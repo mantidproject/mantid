@@ -5,20 +5,13 @@
 
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/Exception.h"
+
+#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-/* A fake symmetry operation for testing the factory
- * without interfering with other tests.
- */
-class TestSymmetryOperation : public SymmetryOperation
-{
-public:
-    TestSymmetryOperation() : SymmetryOperation(2, IntMatrix(3, 3, true), "fake")
-    {}
-    ~TestSymmetryOperation() { }
-};
 
 class SymmetryOperationFactoryTest : public CxxTest::TestSuite
 {
@@ -30,32 +23,31 @@ public:
 
   SymmetryOperationFactoryTest()
   {
-      SymmetryOperationFactory::Instance().subscribeSymOp<TestSymmetryOperation>();
+      SymmetryOperationFactory::Instance().subscribeSymOp("x,y,z");
   }
 
   ~SymmetryOperationFactoryTest()
   {
-      SymmetryOperationFactory::Instance().unsubscribeSymOp("fake");
+      SymmetryOperationFactory::Instance().unsubscribeSymOp("x,y,z");
   }
 
 
   void testCreateSymOp()
   {
-      TS_ASSERT_THROWS_NOTHING(SymmetryOperationFactory::Instance().createSymOp("fake"));
-      TS_ASSERT_THROWS(SymmetryOperationFactory::Instance().createSymOp("fake2"), Mantid::Kernel::Exception::NotFoundError);
+      TS_ASSERT_THROWS_NOTHING(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+      TS_ASSERT_THROWS(SymmetryOperationFactory::Instance().createSymOp("fake2"), Mantid::Kernel::Exception::ParseError);
   }
 
   void testUnsubscribe()
   {
-      TS_ASSERT_THROWS_NOTHING(SymmetryOperationFactory::Instance().createSymOp("fake"));
+      TS_ASSERT_THROWS_NOTHING(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
 
-      SymmetryOperationFactory::Instance().unsubscribeSymOp("fake");
-      TS_ASSERT_THROWS(SymmetryOperationFactory::Instance().createSymOp("fake"), Mantid::Kernel::Exception::NotFoundError);
+      TS_ASSERT_THROWS_NOTHING(SymmetryOperationFactory::Instance().unsubscribeSymOp("x,y,z"));
+      TS_ASSERT_EQUALS(SymmetryOperationFactory::Instance().isSubscribed("x,y,z"), false);
+      TS_ASSERT_THROWS_NOTHING(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
 
-      SymmetryOperationFactory::Instance().subscribeSymOp<TestSymmetryOperation>();
-      TS_ASSERT_THROWS_NOTHING(SymmetryOperationFactory::Instance().createSymOp("fake"));
+      TS_ASSERT_THROWS_NOTHING(SymmetryOperationFactory::Instance().subscribeSymOp("x,y,z"));
   }
-
 };
 
 

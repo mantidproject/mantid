@@ -2,11 +2,13 @@
 #define MANTID_GEOMETRY_SYMMETRYOPERATIONFACTORY_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
+#include "MantidGeometry/Crystal/SymmetryOperationSymbolParser.h"
+#include "MantidKernel/RegistrationHelper.h"
 
 #include <list>
+#include <map>
 #include <iostream>
 
 namespace Mantid
@@ -47,31 +49,28 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class MANTID_GEOMETRY_DLL SymmetryOperationFactoryImpl : public Kernel::DynamicFactory<const SymmetryOperation>
+  class MANTID_GEOMETRY_DLL SymmetryOperationFactoryImpl
   {
   public:
-      SymmetryOperation_const_sptr createSymOp(const std::string &identifier) const;
+      SymmetryOperation createSymOp(const std::string &identifier);
 
-      /// Subscribes a symmetry operation into the factory
-      template <class C>
-      void subscribeSymOp()
-      {
-          Kernel::Instantiator<const C, const SymmetryOperation> *instantiator = new Kernel::Instantiator<const C, const SymmetryOperation>;
-          SymmetryOperation_const_sptr temporarySymOp = instantiator->createInstance();
+      void subscribeSymOp(const std::string &identifier);
+      void unsubscribeSymOp(const std::string &identifier);
 
-          subscribe(temporarySymOp->identifier(), instantiator);
-      }
+      bool isSubscribed(const std::string &identifier) const;
 
-      /// Unsubscribes a symmetry operation from the factory
-      void unsubscribeSymOp(const std::string &identifier)
-      {
-          unsubscribe(identifier);
-      }
+  protected:
+      void subscribe(const std::string &alias, const SymmetryOperation &prototype);
+
+      std::map<std::string, SymmetryOperation> m_prototypes;
 
   private:
       friend struct Mantid::Kernel::CreateUsingNew<SymmetryOperationFactoryImpl>;
 
+
       SymmetryOperationFactoryImpl();
+
+
   };
 
 // This is taken from FuncMinimizerFactory
@@ -85,10 +84,10 @@ typedef Mantid::Kernel::SingletonHolder<SymmetryOperationFactoryImpl> SymmetryOp
 } // namespace Geometry
 } // namespace Mantid
 
-#define DECLARE_SYMMETRY_OPERATION(classname) \
+#define DECLARE_SYMMETRY_OPERATION(operation,name) \
         namespace { \
-    Mantid::Kernel::RegistrationHelper register_symop_##classname( \
-  ((Mantid::Geometry::SymmetryOperationFactory::Instance().subscribeSymOp<classname>()) \
+    Mantid::Kernel::RegistrationHelper register_symop_##name( \
+  ((Mantid::Geometry::SymmetryOperationFactory::Instance().subscribeSymOp(operation)) \
     , 0)); \
     }
 

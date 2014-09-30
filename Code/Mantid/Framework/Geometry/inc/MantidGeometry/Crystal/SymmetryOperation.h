@@ -6,7 +6,6 @@
 #include "MantidGeometry/Crystal/V3R.h"
 
 #include <boost/shared_ptr.hpp>
-#include <boost/regex.hpp>
 
 namespace Mantid
 {
@@ -74,172 +73,53 @@ namespace Geometry
   */
 class SymmetryOperation;
 
-typedef boost::shared_ptr<SymmetryOperation> SymmetryOperation_sptr;
-typedef boost::shared_ptr<const SymmetryOperation> SymmetryOperation_const_sptr;
-
 class MANTID_GEOMETRY_DLL SymmetryOperation
 {
 public:
     SymmetryOperation();
-    SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R &vector);
+    SymmetryOperation(const std::string &identifier);
 
-    void initialize();
+    SymmetryOperation(const SymmetryOperation &other);
+    SymmetryOperation &operator =(const SymmetryOperation &other);
 
     virtual ~SymmetryOperation() { }
+
+    const Kernel::IntMatrix &matrix() const;
+    const V3R &vector() const;
 
     size_t order() const;
     std::string identifier() const;
 
     bool isIdentity() const;
-
-    template<typename T>
-    T apply(const T &operand) const
-    {
-        return m_matrix * operand;
-    }
-
-    SymmetryOperation_const_sptr operator *(const SymmetryOperation_const_sptr &operand) const;
+    bool hasTranslation() const;
 
     template<typename T>
     T operator *(const T &operand) const
     {
+        if(!hasTranslation()) {
+            return m_matrix * operand;
+        }
+
         return (m_matrix * operand) + m_vector;
     }
 
+    SymmetryOperation operator *(const SymmetryOperation &operand) const;
+
+    bool operator !=(const SymmetryOperation &other) const;
+    bool operator ==(const SymmetryOperation &other) const;
 
 protected:
-    SymmetryOperation(size_t order, Kernel::IntMatrix matrix, std::string identifier);
-    void setMatrixFromArray(int array[]);
+    SymmetryOperation(const std::pair<Kernel::IntMatrix, V3R> &data);
+    SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R &vector);
 
     V3R getWrappedVector(const V3R &vector) const;
-    size_t getOrderFromComponents(const Kernel::IntMatrix &matrix, const V3R &vector) const;
-    std::string getIdentifierFromComponents(const Kernel::IntMatrix &matrix, const V3R &vector) const;
+    size_t getOrderFromMatrix(const Kernel::IntMatrix &matrix) const;
 
-    std::pair<Kernel::IntMatrix, V3R> parseIdentifier(const std::string &identifier) const;
-    std::pair<Kernel::IntMatrix, V3R> parseComponents(const std::vector<std::string> &components) const;
-    std::string getCleanComponentString(const std::string &componentString) const;
-    std::pair<std::vector<int>, RationalNumber> parseComponent(const std::string &component) const;
-
-    void processMatrixRowToken(const std::string &matrixToken, std::vector<int> &matrixRow) const;
-    void addToVector(std::vector<int> &vector, const std::vector<int> &add) const;
-    std::vector<int> getVectorForSymbol(const char symbol, const char sign = '+') const;
-    int getFactorForSign(const char sign) const;
-
-    void processVectorComponentToken(const std::string &rationalNumberToken, RationalNumber &vectorComponent) const;
-
-    bool isValidMatrixRow(const std::vector<int> &matrixRow) const;
 
     size_t m_order;
     Kernel::IntMatrix m_matrix;
     V3R m_vector;
     std::string m_identifier;
-
-    static boost::regex m_tokenRegex;
-    static boost::regex m_matrixRowRegex;
-    static boost::regex m_vectorComponentRegex;
-};
-
-// Identity
-class MANTID_GEOMETRY_DLL SymOpIdentity : public SymmetryOperation
-{
-public:
-    SymOpIdentity();
-};
-
-// Inversion
-class MANTID_GEOMETRY_DLL SymOpInversion : public SymmetryOperation
-{
-public:
-    SymOpInversion();
-};
-
-// Rotations 2-fold
-// x-axis
-class MANTID_GEOMETRY_DLL SymOpRotationTwoFoldX : public SymmetryOperation
-{
-public:
-    SymOpRotationTwoFoldX();
-};
-
-// y-axis
-class MANTID_GEOMETRY_DLL SymOpRotationTwoFoldY : public SymmetryOperation
-{
-public:
-    SymOpRotationTwoFoldY();
-};
-
-// z-axis
-class MANTID_GEOMETRY_DLL SymOpRotationTwoFoldZ : public SymmetryOperation
-{
-public:
-    SymOpRotationTwoFoldZ();
-};
-
-// x-axis
-class MANTID_GEOMETRY_DLL SymOpRotationTwoFoldXHexagonal : public SymmetryOperation
-{
-public:
-    SymOpRotationTwoFoldXHexagonal();
-};
-
-// 210, hexagonal
-class MANTID_GEOMETRY_DLL SymOpRotationTwoFold210Hexagonal : public SymmetryOperation
-{
-public:
-    SymOpRotationTwoFold210Hexagonal();
-};
-
-// Rotations 4-fold
-// z-axis
-class MANTID_GEOMETRY_DLL SymOpRotationFourFoldZ : public SymmetryOperation
-{
-public:
-    SymOpRotationFourFoldZ();
-};
-
-// Rotations 3-fold
-// z-axis, hexagonal
-class MANTID_GEOMETRY_DLL SymOpRotationThreeFoldZHexagonal : public SymmetryOperation
-{
-public:
-    SymOpRotationThreeFoldZHexagonal();
-};
-
-// 111
-class MANTID_GEOMETRY_DLL SymOpRotationThreeFold111 : public SymmetryOperation
-{
-public:
-    SymOpRotationThreeFold111();
-};
-
-// Rotations 6-fold
-// z-axis, hexagonal
-class MANTID_GEOMETRY_DLL SymOpRotationSixFoldZHexagonal : public SymmetryOperation
-{
-public:
-    SymOpRotationSixFoldZHexagonal();
-};
-
-// Mirror planes
-// y-axis
-class MANTID_GEOMETRY_DLL SymOpMirrorPlaneY : public SymmetryOperation
-{
-public:
-    SymOpMirrorPlaneY();
-};
-
-// z-axis
-class MANTID_GEOMETRY_DLL SymOpMirrorPlaneZ : public SymmetryOperation
-{
-public:
-    SymOpMirrorPlaneZ();
-};
-
-// 210, hexagonal
-class MANTID_GEOMETRY_DLL SymOpMirrorPlane210Hexagonal : public SymmetryOperation
-{
-public:
-    SymOpMirrorPlane210Hexagonal();
 };
 
 
