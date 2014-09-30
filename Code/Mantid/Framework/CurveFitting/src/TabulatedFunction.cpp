@@ -36,14 +36,14 @@ TabulatedFunction::TabulatedFunction():
     m_setupFinished(false)
 {
   declareParameter("Scaling",1.0,"A scaling factor");
-  declareParameter("Centre", 0.0, "Shift in the abscissa");
+  declareParameter("Shift", 0.0, "Shift in the abscissa");
   declareAttribute("FileName", Attribute("", true));
   declareAttribute("Workspace", Attribute(""));
   declareAttribute("WorkspaceIndex", Attribute(defaultIndexValue));
 }
 
 /// Evaluate the function for a list of arguments and given scaling factor
-void TabulatedFunction::eval(double scaling, double centre, double* out, const double* xValues, const size_t nData)const
+void TabulatedFunction::eval(double scaling, double shift, double* out, const double* xValues, const size_t nData)const
 {
   if (nData == 0) return;
 
@@ -54,7 +54,7 @@ void TabulatedFunction::eval(double scaling, double centre, double* out, const d
   std::vector<double> xData(m_xData);
   for(std::vector<double>::iterator it = xData.begin(); it != xData.end(); ++it)
   {
-    *it -= centre;
+    *it += shift;
   }
 
   const double xStart = xData.front();
@@ -113,8 +113,8 @@ void TabulatedFunction::eval(double scaling, double centre, double* out, const d
 void TabulatedFunction::function1D(double* out, const double* xValues, const size_t nData)const
 {
   const double scaling = getParameter(0);
-  const double centre = getParameter("Centre");
-  eval(scaling, centre, out, xValues, nData);
+  const double shift = getParameter("Shift");
+  eval(scaling, shift, out, xValues, nData);
 }
 
 /**
@@ -125,16 +125,16 @@ void TabulatedFunction::function1D(double* out, const double* xValues, const siz
  */
 void TabulatedFunction::functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
 {
-  const double centre = getParameter("Centre");
+  const double shift = getParameter("Shift");
   std::vector<double> tmp( nData );
   // derivative with respect to Scaling parameter
-  eval(1.0, centre, tmp.data(), xValues, nData);
+  eval(1.0, shift, tmp.data(), xValues, nData);
   for(size_t i = 0; i < nData; ++i)
   {
     out->set( i, 0, tmp[i] );
   }
   // There is no unique definition for the partial derivative with respect
-  // to the Centre parameter. Here we take the central difference,
+  // to the Shift parameter. Here we take the central difference,
   // except at the extremes of array xValues
   out->set( 0, 1, (tmp[1]-tmp[0])/(xValues[1]-xValues[0]) );  // forward difference at beginning of xValues
   for(size_t i = 1; i < nData-1; ++i)
