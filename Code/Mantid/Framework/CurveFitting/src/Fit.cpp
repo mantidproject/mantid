@@ -118,7 +118,7 @@ namespace CurveFitting
       auto &properties = minimizer.getProperties();
       for(auto prop = properties.begin(); prop != properties.end(); ++prop)
       {
-          if ( (**prop).direction() == Kernel::Direction::Output )
+          if ( (**prop).direction() == Kernel::Direction::Output && (**prop).isValid() == "" )
           {
               Kernel::Property* property = (**prop).clone();
               declareProperty( property );

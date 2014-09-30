@@ -105,6 +105,7 @@ FABADAMinimizer::~FABADAMinimizer()
 
     if ( m_numberIterations > maxIterations )
     {
+        g_log.warning() << "MaxIterations property reduces the required number of iterations (" << m_numberIterations << ")." << std::endl;
         m_numberIterations = maxIterations;
     }
 
@@ -360,11 +361,6 @@ FABADAMinimizer::~FABADAMinimizer()
         // If there is not convergence continue the iterations.
         if ( m_counter <= convergenceMaxIterations && m_counter < m_numberIterations -  1 )
         {
-            return true;
-        }
-        else if (m_counter == m_numberIterations - 1)
-        {
-            m_converged = true;
             return true;
         }
         // If there is not convergence, but it has been made convergenceMaxIterations iterations, stop and throw the error.

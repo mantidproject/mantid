@@ -34,7 +34,7 @@ public:
     auto ws2 = createTestWorkspace(histogram);
 
     API::IFunction_sptr fun(new ExpDecay);
-    fun->setParameter("Height",1.);
+    fun->setParameter("Height",8.);
     fun->setParameter("Lifetime",1.0);
 
     Fit fit;
@@ -46,13 +46,13 @@ public:
     fit.setProperty("WorkspaceIndex",0);
     fit.setProperty("CreateOutput",true);
     fit.setProperty("MaxIterations",100000);
-    fit.setProperty("Minimizer", "FABADA,ChainLength=5000,ConvergenceCriteria = 0.01, OutputWorkspaceConverged=conv");
+    fit.setProperty("Minimizer", "FABADA,ChainLength=5000,ConvergenceCriteria = 0.1, OutputWorkspaceConverged=conv");
 
     TS_ASSERT_THROWS_NOTHING( fit.execute() );
 
     TS_ASSERT(fit.isExecuted());
 
-    TS_ASSERT_DELTA( fun->getParameter("Height"), 10.0, 1e-2);
+    TS_ASSERT_DELTA( fun->getParameter("Height"), 10.0, 1e-1);
     TS_ASSERT_DELTA( fun->getParameter("Lifetime"), 0.5, 1e-2);
 
     TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
@@ -107,7 +107,7 @@ public:
     TS_ASSERT_EQUALS(wsChain->getNumberHistograms(),n+1);
 
     const Mantid::MantidVec& Xchain = wsChain->dataX(0);
-    TS_ASSERT_EQUALS(Xchain.size(), 5001);
+    TS_ASSERT_EQUALS(Xchain.size(), 6881);
     TS_ASSERT_EQUALS(Xchain[5000], 5000);
 
     TS_ASSERT(Xconv.size() < Xchain.size());
@@ -132,6 +132,31 @@ public:
 
   }
 
+  void test_low_MaxIterations()
+  {
+    const bool histogram(false);
+    auto ws2 = createTestWorkspace(histogram);
+
+    API::IFunction_sptr fun(new ExpDecay);
+    fun->setParameter("Height",1.);
+    fun->setParameter("Lifetime",1.0);
+
+    Fit fit;
+    fit.initialize();
+
+    fit.setRethrows(true);
+    fit.setProperty("Function",fun);
+    fit.setProperty("InputWorkspace",ws2);
+    fit.setProperty("WorkspaceIndex",0);
+    fit.setProperty("CreateOutput",true);
+    fit.setProperty("MaxIterations",10);
+    fit.setProperty("Minimizer", "FABADA,ChainLength=5000,ConvergenceCriteria = 0.01, OutputWorkspaceConverged=conv");
+
+    TS_ASSERT_THROWS( fit.execute(), std::runtime_error );
+
+    TS_ASSERT( !fit.isExecuted() );
+
+  }
 private:
 
   API::MatrixWorkspace_sptr createTestWorkspace(const bool histogram)
