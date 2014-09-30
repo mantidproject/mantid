@@ -34,7 +34,7 @@ namespace Mantid
     namespace
     {
       const size_t NSIMULATIONS = 10;
-      const size_t NEVENTS = 500000;
+      const size_t NEVENTS = 50000;
       const size_t NSCATTERS = 3;
       const size_t MAX_SCATTER_PT_TRIES = 25;
       /// Conversion constant
@@ -313,7 +313,6 @@ namespace Mantid
     //-------------------------------------------------------------------------
     // RandomNumberGenerator helper
     //-------------------------------------------------------------------------
-
     /**
      * Produces random numbers with various probability distributions
      */
@@ -618,6 +617,9 @@ namespace Mantid
            << m_srcR1;
         throw std::invalid_argument(os.str());
       }
+      // Convert to metres
+      m_srcR1 /= 100.0;
+      m_srcR2 /= 100.0;
 
       // Sample rotation specified by a goniometer
       m_goniometer = &(m_inputWS->run().getGoniometerMatrix());
@@ -820,8 +822,11 @@ namespace Mantid
       V3D srcPos = generateSrcPos(detpar.l1);
       // transform to sample frame
       srcPos.rotate(*m_goniometer);
-      if(fabs(srcPos[0]) > m_halfSampleWidth ||
-         fabs(srcPos[1]) > m_halfSampleHeight) return 0.0; // misses sample
+      if(fabs(srcPos[m_acrossIdx]) > m_halfSampleWidth ||
+         fabs(srcPos[m_upIdx]) > m_halfSampleHeight)
+      {
+        return 0.0; // misses sample
+      }
 
       // track various variables during calculation
       std::vector<double> weights(nscatters, 1.0), // start at 1.0
