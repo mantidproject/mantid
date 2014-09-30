@@ -47,6 +47,7 @@ class LoadData(ReductionStep):
     def execute(self, reducer, file_ws):
         """Loads the data.
         """
+        self._reducer = reducer
         wsname = ''
 
         for output_ws, filename in self._data_files.iteritems():
@@ -77,9 +78,6 @@ class LoadData(ReductionStep):
 
     def set_parameter_file(self, value):
         self._parameter_file = value
-
-    def set_monitor_index(self, index):
-        self._monitor_index = index
 
     def set_detector_range(self, start, end):
         self._detector_range_start = start
@@ -119,6 +117,7 @@ class LoadData(ReductionStep):
         if self._parameter_file != None:
             LoadParameterFile(Workspace=output_ws,Filename= self._parameter_file)
 
+        self._monitor_index = self._reducer._get_monitor_index(mtd[output_ws])
 
         if self._require_chop_data(output_ws):
             ChopData(InputWorkspace=output_ws,OutputWorkspace= output_ws,Step= 20000.0,NChops= 5, IntegrationRangeLower=5000.0,
@@ -482,9 +481,9 @@ class HandleMonitor(ReductionStep):
     """Handles the montior for the reduction of inelastic indirect data.
 
     This uses the following parameters from the instrument:
-    * Workflow.MonitorArea
-    * Workflow.MonitorThickness
-    * Workflow.MonitorScalingFactor
+    * Workflow.Monitor1-Area
+    * Workflow.Monitor1-Thickness
+    * Workflow.Monitor1-ScalingFactor
     * Workflow.UnwrapMonitor
     """
     _multiple_frames = False
@@ -947,25 +946,40 @@ class Grouping(ReductionStep):
             for i in range(0, nhist):
                 if i not in self._masking_detectors:
                     wslist.append(i)
-            GroupDetectors(InputWorkspace=workspace,OutputWorkspace= workspace,
-                WorkspaceIndexList=wslist, Behaviour='Average')
+            GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, 
+                           WorkspaceIndexList=wslist, Behaviour='Average')
         else:
-            # Assume we have a grouping file.
-            # First lets, find the file...
-            if (os.path.isfile(grouping)):
-                grouping_filename = grouping
-            else:
-                grouping_filename = os.path.join(config.getString('groupingFiles.directory'),
-                        grouping)
+            # We may have either a workspace name or a mapping file name here
+            grouping_workspace = None
+            grouping_filename = None
 
-            #mask detectors before grouping if we need to
+            # See if it a workspace in ADS
+            # If not assume it is a mapping file
+            try:
+                grouping_workspace = mtd[grouping]
+            except KeyError:
+                logger.notice("Cannot find group workspace " + grouping + ", attempting to find as file")
+
+                # See if it is an absolute path
+                # Otherwise check in the default group files directory
+                if (os.path.isfile(grouping)):
+                    grouping_filename = grouping
+                else:
+                    grouping_filename = os.path.join(config.getString('groupingFiles.directory'), grouping)
+
+            # Mask detectors before grouping if we need to
             if len(self._masking_detectors) > 0:
                 MaskDetectors(workspace, WorkspaceIndexList=self._masking_detectors)
 
-            # Final check that the Mapfile exists, if not don't run the alg.
-            if os.path.isfile(grouping_filename):
-                GroupDetectors(InputWorkspace=workspace,OutputWorkspace=workspace, MapFile=grouping_filename,
+            # Run GroupDetectors with a workspace if we have one
+            # Otherwise try to run it with a mapping file
+            if grouping_workspace is not None:
+                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, CopyGroupingFromWorkspace=grouping_workspace, 
                         Behaviour='Average')
+            elif os.path.isfile(grouping_filename):
+                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, MapFile=grouping_filename, 
+                        Behaviour='Average')
+
         return workspace
 
 class SaveItem(ReductionStep):

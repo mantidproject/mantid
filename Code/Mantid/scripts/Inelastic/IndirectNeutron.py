@@ -18,21 +18,21 @@ def Iblock(a,first):                                 #read Ascii block of Intege
     lines=numb/10
     last = numb-10*lines
     if line1.startswith('I'):
-    	error = ''
+        error = ''
     else:
-    	error = 'NOT an I block starting at line ' +str(first)
-    	logger.notice('ERROR *** ' + error)
-    	sys.exit(error)
+        error = 'NOT an I block starting at line ' +str(first)
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
     ival = []
     for m in range(0, lines):
-    	mm = first+2+m
-    	val = ExtractInt(a[mm])
-    	for n in range(0, 10):
-    		ival.append(val[n])
+        mm = first+2+m
+        val = ExtractInt(a[mm])
+        for n in range(0, 10):
+            ival.append(val[n])
     mm += 1
     val = ExtractInt(a[mm])
     for n in range(0, last):
-    	ival.append(val[n])
+        ival.append(val[n])
     mm += 1
     return mm,ival                                       #values as list
 
@@ -44,21 +44,21 @@ def Fblock(a,first):                                 #read Ascii block of Floats
     lines=numb/5
     last = numb-5*lines
     if line1.startswith('F'):
-    	error= ''
+        error= ''
     else:
-    	error = 'NOT an F block starting at line ' +str(first)
-    	logger.notice('ERROR *** ' + error)
-    	sys.exit(error)
+        error = 'NOT an F block starting at line ' +str(first)
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
     fval = []
     for m in range(0, lines):
-    	mm = first+2+m
-    	val = ExtractFloat(a[mm])
-    	for n in range(0, 5):
-    		fval.append(val[n])
+        mm = first+2+m
+        val = ExtractFloat(a[mm])
+        for n in range(0, 5):
+            fval.append(val[n])
     mm += 1
     val = ExtractFloat(a[mm])
     for n in range(0, last):
-    	fval.append(val[n])
+        fval.append(val[n])
     mm += 1
     return mm,fval                                       #values as list
 
@@ -73,19 +73,19 @@ def ReadIbackGroup(a,first):                           #read Ascii block of spec
     n1 = val[0]
     ngrp = val[2]
     if line1.startswith('S'):
-    	error = ''
+        error = ''
     else:
-    	error = 'NOT an S block starting at line ' +str(first)
-    	logger.notice('ERROR *** ' + error)
-    	sys.exit(error)
+        error = 'NOT an S block starting at line ' +str(first)
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
     next += 1
     next,Ival = Iblock(a,next)
     for m in range(0, len(Ival)):
-    	x.append(float(m))
-    	yy = float(Ival[m])
-    	y.append(yy)
-    	ee = math.sqrt(yy)
-    	e.append(ee)
+        x.append(float(m))
+        yy = float(Ival[m])
+        y.append(yy)
+        ee = math.sqrt(yy)
+        e.append(ee)
     return next,x,y,e                                #values of x,y,e as lists
 
 # Get the path to the file
@@ -95,36 +95,36 @@ def getFilePath(run,ext,instr):
     path = None
     fname = None
     if(os.path.isfile(run)):
-    	#using full file path
-    	path = run
-    	#base name less extension
-    	base = os.path.basename(path)
-    	fname = os.path.splitext(base)[0]
+        #using full file path
+        path = run
+        #base name less extension
+        base = os.path.basename(path)
+        fname = os.path.splitext(base)[0]
     else:
-    	#using run number
-    	path = FileFinder.getFullPath(instr + "_" + run + ext)
-    	fname = instr + "_" + run
+        #using run number
+        path = FileFinder.getFullPath(instr + "_" + run + ext)
+        fname = instr + "_" + run
 
     if path:
-    	return path, fname
+        return path, fname
     else:
-    	error = 'ERROR *** Could not find ' + ext + ' file: ' + fname
-    	sys.exit(error)
+        error = 'ERROR *** Could not find ' + ext + ' file: ' + fname
+        sys.exit(error)
 
 # Load an ascii/inx file
 def loadFile(path):
     try:
-    	handle = open(path, 'r')
-    	asc = []
-    	for line in handle:
-    		line = line.rstrip()
-    		asc.append(line)
-    	handle.close()
+        handle = open(path, 'r')
+        asc = []
+        for line in handle:
+            line = line.rstrip()
+            asc.append(line)
+        handle.close()
 
-    	return asc
+        return asc
     except:
-    	error = 'ERROR *** Could not load ' + path
-    	sys.exit(error)
+        error = 'ERROR *** Could not load ' + path
+        sys.exit(error)
 
 def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      #Ascii start routine
     StartTime('Iback')
@@ -133,7 +133,7 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      
     path, fname = getFilePath(run,'.asc',instr)
 
     if Verbose:
-    	logger.notice('Reading file : ' + path)
+        logger.notice('Reading file : ' + path)
 
     asc = loadFile(path)
     lasc = len(asc)
@@ -153,14 +153,14 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      
 # back head1
     next,Fval = Fblock(asc,next)
     if instr == 'IN10':
-    	freq = Fval[89]
+        freq = Fval[89]
     if instr == 'IN16':
-    	freq = Fval[2]
-    	amp = Fval[3]
-    	wave = Fval[69]
-    	Ef = 81.787/(4.0*wave*wave)
-    	npt = int(Fval[6])
-    	nsp = int(Fval[7])
+        freq = Fval[2]
+        amp = Fval[3]
+        wave = Fval[69]
+        Ef = 81.787/(4.0*wave*wave)
+        npt = int(Fval[6])
+        nsp = int(Fval[7])
 # back head2
     next,Fval = Fblock(asc,next)
     k0 = 4.0*math.pi/wave
@@ -168,16 +168,16 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      
     theta = []
     Q = []
     for m in range(0, nsp):
-    	theta.append(Fval[m])
+        theta.append(Fval[m])
 # raw spectra
     val = ExtractInt(asc[next+3])
     npt = val[0]
     lgrp=5+npt/10
     val = ExtractInt(asc[next+1])
     if instr == 'IN10':
-    	nsp = int(val[2])
+        nsp = int(val[2])
     if Verbose:
-    	logger.notice('Number of spectra : ' + str(nsp))
+        logger.notice('Number of spectra : ' + str(nsp))
 # read monitor
     nmon = next+nsp*lgrp
     nm,xm,ym,em = ReadIbackGroup(asc,nmon)
@@ -185,37 +185,37 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      
     imin = 0
     ymax = 0
     for m in range(0, 20):
-    	if ym[m] > ymax:
-    		imin=m
-    		ymax=ym[m]
+        if ym[m] > ymax:
+            imin=m
+            ymax=ym[m]
     npt = len(ym)
     imax = npt
     ymax = 0
     for m in range(npt-1, npt-20, -1):
-    	if ym[m] > ymax:
-    		imax=m
-    		ymax=ym[m]
+        if ym[m] > ymax:
+            imax=m
+            ymax=ym[m]
     new=imax-imin
     imid=new/2+1
     if instr == 'IN10':
-    	DRV=18.706							# fast drive
-    	vmax=freq*DRV
+        DRV=18.706                            # fast drive
+        vmax=freq*DRV
     if instr == 'IN16':
-    	vmax=1.2992581918414711e-4*freq*amp*2.0/wave 	#max energy
+        vmax=1.2992581918414711e-4*freq*amp*2.0/wave     #max energy
     dele=2.0*vmax/new
     xMon = []
     yOut = []
     eOut = []
     for m in range(0, new+1):
-    	xe = (m-imid)*dele
-    	mm = m+imin
-    	xMon.append(xe)
-    	yOut.append(ym[mm]/100.0)
-    	eOut.append(em[mm]/10.0)
+        xe = (m-imid)*dele
+        mm = m+imin
+        xMon.append(xe)
+        yOut.append(ym[mm]/100.0)
+        eOut.append(em[mm]/10.0)
     xMon.append(2*xMon[new-1]-xMon[new-2])
     monWS = '__Mon'
     CreateWorkspace(OutputWorkspace=monWS, DataX=xMon, DataY=yOut, DataE=eOut,
-    	Nspec=1, UnitX='Energy')
+        Nspec=1, UnitX='DeltaE')
 #
     Qaxis = ''
     xDat = []
@@ -223,44 +223,44 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      
     eDat = []
     tot = []
     for n in range(0, nsp):
-    	next,xd,yd,ed = ReadIbackGroup(asc,next)
-    	tot.append(sum(yd))
-    	if Verbose:
-    		logger.notice('Spectrum ' + str(n+1) +' at angle '+ str(theta[n])+
-    			' ; Total counts = '+str(sum(yd)))
-    	for m in range(0, new+1):
-    		mm = m+imin
-    		xDat.append(xMon[m])
-    		yDat.append(yd[mm])
-    		eDat.append(ed[mm])
-    	if n != 0:
-    		Qaxis += ','
-    	xDat.append(2*xDat[new-1]-xDat[new-2])
-    	Qaxis += str(theta[n])
+        next,xd,yd,ed = ReadIbackGroup(asc,next)
+        tot.append(sum(yd))
+        if Verbose:
+            logger.notice('Spectrum ' + str(n+1) +' at angle '+ str(theta[n])+
+                ' ; Total counts = '+str(sum(yd)))
+        for m in range(0, new+1):
+            mm = m+imin
+            xDat.append(xMon[m])
+            yDat.append(yd[mm])
+            eDat.append(ed[mm])
+        if n != 0:
+            Qaxis += ','
+        xDat.append(2*xDat[new-1]-xDat[new-2])
+        Qaxis += str(theta[n])
     ascWS = fname +'_' +ana+refl +'_asc'
     outWS = fname +'_' +ana+refl +'_red'
     CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
-    	Nspec=nsp, UnitX='Energy')
+        Nspec=nsp, UnitX='DeltaE')
     Divide(LHSWorkspace=ascWS, RHSWorkspace=monWS, OutputWorkspace=ascWS,
-    	AllowDifferentNumberSpectra=True)
-    DeleteWorkspace(monWS)								# delete monitor WS
+        AllowDifferentNumberSpectra=True)
+    DeleteWorkspace(monWS)                                # delete monitor WS
     InstrParas(ascWS,instr,ana,refl)
     efixed = RunParas(ascWS,instr,run,title,Verbose)
     ChangeAngles(ascWS,instr,theta,Verbose)
     if useM:
-    	map = ReadMap(mapPath,Verbose)
-    	UseMap(ascWS,map,Verbose)
+        map = ReadMap(mapPath,Verbose)
+        UseMap(ascWS,map,Verbose)
     if rejectZ:
-    	RejectZero(ascWS,tot,Verbose)
+        RejectZero(ascWS,tot,Verbose)
     if useM == False and rejectZ == False:
-    	CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
+        CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
     if Save:
-    	opath = os.path.join(workdir,outWS+'.nxs')
-    	SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
-    	if Verbose:
-    		logger.notice('Output file : ' + opath)
+        opath = os.path.join(workdir,outWS+'.nxs')
+        SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
+        if Verbose:
+            logger.notice('Output file : ' + opath)
     if (Plot):
-    	plotForce(outWS,Plot)
+        plotForce(outWS,Plot)
     EndTime('Iback')
 
 # Routines for Inx ascii file
@@ -274,10 +274,10 @@ def ReadInxGroup(asc,n,lgrp):                  # read ascii x,y,e
     val = ExtractFloat(asc[first+2])
     Q = val[0]
     for m in range(first+4, last):
-    	val = ExtractFloat(asc[m])
-    	x.append(val[0]/1000.0)
-    	y.append(val[1])
-    	e.append(val[2])
+        val = ExtractFloat(asc[m])
+        x.append(val[0]/1000.0)
+        y.append(val[1])
+        e.append(val[2])
     npt = len(x)
     return Q,npt,x,y,e                                 #values of x,y,e as lists
 
@@ -288,7 +288,7 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):
     path, fname = getFilePath(run, '.inx', instr)
 
     if Verbose:
-    	logger.notice('Reading file : ' + path)
+        logger.notice('Reading file : ' + path)
 
     asc = loadFile(path)
     lasc = len(asc)
@@ -300,13 +300,13 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):
     title = asc[1]
     ltot = ngrp*lgrp
     if Verbose:
-    	logger.notice('Number of spectra : ' + str(ngrp))
+        logger.notice('Number of spectra : ' + str(ngrp))
     if ltot == lasc:
-    	error = ''
+        error = ''
     else:
-    	error = 'file ' +filext+ ' should be ' +str(ltot)+ ' lines'
-    	logger.notice('ERROR *** ' + error)
-    	sys.exit(error)
+        error = 'file ' +filext+ ' should be ' +str(ltot)+ ' lines'
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
     Qaxis = ''
     xDat = []
     yDat = []
@@ -315,50 +315,50 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):
     Q = []
     tot = []
     for m in range(0,ngrp):
-    	Qq,nd,xd,yd,ed = ReadInxGroup(asc,m,lgrp)
-    	tot.append(sum(yd))
-    	if Verbose:
-    		logger.notice('Spectrum ' + str(m+1) +' at Q= '+ str(Qq)+' ; Total counts = '+str(tot))
-    	if ns != 0:
-    		Qaxis += ','
-    	Qaxis += str(Qq)
-    	Q.append(Qq)
-    	for n in range(0,nd):
-    		xDat.append(xd[n])
-    		yDat.append(yd[n])
-    		eDat.append(ed[n])
-    	xDat.append(2*xd[nd-1]-xd[nd-2])
-    	ns += 1
+        Qq,nd,xd,yd,ed = ReadInxGroup(asc,m,lgrp)
+        tot.append(sum(yd))
+        if Verbose:
+            logger.notice('Spectrum ' + str(m+1) +' at Q= '+ str(Qq)+' ; Total counts = '+str(tot))
+        if ns != 0:
+            Qaxis += ','
+        Qaxis += str(Qq)
+        Q.append(Qq)
+        for n in range(0,nd):
+            xDat.append(xd[n])
+            yDat.append(yd[n])
+            eDat.append(ed[n])
+        xDat.append(2*xd[nd-1]-xd[nd-2])
+        ns += 1
     ascWS = fname +'_' +ana+refl +'_inx'
     outWS = fname +'_' +ana+refl +'_red'
     CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
-    	Nspec=ns, UnitX='Energy')
+        Nspec=ns, UnitX='DeltaE')
     InstrParas(ascWS,instr,ana,refl)
-    efixed = RunParas(ascWS,instr,run,title,Verbose)
+    efixed = RunParas(ascWS,instr,0,title,Verbose)    
     pi4 = 4.0*math.pi
     wave=1.8*math.sqrt(25.2429/efixed)
     theta = []
     for n in range(0,ngrp):
-    	qw = wave*Q[n]/pi4
-    	ang = 2.0*math.degrees(math.asin(qw))
-    	theta.append(ang)
+        qw = wave*Q[n]/pi4
+        ang = 2.0*math.degrees(math.asin(qw))
+        theta.append(ang)
     ChangeAngles(ascWS,instr,theta,Verbose)
     if useM:
-    	map = ReadMap(mapPath,Verbose)
-    	UseMap(ascWS,map,Verbose)
+        map = ReadMap(mapPath,Verbose)
+        UseMap(ascWS,map,Verbose)
     if rejectZ:
-    	RejectZero(ascWS,tot,Verbose)
+        RejectZero(ascWS,tot,Verbose)
     if useM == False and rejectZ == False:
-    	CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
+        CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
     if Save:
-    	opath = os.path.join(workdir,outWS+'.nxs')
-    	SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
-    	if Verbose:
-    		logger.notice('Output file : ' + opath)
+        opath = os.path.join(workdir,outWS+'.nxs')
+        SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
+        if Verbose:
+            logger.notice('Output file : ' + opath)
     if (Plot):
-    	plotForce(outWS,Plot)
+        plotForce(outWS,Plot)
     EndTime('Inx')
-
+    
 # General routines
 
 def RejectZero(inWS,tot,Verbose):
@@ -366,17 +366,17 @@ def RejectZero(inWS,tot,Verbose):
     nout = 0
     outWS = inWS[:-3]+'red'
     for n in range(0, nin):
-    	if tot[n] > 0:
-    		ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',
-    			WorkspaceIndex=n)
-    		if nout == 0:
-    			RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
-    		else:
-    			ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',CheckOverlapping=False)
-    		nout += 1
-    	else:
-    		if Verbose:
-    			logger.notice('** spectrum '+str(n+1)+' rejected')
+        if tot[n] > 0:
+            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',
+                WorkspaceIndex=n)
+            if nout == 0:
+                RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
+            else:
+                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',CheckOverlapping=False)
+            nout += 1
+        else:
+            if Verbose:
+                logger.notice('** spectrum '+str(n+1)+' rejected')
 
 def ReadMap(path,Verbose):
     workdir = config['defaultsave.directory']
@@ -385,17 +385,17 @@ def ReadMap(path,Verbose):
 
     lasc = len(asc)
     if Verbose:
-    	logger.notice('Map file : ' + path +' ; spectra = ' +str(lasc-1))
+        logger.notice('Map file : ' + path +' ; spectra = ' +str(lasc-1))
     val = ExtractInt(asc[0])
     numb = val[0]
     if (numb != (lasc-1)):
-    	error = 'Number of lines  not equal to number of spectra'
-    	logger.notice('ERROR *** ' + error)
-    	sys.exit(error)
+        error = 'Number of lines  not equal to number of spectra'
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
     map = []
     for n in range(1,lasc):
-    	val = ExtractInt(asc[n])
-    	map.append(val[1])
+        val = ExtractInt(asc[n])
+        map.append(val[1])
     return map
 
 def UseMap(inWS,map,Verbose):
@@ -403,48 +403,48 @@ def UseMap(inWS,map,Verbose):
     nout = 0
     outWS = inWS[:-3]+'red'
     for n in range(0, nin):
-    	if map[n] == 1:
-    		ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',
-    			WorkspaceIndex=n)
-    		if nout == 0:
-    			RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
-    		else:
-    			ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',CheckOverlapping=False)
-    		nout += 1
-    		if Verbose:
-    			logger.notice('** spectrum '+str(n+1)+' mapped')
-    	else:
-    		if Verbose:
-    			logger.notice('** spectrum '+str(n+1)+' skipped')
+        if map[n] == 1:
+            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',
+                WorkspaceIndex=n)
+            if nout == 0:
+                RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
+            else:
+                ConjoinWorkspaces(InputWorkspace1=outWS, InputWorkspace2='__tmp',CheckOverlapping=False)
+            nout += 1
+            if Verbose:
+                logger.notice('** spectrum '+str(n+1)+' mapped')
+        else:
+            if Verbose:
+                logger.notice('** spectrum '+str(n+1)+' skipped')
 
 def plotForce(inWS,Plot):
     if (Plot == 'Spectrum' or Plot == 'Both'):
-    	nHist = mtd[inWS].getNumberHistograms()
-    	if nHist > 10 :
-    		nHist = 10
-    	plot_list = []
-    	for i in range(0, nHist):
-    		plot_list.append(i)
-    	res_plot=mp.plotSpectrum(inWS,plot_list)
+        nHist = mtd[inWS].getNumberHistograms()
+        if nHist > 10 :
+            nHist = 10
+        plot_list = []
+        for i in range(0, nHist):
+            plot_list.append(i)
+        res_plot=mp.plotSpectrum(inWS,plot_list)
     if (Plot == 'Contour' or Plot == 'Both'):
-    	cont_plot=mp.importMatrixWorkspace(inWS).plotGraph2D()
+        cont_plot=mp.importMatrixWorkspace(inWS).plotGraph2D()
 
 def ChangeAngles(inWS,instr,theta,Verbose):
     workdir = config['defaultsave.directory']
     file = instr+'_angles.txt'
     path = os.path.join(workdir, file)
     if Verbose:
-    	logger.notice('Creating angles file : ' + path)
+        logger.notice('Creating angles file : ' + path)
     handle = open(path, 'w')
     head = 'spectrum,theta'
     handle.write(head +" \n" )
     for n in range(0,len(theta)):
-    	handle.write(str(n+1) +'   '+ str(theta[n]) +"\n" )
-    	if Verbose:
-    		logger.notice('Spectrum ' +str(n+1)+ ' = '+str(theta[n]))
+        handle.write(str(n+1) +'   '+ str(theta[n]) +"\n" )
+        if Verbose:
+            logger.notice('Spectrum ' +str(n+1)+ ' = '+str(theta[n]))
     handle.close()
     UpdateInstrumentFromFile(Workspace=inWS, Filename=path, MoveMonitors=False, IgnorePhi=False,
-    	AsciiHeader=head)
+        AsciiHeader=head)
 
 def InstrParas(ws,instr,ana,refl):
     idf_dir = config['instrumentDefinition.directory']
@@ -461,14 +461,14 @@ def RunParas(ascWS,instr,run,title,Verbose):
     ws.getRun()['run_title'] = title
     efixed = inst.getNumberParameter('efixed-val')[0]
     if Verbose:
-    	facility = ws.getRun().getLogData('facility').value
-    	logger.notice('Facility is ' +facility)
-    	runNo = ws.getRun()['run_number'].value
-    	runTitle = ws.getRun()['run_title'].value.strip()
-    	logger.notice('Run : ' +runNo + ' ; Title : ' + runTitle)
-    	an = inst.getStringParameter('analyser')[0]
-    	ref = inst.getStringParameter('reflection')[0]
-    	logger.notice('Analyser : ' +an+ref +' with energy = ' + str(efixed))
+        facility = ws.getRun().getLogData('facility').value
+        logger.notice('Facility is ' +facility)
+        runNo = ws.getRun()['run_number'].value
+        runTitle = ws.getRun()['run_title'].value.strip()
+        logger.notice('Run : ' + str(runNo) + ' ; Title : ' + runTitle)
+        an = inst.getStringParameter('analyser')[0]
+        ref = inst.getStringParameter('reflection')[0]
+        logger.notice('Analyser : ' +an+ref +' with energy = ' + str(efixed))
     return efixed
 
 # IN13 routines
@@ -485,7 +485,7 @@ def IN13Read(instr,run,ana,refl,Verbose,Plot,Save):      #Ascii start routine
     path, fname = getFilePath(run,'.asc', instr)
 
     if Verbose:
-    	logger.notice('Reading file : ' + path)
+        logger.notice('Reading file : ' + path)
 
     asc = loadFile(path)
     lasc = len(asc)
@@ -509,23 +509,23 @@ def IN13Read(instr,run,ana,refl,Verbose,Plot,Save):      #Ascii start routine
     ltemp = int(f1)
     f2 = f1 -10*ltemp
     if f2 >= 0.:
-    	ltemp = ltemp +1
+        ltemp = ltemp +1
     wave = 2.0*Fval[81]
     if Verbose:
-    	logger.notice('No. sub-spectra : ' + str(nsubsp))
-    	logger.notice('No. spectra : ' + str(nspec))
-    	logger.notice('Scan type : ' + str(int(Fval[8]))+
-    		' ; Average energy : ' + str(Fval[9]))
-    	logger.notice('CaF2 lattice : ' + str(Fval[81])+
-    		' ; Graphite lattice : ' + str(Fval[82]))
-    	logger.notice('Wavelength : ' + str(wave))
-    	logger.notice('No. temperatures : ' + str(ntemp))
-    	logger.notice('No. temperature lines : ' + str(ltemp))
+        logger.notice('No. sub-spectra : ' + str(nsubsp))
+        logger.notice('No. spectra : ' + str(nspec))
+        logger.notice('Scan type : ' + str(int(Fval[8]))+
+            ' ; Average energy : ' + str(Fval[9]))
+        logger.notice('CaF2 lattice : ' + str(Fval[81])+
+            ' ; Graphite lattice : ' + str(Fval[82]))
+        logger.notice('Wavelength : ' + str(wave))
+        logger.notice('No. temperatures : ' + str(ntemp))
+        logger.notice('No. temperature lines : ' + str(ltemp))
 # para2 block
     next,Fval = Fblock(asc,next)
     angles = Fval[:nspec]
     if Verbose:
-    	logger.notice('Angles : ' + str(angles))
+        logger.notice('Angles : ' + str(angles))
     lspec = 4 +ltemp
 # monitors
     psd = next + (nspec+2048)*lspec
@@ -534,27 +534,27 @@ def IN13Read(instr,run,ana,refl,Verbose,Plot,Save):      #Ascii start routine
     l2m1 = l1m1 +3
     mon1 = ExtractFloat(asc[l2m1])
     if Verbose:
-    	logger.notice('Mon1 : Line '+str(l2m1)+' : ' + asc[l2m1])
+        logger.notice('Mon1 : Line '+str(l2m1)+' : ' + asc[l2m1])
 # raw spectra
     first = next
     xDat = angles
     y2D = []
     e2D = []
     for n in range(0,nspec):
-    	ylist = []
-    	elist = []
-    	l1 = first + lspec*n + 1
-    	if Verbose:
-    		logger.notice('Line '+str(l1)+' : ' + asc[l1])
-    	for l in range(0,ltemp):
-    		l2 = l1 + 3 + l
-    		val = ExtractFloat(asc[l2])
-    		nval = len(val)
-    		for m in range(0,nval):
-    			ylist.append(val[m]/mon1[m])
-    			elist.append(math.sqrt(val[m])/mon1[m])
-    	y2D.append(ylist)
-    	e2D.append(elist)
+        ylist = []
+        elist = []
+        l1 = first + lspec*n + 1
+        if Verbose:
+            logger.notice('Line '+str(l1)+' : ' + asc[l1])
+        for l in range(0,ltemp):
+            l2 = l1 + 3 + l
+            val = ExtractFloat(asc[l2])
+            nval = len(val)
+            for m in range(0,nval):
+                ylist.append(val[m]/mon1[m])
+                elist.append(math.sqrt(val[m])/mon1[m])
+        y2D.append(ylist)
+        e2D.append(elist)
 # create WS
     npt = len(xDat)
     xDat.append(2*xDat[npt-1]-xDat[npt-2])
@@ -564,11 +564,11 @@ def IN13Read(instr,run,ana,refl,Verbose,Plot,Save):      #Ascii start routine
     k0 = 4*math.pi/wave
     Q = []
     for n in range(0,nspec):
-    	if angles[n] >= 180.0:
-    		angles[n] = 360.0 - angles[n]
-    	theta = math.radians(angles[n]/2.)
-    	qq = k0*math.sin(theta)
-    	Q.append(qq)
+        if angles[n] >= 180.0:
+            angles[n] = 360.0 - angles[n]
+        theta = math.radians(angles[n]/2.)
+        qq = k0*math.sin(theta)
+        Q.append(qq)
     Qa = np.array(Q)
     sorted_indices=Qa.argsort()
     sorted_Q=Qa[sorted_indices]
@@ -577,42 +577,42 @@ def IN13Read(instr,run,ana,refl,Verbose,Plot,Save):      #Ascii start routine
     sorted_Q = np.append(sorted_Q,xlast)
     xDq = sorted_Q
     for m in range(0,nval):
-    	ylist = []
-    	elist = []
-    	for n in range(0,nspec):
-    		ylist.append(y2D[n][m])
-    		elist.append(e2D[n][m])
-    	y1D = np.array(ylist)
-    	e1D = np.array(elist)
-    	y1Dq = y1D[sorted_indices]
-    	e1Dq = e1D[sorted_indices]
-    	if m == 0:
-    		xData = xD
-    		yData = y1D
-    		eData = e1D
-    		xDq = sorted_Q
-    		yDq = y1Dq
-    		eDq = e1Dq
-    	else:
-    		xData = np.append(xData,xD)
-    		yData = np.append(yData,y1D)
-    		eData = np.append(eData,e1D)
-    		xDq = np.append(xDq,sorted_Q)
-    		yDq = np.append(yDq,y1Dq)
-    		eDq = np.append(eDq,e1Dq)
+        ylist = []
+        elist = []
+        for n in range(0,nspec):
+            ylist.append(y2D[n][m])
+            elist.append(e2D[n][m])
+        y1D = np.array(ylist)
+        e1D = np.array(elist)
+        y1Dq = y1D[sorted_indices]
+        e1Dq = e1D[sorted_indices]
+        if m == 0:
+            xData = xD
+            yData = y1D
+            eData = e1D
+            xDq = sorted_Q
+            yDq = y1Dq
+            eDq = e1Dq
+        else:
+            xData = np.append(xData,xD)
+            yData = np.append(yData,y1D)
+            eData = np.append(eData,e1D)
+            xDq = np.append(xDq,sorted_Q)
+            yDq = np.append(yDq,y1Dq)
+            eDq = np.append(eDq,e1Dq)
     CreateWorkspace(OutputWorkspace=ascWS, DataX=xData, DataY=yData, DataE=eData,
-    	Nspec=3, UnitX='MomentumTransfer')
+        Nspec=3, UnitX='MomentumTransfer')
     IN13Paras(ascWS,run,title,wave,Verbose)
     CreateWorkspace(OutputWorkspace=outWS, DataX=xDq, DataY=yDq, DataE=eDq,
-    	Nspec=3, UnitX='MomentumTransfer')
+        Nspec=3, UnitX='MomentumTransfer')
     IN13Paras(outWS,run,title,wave,Verbose)
     if Save:
-    	opath = os.path.join(workdir,outWS+'.nxs')
-    	SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
-    	if Verbose:
-    		logger.notice('Output file : ' + opath)
+        opath = os.path.join(workdir,outWS+'.nxs')
+        SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
+        if Verbose:
+            logger.notice('Output file : ' + opath)
     if (Plot != 'None'):
-    	plotForce(outWS,Plot)
+        plotForce(outWS,Plot)
     return outWS
 
 def IN13Paras(ascWS,run,title,wave,Verbose):
@@ -621,9 +621,9 @@ def IN13Paras(ascWS,run,title,wave,Verbose):
     ws.getRun()['run_number'] = run
     ws.getRun()['run_title'] = title
     if Verbose:
-    	facility = ws.getRun().getLogData('facility').value
-    	logger.notice('Facility is ' +facility)
-    	runNo = ws.getRun()['run_number'].value
-    	runTitle = ws.getRun()['run_title'].value.strip()
-    	logger.notice('Run : ' +runNo + ' ; Title : ' + runTitle)
-    	logger.notice('Wavelength : ' + str(wave))
+        facility = ws.getRun().getLogData('facility').value
+        logger.notice('Facility is ' +facility)
+        runNo = ws.getRun()['run_number'].value
+        runTitle = ws.getRun()['run_title'].value.strip()
+        logger.notice('Run : ' +runNo + ' ; Title : ' + runTitle)
+        logger.notice('Wavelength : ' + str(wave))

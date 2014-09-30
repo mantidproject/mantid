@@ -16,6 +16,7 @@ set ( TEST_PY_FILES
   GetEiT0atSNSTest.py
   IndirectILLReductionTest.py
   IndirectTransmissionTest.py
+  IndirectTransmissionMonitorTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
@@ -29,6 +30,7 @@ set ( TEST_PY_FILES
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py
+  SaveVulcanGSSTest.py
   SortByQVectorsTest.py
   SofQWMomentsTest.py
   SortDetectorsTest.py

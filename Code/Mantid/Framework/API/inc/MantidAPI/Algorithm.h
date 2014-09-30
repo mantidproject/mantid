@@ -261,6 +261,18 @@ public:
   /// set whether we wish to track the child algorithm's history and pass it the parent object to fill.
   void trackAlgorithmHistory(boost::shared_ptr<AlgorithmHistory> parentHist);
 
+  typedef std::vector<boost::shared_ptr<Workspace> > WorkspaceVector;
+
+  void findWorkspaceProperties(WorkspaceVector& inputWorkspaces,
+      WorkspaceVector& outputWorkspaces) const;
+
+  // ------------------ For WorkspaceGroups ------------------------------------
+  virtual bool checkGroups();
+
+  virtual bool processGroups();
+
+  void copyNonWorkspaceProperties(IAlgorithm * alg, int periodNum);
+
 protected:
 
   /// Virtual method - must be overridden by concrete algorithm
@@ -312,17 +324,7 @@ protected:
   friend class WorkspaceHistory; // Allow workspace history loading to adjust g_execCount 
   static size_t g_execCount; ///< Counter to keep track of algorithm execution order
 
-  // ------------------ For WorkspaceGroups ------------------------------------
-  virtual bool checkGroups();
-
-  virtual bool processGroups();
   virtual void setOtherProperties(IAlgorithm * alg, const std::string & propertyName, const std::string & propertyValue, int periodNum);
-  typedef std::vector<boost::shared_ptr<Workspace> > WorkspaceVector;
-
-  void findWorkspaceProperties(WorkspaceVector& inputWorkspaces,
-      WorkspaceVector& outputWorkspaces) const;
-
-  void copyNonWorkspaceProperties(IAlgorithm * alg, int periodNum);
 
   /// All the WorkspaceProperties that are Input or InOut. Set in execute()
   std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;

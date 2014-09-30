@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File see http://www.mantidproject.org/IDF -->
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" name="IN6" valid-from="1900-01-31 23:59:59"
-valid-to="2100-01-31 23:59:59" last-modified="2014-05-27 13:32:58">
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+            name="IN6" valid-from="1900-01-31 23:59:59"
+            valid-to="2100-01-31 23:59:59" last-modified="2014-09-04 07:11:39">
   <!-- Author: ricardo.leal@ill.fr -->
   <defaults>
     <length unit="meter" />
@@ -420,831 +423,1473 @@ valid-to="2100-01-31 23:59:59" last-modified="2014-05-27 13:32:58">
   <!-- Definition of every bank -->
   <type name="bank_1">
     <component type="pack">
-      <location r="2.483" t="-10.330" p="0.000" name="det3"></location>
+      <location x="-0.445" y="0.000" z="2.443" name="det3"></location>
     </component>
   </type>
   <type name="bank_2">
     <component type="pack">
-      <location r="2.483" t="-11.110" p="0.000" name="det4"></location>
+      <location x="-0.478" y="0.000" z="2.436" name="det4"></location>
     </component>
   </type>
   <type name="bank_3">
     <component type="pack">
-      <location r="2.483" t="-11.890" p="0.000" name="det5"></location>
+      <location x="-0.512" y="0.000" z="2.430" name="det5"></location>
     </component>
   </type>
   <type name="bank_4">
     <component type="pack">
-      <location r="2.483" t="-12.670" p="0.000" name="det6"></location>
+      <location x="-0.545" y="0.000" z="2.423" name="det6"></location>
     </component>
   </type>
   <type name="bank_5">
     <component type="pack">
-      <location r="2.483" t="-13.730" p="0.000" name="det7"></location>
+      <location x="-0.589" y="0.000" z="2.412" name="det7"></location>
     </component>
   </type>
   <type name="bank_6">
     <component type="pack">
-      <location r="2.483" t="-14.510" p="0.000" name="det8"></location>
+      <location x="-0.622" y="0.000" z="2.404" name="det8"></location>
     </component>
   </type>
   <type name="bank_7">
     <component type="pack">
-      <location r="2.483" t="-15.290" p="0.000" name="det9"></location>
+      <location x="-0.655" y="0.000" z="2.395" name="det9"></location>
     </component>
   </type>
   <type name="bank_8">
     <component type="pack">
-      <location r="2.483" t="-16.070" p="0.000" name="det10"></location>
+      <location x="-0.687" y="0.000" z="2.386" name="det10"></location>
     </component>
   </type>
   <type name="bank_9">
     <component type="pack">
-      <location r="2.483" t="-17.130" p="-15.000" name="det11" />
-      <location r="2.483" t="-17.130" p="0.000" name="det12" />
-      <location r="2.483" t="-17.130" p="15.000" name="det13" />
+      <location x="-0.349" y="0.643" z="2.373" rot="-17.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det11">
+        <facing x="0" y="0" z="0" />
+        <rot val="-61.488" axis-x="-0.349" axis-y="0.643" axis-z="2.373" />
+      </location>
+      <location x="-0.731" y="0.000" z="2.373" rot="-17.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det12" />
+      <location x="-0.349" y="-0.643" z="2.373" rot="-17.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det13">
+        <facing x="0" y="0" z="0" />
+        <rot val="61.488" axis-x="-0.349" axis-y="-0.643" axis-z="2.373" />
+      </location>
     </component>
   </type>
   <type name="bank_10">
     <component type="pack">
-      <location r="2.483" t="-17.910" p="-15.000" name="det15" />
-      <location r="2.483" t="-17.910" p="0.000" name="det16" />
-      <location r="2.483" t="-17.910" p="15.000" name="det17" />
+      <location x="-0.412" y="0.643" z="2.363" rot="-17.910" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det14">
+        <facing x="0" y="0" z="0" />
+        <rot val="-57.312" axis-x="-0.412" axis-y="0.643" axis-z="2.363" />
+      </location>
+      <location x="-0.764" y="0.000" z="2.363" rot="-17.910" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det15" />
+      <location x="-0.412" y="-0.643" z="2.363" rot="-17.910" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det16">
+        <facing x="0" y="0" z="0" />
+        <rot val="57.312" axis-x="-0.412" axis-y="-0.643" axis-z="2.363" />
+      </location>
     </component>
   </type>
   <type name="bank_11">
     <component type="pack">
-      <location r="2.483" t="-18.690" p="-15.000" name="det19" />
-      <location r="2.483" t="-18.690" p="0.000" name="det20" />
-      <location r="2.483" t="-18.690" p="15.000" name="det21" />
+      <location x="-0.469" y="0.643" z="2.352" rot="-18.690" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det17">
+        <facing x="0" y="0" z="0" />
+        <rot val="-53.870" axis-x="-0.469" axis-y="0.643" axis-z="2.352" />
+      </location>
+      <location x="-0.796" y="0.000" z="2.352" rot="-18.690" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det18" />
+      <location x="-0.469" y="-0.643" z="2.352" rot="-18.690" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det19">
+        <facing x="0" y="0" z="0" />
+        <rot val="53.870" axis-x="-0.469" axis-y="-0.643" axis-z="2.352" />
+      </location>
     </component>
   </type>
   <type name="bank_12">
     <component type="pack">
-      <location r="2.483" t="-19.470" p="0.000" name="det23"></location>
+      <location x="-0.828" y="0.000" z="2.341" name="det20"></location>
     </component>
   </type>
   <type name="bank_13">
     <component type="pack">
-      <location r="2.483" t="-20.530" p="-15.000" name="det24" />
-      <location r="2.483" t="-20.530" p="0.000" name="det25" />
-      <location r="2.483" t="-20.530" p="15.000" name="det26" />
+      <location x="-0.588" y="0.643" z="2.325" rot="-20.530" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det21">
+        <facing x="0" y="0" z="0" />
+        <rot val="-47.562" axis-x="-0.588" axis-y="0.643" axis-z="2.325" />
+      </location>
+      <location x="-0.871" y="0.000" z="2.325" rot="-20.530" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det22" />
+      <location x="-0.588" y="-0.643" z="2.325" rot="-20.530" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det23">
+        <facing x="0" y="0" z="0" />
+        <rot val="47.562" axis-x="-0.588" axis-y="-0.643" axis-z="2.325" />
+      </location>
     </component>
   </type>
   <type name="bank_14">
     <component type="pack">
-      <location r="2.483" t="-21.310" p="-15.000" name="det28" />
-      <location r="2.483" t="-21.310" p="0.000" name="det29" />
-      <location r="2.483" t="-21.310" p="15.000" name="det30" />
+      <location x="-0.633" y="0.643" z="2.313" rot="-21.310" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det24">
+        <facing x="0" y="0" z="0" />
+        <rot val="-45.413" axis-x="-0.633" axis-y="0.643" axis-z="2.313" />
+      </location>
+      <location x="-0.902" y="0.000" z="2.313" rot="-21.310" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det25" />
+      <location x="-0.633" y="-0.643" z="2.313" rot="-21.310" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det26">
+        <facing x="0" y="0" z="0" />
+        <rot val="45.413" axis-x="-0.633" axis-y="-0.643" axis-z="2.313" />
+      </location>
     </component>
   </type>
   <type name="bank_15">
     <component type="pack">
-      <location r="2.483" t="-22.090" p="-15.000" name="det32" />
-      <location r="2.483" t="-22.090" p="0.000" name="det33" />
-      <location r="2.483" t="-22.090" p="15.000" name="det34" />
+      <location x="-0.677" y="0.643" z="2.301" rot="-22.090" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det27">
+        <facing x="0" y="0" z="0" />
+        <rot val="-43.490" axis-x="-0.677" axis-y="0.643" axis-z="2.301" />
+      </location>
+      <location x="-0.934" y="0.000" z="2.301" rot="-22.090" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det28" />
+      <location x="-0.677" y="-0.643" z="2.301" rot="-22.090" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det29">
+        <facing x="0" y="0" z="0" />
+        <rot val="43.490" axis-x="-0.677" axis-y="-0.643" axis-z="2.301" />
+      </location>
     </component>
   </type>
   <type name="bank_16">
     <component type="pack">
-      <location r="2.483" t="-22.870" p="0.000" name="det36"></location>
+      <location x="-0.965" y="0.000" z="2.288" name="det30"></location>
     </component>
   </type>
   <type name="bank_17">
     <component type="pack">
-      <location r="2.483" t="-23.930" p="-15.000" name="det37" />
-      <location r="2.483" t="-23.930" p="0.000" name="det38" />
-      <location r="2.483" t="-23.930" p="15.000" name="det39" />
+      <location x="-0.775" y="0.643" z="2.270" rot="-23.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det31">
+        <facing x="0" y="0" z="0" />
+        <rot val="-39.649" axis-x="-0.775" axis-y="0.643" axis-z="2.270" />
+      </location>
+      <location x="-1.007" y="0.000" z="2.270" rot="-23.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det32" />
+      <location x="-0.775" y="-0.643" z="2.270" rot="-23.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det33">
+        <facing x="0" y="0" z="0" />
+        <rot val="39.649" axis-x="-0.775" axis-y="-0.643" axis-z="2.270" />
+      </location>
     </component>
   </type>
   <type name="bank_18">
     <component type="pack">
-      <location r="2.483" t="-24.710" p="-15.000" name="det41" />
-      <location r="2.483" t="-24.710" p="0.000" name="det42" />
-      <location r="2.483" t="-24.710" p="15.000" name="det43" />
+      <location x="-0.815" y="0.643" z="2.256" rot="-24.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det34">
+        <facing x="0" y="0" z="0" />
+        <rot val="-38.254" axis-x="-0.815" axis-y="0.643" axis-z="2.256" />
+      </location>
+      <location x="-1.038" y="0.000" z="2.256" rot="-24.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det35" />
+      <location x="-0.815" y="-0.643" z="2.256" rot="-24.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det36">
+        <facing x="0" y="0" z="0" />
+        <rot val="38.254" axis-x="-0.815" axis-y="-0.643" axis-z="2.256" />
+      </location>
     </component>
   </type>
   <type name="bank_19">
     <component type="pack">
-      <location r="2.483" t="-25.490" p="-15.000" name="det45" />
-      <location r="2.483" t="-25.490" p="0.000" name="det46" />
-      <location r="2.483" t="-25.490" p="15.000" name="det47" />
+      <location x="-0.854" y="0.643" z="2.241" rot="-25.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det37">
+        <facing x="0" y="0" z="0" />
+        <rot val="-36.971" axis-x="-0.854" axis-y="0.643" axis-z="2.241" />
+      </location>
+      <location x="-1.069" y="0.000" z="2.241" rot="-25.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det38" />
+      <location x="-0.854" y="-0.643" z="2.241" rot="-25.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det39">
+        <facing x="0" y="0" z="0" />
+        <rot val="36.971" axis-x="-0.854" axis-y="-0.643" axis-z="2.241" />
+      </location>
     </component>
   </type>
   <type name="bank_20">
     <component type="pack">
-      <location r="2.483" t="-26.270" p="0.000" name="det49"></location>
+      <location x="-1.099" y="0.000" z="2.227" name="det40"></location>
     </component>
   </type>
   <type name="bank_21">
     <component type="pack">
-      <location r="2.483" t="-27.330" p="-15.000" name="det50" />
-      <location r="2.483" t="-27.330" p="0.000" name="det51" />
-      <location r="2.483" t="-27.330" p="15.000" name="det52" />
+      <location x="-0.942" y="0.643" z="2.206" rot="-27.330" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det41">
+        <facing x="0" y="0" z="0" />
+        <rot val="-34.314" axis-x="-0.942" axis-y="0.643" axis-z="2.206" />
+      </location>
+      <location x="-1.140" y="0.000" z="2.206" rot="-27.330" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det42" />
+      <location x="-0.942" y="-0.643" z="2.206" rot="-27.330" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det43">
+        <facing x="0" y="0" z="0" />
+        <rot val="34.314" axis-x="-0.942" axis-y="-0.643" axis-z="2.206" />
+      </location>
     </component>
   </type>
   <type name="bank_22">
     <component type="pack">
-      <location r="2.483" t="-28.110" p="-15.000" name="det54" />
-      <location r="2.483" t="-28.110" p="0.000" name="det55" />
-      <location r="2.483" t="-28.110" p="15.000" name="det56" />
+      <location x="-0.978" y="0.643" z="2.190" rot="-28.110" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det44">
+        <facing x="0" y="0" z="0" />
+        <rot val="-33.320" axis-x="-0.978" axis-y="0.643" axis-z="2.190" />
+      </location>
+      <location x="-1.170" y="0.000" z="2.190" rot="-28.110" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det45" />
+      <location x="-0.978" y="-0.643" z="2.190" rot="-28.110" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det46">
+        <facing x="0" y="0" z="0" />
+        <rot val="33.320" axis-x="-0.978" axis-y="-0.643" axis-z="2.190" />
+      </location>
     </component>
   </type>
   <type name="bank_23">
     <component type="pack">
-      <location r="2.483" t="-28.890" p="-15.000" name="det58" />
-      <location r="2.483" t="-28.890" p="0.000" name="det59" />
-      <location r="2.483" t="-28.890" p="15.000" name="det60" />
+      <location x="-1.013" y="0.643" z="2.174" rot="-28.890" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det47">
+        <facing x="0" y="0" z="0" />
+        <rot val="-32.392" axis-x="-1.013" axis-y="0.643" axis-z="2.174" />
+      </location>
+      <location x="-1.200" y="0.000" z="2.174" rot="-28.890" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det48" />
+      <location x="-1.013" y="-0.643" z="2.174" rot="-28.890" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det49">
+        <facing x="0" y="0" z="0" />
+        <rot val="32.392" axis-x="-1.013" axis-y="-0.643" axis-z="2.174" />
+      </location>
     </component>
   </type>
   <type name="bank_24">
     <component type="pack">
-      <location r="2.483" t="-29.670" p="0.000" name="det62"></location>
+      <location x="-1.229" y="0.000" z="2.157" name="det50"></location>
     </component>
   </type>
   <type name="bank_25">
     <component type="pack">
-      <location r="2.483" t="-30.730" p="-15.000" name="det63" />
-      <location r="2.483" t="-30.730" p="0.000" name="det64" />
-      <location r="2.483" t="-30.730" p="15.000" name="det65" />
+      <location x="-1.094" y="0.643" z="2.134" rot="-30.730" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det51">
+        <facing x="0" y="0" z="0" />
+        <rot val="-30.431" axis-x="-1.094" axis-y="0.643" axis-z="2.134" />
+      </location>
+      <location x="-1.269" y="0.000" z="2.134" rot="-30.730" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det52" />
+      <location x="-1.094" y="-0.643" z="2.134" rot="-30.730" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det53">
+        <facing x="0" y="0" z="0" />
+        <rot val="30.431" axis-x="-1.094" axis-y="-0.643" axis-z="2.134" />
+      </location>
     </component>
   </type>
   <type name="bank_26">
     <component type="pack">
-      <location r="2.483" t="-31.510" p="-15.000" name="det67" />
-      <location r="2.483" t="-31.510" p="0.000" name="det68" />
-      <location r="2.483" t="-31.510" p="15.000" name="det69" />
+      <location x="-1.127" y="0.643" z="2.117" rot="-31.510" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det54">
+        <facing x="0" y="0" z="0" />
+        <rot val="-29.683" axis-x="-1.127" axis-y="0.643" axis-z="2.117" />
+      </location>
+      <location x="-1.298" y="0.000" z="2.117" rot="-31.510" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det55" />
+      <location x="-1.127" y="-0.643" z="2.117" rot="-31.510" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det56">
+        <facing x="0" y="0" z="0" />
+        <rot val="29.683" axis-x="-1.127" axis-y="-0.643" axis-z="2.117" />
+      </location>
     </component>
   </type>
   <type name="bank_27">
     <component type="pack">
-      <location r="2.483" t="-32.290" p="-15.000" name="det71" />
-      <location r="2.483" t="-32.290" p="0.000" name="det72" />
-      <location r="2.483" t="-32.290" p="15.000" name="det73" />
+      <location x="-1.160" y="0.643" z="2.099" rot="-32.290" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det57">
+        <facing x="0" y="0" z="0" />
+        <rot val="-28.979" axis-x="-1.160" axis-y="0.643" axis-z="2.099" />
+      </location>
+      <location x="-1.326" y="0.000" z="2.099" rot="-32.290" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det58" />
+      <location x="-1.160" y="-0.643" z="2.099" rot="-32.290" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det59">
+        <facing x="0" y="0" z="0" />
+        <rot val="28.979" axis-x="-1.160" axis-y="-0.643" axis-z="2.099" />
+      </location>
     </component>
   </type>
   <type name="bank_28">
     <component type="pack">
-      <location r="2.483" t="-33.070" p="0.000" name="det75"></location>
+      <location x="-1.355" y="0.000" z="2.081" name="det60"></location>
     </component>
   </type>
   <type name="bank_29">
     <component type="pack">
-      <location r="2.483" t="-34.130" p="-15.000" name="det76" />
-      <location r="2.483" t="-34.130" p="0.000" name="det77" />
-      <location r="2.483" t="-34.130" p="15.000" name="det78" />
+      <location x="-1.236" y="0.643" z="2.055" rot="-34.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det61">
+        <facing x="0" y="0" z="0" />
+        <rot val="-27.471" axis-x="-1.236" axis-y="0.643" axis-z="2.055" />
+      </location>
+      <location x="-1.393" y="0.000" z="2.055" rot="-34.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det62" />
+      <location x="-1.236" y="-0.643" z="2.055" rot="-34.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det63">
+        <facing x="0" y="0" z="0" />
+        <rot val="27.471" axis-x="-1.236" axis-y="-0.643" axis-z="2.055" />
+      </location>
     </component>
   </type>
   <type name="bank_30">
     <component type="pack">
-      <location r="2.483" t="-34.910" p="-15.000" name="det80" />
-      <location r="2.483" t="-34.910" p="0.000" name="det81" />
-      <location r="2.483" t="-34.910" p="15.000" name="det82" />
+      <location x="-1.267" y="0.643" z="2.036" rot="-34.910" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det64">
+        <facing x="0" y="0" z="0" />
+        <rot val="-26.888" axis-x="-1.267" axis-y="0.643" axis-z="2.036" />
+      </location>
+      <location x="-1.421" y="0.000" z="2.036" rot="-34.910" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det65" />
+      <location x="-1.267" y="-0.643" z="2.036" rot="-34.910" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det66">
+        <facing x="0" y="0" z="0" />
+        <rot val="26.888" axis-x="-1.267" axis-y="-0.643" axis-z="2.036" />
+      </location>
     </component>
   </type>
   <type name="bank_31">
     <component type="pack">
-      <location r="2.483" t="-35.690" p="-15.000" name="det84" />
-      <location r="2.483" t="-35.690" p="0.000" name="det85" />
-      <location r="2.483" t="-35.690" p="15.000" name="det86" />
+      <location x="-1.298" y="0.643" z="2.017" rot="-35.690" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det67">
+        <facing x="0" y="0" z="0" />
+        <rot val="-26.336" axis-x="-1.298" axis-y="0.643" axis-z="2.017" />
+      </location>
+      <location x="-1.449" y="0.000" z="2.017" rot="-35.690" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det68" />
+      <location x="-1.298" y="-0.643" z="2.017" rot="-35.690" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det69">
+        <facing x="0" y="0" z="0" />
+        <rot val="26.336" axis-x="-1.298" axis-y="-0.643" axis-z="2.017" />
+      </location>
     </component>
   </type>
   <type name="bank_32">
     <component type="pack">
-      <location r="2.483" t="-36.470" p="0.000" name="det88"></location>
+      <location x="-1.476" y="0.000" z="1.997" name="det70"></location>
     </component>
   </type>
   <type name="bank_33">
     <component type="pack">
-      <location r="2.483" t="-37.530" p="-15.000" name="det89" />
-      <location r="2.483" t="-37.530" p="0.000" name="det90" />
-      <location r="2.483" t="-37.530" p="15.000" name="det91" />
+      <location x="-1.369" y="0.643" z="1.969" rot="-37.530" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det71">
+        <facing x="0" y="0" z="0" />
+        <rot val="-25.142" axis-x="-1.369" axis-y="0.643" axis-z="1.969" />
+      </location>
+      <location x="-1.513" y="0.000" z="1.969" rot="-37.530" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det72" />
+      <location x="-1.369" y="-0.643" z="1.969" rot="-37.530" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det73">
+        <facing x="0" y="0" z="0" />
+        <rot val="25.142" axis-x="-1.369" axis-y="-0.643" axis-z="1.969" />
+      </location>
     </component>
   </type>
   <type name="bank_34">
     <component type="pack">
-      <location r="2.483" t="-38.310" p="-15.000" name="det93" />
-      <location r="2.483" t="-38.310" p="0.000" name="det94" />
-      <location r="2.483" t="-38.310" p="15.000" name="det95" />
+      <location x="-1.399" y="0.643" z="1.948" rot="-38.310" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det74">
+        <facing x="0" y="0" z="0" />
+        <rot val="-24.677" axis-x="-1.399" axis-y="0.643" axis-z="1.948" />
+      </location>
+      <location x="-1.539" y="0.000" z="1.948" rot="-38.310" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det75" />
+      <location x="-1.399" y="-0.643" z="1.948" rot="-38.310" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det76">
+        <facing x="0" y="0" z="0" />
+        <rot val="24.677" axis-x="-1.399" axis-y="-0.643" axis-z="1.948" />
+      </location>
     </component>
   </type>
   <type name="bank_35">
     <component type="pack">
-      <location r="2.483" t="-39.090" p="-15.000" name="det97" />
-      <location r="2.483" t="-39.090" p="0.000" name="det98" />
-      <location r="2.483" t="-39.090" p="15.000" name="det99" />
+      <location x="-1.428" y="0.643" z="1.927" rot="-39.090" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det77">
+        <facing x="0" y="0" z="0" />
+        <rot val="-24.234" axis-x="-1.428" axis-y="0.643" axis-z="1.927" />
+      </location>
+      <location x="-1.566" y="0.000" z="1.927" rot="-39.090" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det78" />
+      <location x="-1.428" y="-0.643" z="1.927" rot="-39.090" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det79">
+        <facing x="0" y="0" z="0" />
+        <rot val="24.234" axis-x="-1.428" axis-y="-0.643" axis-z="1.927" />
+      </location>
     </component>
   </type>
   <type name="bank_36">
     <component type="pack">
-      <location r="2.483" t="-39.870" p="0.000" name="det101"></location>
+      <location x="-1.592" y="0.000" z="1.906" name="det80"></location>
     </component>
   </type>
   <type name="bank_37">
     <component type="pack">
-      <location r="2.483" t="-40.930" p="-15.000" name="det102" />
-      <location r="2.483" t="-40.930" p="0.000" name="det103" />
-      <location r="2.483" t="-40.930" p="15.000" name="det104" />
+      <location x="-1.494" y="0.643" z="1.876" rot="-40.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det81">
+        <facing x="0" y="0" z="0" />
+        <rot val="-23.270" axis-x="-1.494" axis-y="0.643" axis-z="1.876" />
+      </location>
+      <location x="-1.627" y="0.000" z="1.876" rot="-40.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det82" />
+      <location x="-1.494" y="-0.643" z="1.876" rot="-40.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det83">
+        <facing x="0" y="0" z="0" />
+        <rot val="23.270" axis-x="-1.494" axis-y="-0.643" axis-z="1.876" />
+      </location>
     </component>
   </type>
   <type name="bank_38">
     <component type="pack">
-      <location r="2.483" t="-41.710" p="-15.000" name="det106" />
-      <location r="2.483" t="-41.710" p="0.000" name="det107" />
-      <location r="2.483" t="-41.710" p="15.000" name="det108" />
+      <location x="-1.522" y="0.643" z="1.854" rot="-41.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det84">
+        <facing x="0" y="0" z="0" />
+        <rot val="-22.892" axis-x="-1.522" axis-y="0.643" axis-z="1.854" />
+      </location>
+      <location x="-1.652" y="0.000" z="1.854" rot="-41.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det85" />
+      <location x="-1.522" y="-0.643" z="1.854" rot="-41.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det86">
+        <facing x="0" y="0" z="0" />
+        <rot val="22.892" axis-x="-1.522" axis-y="-0.643" axis-z="1.854" />
+      </location>
     </component>
   </type>
   <type name="bank_39">
     <component type="pack">
-      <location r="2.483" t="-42.490" p="-15.000" name="det110" />
-      <location r="2.483" t="-42.490" p="0.000" name="det111" />
-      <location r="2.483" t="-42.490" p="15.000" name="det112" />
+      <location x="-1.549" y="0.643" z="1.831" rot="-42.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det87">
+        <facing x="0" y="0" z="0" />
+        <rot val="-22.530" axis-x="-1.549" axis-y="0.643" axis-z="1.831" />
+      </location>
+      <location x="-1.677" y="0.000" z="1.831" rot="-42.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det88" />
+      <location x="-1.549" y="-0.643" z="1.831" rot="-42.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det89">
+        <facing x="0" y="0" z="0" />
+        <rot val="22.530" axis-x="-1.549" axis-y="-0.643" axis-z="1.831" />
+      </location>
     </component>
   </type>
   <type name="bank_40">
     <component type="pack">
-      <location r="2.483" t="-43.270" p="0.000" name="det114"></location>
+      <location x="-1.702" y="0.000" z="1.808" name="det90"></location>
     </component>
   </type>
   <type name="bank_41">
     <component type="pack">
-      <location r="2.483" t="-44.330" p="-15.000" name="det115" />
-      <location r="2.483" t="-44.330" p="0.000" name="det116" />
-      <location r="2.483" t="-44.330" p="15.000" name="det117" />
+      <location x="-1.612" y="0.643" z="1.776" rot="-44.330" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det91">
+        <facing x="0" y="0" z="0" />
+        <rot val="-21.739" axis-x="-1.612" axis-y="0.643" axis-z="1.776" />
+      </location>
+      <location x="-1.735" y="0.000" z="1.776" rot="-44.330" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det92" />
+      <location x="-1.612" y="-0.643" z="1.776" rot="-44.330" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det93">
+        <facing x="0" y="0" z="0" />
+        <rot val="21.739" axis-x="-1.612" axis-y="-0.643" axis-z="1.776" />
+      </location>
     </component>
   </type>
   <type name="bank_42">
     <component type="pack">
-      <location r="2.483" t="-45.110" p="-15.000" name="det119" />
-      <location r="2.483" t="-45.110" p="0.000" name="det120" />
-      <location r="2.483" t="-45.110" p="15.000" name="det121" />
+      <location x="-1.638" y="0.643" z="1.752" rot="-45.110" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det94">
+        <facing x="0" y="0" z="0" />
+        <rot val="-21.428" axis-x="-1.638" axis-y="0.643" axis-z="1.752" />
+      </location>
+      <location x="-1.759" y="0.000" z="1.752" rot="-45.110" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det95" />
+      <location x="-1.638" y="-0.643" z="1.752" rot="-45.110" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det96">
+        <facing x="0" y="0" z="0" />
+        <rot val="21.428" axis-x="-1.638" axis-y="-0.643" axis-z="1.752" />
+      </location>
     </component>
   </type>
   <type name="bank_43">
     <component type="pack">
-      <location r="2.483" t="-45.890" p="-15.000" name="det123" />
-      <location r="2.483" t="-45.890" p="0.000" name="det124" />
-      <location r="2.483" t="-45.890" p="15.000" name="det125" />
+      <location x="-1.663" y="0.643" z="1.728" rot="-45.890" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det97">
+        <facing x="0" y="0" z="0" />
+        <rot val="-21.129" axis-x="-1.663" axis-y="0.643" axis-z="1.728" />
+      </location>
+      <location x="-1.783" y="0.000" z="1.728" rot="-45.890" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det98" />
+      <location x="-1.663" y="-0.643" z="1.728" rot="-45.890" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det99">
+        <facing x="0" y="0" z="0" />
+        <rot val="21.129" axis-x="-1.663" axis-y="-0.643" axis-z="1.728" />
+      </location>
     </component>
   </type>
   <type name="bank_44">
     <component type="pack">
-      <location r="2.483" t="-46.670" p="-15.000" name="det127" />
-      <location r="2.483" t="-46.670" p="0.000" name="det128" />
-      <location r="2.483" t="-46.670" p="15.000" name="det129" />
+      <location x="-1.688" y="0.643" z="1.704" rot="-46.670" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det100">
+        <facing x="0" y="0" z="0" />
+        <rot val="-20.843" axis-x="-1.688" axis-y="0.643" axis-z="1.704" />
+      </location>
+      <location x="-1.806" y="0.000" z="1.704" rot="-46.670" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det101" />
+      <location x="-1.688" y="-0.643" z="1.704" rot="-46.670" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det102">
+        <facing x="0" y="0" z="0" />
+        <rot val="20.843" axis-x="-1.688" axis-y="-0.643" axis-z="1.704" />
+      </location>
     </component>
   </type>
   <type name="bank_45">
     <component type="pack">
-      <location r="2.483" t="-47.730" p="-15.000" name="det131" />
-      <location r="2.483" t="-47.730" p="0.000" name="det132" />
-      <location r="2.483" t="-47.730" p="15.000" name="det133" />
+      <location x="-1.721" y="0.643" z="1.670" rot="-47.730" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det103">
+        <facing x="0" y="0" z="0" />
+        <rot val="-20.473" axis-x="-1.721" axis-y="0.643" axis-z="1.670" />
+      </location>
+      <location x="-1.837" y="0.000" z="1.670" rot="-47.730" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det104" />
+      <location x="-1.721" y="-0.643" z="1.670" rot="-47.730" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det105">
+        <facing x="0" y="0" z="0" />
+        <rot val="20.473" axis-x="-1.721" axis-y="-0.643" axis-z="1.670" />
+      </location>
     </component>
   </type>
   <type name="bank_46">
     <component type="pack">
-      <location r="2.483" t="-48.510" p="-15.000" name="det135" />
-      <location r="2.483" t="-48.510" p="0.000" name="det136" />
-      <location r="2.483" t="-48.510" p="15.000" name="det137" />
+      <location x="-1.745" y="0.643" z="1.645" rot="-48.510" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det106">
+        <facing x="0" y="0" z="0" />
+        <rot val="-20.214" axis-x="-1.745" axis-y="0.643" axis-z="1.645" />
+      </location>
+      <location x="-1.860" y="0.000" z="1.645" rot="-48.510" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det107" />
+      <location x="-1.745" y="-0.643" z="1.645" rot="-48.510" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det108">
+        <facing x="0" y="0" z="0" />
+        <rot val="20.214" axis-x="-1.745" axis-y="-0.643" axis-z="1.645" />
+      </location>
     </component>
   </type>
   <type name="bank_47">
     <component type="pack">
-      <location r="2.483" t="-49.290" p="-15.000" name="det139" />
-      <location r="2.483" t="-49.290" p="0.000" name="det140" />
-      <location r="2.483" t="-49.290" p="15.000" name="det141" />
+      <location x="-1.769" y="0.643" z="1.619" rot="-49.290" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det109">
+        <facing x="0" y="0" z="0" />
+        <rot val="-19.965" axis-x="-1.769" axis-y="0.643" axis-z="1.619" />
+      </location>
+      <location x="-1.882" y="0.000" z="1.619" rot="-49.290" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det110" />
+      <location x="-1.769" y="-0.643" z="1.619" rot="-49.290" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det111">
+        <facing x="0" y="0" z="0" />
+        <rot val="19.965" axis-x="-1.769" axis-y="-0.643" axis-z="1.619" />
+      </location>
     </component>
   </type>
   <type name="bank_48">
     <component type="pack">
-      <location r="2.483" t="-50.070" p="-15.000" name="det143" />
-      <location r="2.483" t="-50.070" p="0.000" name="det144" />
-      <location r="2.483" t="-50.070" p="15.000" name="det145" />
+      <location x="-1.792" y="0.643" z="1.594" rot="-50.070" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det112">
+        <facing x="0" y="0" z="0" />
+        <rot val="-19.726" axis-x="-1.792" axis-y="0.643" axis-z="1.594" />
+      </location>
+      <location x="-1.904" y="0.000" z="1.594" rot="-50.070" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det113" />
+      <location x="-1.792" y="-0.643" z="1.594" rot="-50.070" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det114">
+        <facing x="0" y="0" z="0" />
+        <rot val="19.726" axis-x="-1.792" axis-y="-0.643" axis-z="1.594" />
+      </location>
     </component>
   </type>
   <type name="bank_49">
     <component type="pack">
-      <location r="2.483" t="-51.130" p="-15.000" name="det147" />
-      <location r="2.483" t="-51.130" p="0.000" name="det148" />
-      <location r="2.483" t="-51.130" p="15.000" name="det149" />
+      <location x="-1.823" y="0.643" z="1.558" rot="-51.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det115">
+        <facing x="0" y="0" z="0" />
+        <rot val="-19.416" axis-x="-1.823" axis-y="0.643" axis-z="1.558" />
+      </location>
+      <location x="-1.933" y="0.000" z="1.558" rot="-51.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det116" />
+      <location x="-1.823" y="-0.643" z="1.558" rot="-51.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det117">
+        <facing x="0" y="0" z="0" />
+        <rot val="19.416" axis-x="-1.823" axis-y="-0.643" axis-z="1.558" />
+      </location>
     </component>
   </type>
   <type name="bank_50">
     <component type="pack">
-      <location r="2.483" t="-51.910" p="-15.000" name="det151" />
-      <location r="2.483" t="-51.910" p="0.000" name="det152" />
-      <location r="2.483" t="-51.910" p="15.000" name="det153" />
+      <location x="-1.846" y="0.643" z="1.532" rot="-51.910" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det118">
+        <facing x="0" y="0" z="0" />
+        <rot val="-19.199" axis-x="-1.846" axis-y="0.643" axis-z="1.532" />
+      </location>
+      <location x="-1.954" y="0.000" z="1.532" rot="-51.910" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det119" />
+      <location x="-1.846" y="-0.643" z="1.532" rot="-51.910" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det120">
+        <facing x="0" y="0" z="0" />
+        <rot val="19.199" axis-x="-1.846" axis-y="-0.643" axis-z="1.532" />
+      </location>
     </component>
   </type>
   <type name="bank_51">
     <component type="pack">
-      <location r="2.483" t="-52.690" p="-15.000" name="det155" />
-      <location r="2.483" t="-52.690" p="0.000" name="det156" />
-      <location r="2.483" t="-52.690" p="15.000" name="det157" />
+      <location x="-1.867" y="0.643" z="1.505" rot="-52.690" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det121">
+        <facing x="0" y="0" z="0" />
+        <rot val="-18.990" axis-x="-1.867" axis-y="0.643" axis-z="1.505" />
+      </location>
+      <location x="-1.975" y="0.000" z="1.505" rot="-52.690" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det122" />
+      <location x="-1.867" y="-0.643" z="1.505" rot="-52.690" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det123">
+        <facing x="0" y="0" z="0" />
+        <rot val="18.990" axis-x="-1.867" axis-y="-0.643" axis-z="1.505" />
+      </location>
     </component>
   </type>
   <type name="bank_52">
     <component type="pack">
-      <location r="2.483" t="-53.470" p="-15.000" name="det159" />
-      <location r="2.483" t="-53.470" p="0.000" name="det160" />
-      <location r="2.483" t="-53.470" p="15.000" name="det161" />
+      <location x="-1.889" y="0.643" z="1.478" rot="-53.470" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det124">
+        <facing x="0" y="0" z="0" />
+        <rot val="-18.790" axis-x="-1.889" axis-y="0.643" axis-z="1.478" />
+      </location>
+      <location x="-1.995" y="0.000" z="1.478" rot="-53.470" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det125" />
+      <location x="-1.889" y="-0.643" z="1.478" rot="-53.470" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det126">
+        <facing x="0" y="0" z="0" />
+        <rot val="18.790" axis-x="-1.889" axis-y="-0.643" axis-z="1.478" />
+      </location>
     </component>
   </type>
   <type name="bank_53">
     <component type="pack">
-      <location r="2.483" t="-54.530" p="-15.000" name="det163" />
-      <location r="2.483" t="-54.530" p="0.000" name="det164" />
-      <location r="2.483" t="-54.530" p="15.000" name="det165" />
+      <location x="-1.917" y="0.643" z="1.441" rot="-54.530" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det127">
+        <facing x="0" y="0" z="0" />
+        <rot val="-18.530" axis-x="-1.917" axis-y="0.643" axis-z="1.441" />
+      </location>
+      <location x="-2.022" y="0.000" z="1.441" rot="-54.530" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det128" />
+      <location x="-1.917" y="-0.643" z="1.441" rot="-54.530" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det129">
+        <facing x="0" y="0" z="0" />
+        <rot val="18.530" axis-x="-1.917" axis-y="-0.643" axis-z="1.441" />
+      </location>
     </component>
   </type>
   <type name="bank_54">
     <component type="pack">
-      <location r="2.483" t="-55.310" p="-15.000" name="det167" />
-      <location r="2.483" t="-55.310" p="0.000" name="det168" />
-      <location r="2.483" t="-55.310" p="15.000" name="det169" />
+      <location x="-1.938" y="0.643" z="1.413" rot="-55.310" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det130">
+        <facing x="0" y="0" z="0" />
+        <rot val="-18.347" axis-x="-1.938" axis-y="0.643" axis-z="1.413" />
+      </location>
+      <location x="-2.042" y="0.000" z="1.413" rot="-55.310" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det131" />
+      <location x="-1.938" y="-0.643" z="1.413" rot="-55.310" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det132">
+        <facing x="0" y="0" z="0" />
+        <rot val="18.347" axis-x="-1.938" axis-y="-0.643" axis-z="1.413" />
+      </location>
     </component>
   </type>
   <type name="bank_55">
     <component type="pack">
-      <location r="2.483" t="-56.090" p="-15.000" name="det171" />
-      <location r="2.483" t="-56.090" p="0.000" name="det172" />
-      <location r="2.483" t="-56.090" p="15.000" name="det173" />
+      <location x="-1.958" y="0.643" z="1.385" rot="-56.090" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det133">
+        <facing x="0" y="0" z="0" />
+        <rot val="-18.171" axis-x="-1.958" axis-y="0.643" axis-z="1.385" />
+      </location>
+      <location x="-2.061" y="0.000" z="1.385" rot="-56.090" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det134" />
+      <location x="-1.958" y="-0.643" z="1.385" rot="-56.090" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det135">
+        <facing x="0" y="0" z="0" />
+        <rot val="18.171" axis-x="-1.958" axis-y="-0.643" axis-z="1.385" />
+      </location>
     </component>
   </type>
   <type name="bank_56">
     <component type="pack">
-      <location r="2.483" t="-56.870" p="-15.000" name="det175" />
-      <location r="2.483" t="-56.870" p="0.000" name="det176" />
-      <location r="2.483" t="-56.870" p="15.000" name="det177" />
+      <location x="-1.978" y="0.643" z="1.357" rot="-56.870" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det136">
+        <facing x="0" y="0" z="0" />
+        <rot val="-18.003" axis-x="-1.978" axis-y="0.643" axis-z="1.357" />
+      </location>
+      <location x="-2.079" y="0.000" z="1.357" rot="-56.870" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det137" />
+      <location x="-1.978" y="-0.643" z="1.357" rot="-56.870" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det138">
+        <facing x="0" y="0" z="0" />
+        <rot val="18.003" axis-x="-1.978" axis-y="-0.643" axis-z="1.357" />
+      </location>
     </component>
   </type>
   <type name="bank_57">
     <component type="pack">
-      <location r="2.483" t="-57.930" p="-15.000" name="det179" />
-      <location r="2.483" t="-57.930" p="0.000" name="det180" />
-      <location r="2.483" t="-57.930" p="15.000" name="det181" />
+      <location x="-2.004" y="0.643" z="1.318" rot="-57.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det139">
+        <facing x="0" y="0" z="0" />
+        <rot val="-17.784" axis-x="-2.004" axis-y="0.643" axis-z="1.318" />
+      </location>
+      <location x="-2.104" y="0.000" z="1.318" rot="-57.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det140" />
+      <location x="-2.004" y="-0.643" z="1.318" rot="-57.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det141">
+        <facing x="0" y="0" z="0" />
+        <rot val="17.784" axis-x="-2.004" axis-y="-0.643" axis-z="1.318" />
+      </location>
     </component>
   </type>
   <type name="bank_58">
     <component type="pack">
-      <location r="2.483" t="-58.710" p="-15.000" name="det183" />
-      <location r="2.483" t="-58.710" p="0.000" name="det184" />
-      <location r="2.483" t="-58.710" p="15.000" name="det185" />
+      <location x="-2.022" y="0.643" z="1.290" rot="-58.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det142">
+        <facing x="0" y="0" z="0" />
+        <rot val="-17.630" axis-x="-2.022" axis-y="0.643" axis-z="1.290" />
+      </location>
+      <location x="-2.122" y="0.000" z="1.290" rot="-58.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det143" />
+      <location x="-2.022" y="-0.643" z="1.290" rot="-58.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det144">
+        <facing x="0" y="0" z="0" />
+        <rot val="17.630" axis-x="-2.022" axis-y="-0.643" axis-z="1.290" />
+      </location>
     </component>
   </type>
   <type name="bank_59">
     <component type="pack">
-      <location r="2.483" t="-59.490" p="-15.000" name="det187" />
-      <location r="2.483" t="-59.490" p="0.000" name="det188" />
-      <location r="2.483" t="-59.490" p="15.000" name="det189" />
+      <location x="-2.040" y="0.643" z="1.261" rot="-59.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det145">
+        <facing x="0" y="0" z="0" />
+        <rot val="-17.482" axis-x="-2.040" axis-y="0.643" axis-z="1.261" />
+      </location>
+      <location x="-2.139" y="0.000" z="1.261" rot="-59.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det146" />
+      <location x="-2.040" y="-0.643" z="1.261" rot="-59.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det147">
+        <facing x="0" y="0" z="0" />
+        <rot val="17.482" axis-x="-2.040" axis-y="-0.643" axis-z="1.261" />
+      </location>
     </component>
   </type>
   <type name="bank_60">
     <component type="pack">
-      <location r="2.483" t="-60.270" p="-15.000" name="det191" />
-      <location r="2.483" t="-60.270" p="0.000" name="det192" />
-      <location r="2.483" t="-60.270" p="15.000" name="det193" />
+      <location x="-2.058" y="0.643" z="1.231" rot="-60.270" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det148">
+        <facing x="0" y="0" z="0" />
+        <rot val="-17.341" axis-x="-2.058" axis-y="0.643" axis-z="1.231" />
+      </location>
+      <location x="-2.156" y="0.000" z="1.231" rot="-60.270" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det149" />
+      <location x="-2.058" y="-0.643" z="1.231" rot="-60.270" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det150">
+        <facing x="0" y="0" z="0" />
+        <rot val="17.341" axis-x="-2.058" axis-y="-0.643" axis-z="1.231" />
+      </location>
     </component>
   </type>
   <type name="bank_61">
     <component type="pack">
-      <location r="2.483" t="-61.330" p="-15.000" name="det195" />
-      <location r="2.483" t="-61.330" p="0.000" name="det196" />
-      <location r="2.483" t="-61.330" p="15.000" name="det197" />
+      <location x="-2.082" y="0.643" z="1.191" rot="-61.330" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det151">
+        <facing x="0" y="0" z="0" />
+        <rot val="-17.157" axis-x="-2.082" axis-y="0.643" axis-z="1.191" />
+      </location>
+      <location x="-2.179" y="0.000" z="1.191" rot="-61.330" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det152" />
+      <location x="-2.082" y="-0.643" z="1.191" rot="-61.330" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det153">
+        <facing x="0" y="0" z="0" />
+        <rot val="17.157" axis-x="-2.082" axis-y="-0.643" axis-z="1.191" />
+      </location>
     </component>
   </type>
   <type name="bank_62">
     <component type="pack">
-      <location r="2.483" t="-62.110" p="-15.000" name="det199" />
-      <location r="2.483" t="-62.110" p="0.000" name="det200" />
-      <location r="2.483" t="-62.110" p="15.000" name="det201" />
+      <location x="-2.098" y="0.643" z="1.161" rot="-62.110" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det154">
+        <facing x="0" y="0" z="0" />
+        <rot val="-17.028" axis-x="-2.098" axis-y="0.643" axis-z="1.161" />
+      </location>
+      <location x="-2.195" y="0.000" z="1.161" rot="-62.110" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det155" />
+      <location x="-2.098" y="-0.643" z="1.161" rot="-62.110" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det156">
+        <facing x="0" y="0" z="0" />
+        <rot val="17.028" axis-x="-2.098" axis-y="-0.643" axis-z="1.161" />
+      </location>
     </component>
   </type>
   <type name="bank_63">
     <component type="pack">
-      <location r="2.483" t="-62.890" p="-15.000" name="det203" />
-      <location r="2.483" t="-62.890" p="0.000" name="det204" />
-      <location r="2.483" t="-62.890" p="15.000" name="det205" />
+      <location x="-2.115" y="0.643" z="1.132" rot="-62.890" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det157">
+        <facing x="0" y="0" z="0" />
+        <rot val="-16.904" axis-x="-2.115" axis-y="0.643" axis-z="1.132" />
+      </location>
+      <location x="-2.210" y="0.000" z="1.132" rot="-62.890" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det158" />
+      <location x="-2.115" y="-0.643" z="1.132" rot="-62.890" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det159">
+        <facing x="0" y="0" z="0" />
+        <rot val="16.904" axis-x="-2.115" axis-y="-0.643" axis-z="1.132" />
+      </location>
     </component>
   </type>
   <type name="bank_64">
     <component type="pack">
-      <location r="2.483" t="-63.670" p="-15.000" name="det207" />
-      <location r="2.483" t="-63.670" p="0.000" name="det208" />
-      <location r="2.483" t="-63.670" p="15.000" name="det209" />
+      <location x="-2.131" y="0.643" z="1.101" rot="-63.670" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det160">
+        <facing x="0" y="0" z="0" />
+        <rot val="-16.785" axis-x="-2.131" axis-y="0.643" axis-z="1.101" />
+      </location>
+      <location x="-2.225" y="0.000" z="1.101" rot="-63.670" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det161" />
+      <location x="-2.131" y="-0.643" z="1.101" rot="-63.670" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det162">
+        <facing x="0" y="0" z="0" />
+        <rot val="16.785" axis-x="-2.131" axis-y="-0.643" axis-z="1.101" />
+      </location>
     </component>
   </type>
   <type name="bank_65">
     <component type="pack">
-      <location r="2.483" t="-64.730" p="-15.000" name="det211" />
-      <location r="2.483" t="-64.730" p="0.000" name="det212" />
-      <location r="2.483" t="-64.730" p="15.000" name="det213" />
+      <location x="-2.151" y="0.643" z="1.060" rot="-64.730" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det163">
+        <facing x="0" y="0" z="0" />
+        <rot val="-16.631" axis-x="-2.151" axis-y="0.643" axis-z="1.060" />
+      </location>
+      <location x="-2.245" y="0.000" z="1.060" rot="-64.730" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det164" />
+      <location x="-2.151" y="-0.643" z="1.060" rot="-64.730" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det165">
+        <facing x="0" y="0" z="0" />
+        <rot val="16.631" axis-x="-2.151" axis-y="-0.643" axis-z="1.060" />
+      </location>
     </component>
   </type>
   <type name="bank_66">
     <component type="pack">
-      <location r="2.483" t="-65.510" p="-15.000" name="det215" />
-      <location r="2.483" t="-65.510" p="0.000" name="det216" />
-      <location r="2.483" t="-65.510" p="15.000" name="det217" />
+      <location x="-2.166" y="0.643" z="1.029" rot="-65.510" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det166">
+        <facing x="0" y="0" z="0" />
+        <rot val="-16.523" axis-x="-2.166" axis-y="0.643" axis-z="1.029" />
+      </location>
+      <location x="-2.260" y="0.000" z="1.029" rot="-65.510" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det167" />
+      <location x="-2.166" y="-0.643" z="1.029" rot="-65.510" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det168">
+        <facing x="0" y="0" z="0" />
+        <rot val="16.523" axis-x="-2.166" axis-y="-0.643" axis-z="1.029" />
+      </location>
     </component>
   </type>
   <type name="bank_67">
     <component type="pack">
-      <location r="2.483" t="-66.290" p="-15.000" name="det219" />
-      <location r="2.483" t="-66.290" p="0.000" name="det220" />
-      <location r="2.483" t="-66.290" p="15.000" name="det221" />
+      <location x="-2.181" y="0.643" z="0.998" rot="-66.290" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det169">
+        <facing x="0" y="0" z="0" />
+        <rot val="-16.420" axis-x="-2.181" axis-y="0.643" axis-z="0.998" />
+      </location>
+      <location x="-2.273" y="0.000" z="0.998" rot="-66.290" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det170" />
+      <location x="-2.181" y="-0.643" z="0.998" rot="-66.290" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det171">
+        <facing x="0" y="0" z="0" />
+        <rot val="16.420" axis-x="-2.181" axis-y="-0.643" axis-z="0.998" />
+      </location>
     </component>
   </type>
   <type name="bank_68">
     <component type="pack">
-      <location r="2.483" t="-67.070" p="-15.000" name="det223" />
-      <location r="2.483" t="-67.070" p="0.000" name="det224" />
-      <location r="2.483" t="-67.070" p="15.000" name="det225" />
+      <location x="-2.195" y="0.643" z="0.967" rot="-67.070" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det172">
+        <facing x="0" y="0" z="0" />
+        <rot val="-16.321" axis-x="-2.195" axis-y="0.643" axis-z="0.967" />
+      </location>
+      <location x="-2.287" y="0.000" z="0.967" rot="-67.070" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det173" />
+      <location x="-2.195" y="-0.643" z="0.967" rot="-67.070" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det174">
+        <facing x="0" y="0" z="0" />
+        <rot val="16.321" axis-x="-2.195" axis-y="-0.643" axis-z="0.967" />
+      </location>
     </component>
   </type>
   <type name="bank_69">
     <component type="pack">
-      <location r="2.483" t="-68.130" p="-15.000" name="det227" />
-      <location r="2.483" t="-68.130" p="0.000" name="det228" />
-      <location r="2.483" t="-68.130" p="15.000" name="det229" />
+      <location x="-2.213" y="0.643" z="0.925" rot="-68.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det175">
+        <facing x="0" y="0" z="0" />
+        <rot val="-16.194" axis-x="-2.213" axis-y="0.643" axis-z="0.925" />
+      </location>
+      <location x="-2.304" y="0.000" z="0.925" rot="-68.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det176" />
+      <location x="-2.213" y="-0.643" z="0.925" rot="-68.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det177">
+        <facing x="0" y="0" z="0" />
+        <rot val="16.194" axis-x="-2.213" axis-y="-0.643" axis-z="0.925" />
+      </location>
     </component>
   </type>
   <type name="bank_70">
     <component type="pack">
-      <location r="2.483" t="-68.910" p="-15.000" name="det231" />
-      <location r="2.483" t="-68.910" p="0.000" name="det232" />
-      <location r="2.483" t="-68.910" p="15.000" name="det233" />
+      <location x="-2.226" y="0.643" z="0.893" rot="-68.910" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det178">
+        <facing x="0" y="0" z="0" />
+        <rot val="-16.105" axis-x="-2.226" axis-y="0.643" axis-z="0.893" />
+      </location>
+      <location x="-2.317" y="0.000" z="0.893" rot="-68.910" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det179" />
+      <location x="-2.226" y="-0.643" z="0.893" rot="-68.910" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det180">
+        <facing x="0" y="0" z="0" />
+        <rot val="16.105" axis-x="-2.226" axis-y="-0.643" axis-z="0.893" />
+      </location>
     </component>
   </type>
   <type name="bank_71">
     <component type="pack">
-      <location r="2.483" t="-69.690" p="-15.000" name="det235" />
-      <location r="2.483" t="-69.690" p="0.000" name="det236" />
-      <location r="2.483" t="-69.690" p="15.000" name="det237" />
+      <location x="-2.238" y="0.643" z="0.862" rot="-69.690" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det181">
+        <facing x="0" y="0" z="0" />
+        <rot val="-16.020" axis-x="-2.238" axis-y="0.643" axis-z="0.862" />
+      </location>
+      <location x="-2.329" y="0.000" z="0.862" rot="-69.690" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det182" />
+      <location x="-2.238" y="-0.643" z="0.862" rot="-69.690" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det183">
+        <facing x="0" y="0" z="0" />
+        <rot val="16.020" axis-x="-2.238" axis-y="-0.643" axis-z="0.862" />
+      </location>
     </component>
   </type>
   <type name="bank_72">
     <component type="pack">
-      <location r="2.483" t="-70.470" p="-15.000" name="det239" />
-      <location r="2.483" t="-70.470" p="0.000" name="det240" />
-      <location r="2.483" t="-70.470" p="15.000" name="det241" />
+      <location x="-2.250" y="0.643" z="0.830" rot="-70.470" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det184">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.939" axis-x="-2.250" axis-y="0.643" axis-z="0.830" />
+      </location>
+      <location x="-2.340" y="0.000" z="0.830" rot="-70.470" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det185" />
+      <location x="-2.250" y="-0.643" z="0.830" rot="-70.470" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det186">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.939" axis-x="-2.250" axis-y="-0.643" axis-z="0.830" />
+      </location>
     </component>
   </type>
   <type name="bank_73">
     <component type="pack">
-      <location r="2.483" t="-71.530" p="-15.000" name="det243" />
-      <location r="2.483" t="-71.530" p="0.000" name="det244" />
-      <location r="2.483" t="-71.530" p="15.000" name="det245" />
+      <location x="-2.266" y="0.643" z="0.787" rot="-71.530" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det187">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.835" axis-x="-2.266" axis-y="0.643" axis-z="0.787" />
+      </location>
+      <location x="-2.355" y="0.000" z="0.787" rot="-71.530" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det188" />
+      <location x="-2.266" y="-0.643" z="0.787" rot="-71.530" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det189">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.835" axis-x="-2.266" axis-y="-0.643" axis-z="0.787" />
+      </location>
     </component>
   </type>
   <type name="bank_74">
     <component type="pack">
-      <location r="2.483" t="-72.310" p="-15.000" name="det247" />
-      <location r="2.483" t="-72.310" p="0.000" name="det248" />
-      <location r="2.483" t="-72.310" p="15.000" name="det249" />
+      <location x="-2.277" y="0.643" z="0.755" rot="-72.310" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det190">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.763" axis-x="-2.277" axis-y="0.643" axis-z="0.755" />
+      </location>
+      <location x="-2.366" y="0.000" z="0.755" rot="-72.310" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det191" />
+      <location x="-2.277" y="-0.643" z="0.755" rot="-72.310" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det192">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.763" axis-x="-2.277" axis-y="-0.643" axis-z="0.755" />
+      </location>
     </component>
   </type>
   <type name="bank_75">
     <component type="pack">
-      <location r="2.483" t="-73.090" p="-15.000" name="det251" />
-      <location r="2.483" t="-73.090" p="0.000" name="det252" />
-      <location r="2.483" t="-73.090" p="15.000" name="det253" />
+      <location x="-2.287" y="0.643" z="0.722" rot="-73.090" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det193">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.695" axis-x="-2.287" axis-y="0.643" axis-z="0.722" />
+      </location>
+      <location x="-2.376" y="0.000" z="0.722" rot="-73.090" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det194" />
+      <location x="-2.287" y="-0.643" z="0.722" rot="-73.090" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det195">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.695" axis-x="-2.287" axis-y="-0.643" axis-z="0.722" />
+      </location>
     </component>
   </type>
   <type name="bank_76">
     <component type="pack">
-      <location r="2.483" t="-73.870" p="-15.000" name="det255" />
-      <location r="2.483" t="-73.870" p="0.000" name="det256" />
-      <location r="2.483" t="-73.870" p="15.000" name="det257" />
+      <location x="-2.297" y="0.643" z="0.690" rot="-73.870" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det196">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.630" axis-x="-2.297" axis-y="0.643" axis-z="0.690" />
+      </location>
+      <location x="-2.385" y="0.000" z="0.690" rot="-73.870" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det197" />
+      <location x="-2.297" y="-0.643" z="0.690" rot="-73.870" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det198">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.630" axis-x="-2.297" axis-y="-0.643" axis-z="0.690" />
+      </location>
     </component>
   </type>
   <type name="bank_77">
     <component type="pack">
-      <location r="2.483" t="-74.930" p="-15.000" name="det259" />
-      <location r="2.483" t="-74.930" p="0.000" name="det260" />
-      <location r="2.483" t="-74.930" p="15.000" name="det261" />
+      <location x="-2.310" y="0.643" z="0.646" rot="-74.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det199">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.547" axis-x="-2.310" axis-y="0.643" axis-z="0.646" />
+      </location>
+      <location x="-2.398" y="0.000" z="0.646" rot="-74.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det200" />
+      <location x="-2.310" y="-0.643" z="0.646" rot="-74.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det201">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.547" axis-x="-2.310" axis-y="-0.643" axis-z="0.646" />
+      </location>
     </component>
   </type>
   <type name="bank_78">
     <component type="pack">
-      <location r="2.483" t="-75.710" p="-15.000" name="det263" />
-      <location r="2.483" t="-75.710" p="0.000" name="det264" />
-      <location r="2.483" t="-75.710" p="15.000" name="det265" />
+      <location x="-2.319" y="0.643" z="0.613" rot="-75.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det202">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.491" axis-x="-2.319" axis-y="0.643" axis-z="0.613" />
+      </location>
+      <location x="-2.406" y="0.000" z="0.613" rot="-75.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det203" />
+      <location x="-2.319" y="-0.643" z="0.613" rot="-75.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det204">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.491" axis-x="-2.319" axis-y="-0.643" axis-z="0.613" />
+      </location>
     </component>
   </type>
   <type name="bank_79">
     <component type="pack">
-      <location r="2.483" t="-76.490" p="-15.000" name="det267" />
-      <location r="2.483" t="-76.490" p="0.000" name="det268" />
-      <location r="2.483" t="-76.490" p="15.000" name="det269" />
+      <location x="-2.327" y="0.643" z="0.580" rot="-76.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det205">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.437" axis-x="-2.327" axis-y="0.643" axis-z="0.580" />
+      </location>
+      <location x="-2.414" y="0.000" z="0.580" rot="-76.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det206" />
+      <location x="-2.327" y="-0.643" z="0.580" rot="-76.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det207">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.437" axis-x="-2.327" axis-y="-0.643" axis-z="0.580" />
+      </location>
     </component>
   </type>
   <type name="bank_80">
     <component type="pack">
-      <location r="2.483" t="-77.270" p="-15.000" name="det271" />
-      <location r="2.483" t="-77.270" p="0.000" name="det272" />
-      <location r="2.483" t="-77.270" p="15.000" name="det273" />
+      <location x="-2.335" y="0.643" z="0.547" rot="-77.270" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det208">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.387" axis-x="-2.335" axis-y="0.643" axis-z="0.547" />
+      </location>
+      <location x="-2.422" y="0.000" z="0.547" rot="-77.270" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det209" />
+      <location x="-2.335" y="-0.643" z="0.547" rot="-77.270" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det210">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.387" axis-x="-2.335" axis-y="-0.643" axis-z="0.547" />
+      </location>
     </component>
   </type>
   <type name="bank_81">
     <component type="pack">
-      <location r="2.483" t="-78.330" p="-15.000" name="det275" />
-      <location r="2.483" t="-78.330" p="0.000" name="det276" />
-      <location r="2.483" t="-78.330" p="15.000" name="det277" />
+      <location x="-2.345" y="0.643" z="0.502" rot="-78.330" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det211">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.324" axis-x="-2.345" axis-y="0.643" axis-z="0.502" />
+      </location>
+      <location x="-2.432" y="0.000" z="0.502" rot="-78.330" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det212" />
+      <location x="-2.345" y="-0.643" z="0.502" rot="-78.330" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det213">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.324" axis-x="-2.345" axis-y="-0.643" axis-z="0.502" />
+      </location>
     </component>
   </type>
   <type name="bank_82">
     <component type="pack">
-      <location r="2.483" t="-79.110" p="-15.000" name="det279" />
-      <location r="2.483" t="-79.110" p="0.000" name="det280" />
-      <location r="2.483" t="-79.110" p="15.000" name="det281" />
+      <location x="-2.352" y="0.643" z="0.469" rot="-79.110" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det214">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.282" axis-x="-2.352" axis-y="0.643" axis-z="0.469" />
+      </location>
+      <location x="-2.438" y="0.000" z="0.469" rot="-79.110" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det215" />
+      <location x="-2.352" y="-0.643" z="0.469" rot="-79.110" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det216">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.282" axis-x="-2.352" axis-y="-0.643" axis-z="0.469" />
+      </location>
     </component>
   </type>
   <type name="bank_83">
     <component type="pack">
-      <location r="2.483" t="-79.890" p="-15.000" name="det283" />
-      <location r="2.483" t="-79.890" p="0.000" name="det284" />
-      <location r="2.483" t="-79.890" p="15.000" name="det285" />
+      <location x="-2.358" y="0.643" z="0.436" rot="-79.890" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det217">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.242" axis-x="-2.358" axis-y="0.643" axis-z="0.436" />
+      </location>
+      <location x="-2.444" y="0.000" z="0.436" rot="-79.890" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det218" />
+      <location x="-2.358" y="-0.643" z="0.436" rot="-79.890" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det219">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.242" axis-x="-2.358" axis-y="-0.643" axis-z="0.436" />
+      </location>
     </component>
   </type>
   <type name="bank_84">
     <component type="pack">
-      <location r="2.483" t="-80.670" p="-15.000" name="det287" />
-      <location r="2.483" t="-80.670" p="0.000" name="det288" />
-      <location r="2.483" t="-80.670" p="15.000" name="det289" />
+      <location x="-2.364" y="0.643" z="0.403" rot="-80.670" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det220">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.206" axis-x="-2.364" axis-y="0.643" axis-z="0.403" />
+      </location>
+      <location x="-2.450" y="0.000" z="0.403" rot="-80.670" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det221" />
+      <location x="-2.364" y="-0.643" z="0.403" rot="-80.670" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det222">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.206" axis-x="-2.364" axis-y="-0.643" axis-z="0.403" />
+      </location>
     </component>
   </type>
   <type name="bank_85">
     <component type="pack">
-      <location r="2.483" t="-81.730" p="-15.000" name="det291" />
-      <location r="2.483" t="-81.730" p="0.000" name="det292" />
-      <location r="2.483" t="-81.730" p="15.000" name="det293" />
+      <location x="-2.372" y="0.643" z="0.357" rot="-81.730" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det223">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.161" axis-x="-2.372" axis-y="0.643" axis-z="0.357" />
+      </location>
+      <location x="-2.457" y="0.000" z="0.357" rot="-81.730" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det224" />
+      <location x="-2.372" y="-0.643" z="0.357" rot="-81.730" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det225">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.161" axis-x="-2.372" axis-y="-0.643" axis-z="0.357" />
+      </location>
     </component>
   </type>
   <type name="bank_86">
     <component type="pack">
-      <location r="2.483" t="-82.510" p="-15.000" name="det295" />
-      <location r="2.483" t="-82.510" p="0.000" name="det296" />
-      <location r="2.483" t="-82.510" p="15.000" name="det297" />
+      <location x="-2.376" y="0.643" z="0.324" rot="-82.510" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det226">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.132" axis-x="-2.376" axis-y="0.643" axis-z="0.324" />
+      </location>
+      <location x="-2.462" y="0.000" z="0.324" rot="-82.510" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det227" />
+      <location x="-2.376" y="-0.643" z="0.324" rot="-82.510" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det228">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.132" axis-x="-2.376" axis-y="-0.643" axis-z="0.324" />
+      </location>
     </component>
   </type>
   <type name="bank_87">
     <component type="pack">
-      <location r="2.483" t="-83.290" p="-15.000" name="det299" />
-      <location r="2.483" t="-83.290" p="0.000" name="det300" />
-      <location r="2.483" t="-83.290" p="15.000" name="det301" />
+      <location x="-2.381" y="0.643" z="0.290" rot="-83.290" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det229">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.106" axis-x="-2.381" axis-y="0.643" axis-z="0.290" />
+      </location>
+      <location x="-2.466" y="0.000" z="0.290" rot="-83.290" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det230" />
+      <location x="-2.381" y="-0.643" z="0.290" rot="-83.290" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det231">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.106" axis-x="-2.381" axis-y="-0.643" axis-z="0.290" />
+      </location>
     </component>
   </type>
   <type name="bank_88">
     <component type="pack">
-      <location r="2.483" t="-84.070" p="-15.000" name="det303" />
-      <location r="2.483" t="-84.070" p="0.000" name="det304" />
-      <location r="2.483" t="-84.070" p="15.000" name="det305" />
+      <location x="-2.385" y="0.643" z="0.257" rot="-84.070" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det232">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.083" axis-x="-2.385" axis-y="0.643" axis-z="0.257" />
+      </location>
+      <location x="-2.470" y="0.000" z="0.257" rot="-84.070" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det233" />
+      <location x="-2.385" y="-0.643" z="0.257" rot="-84.070" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det234">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.083" axis-x="-2.385" axis-y="-0.643" axis-z="0.257" />
+      </location>
     </component>
   </type>
   <type name="bank_89">
     <component type="pack">
-      <location r="2.483" t="-85.130" p="-15.000" name="det307" />
-      <location r="2.483" t="-85.130" p="0.000" name="det308" />
-      <location r="2.483" t="-85.130" p="15.000" name="det309" />
+      <location x="-2.389" y="0.643" z="0.211" rot="-85.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det235">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.056" axis-x="-2.389" axis-y="0.643" axis-z="0.211" />
+      </location>
+      <location x="-2.474" y="0.000" z="0.211" rot="-85.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det236" />
+      <location x="-2.389" y="-0.643" z="0.211" rot="-85.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det237">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.056" axis-x="-2.389" axis-y="-0.643" axis-z="0.211" />
+      </location>
     </component>
   </type>
   <type name="bank_90">
     <component type="pack">
-      <location r="2.483" t="-85.910" p="-15.000" name="det311" />
-      <location r="2.483" t="-85.910" p="0.000" name="det312" />
-      <location r="2.483" t="-85.910" p="15.000" name="det313" />
+      <location x="-2.392" y="0.643" z="0.177" rot="-85.910" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det238">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.039" axis-x="-2.392" axis-y="0.643" axis-z="0.177" />
+      </location>
+      <location x="-2.477" y="0.000" z="0.177" rot="-85.910" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det239" />
+      <location x="-2.392" y="-0.643" z="0.177" rot="-85.910" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det240">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.039" axis-x="-2.392" axis-y="-0.643" axis-z="0.177" />
+      </location>
     </component>
   </type>
   <type name="bank_91">
     <component type="pack">
-      <location r="2.483" t="-86.690" p="-15.000" name="det315" />
-      <location r="2.483" t="-86.690" p="0.000" name="det316" />
-      <location r="2.483" t="-86.690" p="15.000" name="det317" />
+      <location x="-2.394" y="0.643" z="0.143" rot="-86.690" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det241">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.026" axis-x="-2.394" axis-y="0.643" axis-z="0.143" />
+      </location>
+      <location x="-2.479" y="0.000" z="0.143" rot="-86.690" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det242" />
+      <location x="-2.394" y="-0.643" z="0.143" rot="-86.690" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det243">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.026" axis-x="-2.394" axis-y="-0.643" axis-z="0.143" />
+      </location>
     </component>
   </type>
   <type name="bank_92">
     <component type="pack">
-      <location r="2.483" t="-87.470" p="-15.000" name="det319" />
-      <location r="2.483" t="-87.470" p="0.000" name="det320" />
-      <location r="2.483" t="-87.470" p="15.000" name="det321" />
+      <location x="-2.396" y="0.643" z="0.110" rot="-87.470" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det244">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.015" axis-x="-2.396" axis-y="0.643" axis-z="0.110" />
+      </location>
+      <location x="-2.481" y="0.000" z="0.110" rot="-87.470" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det245" />
+      <location x="-2.396" y="-0.643" z="0.110" rot="-87.470" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det246">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.015" axis-x="-2.396" axis-y="-0.643" axis-z="0.110" />
+      </location>
     </component>
   </type>
   <type name="bank_93">
     <component type="pack">
-      <location r="2.483" t="-88.530" p="-15.000" name="det323" />
-      <location r="2.483" t="-88.530" p="0.000" name="det324" />
-      <location r="2.483" t="-88.530" p="15.000" name="det325" />
+      <location x="-2.398" y="0.643" z="0.064" rot="-88.530" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det247">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.005" axis-x="-2.398" axis-y="0.643" axis-z="0.064" />
+      </location>
+      <location x="-2.482" y="0.000" z="0.064" rot="-88.530" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det248" />
+      <location x="-2.398" y="-0.643" z="0.064" rot="-88.530" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det249">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.005" axis-x="-2.398" axis-y="-0.643" axis-z="0.064" />
+      </location>
     </component>
   </type>
   <type name="bank_94">
     <component type="pack">
-      <location r="2.483" t="-89.310" p="-15.000" name="det327" />
-      <location r="2.483" t="-89.310" p="0.000" name="det328" />
-      <location r="2.483" t="-89.310" p="15.000" name="det329" />
+      <location x="-2.398" y="0.643" z="0.030" rot="-89.310" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det250">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.001" axis-x="-2.398" axis-y="0.643" axis-z="0.030" />
+      </location>
+      <location x="-2.483" y="0.000" z="0.030" rot="-89.310" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det251" />
+      <location x="-2.398" y="-0.643" z="0.030" rot="-89.310" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det252">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.001" axis-x="-2.398" axis-y="-0.643" axis-z="0.030" />
+      </location>
     </component>
   </type>
   <type name="bank_95">
     <component type="pack">
-      <location r="2.483" t="-90.090" p="-15.000" name="det331" />
-      <location r="2.483" t="-90.090" p="0.000" name="det332" />
-      <location r="2.483" t="-90.090" p="15.000" name="det333" />
+      <location x="-2.398" y="0.643" z="-0.004" rot="-90.090" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det253">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.000" axis-x="-2.398" axis-y="0.643" axis-z="-0.004" />
+      </location>
+      <location x="-2.483" y="0.000" z="-0.004" rot="-90.090" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det254" />
+      <location x="-2.398" y="-0.643" z="-0.004" rot="-90.090" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det255">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.000" axis-x="-2.398" axis-y="-0.643" axis-z="-0.004" />
+      </location>
     </component>
   </type>
   <type name="bank_96">
     <component type="pack">
-      <location r="2.483" t="-90.870" p="-15.000" name="det335" />
-      <location r="2.483" t="-90.870" p="0.000" name="det336" />
-      <location r="2.483" t="-90.870" p="15.000" name="det337" />
+      <location x="-2.398" y="0.643" z="-0.038" rot="-90.870" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det256">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.002" axis-x="-2.398" axis-y="0.643" axis-z="-0.038" />
+      </location>
+      <location x="-2.483" y="0.000" z="-0.038" rot="-90.870" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det257" />
+      <location x="-2.398" y="-0.643" z="-0.038" rot="-90.870" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det258">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.002" axis-x="-2.398" axis-y="-0.643" axis-z="-0.038" />
+      </location>
     </component>
   </type>
   <type name="bank_97">
     <component type="pack">
-      <location r="2.483" t="-91.930" p="-15.000" name="det339" />
-      <location r="2.483" t="-91.930" p="0.000" name="det340" />
-      <location r="2.483" t="-91.930" p="15.000" name="det341" />
+      <location x="-2.397" y="0.643" z="-0.084" rot="-91.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det259">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.009" axis-x="-2.397" axis-y="0.643" axis-z="-0.084" />
+      </location>
+      <location x="-2.482" y="0.000" z="-0.084" rot="-91.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det260" />
+      <location x="-2.397" y="-0.643" z="-0.084" rot="-91.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det261">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.009" axis-x="-2.397" axis-y="-0.643" axis-z="-0.084" />
+      </location>
     </component>
   </type>
   <type name="bank_98">
     <component type="pack">
-      <location r="2.483" t="-92.710" p="-15.000" name="det343" />
-      <location r="2.483" t="-92.710" p="0.000" name="det344" />
-      <location r="2.483" t="-92.710" p="15.000" name="det345" />
+      <location x="-2.396" y="0.643" z="-0.117" rot="-92.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det262">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.017" axis-x="-2.396" axis-y="0.643" axis-z="-0.117" />
+      </location>
+      <location x="-2.480" y="0.000" z="-0.117" rot="-92.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det263" />
+      <location x="-2.396" y="-0.643" z="-0.117" rot="-92.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det264">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.017" axis-x="-2.396" axis-y="-0.643" axis-z="-0.117" />
+      </location>
     </component>
   </type>
   <type name="bank_99">
     <component type="pack">
-      <location r="2.483" t="-93.490" p="-15.000" name="det347" />
-      <location r="2.483" t="-93.490" p="0.000" name="det348" />
-      <location r="2.483" t="-93.490" p="15.000" name="det349" />
+      <location x="-2.394" y="0.643" z="-0.151" rot="-93.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det265">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.029" axis-x="-2.394" axis-y="0.643" axis-z="-0.151" />
+      </location>
+      <location x="-2.478" y="0.000" z="-0.151" rot="-93.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det266" />
+      <location x="-2.394" y="-0.643" z="-0.151" rot="-93.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det267">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.029" axis-x="-2.394" axis-y="-0.643" axis-z="-0.151" />
+      </location>
     </component>
   </type>
   <type name="bank_100">
     <component type="pack">
-      <location r="2.483" t="-94.270" p="-15.000" name="det351" />
-      <location r="2.483" t="-94.270" p="0.000" name="det352" />
-      <location r="2.483" t="-94.270" p="15.000" name="det353" />
+      <location x="-2.391" y="0.643" z="-0.185" rot="-94.270" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det268">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.043" axis-x="-2.391" axis-y="0.643" axis-z="-0.185" />
+      </location>
+      <location x="-2.476" y="0.000" z="-0.185" rot="-94.270" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det269" />
+      <location x="-2.391" y="-0.643" z="-0.185" rot="-94.270" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det270">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.043" axis-x="-2.391" axis-y="-0.643" axis-z="-0.185" />
+      </location>
     </component>
   </type>
   <type name="bank_101">
     <component type="pack">
-      <location r="2.483" t="-95.330" p="-15.000" name="det355" />
-      <location r="2.483" t="-95.330" p="0.000" name="det356" />
-      <location r="2.483" t="-95.330" p="15.000" name="det357" />
+      <location x="-2.387" y="0.643" z="-0.231" rot="-95.330" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det271">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.067" axis-x="-2.387" axis-y="0.643" axis-z="-0.231" />
+      </location>
+      <location x="-2.472" y="0.000" z="-0.231" rot="-95.330" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det272" />
+      <location x="-2.387" y="-0.643" z="-0.231" rot="-95.330" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det273">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.067" axis-x="-2.387" axis-y="-0.643" axis-z="-0.231" />
+      </location>
     </component>
   </type>
   <type name="bank_102">
     <component type="pack">
-      <location r="2.483" t="-96.110" p="-15.000" name="det359" />
-      <location r="2.483" t="-96.110" p="0.000" name="det360" />
-      <location r="2.483" t="-96.110" p="15.000" name="det361" />
+      <location x="-2.384" y="0.643" z="-0.264" rot="-96.110" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det274">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.088" axis-x="-2.384" axis-y="0.643" axis-z="-0.264" />
+      </location>
+      <location x="-2.469" y="0.000" z="-0.264" rot="-96.110" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det275" />
+      <location x="-2.384" y="-0.643" z="-0.264" rot="-96.110" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det276">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.088" axis-x="-2.384" axis-y="-0.643" axis-z="-0.264" />
+      </location>
     </component>
   </type>
   <type name="bank_103">
     <component type="pack">
-      <location r="2.483" t="-96.890" p="-15.000" name="det363" />
-      <location r="2.483" t="-96.890" p="0.000" name="det364" />
-      <location r="2.483" t="-96.890" p="15.000" name="det365" />
+      <location x="-2.380" y="0.643" z="-0.298" rot="-96.890" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det277">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.112" axis-x="-2.380" axis-y="0.643" axis-z="-0.298" />
+      </location>
+      <location x="-2.465" y="0.000" z="-0.298" rot="-96.890" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det278" />
+      <location x="-2.380" y="-0.643" z="-0.298" rot="-96.890" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det279">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.112" axis-x="-2.380" axis-y="-0.643" axis-z="-0.298" />
+      </location>
     </component>
   </type>
   <type name="bank_104">
     <component type="pack">
-      <location r="2.483" t="-97.670" p="-15.000" name="det367" />
-      <location r="2.483" t="-97.670" p="0.000" name="det368" />
-      <location r="2.483" t="-97.670" p="15.000" name="det369" />
+      <location x="-2.375" y="0.643" z="-0.331" rot="-97.670" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det280">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.139" axis-x="-2.375" axis-y="0.643" axis-z="-0.331" />
+      </location>
+      <location x="-2.461" y="0.000" z="-0.331" rot="-97.670" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det281" />
+      <location x="-2.375" y="-0.643" z="-0.331" rot="-97.670" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det282">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.139" axis-x="-2.375" axis-y="-0.643" axis-z="-0.331" />
+      </location>
     </component>
   </type>
   <type name="bank_105">
     <component type="pack">
-      <location r="2.483" t="-98.730" p="-15.000" name="det371" />
-      <location r="2.483" t="-98.730" p="0.000" name="det372" />
-      <location r="2.483" t="-98.730" p="15.000" name="det373" />
+      <location x="-2.369" y="0.643" z="-0.377" rot="-98.730" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det283">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.180" axis-x="-2.369" axis-y="0.643" axis-z="-0.377" />
+      </location>
+      <location x="-2.454" y="0.000" z="-0.377" rot="-98.730" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det284" />
+      <location x="-2.369" y="-0.643" z="-0.377" rot="-98.730" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det285">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.180" axis-x="-2.369" axis-y="-0.643" axis-z="-0.377" />
+      </location>
     </component>
   </type>
   <type name="bank_106">
     <component type="pack">
-      <location r="2.483" t="-99.510" p="-15.000" name="det375" />
-      <location r="2.483" t="-99.510" p="0.000" name="det376" />
-      <location r="2.483" t="-99.510" p="15.000" name="det377" />
+      <location x="-2.363" y="0.643" z="-0.410" rot="-99.510" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det286">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.214" axis-x="-2.363" axis-y="0.643" axis-z="-0.410" />
+      </location>
+      <location x="-2.449" y="0.000" z="-0.410" rot="-99.510" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det287" />
+      <location x="-2.363" y="-0.643" z="-0.410" rot="-99.510" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det288">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.214" axis-x="-2.363" axis-y="-0.643" axis-z="-0.410" />
+      </location>
     </component>
   </type>
   <type name="bank_107">
     <component type="pack">
-      <location r="2.483" t="-100.290" p="-15.000" name="det379" />
-      <location r="2.483" t="-100.290" p="0.000" name="det380" />
-      <location r="2.483" t="-100.290" p="15.000" name="det381" />
+      <location x="-2.357" y="0.643" z="-0.444" rot="-100.290" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det289">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.251" axis-x="-2.357" axis-y="0.643" axis-z="-0.444" />
+      </location>
+      <location x="-2.443" y="0.000" z="-0.444" rot="-100.290" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det290" />
+      <location x="-2.357" y="-0.643" z="-0.444" rot="-100.290" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det291">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.251" axis-x="-2.357" axis-y="-0.643" axis-z="-0.444" />
+      </location>
     </component>
   </type>
   <type name="bank_108">
     <component type="pack">
-      <location r="2.483" t="-101.070" p="-15.000" name="det383" />
-      <location r="2.483" t="-101.070" p="0.000" name="det384" />
-      <location r="2.483" t="-101.070" p="15.000" name="det385" />
+      <location x="-2.351" y="0.643" z="-0.477" rot="-101.070" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det292">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.291" axis-x="-2.351" axis-y="0.643" axis-z="-0.477" />
+      </location>
+      <location x="-2.437" y="0.000" z="-0.477" rot="-101.070" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det293" />
+      <location x="-2.351" y="-0.643" z="-0.477" rot="-101.070" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det294">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.291" axis-x="-2.351" axis-y="-0.643" axis-z="-0.477" />
+      </location>
     </component>
   </type>
   <type name="bank_109">
     <component type="pack">
-      <location r="2.483" t="-102.930" p="-15.000" name="det387" />
-      <location r="2.483" t="-102.930" p="0.000" name="det388" />
-      <location r="2.483" t="-102.930" p="15.000" name="det389" />
+      <location x="-2.333" y="0.643" z="-0.556" rot="-102.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det295">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.400" axis-x="-2.333" axis-y="0.643" axis-z="-0.556" />
+      </location>
+      <location x="-2.420" y="0.000" z="-0.556" rot="-102.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det296" />
+      <location x="-2.333" y="-0.643" z="-0.556" rot="-102.930" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det297">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.400" axis-x="-2.333" axis-y="-0.643" axis-z="-0.556" />
+      </location>
     </component>
   </type>
   <type name="bank_110">
     <component type="pack">
-      <location r="2.483" t="-103.710" p="-15.000" name="det391" />
-      <location r="2.483" t="-103.710" p="0.000" name="det392" />
-      <location r="2.483" t="-103.710" p="15.000" name="det393" />
+      <location x="-2.325" y="0.643" z="-0.588" rot="-103.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det298">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.451" axis-x="-2.325" axis-y="0.643" axis-z="-0.588" />
+      </location>
+      <location x="-2.412" y="0.000" z="-0.588" rot="-103.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det299" />
+      <location x="-2.325" y="-0.643" z="-0.588" rot="-103.710" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det300">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.451" axis-x="-2.325" axis-y="-0.643" axis-z="-0.588" />
+      </location>
     </component>
   </type>
   <type name="bank_111">
     <component type="pack">
-      <location r="2.483" t="-104.490" p="-15.000" name="det395" />
-      <location r="2.483" t="-104.490" p="0.000" name="det396" />
-      <location r="2.483" t="-104.490" p="15.000" name="det397" />
+      <location x="-2.317" y="0.643" z="-0.621" rot="-104.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det301">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.505" axis-x="-2.317" axis-y="0.643" axis-z="-0.621" />
+      </location>
+      <location x="-2.404" y="0.000" z="-0.621" rot="-104.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det302" />
+      <location x="-2.317" y="-0.643" z="-0.621" rot="-104.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det303">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.505" axis-x="-2.317" axis-y="-0.643" axis-z="-0.621" />
+      </location>
     </component>
   </type>
   <type name="bank_112">
     <component type="pack">
-      <location r="2.483" t="-105.570" p="-15.000" name="det399" />
-      <location r="2.483" t="-105.570" p="0.000" name="det400" />
-      <location r="2.483" t="-105.570" p="15.000" name="det401" />
+      <location x="-2.304" y="0.643" z="-0.666" rot="-105.570" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det304">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.586" axis-x="-2.304" axis-y="0.643" axis-z="-0.666" />
+      </location>
+      <location x="-2.392" y="0.000" z="-0.666" rot="-105.570" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det305" />
+      <location x="-2.304" y="-0.643" z="-0.666" rot="-105.570" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det306">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.586" axis-x="-2.304" axis-y="-0.643" axis-z="-0.666" />
+      </location>
     </component>
   </type>
   <type name="bank_113">
     <component type="pack">
-      <location r="2.483" t="-106.350" p="-15.000" name="det403" />
-      <location r="2.483" t="-106.350" p="0.000" name="det404" />
-      <location r="2.483" t="-106.350" p="15.000" name="det405" />
+      <location x="-2.294" y="0.643" z="-0.699" rot="-106.350" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det307">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.648" axis-x="-2.294" axis-y="0.643" axis-z="-0.699" />
+      </location>
+      <location x="-2.383" y="0.000" z="-0.699" rot="-106.350" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det308" />
+      <location x="-2.294" y="-0.643" z="-0.699" rot="-106.350" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det309">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.648" axis-x="-2.294" axis-y="-0.643" axis-z="-0.699" />
+      </location>
     </component>
   </type>
   <type name="bank_114">
     <component type="pack">
-      <location r="2.483" t="-107.130" p="-15.000" name="det407" />
-      <location r="2.483" t="-107.130" p="0.000" name="det408" />
-      <location r="2.483" t="-107.130" p="15.000" name="det409" />
+      <location x="-2.284" y="0.643" z="-0.731" rot="-107.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det310">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.714" axis-x="-2.284" axis-y="0.643" axis-z="-0.731" />
+      </location>
+      <location x="-2.373" y="0.000" z="-0.731" rot="-107.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det311" />
+      <location x="-2.284" y="-0.643" z="-0.731" rot="-107.130" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det312">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.714" axis-x="-2.284" axis-y="-0.643" axis-z="-0.731" />
+      </location>
     </component>
   </type>
   <type name="bank_115">
     <component type="pack">
-      <location r="2.483" t="-108.210" p="-15.000" name="det411" />
-      <location r="2.483" t="-108.210" p="0.000" name="det412" />
-      <location r="2.483" t="-108.210" p="15.000" name="det413" />
+      <location x="-2.269" y="0.643" z="-0.776" rot="-108.210" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det313">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.811" axis-x="-2.269" axis-y="0.643" axis-z="-0.776" />
+      </location>
+      <location x="-2.359" y="0.000" z="-0.776" rot="-108.210" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det314" />
+      <location x="-2.269" y="-0.643" z="-0.776" rot="-108.210" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det315">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.811" axis-x="-2.269" axis-y="-0.643" axis-z="-0.776" />
+      </location>
     </component>
   </type>
   <type name="bank_116">
     <component type="pack">
-      <location r="2.483" t="-108.990" p="-15.000" name="det415" />
-      <location r="2.483" t="-108.990" p="0.000" name="det416" />
-      <location r="2.483" t="-108.990" p="15.000" name="det417" />
+      <location x="-2.258" y="0.643" z="-0.808" rot="-108.990" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det316">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.886" axis-x="-2.258" axis-y="0.643" axis-z="-0.808" />
+      </location>
+      <location x="-2.348" y="0.000" z="-0.808" rot="-108.990" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det317" />
+      <location x="-2.258" y="-0.643" z="-0.808" rot="-108.990" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det318">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.886" axis-x="-2.258" axis-y="-0.643" axis-z="-0.808" />
+      </location>
     </component>
   </type>
   <type name="bank_117">
     <component type="pack">
-      <location r="2.483" t="-109.770" p="-15.000" name="det419" />
-      <location r="2.483" t="-109.770" p="0.000" name="det420" />
-      <location r="2.483" t="-109.770" p="15.000" name="det421" />
+      <location x="-2.247" y="0.643" z="-0.840" rot="-109.770" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det319">
+        <facing x="0" y="0" z="0" />
+        <rot val="-15.964" axis-x="-2.247" axis-y="0.643" axis-z="-0.840" />
+      </location>
+      <location x="-2.337" y="0.000" z="-0.840" rot="-109.770" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det320" />
+      <location x="-2.247" y="-0.643" z="-0.840" rot="-109.770" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det321">
+        <facing x="0" y="0" z="0" />
+        <rot val="15.964" axis-x="-2.247" axis-y="-0.643" axis-z="-0.840" />
+      </location>
     </component>
   </type>
   <type name="bank_118">
     <component type="pack">
-      <location r="2.483" t="-110.850" p="-15.000" name="det423" />
-      <location r="2.483" t="-110.850" p="0.000" name="det424" />
-      <location r="2.483" t="-110.850" p="15.000" name="det425" />
+      <location x="-2.230" y="0.643" z="-0.884" rot="-110.850" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det322">
+        <facing x="0" y="0" z="0" />
+        <rot val="-16.079" axis-x="-2.230" axis-y="0.643" axis-z="-0.884" />
+      </location>
+      <location x="-2.320" y="0.000" z="-0.884" rot="-110.850" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det323" />
+      <location x="-2.230" y="-0.643" z="-0.884" rot="-110.850" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det324">
+        <facing x="0" y="0" z="0" />
+        <rot val="16.079" axis-x="-2.230" axis-y="-0.643" axis-z="-0.884" />
+      </location>
     </component>
   </type>
   <type name="bank_119">
     <component type="pack">
-      <location r="2.483" t="-111.630" p="-15.000" name="det427" />
-      <location r="2.483" t="-111.630" p="0.000" name="det428" />
-      <location r="2.483" t="-111.630" p="15.000" name="det429" />
+      <location x="-2.217" y="0.643" z="-0.915" rot="-111.630" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det325">
+        <facing x="0" y="0" z="0" />
+        <rot val="-16.166" axis-x="-2.217" axis-y="0.643" axis-z="-0.915" />
+      </location>
+      <location x="-2.308" y="0.000" z="-0.915" rot="-111.630" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det326" />
+      <location x="-2.217" y="-0.643" z="-0.915" rot="-111.630" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det327">
+        <facing x="0" y="0" z="0" />
+        <rot val="16.166" axis-x="-2.217" axis-y="-0.643" axis-z="-0.915" />
+      </location>
     </component>
   </type>
   <type name="bank_120">
     <component type="pack">
-      <location r="2.483" t="-112.410" p="-15.000" name="det431" />
-      <location r="2.483" t="-112.410" p="0.000" name="det432" />
-      <location r="2.483" t="-112.410" p="15.000" name="det433" />
+      <location x="-2.204" y="0.643" z="-0.947" rot="-112.410" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det328">
+        <facing x="0" y="0" z="0" />
+        <rot val="-16.258" axis-x="-2.204" axis-y="0.643" axis-z="-0.947" />
+      </location>
+      <location x="-2.295" y="0.000" z="-0.947" rot="-112.410" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det329" />
+      <location x="-2.204" y="-0.643" z="-0.947" rot="-112.410" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det330">
+        <facing x="0" y="0" z="0" />
+        <rot val="16.258" axis-x="-2.204" axis-y="-0.643" axis-z="-0.947" />
+      </location>
     </component>
   </type>
   <type name="bank_121">
     <component type="pack">
-      <location r="2.483" t="-113.490" p="-15.000" name="det435" />
-      <location r="2.483" t="-113.490" p="0.000" name="det436" />
-      <location r="2.483" t="-113.490" p="15.000" name="det437" />
+      <location x="-2.185" y="0.643" z="-0.990" rot="-113.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det331">
+        <facing x="0" y="0" z="0" />
+        <rot val="-16.392" axis-x="-2.185" axis-y="0.643" axis-z="-0.990" />
+      </location>
+      <location x="-2.277" y="0.000" z="-0.990" rot="-113.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det332" />
+      <location x="-2.185" y="-0.643" z="-0.990" rot="-113.490" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det333">
+        <facing x="0" y="0" z="0" />
+        <rot val="16.392" axis-x="-2.185" axis-y="-0.643" axis-z="-0.990" />
+      </location>
     </component>
   </type>
   <type name="bank_122">
     <component type="pack">
-      <location r="2.483" t="-114.270" p="-15.000" name="det439" />
-      <location r="2.483" t="-114.270" p="0.000" name="det440" />
-      <location r="2.483" t="-114.270" p="15.000" name="det441" />
+      <location x="-2.170" y="0.643" z="-1.021" rot="-114.270" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det334">
+        <facing x="0" y="0" z="0" />
+        <rot val="-16.494" axis-x="-2.170" axis-y="0.643" axis-z="-1.021" />
+      </location>
+      <location x="-2.264" y="0.000" z="-1.021" rot="-114.270" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det335" />
+      <location x="-2.170" y="-0.643" z="-1.021" rot="-114.270" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det336">
+        <facing x="0" y="0" z="0" />
+        <rot val="16.494" axis-x="-2.170" axis-y="-0.643" axis-z="-1.021" />
+      </location>
     </component>
   </type>
   <type name="bank_123">
     <component type="pack">
-      <location r="2.483" t="-115.050" p="-15.000" name="det443" />
-      <location r="2.483" t="-115.050" p="0.000" name="det444" />
-      <location r="2.483" t="-115.050" p="15.000" name="det445" />
+      <location x="-2.156" y="0.643" z="-1.051" rot="-115.050" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det337">
+        <facing x="0" y="0" z="0" />
+        <rot val="-16.600" axis-x="-2.156" axis-y="0.643" axis-z="-1.051" />
+      </location>
+      <location x="-2.249" y="0.000" z="-1.051" rot="-115.050" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det338" />
+      <location x="-2.156" y="-0.643" z="-1.051" rot="-115.050" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="det339">
+        <facing x="0" y="0" z="0" />
+        <rot val="16.600" axis-x="-2.156" axis-y="-0.643" axis-z="-1.051" />
+      </location>
     </component>
   </type>
   <!--MONITOR SHAPE-->
@@ -1264,10 +1909,10 @@ valid-to="2100-01-31 23:59:59" last-modified="2014-05-27 13:32:58">
   </idlist>
   <type name="pack" is="detector">
     <cuboid id="pack-pixel-shape">
-      <left-front-bottom-point z="-0.005" y="-0.2" x="-0.01" />
-      <left-front-top-point z="-0.005" y="0.2" x="-0.01" />
-      <left-back-bottom-point z="-0.005" y="-0.2" x="0.01" />
-      <right-front-bottom-point z="0.005" y="-0.2" x="-0.01" />
+      <left-front-bottom-point x="0.01" y="-0.2" z="0.0" />
+      <left-front-top-point x="0.01" y="-0.2" z="0.01" />
+      <left-back-bottom-point x="-0.01" y="-0.2" z="0.0" />
+      <right-front-bottom-point x="0.01" y="0.2" z="0.0" />
     </cuboid>
     <algebra val="pack-pixel-shape" />
   </type>
