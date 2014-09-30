@@ -14,35 +14,66 @@ namespace Geometry
 
 /** SymmetryOperation :
 
-    Crystallographic symmetry operations that involve rotations, (roto-)inversions
-    and mirror-planes in three dimensions can be represented by 3x3 integer
-    matrices.
+    Crystallographic symmetry operations are composed of a rotational component,
+    which is represented by a matrix and a translational part, which is
+    described by a vector.
 
-    In this interface, each symmetry operation has an "order", which is an
+    In this interface, each symmetry operation has a so-called order, which is an
     unsigned integer describing the number of times a symmetry operation
     has to be applied to an object until it is identical.
 
     Furthermore, each symmetry operation has a string-identifier. It contains the
-    symbol of the operation and the relevant direction, i.e. direction of a rotation
-    axis or direction perpendicular to a mirror plane. Examples are "2 [100]" for
-    a 2-fold rotation around the x-axis or "m [001]" for a mirror plane perpendicular
-    to the z-axis. For hexagonal coordinate systems the symmetry operations differ,
-    so their symbols are marked with an additional "h" at the end. One example is
-    "2 [100]h" which denotes a 2-fold axis in x-direction of a hexagonal coordinate
-    system. The matrices and identifiers are taken from [1].
+    Jones faithful representation of the operation, as it is commonly used in
+    many crystallographic programs and of course the International Tables
+    for Crystallography, where the symmetry operations and their representations
+    may be found [1].
 
-    Using the symmetry operations in code is easy. All that is required is constructing
-    an instance of the desired operation and calling its templated apply-method:
+    The Jones faithful notation is a very concise way of describing matrix/vector pairs.
+    The matrix/vector pair of a two-fold rotation axis along z is for example:
 
-        SymOpMirrorPlaneZ symOp;
-        V3D mirrored = symOp.apply(V3D(1, 1, 1));
+        Matrix      Vector
+       -1  0  0     0
+        0 -1  0     0
+        0  0  1     0
 
-    Because the symmetry operation is using Kernel::IntMatrix internally, it can be
-    used on any object for which Kernel::IntMatrix implements a multiplication-operator.
+    This is described by the symbol '-x,-y,z'. If it were a 2_1 screw axis in the same
+    direction, the matrix/vector pair would look like this:
 
-    While all the operations could be represented by just one class (SymmetryOperation)
-    with the correct parameters set, having one class for each operation provides more
-    semantics in the code using these operations.
+        Matrix      Vector
+       -1  0  0     0
+        0 -1  0     0
+        0  0  1    1/2
+
+    And this is represented by the string '-x,-y,z+1/2'. In hexagonal systems there
+    are often operations involving 1/3 or 2/3, so the translational part is kept as
+    a vector of rational numbers in order to carry out precise calculations. For details,
+    see the class V3R.
+
+    Using the symmetry operations in code is easy, since SymmetryOperationSymbolParser is
+    automatically called by the string-based constructor of SymmetryOperation and the multiplication
+    operator is overloaded:
+
+        SymmetryOperation inversion("-x,-y,-z");
+        V3D hklPrime = inversion * V3D(1, 1, -1); // results in -1, -1, 1
+
+    The operator is templated and works for any object Kernel::IntMatrix can be
+    multiplied with and V3R can be added to (for example V3R, V3D, std::vector<int>).
+
+    A special case is the multiplication of several symmetry operations, which can
+    be used to generate new operations:
+
+        SymmetryOperation inversion("-x,-y,-z");
+        SymmetryOperation identity = inversion * inversion;
+
+    Constructing a SymmetryOperation object from a string is heavy, because the string
+    has to be parsed every time. It's preferable to use the available factory:
+
+        SymmetryOperation inversion = SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z");
+
+    It stores a prototype of the created operation and copy constructs a new
+    instance on subsequent calls with the same string.
+
+    SymmetryOperation-objects are for example used in PointGroup.
 
     References:
         [1] International Tables for Crystallography, Volume A, Fourth edition, pp 797-798.

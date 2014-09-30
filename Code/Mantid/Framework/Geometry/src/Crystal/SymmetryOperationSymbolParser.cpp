@@ -22,14 +22,16 @@ SymmetryOperationSymbolParser::SymmetryOperationSymbolParser()
 /**
  * Tries to parse the given symbol
  *
- * This method is the only public method of the parser. It takes a string with a symbol
- * in the format:
+ * This method tries to parse a given symbol and returns the matrix/vector pair resulting from
+ * the parsing process. It takes a string representing a symmetry operation in the format:
  *      x+a/b, -y-c/d, e/f-z
- * Where x, y and z are the literals 'x', 'y' and 'z', while a-f are integers, representing
- * rational numbers. They don't need to be present, a string "x,y,z" is valid. Leading plus-signs
- * may be omitted if desired, but can also be present, so that "+x,+y,+z" is also valid.
+ * where x, y and z are the literals 'x', 'y' and 'z', while a-f are integers, representing
+ * rational numbers. The latter don't need to be present, a string "x,y,z" is valid. Leading plus-signs
+ * may be included if desired, so that "+x,+y,+z" is also valid.
  *
  * If there is a problem, a Kernel::Exception::ParseError exception is thrown.
+ *
+ * See also SymmetryOperationSymbolParser::getNormalizedIdentifier, which performs the opposite operation.
  *
  * @param identifier :: Symbol representing a symmetry operation
  * @return Pair of Kernel::IntMatrix and V3R, representing the symmetry operation.
@@ -50,15 +52,37 @@ std::pair<Kernel::IntMatrix, V3R> SymmetryOperationSymbolParser::parseIdentifier
     }
 }
 
+/// Returns a Jones faithful representation of the symmetry operation characterized by the supplied matrix/column pair.
 std::string SymmetryOperationSymbolParser::getNormalizedIdentifier(const std::pair<Kernel::IntMatrix, V3R> &data)
 {
     return getNormalizedIdentifier(data.first, data.second);
 }
 
+/**
+ * Returns the Jones faithful representation of a symmetry operation
+ *
+ * This method generates a Jones faithful string for the given matrix and vector.
+ * The string is generated bases on some rules:
+ *
+ *  - No spaces:
+ *          'x + 1/2' -> 'x+1/2'
+ *  - Matrix components occur before vector components:
+ *          '1/2+x' -> 'x+1/2'
+ *  - No leading '+' signs:
+ *          '+x' -> 'x'
+ *  - If more than one matrix element is present, they are ordered x, y, z:
+ *          'y-x' -> '-x+y'
+ *
+ * If the matrix is not 3x3, an std::runtime_error exception is thrown.
+ *
+ * @param matrix
+ * @param vector
+ * @return
+ */
 std::string SymmetryOperationSymbolParser::getNormalizedIdentifier(const Kernel::IntMatrix &matrix, const V3R &vector)
 {
     if(matrix.numCols() != 3 || matrix.numRows() != 3) {
-        return "";
+        throw std::runtime_error("Matrix is not a 3x3 matrix.");
     }
 
     std::vector<std::string> symbols;
