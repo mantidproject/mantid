@@ -115,19 +115,20 @@ namespace Mantid
 
       /*Only create the file handle if needed.*/
       if (!m_filehandle)
-      {
+      {  
+        // open the file and copy the handle into the NeXus::File object
+        NXstatus status = NXopen(fileName.c_str(), mode, &fileID);
+        if (status == NX_ERROR)
+        {
+          g_log.error("Unable to open file " + fileName);
+          throw Exception::FileError("Unable to open File:", fileName);
+        }
         ::NeXus::File* file = new ::NeXus::File(fileID, true);
         m_filehandle = boost::shared_ptr< ::NeXus::File>(file);
-        m_filehandle->close();
+        //m_filehandle->close();
       }
 
-      // open the file and copy the handle into the NeXus::File object
-      NXstatus status = NXopen(fileName.c_str(), mode, &fileID);
-      if (status == NX_ERROR)
-      {
-        g_log.error("Unable to open file " + fileName);
-        throw Exception::FileError("Unable to open File:", fileName);
-      }
+      
 
       //
       // for existing files, search for any current mantid_workspace_<n> entries and set the
