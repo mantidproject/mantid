@@ -37,7 +37,7 @@ namespace Mantid
 
     ///@cond
     const char NUM_FORM[] = "%-10.4G";
-    const char NUMS_FORM[] = "%-10.4G%-10.3E%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G\n";
+    const char NUMS_FORM[] = "%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G\n";
     static const char Y_HEADER[] = "### S(Phi,w)\n";
     static const char E_HEADER[] = "### Errors\n";
     ///@endcond
