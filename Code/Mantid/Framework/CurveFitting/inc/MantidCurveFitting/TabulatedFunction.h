@@ -37,7 +37,7 @@ of real numbers separated by spaces. The first column are the x-values and the s
 If a nexus file is used its first spectrum provides the data for the function. The same is true for 
 a workspace which must be a MatrixWorkspace.
 
-The function has a signle parameter - a scaling factor "Scaling". 
+The function has two parameters - a scaling factor "Scaling" and a shift factor along the abscissas 'Shift'
 
 @author Roman Tolchenov, Tessella plc
 @date 4/09/2012

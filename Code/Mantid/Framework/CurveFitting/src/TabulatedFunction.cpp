@@ -43,7 +43,7 @@ TabulatedFunction::TabulatedFunction():
 }
 
 /// Evaluate the function for a list of arguments and given scaling factor
-void TabulatedFunction::eval(double scaling, double shift, double* out, const double* xValues, const size_t nData)const
+void TabulatedFunction::eval(double scaling, double xshift, double* out, const double* xValues, const size_t nData)const
 {
   if (nData == 0) return;
 
@@ -51,10 +51,11 @@ void TabulatedFunction::eval(double scaling, double shift, double* out, const do
 
   if (size() == 0) return;
 
+  //shift the domain over which the function is defined
   std::vector<double> xData(m_xData);
   for(std::vector<double>::iterator it = xData.begin(); it != xData.end(); ++it)
   {
-    *it += shift;
+    *it += xshift;
   }
 
   const double xStart = xData.front();
@@ -112,9 +113,9 @@ void TabulatedFunction::eval(double scaling, double shift, double* out, const do
  */
 void TabulatedFunction::function1D(double* out, const double* xValues, const size_t nData)const
 {
-  const double scaling = getParameter(0);
-  const double shift = getParameter("Shift");
-  eval(scaling, shift, out, xValues, nData);
+  const double scaling = getParameter("Scaling");
+  const double xshift = getParameter("Shift");
+  eval(scaling, xshift, out, xValues, nData);
 }
 
 /**
@@ -125,23 +126,27 @@ void TabulatedFunction::function1D(double* out, const double* xValues, const siz
  */
 void TabulatedFunction::functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
 {
-  const double shift = getParameter("Shift");
+  const double scaling = getParameter("Scaling");
+  const double xshift = getParameter("Shift");
   std::vector<double> tmp( nData );
   // derivative with respect to Scaling parameter
-  eval(1.0, shift, tmp.data(), xValues, nData);
+  eval(1.0, xshift, tmp.data(), xValues, nData);
   for(size_t i = 0; i < nData; ++i)
   {
     out->set( i, 0, tmp[i] );
   }
+
   // There is no unique definition for the partial derivative with respect
   // to the Shift parameter. Here we take the central difference,
-  // except at the extremes of array xValues
-  out->set( 0, 1, (tmp[1]-tmp[0])/(xValues[1]-xValues[0]) );  // forward difference at beginning of xValues
-  for(size_t i = 1; i < nData-1; ++i)
+  const double dx = (xValues[nData-1]-xValues[0])/nData;
+  std::vector<double> tmpplus( nData );
+  eval(scaling, xshift+dx, tmpplus.data(), xValues, nData);
+  std::vector<double> tmpminus( nData );
+  eval(scaling, xshift-dx, tmpminus.data(), xValues, nData);
+  for(size_t i = 0; i < nData; ++i)
   {
-    out->set( i, 1, (tmp[i+1]-tmp[i-1])/(xValues[i+1]-xValues[i-1]) ); // centered difference
+    out->set( i, 1, (tmpplus[i]-tmpminus[i])/(2*dx) );
   }
-  out->set( nData-1, 1, (tmp[nData-1]-tmp[nData-2])/(xValues[nData-1]-xValues[nData-2]) );  // backward difference
 }
 
 
