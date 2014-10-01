@@ -138,7 +138,7 @@ void TabulatedFunction::functionDeriv1D(API::Jacobian* out, const double* xValue
 
   // There is no unique definition for the partial derivative with respect
   // to the Shift parameter. Here we take the central difference,
-  const double dx = (xValues[nData-1]-xValues[0])/nData;
+  const double dx = (xValues[nData-1]-xValues[0])/static_cast<double>(nData);
   std::vector<double> tmpplus( nData );
   eval(scaling, xshift+dx, tmpplus.data(), xValues, nData);
   std::vector<double> tmpminus( nData );
