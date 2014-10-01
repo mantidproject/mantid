@@ -71,11 +71,11 @@ void LoadParameterFile::init()
 void LoadParameterFile::exec()
 {
   // Retrieve the filename from the properties
-  std::string filename = getPropertyValue("Filename");
+  const std::string filename = getPropertyValue("Filename");
 
   // Retrieve the parameter XML string from the properties
   const Property * const parameterXMLProperty = getProperty("ParameterXML"); // to check whether it is default
-  std::string parameterXML = getPropertyValue("ParameterXML");
+  const std::string parameterXML = getPropertyValue("ParameterXML");
 
   // Check the two properties (at least one must be set)
   if( filename.empty() && parameterXMLProperty->isDefault()){
@@ -85,11 +85,6 @@ void LoadParameterFile::exec()
   // Get the input workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
-  execManually(!parameterXMLProperty->isDefault(), filename, parameterXML, localWorkspace);
-}
-
-void LoadParameterFile::execManually(bool useString, std::string filename, std::string parameterXML,  Mantid::API::ExperimentInfo_sptr localWorkspace)
-{
   // TODO: Refactor to remove the need for the const cast (ticket #8521)
   Instrument_sptr instrument = boost::const_pointer_cast<Instrument>(localWorkspace->getInstrument()->baseInstrument());
 
@@ -97,7 +92,9 @@ void LoadParameterFile::execManually(bool useString, std::string filename, std::
   DOMParser pParser;
   AutoPtr<Document> pDoc;
 
-  if(useString){
+  //If we've been given an XML string parse that instead
+  if(!parameterXMLProperty->isDefault())
+  {
     try
     {
       pDoc = pParser.parseString(parameterXML);
