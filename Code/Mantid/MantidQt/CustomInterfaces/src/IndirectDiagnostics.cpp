@@ -180,7 +180,7 @@ namespace CustomInterfaces
     }
 
     // Check spectra range
-    auto specRange = std::make_pair(m_dblManager->value(m_properties["SpecMin"]), m_dblManager->value(m_properties["SpecMax"]));
+    auto specRange = std::make_pair(m_dblManager->value(m_properties["SpecMin"]), m_dblManager->value(m_properties["SpecMax"]) + 1);
     uiv.checkValidRange("Spectra Range", specRange);
 
     QString error = uiv.generateErrorMessage();
