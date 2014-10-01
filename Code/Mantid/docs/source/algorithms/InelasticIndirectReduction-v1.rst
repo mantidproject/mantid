@@ -14,25 +14,29 @@ Performs a reduction for an inelastic indirect geometry instrument.
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 **Example - IRIS energy conversion:**
 
 .. testcode:: ExIRISReduction
 
-    InelasticIndirectReduction(InputFiles='IRS21360.RAW',
-                               OutputWorkspaceGroup='IndirectReductions',
-                               Instrument='IRIS',
-                               Analyser='graphite',
-                               Reflection='002',
-                               DetectorRange=[3, 53],
-                               SaveFormats=['nxs'])
+   InelasticIndirectReduction(InputFiles='IRS21360.raw',
+      OutputWorkspaceGroup='IndirectReductions',
+      Instrument='IRIS',
+      Analyser='graphite',
+      Reflection='002',
+      DetectorRange=[3, 53],
+      SaveFormats=['nxs'])
 
-    reduction_workspace_names = mtd['IndirectReductions'].getNames()
+   reduction_workspace_names = mtd['IndirectReductions'].getNames()
 
-    for workspace_name in reduction_workspace_names:
-        print workspace_name
+   for workspace_name in reduction_workspace_names:
+      print workspace_name
+
+Output:
 
 .. testoutput:: ExIRISReduction
 
-    irs21360_graphite002_red
+   irs21360_graphite002_red
 
 .. categories::

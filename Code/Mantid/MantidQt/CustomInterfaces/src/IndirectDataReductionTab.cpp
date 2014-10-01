@@ -142,11 +142,11 @@ namespace CustomInterfaces
    * Gets the operation modes for a given instrument as defined in it's parameter file.
    *
    * @param instrumentName The name of an indirect instrument (IRIS, OSIRIS, TOSCA, VESUVIO)
-   * @returns A map of analysers to a vector of reflections that can be used
+   * @returns A list of analysers and a vector of reflections that can be used with each
    */
-  std::map<std::string, std::vector<std::string> > IndirectDataReductionTab::getInstrumentModes(std::string instrumentName)
+  std::vector<std::pair<std::string, std::vector<std::string> > > IndirectDataReductionTab::getInstrumentModes(std::string instrumentName)
   {
-    std::map<std::string, std::vector<std::string> > modes;
+    std::vector<std::pair<std::string, std::vector<std::string> > > modes;
     MatrixWorkspace_sptr instWorkspace = loadInstrumentIfNotExist(instrumentName);
     Instrument_const_sptr instrument = instWorkspace->getInstrument();
 
@@ -161,7 +161,8 @@ namespace CustomInterfaces
       std::vector<std::string> reflections;
       boost::split(reflections, ipfReflections, boost::is_any_of(","), boost::token_compress_on);
 
-      modes[analyser] = reflections;
+      std::pair<std::string, std::vector<std::string> > data(analyser, reflections);
+      modes.push_back(data);
     }
 
     return modes;
@@ -235,7 +236,7 @@ namespace CustomInterfaces
    * @param curveID :: The string index of the curve in the m_curves map
    * @return A pair containing the maximum and minimum points of the curve
    */
-  std::pair<double,double> IndirectDataReductionTab::getCurveRange(const QString& curveID)
+  std::pair<double, double> IndirectDataReductionTab::getCurveRange(const QString& curveID)
   {
     size_t npts = m_curves[curveID]->data().size();
 
