@@ -25,7 +25,7 @@ cmake --version
 # OS X setup steps
 ###############################################################################
 if [[ $(uname) == 'Darwin' ]]; then
-  if [[ ${JOB_NAME} == *clang* || ${NODE_LABEL} == *10.9* ]]; then
+  if [[ ${JOB_NAME} == *clang* || ${JOB_NAME} == *10.9* ]]; then
     # Assuming we are using the clang compiler
     echo "Using clang/llvm compiler."
     clang --version
