@@ -1142,5 +1142,5 @@ class Naming(ReductionStep):
         except IndexError:
             analyser = ''
             reflection = ''
-        prefix = inst + run + '_' + analyser + reflection + '_red'
+        prefix = short_name + run + '_' + analyser + reflection + '_red'
         return prefix
