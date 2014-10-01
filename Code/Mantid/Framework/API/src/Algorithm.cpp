@@ -78,13 +78,13 @@ namespace Mantid
     Algorithm::Algorithm() :
     PropertyManagerOwner(),
       m_cancel(false),m_parallelException(false), m_log("Algorithm"), g_log(m_log),
+      m_groupSize(0),
       m_executeAsync(NULL),
       m_notificationCenter(NULL),
       m_progressObserver(NULL),
       m_isInitialized(false), m_isExecuted(false),m_isChildAlgorithm(false), m_recordHistoryForChild(false),
       m_alwaysStoreInADS(false),m_runningAsync(false),
-      m_running(false),m_rethrow(false),
-      m_groupSize(0), m_algorithmID(this), m_singleGroup(-1), m_groupsHaveSimilarNames(false)
+      m_running(false), m_rethrow(false), m_algorithmID(this), m_singleGroup(-1), m_groupsHaveSimilarNames(false)
     {
     }
 
