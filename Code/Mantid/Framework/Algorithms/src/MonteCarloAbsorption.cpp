@@ -45,11 +45,11 @@ namespace Mantid
     /**
      * Constructor
      */
-    MonteCarloAbsorption::MonteCarloAbsorption() : 
-      m_inputWS(), m_sampleShape(NULL), m_container(NULL), m_numberOfPoints(0), 
-      m_xStepSize(0), m_numberOfEvents(1), m_samplePos(), m_sourcePos(), 
-      m_bbox_length(0.0), m_bbox_halflength(0.0), m_bbox_width(0.0), 
-      m_bbox_halfwidth(0.0), m_bbox_height(0.0), m_bbox_halfheight(0.0), 
+    MonteCarloAbsorption::MonteCarloAbsorption() :
+      m_inputWS(), m_sampleShape(NULL), m_container(NULL), m_numberOfPoints(0),
+      m_xStepSize(0), m_numberOfEvents(1), m_samplePos(), m_sourcePos(),
+      m_bbox_length(0.0), m_bbox_halflength(0.0), m_bbox_width(0.0),
+      m_bbox_halfwidth(0.0), m_bbox_height(0.0), m_bbox_halfheight(0.0),
       m_randGen(NULL)
     {
     }
@@ -66,7 +66,7 @@ namespace Mantid
     // Private methods
     //------------------------------------------------------------------------------
     
-    /** 
+    /**
      * Initialize the algorithm
      */
     void MonteCarloAbsorption::init()
@@ -77,18 +77,18 @@ namespace Mantid
       wsValidator->add<InstrumentValidator>();
 
       declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-          wsValidator),
-          "The name of the input workspace.  The input workspace must have X units of wavelength.");
+                                              wsValidator),
+                      "The name of the input workspace.  The input workspace must have X units of wavelength.");
       declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "", Direction::Output),
-          "The name to use for the output workspace.");
+                      "The name to use for the output workspace.");
       auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int> >();
       positiveInt->setLower(1);
       declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
-          "The number of wavelength points for which a simulation is atttempted (default: all points)");
+                      "The number of wavelength points for which a simulation is atttempted (default: all points)");
       declareProperty("EventsPerPoint", 300, positiveInt,
-          "The number of \"neutron\" events to generate per simulated point");
+                      "The number of \"neutron\" events to generate per simulated point");
       declareProperty("SeedValue", 123456789, positiveInt,
-          "Seed the random number generator with this value");
+                      "Seed the random number generator with this value");
 
     }
     
@@ -98,7 +98,7 @@ namespace Mantid
     void MonteCarloAbsorption::exec()
     {
       retrieveInput();
-      initCaches();      
+      initCaches();
       
       MatrixWorkspace_sptr correctionFactors = WorkspaceFactory::Instance().create(m_inputWS);
       correctionFactors->isDistribution(true); // The output of this is a distribution
@@ -141,7 +141,7 @@ namespace Mantid
         for( int bin = 0; bin < numBins; bin += m_xStepSize )
         {
           const double lambda = isHistogram ?
-              (0.5 * (xValues[bin] + xValues[bin + 1]) ) : xValues[bin];
+                (0.5 * (xValues[bin] + xValues[bin + 1]) ) : xValues[bin];
           doSimulation(detector.get(), lambda, yValues[bin], eValues[bin]);
           // Ensure we have the last point for the interpolation
           if ( m_xStepSize > 1 && bin + m_xStepSize >= numBins && bin+1 != numBins)
@@ -157,7 +157,7 @@ namespace Mantid
         }
         prog.report();
 
-     }
+      }
 
       // Save the results
       setProperty("OutputWorkspace", correctionFactors);
@@ -175,9 +175,9 @@ namespace Mantid
                                             double & attenFactor, double & error)
     {
       /**
-       Currently, assuming square beam profile to pick start position then randomly selecting 
+       Currently, assuming square beam profile to pick start position then randomly selecting
        a point within the sample using it's bounding box.
-       This point defines the single scattering point and hence the attenuation path lengths and final 
+       This point defines the single scattering point and hence the attenuation path lengths and final
        directional vector to the detector
        */
       // Absolute detector position
@@ -218,14 +218,16 @@ namespace Mantid
     }
 
     /**
-     * Selects a random location within the sample + container environment. 
+     * Selects a random location within the sample + container environment. The bounding box is
+     * used as an approximation to generate a point and this is then tested for its validity within
+     * the shape.
      * @returns Selected position as V3D object
      */
     V3D MonteCarloAbsorption::selectScatterPoint() const
     {
       // Generate 3 random numbers, use them to calculate a random location
-      // within the bounding box of the sample environment + sample 
-      // and then check if this position is within the whole environment. 
+      // within the bounding box of the sample environment + sample
+      // and then check if this position is within the whole environment.
       // If it is return it, if not try again.
       V3D scatterPoint;
       int nattempts(0);
@@ -245,7 +247,7 @@ namespace Mantid
       }
       // If we got here then the shape is too strange for the bounding box to be of any use.
       g_log.error() << "Attempts to generate a random point with the sample/can "
-          << "have exceeded the allowed number of tries.\n";
+                    << "have exceeded the allowed number of tries.\n";
       throw std::runtime_error("Attempts to produce random scatter point failed. Check sample shape.");
 
     }
@@ -258,20 +260,20 @@ namespace Mantid
      * @param lambda :: The wavelength of the neutron
      * @returns The attenuation factor for this neutron's track
      */
-    double 
+    double
     MonteCarloAbsorption::attenuationFactor(const V3D & startPos, const V3D & scatterPoint,
                                             const V3D & finalPos, const double lambda)
     {
       double factor(1.0);
 
-      // Define two tracks, before and after scatter, and trace check their 
+      // Define two tracks, before and after scatter, and trace check their
       // intersections with the the environment and sample
       Track beforeScatter(scatterPoint, (startPos - scatterPoint));
       Track afterScatter(scatterPoint, (finalPos - scatterPoint));
       // Theoretically this should never happen as there should always be an intersection
       // but do to precision limitations points very close to the surface give
       // zero intersection, so just reject
-      if( m_sampleShape->interceptSurface(beforeScatter) == 0 || 
+      if( m_sampleShape->interceptSurface(beforeScatter) == 0 ||
           m_sampleShape->interceptSurface(afterScatter) == 0 )
       {
         throw std::logic_error("Track has no surfaces intersections.");
@@ -314,18 +316,18 @@ namespace Mantid
         Material_const_sptr mat = objComp->material();
         factor *= attenuation(length, *mat, lambda);
       }
-        
+
       return factor;
     }
 
     /**
      * Calculate the attenuation for a given length, material and wavelength
      * @param length :: Distance through the material
-     * @param material :: A reference to the Material 
+     * @param material :: A reference to the Material
      * @param lambda :: The wavelength
      * @returns The attenuation factor
      */
-    double 
+    double
     MonteCarloAbsorption::attenuation(const double length, const Kernel::Material& material,
                                       const double lambda) const
     {
@@ -402,7 +404,7 @@ namespace Mantid
     }
 
     /**
-     * Initialise the caches used here including setting up the random 
+     * Initialise the caches used here including setting up the random
      * number generator
      */
     void MonteCarloAbsorption::initCaches()

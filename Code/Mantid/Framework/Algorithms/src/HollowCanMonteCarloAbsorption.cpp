@@ -36,7 +36,7 @@ namespace Mantid
     HollowCanMonteCarloAbsorption::HollowCanMonteCarloAbsorption()
     {
     }
-    
+
     //----------------------------------------------------------------------------------------------
     /** Destructor
     */
