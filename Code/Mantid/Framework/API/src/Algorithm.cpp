@@ -84,7 +84,7 @@ namespace Mantid
       m_isInitialized(false), m_isExecuted(false),m_isChildAlgorithm(false), m_recordHistoryForChild(false),
       m_alwaysStoreInADS(false),m_runningAsync(false),
       m_running(false),m_rethrow(false),m_algorithmID(this),
-       m_groupSize(0),m_singleGroup(-1), m_groupsHaveSimilarNames(false)
+      m_singleGroup(-1), m_groupSize(0), m_groupsHaveSimilarNames(false)
     {
     }
 
