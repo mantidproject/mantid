@@ -233,7 +233,7 @@ namespace Mantid
       @param  inError  :: the vector of the spectra errors
 
       @param  Signal   :: the vector of the verified spectra signals, containing masked values in place of NaN-s and Inf-S
-      @param  inError  :: the vector of the verified spectra errors, containing masked values in place of NaN-s and Inf-S of the correspondent signal
+      @param  Error  :: the vector of the verified spectra errors, containing masked values in place of NaN-s and Inf-S of the correspondent signal
 
     */
     void SaveSPE::check_and_copy_spectra(const MantidVec &inSignal,const MantidVec &inErr,MantidVec &Signal,MantidVec &Error)const
