@@ -22,6 +22,7 @@ if ( NOT COMMONSETUP_DONE )
   include ( CommonSetup )
 endif ()
 
+option(BUILD_MATLAB_DEPENDENCIES "Build Mantid-Matlab dependencies in the case if the matlab is found" OFF)
 ###########################################################################
 # Look for dependencies - bail out if any necessary ones not found
 ###########################################################################
@@ -83,7 +84,7 @@ set ( MANTIDLIBS ${MANTIDLIBS} API )
 add_subdirectory (PythonInterface)
 
 find_package ( Matlab )
-if( MATLAB_FOUND )
+if( MATLAB_FOUND & BUILD_MATLAB_DEPENDENCIES)
   add_subdirectory (MatlabAPI)
 endif ()
 
