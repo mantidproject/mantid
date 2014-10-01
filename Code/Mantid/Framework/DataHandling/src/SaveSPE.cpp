@@ -230,7 +230,7 @@ namespace Mantid
     }
     /**  method verifies if a spectra contains any NaN or Inf values and replaces these values with SPE-specified constants
       @param  inSignal :: the vector of the spectra signals 
-      @param  inError  :: the vector of the spectra errors
+      @param  inErr  :: the vector of the spectra errors
 
       @param  Signal   :: the vector of the verified spectra signals, containing masked values in place of NaN-s and Inf-S
       @param  Error  :: the vector of the verified spectra errors, containing masked values in place of NaN-s and Inf-S of the correspondent signal
