@@ -198,7 +198,9 @@ namespace CustomInterfaces
     MatrixWorkspace_sptr instWorkspace = loadInstrumentIfNotExist(instrumentName, analyser, reflection);
 
     // Get the instrument
-    Instrument_const_sptr instrument = instWorkspace->getInstrument();
+    auto instrument = instWorkspace->getInstrument()->getComponentByName(analyser);
+    if(instrument == NULL)
+      return instDetails;
 
     // For each parameter we want to get
     for(auto it = ipfElements.begin(); it != ipfElements.end(); ++it)
@@ -435,7 +437,7 @@ namespace CustomInterfaces
     std::map<std::string, double> ranges;
 
     // Get the instrument
-    auto instWs = loadInstrumentIfNotExist(instName, analyser, reflection);
+    auto instWs = loadInstrumentIfNotExist(instName.toStdString(), analyser.toStdString(), reflection.toStdString());
     auto inst = instWs->getInstrument();
 
     // Get the analyser component
