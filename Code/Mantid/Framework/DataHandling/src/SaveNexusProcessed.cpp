@@ -314,7 +314,7 @@ namespace DataHandling
     }
     
     inputWorkspace->history().saveNexus(cppFile);
-
+    nexusFile->closeGroup();
     return;
   }
 
@@ -514,6 +514,8 @@ namespace DataHandling
         this->doExec(ws, nexusFile, true /*keepFile*/);
       }
     }  
+
+    nexusFile->closeNexusFile();
     // We finished successfully.
     setExecuted(true);
     notificationCenter().postNotification(new FinishedNotification(this,isExecuted()));

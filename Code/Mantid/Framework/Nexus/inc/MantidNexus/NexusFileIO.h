@@ -68,6 +68,8 @@ namespace Mantid
       int writeNexusProcessedHeader( const std::string& title, const std::string& wsName="") const;
       /// close the nexus file
       void closeNexusFile();
+      /// Close the group.
+      void closeGroup();
       /// Write a lgos section
       int writeNexusSampleLogs( const Mantid::API::Run& runProperties) const;
       /// write the workspace data

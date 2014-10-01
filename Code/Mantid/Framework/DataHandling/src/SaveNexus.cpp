@@ -164,5 +164,21 @@ void SaveNexus::runSaveNexusProcessed()
   //
   progress(1);
 }
+
+  /**
+  Overriden process groups.
+  */
+  bool SaveNexus::processGroups()
+  { 
+    this->exec();
+
+    // We finished successfully.
+    setExecuted(true);
+    notificationCenter().postNotification(new FinishedNotification(this,isExecuted()));
+
+    return true;
+  }
+
+
 } // namespace DataHandling
 } // namespace Mantid

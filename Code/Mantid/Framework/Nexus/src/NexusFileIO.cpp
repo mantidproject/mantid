@@ -149,12 +149,16 @@ namespace Mantid
       m_filehandle->openGroup(mantidEntryName, className);
     }
 
+    void NexusFileIO::closeGroup()
+    {
+      m_filehandle->closeGroup();
+    }
+
     //-----------------------------------------------------------------------------------------------
     void NexusFileIO::closeNexusFile()
     {
       if (m_filehandle)
       {
-        m_filehandle->closeGroup();
         m_filehandle.reset();
       }
     }
@@ -1256,7 +1260,7 @@ namespace Mantid
     NexusFileIO::~NexusFileIO()
     {
       // Close the nexus file if not already closed.
-      this->closeNexusFile();
+      //this->closeNexusFile();
     }
 
   } // namespace NeXus
