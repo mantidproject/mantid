@@ -550,6 +550,18 @@ namespace Mantid
         }
       }
 
+      if(trackingHistory())
+      {
+        // count used for defining the algorithm execution order
+        // If history is being recorded we need to count this as a separate algorithm
+        // as the history compares histories by their execution number
+        ++Algorithm::g_execCount;
+            
+        //populate history record before execution so we can record child algorithms in it
+        AlgorithmHistory algHist;
+        m_history = boost::make_shared<AlgorithmHistory>(algHist);
+      }
+
       // ----- Check for processing groups -------------
       // default true so that it has the right value at the check below the catch block should checkGroups throw
       bool callProcessGroups = true;
@@ -592,19 +604,6 @@ namespace Mantid
           { 
             Poco::FastMutex::ScopedLock _lock(m_mutex);
             m_running = true;
-          }
-          
-          
-          if(trackingHistory())
-          {
-            // count used for defining the algorithm execution order
-            // If history is being recorded we need to count this as a separate algorithm
-            // as the history compares histories by their execution number
-            ++Algorithm::g_execCount;
-            
-            //populate history record before execution so we can record child algorithms in it
-            AlgorithmHistory algHist;
-            m_history = boost::make_shared<AlgorithmHistory>(algHist);
           }
 
           start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
