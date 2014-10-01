@@ -18,13 +18,17 @@ namespace Geometry
   /** SymmetryOperationFactory
 
     A factory for symmetry operations. Symmetry operations are stored
-    with respect to their identifier (see SymmetryOperations for details).
+    with respect to their identifier (see SymmetryOperation for details).
 
     Creation of symmetry operations is then performed like this:
 
-        SymmetryOperations_sptr inversion = SymmetryOperationFactory::Instance().createSymOp("-1");
+        SymmetryOperations inversion = SymmetryOperationFactory::Instance().createSymOp("x,y,z");
 
-    Available symmetry operations may be queried with DynamicFactory::getKeys().
+    Creating a symmetry operation object automatically registers the object
+    as a prototype and subsequent creations are much more efficient because
+    the symbol does not need to be parsed.
+
+    Available symmetry operations may be queried with SymmetryOperation::subscribedSymbols.
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 10/09/2014
@@ -58,6 +62,8 @@ namespace Geometry
       void unsubscribeSymOp(const std::string &identifier);
 
       bool isSubscribed(const std::string &identifier) const;
+
+      std::vector<std::string> subscribedSymbols() const;
 
   protected:
       void subscribe(const std::string &alias, const SymmetryOperation &prototype);

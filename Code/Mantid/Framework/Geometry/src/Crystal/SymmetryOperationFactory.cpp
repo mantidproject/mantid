@@ -41,6 +41,19 @@ bool SymmetryOperationFactoryImpl::isSubscribed(const std::string &identifier) c
     return m_prototypes.find(identifier) != m_prototypes.end();
 }
 
+/// Returns all symbols in the factory.
+std::vector<std::string> SymmetryOperationFactoryImpl::subscribedSymbols() const
+{
+    std::vector<std::string> symbols;
+    symbols.reserve(m_prototypes.size());
+
+    for(auto it = m_prototypes.begin(); it != m_prototypes.end(); ++it) {
+        symbols.push_back(it->first);
+    }
+
+    return symbols;
+}
+
 /// Subscribes symmetry operation into factory, using the supplied alias as key.
 void SymmetryOperationFactoryImpl::subscribe(const std::string &alias, const SymmetryOperation &prototype)
 {
