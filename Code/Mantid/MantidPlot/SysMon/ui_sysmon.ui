@@ -10,6 +10,12 @@
     <height>331</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>230</width>
+    <height>331</height>
+   </size>
+  </property>
   <property name="maximumSize">
    <size>
     <width>16777215</width>
@@ -36,7 +42,7 @@
        <string>System</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
+       <item alignment="Qt::AlignLeft">
         <widget class="QScrollArea" name="scrollArea">
          <property name="widgetResizable">
           <bool>true</bool>
@@ -46,8 +52,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>320</width>
-            <height>293</height>
+            <width>186</width>
+            <height>267</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -168,7 +174,7 @@
                 </item>
                </layout>
               </item>
-              <item row="1" column="0">
+              <item row="1" column="0" alignment="Qt::AlignLeft">
                <widget class="QGroupBox" name="groupBox_5">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -192,8 +198,8 @@
                 <property name="title">
                  <string>Composite System Status</string>
                 </property>
-                <layout class="QGridLayout" name="gridLayout_6">
-                 <item row="0" column="0">
+                <layout class="QVBoxLayout" name="verticalLayout_7">
+                 <item>
                   <widget class="QLabel" name="labelMemUsage">
                    <property name="font">
                     <font>
@@ -205,52 +211,51 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="0">
+                 <item alignment="Qt::AlignLeft">
+                  <widget class="QProgressBar" name="progressBarStatusMemory">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>210</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="toolTip">
+                    <string extracomment="Percent of Memory Usage"/>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <widget class="QLabel" name="labelCPUCount">
                    <property name="text">
                     <string>CPU count:</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="labelMaxMem">
-                   <property name="text">
-                    <string>Max Mem:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_102">
-                   <property name="font">
-                    <font>
-                     <underline>false</underline>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Composite CPU Usage</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="1" rowspan="2">
+                 <item alignment="Qt::AlignLeft">
                   <widget class="QProgressBar" name="progressBarStatusCPU">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
-                   <property name="value">
-                    <number>24</number>
+                   <property name="maximumSize">
+                    <size>
+                     <width>210</width>
+                     <height>16777215</height>
+                    </size>
                    </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1" rowspan="2">
-                  <widget class="QProgressBar" name="progressBarStatusMemory">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
+                   <property name="toolTip">
+                    <string extracomment="Percent of Composite CPU Usage"/>
+                   </property>
+                   <property name="statusTip">
+                    <string extracomment="Composite CPU Usage"/>
                    </property>
                    <property name="value">
                     <number>24</number>
@@ -492,6 +497,16 @@
              <string>Memory</string>
             </property>
             <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radioButtonMax">
+            <property name="text">
+             <string>Max</string>
+            </property>
+            <property name="checked">
              <bool>true</bool>
             </property>
            </widget>
@@ -532,8 +547,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>303</width>
-            <height>244</height>
+            <width>232</width>
+            <height>250</height>
            </rect>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_5">

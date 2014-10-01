@@ -3,6 +3,8 @@ from PyQt4 import Qt, QtCore, QtGui
 import datetime
 import numpy as np
 import config
+import math
+import getpass
 
 #check if command line flag --nompl set to disable matplotlib 
 if not(config.nompl):
@@ -31,8 +33,24 @@ def constantUpdateActor(self,config):
     #update global variables 
 
     #mode to show status in percentage
+    if self.update < 3:
+        #use averaging if using faster update rates
+        Navg=1
+    else:
+        #Don't need averaging in longer acquisition cases
+        Navg=1
+    busy_avg=0
     cpu_stats = psutil.cpu_times_percent(interval=0,percpu=False) #syntax seems to be same for psutil versions 1 and 2
-    percentcpubusy = 100.0 - cpu_stats.idle
+    
+    tmpsum=cpu_stats.system+cpu_stats.user
+    if sum(self.ui.cpu[0:Navg-2+1]) == 0:
+        #avoid initial zeros in the array pulling down the average - just use the value measured in this case.
+        busy_avg=tmpsum
+    else:
+        #case to average
+        busy_avg=(tmpsum+sum(self.ui.cpu[0:Navg-2+1]))/Navg
+    
+    percentcpubusy = busy_avg
     self.ui.progressBarStatusCPU.setValue(round(percentcpubusy))
     percentmembusy=psutil.virtual_memory().percent
     self.ui.progressBarStatusMemory.setValue(round(percentmembusy))
@@ -40,24 +58,13 @@ def constantUpdateActor(self,config):
     self.ui.Ncpus=Ncpus
     totalcpustr='CPU Count: '+str(Ncpus)
 #        print "Total CPU str: ",totalcpustr
-    self.ui.labelCPUCount.setText(totalcpustr)
+    self.ui.labelCPUCount.setText(totalcpustr+'  - CPU Utilization:')
     totalmem=int(round(float(psutil.virtual_memory().total)/(1024*1024*1024))) #psutil syntax OK for both versions
 #        print "Total Mem: ",totalmem
-    self.ui.labelMemUsage.setText('Memory Usage: '+str(totalmem*percentmembusy/100)+' GB')
     self.ui.totalmem=totalmem
-    totalmemstr='Max Mem: '+str(totalmem)+' GB'
+    totalmemstr=str(totalmem)+' GB'
+    self.ui.labelMemUsage.setText('Memory Usage: '+str(totalmem*percentmembusy/100)+' GB of '+totalmemstr)
 #        print "Total Mem str: ",totalmemstr
-    self.ui.labelMaxMem.setText(totalmemstr)
-#    print "** config.mplLoaded: ",config.mplLoaded
-    
-    if config.mplLoaded:
-        #update first position with most recent value overwriting oldest value which has been shifted to first position
-        self.ui.cpu=np.roll(self.ui.cpu,1)
-        self.ui.cpu[0]=percentcpubusy
-        self.ui.mem=np.roll(self.ui.mem,1)
-        self.ui.mem[0]=percentmembusy
-    #        self.ui.dt=np.roll(self.ui.dt,1)
-    #        self.ui.dt[0]=datetime.datetime.now()
     
     # update system tab
     if self.ui.tabWidget.currentIndex() == config.SYST_TAB:
@@ -78,13 +85,55 @@ def constantUpdateActor(self,config):
         uusers=set(lst)
         Nuusers=len(uusers)
         self.ui.labelNUsers.setText("Number of Users Logged On: "+str(Nuusers))
-    
+        
+    #determine "Me" user CPU and memory statistics
+    Me=getpass.getuser()
+    cpupctMe=0
+    memValMe=0
+    cpupctTot=0
+    memValTot=0
+    for proc in psutil.process_iter():
+        try:
+            #check if process still exists, if so, update dictionaries
+            cpupct=proc.get_cpu_percent(interval=0) if config.psutilVer == 1 else proc.cpu_percent(interval=0)
+            memVal=proc.get_memory_percent() if config.psutilVer == 1 else proc.memory_percent()
+
+            try:
+                #some processes give permission denied when getting the name, if so, fail out gracefully using this try.
+                if config.psutilVer == 1:
+                    uname=proc.username
+                else:
+                    uname=proc.username()
+                #print "proc.username: ",uname," type: ",type(uname),"  Me: ",Me," type: ",type(Me)
+            except:
+                uname=''
+        except:
+            pass #skip process - case where process no longer exists
+        cpupctTot+=cpupct
+        memValTot+=memVal
+        #print "uname: ",uname,"  Me: ",Me
+        #note that on Windows systems that getpass.getuser() does not return the same base username as proc.username, so check for the smaller 
+        if Me in uname:
+            cpupctMe+=cpupct
+            memValMe+=memVal
+    #print "cpupctMe: ",cpupctMe,"  memValMe: ",memValMe
+    if config.mplLoaded:
+        #update first position with most recent value overwriting oldest value which has been shifted to first position
+        self.ui.cpu=np.roll(self.ui.cpu,1)
+        self.ui.cpu[0]=percentcpubusy   #percentcpubusy seems to agree better with system System Monitor than cpupctTot/Ncpus
+        self.ui.mem=np.roll(self.ui.mem,1)
+        self.ui.mem[0]=percentmembusy
+        self.ui.cpuMe=np.roll(self.ui.cpuMe,1)
+        self.ui.cpuMe[0]=cpupctMe/(Ncpus)
+        self.ui.memMe=np.roll(self.ui.memMe,1)
+        self.ui.memMe[0]=memValMe    
+
     #update the history plot
     if self.ui.tabWidget.currentIndex() == config.HIST_TAB:
         #only update history plot if tab is active    
         font = {'family' : 'sans-serif',
             'weight' : 'bold',
-            'size'   : 10}
+            'size'   : config.pltFont+1}
         matplotlib.rc('font', **font)
      
         xtime=range(0,self.ui.Nsamples+1,self.update)
@@ -93,10 +142,13 @@ def constantUpdateActor(self,config):
         
         plt.figure(self.ui.figure.number)     #make plot figure active   
         plt.clf() #clear figure each time for rolling updates to show
-        plt.plot(xtime[0:Npts+1],self.ui.cpu[0:Npts+1],color='Blue',label='CPU Busy')
-        plt.plot(xtime[0:Npts+1],self.ui.mem[0:Npts+1],color='Green',label='Mem Busy')
-        plt.title('Composite CPU and Memory Activity',fontsize=10,fontweight='bold')
-        plt.ylabel('% Busy',fontsize=9.5,fontweight='bold')
+        plt.plot(xtime[0:Npts+1],self.ui.cpu[0:Npts+1],color='Blue',label='CPU: All',linewidth=config.linewidth)
+        plt.plot(xtime[0:Npts+1],self.ui.mem[0:Npts+1],color='Green',label='Mem: All',linewidth=config.linewidth)
+        plt.plot(xtime[0:Npts+1],self.ui.cpuMe[0:Npts+1],color='red',label='CPU: '+Me,linewidth=config.linewidth)
+        plt.plot(xtime[0:Npts+1],self.ui.memMe[0:Npts+1],color='cyan',label='Mem: '+Me,linewidth=config.linewidth)
+
+        plt.title('Composite CPU and Memory Activity',fontsize=config.pltFont+1,fontweight='bold')
+        plt.ylabel('% Used',fontsize=config.pltFont+0.5,fontweight='bold')
         
         if self.update == 1:
             xlab="Seconds with 1 Second Updates"
@@ -106,8 +158,9 @@ def constantUpdateActor(self,config):
             xlab="Seconds with 5 Second Updates"    
         elif self.update == 10:
             xlab="Seconds with 10 Second Updates"
-        plt.xlabel(xlab,fontsize=9.5,fontweight='bold')
-        plt.legend(loc="upper right",prop={'size':9})
+        plt.xlabel(xlab,fontsize=config.pltFont+0.5,fontweight='bold')
+        plt.legend(loc="upper right",prop={'size':config.pltFont})
+        
         plt.xlim([0,Ndur])
         self.ui.canvas.draw()
     
@@ -159,17 +212,21 @@ def updateProcTable(self,config):
 
         #fill the dictionaries - seems to need to be done faster than within loop which also fills the table...not sure why...
         for proc in psutil.process_iter():
-            cpupct=proc.get_cpu_percent(interval=0) if config.psutilVer == 1 else proc.cpu_percent(interval=0)
-            memVal=float(int(float(proc.get_memory_percent())*100.0))/100.0 if config.psutilVer == 1 else float(int(float(proc.memory_percent())*100.0))/100.0
             try:
-                #don't update dictionaries if name gives an access denied error when checking process name
-                pname=proc.name if config.psutilVer == 1 else proc.name()
-                d_user.update({proc.pid:proc.username}) if config.psutilVer == 1 else d_user.update({proc.pid:proc.username()})
-                d_cpu.update({proc.pid:cpupct})
-                d_mem.update({proc.pid:memVal})
-                d_name.update({proc.pid:pname})
+                #check if process still exists, if so, update dictionaries
+                cpupct=proc.get_cpu_percent(interval=0) if config.psutilVer == 1 else proc.cpu_percent(interval=0)
+                memVal=float(int(float(proc.get_memory_percent())*100.0))/100.0 if config.psutilVer == 1 else float(int(float(proc.memory_percent())*100.0))/100.0
+                try:
+                    #don't update dictionaries if name gives an access denied error when checking process name
+                    pname=proc.name if config.psutilVer == 1 else proc.name()
+                    d_user.update({proc.pid:proc.username}) if config.psutilVer == 1 else d_user.update({proc.pid:proc.username()})
+                    d_cpu.update({proc.pid:cpupct})
+                    d_mem.update({proc.pid:memVal})
+                    d_name.update({proc.pid:pname})
+                except:
+                    pass #place holder
             except:
-                pass #place holder
+                pass #skip this process - case where it no longer exists
 
         #now fill the table for display
         for proc in d_user.keys():
@@ -207,10 +264,10 @@ def updateProcTable(self,config):
         self.ui.labelLastUpdate.setText("Last Update: "+str(datetime.datetime.now()))
 
 def updateUserChart(self,config):
-
+    
     font = {'family' : 'sans-serif',
         'weight' : 'bold',
-        'size'   : 9}
+        'size'   : config.pltFont}
 
     matplotlib.rc('font', **font)
     
@@ -220,7 +277,7 @@ def updateUserChart(self,config):
     plt.clf()
     plt.cla()
 #    f.gca().cla()
-
+    plt.subplot(121) #divide plot area into two: plot on left and legend on right
     #create empty dictionaries to be used by the process table
     d_user={}
     d_cpu={}
@@ -228,18 +285,24 @@ def updateUserChart(self,config):
     d_name={}
     #fill the dictionaries - seems to need to be done faster than within loop which also fills the table...not sure why...
     for proc in psutil.process_iter():
-        cpupct=proc.get_cpu_percent(interval=0) if config.psutilVer == 1 else proc.cpu_percent(interval=0)
-        memVal=float(int(float(proc.get_memory_percent())*100.0))/100.0 if config.psutilVer == 1 else float(int(float(proc.memory_percent())*100.0))/100.0
         try:
-            #don't update dictionaries if name gives an access denied error when checking process name
-            pname=proc.name if config.psutilVer == 1 else proc.name()
-            d_user.update({proc.pid:proc.username}) if config.psutilVer == 1 else d_user.update({proc.pid:proc.username()})
-            d_cpu.update({proc.pid:cpupct})
-            d_mem.update({proc.pid:memVal})
-            d_name.update({proc.pid:pname})
+            #check if process still exists, if so, update dictionaries
+            cpupct=proc.get_cpu_percent(interval=0) if config.psutilVer == 1 else proc.cpu_percent(interval=0)
+            memVal=float(int(float(proc.get_memory_percent())*100.0))/100.0 if config.psutilVer == 1 else float(int(float(proc.memory_percent())*100.0))/100.0
+            try:
+                #don't update dictionaries if name gives an access denied error when checking process name
+                pname=proc.name if config.psutilVer == 1 else proc.name()
+                d_user.update({proc.pid:proc.username}) if config.psutilVer == 1 else d_user.update({proc.pid:proc.username()})
+                d_cpu.update({proc.pid:cpupct})
+                d_mem.update({proc.pid:memVal})
+                d_name.update({proc.pid:pname})
+            except:
+                #print "access denied"
+                pass #place holder
         except:
-            pass #place holder
-            
+            #print "skipped process"
+            pass #skip this process as it no longer exists
+    #print "** Total Mem Used: ",sum(d_mem.values())
     users=d_user.values()
     users_unique=list(set(users)) #use set() to find unique users then convert the resulting set to a list via list()
     Nusers=len(users_unique)
@@ -274,6 +337,8 @@ def updateUserChart(self,config):
         sortBy='cpu'
     elif self.ui.radioButtonMem.isChecked():
         sortBy='mem'
+    elif self.ui.radioButtonMax.isChecked():
+        sortBy='max'
     else:
         print "invalid radio button selection - using CPU sort as default"
         sortBy='cpu'
@@ -283,6 +348,14 @@ def updateUserChart(self,config):
         indx=sorted(range(len(cpu_by_users_lst)), key=cpu_by_users_lst.__getitem__,reverse=True)
     elif sortBy=='mem':
         indx=sorted(range(len(mem_by_users_lst)), key=mem_by_users_lst.__getitem__,reverse=True)
+    elif sortBy=='max':
+        #determine if cpu or mem is larger
+        if sum(cpu_by_users_lst) > sum(mem_by_users_lst):
+            #case where cpu usage is larger value
+            indx=sorted(range(len(cpu_by_users_lst)), key=cpu_by_users_lst.__getitem__,reverse=True)
+        else:
+            #case where mem usage is larger
+            indx=sorted(range(len(mem_by_users_lst)), key=mem_by_users_lst.__getitem__,reverse=True)
     else:
         print 'Incorrect sort parameter'
     #sort lists
@@ -294,90 +367,120 @@ def updateUserChart(self,config):
     if Nusers > Nmax:
         #replace the Nmaxth - 1 element with the total of the values from index Nmax - 1 to the end of the list
         cpu_by_users_sorted[Nmax-1]=sum(cpu_by_users_sorted[Nmax-1:])
-        mem_remaining=sum(mem_by_users_sorted[Nmax-1:])
+        mem_by_users_sorted[Nmax-1]=sum(mem_by_users_sorted[Nmax-1:])
         users_unique_sorted[Nmax-1]='Remaining'
         Nshow=Nmax
     else:
         Nshow=Nusers
 
     if min(cpu_by_users_sorted) < 0:
-        print " *** cp_by_users_sorted has values less than zero"
+        print " *** cpu_by_users_sorted has values less than zero - should not occur, please check"
         print cpu_by_users_sorted
         print " ***"
     if min(mem_by_users_sorted) < 0:
-        print " *** mem_by_users_sorted has values less than zero"
+        print " *** mem_by_users_sorted has values less than zero - should not occur, please check"
         print mem_by_users_sorted
         print " ***"        
 
     #range check the values of the sorted lists - may not be necessary, just being cautious...
     tst=np.array(cpu_by_users_sorted)<0  #need an array for summing
-    indx=cpu_by_users_sorted<0           #need bool list for indexing
+    indx=list(np.array(cpu_by_users_sorted)<0)           #need bool list for indexing
+    #check if any users have less than zero CPU usage and set usage to 0 for these users
     if sum(tst) > 0:
         print "cpu_by_users < 0: ",sum(indx)
-        cpu_by_users_sorted[indx]=0
-    tst=np.array(cpu_by_users_sorted)>self.ui.Ncpus*100
-    indx=cpu_by_users_sorted>self.ui.Ncpus*100
+        cpu_by_users_sorted=[0 if x<0 else x for x in cpu_by_users_sorted]
+    tst=np.array(cpu_by_users_sorted)>(self.ui.Ncpus*100)
+    indx=list(np.array(cpu_by_users_sorted)>self.ui.Ncpus*100)
+    #check if any users have CPU usage greater than possible number of CPUs and set usage to max CPU usage for those users
     if sum(tst) > 0:
         print "cpu_by_users > Ncpus*100: ",sum(indx)
-        cpu_by_users_sorted[indx]=self.ui.Ncpus*100
+        cpu_by_users_sorted=[self.ui.Ncpus*100 if x>self.ui.Ncpus*100 else x for x in cpu_by_users_sorted]
     tst=np.array(mem_by_users_sorted)<0
-    indx=mem_by_users_sorted<0
+    indx=list(np.array(mem_by_users_sorted)<0)
+    #check if any users have less than zero memory usage and set these users to zero usage
     if sum(tst) > 0:
         print "mem_by_users < 0: ",sum(indx)
-        mem_by_users_sorted[indx]=0
+        mem_by_users_sorted=[0 if x<0 else x for x in mem_by_users_sorted]
     tst=np.array(mem_by_users_sorted)>self.ui.totalmem
-    indx=mem_by_users_sorted>self.ui.totalmem
+    indx=np.array(mem_by_users_sorted)>self.ui.totalmem
+    #check if any users have memory usage greater than the total system memory - should never happen...
     if sum(tst) > 0:
-        print "mem_by_users > totalmem: ",sum(indx)
-        mem_by_users_sorted[indx]=self.ui.totalmem
+        #if true, then need to adjust maximum usage for these users to the total memory possible
+        #print "mem_by_users > totalmem: ",sum(indx),"  indx: ",indx,"  mem_by_users: ",mem_by_users_sorted
+        mem_by_users_sorted=[self.ui.totalmem if x>self.ui.totalmem else x for x in mem_by_users_sorted]
     
     
     p=[] #list to contain plot objects for use by the legend   
     ind=np.arange(2)
-    
-    
+    #print "**************"
+    #print mem_by_users_sorted[0:Nshow]
     for u in range(Nshow):
         if u == 0:
             p.append(plt.bar(ind,(cpu_by_users_sorted[u],mem_by_users_sorted[u]),width,bottom=(0,0),color=colors[u]))
         else:
             p.append(plt.bar(ind,(cpu_by_users_sorted[u],mem_by_users_sorted[u]),width,bottom=(sum(cpu_by_users_sorted[0:u]),sum(mem_by_users_sorted[0:u])),color=colors[u]))
     
-    plt.title('CPU and Memory Usage by User',fontsize=10,fontweight='bold')
+    plt.title('Usage by User',fontsize=config.pltFont+1,fontweight='bold')
     
     #remove default yaxis ticks then redraw them via ax1 and ax2 below
     frame=plt.gca()
     frame.axes.get_yaxis().set_ticks([])
-    plt.xticks(np.arange(2)+width/2.,('CPU','Mem'),fontsize=9,fontweight='bold')
-    ymaxCPU=round(int((sum(cpu_by_users_sorted[0:Nshow])+100)/100)*100)
-    ymaxMEM=round(int((sum(mem_by_users_sorted[0:Nshow])+100)/100)*100)
-    ymax=max([ymaxCPU,ymaxMEM,100])
-#    plt.ylim([0,ymax])
+    plt.xticks(np.arange(2)+width/2.,('CPU','Mem'),fontsize=config.pltFont,fontweight='bold')
+    ymaxCPU=int((sum(cpu_by_users_sorted)+100)/100)*100    #range ymaxCPU to nearest 100%
+    ymaxMEM=int(round(sum(mem_by_users_sorted)+10))/10*10  #range ymaxMEM to nearest 10%
+    
+    ymaxMAX=max([ymaxCPU,ymaxMEM,100])
+
+    if sortBy == 'cpu':
+        ymax=max([ymaxCPU,10])
+        auto=False
+    elif sortBy == 'mem':
+        ymax=max([ymaxMEM,10])
+        auto=False
+    elif sortBy == 'max':
+        ymax=max([ymaxMAX,10])
+        auto=True
+#    print 'ymaxCPU: ',ymaxCPU,'  ymaxMEM: ',ymaxMEM,'  ymaxMAX: ',ymaxMAX,'  ymax: ',ymax,' sum(mem_by_users_sorted): ',sum(mem_by_users_sorted)
+    plt.ylim(0,ymax,auto=auto)
+    
+
     
     #compute composite %
-    ylab=np.arange(6)/5.0*float(ymax)/float(self.ui.Ncpus)
-    ylab=ylab*10
+    sumCPU=sum(cpu_by_users_sorted)
+    ylab=np.arange(5)/4.0*float(sumCPU)/float(self.ui.Ncpus)
+    scl=float(ymax)/float(sumCPU)
+    ylab=ylab*100*scl
     tmp=ylab.astype('int')
     tmp1=tmp.astype('float')
-    tmp1=tmp1/10
+    tmp1=tmp1/100
     ylab1=tmp1
     
     ax1=plt.twinx()
-    ax1.set_ylabel('Composite CPU Percent',fontsize=9,fontweight='bold')
+    ax1.set_ylabel('Composite CPU Percent',fontsize=config.pltFont,fontweight='bold')
     ax1.yaxis.set_ticks_position('left')
     ax1.yaxis.set_label_position('left')
+    ax1.set_ybound(lower=0,upper=max(ylab1))
     ax1.set_yticks(ylab1)
     
+#    print 'ylab1: ',ylab1
+    
+    #place warnings if MEM or CPU go out of range
+    if ymax < ymaxCPU:
+        plt.text(2.7,0.0,'CPU Above Axis',color='red')
+    if ymax < ymaxMEM:
+        plt.text(2.7,0.0,'MEM Above Axis',color='green')    
+        
     usersLegend=users_unique_sorted[0:Nshow]
     #reverse legend print order to have legend correspond with the order data are placed in the bar chart
     usersLegend.reverse()
     p.reverse()
-    plt.legend(p,usersLegend)
-
-    
+    #place legend outside of plot to the right
+    plt.legend(p,usersLegend,bbox_to_anchor=(1.45, 1.1), loc="upper left", borderaxespad=0.1,fontsize=config.pltFont-0.5,title='Users')
+        
     #place second y axis label on plot
     ylab2=np.arange(5)/4.0*float(ymax)
     ax2=plt.twinx()
-    ax2.set_ylabel('Percent',fontsize=9,fontweight='bold')
+    ax2.set_ylabel('Percent',fontsize=config.pltFont,fontweight='bold',position=(0.9,0.5))
     ax2.set_yticks(ylab2)
     #ax2.set_yticks(ylab2)
     ax2.yaxis.set_ticks_position('right')
