@@ -65,6 +65,9 @@
 
 #include <algorithm>
 
+namespace{
+  const char * globalOptionName = "Global";
+}
 
 namespace MantidQt
 {
@@ -130,7 +133,7 @@ void FunctionBrowser::createBrowser()
   QStringList options;
   if ( m_multiDataset )
   {
-    options << "Global";
+    options << globalOptionName;
   }
 
   m_browser = new QtTreePropertyBrowser(NULL,options);
@@ -387,7 +390,7 @@ FunctionBrowser::AProperty FunctionBrowser::addParameterProperty(QtProperty* par
   m_parameterManager->setValue(prop,paramValue);
   if ( m_multiDataset )
   {
-    prop->setOption("Global",false);
+    prop->setOption(globalOptionName,false);
   }
   return addProperty(parent,prop);
 }
@@ -735,6 +738,22 @@ FunctionBrowser::AProperty FunctionBrowser::getFunctionProperty()
   return m_properties[prop];
 }
 
+/**
+ * Get a list of names of global parameters
+ */
+QStringList FunctionBrowser::getGlobalParameters() const
+{
+  QStringList out;
+  for(auto propIt = m_properties.begin(); propIt != m_properties.end(); ++propIt)
+  {
+    QtProperty *prop = propIt->prop;
+    if ( prop->hasOption(globalOptionName) && prop->checkOption(globalOptionName) )
+    {
+      out << getIndex(prop) + prop->propertyName();
+    }
+  }
+  return out;
+}
 
 /**
  * Check if property is a function group
@@ -746,7 +765,7 @@ bool FunctionBrowser::isFunction(QtProperty* prop) const
 }
 
 /**
- * Check if property is a function attribute
+ * Check if property is any of the string attributes
  * @param prop :: Property to check
  */
 bool FunctionBrowser::isStringAttribute(QtProperty* prop) const

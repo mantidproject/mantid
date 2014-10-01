@@ -93,6 +93,8 @@ public:
   QString getFunctionString();
   /// Return the function
   Mantid::API::IFunction_sptr getFunction(QtProperty* prop = NULL, bool attributesOnly = false);
+  /// Get a list of names of global parameters
+  QStringList getGlobalParameters() const;
 
   /// Return a function with specified index
   Mantid::API::IFunction_sptr getFunctionByIndex(const QString& index);

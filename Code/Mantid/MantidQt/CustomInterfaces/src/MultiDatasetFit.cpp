@@ -1,6 +1,8 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit.h"
 #include "MantidQtMantidWidgets/FunctionBrowser.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 
@@ -326,6 +328,7 @@ void MultiDatasetFit::initLayout()
   connect(m_uiForm.btnAddWorkspace,SIGNAL(clicked()),this,SLOT(addWorkspace()));
   connect(m_uiForm.btnRemove,SIGNAL(clicked()),this,SLOT(removeSelectedSpectra()));
   connect(m_uiForm.dataTable,SIGNAL(itemSelectionChanged()), this,SLOT(workspaceSelectionChanged()));
+  connect(m_uiForm.btnFit,SIGNAL(clicked()),this,SLOT(fit()));
 
   m_plotController = new PlotController(this,
                                         m_uiForm.plot,
@@ -334,7 +337,8 @@ void MultiDatasetFit::initLayout()
                                         m_uiForm.btnPrev,
                                         m_uiForm.btnNext);
 
-  m_uiForm.browserLayout->addWidget( new MantidQt::MantidWidgets::FunctionBrowser(NULL, true) );
+  m_functionBrowser = new MantidQt::MantidWidgets::FunctionBrowser(NULL, true);
+  m_uiForm.browserLayout->addWidget( m_functionBrowser );
 }
 
 /**
@@ -414,6 +418,81 @@ void MultiDatasetFit::removeSelectedSpectra()
     m_uiForm.dataTable->removeRow( *row );
   }
   emit dataTableUpdated();
+}
+
+/**
+ * Create a multi-domain function to fit all the spectra in the data table.
+ */
+boost::shared_ptr<Mantid::API::IFunction> MultiDatasetFit::createFunction() const
+{
+  // number of spectra to fit == size of the multi-domain function
+  size_t nOfDataSets = static_cast<size_t>( m_uiForm.dataTable->rowCount() );
+  if ( nOfDataSets == 0 )
+  {
+    throw std::runtime_error("There are no data sets specified.");
+  }
+
+  // description of a single function
+  QString funStr = m_functionBrowser->getFunctionString();
+
+  if ( nOfDataSets == 1 )
+  {
+    return Mantid::API::FunctionFactory::Instance().createInitialized( funStr.toStdString() );
+  }
+
+  QString multiFunStr = "composite=MultiDomainFunction,NumDeriv=1";
+  funStr = ";(" + funStr + ")";
+  for(size_t i = 0; i < nOfDataSets; ++i)
+  {
+    multiFunStr += funStr;
+  }
+
+  QStringList globals = m_functionBrowser->getGlobalParameters();
+  QString globalTies;
+  if ( !globals.isEmpty() )
+  {
+    globalTies = "ties=(";
+    bool isFirst = true;
+    foreach(QString par, globals)
+    {
+      if ( !isFirst ) globalTies += ",";
+      else
+        isFirst = false;
+
+      for(size_t i = 1; i < nOfDataSets; ++i)
+      {
+        globalTies += QString("f%1.").arg(i) + par + "=";
+      }
+      globalTies += QString("f0.%1").arg(par);
+    }
+    globalTies += ")";
+    multiFunStr += ";" + globalTies;
+  }
+  std::cerr << globalTies.toStdString() << std::endl;
+
+  // create the multi-domain function
+  auto fun = Mantid::API::FunctionFactory::Instance().createInitialized( multiFunStr.toStdString() );
+  boost::shared_ptr<Mantid::API::MultiDomainFunction> multiFun = boost::dynamic_pointer_cast<Mantid::API::MultiDomainFunction>( fun );
+  if ( !multiFun )
+  {
+    throw std::runtime_error("Failed to create the MultiDomainFunction");
+  }
+  
+  // set the domain indices
+  for(size_t i = 0; i < nOfDataSets; ++i)
+  {
+    multiFun->setDomainIndex(i,i);
+  }
+  assert( multiFun->nFunctions() == nOfDataSets );
+  return fun;
+}
+
+/**
+ * Run the fitting algorithm.
+ */
+void MultiDatasetFit::fit()
+{
+  std::cerr << createFunction()->asString() << std::endl;
 }
 
 /*==========================================================================================*/
