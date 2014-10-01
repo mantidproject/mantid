@@ -45,9 +45,9 @@ std::pair<Kernel::IntMatrix, V3R> SymmetryOperationSymbolParser::parseIdentifier
         std::pair<Kernel::IntMatrix, V3R> matrixVector = parseComponents(components);
 
         return matrixVector;
-    } catch(std::runtime_error e1) {
+    } catch(const std::runtime_error &e1) {
         throw Kernel::Exception::ParseError("Error in parsing symbol " + identifier + ":\n" + std::string(e1.what()), "", 0);
-    } catch(boost::bad_lexical_cast e2) {
+    } catch(const boost::bad_lexical_cast &e2) {
         throw Kernel::Exception::ParseError("Error in parsing symbol " + identifier + ":\n" + std::string(e2.what()), "", 0);
     }
 }
