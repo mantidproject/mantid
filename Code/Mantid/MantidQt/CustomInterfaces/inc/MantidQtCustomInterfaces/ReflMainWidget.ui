@@ -421,6 +421,41 @@
     </item>
    </layout>
   </widget>
+  <action name="actionNewTable">
+   <property name="text">
+    <string>New Table</string>
+   </property>
+  </action>
+  <action name="actionSaveTable">
+   <property name="text">
+    <string>Save Table</string>
+   </property>
+  </action>
+  <action name="actionSaveTableAs">
+   <property name="text">
+    <string>Save Table As</string>
+   </property>
+  </action>
+  <action name="actionAddRow">
+   <property name="text">
+    <string>Add Row</string>
+   </property>
+  </action>
+  <action name="actionDeleteRow">
+   <property name="text">
+    <string>Delete Row</string>
+   </property>
+  </action>
+  <action name="actionGroupRows">
+   <property name="text">
+    <string>Group Rows</string>
+   </property>
+  </action>
+  <action name="actionProcess">
+   <property name="text">
+    <string>Process</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -436,5 +471,48 @@
   <tabstop>buttonProcess</tabstop>
  </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>buttonNew</sender>
+   <signal>clicked()</signal>
+   <receiver>actionNewTable</receiver>
+   <slot>trigger()</slot>
+  </connection>
+  <connection>
+   <sender>buttonAddRow</sender>
+   <signal>clicked()</signal>
+   <receiver>actionAddRow</receiver>
+   <slot>trigger()</slot>
+  </connection>
+  <connection>
+   <sender>buttonDeleteRow</sender>
+   <signal>clicked()</signal>
+   <receiver>actionDeleteRow</receiver>
+   <slot>trigger()</slot>
+  </connection>
+  <connection>
+   <sender>buttonGroupRows</sender>
+   <signal>clicked()</signal>
+   <receiver>actionGroupRows</receiver>
+   <slot>trigger()</slot>
+  </connection>
+  <connection>
+   <sender>buttonProcess</sender>
+   <signal>clicked()</signal>
+   <receiver>actionProcess</receiver>
+   <slot>trigger()</slot>
+  </connection>
+  <connection>
+   <sender>buttonSave</sender>
+   <signal>clicked()</signal>
+   <receiver>actionSaveTable</receiver>
+   <slot>trigger()</slot>
+  </connection>
+  <connection>
+   <sender>buttonSaveAs</sender>
+   <signal>clicked()</signal>
+   <receiver>actionSaveTableAs</receiver>
+   <slot>trigger()</slot>
+  </connection>
+ </connections>
 </ui>

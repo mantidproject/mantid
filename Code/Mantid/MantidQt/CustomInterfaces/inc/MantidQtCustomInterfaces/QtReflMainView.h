@@ -78,12 +78,12 @@ namespace MantidQt
     private slots:
       void setModel(QString name);
       void setNew();
-      void saveButton();
-      void saveAsButton();
-      void addRowButton();
-      void deleteRowButton();
-      void processButton();
-      void groupRowsButton();
+      void actionSave();
+      void actionSaveAs();
+      void actionAddRow();
+      void actionDeleteRow();
+      void actionProcess();
+      void actionGroupRows();
     };
 
 
