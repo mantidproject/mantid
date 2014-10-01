@@ -92,6 +92,10 @@ void LoadParameterFile::exec()
   DOMParser pParser;
   AutoPtr<Document> pDoc;
 
+  //Progress reporting object
+  Progress prog(this, 0.0, 1.0, 100);
+
+  prog.report("Parsing XML");
   //If we've been given an XML string parse that instead
   if(!parameterXMLProperty->isDefault())
   {
@@ -133,11 +137,13 @@ void LoadParameterFile::exec()
 
   // Set all parameters that specified in all component-link elements of pRootElem
   InstrumentDefinitionParser loadInstr;
-  loadInstr.setComponentLinks(instrument, pRootElem);
+  loadInstr.setComponentLinks(instrument, pRootElem, &prog);
 
   // populate parameter map of workspace 
   localWorkspace->populateInstrumentParameters();
 
+  prog.resetNumSteps(1, 0.0, 1.0);
+  prog.report("Done");
 }
 
 } // namespace DataHandling

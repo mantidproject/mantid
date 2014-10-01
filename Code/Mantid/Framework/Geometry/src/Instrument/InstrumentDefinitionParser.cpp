@@ -1930,7 +1930,7 @@ namespace Geometry
   *  @param instrument :: Instrument
   *  @param pRootElem ::  Associated Poco::XML element that may contain \<component-link\> elements
   */
-  void InstrumentDefinitionParser::setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pRootElem)
+  void InstrumentDefinitionParser::setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pRootElem, Kernel::ProgressBase* progress)
   {
     Poco::AutoPtr<NodeList> pNL_link = pRootElem->getElementsByTagName("component-link");
     unsigned long numberLinks = pNL_link->length();
@@ -1944,10 +1944,18 @@ namespace Geometry
       if ( unit_it->second == "radian" )
         m_angleConvertConst = 180.0/M_PI;
 
+    if(progress)
+      progress->resetNumSteps((int64_t)numberLinks, 0.0, 1.0);
 
     // Loop over all component-link elements of pRootElem
     for (unsigned long iLink = 0; iLink < numberLinks; iLink++)
     {
+      if(progress)
+      {
+        if(progress->hasCancellationBeenRequested())
+          return;
+        progress->report("Loading parameters");
+      }
       Element* pLinkElem = static_cast<Element*>(pNL_link->item(iLink));
       std::string id = pLinkElem->getAttribute("id");
       std::string name = pLinkElem->getAttribute("name");

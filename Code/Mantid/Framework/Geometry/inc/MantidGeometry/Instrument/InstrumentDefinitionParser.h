@@ -78,7 +78,7 @@ namespace Geometry
     boost::shared_ptr<Instrument> parseXML(Kernel::ProgressBase * prog);
 
     /// Add/overwrite any parameters specified in instrument with param values specified in <component-link> XML elements
-    void setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pElem);
+    void setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pElem, Kernel::ProgressBase* progress = NULL);
 
     std::string getMangledName();
 
