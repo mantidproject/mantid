@@ -368,7 +368,5 @@ V3R operator *(const Kernel::IntMatrix &lhs, const V3R &rhs)
     return result;
 }
 
-
-
 } // namespace Geometry
 } // namespace Mantid

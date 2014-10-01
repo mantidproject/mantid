@@ -46,7 +46,7 @@ SymmetryOperation::SymmetryOperation(const std::pair<Kernel::IntMatrix, V3R> &da
 SymmetryOperation::SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R &vector) :
     m_order(0),
     m_matrix(matrix),
-    m_vector(vector),
+    m_vector(getWrappedVector(vector)),
     m_identifier()
 {
     m_order = getOrderFromMatrix(m_matrix);
@@ -153,22 +153,7 @@ bool SymmetryOperation::operator !=(const SymmetryOperation &other) const
     return !(this->operator ==(other));
 }
 
-/// Returns a vector on the interval (0, 1]
-V3R SymmetryOperation::getWrappedVector(const V3R &vector) const
-{
-    V3R wrappedVector(vector);
-    for(size_t i = 0; i < 3; ++i) {
-        if(wrappedVector[i] < 0) {
-            wrappedVector[i] += 1;
-        } else if(wrappedVector[i] >= 1) {
-            wrappedVector[i] -= 1;
-        }
-    }
-
-    return wrappedVector;
-}
-
-/// Returns the order of the symmetry operation based on the matrix. From Introduction to Crystal Growth and Characterization, Benz and Neumann, Wiley, 2014, p. 51.
+/// Returns the order of the symmetry operation based on the matrix. From "Introduction to Crystal Growth and Characterization, Benz and Neumann, Wiley, 2014, p. 51."
 size_t SymmetryOperation::getOrderFromMatrix(const Kernel::IntMatrix &matrix) const
 {
     int trace = matrix.Trace();
@@ -207,6 +192,46 @@ size_t SymmetryOperation::getOrderFromMatrix(const Kernel::IntMatrix &matrix) co
     }
 
     throw std::runtime_error("There is something wrong with supplied matrix.");
+}
+
+/**
+ * Wraps a V3R to the interval (0, 1]
+ *
+ * For certain crystallographic calculations it is necessary to constrain fractional
+ * coordinates to the unit cell, for example to generate all atomic positions
+ * in the cell. In this context, the fractional coordinate -0.45 is equal to
+ * "0.55 of the next cell", so it's transformed to 0.55.
+ *
+ * @param vector :: Input vector with arbitrary numbers.
+ * @return Vector with components on the interval (0, 1]
+ */
+V3R getWrappedVector(const V3R &vector)
+{
+    V3R wrappedVector(vector);
+    for(size_t i = 0; i < 3; ++i) {
+        if(wrappedVector[i] < 0) {
+            wrappedVector[i] += (abs(vector[i].numerator() / vector[i].denominator()) + 1);
+        } else if(wrappedVector[i] >= 1) {
+            wrappedVector[i] -= (vector[i].numerator() / vector[i].denominator());
+        }
+    }
+
+    return wrappedVector;
+}
+
+/// Returns a V3D with components on the interval (0, 1], as the version for V3R.
+Kernel::V3D getWrappedVector(const Kernel::V3D &vector)
+{
+    Kernel::V3D wrappedVector(vector);
+    for(size_t i = 0; i < 3; ++i) {
+        if(wrappedVector[i] < 0) {
+            wrappedVector[i] = fmod(vector[i], 1.0) + 1.0;
+        } else if(wrappedVector[i] >= 1) {
+            wrappedVector[i] = fmod(vector[i], 1.0);
+        }
+    }
+
+    return wrappedVector;
 }
 
 

@@ -57,13 +57,16 @@ namespace Geometry
         V3D hklPrime = inversion * V3D(1, 1, -1); // results in -1, -1, 1
 
     The operator is templated and works for any object Kernel::IntMatrix can be
-    multiplied with and V3R can be added to (for example V3R, V3D, std::vector<int>).
+    multiplied with and V3R can be added to (for example V3R, V3D).
 
     A special case is the multiplication of several symmetry operations, which can
     be used to generate new operations:
 
         SymmetryOperation inversion("-x,-y,-z");
         SymmetryOperation identity = inversion * inversion;
+
+    Please note that the components of the vector are wrapped to
+    the interval (0, 1] when two symmetry operations are combined.
 
     Constructing a SymmetryOperation object from a string is heavy, because the string
     has to be parsed every time. It's preferable to use the available factory:
@@ -124,6 +127,7 @@ public:
     bool isIdentity() const;
     bool hasTranslation() const;
 
+    /// Returns the transformed vector.
     template<typename T>
     T operator *(const T &operand) const
     {
@@ -143,7 +147,6 @@ protected:
     SymmetryOperation(const std::pair<Kernel::IntMatrix, V3R> &data);
     SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R &vector);
 
-    V3R getWrappedVector(const V3R &vector) const;
     size_t getOrderFromMatrix(const Kernel::IntMatrix &matrix) const;
 
 
@@ -152,6 +155,9 @@ protected:
     V3R m_vector;
     std::string m_identifier;
 };
+
+MANTID_GEOMETRY_DLL V3R getWrappedVector(const V3R &vector);
+MANTID_GEOMETRY_DLL Kernel::V3D getWrappedVector(const Kernel::V3D &vector);
 
 
 } // namespace Geometry

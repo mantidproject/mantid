@@ -47,17 +47,138 @@ public:
         m_allHkl.push_back(m_h00);
     }
 
-    void testGetWrappedVector()
+    void testDefaultConstructor()
     {
-        TestableSymmetryOperation symOp;
+        SymmetryOperation symOp;
+        TS_ASSERT(symOp.isIdentity());
+        TS_ASSERT(!symOp.hasTranslation())
+        TS_ASSERT_EQUALS(symOp.order(), 1);
+        TS_ASSERT_EQUALS(symOp.identifier(), "x,y,z");
+
+        V3D hkl(1, 1, 1);
+        TS_ASSERT_EQUALS(symOp * hkl, hkl);
+    }
+
+    void testStringConstructor()
+    {
+        SymmetryOperation inversion("-x,-y,-z");
+
+        TS_ASSERT(!inversion.isIdentity());
+        TS_ASSERT(!inversion.hasTranslation());
+        TS_ASSERT_EQUALS(inversion.order(), 2);
+        TS_ASSERT_EQUALS(inversion.identifier(), "-x,-y,-z");
+
+        V3D hkl(1, 1, 1);
+        TS_ASSERT_EQUALS(inversion * hkl, hkl * -1.0);
+
+        // translational components are wrapped to the unit cell
+        SymmetryOperation screw21z("-x,-y,z+3/2");
+        TS_ASSERT_EQUALS(screw21z.identifier(), "-x,-y,z+1/2");
+    }
+
+    void testCopyConstructor()
+    {
+        SymmetryOperation inversion("-x,-y,-z");
+        SymmetryOperation anotherInversion(inversion);
+
+        TS_ASSERT_EQUALS(inversion, anotherInversion);
+        TS_ASSERT_EQUALS(inversion.order(), anotherInversion.order());
+        TS_ASSERT_EQUALS(inversion.identifier(), anotherInversion.identifier());
+    }
+
+    void testIsIdentity()
+    {
+        SymmetryOperation identity;
+        TS_ASSERT(identity.isIdentity());
+
+        SymmetryOperation inversion("-x,-y,-z");
+        TS_ASSERT(!inversion.isIdentity());
+
+        SymmetryOperation screw21z("-x,-y,z+1/2");
+        TS_ASSERT(!screw21z.isIdentity());
+
+        SymmetryOperation shift("x+1/2,y+1/2,z+1/2");
+        TS_ASSERT(!shift.isIdentity());
+    }
+
+    void testHasTranslation()
+    {
+        SymmetryOperation identity;
+        TS_ASSERT(!identity.hasTranslation());
+
+        SymmetryOperation inversion("-x,-y,-z");
+        TS_ASSERT(!inversion.hasTranslation());
+
+        SymmetryOperation screw21z("-x,-y,z+1/2");
+        TS_ASSERT(screw21z.hasTranslation());
+
+        SymmetryOperation shift("x+1/2,y+1/2,z+1/2");
+        TS_ASSERT(shift.hasTranslation());
+    }
+
+    void testMultiplicationOperator()
+    {
+        SymmetryOperation inversion("-x,-y,-z");
+
+        V3D hklDouble(1.0, 1.0, 1.0);
+        V3D hklDoubleReferenceInversion(-1.0, -1.0, -1.0);
+        TS_ASSERT_EQUALS(inversion * hklDouble, hklDoubleReferenceInversion);
+
+        V3R hklRational(1, 1, 1);
+        V3R hklRationalReferenceInversion(-1, -1, -1);
+        TS_ASSERT_EQUALS(inversion * hklRational, hklRationalReferenceInversion);
+
+        SymmetryOperation screw21z("-x,-y,z+1/2");
+
+        V3D coordinates(0.35, 0.45, 0.75);
+        V3D coordinatesReference(-0.35, -0.45, 1.25);
+
+        TS_ASSERT_EQUALS(screw21z * coordinates, coordinatesReference);
+    }
+
+    void testMultiplicationOperatorSymmetryOperation()
+    {
+        SymmetryOperation screw21z("-x,-y,z+1/2");
+        SymmetryOperation identity;
+
+        // should be identity, since 1/2 + 1/2 = 1 => 0
+        TS_ASSERT_EQUALS(screw21z * screw21z, identity);
+    }
+
+    void testGetWrappedVectorV3R()
+    {
         V3R one = V3R(1, 1, 1) / 2;
-        TS_ASSERT_EQUALS(one, symOp.getWrappedVector(one));
+        TS_ASSERT_EQUALS(one, getWrappedVector(one));
 
         V3R two = one + 1;
-        TS_ASSERT_EQUALS(one, symOp.getWrappedVector(two));
+        TS_ASSERT_EQUALS(one, getWrappedVector(two));
 
         V3R three = one - 1;
-        TS_ASSERT_EQUALS(one, symOp.getWrappedVector(three));
+        TS_ASSERT_EQUALS(one, getWrappedVector(three));
+
+        V3R four = one - 10;
+        TS_ASSERT_EQUALS(one, getWrappedVector(four));
+
+        V3R five = one + 10;
+        TS_ASSERT_EQUALS(one, getWrappedVector(five));
+    }
+
+    void testGetWrappedVectorV3D()
+    {
+        V3D one = V3D(0.5, 0.5, 0.5);
+        TS_ASSERT_EQUALS(one, getWrappedVector(one));
+
+        V3D two = one + V3D(1.0, 1.0, 1.0);
+        TS_ASSERT_EQUALS(one, getWrappedVector(two));
+
+        V3D three = one + V3D(1.0, 1.0, 1.0);
+        TS_ASSERT_EQUALS(one, getWrappedVector(three));
+
+        V3D four = one + V3D(10.0, 10.0, 10.0);
+        TS_ASSERT_EQUALS(one, getWrappedVector(four));
+
+        V3D five = one + V3D(10.0, 10.0, 10.0);
+        TS_ASSERT_EQUALS(one, getWrappedVector(five));
     }
 
     void testGetOrderFromComponents()
@@ -81,8 +202,6 @@ public:
         TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param4.first), 4);
 
         // check that random matrices don't work
-        V3R null;
-
         Mantid::Kernel::IntMatrix randMatrix(3, 3, false);
 
         for(int i = 1; i < 10; ++i) {
