@@ -11,31 +11,31 @@ Description
 
 The generic routine used to reduce diffraction runs from indirect inelastic geometry instruments at ISIS.
 
-.. Usage
-.. -----
+Usage
+-----
 
-.. **Example - Running MSGDiffractionReduction.**
+**Example - Running MSGDiffractionReduction.**
 
-.. .. testcode:: ExMSGDiffractionReductionSimple
+.. testcode:: ExMSGDiffractionReductionSimple
 
-..     MSGDiffractionReduction(InputFiles='IRS21360.raw',
-..                             OutputWorkspaceGroup='DiffOut',
-..                             Instrument='IRIS',
-..                             Mode='diffspec',
-..                             DetectorRange=[105,112])
+    MSGDiffractionReduction(InputFiles='IRS21360.raw',
+                            OutputWorkspaceGroup='DiffOut',
+                            Instrument='IRIS',
+                            Mode='diffspec',
+                            DetectorRange=[105,112])
 
-..     ws = mtd['DiffOut'].getItem(0)
+    ws = mtd['DiffOut'].getItem(0)
 
-..     print 'Workspace name: %s' % ws.getName()
-..     print 'Number of spectra: %d' % ws.getNumberHistograms()
-..     print 'Number of bins: %s' % ws.blocksize()
+    print 'Workspace name: %s' % ws.getName()
+    print 'Number of spectra: %d' % ws.getNumberHistograms()
+    print 'Number of bins: %s' % ws.blocksize()
 
-.. Output:
+Output:
 
-.. .. testoutput:: ExMSGDiffractionReductionSimple
+.. testoutput:: ExMSGDiffractionReductionSimple
 
-..     Workspace name: irs21360_diffspec_red
-..     Number of spectra: 1
-..     Number of bins: 1935
+    Workspace name: irs21360_diffspec_red
+    Number of spectra: 1
+    Number of bins: 1935
 
 .. categories::
