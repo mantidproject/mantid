@@ -144,8 +144,9 @@ public:
     bool operator ==(const SymmetryOperation &other) const;
 
 protected:
-    SymmetryOperation(const std::pair<Kernel::IntMatrix, V3R> &data);
     SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R &vector);
+
+    void init(const Kernel::IntMatrix &matrix, const V3R &vector);
 
     size_t getOrderFromMatrix(const Kernel::IntMatrix &matrix) const;
 

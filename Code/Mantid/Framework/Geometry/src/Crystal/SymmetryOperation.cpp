@@ -29,28 +29,16 @@ SymmetryOperation::SymmetryOperation() :
  *
  * @param identifier :: Jones faithful representation of a symmetry operation
  */
-SymmetryOperation::SymmetryOperation(const std::string &identifier) :
-    SymmetryOperation(SymmetryOperationSymbolParser::parseIdentifier(identifier))
+SymmetryOperation::SymmetryOperation(const std::string &identifier)
 {
-
-}
-
-/// Constructs a symmetry operation from a matrix/vector pair returned by the parser.
-SymmetryOperation::SymmetryOperation(const std::pair<Kernel::IntMatrix, V3R> &data) :
-    SymmetryOperation(data.first, data.second)
-{
-
+    const std::pair<Kernel::IntMatrix, V3R> parsedSymbol = SymmetryOperationSymbolParser::parseIdentifier(identifier);
+    init(parsedSymbol.first, parsedSymbol.second);
 }
 
 /// Constructs a symmetry operation from a matrix component and a vector, derives order and identifier from matrix and vector.
-SymmetryOperation::SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R &vector) :
-    m_order(0),
-    m_matrix(matrix),
-    m_vector(getWrappedVector(vector)),
-    m_identifier()
+SymmetryOperation::SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R &vector)
 {
-    m_order = getOrderFromMatrix(m_matrix);
-    m_identifier = SymmetryOperationSymbolParser::getNormalizedIdentifier(m_matrix, m_vector);
+    init(matrix, vector);
 }
 
 /// Copy-constructor
@@ -72,6 +60,16 @@ SymmetryOperation &SymmetryOperation::operator =(const SymmetryOperation &other)
     m_identifier = other.m_identifier;
 
     return *this;
+}
+
+/// Initialize from matrix and vector.
+void SymmetryOperation::init(const Kernel::IntMatrix &matrix, const V3R &vector)
+{
+    m_matrix = matrix;
+    m_vector = getWrappedVector(vector);
+
+    m_order = getOrderFromMatrix(m_matrix);
+    m_identifier = SymmetryOperationSymbolParser::getNormalizedIdentifier(m_matrix, m_vector);
 }
 
 /// Returns a const reference to the internally stored matrix
