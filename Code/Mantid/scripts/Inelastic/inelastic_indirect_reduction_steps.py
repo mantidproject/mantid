@@ -1115,8 +1115,24 @@ class Naming(ReductionStep):
         if workspace == '':
             return ''
         ws = mtd[workspace]
-        ins = ws.getInstrument().getName()
-        ins = config.getFacility().instrument(ins).shortName().lower()
+        inst = ws.getInstrument().getName()
+
+        short_name = ''
+        try:
+            short_name = config.getFacility().instrument(inst).shortName().lower()
+        except RuntimeError:
+            original_facility = config['default.facility']
+            for facility in config.getFacilities():
+                config['default.facility'] = facility.name()
+                try:
+                    short_name = config.getFacility().instrument(inst).shortName().lower()
+                except RuntimeError:
+                    pass
+            config['default.facility'] = original_facility
+
+        if short_name == '':
+            raise RuntimeError('Cannot find instrument "%s" in any facility' % str(inst))
+
         run = ws.getRun().getLogData('run_number').value
         if self._multi_run:
             run += '_multi'
@@ -1126,5 +1142,5 @@ class Naming(ReductionStep):
         except IndexError:
             analyser = ''
             reflection = ''
-        prefix = ins + run + '_' + analyser + reflection + '_red'
+        prefix = inst + run + '_' + analyser + reflection + '_red'
         return prefix
