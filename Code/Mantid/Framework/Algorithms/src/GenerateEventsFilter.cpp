@@ -277,10 +277,8 @@ namespace Algorithms
 
     // Obtain run time range
     DateAndTime runstarttime = m_dataWS->run().startTime();
-    /// FIXME Use this simple method may miss the events in the last pulse
-    Kernel::TimeSeriesProperty<double>* protonchargelog =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_dataWS->run().getProperty("proton_charge"));
-    Kernel::DateAndTime runendtime = protonchargelog->lastTime();
+
+    m_runEndTime = findRunEnd();
 
     // Obtain time unit converter
     std::string timeunit = this->getProperty("UnitOfTime");
@@ -298,7 +296,7 @@ namespace Algorithms
     else if (timeunit.compare("Percent") == 0)
     {
       // (percent of total run time)
-      int64_t runtime_ns = runendtime.totalNanoseconds()-runstarttime.totalNanoseconds();
+      int64_t runtime_ns = m_runEndTime.totalNanoseconds()-runstarttime.totalNanoseconds();
       double runtimed_ns = static_cast<double>(runtime_ns);
       m_timeUnitConvertFactorToNS = 0.01*runtimed_ns;
     }
@@ -339,7 +337,7 @@ namespace Algorithms
     if (defaultstop)
     {
       // Default
-      m_stopTime = runendtime;
+      m_stopTime = m_runEndTime;
     }
     else if (instringformat)
     {
@@ -365,7 +363,7 @@ namespace Algorithms
 
     g_log.information() << "Filter: StartTime = " << m_startTime << ", StopTime = " << m_stopTime
                         << "; Run start = " << runstarttime.toISO8601String()
-                        << ", Run stop = " << runendtime.toISO8601String() << "\n";
+                        << ", Run stop = " << m_runEndTime.toISO8601String() << "\n";
 
     return;
   }
@@ -382,6 +380,9 @@ namespace Algorithms
 
     // Progress
     int64_t totaltime = m_stopTime.totalNanoseconds()-m_startTime.totalNanoseconds();
+
+    g_log.warning() << "Filter by time: start @ " << m_startTime.totalNanoseconds() << "; "
+                    << "stop @ " << m_stopTime.totalNanoseconds() << "\n";
 
     if (singleslot)
     {
@@ -452,15 +453,17 @@ namespace Algorithms
       throw runtime_error(errmsg.str());
     }
 
-    //  Clear duplicate value
+    //  Clear duplicate value and extend to run end
     if (m_dblLog)
     {
       g_log.debug("Attempting to remove duplicates in double series log.");
+      m_dblLog->addValue(m_runEndTime, 0.);
       m_dblLog->eliminateDuplicates();
     }
     else
     {
       g_log.debug("Attempting to remove duplicates in integer series log.");
+      m_intLog->addValue(m_runEndTime, 0);
       m_intLog->eliminateDuplicates();
     }
 
@@ -1864,6 +1867,83 @@ namespace Algorithms
     }
 
     return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Find run end time.  Here is how the run end time is defined ranked from highest priority
+    * 1. Run.endTime()
+    * 2. Last proton charge log time
+    * 3. Last event time
+    * In order to consider the events in the last pulse,
+    * 1. if proton charge does exist, then run end time will be extended by 1 pulse time
+    * 2. otherwise, extended by 0.1 second (10 Hz)
+    * Exception: None of the 3 conditions is found to determine run end time
+    */
+  DateAndTime GenerateEventsFilter::findRunEnd()
+  {
+    // Try to get the run end from Run object
+    DateAndTime runendtime(0);
+    bool norunendset = false;
+    try
+    {
+      runendtime = m_dataWS->run().endTime();
+    }
+    catch (std::runtime_error err)
+    {
+      norunendset = true;
+    }
+
+    g_log.debug() << "Check point 1 " << "Run end time = " << runendtime << ", no run end set = "
+                  << norunendset << "\n";
+
+    int64_t extended_ns = static_cast<int64_t>(1.0E8);
+    if (m_dataWS->run().hasProperty("proton_charge"))
+    {
+      // Get last proton charge time and compare with run end time
+      Kernel::TimeSeriesProperty<double>* protonchargelog =
+          dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_dataWS->run().getProperty("proton_charge"));
+
+      if (protonchargelog->size() > 1)
+      {
+        Kernel::DateAndTime tmpendtime = protonchargelog->lastTime();
+        extended_ns = protonchargelog->nthTime(1).totalNanoseconds() - protonchargelog->nthTime(0).totalNanoseconds();
+        if (tmpendtime > runendtime)
+        {
+          // Use the last proton charge time
+          runendtime = tmpendtime;
+        }
+        norunendset = false;
+      }
+
+      g_log.debug() << "Check point 2A " << " run end time = " << runendtime << "\n";
+    }
+    else if (norunendset && m_dataWS->getNumberEvents() > 0)
+    {
+      // No proton_charge or run_end: sort events and find the last event
+      norunendset = false;
+
+      for (size_t i = 0; i < m_dataWS->getNumberHistograms(); ++i)
+      {
+        const DataObjects::EventList& evlist = m_dataWS->getEventList(i);
+        if (evlist.getNumberEvents() > 0)
+        {
+          // If event list is empty, the returned value may not make any sense
+          DateAndTime lastpulse = evlist.getPulseTimeMax();
+          if (lastpulse > runendtime)
+            runendtime = lastpulse;
+        }
+      }
+      g_log.warning() << "Check point 2B " << " run end time = " << runendtime << "\n";
+    }
+
+    // Check whether run end time is set
+    if (norunendset)
+      throw runtime_error("Run end time cannot be determined. ");
+
+    // Add 1 second to make sure that no event left behind either last pulse time or last event time
+    runendtime = DateAndTime(runendtime.totalNanoseconds() + extended_ns);
+
+    return runendtime;
   }
 
 } // namespace Mantid
