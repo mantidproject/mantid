@@ -545,6 +545,23 @@ namespace DataObjects
       detPos = det->getPos();
       return true;
     }
+    /*else  //fix for gaps between tubes
+    {
+    	beam = beam + V3D(0.00065,0.00065,0.00065);
+        tracker.traceFromSample(beam);
+        IDetector_const_sptr det1 = tracker.getDetectorResult();
+    	beam = beam + V3D(-0.00065,-0.00065,-0.00065);
+        tracker.traceFromSample(beam);
+        IDetector_const_sptr det2 = tracker.getDetectorResult();
+        if (det1 && det2)
+        {
+          // Set the detector ID, the row, col, etc.
+          this->setDetectorID(static_cast<int>((det1->getID()+det1->getID())*0.5));;
+          // The old detector position is not more precise if it comes from FindPeaksMD
+          detPos = (det1->getPos() + det2->getPos())*0.5;
+          return true;
+        }
+    }*/
     return false;
   }
 
