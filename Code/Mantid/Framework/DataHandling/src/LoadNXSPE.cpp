@@ -2,10 +2,12 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectraAxis.h"
 
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 #include "MantidNexus/NexusClasses.h"
+
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -46,7 +48,7 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
 
   /**
-   * Return the confidence with with this algorithm can load the file
+   * Return the confidence with this algorithm can load the file
    * @param descriptor A descriptor for the file
    * @returns An integer specifying the confidence level. 0 indicates it will not be used
    */
@@ -94,7 +96,7 @@ namespace DataHandling
   void LoadNXSPE::exec()
   {
     std::string filename = getProperty("Filename");
-    //quicly check if it's really nxspe
+    //quickly check if it's really nxspe
     try
     {
       ::NeXus::File file(filename);
@@ -244,6 +246,8 @@ namespace DataHandling
     // Need to get hold of the parameter map
     Geometry::ParameterMap& pmap = outputWS->instrumentParameters();
     outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
+    outputWS->setYUnit("SpectraNumber");
+
     std::vector<double>::iterator itdata=data.begin(),iterror=error.begin(),itdataend,iterrorend;
     API::Progress prog = API::Progress(this, 0.0, 0.9, numSpectra);
     for (std::size_t i=0; i<numSpectra; ++i)
