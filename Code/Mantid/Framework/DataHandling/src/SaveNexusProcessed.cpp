@@ -525,7 +525,8 @@ namespace Mantid
     bool append_to_file = this->getProperty("Append");
     if (!append_to_file)
     {
-      Poco::File file(m_filename);
+      const std::string filename = getPropertyValue("Filename");
+      Poco::File file(filename);
       if (file.exists())
       {
         file.remove();
