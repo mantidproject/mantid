@@ -246,13 +246,17 @@ namespace MantidQt
         Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_ANGLE), theta);
 
       Workspace_sptr runWS = loadRun(run, m_view->getProcessInstrument());
-      MatrixWorkspace_sptr transWS = makeTransWS(transStr);
       const std::string runNo = getRunNumber(runWS);
+
+      MatrixWorkspace_sptr transWS;
+      if(!transStr.empty())
+        transWS = makeTransWS(transStr);
 
       IAlgorithm_sptr algReflOne = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
       algReflOne->initialize();
       algReflOne->setProperty("InputWorkspace", runWS);
-      algReflOne->setProperty("FirstTransmissionRun", transWS);
+      if(transWS)
+        algReflOne->setProperty("FirstTransmissionRun", transWS);
       algReflOne->setProperty("OutputWorkspace", "IvsQ_" + runNo);
       algReflOne->setProperty("OutputWorkspaceWaveLength", "IvsLam_" + runNo);
       algReflOne->setProperty("ThetaIn", theta);
