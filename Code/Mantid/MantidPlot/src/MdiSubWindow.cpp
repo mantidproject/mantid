@@ -552,7 +552,10 @@ void MdiSubWindow::resize(int w, int h)
 {
   QWidget* pw = getWrapperWindow();
   if(pw)
-    pw->resize(w,h);
+  {
+    setGeometry(x(), y(), w, h);
+    pw->adjustSize();
+  }
 }
 
 /**
@@ -562,5 +565,13 @@ void MdiSubWindow::resize(const QSize& size)
 {
   QWidget* pw = getWrapperWindow();
   if(pw)
-    pw->resize(size);
+  {
+    setGeometry(pw->x(), pw->y(), size.width(), size.height());
+    pw->adjustSize();
+  }
+}
+
+QSize MdiSubWindow::sizeHint() const
+{
+  return size();
 }

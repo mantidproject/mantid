@@ -227,6 +227,7 @@ public slots:
   void show();
   void resize(int w, int h);
   void resize(const QSize& size);
+  QSize sizeHint() const;
 
   /// Focus on the window
   void setFocus();
