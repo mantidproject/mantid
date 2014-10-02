@@ -80,6 +80,7 @@ class DensityOfStates(PythonAlgorithm):
                     self._compute_partial(ions, frequencies, eigenvectors, weights)
                     mtd[self._ws_name].setYUnit('(D/A)^2/amu')
                     mtd[self._ws_name].setYUnitLabel('Intensity')
+                    SetSampleMaterial(InputWorkspace=self._ws_name, ChemicalFormula=ion_name)
 
                     partial_ws_name = self._ws_name + '_' + ion_name
                     partial_workspaces.append(partial_ws_name)
@@ -176,6 +177,7 @@ class DensityOfStates(PythonAlgorithm):
         This uses the eigenvectors in a .phonon file to calculate
         the partial density of states.
 
+        @param ion_numbers - list of ion number to use in calculation
         @param frequencies - frequencies read from file
         @param eigenvectors - eigenvectors read from file
         @param weights - weights for each frequency block
