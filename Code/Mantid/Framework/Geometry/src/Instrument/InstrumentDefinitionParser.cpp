@@ -1929,6 +1929,7 @@ namespace Geometry
   *
   *  @param instrument :: Instrument
   *  @param pRootElem ::  Associated Poco::XML element that may contain \<component-link\> elements
+  *  @param progress :: Optional progress object for reporting progress to an algorithm
   */
   void InstrumentDefinitionParser::setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pRootElem, Kernel::ProgressBase* progress)
   {
