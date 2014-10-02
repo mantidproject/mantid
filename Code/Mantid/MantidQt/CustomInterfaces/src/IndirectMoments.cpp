@@ -67,7 +67,12 @@ namespace CustomInterfaces
     connect(m_rangeSelectors["MomentsRangeSelector"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
 
+    // Update the preview plot when the algorithm completes
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(momentsAlgComplete(bool)));
+
+    // Events that will update the preview plot
+    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePreviewPlot()));
+    connect(m_uiForm.moment_dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(updatePreviewPlot(const QString&)));
 
     m_uiForm.moment_validScale->setStyleSheet("QLabel { color : #aa0000; }");
   }
@@ -86,7 +91,7 @@ namespace CustomInterfaces
   void IndirectMoments::run()
   {
     QString workspaceName = m_uiForm.moment_dsInput->getCurrentDataName();
-    QString outputName = workspaceName.left(workspaceName.length()-4);
+    QString outputName = workspaceName.left(workspaceName.length() - 4);
     QString scaleString = m_uiForm.moment_leScale->text();
     double scale = 1.0;
     double eMin = m_dblManager->value(m_properties["EMin"]);
@@ -96,7 +101,7 @@ namespace CustomInterfaces
     bool verbose = m_uiForm.moment_ckVerbose->isChecked();
     bool save = m_uiForm.moment_ckSave->isChecked();
 
-    if (!scaleString.isEmpty())
+    if(!scaleString.isEmpty())
       scale = scaleString.toDouble();
 
     std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
@@ -137,10 +142,14 @@ namespace CustomInterfaces
 
   void IndirectMoments::handleSampleInputReady(const QString& filename)
   {
+    disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePreviewPlot()));
+
     plotMiniPlot(filename, 0, "MomentsPlot", "MomentsPlotCurve");
     std::pair<double,double> range = getCurveRange("MomentsPlotCurve");
     setMiniPlotGuides("MomentsRangeSelector", m_properties["EMin"], m_properties["EMax"], range);
     setPlotRange("MomentsRangeSelector", m_properties["EMin"], m_properties["EMax"], range);
+
+    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePreviewPlot()));
   }
 
   /**
@@ -163,7 +172,7 @@ namespace CustomInterfaces
     m_dblManager->setValue(m_properties["EMax"], max);  
   }
 
-   /**
+  /**
    * Handles when properties in the property manager are updated.
    *
    * @param prop :: The property being updated
@@ -200,9 +209,11 @@ namespace CustomInterfaces
   /**
    * Runs the moments algorithm with preview properties.
    */
-  void IndirectMoments::updatePreviewPlot()
+  void IndirectMoments::updatePreviewPlot(QString workspaceName)
   {
-    QString workspaceName = m_uiForm.moment_dsInput->getCurrentDataName();
+    if(workspaceName.isEmpty())
+      workspaceName = m_uiForm.moment_dsInput->getCurrentDataName();
+
     QString outputName = workspaceName.left(workspaceName.length() - 4);
     QString scaleString = m_uiForm.moment_leScale->text();
     double scale = 1.0;
@@ -256,13 +267,11 @@ namespace CustomInterfaces
     plotMiniPlot(QString::fromStdString(resultWsNames[2]), 0, "MomentsPreviewPlot", "Moments_M2");
     plotMiniPlot(QString::fromStdString(resultWsNames[3]), 0, "MomentsPreviewPlot", "Moments_M4");
 
-    // Colour plots as per plot option
+    // Colour plots as close to plot output as possible
     m_curves["Moments_M0"]->setPen(QColor(Qt::green));
     m_curves["Moments_M2"]->setPen(QColor(Qt::black));
     m_curves["Moments_M4"]->setPen(QColor(Qt::red));
 
-    // Set X range to data range
-    /* setXAxisToCurve("PreviewPlot", ""); */
     m_plots["MomentsPreviewPlot"]->replot();
   }
 
