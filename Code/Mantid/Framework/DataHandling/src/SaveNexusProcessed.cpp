@@ -32,6 +32,8 @@ namespace Mantid
     using namespace DataObjects;
     using Geometry::Instrument_const_sptr;
 
+    typedef NeXus::NexusFileIO::optional_size_t optional_size_t;
+
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(SaveNexusProcessed)
 
@@ -158,7 +160,7 @@ namespace Mantid
     }
 
     void SaveNexusProcessed::doExec(Workspace_sptr inputWorkspace,
-        Mantid::NeXus::NexusFileIO_sptr& nexusFile, const bool keepFile)
+        Mantid::NeXus::NexusFileIO_sptr& nexusFile, const bool keepFile, optional_size_t entryNumber)
     {
       //TODO: Remove?
       NXMEnableErrorReporting();
@@ -234,7 +236,7 @@ namespace Mantid
       }
 
       nexusFile->resetProgress(&prog_init);
-      nexusFile->openNexusWrite(m_filename);
+      nexusFile->openNexusWrite(m_filename, entryNumber);
 
       // Equivalent C++ API handle
       ::NeXus::File * cppFile = new ::NeXus::File(nexusFile->fileID);
@@ -540,7 +542,7 @@ namespace Mantid
       for (size_t entry = 0; entry < m_groupSize; entry++)
       {
         Workspace_sptr ws = thisGroup[entry];
-        this->doExec(ws, nexusFile, true /*keepFile*/);
+        this->doExec(ws, nexusFile, true /*keepFile*/, entry);
         std::stringstream buffer;
         buffer << "Saving group index " << entry;
         m_log.information(buffer.str());

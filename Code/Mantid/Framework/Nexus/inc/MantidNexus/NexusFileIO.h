@@ -14,6 +14,7 @@
 #include <limits.h>
 #include <nexus/NeXusFile.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
 
 namespace Mantid
 {
@@ -52,7 +53,11 @@ namespace Mantid
     */
     class DLLExport NexusFileIO
     {
+
     public:
+      // Helper typedef
+      typedef boost::optional<size_t> optional_size_t;
+
       /// Default constructor
       NexusFileIO();
 
@@ -63,7 +68,7 @@ namespace Mantid
       ~NexusFileIO();
 
       /// open the nexus file for writing
-      void openNexusWrite(const std::string& fileName);
+      void openNexusWrite(const std::string& fileName, optional_size_t entryNumber = optional_size_t());
       /// write the header ifon for the Mantid workspace format
       int writeNexusProcessedHeader( const std::string& title, const std::string& wsName="") const;
       /// close the nexus file

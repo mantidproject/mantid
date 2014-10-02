@@ -88,7 +88,7 @@ namespace Mantid
     //   </NXprocess>
     // </NXentry>
 
-    void NexusFileIO::openNexusWrite(const std::string& fileName)
+    void NexusFileIO::openNexusWrite(const std::string& fileName, NexusFileIO::optional_size_t entryNumber)
     {
       // open named file and entry - file may exist
       // @throw Exception::FileError if cannot open Nexus file for writing
@@ -134,7 +134,18 @@ namespace Mantid
       //
       if (mode == NXACC_RDWR)
       {
-        int count = findMantidWSEntries();
+        size_t count = 0;
+        if( entryNumber.is_initialized() )
+        {
+          // Use the entry number provided.
+          count = entryNumber.get();
+        }
+        else
+        {
+          // Have to figure it our ourselves. Requires opening the exisitng file to get the information via a search.
+          count = findMantidWSEntries();
+        }
+
         std::stringstream suffix;
         suffix << (count + 1);
         mantidEntryName = "mantid_workspace_" + suffix.str();

@@ -86,7 +86,8 @@ namespace Mantid
       /// sets non workspace properties for the algorithm
       void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
       /// execute the algorithm.
-      void doExec(Mantid::API::Workspace_sptr workspace, Mantid::NeXus::NexusFileIO_sptr& nexusFile,  const bool keepFile=false);
+      void doExec(Mantid::API::Workspace_sptr workspace, Mantid::NeXus::NexusFileIO_sptr& nexusFile,
+          const bool keepFile=false, NeXus::NexusFileIO::optional_size_t entryNumber = NeXus::NexusFileIO::optional_size_t());
       
       /// The name and path of the input file
       std::string m_filename;
