@@ -1094,6 +1094,10 @@ namespace Algorithms
     height = vecY[i_min] - (bg0 + bg1*tmpx + bg2*tmpx*tmpx);
     double lowest = height;
 
+    // Extreme case
+    if (i_max == vecY.size())
+        i_max = i_max - 1;
+
     // Searching
     for (size_t i = i_min+1; i <= i_max; ++i)
     {

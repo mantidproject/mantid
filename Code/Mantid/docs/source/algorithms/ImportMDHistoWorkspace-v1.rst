@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm takes a text file (.txt extension) containing two columns
-and converts it into an `MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`_.
+and converts it into an :ref:`MDHistoWorkspace <MDHistoWorkspace>`.
 
 Details
 #######

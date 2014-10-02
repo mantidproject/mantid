@@ -59,6 +59,18 @@ using namespace MantidQt::API;
 // Name of the QSettings group to store the InstrumentWindw settings
 const char* InstrumentWindowSettingsGroup = "Mantid/InstrumentWindow";
 
+namespace {
+  /**
+   * Exception type thrown when an istrument has no sample and cannot be displayed in the instrument view.
+   */
+  class InstrumentHasNoSampleError: public std::runtime_error
+  {
+  public:
+    InstrumentHasNoSampleError():std::runtime_error("Instrument has no sample.\nSource and sample need to be set in the IDF."){}
+  };
+
+}
+
 /**
  * Constructor.
  */
@@ -332,6 +344,10 @@ void InstrumentWindow::setSurfaceType(int type)
     {
         Mantid::Geometry::Instrument_const_sptr instr = m_instrumentActor->getInstrument();
         Mantid::Geometry::IComponent_const_sptr sample = instr->getSample();
+        if ( !sample )
+        {
+          throw InstrumentHasNoSampleError();
+        }
         Mantid::Kernel::V3D sample_pos = sample->getPos();
         Mantid::Kernel::V3D axis;
         // define the axis
@@ -369,6 +385,11 @@ void InstrumentWindow::setSurfaceType(int type)
         {
             surface = new PanelsSurface(m_instrumentActor,sample_pos,axis);
         }
+    }
+    catch(InstrumentHasNoSampleError&)
+    {
+      QApplication::restoreOverrideCursor();
+      throw;
     }
     catch(std::exception &e)
     {
@@ -704,12 +725,17 @@ void InstrumentWindow::saveSettings()
   settings.beginGroup("Mantid/InstrumentWindow");
   if ( m_InstrumentDisplay )
     settings.setValue("BackgroundColor", m_InstrumentDisplay->currentBackgroundColor());
-  settings.setValue("PeakLabelPrecision",getSurface()->getPeakLabelPrecision());
-  settings.setValue("ShowPeakRows",getSurface()->getShowPeakRowsFlag());
-  settings.setValue("ShowPeakLabels",getSurface()->getShowPeakLabelsFlag());
-  foreach(InstrumentWindowTab* tab, m_tabs)
+  auto surface = getSurface();
+  if ( surface )
   {
-      tab->saveSettings(settings);
+    // if surface is null istrument view wasn't created and there is nothing to save
+    settings.setValue("PeakLabelPrecision",getSurface()->getPeakLabelPrecision());
+    settings.setValue("ShowPeakRows",getSurface()->getShowPeakRowsFlag());
+    settings.setValue("ShowPeakLabels",getSurface()->getShowPeakLabelsFlag());
+    foreach(InstrumentWindowTab* tab, m_tabs)
+    {
+        tab->saveSettings(settings);
+    }
   }
   settings.endGroup();
 }

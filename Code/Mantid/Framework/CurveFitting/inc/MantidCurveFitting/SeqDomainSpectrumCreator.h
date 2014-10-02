@@ -42,9 +42,7 @@ namespace CurveFitting
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-using namespace API;
-
-class DLLExport SeqDomainSpectrumCreator : public IDomainCreator
+class DLLExport SeqDomainSpectrumCreator : public API::IDomainCreator
 {
 public:
     SeqDomainSpectrumCreator(Kernel::IPropertyManager* manager,
@@ -52,23 +50,23 @@ public:
 
     virtual ~SeqDomainSpectrumCreator() { }
 
-    virtual void createDomain(boost::shared_ptr<FunctionDomain> &domain,
-                              boost::shared_ptr<FunctionValues> &values,
+    virtual void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
+                              boost::shared_ptr<API::FunctionValues> &values,
                               size_t i0 = 0);
 
-    virtual Workspace_sptr createOutputWorkspace(const std::string &baseName,
-                                       IFunction_sptr function,
-                                       boost::shared_ptr<FunctionDomain> domain,
-                                       boost::shared_ptr<FunctionValues> values,
+    virtual API::Workspace_sptr createOutputWorkspace(const std::string &baseName,
+                                       API::IFunction_sptr function,
+                                       boost::shared_ptr<API::FunctionDomain> domain,
+                                       boost::shared_ptr<API::FunctionValues> values,
                                        const std::string &outputWorkspacePropertyName = "OutputWorkspace");
     virtual size_t getDomainSize() const;
 
 protected:
     void setParametersFromPropertyManager();
-    void setMatrixWorkspace(MatrixWorkspace_sptr matrixWorkspace);
+    void setMatrixWorkspace(API::MatrixWorkspace_sptr matrixWorkspace);
 
     std::string m_workspacePropertyName;
-    MatrixWorkspace_sptr m_matrixWorkspace;
+    API::MatrixWorkspace_sptr m_matrixWorkspace;
 };
 
 

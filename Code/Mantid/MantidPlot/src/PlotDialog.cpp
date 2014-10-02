@@ -536,10 +536,17 @@ void PlotDialog::initLayerPage()
   boxBkgLayout->addWidget(new QLabel(tr("Border Color")), 2, 0);
   boxBorderColor = new ColorButton();
   boxBkgLayout->addWidget(boxBorderColor, 2, 1);
-
   boxBkgLayout->addWidget(new QLabel(tr("Width")), 2, 2);
   boxBorderWidth = new QSpinBox();
   boxBkgLayout->addWidget(boxBorderWidth, 2, 3);
+  boxBkgLayout->setRowStretch(4, 1);
+
+  boxBkgLayout->addWidget(new QLabel(tr("Canvas Frame Color")), 3, 0);
+  boxCanvasFrameColor = new ColorButton();
+  boxBkgLayout->addWidget(boxCanvasFrameColor, 3, 1);
+  boxBkgLayout->addWidget(new QLabel(tr("Width")), 3, 2);
+  boxCanvasFrameWidth = new QSpinBox();
+  boxBkgLayout->addWidget(boxCanvasFrameWidth, 3, 3);
   boxBkgLayout->setRowStretch(4, 1);
 
   QGroupBox * box4 = new QGroupBox(QString());
@@ -1828,6 +1835,9 @@ void PlotDialog::setActiveLayer(LayerItem *item)
   boxCanvasTransparency->blockSignals(false);
   boxBorderWidth->blockSignals(false);
 
+  boxCanvasFrameColor->setColor(g->canvasFrameColor());
+  boxCanvasFrameWidth->setValue(g->canvasFrameWidth());
+
   boxX->setValue(g->pos().x());
   boxY->setValue(g->pos().y());
 
@@ -2221,6 +2231,9 @@ bool PlotDialog::acceptParams()
         g->setCanvasBackground(c);
 
         g->setAntialiasing(boxAntialiasing->isChecked());
+
+        //Canvas frame
+        g->setCanvasFrame(boxCanvasFrameWidth->value(), boxCanvasFrameColor->color());
       }
     }
     else
@@ -2248,6 +2261,8 @@ bool PlotDialog::acceptParams()
         g->setAntialiasing(boxAntialiasing->isChecked());
         //Margin
         g->setMargin(boxMargin->value());
+        //Canvas frame
+        g->setCanvasFrame(boxCanvasFrameWidth->value(), boxCanvasFrameColor->color());
       }
     }
     return true;

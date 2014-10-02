@@ -54,7 +54,7 @@ namespace IDA
 
   public:
     /// The name of the interface as registered into the factory
-    static std::string name() { return "Indirect Data Analysis"; }
+    static std::string name() { return "Data Analysis"; }
     // This interface's categories.
     static QString categoryInfo() { return "Indirect"; }
     /// Default Constructor

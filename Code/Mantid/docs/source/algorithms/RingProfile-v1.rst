@@ -12,7 +12,7 @@ Description
 RingProfile sums the counts against a ring.
 
 Below, there is an example of the execution of the RingProfile to a
-`Workspace2D <http://www.mantidproject.org/Workspace2D>`_ where the position of the pixels are not
+:ref:`Workspace2D <Workspace2D>` where the position of the pixels are not
 associated to detector positions, but it is derived from the
 `Axes <Interacting_with_Matrix_Workspaces#Axes>`__.
 

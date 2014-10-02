@@ -9,11 +9,14 @@ set ( TEST_PY_FILES
   CreateLeBailFitInputTest.py
   CreateWorkspaceTest.py
   DakotaChiSquaredTest.py
+  DensityOfStatesTest.py
   DSFinterpTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   GetEiT0atSNSTest.py
   IndirectILLReductionTest.py
+  IndirectTransmissionTest.py
+  IndirectTransmissionMonitorTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
@@ -27,6 +30,9 @@ set ( TEST_PY_FILES
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py
+  SaveVulcanGSSTest.py
+  SortByQVectorsTest.py
+  SofQWMomentsTest.py
   SortDetectorsTest.py
   SortXAxisTest.py
   Stitch1DManyTest.py

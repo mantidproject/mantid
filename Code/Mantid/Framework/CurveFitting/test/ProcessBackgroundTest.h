@@ -272,6 +272,7 @@ public:
     alg.setProperty("BackgroundTableWorkspace", functablews);
 
     alg.setProperty("OutputBackgroundParameterWorkspace", "OutBackgroundParameters");
+    alg.setProperty("UserBackgroundWorkspace", "VisualWS");
     alg.setProperty("OutputBackgroundType", "Chebyshev");
     alg.setProperty("OutputBackgroundOrder", 6);
 

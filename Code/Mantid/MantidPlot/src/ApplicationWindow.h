@@ -1246,6 +1246,9 @@ public:
   //! default precision to be used for all other operations than fitting
   int d_decimal_digits;
 
+  //! precision to use when displaying values relating to plots
+  int d_graphing_digits;
+
   //! pointer to the current folder in the project
   Folder *d_current_folder;
   //! pointer to the folder marked current in the last loaded project
@@ -1298,7 +1301,7 @@ public:
   QFont appFont, plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
   QFont tableTextFont, tableHeaderFont, plotAxesFont, plotLegendFont, plotNumbersFont, plotTitleFont;
   QColor tableBkgdColor, tableTextColor, tableHeaderColor;
-  QString projectname,columnSeparator, helpFilePath, appLanguage;
+  QString projectname, columnSeparator, helpFilePath, appLanguage;
   QString configFilePath, fitPluginsPath, fitModelsPath, asciiDirPath, imagesDirPath, scriptsDirPath;
   int ignoredLines, savingTimerId, plot3DResolution, recentMenuID;
   bool renameColumns, strip_spaces, simplify_spaces;

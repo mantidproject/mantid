@@ -10,7 +10,7 @@ Description
 -----------
 
 The `Vesuvio <http://www.isis.stfc.ac.uk/instruments/vesuvio/vesuvio4837.html>`__ instrument at ISIS produces
-`RAW <http://www.mantidproject.org/RAW_File>` files in the standard format. However, due to the unique design
+`RAW <http://www.mantidproject.org/Raw File>` files in the standard format. However, due to the unique design
 of the instrument the raw counts from the input files must be manipulated before they are considered useful.
 
 This algorithm wraps calls to :ref:`LoadRaw <algm-LoadRaw>` and computes the counts (:math:`\mu s^{-1}`) using the

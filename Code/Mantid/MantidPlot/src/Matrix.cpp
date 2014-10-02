@@ -659,6 +659,8 @@ void Matrix::pasteSelection()
     d_matrix_model->pasteData(clipboardBuffer, topRow, leftCol, rows, cols);
     emit modifiedWindow(this);
   }
+
+  free(clipboardBuffer);
 }
 
 void Matrix::cutSelection()

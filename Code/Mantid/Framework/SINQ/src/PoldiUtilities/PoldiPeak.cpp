@@ -7,6 +7,11 @@
 namespace Mantid {
 namespace Poldi {
 
+PoldiPeak_sptr PoldiPeak::clone() const
+{
+    return PoldiPeak_sptr(new PoldiPeak(*this));
+}
+
 const MillerIndices &PoldiPeak::hkl() const
 {
     return m_hkl;
@@ -132,6 +137,11 @@ PoldiPeak_sptr PoldiPeak::create(UncertainValue qValue, UncertainValue intensity
 PoldiPeak_sptr PoldiPeak::create(double qValue, double intensity)
 {
     return PoldiPeak::create(UncertainValue(qValue), UncertainValue(intensity));
+}
+
+PoldiPeak_sptr PoldiPeak::create(MillerIndices hkl, double dValue)
+{
+    return PoldiPeak_sptr(new PoldiPeak(UncertainValue(dValue), UncertainValue(0.0), UncertainValue(0.0), hkl));
 }
 
 PoldiPeak_sptr PoldiPeak::create(MillerIndices hkl, UncertainValue dValue, UncertainValue intensity, UncertainValue fwhmRelative)

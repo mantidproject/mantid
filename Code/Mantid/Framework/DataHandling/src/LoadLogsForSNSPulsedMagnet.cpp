@@ -241,6 +241,9 @@ struct Pulse
 
     g_log.debug() << "Integration is Over!\n";
 
+    // Clean memory
+    delete[] property;
+
     return;
   }
 

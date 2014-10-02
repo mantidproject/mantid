@@ -5,7 +5,7 @@ import unittest
 import time
 from PyQt4 import QtCore, QtGui
 
-        
+
 # Import the Mantid framework
 from mantid.simpleapi import *
 import mantidqtpython
@@ -19,11 +19,11 @@ app = QtGui.QApplication(sys.argv)
 class SliceViewerPythonInterfaceTest(unittest.TestCase):
     """Test for accessing SliceViewer widgets from MantidPlot
     python interpreter"""
-    
+
     def setUp(self):
         """ Set up and create a SliceViewer widget """
         # Create a test data set
-        CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z', 
+        CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',
             Units='m,m,m',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='mdw')
         FakeMDEventData("mdw",  UniformParams="1e4")
         FakeMDEventData("mdw",  PeakParams="1e3, 1, 2, 3, 1.0")
@@ -35,16 +35,16 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         # Retrieve the SliceViewer widget alone.
         self.sv = self.svw.getSlicer()
         pass
-    
+
     def setUpXML(self):
         """Special set up for the XML version """
-        CreateMDWorkspace(Dimensions='3',Extents='-15,15, -15,15, -15,15',Names='Q_lab_x,Q_lab_y,Q_lab_z', 
+        CreateMDWorkspace(Dimensions='3',Extents='-15,15, -15,15, -15,15',Names='Q_lab_x,Q_lab_y,Q_lab_z',
             Units='m,m,m',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='TOPAZ_3680')
-        CreateMDWorkspace(Dimensions='4',Extents='-15,15, -15,15, -15,15, -10, 100',Names='Q_x,Q_y,Q_z,E', 
+        CreateMDWorkspace(Dimensions='4',Extents='-15,15, -15,15, -15,15, -10, 100',Names='Q_x,Q_y,Q_z,E',
             Units='A,A,A,meV',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='WS_4D')
         FakeMDEventData("TOPAZ_3680",  UniformParams="1e4")
         FakeMDEventData("WS_4D",  UniformParams="1e4")
-        
+
         self.xml_3d = """<MDInstruction><MDWorkspaceName>TOPAZ_3680</MDWorkspaceName>
 <DimensionSet>
     <Dimension ID="Q_lab_x"><Name>Q_lab_x</Name><Units>Angstroms^-1</Units><UpperBounds>15.0000</UpperBounds><LowerBounds>-15.0000</LowerBounds><NumberOfBins>10</NumberOfBins></Dimension>
@@ -79,7 +79,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
 </ParameterList></Function></MDInstruction>"""
 
 
-    
+
     def tearDown(self):
         """ Close the created widget """
         # This is crucial! Forces the object to be deleted NOW, not when python exits
@@ -90,7 +90,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         QtCore.QTimer.singleShot(0, app, QtCore.SLOT("quit()"))
         # This is required for deleteLater() to do anything (it deletes at the next event loop)
         app.quitOnLastWindowClosed = True
-       	app.exec_()
+        app.exec_()
 
 
     #==========================================================================
@@ -99,24 +99,24 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
 
     def test_setWorkspace(self):
         sv = self.sv
-        assert (sv is not None) 
-    
+        assert (sv is not None)
+
     def test_getWorkspace(self):
         sv = self.sv
         self.assertEqual(sv.getWorkspaceName(), "uniform")
         assert (sv is not None)
-        
+
     def test_setWorkspace_MDEventWorkspace(self):
         sv = self.sv
         sv.setWorkspace('mdw')
-    
+
     def test_setWorkspace_throwsOnBadInputs(self):
         sv = self.sv
         #sv.setWorkspace('workspace2d')
         self.assertRaises(StdRuntimeError, sv.setWorkspace, '')
         self.assertRaises(StdRuntimeError, sv.setWorkspace, 'non_existent_workspace')
         self.assertRaises(StdRuntimeError, sv.setWorkspace, 'workspace2d')
-    
+
     #==========================================================================
     #======================= XML Tests ========================================
     #==========================================================================
@@ -131,7 +131,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual(sv.getDimY(), 2)
         self.assertAlmostEqual( sv.getSlicePoint(0), 4.84211, 3)
         pass
-    
+
     def test_openFromXML_4D(self):
         sv = self.sv
         self.setUpXML()
@@ -144,7 +144,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual(sv.getDimY(), 3) # Energy is Y
         self.assertAlmostEqual( sv.getSlicePoint(1), 1.234, 3) # Slice point in Q_y
         self.assertAlmostEqual( sv.getSlicePoint(2), 4.567, 3) # Slice point in Q_z
-        
+
     def test_openFromXML_3D_binned(self):
         sv = self.sv
         self.setUpXML()
@@ -159,7 +159,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual(sv.getDimY(), 2)
         self.assertAlmostEqual( sv.getSlicePoint(0), 4.84211, 3)
         pass
-    
+
 
     #==========================================================================
     #======================= Setting Dimensions, etc ==========================
@@ -171,19 +171,19 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual( sv.getDimY(), 2, "Y dimension was set")
         #sv.show()
         #app.exec_()
-        
+
     def test_setXYDim_strings(self):
         sv = self.sv
         sv.setXYDim("x", "z")
         self.assertEqual( sv.getDimX(), 0, "X dimension was set")
         self.assertEqual( sv.getDimY(), 2, "Y dimension was set")
-        
+
     def test_setXYDim_strings_throwsOnBadInputs(self):
         sv = self.sv
         self.assertRaises(StdRuntimeError, sv.setXYDim, "monkey", "y")
         self.assertRaises(StdRuntimeError, sv.setXYDim, "x", "monkey")
-        
-            
+
+
     def test_setXYDim_throwsOnBadInputs(self):
         sv = self.sv
         self.assertRaises(StdInvalidArgument, sv.setXYDim, -1, 0)
@@ -191,7 +191,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertRaises(StdInvalidArgument, sv.setXYDim, 0, -1)
         self.assertRaises(StdInvalidArgument, sv.setXYDim, 0, 3)
         self.assertRaises(StdInvalidArgument, sv.setXYDim, 0, 0)
-        
+
     def test_setSlicePoint(self):
         sv = self.sv
         # Set the slice point and got back the value?
@@ -203,27 +203,27 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         # Go to too big a value
         sv.setSlicePoint(2, 22.3)
         self.assertAlmostEqual( sv.getSlicePoint(2), 10.0, 2)
-        
+
     def test_setSlicePoint_strings(self):
         sv = self.sv
         sv.setSlicePoint("z", 7.6)
         self.assertAlmostEqual( sv.getSlicePoint("z"), 7.6, 2)
-        
+
     def test_setSlicePoint_strings_throwsOnBadInputs(self):
         sv = self.sv
         self.assertRaises(StdRuntimeError, sv.setSlicePoint, "monkey", 2.34)
         self.assertRaises(StdRuntimeError, sv.getSlicePoint, "monkey")
-                
+
     def test_setSlicePoint_throwsOnBadInputs(self):
         sv = self.sv
         self.assertRaises(StdInvalidArgument, sv.setSlicePoint, -1, 7.6)
         self.assertRaises(StdInvalidArgument, sv.setSlicePoint, 3, 7.6)
-                    
+
     def test_getSlicePoint_throwsOnBadInputs(self):
         sv = self.sv
         self.assertRaises(StdInvalidArgument, sv.getSlicePoint, -1)
         self.assertRaises(StdInvalidArgument, sv.getSlicePoint, 3)
-        
+
     def test_setXYLimits(self):
         sv = self.sv
         sv.setXYLimits(5,10, 7,8)
@@ -232,7 +232,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual(sv.getYLimits(), [7, 8])
         #sv.show()
         #app.exec_()
-                
+
     def test_zoomBy(self):
         sv = self.sv
         self.assertEqual(sv.getXLimits(), [0, 10])
@@ -245,7 +245,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         sv.zoomBy(0.5)
         self.assertEqual(sv.getXLimits(), [0, 10])
         self.assertEqual(sv.getYLimits(), [0, 10])
-                                
+
     def test_setXYCenter(self):
         sv = self.sv
         self.assertEqual(sv.getXLimits(), [0, 10])
@@ -254,7 +254,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         sv.setXYCenter(2.0, 6.0)
         self.assertEqual(sv.getXLimits(), [-3, 7])
         self.assertEqual(sv.getYLimits(), [1, 11])
-        
+
     def test_resetZoom(self):
         sv = self.sv
         sv.zoomBy(2.0)
@@ -264,7 +264,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         sv.resetZoom()
         self.assertEqual(sv.getXLimits(), [0, 10])
         self.assertEqual(sv.getYLimits(), [0, 10])
-                
+
     #==========================================================================
     #======================= ColorMap and range ===============================
     #==========================================================================
@@ -272,7 +272,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         """ Needs an absolute path - can't readily do unit test """
         sv = self.sv
         #sv.loadColorMap('')
-        
+
     def test_setColorScale(self):
         sv = self.sv
         sv.setColorScale(10, 30, False)
@@ -283,27 +283,27 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual(sv.getColorScaleMin(), 20)
         self.assertEqual(sv.getColorScaleMax(), 1000)
         self.assertEqual(sv.getColorScaleLog(), True)
-                    
+
     def test_setColorScale_throwsOnBadInputs(self):
         sv = self.sv
         self.assertRaises(StdInvalidArgument, sv.setColorScale, 10, 5, False)
         self.assertRaises(StdInvalidArgument, sv.setColorScale, 0, 5, True)
         self.assertRaises(StdInvalidArgument, sv.setColorScale, -3, -1, True)
-                   
+
     def test_setColorScaleAutoFull(self):
         sv = self.sv
         sv.setNormalization(1) # Make sure volume normalization is set
         sv.setColorScaleAutoFull()
         self.assertAlmostEqual(sv.getColorScaleMin(), 27.0, 3)
         self.assertAlmostEqual(sv.getColorScaleMax(), 540.0, 3)
-                   
+
     def test_setColorScaleAutoSlice(self):
         sv = self.sv
         sv.setNormalization(1) # Make sure volume normalization is set
         sv.setColorScaleAutoSlice()
         self.assertAlmostEqual(sv.getColorScaleMin(), 27.0, 3)
         self.assertAlmostEqual(sv.getColorScaleMax(), 81.0, 3)
-                   
+
     def test_setNormalization(self):
         sv = self.sv
         sv.setNormalization(0)
@@ -312,7 +312,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual(sv.getNormalization(), 1)
         sv.setNormalization(2)
         self.assertEqual(sv.getNormalization(), 2)
-            
+
     #==========================================================================
     #======================= Screenshots etc. =================================
     #==========================================================================
@@ -321,11 +321,11 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertTrue(sv.getFastRender(), "Fast rendering mode is TRUE by default")
         sv.setFastRender(False)
         self.assertFalse(sv.getFastRender(), "Fast rendering mode is set to false")
-        
+
     #==========================================================================
     #======================= LineViewer =======================================
     #==========================================================================
-        
+
     def test_make_a_line(self):
         svw = self.svw
         sv = self.sv
@@ -339,7 +339,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual(liner.getNumBins(), 200)
         # Length of 5 with 200 bins = 0.025 width
         self.assertAlmostEqual(liner.getBinWidth(), 0.025, 3)
-    
+
     def test_setThickness(self):
         svw = self.svw
         self.sv.toggleLineMode(True)
@@ -348,8 +348,8 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertAlmostEqual(liner.getPlanarWidth(), 1.5, 3)
         liner.setThickness(2, 0.75)
         # Not yet a method to get the width in any dimension
-        
-                
+
+
     def test_fixedBinWidth(self):
         svw = self.svw
         sv = self.sv
@@ -363,43 +363,43 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         # Length of 5, bin width of 0.025 = 200 bins
         self.assertEqual(liner.getNumBins(), 200)
         self.assertAlmostEqual(liner.getBinWidth(), 0.025, 3)
- 
+
     #Helper method to find the name of the plot's x axis.
     def _getPlotXAxisName(self, lv, ws):
         index = lv.getXAxisDimensionIndex()
         dim = ws.getDimension(index)
         return dim.getName()
- 
+
     def test_mdhistoAutoAxisAssignmentWhenNoIntegration(self):
         CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='A,B,C',Units='A,A,A',OutputWorkspace='original')
         FakeMDEventData(InputWorkspace='original',UniformParams='10000',PeakParams='10000,2,2,2,1',RandomizeSignal='1')
         #Note that all axis have 10 bins below.
         SliceMD(InputWorkspace='original',AlignedDim0='A,0,10,10',AlignedDim1='B,0,10,10',AlignedDim2='C,0,10,10',OutputWorkspace='binned_ws')
         binned_ws = mtd['binned_ws']
-        
+
         sv = self.sv
         sv.setWorkspace('binned_ws')
         sv.setXYDim("A","B")
-        
+
         #should toggle to 'A' axis as that is now the longest
         lv = self.svw.getLiner()
         lv.setStartXY(0, 0)
         lv.setEndXY(10,5)
         self.assertEquals("A", self._getPlotXAxisName(lv, binned_ws))
-        
+
         #should toggle to 'B' axis as that is now the longest
         lv.setStartXY(0, 0)
         lv.setEndXY(5,10)
         self.assertEquals("B", self._getPlotXAxisName(lv, binned_ws))
 
-        
+
     def test_mdhistoAutoAxisAssignmentWhenAnAxisIsIntegrated(self):
         CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='A,B,C',Units='A,A,A',OutputWorkspace='original')
         FakeMDEventData(InputWorkspace='original',UniformParams='10000',PeakParams='10000,2,2,2,1',RandomizeSignal='1')
         #Note that the 'A' axis is now integrated (see call below)
         SliceMD(InputWorkspace='original',AlignedDim0='A,0,10,1',AlignedDim1='B,0,10,10',AlignedDim2='C,0,10,10',OutputWorkspace='binned_ws')
         binned_ws = mtd['binned_ws']
-        
+
         sv = self.sv
         sv.setWorkspace('binned_ws')
         sv.setXYDim("A","B")
@@ -408,7 +408,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         lv.setStartXY(0, 0)
         lv.setEndXY(10,5)
         self.assertEquals("B", self._getPlotXAxisName(lv, binned_ws))
-        
+
         #should toggle to 'B' axis as that is now the longest and also because 'A' is integrated.
         lv.setStartXY(0, 0)
         lv.setEndXY(5,10)
@@ -419,7 +419,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         FakeMDEventData(InputWorkspace='original',UniformParams='10000',PeakParams='10000,2,2,2,1',RandomizeSignal='1')
         #Effectively all axis will be 'integrated', nbins = 1 because this workspace is not histogrammed. Plotting functionality should now ignore integration checking on axis to autoplot.
         original = mtd['original']
-        
+
         sv = self.sv
         sv.setWorkspace('original')
         sv.setXYDim("A","B")
@@ -428,12 +428,12 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         lv.setStartXY(0, 0)
         lv.setEndXY(10,5)
         self.assertEquals("A", self._getPlotXAxisName(lv, original))
-        
+
         #should toggle to 'B' axis as that is now the longest.
         lv.setStartXY(0, 0)
         lv.setEndXY(5,10)
         self.assertEquals("B", self._getPlotXAxisName(lv, original))
-        
+
     #==========================================================================
     #======================= Dynamic Rebinning ================================
     #==========================================================================
@@ -448,8 +448,8 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         ws = mtd['uniform_rebinned']
         self.assertEqual(ws.getNumDims(), 3)
         self.assertEqual(ws.getNPoints(), 50*200*1)
-        
-        
-        
 
-        
+
+
+
+

@@ -79,7 +79,7 @@ public:
     FrameworkManager::Instance();
   }
 
-  void test_default_start_label_id()
+    void test_default_start_label_id()
   {
     ConnectedComponentLabeling ccl;
     TSM_ASSERT_EQUALS("Start Label Id should be 1 by default", 1, ccl.getStartLabelId());
@@ -473,6 +473,7 @@ public:
     do_test_3d_with_many_objects(2 /*N threads*/);
   }
 
+
   void do_test_brige_link_schenario(int nThreads) // Regression test
   {
 
@@ -534,12 +535,12 @@ public:
     TS_ASSERT(does_set_contain(uniqueEntries, m_emptyLabel));
   }
 
-  void xtest_brige_link_schenario_single_threaded()
+  void test_brige_link_schenario_single_threaded()
   {
     do_test_brige_link_schenario(1);
   }
 
-  void xtest_brige_link_schenario_multi_threaded()
+  void test_brige_link_schenario_multi_threaded()
   {
     do_test_brige_link_schenario(3);
   }

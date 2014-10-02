@@ -32,7 +32,7 @@ namespace IDA
     void bgTypeSelection(int index);
     void plotInput();
     void plotGuess(QtProperty*);
-    void sequential();
+    void singleFit();
     void minChanged(double);
     void maxChanged(double);
     void backgLevel(double);
@@ -47,6 +47,7 @@ namespace IDA
 
   private:
     boost::shared_ptr<Mantid::API::CompositeFunction> createFunction(bool tieCentres=false);
+    double getInstrumentResolution(std::string workspaceName);
     QtProperty* createLorentzian(const QString &);
     void createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product);
     void populateFunction(Mantid::API::IFunction_sptr func, Mantid::API::IFunction_sptr comp, QtProperty* group, const std::string & pref, bool tie);

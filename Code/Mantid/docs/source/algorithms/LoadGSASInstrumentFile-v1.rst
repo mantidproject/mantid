@@ -23,6 +23,8 @@ Usage
 
 **Example - Run LoadGSASInstrumentFile for both TableWorkspace and workspace with Instrument**
 
+.. include:: ../usagedata-note.txt
+
 .. testcode:: ExLoadGSASInstrumentFileSimple
 
    # We load a GSAS Instrument file with 2 Banks

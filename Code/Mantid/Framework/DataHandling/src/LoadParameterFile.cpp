@@ -5,7 +5,6 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
-#include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidAPI/Progress.h"
@@ -135,7 +134,7 @@ void LoadParameterFile::execManually(bool useString, std::string filename, std::
     throw Kernel::Exception::InstrumentDefinitionError("No root element in XML Parameter file", filename);
   }
 
-  // 
+  // Set all parameters that specified in all component-link elements of pRootElem
   InstrumentDefinitionParser loadInstr;
   loadInstr.setComponentLinks(instrument, pRootElem);
 

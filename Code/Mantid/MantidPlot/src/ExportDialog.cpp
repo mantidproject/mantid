@@ -45,85 +45,86 @@ ExportDialog::ExportDialog(const QString& tableName, QWidget* parent, Qt::WFlags
 	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent);
 
 	QGridLayout *gl1 = new QGridLayout();
-    gl1->addWidget(new QLabel(tr("Export From")), 0, 0);
+  gl1->addWidget(new QLabel(tr("Export From")), 0, 0);
 	boxTable = new QComboBox();
 	QStringList tables = app->tableNames() + app->matrixNames() + app->mantidmatrixNames();
 	boxTable->addItems(tables);
 	boxTable->setCurrentIndex(0);
 
-	boxTable->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
-	gl1->addWidget(boxTable, 0, 1);
+  boxTable->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+  gl1->addWidget(boxTable, 0, 1);
 
-	boxAllTables = new QCheckBox(tr( "&All" ));
-    boxAllTables->setChecked(false);
-	gl1->addWidget(boxAllTables, 0, 2);
+  boxAllTables = new QCheckBox(tr( "&All" ));
+  boxAllTables->setChecked(false);
+  gl1->addWidget(boxAllTables, 0, 2);
 
-    sepText = new QLabel( tr( "Separator" ) );
-	gl1->addWidget(sepText, 1, 0);
+  sepText = new QLabel( tr( "Separator" ) );
+  gl1->addWidget(sepText, 1, 0);
 
-    boxSeparator = new QComboBox();
-	boxSeparator->addItem(tr("TAB"));
-    boxSeparator->addItem(tr("SPACE"));
-	boxSeparator->addItem(";" + tr("TAB"));
-	boxSeparator->addItem("," + tr("TAB"));
-	boxSeparator->addItem(";" + tr("SPACE"));
-	boxSeparator->addItem("," + tr("SPACE"));
-    boxSeparator->addItem(";");
-    boxSeparator->addItem(",");
-	boxSeparator->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
-	boxSeparator->setEditable( true );
-	gl1->addWidget(boxSeparator, 1, 1);
-	setColumnSeparator(app->d_export_col_separator);
+  boxSeparator = new QComboBox();
+  boxSeparator->addItem(tr("TAB"));
+  boxSeparator->addItem(tr("SPACE"));
+  boxSeparator->addItem(";" + tr("TAB"));
+  boxSeparator->addItem("," + tr("TAB"));
+  boxSeparator->addItem(";" + tr("SPACE"));
+  boxSeparator->addItem("," + tr("SPACE"));
+  boxSeparator->addItem(";");
+  boxSeparator->addItem(",");
+  boxSeparator->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+  boxSeparator->setEditable(true);
+
+  gl1->addWidget(boxSeparator, 1, 1);
+  setColumnSeparator(app->d_export_col_separator);
 
 	QString help = tr("The column separator can be customized. The following special codes can be used:\n\\t for a TAB character \n\\s for a SPACE");
 	help += "\n"+tr("The separator must not contain the following characters: 0-9eE.+-");
 
 	boxSeparator->setWhatsThis(help);
-	sepText->setWhatsThis(help);
-	boxSeparator->setToolTip(help);
-	sepText->setToolTip(help);
+  sepText->setWhatsThis(help);
+  boxSeparator->setToolTip(help);
+  sepText->setToolTip(help);
 
-	boxNames = new QCheckBox(tr( "Include Column &Names" ));
-    boxNames->setChecked( app->d_export_col_names );
+  boxNames = new QCheckBox(tr( "Include Column &Names" ));
+  boxNames->setChecked( app->d_export_col_names );
 
-	boxComments = new QCheckBox(tr( "Include Column Co&mments" ));
-    boxComments->setChecked( app->d_export_col_comment );
+  boxComments = new QCheckBox(tr( "Include Column Co&mments" ));
+  boxComments->setChecked( app->d_export_col_comment );
 
-    boxSelection = new QCheckBox(tr( "Export &Selection" ));
-    boxSelection->setChecked( app->d_export_table_selection );
+  boxSelection = new QCheckBox(tr( "Export &Selection" ));
+  boxSelection->setChecked( app->d_export_table_selection );
 
-	QVBoxLayout *vl1 = new QVBoxLayout();
-	vl1->addLayout( gl1 );
-	vl1->addWidget( boxNames );
-	vl1->addWidget( boxComments );
-	vl1->addWidget( boxSelection );
+  QVBoxLayout *vl1 = new QVBoxLayout();
+  vl1->addLayout( gl1 );
+  vl1->addWidget( boxNames );
+  vl1->addWidget( boxComments );
+  vl1->addWidget( boxSelection );
 
-	QHBoxLayout *hbox3 = new QHBoxLayout();
-	buttonOk = new QPushButton(tr( "&OK" ));
-    buttonOk->setDefault( true );
-	hbox3->addWidget( buttonOk );
-    buttonCancel = new QPushButton(tr( "&Cancel" ));
-	hbox3->addWidget( buttonCancel );
-	buttonHelp = new QPushButton(tr( "&Help" ));
-	hbox3->addWidget( buttonHelp );
-	hbox3->addStretch();
+  QHBoxLayout *hbox3 = new QHBoxLayout();
+  buttonOk = new QPushButton(tr( "&OK" ));
+  buttonOk->setDefault( true );
+  hbox3->addWidget( buttonOk );
+  buttonCancel = new QPushButton(tr( "&Cancel" ));
+  hbox3->addWidget( buttonCancel );
+  buttonHelp = new QPushButton(tr( "&Help" ));
+  hbox3->addWidget( buttonHelp );
+  hbox3->addStretch();
 
-	QVBoxLayout *vl = new QVBoxLayout( this );
-    vl->addLayout(vl1);
-	vl->addStretch();
-	vl->addLayout(hbox3);
+  QVBoxLayout *vl = new QVBoxLayout( this );
+  vl->addLayout(vl1);
+  vl->addStretch();
+  vl->addLayout(hbox3);
 
-    // signals and slots connections
-    connect( boxTable, SIGNAL(activated(const QString &)), this, SLOT(updateOptions(const QString &)));
-    connect( buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
-	connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( close() ) );
-    connect( buttonHelp, SIGNAL( clicked() ), this, SLOT( help() ) );
-	connect( boxAllTables, SIGNAL( toggled(bool) ), this, SLOT( enableTableName(bool) ) );
+  // signals and slots connections
+  connect( boxTable, SIGNAL(activated(const QString &)), this, SLOT(updateOptions(const QString &)));
+  connect( buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
+  connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( close() ) );
+  connect( buttonHelp, SIGNAL( clicked() ), this, SLOT( help() ) );
+  connect( boxAllTables, SIGNAL( toggled(bool) ), this, SLOT( enableTableName(bool) ) );
 
-    if (tables.contains(tableName)){
-		boxTable->setCurrentIndex(boxTable->findText(tableName));
-		updateOptions(tableName);
-    }
+  if (tables.contains(tableName)){
+    boxTable->setCurrentIndex(boxTable->findText(tableName));
+    updateOptions(tableName);
+  }
 }
 
 void ExportDialog::help()

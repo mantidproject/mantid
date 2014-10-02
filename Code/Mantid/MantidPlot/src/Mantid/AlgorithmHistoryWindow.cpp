@@ -220,7 +220,15 @@ m_wsName(wsptr->getName().c_str()), m_view(wsptr->getHistory().createView())
   environmentLayout->addWidget(m_execSumGrpBox, 1);
   environmentLayout->addWidget(m_envHistGrpBox, 2);
 
-  // The button at the bottom
+  // The buttons at the bottom
+  m_scriptVersionLabel = new QLabel("Algorithm Versions:", this);
+  m_scriptComboMode = new QComboBox(this);
+  // N.B. The combobox item strings below are used in AlgorithmHistoryWindow::getScriptVersionMode()
+  // If you change them here, you MUST change them there too.
+  m_scriptComboMode->addItem("Only Specify Old Versions");
+  m_scriptComboMode->addItem("Never Specify Versions");
+  m_scriptComboMode->addItem("Always Specify Versions");
+  m_scriptComboMode->setToolTip("When to specify which version of an algorithm was used.");
   m_scriptButtonFile = new QPushButton("Script to File",this);
   m_scriptButtonClipboard = new QPushButton("Script to Clipboard",this);
   connect(m_scriptButtonFile,SIGNAL(clicked()), this, SLOT(writeToScriptFile()));
@@ -228,6 +236,8 @@ m_wsName(wsptr->getName().c_str()), m_view(wsptr->getHistory().createView())
 
   QHBoxLayout *buttonLayout = new QHBoxLayout;
   buttonLayout->addStretch(1); // Align the button to the right
+  buttonLayout->addWidget(m_scriptVersionLabel);
+  buttonLayout->addWidget(m_scriptComboMode);
   buttonLayout->addWidget(m_scriptButtonFile);
   buttonLayout->addWidget(m_scriptButtonClipboard);
 
@@ -305,6 +315,27 @@ AlgHistoryProperties* AlgorithmHistoryWindow::createAlgHistoryPropWindow()
   }
 }
 
+//! Used by the save script to clipboard/file buttons to select which versioning mode to use.
+std::string AlgorithmHistoryWindow::getScriptVersionMode()
+{
+  std::string curText = m_scriptComboMode->currentText().toStdString();
+
+  if(curText == "Only Specify Old Versions")
+  {
+    return "old";
+  }
+  else if(curText == "Always Specify Versions")
+  {
+    return "all";
+  }
+  else if(curText == "Never Specify Versions")
+  {
+    return "none";
+  }
+
+  throw std::runtime_error("AlgorithmHistoryWindow::getScriptVersionMode received unhandled version mode string");
+}
+
 void AlgorithmHistoryWindow::writeToScriptFile()
 {
   QString prevDir = MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
@@ -322,7 +353,7 @@ void AlgorithmHistoryWindow::writeToScriptFile()
   // An empty string indicates they clicked cancel
   if( filePath.isEmpty() ) return;
   
-  ScriptBuilder builder(m_view);
+  ScriptBuilder builder(m_view, getScriptVersionMode());
   std::ofstream file(filePath.toStdString().c_str(), std::ofstream::trunc);
   file << builder.build();
   file.flush();
@@ -374,7 +405,7 @@ void AlgorithmHistoryWindow::updateExecSummaryGrpBox(AlgorithmHistory_const_sptr
 
 void AlgorithmHistoryWindow::copytoClipboard()
 {	
-  ScriptBuilder builder(m_view);
+  ScriptBuilder builder(m_view, getScriptVersionMode());
   QString script;
   const std::string contents = builder.build();
   script.append(contents.c_str());

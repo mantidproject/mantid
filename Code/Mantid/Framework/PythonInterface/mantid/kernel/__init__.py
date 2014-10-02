@@ -12,7 +12,7 @@ Defines Python objects that wrap the C++ Kernel namespace.
 import dlopen as _pydlopen
 import os as _os
 clib = _os.path.join(_os.path.dirname(__file__), '_kernel.so')
-flags = _pydlopen.setup_dlopen(clib, ['libMantidKernel']) 
+flags = _pydlopen.setup_dlopen(clib, ['libMantidKernel'])
 from _kernel import *
 _pydlopen.restore_flags(flags)
 ###############################################################################

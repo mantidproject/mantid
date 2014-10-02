@@ -44,10 +44,10 @@ namespace Mantid
     /// Initialise the properties
     void PredictFractionalPeaks::init()
     {
-      declareProperty(new WorkspaceProperty<PeaksWorkspace> ("Peaks", "", Direction::Input),
+      declareProperty(new WorkspaceProperty<IPeaksWorkspace> ("Peaks", "", Direction::Input),
         "Workspace of Peaks with orientation matrix that indexed the peaks and instrument loaded");
 
-      declareProperty(new WorkspaceProperty<PeaksWorkspace> ("FracPeaks", "", Direction::Output),
+      declareProperty(new WorkspaceProperty<IPeaksWorkspace> ("FracPeaks", "", Direction::Output),
         "Workspace of Peaks with peaks with fractional h,k, and/or l values");
 
       declareProperty(new Kernel::ArrayProperty<double>(string("HOffset"),string("-.5,0, .5")),"Offset in the h direction");
@@ -90,7 +90,9 @@ namespace Mantid
     /// Run the algorithm
     void PredictFractionalPeaks::exec()
     {
-      PeaksWorkspace_sptr Peaks=getProperty("Peaks");
+      IPeaksWorkspace_sptr ipeaks = getProperty("Peaks");
+      auto Peaks = boost::dynamic_pointer_cast<PeaksWorkspace>(ipeaks);
+      if(!Peaks) throw std::invalid_argument("Input workspace is not a PeaksWorkspace. Type=" + ipeaks->id());
 
       vector<double> hOffsets = getProperty("HOffset");
       vector<double> kOffsets = getProperty("KOffset");
@@ -99,7 +101,6 @@ namespace Mantid
       if ( kOffsets.empty())kOffsets.push_back(0.0);
       if ( lOffsets.empty())lOffsets.push_back(0.0);
 
-      ;
       bool includePeaksInRange= getProperty("IncludeAllPeaksInRange");
 
       if(  Peaks->getNumberPeaks()<=0)

@@ -45,7 +45,7 @@ class DSFinterp(PythonAlgorithm):
     self.channelgroup = None
 
   def areWorkspacesCompatible(self, a, b):
-    sizeA = a.blocksize() * a.getNumberHistograms() 
+    sizeA = a.blocksize() * a.getNumberHistograms()
     sizeB = b.blocksize() * b.getNumberHistograms()
     return sizeA == sizeB
 
