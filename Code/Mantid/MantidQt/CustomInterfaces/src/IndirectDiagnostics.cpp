@@ -208,7 +208,7 @@ namespace CustomInterfaces
 
     //Set spectra range
     m_dblManager->setValue(m_properties["SpecMin"], instDetails["spectra-min"].toDouble());
-    m_dblManager->setValue(m_properties["SpecMax"], instDetails["spectra-min"].toDouble());
+    m_dblManager->setValue(m_properties["SpecMax"], instDetails["spectra-max"].toDouble());
 
     //Set peak and background ranges
     if(instDetails.size() >= 8)
