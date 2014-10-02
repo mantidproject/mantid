@@ -26,6 +26,32 @@ namespace MantidQt
     }
 
     /**
+     * Finds the first unused group id
+     */
+    int ReflMainViewPresenter::getUnusedGroup(std::vector<size_t> ignoredRows) const
+    {
+      std::vector<int> usedGroups;
+
+      //Scan through all the rows, working out which group ids are used
+      for(size_t idx = 0; idx < m_model->rowCount(); ++idx)
+      {
+        if(std::find(ignoredRows.begin(), ignoredRows.end(), idx) != ignoredRows.end())
+          continue;
+
+        //This is an unselected row. Add it to the list of used group ids
+        usedGroups.push_back(m_model->Int(idx, COL_GROUP));
+      }
+
+      int groupId = 0;
+
+      //While the group id is one of the used ones, increment it by 1
+      while(std::find(usedGroups.begin(), usedGroups.end(), groupId) != usedGroups.end())
+        groupId++;
+
+      return groupId;
+    }
+
+    /**
     Process selected rows
     */
     void ReflMainViewPresenter::process()
@@ -432,32 +458,15 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::groupRows()
     {
-      std::vector<size_t> rows = m_view->getSelectedRowIndexes();
-      std::vector<int> usedGroups;
-
-      //First we need find the first unused group id
-
-      //Scan through all the rows, working out which group ids are used
-      for(size_t idx = 0; idx < m_model->rowCount(); ++idx)
-      {
-        //If this row is one of the selected rows we don't need to include it
-        if(std::find(rows.begin(), rows.end(), idx) != rows.end())
-          continue;
-
-        //This is an unselected row. At it to the list of used group ids
-        usedGroups.push_back(m_model->Int(idx, COL_GROUP));
-      }
-
-      int groupId = 0;
-
-      //While the group id is one of the used ones, increment it by 1
-      while(std::find(usedGroups.begin(), usedGroups.end(), groupId) != usedGroups.end())
-        groupId++;
+      const std::vector<size_t> rows = m_view->getSelectedRowIndexes();
+      //Find the first unused group id, ignoring the selected rows
+      const int groupId = getUnusedGroup(rows);
 
       //Now we just have to set the group id on the selected rows
       for(auto it = rows.begin(); it != rows.end(); ++it)
         m_model->Int(*it, COL_GROUP) = groupId;
 
+      //Make sure the view updates
       m_view->showTable(m_model);
     }
 

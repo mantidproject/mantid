@@ -57,6 +57,8 @@ namespace MantidQt
       Mantid::API::Workspace_sptr loadRun(const std::string& run, const std::string& instrument);
       //get the run number of a TOF workspace
       std::string getRunNumber(const Mantid::API::Workspace_sptr& ws);
+      //get an unused group id
+      int getUnusedGroup(std::vector<size_t> ignoredRows = std::vector<size_t>()) const;
       //make a transmission workspace
       Mantid::API::MatrixWorkspace_sptr makeTransWS(const std::string& transString);
       //Validate a row
