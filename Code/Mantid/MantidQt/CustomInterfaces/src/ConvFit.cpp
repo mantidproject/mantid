@@ -187,6 +187,9 @@ namespace IDA
 
     pyInput += uiForm().confit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
 
+    if ( uiForm().confit_ckConvolve->isChecked() ) pyInput += "convolve = True\n";
+    else pyInput += "convolve = False\n";
+
     if ( uiForm().confit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
 
@@ -204,7 +207,7 @@ namespace IDA
     pyInput +=    
       "bg = '" + bg + "'\n"
       "ftype = '" + ftype + "'\n"
-      "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, Verbose=verbose, Plot=plot, Save=save)\n";
+      "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, convolve, Verbose=verbose, Plot=plot, Save=save)\n";
 
     QString pyOutput = runPythonCode(pyInput);
   }
