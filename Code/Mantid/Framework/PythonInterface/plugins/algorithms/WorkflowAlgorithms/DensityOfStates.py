@@ -214,12 +214,12 @@ class DensityOfStates(PythonAlgorithm):
         @param intensities - intensities read from file
         @param weights - weights for each frequency block
         """
-        if ( frequencies.size > intensities.size ):
+        if frequencies.size > intensities.size:
             #if we have less intensities than frequencies fill the difference with ones.
             diff = frequencies.size-intensities.size
             intensities = np.concatenate((intensities, np.ones(diff)))
 
-        if ( frequencies.size != weights.size or frequencies.size != intensities.size ):
+        if frequencies.size != weights.size or frequencies.size != intensities.size:
             raise ValueError("Number of data points must match!")
 
         #ignore values below fzerotol
@@ -316,7 +316,7 @@ class DensityOfStates(PythonAlgorithm):
 
         frequencies = file_data[0]
 
-        if ( frequencies.size == 0 ):
+        if frequencies.size == 0:
             raise ValueError("Failed to load any frequencies from file.")
 
         return file_data
@@ -373,6 +373,8 @@ class DensityOfStates(PythonAlgorithm):
                         mode = int(line_data[0])-1 #-1 to convert to zero based indexing
                         self._ion_dict[ion].append(mode)
 
+                logger.debug(str(self._ion_dict))
+
                 self._partial_ion_numbers = []
                 for ion, ion_nums in self._ion_dict.items():
                     if len(ion_nums) == 0:
@@ -393,19 +395,19 @@ class DensityOfStates(PythonAlgorithm):
 #----------------------------------------------------------------------------------------
 
     def _parse_phonon_freq_block(self, f_handle):
-            """
-            Iterator to parse a block of frequencies from a .phonon file.
+        """
+        Iterator to parse a block of frequencies from a .phonon file.
 
-            @param f_handle - handle to the file.
-            """
-            prog_reporter = Progress(self,0.0,1.0,1)
-            for _ in xrange( self._num_branches):
-                line = f_handle.readline()
-                line_data = line.strip().split()[1:]
-                line_data = map(float, line_data)
-                yield line_data
+        @param f_handle - handle to the file.
+        """
+        prog_reporter = Progress(self,0.0,1.0,1)
+        for _ in xrange( self._num_branches):
+            line = f_handle.readline()
+            line_data = line.strip().split()[1:]
+            line_data = map(float, line_data)
+            yield line_data
 
-            prog_reporter.report("Reading frequencies.")
+        prog_reporter.report("Reading frequencies.")
 
 #----------------------------------------------------------------------------------------
     def _parse_phonon_eigenvectors(self, f_handle):
