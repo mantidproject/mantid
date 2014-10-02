@@ -91,6 +91,10 @@ namespace Mantid
       /// Initialise the caches used here including setting up the random
       /// number generator
       void initCaches();
+      /// Checks if a given box has any corners inside the sample or container
+      bool boxIntersectsSample(const Geometry::BoundingBox & block) const;
+      /// Checks if the given point is inside the sample or container
+      bool ptIntersectsSample(const Kernel::V3D & pt) const;
 
     private:
       /** @name Cached values */

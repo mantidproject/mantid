@@ -240,8 +240,7 @@ namespace Mantid
         const double z = m_blkHalfZ*(2.0*uniReal() - 1.0) + block.zMin();
         scatterPoint(x,y,z);
         ++nattempts;
-        if( m_sampleShape->isValid(scatterPoint) ||
-            (m_container && m_container->isValid(scatterPoint)) )
+        if( ptIntersectsSample(scatterPoint) )
         {
           scatterPoint += m_samplePos;
           return scatterPoint;
@@ -392,7 +391,7 @@ namespace Mantid
      */
     void MonteCarloAbsorption::initCaches()
     {
-      g_log.debug() << "Caching input";
+      g_log.debug() << "Caching input\n";
       if( m_rng ) delete m_rng;
       const int seedValue = getProperty("SeedValue");
       m_rng = new boost::mt19937(seedValue);
@@ -424,7 +423,7 @@ namespace Mantid
       m_blkHalfZ = 0.5*zThick;
 
       const size_t numVolumeElements = numXSlices*numYSlices*numZSlices;
-      g_log.debug() << "Attepmting to divide sample + container into " << numVolumeElements << " blocks.\n";
+      g_log.debug() << "Attempting to divide sample + container into " << numVolumeElements << " blocks.\n";
 
       try
       {
@@ -443,6 +442,9 @@ namespace Mantid
       const double y0 = boxCentre.Y() - 0.5*yLength;
       const double z0 = boxCentre.Z() - 0.5*zLength;
       // Store a chunk as a BoundingBox object.
+      // Only cache blocks that have some intersection with the
+      // sample or container.
+
       for (int i = 0; i < numZSlices; ++i)
       {
         const double zmin = z0 + i*zThick;
@@ -455,12 +457,52 @@ namespace Mantid
           {
             const double xmin = x0 + k*xThick;
             const double xmax = xmin + xThick;
-            m_blocks.push_back(BoundingBox(xmax, ymax, zmax, xmin, ymin, zmin));
+            BoundingBox block(xmax, ymax, zmax, xmin, ymin, zmin);
+            if(boxIntersectsSample(block)) m_blocks.push_back(block);
           }
         }
       }
 
-      g_log.debug() << "Sample + container divided into " << m_blocks.size() << " blocks.\n";
+      g_log.debug() << "Sample + container divided into " << m_blocks.size() << " blocks.";
+      if(m_blocks.size() == numVolumeElements) g_log.debug("\n");
+      else g_log.debug() << " Skipped " << (numVolumeElements-m_blocks.size())
+                         << " blocks that do not intersect with the sample + container\n";
+    }
+
+    /**
+     * @param block A BoundingBox object defining a block
+     * @return True if any of the vertices intersect the sample or container
+     */
+    bool MonteCarloAbsorption::boxIntersectsSample(const BoundingBox &block) const
+    {
+      // Check all 8 corners for intersection
+      V3D vertices[] = {
+        V3D(block.xMax(), block.yMin(), block.zMin()), // left-front-bottom
+        V3D(block.xMax(), block.yMax(), block.zMin()), // left-front-top
+        V3D(block.xMin(), block.yMax(), block.zMin()), // right-front-top
+        V3D(block.xMin(), block.yMin(), block.zMin()), // right-front-bottom
+        V3D(block.xMax(), block.yMin(), block.zMax()), // left-back-bottom
+        V3D(block.xMax(), block.yMax(), block.zMax()), // left-back-top
+        V3D(block.xMin(), block.yMax(), block.zMax()), // right-back-top
+        V3D(block.xMin(), block.yMin(), block.zMax()) // right-back-bottom
+      };
+      bool intersects(true);
+      for(size_t i = 0; i < 8; ++i)
+      {
+        intersects &= ptIntersectsSample(vertices[i]);
+      }
+      return intersects;
+    }
+
+    /**
+     *
+     * @param pt A V3D giving a point to test
+     * @return True if point is inside sample or container, false otherwise
+     */
+    bool MonteCarloAbsorption::ptIntersectsSample(const V3D &pt) const
+    {
+      return m_sampleShape->isValid(pt) ||
+          (m_container && m_container->isValid(pt));
     }
 
   }
