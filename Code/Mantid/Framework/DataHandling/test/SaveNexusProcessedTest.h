@@ -395,27 +395,37 @@ public:
 
   void testSaveGroupWorkspace()
   {
-      const int nEntries = 3;
-      const int nHist = 1;
-      const int nBins = 1;
-      const std::string stem = "test_group_ws"; 
-      Mantid::API::WorkspaceGroup_sptr group_ws = WorkspaceCreationHelper::CreateWorkspaceGroup(nEntries,  nHist, nBins, stem);
+    const std::string output_filename = "SaveNexusProcessedTest_GroupWorkspaceFile.nxs";
 
-      SaveNexusProcessed alg;
-      alg.setRethrows(true);
-      alg.setChild(true);
-      alg.initialize();
-      const std::string output_filename = "SaveNexusProcessedTest_GroupWorkspaceFile.nxs";
-      alg.setProperty("Filename", output_filename);
-      alg.setProperty("InputWorkspace", group_ws);
-      alg.execute();
+    // Clean out any previous instances.
+    bool doesFileExist = Poco::File(output_filename).exists();
+    if (doesFileExist)
+    {
+      Poco::File(output_filename).remove();
+    }
 
-      const bool doesFileExist = Poco::File(output_filename).exists() ;
-      TSM_ASSERT("File should have been created", doesFileExist);
-      if (doesFileExist)
-      {  
-        Poco::File(output_filename).remove();
-      }
+    const int nEntries = 3;
+    const int nHist = 1;
+    const int nBins = 1;
+    const std::string stem = "test_group_ws";
+    Mantid::API::WorkspaceGroup_sptr group_ws = WorkspaceCreationHelper::CreateWorkspaceGroup(nEntries,
+        nHist, nBins, stem);
+
+    SaveNexusProcessed alg;
+    alg.setRethrows(true);
+    alg.setChild(true);
+    alg.initialize();
+
+    alg.setProperty("Filename", output_filename);
+    alg.setProperty("InputWorkspace", group_ws);
+    alg.execute();
+
+    doesFileExist = Poco::File(output_filename).exists();
+    TSM_ASSERT("File should have been created", doesFileExist);
+    if (doesFileExist)
+    {
+      Poco::File(output_filename).remove();
+    }
 
   }
 
