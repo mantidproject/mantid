@@ -3,6 +3,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 
@@ -134,34 +135,64 @@ void AddWorkspaceDialog::reject()
 /*                                DatasetPlotData                                           */
 /*==========================================================================================*/
 
+/**
+ * Contains graphics for a single data set.
+ */
 class DatasetPlotData
 {
 public:
-  DatasetPlotData(const QString& wsName, int wsIndex);
+  DatasetPlotData(const QString& wsName, int wsIndex, const QString& outputWSName);
   ~DatasetPlotData();
   void show(QwtPlot *plot);
   void hide();
 private:
-  void setData(QwtPlotCurve *curve, Mantid::API::MatrixWorkspace_sptr ws, int wsIndex);
+  void setData(QwtPlotCurve *curve, const Mantid::API::MatrixWorkspace *ws, int wsIndex, const Mantid::API::MatrixWorkspace *outputWS);
   QwtPlotCurve *m_dataCurve;
+  QwtPlotCurve *m_calcCurve;
+  QwtPlotCurve *m_diffCurve;
 };
 
-DatasetPlotData::DatasetPlotData(const QString& wsName, int wsIndex):
-  m_dataCurve(new QwtPlotCurve(wsName + QString(" (%1)").arg(wsIndex)))
+/**
+ * Creator.
+ * @param wsName :: Name of a MatrixWorkspace with the data for fitting.
+ * @param wsIndex :: Workspace index of a spectrum in wsName to plot.
+ * @param outputWSName :: Name of the Fit's output workspace containing at least 3 spectra:
+ *    #0 - original data (the same as in wsName[wsIndex]), #1 - calculated data, #3 - difference.
+ *    If empty - ignore this workspace.
+ */
+DatasetPlotData::DatasetPlotData(const QString& wsName, int wsIndex, const QString& outputWSName):
+  m_dataCurve(new QwtPlotCurve(wsName + QString(" (%1)").arg(wsIndex))),
+  m_calcCurve(NULL),
+  m_diffCurve(NULL)
 {
+  // get the data workspace
   auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>( wsName.toStdString() );
   if ( !ws )
   {
     QString mess = QString("Workspace %1 either doesn't exist or isn't a MatrixWorkspace").arg(wsName);
     throw std::runtime_error( mess.toStdString() );
   }
+  // check that the index is in range
   if ( wsIndex >= ws->getNumberHistograms() )
   {
     QString mess = QString("Spectrum %1 doesn't exist in workspace %2").arg(wsIndex).arg(wsName);
     throw std::runtime_error( mess.toStdString() );
   }
 
-  setData( m_dataCurve, ws, wsIndex);
+  // get the data workspace
+  Mantid::API::MatrixWorkspace_sptr outputWS;
+  if ( !outputWSName.isEmpty() )
+  {
+    outputWS = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>( outputWSName.toStdString() );
+    if ( !outputWS )
+    {
+      QString mess = QString("Workspace %1 either doesn't exist or isn't a MatrixWorkspace").arg(outputWSName);
+      throw std::runtime_error( mess.toStdString() );
+    }
+  }
+
+  // create the curves
+  setData( m_dataCurve, ws.get(), wsIndex, outputWS.get() );
 
 }
 
@@ -171,7 +202,7 @@ DatasetPlotData::~DatasetPlotData()
   delete m_dataCurve;
 }
 
-void DatasetPlotData::setData(QwtPlotCurve *curve, Mantid::API::MatrixWorkspace_sptr ws, int wsIndex)
+void DatasetPlotData::setData(QwtPlotCurve *curve, const Mantid::API::MatrixWorkspace *ws, int wsIndex, const Mantid::API::MatrixWorkspace *outputWS)
 {
   std::vector<double> xValues = ws->readX(wsIndex);
   if ( ws->isHistogramData() )
@@ -184,23 +215,51 @@ void DatasetPlotData::setData(QwtPlotCurve *curve, Mantid::API::MatrixWorkspace_
     xValues.pop_back();
   }
   m_dataCurve->setData( xValues.data(), ws->readY(wsIndex).data(), static_cast<int>(xValues.size()) );
+
+  if ( outputWS && outputWS->getNumberHistograms() >= 3 )
+  {
+    m_calcCurve = new QwtPlotCurve("calc");
+    m_calcCurve->setData( xValues.data(), outputWS->readY(1).data(), static_cast<int>(xValues.size()) );
+    QPen penCalc("red");
+    m_calcCurve->setPen(penCalc);
+    m_diffCurve = new QwtPlotCurve("diff");
+    m_diffCurve->setData( xValues.data(), outputWS->readY(2).data(), static_cast<int>(xValues.size()) );
+    QPen penDiff("green");
+    m_diffCurve->setPen(penDiff);
+  }
 }
 
 void DatasetPlotData::show(QwtPlot *plot)
 {
   m_dataCurve->attach(plot);
+  if ( m_calcCurve )
+  {
+    m_calcCurve->attach(plot);
+  }
+  if ( m_diffCurve )
+  {
+    m_diffCurve->attach(plot);
+  }
 }
 
 void DatasetPlotData::hide()
 {
   m_dataCurve->detach();
+  if ( m_calcCurve )
+  {
+    m_calcCurve->detach();
+  }
+  if ( m_diffCurve )
+  {
+    m_diffCurve->detach();
+  }
 }
 
 /*==========================================================================================*/
 /*                                PlotController                                            */
 /*==========================================================================================*/
 
-PlotController::PlotController(QObject *parent,QwtPlot *plot, QTableWidget *table, QComboBox *plotSelector, QPushButton *prev, QPushButton *next):
+PlotController::PlotController(MultiDatasetFit *parent,QwtPlot *plot, QTableWidget *table, QComboBox *plotSelector, QPushButton *prev, QPushButton *next):
   QObject(parent),m_plot(plot),m_table(table),m_plotSelector(plotSelector),m_prevPlot(prev),m_nextPlot(next),m_currentIndex(-1)
 {
   connect(parent,SIGNAL(dataTableUpdated()),this,SLOT(tableUpdated()));
@@ -271,7 +330,12 @@ void PlotController::plotDataSet(int index)
   {
     QString wsName = m_table->item( index, wsColumn )->text();
     int wsIndex = m_table->item( index, wsIndexColumn )->text().toInt();
-    auto value = boost::make_shared<DatasetPlotData>( wsName, wsIndex );
+    QString outputWorkspaceName = owner()->getOutputWorkspaceName();
+    if ( !outputWorkspaceName.isEmpty() )
+    {
+      outputWorkspaceName += QString("_%1").arg(index);
+    }
+    auto value = boost::make_shared<DatasetPlotData>( wsName, wsIndex, outputWorkspaceName );
     m_plotData.insert(index, value );
   }
   if ( m_currentIndex > -1 ) 
@@ -287,6 +351,12 @@ void PlotController::clear()
 {
   m_plotData.clear();
 }
+
+void PlotController::update()
+{
+  plotDataSet( m_currentIndex );
+}
+
 /*==========================================================================================*/
 /*                                MultiDatasetFit                                           */
 /*==========================================================================================*/
@@ -426,7 +496,7 @@ void MultiDatasetFit::removeSelectedSpectra()
 boost::shared_ptr<Mantid::API::IFunction> MultiDatasetFit::createFunction() const
 {
   // number of spectra to fit == size of the multi-domain function
-  size_t nOfDataSets = static_cast<size_t>( m_uiForm.dataTable->rowCount() );
+  size_t nOfDataSets = getNumberOfSpectra();
   if ( nOfDataSets == 0 )
   {
     throw std::runtime_error("There are no data sets specified.");
@@ -447,6 +517,7 @@ boost::shared_ptr<Mantid::API::IFunction> MultiDatasetFit::createFunction() cons
     multiFunStr += funStr;
   }
 
+  // add the global ties
   QStringList globals = m_functionBrowser->getGlobalParameters();
   QString globalTies;
   if ( !globals.isEmpty() )
@@ -468,7 +539,6 @@ boost::shared_ptr<Mantid::API::IFunction> MultiDatasetFit::createFunction() cons
     globalTies += ")";
     multiFunStr += ";" + globalTies;
   }
-  std::cerr << globalTies.toStdString() << std::endl;
 
   // create the multi-domain function
   auto fun = Mantid::API::FunctionFactory::Instance().createInitialized( multiFunStr.toStdString() );
@@ -492,7 +562,69 @@ boost::shared_ptr<Mantid::API::IFunction> MultiDatasetFit::createFunction() cons
  */
 void MultiDatasetFit::fit()
 {
-  std::cerr << createFunction()->asString() << std::endl;
+  try
+  {
+    auto fun = createFunction();
+    auto fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    fit->initialize();
+    fit->setProperty("Function", fun );
+    fit->setPropertyValue("InputWorkspace", getWorkspaceName(0));
+    fit->setProperty("WorkspaceIndex", getWorkspaceIndex(0));
+
+    m_outputWorkspaceName = "out";
+    fit->setPropertyValue("Output",m_outputWorkspaceName);
+    m_outputWorkspaceName += "_Workspace";
+
+    size_t n = getNumberOfSpectra();
+    for(size_t ispec = 1; ispec < n; ++ispec)
+    {
+      std::string suffix = boost::lexical_cast<std::string>(ispec);
+      fit->setPropertyValue( "InputWorkspace_" + suffix, getWorkspaceName(ispec) );
+      fit->setProperty( "WorkspaceIndex_" + suffix, getWorkspaceIndex(ispec) );
+    }
+
+    fit->execute();
+
+    m_plotController->clear();
+    m_plotController->update();
+  }
+  catch(std::exception& e)
+  {
+    QString mess(e.what());
+    const int maxSize = 500;
+    if ( mess.size() > maxSize )
+    {
+      mess = mess.mid(0,maxSize);
+      mess += "...";
+    }
+    QMessageBox::critical( this, "MantidPlot - Error", QString("Fit failed:\n\n  %1").arg(mess) );
+  }
+}
+
+/**
+ * Get the workspace name of the i-th spectrum.
+ * @param i :: Index of a spectrum in the data table.
+ */
+std::string MultiDatasetFit::getWorkspaceName(size_t i) const
+{
+  return m_uiForm.dataTable->item(static_cast<int>(i), wsColumn)->text().toStdString();
+}
+
+/**
+ * Get the workspace index of the i-th spectrum.
+ * @param i :: Index of a spectrum in the data table.
+ */
+int MultiDatasetFit::getWorkspaceIndex(size_t i) const
+{
+  return m_uiForm.dataTable->item(static_cast<int>(i), wsIndexColumn)->text().toInt();
+}
+
+/**
+ * Get the number of spectra to fit to.
+ */
+size_t MultiDatasetFit::getNumberOfSpectra() const
+{
+  return static_cast<size_t>( m_uiForm.dataTable->rowCount() );
 }
 
 /*==========================================================================================*/
