@@ -424,7 +424,10 @@ namespace MantidQt
       std::vector<size_t> rows = m_view->getSelectedRowIndexes();
       if (rows.size() == 0)
       {
+        const int groupId = getUnusedGroup();
+        const size_t row = m_model->rowCount();
         m_model->appendRow();
+        m_model->Int(row, COL_GROUP) = groupId;
       }
       else
       {
@@ -433,7 +436,9 @@ namespace MantidQt
         std::sort (rows.begin(), rows.end());
         for (size_t idx = rows.size(); 0 < idx; --idx)
         {
-          m_model->insertRow(rows.at(0));
+          const int groupId = getUnusedGroup();
+          const size_t row = m_model->insertRow(rows.at(0));
+          m_model->Int(row, COL_GROUP) = groupId;
         }
       }
 
