@@ -38,6 +38,7 @@ class IndirectResolution(DataProcessorAlgorithm):
 
         self.declareProperty(name='RebinParam', defaultValue='', doc='Rebinning parameters (min,width,max)')
         self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='Factor to scale resolution curve by')
+        self.declareProperty(name='Smooth', defaultValue=False, doc='Apply WienerSmooth to resolution')
 
         self.declareProperty(name='Verbose', defaultValue=False, doc='Print more information to results log')
         self.declareProperty(name='Plot', defaultValue=False, doc='Plot resolution curve')
@@ -84,6 +85,9 @@ class IndirectResolution(DataProcessorAlgorithm):
 
         Rebin(InputWorkspace=self._out_ws, OutputWorkspace=self._out_ws, Params=self._rebin_string)
 
+        if self._smooth:
+            WienerSmooth(InputWorkspace=self._out_ws, OutputWorkspace=self._out_ws)
+
         self._post_process()
         self.setProperty('OutputWorkspace', self._out_ws)
 
@@ -106,6 +110,7 @@ class IndirectResolution(DataProcessorAlgorithm):
         self._background = self.getProperty('BackgroundRange').value
         self._rebin_string = self.getProperty('RebinParam').value
         self._scale_factor = self.getProperty('ScaleFactor').value
+        self._smooth = self.getProperty('Smooth').value
 
         self._verbose = self.getProperty('Verbose').value
         self._plot = self.getProperty('Plot').value

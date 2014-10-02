@@ -349,26 +349,9 @@ namespace CustomInterfaces
     QString detRange = QString::number(m_dblManager->value(m_properties["ResSpecMin"])) + ","
         + QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
 
-    //TODO: This can be replaced with IndirectInelasticReducer
+    //TODO: Use IndirectInelasticReducer
     return;
-    Mantid::API::IAlgorithm_sptr resAlg = Mantid::API::AlgorithmManager::Instance().create("IndirectResolution", -1);
-    resAlg->initialize();
 
-    resAlg->setProperty("InputFiles", files.toStdString());
-    resAlg->setProperty("OutputWorkspace", outWS.toStdString());
-    resAlg->setProperty("Instrument", m_uiForm.cbInst->currentText().toStdString());
-    resAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
-    resAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
-    resAlg->setProperty("Res", false);
-    resAlg->setProperty("DetectorRange", detRange.toStdString());
-
-    resAlg->execute();
-
-    if(!resAlg->isExecuted())
-    {
-      emit showMessageBox("Failed to convert to energy. See log for details.");
-      return;
-    }
 
     Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(outWS.toStdString()));
@@ -553,6 +536,7 @@ namespace CustomInterfaces
     resAlg->setProperty("BackgroundRange", background.toStdString());
 
     resAlg->setProperty("ScaleFactor", m_uiForm.cal_leIntensityScaleMultiplier->text().toDouble());
+    resAlg->setProperty("Smooth", m_uiForm.cal_cbSmooth->isChecked());
 
     resAlg->setProperty("Verbose", m_uiForm.cal_ckVerbose->isChecked());
     resAlg->setProperty("Plot", m_uiForm.cal_ckPlotResult->isChecked());
