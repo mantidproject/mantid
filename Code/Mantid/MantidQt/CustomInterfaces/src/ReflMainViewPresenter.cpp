@@ -422,26 +422,27 @@ namespace MantidQt
     void ReflMainViewPresenter::addRow()
     {
       std::vector<size_t> rows = m_view->getSelectedRowIndexes();
-      if (rows.size() == 0)
+      std::sort(rows.begin(), rows.end());
+
+      const int groupId = getUnusedGroup();
+      size_t row = 0;
+
+      if(rows.size() == 0)
       {
-        const int groupId = getUnusedGroup();
-        const size_t row = m_model->rowCount();
+        //No rows selected, just append a new row
+        row = m_model->rowCount();
         m_model->appendRow();
-        m_model->Int(row, COL_GROUP) = groupId;
       }
       else
       {
-        //as selections have to be contigous, then all that needs to be done is add
-        //a number of rows at the highest index equal to the size of the returned vector
-        std::sort (rows.begin(), rows.end());
-        for (size_t idx = rows.size(); 0 < idx; --idx)
-        {
-          const int groupId = getUnusedGroup();
-          const size_t row = m_model->insertRow(rows.at(0));
-          m_model->Int(row, COL_GROUP) = groupId;
-        }
+        //One or more rows selected, insert after the last row
+        row = m_model->insertRow(*rows.rbegin() + 1);
       }
 
+      //Set the group id of the new row
+      m_model->Int(row, COL_GROUP) = groupId;
+
+      //Make sure the view updates
       m_view->showTable(m_model);
     }
 
