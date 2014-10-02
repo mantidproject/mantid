@@ -1,8 +1,8 @@
 .. _func-TabulatedFunction:
 
-==============
+=================
 TabulatedFunction
-==============
+=================
 
 .. index:: TabulatedFunction
 
