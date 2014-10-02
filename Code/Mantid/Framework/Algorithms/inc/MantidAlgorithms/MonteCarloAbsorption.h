@@ -5,8 +5,9 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidGeometry/IComponent.h"
+
+#include <boost/random/mersenne_twister.hpp>
 
 namespace Mantid
 {
@@ -63,7 +64,6 @@ namespace Mantid
       ///Summary of algorithms purpose
       virtual const std::string summary() const {return "Calculates attenuation due to absorption and scattering in a sample & its environment using a weighted Monte Carlo.";}
 
-
     private:
       /// Initialize the algorithm
       void init();
@@ -93,6 +93,25 @@ namespace Mantid
       void initCaches();
 
     private:
+      /** @name Cached values */
+      //@{
+      /// The sample position
+      Kernel::V3D m_samplePos;
+      /// The source position
+      Kernel::V3D m_sourcePos;
+      /// Object divided into little boxes
+      std::vector<Geometry::BoundingBox> m_blocks;
+
+      /// Half a single block width in X
+      double m_blkHalfX;
+      /// Half a single block width in Y
+      double m_blkHalfY;
+      /// Half a single block width in Z
+      double m_blkHalfZ;
+      /// Random number generator
+      boost::mt19937 *m_rng;
+      //@}
+
       /// The input workspace
       API::MatrixWorkspace_sptr m_inputWS;
       /// The sample's shape
@@ -107,29 +126,6 @@ namespace Mantid
       int m_xStepSize;
       /// The number of events per point
       int m_numberOfEvents;
-
-      /** @name Cached values */
-      //@{
-      /// The sample position
-      Kernel::V3D m_samplePos;
-      /// The source position
-      Kernel::V3D m_sourcePos;
-      /// Bounding box length
-      double m_bbox_length;
-      /// Half the bounding box length
-      double m_bbox_halflength;
-      /// Bounding box width
-      double m_bbox_width;
-      /// Half the bounding box width
-      double m_bbox_halfwidth;
-      /// Bounding box height
-      double m_bbox_height;
-      /// Bounding box height
-      double m_bbox_halfheight;
-      //@}
-
-      /// A pointer to the random number generator
-      Kernel::PseudoRandomNumberGenerator *m_randGen;
     };
 
   }

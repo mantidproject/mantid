@@ -5,20 +5,24 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SampleEnvironment.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/NeutronAtom.h"
+#include "MantidKernel/VectorHelper.h"
 
-// @todo: This needs a factory
-#include "MantidKernel/MersenneTwister.h"
+#include <boost/random/uniform_int.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
 
 /// @cond
 namespace
 {
   /// Number of attempts to choose a random point within the object before it gives up
-  const int MaxRandPointAttempts(20);
+  const int MaxRandPointAttempts(500);
+
+  /// Element size in mm
+  const double ELEMENT_SIZE = 1.0;
 }
 /// @endcond
 
@@ -26,15 +30,10 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    
+
     DECLARE_ALGORITHM(MonteCarloAbsorption)
 
-    using API::WorkspaceProperty;
-    using API::WorkspaceUnitValidator;
-    using API::InstrumentValidator;
-    using API::MatrixWorkspace_sptr;
-    using API::WorkspaceFactory;
-    using API::Progress;
+    using namespace API;
     using namespace Geometry;
     using namespace Kernel;
 
@@ -46,26 +45,25 @@ namespace Mantid
      * Constructor
      */
     MonteCarloAbsorption::MonteCarloAbsorption() :
-      m_inputWS(), m_sampleShape(NULL), m_container(NULL), m_numberOfPoints(0),
-      m_xStepSize(0), m_numberOfEvents(1), m_samplePos(), m_sourcePos(),
-      m_bbox_length(0.0), m_bbox_halflength(0.0), m_bbox_width(0.0),
-      m_bbox_halfwidth(0.0), m_bbox_height(0.0), m_bbox_halfheight(0.0),
-      m_randGen(NULL)
+      m_samplePos(), m_sourcePos(), m_blocks(),
+      m_blkHalfX(0.0), m_blkHalfY(0.0), m_blkHalfZ(0.0),
+      m_rng(NULL), m_inputWS(), m_sampleShape(NULL), m_container(NULL), m_numberOfPoints(0),
+      m_xStepSize(0), m_numberOfEvents(300)
     {
     }
-    
+
     /**
      * Destructor
      */
     MonteCarloAbsorption::~MonteCarloAbsorption()
     {
-      delete m_randGen;
+      delete m_rng;
     }
 
     //------------------------------------------------------------------------------
     // Private methods
     //------------------------------------------------------------------------------
-    
+
     /**
      * Initialize the algorithm
      */
@@ -85,13 +83,13 @@ namespace Mantid
       positiveInt->setLower(1);
       declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
                       "The number of wavelength points for which a simulation is atttempted (default: all points)");
-      declareProperty("EventsPerPoint", 300, positiveInt,
+      declareProperty("EventsPerPoint", m_numberOfEvents, positiveInt,
                       "The number of \"neutron\" events to generate per simulated point");
       declareProperty("SeedValue", 123456789, positiveInt,
                       "Seed the random number generator with this value");
 
     }
-    
+
     /**
      * Execution code
      */
@@ -99,28 +97,26 @@ namespace Mantid
     {
       retrieveInput();
       initCaches();
-      
+
+      g_log.debug() << "Creating output workspace\n";
       MatrixWorkspace_sptr correctionFactors = WorkspaceFactory::Instance().create(m_inputWS);
       correctionFactors->isDistribution(true); // The output of this is a distribution
       correctionFactors->setYUnit(""); // Need to explicitly set YUnit to nothing
       correctionFactors->setYUnitLabel("Attenuation factor");
-      
+
       const bool isHistogram = m_inputWS->isHistogramData();
       const int numHists = static_cast<int>(m_inputWS->getNumberHistograms());
       const int numBins = static_cast<int>(m_inputWS->blocksize());
-      
+
       // Compute the step size
       m_xStepSize = numBins/m_numberOfPoints;
 
-      std::ostringstream message;
-      message << "Simulation performed every " << m_xStepSize  << " wavelength points" << std::endl;
-      g_log.information(message.str());
-      message.str("");
-      
-      Progress prog(this,0.0,1.0,numHists);
+      g_log.information() << "Simulation performed every " << m_xStepSize
+                          << " wavelength points" << std::endl;
+
+      Progress prog(this,0.0,1.0, numHists*numBins/m_xStepSize);
       for( int i = 0; i < numHists; ++i )
       {
-
         // Copy over the X-values
         const MantidVec & xValues = m_inputWS->readX(i);
         correctionFactors->dataX(i) = xValues;
@@ -140,6 +136,7 @@ namespace Mantid
         // Simulation for each requested wavelength point
         for( int bin = 0; bin < numBins; bin += m_xStepSize )
         {
+          prog.report("Computing corrections for bin " + boost::lexical_cast<std::string>(bin));
           const double lambda = isHistogram ?
                 (0.5 * (xValues[bin] + xValues[bin + 1]) ) : xValues[bin];
           doSimulation(detector.get(), lambda, yValues[bin], eValues[bin]);
@@ -153,9 +150,9 @@ namespace Mantid
         // Interpolate through points not simulated
         if( m_xStepSize > 1 )
         {
+          prog.report("Interpolating unsimulated points");
           Kernel::VectorHelper::linearlyInterpolateY(xValues, yValues, m_xStepSize);
         }
-        prog.report();
 
       }
 
@@ -225,17 +222,22 @@ namespace Mantid
      */
     V3D MonteCarloAbsorption::selectScatterPoint() const
     {
-      // Generate 3 random numbers, use them to calculate a random location
-      // within the bounding box of the sample environment + sample
-      // and then check if this position is within the whole environment.
-      // If it is return it, if not try again.
+      // Randomly select a block from the subdivided set and then randomly select a point
+      // within that block and test if it inside the sample/container. If yes then accept, else
+      // keep trying.
+      boost::uniform_int<size_t> uniIntDist(0, m_blocks.size() - 1);
+      boost::variate_generator<boost::mt19937&, boost::uniform_int<size_t>> uniInt(*m_rng, uniIntDist);
+      boost::uniform_real<> uniRealDist(0, 1.0);
+      boost::variate_generator<boost::mt19937&, boost::uniform_real<>> uniReal(*m_rng, uniRealDist);
+
       V3D scatterPoint;
       int nattempts(0);
       while( nattempts < MaxRandPointAttempts )
       {
-        const double x = m_bbox_halflength*(2.0*m_randGen->nextValue() - 1.0);
-        const double y = m_bbox_halfwidth*(2.0*m_randGen->nextValue() - 1.0);
-        const double z = m_bbox_halfheight*(2.0*m_randGen->nextValue() - 1.0);
+        const auto & block = m_blocks[uniInt()];
+        const double x = m_blkHalfX*(2.0*uniReal() - 1.0) + block.xMin();
+        const double y = m_blkHalfY*(2.0*uniReal() - 1.0) + block.yMin();
+        const double z = m_blkHalfZ*(2.0*uniReal() - 1.0) + block.zMin();
         scatterPoint(x,y,z);
         ++nattempts;
         if( m_sampleShape->isValid(scatterPoint) ||
@@ -249,7 +251,6 @@ namespace Mantid
       g_log.error() << "Attempts to generate a random point with the sample/can "
                     << "have exceeded the allowed number of tries.\n";
       throw std::runtime_error("Attempts to produce random scatter point failed. Check sample shape.");
-
     }
 
     /**
@@ -300,7 +301,7 @@ namespace Mantid
 
       length = afterScatter.begin()->distInsideObject;
       factor *= attenuation(length, *m_sampleMaterial, lambda);
-      
+
       afterScatter.clearIntersectionResults();
       if( m_container )
       {
@@ -346,24 +347,6 @@ namespace Mantid
     {
       m_inputWS = getProperty("InputWorkspace");
 
-      // // Define a test sample material
-      // Material *vanadium = new Material("Vanadium", PhysicalConstants::getNeutronAtom(23,0), 0.072);
-      // m_inputWS->mutableSample().setMaterial(*vanadium);
-
-      // // Define test environment
-      // std::ostringstream xml;
-      // xml << "<sphere id=\"" << "sp" <<  "\">"
-      // 	  << "<centre x=\"" << 0.0 << "\"  y=\"" << 0.0 << "\" z=\"" << 0.0 << "\" />"
-      // 	  << "<radius val=\"" << 0.05 << "\" />"
-      // 	  << "</sphere>";
-
-      // Geometry::ShapeFactory shapeMaker;
-      // Object_sptr p = shapeMaker.createShape(xml.str());
-
-      // API::SampleEnvironment * kit = new API::SampleEnvironment("TestEnv");
-      // kit->add(new ObjComponent("one", p, NULL, boost::shared_ptr<Material>(vanadium)));
-      // m_inputWS->mutableSample().setEnvironment(kit);
-
       m_sampleShape = &(m_inputWS->sample().getShape());
       m_sampleMaterial = &(m_inputWS->sample().getMaterial());
       if( !m_sampleShape->hasValidShape() )
@@ -372,13 +355,13 @@ namespace Mantid
                       << ", No. of surfaces: " << m_sampleShape->getSurfacePtr().size() << "\n";
         throw std::invalid_argument("Input workspace has an invalid sample shape.");
       }
-      
+
       if( m_sampleMaterial->totalScatterXSection(1.0) == 0.0 )
       {
         g_log.warning() << "The sample material appears to have zero scattering cross section.\n"
                         << "Result will most likely be nonsensical.\n";
       }
-      
+
       try
       {
         m_container = &(m_inputWS->sample().getEnvironment());
@@ -409,12 +392,11 @@ namespace Mantid
      */
     void MonteCarloAbsorption::initCaches()
     {
-      if( !m_randGen )
-      {
-        const int seedValue = getProperty("SeedValue");
-        m_randGen = new Kernel::MersenneTwister(seedValue);
-      }
-      
+      g_log.debug() << "Caching input";
+      if( m_rng ) delete m_rng;
+      const int seedValue = getProperty("SeedValue");
+      m_rng = new boost::mt19937(seedValue);
+
       m_samplePos = m_inputWS->getInstrument()->getSample()->getPos();
       m_sourcePos = m_inputWS->getInstrument()->getSource()->getPos();
       BoundingBox box(m_sampleShape->getBoundingBox());
@@ -424,13 +406,61 @@ namespace Mantid
         m_container->getBoundingBox(envBox);
         box.grow(envBox);
       }
-      //Save the dimensions for quicker calculations later
-      m_bbox_length = box.xMax() - box.xMin();
-      m_bbox_halflength = 0.5 * m_bbox_length;
-      m_bbox_width = box.yMax() - box.yMin();
-      m_bbox_halfwidth = 0.5 * m_bbox_width;
-      m_bbox_height = box.zMax() - box.zMin();
-      m_bbox_halfheight = 0.5 * m_bbox_height;
+
+      // Chop the bounding box up into a set of small boxes. This will be used
+      // as a first guess for generating a random scatter point
+      const double cubeSide = ELEMENT_SIZE*1e-3;
+      const double xLength = box.width().X();
+      const double yLength = box.width().Y();
+      const double zLength = box.width().Z();
+      const int numXSlices = static_cast<int>(xLength/cubeSide);
+      const int numYSlices = static_cast<int>(yLength/cubeSide);
+      const int numZSlices = static_cast<int>(zLength/cubeSide);
+      const double xThick = xLength/numXSlices;
+      const double yThick = yLength/numYSlices;
+      const double zThick = zLength/numZSlices;
+      m_blkHalfX = 0.5*xThick;
+      m_blkHalfY = 0.5*yThick;
+      m_blkHalfZ = 0.5*zThick;
+
+      const size_t numVolumeElements = numXSlices*numYSlices*numZSlices;
+      g_log.debug() << "Attepmting to divide sample + container into " << numVolumeElements << " blocks.\n";
+
+      try
+      {
+        m_blocks.clear();
+        m_blocks.reserve(numVolumeElements);
+      }
+      catch (std::exception&)
+      {
+        // Typically get here if the number of volume elements is too large
+        // Provide a bit more information
+        g_log.error("Too many volume elements requested - try increasing the value of the ElementSize property.");
+        throw;
+      }
+      const auto boxCentre = box.centrePoint();
+      const double x0 = boxCentre.X() - 0.5*xLength;
+      const double y0 = boxCentre.Y() - 0.5*yLength;
+      const double z0 = boxCentre.Z() - 0.5*zLength;
+      // Store a chunk as a BoundingBox object.
+      for (int i = 0; i < numZSlices; ++i)
+      {
+        const double zmin = z0 + i*zThick;
+        const double zmax = zmin + zThick;
+        for (int j = 0; j < numYSlices; ++j)
+        {
+          const double ymin = y0 + j*yThick;
+          const double ymax = ymin + yThick;
+          for (int k = 0; k < numXSlices; ++k)
+          {
+            const double xmin = x0 + k*xThick;
+            const double xmax = xmin + xThick;
+            m_blocks.push_back(BoundingBox(xmax, ymax, zmax, xmin, ymin, zmin));
+          }
+        }
+      }
+
+      g_log.debug() << "Sample + container divided into " << m_blocks.size() << " blocks.\n";
     }
 
   }
