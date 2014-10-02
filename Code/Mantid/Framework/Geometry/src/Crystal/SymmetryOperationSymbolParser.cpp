@@ -232,7 +232,7 @@ std::vector<int> SymmetryOperationSymbolParser::getVectorForSymbol(const char sy
         symbolVector[2] = factor * 1;
         break;
     default:
-        throw std::runtime_error("Failed to parse matrix row token " + std::string(&symbol) + " with sign " + std::string(&sign));
+        throw std::runtime_error("Failed to parse matrix row token " + std::string(1, symbol) + " with sign " + std::string(1, sign));
     }
 
     return symbolVector;
@@ -247,7 +247,7 @@ int SymmetryOperationSymbolParser::getFactorForSign(const char sign)
     case '-':
         return -1;
     default:
-        throw std::runtime_error("Failed to parse sign " + std::string(&sign));
+        throw std::runtime_error("Failed to parse sign " + std::string(1, sign));
     }
 }
 
