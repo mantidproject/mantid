@@ -1,8 +1,9 @@
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/regex.hpp>
 
@@ -55,6 +56,7 @@ namespace MantidQt
         try
         {
           validateRow(*it);
+          autofillRow(*it);
 
           const int group = m_model->Int(*it, COL_GROUP);
           groups[group].push_back(*it);
@@ -112,29 +114,89 @@ namespace MantidQt
     }
 
     /**
-    Validate a row
+    Validate a row.
+    If a row passes validation, it is ready to be autofilled, but
+    not necessarily ready for processing.
     @param rowNo : The row in the model to validate
     @throws std::invalid_argument if the row fails validation
     */
     void ReflMainViewPresenter::validateRow(size_t rowNo) const
     {
+      if(rowNo >= m_model->rowCount())
+        throw std::invalid_argument("Invalid row");
+
       const std::string   runStr = m_model->String(rowNo, COL_RUNS);
-      const std::string   dqqStr = m_model->String(rowNo, COL_DQQ);
-      const std::string thetaStr = m_model->String(rowNo, COL_ANGLE);
       const std::string  qMinStr = m_model->String(rowNo, COL_QMIN);
       const std::string  qMaxStr = m_model->String(rowNo, COL_QMAX);
 
       if(runStr.empty())
         throw std::invalid_argument("Run column may not be empty.");
 
-      if(dqqStr.empty() && thetaStr.empty())
-        throw std::invalid_argument("Theta and dQ/Q columns may not BOTH be empty.");
-
       if(qMinStr.empty())
         throw std::invalid_argument("Qmin column may not be empty.");
 
       if(qMaxStr.empty())
         throw std::invalid_argument("Qmax column may not be empty.");
+    }
+
+    /**
+    Autofill a row
+    @param rowNo : The row in the model to autofill
+    @throws std::runtime_error if the row could not be auto-filled
+    */
+    void ReflMainViewPresenter::autofillRow(size_t rowNo)
+    {
+      if(rowNo >= m_model->rowCount())
+        throw std::runtime_error("Invalid row");
+
+      const std::string runStr = m_model->String(rowNo, COL_RUNS);
+      MatrixWorkspace_sptr run = boost::dynamic_pointer_cast<MatrixWorkspace>(loadRun(runStr, m_view->getProcessInstrument()));
+
+      //Fetch two theta from the log if needed
+      if(m_model->String(rowNo, COL_ANGLE).empty())
+      {
+        Property* logData = NULL;
+
+        //First try TwoTheta
+        try
+        {
+          logData = run->mutableRun().getLogData("Theta");
+        }
+        catch(std::exception&)
+        {
+          throw std::runtime_error("Value for two theta could not be found in log.");
+        }
+
+        auto logPWV = dynamic_cast<const PropertyWithValue<double>*>(logData);
+        auto logTSP = dynamic_cast<const TimeSeriesProperty<double>*>(logData);
+
+        double thetaVal;
+        if(logPWV)
+          thetaVal = *logPWV;
+        else if(logTSP && logTSP->realSize() > 0)
+          thetaVal = logTSP->lastValue();
+        else
+          throw std::runtime_error("Value for two theta could not be found in log.");
+
+        //Update the model
+        m_model->String(rowNo, COL_ANGLE) = Strings::toString<double>(thetaVal);
+      }
+
+      //If we need to calculate the resolution, do.
+      if(m_model->String(rowNo, COL_DQQ).empty())
+      {
+        IAlgorithm_sptr calcResAlg = AlgorithmManager::Instance().create("CalculateResolution");
+        calcResAlg->setProperty("Workspace", run);
+        calcResAlg->setProperty("TwoTheta", m_model->String(rowNo, COL_ANGLE));
+        calcResAlg->execute();
+
+        //Update the model
+        double dqqVal = calcResAlg->getProperty("Resolution");
+        m_model->String(rowNo, COL_DQQ) = Strings::toString<double>(dqqVal);
+      }
+
+      //Make sure the view updates
+      m_view->showTable(m_model);
     }
 
     /**
