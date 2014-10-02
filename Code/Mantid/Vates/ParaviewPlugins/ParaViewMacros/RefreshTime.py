@@ -2,7 +2,7 @@
 ## Author: Owen Arnold @ ISIS/Tessella
 ## Date: 24/03/2011
 ## Purpose: Resets the time animation range to reflect the timestep values on the active source.
-##          
+##
 ##-------------------------------------------------------------------------
 
 src = GetActiveSource()

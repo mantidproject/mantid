@@ -99,9 +99,9 @@ namespace IDA
     // Signal/slot ui connections
     connect(uiForm().furyfit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(plotInput()));
     connect(uiForm().furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
-    connect(uiForm().furyfit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(plotInput()));
+    connect(uiForm().furyfit_lePlotSpectrum, SIGNAL(editingFinished()), this, SLOT(plotInput()));
     connect(uiForm().furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().furyfit_swInput, SLOT(setCurrentIndex(int)));  
-    connect(uiForm().furyfit_pbSeqFit, SIGNAL(clicked()), this, SLOT(sequential()));
+    connect(uiForm().furyfit_pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
 
     //plot input connections
     connect(uiForm().furyfit_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
@@ -110,7 +110,9 @@ namespace IDA
     connect(uiForm().furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
 
     // apply validators - furyfit
-    uiForm().furyfit_leSpecNo->setValidator(m_intVal);
+    uiForm().furyfit_lePlotSpectrum->setValidator(m_intVal);
+    uiForm().furyfit_leSpectraMin->setValidator(m_intVal);
+    uiForm().furyfit_leSpectraMax->setValidator(m_intVal);
 
     // Set a custom handler for the QTreePropertyBrowser's ContextMenu event
     m_ffTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -119,115 +121,63 @@ namespace IDA
 
   void FuryFit::run()
   {
-    // First create the function
-    auto function = createFunction();
-
-    uiForm().furyfit_ckPlotGuess->setChecked(false);
-    
-    const int fitType = uiForm().furyfit_cbFitType->currentIndex();
-    if ( uiForm().furyfit_ckConstrainIntensities->isChecked() )
+    const QString error = validate();
+    if( ! error.isEmpty() )
     {
-      switch ( fitType )
-      {
-      case 0: // 1 Exp
-      case 2: // 1 Str
-        m_ties = "f1.Intensity = 1-f0.A0";
-        break;
-      case 1: // 2 Exp
-      case 3: // 1 Exp & 1 Str
-        m_ties = "f1.Intensity=1-f2.Intensity-f0.A0";
-        break;
-      default:
-        break;
-      }
+      showInformationBox(error);
+      return;
     }
-    QString ftype = fitTypeString();
-
-    plotInput();
+    
     if ( m_ffInputWS == NULL )
     {
       return;
     }
 
-    QString pyInput = "from IndirectCommon import getWSprefix\nprint getWSprefix('%1')\n";
-    pyInput = pyInput.arg(m_ffInputWSName);
-    QString outputNm = runPythonCode(pyInput).trimmed();
-    outputNm += QString("fury_") + ftype + uiForm().furyfit_leSpecNo->text();
-    std::string output = outputNm.toStdString();
-
-    // Create the Fit Algorithm
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
-    alg->initialize();
-    alg->setPropertyValue("Function", function->asString());
-    alg->setPropertyValue("InputWorkspace", m_ffInputWSName.toStdString());
-    alg->setProperty("WorkspaceIndex", uiForm().furyfit_leSpecNo->text().toInt());
-    alg->setProperty("StartX", m_ffRangeManager->value(m_ffProp["StartX"]));
-    alg->setProperty("EndX", m_ffRangeManager->value(m_ffProp["EndX"]));
-    alg->setProperty("Ties", m_ties.toStdString());
-    alg->setPropertyValue("Output", output);
-    alg->execute();
-
-    if ( ! alg->isExecuted() )
-    {
-      QString msg = "There was an error executing the fitting algorithm. Please see the "
-        "Results Log pane for more details.";
-      showInformationBox(msg);
-      return;
-    }
-
-    // Now show the fitted curve of the mini plot
-    m_ffFitCurve = plotMiniplot(m_ffPlot, m_ffFitCurve, outputNm+"_Workspace", 1);
-    QPen fitPen(Qt::red, Qt::SolidLine);
-    m_ffFitCurve->setPen(fitPen);
-    m_ffPlot->replot();
-
-    Mantid::API::IFunction_sptr outputFunc = alg->getProperty("Function");
-
-    // Get params.
-    QMap<QString,double> parameters;
-    std::vector<std::string> parNames = outputFunc->getParameterNames();
-    std::vector<double> parVals;
-
-    for( size_t i = 0; i < parNames.size(); ++i )
-      parVals.push_back(outputFunc->getParameter(parNames[i]));
-
-    for ( size_t i = 0; i < parNames.size(); ++i )
-      parameters[QString(parNames[i].c_str())] = parVals[i];
-
-    m_ffRangeManager->setValue(m_ffProp["BackgroundA0"], parameters["f0.A0"]);
-  
-    if ( fitType != 2 )
-    {
-      // Exp 1
-      m_ffDblMng->setValue(m_ffProp["Exponential1.Intensity"], parameters["f1.Intensity"]);
-      m_ffDblMng->setValue(m_ffProp["Exponential1.Tau"], parameters["f1.Tau"]);
+    const bool constrainBeta = uiForm().furyfit_ckConstrainBeta->isChecked();
+    const bool constrainIntens = uiForm().furyfit_ckConstrainIntensities->isChecked();
+    Mantid::API::CompositeFunction_sptr func = createFunction();
+    func->tie("f0.A1", "0");
     
-      if ( fitType == 1 )
-      {
-        // Exp 2
-        m_ffDblMng->setValue(m_ffProp["Exponential2.Intensity"], parameters["f2.Intensity"]);
-        m_ffDblMng->setValue(m_ffProp["Exponential2.Tau"], parameters["f2.Tau"]);
-      }
+    if ( constrainIntens )
+    {
+      constrainIntensities(func);
+    }
+    
+    func->applyTies();
+    
+    std::string function = std::string(func->asString());
+    QString pyInput = "from IndirectDataAnalysis import furyfitSeq, furyfitMult\n"
+      "input = '" + m_ffInputWSName + "'\n"
+      "func = r'" + QString::fromStdString(function) + "'\n"
+      "ftype = '"   + fitTypeString() + "'\n"
+      "startx = " + m_ffProp["StartX"]->valueText() + "\n"
+      "endx = " + m_ffProp["EndX"]->valueText() + "\n"
+      "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n"
+      "spec_min = " + uiForm().furyfit_leSpectraMin->text() + "\n"
+      "spec_max = None\n";
+    
+    if(uiForm().furyfit_leSpectraMax->text() != "")
+        pyInput += "spec_max = " + uiForm().furyfit_leSpectraMax->text() + "\n";
+
+    if (constrainIntens) pyInput += "constrain_intens = True \n";
+    else pyInput += "constrain_intens = False \n";
+
+    if ( uiForm().furyfit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+    else pyInput += "verbose = False\n";
+
+    if ( uiForm().furyfit_ckSaveSeq->isChecked() ) pyInput += "save = True\n";
+    else pyInput += "save = False\n";
+
+    if( !constrainBeta )
+    {
+      pyInput += "furyfitSeq(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
+    }
+    else
+    {
+      pyInput += "furyfitMult(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
     }
   
-    if ( fitType > 1 )
-    {
-      // Str
-      QString fval;
-      if ( fitType == 2 ) { fval = "f1."; }
-      else { fval = "f2."; }
-    
-      m_ffDblMng->setValue(m_ffProp["StretchedExp.Intensity"], parameters[fval+"Intensity"]);
-      m_ffDblMng->setValue(m_ffProp["StretchedExp.Tau"], parameters[fval+"Tau"]);
-      m_ffDblMng->setValue(m_ffProp["StretchedExp.Beta"], parameters[fval+"Beta"]);
-    }
-
-    if ( uiForm().furyfit_ckPlotOutput->isChecked() )
-    {
-      QString pyInput = "from mantidplot import *\n"
-        "plotSpectrum('" + QString::fromStdString(output) + "_Workspace', [0,1,2])\n";
-      QString pyOutput = runPythonCode(pyInput);
-    }
+    QString pyOutput = runPythonCode(pyInput);
   }
 
   QString FuryFit::validate()
@@ -392,20 +342,20 @@ namespace IDA
       m_ffTree->addProperty(m_ffProp["Exponential1"]);
 
       //remove option to plot beta
-      uiForm().furyfit_cbPlotOutput->removeItem(3);
+      uiForm().furyfit_cbPlotOutput->removeItem(4);
       break;
     case 1:
       m_ffTree->addProperty(m_ffProp["Exponential1"]);
       m_ffTree->addProperty(m_ffProp["Exponential2"]);
 
       //remove option to plot beta
-      uiForm().furyfit_cbPlotOutput->removeItem(3);
+      uiForm().furyfit_cbPlotOutput->removeItem(4);
       break;
     case 2:
       m_ffTree->addProperty(m_ffProp["StretchedExp"]);
 
       //add option to plot beta
-      if(uiForm().furyfit_cbPlotOutput->count() == 3)
+      if(uiForm().furyfit_cbPlotOutput->count() == 4)
       {
         uiForm().furyfit_cbPlotOutput->addItem("Beta");
       }
@@ -416,7 +366,7 @@ namespace IDA
       m_ffTree->addProperty(m_ffProp["StretchedExp"]);
 
       //add option to plot beta
-      if(uiForm().furyfit_cbPlotOutput->count() == 3)
+      if(uiForm().furyfit_cbPlotOutput->count() == 4)
       {
         uiForm().furyfit_cbPlotOutput->addItem("Beta");
       }
@@ -478,8 +428,14 @@ namespace IDA
       break;
     }
 
-    int specNo = uiForm().furyfit_leSpecNo->text().toInt();
+    int specNo = uiForm().furyfit_lePlotSpectrum->text().toInt();
     int nHist = static_cast<int>(m_ffInputWS->getNumberHistograms());
+    int specMin = 0;
+    int specMax = nHist - 1;
+
+    m_intVal->setRange(specMin, specMax);
+    uiForm().furyfit_leSpectraMin->setText(QString::number(specMin));
+    uiForm().furyfit_leSpectraMax->setText(QString::number(specMax));
 
     if( specNo < 0 || specNo >= nHist )
     {
@@ -491,7 +447,7 @@ namespace IDA
       {
         specNo = nHist-1;
       }
-      uiForm().furyfit_leSpecNo->setText(QString::number(specNo));
+      uiForm().furyfit_lePlotSpectrum->setText(QString::number(specNo));
     }
 
     m_ffDataCurve = plotMiniplot(m_ffPlot, m_ffDataCurve, m_ffInputWS, specNo);
@@ -616,7 +572,7 @@ namespace IDA
     }
   }
 
-  void FuryFit::sequential()
+  void FuryFit::singleFit()
   {
     const QString error = validate();
     if( ! error.isEmpty() )
@@ -624,57 +580,112 @@ namespace IDA
       showInformationBox(error);
       return;
     }
-    
+
+    // First create the function
+    auto function = createFunction();
+
+    const int fitType = uiForm().furyfit_cbFitType->currentIndex();
+    if ( uiForm().furyfit_ckConstrainIntensities->isChecked() )
+    {
+      switch ( fitType )
+      {
+      case 0: // 1 Exp
+      case 2: // 1 Str
+        m_ties = "f1.Intensity = 1-f0.A0";
+        break;
+      case 1: // 2 Exp
+      case 3: // 1 Exp & 1 Str
+        m_ties = "f1.Intensity=1-f2.Intensity-f0.A0";
+        break;
+      default:
+        break;
+      }
+    }
+    QString ftype = fitTypeString();
+
+    plotInput();
     if ( m_ffInputWS == NULL )
     {
       return;
     }
 
-    const bool constrainBeta = uiForm().furyfit_ckConstrainBeta->isChecked();
-    const bool constrainIntens = uiForm().furyfit_ckConstrainIntensities->isChecked();
-    Mantid::API::CompositeFunction_sptr func = createFunction();
-    func->tie("f0.A1", "0");
-    
-    if ( constrainIntens )
+    QString pyInput = "from IndirectCommon import getWSprefix\nprint getWSprefix('%1')\n";
+    pyInput = pyInput.arg(m_ffInputWSName);
+    QString outputNm = runPythonCode(pyInput).trimmed();
+    outputNm += QString("fury_") + ftype + uiForm().furyfit_lePlotSpectrum->text();
+    std::string output = outputNm.toStdString();
+
+    // Create the Fit Algorithm
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    alg->initialize();
+    alg->setPropertyValue("Function", function->asString());
+    alg->setPropertyValue("InputWorkspace", m_ffInputWSName.toStdString());
+    alg->setProperty("WorkspaceIndex", uiForm().furyfit_lePlotSpectrum->text().toInt());
+    alg->setProperty("StartX", m_ffRangeManager->value(m_ffProp["StartX"]));
+    alg->setProperty("EndX", m_ffRangeManager->value(m_ffProp["EndX"]));
+    alg->setProperty("Ties", m_ties.toStdString());
+    alg->setPropertyValue("Output", output);
+    alg->execute();
+
+    if ( ! alg->isExecuted() )
     {
-      constrainIntensities(func);
+      QString msg = "There was an error executing the fitting algorithm. Please see the "
+        "Results Log pane for more details.";
+      showInformationBox(msg);
+      return;
     }
-    
-    func->applyTies();
-    
-    std::string function = std::string(func->asString());
-    QString pyInput = "from IndirectDataAnalysis import furyfitSeq, furyfitMult\n"
-      "input = '" + m_ffInputWSName + "'\n"
-      "func = r'" + QString::fromStdString(function) + "'\n"
-      "ftype = '"   + fitTypeString() + "'\n"
-      "startx = " + m_ffProp["StartX"]->valueText() + "\n"
-      "endx = " + m_ffProp["EndX"]->valueText() + "\n"
-      "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n";
-    
-    if (constrainIntens) pyInput += "constrain_intens = True \n";
-    else pyInput += "constrain_intens = False \n";
 
-    if ( uiForm().furyfit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
+    // Now show the fitted curve of the mini plot
+    m_ffFitCurve = plotMiniplot(m_ffPlot, m_ffFitCurve, outputNm+"_Workspace", 1);
+    QPen fitPen(Qt::red, Qt::SolidLine);
+    m_ffFitCurve->setPen(fitPen);
+    m_ffPlot->replot();
 
-    if ( uiForm().furyfit_ckSaveSeq->isChecked() ) pyInput += "save = True\n";
-    else pyInput += "save = False\n";
+    Mantid::API::IFunction_sptr outputFunc = alg->getProperty("Function");
 
-    if( !constrainBeta )
+    // Get params.
+    QMap<QString,double> parameters;
+    std::vector<std::string> parNames = outputFunc->getParameterNames();
+    std::vector<double> parVals;
+
+    for( size_t i = 0; i < parNames.size(); ++i )
+      parVals.push_back(outputFunc->getParameter(parNames[i]));
+
+    for ( size_t i = 0; i < parNames.size(); ++i )
+      parameters[QString(parNames[i].c_str())] = parVals[i];
+
+    m_ffRangeManager->setValue(m_ffProp["BackgroundA0"], parameters["f0.A0"]);
+  
+    if ( fitType != 2 )
     {
-      pyInput += "furyfitSeq(input, func, ftype, startx, endx, constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
-    }
-    else
-    {
-      pyInput += "furyfitMult(input, func, ftype, startx, endx, constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
+      // Exp 1
+      m_ffDblMng->setValue(m_ffProp["Exponential1.Intensity"], parameters["f1.Intensity"]);
+      m_ffDblMng->setValue(m_ffProp["Exponential1.Tau"], parameters["f1.Tau"]);
+    
+      if ( fitType == 1 )
+      {
+        // Exp 2
+        m_ffDblMng->setValue(m_ffProp["Exponential2.Intensity"], parameters["f2.Intensity"]);
+        m_ffDblMng->setValue(m_ffProp["Exponential2.Tau"], parameters["f2.Tau"]);
+      }
     }
   
-    QString pyOutput = runPythonCode(pyInput);
+    if ( fitType > 1 )
+    {
+      // Str
+      QString fval;
+      if ( fitType == 2 ) { fval = "f1."; }
+      else { fval = "f2."; }
+    
+      m_ffDblMng->setValue(m_ffProp["StretchedExp.Intensity"], parameters[fval+"Intensity"]);
+      m_ffDblMng->setValue(m_ffProp["StretchedExp.Tau"], parameters[fval+"Tau"]);
+      m_ffDblMng->setValue(m_ffProp["StretchedExp.Beta"], parameters[fval+"Beta"]);
+    }
   }
 
   void FuryFit::plotGuess(QtProperty*)
   {
-    if ( ! uiForm().furyfit_ckPlotGuess->isChecked() || m_ffDataCurve == NULL )
+    if ( m_ffDataCurve == NULL )
     {
       return;
     }

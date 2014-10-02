@@ -20,7 +20,7 @@ Description
 EventWorkspace note
 ###################
 
-For `EventWorkspaces <http://www.mantidproject.org/EventWorkspace>`_, the event lists at each
+For :ref:`EventWorkspaces <EventWorkspace>`, the event lists at each
 workspace index are concatenated to create the output event list at the
 same workspace index. Note that in some (rare :sup:`\*`) cases, these
 event lists might be from different detectors; this is not checked

@@ -34,6 +34,7 @@ public slots:
 private slots:
   void setDefaultAccumulationMethod(const QString&);
   void accept();
+  void initListenerPropLayout(const QString&);
 
 private:
   /// Initialize the layout

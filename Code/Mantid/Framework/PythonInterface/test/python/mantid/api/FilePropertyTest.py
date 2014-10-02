@@ -3,12 +3,12 @@ from mantid.api import FileProperty, FileAction, AlgorithmManager
 from mantid.kernel import Direction
 
 class FilePropertyTest(unittest.TestCase):
-  
+
     def test_constructor_with_name_and_default_and_action(self):
         prop = FileProperty("LoadProperty", "", FileAction.Load)
         self.assertNotEquals("", prop.isValid)
         self.assertEquals(Direction.Input, prop.direction)
-        
+
     def test_constructor_with_name_and_default_and_action_and_exts_list(self):
         prop = FileProperty("LoadProperty", "", FileAction.Load, ['.nxs', '.raw'])
         self.assertNotEquals("", prop.isValid)
@@ -28,7 +28,7 @@ class FilePropertyTest(unittest.TestCase):
         prop = FileProperty("LoadProperty", "", FileAction.Load, ['.nxs'], Direction.InOut)
         self.assertNotEquals("", prop.isValid)
         self.assertEquals(Direction.InOut, prop.direction)
-    
+
     def test_alg_get_property_converts_to_this(self):
         alg = AlgorithmManager.createUnmanaged("LoadRaw")
         alg.initialize()

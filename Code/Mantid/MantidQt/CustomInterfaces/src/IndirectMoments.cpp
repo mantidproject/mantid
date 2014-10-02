@@ -70,6 +70,7 @@ namespace CustomInterfaces
   void IndirectMoments::run()
   {
     using namespace Mantid::API;
+
     QString workspaceName = m_uiForm.moment_dsInput->getCurrentDataName();
     QString outputName = workspaceName.left(workspaceName.length()-4);
     QString scaleString = m_uiForm.moment_leScale->text();
@@ -86,6 +87,8 @@ namespace CustomInterfaces
       scale = scaleString.toDouble();
     }
 
+    std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
+
     IAlgorithm_sptr momentsAlg = AlgorithmManager::Instance().create("SofQWMoments", -1);
     momentsAlg->initialize();
     momentsAlg->setProperty("Sample", workspaceName.toStdString());
@@ -95,7 +98,7 @@ namespace CustomInterfaces
     momentsAlg->setProperty("Plot", plot);
     momentsAlg->setProperty("Verbose", verbose);
     momentsAlg->setProperty("Save", save);
-    momentsAlg->setProperty("OutputWorkspace", outputName.toStdString() + "_Moments");
+    momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
 
     //execute algorithm on seperate thread
     runAlgorithm(momentsAlg);

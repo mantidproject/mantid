@@ -22,18 +22,9 @@ Usage
 
 .. testcode:: ExHistSimple
 
-  # Set up default directory and file name
+  # Create filename (puts it in home directory to guarantee it exists)
   import os
-
-  defaultsavepath = config["defaultsave.directory"]
-  if config.hasProperty("defaultsave.directory"):
-    defaultpath = config["defaultsave.directory"]
-  elif config.hasProperty("default.savedirectory"):
-    defaultpath = config["default.savedirectory"]
-  else:
-    defaultpath = "/tmp/"
-
-  savefile = os.path.join(defaultpath, "fixed.iparm")
+  savefile = os.path.expanduser("~/fixed.iparm")
 
   # Run the algorithm
   FixGSASInstrumentFile(InputFilename="PG3HR60_FmPython.iparm", OutputFilename=savefile)
@@ -41,6 +32,7 @@ Usage
   # Load new file and check each line
   wfile = open(savefile, "r")
   lines = wfile.readlines()
+  wfile.close()
   numlinefewer80b = 0
   for line in lines:
     if len(line) > 0:

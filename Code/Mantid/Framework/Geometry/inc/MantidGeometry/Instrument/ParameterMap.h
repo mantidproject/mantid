@@ -109,6 +109,8 @@ namespace Geometry
     static const std::string & pV3D();
     static const std::string & pQuat();
 
+    const std::string diff(const ParameterMap & rhs, const bool & firstDiffOnly = false) const;
+
     /// Inquality comparison operator
     bool operator!=(const ParameterMap & rhs) const;
     /// Equality comparison operator
@@ -233,7 +235,7 @@ namespace Geometry
     }
 
     /// Return the value of a parameter as a string
-    std::string getString(const IComponent* comp,const std::string& name) const;
+    std::string getString(const IComponent* comp,const std::string& name, bool recursive = false) const;
     /// Returns a string parameter as vector's first element if exists and an empty vector if it doesn't
     std::vector<std::string> getString(const std::string& compName,const std::string& name) const 
     {

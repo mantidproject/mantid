@@ -1,10 +1,163 @@
 """We need to run Sphinx inside MantidPlot to document the internal
-   module. This script calls the sphinx entry point with the necessary 
+   module. This script calls the sphinx entry point with the necessary
    arguments
 """
+from optparse import OptionParser
 import os
-import shutil
+import re
 import sys
+
+DOC_EXT = ".rst"
+
+###############################################################################
+# CMake-populated variables
+###############################################################################
+BUILDER = "@BUILDER@"
+SRC_DIR = "@SPHINX_SRC_DIR@"
+CONF_DIR = "@SPHINX_CONF_DIR@"
+SPHINX_BUILD_DIR = "@SPHINX_BUILD_DIR@"
+SCREENSHOTS_DIR = "@SCREENSHOTS_DIR@"
+
+###############################################################################
+# Main
+###############################################################################
+
+def main(sysarg):
+    """
+    Execute the Sphinx build.
+
+    Args:
+      sysarg (list): A list of strings giving arguments to the script,
+                     where it is assumed that the path to the script is the
+                     first argument
+    """
+    opts, args = parseargs(sysarg)
+    if len(args) > 0:
+        raise RuntimeError("Unexpected command line arguments: %s. "
+                           "Use -h for help" % ' '.join(args))
+
+    # Update sys path if we need to
+    update_path(opts.mantidpath)
+
+    # Find test files
+    testpaths = find_test_files(SRC_DIR, opts.testinclude)
+
+    # Update environment with screenshots path if necessary
+    if SCREENSHOTS_DIR != "":
+        os.environ["SCREENSHOTS_DIR"] = SCREENSHOTS_DIR
+
+    # Arguments for main
+    output_dir = pathjoin(SPHINX_BUILD_DIR, BUILDER)
+    doctree_dir = pathjoin(SPHINX_BUILD_DIR, "doctrees")
+    argv = [sys.executable,
+            "-b", BUILDER,
+            "-d", doctree_dir,
+            "-c", CONF_DIR,
+            SRC_DIR, output_dir]
+
+    if testpaths is not None:
+        if len(testpaths) > 0:
+            argv.extend(testpaths)
+        else:
+            raise RuntimeError("No tests matched regex '%s'"
+                                % opts.testinclude)
+
+    # Run
+    import sphinx
+    sys.exit(sphinx.main(argv))
+
+#-----------------------------------------------------------------------------------------------
+
+def parseargs(arglist):
+    """
+    Split script arguments into options and arguments.
+
+    Args:
+      arglist: List of strings to control program
+    """
+    parser = OptionParser(usage="Usage: %prog [options]",
+                          conflict_handler='error')
+    parser.add_option("-m", "--mantidpath", dest="mantidpath",
+                      help="Location of mantid package. Has no effect if run inside MantidPlot")
+    parser.add_option("-R", "--tests-regex", dest="testinclude",
+                      help="Regex specifying which tests to run. It is matched against the "
+                      "filename when considering whether to run a test.")
+    return parser.parse_args(arglist[1:]) # hack off filename
+
+#-----------------------------------------------------------------------------------------------
+
+def update_path(mantidpath):
+    """
+    If not inside MantidPlot (current check is whether we can import _qti)
+    then insert given path as first directory in sys.path
+
+    Args:
+      mantidpath (str): A string giving the location of the mantid module
+    """
+    try:
+        import _qti
+        gui = True
+    except ImportError:
+        gui = False
+
+    # If it's MantidPlot then we already know what our paths should be so ignore it
+    if gui:
+        return
+
+    # check for directory
+    if not os.path.isdir(os.path.join(mantidpath, "mantid")):
+        raise ValueError("Unable to find mantid package in '%s'" % mantidpath)
+    # is package valid
+    if not os.path.isfile(os.path.join(mantidpath, "mantid", "__init__.py")):
+        raise ValueError("Invalid mantid package. No __init__ found in '%s' %s")
+
+    # Update sys.path
+    sys.path.insert(0, mantidpath)
+
+#-----------------------------------------------------------------------------------------------
+
+def find_test_files(src_dir, name_re):
+    """
+    Find the test files that should be run based on a source directory
+    and regex.
+
+    Args:
+      src_dir (str): A string giving the source directory of doc files
+      name_re (str): A regex to match against a test filename. If None
+                     then None is returned
+    Returns:
+      A list of paths to the chosen test files.
+    """
+    if name_re is None:
+        return None
+    name_re_comp = re.compile(name_re)
+    testpaths = []
+    for dirpath, dirnames, filenames in os.walk(src_dir):
+        testfiles = find_matching_tests(filenames, name_re_comp)
+        # Join each filename with the current path and extend the list
+        testpaths.extend(map(lambda x: os.path.join(dirpath, x), testfiles))
+
+    return testpaths
+
+def find_matching_tests(filenames, name_re):
+    """
+    For a list of filenames, return the list that matches the given
+    regex
+
+    Args:
+      filenames: A list of filenames
+      name_re (re.regex): A compiled regex object
+    Returns:
+      A list of matching test names
+    """
+    testfiles = []
+    for filename in filenames:
+        if not filename.endswith(DOC_EXT):
+            continue
+        if name_re.match(filename.rstrip(DOC_EXT)):
+            testfiles.append(filename)
+
+    return testfiles
 
 #-----------------------------------------------------------------------------------------------
 def pathjoin(left, *args):
@@ -13,24 +166,11 @@ def pathjoin(left, *args):
     always "/" separated, even on Windows.
     """
     return left + "/" + "/".join(args)
+
 #-----------------------------------------------------------------------------------------------
 
-# set environment
-screenshots_dir = "@SCREENSHOTS_DIR@"
-if screenshots_dir != "":
-    os.environ["SCREENSHOTS_DIR"] = screenshots_dir
 
-# All paths are cmake style so are "/" separated, even on Windows
-builder = "@BUILDER@"
-src_dir = "@CMAKE_CURRENT_SOURCE_DIR@/source"
-sphinx_build_dir = "@SPHINX_BUILD_DIR@"
-conf_dir = "@SPHINX_CONF_DIR@"
-
-output_dir = pathjoin(sphinx_build_dir, builder)
-doctree_dir = pathjoin(sphinx_build_dir, "doctrees")
+##################################################################################
 
 if __name__ == "__main__":
-    from sphinx import main
-    argv = [sys.executable, "-b", builder, "-d", doctree_dir, "-c", conf_dir, src_dir, output_dir]
-    sys.exit(main(argv))
-
+    main(sys.argv)

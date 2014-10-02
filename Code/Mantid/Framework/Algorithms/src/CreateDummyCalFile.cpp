@@ -264,7 +264,6 @@ namespace Mantid
         int number, udet, select, group;
         double offset;
 
-        instrcalmap::const_iterator it;
         std::string str;
         while(getline(infile,str))
         {
@@ -272,10 +271,12 @@ namespace Mantid
             continue;
           std::istringstream istr(str);
           istr >> number >> udet >> offset >> select >> group;
-          it=instrcalib.find(udet);
-          if (it==instrcalib.end()) // Not found, don't assign a group
-            group=0;
-          group=((*it).second).second; // If found then assign new group
+          instrcalmap::const_iterator it = instrcalib.find(udet);
+          if (it == instrcalib.end()) // Not found, don't assign a group
+            group = 0;
+          else
+            group=((*it).second).second; // If found then assign new group
+          // write to file
           writeCalEntry(outfile,number,udet,offset,select,group);
         }
       }

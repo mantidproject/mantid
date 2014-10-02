@@ -19,17 +19,17 @@ def CalibrateWish( RunNumber, PanelNumber):
     config['default.instrument']="WISH"
     filename = str(RunNumber)
     CalibratedComponent = 'WISH/panel'+PanelNumber
-    
+
     # Get calibration raw file and integrate it
-    print "Loading",filename 
+    print "Loading",filename
     rawCalibInstWS = Load(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
     CalibInstWS = Integration( rawCalibInstWS, RangeLower=1, RangeUpper=20000 )
     DeleteWorkspace(rawCalibInstWS)
-    print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate" 
+    print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate"
 
     # Give y-positions of slit points (gotten for converting first tube's slit point to Y)
 
-    # WISH instrument has a particularity. It is composed by a group of upper tubes and lower tubes, 
+    # WISH instrument has a particularity. It is composed by a group of upper tubes and lower tubes,
     # they are disposed 3 milimiters in difference one among the other
     lower_tube = numpy.array([-0.41,-0.31,-0.21,-0.11,-0.02, 0.09, 0.18, 0.28, 0.39 ])
     upper_tube = numpy.array(lower_tube+0.003)
@@ -38,17 +38,17 @@ def CalibrateWish( RunNumber, PanelNumber):
 
     # Get the calibration and put it into the calibration table
 
-    #calibrate the lower tubes 
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, lower_tube, funcForm, 
+    #calibrate the lower tubes
+    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, lower_tube, funcForm,
                                                   rangeList = range(0,76), outputPeak=True)
-    
+
     #calibrate the upper tubes
     calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, upper_tube, funcForm,
                                     rangeList = range(76,152),
                                     calibTable=calibrationTable, #give the calibration table to append data
                                     outputPeak = peakTable #give peak table to append data
                                                  )
-                                                 
+
     print "Got calibration (new positions of detectors)"
 
     #Apply the calibration
@@ -69,4 +69,4 @@ if __name__ == "__main__":
   # this file is found on cycle_11_1
   RunNumber = 17701
   PanelNumber = '03'
-  CalibrateWish(RunNumber, PanelNumber)   
+  CalibrateWish(RunNumber, PanelNumber)

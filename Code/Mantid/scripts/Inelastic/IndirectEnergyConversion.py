@@ -16,7 +16,7 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
             if ( SpecMin == -1 ) and ( SpecMax == -1 ):
                 Load(Filename=file, OutputWorkspace=name+Suffix, LoadLogFiles=False)
             else:
-                Load(Filename=file, OutputWorkspace=name+Suffix, SpectrumMin=SpecMin, 
+                Load(Filename=file, OutputWorkspace=name+Suffix, SpectrumMin=SpecMin,
                     SpectrumMax=SpecMax, LoadLogFiles=False)
             workspaces.append(name+Suffix)
         except ValueError, message:
@@ -62,7 +62,7 @@ def sliceReadRawFile(fname, Verbose):
     #Load the raw file
     (dir, filename) = os.path.split(fname)
     (root, ext) = os.path.splitext(filename)
-    
+
     Load(Filename=fname, OutputWorkspace=root, LoadLogFiles=False)
 
     return root
@@ -74,7 +74,7 @@ def countMonitors(rawFile):
     nhist = rawFile.getNumberHistograms()
     detector = rawFile.getDetector(0)
     monCount = 1
-    
+
     if detector.isMonitor():
         #monitors are at the start
         for i in range(1,nhist):
@@ -84,7 +84,7 @@ def countMonitors(rawFile):
                 monCount += 1
             else:
                 break
-        
+
         return monCount, True
     else:
         #monitors are at the end
@@ -93,7 +93,7 @@ def countMonitors(rawFile):
         if not detector.isMonitor():
             #if it's not, we don't have any monitors!
             return 0, True
-        
+
         for i in range(nhist,0,-1):
             detector = rawFile.getDetector(i)
 
@@ -114,16 +114,16 @@ def sliceProcessCalib(rawFile, calibWsName, spec):
     #offset cropping range to account for monitors
     (monCount, atStart) = countMonitors(rawFile)
 
-    if atStart: 
+    if atStart:
         calibSpecMin -= monCount+1
         calibSpecMax -= monCount+1
 
     #Crop the calibration workspace, excluding the monitors
-    CropWorkspace(InputWorkspace=calibWsName, OutputWorkspace=calibWsName, 
+    CropWorkspace(InputWorkspace=calibWsName, OutputWorkspace=calibWsName,
         StartWorkspaceIndex=calibSpecMin, EndWorkspaceIndex=calibSpecMax)
 
 def sliceProcessRawFile(rawFile, calibWsName, useCalib, xRange, useTwoRanges, spec, suffix, Verbose):
-    
+
     #Crop the raw file to use the desired number of spectra
     #less one because CropWorkspace is zero based
     CropWorkspace(InputWorkspace=rawFile, OutputWorkspace=rawFile,
@@ -143,7 +143,7 @@ def sliceProcessRawFile(rawFile, calibWsName, useCalib, xRange, useTwoRanges, sp
         Integration(InputWorkspace=rawFile, OutputWorkspace=sfile, RangeLower=xRange[0], RangeUpper=xRange[1],
             StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
     else:
-        CalculateFlatBackground(InputWorkspace=rawFile, OutputWorkspace=sfile, StartX=xRange[2], EndX=xRange[3], 
+        CalculateFlatBackground(InputWorkspace=rawFile, OutputWorkspace=sfile, StartX=xRange[2], EndX=xRange[3],
                 Mode='Mean')
         Integration(InputWorkspace=sfile, OutputWorkspace=sfile, RangeLower=xRange[0], RangeUpper=xRange[1],
             StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
@@ -162,7 +162,7 @@ def slice(inputfiles, calib, xRange, spec, suffix, Save=False, Verbose=False, Pl
     useTwoRanges = (len(xRange) != 2)
     useCalib = (calib != '')
     calibWsName = '__calibration'
-    
+
     #load the calibration file
     if useCalib:
         Load(Filename=calib, OutputWorkspace=calibWsName)
@@ -203,7 +203,7 @@ def slice(inputfiles, calib, xRange, spec, suffix, Save=False, Verbose=False, Pl
             pass
 
     EndTime('Slice')
-    
+
 def getInstrumentDetails(instrument):
     instr_name = '__empty_' + instrument
     if mtd.doesExist(instr_name):
@@ -267,81 +267,3 @@ def getReflectionDetails(inst, analyser, refl):
     except IndexError:
         pass
     return result
-
-##############################################################################
-# Transmission
-##############################################################################
-
-def UnwrapMon(inWS):
-# Unwrap monitor - inWS contains M1,M2,S1  - outWS contains unwrapped Mon
-#Unwrap s1>2 to L of S2 (M2) ie 38.76  Ouput is in wavelength
-    out, join = UnwrapMonitor(InputWorkspace=inWS,LRef='37.86')
-    outWS = 'out'
-#Fill bad (dip) in spectrum
-    RemoveBins(InputWorkspace=outWS, OutputWorkspace=outWS, Xmin=join-0.001, Xmax=join+0.001,
-        Interpolation="Linear")
-    FFTSmooth(InputWorkspace=outWS, OutputWorkspace=outWS, WorkspaceIndex=0, IgnoreXBins=True) # Smooth - FFT
-    DeleteWorkspace(inWS)	# delete monWS
-    return outWS
-
-def TransMon(inst, type,file,verbose):
-    if verbose:
-        logger.notice('Raw file : '+file)
-    LoadRaw(Filename=file,OutputWorkspace='__m1',SpectrumMin=1,SpectrumMax=1)
-    LoadRaw(Filename=file,OutputWorkspace='__m2',SpectrumMin=2,SpectrumMax=2)		
-    LoadRaw(Filename=file,OutputWorkspace='__det',SpectrumMin=3,SpectrumMax=3)	
-# Check for single or multiple time regimes
-    MonTCBstart = mtd['__m1'].readX(0)[0]
-    SpecTCBstart = mtd['__det'].readX(0)[0]	
-    DeleteWorkspace('__det')								# delete monWS
-    monWS = '__Mon'
-    if (SpecTCBstart == MonTCBstart):
-        monWS = UnwrapMon('__m1')	# unwrap the monitor spectrum and convert to wavelength
-        RenameWorkspace(InputWorkspace=monWS, OutputWorkspace='__Mon1')		
-    else:
-        ConvertUnits(InputWorkspace='__m1', OutputWorkspace='__Mon1', Target="Wavelength")
-    ConvertUnits(InputWorkspace='__m2', OutputWorkspace='__Mon2', Target="Wavelength")		
-    DeleteWorkspace('__m2')								# delete monWS
-    Xin = mtd['__Mon1'].readX(0)
-    xmin1 = mtd['__Mon1'].readX(0)[0]
-    xmax1 = mtd['__Mon1'].readX(0)[len(Xin)-1]
-    Xin = mtd['__Mon2'].readX(0)
-    xmin2 = mtd['__Mon2'].readX(0)[0]
-    xmax2 = mtd['__Mon2'].readX(0)[len(Xin)-1]
-    wmin = max(xmin1,xmin2)
-    wmax = min(xmax1,xmax2)
-    CropWorkspace(InputWorkspace='__Mon1', OutputWorkspace='__Mon1', XMin=wmin, XMax=wmax)
-    RebinToWorkspace(WorkspaceToRebin='__Mon2', WorkspaceToMatch='__Mon1', OutputWorkspace='__Mon2')
-    monWS = inst +'_'+ type
-    Divide(LHSWorkspace='__Mon2', RHSWorkspace='__Mon1', OutputWorkspace=monWS)
-    DeleteWorkspace('__Mon1')								# delete monWS
-    DeleteWorkspace('__Mon2')								# delete monWS
-	
-def TransPlot(inputWS):
-    tr_plot=mp.plotSpectrum(inputWS,0)
-
-def IndirectTrans(inst, sfile,cfile,Verbose=False,Plot=False,Save=False):
-    StartTime('Transmission')
-    TransMon(inst,'Sam',sfile,Verbose)
-    TransMon(inst,'Can',cfile,Verbose)
-    samWS = inst + '_Sam'
-    canWS = inst + '_Can'
-    trWS = inst + '_Trans'
-    Divide(LHSWorkspace=samWS, RHSWorkspace=canWS, OutputWorkspace=trWS)
-    trans = np.average(mtd[trWS].readY(0))
-    transWS = inst + '_Transmission'
-    workdir = config['defaultsave.directory']
-    group = samWS +','+ canWS +','+ trWS
-    GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=transWS)
-    if Verbose:
-        logger.notice('Transmission : '+str(trans))
-    path = os.path.join(workdir,transWS+'.nxs')
-    
-    if Save:
-        SaveNexusProcessed(InputWorkspace=transWS, Filename=path)
-        if Verbose:
-            logger.notice('Output file created : '+path)
-            
-    if Plot:
-        TransPlot(transWS)
-    EndTime('Transmission')

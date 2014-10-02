@@ -1,7 +1,7 @@
 #
 # TUBE CALIBRATION DEMONSTRATION PROGRAM FOR MAPS - Execute this
 #
-# Here we run the calibration of a selected part of MAPS 
+# Here we run the calibration of a selected part of MAPS
 
 #
 import tube
@@ -11,16 +11,16 @@ from tube_calib_fit_params import TubeCalibFitParams
 filename = 'MAP14919.raw' # Calibration run ( found in \\isis\inst$\NDXMAPS\Instrument\data\cycle_09_5 )
 # Set what we want to calibrate (e.g whole intrument or one door )
 CalibratedComponent = 'D2_window'  # Calibrate D2 window
- 
 
-# Get calibration raw file and integrate it    
+
+# Get calibration raw file and integrate it
 rawCalibInstWS = Load(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
 print "Integrating Workspace"
-rangeLower = 2000 # Integrate counts in each spectra from rangeLower to rangeUpper 
+rangeLower = 2000 # Integrate counts in each spectra from rangeLower to rangeUpper
 rangeUpper = 10000 #
 CalibInstWS = Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
 DeleteWorkspace(rawCalibInstWS)
-print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate" 
+print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate"
 
 # == Create Objects needed for calibration ==
 
@@ -41,7 +41,7 @@ fitPar.setAutomatic(True)
 print "Created objects needed for calibration."
 
 # == Get the calibration and put results into calibration table ==
-calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm, 
+calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm,
                                   fitPar = fitPar)
 print "Got calibration (new positions of detectors) "
 

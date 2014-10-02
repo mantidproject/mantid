@@ -1,7 +1,7 @@
 #
 # TUBE CALIBRATION DEMONSTRATION PROGRAM FOR MAPS - Execute this
 #
-# Here we run the calibration of a selected part of MAPS 
+# Here we run the calibration of a selected part of MAPS
 
 #
 import tube
@@ -9,20 +9,20 @@ import tube
 # == Set parameters for calibration ==
 
 filename = 'MAP14919.raw' # Name of calibration run
-rangeLower = 2000 # Integrate counts in each spectra from rangeLower to rangeUpper 
+rangeLower = 2000 # Integrate counts in each spectra from rangeLower to rangeUpper
 rangeUpper = 10000 #
 
 
 # Set what we want to calibrate (e.g whole intrument or one door )
 CalibratedComponent = 'D2_window'  # Calibrate D2 window
- 
-    
-# Get calibration raw file and integrate it    
+
+
+# Get calibration raw file and integrate it
 rawCalibInstWS = Load(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
 print "Integrating Workspace"
 CalibInstWS = Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
 DeleteWorkspace(rawCalibInstWS)
-print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate" 
+print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate"
 
 # == Create Objects needed for calibration ==
 

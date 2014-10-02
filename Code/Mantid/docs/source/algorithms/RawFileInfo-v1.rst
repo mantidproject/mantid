@@ -9,7 +9,7 @@
 Description
 -----------
 
-Extracts run parameters from the `RAW <http://www.mantidproject.org/RAW_File>`__ file given as an
+Extracts run parameters from the :ref:`RAW <Raw File>` file given as an
 input property. If the ``GetRunParameters`` argument is ``True`` then a
 `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`__ is created that contains a 
 column for each value of the ``RPB_STRUCT``, i.e. column names such as ``r_dur``, ``r_goodfrm``

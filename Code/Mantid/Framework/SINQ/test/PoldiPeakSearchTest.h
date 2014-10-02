@@ -114,10 +114,14 @@ public:
         double testListRaw[] = {2.0, -3.0, -2.0, 12.0, 3.0 };
         std::vector<double> baseData(testListRaw, testListRaw + 5);
 
+        TS_ASSERT_EQUALS(poldiPeakSearch.m_recursionBordersInitialized, false);
+
         poldiPeakSearch.setRecursionAbsoluteBorders(baseData.begin(), baseData.end());
 
         TS_ASSERT_EQUALS(poldiPeakSearch.m_recursionAbsoluteBegin, baseData.begin());
         TS_ASSERT_EQUALS(poldiPeakSearch.m_recursionAbsoluteEnd, baseData.end());
+
+        TS_ASSERT_EQUALS(poldiPeakSearch.m_recursionBordersInitialized, true);
     }
 
     void testgetLeftRangeBegin()

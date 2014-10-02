@@ -6,6 +6,29 @@
 using namespace boost::python;
 using Mantid::Kernel::V3D;
 
+namespace
+{
+
+  /**
+   * Helper forwarding method for directionAngles to allow default argument values.
+   * @param self
+   * @return
+   */
+  V3D directionAnglesDefault(V3D & self)
+  {
+    return self.directionAngles();
+  }
+
+  long hashV3D(V3D & self)
+  {
+      boost::python::object tmpObj(self.toString());
+
+      return PyObject_Hash(tmpObj.ptr());
+  }
+
+}
+
+
 void export_V3D()
 {
   //V3D class
@@ -41,5 +64,9 @@ void export_V3D()
     .def(self == self)
     .def(self != self) // must define != as Python's default is to compare object address
     .def(self_ns::str(self))
+    .def(self_ns::repr(self))
+    .def("__hash__", &hashV3D)
+    .def("directionAngles", &V3D::directionAngles, "Calculate direction angles from direction cosines")
+    .def("directionAngles", &directionAnglesDefault, "Calculate direction angles from direction cosines")
     ;
 }
