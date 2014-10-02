@@ -5,6 +5,8 @@
 #include <QDoubleValidator>
 #include <QFileInfo>
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -17,22 +19,34 @@ namespace CustomInterfaces
   {
     const unsigned int NUM_DECIMALS = 6;
 
+    // RAW PLOT
     m_plots["MomentsPlot"] = new QwtPlot(m_parentWidget);
-    m_curves["MomentsPlotCurve"] = new QwtPlotCurve();
+    /* m_curves["MomentsPlotCurve"] = new QwtPlotCurve(); */
     m_rangeSelectors["MomentsRangeSelector"] = new MantidWidgets::RangeSelector(m_plots["MomentsPlot"]);
-    m_propTrees["MomentsPropTree"] = new QtTreePropertyBrowser();
-
-    m_propTrees["MomentsPropTree"]->setFactoryForManager(m_dblManager, m_dblEdFac);
     m_rangeSelectors["MomentsRangeSelector"]->setInfoOnly(false);
 
-    // initilise plot
+    // Initilise plot
     m_plots["MomentsPlot"]->setCanvasBackground(Qt::white);
     m_plots["MomentsPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
     m_plots["MomentsPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
 
-    //add the plot to the ui form
+    // Add plot to UI
     m_uiForm.moment_plotSpace->addWidget(m_plots["MomentsPlot"]);
-    //add the properties browser to the ui form
+
+    // PREVIEW PLOT
+    m_plots["MomentsPreviewPlot"] = new QwtPlot(m_parentWidget);
+
+    // Initilise plot
+    m_plots["MomentsPreviewPlot"]->setCanvasBackground(Qt::white);
+    m_plots["MomentsPreviewPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
+    m_plots["MomentsPreviewPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
+
+    // Add plot to UI
+    m_uiForm.moment_plotPreview->addWidget(m_plots["MomentsPreviewPlot"]);
+
+    // PROPERTY TREE
+    m_propTrees["MomentsPropTree"] = new QtTreePropertyBrowser();
+    m_propTrees["MomentsPropTree"]->setFactoryForManager(m_dblManager, m_dblEdFac);
     m_uiForm.moment_treeSpace->addWidget(m_propTrees["MomentsPropTree"]);
     m_properties["EMin"] = m_dblManager->addProperty("EMin");
     m_properties["EMax"] = m_dblManager->addProperty("EMax");
@@ -53,6 +67,8 @@ namespace CustomInterfaces
     connect(m_rangeSelectors["MomentsRangeSelector"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
 
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(momentsAlgComplete(bool)));
+
     m_uiForm.moment_validScale->setStyleSheet("QLabel { color : #aa0000; }");
   }
     
@@ -69,8 +85,6 @@ namespace CustomInterfaces
 
   void IndirectMoments::run()
   {
-    using namespace Mantid::API;
-
     QString workspaceName = m_uiForm.moment_dsInput->getCurrentDataName();
     QString outputName = workspaceName.left(workspaceName.length()-4);
     QString scaleString = m_uiForm.moment_leScale->text();
@@ -83,9 +97,7 @@ namespace CustomInterfaces
     bool save = m_uiForm.moment_ckSave->isChecked();
 
     if (!scaleString.isEmpty())
-    {
       scale = scaleString.toDouble();
-    }
 
     std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
 
@@ -106,15 +118,12 @@ namespace CustomInterfaces
 
   bool IndirectMoments::validate()
   {
-    using namespace Mantid::API;
     UserInputValidator uiv;
 
     uiv.checkDataSelectorIsValid("Sample input", m_uiForm.moment_dsInput);
 
     if (m_uiForm.moment_ckScale->isChecked())
-    {
       uiv.checkFieldIsValid("A valid scale must be supplied.\n", m_uiForm.moment_leScale, m_uiForm.moment_validScale);
-    }
 
     QString msg = uiv.generateErrorMessage();
     if (!msg.isEmpty())
@@ -186,6 +195,75 @@ namespace CustomInterfaces
         m_rangeSelectors["MomentsRangeSelector"]->setMaximum(val);
       }
     }
+  }
+
+  /**
+   * Runs the moments algorithm with preview properties.
+   */
+  void IndirectMoments::updatePreviewPlot()
+  {
+    QString workspaceName = m_uiForm.moment_dsInput->getCurrentDataName();
+    QString outputName = workspaceName.left(workspaceName.length() - 4);
+    QString scaleString = m_uiForm.moment_leScale->text();
+    double scale = 1.0;
+    double eMin = m_dblManager->value(m_properties["EMin"]);
+    double eMax = m_dblManager->value(m_properties["EMax"]);
+
+    bool verbose = m_uiForm.moment_ckVerbose->isChecked();
+
+    if(!scaleString.isEmpty())
+      scale = scaleString.toDouble();
+
+    std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
+
+    IAlgorithm_sptr momentsAlg = AlgorithmManager::Instance().create("SofQWMoments");
+    momentsAlg->initialize();
+    momentsAlg->setProperty("Sample", workspaceName.toStdString());
+    momentsAlg->setProperty("Scale", scale);
+    momentsAlg->setProperty("EnergyMin", eMin);
+    momentsAlg->setProperty("EnergyMax", eMax);
+    momentsAlg->setProperty("Plot", false);
+    momentsAlg->setProperty("Verbose", verbose);
+    momentsAlg->setProperty("Save", false);
+    momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
+
+    // Execute algorithm on seperate thread
+    runAlgorithm(momentsAlg);
+  }
+
+  /**
+   * Handles plotting the preview plot when the algorithm finishes.
+   *
+   * @param error True if the algorithm exited due to error, false otherwise
+   */
+  void IndirectMoments::momentsAlgComplete(bool error)
+  {
+    if(error)
+      return;
+
+    QString workspaceName = m_uiForm.moment_dsInput->getCurrentDataName();
+    QString outputName = workspaceName.left(workspaceName.length() - 4);
+    std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
+
+    WorkspaceGroup_sptr resultWsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWorkspaceName);
+    std::vector<std::string> resultWsNames = resultWsGroup->getNames();
+
+    if(resultWsNames.size() < 4)
+      return;
+
+    // Plot each spectrum
+    plotMiniPlot(QString::fromStdString(resultWsNames[0]), 0, "MomentsPreviewPlot", "Moments_M0");
+    plotMiniPlot(QString::fromStdString(resultWsNames[2]), 0, "MomentsPreviewPlot", "Moments_M2");
+    plotMiniPlot(QString::fromStdString(resultWsNames[3]), 0, "MomentsPreviewPlot", "Moments_M4");
+
+    // Colour plots as per plot option
+    m_curves["Moments_M0"]->setPen(QColor(Qt::green));
+    m_curves["Moments_M2"]->setPen(QColor(Qt::black));
+    m_curves["Moments_M4"]->setPen(QColor(Qt::red));
+
+    // Set X range to data range
+    /* setXAxisToCurve("PreviewPlot", ""); */
+    m_plots["MomentsPreviewPlot"]->replot();
   }
 
 } // namespace CustomInterfaces

@@ -58,6 +58,10 @@ namespace CustomInterfaces
     void maxValueChanged(double max);
     /// Slot to update the guides when the range properties change
     void updateProperties(QtProperty* prop, double val);
+    /// Triggers an update of the preview plot
+    void updatePreviewPlot();
+    /// Called when the algorithm completes to update preview plot
+    void momentsAlgComplete(bool error);
 
   };
 } // namespace CustomInterfaces
