@@ -579,13 +579,13 @@ public:
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->String(0, ThetaCol), "0.7");
     TS_ASSERT_EQUALS(ws->String(0,   DQQCol), "0.0340301");
-    TS_ASSERT_EQUALS(ws->String(0,  QMinCol), "0.01");
-    TS_ASSERT_EQUALS(ws->String(0,  QMaxCol), "0.077");
+    TS_ASSERT_EQUALS(ws->String(0,  QMinCol), "0.009");
+    TS_ASSERT_EQUALS(ws->String(0,  QMaxCol), "0.154");
 
     TS_ASSERT_EQUALS(ws->String(1, ThetaCol), "2.3");
     TS_ASSERT_EQUALS(ws->String(1,   DQQCol), "0.0340505");
-    TS_ASSERT_EQUALS(ws->String(1,  QMinCol), "0.034");
-    TS_ASSERT_EQUALS(ws->String(1,  QMaxCol), "0.252");
+    TS_ASSERT_EQUALS(ws->String(1,  QMinCol), "0.03");
+    TS_ASSERT_EQUALS(ws->String(1,  QMaxCol), "0.504");
 
     //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");

@@ -347,8 +347,8 @@ namespace MantidQt
       try
       {
         const Instrument_const_sptr instrument = ws->getInstrument();
-        lmin = instrument->getNumberParameter("LambdaMin")[0] + 1;
-        lmax = instrument->getNumberParameter("LambdaMax")[0] - 2;
+        lmin = instrument->getNumberParameter("LambdaMin")[0];
+        lmax = instrument->getNumberParameter("LambdaMax")[0];
       }
       catch(std::exception&)
       {
@@ -359,9 +359,6 @@ namespace MantidQt
       double qmax = 4 * M_PI / lmin * sin(theta * M_PI / 180.0);
       qmin = Utils::roundToDP(qmin, 3);
       qmax = Utils::roundToDP(qmax, 3);
-
-      //The old refl_gui performs this additional calculation on the last workspace of a stitch group
-      //qmax = 4 * M_PI / ((4 * M_PI / qmax * sin(theta * M_PI / 180)) - 0.5) * sin(theta * M_PI / 180);
 
       std::vector<double> ret;
       ret.push_back(qmin);
