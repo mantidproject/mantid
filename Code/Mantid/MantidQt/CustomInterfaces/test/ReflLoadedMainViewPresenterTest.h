@@ -541,6 +541,62 @@ public:
     AnalysisDataService::Instance().remove("TRANS_13463_13464");
   }
 
+  /*
+   * Test autofilling workspace values.
+   */
+  void testAutofill()
+  {
+    auto ws = createWorkspace("TestWorkspace");
+    //Autofill everything we can
+    TableRow row = ws->appendRow();
+    row << "13460" << "" << "13463,13464" << "" << "" << "" << "1" << 1;
+    row = ws->appendRow();
+    row << "13462" << "" << "13463,13464" << "" << "" << "" << "1" << 1;
+
+    MockView mockView;
+    ReflLoadedMainViewPresenter presenter(ws,&mockView);
+    std::vector<size_t> rowlist;
+    rowlist.push_back(0);
+    rowlist.push_back(1);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+
+    //The user hits the "process" button with the first two rows selected
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
+    EXPECT_CALL(mockView, getProcessInstrument()).WillRepeatedly(Return("INTER"));
+    EXPECT_CALL(mockView, setProgressRange(_,_));
+    EXPECT_CALL(mockView, setProgress(_)).Times(4);
+    presenter.notify(ProcessFlag);
+
+    //The user hits the "save" button
+    presenter.notify(SaveFlag);
+
+    //Check the calls were made as expected
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Check the table was updated as expected
+    ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->String(0, ThetaCol), "0.7");
+    TS_ASSERT_EQUALS(ws->String(0,   DQQCol), "0.0340301");
+    TS_ASSERT_EQUALS(ws->String(0,  QMinCol), "0.009");
+    TS_ASSERT_EQUALS(ws->String(0,  QMaxCol), "0.154");
+
+    TS_ASSERT_EQUALS(ws->String(1, ThetaCol), "2.3");
+    TS_ASSERT_EQUALS(ws->String(1,   DQQCol), "0.0340505");
+    TS_ASSERT_EQUALS(ws->String(1,  QMinCol), "0.03");
+    TS_ASSERT_EQUALS(ws->String(1,  QMaxCol), "0.504");
+
+    //Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("TRANS_13463_13464");
+    AnalysisDataService::Instance().remove("TOF_13460");
+    AnalysisDataService::Instance().remove("TOF_13463");
+    AnalysisDataService::Instance().remove("TOF_13464");
+    AnalysisDataService::Instance().remove("IvsQ_13460");
+    AnalysisDataService::Instance().remove("IvsLam_13460");
+  }
+
   void testBadWorkspaceName()
   {
     MockView mockView;
