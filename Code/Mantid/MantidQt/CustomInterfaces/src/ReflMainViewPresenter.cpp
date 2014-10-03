@@ -1,13 +1,15 @@
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidQtCustomInterfaces/ReflMainView.h"
 
 #include <boost/regex.hpp>
 
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 namespace MantidQt
@@ -125,18 +127,8 @@ namespace MantidQt
       if(rowNo >= m_model->rowCount())
         throw std::invalid_argument("Invalid row");
 
-      const std::string   runStr = m_model->String(rowNo, COL_RUNS);
-      const std::string  qMinStr = m_model->String(rowNo, COL_QMIN);
-      const std::string  qMaxStr = m_model->String(rowNo, COL_QMAX);
-
-      if(runStr.empty())
+      if(m_model->String(rowNo, COL_RUNS).empty())
         throw std::invalid_argument("Run column may not be empty.");
-
-      if(qMinStr.empty())
-        throw std::invalid_argument("Qmin column may not be empty.");
-
-      if(qMaxStr.empty())
-        throw std::invalid_argument("Qmax column may not be empty.");
     }
 
     /**
@@ -326,6 +318,47 @@ namespace MantidQt
 
       if(!algReflOne->isExecuted())
         throw std::runtime_error("Failed to run ReflectometryReductionOneAuto.");
+
+      //Processing has completed. Put Qmin and Qmax into the table if needed, for stitching.
+      if(m_model->String(rowNo, COL_QMIN).empty() || m_model->String(rowNo, COL_QMAX).empty())
+      {
+        MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IvsQ_" + runNo);
+        std::vector<double> qrange = calcQRange(ws, theta);
+
+        if(m_model->String(rowNo, COL_QMIN).empty())
+          m_model->String(rowNo, COL_QMIN) = Strings::toString<double>(qrange[0]);
+
+        if(m_model->String(rowNo, COL_QMAX).empty())
+          m_model->String(rowNo, COL_QMAX) = Strings::toString<double>(qrange[1]);
+      }
+    }
+
+    /**
+    Calculates the minimum and maximum values for Q
+    @param ws : The workspace to fetch the instrument values from
+    @param theta : The value of two theta to use in calculations
+    */
+    std::vector<double> ReflMainViewPresenter::calcQRange(MatrixWorkspace_sptr ws, double theta)
+    {
+      double lmin, lmax;
+      try
+      {
+        const Instrument_const_sptr instrument = ws->getInstrument();
+        lmin = instrument->getNumberParameter("LambdaMin")[0];
+        lmax = instrument->getNumberParameter("LambdaMax")[0];
+      }
+      catch(std::exception&)
+      {
+        throw std::runtime_error("LambdaMin/LambdaMax instrument parameters are required to calculate qmin/qmax");
+      }
+
+      double qmin = 4 * M_PI / lmax * sin(theta * M_PI / 180.0);
+      double qmax = 4 * M_PI / lmin * sin(theta * M_PI / 180.0);
+
+      std::vector<double> ret;
+      ret.push_back(qmin);
+      ret.push_back(qmax);
+      return ret;
     }
 
     /**
