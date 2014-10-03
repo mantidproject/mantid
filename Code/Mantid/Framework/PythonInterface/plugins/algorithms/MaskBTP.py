@@ -74,11 +74,15 @@ class MaskBTP(mantid.api.PythonAlgorithm):
 
         if (tubeString == ""):
             tubes=numpy.arange(tubemax[self.instname]-tubemin[self.instname]+1)+tubemin[self.instname]
+        elif (tubeString == "edges"):
+            tubes=[tubemin[self.instname],tubemax[self.instname]]
         else:
             tubes=self._parseBTPlist(tubeString)
 
         if(pixelString == ""):
             pixels=numpy.arange(pixmax[self.instname]-pixmin[self.instname]+1)+pixmin[self.instname]
+        elif (pixelString == "edges"):
+            pixels=[pixmin[self.instname],pixmax[self.instname]]
         else:
             pixels=self._parseBTPlist(pixelString)
 

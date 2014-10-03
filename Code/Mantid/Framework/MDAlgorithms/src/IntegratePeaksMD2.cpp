@@ -136,8 +136,8 @@ namespace MDAlgorithms
     Mantid::DataObjects::PeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
     if (peakWS != inPeakWS)
       peakWS = inPeakWS->clone();
-    runMaskDetectors(peakWS,"Tube","0,255");
-	runMaskDetectors(peakWS,"Pixel","0,255");
+    runMaskDetectors(peakWS,"Tube","edges");
+	runMaskDetectors(peakWS,"Pixel","edges");
 
     // Get the instrument and its detectors
     inst = peakWS->getInstrument();
