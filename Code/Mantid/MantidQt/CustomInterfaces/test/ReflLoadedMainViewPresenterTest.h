@@ -547,33 +547,26 @@ public:
   void testAutofill()
   {
     auto ws = createWorkspace("TestWorkspace");
-    //Autofill two theta
+    //Autofill everything we can
     TableRow row = ws->appendRow();
-    row << "13460" << "" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 1;
-
-    //Autofill dqq
+    row << "13460" << "" << "13463,13464" << "" << "" << "" << "1" << 1;
     row = ws->appendRow();
-    row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "" << "1" << 2;
-
-    //Autofill two theta and dqq
-    row = ws->appendRow();
-    row << "13460" << "" << "13463,13464" << "0.01" << "0.06" << "" << "1" << 3;
+    row << "13462" << "" << "13463,13464" << "" << "" << "" << "1" << 1;
 
     MockView mockView;
     ReflLoadedMainViewPresenter presenter(ws,&mockView);
     std::vector<size_t> rowlist;
     rowlist.push_back(0);
     rowlist.push_back(1);
-    rowlist.push_back(2);
 
     //We should not receive any errors
     EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
 
-    //The user hits the "process" button with the first three rows selected
+    //The user hits the "process" button with the first two rows selected
     EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
     EXPECT_CALL(mockView, getProcessInstrument()).WillRepeatedly(Return("INTER"));
     EXPECT_CALL(mockView, setProgressRange(_,_));
-    EXPECT_CALL(mockView, setProgress(_)).Times(7);
+    EXPECT_CALL(mockView, setProgress(_)).Times(4);
     presenter.notify(ProcessFlag);
 
     //The user hits the "save" button
@@ -585,11 +578,14 @@ public:
     //Check the table was updated as expected
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->String(0, ThetaCol), "0.70002");
-    TS_ASSERT_EQUALS(ws->String(0,   DQQCol), "0.04");
-    TS_ASSERT_EQUALS(ws->String(1, ThetaCol), "0.7");
-    TS_ASSERT_EQUALS(ws->String(1,   DQQCol), "0.0340301");
-    TS_ASSERT_EQUALS(ws->String(2, ThetaCol), "0.70002");
-    TS_ASSERT_EQUALS(ws->String(2,   DQQCol), "0.0340292");
+    TS_ASSERT_EQUALS(ws->String(0,   DQQCol), "0.0340292");
+    TS_ASSERT_EQUALS(ws->String(0,  QMinCol), "0.00903104");
+    TS_ASSERT_EQUALS(ws->String(0,  QMaxCol), "0.153528");
+
+    TS_ASSERT_EQUALS(ws->String(1, ThetaCol), "2.3");
+    TS_ASSERT_EQUALS(ws->String(1,   DQQCol), "0.0340505");
+    TS_ASSERT_EQUALS(ws->String(1,  QMinCol), "0.0296654");
+    TS_ASSERT_EQUALS(ws->String(1,  QMaxCol), "0.504311");
 
     //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
