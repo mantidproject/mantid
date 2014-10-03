@@ -6,7 +6,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
-#include "MantidDataHandling/LoadParameterFile.h"
 
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
@@ -892,8 +891,10 @@ namespace DataHandling
 
 
     // Load the string into the workspace
-    LoadParameterFile::execManually(true, "", parameterXMLString, ws);
-
+    Algorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
+    loadParamAlg->setProperty("ParameterXML", parameterXMLString);
+    loadParamAlg->setProperty("Workspace", ws);
+    loadParamAlg->execute();
   }
 
   /* Add an Ikeda Carpenter PV ALFBE parameter to the XML document according to the table workspace
