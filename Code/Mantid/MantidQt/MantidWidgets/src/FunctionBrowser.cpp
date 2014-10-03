@@ -40,6 +40,8 @@
 #endif
 #include "qteditorfactory.h"
 #include "DoubleEditorFactory.h"
+#include "CompositeEditorFactory.h"
+#include "ButtonEditorFactory.h"
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1125
 #elif defined(__GNUC__)
@@ -104,6 +106,12 @@ FunctionBrowser::~FunctionBrowser()
  */
 void FunctionBrowser::createBrowser()
 {
+  QStringList options;
+  if ( m_multiDataset )
+  {
+    options << globalOptionName;
+  }
+
   /* Create property managers: they create, own properties, get and set values  */
   m_functionManager = new QtGroupPropertyManager(this);
   m_parameterManager = new QtDoublePropertyManager(this);
@@ -124,21 +132,30 @@ void FunctionBrowser::createBrowser()
   // create editor factories
   QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(this);
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(this);
+
+  QtAbstractEditorFactory<QtDoublePropertyManager> *parameterEditorFactory(NULL);
+  if ( m_multiDataset )
+  {
+    auto buttonFactory = new DoubleButtonEditorFactory(this);
+    auto compositeFactory = new CompositeEditorFactory<QtDoublePropertyManager>(this,buttonFactory);
+    compositeFactory->setSecondaryFactory(globalOptionName, doubleEditorFactory);
+    parameterEditorFactory = compositeFactory;
+    connect(buttonFactory,SIGNAL(buttonClicked(QtProperty*)), this,SIGNAL(localParameterButtonClicked(QtProperty*)));
+  }
+  else
+  {
+    parameterEditorFactory = doubleEditorFactory;
+  }
+  
   QtLineEditFactory *lineEditFactory = new QtLineEditFactory(this);
   QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(this);
   FilenameDialogEditorFactory* filenameDialogEditorFactory = new FilenameDialogEditorFactory(this);
   FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(this);
   WorkspaceEditorFactory* workspaceEditorFactory = new WorkspaceEditorFactory(this);
 
-  QStringList options;
-  if ( m_multiDataset )
-  {
-    options << globalOptionName;
-  }
-
   m_browser = new QtTreePropertyBrowser(NULL,options);
   // assign factories to property managers
-  m_browser->setFactoryForManager(m_parameterManager, doubleEditorFactory);
+  m_browser->setFactoryForManager(m_parameterManager, parameterEditorFactory);
   m_browser->setFactoryForManager(m_attributeStringManager, lineEditFactory);
   m_browser->setFactoryForManager(m_attributeDoubleManager, doubleEditorFactory);
   m_browser->setFactoryForManager(m_attributeIntManager, spinBoxFactory);
@@ -1701,7 +1718,6 @@ void FunctionBrowser::parameterChanged(QtProperty* prop)
 {
   emit parameterChanged(getIndex(prop), prop->propertyName());
 }
-
 
 } // MantidWidgets
 } // MantidQt

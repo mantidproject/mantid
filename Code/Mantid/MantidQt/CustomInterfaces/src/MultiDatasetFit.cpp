@@ -7,6 +7,8 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 
+#include "qtpropertybrowser.h"
+
 #include <QDialog>
 #include <QHeaderView>
 #include <QMessageBox>
@@ -409,6 +411,7 @@ void MultiDatasetFit::initLayout()
 
   m_functionBrowser = new MantidQt::MantidWidgets::FunctionBrowser(NULL, true);
   m_uiForm.browserLayout->addWidget( m_functionBrowser );
+  connect(m_functionBrowser,SIGNAL(localParameterButtonClicked(QtProperty*)),this,SLOT(editLocalParameterValues(QtProperty*)));
 }
 
 /**
@@ -625,6 +628,15 @@ int MultiDatasetFit::getWorkspaceIndex(size_t i) const
 size_t MultiDatasetFit::getNumberOfSpectra() const
 {
   return static_cast<size_t>( m_uiForm.dataTable->rowCount() );
+}
+
+/**
+ * Start an editor to display and edit individual local parameter values.
+ * @param prop :: QtProperty for a local parameter (Global unchecked).
+ */
+void MultiDatasetFit::editLocalParameterValues(QtProperty *prop)
+{
+  throw std::runtime_error("Hello, " + prop->propertyName().toStdString());
 }
 
 /*==========================================================================================*/

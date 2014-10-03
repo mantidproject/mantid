@@ -114,6 +114,9 @@ signals:
   /// @param paramName :: Name of the changed parameter
   void parameterChanged(const QString& funcIndex, const QString& paramName);
 
+  /// In multi-dataset context a button value editor was clicked
+  void localParameterButtonClicked(QtProperty*);
+
 protected:
   /// Create the Qt property browser
   void createBrowser();
@@ -303,7 +306,6 @@ protected:
   friend class CreateAttributePropertyForFunctionBrowser;
   friend class SetAttributeFromProperty;
 };
-
 
 } // MantidWidgets
 

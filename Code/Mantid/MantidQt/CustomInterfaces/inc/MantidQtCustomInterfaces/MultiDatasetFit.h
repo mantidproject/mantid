@@ -11,12 +11,13 @@
 #include <QMap>
 #include <vector>
 
+// Forward declarations
 class QwtPlot;
 class QTableWidget;
 class QComboBox;
 class QPushButton;
+class QtProperty;
 
-// Forward declarations
 namespace Mantid
 {
 namespace API
@@ -73,6 +74,7 @@ private slots:
   void workspaceSelectionChanged();
   void removeSelectedSpectra();
   void fit();
+  void editLocalParameterValues(QtProperty*);
 private:
   void addWorkspaceSpectrum(const QString &wsName, int wsIndex);
   boost::shared_ptr<Mantid::API::IFunction> createFunction() const;
