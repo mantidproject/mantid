@@ -18,16 +18,15 @@ conversion can be done either to Q-space in the lab or sample frame, or
 to HKL of the crystal.
 
 Version 2 of the algorithm is the wrapper around :ref:`algm-ConvertToMD` algorithm, used for
-diffraction workflow and to support the interface of the previous specialized version of this 
-algorithm.  Old specialized version of this :ref:`algm-ConvertToDiffractionMDWorkspace-v1`
-algorithm also exists.
+diffraction workflow and for supporting the interface of the previous specialized version of this 
+algorithm.  Old specialized version of this algorithm also exists.
 
-See the :ref:`algm-ConvertToDiffractionMDWorkspace-v1` for details of the old and  :ref:`algm-ConvertToMD` of this algorithms implementations. 
+See the :ref:`algm-ConvertToDiffractionMDWorkspace-v1` for details of the old and  :ref:`algm-ConvertToMD` for this algorithms implementations. 
  
-The main difference between previous and this algorithm versions (in addition to the internal implementation details) 
-is the type of the workspace, produced by the algorithm by default. 
-Old version was producing `MDLeanEvent<3> <http://www.mantidproject.org/MDWorkspace#Description%20of%20MDWorkspace>`__-s 
-and this version generates `MDEvent<3> <http://www.mantidproject.org/MDWorkspace#Description%20of%20MDWorkspace>`__-s. 
+The main difference between the results produced by the version one and two of this algorithm 
+is the type of the workspace, produced by default. 
+Version one is producing `MDLeanEvent<3> <http://www.mantidproject.org/MDWorkspace#Description%20of%20MDWorkspace>`__-s workspace 
+and this version generates `MDEvent<3> <http://www.mantidproject.org/MDWorkspace#Description%20of%20MDWorkspace>`__-s workspace.
 
 To obtain a workspace containing `MDLeanEvent<3> <http://www.mantidproject.org/MDWorkspace#Description%20of%20MDWorkspace>`__-s, 
 and fine-tune the output workspace properties, 
