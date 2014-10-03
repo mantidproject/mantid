@@ -2,6 +2,7 @@
 #define MANTID_API_MultiPeriodGroupAlgorithmTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MultiPeriodGroupTestBase.h"
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidTestHelpers/FakeObjects.h"
@@ -19,7 +20,7 @@ public:
   virtual const std::string name() const {return "TestAlgorithmA";}
   virtual int version() const {return 1;}
   virtual const std::string summary() const { return "Test summary"; }
-  virtual void init() 
+  virtual void init()
   {
     declareProperty(new ArrayProperty<std::string>("MyInputWorkspaces"));
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "");
@@ -54,7 +55,7 @@ public:
   virtual const std::string name() const {return "TestAlgorithmB";}
   virtual int version() const {return 1;}
   virtual const std::string summary() const { return "Test summary"; }
-  virtual void init() 
+  virtual void init()
   {
     declareProperty(new WorkspaceProperty<>("PropertyA", "ws1", Direction::Input));
     declareProperty(new WorkspaceProperty<>("PropertyB", "ws2", Direction::Input));
@@ -92,42 +93,8 @@ DECLARE_ALGORITHM( TestAlgorithmB)
 // End class dec
 
 
-class MultiPeriodGroupAlgorithmTest : public CxxTest::TestSuite
+class MultiPeriodGroupAlgorithmTest : public CxxTest::TestSuite, public MultiPeriodGroupTestBase
 {
-private:
-
-  // Helper method to add multiperiod logs to make a workspacegroup look like a real multiperiod workspace group.
-  void add_periods_logs(WorkspaceGroup_sptr ws)
-  {
-    int nperiods = static_cast<int>(ws->size());
-    for(size_t i = 0; i < ws->size(); ++i)
-    { 
-      MatrixWorkspace_sptr currentWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));
-      PropertyWithValue<int>* nperiodsProp = new PropertyWithValue<int>("nperiods", nperiods);
-      currentWS->mutableRun().addLogData(nperiodsProp);
-      PropertyWithValue<int>* currentPeriodsProp = new PropertyWithValue<int>("current_period", static_cast<int>(i+1));
-      currentWS->mutableRun().addLogData(currentPeriodsProp);
-    }
-  }
-    /// Helper to fabricate a workspace group consisting of equal sized matrixworkspaces.
-  WorkspaceGroup_sptr create_good_multiperiod_workspace_group(const std::string name)
-  {
-    MatrixWorkspace_sptr a = MatrixWorkspace_sptr(new WorkspaceTester);
-    MatrixWorkspace_sptr b = MatrixWorkspace_sptr(new WorkspaceTester);
-    //a->setName(name + "_1");
-    //b->setName(name + "_2");
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
-    //group->setName(name);
-    group->addWorkspace(a);
-    group->addWorkspace(b);
-    add_periods_logs(group);
-//    AnalysisDataService::Instance().addOrReplace(a->name(), a);
-//    AnalysisDataService::Instance().addOrReplace(b->name(), b);
-    AnalysisDataService::Instance().addOrReplace(name+"_1", a);
-    AnalysisDataService::Instance().addOrReplace(name+"_2", b);
-    AnalysisDataService::Instance().addOrReplace(name, group);
-    return group;
-  }
 
 public:
 

@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/RegisterFileLoader.h"

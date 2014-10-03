@@ -99,6 +99,7 @@ public:
     if ( ! sameOutputWS ) outputWS.append("2");
     TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("OutputWorkspace",outputWS) )
     TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("MonitorSpectrum","0") )
+    TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("NormFactorWS","NormFactor") )
     TS_ASSERT_THROWS_NOTHING( norm.execute() )
     TS_ASSERT( norm.isExecuted() )
 
@@ -129,6 +130,9 @@ public:
       EventWorkspace_const_sptr eventOut = boost::dynamic_pointer_cast<const EventWorkspace>(output);
       TS_ASSERT(eventOut);
     }
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("NormFactor") )
+    TS_ASSERT_EQUALS(output->getNumberHistograms(),1);
+    AnalysisDataService::Instance().remove("NormFactor");
   }
 
 
@@ -164,6 +168,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( norm2.setPropertyValue("MonitorSpectrum","0") )
     TS_ASSERT_THROWS_NOTHING( norm2.setPropertyValue("IntegrationRangeMin","5") )
     TS_ASSERT_THROWS_NOTHING( norm2.setPropertyValue("IntegrationRangeMax","20") )
+    TS_ASSERT_THROWS_NOTHING( norm2.setPropertyValue("NormFactorWS","normMon3") )
     TS_ASSERT_THROWS_NOTHING( norm2.execute() )
     TS_ASSERT( norm2.isExecuted() )
 
@@ -190,6 +195,10 @@ public:
       TS_ASSERT_EQUALS( output->readY(0)[k], 0.2 )
       TS_ASSERT_DELTA( output->readE(0)[k], 0.0657, 0.0001 )
     }
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("normMon3_normFactor") )
+    TS_ASSERT_EQUALS(output->getNumberHistograms(),1);
+    AnalysisDataService::Instance().remove("normMon3_normFactor");
+
   }
 
   void testNormaliseByIntegratedCountIncPartBins()
@@ -229,18 +238,25 @@ public:
       TS_ASSERT_DELTA( output->readE(0)[k], 0.0518, 0.0001 )
     }
     AnalysisDataService::Instance().remove("normMon4");
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("NormWS") );
+
   }
 
   void testFailsOnSettingBothMethods()
   {
     NormaliseToMonitor norm3;
     norm3.initialize();
-    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("InputWorkspace","normMon") )
-    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("OutputWorkspace","normMon3") )
-    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorWorkspaceIndex","0") )
-    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorWorkspace","monWS") )
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("InputWorkspace","normMon") );
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("OutputWorkspace","normMon3") );
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorWorkspaceIndex","0") );
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorWorkspace","monWS") );
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("NormFactorWS","NormWS") );
     TS_ASSERT_THROWS_NOTHING( norm3.execute() )
-    TS_ASSERT(  norm3.isExecuted() )
+    TS_ASSERT(  norm3.isExecuted() );
+
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("NormWS") );
+    AnalysisDataService::Instance().remove("NormWS");
+
   }
 
   void testSeparateWorkspaceWithRebin()
@@ -249,9 +265,16 @@ public:
     norm4.initialize();
     TS_ASSERT_THROWS_NOTHING( norm4.setPropertyValue("InputWorkspace","normMon") )
     TS_ASSERT_THROWS_NOTHING( norm4.setPropertyValue("OutputWorkspace","normMon4") )
-    TS_ASSERT_THROWS_NOTHING( norm4.setPropertyValue("MonitorWorkspace","monWS") )
+    TS_ASSERT_THROWS_NOTHING( norm4.setPropertyValue("MonitorWorkspace","monWS") )  
+    TS_ASSERT_THROWS_NOTHING( norm4.setPropertyValue("NormFactorWS","NormWS") );
+
+
     TS_ASSERT_THROWS_NOTHING( norm4.execute() )
     TS_ASSERT( norm4.isExecuted() )
+
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("NormWS") );
+    AnalysisDataService::Instance().remove("NormWS");
+
   }
 
   void testMonIDPropChangerEnabled()

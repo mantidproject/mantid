@@ -91,7 +91,7 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
         logger.notice('Fit type : Delta = ' + str(using_delta_func) + ' ; Lorentzians = ' + str(lorentzians))
         logger.notice('Background type : ' + bgd)
 
-    output_workspace = getWSprefix(inputWS) + 'conv_' + ftype + bgd + '_' + str(specMin) + "_to_" + str(specMax)
+    output_workspace = getWSprefix(inputWS) + 'conv_' + ftype + bgd + '_s' + str(specMin) + "_to_" + str(specMax)
 
     #convert input workspace to get Q axis
     temp_fit_workspace = "__convfit_fit_ws"
@@ -295,13 +295,6 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     else:
         ename = first+'to_'+last
 
-    #check if temp was increasing or decreasing
-    if(datTx[0] > datTx[-1]):
-        # if so reverse data to follow natural ordering
-        datTx = datTx[::-1]
-        datTy = datTy[::-1]
-        datTe = datTe[::-1]
-
     elfWS = ename+'_elf'
     e1WS = ename+'_eq1'
     e2WS = ename+'_eq2'
@@ -336,6 +329,8 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
 
         CreateWorkspace(OutputWorkspace=wsname, DataX=x, DataY=y, DataE=e,
             Nspec=nspec, UnitX=xunit, VerticalAxisUnit=vunit, VerticalAxisValues=vvalue)
+
+        SortXAxis(InputWorkspace=wsname, OutputWorkspace=wsname)
 
         #add sample logs to new workspace
         CopyLogs(InputWorkspace=tempWS, OutputWorkspace=wsname)
@@ -537,27 +532,30 @@ def fury(samWorkspaces, res_workspace, rebinParam, RES=True, Save=False, Verbose
 # FuryFit
 ##############################################################################
 
-
-def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False, Save=False, Plot='None', Verbose=False):
+def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, intensities_constrained=False, Save=False, Plot='None', Verbose=False):
 
   StartTime('FuryFit')
-  nHist = mtd[inputWS].getNumberHistograms()
 
-  #name stem for generated workspace
-  output_workspace = getWSprefix(inputWS) + 'fury_' + ftype + "0_to_" + str(nHist-1)
-
-  fitType = ftype[:-2]
+  fit_type = ftype[:-2]
   if Verbose:
-    logger.notice('Option: '+fitType)
+    logger.notice('Option: ' + fit_type)
     logger.notice(func)
 
   tmp_fit_workspace = "__furyfit_fit_ws"
   CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx)
+
+  num_hist = mtd[inputWS].getNumberHistograms()
+  if spec_max is None:
+    spec_max = num_hist - 1
+  
+  # name stem for generated workspace
+  output_workspace = getWSprefix(inputWS) + 'fury_' + ftype + str(spec_min) + "_to_" + str(spec_max)
+
   ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
   convertToElasticQ(tmp_fit_workspace)
 
   #build input string for PlotPeakByLogValue
-  input_str = [tmp_fit_workspace + ',i%d' % i for i in range(0,nHist)]
+  input_str = [tmp_fit_workspace + ',i%d' % i for i in range(spec_min, spec_max + 1)]
   input_str = ';'.join(input_str)
 
   PlotPeakByLogValue(Input=input_str, OutputWorkspace=output_workspace, Function=func,
@@ -582,12 +580,12 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False
 
   #process generated workspaces
   wsnames = mtd[fit_group].getNames()
-  params = [startx, endx, fitType]
+  params = [startx, endx, fit_type]
   for i, ws in enumerate(wsnames):
     output_ws = output_workspace + '_%d_Workspace' % i
     RenameWorkspace(ws, OutputWorkspace=output_ws)
 
-  sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': ftype,
+  sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': fit_type,
                   'intensities_constrained': intensities_constrained, 'beta_constrained': False}
 
   CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
@@ -607,7 +605,7 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False
   return result_workspace
 
 
-def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=False, Save=False, Plot='None', Verbose=False):
+def furyfitMult(inputWS, function, ftype, startx, endx, spec_min=0, spec_max=None, intensities_constrained=False, Save=False, Plot='None', Verbose=False):
   StartTime('FuryFit Multi')
 
   nHist = mtd[inputWS].getNumberHistograms()
@@ -620,7 +618,13 @@ def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=
 
   #prepare input workspace for fitting
   tmp_fit_workspace = "__furyfit_fit_ws"
-  CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx)
+  if spec_max is None:
+      CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx,
+                    StartWorkspaceIndex=spec_min)
+  else:
+      CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx,
+                    StartWorkspaceIndex=spec_min, EndWorkspaceIndex=spec_max)
+
   ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
   convertToElasticQ(tmp_fit_workspace)
 

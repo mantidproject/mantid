@@ -213,7 +213,11 @@ namespace CustomInterfaces
       "    AddSampleLog(Workspace=ws, LogName='detailed_balance_temp', LogType='Number', LogText='"+m_uiForm.leDetailedBalance->text()+"')\n"
       "  AddSampleLog(Workspace=ws, LogName='scale', LogType='String', LogText=str(scaled))\n"
       "  if scaled:\n"
-      "    AddSampleLog(Workspace=ws, LogName='scale_factor', LogType='Number', LogText='"+m_uiForm.leScaleMultiplier->text()+"')\n";
+      "    AddSampleLog(Workspace=ws, LogName='scale_factor', LogType='Number', LogText='"+m_uiForm.leScaleMultiplier->text()+"')\n"
+      "try:\n"
+      "  DeleteWorkspace(Workspace='__Grouping')\n"
+      "except ValueError:\n"
+      "  pass\n";
 
     QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
   }
@@ -642,47 +646,40 @@ namespace CustomInterfaces
    */
   QString IndirectConvertToEnergy::createMapFile(const QString& groupType)
   {
-    QString groupFile, ngroup, nspec;
-    QString ndet = "( "+m_uiForm.leSpectraMax->text()+" - "+m_uiForm.leSpectraMin->text()+") + 1";
+    using namespace Mantid::API;
 
-    if ( groupType == "File" )
+    QString specRange = m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text();
+
+    if(groupType == "File")
     {
-      groupFile = m_uiForm.ind_mapFile->getFirstFilename();
-      if ( groupFile == "" )
+      QString groupFile = m_uiForm.ind_mapFile->getFirstFilename();
+      if(groupFile == "")
       {
         emit showMessageBox("You must enter a path to the .map file.");
       }
       return groupFile;
     }
-    else if ( groupType == "Groups" )
+    else if(groupType == "Groups")
     {
-      ngroup = m_uiForm.leNoGroups->text();
-      nspec = "( " +ndet+ " ) / " +ngroup;
+      QString groupWS = "__Grouping";
+
+      IAlgorithm_sptr groupingAlg = AlgorithmManager::Instance().create("CreateGroupingWorkspace");
+      groupingAlg->initialize();
+
+      groupingAlg->setProperty("FixedGroupCount", m_uiForm.leNoGroups->text().toInt());
+      groupingAlg->setProperty("InstrumentName", m_uiForm.cbInst->currentText().toStdString());
+      groupingAlg->setProperty("ComponentName", m_uiForm.cbAnalyser->currentText().toStdString());
+      groupingAlg->setProperty("OutputWorkspace", groupWS.toStdString());
+
+      groupingAlg->execute();
+
+      return groupWS;
     }
-    else if ( groupType == "All" )
+    else
     {
-      return "All";
+      // Catch All and Individual
+      return groupType;
     }
-    else if ( groupType == "Individual" )
-    {
-      return "Individual";
-    }
-
-    groupFile = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
-    groupFile += "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText();
-    groupFile += "_" + groupType + ".map";	
-
-    QString pyInput =
-      "import IndirectEnergyConversion as ind\n"
-      "mapfile = ind.createMappingFile('"+groupFile+"', %1, %2, %3)\n"
-      "print mapfile\n";
-    pyInput = pyInput.arg(ngroup);
-    pyInput = pyInput.arg(nspec);
-    pyInput = pyInput.arg(m_uiForm.leSpectraMin->text());
-
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
-
-    return pyOutput;
   }
 
   /**

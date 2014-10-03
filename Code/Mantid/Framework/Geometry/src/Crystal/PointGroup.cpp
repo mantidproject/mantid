@@ -3,6 +3,10 @@
 
 #include <set>
 #include <boost/make_shared.hpp>
+#include <iostream>
+
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
 namespace Mantid
 {
@@ -51,10 +55,17 @@ namespace Geometry
   }
 
   /// Protected constructor - can not be used directly.
-  PointGroup::PointGroup() :
+  PointGroup::PointGroup(const std::string &symbolHM) :
       m_symmetryOperations(),
-      m_transformationMatrices()
+      m_transformationMatrices(),
+      m_symbolHM(symbolHM)
   {
+  }
+
+  /// Hermann-Mauguin symbol
+  std::string PointGroup::getSymbol() const
+  {
+      return m_symbolHM;
   }
 
   /**
@@ -148,19 +159,16 @@ namespace Geometry
   }
 
 
-  PointGroupLaue1::PointGroupLaue1()
-  {
-      addSymmetryOperation(boost::make_shared<const SymOpInversion>());
+  PointGroupLaue1::PointGroupLaue1() :
+      PointGroup("-1")
+  { }
 
-      setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
-  }
-
-  std::string PointGroupLaue1::getName()
+  std::string PointGroupLaue1::getName() const
   {
       return "-1 (Triclinic)";
   }
 
-  bool PointGroupLaue1::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue1::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -174,20 +182,23 @@ namespace Geometry
       return Triclinic;
   }
 
-  PointGroupLaue2::PointGroupLaue2()
+  void PointGroupLaue1::init()
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldY>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneY>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue2::getName()
+  PointGroupLaue2::PointGroupLaue2() :
+      PointGroup("2/m")
+  { }
+
+  std::string PointGroupLaue2::getName() const
   {
       return "1 2/m 1 (Monoclinic, unique axis b)";
   }
 
-  bool PointGroupLaue2::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue2::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -201,20 +212,24 @@ namespace Geometry
       return Monoclinic;
   }
 
-  PointGroupLaue3::PointGroupLaue3()
+  void PointGroupLaue2::init()
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldZ>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [010]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [010]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue3::getName()
+  PointGroupLaue3::PointGroupLaue3() :
+      PointGroup("112/m")
+  { }
+
+  std::string PointGroupLaue3::getName() const
   {
       return "1 1 2/m (Monoclinic, unique axis c)";
   }
 
-  bool PointGroupLaue3::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue3::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -228,21 +243,24 @@ namespace Geometry
       return Monoclinic;
   }
 
-  PointGroupLaue4::PointGroupLaue4()
+  void PointGroupLaue3::init()
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldX>());
-      addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldY>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue4::getName()
+  PointGroupLaue4::PointGroupLaue4() :
+      PointGroup("mmm")
+  { }
+
+  std::string PointGroupLaue4::getName() const
   {
       return "mmm (Orthorombic)";
   }
 
-  bool PointGroupLaue4::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue4::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -258,20 +276,25 @@ namespace Geometry
       return Orthorhombic;
   }
 
-  PointGroupLaue5::PointGroupLaue5()
+  void PointGroupLaue4::init()
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationFourFoldZ>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [100]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [010]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue5::getName()
+  PointGroupLaue5::PointGroupLaue5() :
+      PointGroup("4/m")
+  { }
+
+  std::string PointGroupLaue5::getName() const
   {
       return "4/m (Tetragonal)";
   }
 
-  bool PointGroupLaue5::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue5::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -287,21 +310,24 @@ namespace Geometry
       return Tetragonal;
   }
 
-  PointGroupLaue6::PointGroupLaue6()
+  void PointGroupLaue5::init()
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationFourFoldZ>());
-      addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldX>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("4 [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue6::getName()
+  PointGroupLaue6::PointGroupLaue6() :
+      PointGroup("4/mmm")
+  { }
+
+  std::string PointGroupLaue6::getName() const
   {
       return "4/mmm (Tetragonal)";
   }
 
-  bool PointGroupLaue6::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue6::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -320,20 +346,25 @@ namespace Geometry
       return Tetragonal;
   }
 
-  PointGroupLaue7::PointGroupLaue7()
+  void PointGroupLaue6::init()
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFoldZHexagonal>());
-      addSymmetryOperation(boost::make_shared<const SymOpInversion>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("4 [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [100]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue7::getName()
+  PointGroupLaue7::PointGroupLaue7() :
+      PointGroup("-3")
+  { }
+
+  std::string PointGroupLaue7::getName() const
   {
       return "-3 (Trigonal - Hexagonal)";
   }
 
-  bool PointGroupLaue7::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue7::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -348,21 +379,24 @@ namespace Geometry
       return Trigonal;
   }
 
-  PointGroupLaue8::PointGroupLaue8()
+  void PointGroupLaue7::init()
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFoldZHexagonal>());
-      addSymmetryOperation(boost::make_shared<const SymOpInversion>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlane210Hexagonal>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [001]h"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue8::getName()
+  PointGroupLaue8::PointGroupLaue8() :
+      PointGroup("-3m1")
+  { }
+
+  std::string PointGroupLaue8::getName() const
   {
       return "-3m1 (Trigonal - Rhombohedral)";
   }
 
-  bool PointGroupLaue8::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue8::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -379,21 +413,25 @@ namespace Geometry
       return Trigonal;
   }
 
-  PointGroupLaue9::PointGroupLaue9()
+  void PointGroupLaue8::init()
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFoldZHexagonal>());
-      addSymmetryOperation(boost::make_shared<const SymOpInversion>());
-      addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFold210Hexagonal>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [001]h"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [210]h"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue9::getName()
+  PointGroupLaue9::PointGroupLaue9() :
+      PointGroup("-31m")
+  { }
+
+  std::string PointGroupLaue9::getName() const
   {
       return "-31m (Trigonal - Rhombohedral)";
   }
 
-  bool PointGroupLaue9::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue9::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -410,20 +448,25 @@ namespace Geometry
       return Trigonal;
   }
 
-  PointGroupLaue10::PointGroupLaue10()
+  void PointGroupLaue9::init()
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationSixFoldZHexagonal>());
-      addSymmetryOperation(boost::make_shared<const SymOpInversion>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [001]h"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [210]h"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue10::getName()
+  PointGroupLaue10::PointGroupLaue10() :
+      PointGroup("6/m")
+  { }
+
+  std::string PointGroupLaue10::getName() const
   {
       return "6/m (Hexagonal)";
   }
 
-  bool PointGroupLaue10::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue10::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -440,21 +483,24 @@ namespace Geometry
       return Hexagonal;
   }
 
-  PointGroupLaue11::PointGroupLaue11()
+  void PointGroupLaue10::init()
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationSixFoldZHexagonal>());
-      addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldXHexagonal>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("6 [001]h"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue11::getName()
+  PointGroupLaue11::PointGroupLaue11() :
+      PointGroup("6/mmm")
+  { }
+
+  std::string PointGroupLaue11::getName() const
   {
       return "6/mmm (Hexagonal)";
   }
 
-  bool PointGroupLaue11::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue11::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -475,22 +521,25 @@ namespace Geometry
       return Hexagonal;
   }
 
-  PointGroupLaue12::PointGroupLaue12()
+  void PointGroupLaue11::init()
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFold111>());
-      addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldZ>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneY>());
-      addSymmetryOperation(boost::make_shared<const SymOpInversion>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("6 [001]h"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [100]h"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue12::getName()
+  PointGroupLaue12::PointGroupLaue12() :
+      PointGroup("m-3")
+  { }
+
+  std::string PointGroupLaue12::getName() const
   {
       return "m-3 (Cubic)";
   }
 
-  bool PointGroupLaue12::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue12::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -511,22 +560,26 @@ namespace Geometry
       return Cubic;
   }
 
-  PointGroupLaue13::PointGroupLaue13()
+  void PointGroupLaue12::init()
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFold111>());
-      addSymmetryOperation(boost::make_shared<const SymOpRotationFourFoldZ>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneY>());
-      addSymmetryOperation(boost::make_shared<const SymOpInversion>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [111]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [010]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue13::getName()
+  PointGroupLaue13::PointGroupLaue13() :
+      PointGroup("m-3m")
+  { }
+
+  std::string PointGroupLaue13::getName() const
   {
       return "m-3m (Cubic)";
   }
 
-  bool PointGroupLaue13::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue13::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -555,23 +608,26 @@ namespace Geometry
       return Cubic;
   }
 
+  void PointGroupLaue13::init()
+  {
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [111]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("4 [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [010]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
+
+      setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
+  }
+
   /** @return a vector with all possible PointGroup objects */
   std::vector<PointGroup_sptr> getAllPointGroups()
   {
+    std::vector<std::string> allSymbols = PointGroupFactory::Instance().getAllPointGroupSymbols();
+
     std::vector<PointGroup_sptr> out;
-    out.push_back( boost::make_shared<PointGroupLaue1>() );
-    out.push_back( boost::make_shared<PointGroupLaue2>() );
-    out.push_back( boost::make_shared<PointGroupLaue3>() );
-    out.push_back( boost::make_shared<PointGroupLaue4>() );
-    out.push_back( boost::make_shared<PointGroupLaue5>() );
-    out.push_back( boost::make_shared<PointGroupLaue6>() );
-    out.push_back( boost::make_shared<PointGroupLaue7>() );
-    out.push_back( boost::make_shared<PointGroupLaue8>() );
-    out.push_back( boost::make_shared<PointGroupLaue9>() );
-    out.push_back( boost::make_shared<PointGroupLaue10>() );
-    out.push_back( boost::make_shared<PointGroupLaue11>() );
-    out.push_back( boost::make_shared<PointGroupLaue12>() );
-    out.push_back( boost::make_shared<PointGroupLaue13>() );
+    for(auto it = allSymbols.begin(); it != allSymbols.end(); ++it) {
+        out.push_back(PointGroupFactory::Instance().createPointGroup(*it));
+    }
+
     return out;
   }
 
@@ -587,7 +643,19 @@ namespace Geometry
       return map;
   }
 
-
+  DECLARE_POINTGROUP(PointGroupLaue1)
+  DECLARE_POINTGROUP(PointGroupLaue2)
+  DECLARE_POINTGROUP(PointGroupLaue3)
+  DECLARE_POINTGROUP(PointGroupLaue4)
+  DECLARE_POINTGROUP(PointGroupLaue5)
+  DECLARE_POINTGROUP(PointGroupLaue6)
+  DECLARE_POINTGROUP(PointGroupLaue7)
+  DECLARE_POINTGROUP(PointGroupLaue8)
+  DECLARE_POINTGROUP(PointGroupLaue9)
+  DECLARE_POINTGROUP(PointGroupLaue10)
+  DECLARE_POINTGROUP(PointGroupLaue11)
+  DECLARE_POINTGROUP(PointGroupLaue12)
+  DECLARE_POINTGROUP(PointGroupLaue13)
 
 } // namespace Mantid
 } // namespace Geometry

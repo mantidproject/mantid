@@ -24,6 +24,10 @@ set ( EXPORT_FILES
   src/Exports/ReferenceFrame.cpp
   src/Exports/Goniometer.cpp
   src/Exports/Object.cpp
+  src/Exports/PointGroup.cpp
+  src/Exports/PointGroupFactory.cpp
+  src/Exports/SymmetryOperation.cpp
+  src/Exports/SymmetryOperationFactory.cpp
 )  
 
 set ( SRC_FILES

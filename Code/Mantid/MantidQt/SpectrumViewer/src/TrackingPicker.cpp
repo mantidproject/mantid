@@ -40,7 +40,7 @@ void TrackingPicker::HideReadout( bool hide )
  */
 QwtText TrackingPicker::trackerText( const QPoint & point ) const
 {
-  emit mouseMoved();
+  emit mouseMoved(point);
   if ( hide_readout )
   {
     return QwtText();
@@ -60,7 +60,7 @@ QwtText TrackingPicker::trackerText( const QPoint & point ) const
  */
 QwtText TrackingPicker::trackerText( const QwtDoublePoint & pos ) const
 {
-  emit mouseMoved();
+  emit mouseMoved(pos.toPoint());
   if ( hide_readout )
   {
     return QwtText();

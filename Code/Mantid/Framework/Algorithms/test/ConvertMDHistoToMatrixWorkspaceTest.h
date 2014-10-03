@@ -16,6 +16,8 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <boost/lexical_cast.hpp>
+
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -78,6 +80,151 @@ public:
     return out_ws;
   }
 
+  /**
+    * Test convesion of a MD workspace to a 2D MatrixWorkspace.
+    * 
+    * @param ndims :: Number of dimensions in the input MDHistoWorkspace. ndims >= 2.
+    * @param nonIntegr :: Indices of the non-integrated dimensions. There must be 2 of them to pass the test.
+    */
+  void do_test_2D_slice(size_t ndims, std::vector<size_t> nonIntegr)
+  {
+    // prepare input workspace
+
+    // create an MD histo workspace
+    size_t size = 1;
+    // property values for CreateMDHistoWorkspace
+    std::vector<double> extents(ndims*2);
+    std::vector<int> numberOfBins(ndims);
+    std::vector<std::string> names(ndims);
+    std::vector<std::string> units(ndims);
+    // property values for SliceMDHisto
+    std::vector<int> start(ndims);
+    std::vector<int> end(ndims);
+    for(size_t i = 0; i < ndims; ++i)
+    {
+      size_t nbins = 3 + i;
+      size *= nbins;
+      numberOfBins[i] = static_cast<int>(nbins);
+      extents[2*i] = 0.0;
+      extents[2*i+1] = static_cast<double>(nbins);
+      names[i] = "x_" + boost::lexical_cast<std::string>(i);
+      if ( nonIntegr.end() != std::find( nonIntegr.begin(), nonIntegr.end(), i) )
+      {
+        // if it's a non-integrated dimension - don't slice
+        end[i] = static_cast<int>(nbins);
+      }
+      else
+      {
+        end[i] = 1;
+      }
+    }
+    std::vector<signal_t> data(size);
+    std::vector<signal_t> error(size);
+
+    auto alg = AlgorithmManager::Instance().create("CreateMDHistoWorkspace");
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setChild(true);
+    alg->setProperty("SignalInput", data);
+    alg->setProperty("ErrorInput", error);
+    alg->setProperty("Dimensionality", static_cast<int>(ndims));
+    alg->setProperty("Extents", extents);
+    alg->setProperty("NumberOfBins", numberOfBins);
+    alg->setProperty("Names", names);
+    alg->setProperty("Units", units);
+    alg->setPropertyValue("OutputWorkspace", "_"); // Not really required for child algorithm
+
+    try
+    {
+      alg->execute();
+    }
+    catch(std::exception& e)
+    {
+      TS_FAIL(e.what());
+    }
+
+    // slice the md ws to make it acceptable by ConvertMDHistoToMatrixWorkspace
+    IMDHistoWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
+    TS_ASSERT( ws );
+
+    alg = AlgorithmManager::Instance().create("SliceMDHisto");
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("Start", start);
+    alg->setProperty("End", end);
+    alg->setPropertyValue("OutputWorkspace", "_1"); // Not really required for child algorithm
+
+    try
+    {
+      alg->execute();
+    }
+    catch(std::exception& e)
+    {
+      TS_FAIL(e.what());
+    }
+
+    IMDHistoWorkspace_sptr slice = alg->getProperty("OutputWorkspace");
+    TS_ASSERT( slice );
+
+    // test ConvertMDHistoToMatrixWorkspace
+
+    alg = AlgorithmManager::Instance().create("ConvertMDHistoToMatrixWorkspace");
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", slice);
+    alg->setPropertyValue("OutputWorkspace", "_2"); // Not really required for child algorithm
+
+    if ( nonIntegr.size() > 2 || nonIntegr.empty() )
+    {
+      TS_ASSERT_THROWS( alg->execute(), std::invalid_argument );
+    }
+    else
+    {
+      try
+      {
+        alg->execute();
+      }
+      catch(std::exception& e)
+      {
+        TS_FAIL(e.what());
+      }
+    
+
+      MatrixWorkspace_sptr matrix = alg->getProperty("OutputWorkspace");
+      TS_ASSERT( matrix );
+
+      if ( nonIntegr.size() == 1 )
+      {
+        TS_ASSERT_EQUALS( matrix->getNumberHistograms(), 1 );
+      }
+
+      if ( nonIntegr.size() >= 1 )
+      {
+        auto xDim = slice->getDimension(nonIntegr[0]);
+        TS_ASSERT_EQUALS( xDim->getNBins(), matrix->blocksize() );
+        for(size_t i = 0; i < matrix->getNumberHistograms(); ++i)
+        {
+          TS_ASSERT_EQUALS( matrix->readX(i).front(), xDim->getMinimum() );
+          TS_ASSERT_EQUALS( matrix->readX(i).back(), xDim->getMaximum() );
+        }
+      }
+      else if ( nonIntegr.size() == 2 )
+      {
+        auto yDim = slice->getDimension(nonIntegr[1]);
+        TS_ASSERT_EQUALS( yDim->getNBins(), matrix->getNumberHistograms() );
+        auto axis = matrix->getAxis(1);
+        TS_ASSERT_EQUALS( axis->getMin(), yDim->getMinimum() );
+        TS_ASSERT_EQUALS( axis->getMax(), yDim->getMaximum() );
+      }
+
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
 public:
 
   ConvertMDHistoToMatrixWorkspaceTest()
@@ -103,7 +250,7 @@ public:
     const size_t n_dims = 1;
     const double signal = 1;
     const double error_sq = 0;
-    size_t nbins[1] = {1};
+    size_t nbins[1] = {2};
     coord_t min[1] = {-1};
     coord_t max[1] = {1};
 
@@ -128,6 +275,107 @@ public:
     TSM_ASSERT_DELTA("First coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.front(), -10, 1e-3);
     TSM_ASSERT_DELTA( "Last coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.back(), 10, 1e-3);
 
+  }
+
+  void test_2D_slice_0()
+  {
+    // 4D sliced to 2D
+    std::vector<size_t> nonIntegr(2);
+    nonIntegr[0] = 0;
+    nonIntegr[1] = 1;
+    do_test_2D_slice(4,nonIntegr);
+  }
+
+  void test_2D_slice_1()
+  {
+    // 4D unsliced
+    do_test_2D_slice(4,std::vector<size_t>());
+  }
+
+  void test_2D_slice_2()
+  {
+    // 4D sliced to 3D
+    std::vector<size_t> nonIntegr(3);
+    nonIntegr[0] = 0;
+    nonIntegr[1] = 1;
+    nonIntegr[2] = 2;
+    do_test_2D_slice(4,nonIntegr);
+  }
+
+  void test_2D_slice_3()
+  {
+    // 4D sliced to 2D
+    std::vector<size_t> nonIntegr(2);
+    nonIntegr[0] = 0;
+    nonIntegr[1] = 2;
+    do_test_2D_slice(4,nonIntegr);
+  }
+
+  void test_2D_slice_4()
+  {
+    // 4D sliced to 2D
+    std::vector<size_t> nonIntegr(2);
+    nonIntegr[0] = 0;
+    nonIntegr[1] = 3;
+    do_test_2D_slice(4,nonIntegr);
+  }
+
+  void test_2D_slice_5()
+  {
+    // 4D sliced to 2D
+    std::vector<size_t> nonIntegr(2);
+    nonIntegr[0] = 1;
+    nonIntegr[1] = 3;
+    do_test_2D_slice(4,nonIntegr);
+  }
+
+  void test_2D_slice_6()
+  {
+    // 3D sliced to 2D
+    std::vector<size_t> nonIntegr(2);
+    nonIntegr[0] = 1;
+    nonIntegr[1] = 2;
+    do_test_2D_slice(3,nonIntegr);
+  }
+
+  void test_2D_slice_7()
+  {
+    // 4D sliced to 1D
+    std::vector<size_t> nonIntegr(1,0);
+    do_test_2D_slice(4,nonIntegr);
+  }
+
+  void test_2D_slice_8()
+  {
+    // 4D sliced to 1D
+    std::vector<size_t> nonIntegr(1,1);
+    do_test_2D_slice(4,nonIntegr);
+  }
+
+  void test_2D_slice_9()
+  {
+    // 4D sliced to 1D
+    std::vector<size_t> nonIntegr(1,2);
+    do_test_2D_slice(4,nonIntegr);
+  }
+
+  void test_2D_slice_10()
+  {
+    // 4D sliced to 1D
+    std::vector<size_t> nonIntegr(1,3);
+    do_test_2D_slice(4,nonIntegr);
+  }
+
+  void test_2D_slice_11()
+  {
+    // 2D unsliced
+    do_test_2D_slice(2,std::vector<size_t>());
+  }
+
+  void test_2D_slice_12()
+  {
+    // 1D unsliced
+    do_test_2D_slice(1,std::vector<size_t>());
   }
 
 };
