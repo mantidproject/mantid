@@ -2,6 +2,8 @@ set ( SRC_FILES
 	src/ComponentParser.cpp
 	src/Crystal/ConventionalCell.cpp
 	src/Crystal/CrystalStructure.cpp
+	src/Crystal/CyclicGroup.cpp
+	src/Crystal/Group.cpp
 	src/Crystal/IndexingUtils.cpp
 	src/Crystal/NiggliCell.cpp
 	src/Crystal/OrientedLattice.cpp
@@ -107,6 +109,8 @@ set ( INC_FILES
 	inc/MantidGeometry/ComponentParser.h
 	inc/MantidGeometry/Crystal/ConventionalCell.h
 	inc/MantidGeometry/Crystal/CrystalStructure.h
+	inc/MantidGeometry/Crystal/CyclicGroup.h
+	inc/MantidGeometry/Crystal/Group.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
 	inc/MantidGeometry/Crystal/NiggliCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
@@ -215,12 +219,14 @@ set ( TEST_FILES
 	ConventionalCellTest.h
 	ConvexPolygonTest.h
 	CrystalStructureTest.h
+	CyclicGroupTest.h
 	CylinderTest.h
 	DetectorGroupTest.h
 	DetectorTest.h
 	FitParameterTest.h
 	GeneralTest.h
 	GoniometerTest.h
+	GroupTest.h
 	IDFObjectTest.h
 	IMDDimensionFactoryTest.h
 	IMDDimensionTest.h
