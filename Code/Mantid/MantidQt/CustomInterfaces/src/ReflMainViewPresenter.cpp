@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Utils.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 
 #include <boost/regex.hpp>
@@ -171,7 +172,7 @@ namespace MantidQt
           throw std::runtime_error("Value for two theta could not be found in log.");
 
         //Update the model
-        m_model->String(rowNo, COL_ANGLE) = Strings::toString<double>(thetaVal);
+        m_model->String(rowNo, COL_ANGLE) = Strings::toString<double>(Utils::roundToDP(thetaVal, 3));
       }
 
       //If we need to calculate the resolution, do.
@@ -346,8 +347,8 @@ namespace MantidQt
       try
       {
         const Instrument_const_sptr instrument = ws->getInstrument();
-        lmin = instrument->getNumberParameter("LambdaMin")[0];
-        lmax = instrument->getNumberParameter("LambdaMax")[0];
+        lmin = instrument->getNumberParameter("LambdaMin")[0] + 1;
+        lmax = instrument->getNumberParameter("LambdaMax")[0] - 2;
       }
       catch(std::exception&)
       {
@@ -356,6 +357,11 @@ namespace MantidQt
 
       double qmin = 4 * M_PI / lmax * sin(theta * M_PI / 180.0);
       double qmax = 4 * M_PI / lmin * sin(theta * M_PI / 180.0);
+      qmin = Utils::roundToDP(qmin, 3);
+      qmax = Utils::roundToDP(qmax, 3);
+
+      //The old refl_gui performs this additional calculation on the last workspace of a stitch group
+      //qmax = 4 * M_PI / ((4 * M_PI / qmax * sin(theta * M_PI / 180)) - 0.5) * sin(theta * M_PI / 180);
 
       std::vector<double> ret;
       ret.push_back(qmin);
