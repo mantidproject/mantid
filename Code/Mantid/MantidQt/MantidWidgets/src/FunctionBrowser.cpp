@@ -140,7 +140,7 @@ void FunctionBrowser::createBrowser()
     auto compositeFactory = new CompositeEditorFactory<QtDoublePropertyManager>(this,buttonFactory);
     compositeFactory->setSecondaryFactory(globalOptionName, doubleEditorFactory);
     parameterEditorFactory = compositeFactory;
-    connect(buttonFactory,SIGNAL(buttonClicked(QtProperty*)), this,SIGNAL(localParameterButtonClicked(QtProperty*)));
+    connect(buttonFactory,SIGNAL(buttonClicked(QtProperty*)), this,SLOT(parameterButtonClicked(QtProperty*)));
   }
   else
   {
@@ -740,7 +740,7 @@ void FunctionBrowser::updateFunctionIndices(QtProperty* prop, QString index)
 /**
  * Get property of the overall function.
  */
-FunctionBrowser::AProperty FunctionBrowser::getFunctionProperty()
+FunctionBrowser::AProperty FunctionBrowser::getFunctionProperty() const
 {
   auto props = m_browser->properties();
   if ( props.isEmpty() )
@@ -898,7 +898,7 @@ QString FunctionBrowser::getIndex(QtProperty* prop) const
  * @param index :: Function index to search, or empty string for top-level function
  * @return Function property, or NULL if not found
  */
-QtProperty* FunctionBrowser::getFunctionProperty(const QString& index)
+QtProperty* FunctionBrowser::getFunctionProperty(const QString& index) const
 {
   // Might not be the most efficient way to do it. m_functionManager might be searched instead,
   // but it is not being kept up-to-date at the moment (is not cleared).
@@ -1491,6 +1491,27 @@ void FunctionBrowser::setParameter(const QString& funcIndex, const QString& para
 }
 
 /**
+ * Get a value of a parameter
+ * @param funcIndex :: Index of the function
+ * @param paramName :: Parameter name
+ */
+double FunctionBrowser::getParameter(const QString& funcIndex, const QString& paramName) const
+{
+  if (auto prop = getFunctionProperty(funcIndex))
+  {
+    auto children = prop->subProperties();
+    foreach(QtProperty* child, children)
+    {
+      if (isParameter(child) && child->propertyName() == paramName)
+      {
+        return m_parameterManager->value(child);
+      }
+    }
+  }
+  throw std::runtime_error("Unknown function parameter " + (funcIndex + paramName).toStdString());
+}
+
+/**
  * Return FunctionFactory function string
  */
 QString FunctionBrowser::getFunctionString()
@@ -1717,6 +1738,11 @@ void FunctionBrowser::attributeVectorDoubleChanged(QtProperty *prop)
 void FunctionBrowser::parameterChanged(QtProperty* prop)
 {
   emit parameterChanged(getIndex(prop), prop->propertyName());
+}
+
+void FunctionBrowser::parameterButtonClicked(QtProperty *prop)
+{
+  emit localParameterButtonClicked(getIndex(prop) + prop->propertyName());
 }
 
 } // MantidWidgets

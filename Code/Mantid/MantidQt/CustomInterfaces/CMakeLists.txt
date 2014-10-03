@@ -235,6 +235,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/Stretch.ui
                inc/MantidQtCustomInterfaces/MantidEV.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
+			   inc/MantidQtCustomInterfaces/EditLocalParameterDialog.ui
 )
 
 set ( TEST_FILES

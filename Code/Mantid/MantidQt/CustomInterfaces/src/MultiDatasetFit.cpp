@@ -360,7 +360,31 @@ void PlotController::update()
 }
 
 /*==========================================================================================*/
-/*                                MultiDatasetFit                                           */
+/*                               EditLocalParameterDialog                                   */
+/*==========================================================================================*/
+
+EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *parent, const QString &parName):
+  QDialog(parent)
+{
+  m_uiForm.setupUi(this);
+  QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
+  header->setResizeMode(0,QHeaderView::Stretch);
+  header->setResizeMode(1,QHeaderView::Stretch);
+
+  auto multifit = owner();
+  auto n = static_cast<int>( multifit->getNumberOfSpectra() );
+  for(int i = 0; i < n; ++i)
+  {
+    m_uiForm.tableWidget->insertRow(i);
+    auto cell = new QTableWidgetItem( QString("f%1.").arg(i) + parName );
+    m_uiForm.tableWidget->setItem( i, 0, cell );
+    cell = new QTableWidgetItem( QString::number(multifit->getLocalParameterValue(parName,i)) );
+    m_uiForm.tableWidget->setItem( i, 1, cell );
+  }
+}
+
+/*==========================================================================================*/
+/*                                    MultiDatasetFit                                       */
 /*==========================================================================================*/
 
 //Register the class with the factory
@@ -411,7 +435,7 @@ void MultiDatasetFit::initLayout()
 
   m_functionBrowser = new MantidQt::MantidWidgets::FunctionBrowser(NULL, true);
   m_uiForm.browserLayout->addWidget( m_functionBrowser );
-  connect(m_functionBrowser,SIGNAL(localParameterButtonClicked(QtProperty*)),this,SLOT(editLocalParameterValues(QtProperty*)));
+  connect(m_functionBrowser,SIGNAL(localParameterButtonClicked(const QString&)),this,SLOT(editLocalParameterValues(const QString&)));
 }
 
 /**
@@ -632,12 +656,35 @@ size_t MultiDatasetFit::getNumberOfSpectra() const
 
 /**
  * Start an editor to display and edit individual local parameter values.
- * @param prop :: QtProperty for a local parameter (Global unchecked).
+ * @param parName :: Fully qualified name for a local parameter (Global unchecked).
  */
-void MultiDatasetFit::editLocalParameterValues(QtProperty *prop)
+void MultiDatasetFit::editLocalParameterValues(const QString& parName)
 {
-  throw std::runtime_error("Hello, " + prop->propertyName().toStdString());
+  EditLocalParameterDialog dialog(this,parName);
+  if ( dialog.exec() == QDialog::Accepted )
+  {
+    throw std::runtime_error("Edit local parameters.");
+  }
 }
+
+/**
+ * Get value of a local parameter
+ * @param parName :: Name of a parameter.
+ */
+double MultiDatasetFit::getLocalParameterValue(const QString& parName, int i) const
+{
+  QString functionIndex;
+  QString parameterName = parName;
+  int j = parName.lastIndexOf('.');
+  if ( j > 0 )
+  {
+    ++j;
+    functionIndex = parName.mid(0,j);
+    parameterName = parName.mid(j);
+  }
+  return m_functionBrowser->getParameter(functionIndex,parameterName);
+}
+
 
 /*==========================================================================================*/
 } // CustomInterfaces

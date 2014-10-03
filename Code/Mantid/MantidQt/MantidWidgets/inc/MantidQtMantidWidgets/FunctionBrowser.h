@@ -105,6 +105,9 @@ public:
   /// Update the function parameter value
   void setParameter(const QString& funcIndex, const QString& paramName, double value);
 
+  /// Get a value of a parameter
+  double getParameter(const QString& funcIndex, const QString& paramName) const;
+
 signals:
   /// User selects a different function (or one of it's sub-properties)
   void currentFunctionChanged();
@@ -115,7 +118,7 @@ signals:
   void parameterChanged(const QString& funcIndex, const QString& paramName);
 
   /// In multi-dataset context a button value editor was clicked
-  void localParameterButtonClicked(QtProperty*);
+  void localParameterButtonClicked(const QString& parName);
 
 protected:
   /// Create the Qt property browser
@@ -143,7 +146,7 @@ protected:
   /// Update function index properties 
   void updateFunctionIndices(QtProperty* prop = NULL, QString index = "");
   /// Get property of the overall function
-  AProperty getFunctionProperty();
+  AProperty getFunctionProperty() const;
   /// Check if property is a function group
   bool isFunction(QtProperty* prop) const;
   /// Check if property is a function attribute
@@ -167,7 +170,7 @@ protected:
   /// Get the function index for a property
   QString getIndex(QtProperty* prop) const;
   /// Get function property for the index
-  QtProperty* getFunctionProperty(const QString& index);
+  QtProperty* getFunctionProperty(const QString& index)const;
 
   /// Add a tie property
   AProperty addTieProperty(QtProperty* prop, QString tie);
@@ -227,6 +230,7 @@ protected slots:
   void attributeVectorDoubleChanged(QtProperty*);
   /// Called when a function parameter property is changed
   void parameterChanged(QtProperty*);
+  void parameterButtonClicked(QtProperty*);
 
 protected:
   /// Manager for function group properties
