@@ -73,6 +73,8 @@ namespace CustomInterfaces
     void sliceMaxChanged(double val);
     void sliceUpdateRS(QtProperty*, double);
     void setDefaultInstDetails();
+    void updatePreviewPlot();
+    void sliceAlgDone(bool error);
 
   };
 } // namespace CustomInterfaces
