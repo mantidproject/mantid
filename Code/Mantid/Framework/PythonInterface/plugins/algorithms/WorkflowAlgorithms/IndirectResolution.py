@@ -86,7 +86,9 @@ class IndirectResolution(DataProcessorAlgorithm):
         Rebin(InputWorkspace=self._out_ws, OutputWorkspace=self._out_ws, Params=self._rebin_string)
 
         if self._smooth:
-            WienerSmooth(InputWorkspace=self._out_ws, OutputWorkspace=self._out_ws)
+            WienerSmooth(InputWorkspace=self._out_ws, OutputWorkspace='__smooth_temp')
+            CopyLogs(InputWorkspace=self._out_ws, OutputWorkspace='__smooth_temp')
+            RenameWorkspace(InputWorkspace='__smooth_temp', OutputWorkspace=self._out_ws)
 
         self._post_process()
         self.setProperty('OutputWorkspace', self._out_ws)
@@ -126,6 +128,8 @@ class IndirectResolution(DataProcessorAlgorithm):
         AddSampleLog(Workspace=self._out_ws, LogName='scale', LogType='String', LogText=str(use_scale_factor))
         if use_scale_factor:
             AddSampleLog(Workspace=self._out_ws, LogName='scale_factor', LogType='Number', LogText=str(self._scale_factor))
+
+        AddSampleLog(Workspace=self._out_ws, LogName='res_smoothing_applied', LogType='String', LogText=str(self._smooth))
 
         AddSampleLog(Workspace=self._out_ws, LogName='back_start', LogType='Number', LogText=str(self._background[0]))
         AddSampleLog(Workspace=self._out_ws, LogName='back_end', LogType='Number', LogText=str(self._background[1]))
