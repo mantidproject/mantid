@@ -139,9 +139,11 @@ public:
     }
 
     SymmetryOperation operator *(const SymmetryOperation &operand) const;
+    SymmetryOperation inverse() const;
 
     bool operator !=(const SymmetryOperation &other) const;
     bool operator ==(const SymmetryOperation &other) const;
+    bool operator <(const SymmetryOperation &other) const;
 
 protected:
     SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R &vector);

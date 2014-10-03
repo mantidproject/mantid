@@ -145,6 +145,27 @@ public:
         TS_ASSERT_EQUALS(screw21z * screw21z, identity);
     }
 
+    void testInverse()
+    {
+        SymmetryOperation identity("x,y,z");
+        SymmetryOperation inversion = identity.inverse();
+        TS_ASSERT_EQUALS(inversion.identifier(), "x,y,z");
+
+        SymmetryOperation fourFoldZPlus("-y,x,z");
+        SymmetryOperation fourFoldZMinus = fourFoldZPlus.inverse();
+        TS_ASSERT_EQUALS(fourFoldZMinus.identifier(), "y,-x,z");
+
+        SymmetryOperation fourOneScrewZPlus("-y,x,z+1/4");
+        SymmetryOperation fourOneScrewZMinus = fourOneScrewZPlus.inverse();
+        TS_ASSERT_EQUALS(fourOneScrewZMinus.identifier(), "y,-x,z+3/4");
+
+        // (Op^-1)^-1 = Op
+        TS_ASSERT_EQUALS(fourOneScrewZMinus.inverse(), fourOneScrewZPlus);
+
+        // Op * Op^-1 = Identity
+        TS_ASSERT_EQUALS(fourOneScrewZPlus * fourOneScrewZMinus, identity);
+    }
+
     void testGetWrappedVectorV3R()
     {
         V3R one = V3R(1, 1, 1) / 2;
@@ -217,7 +238,6 @@ public:
 
 
         TS_ASSERT(inversion1 == inversion2);
-
     }
 
     void testSymmetryOperations()

@@ -139,10 +139,26 @@ SymmetryOperation SymmetryOperation::operator *(const SymmetryOperation &operand
     return SymmetryOperation(m_matrix * operand.m_matrix, getWrappedVector((m_matrix * operand.m_vector) + m_vector) );
 }
 
+/// Returns the inverse of the symmetry operation.
+SymmetryOperation SymmetryOperation::inverse() const
+{
+    Kernel::IntMatrix matrix(m_matrix);
+    matrix.Invert();
+
+    return SymmetryOperation(matrix, -(matrix * m_vector));
+}
+
+
 /// Returns true if matrix and vector are equal
 bool SymmetryOperation::operator ==(const SymmetryOperation &other) const
 {
     return m_matrix == other.m_matrix && m_vector == other.m_vector;
+}
+
+/// Returns true if SymmetryOperation is "smaller" than other, determined by using the identifier strings.
+bool SymmetryOperation::operator <(const SymmetryOperation &other) const
+{
+    return m_identifier < other.m_identifier;
 }
 
 /// Returns true if operatios are not equal
