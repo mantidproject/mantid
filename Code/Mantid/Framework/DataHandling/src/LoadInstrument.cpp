@@ -5,7 +5,6 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/Progress.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -220,7 +219,10 @@ namespace Mantid
         try
         {
           // To allow the use of ExperimentInfo instead of workspace, we call it manually
-          LoadParameterFile::execManually(false, fullPathParamIDF, "", m_workspace);
+          Algorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
+          loadParamAlg->setProperty("Filename", fullPathParamIDF);
+          loadParamAlg->setProperty("Workspace", m_workspace);
+          loadParamAlg->execute();
           g_log.debug("Parameters loaded successfully.");
         } catch (std::invalid_argument& e)
         {
