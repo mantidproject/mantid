@@ -330,6 +330,8 @@ namespace MantidQt
 
         if(m_model->String(rowNo, COL_QMAX).empty())
           m_model->String(rowNo, COL_QMAX) = Strings::toString<double>(qrange[1]);
+
+        m_view->showTable(m_model);
       }
     }
 
