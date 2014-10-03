@@ -1456,51 +1456,49 @@ Later steps in the process (saving, renaming) will not be done.</string>
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QPushButton" name="slice_pbPlotRaw">
-              <property name="text">
-               <string>Plot Raw</string>
-              </property>
-             </widget>
-            </item>
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="loDiagnosticsCalibrationFile">
+           <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
              <widget class="QCheckBox" name="slice_ckUseCalib">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
-               <string>Use Calibration File</string>
+               <string>Use Calibration</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_calibFile" native="true">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
+             <widget class="MantidQt::MantidWidgets::DataSelector" name="slice_dsCalibFile" native="true">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
-                <verstretch>41</verstretch>
+                <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="findRunFiles" stdset="0">
-               <bool>false</bool>
-              </property>
-              <property name="label" stdset="0">
-               <string/>
-              </property>
-              <property name="multipleFiles" stdset="0">
-               <bool>false</bool>
-              </property>
-              <property name="optional" stdset="0">
+              <property name="autoLoad" stdset="0">
                <bool>true</bool>
               </property>
-              <property name="fileExtensions" stdset="0">
+              <property name="loadLabelText" stdset="0">
+               <string/>
+              </property>
+              <property name="workspaceSuffixes" stdset="0">
+               <stringlist>
+                <string>_calib</string>
+               </stringlist>
+              </property>
+              <property name="fileBrowserSuffixes" stdset="0">
                <stringlist>
                 <string>_calib.nxs</string>
                </stringlist>
+              </property>
+              <property name="showLoad" stdset="0">
+               <bool>false</bool>
               </property>
              </widget>
             </item>
@@ -2578,9 +2576,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>cal_ckRES</tabstop>
   <tabstop>cal_ckPlotResult</tabstop>
   <tabstop>slice_inputFile</tabstop>
-  <tabstop>slice_pbPlotRaw</tabstop>
-  <tabstop>slice_ckUseCalib</tabstop>
-  <tabstop>slice_calibFile</tabstop>
   <tabstop>slice_ckVerbose</tabstop>
   <tabstop>slice_ckPlot</tabstop>
   <tabstop>slice_ckSave</tabstop>
