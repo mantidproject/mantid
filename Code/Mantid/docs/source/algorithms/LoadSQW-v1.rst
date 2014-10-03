@@ -167,7 +167,7 @@ Usage
 -----
 .. include:: ../usagedata-note.txt
 
-**Example - Load 4D workspace form sample SQW file.
+**Example - Load 4D workspace form sample SQW file.**
 
 .. testcode:: ExLoadSQW
 

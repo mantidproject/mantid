@@ -32,7 +32,7 @@ Usage
 -----
 .. include:: ../usagedata-note.txt
 
-**Example - Load MD workspace.
+**Example - Load MD workspace.**
 
 .. testcode:: ExLoadMD
 
