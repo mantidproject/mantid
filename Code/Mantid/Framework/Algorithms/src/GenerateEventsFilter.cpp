@@ -457,7 +457,8 @@ namespace Algorithms
     if (m_dblLog)
     {
       g_log.debug("Attempting to remove duplicates in double series log.");
-      m_dblLog->addValue(m_runEndTime, 0.);
+      if (m_runEndTime > m_dblLog->lastTime())
+        m_dblLog->addValue(m_runEndTime, 0.);
       m_dblLog->eliminateDuplicates();
     }
     else
@@ -1893,7 +1894,8 @@ namespace Algorithms
       norunendset = true;
     }
 
-    g_log.debug() << "Check point 1 " << "Run end time = " << runendtime << ", no run end set = "
+    g_log.debug() << "Check point 1 " << "Run end time = " << runendtime << "/"
+                  << runendtime.totalNanoseconds() << ", no run end set = "
                   << norunendset << "\n";
 
     int64_t extended_ns = static_cast<int64_t>(1.0E8);
@@ -1911,6 +1913,8 @@ namespace Algorithms
         {
           // Use the last proton charge time
           runendtime = tmpendtime;
+          g_log.debug() << "Check point 1B: " << "Use last proton charge time = " << tmpendtime.totalNanoseconds()
+                        << " as run end. " << "\n" ;
         }
         norunendset = false;
       }
@@ -1933,7 +1937,8 @@ namespace Algorithms
             runendtime = lastpulse;
         }
       }
-      g_log.warning() << "Check point 2B " << " run end time = " << runendtime << "\n";
+      g_log.debug() << "Check point 2B " << " from last event: run end time = " << runendtime
+                    << " / " << runendtime.totalNanoseconds() << "\n";
     }
 
     // Check whether run end time is set
