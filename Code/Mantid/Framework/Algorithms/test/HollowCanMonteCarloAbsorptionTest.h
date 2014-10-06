@@ -28,22 +28,17 @@ public:
 
   //-------------------- Success cases --------------------------------
 
-  void test_Algorithm_Attaches_Environment_To_InputWorkspace_And_Produces_Correct_Result()
+  void test_Algorithm_Attaches_Sample_To_InputWorkspace_And_Produces_Correct_Result()
   {
     using Mantid::API::MatrixWorkspace_sptr;
 
-    auto alg = createAlgorithmForAluminumTestCan();
+    auto alg = createAlgorithmForTestCan();
     auto inputWS = createInputWorkspace();
 
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("InputWorkspace", inputWS) );
-    TS_ASSERT_THROWS_NOTHING( alg->setProperty("CanMaterialFormula", "Al") );
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace", "UnusedForChild") );
     TS_ASSERT_THROWS_NOTHING( alg->execute(); );
     TS_ASSERT( alg->isExecuted() );
-
-//    // Does the input workspace have a defined environment
-//    auto sample = inputWS->sample();
-//    TS_ASSERT_THROWS_NOTHING(sample.getEnvironment());
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
     TS_ASSERT(outWS);
@@ -79,7 +74,7 @@ public:
   {
     using Mantid::API::MatrixWorkspace_sptr;
 
-    auto alg = createAlgorithmForAluminumTestCan();
+    auto alg = createAlgorithmForTestCan();
     auto inputWS = createInputWorkspace();
 
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("InputWorkspace", inputWS) );
@@ -88,25 +83,11 @@ public:
     TS_ASSERT( !alg->isExecuted() );
   }
 
-  void test_Can_Material_With_More_Than_One_Atom_Is_Not_Allowed()
-  {
-    using Mantid::API::MatrixWorkspace_sptr;
-
-    auto alg = createAlgorithmForAluminumTestCan();
-    auto inputWS = createInputWorkspace();
-
-    TS_ASSERT_THROWS_NOTHING( alg->setProperty("InputWorkspace", inputWS) );
-    TS_ASSERT_THROWS_NOTHING( alg->setProperty("CanMaterialFormula", "AlO") );
-    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace", "UnusedForChild") );
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument );
-    TS_ASSERT( !alg->isExecuted() );
-  }
-
   //-------------------- Helpers --------------------------------------
 
 private:
 
-  Mantid::API::IAlgorithm_sptr createAlgorithmForAluminumTestCan()
+  Mantid::API::IAlgorithm_sptr createAlgorithmForTestCan()
   {
     auto alg = createAlgorithm();
 
@@ -114,9 +95,6 @@ private:
 
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("CanOuterRadius", 1.1) );
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("CanInnerRadius", 0.92) );
-    TS_ASSERT_THROWS_NOTHING( alg->setProperty("CanSachetHeight", 4.0) );
-    TS_ASSERT_THROWS_NOTHING( alg->setProperty("CanSachetThickness", 0.09) );
-    TS_ASSERT_THROWS_NOTHING( alg->setProperty("CanMaterialFormula", "Al") );
 
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("SampleHeight", 3.8) );
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("SampleThickness", 0.05) );

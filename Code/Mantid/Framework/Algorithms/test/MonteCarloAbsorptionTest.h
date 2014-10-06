@@ -70,18 +70,18 @@ public:
     // Pick out some random values
     const double delta(1e-08);
     const size_t middle_index = (nbins/2) - 1;
-    TS_ASSERT_DELTA(factorWS->readY(0).front(), 0.005055019, delta);
-    TS_ASSERT_DELTA(factorWS->readY(0)[middle_index], 0.000124057, delta);
-    TS_ASSERT_DELTA(factorWS->readY(0).back(), 0.000000311, delta);
+    TS_ASSERT_DELTA(factorWS->readY(0).front(), 0.005869406, delta);
+    TS_ASSERT_DELTA(factorWS->readY(0)[middle_index], 0.000104369, delta);
+    TS_ASSERT_DELTA(factorWS->readY(0).back(), 0.000004338, delta);
 
     // Different spectra
-    TS_ASSERT_DELTA(factorWS->readY(4).front(), 0.004892241, delta);
-    TS_ASSERT_DELTA(factorWS->readY(4)[middle_index],0.000074621005, delta);
-    TS_ASSERT_DELTA(factorWS->readY(4).back(), 0.000008845, delta);
+    TS_ASSERT_DELTA(factorWS->readY(4).front(), 0.004037809, delta);
+    TS_ASSERT_DELTA(factorWS->readY(4)[middle_index], 0.000190783, delta);
+    TS_ASSERT_DELTA(factorWS->readY(4).back(), 0.000019473, delta);
 
-    TS_ASSERT_DELTA(factorWS->readY(8).front(), 0.008062871904, delta);
-    TS_ASSERT_DELTA(factorWS->readY(8)[middle_index], 0.000061621, delta);
-    TS_ASSERT_DELTA(factorWS->readY(8).back(), 0.000001655, delta);
+    TS_ASSERT_DELTA(factorWS->readY(8).front(), 0.004150238, delta);
+    TS_ASSERT_DELTA(factorWS->readY(8)[middle_index], 0.000101628, delta);
+    TS_ASSERT_DELTA(factorWS->readY(8).back(), 0.000064700, delta);
 
     dataStore.remove(inputName);
     dataStore.remove(outputName);
@@ -113,9 +113,9 @@ public:
     // Pick out some random values
     const double delta(1e-08);
     const size_t middle_index = (nbins/2) - 1;
-    TS_ASSERT_DELTA(factorWS->readY(0).front(), 0.006268941, delta);
-    TS_ASSERT_DELTA(factorWS->readY(0)[middle_index], 0.000134452, delta);
-    TS_ASSERT_DELTA(factorWS->readY(0).back(), 0.000011674, delta);
+    TS_ASSERT_DELTA(factorWS->readY(0).front(), 0.005122949, delta);
+    TS_ASSERT_DELTA(factorWS->readY(0)[middle_index], 0.000238143162, delta);
+    TS_ASSERT_DELTA(factorWS->readY(0).back(), 0.000003069996, delta);
 
     dataStore.remove(inputName);
     dataStore.remove(outputName);

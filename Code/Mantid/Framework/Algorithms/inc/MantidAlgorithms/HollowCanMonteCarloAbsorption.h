@@ -58,20 +58,13 @@ namespace Mantid
       void init();
       void exec();
 
-      void attachEnvironment(API::MatrixWorkspace_sptr & workspace);
-      boost::shared_ptr<Geometry::Object> createEnvironmentShape() const;
-      boost::shared_ptr<Kernel::Material> createEnvironmentMaterial() const;
-
       void attachSample(API::MatrixWorkspace_sptr & workspace);
-      boost::shared_ptr<Geometry::Object> createSampleShape() const;
-      void runSetSampleMaterial(API::MatrixWorkspace_sptr & workspace);
-
-      API::MatrixWorkspace_sptr runMonteCarloAbsorptionCorrection(const API::MatrixWorkspace_sptr & workspace);
-
+      void runCreateSampleShape(API::MatrixWorkspace_sptr & workspace);
+      std::string createSampleShapeXML(const Kernel::V3D &upAxis) const;
       const std::string cylinderXML(const std::string &id, const Kernel::V3D & bottomCentre, const double radius,
                                     const Kernel::V3D & axis, const double height) const;
-      const std::string cuboidXML(const std::string &id, const Kernel::V3D & leftFrontBottom, const Kernel::V3D & leftBackBottom,
-                                  const Kernel::V3D & leftFrontTop, const Kernel::V3D & rightFrontBottom) const;
+      void runSetSampleMaterial(API::MatrixWorkspace_sptr & workspace);
+      API::MatrixWorkspace_sptr runMonteCarloAbsorptionCorrection(const API::MatrixWorkspace_sptr & workspace);
     };
 
 

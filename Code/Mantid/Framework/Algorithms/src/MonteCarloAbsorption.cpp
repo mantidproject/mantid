@@ -234,7 +234,8 @@ namespace Mantid
       int nattempts(0);
       while( nattempts < MaxRandPointAttempts )
       {
-        const auto & block = m_blocks[uniInt()];
+        size_t index = uniInt();
+        const auto & block = m_blocks[index];
         const double x = m_blkHalfX*(2.0*uniReal() - 1.0) + block.xMin();
         const double y = m_blkHalfY*(2.0*uniReal() - 1.0) + block.yMin();
         const double z = m_blkHalfZ*(2.0*uniReal() - 1.0) + block.zMin();
@@ -463,10 +464,17 @@ namespace Mantid
         }
       }
 
-      g_log.debug() << "Sample + container divided into " << m_blocks.size() << " blocks.";
-      if(m_blocks.size() == numVolumeElements) g_log.debug("\n");
-      else g_log.debug() << " Skipped " << (numVolumeElements-m_blocks.size())
-                         << " blocks that do not intersect with the sample + container\n";
+      if(m_blocks.empty())
+      {
+        throw std::logic_error("Error dividing up sample. No sub-blocks intercept with the actual object.");
+      }
+      else
+      {
+        g_log.debug() << "Sample + container divided into " << m_blocks.size() << " blocks.";
+        if(m_blocks.size() == numVolumeElements) g_log.debug("\n");
+        else g_log.debug() << " Skipped " << (numVolumeElements-m_blocks.size())
+                           << " blocks that do not intersect with the sample + container\n";
+      }
     }
 
     /**
@@ -486,10 +494,10 @@ namespace Mantid
         V3D(block.xMin(), block.yMax(), block.zMax()), // right-back-top
         V3D(block.xMin(), block.yMin(), block.zMax()) // right-back-bottom
       };
-      bool intersects(true);
-      for(size_t i = 0; i < 8; ++i)
+      bool intersects(ptIntersectsSample(vertices[0]));
+      for(size_t i = 1; i < 8; ++i)
       {
-        intersects &= ptIntersectsSample(vertices[i]);
+        intersects |= ptIntersectsSample(vertices[i]);
       }
       return intersects;
     }
