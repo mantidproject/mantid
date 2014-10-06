@@ -69,6 +69,7 @@ namespace CustomInterfaces
     void plotRawInput(const QString &workspaceName);
     void updateMiniPlots();
     void replotNewSpectrum(QtProperty *prop, double value);
+    void verifyERange(QtProperty *prop, double value);
     void updateRangeSelectors(QtProperty *prop, double value);
     void preview();
     void previewAlgDone(bool error);

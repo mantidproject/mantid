@@ -132,6 +132,8 @@ namespace CustomInterfaces
     // SIGNAL/SLOT CONNECTIONS
     // Update range selctors when a property is changed
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRangeSelectors(QtProperty*, double)));
+    // Verify an energy range when it is updated
+    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(verifyERange(QtProperty*, double)));
     // Plot a new spectrum when the user changes the value of the preview spectrum
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(replotNewSpectrum(QtProperty*, double)));
     // Plot miniplot when file has finished loading
@@ -275,6 +277,42 @@ namespace CustomInterfaces
 
     if((prop == m_properties["PreviewSpec"]) || (prop == m_properties["PreviewRange"]))
       updateMiniPlots();
+  }
+
+  /**
+   * Verifies that the E Range is valid.
+   *
+   * Resets the last property changed to it's default if not.
+   *
+   * @param prop QtProperty changed
+   * @param value Value it was changed to (unused)
+   */
+  void IndirectSymmetrise::verifyERange(QtProperty *prop, double value)
+  {
+    UNUSED_ARG(value);
+
+    double eMin = m_dblManager->value(m_properties["EMin"]);
+    double eMax = m_dblManager->value(m_properties["EMax"]);
+
+    // First check that the raw curve has been plotted
+    if(!m_curves["SymmRawPlot"])
+      return;
+
+    // Get the range of the plotted raw curve
+    auto axisRange = getCurveRange("SymmRawPlot");
+
+    if(prop == m_properties["EMin"])
+    {
+      // If range is invalid reset EMin to range/10
+      if(eMin > eMax)
+        m_dblManager->setValue(m_properties["EMin"], axisRange.second/10);
+    }
+    else if(prop == m_properties["EMax"])
+    {
+      // If range is invalid reset EMax to range
+      if(eMin > eMax)
+        m_dblManager->setValue(m_properties["EMax"], axisRange.second);
+    }
   }
 
   /**
