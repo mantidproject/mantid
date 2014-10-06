@@ -53,8 +53,8 @@ if(CMAKE_GENERATOR STREQUAL Xcode)
   set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/geometry )
 endif()
 
-copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
-                           PYTHON_INSTALL_FILES )
+copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
+                     PYTHON_INSTALL_FILES )
 
 #############################################################################################
 # Create the target for this directory

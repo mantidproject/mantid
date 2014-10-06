@@ -821,15 +821,16 @@ endif ()
 # Config reset scripts
 ###########################################################################
 
-if( WIN32 )
-  file( COPY
-        ${CMAKE_CURRENT_SOURCE_DIR}/reset_settings.bat
-        DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
+if ( WIN32 )
+  set ( CONFIG_RESET_SCRIPT reset_settings.bat )
 else ()
-  file( COPY
-        ${CMAKE_CURRENT_SOURCE_DIR}/reset_settings.sh
-        DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
+  set ( CONFIG_RESET_SCRIPT reset_settings.sh )
 endif ()
+
+copy_files_to_dir ( "${CONFIG_RESET_SCRIPT}"
+                     ${CMAKE_CURRENT_SOURCE_DIR}
+                     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+                     CONFIG_RESET_SCRIPT_FILE )
 
 ###########################################################################
 # Required Python config files
@@ -837,29 +838,29 @@ endif ()
 
 # Top-level python scripts
 set( PY_FILES mantidplotrc.py mantidplot.py qt_settings_editor.py )
-copy_python_files_to_dir ( "${PY_FILES}"
-                            ${CMAKE_CURRENT_SOURCE_DIR}
-                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
-                            PYTHON_INSTALL_FILES )
+copy_files_to_dir ( "${PY_FILES}"
+                     ${CMAKE_CURRENT_SOURCE_DIR}
+                     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+                     PYTHON_INSTALL_FILES )
 # mantidplot.py package
 set( MTDPLOTPY_FILES
   __init__.py
   proxies.py
 )
-copy_python_files_to_dir ( "${MTDPLOTPY_FILES}"
-                            ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotpy
-                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplotpy
-                            MTDPLOT_INSTALL_FILES )
+copy_files_to_dir ( "${MTDPLOTPY_FILES}"
+                     ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotpy
+                     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplotpy
+                     MTDPLOT_INSTALL_FILES )
 
 # IPython scripts
 set( IPY_FILES
   __init__.py
   mantid_ipython_widget.py
 )
-copy_python_files_to_dir ( "${IPY_FILES}"
-                            ${CMAKE_CURRENT_SOURCE_DIR}/ipython_widget
-                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_widget
-                            IPYTHON_INSTALL_FILES )
+copy_files_to_dir ( "${IPY_FILES}"
+                     ${CMAKE_CURRENT_SOURCE_DIR}/ipython_widget
+                     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_widget
+                     IPYTHON_INSTALL_FILES )
 
 ###########################################################################
 # MantidPlot executable
@@ -868,7 +869,7 @@ copy_python_files_to_dir ( "${IPY_FILES}"
 add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS}
 							${RES_FILES} ${MANTID_RC_FILE}
-							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${IPYTHON_INSTALL_FILES}
+              ${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${IPYTHON_INSTALL_FILES} ${CONFIG_RESET_SCRIPT_FILE}
 )
 
 # Library dependencies
@@ -1005,6 +1006,7 @@ endforeach()
 foreach(PY_FILE ${IPY_FILES} )
   install ( FILES ipython_widget/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_widget )
 endforeach()
+install ( FILES ${CONFIG_RESET_SCRIPT} DESTINATION ${BIN_DIR} )
 
 if ( APPLE )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
@@ -1015,8 +1017,3 @@ if ( APPLE )
   install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake )
 endif ()
 
-if( WIN32 )
-  install( PROGRAMS reset_settings.bat DESTINATION ${BIN_DIR} )
-else ()
-  install( PROGRAMS reset_settings.sh DESTINATION ${BIN_DIR} )
-endif ()
