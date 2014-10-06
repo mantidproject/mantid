@@ -91,10 +91,8 @@ namespace CustomInterfaces
     // SIGNAL/SLOT CONNECTIONS
 
     // Update properties when a range selector is changed
-    /* connect(m_rangeSelectors["SlicePeak"], SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double))); */
-    /* connect(m_rangeSelectors["SlicePeak"], SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double))); */
-    /* connect(m_rangeSelectors["SliceBackground"], SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double))); */
-    /* connect(m_rangeSelectors["SliceBackground"], SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double))); */
+    connect(m_rangeSelectors["SlicePeak"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rangeSelectorDropped(double, double)));
+    connect(m_rangeSelectors["SliceBackground"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rangeSelectorDropped(double, double)));
 
     // Update range selctors when a property is changed
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(sliceUpdateRS(QtProperty*, double)));
@@ -291,34 +289,20 @@ namespace CustomInterfaces
     m_uiForm.slice_dsCalibFile->setEnabled(state);
   }
 
-  /**
-   * Handles the value of a range selector minimum value being changed
-   *
-   * @param val :: New minimum value
-   */
-  void IndirectDiagnostics::sliceMinChanged(double val)
+  void IndirectDiagnostics::rangeSelectorDropped(double min, double max)
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
 
-    if ( from == m_rangeSelectors["SlicePeak"] )
-      m_dblManager->setValue(m_properties["PeakStart"], val);
-    else if ( from == m_rangeSelectors["SliceBackground"] )
-      m_dblManager->setValue(m_properties["BackgroundStart"], val);
-  }
-
-  /**
-   * Handles the value of a range selector maximum value being changed
-   *
-   * @param val :: New maximum value
-   */
-  void IndirectDiagnostics::sliceMaxChanged(double val)
-  {
-    MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
-
-    if ( from == m_rangeSelectors["SlicePeak"] )
-      m_dblManager->setValue(m_properties["PeakEnd"], val);
-    else if ( from == m_rangeSelectors["SliceBackground"] )
-      m_dblManager->setValue(m_properties["BackgroundEnd"], val);
+    if(from == m_rangeSelectors["SlicePeak"])
+    {
+      m_dblManager->setValue(m_properties["PeakStart"], min);
+      m_dblManager->setValue(m_properties["PeakEnd"], max);
+    }
+    else if(from == m_rangeSelectors["SliceBackground"])
+    {
+      m_dblManager->setValue(m_properties["BackgroundStart"], min);
+      m_dblManager->setValue(m_properties["BackgroundEnd"], max);
+    }
   }
 
   /**

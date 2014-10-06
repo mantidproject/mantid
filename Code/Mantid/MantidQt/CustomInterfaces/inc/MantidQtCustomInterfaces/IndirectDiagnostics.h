@@ -69,8 +69,7 @@ namespace CustomInterfaces
     void slicePlotRaw();
     void sliceTwoRanges(QtProperty*, bool);
     void sliceCalib(bool state);
-    void sliceMinChanged(double val);
-    void sliceMaxChanged(double val);
+    void rangeSelectorDropped(double, double);
     void sliceUpdateRS(QtProperty*, double);
     void setDefaultInstDetails();
     void updatePreviewPlot();
