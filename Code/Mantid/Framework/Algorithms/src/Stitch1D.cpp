@@ -16,7 +16,6 @@
 #include <vector>
 #include <algorithm>
 
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::MantidVec;
@@ -36,6 +35,17 @@ namespace
   {
     return (0 != i);
   }
+
+  bool isNan(const double& value)
+  {
+    return boost::math::isnan(value);
+  }
+
+  bool isInf(const double& value)
+  {
+    return std::abs(value) == std::numeric_limits<double>::infinity();
+  }
+
 }
 
 namespace Mantid
@@ -50,10 +60,77 @@ namespace Mantid
      * inclusive of bin boundaries if they are sitting ontop of the bin boundaries.
      */
     const double Stitch1D::range_tolerance = 1e-9;
-    // Register the algorithm into the AlgorithmFactory
+// Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(Stitch1D)
 
-    //----------------------------------------------------------------------------------------------
+    /**
+     * Zero out all y and e data that is not in the region a1 to a2.
+     * @param a1 : Zero based bin index (first one)
+     * @param a2 : Zero based bin index (last one inclusive)
+     * @param source : Workspace providing the source data.
+     * @return Masked workspace.
+     */
+    MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2, MatrixWorkspace_sptr & source)
+    {
+      MatrixWorkspace_sptr product = WorkspaceFactory::Instance().create(source);
+      const int histogramCount = static_cast<int>(source->getNumberHistograms());
+      PARALLEL_FOR2(source,product)
+      for (int i = 0; i < histogramCount; ++i)
+      {
+        PARALLEL_START_INTERUPT_REGION
+        // Copy over the bin boundaries
+        product->setX(i, source->refX(i));
+        // Copy over the data
+        const MantidVec& sourceY = source->readY(i);
+        const MantidVec& sourceE = source->readE(i);
+
+        // initially zero - out the data.
+        product->dataY(i) = MantidVec(sourceY.size(), 0);
+        product->dataE(i) = MantidVec(sourceE.size(), 0);
+
+        MantidVec& newY = product->dataY(i);
+        MantidVec& newE = product->dataE(i);
+
+        // Copy over the non-zero stuff
+        std::copy(sourceY.begin() + a1 + 1, sourceY.begin() + a2, newY.begin() + a1 + 1);
+        std::copy(sourceE.begin() + a1 + 1, sourceE.begin() + a2, newE.begin() + a1 + 1);
+
+        PARALLEL_END_INTERUPT_REGION
+      }
+      PARALLEL_CHECK_INTERUPT_REGION
+      return product;
+    }
+
+    /**
+     * Mask out data in the region between a1 and a2 with zeros. Operation performed on the original workspace
+     * @param a1 : start position in X
+     * @param a2 : end position in X
+     * @param source : Workspace to mask.
+     */
+    void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr source)
+    {
+      MatrixWorkspace_sptr product = WorkspaceFactory::Instance().create(source);
+      const int histogramCount = static_cast<int>(source->getNumberHistograms());
+      PARALLEL_FOR2(source,product)
+      for (int i = 0; i < histogramCount; ++i)
+      {
+        PARALLEL_START_INTERUPT_REGION
+        // Copy over the data
+        MantidVec& sourceY = source->dataY(i);
+        MantidVec& sourceE = source->dataE(i);
+
+        for (int i = a1; i < a2; ++i)
+        {
+          sourceY[i] = 0;
+          sourceE[i] = 0;
+        }
+
+        PARALLEL_END_INTERUPT_REGION
+      }
+      PARALLEL_CHECK_INTERUPT_REGION
+    }
+
+//----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
      */
     void Stitch1D::init()
@@ -83,8 +160,9 @@ namespace Mantid
       auto manualScaleFactorValidator = boost::make_shared<BoundedValidator<double> >();
       manualScaleFactorValidator->setLower(0);
       manualScaleFactorValidator->setExclusive(true);
-      declareProperty(new PropertyWithValue<double>("ManualScaleFactor", 1.0, manualScaleFactorValidator, Direction::Input),
-          "Provided value for the scale factor. Optional.");
+      declareProperty(
+          new PropertyWithValue<double>("ManualScaleFactor", 1.0, manualScaleFactorValidator,
+              Direction::Input), "Provided value for the scale factor. Optional.");
       declareProperty(
           new PropertyWithValue<double>("OutScaleFactor", Mantid::EMPTY_DBL(), Direction::Output),
           "The actual used value for the scaling factor.");
@@ -156,7 +234,8 @@ namespace Mantid
      @param scaleRHS :: Scale the right hand side workspace
      @return a vector<double> contianing the rebinning parameters
      */
-    MantidVec Stitch1D::getRebinParams(MatrixWorkspace_sptr& lhsWS, MatrixWorkspace_sptr& rhsWS, const bool scaleRHS) const
+    MantidVec Stitch1D::getRebinParams(MatrixWorkspace_sptr& lhsWS, MatrixWorkspace_sptr& rhsWS,
+        const bool scaleRHS) const
     {
       MantidVec inputParams = this->getProperty("Params");
       Property* prop = this->getProperty("Params");
@@ -176,8 +255,8 @@ namespace Mantid
         MantidVec calculatedParams;
 
         // Calculate the step size based on the existing step size of the LHS workspace. That way scale factors should be reasonably maintained.
-        double calculatedStep =0;
-        if(scaleRHS)
+        double calculatedStep = 0;
+        if (scaleRHS)
         {
           // Calculate the step from the workspace that will not be scaled. The LHS workspace.
           calculatedStep = lhsX[1] - lhsX[0];
@@ -223,30 +302,68 @@ namespace Mantid
       rebin->setProperty("Params", params);
       rebin->execute();
       MatrixWorkspace_sptr outWS = rebin->getProperty("OutputWorkspace");
+
+      const int histogramCount = static_cast<int>(outWS->getNumberHistograms());
+
+      // Record special values and then mask them out as zeros. Special values are remembered and then replaced post processing.
+      PARALLEL_FOR1(outWS)
+      for (int i = 0; i < histogramCount; ++i)
+      {
+        PARALLEL_START_INTERUPT_REGION
+        std::vector<size_t>& nanYIndexes = m_nanYIndexes[i];
+        std::vector<size_t>& nanEIndexes = m_nanEIndexes[i];
+        std::vector<size_t>& infYIndexes = m_infYIndexes[i];
+        std::vector<size_t>& infEIndexes = m_infEIndexes[i];
+        // Copy over the data
+        MantidVec& sourceY = outWS->dataY(i);
+        MantidVec& sourceE = outWS->dataE(i);
+
+        for (size_t j = 0; j < sourceY.size(); ++j)
+        {
+          const double& value = sourceY[j];
+          const double& eValue = sourceE[j];
+          if (isNan(value))
+          {
+            nanYIndexes.push_back(j);
+            sourceY[j] = 0;
+          }
+          else if (isInf(value))
+          {
+            infYIndexes.push_back(j);
+            sourceY[j] = 0;
+          }
+
+          if (isNan(eValue))
+          {
+            nanEIndexes.push_back(j);
+            sourceE[j] = 0;
+          }
+          else if (isInf(eValue))
+          {
+            infEIndexes.push_back(j);
+            sourceE[j] = 0;
+          }
+
+        }
+
+      PARALLEL_END_INTERUPT_REGION
+      }
+      PARALLEL_CHECK_INTERUPT_REGION
+
       return outWS;
     }
 
-    /**Runs the Integration Algorithm as a child after replacing special values.
+    /**Runs the Integration Algorithm as a child.
      @param input :: The input workspace
      @param start :: a double defining the start of the region to integrate
      @param stop :: a double defining the end of the region to integrate
      @return A shared pointer to the resulting MatrixWorkspace
      */
-    MatrixWorkspace_sptr Stitch1D::specialIntegration(MatrixWorkspace_sptr& input, const double& start,
+    MatrixWorkspace_sptr Stitch1D::integration(MatrixWorkspace_sptr& input, const double& start,
         const double& stop)
     {
-      // Effectively ignore values that will trip the integration.
-      auto replace = this->createChildAlgorithm("ReplaceSpecialValues");
-      replace->setProperty("InputWorkspace", input);
-      replace->setProperty("NaNValue", 0.0);
-      replace->setProperty("NaNError", 0.0);
-      replace->setProperty("InfinityValue", 0.0);
-      replace->setProperty("InfinityError", 0.0);
-      replace->execute();
-      MatrixWorkspace_sptr patchedWS = replace->getProperty("OutputWorkspace");
-
       auto integration = this->createChildAlgorithm("Integration");
-      integration->setProperty("InputWorkspace", patchedWS);
+      integration->setProperty("InputWorkspace", input);
       integration->setProperty("RangeLower", start);
       integration->setProperty("RangeUpper", stop);
       integration->execute();
@@ -355,7 +472,7 @@ namespace Mantid
         if (!hasNonZeroErrors) // Keep checking
         {
           auto e = ws->readE(i);
-          auto it = std::find_if(e.begin(), e.end(),isNonzero);
+          auto it = std::find_if(e.begin(), e.end(), isNonzero);
           if (it != e.end())
           {
             PARALLEL_CRITICAL(has_non_zero)
@@ -371,7 +488,7 @@ namespace Mantid
     return hasNonZeroErrors;
   }
 
-  //----------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
   void Stitch1D::exec()
@@ -422,6 +539,11 @@ namespace Mantid
       throw std::runtime_error(message);
     }
 
+    const size_t histogramCount = rhsWS->getNumberHistograms();
+    m_nanYIndexes.resize(histogramCount);
+    m_infYIndexes.resize(histogramCount);
+    m_nanEIndexes.resize(histogramCount);
+    m_infEIndexes.resize(histogramCount);
     auto rebinnedLHS = rebin(lhsWS, params);
     auto rebinnedRHS = rebin(rhsWS, params);
 
@@ -449,8 +571,8 @@ namespace Mantid
     }
     else
     {
-      auto rhsOverlapIntegrated = specialIntegration(rebinnedRHS, startOverlap, endOverlap);
-      auto lhsOverlapIntegrated = specialIntegration(rebinnedLHS, startOverlap, endOverlap);
+      auto rhsOverlapIntegrated = integration(rebinnedRHS, startOverlap, endOverlap);
+      auto lhsOverlapIntegrated = integration(rebinnedLHS, startOverlap, endOverlap);
 
       MatrixWorkspace_sptr ratio;
       if (scaleRHS)
@@ -465,10 +587,11 @@ namespace Mantid
       }
       scaleFactor = ratio->readY(0).front();
       errorScaleFactor = ratio->readE(0).front();
-      if(scaleFactor < 1e-2 || scaleFactor > 1e2  || boost::math::isnan(scaleFactor))
+      if (scaleFactor < 1e-2 || scaleFactor > 1e2 || boost::math::isnan(scaleFactor))
       {
         std::stringstream messageBuffer;
-        messageBuffer << "Stitch1D calculated scale factor is: " << scaleFactor << ". Check that in both input workspaces the integrated overlap region is non-zero.";
+        messageBuffer << "Stitch1D calculated scale factor is: " << scaleFactor
+            << ". Check that in both input workspaces the integrated overlap region is non-zero.";
         g_log.warning(messageBuffer.str());
       }
 
@@ -478,20 +601,13 @@ namespace Mantid
     int a2 = boost::tuples::get<1>(startEnd);
 
     // Mask out everything BUT the overlap region as a new workspace.
-    MatrixWorkspace_sptr overlap1 = multiplyRange(rebinnedLHS, 0, a1, 0);
-    overlap1 = multiplyRange(overlap1, a2, 0);
-
+    MatrixWorkspace_sptr overlap1 = maskAllBut(a1, a2, rebinnedLHS);
     // Mask out everything BUT the overlap region as a new workspace.
-    MatrixWorkspace_sptr overlap2 = multiplyRange(rebinnedRHS, 0, a1, 0);
-    overlap2 = multiplyRange(overlap2, a2, 0);
-
-    // Mask out everything AFTER the start of the overlap region
-    rebinnedLHS = multiplyRange(rebinnedLHS, a1 + 1, 0);
-
-    // Mask out everything BEFORE the end of the overlap region
-    rebinnedRHS = multiplyRange(rebinnedRHS, 0, a2 - 1, 0);
-
-    // Calculate a weighted mean for the overlap region
+    MatrixWorkspace_sptr overlap2 = maskAllBut(a1, a2, rebinnedRHS);
+    // Mask out everything AFTER the overlap region as a new workspace.
+    maskInPlace(a1 + 1, static_cast<int>(rebinnedLHS->blocksize()), rebinnedLHS);
+    // Mask out everything BEFORE the overlap region as a new workspace.
+    maskInPlace(0, a2, rebinnedRHS);
 
     MatrixWorkspace_sptr overlapave;
     if (hasNonzeroErrors(overlap1) && hasNonzeroErrors(overlap2))
@@ -507,6 +623,7 @@ namespace Mantid
     }
 
     MatrixWorkspace_sptr result = rebinnedLHS + overlapave + rebinnedRHS;
+    reinsertSpecialValues(result);
 
     // Provide log information about the scale factors used in the calculations.
     std::stringstream messageBuffer;
@@ -517,6 +634,45 @@ namespace Mantid
     setProperty("OutScaleFactor", scaleFactor);
 
   }
+
+  /**
+   * Put special values back.
+   * @param ws : MatrixWorkspace to resinsert special values into.
+   */
+  void Stitch1D::reinsertSpecialValues(MatrixWorkspace_sptr ws)
+  {
+    int histogramCount = static_cast<int>(ws->getNumberHistograms());
+    PARALLEL_FOR1(ws)
+    for (int i = 0; i < histogramCount; ++i)
+    {
+      PARALLEL_START_INTERUPT_REGION
+      // Copy over the data
+      MantidVec& sourceY = ws->dataY(i);
+
+      for (size_t j = 0; j < m_nanYIndexes[i].size(); ++j)
+      {
+        sourceY[m_nanYIndexes[i][j]] = std::numeric_limits<double>::quiet_NaN();
+      }
+
+      for (size_t j = 0; j < m_infYIndexes[i].size(); ++j)
+      {
+        sourceY[m_infYIndexes[i][j]] = std::numeric_limits<double>::infinity();
+      }
+
+      for (size_t j = 0; j < m_nanEIndexes[i].size(); ++j)
+      {
+        sourceY[m_nanEIndexes[i][j]] = std::numeric_limits<double>::quiet_NaN();
+      }
+
+      for (size_t j = 0; j < m_infEIndexes[i].size(); ++j)
+      {
+        sourceY[m_infEIndexes[i][j]] = std::numeric_limits<double>::infinity();
+      }
+
+    PARALLEL_END_INTERUPT_REGION
+  }
+PARALLEL_CHECK_INTERUPT_REGION
+}
 
 } // namespace Algorithms
 } // namespace Mantid

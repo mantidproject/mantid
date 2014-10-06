@@ -12,8 +12,8 @@ Description
 The Sassena application `1 <http://sassena.org>`__ generates
 intermediate scattering factors from molecular dynamics trajectories.
 This algorithm reads Sassena output and stores all data in workspaces of
-type `Workspace2D <http://www.mantidproject.org/Workspace2D>`_, grouped under a single
-`WorkspaceGroup <http://www.mantidproject.org/WorkspaceGroup>`_.
+type :ref:`Workspace2D <Workspace2D>`, grouped under a single
+:ref:`WorkspaceGroup <WorkspaceGroup>`.
 
 Sassena ouput files are in HDF5 format
 `2 <http://www.hdfgroup.org/HDF5>`__, and can be made up of the
@@ -46,5 +46,47 @@ is the same:
 -  X-values contain the time variable
 -  Y-values contain the structure factors
 -  one spectra for each q-vector
+
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+.. testcode:: Ex
+
+    ws = LoadSassena("loadSassenaExample.h5", TimeUnit=1.0)
+    print 'workspaces instantiated: ', ', '.join(ws.getNames())
+    fqtReal = ws[1] # Real part of F(Q,t)
+    # Let's fit it to a Gaussian. We start with an initial guess
+    intensity = 0.5
+    center = 0.0
+    sigma = 200.0
+    startX = -900.0
+    endX = 900.0 
+    myFunc = 'name=Gaussian,Height={0},PeakCentre={1},Sigma={2}'.format(intensity,center,sigma)
+
+    # Call the Fit algorithm and perform the fit
+    fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace =\
+    Fit(Function=myFunc, InputWorkspace=fqtReal, WorkspaceIndex=0, StartX = startX, EndX=endX, Output='fit')
+
+    print "The fit was: " + fitStatus
+    print("Fitted Height value is: %.2f" % paramTable.column(1)[0])
+    print("Fitted centre value is: %.2f" % abs(paramTable.column(1)[1]))
+    print("Fitted sigma value is: %.1f" % paramTable.column(1)[2])
+    # fitWorkspace contains the data, the calculated and the difference patterns
+    print "Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms())
+    print("The 989th y-value of the fitted curve: %.3f" % fitWorkspace.readY(1)[989])
+
+Output:
+
+.. testoutput:: Ex
+
+    workspaces instantiated:  ws_qvectors, ws_fqt.Re, ws_fqt.Im
+    The fit was: success
+    Fitted Height value is: 1.00
+    Fitted centre value is: 0.00
+    Fitted sigma value is: 100.0
+    Number of spectra in fitWorkspace is: 3
+    The 989th y-value of the fitted curve: 0.673
 
 .. categories::

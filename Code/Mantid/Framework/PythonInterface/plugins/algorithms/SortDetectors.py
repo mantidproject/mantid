@@ -11,32 +11,32 @@ class SortDetectors(PythonAlgorithm):
         """ Return category
         """
         return "PythonAlgorithms;Utility"
-    
+
     def name(self):
         """ Return name
         """
         return "SortDetectors"
- 
+
     def summary(self):
         """ Return summary
         """
         return "Algorithm to sort detectors by distance."
-           
+
     def PyInit(self):
         """ Declare properties
         """
         self.declareProperty(mantid.api.WorkspaceProperty("Workspace","",direction=mantid.kernel.Direction.Input, validator=mantid.api.InstrumentValidator()), "Input workspace")
-        
-    	self.declareProperty(IntArrayProperty("UpstreamSpectra",Direction.Output))
-    	self.declareProperty(FloatArrayProperty("UpstreamDetectorDistances",Direction.Output))
+
+        self.declareProperty(IntArrayProperty("UpstreamSpectra",Direction.Output))
+        self.declareProperty(FloatArrayProperty("UpstreamDetectorDistances",Direction.Output))
         self.declareProperty(IntArrayProperty("DownstreamSpectra",Direction.Output))
         self.declareProperty(FloatArrayProperty("DownstreamDetectorDistances",Direction.Output))
         return
-    
+
     def PyExec(self):
         """ Main execution body
         """
-        w = self.getProperty("Workspace").value	
+        w = self.getProperty("Workspace").value
         samplePos=w.getInstrument().getSample().getPos()
         moderatorPos=w.getInstrument().getSource().getPos()
         incident=samplePos-moderatorPos
@@ -68,5 +68,5 @@ class SortDetectors(PythonAlgorithm):
         self.setProperty("UpstreamDetectorDistances", numpy.array(updist))
         self.setProperty("DownstreamSpectra", numpy.array(downinds))
         self.setProperty("DownstreamDetectorDistances", numpy.array(downdist))
-        
+
 AlgorithmFactory.subscribe(SortDetectors)

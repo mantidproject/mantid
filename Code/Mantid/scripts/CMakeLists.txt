@@ -5,8 +5,8 @@ set ( TEST_PY_FILES
       test/DgreduceTest.py
       test/DirectEnergyConversionTest.py
       test/IndirectApplyCorrectionsTest.py
+      test/IndirectCommonTests.py
       test/ReflectometryQuickAuxiliaryTest.py 
-      test/ExtendedUnitCellTest.py
       test/SansIsisGuiSettings.py
       test/ReductionSettingsTest.py
       )

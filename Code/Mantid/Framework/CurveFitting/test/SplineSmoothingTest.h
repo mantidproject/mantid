@@ -21,7 +21,7 @@ public:
   {
     double operator()(double x, int)
     {
-      return x*2;
+      return std::sin(x);
     }
   };
 
@@ -40,7 +40,7 @@ public:
     const int order (2), spectra(2);
 
     //create a binned workspace
-    MatrixWorkspace_sptr inputWorkspace = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 20, 1, false);
+    MatrixWorkspace_sptr inputWorkspace = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 5, 0.02, false);
 
     //setup algorithm
     SplineSmoothing alg;
@@ -56,7 +56,7 @@ public:
     const int order (2), spectra(1);
 
     //create a binned workspace
-    MatrixWorkspace_sptr inputWorkspace = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 20, 1, true);
+    MatrixWorkspace_sptr inputWorkspace = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 5, 0.02, true);
 
     SplineSmoothing alg;
     runAlgorithm(alg, order, inputWorkspace);
@@ -71,7 +71,7 @@ public:
     const int order (2), spectra(3);
 
     //create a binned workspace
-    MatrixWorkspace_sptr inputWorkspace = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 20, 1, true);
+    MatrixWorkspace_sptr inputWorkspace = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 5, 0.02, true);
 
     SplineSmoothing alg;
     runAlgorithm(alg, order, inputWorkspace);
@@ -96,9 +96,9 @@ public:
       //check output for consistency
       for(size_t j = 0; j < ys.size(); ++j)
       {
-        TS_ASSERT_DELTA(ys[j], xs[j]*2, 1e-15);
-        TS_ASSERT_DELTA(d1[j], 2, 1e-15);
-        TS_ASSERT_DELTA(d2[j], 0, 1e-15);
+        TS_ASSERT_DELTA(ys[j], std::sin(xs[j]), 1e-4);
+        TS_ASSERT_DELTA(d1[j], std::cos(xs[j]), 1e-1);
+        TS_ASSERT_DELTA(d2[j], -std::sin(xs[j]), 1e-1);
       }
     }
   }
@@ -106,11 +106,11 @@ public:
   void runAlgorithm(SplineSmoothing& alg, int order, const Mantid::API::MatrixWorkspace_sptr& iws) const
   {
     alg.initialize();
-    alg.isInitialized();
     alg.setChild(true);
     alg.setPropertyValue("OutputWorkspace", "Anon");
+    alg.setPropertyValue("OutputWorkspaceDeriv", "AnonDerivs");
 
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Error", 0.02));
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Error", 0.05));
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("DerivOrder", order));
 
     alg.setProperty("InputWorkspace", iws);

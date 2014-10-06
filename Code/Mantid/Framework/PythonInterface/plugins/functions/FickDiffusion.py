@@ -29,17 +29,17 @@ import math
 import numpy as np
 
 class FickDiffusion(IFunction1D):
-    
+
     def category(self):
         return "QuasiElastic"
 
     def init(self):
         # Active fitting parameters
         self.declareParameter("D", 1.0, 'Diffusion constant')
-       
+
     def function1D(self, xvals):
         return self.getParameterValue("D")*xvals*xvals
-    
+
     def functionDeriv1D(self, xvals, jacobian):
         i = 0
         for x in xvals:

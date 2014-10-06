@@ -152,6 +152,7 @@ namespace Crystal
         }
     }
 
+    delete latt;
     this->setProperty("InputWorkspace", ws1);
 
   }

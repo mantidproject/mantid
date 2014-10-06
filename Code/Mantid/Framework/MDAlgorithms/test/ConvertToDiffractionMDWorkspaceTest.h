@@ -139,7 +139,7 @@ public:
     if (!ws) return;
     size_t npoints = ws->getNPoints();
     // # of points != # of bins exactly because some are off the extents
-    TS_ASSERT_LESS_THAN( 100000, npoints);
+    TS_ASSERT_LESS_THAN( 399, npoints);
 
     TS_ASSERT_EQUALS( ws->getNumExperimentInfo(), 1);
     TSM_ASSERT("ExperimentInfo object is valid", ws->getExperimentInfo(0) );

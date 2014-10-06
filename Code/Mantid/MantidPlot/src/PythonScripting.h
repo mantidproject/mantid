@@ -57,6 +57,9 @@ public:
   /// 'Fake' method needed for IPython import
   void set_parent(PyObject*) {}
 
+  /// Set the argv attribute on the sys module
+  void setSysArgs(const QStringList & args);
+
   /// Create a new script object that can execute code within this enviroment
   virtual Script *newScript(const QString &name, QObject * context, const Script::InteractionType interact) const;
 
@@ -69,8 +72,10 @@ public:
 
   /// Return a string represenation of the given object
   QString toString(PyObject *object, bool decref = false);
-  //Convert a Python list object to a Qt QStringList
+  /// Convert a Python list object to a Qt QStringList
   QStringList toStringList(PyObject *py_seq);
+  /// Convert a QtringList to a Python List
+  PyObject * toPyList(const QStringList & items);
   /// Returns an integer representation of the object. No check is performed to see if it is an integer
   long toLong(PyObject *object, bool decref = false);
 

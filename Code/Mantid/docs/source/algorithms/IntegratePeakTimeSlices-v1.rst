@@ -45,4 +45,20 @@ give good results.
 This Algorithm is also used by the :ref:`algm-PeakIntegration`
 algorithm when the Fit tag is selected.
 
+Usage
+-----
+
+.. code-block:: python
+
+    # Load a SCD data set from systemtests Data and find the peaks
+    LoadEventNexus(Filename=r'TOPAZ_3132_event.nxs',OutputWorkspace='TOPAZ_3132_nxs')
+    ConvertToDiffractionMDWorkspace(InputWorkspace='TOPAZ_3132_nxs',OutputWorkspace='TOPAZ_3132_md',LorentzCorrection='1')
+    FindPeaksMD(InputWorkspace='TOPAZ_3132_md',PeakDistanceThreshold='0.15',MaxPeaks='100',OutputWorkspace='peaks')
+    FindUBUsingFFT(PeaksWorkspace='peaks',MinD='2',MaxD='16')
+    IndexPeaks(PeaksWorkspace='peaks')
+
+    # Run the Integration algorithm and print results
+    peak0,int,sig = IntegratePeakTimeSlices(InputWorkspace='TOPAZ_3132_nxs', Peaks='peaks', Intensity=4580.8587719746683, SigmaIntensity=190.21154129339735)
+    print "Intensity and SigmaIntensity of peak 0  = ",int,sig
+
 .. categories::

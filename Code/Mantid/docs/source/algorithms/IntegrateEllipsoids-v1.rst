@@ -44,7 +44,7 @@ Explanation of Inputs
 #####################
 
 -  The event data to be integrated is obtained from an ordinary
-   `EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_ 
+   :ref:`EventWorkspace <EventWorkspace>` 
    with an X-axis in time-of-flight, as loaded from a
    NeXus event file. This algorithm maps the events to reciprocal space 
    using *PeaksWorkwpace* with indexed peaks to determine the parameters 
@@ -101,7 +101,7 @@ Detailed Algorithm Description
 
 This algorithm will integrate a list of indexed single-crystal
 diffraction peaks from a *PeaksWorkspace*, using events from an
-( `EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_ ).
+( :ref:`EventWorkspace <EventWorkspace>` ).
 The indexed peaks are first used to determine a UB
 matrix. The inverse of that UB matrix is then used to form lists of
 events that are close to peaks in reciprocal space. An event will be

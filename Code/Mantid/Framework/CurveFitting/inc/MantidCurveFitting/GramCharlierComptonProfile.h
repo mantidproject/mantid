@@ -71,7 +71,7 @@ namespace CurveFitting
     void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX);
     /// Pre-calculate the Y-space values
     void cacheYSpaceValues(const std::vector<double> & tseconds, const bool isHistogram,
-                           const DetectorParams & detpar,const ResolutionParams & respar);
+                           const DetectorParams & detpar);
 
     /// The active hermite coefficents
     std::vector<short> m_hermite;

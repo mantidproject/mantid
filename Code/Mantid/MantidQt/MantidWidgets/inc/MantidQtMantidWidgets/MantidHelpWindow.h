@@ -31,6 +31,8 @@ public:
   virtual void showWikiPage(const std::string &page=std::string());
   virtual void showAlgorithm(const std::string &name=std::string(), const int version=-1);
   virtual void showAlgorithm(const QString &name, const int version=-1);
+  virtual void showConcept(const std::string &name);
+  virtual void showConcept(const QString &name);
   virtual void showFitFunction(const std::string &name=std::string());
 
 private:

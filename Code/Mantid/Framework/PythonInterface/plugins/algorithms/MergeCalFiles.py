@@ -11,16 +11,16 @@ class MergeCalFiles(PythonAlgorithm):
 
   def summary(self):
     return "Combines the data from two Cal Files."
-    
+
   def PyInit(self):
     self.declareProperty(FileProperty("UpdateFile","", FileAction.Load, ['cal']), doc="The cal file containing the updates to merge into another file.")
     self.declareProperty(FileProperty("MasterFile","", FileAction.Load, ['cal']), doc="The master file to be altered, the file must be sorted by UDET")
     self.declareProperty(FileProperty("OutputFile","", FileAction.Save, ['cal']), doc="The file to contain the results")
-	
+
     self.declareProperty("MergeOffsets", False, doc="If True, the offsets from file1 will be merged to the master file. Default: False")
     self.declareProperty("MergeSelections", False, doc="If True, the selections from file1 will be merged to the master file. Default: False")
     self.declareProperty("MergeGroups", False, doc="If True, the Groups from file1 will be merged to the master file. Default: False")
-        
+
   def PyExec(self):
     #extract settings
     mergeOffsets = self.getProperty("MergeOffsets").value
@@ -29,13 +29,13 @@ class MergeCalFiles(PythonAlgorithm):
     updateFileName = self.getPropertyValue("UpdateFile")
     masterFileName = self.getPropertyValue("MasterFile")
     outputFileName = self.getPropertyValue("OutputFile")
-    
-	
+
+
     if (masterFileName == outputFileName) :
        raise RuntimeError('The output file must be different to the master file.')
-	
+
     self.DisplayMessage(mergeOffsets,mergeSelections,mergeGroups,updateFileName,masterFileName)
-    
+
     updateFile = open(updateFileName,"r")
     updateDict=dict()
     lastNumber = 0
@@ -52,14 +52,14 @@ class MergeCalFiles(PythonAlgorithm):
           pass
         #remeber all of the values
         updateDict[UDET] = (offset,select,group)
-      
+
     updateFile.close()
     self.log().information(str(len(updateDict)) + " updates found in " + updateFileName)
-    
-    
+
+
     masterFile = open(masterFileName,"r")
     outputFile = open(outputFileName,"w")
-    
+
     for line in  masterFile:
       if self.IsComment(line):
         #copy the comment over
@@ -92,29 +92,29 @@ class MergeCalFiles(PythonAlgorithm):
       lastNumber += 1
       outputFile.write(self.FormatLine(lastNumber,UDET,offset,select,group))
       linesAdded += 1
-          
+
     self.log().information("{0} lines Updated, {1} lines added, {2} lines untouched".format(linesUpdated,linesAdded,linesUntouched))
     #close the files
     masterFile.close()
     outputFile.close()
-	
+
   def DisplayMessage(self,mergeOffsets,mergeSelections,mergeGroups,fileName1,fileName2):
     #Log the settings string
     outputString = "Merging "
-    if (mergeOffsets): 
+    if (mergeOffsets):
       outputString+= "offsets, "
-    if (mergeSelections): 
+    if (mergeSelections):
       outputString+= "selections, "
-    if (mergeGroups): 
+    if (mergeGroups):
       outputString+= "groups, "
     #strip the final comma
     outputString = outputString [0:len(outputString)-2]
     outputString += " from file " + fileName1 + " into " + fileName2
     self.log().information(outputString)
-	
+
   def IsComment(self,line):
     return line.startswith("#")
-	
+
   def ProcessLine(self,line):
     try:
       elements = line.split()
@@ -126,10 +126,10 @@ class MergeCalFiles(PythonAlgorithm):
     except:
       raise ValueError("invalid line: " + line)
     return (number,UDET,offset,select,group)
-	
+
   def FormatLine(self,number,UDET,offset,select,group):
     line = "{0:9d}{1:16d}{2:16.7f}{3:9d}{4:9d}\n".format(number,UDET,offset,select,group)
     return line
-	
+
 #############################################################################################
 AlgorithmFactory.subscribe(MergeCalFiles())

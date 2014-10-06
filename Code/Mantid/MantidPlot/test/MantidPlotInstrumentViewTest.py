@@ -1,4 +1,4 @@
-""" 
+"""
 Test the interaction with the instrument view.
 Assertion that things work is difficult so mosts
 test will just that things don't crash.
@@ -22,8 +22,8 @@ X = np.append(X1, X2)
 Y = np.append(Y1, Y2)
 E = np.sqrt(Y)
 
-CreateWorkspace(OutputWorkspace="loq_inst", DataX=list(X), DataY=list(Y), 
-                DataE=list(E), NSpec=2, UnitX="TOF", YUnitLabel="Counts",  
+CreateWorkspace(OutputWorkspace="loq_inst", DataX=list(X), DataY=list(Y),
+                DataE=list(E), NSpec=2, UnitX="TOF", YUnitLabel="Counts",
                 WorkspaceTitle="Faked data Workspace")
 LoadInstrument(Workspace="loq_inst", InstrumentName="LOQ")
 INST_WIN = getInstrumentView("loq_inst")
@@ -64,11 +64,11 @@ class MantidPlotInstrumentViewTest(unittest.TestCase):
         render_tab.setSurfaceType(0)
         render_tab.setAxis("Y-")
         render_tab.flipUnwrappedView(True)
-    
+
     def test_closing_window_invalidates_reference(self):
         inst = getInstrumentView("loq_inst")
         inst.close()
         self.assertTrue(inst._getHeldObject() is None)
-    
+
 # Run the unit tests
 mantidplottests.runTests(MantidPlotInstrumentViewTest)

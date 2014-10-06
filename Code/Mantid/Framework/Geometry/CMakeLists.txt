@@ -1,13 +1,17 @@
 set ( SRC_FILES
 	src/ComponentParser.cpp
 	src/Crystal/ConventionalCell.cpp
+	src/Crystal/CrystalStructure.cpp
 	src/Crystal/IndexingUtils.cpp
 	src/Crystal/NiggliCell.cpp
 	src/Crystal/OrientedLattice.cpp
 	src/Crystal/PointGroup.cpp
+	src/Crystal/PointGroupFactory.cpp
 	src/Crystal/ReducedCell.cpp
 	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/ScalarUtils.cpp
+        src/Crystal/SymmetryOperation.cpp
+        src/Crystal/SymmetryOperationFactory.cpp
 	src/Crystal/UnitCell.cpp
 	src/IObjComponent.cpp
 	src/Instrument.cpp
@@ -30,7 +34,7 @@ set ( SRC_FILES
 	src/Instrument/RectangularDetector.cpp
 	src/Instrument/RectangularDetectorPixel.cpp
 	src/Instrument/ReferenceFrame.cpp
-	src/Instrument/XMLlogfile.cpp
+	src/Instrument/XMLInstrumentParameter.cpp
 	src/MDGeometry/CompositeImplicitFunction.cpp
 	src/MDGeometry/IMDDimension.cpp
 	src/MDGeometry/IMDDimensionFactory.cpp
@@ -100,13 +104,17 @@ set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
 set ( INC_FILES
 	inc/MantidGeometry/ComponentParser.h
 	inc/MantidGeometry/Crystal/ConventionalCell.h
+	inc/MantidGeometry/Crystal/CrystalStructure.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
 	inc/MantidGeometry/Crystal/NiggliCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
 	inc/MantidGeometry/Crystal/PointGroup.h
+	inc/MantidGeometry/Crystal/PointGroupFactory.h
 	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
 	inc/MantidGeometry/Crystal/ScalarUtils.h
+        inc/MantidGeometry/Crystal/SymmetryOperation.h
+        inc/MantidGeometry/Crystal/SymmetryOperationFactory.h
 	inc/MantidGeometry/Crystal/UnitCell.h
 	inc/MantidGeometry/DllConfig.h
 	inc/MantidGeometry/ICompAssembly.h
@@ -136,7 +144,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/RectangularDetector.h
 	inc/MantidGeometry/Instrument/RectangularDetectorPixel.h
 	inc/MantidGeometry/Instrument/ReferenceFrame.h
-	inc/MantidGeometry/Instrument/XMLlogfile.h
+	inc/MantidGeometry/Instrument/XMLInstrumentParameter.h
 	inc/MantidGeometry/MDGeometry/CompositeImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/IMDDimension.h
 	inc/MantidGeometry/MDGeometry/IMDDimensionFactory.h
@@ -202,6 +210,7 @@ set ( TEST_FILES
 	ConeTest.h
 	ConventionalCellTest.h
 	ConvexPolygonTest.h
+	CrystalStructureTest.h
 	CylinderTest.h
 	DetectorGroupTest.h
 	DetectorTest.h
@@ -244,6 +253,7 @@ set ( TEST_FILES
 	ParameterMapTest.h
 	ParametrizedComponentTest.h
 	PlaneTest.h
+	PointGroupFactoryTest.h
 	PointGroupTest.h
 	PolygonEdgeTest.h
 	QuadrilateralTest.h
@@ -265,13 +275,15 @@ set ( TEST_FILES
 	SphereTest.h
 	SurfaceFactoryTest.h
 	SurfaceTest.h
+	SymmetryOperationFactoryTest.h
+	SymmetryOperationTest.h
 	TorusTest.h
 	TrackTest.h
 	TripleTest.h
 	UnitCellTest.h
 	Vertex2DListTest.h
 	Vertex2DTest.h
-	XMLlogfileTest.h
+	XMLInstrumentParameterTest.h
 )
 
 set ( GMOCK_TEST_FILES

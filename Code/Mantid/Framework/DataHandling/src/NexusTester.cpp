@@ -192,6 +192,7 @@ namespace DataHandling
       g_log.notice() << tim << " to load the file = " << MBperSec << " MB/sec (data), " << MBperSec*CompressionFactor << " MB/sec (file)" << std::endl;
     }
 
+    delete[] fakeData;
   }
 
 

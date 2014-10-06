@@ -50,6 +50,9 @@ Usage
 
     print "Log values:",wg.getRun().keys()
     print "Goniometer angles: ",wg.getRun().getGoniometer().getEulerAngles('YZY')
+    print "Clearing goniometer up"
+    SetGoniometer(wg) 
+    print "Goniometer angles: ",wg.getRun().getGoniometer().getEulerAngles('YZY')    
 
 .. testcleanup:: SetGoniometer
 
@@ -61,7 +64,9 @@ Output:
 
     Log values: ['Motor1', 'GoniometerAxis1_FixedValue']
     Goniometer angles:  [50,0,0]
-   
+    Clearing goniometer up
+    Goniometer angles:  [0,0,0]    
+ 
 
 
 .. categories::

@@ -13,33 +13,31 @@ class QLineEdit;
 //! Matrix properties dialog
 class MantidMatrixDialog : public QDialog
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-	//! Constructor
-	/**
-	 * @param parent :: parent widget
-	 * @param fl :: window flags
-	 */
-    MantidMatrixDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
-    void setMatrix(MantidMatrix *m);
+  //! Constructor
+  /**
+  * @param parent :: parent widget
+  * @param fl :: window flags
+  */
+  MantidMatrixDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
+  void setMatrix(MantidMatrix *m);
 
-private slots:
-	//! Accept changes and quit
-	void accept();
-	//! Apply changes
-	void apply();
-	//! Activate the numeric precision choice box
-	void showPrecisionBox(int item);
+  private slots:
+    //! Accept changes and quit
+    void accept();
+    //! Apply changes
+    void apply();
 
 private:
-    MantidMatrix* d_matrix;
+  MantidMatrix* d_matrix;
 
-    QPushButton* buttonOk;
-	QPushButton* buttonCancel;
-	QSpinBox* boxColWidth, *boxPrecision;
-	QComboBox *boxFormat, *boxNumericDisplay;
-    QLineEdit *editRangeMin, *editRangeMax;
+  QPushButton* buttonOk;
+  QPushButton* buttonCancel;
+  QSpinBox* boxColWidth, *boxPrecision;
+  QComboBox *boxFormat;
+  QLineEdit *editRangeMin, *editRangeMax;
 };
 
 #endif // MANTIDMATRIXDIALOG_H

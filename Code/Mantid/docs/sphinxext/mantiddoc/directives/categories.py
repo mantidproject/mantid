@@ -17,7 +17,7 @@ CATEGORIES_DIR = "categories"
 # List of category names that are considered the index for everything in that type
 # When this category is encountered an additional index.html is written to both the
 # directory of the document and the category directory
-INDEX_CATEGORIES = ["Algorithms", "FitFunctions"]
+INDEX_CATEGORIES = ["Algorithms", "FitFunctions","Concepts"]
 
 class LinkItem(object):
     """
@@ -106,7 +106,7 @@ class Category(LinkItem):
         dirpath, filename = os.path.split(docname)
         html_dir = dirpath + "/" + CATEGORIES_DIR
         self.html_path = html_dir + "/" + name + ".html"
-        
+
         super(Category, self).__init__(name, self.html_path)
         self.pages = set([])
         self.subcategories = set([])

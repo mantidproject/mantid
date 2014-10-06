@@ -29,6 +29,27 @@ public:
     TS_ASSERT_THROWS_NOTHING(WSD.buildFromMatrixWS(ws2D,"|Q|","Direct"));
     TS_ASSERT_EQUALS(2,WSD.nDimensions());
 
+    std::vector<int> nBins(1,100);
+    TS_ASSERT_THROWS_NOTHING(WSD.setNumBins(nBins));
+
+    auto nBinsSet= WSD.getNBins();
+    TS_ASSERT_EQUALS(2,nBinsSet.size());
+    TS_ASSERT_EQUALS(100,nBinsSet[0]);
+    TS_ASSERT_EQUALS(100,nBinsSet[1]);
+
+    int binNumRight[] = {120,60};
+    nBins.assign(binNumRight,binNumRight+2);
+    TS_ASSERT_THROWS_NOTHING(WSD.setNumBins(nBins));
+
+    nBinsSet= WSD.getNBins();
+    TS_ASSERT_EQUALS(2,nBinsSet.size());
+    TS_ASSERT_EQUALS(120,nBinsSet[0]);
+    TS_ASSERT_EQUALS(60,nBinsSet[1]);
+
+    int binNumWrong[] = {120,60,200};
+    nBins.assign(binNumWrong,binNumWrong+3);
+    TS_ASSERT_THROWS(WSD.setNumBins(nBins),std::invalid_argument);
+
 
   }
   void testBuildFromMatrixWS4D()
@@ -46,6 +67,32 @@ public:
     PropNamews[1]="H";
     TS_ASSERT_THROWS_NOTHING(WSD.buildFromMatrixWS(ws2D,"|Q|","Indirect",PropNamews));
     TS_ASSERT_EQUALS(4,WSD.nDimensions());
+
+
+    std::vector<int> nBins(1,100);
+    TS_ASSERT_THROWS_NOTHING(WSD.setNumBins(nBins));
+
+    auto nBinsSet= WSD.getNBins();
+    TS_ASSERT_EQUALS(4,nBinsSet.size());
+    TS_ASSERT_EQUALS(100,nBinsSet[0]);
+    TS_ASSERT_EQUALS(100,nBinsSet[3]);
+
+    int binNumWrong[] = {120,60};
+    nBins.assign(binNumWrong,binNumWrong+2);
+    TS_ASSERT_THROWS(WSD.setNumBins(nBins),std::invalid_argument);
+
+
+
+    int binNumRight[] = {120,60,200,100};
+    nBins.assign(binNumRight,binNumRight+4);
+    TS_ASSERT_THROWS_NOTHING(WSD.setNumBins(nBins));
+
+    nBinsSet= WSD.getNBins();
+    TS_ASSERT_EQUALS(4,nBinsSet.size());
+    TS_ASSERT_EQUALS(120,nBinsSet[0]);
+    TS_ASSERT_EQUALS(60,nBinsSet[1]);
+    TS_ASSERT_EQUALS(200,nBinsSet[2]);
+    TS_ASSERT_EQUALS(100,nBinsSet[3]);
 
   }
   void testGetWS4DimIDFine()

@@ -229,7 +229,8 @@ private:
 
     m_expt->setInstrument(instrument);
     m_expt->mutableRun().addProperty("deltaE-mode", DeltaEMode::asString(emode));
-    m_expt->mutableSample().setOrientedLattice(new Mantid::Geometry::OrientedLattice(5.57,5.51,12.298));
+    Mantid::Geometry::OrientedLattice latt(5.57,5.51,12.298);
+    m_expt->mutableSample().setOrientedLattice(&latt);
 
     if(emode == DeltaEMode::Direct) // Direct
     {

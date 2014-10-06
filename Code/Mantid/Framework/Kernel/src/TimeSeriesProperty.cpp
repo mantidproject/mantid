@@ -1786,6 +1786,9 @@ namespace Mantid
         ++ vit;
       }
 
+      // update m_size
+      countSize();
+
       // 3. Finish
       g_log.warning() << "Log " << this->name() << " has " << numremoved << " entries removed due to duplicated time. " << "\n";
 

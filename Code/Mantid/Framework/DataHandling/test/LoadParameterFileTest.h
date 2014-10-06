@@ -59,6 +59,13 @@ public:
     param = paramMap.get(&(*ptrDet), "fjols-test-paramfile");
     TS_ASSERT_DELTA( param->value<double>(), 50.0, 0.0001);
 
+    ptrDet = i->getDetector(1301);
+    TS_ASSERT_EQUALS( ptrDet->getID(), 1301);
+    TS_ASSERT_EQUALS( ptrDet->getName(), "pixel");
+    param = paramMap.get(ptrDet.get(), "testDouble");
+    TS_ASSERT_DELTA( param->value<double>(), 25.0, 0.0001);
+    TS_ASSERT_EQUALS( paramMap.getString(ptrDet.get(), "testString"), "hello world");
+
     std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");
     TS_ASSERT_DELTA( dummy[0], 1.0, 0.0001);
     dummy = paramMap.getDouble("nickel-holder", "pos");
@@ -92,6 +99,10 @@ public:
       " <component-link name=\"IDF_for_UNIT_TESTING2.xml/combined translation6\" >"
       "  <parameter name=\"fjols-test-paramfile\"> <value val=\"52.0\" /> </parameter>"
       "	</component-link>"
+      " <component-link id=\"1301\" >"
+      "  <parameter name=\"testDouble\"> <value val=\"27.0\" /> </parameter>"
+      "  <parameter name=\"testString\" type=\"string\"> <value val=\"goodbye world\" /> </parameter>"
+      "	</component-link>"
       "</parameter-file>";
 
     // load in additional parameters
@@ -117,6 +128,13 @@ public:
     TS_ASSERT_DELTA( param->value<double>(), 77.0, 0.0001);
     param = paramMap.get(&(*ptrDet), "fjols-test-paramfile");
     TS_ASSERT_DELTA( param->value<double>(), 52.0, 0.0001);
+
+    ptrDet = i->getDetector(1301);
+    TS_ASSERT_EQUALS( ptrDet->getID(), 1301);
+    TS_ASSERT_EQUALS( ptrDet->getName(), "pixel");
+    param = paramMap.get(ptrDet.get(), "testDouble");
+    TS_ASSERT_DELTA( param->value<double>(), 27.0, 0.0001);
+    TS_ASSERT_EQUALS( paramMap.getString(ptrDet.get(), "testString"), "goodbye world");
 
     std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");
     TS_ASSERT_DELTA( dummy[0], 1.0, 0.0001);

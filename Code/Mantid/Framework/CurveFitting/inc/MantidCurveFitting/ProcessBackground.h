@@ -86,19 +86,17 @@ private:
     /// Execution body
     virtual void exec();
 
-    /// Select background points (main)
-    void execSelectBkgdPoints();
+    /// Set up dummy output optional workspaces
+    void setupDummyOutputWSes();
+
+    /// Select b...
+    void selectBkgdPoints();
 
     /// Select background points (main)
-    void execSelectBkgdPoints2();
+    void selectFromGivenXValues();
 
-    /// Parse peak centre and FWHM from a table workspace
-    void parsePeakTableWorkspace(DataObjects::TableWorkspace_sptr peaktablews, std::vector<double>& vec_peakcentre,
-                                 std::vector<double>& vec_peakfwhm);
-
-    /// Exclude peak regions
-    size_t excludePeaks(std::vector<double> v_inX, std::vector<bool>& v_useX, std::vector<double> v_centre,
-                        std::vector<double> v_fwhm);
+    /// Select background points (main)
+    void selectFromGivenFunction();
 
     /// Select background points automatically
     DataObjects::Workspace2D_sptr autoBackgroundSelection(DataObjects::Workspace2D_sptr bkgdWS);
@@ -119,7 +117,7 @@ private:
 
     std::string m_bkgdType;
 
-    bool m_doFitBackground;
+    // bool m_doFitBackground;
 
     // double mTolerance;
 

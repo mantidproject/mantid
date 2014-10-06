@@ -89,13 +89,13 @@ namespace Mantid
     void GaussianComptonProfile::massProfile(double * result, const size_t nData, const double amplitude) const
     {
       double lorentzPos(0.0), gaussWidth(getParameter(0));
-      double gaussFWHM = std::sqrt(std::pow(resolutionFWHM(),2) + std::pow(2.0*STDDEV_TO_HWHM*gaussWidth,2));
+      double gaussFWHM = std::sqrt(std::pow(m_resolutionFunction->resolutionFWHM(),2) + std::pow(2.0*STDDEV_TO_HWHM*gaussWidth,2));
 
       const auto & yspace = ySpace();
       // Gaussian already folded into Voigt
       std::vector<double> voigt(yspace.size()), voigtDiffResult(yspace.size());
-      voigtApprox(voigt, yspace, lorentzPos, amplitude, lorentzFWHM(), gaussFWHM);
-      voigtApproxDiff(voigtDiffResult, yspace, lorentzPos, amplitude, lorentzFWHM(), gaussFWHM);
+      m_resolutionFunction->voigtApprox(voigt, yspace, lorentzPos, amplitude, m_resolutionFunction->lorentzFWHM(), gaussFWHM);
+      voigtApproxDiff(voigtDiffResult, yspace, lorentzPos, amplitude, m_resolutionFunction->lorentzFWHM(), gaussFWHM);
 
       const auto & modq = modQ();
       const auto & ei = e0();

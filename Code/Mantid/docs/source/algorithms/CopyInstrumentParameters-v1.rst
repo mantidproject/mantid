@@ -25,6 +25,8 @@ Usage
 -----
 **Example - Copy parameters that contain the movement of 3 detectors**
 
+.. include:: ../usagedata-note.txt 
+
 .. testcode:: ExCopyInstrumentParametersSimple
 
    # We load two workspaces with same instument

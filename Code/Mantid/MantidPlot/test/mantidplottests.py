@@ -5,7 +5,7 @@ inside MantidPlot.
 Public methods:
     runTests(): to run MantidPlot unit tests
     screenshot(): take a screenshot and save to a report
-    
+
 """
 import sys
 import os
@@ -49,19 +49,19 @@ def runTests(classname):
         sys.path.append( os.path.join(src, "TestingTools/unittest-xml-reporting/src") )
         import xmlrunner
         runner = xmlrunner.XMLTestRunner(output='Testing')
-	
+
     #Run using either runner
     res = runner.run(suite)
-    
+
     # Process some events that ensure MantidPlot closes properly.
     QtCore.QCoreApplication.processEvents()
     QtCore.QCoreApplication.processEvents()
     QtCore.QCoreApplication.processEvents()
-    
+
     # Set Mantid exit code
     if not res.wasSuccessful():
         _qti.app.setExitCode(1)
     else:
         _qti.app.setExitCode(0)
-    
+
     return res

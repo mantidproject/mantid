@@ -8,7 +8,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/Instrument/XMLlogfile.h"
+#include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -213,7 +213,7 @@ namespace API
    
     struct ParameterValue
     {
-      ParameterValue(const Geometry::XMLlogfile & paramInfo, 
+      ParameterValue(const Geometry::XMLInstrumentParameter & paramInfo, 
                      const API::Run & run) 
         : info(paramInfo), runData(run) {}
       
@@ -234,7 +234,7 @@ namespace API
         else if(boost::iequals(info.m_value, "yes")) return true;
         else return false;
       }
-      const Geometry::XMLlogfile & info;
+      const Geometry::XMLInstrumentParameter & info;
       const Run & runData;
     };
     ///@endcond
@@ -242,8 +242,8 @@ namespace API
 
   //---------------------------------------------------------------------------------------
   /** Add parameters to the instrument parameter map that are defined in instrument
-  *   definition file and for which logfile data are available. Logs must be loaded
-  *   before running this method.
+  *   definition file or parameter file, which may contain parameters that require 
+  *   logfile data to be available. Logs must be loaded before running this method.
   */
   void ExperimentInfo::populateInstrumentParameters()
   {
@@ -270,7 +270,8 @@ namespace API
 
       try
       {
-        // Special case for r,t,p. We need to know all three first to calculate X,Y,Z
+        // Special case where user has specified r-position,t-position, and/or p-position. 
+        // We need to know all three first to calculate a set of X,Y,Z
         if(paramN.compare(1,9,"-position") == 0)
         {
           auto & rtpValues  = rtpParams[paramInfo->m_component]; //If not found, constructs default
@@ -1090,14 +1091,15 @@ namespace API
   //------------------------------------------------------------------------------------------------------
 
   /** 
-   * Fill map with given instrument parameter
+   * Fill map with instrument parameter first set in xml file
+   * Where this is appropriate a parameter value is dependent on values in a log entry
    * @param paramMap Map to populate
    * @param name The name of the parameter
    * @param paramInfo A reference to the object describing this parameter
-   * @param runData A reference to the run object
+   * @param runData A reference to the run object, which stores log value entries
    */
   void ExperimentInfo::populateWithParameter(Geometry::ParameterMap & paramMap,
-                                             const std::string & name, const Geometry::XMLlogfile & paramInfo,
+                                             const std::string & name, const Geometry::XMLInstrumentParameter & paramInfo,
                                              const Run & runData)
   {
     const std::string & category = paramInfo.m_type;

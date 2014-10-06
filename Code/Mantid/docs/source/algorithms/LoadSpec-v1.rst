@@ -10,7 +10,7 @@ Description
 -----------
 
 The LoadSpec algorithm reads in spectra data from a text file and stores
-it in a `Workspace2D <http://www.mantidproject.org/Workspace2D>`__ as data points. 
+it in a :ref:`Workspace2D <Workspace2D>` as data points. 
 The data in the file must be organized by set of 3 columns (separated by any number of spaces). The
 first column has to be the X values, the second column the Y values and
 the third column the error values.
@@ -38,7 +38,7 @@ LoadSpec:
     5.0   25.0  3.2
     6.0   30.0  4.2
 
-This will create a `Workspace2D <http://www.mantidproject.org/Workspace2D>`__ with 1 spectrum.
+This will create a :ref:`Workspace2D <Workspace2D>` with 1 spectrum.
 
 *Example 2:*
 
@@ -71,6 +71,6 @@ This will create a `Workspace2D <http://www.mantidproject.org/Workspace2D>`__ wi
     2.0   210.0  3.0
     3.0   215.0  4.0
 
-This text file will create a `Workspace2D <http://www.mantidproject.org/Workspace2D>`__ with 3 spectra.
+This text file will create a :ref:`Workspace2D <Workspace2D>` with 3 spectra.
 
 .. categories::

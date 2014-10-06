@@ -73,6 +73,7 @@ namespace Mantid
       GluGeometryHandler(IObjComponent* obj); ///< Constructor
       GluGeometryHandler(boost::shared_ptr<Object> obj); ///< Constructor
       GluGeometryHandler(Object* obj); ///< Constructor
+      boost::shared_ptr<GeometryHandler> clone() const;
       ~GluGeometryHandler(); ///< Destructor
       GeometryHandler* createInstance(IObjComponent *comp);
       GeometryHandler* createInstance(boost::shared_ptr<Object> obj);
