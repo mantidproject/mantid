@@ -63,16 +63,11 @@ namespace CustomInterfaces
     connect(m_uiForm.moment_ckScale, SIGNAL(toggled(bool)), m_uiForm.moment_leScale, SLOT(setEnabled(bool)));
     connect(m_uiForm.moment_ckScale, SIGNAL(toggled(bool)), m_uiForm.moment_validScale, SLOT(setVisible(bool)));
     
-    connect(m_rangeSelectors["MomentsRangeSelector"], SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
-    connect(m_rangeSelectors["MomentsRangeSelector"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
+    connect(m_rangeSelectors["MomentsRangeSelector"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rangeChanged(double, double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
 
     // Update the preview plot when the algorithm completes
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(momentsAlgComplete(bool)));
-
-    // Events that will update the preview plot
-    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePreviewPlot()));
-    connect(m_uiForm.moment_dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(updatePreviewPlot(const QString&)));
 
     m_uiForm.moment_validScale->setStyleSheet("QLabel { color : #aa0000; }");
   }
@@ -142,38 +137,35 @@ namespace CustomInterfaces
 
   void IndirectMoments::handleSampleInputReady(const QString& filename)
   {
-    disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePreviewPlot()));
+    disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
 
     plotMiniPlot(filename, 0, "MomentsPlot", "MomentsPlotCurve");
     std::pair<double,double> range = getCurveRange("MomentsPlotCurve");
     setMiniPlotGuides("MomentsRangeSelector", m_properties["EMin"], m_properties["EMax"], range);
     setPlotRange("MomentsRangeSelector", m_properties["EMin"], m_properties["EMax"], range);
 
-    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePreviewPlot()));
+    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
+
+    // Update the results preview plot
+    updatePreviewPlot();
   }
 
   /**
-   * Updates the property manager when the lower guide is moved on the mini plot
+   * Updates the property manager when the range selector is moved.
    *
    * @param min :: The new value of the lower guide
-   */
-  void IndirectMoments::minValueChanged(double min)
-  {
-    m_dblManager->setValue(m_properties["EMin"], min);
-  }
-
-  /**
-   * Updates the property manager when the upper guide is moved on the mini plot
-   *
    * @param max :: The new value of the upper guide
    */
-  void IndirectMoments::maxValueChanged(double max)
+  void IndirectMoments::rangeChanged(double min, double max)
   {
+    m_dblManager->setValue(m_properties["EMin"], min);
     m_dblManager->setValue(m_properties["EMax"], max);  
   }
 
   /**
    * Handles when properties in the property manager are updated.
+   *
+   * Performs validation and uodated preview plot.
    *
    * @param prop :: The property being updated
    * @param val :: The new value for the property
@@ -204,6 +196,8 @@ namespace CustomInterfaces
         m_rangeSelectors["MomentsRangeSelector"]->setMaximum(val);
       }
     }
+
+    updatePreviewPlot();
   }
 
   /**
@@ -238,8 +232,11 @@ namespace CustomInterfaces
     momentsAlg->setProperty("Save", false);
     momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
 
-    // Execute algorithm on seperate thread
-    runAlgorithm(momentsAlg);
+    // Make sure there are no other algorithms in the queue.
+    // It seems to be possible to have the selctionChangedLazy signal fire multiple times
+    // if the renage selector is moved in a certain way.
+    if(m_batchAlgoRunner->queueLength() == 0)
+      runAlgorithm(momentsAlg);
   }
 
   /**
