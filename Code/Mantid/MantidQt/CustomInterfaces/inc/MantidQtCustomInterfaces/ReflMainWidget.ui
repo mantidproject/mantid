@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>reflMainWidget</class>
- <widget class="QWidget" name="reflMainWidget">
+ <widget class="QMainWindow" name="reflMainWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,6 +13,7 @@
   <property name="windowTitle">
    <string>ISIS Reflectometry</string>
   </property>
+  <widget class="QWidget" name="centralwidget">
   <layout class="QVBoxLayout" name="layoutMain">
    <property name="margin">
     <number>1</number>
@@ -419,6 +420,7 @@
     </widget>
    </item>
   </layout>
+ </widget>
  </widget>
  <customwidgets>
   <customwidget>

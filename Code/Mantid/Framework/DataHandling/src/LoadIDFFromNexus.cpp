@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadIDFFromNexus.h"
-#include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FileProperty.h"
 
@@ -86,7 +85,10 @@ void LoadIDFFromNexus::exec()
 
     try {
       // load and also populate instrument parameters from this 'fallback' parameter file 
-      LoadParameterFile::execManually(false, paramFile,"", localWorkspace);
+      Algorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
+      loadParamAlg->setProperty("Filename", paramFile);
+      loadParamAlg->setProperty("Workspace", localWorkspace);
+      loadParamAlg->execute();
       g_log.notice() << "Instrument parameter file: " << paramFile << " has been loaded" << std::endl;
     } catch ( std::runtime_error& ) {
       g_log.debug() << "Instrument parameter file: " << paramFile << " not found or un-parsable. ";
