@@ -264,6 +264,7 @@ void FunctionBrowser::setFunction(Mantid::API::IFunction_sptr fun)
 {
   clear();
   addFunction(NULL,fun);
+  emit functionStructureChanged();
 }
 
 /**
@@ -1323,6 +1324,7 @@ void FunctionBrowser::addFunction()
   {// the browser is empty - add first function
     addFunction(NULL,f);
   }
+  emit functionStructureChanged();
 }
 
 /**
@@ -1532,6 +1534,7 @@ void FunctionBrowser::removeFunction()
   if (!isFunction(prop)) return;
   removeProperty(prop);
   updateFunctionIndices();
+  emit functionStructureChanged();
 }
 
 /**

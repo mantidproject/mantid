@@ -4,6 +4,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ParameterTie.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 
@@ -202,6 +203,16 @@ DatasetPlotData::~DatasetPlotData()
 {
   m_dataCurve->detach();
   delete m_dataCurve;
+  if ( m_calcCurve )
+  {
+    m_calcCurve->detach();
+    delete m_calcCurve;
+  }
+  if ( m_diffCurve )
+  {
+    m_diffCurve->detach();
+    delete m_diffCurve;
+  }
 }
 
 void DatasetPlotData::setData(QwtPlotCurve *curve, const Mantid::API::MatrixWorkspace *ws, int wsIndex, const Mantid::API::MatrixWorkspace *outputWS)
@@ -272,7 +283,6 @@ PlotController::PlotController(MultiDatasetFit *parent,QwtPlot *plot, QTableWidg
 
 PlotController::~PlotController()
 {
-  std::cerr << "Plot controller destroyed." << std::endl;
   m_plotData.clear();
 }
 
@@ -364,12 +374,13 @@ void PlotController::update()
 /*==========================================================================================*/
 
 EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *parent, const QString &parName):
-  QDialog(parent)
+  QDialog(parent),m_parName(parName)
 {
   m_uiForm.setupUi(this);
   QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
   header->setResizeMode(0,QHeaderView::Stretch);
   header->setResizeMode(1,QHeaderView::Stretch);
+  connect(m_uiForm.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(valueChanged(int,int)));
 
   auto multifit = owner();
   auto n = static_cast<int>( multifit->getNumberOfSpectra() );
@@ -380,6 +391,29 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *parent, cons
     m_uiForm.tableWidget->setItem( i, 0, cell );
     cell = new QTableWidgetItem( QString::number(multifit->getLocalParameterValue(parName,i)) );
     m_uiForm.tableWidget->setItem( i, 1, cell );
+  }
+}
+
+/**
+ * Slot. Called when a value changes.
+ * @param row :: Row index of the changed cell.
+ * @param col :: Column index of the changed cell.
+ */
+void EditLocalParameterDialog::valueChanged(int row, int col)
+{
+  if ( col == 1 )
+  {
+    QString text = m_uiForm.tableWidget->item(row,col)->text();
+    try
+    {
+      double value = text.toDouble();
+      owner()->setLocalParameterValue(m_parName,row,value);
+    }
+    catch(std::exception&)
+    {
+      // restore old value
+      m_uiForm.tableWidget->item(row,col)->setText( QString::number(owner()->getLocalParameterValue(m_parName,row)) );
+    }
   }
 }
 
@@ -425,6 +459,7 @@ void MultiDatasetFit::initLayout()
   connect(m_uiForm.btnRemove,SIGNAL(clicked()),this,SLOT(removeSelectedSpectra()));
   connect(m_uiForm.dataTable,SIGNAL(itemSelectionChanged()), this,SLOT(workspaceSelectionChanged()));
   connect(m_uiForm.btnFit,SIGNAL(clicked()),this,SLOT(fit()));
+  connect(this,SIGNAL(dataTableUpdated()),this,SLOT(reset()));
 
   m_plotController = new PlotController(this,
                                         m_uiForm.plot,
@@ -436,6 +471,7 @@ void MultiDatasetFit::initLayout()
   m_functionBrowser = new MantidQt::MantidWidgets::FunctionBrowser(NULL, true);
   m_uiForm.browserLayout->addWidget( m_functionBrowser );
   connect(m_functionBrowser,SIGNAL(localParameterButtonClicked(const QString&)),this,SLOT(editLocalParameterValues(const QString&)));
+  connect(m_functionBrowser,SIGNAL(functionStructureChanged()),this,SLOT(reset()));
 }
 
 /**
@@ -537,8 +573,17 @@ boost::shared_ptr<Mantid::API::IFunction> MultiDatasetFit::createFunction() cons
     return Mantid::API::FunctionFactory::Instance().createInitialized( funStr.toStdString() );
   }
 
+  bool isComposite = (std::find(funStr.begin(),funStr.end(),';') != funStr.end());
+  if ( isComposite )
+  {
+    funStr = ";(" + funStr + ")";
+  }
+  else
+  {
+    funStr = ";" + funStr;
+  }
+
   QString multiFunStr = "composite=MultiDomainFunction,NumDeriv=1";
-  funStr = ";(" + funStr + ")";
   for(size_t i = 0; i < nOfDataSets; ++i)
   {
     multiFunStr += funStr;
@@ -568,19 +613,51 @@ boost::shared_ptr<Mantid::API::IFunction> MultiDatasetFit::createFunction() cons
   }
 
   // create the multi-domain function
-  auto fun = Mantid::API::FunctionFactory::Instance().createInitialized( multiFunStr.toStdString() );
+  std::string tmpStr = multiFunStr.toStdString();
+  auto fun = Mantid::API::FunctionFactory::Instance().createInitialized( tmpStr );
   boost::shared_ptr<Mantid::API::MultiDomainFunction> multiFun = boost::dynamic_pointer_cast<Mantid::API::MultiDomainFunction>( fun );
   if ( !multiFun )
   {
     throw std::runtime_error("Failed to create the MultiDomainFunction");
   }
   
-  // set the domain indices
+  auto globalParams = m_functionBrowser->getGlobalParameters();
+
+  // set the domain indices, initial local parameter values and ties
   for(size_t i = 0; i < nOfDataSets; ++i)
   {
     multiFun->setDomainIndex(i,i);
+    auto fun1 = multiFun->getFunction(i);
+    for(size_t j = 0; j < fun1->nParams(); ++j)
+    {
+      auto tie = fun1->getTie(j);
+      if ( tie )
+      {
+        // if a local parameter has a constant tie (is fixed) set tie's value to 
+        // the value of the local parameter
+        if ( tie->isConstant() )
+        {
+          QString parName = QString::fromStdString(fun1->parameterName(j));
+          if ( !globalParams.contains(parName) )
+          {
+            std::string expr = boost::lexical_cast<std::string>( getLocalParameterValue(parName,static_cast<int>(i)) );
+            tie->set( expr );
+          }
+        }
+      }
+      else
+      {
+        // if local parameter isn't tied set its local value
+        QString parName = QString::fromStdString(fun1->parameterName(j));
+        if ( !globalParams.contains(parName) )
+        {
+          fun1->setParameter(j, getLocalParameterValue(parName,static_cast<int>(i)));
+        }
+      }
+    }
   }
   assert( multiFun->nFunctions() == nOfDataSets );
+
   return fun;
 }
 
@@ -602,8 +679,8 @@ void MultiDatasetFit::fit()
     fit->setPropertyValue("Output",m_outputWorkspaceName);
     m_outputWorkspaceName += "_Workspace";
 
-    size_t n = getNumberOfSpectra();
-    for(size_t ispec = 1; ispec < n; ++ispec)
+    int n = getNumberOfSpectra();
+    for(int ispec = 1; ispec < n; ++ispec)
     {
       std::string suffix = boost::lexical_cast<std::string>(ispec);
       fit->setPropertyValue( "InputWorkspace_" + suffix, getWorkspaceName(ispec) );
@@ -632,26 +709,26 @@ void MultiDatasetFit::fit()
  * Get the workspace name of the i-th spectrum.
  * @param i :: Index of a spectrum in the data table.
  */
-std::string MultiDatasetFit::getWorkspaceName(size_t i) const
+std::string MultiDatasetFit::getWorkspaceName(int i) const
 {
-  return m_uiForm.dataTable->item(static_cast<int>(i), wsColumn)->text().toStdString();
+  return m_uiForm.dataTable->item(i, wsColumn)->text().toStdString();
 }
 
 /**
  * Get the workspace index of the i-th spectrum.
  * @param i :: Index of a spectrum in the data table.
  */
-int MultiDatasetFit::getWorkspaceIndex(size_t i) const
+int MultiDatasetFit::getWorkspaceIndex(int i) const
 {
-  return m_uiForm.dataTable->item(static_cast<int>(i), wsIndexColumn)->text().toInt();
+  return m_uiForm.dataTable->item(i, wsIndexColumn)->text().toInt();
 }
 
 /**
  * Get the number of spectra to fit to.
  */
-size_t MultiDatasetFit::getNumberOfSpectra() const
+int MultiDatasetFit::getNumberOfSpectra() const
 {
-  return static_cast<size_t>( m_uiForm.dataTable->rowCount() );
+  return m_uiForm.dataTable->rowCount();
 }
 
 /**
@@ -673,6 +750,28 @@ void MultiDatasetFit::editLocalParameterValues(const QString& parName)
  */
 double MultiDatasetFit::getLocalParameterValue(const QString& parName, int i) const
 {
+  if ( !m_localParameterValues.contains(parName) || m_localParameterValues[parName].size() != getNumberOfSpectra() )
+  {
+    initLocalParameter(parName);
+  }
+  return m_localParameterValues[parName][i];
+}
+
+void MultiDatasetFit::setLocalParameterValue(const QString& parName, int i, double value)
+{
+  if ( !m_localParameterValues.contains(parName) || m_localParameterValues[parName].size() != getNumberOfSpectra() )
+  {
+    initLocalParameter(parName);
+  }
+  m_localParameterValues[parName][i] = value;
+}
+
+/**
+ * Init a local parameter. Define initial values for all datasets.
+ * @param parName :: Name of parametere to init.
+ */
+void MultiDatasetFit::initLocalParameter(const QString& parName)const
+{
   QString functionIndex;
   QString parameterName = parName;
   int j = parName.lastIndexOf('.');
@@ -682,9 +781,15 @@ double MultiDatasetFit::getLocalParameterValue(const QString& parName, int i) co
     functionIndex = parName.mid(0,j);
     parameterName = parName.mid(j);
   }
-  return m_functionBrowser->getParameter(functionIndex,parameterName);
+  double value = m_functionBrowser->getParameter(functionIndex,parameterName);
+  QVector<double> values( static_cast<int>(getNumberOfSpectra()), value );
+  m_localParameterValues[parName] = values;
 }
 
+void MultiDatasetFit::reset()
+{
+  m_localParameterValues.clear();
+}
 
 /*==========================================================================================*/
 } // CustomInterfaces

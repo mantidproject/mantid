@@ -120,6 +120,8 @@ signals:
   /// In multi-dataset context a button value editor was clicked
   void localParameterButtonClicked(const QString& parName);
 
+  void functionStructureChanged();
+
 protected:
   /// Create the Qt property browser
   void createBrowser();
