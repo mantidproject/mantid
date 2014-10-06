@@ -150,9 +150,10 @@ private:
   std::string m_backType;
   /// Peak profile type
   std::string m_peakType;
+  /// Criterias for fitting peak
   double m_maxChiSq;
   double m_minPeakHeight;
-
+  double m_leastMaxObsY;
   double m_maxOffset;
 
   std::vector<double> m_peakPositions;

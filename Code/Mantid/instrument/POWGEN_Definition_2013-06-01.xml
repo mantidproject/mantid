@@ -1,5 +1,7 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  last-modified="2013-05-14 13:32:38.270017" valid-to="2013-07-31 23:59:59" name="PG3" valid-from="2013-06-01 00:00:01">
   <!--Created by Stuart Campbell, Vickie Lynch, Peter Peterson, Janik Zikovsky-->
   <!--DEFAULTS-->

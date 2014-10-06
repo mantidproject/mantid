@@ -1,9 +1,13 @@
 from reduction.reducer import ReductionStep
+
 import mantid
 from mantid import config
 from mantid.simpleapi import *
+from mantid.api import IEventWorkspace
+
 import string
 import os
+
 
 class LoadData(ReductionStep):
     """Handles the loading of the data for Indirect instruments. The summing
@@ -29,6 +33,7 @@ class LoadData(ReductionStep):
     _parameter_file = None
     _data_files = {}
     _extra_load_opts = {}
+    _contains_event_data = False
 
     def __init__(self):
         """Initialise the ReductionStep. Constructor should set the initial
@@ -92,10 +97,16 @@ class LoadData(ReductionStep):
     def get_ws_list(self):
         return self._data_files
 
+    def contains_event_data(self):
+        return self._contains_event_data
+
     def _load_single_file(self, filename, output_ws):
         logger.notice("Loading file %s" % filename)
 
-        loader_name = self._load_data(filename, output_ws)
+        self._load_data(filename, output_ws)
+
+        if type(mtd[output_ws]) is IEventWorkspace:
+            self._contains_event_data = True
 
         inst_name = mtd[output_ws].getInstrument().getName()
         if inst_name == 'BASIS':
@@ -154,7 +165,7 @@ class LoadData(ReductionStep):
         if self._parameter_file is not None and "VESUVIO" in self._parameter_file:
             loaded_ws = LoadVesuvio(Filename=filename, OutputWorkspace=output_ws, SpectrumList="1-198", **self._extra_load_opts)
         else:
-            loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
+            # loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
             if self._load_logs == True:
                 loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=True, **self._extra_load_opts)
                 logger.notice("Loaded sample logs")
@@ -163,36 +174,48 @@ class LoadData(ReductionStep):
 
     def _sum_regular(self, wsname):
         merges = [[], []]
+        run_numbers = []
         for ws in self._data_files:
             merges[0].append(ws)
-            merges[1].append(ws+'_mon')
-        MergeRuns(InputWorkspaces=','.join(merges[0]),OutputWorkspace= wsname)
-        MergeRuns(InputWorkspaces=','.join(merges[1]),OutputWorkspace= wsname+'_mon')
+            merges[1].append(ws + '_mon')
+            run_numbers.append(str(mtd[ws].getRunNumber()))
+
+        MergeRuns(InputWorkspaces=','.join(merges[0]), OutputWorkspace=wsname)
+        MergeRuns(InputWorkspaces=','.join(merges[1]), OutputWorkspace=wsname + '_mon')
+
+        AddSampleLog(Workspace=wsname, LogName='multi_run_numbers', LogType='String',
+                     LogText=','.join(run_numbers))
+
         for n in range(1, len(merges[0])):
             DeleteWorkspace(Workspace=merges[0][n])
             DeleteWorkspace(Workspace=merges[1][n])
+
         factor = 1.0 / len(self._data_files)
-        Scale(InputWorkspace=wsname,OutputWorkspace= wsname,Factor= factor)
-        Scale(InputWorkspace=wsname+'_mon',OutputWorkspace= wsname+'_mon',Factor= factor)
+        Scale(InputWorkspace=wsname, OutputWorkspace=wsname, Factor=factor)
+        Scale(InputWorkspace=wsname + '_mon', OutputWorkspace=wsname + '_mon', Factor=factor)
 
     def _sum_chopped(self, wsname):
         merges = []
         nmerges = len(mtd[wsname].getNames())
+
         for n in range(0, nmerges):
             merges.append([])
             merges.append([])
+
             for file in self._data_files:
                 try:
-                    merges[2*n].append(mtd[file].getNames()[n])
-                    merges[2*n+1].append(mtd[file].getNames()[n]+'_mon')
+                    merges[2 * n].append(mtd[file].getNames()[n])
+                    merges[2 * n + 1].append(mtd[file].getNames()[n] + '_mon')
                 except AttributeError:
                     if n == 0:
                         merges[0].append(file)
-                        merges[1].append(file+'_mon')
+                        merges[1].append(file + '_mon')
+
         for merge in merges:
-            MergeRuns(InputWorkspaces=','.join(merge),OutputWorkspace= merge[0])
+            MergeRuns(InputWorkspaces=','.join(merge), OutputWorkspace=merge[0])
             factor = 1.0 / len(merge)
-            Scale(InputWorkspace=merge[0],OutputWorkspace= merge[0],Factor= factor)
+            Scale(InputWorkspace=merge[0], OutputWorkspace=merge[0], Factor=factor)
+
             for n in range(1, len(merge)):
                 DeleteWorkspace(Workspace=merge[n])
 
@@ -942,25 +965,40 @@ class Grouping(ReductionStep):
             for i in range(0, nhist):
                 if i not in self._masking_detectors:
                     wslist.append(i)
-            GroupDetectors(InputWorkspace=workspace,OutputWorkspace= workspace,
-                WorkspaceIndexList=wslist, Behaviour='Average')
+            GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, 
+                           WorkspaceIndexList=wslist, Behaviour='Average')
         else:
-            # Assume we have a grouping file.
-            # First lets, find the file...
-            if (os.path.isfile(grouping)):
-                grouping_filename = grouping
-            else:
-                grouping_filename = os.path.join(config.getString('groupingFiles.directory'),
-                        grouping)
+            # We may have either a workspace name or a mapping file name here
+            grouping_workspace = None
+            grouping_filename = None
 
-            #mask detectors before grouping if we need to
+            # See if it a workspace in ADS
+            # If not assume it is a mapping file
+            try:
+                grouping_workspace = mtd[grouping]
+            except KeyError:
+                logger.notice("Cannot find group workspace " + grouping + ", attempting to find as file")
+
+                # See if it is an absolute path
+                # Otherwise check in the default group files directory
+                if (os.path.isfile(grouping)):
+                    grouping_filename = grouping
+                else:
+                    grouping_filename = os.path.join(config.getString('groupingFiles.directory'), grouping)
+
+            # Mask detectors before grouping if we need to
             if len(self._masking_detectors) > 0:
                 MaskDetectors(workspace, WorkspaceIndexList=self._masking_detectors)
 
-            # Final check that the Mapfile exists, if not don't run the alg.
-            if os.path.isfile(grouping_filename):
-                GroupDetectors(InputWorkspace=workspace,OutputWorkspace=workspace, MapFile=grouping_filename,
+            # Run GroupDetectors with a workspace if we have one
+            # Otherwise try to run it with a mapping file
+            if grouping_workspace is not None:
+                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, CopyGroupingFromWorkspace=grouping_workspace, 
                         Behaviour='Average')
+            elif os.path.isfile(grouping_filename):
+                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, MapFile=grouping_filename, 
+                        Behaviour='Average')
+
         return workspace
 
 class SaveItem(ReductionStep):
@@ -972,6 +1010,7 @@ class SaveItem(ReductionStep):
         * 'ascii' - Comma Seperated Values (file extension '.dat')
         * 'gss' - GSAS file format (N.B.: units will be converted to Time of
             Flight if not already in that unit for saving in this format).
+        * 'davegrp' - DAVE grouped ASCII format
     """
     _formats = []
     _save_to_cm_1 = False
@@ -982,32 +1021,37 @@ class SaveItem(ReductionStep):
 
     def execute(self, reducer, file_ws):
         naming = Naming()
-        filename = naming._get_ws_name(file_ws)
+        filename = naming.get_ws_name(file_ws, reducer)
         for format in self._formats:
             if format == 'spe':
-                SaveSPE(InputWorkspace=file_ws,Filename= filename+'.spe')
+                SaveSPE(InputWorkspace=file_ws, Filename=filename + '.spe')
             elif format == 'nxs':
-                SaveNexusProcessed(InputWorkspace=file_ws,Filename= filename+'.nxs')
+                SaveNexusProcessed(InputWorkspace=file_ws, Filename=filename + '.nxs')
             elif format == 'nxspe':
-                SaveNXSPE(InputWorkspace=file_ws,Filename= filename+'.nxspe')
+                SaveNXSPE(InputWorkspace=file_ws, Filename=filename + '.nxspe')
             elif format == 'ascii':
                 #version 1 of SaveASCII produces output that works better with excel/origin
-                SaveAscii(InputWorkspace=file_ws,Filename= filename+'.dat', Version=1)
+                SaveAscii(InputWorkspace=file_ws, Filename=filename + '.dat', Version=1)
             elif format == 'gss':
-                ConvertUnits(InputWorkspace=file_ws,OutputWorkspace= "__save_item_temp",Target= "TOF")
-                SaveGSS(InputWorkspace="__save_item_temp",Filename= filename+".gss")
+                ConvertUnits(InputWorkspace=file_ws, OutputWorkspace="__save_item_temp", Target="TOF")
+                SaveGSS(InputWorkspace="__save_item_temp", Filename=filename + ".gss")
                 DeleteWorkspace(Workspace="__save_item_temp")
             elif format == 'aclimax':
-                if (self._save_to_cm_1 == False):
+                if self._save_to_cm_1 == False:
                     bins = '3, -0.005, 500' #meV
                 else:
                     bins = '24, -0.005, 4000' #cm-1
-                Rebin(InputWorkspace=file_ws,OutputWorkspace= file_ws + '_aclimax_save_temp',Params= bins)
-                SaveAscii(InputWorkspace=file_ws + '_aclimax_save_temp',Filename= filename+ '_aclimax.dat', Separator='Tab')
+                Rebin(InputWorkspace=file_ws,OutputWorkspace= file_ws + '_aclimax_save_temp', Params=bins)
+                SaveAscii(InputWorkspace=file_ws + '_aclimax_save_temp', Filename=filename + '_aclimax.dat', Separator='Tab')
                 DeleteWorkspace(Workspace=file_ws + '_aclimax_save_temp')
+            elif format == 'davegrp':
+                ConvertSpectrumAxis(InputWorkspace=file_ws, OutputWorkspace=file_ws + '_davegrp_save_temp', Target='ElasticQ', EMode='Indirect')
+                SaveDaveGrp(InputWorkspace=file_ws + '_davegrp_save_temp', Filename=filename + '.grp')
+                DeleteWorkspace(Workspace=file_ws + '_davegrp_save_temp')
 
     def set_formats(self, formats):
         self._formats = formats
+
     def set_save_to_cm_1(self, save_to_cm_1):
         self._save_to_cm_1 = save_to_cm_1
 
@@ -1023,14 +1067,20 @@ class Naming(ReductionStep):
     def __init__(self):
         super(Naming, self).__init__()
         self._result_workspaces = []
+        self._multi_run = False
 
     def execute(self, reducer, file_ws):
+        self._multi_run = reducer._sum
         wsname = self._get_ws_name(file_ws)
-        RenameWorkspace(InputWorkspace=file_ws,OutputWorkspace= wsname)
+        RenameWorkspace(InputWorkspace=file_ws, OutputWorkspace=wsname)
         self._result_workspaces.append(wsname)
 
     def get_result_workspaces(self):
         return self._result_workspaces
+
+    def get_ws_name(self, workspace, reducer):
+        self._multi_run = reducer._sum
+        return self._get_ws_name(workspace)
 
     def _get_ws_name(self, workspace):
         try:
@@ -1039,9 +1089,9 @@ class Naming(ReductionStep):
         except IndexError:
             type = 'RunTitle'
 
-        if ( type == 'AnalyserReflection' ):
+        if type == 'AnalyserReflection':
             return self._analyser_reflection(workspace)
-        elif ( type == 'RunTitle' ):
+        elif type == 'RunTitle':
             return self._run_title(workspace)
         else:
             raise NotImplementedError('Unknown \'Workflow.NamingConvention\''
@@ -1051,6 +1101,8 @@ class Naming(ReductionStep):
         ws = mtd[workspace]
         title = ws.getRun()['run_title'].value.strip()
         runNo = ws.getRun()['run_number'].value
+        if self._multi_run:
+            runNo += '_multi'
         inst = ws.getInstrument().getName()
         isn = config.getFacility().instrument(inst).shortName().upper()
         valid = "-_.() %s%s" % (string.ascii_letters, string.digits)
@@ -1062,14 +1114,32 @@ class Naming(ReductionStep):
         if workspace == '':
             return ''
         ws = mtd[workspace]
-        ins = ws.getInstrument().getName()
-        ins = config.getFacility().instrument(ins).shortName().lower()
+        inst = ws.getInstrument().getName()
+
+        short_name = ''
+        try:
+            short_name = config.getFacility().instrument(inst).shortName().lower()
+        except RuntimeError:
+            original_facility = config['default.facility']
+            for facility in config.getFacilities():
+                config['default.facility'] = facility.name()
+                try:
+                    short_name = config.getFacility().instrument(inst).shortName().lower()
+                except RuntimeError:
+                    pass
+            config['default.facility'] = original_facility
+
+        if short_name == '':
+            raise RuntimeError('Cannot find instrument "%s" in any facility' % str(inst))
+
         run = ws.getRun().getLogData('run_number').value
+        if self._multi_run:
+            run += '_multi'
         try:
             analyser = ws.getInstrument().getStringParameter('analyser')[0]
             reflection = ws.getInstrument().getStringParameter('reflection')[0]
         except IndexError:
             analyser = ''
             reflection = ''
-        prefix = ins + run + '_' + analyser + reflection + '_red'
+        prefix = short_name + run + '_' + analyser + reflection + '_red'
         return prefix

@@ -40,7 +40,7 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  LoadVulcanCalFile::LoadVulcanCalFile()
+  LoadVulcanCalFile::LoadVulcanCalFile() : m_doAlignEventWS(false)
   {
   }
     
@@ -572,6 +572,7 @@ namespace DataHandling
     // FIXME - The simple version of the algorithm to calculate 2theta is used here.
     //         A check will be made to raise exception if the condition is not met to use the simple version.
     double s_r, s_2theta, s_phi;
+    s_r = s_2theta = s_phi = 0.;
     samplePos.spherical(s_r, s_2theta, s_phi);
     if (fabs(beamline.X()) > 1.0E-20 || fabs(beamline.Y()) > 1.0E-20 || s_r > 1.0E-20)
       throw runtime_error("Source is not at (0, 0, Z) or sample is not at (0, 0, 0).  "
