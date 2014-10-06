@@ -49,7 +49,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
 
         instrumentList=["ARCS","CNCS","CORELLI","HYSPEC","NOMAD","POWGEN","SEQUOIA","SNAP","TOPAZ","WISH"]
         self.bankmin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"NOMAD":1,"POWGEN":1,"SEQUOIA":38,"SNAP":1,"TOPAZ":10,"WISH":1}
-        self.bankmax={"ARCS":115,"CNCS":50,"CORELLI":91,"HYSPEC":20,"NOMAD":99,"POWGEN":300,"SEQUOIA":150,"SNAP":18,"TOPAZ":59,"WISH":5}
+        self.bankmax={"ARCS":115,"CNCS":50,"CORELLI":91,"HYSPEC":20,"NOMAD":99,"POWGEN":300,"SEQUOIA":150,"SNAP":18,"TOPAZ":59,"WISH":10}
         tubemin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"NOMAD":1,"POWGEN":0,"SEQUOIA":1,"SNAP":0,"TOPAZ":0,"WISH":1}
         tubemax={"ARCS":8,"CNCS":8,"CORELLI":16,"HYSPEC":8,"NOMAD":8,"POWGEN":153,"SEQUOIA":8,"SNAP":255,"TOPAZ":255,"WISH":152}
         pixmin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"NOMAD":1,"POWGEN":0,"SEQUOIA":1,"SNAP":0,"TOPAZ":0,"WISH":1}
@@ -175,8 +175,10 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 raise ValueError("Out of range index for "+str(self.instname)+" instrument bank numbers")
         elif self.instname=="WISH":
             if (self.bankmin[self.instname]<=banknum<= self.bankmax[self.instname]):
-                print "panel"+"%02d" % banknum
-                return self.instrument.getComponentByName("panel"+"%02d" % banknum)[0]
+                try:
+                	return self.instrument.getComponentByName("panel"+"%02d" % banknum)[0]
+                except:
+                        return None
             else:
                 raise ValueError("Out of range index for "+str(self.instname)+" instrument bank numbers")
         else:

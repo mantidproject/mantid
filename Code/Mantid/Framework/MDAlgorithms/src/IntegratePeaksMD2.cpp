@@ -587,7 +587,6 @@ namespace MDAlgorithms
    */
   bool IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r)
   {
-		double kmax=100.;
 		std::vector<detid_t> detectorIDs = inst->getDetectorIDs();
 
 		for (auto detID = detectorIDs.begin(); detID != detectorIDs.end(); ++detID)
@@ -597,7 +596,7 @@ namespace MDAlgorithms
 				if( !det->isMasked() ) continue;// edge is masked so don't check if not masked
 				double tt1=det->getTwoTheta(V3D(0,0,0),V3D(0,0,1)); //two theta
 				double ph1=det->getPhi(); //phi
-				V3D E1=V3D(-kmax*std::sin(tt1)*std::cos(ph1),-kmax*std::sin(tt1)*std::sin(ph1),kmax-kmax*std::cos(tt1)); //end of trajectory
+				V3D E1=V3D(-std::sin(tt1)*std::cos(ph1),-std::sin(tt1)*std::sin(ph1),1.-std::cos(tt1)); //end of trajectory
 				E1=E1*(1./E1.norm()); //normalize
 				V3D distv=QLabFrame-E1*(QLabFrame.scalar_prod(E1)); //distance to the trajectory as a vector
 				if(distv.norm()<r)

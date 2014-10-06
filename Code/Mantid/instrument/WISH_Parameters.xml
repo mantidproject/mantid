@@ -23,5 +23,10 @@
           <value val="Always" />
          </parameter>
 		
+         <!-- Specify the gap between the tubes for Peak::findDetector -->
+         <parameter name="tube-gap">
+           <value val="0.0003"/>
+         </parameter>
+
     </component-link>
 </parameter-file>    

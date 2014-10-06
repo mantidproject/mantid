@@ -528,69 +528,72 @@ namespace DataObjects
    */
   bool Peak::findDetector()
   {
-    // Scattered beam direction
-    V3D oldDetPos = detPos;
-    V3D beam = detPos - samplePos;
-    beam.normalize();
+	// Scattered beam direction
+	V3D oldDetPos = detPos;
+	V3D beam = detPos - samplePos;
+	beam.normalize();
 
-    // Create a ray tracer
-    InstrumentRayTracer tracker( m_inst );
-    tracker.traceFromSample(beam);
-    IDetector_const_sptr det = tracker.getDetectorResult();
-    if (det)
-    {
-      // Set the detector ID, the row, col, etc.
-      this->setDetectorID(det->getID());
-      // The old detector position is not more precise if it comes from FindPeaksMD
-      detPos = det->getPos();
-      return true;
-    }
-    else  //fix for gaps between tubes
-    {
-    	double gap = 0.00065;
-    	V3D beam1 = beam + V3D(gap,0.,0.);
-        tracker.traceFromSample(beam1);
-        IDetector_const_sptr det1 = tracker.getDetectorResult();
-    	V3D beam2 = beam + V3D(-gap,0.,0.);
-        tracker.traceFromSample(beam2);
-        IDetector_const_sptr det2 = tracker.getDetectorResult();
-        if (det1 && det2)
-         {
-           // Set the detector ID, the row, col, etc.
-           this->setDetectorID(static_cast<int>((det1->getID()+det2->getID())*0.5));;
-           detPos = (det1->getPos() + det2->getPos())*0.5;
-           std::cout <<static_cast<int>((det1->getID()+det2->getID())*0.5) << " x gap\n";
-           return true;
-         }
-    	beam1 = beam + V3D(0.,gap,0.);
-        tracker.traceFromSample(beam1);
-        det1 = tracker.getDetectorResult();
-    	beam2 = beam + V3D(0.,-gap,0.);
-        tracker.traceFromSample(beam2);
-        det2 = tracker.getDetectorResult();
-        if (det1 && det2)
-         {
-           // Set the detector ID, the row, col, etc.
-           this->setDetectorID(static_cast<int>((det1->getID()+det2->getID())*0.5));;
-           detPos = (det1->getPos() + det2->getPos())*0.5;
-           std::cout <<static_cast<int>((det1->getID()+det2->getID())*0.5) << " y gap\n";
-           return true;
-         }
-    	beam1 = beam + V3D(0.,0.,gap);
-        tracker.traceFromSample(beam1);
-        det1 = tracker.getDetectorResult();
-    	beam2 = beam + V3D(0.,0.,-gap);
-        tracker.traceFromSample(beam2);
-        det2 = tracker.getDetectorResult();
-        if (det1 && det2)
-         {
-           // Set the detector ID, the row, col, etc.
-           this->setDetectorID(static_cast<int>((det1->getID()+det2->getID())*0.5));;
-           detPos = (det1->getPos() + det2->getPos())*0.5;
-           std::cout <<static_cast<int>((det1->getID()+det2->getID())*0.5) << " z gap\n";
-           return true;
-         }
-    }
+	// Create a ray tracer
+	InstrumentRayTracer tracker( m_inst );
+	tracker.traceFromSample(beam);
+	IDetector_const_sptr det = tracker.getDetectorResult();
+	if (det)
+	{
+		// Set the detector ID, the row, col, etc.
+		this->setDetectorID(det->getID());
+		// The old detector position is not more precise if it comes from FindPeaksMD
+		detPos = det->getPos();
+		return true;
+	}
+	//fix for gaps between tubes
+	else if (m_inst->hasParameter("tube-gap"))
+	{
+		std::vector<double> gaps = m_inst->getNumberParameter("tube-gap", true);
+		if (gaps.empty()) return false;
+		const double gap = static_cast<double>(gaps.front());
+		V3D beam1 = beam + V3D(0.,0.,gap);
+		tracker.traceFromSample(beam1);
+		IDetector_const_sptr det1 = tracker.getDetectorResult();
+		V3D beam2 = beam + V3D(0.,0.,-gap);
+		tracker.traceFromSample(beam2);
+		IDetector_const_sptr det2 = tracker.getDetectorResult();
+		if (det1 && det2)
+		{
+			// Set the detector ID, the row, col, etc.
+			this->setDetectorID(static_cast<int>((det1->getID()+det2->getID())*0.5));;
+			detPos = (det1->getPos() + det2->getPos())*0.5;
+			std::cout <<gap<<"  "<<static_cast<int>((det1->getID()+det2->getID())*0.5) << " z gap\n";
+			return true;
+		}
+		beam1 = beam + V3D(gap,0.,0.);
+		tracker.traceFromSample(beam1);
+		det1 = tracker.getDetectorResult();
+		beam2 = beam + V3D(-gap,0.,0.);
+		tracker.traceFromSample(beam2);
+		det2 = tracker.getDetectorResult();
+		if (det1 && det2)
+		{
+			// Set the detector ID, the row, col, etc.
+			this->setDetectorID(static_cast<int>((det1->getID()+det2->getID())*0.5));;
+			detPos = (det1->getPos() + det2->getPos())*0.5;
+			std::cout <<gap<<"  "<<static_cast<int>((det1->getID()+det2->getID())*0.5) << " x gap\n";
+			return true;
+		}
+		beam1 = beam + V3D(0.,gap,0.);
+		tracker.traceFromSample(beam1);
+		det1 = tracker.getDetectorResult();
+		beam2 = beam + V3D(0.,-gap,0.);
+		tracker.traceFromSample(beam2);
+		det2 = tracker.getDetectorResult();
+		if (det1 && det2)
+		{
+			// Set the detector ID, the row, col, etc.
+			this->setDetectorID(static_cast<int>((det1->getID()+det2->getID())*0.5));;
+			detPos = (det1->getPos() + det2->getPos())*0.5;
+			std::cout <<gap<<"  "<<static_cast<int>((det1->getID()+det2->getID())*0.5) << " y gap\n";
+			return true;
+		}
+	}
     return false;
   }
 
