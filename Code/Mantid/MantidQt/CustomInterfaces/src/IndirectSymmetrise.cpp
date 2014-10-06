@@ -130,9 +130,7 @@ namespace CustomInterfaces
     m_plots["SymmPreviewPlot"]->replot();
 
     // SIGNAL/SLOT CONNECTIONS
-    // Update range selctors when a property is changed
-    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRangeSelectors(QtProperty*, double)));
-    // Verify an energy range when it is updated
+    // Validate the E range when it is changed
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(verifyERange(QtProperty*, double)));
     // Plot a new spectrum when the user changes the value of the preview spectrum
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(replotNewSpectrum(QtProperty*, double)));
@@ -290,8 +288,6 @@ namespace CustomInterfaces
   /**
    * Verifies that the E Range is valid.
    *
-   * Resets the last property changed to it's default if not.
-   *
    * @param prop QtProperty changed
    * @param value Value it was changed to (unused)
    */
@@ -302,25 +298,44 @@ namespace CustomInterfaces
     double eMin = m_dblManager->value(m_properties["EMin"]);
     double eMax = m_dblManager->value(m_properties["EMax"]);
 
-    // First check that the raw curve has been plotted
-    if(!m_curves["SymmRawPlot"])
-      return;
-
-    // Get the range of the plotted raw curve
-    auto axisRange = getCurveRange("SymmRawPlot");
-
     if(prop == m_properties["EMin"])
     {
-      // If range is invalid reset EMin to range/10
+      // If the value of EMin is negative try negating it to get a valid range
+      if(eMin < 0)
+      {
+        eMin = -eMin;
+        m_dblManager->setValue(m_properties["EMin"], eMin);
+        return;
+      }
+
+      // If range is still invalid reset EMin to half EMax
       if(eMin > eMax)
-        m_dblManager->setValue(m_properties["EMin"], axisRange.second/10);
+      {
+        m_dblManager->setValue(m_properties["EMin"], eMax/2);
+        return;
+      }
     }
     else if(prop == m_properties["EMax"])
     {
-      // If range is invalid reset EMax to range
+      // If the value of EMax is negative try negating it to get a valid range
+      if(eMax < 0)
+      {
+        eMax = -eMax;
+        m_dblManager->setValue(m_properties["EMax"], eMax);
+        return;
+      }
+
+      // If range is invalid reset EMax to double EMin
       if(eMin > eMax)
-        m_dblManager->setValue(m_properties["EMax"], axisRange.second);
+      {
+        m_dblManager->setValue(m_properties["EMax"], eMin*2);
+        return;
+      }
     }
+
+    // If we get this far then the E range is valid
+    // Update the range selectors with the new values.
+    updateRangeSelectors(prop, value);
   }
 
   /**
@@ -407,9 +422,14 @@ namespace CustomInterfaces
 
   /**
    * Updates position of XCut range selectors when used changed value of XCut.
+   *
+   * @param prop QtProperty changed
+   * @param value Value it was changed to (unused)
    */
   void IndirectSymmetrise::updateRangeSelectors(QtProperty *prop, double value)
   {
+    value = fabs(value);
+
     if(prop == m_properties["EMin"])
     {
       m_rangeSelectors["NegativeE_Raw"]->setMaximum(-value);
