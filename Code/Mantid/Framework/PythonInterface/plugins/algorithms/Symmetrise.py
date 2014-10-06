@@ -13,8 +13,10 @@ class Symmetrise(PythonAlgorithm):
     def category(self):
         return 'Workflow\\MIDAS;PythonAlgorithms'
 
+
     def summary(self):
         return 'Takes an asymmetric S(Q,w) and makes it symmetric'
+
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('Sample', '', Direction.Input),
@@ -38,6 +40,7 @@ class Symmetrise(PythonAlgorithm):
 
         self.declareProperty(WorkspaceProperty('OutputPropertiesTable', '',
                              Direction.Output, PropertyMode.Optional), doc='Name to call the properties output table workspace.')
+
 
     def PyExec(self):
         from IndirectCommon import StartTime, EndTime
@@ -154,28 +157,66 @@ class Symmetrise(PythonAlgorithm):
 
         EndTime('Symmetrise')
 
+
+    def validateInputs(self):
+        """
+        Checks for invalid input properties.
+        """
+        from IndirectCommon import CheckHistZero
+        issues = dict()
+
+        input_workspace_name = self.getPropertyValue('Sample')
+
+        # Validate spectra range
+        spectra_range = self.getProperty('SpectraRange').value
+        if len(spectra_range) != 0 and len(spectra_range) != 2:
+            issues['SpectraRange'] = 'Must be in format "spec_min,spec_max"'
+
+        if len(spectra_range) == 2:
+            spec_min = spectra_range[0]
+            spec_max = spectra_range[1]
+
+            num_sample_spectra, _ = CheckHistZero(input_workspace_name)
+            min_spectra_number = mtd[input_workspace_name].getSpectrum(0).getSpectrumNo()
+            max_spectra_number = mtd[input_workspace_name].getSpectrum(num_sample_spectra - 1).getSpectrumNo()
+
+            if spec_min < min_spectra_number:
+                issues['SpectraRange'] = 'Minimum spectra must be greater than or equal to %d' % min_spectra_number
+
+            if spec_max > max_spectra_number:
+                issues['SpectraRange'] = 'Maximum spectra must be less than or equal to %d' % max_spectra_number
+
+            if spec_max < spec_min:
+                issues['SpectraRange'] = 'Minimum spectra must be smaller than maximum spectra'
+
+        # Validate X range
+        x_min = self.getProperty('XMin').value
+        if x_min < 1e-5:
+            issues['XMin'] = 'XMin must be greater than zero'
+
+        x_max = self.getProperty('XMax').value
+        if x_max < 1e-5:
+            issues['XMax'] = 'XMax must be greater than zero'
+
+        if math.fabs(x_max - x_min) < 1e-5:
+            issues['XMin'] = 'X range is close to zero'
+            issues['XMax'] = 'X range is close to zero'
+
+        if x_max < x_min:
+            issues['XMin'] = 'XMin must be less than XMax'
+            issues['XMax'] = 'XMax must be greater than XMin'
+
+        return issues
+
+
     def _setup(self):
         """
         Get the algorithm properties and validate them.
         """
-        from IndirectCommon import CheckHistZero
-
         self._sample = self.getPropertyValue('Sample')
-
-        num_sample_spectra, _ = CheckHistZero(self._sample)
-        min_spectra_number = mtd[self._sample].getSpectrum(0).getSpectrumNo()
-        max_spectra_number = mtd[self._sample].getSpectrum(num_sample_spectra - 1).getSpectrumNo()
 
         self._x_min = math.fabs(self.getProperty('XMin').value)
         self._x_max = math.fabs(self.getProperty('XMax').value)
-
-        if self._x_min < 1e-5:
-            raise ValueError('XMin point is Zero')
-        if self._x_max < 1e-5:
-            raise ValueError('XMax point is Zero')
-
-        if math.fabs(self._x_max - self._x_min) < 1e-5:
-            raise ValueError('X range is Zero')
 
         self._verbose = self.getProperty('Verbose').value
         self._plot = self.getProperty('Plot').value
@@ -183,17 +224,9 @@ class Symmetrise(PythonAlgorithm):
 
         self._spectra_range = self.getProperty('SpectraRange').value
 
-        if len(self._spectra_range) < 2:
-            self._spectra_range = [min_spectra_number, max_spectra_number]
-        else:
-            if self._spectra_range[0] > self._spectra_range[1]:
-                raise ValueError('Invalid spectra range')
-
-            if self._spectra_range[1] > max_spectra_number:
-                raise ValueError('Max spectrum number out of range')
-
         self._output_workspace = self.getPropertyValue('OutputWorkspace')
         self._props_output_workspace = self.getPropertyValue('OutputPropertiesTable')
+
 
     def _calculate_array_points(self, sample_x, sample_array_len):
         """
@@ -221,6 +254,7 @@ class Symmetrise(PythonAlgorithm):
             self._positive_max_index -= 1
         self._check_bounds(self._positive_max_index, sample_array_len, label='Positive')
 
+
     def _check_bounds(self, index, num_pts, label=''):
         """
         Check if the index falls within the bounds of the x range.
@@ -234,6 +268,7 @@ class Symmetrise(PythonAlgorithm):
             raise ValueError('%s point %d < 0' % (label, index))
         elif index >= num_pts:
             raise ValueError('%s point %d > %d' % (label, index, num_pts))
+
 
     def _generate_props_table(self):
         """
@@ -249,6 +284,7 @@ class Symmetrise(PythonAlgorithm):
 
         self.setProperty('OutputPropertiesTable', self._props_output_workspace)
 
+
     def _save_output(self):
         """
         Save the output workspace to the user's default working directory
@@ -262,6 +298,7 @@ class Symmetrise(PythonAlgorithm):
         if self._verbose:
             logger.notice('Output file : ' + file_path)
 
+
     def _plot_output(self):
         """
         Plot the first spectrum of the input and output workspace together.
@@ -270,6 +307,7 @@ class Symmetrise(PythonAlgorithm):
         mtd_plot = import_mantidplot()
 
         mtd_plot.plotSpectrum([self._sample, self._output_workspace], 0)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(Symmetrise)
