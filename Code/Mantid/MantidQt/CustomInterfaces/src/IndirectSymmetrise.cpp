@@ -95,7 +95,7 @@ namespace CustomInterfaces
 
     // Indicators for negative and positive X range values on X axis
     // The user can use these to move the X range
-    // Note that the max and min of the negative range selector corespond to the opposit X value
+    // Note that the max and min of the negative range selector corespond to the opposite X value
     // i.e. RS min is X max
     m_rangeSelectors["NegativeE_Raw"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"]);
     m_rangeSelectors["PositiveE_Raw"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"]);
@@ -274,13 +274,42 @@ namespace CustomInterfaces
    */
   void IndirectSymmetrise::replotNewSpectrum(QtProperty *prop, double value)
   {
+    // Validate the preview range
     if(prop == m_properties["PreviewRange"])
     {
       // If preview range was set negative then set it to the absolute value of the value it was set to
       if(value < 0)
+      {
         m_dblManager->setValue(m_properties["PreviewRange"], fabs(value));
+        return;
+      }
     }
 
+    // Validate the preview spectra
+    if(prop == m_properties["PreviewSpec"])
+    {
+      // Get the range of possible spectra numbers
+      QString workspaceName = m_uiForm.symm_dsInput->getCurrentDataName();
+      MatrixWorkspace_sptr sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
+      int minSpectrumRange = sampleWS->getSpectrum(0)->getSpectrumNo();
+      int maxSpectrumRange = sampleWS->getSpectrum(sampleWS->getNumberHistograms()-1)->getSpectrumNo();
+
+      // If entered value is lower then set spectra number to lowest valid value
+      if(value < minSpectrumRange)
+      {
+        m_dblManager->setValue(m_properties["PreviewSpec"], minSpectrumRange);
+        return;
+      }
+
+      // If entered value is higer then set spectra number to highest valid value
+      if(value > maxSpectrumRange)
+      {
+        m_dblManager->setValue(m_properties["PreviewSpec"], maxSpectrumRange);
+        return;
+      }
+    }
+
+    // If we get this far then properties are valid so update mini plots
     if((prop == m_properties["PreviewSpec"]) || (prop == m_properties["PreviewRange"]))
       updateMiniPlots();
   }
