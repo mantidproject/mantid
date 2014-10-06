@@ -270,10 +270,18 @@ namespace CustomInterfaces
 
   /**
    * Redraws mini plots when user changes previw range or spectrum.
+   *
+   * @param prop QtProperty that was changed
+   * @param value Value it was changed to
    */
   void IndirectSymmetrise::replotNewSpectrum(QtProperty *prop, double value)
   {
-    UNUSED_ARG(value);
+    if(prop == m_properties["PreviewRange"])
+    {
+      // If preview range was set negative then set it to the absolute value of the value it was set to
+      if(value < 0)
+        m_dblManager->setValue(m_properties["PreviewRange"], fabs(value));
+    }
 
     if((prop == m_properties["PreviewSpec"]) || (prop == m_properties["PreviewRange"]))
       updateMiniPlots();
