@@ -423,13 +423,13 @@ namespace Mantid
       m_blkHalfY = 0.5*yThick;
       m_blkHalfZ = 0.5*zThick;
 
-      const size_t numVolumeElements = numXSlices*numYSlices*numZSlices;
-      g_log.debug() << "Attempting to divide sample + container into " << numVolumeElements << " blocks.\n";
+      const size_t numPossibleVolElements = numXSlices*numYSlices*numZSlices;
+      g_log.debug() << "Attempting to divide sample + container into " << numPossibleVolElements << " blocks.\n";
 
       try
       {
         m_blocks.clear();
-        m_blocks.reserve(numVolumeElements);
+        m_blocks.reserve(numPossibleVolElements/2);
       }
       catch (std::exception&)
       {
@@ -438,6 +438,7 @@ namespace Mantid
         g_log.error("Too many volume elements requested - try increasing the value of the ElementSize property.");
         throw;
       }
+
       const auto boxCentre = box.centrePoint();
       const double x0 = boxCentre.X() - 0.5*xLength;
       const double y0 = boxCentre.Y() - 0.5*yLength;
@@ -445,7 +446,6 @@ namespace Mantid
       // Store a chunk as a BoundingBox object.
       // Only cache blocks that have some intersection with the
       // sample or container.
-
       for (int i = 0; i < numZSlices; ++i)
       {
         const double zmin = z0 + i*zThick;
@@ -458,48 +458,50 @@ namespace Mantid
           {
             const double xmin = x0 + k*xThick;
             const double xmax = xmin + xThick;
-            BoundingBox block(xmax, ymax, zmax, xmin, ymin, zmin);
-            if(boxIntersectsSample(block)) m_blocks.push_back(block);
+            if(boxIntersectsSample(xmax, ymax, zmax, xmin, ymin, zmin))
+            {
+#if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
+                m_blocks.emplace_back(xmax, ymax, zmax, xmin, ymin, zmin);
+#else
+                m_blocks.push_back(xmax, ymax, zmax, xmin, ymin, zmin);
+#endif
+            }
           }
         }
       }
 
-      if(m_blocks.empty())
-      {
-        throw std::logic_error("Error dividing up sample. No sub-blocks intercept with the actual object.");
-      }
-      else
-      {
-        g_log.debug() << "Sample + container divided into " << m_blocks.size() << " blocks.";
-        if(m_blocks.size() == numVolumeElements) g_log.debug("\n");
-        else g_log.debug() << " Skipped " << (numVolumeElements-m_blocks.size())
-                           << " blocks that do not intersect with the sample + container\n";
-      }
+      m_numVolumeElements = m_blocks.size();
+      g_log.debug() << "Sample + container divided into " << m_numVolumeElements << " blocks.";
+      if(m_numVolumeElements == numPossibleVolElements) g_log.debug("\n");
+      else g_log.debug() << " Skipped " << (numPossibleVolElements-m_numVolumeElements)
+                         << " blocks that do not intersect with the sample + container\n";
     }
 
     /**
-     * @param block A BoundingBox object defining a block
+     * @param xmax max x-coordinate of cuboid point
+     * @param ymax max y-coordinate of cuboid point
+     * @param zmax max z-coordinate of cuboid point
+     * @param xmin min z-coordinate of cuboid point
+     * @param ymin min z-coordinate of cuboid point
+     * @param zmin min z-coordinate of cuboid point
      * @return True if any of the vertices intersect the sample or container
      */
-    bool MonteCarloAbsorption::boxIntersectsSample(const BoundingBox &block) const
+    bool MonteCarloAbsorption::boxIntersectsSample(const double xmax, const double ymax, const double zmax,
+                                                   const double xmin, const double ymin, const double zmin) const
     {
       // Check all 8 corners for intersection
-      V3D vertices[] = {
-        V3D(block.xMax(), block.yMin(), block.zMin()), // left-front-bottom
-        V3D(block.xMax(), block.yMax(), block.zMin()), // left-front-top
-        V3D(block.xMin(), block.yMax(), block.zMin()), // right-front-top
-        V3D(block.xMin(), block.yMin(), block.zMin()), // right-front-bottom
-        V3D(block.xMax(), block.yMin(), block.zMax()), // left-back-bottom
-        V3D(block.xMax(), block.yMax(), block.zMax()), // left-back-top
-        V3D(block.xMin(), block.yMax(), block.zMax()), // right-back-top
-        V3D(block.xMin(), block.yMin(), block.zMax()) // right-back-bottom
-      };
-      bool intersects(ptIntersectsSample(vertices[0]));
-      for(size_t i = 1; i < 8; ++i)
+      if( ptIntersectsSample(V3D(xmax, ymin, zmin)) || // left-front-bottom
+          ptIntersectsSample(V3D(xmax, ymax, zmin)) || // left-front-top
+          ptIntersectsSample(V3D(xmin, ymax, zmin)) || // right-front-top
+          ptIntersectsSample(V3D(xmin, ymin, zmin)) || // right-front-bottom
+          ptIntersectsSample(V3D(xmax, ymin, zmax)) || // left-back-bottom
+          ptIntersectsSample(V3D(xmax, ymax, zmax)) || // left-back-top
+          ptIntersectsSample(V3D(xmin, ymax, zmax)) || // right-back-top
+          ptIntersectsSample(V3D(xmin, ymin, zmax)) ) // right-back-bottom
       {
-        intersects |= ptIntersectsSample(vertices[i]);
+        return true;
       }
-      return intersects;
+      else return false;
     }
 
     /**

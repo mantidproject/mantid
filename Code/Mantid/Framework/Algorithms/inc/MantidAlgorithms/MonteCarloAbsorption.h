@@ -92,7 +92,8 @@ namespace Mantid
       /// number generator
       void initCaches();
       /// Checks if a given box has any corners inside the sample or container
-      bool boxIntersectsSample(const Geometry::BoundingBox & block) const;
+      bool boxIntersectsSample(const double xmax, const double ymax, const double zmax,
+                               const double xmin, const double ymin, const double zmin) const;
       /// Checks if the given point is inside the sample or container
       bool ptIntersectsSample(const Kernel::V3D & pt) const;
 
@@ -103,6 +104,8 @@ namespace Mantid
       Kernel::V3D m_samplePos;
       /// The source position
       Kernel::V3D m_sourcePos;
+      ///
+      size_t m_numVolumeElements;
       /// Object divided into little boxes
       std::vector<Geometry::BoundingBox> m_blocks;
 
