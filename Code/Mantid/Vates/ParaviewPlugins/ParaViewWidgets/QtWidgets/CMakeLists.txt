@@ -37,7 +37,10 @@ project( MantidParaViewQtWidgets )
 add_library( MantidParaViewQtWidgets ${SRC_FILES} ${MOCCED_FILES} ${INC_FILES} ) 
 # Add to the 'Vates' group in VS
 set_property( TARGET MantidParaViewQtWidgets PROPERTY FOLDER "MantidVates" )
-target_link_libraries( MantidParaViewQtWidgets ${QT_LIBRARIES} 
+target_link_libraries( MantidParaViewQtWidgets 
+vtkRenderingFreeType
+vtkRenderingFreeTypeOpenGL
+${QT_LIBRARIES} 
 ${MANTID_SUBPROJECT_LIBS} )
 
 add_definitions( -DIN_MANTIDPARAVIEWQT_MANTIDPARAVIEWWIDGETS )

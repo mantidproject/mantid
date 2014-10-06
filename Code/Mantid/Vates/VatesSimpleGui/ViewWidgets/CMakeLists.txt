@@ -99,6 +99,9 @@ target_link_libraries( VatesSimpleGuiViewWidgets
 VatesSimpleGuiQtWidgets
 pqApplicationComponents
 pqComponents
+vtkPVServerManagerRendering
+vtkRenderingFreeType
+vtkRenderingFreeTypeOpenGL
 ${QT_LIBRARIES}
 MantidQtAPI
 VatesAPI
