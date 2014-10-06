@@ -45,8 +45,8 @@ Usage
    # Do a "roundtrip" of the data.
    SaveNXSPE(out_ws, file_path,Psi=32)
    
-   # SaveMXSPE does not store detector's ID-s. LoadNXSPE sets detector's ID-s to defaults.
-   # To compare loaded and saved workpsaces, one needs to set-up default detector's ID-s to the source workspace
+   # By desigghn, SaveMXSPE does not store detector's ID-s. LoadNXSPE sets detector's ID-s to defaults.
+   # To compare loaded and saved workspaces here, one needs to set-up default detector's ID-s to the source workspace.
    nSpec = out_ws.getNumberHistograms()
    for i in xrange(0,nSpec):
        sp=out_ws.getSpectrum(i);
