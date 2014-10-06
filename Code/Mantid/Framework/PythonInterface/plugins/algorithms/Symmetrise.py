@@ -213,6 +213,8 @@ class Symmetrise(PythonAlgorithm):
         """
         Get the algorithm properties and validate them.
         """
+        from IndirectCommon import CheckHistZero
+
         self._sample = self.getPropertyValue('Sample')
 
         self._x_min = math.fabs(self.getProperty('XMin').value)
@@ -223,6 +225,12 @@ class Symmetrise(PythonAlgorithm):
         self._save = self.getProperty('Save').value
 
         self._spectra_range = self.getProperty('SpectraRange').value
+        # If the user did not enter a spectra range, use the spectra range of the workspace
+        if len(self._spectra_range) == 0:
+            num_sample_spectra, _ = CheckHistZero(self._sample)
+            min_spectra_number = mtd[self._sample].getSpectrum(0).getSpectrumNo()
+            max_spectra_number = mtd[self._sample].getSpectrum(num_sample_spectra - 1).getSpectrumNo()
+            self._spectra_range = [min_spectra_number, max_spectra_number]
 
         self._output_workspace = self.getPropertyValue('OutputWorkspace')
         self._props_output_workspace = self.getPropertyValue('OutputPropertiesTable')
