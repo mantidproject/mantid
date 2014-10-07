@@ -21,7 +21,7 @@ namespace Mantid
 
     Loads an file in ISIS RAW format and stores it in a 2D workspace
     (Workspace2D class). LoadRaw is an algorithm and LoadRawHelper class and
-	overrides the init() & exec() methods.
+  overrides the init() & exec() methods.
     LoadRaw3 uses less memory by only loading up the datablocks as required.
 
     Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory

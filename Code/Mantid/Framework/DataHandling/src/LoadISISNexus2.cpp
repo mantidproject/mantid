@@ -7,6 +7,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/LogParser.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -83,6 +84,28 @@ namespace Mantid
       declareProperty(new ArrayProperty<int64_t>("SpectrumList"));
       declareProperty("EntryNumber", (int64_t)0, mustBePositive,
         "The particular entry number to read (default: Load all workspaces and creates a workspace group)");
+
+      declareProperty(new PropertyWithValue<bool>("LoadMonitorsSeparately", false, Direction::Input),
+        "If true, loads monitors and puts them into separate workspace");
+
+      std::vector<std::string> monitorOptions;
+      monitorOptions.push_back("Include");
+      monitorOptions.push_back("Exclude");
+      monitorOptions.push_back("Separate");
+      std::map<std::string,std::string> monitorOptionsAliases;
+      monitorOptionsAliases["1"] = "Separate";
+      monitorOptionsAliases["0"] = "Exclude";
+      declareProperty("LoadMonitors","Exclude", boost::make_shared<Kernel::StringListValidator>(monitorOptions,monitorOptionsAliases),
+          "Option to control the loading of monitors.\n"
+      "Allowed options are Include,Exclude, Separate.\n"
+      "Include:Include option would load monitors with the workspace. If the time binning for the monitors is different from the\n"
+      "binning of the detectors this option is equivalent to Separate option\n"
+      "Exclude:The default is Exclude option excludes monitors from the output workspace.\n"
+      "Separate:The Separate option loads monitors into a separate workspace called OutputWorkspace_monitor.\n"
+      "Defined aliases:\n"
+      "1:  Equivalent to Separate.\n"
+      "0:  Equivalent to Exclude.\n");
+
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating

@@ -194,7 +194,7 @@ namespace Mantid
           }
         }
 
-        // Check for cancelled algorithm
+        // Check for canceled algorithm
         if (alg->getCancel())
         {
           return;

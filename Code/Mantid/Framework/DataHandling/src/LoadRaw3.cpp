@@ -74,7 +74,7 @@ namespace Mantid
       "Allowed options are Include,Exclude, Separate.\n"
       "Include:The default is Include option which loads the monitors into the output workspace.\n"
       "Exclude:The Exclude option excludes monitors from the output workspace.\n"
-      "Separate:The Separate option loads monitors into a separate workspace called OutputWorkspace_Monitor.\n"
+      "Separate:The Separate option loads monitors into a separate workspace called OutputWorkspace_monitor.\n"
       "Defined aliases:\n"
       "1:  Equivalent to Separate.\n"
       "0:  Equivalent to Exclude.\n");
