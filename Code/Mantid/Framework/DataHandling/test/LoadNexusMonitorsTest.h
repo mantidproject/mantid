@@ -117,7 +117,7 @@ public:
     TS_ASSERT_EQUALS( WS->readY(1)[0], 0 );
 
     TS_ASSERT_EQUALS( WS->readX(0)[0], 5.0 );
-    TS_ASSERT_EQUALS( WS->readX(1)[5],1995.0 );
+    TS_ASSERT_EQUALS( WS->readX(1)[5],19995.0 );
 
   }
 
