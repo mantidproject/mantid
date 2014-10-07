@@ -98,5 +98,81 @@ values.
 #. "RefinePowderInstrumentParameters" refines the instrumental geometry related parameters by using the d-TOF function;
 #. Repeat step 1 and 2 for  more single peaks incrementally. The predicted peak positions are more accurate in this step.
 
+Usage
+-----
+
+**Example - Fit diffraction peaks by single peak fitting:**
+
+.. testcode:: ExFitSingleDiffPeaks
+
+  # Load reduced powder diffraction data
+  LoadAscii(Filename='PG3_11487-3.dat', 
+        OutputWorkspace='PG3_11487', Unit='TOF')
+
+  # Create table workspaces used by Le Bail fit algorithms
+  CreateLeBailFitInput(ReflectionsFile='LB4854b3.hkl', FullprofParameterFile='2011B_HR60b3.irf', 
+        Bank=3, LatticeConstant=4.1568899999999998, InstrumentParameterWorkspace='Bank3InstrumentParameterTable1', 
+        BraggPeakParameterWorkspace='BraggPeakParameterTable1')
+
+  # Fit background of the powder diffraction data
+  ProcessBackground(InputWorkspace='PG3_11487', OutputWorkspace='PG3_11487_Background', Options='SelectBackgroundPoints', 
+        LowerBound=10080, UpperBound=72000, SelectionMode='FitGivenDataPoints', 
+        BackgroundPoints='10082,10591,11154,12615,13690,13715,15073,16893,17764,19628,21318,24192,35350,44212,50900,60000,69900,79000', 
+        NoiseTolerance=0.10000000000000001, UserBackgroundWorkspace='dummy0', OutputBackgroundParameterWorkspace='dummy1')
+
+  Fit(Function='name=Polynomial,n=6,A0=0.473391,A1=-3.8911e-05,A2=1.7206e-09,A3=-3.21291e-14,A4=9.31264e-20,A5=3.90465e-24,A6=-3.28688e-29', 
+        InputWorkspace='PG3_11487_Background', MaxIterations=1000, OutputStatus='success', 
+        OutputChi2overDoF=2.0078239589764837, Minimizer='Levenberg-MarquardtMD', CreateOutput=True, 
+        Output='PG3_11487_Background', StartX=10080, EndX=72000, 
+        OutputNormalisedCovarianceMatrix='PG3_11487_Background_NormalisedCovarianceMatrix',
+        OutputParameters='PG3_11487_Background_Parameters', OutputWorkspace='PG3_11487_Background_Workspace', Version=1)
+
+  # Fit individual peaks in the diffraction pattern
+  FitPowderDiffPeaks(InputWorkspace='PG3_11487', OutputWorkspace='Bank3FittedPeaks', 
+        BraggPeakParameterWorkspace='BraggPeakParameterTable1', 
+        InstrumentParameterWorkspace='Bank3InstrumentParameterTable1', 
+        OutputBraggPeakParameterWorkspace='BraggPeakParameterTable2_0', 
+        OutputBraggPeakParameterDataWorkspace='BraggPeakParameterTable2_P', 
+        OutputZscoreWorkspace='BraggPeakParameterTable2_Zscore', 
+        MinTOF=16866, MaxTOF=70000, UseGivenPeakCentreTOF=False, MinimumPeakHeight=0.29999999999999999, 
+        PeaksCorrelated=True, MinimumHKL='12,12,12', RightMostPeakHKL='1,1,0', RightMostPeakLeftBound=65800, RightMostPeakRightBound=67000)
+
+  # Print result
+  resultws = mtd["BraggPeakParameterTable2_P"]
+  for i in xrange(10):
+      print "Peak @ d = %.5f, TOF_0 = %.5f, A = %.5f, B = %.5f, Sigma = %.5f" % (resultws.readX(0)[i], 
+          resultws.readY(0)[i], resultws.readY(1)[i], resultws.readY(2)[i], resultws.readY(3)[i])
+
+.. testcleanup:: ExFitSingleDiffPeaks
+
+  DeleteWorkspace(Workspace="Bank3FittedPeaks")
+  DeleteWorkspace(Workspace="Bank3InstrumentParameterTable1")
+  DeleteWorkspace(Workspace="BraggPeakParameterTable1")
+  DeleteWorkspace(Workspace="BraggPeakParameterTable2_0")
+  DeleteWorkspace(Workspace="BraggPeakParameterTable2_P")
+  DeleteWorkspace(Workspace="BraggPeakParameterTable2_Zscore")
+  DeleteWorkspace(Workspace="PG3_11487")
+  DeleteWorkspace(Workspace="PG3_11487_Background")
+  DeleteWorkspace(Workspace="PG3_11487_Background_NormalisedCovarianceMatrix")
+  DeleteWorkspace(Workspace="PG3_11487_Background_Parameters")
+  DeleteWorkspace(Workspace="PG3_11487_Background_Workspace")
+  DeleteWorkspace(Workspace="dummy0")
+  DeleteWorkspace(Workspace="dummy1")
+
+Output:
+
+.. testoutput:: ExFitSingleDiffPeaks
+
+  GeneraateHKL? =  False
+  Peak @ d = 0.75894, TOF_0 = 17142.40084, A = 0.14766, B = 0.09747, Sigma = 5.88190
+  Peak @ d = 0.77192, TOF_0 = 17435.15107, A = 0.17045, B = 0.10801, Sigma = 6.85485
+  Peak @ d = 0.79999, TOF_0 = 18069.53290, A = 0.15059, B = 0.09938, Sigma = 6.64280
+  Peak @ d = 0.81523, TOF_0 = 18414.02993, A = 0.14393, B = 0.09846, Sigma = 6.91842
+  Peak @ d = 0.83138, TOF_0 = 18778.52589, A = 0.12773, B = 0.08919, Sigma = 6.27234
+  Peak @ d = 0.84852, TOF_0 = 19165.40385, A = 0.16123, B = 0.10180, Sigma = 7.82683
+  Peak @ d = 0.88625, TOF_0 = 20017.83892, A = 0.12389, B = 0.08524, Sigma = 7.30149
+  Peak @ d = 0.90711, TOF_0 = 20488.91694, A = 0.11704, B = 0.07958, Sigma = 7.14048
+  Peak @ d = 0.92951, TOF_0 = 20994.52409, A = 0.14055, B = 0.08953, Sigma = 8.85983
+  Peak @ d = 0.95366, TOF_0 = 21540.47540, A = 0.12654, B = 0.08499, Sigma = 8.21974
 
 .. categories::
