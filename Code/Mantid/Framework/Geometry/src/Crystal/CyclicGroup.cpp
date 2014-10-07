@@ -8,14 +8,15 @@ namespace Geometry
 {
 
 /// Construct cyclic group from one symmetry operation by applying it to itself until identity is obtained.
+CyclicGroup::CyclicGroup(const std::string &symmetryOperationString) :
+    Group(generateAllOperations(SymmetryOperationFactory::Instance().createSymOp(symmetryOperationString)))
+{
+
+}
+
 CyclicGroup::CyclicGroup(const SymmetryOperation &symmetryOperation) :
     Group(generateAllOperations(symmetryOperation))
 {
-}
-
-Group_const_sptr CyclicGroup::create(const std::string &symmetryOperation)
-{
-    return boost::make_shared<const CyclicGroup>(SymmetryOperationFactory::Instance().createSymOp(symmetryOperation));
 }
 
 std::vector<SymmetryOperation> CyclicGroup::generateAllOperations(const SymmetryOperation &operation) const

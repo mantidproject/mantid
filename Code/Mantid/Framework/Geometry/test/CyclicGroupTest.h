@@ -29,7 +29,7 @@ public:
 
   void testCreate()
   {
-      Group_const_sptr group = CyclicGroup::create("-x,-y,-z");
+      Group_const_sptr group = GroupFactory::create<CyclicGroup>("-x,-y,-z");
       TS_ASSERT(boost::dynamic_pointer_cast<const CyclicGroup>(group));
 
       TS_ASSERT_EQUALS(group->order(), 2);
@@ -41,15 +41,15 @@ public:
        * the method used to generate point groups.
        */
 
-      Group_const_sptr groupOne = CyclicGroup::create("-x,-y,z");
-      Group_const_sptr groupTwo = CyclicGroup::create("x,-y,-z");
+      Group_const_sptr groupOne = GroupFactory::create<CyclicGroup>("-x,-y,z");
+      Group_const_sptr groupTwo = GroupFactory::create<CyclicGroup>("x,-y,-z");
 
       // This is in fact point group 222
       Group_const_sptr groupThree = groupOne * groupTwo;
 
       TS_ASSERT_EQUALS(groupThree->order(), 4);
 
-      Group_const_sptr groupFour = CyclicGroup::create("-x,-y,-z");
+      Group_const_sptr groupFour = GroupFactory::create<CyclicGroup>("-x,-y,-z");
 
       // Which becomes mmm, if inversion is added.
       Group_const_sptr groupFive = groupFour * groupThree;
@@ -59,11 +59,11 @@ public:
   void testSpaceGroup()
   {
       // Small test, constructing Fm-3m (225) from the generators listed in ITA
-      Group_const_sptr group1 = CyclicGroup::create("-x,-y,z");
-      Group_const_sptr group2 = CyclicGroup::create("-x,y,-z");
-      Group_const_sptr group3 = CyclicGroup::create("z,x,y");
-      Group_const_sptr group4 = CyclicGroup::create("y,x,-z");
-      Group_const_sptr group5 = CyclicGroup::create("-x,-y,-z");
+      Group_const_sptr group1 = GroupFactory::create<CyclicGroup>("-x,-y,z");
+      Group_const_sptr group2 = GroupFactory::create<CyclicGroup>("-x,y,-z");
+      Group_const_sptr group3 = GroupFactory::create<CyclicGroup>("z,x,y");
+      Group_const_sptr group4 = GroupFactory::create<CyclicGroup>("y,x,-z");
+      Group_const_sptr group5 = GroupFactory::create<CyclicGroup>("-x,-y,-z");
 
       // Make a translation group "F"
       std::vector<SymmetryOperation> lops;

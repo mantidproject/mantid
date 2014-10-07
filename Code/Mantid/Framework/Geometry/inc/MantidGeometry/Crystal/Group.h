@@ -8,6 +8,7 @@
 #include <set>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 namespace Mantid
 {
@@ -70,6 +71,14 @@ protected:
 
 typedef boost::shared_ptr<Group> Group_sptr;
 typedef boost::shared_ptr<const Group> Group_const_sptr;
+
+namespace GroupFactory {
+    template<typename T>
+    Group_const_sptr create(const std::string &initializationString)
+    {
+        return boost::make_shared<const T>(initializationString);
+    }
+}
 
 MANTID_GEOMETRY_DLL Group_const_sptr operator *(const Group_const_sptr &lhs, const Group_const_sptr &rhs);
 MANTID_GEOMETRY_DLL std::vector<Kernel::V3D> operator *(const Group_const_sptr &lhs, const Kernel::V3D &rhs);

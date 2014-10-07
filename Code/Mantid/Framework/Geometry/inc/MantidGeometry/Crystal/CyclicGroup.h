@@ -43,10 +43,9 @@ namespace Geometry
 class MANTID_GEOMETRY_DLL CyclicGroup : public Group
 {
 public:
+    CyclicGroup(const std::string &symmetryOperationString);
     CyclicGroup(const SymmetryOperation &symmetryOperation);
     virtual ~CyclicGroup() { }
-
-    static Group_const_sptr create(const std::string &symmetryOperation);
 
 protected:
     std::vector<SymmetryOperation> generateAllOperations(const SymmetryOperation &operation) const;
