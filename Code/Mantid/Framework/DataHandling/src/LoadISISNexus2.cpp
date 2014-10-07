@@ -27,6 +27,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <cmath>
+#include <climits>
 #include <vector>
 #include <sstream>
 #include <cctype>
@@ -132,6 +133,9 @@ namespace Mantid
 
       //Pull out the monitor blocks, if any exist
       size_t nmons(0);
+      std::vector<int64_t> mon_spectra_num;
+      int64_t max_spectra_num(LONG_MIN);
+      int64_t min_spectra_num(LONG_MAX);
       for(std::vector<NXClassInfo>::const_iterator it = entry.groups().begin(); 
         it != entry.groups().end(); ++it) 
       {
@@ -139,7 +143,12 @@ namespace Mantid
         {
           NXInt index = entry.openNXInt(std::string(it->nxname) + "/spectrum_index");
           index.load();
-          m_monitors[*index()] = it->nxname;
+          int64_t ind = *index();
+          m_monitors[ind ] = it->nxname;
+          mon_spectra_num.push_back(ind);
+
+          if (ind > max_spectra_num)max_spectra_num=ind;
+          if (ind < min_spectra_num)min_spectra_num=ind;
           ++nmons;
         }
       }
@@ -166,6 +175,8 @@ namespace Mantid
         m_numberOfPeriodsInFile = m_numberOfPeriods = data.dim0();
         m_numberOfSpectraInFile = m_numberOfSpectra = nsp1[0];
         m_numberOfChannelsInFile = m_numberOfChannels = data.dim2();
+        if(max_spectra_num > m_numberOfSpectra)
+          m_numberOfSpectra += mon_spectra_num.size();
 
         if( nmons > 0 && m_numberOfSpectra == static_cast<size_t>(data.dim1()) )
         {
