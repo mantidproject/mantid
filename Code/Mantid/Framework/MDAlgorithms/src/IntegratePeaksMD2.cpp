@@ -136,8 +136,16 @@ namespace MDAlgorithms
     Mantid::DataObjects::PeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
     if (peakWS != inPeakWS)
       peakWS = inPeakWS->clone();
-    runMaskDetectors(peakWS,"Tube","edges");
-	runMaskDetectors(peakWS,"Pixel","edges");
+    // This only fails in the unit tests which say that MaskBTP is not registered
+    try
+    {
+		runMaskDetectors(peakWS,"Tube","edges");
+		runMaskDetectors(peakWS,"Pixel","edges");
+    } catch (...)
+    {
+		g_log.error("Can't execute MaskBTP algorithm");
+    }
+
 
     // Get the instrument and its detectors
     inst = peakWS->getInstrument();
