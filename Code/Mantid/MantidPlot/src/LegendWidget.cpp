@@ -608,7 +608,7 @@ PlotCurve* LegendWidget::getCurve(const QString& s, int &point)
 	return curve;
 }
 
-void LegendWidget::mousePressEvent (QMouseEvent *e)
+void LegendWidget::mousePressEvent (QMouseEvent */*e*/)
 {
   if (d_selector)
   {
