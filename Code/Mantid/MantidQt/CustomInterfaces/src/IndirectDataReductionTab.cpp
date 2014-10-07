@@ -20,8 +20,11 @@ namespace CustomInterfaces
    */
   IndirectDataReductionTab::IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QObject* parent) : QObject(parent),
       m_plots(), m_curves(), m_rangeSelectors(),
+      m_tabRunning(false),
       m_properties(),
-      m_dblManager(new QtDoublePropertyManager()), m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
+      m_dblManager(new QtDoublePropertyManager()),
+      m_blnManager(new QtBoolPropertyManager()),
+      m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()),
       m_uiForm(uiForm)
   {
@@ -36,6 +39,8 @@ namespace CustomInterfaces
     m_valPosDbl->setBottom(tolerance);
 
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmFinished(bool)));
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
+
     connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   }
 
@@ -49,9 +54,15 @@ namespace CustomInterfaces
   void IndirectDataReductionTab::runTab()
   {
     if(validate())
+    {
+      m_tabRunning = true;
+      emit updateRunButton(false, "Running...", "Running data reduction...");
       run();
+    }
     else
+    {
       g_log.warning("Failed to validate indirect tab input!");
+    }
   }
 
   void IndirectDataReductionTab::setupTab()
@@ -62,6 +73,22 @@ namespace CustomInterfaces
   void IndirectDataReductionTab::validateTab()
   {
     validate();
+  }
+
+  /**
+   * Slot used to update the run button when an algorithm that was strted by the Run button complete.
+   *
+   * @parm error Unused
+   */
+  void IndirectDataReductionTab::tabExecutionComplete(bool error)
+  {
+    UNUSED_ARG(error);
+
+    if(m_tabRunning)
+    {
+      m_tabRunning = false;
+      emit updateRunButton();
+    }
   }
 
   /**
