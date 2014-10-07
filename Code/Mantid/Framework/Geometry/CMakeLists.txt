@@ -1,5 +1,6 @@
 set ( SRC_FILES
 	src/ComponentParser.cpp
+	src/Crystal/CenteringGroup.cpp
 	src/Crystal/ConventionalCell.cpp
 	src/Crystal/CrystalStructure.cpp
 	src/Crystal/CyclicGroup.cpp
@@ -107,6 +108,7 @@ set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
         
 set ( INC_FILES
 	inc/MantidGeometry/ComponentParser.h
+	inc/MantidGeometry/Crystal/CenteringGroup.h
 	inc/MantidGeometry/Crystal/ConventionalCell.h
 	inc/MantidGeometry/Crystal/CrystalStructure.h
 	inc/MantidGeometry/Crystal/CyclicGroup.h
@@ -210,6 +212,7 @@ set ( TEST_FILES
 	AlgebraTest.h
 	BnIdTest.h
 	BoundingBoxTest.h
+	CenteringGroupTest.h
 	CompAssemblyTest.h
 	ComponentHelperTest.h
 	ComponentParserTest.h
