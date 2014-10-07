@@ -848,6 +848,19 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
+         <spacer name="etLayoutSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+       </item>
+       <item>
         <widget class="QGroupBox" name="gbSave">
          <property name="title">
           <string>Output</string>
