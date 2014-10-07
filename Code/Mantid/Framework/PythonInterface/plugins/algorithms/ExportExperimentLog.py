@@ -100,11 +100,13 @@ class ExportExperimentLog(PythonAlgorithm):
 
         if len(self._sampleLogNames) != len(ops):
             raise NotImplementedError("Size of sample log names and sample operations are unequal!")
-        self._sampleLogOperations = {}
+        #self._sampleLogOperations = {}
+        self._sampleLogOperations = []
         for i in xrange(len(self._sampleLogNames)):
-            key = self._sampleLogNames[i]
+            #key = self._sampleLogNames[i]
             value = ops[i]
-            self._sampleLogOperations[key] = value
+            #self._sampleLogOperations[key] = value
+            self._sampleLogOperations.append(value)
         # ENDFOR
 
         if len(self._headerTitles) > 0 and len(self._headerTitles) != len(self._sampleLogNames):
@@ -270,7 +272,9 @@ class ExportExperimentLog(PythonAlgorithm):
                 str(self._wksp)))
             return None
 
-        for logname in self._sampleLogNames:
+        #for logname in self._sampleLogNames:
+        for il in xrange(len(self._sampleLogNames)):
+            logname = self._sampleLogNames[il]
             isexist = run.hasProperty(logname)
 
             # check whether this property does exist.
@@ -286,13 +290,15 @@ class ExportExperimentLog(PythonAlgorithm):
             # Get log value according to type
             if logclass == "StringPropertyWithValue":
                 propertyvalue = logproperty.value
-                operationtype = self._sampleLogOperations[logname]
+                #operationtype = self._sampleLogOperations[logname]
+                operationtype = self._sampleLogOperations[il]
                 if operationtype.lower() == "localtime":
                     propertyvalue = self._convertLocalTimeString(propertyvalue)
             elif logclass == "FloatPropertyWithValue":
                 propertyvalue = logproperty.value
             elif logclass == "FloatTimeSeriesProperty":
-                operationtype = self._sampleLogOperations[logname]
+                #operationtype = self._sampleLogOperations[logname]
+                operationtype = self._sampleLogOperations[il]
                 if operationtype.lower() == "min":
                     propertyvalue = min(logproperty.value)
                 elif operationtype.lower() == "max":
