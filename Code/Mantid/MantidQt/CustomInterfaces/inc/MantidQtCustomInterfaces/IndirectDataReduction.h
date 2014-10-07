@@ -84,16 +84,16 @@ namespace MantidQt
       void userSelectInstrument(const QString& name);
       void openDirectoryDialog();
       void showMessageBox(const QString& message); /// Slot showing a message box to the user
+      void updateRunButton(bool enabled = true, QString message = "Run", QString tooltip = "");
 
     private:
-      void loadSettings();
       void readSettings();
       void saveSettings();
+
       void setDefaultInstrument(const QString & name);
       void instrumentSelectChanged(const QString& name);
-      ///// Find path to instrument's _Definition.xml file (and check there is a parameter file).
-      //QString getIDFPath(const QString& prefix);
-      /// set and show an instrument-specific widget
+
+      /// Set and show an instrument-specific widget
       void setInstSpecificWidget(const std::string & parameterName, QCheckBox * checkBox, QCheckBox::ToggleState defaultState);
       virtual void closeEvent(QCloseEvent* close);
 
@@ -106,15 +106,11 @@ namespace MantidQt
       /// Runner for insturment load algorithm
       MantidQt::API::AlgorithmRunner* m_algRunner;
 
-      //All indirect tabs
-      IndirectDataReductionTab* m_tab_convert_to_energy;
-      IndirectDataReductionTab* m_tab_sqw;
-      IndirectDataReductionTab* m_tab_diagnostics;
-      IndirectDataReductionTab* m_tab_calibration;
-      IndirectDataReductionTab* m_tab_trans;
-      IndirectDataReductionTab* m_tab_moments;
+      // All indirect tabs
+      std::map<QString, IndirectDataReductionTab*> m_tabs;
 
-      Poco::NObserver<IndirectDataReduction, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver; ///< Poco observer for changes in user directory settings
+      /// Poco observer for changes in user directory settings
+      Poco::NObserver<IndirectDataReduction, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
       QString m_dataDir; ///< default data search directory
       QString m_saveDir; ///< default data save directory
     };

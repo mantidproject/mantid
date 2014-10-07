@@ -60,7 +60,7 @@ IndirectDataReduction::IndirectDataReduction(QWidget *parent) :
  */
 IndirectDataReduction::~IndirectDataReduction()
 {
-  //Make sure no algos are sunning after the window has been closed
+  //Make sure no algos are running after the window has been closed
   m_algRunner->cancelRunningAlgorithm();
 
   saveSettings();
@@ -74,7 +74,9 @@ void IndirectDataReduction::helpClicked()
 {
   QString tabName = m_uiForm.tabWidget->tabText(
       m_uiForm.tabWidget->currentIndex());
+
   QString url = "http://www.mantidproject.org/Indirect:";
+
   if ( tabName == "Energy Transfer" )
     url += "EnergyTransfer";
   else if ( tabName == "Calibration" )
@@ -87,6 +89,7 @@ void IndirectDataReduction::helpClicked()
     url += "Transmission";
   else if (tabName == "Moments")
     url += "Moments";
+
   QDesktopServices::openUrl(QUrl(url));
 }
 
@@ -97,18 +100,7 @@ void IndirectDataReduction::helpClicked()
 void IndirectDataReduction::runClicked()
 {
   QString tabName = m_uiForm.tabWidget->tabText(m_uiForm.tabWidget->currentIndex());
-  if ( tabName == "Energy Transfer" )
-    m_tab_convert_to_energy->runTab();
-  else if ( tabName == "Calibration" )
-    m_tab_calibration->runTab();
-  else if ( tabName == "Diagnostics" )
-    m_tab_diagnostics->runTab();
-  else if ( tabName == "S(Q, w)" )
-    m_tab_sqw->runTab();
-  else if (tabName == "Transmission")
-    m_tab_trans->runTab();
-  else if(tabName == "Moments")
-    m_tab_moments->runTab();
+  m_tabs[tabName]->runTab();
 }
 
 /**
@@ -118,51 +110,38 @@ void IndirectDataReduction::initLayout()
 {
   m_uiForm.setupUi(this);
 
-  m_tab_convert_to_energy = new IndirectConvertToEnergy(m_uiForm, this);
-  m_tab_sqw = new IndirectSqw(m_uiForm, this);
-  m_tab_diagnostics = new IndirectDiagnostics(m_uiForm, this);
-  m_tab_calibration = new IndirectCalibration(m_uiForm, this);
-  m_tab_trans = new IndirectTransmission(m_uiForm, this);
-  m_tab_moments = new IndirectMoments(m_uiForm, this);
+  // Do not allow running until setup  and instrument laoding are done
+  updateRunButton(false, "Loading UI", "Initialising user interface components...");
 
-  // Assume we get a incompatiable instrument to start with
-  m_uiForm.pbRun->setEnabled(false);
+  // Create the tabs
+  m_tabs["Energy Transfer"] = new IndirectConvertToEnergy(m_uiForm, this);
+  m_tabs["Calibration"] = new IndirectCalibration(m_uiForm, this);
+  m_tabs["Diagnostics"] = new IndirectDiagnostics(m_uiForm, this);
+  m_tabs["Transmission"] = new IndirectTransmission(m_uiForm, this);
+  m_tabs["S(Q, w)"] = new IndirectSqw(m_uiForm, this);
+  m_tabs["Moments"] = new IndirectMoments(m_uiForm, this);
 
-  // Signal / Slot Connections Set Up Here
-
-  // signal/slot connections to respond to changes in instrument selection combo boxes
+  // Signal/slot connections to respond to changes in instrument selection combo boxes
   connect(m_uiForm.cbInst, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(userSelectInstrument(const QString&)));
 
-  // connect "?" (Help) Button
+  // Connect "?" (Help) Button
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
-  // connect the "Run" button
+  // Connect the "Run" button
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  // connect the "Manage User Directories" Button
+  // Connect the "Manage User Directories" Button
   connect(m_uiForm.pbManageDirectories, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
 
-  // ignals for tabs running Python
-  connect(m_tab_convert_to_energy, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
-  connect(m_tab_sqw, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
-  connect(m_tab_calibration, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
-  connect(m_tab_diagnostics, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
-  connect(m_tab_trans, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
-  connect(m_tab_moments, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
+  // Reset the Run button state when the tab is changed
+  connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(updateRunButton()));
 
-  // ignals for tabs showing mesage boxes
-  connect(m_tab_convert_to_energy, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
-  connect(m_tab_sqw, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
-  connect(m_tab_calibration, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
-  connect(m_tab_diagnostics, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
-  connect(m_tab_trans, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
-  connect(m_tab_moments, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
-
-  // Run any tab setup code
-  m_tab_convert_to_energy->setupTab();
-  m_tab_sqw->setupTab();
-  m_tab_diagnostics->setupTab();
-  m_tab_calibration->setupTab();
-  m_tab_trans->setupTab();
-  m_tab_moments->setupTab();
+  // Connect tab signals and run any setup code
+  for(auto it = m_tabs.begin(); it != m_tabs.end(); ++it)
+  {
+    connect(it->second, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
+    connect(it->second, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
+    connect(it->second, SIGNAL(updateRunButton(bool, QString, QString)), this, SLOT(updateRunButton(bool, QString, QString)));
+    it->second->setupTab();
+  }
 }
 
 /**
@@ -175,38 +154,8 @@ void IndirectDataReduction::initLocalPython()
   // select starting instrument
   readSettings();
 
-  if ( m_curInterfaceSetup == "" )
-  {
+  if(m_curInterfaceSetup == "")
     userSelectInstrument(m_uiForm.cbInst->currentText());
-  }
-}
-
-/**
- * Read settings from the persistent store
- */
-void IndirectDataReduction::readSettings()
-{
-  QSettings settings;
-  settings.beginGroup(m_settingsGroup);
-  QString instrName = settings.value("instrument-name", "").toString();
-  settings.endGroup();
-
-  setDefaultInstrument(instrName);
-}
-
-/**
- * Save settings to a persistent storage
- */
-void IndirectDataReduction::saveSettings()
-{
-  QSettings settings;
-  settings.beginGroup(m_settingsGroup);
-  QString instrName;
-
-  instrName = m_uiForm.cbInst->currentText();
-
-  settings.setValue("instrument-name", instrName);
-  settings.endGroup();
 }
 
 /**
@@ -237,7 +186,7 @@ void IndirectDataReduction::instrumentSelectChanged(const QString& name)
   {
     g_log.error("Instument loading failed!");
     m_uiForm.cbInst->setEnabled(true);
-    m_uiForm.pbRun->setEnabled(true);
+    updateRunButton(false, "No Instrument", "No instrument is currently loaded.");
     return;
   }
 
@@ -267,14 +216,14 @@ void IndirectDataReduction::instrumentLoadingDone(bool error)
   {
     g_log.error("Instument loading failed! (this can be caused by having both direct and indirect interfaces open)");
     m_uiForm.cbInst->setEnabled(true);
-    m_uiForm.pbRun->setEnabled(true);
+    updateRunButton(false, "No Instrument", "No instrument is currently loaded.");
     return;
   }
 
   performInstSpecific();
   setIDFValues(curInstPrefix);
 
-  m_uiForm.pbRun->setEnabled(true);
+  updateRunButton();
   m_uiForm.cbInst->setEnabled(true);
 }
 
@@ -284,7 +233,7 @@ void IndirectDataReduction::instrumentLoadingDone(bool error)
  */
 void IndirectDataReduction::userSelectInstrument(const QString& prefix) 
 {
-  if ( prefix != m_curInterfaceSetup )
+  if(prefix != m_curInterfaceSetup)
   {
     // Remove the old empty instrument workspace if it is there
     std::string ws_name = "__empty_" + m_curInterfaceSetup.toStdString();
@@ -294,7 +243,7 @@ void IndirectDataReduction::userSelectInstrument(const QString& prefix)
       dataStore.remove(ws_name);
     }
 
-    m_uiForm.pbRun->setEnabled(false);
+    updateRunButton(false, "Loading Inst.", "Loading the selected instrument...");
     m_uiForm.cbInst->setEnabled(false);
     instrumentSelectChanged(prefix);
   }
@@ -308,19 +257,19 @@ void IndirectDataReduction::openDirectoryDialog()
 }
 
 /**
-* This function holds any steps that must be performed on the selection of an instrument,
-* for example loading values from the Instrument Definition File (IDF).
-* @param prefix :: The selected instruments prefix in Mantid.
-*/
+ * This function holds any steps that must be performed on the selection of an instrument,
+ * for example loading values from the Instrument Definition File (IDF).
+ * @param prefix :: The selected instruments prefix in Mantid.
+ */
 void IndirectDataReduction::setIDFValues(const QString & prefix)
 {
-  dynamic_cast<IndirectConvertToEnergy *>(m_tab_convert_to_energy)->setIDFValues(prefix);
+  dynamic_cast<IndirectConvertToEnergy *>(m_tabs["Energy Transfer"])->setIDFValues(prefix);
 }
 
 /**
-* This function holds any steps that must be performed on the layout that are specific
-* to the currently selected instrument.
-*/
+ * This function holds any steps that must be performed on the layout that are specific
+ * to the currently selected instrument.
+ */
 void IndirectDataReduction::performInstSpecific()
 {
   setInstSpecificWidget("cm-1-convert-choice", m_uiForm.ckCm1Units, QCheckBox::Off);
@@ -328,14 +277,14 @@ void IndirectDataReduction::performInstSpecific()
 }
 
 /**
-* This function either shows or hides the given QCheckBox, based on the named property
-* inside the instrument param file.  When hidden, the default state will be used to
-* reset to the "unused" state of the checkbox.
-*
-* @param parameterName :: The name of the property to look for inside the current inst param file.
-* @param checkBox :: The checkbox to set the state of, and to either hide or show based on the current inst.
-* @param defaultState :: The state to which the checkbox will be set upon hiding it.
-*/
+ * This function either shows or hides the given QCheckBox, based on the named property
+ * inside the instrument param file.  When hidden, the default state will be used to
+ * reset to the "unused" state of the checkbox.
+ *
+ * @param parameterName :: The name of the property to look for inside the current inst param file.
+ * @param checkBox :: The checkbox to set the state of, and to either hide or show based on the current inst.
+ * @param defaultState :: The state to which the checkbox will be set upon hiding it.
+ */
 void IndirectDataReduction::setInstSpecificWidget(const std::string & parameterName, QCheckBox * checkBox, QCheckBox::ToggleState defaultState)
 {
   // Get access to instrument specific parameters via the loaded empty workspace.
@@ -362,32 +311,42 @@ void IndirectDataReduction::setInstSpecificWidget(const std::string & parameterN
   }
 }
 
+/**
+ * Remove the Poco observer on the config service when the interfaces is closed.
+ *
+ * @param close CLose event (unused)
+ */
 void IndirectDataReduction::closeEvent(QCloseEvent* close)
 {
-  (void) close;
+  UNUSED_ARG(close);
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 
+/**
+ * Reloads settings if the default sata search or save directories have been changed.
+ */
 void IndirectDataReduction::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
 {
   std::string key = pNf->key();
 
-  if ( key == "datasearch.directories" || key == "defaultsave.directory" )
-  {
-    loadSettings();
-  }
+  if(key == "datasearch.directories" || key == "defaultsave.directory")
+    readSettings();
 }
 
-void IndirectDataReduction::loadSettings()
+/**
+ * Read Qt settings for the interface.
+ */
+void IndirectDataReduction::readSettings()
 {  
-  // set values of m_dataDir and m_saveDir
+  // Set values of m_dataDir and m_saveDir
   m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
-  m_dataDir.replace(" ","");
+  m_dataDir.replace(" ", "");
   if(m_dataDir.length() > 0)
     m_dataDir = m_dataDir.split(";", QString::SkipEmptyParts)[0];
   m_saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
   
   QSettings settings;
+
   // Load settings for MWRunFile widgets
   settings.beginGroup(m_settingsGroup + "DataFiles");
   settings.setValue("last_directory", m_dataDir);
@@ -404,6 +363,28 @@ void IndirectDataReduction::loadSettings()
   m_uiForm.moment_dsInput->readSettings(settings.group());
   m_uiForm.sqw_dsSampleInput->readSettings(settings.group());
   settings.endGroup();
+
+  // Load the last used instrument
+  settings.beginGroup(m_settingsGroup);
+  QString instrName = settings.value("instrument-name", "").toString();
+  settings.endGroup();
+
+  setDefaultInstrument(instrName);
+}
+
+/**
+ * Save settings to a persistent storage
+ */
+void IndirectDataReduction::saveSettings()
+{
+  QSettings settings;
+  settings.beginGroup(m_settingsGroup);
+  QString instrName;
+
+  instrName = m_uiForm.cbInst->currentText();
+
+  settings.setValue("instrument-name", instrName);
+  settings.endGroup();
 }
 
 /**
@@ -415,4 +396,18 @@ void IndirectDataReduction::loadSettings()
 void IndirectDataReduction::showMessageBox(const QString& message)
 {
   showInformationBox(message);
+}
+
+/**
+ * Slot to allow setting the state of the Run button.
+ *
+ * @param enabled If the button is clickable
+ * @param message Message shown on the button
+ * @parm tooltip Tooltip shown when hovering over button
+ */
+void IndirectDataReduction::updateRunButton(bool enabled, QString message, QString tooltip)
+{
+  m_uiForm.pbRun->setEnabled(enabled);
+  m_uiForm.pbRun->setText(message);
+  m_uiForm.pbRun->setToolTip(tooltip);
 }

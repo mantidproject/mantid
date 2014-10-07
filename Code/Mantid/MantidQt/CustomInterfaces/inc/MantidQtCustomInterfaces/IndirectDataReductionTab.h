@@ -158,6 +158,8 @@ namespace CustomInterfaces
     void showMessageBox(const QString& message);
     /// Run a python script
     void runAsPythonScript(const QString & code, bool no_output);
+    /// Update the Run button on the IDR main window
+    void updateRunButton(bool enabled = true, QString message = "Run", QString tooltip = "");
 
   private:
     /// Overidden by child class.
