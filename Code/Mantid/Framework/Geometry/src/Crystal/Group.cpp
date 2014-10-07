@@ -6,8 +6,6 @@ namespace Mantid
 namespace Geometry
 {
 
-int Group::m_numOps = 0;
-
 /// Construct a group group from a given set of operations. This is
 Group::Group() :
     m_allOperations(),
@@ -57,7 +55,6 @@ Group Group::operator *(const Group &other) const
     for(auto selfOp = m_allOperations.begin(); selfOp != m_allOperations.end(); ++selfOp) {
         for(auto otherOp = other.m_allOperations.begin(); otherOp != other.m_allOperations.end(); ++otherOp) {
             result.push_back((*selfOp) * (*otherOp));
-            ++m_numOps;
         }
     }
 

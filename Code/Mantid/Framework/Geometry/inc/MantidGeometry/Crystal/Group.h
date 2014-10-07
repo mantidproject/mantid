@@ -61,8 +61,6 @@ public:
     bool operator ==(const Group &other) const;
     bool operator !=(const Group &other) const;
 
-    static int m_numOps;
-
 protected:
     void setSymmetryOperations(const std::vector<SymmetryOperation> &symmetryOperations);
 
