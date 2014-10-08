@@ -19,6 +19,13 @@ namespace
     return self.directionAngles();
   }
 
+  long hashV3D(V3D & self)
+  {
+      boost::python::object tmpObj(self.toString());
+
+      return PyObject_Hash(tmpObj.ptr());
+  }
+
 }
 
 
@@ -57,6 +64,8 @@ void export_V3D()
     .def(self == self)
     .def(self != self) // must define != as Python's default is to compare object address
     .def(self_ns::str(self))
+    .def(self_ns::repr(self))
+    .def("__hash__", &hashV3D)
     .def("directionAngles", &V3D::directionAngles, "Calculate direction angles from direction cosines")
     .def("directionAngles", &directionAnglesDefault, "Calculate direction angles from direction cosines")
     ;

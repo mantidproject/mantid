@@ -8,6 +8,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidQtCustomInterfaces/ReflLoadedMainViewPresenter.h"
@@ -89,6 +90,16 @@ private:
       ws->removeColumn("StitchGroup");
 
     return ws;
+  }
+
+  Workspace_sptr loadWorkspace(const std::string& filename, const std::string& wsName)
+  {
+    IAlgorithm_sptr algLoad = AlgorithmManager::Instance().create("Load");
+    algLoad->initialize();
+    algLoad->setProperty("Filename", filename);
+    algLoad->setProperty("OutputWorkspace", wsName);
+    algLoad->execute();
+    return algLoad->getProperty("OutputWorkspace");
   }
 
 public:
@@ -449,25 +460,141 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
 
     //Check output workspaces were created as expected
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("13460_IvsQ"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("13460_IvsLam"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("13460_TOF"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("13462_IvsQ"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("13462_IvsLam"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("13462_TOF"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("13460_13462_IvsQ"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_13460"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13462"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_13462"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460_13462"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463_13464"));
 
     //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("13460_IvsQ");
-    AnalysisDataService::Instance().remove("13460_IvsLam");
-    AnalysisDataService::Instance().remove("13460_TOF");
-    AnalysisDataService::Instance().remove("13462_IvsQ");
-    AnalysisDataService::Instance().remove("13462_IvsLam");
-    AnalysisDataService::Instance().remove("13462_TOF");
-    AnalysisDataService::Instance().remove("13460_13462_IvsQ");
+    AnalysisDataService::Instance().remove("IvsQ_13460");
+    AnalysisDataService::Instance().remove("IvsLam_13460");
+    AnalysisDataService::Instance().remove("TOF_13460");
+    AnalysisDataService::Instance().remove("IvsQ_13462");
+    AnalysisDataService::Instance().remove("IvsLam_13462");
+    AnalysisDataService::Instance().remove("TOF_13462");
+    AnalysisDataService::Instance().remove("IvsQ_13460_13462");
     AnalysisDataService::Instance().remove("TRANS_13463_13464");
+  }
+
+  /*
+   * Test processing workspaces with non-standard names, with
+   * and without run_number information in the sample log.
+   */
+  void testProcessCustomNames()
+  {
+    auto ws = createWorkspace("TestWorkspace");
+    TableRow row = ws->appendRow();
+    row << "dataA" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 1;
+    row = ws->appendRow();
+    row << "dataB" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 1;
+
+    loadWorkspace("INTER13460", "dataA");
+    loadWorkspace("INTER13462", "dataB");
+
+    //Remove the `run_number` entry from dataA's log so its run number cannot be determined that way
+    IAlgorithm_sptr algDelLog = AlgorithmManager::Instance().create("DeleteLog");
+    algDelLog->initialize();
+    algDelLog->setProperty("Workspace", "dataA");
+    algDelLog->setProperty("Name", "run_number");
+    algDelLog->execute();
+
+    MockView mockView;
+    ReflLoadedMainViewPresenter presenter(ws,&mockView);
+    std::vector<size_t> rowlist;
+    rowlist.push_back(0);
+    rowlist.push_back(1);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+
+    //The user hits the "process" button with the first two rows selected
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
+    EXPECT_CALL(mockView, getProcessInstrument()).WillRepeatedly(Return("INTER"));
+    EXPECT_CALL(mockView, setProgressRange(_,_));
+    EXPECT_CALL(mockView, setProgress(_)).Times(4);
+    presenter.notify(ProcessFlag);
+
+    //Check the calls were made as expected
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Check output workspaces were created as expected
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_dataA"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13462"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_dataA_13462"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_dataA"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_13462"));
+
+    //Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("dataA");
+    AnalysisDataService::Instance().remove("dataB");
+    AnalysisDataService::Instance().remove("IvsQ_dataA");
+    AnalysisDataService::Instance().remove("IvsLam_dataA");
+    AnalysisDataService::Instance().remove("IvsQ_13462");
+    AnalysisDataService::Instance().remove("IvsLam_13462");
+    AnalysisDataService::Instance().remove("IvsQ_dataA_13462");
+    AnalysisDataService::Instance().remove("TRANS_13463_13464");
+  }
+
+  /*
+   * Test autofilling workspace values.
+   */
+  void testAutofill()
+  {
+    auto ws = createWorkspace("TestWorkspace");
+    //Autofill everything we can
+    TableRow row = ws->appendRow();
+    row << "13460" << "" << "13463,13464" << "" << "" << "" << "1" << 1;
+    row = ws->appendRow();
+    row << "13462" << "" << "13463,13464" << "" << "" << "" << "1" << 1;
+
+    MockView mockView;
+    ReflLoadedMainViewPresenter presenter(ws,&mockView);
+    std::vector<size_t> rowlist;
+    rowlist.push_back(0);
+    rowlist.push_back(1);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+
+    //The user hits the "process" button with the first two rows selected
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
+    EXPECT_CALL(mockView, getProcessInstrument()).WillRepeatedly(Return("INTER"));
+    EXPECT_CALL(mockView, setProgressRange(_,_));
+    EXPECT_CALL(mockView, setProgress(_)).Times(4);
+    presenter.notify(ProcessFlag);
+
+    //The user hits the "save" button
+    presenter.notify(SaveFlag);
+
+    //Check the calls were made as expected
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Check the table was updated as expected
+    ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->String(0, ThetaCol), "0.7");
+    TS_ASSERT_EQUALS(ws->String(0,   DQQCol), "0.0340301");
+    TS_ASSERT_EQUALS(ws->String(0,  QMinCol), "0.009");
+    TS_ASSERT_EQUALS(ws->String(0,  QMaxCol), "0.154");
+
+    TS_ASSERT_EQUALS(ws->String(1, ThetaCol), "2.3");
+    TS_ASSERT_EQUALS(ws->String(1,   DQQCol), "0.0340505");
+    TS_ASSERT_EQUALS(ws->String(1,  QMinCol), "0.03");
+    TS_ASSERT_EQUALS(ws->String(1,  QMaxCol), "0.504");
+
+    //Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("TRANS_13463_13464");
+    AnalysisDataService::Instance().remove("TOF_13460");
+    AnalysisDataService::Instance().remove("TOF_13463");
+    AnalysisDataService::Instance().remove("TOF_13464");
+    AnalysisDataService::Instance().remove("IvsQ_13460");
+    AnalysisDataService::Instance().remove("IvsLam_13460");
   }
 
   void testBadWorkspaceName()

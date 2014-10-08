@@ -48,7 +48,7 @@ namespace Algorithms
     this->declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
         "Output Workspace with bins masked.");
     this->declareProperty(new WorkspaceProperty<DataObjects::TableWorkspace>("MaskingInformation", "", Direction::Input),
-        "Input TableWorkspace containing parameters, SpectraList, XMin and XMax.");
+        "Input TableWorkspace containing parameters, XMin and XMax and either SprectaList or DetectorIDsList");
 
     return;
   }
@@ -188,7 +188,7 @@ namespace Algorithms
     if (id_xmin < 0 || id_xmax < 0 || id_xmin == id_xmax)
       throw runtime_error("Either Xmin nor Xmax is not given. ");
     if (id_spec == id_dets)
-      throw runtime_error("Neither SpectraList nor DetectorIDList is not given.");
+      throw runtime_error("Neither SpectraList nor DetectorIDList is given.");
     else if (id_dets >= 0)
       m_useDetectorID = true;
     else
