@@ -102,7 +102,7 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
       // Validate the optional input properties
-      void checkOptionalProperties();
+      void checkOptionalProperties(const std::set<specid_t> &ExcludedSpectra);
       /// Prepare a vector of SpectraBlock structures to simplify loading
       size_t prepareSpectraBlocks();
       /// Run LoadInstrument as a ChildAlgorithm
@@ -126,7 +126,7 @@ namespace Mantid
       // Validate multi-period logs
       void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr);
       // build the list of spectra numbers to load and include in the spectra list
-      void buildSpectraInd2SpectraNumMap(const std::vector<int64_t>  &spec_list);
+      void buildSpectraInd2SpectraNumMap(const std::vector<int64_t>  &spec_list,const std::set<specid_t> &ExcludedSpectra);
 
 
       /// The name and path of the input file
@@ -195,7 +195,7 @@ namespace Mantid
       boost::scoped_ptr<::NeXus::File> m_cppFile;
 
       bool findSpectraDetRangeInFile(NeXus::NXEntry &entry,boost::shared_array<int>  &spectrum_index,int64_t ndets,int64_t n_vms_compat_spectra,
-                                  std::map<int64_t,std::string> &monitors,bool excludeMonitors,bool separateMonitors,bool &spectraExcluded);
+                                  std::map<int64_t,std::string> &monitors,bool excludeMonitors,bool separateMonitors,std::set<specid_t> &ExcludedSpectra);
     };
 
   } // namespace DataHandling

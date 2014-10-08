@@ -173,23 +173,23 @@ namespace Mantid
       spec.load();
 
       size_t nmons(0);
-      if (bincludeMonitors)
-      {
-        //Pull out the monitor blocks, if any exist
-        for(std::vector<NXClassInfo>::const_iterator it = entry.groups().begin(); 
-          it != entry.groups().end(); ++it) 
-        {
-          if (it->nxclass == "NXmonitor") // Count monitors
-          {
-            NXInt index = entry.openNXInt(std::string(it->nxname) + "/spectrum_index");
-            index.load();
-            int64_t ind = *index();
-            m_monitors[ind ] = it->nxname;
+ 
 
-            ++nmons;
-          }
+      //Pull out the monitor blocks, if any exist
+      for(std::vector<NXClassInfo>::const_iterator it = entry.groups().begin(); 
+        it != entry.groups().end(); ++it) 
+      {
+        if (it->nxclass == "NXmonitor") // Count monitors
+        {
+          NXInt index = entry.openNXInt(std::string(it->nxname) + "/spectrum_index");
+          index.load();
+          int64_t ind = *index();
+          m_monitors[ind ] = it->nxname;
+
+          ++nmons;
         }
       }
+
 
       if( ndets == 0 && nmons == 0 )
       {
@@ -204,13 +204,13 @@ namespace Mantid
           throw std::runtime_error("Inconsistent NeXus file structure.");
         }
       }
-      bool spectraExcluded(false);
-      bseparateMonitors=findSpectraDetRangeInFile(entry,m_spec,ndets,nsp1[0],m_monitors,bexcludeMonitors,bseparateMonitors,spectraExcluded);
+      std::set<specid_t>  ExcluedSpectra;
+      bseparateMonitors=findSpectraDetRangeInFile(entry,m_spec,ndets,nsp1[0],m_monitors,bexcludeMonitors,bseparateMonitors,ExcluedSpectra);
 
       const size_t x_length = m_numberOfChannels + 1;
 
-      // Check input is consistent with the file, throwing if not
-      checkOptionalProperties();
+      // Check input is consistent with the file, throwing if not, exclude spectra selected at findSpectraDetRangeInFile;
+      checkOptionalProperties(ExcluedSpectra);
       // Fill up m_spectraBlocks
       size_t total_specs = prepareSpectraBlocks();
 
@@ -332,36 +332,6 @@ namespace Mantid
       };
 
     }
-    /**
-    build the list of spectra to load and include into spectra-detectors map
-    @param spec_list -- list of spectra to load 
-    **/
-    void  LoadISISNexus2::buildSpectraInd2SpectraNumMap(const std::vector<int64_t>  &spec_list)
-    {
-
-      int64_t ic(0);
-
-      if(spec_list.size()>0)
-      {
-        auto start_point = spec_list.begin();
-        for(auto it =start_point  ;it!=spec_list.end();it++)
-        {
-          ic = it-start_point;
-          m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(ic,static_cast<specid_t>(*it)));
-        }
-      }
-      else
-      {
-        if(m_range_supplied)
-        {
-          ic = m_specInd2specNum_map.size();
-          for(int64_t i=m_spec_min;i<m_spec_max+1;i++)
-            m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(i-m_spec_min+ic,static_cast<specid_t>(i)));
-
-        }
-      }
-    }
-
 
     /**
     Check for a set of synthetic logs associated with multi-period log data. Raise warnings where necessary.
@@ -385,11 +355,19 @@ namespace Mantid
 
     /**
     * Check the validity of the optional properties of the algorithm and identify if partial data should be loaded.
+    * @param SpectraExclued :: set of spectra ID-s to exclude from spectra list to load
     */
-    void LoadISISNexus2::checkOptionalProperties()
+    void LoadISISNexus2::checkOptionalProperties(const std::set<specid_t> &SpectraExcluded)
     {
       // optional properties specify that only some spectra have to be loaded
-      m_load_selected_spectra = false;
+      size_t numSpectraExclued=0;
+      if (!SpectraExcluded.empty())
+      {
+        m_load_selected_spectra = true;
+        numSpectraExclued = SpectraExcluded.size();
+      }
+      
+      // 
       m_spec_min = getProperty("SpectrumMin");
       m_spec_max = getProperty("SpectrumMax");
 
@@ -415,11 +393,11 @@ namespace Mantid
         throw std::invalid_argument("Inconsistent range properties. SpectrumMin is larger than SpectrumMax.");
       }
 
-      if( static_cast<size_t>(m_spec_max) > m_numberOfSpectra )
+      if( static_cast<size_t>(m_spec_max) > m_numberOfSpectra+numSpectraExclued )
       {
-        std::string err="Inconsistent range property. SpectrumMax is larger than number of spectra: "+boost::lexical_cast<std::string>(m_numberOfSpectra ); 
-        throw std::invalid_argument(err);
-      }
+          std::string err="Inconsistent range property. SpectrumMax is larger than number of spectra: "+boost::lexical_cast<std::string>(m_numberOfSpectra+numSpectraExclued ); 
+          throw std::invalid_argument(err);
+        }
 
       // Check the entry number
       m_entrynumber = getProperty("EntryNumber");
@@ -442,9 +420,9 @@ namespace Mantid
         // Sort the list so that we can check it's range
         std::sort(spec_list.begin(), spec_list.end());
 
-        if( spec_list.back() > static_cast<int64_t>(m_numberOfSpectra) )
+        if( spec_list.back() > static_cast<int64_t>(m_numberOfSpectra+numSpectraExclued) )
         {
-          std::string err="A spectra number in the spectra list exceeds total number of "+boost::lexical_cast<std::string>(m_numberOfSpectra )+ " spectra ";
+          std::string err="A spectra number in the spectra list exceeds total number of "+boost::lexical_cast<std::string>(m_numberOfSpectra+numSpectraExclued )+ " spectra ";
           throw std::invalid_argument(err);
         }
 
@@ -455,6 +433,7 @@ namespace Mantid
         {
           throw std::invalid_argument("Negative SpectraList property encountered.");
         }
+
         range_check in_range(m_spec_min, m_spec_max);
         if( m_range_supplied )
         {
@@ -463,7 +442,11 @@ namespace Mantid
           if (spec_list.size()>0)
           {
             for(int64_t i=m_spec_min;i<m_spec_max+1;i++)
-              spec_list.push_back(static_cast<specid_t>(i));
+            {
+              specid_t spec_num = static_cast<specid_t>(i);
+              if (SpectraExcluded.find(spec_num)==SpectraExcluded.end() )
+                  spec_list.push_back(spec_num);
+            }
             // Sort the list so that lower spectra indexes correspond to smaller spectra ID-s
             std::sort(spec_list.begin(), spec_list.end());
 
@@ -474,12 +457,53 @@ namespace Mantid
       {
         m_range_supplied = true;
       }
+      // 
       if (m_load_selected_spectra)
       {
-        buildSpectraInd2SpectraNumMap(spec_list);
+        buildSpectraInd2SpectraNumMap(spec_list,SpectraExcluded);
       }
 
     }
+    /**
+    build the list of spectra to load and include into spectra-detectors map
+    @param spec_list -- list of spectra numbers to load 
+    @param SpectraExcluded set of the spectra ID-s to exclude from loading
+    **/
+    void  LoadISISNexus2::buildSpectraInd2SpectraNumMap(const std::vector<int64_t>  &spec_list,const std::set<specid_t> &SpectraExcluded)
+    {
+
+      int64_t ic(0);
+
+      if(spec_list.size()>0)
+      {
+        auto start_point = spec_list.begin();
+        for(auto it =start_point  ;it!=spec_list.end();it++)
+        {
+          ic = it-start_point;
+          m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(ic,static_cast<specid_t>(*it)));
+        }
+      }
+      else
+      {
+        if(m_range_supplied)
+        {
+          ic = 0;
+          int64_t  max_range = m_spec_max+SpectraExcluded.size()+1;
+          for(int64_t i=m_spec_min;i<max_range;i++)
+          {
+            specid_t spectra = static_cast<specid_t>(i);
+            if(SpectraExcluded.find(spectra)==SpectraExcluded.end())
+            {
+              m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(ic,spectra));
+              ic++;
+            }
+          }
+
+        }
+      }
+    }
+
+
 
     namespace
     {
@@ -990,19 +1014,24 @@ namespace Mantid
     }
 
     bool LoadISISNexus2::findSpectraDetRangeInFile(NXEntry &entry,boost::shared_array<int>  &spectrum_index,int64_t ndets,int64_t n_vms_compat_spectra,
-      std::map<int64_t,std::string> &monitors,bool excludeMonitors,bool separateMonitors,bool &spectraExcluded)
+      std::map<int64_t,std::string> &monitors,bool excludeMonitors,bool separateMonitors,std::set<specid_t> &ExcludedSpectra)
     {
-      spectraExcluded = false;
+      ExcludedSpectra.clear();
       size_t nmons = monitors.size();
 
       //Grab the number of channels
-      NXInt chans = entry.openNXInt(m_monitors.begin()->second + "/data");
+      int nMonitorPeriods(0);
+      size_t nMonitorChannels(0);
+      if (nmons>0)
+      {
+        NXInt chans = entry.openNXInt(m_monitors.begin()->second + "/data");
 
-      int nMonitorPeriods = chans.dim0();
-      size_t nMonitorChannels = chans.dim2();
-      m_numberOfPeriodsInFile = m_numberOfPeriods = nMonitorPeriods ;
-      m_numberOfSpectraInFile = m_numberOfSpectra = nmons;
-      m_numberOfChannelsInFile = m_numberOfChannels = nMonitorChannels;
+        nMonitorPeriods = chans.dim0();
+        nMonitorChannels = chans.dim2();
+        m_numberOfPeriodsInFile = m_numberOfPeriods = nMonitorPeriods ;
+        m_numberOfSpectraInFile = m_numberOfSpectra = nmons;
+        m_numberOfChannelsInFile = m_numberOfChannels = nMonitorChannels;
+      }
 
       if( ndets == 0 )
       {
@@ -1015,7 +1044,7 @@ namespace Mantid
 
       m_numberOfPeriodsInFile = m_numberOfPeriods = data.dim0();
       m_numberOfChannelsInFile = m_numberOfChannels = data.dim2();
-      if ((m_numberOfPeriodsInFile !=nMonitorPeriods) || (m_numberOfChannelsInFile!=nMonitorChannels))
+      if (((m_numberOfPeriodsInFile !=nMonitorPeriods) || (m_numberOfChannelsInFile!=nMonitorChannels)) && nmons>0)
       {
         if(!separateMonitors)
         {
@@ -1029,7 +1058,10 @@ namespace Mantid
 
 
 
-      if(m_numberOfSpectra+nmons ==static_cast<size_t>( n_vms_compat_spectra )&& !separateMonitors)
+      bool removeMonitors = excludeMonitors || separateMonitors;
+
+
+      if(m_numberOfSpectra+nmons ==static_cast<size_t>( n_vms_compat_spectra )&& !removeMonitors)
       {
         // workspace contain the same number of bins for spectra and monitors. Total number of spectra in workspace will be equal to 
         //   n_vms_compat_spectra
@@ -1038,28 +1070,30 @@ namespace Mantid
         return separateMonitors;
       }
 
-
-      //Now check if monitors expand the spectra range
-
+      //Now check if monitors expand or shrink the workspace's spectra range
+   
       // We assume again that this spectrum list increases monotonically
       int64_t min_index = spectrum_index[0];
       int64_t max_index = spectrum_index[ndets-1];
+
       std::map<int64_t,std::string> remaining_monitors;
       for(auto it = monitors.begin(); it!=monitors.end(); it++)
       {
         if(it->first>=min_index && it->first <=max_index)
         {
-          if(excludeMonitors || separateMonitors)
+          if(removeMonitors)
           {
             m_numberOfSpectra--;
-            spectraExcluded = true;
-            spectrum_index[it->first]=-1;
+            ExcludedSpectra.insert(static_cast<specid_t>(it->first));
           }
         }
         else
         {
-          remaining_monitors.insert(*it);
-          m_numberOfSpectra++;
+          if(!removeMonitors)
+          {
+            remaining_monitors.insert(*it);
+            m_numberOfSpectra++;
+          }
         }
       }
       monitors.swap(remaining_monitors);
