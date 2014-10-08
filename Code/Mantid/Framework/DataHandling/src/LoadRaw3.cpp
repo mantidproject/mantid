@@ -102,13 +102,13 @@ namespace Mantid
       if (monitorOption=="0")
          monitorOption = "Exclude";
 
-      bool bincludeMonitors = isIncludeMonitors(monitorOption);
+      bool bincludeMonitors = LoadRawHelper::isIncludeMonitors(monitorOption);
       bool bseparateMonitors = false;
       bool bexcludeMonitors = false;
       if (!bincludeMonitors)
       {
-        bseparateMonitors = isSeparateMonitors(monitorOption);
-        bexcludeMonitors = isExcludeMonitors(monitorOption);
+        bseparateMonitors = LoadRawHelper::isSeparateMonitors(monitorOption);
+        bexcludeMonitors = LoadRawHelper::isExcludeMonitors(monitorOption);
       }
       //
 
@@ -576,36 +576,6 @@ namespace Mantid
         }
       }
 
-    }
-    /** This method checks the value of LoadMonitors property and returns true or false
-     *  @return true if Exclude Monitors option is selected,otherwise false
-     */
-    bool LoadRaw3::isExcludeMonitors(const std::string &monitorOption)
-    {
-      bool bExclude;
-      monitorOption.compare("Exclude") ? (bExclude = false) : (bExclude = true);
-      return bExclude;
-    }
-
-    /**This method checks the value of LoadMonitors property and returns true or false
-     * @return true if Include Monitors option is selected,otherwise false
-     */
-    bool LoadRaw3::isIncludeMonitors(const std::string &monitorOption)
-    {
-      bool bExclude;
-      monitorOption.compare("Include") ? (bExclude = false) : (bExclude = true);
- 
-      return bExclude;
-    }
-
-    /** This method checks the value of LoadMonitors property and returns true or false
-     *  @return true if Separate Monitors option is selected,otherwise false
-     */
-    bool LoadRaw3::isSeparateMonitors(const std::string &monitorOption)
-    {
-      bool bSeparate;
-      monitorOption.compare("Separate") ? (bSeparate = false) : (bSeparate = true);
-      return bSeparate;
     }
 
     /** This method checks given spectrum is a monitor

@@ -1289,5 +1289,37 @@ namespace Mantid
       return true;
     }
 
+    /** This method checks the value of LoadMonitors property and returns true or false
+     *  @return true if Exclude Monitors option is selected,otherwise false
+     */
+    bool LoadRawHelper::isExcludeMonitors(const std::string &monitorOption)
+    {
+      bool bExclude;
+      monitorOption.compare("Exclude") ? (bExclude = false) : (bExclude = true);
+      return bExclude;
+    }
+
+    /**This method checks the value of LoadMonitors property and returns true or false
+     * @return true if Include Monitors option is selected,otherwise false
+     */
+    bool LoadRawHelper::isIncludeMonitors(const std::string &monitorOption)
+    {
+      bool bExclude;
+      monitorOption.compare("Include") ? (bExclude = false) : (bExclude = true);
+ 
+      return bExclude;
+    }
+
+    /** This method checks the value of LoadMonitors property and returns true or false
+     *  @return true if Separate Monitors option is selected,otherwise false
+     */
+    bool LoadRawHelper::isSeparateMonitors(const std::string &monitorOption)
+    {
+      bool bSeparate;
+      monitorOption.compare("Separate") ? (bSeparate = false) : (bSeparate = true);
+      return bSeparate;
+    }
+
+
   } // namespace DataHandling
 } // namespace Mantid
