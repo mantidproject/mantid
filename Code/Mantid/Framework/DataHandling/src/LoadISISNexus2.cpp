@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadRawHelper.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -85,9 +86,6 @@ namespace Mantid
       declareProperty("EntryNumber", (int64_t)0, mustBePositive,
         "The particular entry number to read (default: Load all workspaces and creates a workspace group)");
 
-      declareProperty(new PropertyWithValue<bool>("LoadMonitorsSeparately", false, Direction::Input),
-        "If true, loads monitors and puts them into separate workspace");
-
       std::vector<std::string> monitorOptions;
       monitorOptions.push_back("Include");
       monitorOptions.push_back("Exclude");
@@ -95,16 +93,17 @@ namespace Mantid
       std::map<std::string,std::string> monitorOptionsAliases;
       monitorOptionsAliases["1"] = "Separate";
       monitorOptionsAliases["0"] = "Exclude";
-      declareProperty("LoadMonitors","Exclude", boost::make_shared<Kernel::StringListValidator>(monitorOptions,monitorOptionsAliases),
-          "Option to control the loading of monitors.\n"
-      "Allowed options are Include,Exclude, Separate.\n"
-      "Include:Include option would load monitors with the workspace. If the time binning for the monitors is different from the\n"
-      "binning of the detectors this option is equivalent to Separate option\n"
-      "Exclude:The default is Exclude option excludes monitors from the output workspace.\n"
-      "Separate:The Separate option loads monitors into a separate workspace called OutputWorkspace_monitor.\n"
-      "Defined aliases:\n"
-      "1:  Equivalent to Separate.\n"
-      "0:  Equivalent to Exclude.\n");
+      declareProperty("LoadMonitors","Include", boost::make_shared<Kernel::StringListValidator>(monitorOptions,monitorOptionsAliases),
+        "Option to control the loading of monitors.\n"
+        "Allowed options are Include,Exclude, Separate.\n"
+        "Include:The default is Include option would load monitors with the workspace if monitors spectra are within the range of loaded detectors.\n"
+        "If the time binning for the monitors is different from the\n"
+        "binning of the detectors this option is equivalent to the Separate option\n"
+        "Exclude:Exclude option excludes monitors from the output workspace.\n"
+        "Separate:Separate option loads monitors into a separate workspace called: OutputWorkspace_monitors.\n"
+        "Defined aliases:\n"
+        "1:  Equivalent to Separate.\n"
+        "0:  Equivalent to Exclude.\n");
 
     }
 
@@ -116,12 +115,31 @@ namespace Mantid
     */
     void LoadISISNexus2::exec()
     {
+
+      //**********************************************************************
+      // process primary monitor options
+      std::string monitorOption = getProperty("LoadMonitors");
+      if (monitorOption =="1")
+        monitorOption = "Separate";
+      if (monitorOption=="0")
+        monitorOption = "Exclude";
+
+      bool bincludeMonitors = LoadRawHelper::isIncludeMonitors(monitorOption);
+      bool bseparateMonitors = false;
+      bool bexcludeMonitors = false;
+      if (!bincludeMonitors)
+      {
+        bseparateMonitors = LoadRawHelper::isSeparateMonitors(monitorOption);
+        bexcludeMonitors = LoadRawHelper::isExcludeMonitors(monitorOption);
+      }
+      //**********************************************************************
+
       m_filename = getPropertyValue("Filename");
       // Create the root Nexus class
       NXRoot root(m_filename);
 
       // "Open" the same file but with the C++ interface
-      m_cppFile = new ::NeXus::File(root.m_fileID);
+      m_cppFile.reset( new ::NeXus::File(root.m_fileID));
 
       // Open the raw data group 'raw_data_1'
       NXEntry entry = root.openEntry("raw_data_1");
@@ -154,58 +172,41 @@ namespace Mantid
       NXInt spec = entry.openNXInt("isis_vms_compat/SPEC");
       spec.load();
 
-      //Pull out the monitor blocks, if any exist
       size_t nmons(0);
-      std::vector<int64_t> mon_spectra_num;
-      int64_t max_spectra_num(LONG_MIN);
-      int64_t min_spectra_num(LONG_MAX);
-      for(std::vector<NXClassInfo>::const_iterator it = entry.groups().begin(); 
-        it != entry.groups().end(); ++it) 
+      if (bincludeMonitors)
       {
-        if (it->nxclass == "NXmonitor") // Count monitors
+        //Pull out the monitor blocks, if any exist
+        for(std::vector<NXClassInfo>::const_iterator it = entry.groups().begin(); 
+          it != entry.groups().end(); ++it) 
         {
-          NXInt index = entry.openNXInt(std::string(it->nxname) + "/spectrum_index");
-          index.load();
-          int64_t ind = *index();
-          m_monitors[ind ] = it->nxname;
-          mon_spectra_num.push_back(ind);
+          if (it->nxclass == "NXmonitor") // Count monitors
+          {
+            NXInt index = entry.openNXInt(std::string(it->nxname) + "/spectrum_index");
+            index.load();
+            int64_t ind = *index();
+            m_monitors[ind ] = it->nxname;
 
-          if (ind > max_spectra_num)max_spectra_num=ind;
-          if (ind < min_spectra_num)min_spectra_num=ind;
-          ++nmons;
+            ++nmons;
+          }
         }
       }
 
       if( ndets == 0 && nmons == 0 )
       {
-        g_log.error() << "Invalid NeXus structure, cannot find detector or monitor blocks.";
-        throw std::runtime_error("Inconsistent NeXus file structure.");
-      }
-
-      if( ndets == 0 )
-      {
-
-        //Grab the number of channels
-        NXInt chans = entry.openNXInt(m_monitors.begin()->second + "/data");
-        m_numberOfPeriodsInFile = m_numberOfPeriods = chans.dim0();
-        m_numberOfSpectraInFile = m_numberOfSpectra = nmons;
-        m_numberOfChannelsInFile = m_numberOfChannels = chans.dim2();
-      }
-      else 
-      {
-        NXData nxData = entry.openNXData("detector_1");
-        NXInt data = nxData.openIntData();
-        m_numberOfPeriodsInFile = m_numberOfPeriods = data.dim0();
-        m_numberOfSpectraInFile = m_numberOfSpectra = nsp1[0];
-        m_numberOfChannelsInFile = m_numberOfChannels = data.dim2();
-        if(max_spectra_num > m_numberOfSpectra)
-          m_numberOfSpectra += mon_spectra_num.size();
-
-        if( nmons > 0 && m_numberOfSpectra == static_cast<size_t>(data.dim1()) )
+        if (bexcludeMonitors)
         {
-          m_monitors.clear();
+          g_log.warning() << "Nothing to do. No detectors found and no monitor loading requested";
+          return;
+        }
+        else
+        {
+          g_log.error() << "Invalid NeXus structure, cannot find detector or monitor blocks.";
+          throw std::runtime_error("Inconsistent NeXus file structure.");
         }
       }
+      bool spectraExcluded(false);
+      bseparateMonitors=findSpectraDetRangeInFile(entry,m_spec,ndets,nsp1[0],m_monitors,bexcludeMonitors,bseparateMonitors,spectraExcluded);
+
       const size_t x_length = m_numberOfChannels + 1;
 
       // Check input is consistent with the file, throwing if not
@@ -245,7 +246,7 @@ namespace Mantid
 
       // Load logs and sample information
       m_cppFile->openPath(entry.path());      
-      local_workspace->loadSampleAndLogInfoNexus(m_cppFile);
+      local_workspace->loadSampleAndLogInfoNexus(m_cppFile.get());
 
       // Load logs and sample information further information... See maintenance ticket #8697 
       loadSampleData(local_workspace, entry);
@@ -987,6 +988,85 @@ namespace Mantid
     {
       return sqrt(in);
     }
+
+    bool LoadISISNexus2::findSpectraDetRangeInFile(NXEntry &entry,boost::shared_array<int>  &spectrum_index,int64_t ndets,int64_t n_vms_compat_spectra,
+      std::map<int64_t,std::string> &monitors,bool excludeMonitors,bool separateMonitors,bool &spectraExcluded)
+    {
+      spectraExcluded = false;
+      size_t nmons = monitors.size();
+
+      //Grab the number of channels
+      NXInt chans = entry.openNXInt(m_monitors.begin()->second + "/data");
+
+      int nMonitorPeriods = chans.dim0();
+      size_t nMonitorChannels = chans.dim2();
+      m_numberOfPeriodsInFile = m_numberOfPeriods = nMonitorPeriods ;
+      m_numberOfSpectraInFile = m_numberOfSpectra = nmons;
+      m_numberOfChannelsInFile = m_numberOfChannels = nMonitorChannels;
+
+      if( ndets == 0 )
+      {
+        separateMonitors = true;
+        return separateMonitors;
+      }
+
+      NXData nxData = entry.openNXData("detector_1");
+      NXInt data = nxData.openIntData();
+
+      m_numberOfPeriodsInFile = m_numberOfPeriods = data.dim0();
+      m_numberOfChannelsInFile = m_numberOfChannels = data.dim2();
+      if ((m_numberOfPeriodsInFile !=nMonitorPeriods) || (m_numberOfChannelsInFile!=nMonitorChannels))
+      {
+        if(!separateMonitors)
+        {
+          g_log.warning()<<" Performing separate loading as can not load spectra and monitors in the single workspace:\n" ;
+          g_log.warning()<<" Monitors data contain :"<<nMonitorChannels<<" time channels and: "<<nMonitorPeriods<<" period(s)\n";
+          g_log.warning()<<" Spectra  data contain :"<<m_numberOfChannels<<" time channels and: "<<m_numberOfPeriods<<" period(s)\n";
+        }
+        separateMonitors = true;
+      }
+      m_numberOfSpectraInFile = m_numberOfSpectra = data.dim1();
+
+
+
+      if(m_numberOfSpectra+nmons ==static_cast<size_t>( n_vms_compat_spectra )&& !separateMonitors)
+      {
+        // workspace contain the same number of bins for spectra and monitors. Total number of spectra in workspace will be equal to 
+        //   n_vms_compat_spectra
+        m_numberOfSpectraInFile = m_numberOfSpectra;
+        m_numberOfSpectra=n_vms_compat_spectra;
+        return separateMonitors;
+      }
+
+
+      //Now check if monitors expand the spectra range
+
+      // We assume again that this spectrum list increases monotonically
+      int64_t min_index = spectrum_index[0];
+      int64_t max_index = spectrum_index[ndets-1];
+      std::map<int64_t,std::string> remaining_monitors;
+      for(auto it = monitors.begin(); it!=monitors.end(); it++)
+      {
+        if(it->first>=min_index && it->first <=max_index)
+        {
+          if(excludeMonitors || separateMonitors)
+          {
+            m_numberOfSpectra--;
+            spectraExcluded = true;
+            spectrum_index[it->first]=-1;
+          }
+        }
+        else
+        {
+          remaining_monitors.insert(*it);
+          m_numberOfSpectra++;
+        }
+      }
+      monitors.swap(remaining_monitors);
+      return separateMonitors;
+
+    }
+
 
   } // namespace DataHandling
 } // namespace Mantid

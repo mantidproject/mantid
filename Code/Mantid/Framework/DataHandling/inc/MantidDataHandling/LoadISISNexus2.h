@@ -192,8 +192,10 @@ namespace Mantid
       static double dblSqrt(double in);
 
       // C++ interface to the NXS file
-      ::NeXus::File * m_cppFile;
+      boost::scoped_ptr<::NeXus::File> m_cppFile;
 
+      bool findSpectraDetRangeInFile(NeXus::NXEntry &entry,boost::shared_array<int>  &spectrum_index,int64_t ndets,int64_t n_vms_compat_spectra,
+                                  std::map<int64_t,std::string> &monitors,bool excludeMonitors,bool separateMonitors,bool &spectraExcluded);
     };
 
   } // namespace DataHandling
