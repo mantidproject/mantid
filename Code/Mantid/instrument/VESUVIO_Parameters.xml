@@ -132,6 +132,27 @@
     <value val="diffspec" />
   </parameter>
 
+  <!-- Monitor workflow parameters -->
+  <parameter name="Workflow.Monitor1-SpectrumNumber" >
+    <value val="0" />
+  </parameter>
+
+  <parameter name="Workflow.Monitor1-Area" >
+    <value val="-1" />
+  </parameter>
+
+  <parameter name="Workflow.Monitor1-Thickness" >
+    <value val="-1" />
+  </parameter>
+
+  <parameter name="Workflow.Monitor1-Attenuation" >
+    <value val="-1" />
+  </parameter>
+
+  <parameter name="Workflow.Monitor1-ScalingFactor">
+    <value val="1" />
+  </parameter>
+
 </component-link> 
 <!-- End VESUVIO link -->
 
