@@ -194,7 +194,7 @@ namespace MantidQt
 		void Quasi::handleSampleInputReady(const QString& filename)
 		{
 			plotMiniPlot(filename, 0, "QuasiPlot", "RawPlotCurve");
-			std::pair<double,double> range = getCurveRange("QuasiPlot");
+			std::pair<double,double> range = getCurveRange("RawPlotCurve");
 			setMiniPlotGuides("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
 			setPlotRange("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
 		}
@@ -229,11 +229,11 @@ namespace MantidQt
     {
     	if(prop == m_properties["EMin"])
     	{
-    		updateLowerGuide(m_properties["EMin"], m_properties["EMax"], val);
+    		updateLowerGuide(m_rangeSelectors["QuasiERange"], m_properties["EMin"], m_properties["EMax"], val);
     	}
     	else if (prop == m_properties["EMax"])
     	{
-				updateUpperGuide(m_properties["EMin"], m_properties["EMax"], val);
+				updateUpperGuide(m_rangeSelectors["QuasiERange"], m_properties["EMin"], m_properties["EMax"], val);
     	}
     }
 

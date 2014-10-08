@@ -43,7 +43,7 @@ namespace MantidQt
 			This class defines a abstract base class for the different tabs of the Indirect Bayes interface.
 			Any joint functionality shared between each of the tabs should be implemented here as well as defining
 			shared member functions.
-    
+
 			@author Samuel Jackson, STFC
 
 			Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -83,7 +83,7 @@ namespace MantidQt
 			/// Returns a URL for the wiki help page for this interface
 			QString tabHelpURL();
 
-			/// Base methods implemented in derived classes 
+			/// Base methods implemented in derived classes
 			virtual QString help() = 0;
 			virtual void loadSettings(const QSettings& settings) = 0;
 
@@ -95,7 +95,7 @@ namespace MantidQt
 
     protected slots:
 			/// Slot to update the guides when the range properties change
-			void updateProperties(QtProperty* prop, double val);
+			virtual void updateProperties(QtProperty* prop, double val) = 0;
 
 		protected:
 			/// Function to run a string as python code
@@ -105,9 +105,9 @@ namespace MantidQt
 			/// Function to read an instrument's resolution from the IPF using a workspace pointer
 			bool getInstrumentResolution(Mantid::API::MatrixWorkspace_const_sptr ws, std::pair<double,double>& res);
 			/// Function to set the position of the lower guide on the plot
-	    void updateLowerGuide(QtProperty* lower, QtProperty* upper, double value);
+	    void updateLowerGuide(MantidQt::MantidWidgets::RangeSelector* rs, QtProperty* lower, QtProperty* upper, double value);
 			/// Function to set the position of the upper guide on the plot
-	    void updateUpperGuide(QtProperty* lower, QtProperty* upper, double value);
+	    void updateUpperGuide(MantidQt::MantidWidgets::RangeSelector* rs, QtProperty* lower, QtProperty* upper, double value);
 
 			/// Tree of the properties
 			QtTreePropertyBrowser* m_propTree;

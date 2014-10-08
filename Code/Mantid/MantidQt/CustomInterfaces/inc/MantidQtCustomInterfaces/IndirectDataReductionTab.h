@@ -42,7 +42,9 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  /** IndirectDataReductionTab : TODO: DESCRIPTION
+  /** IndirectDataReductionTab
+
+    This class defines common functionality of tabs used in the Indirect Data Reduction interface.
 
     @author Samuel Jackson
     @date 13/08/2013

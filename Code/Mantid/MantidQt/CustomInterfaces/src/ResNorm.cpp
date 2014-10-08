@@ -127,7 +127,7 @@ namespace MantidQt
 		{
 			plotMiniPlot(filename, 0, "ResNormPlot", "RawPlotCurve");
 			std::pair<double,double> res;
-			std::pair<double,double> range = getCurveRange("ResNormPlot");
+			std::pair<double,double> range = getCurveRange("RawPlotCurve");
 
 			//Use the values from the instrument parameter file if we can
 			if(getInstrumentResolution(filename, res))
@@ -176,11 +176,11 @@ namespace MantidQt
     {
     	if(prop == m_properties["EMin"])
     	{
-				updateLowerGuide(m_properties["EMin"], m_properties["EMax"], val);
+				updateLowerGuide(m_rangeSelectors["ResNormERange"], m_properties["EMin"], m_properties["EMax"], val);
     	}
     	else if (prop == m_properties["EMax"])
     	{
-    		updateUpperGuide(m_properties["EMin"], m_properties["EMax"], val);
+    		updateUpperGuide(m_rangeSelectors["ResNormERange"], m_properties["EMin"], m_properties["EMax"], val);
 			}
     }
 	} // namespace CustomInterfaces

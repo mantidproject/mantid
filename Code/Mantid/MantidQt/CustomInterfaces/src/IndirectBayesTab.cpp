@@ -4,6 +4,8 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/IndirectBayesTab.h"
 
+using MantidQt::MantidWidgets::RangeSelector;
+
 namespace MantidQt
 {
 	namespace CustomInterfaces
@@ -30,18 +32,18 @@ namespace MantidQt
 
     /**
      * Method to build a URL to the appropriate page on the wiki for this tab.
-     * 
+     *
      * @return The URL to the wiki page
      */
     QString IndirectBayesTab::tabHelpURL()
-    { 
+    {
       return "http://www.mantidproject.org/IndirectBayes:" + help();
     }
 
     /**
      * Emits a signal to run a python script using the method in the parent
      * UserSubWindow
-     * 
+     *
      * @param pyInput :: A string of python code to execute
      */
     void IndirectBayesTab::runPythonScript(const QString& pyInput)
@@ -50,7 +52,7 @@ namespace MantidQt
     }
 
     /**
-     * Checks the workspace's intrument for a resolution parameter to use as 
+     * Checks the workspace's intrument for a resolution parameter to use as
      * a default for the energy range on the mini plot
      *
      * @param workspace :: Name of the workspace to use
@@ -63,7 +65,7 @@ namespace MantidQt
     }
 
     /**
-     * Checks the workspace's intrument for a resolution parameter to use as 
+     * Checks the workspace's intrument for a resolution parameter to use as
      * a default for the energy range on the mini plot
      *
      * @param ws :: Pointer to the workspace to use
@@ -92,42 +94,37 @@ namespace MantidQt
 
     /**
      * Set the position of the lower guide on the mini plot
-     * 
+     *
+     * @param rs :: Range selector to update
      * @param lower :: The lower guide property in the property browser
      * @param upper :: The upper guide property in the property browser
      * @param value :: The value of the lower guide
      */
-    void IndirectBayesTab::updateLowerGuide(QtProperty* lower, QtProperty* upper, double value)
+    void IndirectBayesTab::updateLowerGuide(RangeSelector* rs, QtProperty* lower, QtProperty* upper, double value)
     {
       // Check if the user is setting the max less than the min
       if(value > m_dblManager->value(upper))
-      {
         m_dblManager->setValue(lower, m_dblManager->value(upper));
-      }
       else
-      {
-        m_rangeSelectors["BayesRS"]->setMinimum(value);
-      }
+        rs->setMinimum(value);
     }
 
     /**
      * Set the position of the upper guide on the mini plot
-     * 
+     *
+     * @param rs :: Range selector to update
      * @param lower :: The lower guide property in the property browser
      * @param upper :: The upper guide property in the property browser
      * @param value :: The value of the upper guide
      */
-    void IndirectBayesTab::updateUpperGuide(QtProperty* lower, QtProperty* upper, double value)
+    void IndirectBayesTab::updateUpperGuide(RangeSelector* rs, QtProperty* lower, QtProperty* upper, double value)
     {
       // Check if the user is setting the min greater than the max
       if(value < m_dblManager->value(lower))
-      {
         m_dblManager->setValue(upper, m_dblManager->value(lower));
-      }
       else
-      {
-        m_rangeSelectors["BayesRS"]->setMaximum(value);
-      }
+        rs->setMaximum(value);
     }
+
   }
 } // namespace MantidQt

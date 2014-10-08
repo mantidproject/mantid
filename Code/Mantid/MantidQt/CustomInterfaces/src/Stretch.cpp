@@ -153,7 +153,7 @@ namespace MantidQt
 		void Stretch::handleSampleInputReady(const QString& filename)
 		{
 			plotMiniPlot(filename, 0, "StretchPlot", "RawPlotCurve");
-			std::pair<double,double> range = getCurveRange("StretchPlot");
+			std::pair<double,double> range = getCurveRange("RawPlotCurve");
 			setMiniPlotGuides("StretchERange", m_properties["EMin"], m_properties["EMax"], range);
 			setPlotRange("StretchERange", m_properties["EMin"], m_properties["EMax"], range);
 		}
@@ -188,11 +188,11 @@ namespace MantidQt
     {
     	if(prop == m_properties["EMin"])
     	{
-    		updateLowerGuide(m_properties["EMin"], m_properties["EMax"], val);
+    		updateLowerGuide(m_rangeSelectors["StretchERange"], m_properties["EMin"], m_properties["EMax"], val);
     	}
     	else if (prop == m_properties["EMax"])
     	{
-				updateUpperGuide(m_properties["EMin"], m_properties["EMax"], val);
+				updateUpperGuide(m_rangeSelectors["StretchERange"], m_properties["EMin"], m_properties["EMax"], val);
     	}
     }
 

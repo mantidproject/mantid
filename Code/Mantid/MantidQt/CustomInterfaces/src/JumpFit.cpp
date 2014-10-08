@@ -161,7 +161,7 @@ namespace MantidQt
 				std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
 				plotMiniPlot(filename, spectraList[currentWidth], "JumpFitPlot", "RawPlotCurve");
 				std::pair<double,double> res;
-				std::pair<double,double> range = getCurveRange("JumpFitPlot");
+				std::pair<double,double> range = getCurveRange("RawPlotCurve");
 
 				//Use the values from the instrument parameter file if we can
 				if(getInstrumentResolution(filename, res))
@@ -281,11 +281,11 @@ namespace MantidQt
     {
     	if(prop == m_properties["QMin"])
     	{
-    		updateLowerGuide(m_properties["QMin"], m_properties["QMax"], val);
+    		updateLowerGuide(m_rangeSelectors["JumpFitQ"], m_properties["QMin"], m_properties["QMax"], val);
     	}
     	else if (prop == m_properties["QMax"])
     	{
-				updateUpperGuide(m_properties["QMin"], m_properties["QMax"], val);
+				updateUpperGuide(m_rangeSelectors["JumpFitQ"], m_properties["QMin"], m_properties["QMax"], val);
     	}
     }
 	} // namespace CustomInterfaces
