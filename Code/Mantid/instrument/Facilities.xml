@@ -314,7 +314,6 @@
 
    <archive>
       <archiveSearch plugin="SNSDataSearch" />
-      <archiveSearch plugin="SNSDataSearchICAT2" />
    </archive>
 
    <computeResource name="Fermi">

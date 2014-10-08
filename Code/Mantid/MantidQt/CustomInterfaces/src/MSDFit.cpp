@@ -168,13 +168,13 @@ namespace IDA
     auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsname.toStdString());
     int nHist = static_cast<int>(ws->getNumberHistograms());
 
-    QString plotSpec =uiForm().msd_lePlotSpectrum->text();
+    QString plotSpec = uiForm().msd_lePlotSpectrum->text();
     QString specMin = uiForm().msd_leSpectraMin->text();
     QString specMax = uiForm().msd_leSpectraMax->text();
 
     int wsIndex = 0;
     int minIndex = 0;
-    int maxIndex = nHist-1;
+    int maxIndex = nHist - 1;
 
     if (currentWsName == wsname)
     {
@@ -213,7 +213,7 @@ namespace IDA
       uiForm().msd_leSpectraMax->setText(QString::number(maxIndex));
       uiForm().msd_lePlotSpectrum->setText(QString::number(wsIndex));
 
-      m_intVal->setRange(0, nHist-1);
+      m_intVal->setRange(0, maxIndex);
 
       //delete reference to fitting.
       if (m_msdFitCurve != NULL)

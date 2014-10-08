@@ -243,26 +243,26 @@ def plotAbs(workspaces, plotOpt):
         graph.activeLayer().setAxisTitle(mp.Layer.Bottom, 'Angle')
 
 
-def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=None, sampleFormula=None, canFormula=None, sigs=None, siga=None,
-                 plotOpt='None', Verbose=False, Save=False):
+def AbsRunFeeder(input_ws, can_ws, geom, ncan, size, avar, density, beam_width=None, sample_formula=None, can_formula=None, sigs=None, siga=None,
+                 plot_opt='None', verbose=False, save=False):
     """
         Handles the feeding of input and plotting of output for the F2PY
         absorption correction routine.
 
-        @param inputWS - workspace to generate corrections for
+        @param input_ws - workspace to generate corrections for
         @param geom - type of geometry used (flat plate or cylinder)
         @param beam_width - width of the beam used. If None this will be taken from the IPF
         @param ncan - number of cans used.
         @param size - sample & can thickness
-        @param sampleFormula - optional, chemical formula for the sample
-        @param camFormula - optional, chemical formula for the can
+        @param sample_formula - optional, chemical formula for the sample
+        @param cam_formula - optional, chemical formula for the can
         @param density - density of the sample and cans(s)
         @param sigs - scattering for sample and can(s)
         @param siga - absorption for sample and can(s)
         @param avar - sample angle
-        @param plotOpt - whether to plot output
-        @param Verbose - whether to show extra verbose output
-        @param Save - whether to save the output to file
+        @param plot_opt - whether to plot output
+        @param verbose - whether to show extra verbose output
+        @param save - whether to save the output to file
     """
 
     StartTime('CalculateCorrections')
@@ -270,12 +270,12 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
 
     #attempt to find beam width if none given
     if beam_width is None:
-        beam_width = getInstrumentParameter(inputWS, 'Workflow.beam-width')
+        beam_width = getInstrumentParameter(input_ws, 'Workflow.beam-width')
         beam_width = float(beam_width)
 
     #attempt to find beam height from parameter file
     try:
-        beam_height = getInstrumentParameter(inputWS, 'Workflow.beam-height')
+        beam_height = getInstrumentParameter(input_ws, 'Workflow.beam-height')
         beam_height = float(beam_height)
     except ValueError:
         # fall back on default value for beam height
@@ -288,14 +288,14 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
     # beam[7:8]  hsdown,hsup    bottom and top of scattered beam from sample b.
     beam = [beam_height, 0.5 * beam_width, -0.5 * beam_width, (beam_width / 2), -(beam_width / 2), 0.0, beam_height, 0.0, beam_height]
 
-    if sampleFormula is None and (sigs is None or siga is None):
+    if sample_formula is None and (sigs is None or siga is None):
         raise ValueError("Either a formula for the sample or values for the cross sections must be supplied.")
 
     #set sample material based on input or formula
-    if sampleFormula is not None:
-        SetSampleMaterial(InputWorkspace=inputWS, ChemicalFormula=sampleFormula, SampleNumberDensity=density[0])
+    if sample_formula is not None:
+        SetSampleMaterial(InputWorkspace=input_ws, ChemicalFormula=sample_formula, SampleNumberDensity=density[0])
 
-        sample = mtd[inputWS].sample()
+        sample = mtd[input_ws].sample()
         sam_mat = sample.getMaterial()
 
         # total scattering x-section
@@ -303,11 +303,11 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
         # absorption x-section
         siga[0] = sam_mat.absorbXSection()
 
-    if canFormula is not None and ncan == 2:
+    if can_formula is not None and ncan == 2:
         #set can material based on input or formula
-        SetSampleMaterial(InputWorkspace=canWS, ChemicalFormula=canFormula, SampleNumberDensity=density[1])
+        SetSampleMaterial(InputWorkspace=can_ws, ChemicalFormula=can_formula, SampleNumberDensity=density[1])
 
-        can_sample = mtd[canWS].sample()
+        can_sample = mtd[can_ws].sample()
         can_mat = can_sample.getMaterial()
 
         # total scattering x-section for can
@@ -317,11 +317,11 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
         siga[1] = can_mat.absorbXSection()
         siga[2] = can_mat.absorbXSection()
 
-    workspaces = AbsRun(inputWS, geom, beam, ncan, size, density,
-                        sigs, siga, avar, Verbose, Save)
+    workspaces = AbsRun(input_ws, geom, beam, ncan, size, density,
+                        sigs, siga, avar, verbose, save)
 
     EndTime('CalculateCorrections')
-    plotAbs(workspaces, plotOpt)
+    plotAbs(workspaces, plot_opt)
 
 
 def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):

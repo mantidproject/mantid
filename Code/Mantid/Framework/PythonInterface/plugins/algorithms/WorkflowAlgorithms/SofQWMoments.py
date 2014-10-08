@@ -112,7 +112,6 @@ class SofQWMoments(PythonAlgorithm):
     		workdir = getDefaultWorkingDirectory()
     		opath = os.path.join(workdir,output_workspace+'.nxs')
     		SaveNexusProcessed(InputWorkspace=output_workspace, Filename=opath)
-
     		if Verbose:
     			logger.notice('Output file : ' + opath)
 

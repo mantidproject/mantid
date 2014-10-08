@@ -15,7 +15,9 @@ set ( TEST_PY_FILES
   FindReflectometryLinesTest.py
   GetEiT0atSNSTest.py
   IndirectILLReductionTest.py
+  InelasticIndirectReductionTest.py
   IndirectTransmissionTest.py
+  IndirectTransmissionMonitorTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
@@ -29,6 +31,7 @@ set ( TEST_PY_FILES
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py
+  SaveVulcanGSSTest.py
   SortByQVectorsTest.py
   SofQWMomentsTest.py
   SortDetectorsTest.py
@@ -38,6 +41,7 @@ set ( TEST_PY_FILES
   SuggestTibHYSPECTest.py
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
+  TimeSliceTest.py
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py

@@ -272,16 +272,16 @@ namespace CustomInterfaces
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
     //Set spectra range
-    m_dblManager->setValue(m_properties["ResSpecMin"], instDetails["SpectraMin"].toDouble());
-    m_dblManager->setValue(m_properties["ResSpecMax"], instDetails["SpectraMax"].toDouble());
+    m_dblManager->setValue(m_properties["ResSpecMin"], instDetails["spectra-min"].toDouble());
+    m_dblManager->setValue(m_properties["ResSpecMax"], instDetails["spectra-max"].toDouble());
 
     //Set pean and background ranges
     if(instDetails.size() >= 8)
     {
       setMiniPlotGuides("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"],
-          std::pair<double, double>(instDetails["PeakMin"].toDouble(), instDetails["PeakMax"].toDouble()));
+          std::pair<double, double>(instDetails["peak-start"].toDouble(), instDetails["peak-end"].toDouble()));
       setMiniPlotGuides("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"],
-          std::pair<double, double>(instDetails["BackMin"].toDouble(), instDetails["BackMax"].toDouble()));
+          std::pair<double, double>(instDetails["back-start"].toDouble(), instDetails["back-end"].toDouble()));
     }
   }
 

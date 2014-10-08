@@ -6,6 +6,8 @@
 
 #include <QFileInfo>
 
+using namespace Mantid::API;
+
 namespace
 {
   Mantid::Kernel::Logger g_log("IndirectDiagnostics");
@@ -93,93 +95,83 @@ namespace CustomInterfaces
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(sliceTwoRanges(QtProperty*, bool)));
     // Plot slice miniplot when file has finished loading
     connect(m_uiForm.slice_inputFile, SIGNAL(filesFound()), this, SLOT(slicePlotRaw()));
-    // Plot slice miniplot when user clicks Plot Raw
-    connect(m_uiForm.slice_pbPlotRaw, SIGNAL(clicked()), this, SLOT(slicePlotRaw()));
     // Enables/disables calibration file selection when user toggles Use Calibratin File checkbox
     connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
 
     // Set default UI state
     sliceTwoRanges(0, false);
+    m_uiForm.slice_ckUseCalib->setChecked(false);
+    sliceCalib(false);
   }
-    
+
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   IndirectDiagnostics::~IndirectDiagnostics()
   {
   }
-  
+
   void IndirectDiagnostics::setup()
   {
   }
 
   void IndirectDiagnostics::run()
   {
-    QString pyInput =
-      "from IndirectEnergyConversion import slice\n"
-      "tofRange = [" + QString::number(m_dblManager->value(m_properties["PeakStart"])) + ","
-      + QString::number(m_dblManager->value(m_properties["PeakEnd"]));
-    if ( m_blnManager->value(m_properties["UseTwoRanges"]) )
-    {
-      pyInput +=
-        "," + QString::number(m_dblManager->value(m_properties["BackgroundStart"])) + ","
-        + QString::number(m_dblManager->value(m_properties["BackgroundEnd"])) + "]\n";
-    }
-    else
-    {
-      pyInput += "]\n";
-    }
-    if ( m_uiForm.slice_ckUseCalib->isChecked() )
-    {
-      pyInput +=
-        "calib = r'" + m_uiForm.slice_calibFile->getFirstFilename() + "'\n";
-    }
-    else
-    {
-      pyInput +=
-        "calib = ''\n";
-    }
+    QString suffix = "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_slice";
     QString filenames = m_uiForm.slice_inputFile->getFilenames().join("', r'");
-    QString suffix = m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText();
-    pyInput +=
-      "rawfile = [r'" + filenames + "']\n"
-      "spectra = ["+ QString::number(m_dblManager->value(m_properties["SpecMin"])) + "," + QString::number(m_dblManager->value(m_properties["SpecMax"])) +"]\n"
-      "suffix = '" + suffix + "'\n";
 
-    if(m_uiForm.slice_ckVerbose->isChecked())
-      pyInput += "verbose = True\n";
-    else
-      pyInput += "verbose = False\n";
+    std::vector<long> spectraRange;
+    spectraRange.push_back(static_cast<long>(m_dblManager->value(m_properties["SpecMin"])));
+    spectraRange.push_back(static_cast<long>(m_dblManager->value(m_properties["SpecMax"])));
 
-    if(m_uiForm.slice_ckPlot->isChecked())
-      pyInput += "plot = True\n";
-    else
-      pyInput += "plot = False\n";
+    std::vector<double> peakRange;
+    peakRange.push_back(m_dblManager->value(m_properties["PeakStart"]));
+    peakRange.push_back(m_dblManager->value(m_properties["PeakEnd"]));
 
-    if(m_uiForm.slice_ckSave->isChecked())
-      pyInput += "save = True\n";
-    else
-      pyInput += "save = False\n";
+    IAlgorithm_sptr sliceAlg = AlgorithmManager::Instance().create("TimeSlice");
+    sliceAlg->initialize();
 
-    pyInput +=
-      "slice(rawfile, calib, tofRange, spectra, suffix, Save=save, Verbose=verbose, Plot=plot)";
+    sliceAlg->setProperty("InputFiles", filenames.toStdString());
+    sliceAlg->setProperty("SpectraRange", spectraRange);
+    sliceAlg->setProperty("PeakRange", peakRange);
+    sliceAlg->setProperty("Verbose", m_uiForm.slice_ckVerbose->isChecked());
+    sliceAlg->setProperty("Plot", m_uiForm.slice_ckPlot->isChecked());
+    sliceAlg->setProperty("Save", m_uiForm.slice_ckSave->isChecked());
+    sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
 
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
+    if(m_uiForm.slice_ckUseCalib->isChecked())
+    {
+      QString calibWsName = m_uiForm.slice_dsCalibFile->getCurrentDataName();
+      sliceAlg->setProperty("CalibrationWorkspace", calibWsName.toStdString());
+    }
+
+    if(m_blnManager->value(m_properties["UseTwoRanges"]))
+    {
+      std::vector<double> backgroundRange;
+      backgroundRange.push_back(m_dblManager->value(m_properties["BackgroundStart"]));
+      backgroundRange.push_back(m_dblManager->value(m_properties["BackgroundEnd"]));
+      sliceAlg->setProperty("BackgroundRange", backgroundRange);
+    }
+
+    runAlgorithm(sliceAlg);
   }
 
   bool IndirectDiagnostics::validate()
   {
     UserInputValidator uiv;
 
+    // Check raw input
     uiv.checkMWRunFilesIsValid("Input", m_uiForm.slice_inputFile);
-    if( m_uiForm.slice_ckUseCalib->isChecked() )
+    if(m_uiForm.slice_ckUseCalib->isChecked())
       uiv.checkMWRunFilesIsValid("Calibration", m_uiForm.slice_inputFile);
 
+    // Check peak range
     auto rangeOne = std::make_pair(m_dblManager->value(m_properties["PeakStart"]), m_dblManager->value(m_properties["PeakEnd"]));
     uiv.checkValidRange("Range One", rangeOne);
 
+    // Check background range
     bool useTwoRanges = m_blnManager->value(m_properties["UseTwoRanges"]);
-    if( useTwoRanges )
+    if(useTwoRanges)
     {
       auto rangeTwo = std::make_pair(m_dblManager->value(m_properties["BackgroundStart"]), m_dblManager->value(m_properties["BackgroundEnd"]));
       uiv.checkValidRange("Range Two", rangeTwo);
@@ -187,19 +179,21 @@ namespace CustomInterfaces
       uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
     }
 
-    auto specRange = std::make_pair(m_dblManager->value(m_properties["SpecMin"]), m_dblManager->value(m_properties["SpecMax"]));
+    // Check spectra range
+    auto specRange = std::make_pair(m_dblManager->value(m_properties["SpecMin"]), m_dblManager->value(m_properties["SpecMax"]) + 1);
     uiv.checkValidRange("Spectra Range", specRange);
 
     QString error = uiv.generateErrorMessage();
+    bool isError = error != "";
 
-    if(error != "")
+    if(isError)
       g_log.warning(error.toStdString());
 
-    return (error == "");
+    return !isError;
   }
 
   /**
-   * Sets default spectra, peak and background ranges
+   * Sets default spectra, peak and background ranges.
    */
   void IndirectDiagnostics::setDefaultInstDetails()
   {
@@ -207,16 +201,16 @@ namespace CustomInterfaces
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
     //Set spectra range
-    m_dblManager->setValue(m_properties["SpecMin"], instDetails["SpectraMin"].toDouble());
-    m_dblManager->setValue(m_properties["SpecMax"], instDetails["SpectraMax"].toDouble());
+    m_dblManager->setValue(m_properties["SpecMin"], instDetails["spectra-min"].toDouble());
+    m_dblManager->setValue(m_properties["SpecMax"], instDetails["spectra-max"].toDouble());
 
     //Set peak and background ranges
     if(instDetails.size() >= 8)
     {
       setMiniPlotGuides("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"],
-          std::pair<double, double>(instDetails["PeakMin"].toDouble(), instDetails["PeakMax"].toDouble()));
+          std::pair<double, double>(instDetails["peak-start"].toDouble(), instDetails["peak-end"].toDouble()));
       setMiniPlotGuides("SliceBackground", m_properties["BackStart"], m_properties["BackEnd"],
-          std::pair<double, double>(instDetails["BackMin"].toDouble(), instDetails["BackMax"].toDouble()));
+          std::pair<double, double>(instDetails["back-start"].toDouble(), instDetails["back-end"].toDouble()));
     }
   }
 
@@ -225,8 +219,6 @@ namespace CustomInterfaces
    */
   void IndirectDiagnostics::slicePlotRaw()
   {
-    using namespace Mantid::API;
-
     setDefaultInstDetails();
 
     if ( m_uiForm.slice_inputFile->isValid() )
@@ -278,8 +270,7 @@ namespace CustomInterfaces
    */
   void IndirectDiagnostics::sliceCalib(bool state)
   {
-    m_uiForm.slice_calibFile->setEnabled(state);
-    m_uiForm.slice_calibFile->isOptional(!state);
+    m_uiForm.slice_dsCalibFile->setEnabled(state);
   }
 
   /**
@@ -320,10 +311,10 @@ namespace CustomInterfaces
    */
   void IndirectDiagnostics::sliceUpdateRS(QtProperty* prop, double val)
   {
-    if ( prop == m_properties["PeakStart"] )      m_rangeSelectors["SlicePeak"]->setMinimum(val);
-    else if ( prop == m_properties["PeakEnd"] ) m_rangeSelectors["SlicePeak"]->setMaximum(val);
-    else if ( prop == m_properties["BackgroundStart"] ) m_rangeSelectors["SliceBackground"]->setMinimum(val);
-    else if ( prop == m_properties["BackgroundEnd"] ) m_rangeSelectors["SliceBackground"]->setMaximum(val);
+    if(prop == m_properties["PeakStart"])             m_rangeSelectors["SlicePeak"]->setMinimum(val);
+    else if(prop == m_properties["PeakEnd"])          m_rangeSelectors["SlicePeak"]->setMaximum(val);
+    else if(prop == m_properties["BackgroundStart"])  m_rangeSelectors["SliceBackground"]->setMinimum(val);
+    else if(prop == m_properties["BackgroundEnd"])    m_rangeSelectors["SliceBackground"]->setMaximum(val);
   }
 
 } // namespace CustomInterfaces

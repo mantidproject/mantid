@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidNexus/NexusClasses.h"
+#include "LoadANSTOHelper.h"
 
 namespace Mantid
 {
@@ -42,10 +43,6 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-    namespace BbyTar {
-      class File;
-    }
-
     class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
     public:
       // construction
@@ -69,14 +66,16 @@ namespace Mantid
 
     private:      
       // instrument creation
-      Geometry::Instrument_sptr createInstrument(BbyTar::File &tarFile);
+      Geometry::Instrument_sptr createInstrument(ANSTO::Tar::File &tarFile);
 
-      // to micro seconds
-      static double ToMicroSeconds(double fileTime);
+      // load nx dataset
+      template<class T>
+      static bool loadNXDataSet(T &value, NeXus::NXEntry &entry, const std::string &path);
 
       // binary file access
       template<class Counter>
-      void loadEvents(API::Progress &prog, const char *progMsg, BbyTar::File &file, const double tofMinBoundary, const double tofMaxBoundary, Counter &counter);
+      static void loadEvents(API::Progress &prog, const char *progMsg, ANSTO::Tar::File &file, const double tofMinBoundary, const double tofMaxBoundary, Counter &counter);
+      static std::vector<bool> createMaskVector(const std::string &maskFilename, bool &maskFileLoaded);
     };
   }
 }

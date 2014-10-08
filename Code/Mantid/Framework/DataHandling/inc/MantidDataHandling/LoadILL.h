@@ -82,7 +82,6 @@ namespace Mantid
       void addAllNexusFieldsAsProperties(std::string filename);
       void addEnergyToRun();
 
-      void loadExperimentDetails(NeXus::NXEntry & entry);
       int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
       void loadTimeDetails(NeXus::NXEntry& entry);
       NeXus::NXData loadNexusFileData(NeXus::NXEntry& entry);

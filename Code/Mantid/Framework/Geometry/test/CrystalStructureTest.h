@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Crystal/CrystalStructure.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -18,7 +19,7 @@ public:
 
   CrystalStructureTest() :
       m_CsCl(4.126, 4.126, 4.126),
-      m_pg(new PointGroupLaue13),
+      m_pg(PointGroupFactory::Instance().createPointGroup("m-3m")),
       m_centering(new ReflectionConditionPrimitive)
   {
   }
@@ -129,7 +130,7 @@ public:
       double dMax = 4.0;
 
       // make a structure with P-1
-      CrystalStructure structure(m_CsCl);
+      CrystalStructure structure(m_CsCl, PointGroupFactory::Instance().createPointGroup("-1"));
 
       std::vector<V3D> unique = structure.getUniqueHKLs(dMin, dMax);
       std::vector<V3D> peaks = structure.getHKLs(dMin, dMax);
