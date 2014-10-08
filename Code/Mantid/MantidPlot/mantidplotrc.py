@@ -11,8 +11,8 @@
 #----------------------------------------------
 if __name__ == '__main__':
     # Import MantidPlot python commands
-    import mantidplot
-    from mantidplot import *
+    import mantidplotpy
+    from mantidplotpy import *
 
     # Make Mantid available
     import mantid

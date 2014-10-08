@@ -4,7 +4,7 @@ This will test the interface to SliceViewer widgets.
 Note: the SliceViewerPythonInterfaceTest.py offers
 more tests of specific functions. This module
 tests (primarily) the plotSlice() helper methods that is available
-only within mantidplot.py
+only within mantidplot
 """
 import sys
 import os

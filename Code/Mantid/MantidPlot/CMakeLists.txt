@@ -826,12 +826,12 @@ endif ()
 ###########################################################################
 
 # Top-level python scripts
-set( PY_FILES mantidplotrc.py mantidplot.py )
+set( PY_FILES mantidplotrc.py)
 copy_python_files_to_dir ( "${PY_FILES}"
                             ${CMAKE_CURRENT_SOURCE_DIR}
                             ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
                             PYTHON_INSTALL_FILES )
-# mantidplot.py package
+# mantidplot package
 set( MTDPLOTPY_FILES
   __init__.py
   proxies.py
