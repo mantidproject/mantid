@@ -14,6 +14,7 @@ set ( SRC_FILES
 	src/Crystal/ReducedCell.cpp
 	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/ScalarUtils.cpp
+	src/Crystal/SpaceGroup.cpp
         src/Crystal/SymmetryOperation.cpp
         src/Crystal/SymmetryOperationFactory.cpp
 	src/Crystal/SymmetryOperationSymbolParser.cpp
@@ -123,6 +124,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
 	inc/MantidGeometry/Crystal/ScalarUtils.h
+	inc/MantidGeometry/Crystal/SpaceGroup.h
         inc/MantidGeometry/Crystal/SymmetryOperation.h
         inc/MantidGeometry/Crystal/SymmetryOperationFactory.h
 	inc/MantidGeometry/Crystal/SymmetryOperationSymbolParser.h
@@ -288,6 +290,7 @@ set ( TEST_FILES
 	RulesUnionTest.h
 	ScalarUtilsTest.h
 	ShapeFactoryTest.h
+	SpaceGroupTest.h
 	SphereTest.h
 	SurfaceFactoryTest.h
 	SurfaceTest.h
