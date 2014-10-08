@@ -10,9 +10,19 @@ namespace MantidQt
 		{
 			m_uiForm.setupUi(parent);
 
-			//add the plot to the ui form
-			m_uiForm.plotSpace->addWidget(m_plot);
-			//add the properties browser to the ui form
+			// Create the plot
+      m_plots["StretchPlot"] = new QwtPlot(m_parentWidget);
+      m_plots["StretchPlot"]->setCanvasBackground(Qt::white);
+      m_plots["StretchPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
+      m_plots["StretchPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
+			m_uiForm.plotSpace->addWidget(m_plots["StretchPlot"]);
+
+      // Create range selector
+      m_rangeSelectors["StretchERange"] = new MantidWidgets::RangeSelector(m_plots["StretchPlot"]);
+      connect(m_rangeSelectors["StretchERange"], SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
+      connect(m_rangeSelectors["StretchERange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
+
+			// Add the properties browser to the ui form
 			m_uiForm.treeSpace->addWidget(m_propTree);
 
 			m_properties["EMin"] = m_dblManager->addProperty("EMin");
@@ -47,6 +57,10 @@ namespace MantidQt
 			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
 			connect(m_uiForm.chkSequentialFit, SIGNAL(toggled(bool)), m_uiForm.cbPlot, SLOT(setEnabled(bool)));
 		}
+
+    void Stretch::setup()
+    {
+    }
 
 		/**
 		 * Validate the form to check the program can be run
@@ -138,10 +152,10 @@ namespace MantidQt
 		 */
 		void Stretch::handleSampleInputReady(const QString& filename)
 		{
-			plotMiniPlot(filename, 0);
-			std::pair<double,double> range = getCurveRange();
-			setMiniPlotGuides(m_properties["EMin"], m_properties["EMax"], range);
-			setPlotRange(m_properties["EMin"], m_properties["EMax"], range);
+			plotMiniPlot(filename, 0, "StretchPlot", "RawPlotCurve");
+			std::pair<double,double> range = getCurveRange("StretchPlot");
+			setMiniPlotGuides("StretchERange", m_properties["EMin"], m_properties["EMax"], range);
+			setPlotRange("StretchERange", m_properties["EMin"], m_properties["EMax"], range);
 		}
 
 		/**

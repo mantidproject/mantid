@@ -58,7 +58,7 @@ namespace CustomInterfaces
     setup();
   }
 
-  void IndirectTab::validateTab()
+  bool IndirectTab::validateTab()
   {
     validate();
   }

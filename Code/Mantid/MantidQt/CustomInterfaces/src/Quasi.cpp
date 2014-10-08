@@ -10,10 +10,19 @@ namespace MantidQt
 		{
 			m_uiForm.setupUi(parent);
 
-			//add the plot to the ui form
-			m_uiForm.plotSpace->addWidget(m_plot);
+			// Create the plot
+      m_plots["QuasiPlot"] = new QwtPlot(m_parentWidget);
+      m_plots["QuasiPlot"]->setCanvasBackground(Qt::white);
+      m_plots["QuasiPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
+      m_plots["QuasiPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
+			m_uiForm.plotSpace->addWidget(m_plots["QuasiPlot"]);
 
-			//add the properties browser to the ui form
+      // Create range selector
+      m_rangeSelectors["QuasiERange"] = new MantidWidgets::RangeSelector(m_plots["QuasiPlot"]);
+      connect(m_rangeSelectors["QuasiERange"], SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
+      connect(m_rangeSelectors["QuasiERange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
+
+			// Add the properties browser to the UI form
 			m_uiForm.treeSpace->addWidget(m_propTree);
 
 			m_properties["EMin"] = m_dblManager->addProperty("EMin");
@@ -60,6 +69,10 @@ namespace MantidQt
 			m_uiForm.dsResNorm->readSettings(settings.group());
 			m_uiForm.mwFixWidthDat->readSettings(settings.group());
 		}
+
+    void Quasi::setup()
+    {
+    }
 
 		/**
 		 * Validate the form to check the program can be run
@@ -180,10 +193,10 @@ namespace MantidQt
 		 */
 		void Quasi::handleSampleInputReady(const QString& filename)
 		{
-			plotMiniPlot(filename, 0);
-			std::pair<double,double> range = getCurveRange();
-			setMiniPlotGuides(m_properties["EMin"], m_properties["EMax"], range);
-			setPlotRange(m_properties["EMin"], m_properties["EMax"], range);
+			plotMiniPlot(filename, 0, "QuasiPlot", "RawPlotCurve");
+			std::pair<double,double> range = getCurveRange("QuasiPlot");
+			setMiniPlotGuides("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
+			setPlotRange("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
 		}
 
 		/**

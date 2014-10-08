@@ -17,6 +17,7 @@ namespace MantidQt
 
 			// Inherited methods from IndirectBayesTab
 			QString help() { return "JumpFit"; };
+      void setup();
 			bool validate();
 			void run();
 			/// Load default settings into the interface
@@ -28,19 +29,19 @@ namespace MantidQt
 			/// Slot to handle plotting a different spectrum of the workspace
 			void handleWidthChange(const QString& text);
 			/// Slot for when the min range on the range selector changes
-			virtual void minValueChanged(double min);
+			void minValueChanged(double min);
 			/// Slot for when the min range on the range selector changes
-			virtual void maxValueChanged(double max);
+			void maxValueChanged(double max);
 			/// Slot to update the guides when the range properties change
 			void updateProperties(QtProperty* prop, double val);
 			/// Find all spectra with width data in the workspace
 			void findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws);
 
 		private:
-			//The ui form
+			// The UI form
 			Ui::JumpFit m_uiForm;
 			// map of axis labels to spectrum number
-			std::map<std::string,int> spectraList;
+			std::map<std::string, int> spectraList;
 
 		};
 	} // namespace CustomInterfaces

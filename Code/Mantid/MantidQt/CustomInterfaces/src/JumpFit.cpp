@@ -15,9 +15,19 @@ namespace MantidQt
 		{
 			m_uiForm.setupUi(parent);
 
-			//add the plot to the ui form
-			m_uiForm.plotSpace->addWidget(m_plot);
-			//add the properties browser to the ui form
+			// Create the plot
+      m_plots["JumpFitPlot"] = new QwtPlot(m_parentWidget);
+      m_plots["JumpFitPlot"]->setCanvasBackground(Qt::white);
+      m_plots["JumpFitPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
+      m_plots["JumpFitPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
+			m_uiForm.plotSpace->addWidget(m_plots["JumpFitPlot"]);
+
+      // Create range selector
+      m_rangeSelectors["JumpFitQ"] = new MantidWidgets::RangeSelector(m_plots["JumpFitPlot"]);
+      connect(m_rangeSelectors["JumpFitQ"], SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
+      connect(m_rangeSelectors["JumpFitQ"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
+
+			// Add the properties browser to the ui form
 			m_uiForm.treeSpace->addWidget(m_propTree);
 
 			m_properties["QMin"] = m_dblManager->addProperty("QMin");
@@ -36,6 +46,10 @@ namespace MantidQt
 			// Connect width selector to handler method
 			connect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(handleWidthChange(const QString&)));
 		}
+
+    void JumpFit::setup()
+    {
+    }
 
 		/**
 		 * Validate the form to check the program can be run
@@ -145,21 +159,21 @@ namespace MantidQt
 				m_uiForm.cbWidth->setEnabled(true);
 
 				std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
-				plotMiniPlot(filename, spectraList[currentWidth]);
+				plotMiniPlot(filename, spectraList[currentWidth], "JumpFitPlot", "RawPlotCurve");
 				std::pair<double,double> res;
-				std::pair<double,double> range = getCurveRange();
+				std::pair<double,double> range = getCurveRange("JumpFitPlot");
 
 				//Use the values from the instrument parameter file if we can
 				if(getInstrumentResolution(filename, res))
 				{
-					setMiniPlotGuides(m_properties["QMin"], m_properties["QMax"], res);
+					setMiniPlotGuides("JumpFitQ", m_properties["QMin"], m_properties["QMax"], res);
 				}
 				else
 				{
-					setMiniPlotGuides(m_properties["QMin"], m_properties["QMax"], range);
+					setMiniPlotGuides("JumpFitQ", m_properties["QMin"], m_properties["QMax"], range);
 				}
 
-				setPlotRange(m_properties["QMin"], m_properties["QMax"], range);
+				setPlotRange("JumpFitQ", m_properties["QMin"], m_properties["QMax"], range);
 			}
 			else
 			{
@@ -232,7 +246,7 @@ namespace MantidQt
 			{
 				if(validate())
 				{
-					plotMiniPlot(sampleName, spectraList[text.toStdString()]);
+					plotMiniPlot(sampleName, spectraList[text.toStdString()], "JumpFitPlot", "RawPlotCurve");
 				}
 			}
 		}

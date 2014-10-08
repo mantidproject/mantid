@@ -43,7 +43,7 @@ namespace CustomInterfaces
   /** IndirectTab : TODO: DESCRIPTION
 
     @author Dan Nixon
-    @date 13/08/2013
+    @date 08/10/2014
 
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -76,7 +76,7 @@ namespace CustomInterfaces
   public slots:
     void runTab();
     void setupTab();
-    void validateTab();
+    bool validateTab();
 
   protected slots:
     /// Slot to handle when an algorithm finishes running
