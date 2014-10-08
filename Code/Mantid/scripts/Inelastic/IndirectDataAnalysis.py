@@ -7,6 +7,7 @@ from mantid.simpleapi import *
 from mantid.api import TextAxis
 from mantid import *
 
+
 ##############################################################################
 # Misc. Helper Functions
 ##############################################################################
@@ -468,16 +469,14 @@ def fury(samWorkspaces, res_workspace, rebinParam, RES=True, Save=False, Verbose
     Xin = mtd[samTemp].readX(0)
     d1 = Xin[1]-Xin[0]
     if d1 < 1e-8:
-        error = 'Data energy bin is zero'
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise RuntimeError('Data energy bin is zero')
+
     d2 = Xin[npt-1]-Xin[npt-2]
     dmin = min(d1,d2)
     pars = rebinParam.split(',')
-    if (float(pars[1]) <= dmin):
-        error = 'EWidth = ' + pars[1] + ' < smallest Eincr = ' + str(dmin)
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+    if float(pars[1]) <= dmin:
+        raise RuntimeError('EWidth = ' + pars[1] + ' < smallest Eincr = ' + str(dmin))
+
     outWSlist = []
     # Process RES Data Only Once
     CheckAnalysers(samTemp, res_workspace, Verbose)
@@ -831,11 +830,14 @@ def plotInput(inputfiles,spectra=[]):
 ##############################################################################
 
 def CubicFit(inputWS, spec, Verbose=False):
-    '''Uses the Mantid Fit Algorithm to fit a quadratic to the inputWS
-    parameter. Returns a list containing the fitted parameter values.'''
+    '''
+    Uses the Mantid Fit Algorithm to fit a quadratic to the inputWS
+    parameter. Returns a list containing the fitted parameter values.
+    '''
+
     function = 'name=Quadratic, A0=1, A1=0, A2=0'
     fit = Fit(Function=function, InputWorkspace=inputWS, WorkspaceIndex=spec,
-      CreateOutput=True, Output='Fit')
+              CreateOutput=True, Output='Fit')
     table = mtd['Fit_Parameters']
     A0 = table.cell(0,1)
     A1 = table.cell(1,1)
@@ -845,8 +847,10 @@ def CubicFit(inputWS, spec, Verbose=False):
        logger.notice('Group '+str(spec)+' of '+inputWS+' ; fit coefficients are : '+str(Abs))
     return Abs
 
+
 def subractCanWorkspace(sample, can, output_name, rebin_can=False):
-    '''Subtract the can workspace from the sample workspace.
+    '''
+    Subtract the can workspace from the sample workspace.
     Optionally rebin the can to match the sample.
 
     @param sample :: sample workspace to use subract from
@@ -867,8 +871,10 @@ def subractCanWorkspace(sample, can, output_name, rebin_can=False):
 
 
 def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
-    '''Through the PolynomialCorrection algorithm, makes corrections to the
-    input workspace based on the supplied correction values.'''
+    '''
+    Through the PolynomialCorrection algorithm, makes corrections to the
+    input workspace based on the supplied correction values.
+    '''
     # Corrections are applied in Lambda (Wavelength)
 
     diffraction_run = checkUnitIs(inputWS, 'dSpacing')
@@ -906,37 +912,37 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
     CorrectedCanWS = '__ccan'
     for i in range(0, nHist): # Loop through each spectra in the inputWS
         ExtractSingleSpectrum(InputWorkspace=inputWS, OutputWorkspace=CorrectedSampleWS,
-            WorkspaceIndex=i)
+                              WorkspaceIndex=i)
         logger.notice(str(i) + str(mtd[CorrectedSampleWS].readX(0)))
-        if ( len(corrections) == 1 ):
+        if len(corrections) == 1:
             Ass = CubicFit(corrections[0], i, Verbose)
             PolynomialCorrection(InputWorkspace=CorrectedSampleWS, OutputWorkspace=CorrectedSampleWS,
-                Coefficients=Ass, Operation='Divide')
-            if ( i == 0 ):
+                                 Coefficients=Ass, Operation='Divide')
+            if i == 0:
                 CloneWorkspace(InputWorkspace=CorrectedSampleWS, OutputWorkspace=CorrectedWS)
             else:
                 ConjoinWorkspaces(InputWorkspace1=CorrectedWS, InputWorkspace2=CorrectedSampleWS)
         else:
             if mtd.doesExist(canWS):
                 ExtractSingleSpectrum(InputWorkspace=canWS, OutputWorkspace=CorrectedCanWS,
-                    WorkspaceIndex=i)
+                                      WorkspaceIndex=i)
                 Acc = CubicFit(corrections[3], i, Verbose)
                 PolynomialCorrection(InputWorkspace=CorrectedCanWS, OutputWorkspace=CorrectedCanWS,
-                    Coefficients=Acc, Operation='Divide')
+                                     Coefficients=Acc, Operation='Divide')
                 Acsc = CubicFit(corrections[2], i, Verbose)
                 PolynomialCorrection(InputWorkspace=CorrectedCanWS, OutputWorkspace=CorrectedCanWS,
-                    Coefficients=Acsc, Operation='Multiply')
+                                     Coefficients=Acsc, Operation='Multiply')
 
                 subractCanWorkspace(CorrectedSampleWS, CorrectedCanWS, CorrectedSampleWS, rebin_can=rebin_can)
 
             Assc = CubicFit(corrections[1], i, Verbose)
             PolynomialCorrection(InputWorkspace=CorrectedSampleWS, OutputWorkspace=CorrectedSampleWS,
                 Coefficients=Assc, Operation='Divide')
-            if ( i == 0 ):
+            if i == 0:
                 CloneWorkspace(InputWorkspace=CorrectedSampleWS, OutputWorkspace=CorrectedWS)
             else:
                 ConjoinWorkspaces(InputWorkspace1=CorrectedWS, InputWorkspace2=CorrectedSampleWS,
-                                      CheckOverlapping=False)
+                                  CheckOverlapping=False)
 
     if diffraction_run:
         ConvertUnits(InputWorkspace=inputWS, OutputWorksapce=inputWS, Target='dSpacing')
@@ -970,10 +976,14 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
     DeleteWorkspace('Fit_Workspace')
     return CorrectedWS
 
+
 def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, RebinCan=False, ScaleOrNotToScale=False, factor=1, Save=False,
         PlotResult='None', PlotContrib=False):
-    '''Load up the necessary files and then passes them into the main
-    applyCorrections routine.'''
+    '''
+    Load up the necessary files and then passes them into the main
+    applyCorrections routine.
+    '''
+
     StartTime('ApplyCorrections')
     workdir = config['defaultsave.directory']
     s_hist,sxlen = CheckHistZero(sample)
@@ -1031,12 +1041,12 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
         calc_plot = [cor_result + ext, sample]
         res_plot = cor_result+'_rqw'
     else:
-        if ( scaled_container == '' ):
-            sys.exit('ERROR *** Invalid options - nothing to do!')
+        if scaled_container == '':
+            raise RuntimeError('Invalid options - nothing to do!')
         else:
-            sub_result = sam_name +'Subtract_'+ can_run
+            sub_result = sam_name + 'Subtract_' + can_run
             if Verbose:
-                logger.notice('Subtracting '+container+' from '+sample)
+                logger.notice('Subtracting ' + container + ' from ' + sample)
 
             subractCanWorkspace(sample, scaled_container, sub_result, rebin_can=RebinCan)
 
@@ -1046,7 +1056,7 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
 
             red_ws_name = sub_result + '_red'
             RenameWorkspace(InputWorkspace=sub_result, OutputWorkspace=red_ws_name)
-            CopyLogs(InputWorkspace=sample, OutputWorksapce=red_ws_name)
+            CopyLogs(InputWorkspace=sample, OutputWorkspace=red_ws_name)
 
             rws = mtd[red_ws_name]
             outNm= sub_result + '_Result_'
@@ -1062,10 +1072,10 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
             else:
                 res_plot = sub_result + '_red'
 
-    if (PlotResult != 'None'):
+    if PlotResult != 'None':
         plotCorrResult(res_plot, PlotResult)
 
-    if ( mtd.doesExist(scaled_container) ):
+    if mtd.doesExist(scaled_container):
         sws = mtd[sample]
         cws = mtd[scaled_container]
         names = 'Sample,Can,Calc'
@@ -1078,16 +1088,16 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
             dataX = np.array(sws.readX(i))
             dataY = np.array(sws.readY(i))
             dataE = np.array(sws.readE(i))
-            dataX = np.append(dataX,np.array(cws.readX(i)))
-            dataY = np.append(dataY,np.array(cws.readY(i)))
-            dataE = np.append(dataE,np.array(cws.readE(i)))
-            dataX = np.append(dataX,np.array(rws.readX(i)))
-            dataY = np.append(dataY,np.array(rws.readY(i)))
-            dataE = np.append(dataE,np.array(rws.readE(i)))
+            dataX = np.append(dataX, np.array(cws.readX(i)))
+            dataY = np.append(dataY, np.array(cws.readY(i)))
+            dataE = np.append(dataE, np.array(cws.readE(i)))
+            dataX = np.append(dataX, np.array(rws.readX(i)))
+            dataY = np.append(dataY, np.array(rws.readY(i)))
+            dataE = np.append(dataE, np.array(rws.readE(i)))
             fout = outNm + str(i)
 
             CreateWorkspace(OutputWorkspace=fout, DataX=dataX, DataY=dataY, DataE=dataE,
-                Nspec=3, UnitX=x_unit, VerticalAxisUnit='Text', VerticalAxisValues=names)
+                            Nspec=3, UnitX=x_unit, VerticalAxisUnit='Text', VerticalAxisValues=names)
 
             if i == 0:
                 group = fout
@@ -1095,30 +1105,32 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
                 group += ',' + fout
 
         CopyLogs(InputWorkspace=sample, OutputWorkspace=fout)
-        GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=outNm[:-1])
+        GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=outNm[:-1])
         if PlotContrib:
-            plotCorrContrib(outNm+'0',[0,1,2])
+            plotCorrContrib(outNm+'0', [0, 1, 2])
         if Save:
-            res_path = os.path.join(workdir,outNm[:-1]+'.nxs')
-            SaveNexusProcessed(InputWorkspace=outNm[:-1],Filename=res_path)
+            res_path = os.path.join(workdir,outNm[:-1] + '.nxs')
+            SaveNexusProcessed(InputWorkspace=outNm[:-1], Filename=res_path)
             if Verbose:
                 logger.notice('Output file created : '+res_path)
 
         DeleteWorkspace(cws)
     EndTime('ApplyCorrections')
 
-def plotCorrResult(inWS,PlotResult):
+
+def plotCorrResult(inWS, PlotResult):
     nHist = mtd[inWS].getNumberHistograms()
-    if (PlotResult == 'Spectrum' or PlotResult == 'Both'):
+    if PlotResult == 'Spectrum' or PlotResult == 'Both':
         if nHist >= 10:                       #only plot up to 10 hists
             nHist = 10
         plot_list = []
         for i in range(0, nHist):
             plot_list.append(i)
-        res_plot=mp.plotSpectrum(inWS,plot_list)
-    if (PlotResult == 'Contour' or PlotResult == 'Both'):
+        res_plot=mp.plotSpectrum(inWS, plot_list)
+    if PlotResult == 'Contour' or PlotResult == 'Both':
         if nHist >= 5:                        #needs at least 5 hists for a contour
             mp.importMatrixWorkspace(inWS).plotGraph2D()
 
-def plotCorrContrib(plot_list,n):
-        con_plot=mp.plotSpectrum(plot_list,n)
+
+def plotCorrContrib(plot_list, n):
+    con_plot = mp.plotSpectrum(plot_list, n)
