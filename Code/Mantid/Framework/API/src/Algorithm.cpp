@@ -572,7 +572,21 @@ namespace Mantid
         if (callProcessGroups)
         {
           // This calls this->execute() again on each member of the group.
-          return processGroups();
+          start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
+          // Start a timer
+          Timer timer;
+          // Call the concrete algorithm's exec method
+          const bool completed = processGroups();
+          // Check for a cancellation request in case the concrete algorithm doesn't
+          interruption_point();			
+          // Get how long this algorithm took to run
+          const float duration = timer.elapsed();
+          
+          if(completed)
+          {
+            // Log that execution has completed.
+            reportCompleted(duration, true/*indicat that this is for group processing*/);
+          }
         }
       }
       catch(std::exception& ex)
@@ -630,14 +644,9 @@ namespace Mantid
 
           // RJT, 19/3/08: Moved this up from below the catch blocks
           setExecuted(true);
-          if (!m_isChildAlgorithm || m_alwaysStoreInADS)
-          {
-            getLogger().notice() << name() << " successful, Duration "
-              << std::fixed << std::setprecision(2) << duration << " seconds" << std::endl;
-          }
-          else
-            getLogger().debug() << name() << " finished with isChild = " << isChild() << std::endl;
-          m_running = false;
+
+          // Log that execution has completed.
+          reportCompleted(duration);
         }
         catch(std::runtime_error& ex)
         {
@@ -1611,6 +1620,32 @@ namespace Mantid
       // openmp cancel handling is performed using the ??, ?? and ?? macros in each algrothim
       IF_NOT_PARALLEL
         if (m_cancel) throw CancelException();
+    }
+
+    /**
+    Report that the algorithm has completed.
+    @param duration : Algorithm duration
+    @param groupProcessing : We have been processing via processGroups if true.
+    */
+    void Algorithm::reportCompleted(const double& duration, const bool groupProcessing)
+    {
+      std::string optionalMessage;
+      if(groupProcessing)
+      {
+        optionalMessage = ". Processed as a workspace group";
+      }
+
+      if (!m_isChildAlgorithm || m_alwaysStoreInADS)
+      {
+        getLogger().notice() << name() << " successful, Duration "
+              << std::fixed << std::setprecision(2) << duration << " seconds" << optionalMessage << std::endl;
+      }
+      
+      else
+      {
+        getLogger().debug() << name() << " finished with isChild = " << isChild() << std::endl;
+      }
+      m_running = false;
     }
 
 

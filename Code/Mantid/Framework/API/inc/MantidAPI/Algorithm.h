@@ -359,6 +359,9 @@ private:
 
   bool executeAsyncImpl(const Poco::Void & i);
 
+  // Report that the algorithm has completed.
+  void reportCompleted(const double& duration, const bool groupProcessing = false);
+
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.
   Poco::ActiveMethod<bool, Poco::Void, Algorithm, Poco::ActiveStarter<Algorithm>> *m_executeAsync;
