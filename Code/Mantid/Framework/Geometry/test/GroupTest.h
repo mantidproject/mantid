@@ -24,6 +24,12 @@ public:
         TS_ASSERT(group.getSymmetryOperations().front().isIdentity());
     }
 
+    void testStringConstructor()
+    {
+        Group group("x,y,z; -x,-y,-z");
+
+        TS_ASSERT_EQUALS(group.order(), 2);
+    }
 
     void testConstructor()
     {
@@ -168,6 +174,18 @@ public:
 
         // Check that it is found in the list of symmetry operations of the new group
         TS_ASSERT_DIFFERS(std::find(opsOfThree.begin(), opsOfThree.end(), mirrorY), opsOfThree.end());
+
+        // Make sure that null-pointer do not work
+        Group_const_sptr null;
+
+        TS_ASSERT_THROWS(null * null, std::invalid_argument);
+        TS_ASSERT_THROWS(null == null, std::invalid_argument);
+        TS_ASSERT_THROWS(null != null, std::invalid_argument);
+        TS_ASSERT_THROWS(three * null, std::invalid_argument);
+        TS_ASSERT_THROWS(null * three, std::invalid_argument);
+
+        Mantid::Kernel::V3D coords(0.4, 0.3, 0.1);
+        TS_ASSERT_THROWS(null * coords, std::invalid_argument);
     }
 
 

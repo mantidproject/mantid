@@ -1,4 +1,5 @@
 #include "MantidGeometry/Crystal/Group.h"
+#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 #include <boost/make_shared.hpp>
 
 namespace Mantid
@@ -13,6 +14,13 @@ Group::Group() :
 {
     std::vector<SymmetryOperation> operation(1);
     setSymmetryOperations(operation);
+}
+
+Group::Group(const std::string &symmetryOperationString) :
+    m_allOperations(),
+    m_operationSet()
+{
+    setSymmetryOperations(SymmetryOperationFactory::Instance().createSymOps(symmetryOperationString));
 }
 
 Group::Group(const std::vector<SymmetryOperation> &symmetryOperations) :
@@ -94,17 +102,29 @@ void Group::setSymmetryOperations(const std::vector<SymmetryOperation> &symmetry
 
 Group_const_sptr operator *(const Group_const_sptr &lhs, const Group_const_sptr &rhs)
 {
+    if(!lhs || !rhs) {
+        throw std::invalid_argument("One of the operands is null. Aborting.");
+    }
+
     return boost::make_shared<const Group>((*lhs) * (*rhs));
 }
 
 std::vector<Kernel::V3D> operator *(const Group_const_sptr &lhs, const Kernel::V3D &rhs)
 {
+    if(!lhs) {
+        throw std::invalid_argument("Cannot use null pointer for multiplication.");
+    }
+
     return (*lhs) * rhs;
 }
 
 
 bool operator ==(const Group_const_sptr &lhs, const Group_const_sptr &rhs)
 {
+    if(!lhs || !rhs) {
+        throw std::invalid_argument("One of the operands is null. Aborting.");
+    }
+
     return (*lhs) == (*rhs);
 }
 

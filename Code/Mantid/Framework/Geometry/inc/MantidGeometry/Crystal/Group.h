@@ -46,6 +46,7 @@ class MANTID_GEOMETRY_DLL Group
 {
 public:
     Group();
+    Group(const std::string &symmetryOperationString);
     Group(const std::vector<SymmetryOperation> &symmetryOperations);
     Group(const Group &other);
     Group &operator =(const Group &other);
