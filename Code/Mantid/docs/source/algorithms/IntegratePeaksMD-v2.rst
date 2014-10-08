@@ -93,6 +93,36 @@ If BackgroundInnerRadius is left blank, then **BackgroundInnerRadius** =
 
    IntegratePeaksMD\_graph2.png
 
+IntegrateIfOnEdge option
+###################################
+
+Edges for each bank or pack of tubes of the instrument are defined by masking the edges in the PeaksWorkspace instrument. 
+e.g. For CORELLI, tubes 1 and 16, and pixels 0 and 255.
+Q in the lab frame for every peak is calculated, call it C
+For every point on the edge, the trajectory in reciprocal space is a straight line, going through:
+
+:math:`\vec{O}=(0,0,0)`
+
+Calculate a point at a fixed momentum, say k=1. 
+Q in the lab frame:
+
+:math:`\vec{E}=(-k*sin(\theta)*cos(\phi),-k*sin(\theta)*sin(\phi),k-k*cos(\phi))`
+
+Normalize E to 1: 
+
+:math:`\vec{E}=\vec{E}*(1./\left|\vec{E}\right|)`
+
+The distance from C to OE is given by:
+
+:math:`dv=\vec{C}-\vec{E}*(\vec{C} \cdot \vec{E})`
+
+If:
+
+:math:`\left|dv\right|<PeakRadius`
+
+for the integration, one of the detector trajectories on the edge is too close to the peak 
+This method is also applied to all masked pixels.  If there are masked pixels trajectories inside an integration volume, the peak must be rejected.
+
    
 Usage
 ------
