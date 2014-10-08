@@ -587,6 +587,7 @@ namespace Mantid
             // Log that execution has completed.
             reportCompleted(duration, true/*indicat that this is for group processing*/);
           }
+          return completed;
         }
       }
       catch(std::exception& ex)
