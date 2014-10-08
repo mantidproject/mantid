@@ -54,38 +54,34 @@ public:
 protected:
     CenteringType m_type;
     std::string m_symbol;
-
-private:
-    /// Private helper class to keep this out of the interface of CenteringGroup.
-    class CenteringGroupCreationHelper
-    {
-    public:
-        static CenteringGroup::CenteringType getCenteringType(const std::string &centeringSymbol);
-
-        static std::vector<SymmetryOperation> getSymmetryOperations(CenteringGroup::CenteringType centeringType);
-
-    protected:
-        CenteringGroupCreationHelper() { }
-        ~CenteringGroupCreationHelper() { }
-
-        static std::vector<SymmetryOperation> getPrimitive();
-        static std::vector<SymmetryOperation> getBodyCentered();
-        static std::vector<SymmetryOperation> getACentered();
-        static std::vector<SymmetryOperation> getBCentered();
-        static std::vector<SymmetryOperation> getCCentered();
-        static std::vector<SymmetryOperation> getFCentered();
-        static std::vector<SymmetryOperation> getRobvCentered();
-        static std::vector<SymmetryOperation> getRrevCentered();
-
-        static std::map<std::string, CenteringGroup::CenteringType> m_centeringSymbolMap;
-    };
-    
 };
 
 typedef boost::shared_ptr<CenteringGroup> CenteringGroup_sptr;
 typedef boost::shared_ptr<const CenteringGroup> CenteringGroup_const_sptr;
 
+/// Helper class to keep this out of the interface of CenteringGroup.
+class CenteringGroupCreationHelper
+{
+public:
+    static CenteringGroup::CenteringType getCenteringType(const std::string &centeringSymbol);
 
+    static std::vector<SymmetryOperation> getSymmetryOperations(CenteringGroup::CenteringType centeringType);
+
+protected:
+    CenteringGroupCreationHelper() { }
+    ~CenteringGroupCreationHelper() { }
+
+    static std::vector<SymmetryOperation> getPrimitive();
+    static std::vector<SymmetryOperation> getBodyCentered();
+    static std::vector<SymmetryOperation> getACentered();
+    static std::vector<SymmetryOperation> getBCentered();
+    static std::vector<SymmetryOperation> getCCentered();
+    static std::vector<SymmetryOperation> getFCentered();
+    static std::vector<SymmetryOperation> getRobvCentered();
+    static std::vector<SymmetryOperation> getRrevCentered();
+
+    static std::map<std::string, CenteringGroup::CenteringType> m_centeringSymbolMap;
+};
 
 
 

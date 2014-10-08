@@ -33,7 +33,7 @@ std::string CenteringGroup::getSymbol() const
 }
 
 /// Map between string symbols and enum-values for centering type.
-std::map<std::string, CenteringGroup::CenteringType> CenteringGroup::CenteringGroupCreationHelper::m_centeringSymbolMap =
+std::map<std::string, CenteringGroup::CenteringType> CenteringGroupCreationHelper::m_centeringSymbolMap =
         boost::assign::map_list_of
         ("P", CenteringGroup::P)
         ("I", CenteringGroup::I)
@@ -46,7 +46,7 @@ std::map<std::string, CenteringGroup::CenteringType> CenteringGroup::CenteringGr
         ("Rrev", CenteringGroup::Rrev);
 
 /// Returns centering type enum value if centering symbol exists, throws std::invalid_argument exception otherwise.
-CenteringGroup::CenteringType CenteringGroup::CenteringGroupCreationHelper::getCenteringType(const std::string &centeringSymbol)
+CenteringGroup::CenteringType CenteringGroupCreationHelper::getCenteringType(const std::string &centeringSymbol)
 {
     auto it = m_centeringSymbolMap.find(centeringSymbol);
 
@@ -58,7 +58,7 @@ CenteringGroup::CenteringType CenteringGroup::CenteringGroupCreationHelper::getC
 }
 
 /// Returns a vector of symmetry operations for the given centering type or throws std::invalid_argument if an invalid value is supplied.
-std::vector<SymmetryOperation> CenteringGroup::CenteringGroupCreationHelper::getSymmetryOperations(CenteringGroup::CenteringType centeringType)
+std::vector<SymmetryOperation> CenteringGroupCreationHelper::getSymmetryOperations(CenteringGroup::CenteringType centeringType)
 {
     switch(centeringType) {
     case CenteringGroup::P:
@@ -83,49 +83,49 @@ std::vector<SymmetryOperation> CenteringGroup::CenteringGroupCreationHelper::get
 }
 
 /// Returns symmetry operations for P-centering.
-std::vector<SymmetryOperation> CenteringGroup::CenteringGroup::CenteringGroupCreationHelper::getPrimitive()
+std::vector<SymmetryOperation> CenteringGroupCreationHelper::getPrimitive()
 {
     return SymmetryOperationFactory::Instance().createSymOps("x,y,z");
 }
 
 /// Returns symmetry operations for I-centering.
-std::vector<SymmetryOperation> CenteringGroup::CenteringGroupCreationHelper::getBodyCentered()
+std::vector<SymmetryOperation> CenteringGroupCreationHelper::getBodyCentered()
 {
     return SymmetryOperationFactory::Instance().createSymOps("x,y,z; x+1/2,y+1/2,z+1/2");
 }
 
 /// Returns symmetry operations for A-centering.
-std::vector<SymmetryOperation> CenteringGroup::CenteringGroupCreationHelper::getACentered()
+std::vector<SymmetryOperation> CenteringGroupCreationHelper::getACentered()
 {
     return SymmetryOperationFactory::Instance().createSymOps("x,y,z; x,y+1/2,z+1/2");
 }
 
 /// Returns symmetry operations for B-centering.
-std::vector<SymmetryOperation> CenteringGroup::CenteringGroupCreationHelper::getBCentered()
+std::vector<SymmetryOperation> CenteringGroupCreationHelper::getBCentered()
 {
     return SymmetryOperationFactory::Instance().createSymOps("x,y,z; x+1/2,y,z+1/2");
 }
 
 /// Returns symmetry operations for C-centering.
-std::vector<SymmetryOperation> CenteringGroup::CenteringGroupCreationHelper::getCCentered()
+std::vector<SymmetryOperation> CenteringGroupCreationHelper::getCCentered()
 {
     return SymmetryOperationFactory::Instance().createSymOps("x,y,z; x+1/2,y+1/2,z");
 }
 
 /// Returns symmetry operations for F-centering.
-std::vector<SymmetryOperation> CenteringGroup::CenteringGroupCreationHelper::getFCentered()
+std::vector<SymmetryOperation> CenteringGroupCreationHelper::getFCentered()
 {
     return SymmetryOperationFactory::Instance().createSymOps("x,y,z; x,y+1/2,z+1/2; x+1/2,y,z+1/2; x+1/2,y+1/2,z");
 }
 
 /// Returns symmetry operations for R-centering, obverse setting.
-std::vector<SymmetryOperation> CenteringGroup::CenteringGroupCreationHelper::getRobvCentered()
+std::vector<SymmetryOperation> CenteringGroupCreationHelper::getRobvCentered()
 {
     return SymmetryOperationFactory::Instance().createSymOps("x,y,z; x+1/3,y+2/3,z+2/3; x+2/3,y+1/3,z+1/3");
 }
 
 /// Returns symmetry operations for R-centering, reverse setting.
-std::vector<SymmetryOperation> CenteringGroup::CenteringGroupCreationHelper::getRrevCentered()
+std::vector<SymmetryOperation> CenteringGroupCreationHelper::getRrevCentered()
 {
     return SymmetryOperationFactory::Instance().createSymOps("x,y,z; x+1/3,y+2/3,z+1/3; x+2/3,y+1/3,z+2/3");
 }
