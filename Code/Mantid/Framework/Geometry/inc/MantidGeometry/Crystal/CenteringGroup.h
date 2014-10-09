@@ -76,22 +76,24 @@ typedef boost::shared_ptr<const CenteringGroup> CenteringGroup_const_sptr;
 class CenteringGroupCreationHelper
 {
 public:
-    static CenteringGroup::CenteringType getCenteringType(const std::string &centeringSymbol);
-
-    static std::vector<SymmetryOperation> getSymmetryOperations(CenteringGroup::CenteringType centeringType);
-
-protected:
-    CenteringGroupCreationHelper() { }
+    CenteringGroupCreationHelper();
     ~CenteringGroupCreationHelper() { }
 
-    static std::vector<SymmetryOperation> getPrimitive();
-    static std::vector<SymmetryOperation> getBodyCentered();
-    static std::vector<SymmetryOperation> getACentered();
-    static std::vector<SymmetryOperation> getBCentered();
-    static std::vector<SymmetryOperation> getCCentered();
-    static std::vector<SymmetryOperation> getFCentered();
-    static std::vector<SymmetryOperation> getRobvCentered();
-    static std::vector<SymmetryOperation> getRrevCentered();
+    CenteringGroup::CenteringType getCenteringType(const std::string &centeringSymbol) const;
+
+    std::vector<SymmetryOperation> getSymmetryOperations(CenteringGroup::CenteringType centeringType) const;
+
+protected:
+    std::vector<SymmetryOperation> getPrimitive() const;
+    std::vector<SymmetryOperation> getBodyCentered() const;
+    std::vector<SymmetryOperation> getACentered() const;
+    std::vector<SymmetryOperation> getBCentered() const;
+    std::vector<SymmetryOperation> getCCentered() const;
+    std::vector<SymmetryOperation> getFCentered() const;
+    std::vector<SymmetryOperation> getRobvCentered() const;
+    std::vector<SymmetryOperation> getRrevCentered() const;
+
+    std::map<std::string, CenteringGroup::CenteringType> m_centeringSymbolMap;
 };
 
 
