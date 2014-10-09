@@ -36,10 +36,14 @@ public:
         // subscribing twice does not work
         TS_ASSERT_THROWS(factory.subscribeGeneratedSpaceGroup(2, "P-1", "-x,-y,-z"), std::invalid_argument);
 
+
+        // but having a different symbol for the same number is ok.
+        TS_ASSERT_THROWS_NOTHING(factory.subscribeGeneratedSpaceGroup(2, "F-1", "-x,-y,-z"))
+
         // neither does with a tabulated space group
         TS_ASSERT_THROWS(factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"), std::invalid_argument);
 
-        TS_ASSERT_THROWS(factory.subscribeGeneratedSpaceGroup(2, "FAKE", "-x,-y,-z"), std::invalid_argument);
+        // Different number with same symbol - does not work
         TS_ASSERT_THROWS(factory.subscribeGeneratedSpaceGroup(3, "P-1", "-x,-y,-z"), std::invalid_argument);
 
         // invalid generators are caught before anything is done
@@ -64,10 +68,13 @@ public:
         // subscribing twice does not work
         TS_ASSERT_THROWS(factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"), std::invalid_argument);
 
+        // but having a different symbol for the same number is ok.
+        TS_ASSERT_THROWS_NOTHING(factory.subscribeTabulatedSpaceGroup(2, "F-1", "x,y,z; -x,-y,-z"))
+
         // neither does with a generated space group
         TS_ASSERT_THROWS(factory.subscribeGeneratedSpaceGroup(2, "P-1", "-x,-y,-z"), std::invalid_argument);
 
-        TS_ASSERT_THROWS(factory.subscribeTabulatedSpaceGroup(2, "FAKE", "-x,-y,-z"), std::invalid_argument);
+        // Different number with same symbol - does not work
         TS_ASSERT_THROWS(factory.subscribeTabulatedSpaceGroup(3, "P-1", "-x,-y,-z"), std::invalid_argument);
 
         // invalid generators are caught before anything is done
@@ -128,18 +135,25 @@ public:
         numbers = factory.subscribedSpaceGroupNumbers();
         TS_ASSERT_EQUALS(numbers.size(), 2);
         TS_ASSERT_DIFFERS(std::find(numbers.begin(), numbers.end(), 1), numbers.end());
+
+        // Subscribing the same number twice should not influence vector size
+        TS_ASSERT_THROWS_NOTHING(factory.subscribeTabulatedSpaceGroup(1, "F1", "x,y,z"));
+        numbers = factory.subscribedSpaceGroupNumbers();
+        TS_ASSERT_EQUALS(numbers.size(), 2);
     }
 
-    void testUnsubscribeNumber()
+    void testSubscribedSpaceGroupSymbolsForNumber()
     {
         TestableSpaceGroupFactory factory;
+        factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z");
+        factory.subscribeTabulatedSpaceGroup(2, "F-1", "x,y,z; -x,-y,-z");
+        factory.subscribeTabulatedSpaceGroup(1, "P1", "x,y,z");
 
-        TS_ASSERT_THROWS(factory.unsubscribeSpaceGroup(2), std::invalid_argument);
+        std::vector<std::string> symbols = factory.subscribedSpaceGroupSymbols(1);
+        TS_ASSERT_EQUALS(symbols.size(), 1);
 
-        TS_ASSERT_THROWS_NOTHING(factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"));
-        TS_ASSERT_THROWS_NOTHING(factory.unsubscribeSpaceGroup(2));
-
-        TS_ASSERT_THROWS(factory.unsubscribeSpaceGroup("P-1"), std::invalid_argument);
+        symbols = factory.subscribedSpaceGroupSymbols(2);
+        TS_ASSERT_EQUALS(symbols.size(), 2);
     }
 
     void testUnsubscribeSymbol()
@@ -150,26 +164,11 @@ public:
 
         TS_ASSERT_THROWS_NOTHING(factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"));
         TS_ASSERT_THROWS_NOTHING(factory.unsubscribeSpaceGroup("P-1"));
-
-        TS_ASSERT_THROWS(factory.unsubscribeSpaceGroup(2), std::invalid_argument);
-    }
-
-    void testCreateSpaceGroupNumber()
-    {
-        TestableSpaceGroupFactory factory;
-
-        TS_ASSERT_THROWS(factory.createSpaceGroup(2), std::invalid_argument);
-        TS_ASSERT_THROWS_NOTHING(factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"));
-
-        TS_ASSERT_THROWS_NOTHING(factory.createSpaceGroup(2));
-
-        SpaceGroup_const_sptr spaceGroup = factory.createSpaceGroup(2);
-        TS_ASSERT_EQUALS(spaceGroup->order(), 2);
     }
 
     void testSpaceGroup()
     {
-        SpaceGroup_const_sptr sgBCC = SpaceGroupFactory::Instance().createSpaceGroup(229);
+        SpaceGroup_const_sptr sgBCC = SpaceGroupFactory::Instance().createSpaceGroup("Im-3m");
 
         std::cout << "Space group: " << sgBCC->hmSymbol() << " (" << sgBCC->number() << "):" << std::endl;
         std::cout << "  Order: " << sgBCC->order() << std::endl;

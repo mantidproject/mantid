@@ -20,39 +20,43 @@ SpaceGroup_const_sptr SpaceGroupFactoryImpl::createSpaceGroup(const std::string 
         throw std::invalid_argument("Space group with symbol '" + hmSymbol + "' is not registered.");
     }
 
-    return constructFromPrototype(m_prototypesBySymbol.find(hmSymbol)->second);
-}
-
-/// Creates a space group given the ITA space group number, throws std::invalid_argument if number is not registered.
-SpaceGroup_const_sptr SpaceGroupFactoryImpl::createSpaceGroup(size_t number) const
-{
-    if(!isSubscribed(number)) {
-        throw std::invalid_argument("Space group with requested number is not registered.");
-    }
-
-    return constructFromPrototype(m_prototypesByNumber.find(number)->second);
+    return constructFromPrototype(m_prototypes.find(hmSymbol)->second);
 }
 
 /// Returns true if space group with given symbol is subscribed.
 bool SpaceGroupFactoryImpl::isSubscribed(const std::string &hmSymbol) const
 {
-    return m_prototypesBySymbol.find(hmSymbol) != m_prototypesBySymbol.end();
+    return m_prototypes.find(hmSymbol) != m_prototypes.end();
 }
 
 /// Returns true if space group with given number is subscribed.
 bool SpaceGroupFactoryImpl::isSubscribed(size_t number) const
 {
-    return m_prototypesByNumber.find(number) != m_prototypesByNumber.end();
+    return m_numberMap.find(number) != m_numberMap.end();
 }
 
 /// Returns a vector with all subscribed space group symbols.
 std::vector<std::string> SpaceGroupFactoryImpl::subscribedSpaceGroupSymbols() const
 {
     std::vector<std::string> symbols;
-    symbols.reserve(m_prototypesBySymbol.size());
+    symbols.reserve(m_prototypes.size());
 
-    for(auto it = m_prototypesBySymbol.begin(); it != m_prototypesBySymbol.end(); ++it) {
+    for(auto it = m_prototypes.begin(); it != m_prototypes.end(); ++it) {
         symbols.push_back(it->first);
+    }
+
+    return symbols;
+}
+
+/// Returns a vector with all symbols that correspond to a space group number
+std::vector<std::string> SpaceGroupFactoryImpl::subscribedSpaceGroupSymbols(size_t number) const
+{
+    std::vector<std::string> symbols;
+
+    auto keyPair = m_numberMap.equal_range(number);
+
+    for(auto it = keyPair.first; it != keyPair.second; ++it) {
+        symbols.push_back(it->second);
     }
 
     return symbols;
@@ -62,9 +66,9 @@ std::vector<std::string> SpaceGroupFactoryImpl::subscribedSpaceGroupSymbols() co
 std::vector<size_t> SpaceGroupFactoryImpl::subscribedSpaceGroupNumbers() const
 {
     std::vector<size_t> numbers;
-    numbers.reserve(m_prototypesByNumber.size());
+    numbers.reserve(m_numberMap.size());
 
-    for(auto it = m_prototypesByNumber.begin(); it != m_prototypesByNumber.end(); ++it) {
+    for(auto it = m_numberMap.begin(); it != m_numberMap.end(); it = m_numberMap.upper_bound(it->first)) {
         numbers.push_back(it->first);
     }
 
@@ -78,27 +82,12 @@ void SpaceGroupFactoryImpl::unsubscribeSpaceGroup(const std::string &hmSymbol)
         throw std::invalid_argument("Cannot unsubscribe space group that is not registered.");
     }
 
-    auto eraseSymbol = m_prototypesBySymbol.find(hmSymbol);
+    auto eraseSymbol = m_prototypes.find(hmSymbol);
     SpaceGroup_const_sptr spaceGroup = eraseSymbol->second;
 
-    auto eraseNumber = m_prototypesByNumber.find(spaceGroup->number());
-    m_prototypesByNumber.erase(eraseNumber);
-    m_prototypesBySymbol.erase(eraseSymbol);
-}
-
-/// Unsubscribes the space group with the given number, but throws std::invalid_argument if number is not registered.
-void SpaceGroupFactoryImpl::unsubscribeSpaceGroup(size_t number)
-{
-    if(!isSubscribed(number)) {
-        throw std::invalid_argument("Cannot unsubscribe space group that is not registered.");
-    }
-
-    auto eraseNumber = m_prototypesByNumber.find(number);
-    SpaceGroup_const_sptr spaceGroup = eraseNumber->second;
-
-    auto eraseSymbol = m_prototypesBySymbol.find(spaceGroup->hmSymbol());
-    m_prototypesBySymbol.erase(eraseSymbol);
-    m_prototypesByNumber.erase(eraseNumber);
+    auto eraseNumber = m_numberMap.find(spaceGroup->number());
+    m_numberMap.erase(eraseNumber);
+    m_prototypes.erase(eraseSymbol);
 }
 
 /**
@@ -120,7 +109,7 @@ void SpaceGroupFactoryImpl::unsubscribeSpaceGroup(size_t number)
  */
 void SpaceGroupFactoryImpl::subscribeGeneratedSpaceGroup(size_t number, const std::string &hmSymbol, const std::string &generators)
 {
-    throwIfSubscribed(number, hmSymbol);
+    throwIfSubscribed(hmSymbol);
 
     // Generate factor group and centering group
     std::string centeringSymbol = getCenteringString(hmSymbol);
@@ -132,7 +121,7 @@ void SpaceGroupFactoryImpl::subscribeGeneratedSpaceGroup(size_t number, const st
 
 void SpaceGroupFactoryImpl::subscribeTabulatedSpaceGroup(size_t number, const std::string &hmSymbol, const std::string &symmetryOperations)
 {
-    throwIfSubscribed(number, hmSymbol);
+    throwIfSubscribed(hmSymbol);
 
     // Generate a group using the supplied symmetry operations
     Group_const_sptr generatingGroup = getTabulatedGroup(symmetryOperations);
@@ -155,17 +144,17 @@ SpaceGroup_const_sptr SpaceGroupFactoryImpl::constructFromPrototype(const SpaceG
     return boost::make_shared<const SpaceGroup>(*prototype);
 }
 
-void SpaceGroupFactoryImpl::throwIfSubscribed(size_t number, const std::string &hmSymbol)
+void SpaceGroupFactoryImpl::throwIfSubscribed(const std::string &hmSymbol)
 {
-    if(isSubscribed(number) || isSubscribed(hmSymbol)) {
-        throw std::invalid_argument("Space group with this number/symbol is already registered.");
+    if(isSubscribed(hmSymbol)) {
+        throw std::invalid_argument("Space group with this symbol is already registered.");
     }
 }
 
 void SpaceGroupFactoryImpl::subscribe(const SpaceGroup_const_sptr &prototype)
 {
-    m_prototypesByNumber.insert(std::make_pair(prototype->number(), prototype));
-    m_prototypesBySymbol.insert(std::make_pair(prototype->hmSymbol(), prototype));
+    m_numberMap.insert(std::make_pair(prototype->number(), prototype->hmSymbol()));
+    m_prototypes.insert(std::make_pair(prototype->hmSymbol(), prototype));
 }
 
 Group_const_sptr SpaceGroupFactoryImpl::getTabulatedGroup(const std::string &symmetryOperations) const
@@ -187,8 +176,8 @@ Group_const_sptr SpaceGroupFactoryImpl::getGeneratedGroup(const std::string &gen
 }
 
 SpaceGroupFactoryImpl::SpaceGroupFactoryImpl() :
-    m_prototypesByNumber(),
-    m_prototypesBySymbol()
+    m_numberMap(),
+    m_prototypes()
 {
     Kernel::LibraryManager::Instance();
 }

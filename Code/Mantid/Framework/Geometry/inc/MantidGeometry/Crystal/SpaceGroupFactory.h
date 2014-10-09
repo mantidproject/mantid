@@ -53,22 +53,21 @@ public:
     virtual ~SpaceGroupFactoryImpl() { }
 
     SpaceGroup_const_sptr createSpaceGroup(const std::string &hmSymbol) const;
-    SpaceGroup_const_sptr createSpaceGroup(size_t number) const;
 
     bool isSubscribed(const std::string &hmSymbol) const;
     bool isSubscribed(size_t number) const;
 
     std::vector<std::string> subscribedSpaceGroupSymbols() const;
+    std::vector<std::string> subscribedSpaceGroupSymbols(size_t number) const;
     std::vector<size_t> subscribedSpaceGroupNumbers() const;
 
     void unsubscribeSpaceGroup(const std::string &hmSymbol);
-    void unsubscribeSpaceGroup(size_t number);
 
     void subscribeGeneratedSpaceGroup(size_t number, const std::string &hmSymbol, const std::string &generators);
     void subscribeTabulatedSpaceGroup(size_t number, const std::string &hmSymbol, const std::string &symmetryOperations);
 
 protected:
-    void throwIfSubscribed(size_t number, const std::string &hmSymbol);
+    void throwIfSubscribed(const std::string &hmSymbol);
 
     std::string getCenteringString(const std::string &hmSymbol) const;
     Group_const_sptr getGeneratedGroup(const std::string &generators, const std::string &centeringSymbol) const;
@@ -80,8 +79,8 @@ protected:
 
     SpaceGroup_const_sptr constructFromPrototype(const SpaceGroup_const_sptr prototype) const;
 
-    std::map<size_t, SpaceGroup_const_sptr> m_prototypesByNumber;
-    std::map<std::string, SpaceGroup_const_sptr> m_prototypesBySymbol;
+    std::multimap<size_t, std::string> m_numberMap;
+    std::map<std::string, SpaceGroup_const_sptr> m_prototypes;
 
     SpaceGroupFactoryImpl();
 
