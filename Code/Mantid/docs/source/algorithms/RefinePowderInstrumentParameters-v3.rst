@@ -135,6 +135,12 @@ with constraint:
 
 The coefficients in this function are strongly correlated to each other.
 
+Current Implementation
+======================
+
+Only the parameters of the function for :math:`X_0` are fitted in 
+present implementation. 
+
 Refinement Algorithm
 ====================
 
