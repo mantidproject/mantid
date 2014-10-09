@@ -3,7 +3,7 @@
 
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
-#include "vtkPolyDataAlgorithm.h"
+#include "MantidVatesAPI/vtkPolyDataAlgorithm_Silent.h"
 #include <string>
 
 /**

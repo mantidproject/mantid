@@ -6,7 +6,7 @@
 #include "MantidAPI/IPeak.h"
 #include "MantidKernel/V3D.h"
 #include <vtkVertex.h>
-#include <vtkGlyph3D.h>
+#include "MantidVatesAPI/vtkGlyph3D_Silent.h"
 #include <vtkSphereSource.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkFloatArray.h>

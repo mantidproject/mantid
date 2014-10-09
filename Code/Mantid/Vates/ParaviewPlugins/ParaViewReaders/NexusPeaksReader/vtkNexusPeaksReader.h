@@ -1,6 +1,6 @@
 #ifndef _vtkEventNexusReader_h
 #define _vtkEventNexusReader_h
-#include "vtkPolyDataAlgorithm.h"
+#include "MantidVatesAPI/vtkPolyDataAlgorithm_Silent.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 
 class vtkImplicitFunction;
