@@ -559,10 +559,9 @@ namespace DataObjects
         IDetector_const_sptr det2 = tracker.getDetectorResult();
         if (det1 && det2)
         {
-            // Set the detector ID, the row, col, etc.
-            this->setDetectorID(static_cast<int>((det1->getID()+det2->getID())*0.5));;
-            detPos = (det1->getPos() + det2->getPos())*0.5;
-            std::cout <<gap<<"  "<<static_cast<int>((det1->getID()+det2->getID())*0.5) << " z gap\n";
+            // Set the detector ID to one of the neighboring pixels
+            this->setDetectorID(static_cast<int>(det1->getID()));;
+            detPos = det1->getPos() ;
             return true;
         }
         beam1 = beam + V3D(gap,0.,0.);
@@ -573,10 +572,9 @@ namespace DataObjects
         det2 = tracker.getDetectorResult();
         if (det1 && det2)
         {
-            // Set the detector ID, the row, col, etc.
-            this->setDetectorID(static_cast<int>((det1->getID()+det2->getID())*0.5));;
-            detPos = (det1->getPos() + det2->getPos())*0.5;
-            std::cout <<gap<<"  "<<static_cast<int>((det1->getID()+det2->getID())*0.5) << " x gap\n";
+            // Set the detector ID to one of the neighboring pixels
+            this->setDetectorID(static_cast<int>(det1->getID()));;
+            detPos = det1->getPos() ;
             return true;
         }
         beam1 = beam + V3D(0.,gap,0.);
@@ -587,10 +585,9 @@ namespace DataObjects
         det2 = tracker.getDetectorResult();
         if (det1 && det2)
         {
-            // Set the detector ID, the row, col, etc.
-            this->setDetectorID(static_cast<int>((det1->getID()+det2->getID())*0.5));;
-            detPos = (det1->getPos() + det2->getPos())*0.5;
-            std::cout <<gap<<"  "<<static_cast<int>((det1->getID()+det2->getID())*0.5) << " y gap\n";
+            // Set the detector ID to one of the neighboring pixels
+            this->setDetectorID(static_cast<int>(det1->getID()));;
+            detPos = det1->getPos() ;
             return true;
         }
     }
