@@ -149,6 +149,9 @@ public:
   void show(QwtPlot *plot);
   void hide();
 private:
+  // no copying
+  DatasetPlotData(const DatasetPlotData&);
+  DatasetPlotData& operator=(const DatasetPlotData&);
   void setData(const Mantid::API::MatrixWorkspace *ws, int wsIndex, const Mantid::API::MatrixWorkspace *outputWS);
   QwtPlotCurve *m_dataCurve;
   QwtPlotCurve *m_calcCurve;
@@ -738,10 +741,7 @@ int MultiDatasetFit::getNumberOfSpectra() const
 void MultiDatasetFit::editLocalParameterValues(const QString& parName)
 {
   EditLocalParameterDialog dialog(this,parName);
-  if ( dialog.exec() == QDialog::Accepted )
-  {
-    throw std::runtime_error("Edit local parameters.");
-  }
+  dialog.exec();
 }
 
 /**
