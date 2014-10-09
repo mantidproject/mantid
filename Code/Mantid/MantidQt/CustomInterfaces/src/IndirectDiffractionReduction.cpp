@@ -129,6 +129,8 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
   if(!rebinStart.isEmpty() && !rebinWidth.isEmpty() && !rebinEnd.isEmpty())
       rebin = rebinStart + "," + rebinWidth + "," + rebinEnd;
 
+  bool individualGrouping = m_uiForm.ckIndividualGrouping->isChecked();
+
   // Get detector range
   std::vector<long> detRange;
   detRange.push_back(m_uiForm.set_leSpecMin->text().toLong());
@@ -138,6 +140,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
   IAlgorithm_sptr msgDiffReduction = AlgorithmManager::Instance().create("MSGDiffractionReduction");
   msgDiffReduction->initialize();
 
+  // Get save formats
   std::vector<std::string> saveFormats;
   if(m_uiForm.ckGSS->isChecked())   saveFormats.push_back("gss");
   if(m_uiForm.ckNexus->isChecked()) saveFormats.push_back("nxs");
@@ -150,6 +153,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
   msgDiffReduction->setProperty("InputFiles", m_uiForm.dem_rawFiles->getFilenames().join(",").toStdString());
   msgDiffReduction->setProperty("DetectorRange", detRange);
   msgDiffReduction->setProperty("RebinParam", rebin.toStdString());
+  msgDiffReduction->setProperty("IndividualGrouping", individualGrouping);
   msgDiffReduction->setProperty("SaveFormats", saveFormats);
   msgDiffReduction->setProperty("OutputWorkspaceGroup", "IndirectDiffraction_Workspaces");
 
@@ -530,6 +534,11 @@ void IndirectDiffractionReduction::runFilesFound()
     m_uiForm.pbRun->setText("Run");
   else
     m_uiForm.pbRun->setText("Invalid Run");
+
+  // Disable sum files if only one file is given
+  int fileCount = m_uiForm.dem_rawFiles->getFilenames().size();
+  if(fileCount < 2)
+    m_uiForm.dem_ckSumFiles->setChecked(false);
 }
 
 }

@@ -153,6 +153,10 @@
     <value val="1" />
   </parameter>
 
+  <parameter name="Workflow.NamingConvention" type="string">
+    <value val="AnalyserReflection" />
+  </parameter>
+
 </component-link> 
 <!-- End VESUVIO link -->
 
