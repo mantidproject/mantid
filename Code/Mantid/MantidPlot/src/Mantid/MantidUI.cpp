@@ -40,6 +40,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 
+
 #include <QMessageBox>
 #include <QTextEdit>
 #include <QListWidget>
@@ -1097,8 +1098,13 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
   // Cache some frequently used values
   IComponent_const_sptr sample = ws->getInstrument()->getSample();
   bool signedThetaParamRetrieved(false), showSignedTwoTheta(false); //If true,  signedVersion of the two theta value should be displayed
+  PARALLEL_FOR1(ws)
   for( int row = 0; row < nrows; ++row )
   {
+    // Note PARALLEL_START_INTERUPT_REGION & friends apparently not needed (like in algorithms)
+    // as there's an extensive try...catch below. If it was need, using those macros would
+    // require data members and methods that are available in algorithm classed but not here,
+    // including m_cancel, m_parallelException, interrrupt_point().
     size_t wsIndex = indices.empty() ? static_cast<size_t>(row) : indices[row];
     QList<QVariant> colValues;
     colValues << QVariant(static_cast<double>(wsIndex));
