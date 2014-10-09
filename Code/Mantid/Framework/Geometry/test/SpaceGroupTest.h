@@ -8,8 +8,6 @@
 #include "MantidGeometry/Crystal/CyclicGroup.h"
 #include "MantidKernel/V3D.h"
 
-#include <unordered_set>
-
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 
