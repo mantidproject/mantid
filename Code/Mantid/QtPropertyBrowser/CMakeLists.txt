@@ -104,7 +104,6 @@ set (
 
 qt4_wrap_cpp ( EXTRA_MOCS src/DoubleEditorFactory.h 
                           src/ButtonEditorFactory.h
-                          src/CompositeEditorFactory.h
                           src/ParameterPropertyManager.h
 )
 

@@ -149,7 +149,7 @@ public:
   void show(QwtPlot *plot);
   void hide();
 private:
-  void setData(QwtPlotCurve *curve, const Mantid::API::MatrixWorkspace *ws, int wsIndex, const Mantid::API::MatrixWorkspace *outputWS);
+  void setData(const Mantid::API::MatrixWorkspace *ws, int wsIndex, const Mantid::API::MatrixWorkspace *outputWS);
   QwtPlotCurve *m_dataCurve;
   QwtPlotCurve *m_calcCurve;
   QwtPlotCurve *m_diffCurve;
@@ -176,7 +176,7 @@ DatasetPlotData::DatasetPlotData(const QString& wsName, int wsIndex, const QStri
     throw std::runtime_error( mess.toStdString() );
   }
   // check that the index is in range
-  if ( wsIndex >= ws->getNumberHistograms() )
+  if ( static_cast<size_t>(wsIndex) >= ws->getNumberHistograms() )
   {
     QString mess = QString("Spectrum %1 doesn't exist in workspace %2").arg(wsIndex).arg(wsName);
     throw std::runtime_error( mess.toStdString() );
@@ -215,7 +215,7 @@ DatasetPlotData::~DatasetPlotData()
   }
 }
 
-void DatasetPlotData::setData(QwtPlotCurve *curve, const Mantid::API::MatrixWorkspace *ws, int wsIndex, const Mantid::API::MatrixWorkspace *outputWS)
+void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws, int wsIndex, const Mantid::API::MatrixWorkspace *outputWS)
 {
   std::vector<double> xValues = ws->readX(wsIndex);
   if ( ws->isHistogramData() )

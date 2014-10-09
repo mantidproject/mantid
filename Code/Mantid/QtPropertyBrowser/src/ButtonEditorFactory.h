@@ -52,7 +52,7 @@ protected:
   {
     (void) manager; // Unused
     auto button = new ButtonEditor(property, parent);
-    connect(button,SIGNAL(buttonClicked(QtProperty *)),this,SIGNAL(buttonClicked(QtProperty *)));
+    this->connect(button,SIGNAL(buttonClicked(QtProperty *)),this,SIGNAL(buttonClicked(QtProperty *)));
     return button;
   }
 };
