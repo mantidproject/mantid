@@ -79,6 +79,7 @@ namespace MantidWidgets
 /**
  * Constructor
  * @param parent :: The parent widget.
+ * @param multi  :: Option to use the browser for multi-dataset fitting.
  */
 FunctionBrowser::FunctionBrowser(QWidget *parent, bool multi)
   :QWidget(parent),m_multiDataset(multi)

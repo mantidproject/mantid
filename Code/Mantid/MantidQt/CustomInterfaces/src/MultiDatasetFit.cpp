@@ -747,6 +747,7 @@ void MultiDatasetFit::editLocalParameterValues(const QString& parName)
 /**
  * Get value of a local parameter
  * @param parName :: Name of a parameter.
+ * @param i :: Data set index.
  */
 double MultiDatasetFit::getLocalParameterValue(const QString& parName, int i) const
 {
