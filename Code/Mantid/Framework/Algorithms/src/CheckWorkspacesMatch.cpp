@@ -842,10 +842,10 @@ bool CheckWorkspacesMatch::checkRunProperties(const API::Run& run1, const API::R
     PARALLEL_START_INTERUPT_REGION
     if (matched)
     {
-      if ( *(ws1logs[i]) != *(ws1logs[i]))
+      if ( *(ws1logs[i]) != *(ws2logs[i]))
       {
         matched = false;
-        result = "Log value mismatch";
+        result = "Log mismatch";
       }
     }
     PARALLEL_END_INTERUPT_REGION
