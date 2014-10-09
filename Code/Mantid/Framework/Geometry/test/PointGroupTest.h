@@ -12,7 +12,7 @@
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
 #include <boost/lexical_cast.hpp>
-
+#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -116,7 +116,6 @@ public:
       TestablePointGroup defaultPointgroup;
 
       TS_ASSERT_EQUALS(defaultPointgroup.m_symmetryOperations.size(), 0);
-      TS_ASSERT_EQUALS(defaultPointgroup.m_transformationMatrices.size(), 0);
   }
 
   void testAddSymmetryOperation()
@@ -125,42 +124,31 @@ public:
 
       TS_ASSERT_EQUALS(pg.getSymmetryOperations().size(), 0);
 
-      SymmetryOperation_const_sptr symOp(new SymOpInversion);
+      SymmetryOperation symOp = SymmetryOperationFactory::Instance().createSymOp("x,y,z");
       pg.addSymmetryOperation(symOp);
 
-      std::vector<SymmetryOperation_const_sptr> ops = pg.getSymmetryOperations();
+      std::vector<SymmetryOperation> ops = pg.getSymmetryOperations();
 
       TS_ASSERT_EQUALS(ops.size(), 1);
       TS_ASSERT_EQUALS(ops[0], symOp);
-  }
-
-  void testSetTransformationMatrices()
-  {
-      TestablePointGroup pg;
-
-      std::vector<IntMatrix> matrices(1, IntMatrix(3, 3, true));
-      pg.setTransformationMatrices(matrices);
-
-      TS_ASSERT_EQUALS(pg.m_transformationMatrices.size(), 1);
-      TS_ASSERT_EQUALS(pg.m_transformationMatrices[0], IntMatrix(3, 3, true));
   }
 
   void testGenerateTransformationMatrices()
   {
       TestablePointGroup pg;
 
-      SymmetryOperation_const_sptr identity(new SymOpIdentity);
-      SymmetryOperation_const_sptr inversion(new SymOpInversion);
-      SymmetryOperation_const_sptr mirror(new SymOpMirrorPlaneZ);
-      SymmetryOperation_const_sptr twoFold(new SymOpRotationTwoFoldZ);
+      SymmetryOperation identity = SymmetryOperationFactory::Instance().createSymOp("x,y,z");
+      SymmetryOperation inversion = SymmetryOperationFactory::Instance().createSymOp("x,y,z");
+      SymmetryOperation mirror = SymmetryOperationFactory::Instance().createSymOp("x,y,-z");
+      SymmetryOperation twoFold = SymmetryOperationFactory::Instance().createSymOp("-x,-y,z");
 
       pg.addSymmetryOperation(mirror);
       pg.addSymmetryOperation(twoFold);
 
-      std::vector<SymmetryOperation_const_sptr> ops = pg.getSymmetryOperations();
+      std::vector<SymmetryOperation> ops = pg.getSymmetryOperations();
       TS_ASSERT_EQUALS(ops.size(), 2);
 
-      std::vector<IntMatrix> matrices = pg.generateTransformationMatrices(ops);
+      std::vector<SymmetryOperation> matrices = pg.generateSymmetryOperations(ops);
 
       // Mirror and 2-fold axis generate inversion, identity is implicit.
       TS_ASSERT_EQUALS(matrices.size(), 4);
@@ -168,12 +156,12 @@ public:
       auto matrixVectorBegin = matrices.begin();
       auto matrixVectorEnd = matrices.end();
 
-      IntMatrix identityMatrix(3, 3, true);
+      SymmetryOperation identityOp = SymmetryOperationFactory::Instance().createSymOp("x,y,z");
 
-      TS_ASSERT_DIFFERS(std::find(matrixVectorBegin, matrixVectorEnd, identity->apply(identityMatrix)), matrixVectorEnd);
-      TS_ASSERT_DIFFERS(std::find(matrixVectorBegin, matrixVectorEnd, inversion->apply(identityMatrix)), matrixVectorEnd);
-      TS_ASSERT_DIFFERS(std::find(matrixVectorBegin, matrixVectorEnd, mirror->apply(identityMatrix)), matrixVectorEnd);
-      TS_ASSERT_DIFFERS(std::find(matrixVectorBegin, matrixVectorEnd, twoFold->apply(identityMatrix)), matrixVectorEnd);
+      TS_ASSERT_DIFFERS(std::find(matrixVectorBegin, matrixVectorEnd, identity * identityOp), matrixVectorEnd);
+      TS_ASSERT_DIFFERS(std::find(matrixVectorBegin, matrixVectorEnd, inversion * identityOp), matrixVectorEnd);
+      TS_ASSERT_DIFFERS(std::find(matrixVectorBegin, matrixVectorEnd, mirror * identityOp), matrixVectorEnd);
+      TS_ASSERT_DIFFERS(std::find(matrixVectorBegin, matrixVectorEnd, twoFold * identityOp), matrixVectorEnd);
 
       TS_ASSERT_DIFFERS(matrices[0], matrices[1]);
   }
