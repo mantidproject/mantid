@@ -92,8 +92,6 @@ protected:
     static std::vector<SymmetryOperation> getFCentered();
     static std::vector<SymmetryOperation> getRobvCentered();
     static std::vector<SymmetryOperation> getRrevCentered();
-
-    static std::map<std::string, CenteringGroup::CenteringType> m_centeringSymbolMap;
 };
 
 

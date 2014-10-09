@@ -33,28 +33,30 @@ std::string CenteringGroup::getSymbol() const
 }
 
 /// Map between string symbols and enum-values for centering type.
-std::map<std::string, CenteringGroup::CenteringType> CenteringGroupCreationHelper::m_centeringSymbolMap =
-        boost::assign::map_list_of
-        ("P", CenteringGroup::P)
-        ("I", CenteringGroup::I)
-        ("A", CenteringGroup::A)
-        ("B", CenteringGroup::B)
-        ("C", CenteringGroup::C)
-        ("F", CenteringGroup::F)
-        ("R", CenteringGroup::Robv)
-        ("Robv", CenteringGroup::Robv)
-        ("Rrev", CenteringGroup::Rrev);
 
 /// Returns centering type enum value if centering symbol exists, throws std::invalid_argument exception otherwise.
 CenteringGroup::CenteringType CenteringGroupCreationHelper::getCenteringType(const std::string &centeringSymbol)
 {
-    auto it = m_centeringSymbolMap.find(centeringSymbol);
+    std::map<std::string, CenteringGroup::CenteringType> centeringSymbolMap =
+            boost::assign::map_list_of
+            ("P", CenteringGroup::P)
+            ("I", CenteringGroup::I)
+            ("A", CenteringGroup::A)
+            ("B", CenteringGroup::B)
+            ("C", CenteringGroup::C)
+            ("F", CenteringGroup::F)
+            ("R", CenteringGroup::Robv)
+            ("Robv", CenteringGroup::Robv)
+            ("Rrev", CenteringGroup::Rrev);
 
-    if(it == m_centeringSymbolMap.end()) {
+
+    auto it = centeringSymbolMap.find(centeringSymbol);
+
+    if(it == centeringSymbolMap.end()) {
         throw std::invalid_argument("Centering does not exist: " + centeringSymbol);
     }
 
-    return m_centeringSymbolMap[centeringSymbol];
+    return centeringSymbolMap[centeringSymbol];
 }
 
 /// Returns a vector of symmetry operations for the given centering type or throws std::invalid_argument if an invalid value is supplied.
