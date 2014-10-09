@@ -54,7 +54,8 @@ public:
     // For each range in the list, use the slave QDoubleValidator to find out the state.
     for( auto range = m_ranges.begin(); range != m_ranges.end(); ++ range )
     {
-      assert(range->first < range->second); // Play nice.
+      if(range->first >= range->second)
+        throw std::runtime_error("Invalid range");
 
       m_slaveVal->setBottom(range->first);
       m_slaveVal->setTop(range->second);
