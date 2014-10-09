@@ -101,7 +101,7 @@ void SpaceGroupFactoryImpl::unsubscribeSpaceGroup(const std::string &hmSymbol)
  * The method will throw an exception if the number or symbol is already registered.
  *
  * [1] Shmueli, U. Acta Crystallogr. A 40, 559–567 (1984).
-        http://dx.doi.org/10.1107/S0108767384001161
+ *     http://dx.doi.org/10.1107/S0108767384001161
  *
  * @param number :: Space group number according to International Tables for Crystallography A
  * @param hmSymbol :: Herrman-Mauguin symbol with upper case first letter (centering).
@@ -119,6 +119,7 @@ void SpaceGroupFactoryImpl::subscribeGeneratedSpaceGroup(size_t number, const st
     subscribe(prototype);
 }
 
+/// Subscribes a "tabulated space group" into the factory where all symmetry operations need to be supplied, including centering.
 void SpaceGroupFactoryImpl::subscribeTabulatedSpaceGroup(size_t number, const std::string &hmSymbol, const std::string &symmetryOperations)
 {
     throwIfSubscribed(hmSymbol);
@@ -130,6 +131,7 @@ void SpaceGroupFactoryImpl::subscribeTabulatedSpaceGroup(size_t number, const st
     subscribe(prototype);
 }
 
+/// Creatings a prototype instance of SpaceGroup using the supplied parameters.
 SpaceGroup_const_sptr SpaceGroupFactoryImpl::getPrototype(Group_const_sptr generatingGroup, size_t number, const std::string &hmSymbol) const
 {
     if(!generatingGroup) {
@@ -139,11 +141,13 @@ SpaceGroup_const_sptr SpaceGroupFactoryImpl::getPrototype(Group_const_sptr gener
     return boost::make_shared<const SpaceGroup>(number, hmSymbol, *generatingGroup);
 }
 
+/// Returns a copy-constructed instance of the supplied space group prototype object.
 SpaceGroup_const_sptr SpaceGroupFactoryImpl::constructFromPrototype(const SpaceGroup_const_sptr prototype) const
 {
     return boost::make_shared<const SpaceGroup>(*prototype);
 }
 
+/// Throws std::invalid_argument if a space group with the given Hermann-Mauguin symbol is already registered in the factory.
 void SpaceGroupFactoryImpl::throwIfSubscribed(const std::string &hmSymbol)
 {
     if(isSubscribed(hmSymbol)) {
@@ -151,12 +155,14 @@ void SpaceGroupFactoryImpl::throwIfSubscribed(const std::string &hmSymbol)
     }
 }
 
+/// Stores the given prototype in the space group factory.
 void SpaceGroupFactoryImpl::subscribe(const SpaceGroup_const_sptr &prototype)
 {
     m_numberMap.insert(std::make_pair(prototype->number(), prototype->hmSymbol()));
     m_prototypes.insert(std::make_pair(prototype->hmSymbol(), prototype));
 }
 
+/// Returns a group with the given symmetry operations.
 Group_const_sptr SpaceGroupFactoryImpl::getTabulatedGroup(const std::string &symmetryOperations) const
 {
     return GroupFactory::create<Group>(symmetryOperations);
@@ -167,6 +173,18 @@ std::string SpaceGroupFactoryImpl::getCenteringString(const std::string &hmSymbo
     return hmSymbol.substr(0, 1);
 }
 
+/**
+ * Returns a group constructed from a generator string and a centering symbol
+ *
+ * Generators have to be provided as a semicolon separated list of symmetry operations
+ * in x,y,z format, for example "-x,-y,-z; -x,y,z; -y,x,z". A ProductGroup using this
+ * string is constructed. Centering symbol has to be supported by CenteringGroup. The
+ * group is then calculated as the product of these two groups.
+ *
+ * @param generators :: Semicolon separated list of symmetry operations.
+ * @param centeringSymbol :: Symbol for the lattice centering (see CenteringGroup).
+ * @return Resulting group.
+ */
 Group_const_sptr SpaceGroupFactoryImpl::getGeneratedGroup(const std::string &generators, const std::string &centeringSymbol) const
 {
     Group_const_sptr baseGroup = GroupFactory::create<ProductGroup>(generators);
@@ -175,6 +193,7 @@ Group_const_sptr SpaceGroupFactoryImpl::getGeneratedGroup(const std::string &gen
     return baseGroup * centeringGroup;
 }
 
+/// Constructor cannot be called, since SingletonHolder is used.
 SpaceGroupFactoryImpl::SpaceGroupFactoryImpl() :
     m_numberMap(),
     m_prototypes()
@@ -182,11 +201,11 @@ SpaceGroupFactoryImpl::SpaceGroupFactoryImpl() :
     Kernel::LibraryManager::Instance();
 }
 
-DECLARE_TABULATED_SPACE_GROUP(1, "P1", "x,y,z");
+DECLARE_TABULATED_SPACE_GROUP(1, "P 1", "x,y,z");
 
-DECLARE_GENERATED_SPACE_GROUP(2, "P-1", "-x,-y,-z");
-DECLARE_GENERATED_SPACE_GROUP(225, "Fm-3m", "-x,-y,z; -x,y,-z; z,x,y; y,x,-z; -x,-y,-z");
-DECLARE_GENERATED_SPACE_GROUP(229, "Im-3m", "-x,-y,z; -x,y,-z; z,x,y; y,x,-z; -x,-y,-z");
+DECLARE_GENERATED_SPACE_GROUP(2, "P -1", "-x,-y,-z");
+DECLARE_GENERATED_SPACE_GROUP(225, "F m -3 m", "-x,-y,z; -x,y,-z; z,x,y; y,x,-z; -x,-y,-z");
+DECLARE_GENERATED_SPACE_GROUP(229, "I m -3 m", "-x,-y,z; -x,y,-z; z,x,y; y,x,-z; -x,-y,-z");
 
 } // namespace Geometry
 } // namespace Mantid

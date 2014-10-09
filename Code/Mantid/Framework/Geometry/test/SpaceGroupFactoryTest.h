@@ -168,7 +168,7 @@ public:
 
     void testSpaceGroup()
     {
-        SpaceGroup_const_sptr sgBCC = SpaceGroupFactory::Instance().createSpaceGroup("Im-3m");
+        SpaceGroup_const_sptr sgBCC = SpaceGroupFactory::Instance().createSpaceGroup("I m -3 m");
 
         std::cout << "Space group: " << sgBCC->hmSymbol() << " (" << sgBCC->number() << "):" << std::endl;
         std::cout << "  Order: " << sgBCC->order() << std::endl;

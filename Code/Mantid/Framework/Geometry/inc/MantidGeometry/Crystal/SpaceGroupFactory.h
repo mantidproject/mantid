@@ -99,18 +99,32 @@ typedef Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl> SpaceGroupFactory
 } // namespace Geometry
 } // namespace Mantid
 
+/* Macros for compile time space group registration
+ *
+ * The macros are a bit different than in other factories,
+ * because there is no identifier that can be used to generate
+ * a unique name for each RegistrationHelper instance.
+ *
+ * Instead, the __COUNTER__ macro is used, which is available
+ * in many compilers and is incremented every time it's called.
+ *
+ * Solution was found here: http://stackoverflow.com/a/1295338
+ */
+#define SPGF_CONCAT_IMPL(x, y) x##y
+#define SPGF_CONCAT(x, y) SPGF_CONCAT_IMPL(x, y)
+
 #define DECLARE_GENERATED_SPACE_GROUP(number,hmSymbol,generators) \
       namespace { \
-  Mantid::Kernel::RegistrationHelper register_symop_##number( \
+  Mantid::Kernel::RegistrationHelper SPGF_CONCAT(register_spacegroup_, __COUNTER__)( \
 ((Mantid::Geometry::SpaceGroupFactory::Instance().subscribeGeneratedSpaceGroup(number, hmSymbol, generators)) \
   , 0)); \
   }
 
 #define DECLARE_TABULATED_SPACE_GROUP(number,hmSymbol,symmetryOperations) \
-      namespace { \
-  Mantid::Kernel::RegistrationHelper register_symop_##number( \
+    namespace { \
+Mantid::Kernel::RegistrationHelper SPGF_CONCAT(register_spacegroup_, __COUNTER__)( \
 ((Mantid::Geometry::SpaceGroupFactory::Instance().subscribeTabulatedSpaceGroup(number, hmSymbol, symmetryOperations)) \
-  , 0)); \
-  }
+, 0)); \
+}
 
 #endif  /* MANTID_GEOMETRY_SPACEGROUPFACTORY_H_ */
