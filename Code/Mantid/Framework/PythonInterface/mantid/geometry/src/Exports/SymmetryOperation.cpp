@@ -19,7 +19,7 @@ namespace //<unnamed>
 
   Mantid::Kernel::V3D applyToVector(SymmetryOperation & self, const object& hkl)
   {
-    return self.apply<Mantid::Kernel::V3D>(Converters::PyObjectToV3D(hkl)());
+    return self.operator *<Mantid::Kernel::V3D>(Converters::PyObjectToV3D(hkl)());
   }
 }
 
@@ -27,7 +27,7 @@ void export_SymmetryOperation()
 {
   register_ptr_to_python<boost::shared_ptr<SymmetryOperation> >();
 
-  class_<SymmetryOperation, boost::noncopyable>("SymmetryOperation", no_init)
+  class_<SymmetryOperation>("SymmetryOperation")
           .def("order", &SymmetryOperation::order)
           .def("identifier", &SymmetryOperation::identifier)
           .def("apply", &applyToVector);

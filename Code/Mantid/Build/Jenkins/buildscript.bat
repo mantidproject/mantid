@@ -20,6 +20,7 @@ if NOT "%JOB_NAME%"=="%JOB_NAME:pvnext=%" (
 )
 
 "C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" --version 
+echo %sha1%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check the required build configuration
