@@ -479,7 +479,8 @@ public:
     TS_ASSERT_EQUALS(ws->getSpectrum(6-2)->getSpectrumNo(),7);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(6-2)->getDetectorIDs().begin()), 7);
     //
-    TS_ASSERT_EQUALS(ws->readY(9-2)[3],1.);
+    TS_ASSERT_EQUALS(ws->readY(8-2)[3],1.);
+
     // spectrum with ID 9 is now spectrum N 6
     TS_ASSERT_EQUALS(ws->getSpectrum(8-2)->getSpectrumNo(),9);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(8-2)->getDetectorIDs().begin()), 9);
