@@ -464,6 +464,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
 
+
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
     TS_ASSERT_EQUALS(ws->blocksize(),5);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(),17790);

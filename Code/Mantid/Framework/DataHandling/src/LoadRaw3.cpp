@@ -159,7 +159,7 @@ namespace Mantid
 
       if (bincludeMonitors)
       {
-        setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace,m_numberOfPeriods, false);
+        setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace,m_numberOfPeriods, false,this);
       }
       else
       {
@@ -181,13 +181,13 @@ namespace Mantid
         if(normalwsSpecs > 0)
         {
           localWorkspace = createWorkspace(localWorkspace,normalwsSpecs,m_lengthIn,m_lengthIn-1);
-          setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace,m_numberOfPeriods,false);
+          setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace,m_numberOfPeriods,false,this);
         }
         //now create monitor workspace if separateMonitors selected
         if (bseparateMonitors)
         {
           createMonitorWorkspace(monitorWorkspace,localWorkspace,monitorws_grp,monitorwsSpecs,
-              normalwsSpecs,m_numberOfPeriods,m_lengthIn,title);
+              normalwsSpecs,m_numberOfPeriods,m_lengthIn,title,this);
         }
       }
 
@@ -285,18 +285,18 @@ namespace Mantid
             if(normalwsSpecs > 0)
             {
               // declare and set monitor workspace for each period
-              setWorkspaceProperty(monitorWorkspace, monitorws_grp, period, true);
+              setWorkspaceProperty(monitorWorkspace, monitorws_grp, period, true,this);
             }
             else
             {
               localWorkspace = monitorWorkspace;
             }
             // declare and set output workspace for each period
-            setWorkspaceProperty(localWorkspace, ws_grp, period, false);
+            setWorkspaceProperty(localWorkspace, ws_grp, period, false,this);
           }
           else
           {
-            setWorkspaceProperty(localWorkspace, ws_grp, period, false);
+            setWorkspaceProperty(localWorkspace, ws_grp, period, false,this);
           }
           // progress for workspace groups
           setProg ( static_cast<double>(period) / static_cast<double>(m_numberOfPeriods - 1) );

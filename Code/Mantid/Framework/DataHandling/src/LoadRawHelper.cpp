@@ -237,11 +237,11 @@ namespace Mantid
      *@param numberOfPeriods :: total number of periods from raw file
      *@param lengthIn :: size of workspace vectors
      *@param title :: title of the workspace
-
+     *@param pAlg   :: pointer to the algorithm, this method works with.
      */
     void LoadRawHelper::createMonitorWorkspace(DataObjects::Workspace2D_sptr& monws_sptr,DataObjects::Workspace2D_sptr& normalws_sptr,
         WorkspaceGroup_sptr& mongrp_sptr,const int64_t mwsSpecs,const int64_t nwsSpecs,
-        const int64_t numberOfPeriods,const int64_t lengthIn,const std::string title)
+        const int64_t numberOfPeriods,const int64_t lengthIn,const std::string title,API::Algorithm *pAlg)
     {
       try
       { 
@@ -262,31 +262,31 @@ namespace Mantid
         }
         if(!monws_sptr) return ;
 
-        std::string wsName= getPropertyValue("OutputWorkspace");
+        std::string wsName= pAlg->getPropertyValue("OutputWorkspace");
         // if the normal output workspace size>0 then set the workspace as "MonitorWorkspace"
         // otherwise  set the workspace as "OutputWorkspace"
         if (nwsSpecs> 0)
         {               
           std::string monitorwsName = wsName + "_monitors";
-          declareProperty(new WorkspaceProperty<Workspace> ("MonitorWorkspace", monitorwsName,
+          pAlg->declareProperty(new WorkspaceProperty<Workspace> ("MonitorWorkspace", monitorwsName,
               Direction::Output));
-          setWorkspaceProperty("MonitorWorkspace", title, mongrp_sptr, monws_sptr,numberOfPeriods, true);
+          setWorkspaceProperty("MonitorWorkspace", title, mongrp_sptr, monws_sptr,numberOfPeriods, true,pAlg);
         }
         else
         { 
           //if only monitors range selected
           //then set the monitor workspace as the outputworkspace
-          setWorkspaceProperty("OutputWorkspace", title, mongrp_sptr, monws_sptr,numberOfPeriods, false);
+          setWorkspaceProperty("OutputWorkspace", title, mongrp_sptr, monws_sptr,numberOfPeriods, false,pAlg);
         }
 
       }
       catch(std::out_of_range& )
       {
-        g_log.debug()<<"Error in creating monitor workspace"<<std::endl;
+        pAlg->getLogger().debug()<<"Error in creating monitor workspace"<<std::endl;
       }
       catch(std::runtime_error& )
       {
-        g_log.debug()<<"Error in creating monitor workspace"<<std::endl;
+        pAlg->getLogger().debug()<<"Error in creating monitor workspace"<<std::endl;
       }
     }
 
@@ -307,14 +307,14 @@ namespace Mantid
      *  @param bmonitors :: boolean flag to name  the workspaces
      */
     void LoadRawHelper::setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr, WorkspaceGroup_sptr grpws_sptr,
-        const int64_t period, bool bmonitors)
+        const int64_t period, bool bmonitors,API::Algorithm *pAlg)
     {
       if(!ws_sptr) return;
       if(!grpws_sptr) return;
       std::string wsName;
       std::string outws;
       std::string outputWorkspace;
-      std::string localWSName = getProperty("OutputWorkspace");
+      std::string localWSName = pAlg->getProperty("OutputWorkspace");
       std::stringstream suffix;
       suffix << (period + 1);
       if (bmonitors)
@@ -328,8 +328,8 @@ namespace Mantid
         outputWorkspace = "OutputWorkspace";
       }
       outws = outputWorkspace + "_" + suffix.str();
-      declareProperty(new WorkspaceProperty<Workspace> (outws, wsName, Direction::Output));
-      setProperty(outws, boost::static_pointer_cast<Workspace>(ws_sptr));
+      pAlg->declareProperty(new WorkspaceProperty<Workspace> (outws, wsName, Direction::Output));
+      pAlg->setProperty(outws, boost::static_pointer_cast<Workspace>(ws_sptr));
       grpws_sptr->addWorkspace( ws_sptr );
     }
 
@@ -338,14 +338,14 @@ namespace Mantid
      *  @param title :: title of the workspace
      *  @param grpws_sptr ::  shared pointer to group workspace
      *  @param ws_sptr ::  shared pointer to workspace
-     *  @param numberOfPeriods :: numer periods in the raw file
+     *  @param numberOfPeriods :: number periods in the raw file
      *  @param  bMonitor to identify the workspace is an output workspace or monitor workspace
      */
     void LoadRawHelper::setWorkspaceProperty(const std::string& propertyName, const std::string& title,
-        WorkspaceGroup_sptr grpws_sptr, DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods, bool bMonitor)
+        WorkspaceGroup_sptr grpws_sptr, DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods, bool bMonitor,API::Algorithm *pAlg)
     {
       UNUSED_ARG(bMonitor);
-      Property *ws = getProperty("OutputWorkspace");
+      Property *ws = pAlg->getProperty("OutputWorkspace");
       if(!ws) return;
       if(!grpws_sptr) return;
       if(!ws_sptr)return;
@@ -353,11 +353,11 @@ namespace Mantid
       ws_sptr->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
       if (numberOfPeriods > 1)
       {
-        setProperty(propertyName, boost::dynamic_pointer_cast<Workspace>(grpws_sptr));
+        pAlg->setProperty(propertyName, boost::dynamic_pointer_cast<Workspace>(grpws_sptr));
       }
       else
       {
-        setProperty(propertyName, boost::dynamic_pointer_cast<Workspace>(ws_sptr));
+        pAlg->setProperty(propertyName, boost::dynamic_pointer_cast<Workspace>(ws_sptr));
       }
     }
 

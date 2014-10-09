@@ -96,6 +96,25 @@ namespace Mantid
         int64_t last; ///< last spectrum number of the block
         bool isMonitor; ///< is the data in a monitor group
       };
+
+      /// The structure describes parameters of a single time-block written in the nexus file
+      struct DataBlock
+      {
+        /// The number of data periods
+        int numberOfPeriods;
+         /// The number of time channels per spectrum (N histogram bins -1)
+        std::size_t numberOfChannels;   
+        /// The number of spectra
+        std::size_t numberOfSpectra;
+
+        DataBlock():numberOfPeriods(0),numberOfChannels(0),numberOfSpectra(0){}
+
+        DataBlock(const NeXus::NXInt &data):
+          numberOfPeriods(data.dim0()),
+          numberOfChannels(data.dim2()),
+          numberOfSpectra (data.dim1())
+        {};
+     };
     private:
       /// Overwrites Algorithm method.
       void init();
@@ -106,25 +125,25 @@ namespace Mantid
       /// Prepare a vector of SpectraBlock structures to simplify loading
       size_t prepareSpectraBlocks();
       /// Run LoadInstrument as a ChildAlgorithm
-      void runLoadInstrument(DataObjects::Workspace2D_sptr);
+      void runLoadInstrument(DataObjects::Workspace2D_sptr &);
       /// Load in details about the run
-      void loadRunDetails(DataObjects::Workspace2D_sptr local_workspace, Mantid::NeXus::NXEntry & entry);
+      void loadRunDetails(DataObjects::Workspace2D_sptr &local_workspace, Mantid::NeXus::NXEntry & entry);
       /// Parse an ISO formatted date-time string into separate date and time strings
       void parseISODateTime(const std::string & datetime_iso, std::string & date, std::string & time) const;
       /// Load in details about the sample
-      void loadSampleData(DataObjects::Workspace2D_sptr, Mantid::NeXus::NXEntry & entry);
+      void loadSampleData(DataObjects::Workspace2D_sptr &, Mantid::NeXus::NXEntry & entry);
       /// Load log data from the nexus file
-      void loadLogs(DataObjects::Workspace2D_sptr ws, Mantid::NeXus::NXEntry & entry);
+      void loadLogs(DataObjects::Workspace2D_sptr &ws, Mantid::NeXus::NXEntry & entry);
       // Load a given period into the workspace
-      void loadPeriodData(int64_t period, Mantid::NeXus::NXEntry & entry, DataObjects::Workspace2D_sptr local_workspace);
+      void loadPeriodData(int64_t period, Mantid::NeXus::NXEntry & entry, DataObjects::Workspace2D_sptr &local_workspace);
       // Load a data block
       void loadBlock(Mantid::NeXus::NXDataSetTyped<int> & data, int64_t blocksize, int64_t period, int64_t start,
-          int64_t &hist, int64_t& spec_num, DataObjects::Workspace2D_sptr localWorkspace);
+          int64_t &hist, int64_t& spec_num, DataObjects::Workspace2D_sptr &localWorkspace);
 
       // Create period logs
-      void createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr local_workspace);
+      void createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr &local_workspace);
       // Validate multi-period logs
-      void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr);
+      void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr );
       // build the list of spectra numbers to load and include in the spectra list
       void buildSpectraInd2SpectraNumMap(const std::vector<int64_t>  &spec_list,const std::set<specid_t> &ExcludedSpectra);
 
@@ -136,18 +155,12 @@ namespace Mantid
       /// The sample name read from Nexus
       std::string m_samplename;
 
-      /// The number of spectra
-      std::size_t m_numberOfSpectra;
-      /// The number of spectra in the raw file
-      std::size_t m_numberOfSpectraInFile;
-      /// The number of periods
-      int m_numberOfPeriods;
-      /// The number of periods in the raw file
-      int m_numberOfPeriodsInFile;
-      /// The number of time channels per spectrum
-      std::size_t m_numberOfChannels;
-      /// The number of time channels per spectrum in the raw file
-      std::size_t m_numberOfChannelsInFile;
+      // the description of the data block, containing in the file. May include monitors and detectors with the same time binning
+      DataBlock m_detFileDataInfo;
+      // the description of single time-range data block, obtained from detectors
+      DataBlock m_detBlockInfo;
+      // the description of single time-range data block, obtained from monitors
+      DataBlock m_monBlockInfo;
       /// Is there a detector block
       bool m_have_detector;
 
