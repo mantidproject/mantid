@@ -31,24 +31,28 @@ def __is_array_of_workspaces(arg):
     return __is_array(arg) and len(arg) > 0 and __is_workspace(arg[0])
 
 
-def __plot_as_workspace(workspaces):
+def __plot_as_workspace(*args, **kwargs):
     """
         plotSpectrum via qti plotting framework to plot a workspace.
-        @param workspaces :: workspace or list of workspaces
+        @param Args :: curve data and options.
+        @param Kwargs :: plot line options
+        
         
         Returns :: A plot handle
     """
-    return mantidplot.plotSpectrum(workspaces, 0)
+    return mantidplot.plotSpectrum(args[0], 0) # HACK. Hard-codes to workspace index zero.
 
-def __plot_as_workspaces(workspaces):
+def __plot_as_workspaces(*args, **kwargs):
     """
         Plot a series of workspaces
-        @param workspaces :: workspaces to plot
+        @param Args :: curve data and options.
+        @param Kwargs :: plot line options
+        
         
         Returns :: A plot handle
     """
     # plotSpectrum can already handle 1 or more input workspaces.
-    return __plot_as_workspace(workspaces)
+    return __plot_as_workspace(*args, **kwargs)
 
 def __create_workspace(x, y, name="dummy"):
     """
@@ -71,44 +75,51 @@ def __create_workspace(x, y, name="dummy"):
     return ws
         
 
-def __plot_as_array(y, *args, **kwargs):
+def __plot_as_array(*args, **kwargs):
     """
         Plot from an array
-        @param y :: y array
-        @param Args :: x array
-        @param Kwargs :: Matplot lib style options
+        @param Args :: curve data and options.
+        @param Kwargs :: plot line options
         
         Returns :: A plot handle
     """
-    if len(args) != 0:
-        if __is_array(args):
-            ws = __create_workspace(args, y)
+    y = args[0]
+    if len(args) > 1:
+        if __is_array(args[1]):
+            ws = __create_workspace(args[1], y)
         else:
             raise ValueError("Inputs are of type: " + str(type(args)) + ". Not plottable." )
     else:
         x = range(0, len(y), 1) # 0 to n, incremented by 1.
         ws = __create_workspace(x, y)
-    return __plot_as_workspace(ws)
+    return __plot_as_workspace(ws, **kwargs)
 
 
 
-def plot (y, *args, **kwargs):
+
+def plot (*args, **kwargs):
     """
         Plot the data.
-        @param y :: argument
-        @param args :: curve inputs
-        @param kwargs :: plot line options
+        @param Args :: curve data and options
+        @param Kwargs :: plot line options
         
         Returns :: A plot handle.
     """
+    
+    nargs = len(args)
+    if nargs < 1:
+        raise ValueError("Must provide data to plot")
+    
+    y = args[0]
+    
     print type(y)
     if __is_array(y):
         if __is_array_of_workspaces(y):
-            return __plot_as_workspaces(y)
+            return __plot_as_workspaces(*args, **kwargs)
         else:
-            return __plot_as_array(y)
+            return __plot_as_array(*args, **kwargs)
     elif __is_workspace(y):
-        return __plot_as_workspace(y)
+        return __plot_as_workspace(*args, **kwargs)
     else:
         raise ValueError("Cannot plot argument of type " + str(type(y)) )
          
