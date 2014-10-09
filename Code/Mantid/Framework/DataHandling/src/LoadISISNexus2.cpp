@@ -344,7 +344,7 @@ namespace Mantid
 
     /**
     * Check the validity of the optional properties of the algorithm and identify if partial data should be loaded.
-    * @param SpectraExclued :: set of spectra ID-s to exclude from spectra list to load
+    * @param SpectraExcluded :: set of spectra ID-s to exclude from spectra list to load
     */
     void LoadISISNexus2::checkOptionalProperties(const std::set<specid_t> &SpectraExcluded)
     {
