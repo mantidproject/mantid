@@ -95,22 +95,9 @@ namespace Mantid
 
       bool bLoadlogFiles = getProperty("LoadLogFiles");
 
-      // process monitor option
-      std::string monitorOption = getProperty("LoadMonitors");
-      if (monitorOption =="1")
-        monitorOption = "Separate";
-      if (monitorOption=="0")
-         monitorOption = "Exclude";
+      bool bincludeMonitors,bseparateMonitors, bexcludeMonitors;
+      LoadRawHelper::ProcessLoadMonitorOptions(bincludeMonitors,bseparateMonitors, bexcludeMonitors,this);
 
-      bool bincludeMonitors = LoadRawHelper::isIncludeMonitors(monitorOption);
-      bool bseparateMonitors = false;
-      bool bexcludeMonitors = false;
-      if (!bincludeMonitors)
-      {
-        bseparateMonitors = LoadRawHelper::isSeparateMonitors(monitorOption);
-        bexcludeMonitors = LoadRawHelper::isExcludeMonitors(monitorOption);
-      }
-      //
 
       std::string title;
       //read workspace title from raw file

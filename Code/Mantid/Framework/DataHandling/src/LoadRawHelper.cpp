@@ -1319,7 +1319,32 @@ namespace Mantid
       monitorOption.compare("Separate") ? (bSeparate = false) : (bSeparate = true);
       return bSeparate;
     }
+    /**The method to interpret LoadMonitors property options and convert then into boolean values
+     * @param bincludeMonitors  :: if monitors requested to be included with workspace
+     * @param bseparateMonitors :: if monitors requested to be loaded separately from the workspace
+     * @param bexcludeMonitors  :: if monitors should not be loaded at all. 
+     * @param pAlgo             :: pointer to the algorithm, which has LoadMonitors property.
+     */ 
+    void LoadRawHelper::ProcessLoadMonitorOptions(bool &bincludeMonitors,bool &bseparateMonitors,bool &bexcludeMonitors,API::Algorithm *pAlgo)
+    {
+      // process monitor option
+      std::string monitorOption = pAlgo->getProperty("LoadMonitors");
+      if (monitorOption =="1")
+        monitorOption = "Separate";
+      if (monitorOption=="0")
+        monitorOption = "Exclude";
 
+      bincludeMonitors = LoadRawHelper::isIncludeMonitors(monitorOption);
+      bseparateMonitors = false;
+      bexcludeMonitors = false;
+      if (!bincludeMonitors)
+      {
+        bseparateMonitors = LoadRawHelper::isSeparateMonitors(monitorOption);
+        bexcludeMonitors = LoadRawHelper::isExcludeMonitors(monitorOption);
+      }
+      //
+
+    }
 
   } // namespace DataHandling
 } // namespace Mantid

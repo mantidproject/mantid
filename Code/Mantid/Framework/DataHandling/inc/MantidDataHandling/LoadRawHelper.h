@@ -82,7 +82,7 @@ namespace Mantid
       static bool isIncludeMonitors(const std::string &monitorOption);
 
 
-
+      static void ProcessLoadMonitorOptions(bool &bincludeMonitors,bool &bseparateMonitors,bool &bexcludeMonitors,API::Algorithm *pAlgo);
     protected:
       /// Overwrites Algorithm method.
       void init();

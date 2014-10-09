@@ -117,23 +117,11 @@ namespace Mantid
     {
 
       //**********************************************************************
-      // process primary monitor options
-      std::string monitorOption = getProperty("LoadMonitors");
-      if (monitorOption =="1")
-        monitorOption = "Separate";
-      if (monitorOption=="0")
-        monitorOption = "Exclude";
+      // process load monitor options request
+      bool bincludeMonitors,bseparateMonitors, bexcludeMonitors;
+      LoadRawHelper::ProcessLoadMonitorOptions(bincludeMonitors,bseparateMonitors, bexcludeMonitors,this);
 
-      bool bincludeMonitors = LoadRawHelper::isIncludeMonitors(monitorOption);
-      bool bseparateMonitors = false;
-      bool bexcludeMonitors = false;
-      if (!bincludeMonitors)
-      {
-        bseparateMonitors = LoadRawHelper::isSeparateMonitors(monitorOption);
-        bexcludeMonitors = LoadRawHelper::isExcludeMonitors(monitorOption);
-      }
       //**********************************************************************
-
       m_filename = getPropertyValue("Filename");
       // Create the root Nexus class
       NXRoot root(m_filename);
@@ -204,13 +192,13 @@ namespace Mantid
           throw std::runtime_error("Inconsistent NeXus file structure.");
         }
       }
-      std::set<specid_t>  ExcluedSpectra;
-      bseparateMonitors=findSpectraDetRangeInFile(entry,m_spec,ndets,nsp1[0],m_monitors,bexcludeMonitors,bseparateMonitors,ExcluedSpectra);
+      std::set<specid_t>  ExcluedMonitorsSpectra;
+      bseparateMonitors=findSpectraDetRangeInFile(entry,m_spec,ndets,nsp1[0],m_monitors,bexcludeMonitors,bseparateMonitors,ExcluedMonitorsSpectra);
 
       const size_t x_length = m_numberOfChannels + 1;
 
       // Check input is consistent with the file, throwing if not, exclude spectra selected at findSpectraDetRangeInFile;
-      checkOptionalProperties(ExcluedSpectra);
+      checkOptionalProperties(ExcluedMonitorsSpectra);
       // Fill up m_spectraBlocks
       size_t total_specs = prepareSpectraBlocks();
 
@@ -311,6 +299,7 @@ namespace Mantid
       m_tof_data.reset();
       m_spec.reset();
       m_monitors.clear();
+      m_specInd2specNum_map.clear();
     }
 
     // Function object for remove_if STL algorithm
@@ -1012,11 +1001,27 @@ namespace Mantid
     {
       return sqrt(in);
     }
-
+    /**Method takes input parameters which describe  monitor loading and analyze them against spectra/monitor information in the file. 
+     * The result is the option if monitors can  be loaded together with spectra or mast be treated separately 
+     * and additional information on how to treat monitor spectra.
+     *
+     *@param entry                :: entry to the NeXus file, opened at root folder
+     *@param spectrum_index       :: array of spectra indexes of the data present in the file
+     *@param ndets                :: size of the spectrum index array
+     *@param n_vms_compat_spectra :: number of data entries containing common time bins (e.g. all spectra, or all spectra and monitors or some spectra (this is not fully supported)
+     *@param monitors             :: map connecting monitor spectra ID against monitor group name in the file. 
+     *@param excludeMonitors      :: input property indicating if it is requested to exclude monitors from the target workspace
+     *@param separateMonitors     :: input property indicating if it is requested to load monitors separately (and exclude them from target data workspace this way)
+     *
+     *@param MonitorSpectra       :: output property containing the list of monitors which should be loaded separately. 
+     *@return excludeMonitors     :: indicator if monitors should or mast be excluded from the main data workspace if they can not be loaded with the data
+     *                               (contain different number of time channels)
+     *
+    */
     bool LoadISISNexus2::findSpectraDetRangeInFile(NXEntry &entry,boost::shared_array<int>  &spectrum_index,int64_t ndets,int64_t n_vms_compat_spectra,
-      std::map<int64_t,std::string> &monitors,bool excludeMonitors,bool separateMonitors,std::set<specid_t> &ExcludedSpectra)
+      std::map<int64_t,std::string> &monitors,bool excludeMonitors,bool separateMonitors,std::set<specid_t> &MonitorSpectra)
     {
-      ExcludedSpectra.clear();
+      MonitorSpectra.clear();
       size_t nmons = monitors.size();
 
       //Grab the number of channels
@@ -1084,7 +1089,7 @@ namespace Mantid
           if(removeMonitors)
           {
             m_numberOfSpectra--;
-            ExcludedSpectra.insert(static_cast<specid_t>(it->first));
+            MonitorSpectra.insert(static_cast<specid_t>(it->first));
           }
         }
         else
