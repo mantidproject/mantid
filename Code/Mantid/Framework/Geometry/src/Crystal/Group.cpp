@@ -7,7 +7,7 @@ namespace Mantid
 namespace Geometry
 {
 
-/// Construct a group group from a given set of operations. This is
+/// Default constructor. Creates a group with one symmetry operation (identity).
 Group::Group() :
     m_allOperations(),
     m_operationSet()
@@ -16,6 +16,7 @@ Group::Group() :
     setSymmetryOperations(operation);
 }
 
+/// Uses SymmetryOperationFactory to create a vector of symmetry operations from the string.
 Group::Group(const std::string &symmetryOperationString) :
     m_allOperations(),
     m_operationSet()
@@ -23,6 +24,7 @@ Group::Group(const std::string &symmetryOperationString) :
     setSymmetryOperations(SymmetryOperationFactory::Instance().createSymOps(symmetryOperationString));
 }
 
+/// Constructs a group from the symmetry operations in the vector, duplicates are removed.
 Group::Group(const std::vector<SymmetryOperation> &symmetryOperations) :
     m_allOperations(),
     m_operationSet()
@@ -30,6 +32,7 @@ Group::Group(const std::vector<SymmetryOperation> &symmetryOperations) :
     setSymmetryOperations(symmetryOperations);
 }
 
+/// Copy constructor.
 Group::Group(const Group &other) :
     m_allOperations(other.m_allOperations),
     m_operationSet(other.m_operationSet)
@@ -37,6 +40,7 @@ Group::Group(const Group &other) :
 
 }
 
+/// Assignment operator.
 Group &Group::operator =(const Group &other)
 {
     m_allOperations = other.m_allOperations;
@@ -45,16 +49,27 @@ Group &Group::operator =(const Group &other)
     return *this;
 }
 
+/// Returns the order of the group, which is the number of symmetry operations.
 size_t Group::order() const
 {
     return m_allOperations.size();
 }
 
+/// Returns a vector with all symmetry operations.
 std::vector<SymmetryOperation> Group::getSymmetryOperations() const
 {
     return m_allOperations;
 }
 
+/**
+ * Multiplication operator of two groups.
+ *
+ * Multiplies each element of this group with each element of the other
+ * group, as described in the class documentation.
+ *
+ * @param other :: A group.
+ * @return The product resulting from the group multiplication.
+ */
 Group Group::operator *(const Group &other) const
 {
     std::vector<SymmetryOperation> result;
@@ -69,6 +84,7 @@ Group Group::operator *(const Group &other) const
     return Group(result);
 }
 
+/// Returns a unique set of Kernel::V3D resulting from applying all symmetry operations, vectors are wrapped to [0, 1).
 std::vector<Kernel::V3D> Group::operator *(const Kernel::V3D &vector) const
 {
     std::set<Kernel::V3D> result;
@@ -80,16 +96,19 @@ std::vector<Kernel::V3D> Group::operator *(const Kernel::V3D &vector) const
     return std::vector<Kernel::V3D>(result.begin(), result.end());
 }
 
+/// Returns true if both groups contain the same set of symmetry operations.
 bool Group::operator ==(const Group &other) const
 {
     return m_operationSet == other.m_operationSet;
 }
 
+/// Returns true if groups are different from eachother.
 bool Group::operator !=(const Group &other) const
 {
     return !(this->operator ==(other));
 }
 
+/// Assigns symmetry operations, throws std::invalid_argument if vector is empty.
 void Group::setSymmetryOperations(const std::vector<SymmetryOperation> &symmetryOperations)
 {
     if(symmetryOperations.size() < 1) {
@@ -100,6 +119,7 @@ void Group::setSymmetryOperations(const std::vector<SymmetryOperation> &symmetry
     m_allOperations = std::vector<SymmetryOperation>(m_operationSet.begin(), m_operationSet.end());
 }
 
+/// Convenience operator* for directly multiplying groups using shared pointers.
 Group_const_sptr operator *(const Group_const_sptr &lhs, const Group_const_sptr &rhs)
 {
     if(!lhs || !rhs) {
@@ -109,6 +129,7 @@ Group_const_sptr operator *(const Group_const_sptr &lhs, const Group_const_sptr 
     return boost::make_shared<const Group>((*lhs) * (*rhs));
 }
 
+/// Convenience operator* for getting a vector of V3D using shared pointers.
 std::vector<Kernel::V3D> operator *(const Group_const_sptr &lhs, const Kernel::V3D &rhs)
 {
     if(!lhs) {
@@ -118,7 +139,7 @@ std::vector<Kernel::V3D> operator *(const Group_const_sptr &lhs, const Kernel::V
     return (*lhs) * rhs;
 }
 
-
+/// Equality operator for shared pointers.
 bool operator ==(const Group_const_sptr &lhs, const Group_const_sptr &rhs)
 {
     if(!lhs || !rhs) {
@@ -128,6 +149,7 @@ bool operator ==(const Group_const_sptr &lhs, const Group_const_sptr &rhs)
     return (*lhs) == (*rhs);
 }
 
+/// Inequality operator for shared pointers.
 bool operator !=(const Group_const_sptr &lhs, const Group_const_sptr &rhs)
 {
     return !(operator ==(lhs, rhs));

@@ -12,8 +12,21 @@ namespace Geometry
 
 /** CenteringGroup
 
-    A class that holds symmetry operations to describe a lattice
-    centering.
+    This class is mostly a convenience class. It takes a bravais lattice symbol
+    (P, I, A, B, C, F, R) and forms a group that contains all translations
+    connected to the centering. This is for example used in the space group
+    generation process.
+
+    In addition to the inherited interface of Group, CenteringGroup provides
+    methods that provide some meta information, namely the "name" of the
+    centering operation. While CenteringGroup::getSymbol() returns a string,
+    CenteringGroup::getType() returns a value of the enum type
+    CenteringGroup::CenteringType.
+
+    Important differences occur in the handling of Rhombohedral centering.
+    CenteringType distinguishes between obverse (Robv) and reverse (Rrev)
+    setting. These can be given explicitly as strings for construction. When
+    only "R" is provided, the obverse setting is assumed.
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 07/10/2014

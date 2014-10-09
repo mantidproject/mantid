@@ -14,11 +14,13 @@ CyclicGroup::CyclicGroup(const std::string &symmetryOperationString) :
 
 }
 
+/// Construct CyclicGroup from a SymmetryOperation object.
 CyclicGroup::CyclicGroup(const SymmetryOperation &symmetryOperation) :
     Group(generateAllOperations(symmetryOperation))
 {
 }
 
+/// Returns a vector with all symmetry operations that are part of the cyclic group defined by the generating operation.
 std::vector<SymmetryOperation> CyclicGroup::generateAllOperations(const SymmetryOperation &operation) const
 {
     std::vector<SymmetryOperation> symOps(1, operation);
