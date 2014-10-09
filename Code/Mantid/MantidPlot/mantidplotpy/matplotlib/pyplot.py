@@ -1,5 +1,5 @@
 import numpy as np
-from mantid.api import MatrixWorkspace as MatrixWorkspace
+from mantid.api import (MatrixWorkspace as MatrixWorkspace, AlgorithmManager as AlgorithmManager, AnalysisDataService as ADS)
 from mantid.simpleapi import CreateWorkspace as CreateWorkspace
 import mantidplot  
 
@@ -49,6 +49,26 @@ def __plot_as_workspaces(workspaces):
     """
     # plotSpectrum can already handle 1 or more input workspaces.
     return __plot_as_workspace(workspaces)
+
+def __create_workspace(x, y, name="dummy"):
+    """
+        Create a workspace. Also puts it in the ADS
+        @param x :: x array
+        @param y :: y array
+        @param name :: workspace name
+        
+        Returns :: Workspace
+    """    
+    alg = AlgorithmManager.create("CreateWorkspace")
+    alg.setChild(True) 
+    alg.initialize()
+    alg.setProperty("DataX", x)
+    alg.setProperty("DataY", y)
+    alg.setPropertyValue("OutputWorkspace", name) 
+    alg.execute()
+    ws = alg.getProperty("OutputWorkspace").value
+    ADS.addOrReplace(name, ws) # Cannot plot a workspace that is not in the ADS
+    return ws
         
 
 def __plot_as_array(y, *args, **kwargs):
@@ -62,12 +82,12 @@ def __plot_as_array(y, *args, **kwargs):
     """
     if len(args) != 0:
         if __is_array(args):
-            ws = CreateWorkspace(DataX=args, DataY=y)     
+            ws = __create_workspace(args, y)
         else:
             raise ValueError("Inputs are of type: " + str(type(args)) + ". Not plottable." )
     else:
         x = range(0, len(y), 1) # 0 to n, incremented by 1.
-        ws = CreateWorkspace(DataX=x, DataY=y)   
+        ws = __create_workspace(x, y)
     return __plot_as_workspace(ws)
 
 
