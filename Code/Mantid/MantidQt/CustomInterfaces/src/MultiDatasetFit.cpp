@@ -195,7 +195,7 @@ DatasetPlotData::DatasetPlotData(const QString& wsName, int wsIndex, const QStri
   }
 
   // create the curves
-  setData( m_dataCurve, ws.get(), wsIndex, outputWS.get() );
+  setData( ws.get(), wsIndex, outputWS.get() );
 
 }
 
