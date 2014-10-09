@@ -1,3 +1,4 @@
+#include "MantidAPI/TextAxis.h"
 #include "MantidQtCustomInterfaces/Quasi.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
@@ -114,6 +115,8 @@ namespace MantidQt
 		 */
 		void Quasi::run() 
 		{
+      using namespace Mantid::API;
+
 			// Using 1/0 instead of True/False for compatibility with underlying Fortran code
 			// in some places
 			QString verbose("False");
@@ -183,6 +186,30 @@ namespace MantidQt
 										" Save="+save+", Plot='"+plot+"', Verbose="+verbose+")\n";
 
 			runPythonScript(pyInput);
+
+      //Update mini plot
+      QString outWsName = sampleName.left(sampleName.size() - 3) + "QLr_Workspace_0";
+      MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName.toStdString());
+      TextAxis* axis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
+
+      for(int histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
+      {
+        QString specName = QString::fromStdString(axis->label(histIndex));
+
+        if(specName.contains("fit"))
+        {
+          plotMiniPlot(outputWorkspace, histIndex, "QuasiPlot", specName);
+          m_curves[specName]->setPen(QColor(Qt::red));
+        }
+
+        if(specName.contains("diff"))
+        {
+          plotMiniPlot(outputWorkspace, histIndex, "QuasiPlot", specName);
+          m_curves[specName]->setPen(QColor(Qt::green));
+        }
+      }
+  
+      replot("QuasiPlot");
 		}
 
 		/**

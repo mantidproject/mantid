@@ -60,7 +60,7 @@ namespace CustomInterfaces
 
   bool IndirectTab::validateTab()
   {
-    validate();
+    return validate();
   }
 
   /**

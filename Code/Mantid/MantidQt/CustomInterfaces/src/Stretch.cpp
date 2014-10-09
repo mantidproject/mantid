@@ -1,6 +1,11 @@
 #include "MantidQtCustomInterfaces/Stretch.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
+namespace
+{
+  Mantid::Kernel::Logger g_log("Stretch");
+}
+
 namespace MantidQt
 {
 	namespace CustomInterfaces
@@ -89,6 +94,8 @@ namespace MantidQt
 		 */
 		void Stretch::run() 
 		{
+      using namespace Mantid::API;
+
 			QString save("False");
 			QString verbose("False");
 
@@ -130,6 +137,21 @@ namespace MantidQt
 										" Save="+save+", Plot='"+plot+"', Verbose="+verbose+")\n";
 
 			runPythonScript(pyInput);
+
+      //Update mini plot
+      QString sigmaWsName = sampleName.left(sampleName.size() - 3) + "Qst_Sigma";
+      QString betaWsName = sampleName.left(sampleName.size() - 3) + "Qst_Beta";
+
+      MatrixWorkspace_sptr sigmaWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sigmaWsName.toStdString());
+      MatrixWorkspace_sptr betaWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(betaWsName.toStdString());
+
+      plotMiniPlot(sigmaWs, 0, "StretchPlot", "SigmaCurve");
+      plotMiniPlot(betaWs, 0, "StretchPlot", "BetaCurve");
+
+      m_curves["SigmaCurve"]->setPen(QColor(Qt::red));
+      m_curves["BetaCurve"]->setPen(QColor(Qt::green));
+
+      replot("StretchPlot");
 		}
 
 		/**
