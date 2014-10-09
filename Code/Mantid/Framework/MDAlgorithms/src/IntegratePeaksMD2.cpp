@@ -143,7 +143,7 @@ namespace MDAlgorithms
 		runMaskDetectors(peakWS,"Pixel","edges");
     } catch (...)
     {
-		g_log.error("Can't execute MaskBTP algorithm");
+		g_log.error("Can't execute MaskBTP algorithm for this instrument to set edge for IntegrateIfOnEdge option");
     }
 
 
