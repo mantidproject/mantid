@@ -57,16 +57,15 @@ namespace Geometry
   protected:
     PointGroup(const std::string &symbolHM);
 
-    void addSymmetryOperation(const SymmetryOperation_const_sptr &symmetryOperation);
-    std::vector<SymmetryOperation_const_sptr> getSymmetryOperations() const;
+    void setSymmetryOperations(const std::vector<SymmetryOperation> &generators);
+    void addSymmetryOperation(const SymmetryOperation &symmetryOperation);
+    std::vector<SymmetryOperation> getSymmetryOperations() const;
 
-    std::vector<Kernel::IntMatrix> generateTransformationMatrices(const std::vector<SymmetryOperation_const_sptr> &symmetryOperations);
-    void setTransformationMatrices(const std::vector<Kernel::IntMatrix> &matrices);
+    std::vector<SymmetryOperation> generateSymmetryOperations(const std::vector<SymmetryOperation> &symmetryOperations);
 
     std::set<Kernel::V3D> getEquivalentSet(const Kernel::V3D &hkl) const;
 
-    std::vector<SymmetryOperation_const_sptr> m_symmetryOperations;
-    std::vector<Kernel::IntMatrix> m_transformationMatrices;
+    std::vector<SymmetryOperation> m_symmetryOperations;
     std::string m_symbolHM;
   };
 

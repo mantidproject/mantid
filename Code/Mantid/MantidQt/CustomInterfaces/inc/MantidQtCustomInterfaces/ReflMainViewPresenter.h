@@ -88,6 +88,7 @@ namespace MantidQt
       static const int COL_DQQ          = 5;
       static const int COL_SCALE        = 6;
       static const int COL_GROUP        = 7;
+      static const int COL_OPTIONS      = 8;
     };
   }
 }

@@ -219,7 +219,7 @@ void toValue(const std::string& strvalue, std::vector<std::vector<T> >& value, c
   PROPERTYWITHVALUE_TOVALUE(long);
   PROPERTYWITHVALUE_TOVALUE(uint32_t);
   PROPERTYWITHVALUE_TOVALUE(uint64_t);
-  #ifdef __INTEL_COMPILER
+  #if defined(__INTEL_COMPILER) || defined(__clang__)
     PROPERTYWITHVALUE_TOVALUE(unsigned long);
   #endif
 
@@ -329,6 +329,28 @@ public:
   virtual std::string value() const
   {
     return toString(m_value);
+  }
+
+  /**
+   * Deep comparison.
+   * @param right The other property to compare to.
+   * @return true if the are equal.
+   */
+  virtual bool operator==(const PropertyWithValue<TYPE> & rhs) const
+  {
+    if (this->name() != rhs.name())
+      return false;
+    return (m_value == rhs.m_value);
+  }
+
+  /**
+   * Deep comparison (not equal).
+   * @param right The other property to compare to.
+   * @return true if the are not equal.
+   */
+  virtual bool operator!=(const PropertyWithValue<TYPE> & rhs) const
+  {
+    return !(*this == rhs);
   }
 
   /** Get the size of the property.

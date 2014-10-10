@@ -17,14 +17,15 @@ const int DeleteRowFlag = ReflMainView::DeleteRowFlag;
 const int GroupRowsFlag = ReflMainView::GroupRowsFlag;
 
 //Clean column ids for use within tests
-const int RunCol   = ReflMainViewPresenter::COL_RUNS;
-const int ThetaCol = ReflMainViewPresenter::COL_ANGLE;
-const int TransCol = ReflMainViewPresenter::COL_TRANSMISSION;
-const int QMinCol  = ReflMainViewPresenter::COL_QMIN;
-const int QMaxCol  = ReflMainViewPresenter::COL_QMAX;
-const int DQQCol   = ReflMainViewPresenter::COL_DQQ;
-const int ScaleCol = ReflMainViewPresenter::COL_SCALE;
-const int GroupCol = ReflMainViewPresenter::COL_GROUP;
+const int RunCol     = ReflMainViewPresenter::COL_RUNS;
+const int ThetaCol   = ReflMainViewPresenter::COL_ANGLE;
+const int TransCol   = ReflMainViewPresenter::COL_TRANSMISSION;
+const int QMinCol    = ReflMainViewPresenter::COL_QMIN;
+const int QMaxCol    = ReflMainViewPresenter::COL_QMAX;
+const int DQQCol     = ReflMainViewPresenter::COL_DQQ;
+const int ScaleCol   = ReflMainViewPresenter::COL_SCALE;
+const int GroupCol   = ReflMainViewPresenter::COL_GROUP;
+const int OptionsCol = ReflMainViewPresenter::COL_OPTIONS;
 
 class MockView : public ReflMainView
 {
@@ -45,13 +46,13 @@ public:
   void addDataForTest()
   {
     TableRow row = m_model->appendRow();
-    row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 3;
+    row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 3 << "";
     row = m_model->appendRow();
-    row << "13462" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 3;
+    row << "13462" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 3 << "";
     row = m_model->appendRow();
-    row << "13469" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 1;
+    row << "13469" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 1 << "";
     row = m_model->appendRow();
-    row << "13470" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 1;
+    row << "13470" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 1 << "";
     m_model->removeRow(0);
   }
 private:

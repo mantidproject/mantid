@@ -8,11 +8,11 @@ This document explains how crystallographic point groups are used in Mantid.
 Introduction
 ------------
 
-Point groups can be used to describe the symmetry of an object or a lattice, as commonly used in the context of diffraction techniques. According to the definition given in the International Tables for Crystallography A, a "point group is a group of symmetry operations all of which leave at least one point unmoved" [ITA6]_. This means that only symmetry operations without a translational component are allowed, which leaves only rotations :math:`1`, :math:`2`, :math:`3`, :math:`4`, :math:`6` and roto-inversions :math:`\bar{1}`, :math:`\bar{3}`, :math:`\bar{4}`, :math:`\bar{6}` and mirror planes :math:`m`.
+Point groups can be used to describe the symmetry of an object or a lattice, as commonly used in the context of diffraction techniques. According to the definition given in the International Tables for Crystallography A, a "point group is a group of symmetry operations all of which leave at least one point unmoved" [ITA6]_. This means that only symmetry operations without a translational component are allowed, which leaves only rotations :math:`1`, :math:`2`, :math:`3`, :math:`4`, :math:`6` and roto-inversions :math:`\bar{1}`, :math:`\bar{3}`, :math:`\bar{4}`, :math:`\bar{6}` and mirror planes :math:`m`. In space groups, translational symmetry is present as well (for example in the form of screw axes and glide planes).
 
 In three dimensions there are 32 crystallographic point groups and in 11 of these an inversion center (:math:`\bar{1}`) is present. These so called Laue classes are important for diffraction experiments because Friedel's law defines that diffraction patterns always show a center of symmetry if anomalous dispersion is not taken into account.
 
-Through the presence of certain symmetry operations in certain directions, the Laue classes can be categorized into seven crystal systems (see table). This information is included in the Hermann-Mauguin symbol, which describes symmetry along different directions, depending on the crystal system.
+Through the presence of certain symmetry operations in certain directions, the Laue classes can be categorized into seven crystal systems (see table below). This information is included in the Hermann-Mauguin symbol, which describes symmetry along different directions, depending on the crystal system.
 
 .. table:: The seven crystal systems and how they relate to the 11 Laue classes.
 
@@ -34,23 +34,37 @@ Through the presence of certain symmetry operations in certain directions, the L
     | Triclinic      | :math:`\bar{1}`                     |
     +----------------+-------------------------------------+
     
-As mentioned before, point groups can describe the symmetry of a lattice, including the reciprocal lattice. When working with diffraction data, which are often described in terms of reciprocal lattice vectors with their Miller indices :math:`hkl` (since it's a vector it can be written shortly as :math:`\mathbf{h}`), this is particularly useful. Each symmetry element of the point group transforms a vector :math:`\mathbf{h}` into a new vector :math:`\mathbf{h}'`:
+As mentioned before, point groups can describe the symmetry of a lattice, including the reciprocal lattice. When working with diffraction data, which are often described in terms of reciprocal lattice vectors with their Miller indices :math:`hkl` (since it's a vector it can be written shortly as :math:`\mathbf{h}`), this is particularly useful. Each symmetry operation :math:`S_i` of the point group transforms a vector :math:`\mathbf{h}` into a new vector :math:`\mathbf{h}'`:
 
 .. math::
     \mathbf{h}' = \mathbf{S}_i \cdot \mathbf{h}
     
-In three dimensions :math:`\mathbf{h}` has three elements, so :math:`\mathbf{S}` is a :math:`3\times3`-matrix and the symmetry operation is applied to the vector by matrix-multiplication. Thus, for the purposes currently aimed at in Mantid, each point group can be represented by a collection of :math:`3\times3`-matrices. The number of matrices present in this collection is the so called order :math:`N` of the corresponding point group. Applying all symmetry operations of a point group to a given vector :math:`\mathbf{h}` results in :math:`N` new vectors :math:`\mathbf{h}'`, some of which may be identical (this depends on the symmetry and also on the vectors, e.g. if one or more index is 0). This means that the symmetry operations of a point group generate a set of :math:`N'` (where :math:`N' < N`) non-identical vectors :math:`\mathbf{h}'` for a given vector :math:`\mathbf{h}` - these vectors are called symmetry equivalents.
+To describe the rotational and translational components of the symmetry operation, a matrix :math:`M_i` and a vector :math:`v_i` are used. In three dimensions :math:`\mathbf{h}` has three elements, so :math:`\mathbf{M_i}` is a :math:`3\times3`-matrix and the symmetry operation is applied like this:
+
+.. math::
+    \mathbf{h}' = \mathbf{M}_i \cdot \mathbf{h} + \mathbf{v_i}
+
+A point group is an ensemble of symmetry operations. The number of operations present in this collection is the so called order :math:`N` of the corresponding point group. Applying all symmetry operations of a point group to a given vector :math:`\mathbf{h}` results in :math:`N` new vectors :math:`\mathbf{h}'`, some of which may be identical (this depends on the symmetry and also on the vectors, e.g. if one or more index is 0). This means that the symmetry operations of a point group generate a set of :math:`N'` (where :math:`N' < N`) non-identical vectors :math:`\mathbf{h}'` for a given vector :math:`\mathbf{h}` - these vectors are called symmetry equivalents.
+
+A very common representation of symmetry operations is the Jones faithful notation, which is very concise and used throughout the International Tables. Some examples of the notation are given in the following table.
+
+.. table:: Examples for symmetry operations in Jones faithful notation.
+
+    =============== ===================
+    Symbol          Symmetry operation
+    =============== ===================
+    ``x,y,z``       Identity
+    ``-x,-y,-z``    Inversion
+    ``-x,-y,z``     2-fold rotation around :math:`z`
+    ``x,y,-z``      Mirror plane perpendicular to :math:`z`
+    ``-x,-y,z+1/2`` :math:`2_1` screw axis along :math:`z`
+    =============== ===================
+
 
 Using symmetry operations
 -------------------------
 
-As described in the introduction, point groups are represented as a collection of symmetry operations, which in turn are represented by :math:`3\times3`-matrices. In order to provide more context to the code using symmetry operations, there is an interface that wraps the :math:`3\times3`-matrix, it's called ``SymmetryOperation``. Besides the matrix this class contains an identifier for the operation, based on the definition in [ITA4]_. It's a symbol that consists of three parts:
-    
-    1. Symmetry operation in terms of Hermann-Mauguin notation, where :math:`\bar{n}` is denoted as ``-n``.
-    2. Direction of the symmetry axis (in case of a mirror plane, the axis perpendicular to the plane) in square brackets, components separated by spaces ``[u v w]``. For :math:`1` and :math:`\bar{1}` the direction must not be present.
-    3. ``h`` if the direction refers to a hexagonal coordinate system.
-    
-Valid examples are ``2 [1 0 0]`` or ``6 [0 0 1]h``. Furthermore, each symmetry operation also has an "order" - it defines how often the operation has to be applied to a vector to generate an identical vector. For a six-fold rotation axis this is 6, for a mirror plane 2.
+As explained above, point groups are represented as a collection of symmetry operations, which in turn are described by a :math:`3\times3`-matrix for the rotational part and a :math:`3\times1`-vector for the translational component.
 
 Using these identifiers, ``SymmetryOperation``-objects can be created through a factory and then used to transform vectors. The following code sample shows how to do that in Python:
 
@@ -58,7 +72,7 @@ Using these identifiers, ``SymmetryOperation``-objects can be created through a 
 
     from mantid.geometry import SymmetryOperation, SymmetryOperationFactoryImpl
     
-    symOp = SymmetryOperationFactoryImpl.Instance().createSymOp("m [001]")
+    symOp = SymmetryOperationFactoryImpl.Instance().createSymOp("x,y,-z")
     
     hkl = [1, -1, 3]
     hklPrime = symOp.apply(hkl)
@@ -195,7 +209,6 @@ This example code produces the output below upon execution:
 Again, as in the case of ``SymmetryOperation``, the usage of ``PointGroup`` and the corresponding factory is very similar in C++.
 
 .. [ITA6] International Tables for Crystallography (2006). Vol. A, ch. 10.1, p. 762
-.. [ITA4] International Tables for Crystallography, Vol. A, Fourth edition, pp 797-798.
 
 .. [#f1] In the case of the monoclinic Laue class :math:`2/m` it's a bit more complicated, because there are two conventions regarding the unique axis. According to current crystallographic standards, the :math:`b`-axis is used, but in some cases one may find the :math:`c`-axis for this purpose. To resolve this, both options are offered in Mantid. When using the symbol ``2/m``, the :math:`b`-axis convention is used, for :math:`c` one has to explicitly provide the symbol as ``112/m``.
 
