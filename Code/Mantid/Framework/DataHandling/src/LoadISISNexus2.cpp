@@ -1100,7 +1100,7 @@ namespace Mantid
     *@param excludeMonitors      :: input property indicating if it is requested to exclude monitors from the target workspace
     *@param separateMonitors     :: input property indicating if it is requested to load monitors separately (and exclude them from target data workspace this way)
     *
-    *@param OvelapMonitorSpectra :: output property containing the list of monitors ID for monitors, which are also included with spectra. 
+    *@param OvelapMonitors       :: output property containing the list of monitors ID for monitors, which are also included with spectra. 
     *@return excludeMonitors     :: indicator if monitors should or mast be excluded from the main data workspace if they can not be loaded with the data
     *                               (contain different number of time channels)
     *
