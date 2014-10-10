@@ -836,8 +836,9 @@ bool CheckWorkspacesMatch::checkRunProperties(const API::Run& run1, const API::R
   
   // Now loop over the individual logs
   bool matched(true);
+  int64_t length(static_cast<int64_t>(ws1logs.size()));
   PARALLEL_FOR_IF(true)
-  for ( size_t i = 0; i < ws1logs.size(); ++i )
+  for ( int64_t i = 0; i < length; ++i )
   {
     PARALLEL_START_INTERUPT_REGION
     if (matched)
