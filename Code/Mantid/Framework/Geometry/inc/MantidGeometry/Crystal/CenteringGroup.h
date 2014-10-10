@@ -5,6 +5,9 @@
 #include "MantidGeometry/Crystal/Group.h"
 #include <map>
 
+#include "MantidKernel/SingletonHolder.h"
+
+
 namespace Mantid
 {
 namespace Geometry
@@ -73,11 +76,10 @@ typedef boost::shared_ptr<CenteringGroup> CenteringGroup_sptr;
 typedef boost::shared_ptr<const CenteringGroup> CenteringGroup_const_sptr;
 
 /// Helper class to keep this out of the interface of CenteringGroup.
-class CenteringGroupCreationHelper
+class MANTID_GEOMETRY_DLL CenteringGroupCreatorImpl
 {
 public:
-    CenteringGroupCreationHelper();
-    ~CenteringGroupCreationHelper() { }
+    ~CenteringGroupCreatorImpl() { }
 
     CenteringGroup::CenteringType getCenteringType(const std::string &centeringSymbol) const;
 
@@ -92,11 +94,18 @@ protected:
     std::vector<SymmetryOperation> getFCentered() const;
     std::vector<SymmetryOperation> getRobvCentered() const;
     std::vector<SymmetryOperation> getRrevCentered() const;
+    CenteringGroupCreatorImpl();
 
     std::map<std::string, CenteringGroup::CenteringType> m_centeringSymbolMap;
+private:
+    friend struct Mantid::Kernel::CreateUsingNew<CenteringGroupCreatorImpl>;
 };
 
+#ifdef _WIN32
+  template class MANTID_GEOMETRY_DLL Mantid::Kernel::SingletonHolder<CenteringGroupCreatorImpl>;
+#endif
 
+typedef Mantid::Kernel::SingletonHolder<CenteringGroupCreatorImpl> CenteringGroupCreator;
 
 } // namespace Geometry
 } // namespace Mantid
