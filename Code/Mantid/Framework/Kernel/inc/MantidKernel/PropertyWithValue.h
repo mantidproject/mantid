@@ -331,6 +331,28 @@ public:
     return toString(m_value);
   }
 
+  /**
+   * Deep comparison.
+   * @param right The other property to compare to.
+   * @return true if the are equal.
+   */
+  virtual bool operator==(const PropertyWithValue<TYPE> & rhs) const
+  {
+    if (this->name() != rhs.name())
+      return false;
+    return (m_value == rhs.m_value);
+  }
+
+  /**
+   * Deep comparison (not equal).
+   * @param right The other property to compare to.
+   * @return true if the are not equal.
+   */
+  virtual bool operator!=(const PropertyWithValue<TYPE> & rhs) const
+  {
+    return !(*this == rhs);
+  }
+
   /** Get the size of the property.
   */
   virtual int size() const
