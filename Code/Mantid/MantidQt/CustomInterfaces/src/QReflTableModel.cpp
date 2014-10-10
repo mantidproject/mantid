@@ -16,6 +16,7 @@ namespace MantidQt
     const QString QReflTableModel::DQQ = "dq/q";
     const QString QReflTableModel::SCALE = "Scale";
     const QString QReflTableModel::GROUP = "Group";
+    const QString QReflTableModel::OPTIONS = "Options";
 
     const int QReflTableModel::COL_RUNS(0);
     const int QReflTableModel::COL_ANGLE(1);
@@ -25,6 +26,7 @@ namespace MantidQt
     const int QReflTableModel::COL_DQQ(5);
     const int QReflTableModel::COL_SCALE(6);
     const int QReflTableModel::COL_GROUP(7);
+    const int QReflTableModel::COL_OPTIONS(8);
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
@@ -40,6 +42,7 @@ namespace MantidQt
       m_columnNameMap.insert(std::make_pair(COL_DQQ, DQQ));
       m_columnNameMap.insert(std::make_pair(COL_SCALE, SCALE));
       m_columnNameMap.insert(std::make_pair(COL_GROUP, GROUP));
+      m_columnNameMap.insert(std::make_pair(COL_OPTIONS, OPTIONS));
     }
 
     //----------------------------------------------------------------------------------------------
@@ -82,6 +85,7 @@ namespace MantidQt
       m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_DQQ)));
       m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_SCALE)));
       m_dataCache.push_back(QString::number(tableRow.cell<int>(COL_GROUP)));
+      m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_OPTIONS)));
 
       m_dataCachePeakIndex = row;
     }
