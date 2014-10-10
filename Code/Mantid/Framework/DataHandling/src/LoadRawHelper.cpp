@@ -170,7 +170,7 @@ namespace Mantid
       run.addLogData( new PropertyWithValue<std::string>("run_number", run_num) );
     }
     /**reads workspace dimensions,number of periods etc from raw data
-     * @param numberOfSpectra :: number of spectrums
+     * @param numberOfSpectra :: number of spectra
      * @param numberOfPeriods :: number of periods
      * @param lengthIn :: size of workspace vectors
      * @param noTimeRegimes :: number of time regime.

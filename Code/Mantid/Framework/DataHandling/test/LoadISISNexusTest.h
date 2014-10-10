@@ -68,6 +68,75 @@ private:
 
 public:
 
+  void testExecMonSeparated()
+  {
+    Mantid::API::FrameworkManager::Instance();
+    LoadISISNexus2 ld;
+    ld.initialize();
+    ld.setPropertyValue("Filename","LOQ49886.nxs");
+    ld.setPropertyValue("OutputWorkspace","outWS");
+    ld.setPropertyValue("LoadMonitors","1"); // should read "Separate"
+    TS_ASSERT_THROWS_NOTHING(ld.execute());
+    TS_ASSERT(ld.isExecuted());
+
+
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr mon_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS_monitors");
+
+    TS_ASSERT_EQUALS(ws->blocksize(),5);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(),17790);
+
+    TS_ASSERT_EQUALS(mon_ws->blocksize(),5);
+    TS_ASSERT_EQUALS(mon_ws->getNumberHistograms(),2);
+
+    // Two monitors which form two first spectra are excluded by load separately
+
+    // spectrum with ID 5 is now spectrum N 3 as 2 monitors
+    TS_ASSERT_EQUALS(ws->readY(5-2)[1],1.);
+    TS_ASSERT_EQUALS(ws->getSpectrum(5-2)->getSpectrumNo(),6);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(5-2)->getDetectorIDs().begin()), 6);
+    // spectrum with ID 7 is now spectrum N 4
+    TS_ASSERT_EQUALS(ws->readY(6-2)[0],1.);
+    TS_ASSERT_EQUALS(ws->getSpectrum(6-2)->getSpectrumNo(),7);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(6-2)->getDetectorIDs().begin()), 7);
+    //
+    TS_ASSERT_EQUALS(ws->readY(8-2)[3],1.);
+
+    TS_ASSERT_EQUALS(mon_ws->readX(0)[0],5.);
+    TS_ASSERT_EQUALS(mon_ws->readX(0)[1],4005.);
+    TS_ASSERT_EQUALS(mon_ws->readX(0)[2],8005.);
+
+    // these spectra are not loaded as above so their values are different  (occasionally 0)
+    TS_ASSERT_EQUALS(mon_ws->readY(0)[1],0);
+    TS_ASSERT_EQUALS(mon_ws->readY(1)[0],0.);
+    TS_ASSERT_EQUALS(mon_ws->readY(0)[3],0.);
+
+
+  
+    const std::vector< Property* >& logs = mon_ws->run().getLogData();
+    TS_ASSERT_EQUALS(logs.size(), 62);
+
+    std::string header = mon_ws->run().getPropertyValueAsType<std::string>("run_header");
+    TS_ASSERT_EQUALS(86, header.size());
+    TS_ASSERT_EQUALS("LOQ 49886 Team LOQ             Quiet Count, ISIS Off, N 28-APR-2009  09:20:29     0.00", header);
+
+    TimeSeriesProperty<std::string>* slog = dynamic_cast<TimeSeriesProperty<std::string>*>(mon_ws->run().getLogData("icp_event"));
+    TS_ASSERT(slog);
+    std::string str = slog->value();
+    TS_ASSERT_EQUALS(str.size(),1023);
+    TS_ASSERT_EQUALS(str.substr(0,37),"2009-Apr-28 09:20:29  CHANGE_PERIOD 1");
+
+    slog = dynamic_cast<TimeSeriesProperty<std::string>*>(mon_ws->run().getLogData("icp_debug"));
+    TS_ASSERT(slog);
+    TS_ASSERT_EQUALS(slog->size(),50);
+
+    AnalysisDataService::Instance().remove("outWS");
+    AnalysisDataService::Instance().remove("outWS_monitors");
+  }
+
+
+
+
 
   void testExec()
   {
