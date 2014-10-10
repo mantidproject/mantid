@@ -82,7 +82,7 @@ namespace Mantid
       static bool isIncludeMonitors(const std::string &monitorOption);
 
 
-      static void ProcessLoadMonitorOptions(bool &bincludeMonitors,bool &bseparateMonitors,bool &bexcludeMonitors,API::Algorithm *pAlgo);
+      static void ProcessLoadMonitorOptions(bool &bincludeMonitors,bool &bseparateMonitors,bool &bexcludeMonitors,API::Algorithm *const pAlgo);
       ///creates monitor workspace
       static void createMonitorWorkspace(DataObjects::Workspace2D_sptr& monws_sptr,
         DataObjects::Workspace2D_sptr& ws_sptr,API::WorkspaceGroup_sptr& mongrp_sptr,
@@ -174,7 +174,7 @@ namespace Mantid
       /// calculate workspace sizes if separate or exclude monitors are selected
       void calculateWorkspacesizes(const std::vector<specid_t>& monitorSpecList,
         specid_t& normalwsSpecs, specid_t& monitorwsSpecs);
-      /// load the specra
+      /// load the spectra
       void loadSpectra(FILE* file,const int& period, const int& m_total_specs,
         DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> >);
 

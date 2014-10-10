@@ -1061,9 +1061,6 @@ namespace Mantid
       OvelapMonitorSpectra.clear();
       size_t nmons = monitors.size();
 
-      //Grab the number of channels
-      int nMonitorPeriods(0);
-      size_t nMonitorChannels(0);
       if (nmons>0)
       {
         NXInt chans = entry.openNXInt(m_monitors.begin()->second + "/data");
