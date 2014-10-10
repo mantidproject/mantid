@@ -201,6 +201,7 @@ def plot(source, *args, **kwargs):
         return plotSpectrum(source, *args, **kwargs)
 
 #----------------------------------------------------------------------------------------------------
+
 def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, clearWindow = False):
     """Open a 1D Plot of a spectrum in a workspace.
 
@@ -218,11 +219,20 @@ def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, 
         A handle to window if one was specified, otherwise a handle to the created one. None in case of error.
     """
     workspace_names = getWorkspaceNames(source)
+    __checkPlotWorkspaces(workspace_names)
+    # check spectrum indices
     index_list = __getWorkspaceIndices(indices)
-    if len(workspace_names) == 0:
-        raise ValueError("No workspace names given to plot")
     if len(index_list) == 0:
-        raise ValueError("No indices given to plot")
+        raise ValueError("No spectrum indices given")
+    for idx in index_list:
+        if idx < 0:
+            raise ValueError("Wrong spectrum index (<0): %d" % idx)
+    for name in workspace_names:
+        max_spec = workspace(name).getNumberHistograms() - 1
+        for idx in index_list:
+            if idx > max_spec:
+                raise ValueError("Wrong spectrum index for workspace %s: %d, which is bigger than the"
+                                 " number of spectra in this workspace - 1 (%d)" % (name, idx, max_spec))
 
     # Unwrap the window object, if any specified
     if window != None:
@@ -294,16 +304,19 @@ def plotMD(source, plot_axis=-2, normalization = DEFAULT_MD_NORMALIZATION, error
         A handle to the matrix containing the image data.
     """
     workspace_names = getWorkspaceNames(source)
-    if len(workspace_names) == 0:
-        raise ValueError("No workspace names given to plotMD")
+    __checkPlotMDWorkspaces(workspace_names)
+
     for name in workspace_names:
-        if not mantid.api.mtd.doesExist(name):
-            raise ValueError("%s does not exist in the workspace list" % name)
-        if not isinstance(mantid.api.mtd[name], mantid.api.IMDWorkspace):
-            raise ValueError("%s is not an IMDWorkspace" % name)
         non_integrated_dims = mantid.api.mtd[name].getNonIntegratedDimensions()
         if not len(non_integrated_dims) == 1:
             raise ValueError("%s must have a single non-integrated dimension in order to be rendered via plotMD" % name)
+
+    # check axis index
+    for name in workspace_names:
+        max_axis = workspace(name).axes()
+        # see choice in MantidQwtIMDWorkspaceData::setPlotAxisChoice, -2: auto, -1: distance
+        if plot_axis < -2 or plot_axis > max_axis:
+            raise ValueError("Incorrect axis index given for workspace %s: %d, should be < %d" % (name, plot_axis, max_axis))
 
     # Unwrap the window object, if any specified
     if window != None:
@@ -341,12 +354,21 @@ def plotBin(source, indices, error_bars = False, type = -1, window = None, clear
     Returns:
         A handle to window if one was specified, otherwise a handle to the created one. None in case of error.
     """
+
     workspace_names = getWorkspaceNames(source)
+    __checkPlotWorkspaces(workspace_names)
     index_list = __getWorkspaceIndices(indices)
-    if len(workspace_names) == 0:
-        raise ValueError("No workspace names given to plot")
     if len(index_list) == 0:
-        raise ValueError("No indices given to plot")
+        raise ValueError("No indices given")
+    for idx in index_list:
+        if idx < 0:
+            raise ValueError("Wrong bin index (<0): %d" % idx)
+    for name in workspace_names:
+        max_bin = workspace(name).blocksize() - 1
+        for idx in index_list:
+            if idx > max_bin:
+                raise ValueError("Wrong bin index for workspace %s: %d, which is bigger than the"
+                                 " number of bins in this workspace - 1 (%d)" % (name, idx, max_bin))
 
     # Unwrap the window object, if any specified
     if window != None:
@@ -968,5 +990,44 @@ def __getWorkspaceIndices(source):
     else:
         raise TypeError('Incorrect type passed as index argument "' + str(source) + '"')
     return index_list
+
+# Common checks for plotSpectrum, plotMD, and plotBin:
+def __checkPlotWorkspaces(workspace_names):
+    """Check that a list of workspaces is not empty and all the elements exist
+
+    Throws Python-level exceptions if the list is empty or any of the spaces don't exist.
+
+    Args:
+        workspace_names: list of names of workspace(s)
+
+    Returns:
+        Nothing, just throws exceptions in case of error/inconsistent inputs
+    """
+
+    if len(workspace_names) == 0:
+        raise ValueError("No workspace names given")
+    for name in workspace_names:
+        if not mantid.api.mtd.doesExist(name):
+            raise ValueError("Workspace '%s' does not exist in the workspace list" % name)
+        if not isinstance(mantid.api.mtd[name], mantid.api.IMDWorkspace):
+            raise ValueError("Workspace '%s' is not an IMDWorkspace" % name)
+
+def __checkPlotMDWorkspaces(workspace_names):
+    """Check that a list of workspaces is not empty AND all the elements exist AND they are
+    IMDWorkspace(s). First part of the check is done based on __checkPlotWorkspaces()
+
+    Throws Python-level exceptions if the list is empty or any of the spaces don't exist or
+    are not IMDWorkspace.
+
+    Args:
+        workspace_names: list of names of workspace(s)
+
+    Returns:
+        Nothing, just throws exceptions in case of error/inconsistent inputs
+    """
+    __checkPlotWorkspaces(workspace_names)
+    for name in workspace_names:
+        if not isinstance(mantid.api.mtd[name], mantid.api.IMDWorkspace):
+            raise ValueError("Workspace '%s' is not an IMDWorkspace" % name)
 
 #-----------------------------------------------------------------------------
