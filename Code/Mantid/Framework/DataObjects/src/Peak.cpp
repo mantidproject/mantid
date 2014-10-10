@@ -539,11 +539,57 @@ namespace DataObjects
     IDetector_const_sptr det = tracker.getDetectorResult();
     if (det)
     {
-      // Set the detector ID, the row, col, etc.
-      this->setDetectorID(det->getID());
-      // The old detector position is not more precise if it comes from FindPeaksMD
-      detPos = det->getPos();
-      return true;
+        // Set the detector ID, the row, col, etc.
+        this->setDetectorID(det->getID());
+        // The old detector position is not more precise if it comes from FindPeaksMD
+        detPos = det->getPos();
+        return true;
+    }
+    //fix for gaps between tubes
+    else if (m_inst->hasParameter("tube-gap"))
+    {
+        std::vector<double> gaps = m_inst->getNumberParameter("tube-gap", true);
+        if (gaps.empty()) return false;
+        const double gap = static_cast<double>(gaps.front());
+        V3D beam1 = beam + V3D(0.,0.,gap);
+        tracker.traceFromSample(beam1);
+        IDetector_const_sptr det1 = tracker.getDetectorResult();
+        V3D beam2 = beam + V3D(0.,0.,-gap);
+        tracker.traceFromSample(beam2);
+        IDetector_const_sptr det2 = tracker.getDetectorResult();
+        if (det1 && det2)
+        {
+            // Set the detector ID to one of the neighboring pixels
+            this->setDetectorID(static_cast<int>(det1->getID()));;
+            detPos = det1->getPos() ;
+            return true;
+        }
+        beam1 = beam + V3D(gap,0.,0.);
+        tracker.traceFromSample(beam1);
+        det1 = tracker.getDetectorResult();
+        beam2 = beam + V3D(-gap,0.,0.);
+        tracker.traceFromSample(beam2);
+        det2 = tracker.getDetectorResult();
+        if (det1 && det2)
+        {
+            // Set the detector ID to one of the neighboring pixels
+            this->setDetectorID(static_cast<int>(det1->getID()));;
+            detPos = det1->getPos() ;
+            return true;
+        }
+        beam1 = beam + V3D(0.,gap,0.);
+        tracker.traceFromSample(beam1);
+        det1 = tracker.getDetectorResult();
+        beam2 = beam + V3D(0.,-gap,0.);
+        tracker.traceFromSample(beam2);
+        det2 = tracker.getDetectorResult();
+        if (det1 && det2)
+        {
+            // Set the detector ID to one of the neighboring pixels
+            this->setDetectorID(static_cast<int>(det1->getID()));;
+            detPos = det1->getPos() ;
+            return true;
+        }
     }
     return false;
   }

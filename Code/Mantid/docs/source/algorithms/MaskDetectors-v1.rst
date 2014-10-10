@@ -11,7 +11,8 @@ Description
 
 This algorithm will flag the detectors listed as
 masked(\ `IDetector <http://www.mantidproject.org/IDetector>`__::isMasked() method) and will zero the
-data in the spectra related to those detectors.
+data in the spectra for MatrixWorkspaces related to those detectors.  For PeaksWorkspaces, only the 
+detectors listed are masked and the mask must be specified by a DetectorList or MaskedWorkspace.
 
 All but the first property are optional and at least one of them must be
 set. If several are set, the first will be used.
