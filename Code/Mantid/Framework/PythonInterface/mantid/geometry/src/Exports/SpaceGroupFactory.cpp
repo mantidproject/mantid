@@ -30,6 +30,13 @@ namespace
         return self.isSubscribed(number);
     }
 
+    SpaceGroup_sptr createSpaceGroup(SpaceGroupFactoryImpl &self, const std::string &symbol)
+    {
+        SpaceGroup_const_sptr spaceGroup = self.createSpaceGroup(symbol);
+
+        return boost::const_pointer_cast<SpaceGroup>(spaceGroup);
+    }
+
 }
 
 void export_SpaceGroupFactory()
@@ -38,7 +45,7 @@ void export_SpaceGroupFactory()
     class_<SpaceGroupFactoryImpl,boost::noncopyable>("SpaceGroupFactoryImpl", no_init)
             .def("isSubscribedSymbol", &isSubscribedSymbol)
             .def("isSubscribedNumber", &isSubscribedNumber)
-            .def("createSpaceGroup", &SpaceGroupFactoryImpl::createSpaceGroup)
+            .def("createSpaceGroup", &createSpaceGroup)
             .def("allSubscribedSpaceGroupSymbols", &allSpaceGroupSymbols)
             .def("subscribedSpaceGroupSymbols", &spaceGroupSymbolsForNumber)
             .def("subscribedSpaceGroupNumbers", &SpaceGroupFactoryImpl::subscribedSpaceGroupNumbers)
