@@ -367,7 +367,9 @@ namespace CustomInterfaces
       sliceAlg->setProperty("BackgroundRange", backgroundRange);
     }
 
-    runAlgorithm(sliceAlg);
+    // Stop the algorithm conflicting with it's self if it is already running
+    if(m_batchAlgoRunner->queueLength() == 0)
+      runAlgorithm(sliceAlg);
   }
 
   /**
