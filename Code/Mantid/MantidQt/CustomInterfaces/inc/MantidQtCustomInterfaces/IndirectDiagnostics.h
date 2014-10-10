@@ -75,6 +75,9 @@ namespace CustomInterfaces
     void updatePreviewPlot();
     void sliceAlgDone(bool error);
 
+  private:
+    QString m_lastDiagFilename;
+
   };
 } // namespace CustomInterfaces
 } // namespace Mantid

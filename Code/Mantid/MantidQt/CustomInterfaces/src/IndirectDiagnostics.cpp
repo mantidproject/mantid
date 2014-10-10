@@ -21,7 +21,7 @@ namespace CustomInterfaces
   /** Constructor
    */
   IndirectDiagnostics::IndirectDiagnostics(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
-      IndirectDataReductionTab(uiForm, parent)
+      IndirectDataReductionTab(uiForm, parent), m_lastDiagFilename("")
   {
     // Property Tree
     m_propTrees["SlicePropTree"] = new QtTreePropertyBrowser();
@@ -227,6 +227,14 @@ namespace CustomInterfaces
    */
   void IndirectDiagnostics::slicePlotRaw()
   {
+    QString filename = m_uiForm.slice_inputFile->getFirstFilename();
+
+    // Only update if we have a different file
+    if(filename == m_lastDiagFilename)
+      return;
+
+    m_lastDiagFilename = filename;
+
     disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePreviewPlot()));
     disconnect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(updatePreviewPlot()));
 
@@ -234,7 +242,6 @@ namespace CustomInterfaces
 
     if ( m_uiForm.slice_inputFile->isValid() )
     {
-      QString filename = m_uiForm.slice_inputFile->getFirstFilename();
       QFileInfo fi(filename);
       QString wsname = fi.baseName();
 
