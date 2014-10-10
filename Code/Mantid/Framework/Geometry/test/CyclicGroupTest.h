@@ -55,46 +55,6 @@ public:
       Group_const_sptr groupFive = groupFour * groupThree;
       TS_ASSERT_EQUALS(groupFive->order(), 8);
   }
-
-  void testSpaceGroup()
-  {
-      // Small test, constructing Fm-3m (225) from the generators listed in ITA
-      Group_const_sptr group1 = GroupFactory::create<CyclicGroup>("-x,-y,z");
-      Group_const_sptr group2 = GroupFactory::create<CyclicGroup>("-x,y,-z");
-      Group_const_sptr group3 = GroupFactory::create<CyclicGroup>("z,x,y");
-      Group_const_sptr group4 = GroupFactory::create<CyclicGroup>("y,x,-z");
-      Group_const_sptr group5 = GroupFactory::create<CyclicGroup>("-x,-y,-z");
-
-      // Make a translation group "F"
-      std::vector<SymmetryOperation> lops;
-      lops.push_back(SymmetryOperation("x,y,z"));
-      lops.push_back(SymmetryOperation("x,y+1/2,z+1/2"));
-      lops.push_back(SymmetryOperation("x+1/2,y+1/2,z"));
-      lops.push_back(SymmetryOperation("x+1/2,y,z+1/2"));
-
-      Group_const_sptr translationGroup = boost::make_shared<const Group>(lops);
-
-      // Generate space group by multiplying the generating groups
-      Group_const_sptr fm3barm = group1 * group2 * group3 * group4 * group5 * translationGroup;
-
-      // Output the symmetry operations including Centering in x,y,z-form
-      std::cout << std::endl;
-      std::cout << "Order: " << fm3barm->order() << std::endl;
-      std::vector<SymmetryOperation> ops = fm3barm->getSymmetryOperations();
-      for(auto it = ops.begin(); it != ops.end(); ++it) {
-          std::cout << (*it).identifier() << std::endl;
-      }
-
-      V3D w2a(0, 0, 0);
-      std::vector<V3D> w2at = fm3barm * w2a;
-      std::cout << "Equivalents of " << w2a << ":" << std::endl;
-      for(auto it = w2at.begin(); it != w2at.end(); ++it) {
-          std::cout << "   " << (*it) << std::endl;
-      }
-  }
-
-
-
 };
 
 

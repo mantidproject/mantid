@@ -166,23 +166,6 @@ public:
         TS_ASSERT_THROWS_NOTHING(factory.unsubscribeSpaceGroup("P-1"));
     }
 
-    void testSpaceGroup()
-    {
-        SpaceGroup_const_sptr sgBCC = SpaceGroupFactory::Instance().createSpaceGroup("I m -3 m");
-
-        std::cout << "Space group: " << sgBCC->hmSymbol() << " (" << sgBCC->number() << "):" << std::endl;
-        std::cout << "  Order: " << sgBCC->order() << std::endl;
-
-        std::cout << "  Equivalent positions:" << std::endl;
-        std::cout << "    96l (";
-
-        V3D general(0.54, 0.43, 0.12);
-        std::vector<V3D> equivs = sgBCC->getEquivalentPositions(general);
-
-        std::cout << equivs.size() << " equivalents)." << std::endl;
-    }
-
-
 private:
     class TestableSpaceGroupFactory : public SpaceGroupFactoryImpl
     {
