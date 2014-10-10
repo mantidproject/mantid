@@ -15,6 +15,7 @@ set ( TEST_PY_FILES
   FindReflectometryLinesTest.py
   GetEiT0atSNSTest.py
   IndirectILLReductionTest.py
+  InelasticIndirectReductionTest.py
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
   LoadFullprofFileTest.py

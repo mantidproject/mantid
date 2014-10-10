@@ -338,6 +338,11 @@ protected:
   /// Pointer to the parent history object (if set)
   boost::shared_ptr<AlgorithmHistory> m_parentHistory;
 
+  /// One vector of workspaces for each input workspace property
+  std::vector<WorkspaceVector> m_groups;
+  /// Size of the group(s) being processed
+  size_t m_groupSize;
+
 private:
   /// Private Copy constructor: NO COPY ALLOWED
   Algorithm(const Algorithm&);
@@ -353,6 +358,9 @@ private:
   void logAlgorithmInfo() const;
 
   bool executeAsyncImpl(const Poco::Void & i);
+
+  // Report that the algorithm has completed.
+  void reportCompleted(const double& duration, const bool groupProcessing = false);
 
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.
@@ -387,14 +395,10 @@ private:
   /// All the WorkspaceProperties that are Output (not inOut). Set in execute()
   std::vector<IWorkspaceProperty *> m_pureOutputWorkspaceProps;
 
-  /// One vector of workspaces for each input workspace property
-  std::vector<WorkspaceVector> m_groups;
   /// Pointer to the WorkspaceGroup (if any) for each input workspace property
   std::vector<boost::shared_ptr<WorkspaceGroup> > m_groupWorkspaces;
   /// If only one input is a group, this is its index. -1 if they are all groups
   int m_singleGroup;
-  /// Size of the group(s) being processed
-  size_t m_groupSize;
   /// All the groups have similar names (group_1, group_2 etc.)
   bool m_groupsHaveSimilarNames;
   /// A non-recursive mutex for thread-safety
