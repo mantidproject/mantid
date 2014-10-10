@@ -50,8 +50,8 @@ namespace Mantid
     /// Empty default constructor
     LoadISISNexus2::LoadISISNexus2() : 
       m_filename(), m_instrument_name(), m_samplename(),
-      m_detFileDataInfo(),m_detBlockInfo(),m_monBlockInfo(),
-      m_have_detector(false),m_range_supplied(true), m_spec_min(0), m_spec_max(EMPTY_INT()),
+      m_detBlockInfo(),m_monBlockInfo(),m_loadBlockInfo(),
+      m_have_detector(false),
       m_load_selected_spectra(false),m_specInd2specNum_map(),m_spec2det_map(),
       m_entrynumber(0), m_tof_data(), m_proton_charge(0.),
       m_spec(), m_monitors(), m_logCreator(), m_progress()
@@ -161,7 +161,7 @@ namespace Mantid
       spec.load();
 
       size_t nmons(0);
- 
+
 
       //Pull out the monitor blocks, if any exist
       for(std::vector<NXClassInfo>::const_iterator it = entry.groups().begin(); 
@@ -202,10 +202,10 @@ namespace Mantid
       // Fill up m_spectraBlocks
       size_t total_specs = prepareSpectraBlocks();
 
-      m_progress = boost::shared_ptr<API::Progress>(new Progress(this, 0.0, 1.0, total_specs * m_detFileDataInfo.numberOfPeriods));
+      m_progress = boost::shared_ptr<API::Progress>(new Progress(this, 0.0, 1.0, total_specs * m_detBlockInfo.numberOfPeriods));
 
       DataObjects::Workspace2D_sptr local_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-        (WorkspaceFactory::Instance().create("Workspace2D", total_specs, x_length, m_detFileDataInfo.numberOfChannels));
+        (WorkspaceFactory::Instance().create("Workspace2D", total_specs, x_length, m_detBlockInfo.numberOfChannels));
       // Set the units on the workspace to TOF & Counts
       local_workspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
       local_workspace->setYUnit("Counts");
@@ -259,7 +259,7 @@ namespace Mantid
 
       createPeriodLogs(firstentry, local_workspace);
 
-      if( m_detFileDataInfo.numberOfPeriods > 1 && m_entrynumber == 0 )
+      if( m_detBlockInfo.numberOfPeriods > 1 && m_entrynumber == 0 )
       {
 
         WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
@@ -269,7 +269,7 @@ namespace Mantid
         const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
         const std::string prop_name = "OutputWorkspace_";
 
-        for( int p = 1; p <= m_detFileDataInfo.numberOfPeriods; ++p )
+        for( int p = 1; p <= m_detBlockInfo.numberOfPeriods; ++p )
         {
           std::ostringstream os;
           os << p;
@@ -301,7 +301,8 @@ namespace Mantid
       // Workspace or group of workspaces without monitors is loaded. Now we are loading monitors separately.
       if(bseparateMonitors)
       {
-
+        // debug!!!
+        setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(local_workspace));
       }
 
       // Clear off the member variable containers
@@ -359,52 +360,66 @@ namespace Mantid
     {
       // optional properties specify that only some spectra have to be loaded
       size_t numSpectraExclued=0;
+      bool range_supplied(false);
+
       if (!SpectraExcluded.empty())
       {
+        range_supplied = true;
         m_load_selected_spectra = true;
-        numSpectraExclued = SpectraExcluded.size();
       }
-      
+
+      int64_t spec_min(0);
+      int64_t spec_max(EMPTY_INT());
       // 
-      m_spec_min = getProperty("SpectrumMin");
-      m_spec_max = getProperty("SpectrumMax");
+      spec_min = getProperty("SpectrumMin");
+      spec_max = getProperty("SpectrumMax");
 
-      if( m_spec_min == 0 && m_spec_max == EMPTY_INT() )
+
+      // default spectra ID-s would not work if spectraID_min!=1
+      if(m_loadBlockInfo.spectraID_min!=1)
       {
-        m_range_supplied = false;
+        range_supplied = true;
+        m_load_selected_spectra = true;
       }
 
-      if( m_spec_min == 0 )
-        m_spec_min = 1;
+
+      if( spec_min == 0 )
+        spec_min = m_loadBlockInfo.spectraID_min; 
       else
+      { 
+        range_supplied = true;
         m_load_selected_spectra = true;
+      }
 
 
-      if( m_spec_max == EMPTY_INT() )
-        m_spec_max = m_detBlockInfo.numberOfSpectra;
+      if( spec_max == EMPTY_INT() )
+        spec_max = m_loadBlockInfo.spectraID_max;
       else
+      { 
+        range_supplied = true;
         m_load_selected_spectra = true;
+      }
 
       // Sanity check for min/max
-      if( m_spec_min > m_spec_max )
+      if( spec_min > spec_max )
       {
         throw std::invalid_argument("Inconsistent range properties. SpectrumMin is larger than SpectrumMax.");
       }
 
-      if( static_cast<size_t>(m_spec_max) > m_detBlockInfo.numberOfSpectra+numSpectraExclued )
+      if( spec_max > m_loadBlockInfo.spectraID_max)
       {
-          std::string err="Inconsistent range property. SpectrumMax is larger than number of spectra: "+boost::lexical_cast<std::string>(m_detFileDataInfo.numberOfSpectra+numSpectraExclued ); 
-          throw std::invalid_argument(err);
-        }
+        std::string err="Inconsistent range property. SpectrumMax is larger than number of spectra: "+boost::lexical_cast<std::string>(m_loadBlockInfo.spectraID_max ); 
+        throw std::invalid_argument(err);
+      }
 
       // Check the entry number
       m_entrynumber = getProperty("EntryNumber");
-      if( static_cast<int>(m_entrynumber) > m_detBlockInfo.numberOfPeriods || m_entrynumber < 0 )
+      if( static_cast<int>(m_entrynumber) > m_loadBlockInfo.numberOfPeriods || m_entrynumber < 0 )
       {
-        std::string err="Invalid entry number entered. File contains "+boost::lexical_cast<std::string>(m_detBlockInfo.numberOfPeriods)+ " period. ";
+        std::string err="Invalid entry number entered. File contains "+boost::lexical_cast<std::string>(m_loadBlockInfo.numberOfPeriods)+ " period. ";
         throw std::invalid_argument(err);
       }
-      if(m_detBlockInfo.numberOfPeriods== 1 )
+      if(m_loadBlockInfo.numberOfPeriods== 1 )
       {
         m_entrynumber = 1;
       }
@@ -418,47 +433,49 @@ namespace Mantid
         // Sort the list so that we can check it's range
         std::sort(spec_list.begin(), spec_list.end());
 
-        if( spec_list.back() > static_cast<int64_t>(m_detBlockInfo.numberOfSpectra+numSpectraExclued) )
+        if( spec_list.back() > m_loadBlockInfo.spectraID_max )
         {
-          std::string err="A spectra number in the spectra list exceeds total number of "+boost::lexical_cast<std::string>(m_detBlockInfo.numberOfSpectra+numSpectraExclued )+ " spectra ";
+          std::string err="A spectra number in the spectra list exceeds maximal spectra ID:  "+boost::lexical_cast<std::string>(m_loadBlockInfo.spectraID_max )+ " in the file ";
+          throw std::invalid_argument(err);
+        }
+        if( spec_list.front() < m_loadBlockInfo.spectraID_min )
+        {
+          std::string err="A spectra number in the spectra list smaller then minimal spectra ID:  "+boost::lexical_cast<std::string>(m_loadBlockInfo.spectraID_min )+ " in the file";
           throw std::invalid_argument(err);
         }
 
-        //Check no negative numbers have been passed
-        std::vector<int64_t>::iterator itr =
-          std::find_if(spec_list.begin(), spec_list.end(), std::bind2nd(std::less<int>(), 0));
-        if( itr != spec_list.end() )
-        {
-          throw std::invalid_argument("Negative SpectraList property encountered.");
-        }
 
-        range_check in_range(m_spec_min, m_spec_max);
-        if( m_range_supplied )
+        range_check in_range(spec_min, spec_max);
+        if(range_supplied )
         {
           spec_list.erase(remove_if(spec_list.begin(), spec_list.end(), in_range), spec_list.end());
           // combine spectra numbers from ranges and the list
           if (spec_list.size()>0)
           {
-            for(int64_t i=m_spec_min;i<m_spec_max+1;i++)
+            for(int64_t i=spec_min;i<spec_max+1;i++)
             {
               specid_t spec_num = static_cast<specid_t>(i);
+              // remove excluded spectra now rather then inserting it here and removing later
               if (SpectraExcluded.find(spec_num)==SpectraExcluded.end() )
-                  spec_list.push_back(spec_num);
+                spec_list.push_back(spec_num);
             }
             // Sort the list so that lower spectra indexes correspond to smaller spectra ID-s
             std::sort(spec_list.begin(), spec_list.end());
-
+            // supplied range converted into the list, so no more supplied range
+            range_supplied =false;
           }
         }
-      }
-      else
-      {
-        m_range_supplied = true;
+
       }
       // 
       if (m_load_selected_spectra)
       {
-        buildSpectraInd2SpectraNumMap(spec_list,SpectraExcluded);
+        buildSpectraInd2SpectraNumMap(range_supplied,spec_min,spec_max,spec_list,SpectraExcluded);
+      }
+      else // may be just range supplied and the range have to start from 1 to use defaults in spectra num to spectra ID map!
+      {
+        m_loadBlockInfo.spectraID_max=spec_max;
+        m_loadBlockInfo.numberOfSpectra = m_loadBlockInfo.spectraID_max-m_loadBlockInfo.spectraID_min+1;
       }
 
     }
@@ -467,32 +484,38 @@ namespace Mantid
     @param spec_list -- list of spectra numbers to load 
     @param SpectraExcluded set of the spectra ID-s to exclude from loading
     **/
-    void  LoadISISNexus2::buildSpectraInd2SpectraNumMap(const std::vector<int64_t>  &spec_list,const std::set<specid_t> &SpectraExcluded)
+    void  LoadISISNexus2::buildSpectraInd2SpectraNumMap(bool range_supplied,int64_t range_min,int64_t range_max,
+      const std::vector<int64_t>  &spec_list,const std::set<specid_t> &SpectraExcluded)
     {
 
       int64_t ic(0);
 
       if(spec_list.size()>0)
       {
+        ic = 0;
         auto start_point = spec_list.begin();
         for(auto it =start_point  ;it!=spec_list.end();it++)
         {
-          ic = it-start_point;
-          m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(ic,static_cast<specid_t>(*it)));
+
+          specid_t spec_num = static_cast<specid_t>(*it);
+          if (SpectraExcluded.find(spec_num)==SpectraExcluded.end() )
+          {
+            m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(ic,spec_num));
+            ic++;
+          }
         }
       }
       else
       {
-        if(m_range_supplied)
+        if(range_supplied)
         {
           ic = 0;
-          int64_t  max_range = m_spec_max+SpectraExcluded.size()+1;
-          for(int64_t i=m_spec_min;i<max_range;i++)
+          for(int64_t i=range_min;i<range_max+1;i++)
           {
-            specid_t spectra = static_cast<specid_t>(i);
-            if(SpectraExcluded.find(spectra)==SpectraExcluded.end())
+            specid_t spec_num = static_cast<specid_t>(i);
+            if (SpectraExcluded.find(spec_num)==SpectraExcluded.end() )
             {
-              m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(ic,spectra));
+              m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(ic,spec_num));
               ic++;
             }
           }
@@ -558,10 +581,11 @@ namespace Mantid
 
         return m_specInd2specNum_map.size();
       }
-
+      // here we are only if ranges are not supplied
+      //
       // put in the spectra range, possibly breaking it into parts by monitors
-      int64_t first = m_spec_min;
-      for(int64_t hist = first; hist < m_spec_max; ++hist)
+      int64_t first = m_loadBlockInfo.spectraID_min;
+      for(int64_t hist = first; hist < m_loadBlockInfo.spectraID_max; ++hist)
       {
         if ( m_monitors.find( hist ) != m_monitors.end() )
         {
@@ -574,14 +598,15 @@ namespace Mantid
           first = hist + 1;
         }
       }
-      if ( first == m_spec_max && m_monitors.find( first ) != m_monitors.end() )
+      int64_t spec_max  = m_loadBlockInfo.spectraID_max;
+      if ( first == spec_max  && m_monitors.find( first ) != m_monitors.end() )
       {
-        m_spectraBlocks.push_back( SpectraBlock( first, m_spec_max, true ) );
-        includedMonitors.push_back( m_spec_max );
+        m_spectraBlocks.push_back( SpectraBlock( first, spec_max, true ) );
+        includedMonitors.push_back( spec_max );
       }
       else
       {
-        m_spectraBlocks.push_back( SpectraBlock( first, m_spec_max, false ) );
+        m_spectraBlocks.push_back( SpectraBlock( first, spec_max, false ) );
       }
 
       // sort and check for overlapping
@@ -737,7 +762,7 @@ namespace Mantid
     {
       data.load(static_cast<int>(blocksize), static_cast<int>(period), static_cast<int>(start)); // TODO this is just wrong
       int *data_start = data();
-      int *data_end = data_start + m_detBlockInfo.numberOfChannels;
+      int *data_end = data_start + m_loadBlockInfo.numberOfChannels;
       int64_t final(hist + blocksize);
       while( hist < final )
       {
@@ -869,9 +894,9 @@ namespace Mantid
       runDetails.addProperty("run_header", std::string(header, header + 86));
 
       // Data details on run not the workspace
-      runDetails.addProperty("nspectra", static_cast<int>(m_detFileDataInfo.numberOfSpectra));
-      runDetails.addProperty("nchannels", static_cast<int>(m_detFileDataInfo.numberOfChannels));
-      runDetails.addProperty("nperiods", static_cast<int>(m_detFileDataInfo.numberOfPeriods));
+      runDetails.addProperty("nspectra", static_cast<int>(m_loadBlockInfo.numberOfSpectra));
+      runDetails.addProperty("nchannels", static_cast<int>(m_loadBlockInfo.numberOfChannels));
+      runDetails.addProperty("nperiods", static_cast<int>(m_loadBlockInfo.numberOfPeriods));
 
       // RPB struct info
       NXInt rpb_int = vms_compat.openNXInt("IRPB");
@@ -1011,27 +1036,27 @@ namespace Mantid
     {
       return sqrt(in);
     }
-    /**Method takes input parameters which describe  monitor loading and analyze them against spectra/monitor information in the file. 
-     * The result is the option if monitors can  be loaded together with spectra or mast be treated separately 
-     * and additional information on how to treat monitor spectra.
-     *
-     *@param entry                :: entry to the NeXus file, opened at root folder
-     *@param spectrum_index       :: array of spectra indexes of the data present in the file
-     *@param ndets                :: size of the spectrum index array
-     *@param n_vms_compat_spectra :: number of data entries containing common time bins (e.g. all spectra, or all spectra and monitors or some spectra (this is not fully supported)
-     *@param monitors             :: map connecting monitor spectra ID against monitor group name in the file. 
-     *@param excludeMonitors      :: input property indicating if it is requested to exclude monitors from the target workspace
-     *@param separateMonitors     :: input property indicating if it is requested to load monitors separately (and exclude them from target data workspace this way)
-     *
-     *@param MonitorSpectra       :: output property containing the list of monitors which should be loaded separately. 
-     *@return excludeMonitors     :: indicator if monitors should or mast be excluded from the main data workspace if they can not be loaded with the data
-     *                               (contain different number of time channels)
-     *
+    /**Method takes input parameters which describe  monitor loading and analyze them against spectra/monitor block information in the file. 
+    * The result is the option if monitors can  be loaded together with spectra or mast be treated separately 
+    * and additional information on how to treat monitor spectra.
+    *
+    *@param entry                :: entry to the NeXus file, opened at root folder
+    *@param spectrum_index       :: array of spectra indexes of the data present in the file
+    *@param ndets                :: size of the spectrum index array
+    *@param n_vms_compat_spectra :: number of data entries containing common time bins (e.g. all spectra, or all spectra and monitors or some spectra (this is not fully supported)
+    *@param monitors             :: map connecting monitor spectra ID against monitor group name in the file. 
+    *@param excludeMonitors      :: input property indicating if it is requested to exclude monitors from the target workspace
+    *@param separateMonitors     :: input property indicating if it is requested to load monitors separately (and exclude them from target data workspace this way)
+    *
+    *@param OvelapMonitorSpectra :: output property containing the list of monitors ID for monitors, which are also included with spectra. 
+    *@return excludeMonitors     :: indicator if monitors should or mast be excluded from the main data workspace if they can not be loaded with the data
+    *                               (contain different number of time channels)
+    *
     */
     bool LoadISISNexus2::findSpectraDetRangeInFile(NXEntry &entry,boost::shared_array<int>  &spectrum_index,int64_t ndets,int64_t n_vms_compat_spectra,
-      std::map<int64_t,std::string> &monitors,bool excludeMonitors,bool separateMonitors,std::set<specid_t> &MonitorSpectra)
+      std::map<int64_t,std::string> &monitors,bool excludeMonitors,bool separateMonitors,std::set<specid_t> &OvelapMonitorSpectra)
     {
-      MonitorSpectra.clear();
+      OvelapMonitorSpectra.clear();
       size_t nmons = monitors.size();
 
       //Grab the number of channels
@@ -1043,14 +1068,26 @@ namespace Mantid
 
         m_monBlockInfo    = DataBlock(chans);
         m_monBlockInfo.numberOfSpectra = nmons; // each monitor is in separate group so number of spectra is equal to number of groups.
-        // at this stage let's set up  all other detector information to monitors
-        m_detFileDataInfo = m_monBlockInfo;
-        m_detBlockInfo    =  m_monBlockInfo;
+
+        // identify monitor ID range.
+        for(auto it = monitors.begin(); it!=monitors.end(); it++)
+        {
+          int64_t mon_id = static_cast<int64_t>(it->first);
+          if(m_monBlockInfo.spectraID_min>mon_id )m_monBlockInfo.spectraID_min=mon_id;
+          if(m_monBlockInfo.spectraID_max<mon_id )m_monBlockInfo.spectraID_max=mon_id;
+        }
+        if(m_monBlockInfo.spectraID_max-m_monBlockInfo.spectraID_min+1!=static_cast<int64_t>(nmons))
+        {
+          g_log.warning()<<" non-consequent monitor ID-s in the monitor block. Unexpected situation for the loader\n";
+        }
+        // at this stage we assume that the only going to load monitors
+        m_loadBlockInfo =  m_monBlockInfo;
+
       }
 
       if( ndets == 0 )
       {
-        separateMonitors = false; // load monitors in the main workspace. No detectors 
+        separateMonitors = false; // only monitors in the main workspace. No detectors. Will be loaded in the main workspace
         return separateMonitors;
       }
 
@@ -1059,59 +1096,79 @@ namespace Mantid
       NXInt data = nxData.openIntData();
 
       m_detBlockInfo    = DataBlock(data);
-      m_detFileDataInfo = m_detBlockInfo;      
+      // We assume again that this spectrum list ID increase monotonically
+      m_detBlockInfo.spectraID_min = spectrum_index[0];
+      m_detBlockInfo.spectraID_max = spectrum_index[ndets-1];
+      if(m_detBlockInfo.spectraID_max-m_detBlockInfo.spectraID_min+1!=static_cast<int64_t>(m_detBlockInfo.numberOfSpectra))
+      {
+        g_log.warning()<<" non-consequent spectra ID-s in the detectors block. Unexpected situation for the loader\n";
+      }
+
+
+      m_loadBlockInfo   = m_detBlockInfo;  
+
+
+      // now we are analyzing what is actually going or can be loaded
+
+      bool removeMonitors = excludeMonitors || separateMonitors;
       if (((m_detBlockInfo.numberOfPeriods!=m_monBlockInfo.numberOfPeriods) || (m_detBlockInfo.numberOfChannels!=m_monBlockInfo.numberOfChannels)) && nmons>0)
       {
         // detectors and monitors have different characteristics. Can be loaded only to separate workspaces.
-        if(!separateMonitors)
+        if(!removeMonitors)
         {
           g_log.warning()<<" Performing separate loading as can not load spectra and monitors in the single workspace:\n" ;
           g_log.warning()<<" Monitors data contain :"<<m_monBlockInfo.numberOfChannels<<" time channels and: "<<m_monBlockInfo.numberOfPeriods<<" period(s)\n";
           g_log.warning()<<" Spectra  data contain :"<<m_detBlockInfo.numberOfChannels<<" time channels and: "<<m_detBlockInfo.numberOfPeriods<<" period(s)\n";
         }
         separateMonitors = true;
+        removeMonitors  = true;
       }
 
-
-      bool removeMonitors = excludeMonitors || separateMonitors;
-      // workspace contain the same number of bins for spectra and monitors. Total number of spectra in workspace will be equal to 
-      //   n_vms_compat_spectra
+      int64_t spectraID_min  = std::min(m_monBlockInfo.spectraID_min,m_detBlockInfo.spectraID_min);
+      int64_t spectraID_max  = std::max(m_monBlockInfo.spectraID_max,m_detBlockInfo.spectraID_max);
+      size_t  totNumOfSpectra= m_monBlockInfo.numberOfSpectra+m_detBlockInfo.numberOfSpectra;
       if(!removeMonitors)
       {
-        m_detFileDataInfo.numberOfSpectra = n_vms_compat_spectra;
-        if(m_detBlockInfo.numberOfSpectra+nmons ==static_cast<size_t>( n_vms_compat_spectra ))
-          return separateMonitors;
+        m_loadBlockInfo.numberOfSpectra =totNumOfSpectra;
+        m_loadBlockInfo.spectraID_min = spectraID_min;
+        m_loadBlockInfo.spectraID_max = spectraID_max;
+      }
+      if (separateMonitors)
+        m_loadBlockInfo = m_detBlockInfo;
+
+
+      // verify integrity of the monitor and detector information
+
+      if((totNumOfSpectra ==static_cast<size_t>( n_vms_compat_spectra )) && (spectraID_max-spectraID_min+1 ==static_cast<int64_t>(n_vms_compat_spectra)))
+      {
+        // all information written in the file is correct, there are no spurious spectra and detectors & monitors form continuous block on HDD
+        return separateMonitors;
       }
 
-      //Now check if monitors expand or shrink the workspace's spectra range
 
-      // We assume again that this spectrum list increases monotonically
-      int64_t min_index = spectrum_index[0];
-      int64_t max_index = spectrum_index[ndets-1];
+      // something is wrong and we need to analyze spectra map.  Currently we can identify and manage the case when all monitor's spectra are written together with detectors
+      //make settings for this situation
+      m_detBlockInfo.numberOfSpectra -= m_monBlockInfo.numberOfSpectra; 
+      m_loadBlockInfo.numberOfSpectra-=  m_monBlockInfo.numberOfSpectra;
 
       std::map<int64_t,std::string> remaining_monitors;
-      for(auto it = monitors.begin(); it!=monitors.end(); it++)
+      if(removeMonitors)
       {
-        if(it->first>=min_index && it->first <=max_index)
+        for(auto it = monitors.begin(); it!=monitors.end(); it++)
         {
-          if(removeMonitors)
-          {
-            MonitorSpectra.insert(static_cast<specid_t>(it->first));
-            m_detBlockInfo.numberOfSpectra--;
+          if(it->first>=m_detBlockInfo.spectraID_min && it->first <=m_detBlockInfo.spectraID_max)
+          {   //monitors ID-s are included with spectra ID-s -- let's try not to load it twice. 
+            OvelapMonitorSpectra.insert(static_cast<specid_t>(it->first));
           }
-
-        }
-        else
-        {
-          if(!removeMonitors)
+          else
           {
             remaining_monitors.insert(*it);
-            m_detBlockInfo.numberOfSpectra++;
-
           }
         }
       }
       monitors.swap(remaining_monitors);
+
+
       return separateMonitors;
 
     }
