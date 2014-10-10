@@ -62,6 +62,8 @@ namespace CustomInterfaces
   private:
     void createRESfile(const QString& file);
 
+    QString m_lastCalPlotFilename;
+
   };
 } // namespace CustomInterfaces
 } // namespace Mantid
