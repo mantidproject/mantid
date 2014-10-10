@@ -9,10 +9,9 @@
 #include <climits>
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+
 #include <map>
-#ifdef HAS_UNORDERED_MAP_H
-#include <tr1/unordered_map>
-#endif
+
 
 #include <Poco/SAX/ContentHandler.h>
 
@@ -133,13 +132,8 @@ private:
     };
   };
 
-
-#ifndef HAS_UNORDERED_MAP_H
-/// used to store the lists of WORKSPACE INDICES that will be grouped, the keys are not used
-typedef std::map<specid_t, std::vector<size_t> > storage_map;
-#else
-typedef std::tr1::unordered_map<specid_t, std::vector<size_t> > storage_map;
-#endif
+  /// used to store the lists of WORKSPACE INDICES that will be grouped, the keys are not used
+  typedef std::map<specid_t, std::vector<size_t> > storage_map;
 
   /// An estimate of the percentage of the algorithm runtimes that has been completed 
   double m_FracCompl;
