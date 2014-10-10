@@ -26,7 +26,7 @@ namespace Mantid
     * Constructor
     * @param startPt :: Initial point
     * @param unitVector :: Directional vector. It must be unit vector.
-    */ 
+    */
     Track::Track(const V3D& startPt, const V3D& unitVector) :
     m_startPoint(startPt),m_unitVector(unitVector)
     {}
@@ -34,7 +34,7 @@ namespace Mantid
     /**
      * Copy Constructor
      * @param other :: Track to initialise this copy with.
-     */ 
+     */
     Track::Track(const Track& other) : m_startPoint(other.m_startPoint),m_unitVector(other.m_unitVector),
       m_links(other.m_links),m_surfPoints(other.m_surfPoints)
     {}
@@ -43,7 +43,7 @@ namespace Mantid
     * Assignment operator
     * @param other :: The track to copy from
     * @return *this
-    */ 
+    */
     Track& Track::operator=(const Track& other)
     {
       if (this != &other)
@@ -63,7 +63,7 @@ namespace Mantid
     {}
 
     /**
-     * Resets the track starting point and direction. 
+     * Resets the track starting point and direction.
      * @param startPoint :: The new starting point
      * @param direction :: The new direction. Must be a unit vector!
      */
@@ -153,11 +153,14 @@ namespace Mantid
      * @param directionFlag :: A flag indicating if the direction of travel is entering/leaving
      * an object. +1 is entering, -1 is leaving.
      * @param endPoint :: Point of intersection
+     * @param obj :: A reference to the object that was intersected
      * @param compID :: ID of the component that this link is about (Default=NULL)
      */
-    void Track::addPoint(const int directionFlag, const V3D& endPoint, const ComponentID compID)
+    void Track::addPoint(const int directionFlag, const V3D& endPoint, const Object & obj,
+                         const ComponentID compID)
     {
-      IntersectionPoint newPoint(directionFlag, endPoint, endPoint.distance(m_startPoint), compID);
+      IntersectionPoint newPoint(directionFlag, endPoint, endPoint.distance(m_startPoint),
+                                 obj, compID);
       PType::iterator lowestPtr = std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
       m_surfPoints.insert(lowestPtr, newPoint);
     }
@@ -167,14 +170,15 @@ namespace Mantid
     * @param firstPoint :: first Point
     * @param secondPoint :: second Point
     * @param distanceAlongTrack :: Distance along track
+    * @param obj :: A reference to the object that was intersected
     * @param compID :: ID of the component that this link is about (Default=NULL)
     * @retval Index of link within the track
     */
     int Track::addLink(const V3D& firstPoint, const V3D& secondPoint,
-      const double distanceAlongTrack, const ComponentID compID)
+      const double distanceAlongTrack, const Object &obj, const ComponentID compID)
     {
       // Process First Point
-      Link newLink(firstPoint,secondPoint,distanceAlongTrack,compID);
+      Link newLink(firstPoint,secondPoint,distanceAlongTrack,obj,compID);
       int index(0);
       if( m_links.empty() )
       {
@@ -193,7 +197,7 @@ namespace Mantid
 
      /**
       * Builds a set of linking track components.
-      * This version deals with touching surfaces 
+      * This version deals with touching surfaces
       */
     void Track::buildLink()
     {
@@ -213,7 +217,7 @@ namespace Mantid
       {
         if (ac->directionFlag==-1)
         {
-          addLink(m_startPoint,ac->endPoint,ac->distFromStart,ac->componentID);  // from the void
+          addLink(m_startPoint,ac->endPoint,ac->distFromStart,*ac->object,ac->componentID);  // from the void
           workPt = ac->endPoint;
         }
         ++ac;
@@ -221,7 +225,7 @@ namespace Mantid
         {
           ++bc;
         }
-      } 
+      }
 
       //have we now passed over all of the potential intersections without actually hitting the object
       if (ac == m_surfPoints.end())
@@ -231,7 +235,7 @@ namespace Mantid
         return;
       }
 
-      workPt = ac->endPoint;      
+      workPt = ac->endPoint;
       while(bc != m_surfPoints.end())      // Since bc > ac
       {
         if (ac->directionFlag==1 && bc->directionFlag==-1)
@@ -240,19 +244,19 @@ namespace Mantid
           if (fabs(ac->distFromStart - bc->distFromStart)>Tolerance)
           {
             // track leave ac into bc.
-            addLink(ac->endPoint,bc->endPoint,bc->distFromStart,ac->componentID);
+            addLink(ac->endPoint,bc->endPoint,bc->distFromStart,*ac->object,ac->componentID);
           }
           // Points with intermediate void
           else
           {
-            addLink(workPt,ac->endPoint,ac->distFromStart,ac->componentID);
+            addLink(workPt,ac->endPoint,ac->distFromStart,*ac->object,ac->componentID);
           }
           workPt = bc->endPoint;
 
           // ADDING to ac twice: since processing pairs
           ++ac;
           ++ac;
-          ++bc;    // can I do this past the end ? 
+          ++bc;    // can I do this past the end ?
           if (bc!=m_surfPoints.end())
           {
             ++bc;
@@ -263,9 +267,9 @@ namespace Mantid
           ++ac;
           ++bc;
         }
-      }	
+      }
 
-      m_surfPoints.clear();        // While vector 
+      m_surfPoints.clear();        // While vector
       return;
     }
 
