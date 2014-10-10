@@ -217,7 +217,7 @@ namespace CustomInterfaces
     {
       setMiniPlotGuides("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"],
           std::pair<double, double>(instDetails["PeakMin"].toDouble(), instDetails["PeakMax"].toDouble()));
-      setMiniPlotGuides("SliceBackground", m_properties["BackStart"], m_properties["BackEnd"],
+      setMiniPlotGuides("SliceBackground", m_properties["BackgroundStart"], m_properties["BackgroundEnd"],
           std::pair<double, double>(instDetails["BackMin"].toDouble(), instDetails["BackMax"].toDouble()));
     }
   }
