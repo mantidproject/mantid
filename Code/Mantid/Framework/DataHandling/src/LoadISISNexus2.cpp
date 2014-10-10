@@ -359,7 +359,6 @@ namespace Mantid
     void LoadISISNexus2::checkOptionalProperties(const std::set<specid_t> &SpectraExcluded)
     {
       // optional properties specify that only some spectra have to be loaded
-      size_t numSpectraExclued=0;
       bool range_supplied(false);
 
       if (!SpectraExcluded.empty())
@@ -481,8 +480,11 @@ namespace Mantid
     }
     /**
     build the list of spectra to load and include into spectra-detectors map
-    @param spec_list -- list of spectra numbers to load 
-    @param SpectraExcluded set of the spectra ID-s to exclude from loading
+    @param range_supplied  -- if true specifies that the range of values provided below have to be processed rather then spectra list
+    @param range_min       -- min value for spectra-ID to load
+    @param range_max       -- max value for spectra-ID to load
+    @param spec_list       -- list of spectra numbers to load 
+    @param SpectraExcluded -- set of the spectra ID-s to exclude from loading
     **/
     void  LoadISISNexus2::buildSpectraInd2SpectraNumMap(bool range_supplied,int64_t range_min,int64_t range_max,
       const std::vector<int64_t>  &spec_list,const std::set<specid_t> &SpectraExcluded)

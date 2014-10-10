@@ -275,7 +275,7 @@ namespace Mantid
         else
         { 
           //if only monitors range selected
-          //then set the monitor workspace as the outputworkspace
+          //then set the monitor workspace as the output workspace
           setWorkspaceProperty("OutputWorkspace", title, mongrp_sptr, monws_sptr,numberOfPeriods, false,pAlg);
         }
 
@@ -305,9 +305,10 @@ namespace Mantid
      *  @param grpws_sptr :: shared pointer to  group workspace
      *  @param  period period number
      *  @param bmonitors :: boolean flag to name  the workspaces
+     *  @param pAlg      :: pointer to algorithm this method works with.
      */
     void LoadRawHelper::setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr, WorkspaceGroup_sptr grpws_sptr,
-        const int64_t period, bool bmonitors,API::Algorithm *pAlg)
+        const int64_t period, bool bmonitors, API::Algorithm *const pAlg)
     {
       if(!ws_sptr) return;
       if(!grpws_sptr) return;
@@ -340,9 +341,10 @@ namespace Mantid
      *  @param ws_sptr ::  shared pointer to workspace
      *  @param numberOfPeriods :: number periods in the raw file
      *  @param  bMonitor to identify the workspace is an output workspace or monitor workspace
+     *  @param pAlg         :: pointer to algorithm this method works with.
      */
     void LoadRawHelper::setWorkspaceProperty(const std::string& propertyName, const std::string& title,
-        WorkspaceGroup_sptr grpws_sptr, DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods, bool bMonitor,API::Algorithm *pAlg)
+        WorkspaceGroup_sptr grpws_sptr, DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods, bool bMonitor, API::Algorithm *const pAlg)
     {
       UNUSED_ARG(bMonitor);
       Property *ws = pAlg->getProperty("OutputWorkspace");
@@ -364,7 +366,7 @@ namespace Mantid
     /** This method sets the raw file data to workspace vectors
      *  @param newWorkspace ::  shared pointer to the  workspace
      *  @param timeChannelsVec ::  vector holding the X data
-     *  @param  wsIndex  variable used for indexing the ouputworkspace
+     *  @param  wsIndex  variable used for indexing the output workspace
      *  @param  nspecNum  spectrum number
      *  @param noTimeRegimes ::   regime no.
      *  @param lengthIn :: length of the workspace

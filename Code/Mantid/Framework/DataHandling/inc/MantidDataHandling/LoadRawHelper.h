@@ -86,7 +86,7 @@ namespace Mantid
       ///creates monitor workspace
       static void createMonitorWorkspace(DataObjects::Workspace2D_sptr& monws_sptr,
         DataObjects::Workspace2D_sptr& ws_sptr,API::WorkspaceGroup_sptr& mongrp_sptr,
-        const int64_t mwsSpecs,const int64_t nwsSpecs,const int64_t numberOfPeriods,const int64_t lenthIn,std::string title,API::Algorithm *pAlg);
+        const int64_t mwsSpecs,const int64_t nwsSpecs,const int64_t numberOfPeriods,const int64_t lenthIn,std::string title,API::Algorithm *const pAlg);
       /// creates  shared pointer to group workspace 
       static API::WorkspaceGroup_sptr createGroupWorkspace();
 
@@ -99,10 +99,10 @@ namespace Mantid
 
       /// sets the workspace property 
       static void setWorkspaceProperty(const std::string & propertyName,const std::string& title,
-        API::WorkspaceGroup_sptr grpws_sptr,DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods,bool bMonitor,API::Algorithm *pAlg);
+        API::WorkspaceGroup_sptr grpws_sptr,DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods,bool bMonitor,API::Algorithm * const pAlg);
 
       /// overloaded method to set the workspace property 
-      static void setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr,API::WorkspaceGroup_sptr grpws_sptr,const int64_t period,bool bmonitors,API::Algorithm *pAlg);
+      static void setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr,API::WorkspaceGroup_sptr grpws_sptr,const int64_t period,bool bmonitors,API::Algorithm *const pAlg);
 
 
     protected:
