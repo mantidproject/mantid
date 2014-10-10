@@ -201,11 +201,35 @@ SpaceGroupFactoryImpl::SpaceGroupFactoryImpl() :
     Kernel::LibraryManager::Instance();
 }
 
-DECLARE_TABULATED_SPACE_GROUP(1, "P 1", "x,y,z");
+/* Space groups according to International Tables for Crystallography,
+ * using the generators specified there.
+ *
+ * When two origin choices are possible, only the first is given.
+ */
+// Triclinic
+DECLARE_TABULATED_SPACE_GROUP(1, "P 1", "x,y,z")
+DECLARE_GENERATED_SPACE_GROUP(2, "P -1", "-x,-y,-z")
 
-DECLARE_GENERATED_SPACE_GROUP(2, "P -1", "-x,-y,-z");
-DECLARE_GENERATED_SPACE_GROUP(225, "F m -3 m", "-x,-y,z; -x,y,-z; z,x,y; y,x,-z; -x,-y,-z");
-DECLARE_GENERATED_SPACE_GROUP(229, "I m -3 m", "-x,-y,z; -x,y,-z; z,x,y; y,x,-z; -x,-y,-z");
+// Monoclinic
+DECLARE_GENERATED_SPACE_GROUP(3, "P 1 2 1", "-x,y,-z")
+DECLARE_GENERATED_SPACE_GROUP(4, "P 1 21 1", "-x,y+1/2,-z")
+DECLARE_GENERATED_SPACE_GROUP(5, "C 1 2 1", "-x,y,-z")
+DECLARE_GENERATED_SPACE_GROUP(6, "P 1 m 1", "x,-y,z")
+DECLARE_GENERATED_SPACE_GROUP(7, "P 1 c 1", "x,-y,z+1/2")
+DECLARE_GENERATED_SPACE_GROUP(8, "C 1 m 1", "x,-y,z")
+DECLARE_GENERATED_SPACE_GROUP(9, "C 1 c 1", "x,-y,z+1/2")
+DECLARE_GENERATED_SPACE_GROUP(10, "P 1 2/m 1", "-x,y,-z; -x,-y,-z")
+DECLARE_GENERATED_SPACE_GROUP(11, "P 1 21/m 1", "-x,y+1/2,-z; -x,-y,-z")
+DECLARE_GENERATED_SPACE_GROUP(12, "C 1 2/m 1", "-x,y,-z; -x,-y,-z")
+DECLARE_GENERATED_SPACE_GROUP(13, "P 1 2/c 1", "-x,y,-z+1/2; -x,-y,-z")
+DECLARE_GENERATED_SPACE_GROUP(14, "P 1 21/c 1", "-x,y+1/2,-z+1/2; -x,-y,-z")
+DECLARE_GENERATED_SPACE_GROUP(15, "C 1 2/c 1", "-x,y,-z+1/2; -x,-y,-z")
+
+DECLARE_GENERATED_SPACE_GROUP(194, "P 63/m m c", "-y,x-y,z; -x,-y,z+1/2; y,x,-z; -x,-y,-z")
+
+DECLARE_GENERATED_SPACE_GROUP(221, "P m -3 m", "-x,-y,z; -x,y,-z; z,x,y; y,x,-z; -x,-y,-z")
+DECLARE_GENERATED_SPACE_GROUP(225, "F m -3 m", "-x,-y,z; -x,y,-z; z,x,y; y,x,-z; -x,-y,-z")
+DECLARE_GENERATED_SPACE_GROUP(229, "I m -3 m", "-x,-y,z; -x,y,-z; z,x,y; y,x,-z; -x,-y,-z")
 
 } // namespace Geometry
 } // namespace Mantid
