@@ -195,7 +195,7 @@ namespace Mantid
       std::map<int64_t,std::string>  ExcluedMonitorsSpectra;
       bseparateMonitors=findSpectraDetRangeInFile(entry,m_spec,ndets,nsp1[0],m_monitors,bexcludeMonitors,bseparateMonitors,ExcluedMonitorsSpectra);
 
-      size_t x_length = m_detBlockInfo.numberOfChannels + 1;
+      size_t x_length = m_loadBlockInfo.numberOfChannels + 1;
 
       // Check input is consistent with the file, throwing if not, exclude spectra selected at findSpectraDetRangeInFile;
       checkOptionalProperties(ExcluedMonitorsSpectra);
@@ -205,7 +205,7 @@ namespace Mantid
       m_progress = boost::shared_ptr<API::Progress>(new Progress(this, 0.0, 1.0, total_specs * m_detBlockInfo.numberOfPeriods));
 
       DataObjects::Workspace2D_sptr local_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-        (WorkspaceFactory::Instance().create("Workspace2D", total_specs, x_length, m_detBlockInfo.numberOfChannels));
+        (WorkspaceFactory::Instance().create("Workspace2D", total_specs, x_length, m_loadBlockInfo.numberOfChannels));
       // Set the units on the workspace to TOF & Counts
       local_workspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
       local_workspace->setYUnit("Counts");
