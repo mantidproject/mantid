@@ -25,7 +25,7 @@ echo Found Git at %GIT_BIN_DIR%
 set FILES=git-new git-checkbuild gitworkflow-helpers git-finish git-test git-publish
 
 :: Do copy
-FOR %%f IN (%FILES%) DO echo Copying %%f to %GIT_BIN_DIR%bin\ && xcopy /Y %~dp0%%f %GIT_BIN_DIR%bin\
+FOR %%f IN (%FILES%) DO echo Copying %%f to "%GIT_BIN_DIR%bin\" && xcopy /Y %~dp0%%f "%GIT_BIN_DIR%bin\"
 
 :: Leave the window open just in case any error messages
 pause
