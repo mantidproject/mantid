@@ -11,7 +11,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
@@ -20,8 +19,9 @@
 #include "MantidGeometry/Surfaces/SurfaceFactory.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+
+#include "MantidKernel/Material.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
@@ -33,6 +33,25 @@ class ObjectTest: public CxxTest::TestSuite
 {
 
 public:
+
+  void testDefaultObjectHasEmptyMaterial()
+  {
+    Object obj;
+
+    TSM_ASSERT_DELTA("Expected a zero number density",0.0, obj.material().numberDensity(), 1e-12);
+  }
+
+  void testObjectSetMaterialReplacesExisting()
+  {
+    using Mantid::Kernel::Material;
+    Object obj;
+
+    TSM_ASSERT_DELTA("Expected a zero number density", 0.0,
+                     obj.material().numberDensity(), 1e-12);
+    obj.setMaterial(Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0));
+    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
+                     obj.material().numberDensity(), 1e-12);
+  }
 
   void testCopyConstructorGivesObjectWithSameAttributes()
   {

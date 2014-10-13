@@ -4,7 +4,6 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/LineIntersectVisit.h"
@@ -36,7 +35,8 @@ namespace Mantid
     ObjName(0), TopRule(0), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
       AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), handle(), bGeometryCaching(false),
       vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
-      vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>())
+      vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
+      m_material() // empty by default
     {
       handle = boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
     }
@@ -49,7 +49,7 @@ namespace Mantid
     ObjName(0), TopRule(0), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
       AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), handle(), bGeometryCaching(false),
       vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()), vtkCacheWriter(boost::shared_ptr<
-      vtkGeometryCacheWriter>()), m_shapeXML(shapeXML)
+      vtkGeometryCacheWriter>()), m_shapeXML(shapeXML), m_material() // empty by default
     {
       handle = boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
     }
@@ -64,7 +64,7 @@ namespace Mantid
       AABByMin(A.AABByMin), AABBzMin(A.AABBzMin), boolBounded(A.boolBounded), handle(A.handle->clone()),
       bGeometryCaching(A.bGeometryCaching), vtkCacheReader(A.vtkCacheReader),
       vtkCacheWriter(A.vtkCacheWriter),
-      m_shapeXML(A.m_shapeXML)
+      m_shapeXML(A.m_shapeXML), m_material(A.m_material)
     {
       if (TopRule) createSurfaceList();
     }
@@ -93,6 +93,7 @@ namespace Mantid
         vtkCacheReader = A.vtkCacheReader;
         vtkCacheWriter = A.vtkCacheWriter;
         m_shapeXML = A.m_shapeXML;
+        m_material = A.m_material;
 
         if (TopRule) createSurfaceList();
       }
@@ -106,6 +107,22 @@ namespace Mantid
     Object::~Object()
     {
       delete TopRule;
+    }
+
+    /**
+     * @param material The new Material that the object is composed from
+     */
+    void Object::setMaterial(const Kernel::Material &material)
+    {
+      m_material = material;
+    }
+
+    /**
+     * @return The Material that the object is composed from
+     */
+    const Kernel::Material &Object::material() const
+    {
+      return m_material;
     }
 
     /**
