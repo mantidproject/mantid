@@ -10,76 +10,46 @@ namespace Mantid
 {
   namespace API
   {
-
-    using Geometry::IComponent;
-    using Geometry::IObjComponent;
-    using Kernel::V3D;
+    using Geometry::BoundingBox;
+    using Geometry::SolidShape;
     using Geometry::Track;
+    using Kernel::Material;
+    using Kernel::V3D;
 
     //------------------------------------------------------------------------------
     // Public methods
     //------------------------------------------------------------------------------
 
     /**
-     * Constructor specifying a name for the environment
+     * Constructor specifying a name for the environment. It is empty by default and
+     * required by various other users of it
      * @param name :: A name for the environment kit
      */
     SampleEnvironment::SampleEnvironment(const std::string & name) :
-      CompAssembly(name, NULL), m_elements()
+      m_name(name), m_elements()
     {
     }
 
     /**
-     * Copy constructor
-     * @param original :: The object whose state is to be copied.
+     * @return An axis-aligned BoundingBox object that encompasses the whole kit.
      */
-    SampleEnvironment::SampleEnvironment(const SampleEnvironment & original) :
-      CompAssembly(original), m_elements(nelements())
+    Geometry::BoundingBox SampleEnvironment::boundingBox() const
     {
-      for(int i = 0; i < nelements(); ++i)
+      BoundingBox box;
+      auto itrEnd = m_elements.end();
+      for(auto itr = m_elements.begin(); itr != itrEnd; ++itr)
       {
-        // type is enforced by ::add
-        m_elements[i] = dynamic_cast<IObjComponent*>(m_children[i]);
+        box.grow(itr->getBoundingBox());
       }
+      return box;
     }
 
     /**
-     * Clone the environment assembly
-     * @returns A pointer to the clone object
+     * @param element A shape + material object
      */
-    Geometry::IComponent* SampleEnvironment::clone() const
+    void SampleEnvironment::add(const Geometry::Object &element)
     {
-      return new SampleEnvironment(*this);
-    }
-
-    /**
-     * Override the add method so that we can only add physical components that
-     * have a defined shape, i.e. an ObjComponent with a valid shape
-     * @param comp :: A pointer to the phyiscal component. This object will take
-     * ownership of the pointer
-     * @returns The number of items within the assembly, after this component has
-     * been added
-     */
-    int SampleEnvironment::add(IComponent * comp)
-    {
-      // Check if this is a component with a shape
-      IObjComponent * physicalComp = dynamic_cast<IObjComponent*>(comp);
-      if( !physicalComp )
-      {
-        throw std::invalid_argument("CompAssembly::add - Invalid component, it must implement "
-                                    "the IObjComponent interface");
-      }
-      if( physicalComp->shape() && physicalComp->shape()->hasValidShape() )
-      {
-        // Accept this component
-        m_elements.reserve(m_elements.size() + 1); // avoid the power-like memory increase
-        m_elements.push_back(physicalComp);
-        return CompAssembly::add(comp);
-      }
-      else
-      {
-        throw std::invalid_argument("CompAssembly::add - Component does not have a defined shape.");
-      }
+      m_elements.push_back(element);
     }
 
     /**
@@ -92,7 +62,7 @@ namespace Mantid
       auto itrEnd = m_elements.end();
       for(auto itr = m_elements.begin(); itr != itrEnd; ++itr)
       {
-        if( (*itr)->isValid(point) )
+        if( itr->isValid(point) )
         {
           return true;
         }
@@ -110,7 +80,7 @@ namespace Mantid
       auto itrEnd = m_elements.end();
       for(auto itr = m_elements.begin(); itr != itrEnd; ++itr)
       {
-        (*itr)->interceptSurface(track);
+        itr->interceptSurface(track);
       }
     }
 

@@ -294,9 +294,7 @@ namespace Mantid
           citr != cend; ++citr)
       {
         length = citr->distInsideObject;
-        IObjComponent *objComp = dynamic_cast<IObjComponent*>(citr->componentID);
-        Material_const_sptr mat = objComp->material();
-        factor *= attenuation(length, *mat, lambda);
+        factor *= attenuation(length, citr->object->material(), lambda);
       }
 
       length = afterScatter.begin()->distInsideObject;
@@ -313,9 +311,7 @@ namespace Mantid
           citr != cend; ++citr)
       {
         length = citr->distInsideObject;
-        IObjComponent *objComp = dynamic_cast<IObjComponent*>(citr->componentID);
-        Material_const_sptr mat = objComp->material();
-        factor *= attenuation(length, *mat, lambda);
+        factor *= attenuation(length, citr->object->material(), lambda);
       }
 
       return factor;
@@ -393,18 +389,15 @@ namespace Mantid
     void MonteCarloAbsorption::initCaches()
     {
       g_log.debug() << "Caching input\n";
-      if( m_rng ) delete m_rng;
-      const int seedValue = getProperty("SeedValue");
-      m_rng = new boost::mt19937(seedValue);
+      // Setup random number generators for parallel execution
+      initRNG();
 
       m_samplePos = m_inputWS->getInstrument()->getSample()->getPos();
       m_sourcePos = m_inputWS->getInstrument()->getSource()->getPos();
       BoundingBox box(m_sampleShape->getBoundingBox());
       if( m_container )
       {
-        BoundingBox envBox;
-        m_container->getBoundingBox(envBox);
-        box.grow(envBox);
+        box.grow(m_container->boundingBox());
       }
 
       // Chop the bounding box up into a set of small boxes. This will be used
@@ -475,6 +468,15 @@ namespace Mantid
       if(m_numVolumeElements == numPossibleVolElements) g_log.debug("\n");
       else g_log.debug() << " Skipped " << (numPossibleVolElements-m_numVolumeElements)
                          << " blocks that do not intersect with the sample + container\n";
+    }
+
+    /**
+     */
+    void MonteCarloAbsorption::initRNG()
+    {
+      if( m_rng ) delete m_rng;
+      const int seedValue = getProperty("SeedValue");
+      m_rng = new boost::mt19937(seedValue);
     }
 
     /**

@@ -88,9 +88,10 @@ namespace Mantid
 
       /// Check the input and throw if invalid
       void retrieveInput();
-      /// Initialise the caches used here including setting up the random
-      /// number generator
+      /// Initialise the caches used
       void initCaches();
+      /// Setting up the random number generator
+      void initRNG();
       /// Checks if a given box has any corners inside the sample or container
       bool boxIntersectsSample(const double xmax, const double ymax, const double zmax,
                                const double xmin, const double ymin, const double zmin) const;

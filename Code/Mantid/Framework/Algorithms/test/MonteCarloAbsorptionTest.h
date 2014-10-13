@@ -12,7 +12,6 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-
 class MonteCarloAbsorptionTest : public CxxTest::TestSuite
 {
 public:
@@ -102,7 +101,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setPropertyValue("OutputWorkspace",outputName));
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
 
-
     auto factorWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataStore.retrieve(outputName));
 
     TS_ASSERT(factorWS);
@@ -162,9 +160,9 @@ private:
 
       ShapeFactory shapeMaker;
       Object_sptr containerShape = shapeMaker.createShape(xml.str());
-      Material_sptr canMaterial(new Material("CanMaterial", PhysicalConstants::getNeutronAtom(26, 0), 0.01));
+      containerShape->setMaterial(Material("CanMaterial", PhysicalConstants::getNeutronAtom(26, 0), 0.01));
       SampleEnvironment *can = new SampleEnvironment("can");
-      can->add(new ObjComponent("1", containerShape, NULL, canMaterial));
+      can->add(*containerShape);
       space->mutableSample().setEnvironment(can);
     }
 

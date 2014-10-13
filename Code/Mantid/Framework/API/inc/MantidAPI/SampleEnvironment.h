@@ -5,7 +5,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Objects/SolidShape.h"
 
 namespace Mantid
 {
@@ -13,11 +13,7 @@ namespace Mantid
   {
     /**
       This class stores details regarding the sample environment that was used during
-      a specific run. It is implemented as a type of CompAssembly so that enviroment kits
-      consisting of objects made from different materials can be constructed easily.
-
-      @author Martyn Gigg, Tessella plc
-      @date 23/11/2010
+      a specific run. It is implemented as a collection of pairs of Object elements
 
       Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -39,34 +35,34 @@ namespace Mantid
       File change history is stored at: <https://github.com/mantidproject/mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class MANTID_API_DLL SampleEnvironment : public Geometry::CompAssembly
+    class MANTID_API_DLL SampleEnvironment
     {
     public:
       /// Constructor defining the name of the environment
       SampleEnvironment(const std::string & name);
-      /// Copy constructor
-      SampleEnvironment(const SampleEnvironment& original);
-      /// Clone the assembly
-      virtual Geometry::IComponent* clone() const;
-      /// Type of object
-      virtual std::string type() const {return "SampleEnvironment"; }
 
-      /// Override the default add member to only add components with a defined
-      /// shape
-      int add(IComponent* comp);
+      /// @return The name of kit
+      inline const std::string name() const { return m_name; }
+      /// @return The number of elements the environment is composed of
+      inline size_t nelements() const { return m_elements.size(); }
+      /// Return the bounding box of all of the elements
+      Geometry::BoundingBox boundingBox() const;
+
+      /// Add an element
+      void add(const Geometry::Object & element);
+
       /// Is the point given a valid point within the environment
       bool isValid(const Kernel::V3D & point) const;
       /// Update the given track with intersections within the environment
       void interceptSurfaces(Geometry::Track & track) const;
 
     private:
-      /// Default constructor
-      SampleEnvironment();
-      /// Assignment operator
-      SampleEnvironment& operator=(const SampleEnvironment&);
+      DISABLE_DEFAULT_CONSTRUCT(SampleEnvironment)
 
-      /// Cached pointers to CompAssembly components
-      std::vector<Geometry::IObjComponent*> m_elements;
+      // Name of the kit
+      std::string m_name;
+      // The elements
+      std::vector<Geometry::Object> m_elements;
     };
   }
 }
