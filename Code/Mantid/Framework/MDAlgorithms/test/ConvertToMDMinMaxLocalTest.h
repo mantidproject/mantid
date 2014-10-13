@@ -149,8 +149,8 @@ public:
     TS_ASSERT( alg.isExecuted() );
     // Check the results
 
-    TS_ASSERT_EQUALS("0.53808,-2.5",alg.getPropertyValue("MinValues"));
-    TS_ASSERT_EQUALS("0.55285,2.5",alg.getPropertyValue("MaxValues"));
+    TS_ASSERT_EQUALS("0.250462,-2.5",alg.getPropertyValue("MinValues"));
+    TS_ASSERT_EQUALS("0.34787,2.5",alg.getPropertyValue("MaxValues"));
     // Remove workspace from the data service.
     Mantid::API::AnalysisDataService::Instance().remove(WSName);
   }
