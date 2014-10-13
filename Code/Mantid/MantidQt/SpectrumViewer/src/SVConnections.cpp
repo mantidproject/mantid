@@ -313,6 +313,7 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
     int newY = m_picker_y;
 
     QKeyEvent *keyEvent = dynamic_cast<QKeyEvent *>(event);
+    if(!keyEvent) return false;
     int key = keyEvent->key();
     switch (key)
     {

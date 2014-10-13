@@ -314,7 +314,10 @@ void IndirectDataReduction::openDirectoryDialog()
 */
 void IndirectDataReduction::setIDFValues(const QString & prefix)
 {
-  dynamic_cast<IndirectConvertToEnergy *>(m_tab_convert_to_energy)->setIDFValues(prefix);
+  IndirectConvertToEnergy *etTab = dynamic_cast<IndirectConvertToEnergy *>(m_tab_convert_to_energy);
+
+  if(etTab)
+    etTab->setIDFValues(prefix);
 }
 
 /**

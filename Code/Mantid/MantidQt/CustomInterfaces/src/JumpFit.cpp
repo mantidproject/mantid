@@ -181,39 +181,43 @@ namespace MantidQt
 			for (size_t i = 0; i < ws->getNumberHistograms(); ++i)
 			{
 				auto axis = dynamic_cast<Mantid::API::TextAxis*>(ws->getAxis(1));
-				std::string title = axis->label(i);
 
-				//check if the axis labels indicate this spectrum is width data 
-				size_t qLinesWidthIndex = title.find(".Width");
-				size_t convFitWidthIndex = title.find(".FWHM");
+        if(axis)
+        {
+          std::string title = axis->label(i);
 
-				bool qLinesWidth = qLinesWidthIndex != std::string::npos;
-				bool convFitWidth = convFitWidthIndex != std::string::npos;
+          //check if the axis labels indicate this spectrum is width data 
+          size_t qLinesWidthIndex = title.find(".Width");
+          size_t convFitWidthIndex = title.find(".FWHM");
 
-				//if we get a match, add this spectrum to the combobox
-				if(convFitWidth || qLinesWidth)
-				{
-					std::string cbItemName = "";
-					size_t substrIndex = 0;
-					
-					if (qLinesWidth)
-					{
-						substrIndex = qLinesWidthIndex;
-					}
-					else if (convFitWidth)
-					{
-						substrIndex = convFitWidthIndex;
-					}
+          bool qLinesWidth = qLinesWidthIndex != std::string::npos;
+          bool convFitWidth = convFitWidthIndex != std::string::npos;
 
-					cbItemName = title.substr(0, substrIndex);
-					spectraList[cbItemName] = static_cast<int>(i);
-					m_uiForm.cbWidth->addItem(QString(cbItemName.c_str()));
-					
-					//display widths f1.f1, f2.f1 and f2.f2
-					if (m_uiForm.cbWidth->count() == 3)
-					{
-						return;
-					}
+          //if we get a match, add this spectrum to the combobox
+          if(convFitWidth || qLinesWidth)
+          {
+            std::string cbItemName = "";
+            size_t substrIndex = 0;
+            
+            if (qLinesWidth)
+            {
+              substrIndex = qLinesWidthIndex;
+            }
+            else if (convFitWidth)
+            {
+              substrIndex = convFitWidthIndex;
+            }
+
+            cbItemName = title.substr(0, substrIndex);
+            spectraList[cbItemName] = static_cast<int>(i);
+            m_uiForm.cbWidth->addItem(QString(cbItemName.c_str()));
+            
+            //display widths f1.f1, f2.f1 and f2.f2
+            if (m_uiForm.cbWidth->count() == 3)
+            {
+              return;
+            }
+          }
 				}
 			}
 		}
