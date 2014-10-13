@@ -102,11 +102,20 @@ void IndirectDiffractionReduction::plotResults(bool error)
   QString instName = m_uiForm.cbInst->currentText();
   QString mode = m_uiForm.cbReflection->currentText();
 
-  QString pyInput = "from mantidplot import plotSpectrum\n";
-  if(m_uiForm.cbPlotType->currentText() == "Spectra")
+  QString plotType = m_uiForm.cbPlotType->currentText();
+
+  QString pyInput = "from mantidplot import plotSpectrum, plot2D\n";
+
+  if(plotType == "Spectra" || plotType == "Both")
   {
     for(auto it = m_plotWorkspaces.begin(); it != m_plotWorkspaces.end(); ++it)
       pyInput += "plotSpectrum('" + *it + "', 0)\n";
+  }
+
+  if(plotType == "Contour" || plotType == "Both")
+  {
+    for(auto it = m_plotWorkspaces.begin(); it != m_plotWorkspaces.end(); ++it)
+      pyInput += "plot2D('" + *it + "')\n";
   }
 
   runPythonCode(pyInput);
@@ -344,15 +353,26 @@ void IndirectDiffractionReduction::reflectionSelected(int)
   // Hide options that the current instrument config cannot process
   if(instrumentName == "OSIRIS" && reflection == "diffonly")
   {
+    // Disable individual grouping
+    m_uiForm.ckIndividualGrouping->setToolTip("OSIRIS cannot group detectors individually in diffonly mode");
+    m_uiForm.ckIndividualGrouping->setEnabled(false);
+    m_uiForm.ckIndividualGrouping->setChecked(false);
+
+    // Disable sum files
     m_uiForm.dem_ckSumFiles->setToolTip("OSIRIS cannot sum files in diffonly mode");
     m_uiForm.dem_ckSumFiles->setEnabled(false);
     m_uiForm.dem_ckSumFiles->setChecked(false);
   }
   else
   {
+    // Re-enable sum files
     m_uiForm.dem_ckSumFiles->setToolTip("");
     m_uiForm.dem_ckSumFiles->setEnabled(true);
     m_uiForm.dem_ckSumFiles->setChecked(true);
+
+    // Re-enable individual grouping
+    m_uiForm.ckIndividualGrouping->setToolTip("");
+    m_uiForm.ckIndividualGrouping->setEnabled(true);
   }
 }
 
@@ -403,6 +423,9 @@ void IndirectDiffractionReduction::initLayout()
   m_uiForm.leRebinStart->setValidator(m_valDbl);
   m_uiForm.leRebinWidth->setValidator(m_valDbl);
   m_uiForm.leRebinEnd->setValidator(m_valDbl);
+
+  // Update the list of plot options when individual grouping is toggled
+  connect(m_uiForm.ckIndividualGrouping, SIGNAL(stateChanged(int)), this, SLOT(individualGroupingToggled(int)));
 
   loadSettings();
 
@@ -539,6 +562,38 @@ void IndirectDiffractionReduction::runFilesFound()
   int fileCount = m_uiForm.dem_rawFiles->getFilenames().size();
   if(fileCount < 2)
     m_uiForm.dem_ckSumFiles->setChecked(false);
+}
+
+/**
+ * Handles the user toggling the individual grouping check box.
+ *
+ * @param state The selection state of the check box
+ */
+void IndirectDiffractionReduction::individualGroupingToggled(int state)
+{
+  int itemCount = m_uiForm.cbPlotType->count();
+
+  switch(state)
+  {
+    case Qt::Unchecked:
+      if(itemCount == 4)
+      {
+        m_uiForm.cbPlotType->removeItem(3);
+        m_uiForm.cbPlotType->removeItem(2);
+      }
+      break;
+
+    case Qt::Checked:
+      if(itemCount == 2)
+      {
+        m_uiForm.cbPlotType->insertItem(2, "Contour");
+        m_uiForm.cbPlotType->insertItem(3, "Both");
+      }
+      break;
+
+    default:
+      return;
+  }
 }
 
 }
