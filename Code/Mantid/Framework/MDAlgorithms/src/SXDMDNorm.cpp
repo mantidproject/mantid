@@ -32,6 +32,16 @@ namespace MDAlgorithms
    */
   SXDMDNorm::SXDMDNorm()
   {
+      hIndex=-1;
+      kIndex=-1;
+      lIndex=-1;
+      hIntegrated=true;
+      kIntegrated=true;
+      lIntegrated=true;
+      m_nDims=0;
+      transf=Mantid::Kernel::DblMatrix(3,3);
+      KincidentMin=0;
+      KincidentMax=EMPTY_DBL();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -141,16 +151,17 @@ namespace MDAlgorithms
       {
           float dimMin=static_cast<float>(m_inputWS->getDimension(i)->getMinimum());
           float dimMax=static_cast<float>(m_inputWS->getDimension(i)->getMaximum());
-
           Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_inputWS->getExperimentInfo(0)->run().getProperty(m_inputWS->getDimension(i)->getName()));
-          coord_t value=static_cast<coord_t>(run_property->firstValue());
-          otherValues.push_back(value);
-          //in the original MD data no time was spent measuring between dimMin and dimMax
-          if ((value<dimMin)||(value>dimMax))
+          if (run_property!=NULL)
           {
+            coord_t value=static_cast<coord_t>(run_property->firstValue());
+            otherValues.push_back(value);
+            //in the original MD data no time was spent measuring between dimMin and dimMax
+            if ((value<dimMin)||(value>dimMax))
+            {
               skipProcessing=true;
+            }
           }
-
           delete run_property;
       }
 
@@ -239,9 +250,16 @@ namespace MDAlgorithms
       {
           double PC=m_normWS->getExperimentInfo(0)->run().getProtonCharge();
           Kernel::PropertyWithValue< std::vector<double> > *prop=dynamic_cast< Mantid::Kernel::PropertyWithValue<std::vector<double> >*>(m_normWS->getExperimentInfo(0)->getLog("RUBW_MATRIX"));
-          Mantid::Kernel::DblMatrix RUBW((*prop)()); //includes the 2*pi factor but not goniometer for now :)
-          transf=m_normWS->getExperimentInfo(0)->run().getGoniometerMatrix()*RUBW;
-          transf.Invert();
+          if (prop==NULL)
+          {
+              throw std::runtime_error("No RUBW_MATRIX");
+          }
+          else
+          {
+              Mantid::Kernel::DblMatrix RUBW((*prop)()); //includes the 2*pi factor but not goniometer for now :)
+              transf=m_normWS->getExperimentInfo(0)->run().getGoniometerMatrix()*RUBW;
+              transf.Invert();
+          }
           //FIXME: the detector positions are from the IDF. Need to account for calibration
           std::vector<detid_t> detIDS=m_normWS->getExperimentInfo(0)->getInstrument()->getDetectorIDs(true);
 
@@ -290,9 +308,9 @@ namespace MDAlgorithms
                                   double signal=0.;
                                   while((*start).tof()<(*it)[3])
                                   {
-                                      signal+=(*start).weight();
                                       if (start==el.end())
                                           break;
+                                      signal+=(*start).weight();
                                       ++start;
                                   }
                                   signal*=solid;
@@ -312,10 +330,11 @@ namespace MDAlgorithms
               PARALLEL_END_INTERUPT_REGION
           }
           PARALLEL_CHECK_INTERUPT_REGION
-
+          delete prog;
       }
 
       this->setProperty("OutputNormalizationWorkspace",m_normWS);
+
   }
 
 
