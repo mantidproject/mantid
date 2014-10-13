@@ -1,5 +1,7 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit.h"
 #include "MantidQtMantidWidgets/FunctionBrowser.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
+
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
@@ -16,6 +18,7 @@
 
 #include <boost/make_shared.hpp>
 #include <qwt_plot_curve.h>
+#include <Poco/ActiveResult.h>
 
 #include <vector>
 #include <algorithm>
@@ -475,6 +478,8 @@ void MultiDatasetFit::initLayout()
   m_uiForm.browserLayout->addWidget( m_functionBrowser );
   connect(m_functionBrowser,SIGNAL(localParameterButtonClicked(const QString&)),this,SLOT(editLocalParameterValues(const QString&)));
   connect(m_functionBrowser,SIGNAL(functionStructureChanged()),this,SLOT(reset()));
+
+  m_uiForm.progressBar->setValue(0);
 }
 
 /**
@@ -690,10 +695,12 @@ void MultiDatasetFit::fit()
       fit->setProperty( "WorkspaceIndex_" + suffix, getWorkspaceIndex(ispec) );
     }
 
-    fit->execute();
+    m_fitRunner.reset( new API::AlgorithmRunner() );
+    connect( m_fitRunner.get(),SIGNAL(algorithmComplete(bool)), this, SLOT(finishFit(bool)), Qt::QueuedConnection );
+    connect( m_fitRunner.get(),SIGNAL(algorithmProgress(double,const std::string&)),this,SLOT(progressFit(double,const std::string&)), Qt::QueuedConnection );
 
-    m_plotController->clear();
-    m_plotController->update();
+    m_fitRunner->startAlgorithm(fit);
+
   }
   catch(std::exception& e)
   {
@@ -790,6 +797,21 @@ void MultiDatasetFit::initLocalParameter(const QString& parName)const
 void MultiDatasetFit::reset()
 {
   m_localParameterValues.clear();
+}
+
+void MultiDatasetFit::finishFit(bool)
+{
+  std::cerr << "Fit finished" << std::endl;
+
+  m_plotController->clear();
+  m_plotController->update();
+  m_uiForm.progressBar->setValue(0);
+}
+
+void MultiDatasetFit::progressFit(double p,const std::string& msg)
+{
+  std::cerr << "Fit progress: " << p << " msg: " << msg << std::endl;
+  m_uiForm.progressBar->setValue( static_cast<int>(p*100) );
 }
 
 /*==========================================================================================*/

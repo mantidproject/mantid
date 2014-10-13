@@ -23,6 +23,7 @@ namespace Mantid
 namespace API
 {
   class IFunction;
+  class IAlgorithm;
 }
 }
 
@@ -33,6 +34,11 @@ namespace MantidQt
 namespace MantidWidgets
 {
   class FunctionBrowser;
+}
+
+namespace API
+{
+  class AlgorithmRunner;
 }
 
 namespace CustomInterfaces
@@ -47,8 +53,7 @@ class DatasetPlotData;
  * and displaying the results.
  */
 
-class MultiDatasetFit: public API::UserSubWindow, public Mantid::API::AlgorithmObserver,
-                          public MantidQt::API::WorkspaceObserver
+class MultiDatasetFit: public API::UserSubWindow
 {
   Q_OBJECT
 public:
@@ -83,6 +88,8 @@ private slots:
   void removeSelectedSpectra();
   void fit();
   void editLocalParameterValues(const QString& parName);
+  void finishFit(bool);
+  void progressFit(double p,const std::string& msg);
 
 protected:
   /// To be overridden to set the appropriate layout
@@ -103,6 +110,8 @@ private:
   std::string m_outputWorkspaceName;
   /// Storage for local paramtere values
   mutable QMap<QString,QVector<double>> m_localParameterValues;
+  /// Fit algorithm runner
+  boost::shared_ptr<API::AlgorithmRunner> m_fitRunner;
 };
 
 /*==========================================================================================*/
