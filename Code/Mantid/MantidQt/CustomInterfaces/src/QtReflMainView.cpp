@@ -47,6 +47,7 @@ namespace MantidQt
       ui.progressBar->setRange(0, 100);
       ui.progressBar->setValue(0);
 
+      //Set up the instrument selectors
       std::vector<std::string> instruments;
       instruments.push_back("INTER");
       instruments.push_back("SURF");
@@ -55,13 +56,15 @@ namespace MantidQt
       setInstrumentList(instruments);
 
       const std::string defaultInst = Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
-
       if(std::find(instruments.begin(), instruments.end(), defaultInst) != instruments.end())
       {
         int index = ui.comboSearchInstrument->findData(QString::fromStdString(defaultInst), Qt::DisplayRole);
         ui.comboSearchInstrument->setCurrentIndex(index);
         ui.comboProcessInstrument->setCurrentIndex(index);
       }
+
+      //Allow rows to be reordered
+      ui.viewTable->verticalHeader()->setMovable(true);
 
       connect(ui.workspaceSelector,SIGNAL(activated(QString)),this,SLOT(setModel(QString)));
       connect(ui.buttonSave, SIGNAL(clicked()),this, SLOT(saveButton()));
