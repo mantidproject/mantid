@@ -188,6 +188,17 @@ namespace Mantid
 
           if(oldInstrName==currentWSInstrumentName)
           { 
+            // a direct mode instrument can be unchanged but incident energy can be different.
+            // It is cheap operation so we should always replace incident energy on the target workspace
+            try
+            {
+              double Ei =  InWS2D->run().getPropertyValueAsType<double>("Ei");
+              TargTableWS->logs()->addProperty<double>("Ei",Ei,true);           
+            }
+            catch(Kernel::Exception::NotFoundError &)
+            {}
+ 
+
             if(!updateMasks) return TargTableWS;
             //Target workspace with preprocessed detectors exists and seems is correct one. 
             // We still need to update masked detectors information
