@@ -196,7 +196,11 @@ namespace Mantid
               TargTableWS->logs()->addProperty<double>("Ei",Ei,true);           
             }
             catch(Kernel::Exception::NotFoundError &)
-            {}
+            {
+              Emode = Kernel::DeltaEMode().fromString(dEModeRequested);
+              if(Emode==Kernel::DeltaEMode::Direct)
+                  throw(std::invalid_argument("Input neutron's energy has to be attached to the workspace as Ei number log in direct inelastic mode"));
+            }
  
 
             if(!updateMasks) return TargTableWS;
