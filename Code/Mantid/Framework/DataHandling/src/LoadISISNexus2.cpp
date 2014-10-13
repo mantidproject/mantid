@@ -318,19 +318,17 @@ namespace Mantid
             x_length = m_monBlockInfo.numberOfChannels+1;
             DataObjects::Workspace2D_sptr monitor_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
               (WorkspaceFactory::Instance().create(local_workspace, m_monBlockInfo.numberOfSpectra,x_length,m_monBlockInfo.numberOfChannels));
+            local_workspace->setMonitorWorkspace(monitor_workspace);
 
             m_spectraBlocks.clear();
             m_specInd2specNum_map.clear();
             std::vector<int64_t> dummyS1;
-            std::map<int64_t,std::string> dummySpectr;
-            buildSpectraInd2SpectraNumMap(true,m_monBlockInfo.spectraID_min,m_monBlockInfo.spectraID_max,dummyS1,dummySpectr);
+            // at the moment here we clear this map to enable possibility to load monitors from the spectra block (wiring table bug). 
+            // if monitor's spectra present in the detectors block due to this bug should be read from monitors, this map should be dealt with properly.
+            ExcluedMonitorsSpectra.clear();
+            buildSpectraInd2SpectraNumMap(true,m_monBlockInfo.spectraID_min,m_monBlockInfo.spectraID_max,dummyS1,ExcluedMonitorsSpectra);
             // lo
             prepareSpectraBlocks(m_monitors,m_specInd2specNum_map,m_monBlockInfo);
-
-            NXFloat timeBins = entry.openNXFloat("monitor_1/time_of_flight");
-            timeBins.load();
-            m_tof_data.reset(new MantidVec(timeBins(), timeBins() + x_length));
-
 
 
             int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
