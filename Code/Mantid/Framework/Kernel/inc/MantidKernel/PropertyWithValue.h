@@ -333,7 +333,7 @@ public:
 
   /**
    * Deep comparison.
-   * @param right The other property to compare to.
+   * @param rhs The other property to compare to.
    * @return true if the are equal.
    */
   virtual bool operator==(const PropertyWithValue<TYPE> & rhs) const
@@ -345,7 +345,7 @@ public:
 
   /**
    * Deep comparison (not equal).
-   * @param right The other property to compare to.
+   * @param rhs The other property to compare to.
    * @return true if the are not equal.
    */
   virtual bool operator!=(const PropertyWithValue<TYPE> & rhs) const
