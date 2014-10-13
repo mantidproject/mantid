@@ -17,9 +17,13 @@ namespace RefDetectorViewer
  *  Construct a RefRangeHandler object to manage min, max and step controls
  *  in the specified UI
  */
-RefRangeHandler::RefRangeHandler( Ui_RefImageViewer* iv_ui )
+RefRangeHandler::RefRangeHandler( Ui_RefImageViewer* iv_ui ) :
+  iv_ui(iv_ui),
+  total_min_x(0.0), total_max_x(0.0),
+  total_min_y(0.0), total_max_y(0.0),
+  total_n_steps(0)
 {
-  this->iv_ui = iv_ui;
+  /* this->iv_ui = iv_ui; */
 }
 
 
@@ -30,8 +34,7 @@ RefRangeHandler::RefRangeHandler( Ui_RefImageViewer* iv_ui )
  */
 void RefRangeHandler::ConfigureRangeControls( SpectrumDataSource* data_source )
 {
-  
-    //x axis
+  //x axis
   total_min_x   = data_source->GetXMin();
   total_max_x   = data_source->GetXMax();
   total_n_steps = data_source->GetNCols();
@@ -58,8 +61,6 @@ void RefRangeHandler::ConfigureRangeControls( SpectrumDataSource* data_source )
     }
     
     SetRange( total_min_y, total_max_y, defaulty_step, 'y' );
-
-
 }
 
 

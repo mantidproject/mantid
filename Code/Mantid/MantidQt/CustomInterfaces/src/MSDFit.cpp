@@ -16,7 +16,9 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  MSDFit::MSDFit(QWidget * parent) : IDATab(parent), m_msdPlot(NULL), m_msdRange(NULL), m_msdDataCurve(NULL), m_msdFitCurve(NULL), 
+  MSDFit::MSDFit(QWidget * parent) : IDATab(parent),
+    m_intVal(NULL),
+    m_msdPlot(NULL), m_msdRange(NULL), m_msdDataCurve(NULL), m_msdFitCurve(NULL), 
     m_msdTree(NULL), m_msdProp(), m_msdDblMng(NULL)
   {}
   

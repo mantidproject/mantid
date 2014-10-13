@@ -62,8 +62,8 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefRangeHandler : public SpectrumVie
     Ui_RefImageViewer* iv_ui;
     double         total_min_x;
     double         total_max_x;
-    double         total_max_y;
     double         total_min_y;
+    double         total_max_y;
     size_t         total_n_steps;
 };
 

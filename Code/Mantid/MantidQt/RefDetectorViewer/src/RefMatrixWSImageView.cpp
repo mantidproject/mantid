@@ -18,7 +18,8 @@ using namespace Mantid::API;
 /**
  * Construct an ImageView for the specified matrix workspace
  */
-RefMatrixWSImageView::RefMatrixWSImageView( MatrixWorkspace_sptr /*mat_ws*/ )
+RefMatrixWSImageView::RefMatrixWSImageView( MatrixWorkspace_sptr /*mat_ws*/ ) :
+  image_view(NULL)
 {
     return;
     //  RefMatrixWSDataSource* source = new RefMatrixWSDataSource( mat_ws );

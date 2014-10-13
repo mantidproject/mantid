@@ -40,7 +40,7 @@ SpectrumDisplay::SpectrumDisplay(  QwtPlot*       spectrum_plot,
                              GraphDisplay*  h_graph,
                              GraphDisplay*  v_graph,
                              QTableWidget*  table_widget )
-  : data_source(0), spectrum_plot(spectrum_plot), slider_handler(slider_handler),
+  : data_source(NULL), data_array(NULL), spectrum_plot(spectrum_plot), slider_handler(slider_handler),
     range_handler(range_handler), h_graph_display(h_graph), v_graph_display(v_graph),
     image_table(table_widget)
 {

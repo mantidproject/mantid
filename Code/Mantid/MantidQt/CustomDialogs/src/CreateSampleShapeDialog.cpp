@@ -38,7 +38,7 @@ using namespace MantidQt::CustomDialogs;
  * Constructor
  */
 CreateSampleShapeDialog::CreateSampleShapeDialog(QWidget *parent) :
-  AlgorithmDialog(parent), m_setup_map(), m_details_map(), m_ops_map()
+  AlgorithmDialog(parent), m_shapeTree(NULL), m_setup_map(), m_details_map(), m_ops_map()
 {
   m_object_viewer = new MantidGLWidget;
 }

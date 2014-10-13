@@ -85,23 +85,49 @@ namespace MantidWidgets
  * @param parent :: The parent widget - must be an ApplicationWindow
  * @param mantidui :: The UI form for MantidPlot
  */
-FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject* mantidui)
-:QDockWidget("Fit Function",parent),
-m_logValue(NULL),
-m_compositeFunction(),
-m_changeSlotsEnabled(false),
-m_guessOutputName(true),
-m_updateObserver(*this,&FitPropertyBrowser::handleFactoryUpdate),
-m_currentHandler(0),
-m_defaultFunction("Gaussian"),
-m_defaultPeak("Gaussian"),
-m_defaultBackground("LinearBackground"),
-m_peakToolOn(false),
-m_auto_back(false),
-m_autoBgName(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground"))),
-m_autoBackground(NULL),
-m_decimals(-1),
-m_mantidui(mantidui)
+FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject* mantidui):
+  QDockWidget("Fit Function",parent),
+  m_logValue(NULL),
+  m_plotCompositeMembers(NULL),
+  m_convolveMembers(NULL),
+  m_rawData(NULL),
+  m_xColumn(NULL),
+  m_yColumn(NULL),
+  m_errColumn(NULL),
+  m_showParamErrors(NULL),
+  m_compositeFunction(),
+  m_browser(NULL),
+  m_fitActionUndoFit(NULL),
+  m_fitActionSeqFit(NULL),
+  m_fitActionFit(NULL),
+  m_fitActionEvaluate(NULL),
+  m_functionsGroup(NULL),
+  m_settingsGroup(NULL),
+  m_customSettingsGroup(NULL),
+  m_changeSlotsEnabled(false),
+  m_guessOutputName(true),
+  m_updateObserver(*this,&FitPropertyBrowser::handleFactoryUpdate),
+  m_fitMapper(NULL),
+  m_fitMenu(NULL),
+  m_displayActionPlotGuess(NULL),
+  m_displayActionQuality(NULL),
+  m_displayActionClearAll(NULL),
+  m_setupActionCustomSetup(NULL),
+  m_setupActionRemove(NULL),
+  m_tip(NULL),
+  m_fitSelector(NULL),
+  m_fitTree(NULL),
+  m_currentHandler(0),
+  m_defaultFunction("Gaussian"),
+  m_defaultPeak("Gaussian"),
+  m_defaultBackground("LinearBackground"),
+  m_index_(0),
+  m_peakToolOn(false),
+  m_auto_back(false),
+  m_autoBgName(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground"))),
+  m_autoBackground(NULL),
+  m_decimals(-1),
+  m_mantidui(mantidui)
 {
   // Make sure plugins are loaded
   std::string libpath = Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");
@@ -2074,6 +2100,7 @@ void FitPropertyBrowser::deleteTie()
   QtBrowserItem * ci = m_browser->currentItem();
   QtProperty* paramProp = ci->property();
   PropertyHandler* h = getHandler()->findHandler(paramProp);
+  if (!h) return;
 
   if (ci->property()->propertyName() != "Tie") 
   {

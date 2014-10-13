@@ -30,7 +30,14 @@ namespace SpectrumView
 SpectrumView::SpectrumView(QWidget *parent) :
   QMainWindow(parent, 0),
   WorkspaceObserver(),
-  m_ui(new Ui::SpectrumViewer())
+  h_graph(NULL),
+  v_graph(NULL),
+  m_ui(new Ui::SpectrumViewer()),
+  m_slider_handler(NULL),
+  m_range_handler(NULL),
+  m_spectrum_display(NULL),
+  m_sv_connections(NULL),
+  m_emode_handler(NULL)
 {
   m_ui->setupUi(this);
 }

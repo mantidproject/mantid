@@ -38,7 +38,9 @@ using namespace MantidQt::CustomInterfaces;
 Homer::Homer(QWidget *parent, Ui::DirectConvertToEnergy & uiForm) : 
   UserSubWindow(parent), m_uiForm(uiForm),
   m_backgroundDialog(NULL), m_diagPage(NULL),m_saveChanged(false),
-  m_backgroundWasVisible(false), m_absEiDirty(false), m_topSettingsGroup("CustomInterfaces/Homer")
+  m_backgroundWasVisible(false), m_absEiDirty(false),
+  m_saveChecksGroup(NULL),
+  m_topSettingsGroup("CustomInterfaces/Homer")
 {}
 
 /// Set up the dialog layout

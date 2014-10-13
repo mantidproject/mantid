@@ -27,7 +27,9 @@ namespace SpectrumView
  */
 GraphDisplay::GraphDisplay( QwtPlot*      graph_plot, 
                             QTableWidget* graph_table,
-                            bool          is_vertical )
+                            bool          is_vertical ) :
+  min_x(0.0), max_x(0.0),
+  min_y(0.0), max_y(0.0)
 {
   this->graph_plot  = graph_plot;
   this->graph_table = graph_table;
