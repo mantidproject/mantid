@@ -12,7 +12,6 @@
 
 #include <map>
 
-
 #include <Poco/SAX/ContentHandler.h>
 
 namespace Mantid
