@@ -191,7 +191,7 @@ namespace Mantid
             // a direct mode instrument can be unchanged but incident energy can be different.
             // It is cheap operation so we should always replace incident energy on the target workspace
             bool hasEi= InWS2D->run().hasProperty("Ei");
-            bool hasEfix=InWS2D->run().hasProperty("eFixed");
+            bool hasEfix=InWS2D->run().hasProperty("eFixed") || InWS2D->run().hasProperty("Efixed");
             if (hasEi||hasEfix)
             {
 
