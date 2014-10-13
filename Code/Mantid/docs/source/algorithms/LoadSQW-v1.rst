@@ -172,8 +172,9 @@ Usage
 .. testcode:: ExLoadSQW
 
    # Delete existing workspace if it is already in Mantid as LoadSQW does not support overwriting
+   # existig workspaces by desighn
    if 'mdws' in mtd:
-       DeleteWorkspace(mdws)
+       DeleteWorkspace('mdws')
    #
    # Load sample sqw file, present in Mantid unit tests as MD workspace
    mdws = LoadSQW('test_horace_reader.sqw');
