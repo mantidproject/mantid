@@ -137,20 +137,23 @@
     <value val="0" />
   </parameter>
 
+  <!-- Area, thickness, attenuation and scale factor taken from TOSCA. -->
+  <!-- By lack of actual data and the fact the monitors would have been installed at -->
+  <!-- a similar time this is a reasonable guess. -->
   <parameter name="Workflow.Monitor1-Area" >
-    <value val="-1" />
+    <value val="5.391011e-5" />
   </parameter>
 
   <parameter name="Workflow.Monitor1-Thickness" >
-    <value val="-1" />
+    <value val="0.013" />
   </parameter>
 
   <parameter name="Workflow.Monitor1-Attenuation" >
-    <value val="-1" />
+    <value val="8.3" />
   </parameter>
 
   <parameter name="Workflow.Monitor1-ScalingFactor">
-    <value val="1" />
+    <value val="1e9" />
   </parameter>
 
   <parameter name="Workflow.NamingConvention" type="string">
