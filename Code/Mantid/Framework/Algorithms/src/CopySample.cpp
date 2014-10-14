@@ -137,16 +137,24 @@ namespace Algorithms
   void CopySample::copyParameters(Sample& from,Sample& to,bool nameFlag,bool materialFlag, bool environmentFlag, bool shapeFlag,bool latticeFlag, bool orientationOnlyFlag)
   {
     if (nameFlag) to.setName(from.getName());
-    if (materialFlag) to.setMaterial(from.getMaterial());
     if (environmentFlag) to.setEnvironment(new SampleEnvironment(from.getEnvironment()));
     if (shapeFlag)
     {
       to.setShape(from.getShape());
+      // reset to original
+      const auto & lhsMaterial = from.getShape().material();
+      if(!materialFlag) to.setMaterial(lhsMaterial);
+      
       to.setGeometryFlag(from.getGeometryFlag());
       to.setHeight(from.getHeight());
       to.setThickness(from.getThickness());
       to.setWidth(from.getWidth());
     }
+    else if(materialFlag)
+    {
+      to.setMaterial(from.getMaterial());
+    }
+    
     if ((latticeFlag) && from.hasOrientedLattice())
     {
         if (to.hasOrientedLattice() && orientationOnlyFlag)
