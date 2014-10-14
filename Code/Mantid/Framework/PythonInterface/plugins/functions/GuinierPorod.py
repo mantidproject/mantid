@@ -44,6 +44,20 @@ class GuinierPorod(IFunction1D):
         self.declareParameter("M", 3.0, 'M')
         self.declareParameter("Background", 0.0, 'Background')
 
+    def _boundary_conditions(self, qval):
+        """
+            Check boundary constraints and return True if we
+            are out of bounds.
+            @param qval: q-value to evaluate at
+        """
+        s = self.getParameterValue('Dimension')
+        Rg = self.getParameterValue('Rg')
+        m = self.getParameterValue('M')
+        if Rg<=0: return True
+        if m<s: return True
+        if s>3.0: return True 
+        return False
+
     def _guinier_porod_core(self, qval):
         """
             Compute the main function for the model
@@ -53,6 +67,7 @@ class GuinierPorod(IFunction1D):
         Rg = self.getParameterValue('Rg')
         m = self.getParameterValue('M')
         n = 3.0 - s
+        if self._boundary_conditions(qval): return 0.0
         q1 = math.sqrt((m-s)*n/2.0)/Rg
         if qval < q1:
             return math.pow(qval,-s)*math.exp((-qval*qval*Rg*Rg)/n) 
@@ -68,6 +83,7 @@ class GuinierPorod(IFunction1D):
         Rg = self.getParameterValue('Rg')
         m = self.getParameterValue('M')
         n = 3.0 - s
+        if self._boundary_conditions(qval): return 1.0
         q1 = math.sqrt((m-s)*n/2.0)/Rg
         qrg = qval*qval*Rg*Rg
         if qval < q1:
@@ -91,6 +107,7 @@ class GuinierPorod(IFunction1D):
         Rg = self.getParameterValue('Rg')
         m = self.getParameterValue('M')
         n = 3.0 - s
+        if self._boundary_conditions(qval): return 1.0
         q1 = math.sqrt((m-s)*n/2.0)/Rg
         if qval < q1:
             return 0.0
@@ -108,6 +125,7 @@ class GuinierPorod(IFunction1D):
         Rg = self.getParameterValue('Rg')
         m = self.getParameterValue('M')
         n = 3.0 - s
+        if self._boundary_conditions(qval): return 1.0
         q1 = math.sqrt((m-s)*n/2.0)/Rg
         qrg = qval*qval*Rg*Rg
         if qval < q1:
