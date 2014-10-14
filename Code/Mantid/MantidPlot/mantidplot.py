@@ -231,7 +231,7 @@ def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, 
         max_spec = workspace(name).getNumberHistograms() - 1
         for idx in index_list:
             if idx > max_spec:
-                raise ValueError("Wrong spectrum index for workspace %s: %d, which is bigger than the"
+                raise ValueError("Wrong spectrum index for workspace '%s': %d, which is bigger than the"
                                  " number of spectra in this workspace - 1 (%d)" % (name, idx, max_spec))
 
     # Unwrap the window object, if any specified
@@ -309,14 +309,14 @@ def plotMD(source, plot_axis=-2, normalization = DEFAULT_MD_NORMALIZATION, error
     for name in workspace_names:
         non_integrated_dims = mantid.api.mtd[name].getNonIntegratedDimensions()
         if not len(non_integrated_dims) == 1:
-            raise ValueError("%s must have a single non-integrated dimension in order to be rendered via plotMD" % name)
+            raise ValueError("'%s' must have a single non-integrated dimension in order to be rendered via plotMD" % name)
 
     # check axis index
     for name in workspace_names:
         max_axis = workspace(name).axes()
         # see choice in MantidQwtIMDWorkspaceData::setPlotAxisChoice, -2: auto, -1: distance
         if plot_axis < -2 or plot_axis > max_axis:
-            raise ValueError("Incorrect axis index given for workspace %s: %d, should be < %d" % (name, plot_axis, max_axis))
+            raise ValueError("Incorrect axis index given for workspace '%s': %d, should be < %d" % (name, plot_axis, max_axis))
 
     # Unwrap the window object, if any specified
     if window != None:
@@ -367,7 +367,7 @@ def plotBin(source, indices, error_bars = False, type = -1, window = None, clear
         max_bin = workspace(name).blocksize() - 1
         for idx in index_list:
             if idx > max_bin:
-                raise ValueError("Wrong bin index for workspace %s: %d, which is bigger than the"
+                raise ValueError("Wrong bin index for workspace '%s': %d, which is bigger than the"
                                  " number of bins in this workspace - 1 (%d)" % (name, idx, max_bin))
 
     # Unwrap the window object, if any specified
@@ -599,7 +599,7 @@ def getInstrumentView(name, tab=InstrumentWindow.RENDER):
     """
     ads = _get_analysis_data_service()
     if name not in ads:
-        raise ValueError("Workspace %s does not exist" % name)
+        raise ValueError("Workspace '%s' does not exist" % name)
     return new_proxy(proxies.InstrumentWindow, _qti.app.mantidUI.getInstrumentView, name, tab)
 
 def importMatrixWorkspace(name, firstIndex=None, lastIndex=None, showDialog=False, visible=False):
