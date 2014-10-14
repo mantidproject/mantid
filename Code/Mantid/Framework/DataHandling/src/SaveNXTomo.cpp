@@ -136,7 +136,7 @@ namespace Mantid
 			nxFile.writeData("image_key", imageKeys);
 			// Create link to image_key
 			nxFile.openData("image_key");
-			NXlink imageKeyLink = nxFile.getDataID();      
+			//NXlink imageKeyLink = nxFile.getDataID();      
 			nxFile.closeData();
 			nxFile.closeGroup();
 
@@ -206,7 +206,7 @@ namespace Mantid
 			// define the data and error vectors for masked detectors
 			std::vector<double> masked_data (dims_array[0], MASK_FLAG);
 			if(m_includeError)
-				std::vector<double> masked_error (dims_array[0], MASK_ERROR);	
+        std::vector<double> masked_error (dims_array[0], MASK_ERROR);	
 
 			// Create a progress reporting object
 			Progress progress(this,0,1,100);
@@ -214,7 +214,7 @@ namespace Mantid
 			Geometry::IDetector_const_sptr det;
 			
 			double *dataArr = new double[dims_array[0]*dims_array[2]*m_numberOfRows];
-			double *errorArr;
+			double *errorArr = NULL;
 			if(m_includeError)
 				errorArr = new double[dims_array[0]*dims_array[2]*m_numberOfRows];
 
@@ -256,14 +256,18 @@ namespace Mantid
 						//{
 						//  dataArr[currInd] = masked_data[j];
 						//  if(m_includeError)
-						//    errorArr[currInd] = masked_error[j];
+            //    errorArr[currInd] = masked_error[j];
 						//}
 					}   
 				
-					// If end of the row has been reached, check for end of slab and write data/error
+					// If end of the row has been reached, check for end of slab (or end of row count) and write data/error
 					if(((i+1)%dims_array[2]) == 0)
 					{
 						rowIndForSlab += 1;
+
+            // Check if we have collected all of the rows (prior to completing a slab) - if so, write the final section
+            // TODO::
+            
 
 						// if a slab has been collected. Put it into the file
 						if(rowIndForSlab >= m_numberOfRows)
@@ -322,8 +326,7 @@ namespace Mantid
 
 			// Clean up memory
 			delete [] dataArr;
-			if(m_includeError)
-				delete [] errorArr;
+			delete [] errorArr;
 		}
 
 		/**
@@ -331,12 +334,12 @@ namespace Mantid
 		* @param instrument instrument to search for detectors in
 		* @returns vector of all Rectangular Detectors
 		*/
-		std::vector<RectangularDetector> SaveNXTomo::getRectangularDetectors(const Geometry::Instrument_const_sptr &instrument)
+		std::vector<const RectangularDetector*> SaveNXTomo::getRectangularDetectors(const Geometry::Instrument_const_sptr &instrument)
 		{
 			std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> components;
 			instrument->getChildren(components,true);
 
-			std::vector<RectangularDetector> rectDetectors;
+			std::vector<const RectangularDetector*> rectDetectors;
 		
 			for(auto it = components.begin(); it != components.end(); ++it)
 			{
@@ -345,7 +348,7 @@ namespace Mantid
 					
 				if(dynamic_cast<const RectangularDetector*>(c))
 				{
-					rectDetectors.push_back(*(dynamic_cast<const RectangularDetector *>(&(**it))));       
+					rectDetectors.push_back(dynamic_cast<const RectangularDetector *>(&(**it)));       
 				}     
 			}
 			
@@ -360,7 +363,7 @@ namespace Mantid
 		* 
 		*  @throw runtime_error Thrown if there are no rectangular detectors
 		*/
-		void SaveNXTomo::getDimensionsFromDetector(const std::vector<RectangularDetector> &rectDetectors, std::vector<int64_t> &dims_array, size_t useDetectorIndex) 
+		void SaveNXTomo::getDimensionsFromDetector(std::vector<const RectangularDetector*> &rectDetectors, std::vector<int64_t> &dims_array, size_t useDetectorIndex) 
 		{
 			// Add number of pixels in X and Y from instrument definition
 			// Throws if no rectangular detector is present.
@@ -368,8 +371,8 @@ namespace Mantid
 			if(rectDetectors.size() != 0)
 			{
 				// Assume the first rect detector is the desired one.
-				dims_array.push_back(rectDetectors[useDetectorIndex].xpixels());
-				dims_array.push_back(rectDetectors[useDetectorIndex].ypixels());
+        dims_array.push_back(rectDetectors[useDetectorIndex]->xpixels());
+				dims_array.push_back(rectDetectors[useDetectorIndex]->ypixels());
 			}
 			else
 			{
