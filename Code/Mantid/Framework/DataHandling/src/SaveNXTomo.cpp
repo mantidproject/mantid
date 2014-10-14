@@ -24,7 +24,7 @@ namespace Mantid
 		SaveNXTomo::SaveNXTomo() :  API::Algorithm()
 		{
 			m_filename = "";
-      m_numberOfRows = 32;
+			m_numberOfRows = 32;
 		}
 
 		/**
@@ -38,13 +38,13 @@ namespace Mantid
 			wsValidator->add<API::HistogramValidator>();
 
 			declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InputWorkspace",	"", Direction::Input, wsValidator),
-			  "The name of the workspace to save.");
+				"The name of the workspace to save.");
 
 			declareProperty(new API::FileProperty("Filename", "", FileProperty::Save, std::vector<std::string>(1,".nxs")),
 				"The name of the NXTomo file to write, as a full or relative path");
 
-      declareProperty(new PropertyWithValue<size_t>("Row chunk size", 32, Kernel::Direction::Input), 
-        "Please use an evenly divisible number smaller than the image height");
+			declareProperty(new PropertyWithValue<size_t>("Row chunk size", 32, Kernel::Direction::Input), 
+				"Please use an evenly divisible number smaller than the image height");
 		}
 
 		/**
@@ -55,7 +55,7 @@ namespace Mantid
 			// Retrieve the input workspace
 			const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 			
-      m_numberOfRows = getProperty("Row chunk size");
+			m_numberOfRows = getProperty("Row chunk size");
 
 			const std::string workspaceID = inputWS->id();
 			
@@ -71,7 +71,7 @@ namespace Mantid
 			}
 
 			// Number of spectra
-			const int nHist = static_cast<int>(inputWS->getNumberHistograms());
+			const size_t nHist = inputWS->getNumberHistograms();
 			// Number of energy bins
 			//this->m_nBins = inputWS->blocksize();
 
@@ -84,7 +84,7 @@ namespace Mantid
 				 
 			// Dimensions for axis in nxTomo file.
 			std::vector<int64_t> dims_array;
-      dims_array.push_back(inputWS->blocksize()); // Number of bins
+			dims_array.push_back(inputWS->blocksize()); // Number of bins
 
 			// Populate the array
 			getDimensionsFromDetector(getRectangularDetectors(inputWS->getInstrument()), dims_array);
@@ -188,9 +188,9 @@ namespace Mantid
 			std::vector<int64_t> slabSize;
 
 			// What size slabs are we going to write			
-      slabSize.push_back(dims_array[0]);
-      slabSize.push_back((int64_t)dims_array[1]);
-      slabSize.push_back((int64_t)m_numberOfRows);
+			slabSize.push_back(dims_array[0]);
+			slabSize.push_back((int64_t)dims_array[1]);
+			slabSize.push_back((int64_t)m_numberOfRows);
 				
 			// Init start to first row
 			slabStart.push_back(0);
@@ -203,91 +203,90 @@ namespace Mantid
 
 			// Create a progress reporting object
 			Progress progress(this,0,1,100);
-			const int progStep = (int)(ceil(nHist/100.0));
+			const size_t progStep = static_cast<size_t>(ceil(nHist/100.0));
 			Geometry::IDetector_const_sptr det;
-      
-      double *dataArr = new double[dims_array[0]*dims_array[2]*m_numberOfRows];
-      double *errorArr = new double[dims_array[0]*dims_array[2]*m_numberOfRows];
+			
+			double *dataArr = new double[dims_array[0]*dims_array[2]*m_numberOfRows];
+			double *errorArr = new double[dims_array[0]*dims_array[2]*m_numberOfRows];
 
-      int currY = 0;
-      int rowIndForSlab = 0; // as we're creating slabs of multiple rows, this says which y index we're at in current slab
+			int currY = 0;
+			size_t rowIndForSlab = 0; // as we're creating slabs of multiple rows, this says which y index we're at in current slab
 
 			// Loop over detectors
 			for (size_t i = 0; i < nHist; ++i)
 			{      
-        try
-			  { 
-          // detector exist
-				  //det = inputWS->getDetector(i);
-				  // Check that we aren't writing a monitor
-				  //if (!det->isMonitor())
-				  //{
-					  //Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
-			  
-          // Figure out where this pixel is supposed to be going and set the correct slab start.
-				  const MantidVec *y = &inputWS->readY(i);    
-              
-          if(i!=0 && (i)%dims_array[1] == 0){ // When this iteration matches end of a row
-            currY += 1;
-          }
-          size_t currX = (i) - (currY*dims_array[1]);
-        					
-          const MantidVec & thisY = inputWS->readY(i);
-				  // No masking - Set the data and error as is
-          for(int j=0; j<dims_array[0];++j)
-          {        
-            const size_t currInd = j*dims_array[2]*m_numberOfRows + currX*m_numberOfRows + rowIndForSlab;
-
-           // if(!det->isMasked())
-           // {              
-              dataArr[currInd] = thisY.at(j);
-              errorArr[currInd] = inputWS->readE(i).at(j);
-            //}
-            //else
-            //{
-            //  dataArr[currInd] = masked_data[j];
-            //  errorArr[currInd] = masked_error[j];
-            //}
-          }   
+				try
+				{ 
+					// detector exist
+					//det = inputWS->getDetector(i);
+					// Check that we aren't writing a monitor
+					//if (!det->isMonitor())
+					//{
+						//Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
 				
-          // If end of the row has been reached, check for end of slab and write data/error
-          if(((i+1)%dims_array[2]) == 0)
-          {
-            rowIndForSlab += 1;
+					// Figure out where this pixel is supposed to be going and set the correct slab start.
+							
+					if(i!=0 && (i)%dims_array[1] == 0){ // When this iteration matches end of a row
+						currY += 1;
+					}
+					size_t currX = (i) - (currY*dims_array[1]);
+									
+					const MantidVec & thisY = inputWS->readY(i);
+					// No masking - Set the data and error as is
+					for(int j=0; j<dims_array[0];++j)
+					{        
+						const size_t currInd = j*dims_array[2]*m_numberOfRows + currX*m_numberOfRows + rowIndForSlab;
 
-            // if a slab has been collected. Put it into the file
-            if(rowIndForSlab >= m_numberOfRows)
-            {                       
-              slabStart[2] = currY-(rowIndForSlab-1);    
-            
-              // Write Data
-              nxFile.openData("data");                                  
-                nxFile.putSlab(dataArr, slabStart, slabSize);                
-              nxFile.closeData();
-              // Write Error
-              nxFile.openData("error");                                
-                nxFile.putSlab(errorArr, slabStart, slabSize);                
-              nxFile.closeData();
-            
-              // Reset slab index count
-              rowIndForSlab = 0;
-            }
-          }			
-			  }
-			  catch(Exception::NotFoundError&)
-			  {
-					  /*Catch if no detector. Next line tests whether this happened - test placed
-					  outside here because Mac Intel compiler doesn't like 'continue' in a catch
-					  in an openmp block.*/
-			  }
-			  // If no detector found, skip onto the next spectrum
-			  if ( !det ) continue;
-  
-        // Make regular progress reports and check for canceling the algorithm
-			  if ( i % progStep == 0 )
-			  {
-			  	progress.report();
-			  }        
+					 // if(!det->isMasked())
+					 // {              
+							dataArr[currInd] = thisY.at(j);
+							errorArr[currInd] = inputWS->readE(i).at(j);
+						//}
+						//else
+						//{
+						//  dataArr[currInd] = masked_data[j];
+						//  errorArr[currInd] = masked_error[j];
+						//}
+					}   
+				
+					// If end of the row has been reached, check for end of slab and write data/error
+					if(((i+1)%dims_array[2]) == 0)
+					{
+						rowIndForSlab += 1;
+
+						// if a slab has been collected. Put it into the file
+						if(rowIndForSlab >= m_numberOfRows)
+						{                       
+							slabStart[2] = currY-(rowIndForSlab-1);    
+						
+							// Write Data
+							nxFile.openData("data");                                  
+								nxFile.putSlab(dataArr, slabStart, slabSize);                
+							nxFile.closeData();
+							// Write Error
+							nxFile.openData("error");                                
+								nxFile.putSlab(errorArr, slabStart, slabSize);                
+							nxFile.closeData();
+						
+							// Reset slab index count
+							rowIndForSlab = 0;
+						}
+					}			
+				}
+				catch(Exception::NotFoundError&)
+				{
+						/*Catch if no detector. Next line tests whether this happened - test placed
+						outside here because Mac Intel compiler doesn't like 'continue' in a catch
+						in an openmp block.*/
+				}
+				// If no detector found, skip onto the next spectrum
+				if ( !det ) continue;
+	
+				// Make regular progress reports and check for canceling the algorithm
+				if ( i % progStep == 0 )
+				{
+					progress.report();
+				}        
 			}
 			
 			// Create a link object for the data
@@ -308,9 +307,9 @@ namespace Mantid
 			nxFile.closeGroup(); // tomo_entry sub-group
 			nxFile.closeGroup(); // Top level NXentry          
 
-      // Clean up memory
-      delete [] dataArr;
-      delete [] errorArr;
+			// Clean up memory
+			delete [] dataArr;
+			delete [] errorArr;
 		}
 
 		/**
@@ -318,7 +317,7 @@ namespace Mantid
 		* @param instrument instrument to search for detectors in
 		* @returns vector of all Rectangular Detectors
 		*/
-		std::vector<RectangularDetector> SaveNXTomo::getRectangularDetectors(Geometry::Instrument_const_sptr &instrument)
+		std::vector<RectangularDetector> SaveNXTomo::getRectangularDetectors(const Geometry::Instrument_const_sptr &instrument)
 		{
 			std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> components;
 			instrument->getChildren(components,true);
@@ -329,8 +328,8 @@ namespace Mantid
 			{
 				// for all components, compare to RectangularDetector - if it is one, add it to detectors list. 
 				const Geometry::IComponent* c = dynamic_cast<const Geometry::IComponent*>(&(**it));
-
-				if(const RectangularDetector* r = dynamic_cast<const RectangularDetector*>(c))
+					
+				if(dynamic_cast<const RectangularDetector*>(c))
 				{
 					rectDetectors.push_back(*(dynamic_cast<const RectangularDetector *>(&(**it))));       
 				}     
