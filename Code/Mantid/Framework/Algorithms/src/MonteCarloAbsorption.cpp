@@ -271,7 +271,8 @@ namespace Mantid
      * @param scatterPoint :: The point of scatter
      * @param finalPos :: The end point of the track
      * @param lambda :: The wavelength of the neutron
-     * @returns The attenuation factor for this neutron's track
+     * @param factor :: Output parameter storing the attenuation factor
+     * @returns True if the track was valid, false otherwise
      */
     bool
     MonteCarloAbsorption::attenuationFactor(const V3D & startPos, const V3D & scatterPoint,
