@@ -9,6 +9,9 @@ namespace
   Mantid::Kernel::Logger g_log("IndirectCalibration");
 }
 
+using namespace Mantid::API;
+using MantidQt::API::BatchAlgorithmRunner;
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -160,9 +163,6 @@ namespace CustomInterfaces
   {
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmsComplete(bool)));
 
-    using namespace Mantid::API;
-    using MantidQt::API::BatchAlgorithmRunner;
-
     // Get properties
     QString firstFile = m_uiForm.cal_leRunNo->getFirstFilename();
     QString filenames = m_uiForm.cal_leRunNo->getFilenames().join(",");
@@ -220,7 +220,7 @@ namespace CustomInterfaces
 
     if(m_uiForm.cal_ckRES->isChecked())
     {
-      QString filenames = "['" + m_uiForm.cal_leRunNo->getFilenames().join("','") + "']";
+      QString filenames = m_uiForm.cal_leRunNo->getFilenames().join(",");
       createRESfile(filenames);
     }
 
@@ -359,8 +359,15 @@ namespace CustomInterfaces
     QString detRange = QString::number(m_dblManager->value(m_properties["ResSpecMin"])) + ","
         + QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
 
-    //TODO: Use IndirectInelasticReducer
-    return;
+    IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("InelasticIndirectReduction");
+    reductionAlg->initialize();
+    reductionAlg->setProperty("Instrument", m_uiForm.cbInst->currentText().toStdString());
+    reductionAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
+    reductionAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
+    reductionAlg->setProperty("InputFiles", files.toStdString());
+    reductionAlg->setProperty("DetectorRange", detRange.toStdString());
+    /* reductionAlg->setProperty("", ""); */
+    reductionAlg->execute();
 
     Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(outWS.toStdString()));
@@ -545,7 +552,6 @@ namespace CustomInterfaces
 
     resAlg->setProperty("RebinParam", rebinString.toStdString());
 
-    resAlg->setProperty("Res", true);
     resAlg->setProperty("DetectorRange", detRange.toStdString());
     resAlg->setProperty("BackgroundRange", background.toStdString());
 
