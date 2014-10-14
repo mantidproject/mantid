@@ -12,9 +12,9 @@ set ( SRC_FILES
   src/Crystal/ScalarUtils.cpp
   src/Crystal/SymmetryOperation.cpp
   src/Crystal/SymmetryOperationFactory.cpp
-	src/Crystal/SymmetryOperationSymbolParser.cpp
+  src/Crystal/SymmetryOperationSymbolParser.cpp
   src/Crystal/UnitCell.cpp
-	src/Crystal/V3R.cpp
+  src/Crystal/V3R.cpp
   src/IObjComponent.cpp
   src/Instrument.cpp
   src/Instrument/CompAssembly.cpp
@@ -68,7 +68,6 @@ set ( SRC_FILES
   src/Objects/RuleItems.cpp
   src/Objects/Rules.cpp
   src/Objects/ShapeFactory.cpp
-  src/Objects/SolidShape.cpp
   src/Objects/Track.cpp
   src/Rendering/BitmapGeometryHandler.cpp
   src/Rendering/CacheGeometryGenerator.cpp
@@ -99,10 +98,10 @@ set ( OPENCASCADE_SRC
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
-        src/Instrument/ObjCompAssembly.cpp
-        src/Rendering/OCGeometryHandler.cpp
-        src/Rendering/OCGeometryRenderer.cpp
-        )
+  src/Instrument/ObjCompAssembly.cpp
+  src/Rendering/OCGeometryHandler.cpp
+  src/Rendering/OCGeometryRenderer.cpp
+)
 
 set ( INC_FILES
   inc/MantidGeometry/ComponentParser.h
@@ -118,9 +117,9 @@ set ( INC_FILES
   inc/MantidGeometry/Crystal/ScalarUtils.h
   inc/MantidGeometry/Crystal/SymmetryOperation.h
   inc/MantidGeometry/Crystal/SymmetryOperationFactory.h
-	inc/MantidGeometry/Crystal/SymmetryOperationSymbolParser.h
+  inc/MantidGeometry/Crystal/SymmetryOperationSymbolParser.h
   inc/MantidGeometry/Crystal/UnitCell.h
-	inc/MantidGeometry/Crystal/V3R.h
+  inc/MantidGeometry/Crystal/V3R.h
   inc/MantidGeometry/DllConfig.h
   inc/MantidGeometry/ICompAssembly.h
   inc/MantidGeometry/IComponent.h
@@ -185,7 +184,6 @@ set ( INC_FILES
   inc/MantidGeometry/Objects/Object.h
   inc/MantidGeometry/Objects/Rules.h
   inc/MantidGeometry/Objects/ShapeFactory.h
-  inc/MantidGeometry/Objects/SolidShape.h
   inc/MantidGeometry/Objects/Track.h
   inc/MantidGeometry/Rendering/BitmapGeometryHandler.h
   inc/MantidGeometry/Rendering/CacheGeometryGenerator.h
@@ -278,25 +276,24 @@ set ( TEST_FILES
   RulesUnionTest.h
   ScalarUtilsTest.h
   ShapeFactoryTest.h
-  SolidShapeTest.h
   SphereTest.h
   SurfaceFactoryTest.h
   SurfaceTest.h
   SymmetryOperationFactoryTest.h
-	SymmetryOperationSymbolParserTest.h
+  SymmetryOperationSymbolParserTest.h
   SymmetryOperationTest.h
   TorusTest.h
   TrackTest.h
   TripleTest.h
   UnitCellTest.h
-	V3RTest.h
+  V3RTest.h
   Vertex2DListTest.h
   Vertex2DTest.h
   XMLInstrumentParameterTest.h
 )
 
 set ( GMOCK_TEST_FILES
-    MDGeometryXMLBuilderTest.h
+  MDGeometryXMLBuilderTest.h
 )
 
 
