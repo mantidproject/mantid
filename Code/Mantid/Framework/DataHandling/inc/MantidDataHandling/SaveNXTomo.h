@@ -78,7 +78,7 @@ namespace Mantid
 			std::vector<const Mantid::Geometry::RectangularDetector*> getRectangularDetectors(const Geometry::Instrument_const_sptr &instrument);
 
 			/// Populate dims_array with the dimensions defined in the rectangular detector in the instrument
-			void getDimensionsFromDetector(std::vector<const Mantid::Geometry::RectangularDetector*> &rectDetectors, std::vector<int64_t> &dims_array, size_t useDetectorIndex = 0);
+			std::vector<int64_t> getDimensionsFromDetector(const std::vector<const Mantid::Geometry::RectangularDetector*> &rectDetectors, size_t useDetectorIndex = 0);
 
 			// Number of rows to 
 			size_t m_numberOfRows;
