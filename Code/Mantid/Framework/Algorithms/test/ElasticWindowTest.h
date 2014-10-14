@@ -26,7 +26,7 @@ public:
 
   void setUp()
   {
-    // Cretae a workspace and format it for the ElasticWindow alorithm
+    // Create a workspace and format it for the ElasticWindow algorithm
 
     CreateSampleWorkspace createAlg;
     createAlg.initialize();
@@ -96,7 +96,7 @@ public:
   }
 
   /**
-   * Test running ElasticWindow with both the peak and bakground ranges defined.
+   * Test running ElasticWindow with both the peak and background ranges defined.
    */
   void test_peakAndBackground()
   {
@@ -123,12 +123,22 @@ public:
 
 private:
 
+  /**
+   * Ensures that a workspace is valid output in Q.
+   *
+   * @param ws Workspace to test
+   */
   void verifyQworkspace(MatrixWorkspace_sptr ws)
   {
     std::string unitID = ws->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unitID, "MomentumTransfer");
   }
 
+  /**
+   * Ensures that a workspace is valid output in Q^2.
+   *
+   * @param ws Workspace to test
+   */
   void verifyQ2workspace(MatrixWorkspace_sptr ws)
   {
     std::string unitID = ws->getAxis(0)->unit()->unitID();
