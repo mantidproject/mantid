@@ -4,9 +4,10 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-//#include "MantidNexus/NexusClasses.h"
-//#include <nexus/NeXusFile.hpp>
-//#include <nexus/NeXusException.hpp>
+#include "vector"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+
+using Mantid::Geometry::RectangularDetector;
 
 namespace Mantid
 {
@@ -15,7 +16,7 @@ namespace Mantid
 
 		/**
 		 * Saves a workspace into a NeXus/HDF5 NXTomo file.
-     * File format is defined here: http://download.nexusformat.org/sphinx/classes/applications/NXtomo.html
+		 * File format is defined here: http://download.nexusformat.org/sphinx/classes/applications/NXtomo.html
 		 *
 		 * Required properties:
 		 * <ul>
@@ -53,7 +54,7 @@ namespace Mantid
 			/// Virtual dtor
 			virtual ~SaveNXTomo() {}
 
-      /// Algorithm's name for identification overriding a virtual method
+			/// Algorithm's name for identification overriding a virtual method
 			virtual const std::string name() const {	return "SaveNXTomo"; }
 
 			///Summary of algorithms purpose
@@ -71,22 +72,31 @@ namespace Mantid
 			/// Execution code
 			void exec();
 
-      /// Save all data to file
+			/// Save all data to file
 
-      /// Save batch of images to the file
+			/// Save batch of images to the file
+
+			/// Fetch all rectangular Detector objects defined for an instrument
+			std::vector<RectangularDetector> getRectangularDetectors(Geometry::Instrument_const_sptr &instrument);
+
+			/// Populate dims_array with the dimensions defined in the rectangular detector in the instrument
+			void getDimensionsFromDetector(std::vector<RectangularDetector> &rectDetectors, std::vector<int64_t> &dims_array, size_t useDetectorIndex = 0);
+
+      // Number of rows to 
+			size_t m_numberOfRows;
 
 			///the number of bins in each histogram, as the histogram must have common bins this shouldn't change
-			size_t m_nBins;
+			//size_t m_nBins;
 			/// The filename of the output file
-			std::string m_filename;
+			std::string m_filename;      
 
 			// Some constants to be written for masked values.
 			/// Value for data if pixel is masked
 			static const double MASK_FLAG;
 			/// Value for error if pixel is masked
 			static const double MASK_ERROR;
-		  /// file format version
-		  static const std::string NXTOMO_VER;
+			/// file format version
+			static const std::string NXTOMO_VER;
 		};
 
 	} // namespace DataHandling
