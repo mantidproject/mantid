@@ -19,6 +19,7 @@
 
 #include <istream>
 #include <Poco/Thread.h>
+#include <Poco/Mutex.h>
 
 namespace Mantid 
 {
@@ -73,6 +74,8 @@ private:
 private:
   /// Store a map of thread indices to messages
   std::map<Poco::Thread::TID, std::string> m_messages;
+  /// mutex protecting logstream
+  Poco::Mutex m_mutex;
 };
 
 
