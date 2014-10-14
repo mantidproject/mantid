@@ -11,7 +11,6 @@ namespace Mantid
   namespace API
   {
     using Geometry::BoundingBox;
-    using Geometry::SolidShape;
     using Geometry::Track;
     using Kernel::Material;
     using Kernel::V3D;

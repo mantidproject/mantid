@@ -5,10 +5,15 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidGeometry/Objects/SolidShape.h"
+#include "MantidGeometry/Objects/Object.h"
+#include "MantidKernel/ClassMacros.h"
 
 namespace Mantid
 {
+  namespace Geometry
+  {
+    class Track;
+  }
   namespace API
   {
     /**

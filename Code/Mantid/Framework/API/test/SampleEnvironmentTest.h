@@ -2,7 +2,6 @@
 #define TESTSAMPLEENVIRONMENT_H_
 
 #include "MantidAPI/SampleEnvironment.h"
-#include "MantidGeometry/Objects/SolidShape.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
