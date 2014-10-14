@@ -134,8 +134,6 @@ namespace CustomInterfaces
     connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calPlotRaw()));
     // Toggle RES file options when user toggles Create RES File checkbox
     connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
-    // Toggle RES range selector when user toggles Create RES File checkbox
-    connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), m_uiForm.cal_ckResScale, SLOT(setEnabled(bool)));
     // Enable/disable RES scaling option when user toggles Scale RES checkbox
     connect(m_uiForm.cal_ckResScale, SIGNAL(toggled(bool)), m_uiForm.cal_leResScale, SLOT(setEnabled(bool)));
     // Enable/dosable scale factor option when user toggles Intensity Scale Factor checkbox
@@ -364,7 +362,6 @@ namespace CustomInterfaces
     //TODO: Use IndirectInelasticReducer
     return;
 
-
     Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(outWS.toStdString()));
 
@@ -498,6 +495,11 @@ namespace CustomInterfaces
   {
     m_rangeSelectors["ResPeak"]->setVisible(state);
     m_rangeSelectors["ResBackground"]->setVisible(state);
+
+    // Toggle scale and smooth options
+    m_uiForm.cal_ckResScale->setEnabled(state);
+    m_uiForm.cal_ckResScale->setChecked(false);
+    m_uiForm.cal_ckSmooth->setEnabled(state);
   }
 
   /**
@@ -548,7 +550,7 @@ namespace CustomInterfaces
     resAlg->setProperty("BackgroundRange", background.toStdString());
 
     resAlg->setProperty("ScaleFactor", m_uiForm.cal_leIntensityScaleMultiplier->text().toDouble());
-    resAlg->setProperty("Smooth", m_uiForm.cal_cbSmooth->isChecked());
+    resAlg->setProperty("Smooth", m_uiForm.cal_ckSmooth->isChecked());
 
     resAlg->setProperty("Verbose", m_uiForm.cal_ckVerbose->isChecked());
     resAlg->setProperty("Plot", m_uiForm.cal_ckPlotResult->isChecked());
