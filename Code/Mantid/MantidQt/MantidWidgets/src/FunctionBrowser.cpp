@@ -775,6 +775,23 @@ QStringList FunctionBrowser::getGlobalParameters() const
 }
 
 /**
+ * Get a list of names of local parameters
+ */
+QStringList FunctionBrowser::getLocalParameters() const
+{
+  QStringList out;
+  for(auto propIt = m_properties.begin(); propIt != m_properties.end(); ++propIt)
+  {
+    QtProperty *prop = propIt->prop;
+    if ( prop->hasOption(globalOptionName) && !prop->checkOption(globalOptionName) )
+    {
+      out << getIndex(prop) + prop->propertyName();
+    }
+  }
+  return out;
+}
+
+/**
  * Check if property is a function group
  * @param prop :: Property to check
  */
@@ -1512,6 +1529,63 @@ double FunctionBrowser::getParameter(const QString& funcIndex, const QString& pa
     }
   }
   throw std::runtime_error("Unknown function parameter " + (funcIndex + paramName).toStdString());
+}
+
+/**
+ * Split a qualified parameter name into function index and local parameter name.
+ * @param paramName :: Fully qualified parameter name (includes function index)
+ * @return :: A string list with the first item is the function index and the second
+ *   item is the param local name.
+ */
+QStringList FunctionBrowser::splitParameterName(const QString& paramName) const
+{
+  QString functionIndex;
+  QString parameterName = paramName;
+  int j = paramName.lastIndexOf('.');
+  if ( j > 0 )
+  {
+    ++j;
+    functionIndex = paramName.mid(0,j);
+    parameterName = paramName.mid(j);
+  }
+  QStringList res;
+  res << functionIndex << parameterName;
+  return res;
+}
+
+/**
+ * Updates the function parameter value
+ * @param paramName :: Fully qualified parameter name (includes function index)
+ * @param value :: New value
+ */
+void FunctionBrowser::setParameter(const QString& paramName, double value)
+{
+  QStringList name = splitParameterName(paramName);
+  setParameter(name[0],name[1],value);
+}
+
+/**
+ * Get a value of a parameter
+ * @param paramName :: Fully qualified parameter name (includes function index)
+ */
+double FunctionBrowser::getParameter(const QString& paramName) const
+{
+  QStringList name = splitParameterName(paramName);
+  return getParameter(name[0],name[1]);
+}
+
+/**
+ * Update parameter values in the browser to match those of a function.
+ * @param fun :: A function to copy the values from. It must have the same
+ *   type (composition) as the function in the browser.
+ */
+void FunctionBrowser::updateParameters(const Mantid::API::IFunction& fun)
+{
+  auto paramNames = fun.getParameterNames();
+  for(auto par = paramNames.begin(); par != paramNames.end(); ++par)
+  {
+    setParameter( QString::fromStdString(*par), fun.getParameter(*par) );
+  }
 }
 
 /**

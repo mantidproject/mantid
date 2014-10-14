@@ -142,7 +142,7 @@ void AddWorkspaceDialog::reject()
 /*==========================================================================================*/
 
 /**
- * Contains graphics for a single data set.
+ * Contains graphics for a single data set: fitting data, claculated result, difference.
  */
 class DatasetPlotData
 {
@@ -162,7 +162,7 @@ private:
 };
 
 /**
- * Creator.
+ * Constructor.
  * @param wsName :: Name of a MatrixWorkspace with the data for fitting.
  * @param wsIndex :: Workspace index of a spectrum in wsName to plot.
  * @param outputWSName :: Name of the Fit's output workspace containing at least 3 spectra:
@@ -205,6 +205,9 @@ DatasetPlotData::DatasetPlotData(const QString& wsName, int wsIndex, const QStri
 
 }
 
+/**
+ * Destructor.
+ */
 DatasetPlotData::~DatasetPlotData()
 {
   m_dataCurve->detach();
@@ -221,6 +224,12 @@ DatasetPlotData::~DatasetPlotData()
   }
 }
 
+/**
+ * Set the data to the curves.
+ * @param ws :: A Fit's input workspace.
+ * @param wsIndex :: Workspace index of a spectrum to costruct the plot data for.
+ * @param outputWS :: The output workspace from Fit containing the calculated spectrum.
+ */
 void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws, int wsIndex, const Mantid::API::MatrixWorkspace *outputWS)
 {
   std::vector<double> xValues = ws->readX(wsIndex);
@@ -248,6 +257,9 @@ void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws, int wsInde
   }
 }
 
+/**
+ * Show the curves on a plot.
+ */
 void DatasetPlotData::show(QwtPlot *plot)
 {
   m_dataCurve->attach(plot);
@@ -261,6 +273,9 @@ void DatasetPlotData::show(QwtPlot *plot)
   }
 }
 
+/**
+ * Hide the curves from any plot.
+ */
 void DatasetPlotData::hide()
 {
   m_dataCurve->detach();
@@ -363,6 +378,7 @@ void PlotController::plotDataSet(int index)
   m_plotData[index]->show( m_plot );
   m_plot->replot();
   m_currentIndex = index;
+  emit currentIndexChanged( index );
 }
 
 void PlotController::clear()
@@ -473,6 +489,7 @@ void MultiDatasetFit::initLayout()
                                         m_uiForm.cbPlotSelector,
                                         m_uiForm.btnPrev,
                                         m_uiForm.btnNext);
+  connect(m_plotController,SIGNAL(currentIndexChanged(int)),this,SLOT(updateLocalParameters(int)));
 
   m_functionBrowser = new MantidQt::MantidWidgets::FunctionBrowser(NULL, true);
   m_uiForm.browserLayout->addWidget( m_functionBrowser );
@@ -780,16 +797,7 @@ void MultiDatasetFit::setLocalParameterValue(const QString& parName, int i, doub
  */
 void MultiDatasetFit::initLocalParameter(const QString& parName)const
 {
-  QString functionIndex;
-  QString parameterName = parName;
-  int j = parName.lastIndexOf('.');
-  if ( j > 0 )
-  {
-    ++j;
-    functionIndex = parName.mid(0,j);
-    parameterName = parName.mid(j);
-  }
-  double value = m_functionBrowser->getParameter(functionIndex,parameterName);
+  double value = m_functionBrowser->getParameter(parName);
   QVector<double> values( static_cast<int>(getNumberOfSpectra()), value );
   m_localParameterValues[parName] = values;
 }
@@ -801,17 +809,65 @@ void MultiDatasetFit::reset()
 
 void MultiDatasetFit::finishFit(bool)
 {
-  std::cerr << "Fit finished" << std::endl;
-
   m_plotController->clear();
   m_plotController->update();
   m_uiForm.progressBar->setValue(0);
+  Mantid::API::IFunction_sptr fun = m_fitRunner->getAlgorithm()->getProperty("Function");
+  updateParameters( *fun );
 }
 
 void MultiDatasetFit::progressFit(double p,const std::string& msg)
 {
-  std::cerr << "Fit progress: " << p << " msg: " << msg << std::endl;
   m_uiForm.progressBar->setValue( static_cast<int>(p*100) );
+}
+
+/**
+ * Update the interface to have the sametparameter values as in a function.
+ */
+void MultiDatasetFit::updateParameters(const Mantid::API::IFunction& fun)
+{
+  m_localParameterValues.clear();
+  auto cfun = dynamic_cast<const Mantid::API::CompositeFunction*>( &fun );
+  if ( cfun && cfun->nFunctions() > 0 )
+  {
+    auto qLocalParameters = m_functionBrowser->getLocalParameters();
+    std::vector<std::string> localParameters;
+    foreach(QString par, qLocalParameters)
+    {
+      localParameters.push_back( par.toStdString() );
+    }
+    size_t currentIndex = static_cast<size_t>( m_plotController->getCurrentIndex() );
+    for(size_t i = 0; i < cfun->nFunctions(); ++i)
+    {
+      auto sfun = cfun->getFunction(i);
+      if ( i == currentIndex )
+      {
+        m_functionBrowser->updateParameters( *sfun );
+      }
+      for(int j = 0; j < qLocalParameters.size(); ++j)
+      {
+        setLocalParameterValue( qLocalParameters[j], static_cast<int>(i), sfun->getParameter(localParameters[j]) );
+      }
+    }
+  }
+  else
+  {
+    m_functionBrowser->updateParameters( fun );
+  }
+}
+
+/**
+ * Update the local parameters in the function browser to show values corresponding
+ * to a particular dataset.
+ * @param index :: Index of a dataset.
+ */
+void MultiDatasetFit::updateLocalParameters(int index)
+{
+  auto localParameters = m_functionBrowser->getLocalParameters();
+  foreach(QString par, localParameters)
+  {
+    m_functionBrowser->setParameter( par, getLocalParameterValue( par, index ) );
+  }
 }
 
 /*==========================================================================================*/

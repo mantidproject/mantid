@@ -95,6 +95,8 @@ public:
   Mantid::API::IFunction_sptr getFunction(QtProperty* prop = NULL, bool attributesOnly = false);
   /// Get a list of names of global parameters
   QStringList getGlobalParameters() const;
+  /// Get a list of names of local parameters
+  QStringList getLocalParameters() const;
 
   /// Return a function with specified index
   Mantid::API::IFunction_sptr getFunctionByIndex(const QString& index);
@@ -104,9 +106,14 @@ public:
 
   /// Update the function parameter value
   void setParameter(const QString& funcIndex, const QString& paramName, double value);
-
   /// Get a value of a parameter
   double getParameter(const QString& funcIndex, const QString& paramName) const;
+  /// Update the function parameter value
+  void setParameter(const QString& paramName, double value);
+  /// Get a value of a parameter
+  double getParameter(const QString& paramName) const;
+  /// Update parameter values in the browser to match those of a function.
+  void updateParameters(const Mantid::API::IFunction& fun);
 
 signals:
   /// User selects a different function (or one of it's sub-properties)
@@ -173,6 +180,8 @@ protected:
   QString getIndex(QtProperty* prop) const;
   /// Get function property for the index
   QtProperty* getFunctionProperty(const QString& index)const;
+  /// Split a qualified parameter name into function index and local parameter name.
+  QStringList splitParameterName(const QString& paramName) const;
 
   /// Add a tie property
   AProperty addTieProperty(QtProperty* prop, QString tie);
