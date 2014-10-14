@@ -7,8 +7,8 @@ namespace
 {
   void hasValidModel(ITableWorkspace_sptr model)
   {
-    if(model->columnCount() != 8)
-      throw std::runtime_error("Selected table has the incorrect number of columns (8) to be used as a reflectometry table.");
+    if(model->columnCount() != 9)
+      throw std::runtime_error("Selected table has the incorrect number of columns (9) to be used as a reflectometry table.");
 
     try
     {
@@ -20,6 +20,7 @@ namespace
       model->String(0,5);
       model->String(0,6);
       model->Int(0,7);
+      model->String(0,8);
     }
     catch(const std::runtime_error&)
     {

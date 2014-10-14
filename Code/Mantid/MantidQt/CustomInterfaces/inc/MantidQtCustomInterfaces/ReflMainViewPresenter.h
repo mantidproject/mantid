@@ -53,14 +53,18 @@ namespace MantidQt
       virtual void load();
       //process selected rows
       virtual void process();
-      //fetch a run
-      Mantid::API::Workspace_sptr fetchRun(const std::string& run, const std::string& instrument);
-      //make a transmission workspace name
-      std::string makeTransWSName(const std::string& transString) const;
+      //load a run into the ADS, or re-use one in the ADS if possible
+      Mantid::API::Workspace_sptr loadRun(const std::string& run, const std::string& instrument);
+      //get the run number of a TOF workspace
+      std::string getRunNumber(const Mantid::API::Workspace_sptr& ws);
       //make a transmission workspace
       Mantid::API::MatrixWorkspace_sptr makeTransWS(const std::string& transString);
       //Validate a row
       void validateRow(size_t rowNo) const;
+      //Autofill a row with sensible values
+      void autofillRow(size_t rowNo);
+      //calculates qmin and qmax
+      static std::vector<double> calcQRange(Mantid::API::MatrixWorkspace_sptr ws, double theta);
       //Process a row
       void processRow(size_t rowNo);
       //Stitch some rows
@@ -84,6 +88,7 @@ namespace MantidQt
       static const int COL_DQQ          = 5;
       static const int COL_SCALE        = 6;
       static const int COL_GROUP        = 7;
+      static const int COL_OPTIONS      = 8;
     };
   }
 }

@@ -97,7 +97,7 @@ private:
 	QString parse(const QString& str);
 
 	virtual void paintEvent(QPaintEvent *e);
-    void mousePressEvent(QMouseEvent *);
+    void mousePressEvent(QMouseEvent *e);
 	void contextMenuEvent(QContextMenuEvent * ){emit showMenu();};
 
 	//! Parent plot

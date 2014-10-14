@@ -32,12 +32,12 @@ namespace Mantid
       class ProgressTracker {
       private:
         // fields
-        const std::string _msg;
-        size_t _count;
-        int64_t _step;
-        int64_t _next;
+        const std::string m_msg;
+        size_t  m_count;
+        int64_t m_step;
+        int64_t m_next;
         // matntid
-        API::Progress &_progBar;
+        API::Progress &m_progBar;
 
       public:
         // construction
@@ -52,10 +52,10 @@ namespace Mantid
       class EventCounter {
       private:
         // fields
-        std::vector<size_t> &_eventCounts;
-        const std::vector<bool> &_mask;
-        double _tofMin;
-        double _tofMax;
+        std::vector<size_t> &m_eventCounts;
+        const std::vector<bool> &m_mask;
+        double m_tofMin;
+        double m_tofMax;
 
       public:
         // construction
@@ -72,8 +72,8 @@ namespace Mantid
       class EventAssigner {
       private:
         // fields
-        std::vector<EventVector_pt> &_eventVectors;
-        const std::vector<bool> &_mask;
+        std::vector<EventVector_pt> &m_eventVectors;
+        const std::vector<bool> &m_mask;
 
       public:
         // construction
@@ -86,9 +86,9 @@ namespace Mantid
       class FastReadOnlyFile {
       private:
 #ifdef WIN32
-        HANDLE _handle;
+        HANDLE m_handle;
 #else
-        FILE *_handle;
+        FILE *m_handle;
 #endif
       public:
         // construction
@@ -143,7 +143,7 @@ namespace Mantid
       
         class File {
 
-          static const auto BufferSize = 4096;
+          static const auto BUFFER_SIZE = 4096;
   
           struct FileInfo {
             int64_t Offset;
@@ -152,18 +152,18 @@ namespace Mantid
 
         private:
           // fields
-          bool  _good;
-          FastReadOnlyFile _file;
-          std::vector<std::string> _fileNames;
-          std::vector<FileInfo>    _fileInfos;
+          bool m_good;
+          FastReadOnlyFile m_file;
+          std::vector<std::string> m_fileNames;
+          std::vector<FileInfo>    m_fileInfos;
           // selected file
-          size_t _selected; // index
-          int64_t _position;
-          int64_t _size;
+          size_t  m_selected; // index
+          int64_t m_position;
+          int64_t m_size;
           // buffer
-          uint8_t _buffer[BufferSize];
-          size_t _bufferPosition;
-          size_t _bufferAvailable;
+          uint8_t m_buffer[BUFFER_SIZE];
+          size_t  m_bufferPosition;
+          size_t  m_bufferAvailable;
 
           // not supported
           File(const File&);

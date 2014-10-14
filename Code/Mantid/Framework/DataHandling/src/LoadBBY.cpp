@@ -50,7 +50,7 @@ namespace Mantid
         const Kernel::V3D &center);
       
       // methods
-      void createAndAssign(size_t startIndex, const Kernel::V3D &pos, const Kernel::Quat &rot);
+      void createAndAssign(size_t startIndex, const Kernel::V3D &pos, const Kernel::Quat &rot) const;
     };
     
     /**
@@ -194,7 +194,7 @@ namespace Mantid
       eventWS->setInstrument(instrument);
 
       // load events
-                  
+      
       size_t numberHistograms = eventWS->getNumberHistograms();
 
       std::vector<EventVector_pt> eventVectors(numberHistograms, NULL);
@@ -617,7 +617,7 @@ namespace Mantid
       _pixelHeight(pixelHeight),
       _center(center) {
     }
-    void BbyDetectorBankFactory::createAndAssign(size_t startIndex, const Kernel::V3D &pos, const Kernel::Quat &rot) {
+    void BbyDetectorBankFactory::createAndAssign(size_t startIndex, const Kernel::V3D &pos, const Kernel::Quat &rot) const {
       // create a RectangularDetector which represents a rectangular array of pixels
       Geometry::RectangularDetector* bank = new Geometry::RectangularDetector("bank", _instrument.get()); // ??? possible memory leak!? "new" without "delete"
 

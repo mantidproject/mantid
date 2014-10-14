@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
   ConjoinSpectraTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
+  CreateCalibrationWorkspaceTest.py
   CreateWorkspaceTest.py
   DakotaChiSquaredTest.py
   DensityOfStatesTest.py
@@ -15,6 +16,7 @@ set ( TEST_PY_FILES
   FindReflectometryLinesTest.py
   GetEiT0atSNSTest.py
   IndirectILLReductionTest.py
+  InelasticIndirectReductionTest.py
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
   LoadFullprofFileTest.py
@@ -40,6 +42,7 @@ set ( TEST_PY_FILES
   SuggestTibHYSPECTest.py
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
+  TimeSliceTest.py
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
