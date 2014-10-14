@@ -93,10 +93,10 @@ public:
         if((name.find("i")!=std::string::npos)||(name.find("l")!=std::string::npos)||
             (name.find("x")!=std::string::npos)){
             if(length==4){                
-                this->m_type=="int";
+                this->m_type="int";
             }
             if(length==8){
-                this->m_type=="int64";
+                this->m_type="int64";
             }
         }
         if(name.find("f")!=std::string::npos){
@@ -109,11 +109,11 @@ public:
         {
           if(length == 4)
           {
-              this->m_type=="uint32_t";
+              this->m_type="uint32_t";
           }
           if(length == 8)
           {
-              this->m_type=="uint64_t";
+              this->m_type="uint64_t";
           }
         }
         if(this->m_type.empty()){

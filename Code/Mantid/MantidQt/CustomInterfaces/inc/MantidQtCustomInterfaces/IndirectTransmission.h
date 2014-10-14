@@ -10,7 +10,7 @@ namespace MantidQt
 namespace CustomInterfaces
 {
   /** IndirectTransmission : TODO: DESCRIPTION
-    
+
 
     @author Samuel Jackson
     @date 13/08/2013
@@ -46,6 +46,11 @@ namespace CustomInterfaces
     virtual void setup();
     virtual void run();
     virtual bool validate();
+
+  private slots:
+    void dataLoaded();
+    void previewPlot();
+    void transAlgDone(bool error);
   };
 
 } // namespace CustomInterfaces

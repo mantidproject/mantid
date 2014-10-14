@@ -15,6 +15,7 @@ namespace
     auto colDqq = ws->addColumn("str","dq/q");
     auto colScale = ws->addColumn("str","Scale");
     auto colStitch = ws->addColumn("int","StitchGroup");
+    auto colOptions = ws->addColumn("str","Options");
 
     colRuns->setPlotType(0);
     colTheta->setPlotType(0);
@@ -24,6 +25,7 @@ namespace
     colDqq->setPlotType(0);
     colScale->setPlotType(0);
     colStitch->setPlotType(0);
+    colOptions->setPlotType(0);
 
     TableRow row = ws->appendRow();
     return ws;

@@ -39,6 +39,7 @@ private:
     auto colDqq = ws->addColumn("str","dq/q");
     auto colScale = ws->addColumn("str","Scale");
     auto colStitch = ws->addColumn("int","StitchGroup");
+    auto colOptions = ws->addColumn("str","Options");
 
     colRuns->setPlotType(0);
     colTheta->setPlotType(0);
@@ -48,6 +49,7 @@ private:
     colDqq->setPlotType(0);
     colScale->setPlotType(0);
     colStitch->setPlotType(0);
+    colOptions->setPlotType(0);
 
     if(wsName.length() > 0)
       AnalysisDataService::Instance().addOrReplace(wsName, ws);
@@ -60,13 +62,13 @@ private:
     auto ws = createWorkspace(wsName);
 
     TableRow row = ws->appendRow();
-    row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 3;
+    row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 3 << "";
     row = ws->appendRow();
-    row << "13462" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 3;
+    row << "13462" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 3 << "";
     row = ws->appendRow();
-    row << "13469" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 1;
+    row << "13469" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 1 << "";
     row = ws->appendRow();
-    row << "13470" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 1;
+    row << "13470" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 1 << "";
     return ws;
   }
 
@@ -75,7 +77,7 @@ private:
     ITableWorkspace_sptr ws = createWorkspace();
 
     TableRow row = ws->appendRow();
-    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << "2" << "1";
+    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << "2" << "1" << "";
 
     return ws;
   }
@@ -87,7 +89,7 @@ private:
     if(longer)
       ws->addColumn("str","extracolumn");
     else
-      ws->removeColumn("StitchGroup");
+      ws->removeColumn("Options");
 
     return ws;
   }
@@ -539,6 +541,62 @@ public:
     AnalysisDataService::Instance().remove("IvsLam_13462");
     AnalysisDataService::Instance().remove("IvsQ_dataA_13462");
     AnalysisDataService::Instance().remove("TRANS_13463_13464");
+  }
+
+  /*
+   * Test autofilling workspace values.
+   */
+  void testAutofill()
+  {
+    auto ws = createWorkspace("TestWorkspace");
+    //Autofill everything we can
+    TableRow row = ws->appendRow();
+    row << "13460" << "" << "13463,13464" << "" << "" << "" << "1" << 1;
+    row = ws->appendRow();
+    row << "13462" << "" << "13463,13464" << "" << "" << "" << "1" << 1;
+
+    MockView mockView;
+    ReflLoadedMainViewPresenter presenter(ws,&mockView);
+    std::vector<size_t> rowlist;
+    rowlist.push_back(0);
+    rowlist.push_back(1);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+
+    //The user hits the "process" button with the first two rows selected
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
+    EXPECT_CALL(mockView, getProcessInstrument()).WillRepeatedly(Return("INTER"));
+    EXPECT_CALL(mockView, setProgressRange(_,_));
+    EXPECT_CALL(mockView, setProgress(_)).Times(4);
+    presenter.notify(ProcessFlag);
+
+    //The user hits the "save" button
+    presenter.notify(SaveFlag);
+
+    //Check the calls were made as expected
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Check the table was updated as expected
+    ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->String(0, ThetaCol), "0.7");
+    TS_ASSERT_EQUALS(ws->String(0,   DQQCol), "0.0340301");
+    TS_ASSERT_EQUALS(ws->String(0,  QMinCol), "0.009");
+    TS_ASSERT_EQUALS(ws->String(0,  QMaxCol), "0.154");
+
+    TS_ASSERT_EQUALS(ws->String(1, ThetaCol), "2.3");
+    TS_ASSERT_EQUALS(ws->String(1,   DQQCol), "0.0340505");
+    TS_ASSERT_EQUALS(ws->String(1,  QMinCol), "0.03");
+    TS_ASSERT_EQUALS(ws->String(1,  QMaxCol), "0.504");
+
+    //Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("TRANS_13463_13464");
+    AnalysisDataService::Instance().remove("TOF_13460");
+    AnalysisDataService::Instance().remove("TOF_13463");
+    AnalysisDataService::Instance().remove("TOF_13464");
+    AnalysisDataService::Instance().remove("IvsQ_13460");
+    AnalysisDataService::Instance().remove("IvsLam_13460");
   }
 
   void testBadWorkspaceName()

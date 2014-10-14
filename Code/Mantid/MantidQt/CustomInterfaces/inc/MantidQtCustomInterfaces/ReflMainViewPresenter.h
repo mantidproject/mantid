@@ -61,6 +61,10 @@ namespace MantidQt
       Mantid::API::MatrixWorkspace_sptr makeTransWS(const std::string& transString);
       //Validate a row
       void validateRow(size_t rowNo) const;
+      //Autofill a row with sensible values
+      void autofillRow(size_t rowNo);
+      //calculates qmin and qmax
+      static std::vector<double> calcQRange(Mantid::API::MatrixWorkspace_sptr ws, double theta);
       //Process a row
       void processRow(size_t rowNo);
       //Stitch some rows
@@ -84,6 +88,7 @@ namespace MantidQt
       static const int COL_DQQ          = 5;
       static const int COL_SCALE        = 6;
       static const int COL_GROUP        = 7;
+      static const int COL_OPTIONS      = 8;
     };
   }
 }
