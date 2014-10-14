@@ -2,6 +2,7 @@
 #define MONTECARLOABSORPTIONTEST_H_
 
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -55,7 +56,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setPropertyValue("InputWorkspace", inputName));
     const std::string outputName("mcabsorb-factors");
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setPropertyValue("OutputWorkspace",outputName));
+    const int numOMPThreads = FrameworkManager::Instance().getNumOMPThreads();
+    FrameworkManager::Instance().setNumOMPThreads(2);
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
+    FrameworkManager::Instance().setNumOMPThreads(numOMPThreads);
 
     AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
     MatrixWorkspace_sptr factorWS =
@@ -69,18 +73,18 @@ public:
     // Pick out some random values
     const double delta(1e-08);
     const size_t middle_index = (nbins/2) - 1;
-    TS_ASSERT_DELTA(factorWS->readY(0).front(), 0.005869406, delta);
-    TS_ASSERT_DELTA(factorWS->readY(0)[middle_index], 0.000104369, delta);
-    TS_ASSERT_DELTA(factorWS->readY(0).back(), 0.000004338, delta);
+    TS_ASSERT_DELTA(factorWS->readY(0).front(), 0.005869405757, delta);
+    TS_ASSERT_DELTA(factorWS->readY(0)[middle_index], 0.000104368636, delta);
+    TS_ASSERT_DELTA(factorWS->readY(0).back(), 0.000004337609, delta);
 
     // Different spectra
-    TS_ASSERT_DELTA(factorWS->readY(4).front(), 0.004037809, delta);
-    TS_ASSERT_DELTA(factorWS->readY(4)[middle_index], 0.000190783, delta);
-    TS_ASSERT_DELTA(factorWS->readY(4).back(), 0.000019473, delta);
+    TS_ASSERT_DELTA(factorWS->readY(2).front(), 0.007355971026, delta);
+    TS_ASSERT_DELTA(factorWS->readY(2)[middle_index], 0.000092901957, delta);
+    TS_ASSERT_DELTA(factorWS->readY(2).back(), 0.000003265731, delta);
 
-    TS_ASSERT_DELTA(factorWS->readY(8).front(), 0.004150238, delta);
-    TS_ASSERT_DELTA(factorWS->readY(8)[middle_index], 0.000101628, delta);
-    TS_ASSERT_DELTA(factorWS->readY(8).back(), 0.000064700, delta);
+    TS_ASSERT_DELTA(factorWS->readY(4).front(), 0.007978456911, delta);
+    TS_ASSERT_DELTA(factorWS->readY(4)[middle_index], 0.000136063390, delta);
+    TS_ASSERT_DELTA(factorWS->readY(4).back(), 0.000013351473, delta);
 
     dataStore.remove(inputName);
     dataStore.remove(outputName);
@@ -122,7 +126,7 @@ public:
 
 private:
 
-  void setUpWS(const std::string & name, const int nspectra = 9, const int nbins = 10,
+  void setUpWS(const std::string & name, const int nspectra = 5, const int nbins = 10,
                bool addContainer = false)
   {
     using namespace Mantid::API;

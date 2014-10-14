@@ -79,9 +79,10 @@ namespace Mantid
       /// Select a random location within the sample + container environment
       Kernel::V3D selectScatterPoint() const;
       /// Calculate the attenuation factor for the given single scatter setup
-      double attenuationFactor(const Kernel::V3D & startPos,
-                               const Kernel::V3D & scatterPoint,
-                               const Kernel::V3D & finalPos, const double lambda);
+      bool attenuationFactor(const Kernel::V3D & startPos,
+                             const Kernel::V3D & scatterPoint,
+                             const Kernel::V3D & finalPos,
+                             const double lambda, double &factor);
       /// Calculate the attenuation for a given length, material and wavelength
       double attenuation(const double length, const Kernel::Material& material,
                          const double lambda) const;
@@ -92,6 +93,8 @@ namespace Mantid
       void initCaches();
       /// Setting up the random number generator
       void initRNG();
+      /// Return the random number generator for the current thread
+      boost::mt19937 & rgen() const;
       /// Checks if a given box has any corners inside the sample or container
       bool boxIntersectsSample(const double xmax, const double ymax, const double zmax,
                                const double xmin, const double ymin, const double zmin) const;
@@ -117,7 +120,7 @@ namespace Mantid
       /// Half a single block width in Z
       double m_blkHalfZ;
       /// Random number generator
-      boost::mt19937 *m_rng;
+      std::vector<boost::mt19937> m_rngs;
       //@}
 
       /// The input workspace

@@ -47,7 +47,7 @@ namespace Mantid
     MonteCarloAbsorption::MonteCarloAbsorption() :
       m_samplePos(), m_sourcePos(), m_blocks(),
       m_blkHalfX(0.0), m_blkHalfY(0.0), m_blkHalfZ(0.0),
-      m_rng(NULL), m_inputWS(), m_sampleShape(NULL), m_container(NULL), m_numberOfPoints(0),
+      m_rngs(0), m_inputWS(), m_sampleShape(NULL), m_container(NULL), m_numberOfPoints(0),
       m_xStepSize(0), m_numberOfEvents(300)
     {
     }
@@ -57,7 +57,6 @@ namespace Mantid
      */
     MonteCarloAbsorption::~MonteCarloAbsorption()
     {
-      delete m_rng;
     }
 
     //------------------------------------------------------------------------------
@@ -115,8 +114,11 @@ namespace Mantid
                           << " wavelength points" << std::endl;
 
       Progress prog(this,0.0,1.0, numHists*numBins/m_xStepSize);
+      PARALLEL_FOR1(correctionFactors)
       for( int i = 0; i < numHists; ++i )
       {
+        PARALLEL_START_INTERUPT_REGION
+
         // Copy over the X-values
         const MantidVec & xValues = m_inputWS->readX(i);
         correctionFactors->dataX(i) = xValues;
@@ -154,7 +156,9 @@ namespace Mantid
           Kernel::VectorHelper::linearlyInterpolateY(xValues, yValues, m_xStepSize);
         }
 
+        PARALLEL_END_INTERUPT_REGION
       }
+      PARALLEL_CHECK_INTERUPT_REGION
 
       // Save the results
       setProperty("OutputWorkspace", correctionFactors);
@@ -187,15 +191,21 @@ namespace Mantid
       {
         V3D startPos = sampleBeamProfile();
         V3D scatterPoint = selectScatterPoint();
-        try
+        double eventFactor(0.0);
+        if(attenuationFactor(startPos, scatterPoint, detectorPos, lambda, eventFactor))
         {
-          attenFactor += attenuationFactor(startPos, scatterPoint, detectorPos, lambda);
+          attenFactor += eventFactor;
+          ++numDetected;
         }
-        catch(std::logic_error &)
-        {
-          continue;
-        }
-        ++numDetected;
+//        try
+//        {
+//          attenFactor += attenuationFactor(startPos, scatterPoint, detectorPos, lambda);
+//        }
+//        catch(std::logic_error &)
+//        {
+//          continue;
+//        }
+
       }
 
       // Attenuation factor is simply the average value
@@ -226,9 +236,11 @@ namespace Mantid
       // within that block and test if it inside the sample/container. If yes then accept, else
       // keep trying.
       boost::uniform_int<size_t> uniIntDist(0, m_blocks.size() - 1);
-      boost::variate_generator<boost::mt19937&, boost::uniform_int<size_t>> uniInt(*m_rng, uniIntDist);
+      boost::variate_generator<boost::mt19937&, boost::uniform_int<size_t>>
+          uniInt(rgen(), uniIntDist);
       boost::uniform_real<> uniRealDist(0, 1.0);
-      boost::variate_generator<boost::mt19937&, boost::uniform_real<>> uniReal(*m_rng, uniRealDist);
+      boost::variate_generator<boost::mt19937&, boost::uniform_real<>>
+          uniReal(rgen(), uniRealDist);
 
       V3D scatterPoint;
       int nattempts(0);
@@ -261,12 +273,13 @@ namespace Mantid
      * @param lambda :: The wavelength of the neutron
      * @returns The attenuation factor for this neutron's track
      */
-    double
+    bool
     MonteCarloAbsorption::attenuationFactor(const V3D & startPos, const V3D & scatterPoint,
-                                            const V3D & finalPos, const double lambda)
+                                            const V3D & finalPos, const double lambda,
+                                            double & factor)
     {
-      double factor(1.0);
-
+      // Start at one
+      factor = 1.0;
       // Define two tracks, before and after scatter, and trace check their
       // intersections with the the environment and sample
       Track beforeScatter(scatterPoint, (startPos - scatterPoint));
@@ -277,7 +290,7 @@ namespace Mantid
       if( m_sampleShape->interceptSurface(beforeScatter) == 0 ||
           m_sampleShape->interceptSurface(afterScatter) == 0 )
       {
-        throw std::logic_error("Track has no surfaces intersections.");
+        return false;
       }
 
       double length = beforeScatter.begin()->distInsideObject;
@@ -314,7 +327,7 @@ namespace Mantid
         factor *= attenuation(length, citr->object->material(), lambda);
       }
 
-      return factor;
+      return true;
     }
 
     /**
@@ -474,9 +487,23 @@ namespace Mantid
      */
     void MonteCarloAbsorption::initRNG()
     {
-      if( m_rng ) delete m_rng;
-      const int seedValue = getProperty("SeedValue");
-      m_rng = new boost::mt19937(seedValue);
+      const int baseSeed = getProperty("SeedValue");
+      // For parallel execution use a vector of RNG, each with a seed one higher that the previous
+      m_rngs.resize(PARALLEL_GET_MAX_THREADS);
+      // Set the seeds
+      for(int i = 0; i < static_cast<int>(m_rngs.size()); ++i)
+      {
+        m_rngs[i].seed(baseSeed + i);
+      }
+    }
+
+    /**
+     * @return A reference to a boost::random::mt19937 object
+     */
+    boost::mt19937 &MonteCarloAbsorption::rgen() const
+    {
+      // Const from point of view of caller
+      return const_cast<MonteCarloAbsorption*>(this)->m_rngs[PARALLEL_THREAD_NUMBER];
     }
 
     /**

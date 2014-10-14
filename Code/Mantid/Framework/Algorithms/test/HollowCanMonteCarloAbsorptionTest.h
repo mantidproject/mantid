@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/HollowCanMonteCarloAbsorption.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -30,18 +31,27 @@ public:
 
   void test_Algorithm_Attaches_Sample_To_InputWorkspace_And_Produces_Correct_Result()
   {
-    using Mantid::API::MatrixWorkspace_sptr;
+    using namespace Mantid::API;
 
     auto alg = createAlgorithmForTestCan();
     auto inputWS = createInputWorkspace();
 
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("InputWorkspace", inputWS) );
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace", "UnusedForChild") );
-    TS_ASSERT_THROWS_NOTHING( alg->execute(); );
+    const int numOMPThreads = FrameworkManager::Instance().getNumOMPThreads();
+    FrameworkManager::Instance().setNumOMPThreads(2);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    FrameworkManager::Instance().setNumOMPThreads(numOMPThreads);
     TS_ASSERT( alg->isExecuted() );
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
     TS_ASSERT(outWS);
+
+    const double delta(1e-08);
+    const size_t middle_index = 4;
+    TS_ASSERT_DELTA(outWS->readY(0).front(), 0.984770748517, delta);
+    TS_ASSERT_DELTA(outWS->readY(0)[middle_index], 0.896084505371, delta);
+    TS_ASSERT_DELTA(outWS->readY(0).back(), 0.807794634447, delta);
   }
 
   //-------------------- Failure cases --------------------------------
@@ -101,6 +111,9 @@ private:
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("SampleChemicalFormula", "Li2-Ir-O3") );
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("SampleNumberDensity", 0.004813) );
 
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty<int>("NumberOfWavelengthPoints", 5000) );
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty<int>("EventsPerPoint", 300) );
+
     return alg;
   }
 
@@ -116,7 +129,7 @@ private:
 
   Mantid::API::MatrixWorkspace_sptr createInputWorkspace()
   {
-    const int nspectra(9), nbins(10);
+    const int nspectra(1), nbins(9);
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nspectra, nbins);
     // Needs to have units of wavelength
     inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
