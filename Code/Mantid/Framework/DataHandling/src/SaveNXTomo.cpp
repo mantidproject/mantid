@@ -24,6 +24,7 @@ namespace Mantid
 		SaveNXTomo::SaveNXTomo() :  API::Algorithm()
 		{
 			m_filename = "";
+			m_includeError = false;
 			m_numberOfRows = 32;
 		}
 
@@ -45,6 +46,9 @@ namespace Mantid
 
 			declareProperty(new PropertyWithValue<size_t>("Row chunk size", 32, Kernel::Direction::Input), 
 				"Please use an evenly divisible number smaller than the image height");
+
+			declareProperty(new PropertyWithValue<bool>("Include error", false, Kernel::Direction::Input),
+				"Write the error values to NXTomo file?");
 		}
 
 		/**
@@ -56,6 +60,7 @@ namespace Mantid
 			const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 			
 			m_numberOfRows = getProperty("Row chunk size");
+			m_includeError = getProperty("Include error");
 
 			const std::string workspaceID = inputWS->id();
 			
@@ -182,7 +187,8 @@ namespace Mantid
 			nxFile.makeLink(rotationLink);
 
 			nxFile.makeData("data", ::NeXus::FLOAT64, dims_array, false);
-			nxFile.makeData("error", ::NeXus::FLOAT64, dims_array, false);
+			if(m_includeError) 
+				nxFile.makeData("error", ::NeXus::FLOAT64, dims_array, false);
 
 			std::vector<int64_t> slabStart;
 			std::vector<int64_t> slabSize;
@@ -199,15 +205,18 @@ namespace Mantid
 
 			// define the data and error vectors for masked detectors
 			std::vector<double> masked_data (dims_array[0], MASK_FLAG);
-			std::vector<double> masked_error (dims_array[0], MASK_ERROR);	
+			if(m_includeError)
+				std::vector<double> masked_error (dims_array[0], MASK_ERROR);	
 
 			// Create a progress reporting object
 			Progress progress(this,0,1,100);
-			const size_t progStep = static_cast<size_t>(ceil(nHist/100.0));
+			const size_t progStep = static_cast<size_t>(ceil(static_cast<double>(nHist)/100.0));
 			Geometry::IDetector_const_sptr det;
 			
 			double *dataArr = new double[dims_array[0]*dims_array[2]*m_numberOfRows];
-			double *errorArr = new double[dims_array[0]*dims_array[2]*m_numberOfRows];
+			double *errorArr;
+			if(m_includeError)
+				errorArr = new double[dims_array[0]*dims_array[2]*m_numberOfRows];
 
 			int currY = 0;
 			size_t rowIndForSlab = 0; // as we're creating slabs of multiple rows, this says which y index we're at in current slab
@@ -240,12 +249,14 @@ namespace Mantid
 					 // if(!det->isMasked())
 					 // {              
 							dataArr[currInd] = thisY.at(j);
-							errorArr[currInd] = inputWS->readE(i).at(j);
+							if(m_includeError)
+								errorArr[currInd] = inputWS->readE(i).at(j);
 						//}
 						//else
 						//{
 						//  dataArr[currInd] = masked_data[j];
-						//  errorArr[currInd] = masked_error[j];
+						//  if(m_includeError)
+						//    errorArr[currInd] = masked_error[j];
 						//}
 					}   
 				
@@ -264,10 +275,12 @@ namespace Mantid
 								nxFile.putSlab(dataArr, slabStart, slabSize);                
 							nxFile.closeData();
 							// Write Error
-							nxFile.openData("error");                                
-								nxFile.putSlab(errorArr, slabStart, slabSize);                
-							nxFile.closeData();
-						
+							if(m_includeError)
+							{
+								nxFile.openData("error");                                
+									nxFile.putSlab(errorArr, slabStart, slabSize);                
+								nxFile.closeData();
+							}
 							// Reset slab index count
 							rowIndForSlab = 0;
 						}
@@ -309,7 +322,8 @@ namespace Mantid
 
 			// Clean up memory
 			delete [] dataArr;
-			delete [] errorArr;
+			if(m_includeError)
+				delete [] errorArr;
 		}
 
 		/**
@@ -346,7 +360,7 @@ namespace Mantid
 		* 
 		*  @throw runtime_error Thrown if there are no rectangular detectors
 		*/
-		void SaveNXTomo::getDimensionsFromDetector(std::vector<RectangularDetector> &rectDetectors, std::vector<int64_t> &dims_array, size_t useDetectorIndex) 
+		void SaveNXTomo::getDimensionsFromDetector(const std::vector<RectangularDetector> &rectDetectors, std::vector<int64_t> &dims_array, size_t useDetectorIndex) 
 		{
 			// Add number of pixels in X and Y from instrument definition
 			// Throws if no rectangular detector is present.
