@@ -1715,11 +1715,15 @@ GCC_DIAG_ON(array-bounds)
   {
       throw(Kernel::Exception::NotImplementedError("Recursive file backed is not yet implemented (unclear how to set file location etc)"));
   }
-  /** Make the box file-backed without knowing its position on the HDD. Not implemented for gridboxes*/
+  /** Make the box file-backed without knowing its position on the HDD. Works recursively through all children*/
   TMDE(
   void MDGridBox)::setFileBacked()
   {
-      this->setFileBacked(UNDEF_UINT64,0,false);
+    for(size_t i=0;i<this->numBoxes;i++)
+    {
+      m_Children[i]->setFileBacked();
+    }
+
   }
    /**Recursively clear the file-backed information stored in mdBoxes from the boxes if such information exists 
     *

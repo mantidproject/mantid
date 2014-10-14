@@ -1,12 +1,16 @@
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/PropertyWithValue.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Utils.h"
+#include "MantidQtCustomInterfaces/ReflMainView.h"
 
 #include <boost/regex.hpp>
 
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 namespace MantidQt
@@ -55,6 +59,7 @@ namespace MantidQt
         try
         {
           validateRow(*it);
+          autofillRow(*it);
 
           const int group = m_model->Int(*it, COL_GROUP);
           groups[group].push_back(*it);
@@ -112,29 +117,79 @@ namespace MantidQt
     }
 
     /**
-    Validate a row
+    Validate a row.
+    If a row passes validation, it is ready to be autofilled, but
+    not necessarily ready for processing.
     @param rowNo : The row in the model to validate
     @throws std::invalid_argument if the row fails validation
     */
     void ReflMainViewPresenter::validateRow(size_t rowNo) const
     {
-      const std::string   runStr = m_model->String(rowNo, COL_RUNS);
-      const std::string   dqqStr = m_model->String(rowNo, COL_DQQ);
-      const std::string thetaStr = m_model->String(rowNo, COL_ANGLE);
-      const std::string  qMinStr = m_model->String(rowNo, COL_QMIN);
-      const std::string  qMaxStr = m_model->String(rowNo, COL_QMAX);
+      if(rowNo >= m_model->rowCount())
+        throw std::invalid_argument("Invalid row");
 
-      if(runStr.empty())
+      if(m_model->String(rowNo, COL_RUNS).empty())
         throw std::invalid_argument("Run column may not be empty.");
+    }
 
-      if(dqqStr.empty() && thetaStr.empty())
-        throw std::invalid_argument("Theta and dQ/Q columns may not BOTH be empty.");
+    /**
+    Autofill a row
+    @param rowNo : The row in the model to autofill
+    @throws std::runtime_error if the row could not be auto-filled
+    */
+    void ReflMainViewPresenter::autofillRow(size_t rowNo)
+    {
+      if(rowNo >= m_model->rowCount())
+        throw std::runtime_error("Invalid row");
 
-      if(qMinStr.empty())
-        throw std::invalid_argument("Qmin column may not be empty.");
+      const std::string runStr = m_model->String(rowNo, COL_RUNS);
+      MatrixWorkspace_sptr run = boost::dynamic_pointer_cast<MatrixWorkspace>(loadRun(runStr, m_view->getProcessInstrument()));
 
-      if(qMaxStr.empty())
-        throw std::invalid_argument("Qmax column may not be empty.");
+      //Fetch two theta from the log if needed
+      if(m_model->String(rowNo, COL_ANGLE).empty())
+      {
+        Property* logData = NULL;
+
+        //First try TwoTheta
+        try
+        {
+          logData = run->mutableRun().getLogData("Theta");
+        }
+        catch(std::exception&)
+        {
+          throw std::runtime_error("Value for two theta could not be found in log.");
+        }
+
+        auto logPWV = dynamic_cast<const PropertyWithValue<double>*>(logData);
+        auto logTSP = dynamic_cast<const TimeSeriesProperty<double>*>(logData);
+
+        double thetaVal;
+        if(logPWV)
+          thetaVal = *logPWV;
+        else if(logTSP && logTSP->realSize() > 0)
+          thetaVal = logTSP->lastValue();
+        else
+          throw std::runtime_error("Value for two theta could not be found in log.");
+
+        //Update the model
+        m_model->String(rowNo, COL_ANGLE) = Strings::toString<double>(Utils::roundToDP(thetaVal, 3));
+      }
+
+      //If we need to calculate the resolution, do.
+      if(m_model->String(rowNo, COL_DQQ).empty())
+      {
+        IAlgorithm_sptr calcResAlg = AlgorithmManager::Instance().create("CalculateResolution");
+        calcResAlg->setProperty("Workspace", run);
+        calcResAlg->setProperty("TwoTheta", m_model->String(rowNo, COL_ANGLE));
+        calcResAlg->execute();
+
+        //Update the model
+        double dqqVal = calcResAlg->getProperty("Resolution");
+        m_model->String(rowNo, COL_DQQ) = Strings::toString<double>(dqqVal);
+      }
+
+      //Make sure the view updates
+      m_view->showTable(m_model);
     }
 
     /**
@@ -237,6 +292,7 @@ namespace MantidQt
     {
       const std::string         run = m_model->String(rowNo, COL_RUNS);
       const std::string    transStr = m_model->String(rowNo, COL_TRANSMISSION);
+      const std::string     options = m_model->String(rowNo, COL_OPTIONS);
 
       double theta = 0;
 
@@ -246,20 +302,84 @@ namespace MantidQt
         Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_ANGLE), theta);
 
       Workspace_sptr runWS = loadRun(run, m_view->getProcessInstrument());
-      MatrixWorkspace_sptr transWS = makeTransWS(transStr);
       const std::string runNo = getRunNumber(runWS);
+
+      MatrixWorkspace_sptr transWS;
+      if(!transStr.empty())
+        transWS = makeTransWS(transStr);
 
       IAlgorithm_sptr algReflOne = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
       algReflOne->initialize();
       algReflOne->setProperty("InputWorkspace", runWS);
-      algReflOne->setProperty("FirstTransmissionRun", transWS);
+      if(transWS)
+        algReflOne->setProperty("FirstTransmissionRun", transWS);
       algReflOne->setProperty("OutputWorkspace", "IvsQ_" + runNo);
       algReflOne->setProperty("OutputWorkspaceWaveLength", "IvsLam_" + runNo);
       algReflOne->setProperty("ThetaIn", theta);
+
+      //Parse and set any user-specified options
+      auto optionsMap = Mantid::Kernel::Strings::splitToKeyValues(options);
+      for(auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp)
+      {
+        try
+        {
+          algReflOne->setProperty(kvp->first, kvp->second);
+        }
+        catch(Mantid::Kernel::Exception::NotFoundError&)
+        {
+          throw std::runtime_error("Invalid property in options column: " + kvp->first);
+        }
+      }
+
       algReflOne->execute();
 
       if(!algReflOne->isExecuted())
         throw std::runtime_error("Failed to run ReflectometryReductionOneAuto.");
+
+      //Processing has completed. Put Qmin and Qmax into the table if needed, for stitching.
+      if(m_model->String(rowNo, COL_QMIN).empty() || m_model->String(rowNo, COL_QMAX).empty())
+      {
+        MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IvsQ_" + runNo);
+        std::vector<double> qrange = calcQRange(ws, theta);
+
+        if(m_model->String(rowNo, COL_QMIN).empty())
+          m_model->String(rowNo, COL_QMIN) = Strings::toString<double>(qrange[0]);
+
+        if(m_model->String(rowNo, COL_QMAX).empty())
+          m_model->String(rowNo, COL_QMAX) = Strings::toString<double>(qrange[1]);
+
+        m_view->showTable(m_model);
+      }
+    }
+
+    /**
+    Calculates the minimum and maximum values for Q
+    @param ws : The workspace to fetch the instrument values from
+    @param theta : The value of two theta to use in calculations
+    */
+    std::vector<double> ReflMainViewPresenter::calcQRange(MatrixWorkspace_sptr ws, double theta)
+    {
+      double lmin, lmax;
+      try
+      {
+        const Instrument_const_sptr instrument = ws->getInstrument();
+        lmin = instrument->getNumberParameter("LambdaMin")[0];
+        lmax = instrument->getNumberParameter("LambdaMax")[0];
+      }
+      catch(std::exception&)
+      {
+        throw std::runtime_error("LambdaMin/LambdaMax instrument parameters are required to calculate qmin/qmax");
+      }
+
+      double qmin = 4 * M_PI / lmax * sin(theta * M_PI / 180.0);
+      double qmax = 4 * M_PI / lmin * sin(theta * M_PI / 180.0);
+      qmin = Utils::roundToDP(qmin, 3);
+      qmax = Utils::roundToDP(qmax, 3);
+
+      std::vector<double> ret;
+      ret.push_back(qmin);
+      ret.push_back(qmax);
+      return ret;
     }
 
     /**

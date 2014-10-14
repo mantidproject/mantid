@@ -136,7 +136,19 @@ namespace MDAlgorithms
     Mantid::DataObjects::PeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
     if (peakWS != inPeakWS)
       peakWS = inPeakWS->clone();
+    // This only fails in the unit tests which say that MaskBTP is not registered
+    try
+    {
+		runMaskDetectors(peakWS,"Tube","edges");
+		runMaskDetectors(peakWS,"Pixel","edges");
+    } catch (...)
+    {
+		g_log.error("Can't execute MaskBTP algorithm for this instrument to set edge for IntegrateIfOnEdge option");
+    }
 
+
+    // Get the instrument and its detectors
+    inst = peakWS->getInstrument();
     int CoordinatesToUse =  ws->getSpecialCoordinateSystem();
 
     /// Radius to use around peaks
@@ -242,8 +254,6 @@ namespace MDAlgorithms
       else if (CoordinatesToUse == 3) //"HKL"
         pos = p.getHKL();
 
-      // Get the instrument and its detectors
-      inst = peakWS->getInstrument();
       // Do not integrate if sphere is off edge of detector
       if (BackgroundOuterRadius > PeakRadius)
       {
@@ -585,39 +595,35 @@ namespace MDAlgorithms
    */
   bool IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r)
   {
-    bool in = true;
-    const int nAngles = 8;
-    double dAngles = static_cast<coord_t>(nAngles);
-    // check 64 points in theta and phi at outer radius
-    for (int i = 0; i < nAngles; ++i)
-    {
-      double theta = (2 * M_PI) / dAngles * i;
-      for (int j = 0; j < nAngles; ++j)
-      {
-        double phi = (2 * M_PI) / dAngles * j;
-        // Calculate an edge position at this point on the sphere surface. Spherical coordinates to cartesian.
-        V3D edge = V3D(
-            QLabFrame.X() + r * std::cos(theta) * std::sin(phi),
-            QLabFrame.Y() + r * std::sin(theta) * std::sin(phi),
-            QLabFrame.Z() + r * std::cos(phi));
-        // Create the peak using the Q in the lab frame with all its info:
-        try
-        {
-          Peak p(inst, edge);
-          in = (in && p.findDetector());
-          if (!in)
-          {
-            return in;
-          }
-        }
-        catch (...)
-        {
-          return false;
-        }
-      }
-    }
-    return in;
+		std::vector<detid_t> detectorIDs = inst->getDetectorIDs();
+
+		for (auto detID = detectorIDs.begin(); detID != detectorIDs.end(); ++detID)
+		{
+				Mantid::Geometry::IDetector_const_sptr det = inst->getDetector(*detID);
+				if( det->isMonitor() ) continue; //skip monitor
+				if( !det->isMasked() ) continue;// edge is masked so don't check if not masked
+				double tt1=det->getTwoTheta(V3D(0,0,0),V3D(0,0,1)); //two theta
+				double ph1=det->getPhi(); //phi
+				V3D E1=V3D(-std::sin(tt1)*std::cos(ph1),-std::sin(tt1)*std::sin(ph1),1.-std::cos(tt1)); //end of trajectory
+				E1=E1*(1./E1.norm()); //normalize
+				V3D distv=QLabFrame-E1*(QLabFrame.scalar_prod(E1)); //distance to the trajectory as a vector
+				if(distv.norm()<r)
+				{
+					return false;
+				}
+		}
+
+		return true;
   }
+  void  IntegratePeaksMD2::runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,std::string property, std::string values)
+  {
+    IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
+    alg->setProperty<Workspace_sptr>("Workspace", peakWS);
+    alg->setProperty(property,values);
+    if (!alg->execute())
+      throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
+  }
+
   void IntegratePeaksMD2::checkOverlap(int i,
       Mantid::DataObjects::PeaksWorkspace_sptr peakWS, int CoordinatesToUse, double radius)
   {

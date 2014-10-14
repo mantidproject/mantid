@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "CORELLI" valid-from = "2014-02-25 00:00:00">
+
+  <component-link name = "CORELLI">
+
+    <!-- Specify the gap between the tubes for Peak::findDetector -->
+    <parameter name="tube-gap">
+      <value val="0.00065"/>
+    </parameter>
+
+  </component-link>
+
+</parameter-file>
+

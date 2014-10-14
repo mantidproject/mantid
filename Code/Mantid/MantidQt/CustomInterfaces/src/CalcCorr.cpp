@@ -26,9 +26,9 @@ public:
   }
 
   ~QDoubleMultiRangeValidator() {}
-  
+
   /**
-   * Reimplemented from QValidator::validate(). 
+   * Reimplemented from QValidator::validate().
    *
    * Returns Acceptable if the string input contains a double that is within at least one
    * of the ranges and is in the correct format.
@@ -286,7 +286,7 @@ namespace IDA
       "plotOpt = '" + uiForm().absp_cbPlotOutput->currentText() + "'\n"
       "sampleFormula = " + sampleFormula + "\n"
       "canFormula = " + canFormula + "\n"
-      "IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plotOpt=plotOpt, Save=save, Verbose=verbose)\n";
+      "IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plot_opt=plotOpt, save=save, verbose=verbose)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }

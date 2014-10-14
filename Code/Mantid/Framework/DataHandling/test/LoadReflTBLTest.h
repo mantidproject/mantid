@@ -54,7 +54,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(m_wsName));
     TableWorkspace_sptr outputWS = boost::dynamic_pointer_cast<TableWorkspace>(output);
-    TS_ASSERT_EQUALS(outputWS->columnCount(),8);
+    TS_ASSERT_EQUALS(outputWS->columnCount(),9);
     TS_ASSERT_EQUALS(outputWS->rowCount(),10);
 
     //test the first three rows, equivalent to the first two rows of the file.
@@ -117,7 +117,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(m_wsName));
     TableWorkspace_sptr outputWS = boost::dynamic_pointer_cast<TableWorkspace>(output);
-    TS_ASSERT_EQUALS(outputWS->columnCount(),8);
+    TS_ASSERT_EQUALS(outputWS->columnCount(),9);
     TS_ASSERT_EQUALS(outputWS->rowCount(),10);
 
     //test the first three rows, equivalent to the first two rows of the file.
@@ -244,7 +244,7 @@ public:
     TableWorkspace_sptr outputWS = boost::dynamic_pointer_cast<TableWorkspace>(output);
 
     //the columns should be there, but no rows
-    TS_ASSERT_EQUALS(outputWS->columnCount(),8);
+    TS_ASSERT_EQUALS(outputWS->columnCount(),9);
     TS_ASSERT_EQUALS(outputWS->rowCount(),0);
 
     cleanupafterwards();
@@ -279,7 +279,7 @@ public:
     TableWorkspace_sptr outputWS = boost::dynamic_pointer_cast<TableWorkspace>(output);
 
     //the columns should be there, but no rows
-    TS_ASSERT_EQUALS(outputWS->columnCount(),8);
+    TS_ASSERT_EQUALS(outputWS->columnCount(),9);
     TS_ASSERT_EQUALS(outputWS->rowCount(),0);
 
     cleanupafterwards();

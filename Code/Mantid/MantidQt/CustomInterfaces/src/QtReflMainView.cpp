@@ -64,13 +64,13 @@ namespace MantidQt
       }
 
       connect(ui.workspaceSelector,SIGNAL(activated(QString)),this,SLOT(setModel(QString)));
-      connect(ui.buttonSave, SIGNAL(clicked()),this, SLOT(saveButton()));
-      connect(ui.buttonSaveAs, SIGNAL(clicked()),this, SLOT(saveAsButton()));
-      connect(ui.buttonNew, SIGNAL(clicked()),this, SLOT(setNew()));
-      connect(ui.buttonAddRow, SIGNAL(clicked()),this, SLOT(addRowButton()));
-      connect(ui.buttonDeleteRow, SIGNAL(clicked()),this, SLOT(deleteRowButton()));
-      connect(ui.buttonProcess, SIGNAL(clicked()),this, SLOT(processButton()));
-      connect(ui.buttonGroupRows, SIGNAL(clicked()),this, SLOT(groupRowsButton()));
+      connect(ui.actionSaveTable, SIGNAL(triggered()),this, SLOT(actionSave()));
+      connect(ui.actionSaveTableAs, SIGNAL(triggered()),this, SLOT(actionSaveAs()));
+      connect(ui.actionNewTable, SIGNAL(triggered()),this, SLOT(setNew()));
+      connect(ui.actionAddRow, SIGNAL(triggered()),this, SLOT(actionAddRow()));
+      connect(ui.actionDeleteRow, SIGNAL(triggered()),this, SLOT(actionDeleteRow()));
+      connect(ui.actionProcess, SIGNAL(triggered()),this, SLOT(actionProcess()));
+      connect(ui.actionGroupRows, SIGNAL(triggered()),this, SLOT(actionGroupRows()));
       setNew();
     }
 
@@ -107,7 +107,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "save" button has been pressed
     */
-    void QtReflMainView::saveButton()
+    void QtReflMainView::actionSave()
     {
       m_presenter->notify(SaveFlag);
     }
@@ -115,7 +115,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "save as" button has been pressed
     */
-    void QtReflMainView::saveAsButton()
+    void QtReflMainView::actionSaveAs()
     {
       m_presenter->notify(SaveAsFlag);
     }
@@ -123,7 +123,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "add row" button has been pressed
     */
-    void QtReflMainView::addRowButton()
+    void QtReflMainView::actionAddRow()
     {
       m_presenter->notify(AddRowFlag);
     }
@@ -131,7 +131,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "delete" button has been pressed
     */
-    void QtReflMainView::deleteRowButton()
+    void QtReflMainView::actionDeleteRow()
     {
       m_presenter->notify(DeleteRowFlag);
     }
@@ -139,7 +139,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "process" button has been pressed
     */
-    void QtReflMainView::processButton()
+    void QtReflMainView::actionProcess()
     {
       m_presenter->notify(ProcessFlag);
     }
@@ -147,7 +147,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "group rows" button has been pressed
     */
-    void QtReflMainView::groupRowsButton()
+    void QtReflMainView::actionGroupRows()
     {
       m_presenter->notify(GroupRowsFlag);
     }
