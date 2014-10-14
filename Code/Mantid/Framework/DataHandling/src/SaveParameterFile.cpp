@@ -134,33 +134,14 @@ namespace DataHandling
         const V3D  absPos =     comp->getPos();
         const V3D posDiff = absPos - basePos;
 
-        bool savePos = true;
+        const double threshold = 0.0001;
 
-        const IComponent_const_sptr parent = comp->getParent();
-        if(parent)
-        {
-          const V3D parBasePos = parent->getBaseComponent()->getPos();
-          const V3D  parAbsPos = parent->getPos();
-          const V3D parPosDiff = parAbsPos - parBasePos;
-          const V3D    parDiff = parPosDiff - posDiff;
-
-          //If our parent's position offset is the same as ours (ignoring floating point errors
-          //then we won't bother saving our own position.
-          //if mag(diff) < mag(tolerance):
-          const double tolerance = 0.0001;
-          if(V3D::CompareMagnitude(parDiff, V3D(tolerance, tolerance, tolerance)))
-            savePos = false;
-        }
-
-        if(savePos)
-        {
-          if(posDiff.X() != 0)
-            toSave[cID].push_back(boost::make_tuple("x", "double", Strings::toString<double>(absPos.X())));
-          if(posDiff.Y() != 0)
-            toSave[cID].push_back(boost::make_tuple("y", "double", Strings::toString<double>(absPos.Y())));
-          if(posDiff.Z() != 0)
-            toSave[cID].push_back(boost::make_tuple("z", "double", Strings::toString<double>(absPos.Z())));
-        }
+        if(std::abs(posDiff.X()) > threshold)
+          toSave[cID].push_back(boost::make_tuple("x", "double", Strings::toString<double>(absPos.X())));
+        if(std::abs(posDiff.Y()) > threshold)
+          toSave[cID].push_back(boost::make_tuple("y", "double", Strings::toString<double>(absPos.Y())));
+        if(std::abs(posDiff.Z()) > threshold)
+          toSave[cID].push_back(boost::make_tuple("z", "double", Strings::toString<double>(absPos.Z())));
 
         //Check if the rotation has been changed by a parameter
         //If so, convert to Euler (XYZ order) and output each component that differs
@@ -197,9 +178,11 @@ namespace DataHandling
       const std::string cFullName = cID->getFullName();
       const IDetector* cDet = dynamic_cast<IDetector*>(cID);
       const detid_t cDetID = (cDet) ? cDet->getID() : 0;
-      const std::string cDetIDStr = boost::lexical_cast<std::string>(cDetID);
 
-      file << "	<component-link name=\"" << cFullName << "\">\n";
+      file << "	<component-link";
+      if(cDetID != 0)
+        file << " id=\"" << cDetID << "\"";
+      file << " name=\"" << cFullName << "\">\n";
       for(auto paramIt = compIt->second.begin(); paramIt != compIt->second.end(); ++paramIt)
       {
         const std::string pName = boost::get<0>(*paramIt);
