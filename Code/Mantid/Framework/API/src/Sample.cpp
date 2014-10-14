@@ -131,15 +131,6 @@ namespace Mantid
     }
 
     /**
-     * Set the type of material that this sample is composed from
-     * @param material :: A reference to the material object. It is copied into the sample.
-     */
-    void Sample::setMaterial(const Kernel::Material& material)
-    {
-      m_shape.setMaterial(material);
-    }
-
-    /**
      * Return a reference to the sample environment that this sample is attached to
      * @return A const reference to a SampleEnvironment object
      * @throw std::runtime_error If the environment has not been defined

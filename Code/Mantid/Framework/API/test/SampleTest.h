@@ -212,7 +212,9 @@ public:
   {
     Material vanBlock("vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
     Sample sample;
-    sample.setMaterial(vanBlock);
+    Object shape;
+    shape.setMaterial(vanBlock);
+    sample.setShape(shape);
 
     const Material& mat = sample.getMaterial();
     const double lambda(2.1);

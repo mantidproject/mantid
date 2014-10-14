@@ -81,10 +81,8 @@ namespace Mantid
 
       /** @name Material properties.*/
       //@{
-      /// Return the material
+      /// Return the material (convenience method)
       const Kernel::Material & getMaterial() const;
-      /// Set the type of material that this sample is composed from
-      void setMaterial(const Kernel::Material& material);
       //@}
 
       /** @name Access the environment information */

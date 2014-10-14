@@ -140,10 +140,9 @@ private:
 
     // Define a sample shape
     Object_sptr sampleShape = ComponentCreationHelper::createSphere(0.1, V3D(), "sample-sphere");
-    space->mutableSample().setShape(*sampleShape);
     // And a material
-    Material vanadium("Vanadium", PhysicalConstants::getNeutronAtom(23,0), 0.072);
-    space->mutableSample().setMaterial(vanadium);
+    sampleShape->setMaterial(Material("Vanadium", PhysicalConstants::getNeutronAtom(23,0), 0.072));
+    space->mutableSample().setShape(*sampleShape);
 
     if( addContainer )
     {

@@ -140,11 +140,14 @@ namespace Algorithms
     if (environmentFlag) to.setEnvironment(new SampleEnvironment(from.getEnvironment()));
     if (shapeFlag)
     {
-      to.setShape(from.getShape());
-      // reset to original
-      const auto & lhsMaterial = from.getShape().material();
-      if(!materialFlag) to.setMaterial(lhsMaterial);
-      
+      auto rhsObject = from.getShape(); //copy
+      const auto & lhsMaterial = to.getMaterial();
+      // reset to original lhs material
+      if(!materialFlag)
+      {
+        rhsObject.setMaterial(lhsMaterial);
+      }
+      to.setShape(rhsObject);
       to.setGeometryFlag(from.getGeometryFlag());
       to.setHeight(from.getHeight());
       to.setThickness(from.getThickness());
@@ -152,7 +155,9 @@ namespace Algorithms
     }
     else if(materialFlag)
     {
-      to.setMaterial(from.getMaterial());
+      auto lhsObject = to.getShape(); //copy
+      lhsObject.setMaterial(from.getMaterial());
+      to.setShape(lhsObject);
     }
     
     if ((latticeFlag) && from.hasOrientedLattice())
