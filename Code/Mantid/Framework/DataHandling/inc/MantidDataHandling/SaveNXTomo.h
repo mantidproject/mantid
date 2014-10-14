@@ -78,10 +78,13 @@ namespace Mantid
 			std::vector<Mantid::Geometry::RectangularDetector> getRectangularDetectors(const Geometry::Instrument_const_sptr &instrument);
 
 			/// Populate dims_array with the dimensions defined in the rectangular detector in the instrument
-			void getDimensionsFromDetector(std::vector<Mantid::Geometry::RectangularDetector> &rectDetectors, std::vector<int64_t> &dims_array, size_t useDetectorIndex = 0);
+			void getDimensionsFromDetector(const std::vector<Mantid::Geometry::RectangularDetector> &rectDetectors, std::vector<int64_t> &dims_array, size_t useDetectorIndex = 0);
 
 			// Number of rows to 
 			size_t m_numberOfRows;
+
+      // Include error data in the written file
+      bool m_includeError;
 
 			///the number of bins in each histogram, as the histogram must have common bins this shouldn't change
 			//size_t m_nBins;
