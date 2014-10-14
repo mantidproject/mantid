@@ -916,16 +916,18 @@ endif( WIN32 )
 
 # List of .py files than must be run WITHIN MantidPlot.
 set ( MANTIDPLOT_TEST_PY_FILES
-    MantidPlotAlgorithmDialogTest.py
-    MantidPlotInstrumentViewTest.py
+# Remember to put it at the end!!!
+        MantidPlotAlgorithmDialogTest.py
+        MantidPlotInstrumentViewTest.py
 	MantidPlotSliceViewerTest.py
 	MantidPlot1DPlotTest.py
-  MantidPlot2DPlotTest.py
-  MantidPlotProxiesTest.py
+        MantidPlot2DPlotTest.py
+        MantidPlotProxiesTest.py
 	MantidPlotPythonImportTest.py
 	MantidPlotFoldersTest.py 
 	MantidPlotMdiSubWindowTest.py 
 	MantidPlotTiledWindowTest.py 
+        MantidPlotInputArgsCheck.py
 )
 
 if ( 0 )
