@@ -55,7 +55,7 @@ namespace MDEvents
    }
  /** The optional method to set up the event type and the size of the event coordinate
    *  As save/load operations use void data type, these function allow set up/get  the type name provided for the IO operations
-   *  and the size of the data type in bytes (e.g. the  class dependant physical  meaning of the blockSize and blockPosition used 
+   *  and the size of the data type in bytes (e.g. the  class dependent physical  meaning of the blockSize and blockPosition used 
    *  by save/load operations     
    * @param blockSize -- size (in bytes) of the blockPosition and blockSize used in save/load operations. 4 and 8 are supported only
                          e.g. float and double
@@ -86,7 +86,7 @@ namespace MDEvents
   }
 
   /** As save/load operations use void data type, these function allow set up/get  the type name provided for the IO operations
-   *  and the size of the data type in bytes (e.g. the  class dependant physical  meaning of the blockSize and blockPosition used 
+   *  and the size of the data type in bytes (e.g. the  class dependent physical  meaning of the blockSize and blockPosition used 
    *  by save/load operations     
    *@return CoordSize -- size (in bytes) of the blockPosition and blockSize used in save/load operations
    *@return typeName  -- the name of the event used in the operations. The name itself defines the size and the format of the event
@@ -100,7 +100,7 @@ namespace MDEvents
 
   /**Open the file to use in IO operations with events 
    *
-   *@param fileName -- the name of the file to open. Search for file perfomed within the Mantid search path. 
+   *@param fileName -- the name of the file to open. Search for file performed within the Mantid search path. 
    *@param mode  -- opening mode (read or read/write)
    *
    *
@@ -133,7 +133,10 @@ namespace MDEvents
               throw Kernel::Exception::FileError("Can not open file to read ",m_fileName);
       }
       int nDims = static_cast<int>(this->m_bc->getNDims());
-      m_File = MDBoxFlatTree::createOrOpenMDWSgroup(m_fileName,nDims, m_EventsTypesSupported[m_EventType],m_ReadOnly);
+
+      bool group_exists;
+      m_File = MDBoxFlatTree::createOrOpenMDWSgroup(m_fileName,nDims, m_EventsTypesSupported[m_EventType],m_ReadOnly,group_exists);
+
       // we are in MD workspace Class  group now
       std::map<std::string, std::string> groupEntries;
       m_File->getEntries(groupEntries);
@@ -144,7 +147,7 @@ namespace MDEvents
       // we are in MDEvent group now (either created or opened)
 
 
-      // read if exist and create if not the group, which is responsible for saving DiskBuffer infornation;
+      // read if exist and create if not the group, which is responsible for saving DiskBuffer information;
       getDiskBufferFileData();
 
       if(m_ReadOnly)
