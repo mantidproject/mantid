@@ -179,21 +179,20 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
             raise ValueError('Detector ' + str(n) + ' at angle : ' + str(det[n]) + ' *** failed : Error code ' + str(kill))
 
     dataX = waves * ndet
-    qAxis = createQaxis(inputWS)
 
     if diffraction_run:
         v_axis_unit = 'dSpacing'
         v_axis_values = [1.0]
     else:
         v_axis_unit = 'MomentumTransfer'
-        v_axis_values = createQAxis(inputWS)
+        v_axis_values = createQaxis(inputWS)
 
     # Create the output workspaces
     assWS = name + '_ass'
     asscWS = name + '_assc'
     acscWS = name + '_acsc'
     accWS = name + '_acc'
-    fname = name +'_abs'
+    fname = name + '_abs'
 
     CreateWorkspace(OutputWorkspace=assWS, DataX=dataX, DataY=dataA1,
                     NSpec=ndet, UnitX='Wavelength',
