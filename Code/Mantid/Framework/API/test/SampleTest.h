@@ -39,12 +39,12 @@ public:
     TS_ASSERT_EQUALS(shape_sptr->getName(), sampleShape.getName());
   }
 
-  void test_That_An_Setting_An_Invalid_Shape_Throws_An_Invalid_Argument()
+  void test_Setting_Default_Shape_Is_Accepted()
   {
     Sample sample;
     Object object;
     TS_ASSERT_EQUALS(object.hasValidShape(), false);
-    TS_ASSERT_THROWS(sample.setShape(object), std::invalid_argument);
+    TS_ASSERT_THROWS_NOTHING(sample.setShape(object));
   }
 
   void test_That_Requests_For_An_Undefined_Environment_Throw()

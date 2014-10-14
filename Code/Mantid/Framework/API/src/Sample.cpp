@@ -104,22 +104,13 @@ namespace Mantid
       return m_shape;
     }
 
-    /** Set the object that describes the sample shape. It is assumed that this is defined such
-     * that its centre is at [0,0,0]
+    /** Set the object that describes the sample shape. The object is defined within
+     * its own coordinate system
      * @param shape :: The object describing the shape
-     * @throw An std::invalid_argument error if the object does
-     * not have a valid shape
      */
     void Sample::setShape(const Object & shape)
     {
-      if( shape.hasValidShape() )
-      {
-        m_shape = shape;
-      }
-      else
-      {
-        throw std::invalid_argument("Sample::setShape - Object has an invalid shape.");
-      }
+      m_shape = shape;
     }
 
     /** Return the material.
