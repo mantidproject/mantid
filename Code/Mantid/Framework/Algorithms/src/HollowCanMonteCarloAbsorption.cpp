@@ -68,7 +68,7 @@ namespace Mantid
      /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
      const std::string HollowCanMonteCarloAbsorption::summary() const
      {
-       return "Calculates bin-by-bin correction factors for attenuation due to absorption"
+       return "Calculates bin-by-bin correction factors for attenuation due to absorption "
               "in a cylindrical sample in the wall of a hollow can";
      }
 

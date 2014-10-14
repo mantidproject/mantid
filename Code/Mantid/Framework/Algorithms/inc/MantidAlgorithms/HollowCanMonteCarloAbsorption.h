@@ -22,7 +22,9 @@ namespace Mantid
   {
 
     /**
-
+      Constructs a hollow sample shape, defines material for the sample and runs the
+      MonteCarloAbsorption algorithm.
+      
       Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
       This file is part of Mantid.

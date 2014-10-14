@@ -10,35 +10,42 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here. 
+Sets up a hollow sample shape, along with the required material properties, and runs
+the :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption-v1>` algorithm. This algorithm merely
+serves as a simpler interface to define the shape & material of the sample without having
+to resort to the more complex :ref:`CreateSampleShape <algm-CreateSampleShape-v1>` & :ref:`SetSampleMaterial <algm-SetSampleMaterial-v1>`
+algorithms. The computational part is all taken care of by :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption-v1>`. Please see that
+documentation for more details.
+
+Assumptions
+###########
+
+The algorithm currently assumes that the can wall is sufficiently thin & a weak absorber so that it can be ignored.
 
 
 Usage
 -----
-..  Try not to use files in your examples, 
-    but if you cannot avoid it then the (small) files must be added to 
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
-**Example - HollowCanMonteCarloAbsorption**
+**Example**
 
 .. testcode:: HollowCanMonteCarloAbsorptionExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
+   sample_ws = CreateSampleWorkspace("Histogram",NumBanks=1) # fake some data in TOF
+   sample_ws = ConvertUnits(sample_ws, Target="Wavelength")
+   factors = \
+     HollowCanMonteCarloAbsorption(sample_ws,
+       SampleHeight=3.8, SampleThickness=0.05, CanOuterRadius=1.1,CanInnerRadius=0.92,
+       SampleChemicalFormula="Li2-Ir-O3",SampleNumberDensity=0.004813,
+       EventsPerPoint=300)
 
-   wsOut = HollowCanMonteCarloAbsorption()
-
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+   print "The created workspace has one entry for each spectra: %i" % factors.getNumberHistograms()
+   print "Just divide your data by the correction to correct for absorption."
 
 Output:
 
-.. testoutput:: HollowCanMonteCarloAbsorptionExample 
+.. testoutput:: HollowCanMonteCarloAbsorptionExample
 
-  The output workspace has ?? spectra
+   The created workspace has one entry for each spectra: 100
+   Just divide your data by the correction to correct for absorption.
 
 .. categories::
-
