@@ -81,6 +81,13 @@ endif ()
 ###########################################################################
 set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64" )
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -std=c++0x" )
+set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x" )
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-register" )
+  set ( CMAKE_XCODE_ATTRIBUTE_OTHER_CPLUSPLUSFLAGS "-Wno-deprecated-register")
+  set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
+endif()
 
 if( ${CMAKE_C_COMPILER} MATCHES "icc.*$" )
   set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -no-intel-extensions" )

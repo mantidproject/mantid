@@ -292,6 +292,7 @@ namespace MantidQt
     {
       const std::string         run = m_model->String(rowNo, COL_RUNS);
       const std::string    transStr = m_model->String(rowNo, COL_TRANSMISSION);
+      const std::string     options = m_model->String(rowNo, COL_OPTIONS);
 
       double theta = 0;
 
@@ -315,6 +316,21 @@ namespace MantidQt
       algReflOne->setProperty("OutputWorkspace", "IvsQ_" + runNo);
       algReflOne->setProperty("OutputWorkspaceWaveLength", "IvsLam_" + runNo);
       algReflOne->setProperty("ThetaIn", theta);
+
+      //Parse and set any user-specified options
+      auto optionsMap = Mantid::Kernel::Strings::splitToKeyValues(options);
+      for(auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp)
+      {
+        try
+        {
+          algReflOne->setProperty(kvp->first, kvp->second);
+        }
+        catch(Mantid::Kernel::Exception::NotFoundError&)
+        {
+          throw std::runtime_error("Invalid property in options column: " + kvp->first);
+        }
+      }
+
       algReflOne->execute();
 
       if(!algReflOne->isExecuted())

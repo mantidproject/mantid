@@ -158,6 +158,10 @@ namespace Mantid
       virtual bool operator==( const TimeSeriesProperty<TYPE> & right ) const;
       ///Deep comparison (not equal).
       virtual bool operator!=(const TimeSeriesProperty<TYPE> & right ) const;
+      /// Deep comparison
+      virtual bool operator==( const Property & right ) const;
+      ///Deep comparison (not equal).
+      virtual bool operator!=(const Property & right ) const;
 
       /// Set name of property
       void setName(const std::string name);

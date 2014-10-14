@@ -217,8 +217,13 @@ private:
   bool m_remember;
 };
 
-  /// Return the name corresponding to the mangled string given by typeid
-  MANTID_KERNEL_DLL std::string getUnmangledTypeName(const std::type_info& type);
+/// Compares this to another property for equality
+MANTID_KERNEL_DLL bool operator==( const Mantid::Kernel::Property & lhs, const Mantid::Kernel::Property & rhs );
+/// Compares this to another property for inequality
+MANTID_KERNEL_DLL bool operator!=( const Mantid::Kernel::Property & lhs, const Mantid::Kernel::Property & rhs );
+
+/// Return the name corresponding to the mangled string given by typeid
+MANTID_KERNEL_DLL std::string getUnmangledTypeName(const std::type_info& type);
 
 } // namespace Kernel
 } // namespace Mantid

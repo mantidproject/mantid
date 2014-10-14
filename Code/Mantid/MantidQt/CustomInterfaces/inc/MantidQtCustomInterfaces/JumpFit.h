@@ -40,8 +40,9 @@ namespace MantidQt
 		private:
 			// The UI form
 			Ui::JumpFit m_uiForm;
-			// map of axis labels to spectrum number
-			std::map<std::string, int> spectraList;
+
+			// Map of axis labels to spectrum number
+			std::map<std::string, int> m_spectraList;
 
 		};
 	} // namespace CustomInterfaces
