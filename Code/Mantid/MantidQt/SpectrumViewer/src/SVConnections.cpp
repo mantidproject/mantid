@@ -308,30 +308,34 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
     if (m_picker_x < 0) return false;
     if (m_picker_y < 0) return false;
 
-    // temporary variables so we can step back to previous state
+    // Convert Y position to values so that a change of 1 corresponds to a change in spec. no by 1
+    QPair<double, double> newPositionData = spectrum_display->GetPlotInvTransform(QPoint(m_picker_x, m_picker_y));
     int newX = m_picker_x;
-    int newY = m_picker_y;
 
     QKeyEvent *keyEvent = dynamic_cast<QKeyEvent *>(event);
     int key = keyEvent->key();
     switch (key)
     {
     case Qt::Key_Up:
-      newY += -1;
+      newPositionData.second++;
       break;
     case Qt::Key_Down:
-      newY += 1;
+      newPositionData.second--;
       break;
     case Qt::Key_Left:
-      newX += -1;
+      newX--;
       break;
     case Qt::Key_Right:
-      newX += 1;
+      newX++;
       break;
     default:
       // this is not the event we were looking for
       return false;
     }
+
+    // Convert Y position back to pixel position
+    QPoint newPoint = spectrum_display->GetPlotTransform(newPositionData);
+    int newY = newPoint.y();
 
     // see if we should react
     if (newX < 0) return false;

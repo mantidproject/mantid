@@ -95,8 +95,11 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      /// Set vertical graph with data from the array at the specified x value
      void SetVGraph( double x );
 
+     QPoint GetPlotTransform( QPair<double, double> values );
+     QPair<double, double> GetPlotInvTransform( QPoint point );
+
   protected:
-     SpectrumPlotItem*       spectrum_plot_item;
+     SpectrumPlotItem*    spectrum_plot_item;
 
   private:
      /// Check if the DataSource has been changed under us
@@ -112,13 +115,13 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      std::vector<QRgb>    negative_color_table;
      std::vector<double>  intensity_table;
 
-     SpectrumDataSource*     data_source;
+     SpectrumDataSource*  data_source;
      DataArray*           data_array;
 
      QwtPlot*             spectrum_plot;
 
-     ISliderHandler*       slider_handler;
-     IRangeHandler*        range_handler;
+     ISliderHandler*      slider_handler;
+     IRangeHandler*       range_handler;
 
      GraphDisplay*        h_graph_display;
      GraphDisplay*        v_graph_display;

@@ -352,6 +352,24 @@ void SpectrumDisplay::SetIntensity( double control_parameter )
 }
 
 
+QPoint SpectrumDisplay::GetPlotTransform( QPair<double, double> values )
+{
+  double x = spectrum_plot->transform( QwtPlot::xBottom, values.first );
+  double y = spectrum_plot->transform( QwtPlot::yLeft, values.second );
+
+  return QPoint(x, y);
+}
+
+
+QPair<double, double> SpectrumDisplay::GetPlotInvTransform( QPoint point )
+{
+  double x = spectrum_plot->invTransform( QwtPlot::xBottom, point.x() );
+  double y = spectrum_plot->invTransform( QwtPlot::yLeft, point.y() );
+
+  return qMakePair(x,y);
+}
+
+
 /**
  * Extract data from horizontal and vertical cuts across the image and
  * show those as graphs in the horizontal and vertical graphs and show
@@ -369,15 +387,14 @@ QPair<double,double> SpectrumDisplay::SetPointedAtPoint( QPoint point, int /*mou
     return qMakePair(0.0,0.0);
   }
 
-  double x = spectrum_plot->invTransform( QwtPlot::xBottom, point.x() );
-  double y = spectrum_plot->invTransform( QwtPlot::yLeft, point.y() );
+  QPair<double, double> transPoints = GetPlotInvTransform(point);
 
-  SetHGraph( y );
-  SetVGraph( x );
+  SetHGraph( transPoints.second );
+  SetVGraph( transPoints.first );
 
-  ShowInfoList( x, y );
+  ShowInfoList( transPoints.first, transPoints.second );
 
-  return qMakePair(x,y);
+  return transPoints;
 }
 
 /*
