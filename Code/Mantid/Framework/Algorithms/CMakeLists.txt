@@ -588,6 +588,7 @@ set ( TEST_FILES
 	DiffractionFocussingTest.h
 	DivideTest.h
 	EditInstrumentGeometryTest.h
+  ElasticWindowTest.h
 	EstimatePDDetectorResolutionTest.h
 	ExponentialCorrectionTest.h
 	ExponentialTest.h
