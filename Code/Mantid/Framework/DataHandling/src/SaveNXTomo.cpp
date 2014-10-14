@@ -89,10 +89,12 @@ namespace Mantid
 				 
 			// Dimensions for axis in nxTomo file.
 			std::vector<int64_t> dims_array;
-			dims_array.push_back(inputWS->blocksize()); // Number of bins
+      
+      // Populate the array
+      dims_array = getDimensionsFromDetector(getRectangularDetectors(inputWS->getInstrument()));
 
-			// Populate the array
-			getDimensionsFromDetector(getRectangularDetectors(inputWS->getInstrument()), dims_array);
+      // Insert number of bins at front
+			dims_array.insert(dims_array.begin(), inputWS->blocksize()); // Number of bins			
 			 
 			// Create the file.
 			::NeXus::File nxFile(this->m_filename, NXACC_CREATE5);
@@ -358,21 +360,23 @@ namespace Mantid
 		/**
 		* Populates the dimensions vector with number of files, x and y sizes from a specified rectangular detector
 		* @param rectDetectors List of rectangular detectors to get axis sizes from
-		* @param dims_array vector which is populated with the different dimension values for the nxTomo file
 		* @param useDetectorIndex index of the detector to select from the list, default = 0
-		* 
+		* @returns vector of both axis dimensions for specified detector
+    *
 		*  @throw runtime_error Thrown if there are no rectangular detectors
 		*/
-		void SaveNXTomo::getDimensionsFromDetector(std::vector<const RectangularDetector*> &rectDetectors, std::vector<int64_t> &dims_array, size_t useDetectorIndex) 
+		std::vector<int64_t> SaveNXTomo::getDimensionsFromDetector(const std::vector<const RectangularDetector*> &rectDetectors, size_t useDetectorIndex) 
 		{
 			// Add number of pixels in X and Y from instrument definition
 			// Throws if no rectangular detector is present.
 
+      std::vector<int64_t> dims;
+
 			if(rectDetectors.size() != 0)
 			{
 				// Assume the first rect detector is the desired one.
-        dims_array.push_back(rectDetectors[useDetectorIndex]->xpixels());
-				dims_array.push_back(rectDetectors[useDetectorIndex]->ypixels());
+        dims.push_back(rectDetectors[useDetectorIndex]->xpixels());
+				dims.push_back(rectDetectors[useDetectorIndex]->ypixels());
 			}
 			else
 			{
@@ -380,6 +384,8 @@ namespace Mantid
 				g_log.error("Unable to retrieve x and y pixel count from an instrument definition associated with this workspace.");
 				throw std::runtime_error("Unable to retrieve x and y pixel count from an instrument definition associated with this workspace.");			
 			}
+
+      return dims;
 		}
 
 		//void someRoutineToAddDataToExisting()
