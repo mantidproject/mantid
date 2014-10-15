@@ -53,7 +53,7 @@ namespace Mantid
     {
       if (m_isEmptyProxy)
       {
-        throw std::logic_error("Calling host on an undefined proxy");
+        throw std::logic_error("Calling port on an undefined proxy");
       }
       return m_port;
     }
@@ -64,10 +64,6 @@ namespace Mantid
      */
     bool ProxyInfo::isHttpProxy() const
     {
-      if (m_isEmptyProxy)
-      {
-        throw std::logic_error("Calling host on an undefined proxy");
-      }
       return m_isHttpProxy;
     }
 

@@ -1277,7 +1277,7 @@ namespace API
     //Configure Poco HTTP Client Session
     try{
       Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
-      session.setTimeout(Poco::Timespan(10,0));// 5 secconds
+      session.setTimeout(Poco::Timespan(3,0));// 3 secconds
 
       // configure proxy
       std::string proxy_config; 
@@ -1822,7 +1822,18 @@ bool ScriptRepositoryImpl::getProxyConfig(std::string& proxy_server, unsigned sh
               << errmsg << std::endl; 
     }
 #elif defined(__APPLE__)
-
+    Mantid::ScriptRepository::ProxyOSX proxyHelper;
+    Mantid::ScriptRepository::ProxyInfo proxyInfo = proxyHelper.getHttpProxy(remote_url);
+    if(proxyInfo.emptyProxy())
+    {
+      g_log.information("ScriptRepository: No HTTP network proxy settings found for OSX. None used.");
+    }
+    else
+    {
+      g_log.information("ScriptRepository: HTTP System network proxy settings found.");
+      PROXYSERVER = proxyInfo.host();
+      PROXYPORT = proxyInfo.port();
+    }
     //TODO
 
 #else  // linux and mac

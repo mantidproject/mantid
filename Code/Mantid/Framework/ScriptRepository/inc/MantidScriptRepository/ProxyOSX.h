@@ -10,6 +10,7 @@
 
 #include <boost/tuple/tuple.hpp>
 #include "MantidKernel/System.h"
+#include "MantidKernel/Logger.h"
 #include "MantidScriptRepository/ProxyInfo.h"
 
 namespace Mantid
@@ -42,7 +43,13 @@ namespace Mantid
 
     DLLExport class ProxyOSX
     {
+    private:
+      /// Logger object
+      Mantid::Kernel::Logger m_logger;
     public:
+      /// Constructor
+      ProxyOSX();
+      /// Look for http network proxy settings
       ProxyInfo getHttpProxy(const std::string& targetURLString);
     };
 

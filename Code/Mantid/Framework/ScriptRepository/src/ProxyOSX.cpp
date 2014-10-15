@@ -12,6 +12,13 @@ namespace Mantid
   namespace ScriptRepository
   {
 
+    using Mantid::Kernel::Logger;
+
+    /**
+     * Helper function to convert CFStringRefs to std::string
+     * @param stringRef : CRFStringRef variable
+     * @return std::string
+     */
     std::string toString(CFStringRef stringRef)
     {
       std::string buffer;
@@ -26,13 +33,22 @@ namespace Mantid
       return buffer;
     }
 
+    /**
+     * Helper enums.
+     */
     enum ProxyType
     {
       DefaultProxy, Socks5Proxy, NoProxy, HttpProxy, HttpCachingProxy, FtpCachingProxy
     };
 
+    /// Typedef Collection of proxy information.
     typedef std::vector<ProxyInfo> ProxyInfoVec;
 
+    /**
+     * Extract proxy information from a CFDistionaryRef
+     * @param dict : CFDictionary item
+     * @return ProxyInfo object.
+     */
     ProxyInfo proxyFromDictionary(CFDictionaryRef dict)
     {
       ProxyInfo proxyInfo;
@@ -72,7 +88,14 @@ namespace Mantid
       return proxyInfo;
     }
 
-    ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict, const std::string& targetURLString)
+    /**
+     * Get proxy information from a proxy script.
+     * @param dict : Dictionary to search through.
+     * @param targetURLString : Target remote URL
+     * @param logger : Log object
+     * @return Collection of proxy information.
+     */
+    ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict, const std::string& targetURLString, Logger& logger )
     {
       ProxyInfoVec proxyInfoVec;
 
@@ -92,13 +115,8 @@ namespace Mantid
           if (!CFURLCreateDataAndPropertiesFromResource(kCFAllocatorDefault, pacURL, &pacData, NULL,
               NULL, &errorCode))
           {
-            std::cout << "Unable to get the PAC script at " << toString(cfPacLocation) << "Error code: "
-                << errorCode << std::endl;
-            // TODO throw instead
-          }
-          else
-          {
-            std::cout << toString(cfPacLocation) << std::endl; // TODO. Not required
+            logger.debug()  << "Unable to get the PAC script at " << toString(cfPacLocation) << "Error code: " << errorCode << std::endl;
+            return proxyInfoVec;
           }
 
           CFStringRef pacScript = CFStringCreateFromExternalRepresentation(kCFAllocatorDefault, pacData,
@@ -108,7 +126,8 @@ namespace Mantid
               (UInt8*) targetURLString.c_str(), targetURLString.size(), kCFStringEncodingUTF8, NULL);
           if (!targetURL)
           {
-            //TODO Throw
+            logger.debug("Problem with Target URI for proxy script");
+            return proxyInfoVec;
           }
 
           CFErrorRef pacError;
@@ -119,8 +138,7 @@ namespace Mantid
           {
             std::string pacLocation = toString(cfPacLocation);
             CFStringRef pacErrorDescription = CFErrorCopyDescription(pacError);
-            std::cout << "Execution of PAC script at \"%s\" failed: %s" << pacLocation
-                << toString(pacErrorDescription) << std::endl;
+            logger.debug() << "Execution of PAC script at \"%s\" failed: %s" << pacLocation << toString(pacErrorDescription) << std::endl;
           }
 
           CFIndex size = CFArrayGetCount(proxies);
@@ -134,6 +152,15 @@ namespace Mantid
       return proxyInfoVec;
     }
 
+    /**
+     * Proxy from dictionary.
+     * @param dict
+     * @param type
+     * @param enableKey
+     * @param hostKey
+     * @param portKey
+     * @return return Proxy object.
+     */
      ProxyInfo proxyFromDictionary(CFDictionaryRef dict, ProxyType type, CFStringRef enableKey,
         CFStringRef hostKey, CFStringRef portKey)
     {
@@ -160,6 +187,11 @@ namespace Mantid
       return proxyInfo;
     }
 
+    /**
+     * Specifially look for http proxy settings.
+     * @param dict :
+     * @return Return the proxy info object.
+     */
     ProxyInfo httpProxyFromSystem(CFDictionaryRef dict)
     {
       ProxyInfo tempProxy = proxyFromDictionary(dict, HttpProxy, kSCPropNetProxiesHTTPEnable,
@@ -168,18 +200,25 @@ namespace Mantid
       return tempProxy;
     }
 
-    ProxyInfo findHttpProxy(const std::string& targetURLString)
+    /**
+     * Find the http proxy.
+     * Look through the proxy settings script first.
+     * @param targetURLString : Target remote URL string
+     * @param logger : ref to log object.
+     * @return Proxy object.
+     */
+    ProxyInfo findHttpProxy(const std::string& targetURLString, Mantid::Kernel::Logger& logger)
     {
+      ProxyInfo httpProxy;
       CFDictionaryRef dict = SCDynamicStoreCopyProxies(NULL);
       if (!dict)
       {
-        std::cout << "SCDynamicStoreCopyProxies returned NULL"
-            << std::endl;
+        logger.debug("ScriptRepository SCDynamicStoreCopyProxies returned NULL");
       }
 
       // Query the proxy pac first.
-      ProxyInfoVec info = proxyInformationFromPac(dict, targetURLString);
-      ProxyInfo httpProxy;
+      ProxyInfoVec info = proxyInformationFromPac(dict, targetURLString, logger);
+
       bool foundHttpProxy = false;
       for (ProxyInfoVec::iterator it = info.begin(); it != info.end(); ++it)
       {
@@ -204,16 +243,30 @@ namespace Mantid
 
       if (!foundHttpProxy)
       {
-        std::cout << "No system HTTP Proxy set!" << std::endl;
+        logger.debug("ScriptRepositry. No system HTTP Proxy set!");
       }
 
       return httpProxy;
 
     }
 
+    /**
+     * Proxy OSX helper constructor.
+     * @param logger
+     */
+    ProxyOSX::ProxyOSX() : m_logger("ProxyOSXLogger")
+    {
+
+    }
+
+    /**
+     * Look for http network settings.
+     * @param targetURL : Target remote URL.
+     * @return proxy information.
+     */
     ProxyInfo ProxyOSX::getHttpProxy(const std::string& targetURL)
     {
-      return findHttpProxy(targetURL);
+      return findHttpProxy(targetURL, m_logger);
     }
 
   } // namespace ScriptRepository
