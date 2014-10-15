@@ -22,8 +22,12 @@ using Mantid::Kernel::ConfigServiceImpl;
 #include <Poco/Net/HTMLForm.h>
 #include "Poco/Net/FilePartSource.h"
 
+// Include helper utility required for network proxy settings identification on OSX.
+#if defined(__APPLE__)
+#include "MantidScriptRepository/ProxyOSX.h"
+#endif
 
-// Visual Studion compains with the inclusion of Poco/FileStream
+// Visual Studio complains with the inclusion of Poco/FileStream
 // disabling this warning.
 #if defined(_WIN32) || defined(_WIN64)
 #pragma warning( push )

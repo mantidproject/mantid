@@ -31,6 +31,10 @@ set_property (TARGET ScriptRepository PROPERTY FOLDER "MantidFramework")
 
 include_directories(inc)
 set ( LIBS ${MANTIDLIBS} )
+if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    LIST(APPEND LIBS "-framework SystemConfiguration" "-framework CoreFoundation"  "-framework CoreServices")
+endif()
+
 target_link_libraries(ScriptRepository ${LIBS})
 if ( MSVC )
 target_link_libraries(ScriptRepository Winhttp)
