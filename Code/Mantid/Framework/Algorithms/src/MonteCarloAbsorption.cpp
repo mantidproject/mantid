@@ -197,15 +197,6 @@ namespace Mantid
           attenFactor += eventFactor;
           ++numDetected;
         }
-//        try
-//        {
-//          attenFactor += attenuationFactor(startPos, scatterPoint, detectorPos, lambda);
-//        }
-//        catch(std::logic_error &)
-//        {
-//          continue;
-//        }
-
       }
 
       // Attenuation factor is simply the average value
@@ -470,7 +461,7 @@ namespace Mantid
 #if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
                 m_blocks.emplace_back(xmax, ymax, zmax, xmin, ymin, zmin);
 #else
-                m_blocks.push_back(xmax, ymax, zmax, xmin, ymin, zmin);
+                m_blocks.push_back(BoundingBox(xmax, ymax, zmax, xmin, ymin, zmin));
 #endif
             }
           }
