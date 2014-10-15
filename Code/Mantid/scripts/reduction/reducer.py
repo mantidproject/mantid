@@ -478,7 +478,6 @@ class Reducer(object):
         # Go through the list of files to be reduced
         for file_ws in self._data_files:
             for item in self._reduction_steps:
-                print "step" + str(item)
                 try:
                     result = item.execute(self, file_ws)
                     if result is not None and len(str(result))>0:
