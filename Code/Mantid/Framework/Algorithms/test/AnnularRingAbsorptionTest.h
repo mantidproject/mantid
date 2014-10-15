@@ -1,28 +1,28 @@
-#ifndef MANTID_ALGORITHMS_HOLLOWCANMONTECARLOABSORPTIONTEST_H_
-#define MANTID_ALGORITHMS_HOLLOWCANMONTECARLOABSORPTIONTEST_H_
+#ifndef MANTID_ALGORITHMS_ANNULARRINGABSORPTIONTEST_H_
+#define MANTID_ALGORITHMS_ANNULARRINGABSORPTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/HollowCanMonteCarloAbsorption.h"
+#include "MantidAlgorithms/AnnularRingAbsorption.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Algorithms::HollowCanMonteCarloAbsorption;
+using Mantid::Algorithms::AnnularRingAbsorption;
 
-class HollowCanMonteCarloAbsorptionTest : public CxxTest::TestSuite
+class AnnularRingAbsorptionTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static HollowCanMonteCarloAbsorptionTest *createSuite() { return new HollowCanMonteCarloAbsorptionTest(); }
-  static void destroySuite( HollowCanMonteCarloAbsorptionTest *suite ) { delete suite; }
+  static AnnularRingAbsorptionTest *createSuite() { return new AnnularRingAbsorptionTest(); }
+  static void destroySuite( AnnularRingAbsorptionTest *suite ) { delete suite; }
 
   void test_Init()
   {
-    HollowCanMonteCarloAbsorption alg;
+    AnnularRingAbsorption alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -39,7 +39,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("InputWorkspace", inputWS) );
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace", "UnusedForChild") );
     const int numOMPThreads = FrameworkManager::Instance().getNumOMPThreads();
-    FrameworkManager::Instance().setNumOMPThreads(2);
+    FrameworkManager::Instance().setNumOMPThreads(1); // To ensure reproducible results
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     FrameworkManager::Instance().setNumOMPThreads(numOMPThreads);
     TS_ASSERT( alg->isExecuted() );
@@ -120,7 +120,7 @@ private:
 
   Mantid::API::IAlgorithm_sptr createAlgorithm()
   {
-    auto alg = boost::shared_ptr<Mantid::API::IAlgorithm>(new HollowCanMonteCarloAbsorption());
+    auto alg = boost::shared_ptr<Mantid::API::IAlgorithm>(new AnnularRingAbsorption());
     alg->initialize();
     alg->setChild(true);
     alg->setRethrows(true);
@@ -140,4 +140,4 @@ private:
 };
 
 
-#endif /* MANTID_ALGORITHMS_HOLLOWCANMONTECARLOABSORPTIONTEST_H_ */
+#endif /* MANTID_ALGORITHMS_ANNULARRINGABSORPTIONTEST_H_ */

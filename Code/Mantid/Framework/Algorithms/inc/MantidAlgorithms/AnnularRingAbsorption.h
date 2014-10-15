@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_HOLLOWCANMONTECARLOABSORPTION_H_
-#define MANTID_ALGORITHMS_HOLLOWCANMONTECARLOABSORPTION_H_
+#ifndef MANTID_ALGORITHMS_ANNULARRINGABSORPTION_H_
+#define MANTID_ALGORITHMS_ANNULARRINGABSORPTION_H_
 
 #include "MantidAPI/Algorithm.h"
 
@@ -45,11 +45,11 @@ namespace Mantid
       File change history is stored at: <https://github.com/mantidproject/mantid>
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport HollowCanMonteCarloAbsorption  : public API::Algorithm
+    class DLLExport AnnularRingAbsorption  : public API::Algorithm
     {
     public:
-      HollowCanMonteCarloAbsorption();
-      virtual ~HollowCanMonteCarloAbsorption();
+      AnnularRingAbsorption();
+      virtual ~AnnularRingAbsorption();
 
       virtual const std::string name() const;
       virtual int version() const;
@@ -73,4 +73,4 @@ namespace Mantid
   } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_HOLLOWCANMONTECARLOABSORPTION_H_ */
+#endif  /* MANTID_ALGORITHMS_ANNULARRINGABSORPTION_H_ */

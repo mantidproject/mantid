@@ -28,12 +28,12 @@ Usage
 
 **Example**
 
-.. testcode:: HollowCanMonteCarloAbsorptionExample
+.. testcode:: AnnularRingAbsorptionExample
 
    sample_ws = CreateSampleWorkspace("Histogram",NumBanks=1) # fake some data in TOF
    sample_ws = ConvertUnits(sample_ws, Target="Wavelength")
    factors = \
-     HollowCanMonteCarloAbsorption(sample_ws,
+     AnnularRingAbsorption(sample_ws,
        SampleHeight=3.8, SampleThickness=0.05, CanOuterRadius=1.1,CanInnerRadius=0.92,
        SampleChemicalFormula="Li2-Ir-O3",SampleNumberDensity=0.004813,
        EventsPerPoint=300)
@@ -43,7 +43,7 @@ Usage
 
 Output:
 
-.. testoutput:: HollowCanMonteCarloAbsorptionExample
+.. testoutput:: AnnularRingAbsorptionExample
 
    The created workspace has one entry for each spectra: 100
    Just divide your data by the correction to correct for absorption.

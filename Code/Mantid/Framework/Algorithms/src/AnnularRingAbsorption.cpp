@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/HollowCanMonteCarloAbsorption.h"
+#include "MantidAlgorithms/AnnularRingAbsorption.h"
 
 #include "MantidAPI/SampleEnvironment.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -27,20 +27,20 @@ namespace Mantid
     using namespace Mantid::Kernel;
 
     // Register the algorithm into the AlgorithmFactory
-    DECLARE_ALGORITHM(HollowCanMonteCarloAbsorption)
+    DECLARE_ALGORITHM(AnnularRingAbsorption)
 
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    HollowCanMonteCarloAbsorption::HollowCanMonteCarloAbsorption()
+    AnnularRingAbsorption::AnnularRingAbsorption()
     {
     }
 
     //----------------------------------------------------------------------------------------------
     /** Destructor
     */
-    HollowCanMonteCarloAbsorption::~HollowCanMonteCarloAbsorption()
+    AnnularRingAbsorption::~AnnularRingAbsorption()
     {
     }
 
@@ -48,25 +48,25 @@ namespace Mantid
 
 
     /// Algorithm's name for identification. @see Algorithm::version
-    const std::string HollowCanMonteCarloAbsorption::name() const
+    const std::string AnnularRingAbsorption::name() const
     {
-      return "HollowCanMonteCarloAbsorption";
+      return "AnnularRingAbsorption";
     }
 
     /// Algorithm's version for identification. @see Algorithm::version
-    int HollowCanMonteCarloAbsorption::version() const
+    int AnnularRingAbsorption::version() const
     {
       return 1;
     }
 
     /// Algorithm's category for identification. @see Algorithm::category
-    const std::string HollowCanMonteCarloAbsorption::category() const
+    const std::string AnnularRingAbsorption::category() const
     {
       return "CorrectionFunctions\\AbsorptionCorrections";
     }
 
      /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-     const std::string HollowCanMonteCarloAbsorption::summary() const
+     const std::string AnnularRingAbsorption::summary() const
      {
        return "Calculates bin-by-bin correction factors for attenuation due to absorption "
               "in a cylindrical sample in the wall of a hollow can";
@@ -76,7 +76,7 @@ namespace Mantid
     /**
      * Initialize the algorithm's properties.
      */
-    void HollowCanMonteCarloAbsorption::init()
+    void AnnularRingAbsorption::init()
     {
       // The input workspace must have an instrument and units of wavelength
       auto wsValidator = boost::make_shared<CompositeValidator>();
@@ -124,7 +124,7 @@ namespace Mantid
     /**
      * Execute the algorithm.
      */
-    void HollowCanMonteCarloAbsorption::exec()
+    void AnnularRingAbsorption::exec()
     {
       MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
       // We neglect any absorption in the can so the actual shape defined is a hollow cylinder
@@ -142,7 +142,7 @@ namespace Mantid
     /**
      * @param workspace The workspace where the environment should be attached
      */
-    void HollowCanMonteCarloAbsorption::attachSample(MatrixWorkspace_sptr &workspace)
+    void AnnularRingAbsorption::attachSample(MatrixWorkspace_sptr &workspace)
     {
       runCreateSampleShape(workspace);
       runSetSampleMaterial(workspace);
@@ -151,7 +151,7 @@ namespace Mantid
     /**
      * @return Creates a new shape object for the sample
      */
-    void HollowCanMonteCarloAbsorption::runCreateSampleShape(API::MatrixWorkspace_sptr & workspace)
+    void AnnularRingAbsorption::runCreateSampleShape(API::MatrixWorkspace_sptr & workspace)
     {
       auto inst = workspace->getInstrument();
       auto refFrame = inst->getReferenceFrame();
@@ -181,7 +181,7 @@ namespace Mantid
      * @param upAxis A vector pointing up
      * @returns A string containing the shape XML
      */
-    std::string HollowCanMonteCarloAbsorption::createSampleShapeXML(const V3D & upAxis) const
+    std::string AnnularRingAbsorption::createSampleShapeXML(const V3D & upAxis) const
     {
       // User input
       const double canLowRadiusCM = getProperty("CanInnerRadius");
@@ -217,7 +217,7 @@ namespace Mantid
      * @param height The height of the cylinder
      * @return A string defining the XML
      */
-    const std::string HollowCanMonteCarloAbsorption::cylinderXML(const std::string &id, const V3D &bottomCentre,
+    const std::string AnnularRingAbsorption::cylinderXML(const std::string &id, const V3D &bottomCentre,
                                                                  const double radius, const V3D &axis,
                                                                  const double height) const
     {
@@ -241,7 +241,7 @@ namespace Mantid
     /**
      * @return Attaches a new Material object to the sample
      */
-    void HollowCanMonteCarloAbsorption::runSetSampleMaterial(API::MatrixWorkspace_sptr & workspace)
+    void AnnularRingAbsorption::runSetSampleMaterial(API::MatrixWorkspace_sptr & workspace)
     {
       bool childLog = g_log.is(Logger::Priority::PRIO_DEBUG);
       auto alg = this->createChildAlgorithm("SetSampleMaterial", -1,-1, childLog);
@@ -263,7 +263,7 @@ namespace Mantid
      * @param workspace The input workspace that has the sample and can defined
      * @return A 2D workspace of attenuation factors
      */
-    MatrixWorkspace_sptr HollowCanMonteCarloAbsorption::runMonteCarloAbsorptionCorrection(const MatrixWorkspace_sptr &workspace)
+    MatrixWorkspace_sptr AnnularRingAbsorption::runMonteCarloAbsorptionCorrection(const MatrixWorkspace_sptr &workspace)
     {
       bool childLog = g_log.is(Logger::Priority::PRIO_DEBUG);
       auto alg = this->createChildAlgorithm("MonteCarloAbsorption", 0.1,1.0, childLog);
