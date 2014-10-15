@@ -45,6 +45,7 @@ public:
                         0.0, 0.0, smu, 0.0, smu, amu);
     Object sampleShape;
     sampleShape.setMaterial(Material("SetInAnvredCorrection", neutron, 1.0));
+    ws->mutableSample().setShape(sampleShape);
 
     API::Run & mrun = ws->mutableRun();
     mrun.addProperty<double>("Radius", 0.1, true);
