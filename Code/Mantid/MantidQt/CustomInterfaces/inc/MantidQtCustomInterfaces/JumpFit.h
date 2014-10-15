@@ -36,6 +36,8 @@ namespace MantidQt
 			void updateProperties(QtProperty* prop, double val);
 			/// Find all spectra with width data in the workspace
 			void findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws);
+      /// Handles plotting results of algorithm on miniplot
+      void fitAlgDone(bool error);
 
 		private:
 			// The UI form
@@ -43,6 +45,8 @@ namespace MantidQt
 
 			// Map of axis labels to spectrum number
 			std::map<std::string, int> m_spectraList;
+
+      Mantid::API::IAlgorithm_sptr fitAlg;
 
 		};
 	} // namespace CustomInterfaces

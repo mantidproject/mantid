@@ -7,6 +7,8 @@
 #include <string>
 #include <boost/lexical_cast.hpp>
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
 	namespace CustomInterfaces
@@ -46,6 +48,9 @@ namespace MantidQt
 			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
 			// Connect width selector to handler method
 			connect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(handleWidthChange(const QString&)));
+
+      // Connect algorithm runner to completion handler function
+      connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(fitAlgDone(bool)));
 		}
 
     void JumpFit::setup()
@@ -84,8 +89,6 @@ namespace MantidQt
 		 */
 		void JumpFit::run() 
 		{
-      using namespace Mantid::API;
-
 			// Fit function to use
 			QString fitFunction("ChudleyElliot");
 			switch(m_uiForm.cbFunction->currentIndex())
@@ -111,7 +114,7 @@ namespace MantidQt
 			std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
       long width = m_spectraList[widthText];
 
-      IAlgorithm_sptr fitAlg = AlgorithmManager::Instance().create("JumpFit");
+      fitAlg = AlgorithmManager::Instance().create("JumpFit");
       fitAlg->initialize();
 
       fitAlg->setProperty("InputWorkspace", ws);
@@ -130,6 +133,41 @@ namespace MantidQt
 
       runAlgorithm(fitAlg);
 		}
+
+    /**
+     * Handles the JumpFit algorithm finishing, used to plot fit in miniplot.
+     *
+     * @param error True if the algorithm failed, false otherwise
+     */
+    void JumpFit::fitAlgDone(bool error)
+    {
+      // Ignore errors
+      if(error)
+        return;
+
+      std::string outWsName = fitAlg->getPropertyValue("Output") + "_Workspace";
+      MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
+      TextAxis* axis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
+
+      for(int histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
+      {
+        QString specName = QString::fromStdString(axis->label(histIndex));
+
+        if(specName == "Calc")
+        {
+          plotMiniPlot(outputWorkspace, histIndex, "JumpFitPlot", specName);
+          m_curves[specName]->setPen(QColor(Qt::red));
+        }
+
+        if(specName == "Diff")
+        {
+          plotMiniPlot(outputWorkspace, histIndex, "JumpFitPlot", specName);
+          m_curves[specName]->setPen(QColor(Qt::green));
+        }
+      }
+  
+      replot("JumpFitPlot");
+    }
 
 		/**
 		 * Set the data selectors to use the default save directory
