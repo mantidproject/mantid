@@ -332,7 +332,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 
     # calculate absolute units integral and apply it to the workspace
     if monovan_run != None or Reducer.mono_correction_factor != None :
-        deltaE_wkspace_sample = apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_guess,wb_run)
+        deltaE_wkspace_sample = apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_guess,wb_for_monovanadium)
         # Hack for multirep
         #if isinstance(monovan_run,int):
         #    filename = common.find_file(monovan_run)
