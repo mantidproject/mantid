@@ -27,8 +27,7 @@ namespace MantidQt
 
       // Create range selector
       m_rangeSelectors["JumpFitQ"] = new MantidWidgets::RangeSelector(m_plots["JumpFitPlot"]);
-      connect(m_rangeSelectors["JumpFitQ"], SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
-      connect(m_rangeSelectors["JumpFitQ"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
+      connect(m_rangeSelectors["JumpFitQ"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(qRangeChanged(double, double)));
 
 			// Add the properties browser to the ui form
 			m_uiForm.treeSpace->addWidget(m_propTree);
@@ -89,6 +88,34 @@ namespace MantidQt
 		 */
 		void JumpFit::run() 
 		{
+			bool verbose = m_uiForm.chkVerbose->isChecked();
+			bool save = m_uiForm.chkSave->isChecked();
+			bool plot = m_uiForm.chkPlot->isChecked();
+
+      runImpl(verbose, plot, save);
+		}
+
+    /**
+     * Runs the JumpFit algorithm with preview parameters to update the preview plot.
+     */
+    void JumpFit::runPreviewAlgorithm()
+    {
+      runImpl();
+    }
+
+    /**
+     * Runs algorithm.
+     *
+     * @param verbose Enable/disable verbose option
+     * @param plot Enable/disable plotting
+     * @param save Enable/disable saving
+     */
+    void JumpFit::runImpl(bool verbose, bool plot, bool save)
+    {
+      // Do noting with invalid data
+			if(!m_uiForm.dsSample->isValid())
+        return;
+
 			// Fit function to use
 			QString fitFunction("ChudleyElliot");
 			switch(m_uiForm.cbFunction->currentIndex())
@@ -124,15 +151,13 @@ namespace MantidQt
       fitAlg->setProperty("QMin", m_dblManager->value(m_properties["QMin"]));
       fitAlg->setProperty("QMax", m_dblManager->value(m_properties["QMax"]));
 
-			bool verbose = m_uiForm.chkVerbose->isChecked();
-			bool save = m_uiForm.chkSave->isChecked();
-			bool plot = m_uiForm.chkPlot->isChecked();
-      fitAlg->setProperty("Plot", plot);
       fitAlg->setProperty("Verbose", verbose);
+      fitAlg->setProperty("Plot", plot);
       fitAlg->setProperty("Save", save);
 
-      runAlgorithm(fitAlg);
-		}
+      if(m_batchAlgoRunner->queueLength() < 1)
+        runAlgorithm(fitAlg);
+    }
 
     /**
      * Handles the JumpFit algorithm finishing, used to plot fit in miniplot.
@@ -149,7 +174,7 @@ namespace MantidQt
       MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
       TextAxis* axis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
 
-      for(int histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
+      for(unsigned int histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
       {
         QString specName = QString::fromStdString(axis->label(histIndex));
 
@@ -188,6 +213,11 @@ namespace MantidQt
 		 */
 		void JumpFit::handleSampleInputReady(const QString& filename)
 		{
+      // Disable things that run the preview algorithm
+      disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(runPreviewAlgorithm()));
+			disconnect(m_uiForm.cbFunction, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(runPreviewAlgorithm()));
+			disconnect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(runPreviewAlgorithm()));
+
 			auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(filename.toStdString());
 			auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 
@@ -219,6 +249,14 @@ namespace MantidQt
 				m_uiForm.cbWidth->setEnabled(false);
 				emit showMessageBox("Workspace doesn't appear to contain any width data");
 			}
+
+      // Update preview plot
+      runPreviewAlgorithm();
+
+      // Re-enable things that run the preview algorithm
+      connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(runPreviewAlgorithm()));
+			connect(m_uiForm.cbFunction, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(runPreviewAlgorithm()));
+			connect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(runPreviewAlgorithm()));
 		}
 
 		/**
@@ -291,23 +329,15 @@ namespace MantidQt
 		}
 
 		/**
-		 * Updates the property manager when the lower guide is moved on the mini plot
+		 * Updates the property manager when the range selector is moved on the mini plot.
 		 *
 		 * @param min :: The new value of the lower guide
-		 */
-		void JumpFit::minValueChanged(double min)
-    {
-      m_dblManager->setValue(m_properties["QMin"], min);
-    }
-
-		/**
-		 * Updates the property manager when the upper guide is moved on the mini plot
-		 *
 		 * @param max :: The new value of the upper guide
 		 */
-    void JumpFit::maxValueChanged(double max)
+		void JumpFit::qRangeChanged(double min, double max)
     {
-			m_dblManager->setValue(m_properties["QMax"], max);	
+      m_dblManager->setValue(m_properties["QMin"], min);
+			m_dblManager->setValue(m_properties["QMax"], max);
     }
 
 		/**
