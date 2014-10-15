@@ -77,7 +77,7 @@ private:
     ITableWorkspace_sptr ws = createWorkspace();
 
     TableRow row = ws->appendRow();
-    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << "2" << "1" << "";
+    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << 2.0 << 1 << "";
 
     return ws;
   }
@@ -487,9 +487,9 @@ public:
   {
     auto ws = createWorkspace("TestWorkspace");
     TableRow row = ws->appendRow();
-    row << "dataA" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 1;
+    row << "dataA" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << 1.0 << 1;
     row = ws->appendRow();
-    row << "dataB" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 1;
+    row << "dataB" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << 1.0 << 1;
 
     loadWorkspace("INTER13460", "dataA");
     loadWorkspace("INTER13462", "dataB");
@@ -547,9 +547,9 @@ public:
     auto ws = createWorkspace("TestWorkspace");
     //Autofill everything we can
     TableRow row = ws->appendRow();
-    row << "13460" << "" << "13463,13464" << "" << "" << "" << "1" << 1;
+    row << "13460" << "" << "13463,13464" << "" << "" << "" << 1.0 << 1;
     row = ws->appendRow();
-    row << "13462" << "" << "13463,13464" << "" << "" << "" << "1" << 1;
+    row << "13462" << "" << "13463,13464" << "" << "" << "" << 1.0 << 1;
 
     MockView mockView;
     ReflLoadedMainViewPresenter presenter(ws,&mockView);
