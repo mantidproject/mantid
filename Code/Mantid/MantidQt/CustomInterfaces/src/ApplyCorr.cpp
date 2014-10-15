@@ -29,7 +29,6 @@ namespace IDA
     connect(uiForm().abscor_ckUseCorrections, SIGNAL(toggled(bool)), uiForm().abscor_dsCorrections, SLOT(setEnabled(bool)));
     connect(uiForm().abscor_ckScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(scaleMultiplierCheck(bool)));
     connect(uiForm().abscor_cbGeometry, SIGNAL(currentIndexChanged(int)), this, SLOT(handleGeometryChange(int)));
-    connect(uiForm().abscor_ckUseCan, SIGNAL(toggled(bool)), uiForm().abscor_ckPlotContrib, SLOT(setEnabled(bool)));
     connect(uiForm().abscor_dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(newData(const QString&)));
 
     // Create a validator for input box of the Scale option.
@@ -231,8 +230,7 @@ namespace IDA
     
     pyInput += "plotResult = '" + plotResult + "'\n";
         
-    if ( uiForm().abscor_ckPlotContrib->isChecked() ) pyInput += "plotContrib = True\n";
-    else pyInput += "plotContrib = False\n";
+    pyInput += "plotContrib = False\n";
 
     pyInput += "abscorFeeder(sample, container, geom, useCor, corrections, Verbose=verbose, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult, PlotContrib=plotContrib)\n";
 
