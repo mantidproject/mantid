@@ -33,7 +33,7 @@ class IndirectResolution(DataProcessorAlgorithm):
 
         self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1]),
                              doc='Range of detetcors to use in resolution calculation')
-        self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0, 0]),
+        self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 0.0]),
                              doc='Energy range to use as background')
 
         self.declareProperty(name='RebinParam', defaultValue='', doc='Rebinning parameters (min,width,max)')
@@ -55,7 +55,7 @@ class IndirectResolution(DataProcessorAlgorithm):
         # TODO: Replace with InelasticIndirectReduction algorithm
         reducer = inelastic_indirect_reducer.IndirectReducer()
         reducer.set_instrument_name(self._instrument)
-        reducer.set_detector_range(self._detector_range[0] - 1, self._detector_range[1] - 1)
+        reducer.set_detector_range(int(self._detector_range[0]) - 1, int(self._detector_range[1]) - 1)
         for in_file in self._input_files:
             reducer.append_data_file(in_file)
         parfile = config['instrumentDefinition.directory']
