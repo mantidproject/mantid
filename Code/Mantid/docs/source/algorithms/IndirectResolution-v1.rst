@@ -20,7 +20,7 @@ Usage
 
 .. testcode:: ExIndirectResolutionSimple
 
-    resolution = IndirectResolution(InputFiles='IRS38633.raw',
+    resolution = IndirectResolution(InputFiles='IRS26173.raw',
                                     Instrument='IRIS',
                                     Analyser='graphite',
                                     Reflection='002',
