@@ -44,10 +44,10 @@ namespace Mantid
 			declareProperty(new API::FileProperty("Filename", "", FileProperty::Save, std::vector<std::string>(1,".nxs")),
 				"The name of the NXTomo file to write, as a full or relative path");
 
-			declareProperty(new PropertyWithValue<size_t>("Row chunk size", 32, Kernel::Direction::Input), 
+			declareProperty(new PropertyWithValue<size_t>("RowChunkSize", 32, Kernel::Direction::Input), 
 				"Please use an evenly divisible number smaller than the image height");
 
-			declareProperty(new PropertyWithValue<bool>("Include error", false, Kernel::Direction::Input),
+			declareProperty(new PropertyWithValue<bool>("IncludeError", false, Kernel::Direction::Input),
 				"Write the error values to NXTomo file?");
 		}
 
