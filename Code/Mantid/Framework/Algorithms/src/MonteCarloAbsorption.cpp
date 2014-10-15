@@ -130,8 +130,10 @@ namespace Mantid
         }
         catch(Kernel::Exception::NotFoundError&)
         {
-          continue;
+          // intel compiler hangs with continue statements inside a catch
+          // block that is within an omp loop...
         }
+        if(!detector) continue;
 
         MantidVec & yValues = correctionFactors->dataY(i);
         MantidVec & eValues = correctionFactors->dataE(i);
