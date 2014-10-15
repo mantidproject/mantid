@@ -1273,7 +1273,7 @@ namespace API
     //Configure Poco HTTP Client Session
     try{
       Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
-      session.setTimeout(Poco::Timespan(2,0));// 2 secconds	
+      session.setTimeout(Poco::Timespan(10,0));// 5 secconds
 
       // configure proxy
       std::string proxy_config; 
@@ -1817,6 +1817,10 @@ bool ScriptRepositoryImpl::getProxyConfig(std::string& proxy_server, unsigned sh
     g_log.information() << "ScriptRepository failed to find the proxy information. It will attempt without proxy. " 
               << errmsg << std::endl; 
     }
+#elif defined(__APPLE__)
+
+    //TODO
+
 #else  // linux and mac
     char * proxy_var = getenv("http_proxy"); 
     if (proxy_var == 0)

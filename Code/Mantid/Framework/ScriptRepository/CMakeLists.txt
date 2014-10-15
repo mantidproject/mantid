@@ -1,14 +1,21 @@
 # Mantid source
-set ( SRC_FILES 
-  src/ScriptRepositoryImpl.cpp
+set ( SRC_FILES
+	src/ProxyInfo.cpp
+	src/ProxyOSX.cpp
+	src/ScriptRepositoryImpl.cpp
 )
 
-set ( INC_FILES inc/MantidScriptRepository/ScriptRepositoryImpl.h
+set ( INC_FILES
+	inc/MantidScriptRepository/ProxyInfo.h
+	inc/MantidScriptRepository/ProxyOSX.h
+	inc/MantidScriptRepository/ScriptRepositoryImpl.h
 )
 
 #
 set ( TEST_FILES
-	ScriptRepositoryTestImpl.h)
+	ProxyInfoTest.h
+	ScriptRepositoryTestImpl.h
+)
 #        ScriptRepositoryFactoryTest.h)
 
 
