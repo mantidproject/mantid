@@ -57,7 +57,7 @@ public:
     const std::string outputName("mcabsorb-factors");
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setPropertyValue("OutputWorkspace",outputName));
     const int numOMPThreads = FrameworkManager::Instance().getNumOMPThreads();
-    FrameworkManager::Instance().setNumOMPThreads(2);
+    FrameworkManager::Instance().setNumOMPThreads(1); // To ensure reproducible results
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
     FrameworkManager::Instance().setNumOMPThreads(numOMPThreads);
 
@@ -82,9 +82,9 @@ public:
     TS_ASSERT_DELTA(factorWS->readY(2)[middle_index], 0.000092901957, delta);
     TS_ASSERT_DELTA(factorWS->readY(2).back(), 0.000003265731, delta);
 
-    TS_ASSERT_DELTA(factorWS->readY(4).front(), 0.007978456911, delta);
-    TS_ASSERT_DELTA(factorWS->readY(4)[middle_index], 0.000136063390, delta);
-    TS_ASSERT_DELTA(factorWS->readY(4).back(), 0.000013351473, delta);
+    TS_ASSERT_DELTA(factorWS->readY(4).front(), 0.004037809093, delta);
+    TS_ASSERT_DELTA(factorWS->readY(4)[middle_index], 0.000190782521, delta);
+    TS_ASSERT_DELTA(factorWS->readY(4).back(), 0.000019473169, delta);
 
     dataStore.remove(inputName);
     dataStore.remove(outputName);
