@@ -1424,7 +1424,8 @@ private:
 
   QWidget* catalogSearch;
 
-  QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recentProjectsMenu, *recentFilesMenu, *interfaceMenu;
+  QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit;
+  QMenu *recentProjectsMenu, *recentFilesMenu, *interfaceMenu;
   
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
