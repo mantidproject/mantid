@@ -94,10 +94,14 @@ namespace Mantid
      */
     ProxyInfo& ProxyInfo::operator=(const ProxyInfo& other)
     {
-      m_host = other.host();
-      m_isEmptyProxy = other.emptyProxy();
-      m_isHttpProxy = other.isHttpProxy();
-      m_port = other.port();
+      if (&other != this)
+      {
+        m_host = other.host();
+        m_isEmptyProxy = other.emptyProxy();
+        m_isHttpProxy = other.isHttpProxy();
+        m_port = other.port();
+      }
+      return *this;
     }
 
   } // namespace ScriptRepository
