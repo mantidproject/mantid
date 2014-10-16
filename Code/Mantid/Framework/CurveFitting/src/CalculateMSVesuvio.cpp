@@ -249,8 +249,8 @@ namespace Mantid
       }
 
       /**
-       * Generate the final energy of a neutron for gold foil analyser at 293K
-       * with number density of 7.35E19 atoms/cm^2 in double-difference mode.
+       * Generate the final energy of a neutron for uranium foil analyser at 293K
+       * with number density of 1.456E20 atoms/cm^2 in double-difference mode.
        * @param randv A random number between 0.0 & 1.0, sample from a flat distribution
        * @return A value to use for the final energy
        */
@@ -296,7 +296,7 @@ namespace Mantid
           1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000
         };
 
-        for(size_t i = 0; i < 299; ++i)
+        for(size_t i = 0; i < 200; ++i)
         {
           if(XVALUES[i] < randv && XVALUES[i+1] > randv)
           {
