@@ -1834,7 +1834,6 @@ bool ScriptRepositoryImpl::getProxyConfig(std::string& proxy_server, unsigned sh
       PROXYSERVER = proxyInfo.host();
       PROXYPORT = proxyInfo.port();
     }
-    //TODO
 
 #else  // linux and mac
     char * proxy_var = getenv("http_proxy"); 

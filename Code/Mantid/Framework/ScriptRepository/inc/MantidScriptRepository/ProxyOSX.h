@@ -1,10 +1,3 @@
-/*
- * ProxyOSX.h
- *
- *  Created on: 15 Oct 2014
- *      Author: spu92482
- */
-
 #ifndef _MANTIDSCRIPTREPOSITORY_PROXYOSX_H_
 #define _MANTIDSCRIPTREPOSITORY_PROXYOSX_H_
 
@@ -18,7 +11,7 @@ namespace Mantid
   namespace ScriptRepository
   {
 
-    /** ProxyInfo : Utility for getting network proxy information off the OSX OS.
+    /** ProxyOSX : Utility for getting network proxy information off the OSX OS.
 
      Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
