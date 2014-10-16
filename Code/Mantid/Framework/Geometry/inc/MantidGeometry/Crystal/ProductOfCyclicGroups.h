@@ -9,15 +9,15 @@ namespace Mantid
 namespace Geometry
 {
 
-/** ProductGroup :
+/** ProductOfCyclicGroups :
 
-    ProductGroup expands a bit on the explanations given in
+    ProductOfCyclicGroups expands a bit on the explanations given in
     CyclicGroup. As shown for example in [1], some point groups
     cannot be expressed solely as a cyclic group. Instead it's
     necessary to multiply two or three cyclic groups to obtain all
     symmetry operations of that group.
 
-    For this purpose, ProductGroup was created. It takes a set of
+    For this purpose, ProductOfCyclicGroups was created. It takes a set of
     n symmetry operations, each of which is seen as a generator of
     a cyclic group C_i. The resulting n groups ("factor groups") are
     multiplied to form a product group G:
@@ -28,7 +28,7 @@ namespace Geometry
     in code to generate even large groups from a few generators
     becomes very short using this class:
 
-      Group_const_sptr pointGroup422 = GroupFactory::create<ProductGroup>("-y,x,z; x,-y,-z");
+      Group_const_sptr pointGroup422 = GroupFactory::create<ProductOfCyclicGroups>("-y,x,z; x,-y,-z");
 
     This is for example used in SpaceGroupFactory to create space groups
     from a small set of generators supplied in the International Tables
@@ -60,17 +60,17 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_GEOMETRY_DLL ProductGroup : public Group
+class MANTID_GEOMETRY_DLL ProductOfCyclicGroups : public Group
 {
 public:
-    ProductGroup(const std::string &generators);
-    ProductGroup(const std::vector<Group_const_sptr> &factorGroups);
-    virtual ~ProductGroup() { }
+    ProductOfCyclicGroups(const std::string &generators);
+    ProductOfCyclicGroups(const std::vector<Group_const_sptr> &factorGroups);
+    virtual ~ProductOfCyclicGroups() { }
 
 protected:
     Group_const_sptr getGeneratedGroup(const std::string &generators) const;
     std::vector<Group_const_sptr> getFactorGroups(const std::vector<SymmetryOperation> &symmetryOperations) const;
-    Group_const_sptr getProductGroup(const std::vector<Group_const_sptr> &factorGroups) const;
+    Group_const_sptr getProductOfCyclicGroups(const std::vector<Group_const_sptr> &factorGroups) const;
 };
 
 

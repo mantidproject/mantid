@@ -49,7 +49,7 @@ namespace Geometry
     This is much more convenient than having to construct a Group,
     where all four symmetry operations would have to be supplied.
 
-    Related to this class is ProductGroup, which provides an easy way
+    Related to this class is ProductOfCyclicGroups, which provides an easy way
     to express a group that is the product of multiple cyclic groups
     (such as some point groups).
 

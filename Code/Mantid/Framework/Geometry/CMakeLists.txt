@@ -10,7 +10,7 @@ set ( SRC_FILES
 	src/Crystal/OrientedLattice.cpp
 	src/Crystal/PointGroup.cpp
 	src/Crystal/PointGroupFactory.cpp
-	src/Crystal/ProductGroup.cpp
+        src/Crystal/ProductOfCyclicGroups.cpp
 	src/Crystal/ReducedCell.cpp
 	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/ScalarUtils.cpp
@@ -121,7 +121,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/OrientedLattice.h
 	inc/MantidGeometry/Crystal/PointGroup.h
 	inc/MantidGeometry/Crystal/PointGroupFactory.h
-	inc/MantidGeometry/Crystal/ProductGroup.h
+        inc/MantidGeometry/Crystal/ProductOfCyclicGroups.h
 	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
 	inc/MantidGeometry/Crystal/ScalarUtils.h
@@ -275,7 +275,7 @@ set ( TEST_FILES
 	PointGroupFactoryTest.h
 	PointGroupTest.h
 	PolygonEdgeTest.h
-	ProductGroupTest.h
+        ProductOfCyclicGroupsTest.h
 	QuadrilateralTest.h
 	RectangularDetectorPixelTest.h
 	RectangularDetectorTest.h

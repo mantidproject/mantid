@@ -76,7 +76,7 @@ namespace Geometry
 
     Most of the time it's not required to use Group directly, there are several
     sub-classes that implement different behavior (CenteringGroup, CyclicGroup,
-    ProductGroup) and are easier to handle. For construction there is a simple
+    ProductOfCyclicGroups) and are easier to handle. For construction there is a simple
     "factory function", that works for all Group-based classes which provide a
     string-based constructor:
 

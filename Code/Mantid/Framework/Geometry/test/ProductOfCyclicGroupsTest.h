@@ -3,27 +3,27 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Crystal/ProductGroup.h"
+#include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 #include "MantidGeometry/Crystal/CyclicGroup.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
 using namespace Mantid::Geometry;
 
-class ProductGroupTest : public CxxTest::TestSuite
+class ProductOfCyclicGroupsTest : public CxxTest::TestSuite
 {
 public:
     // This pair of boilerplate methods prevent the suite being created statically
     // This means the constructor isn't called when running other tests
-    static ProductGroupTest *createSuite() { return new ProductGroupTest(); }
-    static void destroySuite( ProductGroupTest *suite ) { delete suite; }
+    static ProductOfCyclicGroupsTest *createSuite() { return new ProductOfCyclicGroupsTest(); }
+    static void destroySuite( ProductOfCyclicGroupsTest *suite ) { delete suite; }
 
 
     void testStringConstructor()
     {
-        TS_ASSERT_THROWS_NOTHING(ProductGroup group("x,y,z"));
+        TS_ASSERT_THROWS_NOTHING(ProductOfCyclicGroups group("x,y,z"));
 
-        TS_ASSERT_THROWS_ANYTHING(ProductGroup group("x,y,z; doesnt work"));
-        TS_ASSERT_THROWS_ANYTHING(ProductGroup group("x,y,z| z,x,y"));
+        TS_ASSERT_THROWS_ANYTHING(ProductOfCyclicGroups group("x,y,z; doesnt work"));
+        TS_ASSERT_THROWS_ANYTHING(ProductOfCyclicGroups group("x,y,z| z,x,y"));
     }
 
     void testVectorConstructor()
@@ -32,17 +32,17 @@ public:
         groups.push_back(GroupFactory::create<CyclicGroup>("-x,-y,-z"));
         groups.push_back(GroupFactory::create<CyclicGroup>("x,-y,z"));
 
-        TS_ASSERT_THROWS_NOTHING(ProductGroup group(groups));
+        TS_ASSERT_THROWS_NOTHING(ProductOfCyclicGroups group(groups));
 
         Group_const_sptr null;
         groups.push_back(null);
 
-        TS_ASSERT_THROWS_ANYTHING(ProductGroup group(groups));
+        TS_ASSERT_THROWS_ANYTHING(ProductOfCyclicGroups group(groups));
     }
 
     void testGetGeneratedGroup()
     {
-        TestableProductGroup group;
+        TestableProductOfCyclicGroups group;
 
         Group_const_sptr generatedGroup = group.getGeneratedGroup("-x,-y,-z; x,-y,z");
 
@@ -52,7 +52,7 @@ public:
 
     void testGetFactorGroups()
     {
-        TestableProductGroup group;
+        TestableProductOfCyclicGroups group;
 
         std::vector<SymmetryOperation> symmetryOperations = SymmetryOperationFactory::Instance().createSymOps("-x,-y,-z; x,-y,z");
         std::vector<Group_const_sptr> generatedGroup = group.getFactorGroups(symmetryOperations);
@@ -60,27 +60,27 @@ public:
         TS_ASSERT_EQUALS(generatedGroup.size(), 2);
     }
 
-    void testGetProductGroup()
+    void testGetProductOfCyclicGroups()
     {
-        TestableProductGroup group;
+        TestableProductOfCyclicGroups group;
 
         std::vector<Group_const_sptr> groups;
         groups.push_back(GroupFactory::create<CyclicGroup>("-x,-y,-z"));
         groups.push_back(GroupFactory::create<CyclicGroup>("x,-y,z"));
 
-        Group_const_sptr productGroup = group.getProductGroup(groups);
+        Group_const_sptr productGroup = group.getProductOfCyclicGroups(groups);
 
         TS_ASSERT_EQUALS(productGroup->order(), 4);
     }
 
 private:
-    class TestableProductGroup : public ProductGroup
+    class TestableProductOfCyclicGroups : public ProductOfCyclicGroups
     {
-        friend class ProductGroupTest;
+        friend class ProductOfCyclicGroupsTest;
     public:
-        TestableProductGroup() :
-            ProductGroup("x,y,z") { }
-        ~TestableProductGroup() { }
+        TestableProductOfCyclicGroups() :
+            ProductOfCyclicGroups("x,y,z") { }
+        ~TestableProductOfCyclicGroups() { }
     };
 
 };

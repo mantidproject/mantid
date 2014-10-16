@@ -1,7 +1,7 @@
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
-#include "MantidGeometry/Crystal/ProductGroup.h"
+#include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 #include "MantidGeometry/Crystal/CenteringGroup.h"
 
 #include "MantidKernel/LibraryManager.h"
@@ -177,7 +177,7 @@ std::string SpaceGroupFactoryImpl::getCenteringString(const std::string &hmSymbo
  * Returns a group constructed from a generator string and a centering symbol
  *
  * Generators have to be provided as a semicolon separated list of symmetry operations
- * in x,y,z format, for example "-x,-y,-z; -x,y,z; -y,x,z". A ProductGroup using this
+ * in x,y,z format, for example "-x,-y,-z; -x,y,z; -y,x,z". A ProductOfCyclicGroups using this
  * string is constructed. Centering symbol has to be supported by CenteringGroup. The
  * group is then calculated as the product of these two groups.
  *
@@ -187,7 +187,7 @@ std::string SpaceGroupFactoryImpl::getCenteringString(const std::string &hmSymbo
  */
 Group_const_sptr SpaceGroupFactoryImpl::getGeneratedGroup(const std::string &generators, const std::string &centeringSymbol) const
 {
-    Group_const_sptr baseGroup = GroupFactory::create<ProductGroup>(generators);
+    Group_const_sptr baseGroup = GroupFactory::create<ProductOfCyclicGroups>(generators);
     Group_const_sptr centeringGroup = GroupFactory::create<CenteringGroup>(centeringSymbol);
 
     return baseGroup * centeringGroup;
