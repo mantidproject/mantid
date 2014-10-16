@@ -19,7 +19,7 @@ namespace CustomInterfaces
   /** Constructor
    */
   IndirectCalibration::IndirectCalibration(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
-      IndirectDataReductionTab(uiForm, parent)
+      IndirectDataReductionTab(uiForm, parent), m_lastCalPlotFilename("")
   {
     DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
 
@@ -308,6 +308,12 @@ namespace CustomInterfaces
     setDefaultInstDetails();
 
     QString filename = m_uiForm.cal_leRunNo->getFirstFilename();
+
+    // Don't do anything if the file we would plot has not changed
+    if(filename == m_lastCalPlotFilename)
+      return;
+
+    m_lastCalPlotFilename = filename;
 
     if ( filename.isEmpty() )
     {
