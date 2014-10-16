@@ -917,6 +917,8 @@ namespace Mantid
                                  "Logical error. No intersection with sample, despite track "
                                  "originating from with sample.");
         }
+        // Calculate final scattering angle
+        scAngs[i] = detDirection.angle(scatterPts[i]);
         const auto & link = scatterToDet.begin();
         double distToExit = link->distInsideObject;
         // Weight by probability neutron leaves sample
