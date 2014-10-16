@@ -2711,7 +2711,7 @@ double LoadEventNexus::get_longest_tof()
 
 void LoadEventNexus::set_longest_tof(double tof)
 {
-  Poco::Mutex::ScopedLock lock(m_shortest_tof_Mutex);
+  Poco::Mutex::ScopedLock lock(m_longest_tof_Mutex);
     this->longest_tof = tof;
 }
 

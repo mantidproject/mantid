@@ -158,10 +158,6 @@ namespace DataHandling
     /// Was the instrument loaded?
     bool instrument_loaded_correctly;
 
-    /// Limits found to tof
-    double longest_tof;
-    /// Limits found to tof
-    double shortest_tof;
 
     /// mutexed getter/setter for longest_tof
     double get_longest_tof();
@@ -252,6 +248,12 @@ namespace DataHandling
 
     void filterDuringPause(API::MatrixWorkspace_sptr workspace);
 
+      
+    /// Limits found to tof
+    double longest_tof;
+    /// Limits found to tof
+    double shortest_tof;
+      
     Poco::Mutex m_shortest_tof_Mutex;
     Poco::Mutex m_longest_tof_Mutex;
 
