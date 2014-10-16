@@ -1802,6 +1802,7 @@ namespace Mantid
       else
       {
         g_log.information("ScriptRepository: HTTP System network proxy settings found.");
+        g_log.debug() << "ScriptRepository Host found: " << proxyInfo.host() << " Port found: " << proxyInfo.port() << std::endl;
       }
 
       if (!proxyInfo.emptyProxy())
@@ -1826,6 +1827,8 @@ namespace Mantid
           // report that the proxy was configured
           g_log.information() << "ScriptRepository proxy found. Host: " << proxyInfo.host() << " Port: "
               << proxyInfo.port() << std::endl;
+          proxy_server = proxyInfo.host();
+          proxy_port = static_cast<unsigned short>(proxyInfo.port());
         } catch (Poco::Net::HostNotFoundException & ex)
         {
           g_log.information()
@@ -1838,8 +1841,7 @@ namespace Mantid
         }
       }
 
-      proxy_server = proxyInfo.host();
-      proxy_port = static_cast<unsigned short>(proxyInfo.port());
+
 
       return !proxyInfo.emptyProxy();;
     }
