@@ -38,6 +38,13 @@ namespace IDA
 
     // Apply the validator to the input box for the Scale option.
     uiForm().abscor_leScaleMultiplier->setValidator(m_valPosDbl);
+
+    // Create the plot
+    m_plots["ApplyCorrPlot"] = new QwtPlot(m_parentWidget);
+    m_plots["ApplyCorrPlot"]->setCanvasBackground(Qt::white);
+    /* m_plots["ApplyCorrPlot"]->setAxisFont(QwtPlot::xBottom, parent->font()); */
+    /* m_plots["ApplyCorrPlot"]->setAxisFont(QwtPlot::yLeft, parent->font()); */
+	m_uiForm.plotSpace->addWidget(m_plots["ApplyCorrPlot"]);
   }
 
   /**
@@ -76,6 +83,8 @@ namespace IDA
     }
 
     uiForm().abscor_ckUseCorrections->setEnabled(!isSqw);
+
+    plotMiniPlot(dataName, 0, "ApplyCorrPlot", "ApplyCorrSampleCurve");
   }
 
   bool ApplyCorr::validateScaleInput()
@@ -229,12 +238,36 @@ namespace IDA
     }
     
     pyInput += "plotResult = '" + plotResult + "'\n";
-        
-    pyInput += "plotContrib = False\n";
 
-    pyInput += "abscorFeeder(sample, container, geom, useCor, corrections, Verbose=verbose, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult, PlotContrib=plotContrib)\n";
+    pyInput += "print abscorFeeder(sample, container, geom, useCor, corrections, Verbose=verbose, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
+
+    if(pyOutput.toStdString != "None")
+    {
+      pyOutput += "0";
+      MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(pyOutput.toStdString());
+      TextAxis* axis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
+
+      for(int histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
+      {
+        QString specName = QString::fromStdString(axis->label(histIndex));
+
+        if(specName.contains("Can"))
+        {
+          plotMiniPlot(outputWorkspace, histIndex, "ApplyCorrPlot", specName);
+          m_curves[specName]->setPen(QColor(Qt::red));
+        }
+
+        if(specName.contains("Calc"))
+        {
+          plotMiniPlot(outputWorkspace, histIndex, "ApplyCorrPlot", specName);
+          m_curves[specName]->setPen(QColor(Qt::green));
+        }
+      }
+  
+      replot("ApplyCorrPlot");
+    }
   }
 
   /**
