@@ -197,22 +197,22 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
     CreateWorkspace(OutputWorkspace=assWS, DataX=dataX, DataY=dataA1,
                     NSpec=ndet, UnitX='Wavelength',
                     VerticalAxisUnit=v_axis_unit, VerticalAxisValues=v_axis_values)
-    AddSampleLogs(assWS, sample_logs)
+    addSampleLogs(assWS, sample_logs)
 
     CreateWorkspace(OutputWorkspace=asscWS, DataX=dataX, DataY=dataA2,
                     NSpec=ndet, UnitX='Wavelength',
                     VerticalAxisUnit=v_axis_unit, VerticalAxisValues=v_axis_values)
-    AddSampleLogs(asscWS, sample_logs)
+    addSampleLogs(asscWS, sample_logs)
 
     CreateWorkspace(OutputWorkspace=acscWS, DataX=dataX, DataY=dataA3,
                     NSpec=ndet, UnitX='Wavelength',
                     VerticalAxisUnit=v_axis_unit, VerticalAxisValues=v_axis_values)
-    AddSampleLogs(acscWS, sample_logs)
+    addSampleLogs(acscWS, sample_logs)
 
     CreateWorkspace(OutputWorkspace=accWS, DataX=dataX, DataY=dataA4,
                     NSpec=ndet, UnitX='Wavelength',
                     VerticalAxisUnit=v_axis_unit, VerticalAxisValues=v_axis_values)
-    AddSampleLogs(accWS, sample_logs)
+    addSampleLogs(accWS, sample_logs)
 
     group = assWS + ',' + asscWS + ',' + acscWS + ',' + accWS
     GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=fname)
