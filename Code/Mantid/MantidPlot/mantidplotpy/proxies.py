@@ -748,7 +748,13 @@ def getWorkspaceNames(source):
         else:
             ws_names.append(wspace.getName())
     elif isinstance(source,str):
-        w = mantid.AnalysisDataService.Instance()[source]
+        w = None
+        try:
+            # for non-existent names this raises a KeyError
+            w = mantid.AnalysisDataService.Instance()[source]
+        except Exception, exc:
+            raise ValueError("Workspace '%s' not found!"%source)
+
         if w != None:
             names = getWorkspaceNames(w)
             for n in names:

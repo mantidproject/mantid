@@ -218,7 +218,7 @@ public:
     TS_ASSERT_EQUALS(ws->String(5, RunCol), "");
     TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 3);
     TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 2);
     TS_ASSERT_THROWS(ws->Int(6, GroupCol), std::runtime_error);
 
     //Tidy up
@@ -260,12 +260,12 @@ public:
     //Check that the table has been modified correctly
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 6);
-    TS_ASSERT_EQUALS(ws->String(1, RunCol), "");
     TS_ASSERT_EQUALS(ws->String(2, RunCol), "");
+    TS_ASSERT_EQUALS(ws->String(3, RunCol), "");
     TS_ASSERT_EQUALS(ws->String(4, RunCol), "13469");
     TS_ASSERT_EQUALS(ws->String(5, RunCol), "13470");
-    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 2);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 0);
     TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 1);
     TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 1);
     TS_ASSERT_THROWS(ws->Int(6, GroupCol), std::runtime_error);
@@ -310,20 +310,16 @@ public:
 
     //Check that the table was modified correctly
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
-    TS_ASSERT_EQUALS(ws->rowCount(), 7);
-    TS_ASSERT_EQUALS(ws->String(1, RunCol), "");
-    TS_ASSERT_EQUALS(ws->String(2, RunCol), "");
-    TS_ASSERT_EQUALS(ws->String(3, RunCol), "");
-    TS_ASSERT_EQUALS(ws->String(4, RunCol), "13462");
-    TS_ASSERT_EQUALS(ws->String(5, RunCol), "13469");
-    TS_ASSERT_EQUALS(ws->String(6, RunCol), "13470");
-    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 3);
-    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 1);
-    TS_ASSERT_EQUALS(ws->Int(6, GroupCol), 1);
-    TS_ASSERT_THROWS(ws->Int(7, GroupCol), std::runtime_error);
+    TS_ASSERT_EQUALS(ws->rowCount(), 5);
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "13462");
+    TS_ASSERT_EQUALS(ws->String(2, RunCol), "13469");
+    TS_ASSERT_EQUALS(ws->String(3, RunCol), "13470");
+    TS_ASSERT_EQUALS(ws->String(4, RunCol), "");
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 0);
+    TS_ASSERT_THROWS(ws->Int(5, GroupCol), std::runtime_error);
 
     //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
