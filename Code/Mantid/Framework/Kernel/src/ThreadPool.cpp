@@ -38,7 +38,7 @@ namespace Kernel
 
     if (numThreads == 0)
     {
-      //Uses OpenMP to find how many cores there are.
+      //Uses Poco to find how many cores there are.
       m_numThreads = getNumPhysicalCores();
     }
     else
