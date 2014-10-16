@@ -81,6 +81,8 @@ namespace IDA
     void openDirectoryDialog();
     /// Opens the Mantid Wiki web page of the current tab.
     void help();
+    /// Slot showing a message box to the user
+    void showMessageBox(const QString& message);
 
   private:
     /// UI form containing all Qt elements.

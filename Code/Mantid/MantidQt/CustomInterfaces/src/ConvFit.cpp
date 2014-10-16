@@ -195,7 +195,7 @@ namespace IDA
       "ftype = '" + ftype + "'\n"
       "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, Verbose=verbose, Plot=plot, Save=save)\n";
 
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput, false);
+    QString pyOutput = runPythonCode(pyInput);
   }
 
   /**
@@ -776,7 +776,7 @@ namespace IDA
       g_log.error("No fit type defined!");
     }
 
-    QString outputNm = m_pythonRunner.runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + m_cfInputWSName + QString("')\n"), false).trimmed();
+    QString outputNm = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + m_cfInputWSName + QString("')\n")).trimmed();
     outputNm += QString("conv_") + ftype + bg + uiForm().confit_lePlotSpectrum->text();  
     std::string output = outputNm.toStdString();
 

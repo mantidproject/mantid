@@ -108,6 +108,8 @@ namespace CustomInterfaces
     /// Function to run an algorithm on a seperate thread
     void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
 
+    QString runPythonCode(QString vode, bool no_output = false);
+
     /// Parent QWidget (if applicable)
     QWidget *m_parentWidget;
 
@@ -149,8 +151,8 @@ namespace CustomInterfaces
   signals:
     /// Send signal to parent window to show a message box to user
     void showMessageBox(const QString& message);
-    /// Run a python script
-    void runAsPythonScript(const QString & code, bool no_output);
+    /// Send signal to parent window to execute python script
+    void executePythonScript(const QString& pyInput, bool output);
 
   private:
     /// Overidden by child class.

@@ -10,7 +10,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class Elwin : public IDATab
+  class DLLExport Elwin : public IDATab
   {
     Q_OBJECT
 

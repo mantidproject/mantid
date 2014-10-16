@@ -83,7 +83,7 @@ namespace IDA
     pyInput +=
       "msdfit(input, startX, endX, spec_min=specMin, spec_max=specMax, Save=save, Verbose=verbose, Plot=plot)\n";
 
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput, false).trimmed();
+    runPythonCode(pyInput).trimmed();
   }
 
   void MSDFit::singleFit()
@@ -103,7 +103,7 @@ namespace IDA
       "output = msdfit(input, startX, endX, spec_min=specMin, spec_max=specMax, Save=False, Verbose=verbose, Plot=False)\n"
       "print output \n";
 
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput, false).trimmed();
+    QString pyOutput = runPythonCode(pyInput).trimmed();
     plotFit(pyOutput);
   }
 

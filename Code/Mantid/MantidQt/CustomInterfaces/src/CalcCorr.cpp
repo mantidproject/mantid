@@ -288,7 +288,7 @@ namespace IDA
       "canFormula = " + canFormula + "\n"
       "IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plot_opt=plotOpt, save=save, verbose=verbose)\n";
 
-    m_pythonRunner.runPythonCode(pyInput, false).trimmed();
+    runPythonCode(pyInput).trimmed();
   }
 
   bool CalcCorr::validate()

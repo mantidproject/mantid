@@ -232,7 +232,7 @@ namespace IDA
 
     pyInput += "print abscorFeeder(sample, container, geom, useCor, corrections, Verbose=verbose, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult)\n";
 
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
+    QString pyOutput = runPythonCode(pyInput).trimmed();
 
     if(pyOutput.toStdString() != "None")
     {

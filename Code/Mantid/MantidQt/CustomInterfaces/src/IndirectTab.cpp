@@ -22,7 +22,8 @@ namespace CustomInterfaces
       m_plots(), m_curves(), m_rangeSelectors(),
       m_properties(),
       m_dblManager(new QtDoublePropertyManager()), m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
-      m_dblEdFac(new DoubleEditorFactory())
+      m_dblEdFac(new DoubleEditorFactory()),
+      m_pythonRunner()
   {
     m_parentWidget = dynamic_cast<QWidget *>(parent);
 
@@ -35,7 +36,7 @@ namespace CustomInterfaces
     m_valPosDbl->setBottom(tolerance);
 
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmFinished(bool)));
-    connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
+    connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(executePythonScript(const QString&, bool)));
   }
 
   //----------------------------------------------------------------------------------------------
@@ -273,6 +274,18 @@ namespace CustomInterfaces
     {
       emit showMessageBox("Error running algorithm. \nSee results log for details.");
     }
+  }
+
+  /**
+   * Run Python code and return anything printed to stdout.
+   *
+   * @param code Python code the execute
+   * @param no_output Enable to ignore any output
+   * @returns What was printed to stdout
+   */
+  QString IndirectTab::runPythonCode(QString code, bool no_output)
+  {
+    return m_pythonRunner.runPythonCode(code, no_output);
   }
 
 } // namespace CustomInterfaces

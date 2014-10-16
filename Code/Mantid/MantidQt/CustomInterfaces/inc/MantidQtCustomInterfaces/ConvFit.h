@@ -13,7 +13,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class ConvFit : public IDATab
+  class DLLExport ConvFit : public IDATab
   {
     Q_OBJECT
 

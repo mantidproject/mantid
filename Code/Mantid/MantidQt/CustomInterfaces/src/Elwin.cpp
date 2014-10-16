@@ -119,8 +119,7 @@ namespace IDA
     pyInput +=
       "eq1_ws, eq2_ws = elwin(input, eRange, log_type=logType, Normalise=normalise, Save=save, Verbose=verbose, Plot=plot)\n";
 
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput, false).trimmed();
-
+    runPythonCode(pyInput).trimmed();
   }
 
   bool Elwin::validate()

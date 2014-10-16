@@ -89,8 +89,6 @@ namespace MantidQt
 			virtual void loadSettings(const QSettings& settings) = 0;
 
 		signals:
-			/// Send signal to parent window to execute python script
-			void executePythonScript(const QString& pyInput, bool output);
 			/// Send signal to parent window to show a message box to user
 			void showMessageBox(const QString& message);
 

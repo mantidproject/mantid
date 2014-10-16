@@ -53,10 +53,6 @@ namespace IDA
     /// Constructor
     IDATab(QWidget * parent = 0);
 
-    /// Sets up the tab.
-    void setupTab();
-    /// Runs the tab.
-    void runTab();
     /// Loads the tab's settings.
     void loadTabSettings(const QSettings & settings);
     /// Returns the URL of the Mantid Wiki webpage for the tab.

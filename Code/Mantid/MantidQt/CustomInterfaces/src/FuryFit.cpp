@@ -171,7 +171,7 @@ namespace IDA
       pyInput += "furyfitMult(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
     }
   
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput, false);
+    QString pyOutput = runPythonCode(pyInput);
   }
 
   bool FuryFit::validate()
@@ -604,7 +604,7 @@ namespace IDA
 
     QString pyInput = "from IndirectCommon import getWSprefix\nprint getWSprefix('%1')\n";
     pyInput = pyInput.arg(m_ffInputWSName);
-    QString outputNm = m_pythonRunner.runPythonCode(pyInput, false).trimmed();
+    QString outputNm = runPythonCode(pyInput).trimmed();
     outputNm += QString("fury_") + ftype + uiForm().furyfit_lePlotSpectrum->text();
     std::string output = outputNm.toStdString();
 
