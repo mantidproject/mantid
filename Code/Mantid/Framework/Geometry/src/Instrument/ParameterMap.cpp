@@ -331,7 +331,7 @@ namespace Mantid
       // can not add null pointer
       if(!par)return;
 
-      PARALLEL_CRITICAL(parameter_add)
+      PARALLEL_CRITICAL(m_mapAccess)
       {
         auto existing_par = positionOf(comp,par->name().c_str(),"");
         // As this is only an add method it should really throw if it already exists.
@@ -654,7 +654,7 @@ namespace Mantid
       Parameter_sptr result;
       if(!comp) return result;
 
-      PARALLEL_CRITICAL(ParameterMap_get)
+      PARALLEL_CRITICAL(m_mapAccess)
       {
         auto itr = positionOf(comp,name, type);
         if (itr != m_map.end())
@@ -662,8 +662,8 @@ namespace Mantid
       }
       return result;
     }
-    
-    /**Return an iterator pointing to a named parameter of a given type. 
+
+    /**Return an iterator pointing to a named parameter of a given type.
      * @param comp :: Component to which parameter is related
      * @param name :: Parameter name
      * @param type :: An optional type string. If empty, any type is returned
@@ -739,7 +739,7 @@ namespace Mantid
     Parameter_sptr ParameterMap::getByType(const IComponent* comp, const std::string& type) const
     {
       Parameter_sptr result = Parameter_sptr();
-      PARALLEL_CRITICAL(ParameterMap_get)
+      PARALLEL_CRITICAL(m_mapAccess)
       {
         if( !m_map.empty() )
         {
@@ -763,7 +763,7 @@ namespace Mantid
              } // found->firdst
           } // it_found != m_map.end()
         } //!m_map.empty()
-      } // PARALLEL_CRITICAL(ParameterMap_get)
+      } // PARALLEL_CRITICAL(m_map_access)
       return result;
     }
 
