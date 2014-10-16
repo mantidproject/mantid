@@ -110,9 +110,9 @@ void IndirectBayes::runClicked()
 {
 	int tabIndex = m_uiForm.indirectBayesTabs->currentIndex();
 
-	if(m_bayesTabs[tabIndex]->validate())
+	if(m_bayesTabs[tabIndex]->validateTab())
 	{
-		m_bayesTabs[tabIndex]->run();
+		m_bayesTabs[tabIndex]->runTab();
 	}
 }
 

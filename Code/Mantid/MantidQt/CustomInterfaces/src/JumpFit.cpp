@@ -7,6 +7,8 @@
 #include <string>
 #include <boost/lexical_cast.hpp>
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
 	namespace CustomInterfaces
@@ -16,9 +18,18 @@ namespace MantidQt
 		{
 			m_uiForm.setupUi(parent);
 
-			//add the plot to the ui form
-			m_uiForm.plotSpace->addWidget(m_plot);
-			//add the properties browser to the ui form
+			// Create the plot
+      m_plots["JumpFitPlot"] = new QwtPlot(m_parentWidget);
+      m_plots["JumpFitPlot"]->setCanvasBackground(Qt::white);
+      m_plots["JumpFitPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
+      m_plots["JumpFitPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
+			m_uiForm.plotSpace->addWidget(m_plots["JumpFitPlot"]);
+
+      // Create range selector
+      m_rangeSelectors["JumpFitQ"] = new MantidWidgets::RangeSelector(m_plots["JumpFitPlot"]);
+      connect(m_rangeSelectors["JumpFitQ"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(qRangeChanged(double, double)));
+
+			// Add the properties browser to the ui form
 			m_uiForm.treeSpace->addWidget(m_propTree);
 
 			m_properties["QMin"] = m_dblManager->addProperty("QMin");
@@ -36,7 +47,14 @@ namespace MantidQt
 			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
 			// Connect width selector to handler method
 			connect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(handleWidthChange(const QString&)));
+
+      // Connect algorithm runner to completion handler function
+      connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(fitAlgDone(bool)));
 		}
+
+    void JumpFit::setup()
+    {
+    }
 
 		/**
 		 * Validate the form to check the program can be run
@@ -70,7 +88,33 @@ namespace MantidQt
 		 */
 		void JumpFit::run() 
 		{
-      using namespace Mantid::API;
+			bool verbose = m_uiForm.chkVerbose->isChecked();
+			bool save = m_uiForm.chkSave->isChecked();
+			bool plot = m_uiForm.chkPlot->isChecked();
+
+      runImpl(verbose, plot, save);
+		}
+
+    /**
+     * Runs the JumpFit algorithm with preview parameters to update the preview plot.
+     */
+    void JumpFit::runPreviewAlgorithm()
+    {
+      runImpl();
+    }
+
+    /**
+     * Runs algorithm.
+     *
+     * @param verbose Enable/disable verbose option
+     * @param plot Enable/disable plotting
+     * @param save Enable/disable saving
+     */
+    void JumpFit::runImpl(bool verbose, bool plot, bool save)
+    {
+      // Do noting with invalid data
+			if(!m_uiForm.dsSample->isValid())
+        return;
 
 			// Fit function to use
 			QString fitFunction("ChudleyElliot");
@@ -97,7 +141,7 @@ namespace MantidQt
 			std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
       long width = m_spectraList[widthText];
 
-      IAlgorithm_sptr fitAlg = AlgorithmManager::Instance().create("JumpFit");
+      fitAlg = AlgorithmManager::Instance().create("JumpFit");
       fitAlg->initialize();
 
       fitAlg->setProperty("InputWorkspace", ws);
@@ -107,15 +151,48 @@ namespace MantidQt
       fitAlg->setProperty("QMin", m_dblManager->value(m_properties["QMin"]));
       fitAlg->setProperty("QMax", m_dblManager->value(m_properties["QMax"]));
 
-			bool verbose = m_uiForm.chkVerbose->isChecked();
-			bool save = m_uiForm.chkSave->isChecked();
-			bool plot = m_uiForm.chkPlot->isChecked();
-      fitAlg->setProperty("Plot", plot);
       fitAlg->setProperty("Verbose", verbose);
+      fitAlg->setProperty("Plot", plot);
       fitAlg->setProperty("Save", save);
 
-      runAlgorithm(fitAlg);
-		}
+      if(m_batchAlgoRunner->queueLength() < 1)
+        runAlgorithm(fitAlg);
+    }
+
+    /**
+     * Handles the JumpFit algorithm finishing, used to plot fit in miniplot.
+     *
+     * @param error True if the algorithm failed, false otherwise
+     */
+    void JumpFit::fitAlgDone(bool error)
+    {
+      // Ignore errors
+      if(error)
+        return;
+
+      std::string outWsName = fitAlg->getPropertyValue("Output") + "_Workspace";
+      MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
+      TextAxis* axis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
+
+      for(unsigned int histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
+      {
+        QString specName = QString::fromStdString(axis->label(histIndex));
+
+        if(specName == "Calc")
+        {
+          plotMiniPlot(outputWorkspace, histIndex, "JumpFitPlot", specName);
+          m_curves[specName]->setPen(QColor(Qt::red));
+        }
+
+        if(specName == "Diff")
+        {
+          plotMiniPlot(outputWorkspace, histIndex, "JumpFitPlot", specName);
+          m_curves[specName]->setPen(QColor(Qt::green));
+        }
+      }
+  
+      replot("JumpFitPlot");
+    }
 
 		/**
 		 * Set the data selectors to use the default save directory
@@ -136,6 +213,11 @@ namespace MantidQt
 		 */
 		void JumpFit::handleSampleInputReady(const QString& filename)
 		{
+      // Disable things that run the preview algorithm
+      disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(runPreviewAlgorithm()));
+			disconnect(m_uiForm.cbFunction, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(runPreviewAlgorithm()));
+			disconnect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(runPreviewAlgorithm()));
+
 			auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(filename.toStdString());
 			auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 
@@ -146,27 +228,35 @@ namespace MantidQt
 				m_uiForm.cbWidth->setEnabled(true);
 
 				std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
-				plotMiniPlot(filename, m_spectraList[currentWidth]);
+				plotMiniPlot(filename, m_spectraList[currentWidth], "JumpFitPlot", "RawPlotCurve");
 				std::pair<double,double> res;
-				std::pair<double,double> range = getCurveRange();
+				std::pair<double,double> range = getCurveRange("RawPlotCurve");
 
 				//Use the values from the instrument parameter file if we can
 				if(getInstrumentResolution(filename, res))
 				{
-					setMiniPlotGuides(m_properties["QMin"], m_properties["QMax"], res);
+					setMiniPlotGuides("JumpFitQ", m_properties["QMin"], m_properties["QMax"], res);
 				}
 				else
 				{
-					setMiniPlotGuides(m_properties["QMin"], m_properties["QMax"], range);
+					setMiniPlotGuides("JumpFitQ", m_properties["QMin"], m_properties["QMax"], range);
 				}
 
-				setPlotRange(m_properties["QMin"], m_properties["QMax"], range);
+				setPlotRange("JumpFitQ", m_properties["QMin"], m_properties["QMax"], range);
 			}
 			else
 			{
 				m_uiForm.cbWidth->setEnabled(false);
 				emit showMessageBox("Workspace doesn't appear to contain any width data");
 			}
+
+      // Update preview plot
+      runPreviewAlgorithm();
+
+      // Re-enable things that run the preview algorithm
+      connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(runPreviewAlgorithm()));
+			connect(m_uiForm.cbFunction, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(runPreviewAlgorithm()));
+			connect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(runPreviewAlgorithm()));
 		}
 
 		/**
@@ -233,29 +323,21 @@ namespace MantidQt
 			{
 				if(validate())
 				{
-					plotMiniPlot(sampleName, m_spectraList[text.toStdString()]);
+					plotMiniPlot(sampleName, m_spectraList[text.toStdString()], "JumpFitPlot", "RawPlotCurve");
 				}
 			}
 		}
 
 		/**
-		 * Updates the property manager when the lower guide is moved on the mini plot
+		 * Updates the property manager when the range selector is moved on the mini plot.
 		 *
 		 * @param min :: The new value of the lower guide
-		 */
-		void JumpFit::minValueChanged(double min)
-    {
-      m_dblManager->setValue(m_properties["QMin"], min);
-    }
-
-		/**
-		 * Updates the property manager when the upper guide is moved on the mini plot
-		 *
 		 * @param max :: The new value of the upper guide
 		 */
-    void JumpFit::maxValueChanged(double max)
+		void JumpFit::qRangeChanged(double min, double max)
     {
-			m_dblManager->setValue(m_properties["QMax"], max);	
+      m_dblManager->setValue(m_properties["QMin"], min);
+			m_dblManager->setValue(m_properties["QMax"], max);
     }
 
 		/**
@@ -268,11 +350,11 @@ namespace MantidQt
     {
     	if(prop == m_properties["QMin"])
     	{
-    		updateLowerGuide(m_properties["QMin"], m_properties["QMax"], val);
+    		updateLowerGuide(m_rangeSelectors["JumpFitQ"], m_properties["QMin"], m_properties["QMax"], val);
     	}
     	else if (prop == m_properties["QMax"])
     	{
-				updateUpperGuide(m_properties["QMin"], m_properties["QMax"], val);
+				updateUpperGuide(m_rangeSelectors["JumpFitQ"], m_properties["QMin"], m_properties["QMax"], val);
     	}
     }
 	} // namespace CustomInterfaces

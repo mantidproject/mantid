@@ -1,3 +1,4 @@
+#include "MantidAPI/TextAxis.h"
 #include "MantidQtCustomInterfaces/Quasi.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
@@ -10,10 +11,19 @@ namespace MantidQt
 		{
 			m_uiForm.setupUi(parent);
 
-			//add the plot to the ui form
-			m_uiForm.plotSpace->addWidget(m_plot);
+			// Create the plot
+      m_plots["QuasiPlot"] = new QwtPlot(m_parentWidget);
+      m_plots["QuasiPlot"]->setCanvasBackground(Qt::white);
+      m_plots["QuasiPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
+      m_plots["QuasiPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
+			m_uiForm.plotSpace->addWidget(m_plots["QuasiPlot"]);
 
-			//add the properties browser to the ui form
+      // Create range selector
+      m_rangeSelectors["QuasiERange"] = new MantidWidgets::RangeSelector(m_plots["QuasiPlot"]);
+      connect(m_rangeSelectors["QuasiERange"], SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
+      connect(m_rangeSelectors["QuasiERange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
+
+			// Add the properties browser to the UI form
 			m_uiForm.treeSpace->addWidget(m_propTree);
 
 			m_properties["EMin"] = m_dblManager->addProperty("EMin");
@@ -61,6 +71,10 @@ namespace MantidQt
 			m_uiForm.mwFixWidthDat->readSettings(settings.group());
 		}
 
+    void Quasi::setup()
+    {
+    }
+
 		/**
 		 * Validate the form to check the program can be run
 		 * 
@@ -101,6 +115,8 @@ namespace MantidQt
 		 */
 		void Quasi::run() 
 		{
+      using namespace Mantid::API;
+
 			// Using 1/0 instead of True/False for compatibility with underlying Fortran code
 			// in some places
 			QString verbose("False");
@@ -170,6 +186,30 @@ namespace MantidQt
 										" Save="+save+", Plot='"+plot+"', Verbose="+verbose+")\n";
 
 			runPythonScript(pyInput);
+
+      //Update mini plot
+      QString outWsName = sampleName.left(sampleName.size() - 3) + "QLr_Workspace_0";
+      MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName.toStdString());
+      TextAxis* axis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
+
+      for(int histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
+      {
+        QString specName = QString::fromStdString(axis->label(histIndex));
+
+        if(specName.contains("fit"))
+        {
+          plotMiniPlot(outputWorkspace, histIndex, "QuasiPlot", specName);
+          m_curves[specName]->setPen(QColor(Qt::red));
+        }
+
+        if(specName.contains("diff"))
+        {
+          plotMiniPlot(outputWorkspace, histIndex, "QuasiPlot", specName);
+          m_curves[specName]->setPen(QColor(Qt::green));
+        }
+      }
+  
+      replot("QuasiPlot");
 		}
 
 		/**
@@ -180,10 +220,10 @@ namespace MantidQt
 		 */
 		void Quasi::handleSampleInputReady(const QString& filename)
 		{
-			plotMiniPlot(filename, 0);
-			std::pair<double,double> range = getCurveRange();
-			setMiniPlotGuides(m_properties["EMin"], m_properties["EMax"], range);
-			setPlotRange(m_properties["EMin"], m_properties["EMax"], range);
+			plotMiniPlot(filename, 0, "QuasiPlot", "RawPlotCurve");
+			std::pair<double,double> range = getCurveRange("RawPlotCurve");
+			setMiniPlotGuides("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
+			setPlotRange("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
 		}
 
 		/**
@@ -216,11 +256,11 @@ namespace MantidQt
     {
     	if(prop == m_properties["EMin"])
     	{
-    		updateLowerGuide(m_properties["EMin"], m_properties["EMax"], val);
+    		updateLowerGuide(m_rangeSelectors["QuasiERange"], m_properties["EMin"], m_properties["EMax"], val);
     	}
     	else if (prop == m_properties["EMax"])
     	{
-				updateUpperGuide(m_properties["EMin"], m_properties["EMax"], val);
+				updateUpperGuide(m_rangeSelectors["QuasiERange"], m_properties["EMin"], m_properties["EMax"], val);
     	}
     }
 

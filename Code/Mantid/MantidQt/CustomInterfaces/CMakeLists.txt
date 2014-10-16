@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/IndirectSimulation.cpp
 	src/IndirectSimulationTab.cpp
   src/IndirectSqw.cpp
+	src/IndirectTab.cpp
   src/IndirectTransmission.cpp
 	src/JumpFit.cpp
 	src/MSDFit.cpp
@@ -108,6 +109,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
 	inc/MantidQtCustomInterfaces/IndirectSqw.h
   inc/MantidQtCustomInterfaces/IndirectTransmission.h
+  inc/MantidQtCustomInterfaces/IndirectTab.h
 	inc/MantidQtCustomInterfaces/IReflPresenter.h
 	inc/MantidQtCustomInterfaces/JumpFit.h
 	inc/MantidQtCustomInterfaces/MSDFit.h
@@ -191,6 +193,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
                 inc/MantidQtCustomInterfaces/IndirectSqw.h
                 inc/MantidQtCustomInterfaces/IndirectTransmission.h
+                inc/MantidQtCustomInterfaces/IndirectTab.h
                 inc/MantidQtCustomInterfaces/JumpFit.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
                 inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
