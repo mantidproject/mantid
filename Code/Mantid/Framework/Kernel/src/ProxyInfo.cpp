@@ -1,9 +1,9 @@
-#include "MantidScriptRepository/ProxyInfo.h"
+#include "MantidKernel/ProxyInfo.h"
 #include <stdexcept>
 
 namespace Mantid
 {
-  namespace ScriptRepository
+  namespace Kernel
   {
 
     //----------------------------------------------------------------------------------------------
@@ -30,6 +30,10 @@ namespace Mantid
     ProxyInfo::ProxyInfo(const std::string& host, const int port, const bool isHttpProxy) :
         m_host(host), m_port(port), m_isHttpProxy(isHttpProxy), m_isEmptyProxy(false)
     {
+      if(host.empty() || port == 0)
+      {
+        m_isEmptyProxy = true;
+      }
     }
 
     /**
@@ -104,5 +108,5 @@ namespace Mantid
       return *this;
     }
 
-  } // namespace ScriptRepository
+  } // namespace Kernel
 } // namespace Mantid

@@ -1,12 +1,12 @@
-#ifndef MANTID_SCRIPTREPOSITORY_PROXYINFO_H_
-#define MANTID_SCRIPTREPOSITORY_PROXYINFO_H_
+#ifndef MANTID_KERNEL_PROXYINFO_H_
+#define MANTID_KERNEL_PROXYINFO_H_
 
 #include "MantidKernel/System.h"
 #include <string>
 
 namespace Mantid
 {
-  namespace ScriptRepository
+  namespace Kernel
   {
 
     /** ProxyInfo : Container for carrying around network proxy information
@@ -52,7 +52,7 @@ namespace Mantid
 
     };
 
-  } // namespace ScriptRepository
+  } // namespace Kernel
 } // namespace Mantid
 
-#endif  /* MANTID_SCRIPTREPOSITORY_PROXYINFO_H_ */
+#endif  /* MANTID_KERNEL_PROXYINFO_H_ */

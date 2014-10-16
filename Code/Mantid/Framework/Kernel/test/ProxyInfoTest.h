@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidScriptRepository/ProxyInfo.h"
+#include "MantidKernel/ProxyInfo.h"
 
-using Mantid::ScriptRepository::ProxyInfo;
+using Mantid::Kernel::ProxyInfo;
 
 class ProxyInfoTest: public CxxTest::TestSuite
 {
@@ -28,6 +28,24 @@ public:
     TS_ASSERT_THROWS(proxyInfo.host(), std::logic_error&);
     TS_ASSERT_THROWS(proxyInfo.port(), std::logic_error&);
     TSM_ASSERT("Cannot be a http proxy if not a proxy at all.", !proxyInfo.isHttpProxy());
+  }
+
+  void test_empty_host_is_empy_proxy()
+  {
+    const std::string url = "";
+    const int port = 1;
+    const bool isHttpProxy = true;
+    ProxyInfo proxyInfo(url, port, isHttpProxy);
+    TSM_ASSERT("This is a NOT valid proxy object", proxyInfo.emptyProxy());
+  }
+
+  void test_empty_port_is_empy_proxy()
+  {
+    const std::string url = "some_url";
+    const int port = 0;
+    const bool isHttpProxy = true;
+    ProxyInfo proxyInfo(url, port, isHttpProxy);
+    TSM_ASSERT("This is a NOT valid proxy object", proxyInfo.emptyProxy());
   }
 
   void test_construction_proxy()
