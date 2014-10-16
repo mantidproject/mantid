@@ -75,7 +75,7 @@ private:
   /// Store a map of thread indices to messages
   std::map<Poco::Thread::TID, std::string> m_messages;
   /// mutex protecting logstream
-  Poco::Mutex m_mutex;
+  Poco::FastMutex m_mutex;
 };
 
 

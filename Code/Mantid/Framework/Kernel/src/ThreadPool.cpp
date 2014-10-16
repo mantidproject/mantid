@@ -65,7 +65,7 @@ namespace Kernel
    */
   size_t ThreadPool::getNumPhysicalCores()
   {
-      return  Poco::Environment::processorCount();
+    return  Poco::Environment::processorCount();
   }
 
   //--------------------------------------------------------------------------------

@@ -2689,32 +2689,31 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(const std::st
   return out;
 }
     
-/// mutexed getter/setter for shortest_tof;
+// mutexed getter/setter for shortest_tof;
 double LoadEventNexus::get_shortest_tof()
 {
-  Poco::Mutex::ScopedLock lock(m_shortest_tof_Mutex);
+  Poco::FastMutex::ScopedLock lock(m_shortest_tof_Mutex);
   return shortest_tof;
 }
     
 void LoadEventNexus::set_shortest_tof(double tof)
 {
-  Poco::Mutex::ScopedLock lock(m_shortest_tof_Mutex);
+  Poco::FastMutex::ScopedLock lock(m_shortest_tof_Mutex);
   this->shortest_tof = tof;
 }
     
-/// mutexed getter/setter for longest_tof
+// mutexed getter/setter for longest_tof
 double LoadEventNexus::get_longest_tof()
 {
-  Poco::Mutex::ScopedLock lock(m_longest_tof_Mutex);
+  Poco::FastMutex::ScopedLock lock(m_longest_tof_Mutex);
   return longest_tof;
 }
 
 void LoadEventNexus::set_longest_tof(double tof)
 {
-  Poco::Mutex::ScopedLock lock(m_longest_tof_Mutex);
+  Poco::FastMutex::ScopedLock lock(m_longest_tof_Mutex);
     this->longest_tof = tof;
 }
-
 
 
 } // namespace DataHandling
