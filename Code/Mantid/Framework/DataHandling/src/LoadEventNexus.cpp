@@ -354,11 +354,9 @@ namespace DataHandling
                                   "monotonically increasing pulse times" << std::endl;
 
       //Join back up the tof limits to the global ones
-      PARALLEL_CRITICAL(tof_limits)
       {
-        //This is not thread safe, so only one thread at a time runs this.
-        if (my_shortest_tof < alg->shortest_tof) { alg->shortest_tof = my_shortest_tof;}
-        if (my_longest_tof > alg->longest_tof ) { alg->longest_tof  = my_longest_tof;}
+        if (my_shortest_tof < alg->get_shortest_tof() ) { alg->set_shortest_tof(my_shortest_tof);}
+        if (my_longest_tof > alg->get_longest_tof() ) { alg->set_longest_tof(my_longest_tof);}
         alg->bad_tofs += badTofs;
         alg->discarded_events += my_discarded_events;
       }
@@ -2690,6 +2688,33 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(const std::st
   }
   return out;
 }
+    
+/// mutexed getter/setter for shortest_tof;
+double LoadEventNexus::get_shortest_tof()
+{
+  Poco::Mutex::ScopedLock lock(m_shortest_tof_Mutex);
+  return shortest_tof;
+}
+    
+void LoadEventNexus::set_shortest_tof(double tof)
+{
+  Poco::Mutex::ScopedLock lock(m_shortest_tof_Mutex);
+  this->shortest_tof = tof;
+}
+    
+/// mutexed getter/setter for longest_tof
+double LoadEventNexus::get_longest_tof()
+{
+  Poco::Mutex::ScopedLock lock(m_longest_tof_Mutex);
+  return longest_tof;
+}
+
+void LoadEventNexus::set_longest_tof(double tof)
+{
+  Poco::Mutex::ScopedLock lock(m_shortest_tof_Mutex);
+    this->longest_tof = tof;
+}
+
 
 
 } // namespace DataHandling
