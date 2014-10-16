@@ -213,8 +213,13 @@ public slots:
   ApplicationWindow* open(const QString& fn, bool factorySettings = false, bool newProject = true);
   ApplicationWindow* openProject(const QString& fn, bool factorySettings = false, bool newProject = true);
   ApplicationWindow* importOPJ(const QString& fn, bool factorySettings = false, bool newProject = true);
-  /// Load mantid data files using generic load algorithm
+  /// Load mantid data files using generic load algorithm, opening user dialog
   void loadDataFile();
+  /// Load mantid data files (generic load algorithm)
+  void loadDataFileByName(QString fn);
+  /// Open from the list of recent files
+  void openRecentFile(int index);
+
   /**
   * \brief Create a new project from a data file.
   *
@@ -619,6 +624,7 @@ public slots:
   Graph3D* openSurfacePlot(ApplicationWindow* app, const QStringList &lst);
   Graph* openGraph(ApplicationWindow* app, MultiLayer *plot, const QStringList &list);
   void openRecentProject(int index);
+
   //@}
 
   //! \name Table Tools
@@ -852,7 +858,11 @@ public slots:
   void custom3DGrids(int grids);
   //@}
 
+  //! Updates the recent projects list and menu (but doesn't insert anything)
   void updateRecentProjectsList();
+
+  //! Inserts file name in the list of recent files (if fname not empty) and updates the "recent files" menu
+  void updateRecentFilesList(QString fname="");
 
   //!  connected to the done(bool) signal of the http object
   //void receivedVersionFile(bool error);
@@ -1279,6 +1289,7 @@ public:
   //! Describes which windows are shown when the folder becomes the current folder
   ShowWindowsPolicy show_windows_policy;
   enum {MaxRecentProjects = 10};
+  enum {MaxRecentFiles = MaxRecentProjects};
   //! File version code used when opening project files (= maj * 100 + min * 10 + patch)
   int d_file_version;
 
@@ -1327,9 +1338,9 @@ public:
   QColor tableBkgdColor, tableTextColor, tableHeaderColor;
   QString projectname, columnSeparator, helpFilePath, appLanguage;
   QString configFilePath, fitPluginsPath, fitModelsPath, asciiDirPath, imagesDirPath, scriptsDirPath;
-  int ignoredLines, savingTimerId, plot3DResolution, recentMenuID;
+  int ignoredLines, savingTimerId, plot3DResolution, recentMenuID, recentFilesMenuID;
   bool renameColumns, strip_spaces, simplify_spaces;
-  QStringList recentProjects;
+  QStringList recentProjects, recentFiles;
   bool saved, showPlot3DProjection, showPlot3DLegend, orthogonal3DPlots, autoscale3DPlots;
   QStringList plot3DColors, locales;
   QStringList functions; //user-defined functions;
@@ -1413,7 +1424,7 @@ private:
 
   QWidget* catalogSearch;
 
-  QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent, *interfaceMenu;
+  QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recentProjectsMenu, *recentFilesMenu, *interfaceMenu;
   
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
