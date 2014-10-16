@@ -85,8 +85,7 @@ namespace IDA
     m_blnEdFac = new QtCheckBoxFactory(this);
 
     // Set up all tabs.
-    auto tab = m_tabs.begin();
-    for( ; tab != m_tabs.end(); ++tab )
+    for(auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab)
       tab->second->setupTab();
 
     connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));

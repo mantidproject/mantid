@@ -10,7 +10,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class ApplyCorr : public IDATab
+  class DLLExport ApplyCorr : public IDATab
   {
     Q_OBJECT
 
@@ -24,7 +24,7 @@ namespace IDA
   private:
     virtual void setup();
     virtual void run();
-    virtual QString validate();
+    virtual bool validate();
     virtual void loadSettings(const QSettings & settings);
     virtual QString helpURL() {return "AbsCor";}
 

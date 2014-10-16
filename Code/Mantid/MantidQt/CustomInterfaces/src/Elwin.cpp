@@ -13,83 +13,78 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  Elwin::Elwin(QWidget * parent) : IDATab(parent), m_elwPlot(NULL), m_elwR1(NULL), 
-    m_elwR2(NULL), m_elwDataCurve(NULL), m_elwTree(NULL), m_elwProp(), 
-    m_elwDblMng(NULL), m_elwBlnMng(NULL), m_elwGrpMng(NULL)
-  {}
-  
+  Elwin::Elwin(QWidget * parent) : IDATab(parent),
+    m_elwTree(NULL)
+  {
+  }
+
   void Elwin::setup()
   {
     // Create QtTreePropertyBrowser object
     m_elwTree = new QtTreePropertyBrowser();
     uiForm().elwin_properties->addWidget(m_elwTree);
 
-    // Create Manager Objects
-    m_elwDblMng = new QtDoublePropertyManager();
-    m_elwBlnMng = new QtBoolPropertyManager();
-    m_elwGrpMng = new QtGroupPropertyManager();
-
     // Editor Factories
-    m_elwTree->setFactoryForManager(m_elwDblMng, doubleEditorFactory());
-    m_elwTree->setFactoryForManager(m_elwBlnMng, qtCheckBoxFactory());
+    m_elwTree->setFactoryForManager(m_dblManager, doubleEditorFactory());
+    m_elwTree->setFactoryForManager(m_blnManager, qtCheckBoxFactory());
 
     // Create Properties
-    m_elwProp["R1S"] = m_elwDblMng->addProperty("Start");
-    m_elwDblMng->setDecimals(m_elwProp["R1S"], NUM_DECIMALS);
-    m_elwProp["R1E"] = m_elwDblMng->addProperty("End");
-    m_elwDblMng->setDecimals(m_elwProp["R1E"], NUM_DECIMALS);  
-    m_elwProp["R2S"] = m_elwDblMng->addProperty("Start");
-    m_elwDblMng->setDecimals(m_elwProp["R2S"], NUM_DECIMALS);
-    m_elwProp["R2E"] = m_elwDblMng->addProperty("End");
-    m_elwDblMng->setDecimals(m_elwProp["R2E"], NUM_DECIMALS);
+    m_properties["R1S"] = m_dblManager->addProperty("Start");
+    m_dblManager->setDecimals(m_properties["R1S"], NUM_DECIMALS);
+    m_properties["R1E"] = m_dblManager->addProperty("End");
+    m_dblManager->setDecimals(m_properties["R1E"], NUM_DECIMALS);  
+    m_properties["R2S"] = m_dblManager->addProperty("Start");
+    m_dblManager->setDecimals(m_properties["R2S"], NUM_DECIMALS);
+    m_properties["R2E"] = m_dblManager->addProperty("End");
+    m_dblManager->setDecimals(m_properties["R2E"], NUM_DECIMALS);
 
-    m_elwProp["UseTwoRanges"] = m_elwBlnMng->addProperty("Use Two Ranges");
+    m_properties["UseTwoRanges"] = m_blnManager->addProperty("Use Two Ranges");
 
-    m_elwProp["Range1"] = m_elwGrpMng->addProperty("Range One");
-    m_elwProp["Range1"]->addSubProperty(m_elwProp["R1S"]);
-    m_elwProp["Range1"]->addSubProperty(m_elwProp["R1E"]);
-    m_elwProp["Range2"] = m_elwGrpMng->addProperty("Range Two");
-    m_elwProp["Range2"]->addSubProperty(m_elwProp["R2S"]);
-    m_elwProp["Range2"]->addSubProperty(m_elwProp["R2E"]);
+    m_properties["Range1"] = m_grpManager->addProperty("Range One");
+    m_properties["Range1"]->addSubProperty(m_properties["R1S"]);
+    m_properties["Range1"]->addSubProperty(m_properties["R1E"]);
+    m_properties["Range2"] = m_grpManager->addProperty("Range Two");
+    m_properties["Range2"]->addSubProperty(m_properties["R2S"]);
+    m_properties["Range2"]->addSubProperty(m_properties["R2E"]);
 
-    m_elwTree->addProperty(m_elwProp["Range1"]);
-    m_elwTree->addProperty(m_elwProp["UseTwoRanges"]);
-    m_elwTree->addProperty(m_elwProp["Range2"]);
+    m_elwTree->addProperty(m_properties["Range1"]);
+    m_elwTree->addProperty(m_properties["UseTwoRanges"]);
+    m_elwTree->addProperty(m_properties["Range2"]);
 
     // Create Slice Plot Widget for Range Selection
-    m_elwPlot = new QwtPlot(this);
-    m_elwPlot->setAxisFont(QwtPlot::xBottom, this->font());
-    m_elwPlot->setAxisFont(QwtPlot::yLeft, this->font());
-    uiForm().elwin_plot->addWidget(m_elwPlot);
-    m_elwPlot->setCanvasBackground(Qt::white);
+    m_plots["ElwinPlot"] = new QwtPlot(m_parentWidget);
+    m_plots["ElwinPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
+    m_plots["ElwinPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
+    uiForm().elwin_plot->addWidget(m_plots["ElwinPlot"]);
+    m_plots["ElwinPlot"]->setCanvasBackground(Qt::white);
     // We always want one range selector... the second one can be controlled from
     // within the elwinTwoRanges(bool state) function
-    m_elwR1 = new MantidWidgets::RangeSelector(m_elwPlot);
-    connect(m_elwR1, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
-    connect(m_elwR1, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
+    m_rangeSelectors["ElwinRange1"] = new MantidWidgets::RangeSelector(m_plots["ElwinPlot"]);
+    connect(m_rangeSelectors["ElwinRange1"], SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
+    connect(m_rangeSelectors["ElwinRange1"], SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
     // create the second range
-    m_elwR2 = new MantidWidgets::RangeSelector(m_elwPlot);
-    m_elwR2->setColour(Qt::darkGreen); // dark green for background
-    connect(m_elwR1, SIGNAL(rangeChanged(double, double)), m_elwR2, SLOT(setRange(double, double)));
-    connect(m_elwR2, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
-    connect(m_elwR2, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
-    m_elwR2->setRange(m_elwR1->getRange());
+    m_rangeSelectors["ElwinRange2"] = new MantidWidgets::RangeSelector(m_plots["ElwinPlot"]);
+    m_rangeSelectors["ElwinRange2"]->setColour(Qt::darkGreen); // dark green for background
+    connect(m_rangeSelectors["ElwinRange1"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["ElwinRange2"], SLOT(setRange(double, double)));
+    connect(m_rangeSelectors["ElwinRange2"], SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
+    connect(m_rangeSelectors["ElwinRange2"], SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
+    m_rangeSelectors["ElwinRange2"]->setRange(m_rangeSelectors["ElwinRange1"]->getRange());
     // Refresh the plot window
-    m_elwPlot->replot();
+    replot("ElwinPlot");
   
-    connect(m_elwDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
-    connect(m_elwBlnMng, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(twoRanges(QtProperty*, bool)));
+    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
+    connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(twoRanges(QtProperty*, bool)));
     twoRanges(0, false);
 
     connect(uiForm().elwin_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
     connect(uiForm().elwin_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
 
     // Set any default values
-    m_elwDblMng->setValue(m_elwProp["R1S"], -0.02);
-    m_elwDblMng->setValue(m_elwProp["R1E"], 0.02);
+    m_dblManager->setValue(m_properties["R1S"], -0.02);
+    m_dblManager->setValue(m_properties["R1E"], 0.02);
 
-    m_elwDblMng->setValue(m_elwProp["R2S"], -0.24);
-    m_elwDblMng->setValue(m_elwProp["R2E"], -0.22);
+    m_dblManager->setValue(m_properties["R2S"], -0.24);
+    m_dblManager->setValue(m_properties["R2E"], -0.22);
   }
 
   void Elwin::run()
@@ -97,11 +92,11 @@ namespace IDA
     QString pyInput =
       "from IndirectDataAnalysis import elwin\n"
       "input = [r'" + uiForm().elwin_inputFile->getFilenames().join("', r'") + "']\n"
-      "eRange = [ " + QString::number(m_elwDblMng->value(m_elwProp["R1S"])) +","+ QString::number(m_elwDblMng->value(m_elwProp["R1E"]));
+      "eRange = [ " + QString::number(m_dblManager->value(m_properties["R1S"])) +","+ QString::number(m_dblManager->value(m_properties["R1E"]));
 
-    if ( m_elwBlnMng->value(m_elwProp["UseTwoRanges"]) )
+    if ( m_blnManager->value(m_properties["UseTwoRanges"]) )
     {
-      pyInput += ", " + QString::number(m_elwDblMng->value(m_elwProp["R2S"])) + ", " + QString::number(m_elwDblMng->value(m_elwProp["R2E"]));
+      pyInput += ", " + QString::number(m_dblManager->value(m_properties["R2S"])) + ", " + QString::number(m_dblManager->value(m_properties["R2E"]));
     }
 
     pyInput+= "]\n";
@@ -124,28 +119,31 @@ namespace IDA
     pyInput +=
       "eq1_ws, eq2_ws = elwin(input, eRange, log_type=logType, Normalise=normalise, Save=save, Verbose=verbose, Plot=plot)\n";
 
-    QString pyOutput = runPythonCode(pyInput).trimmed();
+    QString pyOutput = m_pythonRunner.runPythonCode(pyInput, false).trimmed();
 
   }
 
-  QString Elwin::validate()
+  bool Elwin::validate()
   {
     UserInputValidator uiv;
     
     uiv.checkMWRunFilesIsValid("Input", uiForm().elwin_inputFile);
 
-    auto rangeOne = std::make_pair(m_elwDblMng->value(m_elwProp["R1S"]), m_elwDblMng->value(m_elwProp["R1E"]));
+    auto rangeOne = std::make_pair(m_dblManager->value(m_properties["R1S"]), m_dblManager->value(m_properties["R1E"]));
     uiv.checkValidRange("Range One", rangeOne);
 
-    bool useTwoRanges = m_elwBlnMng->value(m_elwProp["UseTwoRanges"]);
+    bool useTwoRanges = m_blnManager->value(m_properties["UseTwoRanges"]);
     if( useTwoRanges )
     {
-      auto rangeTwo = std::make_pair(m_elwDblMng->value(m_elwProp["R2S"]), m_elwDblMng->value(m_elwProp["R2E"]));
+      auto rangeTwo = std::make_pair(m_dblManager->value(m_properties["R2S"]), m_dblManager->value(m_properties["R2E"]));
       uiv.checkValidRange("Range Two", rangeTwo);
       uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
     }
 
-    return uiv.generateErrorMessage();
+    QString error = uiv.generateErrorMessage();
+    showMessageBox(error);
+
+    return error.isEmpty();
   }
 
   void Elwin::loadSettings(const QSettings & settings)
@@ -167,11 +165,11 @@ namespace IDA
       if(params.size() > 0)
       {
         double res = params[0];
-        m_elwDblMng->setValue(m_elwProp["R1S"], -res);
-        m_elwDblMng->setValue(m_elwProp["R1E"], res);
+        m_dblManager->setValue(m_properties["R1S"], -res);
+        m_dblManager->setValue(m_properties["R1E"], res);
 
-        m_elwDblMng->setValue(m_elwProp["R2S"], -10*res);
-        m_elwDblMng->setValue(m_elwProp["R2E"], -9*res);
+        m_dblManager->setValue(m_properties["R2S"], -10*res);
+        m_dblManager->setValue(m_properties["R2E"], -9*res);
       }
 
     }
@@ -194,13 +192,16 @@ namespace IDA
 
   void Elwin::plotInput()
   {
+    using namespace Mantid::API;
+
     if ( uiForm().elwin_inputFile->isValid() )
     {
       QString filename = uiForm().elwin_inputFile->getFirstFilename();
       QFileInfo fi(filename);
       QString wsname = fi.baseName();
 
-      auto ws = runLoadNexus(filename, wsname);
+      loadFile(filename, wsname);
+      auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname.toStdString());
 
       if(!ws)
       {
@@ -210,63 +211,63 @@ namespace IDA
       setDefaultResolution(ws);
       setDefaultSampleLog(ws);
 
-      m_elwDataCurve = plotMiniplot(m_elwPlot, m_elwDataCurve, ws, 0);
+      plotMiniPlot(ws, 0, "ElwinPlot", "ElwinDataCurve");
       try
       {
-        const std::pair<double, double> range = getCurveRange(m_elwDataCurve);
-        m_elwR1->setRange(range.first, range.second);
+        const std::pair<double, double> range = getCurveRange("ElwinDataCurve");
+        m_rangeSelectors["ElwinRange1"]->setRange(range.first, range.second);
         // Replot
-        m_elwPlot->replot();
+        replot("ElwinPlot");
       }
       catch(std::invalid_argument & exc)
       {
-        showInformationBox(exc.what());
+        showMessageBox(exc.what());
       }
 
     }
     else
     {
-      showInformationBox("Selected input files are invalid.");
+      showMessageBox("Selected input files are invalid.");
     }
   }
 
   void Elwin::twoRanges(QtProperty*, bool val)
   {
-    m_elwR2->setVisible(val);
+    m_rangeSelectors["ElwinRange2"]->setVisible(val);
   }
 
   void Elwin::minChanged(double val)
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
-    if ( from == m_elwR1 )
+    if ( from == m_rangeSelectors["ElwinRange1"] )
     {
-      m_elwDblMng->setValue(m_elwProp["R1S"], val);
+      m_dblManager->setValue(m_properties["R1S"], val);
     }
-    else if ( from == m_elwR2 )
+    else if ( from == m_rangeSelectors["ElwinRange2"] )
     {
-      m_elwDblMng->setValue(m_elwProp["R2S"], val);
+      m_dblManager->setValue(m_properties["R2S"], val);
     }
   }
 
   void Elwin::maxChanged(double val)
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
-    if ( from == m_elwR1 )
+    if ( from == m_rangeSelectors["ElwinRange1"] )
     {
-      m_elwDblMng->setValue(m_elwProp["R1E"], val);
+      m_dblManager->setValue(m_properties["R1E"], val);
     }
-    else if ( from == m_elwR2 )
+    else if ( from == m_rangeSelectors["ElwinRange2"] )
     {
-      m_elwDblMng->setValue(m_elwProp["R2E"], val);
+      m_dblManager->setValue(m_properties["R2E"], val);
     }
   }
 
   void Elwin::updateRS(QtProperty* prop, double val)
   {
-    if ( prop == m_elwProp["R1S"] ) m_elwR1->setMinimum(val);
-    else if ( prop == m_elwProp["R1E"] ) m_elwR1->setMaximum(val);
-    else if ( prop == m_elwProp["R2S"] ) m_elwR2->setMinimum(val);
-    else if ( prop == m_elwProp["R2E"] ) m_elwR2->setMaximum(val);
+    if ( prop == m_properties["R1S"] ) m_rangeSelectors["ElwinRange1"]->setMinimum(val);
+    else if ( prop == m_properties["R1E"] ) m_rangeSelectors["ElwinRange1"]->setMaximum(val);
+    else if ( prop == m_properties["R2S"] ) m_rangeSelectors["ElwinRange2"]->setMinimum(val);
+    else if ( prop == m_properties["R2E"] ) m_rangeSelectors["ElwinRange2"]->setMaximum(val);
   }
 } // namespace IDA
 } // namespace CustomInterfaces

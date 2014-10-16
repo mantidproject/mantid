@@ -26,21 +26,17 @@ namespace CustomInterfaces
 namespace IDA
 {
   ConvFit::ConvFit(QWidget * parent) : 
-    IDATab(parent), m_intVal(NULL), m_stringManager(NULL), m_cfTree(NULL), 
-      m_cfPlot(NULL), m_cfProp(), m_fixedProps(), m_cfRangeS(NULL), m_cfBackgS(NULL), 
-      m_cfHwhmRange(NULL), m_cfGrpMng(NULL), m_cfDblMng(NULL), m_cfBlnMng(NULL), m_cfDataCurve(NULL), 
-      m_cfCalcCurve(NULL), m_cfInputWS(), m_cfInputWSName(), m_confitResFileType()
+    IDATab(parent),
+    m_stringManager(NULL), m_cfTree(NULL), 
+    m_fixedProps(),
+    m_cfInputWS(), m_cfInputWSName(),
+    m_confitResFileType()
   {
   }
   
   void ConvFit::setup()
   {
-    m_intVal = new QIntValidator(this);
-    
     // Create Property Managers
-    m_cfGrpMng = new QtGroupPropertyManager();
-    m_cfBlnMng = new QtBoolPropertyManager();
-    m_cfDblMng = new QtDoublePropertyManager();
     m_stringManager = new QtStringPropertyManager();
 
     // Create TreeProperty Widget
@@ -48,71 +44,71 @@ namespace IDA
     uiForm().confit_properties->addWidget(m_cfTree);
 
     // add factories to managers
-    m_cfTree->setFactoryForManager(m_cfBlnMng, qtCheckBoxFactory());
-    m_cfTree->setFactoryForManager(m_cfDblMng, doubleEditorFactory());
+    m_cfTree->setFactoryForManager(m_blnManager, qtCheckBoxFactory());
+    m_cfTree->setFactoryForManager(m_dblManager, doubleEditorFactory());
 
     // Create Plot Widget
-    m_cfPlot = new QwtPlot(this);
-    m_cfPlot->setAxisFont(QwtPlot::xBottom, this->font());
-    m_cfPlot->setAxisFont(QwtPlot::yLeft, this->font());
-    m_cfPlot->setCanvasBackground(Qt::white);
-    uiForm().confit_plot->addWidget(m_cfPlot);
+    m_plots["ConvFitPlot"] = new QwtPlot(m_parentWidget);
+    m_plots["ConvFitPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
+    m_plots["ConvFitPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
+    m_plots["ConvFitPlot"]->setCanvasBackground(Qt::white);
+    uiForm().confit_plot->addWidget(m_plots["ConvFitPlot"]);
 
     // Create Range Selectors
-    m_cfRangeS = new MantidQt::MantidWidgets::RangeSelector(m_cfPlot);
-    m_cfBackgS = new MantidQt::MantidWidgets::RangeSelector(m_cfPlot, 
+    m_rangeSelectors["ConvFitRange"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["ConvFitPlot"]);
+    m_rangeSelectors["ConvFitBackRange"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["ConvFitPlot"], 
       MantidQt::MantidWidgets::RangeSelector::YSINGLE);
-    m_cfBackgS->setColour(Qt::darkGreen);
-    m_cfBackgS->setRange(0.0, 1.0);
-    m_cfHwhmRange = new MantidQt::MantidWidgets::RangeSelector(m_cfPlot);
-    m_cfHwhmRange->setColour(Qt::red);
+    m_rangeSelectors["ConvFitBackRange"]->setColour(Qt::darkGreen);
+    m_rangeSelectors["ConvFitBackRange"]->setRange(0.0, 1.0);
+    m_rangeSelectors["ConvFitHWHM"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["ConvFitPlot"]);
+    m_rangeSelectors["ConvFitHWHM"]->setColour(Qt::red);
 
     // Populate Property Widget
-    m_cfProp["FitRange"] = m_cfGrpMng->addProperty("Fitting Range");
-    m_cfProp["StartX"] = m_cfDblMng->addProperty("StartX");
-    m_cfDblMng->setDecimals(m_cfProp["StartX"], NUM_DECIMALS);
-    m_cfProp["EndX"] = m_cfDblMng->addProperty("EndX");
-    m_cfDblMng->setDecimals(m_cfProp["EndX"], NUM_DECIMALS);
-    m_cfProp["FitRange"]->addSubProperty(m_cfProp["StartX"]);
-    m_cfProp["FitRange"]->addSubProperty(m_cfProp["EndX"]);
-    m_cfTree->addProperty(m_cfProp["FitRange"]);
+    m_properties["FitRange"] = m_grpManager->addProperty("Fitting Range");
+    m_properties["StartX"] = m_dblManager->addProperty("StartX");
+    m_dblManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
+    m_properties["EndX"] = m_dblManager->addProperty("EndX");
+    m_dblManager->setDecimals(m_properties["EndX"], NUM_DECIMALS);
+    m_properties["FitRange"]->addSubProperty(m_properties["StartX"]);
+    m_properties["FitRange"]->addSubProperty(m_properties["EndX"]);
+    m_cfTree->addProperty(m_properties["FitRange"]);
 
-    m_cfProp["LinearBackground"] = m_cfGrpMng->addProperty("Background");
-    m_cfProp["BGA0"] = m_cfDblMng->addProperty("A0");
-    m_cfDblMng->setDecimals(m_cfProp["BGA0"], NUM_DECIMALS);
-    m_cfProp["BGA1"] = m_cfDblMng->addProperty("A1");
-    m_cfDblMng->setDecimals(m_cfProp["BGA1"], NUM_DECIMALS);
-    m_cfProp["LinearBackground"]->addSubProperty(m_cfProp["BGA0"]);
-    m_cfProp["LinearBackground"]->addSubProperty(m_cfProp["BGA1"]);
-    m_cfTree->addProperty(m_cfProp["LinearBackground"]);
+    m_properties["LinearBackground"] = m_grpManager->addProperty("Background");
+    m_properties["BGA0"] = m_dblManager->addProperty("A0");
+    m_dblManager->setDecimals(m_properties["BGA0"], NUM_DECIMALS);
+    m_properties["BGA1"] = m_dblManager->addProperty("A1");
+    m_dblManager->setDecimals(m_properties["BGA1"], NUM_DECIMALS);
+    m_properties["LinearBackground"]->addSubProperty(m_properties["BGA0"]);
+    m_properties["LinearBackground"]->addSubProperty(m_properties["BGA1"]);
+    m_cfTree->addProperty(m_properties["LinearBackground"]);
 
     // Delta Function
-    m_cfProp["DeltaFunction"] = m_cfGrpMng->addProperty("Delta Function");
-    m_cfProp["UseDeltaFunc"] = m_cfBlnMng->addProperty("Use");
-    m_cfProp["DeltaHeight"] = m_cfDblMng->addProperty("Height");
-    m_cfDblMng->setDecimals(m_cfProp["DeltaHeight"], NUM_DECIMALS);
-    m_cfProp["DeltaFunction"]->addSubProperty(m_cfProp["UseDeltaFunc"]);
-    m_cfTree->addProperty(m_cfProp["DeltaFunction"]);
+    m_properties["DeltaFunction"] = m_grpManager->addProperty("Delta Function");
+    m_properties["UseDeltaFunc"] = m_blnManager->addProperty("Use");
+    m_properties["DeltaHeight"] = m_dblManager->addProperty("Height");
+    m_dblManager->setDecimals(m_properties["DeltaHeight"], NUM_DECIMALS);
+    m_properties["DeltaFunction"]->addSubProperty(m_properties["UseDeltaFunc"]);
+    m_cfTree->addProperty(m_properties["DeltaFunction"]);
 
-    m_cfProp["Lorentzian1"] = createLorentzian("Lorentzian 1");
-    m_cfProp["Lorentzian2"] = createLorentzian("Lorentzian 2");
+    m_properties["Lorentzian1"] = createLorentzian("Lorentzian 1");
+    m_properties["Lorentzian2"] = createLorentzian("Lorentzian 2");
 
-    uiForm().confit_leTempCorrection->setValidator(new QDoubleValidator(this));
+    uiForm().confit_leTempCorrection->setValidator(new QDoubleValidator(m_parentWidget));
 
     // Connections
-    connect(m_cfRangeS, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
-    connect(m_cfRangeS, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
-    connect(m_cfBackgS, SIGNAL(minValueChanged(double)), this, SLOT(backgLevel(double)));
-    connect(m_cfHwhmRange, SIGNAL(minValueChanged(double)), this, SLOT(hwhmChanged(double)));
-    connect(m_cfHwhmRange, SIGNAL(maxValueChanged(double)), this, SLOT(hwhmChanged(double)));
-    connect(m_cfDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
-    connect(m_cfBlnMng, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(checkBoxUpdate(QtProperty*, bool)));
-    connect(m_cfDblMng, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(plotGuess(QtProperty*)));
+    connect(m_rangeSelectors["ConvFitRange"], SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
+    connect(m_rangeSelectors["ConvFitRange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
+    connect(m_rangeSelectors["ConvFitBackRange"], SIGNAL(minValueChanged(double)), this, SLOT(backgLevel(double)));
+    connect(m_rangeSelectors["ConvFitHWHM"], SIGNAL(minValueChanged(double)), this, SLOT(hwhmChanged(double)));
+    connect(m_rangeSelectors["ConvFitHWHM"], SIGNAL(maxValueChanged(double)), this, SLOT(hwhmChanged(double)));
+    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
+    connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(checkBoxUpdate(QtProperty*, bool)));
+    connect(m_dblManager, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(plotGuess(QtProperty*)));
     connect(uiForm().confit_ckTempCorrection, SIGNAL(toggled(bool)), uiForm().confit_leTempCorrection, SLOT(setEnabled(bool)));
 
     // Have FWHM Range linked to Fit Start/End Range
-    connect(m_cfRangeS, SIGNAL(rangeChanged(double, double)), m_cfHwhmRange, SLOT(setRange(double, double)));
-    m_cfHwhmRange->setRange(-1.0,1.0);
+    connect(m_rangeSelectors["ConvFitRange"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["ConvFitHWHM"], SLOT(setRange(double, double)));
+    m_rangeSelectors["ConvFitHWHM"]->setRange(-1.0,1.0);
     hwhmUpdateRS(0.02);
 
     typeSelection(uiForm().confit_cbFitType->currentIndex());
@@ -126,9 +122,9 @@ namespace IDA
     connect(uiForm().confit_cbBackground, SIGNAL(currentIndexChanged(int)), this, SLOT(bgTypeSelection(int)));
     connect(uiForm().confit_pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
 
-    uiForm().confit_lePlotSpectrum->setValidator(m_intVal);
-    uiForm().confit_leSpectraMin->setValidator(m_intVal);
-    uiForm().confit_leSpectraMax->setValidator(m_intVal);
+    uiForm().confit_lePlotSpectrum->setValidator(m_valInt);
+    uiForm().confit_leSpectraMin->setValidator(m_valInt);
+    uiForm().confit_leSpectraMax->setValidator(m_valInt);
 
     // Context menu
     m_cfTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -141,13 +137,6 @@ namespace IDA
 
   void ConvFit::run()
   {
-    const QString error = validate();
-    if( ! error.isEmpty() )
-    {
-      showInformationBox(error);
-      return;
-    }
-
     if ( m_cfInputWS == NULL )
     {
       return;
@@ -166,8 +155,8 @@ namespace IDA
 
     Mantid::API::CompositeFunction_sptr func = createFunction(useTies);
     std::string function = std::string(func->asString());
-    QString stX = m_cfProp["StartX"]->valueText();
-    QString enX = m_cfProp["EndX"]->valueText();
+    QString stX = m_properties["StartX"]->valueText();
+    QString enX = m_properties["EndX"]->valueText();
 
     QString pyInput =
       "from IndirectDataAnalysis import confitSeq\n"
@@ -206,15 +195,13 @@ namespace IDA
       "ftype = '" + ftype + "'\n"
       "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, Verbose=verbose, Plot=plot, Save=save)\n";
 
-    QString pyOutput = runPythonCode(pyInput);
+    QString pyOutput = m_pythonRunner.runPythonCode(pyInput, false);
   }
 
   /**
    * Validates the user's inputs in the ConvFit tab.
-   *
-   * @returns an string containing an error message if invalid input detected, else an empty string.
    */
-  QString ConvFit::validate()
+  bool ConvFit::validate()
   {
     using Mantid::API::AnalysisDataService;
     
@@ -223,15 +210,18 @@ namespace IDA
     uiv.checkDataSelectorIsValid("Sample", uiForm().confit_dsSampleInput);
     uiv.checkDataSelectorIsValid("Resolution", uiForm().confit_dsResInput);
 
-    auto range = std::make_pair(m_cfDblMng->value(m_cfProp["StartX"]), m_cfDblMng->value(m_cfProp["EndX"]));
+    auto range = std::make_pair(m_dblManager->value(m_properties["StartX"]), m_dblManager->value(m_properties["EndX"]));
     uiv.checkValidRange("Fitting Range", range);
 
     // Enforce the rule that at least one fit is needed; either a delta function, one or two lorentzian functions,
     // or both.  (The resolution function must be convolved with a model.)
-    if ( uiForm().confit_cbFitType->currentIndex() == 0 && ! m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
+    if ( uiForm().confit_cbFitType->currentIndex() == 0 && ! m_blnManager->value(m_properties["UseDeltaFunc"]) )
       uiv.addErrorMessage("No fit function has been selected.");
 
-    return uiv.generateErrorMessage();
+    QString error = uiv.generateErrorMessage();
+    showMessageBox(error);
+
+    return error.isEmpty();
   }
 
   void ConvFit::loadSettings(const QSettings & settings)
@@ -322,13 +312,13 @@ namespace IDA
 
     const int bgType = uiForm().confit_cbBackground->currentIndex(); // 0 = Fixed Flat, 1 = Fit Flat, 2 = Fit all
   
-    if ( bgType == 0 || ! m_cfProp["BGA0"]->subProperties().isEmpty() )
+    if ( bgType == 0 || ! m_properties["BGA0"]->subProperties().isEmpty() )
     {
-      comp->tie("f0.A0", m_cfProp["BGA0"]->valueText().toStdString() );
+      comp->tie("f0.A0", m_properties["BGA0"]->valueText().toStdString() );
     }
     else
     {
-      func->setParameter("A0", m_cfProp["BGA0"]->valueText().toDouble());
+      func->setParameter("A0", m_properties["BGA0"]->valueText().toDouble());
     }
 
     if ( bgType != 2 )
@@ -337,11 +327,11 @@ namespace IDA
     }
     else
     {
-      if ( ! m_cfProp["BGA1"]->subProperties().isEmpty() )
+      if ( ! m_properties["BGA1"]->subProperties().isEmpty() )
       {
-        comp->tie("f0.A1", m_cfProp["BGA1"]->valueText().toStdString() );
+        comp->tie("f0.A1", m_properties["BGA1"]->valueText().toStdString() );
       }
-      else { func->setParameter("A1", m_cfProp["BGA1"]->valueText().toDouble()); }
+      else { func->setParameter("A1", m_properties["BGA1"]->valueText().toDouble()); }
     }
 
     // --------------------------------------------
@@ -369,7 +359,7 @@ namespace IDA
     // --------------------------------------------------------
     Mantid::API::CompositeFunction_sptr model( new Mantid::API::CompositeFunction );
 
-    bool useDeltaFunc = m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]);
+    bool useDeltaFunc = m_blnManager->value(m_properties["UseDeltaFunc"]);
 
     size_t subIndex = 0;
 
@@ -378,7 +368,7 @@ namespace IDA
       func = Mantid::API::FunctionFactory::Instance().createFunction("DeltaFunction");
 			index = model->addFunction(func);
 			std::string parName = createParName(index);
-			populateFunction(func, model, m_cfProp["DeltaFunction"], parName, false);
+			populateFunction(func, model, m_properties["DeltaFunction"], parName, false);
     }
 
     // ------------------------------------------------------------
@@ -415,7 +405,7 @@ namespace IDA
       index = model->addFunction(product);
       prefix1 = createParName(index, subIndex);
 
-      populateFunction(func, model, m_cfProp["Lorentzian1"], prefix1, false);
+      populateFunction(func, model, m_properties["Lorentzian1"], prefix1, false);
     }
 
     // Add 2nd Lorentzian
@@ -435,7 +425,7 @@ namespace IDA
       index = model->addFunction(product);
       prefix2 = createParName(index, subIndex);
       
-      populateFunction(func, model, m_cfProp["Lorentzian2"], prefix2, false);
+      populateFunction(func, model, m_properties["Lorentzian2"], prefix2, false);
     }
 
     conv->addFunction(model);
@@ -512,18 +502,18 @@ namespace IDA
 
   QtProperty* ConvFit::createLorentzian(const QString & name)
   {
-    QtProperty* lorentzGroup = m_cfGrpMng->addProperty(name);
-    m_cfProp[name+".Amplitude"] = m_cfDblMng->addProperty("Amplitude");
-    // m_cfDblMng->setRange(m_cfProp[name+".Amplitude"], 0.0, 1.0); // 0 < Amplitude < 1
-    m_cfProp[name+".PeakCentre"] = m_cfDblMng->addProperty("PeakCentre");
-    m_cfProp[name+".FWHM"] = m_cfDblMng->addProperty("FWHM");
-    m_cfDblMng->setDecimals(m_cfProp[name+".Amplitude"], NUM_DECIMALS);
-    m_cfDblMng->setDecimals(m_cfProp[name+".PeakCentre"], NUM_DECIMALS);
-    m_cfDblMng->setDecimals(m_cfProp[name+".FWHM"], NUM_DECIMALS);
-    m_cfDblMng->setValue(m_cfProp[name+".FWHM"], 0.02);
-    lorentzGroup->addSubProperty(m_cfProp[name+".Amplitude"]);
-    lorentzGroup->addSubProperty(m_cfProp[name+".PeakCentre"]);
-    lorentzGroup->addSubProperty(m_cfProp[name+".FWHM"]);
+    QtProperty* lorentzGroup = m_grpManager->addProperty(name);
+    m_properties[name+".Amplitude"] = m_dblManager->addProperty("Amplitude");
+    // m_dblManager->setRange(m_properties[name+".Amplitude"], 0.0, 1.0); // 0 < Amplitude < 1
+    m_properties[name+".PeakCentre"] = m_dblManager->addProperty("PeakCentre");
+    m_properties[name+".FWHM"] = m_dblManager->addProperty("FWHM");
+    m_dblManager->setDecimals(m_properties[name+".Amplitude"], NUM_DECIMALS);
+    m_dblManager->setDecimals(m_properties[name+".PeakCentre"], NUM_DECIMALS);
+    m_dblManager->setDecimals(m_properties[name+".FWHM"], NUM_DECIMALS);
+    m_dblManager->setValue(m_properties[name+".FWHM"], 0.02);
+    lorentzGroup->addSubProperty(m_properties[name+".Amplitude"]);
+    lorentzGroup->addSubProperty(m_properties[name+".PeakCentre"]);
+    lorentzGroup->addSubProperty(m_properties[name+".FWHM"]);
     return lorentzGroup;
   }
 
@@ -565,7 +555,7 @@ namespace IDA
   {
     QString fitType("");
 
-    if( m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
+    if( m_blnManager->value(m_properties["UseDeltaFunc"]) )
       fitType += "Delta";
 
     switch ( uiForm().confit_cbFitType->currentIndex() )
@@ -607,22 +597,22 @@ namespace IDA
 
   void ConvFit::typeSelection(int index)
   {
-    m_cfTree->removeProperty(m_cfProp["Lorentzian1"]);
-    m_cfTree->removeProperty(m_cfProp["Lorentzian2"]);
+    m_cfTree->removeProperty(m_properties["Lorentzian1"]);
+    m_cfTree->removeProperty(m_properties["Lorentzian2"]);
   
     switch ( index )
     {
     case 0:
-      m_cfHwhmRange->setVisible(false);
+      m_rangeSelectors["ConvFitHWHM"]->setVisible(false);
       break;
     case 1:
-      m_cfTree->addProperty(m_cfProp["Lorentzian1"]);
-      m_cfHwhmRange->setVisible(true);
+      m_cfTree->addProperty(m_properties["Lorentzian1"]);
+      m_rangeSelectors["ConvFitHWHM"]->setVisible(true);
       break;
     case 2:
-      m_cfTree->addProperty(m_cfProp["Lorentzian1"]);
-      m_cfTree->addProperty(m_cfProp["Lorentzian2"]);
-      m_cfHwhmRange->setVisible(true);
+      m_cfTree->addProperty(m_properties["Lorentzian1"]);
+      m_cfTree->addProperty(m_properties["Lorentzian2"]);
+      m_rangeSelectors["ConvFitHWHM"]->setVisible(true);
       break;
     }    
   }
@@ -631,11 +621,11 @@ namespace IDA
   {
     if ( index == 2 )
     {
-      m_cfProp["LinearBackground"]->addSubProperty(m_cfProp["BGA1"]);
+      m_properties["LinearBackground"]->addSubProperty(m_properties["BGA1"]);
     }
     else
     {
-      m_cfProp["LinearBackground"]->removeSubProperty(m_cfProp["BGA1"]);
+      m_properties["LinearBackground"]->removeSubProperty(m_properties["BGA1"]);
     }
   }
 
@@ -655,7 +645,7 @@ namespace IDA
       
       if(!m_cfInputWS)
       {
-        showInformationBox("Could not find the workspace in ADS. See log for details.");
+        showMessageBox("Could not find the workspace in ADS. See log for details.");
       }
     }
 
@@ -664,7 +654,7 @@ namespace IDA
     int specMin = 0;
     int specMax = static_cast<int>(m_cfInputWS->getNumberHistograms()) - 1;
 
-    m_intVal->setRange(specMin, specMax);
+    m_valInt->setRange(specMin, specMax);
     uiForm().confit_leSpectraMin->setText(QString::number(specMin));
     uiForm().confit_leSpectraMax->setText(QString::number(specMax));
 
@@ -680,30 +670,30 @@ namespace IDA
       uiForm().confit_leSpectraMax->setText(QString::number(specMax));
     }
 
-    m_cfDataCurve = plotMiniplot(m_cfPlot, m_cfDataCurve, m_cfInputWS, specNo);
+    plotMiniPlot(m_cfInputWS, specNo, "ConvFitPlot", "CFDataCurve");
     try
     {
-      const std::pair<double, double> range = getCurveRange(m_cfDataCurve);
-      m_cfRangeS->setRange(range.first, range.second);
+      const std::pair<double, double> range = getCurveRange("CFDataCurve");
+      m_rangeSelectors["ConvFitRange"]->setRange(range.first, range.second);
       uiForm().confit_ckPlotGuess->setChecked(plotGuess);
     }
     catch(std::invalid_argument & exc)
     {
-      showInformationBox(exc.what());
+      showMessageBox(exc.what());
     }
 
     // Default FWHM to resolution of instrument
     double resolution = getInstrumentResolution(m_cfInputWSName.toStdString());
     if(resolution > 0)
     {
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], resolution);
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 2.FWHM"], resolution);
+      m_dblManager->setValue(m_properties["Lorentzian 1.FWHM"], resolution);
+      m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], resolution);
     }
   }
 
   void ConvFit::plotGuess(QtProperty*)
   {
-    if ( ! uiForm().confit_ckPlotGuess->isChecked() || m_cfDataCurve == NULL )
+    if ( ! uiForm().confit_ckPlotGuess->isChecked() || m_curves["CFDataCurve"] == NULL )
     {
       return;
     }
@@ -716,8 +706,8 @@ namespace IDA
       plotInput();
     }
 
-    const size_t binIndexLow = m_cfInputWS->binIndexOf(m_cfDblMng->value(m_cfProp["StartX"]));
-    const size_t binIndexHigh = m_cfInputWS->binIndexOf(m_cfDblMng->value(m_cfProp["EndX"]));
+    const size_t binIndexLow = m_cfInputWS->binIndexOf(m_dblManager->value(m_properties["StartX"]));
+    const size_t binIndexHigh = m_cfInputWS->binIndexOf(m_dblManager->value(m_properties["EndX"]));
     const size_t nData = binIndexHigh - binIndexLow;
 
     std::vector<double> inputXData(nData);
@@ -748,35 +738,28 @@ namespace IDA
       dataY.append(outputData.getCalculated(i));
     }
 
-    if ( m_cfCalcCurve != NULL )
+    if ( m_curves["CFCalcCurve"] != NULL )
     {
-      m_cfCalcCurve->attach(0);
-      delete m_cfCalcCurve;
-      m_cfCalcCurve = 0;
+      m_curves["CFCalcCurve"]->attach(0);
+      delete m_curves["CFCalcCurve"];
+      m_curves["CFCalcCurve"] = 0;
     }
 
-    m_cfCalcCurve = new QwtPlotCurve();
-    m_cfCalcCurve->setData(dataX, dataY);
+    m_curves["CFCalcCurve"] = new QwtPlotCurve();
+    m_curves["CFCalcCurve"]->setData(dataX, dataY);
     QPen fitPen(Qt::red, Qt::SolidLine);
-    m_cfCalcCurve->setPen(fitPen);
-    m_cfCalcCurve->attach(m_cfPlot);
-    m_cfPlot->replot();
+    m_curves["CFCalcCurve"]->setPen(fitPen);
+    m_curves["CFCalcCurve"]->attach(m_plots["ConvFitPlot"]);
+    m_plots["ConvFitPlot"]->replot();
   }
 
   void ConvFit::singleFit()
   {
-    const QString error = validate();
-    if( ! error.isEmpty() )
-    {
-      showInformationBox(error);
-      return;
-    }
-
     plotInput();
 
-    if ( m_cfDataCurve == NULL )
+    if ( m_curves["CFDataCurve"] == NULL )
     {
-      showInformationBox("There was an error reading the data file.");
+      showMessageBox("There was an error reading the data file.");
       return;
     }
 
@@ -793,7 +776,7 @@ namespace IDA
       g_log.error("No fit type defined!");
     }
 
-    QString outputNm = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + m_cfInputWSName + QString("')\n")).trimmed();
+    QString outputNm = m_pythonRunner.runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + m_cfInputWSName + QString("')\n"), false).trimmed();
     outputNm += QString("conv_") + ftype + bg + uiForm().confit_lePlotSpectrum->text();  
     std::string output = outputNm.toStdString();
 
@@ -802,8 +785,8 @@ namespace IDA
     alg->setPropertyValue("Function", function->asString());
     alg->setPropertyValue("InputWorkspace", m_cfInputWSName.toStdString());
     alg->setProperty<int>("WorkspaceIndex", uiForm().confit_lePlotSpectrum->text().toInt());
-    alg->setProperty<double>("StartX", m_cfDblMng->value(m_cfProp["StartX"]));
-    alg->setProperty<double>("EndX", m_cfDblMng->value(m_cfProp["EndX"]));
+    alg->setProperty<double>("StartX", m_dblManager->value(m_properties["StartX"]));
+    alg->setProperty<double>("EndX", m_dblManager->value(m_properties["EndX"]));
     alg->setProperty("Output", output);
     alg->setProperty("CreateOutput", true);
     alg->setProperty("OutputCompositeMembers", true);
@@ -812,15 +795,15 @@ namespace IDA
    
     if ( ! alg->isExecuted() )
     {
-      showInformationBox("Fit algorithm failed.");
+      showMessageBox("Fit algorithm failed.");
       return;
     }
 
     // Plot the line on the mini plot
-    m_cfCalcCurve = plotMiniplot(m_cfPlot, m_cfCalcCurve, outputNm+"_Workspace", 1);
+    plotMiniPlot(outputNm+"_Workspace", 1, "ConvFitPlot", "CFCalcCurve");
     QPen fitPen(Qt::red, Qt::SolidLine);
-    m_cfCalcCurve->setPen(fitPen);
-    m_cfPlot->replot();
+    m_curves["CFCalcCurve"]->setPen(fitPen);
+    replot("ConvFitPlot");
 
     Mantid::API::IFunction_sptr outputFunc = alg->getProperty("Function");
 
@@ -837,8 +820,8 @@ namespace IDA
 
     // Populate Tree widget with values
     // Background should always be f0
-    m_cfDblMng->setValue(m_cfProp["BGA0"], parameters["f0.A0"]);
-    m_cfDblMng->setValue(m_cfProp["BGA1"], parameters["f0.A1"]);
+    m_dblManager->setValue(m_properties["BGA0"], parameters["f0.A0"]);
+    m_dblManager->setValue(m_properties["BGA1"], parameters["f0.A1"]);
 
     int noLorentz = uiForm().confit_cbFitType->currentIndex();
 
@@ -852,7 +835,7 @@ namespace IDA
 				subIndex++;
 		}
 
-		bool usingDeltaFunc = m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]);
+		bool usingDeltaFunc = m_blnManager->value(m_properties["UseDeltaFunc"]);
 		bool usingCompositeFunc = ((usingDeltaFunc && noLorentz > 0) || noLorentz > 1);
     QString prefBase = "f1.f1.";
 
@@ -866,7 +849,7 @@ namespace IDA
 			
 			key += "Height";
 
-      m_cfDblMng->setValue(m_cfProp["DeltaHeight"], parameters[key]);
+      m_dblManager->setValue(m_properties["DeltaHeight"], parameters[key]);
       funcIndex++;
     }
 
@@ -884,9 +867,9 @@ namespace IDA
 				pref += "f" + QString::number(subIndex) + ".";
 			}
 
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.Amplitude"], parameters[pref+"Amplitude"]);
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.PeakCentre"], parameters[pref+"PeakCentre"]);
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], parameters[pref+"FWHM"]);
+      m_dblManager->setValue(m_properties["Lorentzian 1.Amplitude"], parameters[pref+"Amplitude"]);
+      m_dblManager->setValue(m_properties["Lorentzian 1.PeakCentre"], parameters[pref+"PeakCentre"]);
+      m_dblManager->setValue(m_properties["Lorentzian 1.FWHM"], parameters[pref+"FWHM"]);
       funcIndex++;
     }
 
@@ -904,71 +887,71 @@ namespace IDA
 				pref += "f" + QString::number(subIndex) + ".";
 			}
 
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 2.Amplitude"], parameters[pref+"Amplitude"]);
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 2.PeakCentre"], parameters[pref+"PeakCentre"]);
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 2.FWHM"], parameters[pref+"FWHM"]);
+      m_dblManager->setValue(m_properties["Lorentzian 2.Amplitude"], parameters[pref+"Amplitude"]);
+      m_dblManager->setValue(m_properties["Lorentzian 2.PeakCentre"], parameters[pref+"PeakCentre"]);
+      m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], parameters[pref+"FWHM"]);
     }
   }
 
   void ConvFit::minChanged(double val)
   {
-    m_cfDblMng->setValue(m_cfProp["StartX"], val);
+    m_dblManager->setValue(m_properties["StartX"], val);
   }
 
   void ConvFit::maxChanged(double val)
   {
-    m_cfDblMng->setValue(m_cfProp["EndX"], val);
+    m_dblManager->setValue(m_properties["EndX"], val);
   }
 
   void ConvFit::hwhmChanged(double val)
   {
-    const double peakCentre = m_cfDblMng->value(m_cfProp["Lorentzian 1.PeakCentre"]);
+    const double peakCentre = m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
     // Always want FWHM to display as positive.
     const double hwhm = std::fabs(val-peakCentre);
     // Update the property
-    m_cfHwhmRange->blockSignals(true);
-    m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], hwhm*2);
-    m_cfHwhmRange->blockSignals(false);
+    m_rangeSelectors["ConvFitHWHM"]->blockSignals(true);
+    m_dblManager->setValue(m_properties["Lorentzian 1.FWHM"], hwhm*2);
+    m_rangeSelectors["ConvFitHWHM"]->blockSignals(false);
   }
 
   void ConvFit::backgLevel(double val)
   {
-    m_cfDblMng->setValue(m_cfProp["BGA0"], val);
+    m_dblManager->setValue(m_properties["BGA0"], val);
   }
 
   void ConvFit::updateRS(QtProperty* prop, double val)
   {
-    if ( prop == m_cfProp["StartX"] ) { m_cfRangeS->setMinimum(val); }
-    else if ( prop == m_cfProp["EndX"] ) { m_cfRangeS->setMaximum(val); }
-    else if ( prop == m_cfProp["BGA0"] ) { m_cfBackgS->setMinimum(val); }
-    else if ( prop == m_cfProp["Lorentzian 1.FWHM"] ) { hwhmUpdateRS(val); }
-    else if ( prop == m_cfProp["Lorentzian 1.PeakCentre"] )
+    if ( prop == m_properties["StartX"] ) { m_rangeSelectors["ConvFitRange"]->setMinimum(val); }
+    else if ( prop == m_properties["EndX"] ) { m_rangeSelectors["ConvFitRange"]->setMaximum(val); }
+    else if ( prop == m_properties["BGA0"] ) { m_rangeSelectors["ConvFitBackRange"]->setMinimum(val); }
+    else if ( prop == m_properties["Lorentzian 1.FWHM"] ) { hwhmUpdateRS(val); }
+    else if ( prop == m_properties["Lorentzian 1.PeakCentre"] )
     {
-        hwhmUpdateRS(m_cfDblMng->value(m_cfProp["Lorentzian 1.FWHM"]));
+        hwhmUpdateRS(m_dblManager->value(m_properties["Lorentzian 1.FWHM"]));
     }
   }
 
   void ConvFit::hwhmUpdateRS(double val)
   {
-    const double peakCentre = m_cfDblMng->value(m_cfProp["Lorentzian 1.PeakCentre"]);
-    m_cfHwhmRange->setMinimum(peakCentre-val/2);
-    m_cfHwhmRange->setMaximum(peakCentre+val/2);
+    const double peakCentre = m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
+    m_rangeSelectors["ConvFitHWHM"]->setMinimum(peakCentre-val/2);
+    m_rangeSelectors["ConvFitHWHM"]->setMaximum(peakCentre+val/2);
   }
 
   void ConvFit::checkBoxUpdate(QtProperty* prop, bool checked)
   {
     // Add/remove some properties to display only relevant options
-    if ( prop == m_cfProp["UseDeltaFunc"] )
+    if ( prop == m_properties["UseDeltaFunc"] )
     {
       if ( checked ) 
       { 
-        m_cfProp["DeltaFunction"]->addSubProperty(m_cfProp["DeltaHeight"]);
+        m_properties["DeltaFunction"]->addSubProperty(m_properties["DeltaHeight"]);
         uiForm().confit_cbPlotOutput->addItem("Height");
         uiForm().confit_cbPlotOutput->addItem("EISF");
       }
       else 
       { 
-        m_cfProp["DeltaFunction"]->removeSubProperty(m_cfProp["DeltaHeight"]);
+        m_properties["DeltaFunction"]->removeSubProperty(m_properties["DeltaHeight"]);
         uiForm().confit_cbPlotOutput->removeItem(uiForm().confit_cbPlotOutput->count()-1);
         uiForm().confit_cbPlotOutput->removeItem(uiForm().confit_cbPlotOutput->count()-1);
       }
@@ -987,11 +970,11 @@ namespace IDA
     // is it a fit property ?
     QtProperty* prop = item->property();
 
-    if ( prop == m_cfProp["StartX"] || prop == m_cfProp["EndX"] )
+    if ( prop == m_properties["StartX"] || prop == m_properties["EndX"] )
       return;
 
     // is it already fixed?
-    bool fixed = prop->propertyManager() != m_cfDblMng;
+    bool fixed = prop->propertyManager() != m_dblManager;
 
     if ( fixed && prop->propertyManager() != m_stringManager ) 
       return;
@@ -1002,12 +985,12 @@ namespace IDA
 
     if ( ! fixed )
     {
-      action = new QAction("Fix", this);
+      action = new QAction("Fix", m_parentWidget);
       connect(action, SIGNAL(triggered()), this, SLOT(fixItem()));
     }
     else
     {
-      action = new QAction("Remove Fix", this);
+      action = new QAction("Remove Fix", m_parentWidget);
       connect(action, SIGNAL(triggered()), this, SLOT(unFixItem()));
     }
 

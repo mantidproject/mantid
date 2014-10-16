@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/ApplyCorr.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/TextAxis.h"
 
 #include <QStringList>
 
@@ -42,9 +43,9 @@ namespace IDA
     // Create the plot
     m_plots["ApplyCorrPlot"] = new QwtPlot(m_parentWidget);
     m_plots["ApplyCorrPlot"]->setCanvasBackground(Qt::white);
-    /* m_plots["ApplyCorrPlot"]->setAxisFont(QwtPlot::xBottom, parent->font()); */
-    /* m_plots["ApplyCorrPlot"]->setAxisFont(QwtPlot::yLeft, parent->font()); */
-	m_uiForm.plotSpace->addWidget(m_plots["ApplyCorrPlot"]);
+    m_plots["ApplyCorrPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
+    m_plots["ApplyCorrPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
+	  uiForm().abscor_plotPreview->addWidget(m_plots["ApplyCorrPlot"]);
   }
 
   /**
@@ -126,13 +127,8 @@ namespace IDA
     QString sample = uiForm().abscor_dsSample->getCurrentDataName();
     MatrixWorkspace_const_sptr sampleWs;
     if (!Mantid::API::AnalysisDataService::Instance().doesExist(sample.toStdString()) )
-    {
-      sampleWs = runLoadNexus(uiForm().abscor_dsSample->getFullFilePath(), sample);
-    }
-    else
-    {
-      sampleWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(sample.toStdString());
-    }
+      loadFile(uiForm().abscor_dsSample->getFullFilePath(), sample);
+    sampleWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(sample.toStdString());
 
     pyInput += "sample = '"+sample+"'\n";
     pyInput += "rebin_can = False\n";
@@ -143,13 +139,8 @@ namespace IDA
       QString container = uiForm().abscor_dsContainer->getCurrentDataName();
       MatrixWorkspace_const_sptr canWs;
       if ( !Mantid::API::AnalysisDataService::Instance().doesExist(container.toStdString()) )
-      {
-        canWs = runLoadNexus(uiForm().abscor_dsContainer->getFullFilePath(), container);
-      }
-      else
-      {
-        canWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(container.toStdString());
-      }
+        loadFile(uiForm().abscor_dsContainer->getFullFilePath(), container);
+      canWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(container.toStdString());
 
       if (!checkWorkspaceBinningMatches(sampleWs, canWs))
       {
@@ -197,7 +188,7 @@ namespace IDA
       // if we have no container and no corrections then abort
       if(noContainer)
       {
-        showInformationBox("Apply Corrections requires either a can file or a corrections file.");
+        showMessageBox("Apply Corrections requires either a can file or a corrections file.");
         return;
       }
     }
@@ -241,15 +232,15 @@ namespace IDA
 
     pyInput += "print abscorFeeder(sample, container, geom, useCor, corrections, Verbose=verbose, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult)\n";
 
-    QString pyOutput = runPythonCode(pyInput).trimmed();
+    QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
 
-    if(pyOutput.toStdString != "None")
+    if(pyOutput.toStdString() != "None")
     {
       pyOutput += "0";
       MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(pyOutput.toStdString());
       TextAxis* axis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
 
-      for(int histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
+      for(unsigned int histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
       {
         QString specName = QString::fromStdString(axis->label(histIndex));
 
@@ -278,14 +269,14 @@ namespace IDA
   {
     QString message = "The sample and can energy ranges do not match, this is not recommended."
         "\n\n Click OK to rebin the can to match the sample and continue or Cancel to abort applying corrections.";
-    QMessageBox::StandardButton reply = QMessageBox::warning(this, "Energy Ranges Do Not Match", 
+    QMessageBox::StandardButton reply = QMessageBox::warning(m_parentWidget, "Energy Ranges Do Not Match", 
                                                              message, QMessageBox::Ok|QMessageBox::Cancel);
     return (reply == QMessageBox::Ok);
   }
 
-  QString ApplyCorr::validate()
+  bool ApplyCorr::validate()
   {
-    return "";
+    return true;
   }
 
   void ApplyCorr::loadSettings(const QSettings & settings)

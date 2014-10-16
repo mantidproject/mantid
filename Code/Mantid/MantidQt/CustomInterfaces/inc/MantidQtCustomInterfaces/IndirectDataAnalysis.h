@@ -6,6 +6,7 @@
 //----------------------
 #include "ui_IndirectDataAnalysis.h"
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtCustomInterfaces/IndirectTab.h"
 
 #include <Poco/NObserver.h>
 #include "MantidKernel/ConfigService.h"
@@ -99,6 +100,7 @@ namespace IDA
 
     /// Map of unsigned int (TabChoice enum values) to tabs.
     std::map<unsigned int, IDATab*> m_tabs;
+
   };
 } // namespace IDA
 } // namespace CustomInterfaces

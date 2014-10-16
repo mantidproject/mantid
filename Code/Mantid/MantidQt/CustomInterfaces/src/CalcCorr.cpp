@@ -288,10 +288,10 @@ namespace IDA
       "canFormula = " + canFormula + "\n"
       "IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plot_opt=plotOpt, save=save, verbose=verbose)\n";
 
-    QString pyOutput = runPythonCode(pyInput).trimmed();
+    m_pythonRunner.runPythonCode(pyInput, false).trimmed();
   }
 
-  QString CalcCorr::validate()
+  bool CalcCorr::validate()
   {
     UserInputValidator uiv;
     bool useCan = uiForm().absp_ckUseCan->isChecked();
@@ -390,7 +390,10 @@ namespace IDA
       }
     }
 
-    return uiv.generateErrorMessage();
+    QString error = uiv.generateErrorMessage();
+    showMessageBox(error);
+
+    return error.isEmpty();
   }
 
   void CalcCorr::loadSettings(const QSettings & settings)
@@ -478,7 +481,7 @@ namespace IDA
     
     if (!ws)
     {
-      showInformationBox("Failed to find workspace " + wsname);
+      showMessageBox("Failed to find workspace " + wsname);
       return; 
     }
 

@@ -9,7 +9,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class MSDFit : public IDATab
+  class DLLExport MSDFit : public IDATab
   {
     Q_OBJECT
 
@@ -19,7 +19,7 @@ namespace IDA
   private:
     virtual void setup();
     virtual void run();
-    virtual QString validate();
+    virtual bool validate();
     virtual void loadSettings(const QSettings & settings);
     virtual QString helpURL() {return "MSDFit";}
 
@@ -33,14 +33,8 @@ namespace IDA
     
   private:
     QString currentWsName;
-    QIntValidator * m_intVal;
-    QwtPlot* m_msdPlot;
-    MantidWidgets::RangeSelector* m_msdRange;
-    QwtPlotCurve* m_msdDataCurve;
-    QwtPlotCurve* m_msdFitCurve;
     QtTreePropertyBrowser* m_msdTree;
-    QMap<QString, QtProperty*> m_msdProp;
-    QtDoublePropertyManager* m_msdDblMng;
+
   };
 } // namespace IDA
 } // namespace CustomInterfaces
