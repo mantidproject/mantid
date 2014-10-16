@@ -191,8 +191,8 @@ class Symmetrise(PythonAlgorithm):
 
         # Validate X range
         x_min = self.getProperty('XMin').value
-        if x_min < 1e-5:
-            issues['XMin'] = 'XMin must be greater than zero'
+        if x_min < -1e-5:
+            issues['XMin'] = 'XMin must be greater than or equal to zero'
 
         x_max = self.getProperty('XMax').value
         if x_max < 1e-5:
