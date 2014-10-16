@@ -30,15 +30,29 @@ namespace DataHandling
 
   //----------------------------------------------------------------------------------------------
 
+  ///Algorithm's name for identification. @see Algorithm::name
+  const std::string SavePDFGui::name() const
+  {
+    return "SavePDFGui";
+  }
 
   /// Algorithm's version for identification. @see Algorithm::version
-  int SavePDFGui::version() const { return 1;};
+  int SavePDFGui::version() const
+  {
+    return 1;
+  }
 
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string SavePDFGui::category() const { return TODO: FILL IN A CATEGORY;}
+  const std::string SavePDFGui::category() const
+  {
+    return "DataHandling";
+  }
 
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-  const std::string SavePDFGui::summary() const { return TODO: FILL IN A SUMMARY;};
+  const std::string SavePDFGui::summary() const
+  {
+    return "Save files readable by PDFGui";
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
