@@ -4,6 +4,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidGeometry/muParser_Silent.h"
 
 namespace Mantid
 {
@@ -147,7 +148,15 @@ namespace Algorithms
     //Get the sample and source, calculate distances.
     IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
     const double distanceChopperToSource = inputWS->getInstrument()->getSource()->getDistance(*chopper);
-    const double distanceChopperToSample = sample->getDistance(*chopper);
+    const double distanceSourceToSample = inputWS->getInstrument()->getSource()->getDistance(*sample);
+
+    // extract formula from instrument parameters
+    std::vector<std::string> t0_formula = inputWS->getInstrument()->getStringParameter("t0_formula");
+    if(t0_formula.empty()) throw Exception::InstrumentDefinitionError("Unable to retrieve t0_formula among instrument parameters");
+    std::string formula = t0_formula[0];
+    g_log.debug() << formula << "\n";
+
+    const double m_convfactor = 0.5e+12*Mantid::PhysicalConstants::NeutronMass/Mantid::PhysicalConstants::meV;
 
     //Do the cross correlation.
     int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
@@ -187,19 +196,29 @@ namespace Algorithms
 	  throw std::runtime_error("Missing pulse times on events. This will not work.");
 
 	//Scale for elastic scattering.
-	double tofScale = distanceChopperToSource/(distanceChopperToSource+distanceChopperToSample+detector->getDistance(*sample));
+	double distanceSourceToDetector = distanceSourceToSample+detector->getDistance(*sample);
+	double tofScale = distanceChopperToSource/distanceSourceToDetector;
+
+	double E1;
+	mu::Parser parser;
+	parser.DefineVar("incidentEnergy", &E1); // associate variable E1 to this parser
+	parser.SetExpr(formula);
 
 	uint64_t tdc_i = 0;
 	std::vector<WeightedEvent>::iterator it;
 	for (it = events.begin(); it != events.end(); ++it)
 	  {
-	    DateAndTime tofTime = it->pulseTime() + static_cast<int64_t>(it->tof()*1000.*tofScale);
+	    double tof = it->tof();
+	    E1 = m_convfactor*(distanceSourceToDetector/tof)*(distanceSourceToDetector/tof);
+	    double t0=parser.Eval();
+
+	    DateAndTime tofTime = it->pulseTime() + static_cast<int64_t>( ( (tof-t0)*tofScale + t0 )*1000. );
 	    while (tofTime>tdc[tdc_i])
 	      {
 		//Make sure the tdc index is not out of bounds.
 		if (tdc_i == tdc.size())
 		  {
-		    if (tofTime>(tdc[tdc_i-1]+static_cast<int64_t>(period)))
+		    if (tofTime>(tdc[tdc_i-1]+static_cast<int64_t>(period*2)))
 			g_log.warning("Event occurred long after last TDC.");
 		    break;
 		  }
