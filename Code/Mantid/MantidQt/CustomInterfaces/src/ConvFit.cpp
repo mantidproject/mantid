@@ -738,13 +738,7 @@ namespace IDA
       dataY.append(outputData.getCalculated(i));
     }
 
-    if ( m_curves["CFCalcCurve"] != NULL )
-    {
-      m_curves["CFCalcCurve"]->attach(0);
-      delete m_curves["CFCalcCurve"];
-      m_curves["CFCalcCurve"] = 0;
-    }
-
+    removeCurve("CFCalcCurve");
     m_curves["CFCalcCurve"] = new QwtPlotCurve();
     m_curves["CFCalcCurve"]->setData(dataX, dataY);
     QPen fitPen(Qt::red, Qt::SolidLine);

@@ -201,14 +201,6 @@ namespace IDA
 
       m_valInt->setRange(0, maxIndex);
 
-      //delete reference to fitting.
-      if (m_curves["MSDFitCurve"] != NULL)
-      {
-        m_curves["MSDFitCurve"]->attach(0);
-        delete m_curves["MSDFitCurve"];
-        m_curves["MSDFitCurve"] = 0;
-      }
-
       // Replot
       replot("MSDPlot");
     }

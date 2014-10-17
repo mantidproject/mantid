@@ -718,13 +718,7 @@ namespace IDA
     }
 
     // Create the curve
-    if ( m_curves["FF_FitCurve"] != NULL )
-    {
-      m_curves["FF_FitCurve"]->attach(0);
-      delete m_curves["FF_FitCurve"];
-      m_curves["FF_FitCurve"] = 0;
-    }
-
+    removeCurve("FF_FitCurve");
     m_curves["FF_FitCurve"] = new QwtPlotCurve();
     m_curves["FF_FitCurve"]->setData(dataX, dataY);
     m_curves["FF_FitCurve"]->attach(m_plots["FuryFitPlot"]);
