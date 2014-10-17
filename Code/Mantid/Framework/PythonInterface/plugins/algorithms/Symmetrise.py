@@ -91,7 +91,7 @@ class Symmetrise(PythonAlgorithm):
             logger.notice('New array length = %d' % new_array_len)
             logger.notice('Output array LR split index = %d' % output_cut_index)
 
-        x_unit = mtd[self._sample].getXDimension().getUnits()
+        x_unit = mtd[self._sample].getAxis(0).getUnit().unitID()
 
         # Create an empty workspace with enough storage for the new data
         zeros = np.zeros(new_array_len * num_symm_spectra)
