@@ -1,5 +1,6 @@
 #include "MantidKernel/ProxyInfo.h"
 #include <stdexcept>
+#include <iostream>
 
 namespace Mantid
 {
@@ -85,8 +86,7 @@ namespace Mantid
      * @param other : to copy from
      */
     ProxyInfo::ProxyInfo(const ProxyInfo& other) :
-        m_host(other.host()), m_isEmptyProxy(other.emptyProxy()), m_isHttpProxy(other.isHttpProxy()), m_port(
-            other.port())
+        m_host(other.m_host), m_port(other.m_port), m_isHttpProxy(other.m_isHttpProxy), m_isEmptyProxy(other.m_isEmptyProxy)   
     {
 
     }
@@ -100,10 +100,10 @@ namespace Mantid
     {
       if (&other != this)
       {
-        m_host = other.host();
-        m_isEmptyProxy = other.emptyProxy();
-        m_isHttpProxy = other.isHttpProxy();
-        m_port = other.port();
+        m_host = other.m_host;
+        m_isEmptyProxy = other.m_isEmptyProxy;
+        m_isHttpProxy = other.m_isHttpProxy;
+        m_port = other.m_port;
       }
       return *this;
     }

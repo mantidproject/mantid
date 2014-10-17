@@ -69,7 +69,7 @@ public:
     TS_ASSERT_EQUALS(isHttpProxy, proxyInfo.isHttpProxy());
   }
 
-  void test_copy()
+  void test_copy_live_proxy()
   {
     const std::string url = "some_url";
     const int port = 1;
@@ -82,7 +82,7 @@ public:
     TS_ASSERT_EQUALS(a.isHttpProxy(), b.isHttpProxy());
   }
 
-  void test_assign()
+  void test_assign_from_live_proxy()
   {
     ProxyInfo a("a", 1, false);
     ProxyInfo b("b", 2, true);
@@ -91,6 +91,21 @@ public:
     TS_ASSERT_EQUALS(a.host(), b.host());
     TS_ASSERT_EQUALS(a.port(), b.port());
     TS_ASSERT_EQUALS(a.isHttpProxy(), b.isHttpProxy());
+  }
+
+  void test_copy_dead_proxy()
+  {
+    ProxyInfo a;
+    ProxyInfo b = a; // Should not throw
+    TS_ASSERT(b.emptyProxy())
+  }
+
+  void test_assign_from_dead_proxy()
+  {
+    ProxyInfo a;
+    ProxyInfo b("b", 1, true);
+    b = a; // Should not throw
+    TS_ASSERT(b.emptyProxy())
   }
 
 };

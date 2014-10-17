@@ -77,7 +77,7 @@ namespace Mantid
             << ex.message() << std::ends;
       else
       {
-        ss << info << " . Unkown:" << ex.displayText() << std::ends;
+        ss << info << " . Unknown:" << ex.displayText() << std::ends;
       }
 
       return ScriptRepoException(ss.str(), ex.displayText());
@@ -1816,7 +1816,7 @@ namespace Mantid
           Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, "/",
               Poco::Net::HTTPMessage::HTTP_1_1);
           // through the proxy
-          session.setProxy(proxyInfo.host(), proxyInfo.port());
+          session.setProxy(proxyInfo.host(), static_cast<unsigned int>(proxyInfo.port()));
           session.sendRequest(request);  // if it fails, it will throw exception here.
 
           // clear the answer.

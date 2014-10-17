@@ -1,4 +1,5 @@
 #include "MantidKernel/NetworkProxy.h"
+#include <Poco/URI.h>
 
 namespace Mantid
 {
@@ -20,7 +21,7 @@ namespace Mantid
     {
     }
 
-    ProxyInfo NetworkProxy::getHttpProxy(const std::string& targetURLString)
+    ProxyInfo NetworkProxy::getHttpProxy(const std::string&)
     {
       ProxyInfo proxyInfo; // NoProxy.
       char * proxy_var = getenv("http_proxy");
@@ -32,6 +33,7 @@ namespace Mantid
         Poco::URI uri_p(proxy_var);
         proxyInfo = ProxyInfo(uri_p.getHost(), uri_p.getPort(), true /*http proxy*/);
       }
+      return proxyInfo;
     }
 
   } // namespace Kernel

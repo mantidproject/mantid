@@ -4,7 +4,6 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
-	inc/MantidScriptRepository/ProxyOSX.h
 	inc/MantidScriptRepository/ScriptRepositoryImpl.h
 )
 
