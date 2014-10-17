@@ -59,6 +59,8 @@ namespace MantidQt
       std::string getRunNumber(const Mantid::API::Workspace_sptr& ws);
       //get an unused group id
       int getUnusedGroup(std::vector<size_t> ignoredRows = std::vector<size_t>()) const;
+      //parse an options column string
+      std::map<std::string,std::string> parseOptionsString(const std::string& options) const;
       //make a transmission workspace
       Mantid::API::MatrixWorkspace_sptr makeTransWS(const std::string& transString);
       //Validate a row
