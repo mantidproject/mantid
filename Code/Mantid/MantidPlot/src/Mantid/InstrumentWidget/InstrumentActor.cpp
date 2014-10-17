@@ -512,8 +512,8 @@ void InstrumentActor::sumDetectorsRagged(QList<int> &dets, std::vector<double> &
         dws->dataX(nSpec) = ws->readX(index);
         dws->dataY(nSpec) = ws->readY(index);
         dws->dataE(nSpec) = ws->readE(index);
-        double xmin = dws->readX(nSpec)[0];
-        double xmax = dws->readX(nSpec)[size];
+        double xmin = dws->readX(nSpec).front();
+        double xmax = dws->readX(nSpec).back();
         if ( xmin < xStart )
         {
           xStart = xmin;
@@ -550,23 +550,32 @@ void InstrumentActor::sumDetectorsRagged(QList<int> &dets, std::vector<double> &
   std::string params = QString("%1,%2,%3").arg(xStart).arg(dx).arg(xEnd).toStdString();
   std::string outName = "_TMP_sumDetectorsRagged";
 
-  // rebin all spectra to the same binning
-  Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("Rebin",-1);
-  alg->setProperty( "InputWorkspace", dws );
-  alg->setPropertyValue( "OutputWorkspace", outName );
-  alg->setPropertyValue( "Params", params );
-  alg->execute();
-
-  ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(outName));
-  Mantid::API::AnalysisDataService::Instance().remove( outName );
-
-  x = ws->readX(0);
-  y = ws->readY(0);
-  // add the spectra
-  for(size_t i = 0; i < nSpec; ++i)
+  try
   {
-    const Mantid::MantidVec& Y = ws->readY(i);
-    std::transform( y.begin(), y.end(), Y.begin(), y.begin(), std::plus<double>() );
+    // rebin all spectra to the same binning
+    Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("Rebin",-1);
+    alg->setProperty( "InputWorkspace", dws );
+    alg->setPropertyValue( "OutputWorkspace", outName );
+    alg->setPropertyValue( "Params", params );
+    alg->execute();
+
+    ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(outName));
+    Mantid::API::AnalysisDataService::Instance().remove( outName );
+
+    x = ws->readX(0);
+    y = ws->readY(0);
+    // add the spectra
+    for(size_t i = 0; i < nSpec; ++i)
+    {
+      const Mantid::MantidVec& Y = ws->readY(i);
+      std::transform( y.begin(), y.end(), Y.begin(), y.begin(), std::plus<double>() );
+    }
+  }
+  catch(std::invalid_argument&)
+  {
+    // wrong Params for any reason
+    x.resize(size,(xEnd + xStart)/2);
+    y.resize(size,0.0);
   }
 
 }

@@ -81,6 +81,14 @@ endif ()
 ###########################################################################
 set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64" )
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -std=c++0x" )
+set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x" )
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
+  set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-register" )
+  set ( CMAKE_XCODE_ATTRIBUTE_OTHER_CPLUSPLUSFLAGS "-Wno-deprecated-register")
+  set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
+endif()
 
 if( ${CMAKE_C_COMPILER} MATCHES "icc.*$" )
   set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -no-intel-extensions" )
@@ -113,8 +121,16 @@ if (OSX_VERSION VERSION_LESS 10.9)
  set ( SITEPACKAGES /Library/Python/${PY_VER}/site-packages )
 else()
  # Assume we are using homebrew for now
+ # set Deployment target to 10.8
+ set ( CMAKE_OSX_SYSROOT /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk )
+ set ( CMAKE_OSX_ARCHITECTURES x86_64 )
+ set ( CMAKE_OSX_DEPLOYMENT_TARGET 10.8 )
  set ( PYQT4_PYTHONPATH /usr/local/lib/python${PY_VER}/site-packages/PyQt4 )
  set ( SITEPACKAGES /usr/local/lib/python${PY_VER}/site-packages )
+ # use homebrew OpenSSL package
+ EXEC_PROGRAM( brew ARGS info openssl | grep openssl: | cut -c 17-22 OUTPUT_VARIABLE _openssl_version )
+ MESSAGE(STATUS "OpenSSL version: ${_openssl_version}")
+ set ( OPENSSL_ROOT_DIR /usr/local/Cellar/openssl/${_openssl_version}/ )
 endif()
 
 # Python packages

@@ -28,7 +28,7 @@ class ConjoinFiles(PythonAlgorithm):
             except Exception, e:
                 logger.information(str(e))
                 pass
-        raise RuntimeError("Failed to load run %s from file %s" % (str(run), filename))              
+        raise RuntimeError("Failed to load run %s from file %s" % (str(run), filename))
 
     def PyInit(self):
         greaterThanZero = IntArrayBoundedValidator()
@@ -43,7 +43,7 @@ class ConjoinFiles(PythonAlgorithm):
         runs = self.getProperty("RunNumbers")
         instr = config.getInstrument().shortName()
         directory = self.getPropertyValue("Directory").strip()
-        
+
         # change here if you want something other than gsas files
         exts = ['.txt', '.gsa']
         loader = LoadGSS

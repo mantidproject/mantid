@@ -2,11 +2,11 @@
     This modules provides a function, importAllFromADS, that creates a python
     variable in the globals dict of the current frame for each
     name in the analysis data service.
-    
+
     If the name is not a valid variable then no variable is created.
-    
+
     The function is also attached to the AnalysisDataService and named importAll.
-    
+
 """
 from mantid.api import AnalysisDataServiceImpl
 import inspect as _inspect
@@ -24,16 +24,16 @@ def _importAll(mtd):
     """
         Creates a named variable in the globals dictionary
         of the current frame (inspect.currentframe).
-        
+
         For example, if the ADS contains a workspace with the name "deltax" then
-            
+
             mtd.importAll()
-            
+
         will create a python variable for that workspace as if the user had typed
         mtd['deltax'].
-        
+
         @param mtd The Analysis Data Service Object
-    """  
+    """
     def clean(name):
         """
             Returns a name cleaned up so that it is a valid
@@ -49,7 +49,7 @@ def _importAll(mtd):
             if LEADING_NUMS_REGEX.match(varname) is not None:
                 varname = "_" + varname
         return varname
-    
+
     stack = _inspect.stack()
     try:
         # stack[1][0] is the frame object of the caller to this function

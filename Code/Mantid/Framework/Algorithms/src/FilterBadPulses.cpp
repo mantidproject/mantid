@@ -159,9 +159,11 @@ void FilterBadPulses::exec()
   }
   else
   {
-    this->g_log.information() << "Deleted " << (inputNumEvents - outputNumEvents)
-                              << " of " << inputNumEvents
-                              << " events (" << static_cast<int>(percent) << "%)\n";
+    this->g_log.notice() << "Deleted " << (inputNumEvents - outputNumEvents)
+                         << " of " << inputNumEvents
+                         << " events (" << static_cast<float>(percent) << "%)"
+                         << " by proton charge from " << min_pcharge << " to " << max_pcharge
+                         << " with mean = " << stats.mean << "\n";
   }
 }
 

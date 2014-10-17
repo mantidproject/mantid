@@ -1,4 +1,4 @@
-#ifndef MANTID_DATAHANDLING_LOADIDFROMNEXUS_H_
+#ifndef MANTID_DATAHANDLING_LOADIDFFROMNEXUS_H_
 #define MANTID_DATAHANDLING_LOADIDFFROMNEXUS_H_
 
 //----------------------------------------------------------------------

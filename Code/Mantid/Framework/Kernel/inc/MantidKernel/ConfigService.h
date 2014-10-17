@@ -298,7 +298,7 @@ namespace Mantid
     };
 
     /// Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(__INTEL_COMPILER)
     inline
 #endif
     template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;

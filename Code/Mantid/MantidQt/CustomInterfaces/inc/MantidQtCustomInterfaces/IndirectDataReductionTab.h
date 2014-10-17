@@ -42,7 +42,7 @@ namespace MantidQt
 namespace CustomInterfaces
 {
   /** IndirectDataReductionTab : TODO: DESCRIPTION
-    
+
     @author Samuel Jackson
     @date 13/08/2013
 
@@ -87,6 +87,9 @@ namespace CustomInterfaces
     /// Run the load algorithm with the given file name, output name and spectrum range
     bool loadFile(const QString& filename, const QString& outputName, const int specMin = -1, const int specMax = -1);
 
+    Mantid::API::MatrixWorkspace_sptr loadInstrumentIfNotExist(std::string instrumentName, std::string analyser="", std::string reflection="");
+    /// Get information about the operation modes of an indirect instrument
+    std::vector<std::pair<std::string, std::vector<std::string> > > getInstrumentModes(std::string instrumentName);
     /// Function to get details about the instrument configuration defined on C2E tab
     std::map<QString, QString> getInstrumentDetails();
 
@@ -111,6 +114,8 @@ namespace CustomInterfaces
 
     /// Function to run an algorithm on a seperate thread
     void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
+
+    std::map<std::string, double> getRangesFromInstrument(QString instName = "", QString analyser = "", QString reflection = "");
 
     /// Parent QWidget (if applicable)
     QWidget *m_parentWidget;
@@ -138,7 +143,7 @@ namespace CustomInterfaces
     DoubleEditorFactory* m_dblEdFac;
 
     /// Algorithm runner object to execute chains algorithms on a seperate thread from the GUI
-    MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner; 
+    MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
 
     /// Use a Python runner for when we need the output of a script
     MantidQt::API::PythonRunner m_pythonRunner;

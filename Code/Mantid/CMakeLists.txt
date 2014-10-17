@@ -184,13 +184,20 @@ if ( ENABLE_CPACK )
       message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 
       # rhel requirements
-      set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,nexus-python,qwt,gsl,glibc,qwtplot3d-qt4,muParser,numpy" )
-      # OpenCASCADE changed names when packaged for Fedora 20
-      if( "${UNIX_CODENAME}" MATCHES "Heisenbug" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,nexus-python,gsl,glibc,qwtplot3d-qt4,muParser,numpy" )
+      # OpenCASCADE changed names when packaged for Fedora 20 and RHEL7
+      if( "${UNIX_CODENAME}" MATCHES "Heisenbug" OR "${UNIX_CODENAME}" MATCHES "Maipo" )
         set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-devel" )
       else()
         set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0" )
       endif()
+      # Qwt is qwt5-qt4 in RHEL7
+      if( "${UNIX_CODENAME}" MATCHES "Maipo" )
+        set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qwt5-qt4" )
+      else()
+        set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qwt" )
+      endif()
+
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-ipython >= 1.1.0" )
       # scipy & matplotlib

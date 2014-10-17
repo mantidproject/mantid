@@ -20,4 +20,41 @@ will be renamed to newName\_1, newname\_2, etc.). Otherwise, only the
 group itself will be renamed - the members will keep their previous
 names.
 
+
+
+Usage
+-----
+
+**Example**
+
+.. testcode:: ExRenameWorkspace
+
+   myWs=CreateSampleWorkspace()
+
+   print "myWs name:", myWs.name()
+   print "myWs exists in Mantid?", mtd.doesExist(myWs.name())
+
+   newNameWs = RenameWorkspace(myWs)
+
+   print "newNameWs name:", newNameWs.name()
+   print "newNameWs exists in Mantid?", mtd.doesExist(newNameWs.name())
+
+   print "As myWs is just a refence to the workspace it now refers to the workspace with the new name"
+   print "myWs name:", myWs.name()
+   print "Does 'myWs' exist in Mantid?", mtd.doesExist("myWs")
+
+
+Output:
+
+.. testoutput:: ExRenameWorkspace
+
+    myWs name: myWs
+    myWs exists in Mantid? True
+    newNameWs name: newNameWs
+    newNameWs exists in Mantid? True
+    As myWs is just a refence to the workspace it now refers to the workspace with the new name
+    myWs name: newNameWs
+    Does 'myWs' exist in Mantid? False
+
+
 .. categories::

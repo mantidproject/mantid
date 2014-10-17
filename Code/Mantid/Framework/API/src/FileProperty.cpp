@@ -219,22 +219,28 @@ void FileProperty::setUp(const std::string & defExt)
  * run file extensions, false otherwise
  */
 bool FileProperty::extsMatchRunFiles()
-{
-  Kernel::FacilityInfo facilityInfo = Kernel::ConfigService::Instance().getFacility();
-  const std::vector<std::string>  facilityExts = facilityInfo.extensions();
-  std::vector<std::string>::const_iterator facilityExtsBegin = facilityExts.begin();
-  std::vector<std::string>::const_iterator facilityExtsEnd = facilityExts.end();
-  const std::vector<std::string> allowedExts = this->allowedValues();
-
+{  
   bool match(false);
-  for( auto it = allowedExts.begin(); it != allowedExts.end(); ++it )
+  try
   {
-    if( std::find(facilityExtsBegin, facilityExtsEnd, *it) != facilityExtsEnd )
+    Kernel::FacilityInfo facilityInfo = Kernel::ConfigService::Instance().getFacility();
+    const std::vector<std::string>  facilityExts = facilityInfo.extensions();
+    std::vector<std::string>::const_iterator facilityExtsBegin = facilityExts.begin();
+    std::vector<std::string>::const_iterator facilityExtsEnd = facilityExts.end();
+    const std::vector<std::string> allowedExts = this->allowedValues();
+
+
+    for( auto it = allowedExts.begin(); it != allowedExts.end(); ++it )
     {
-      match = true;
-      break;
+      if( std::find(facilityExtsBegin, facilityExtsEnd, *it) != facilityExtsEnd )
+      {
+        match = true;
+        break;
+      }
     }
   }
+  catch (Mantid::Kernel::Exception::NotFoundError&)
+  {} //facility could not be found, do nothing this will return the default match of false
 
   return match;
 }

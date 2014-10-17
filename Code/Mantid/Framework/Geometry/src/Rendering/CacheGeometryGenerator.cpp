@@ -7,6 +7,8 @@
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/OCGeometryHandler.h"
 
+#include <boost/make_shared.hpp>
+
 namespace Mantid
 {
 

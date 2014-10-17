@@ -33,13 +33,13 @@ class StatisticsTest(unittest.TestCase):
         self.assertEquals(12.6, stats.minimum)
         self.assertEquals(18.3, stats.maximum)
         self.assertEquals(17.2, stats.median)
-        
+
 
     def test_getZScores(self):
         """Data taken from C++ test"""
         values = [12,13,9,18,7,9,14,16,10,12,7,13,14,19,10,16,12,16,19,11]
         arr = numpy.array(values,dtype=numpy.float64)
-        
+
         zscore = Stats.getZscore(arr)
         self.assertAlmostEqual(1.63977, zscore[4], places = 4)
         self.assertAlmostEqual(0.32235, zscore[6], places = 4)
@@ -64,12 +64,12 @@ class StatisticsTest(unittest.TestCase):
         indep = numpy.arange(numX, dtype=numpy.float64)
         indep = indep*deltaX + offsetX
 
-        
+
         # y-values
         # test different type
         depend = numpy.arange(numX, dtype=numpy.int32)
         self.assertRaises(ValueError, Stats.getMomentsAboutOrigin, indep, depend)
-        
+
         # now correct y values
         weightedDiff = (indep-mean)/sigma
         depend = numpy.exp(-0.5*weightedDiff*weightedDiff)/sigma/math.sqrt(2.*math.pi)

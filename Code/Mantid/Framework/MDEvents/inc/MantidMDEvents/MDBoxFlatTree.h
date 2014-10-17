@@ -66,7 +66,7 @@ namespace MDEvents
     uint64_t restoreBoxTree(std::vector<API::IMDNode *>&Boxes ,API::BoxController_sptr &bc, bool FileBackEnd,bool NoFileInfo=false);
 
     /*** this function tries to set file positions of the boxes to 
-          make data physiclly located close to each otger to be as close as possible on the HDD */
+          make data physically located close to each other to be as close as possible on the HDD */
     void setBoxesFilePositions(bool setFileBacked);
 
     /**Save flat box structure into a file, defined by the file name*/
@@ -112,7 +112,7 @@ namespace MDEvents
     /// shared pointer to multiple experiment info stored within the workspace
     boost::shared_ptr<Mantid::API::MultipleExperimentInfos> m_mEI;
   public:
-    static ::NeXus::File * createOrOpenMDWSgroup(const std::string &fileName,int &nDims, const std::string &WSEventType, bool readOnly);
+    static ::NeXus::File * createOrOpenMDWSgroup(const std::string &fileName,int &nDims, const std::string &WSEventType, bool readOnly,bool &exist);
     // save each experiment info into its own NeXus group within an existing opened group
     static void saveExperimentInfos(::NeXus::File * const file, API::IMDEventWorkspace_const_sptr ws);
     // load experiment infos, previously saved through the the saveExperimentInfo function

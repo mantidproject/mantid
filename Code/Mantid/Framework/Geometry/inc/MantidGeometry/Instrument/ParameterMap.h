@@ -10,12 +10,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Cache.h"
 
-#ifndef HAS_UNORDERED_MAP_H
-#include <map>
-#else
-#include <tr1/unordered_map>
-#endif
-
+#include <boost/unordered_map.hpp>
 #include <vector>
 #include <typeinfo>
 
@@ -59,34 +54,19 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-#ifndef HAS_UNORDERED_MAP_H
-    /// Parameter map iterator typedef
-  typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator component_map_it;
-  typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator component_map_cit;
-#else
    /// Parameter map iterator typedef
-   typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator component_map_it;
-   typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator component_map_cit;
-#endif
+   typedef boost::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator component_map_it;
+   typedef boost::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator component_map_cit;
 
   class MANTID_GEOMETRY_DLL ParameterMap
   {
   public:
-#ifndef HAS_UNORDERED_MAP_H
     /// Parameter map typedef
-    typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
+    typedef boost::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
     /// Parameter map iterator typedef
-    typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator pmap_it;
+    typedef boost::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator pmap_it;
     /// Parameter map iterator typedef
-    typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_cit;
-#else
-    /// Parameter map typedef
-    typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
-    /// Parameter map iterator typedef
-    typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator pmap_it;
-    /// Parameter map iterator typedef
-    typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_cit;
-#endif
+    typedef boost::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_cit;
     /// Default constructor
     ParameterMap();
     /// Returns true if the map is empty, false otherwise
@@ -235,7 +215,7 @@ namespace Geometry
     }
 
     /// Return the value of a parameter as a string
-    std::string getString(const IComponent* comp,const std::string& name) const;
+    std::string getString(const IComponent* comp,const std::string& name, bool recursive = false) const;
     /// Returns a string parameter as vector's first element if exists and an empty vector if it doesn't
     std::vector<std::string> getString(const std::string& compName,const std::string& name) const 
     {

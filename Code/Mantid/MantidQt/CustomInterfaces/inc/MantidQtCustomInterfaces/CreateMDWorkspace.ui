@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>CreateMDWorkspace</class>
- <widget class="QWidget" name="CreateMDWorkspace">
+ <widget class="QMainWindow" name="CreateMDWorkspace">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -19,6 +19,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <widget class="QWidget" name="centralwidget">
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <layout class="QHBoxLayout" name="mainLayout">
@@ -454,6 +455,7 @@
     <layout class="QHBoxLayout" name="controlButtonsLayout"/>
    </item>
   </layout>
+  </widget>
  </widget>
  <customwidgets>
   <customwidget>

@@ -201,6 +201,8 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
@@ -589,6 +591,24 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   {
     showFirstTimeSetup();
   }
+  else
+  {
+    //check we can get the facility and instrument
+    try
+    {
+      const Mantid::Kernel::FacilityInfo& facilityInfo = config.getFacility(facility);
+      const Mantid::Kernel::InstrumentInfo& instrumentInfo = config.getInstrument(instrument);
+      g_log.information()<<"Default facility '" << facilityInfo.name() 
+        << "', instrument '" << instrumentInfo.name() << "'" << std::endl;
+    }
+    catch (Mantid::Kernel::Exception::NotFoundError&)
+    {
+      //failed to find the facility or instrument
+      g_log.error()<<"Could not find your default facility '" << facility 
+        <<"' or instrument '" << instrument << "' in facilities.xml, showing please select again." << std::endl;
+      showFirstTimeSetup();
+    }
+  }
   using namespace Mantid::API;
   // Do this as late as possible to avoid unnecessary updates
   AlgorithmFactory::Instance().enableNotifications();
@@ -791,6 +811,7 @@ void ApplicationWindow::initGlobalConstants()
     d_locale.setNumberOptions(QLocale::OmitGroupSeparator);
 
   d_decimal_digits = 13;
+  d_graphing_digits = 3;
 
   d_extended_open_dialog = true;
   d_extended_export_dialog = true;

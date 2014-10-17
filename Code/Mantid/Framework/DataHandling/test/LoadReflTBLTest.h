@@ -54,7 +54,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(m_wsName));
     TableWorkspace_sptr outputWS = boost::dynamic_pointer_cast<TableWorkspace>(output);
-    TS_ASSERT_EQUALS(outputWS->columnCount(),8);
+    TS_ASSERT_EQUALS(outputWS->columnCount(),9);
     TS_ASSERT_EQUALS(outputWS->rowCount(),10);
 
     //test the first three rows, equivalent to the first two rows of the file.
@@ -65,7 +65,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(3)),0.01,0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)),0.06,0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)),0.04,0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)),2,0.01);
+    TS_ASSERT_DELTA(row.cell<double>(6),2,0.01);
     TS_ASSERT_EQUALS(row.cell<int>(7),1);
 
     row = outputWS->getRow(1);
@@ -75,7 +75,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(3)),0.01,0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)),0.06,0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)),0.04,0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)),2,0.01);
+    TS_ASSERT_DELTA(row.cell<double>(6),2,0.01);
     TS_ASSERT_EQUALS(row.cell<int>(7),2);
 
     row = outputWS->getRow(2);
@@ -85,7 +85,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(3)),0.035,0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)),0.3,0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)),0.04,0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)),2,0.01);
+    TS_ASSERT_DELTA(row.cell<double>(6),2,0.01);
     TS_ASSERT_EQUALS(row.cell<int>(7),2);
 
     cleanupafterwards();
@@ -117,7 +117,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(m_wsName));
     TableWorkspace_sptr outputWS = boost::dynamic_pointer_cast<TableWorkspace>(output);
-    TS_ASSERT_EQUALS(outputWS->columnCount(),8);
+    TS_ASSERT_EQUALS(outputWS->columnCount(),9);
     TS_ASSERT_EQUALS(outputWS->rowCount(),10);
 
     //test the first three rows, equivalent to the first two rows of the file.
@@ -128,7 +128,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(3)),0.01,0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)),0.06,0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)),0.04,0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)),2,0.01);
+    TS_ASSERT_DELTA(row.cell<double>(6),2,0.01);
     TS_ASSERT_EQUALS(row.cell<int>(7),1);
 
     row = outputWS->getRow(1);
@@ -138,7 +138,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(3)),0.01,0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)),0.06,0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)),0.04,0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)),2,0.01);
+    TS_ASSERT_DELTA(row.cell<double>(6),2,0.01);
     TS_ASSERT_EQUALS(row.cell<int>(7),2);
 
     row = outputWS->getRow(2);
@@ -148,7 +148,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(3)),0.035,0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)),0.3,0.001);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)),0.04,0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)),2,0.01);
+    TS_ASSERT_DELTA(row.cell<double>(6),2,0.01);
     TS_ASSERT_EQUALS(row.cell<int>(7),2);
 
     cleanupafterwards();
@@ -244,7 +244,7 @@ public:
     TableWorkspace_sptr outputWS = boost::dynamic_pointer_cast<TableWorkspace>(output);
 
     //the columns should be there, but no rows
-    TS_ASSERT_EQUALS(outputWS->columnCount(),8);
+    TS_ASSERT_EQUALS(outputWS->columnCount(),9);
     TS_ASSERT_EQUALS(outputWS->rowCount(),0);
 
     cleanupafterwards();
@@ -279,7 +279,7 @@ public:
     TableWorkspace_sptr outputWS = boost::dynamic_pointer_cast<TableWorkspace>(output);
 
     //the columns should be there, but no rows
-    TS_ASSERT_EQUALS(outputWS->columnCount(),8);
+    TS_ASSERT_EQUALS(outputWS->columnCount(),9);
     TS_ASSERT_EQUALS(outputWS->rowCount(),0);
 
     cleanupafterwards();

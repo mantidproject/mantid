@@ -170,12 +170,29 @@ namespace Mantid
             // ... store it's name and version and check that all other files have loaders with the same name and version.
             std::string name = loader->name();
             int version = loader->version();
+
+            std::string ext = fileNames[0].substr(fileNames[0].find_last_of("."));
+            
+            auto ifl = boost::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(loader);
+            auto iflNexus = boost::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(loader);                     
+
             for(size_t i = 1; i < fileNames.size(); ++i)
             {
-              loader = getFileLoader(fileNames[i]);
+              // If it's loading into a single file, perform a cursory check on file extensions only.              
+              if((ifl && ifl->loadMutipleAsOne()) || (iflNexus && iflNexus->loadMutipleAsOne()))
+              {
+                if( fileNames[i].substr(fileNames[i].find_last_of(".")) != ext)
+                {
+                  throw std::runtime_error("Cannot load multiple files when more than one Loader is needed.");   
+                }
+              }
+              else
+              {
+                loader = getFileLoader(fileNames[i]);
 
-              if( name != loader->name() || version != loader->version() )
-                throw std::runtime_error("Cannot load multiple files when more than one Loader is needed.");
+                if( name != loader->name() || version != loader->version() )
+                  throw std::runtime_error("Cannot load multiple files when more than one Loader is needed.");        
+              }
             }
           }
 
@@ -224,10 +241,17 @@ namespace Mantid
       // Use the first file property as the main Filename
       const auto & props = loader->getProperties();
       for(auto it = props.begin(); it != props.end(); ++it)
-      {
-        if(auto *fp = dynamic_cast<API::FileProperty*>(*it))
+      {          
+        auto *fp = dynamic_cast<API::MultipleFileProperty*>(*it);
+        auto *fp2 = dynamic_cast<API::FileProperty*>(*it);
+        if(fp)
         {
           m_filenamePropName = fp->name();
+          break;
+        }     
+        if(fp2)
+        {
+          m_filenamePropName = fp2->name();
           break;
         }
       }
@@ -324,10 +348,15 @@ namespace Mantid
      */
     void Load::exec()
     {
-      std::vector<std::vector<std::string> > fileNames = getProperty("Filename");
+      std::vector<std::vector<std::string> > fileNames = getProperty("Filename");      
+
+      // Test for loading as a single file      
+      IAlgorithm_sptr loader = getFileLoader(fileNames[0][0]);
+      auto ifl = boost::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(loader);
+      auto iflNexus = boost::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(loader);
       
-      if(isSingleFile(fileNames))
-      {
+      if(isSingleFile(fileNames) || (ifl && ifl->loadMutipleAsOne()) || (iflNexus && iflNexus->loadMutipleAsOne()))
+      { 
         // This is essentially just the same code that was called before multiple files were supported.
         loadSingleFile();
       }

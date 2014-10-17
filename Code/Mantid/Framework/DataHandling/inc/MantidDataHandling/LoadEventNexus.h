@@ -129,6 +129,9 @@ namespace DataHandling
 
     static void loadSampleDataISIScompatibility(::NeXus::File& file, Mantid::API::MatrixWorkspace_sptr WS);
 
+    /// method used to return instrument name for some old ISIS files where it is not written properly within the instrument
+    static std::string readInstrumentFromISIS_VMSCompat(::NeXus::File &hFile);
+
   public:
 
     /// The name and path of the input file

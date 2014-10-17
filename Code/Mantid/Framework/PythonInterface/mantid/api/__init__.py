@@ -25,15 +25,15 @@ _pydlopen.restore_flags(flags)
 ###############################################################################
 FrameworkManagerImpl.Instance()
 # Declare any additional C++ algorithms defined in this package
-_api._declareCPPAlgorithms() 
+_api._declareCPPAlgorithms()
 
 ###############################################################################
 # Make aliases accessible in this namespace
 ###############################################################################
-from _aliases import * 
+from _aliases import *
 
 ###############################################################################
-# Add importAll member to ADS 
+# Add importAll member to ADS
 ###############################################################################
 import _adsimports
 
