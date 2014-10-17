@@ -4,6 +4,7 @@
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadPoolRunnable.h"
 #include "MantidKernel/Task.h"
+#include "MantidKernel/ConfigService.h"
 #include <algorithm>
 #include <sstream>
 #include <cmath>
@@ -65,7 +66,12 @@ namespace Kernel
    */
   size_t ThreadPool::getNumPhysicalCores()
   {
-    return  Poco::Environment::processorCount();
+    int maxCores(0);
+    int retVal = Kernel::ConfigService::Instance().getValue("MultiThreaded.MaxCores", maxCores);
+    if(retVal > 0 && maxCores > 0)
+      return maxCores;
+    else
+      return Poco::Environment::processorCount();
   }
 
   //--------------------------------------------------------------------------------
