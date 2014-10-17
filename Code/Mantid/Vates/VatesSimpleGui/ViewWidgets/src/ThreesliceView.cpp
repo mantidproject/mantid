@@ -43,7 +43,7 @@ ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
                     QUADVIEW_LIBRARY, &error, false);
 
   this->mainView = this->createRenderView(this->ui.mainRenderFrame,
-                                          QString("pqQuadView"));
+                                          QString("QuadView"));
   pqActiveObjects::instance().setActiveView(this->mainView);
 }
 
