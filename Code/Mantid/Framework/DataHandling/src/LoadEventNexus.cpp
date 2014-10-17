@@ -165,7 +165,6 @@ namespace DataHandling
 
       // ---- Pre-counting events per pixel ID ----
       auto & outputWS = *(alg->WS);
-
       if (alg->precount)
       {
 
