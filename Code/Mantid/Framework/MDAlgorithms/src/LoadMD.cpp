@@ -366,10 +366,7 @@ namespace Mantid
           if(!box)continue;
 
           if(BoxEventIndex[2*i+1]>0) // Load in memory NOT using the file as the back-end,
-          {
-            boxTree[i]->reserveMemoryForLoad(BoxEventIndex[2*i+1]);
             boxTree[i]->loadAndAddFrom(loader.get(),BoxEventIndex[2*i],static_cast<size_t>(BoxEventIndex[2*i+1]));
-          }
 
         }
         loader->closeFile();
