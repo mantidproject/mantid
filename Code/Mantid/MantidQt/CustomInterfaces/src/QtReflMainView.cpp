@@ -220,6 +220,7 @@ namespace MantidQt
     /**
     Set the list of available instruments to search and process for
     @param instruments : The list of instruments available
+    @param defaultInstrument : The instrument to have selected by default
     */
     void QtReflMainView::setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument)
     {
