@@ -41,6 +41,9 @@ namespace MantidQt
       ReflMainViewPresenter(ReflMainView* view);
       virtual ~ReflMainViewPresenter() = 0;
       virtual void notify(int flag);
+
+      //Public for the purposes of unit testing
+      static std::map<std::string,std::string> parseKeyValueString(const std::string& str);
     protected:
       //The model and backup copy of the original model
       Mantid::API::ITableWorkspace_sptr m_model;
@@ -59,8 +62,6 @@ namespace MantidQt
       std::string getRunNumber(const Mantid::API::Workspace_sptr& ws);
       //get an unused group id
       int getUnusedGroup(std::vector<size_t> ignoredRows = std::vector<size_t>()) const;
-      //parse an options column string
-      std::map<std::string,std::string> parseOptionsString(const std::string& options) const;
       //make a transmission workspace
       Mantid::API::MatrixWorkspace_sptr makeTransWS(const std::string& transString);
       //Validate a row

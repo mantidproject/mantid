@@ -60,10 +60,10 @@ namespace MantidQt
     Parses a string in the format `a = 1,b=2, c = "1,2,3,4", d = 5.0, e='a,b,c'` into a map of key/value pairs
     @param options The input string
     */
-    std::map<std::string,std::string> ReflMainViewPresenter::parseOptionsString(const std::string& options) const
+    std::map<std::string,std::string> ReflMainViewPresenter::parseKeyValueString(const std::string& str)
     {
       //Tokenise, using '\' as an escape character, ',' as a delimiter and " and ' as quote characters
-      boost::tokenizer<boost::escaped_list_separator<char> > tok(options, boost::escaped_list_separator<char>("\\", ",", "\"'"));
+      boost::tokenizer<boost::escaped_list_separator<char> > tok(str, boost::escaped_list_separator<char>("\\", ",", "\"'"));
 
       std::map<std::string,std::string> kvp;
 
@@ -380,7 +380,7 @@ namespace MantidQt
       algReflOne->setProperty("ThetaIn", theta);
 
       //Parse and set any user-specified options
-      auto optionsMap = parseOptionsString(options);
+      auto optionsMap = parseKeyValueString(options);
       for(auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp)
       {
         try
