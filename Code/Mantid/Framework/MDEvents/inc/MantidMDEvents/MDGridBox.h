@@ -67,6 +67,8 @@ namespace MDEvents
     /**Load the box data of specified size from the disk location provided using the class, respoinsible for the file IO. */
     virtual void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */)
     {/*Not directly loadable */}
+    virtual void reserveMemoryForLoad(uint64_t /* Size */)
+    {/*Not directly loadable */}
     //-------------------------------------------------------------------------------------------------------
     
     /** Uses the cached value of points stored in the grid box  
