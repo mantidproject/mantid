@@ -734,7 +734,15 @@ namespace MantidQt
       }
 
       ITableWorkspace_sptr newModel = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(toOpen);
-      checkValidModel(newModel);
+      try
+      {
+        checkValidModel(newModel);
+      }
+      catch(std::runtime_error& e)
+      {
+        m_view->giveUserCritical("Invalid workspace to open:\n" + std::string(e.what()), "Error");
+        return;
+      }
 
       m_model = newModel;
       m_wsName = toOpen;
