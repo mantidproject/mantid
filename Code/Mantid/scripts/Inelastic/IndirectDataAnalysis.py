@@ -1078,7 +1078,7 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
         DeleteWorkspace(cws)
 
     EndTime('ApplyCorrections')
-    return outNm
+    return res_plot
 
 def plotCorrResult(inWS,PlotResult):
     nHist = mtd[inWS].getNumberHistograms()

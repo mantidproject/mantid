@@ -134,10 +134,11 @@ namespace IDA
     pyInput += "rebin_can = False\n";
     bool noContainer = false;
 
-    if ( uiForm().abscor_ckUseCan->isChecked() )
+    MatrixWorkspace_const_sptr canWs;
+    bool useCan = uiForm().abscor_ckUseCan->isChecked();
+    if(useCan)
     {
       QString container = uiForm().abscor_dsContainer->getCurrentDataName();
-      MatrixWorkspace_const_sptr canWs;
       if ( !Mantid::API::AnalysisDataService::Instance().doesExist(container.toStdString()) )
         loadFile(uiForm().abscor_dsContainer->getFullFilePath(), container);
       canWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(container.toStdString());
@@ -229,36 +230,27 @@ namespace IDA
     }
     
     pyInput += "plotResult = '" + plotResult + "'\n";
-
     pyInput += "print abscorFeeder(sample, container, geom, useCor, corrections, Verbose=verbose, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
 
-    if(pyOutput.toStdString() != "None")
+    // Plot can if it was used
+    if(useCan)
     {
-      pyOutput += "0";
-      MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(pyOutput.toStdString());
-      TextAxis* axis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
-
-      for(unsigned int histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
-      {
-        QString specName = QString::fromStdString(axis->label(histIndex));
-
-        if(specName.contains("Can"))
-        {
-          plotMiniPlot(outputWorkspace, histIndex, "ApplyCorrPlot", specName);
-          m_curves[specName]->setPen(QColor(Qt::red));
-        }
-
-        if(specName.contains("Calc"))
-        {
-          plotMiniPlot(outputWorkspace, histIndex, "ApplyCorrPlot", specName);
-          m_curves[specName]->setPen(QColor(Qt::green));
-        }
-      }
-  
-      replot("ApplyCorrPlot");
+      plotMiniPlot(canWs, 0, "ApplyCorrPlot", "CanCurve");
+      m_curves["CanCurve"]->setPen(QColor(Qt::red));
     }
+    else
+    {
+      removeCurve("CanCurve");
+    }
+
+    // Plot the calculated/corrected curve
+    MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(pyOutput.toStdString());
+    plotMiniPlot(outputWorkspace, 0, "ApplyCorrPlot", "CalcCurve");
+    m_curves["CalcCurve"]->setPen(QColor(Qt::green));
+
+    replot("ApplyCorrPlot");
   }
 
   /**

@@ -164,6 +164,21 @@ namespace CustomInterfaces
   }
 
   /**
+   * Removes a curve from a mini plot and deletes it.
+   *
+   * @param curveID :: ID of plot in m_plots map
+   */
+  void IndirectTab::removeCurve(const QString& curveID)
+  {
+    if(m_curves[curveID] == NULL)
+      return;
+
+    m_curves[curveID]->attach(0);
+    delete m_curves[curveID];
+    m_curves[curveID] = NULL;
+  }
+
+  /**
    * Plot a workspace to the miniplot given a workspace pointer and
    * a specturm index.
    *
@@ -187,12 +202,7 @@ namespace CustomInterfaces
 
     QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), false);
 
-    if ( m_curves[cID] != NULL )
-    {
-      m_curves[cID]->attach(0);
-      delete m_curves[cID];
-      m_curves[cID] = NULL;
-    }
+    removeCurve(cID);
 
     size_t nhist = workspace->getNumberHistograms();
     if ( wsIndex >= nhist )
