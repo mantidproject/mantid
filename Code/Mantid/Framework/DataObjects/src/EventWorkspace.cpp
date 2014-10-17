@@ -926,6 +926,7 @@ namespace Mantid
       size_t howManyCores = 1;
       // And auto-detect how many threads
       size_t howManyThreads = 0;
+#ifdef _OPENMP
       if (m_noVectors < num_threads * 10)
       {
         // If you have few vectors, sort with 2 cores.
@@ -940,6 +941,7 @@ namespace Mantid
         howManyCores = 4;
         howManyThreads = num_threads / 4 + 1;
       }
+#endif
       g_log.debug() << "Performing sort with " << howManyCores << " cores per EventList, in "
           << howManyThreads << " threads, using a chunk size of " << chunk_size << ".\n";
 
