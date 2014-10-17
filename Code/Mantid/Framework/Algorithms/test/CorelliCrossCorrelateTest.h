@@ -89,7 +89,7 @@ public:
     TS_ASSERT_DELTA(events[0].weight(),-1.99392,0.00001)
     TS_ASSERT_DELTA(events[1].weight(),-1.99392,0.00001)
     TS_ASSERT_DELTA(events[2].weight(),2.00612,0.00001)
-    TS_ASSERT_DELTA(events[3].weight(),2.00612,0.00001)
+    TS_ASSERT_DELTA(events[3].weight(),-1.99392,0.00001)
     TS_ASSERT_DELTA(events[4].weight(),2.00612,0.00001)
 
     // Remove workspace from the data service.
