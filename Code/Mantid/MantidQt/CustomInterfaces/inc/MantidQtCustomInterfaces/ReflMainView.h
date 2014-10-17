@@ -36,8 +36,8 @@ namespace MantidQt
     class DLLExport ReflMainView
     {
     public:
-      ReflMainView();
-      virtual ~ReflMainView() = 0;
+      ReflMainView() {};
+      virtual ~ReflMainView() {};
 
       //Connect the model
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model) = 0;

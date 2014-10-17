@@ -54,7 +54,6 @@ set ( SRC_FILES
 	src/QtWorkspaceMementoModel.cpp
 	src/Quasi.cpp
 	src/RawFileMemento.cpp
-	src/ReflMainView.cpp
 	src/ReflMainViewPresenter.cpp
 	src/ResNorm.cpp
 	src/SANSAddFiles.cpp
