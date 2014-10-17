@@ -17,7 +17,7 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    QtReflMainView::QtReflMainView(QWidget *parent) : UserSubWindow(parent), m_presenter(NULL)
+    QtReflMainView::QtReflMainView(QWidget *parent) : UserSubWindow(parent)
     {
     }
 

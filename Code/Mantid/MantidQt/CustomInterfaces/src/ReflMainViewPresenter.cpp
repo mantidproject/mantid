@@ -71,7 +71,7 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view): m_model(NULL), m_view(view)
+    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view): m_view(view)
     {
       //Set up the instrument selectors
       std::vector<std::string> instruments;
