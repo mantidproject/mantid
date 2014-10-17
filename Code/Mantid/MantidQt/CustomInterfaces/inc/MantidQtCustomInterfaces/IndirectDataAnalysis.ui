@@ -2663,6 +2663,51 @@
            <item>
             <layout class="QVBoxLayout" name="abscor_plotPreview"/>
            </item>
+           <item>
+            <layout class="QVBoxLayout" name="abscor_plotLegend">
+             <item>
+              <widget class="QLabel" name="abscor_plotLSample">
+               <property name="text">
+                <string>Sample</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="abscor_plotLCan">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text">
+                <string>Can</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="abscor_plotLCorr">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(0, 255, 0);</string>
+               </property>
+               <property name="text">
+                <string>Corrected</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+
           </layout>
          </widget>
         </item>
