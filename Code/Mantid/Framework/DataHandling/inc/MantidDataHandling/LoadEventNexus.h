@@ -158,18 +158,13 @@ namespace DataHandling
     /// Was the instrument loaded?
     bool instrument_loaded_correctly;
 
-    /// mutexed getter for longest_tof
-    double get_longest_tof();
-
-    /// mutexed setter for longest_tof
-    void set_longest_tof(double longest_tof);
+    /// Mutex protecting tof limits
+    Poco::FastMutex m_tofMutex;
       
-    /// mutexed getter for shortest_tof;
-    double get_shortest_tof();
-      
-    /// mutexed setter for shortest_tof;
-    void set_shortest_tof(double shortest_tof);
-    
+    /// Limits found to tof
+    double longest_tof;
+    /// Limits found to tof
+    double shortest_tof;
     /// Count of all the "bad" tofs found. These are events with TOF > 2e8 microsec
     size_t bad_tofs;
     /// A count of events discarded because they came from a pixel that's not in the IDF
@@ -240,6 +235,7 @@ namespace DataHandling
     bool loadSpectraMapping(const std::string& filename, const bool monitorsOnly, const std::string& entry_name);
 
   private:
+
     void init();
     void exec();
 
@@ -251,18 +247,6 @@ namespace DataHandling
                                      const std::string& binsName,size_t start_wi = 0, size_t end_wi = 0);
 
     void filterDuringPause(API::MatrixWorkspace_sptr workspace);
-      
-    /// Limits found to tof
-    double longest_tof;
-      
-    /// Limits found to tof
-    double shortest_tof;
-      
-    /// Mutex protecting sortest_tof
-    Poco::FastMutex m_shortest_tof_Mutex;
-      
-    /// Mutex protecting longest_tof
-    Poco::FastMutex m_longest_tof_Mutex;
 
   public:
     /// name of top level NXentry to use
