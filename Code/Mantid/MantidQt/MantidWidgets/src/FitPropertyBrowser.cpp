@@ -3046,7 +3046,7 @@ void FitPropertyBrowser::setWorkspaceProperties()
       {
         if ( name != xName )
         {
-          m_columnManager->setValue(m_xColumn, columns.indexOf( name ));
+          m_columnManager->setValue(m_yColumn, columns.indexOf( name ));
           break;
         }
       }
