@@ -13,7 +13,7 @@ namespace
     auto colQmin = ws->addColumn("str","Qmin");
     auto colQmax = ws->addColumn("str","Qmax");
     auto colDqq = ws->addColumn("str","dq/q");
-    auto colScale = ws->addColumn("str","Scale");
+    auto colScale = ws->addColumn("double","Scale");
     auto colStitch = ws->addColumn("int","StitchGroup");
     auto colOptions = ws->addColumn("str","Options");
 

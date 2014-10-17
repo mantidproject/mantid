@@ -136,12 +136,13 @@ public:
     //Check that the workspace was saved correctly
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 6);
-    TS_ASSERT_EQUALS(ws->String(1, RunCol), "13462");
+    TS_ASSERT_EQUALS(ws->String(0, RunCol), "13460");
     TS_ASSERT_EQUALS(ws->String(4, RunCol), "");
     TS_ASSERT_EQUALS(ws->String(5, RunCol), "");
-    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(0, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 1);
     TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 2);
 
     //Tidy up
     AnalysisDataService::Instance().remove("Workspace");
@@ -175,12 +176,16 @@ public:
     //Check that the workspace was saved correctly
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 6);
-    TS_ASSERT_EQUALS(ws->String(1, RunCol), "");
+    TS_ASSERT_EQUALS(ws->String(0, RunCol), "13460");
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "13462");
     TS_ASSERT_EQUALS(ws->String(2, RunCol), "");
+    TS_ASSERT_EQUALS(ws->String(3, RunCol), "");
     TS_ASSERT_EQUALS(ws->String(4, RunCol), "13469");
     TS_ASSERT_EQUALS(ws->String(5, RunCol), "13470");
-    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(0, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 2);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 0);
     TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 1);
     TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 1);
 
@@ -216,19 +221,15 @@ public:
 
     //Check that the workspace was saved correctly
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
-    TS_ASSERT_EQUALS(ws->rowCount(), 7);
-    TS_ASSERT_EQUALS(ws->String(1, RunCol), "");
-    TS_ASSERT_EQUALS(ws->String(2, RunCol), "");
-    TS_ASSERT_EQUALS(ws->String(3, RunCol), "");
-    TS_ASSERT_EQUALS(ws->String(4, RunCol), "13462");
-    TS_ASSERT_EQUALS(ws->String(5, RunCol), "13469");
-    TS_ASSERT_EQUALS(ws->String(6, RunCol), "13470");
-    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 3);
-    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 1);
-    TS_ASSERT_EQUALS(ws->Int(6, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->rowCount(), 5);
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "13462");
+    TS_ASSERT_EQUALS(ws->String(2, RunCol), "13469");
+    TS_ASSERT_EQUALS(ws->String(3, RunCol), "13470");
+    TS_ASSERT_EQUALS(ws->String(4, RunCol), "");
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 0);
 
     //Tidy up
     AnalysisDataService::Instance().remove("Workspace");

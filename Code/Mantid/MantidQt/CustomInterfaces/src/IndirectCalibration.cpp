@@ -4,6 +4,8 @@
 
 #include <QFileInfo>
 
+using namespace Mantid::API;
+
 namespace
 {
   Mantid::Kernel::Logger g_log("IndirectCalibration");
@@ -17,7 +19,7 @@ namespace CustomInterfaces
   /** Constructor
    */
   IndirectCalibration::IndirectCalibration(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
-      IndirectDataReductionTab(uiForm, parent)
+      IndirectDataReductionTab(uiForm, parent), m_lastCalPlotFilename("")
   {
     DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
 
@@ -277,7 +279,7 @@ namespace CustomInterfaces
   }
 
   /**
-   * Sets default spectra, peak and background ranges
+   * Sets default spectra, peak and background ranges.
    */
   void IndirectCalibration::setDefaultInstDetails()
   {
@@ -288,14 +290,14 @@ namespace CustomInterfaces
     m_dblManager->setValue(m_properties["ResSpecMin"], instDetails["spectra-min"].toDouble());
     m_dblManager->setValue(m_properties["ResSpecMax"], instDetails["spectra-max"].toDouble());
 
-    //Set pean and background ranges
-    if(instDetails.size() >= 8)
-    {
-      setMiniPlotGuides("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"],
-          std::pair<double, double>(instDetails["peak-start"].toDouble(), instDetails["peak-end"].toDouble()));
-      setMiniPlotGuides("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"],
-          std::pair<double, double>(instDetails["back-start"].toDouble(), instDetails["back-end"].toDouble()));
-    }
+    //Set peak and background ranges
+    std::map<std::string, double> ranges = getRangesFromInstrument();
+
+    std::pair<double, double> peakRange(ranges["peak-start-tof"], ranges["peak-end-tof"]);
+    std::pair<double, double> backgroundRange(ranges["back-start-tof"], ranges["back-end-tof"]);
+
+    setMiniPlotGuides("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"], peakRange);
+    setMiniPlotGuides("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"], backgroundRange);
   }
 
   /**
@@ -306,6 +308,12 @@ namespace CustomInterfaces
     setDefaultInstDetails();
 
     QString filename = m_uiForm.cal_leRunNo->getFirstFilename();
+
+    // Don't do anything if the file we would plot has not changed
+    if(filename == m_lastCalPlotFilename)
+      return;
+
+    m_lastCalPlotFilename = filename;
 
     if ( filename.isEmpty() )
     {

@@ -900,9 +900,20 @@ namespace MDEvents
        FileSaver->saveBlock(TabledData,position);
 
    }
+
+   /**
+    * Reserve all the memory required for loading in one step.
+    *
+    * @param size -- number of events to reserve for
+    */
+   TMDE(
+   void MDBox)::reserveMemoryForLoad(uint64_t size)
+   {
+      this->data.reserve(size);
+   }
+
    /**Load the box data of specified size from the disk location provided using the class, respoinsible for the file IO and append them to exisiting events
-    * Clear events vector first if overwriting the exisitng events is necessary. The efficiency would be higher if jentle cleaning occurs (the size of event data vector 
-      is nullified but memory still allocated)
+    * Clear events vector first if overwriting the exisitng events is necessary.
     * 
    * @param FileSaver    -- the pointer to the class, responsible for file IO
    * @param filePosition -- the place in the direct access file, where necessary data are located
@@ -923,9 +934,6 @@ namespace MDEvents
        std::vector<coord_t> TableData;
        FileSaver->loadBlock(TableData,filePosition,nEvents);
 
-       // convert loaded events to data;
-       size_t nCurrentEvents = data.size();
-       this->data.reserve(nCurrentEvents+nEvents);
        // convert data to events appending new events to existing
        MDE::dataToEvents(TableData,data,false);
    

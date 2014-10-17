@@ -18,7 +18,7 @@ namespace
       model->String(0,3);
       model->String(0,4);
       model->String(0,5);
-      model->String(0,6);
+      model->Double(0,6);
       model->Int(0,7);
       model->String(0,8);
     }

@@ -37,7 +37,7 @@ private:
     auto colQmin = ws->addColumn("str","Qmin");
     auto colQmax = ws->addColumn("str","Qmax");
     auto colDqq = ws->addColumn("str","dq/q");
-    auto colScale = ws->addColumn("str","Scale");
+    auto colScale = ws->addColumn("double","Scale");
     auto colStitch = ws->addColumn("int","StitchGroup");
     auto colOptions = ws->addColumn("str","Options");
 
@@ -62,13 +62,13 @@ private:
     auto ws = createWorkspace(wsName);
 
     TableRow row = ws->appendRow();
-    row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 3 << "";
+    row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << 1.0 << 3 << "";
     row = ws->appendRow();
-    row << "13462" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 3 << "";
+    row << "13462" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << 1.0 << 3 << "";
     row = ws->appendRow();
-    row << "13469" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 1 << "";
+    row << "13469" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << 1.0 << 1 << "";
     row = ws->appendRow();
-    row << "13470" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 1 << "";
+    row << "13470" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << 1.0 << 1 << "";
     return ws;
   }
 
@@ -77,7 +77,7 @@ private:
     ITableWorkspace_sptr ws = createWorkspace();
 
     TableRow row = ws->appendRow();
-    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << "2" << "1" << "";
+    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << 2.0 << 1 << "";
 
     return ws;
   }
@@ -218,7 +218,7 @@ public:
     TS_ASSERT_EQUALS(ws->String(5, RunCol), "");
     TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 3);
     TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 2);
     TS_ASSERT_THROWS(ws->Int(6, GroupCol), std::runtime_error);
 
     //Tidy up
@@ -260,12 +260,12 @@ public:
     //Check that the table has been modified correctly
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 6);
-    TS_ASSERT_EQUALS(ws->String(1, RunCol), "");
     TS_ASSERT_EQUALS(ws->String(2, RunCol), "");
+    TS_ASSERT_EQUALS(ws->String(3, RunCol), "");
     TS_ASSERT_EQUALS(ws->String(4, RunCol), "13469");
     TS_ASSERT_EQUALS(ws->String(5, RunCol), "13470");
-    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 2);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 0);
     TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 1);
     TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 1);
     TS_ASSERT_THROWS(ws->Int(6, GroupCol), std::runtime_error);
@@ -310,20 +310,16 @@ public:
 
     //Check that the table was modified correctly
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
-    TS_ASSERT_EQUALS(ws->rowCount(), 7);
-    TS_ASSERT_EQUALS(ws->String(1, RunCol), "");
-    TS_ASSERT_EQUALS(ws->String(2, RunCol), "");
-    TS_ASSERT_EQUALS(ws->String(3, RunCol), "");
-    TS_ASSERT_EQUALS(ws->String(4, RunCol), "13462");
-    TS_ASSERT_EQUALS(ws->String(5, RunCol), "13469");
-    TS_ASSERT_EQUALS(ws->String(6, RunCol), "13470");
-    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 3);
-    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 1);
-    TS_ASSERT_EQUALS(ws->Int(6, GroupCol), 1);
-    TS_ASSERT_THROWS(ws->Int(7, GroupCol), std::runtime_error);
+    TS_ASSERT_EQUALS(ws->rowCount(), 5);
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "13462");
+    TS_ASSERT_EQUALS(ws->String(2, RunCol), "13469");
+    TS_ASSERT_EQUALS(ws->String(3, RunCol), "13470");
+    TS_ASSERT_EQUALS(ws->String(4, RunCol), "");
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 0);
+    TS_ASSERT_THROWS(ws->Int(5, GroupCol), std::runtime_error);
 
     //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -491,9 +487,9 @@ public:
   {
     auto ws = createWorkspace("TestWorkspace");
     TableRow row = ws->appendRow();
-    row << "dataA" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 1;
+    row << "dataA" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << 1.0 << 1;
     row = ws->appendRow();
-    row << "dataB" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 1;
+    row << "dataB" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << 1.0 << 1;
 
     loadWorkspace("INTER13460", "dataA");
     loadWorkspace("INTER13462", "dataB");
@@ -551,9 +547,9 @@ public:
     auto ws = createWorkspace("TestWorkspace");
     //Autofill everything we can
     TableRow row = ws->appendRow();
-    row << "13460" << "" << "13463,13464" << "" << "" << "" << "1" << 1;
+    row << "13460" << "" << "13463,13464" << "" << "" << "" << 1.0 << 1;
     row = ws->appendRow();
-    row << "13462" << "" << "13463,13464" << "" << "" << "" << "1" << 1;
+    row << "13462" << "" << "13463,13464" << "" << "" << "" << 1.0 << 1;
 
     MockView mockView;
     ReflLoadedMainViewPresenter presenter(ws,&mockView);
