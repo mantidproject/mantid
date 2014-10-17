@@ -9,6 +9,8 @@ using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
 
 //Clean flag aliases for use within tests.
+const int NewTableFlag  = ReflMainView::NewTableFlag;
+const int OpenTableFlag = ReflMainView::OpenTableFlag;
 const int SaveAsFlag    = ReflMainView::SaveAsFlag;
 const int SaveFlag      = ReflMainView::SaveFlag;
 const int ProcessFlag   = ReflMainView::ProcessFlag;
@@ -42,6 +44,7 @@ public:
   MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
   MOCK_CONST_METHOD0(getSearchInstrument, std::string());
   MOCK_CONST_METHOD0(getProcessInstrument, std::string());
+  MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
   virtual ~MockView(){}
   void addDataForTest()
   {
