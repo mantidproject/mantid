@@ -73,6 +73,20 @@ namespace MantidQt
   {
     ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view): m_model(NULL), m_view(view)
     {
+      //Set up the instrument selectors
+      std::vector<std::string> instruments;
+      instruments.push_back("INTER");
+      instruments.push_back("SURF");
+      instruments.push_back("CRISP");
+      instruments.push_back("POLREF");
+
+      //If the user's configured default instrument is in this list, set it as the default, otherwise use INTER
+      const std::string defaultInst = Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
+      if(std::find(instruments.begin(), instruments.end(), defaultInst) != instruments.end())
+        m_view->setInstrumentList(instruments, defaultInst);
+      else
+        m_view->setInstrumentList(instruments, "INTER");
+
       newTable();
     }
 

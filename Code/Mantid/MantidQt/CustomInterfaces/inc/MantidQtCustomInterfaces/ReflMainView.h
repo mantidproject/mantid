@@ -53,6 +53,9 @@ namespace MantidQt
       virtual void setProgressRange(int min, int max) = 0;
       virtual void setProgress(int progress) = 0;
 
+      //Settor methods
+      virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument) = 0;
+
       //Accessor methods
       virtual std::vector<size_t> getSelectedRowIndexes() const = 0;
       virtual std::string getSearchInstrument() const = 0;

@@ -61,6 +61,9 @@ namespace MantidQt
       virtual void setProgressRange(int min, int max);
       virtual void setProgress(int progress);
 
+      //Settor methods
+      virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument);
+
       //Accessor methods
       virtual std::vector<size_t> getSelectedRowIndexes() const;
       virtual std::string getSearchInstrument() const;
@@ -70,7 +73,6 @@ namespace MantidQt
     private:
       //initialise the interface
       virtual void initLayout();
-      virtual void setInstrumentList(const std::vector<std::string>& instruments);
       //the presenter
       boost::shared_ptr<IReflPresenter> m_presenter;
       //the interface

@@ -44,22 +44,6 @@ namespace MantidQt
       ui.progressBar->setRange(0, 100);
       ui.progressBar->setValue(0);
 
-      //Set up the instrument selectors
-      std::vector<std::string> instruments;
-      instruments.push_back("INTER");
-      instruments.push_back("SURF");
-      instruments.push_back("CRISP");
-      instruments.push_back("POLREF");
-      setInstrumentList(instruments);
-
-      const std::string defaultInst = Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
-      if(std::find(instruments.begin(), instruments.end(), defaultInst) != instruments.end())
-      {
-        int index = ui.comboSearchInstrument->findData(QString::fromStdString(defaultInst), Qt::DisplayRole);
-        ui.comboSearchInstrument->setCurrentIndex(index);
-        ui.comboProcessInstrument->setCurrentIndex(index);
-      }
-
       //Allow rows to be reordered
       ui.viewTable->verticalHeader()->setMovable(true);
 
@@ -237,7 +221,7 @@ namespace MantidQt
     Set the list of available instruments to search and process for
     @param instruments : The list of instruments available
     */
-    void QtReflMainView::setInstrumentList(const std::vector<std::string>& instruments)
+    void QtReflMainView::setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument)
     {
       ui.comboSearchInstrument->clear();
       ui.comboProcessInstrument->clear();
@@ -248,6 +232,10 @@ namespace MantidQt
         ui.comboSearchInstrument->addItem(instrument);
         ui.comboProcessInstrument->addItem(instrument);
       }
+
+      int index = ui.comboSearchInstrument->findData(QString::fromStdString(defaultInstrument), Qt::DisplayRole);
+      ui.comboSearchInstrument->setCurrentIndex(index);
+      ui.comboProcessInstrument->setCurrentIndex(index);
     }
 
     /**
