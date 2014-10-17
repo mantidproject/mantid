@@ -934,9 +934,6 @@ namespace MDEvents
        std::vector<coord_t> TableData;
        FileSaver->loadBlock(TableData,filePosition,nEvents);
 
-       // convert loaded events to data;
-       size_t nCurrentEvents = data.size();
-       this->data.reserve(nCurrentEvents+nEvents);  // if space already reserved, e.g. from MergeMDFiles, this does nothing
        // convert data to events appending new events to existing
        MDE::dataToEvents(TableData,data,false);
    
