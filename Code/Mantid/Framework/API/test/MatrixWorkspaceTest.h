@@ -700,6 +700,45 @@ public:
     TS_ASSERT_DELTA(ws.getSignalAtCoord(coords, Mantid::API::NoNormalization), 1.0, 1e-5);
   }
 
+  void test_getCoordAtSignal_regression()
+  {
+    /*
+    Having more spectrum numbers (acutally vertical axis increments) than x bins in VolumeNormalisation mode
+    should not cause any issues.
+    */
+    WorkspaceTester ws;
+    const int nVertical = 4;
+
+    const int nBins = 2;
+    const int nYValues = 1;
+    ws.initialize(nVertical, nBins, nYValues);
+    NumericAxis* verticalAxis = new NumericAxis(nVertical);
+    for(int i = 0; i < nVertical; ++i)
+    {
+      for(int j = 0; j < nBins; ++j)
+      {
+        if( j < nYValues )
+        {
+          ws.dataY(i)[j] = 1.0; // All y values are 1.
+          ws.dataE(i)[j] = j;
+        }
+        ws.dataX(i)[j] = j; // x increments by 1
+      }
+      verticalAxis->setValue(i, double(i)); // Vertical axis increments by 1.
+    }
+    ws.replaceAxis(1, verticalAxis);
+    // Signal is always 1 and volume of each box is 1. Therefore normalized signal values by volume should always be 1.
+
+    coord_t coord_top_right[2] = {ws.readX(0).back(),  double(0)};
+    signal_t value;
+    TS_ASSERT_THROWS_NOTHING(value = ws.getSignalAtCoord(coord_top_right, VolumeNormalization));
+    TS_ASSERT_EQUALS(1.0, value);
+
+    coord_t coord_bottom_left[2] = {ws.readX(nVertical-1).front(),  double(nVertical-1) };
+    TS_ASSERT_THROWS_NOTHING(value = ws.getSignalAtCoord(coord_bottom_left, VolumeNormalization));
+    TS_ASSERT_EQUALS(1.0, value);
+  }
+
   void test_setMDMasking()
   {
     WorkspaceTester ws;
