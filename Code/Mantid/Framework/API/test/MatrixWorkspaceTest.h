@@ -729,12 +729,14 @@ public:
     ws.replaceAxis(1, verticalAxis);
     // Signal is always 1 and volume of each box is 1. Therefore normalized signal values by volume should always be 1.
 
+    // Test at the top right.
     coord_t coord_top_right[2] = {ws.readX(0).back(),  double(0)};
-    signal_t value;
+    signal_t value = 0;
     TS_ASSERT_THROWS_NOTHING(value = ws.getSignalAtCoord(coord_top_right, VolumeNormalization));
     TS_ASSERT_EQUALS(1.0, value);
 
-    coord_t coord_bottom_left[2] = {ws.readX(nVertical-1).front(),  double(nVertical-1) };
+    // Test at another location just to be sure.
+    coord_t coord_bottom_left[2] = {ws.readX(nVertical-1)[1],  double(nVertical-1) };
     TS_ASSERT_THROWS_NOTHING(value = ws.getSignalAtCoord(coord_bottom_left, VolumeNormalization));
     TS_ASSERT_EQUALS(1.0, value);
   }
