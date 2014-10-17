@@ -23,7 +23,7 @@ namespace Mantid
      * the intersection of the allowedValues for the child validators
      * @return
      */
-    std::set<std::string> CompositeValidator::allowedValues() const
+    std::vector<std::string> CompositeValidator::allowedValues() const
     {
       std::set<std::string>      elem_unique;
       std::multiset<std::string> elem_all;
@@ -32,14 +32,14 @@ namespace Mantid
       std::list<IValidator_sptr>::const_iterator itrEnd = m_children.end();
       for( std::list<IValidator_sptr>::const_iterator itr = m_children.begin(); itr != itrEnd; ++itr)
       {
-        std::set<std::string> subs = (*itr)->allowedValues();
+        std::vector<std::string> subs = (*itr)->allowedValues();
         if ( subs.empty())continue;
         elem_unique.insert(subs.begin(),subs.end());
         elem_all.insert(subs.begin(),subs.end());
         n_combinations++;
       }
       // empty or single set of allowed values
-      if(n_combinations<2)return elem_unique;
+      if(n_combinations<2)return std::vector<std::string>( elem_unique.begin(), elem_unique.end() );
       // there is more then one combination and we have to identify its union;
       for(std::set<std::string>::const_iterator its=elem_unique.begin();its!=elem_unique.end();++its)
       {
@@ -51,7 +51,7 @@ namespace Mantid
       {
         rez.insert(*im);
       }
-      return rez;
+      return std::vector<std::string>( rez.begin(), rez.end() );
     }
 
     /**

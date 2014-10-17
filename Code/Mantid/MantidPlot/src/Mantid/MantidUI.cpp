@@ -40,6 +40,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 
+
 #include <QMessageBox>
 #include <QTextEdit>
 #include <QListWidget>
@@ -1097,13 +1098,19 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
   // Cache some frequently used values
   IComponent_const_sptr sample = ws->getInstrument()->getSample();
   bool signedThetaParamRetrieved(false), showSignedTwoTheta(false); //If true,  signedVersion of the two theta value should be displayed
+  QVector<QList<QVariant> > tableColValues;
+  tableColValues.resize(nrows);
+  PARALLEL_FOR1( ws )
   for( int row = 0; row < nrows; ++row )
   {
+    // Note PARALLEL_START_INTERUPT_REGION & friends apparently not needed (like in algorithms)
+    // as there's an extensive try...catch below. If it was need, using those macros would
+    // require data members and methods that are available in algorithm classed but not here,
+    // including m_cancel, m_parallelException, interrrupt_point().
+    QList<QVariant>& colValues = tableColValues[row];
     size_t wsIndex = indices.empty() ? static_cast<size_t>(row) : indices[row];
-    QList<QVariant> colValues;
     colValues << QVariant(static_cast<double>(wsIndex));
     const double dataY0(ws->readY(wsIndex)[0]), dataE0(ws->readE(wsIndex)[0]);
-
     try
     {
       ISpectrum *spectrum = ws->getSpectrum(wsIndex);
@@ -1139,7 +1146,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
       IDetector_const_sptr det = ws->getDetector(wsIndex);
       if(!signedThetaParamRetrieved)
       {
-        std::vector<std::string> parameters = det->getStringParameter("show-signed-theta", true); //recursive
+        const std::vector<std::string>& parameters = det->getStringParameter("show-signed-theta", true); //recursive
         showSignedTwoTheta = (!parameters.empty() && find(parameters.begin(), parameters.end(), "Always") != parameters.end());
         signedThetaParamRetrieved = true;
       }
@@ -1196,10 +1203,14 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
                 << QVariant("0") // rtp
                 << QVariant("n/a"); // monitor
     }// End catch for no spectrum
+  }
 
+  // This modifies widgets, so it needs to run in the Qt GUI thread: no openmp here
+  for( int row = 0; row < nrows; ++row ) {
+    const QList<QVariant>& colValues = tableColValues[row];
     for(int col = 0; col < ncols; ++col)
     {
-      const QVariant colValue = colValues[col];
+      const QVariant& colValue = colValues[col];
       if(QMetaType::QString == colValue.userType()) // Avoid a compiler warning with type() about comparing different enums...
       {
         t->setText(row, col, colValue.toString());
@@ -1210,8 +1221,8 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
       }
     }
   }
-
   t->showNormal();
+
   return t;
 }
 
@@ -1811,7 +1822,7 @@ void MantidUI::handleClearADS(Mantid::API::ClearADSNotification_ptr)
 
 void MantidUI::handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr msg)
 {
-  emit workspace_renamed(QString::fromStdString(msg->object_name()),QString::fromStdString(msg->new_objectname()));
+  emit workspace_renamed(QString::fromStdString(msg->objectName()),QString::fromStdString(msg->newObjectName()));
   emit ADS_updated();
 }
 void MantidUI::handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_ptr)
@@ -1886,7 +1897,8 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
   catch(const std::exception& e)
   {
     QApplication::restoreOverrideCursor();
-    QMessageBox::critical(appWindow(),"MantidPlot - Error",e.what());
+    QString errorMessage = "Instrument view cannot be created:\n\n" + QString(e.what());
+    QMessageBox::critical(appWindow(),"MantidPlot - Error",errorMessage);
     if (insWin)
     {
       appWindow()->closeWindow(insWin);

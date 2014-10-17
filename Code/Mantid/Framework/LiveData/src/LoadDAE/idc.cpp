@@ -18,8 +18,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include "MantidKernel/System.h"
 #include "idc.h"
-#include "isisds_command.h"
 
 ///@cond nodoc
 /** used to keep status information about the DAE connection */
@@ -60,14 +60,14 @@ int IDCsetreportfunc(idc_error_report_t report_func)
 }
 
 /** returns 0 on success, -1 on failure */
-int IDCopen(const char* host, int mode, int options, idc_handle_t* pfh)
+int IDCopen(const char* host, int mode, int options, idc_handle_t* pfh, uint16_t port)
 {
   (void) mode; // Avoid compiler warning
   (void) options; // Avoid compiler warning
 
 	SOCKET s;
 	*pfh = NULL;
-	s = isisds_send_open(host, ISISDSDAEAccess);
+	s = isisds_send_open(host, ISISDSDAEAccess, port);
 	if (s == INVALID_SOCKET)
 	{
 		IDCreport(0, 0, "Error accessing DAE");
@@ -106,6 +106,7 @@ static int getdat(idc_handle_t fh, int ifsn, int nos, int** value, int dims_arra
 	if (do_alloc)
 	{
 		stat = isisds_recv_command_alloc(fh->s, &command, (void**)value, &ret_type, dims_array, ndims);
+    free(command);
 	}
 	else
 	{
@@ -157,6 +158,7 @@ static int IDCgetpar(idc_handle_t fh, const char* name, void** value, ISISDSData
 	if (do_alloc)
 	{
 		stat = isisds_recv_command_alloc(fh->s, &command, value, &ret_type, dims_array, ndims);
+    free(command);
 	}
 	else
 	{

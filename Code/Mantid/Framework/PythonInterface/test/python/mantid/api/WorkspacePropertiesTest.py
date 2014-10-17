@@ -1,10 +1,10 @@
-"""Tests the construction of the various workspace 
+"""Tests the construction of the various workspace
 property types
 """
 import unittest
 import testhelpers
-from mantid.api import (WorkspaceProperty, WorkspaceGroupProperty, MatrixWorkspaceProperty, 
-                        IEventWorkspaceProperty, ITableWorkspaceProperty, IMDHistoWorkspaceProperty, 
+from mantid.api import (WorkspaceProperty, WorkspaceGroupProperty, MatrixWorkspaceProperty,
+                        IEventWorkspaceProperty, ITableWorkspaceProperty, IMDHistoWorkspaceProperty,
                         PropertyMode, LockMode)
 from mantid.kernel import Direction, Property
 
@@ -14,14 +14,14 @@ class WorkspacePropertiesTest(unittest.TestCase):
        self.assertTrue(issubclass(WorkspaceGroupProperty, Property))
        self._do_construction_with_name_default_direction(classtype)
        self._do_construction_with_name_default_direction_optional(classtype)
-       
+
     def _do_construction_with_name_default_direction(self, classtype):
         prop = classtype("NoValidation", "test", Direction.Output)
         self.assertTrue(isinstance(prop, classtype))
         self.assertEquals("NoValidation", prop.name)
         self.assertEquals(Direction.Output, prop.direction)
         self.assertEquals("test", prop.valueAsStr)
-        
+
     def _do_construction_with_name_default_direction_optional(self, classtype):
         prop = classtype("IsOptional", "test", Direction.Output, PropertyMode.Optional)
         self.assertTrue(isinstance(prop, classtype))
@@ -38,7 +38,7 @@ class WorkspacePropertiesTest(unittest.TestCase):
         self.assertTrue(prop.isOptional())
         self.assertFalse(prop.isLocking())
         self.assertEquals("test", prop.valueAsStr)
-    
+
     def test_WorkspaceProperty_can_be_instantiated(self):
         self._do_test(WorkspaceProperty)
 
@@ -53,9 +53,9 @@ class WorkspacePropertiesTest(unittest.TestCase):
 
     def test_ITableWorkspaceProperty_can_be_instantiated(self):
         self._do_test(ITableWorkspaceProperty)
-        
-    def test_IHistoWorkspaceProperty_can_be_instantiated(self):    
+
+    def test_IHistoWorkspaceProperty_can_be_instantiated(self):
         self._do_test(IMDHistoWorkspaceProperty)
-        
+
 if __name__ == "__main__":
     unittest.main()

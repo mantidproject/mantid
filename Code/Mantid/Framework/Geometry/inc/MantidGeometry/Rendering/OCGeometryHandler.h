@@ -54,6 +54,7 @@ namespace Mantid
       OCGeometryHandler(IObjComponent* obj); ///< Constructor
       OCGeometryHandler(boost::shared_ptr<Object>       obj); ///< Constructor
       OCGeometryHandler(Object* obj); ///< Constructor
+      boost::shared_ptr<GeometryHandler> clone() const; ///< Virtual copy constructor
       ~OCGeometryHandler(); ///< Destructor
       GeometryHandler* createInstance(IObjComponent *comp);
       GeometryHandler* createInstance(boost::shared_ptr<Object> obj);

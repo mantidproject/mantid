@@ -234,6 +234,46 @@ void MantidHelpWindow::showAlgorithm(const QString &name, const int version)
     this->showAlgorithm(name.toStdString(), version);
 }
 
+
+/**
+ * Show the help page for a particular concept. 
+ *
+ * @param name The name of the concept to show. If this is empty show
+ * the concept index.
+ */
+void MantidHelpWindow::showConcept(const string &name)
+{
+    if (bool(g_helpWindow))
+    {
+        QString url(BASE_URL);
+        url += "concepts/";
+        if (name.empty())
+            url += "index.html";
+        else
+          url += QString(name.c_str()) + ".html";
+        this->showHelp(url);
+    }
+    else // qt-assistant disabled
+    {
+        if (name.empty())
+            this->showWikiPage("Category:Concepts");
+        else
+            this->showWikiPage(name);
+    }
+}
+
+
+/**
+ * Show the help page for a particular concept. 
+ *
+ * @param name The name of the concept to show. If this is empty show
+ * the concept index.
+ */
+void MantidHelpWindow::showConcept(const QString &name)
+{
+    this->showConcept(name.toStdString());
+}
+
 /**
  * Show the help page for a particular fit function. The page is
  * picked using matching naming conventions.

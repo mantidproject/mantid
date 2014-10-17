@@ -81,9 +81,9 @@ public slots:
   void v_scroll_bar_moved();
   void h_scroll_bar_moved();
   void imageSplitter_moved();
-  void imagePicker_moved();
-  void h_graphPicker_moved();
-  void v_graphPicker_moved();
+  void imagePicker_moved(const QPoint &point);
+  void h_graphPicker_moved(const QPoint &point);
+  void v_graphPicker_moved(const QPoint & point);
   void intensity_slider_moved();
   void heat_color_scale();
   void gray_color_scale();
@@ -109,6 +109,10 @@ private:
   TrackingPicker*  h_graph_picker;
   TrackingPicker*  v_graph_picker;
   QActionGroup*    color_group;
+  /// Last known cursor position in the data (x-direction).
+  int m_picker_x;
+  /// Last known cursor position in the data (y-direction).
+  int m_picker_y;
 
 };
 

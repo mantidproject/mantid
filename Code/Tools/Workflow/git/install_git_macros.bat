@@ -1,28 +1,31 @@
 @echo off
 :: Batch script to install the git macros in to the appropriate location.
-:: This assumes you have installed git in the standard location: 
-::   32-bit: C:\Program Files\Git
-::   64-bit: C:\Program Files(x86)\Git
 
-:: Check whether we're 64 or 32 bit and set the install directory appropriately
-set RegQry=HKLM\Hardware\Description\System\CentralProcessor\0
-REG.exe Query %RegQry% > checkOS.txt
-Find /i "x86" < CheckOS.txt > StringCheck.txt
+setlocal
 
-If %ERRORLEVEL% == 0 (
-    set GIT_BIN_DIR="C:\Program Files\Git\bin\"
-) ELSE (
-    set GIT_BIN_DIR="C:\Program Files (x86)\Git\bin\"
+:: Get the install location of Git from the registry
+:REG_QUERY
+for /f "skip=2 delims=: tokens=1*" %%a in ('reg query "HKLM\SOFTWARE%WOW%\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1" /v InstallLocation 2^> nul') do (
+    for /f "tokens=3" %%z in ("%%a") do (
+        set GIT_BIN_DIR=%%z:%%b
+    )
 )
-:: Remove temporary files created above
-del CheckOS.txt
-del StringCheck.txt
+
+if "%GIT_BIN_DIR%"=="" (
+    if "%WOW%"=="" (
+        :: Assume we are on 64-bit Windows, so explicitly read the 32-bit Registry.
+        set WOW=\Wow6432Node
+        goto REG_QUERY
+    )
+)
+
+echo Found Git at %GIT_BIN_DIR%
 
 :: Define files to be copied
 set FILES=git-new git-checkbuild gitworkflow-helpers git-finish git-test git-publish
 
 :: Do copy
-FOR %%f IN (%FILES%) DO echo Copying %%f to %GIT_BIN_DIR% && xcopy /Y %~dp0%%f %GIT_BIN_DIR%
+FOR %%f IN (%FILES%) DO echo Copying %%f to "%GIT_BIN_DIR%bin\" && xcopy /Y %~dp0%%f "%GIT_BIN_DIR%bin\"
 
 :: Leave the window open just in case any error messages
 pause

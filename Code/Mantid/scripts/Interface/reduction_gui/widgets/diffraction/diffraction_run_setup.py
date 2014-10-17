@@ -1,4 +1,4 @@
-################################################################################ 
+################################################################################
 # This is my first attempt to make a tab from quasi-scratch
 ################################################################################
 from PyQt4 import QtGui, uic, QtCore
@@ -6,7 +6,7 @@ from functools import partial
 from reduction_gui.widgets.base_widget import BaseWidget
 import reduction_gui.widgets.util as util
 
-from reduction_gui.reduction.diffraction.diffraction_run_setup_script import RunSetupScript 
+from reduction_gui.reduction.diffraction.diffraction_run_setup_script import RunSetupScript
 import ui.diffraction.ui_diffraction_run_setup
 import ui.diffraction.ui_diffraction_info
 
@@ -29,21 +29,21 @@ class RunSetupWidget(BaseWidget):
         """ Initialization
         """
         super(RunSetupWidget, self).__init__(parent, state, settings, data_type=data_type)
-        
-        class RunSetFrame(QtGui.QFrame, ui.diffraction.ui_diffraction_run_setup.Ui_Frame): 
+
+        class RunSetFrame(QtGui.QFrame, ui.diffraction.ui_diffraction_run_setup.Ui_Frame):
             """ Define class linked to UI Frame
             """
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
         #END-DEF RunSetFrame
-                
+
         self._content = RunSetFrame(self)
         self._layout.addWidget(self._content)
         self._instrument_name = settings.instrument_name
         self._facility_name = settings.facility_name
         self.initialize_content()
-        
+
         if state is not None:
             self.set_state(state)
         else:
@@ -61,7 +61,7 @@ class RunSetupWidget(BaseWidget):
         self._content.bintype_combo.setCurrentIndex(1)
 
         # Radio buttons
-        self._content.disablevancorr_chkbox.setChecked(False) 
+        self._content.disablevancorr_chkbox.setChecked(False)
 
         # Check boxes
         self._content.usebin_button.setChecked(True)
@@ -72,7 +72,7 @@ class RunSetupWidget(BaseWidget):
 
         #self._content.override_emptyrun_checkBox.setChecked(False)
         #self._content.override_vanrun_checkBox.setChecked(False)
-        #self._content.override_vanbkgdrun_checkBox.setChecked(False) 
+        #self._content.override_vanbkgdrun_checkBox.setChecked(False)
 
         # Line edit
         self._content.emptyrun_edit.setEnabled(True)
@@ -109,11 +109,11 @@ class RunSetupWidget(BaseWidget):
         # Default states
 
         # self._handle_tzero_guess(self._content.use_ei_guess_chkbox.isChecked())
-        
-        # Connections from action/event to function to handle 
-        self.connect(self._content.calfile_browse, QtCore.SIGNAL("clicked()"), 
+
+        # Connections from action/event to function to handle
+        self.connect(self._content.calfile_browse, QtCore.SIGNAL("clicked()"),
                 self._calfile_browse)
-        self.connect(self._content.charfile_browse, QtCore.SIGNAL("clicked()"), 
+        self.connect(self._content.charfile_browse, QtCore.SIGNAL("clicked()"),
                 self._charfile_browse)
         self.connect(self._content.outputdir_browse, QtCore.SIGNAL("clicked()"),
                 self._outputdir_browse)
@@ -122,19 +122,19 @@ class RunSetupWidget(BaseWidget):
         self.connect(self._content.bintype_combo, QtCore.SIGNAL("currentIndexChanged(QString)"),
                 self._bintype_process)
 
-        #self.connect(self._content.override_emptyrun_checkBox, QtCore.SIGNAL("clicked()"), 
+        #self.connect(self._content.override_emptyrun_checkBox, QtCore.SIGNAL("clicked()"),
         #        self._overrideemptyrun_clicked)
-        #self.connect(self._content.override_vanrun_checkBox, QtCore.SIGNAL("clicked()"), 
+        #self.connect(self._content.override_vanrun_checkBox, QtCore.SIGNAL("clicked()"),
         #        self._overridevanrun_clicked)
-        #self.connect(self._content.override_vanbkgdrun_checkBox, QtCore.SIGNAL("clicked()"), 
+        #self.connect(self._content.override_vanbkgdrun_checkBox, QtCore.SIGNAL("clicked()"),
         #        self._overridevanbkgdrun_clicked)
 
         self.connect(self._content.disablebkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),
-                self._disablebkgdcorr_clicked) 
+                self._disablebkgdcorr_clicked)
         self.connect(self._content.disablevancorr_chkbox, QtCore.SIGNAL("clicked()"),
-                self._disablevancorr_clicked) 
+                self._disablevancorr_clicked)
         self.connect(self._content.disablevanbkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),
-                self._disablevanbkgdcorr_clicked) 
+                self._disablevanbkgdcorr_clicked)
 
         self.connect(self._content.usebin_button, QtCore.SIGNAL("clicked()"),
                 self._usebin_clicked)
@@ -143,11 +143,11 @@ class RunSetupWidget(BaseWidget):
 
         self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
                 self._show_help)
-        
+
         # Validated widgets
 
-        return 
-    
+        return
+
     def set_state(self, state):
         """ Populate the UI elements with the data from the given state.
             @param state: RunSetupScript object
@@ -174,15 +174,15 @@ class RunSetupWidget(BaseWidget):
         self._content.unit_combo.setCurrentIndex(self._content.unit_combo.findText(state.finalunits))
 
         # Background correction
-        if state.bkgdrunnumber is not None and state.bkgdrunnumber != "": 
+        if state.bkgdrunnumber is not None and state.bkgdrunnumber != "":
             self._content.emptyrun_edit.setText(str(int(state.bkgdrunnumber)))
         self._content.disablebkgdcorr_chkbox.setChecked(state.disablebkgdcorrection)
         # Vanadium correction
-        if state.vanrunnumber is not None and state.vanrunnumber != "": 
+        if state.vanrunnumber is not None and state.vanrunnumber != "":
             self._content.vanrun_edit.setText(str(abs(int(state.vanrunnumber))))
         self._content.disablevancorr_chkbox.setChecked(state.disablevancorrection)
         # Vanadium background correction
-        if state.vanbkgdrunnumber is not None and state.vanbkgdrunnumber != "": 
+        if state.vanbkgdrunnumber is not None and state.vanbkgdrunnumber != "":
             self._content.vanbkgdrun_edit.setText(str(int(state.vanbkgdrunnumber)))
         self._content.disablevanbkgdcorr_chkbox.setChecked(state.disablevanbkgdcorrection)
 
@@ -222,7 +222,7 @@ class RunSetupWidget(BaseWidget):
         s.outputdir = self._content.outputdir_edit.text()
         s.saveas = str(self._content.saveas_combo.currentText())
         s.finalunits = str(self._content.unit_combo.currentText())
-        
+
         s.bkgdrunnumber = self._content.emptyrun_edit.text()
         s.disablebkgdcorrection = self._content.disablebkgdcorr_chkbox.isChecked()
 
@@ -233,7 +233,7 @@ class RunSetupWidget(BaseWidget):
         s.disablevanbkgdcorrection = self._content.disablevanbkgdcorr_chkbox.isChecked()
 
         s.dosamplex = self._content.resamplex_button.isChecked()
-        
+
         #s.vannoiserunnumber = self._content.vannoiserun_edit.text()
 
         return s
@@ -261,7 +261,7 @@ class RunSetupWidget(BaseWidget):
         """ Event handling for browing output directory
         """
         dirname = self.dir_browse_dialog()
-        if dirname: 
+        if dirname:
             self._content.outputdir_edit.setText(dirname)
 
         return
@@ -309,7 +309,7 @@ class RunSetupWidget(BaseWidget):
 
         # 2. For each term
         for level0term in termlevel0s:
-            numdashes = level0term.count("-") 
+            numdashes = level0term.count("-")
             if numdashes == 0:
                 # One integer
                 valuestr = level0term.strip()
@@ -331,7 +331,7 @@ class RunSetupWidget(BaseWidget):
                     except ValueError:
                         return (False, level0term)
                 # ENDFOR
-            
+
             else:
                 return (False, level0term)
         # ENDFOR
@@ -354,7 +354,7 @@ class RunSetupWidget(BaseWidget):
         """ Handling event if overriding emptry run
         """
         if self._content.override_vanrun_checkBox.isChecked() is True:
-            self._content.vanrun_edit.setEnabled(True) 
+            self._content.vanrun_edit.setEnabled(True)
             self._content.disablebkgdcorr_chkbox.setChecked(False)
         else:
             self._content.emptyrun_edit.setEnabled(False)
@@ -430,11 +430,11 @@ class RunSetupWidget(BaseWidget):
         else:
             self._content.binning_edit.setEnabled(True)
             self._content.resamplex_edit.setEnabled(False)
-        
+
         return
 
     def _show_help(self):
-        class HelpDialog(QtGui.QDialog, ui.diffraction.ui_diffraction_info.Ui_Dialog): 
+        class HelpDialog(QtGui.QDialog, ui.diffraction.ui_diffraction_info.Ui_Dialog):
             def __init__(self, parent=None):
                 QtGui.QDialog.__init__(self, parent)
                 self.setupUi(self)

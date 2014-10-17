@@ -418,16 +418,26 @@ void PythonScript::setContext(QObject *context)
 }
 
 /**
- * Clears the current set of local variables and resets
+ * Clears the current set of local variables, if they exist, and resets
  * the dictionary context back to the default set
  */
 void PythonScript::clearLocals()
 {
-  GlobalInterpreterLock pythonlock;
+  GlobalInterpreterLock pythonLock;
 
-  Py_XDECREF(localDict); //clear up any previous dictionary
-  PyObject *pymodule = PyImport_AddModule("__main__");
-  localDict = PyDict_Copy(PyModule_GetDict(pymodule));
+  PyObject *mainModule = PyImport_AddModule("__main__");
+  PyObject *cleanLocals = PyDict_Copy(PyModule_GetDict(mainModule));
+
+  if(localDict)
+  {
+    // Pull out variables that are not user-related
+    PyObject * value = PyDict_GetItemString(localDict, "__file__");
+    if(value) PyDict_SetItemString(cleanLocals, "__file__", value);
+    // reset locals
+    Py_DECREF(localDict);
+    localDict = NULL;
+  }
+  localDict = cleanLocals;
 }
 
 /**

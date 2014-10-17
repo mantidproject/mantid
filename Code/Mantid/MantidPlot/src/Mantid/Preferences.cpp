@@ -52,19 +52,19 @@ void MantidPreferences::MantidMatrixColumnWidth(int width)
 QChar MantidPreferences::MantidMatrixNumberFormatY()
 {
     QSettings settings;
-    return settings.value("Mantid/Preferences/MantidMatrix/NumberFormatY",'e').toChar();
+    return settings.value("Mantid/Preferences/MantidMatrix/NumberFormatY",'g').toChar();
 }
 
 QChar MantidPreferences::MantidMatrixNumberFormatX()
 {
     QSettings settings;
-    return settings.value("Mantid/Preferences/MantidMatrix/NumberFormatX",'e').toChar();
+    return settings.value("Mantid/Preferences/MantidMatrix/NumberFormatX",'g').toChar();
 }
 
 QChar MantidPreferences::MantidMatrixNumberFormatE()
 {
     QSettings settings;
-    return settings.value("Mantid/Preferences/MantidMatrix/NumberFormatE",'e').toChar();
+    return settings.value("Mantid/Preferences/MantidMatrix/NumberFormatE",'g').toChar();
 }
 
 void MantidPreferences::MantidMatrixNumberFormatY(const QChar& f)

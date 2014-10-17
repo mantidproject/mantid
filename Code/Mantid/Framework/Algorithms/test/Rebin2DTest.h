@@ -247,12 +247,18 @@ class Rebin2DTestPerformance : public CxxTest::TestSuite
   
 public:
   
+  Rebin2DTestPerformance()
+  {
+    m_inputWS = makeInputWS(false, true);
+  }
+
   void test_On_Large_Workspace()
   {
-    MatrixWorkspace_sptr inputWS = makeInputWS(false, true);
-    runAlgorithm(inputWS, "100,200,41000", "-0.5,2,499.5");
+    runAlgorithm(m_inputWS, "100,200,41000", "-0.5,2,499.5");
   }
-  
+
+private:
+  MatrixWorkspace_sptr m_inputWS;
 
 };
 

@@ -6,14 +6,6 @@
 
 #include <vector>
 
-#ifndef HAS_UNORDERED_MAP_H
-#include <map>
-#else
-#include <tr1/unordered_map>
-#endif
-
-
-
 /**
   \class  GLActorCollection
   \brief  An actor class collection

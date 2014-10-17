@@ -444,6 +444,8 @@ void AxisDetails::showAxis()
 
     enableFormulaBox();
   }
+
+  emit axisShowChanged(shown);
 }
 
 /** Enables, Disables, Hides or Shows widgets apropriate to the current Axis Format

@@ -89,6 +89,11 @@ const muParserScripting::mathFunction muParserScripting::math_functions[] = {
   {0,0,NULL,NULL,NULL,0}
 };
 
+void muParserScripting::setSysArgs(const QStringList &)
+{
+  throw std::runtime_error("muParserScripting does not support command line arguments");
+}
+
 const QStringList muParserScripting::mathFunctions() const
 {
   QStringList l;

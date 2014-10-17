@@ -47,8 +47,8 @@ public:
     const auto allowedValues = prop->allowedValues();
 
     TS_ASSERT_EQUALS(2, allowedValues.size());
-    TS_ASSERT_EQUALS(1, allowedValues.count("int"));
-    TS_ASSERT_EQUALS(1, allowedValues.count("double"));
+    TS_ASSERT( std::find( allowedValues.begin(), allowedValues.end(), "int") != allowedValues.end() );
+    TS_ASSERT( std::find( allowedValues.begin(), allowedValues.end(), "double") != allowedValues.end() );
   }
 
   void test_delete_existing_removes_complete_log_first()

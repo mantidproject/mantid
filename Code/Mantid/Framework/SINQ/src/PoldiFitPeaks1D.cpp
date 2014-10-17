@@ -85,7 +85,10 @@ void PoldiFitPeaks1D::setPeakFunction(std::string peakFunction)
 
 PoldiPeakCollection_sptr PoldiFitPeaks1D::getInitializedPeakCollection(TableWorkspace_sptr peakTable)
 {
-    return PoldiPeakCollection_sptr(new PoldiPeakCollection(peakTable));
+    PoldiPeakCollection_sptr peakCollection(new PoldiPeakCollection(peakTable));
+    peakCollection->setProfileFunctionName(m_profileTemplate);
+
+    return peakCollection;
 }
 
 IFunction_sptr PoldiFitPeaks1D::getPeakProfile(PoldiPeak_sptr poldiPeak) {

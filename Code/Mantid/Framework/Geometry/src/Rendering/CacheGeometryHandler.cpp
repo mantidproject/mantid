@@ -5,6 +5,8 @@
 #include "MantidGeometry/Rendering/CacheGeometryRenderer.h"
 #include "MantidGeometry/Rendering/CacheGeometryGenerator.h"
 
+#include <boost/make_shared.hpp>
+
 namespace Mantid
 {
   namespace Geometry
@@ -26,6 +28,15 @@ namespace Mantid
     {
       Triangulator=new CacheGeometryGenerator(obj);
       Renderer    =new CacheGeometryRenderer();
+    }
+
+    boost::shared_ptr<GeometryHandler> CacheGeometryHandler::clone() const
+    {
+      auto clone = boost::make_shared<CacheGeometryHandler>(*this);
+      clone->Renderer = new CacheGeometryRenderer(*(this->Renderer));
+      if(this->Triangulator) clone->Triangulator = new CacheGeometryGenerator(this->Obj);
+      else clone->Triangulator = NULL;
+      return clone;
     }
 
     CacheGeometryHandler::~CacheGeometryHandler()

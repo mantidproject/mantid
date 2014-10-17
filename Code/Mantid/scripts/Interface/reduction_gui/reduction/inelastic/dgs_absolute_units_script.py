@@ -1,6 +1,6 @@
 """
-    Classes for each reduction step. Those are kept separately 
-    from the the interface class so that the DgsReduction class could 
+    Classes for each reduction step. Those are kept separately
+    from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
 import os
@@ -10,7 +10,7 @@ import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 
 class AbsoluteUnitsScript(BaseScriptElement):
-    
+
     do_absolute_units = False
     absunits_vanadium = ''
     grouping_file = ''
@@ -26,12 +26,12 @@ class AbsoluteUnitsScript(BaseScriptElement):
     absunits_median_test_out_high = 100
     absunits_median_test_out_low = 0.01
     absunits_errorbar_criterion = 0.0
-    
+
     def __init__(self, inst_name):
         super(AbsoluteUnitsScript, self).__init__()
         self.set_default_pars(inst_name)
         self.reset()
-        
+
     def set_default_pars(self, inst_name):
         import dgs_utils
         ip = dgs_utils.InstrumentParameters(inst_name)
@@ -43,7 +43,7 @@ class AbsoluteUnitsScript(BaseScriptElement):
         AbsoluteUnitsScript.absunits_median_test_high = ip.get_parameter("monovan_hi_frac")
         AbsoluteUnitsScript.absunits_median_test_low = ip.get_parameter("monovan_lo_frac")
         AbsoluteUnitsScript.absunits_errorbar_criterion = ip.get_parameter("diag_samp_sig")
-                
+
     def to_script(self):
         script = ""
         if self.do_absolute_units:
@@ -76,7 +76,7 @@ class AbsoluteUnitsScript(BaseScriptElement):
             if self.absunits_errorbar_criterion != AbsoluteUnitsScript.absunits_errorbar_criterion:
                 script += "AbsUnitsErrorBarCriterion=%s,\n" % str(self.absunits_errorbar_criterion)
         return script
-    
+
     def to_xml(self):
         """
             Create XML from the current data.
@@ -99,12 +99,12 @@ class AbsoluteUnitsScript(BaseScriptElement):
         xml += "  <errorbar_criterion>%s</errorbar_criterion>\n" % str(self.absunits_errorbar_criterion)
         xml += "</AbsoluteUnits>\n"
         return xml
-    
+
     def from_xml(self, xml_str):
         """
             Read in data from XML
             @param xml_str: text to read the data from
-        """       
+        """
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("AbsoluteUnits")
         if len(element_list)>0:
@@ -138,7 +138,7 @@ class AbsoluteUnitsScript(BaseScriptElement):
                                                                  default=AbsoluteUnitsScript.sample_mass)
             self.sample_rmm = BaseScriptElement.getFloatElement(instrument_dom,
                                                                 "sample_rmm",
-                                                                default=AbsoluteUnitsScript.sample_rmm)            
+                                                                default=AbsoluteUnitsScript.sample_rmm)
             self.absunits_median_test_out_low = BaseScriptElement.getFloatElement(instrument_dom,
                                                                                   "median_test_out_low",
                                                                                   default=AbsoluteUnitsScript.absunits_median_test_out_low)
@@ -153,7 +153,7 @@ class AbsoluteUnitsScript(BaseScriptElement):
                                                                                default=AbsoluteUnitsScript.absunits_median_test_high)
             self.absunits_errorbar_criterion = BaseScriptElement.getFloatElement(instrument_dom,
                                                                                  "errorbar_criterion",
-                                                                                 default=AbsoluteUnitsScript.absunits_errorbar_criterion)    
+                                                                                 default=AbsoluteUnitsScript.absunits_errorbar_criterion)
 
     def reset(self):
         """

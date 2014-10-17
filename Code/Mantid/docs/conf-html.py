@@ -3,7 +3,7 @@
 # serve to show the default.
 #
 # Options here are applied and assumed to be those required when the builder is set the "html".
-# For common options see conf.py.in. This file is presumed to be "execfiled" by the main conf.py.in 
+# For common options see conf.py.in. This file is presumed to be "execfiled" by the main conf.py.in
 
 # -- Override options for non-embedded standalone HTML output --------------------------------------------
 

@@ -45,6 +45,9 @@ namespace DataHandling
     /// Run the algorithm
     void exec();
 
+    /// Offset precision
+    int m_precision;
+
 
   };
 

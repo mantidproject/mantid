@@ -1,5 +1,5 @@
 #ifndef SCRIPTREPOSITORYIMPLTEST_H_
-#define SCRIPTREPOSITORYIMPL_H_
+#define SCRIPTREPOSITORYIMPLTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidScriptRepository/ScriptRepositoryImpl.h"
