@@ -1,9 +1,6 @@
 #include "MantidQtCustomInterfaces/QtReflMainView.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
-#include "MantidQtCustomInterfaces/ReflNullMainViewPresenter.h"
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
-#include "MantidQtCustomInterfaces/ReflBlankMainViewPresenter.h"
-#include "MantidQtCustomInterfaces/ReflLoadedMainViewPresenter.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include <qinputdialog.h>
@@ -20,7 +17,7 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    QtReflMainView::QtReflMainView(QWidget *parent) : UserSubWindow(parent), m_presenter(new ReflNullMainViewPresenter())
+    QtReflMainView::QtReflMainView(QWidget *parent) : UserSubWindow(parent), m_presenter(NULL)
     {
     }
 
@@ -66,24 +63,17 @@ namespace MantidQt
       //Allow rows to be reordered
       ui.viewTable->verticalHeader()->setMovable(true);
 
-      connect(ui.workspaceSelector,SIGNAL(activated(QString)),this,SLOT(setModel(QString)));
-      connect(ui.actionSaveTable, SIGNAL(triggered()),this, SLOT(actionSave()));
-      connect(ui.actionSaveTableAs, SIGNAL(triggered()),this, SLOT(actionSaveAs()));
-      connect(ui.actionNewTable, SIGNAL(triggered()),this, SLOT(setNew()));
-      connect(ui.actionAddRow, SIGNAL(triggered()),this, SLOT(actionAddRow()));
-      connect(ui.actionDeleteRow, SIGNAL(triggered()),this, SLOT(actionDeleteRow()));
-      connect(ui.actionProcess, SIGNAL(triggered()),this, SLOT(actionProcess()));
-      connect(ui.actionGroupRows, SIGNAL(triggered()),this, SLOT(actionGroupRows()));
-      setNew();
-    }
+      connect(ui.workspaceSelector, SIGNAL(activated(QString)), this, SLOT(setModel(QString)));
+      connect(ui.actionSaveTable,   SIGNAL(triggered()),        this, SLOT(actionSave()));
+      connect(ui.actionSaveTableAs, SIGNAL(triggered()),        this, SLOT(actionSaveAs()));
+      connect(ui.actionNewTable,    SIGNAL(triggered()),        this, SLOT(actionNewTable()));
+      connect(ui.actionAddRow,      SIGNAL(triggered()),        this, SLOT(actionAddRow()));
+      connect(ui.actionDeleteRow,   SIGNAL(triggered()),        this, SLOT(actionDeleteRow()));
+      connect(ui.actionProcess,     SIGNAL(triggered()),        this, SLOT(actionProcess()));
+      connect(ui.actionGroupRows,   SIGNAL(triggered()),        this, SLOT(actionGroupRows()));
 
-    /**
-    This slot loads a blank table and changes to a BlankMainView presenter
-    */
-    void QtReflMainView::setNew()
-    {
-      boost::scoped_ptr<IReflPresenter> newPtr(new ReflBlankMainViewPresenter(this));
-      m_presenter.swap(newPtr);
+      //Finally, create a presenter to do the thinking for us
+      m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(this));
     }
 
     /**
@@ -92,9 +82,8 @@ namespace MantidQt
     */
     void QtReflMainView::setModel(QString name)
     {
-      boost::scoped_ptr<IReflPresenter> newPtr(new ReflLoadedMainViewPresenter(name.toStdString(), this));
-      m_presenter.swap(newPtr);
-      m_presenter->notify(NoFlags);
+      m_toOpen = name.toStdString();
+      m_presenter->notify(OpenTableFlag);
     }
 
     /**
@@ -153,6 +142,14 @@ namespace MantidQt
     void QtReflMainView::actionGroupRows()
     {
       m_presenter->notify(GroupRowsFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "new table" button as been pressed
+    */
+    void QtReflMainView::actionNewTable()
+    {
+      m_presenter->notify(NewTableFlag);
     }
 
     /**
@@ -285,6 +282,15 @@ namespace MantidQt
         rowIndexes.push_back(idx->row());
       }
       return rowIndexes;
+    }
+
+    /**
+    Get the name of the workspace that the user wishes to open as a table
+    @returns The name of the workspace to open
+    */
+    std::string QtReflMainView::getWorkspaceToOpen() const
+    {
+      return m_toOpen;
     }
 
   } // namespace CustomInterfaces

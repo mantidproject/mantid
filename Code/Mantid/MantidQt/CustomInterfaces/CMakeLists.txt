@@ -54,11 +54,8 @@ set ( SRC_FILES
 	src/QtWorkspaceMementoModel.cpp
 	src/Quasi.cpp
 	src/RawFileMemento.cpp
-	src/ReflBlankMainViewPresenter.cpp
-	src/ReflLoadedMainViewPresenter.cpp
 	src/ReflMainView.cpp
 	src/ReflMainViewPresenter.cpp
-	src/ReflNullMainViewPresenter.cpp
 	src/ResNorm.cpp
 	src/SANSAddFiles.cpp
 	src/SANSDiagnostics.cpp
@@ -134,11 +131,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
-	inc/MantidQtCustomInterfaces/ReflBlankMainViewPresenter.h
-	inc/MantidQtCustomInterfaces/ReflLoadedMainViewPresenter.h
 	inc/MantidQtCustomInterfaces/ReflMainView.h
 	inc/MantidQtCustomInterfaces/ReflMainViewPresenter.h
-	inc/MantidQtCustomInterfaces/ReflNullMainViewPresenter.h
 	inc/MantidQtCustomInterfaces/QReflTableModel.h
 	inc/MantidQtCustomInterfaces/QtReflMainView.h
 	inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
@@ -261,8 +255,6 @@ set ( TEST_FILES
 	IO_MuonGroupingTest.h
 	MuonAnalysisHelperTest.h
 	RawFileMementoTest.h
-	ReflBlankMainViewPresenterTest.h
-	ReflLoadedMainViewPresenterTest.h
 	WorkspaceInADSTest.h
 	WorkspaceMementoTest.h
 )
@@ -314,10 +306,3 @@ add_subdirectory ( test )
 ###########################################################################
 
 install ( TARGETS CustomInterfaces ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR}/qtplugins/mantid )
-
-set ( TEST_FILES
-	QReflTableModelTest.h
-	QtReflMainViewTest.h
-	ReflBlankMainViewPresenterTest.h
-	ReflLoadedMainViewPresenterTest.h
-)

@@ -57,6 +57,7 @@ namespace MantidQt
       virtual std::vector<size_t> getSelectedRowIndexes() const = 0;
       virtual std::string getSearchInstrument() const = 0;
       virtual std::string getProcessInstrument() const = 0;
+      virtual std::string getWorkspaceToOpen() const = 0;
 
       static const int NoFlags       = 0;
       static const int SaveFlag      = 1;
@@ -65,6 +66,8 @@ namespace MantidQt
       static const int DeleteRowFlag = 4;
       static const int ProcessFlag   = 5;
       static const int GroupRowsFlag = 6;
+      static const int OpenTableFlag = 7;
+      static const int NewTableFlag  = 8;
     };
   }
 }

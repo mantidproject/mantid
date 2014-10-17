@@ -65,19 +65,22 @@ namespace MantidQt
       virtual std::vector<size_t> getSelectedRowIndexes() const;
       virtual std::string getSearchInstrument() const;
       virtual std::string getProcessInstrument() const;
+      virtual std::string getWorkspaceToOpen() const;
 
     private:
       //initialise the interface
       virtual void initLayout();
       virtual void setInstrumentList(const std::vector<std::string>& instruments);
       //the presenter
-      boost::scoped_ptr<IReflPresenter> m_presenter;
+      boost::shared_ptr<IReflPresenter> m_presenter;
       //the interface
       Ui::reflMainWidget ui;
+      //the workspace the user selected to open
+      std::string m_toOpen;
 
     private slots:
       void setModel(QString name);
-      void setNew();
+      void actionNewTable();
       void actionSave();
       void actionSaveAs();
       void actionAddRow();

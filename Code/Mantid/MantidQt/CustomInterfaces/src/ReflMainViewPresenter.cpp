@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -13,16 +14,66 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+namespace
+{
+  void checkValidModel(ITableWorkspace_sptr model)
+  {
+    if(model->columnCount() != 9)
+      throw std::runtime_error("Selected table has the incorrect number of columns (9) to be used as a reflectometry table.");
+
+    try
+    {
+      model->String(0,0);
+      model->String(0,1);
+      model->String(0,2);
+      model->String(0,3);
+      model->String(0,4);
+      model->String(0,5);
+      model->Double(0,6);
+      model->Int(0,7);
+      model->String(0,8);
+    }
+    catch(const std::runtime_error&)
+    {
+      throw std::runtime_error("Selected table does not meet the specifications to become a model for this interface.");
+    }
+  }
+
+  ITableWorkspace_sptr createWorkspace()
+  {
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+    auto colRuns = ws->addColumn("str","Run(s)");
+    auto colTheta = ws->addColumn("str","ThetaIn");
+    auto colTrans = ws->addColumn("str","TransRun(s)");
+    auto colQmin = ws->addColumn("str","Qmin");
+    auto colQmax = ws->addColumn("str","Qmax");
+    auto colDqq = ws->addColumn("str","dq/q");
+    auto colScale = ws->addColumn("double","Scale");
+    auto colStitch = ws->addColumn("int","StitchGroup");
+    auto colOptions = ws->addColumn("str","Options");
+
+    colRuns->setPlotType(0);
+    colTheta->setPlotType(0);
+    colTrans->setPlotType(0);
+    colQmin->setPlotType(0);
+    colQmax->setPlotType(0);
+    colDqq->setPlotType(0);
+    colScale->setPlotType(0);
+    colStitch->setPlotType(0);
+    colOptions->setPlotType(0);
+
+    ws->appendRow();
+    return ws;
+  }
+}
+
 namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view): m_view(view)
+    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view): m_model(NULL), m_view(view)
     {
-    }
-
-    ReflMainViewPresenter::ReflMainViewPresenter(ITableWorkspace_sptr model, ReflMainView* view): m_model(model), m_view(view)
-    {
+      newTable();
     }
 
     ReflMainViewPresenter::~ReflMainViewPresenter()
@@ -603,12 +654,14 @@ namespace MantidQt
     {
       switch(flag)
       {
-      case ReflMainView::SaveAsFlag:    saveAs();     break;
-      case ReflMainView::SaveFlag:      save();       break;
-      case ReflMainView::AddRowFlag:    addRow();     break;
-      case ReflMainView::DeleteRowFlag: deleteRow();  break;
-      case ReflMainView::ProcessFlag:   process();    break;
-      case ReflMainView::GroupRowsFlag: groupRows();  break;
+      case ReflMainView::SaveAsFlag:    saveTableAs(); break;
+      case ReflMainView::SaveFlag:      saveTable();   break;
+      case ReflMainView::AddRowFlag:    addRow();      break;
+      case ReflMainView::DeleteRowFlag: deleteRow();   break;
+      case ReflMainView::ProcessFlag:   process();     break;
+      case ReflMainView::GroupRowsFlag: groupRows();   break;
+      case ReflMainView::OpenTableFlag: openTable();   break;
+      case ReflMainView::NewTableFlag:  newTable();    break;
 
       case ReflMainView::NoFlags:       return;
       }
@@ -616,10 +669,61 @@ namespace MantidQt
     }
 
     /**
-    Load the model into the table
+    Press changes to the same item in the ADS
     */
-    void ReflMainViewPresenter::load()
+    void ReflMainViewPresenter::saveTable()
     {
+      if(!m_wsName.empty())
+        AnalysisDataService::Instance().addOrReplace(m_wsName,boost::shared_ptr<ITableWorkspace>(m_model->clone()));
+      else
+        saveTableAs();
+    }
+
+    /**
+    Press changes to a new item in the ADS
+    */
+    void ReflMainViewPresenter::saveTableAs()
+    {
+      const std::string userString = m_view->askUserString("Save As", "Enter a workspace name:", "Workspace");
+      if(!userString.empty())
+      {
+        m_wsName = userString;
+        saveTable();
+      }
+    }
+
+    /**
+    Start a new, untitled table
+    */
+    void ReflMainViewPresenter::newTable()
+    {
+      m_model = createWorkspace();
+      m_wsName.clear();
+      m_view->showTable(m_model);
+    }
+
+    /**
+    Open a table from the ADS
+    */
+    void ReflMainViewPresenter::openTable()
+    {
+      auto& ads = AnalysisDataService::Instance();
+      const std::string toOpen = m_view->getWorkspaceToOpen();
+
+      if(toOpen.empty())
+        return;
+
+      if(!ads.isValid(toOpen).empty())
+      {
+        m_view->giveUserCritical("Could not open workspace: " + toOpen, "Error");
+        return;
+      }
+
+      ITableWorkspace_sptr newModel = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(toOpen);
+      checkValidModel(newModel);
+
+      m_model = newModel;
+      m_wsName = toOpen;
       m_view->showTable(m_model);
     }
   }
