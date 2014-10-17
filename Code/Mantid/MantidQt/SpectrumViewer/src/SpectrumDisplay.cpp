@@ -357,7 +357,7 @@ QPoint SpectrumDisplay::GetPlotTransform( QPair<double, double> values )
   double x = spectrum_plot->transform( QwtPlot::xBottom, values.first );
   double y = spectrum_plot->transform( QwtPlot::yLeft, values.second );
 
-  return QPoint(x, y);
+  return QPoint((int)x, (int)y);
 }
 
 
