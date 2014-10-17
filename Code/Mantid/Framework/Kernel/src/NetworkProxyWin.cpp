@@ -2,6 +2,7 @@
 #if defined(_WIN32) || defined(_WIN64)
 
 #include "MantidKernel/NetworkProxy.h"
+#include <Winhttp.h>
 
 namespace Mantid
 {
@@ -144,8 +145,8 @@ namespace Mantid
 
       ProxyInfo proxyInfo; // No proxy
       std::string errmsg, proxy_option;
-      g_log.debug() << "Attempt to get the proxy configuration for this connection" << std::endl;
-      if(get_proxy_configuration_win(remote_url, proxy_option,errmsg))
+      m_logger.debug() << "Attempt to get the windows proxy configuration for this connection" << std::endl;
+      if(get_proxy_configuration_win(targetURLString, proxy_option,errmsg))
       {
         std::string proxyServer;
         int proxyPort;
@@ -172,13 +173,12 @@ namespace Mantid
             proxyServer = proxy_option;
             proxyPort = 8080;
           }
-          g_log.information() << "ScriptRepository proxy found. Host: " << PROXYSERVER << " Port: " << PROXYPORT << std::endl;
         }
         proxyInfo = ProxyInfo(proxyServer, proxyPort, true);
       }
       else
       {
-        g_log.information() << "ScriptRepository failed to find the proxy information. It will attempt without proxy. "
+        m_logger.information() << "ScriptRepository failed to find the proxy information. It will attempt without proxy. "
         << errmsg << std::endl;
       }
 

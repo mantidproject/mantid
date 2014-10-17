@@ -28,7 +28,5 @@ set ( LIBS ${MANTIDLIBS} )
 include_directories(inc)
 
 target_link_libraries(ScriptRepository ${LIBS})
-if ( MSVC )
-target_link_libraries(ScriptRepository Winhttp)
-endif()
+
 install (TARGETS ScriptRepository ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
