@@ -122,7 +122,7 @@ namespace MantidQt
 
     /**
     Parses a string in the format `a = 1,b=2, c = "1,2,3,4", d = 5.0, e='a,b,c'` into a map of key/value pairs
-    @param options The input string
+    @param str The input string
     */
     std::map<std::string,std::string> ReflMainViewPresenter::parseKeyValueString(const std::string& str)
     {
