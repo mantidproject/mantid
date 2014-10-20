@@ -7,6 +7,7 @@ set ( SRC_FILES
 	src/Crystal/Group.cpp
 	src/Crystal/IScatterer.cpp
 	src/Crystal/IndexingUtils.cpp
+	src/Crystal/IsotropicAtomScatterer.cpp
 	src/Crystal/NiggliCell.cpp
 	src/Crystal/OrientedLattice.cpp
 	src/Crystal/PointGroup.cpp
@@ -14,7 +15,9 @@ set ( SRC_FILES
 	src/Crystal/ProductOfCyclicGroups.cpp
 	src/Crystal/ReducedCell.cpp
 	src/Crystal/ReflectionCondition.cpp
+	src/Crystal/RigidAtomScatterer.cpp
 	src/Crystal/ScalarUtils.cpp
+	src/Crystal/ScattererCollection.cpp
 	src/Crystal/SpaceGroup.cpp
 	src/Crystal/SpaceGroupFactory.cpp
 	src/Crystal/SymmetryOperation.cpp
@@ -119,6 +122,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/Group.h
 	inc/MantidGeometry/Crystal/IScatterer.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
+	inc/MantidGeometry/Crystal/IsotropicAtomScatterer.h
 	inc/MantidGeometry/Crystal/NiggliCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
 	inc/MantidGeometry/Crystal/PointGroup.h
@@ -126,7 +130,9 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/ProductOfCyclicGroups.h
 	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
+	inc/MantidGeometry/Crystal/RigidAtomScatterer.h
 	inc/MantidGeometry/Crystal/ScalarUtils.h
+	inc/MantidGeometry/Crystal/ScattererCollection.h
 	inc/MantidGeometry/Crystal/SpaceGroup.h
 	inc/MantidGeometry/Crystal/SpaceGroupFactory.h
 	inc/MantidGeometry/Crystal/SymmetryOperation.h
@@ -246,6 +252,7 @@ set ( TEST_FILES
 	InstrumentDefinitionParserTest.h
 	InstrumentRayTracerTest.h
 	InstrumentTest.h
+	IsotropicAtomScattererTest.h
 	LaszloIntersectionTest.h
 	LineIntersectVisitTest.h
 	LineTest.h
@@ -285,6 +292,7 @@ set ( TEST_FILES
 	ReducedCellTest.h
 	ReferenceFrameTest.h
 	ReflectionConditionTest.h
+	RigidAtomScattererTest.h
 	RotCounterTest.h
 	RulesBoolValueTest.h
 	RulesCompGrpTest.h
@@ -294,6 +302,7 @@ set ( TEST_FILES
 	RulesTest.h
 	RulesUnionTest.h
 	ScalarUtilsTest.h
+	ScattererCollectionTest.h
 	ShapeFactoryTest.h
 	SpaceGroupFactoryTest.h
 	SpaceGroupTest.h

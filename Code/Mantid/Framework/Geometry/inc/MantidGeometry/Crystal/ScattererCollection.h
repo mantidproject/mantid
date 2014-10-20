@@ -1,28 +1,18 @@
-#ifndef MANTID_GEOMETRY_ISCATTERER_H_
-#define MANTID_GEOMETRY_ISCATTERER_H_
+#ifndef MANTID_GEOMETRY_SCATTERERCOLLECTION_H_
+#define MANTID_GEOMETRY_SCATTERERCOLLECTION_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/V3D.h"
+#include "MantidGeometry/Crystal/IScatterer.h"
 
-#include <complex>
-#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
 namespace Geometry
 {
 
-typedef std::complex<double> StructureFactor;
+/** ScattererCollection : TODO: DESCRIPTION
 
-/** IScatterer
-
-    General interface for any kind of scatterer. The position must be set in
-    Angstrom, not as a relative position in terms of the unit cell.
-
-      @author Michael Wedel, Paul Scherrer Institut - SINQ
-      @date 20/10/2014
-
-    Copyright © 2014 PSI-MSS
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -42,24 +32,26 @@ typedef std::complex<double> StructureFactor;
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_GEOMETRY_DLL IScatterer
+class MANTID_GEOMETRY_DLL ScattererCollection : public IScatterer
 {
 public:
-    IScatterer(const Kernel::V3D &position = Kernel::V3D(0.0, 0.0, 0.0));
-    virtual ~IScatterer() { }
+    ScattererCollection();
+    virtual ~ScattererCollection() { }
 
-    void setPosition(const Kernel::V3D &position);
-    Kernel::V3D getPosition() const;
+    void addScatterer(const IScatterer_sptr &scatterer);
+    size_t nScatterers() const;
+    IScatterer_sptr getScatterer(size_t i) const;
+    void removeScatterer(size_t i);
 
-    virtual StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const = 0;
+    StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const;
     
 protected:
-    Kernel::V3D m_position;
+    std::vector<IScatterer_sptr> m_scatterers;
 };
 
-typedef boost::shared_ptr<IScatterer> IScatterer_sptr;
+typedef boost::shared_ptr<ScattererCollection> ScattererCollection_sptr;
 
 } // namespace Geometry
 } // namespace Mantid
 
-#endif  /* MANTID_GEOMETRY_ISCATTERER_H_ */
+#endif  /* MANTID_GEOMETRY_SCATTERERCOLLECTION_H_ */
