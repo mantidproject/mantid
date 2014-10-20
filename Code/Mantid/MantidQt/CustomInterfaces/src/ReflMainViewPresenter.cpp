@@ -62,7 +62,6 @@ namespace
     colStitch->setPlotType(0);
     colOptions->setPlotType(0);
 
-    ws->appendRow();
     return ws;
   }
 }
@@ -427,6 +426,20 @@ namespace MantidQt
       if(!algReflOne->isExecuted())
         throw std::runtime_error("Failed to run ReflectometryReductionOneAuto.");
 
+      const double scale = m_model->Double(rowNo, COL_SCALE);
+      if(scale != 1.0)
+      {
+        IAlgorithm_sptr algScale = AlgorithmManager::Instance().create("Scale");
+        algScale->initialize();
+        algScale->setProperty("InputWorkspace", "IvsQ_" + runNo);
+        algScale->setProperty("OutputWorkspace", "IvsQ_" + runNo);
+        algScale->setProperty("Factor", 1.0 / scale);
+        algScale->execute();
+
+        if(!algScale->isExecuted())
+          throw std::runtime_error("Failed to run Scale algorithm");
+      }
+
       //Processing has completed. Put Qmin and Qmax into the table if needed, for stitching.
       if(m_model->String(rowNo, COL_QMIN).empty() || m_model->String(rowNo, COL_QMAX).empty())
       {
@@ -602,33 +615,32 @@ namespace MantidQt
     }
 
     /**
+    Inserts a new row in the specified location
+    @param before The index to insert the new row before
+    */
+    void ReflMainViewPresenter::insertRow(size_t before)
+    {
+      const int groupId = getUnusedGroup();
+      size_t row = m_model->insertRow(before);
+      //Set the default scale to 1.0
+      m_model->Double(row, COL_SCALE) = 1.0;
+      //Set the group id of the new row
+      m_model->Int(row, COL_GROUP) = groupId;
+      //Make sure the view updates
+      m_view->showTable(m_model);
+    }
+
+    /**
     Add row(s) to the model
     */
     void ReflMainViewPresenter::addRow()
     {
       std::vector<size_t> rows = m_view->getSelectedRowIndexes();
       std::sort(rows.begin(), rows.end());
-
-      const int groupId = getUnusedGroup();
-      size_t row = 0;
-
       if(rows.size() == 0)
-      {
-        //No rows selected, just append a new row
-        row = m_model->rowCount();
-        m_model->appendRow();
-      }
+        insertRow(m_model->rowCount());
       else
-      {
-        //One or more rows selected, insert after the last row
-        row = m_model->insertRow(*rows.rbegin() + 1);
-      }
-
-      //Set the group id of the new row
-      m_model->Int(row, COL_GROUP) = groupId;
-
-      //Make sure the view updates
-      m_view->showTable(m_model);
+        insertRow(*rows.rbegin() + 1);
     }
 
     /**
@@ -714,6 +726,9 @@ namespace MantidQt
       m_model = createWorkspace();
       m_wsName.clear();
       m_view->showTable(m_model);
+
+      //Start with one blank row
+      insertRow(0);
     }
 
     /**
