@@ -9,13 +9,6 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/System.h"
 
-// To be compatible with VSC Express edition that does not have tr1
-#ifndef HAS_UNORDERED_MAP_H
-#include <map>
-#else
-#include <tr1/unordered_map>
-#endif
-
 namespace Mantid
 {
 namespace Algorithms

@@ -37,10 +37,10 @@ namespace MantidQt
 			void findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws);
 
 		private:
-			//The ui form
+			// The UI form
 			Ui::JumpFit m_uiForm;
-			// map of axis labels to spectrum number
-			std::map<std::string,int> spectraList;
+			// Map of axis labels to spectrum number
+			std::map<std::string, int> m_spectraList;
 
 		};
 	} // namespace CustomInterfaces
