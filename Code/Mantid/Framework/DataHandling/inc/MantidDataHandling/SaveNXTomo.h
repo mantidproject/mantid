@@ -75,10 +75,10 @@ namespace Mantid
       /// Save batch of images to the file
 
       /// Fetch all rectangular Detector objects defined for an instrument
-      std::vector<Mantid::Geometry::RectangularDetector> getRectangularDetectors(const Geometry::Instrument_const_sptr &instrument);
+      std::vector<boost::shared_ptr<const Mantid::Geometry::RectangularDetector>> getRectangularDetectors(const Geometry::Instrument_const_sptr &instrument);
 
       /// Populate dims_array with the dimensions defined in the rectangular detector in the instrument
-      std::vector<int64_t> getDimensionsFromDetector(const std::vector<Mantid::Geometry::RectangularDetector> &rectDetectors, size_t useDetectorIndex = 0);
+      std::vector<int64_t> getDimensionsFromDetector(const std::vector<boost::shared_ptr<const Mantid::Geometry::RectangularDetector>> &rectDetectors, size_t useDetectorIndex = 0);
 
       // Number of rows to 
       size_t m_numberOfRows;

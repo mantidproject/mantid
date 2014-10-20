@@ -336,23 +336,21 @@ namespace Mantid
     * @param instrument instrument to search for detectors in
     * @returns vector of all Rectangular Detectors
     */
-    std::vector<RectangularDetector> SaveNXTomo::getRectangularDetectors(const Geometry::Instrument_const_sptr &instrument)
+    std::vector<boost::shared_ptr<const RectangularDetector>> SaveNXTomo::getRectangularDetectors(const Geometry::Instrument_const_sptr &instrument)
     {
       std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> components;
       instrument->getChildren(components,true);
 
-      std::vector<RectangularDetector> rectDetectors;
+      std::vector<boost::shared_ptr<const RectangularDetector>> rectDetectors;
     
       for(auto it = components.begin(); it != components.end(); ++it)
       {
         // for all components, compare to RectangularDetector - if it is one, add it to detectors list. 
-        const Geometry::IComponent* c = dynamic_cast<const Geometry::IComponent*>(&(**it));          
-
-        if(dynamic_cast<const RectangularDetector*>(c))
+        auto ptr = boost::dynamic_pointer_cast<const RectangularDetector>(*it);
+        if(ptr != NULL)
         {
-          RectangularDetector rd = *(dynamic_cast<const RectangularDetector*>(&(**it)));
-          rectDetectors.push_back(rd);       
-        }     
+          rectDetectors.push_back(ptr);
+        }
       }
       
       return rectDetectors;
@@ -366,7 +364,7 @@ namespace Mantid
     *
     *  @throw runtime_error Thrown if there are no rectangular detectors
     */
-    std::vector<int64_t> SaveNXTomo::getDimensionsFromDetector(const std::vector<RectangularDetector> &rectDetectors, size_t useDetectorIndex) 
+    std::vector<int64_t> SaveNXTomo::getDimensionsFromDetector(const std::vector<boost::shared_ptr<const RectangularDetector>> &rectDetectors, size_t useDetectorIndex) 
     {
       // Add number of pixels in X and Y from instrument definition
       // Throws if no rectangular detector is present.
@@ -376,8 +374,8 @@ namespace Mantid
       if(rectDetectors.size() != 0)
       {
         // Assume the first rect detector is the desired one.
-        dims.push_back(rectDetectors[useDetectorIndex].xpixels());
-        dims.push_back(rectDetectors[useDetectorIndex].ypixels());
+        dims.push_back(rectDetectors[useDetectorIndex]->xpixels());
+        dims.push_back(rectDetectors[useDetectorIndex]->ypixels());
       }
       else
       {
