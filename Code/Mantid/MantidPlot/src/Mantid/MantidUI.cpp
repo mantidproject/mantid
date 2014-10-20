@@ -1766,7 +1766,6 @@ bool MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const boo
 
 /**
 * Slot to update the recent files list (from main appWindow) when accepting LoadDialog dialogs
-* @param dlg :: alg. dialog (in practice of subclass LoadDialog) that has been ok-clicked/accepted
 */
 void MantidUI::loadFileDialogAccept()
 {
