@@ -4473,7 +4473,7 @@ void ApplicationWindow::openRecentFile(int index)
   QFile f(fn);
   if (!f.exists()){
     QMessageBox::critical(this, tr("MantidPlot - File Open Error"),//Mantid
-                          tr("The file: <b> %1 </b> <p>does not exist anymore!"
+                          tr("The file: <b> %1 </b> <p>is not there anymore!"
                              "<p>It will be removed from the list of recent files.").arg(fn));
 
     recentFiles.remove(fn);
