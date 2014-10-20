@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/QtReflMainView.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
+#include "MantidQtCustomInterfaces/ReflOptionsDelegate.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include <qinputdialog.h>
@@ -55,6 +56,9 @@ namespace MantidQt
       connect(ui.actionDeleteRow,   SIGNAL(triggered()),        this, SLOT(actionDeleteRow()));
       connect(ui.actionProcess,     SIGNAL(triggered()),        this, SLOT(actionProcess()));
       connect(ui.actionGroupRows,   SIGNAL(triggered()),        this, SLOT(actionGroupRows()));
+
+      QAbstractItemDelegate* delegate = new ReflOptionsDelegate();
+      ui.viewTable->setItemDelegateForColumn(ReflMainViewPresenter::COL_OPTIONS, delegate);
 
       //Finally, create a presenter to do the thinking for us
       m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(this));
