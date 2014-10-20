@@ -267,37 +267,6 @@
               </property>
              </spacer>
             </item>
-            <item>
-             <widget class="QLabel" name="labelWorkspaceSelector">
-              <property name="text">
-               <string>Table:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="workspaceSelector">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>150</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>Select the Table Workspace to display</string>
-              </property>
-              <property name="WorkspaceTypes" stdset="0">
-               <stringlist>
-                <string>TableWorkspace</string>
-               </stringlist>
-              </property>
-             </widget>
-            </item>
            </layout>
           </item>
           <item>
@@ -410,6 +379,16 @@
     <property name="title">
      <string>Table</string>
     </property>
+    <widget class="QMenu" name="menuOpenTable">
+     <property name="title">
+      <string>Open Table</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+       <normaloff>:/multiload.png</normaloff>:/multiload.png</iconset>
+     </property>
+    </widget>
+    <addaction name="menuOpenTable"/>
     <addaction name="actionNewTable"/>
     <addaction name="actionSaveTable"/>
     <addaction name="actionSaveTableAs"/>
@@ -480,13 +459,6 @@
    </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::WorkspaceSelector</class>
-   <extends>QComboBox</extends>
-   <header>MantidQtMantidWidgets/WorkspaceSelector.h</header>
-  </customwidget>
- </customwidgets>
  <tabstops>
   <tabstop>comboSearchInstrument</tabstop>
   <tabstop>tableRuns</tabstop>
