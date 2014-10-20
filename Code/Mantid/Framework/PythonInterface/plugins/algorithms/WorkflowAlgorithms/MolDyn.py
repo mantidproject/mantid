@@ -440,25 +440,25 @@ class MolDyn(PythonAlgorithm):
 
     def _convolve_with_res(self):
         """
-        Performs collvolution with an instrument resolution workspace.
+        Performs convolution with an instrument resolution workspace.
         """
-
-        # TODO
 
         function_ws_name = mtd[self._out_ws].getItem(0).getName()
 
-        f1 = 'composite=Convolution;'
-        f2 = 'name=TabulatedFunction,Workspace=' + self._res_ws + ',WorkspaceIndex=0;'
-        f3 = 'name=TabulatedFunction,Workspace=' + function_ws_name + ',WorkspaceIndex=0'
-        function = f1 + f2 + f3
-
-        Fit(Function=function, InputWorkspace=function_ws_name, MaxIterations=0, CreateOutput=True,
-            ConvolveMembers=True)
-
-        conv_ws = self._out_ws + '_conv'
         Symmetrise(Sample=function_ws_name, XMin=0, XMax=self._emax,
                    Verbose=self._verbose, Plot=False, Save=False,
-                   OutputWorkspace=conv_ws)
+                   OutputWorkspace=function_ws_name)
+
+        num_hist = mtd[function_ws_name].getNumberHistograms()
+        res_ws_list = []
+        for i in range(0, num_hist):
+            res_ws_list.append(self._res_ws)
+
+        res_ws_str_list = ','.join(res_ws_list)
+        res_multi_spec_ws = ConjoinSpectra(res_ws_str_list, 0)
+
+        ConvolveWorkspaces(OutputWorkspace=self._out_ws,
+                           Workspace1=function_ws_name, Workspace2=res_multi_spec_ws)
 
 
     def _plot_spectra(self, ws_name):
