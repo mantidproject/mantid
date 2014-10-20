@@ -221,8 +221,6 @@ public:
   void test_partial_spectra_loading()
   {
     const std::string wsName = "test_partial_spectra_loading";
-    const int specMin = 200;
-    const int specMax = 2000;
 		std::vector<int32_t> specList;
 		specList.push_back(13);
 		specList.push_back(16);
@@ -233,8 +231,6 @@ public:
     ld.initialize();
     ld.setPropertyValue("OutputWorkspace", wsName);
     ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
-    //ld.setProperty("SpectrumMin", specMin);
-    //ld.setProperty("SpectrumMax", specMax);
 		ld.setProperty("SpectrumList", specList);
     ld.setProperty<bool>("LoadLogs", false); // Time-saver
 
@@ -242,7 +238,6 @@ public:
 
     auto outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName); 
 
-//    TSM_ASSERT("The number of spectra in the workspace should be equal to the spectra filtered", outWs->getNumberHistograms()==specMax-specMin+1);
     TSM_ASSERT("The number of spectra in the workspace should be equal to the spectra filtered", outWs->getNumberHistograms()==specList.size());
     TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(0)->getSpectrumNo()==13);
     TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(1)->getSpectrumNo()==16);
