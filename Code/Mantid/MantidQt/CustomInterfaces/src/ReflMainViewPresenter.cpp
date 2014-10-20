@@ -62,7 +62,6 @@ namespace
     colStitch->setPlotType(0);
     colOptions->setPlotType(0);
 
-    ws->appendRow();
     return ws;
   }
 }
@@ -624,6 +623,9 @@ namespace MantidQt
         row = m_model->insertRow(*rows.rbegin() + 1);
       }
 
+      //Set the default scale to 1.0
+      m_model->Double(row, COL_SCALE) = 1.0;
+
       //Set the group id of the new row
       m_model->Int(row, COL_GROUP) = groupId;
 
@@ -714,6 +716,9 @@ namespace MantidQt
       m_model = createWorkspace();
       m_wsName.clear();
       m_view->showTable(m_model);
+
+      //Start with one blank row
+      addRow();
     }
 
     /**
