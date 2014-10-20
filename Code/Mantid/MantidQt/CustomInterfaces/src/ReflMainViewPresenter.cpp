@@ -426,6 +426,20 @@ namespace MantidQt
       if(!algReflOne->isExecuted())
         throw std::runtime_error("Failed to run ReflectometryReductionOneAuto.");
 
+      const double scale = m_model->Double(rowNo, COL_SCALE);
+      if(scale != 1.0)
+      {
+        IAlgorithm_sptr algScale = AlgorithmManager::Instance().create("Scale");
+        algScale->initialize();
+        algScale->setProperty("InputWorkspace", "IvsQ_" + runNo);
+        algScale->setProperty("OutputWorkspace", "IvsQ_" + runNo);
+        algScale->setProperty("Factor", 1.0 / scale);
+        algScale->execute();
+
+        if(!algScale->isExecuted())
+          throw std::runtime_error("Failed to run Scale algorithm");
+      }
+
       //Processing has completed. Put Qmin and Qmax into the table if needed, for stitching.
       if(m_model->String(rowNo, COL_QMIN).empty() || m_model->String(rowNo, COL_QMAX).empty())
       {
