@@ -434,36 +434,64 @@
    </layout>
   </widget>
   <action name="actionNewTable">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/new.png</normaloff>:/new.png</iconset>
+   </property>
    <property name="text">
     <string>New Table</string>
    </property>
   </action>
   <action name="actionSaveTable">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/filesave.png</normaloff>:/filesave.png</iconset>
+   </property>
    <property name="text">
     <string>Save Table</string>
    </property>
   </action>
   <action name="actionSaveTableAs">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/filesaveas.png</normaloff>:/filesaveas.png</iconset>
+   </property>
    <property name="text">
     <string>Save Table As</string>
    </property>
   </action>
   <action name="actionAddRow">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/insert_row.png</normaloff>:/insert_row.png</iconset>
+   </property>
    <property name="text">
     <string>Add Row</string>
    </property>
   </action>
   <action name="actionDeleteRow">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/delete_row.png</normaloff>:/delete_row.png</iconset>
+   </property>
    <property name="text">
     <string>Delete Row</string>
    </property>
   </action>
   <action name="actionGroupRows">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/drag_curves.png</normaloff>:/drag_curves.png</iconset>
+   </property>
    <property name="text">
     <string>Group Rows</string>
    </property>
   </action>
   <action name="actionProcess">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/play.png</normaloff>:/play.png</iconset>
+   </property>
    <property name="text">
     <string>Process</string>
    </property>
@@ -482,7 +510,9 @@
   <tabstop>viewTable</tabstop>
   <tabstop>buttonProcess</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../../../../MantidPlot/icons/icons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonNew</sender>
