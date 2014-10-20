@@ -4,7 +4,7 @@ set ( SRC_FILES
 	src/ConvFit.cpp
 	src/CreateMDWorkspace.cpp
 	src/CreateMDWorkspaceAlgDialog.cpp
-  src/DirectConvertToEnergy.cpp
+	src/DirectConvertToEnergy.cpp
 	src/Elwin.cpp
 	src/EventNexusFileMemento.cpp
 	src/Fury.cpp
@@ -13,12 +13,12 @@ set ( SRC_FILES
 	src/IDATab.cpp
 	src/IndirectBayes.cpp
 	src/IndirectBayesTab.cpp
-  src/IndirectCalibration.cpp
-  src/IndirectConvertToEnergy.cpp
+	src/IndirectCalibration.cpp
+	src/IndirectConvertToEnergy.cpp
 	src/IndirectDataAnalysis.cpp
-  src/IndirectDataReduction.cpp
-  src/IndirectDataReductionTab.cpp
-  src/IndirectDiagnostics.cpp
+	src/IndirectDataReduction.cpp
+	src/IndirectDataReductionTab.cpp
+	src/IndirectDiagnostics.cpp
 	src/IndirectDiffractionReduction.cpp
 	src/IndirectLoadAscii.cpp
 	src/IndirectLoadAsciiTab.cpp
@@ -27,8 +27,9 @@ set ( SRC_FILES
 	src/IndirectNeutron.cpp
 	src/IndirectSimulation.cpp
 	src/IndirectSimulationTab.cpp
-  src/IndirectSqw.cpp
-  src/IndirectTransmission.cpp
+	src/IndirectSqw.cpp
+	src/IndirectSymmetrise.cpp
+	src/IndirectTransmission.cpp
 	src/JumpFit.cpp
 	src/MSDFit.cpp
 	src/MantidEV.cpp
@@ -78,7 +79,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/ConvFit.h
 	inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
 	inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
-  inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
+	inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/DllConfig.h
 	inc/MantidQtCustomInterfaces/Elwin.h
 	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h
@@ -88,11 +89,11 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IDATab.h
 	inc/MantidQtCustomInterfaces/IndirectBayes.h
 	inc/MantidQtCustomInterfaces/IndirectBayesTab.h
-  inc/MantidQtCustomInterfaces/IndirectCalibration.h
-  inc/MantidQtCustomInterfaces/IndirectConvertToEnergy.h
+	inc/MantidQtCustomInterfaces/IndirectCalibration.h
+	inc/MantidQtCustomInterfaces/IndirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
-  inc/MantidQtCustomInterfaces/IndirectDataReduction.h
-  inc/MantidQtCustomInterfaces/IndirectDataReductionTab.h
+	inc/MantidQtCustomInterfaces/IndirectDataReduction.h
+ 	inc/MantidQtCustomInterfaces/IndirectDataReductionTab.h
 	inc/MantidQtCustomInterfaces/IndirectDiagnostics.h
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
 	inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
@@ -103,7 +104,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IndirectSimulation.h
 	inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
 	inc/MantidQtCustomInterfaces/IndirectSqw.h
-  inc/MantidQtCustomInterfaces/IndirectTransmission.h
+	inc/MantidQtCustomInterfaces/IndirectSymmetrise.h
+	inc/MantidQtCustomInterfaces/IndirectTransmission.h
 	inc/MantidQtCustomInterfaces/IReflPresenter.h
 	inc/MantidQtCustomInterfaces/JumpFit.h
 	inc/MantidQtCustomInterfaces/MSDFit.h
@@ -183,6 +185,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectSimulation.h
                 inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
                 inc/MantidQtCustomInterfaces/IndirectSqw.h
+                inc/MantidQtCustomInterfaces/IndirectSymmetrise.h
                 inc/MantidQtCustomInterfaces/IndirectTransmission.h
                 inc/MantidQtCustomInterfaces/JumpFit.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
