@@ -83,7 +83,7 @@ namespace MantidQt
       m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_QMIN)));
       m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_QMAX)));
       m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_DQQ)));
-      m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_SCALE)));
+      m_dataCache.push_back(QString::number(tableRow.cell<double>(COL_SCALE)));
       m_dataCache.push_back(QString::number(tableRow.cell<int>(COL_GROUP)));
       m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_OPTIONS)));
 
@@ -167,13 +167,14 @@ namespace MantidQt
         const int colNumber = index.column();
         const int rowNumber = index.row();
 
-        if (colNumber == COL_GROUP)
+        switch(colNumber)
         {
-          m_tWS->Int(rowNumber, COL_GROUP) = str.toInt();
-        }
-        else
-        {
-          m_tWS->String(rowNumber, colNumber) = str.toStdString();
+        case COL_GROUP:
+          m_tWS->Int(rowNumber, COL_GROUP) = str.toInt(); break;
+        case COL_SCALE:
+          m_tWS->Double(rowNumber, COL_SCALE) = str.toDouble(); break;
+        default:
+          m_tWS->String(rowNumber, colNumber) = str.toStdString(); break;
         }
 
         invalidateDataCache(rowNumber);

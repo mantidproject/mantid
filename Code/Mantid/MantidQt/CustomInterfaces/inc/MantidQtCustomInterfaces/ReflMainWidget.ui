@@ -48,7 +48,7 @@
        <enum>Qt::Horizontal</enum>
       </property>
       <property name="childrenCollapsible">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <widget class="QGroupBox" name="groupSearchPane">
        <property name="title">
@@ -286,7 +286,7 @@
             <item>
              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="workspaceSelector">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -329,11 +329,17 @@
             <property name="selectionMode">
              <enum>QAbstractItemView::ContiguousSelection</enum>
             </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
+            </property>
             <attribute name="horizontalHeaderDefaultSectionSize">
              <number>60</number>
             </attribute>
             <attribute name="horizontalHeaderMinimumSectionSize">
              <number>20</number>
+            </attribute>
+            <attribute name="horizontalHeaderStretchLastSection">
+             <bool>true</bool>
             </attribute>
             <attribute name="verticalHeaderDefaultSectionSize">
              <number>20</number>
@@ -384,6 +390,12 @@
             </item>
             <item>
              <widget class="QComboBox" name="comboProcessInstrument">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="toolTip">
                <string>Select the instrument to assume for fetching runs</string>
               </property>
