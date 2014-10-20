@@ -37,20 +37,14 @@ namespace MantidQt
     class DLLExport ReflMainViewPresenter: public IReflPresenter
     {
     public:
-      ReflMainViewPresenter(Mantid::API::ITableWorkspace_sptr model, ReflMainView* view);
       ReflMainViewPresenter(ReflMainView* view);
-      virtual ~ReflMainViewPresenter() = 0;
+      virtual ~ReflMainViewPresenter();
       virtual void notify(int flag);
     protected:
-      //The model and backup copy of the original model
       Mantid::API::ITableWorkspace_sptr m_model;
-      Mantid::API::ITableWorkspace_sptr m_cache;
-      std::string m_cache_name;
-      //the view
+      std::string m_wsName;
       ReflMainView* m_view;
 
-      //Load the model into the view
-      virtual void load();
       //process selected rows
       virtual void process();
       //load a run into the ADS, or re-use one in the ADS if possible
@@ -77,9 +71,11 @@ namespace MantidQt
       virtual void deleteRow();
       //group selected rows together
       virtual void groupRows();
-      //virtual save methods
-      virtual void save() = 0;
-      virtual void saveAs() = 0;
+      //table io methods
+      virtual void newTable();
+      virtual void openTable();
+      virtual void saveTable();
+      virtual void saveTableAs();
 
     public:
       static const int COL_RUNS         = 0;
