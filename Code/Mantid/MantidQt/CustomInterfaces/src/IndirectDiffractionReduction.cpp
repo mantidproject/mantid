@@ -97,7 +97,10 @@ void IndirectDiffractionReduction::plotResults(bool error)
 {
   // Nothing can be plotted
   if(error)
+  {
+    showInformationBox("Error running diffraction reduction.\nSee Results Log for details.");
     return;
+  }
 
   QString instName = m_uiForm.cbInst->currentText();
   QString mode = m_uiForm.cbReflection->currentText();
@@ -473,7 +476,7 @@ bool IndirectDiffractionReduction::validateRebin()
     CHECK_VALID(rebStepTxt,m_uiForm.valRebinWidth);
     CHECK_VALID(rebEndTxt,m_uiForm.valRebinEnd);
 
-    if(rebinValid && rebStartTxt.toDouble() > rebEndTxt.toDouble())
+    if(rebinValid && rebStartTxt.toDouble() >= rebEndTxt.toDouble())
     {
       rebinValid = false;
       m_uiForm.valRebinStart->setText("*");
