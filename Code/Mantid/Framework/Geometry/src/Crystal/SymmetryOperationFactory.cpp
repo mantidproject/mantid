@@ -3,6 +3,7 @@
 #include "MantidKernel/Exception.h"
 
 #include <boost/make_shared.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace Mantid
 {
@@ -17,6 +18,26 @@ SymmetryOperation SymmetryOperationFactoryImpl::createSymOp(const std::string &i
     }
 
     return SymmetryOperation(m_prototypes[identifier]);
+}
+
+/// Creates all symmetry operations in string (separated by semicolon).
+std::vector<SymmetryOperation> SymmetryOperationFactoryImpl::createSymOps(const std::string &identifiers)
+{
+    std::vector<std::string> symOpStrings;
+    boost::split(symOpStrings, identifiers, boost::is_any_of(";"));
+
+    return createSymOps(symOpStrings);
+}
+
+/// Creates all symmetry operations with the given strings (whitespaces at beginning and end are removed).
+std::vector<SymmetryOperation> SymmetryOperationFactoryImpl::createSymOps(const std::vector<std::string> &identifiers)
+{
+    std::vector<SymmetryOperation> symOps;
+    for(auto it = identifiers.begin(); it != identifiers.end(); ++it) {
+        symOps.push_back(createSymOp(boost::trim_copy(*it)));
+    }
+
+    return symOps;
 }
 
 /// Subscribes a symmetry operation into the factory

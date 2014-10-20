@@ -159,17 +159,24 @@ namespace MDAlgorithms
     TargetBox->clear();
 
     uint64_t nBoxEvents(0);
+    std::vector<size_t> numFileEvents(m_EventLoader.size());
+
     for (size_t iw=0; iw<this->m_EventLoader.size(); iw++)
     {
       size_t ID = TargetBox->getID();
+      numFileEvents[iw] = static_cast<size_t>(m_fileComponentsStructure[iw].getEventIndex()[2*ID+1]);
+      nBoxEvents += numFileEvents[iw];
+    }
 
-       uint64_t fileLocation   = m_fileComponentsStructure[iw].getEventIndex()[2*ID+0];
-       size_t   numFileEvents  = static_cast<size_t>(m_fileComponentsStructure[iw].getEventIndex()[2*ID+1]);
-       if(numFileEvents==0)continue;
-       //TODO: it is possible to avoid the reallocation of the memory at each load 
-      TargetBox->loadAndAddFrom(m_EventLoader[iw],fileLocation,numFileEvents);
+    // At this point memory required is known, so it is reserved all in one go
+    TargetBox->reserveMemoryForLoad(nBoxEvents);
 
-       nBoxEvents += numFileEvents;
+    for (size_t iw=0; iw<this->m_EventLoader.size(); iw++)
+    {
+      size_t ID = TargetBox->getID();
+      uint64_t fileLocation   = m_fileComponentsStructure[iw].getEventIndex()[2*ID+0];
+      if(numFileEvents[iw]==0) continue;
+      TargetBox->loadAndAddFrom(m_EventLoader[iw],fileLocation,numFileEvents[iw]);
     }
 
     return nBoxEvents;
