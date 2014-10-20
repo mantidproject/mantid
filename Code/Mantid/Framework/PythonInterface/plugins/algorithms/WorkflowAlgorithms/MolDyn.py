@@ -9,7 +9,7 @@ from IndirectCommon import ExtractFloat, ExtractInt
 from IndirectNeutron import ChangeAngles, InstrParas, RunParas
 from IndirectImport import import_mantidplot
 
-mtd_plot = import_mantidplot()
+MTD_PLOT = import_mantidplot()
 
 
 def _split_line(a):
@@ -18,23 +18,6 @@ def _split_line(a):
     for n in elements:
         extracted.append(float(n))
     return extracted  # values as list
-
-def _find_dimensions(a, Verbose):
-    ldim = _find_starts(a, 'dimensions', 0)
-    lQ = _find_tab_starts(a, 'NQVALUES', 0)
-    lT = _find_tab_starts(a, 'NTIMES', 0)
-    lF = _find_tab_starts(a, 'NFREQUENCIES', 0)
-    Qel = a[lQ].split()
-    nQ = int(Qel[2])
-    Tel = a[lT].split()
-    nT = int(Tel[2])
-    Fel = a[lF].split()
-    nF = int(Tel[2])
-    if Verbose:
-        logger.notice(a[2][1:-1])
-        logger.notice(a[3][1:-1])
-        logger.notice(a[6][1:-1])
-    return nQ, nT, nF
 
 def _find_starts(data, c, l1):
     for l in range(l1, len(data)):
@@ -82,7 +65,7 @@ class MolDyn(PythonAlgorithm):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
 
     def summary(self):
-        return ''  # TODO
+        return 'Imports nMOLDYN simulations from CDL and ASCII files.'
 
     def PyInit(self):
         self.declareProperty(FileProperty('SampleFile', '',
@@ -92,9 +75,6 @@ class MolDyn(PythonAlgorithm):
 
         self.declareProperty(StringArrayProperty('Functions'),
                              doc='The Function to use')
-
-        self.declareProperty(name='Convolution', defaultValue=False,
-                             doc='Perform convolution')
 
         self.declareProperty(WorkspaceProperty('Resolution', '', Direction.Input, PropertyMode.Optional),
                              doc='Resolution workspace')
@@ -119,6 +99,25 @@ class MolDyn(PythonAlgorithm):
                              doc='Output workspace name')
 
 
+    def validateInputs(self):
+        issues = dict()
+
+        sample_filename = self.getPropertyValue('SampleFile')
+        function_list = self.getProperty('Functions').value
+        res_ws = self.getPropertyValue('Resolution')
+
+        if len(function_list) == 0 and os.path.splitext(sample_filename)[1] == '.cdl':
+            issues['Functions'] = 'Must specify at least one function when loading a CDL file'
+
+        if len(function_list) > 0 and os.path.splitext(sample_filename)[1] == '.dat':
+            issues['Functions'] = 'Cannot specify functions when loading an ASCII file'
+
+        if res_ws is not '' and len(function_list) > 1:
+            issues['Functions'] = 'Can only specify a single function with a convolving with a resolution workspace'
+
+        return issues
+
+
     def PyExec(self):
         # Do setup
         self._setup()
@@ -128,14 +127,14 @@ class MolDyn(PythonAlgorithm):
 
         # Run MolDyn import
         if ext == '.cdl':
-            self._mol_dyn_import(data, name)
+            self._cdl_import(data, name)
         elif ext == '.dat':
-            self._mol_dyn_text(data, name)
+            self._ascii_import(data, name)
         else:
             raise RuntimeError('Unrecognised file format: %s' % ext)
 
         # Do convolution
-        if self._convolve:
+        if self._res_ws is not '':
             self._convolve_with_res()
 
         # Save result workspace group
@@ -159,7 +158,7 @@ class MolDyn(PythonAlgorithm):
 
         # Plot contour plot
         if self._plot == 'Contour' or self._plot == 'Both':
-            mtd_plot.plot2D(self._out_ws)
+            MTD_PLOT.plot2D(self._out_ws)
 
 
     def _setup(self):
@@ -176,33 +175,11 @@ class MolDyn(PythonAlgorithm):
         raw_functions = self.getProperty('Functions').value
         self._functions = [x.strip() for x in raw_functions]
 
-        self._convolve = self.getProperty('Convolution').value
         self._crop = self.getProperty('Crop').value
         self._emax = self.getPropertyValue('MaxEnergy')
 
         self._res_ws = self.getPropertyValue('Resolution')
         self._out_ws = self.getPropertyValue('OutputWorkspace')
-
-
-    def _plot_spectra(self, ws_name):
-        """
-        Plots up to the first 10 spectra from a workspace.
-
-        @param ws_name Name of workspace to plot
-        """
-
-        num_hist = mtd[ws_name].getNumberHistograms()
-
-        # Limit number of plotted histograms to 10
-        if num_hist > 10:
-            num_hist = 10
-
-        # Build plot list
-        plot_list = []
-        for i in range(0, num_hist):
-            plot_list.append(i)
-
-        mtd_plot.plotSpectrum(ws_name, plot_list)
 
 
     def _load_file(self):
@@ -236,30 +213,33 @@ class MolDyn(PythonAlgorithm):
             raise RuntimeError('Could not load file: %s' % path)
 
 
-    def _convolve_with_res(self):
+    def _find_dimensions(self, data):
         """
-        TODO
+        Gets the number of Q, time and frequency values in given raw data.
+
+        @param data Raw data to search
         """
 
-        base = os.path.basename(self._sam_path)
-        self._sam_ws = os.path.splitext(base)[0]
-        self._sam_ws += '_' + str(self._functions[0])
+        num_q_values = _find_tab_starts(data, 'NQVALUES', 0)
+        num_time_values = _find_tab_starts(data, 'NTIMES', 0)
+        num_freq_values = _find_tab_starts(data, 'NFREQUENCIES', 0)
 
-        f1 = 'composite=Convolution;'
-        f2 = 'name=TabulatedFunction,Workspace=' + self._res_ws + ',WorkspaceIndex=0;'
-        f3 = 'name=TabulatedFunction,Workspace=' + self._sam_ws + ',WorkspaceIndex=0'
-        function = f1 + f2 + f3
+        q_el = data[num_q_values].split()
+        num_q = int(q_el[2])
+        t_el = data[num_time_values].split()
+        num_t = int(t_el[2])
+        f_el = data[num_freq_values].split()
+        num_f = int(f_el[2])
 
-        Fit(Function=function, InputWorkspace=self._sam_ws, MaxIterations=0, CreateOutput=True,
-            ConvolveMembers=True)
+        if self._verbose:
+            logger.notice(data[2][1:-1])
+            logger.notice(data[3][1:-1])
+            logger.notice(data[6][1:-1])
 
-        conv_ws = self._sam_ws + '_conv'
-        Symmetrise(Sample=self._sam_ws, XMin=0, XMax=self._emax,
-                   Verbose=self._verbose, Plot=False, Save=False,
-                   OutputWorkspace=conv_ws)
+        return num_q, num_t, num_f
 
 
-    def _mol_dyn_import(self, data, name):
+    def _cdl_import(self, data, name):
         """
         Import data from CDL file.
 
@@ -270,7 +250,7 @@ class MolDyn(PythonAlgorithm):
         len_data = len(data)
 
         # raw head
-        nQ, nT, nF = _find_dimensions(data, self._verbose)
+        nQ, nT, nF = self._find_dimensions(data)
         ldata = _find_starts(data, 'data:', 0)
         lq1 = _find_starts(data, ' q =', ldata)  # start Q values
         lq2 = _find_starts(data, ' q =', lq1 - 1)
@@ -384,7 +364,7 @@ class MolDyn(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=output_ws_list, OutputWorkspace=self._out_ws)
 
 
-    def _mol_dyn_text(self, data, name):
+    def _ascii_import(self, data, name):
         """
         Import ASCII data.
 
@@ -456,6 +436,50 @@ class MolDyn(PythonAlgorithm):
             theta.append(ang)
 
         ChangeAngles(self._out_ws, instr, theta, self._verbose)
+
+
+    def _convolve_with_res(self):
+        """
+        Performs collvolution with an instrument resolution workspace.
+        """
+
+        base = os.path.basename(self._sam_path)
+        self._sam_ws = os.path.splitext(base)[0]
+        self._sam_ws += '_' + str(self._functions[0])
+
+        f1 = 'composite=Convolution;'
+        f2 = 'name=TabulatedFunction,Workspace=' + self._res_ws + ',WorkspaceIndex=0;'
+        f3 = 'name=TabulatedFunction,Workspace=' + self._sam_ws + ',WorkspaceIndex=0'
+        function = f1 + f2 + f3
+
+        Fit(Function=function, InputWorkspace=self._sam_ws, MaxIterations=0, CreateOutput=True,
+            ConvolveMembers=True)
+
+        conv_ws = self._sam_ws + '_conv'
+        Symmetrise(Sample=self._sam_ws, XMin=0, XMax=self._emax,
+                   Verbose=self._verbose, Plot=False, Save=False,
+                   OutputWorkspace=conv_ws)
+
+
+    def _plot_spectra(self, ws_name):
+        """
+        Plots up to the first 10 spectra from a workspace.
+
+        @param ws_name Name of workspace to plot
+        """
+
+        num_hist = mtd[ws_name].getNumberHistograms()
+
+        # Limit number of plotted histograms to 10
+        if num_hist > 10:
+            num_hist = 10
+
+        # Build plot list
+        plot_list = []
+        for i in range(0, num_hist):
+            plot_list.append(i)
+
+        MTD_PLOT.plotSpectrum(ws_name, plot_list)
 
 
 # Register algorithm with Mantid
