@@ -1,5 +1,5 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLLOADEDMAINVIEWPRESENTERTEST_H_
-#define MANTID_CUSTOMINTERFACES_REFLLOADEDMAINVIEWPRESENTERTEST_H_
+#ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H
+#define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -11,7 +11,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidQtCustomInterfaces/ReflLoadedMainViewPresenter.h"
+#include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
 
 #include "ReflMainViewMockObjects.h"
 
@@ -22,12 +22,12 @@ using namespace testing;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class ReflLoadedMainViewPresenterTest : public CxxTest::TestSuite
+class ReflMainViewPresenterTest : public CxxTest::TestSuite
 {
 
 private:
 
-  ITableWorkspace_sptr createWorkspace(const std::string& wsName = "")
+  ITableWorkspace_sptr createWorkspace(const std::string& wsName)
   {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
@@ -37,8 +37,9 @@ private:
     auto colQmin = ws->addColumn("str","Qmin");
     auto colQmax = ws->addColumn("str","Qmax");
     auto colDqq = ws->addColumn("str","dq/q");
-    auto colScale = ws->addColumn("str","Scale");
+    auto colScale = ws->addColumn("double","Scale");
     auto colStitch = ws->addColumn("int","StitchGroup");
+    auto colOptions = ws->addColumn("str","Options");
 
     colRuns->setPlotType(0);
     colTheta->setPlotType(0);
@@ -48,6 +49,7 @@ private:
     colDqq->setPlotType(0);
     colScale->setPlotType(0);
     colStitch->setPlotType(0);
+    colOptions->setPlotType(0);
 
     if(wsName.length() > 0)
       AnalysisDataService::Instance().addOrReplace(wsName, ws);
@@ -55,40 +57,18 @@ private:
     return ws;
   }
 
-  ITableWorkspace_sptr createPrefilledWorkspace(const std::string& wsName = "")
+  ITableWorkspace_sptr createPrefilledWorkspace(const std::string& wsName)
   {
     auto ws = createWorkspace(wsName);
 
     TableRow row = ws->appendRow();
-    row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 3;
+    row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << 1.0 << 3 << "";
     row = ws->appendRow();
-    row << "13462" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 3;
+    row << "13462" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << 1.0 << 3 << "";
     row = ws->appendRow();
-    row << "13469" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 1;
+    row << "13469" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << 1.0 << 1 << "";
     row = ws->appendRow();
-    row << "13470" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 1;
-    return ws;
-  }
-
-  ITableWorkspace_sptr createBadTypedWorkspace()
-  {
-    ITableWorkspace_sptr ws = createWorkspace();
-
-    TableRow row = ws->appendRow();
-    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << "2" << "1";
-
-    return ws;
-  }
-
-  ITableWorkspace_sptr createBadLengthWorkspace(bool longer)
-  {
-    ITableWorkspace_sptr ws = createWorkspace();
-
-    if(longer)
-      ws->addColumn("str","extracolumn");
-    else
-      ws->removeColumn("StitchGroup");
-
+    row << "13470" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << 1.0 << 1 << "";
     return ws;
   }
 
@@ -105,10 +85,10 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ReflLoadedMainViewPresenterTest *createSuite() { return new ReflLoadedMainViewPresenterTest(); }
-  static void destroySuite( ReflLoadedMainViewPresenterTest *suite ) { delete suite; }
+  static ReflMainViewPresenterTest *createSuite() { return new ReflMainViewPresenterTest(); }
+  static void destroySuite( ReflMainViewPresenterTest *suite ) { delete suite; }
   
-  ReflLoadedMainViewPresenterTest()
+  ReflMainViewPresenterTest()
   {
     FrameworkManager::Instance();
   }
@@ -116,7 +96,13 @@ public:
   void testSave()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
     presenter.notify(SaveFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -125,10 +111,15 @@ public:
   void testSaveAs()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //The user hits "save as" but cancels when choosing a name
     EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillOnce(Return(""));
@@ -152,10 +143,15 @@ public:
   void testSaveProcess()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //The user hits "save as" but cancels when choosing a name
     EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillOnce(Return(""));
@@ -183,10 +179,15 @@ public:
   void testAddRow()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //Check the initial state of the table
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
@@ -216,7 +217,7 @@ public:
     TS_ASSERT_EQUALS(ws->String(5, RunCol), "");
     TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 3);
     TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 2);
     TS_ASSERT_THROWS(ws->Int(6, GroupCol), std::runtime_error);
 
     //Tidy up
@@ -226,12 +227,18 @@ public:
   void testAddRowSpecify()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
     std::vector<size_t> rowlist;
     rowlist.push_back(1);
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //Check the initial state of the table
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
@@ -258,12 +265,12 @@ public:
     //Check that the table has been modified correctly
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 6);
-    TS_ASSERT_EQUALS(ws->String(1, RunCol), "");
     TS_ASSERT_EQUALS(ws->String(2, RunCol), "");
+    TS_ASSERT_EQUALS(ws->String(3, RunCol), "");
     TS_ASSERT_EQUALS(ws->String(4, RunCol), "13469");
     TS_ASSERT_EQUALS(ws->String(5, RunCol), "13470");
-    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 2);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 0);
     TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 1);
     TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 1);
     TS_ASSERT_THROWS(ws->Int(6, GroupCol), std::runtime_error);
@@ -275,14 +282,20 @@ public:
   void testAddRowSpecifyPlural()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
     std::vector<size_t> rowlist;
     rowlist.push_back(1);
     rowlist.push_back(2);
     rowlist.push_back(3);
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //Check the initial state of the table
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
@@ -308,20 +321,16 @@ public:
 
     //Check that the table was modified correctly
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
-    TS_ASSERT_EQUALS(ws->rowCount(), 7);
-    TS_ASSERT_EQUALS(ws->String(1, RunCol), "");
-    TS_ASSERT_EQUALS(ws->String(2, RunCol), "");
-    TS_ASSERT_EQUALS(ws->String(3, RunCol), "");
-    TS_ASSERT_EQUALS(ws->String(4, RunCol), "13462");
-    TS_ASSERT_EQUALS(ws->String(5, RunCol), "13469");
-    TS_ASSERT_EQUALS(ws->String(6, RunCol), "13470");
-    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 3);
-    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 1);
-    TS_ASSERT_EQUALS(ws->Int(6, GroupCol), 1);
-    TS_ASSERT_THROWS(ws->Int(7, GroupCol), std::runtime_error);
+    TS_ASSERT_EQUALS(ws->rowCount(), 5);
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "13462");
+    TS_ASSERT_EQUALS(ws->String(2, RunCol), "13469");
+    TS_ASSERT_EQUALS(ws->String(3, RunCol), "13470");
+    TS_ASSERT_EQUALS(ws->String(4, RunCol), "");
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 0);
+    TS_ASSERT_THROWS(ws->Int(5, GroupCol), std::runtime_error);
 
     //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -330,10 +339,15 @@ public:
   void testDeleteRowNone()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //Check the initial state of the table
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
@@ -364,12 +378,18 @@ public:
   void testDeleteRowSingle()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
     std::vector<size_t> rowlist;
     rowlist.push_back(1);
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //Check the initial state of the table
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
@@ -400,14 +420,20 @@ public:
   void testDeleteRowPlural()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
     std::vector<size_t> rowlist;
     rowlist.push_back(0);
     rowlist.push_back(1);
     rowlist.push_back(2);
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //Check the initial state of the table
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
@@ -441,13 +467,19 @@ public:
   void testProcess()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
     std::vector<size_t> rowlist;
     rowlist.push_back(0);
     rowlist.push_back(1);
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //The user hits the "process" button with the first two rows selected
     EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
@@ -489,9 +521,9 @@ public:
   {
     auto ws = createWorkspace("TestWorkspace");
     TableRow row = ws->appendRow();
-    row << "dataA" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 1;
+    row << "dataA" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << 1.0 << 1;
     row = ws->appendRow();
-    row << "dataB" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 1;
+    row << "dataB" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << 1.0 << 1;
 
     loadWorkspace("INTER13460", "dataA");
     loadWorkspace("INTER13462", "dataB");
@@ -504,13 +536,17 @@ public:
     algDelLog->execute();
 
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(ws,&mockView);
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    ReflMainViewPresenter presenter(&mockView);
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
     std::vector<size_t> rowlist;
     rowlist.push_back(0);
     rowlist.push_back(1);
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //The user hits the "process" button with the first two rows selected
     EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
@@ -549,18 +585,22 @@ public:
     auto ws = createWorkspace("TestWorkspace");
     //Autofill everything we can
     TableRow row = ws->appendRow();
-    row << "13460" << "" << "13463,13464" << "" << "" << "" << "1" << 1;
+    row << "13460" << "" << "13463,13464" << "" << "" << "" << 1.0 << 1;
     row = ws->appendRow();
-    row << "13462" << "" << "13463,13464" << "" << "" << "" << "1" << 1;
+    row << "13462" << "" << "13463,13464" << "" << "" << "" << 1.0 << 1;
 
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(ws,&mockView);
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    ReflMainViewPresenter presenter(&mockView);
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
     std::vector<size_t> rowlist;
     rowlist.push_back(0);
     rowlist.push_back(1);
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //The user hits the "process" button with the first two rows selected
     EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
@@ -597,31 +637,69 @@ public:
     AnalysisDataService::Instance().remove("IvsLam_13460");
   }
 
-  void testBadWorkspaceName()
-  {
-    MockView mockView;
-    TS_ASSERT_THROWS(ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace(),&mockView), std::runtime_error&);
-  }
-
   void testBadWorkspaceType()
   {
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+
+    //Wrong types
+    ws->addColumn("str","Run(s)");
+    ws->addColumn("str","ThetaIn");
+    ws->addColumn("str","TransRun(s)");
+    ws->addColumn("str","Qmin");
+    ws->addColumn("str","Qmax");
+    ws->addColumn("str","dq/q");
+    ws->addColumn("str","Scale");
+    ws->addColumn("str","StitchGroup");
+    ws->addColumn("str","Options");
+
+    AnalysisDataService::Instance().addOrReplace("TestWorkspace", ws);
+
     MockView mockView;
-    TS_ASSERT_THROWS(ReflLoadedMainViewPresenter presenter(createBadTypedWorkspace(),&mockView), std::runtime_error&);
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    ReflMainViewPresenter presenter(&mockView);
+
+    //We should receive an error
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(1);
+
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    AnalysisDataService::Instance().remove("TestWorkspace");
   }
 
-  void testBadWorkspaceShort()
+  void testBadWorkspaceLength()
   {
     MockView mockView;
-    TS_ASSERT_THROWS(ReflLoadedMainViewPresenter presenter(createBadLengthWorkspace(false),&mockView), std::runtime_error&);
-  }
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    ReflMainViewPresenter presenter(&mockView);
 
-  void testBadWorkspaceLong()
-  {
-    MockView mockView;
-    TS_ASSERT_THROWS(ReflLoadedMainViewPresenter presenter(createBadLengthWorkspace(true),&mockView), std::runtime_error&);
-  }
+    //Because we to open twice, get an error twice
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(2);
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(2).WillRepeatedly(Return("TestWorkspace"));
 
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+    ws->addColumn("str","Run(s)");
+    ws->addColumn("str","ThetaIn");
+    ws->addColumn("str","TransRun(s)");
+    ws->addColumn("str","Qmin");
+    ws->addColumn("str","Qmax");
+    ws->addColumn("str","dq/q");
+    ws->addColumn("double","Scale");
+    ws->addColumn("int","StitchGroup");
+    AnalysisDataService::Instance().addOrReplace("TestWorkspace", ws);
+
+    //Try to open with too few columns
+    presenter.notify(OpenTableFlag);
+
+    ws->addColumn("str","OptionsA");
+    ws->addColumn("str","OptionsB");
+    AnalysisDataService::Instance().addOrReplace("TestWorkspace", ws);
+
+    //Try to open with too many columns
+    presenter.notify(OpenTableFlag);
+
+    AnalysisDataService::Instance().remove("TestWorkspace");
+  }
 };
 
-
-#endif /* MANTID_CUSTOMINTERFACES_REFLLOADEDMAINVIEWPRESENTERTEST_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H */

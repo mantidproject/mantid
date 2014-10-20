@@ -7,15 +7,15 @@ class SymmetryOperationTest(unittest.TestCase):
     def test_creation(self):
         self.assertRaises(RuntimeError, SymmetryOperationFactoryImpl.Instance().createSymOp, "none")
 
-        SymmetryOperationFactoryImpl.Instance().createSymOp("m [001]")
+        SymmetryOperationFactoryImpl.Instance().createSymOp("x,y,-z")
 
     def test_getInfo(self):
-        symOp = SymmetryOperationFactoryImpl.Instance().createSymOp("m [001]")
+        symOp = SymmetryOperationFactoryImpl.Instance().createSymOp("x, y, -z")
         self.assertEquals(symOp.order(), 2)
-        self.assertEquals(symOp.identifier(), "m [001]")
+        self.assertEquals(symOp.identifier(), "x,y,-z")
 
     def test_apply(self):
-        symOp = SymmetryOperationFactoryImpl.Instance().createSymOp("m [001]")
+        symOp = SymmetryOperationFactoryImpl.Instance().createSymOp("x,y,-z")
 
         hkl1 = V3D(1, 1, 1)
         hkl2 = symOp.apply(hkl1)

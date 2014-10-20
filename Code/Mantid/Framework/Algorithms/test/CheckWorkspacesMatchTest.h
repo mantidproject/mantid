@@ -688,7 +688,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws3) );
     
     TS_ASSERT( checker.execute() );
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Log name mismatch" );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Log mismatch" );
     
     Mantid::API::MatrixWorkspace_sptr ws4 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     ws4->mutableRun().addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop1",100));
@@ -697,7 +697,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws4) );
     
     TS_ASSERT( checker.execute() );
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Log value mismatch" );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Log mismatch" );
   }
 
   void test_Input_With_Two_Groups_That_Are_The_Same_Matches()
