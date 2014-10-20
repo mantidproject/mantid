@@ -41,9 +41,14 @@ namespace MantidQt
       virtual ~ReflMainViewPresenter();
       virtual void notify(int flag);
     protected:
+      //the model the table is currently representing
       Mantid::API::ITableWorkspace_sptr m_model;
+      //the name of the workspace/table/model in the ADS, blank if unsaved
       std::string m_wsName;
+      //the view we're managing
       ReflMainView* m_view;
+      //stores whether or not the table has changed since it was last saved
+      bool m_tableDirty;
 
       //process selected rows
       virtual void process();

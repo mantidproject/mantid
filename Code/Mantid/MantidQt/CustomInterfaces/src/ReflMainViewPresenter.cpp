@@ -70,7 +70,7 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view): m_view(view)
+    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view): m_view(view), m_tableDirty(false)
     {
       //Set up the instrument selectors
       std::vector<std::string> instruments;
@@ -263,6 +263,7 @@ namespace MantidQt
 
         //Update the model
         m_model->String(rowNo, COL_ANGLE) = Strings::toString<double>(Utils::roundToDP(thetaVal, 3));
+        m_tableDirty = true;
       }
 
       //If we need to calculate the resolution, do.
@@ -276,6 +277,7 @@ namespace MantidQt
         //Update the model
         double dqqVal = calcResAlg->getProperty("Resolution");
         m_model->String(rowNo, COL_DQQ) = Strings::toString<double>(dqqVal);
+        m_tableDirty = true;
       }
 
       //Make sure the view updates
@@ -452,6 +454,7 @@ namespace MantidQt
         if(m_model->String(rowNo, COL_QMAX).empty())
           m_model->String(rowNo, COL_QMAX) = Strings::toString<double>(qrange[1]);
 
+        m_tableDirty = true;
         m_view->showTable(m_model);
       }
     }
@@ -641,6 +644,7 @@ namespace MantidQt
         insertRow(m_model->rowCount());
       else
         insertRow(*rows.rbegin() + 1);
+      m_tableDirty = true;
     }
 
     /**
@@ -654,6 +658,7 @@ namespace MantidQt
         m_model->removeRow(rows.at(0));
 
       m_view->showTable(m_model);
+      m_tableDirty = true;
     }
 
     /**
@@ -671,6 +676,7 @@ namespace MantidQt
 
       //Make sure the view updates
       m_view->showTable(m_model);
+      m_tableDirty = true;
     }
 
     /**
@@ -688,6 +694,7 @@ namespace MantidQt
       case ReflMainView::GroupRowsFlag: groupRows();   break;
       case ReflMainView::OpenTableFlag: openTable();   break;
       case ReflMainView::NewTableFlag:  newTable();    break;
+      case ReflMainView::TableUpdatedFlag:  m_tableDirty = true; break;
 
       case ReflMainView::NoFlags:       return;
       }
@@ -700,9 +707,14 @@ namespace MantidQt
     void ReflMainViewPresenter::saveTable()
     {
       if(!m_wsName.empty())
+      {
         AnalysisDataService::Instance().addOrReplace(m_wsName,boost::shared_ptr<ITableWorkspace>(m_model->clone()));
+        m_tableDirty = false;
+      }
       else
+      {
         saveTableAs();
+      }
     }
 
     /**
@@ -723,12 +735,18 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::newTable()
     {
+      if(m_tableDirty)
+        if(!m_view->askUserYesNo("Your current table has unsaved changes. Are you sure you want to discard them?","Start New Table?"))
+          return;
+
       m_model = createWorkspace();
       m_wsName.clear();
       m_view->showTable(m_model);
 
       //Start with one blank row
       insertRow(0);
+
+      m_tableDirty = false;
     }
 
     /**
@@ -736,6 +754,10 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::openTable()
     {
+      if(m_tableDirty)
+        if(!m_view->askUserYesNo("Your current table has unsaved changes. Are you sure you want to discard them?","Open Table?"))
+          return;
+
       auto& ads = AnalysisDataService::Instance();
       const std::string toOpen = m_view->getWorkspaceToOpen();
 
@@ -762,6 +784,7 @@ namespace MantidQt
       m_model = newModel;
       m_wsName = toOpen;
       m_view->showTable(m_model);
+      m_tableDirty = false;
     }
   }
 }

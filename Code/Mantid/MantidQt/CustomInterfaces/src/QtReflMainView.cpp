@@ -76,7 +76,10 @@ namespace MantidQt
     */
     void QtReflMainView::showTable(ITableWorkspace_sptr model)
     {
-      ui.viewTable->setModel(new QReflTableModel(model));
+      QAbstractItemModel* qModel = new QReflTableModel(model);
+      //So we can notify the presenter when the user updates the table
+      connect(qModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(tableUpdated(const QModelIndex&, const QModelIndex&)));
+      ui.viewTable->setModel(qModel);
       ui.viewTable->resizeColumnsToContents();
     }
 
@@ -134,6 +137,16 @@ namespace MantidQt
     void QtReflMainView::actionNewTable()
     {
       m_presenter->notify(NewTableFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the table has been updated/changed by the user
+    */
+    void QtReflMainView::tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+    {
+      Q_UNUSED(topLeft);
+      Q_UNUSED(bottomRight);
+      m_presenter->notify(TableUpdatedFlag);
     }
 
     /**

@@ -71,6 +71,7 @@ namespace MantidQt
       static const int GroupRowsFlag = 6;
       static const int OpenTableFlag = 7;
       static const int NewTableFlag  = 8;
+      static const int TableUpdatedFlag = 9;
     };
   }
 }
