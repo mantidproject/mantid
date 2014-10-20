@@ -65,6 +65,8 @@ namespace MantidQt
       void processRow(size_t rowNo);
       //Stitch some rows
       void stitchRows(std::vector<size_t> rows);
+      //insert a row in the model before the given index
+      virtual void insertRow(size_t before);
       //add row(s) to the model
       virtual void addRow();
       //delete row(s) from the model

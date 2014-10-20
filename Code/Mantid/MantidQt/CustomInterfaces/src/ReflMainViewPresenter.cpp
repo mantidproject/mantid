@@ -615,36 +615,32 @@ namespace MantidQt
     }
 
     /**
+    Inserts a new row in the specified location
+    @param before The index to insert the new row before
+    */
+    void ReflMainViewPresenter::insertRow(size_t before)
+    {
+      const int groupId = getUnusedGroup();
+      size_t row = m_model->insertRow(before);
+      //Set the default scale to 1.0
+      m_model->Double(row, COL_SCALE) = 1.0;
+      //Set the group id of the new row
+      m_model->Int(row, COL_GROUP) = groupId;
+      //Make sure the view updates
+      m_view->showTable(m_model);
+    }
+
+    /**
     Add row(s) to the model
     */
     void ReflMainViewPresenter::addRow()
     {
       std::vector<size_t> rows = m_view->getSelectedRowIndexes();
       std::sort(rows.begin(), rows.end());
-
-      const int groupId = getUnusedGroup();
-      size_t row = 0;
-
       if(rows.size() == 0)
-      {
-        //No rows selected, just append a new row
-        row = m_model->rowCount();
-        m_model->appendRow();
-      }
+        insertRow(m_model->rowCount());
       else
-      {
-        //One or more rows selected, insert after the last row
-        row = m_model->insertRow(*rows.rbegin() + 1);
-      }
-
-      //Set the default scale to 1.0
-      m_model->Double(row, COL_SCALE) = 1.0;
-
-      //Set the group id of the new row
-      m_model->Int(row, COL_GROUP) = groupId;
-
-      //Make sure the view updates
-      m_view->showTable(m_model);
+        insertRow(*rows.rbegin() + 1);
     }
 
     /**
@@ -732,7 +728,7 @@ namespace MantidQt
       m_view->showTable(m_model);
 
       //Start with one blank row
-      addRow();
+      insertRow(0);
     }
 
     /**
