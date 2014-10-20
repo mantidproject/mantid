@@ -1516,13 +1516,15 @@ namespace Mantid
       double yBinSize(1.0); // only applies for volume normalization & numeric axis
       if (normalization == VolumeNormalization && ax1->isNumeric())
       {
-        if (wi + 1 == nhist && nhist > 1)
+        size_t uVI; // unused vertical index.
+        double currentVertical = ax1->operator ()(wi, uVI);
+        if (wi + 1 == nhist && nhist > 1) // On the boundary, look back to get diff
         {
-          yBinSize =  yVals[wi] - yVals[wi-1];
+          yBinSize =  currentVertical - ax1->operator ()(wi - 1, uVI);
         }
         else
         {
-          yBinSize = yVals[wi+1] - yVals[wi];
+          yBinSize = ax1->operator ()(wi + 1, uVI) - currentVertical;
         }
       }
 
