@@ -142,7 +142,7 @@ class MolDyn(PythonAlgorithm):
             workdir = config['defaultsave.directory']
             out_filename = os.path.join(workdir, self._out_ws + '.nxs')
             if self._verbose:
-                logger.notice('Creating file: %s' % out_filename)
+                logger.information('Creating file: %s' % out_filename)
                 SaveNexus(InputWorkspace=self._out_ws, Filename=out_filename)
 
         # Set the output workspace
@@ -232,9 +232,9 @@ class MolDyn(PythonAlgorithm):
         num_f = int(f_el[2])
 
         if self._verbose:
-            logger.notice(data[2][1:-1])
-            logger.notice(data[3][1:-1])
-            logger.notice(data[6][1:-1])
+            logger.debug(data[2][1:-1])
+            logger.debug(data[3][1:-1])
+            logger.debug(data[6][1:-1])
 
         return num_q, num_t, num_f
 
@@ -264,7 +264,7 @@ class MolDyn(PythonAlgorithm):
 
         Q.append(float(Qlist[nQ - 1][:-1]) / 10.0)
         if self._verbose:
-            logger.notice('Q values = ' + str(Q))
+            logger.information('Q values = ' + str(Q))
 
         lt1 = _find_starts(data, ' time =', lq2)  # start T values
         lt2 = _find_ends(data, ';', lt1)
@@ -280,7 +280,7 @@ class MolDyn(PythonAlgorithm):
         T.append(float(Tlist[nT - 1][:-1]))
         T.append(2 * T[nT - 1] - T[nT - 2])
         if self._verbose:
-            logger.notice('T values = ' + str(T[:2]) + ' to ' + str(T[-3:]))
+            logger.information('T values = ' + str(T[:2]) + ' to ' + str(T[-3:]))
 
         lf1 = _find_starts(data, ' frequency =', lq2)  # start F values
         lf2 = _find_ends(data, ';', lf1)
@@ -296,7 +296,7 @@ class MolDyn(PythonAlgorithm):
         F.append(float(Flist[nF - 1][:-1]))
         F.append(2 * F[nF - 1] - T[nF - 2])
         if self._verbose:
-            logger.notice('F values = ' + str(F[:2]) + ' to ' + str(F[-3:]))
+            logger.information('F values = ' + str(F[:2]) + ' to ' + str(F[-3:]))
 
         # Function
         output_ws_list = list()
@@ -333,7 +333,7 @@ class MolDyn(PythonAlgorithm):
             for n in range(0, nQ):
                 if self._verbose:
                     logger.information(str(start))
-                    logger.notice('Reading : ' + data[start[n]])
+                    logger.information('Reading : ' + data[start[n]])
 
                 Slist = _make_list(data, start[n] + 1, start[n + 1] - 1)
                 if n == nQ - 1:
@@ -345,7 +345,7 @@ class MolDyn(PythonAlgorithm):
                     raise RuntimeError('Error reading S values')
                 else:
                     if self._verbose:
-                        logger.notice('S values = ' + str(S[:2]) + ' to ' + str(S[-2:]))
+                        logger.information('S values = ' + str(S[:2]) + ' to ' + str(S[-2:]))
                 if n == 0:
                     Qaxis += str(Q[n])
                     xDat = xEn
@@ -388,15 +388,15 @@ class MolDyn(PythonAlgorithm):
 
         nX = len(x)
         if self._verbose:
-            logger.notice('nQ = ' + str(nQ))
-            logger.notice('nT = ' + str(nX))
+            logger.information('nQ = ' + str(nQ))
+            logger.information('nT = ' + str(nX))
 
         xT = np.array(x)
         eZero = np.zeros(nX)
         Qaxis = ''
         for m in range(0, nQ):
             if self._verbose:
-                logger.notice('Q[' + str(m + 1) + '] : ' + str(Q[m]))
+                logger.information('Q[' + str(m + 1) + '] : ' + str(Q[m]))
 
             S = []
             for n in range(0, nX):
@@ -426,7 +426,7 @@ class MolDyn(PythonAlgorithm):
         InstrParas(self._out_ws, instr, ana, refl)
         efixed = RunParas(self._out_ws, instr, name, name, self._verbose)
         if self._verbose:
-            logger.notice('Qmax = ' + str(Qmax) + ' ; efixed = ' + str(efixed))
+            logger.information('Qmax = ' + str(Qmax) + ' ; efixed = ' + str(efixed))
         pi4 = 4.0 * math.pi
         wave = 1.8 * math.sqrt(25.2429 / efixed)
         theta = []
@@ -443,20 +443,20 @@ class MolDyn(PythonAlgorithm):
         Performs collvolution with an instrument resolution workspace.
         """
 
-        base = os.path.basename(self._sam_path)
-        self._sam_ws = os.path.splitext(base)[0]
-        self._sam_ws += '_' + str(self._functions[0])
+        # TODO
+
+        function_ws_name = mtd[self._out_ws].getItem(0).getName()
 
         f1 = 'composite=Convolution;'
         f2 = 'name=TabulatedFunction,Workspace=' + self._res_ws + ',WorkspaceIndex=0;'
-        f3 = 'name=TabulatedFunction,Workspace=' + self._sam_ws + ',WorkspaceIndex=0'
+        f3 = 'name=TabulatedFunction,Workspace=' + function_ws_name + ',WorkspaceIndex=0'
         function = f1 + f2 + f3
 
-        Fit(Function=function, InputWorkspace=self._sam_ws, MaxIterations=0, CreateOutput=True,
+        Fit(Function=function, InputWorkspace=function_ws_name, MaxIterations=0, CreateOutput=True,
             ConvolveMembers=True)
 
-        conv_ws = self._sam_ws + '_conv'
-        Symmetrise(Sample=self._sam_ws, XMin=0, XMax=self._emax,
+        conv_ws = self._out_ws + '_conv'
+        Symmetrise(Sample=function_ws_name, XMin=0, XMax=self._emax,
                    Verbose=self._verbose, Plot=False, Save=False,
                    OutputWorkspace=conv_ws)
 
