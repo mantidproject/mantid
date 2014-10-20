@@ -36,6 +36,10 @@ namespace MantidQt
       ui.setupUi(this);
       ui.workspaceSelector->refresh();
 
+      ui.buttonAddRow->setDefaultAction(ui.actionAddRow);
+      ui.buttonDeleteRow->setDefaultAction(ui.actionDeleteRow);
+      ui.buttonGroupRows->setDefaultAction(ui.actionGroupRows);
+
       //Expand the process runs column at the expense of the search column
       ui.splitterTables->setStretchFactor(0, 0);
       ui.splitterTables->setStretchFactor(1, 1);
