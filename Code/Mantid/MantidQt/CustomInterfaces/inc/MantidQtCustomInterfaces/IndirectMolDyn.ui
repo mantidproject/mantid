@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>444</width>
-    <height>329</height>
+    <width>445</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,6 +35,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Simulation filename.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="label" stdset="0">
          <string/>
         </property>
@@ -60,7 +63,11 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="leFunctionNames"/>
+       <widget class="QLineEdit" name="leFunctionNames">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Comma separated list of functions to load from the input file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -129,6 +136,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Instrument resolution file or workspace.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="autoLoad" stdset="0">
          <bool>true</bool>
         </property>
@@ -154,6 +164,9 @@
       </item>
       <item row="0" column="0" colspan="2">
        <widget class="QCheckBox" name="ckResolution">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Convolve suitable workspaces with an instrument resolution.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="text">
          <string>Use Instrument Resolution</string>
         </property>
@@ -281,6 +294,16 @@
    <header>MantidQtMantidWidgets/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>mwRun</tabstop>
+  <tabstop>leFunctionNames</tabstop>
+  <tabstop>leMaxEnergy</tabstop>
+  <tabstop>ckResolution</tabstop>
+  <tabstop>dsResolution</tabstop>
+  <tabstop>ckVerbose</tabstop>
+  <tabstop>cbPlot</tabstop>
+  <tabstop>ckSave</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
