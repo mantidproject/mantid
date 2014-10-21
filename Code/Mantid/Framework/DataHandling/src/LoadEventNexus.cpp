@@ -1114,15 +1114,14 @@ namespace Mantid
       setPropertyGroup("FilterMonByTimeStart", grp4);
       setPropertyGroup("FilterMonByTimeStop", grp4);
 
-		declareProperty("SpectrumMin",(int32_t)EMPTY_INT(), mustBePositive, 
+			declareProperty("SpectrumMin",(int32_t)EMPTY_INT(), mustBePositive, 
 			"The number of the first spectrum to read.");
 		declareProperty("SpectrumMax",(int32_t)EMPTY_INT(), mustBePositive, 
 			"The number of the last spectrum to read.");
 		declareProperty(new ArrayProperty<int32_t>("SpectrumList"),	
 			"A comma-separated list of individual spectra to read.");
 
-
-      declareProperty(
+		declareProperty(
         new PropertyWithValue<bool>("MetaDataOnly", false, Direction::Input),
         "If true, only the meta data and sample logs will be loaded.");
 
@@ -2352,43 +2351,43 @@ namespace Mantid
       }
       else
       {
-        g_log.debug() << "Loading only detector spectra from " << filename << "\n";
+				g_log.debug() << "Loading only detector spectra from " << filename << "\n";
 
-		// If optional spectra are provided, if so, m_specList is initialized. spec is used if necessary
-		createSpectraList(*std::min_element(spec.begin(),spec.end()), *std::max_element(spec.begin(),spec.end()));
+				// If optional spectra are provided, if so, m_specList is initialized. spec is used if necessary
+				createSpectraList(*std::min_element(spec.begin(),spec.end()), *std::max_element(spec.begin(),spec.end()));
 
-		if ( !m_specList.empty() ) {
-			int i=0;
-			std::vector<int32_t> spec_temp, udet_temp;
-			for(auto it=spec.begin(); it!=spec.end(); it++)
-			{
-				if ( find(m_specList.begin(),m_specList.end(),*it)!= m_specList.end() ) // spec element *it is not in spec_list
-				{
-					spec_temp.push_back( *it );
-					udet_temp.push_back( udet.at(i) );
+				if ( !m_specList.empty() ) {
+					int i=0;
+					std::vector<int32_t> spec_temp, udet_temp;
+					for(auto it=spec.begin(); it!=spec.end(); it++)
+					{
+						if ( find(m_specList.begin(),m_specList.end(),*it)!= m_specList.end() ) // spec element *it is not in spec_list
+						{
+							spec_temp.push_back( *it );
+							udet_temp.push_back( udet.at(i) );
+						}
+						i++;
+					}
+					spec=spec_temp;
+					udet=udet_temp;
 				}
-				i++;
-			}
-			spec=spec_temp;
-			udet=udet_temp;
-		}
 
-        SpectrumDetectorMapping mapping(spec,udet, monitors);
-        WS->resizeTo(mapping.getMapping().size());
-        // Make sure spectrum numbers are correct
-        auto uniqueSpectra = mapping.getSpectrumNumbers();
-        auto itend = uniqueSpectra.end();
-        size_t counter = 0;
-        for(auto it = uniqueSpectra.begin(); it != itend; ++it)
-        {
-          WS->getSpectrum(counter)->setSpectrumNo(*it);
-          ++counter;
-        }
-        // Fill detectors based on this mapping
-        WS->updateSpectraUsing(mapping);
-      }
-      return true;
-    }
+				SpectrumDetectorMapping mapping(spec,udet, monitors);
+				WS->resizeTo(mapping.getMapping().size());
+				// Make sure spectrum numbers are correct
+				auto uniqueSpectra = mapping.getSpectrumNumbers();
+				auto itend = uniqueSpectra.end();
+				size_t counter = 0;
+				for(auto it = uniqueSpectra.begin(); it != itend; ++it)
+				{
+					WS->getSpectrum(counter)->setSpectrumNo(*it);
+					++counter;
+				}
+				// Fill detectors based on this mapping
+				WS->updateSpectraUsing(mapping);
+			}
+			return true;
+		}
 
     /**
     * Set the filters on TOF.
@@ -2828,6 +2827,20 @@ void LoadEventNexus::createSpectraList(int32_t min, int32_t max){
 
 	}
 
+	if ( !m_specList.empty() ) {
+
+		 // Check that spectra supplied by user do not correspond to monitors
+		auto nmonitors = WS->getInstrument()->getMonitors().size();
+
+		for( size_t i = 0; i < nmonitors; ++i )
+		{
+			if ( std::find(m_specList.begin(),m_specList.end(),i+1)!= m_specList.end() )
+			{
+				throw std::invalid_argument("Inconsistent range property: some of the selected spectra correspond to monitors.");
+			}
+		}
+
+	}
 
 }
 
