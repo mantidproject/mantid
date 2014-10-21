@@ -33,6 +33,11 @@ namespace Mantid
   {
     class SpectrumDetectorMapping;
 
+    /// typedef for the image type
+    typedef std::vector<std::vector<double>> MantidImage;
+    /// shared pointer to MantidImage
+    typedef boost::shared_ptr<MantidImage> MantidImage_sptr;
+
     //----------------------------------------------------------------------
     /** Base MatrixWorkspace Abstract Class.
 
@@ -311,6 +316,19 @@ namespace Mantid
       // End IMDWorkspace methods
       //=====================================================================================
 
+      //=====================================================================================
+      // Image methods
+      //=====================================================================================
+
+      /// Create an image of Ys.
+      MantidImage_sptr getImageY (size_t start = 0, size_t stop = 0, size_t width = 0, size_t indexStart = 0, size_t indexEnd = 0) const;
+      /// Create an image of Es.
+      MantidImage_sptr getImageE (size_t start = 0, size_t stop = 0, size_t width = 0, size_t indexStart = 0, size_t indexEnd = 0) const;
+
+      //=====================================================================================
+      // End image methods
+      //=====================================================================================
+
     protected:
       MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory* factory = NULL);
 
@@ -328,6 +346,8 @@ namespace Mantid
       MatrixWorkspace(const MatrixWorkspace&);
       /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
       MatrixWorkspace& operator=(const MatrixWorkspace&);
+      /// Create an MantidImage instance.
+      MantidImage_sptr getImage(const MantidVec& (MatrixWorkspace::*read)(std::size_t const) const, size_t start, size_t stop, size_t width, size_t indexStart, size_t indexEnd) const;
 
       /// Has this workspace been initialised?
       bool m_isInitialized;

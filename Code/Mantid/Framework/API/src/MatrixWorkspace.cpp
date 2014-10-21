@@ -1713,6 +1713,138 @@ namespace Mantid
       return Mantid::API::None;
     }
 
+    /**
+     * Creates a 2D image.
+     * @param read :: Pointer to a method returning a MantidVec to provide data for the image.
+     * @param start :: First workspace index for the image.
+     * @param stop :: Last workspace index for the image.
+     * @param width :: Image width. Must divide (stop - start + 1) exactly.
+     * @param indexStart :: First index of the x integration range.
+     * @param indexEnd :: Last index of the x integration range.
+     */
+    MantidImage_sptr MatrixWorkspace::getImage(const MantidVec& (MatrixWorkspace::*read)(std::size_t const) const, size_t start, size_t stop, size_t width, size_t indexStart, size_t indexEnd) const
+    {
+      // width must be provided (for now)
+      if ( width == 0 )
+      {
+        throw std::runtime_error("Cannot create image with width 0");
+      }
+
+      size_t nHist = getNumberHistograms();
+      // use all spectra by default
+      if ( stop == 0 )
+      {
+        stop = nHist;
+      }
+
+      // check start and stop
+      if ( stop < start )
+      {
+        throw std::runtime_error("Cannot create image for an empty data set.");
+      }
+
+      if ( start >= nHist )
+      {
+        throw std::runtime_error("Cannot create image: start index is out of range");
+      }
+
+      if ( stop >= nHist )
+      {
+        throw std::runtime_error("Cannot create image: stop index is out of range");
+      }
+
+      // calculate image geometry
+      size_t dataSize = stop - start + 1;
+      size_t height = dataSize / width;
+
+      // and check that the data fits exactly into this geometry
+      if ( height * width != dataSize )
+      {
+        throw std::runtime_error("Cannot create image: the data set cannot form a rectangle.");
+      }
+
+      size_t nBins = blocksize();
+      bool isHisto = isHistogramData();
+
+      // default indexEnd is the last index of the X vector
+      if ( indexEnd == 0 )
+      {
+        indexEnd = nBins;
+        if ( !isHisto && indexEnd > 0 ) --indexEnd;
+      }
+
+      // check the x-range indices
+      if ( indexEnd < indexStart )
+      {
+        throw std::runtime_error("Cannot create image for an empty data set.");
+      }
+
+      if ( indexStart >= nBins || indexEnd > nBins || (!isHisto && indexEnd == nBins) )
+      {
+        throw std::runtime_error("Cannot create image: integration interval is out of range.");
+      }
+
+      // initialize the image
+      auto image = boost::make_shared<MantidImage>( height );
+      if ( !isHisto ) ++indexEnd;
+
+      // deal separately with single-binned workspaces: no integration is required
+      if ( isHisto && indexEnd == indexStart + 1 )
+      {
+        size_t spec = start;
+        for(auto row = image->begin(); row != image->end(); ++row)
+        {
+          row->resize( width );
+          for(size_t i = 0; i < width; ++i, ++spec)
+          {
+            (*row)[i] = (this->*read)(spec)[indexStart];
+          }
+        }
+      }
+      else
+      {
+        // each image pixel is integrated over the x-range [indexStart,indexEnd)
+        size_t spec = start;
+        for(auto row = image->begin(); row != image->end(); ++row)
+        {
+          row->resize( width );
+          for(size_t i = 0; i < width; ++i, ++spec)
+          {
+            auto &V = (this->*read)(spec);
+            (*row)[i] = std::accumulate( V.begin() + indexStart, V.begin() + indexEnd, 0.0 );
+          }
+        }
+      }
+
+      return image;
+    }
+
+    /**
+     * Creates a 2D image of the y values in this workspace.
+     * @param start :: First workspace index for the image.
+     * @param stop :: Last workspace index for the image.
+     * @param width :: Image width. Must divide (stop - start + 1) exactly.
+     * @param indexStart :: First index of the x integration range.
+     * @param indexEnd :: Last index of the x integration range.
+     */
+    MantidImage_sptr MatrixWorkspace::getImageY(size_t start, size_t stop, size_t width, size_t indexStart, size_t indexEnd) const
+    {
+      return getImage(&MatrixWorkspace::readY,start,stop,width,indexStart,indexEnd);
+    }
+
+    /**
+     * Creates a 2D image of the error values in this workspace.
+     * @param start :: First workspace index for the image.
+     * @param stop :: Last workspace index for the image.
+     * @param width :: Image width. Must divide (stop - start + 1) exactly.
+     * @param indexStart :: First index of the x integration range.
+     * @param indexEnd :: Last index of the x integration range.
+     */
+    MantidImage_sptr MatrixWorkspace::getImageE(size_t start, size_t stop, size_t width, size_t indexStart, size_t indexEnd) const
+    {
+      return getImage(&MatrixWorkspace::readE,start,stop,width,indexStart,indexEnd);
+    }
+
   } // namespace API
 } // Namespace Mantid
 
