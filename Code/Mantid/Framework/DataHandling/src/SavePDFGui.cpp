@@ -1,5 +1,6 @@
 #include "MantidDataHandling/SavePDFGui.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/MantidVersion.h"
 #include <fstream>
 #include <iomanip>
 
@@ -97,12 +98,12 @@ namespace DataHandling
     std::ofstream out;
     out.open(filename.c_str(), std::ios_base::out);
 
-    // --------- write the header
+    // --------- write the header // TODO
 
     // --------- write the label for the data
     out << "##### start data\n";
     //out << "#O0 rg_int sig_rg_int low_int sig_low_int rmax rhofit\n"; // TODO
-    out << "#S 1 - PDF from Mantid\n"; // TODO should add version
+    out << "#S 1 - PDF from Mantid " << Kernel::MantidVersion::version() << "\n";
     //out << "#P0  -22.03808    1.10131 2556.26392    0.03422    1.50  0.5985\n"; // TODO
     out << "#L r G(r) dr dG(r)\n";
 
@@ -111,7 +112,7 @@ namespace DataHandling
     auto dx = inputWS->readDx(0);
     auto y = inputWS->readY(0);
     auto dy = inputWS->readE(0);
-    size_t length = x.size();
+    const size_t length = x.size();
     for (size_t i = 0; i < length; ++i)
     {
       out << "  " << x[i] << "  " << y[i] << "  " << dx[i] << "  " << dy[i] << "\n";
