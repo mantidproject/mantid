@@ -5,20 +5,24 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SampleEnvironment.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/NeutronAtom.h"
+#include "MantidKernel/VectorHelper.h"
 
-// @todo: This needs a factory
-#include "MantidKernel/MersenneTwister.h"
+#include <boost/random/uniform_int.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
 
 /// @cond
 namespace
 {
   /// Number of attempts to choose a random point within the object before it gives up
-  const int MaxRandPointAttempts(20);
+  const int MaxRandPointAttempts(500);
+
+  /// Element size in mm
+  const double ELEMENT_SIZE = 1.0;
 }
 /// @endcond
 
@@ -26,15 +30,10 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    
+
     DECLARE_ALGORITHM(MonteCarloAbsorption)
 
-    using API::WorkspaceProperty;
-    using API::WorkspaceUnitValidator;
-    using API::InstrumentValidator;
-    using API::MatrixWorkspace_sptr;
-    using API::WorkspaceFactory;
-    using API::Progress;
+    using namespace API;
     using namespace Geometry;
     using namespace Kernel;
 
@@ -45,28 +44,26 @@ namespace Mantid
     /**
      * Constructor
      */
-    MonteCarloAbsorption::MonteCarloAbsorption() : 
-      m_inputWS(), m_sampleShape(NULL), m_container(NULL), m_numberOfPoints(0), 
-      m_xStepSize(0), m_numberOfEvents(1), m_samplePos(), m_sourcePos(), 
-      m_bbox_length(0.0), m_bbox_halflength(0.0), m_bbox_width(0.0), 
-      m_bbox_halfwidth(0.0), m_bbox_height(0.0), m_bbox_halfheight(0.0), 
-      m_randGen(NULL)
+    MonteCarloAbsorption::MonteCarloAbsorption() :
+      m_samplePos(), m_sourcePos(), m_blocks(),
+      m_blkHalfX(0.0), m_blkHalfY(0.0), m_blkHalfZ(0.0),
+      m_rngs(0), m_inputWS(), m_sampleShape(NULL), m_container(NULL), m_numberOfPoints(0),
+      m_xStepSize(0), m_numberOfEvents(300)
     {
     }
-    
+
     /**
      * Destructor
      */
     MonteCarloAbsorption::~MonteCarloAbsorption()
     {
-      delete m_randGen;
     }
 
     //------------------------------------------------------------------------------
     // Private methods
     //------------------------------------------------------------------------------
-    
-    /** 
+
+    /**
      * Initialize the algorithm
      */
     void MonteCarloAbsorption::init()
@@ -77,49 +74,50 @@ namespace Mantid
       wsValidator->add<InstrumentValidator>();
 
       declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-          wsValidator),
-          "The name of the input workspace.  The input workspace must have X units of wavelength.");
+                                              wsValidator),
+                      "The name of the input workspace.  The input workspace must have X units of wavelength.");
       declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "", Direction::Output),
-          "The name to use for the output workspace.");
+                      "The name to use for the output workspace.");
       auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int> >();
       positiveInt->setLower(1);
       declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
-          "The number of wavelength points for which a simulation is atttempted (default: all points)");
-      declareProperty("EventsPerPoint", 300, positiveInt,
-          "The number of \"neutron\" events to generate per simulated point");
+                      "The number of wavelength points for which a simulation is atttempted (default: all points)");
+      declareProperty("EventsPerPoint", m_numberOfEvents, positiveInt,
+                      "The number of \"neutron\" events to generate per simulated point");
       declareProperty("SeedValue", 123456789, positiveInt,
-          "Seed the random number generator with this value");
+                      "Seed the random number generator with this value");
 
     }
-    
+
     /**
      * Execution code
      */
     void MonteCarloAbsorption::exec()
     {
       retrieveInput();
-      initCaches();      
-      
+      initCaches();
+
+      g_log.debug() << "Creating output workspace\n";
       MatrixWorkspace_sptr correctionFactors = WorkspaceFactory::Instance().create(m_inputWS);
       correctionFactors->isDistribution(true); // The output of this is a distribution
       correctionFactors->setYUnit(""); // Need to explicitly set YUnit to nothing
       correctionFactors->setYUnitLabel("Attenuation factor");
-      
+
       const bool isHistogram = m_inputWS->isHistogramData();
       const int numHists = static_cast<int>(m_inputWS->getNumberHistograms());
       const int numBins = static_cast<int>(m_inputWS->blocksize());
-      
+
       // Compute the step size
       m_xStepSize = numBins/m_numberOfPoints;
 
-      std::ostringstream message;
-      message << "Simulation performed every " << m_xStepSize  << " wavelength points" << std::endl;
-      g_log.information(message.str());
-      message.str("");
-      
-      Progress prog(this,0.0,1.0,numHists);
+      g_log.information() << "Simulation performed every " << m_xStepSize
+                          << " wavelength points" << std::endl;
+
+      Progress prog(this,0.0,1.0, numHists*numBins/m_xStepSize);
+      PARALLEL_FOR1(correctionFactors)
       for( int i = 0; i < numHists; ++i )
       {
+        PARALLEL_START_INTERUPT_REGION
 
         // Copy over the X-values
         const MantidVec & xValues = m_inputWS->readX(i);
@@ -132,16 +130,19 @@ namespace Mantid
         }
         catch(Kernel::Exception::NotFoundError&)
         {
-          continue;
+          // intel compiler hangs with continue statements inside a catch
+          // block that is within an omp loop...
         }
+        if(!detector) continue;
 
         MantidVec & yValues = correctionFactors->dataY(i);
         MantidVec & eValues = correctionFactors->dataE(i);
         // Simulation for each requested wavelength point
         for( int bin = 0; bin < numBins; bin += m_xStepSize )
         {
+          prog.report("Computing corrections for bin " + boost::lexical_cast<std::string>(bin));
           const double lambda = isHistogram ?
-              (0.5 * (xValues[bin] + xValues[bin + 1]) ) : xValues[bin];
+                (0.5 * (xValues[bin] + xValues[bin + 1]) ) : xValues[bin];
           doSimulation(detector.get(), lambda, yValues[bin], eValues[bin]);
           // Ensure we have the last point for the interpolation
           if ( m_xStepSize > 1 && bin + m_xStepSize >= numBins && bin+1 != numBins)
@@ -153,11 +154,13 @@ namespace Mantid
         // Interpolate through points not simulated
         if( m_xStepSize > 1 )
         {
+          prog.report("Interpolating unsimulated points");
           Kernel::VectorHelper::linearlyInterpolateY(xValues, yValues, m_xStepSize);
         }
-        prog.report();
 
-     }
+        PARALLEL_END_INTERUPT_REGION
+      }
+      PARALLEL_CHECK_INTERUPT_REGION
 
       // Save the results
       setProperty("OutputWorkspace", correctionFactors);
@@ -175,9 +178,9 @@ namespace Mantid
                                             double & attenFactor, double & error)
     {
       /**
-       Currently, assuming square beam profile to pick start position then randomly selecting 
+       Currently, assuming square beam profile to pick start position then randomly selecting
        a point within the sample using it's bounding box.
-       This point defines the single scattering point and hence the attenuation path lengths and final 
+       This point defines the single scattering point and hence the attenuation path lengths and final
        directional vector to the detector
        */
       // Absolute detector position
@@ -190,15 +193,12 @@ namespace Mantid
       {
         V3D startPos = sampleBeamProfile();
         V3D scatterPoint = selectScatterPoint();
-        try
+        double eventFactor(0.0);
+        if(attenuationFactor(startPos, scatterPoint, detectorPos, lambda, eventFactor))
         {
-          attenFactor += attenuationFactor(startPos, scatterPoint, detectorPos, lambda);
+          attenFactor += eventFactor;
+          ++numDetected;
         }
-        catch(std::logic_error &)
-        {
-          continue;
-        }
-        ++numDetected;
       }
 
       // Attenuation factor is simply the average value
@@ -218,26 +218,35 @@ namespace Mantid
     }
 
     /**
-     * Selects a random location within the sample + container environment. 
+     * Selects a random location within the sample + container environment. The bounding box is
+     * used as an approximation to generate a point and this is then tested for its validity within
+     * the shape.
      * @returns Selected position as V3D object
      */
     V3D MonteCarloAbsorption::selectScatterPoint() const
     {
-      // Generate 3 random numbers, use them to calculate a random location
-      // within the bounding box of the sample environment + sample 
-      // and then check if this position is within the whole environment. 
-      // If it is return it, if not try again.
+      // Randomly select a block from the subdivided set and then randomly select a point
+      // within that block and test if it inside the sample/container. If yes then accept, else
+      // keep trying.
+      boost::uniform_int<size_t> uniIntDist(0, m_blocks.size() - 1);
+      boost::variate_generator<boost::mt19937&, boost::uniform_int<size_t>>
+          uniInt(rgen(), uniIntDist);
+      boost::uniform_real<> uniRealDist(0, 1.0);
+      boost::variate_generator<boost::mt19937&, boost::uniform_real<>>
+          uniReal(rgen(), uniRealDist);
+
       V3D scatterPoint;
       int nattempts(0);
       while( nattempts < MaxRandPointAttempts )
       {
-        const double x = m_bbox_halflength*(2.0*m_randGen->nextValue() - 1.0);
-        const double y = m_bbox_halfwidth*(2.0*m_randGen->nextValue() - 1.0);
-        const double z = m_bbox_halfheight*(2.0*m_randGen->nextValue() - 1.0);
+        size_t index = uniInt();
+        const auto & block = m_blocks[index];
+        const double x = m_blkHalfX*(2.0*uniReal() - 1.0) + block.xMin();
+        const double y = m_blkHalfY*(2.0*uniReal() - 1.0) + block.yMin();
+        const double z = m_blkHalfZ*(2.0*uniReal() - 1.0) + block.zMin();
         scatterPoint(x,y,z);
         ++nattempts;
-        if( m_sampleShape->isValid(scatterPoint) ||
-            (m_container && m_container->isValid(scatterPoint)) )
+        if( ptIntersectsSample(scatterPoint) )
         {
           scatterPoint += m_samplePos;
           return scatterPoint;
@@ -245,9 +254,8 @@ namespace Mantid
       }
       // If we got here then the shape is too strange for the bounding box to be of any use.
       g_log.error() << "Attempts to generate a random point with the sample/can "
-          << "have exceeded the allowed number of tries.\n";
+                    << "have exceeded the allowed number of tries.\n";
       throw std::runtime_error("Attempts to produce random scatter point failed. Check sample shape.");
-
     }
 
     /**
@@ -256,25 +264,27 @@ namespace Mantid
      * @param scatterPoint :: The point of scatter
      * @param finalPos :: The end point of the track
      * @param lambda :: The wavelength of the neutron
-     * @returns The attenuation factor for this neutron's track
+     * @param factor :: Output parameter storing the attenuation factor
+     * @returns True if the track was valid, false otherwise
      */
-    double 
+    bool
     MonteCarloAbsorption::attenuationFactor(const V3D & startPos, const V3D & scatterPoint,
-                                            const V3D & finalPos, const double lambda)
+                                            const V3D & finalPos, const double lambda,
+                                            double & factor)
     {
-      double factor(1.0);
-
-      // Define two tracks, before and after scatter, and trace check their 
+      // Start at one
+      factor = 1.0;
+      // Define two tracks, before and after scatter, and trace check their
       // intersections with the the environment and sample
       Track beforeScatter(scatterPoint, (startPos - scatterPoint));
       Track afterScatter(scatterPoint, (finalPos - scatterPoint));
       // Theoretically this should never happen as there should always be an intersection
       // but do to precision limitations points very close to the surface give
       // zero intersection, so just reject
-      if( m_sampleShape->interceptSurface(beforeScatter) == 0 || 
+      if( m_sampleShape->interceptSurface(beforeScatter) == 0 ||
           m_sampleShape->interceptSurface(afterScatter) == 0 )
       {
-        throw std::logic_error("Track has no surfaces intersections.");
+        return false;
       }
 
       double length = beforeScatter.begin()->distInsideObject;
@@ -291,14 +301,12 @@ namespace Mantid
           citr != cend; ++citr)
       {
         length = citr->distInsideObject;
-        IObjComponent *objComp = dynamic_cast<IObjComponent*>(citr->componentID);
-        Material_const_sptr mat = objComp->material();
-        factor *= attenuation(length, *mat, lambda);
+        factor *= attenuation(length, citr->object->material(), lambda);
       }
 
       length = afterScatter.begin()->distInsideObject;
       factor *= attenuation(length, *m_sampleMaterial, lambda);
-      
+
       afterScatter.clearIntersectionResults();
       if( m_container )
       {
@@ -310,22 +318,20 @@ namespace Mantid
           citr != cend; ++citr)
       {
         length = citr->distInsideObject;
-        IObjComponent *objComp = dynamic_cast<IObjComponent*>(citr->componentID);
-        Material_const_sptr mat = objComp->material();
-        factor *= attenuation(length, *mat, lambda);
+        factor *= attenuation(length, citr->object->material(), lambda);
       }
-        
-      return factor;
+
+      return true;
     }
 
     /**
      * Calculate the attenuation for a given length, material and wavelength
      * @param length :: Distance through the material
-     * @param material :: A reference to the Material 
+     * @param material :: A reference to the Material
      * @param lambda :: The wavelength
      * @returns The attenuation factor
      */
-    double 
+    double
     MonteCarloAbsorption::attenuation(const double length, const Kernel::Material& material,
                                       const double lambda) const
     {
@@ -344,24 +350,6 @@ namespace Mantid
     {
       m_inputWS = getProperty("InputWorkspace");
 
-      // // Define a test sample material
-      // Material *vanadium = new Material("Vanadium", PhysicalConstants::getNeutronAtom(23,0), 0.072);
-      // m_inputWS->mutableSample().setMaterial(*vanadium);
-
-      // // Define test environment
-      // std::ostringstream xml;
-      // xml << "<sphere id=\"" << "sp" <<  "\">"
-      // 	  << "<centre x=\"" << 0.0 << "\"  y=\"" << 0.0 << "\" z=\"" << 0.0 << "\" />"
-      // 	  << "<radius val=\"" << 0.05 << "\" />"
-      // 	  << "</sphere>";
-
-      // Geometry::ShapeFactory shapeMaker;
-      // Object_sptr p = shapeMaker.createShape(xml.str());
-
-      // API::SampleEnvironment * kit = new API::SampleEnvironment("TestEnv");
-      // kit->add(new ObjComponent("one", p, NULL, boost::shared_ptr<Material>(vanadium)));
-      // m_inputWS->mutableSample().setEnvironment(kit);
-
       m_sampleShape = &(m_inputWS->sample().getShape());
       m_sampleMaterial = &(m_inputWS->sample().getMaterial());
       if( !m_sampleShape->hasValidShape() )
@@ -370,13 +358,13 @@ namespace Mantid
                       << ", No. of surfaces: " << m_sampleShape->getSurfacePtr().size() << "\n";
         throw std::invalid_argument("Input workspace has an invalid sample shape.");
       }
-      
+
       if( m_sampleMaterial->totalScatterXSection(1.0) == 0.0 )
       {
         g_log.warning() << "The sample material appears to have zero scattering cross section.\n"
                         << "Result will most likely be nonsensical.\n";
       }
-      
+
       try
       {
         m_container = &(m_inputWS->sample().getEnvironment());
@@ -402,33 +390,152 @@ namespace Mantid
     }
 
     /**
-     * Initialise the caches used here including setting up the random 
+     * Initialise the caches used here including setting up the random
      * number generator
      */
     void MonteCarloAbsorption::initCaches()
     {
-      if( !m_randGen )
-      {
-        const int seedValue = getProperty("SeedValue");
-        m_randGen = new Kernel::MersenneTwister(seedValue);
-      }
-      
+      g_log.debug() << "Caching input\n";
+      // Setup random number generators for parallel execution
+      initRNG();
+
       m_samplePos = m_inputWS->getInstrument()->getSample()->getPos();
       m_sourcePos = m_inputWS->getInstrument()->getSource()->getPos();
       BoundingBox box(m_sampleShape->getBoundingBox());
       if( m_container )
       {
-        BoundingBox envBox;
-        m_container->getBoundingBox(envBox);
-        box.grow(envBox);
+        box.grow(m_container->boundingBox());
       }
-      //Save the dimensions for quicker calculations later
-      m_bbox_length = box.xMax() - box.xMin();
-      m_bbox_halflength = 0.5 * m_bbox_length;
-      m_bbox_width = box.yMax() - box.yMin();
-      m_bbox_halfwidth = 0.5 * m_bbox_width;
-      m_bbox_height = box.zMax() - box.zMin();
-      m_bbox_halfheight = 0.5 * m_bbox_height;
+
+      // Chop the bounding box up into a set of small boxes. This will be used
+      // as a first guess for generating a random scatter point
+      const double cubeSide = ELEMENT_SIZE*1e-3;
+      const double xLength = box.width().X();
+      const double yLength = box.width().Y();
+      const double zLength = box.width().Z();
+      const int numXSlices = static_cast<int>(xLength/cubeSide);
+      const int numYSlices = static_cast<int>(yLength/cubeSide);
+      const int numZSlices = static_cast<int>(zLength/cubeSide);
+      const double xThick = xLength/numXSlices;
+      const double yThick = yLength/numYSlices;
+      const double zThick = zLength/numZSlices;
+      m_blkHalfX = 0.5*xThick;
+      m_blkHalfY = 0.5*yThick;
+      m_blkHalfZ = 0.5*zThick;
+
+      const size_t numPossibleVolElements = numXSlices*numYSlices*numZSlices;
+      g_log.debug() << "Attempting to divide sample + container into " << numPossibleVolElements << " blocks.\n";
+
+      try
+      {
+        m_blocks.clear();
+        m_blocks.reserve(numPossibleVolElements/2);
+      }
+      catch (std::exception&)
+      {
+        // Typically get here if the number of volume elements is too large
+        // Provide a bit more information
+        g_log.error("Too many volume elements requested - try increasing the value of the ElementSize property.");
+        throw;
+      }
+
+      const auto boxCentre = box.centrePoint();
+      const double x0 = boxCentre.X() - 0.5*xLength;
+      const double y0 = boxCentre.Y() - 0.5*yLength;
+      const double z0 = boxCentre.Z() - 0.5*zLength;
+      // Store a chunk as a BoundingBox object.
+      // Only cache blocks that have some intersection with the
+      // sample or container.
+      for (int i = 0; i < numZSlices; ++i)
+      {
+        const double zmin = z0 + i*zThick;
+        const double zmax = zmin + zThick;
+        for (int j = 0; j < numYSlices; ++j)
+        {
+          const double ymin = y0 + j*yThick;
+          const double ymax = ymin + yThick;
+          for (int k = 0; k < numXSlices; ++k)
+          {
+            const double xmin = x0 + k*xThick;
+            const double xmax = xmin + xThick;
+            if(boxIntersectsSample(xmax, ymax, zmax, xmin, ymin, zmin))
+            {
+#if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
+                m_blocks.emplace_back(xmax, ymax, zmax, xmin, ymin, zmin);
+#else
+                m_blocks.push_back(BoundingBox(xmax, ymax, zmax, xmin, ymin, zmin));
+#endif
+            }
+          }
+        }
+      }
+
+      m_numVolumeElements = m_blocks.size();
+      g_log.debug() << "Sample + container divided into " << m_numVolumeElements << " blocks.";
+      if(m_numVolumeElements == numPossibleVolElements) g_log.debug("\n");
+      else g_log.debug() << " Skipped " << (numPossibleVolElements-m_numVolumeElements)
+                         << " blocks that do not intersect with the sample + container\n";
+    }
+
+    /**
+     */
+    void MonteCarloAbsorption::initRNG()
+    {
+      const int baseSeed = getProperty("SeedValue");
+      // For parallel execution use a vector of RNG, each with a seed one higher that the previous
+      m_rngs.resize(PARALLEL_GET_MAX_THREADS);
+      // Set the seeds
+      for(int i = 0; i < static_cast<int>(m_rngs.size()); ++i)
+      {
+        m_rngs[i].seed(baseSeed + i);
+      }
+    }
+
+    /**
+     * @return A reference to a boost::random::mt19937 object
+     */
+    boost::mt19937 &MonteCarloAbsorption::rgen() const
+    {
+      // Const from point of view of caller
+      return const_cast<MonteCarloAbsorption*>(this)->m_rngs[PARALLEL_THREAD_NUMBER];
+    }
+
+    /**
+     * @param xmax max x-coordinate of cuboid point
+     * @param ymax max y-coordinate of cuboid point
+     * @param zmax max z-coordinate of cuboid point
+     * @param xmin min z-coordinate of cuboid point
+     * @param ymin min z-coordinate of cuboid point
+     * @param zmin min z-coordinate of cuboid point
+     * @return True if any of the vertices intersect the sample or container
+     */
+    bool MonteCarloAbsorption::boxIntersectsSample(const double xmax, const double ymax, const double zmax,
+                                                   const double xmin, const double ymin, const double zmin) const
+    {
+      // Check all 8 corners for intersection
+      if( ptIntersectsSample(V3D(xmax, ymin, zmin)) || // left-front-bottom
+          ptIntersectsSample(V3D(xmax, ymax, zmin)) || // left-front-top
+          ptIntersectsSample(V3D(xmin, ymax, zmin)) || // right-front-top
+          ptIntersectsSample(V3D(xmin, ymin, zmin)) || // right-front-bottom
+          ptIntersectsSample(V3D(xmax, ymin, zmax)) || // left-back-bottom
+          ptIntersectsSample(V3D(xmax, ymax, zmax)) || // left-back-top
+          ptIntersectsSample(V3D(xmin, ymax, zmax)) || // right-back-top
+          ptIntersectsSample(V3D(xmin, ymin, zmax)) ) // right-back-bottom
+      {
+        return true;
+      }
+      else return false;
+    }
+
+    /**
+     *
+     * @param pt A V3D giving a point to test
+     * @return True if point is inside sample or container, false otherwise
+     */
+    bool MonteCarloAbsorption::ptIntersectsSample(const V3D &pt) const
+    {
+      return m_sampleShape->isValid(pt) ||
+          (m_container && m_container->isValid(pt));
     }
 
   }

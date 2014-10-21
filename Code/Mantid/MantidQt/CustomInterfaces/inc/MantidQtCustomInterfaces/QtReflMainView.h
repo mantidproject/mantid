@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
 #include <boost/scoped_ptr.hpp>
+#include <QSignalMapper>
 #include "ui_ReflMainWidget.h"
 
 namespace MantidQt
@@ -50,6 +51,9 @@ namespace MantidQt
       //Connect the model
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model);
 
+      //Set the list of available tables to open
+      virtual void setTableList(const std::set<std::string>& tables);
+
       //Dialog/Prompt methods
       virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue);
       virtual bool askUserYesNo(std::string prompt, std::string title);
@@ -61,23 +65,29 @@ namespace MantidQt
       virtual void setProgressRange(int min, int max);
       virtual void setProgress(int progress);
 
+      //Settor methods
+      virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument);
+
       //Accessor methods
       virtual std::vector<size_t> getSelectedRowIndexes() const;
       virtual std::string getSearchInstrument() const;
       virtual std::string getProcessInstrument() const;
+      virtual std::string getWorkspaceToOpen() const;
 
     private:
       //initialise the interface
       virtual void initLayout();
-      virtual void setInstrumentList(const std::vector<std::string>& instruments);
       //the presenter
-      boost::scoped_ptr<IReflPresenter> m_presenter;
+      boost::shared_ptr<IReflPresenter> m_presenter;
       //the interface
       Ui::reflMainWidget ui;
+      //the workspace the user selected to open
+      std::string m_toOpen;
+      QSignalMapper* m_openMap;
 
     private slots:
       void setModel(QString name);
-      void setNew();
+      void actionNewTable();
       void actionSave();
       void actionSaveAs();
       void actionAddRow();

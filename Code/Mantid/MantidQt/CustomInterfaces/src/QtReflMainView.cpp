@@ -1,9 +1,6 @@
 #include "MantidQtCustomInterfaces/QtReflMainView.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
-#include "MantidQtCustomInterfaces/ReflNullMainViewPresenter.h"
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
-#include "MantidQtCustomInterfaces/ReflBlankMainViewPresenter.h"
-#include "MantidQtCustomInterfaces/ReflLoadedMainViewPresenter.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include <qinputdialog.h>
@@ -20,7 +17,7 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    QtReflMainView::QtReflMainView(QWidget *parent) : UserSubWindow(parent), m_presenter(new ReflNullMainViewPresenter())
+    QtReflMainView::QtReflMainView(QWidget *parent) : UserSubWindow(parent), m_openMap(new QSignalMapper(this))
     {
     }
 
@@ -37,7 +34,10 @@ namespace MantidQt
     void QtReflMainView::initLayout()
     {
       ui.setupUi(this);
-      ui.workspaceSelector->refresh();
+
+      ui.buttonAddRow->setDefaultAction(ui.actionAddRow);
+      ui.buttonDeleteRow->setDefaultAction(ui.actionDeleteRow);
+      ui.buttonGroupRows->setDefaultAction(ui.actionGroupRows);
 
       //Expand the process runs column at the expense of the search column
       ui.splitterTables->setStretchFactor(0, 0);
@@ -47,40 +47,19 @@ namespace MantidQt
       ui.progressBar->setRange(0, 100);
       ui.progressBar->setValue(0);
 
-      std::vector<std::string> instruments;
-      instruments.push_back("INTER");
-      instruments.push_back("SURF");
-      instruments.push_back("CRISP");
-      instruments.push_back("POLREF");
-      setInstrumentList(instruments);
+      //Allow rows to be reordered
+      ui.viewTable->verticalHeader()->setMovable(true);
 
-      const std::string defaultInst = Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
+      connect(ui.actionSaveTable,   SIGNAL(triggered()), this, SLOT(actionSave()));
+      connect(ui.actionSaveTableAs, SIGNAL(triggered()), this, SLOT(actionSaveAs()));
+      connect(ui.actionNewTable,    SIGNAL(triggered()), this, SLOT(actionNewTable()));
+      connect(ui.actionAddRow,      SIGNAL(triggered()), this, SLOT(actionAddRow()));
+      connect(ui.actionDeleteRow,   SIGNAL(triggered()), this, SLOT(actionDeleteRow()));
+      connect(ui.actionProcess,     SIGNAL(triggered()), this, SLOT(actionProcess()));
+      connect(ui.actionGroupRows,   SIGNAL(triggered()), this, SLOT(actionGroupRows()));
 
-      if(std::find(instruments.begin(), instruments.end(), defaultInst) != instruments.end())
-      {
-        int index = ui.comboSearchInstrument->findData(QString::fromStdString(defaultInst), Qt::DisplayRole);
-        ui.comboSearchInstrument->setCurrentIndex(index);
-        ui.comboProcessInstrument->setCurrentIndex(index);
-      }
-
-      connect(ui.workspaceSelector,SIGNAL(activated(QString)),this,SLOT(setModel(QString)));
-      connect(ui.actionSaveTable, SIGNAL(triggered()),this, SLOT(actionSave()));
-      connect(ui.actionSaveTableAs, SIGNAL(triggered()),this, SLOT(actionSaveAs()));
-      connect(ui.actionNewTable, SIGNAL(triggered()),this, SLOT(setNew()));
-      connect(ui.actionAddRow, SIGNAL(triggered()),this, SLOT(actionAddRow()));
-      connect(ui.actionDeleteRow, SIGNAL(triggered()),this, SLOT(actionDeleteRow()));
-      connect(ui.actionProcess, SIGNAL(triggered()),this, SLOT(actionProcess()));
-      connect(ui.actionGroupRows, SIGNAL(triggered()),this, SLOT(actionGroupRows()));
-      setNew();
-    }
-
-    /**
-    This slot loads a blank table and changes to a BlankMainView presenter
-    */
-    void QtReflMainView::setNew()
-    {
-      boost::scoped_ptr<IReflPresenter> newPtr(new ReflBlankMainViewPresenter(this));
-      m_presenter.swap(newPtr);
+      //Finally, create a presenter to do the thinking for us
+      m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(this));
     }
 
     /**
@@ -89,9 +68,8 @@ namespace MantidQt
     */
     void QtReflMainView::setModel(QString name)
     {
-      boost::scoped_ptr<IReflPresenter> newPtr(new ReflLoadedMainViewPresenter(name.toStdString(), this));
-      m_presenter.swap(newPtr);
-      m_presenter->notify(NoFlags);
+      m_toOpen = name.toStdString();
+      m_presenter->notify(OpenTableFlag);
     }
 
     /**
@@ -102,6 +80,26 @@ namespace MantidQt
     {
       ui.viewTable->setModel(new QReflTableModel(model));
       ui.viewTable->resizeColumnsToContents();
+    }
+
+    /**
+    Set the list of tables the user is offered to open
+    @param tables : the names of the tables in the ADS
+    */
+    void QtReflMainView::setTableList(const std::set<std::string>& tables)
+    {
+      ui.menuOpenTable->clear();
+
+      for(auto it = tables.begin(); it != tables.end(); ++it)
+      {
+        QAction* openTable = ui.menuOpenTable->addAction(QString::fromStdString(*it));
+
+        //Map this action to the table name
+        m_openMap->setMapping(openTable, QString::fromStdString(*it));
+
+        connect(openTable, SIGNAL(triggered()), m_openMap, SLOT(map()));
+        connect(m_openMap, SIGNAL(mapped(QString)), this, SLOT(setModel(QString)));
+      }
     }
 
     /**
@@ -150,6 +148,14 @@ namespace MantidQt
     void QtReflMainView::actionGroupRows()
     {
       m_presenter->notify(GroupRowsFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "new table" button as been pressed
+    */
+    void QtReflMainView::actionNewTable()
+    {
+      m_presenter->notify(NewTableFlag);
     }
 
     /**
@@ -236,8 +242,9 @@ namespace MantidQt
     /**
     Set the list of available instruments to search and process for
     @param instruments : The list of instruments available
+    @param defaultInstrument : The instrument to have selected by default
     */
-    void QtReflMainView::setInstrumentList(const std::vector<std::string>& instruments)
+    void QtReflMainView::setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument)
     {
       ui.comboSearchInstrument->clear();
       ui.comboProcessInstrument->clear();
@@ -248,6 +255,10 @@ namespace MantidQt
         ui.comboSearchInstrument->addItem(instrument);
         ui.comboProcessInstrument->addItem(instrument);
       }
+
+      int index = ui.comboSearchInstrument->findData(QString::fromStdString(defaultInstrument), Qt::DisplayRole);
+      ui.comboSearchInstrument->setCurrentIndex(index);
+      ui.comboProcessInstrument->setCurrentIndex(index);
     }
 
     /**
@@ -282,6 +293,15 @@ namespace MantidQt
         rowIndexes.push_back(idx->row());
       }
       return rowIndexes;
+    }
+
+    /**
+    Get the name of the workspace that the user wishes to open as a table
+    @returns The name of the workspace to open
+    */
+    std::string QtReflMainView::getWorkspaceToOpen() const
+    {
+      return m_toOpen;
     }
 
   } // namespace CustomInterfaces

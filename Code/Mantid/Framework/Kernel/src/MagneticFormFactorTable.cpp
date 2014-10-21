@@ -22,7 +22,7 @@ namespace Mantid
 
     /**
      * Returns an interpolated form factor for the given \f$Q^2\f$ value
-     * @param qsqr :: \f$Q^2\f$ in \f$\AA^{-2}\f$
+     * @param qsqr :: \f$Q^2\f$ in \f$\mbox{\AA}^{-2}\f$
      * @return The interpolated value
      */
     double MagneticFormFactorTable::value(const double qsqr) const

@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/AddTimeSeriesLog.cpp
 	src/AlignDetectors.cpp
 	src/AlphaCalc.cpp
+	src/AnnularRingAbsorption.cpp
 	src/AnyShapeAbsorption.cpp
 	src/AppendSpectra.cpp
 	src/ApplyCalibration.cpp
@@ -256,6 +257,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AddTimeSeriesLog.h
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AlphaCalc.h
+	inc/MantidAlgorithms/AnnularRingAbsorption.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
 	inc/MantidAlgorithms/AppendSpectra.h
 	inc/MantidAlgorithms/ApplyCalibration.h
@@ -515,6 +517,7 @@ set ( TEST_FILES
 	AddTimeSeriesLogTest.h
 	AlignDetectorsTest.h
 	AlphaCalcTest.h
+	AnnularRingAbsorptionTest.h
 	AnyShapeAbsorptionTest.h
 	AppendSpectraTest.h
 	ApplyCalibrationTest.h
@@ -588,6 +591,7 @@ set ( TEST_FILES
 	DiffractionFocussingTest.h
 	DivideTest.h
 	EditInstrumentGeometryTest.h
+  ElasticWindowTest.h
 	EstimatePDDetectorResolutionTest.h
 	ExponentialCorrectionTest.h
 	ExponentialTest.h
@@ -721,9 +725,9 @@ set ( TEST_FILES
 	WeightedMeanOfWorkspaceTest.h
 	WeightedMeanTest.h
 	WeightingStrategyTest.h
+	WienerSmoothTest.h
 	WorkspaceCreationHelperTest.h
 	WorkspaceGroupTest.h
-	WienerSmoothTest.h
 )
 
 set ( TEST_PY_FILES NormaliseToUnityTest.py )

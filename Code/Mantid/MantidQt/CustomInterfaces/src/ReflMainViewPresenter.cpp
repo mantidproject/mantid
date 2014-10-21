@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -13,20 +14,161 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+namespace
+{
+  void validateModel(ITableWorkspace_sptr model)
+  {
+    if(!model)
+      throw std::runtime_error("Null pointer");
+
+    if(model->columnCount() != 9)
+      throw std::runtime_error("Selected table has the incorrect number of columns (9) to be used as a reflectometry table.");
+
+    try
+    {
+      model->String(0,0);
+      model->String(0,1);
+      model->String(0,2);
+      model->String(0,3);
+      model->String(0,4);
+      model->String(0,5);
+      model->Double(0,6);
+      model->Int(0,7);
+      model->String(0,8);
+    }
+    catch(const std::runtime_error&)
+    {
+      throw std::runtime_error("Selected table does not meet the specifications to become a model for this interface.");
+    }
+  }
+
+  bool isValidModel(Workspace_sptr model)
+  {
+    try
+    {
+      validateModel(boost::dynamic_pointer_cast<ITableWorkspace>(model));
+    }
+    catch(...)
+    {
+      return false;
+    }
+    return true;
+  }
+
+  ITableWorkspace_sptr createWorkspace()
+  {
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+    auto colRuns = ws->addColumn("str","Run(s)");
+    auto colTheta = ws->addColumn("str","ThetaIn");
+    auto colTrans = ws->addColumn("str","TransRun(s)");
+    auto colQmin = ws->addColumn("str","Qmin");
+    auto colQmax = ws->addColumn("str","Qmax");
+    auto colDqq = ws->addColumn("str","dq/q");
+    auto colScale = ws->addColumn("double","Scale");
+    auto colStitch = ws->addColumn("int","StitchGroup");
+    auto colOptions = ws->addColumn("str","Options");
+
+    colRuns->setPlotType(0);
+    colTheta->setPlotType(0);
+    colTrans->setPlotType(0);
+    colQmin->setPlotType(0);
+    colQmax->setPlotType(0);
+    colDqq->setPlotType(0);
+    colScale->setPlotType(0);
+    colStitch->setPlotType(0);
+    colOptions->setPlotType(0);
+
+    return ws;
+  }
+}
+
 namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view): m_view(view)
+    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view):
+      m_view(view),
+      m_addObserver(*this, &ReflMainViewPresenter::handleAddEvent),
+      m_remObserver(*this, &ReflMainViewPresenter::handleRemEvent),
+      m_clearObserver(*this, &ReflMainViewPresenter::handleClearEvent),
+      m_renameObserver(*this, &ReflMainViewPresenter::handleRenameEvent),
+      m_replaceObserver(*this, &ReflMainViewPresenter::handleReplaceEvent)
     {
-    }
+      //Set up the instrument selectors
+      std::vector<std::string> instruments;
+      instruments.push_back("INTER");
+      instruments.push_back("SURF");
+      instruments.push_back("CRISP");
+      instruments.push_back("POLREF");
 
-    ReflMainViewPresenter::ReflMainViewPresenter(ITableWorkspace_sptr model, ReflMainView* view): m_model(model), m_view(view)
-    {
+      //If the user's configured default instrument is in this list, set it as the default, otherwise use INTER
+      const std::string defaultInst = Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
+      if(std::find(instruments.begin(), instruments.end(), defaultInst) != instruments.end())
+        m_view->setInstrumentList(instruments, defaultInst);
+      else
+        m_view->setInstrumentList(instruments, "INTER");
+
+      //Populate an initial list of valid tables to open, and subscribe to the ADS to keep it up to date
+      Mantid::API::AnalysisDataServiceImpl& ads = Mantid::API::AnalysisDataService::Instance();
+
+      std::set<std::string> items;
+      items = ads.getObjectNames();
+      for(auto it = items.begin(); it != items.end(); ++it )
+      {
+        const std::string name = *it;
+        Workspace_sptr ws = ads.retrieve(name);
+
+        if(isValidModel(ws))
+          m_workspaceList.insert(name);
+      }
+
+      ads.notificationCenter.addObserver(m_addObserver);
+      ads.notificationCenter.addObserver(m_remObserver);
+      ads.notificationCenter.addObserver(m_renameObserver);
+      ads.notificationCenter.addObserver(m_clearObserver);
+      ads.notificationCenter.addObserver(m_replaceObserver);
+
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
+
+      //Start with a blank table
+      newTable();
     }
 
     ReflMainViewPresenter::~ReflMainViewPresenter()
     {
+      Mantid::API::AnalysisDataServiceImpl& ads = Mantid::API::AnalysisDataService::Instance();
+      ads.notificationCenter.removeObserver(m_addObserver);
+      ads.notificationCenter.removeObserver(m_remObserver);
+      ads.notificationCenter.removeObserver(m_clearObserver);
+      ads.notificationCenter.removeObserver(m_renameObserver);
+      ads.notificationCenter.removeObserver(m_replaceObserver);
+    }
+
+    /**
+     * Finds the first unused group id
+     */
+    int ReflMainViewPresenter::getUnusedGroup(std::vector<size_t> ignoredRows) const
+    {
+      std::vector<int> usedGroups;
+
+      //Scan through all the rows, working out which group ids are used
+      for(size_t idx = 0; idx < m_model->rowCount(); ++idx)
+      {
+        if(std::find(ignoredRows.begin(), ignoredRows.end(), idx) != ignoredRows.end())
+          continue;
+
+        //This is an unselected row. Add it to the list of used group ids
+        usedGroups.push_back(m_model->Int(idx, COL_GROUP));
+      }
+
+      int groupId = 0;
+
+      //While the group id is one of the used ones, increment it by 1
+      while(std::find(usedGroups.begin(), usedGroups.end(), groupId) != usedGroups.end())
+        groupId++;
+
+      return groupId;
     }
 
     /**
@@ -336,6 +478,20 @@ namespace MantidQt
       if(!algReflOne->isExecuted())
         throw std::runtime_error("Failed to run ReflectometryReductionOneAuto.");
 
+      const double scale = m_model->Double(rowNo, COL_SCALE);
+      if(scale != 1.0)
+      {
+        IAlgorithm_sptr algScale = AlgorithmManager::Instance().create("Scale");
+        algScale->initialize();
+        algScale->setProperty("InputWorkspace", "IvsQ_" + runNo);
+        algScale->setProperty("OutputWorkspace", "IvsQ_" + runNo);
+        algScale->setProperty("Factor", 1.0 / scale);
+        algScale->execute();
+
+        if(!algScale->isExecuted())
+          throw std::runtime_error("Failed to run Scale algorithm");
+      }
+
       //Processing has completed. Put Qmin and Qmax into the table if needed, for stitching.
       if(m_model->String(rowNo, COL_QMIN).empty() || m_model->String(rowNo, COL_QMAX).empty())
       {
@@ -511,27 +667,32 @@ namespace MantidQt
     }
 
     /**
+    Inserts a new row in the specified location
+    @param before The index to insert the new row before
+    */
+    void ReflMainViewPresenter::insertRow(size_t before)
+    {
+      const int groupId = getUnusedGroup();
+      size_t row = m_model->insertRow(before);
+      //Set the default scale to 1.0
+      m_model->Double(row, COL_SCALE) = 1.0;
+      //Set the group id of the new row
+      m_model->Int(row, COL_GROUP) = groupId;
+      //Make sure the view updates
+      m_view->showTable(m_model);
+    }
+
+    /**
     Add row(s) to the model
     */
     void ReflMainViewPresenter::addRow()
     {
       std::vector<size_t> rows = m_view->getSelectedRowIndexes();
-      if (rows.size() == 0)
-      {
-        m_model->appendRow();
-      }
+      std::sort(rows.begin(), rows.end());
+      if(rows.size() == 0)
+        insertRow(m_model->rowCount());
       else
-      {
-        //as selections have to be contigous, then all that needs to be done is add
-        //a number of rows at the highest index equal to the size of the returned vector
-        std::sort (rows.begin(), rows.end());
-        for (size_t idx = rows.size(); 0 < idx; --idx)
-        {
-          m_model->insertRow(rows.at(0));
-        }
-      }
-
-      m_view->showTable(m_model);
+        insertRow(*rows.rbegin() + 1);
     }
 
     /**
@@ -552,32 +713,15 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::groupRows()
     {
-      std::vector<size_t> rows = m_view->getSelectedRowIndexes();
-      std::vector<int> usedGroups;
-
-      //First we need find the first unused group id
-
-      //Scan through all the rows, working out which group ids are used
-      for(size_t idx = 0; idx < m_model->rowCount(); ++idx)
-      {
-        //If this row is one of the selected rows we don't need to include it
-        if(std::find(rows.begin(), rows.end(), idx) != rows.end())
-          continue;
-
-        //This is an unselected row. At it to the list of used group ids
-        usedGroups.push_back(m_model->Int(idx, COL_GROUP));
-      }
-
-      int groupId = 0;
-
-      //While the group id is one of the used ones, increment it by 1
-      while(std::find(usedGroups.begin(), usedGroups.end(), groupId) != usedGroups.end())
-        groupId++;
+      const std::vector<size_t> rows = m_view->getSelectedRowIndexes();
+      //Find the first unused group id, ignoring the selected rows
+      const int groupId = getUnusedGroup(rows);
 
       //Now we just have to set the group id on the selected rows
       for(auto it = rows.begin(); it != rows.end(); ++it)
         m_model->Int(*it, COL_GROUP) = groupId;
 
+      //Make sure the view updates
       m_view->showTable(m_model);
     }
 
@@ -588,12 +732,14 @@ namespace MantidQt
     {
       switch(flag)
       {
-      case ReflMainView::SaveAsFlag:    saveAs();     break;
-      case ReflMainView::SaveFlag:      save();       break;
-      case ReflMainView::AddRowFlag:    addRow();     break;
-      case ReflMainView::DeleteRowFlag: deleteRow();  break;
-      case ReflMainView::ProcessFlag:   process();    break;
-      case ReflMainView::GroupRowsFlag: groupRows();  break;
+      case ReflMainView::SaveAsFlag:    saveTableAs(); break;
+      case ReflMainView::SaveFlag:      saveTable();   break;
+      case ReflMainView::AddRowFlag:    addRow();      break;
+      case ReflMainView::DeleteRowFlag: deleteRow();   break;
+      case ReflMainView::ProcessFlag:   process();     break;
+      case ReflMainView::GroupRowsFlag: groupRows();   break;
+      case ReflMainView::OpenTableFlag: openTable();   break;
+      case ReflMainView::NewTableFlag:  newTable();    break;
 
       case ReflMainView::NoFlags:       return;
       }
@@ -601,11 +747,148 @@ namespace MantidQt
     }
 
     /**
-    Load the model into the table
+    Press changes to the same item in the ADS
     */
-    void ReflMainViewPresenter::load()
+    void ReflMainViewPresenter::saveTable()
     {
+      if(!m_wsName.empty())
+        AnalysisDataService::Instance().addOrReplace(m_wsName,boost::shared_ptr<ITableWorkspace>(m_model->clone()));
+      else
+        saveTableAs();
+    }
+
+    /**
+    Press changes to a new item in the ADS
+    */
+    void ReflMainViewPresenter::saveTableAs()
+    {
+      const std::string userString = m_view->askUserString("Save As", "Enter a workspace name:", "Workspace");
+      if(!userString.empty())
+      {
+        m_wsName = userString;
+        saveTable();
+      }
+    }
+
+    /**
+    Start a new, untitled table
+    */
+    void ReflMainViewPresenter::newTable()
+    {
+      m_model = createWorkspace();
+      m_wsName.clear();
       m_view->showTable(m_model);
+
+      //Start with one blank row
+      insertRow(0);
+    }
+
+    /**
+    Open a table from the ADS
+    */
+    void ReflMainViewPresenter::openTable()
+    {
+      auto& ads = AnalysisDataService::Instance();
+      const std::string toOpen = m_view->getWorkspaceToOpen();
+
+      if(toOpen.empty())
+        return;
+
+      if(!ads.isValid(toOpen).empty())
+      {
+        m_view->giveUserCritical("Could not open workspace: " + toOpen, "Error");
+        return;
+      }
+
+      ITableWorkspace_sptr origTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(toOpen);
+
+      //We create a clone of the table for live editing. The original is not updated unless we explicitly save.
+      ITableWorkspace_sptr newModel = boost::shared_ptr<ITableWorkspace>(origTable->clone());
+      try
+      {
+        validateModel(newModel);
+        m_model = newModel;
+        m_wsName = toOpen;
+        m_view->showTable(m_model);
+      }
+      catch(std::runtime_error& e)
+      {
+        m_view->giveUserCritical("Could not open workspace: " + std::string(e.what()), "Error");
+      }
+    }
+
+    /**
+    Handle ADS add events
+    */
+    void ReflMainViewPresenter::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf)
+    {
+      const std::string name = pNf->objectName();
+
+      if(Mantid::API::AnalysisDataService::Instance().isHiddenDataServiceObject(name))
+        return;
+
+      if(!isValidModel(pNf->object()))
+        return;
+
+      m_workspaceList.insert(name);
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
+    }
+
+    /**
+    Handle ADS remove events
+    */
+    void ReflMainViewPresenter::handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf)
+    {
+      const std::string name = pNf->objectName();
+      m_workspaceList.erase(name);
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
+    }
+
+    /**
+    Handle ADS clear events
+    */
+    void ReflMainViewPresenter::handleClearEvent(Mantid::API::ClearADSNotification_ptr)
+    {
+      m_workspaceList.clear();
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
+    }
+
+    /**
+    Handle ADS rename events
+    */
+    void ReflMainViewPresenter::handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf)
+    {
+      //If we have this workspace, rename it
+      const std::string name = pNf->objectName();
+      const std::string newName = pNf->newObjectName();
+
+      if(m_workspaceList.find(name) == m_workspaceList.end())
+        return;
+
+      m_workspaceList.erase(name);
+      m_workspaceList.insert(newName);
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
+    }
+
+    /**
+    Handle ADS replace events
+    */
+    void ReflMainViewPresenter::handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
+    {
+      const std::string name = pNf->objectName();
+      //Erase it
+      m_workspaceList.erase(name);
+
+      //If it's a table workspace, bring it back
+      if(isValidModel(pNf->object()))
+        m_workspaceList.insert(name);
+
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
     }
   }
 }

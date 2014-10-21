@@ -2,10 +2,12 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectraAxis.h"
 
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 #include "MantidNexus/NexusClasses.h"
+
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -264,34 +266,35 @@ namespace Mantid
         throw std::invalid_argument("incompatible sizes of fields in the NXSPE file");
       }
 
-      MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          WorkspaceFactory::Instance().create("Workspace2D", numSpectra, energies.size(), numBins));
-      // Need to get hold of the parameter map
-      Geometry::ParameterMap& pmap = outputWS->instrumentParameters();
-      outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
-      std::vector<double>::iterator itdata = data.begin(), iterror = error.begin(), itdataend,
-          iterrorend;
-      API::Progress prog = API::Progress(this, 0.0, 0.9, numSpectra);
-      for (std::size_t i = 0; i < numSpectra; ++i)
+    MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>
+        (WorkspaceFactory::Instance().create("Workspace2D",numSpectra,energies.size(),numBins));
+    // Need to get hold of the parameter map
+    Geometry::ParameterMap& pmap = outputWS->instrumentParameters();
+    outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
+    outputWS->setYUnit("SpectraNumber");
+
+    std::vector<double>::iterator itdata=data.begin(),iterror=error.begin(),itdataend,iterrorend;
+    API::Progress prog = API::Progress(this, 0.0, 0.9, numSpectra);
+    for (std::size_t i=0; i<numSpectra; ++i)
+    {
+      itdataend=itdata+numBins;
+      iterrorend=iterror+numBins;
+      outputWS->dataX(i)=energies;
+      if (((*itdata)==std::numeric_limits<double>::quiet_NaN())||(*itdata<=-1e10))//masked bin
       {
-        itdataend = itdata + numBins;
-        iterrorend = iterror + numBins;
-        outputWS->dataX(i) = energies;
-        if (((*itdata) == std::numeric_limits<double>::quiet_NaN()) || (*itdata <= -1e10)) //masked bin
-        {
-          outputWS->dataY(i) = std::vector<double>(numBins, 0);
-          outputWS->dataE(i) = std::vector<double>(numBins, 0);
-          pmap.addBool(outputWS->getDetector(i).get(), "masked", true);
-        }
-        else
-        {
-          outputWS->dataY(i) = std::vector<double>(itdata, itdataend);
-          outputWS->dataE(i) = std::vector<double>(iterror, iterrorend);
-        }
-        itdata = (itdataend);
-        iterror = (iterrorend);
-        prog.report();
+        outputWS->dataY(i)=std::vector<double>(numBins,0);
+        outputWS->dataE(i)=std::vector<double>(numBins,0);
+        pmap.addBool(outputWS->getDetector(i).get(),"masked",true);
       }
+      else
+      {
+        outputWS->dataY(i)=std::vector<double>(itdata,itdataend);
+        outputWS->dataE(i)=std::vector<double>(iterror,iterrorend);
+      }
+      itdata=(itdataend);
+      iterror=(iterrorend);
+      prog.report();
+    }
 
       //add logs
       outputWS->mutableRun().addLogData(new PropertyWithValue<double>("Ei", fixed_energy));

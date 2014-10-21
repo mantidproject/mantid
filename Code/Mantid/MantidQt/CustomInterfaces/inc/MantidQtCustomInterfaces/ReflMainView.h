@@ -36,11 +36,14 @@ namespace MantidQt
     class DLLExport ReflMainView
     {
     public:
-      ReflMainView();
-      virtual ~ReflMainView() = 0;
+      ReflMainView() {};
+      virtual ~ReflMainView() {};
 
       //Connect the model
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model) = 0;
+
+      //Set the list of available tables to open
+      virtual void setTableList(const std::set<std::string>& tables) = 0;
 
       //Dialog/Prompt methods
       virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue) = 0;
@@ -53,10 +56,14 @@ namespace MantidQt
       virtual void setProgressRange(int min, int max) = 0;
       virtual void setProgress(int progress) = 0;
 
+      //Settor methods
+      virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument) = 0;
+
       //Accessor methods
       virtual std::vector<size_t> getSelectedRowIndexes() const = 0;
       virtual std::string getSearchInstrument() const = 0;
       virtual std::string getProcessInstrument() const = 0;
+      virtual std::string getWorkspaceToOpen() const = 0;
 
       static const int NoFlags       = 0;
       static const int SaveFlag      = 1;
@@ -65,6 +72,8 @@ namespace MantidQt
       static const int DeleteRowFlag = 4;
       static const int ProcessFlag   = 5;
       static const int GroupRowsFlag = 6;
+      static const int OpenTableFlag = 7;
+      static const int NewTableFlag  = 8;
     };
   }
 }

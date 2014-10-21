@@ -1520,17 +1520,16 @@ Later steps in the process (saving, renaming) will not be done.</string>
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_5">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
+        <widget class="QGroupBox" name="slice_gbPreview">
+         <property name="title">
+          <string>Preview</string>
          </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
+         <layout class="QVBoxLayout" name="verticalLayout_15">
+          <item>
+           <layout class="QVBoxLayout" name="slice_plotPreview"/>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <widget class="QGroupBox" name="gbDiagnosticsOutput">
@@ -1684,7 +1683,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
          <property name="title">
           <string>Preview</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_15">
+         <layout class="QVBoxLayout" name="verticalLayout_18">
           <item>
            <layout class="QVBoxLayout" name="trans_plotPreview">
             <property name="sizeConstraint">
@@ -2364,7 +2363,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
         <property name="title">
          <string>Preview</string>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout">
+        <layout class="QHBoxLayout" name="horizontalLayout_1">
          <property name="margin">
           <number>6</number>
          </property>
