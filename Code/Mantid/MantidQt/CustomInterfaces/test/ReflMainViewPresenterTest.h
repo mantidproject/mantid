@@ -712,6 +712,12 @@ public:
     TS_ASSERT_EQUALS(kvp["e"], "4,5,6");
     TS_ASSERT_EQUALS(kvp["f"], "1+1=2");
     TS_ASSERT_EQUALS(kvp["g"], "'");
+
+    TS_ASSERT_THROWS(ReflMainViewPresenter::parseKeyValueString("a = 1, b = 2, c = 3,"), std::runtime_error);
+    TS_ASSERT_THROWS(ReflMainViewPresenter::parseKeyValueString("a = 1, b = 2, c = 3,d"), std::runtime_error);
+    TS_ASSERT_THROWS(ReflMainViewPresenter::parseKeyValueString(",a = 1"), std::runtime_error);
+    TS_ASSERT_THROWS(ReflMainViewPresenter::parseKeyValueString(",a = 1 = 2,="), std::runtime_error);
+    TS_ASSERT_THROWS(ReflMainViewPresenter::parseKeyValueString("=,=,="), std::runtime_error);
   }
 };
 
