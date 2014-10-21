@@ -17,7 +17,7 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    QtReflMainView::QtReflMainView(QWidget *parent) : UserSubWindow(parent), m_openMap(new QSignalMapper(this))
+    QtReflMainView::QtReflMainView(QWidget *parent) : UserSubWindow(parent)
     {
     }
 
@@ -34,10 +34,7 @@ namespace MantidQt
     void QtReflMainView::initLayout()
     {
       ui.setupUi(this);
-
-      ui.buttonAddRow->setDefaultAction(ui.actionAddRow);
-      ui.buttonDeleteRow->setDefaultAction(ui.actionDeleteRow);
-      ui.buttonGroupRows->setDefaultAction(ui.actionGroupRows);
+      ui.workspaceSelector->refresh();
 
       //Expand the process runs column at the expense of the search column
       ui.splitterTables->setStretchFactor(0, 0);
@@ -50,13 +47,14 @@ namespace MantidQt
       //Allow rows to be reordered
       ui.viewTable->verticalHeader()->setMovable(true);
 
-      connect(ui.actionSaveTable,   SIGNAL(triggered()), this, SLOT(actionSave()));
-      connect(ui.actionSaveTableAs, SIGNAL(triggered()), this, SLOT(actionSaveAs()));
-      connect(ui.actionNewTable,    SIGNAL(triggered()), this, SLOT(actionNewTable()));
-      connect(ui.actionAddRow,      SIGNAL(triggered()), this, SLOT(actionAddRow()));
-      connect(ui.actionDeleteRow,   SIGNAL(triggered()), this, SLOT(actionDeleteRow()));
-      connect(ui.actionProcess,     SIGNAL(triggered()), this, SLOT(actionProcess()));
-      connect(ui.actionGroupRows,   SIGNAL(triggered()), this, SLOT(actionGroupRows()));
+      connect(ui.workspaceSelector, SIGNAL(activated(QString)), this, SLOT(setModel(QString)));
+      connect(ui.actionSaveTable,   SIGNAL(triggered()),        this, SLOT(actionSave()));
+      connect(ui.actionSaveTableAs, SIGNAL(triggered()),        this, SLOT(actionSaveAs()));
+      connect(ui.actionNewTable,    SIGNAL(triggered()),        this, SLOT(actionNewTable()));
+      connect(ui.actionAddRow,      SIGNAL(triggered()),        this, SLOT(actionAddRow()));
+      connect(ui.actionDeleteRow,   SIGNAL(triggered()),        this, SLOT(actionDeleteRow()));
+      connect(ui.actionProcess,     SIGNAL(triggered()),        this, SLOT(actionProcess()));
+      connect(ui.actionGroupRows,   SIGNAL(triggered()),        this, SLOT(actionGroupRows()));
 
       //Finally, create a presenter to do the thinking for us
       m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(this));
@@ -80,26 +78,6 @@ namespace MantidQt
     {
       ui.viewTable->setModel(new QReflTableModel(model));
       ui.viewTable->resizeColumnsToContents();
-    }
-
-    /**
-    Set the list of tables the user is offered to open
-    @param tables : the names of the tables in the ADS
-    */
-    void QtReflMainView::setTableList(const std::set<std::string>& tables)
-    {
-      ui.menuOpenTable->clear();
-
-      for(auto it = tables.begin(); it != tables.end(); ++it)
-      {
-        QAction* openTable = ui.menuOpenTable->addAction(QString::fromStdString(*it));
-
-        //Map this action to the table name
-        m_openMap->setMapping(openTable, QString::fromStdString(*it));
-
-        connect(openTable, SIGNAL(triggered()), m_openMap, SLOT(map()));
-        connect(m_openMap, SIGNAL(mapped(QString)), this, SLOT(setModel(QString)));
-      }
     }
 
     /**
