@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
 #include <boost/scoped_ptr.hpp>
+#include <QSignalMapper>
 #include "ui_ReflMainWidget.h"
 
 namespace MantidQt
@@ -50,6 +51,9 @@ namespace MantidQt
       //Connect the model
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model);
 
+      //Set the list of available tables to open
+      virtual void setTableList(const std::set<std::string>& tables);
+
       //Dialog/Prompt methods
       virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue);
       virtual bool askUserYesNo(std::string prompt, std::string title);
@@ -79,6 +83,7 @@ namespace MantidQt
       Ui::reflMainWidget ui;
       //the workspace the user selected to open
       std::string m_toOpen;
+      QSignalMapper* m_openMap;
 
     private slots:
       void setModel(QString name);
