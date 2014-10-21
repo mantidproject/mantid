@@ -4,6 +4,7 @@ from mantid.api import *
 
 import os
 import numpy as np
+import math
 
 
 def _split_line(a):
@@ -110,8 +111,6 @@ class MolDyn(PythonAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import ExtractFloat, ExtractInt
-        from IndirectNeutron import ChangeAngles, InstrParas, RunParas
         from IndirectImport import import_mantidplot
 
         self._mtd_plot = import_mantidplot()
@@ -402,6 +401,8 @@ class MolDyn(PythonAlgorithm):
         @param name Name of data file
         """
 
+        from IndirectNeutron import ChangeAngles, InstrParas, RunParas
+
         if self._verbose:
             logger.notice('Loading ASCII data: %s' % name)
 
@@ -582,7 +583,7 @@ class MolDyn(PythonAlgorithm):
         for i in range(0, num_hist):
             plot_list.append(i)
 
-        MTD_PLOT.plotSpectrum(ws_name, plot_list)
+        self._mtd_plot.plotSpectrum(ws_name, plot_list)
 
 
 # Register algorithm with Mantid
