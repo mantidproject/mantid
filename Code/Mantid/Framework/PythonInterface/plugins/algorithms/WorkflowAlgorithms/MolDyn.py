@@ -1,16 +1,9 @@
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
-from manitd import *
 
 import os
 import numpy as np
-
-from IndirectCommon import ExtractFloat, ExtractInt
-from IndirectNeutron import ChangeAngles, InstrParas, RunParas
-from IndirectImport import import_mantidplot
-
-MTD_PLOT = import_mantidplot()
 
 
 def _split_line(a):
@@ -114,6 +107,12 @@ class MolDyn(PythonAlgorithm):
 
 
     def PyExec(self):
+        from IndirectCommon import ExtractFloat, ExtractInt
+        from IndirectNeutron import ChangeAngles, InstrParas, RunParas
+        from IndirectImport import import_mantidplot
+
+        self._mtd_plot = import_mantidplot()
+
         # Do setup
         self._setup()
 
@@ -166,7 +165,7 @@ class MolDyn(PythonAlgorithm):
 
         # Plot contour plot
         if self._plot == 'Contour' or self._plot == 'Both':
-            MTD_PLOT.plot2D(self._out_ws)
+            self._mtd_plot.plot2D(self._out_ws)
 
 
     def _setup(self):
