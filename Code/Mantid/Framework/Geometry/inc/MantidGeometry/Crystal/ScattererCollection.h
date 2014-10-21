@@ -32,11 +32,23 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
+class ScattererCollection;
+
+typedef boost::shared_ptr<ScattererCollection> ScattererCollection_sptr;
+
 class MANTID_GEOMETRY_DLL ScattererCollection : public IScatterer
 {
 public:
     ScattererCollection();
     virtual ~ScattererCollection() { }
+
+    static ScattererCollection_sptr create();
+    static ScattererCollection_sptr create(const std::vector<IScatterer_sptr> &scatterers);
+
+    IScatterer_sptr clone() const;
+
+    void setCell(const UnitCell &cell);
+    void setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
 
     void addScatterer(const IScatterer_sptr &scatterer);
     size_t nScatterers() const;
@@ -46,10 +58,12 @@ public:
     StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const;
     
 protected:
+    void setCommonProperties(IScatterer_sptr &scatterer);
+
     std::vector<IScatterer_sptr> m_scatterers;
 };
 
-typedef boost::shared_ptr<ScattererCollection> ScattererCollection_sptr;
+
 
 } // namespace Geometry
 } // namespace Mantid
