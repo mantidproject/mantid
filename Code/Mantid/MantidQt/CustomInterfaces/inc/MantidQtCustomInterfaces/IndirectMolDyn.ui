@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>444</width>
-    <height>182</height>
+    <height>329</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,64 +15,113 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="0">
-      <widget class="QLabel" name="lblFunctionNames">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Function Names:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="leFunctionNames"/>
-     </item>
-     <item row="0" column="1">
-      <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRun" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="label" stdset="0">
-        <string/>
-       </property>
-       <property name="fileExtensions" stdset="0">
-        <stringlist>
-         <string>.dat</string>
-         <string>.cdl</string>
-        </stringlist>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="lblSample">
-       <property name="text">
-        <string>Sample Run:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="lblEnergyCrop">
-       <property name="text">
-        <string>Max. Energy:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="lblResolution">
-       <property name="text">
-        <string>Resolution:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
+    <widget class="QGroupBox" name="gbSimulation">
+     <property name="title">
+      <string>nMOLDYN</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lblSample">
+        <property name="text">
+         <string>Sample Run:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRun" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="label" stdset="0">
+         <string/>
+        </property>
+        <property name="fileExtensions" stdset="0">
+         <stringlist>
+          <string>.dat</string>
+          <string>.cdl</string>
+         </stringlist>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lblFunctionNames">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Function Names:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="leFunctionNames"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbOptions">
+     <property name="title">
+      <string>Options</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lblEnergyCrop">
+        <property name="text">
+         <string>Max. Energy:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="leMaxEnergy">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Crop the upper energy range of any workspaces with energy as the X unit (e.g. Sqw).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbInstRes">
+     <property name="title">
+      <string>Instrument Resolution</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="0">
+       <widget class="QLabel" name="lblResolution">
+        <property name="text">
+         <string>Resolution:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
        <widget class="MantidQt::MantidWidgets::DataSelector" name="dsResolution" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -102,28 +151,19 @@
          <bool>false</bool>
         </property>
        </widget>
-     </item>
-     <item row="2" column="1">
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="leMaxEnergy"/>
-       </item>
-      </layout>
-     </item>
-    </layout>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QCheckBox" name="ckResolution">
+        <property name="text">
+         <string>Use Instrument Resolution</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
     <spacer name="verticalSpacer">
@@ -151,7 +191,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QCheckBox" name="chkVerbose">
+       <widget class="QCheckBox" name="ckVerbose">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -218,7 +258,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QCheckBox" name="chkSave">
+       <widget class="QCheckBox" name="ckSave">
         <property name="text">
          <string>Save Result</string>
         </property>

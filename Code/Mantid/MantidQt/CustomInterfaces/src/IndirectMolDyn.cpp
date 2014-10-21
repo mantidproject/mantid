@@ -15,6 +15,8 @@ namespace MantidQt
 			IndirectSimulationTab(parent)
 		{
 			m_uiForm.setupUi(parent);
+
+      connect(m_uiForm.ckResolution, SIGNAL(toggled(bool)), m_uiForm.dsResolution, SLOT(setEnabled(bool)));
 		}
 
 		/**
@@ -30,9 +32,23 @@ namespace MantidQt
 
 			if(ext != "dat" && ext != "cdl")
 			{
-				emit showMessageBox("File is not of expected type:\n File type must be .dat or .cdl");
+				emit showMessageBox("File is not of expected type.\n File type must be .dat or .cdl");
 				return false;
 			}
+
+      if(m_uiForm.ckResolution->isChecked() && !m_uiForm.dsResolution->isValid())
+      {
+				emit showMessageBox("Invalid resolution file.");
+        return false;
+      }
+
+      bool energyIsNumber = false;
+      m_uiForm.leMaxEnergy->text().toDouble(&energyIsNumber);
+      if(!energyIsNumber)
+      {
+				emit showMessageBox("Max energy must be a number.");
+        return false;
+      }
 
 			return true;
 		}
@@ -51,12 +67,15 @@ namespace MantidQt
       IAlgorithm_sptr molDynAlg = AlgorithmManager::Instance().create("MolDyn");
       molDynAlg->setProperty("Filename", filename.toStdString());
       molDynAlg->setProperty("Functions", m_uiForm.leFunctionNames->text().toStdString());
-      molDynAlg->setProperty("Verbose", m_uiForm.chkVerbose->isChecked());
-      molDynAlg->setProperty("Save", m_uiForm.chkSave->isChecked());
+      molDynAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
+      molDynAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
       molDynAlg->setProperty("Plot", m_uiForm.cbPlot->currentText().toStdString());
       molDynAlg->setProperty("MaxEnergy", m_uiForm.leMaxEnergy->text().toStdString());
-      molDynAlg->setProperty("Resolution", m_uiForm.dsResolution->getCurrentDataName().toStdString());
       molDynAlg->setProperty("OutputWorkspace", baseName.toStdString());
+
+      // Set instrument resolution options
+      if(m_uiForm.ckResolution->isChecked())
+        molDynAlg->setProperty("Resolution", m_uiForm.dsResolution->getCurrentDataName().toStdString());
 
       runAlgorithm(molDynAlg);
 		}
