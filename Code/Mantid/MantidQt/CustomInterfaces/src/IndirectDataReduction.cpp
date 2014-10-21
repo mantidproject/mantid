@@ -156,6 +156,13 @@ void IndirectDataReduction::initLayout()
   connect(m_tab_trans, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
   connect(m_tab_moments, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
 
+  connect(this, SIGNAL(instrumentSelectionChanged(QString, QString, QString)), m_tab_convert_to_energy, SIGNAL(instrumentSelectionChanged(QString, QString, QString))), 
+  connect(this, SIGNAL(instrumentSelectionChanged(QString, QString, QString)), m_tab_sqw, SIGNAL(instrumentSelectionChanged(QString, QString, QString))), 
+  connect(this, SIGNAL(instrumentSelectionChanged(QString, QString, QString)), m_tab_calibration, SIGNAL(instrumentSelectionChanged(QString, QString, QString))), 
+  connect(this, SIGNAL(instrumentSelectionChanged(QString, QString, QString)), m_tab_diagnostics, SIGNAL(instrumentSelectionChanged(QString, QString, QString))), 
+  connect(this, SIGNAL(instrumentSelectionChanged(QString, QString, QString)), m_tab_trans, SIGNAL(instrumentSelectionChanged(QString, QString, QString))), 
+  connect(this, SIGNAL(instrumentSelectionChanged(QString, QString, QString)), m_tab_moments, SIGNAL(instrumentSelectionChanged(QString, QString, QString))), 
+
   // Run any tab setup code
   m_tab_convert_to_energy->setupTab();
   m_tab_sqw->setupTab();
@@ -207,6 +214,20 @@ void IndirectDataReduction::saveSettings()
 
   settings.setValue("instrument-name", instrName);
   settings.endGroup();
+}
+
+/**
+ * Called when any of the instrument configuration options are changed.
+ *
+ * Used to notify tabs that rely on the instrument config when the config changes.
+ */
+void IndirectDataReduction::instrumentChanged()
+{
+  QString instrumentName = m_uiForm.cbInst->currentText();
+  QString analyser = m_uiForm.cbAnalyser->currentText();
+  QString reflection = m_uiForm.cbReflection->currentText();
+
+  emit newInstrumentConfiguration(instrumentName, analyser, reflection);
 }
 
 /**

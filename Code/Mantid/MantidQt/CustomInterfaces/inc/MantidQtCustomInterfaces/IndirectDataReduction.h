@@ -76,11 +76,16 @@ namespace MantidQt
 
       void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf); ///< handle POCO event
 
+    signals:
+      /// Emitted when the instrument setup is changed
+      void newInstrumentConfiguration(QString instrumentName, QString analyser, QString reflection);
+        
     private slots:
       void helpClicked();
       void runClicked();
       void instrumentLoadingDone(bool error);
 
+      void instrumentChanged();
       void userSelectInstrument(const QString& name);
       void openDirectoryDialog();
       void showMessageBox(const QString& message); /// Slot showing a message box to the user
