@@ -9,6 +9,7 @@
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 
 #include <boost/regex.hpp>
+#include <boost/tokenizer.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -16,8 +17,11 @@ using namespace Mantid::Kernel;
 
 namespace
 {
-  void checkValidModel(ITableWorkspace_sptr model)
+  void validateModel(ITableWorkspace_sptr model)
   {
+    if(!model)
+      throw std::runtime_error("Null pointer");
+
     if(model->columnCount() != 9)
       throw std::runtime_error("Selected table has the incorrect number of columns (9) to be used as a reflectometry table.");
 
@@ -37,6 +41,19 @@ namespace
     {
       throw std::runtime_error("Selected table does not meet the specifications to become a model for this interface.");
     }
+  }
+
+  bool isValidModel(Workspace_sptr model)
+  {
+    try
+    {
+      validateModel(boost::dynamic_pointer_cast<ITableWorkspace>(model));
+    }
+    catch(...)
+    {
+      return false;
+    }
+    return true;
   }
 
   ITableWorkspace_sptr createWorkspace()
@@ -70,7 +87,14 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view): m_view(view), m_tableDirty(false)
+    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view):
+      m_view(view),
+      m_tableDirty(false),
+      m_addObserver(*this, &ReflMainViewPresenter::handleAddEvent),
+      m_remObserver(*this, &ReflMainViewPresenter::handleRemEvent),
+      m_clearObserver(*this, &ReflMainViewPresenter::handleClearEvent),
+      m_renameObserver(*this, &ReflMainViewPresenter::handleRenameEvent),
+      m_replaceObserver(*this, &ReflMainViewPresenter::handleReplaceEvent)
     {
       //Set up the instrument selectors
       std::vector<std::string> instruments;
@@ -86,11 +110,41 @@ namespace MantidQt
       else
         m_view->setInstrumentList(instruments, "INTER");
 
+      //Populate an initial list of valid tables to open, and subscribe to the ADS to keep it up to date
+      Mantid::API::AnalysisDataServiceImpl& ads = Mantid::API::AnalysisDataService::Instance();
+
+      std::set<std::string> items;
+      items = ads.getObjectNames();
+      for(auto it = items.begin(); it != items.end(); ++it )
+      {
+        const std::string name = *it;
+        Workspace_sptr ws = ads.retrieve(name);
+
+        if(isValidModel(ws))
+          m_workspaceList.insert(name);
+      }
+
+      ads.notificationCenter.addObserver(m_addObserver);
+      ads.notificationCenter.addObserver(m_remObserver);
+      ads.notificationCenter.addObserver(m_renameObserver);
+      ads.notificationCenter.addObserver(m_clearObserver);
+      ads.notificationCenter.addObserver(m_replaceObserver);
+
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
+
+      //Start with a blank table
       newTable();
     }
 
     ReflMainViewPresenter::~ReflMainViewPresenter()
     {
+      Mantid::API::AnalysisDataServiceImpl& ads = Mantid::API::AnalysisDataService::Instance();
+      ads.notificationCenter.removeObserver(m_addObserver);
+      ads.notificationCenter.removeObserver(m_remObserver);
+      ads.notificationCenter.removeObserver(m_clearObserver);
+      ads.notificationCenter.removeObserver(m_renameObserver);
+      ads.notificationCenter.removeObserver(m_replaceObserver);
     }
 
     /**
@@ -117,6 +171,41 @@ namespace MantidQt
         groupId++;
 
       return groupId;
+    }
+
+    /**
+    Parses a string in the format `a = 1,b=2, c = "1,2,3,4", d = 5.0, e='a,b,c'` into a map of key/value pairs
+    @param str The input string
+    */
+    std::map<std::string,std::string> ReflMainViewPresenter::parseKeyValueString(const std::string& str)
+    {
+      //Tokenise, using '\' as an escape character, ',' as a delimiter and " and ' as quote characters
+      boost::tokenizer<boost::escaped_list_separator<char> > tok(str, boost::escaped_list_separator<char>("\\", ",", "\"'"));
+
+      std::map<std::string,std::string> kvp;
+
+      for(auto it = tok.begin(); it != tok.end(); ++it)
+      {
+        std::vector<std::string> valVec;
+        boost::split(valVec, *it, boost::is_any_of("="));
+
+        if(valVec.size() > 1)
+        {
+          //We split on all '='s. The first delimits the key, the rest are assumed to be part of the value
+          std::string key = valVec[0];
+          //Drop the key from the values vector
+          valVec.erase(valVec.begin());
+          //Join the remaining sections,
+          std::string value = boost::algorithm::join(valVec, "=");
+
+          //Remove any unwanted whitespace
+          boost::trim(key);
+          boost::trim(value);
+
+          kvp[key] = value;
+        }
+      }
+      return kvp;
     }
 
     /**
@@ -410,7 +499,7 @@ namespace MantidQt
       algReflOne->setProperty("ThetaIn", theta);
 
       //Parse and set any user-specified options
-      auto optionsMap = Mantid::Kernel::Strings::splitToKeyValues(options);
+      auto optionsMap = parseKeyValueString(options);
       for(auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp)
       {
         try
@@ -770,21 +859,96 @@ namespace MantidQt
         return;
       }
 
-      ITableWorkspace_sptr newModel = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(toOpen);
+      ITableWorkspace_sptr origTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(toOpen);
+
+      //We create a clone of the table for live editing. The original is not updated unless we explicitly save.
+      ITableWorkspace_sptr newModel = boost::shared_ptr<ITableWorkspace>(origTable->clone());
       try
       {
-        checkValidModel(newModel);
+        validateModel(newModel);
+        m_model = newModel;
+        m_wsName = toOpen;
+        m_view->showTable(m_model);
+        m_tableDirty = false;
       }
       catch(std::runtime_error& e)
       {
-        m_view->giveUserCritical("Invalid workspace to open:\n" + std::string(e.what()), "Error");
-        return;
+        m_view->giveUserCritical("Could not open workspace: " + std::string(e.what()), "Error");
       }
+    }
 
-      m_model = newModel;
-      m_wsName = toOpen;
-      m_view->showTable(m_model);
-      m_tableDirty = false;
+    /**
+    Handle ADS add events
+    */
+    void ReflMainViewPresenter::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf)
+    {
+      const std::string name = pNf->objectName();
+
+      if(Mantid::API::AnalysisDataService::Instance().isHiddenDataServiceObject(name))
+        return;
+
+      if(!isValidModel(pNf->object()))
+        return;
+
+      m_workspaceList.insert(name);
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
+    }
+
+    /**
+    Handle ADS remove events
+    */
+    void ReflMainViewPresenter::handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf)
+    {
+      const std::string name = pNf->objectName();
+      m_workspaceList.erase(name);
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
+    }
+
+    /**
+    Handle ADS clear events
+    */
+    void ReflMainViewPresenter::handleClearEvent(Mantid::API::ClearADSNotification_ptr)
+    {
+      m_workspaceList.clear();
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
+    }
+
+    /**
+    Handle ADS rename events
+    */
+    void ReflMainViewPresenter::handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf)
+    {
+      //If we have this workspace, rename it
+      const std::string name = pNf->objectName();
+      const std::string newName = pNf->newObjectName();
+
+      if(m_workspaceList.find(name) == m_workspaceList.end())
+        return;
+
+      m_workspaceList.erase(name);
+      m_workspaceList.insert(newName);
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
+    }
+
+    /**
+    Handle ADS replace events
+    */
+    void ReflMainViewPresenter::handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
+    {
+      const std::string name = pNf->objectName();
+      //Erase it
+      m_workspaceList.erase(name);
+
+      //If it's a table workspace, bring it back
+      if(isValidModel(pNf->object()))
+        m_workspaceList.insert(name);
+
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
     }
   }
 }

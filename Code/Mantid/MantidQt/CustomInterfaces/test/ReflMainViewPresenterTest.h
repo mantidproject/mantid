@@ -97,6 +97,7 @@ public:
   {
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -104,7 +105,6 @@ public:
     presenter.notify(OpenTableFlag);
 
     presenter.notify(SaveFlag);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
 
@@ -112,6 +112,7 @@ public:
   {
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -129,9 +130,6 @@ public:
     EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillOnce(Return("Workspace"));
     presenter.notify(SaveAsFlag);
 
-    //Check calls were made as expected
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-
     //Check that the workspace was saved
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
 
@@ -144,6 +142,7 @@ public:
   {
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -165,9 +164,6 @@ public:
     EXPECT_CALL(mockView, askUserString(_,_,_)).Times(0);
     presenter.notify(SaveFlag);
 
-    //Check calls were made as expected
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-
     //Check that the workspace was saved
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
 
@@ -180,6 +176,7 @@ public:
   {
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -206,9 +203,6 @@ public:
     //The user hits "save"
     presenter.notify(SaveFlag);
 
-    //Check the calls were made as expected
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-
     //Check that the table has been modified correctly
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 6);
@@ -228,6 +222,7 @@ public:
   {
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -259,9 +254,6 @@ public:
     //The user hits "save"
     presenter.notify(SaveFlag);
 
-    //Check the calls were made as expected
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-
     //Check that the table has been modified correctly
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 6);
@@ -283,6 +275,7 @@ public:
   {
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -316,9 +309,6 @@ public:
     //The user hits "save"
     presenter.notify(SaveFlag);
 
-    //Check the calls were made as expected
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-
     //Check that the table was modified correctly
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 5);
@@ -340,6 +330,7 @@ public:
   {
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -362,9 +353,6 @@ public:
     //The user hits save
     presenter.notify(SaveFlag);
 
-    //Check the calls were made as expected
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-
     //Check that the table was not modified
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 4);
@@ -379,6 +367,7 @@ public:
   {
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -404,9 +393,6 @@ public:
     //The user hits "save"
     presenter.notify(SaveFlag);
 
-    //Check the calls were made as expected
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 3);
     TS_ASSERT_EQUALS(ws->String(1, RunCol), "13469");
@@ -421,6 +407,7 @@ public:
   {
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -448,9 +435,6 @@ public:
     //The user hits save
     presenter.notify(SaveFlag);
 
-    //Check the calls were made as expected
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-
     //Check the rows were deleted as expected
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 1);
@@ -468,6 +452,7 @@ public:
   {
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -487,9 +472,6 @@ public:
     EXPECT_CALL(mockView, setProgressRange(_,_));
     EXPECT_CALL(mockView, setProgress(_)).Times(4);
     presenter.notify(ProcessFlag);
-
-    //Check the calls were made as expected
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
 
     //Check output workspaces were created as expected
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460"));
@@ -537,6 +519,7 @@ public:
 
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
     EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(OpenTableFlag);
@@ -554,9 +537,6 @@ public:
     EXPECT_CALL(mockView, setProgressRange(_,_));
     EXPECT_CALL(mockView, setProgress(_)).Times(4);
     presenter.notify(ProcessFlag);
-
-    //Check the calls were made as expected
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
 
     //Check output workspaces were created as expected
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_dataA"));
@@ -591,6 +571,7 @@ public:
 
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
     EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(OpenTableFlag);
@@ -611,9 +592,6 @@ public:
 
     //The user hits the "save" button
     presenter.notify(SaveFlag);
-
-    //Check the calls were made as expected
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
 
     //Check the table was updated as expected
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
@@ -656,6 +634,7 @@ public:
 
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     //We should receive an error
@@ -671,6 +650,7 @@ public:
   {
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     //Because we to open twice, get an error twice
@@ -699,6 +679,19 @@ public:
     presenter.notify(OpenTableFlag);
 
     AnalysisDataService::Instance().remove("TestWorkspace");
+  }
+
+  void testParseKeyValueString()
+  {
+    std::map<std::string,std::string> kvp = ReflMainViewPresenter::parseKeyValueString("a = 1,b=2.0, c=3, d='1,2,3',e=\"4,5,6\",f=1+1=2, g = '\\''");
+
+    TS_ASSERT_EQUALS(kvp["a"], "1");
+    TS_ASSERT_EQUALS(kvp["b"], "2.0");
+    TS_ASSERT_EQUALS(kvp["c"], "3");
+    TS_ASSERT_EQUALS(kvp["d"], "1,2,3");
+    TS_ASSERT_EQUALS(kvp["e"], "4,5,6");
+    TS_ASSERT_EQUALS(kvp["f"], "1+1=2");
+    TS_ASSERT_EQUALS(kvp["g"], "'");
   }
 };
 
