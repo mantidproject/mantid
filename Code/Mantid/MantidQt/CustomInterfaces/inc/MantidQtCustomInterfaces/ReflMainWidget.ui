@@ -375,6 +375,9 @@
      <height>23</height>
     </rect>
    </property>
+   <property name="nativeMenuBar">
+     <bool>false</bool>
+   </property>
    <widget class="QMenu" name="menuTable">
     <property name="title">
      <string>Table</string>
