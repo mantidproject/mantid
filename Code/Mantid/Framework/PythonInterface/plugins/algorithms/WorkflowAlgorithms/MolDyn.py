@@ -79,11 +79,8 @@ class MolDyn(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty('Resolution', '', Direction.Input, PropertyMode.Optional),
                              doc='Resolution workspace')
 
-        self.declareProperty(name='Crop', defaultValue=False,
-                             doc='Crop the energy range')
-
         self.declareProperty(name='MaxEnergy', defaultValue='',
-                             doc='Maximum energy for cropping')
+                             doc='Crop the result spectra at a given energy')
 
         self.declareProperty(name='Plot', defaultValue='None',
                              validator=StringListValidator(['None', 'Spectra', 'Contour', 'Both']),
@@ -106,10 +103,10 @@ class MolDyn(PythonAlgorithm):
         function_list = self.getProperty('Functions').value
         res_ws = self.getPropertyValue('Resolution')
 
-        if len(function_list) == 0 and os.path.splitext(sample_filename)[1] == '.cdl':
+        if len(function_list) == 0 and os.path.splitext(sample_filename)[1] == 'cdl':
             issues['Functions'] = 'Must specify at least one function when loading a CDL file'
 
-        if len(function_list) > 0 and os.path.splitext(sample_filename)[1] == '.dat':
+        if len(function_list) > 0 and os.path.splitext(sample_filename)[1] == 'dat':
             issues['Functions'] = 'Cannot specify functions when loading an ASCII file'
 
         if res_ws is not '' and len(function_list) > 1:
@@ -126,9 +123,9 @@ class MolDyn(PythonAlgorithm):
         data, name, ext = self._load_file()
 
         # Run MolDyn import
-        if ext == '.cdl':
+        if ext == 'cdl':
             self._cdl_import(data, name)
-        elif ext == '.dat':
+        elif ext == 'dat':
             self._ascii_import(data, name)
         else:
             raise RuntimeError('Unrecognised file format: %s' % ext)
@@ -175,7 +172,6 @@ class MolDyn(PythonAlgorithm):
         raw_functions = self.getProperty('Functions').value
         self._functions = [x.strip() for x in raw_functions]
 
-        self._crop = self.getProperty('Crop').value
         self._emax = self.getPropertyValue('MaxEnergy')
 
         self._res_ws = self.getPropertyValue('Resolution')
@@ -195,8 +191,17 @@ class MolDyn(PythonAlgorithm):
         name = os.path.splitext(base)[0]
         ext = os.path.splitext(path)[1]
 
+        # Remove dot from extension
+        if len(ext) > 1:
+            ext = ext[1:]
+
+        logger.information('Base filename for %s is %s' % (self._sam_path, name))
+        logger.information('File type of %s is %s' % (self._sam_path, ext))
+
         if not os.path.isfile(path):
             path = FileFinder.getFullPath(path)
+
+        logger.information('Got file path for %s: %s' % (self._sam_path, path))
 
         # Open file and get data
         try:
@@ -445,20 +450,47 @@ class MolDyn(PythonAlgorithm):
 
         function_ws_name = mtd[self._out_ws].getItem(0).getName()
 
+        num_sample_hist = mtd[function_ws_name].getNumberHistograms()
+        num_res_hist = mtd[self._res_ws].getNumberHistograms()
+
+        logger.information('Sample has %d spectra\nResolution has %d spectra'
+                           % (num_sample_hist, num_res_hist))
+
+        # If the sample workspace has more spectra than the resolution then copy the first spectra
+        # to make a workspace with equal spectra count to sample
+        if num_sample_hist > num_res_hist:
+            logger.information('Copying first resolution spectra for convolution')
+
+            res_ws_list = []
+            for _ in range(0, num_sample_hist):
+                res_ws_list.append(self._res_ws)
+
+            res_ws_str_list = ','.join(res_ws_list)
+            resolution_ws = ConjoinSpectra(res_ws_str_list, 0)
+
+        # If sample has less spectra then crop the resolution to the same number of spectra as
+        # resolution
+        elif num_sample_hist < num_res_hist:
+            logger.information('Cropping resolution workspace to sample')
+            resolution_ws = CropWorkspace(InputWorkspace=self._res_ws, StartWorkspaceIndex=0,
+                                          EndWorkspaceIndex=num_sample_hist)
+        
+        # If the spectra counts match then just use the resolution as it is
+        else:
+            logger.information('Using resolution workspace as is')
+            resolution_ws = CloneWorkspace(self._res_ws)
+
+        # Symmetrise the sample WS in x=0 as nMOLDYN only gives positive energy values
         Symmetrise(Sample=function_ws_name, XMin=0, XMax=self._emax,
                    Verbose=self._verbose, Plot=False, Save=False,
                    OutputWorkspace=function_ws_name)
 
-        num_hist = mtd[function_ws_name].getNumberHistograms()
-        res_ws_list = []
-        for i in range(0, num_hist):
-            res_ws_list.append(self._res_ws)
+        # Convolve the symmetrised sample with the resolution
+        ConvolveWorkspaces(OutputWorkspace=function_ws_name,
+                           Workspace1=function_ws_name, Workspace2=resolution_ws)
 
-        res_ws_str_list = ','.join(res_ws_list)
-        res_multi_spec_ws = ConjoinSpectra(res_ws_str_list, 0)
-
-        ConvolveWorkspaces(OutputWorkspace=self._out_ws,
-                           Workspace1=function_ws_name, Workspace2=res_multi_spec_ws)
+        # Remove the generated resolution workspace
+        DeleteWorkspace(resolution_ws)
 
 
     def _plot_spectra(self, ws_name):
