@@ -17,8 +17,11 @@ using namespace Mantid::Kernel;
 
 namespace
 {
-  void checkValidModel(ITableWorkspace_sptr model)
+  void validateModel(ITableWorkspace_sptr model)
   {
+    if(!model)
+      throw std::runtime_error("Null pointer");
+
     if(model->columnCount() != 9)
       throw std::runtime_error("Selected table has the incorrect number of columns (9) to be used as a reflectometry table.");
 
@@ -38,6 +41,19 @@ namespace
     {
       throw std::runtime_error("Selected table does not meet the specifications to become a model for this interface.");
     }
+  }
+
+  bool isValidModel(Workspace_sptr model)
+  {
+    try
+    {
+      validateModel(boost::dynamic_pointer_cast<ITableWorkspace>(model));
+    }
+    catch(...)
+    {
+      return false;
+    }
+    return true;
   }
 
   ITableWorkspace_sptr createWorkspace()
@@ -71,7 +87,13 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view): m_view(view)
+    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view):
+      m_view(view),
+      m_addObserver(*this, &ReflMainViewPresenter::handleAddEvent),
+      m_remObserver(*this, &ReflMainViewPresenter::handleRemEvent),
+      m_clearObserver(*this, &ReflMainViewPresenter::handleClearEvent),
+      m_renameObserver(*this, &ReflMainViewPresenter::handleRenameEvent),
+      m_replaceObserver(*this, &ReflMainViewPresenter::handleReplaceEvent)
     {
       //Set up the instrument selectors
       std::vector<std::string> instruments;
@@ -87,11 +109,41 @@ namespace MantidQt
       else
         m_view->setInstrumentList(instruments, "INTER");
 
+      //Populate an initial list of valid tables to open, and subscribe to the ADS to keep it up to date
+      Mantid::API::AnalysisDataServiceImpl& ads = Mantid::API::AnalysisDataService::Instance();
+
+      std::set<std::string> items;
+      items = ads.getObjectNames();
+      for(auto it = items.begin(); it != items.end(); ++it )
+      {
+        const std::string name = *it;
+        Workspace_sptr ws = ads.retrieve(name);
+
+        if(isValidModel(ws))
+          m_workspaceList.insert(name);
+      }
+
+      ads.notificationCenter.addObserver(m_addObserver);
+      ads.notificationCenter.addObserver(m_remObserver);
+      ads.notificationCenter.addObserver(m_renameObserver);
+      ads.notificationCenter.addObserver(m_clearObserver);
+      ads.notificationCenter.addObserver(m_replaceObserver);
+
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
+
+      //Start with a blank table
       newTable();
     }
 
     ReflMainViewPresenter::~ReflMainViewPresenter()
     {
+      Mantid::API::AnalysisDataServiceImpl& ads = Mantid::API::AnalysisDataService::Instance();
+      ads.notificationCenter.removeObserver(m_addObserver);
+      ads.notificationCenter.removeObserver(m_remObserver);
+      ads.notificationCenter.removeObserver(m_clearObserver);
+      ads.notificationCenter.removeObserver(m_renameObserver);
+      ads.notificationCenter.removeObserver(m_replaceObserver);
     }
 
     /**
@@ -784,20 +836,95 @@ namespace MantidQt
         return;
       }
 
-      ITableWorkspace_sptr newModel = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(toOpen);
+      ITableWorkspace_sptr origTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(toOpen);
+
+      //We create a clone of the table for live editing. The original is not updated unless we explicitly save.
+      ITableWorkspace_sptr newModel = boost::shared_ptr<ITableWorkspace>(origTable->clone());
       try
       {
-        checkValidModel(newModel);
+        validateModel(newModel);
+        m_model = newModel;
+        m_wsName = toOpen;
+        m_view->showTable(m_model);
       }
       catch(std::runtime_error& e)
       {
-        m_view->giveUserCritical("Invalid workspace to open:\n" + std::string(e.what()), "Error");
-        return;
+        m_view->giveUserCritical("Could not open workspace: " + std::string(e.what()), "Error");
       }
+    }
 
-      m_model = newModel;
-      m_wsName = toOpen;
-      m_view->showTable(m_model);
+    /**
+    Handle ADS add events
+    */
+    void ReflMainViewPresenter::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf)
+    {
+      const std::string name = pNf->objectName();
+
+      if(Mantid::API::AnalysisDataService::Instance().isHiddenDataServiceObject(name))
+        return;
+
+      if(!isValidModel(pNf->object()))
+        return;
+
+      m_workspaceList.insert(name);
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
+    }
+
+    /**
+    Handle ADS remove events
+    */
+    void ReflMainViewPresenter::handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf)
+    {
+      const std::string name = pNf->objectName();
+      m_workspaceList.erase(name);
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
+    }
+
+    /**
+    Handle ADS clear events
+    */
+    void ReflMainViewPresenter::handleClearEvent(Mantid::API::ClearADSNotification_ptr)
+    {
+      m_workspaceList.clear();
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
+    }
+
+    /**
+    Handle ADS rename events
+    */
+    void ReflMainViewPresenter::handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf)
+    {
+      //If we have this workspace, rename it
+      const std::string name = pNf->objectName();
+      const std::string newName = pNf->newObjectName();
+
+      if(m_workspaceList.find(name) == m_workspaceList.end())
+        return;
+
+      m_workspaceList.erase(name);
+      m_workspaceList.insert(newName);
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
+    }
+
+    /**
+    Handle ADS replace events
+    */
+    void ReflMainViewPresenter::handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
+    {
+      const std::string name = pNf->objectName();
+      //Erase it
+      m_workspaceList.erase(name);
+
+      //If it's a table workspace, bring it back
+      if(isValidModel(pNf->object()))
+        m_workspaceList.insert(name);
+
+      if(m_view)
+        m_view->setTableList(m_workspaceList);
     }
   }
 }

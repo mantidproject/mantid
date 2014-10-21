@@ -1,11 +1,16 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 
-#include "MantidKernel/System.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
+
+#include <Poco/AutoPtr.h>
+#include <Poco/NObserver.h>
+
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -81,6 +86,22 @@ namespace MantidQt
       virtual void openTable();
       virtual void saveTable();
       virtual void saveTableAs();
+
+      //List of workspaces the user can open
+      std::set<std::string> m_workspaceList;
+
+      //To maintain a list of workspaces the user may open, we observe the ADS
+      Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspaceAddNotification> m_addObserver;
+      Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspacePostDeleteNotification> m_remObserver;
+      Poco::NObserver<ReflMainViewPresenter, Mantid::API::ClearADSNotification> m_clearObserver;
+      Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
+      Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
+
+      void handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf);
+      void handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
+      void handleClearEvent(Mantid::API::ClearADSNotification_ptr pNf);
+      void handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf);
+      void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
     public:
       static const int COL_RUNS         = 0;
