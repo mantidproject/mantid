@@ -3,6 +3,8 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidGeometry/Crystal/SpaceGroup.h"
 
 #include <complex>
 #include <boost/shared_ptr.hpp>
@@ -16,8 +18,8 @@ typedef std::complex<double> StructureFactor;
 
 /** IScatterer
 
-    General interface for any kind of scatterer. The position must be set in
-    Angstrom, not as a relative position in terms of the unit cell.
+    General interface for any kind of scatterer. Position is expected to
+    be set as fractional coordinates with respect to the crystal axes.
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 20/10/2014
@@ -42,22 +44,40 @@ typedef std::complex<double> StructureFactor;
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
+
+class IScatterer;
+
+typedef boost::shared_ptr<IScatterer> IScatterer_sptr;
+
 class MANTID_GEOMETRY_DLL IScatterer
 {
 public:
     IScatterer(const Kernel::V3D &position = Kernel::V3D(0.0, 0.0, 0.0));
     virtual ~IScatterer() { }
 
-    void setPosition(const Kernel::V3D &position);
+    virtual IScatterer_sptr clone() const = 0;
+
+    virtual void setPosition(const Kernel::V3D &position);
     Kernel::V3D getPosition() const;
+    std::vector<Kernel::V3D> getEquivalentPositions() const;
+
+    virtual void setCell(const UnitCell &cell);
+    UnitCell getCell() const;
+
+    virtual void setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
+    SpaceGroup_const_sptr getSpaceGroup() const;
 
     virtual StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const = 0;
     
 protected:
-    Kernel::V3D m_position;
-};
+    void recalculateEquivalentPositions();
 
-typedef boost::shared_ptr<IScatterer> IScatterer_sptr;
+    Kernel::V3D m_position;
+    std::vector<Kernel::V3D> m_equivalentPositions;
+
+    UnitCell m_cell;
+    SpaceGroup_const_sptr m_spaceGroup;
+};
 
 } // namespace Geometry
 } // namespace Mantid
