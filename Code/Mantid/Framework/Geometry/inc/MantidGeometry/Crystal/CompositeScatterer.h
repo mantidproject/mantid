@@ -10,9 +10,27 @@ namespace Mantid
 namespace Geometry
 {
 
-/** CompositeScatterer : TODO: DESCRIPTION
+/** CompositeScatterer
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    CompositeScatterer accumulates scatterers, for easier calculation
+    of structure factors. Scatterers can be added through the method
+    addScatterer. The supplied scatterer is not stored directly,
+    it is cloned instead, so there is a new instance. The original instance
+    is not modified at all.
+
+    This is important for the behavior of setCell and setSpaceGroup. They
+    propagate the supplied value to all internally stored scatterers. This
+    makes sense from a crystallographic point of view, since a group of scatterers
+    can not contain members that belong to a different crystal structure.
+
+    For structure factor calculations, all contributions from contained scatterers
+    are summed. Contained scatterers may be CompositeScatterers themselves,
+    so it's possible to build up elaborate structures.
+
+      @author Michael Wedel, Paul Scherrer Institut - SINQ
+      @date 21/10/2014
+
+    Copyright © 2014 PSI-MSS
 
     This file is part of Mantid.
 

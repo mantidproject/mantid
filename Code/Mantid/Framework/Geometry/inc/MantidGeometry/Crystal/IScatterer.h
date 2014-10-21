@@ -21,6 +21,22 @@ typedef std::complex<double> StructureFactor;
     General interface for any kind of scatterer. Position is expected to
     be set as fractional coordinates with respect to the crystal axes.
 
+    Currently there are two implementations of this interface, IsotropicAtomScatterer
+    and CompositeScatterer (composite pattern).
+
+    Most of the interface serves the purpose of providing necessary
+    infrastructure for calculating structure factors. This includes
+    information about unit cell and space group, as well as position
+    of the scatterer in the cell.
+
+    Please note the default behavior of the methods setPosition and setSpaceGroup.
+    When either of them is called, the equivalent positions are recalculated. For
+    more information on how this is done, please consult the documentation
+    of SpaceGroup.
+
+    If no space group is set, or it's P1, only one "equivalent" position is
+    generated - the position itself.
+
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 20/10/2014
 

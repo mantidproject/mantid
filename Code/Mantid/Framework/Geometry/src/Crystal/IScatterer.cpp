@@ -1,4 +1,5 @@
 #include "MantidGeometry/Crystal/IScatterer.h"
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -54,11 +55,13 @@ void IScatterer::setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup)
     recalculateEquivalentPositions();
 }
 
+/// Returns the assigned space group.
 SpaceGroup_const_sptr IScatterer::getSpaceGroup() const
 {
     return m_spaceGroup;
 }
 
+/// Uses the stored space group to calculate all equivalent positions or if present.
 void IScatterer::recalculateEquivalentPositions()
 {
     m_equivalentPositions.clear();
