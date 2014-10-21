@@ -114,7 +114,7 @@ namespace DataHandling
     size_t length = x.size();
     for (size_t i = 0; i < length; ++i)
     {
-      out << x[i] << "  " << y[i] << "  " << dx[i] << "  " << dy[i] << "\n";
+      out << "  " << x[i] << "  " << y[i] << "  " << dx[i] << "  " << dy[i] << "\n";
     }
 
     // --------- close the file
