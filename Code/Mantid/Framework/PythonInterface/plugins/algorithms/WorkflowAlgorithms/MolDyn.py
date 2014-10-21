@@ -1,6 +1,7 @@
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
+from manitd import *
 
 import os
 import numpy as np
