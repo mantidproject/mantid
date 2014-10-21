@@ -15,7 +15,6 @@ set ( SRC_FILES
 	src/Crystal/ProductOfCyclicGroups.cpp
 	src/Crystal/ReducedCell.cpp
 	src/Crystal/ReflectionCondition.cpp
-	src/Crystal/RigidAtomScatterer.cpp
 	src/Crystal/ScalarUtils.cpp
 	src/Crystal/ScattererCollection.cpp
 	src/Crystal/SpaceGroup.cpp
@@ -130,7 +129,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/ProductOfCyclicGroups.h
 	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
-	inc/MantidGeometry/Crystal/RigidAtomScatterer.h
 	inc/MantidGeometry/Crystal/ScalarUtils.h
 	inc/MantidGeometry/Crystal/ScattererCollection.h
 	inc/MantidGeometry/Crystal/SpaceGroup.h
@@ -292,7 +290,6 @@ set ( TEST_FILES
 	ReducedCellTest.h
 	ReferenceFrameTest.h
 	ReflectionConditionTest.h
-	RigidAtomScattererTest.h
 	RotCounterTest.h
 	RulesBoolValueTest.h
 	RulesCompGrpTest.h

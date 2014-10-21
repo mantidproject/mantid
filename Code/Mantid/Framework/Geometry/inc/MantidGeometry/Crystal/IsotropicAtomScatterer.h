@@ -1,8 +1,9 @@
 #ifndef MANTID_GEOMETRY_ISOTROPICATOMSCATTERER_H_
 #define MANTID_GEOMETRY_ISOTROPICATOMSCATTERER_H_
 
-#include "MantidGeometry/Crystal/RigidAtomScatterer.h"
+#include "MantidGeometry/Crystal/IScatterer.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidKernel/NeutronAtom.h"
 
 namespace Mantid
 {
@@ -31,24 +32,40 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_GEOMETRY_DLL IsotropicAtomScatterer : public RigidAtomScatterer
+class MANTID_GEOMETRY_DLL IsotropicAtomScatterer : public IScatterer
 {
 public:
-    IsotropicAtomScatterer(const std::string &element, const Kernel::V3D &position, const UnitCell &cell, double U, double occupancy = 1.0);
+    IsotropicAtomScatterer(const std::string &element,
+                           const Kernel::V3D &position,
+                           double U, double occupancy = 1.0);
     virtual ~IsotropicAtomScatterer() { }
+
+    IScatterer_sptr clone() const;
+
+    void setElement(const std::string &element);
+    std::string getElement() const;
+    PhysicalConstants::NeutronAtom getNeutronAtom() const;
+
+    void setOccupancy(double occupancy);
+    double getOccupancy() const;
 
     void setU(double U);
     double getU() const;
 
-    void setCell(const UnitCell &cell);
-    UnitCell getCell() const;
-
     StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const;
 
 protected:
+    double getDebyeWallerFactor(const Kernel::V3D &hkl) const;
+    double getScatteringLength() const;
+
+    PhysicalConstants::NeutronAtom m_atom;
+    std::string m_label;
+
+    double m_occupancy;
     double m_U;
-    UnitCell m_cell;
 };
+
+typedef boost::shared_ptr<IsotropicAtomScatterer> IsotropicAtomScatterer_sptr;
 
 
 } // namespace Geometry
