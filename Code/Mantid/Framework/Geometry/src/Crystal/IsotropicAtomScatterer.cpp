@@ -74,7 +74,7 @@ double IsotropicAtomScatterer::getU() const
 
 StructureFactor IsotropicAtomScatterer::calculateStructureFactor(const Kernel::V3D &hkl) const
 {
-    double amplitude = getDebyeWallerFactor(hkl) * getScatteringLength();
+    double amplitude = getOccupancy() * getDebyeWallerFactor(hkl) * getScatteringLength();
 
     StructureFactor sum(0.0, 0.0);
 
