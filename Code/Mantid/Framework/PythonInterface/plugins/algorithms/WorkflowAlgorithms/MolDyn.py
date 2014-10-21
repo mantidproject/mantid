@@ -135,7 +135,11 @@ class MolDyn(PythonAlgorithm):
 
             # Convolve all workspaces in output group
             for ws_name in mtd[self._out_ws].getNames():
-                self._convolve_with_res(resolution_ws, ws_name)
+                if ws_name.lower().find('sqw') != -1:
+                    self._convolve_with_res(resolution_ws, ws_name)
+                else:
+                    if self._verbose:
+                        logger.notice('Ignoring workspace %s in convolution step' % ws_name)
 
             # Remove the generated resolution workspace
             DeleteWorkspace(resolution_ws)
@@ -201,13 +205,15 @@ class MolDyn(PythonAlgorithm):
         if len(ext) > 1:
             ext = ext[1:]
 
-        logger.information('Base filename for %s is %s' % (self._sam_path, name))
-        logger.information('File type of %s is %s' % (self._sam_path, ext))
+        if self._verbose:
+            logger.information('Base filename for %s is %s' % (self._sam_path, name))
+            logger.information('File type of %s is %s' % (self._sam_path, ext))
 
         if not os.path.isfile(path):
             path = FileFinder.getFullPath(path)
 
-        logger.information('Got file path for %s: %s' % (self._sam_path, path))
+        if self._verbose:
+            logger.information('Got file path for %s: %s' % (self._sam_path, path))
 
         # Open file and get data
         try:
@@ -258,7 +264,8 @@ class MolDyn(PythonAlgorithm):
         @param name Name of data file
         """
 
-        logger.notice('Loading CDL file: %s' % name)
+        if self._verbose:
+            logger.notice('Loading CDL file: %s' % name)
 
         len_data = len(data)
 
@@ -385,7 +392,8 @@ class MolDyn(PythonAlgorithm):
         @param name Name of data file
         """
 
-        logger.notice('Loading ASCII data: %s' % name)
+        if self._verbose:
+            logger.notice('Loading ASCII data: %s' % name)
 
         val = _split_line(data[3])
         Q = []
@@ -463,14 +471,16 @@ class MolDyn(PythonAlgorithm):
 
         num_res_hist = mtd[self._res_ws].getNumberHistograms()
 
-        logger.notice('Creating resoluton workspace.')
-        logger.information('Sample has %d spectra\nResolution has %d spectra'
-                           % (num_sample_hist, num_res_hist))
+        if self._verbose:
+            logger.notice('Creating resoluton workspace.')
+            logger.information('Sample has %d spectra\nResolution has %d spectra'
+                               % (num_sample_hist, num_res_hist))
 
         # If the sample workspace has more spectra than the resolution then copy the first spectra
         # to make a workspace with equal spectra count to sample
         if num_sample_hist > num_res_hist:
-            logger.information('Copying first resolution spectra for convolution')
+            if self._verbose:
+                logger.information('Copying first resolution spectra for convolution')
 
             res_ws_list = []
             for _ in range(0, num_sample_hist):
@@ -482,13 +492,17 @@ class MolDyn(PythonAlgorithm):
         # If sample has less spectra then crop the resolution to the same number of spectra as
         # resolution
         elif num_sample_hist < num_res_hist:
-            logger.information('Cropping resolution workspace to sample')
+            if self._verbose:
+                logger.information('Cropping resolution workspace to sample')
+
             resolution_ws = CropWorkspace(InputWorkspace=self._res_ws, StartWorkspaceIndex=0,
                                           EndWorkspaceIndex=num_sample_hist)
 
         # If the spectra counts match then just use the resolution as it is
         else:
-            logger.information('Using resolution workspace as is')
+            if self._verbose:
+                logger.information('Using resolution workspace as is')
+
             resolution_ws = CloneWorkspace(self._res_ws)
 
         return resolution_ws
@@ -502,8 +516,9 @@ class MolDyn(PythonAlgorithm):
         @param function_ws_name The workspace name for the function to convolute
         """
 
-        logger.notice('Convoluting sample %s with resolution %s'
-                      % (function_ws_name, resolution_ws))
+        if self._verbose:
+            logger.notice('Convoluting sample %s with resolution %s'
+                          % (function_ws_name, resolution_ws))
 
         # Symmetrise the sample WS in x=0 as nMOLDYN only gives positive energy values
         Symmetrise(Sample=function_ws_name, XMin=0, XMax=self._emax,
