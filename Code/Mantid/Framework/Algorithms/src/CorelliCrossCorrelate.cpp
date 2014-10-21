@@ -117,13 +117,13 @@ namespace Algorithms
 
     std::vector<double> sequence;
     sequence.resize(chopperSequenceSplit.size());
-    sequence[0] = std::stod(chopperSequenceSplit[0]);
+    sequence[0] = boost::lexical_cast<double>(chopperSequenceSplit[0]);
 
     //Need the cumulative sum of the chopper sequence and total transparent
     double totalOpen = 0;
     for (unsigned int i=1; i<chopperSequenceSplit.size(); i++)
       {
-	double seqAngle = std::stod(chopperSequenceSplit[i]);
+	double seqAngle = boost::lexical_cast<double>(chopperSequenceSplit[i]);
 	sequence[i]=sequence[i-1]+seqAngle;
 	if (i % 2 == 1)
 	  totalOpen+=seqAngle;
