@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/FitPropertyBrowser.cpp
 	src/FormulaDialogEditor.cpp
 	src/FunctionBrowser.cpp
+	src/HintingLineEdit.cpp
 	src/InstrumentSelector.cpp
         src/MantidHelpWindow.cpp
 	src/MWDiag.cpp
@@ -53,6 +54,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/FindDialog.h
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h
     inc/MantidQtMantidWidgets/FunctionBrowser.h
+    inc/MantidQtMantidWidgets/HintingLineEdit.h
     inc/MantidQtMantidWidgets/CatalogSearch.h
     inc/MantidQtMantidWidgets/CatalogSelector.h
     inc/MantidQtMantidWidgets/InstrumentSelector.h
