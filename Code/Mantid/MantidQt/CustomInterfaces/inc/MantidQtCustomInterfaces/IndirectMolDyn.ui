@@ -78,15 +78,18 @@
       <string>Options</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
-       <widget class="QLabel" name="lblEnergyCrop">
-        <property name="text">
-         <string>Max. Energy:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
+      <item row="1" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QCheckBox" name="ckCropEnergy">
+          <property name="text">
+           <string>Crop Max Energy</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
         <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
@@ -107,6 +110,13 @@
           </property>
           <property name="text">
            <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lblEnergyCropUnits">
+          <property name="text">
+           <string>meV</string>
           </property>
          </widget>
         </item>
@@ -297,6 +307,7 @@
  <tabstops>
   <tabstop>mwRun</tabstop>
   <tabstop>leFunctionNames</tabstop>
+  <tabstop>ckCropEnergy</tabstop>
   <tabstop>leMaxEnergy</tabstop>
   <tabstop>ckResolution</tabstop>
   <tabstop>dsResolution</tabstop>

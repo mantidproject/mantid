@@ -103,6 +103,9 @@ class MolDyn(PythonAlgorithm):
         if len(function_list) > 0 and os.path.splitext(sample_filename)[1] == 'dat':
             issues['Functions'] = 'Cannot specify functions when loading an ASCII file'
 
+        if res_ws is not '' and emax is '':
+            issues['MaxEnergy'] = 'MaxEnergy must be set when convolving with an instrument resolution'
+
         return issues
 
 
@@ -119,7 +122,7 @@ class MolDyn(PythonAlgorithm):
         # Load data file
         data, name, ext = self._load_file()
 
-        # Run MolDyn import
+        # Run nMOLDYN import
         if ext == 'cdl':
             self._cdl_import(data, name)
         elif ext == 'dat':
@@ -143,6 +146,10 @@ class MolDyn(PythonAlgorithm):
 
             # Remove the generated resolution workspace
             DeleteWorkspace(resolution_ws)
+
+        # Do energy crop
+        if self._emax is not None:
+            self._energy_crop()
 
         # Save result workspace group
         if self._save:
@@ -182,7 +189,10 @@ class MolDyn(PythonAlgorithm):
         raw_functions = self.getProperty('Functions').value
         self._functions = [x.strip() for x in raw_functions]
 
-        self._emax = self.getPropertyValue('MaxEnergy')
+        emax_str = self.getPropertyValue('MaxEnergy')
+        self._emax = None
+        if emax_str != '':
+            self._emax = float(emax_str)
 
         self._res_ws = self.getPropertyValue('Resolution')
         self._out_ws = self.getPropertyValue('OutputWorkspace')
@@ -472,7 +482,7 @@ class MolDyn(PythonAlgorithm):
         num_res_hist = mtd[self._res_ws].getNumberHistograms()
 
         if self._verbose:
-            logger.notice('Creating resoluton workspace.')
+            logger.notice('Creating resolution workspace.')
             logger.information('Sample has %d spectra\nResolution has %d spectra'
                                % (num_sample_hist, num_res_hist))
 
@@ -528,6 +538,30 @@ class MolDyn(PythonAlgorithm):
         # Convolve the symmetrised sample with the resolution
         ConvolveWorkspaces(OutputWorkspace=function_ws_name,
                            Workspace1=function_ws_name, Workspace2=resolution_ws)
+
+
+    def _energy_crop(self):
+        """
+        For each workspace in the result that has an X unit in Energy, apply
+        a crop to MaxEnergy
+        """
+
+        if self._verbose:
+            logger.notice('Cropping workspaces in energy to %f'
+                          % self._emax)
+
+        for ws_name in mtd[self._out_ws].getNames():
+            if mtd[ws_name].getAxis(0).getUnit().unitID() == 'Energy':
+                if self._verbose:
+                    logger.debug('Workspace %s has energy on X axis, will crop to %f'
+                                 % (ws_name, self._emax))
+
+                CropWorkspace(InputWorkspace=ws_name, OutputWorkspace=ws_name,
+                              XMax=self._emax)
+            else:
+                if self._verbose:
+                    logger.debug('Workspace %s does not have energy on X axis, will not crop.'
+                                 % ws_name)
 
 
     def _plot_spectra(self, ws_name):
