@@ -13,6 +13,7 @@
 #include "MantidQtCustomInterfaces/IndirectDiagnostics.h"
 #include "MantidQtCustomInterfaces/IndirectMoments.h"
 #include "MantidQtCustomInterfaces/IndirectSqw.h"
+#include "MantidQtCustomInterfaces/IndirectSymmetrise.h"
 #include "MantidQtCustomInterfaces/IndirectTransmission.h"
 
 #include <QDesktopServices>
@@ -104,7 +105,7 @@ void IndirectDataReduction::runClicked()
 }
 
 /**
- * Sets up Qt UI file and connects signals, slots. 
+ * Sets up Qt UI file and connects signals, slots.
  */
 void IndirectDataReduction::initLayout()
 {
@@ -118,6 +119,7 @@ void IndirectDataReduction::initLayout()
   m_tabs["Calibration"] = new IndirectCalibration(m_uiForm, this);
   m_tabs["Diagnostics"] = new IndirectDiagnostics(m_uiForm, this);
   m_tabs["Transmission"] = new IndirectTransmission(m_uiForm, this);
+  m_tabs["Symmetrise"] = new IndirectSymmetrise(m_uiForm, this);
   m_tabs["S(Q, w)"] = new IndirectSqw(m_uiForm, this);
   m_tabs["Moments"] = new IndirectMoments(m_uiForm, this);
 
@@ -231,7 +233,7 @@ void IndirectDataReduction::instrumentLoadingDone(bool error)
  * If the instrument selection has changed, calls instrumentSelectChanged
  * @param prefix :: instrument name from QComboBox object
  */
-void IndirectDataReduction::userSelectInstrument(const QString& prefix) 
+void IndirectDataReduction::userSelectInstrument(const QString& prefix)
 {
   if(prefix != m_curInterfaceSetup)
   {
@@ -297,11 +299,11 @@ void IndirectDataReduction::setInstSpecificWidget(const std::string & parameterN
 
   // See if the instrument params file requests that the checkbox be shown to the user.
   std::vector<std::string> showParams = instr->getStringParameter(parameterName);
-  
+
   std::string show = "";
   if(!showParams.empty())
     show = showParams[0];
-  
+
   if(show == "Show")
     checkBox->setHidden(false);
   else
@@ -337,14 +339,14 @@ void IndirectDataReduction::handleDirectoryChange(Mantid::Kernel::ConfigValChang
  * Read Qt settings for the interface.
  */
 void IndirectDataReduction::readSettings()
-{  
+{
   // Set values of m_dataDir and m_saveDir
   m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
   m_dataDir.replace(" ", "");
   if(m_dataDir.length() > 0)
     m_dataDir = m_dataDir.split(";", QString::SkipEmptyParts)[0];
   m_saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
-  
+
   QSettings settings;
 
   // Load settings for MWRunFile widgets
@@ -390,7 +392,7 @@ void IndirectDataReduction::saveSettings()
 /**
  * Slot to wrap the protected showInformationBox method defined
  * in UserSubWindow and provide access to composed tabs.
- * 
+ *
  * @param message :: The message to display in the message box
  */
 void IndirectDataReduction::showMessageBox(const QString& message)
