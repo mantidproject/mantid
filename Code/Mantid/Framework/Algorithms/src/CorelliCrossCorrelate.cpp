@@ -46,7 +46,7 @@ namespace Algorithms
     declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input,wsValidator), "An input workspace.");
     declareProperty(new WorkspaceProperty<EventWorkspace>("OutputWorkspace","",Direction::Output), "An output workspace.");
 
-    declareProperty("TimingOffset", static_cast<int64_t>(EMPTY_INT()), boost::make_shared<MandatoryValidator<int64_t> >(), "Correlation chopper TDC timing offset in nanoseconds.");
+    declareProperty("TimingOffset", EMPTY_INT(), boost::make_shared<MandatoryValidator<int> >(), "Correlation chopper TDC timing offset in nanoseconds.");
   }
 
   // Validate inputs workspace first.
@@ -137,7 +137,8 @@ namespace Algorithms
 
     //Read in the TDC timings for the correlation chopper and apply the timing offset.
     std::vector<DateAndTime> tdc = dynamic_cast<ITimeSeriesProperty*>( inputWS->run().getLogData("chopper4_TDC") )->timesAsVector();
-    const int64_t offset = getProperty("TimingOffset");
+    int offset_int = getProperty("TimingOffset");
+    const int64_t offset = static_cast<int64_t>(offset_int);
     for (unsigned long i=0; i<tdc.size(); ++i)
       tdc[i]+=offset;
 
