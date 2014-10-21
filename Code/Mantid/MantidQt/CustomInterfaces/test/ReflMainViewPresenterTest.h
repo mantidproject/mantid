@@ -693,6 +693,117 @@ public:
     TS_ASSERT_EQUALS(kvp["f"], "1+1=2");
     TS_ASSERT_EQUALS(kvp["g"], "'");
   }
+
+  void testPromptSaveAfterAddRow()
+  {
+    MockView mockView;
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
+    ReflMainViewPresenter presenter(&mockView);
+
+    //User hits "add row"
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(std::vector<size_t>()));
+    presenter.notify(AddRowFlag);
+
+    //The user will decide not to discard their changes
+    EXPECT_CALL(mockView, askUserYesNo(_,_)).Times(1).WillOnce(Return(false));
+
+    //Then hits "new table" without having saved
+    presenter.notify(NewTableFlag);
+
+    //The user saves
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillOnce(Return("Workspace"));
+    presenter.notify(SaveFlag);
+
+    //The user tries to create a new table again, and does not get bothered
+    EXPECT_CALL(mockView, askUserYesNo(_,_)).Times(0);
+    presenter.notify(NewTableFlag);
+  }
+
+  void testPromptSaveAfterDeleteRow()
+  {
+    MockView mockView;
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
+    ReflMainViewPresenter presenter(&mockView);
+
+    //User hits "add row" a couple of times
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(2).WillRepeatedly(Return(std::vector<size_t>()));
+    presenter.notify(AddRowFlag);
+    presenter.notify(AddRowFlag);
+
+    //The user saves
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillOnce(Return("Workspace"));
+    presenter.notify(SaveFlag);
+
+    //...then deletes the 2nd row
+    std::vector<size_t> rows;
+    rows.push_back(1);
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rows));
+    presenter.notify(DeleteRowFlag);
+
+    //The user will decide not to discard their changes when asked
+    EXPECT_CALL(mockView, askUserYesNo(_,_)).Times(1).WillOnce(Return(false));
+
+    //Then hits "new table" without having saved
+    presenter.notify(NewTableFlag);
+
+    //The user saves
+    presenter.notify(SaveFlag);
+
+    //The user tries to create a new table again, and does not get bothered
+    EXPECT_CALL(mockView, askUserYesNo(_,_)).Times(0);
+    presenter.notify(NewTableFlag);
+  }
+
+  void testPromptSaveAndDiscard()
+  {
+    MockView mockView;
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
+    ReflMainViewPresenter presenter(&mockView);
+
+    //User hits "add row" a couple of times
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(2).WillRepeatedly(Return(std::vector<size_t>()));
+    presenter.notify(AddRowFlag);
+    presenter.notify(AddRowFlag);
+
+    //Then hits "new table", and decides to discard
+    EXPECT_CALL(mockView, askUserYesNo(_,_)).Times(1).WillOnce(Return(true));
+    presenter.notify(NewTableFlag);
+
+    //These next two times they don't get prompted - they have a new table
+    presenter.notify(NewTableFlag);
+    presenter.notify(NewTableFlag);
+  }
+
+  void testPromptSaveOnOpen()
+  {
+    MockView mockView;
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+
+    //User hits "add row"
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(std::vector<size_t>()));
+    presenter.notify(AddRowFlag);
+
+    //and tries to open a workspace, but gets prompted and decides not to discard
+    EXPECT_CALL(mockView, askUserYesNo(_,_)).Times(1).WillOnce(Return(false));
+    presenter.notify(OpenTableFlag);
+
+    //the user does it again, but discards
+    EXPECT_CALL(mockView, askUserYesNo(_,_)).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    //the user does it one more time, and is not prompted
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    EXPECT_CALL(mockView, askUserYesNo(_,_)).Times(0);
+    presenter.notify(OpenTableFlag);
+  }
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H */
