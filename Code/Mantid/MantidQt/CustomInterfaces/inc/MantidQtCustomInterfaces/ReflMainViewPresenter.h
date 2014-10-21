@@ -40,6 +40,9 @@ namespace MantidQt
       ReflMainViewPresenter(ReflMainView* view);
       virtual ~ReflMainViewPresenter();
       virtual void notify(int flag);
+
+      //Public for the purposes of unit testing
+      static std::map<std::string,std::string> parseKeyValueString(const std::string& str);
     protected:
       Mantid::API::ITableWorkspace_sptr m_model;
       std::string m_wsName;

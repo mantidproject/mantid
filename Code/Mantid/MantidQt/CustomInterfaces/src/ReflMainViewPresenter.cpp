@@ -9,6 +9,7 @@
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 
 #include <boost/regex.hpp>
+#include <boost/tokenizer.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -117,6 +118,41 @@ namespace MantidQt
         groupId++;
 
       return groupId;
+    }
+
+    /**
+    Parses a string in the format `a = 1,b=2, c = "1,2,3,4", d = 5.0, e='a,b,c'` into a map of key/value pairs
+    @param str The input string
+    */
+    std::map<std::string,std::string> ReflMainViewPresenter::parseKeyValueString(const std::string& str)
+    {
+      //Tokenise, using '\' as an escape character, ',' as a delimiter and " and ' as quote characters
+      boost::tokenizer<boost::escaped_list_separator<char> > tok(str, boost::escaped_list_separator<char>("\\", ",", "\"'"));
+
+      std::map<std::string,std::string> kvp;
+
+      for(auto it = tok.begin(); it != tok.end(); ++it)
+      {
+        std::vector<std::string> valVec;
+        boost::split(valVec, *it, boost::is_any_of("="));
+
+        if(valVec.size() > 1)
+        {
+          //We split on all '='s. The first delimits the key, the rest are assumed to be part of the value
+          std::string key = valVec[0];
+          //Drop the key from the values vector
+          valVec.erase(valVec.begin());
+          //Join the remaining sections,
+          std::string value = boost::algorithm::join(valVec, "=");
+
+          //Remove any unwanted whitespace
+          boost::trim(key);
+          boost::trim(value);
+
+          kvp[key] = value;
+        }
+      }
+      return kvp;
     }
 
     /**
@@ -408,7 +444,7 @@ namespace MantidQt
       algReflOne->setProperty("ThetaIn", theta);
 
       //Parse and set any user-specified options
-      auto optionsMap = Mantid::Kernel::Strings::splitToKeyValues(options);
+      auto optionsMap = parseKeyValueString(options);
       for(auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp)
       {
         try
