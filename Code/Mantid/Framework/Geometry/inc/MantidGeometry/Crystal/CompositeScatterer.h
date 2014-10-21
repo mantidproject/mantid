@@ -10,7 +10,7 @@ namespace Mantid
 namespace Geometry
 {
 
-/** ScattererCollection : TODO: DESCRIPTION
+/** CompositeScatterer : TODO: DESCRIPTION
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -32,18 +32,18 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class ScattererCollection;
+class CompositeScatterer;
 
-typedef boost::shared_ptr<ScattererCollection> ScattererCollection_sptr;
+typedef boost::shared_ptr<CompositeScatterer> CompositeScatterer_sptr;
 
-class MANTID_GEOMETRY_DLL ScattererCollection : public IScatterer
+class MANTID_GEOMETRY_DLL CompositeScatterer : public IScatterer
 {
 public:
-    ScattererCollection();
-    virtual ~ScattererCollection() { }
+    CompositeScatterer();
+    virtual ~CompositeScatterer() { }
 
-    static ScattererCollection_sptr create();
-    static ScattererCollection_sptr create(const std::vector<IScatterer_sptr> &scatterers);
+    static CompositeScatterer_sptr create();
+    static CompositeScatterer_sptr create(const std::vector<IScatterer_sptr> &scatterers);
 
     IScatterer_sptr clone() const;
 

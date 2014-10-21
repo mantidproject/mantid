@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Crystal/ScattererCollection.h"
+#include "MantidGeometry/Crystal/CompositeScatterer.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
@@ -15,29 +15,29 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 
-class ScattererCollectionTest : public CxxTest::TestSuite
+class CompositeScattererTest : public CxxTest::TestSuite
 {
 public:
     // This pair of boilerplate methods prevent the suite being created statically
     // This means the constructor isn't called when running other tests
-    static ScattererCollectionTest *createSuite() { return new ScattererCollectionTest(); }
-    static void destroySuite( ScattererCollectionTest *suite ) { delete suite; }
+    static CompositeScattererTest *createSuite() { return new CompositeScattererTest(); }
+    static void destroySuite( CompositeScattererTest *suite ) { delete suite; }
 
 
     void testConstructor()
     {
-        TS_ASSERT_THROWS_NOTHING(ScattererCollection scatterers);
+        TS_ASSERT_THROWS_NOTHING(CompositeScatterer scatterers);
     }
 
     void testCreate()
     {
-        TS_ASSERT_THROWS_NOTHING(ScattererCollection_sptr scatterer = ScattererCollection::create());
+        TS_ASSERT_THROWS_NOTHING(CompositeScatterer_sptr scatterer = CompositeScatterer::create());
 
         std::vector<IScatterer_sptr> scatterers;
         scatterers.push_back(IsotropicAtomScatterer::create("Si", V3D(0.35, 0, 0)));
         scatterers.push_back(IsotropicAtomScatterer::create("Si", V3D(0.25, 0.25, 0.25)));
 
-        ScattererCollection_sptr scatterer = ScattererCollection::create(scatterers);
+        CompositeScatterer_sptr scatterer = CompositeScatterer::create(scatterers);
         TS_ASSERT_EQUALS(scatterer->nScatterers(), 2);
         TS_ASSERT_EQUALS(scatterer->getScatterer(0)->getPosition(), V3D(0.35, 0, 0));
         TS_ASSERT_EQUALS(scatterer->getScatterer(1)->getPosition(), V3D(0.25, 0.25, 0.25));
@@ -45,10 +45,10 @@ public:
 
     void testClone()
     {
-        ScattererCollection_sptr scatterer = getScattererCollection();
+        CompositeScatterer_sptr scatterer = getCompositeScatterer();
 
         IScatterer_sptr clone = scatterer->clone();
-        ScattererCollection_sptr collectionClone = boost::dynamic_pointer_cast<ScattererCollection>(clone);
+        CompositeScatterer_sptr collectionClone = boost::dynamic_pointer_cast<CompositeScatterer>(clone);
 
         TS_ASSERT(collectionClone);
         TS_ASSERT_EQUALS(collectionClone->nScatterers(), 2);
@@ -58,7 +58,7 @@ public:
 
     void testSetCell()
     {
-        ScattererCollection_sptr scatterer = getScattererCollection();
+        CompositeScatterer_sptr scatterer = getCompositeScatterer();
 
         UnitCell cell(5.43, 5.43, 5.43);
         TS_ASSERT_DIFFERS(scatterer->getScatterer(0)->getCell().getG(), cell.getG());
@@ -70,7 +70,7 @@ public:
 
     void testSetSpaceGroup()
     {
-        ScattererCollection_sptr scatterer = getScattererCollection();
+        CompositeScatterer_sptr scatterer = getCompositeScatterer();
 
         SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
         TS_ASSERT(spaceGroup);
@@ -88,7 +88,7 @@ public:
         UnitCell cell(5.43, 5.43, 5.43);
         SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
 
-        ScattererCollection_sptr scatterer = ScattererCollection::create();
+        CompositeScatterer_sptr scatterer = CompositeScatterer::create();
         scatterer->setCell(cell);
         scatterer->setSpaceGroup(spaceGroup);
 
@@ -108,7 +108,7 @@ public:
 
     void testRemoveScatterer()
     {
-        ScattererCollection_sptr scattererCollection = getScattererCollection();
+        CompositeScatterer_sptr scattererCollection = getCompositeScatterer();
         size_t oldCount = scattererCollection->nScatterers();
 
         TS_ASSERT_THROWS_NOTHING(scattererCollection->getScatterer(oldCount - 1));
@@ -132,7 +132,7 @@ public:
         UnitCell cell(5.43, 6.43, 7.43, 90.0, 103.0, 90.0);
         SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
 
-        ScattererCollection_sptr coll = boost::make_shared<ScattererCollection>();
+        CompositeScatterer_sptr coll = boost::make_shared<CompositeScatterer>();
         coll->setSpaceGroup(spaceGroup);
         coll->setCell(cell);
 
@@ -150,13 +150,13 @@ public:
     }
 
 private:
-    ScattererCollection_sptr getScattererCollection()
+    CompositeScatterer_sptr getCompositeScatterer()
     {
         std::vector<IScatterer_sptr> scatterers;
         scatterers.push_back(IsotropicAtomScatterer::create("Si", V3D(0.35, 0, 0)));
         scatterers.push_back(IsotropicAtomScatterer::create("Si", V3D(0.25, 0.25, 0.25)));
 
-        return ScattererCollection::create(scatterers);
+        return CompositeScatterer::create(scatterers);
     }
 
     std::map<V3D, double> getCalculatedStructureFactors()

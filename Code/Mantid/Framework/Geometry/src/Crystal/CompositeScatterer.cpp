@@ -1,23 +1,23 @@
-#include "MantidGeometry/Crystal/ScattererCollection.h"
+#include "MantidGeometry/Crystal/CompositeScatterer.h"
 
 namespace Mantid
 {
 namespace Geometry
 {
-ScattererCollection::ScattererCollection() :
+CompositeScatterer::CompositeScatterer() :
     IScatterer(),
     m_scatterers()
 {
 }
 
-ScattererCollection_sptr ScattererCollection::create()
+CompositeScatterer_sptr CompositeScatterer::create()
 {
-    return boost::make_shared<ScattererCollection>();
+    return boost::make_shared<CompositeScatterer>();
 }
 
-ScattererCollection_sptr ScattererCollection::create(const std::vector<IScatterer_sptr> &scatterers)
+CompositeScatterer_sptr CompositeScatterer::create(const std::vector<IScatterer_sptr> &scatterers)
 {
-    ScattererCollection_sptr collection = ScattererCollection::create();
+    CompositeScatterer_sptr collection = CompositeScatterer::create();
 
     for(auto it = scatterers.begin(); it != scatterers.end(); ++it) {
         collection->addScatterer(*it);
@@ -26,9 +26,9 @@ ScattererCollection_sptr ScattererCollection::create(const std::vector<IScattere
     return collection;
 }
 
-IScatterer_sptr ScattererCollection::clone() const
+IScatterer_sptr CompositeScatterer::clone() const
 {
-    boost::shared_ptr<ScattererCollection> clone = boost::make_shared<ScattererCollection>();
+    boost::shared_ptr<CompositeScatterer> clone = boost::make_shared<CompositeScatterer>();
     clone->setPosition(getPosition());
     clone->setCell(getCell());
     clone->setSpaceGroup(getSpaceGroup());
@@ -40,7 +40,7 @@ IScatterer_sptr ScattererCollection::clone() const
     return clone;
 }
 
-void ScattererCollection::setCell(const UnitCell &cell)
+void CompositeScatterer::setCell(const UnitCell &cell)
 {
     IScatterer::setCell(cell);
 
@@ -49,7 +49,7 @@ void ScattererCollection::setCell(const UnitCell &cell)
     }
 }
 
-void ScattererCollection::setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup)
+void CompositeScatterer::setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup)
 {
     IScatterer::setSpaceGroup(spaceGroup);
 
@@ -58,7 +58,7 @@ void ScattererCollection::setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup)
     }
 }
 
-void ScattererCollection::addScatterer(const IScatterer_sptr &scatterer)
+void CompositeScatterer::addScatterer(const IScatterer_sptr &scatterer)
 {
     if(!scatterer) {
         throw std::invalid_argument("Cannot process null-scatterer.");
@@ -71,12 +71,12 @@ void ScattererCollection::addScatterer(const IScatterer_sptr &scatterer)
     m_scatterers.push_back(localScatterer);
 }
 
-size_t ScattererCollection::nScatterers() const
+size_t CompositeScatterer::nScatterers() const
 {
     return m_scatterers.size();
 }
 
-IScatterer_sptr ScattererCollection::getScatterer(size_t i) const
+IScatterer_sptr CompositeScatterer::getScatterer(size_t i) const
 {
     if(i >= nScatterers()) {
         throw std::out_of_range("Index is out of range.");
@@ -85,7 +85,7 @@ IScatterer_sptr ScattererCollection::getScatterer(size_t i) const
     return m_scatterers[i];
 }
 
-void ScattererCollection::removeScatterer(size_t i)
+void CompositeScatterer::removeScatterer(size_t i)
 {
     if(i >= nScatterers()) {
         throw std::out_of_range("Index is out of range.");
@@ -94,7 +94,7 @@ void ScattererCollection::removeScatterer(size_t i)
     m_scatterers.erase(m_scatterers.begin() + i);
 }
 
-StructureFactor ScattererCollection::calculateStructureFactor(const Kernel::V3D &hkl) const
+StructureFactor CompositeScatterer::calculateStructureFactor(const Kernel::V3D &hkl) const
 {
     StructureFactor sum(0.0, 0.0);
 
@@ -105,7 +105,7 @@ StructureFactor ScattererCollection::calculateStructureFactor(const Kernel::V3D 
     return sum;
 }
 
-void ScattererCollection::setCommonProperties(IScatterer_sptr &scatterer)
+void CompositeScatterer::setCommonProperties(IScatterer_sptr &scatterer)
 {
     scatterer->setCell(getCell());
     scatterer->setSpaceGroup(getSpaceGroup());

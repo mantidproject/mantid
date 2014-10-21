@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/ComponentParser.cpp
 	src/Crystal/CenteringGroup.cpp
+        src/Crystal/CompositeScatterer.cpp
 	src/Crystal/ConventionalCell.cpp
 	src/Crystal/CrystalStructure.cpp
 	src/Crystal/CyclicGroup.cpp
@@ -16,7 +17,6 @@ set ( SRC_FILES
 	src/Crystal/ReducedCell.cpp
 	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/ScalarUtils.cpp
-	src/Crystal/ScattererCollection.cpp
 	src/Crystal/SpaceGroup.cpp
 	src/Crystal/SpaceGroupFactory.cpp
 	src/Crystal/SymmetryOperation.cpp
@@ -115,6 +115,7 @@ set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
 set ( INC_FILES
 	inc/MantidGeometry/ComponentParser.h
 	inc/MantidGeometry/Crystal/CenteringGroup.h
+        inc/MantidGeometry/Crystal/CompositeScatterer.h
 	inc/MantidGeometry/Crystal/ConventionalCell.h
 	inc/MantidGeometry/Crystal/CrystalStructure.h
 	inc/MantidGeometry/Crystal/CyclicGroup.h
@@ -130,7 +131,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
 	inc/MantidGeometry/Crystal/ScalarUtils.h
-	inc/MantidGeometry/Crystal/ScattererCollection.h
 	inc/MantidGeometry/Crystal/SpaceGroup.h
 	inc/MantidGeometry/Crystal/SpaceGroupFactory.h
 	inc/MantidGeometry/Crystal/SymmetryOperation.h
@@ -230,6 +230,7 @@ set ( TEST_FILES
 	ComponentParserTest.h
 	ComponentTest.h
 	CompositeImplicitFunctionTest.h
+        CompositeScattererTest.h
 	ConeTest.h
 	ConventionalCellTest.h
 	ConvexPolygonTest.h
@@ -299,7 +300,6 @@ set ( TEST_FILES
 	RulesTest.h
 	RulesUnionTest.h
 	ScalarUtilsTest.h
-	ScattererCollectionTest.h
 	ShapeFactoryTest.h
 	SpaceGroupFactoryTest.h
 	SpaceGroupTest.h
