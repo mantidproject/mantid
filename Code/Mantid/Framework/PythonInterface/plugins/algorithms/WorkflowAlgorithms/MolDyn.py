@@ -109,9 +109,6 @@ class MolDyn(PythonAlgorithm):
         if len(function_list) > 0 and os.path.splitext(sample_filename)[1] == 'dat':
             issues['Functions'] = 'Cannot specify functions when loading an ASCII file'
 
-        if res_ws is not '' and len(function_list) > 1:
-            issues['Functions'] = 'Can only specify a single function with a convolving with a resolution workspace'
-
         return issues
 
 
@@ -130,9 +127,18 @@ class MolDyn(PythonAlgorithm):
         else:
             raise RuntimeError('Unrecognised file format: %s' % ext)
 
-        # Do convolution
+        # Do convolution if given a resolution workspace
         if self._res_ws is not '':
-            self._convolve_with_res()
+            # Create a workspace with enough spectra for convolution
+            num_sample_hist = mtd[self._out_ws].getItem(0).getNumberHistograms()
+            resolution_ws = self._create_res_ws(num_sample_hist)
+
+            # Convolve all workspaces in output group
+            for ws_name in mtd[self._out_ws].getNames():
+                self._convolve_with_res(resolution_ws, ws_name)
+
+            # Remove the generated resolution workspace
+            DeleteWorkspace(resolution_ws)
 
         # Save result workspace group
         if self._save:
@@ -251,6 +257,8 @@ class MolDyn(PythonAlgorithm):
         @param data Raw data
         @param name Name of data file
         """
+
+        logger.notice('Loading CDL file: %s' % name)
 
         len_data = len(data)
 
@@ -377,6 +385,8 @@ class MolDyn(PythonAlgorithm):
         @param name Name of data file
         """
 
+        logger.notice('Loading ASCII data: %s' % name)
+
         val = _split_line(data[3])
         Q = []
         for n in range(1, len(val)):
@@ -443,16 +453,17 @@ class MolDyn(PythonAlgorithm):
         ChangeAngles(self._out_ws, instr, theta, self._verbose)
 
 
-    def _convolve_with_res(self):
+    def _create_res_ws(self, num_sample_hist):
         """
-        Performs convolution with an instrument resolution workspace.
+        Creates a resolution workspace.
+
+        @param num_sample_hist Number of histgrams required in workspace
+        @returns The generated resolution workspace
         """
 
-        function_ws_name = mtd[self._out_ws].getItem(0).getName()
-
-        num_sample_hist = mtd[function_ws_name].getNumberHistograms()
         num_res_hist = mtd[self._res_ws].getNumberHistograms()
 
+        logger.notice('Creating resoluton workspace.')
         logger.information('Sample has %d spectra\nResolution has %d spectra'
                            % (num_sample_hist, num_res_hist))
 
@@ -474,11 +485,25 @@ class MolDyn(PythonAlgorithm):
             logger.information('Cropping resolution workspace to sample')
             resolution_ws = CropWorkspace(InputWorkspace=self._res_ws, StartWorkspaceIndex=0,
                                           EndWorkspaceIndex=num_sample_hist)
-        
+
         # If the spectra counts match then just use the resolution as it is
         else:
             logger.information('Using resolution workspace as is')
             resolution_ws = CloneWorkspace(self._res_ws)
+
+        return resolution_ws
+
+
+    def _convolve_with_res(self, resolution_ws, function_ws_name):
+        """
+        Performs convolution with an instrument resolution workspace.
+
+        @param resolution_ws The resolution workspace to convolve with
+        @param function_ws_name The workspace name for the function to convolute
+        """
+
+        logger.notice('Convoluting sample %s with resolution %s'
+                      % (function_ws_name, resolution_ws))
 
         # Symmetrise the sample WS in x=0 as nMOLDYN only gives positive energy values
         Symmetrise(Sample=function_ws_name, XMin=0, XMax=self._emax,
@@ -488,9 +513,6 @@ class MolDyn(PythonAlgorithm):
         # Convolve the symmetrised sample with the resolution
         ConvolveWorkspaces(OutputWorkspace=function_ws_name,
                            Workspace1=function_ws_name, Workspace2=resolution_ws)
-
-        # Remove the generated resolution workspace
-        DeleteWorkspace(resolution_ws)
 
 
     def _plot_spectra(self, ws_name):
