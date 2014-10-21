@@ -9,7 +9,16 @@
 Description
 -----------
 
-TODO
+This algorithm is a loader from simulation data from the nMOLDYN software,
+simulations can be loaded form either a plain ASCII file or CDL file.
+
+When loading from a CDL file one or multiple functions can be loaded, when
+loading a single function an instrument resolution workspace can be provided
+which the loaded function is convoluted with to allow comparison with actual
+instrument data.
+
+When loading from ASCII function selection and convolution with an instrument
+resolution are unavailable.
 
 Usage
 -----
@@ -20,7 +29,7 @@ Usage
 
 .. testcode:: ExLoadCDLFile
 
-    out_ws_group = MolDyn(SampleFile='DISF_NaF.cdl', Functions=['Fqt-total', 'Fqt-Na'])
+    out_ws_group = MolDyn(SampleFile='NaF_DISF.cdl', Functions=['Fqt-total', 'Fqt-Na'])
 
     for ws_name in out_ws_group.getNames():
       print ws_name
@@ -29,7 +38,7 @@ Output:
 
 .. testoutput:: ExLoadCDLFile
 
-    DISF_NaF_Fqt-total
-    DISF_NaF_Fqt-Na
+    NaF_DISF_Fqt-total
+    NaF_DISF_Fqt-Na
 
 .. categories::
