@@ -68,7 +68,7 @@ class MolDyn(PythonAlgorithm):
         return 'Imports nMOLDYN simulations from CDL and ASCII files.'
 
     def PyInit(self):
-        self.declareProperty(FileProperty('SampleFile', '',
+        self.declareProperty(FileProperty('Filename', '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['.cdl', '.dat']),
                                           doc='File path for data')
@@ -99,7 +99,7 @@ class MolDyn(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        sample_filename = self.getPropertyValue('SampleFile')
+        sample_filename = self.getPropertyValue('Filename')
         function_list = self.getProperty('Functions').value
         res_ws = self.getPropertyValue('Resolution')
 
@@ -173,7 +173,7 @@ class MolDyn(PythonAlgorithm):
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
 
-        self._sam_path = self.getPropertyValue('SampleFile')
+        self._sam_path = self.getPropertyValue('Filename')
 
         raw_functions = self.getProperty('Functions').value
         self._functions = [x.strip() for x in raw_functions]

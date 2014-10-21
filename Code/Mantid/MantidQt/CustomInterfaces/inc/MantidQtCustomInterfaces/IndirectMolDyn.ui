@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>444</width>
-    <height>155</height>
+    <height>182</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,7 +33,7 @@
       <widget class="QLineEdit" name="leFunctionNames"/>
      </item>
      <item row="0" column="1">
-      <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRun">
+      <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRun" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -43,7 +43,7 @@
        <property name="label" stdset="0">
         <string/>
        </property>
-       <property name="fileExtensions">
+       <property name="fileExtensions" stdset="0">
         <stringlist>
          <string>.dat</string>
          <string>.cdl</string>
@@ -57,6 +57,71 @@
         <string>Sample Run:</string>
        </property>
       </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="lblEnergyCrop">
+       <property name="text">
+        <string>Max. Energy:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="lblResolution">
+       <property name="text">
+        <string>Resolution:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsResolution" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="autoLoad" stdset="0">
+         <bool>true</bool>
+        </property>
+        <property name="loadLabelText" stdset="0">
+         <string/>
+        </property>
+        <property name="workspaceSuffixes" stdset="0">
+         <stringlist>
+          <string>_red</string>
+          <string>_res</string>
+         </stringlist>
+        </property>
+        <property name="fileBrowserSuffixes" stdset="0">
+         <stringlist>
+          <string>_red.nxs</string>
+          <string>_res.nxs</string>
+         </stringlist>
+        </property>
+        <property name="showLoad" stdset="0">
+         <bool>false</bool>
+        </property>
+       </widget>
+     </item>
+     <item row="2" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="leMaxEnergy"/>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
@@ -165,6 +230,11 @@
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::DataSelector</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/DataSelector.h</header>
+  </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::MWRunFiles</class>
    <extends>QWidget</extends>
