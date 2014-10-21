@@ -15,7 +15,8 @@ namespace MantidQt
     IndirectBayesTab::IndirectBayesTab(QWidget * parent) : QWidget(parent),  
       m_plot(new QwtPlot(parent)), m_curve(new QwtPlotCurve()), m_rangeSelector(new MantidWidgets::RangeSelector(m_plot)),
       m_propTree(new QtTreePropertyBrowser()), m_properties(), m_dblManager(new QtDoublePropertyManager()), 
-      m_dblEdFac(new DoubleEditorFactory())
+      m_dblEdFac(new DoubleEditorFactory()),
+      m_algRunner(new MantidQt::API::AlgorithmRunner(parent))
     {
       m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
       m_rangeSelector->setInfoOnly(false);
@@ -56,6 +57,17 @@ namespace MantidQt
     void IndirectBayesTab::runPythonScript(const QString& pyInput)
     {
       emit executePythonScript(pyInput, true);
+    }
+
+    /**
+    * Runs an algorithm async
+    *
+    * @param algorithm :: The algorithm to be run
+    */
+    void IndirectBayesTab::runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm)
+    {
+      algorithm->setRethrows(true);
+      m_algRunner->startAlgorithm(algorithm);
     }
 
     /**

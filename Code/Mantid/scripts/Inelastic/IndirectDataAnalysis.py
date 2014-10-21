@@ -74,7 +74,7 @@ def calculateEISF(params_table):
 
 ##############################################################################
 
-def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin=0, specMax=None, Verbose=False, Plot='None', Save=False):
+def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin=0, specMax=None, convolve=True, Verbose=False, Plot='None', Save=False):
     StartTime('ConvFit')
 
     bgd = bgd[:-2]
@@ -105,7 +105,7 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
                        OutputWorkspace=output_workspace, Function=func,
                        StartX=startX, EndX=endX, FitType='Sequential',
                        CreateOutput=True, OutputCompositeMembers=True,
-                       ConvolveMembers=True)
+                       ConvolveMembers=convolve)
 
     DeleteWorkspace(output_workspace + '_NormalisedCovarianceMatrices')
     DeleteWorkspace(output_workspace + '_Parameters')
@@ -122,6 +122,7 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
     axis.setUnit("MomentumTransfer")
 
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=wsname)
+    AddSampleLog(Workspace=wsname, LogName='convolve_members', LogType='String', LogText=str(convolve))
     AddSampleLog(Workspace=wsname, LogName="fit_program", LogType="String", LogText='ConvFit')
     AddSampleLog(Workspace=wsname, LogName='background', LogType='String', LogText=str(bgd))
     AddSampleLog(Workspace=wsname, LogName='delta_function', LogType='String', LogText=str(using_delta_func))
@@ -533,7 +534,7 @@ def fury(samWorkspaces, res_workspace, rebinParam, RES=True, Save=False, Verbose
 ##############################################################################
 
 def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, intensities_constrained=False, Save=False, Plot='None', Verbose=False):
-
+    
   StartTime('FuryFit')
 
   fit_type = ftype[:-2]
@@ -584,7 +585,7 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, in
   for i, ws in enumerate(wsnames):
     output_ws = output_workspace + '_%d_Workspace' % i
     RenameWorkspace(ws, OutputWorkspace=output_ws)
-
+  
   sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': fit_type,
                   'intensities_constrained': intensities_constrained, 'beta_constrained': False}
 
@@ -872,18 +873,18 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
     # Corrections are applied in Lambda (Wavelength)
 
     efixed = getEfixed(inputWS)                # Get efixed
+    sam_name = getWSprefix(inputWS)
     ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='Wavelength',
         EMode='Indirect', EFixed=efixed)
 
     nameStem = corr[:-4]
-    if canWS != '':
+    corrections = mtd[corr].getNames()
+    if mtd.doesExist(canWS):
         (instr, can_run) = getInstrRun(canWS)
-        corrections = [nameStem+'_ass', nameStem+'_assc', nameStem+'_acsc', nameStem+'_acc']
         CorrectedWS = sam_name +'Correct_'+ can_run
         ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='Wavelength',
             EMode='Indirect', EFixed=efixed)
     else:
-        corrections = [nameStem+'_ass']
         CorrectedWS = sam_name +'Corrected'
     nHist = mtd[inputWS].getNumberHistograms()
     # Check that number of histograms in each corrections workspace matches
@@ -897,6 +898,7 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
     for i in range(0, nHist): # Loop through each spectra in the inputWS
         ExtractSingleSpectrum(InputWorkspace=inputWS, OutputWorkspace=CorrectedSampleWS,
             WorkspaceIndex=i)
+        logger.notice(str(i) + str(mtd[CorrectedSampleWS].readX(0)))
         if ( len(corrections) == 1 ):
             Ass = CubicFit(corrections[0], i, Verbose)
             PolynomialCorrection(InputWorkspace=CorrectedSampleWS, OutputWorkspace=CorrectedSampleWS,
@@ -906,16 +908,17 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
             else:
                 ConjoinWorkspaces(InputWorkspace1=CorrectedWS, InputWorkspace2=CorrectedSampleWS)
         else:
-            ExtractSingleSpectrum(InputWorkspace=canWS, OutputWorkspace=CorrectedCanWS,
-                WorkspaceIndex=i)
-            Acc = CubicFit(corrections[3], i, Verbose)
-            PolynomialCorrection(InputWorkspace=CorrectedCanWS, OutputWorkspace=CorrectedCanWS,
-                Coefficients=Acc, Operation='Divide')
-            Acsc = CubicFit(corrections[2], i, Verbose)
-            PolynomialCorrection(InputWorkspace=CorrectedCanWS, OutputWorkspace=CorrectedCanWS,
-                Coefficients=Acsc, Operation='Multiply')
+            if mtd.doesExist(canWS):
+                ExtractSingleSpectrum(InputWorkspace=canWS, OutputWorkspace=CorrectedCanWS,
+                    WorkspaceIndex=i)
+                Acc = CubicFit(corrections[3], i, Verbose)
+                PolynomialCorrection(InputWorkspace=CorrectedCanWS, OutputWorkspace=CorrectedCanWS,
+                    Coefficients=Acc, Operation='Divide')
+                Acsc = CubicFit(corrections[2], i, Verbose)
+                PolynomialCorrection(InputWorkspace=CorrectedCanWS, OutputWorkspace=CorrectedCanWS,
+                    Coefficients=Acsc, Operation='Multiply')
 
-            subractCanWorkspace(CorrectedSampleWS, CorrectedCanWS, CorrectedSampleWS, rebin_can=rebin_can)
+                subractCanWorkspace(CorrectedSampleWS, CorrectedCanWS, CorrectedSampleWS, rebin_can=rebin_can)
 
             Assc = CubicFit(corrections[1], i, Verbose)
             PolynomialCorrection(InputWorkspace=CorrectedSampleWS, OutputWorkspace=CorrectedSampleWS,
@@ -935,7 +938,7 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
 
     RenameWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_red')
 
-    if canWS != '':
+    if mtd.doesExist(canWS):
         ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='DeltaE',
             EMode='Indirect', EFixed=efixed)
 
@@ -951,6 +954,10 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
     StartTime('ApplyCorrections')
     workdir = config['defaultsave.directory']
     s_hist,sxlen = CheckHistZero(sample)
+
+    CloneWorkspace(sample, OutputWorkspace='__apply_corr_cloned_sample')
+    sample = '__apply_corr_cloned_sample'
+    scaled_container = "__apply_corr_scaled_container"
 
     diffraction_run = checkUnitIs(sample, 'dSpacing')
     sam_name = getWSprefix(sample)
@@ -970,7 +977,6 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
 
         (instr, can_run) = getInstrRun(container)
 
-        scaled_container = "__apply_corr_scaled_container"
         if ScaleOrNotToScale:
             #use temp workspace so we don't modify original data
             Scale(InputWorkspace=container, OutputWorkspace=scaled_container, Factor=factor, Operation='Multiply')
@@ -986,11 +992,11 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
 
         if Verbose:
             text = 'Correcting sample ' + sample
-            if scaled_container != '':
-                text += ' with ' + scaled_container
+            if container != '':
+                text += ' with ' + container
             logger.notice(text)
 
-        cor_result = applyCorrections(sample, container, corrections, RebinCan, Verbose)
+        cor_result = applyCorrections(sample, scaled_container, corrections, RebinCan, Verbose)
         rws = mtd[cor_result + ext]
         outNm = cor_result + '_Result_'
 
@@ -1033,7 +1039,7 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
     if (PlotResult != 'None'):
         plotCorrResult(res_plot, PlotResult)
 
-    if ( scaled_container != '' ):
+    if ( mtd.doesExist(scaled_container) ):
         sws = mtd[sample]
         cws = mtd[scaled_container]
         names = 'Sample,Can,Calc'

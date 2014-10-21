@@ -37,26 +37,25 @@ namespace MantidQt
     class DLLExport ReflMainViewPresenter: public IReflPresenter
     {
     public:
-      ReflMainViewPresenter(Mantid::API::ITableWorkspace_sptr model, ReflMainView* view);
       ReflMainViewPresenter(ReflMainView* view);
-      virtual ~ReflMainViewPresenter() = 0;
+      virtual ~ReflMainViewPresenter();
       virtual void notify(int flag);
+
+      //Public for the purposes of unit testing
+      static std::map<std::string,std::string> parseKeyValueString(const std::string& str);
     protected:
-      //The model and backup copy of the original model
       Mantid::API::ITableWorkspace_sptr m_model;
-      Mantid::API::ITableWorkspace_sptr m_cache;
-      std::string m_cache_name;
-      //the view
+      std::string m_wsName;
       ReflMainView* m_view;
 
-      //Load the model into the view
-      virtual void load();
       //process selected rows
       virtual void process();
       //load a run into the ADS, or re-use one in the ADS if possible
       Mantid::API::Workspace_sptr loadRun(const std::string& run, const std::string& instrument);
       //get the run number of a TOF workspace
       std::string getRunNumber(const Mantid::API::Workspace_sptr& ws);
+      //get an unused group id
+      int getUnusedGroup(std::vector<size_t> ignoredRows = std::vector<size_t>()) const;
       //make a transmission workspace
       Mantid::API::MatrixWorkspace_sptr makeTransWS(const std::string& transString);
       //Validate a row
@@ -69,15 +68,19 @@ namespace MantidQt
       void processRow(size_t rowNo);
       //Stitch some rows
       void stitchRows(std::vector<size_t> rows);
+      //insert a row in the model before the given index
+      virtual void insertRow(size_t before);
       //add row(s) to the model
       virtual void addRow();
       //delete row(s) from the model
       virtual void deleteRow();
       //group selected rows together
       virtual void groupRows();
-      //virtual save methods
-      virtual void save() = 0;
-      virtual void saveAs() = 0;
+      //table io methods
+      virtual void newTable();
+      virtual void openTable();
+      virtual void saveTable();
+      virtual void saveTableAs();
 
     public:
       static const int COL_RUNS         = 0;
@@ -88,6 +91,7 @@ namespace MantidQt
       static const int COL_DQQ          = 5;
       static const int COL_SCALE        = 6;
       static const int COL_GROUP        = 7;
+      static const int COL_OPTIONS      = 8;
     };
   }
 }

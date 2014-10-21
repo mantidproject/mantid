@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
   ConjoinSpectraTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
+  CreateCalibrationWorkspaceTest.py
   CreateWorkspaceTest.py
   DakotaChiSquaredTest.py
   DensityOfStatesTest.py

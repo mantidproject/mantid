@@ -488,7 +488,6 @@ bool CheckWorkspacesMatch::compareEventWorkspaces(DataObjects::EventWorkspace_co
   }
   else
   {
-    result = "Success!";
     wsmatch = true;
   }
 
@@ -836,27 +835,24 @@ bool CheckWorkspacesMatch::checkRunProperties(const API::Run& run1, const API::R
   }
   
   // Now loop over the individual logs
-  for ( size_t i = 0; i < ws1logs.size(); ++i )
+  bool matched(true);
+  int64_t length(static_cast<int64_t>(ws1logs.size()));
+  PARALLEL_FOR_IF(true)
+  for ( int64_t i = 0; i < length; ++i )
   {
-    // Check the log name
-    if ( ws1logs[i]->name() != ws2logs[i]->name() )
+    PARALLEL_START_INTERUPT_REGION
+    if (matched)
     {
-      g_log.debug() << "WS1 log " << i << " name: " << ws1logs[i]->name() << "\n";
-      g_log.debug() << "WS2 log " << i << " name: " << ws2logs[i]->name() << "\n";
-      result = "Log name mismatch";
-      return false;
+      if ( *(ws1logs[i]) != *(ws2logs[i]))
+      {
+        matched = false;
+        result = "Log mismatch";
+      }
     }
-    
-    // Now check the log entry itself, using the method that gives it back as a string
-    if ( ws1logs[i]->value() != ws2logs[i]->value() )
-    {
-      g_log.debug() << "WS1 log " << ws1logs[i]->name() << ": " << ws1logs[i]->value() << "\n";
-      g_log.debug() << "WS2 log " << ws2logs[i]->name() << ": " << ws2logs[i]->value() << "\n";
-      result = "Log value mismatch";
-      return false;
-    }
+    PARALLEL_END_INTERUPT_REGION
   }
-  return true;
+  PARALLEL_CHECK_INTERUPT_REGION
+  return matched;
 }
 
 //------------------------------------------------------------------------------------------------
