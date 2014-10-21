@@ -98,10 +98,17 @@ namespace CustomInterfaces
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(sliceUpdateRS(QtProperty*, double)));
     // Enable/disable second range options when checkbox is toggled
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(sliceTwoRanges(QtProperty*, bool)));
-    // Plot slice miniplot when file has finished loading
-    connect(m_uiForm.slice_inputFile, SIGNAL(filesFound()), this, SLOT(slicePlotRaw()));
     // Enables/disables calibration file selection when user toggles Use Calibratin File checkbox
     connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
+
+    // Plot slice miniplot when file has finished loading
+    connect(m_uiForm.slice_inputFile, SIGNAL(filesFound()), this, SLOT(slicePlotRaw()));
+    // Shows message on run buton when user is inputting a run number
+    connect(m_uiForm.slice_inputFile, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
+    // Shows message on run button when Mantid is finding the file for a given run number
+    connect(m_uiForm.slice_inputFile, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
+    // Reverts run button back to normal when file finding has finished
+    connect(m_uiForm.slice_inputFile, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
 
     // Update preview plot when slice algorithm completes
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sliceAlgDone(bool)));
@@ -396,6 +403,40 @@ namespace CustomInterfaces
     // Set X range to data range
     setXAxisToCurve("SlicePreviewPlot", "SlicePreviewCurve");
     m_plots["SlicePreviewPlot"]->replot();
+  }
+
+  /**
+   * Called when a user starts to type / edit the runs to load.
+   */
+  void IndirectDiagnostics::pbRunEditing()
+  {
+    emit updateRunButton(false, "Editing...", "Run numbers are curently being edited.");
+  }
+
+  /**
+   * Called when the FileFinder starts finding the files.
+   */
+  void IndirectDiagnostics::pbRunFinding()
+  {
+    emit updateRunButton(false, "Finding files...", "Searchig for data files for the run numbers entered...");
+    m_uiForm.slice_inputFile->setEnabled(false);
+  }
+
+  /**
+   * Called when the FileFinder has finished finding the files.
+   */
+  void IndirectDiagnostics::pbRunFinished()
+  {
+    if(!m_uiForm.slice_inputFile->isValid())
+    {
+      emit updateRunButton(false, "Invalid Run(s)", "Cannot find data files for some of the run numbers enetered.");
+    }
+    else
+    {
+      emit updateRunButton();
+    }
+
+    m_uiForm.slice_inputFile->setEnabled(true);
   }
 
 } // namespace CustomInterfaces
