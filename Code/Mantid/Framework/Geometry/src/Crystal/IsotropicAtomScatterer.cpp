@@ -16,6 +16,11 @@ IsotropicAtomScatterer::IsotropicAtomScatterer(const std::string &element,
     setElement(element);
 }
 
+IsotropicAtomScatterer_sptr IsotropicAtomScatterer::create(const std::string &element, const Kernel::V3D &position, double U, double occupancy)
+{
+    return boost::make_shared<IsotropicAtomScatterer>(element, position, U, occupancy);
+}
+
 IScatterer_sptr IsotropicAtomScatterer::clone() const
 {
     IsotropicAtomScatterer_sptr clone = boost::make_shared<IsotropicAtomScatterer>(getElement(), getPosition(), getU(), getOccupancy());

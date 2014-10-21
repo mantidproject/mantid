@@ -64,6 +64,18 @@ public:
         TS_ASSERT_THROWS(scatterer.setU(-0.2), std::invalid_argument);
     }
 
+    void testCreate()
+    {
+        IScatterer_sptr scatterer = IsotropicAtomScatterer::create("Si", V3D(0.3, 0.1, 0.12), 1.0, 0.5);
+        IsotropicAtomScatterer_sptr isotropic = boost::dynamic_pointer_cast<IsotropicAtomScatterer>(scatterer);
+
+        TS_ASSERT(isotropic);
+        TS_ASSERT_EQUALS(isotropic->getElement(), "Si");
+        TS_ASSERT_EQUALS(isotropic->getOccupancy(), 0.5);
+        TS_ASSERT_EQUALS(isotropic->getU(), 1.0);
+        TS_ASSERT_EQUALS(isotropic->getPosition(), V3D(0.3, 0.1, 0.12));
+    }
+
     void testClone()
     {
         UnitCell cell(5.43, 5.43, 5.43);

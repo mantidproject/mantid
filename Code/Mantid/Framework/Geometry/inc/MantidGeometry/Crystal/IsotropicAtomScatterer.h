@@ -32,13 +32,21 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
+class IsotropicAtomScatterer;
+
+typedef boost::shared_ptr<IsotropicAtomScatterer> IsotropicAtomScatterer_sptr;
+
 class MANTID_GEOMETRY_DLL IsotropicAtomScatterer : public IScatterer
 {
 public:
     IsotropicAtomScatterer(const std::string &element,
                            const Kernel::V3D &position,
-                           double U, double occupancy = 1.0);
+                           double U = 0.0, double occupancy = 1.0);
     virtual ~IsotropicAtomScatterer() { }
+
+    static IsotropicAtomScatterer_sptr create(const std::string &element,
+                           const Kernel::V3D &position,
+                           double U = 0.0, double occupancy = 1.0);
 
     IScatterer_sptr clone() const;
 
