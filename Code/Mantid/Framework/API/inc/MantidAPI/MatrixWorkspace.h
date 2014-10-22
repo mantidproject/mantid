@@ -16,6 +16,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
+#include "MAntidKernel/EmptyValues.h"
 
 
 namespace Mantid
@@ -232,6 +233,9 @@ namespace Mantid
       /// Return a vector with the integrated counts for all spectra withing the given range
       virtual void getIntegratedSpectra(std::vector<double> & out, const double minX, const double maxX, const bool entireRange) const;
 
+      /// Return an index in the X vector for an x-value close to a given value
+      std::pair<size_t,double> getXIndex(size_t i, double x, bool isLeft = true, size_t start = 0) const;
+
       //----------------------------------------------------------------------
 
       int axes() const;
@@ -321,9 +325,11 @@ namespace Mantid
       //=====================================================================================
 
       /// Create an image of Ys.
-      MantidImage_sptr getImageY (size_t start = 0, size_t stop = 0, size_t width = 0, size_t indexStart = 0, size_t indexEnd = 0) const;
+      MantidImage_sptr getImageY (size_t start = 0, size_t stop = 0, size_t width = 0, double startX = EMPTY_DBL(), double endX = EMPTY_DBL() ) const;
       /// Create an image of Es.
-      MantidImage_sptr getImageE (size_t start = 0, size_t stop = 0, size_t width = 0, size_t indexStart = 0, size_t indexEnd = 0) const;
+      MantidImage_sptr getImageE (size_t start = 0, size_t stop = 0, size_t width = 0, double startX = EMPTY_DBL(), double endX = EMPTY_DBL() ) const;
+      /// Get start and end x indices for images
+      std::pair<size_t,size_t> getImageStartEndXIndices( size_t i, double startX, double endX ) const;
 
       //=====================================================================================
       // End image methods

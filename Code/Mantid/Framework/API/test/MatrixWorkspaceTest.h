@@ -800,10 +800,128 @@ public:
     TSM_ASSERT( "Monitor workspace not successfully reset", ! ws->monitorWorkspace() )
   }
 
+  void test_getXIndex()
+  {
+    WorkspaceTester ws;
+    ws.init(1,4,3);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
+    X[2] = 3.0;
+    X[3] = 4.0;
+
+    auto ip = ws.getXIndex( 0, 0.0, true );
+    TS_ASSERT_EQUALS( ip.first, 0 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 0.0, false );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 1.0, true );
+    TS_ASSERT_EQUALS( ip.first, 0 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 1.0, false );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 5.0, true );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 5.0, false );
+    TS_ASSERT_EQUALS( ip.first, 3 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, true );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, false );
+    TS_ASSERT_EQUALS( ip.first, 3 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 5.0, true, 5 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 5.0, false, 5 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 3.0, true, 5 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 3.0, false, 5 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, true, 5 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, false, 5 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, true, 4 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, false, 4 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, true, 3 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, false, 3 );
+    TS_ASSERT_EQUALS( ip.first, 3 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, true );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, false );
+    TS_ASSERT_EQUALS( ip.first, 3 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 2.0, true, 3 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 2.0, false, 3 );
+    TS_ASSERT_EQUALS( ip.first, 3 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 1.0, true, 3 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 1.0, false, 3 );
+    TS_ASSERT_EQUALS( ip.first, 3 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 2.1, true );
+    TS_ASSERT_EQUALS( ip.first, 1 );
+    TS_ASSERT_DELTA( ip.second, 0.1, 1e-15 );
+
+    ip = ws.getXIndex( 0, 2.1, false );
+    TS_ASSERT_EQUALS( ip.first, 2 );
+    TS_ASSERT_DELTA( ip.second, 0.9, 1e-15 );
+  }
+
   void test_getImage_0_width()
   {
     WorkspaceTester ws;
     ws.init(9,2,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
     const size_t start = 0;
     const size_t stop  = 8;
     size_t width = 0;
@@ -816,6 +934,9 @@ public:
   {
     WorkspaceTester ws;
     ws.init(9,2,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
     size_t start = 10;
     size_t stop  = 8;
     size_t width = 3;
@@ -830,6 +951,9 @@ public:
   {
     WorkspaceTester ws;
     ws.init(9,2,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
     size_t start = 0;
     size_t stop  = 18;
     size_t width = 3;
@@ -844,6 +968,9 @@ public:
   {
     WorkspaceTester ws;
     ws.init(9,2,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
     size_t start = 1;
     size_t stop  = 0;
     size_t width = 1;
@@ -856,6 +983,9 @@ public:
   {
     WorkspaceTester ws;
     ws.init(9,2,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
     size_t start = 0;
     size_t stop  = 7;
     size_t width = 3;
@@ -866,46 +996,54 @@ public:
   {
     WorkspaceTester ws;
     ws.init(9,2,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
     const size_t start = 0;
     const size_t stop  = 8;
     const size_t width = 3;
-    size_t indexStart = 1;
-    size_t indexEnd = 1;
-    TS_ASSERT_THROWS( ws.getImageY(start,stop,width,indexStart,indexEnd), std::runtime_error );
+    double startX = 3;
+    double endX = 4;
+    TS_ASSERT_THROWS( ws.getImageY(start,stop,width,startX,endX), std::runtime_error );
 
     WorkspaceTester wsh;
     wsh.init(9,1,1);
-    indexStart = 1;
-    indexEnd = 1;
-    TS_ASSERT_THROWS( wsh.getImageY(start,stop,width,indexStart,indexEnd), std::runtime_error );
+    startX = 2;
+    endX = 2;
+    TS_ASSERT_THROWS( wsh.getImageY(start,stop,width,startX,endX), std::runtime_error );
   }
 
   void test_getImage_wrong_indexEnd()
   {
     WorkspaceTester ws;
     ws.init(9,2,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
     const size_t start = 0;
     const size_t stop  = 8;
     const size_t width = 3;
-    size_t indexStart = 0;
-    size_t indexEnd = 2;
-    TS_ASSERT_THROWS( ws.getImageY(start,stop,width,indexStart,indexEnd), std::runtime_error );
-    indexEnd = 20;
-    TS_ASSERT_THROWS( ws.getImageY(start,stop,width,indexStart,indexEnd), std::runtime_error );
+    double startX = 1.0;
+    double endX = 0.0;
+    TS_ASSERT_THROWS( ws.getImageY(start,stop,width,startX,endX), std::runtime_error );
 
     WorkspaceTester wsh;
     wsh.init(9,2,2);
-    indexStart = 0;
-    indexEnd = 2;
-    TS_ASSERT_THROWS( wsh.getImageY(start,stop,width,indexStart,indexEnd), std::runtime_error );
-    indexEnd = 1;
-    TS_ASSERT_THROWS_NOTHING( wsh.getImageY(start,stop,width,indexStart,indexEnd) );
+    auto &X1 = ws.dataX(0);
+    X1[0] = 1.0;
+    X1[1] = 2.0;
+    startX = 1.0;
+    endX = 0.0;
+    TS_ASSERT_THROWS( wsh.getImageY(start,stop,width,startX,endX), std::runtime_error );
   }
 
   void test_getImage_single_bin_histo()
   {
     WorkspaceTester ws;
     ws.init(9,2,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
     for(size_t i = 0; i < ws.getNumberHistograms(); ++i)
     {
       ws.dataY(i)[0] = static_cast<double>( i + 1 );
@@ -913,10 +1051,10 @@ public:
     const size_t start = 0;
     const size_t stop  = 8;
     const size_t width = 3;
-    size_t indexStart = 0;
-    size_t indexEnd = 1;
+    double startX = 0;
+    double endX = 3;
     Mantid::API::MantidImage_sptr image;
-    TS_ASSERT_THROWS_NOTHING( image = ws.getImageY(start,stop,width,indexStart,indexEnd) );
+    TS_ASSERT_THROWS_NOTHING( image = ws.getImageY(start,stop,width,startX,endX) );
     if ( !image ) return;
     TS_ASSERT_EQUALS( image->size(), 3 );
     TS_ASSERT_EQUALS( (*image)[0].size(), 3 );
@@ -939,6 +1077,8 @@ public:
   {
     WorkspaceTester ws;
     ws.init(9,1,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
     for(size_t i = 0; i < ws.getNumberHistograms(); ++i)
     {
       ws.dataY(i)[0] = static_cast<double>( i + 1 );
@@ -946,10 +1086,10 @@ public:
     const size_t start = 0;
     const size_t stop  = 8;
     const size_t width = 3;
-    size_t indexStart = 0;
-    size_t indexEnd = 0;
+    double startX = 1;
+    double endX = 1;
     Mantid::API::MantidImage_sptr image;
-    TS_ASSERT_THROWS_NOTHING( image = ws.getImageY(start,stop,width,indexStart,indexEnd) );
+    TS_ASSERT_THROWS_NOTHING( image = ws.getImageY(start,stop,width,startX,endX) );
     if ( !image ) return;
     TS_ASSERT_EQUALS( image->size(), 3 );
     TS_ASSERT_EQUALS( (*image)[0].size(), 3 );
@@ -972,6 +1112,11 @@ public:
   {
     WorkspaceTester ws;
     ws.init(9,4,3);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
+    X[2] = 3.0;
+    X[3] = 4.0;
     for(size_t i = 0; i < ws.getNumberHistograms(); ++i)
     {
       ws.dataY(i)[0] = static_cast<double>( i + 1 );
@@ -981,10 +1126,8 @@ public:
     const size_t start = 0;
     const size_t stop  = 8;
     const size_t width = 3;
-    size_t indexStart = 0;
-    size_t indexEnd = 0;
     Mantid::API::MantidImage_sptr image;
-    TS_ASSERT_THROWS_NOTHING( image = ws.getImageY(start,stop,width,indexStart,indexEnd) );
+    TS_ASSERT_THROWS_NOTHING( image = ws.getImageY(start,stop,width) );
     if ( !image ) return;
     TS_ASSERT_EQUALS( image->size(), 3 );
     TS_ASSERT_EQUALS( (*image)[0].size(), 3 );
@@ -1007,6 +1150,10 @@ public:
   {
     WorkspaceTester ws;
     ws.init(9,3,3);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
+    X[2] = 3.0;
     for(size_t i = 0; i < ws.getNumberHistograms(); ++i)
     {
       ws.dataY(i)[0] = static_cast<double>( i + 1 );
@@ -1016,10 +1163,8 @@ public:
     const size_t start = 0;
     const size_t stop  = 8;
     const size_t width = 3;
-    size_t indexStart = 0;
-    size_t indexEnd = 0;
     Mantid::API::MantidImage_sptr image;
-    TS_ASSERT_THROWS_NOTHING( image = ws.getImageY(start,stop,width,indexStart,indexEnd) );
+    TS_ASSERT_THROWS_NOTHING( image = ws.getImageY(start,stop,width) );
     if ( !image ) return;
     TS_ASSERT_EQUALS( image->size(), 3 );
     TS_ASSERT_EQUALS( (*image)[0].size(), 3 );

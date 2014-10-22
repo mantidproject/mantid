@@ -1820,16 +1820,40 @@ namespace Mantid
     }
 
     /**
+     * Get start and end x indices for images
+     * @param i :: Histogram index.
+     * @param startX :: Lower bound of the x integration range.
+     * @param endX :: Upper bound of the x integration range.
+     */
+    std::pair<size_t,size_t> MatrixWorkspace::getImageStartEndXIndices( size_t i, double startX, double endX ) const
+    {
+      if ( startX == EMPTY_DBL() ) startX = readX(i).front();
+      auto pStart = getXIndex( i, startX, true );
+      if ( pStart.second != 0.0 )
+      {
+        throw std::runtime_error("Start X value is required to be on bin boundary.");
+      }
+      if ( endX == EMPTY_DBL() ) endX = readX(i).back();
+      auto pEnd = getXIndex( i, endX, false, pStart.first );
+      if ( pEnd.second != 0.0 )
+      {
+        throw std::runtime_error("End X value is required to be on bin boundary.");
+      }
+      return std::make_pair( pStart.first, pEnd.first );
+    }
+
+    /**
      * Creates a 2D image of the y values in this workspace.
      * @param start :: First workspace index for the image.
      * @param stop :: Last workspace index for the image.
      * @param width :: Image width. Must divide (stop - start + 1) exactly.
-     * @param indexStart :: First index of the x integration range.
-     * @param indexEnd :: Last index of the x integration range.
+     * @param startX :: Lower bound of the x integration range.
+     * @param endX :: Upper bound of the x integration range.
      */
-    MantidImage_sptr MatrixWorkspace::getImageY(size_t start, size_t stop, size_t width, size_t indexStart, size_t indexEnd) const
+    MantidImage_sptr MatrixWorkspace::getImageY(size_t start, size_t stop, size_t width, double startX, double endX ) const
     {
-      return getImage(&MatrixWorkspace::readY,start,stop,width,indexStart,indexEnd);
+      auto p = getImageStartEndXIndices( 0, startX, endX );
+      return getImage(&MatrixWorkspace::readY,start,stop,width,p.first,p.second);
     }
 
     /**
@@ -1837,12 +1861,70 @@ namespace Mantid
      * @param start :: First workspace index for the image.
      * @param stop :: Last workspace index for the image.
      * @param width :: Image width. Must divide (stop - start + 1) exactly.
-     * @param indexStart :: First index of the x integration range.
-     * @param indexEnd :: Last index of the x integration range.
+     * @param startX :: Lower bound of the x integration range.
+     * @param endX :: Upper bound of the x integration range.
      */
-    MantidImage_sptr MatrixWorkspace::getImageE(size_t start, size_t stop, size_t width, size_t indexStart, size_t indexEnd) const
+    MantidImage_sptr MatrixWorkspace::getImageE(size_t start, size_t stop, size_t width, double startX, double endX ) const
     {
-      return getImage(&MatrixWorkspace::readE,start,stop,width,indexStart,indexEnd);
+      auto p = getImageStartEndXIndices( 0, startX, endX );
+      return getImage(&MatrixWorkspace::readE,start,stop,width,p.first,p.second);
+    }
+
+    /**
+     * Find an index in the X vector for an x-value close to a given value. It is returned as the first
+     * member of the pair. The second member is the fraction [0,1] of bin width cut off by the search value.
+     * If the first member == size of X vector then search failed.
+     * @param i :: Histogram index.
+     * @param x :: The value to find the index for.
+     * @param isLeft :: If true the left bin boundary is returned, if false - the right one.
+     * @param start :: Index to start the search from.
+     */
+    std::pair<size_t,double> MatrixWorkspace::getXIndex(size_t i, double x, bool isLeft, size_t start) const
+    {
+      auto &X = readX(i);
+      auto nx = X.size();
+
+      // if start out of range - search failed
+      if ( start >= nx ) return std::make_pair( nx, 0.0 );
+      if ( start > 0 && start == nx - 1 )
+      {
+        // starting with the last index is allowed for right boundary search
+        if ( !isLeft ) return std::make_pair( start, 0.0 );
+        return std::make_pair( nx, 0.0 );
+      }
+
+      // consider point data with single value
+      if ( nx == 1 ) 
+      {
+        assert( start == 0 );
+        if ( isLeft ) return x <= X[start] ? std::make_pair( start, 0.0 ) : std::make_pair( nx, 0.0 );
+        return x >= X[start] ? std::make_pair( start, 0.0 ) : std::make_pair( nx, 0.0 );
+      }
+
+      // left boundaries below start value map to the start value
+      if ( x <= X[start] )
+      {
+        return isLeft ? std::make_pair( start, 0.0 ) : std::make_pair( nx, 0.0 );
+      }
+      // right boundary search returns last x value for all values above it
+      if ( x >= X.back() )
+      {
+        return !isLeft ? std::make_pair( nx - 1, 0.0 ) : std::make_pair( nx, 0.0 );
+      }
+
+      // general case: find the boundary index and bin fraction
+      auto end = X.end();
+      for(auto ix = X.begin() + start + 1; ix != end; ++ix)
+      {
+        if ( *ix >= x )
+        {
+          auto index = static_cast<size_t>( std::distance(X.begin(),ix) );
+          if ( isLeft ) --index;
+          return std::make_pair( index, fabs( (X[index] - x) / (*ix - *(ix - 1)) ) );
+        }
+      }
+      // I don't think we can ever get here
+      return std::make_pair( nx, 0.0 );
     }
 
   } // namespace API
