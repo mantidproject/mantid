@@ -440,6 +440,10 @@ public:
   void memoryImage2();
 #endif
 
+private slots:
+
+  // slot for file open dialogs created from the main app menu, or the workspaces dock window
+  void loadFileDialogAccept();
 
 private:
 
