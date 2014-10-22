@@ -26,7 +26,11 @@ namespace MantidQt
       virtual void keyPressEvent(QKeyEvent* e);
       void insertSuggestion();
       void updateMatches();
+      void clearSuggestion();
+      void nextSuggestion();
+      void prevSuggestion();
       std::string m_curKey;
+      std::string m_curMatch;
       std::map<std::string,std::string> m_matches;
       std::map<std::string,std::string> m_hints;
       bool m_dontComplete;

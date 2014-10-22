@@ -20,11 +20,23 @@ namespace MantidQt
     void HintingLineEdit::keyPressEvent(QKeyEvent* e)
     {
       m_dontComplete = (e->key() == Qt::Key_Backspace || e->key() == Qt::Key_Delete || e->key() == Qt::Key_Space);
+
+      if(e->key() == Qt::Key_Up)
+      {
+        prevSuggestion();
+      }
+
+      if(e->key() == Qt::Key_Down)
+      {
+        nextSuggestion();
+        return;
+      }
       QLineEdit::keyPressEvent(e);
     }
 
     void HintingLineEdit::updateMatches()
     {
+      m_curMatch.clear();
       m_matches.clear();
 
       for(auto it = m_hints.begin(); it != m_hints.end(); ++it)
@@ -64,7 +76,9 @@ namespace MantidQt
       if(m_curKey.length() < 1 || m_matches.size() < 1 || m_dontComplete)
         return;
 
-      const std::string key = m_matches.begin()->first;
+      if(m_curMatch.empty())
+        m_curMatch = m_matches.begin()->first;
+
       QString line = text();
       const int curPos = cursorPosition();
 
@@ -72,10 +86,51 @@ namespace MantidQt
       if(curPos + 1 < line.size() && line[curPos+1].isLetterOrNumber())
         return;
 
-      line = line.left(curPos) + QString::fromStdString(key).mid((int)m_curKey.size()) + line.mid(curPos);
+      line = line.left(curPos) + QString::fromStdString(m_curMatch).mid((int)m_curKey.size()) + line.mid(curPos);
 
       setText(line);
-      setSelection(curPos, (int)key.size());
+      setSelection(curPos, (int)m_curMatch.size());
+    }
+
+    void HintingLineEdit::clearSuggestion()
+    {
+      if(!hasSelectedText())
+        return;
+
+      //Remove the selected text
+      QString line = text();
+      line = line.left(selectionStart()) + line.mid(selectionStart() + selectedText().length());
+      setText(line);
+    }
+
+    void HintingLineEdit::nextSuggestion()
+    {
+      clearSuggestion();
+      auto it = m_matches.find(m_curMatch);
+      if(it != m_matches.end())
+      {
+        it++;
+        if(it == m_matches.end())
+          m_curMatch = m_matches.begin()->first;
+        else
+          m_curMatch = it->first;
+        insertSuggestion();
+      }
+    }
+
+    void HintingLineEdit::prevSuggestion()
+    {
+      clearSuggestion();
+      auto it = m_matches.find(m_curMatch);
+      if(it != m_matches.end())
+      {
+        it--;
+        if(it == m_matches.end())
+          m_curMatch = m_matches.rbegin()->first;
+        else
+          m_curMatch = it->first;
+        insertSuggestion();
+      }
     }
 
     void HintingLineEdit::showHint()
