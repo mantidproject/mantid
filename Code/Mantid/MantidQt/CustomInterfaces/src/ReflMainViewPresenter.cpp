@@ -413,10 +413,6 @@ namespace MantidQt
       if(!transStr.empty())
         transWS = makeTransWS(transStr);
 
-      /* If you add/remove any properties given to ReflectometryReductionOneAuto you should consider
-       * updating the list of suggestions provided by the options column in the UI.
-       * See Code/Mantid/MantidQt/CustomInterfaces/inc/MantidQtCustomInterfaces/ReflOptionsDelegate.h
-       */
       IAlgorithm_sptr algReflOne = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
       algReflOne->initialize();
       algReflOne->setProperty("InputWorkspace", runWS);
