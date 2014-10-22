@@ -214,17 +214,8 @@ namespace Algorithms
 	    double t0=parser.Eval();
 
 	    DateAndTime tofTime = it->pulseTime() + static_cast<int64_t>( ( (tof-t0)*tofScale + t0 )*1000. );
-	    while (tofTime>tdc[tdc_i])
-	      {
-		//Make sure the tdc index is not out of bounds.
-		if (tdc_i == tdc.size())
-		  {
-		    if (tofTime>(tdc[tdc_i-1]+static_cast<int64_t>(period*2)))
-			g_log.warning("Event occurred long after last TDC.");
-		    break;
-		  }
-		tdc_i+=1;
-	      }
+	    while (tdc_i != tdc.size() && tofTime>tdc[tdc_i])
+	      tdc_i+=1;
 
 	    double angle = 360.*static_cast<double>(tofTime.totalNanoseconds()-tdc[tdc_i-1].totalNanoseconds())/period;
 
@@ -242,6 +233,11 @@ namespace Algorithms
 		it->m_errorSquared *= weightTransparent*weightTransparent;
 	      }
 	  }
+
+	//Warn if the tdc signal has stopped during the run
+	if ( (events.back().pulseTime() + static_cast<int64_t>(events.back().tof()*1000.)) > (tdc.back()+static_cast<int64_t>(period*2)))
+	  g_log.warning("Events occurred long after last TDC.");
+
 	prog.report();
 	PARALLEL_END_INTERUPT_REGION
       }
