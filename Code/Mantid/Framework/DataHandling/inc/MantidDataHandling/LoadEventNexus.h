@@ -145,6 +145,13 @@ namespace DataHandling
     /// Filter by a maximum time-of-flight
     double filter_tof_max;
 
+		/// Spectra list to load
+		std::vector<int32_t> m_specList;
+		/// Minimum spectrum to load
+		int32_t m_specMin;
+		/// Maximum spectrum to load
+		int32_t m_specMax;
+
     /// Filter by start time
     Kernel::DateAndTime filter_time_start;
     /// Filter by stop time
@@ -250,6 +257,9 @@ namespace DataHandling
                                      const std::string& binsName,size_t start_wi = 0, size_t end_wi = 0);
 
     void filterDuringPause(API::MatrixWorkspace_sptr workspace);
+
+		// Validate the optional spectra input properties and initialize m_specList
+		void createSpectraList(int32_t min, int32_t max);
 
   public:
     /// name of top level NXentry to use
