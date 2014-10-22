@@ -60,6 +60,8 @@ namespace MantidQt
 
       //process selected rows
       virtual void process();
+      //Reduce a row
+      void reduceRow(size_t rowNo);
       //load a run into the ADS, or re-use one in the ADS if possible
       Mantid::API::Workspace_sptr loadRun(const std::string& run, const std::string& instrument);
       //get the run number of a TOF workspace
@@ -74,8 +76,6 @@ namespace MantidQt
       void autofillRow(size_t rowNo);
       //calculates qmin and qmax
       static std::vector<double> calcQRange(Mantid::API::MatrixWorkspace_sptr ws, double theta);
-      //Process a row
-      void processRow(size_t rowNo);
       //Stitch some rows
       void stitchRows(std::vector<size_t> rows);
       //insert a row in the model before the given index

@@ -285,12 +285,12 @@ namespace MantidQt
       {
         const std::vector<size_t> groupRows = gIt->second;
 
-        //Process each row individually
+        //Reduce each row
         for(auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt)
         {
           try
           {
-            processRow(*rIt);
+            reduceRow(*rIt);
             m_view->setProgress(++progress);
           }
           catch(std::exception& ex)
@@ -489,11 +489,11 @@ namespace MantidQt
     }
 
     /**
-    Process a row
-    @param rowNo : The row in the model to process
-    @throws std::runtime_error if processing fails
+    Reduce a row
+    @param rowNo : The row in the model to reduce
+    @throws std::runtime_error if reduction fails
     */
-    void ReflMainViewPresenter::processRow(size_t rowNo)
+    void ReflMainViewPresenter::reduceRow(size_t rowNo)
     {
       const std::string         run = m_model->String(rowNo, COL_RUNS);
       const std::string    transStr = m_model->String(rowNo, COL_TRANSMISSION);
@@ -555,7 +555,7 @@ namespace MantidQt
           throw std::runtime_error("Failed to run Scale algorithm");
       }
 
-      //Processing has completed. Put Qmin and Qmax into the table if needed, for stitching.
+      //Reduction has completed. Put Qmin and Qmax into the table if needed, for stitching.
       if(m_model->String(rowNo, COL_QMIN).empty() || m_model->String(rowNo, COL_QMAX).empty())
       {
         MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IvsQ_" + runNo);
