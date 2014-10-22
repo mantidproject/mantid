@@ -3505,14 +3505,22 @@ void ApplicationWindow::convertTableToWorkspace()
 void ApplicationWindow::convertTableToMatrixWorkspace()
 {
   Table* t = dynamic_cast<Table*>(activeWindow(TableWindow));
-  if (!t) return;
-  if(auto *mt = dynamic_cast<MantidTable*>(t))
-  {
-    mt = convertTableToTableWorkspace(t);
-    QHash<QString,QString> params;
-    params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
-    mantidUI->showAlgorithmDialog(QString("ConvertTableToMatrixWorkspace"),params);
-  }
+	if (!t) return;
+
+	// dynamic_cast is successful when converting MantidTable to MatrixWorkspace
+	auto *mt = dynamic_cast<MantidTable*>(t);
+
+	if (!mt){
+	// if dynamic_cast is unsuccessful, create MantidTable from which to create MatrixWorkspace
+		mt = convertTableToTableWorkspace(t);
+	}
+
+	if (mt){
+		QHash<QString,QString> params;
+		params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
+		mantidUI->showAlgorithmDialog(QString("ConvertTableToMatrixWorkspace"),params);
+	}
+
 }
 
 /**
