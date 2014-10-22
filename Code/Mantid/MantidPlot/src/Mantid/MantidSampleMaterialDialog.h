@@ -7,11 +7,9 @@
 #include "ui_MantidSampleMaterialDialog.h"
 
 #include <QDialog>
-#include <QPoint>
-#include <QLabel>
-#include <QTextEdit>
-#include <QLineEdit>
-#include <QDoubleSpinBox>
+#include <QMap>
+#include <QPair>
+#include <QList>
 
 //----------------------------------
 // Forward declarations
@@ -22,7 +20,7 @@ class QPushButton;
 class QRadioButton;
 class MantidUI;
 
-/** 
+/**
 This class displays a information about the sample material for a workspace
 and allows it to be modified.
 
@@ -47,7 +45,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>    
+Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class MantidSampleMaterialDialog : public QDialog
@@ -55,14 +53,13 @@ class MantidSampleMaterialDialog : public QDialog
   Q_OBJECT
 
 public:
-  MantidSampleMaterialDialog(const QString &wsname, MantidUI* mtdUI, Qt::WFlags flags = 0);
+  MantidSampleMaterialDialog(MantidUI* mtdUI, Qt::WFlags flags = 0);
+
+  void showWorkspace(const QString wsName);
 
 private:
-  /// Initialize the layout
-  void init();
-
-  /// A tree widget
-  QTreeWidget *m_tree;
+  QMap<QString, QString> getMaterial(QString workspaceName);
+  void showPropsOnTree(QMap<QString, QString> materialProps);
 
   /// The workspace name
   std::string m_wsname;
