@@ -213,6 +213,9 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_showLogs = new QAction(tr("Sample Logs..."), this);
   connect(m_showLogs,SIGNAL(triggered()),m_mantidUI,SLOT(showLogFileWindow()));
 
+  m_showSampleMaterial = new QAction(tr("Sample Material..."), this);
+  connect(m_showSampleMaterial,SIGNAL(triggered()),m_mantidUI,SLOT(showSampleMaterialWindow()));
+
   m_showHist = new QAction(tr("Show History"), this);
   connect(m_showHist,SIGNAL(triggered()),m_mantidUI,SLOT(showAlgorithmHistory()));
 
@@ -552,6 +555,7 @@ void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, const Mantid::AP
   menu->addSeparator();
   menu->addAction(m_showDetectors);
   menu->addAction(m_showLogs);
+  menu->addAction(m_showSampleMaterial);
   menu->addAction(m_showHist);
   menu->addAction(m_saveNexus);
 }
@@ -580,6 +584,7 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, const Mantid::A
   menu->addAction(m_showHist);  // Algorithm history
   menu->addAction(m_showListData); // Show data in table
   menu->addAction(m_showLogs);
+  menu->addAction(m_showSampleMaterial); //TODO
 }
 
 void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr &WS) const
@@ -601,6 +606,7 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::A
   menu->addAction(m_showListData); // Show data in table
   menu->addAction(m_convertMDHistoToMatrixWorkspace);
   menu->addAction(m_showLogs);
+  menu->addAction(m_showSampleMaterial); //TODO
 }
 
 

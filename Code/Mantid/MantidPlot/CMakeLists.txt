@@ -181,6 +181,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/MantidMDCurveDialog.cpp
                    src/Mantid/MantidMatrixDialog.cpp
                    src/Mantid/MantidSampleLogDialog.cpp
+                   src/Mantid/MantidSampleMaterialDialog.cpp
                    src/Mantid/MantidUI.cpp
                    src/Mantid/MantidTable.cpp
                    src/Mantid/MantidWSIndexDialog.cpp
@@ -417,6 +418,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/MantidMatrixFunction.h
                    src/Mantid/MantidAlgorithmMetatype.h
                    src/Mantid/MantidSampleLogDialog.h
+                   src/Mantid/MantidSampleMaterialDialog.h
                    src/Mantid/MantidUI.h
                    src/Mantid/MantidWSIndexDialog.h
                    src/Mantid/MantidTable.h
@@ -689,6 +691,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidMatrix.h
                        src/Mantid/MantidMatrixFunction.h
                        src/Mantid/MantidSampleLogDialog.h
+                       src/Mantid/MantidSampleMaterialDialog.h
                        src/Mantid/MantidUI.h
                        src/Mantid/MantidWSIndexDialog.h
                        src/Mantid/MantidTable.h
@@ -729,7 +732,8 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/ManageCustomMenus.ui
                src/Mantid/ManageInterfaceCategories.ui
                src/Mantid/MantidMDCurveDialog.ui
-			   src/Mantid/InstrumentWidget/UCorrectionDialog.ui
+               src/Mantid/MantidSampleMaterialDialog.ui
+      			   src/Mantid/InstrumentWidget/UCorrectionDialog.ui
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${QTIPLOT_MOC_FILES} ${MANTID_MOC_FILES} )

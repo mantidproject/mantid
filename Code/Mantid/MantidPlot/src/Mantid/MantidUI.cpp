@@ -5,6 +5,7 @@
 #include "ImportWorkspaceDlg.h"
 #include "AlgorithmMonitor.h"
 #include "MantidSampleLogDialog.h"
+#include "MantidSampleMaterialDialog.h"
 #include "AlgorithmHistoryWindow.h"
 #include "MantidMatrixCurve.h"
 #include "MantidMDCurve.h"
@@ -2130,6 +2131,10 @@ void MantidUI::menuMantidMatrixAboutToShow()
   connect(action,SIGNAL(triggered()),this,SLOT(showLogFileWindow()));
   menuMantidMatrix->addAction(action);
 
+  action = new QAction("Sample Material...", this);
+  connect(action,SIGNAL(triggered()),this,SLOT(showSampleMaterialWindow()));
+  menuMantidMatrix->addAction(action);
+
   action = new QAction("Show History", this);
   connect(action,SIGNAL(triggered()),this,SLOT(showAlgorithmHistory()));
   menuMantidMatrix->addAction(action);
@@ -2684,6 +2689,15 @@ void MantidUI::showLogFileWindow()
 {
   //Need a new window to display entries
   MantidSampleLogDialog *dlg = new MantidSampleLogDialog(getSelectedWorkspaceName(), this);
+  dlg->setModal(false);
+  dlg->setAttribute(Qt::WA_DeleteOnClose);
+  dlg->show();
+  dlg->setFocus();
+}
+
+void MantidUI::showSampleMaterialWindow()
+{
+  MantidSampleMaterialDialog *dlg = new MantidSampleMaterialDialog(getSelectedWorkspaceName(), this);
   dlg->setModal(false);
   dlg->setAttribute(Qt::WA_DeleteOnClose);
   dlg->show();

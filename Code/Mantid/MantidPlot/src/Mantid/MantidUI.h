@@ -409,6 +409,9 @@ signals:
     // Show log files for selected workspace
     void showLogFileWindow();
 
+    // Show sample material window for selected workspace
+    void showSampleMaterialWindow();
+
     void insertMenu();
 
     // Customize MantidMatrix menu.
