@@ -123,6 +123,7 @@ namespace MantidQt
     /**
     Parses a string in the format `a = 1,b=2, c = "1,2,3,4", d = 5.0, e='a,b,c'` into a map of key/value pairs
     @param str The input string
+    @throws std::runtime_error on an invalid input string
     */
     std::map<std::string,std::string> ReflMainViewPresenter::parseKeyValueString(const std::string& str)
     {
@@ -149,7 +150,15 @@ namespace MantidQt
           boost::trim(key);
           boost::trim(value);
 
+          if(key.empty() || value.empty())
+            throw std::runtime_error("Invalid key value pair, '" + *it + "'");
+
+
           kvp[key] = value;
+        }
+        else
+        {
+          throw std::runtime_error("Invalid key value pair, '" + *it + "'");
         }
       }
       return kvp;
