@@ -3,8 +3,11 @@
 
 #include <QStyledItemDelegate>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtMantidWidgets/HintingLineEdit.h"
 
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt
@@ -22,7 +25,12 @@ namespace MantidQt
         Q_UNUSED(index);
 
         std::map<std::string,std::string> hints;
+
         //Create hints
+        IAlgorithm_sptr algReflOne = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+        auto properties = algReflOne->getProperties();
+        for(auto it = properties.begin(); it != properties.end(); ++it)
+          hints[(*it)->name()] = (*it)->briefDocumentation();
 
         auto editor = new HintingLineEdit(parent, hints);
         editor->setFrame(false);
