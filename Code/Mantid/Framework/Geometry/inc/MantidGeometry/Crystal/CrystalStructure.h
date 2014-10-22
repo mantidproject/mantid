@@ -4,7 +4,10 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include "MantidGeometry/Crystal/SpaceGroup.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
+#include "MantidGeometry/Crystal/CompositeScatterer.h"
 
 #include <boost/make_shared.hpp>
 
@@ -46,29 +49,62 @@ namespace Geometry
 class DLLExport CrystalStructure
 {
 public:
+    enum ReflectionConditionMethod {
+        UseCentering,
+        UseStructureFactor
+    };
+
     CrystalStructure(const UnitCell &unitCell,
-                     const PointGroup_sptr &pointGroup = PointGroup_sptr(new PointGroupLaue1),
-                     const ReflectionCondition_sptr &centering = ReflectionCondition_sptr(new ReflectionConditionPrimitive));
+                     const PointGroup_sptr &pointGroup = PointGroupFactory::Instance().createPointGroup("-1"),
+                     const ReflectionCondition_sptr &centering = boost::make_shared<ReflectionConditionPrimitive>());
+
+    CrystalStructure(const UnitCell &unitCell,
+                     const SpaceGroup_const_sptr &spaceGroup,
+                     const CompositeScatterer_sptr &scatterers);
 
     virtual ~CrystalStructure() { }
 
     UnitCell cell() const;
     void setCell(const UnitCell &cell);
 
-    PointGroup_sptr pointGroup() const;
+    SpaceGroup_const_sptr spaceGroup() const;
+    void setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
+
     void setPointGroup(const PointGroup_sptr &pointGroup);
+    PointGroup_sptr pointGroup() const;
     PointGroup::CrystalSystem crystalSystem() const;
 
-    ReflectionCondition_sptr centering() const;
     void setCentering(const ReflectionCondition_sptr &centering);
+    ReflectionCondition_sptr centering() const;
 
-    std::vector<Kernel::V3D> getHKLs(double dMin, double dMax) const;
-    std::vector<Kernel::V3D> getUniqueHKLs(double dMin, double dMax) const;
+    CompositeScatterer_sptr getScatterers() const;
+    void setScatterers(const CompositeScatterer_sptr &scatterers);
+
+    std::vector<Kernel::V3D> getHKLs(double dMin, double dMax, ReflectionConditionMethod method = UseCentering) const;
+    std::vector<Kernel::V3D> getUniqueHKLs(double dMin, double dMax, ReflectionConditionMethod method = UseCentering) const;
 
     std::vector<double> getDValues(const std::vector<Kernel::V3D> &hkls) const;
+    std::vector<double> getFSquared(const std::vector<Kernel::V3D> &hkls) const;
 
 protected:
+    void setPointGroupFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
+    void setReflectionConditionFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
+
+    void assignSpaceGroupToScatterers(const SpaceGroup_const_sptr &spaceGroup);
+    void assignUnitCellToScatterers(const UnitCell &unitCell);
+
+    void initializeScatterers();
+
+    bool isStateSufficientForHKLGeneration(ReflectionConditionMethod method) const;
+    bool isStateSufficientForUniqueHKLGeneration(ReflectionConditionMethod method) const;
+
+    void throwIfRangeUnacceptable(double dMin, double dMax) const;
+
+    bool isAllowed(const Kernel::V3D &hkl, ReflectionConditionMethod method) const;
+
     UnitCell m_cell;
+    SpaceGroup_const_sptr m_spaceGroup;
+    CompositeScatterer_sptr m_scatterers;
     PointGroup_sptr m_pointGroup;
     ReflectionCondition_sptr m_centering;
     
