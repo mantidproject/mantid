@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtMantidWidgets/HintStrategy.h"
 
 namespace MantidQt
 {
@@ -55,6 +56,7 @@ namespace MantidQt
 
       //Settor methods
       virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument) = 0;
+      virtual void setOptionsHintStrategy(HintStrategy* hintStrategy) = 0;
 
       //Accessor methods
       virtual std::vector<size_t> getSelectedRowIndexes() const = 0;
