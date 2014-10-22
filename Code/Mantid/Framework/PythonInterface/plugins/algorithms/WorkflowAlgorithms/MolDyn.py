@@ -97,6 +97,7 @@ class MolDyn(PythonAlgorithm):
         sample_filename = self.getPropertyValue('Filename')
         function_list = self.getProperty('Functions').value
         res_ws = self.getPropertyValue('Resolution')
+        emax = self.getPropertyValue('MaxEnergy')
 
         if len(function_list) == 0 and os.path.splitext(sample_filename)[1] == 'cdl':
             issues['Functions'] = 'Must specify at least one function when loading a CDL file'
