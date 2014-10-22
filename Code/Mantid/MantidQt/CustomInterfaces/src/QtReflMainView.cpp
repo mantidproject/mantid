@@ -57,8 +57,7 @@ namespace MantidQt
       connect(ui.actionProcess,     SIGNAL(triggered()),        this, SLOT(actionProcess()));
       connect(ui.actionGroupRows,   SIGNAL(triggered()),        this, SLOT(actionGroupRows()));
 
-      QAbstractItemDelegate* delegate = new ReflOptionsDelegate();
-      ui.viewTable->setItemDelegateForColumn(ReflMainViewPresenter::COL_OPTIONS, delegate);
+      ui.viewTable->setItemDelegateForColumn(ReflMainViewPresenter::COL_OPTIONS, new ReflOptionsDelegate());
 
       //Finally, create a presenter to do the thinking for us
       m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(this));
