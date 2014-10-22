@@ -8,13 +8,19 @@ namespace MantidQt
   namespace MantidWidgets
   {
 
-    HintingLineEdit::HintingLineEdit(QWidget *parent, const std::map<std::string,std::string> &hints) : QLineEdit(parent), m_hints(hints)
+    HintingLineEdit::HintingLineEdit(QWidget *parent, const std::map<std::string,std::string> &hints) : QLineEdit(parent), m_hints(hints), m_dontComplete(false)
     {
       connect(this, SIGNAL(textEdited(const QString&)), this, SLOT(updateHint(const QString&)));
     }
 
     HintingLineEdit::~HintingLineEdit()
     {
+    }
+
+    void HintingLineEdit::keyPressEvent(QKeyEvent* e)
+    {
+      m_dontComplete = (e->key() == Qt::Key_Backspace || e->key() == Qt::Key_Delete || e->key() == Qt::Key_Space);
+      QLineEdit::keyPressEvent(e);
     }
 
     void HintingLineEdit::updateMatches()
@@ -53,18 +59,36 @@ namespace MantidQt
       showHint();
     }
 
+    void HintingLineEdit::insertSuggestion()
+    {
+      if(m_curKey.length() < 1 || m_matches.size() < 1 || m_dontComplete)
+        return;
+
+      const std::string key = m_matches.begin()->first;
+      QString line = text();
+      const int curPos = cursorPosition();
+
+      //Don't perform insertions mid-word
+      if(curPos + 1 < line.size() && line[curPos+1].isLetterOrNumber())
+        return;
+
+      line = line.left(curPos) + QString::fromStdString(key).mid((int)m_curKey.size()) + line.mid(curPos);
+
+      setText(line);
+      setSelection(curPos, (int)key.size());
+    }
+
     void HintingLineEdit::showHint()
     {
       updateMatches();
-      //If we're typing the key, auto complete and show matching keys
 
-      //If we're typing the value, show the detailed description for this key
-      QString matchList;
-
+      QString hintList;
       for(auto mIt = m_matches.begin(); mIt != m_matches.end(); ++mIt)
-        matchList += QString::fromStdString(mIt->first) + " : " + QString::fromStdString(mIt->second) + "\n";
+        hintList += QString::fromStdString(mIt->first) + " : " + QString::fromStdString(mIt->second) + "\n";
 
-      QToolTip::showText(mapToGlobal(QPoint(0, 5)), matchList.trimmed());
+      QToolTip::showText(mapToGlobal(QPoint(0, 5)), hintList.trimmed());
+
+      insertSuggestion();
     }
   } //namespace MantidWidgets
 } //namepsace MantidQt

@@ -23,10 +23,13 @@ namespace MantidQt
       HintingLineEdit(QWidget *parent, const std::map<std::string,std::string> &hints);
       virtual ~HintingLineEdit();
     protected:
+      virtual void keyPressEvent(QKeyEvent* e);
+      void insertSuggestion();
       void updateMatches();
       std::string m_curKey;
       std::map<std::string,std::string> m_matches;
       std::map<std::string,std::string> m_hints;
+      bool m_dontComplete;
     public slots:
       void showHint();
       void updateHint(const QString& text);
