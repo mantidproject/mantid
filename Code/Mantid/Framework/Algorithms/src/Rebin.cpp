@@ -93,6 +93,16 @@ namespace Mantid
                       "then the workspace gets converted to a Workspace2D histogram.");
 
       declareProperty("FullBinsOnly", false, "Omit the final bin if it's width is smaller than the step size");
+
+      auto vsValidator = boost::make_shared<CompositeValidator>();
+      vsValidator->add<InstrumentValidator>();
+      vsValidator->add<WorkspaceUnitValidator>("TOF");
+      vsValidator->add<HistogramValidator>();
+      declareProperty(new WorkspaceProperty<>("FlatBkgWorkspace","",Direction::Input,API::PropertyMode::Optional,vsValidator),
+        "An optional histogram workspace in the units of TOF, containing the same number of spectra as the \"InputWorkspace\" "
+        "and single Y value per each spectra, representing flat background in the time bin of this   "
+        "If such workspace is present, the value of the flat background provided by this workspace is removed "
+        "from each spectra of the rebinned workspace");
     }
 
 
