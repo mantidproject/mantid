@@ -46,6 +46,21 @@ void Integration::init()
   declareProperty("IncludePartialBins", false, "If true then partial bins from the beginning and end of the input range are also included in the integration.");
 }
 
+/**
+ * Std-style comparision function object (satisfies the requirements of Compare)
+ * @return true if first argument < second argument (with some tolerance/epsilon)
+ */
+struct tolerant_less: public std::binary_function<double,double,bool>
+{
+public:
+  bool operator()(const double &left, const double &right) const
+  {
+    // soft equal, if the diff left-right is below a numerical error (uncertainty) threshold, we cannot say
+    //std::cerr << "    --- operator: " << left << ", " << right << "      "; //std::endl;
+    return (left < right) && (std::abs(left - right) > std::numeric_limits<double>::epsilon());
+  }
+};
+
 /** Executes the algorithm
  *
  *  @throw runtime_error Thrown if algorithm cannot execute
@@ -129,17 +144,33 @@ void Integration::exec()
 
     // Find the range [min,max]
     MantidVec::const_iterator lowit, highit;
-    if (m_MinRange == EMPTY_DBL()) lowit=X.begin();
-    else lowit=std::lower_bound(X.begin(),X.end(),m_MinRange);
+    if (m_MinRange == EMPTY_DBL())
+    {
+      lowit=X.begin();
+    } else
+    {
+      MantidVec::const_reverse_iterator oit;
+      // note reverse iteration, mirror of the find_if used to find highit (below)
+      oit = (std::find_if(X.rbegin(), X.rend(), std::bind2nd(tolerant_less(),m_MinRange)));
+      // Lower limit is the bin after (decr in reverse iteration), i.e. the last (in reverse order) value not less than MinRange
+      oit--;
+      // turn reverse_iterator into forward/normal iterator
+      lowit = --(oit.base());
+    }
 
-    if (m_MaxRange == EMPTY_DBL()) highit=X.end();
-    else highit=std::find_if(lowit,X.end(),std::bind2nd(std::greater<double>(),m_MaxRange));
+    if (m_MaxRange == EMPTY_DBL())
+    {
+      highit=X.end();
+    } else
+    {
+      highit=std::find_if(lowit, X.end(), std::bind2nd(std::greater<double>(),m_MaxRange));
+    }
 
     // If range specified doesn't overlap with this spectrum then bail out
     if ( lowit == X.end() || highit == X.begin() ) continue;
 
     // Upper limit is the bin before, i.e. the last value smaller than MaxRange
-    --highit;
+    --highit; // (note: decrementing 'end()' is safe for vectors, at least according to the C++ standard)
 
     MantidVec::difference_type distmin = std::distance(X.begin(),lowit);
     MantidVec::difference_type distmax = std::distance(X.begin(),highit);
