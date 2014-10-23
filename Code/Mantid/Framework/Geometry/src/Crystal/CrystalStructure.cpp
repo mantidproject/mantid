@@ -13,7 +13,7 @@ namespace Geometry
 using namespace Mantid::Kernel;
 
 
-
+/// PointGroup/Centering based constructor
 CrystalStructure::CrystalStructure(const UnitCell &unitCell,
                                    const PointGroup_sptr &pointGroup,
                                    const ReflectionCondition_sptr &centering)
@@ -25,6 +25,7 @@ CrystalStructure::CrystalStructure(const UnitCell &unitCell,
     setCentering(centering);
 }
 
+/// SpaceGroup/Scatterers constructor
 CrystalStructure::CrystalStructure(const UnitCell &unitCell,
                                    const SpaceGroup_const_sptr &spaceGroup,
                                    const CompositeScatterer_sptr &scatterers)
@@ -304,6 +305,7 @@ bool CrystalStructure::isStateSufficientForUniqueHKLGeneration(CrystalStructure:
     return isStateSufficientForHKLGeneration(method) && m_pointGroup;
 }
 
+/// Throws std::invalid_argument if dMin <= 0 or dMax >= dMin
 void CrystalStructure::throwIfRangeUnacceptable(double dMin, double dMax) const
 {
     if(dMin <= 0.0) {
@@ -315,6 +317,7 @@ void CrystalStructure::throwIfRangeUnacceptable(double dMin, double dMax) const
     }
 }
 
+/// Checks whether a reflection is allowed, using the specified method
 bool CrystalStructure::isAllowed(const V3D &hkl, CrystalStructure::ReflectionConditionMethod method) const
 {
     switch(method) {
