@@ -285,6 +285,17 @@ namespace MantidQt
       {
         const std::vector<size_t> groupRows = gIt->second;
 
+        //Are we only partially processing a group?
+        if(groupRows.size() < numRowsInGroup(gIt->first))
+        {
+          std::stringstream err;
+          err << "You have only selected " << groupRows.size() << " of the ";
+          err << numRowsInGroup(gIt->first) << " rows in group " << gIt->first << ".";
+          err << " Are you sure you want to continue?";
+          if(!m_view->askUserYesNo(err.str(), "Continue Processing?"))
+            return;
+        }
+
         //Reduce each row
         for(auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt)
         {
