@@ -334,39 +334,25 @@ void LabelTool::dataPointClicked()
  
   // For workspace information.
   QMenu * info = clickMenu->addMenu(tr("More info..."));
-  QMenu * workspaces = info->addMenu(tr("Workspace"));
-  
-  QAction * wsNameToDisplay = new QAction((tr(m_curveWsName)), this);
-  workspaces->addAction(wsNameToDisplay);
-
-  
-  /*
-
-  // Before final testing, make sure that when you select a datapoint, its respective Ws name is displayed
+  QMenu * workspaces = info->addMenu(tr("Workspaces"));
 
   foreach(QString wsName, workspaceNames())
   {
-    QAction * wsNameToDisplay = new QAction((tr(wsName)), this);
-    workspaces->addAction(wsNameToDisplay);
+		QAction * qa = new QAction(tr(wsName),this);
+		workspaces->addAction(qa);
+		connect(qa,SIGNAL(triggered()),this,SLOT(insertLegend()));
   }
 
-  
-  // For displaying workspace title.
-  Mantid::API::Workspace *name; 
-  std::string wsTitle = name->getTitle();
-  
-  QMenu * workspaceTitle = workspaces->addMenu(tr(wsTitle), this);
-  */
+	// For viewing log values.
+	QMenu * logVals = info->addMenu(tr("Log values"));
 
+	foreach(QString logProperty, logValues())
+	{
+		QAction * qa = new QAction(tr(logProperty),this);
+		logVals->addAction(qa);
+		connect(qa,SIGNAL(triggered()),this,SLOT(insertLegend()));
+	}
 
-  // For viewing log values.
-  QMenu * logVals = info->addMenu(tr("Log values"));
-
-  foreach(QString logProperty, logValues())
-  {
-   logVals->addAction(new QAction(tr(logProperty), this));
-  }
-  
   clickMenu->exec(QCursor::pos());
 }
 
