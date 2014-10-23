@@ -153,7 +153,7 @@ void Integration::exec()
       // note reverse iteration, mirror of the find_if used to find highit (below)
       oit = (std::find_if(X.rbegin(), X.rend(), std::bind2nd(tolerant_less(), m_MinRange)));
       // Lower limit is the bin after (decr in reverse iteration), i.e. the last (in reverse order) value not less than MinRange
-      oit--;
+      --oit;
       // turn reverse_iterator into forward/normal iterator
       lowit = --(oit.base());
     }
