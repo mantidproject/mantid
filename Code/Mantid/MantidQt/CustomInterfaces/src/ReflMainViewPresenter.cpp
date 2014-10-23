@@ -816,7 +816,8 @@ namespace MantidQt
       case ReflMainView::GroupRowsFlag: groupRows();   break;
       case ReflMainView::OpenTableFlag: openTable();   break;
       case ReflMainView::NewTableFlag:  newTable();    break;
-      case ReflMainView::TableUpdatedFlag:  m_tableDirty = true; break;
+      case ReflMainView::TableUpdatedFlag:    m_tableDirty = true;  break;
+      case ReflMainView::ExpandSelectionFlag: expandSelection();    break;
 
       case ReflMainView::NoFlags:       return;
       }
@@ -995,6 +996,24 @@ namespace MantidQt
         if(m_model->Int(i, COL_GROUP) == groupId)
           count++;
       return count;
+    }
+
+    /** Expands the current selection to all the rows in the selected groups */
+    void ReflMainViewPresenter::expandSelection()
+    {
+      std::set<int> groupIds;
+
+      std::set<size_t> rows = m_view->getSelectedRows();
+      for(auto row = rows.begin(); row != rows.end(); ++row)
+        groupIds.insert(m_model->Int(*row, COL_GROUP));
+
+      std::set<size_t> selection;
+
+      for(size_t i = 0; i < m_model->rowCount(); ++i)
+        if(groupIds.find(m_model->Int(i, COL_GROUP)) != groupIds.end())
+          selection.insert(i);
+
+      m_view->setSelection(selection);
     }
   }
 }

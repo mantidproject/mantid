@@ -94,6 +94,7 @@ namespace MantidQt
       void actionDeleteRow();
       void actionProcess();
       void actionGroupRows();
+      void actionExpandSelection();
       void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);
     };
 

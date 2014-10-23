@@ -39,6 +39,7 @@ namespace MantidQt
       ui.buttonAddRow->setDefaultAction(ui.actionAddRow);
       ui.buttonDeleteRow->setDefaultAction(ui.actionDeleteRow);
       ui.buttonGroupRows->setDefaultAction(ui.actionGroupRows);
+      ui.buttonExpandSelection->setDefaultAction(ui.actionExpandSelection);
 
       //Expand the process runs column at the expense of the search column
       ui.splitterTables->setStretchFactor(0, 0);
@@ -51,13 +52,14 @@ namespace MantidQt
       //Allow rows to be reordered
       ui.viewTable->verticalHeader()->setMovable(true);
 
-      connect(ui.actionSaveTable,   SIGNAL(triggered()), this, SLOT(actionSave()));
-      connect(ui.actionSaveTableAs, SIGNAL(triggered()), this, SLOT(actionSaveAs()));
-      connect(ui.actionNewTable,    SIGNAL(triggered()), this, SLOT(actionNewTable()));
-      connect(ui.actionAddRow,      SIGNAL(triggered()), this, SLOT(actionAddRow()));
-      connect(ui.actionDeleteRow,   SIGNAL(triggered()), this, SLOT(actionDeleteRow()));
-      connect(ui.actionProcess,     SIGNAL(triggered()), this, SLOT(actionProcess()));
-      connect(ui.actionGroupRows,   SIGNAL(triggered()), this, SLOT(actionGroupRows()));
+      connect(ui.actionSaveTable,       SIGNAL(triggered()), this, SLOT(actionSave()));
+      connect(ui.actionSaveTableAs,     SIGNAL(triggered()), this, SLOT(actionSaveAs()));
+      connect(ui.actionNewTable,        SIGNAL(triggered()), this, SLOT(actionNewTable()));
+      connect(ui.actionAddRow,          SIGNAL(triggered()), this, SLOT(actionAddRow()));
+      connect(ui.actionDeleteRow,       SIGNAL(triggered()), this, SLOT(actionDeleteRow()));
+      connect(ui.actionProcess,         SIGNAL(triggered()), this, SLOT(actionProcess()));
+      connect(ui.actionGroupRows,       SIGNAL(triggered()), this, SLOT(actionGroupRows()));
+      connect(ui.actionExpandSelection, SIGNAL(triggered()), this, SLOT(actionExpandSelection()));
 
       //Finally, create a presenter to do the thinking for us
       m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(this));
@@ -155,11 +157,19 @@ namespace MantidQt
     }
 
     /**
-    This slot notifies the presenter that the "new table" button as been pressed
+    This slot notifies the presenter that the "new table" button has been pressed
     */
     void QtReflMainView::actionNewTable()
     {
       m_presenter->notify(NewTableFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "expand selection" button has been pressed
+    */
+    void QtReflMainView::actionExpandSelection()
+    {
+      m_presenter->notify(ExpandSelectionFlag);
     }
 
     /**

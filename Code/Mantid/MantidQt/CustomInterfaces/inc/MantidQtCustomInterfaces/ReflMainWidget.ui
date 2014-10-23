@@ -255,6 +255,13 @@
              </widget>
             </item>
             <item>
+             <widget class="QToolButton" name="buttonExpandSelection">
+              <property name="text">
+               <string>ExpandSelection</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <spacer name="spacerTableButtons">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -376,7 +383,7 @@
     </rect>
    </property>
    <property name="nativeMenuBar">
-     <bool>false</bool>
+    <bool>false</bool>
    </property>
    <widget class="QMenu" name="menuTable">
     <property name="title">
@@ -459,6 +466,18 @@
    </property>
    <property name="text">
     <string>Process</string>
+   </property>
+  </action>
+  <action name="actionExpandSelection">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/fit_frame.png</normaloff>:/fit_frame.png</iconset>
+   </property>
+   <property name="text">
+    <string>Expand Selection</string>
+   </property>
+   <property name="toolTip">
+    <string>Select an entire group</string>
    </property>
   </action>
  </widget>

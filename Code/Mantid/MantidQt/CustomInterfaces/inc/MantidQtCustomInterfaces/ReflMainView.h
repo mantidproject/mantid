@@ -66,16 +66,17 @@ namespace MantidQt
       virtual std::string getProcessInstrument() const = 0;
       virtual std::string getWorkspaceToOpen() const = 0;
 
-      static const int NoFlags       = 0;
-      static const int SaveFlag      = 1;
-      static const int SaveAsFlag    = 2;
-      static const int AddRowFlag    = 3;
-      static const int DeleteRowFlag = 4;
-      static const int ProcessFlag   = 5;
-      static const int GroupRowsFlag = 6;
-      static const int OpenTableFlag = 7;
-      static const int NewTableFlag  = 8;
-      static const int TableUpdatedFlag = 9;
+      static const int NoFlags             = 0;
+      static const int SaveFlag            = 1;
+      static const int SaveAsFlag          = 2;
+      static const int AddRowFlag          = 3;
+      static const int DeleteRowFlag       = 4;
+      static const int ProcessFlag         = 5;
+      static const int GroupRowsFlag       = 6;
+      static const int OpenTableFlag       = 7;
+      static const int NewTableFlag        = 8;
+      static const int TableUpdatedFlag    = 9;
+      static const int ExpandSelectionFlag = 10;
     };
   }
 }
