@@ -76,6 +76,8 @@ namespace MantidQt
       void autofillRow(size_t rowNo);
       //calculates qmin and qmax
       static std::vector<double> calcQRange(Mantid::API::MatrixWorkspace_sptr ws, double theta);
+      //get the number of rows in a group
+      size_t numRowsInGroup(int groupId) const;
       //Stitch some rows
       void stitchRows(std::vector<size_t> rows);
       //insert a row in the model before the given index

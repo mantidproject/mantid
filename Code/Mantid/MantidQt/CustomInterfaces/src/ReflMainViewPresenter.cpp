@@ -974,5 +974,18 @@ namespace MantidQt
       if(m_view)
         m_view->setTableList(m_workspaceList);
     }
+
+    /** Returns how many rows there are in a given group
+        @param groupId : The id of the group to count the rows of
+        @returns The number of rows in the group
+     */
+    size_t ReflMainViewPresenter::numRowsInGroup(int groupId) const
+    {
+      size_t count = 0;
+      for(size_t i = 0; i < m_model->rowCount(); ++i)
+        if(m_model->Int(i, COL_GROUP) == groupId)
+          count++;
+      return count;
+    }
   }
 }
