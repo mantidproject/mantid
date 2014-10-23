@@ -88,6 +88,8 @@ namespace MantidQt
       virtual void deleteRow();
       //group selected rows together
       virtual void groupRows();
+      //expand selection to group
+      virtual void expandSelection();
       //table io methods
       virtual void newTable();
       virtual void openTable();

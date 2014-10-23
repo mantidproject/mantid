@@ -254,6 +254,19 @@ namespace MantidQt
     }
 
     /**
+    Set which rows are selected
+    @param rows : The set of rows to select
+    */
+    void QtReflMainView::setSelection(const std::set<size_t>& rows)
+    {
+      ui.viewTable->clearSelection();
+      auto selectionModel = ui.viewTable->selectionModel();
+
+      for(auto row = rows.begin(); row != rows.end(); ++row)
+        selectionModel->select(ui.viewTable->model()->index((int)(*row), 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    }
+
+    /**
     Set the list of available instruments to search and process for
     @param instruments : The list of instruments available
     @param defaultInstrument : The instrument to have selected by default

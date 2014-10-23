@@ -43,9 +43,6 @@ namespace MantidQt
       //Connect the model
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model) = 0;
 
-      //Set the list of available tables to open
-      virtual void setTableList(const std::set<std::string>& tables) = 0;
-
       //Dialog/Prompt methods
       virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue) = 0;
       virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
@@ -58,6 +55,8 @@ namespace MantidQt
       virtual void setProgress(int progress) = 0;
 
       //Settor methods
+      virtual void setSelection(const std::set<size_t>& rows) = 0;
+      virtual void setTableList(const std::set<std::string>& tables) = 0;
       virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument) = 0;
       virtual void setOptionsHintStrategy(HintStrategy* hintStrategy) = 0;
 
