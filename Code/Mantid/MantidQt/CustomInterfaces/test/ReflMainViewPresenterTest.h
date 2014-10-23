@@ -810,6 +810,108 @@ public:
     EXPECT_CALL(mockView, askUserYesNo(_,_)).Times(0);
     presenter.notify(OpenTableFlag);
   }
+
+  void testExpandSelection()
+  {
+    auto ws = createWorkspace("TestWorkspace");
+    TableRow row = ws->appendRow();
+    row << "" << "" << "" << "" << "" << "" << 1.0 << 0 << ""; //Row 0
+    row = ws->appendRow();
+    row << "" << "" << "" << "" << "" << "" << 1.0 << 1 << ""; //Row 1
+    row = ws->appendRow();
+    row << "" << "" << "" << "" << "" << "" << 1.0 << 1 << ""; //Row 2
+    row = ws->appendRow();
+    row << "" << "" << "" << "" << "" << "" << 1.0 << 2 << ""; //Row 3
+    row = ws->appendRow();
+    row << "" << "" << "" << "" << "" << "" << 1.0 << 2 << ""; //Row 4
+    row = ws->appendRow();
+    row << "" << "" << "" << "" << "" << "" << 1.0 << 2 << ""; //Row 5
+    row = ws->appendRow();
+    row << "" << "" << "" << "" << "" << "" << 1.0 << 3 << ""; //Row 6
+    row = ws->appendRow();
+    row << "" << "" << "" << "" << "" << "" << 1.0 << 4 << ""; //Row 7
+    row = ws->appendRow();
+    row << "" << "" << "" << "" << "" << "" << 1.0 << 4 << ""; //Row 8
+    row = ws->appendRow();
+    row << "" << "" << "" << "" << "" << "" << 1.0 << 5 << ""; //Row 9
+
+    MockView mockView;
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
+    ReflMainViewPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
+
+    std::set<size_t> selection;
+    std::set<size_t> expected;
+
+    selection.insert(0);
+    expected.insert(0);
+
+    //With row 0 selected, we shouldn't expand at all
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(selection));
+    EXPECT_CALL(mockView, setSelection(ContainerEq(expected))).Times(1);
+    presenter.notify(ExpandSelectionFlag);
+
+    //With 0,1 selected, we should finish with 0,1,2 selected
+    selection.clear();
+    selection.insert(0);
+    selection.insert(1);
+
+    expected.clear();
+    expected.insert(0);
+    expected.insert(1);
+    expected.insert(2);
+
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(selection));
+    EXPECT_CALL(mockView, setSelection(ContainerEq(expected))).Times(1);
+    presenter.notify(ExpandSelectionFlag);
+
+    //With 1,6 selected, we should finish with 1,2,6 selected
+    selection.clear();
+    selection.insert(1);
+    selection.insert(6);
+
+    expected.clear();
+    expected.insert(1);
+    expected.insert(2);
+    expected.insert(6);
+
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(selection));
+    EXPECT_CALL(mockView, setSelection(ContainerEq(expected))).Times(1);
+    presenter.notify(ExpandSelectionFlag);
+
+    //With 4,8 selected, we should finish with 3,4,5,7,8 selected
+    selection.clear();
+    selection.insert(4);
+    selection.insert(8);
+
+    expected.clear();
+    expected.insert(3);
+    expected.insert(4);
+    expected.insert(5);
+    expected.insert(7);
+    expected.insert(8);
+
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(selection));
+    EXPECT_CALL(mockView, setSelection(ContainerEq(expected))).Times(1);
+    presenter.notify(ExpandSelectionFlag);
+
+    //With nothing selected, we should finish with nothing selected
+    selection.clear();
+    expected.clear();
+
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(selection));
+    EXPECT_CALL(mockView, setSelection(ContainerEq(expected))).Times(1);
+    presenter.notify(ExpandSelectionFlag);
+
+    //Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+  }
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H */

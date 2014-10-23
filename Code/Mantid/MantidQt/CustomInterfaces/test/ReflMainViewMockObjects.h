@@ -17,6 +17,7 @@ const int ProcessFlag   = ReflMainView::ProcessFlag;
 const int AddRowFlag    = ReflMainView::AddRowFlag;
 const int DeleteRowFlag = ReflMainView::DeleteRowFlag;
 const int GroupRowsFlag = ReflMainView::GroupRowsFlag;
+const int ExpandSelectionFlag = ReflMainView::ExpandSelectionFlag;
 
 //Clean column ids for use within tests
 const int RunCol     = ReflMainViewPresenter::COL_RUNS;
