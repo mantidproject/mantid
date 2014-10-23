@@ -48,7 +48,7 @@ public:
   {
     const size_t BUFFER_SIZE = 1024 * 1024;
     std::vector <char> buffer( BUFFER_SIZE );
-    std::ifstream in( filename );
+    std::ifstream in( filename.c_str() );
     size_t n = 0;
     while( size_t cc = read( in, buffer ) ) {
       n += countEOL( buffer, cc );
