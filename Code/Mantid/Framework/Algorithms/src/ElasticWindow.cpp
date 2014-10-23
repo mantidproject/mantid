@@ -180,8 +180,6 @@ void ElasticWindow::exec()
     convUnitQ2->setPropertyValue("OutputWorkspace", "outQSquared");
     convUnitQ2->execute();
     outputQSquared = convUnitQ2->getProperty("OutputWorkspace");
-    startProgress += stepProgress;
-    endProgress += stepProgress;
   }
 
   setProperty("OutputInQ", outputQ);
