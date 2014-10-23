@@ -79,7 +79,7 @@ namespace CustomInterfaces
   /**
    * Slot used to update the run button when an algorithm that was strted by the Run button complete.
    *
-   * @parm error Unused
+   * @param error Unused
    */
   void IndirectDataReductionTab::tabExecutionComplete(bool error)
   {

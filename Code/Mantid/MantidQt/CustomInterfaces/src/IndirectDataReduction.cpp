@@ -405,7 +405,7 @@ void IndirectDataReduction::showMessageBox(const QString& message)
  *
  * @param enabled If the button is clickable
  * @param message Message shown on the button
- * @parm tooltip Tooltip shown when hovering over button
+ * @param tooltip Tooltip shown when hovering over button
  */
 void IndirectDataReduction::updateRunButton(bool enabled, QString message, QString tooltip)
 {
