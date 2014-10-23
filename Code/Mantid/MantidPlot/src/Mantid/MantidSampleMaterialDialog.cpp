@@ -6,8 +6,6 @@
 #include "MantidUI.h"
 
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/ArrayProperty.h"
 
 #include <QTreeWidgetItem>
 #include <QTreeWidget>
@@ -120,10 +118,7 @@ void MantidSampleMaterialDialog::handleSetMaterial()
   QHash<QString, QString> presets;
   presets["InputWorkspace"] = m_wsName;
 
-  m_mantidUI->showAlgorithmDialog("SetSampleMaterial", presets);
-
-  //TODO
-  updateMaterial();
+  m_mantidUI->showAlgorithmDialog("SetSampleMaterial", presets, this);
 }
 
 /**
@@ -140,8 +135,16 @@ void MantidSampleMaterialDialog::handleCopyMaterial()
   presets["CopyLattice"] = "0";
   presets["CopyOrientationOnly"] = "0";
 
-  m_mantidUI->showAlgorithmDialog("CopySample", presets);
+  m_mantidUI->showAlgorithmDialog("CopySample", presets, this);
+}
 
-  //TODO
+/**
+ * Reloads the material information when an algorithm started from the dialog finishes.
+ *
+ * @param alg Completed algorithm (unused)
+ */
+void MantidSampleMaterialDialog::finishHandle(const IAlgorithm *alg)
+{
+  UNUSED_ARG(alg);
   updateMaterial();
 }

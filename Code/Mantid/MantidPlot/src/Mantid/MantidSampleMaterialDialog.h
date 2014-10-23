@@ -6,6 +6,8 @@
 //----------------------------------
 #include "ui_MantidSampleMaterialDialog.h"
 
+#include "MantidAPI/AlgorithmObserver.h"
+
 #include <QDialog>
 
 //----------------------------------
@@ -41,7 +43,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MantidSampleMaterialDialog : public QDialog
+class MantidSampleMaterialDialog : public QDialog, Mantid::API::AlgorithmObserver
 {
   Q_OBJECT
 
@@ -54,6 +56,9 @@ public slots:
   void handleCopyMaterial();
 
 private:
+  /// Handle completion of algorithm started from UI
+  void finishHandle(const Mantid::API::IAlgorithm *alg);
+
   /// Name of displayed workspace
   QString m_wsName;
 
