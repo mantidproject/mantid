@@ -56,7 +56,7 @@ public:
   bool operator()(const double &left, const double &right) const
   {
     // soft equal, if the diff left-right is below a numerical error (uncertainty) threshold, we cannot say
-    return (left < right) && (std::abs(left - right) > std::numeric_limits<double>::epsilon());
+    return (left < right) && (std::abs(left - right) > 1*std::numeric_limits<double>::epsilon());
   }
 };
 
@@ -149,13 +149,7 @@ void Integration::exec()
     }
     else
     {
-      MantidVec::const_reverse_iterator oit;
-      // note reverse iteration, mirror of the find_if used to find highit (below)
-      oit = (std::find_if(X.rbegin(), X.rend(), std::bind2nd(tolerant_less(), m_MinRange)));
-      // Lower limit is the bin after (decr in reverse iteration), i.e. the last (in reverse order) value not less than MinRange
-      --oit;
-      // turn reverse_iterator into forward/normal iterator
-      lowit = --(oit.base());
+      lowit = std::lower_bound(X.begin(), X.end(), m_MinRange, tolerant_less());
     }
 
     if (m_MaxRange == EMPTY_DBL())
