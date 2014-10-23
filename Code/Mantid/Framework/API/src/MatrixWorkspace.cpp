@@ -1927,6 +1927,69 @@ namespace Mantid
       return std::make_pair( nx, 0.0 );
     }
 
+      /**
+       * Copy data from an image.
+       * @param dataVec :: A method returning non-const references to data vectors to copy the image to.
+       * @param image :: An image to copy the data from.
+       * @param start :: Startinf workspace indx to copy data to.
+       */
+      void MatrixWorkspace::setImage( MantidVec& (MatrixWorkspace::*dataVec)(const std::size_t), const MantidImage &image, size_t start )
+      {
+
+        if ( image.empty() ) return;
+        if ( image[0].empty() ) return;
+
+        if ( blocksize() != 1 )
+        {
+          throw std::runtime_error("Cannot set image: a single bin workspace is expected.");
+        }
+
+        size_t height = image.size();
+        size_t width  = image.front().size();
+        size_t dataSize = width * height;
+
+        if ( start + dataSize > getNumberHistograms() )
+        {
+          throw std::runtime_error("Cannot set image: image is bigger than workspace.");
+        }
+
+        size_t spec = start;
+        for(auto row = image.begin(); row != image.end(); ++row)
+        {
+          if ( row->size() != width )
+          {
+            throw std::runtime_error("Canot set image: image is corrupted.");
+          }
+          auto rowBegin = row->begin();
+          auto rowEnd = row->end();
+          for(auto pixel = rowBegin; pixel != rowEnd; ++pixel,++spec)
+          {
+            (this->*dataVec)(spec)[0] = *pixel;
+          }
+        }
+      }
+
+      /**
+       * Copy the data (Y's) from an image to this workspace.
+       * @param image :: An image to copy the data from.
+       * @param start :: Startinf workspace indx to copy data to.
+       */
+      void MatrixWorkspace::setImageY( const MantidImage &image, size_t start )
+      {
+        setImage( &MatrixWorkspace::dataY, image, start );
+      }
+
+      /**
+       * Copy the data from an image to this workspace's errors.
+       * @param image :: An image to copy the data from.
+       * @param start :: Startinf workspace indx to copy data to.
+       */
+      void MatrixWorkspace::setImageE( const MantidImage &image, size_t start )
+      {
+        setImage( &MatrixWorkspace::dataE, image, start );
+      }
+
+
   } // namespace API
 } // Namespace Mantid
 

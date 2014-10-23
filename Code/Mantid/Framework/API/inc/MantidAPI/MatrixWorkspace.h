@@ -38,6 +38,8 @@ namespace Mantid
     typedef std::vector<std::vector<double>> MantidImage;
     /// shared pointer to MantidImage
     typedef boost::shared_ptr<MantidImage> MantidImage_sptr;
+    /// shared pointer to const MantidImage
+    typedef boost::shared_ptr<const MantidImage> MantidImage_const_sptr;
 
     //----------------------------------------------------------------------
     /** Base MatrixWorkspace Abstract Class.
@@ -324,12 +326,16 @@ namespace Mantid
       // Image methods
       //=====================================================================================
 
+      /// Get start and end x indices for images
+      std::pair<size_t,size_t> getImageStartEndXIndices( size_t i, double startX, double endX ) const;
       /// Create an image of Ys.
       MantidImage_sptr getImageY (size_t start = 0, size_t stop = 0, size_t width = 0, double startX = EMPTY_DBL(), double endX = EMPTY_DBL() ) const;
       /// Create an image of Es.
       MantidImage_sptr getImageE (size_t start = 0, size_t stop = 0, size_t width = 0, double startX = EMPTY_DBL(), double endX = EMPTY_DBL() ) const;
-      /// Get start and end x indices for images
-      std::pair<size_t,size_t> getImageStartEndXIndices( size_t i, double startX, double endX ) const;
+      /// Copy the data (Y's) from an image to this workspace.
+      void setImageY( const MantidImage &image, size_t start = 0 );
+      /// Copy the data from an image to this workspace's errors.
+      void setImageE( const MantidImage &image, size_t start = 0 );
 
       //=====================================================================================
       // End image methods
@@ -354,6 +360,8 @@ namespace Mantid
       MatrixWorkspace& operator=(const MatrixWorkspace&);
       /// Create an MantidImage instance.
       MantidImage_sptr getImage(const MantidVec& (MatrixWorkspace::*read)(std::size_t const) const, size_t start, size_t stop, size_t width, size_t indexStart, size_t indexEnd) const;
+      /// Copy data from an image.
+      void setImage( MantidVec& (MatrixWorkspace::*dataVec)(const std::size_t), const MantidImage &image, size_t start );
 
       /// Has this workspace been initialised?
       bool m_isInitialized;

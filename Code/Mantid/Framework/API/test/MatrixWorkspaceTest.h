@@ -1183,7 +1183,95 @@ public:
 
   }
 
+  void test_setImage_too_large()
+  {
+    auto image = createImage(2,3);
+    WorkspaceTester ws;
+    ws.init(2,2,1);
+    TS_ASSERT_THROWS( ws.setImageY( *image ), std::runtime_error );
+  }
+
+  void test_setImage_not_single_bin()
+  {
+    auto image = createImage(2,3);
+    WorkspaceTester ws;
+    ws.init(20,3,2);
+    TS_ASSERT_THROWS( ws.setImageY( *image ), std::runtime_error );
+  }
+
+  void test_setImageY()
+  {
+    auto image = createImage(2,3);
+    WorkspaceTester ws;
+    ws.init(6,2,1);
+    TS_ASSERT_THROWS_NOTHING( ws.setImageY( *image ) );
+    TS_ASSERT_EQUALS( ws.readY(0)[0], 1 );
+    TS_ASSERT_EQUALS( ws.readY(1)[0], 2 );
+    TS_ASSERT_EQUALS( ws.readY(2)[0], 3 );
+    TS_ASSERT_EQUALS( ws.readY(3)[0], 4 );
+    TS_ASSERT_EQUALS( ws.readY(4)[0], 5 );
+    TS_ASSERT_EQUALS( ws.readY(5)[0], 6 );
+  }
+
+  void test_setImageE()
+  {
+    auto image = createImage(2,3);
+    WorkspaceTester ws;
+    ws.init(6,2,1);
+    TS_ASSERT_THROWS_NOTHING( ws.setImageE( *image ) );
+    TS_ASSERT_EQUALS( ws.readE(0)[0], 1 );
+    TS_ASSERT_EQUALS( ws.readE(1)[0], 2 );
+    TS_ASSERT_EQUALS( ws.readE(2)[0], 3 );
+    TS_ASSERT_EQUALS( ws.readE(3)[0], 4 );
+    TS_ASSERT_EQUALS( ws.readE(4)[0], 5 );
+    TS_ASSERT_EQUALS( ws.readE(5)[0], 6 );
+  }
+
+  void test_setImageY_start()
+  {
+    auto image = createImage(2,3);
+    WorkspaceTester ws;
+    ws.init(9,2,1);
+    TS_ASSERT_THROWS_NOTHING( ws.setImageY( *image, 3 ) );
+    TS_ASSERT_EQUALS( ws.readY(3)[0], 1 );
+    TS_ASSERT_EQUALS( ws.readY(4)[0], 2 );
+    TS_ASSERT_EQUALS( ws.readY(5)[0], 3 );
+    TS_ASSERT_EQUALS( ws.readY(6)[0], 4 );
+    TS_ASSERT_EQUALS( ws.readY(7)[0], 5 );
+    TS_ASSERT_EQUALS( ws.readY(8)[0], 6 );
+  }
+
+  void test_setImageE_start()
+  {
+    auto image = createImage(2,3);
+    WorkspaceTester ws;
+    ws.init(9,2,1);
+    TS_ASSERT_THROWS_NOTHING( ws.setImageE( *image, 2 ) );
+    TS_ASSERT_EQUALS( ws.readE(2)[0], 1 );
+    TS_ASSERT_EQUALS( ws.readE(3)[0], 2 );
+    TS_ASSERT_EQUALS( ws.readE(4)[0], 3 );
+    TS_ASSERT_EQUALS( ws.readE(5)[0], 4 );
+    TS_ASSERT_EQUALS( ws.readE(6)[0], 5 );
+    TS_ASSERT_EQUALS( ws.readE(7)[0], 6 );
+  }
+
 private:
+
+  Mantid::API::MantidImage_sptr createImage(size_t width, size_t height)
+  {
+    auto image = new Mantid::API::MantidImage(height);
+    double value = 1.0;
+    for(auto row = image->begin(); row != image->end(); ++row)
+    {
+      row->resize( width );
+      for(auto pixel = row->begin(); pixel != row->end(); ++pixel, value += 1.0)
+      {
+        *pixel = value;
+      }
+    }
+    return Mantid::API::MantidImage_sptr( image );
+  }
+
   boost::shared_ptr<MatrixWorkspace> ws;
 
 };
