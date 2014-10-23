@@ -38,6 +38,7 @@ public slots:
   void runFilesChanged();
   void runFilesFinding();
   void runFilesFound();
+  void individualGroupingToggled(int state);
 
 private:
   virtual void initLayout();
