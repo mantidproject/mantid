@@ -56,7 +56,6 @@ public:
   bool operator()(const double &left, const double &right) const
   {
     // soft equal, if the diff left-right is below a numerical error (uncertainty) threshold, we cannot say
-    //std::cerr << "    --- operator: " << left << ", " << right << "      "; //std::endl;
     return (left < right) && (std::abs(left - right) > std::numeric_limits<double>::epsilon());
   }
 };
@@ -147,11 +146,12 @@ void Integration::exec()
     if (m_MinRange == EMPTY_DBL())
     {
       lowit=X.begin();
-    } else
+    }
+    else
     {
       MantidVec::const_reverse_iterator oit;
       // note reverse iteration, mirror of the find_if used to find highit (below)
-      oit = (std::find_if(X.rbegin(), X.rend(), std::bind2nd(tolerant_less(),m_MinRange)));
+      oit = (std::find_if(X.rbegin(), X.rend(), std::bind2nd(tolerant_less(), m_MinRange)));
       // Lower limit is the bin after (decr in reverse iteration), i.e. the last (in reverse order) value not less than MinRange
       oit--;
       // turn reverse_iterator into forward/normal iterator
@@ -161,9 +161,10 @@ void Integration::exec()
     if (m_MaxRange == EMPTY_DBL())
     {
       highit=X.end();
-    } else
+    }
+    else
     {
-      highit=std::find_if(lowit, X.end(), std::bind2nd(std::greater<double>(),m_MaxRange));
+      highit = std::upper_bound(lowit, X.end(), m_MaxRange, tolerant_less());
     }
 
     // If range specified doesn't overlap with this spectrum then bail out
