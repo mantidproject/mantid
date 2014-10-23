@@ -144,6 +144,33 @@ namespace Mantid
         return SpectraInfo(nspectra, have_spectra, spectra, detectorIndex, detectorCount, detectorList);
 
       }
+
+      /**
+       * Is this file from a well-formed multiperiod group workspace.
+       * @param nWorkspaceEntries : Number of entries in the group workspace
+       * @param sampleWS : Sample workspace to inspect the logs of
+       * @param log : Information logger object
+       * @return True only if multiperiod.
+       */
+      bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS, Logger& log)
+      {
+        bool isMultiPeriod = false;
+        if (ExperimentInfo_sptr expInfo = boost::dynamic_pointer_cast<ExperimentInfo>(sampleWS))
+        {
+          const std::string nPeriodsLogEntryName = "nperiods";
+          const Run& run = expInfo->run();
+          if (run.hasProperty(nPeriodsLogEntryName))
+          {
+            const int nPeriods = run.getPropertyValueAsType<int>(nPeriodsLogEntryName);
+            if (nPeriods == nWorkspaceEntries)
+            {
+              isMultiPeriod = true;
+              log.information("Loading as MultiPeriod group workspace.");
+            }
+          }
+        }
+        return isMultiPeriod;
+      }
     }
 
 /// Default constructor
@@ -236,19 +263,26 @@ namespace Mantid
       std::ostringstream os;
       if (bDefaultEntryNumber)
       {
-        ++entrynumber;
+        // Set the entry number to 1 if not provided.
+        entrynumber = 1;
       }
       os << basename << entrynumber;
       const std::string targetEntryName = os.str();
-      if (nWorkspaceEntries == 1 || !bDefaultEntryNumber)
-      {  // Load one first level entry, specified if there are several
 
-        API::Workspace_sptr workspace = loadEntry(root, targetEntryName, 0, 1);
-        //API::Workspace_sptr workspace = boost::static_pointer_cast<API::Workspace>(local_workspace);
-        setProperty("OutputWorkspace", workspace);
+      // Take the first real workspace obtainable. We need it even if loading groups.
+      API::Workspace_sptr tempWS = loadEntry(root, targetEntryName, 0, 1);
+
+      if (nWorkspaceEntries == 1 || !bDefaultEntryNumber)
+      {
+        // We have what we need.
+        setProperty("OutputWorkspace", tempWS);
       }
       else
-      {  // Load all first level entries
+      {
+        // We already know that this is a group workspace. Is it a true multiperiod workspace.
+        const bool bIsMultiPeriod = isMultiPeriodFile(nWorkspaceEntries, tempWS, g_log);
+
+        // Load all first level entries
         WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
         //This forms the name of the group
         std::string base_name = getPropertyValue("OutputWorkspace");
