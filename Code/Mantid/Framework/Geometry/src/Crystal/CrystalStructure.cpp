@@ -163,7 +163,7 @@ std::vector<Kernel::V3D> CrystalStructure::getHKLs(double dMin, double dMax, Ref
         for(int k = -kMax; k <= kMax; ++k) {
             for(int l = -lMax; l <= lMax; ++l) {
                 V3D hkl(h, k, l);
-                double d = m_cell.d(hkl);
+                double d = getDValue(hkl);
 
                 if(d <= dMax && d >= dMin && isAllowed(hkl, method)) {
                     hkls.push_back(hkl);
@@ -194,7 +194,7 @@ std::vector<Kernel::V3D> CrystalStructure::getUniqueHKLs(double dMin, double dMa
         for(int k = -kMax; k <= kMax; ++k) {
             for(int l = -lMax; l <= lMax; ++l) {
                 V3D hkl(h, k, l);
-                double d = m_cell.d(hkl);
+                double d = getDValue(hkl);
 
                 if(d <= dMax && d >= dMin && isAllowed(hkl, method)) {
                     uniqueHKLs.insert(m_pointGroup->getReflectionFamily(hkl));
@@ -211,7 +211,7 @@ std::vector<double> CrystalStructure::getDValues(const std::vector<V3D> &hkls) c
 {
 
     std::vector<double> dValues(hkls.size());
-    std::transform(hkls.begin(), hkls.end(), dValues.begin(), boost::bind<double>(&UnitCell::d, m_cell, _1));
+    std::transform(hkls.begin(), hkls.end(), dValues.begin(), boost::bind<double>(&CrystalStructure::getDValue, this, _1));
 
     return dValues;
 }
@@ -223,7 +223,7 @@ std::vector<double> CrystalStructure::getFSquared(const std::vector<V3D> &hkls) 
     fSquared.reserve(hkls.size());
 
     for(auto hkl = hkls.begin(); hkl != hkls.end(); ++hkl) {
-        fSquared.push_back(m_scatterers->calculateFSquared(*hkl));
+        fSquared.push_back(getFSquared(*hkl));
     }
 
     return fSquared;
@@ -322,10 +322,22 @@ bool CrystalStructure::isAllowed(const V3D &hkl, CrystalStructure::ReflectionCon
 {
     switch(method) {
     case UseStructureFactor:
-        return m_scatterers->calculateFSquared(hkl) > 1e-9;
+        return getFSquared(hkl) > 1e-9;
     default:
         return m_centering->isAllowed(static_cast<int>(hkl.X()), static_cast<int>(hkl.Y()), static_cast<int>(hkl.Z()));
     }
+}
+
+/// Returns the lattice plane spacing for the given HKL.
+double CrystalStructure::getDValue(const V3D &hkl) const
+{
+    return m_cell.d(hkl);
+}
+
+/// Returns |F|^2 for the given HKL.
+double CrystalStructure::getFSquared(const V3D &hkl) const
+{
+    return m_scatterers->calculateFSquared(hkl);
 }
 
 
