@@ -9,12 +9,70 @@
 
 #include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
+#include <boost/optional.hpp>
+#include <boost/shared_array.hpp>
 
 namespace Mantid
 {
 
   namespace DataHandling
   {
+
+    // Helper typedef
+    typedef boost::shared_array<int> IntArray_shared;
+
+    // Struct to contain spectrum information.
+    struct SpectraInfo
+    {
+      // Number of spectra
+      int nSpectra;
+      // Do we have any spectra
+      bool hasSpectra;
+      // Contains spectrum numbers for each workspace index
+      IntArray_shared spectraNumbers;
+      // Index of the detector in the workspace.
+      IntArray_shared detectorIndex;
+      // Number of detectors associated with each spectra
+      IntArray_shared detectorCount;
+      // Detector list contains a list of all of the detector numbers
+      IntArray_shared detectorList;
+
+      SpectraInfo() :
+          nSpectra(0), hasSpectra(false)
+      {
+      }
+
+      SpectraInfo(int _nSpectra, bool _hasSpectra, IntArray_shared _spectraNumbers,
+          IntArray_shared _detectorIndex, IntArray_shared _detectorCount,
+          IntArray_shared _detectorList) :
+          nSpectra(_nSpectra), hasSpectra(_hasSpectra), spectraNumbers(_spectraNumbers), detectorIndex(
+              _detectorIndex), detectorCount(_detectorCount), detectorList(_detectorList)
+      {
+      }
+
+      SpectraInfo(const SpectraInfo& other) : nSpectra(other.nSpectra), hasSpectra(other.hasSpectra), spectraNumbers(other.spectraNumbers), detectorIndex(
+          other.detectorIndex), detectorCount(other.detectorCount), detectorList(other.detectorList)
+      {
+      }
+
+      SpectraInfo& operator=(const SpectraInfo& other)
+      {
+        if (&other != this)
+        {
+          nSpectra = other.nSpectra;
+          hasSpectra = other.hasSpectra;
+          spectraNumbers = other.spectraNumbers;
+          detectorIndex = other.detectorIndex;
+          detectorCount = other.detectorCount;
+          detectorList = other.detectorList;
+        }
+        return *this;
+      }
+    };
+
+    // Helper typdef.
+    typedef boost::optional<SpectraInfo> SpectraInfo_optional;
+
     /**
 
     Loads a workspace from a NeXus Processed entry in a NeXus file.
@@ -91,7 +149,8 @@ namespace Mantid
 
       /// Load a single entry
       API::Workspace_sptr loadEntry(Mantid::NeXus::NXRoot & root, const std::string & entry_name,
-                                              const double& progressStart, const double& progressRange);
+                                              const double& progressStart, const double& progressRange
+                                              , SpectraInfo_optional& specInfo, bool ignoreSpecInfo);
 
       API::Workspace_sptr loadTableEntry(Mantid::NeXus::NXEntry& entry);
 
@@ -112,7 +171,7 @@ namespace Mantid
       /// Add a property to the sample object
       bool addSampleProperty(Mantid::NeXus::NXMainClass & sample_entry, const std::string & entryName, API::Sample& sampleDetails);
       /// Read the spectra 
-      void readInstrumentGroup(Mantid::NeXus::NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace);
+      void readInstrumentGroup(Mantid::NeXus::NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace, SpectraInfo_optional& specInfo, bool ignoreSpecInfo);
       /// Splits a string of exactly three words into the separate words
       void getWordsInString(const std::string & words3, std::string & w1, std::string & w2, std::string & w3);
       /// Splits a string of exactly four words into the separate words

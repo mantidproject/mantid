@@ -23,7 +23,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/optional.hpp>
 #include <cmath>
 #include <Poco/DateTimeParser.h>
 #include <Poco/Path.h>
@@ -46,40 +45,6 @@ namespace Mantid
 
     namespace
     {
-      // Helper typedef
-      typedef boost::shared_array<int> IntArray_shared;
-
-      // Struct to contain spectrum information.
-      struct SpectraInfo
-      {
-        // Number of spectra
-        const int nSpectra;
-        // Do we have any spectra
-        const bool hasSpectra;
-        // Contains spectrum numbers for each workspace index
-        const IntArray_shared spectraNumbers;
-        // Index of the detector in the workspace.
-        const IntArray_shared detectorIndex;
-        // Number of detectors associated with each spectra
-        const IntArray_shared detectorCount;
-        // Detector list contains a list of all of the detector numbers
-        const IntArray_shared detectorList;
-
-        SpectraInfo() :
-            nSpectra(0), hasSpectra(false)
-        {
-        }
-
-        SpectraInfo(int _nSpectra, bool _hasSpectra, IntArray_shared _spectraNumbers,
-            IntArray_shared _detectorIndex, IntArray_shared _detectorCount,
-            IntArray_shared _detectorList) :
-            nSpectra(_nSpectra), hasSpectra(_hasSpectra), spectraNumbers(_spectraNumbers), detectorIndex(
-                _detectorIndex), detectorCount(_detectorCount), detectorList(_detectorList)
-        {
-        }
-      };
-      // Helper typdef.
-      typedef boost::optional<SpectraInfo> SpectraInfo_optional;
 
       /**
        * Extract ALL the detector, spectrum number and workspace index mapping information.
@@ -270,7 +235,9 @@ namespace Mantid
       const std::string targetEntryName = os.str();
 
       // Take the first real workspace obtainable. We need it even if loading groups.
-      API::Workspace_sptr tempWS = loadEntry(root, targetEntryName, 0, 1);
+      SpectraInfo_optional spectraInfo;
+      API::Workspace_sptr tempWS = loadEntry(root, targetEntryName, 0, 1, spectraInfo /*Ignore to begin with*/
+          , false /*Do not Ignore spectrum/instrument information inputs, write them*/);
 
       if (nWorkspaceEntries == 1 || !bDefaultEntryNumber)
       {
@@ -281,6 +248,7 @@ namespace Mantid
       {
         // We already know that this is a group workspace. Is it a true multiperiod workspace.
         const bool bIsMultiPeriod = isMultiPeriodFile(nWorkspaceEntries, tempWS, g_log);
+        const bool ignoreSpecInfo = !bIsMultiPeriod; // Multiperiod groups can reuse it.
 
         // Load all first level entries
         WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
@@ -315,7 +283,8 @@ namespace Mantid
           std::string wsName = buildWorkspaceName(names[p], base_name, p, commonStem);
 
           Workspace_sptr local_workspace = loadEntry(root, basename + os.str(),
-              static_cast<double>(p - 1) / nWorkspaceEntries_d, 1. / nWorkspaceEntries_d);
+              static_cast<double>(p - 1) / nWorkspaceEntries_d, 1. / nWorkspaceEntries_d, spectraInfo, ignoreSpecInfo);
+
           declareProperty(
               new WorkspaceProperty<API::Workspace>(prop_name + os.str(), wsName, Direction::Output));
           //wksp_group->add(base_name + os.str());
@@ -962,10 +931,12 @@ namespace Mantid
    * @param entry_name :: The entry name
    * @param progressStart :: The percentage value to start the progress reporting for this entry
    * @param progressRange :: The percentage range that the progress reporting should cover
+   * @param specInfo :: Spectrum information object
+   * @param ignoreSpecInfo :: true to skip reading and wrting to optional specInfo
    * @returns A 2D workspace containing the loaded data
    */
   API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::string & entry_name,
-      const double& progressStart, const double& progressRange)
+      const double& progressStart, const double& progressRange, SpectraInfo_optional& specInfo, bool ignoreSpecInfo)
   {
     progress(progressStart, "Opening entry " + entry_name + "...");
 
@@ -1316,7 +1287,7 @@ namespace Mantid
     }
 
     // Now assign the spectra-detector map
-    readInstrumentGroup(mtd_entry, local_workspace);
+    readInstrumentGroup(mtd_entry, local_workspace, specInfo, ignoreSpecInfo);
 
     // Parameter map parsing
     progress(progressStart + 0.11 * progressRange, "Reading the parameter maps...");
@@ -1350,12 +1321,18 @@ namespace Mantid
    * Read the instrument group
    * @param mtd_entry :: The node for the current workspace
    * @param local_workspace :: The workspace to attach the instrument
+   * @param inOutSpecInfo :: Spectrum information
+   * @param ignoreSpecInfo :: If True ignore input spectrum info and obtain it yourself.
    */
   void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry,
-      API::MatrixWorkspace_sptr local_workspace)
+      API::MatrixWorkspace_sptr local_workspace, SpectraInfo_optional& inOutSpecInfo, bool ignoreSpecInfo)
   {
     // Get spectrum information for the current entry.
-    SpectraInfo spectraInfo = extractMappingInfo(mtd_entry, this->g_log);
+
+
+    const bool bUseExistingInfo =  inOutSpecInfo.is_initialized() && !ignoreSpecInfo;
+
+    SpectraInfo spectraInfo = bUseExistingInfo ? inOutSpecInfo.get() : extractMappingInfo(mtd_entry, this->g_log);
 
     //Now build the spectra list
     int index = 0;
@@ -1392,6 +1369,12 @@ namespace Mantid
             std::set<detid_t>(spectraInfo.detectorList.get() + start,
                 spectraInfo.detectorList.get() + end));
       }
+    }
+
+    // We can write the spec info under the following conditions.
+    if(!inOutSpecInfo.is_initialized() && !ignoreSpecInfo)
+    {
+      inOutSpecInfo = spectraInfo;
     }
   }
 
