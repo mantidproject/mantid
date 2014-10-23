@@ -16,6 +16,10 @@ namespace MantidQt
     {
     }
 
+    /** Handle a key press event.
+
+        @param e : A pointer to the event
+     */
     void HintingLineEdit::keyPressEvent(QKeyEvent* e)
     {
       m_dontComplete = (e->key() == Qt::Key_Backspace || e->key() == Qt::Key_Delete || e->key() == Qt::Key_Space);
@@ -34,6 +38,11 @@ namespace MantidQt
       QLineEdit::keyPressEvent(e);
     }
 
+    /** Rebuild a list of hints whenever the user edits the text, and use the hints
+        to make auto completion suggestions.
+
+        @param text : The new contents of the QLineEdit
+     */
     void HintingLineEdit::updateHints(const QString& text)
     {
       const size_t curPos = (size_t)cursorPosition();
@@ -63,6 +72,7 @@ namespace MantidQt
       insertSuggestion();
     }
 
+    /** Updates the list of hints matching the user's current input */
     void HintingLineEdit::updateMatches()
     {
       m_curMatch.clear();
@@ -82,6 +92,7 @@ namespace MantidQt
       }
     }
 
+    /** Show a tooltip with the current relevant hints */
     void HintingLineEdit::showToolTip()
     {
       QString hintList;
@@ -91,6 +102,7 @@ namespace MantidQt
       QToolTip::showText(mapToGlobal(QPoint(0, 5)), hintList.trimmed());
     }
 
+    /** Insert an auto completion suggestion beneath the user's cursor and select it */
     void HintingLineEdit::insertSuggestion()
     {
       if(m_curKey.length() < 1 || m_matches.size() < 1 || m_dontComplete)
@@ -114,6 +126,7 @@ namespace MantidQt
       setSelection(curPos, (int)m_curMatch.size());
     }
 
+    /** Remove any existing auto completion suggestion */
     void HintingLineEdit::clearSuggestion()
     {
       if(!hasSelectedText())
@@ -125,6 +138,7 @@ namespace MantidQt
       setText(line);
     }
 
+    /** Change to the next available auto completion suggestion */
     void HintingLineEdit::nextSuggestion()
     {
       clearSuggestion();
@@ -141,6 +155,7 @@ namespace MantidQt
       }
     }
 
+    /** Change to the previous auto completion suggestion */
     void HintingLineEdit::prevSuggestion()
     {
       clearSuggestion();
