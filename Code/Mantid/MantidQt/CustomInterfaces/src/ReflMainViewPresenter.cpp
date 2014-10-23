@@ -7,6 +7,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Utils.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -132,6 +133,20 @@ namespace MantidQt
       if(m_view)
         m_view->setTableList(m_workspaceList);
 
+      //Provide autocompletion hints for the options column. We use the algorithm's properties minus
+      //those we blacklist. We blacklist any useless properties or ones we're handling that the user
+      //should'nt touch.
+      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+      std::set<std::string> blacklist;
+      blacklist.insert("ThetaIn");
+      blacklist.insert("ThetaOut");
+      blacklist.insert("InputWorkspace");
+      blacklist.insert("OutputWorkspace");
+      blacklist.insert("OutputWorkspaceWavelength");
+      blacklist.insert("FirstTransmissionRun");
+      blacklist.insert("SecondTransmissionRun");
+      m_view->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, blacklist));
+
       //Start with a blank table
       newTable();
     }
@@ -175,6 +190,7 @@ namespace MantidQt
     /**
     Parses a string in the format `a = 1,b=2, c = "1,2,3,4", d = 5.0, e='a,b,c'` into a map of key/value pairs
     @param str The input string
+    @throws std::runtime_error on an invalid input string
     */
     std::map<std::string,std::string> ReflMainViewPresenter::parseKeyValueString(const std::string& str)
     {
@@ -201,7 +217,15 @@ namespace MantidQt
           boost::trim(key);
           boost::trim(value);
 
+          if(key.empty() || value.empty())
+            throw std::runtime_error("Invalid key value pair, '" + *it + "'");
+
+
           kvp[key] = value;
+        }
+        else
+        {
+          throw std::runtime_error("Invalid key value pair, '" + *it + "'");
         }
       }
       return kvp;

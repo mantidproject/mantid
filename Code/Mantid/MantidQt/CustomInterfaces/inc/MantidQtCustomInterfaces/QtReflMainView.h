@@ -67,6 +67,7 @@ namespace MantidQt
 
       //Settor methods
       virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument);
+      virtual void setOptionsHintStrategy(HintStrategy* hintStrategy);
 
       //Accessor methods
       virtual std::vector<size_t> getSelectedRowIndexes() const;

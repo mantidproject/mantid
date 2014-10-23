@@ -218,7 +218,35 @@ public:
     TSM_ASSERT("The min TOF in the workspace should be equal to or greater than the filtered cut-off", min >= filterStart);
   }
 
-  void test_Load_And_CompressEvents()
+  void test_partial_spectra_loading()
+  {
+    const std::string wsName = "test_partial_spectra_loading";
+		std::vector<int32_t> specList;
+		specList.push_back(13);
+		specList.push_back(16);
+		specList.push_back(21);
+		specList.push_back(28);
+
+    LoadEventNexus ld;
+    ld.initialize();
+    ld.setPropertyValue("OutputWorkspace", wsName);
+    ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
+		ld.setProperty("SpectrumList", specList);
+    ld.setProperty<bool>("LoadLogs", false); // Time-saver
+
+    TS_ASSERT( ld.execute() );
+
+    auto outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName); 
+
+    TSM_ASSERT("The number of spectra in the workspace should be equal to the spectra filtered", outWs->getNumberHistograms()==specList.size());
+    TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(0)->getSpectrumNo()==13);
+    TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(1)->getSpectrumNo()==16);
+    TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(2)->getSpectrumNo()==21);
+    TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(3)->getSpectrumNo()==28);
+
+  }
+
+	void test_Load_And_CompressEvents()
   {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
