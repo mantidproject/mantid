@@ -49,9 +49,14 @@ namespace MantidQt
       //Public for the purposes of unit testing
       static std::map<std::string,std::string> parseKeyValueString(const std::string& str);
     protected:
+      //the model the table is currently representing
       Mantid::API::ITableWorkspace_sptr m_model;
+      //the name of the workspace/table/model in the ADS, blank if unsaved
       std::string m_wsName;
+      //the view we're managing
       ReflMainView* m_view;
+      //stores whether or not the table has changed since it was last saved
+      bool m_tableDirty;
 
       //process selected rows
       virtual void process();
