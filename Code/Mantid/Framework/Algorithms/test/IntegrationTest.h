@@ -356,7 +356,7 @@ public:
 
   void makeRealBinBoundariesWorkspace(const std::string inWsName)
   {
-    unsigned int lenX = 11, lenY = 10, lenE = lenY;
+    const unsigned int lenX = 11, lenY = 10, lenE = lenY;
 
     Workspace_sptr wsAsWs = WorkspaceFactory::Instance().create("Workspace2D", 1, lenX, lenY);
     Workspace2D_sptr ws = boost::dynamic_pointer_cast<Workspace2D>(wsAsWs);
