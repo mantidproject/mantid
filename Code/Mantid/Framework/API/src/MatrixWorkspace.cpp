@@ -1792,7 +1792,7 @@ namespace Mantid
       if ( isHisto && indexEnd == indexStart + 1 )
       {
         PARALLEL_FOR_NO_WSP_CHECK()
-        for(int i = 0; i < height; ++i)
+        for(int i = 0; i < static_cast<int>(height); ++i)
         {
           auto &row = (*image)[i];
           row.resize( width );
@@ -1807,7 +1807,7 @@ namespace Mantid
       {
         // each image pixel is integrated over the x-range [indexStart,indexEnd)
         PARALLEL_FOR_NO_WSP_CHECK()
-        for(int i = 0; i < height; ++i)
+        for(int i = 0; i < static_cast<int>(height); ++i)
         {
           auto &row = (*image)[i];
           row.resize( width );
@@ -1958,7 +1958,7 @@ namespace Mantid
         }
 
         PARALLEL_FOR_NO_WSP_CHECK()
-        for(int i = 0; i < height; ++i)
+        for(int i = 0; i < static_cast<int>(height); ++i)
         {
           auto &row = image[i];
           if ( row.size() != width )
