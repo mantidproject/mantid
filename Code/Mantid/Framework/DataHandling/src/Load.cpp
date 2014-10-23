@@ -171,7 +171,7 @@ namespace Mantid
             std::string name = loader->name();
             int version = loader->version();
 
-            std::string ext = fileNames[0].substr(fileNames[0].find_last_of("."));
+            //std::string ext = fileNames[0].substr(fileNames[0].find_last_of("."));
             
             auto ifl = boost::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(loader);
             auto iflNexus = boost::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(loader);                     
