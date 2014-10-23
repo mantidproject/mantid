@@ -427,7 +427,7 @@ namespace DataHandling
   */
   std::string LoadFITS::ReadRotations(std::string rotFilePath, size_t fileCount)
   {
-    ifstream fStream(rotFilePath);
+    ifstream fStream(rotFilePath.c_str());
     std::string csvRotations = "";
 
     try
