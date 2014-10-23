@@ -42,6 +42,7 @@ public:
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
   MOCK_METHOD2(setProgressRange, void(int, int));
   MOCK_METHOD1(setProgress, void(int));
+  MOCK_METHOD1(setTableList, void(const std::set<std::string>& tableList));
   MOCK_METHOD2(setInstrumentList, void(const std::vector<std::string>& instruments, const std::string& defaultInstrument));
   MOCK_METHOD1(setInstrument, void(const std::string&));
   MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
