@@ -71,7 +71,8 @@ namespace Mantid
         }
 
         SpectraInfo(int _nSpectra, bool _hasSpectra, IntArray_shared _spectraNumbers,
-            IntArray_shared _detectorIndex, IntArray_shared _detectorCount, IntArray_shared _detectorList) :
+            IntArray_shared _detectorIndex, IntArray_shared _detectorCount,
+            IntArray_shared _detectorList) :
             nSpectra(_nSpectra), hasSpectra(_hasSpectra), spectraNumbers(_spectraNumbers), detectorIndex(
                 _detectorIndex), detectorCount(_detectorCount), detectorList(_detectorList)
         {
@@ -220,8 +221,10 @@ namespace Mantid
 
       // Check for an entry number property
       int64_t entrynumber = static_cast<int64_t>(getProperty("EntryNumber"));
+      Property const * const entryNumberProperty = this->getProperty("EntryNumber");
+      bool bDefaultEntryNumber = entryNumberProperty->isDefault();
 
-      if (entrynumber > 0 && entrynumber > nWorkspaceEntries)
+      if (!bDefaultEntryNumber && entrynumber > nWorkspaceEntries)
       {
         g_log.error() << "Invalid entry number specified. File only contains " << nWorkspaceEntries
             << " entries.\n";
@@ -229,13 +232,18 @@ namespace Mantid
       }
 
       const std::string basename = "mantid_workspace_";
-      if (nWorkspaceEntries == 1 || entrynumber > 0)
+
+      std::ostringstream os;
+      if (bDefaultEntryNumber)
+      {
+        ++entrynumber;
+      }
+      os << basename << entrynumber;
+      const std::string targetEntryName = os.str();
+      if (nWorkspaceEntries == 1 || !bDefaultEntryNumber)
       {  // Load one first level entry, specified if there are several
-        if (entrynumber == 0)
-          ++entrynumber;
-        std::ostringstream os;
-        os << entrynumber;
-        API::Workspace_sptr workspace = loadEntry(root, basename + os.str(), 0, 1);
+
+        API::Workspace_sptr workspace = loadEntry(root, targetEntryName, 0, 1);
         //API::Workspace_sptr workspace = boost::static_pointer_cast<API::Workspace>(local_workspace);
         setProperty("OutputWorkspace", workspace);
       }
