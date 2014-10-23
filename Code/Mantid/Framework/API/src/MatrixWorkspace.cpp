@@ -1791,27 +1791,31 @@ namespace Mantid
       // deal separately with single-binned workspaces: no integration is required
       if ( isHisto && indexEnd == indexStart + 1 )
       {
-        size_t spec = start;
-        for(auto row = image->begin(); row != image->end(); ++row)
+        PARALLEL_FOR_NO_WSP_CHECK()
+        for(int i = 0; i < height; ++i)
         {
-          row->resize( width );
-          for(size_t i = 0; i < width; ++i, ++spec)
+          auto &row = (*image)[i];
+          row.resize( width );
+          size_t spec = start + static_cast<size_t>(i) * width;
+          for(size_t j = 0; j< width; ++j, ++spec)
           {
-            (*row)[i] = (this->*read)(spec)[indexStart];
+            row[j] = (this->*read)(spec)[indexStart];
           }
         }
       }
       else
       {
         // each image pixel is integrated over the x-range [indexStart,indexEnd)
-        size_t spec = start;
-        for(auto row = image->begin(); row != image->end(); ++row)
+        PARALLEL_FOR_NO_WSP_CHECK()
+        for(int i = 0; i < height; ++i)
         {
-          row->resize( width );
-          for(size_t i = 0; i < width; ++i, ++spec)
+          auto &row = (*image)[i];
+          row.resize( width );
+          size_t spec = start + static_cast<size_t>(i) * width;
+          for(size_t j = 0; j < width; ++j, ++spec)
           {
             auto &V = (this->*read)(spec);
-            (*row)[i] = std::accumulate( V.begin() + indexStart, V.begin() + indexEnd, 0.0 );
+            row[j] = std::accumulate( V.begin() + indexStart, V.begin() + indexEnd, 0.0 );
           }
         }
       }
@@ -1953,16 +1957,17 @@ namespace Mantid
           throw std::runtime_error("Cannot set image: image is bigger than workspace.");
         }
 
-        size_t spec = start;
-        for(auto row = image.begin(); row != image.end(); ++row)
+        PARALLEL_FOR_NO_WSP_CHECK()
+        for(int i = 0; i < height; ++i)
         {
-          if ( row->size() != width )
+          auto &row = image[i];
+          if ( row.size() != width )
           {
             throw std::runtime_error("Canot set image: image is corrupted.");
           }
-          auto rowBegin = row->begin();
-          auto rowEnd = row->end();
-          for(auto pixel = rowBegin; pixel != rowEnd; ++pixel,++spec)
+          size_t spec = start + static_cast<size_t>(i) * width;
+          auto rowEnd = row.end();
+          for(auto pixel = row.begin(); pixel != rowEnd; ++pixel,++spec)
           {
             (this->*dataVec)(spec)[0] = *pixel;
           }
