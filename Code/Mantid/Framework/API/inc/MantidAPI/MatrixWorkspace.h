@@ -16,7 +16,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
-#include "MAntidKernel/EmptyValues.h"
+#include "MantidKernel/EmptyValues.h"
 
 
 namespace Mantid
