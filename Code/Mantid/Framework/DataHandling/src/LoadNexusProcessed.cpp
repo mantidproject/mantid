@@ -1176,6 +1176,98 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   return boost::static_pointer_cast<API::Workspace>(local_workspace);
 }
 
+typedef boost::shared_array<int> IntArray_shared;
+struct SpectraInfo
+{
+  // Number of spectra
+  const int nSpectra;
+  // Do we have any spectra
+  const bool hasSpectra;
+  // Contains spectrum numbers for each workspace index
+  const IntArray_shared spectraNumbers;
+  // Index of the detector in the workspace.
+  const IntArray_shared detectorIndex;
+  // Number of detectors associated with each spectra
+  const IntArray_shared detectorCount;
+  // Detector list contains a list of all of the detector numbers
+  const IntArray_shared detectorList;
+
+  SpectraInfo() :
+      nSpectra(0), hasSpectra(false)
+  {
+  }
+
+  SpectraInfo(int _nSpectra, bool _hasSpectra, IntArray_shared _spectraNumbers
+      , IntArray_shared _detectorIndex
+      , IntArray_shared _detectorCount
+      , IntArray_shared _detectorList)
+  :
+      nSpectra(_nSpectra), hasSpectra(_hasSpectra),
+      spectraNumbers(_spectraNumbers), detectorIndex(_detectorIndex),
+      detectorCount(_detectorCount), detectorList(_detectorList)
+  {
+  }
+};
+
+
+SpectraInfo doReadInstrumentGroup(NXEntry & mtd_entry, Logger& logger)
+{
+  //Instrument information
+    NXInstrument inst = mtd_entry.openNXInstrument("instrument");
+    if ( ! inst.containsGroup("detector") )
+    {
+      logger.information() << "Detector block not found. The workspace will not contain any detector information.\n";
+      return SpectraInfo();
+    }
+
+    //Populate the spectra-detector map
+    NXDetector detgroup = inst.openNXDetector("detector");
+
+    //Read necessary arrays from the file
+    // Detector list contains a list of all of the detector numbers. If it not present then we can't update the spectra
+    // map
+    boost::shared_array<int> detectorList;
+    try
+    {
+      NXInt detlist_group = detgroup.openNXInt("detector_list");
+      detlist_group.load();
+      detectorList = detlist_group.sharedBuffer();
+    }
+    catch(std::runtime_error &)
+    {
+      logger.information() << "detector_list block not found. The workspace will not contain any detector information."
+          << std::endl;
+      return SpectraInfo();
+    }
+
+    //Detector count contains the number of detectors associated with each spectra
+    NXInt det_count = detgroup.openNXInt("detector_count");
+    det_count.load();
+    boost::shared_array<int> detectorCount = det_count.sharedBuffer();
+    //Detector index - contains the index of the detector in the workspace
+    NXInt det_index = detgroup.openNXInt("detector_index");
+    det_index.load();
+    int nspectra = det_index.dim0();
+    boost::shared_array<int> detectorIndex = det_index.sharedBuffer();
+
+    //Spectra block - Contains spectrum numbers for each workspace index
+    // This might not exist so wrap and check. If it doesn't exist create a default mapping
+    bool have_spectra(true);
+    boost::shared_array<int> spectra;
+    try
+    {
+      NXInt spectra_block = detgroup.openNXInt("spectra");
+      spectra_block.load();
+      spectra = spectra_block.sharedBuffer();
+    }
+    catch(std::runtime_error &)
+    {
+      have_spectra = false;
+    }
+    return SpectraInfo(nspectra, have_spectra, spectra, detectorIndex, detectorCount, detectorList);
+
+};
+
 
 
 //-------------------------------------------------------------------------------------------------
@@ -1186,65 +1278,23 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
  */
 void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace)
 {
-  //Instrument information
-  NXInstrument inst = mtd_entry.openNXInstrument("instrument");
-  if ( ! inst.containsGroup("detector") )
-  {
-    g_log.information() << "Detector block not found. The workspace will not contain any detector information.\n";
-    return;
-  }
-
-  //Populate the spectra-detector map
-  NXDetector detgroup = inst.openNXDetector("detector");
-
-  //Read necessary arrays from the file
-  // Detector list contains a list of all of the detector numbers. If it not present then we can't update the spectra
-  // map
-  boost::shared_array<int> det_list;
-  try
-  {
-    NXInt detlist_group = detgroup.openNXInt("detector_list");
-    detlist_group.load();
-    det_list = detlist_group.sharedBuffer();
-  }
-  catch(std::runtime_error &)
-  {
-    g_log.information() << "detector_list block not found. The workspace will not contain any detector information."
-        << std::endl;
-    return;
-  }
-
-  //Detector count contains the number of detectors associated with each spectra
-  NXInt det_count = detgroup.openNXInt("detector_count");
-  det_count.load();
-  //Detector index - contains the index of the detector in the workspace
-  NXInt det_index = detgroup.openNXInt("detector_index");
-  det_index.load();
-  int nspectra = det_index.dim0();
-
-  //Spectra block - Contains spectrum numbers for each workspace index
-  // This might not exist so wrap and check. If it doesn't exist create a default mapping
-  bool have_spectra(true);
-  boost::shared_array<int> spectra;
-  try
-  {
-    NXInt spectra_block = detgroup.openNXInt("spectra");
-    spectra_block.load();
-    spectra = spectra_block.sharedBuffer();
-  }
-  catch(std::runtime_error &)
-  {
-    have_spectra = false;
-  }
+  // Get spectrum information for the current entry.
+  SpectraInfo spectraInfo = doReadInstrumentGroup(mtd_entry, this->g_log);
 
   //Now build the spectra list
   int index=0;
 
-  for(int i = 1; i <= nspectra; ++i)
+  for(int i = 1; i <= spectraInfo.nSpectra; ++i)
   { 
       int spectrum(-1);
-      if( have_spectra ) spectrum = spectra[i-1];
-      else spectrum = i+1 ;
+      if( spectraInfo.hasSpectra )
+      {
+        spectrum = spectraInfo.spectraNumbers[i-1];
+      }
+      else
+      {
+        spectrum = i+1;
+      }
 
       if ((i >= m_spec_min && i < m_spec_max )||(m_list && find(m_spec_list.begin(), m_spec_list.end(),
         i) != m_spec_list.end()))
@@ -1260,9 +1310,9 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
         }
         ++index;
 
-        int start = det_index[i-1];
-        int end = start + det_count[i-1];
-        spec->setDetectorIDs(std::set<detid_t>(det_list.get()+start,det_list.get()+end));
+        int start = spectraInfo.detectorIndex[i-1];
+        int end = start + spectraInfo.detectorCount[i-1];
+        spec->setDetectorIDs(std::set<detid_t>(spectraInfo.detectorList.get()+start,spectraInfo.detectorList.get()+end));
       }
   }
 }
