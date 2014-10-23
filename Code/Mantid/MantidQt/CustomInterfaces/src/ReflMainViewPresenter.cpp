@@ -165,24 +165,24 @@ namespace MantidQt
     /**
      * Finds the first unused group id
      */
-    int ReflMainViewPresenter::getUnusedGroup(std::vector<size_t> ignoredRows) const
+    int ReflMainViewPresenter::getUnusedGroup(std::set<size_t> ignoredRows) const
     {
-      std::vector<int> usedGroups;
+      std::set<int> usedGroups;
 
       //Scan through all the rows, working out which group ids are used
       for(size_t idx = 0; idx < m_model->rowCount(); ++idx)
       {
-        if(std::find(ignoredRows.begin(), ignoredRows.end(), idx) != ignoredRows.end())
+        if(ignoredRows.find(idx) != ignoredRows.end())
           continue;
 
         //This is an unselected row. Add it to the list of used group ids
-        usedGroups.push_back(m_model->Int(idx, COL_GROUP));
+        usedGroups.insert(m_model->Int(idx, COL_GROUP));
       }
 
       int groupId = 0;
 
       //While the group id is one of the used ones, increment it by 1
-      while(std::find(usedGroups.begin(), usedGroups.end(), groupId) != usedGroups.end())
+      while(usedGroups.find(groupId) != usedGroups.end())
         groupId++;
 
       return groupId;
@@ -243,7 +243,7 @@ namespace MantidQt
         return;
       }
 
-      std::vector<size_t> rows = m_view->getSelectedRowIndexes();
+      std::set<size_t> rows = m_view->getSelectedRows();
       if(rows.size() == 0)
       {
         //Does the user want to abort?
@@ -252,7 +252,7 @@ namespace MantidQt
 
         //They want to process all rows, so populate rows with every index in the model
         for(size_t idx = 0; idx < m_model->rowCount(); ++idx)
-          rows.push_back(idx);
+          rows.insert(idx);
       }
 
       //Maps group numbers to the list of rows in that group we want to process
@@ -762,8 +762,7 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::addRow()
     {
-      std::vector<size_t> rows = m_view->getSelectedRowIndexes();
-      std::sort(rows.begin(), rows.end());
+      std::set<size_t> rows = m_view->getSelectedRows();
       if(rows.size() == 0)
         insertRow(m_model->rowCount());
       else
@@ -776,10 +775,9 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::deleteRow()
     {
-      std::vector<size_t> rows = m_view->getSelectedRowIndexes();
-      std::sort(rows.begin(), rows.end());
-      for(size_t idx = rows.size(); 0 < idx; --idx)
-        m_model->removeRow(rows.at(0));
+      std::set<size_t> rows = m_view->getSelectedRows();
+      for(auto row = rows.rbegin(); row != rows.rend(); ++row)
+        m_model->removeRow(*row);
 
       m_view->showTable(m_model);
       m_tableDirty = true;
@@ -790,7 +788,7 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::groupRows()
     {
-      const std::vector<size_t> rows = m_view->getSelectedRowIndexes();
+      const std::set<size_t> rows = m_view->getSelectedRows();
       //Find the first unused group id, ignoring the selected rows
       const int groupId = getUnusedGroup(rows);
 

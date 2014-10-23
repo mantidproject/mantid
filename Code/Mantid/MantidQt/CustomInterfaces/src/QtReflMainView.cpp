@@ -306,16 +306,14 @@ namespace MantidQt
     Get the indices of the highlighted rows
     @returns a vector of unsigned ints contianing the highlighted row numbers
     */
-    std::vector<size_t> QtReflMainView::getSelectedRowIndexes() const
+    std::set<size_t> QtReflMainView::getSelectedRows() const
     {
       auto selectedRows = ui.viewTable->selectionModel()->selectedRows();
-      //auto selectedType = ui.viewTable->selectionModel()->;
-      std::vector<size_t> rowIndexes;
-      for (auto idx = selectedRows.begin(); idx != selectedRows.end(); ++idx)
-      {
-        rowIndexes.push_back(idx->row());
-      }
-      return rowIndexes;
+      std::set<size_t> rows;
+      for(auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
+        rows.insert(it->row());
+
+      return rows;
     }
 
     /**

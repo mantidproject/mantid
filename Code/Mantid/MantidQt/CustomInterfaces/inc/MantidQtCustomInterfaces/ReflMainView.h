@@ -62,7 +62,7 @@ namespace MantidQt
       virtual void setOptionsHintStrategy(HintStrategy* hintStrategy) = 0;
 
       //Accessor methods
-      virtual std::vector<size_t> getSelectedRowIndexes() const = 0;
+      virtual std::set<size_t> getSelectedRows() const = 0;
       virtual std::string getSearchInstrument() const = 0;
       virtual std::string getProcessInstrument() const = 0;
       virtual std::string getWorkspaceToOpen() const = 0;
