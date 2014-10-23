@@ -7,6 +7,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Utils.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -86,6 +87,20 @@ namespace MantidQt
         m_view->setInstrumentList(instruments, defaultInst);
       else
         m_view->setInstrumentList(instruments, "INTER");
+
+      //Provide autocompletion hints for the options column. We use the algorithm's properties minus
+      //those we blacklist. We blacklist any useless properties or ones we're handling that the user
+      //should'nt touch.
+      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+      std::set<std::string> blacklist;
+      blacklist.insert("ThetaIn");
+      blacklist.insert("ThetaOut");
+      blacklist.insert("InputWorkspace");
+      blacklist.insert("OutputWorkspace");
+      blacklist.insert("OutputWorkspaceWavelength");
+      blacklist.insert("FirstTransmissionRun");
+      blacklist.insert("SecondTransmissionRun");
+      m_view->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, blacklist));
 
       newTable();
     }

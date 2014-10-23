@@ -137,7 +137,10 @@ namespace MantidQt
     {
       if (role == Qt::TextAlignmentRole)
       {
-        return Qt::AlignRight;
+        if(index.column() == COL_OPTIONS)
+          return Qt::AlignLeft;
+        else
+          return Qt::AlignRight;
       }
       else if( role != Qt::DisplayRole && role != Qt::EditRole)
       {

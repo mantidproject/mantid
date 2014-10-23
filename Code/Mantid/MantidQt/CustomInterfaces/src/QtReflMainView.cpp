@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/QtReflMainView.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
+#include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include <qinputdialog.h>
@@ -237,6 +238,15 @@ namespace MantidQt
       int index = ui.comboSearchInstrument->findData(QString::fromStdString(defaultInstrument), Qt::DisplayRole);
       ui.comboSearchInstrument->setCurrentIndex(index);
       ui.comboProcessInstrument->setCurrentIndex(index);
+    }
+
+    /**
+    Set the strategy used for generating hints for the autocompletion in the options column.
+    @param hintStrategy The hinting strategy to use
+    */
+    void QtReflMainView::setOptionsHintStrategy(HintStrategy* hintStrategy)
+    {
+      ui.viewTable->setItemDelegateForColumn(ReflMainViewPresenter::COL_OPTIONS, new HintingLineEditFactory(hintStrategy));
     }
 
     /**
