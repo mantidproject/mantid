@@ -2697,12 +2697,12 @@ void MantidUI::showLogFileWindow()
 
 void MantidUI::showSampleMaterialWindow()
 {
-  MantidSampleMaterialDialog *dlg = new MantidSampleMaterialDialog(this);
+  MantidSampleMaterialDialog *dlg = new MantidSampleMaterialDialog(getSelectedWorkspaceName(), this);
   dlg->setModal(false);
   dlg->setAttribute(Qt::WA_DeleteOnClose);
   dlg->show();
   dlg->setFocus();
-  dlg->showWorkspace(getSelectedWorkspaceName());
+  dlg->updateMaterial();
 }
 
 //  *****      Plotting Methods     *****  //

@@ -7,17 +7,10 @@
 #include "ui_MantidSampleMaterialDialog.h"
 
 #include <QDialog>
-#include <QMap>
-#include <QPair>
-#include <QList>
 
 //----------------------------------
 // Forward declarations
 //----------------------------------
-class QTreeWidgetItem;
-class QTreeWidget;
-class QPushButton;
-class QRadioButton;
 class MantidUI;
 
 /**
@@ -53,18 +46,18 @@ class MantidSampleMaterialDialog : public QDialog
   Q_OBJECT
 
 public:
-  MantidSampleMaterialDialog(MantidUI* mtdUI, Qt::WFlags flags = 0);
+  MantidSampleMaterialDialog(const QString & wsName, MantidUI* mtdUI, Qt::WFlags flags = 0);
 
-  void showWorkspace(const QString wsName);
+public slots:
+  void updateMaterial();
+  void handleSetMaterial();
+  void handleCopyMaterial();
 
 private:
-  QMap<QString, QString> getMaterial(QString workspaceName);
-  void showPropsOnTree(QMap<QString, QString> materialProps);
+  /// Name of displayed workspace
+  QString m_wsName;
 
-  /// The workspace name
-  std::string m_wsname;
-
-  ///A pointer to the MantidUI object
+  /// A pointer to the MantidUI object
   MantidUI* m_mantidUI;
 
   Ui::MantidSampleMaterialDialog m_uiForm;
