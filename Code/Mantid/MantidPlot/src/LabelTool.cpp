@@ -290,7 +290,9 @@ void LabelTool::blankRegionClicked()
 
   foreach(QString wsName, workspaceNames())
   {
-    workspaces->addAction(new QAction(tr(wsName), this));
+		QAction * qa = new QAction(tr(wsName),this);
+		workspaces->addAction(qa);
+		connect(qa,SIGNAL(triggered()),this,SLOT(insertLegend()));
   }
 
   // For viewing log values.
@@ -298,7 +300,9 @@ void LabelTool::blankRegionClicked()
 
   foreach(QString logProperty, logValues())
   {
-   logVals->addAction(new QAction(tr(logProperty), this));
+		QAction * qa = new QAction(tr(logProperty),this);
+		logVals->addAction(qa);
+		connect(qa,SIGNAL(triggered()),this,SLOT(insertLegend()));
   }
 
   clickMenu->exec(QCursor::pos());
@@ -364,6 +368,19 @@ void LabelTool::dataPointClicked()
   }
   
   clickMenu->exec(QCursor::pos());
+}
+
+/// Creates a label with size equal to the axisFont size
+void LabelTool::insertLegend()
+{
+	QAction *action = qobject_cast<QAction *>(sender());
+	if (action)
+	{
+		LegendWidget *label = new LegendWidget(d_graph->plotWidget());
+		label->setOriginCoord(m_xPos,m_yPos);
+		label->setFont(d_graph->axisFont(0));
+		label->setText(action->text());
+	}
 }
 
 /// Displays a dialog box to input the contents of a label, then creates the label.
