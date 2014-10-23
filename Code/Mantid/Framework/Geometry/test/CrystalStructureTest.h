@@ -29,7 +29,7 @@ public:
       m_spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("I m -3 m");
 
       m_scatterers = CompositeScatterer::create();
-      m_scatterers->addScatterer(IsotropicAtomScatterer::create("Si", V3D(0.25, 0.25, 0.25)));
+      m_scatterers->addScatterer(IsotropicAtomScatterer::create("Si", V3D(0.0, 0.0, 0.0)));
   }
 
 
@@ -259,6 +259,41 @@ public:
       TS_ASSERT_EQUALS(dValues[0], 2.0);
       TS_ASSERT_EQUALS(dValues[1], 3.0);
       TS_ASSERT_EQUALS(dValues[2], 5.0);
+  }
+
+  void testReflectionConditionMethods()
+  {
+      /* This test compares the two methods that are available
+       * for testing if a reflection is allowed.
+       */
+
+      UnitCell cellSi(5.43, 5.43, 5.43);
+      PointGroup_sptr pgSi = PointGroupFactory::Instance().createPointGroup("m-3m");
+      ReflectionCondition_sptr centeringSi= boost::make_shared<ReflectionConditionAllFaceCentred>();
+
+      // Crystal structure with cell, point group, centering
+      CrystalStructure siUseCentering(cellSi, pgSi, centeringSi);
+      std::vector<V3D> hklsCentering = siUseCentering.getUniqueHKLs(0.6, 10.0, CrystalStructure::UseCentering);
+
+      // Crystal structure with cell, space group, scatterers - must be a space group without glides/screws.
+      SpaceGroup_const_sptr sgSi = SpaceGroupFactory::Instance().createSpaceGroup("F m -3 m");
+      // With an atom at (x, x, x) there are no extra conditions.
+      CompositeScatterer_sptr scatterers = CompositeScatterer::create();
+      scatterers->addScatterer(IsotropicAtomScatterer::create("Si", V3D(0.3, 0.3, 0.3)));
+
+      CrystalStructure siUseStructureFactors(cellSi, sgSi, scatterers);
+      std::vector<V3D> hklsStructureFactors = siUseStructureFactors.getUniqueHKLs(0.6, 10.0, CrystalStructure::UseStructureFactor);
+      std::vector<V3D> hklsCenteringAlternative = siUseStructureFactors.getUniqueHKLs(0.6, 10.0, CrystalStructure::UseCentering);
+
+      TS_ASSERT_EQUALS(hklsCentering.size(), hklsStructureFactors.size());
+      TS_ASSERT_EQUALS(hklsCentering.size(), hklsCenteringAlternative.size());
+
+      for(size_t i = 0; i < hklsCentering.size(); ++i) {
+          TS_ASSERT_EQUALS(hklsCentering[i], hklsStructureFactors[i]);
+          TS_ASSERT_EQUALS(hklsCentering[i], hklsCenteringAlternative[i]);
+      }
+
+
   }
 
 private:
