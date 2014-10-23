@@ -24,8 +24,9 @@ namespace MantidQt
       virtual ~HintingLineEdit();
     protected:
       virtual void keyPressEvent(QKeyEvent* e);
-      void insertSuggestion();
       void updateMatches();
+      void showToolTip();
+      void insertSuggestion();
       void clearSuggestion();
       void nextSuggestion();
       void prevSuggestion();
@@ -34,9 +35,8 @@ namespace MantidQt
       std::map<std::string,std::string> m_matches;
       std::map<std::string,std::string> m_hints;
       bool m_dontComplete;
-    public slots:
-      void showHint();
-      void updateHint(const QString& text);
+    protected slots:
+      void updateHints(const QString& text);
     };
   } //namespace MantidWidgets
 } //namepsace MantidQt
