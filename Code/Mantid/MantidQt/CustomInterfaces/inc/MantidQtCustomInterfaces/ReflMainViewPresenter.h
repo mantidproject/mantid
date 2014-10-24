@@ -79,7 +79,7 @@ namespace MantidQt
       //get the number of rows in a group
       size_t numRowsInGroup(int groupId) const;
       //Stitch some rows
-      void stitchRows(std::vector<size_t> rows);
+      void stitchRows(std::set<size_t> rows);
       //insert a row in the model before the given index
       virtual void insertRow(size_t before);
       //add row(s) to the model

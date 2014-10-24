@@ -255,16 +255,16 @@ namespace MantidQt
           rows.insert(idx);
       }
 
-      //Maps group numbers to the list of rows in that group we want to process
-      std::map<int,std::vector<size_t> > groups;
+      //Map group numbers to the set of rows in that group we want to process
+      std::map<int,std::set<size_t> > groups;
       for(auto it = rows.begin(); it != rows.end(); ++it)
-        groups[m_model->Int(*it, COL_GROUP)].push_back(*it);
+        groups[m_model->Int(*it, COL_GROUP)].insert(*it);
 
       //Check each group and warn if we're only partially processing it
       for(auto gIt = groups.begin(); gIt != groups.end(); ++gIt)
       {
         const int& groupId = gIt->first;
-        const std::vector<size_t>& groupRows = gIt->second;
+        const std::set<size_t>& groupRows = gIt->second;
         //Are we only partially processing a group?
         if(groupRows.size() < numRowsInGroup(gIt->first))
         {
@@ -301,7 +301,7 @@ namespace MantidQt
 
       for(auto gIt = groups.begin(); gIt != groups.end(); ++gIt)
       {
-        const std::vector<size_t> groupRows = gIt->second;
+        const std::set<size_t> groupRows = gIt->second;
 
         //Reduce each row
         for(auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt)
@@ -624,14 +624,11 @@ namespace MantidQt
     Stitches the workspaces created by the given rows together.
     @param rows : the list of rows
     */
-    void ReflMainViewPresenter::stitchRows(std::vector<size_t> rows)
+    void ReflMainViewPresenter::stitchRows(std::set<size_t> rows)
     {
       //If we can get away with doing nothing, do.
       if(rows.size() < 2)
         return;
-
-      //Ensure the rows are in order.
-      std::sort(rows.begin(), rows.end());
 
       //Properties for Stitch1DMany
       std::vector<std::string> workspaceNames;
@@ -668,7 +665,7 @@ namespace MantidQt
       }
 
       double dqq;
-      std::string dqqStr = m_model->String(rows.front(), COL_DQQ);
+      std::string dqqStr = m_model->String(*(rows.begin()), COL_DQQ);
       Mantid::Kernel::Strings::convert<double>(dqqStr, dqq);
 
       //params are qmin, -dqq, qmax for the final output
