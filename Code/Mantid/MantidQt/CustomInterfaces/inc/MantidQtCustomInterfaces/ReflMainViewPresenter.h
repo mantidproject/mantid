@@ -83,7 +83,8 @@ namespace MantidQt
       //insert a row in the model before the given index
       virtual void insertRow(size_t before);
       //add row(s) to the model
-      virtual void addRow();
+      virtual void appendRow();
+      virtual void prependRow();
       //delete row(s) from the model
       virtual void deleteRow();
       //group selected rows together

@@ -36,7 +36,7 @@ namespace MantidQt
     {
       ui.setupUi(this);
 
-      ui.buttonAddRow->setDefaultAction(ui.actionAddRow);
+      ui.buttonAppendRow->setDefaultAction(ui.actionAppendRow);
       ui.buttonDeleteRow->setDefaultAction(ui.actionDeleteRow);
       ui.buttonGroupRows->setDefaultAction(ui.actionGroupRows);
       ui.buttonExpandSelection->setDefaultAction(ui.actionExpandSelection);
@@ -59,7 +59,8 @@ namespace MantidQt
       connect(ui.actionSaveTable,       SIGNAL(triggered()), this, SLOT(actionSave()));
       connect(ui.actionSaveTableAs,     SIGNAL(triggered()), this, SLOT(actionSaveAs()));
       connect(ui.actionNewTable,        SIGNAL(triggered()), this, SLOT(actionNewTable()));
-      connect(ui.actionAddRow,          SIGNAL(triggered()), this, SLOT(actionAddRow()));
+      connect(ui.actionAppendRow,       SIGNAL(triggered()), this, SLOT(actionAppendRow()));
+      connect(ui.actionPrependRow,      SIGNAL(triggered()), this, SLOT(actionPrependRow()));
       connect(ui.actionDeleteRow,       SIGNAL(triggered()), this, SLOT(actionDeleteRow()));
       connect(ui.actionProcess,         SIGNAL(triggered()), this, SLOT(actionProcess()));
       connect(ui.actionGroupRows,       SIGNAL(triggered()), this, SLOT(actionGroupRows()));
@@ -130,11 +131,19 @@ namespace MantidQt
     }
 
     /**
-    This slot notifies the presenter that the "add row" button has been pressed
+    This slot notifies the presenter that the "append row" button has been pressed
     */
-    void QtReflMainView::actionAddRow()
+    void QtReflMainView::actionAppendRow()
     {
-      m_presenter->notify(AddRowFlag);
+      m_presenter->notify(AppendRowFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "prepend row" button has been pressed
+    */
+    void QtReflMainView::actionPrependRow()
+    {
+      m_presenter->notify(PrependRowFlag);
     }
 
     /**

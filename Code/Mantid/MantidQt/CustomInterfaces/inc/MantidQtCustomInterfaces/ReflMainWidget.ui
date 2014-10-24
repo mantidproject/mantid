@@ -234,9 +234,9 @@
           <item>
            <layout class="QHBoxLayout" name="layoutTableButtons">
             <item>
-             <widget class="QToolButton" name="buttonAddRow">
+             <widget class="QToolButton" name="buttonAppendRow">
               <property name="text">
-               <string>AddRow</string>
+               <string>AppendRow</string>
               </property>
              </widget>
             </item>
@@ -426,13 +426,28 @@
     <string>Save Table As</string>
    </property>
   </action>
-  <action name="actionAddRow">
+  <action name="actionAppendRow">
    <property name="icon">
     <iconset resource="../../../../MantidPlot/icons/icons.qrc">
      <normaloff>:/insert_row.png</normaloff>:/insert_row.png</iconset>
    </property>
    <property name="text">
-    <string>Add Row</string>
+    <string>Insert Row After</string>
+   </property>
+   <property name="toolTip">
+    <string>Insert Row After</string>
+   </property>
+  </action>
+  <action name="actionPrependRow">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/insert_row.png</normaloff>:/insert_row.png</iconset>
+   </property>
+   <property name="text">
+    <string>Insert Row Before</string>
+   </property>
+   <property name="toolTip">
+    <string>Insert Row Before</string>
    </property>
   </action>
   <action name="actionDeleteRow">

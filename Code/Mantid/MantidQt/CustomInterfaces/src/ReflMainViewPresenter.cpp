@@ -762,15 +762,28 @@ namespace MantidQt
     }
 
     /**
-    Add row(s) to the model
+    Insert a row after the last selected row
     */
-    void ReflMainViewPresenter::addRow()
+    void ReflMainViewPresenter::appendRow()
     {
       std::set<size_t> rows = m_view->getSelectedRows();
       if(rows.empty())
         insertRow(m_model->rowCount());
       else
         insertRow(*rows.rbegin() + 1);
+      m_tableDirty = true;
+    }
+
+    /**
+    Insert a row before the first selected row
+    */
+    void ReflMainViewPresenter::prependRow()
+    {
+      std::set<size_t> rows = m_view->getSelectedRows();
+      if(rows.empty())
+        insertRow(0);
+      else
+        insertRow(*rows.begin());
       m_tableDirty = true;
     }
 
@@ -812,14 +825,15 @@ namespace MantidQt
     {
       switch(flag)
       {
-      case ReflMainView::SaveAsFlag:    saveTableAs(); break;
-      case ReflMainView::SaveFlag:      saveTable();   break;
-      case ReflMainView::AddRowFlag:    addRow();      break;
-      case ReflMainView::DeleteRowFlag: deleteRow();   break;
-      case ReflMainView::ProcessFlag:   process();     break;
-      case ReflMainView::GroupRowsFlag: groupRows();   break;
-      case ReflMainView::OpenTableFlag: openTable();   break;
-      case ReflMainView::NewTableFlag:  newTable();    break;
+      case ReflMainView::SaveAsFlag:          saveTableAs();        break;
+      case ReflMainView::SaveFlag:            saveTable();          break;
+      case ReflMainView::AppendRowFlag:       appendRow();          break;
+      case ReflMainView::PrependRowFlag:      prependRow();         break;
+      case ReflMainView::DeleteRowFlag:       deleteRow();          break;
+      case ReflMainView::ProcessFlag:         process();            break;
+      case ReflMainView::GroupRowsFlag:       groupRows();          break;
+      case ReflMainView::OpenTableFlag:       openTable();          break;
+      case ReflMainView::NewTableFlag:        newTable();           break;
       case ReflMainView::TableUpdatedFlag:    m_tableDirty = true;  break;
       case ReflMainView::ExpandSelectionFlag: expandSelection();    break;
 
