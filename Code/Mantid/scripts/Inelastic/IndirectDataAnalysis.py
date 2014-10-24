@@ -945,8 +945,8 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
                                   CheckOverlapping=False)
 
     if diffraction_run:
-        ConvertUnits(InputWorkspace=inputWS, OutputWorksapce=inputWS, Target='dSpacing')
-        ConvertUnits(InputWorkspace=CorrectedWS, OutputWorksapce=CorrectedWS, Target='dSpacing')
+        ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='dSpacing')
+        ConvertUnits(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS, Target='dSpacing')
     else:
         ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='DeltaE',
                      EMode='Indirect', EFixed=efixed)
