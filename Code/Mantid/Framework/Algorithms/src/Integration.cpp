@@ -9,6 +9,7 @@
 #include "MantidAPI/Progress.h"
 #include <cmath>
 
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/BoundedValidator.h"
 
@@ -89,6 +90,7 @@ void Integration::exec()
   Progress progress(this, 0, 1, m_MaxSpec-m_MinSpec+1);
 
   const bool axisIsText = localworkspace->getAxis(1)->isText();
+  const bool axisIsNumeric = localworkspace->getAxis(1)->isNumeric();
 
   // Loop over spectra
   PARALLEL_FOR2(localworkspace,outputWorkspace)
@@ -103,6 +105,11 @@ void Integration::exec()
     {
       Mantid::API::TextAxis* newAxis = dynamic_cast<Mantid::API::TextAxis*>(outputWorkspace->getAxis(1));
       newAxis->setLabel(outWI, localworkspace->getAxis(1)->label(i));
+    }
+    else if ( axisIsNumeric )
+    {
+      Mantid::API::NumericAxis* newAxis = dynamic_cast<Mantid::API::NumericAxis*>(outputWorkspace->getAxis(1));
+      newAxis->setValue(outWI, (*(localworkspace->getAxis(1)))(i));
     }
 
     // This is the output
