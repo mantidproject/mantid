@@ -40,6 +40,7 @@ namespace MantidQt
       ui.buttonDeleteRow->setDefaultAction(ui.actionDeleteRow);
       ui.buttonGroupRows->setDefaultAction(ui.actionGroupRows);
       ui.buttonExpandSelection->setDefaultAction(ui.actionExpandSelection);
+      ui.buttonProcess->setDefaultAction(ui.actionProcess);
 
       //Expand the process runs column at the expense of the search column
       ui.splitterTables->setStretchFactor(0, 0);
@@ -197,6 +198,7 @@ namespace MantidQt
       //parent widget takes ownership of QMenu
       QMenu* menu = new QMenu(this);
       menu->addAction(ui.actionGroupRows);
+      menu->addAction(ui.actionProcess);
       menu->addSeparator();
       menu->addAction(ui.actionDeleteRow);
 
