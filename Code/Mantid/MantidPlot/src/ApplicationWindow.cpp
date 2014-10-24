@@ -828,6 +828,7 @@ void ApplicationWindow::initGlobalConstants()
   confirmClosePlot2D = false;
   confirmClosePlot3D = false;
   confirmCloseNotes = false;
+  d_inform_delete_workspace = true;
   d_inform_rename_table = false;
   confirmCloseInstrWindow=false;
 
@@ -3093,6 +3094,11 @@ Table* ApplicationWindow::newTable(const QString& caption, int r, int c)
   return w;
 }
 
+bool ApplicationWindow::isDeleteWorkspacePromptEnabled()
+{
+  return d_inform_delete_workspace;
+}
+
 Table* ApplicationWindow::newTable(int r, int c, const QString& name, const QString& legend)
 {
   Table* w = new Table(scriptingEnv(), r, c, legend, this, 0);
@@ -5211,6 +5217,7 @@ void ApplicationWindow::readSettings()
   confirmClosePlot2D = settings.value("/Plot2D", false).toBool();
   confirmClosePlot3D = settings.value("/Plot3D", false).toBool();
   confirmCloseNotes = settings.value("/Note", false).toBool();
+  d_inform_delete_workspace = settings.value("/DeleteWorkspace", true).toBool();
   d_inform_rename_table = settings.value("/RenameTable", false).toBool();
   confirmCloseInstrWindow=settings.value("/InstrumentWindow", false).toBool();
   settings.endGroup(); // Confirmations
@@ -5633,6 +5640,7 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/Plot2D", confirmClosePlot2D);
   settings.setValue("/Plot3D", confirmClosePlot3D);
   settings.setValue("/Note", confirmCloseNotes);
+  settings.setValue("/DeleteWorkspace",d_inform_delete_workspace);
   settings.setValue("/RenameTable", d_inform_rename_table);
   settings.value("/InstrumentWindow", confirmCloseInstrWindow).toBool();
   settings.endGroup(); // Confirmations
