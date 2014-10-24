@@ -89,8 +89,10 @@ set ( MOC_FILES
 # Add the include files are NOT already in MOC_FILES
 set ( INC_FILES
 	${MOC_FILES}
+	inc/MantidQtMantidWidgets/AlgorithmHintStrategy.h
 	inc/MantidQtMantidWidgets/CatalogHelper.h
 	inc/MantidQtMantidWidgets/WidgetDllOption.h
+	inc/MantidQtMantidWidgets/HintStrategy.h
 )
 
 # QtDesigner UI files to process
