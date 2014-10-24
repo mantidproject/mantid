@@ -98,6 +98,23 @@ public:
         TS_ASSERT_EQUALS(scatterer.getEquivalentPositions().front(), specialPosition);
     }
 
+    void testUnitCellStringValidator()
+    {
+        IValidator_sptr validator = boost::make_shared<UnitCellStringValidator>();
+
+        // non-working examples
+        TS_ASSERT_DIFFERS(validator->isValid("1.0"), "");
+        TS_ASSERT_DIFFERS(validator->isValid("1.0 1.0"), "");
+        TS_ASSERT_DIFFERS(validator->isValid("1.0 1.0 1.0 1.0"), "");
+        TS_ASSERT_DIFFERS(validator->isValid("1.0 1.0 1.0 1.0 1.0"), "");
+        TS_ASSERT_DIFFERS(validator->isValid("1.0.3 1.0 1.0"), "");
+
+        // Working examples
+        TS_ASSERT_EQUALS(validator->isValid("1.0 1.0 1.0"), "");
+        TS_ASSERT_EQUALS(validator->isValid("1.0 1.0 1.0 90.0 90.0 90.0"), "");
+        TS_ASSERT_EQUALS(validator->isValid("1.0 1.0 1.0 90.0 90.0 90.0  "), "");
+    }
+
 private:
     class MockIScatterer : public IScatterer
     {

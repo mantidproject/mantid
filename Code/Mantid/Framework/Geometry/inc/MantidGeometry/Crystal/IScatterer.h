@@ -9,6 +9,9 @@
 #include <complex>
 #include <boost/shared_ptr.hpp>
 
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/TypedValidator.h"
+
 namespace Mantid
 {
 namespace Geometry
@@ -65,27 +68,30 @@ class IScatterer;
 
 typedef boost::shared_ptr<IScatterer> IScatterer_sptr;
 
-class MANTID_GEOMETRY_DLL IScatterer
+class MANTID_GEOMETRY_DLL IScatterer : public Kernel::PropertyManager
 {
 public:
     IScatterer(const Kernel::V3D &position = Kernel::V3D(0.0, 0.0, 0.0));
     virtual ~IScatterer() { }
 
+    void initialize();
+
     virtual IScatterer_sptr clone() const = 0;
 
-    virtual void setPosition(const Kernel::V3D &position);
     Kernel::V3D getPosition() const;
     std::vector<Kernel::V3D> getEquivalentPositions() const;
-
-    virtual void setCell(const UnitCell &cell);
     UnitCell getCell() const;
-
-    virtual void setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
     SpaceGroup_const_sptr getSpaceGroup() const;
 
     virtual StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const = 0;
     
 protected:
+    virtual void setPosition(const Kernel::V3D &position);
+    virtual void setCell(const UnitCell &cell);
+    virtual void setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
+
+    virtual void declareProperties() { }
+
     void recalculateEquivalentPositions();
 
     Kernel::V3D m_position;
@@ -93,6 +99,13 @@ protected:
 
     UnitCell m_cell;
     SpaceGroup_const_sptr m_spaceGroup;
+};
+
+class MANTID_GEOMETRY_DLL UnitCellStringValidator : public Kernel::TypedValidator<std::string>
+{
+protected:
+    Kernel::IValidator_sptr clone() const;
+    virtual std::string checkValidity(const std::string &unitCellString) const;
 };
 
 } // namespace Geometry

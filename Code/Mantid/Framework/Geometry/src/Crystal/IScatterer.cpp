@@ -1,18 +1,39 @@
 #include "MantidGeometry/Crystal/IScatterer.h"
 #include <stdexcept>
 
+#include <boost/regex.hpp>
+#include <boost/make_shared.hpp>
+#include "MantidKernel/ListValidator.h"
+#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+
 namespace Mantid
 {
 namespace Geometry
 {
 
+using namespace Kernel;
+
 /// Default constructor, vector is wrapped to interval [0, 1).
 IScatterer::IScatterer(const Kernel::V3D &position) :
+    PropertyManager(),
     m_position(getWrappedVector(position)),
     m_cell(),
     m_spaceGroup()
 {
     recalculateEquivalentPositions();
+}
+
+void IScatterer::initialize()
+{
+    declareProperty(new Kernel::PropertyWithValue<V3D>("Position", V3D(0.0, 0.0, 0.0)), "Position of the scatterer");
+
+    IValidator_sptr unitCellStringValidator = boost::make_shared<UnitCellStringValidator>();
+    declareProperty(new Kernel::PropertyWithValue<std::string>("UnitCell", "1.0 1.0 1.0 90.0 90.0 90.0", unitCellStringValidator), "Unit cell.");
+
+    IValidator_sptr spaceGroupValidator = boost::make_shared<ListValidator<std::string> >(SpaceGroupFactory::Instance().subscribedSpaceGroupSymbols());
+    declareProperty(new Kernel::PropertyWithValue<std::string>("SpaceGroup", "P 1", spaceGroupValidator), "Space group.");
+
+    declareProperties();
 }
 
 /// Sets the position of the scatterer to the supplied coordinates - vector is wrapped to [0, 1) and equivalent positions are recalculated.
@@ -71,6 +92,22 @@ void IScatterer::recalculateEquivalentPositions()
     } else {
         m_equivalentPositions.push_back(m_position);
     }
+}
+
+IValidator_sptr UnitCellStringValidator::clone() const
+{
+    return boost::make_shared<UnitCellStringValidator>(*this);
+}
+
+std::string UnitCellStringValidator::checkValidity(const std::string &unitCellString) const
+{
+    boost::regex unitCellRegex("((\\d+\\.\\d+\\s+){2}|(\\d+\\.\\d+\\s+){5})(\\d+\\.\\d+\\s*)");
+
+    if(!boost::regex_match(unitCellString, unitCellRegex)) {
+        return "Unit cell string is invalid.";
+    }
+
+    return "";
 }
 
 
