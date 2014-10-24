@@ -1,11 +1,16 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 
-#include "MantidKernel/System.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
+
+#include <Poco/AutoPtr.h>
+#include <Poco/NObserver.h>
+
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -44,18 +49,25 @@ namespace MantidQt
       //Public for the purposes of unit testing
       static std::map<std::string,std::string> parseKeyValueString(const std::string& str);
     protected:
+      //the model the table is currently representing
       Mantid::API::ITableWorkspace_sptr m_model;
+      //the name of the workspace/table/model in the ADS, blank if unsaved
       std::string m_wsName;
+      //the view we're managing
       ReflMainView* m_view;
+      //stores whether or not the table has changed since it was last saved
+      bool m_tableDirty;
 
       //process selected rows
       virtual void process();
+      //Reduce a row
+      void reduceRow(size_t rowNo);
       //load a run into the ADS, or re-use one in the ADS if possible
       Mantid::API::Workspace_sptr loadRun(const std::string& run, const std::string& instrument);
       //get the run number of a TOF workspace
       std::string getRunNumber(const Mantid::API::Workspace_sptr& ws);
       //get an unused group id
-      int getUnusedGroup(std::vector<size_t> ignoredRows = std::vector<size_t>()) const;
+      int getUnusedGroup(std::set<size_t> ignoredRows = std::set<size_t>()) const;
       //make a transmission workspace
       Mantid::API::MatrixWorkspace_sptr makeTransWS(const std::string& transString);
       //Validate a row
@@ -64,10 +76,10 @@ namespace MantidQt
       void autofillRow(size_t rowNo);
       //calculates qmin and qmax
       static std::vector<double> calcQRange(Mantid::API::MatrixWorkspace_sptr ws, double theta);
-      //Process a row
-      void processRow(size_t rowNo);
+      //get the number of rows in a group
+      size_t numRowsInGroup(int groupId) const;
       //Stitch some rows
-      void stitchRows(std::vector<size_t> rows);
+      void stitchRows(std::set<size_t> rows);
       //insert a row in the model before the given index
       virtual void insertRow(size_t before);
       //add row(s) to the model
@@ -76,11 +88,29 @@ namespace MantidQt
       virtual void deleteRow();
       //group selected rows together
       virtual void groupRows();
+      //expand selection to group
+      virtual void expandSelection();
       //table io methods
       virtual void newTable();
       virtual void openTable();
       virtual void saveTable();
       virtual void saveTableAs();
+
+      //List of workspaces the user can open
+      std::set<std::string> m_workspaceList;
+
+      //To maintain a list of workspaces the user may open, we observe the ADS
+      Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspaceAddNotification> m_addObserver;
+      Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspacePostDeleteNotification> m_remObserver;
+      Poco::NObserver<ReflMainViewPresenter, Mantid::API::ClearADSNotification> m_clearObserver;
+      Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
+      Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
+
+      void handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf);
+      void handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
+      void handleClearEvent(Mantid::API::ClearADSNotification_ptr pNf);
+      void handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf);
+      void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
     public:
       static const int COL_RUNS         = 0;

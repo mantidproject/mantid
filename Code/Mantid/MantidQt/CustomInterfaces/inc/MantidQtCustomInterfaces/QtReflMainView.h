@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
 #include <boost/scoped_ptr.hpp>
+#include <QSignalMapper>
 #include "ui_ReflMainWidget.h"
 
 namespace MantidQt
@@ -62,10 +63,13 @@ namespace MantidQt
       virtual void setProgress(int progress);
 
       //Settor methods
+      virtual void setSelection(const std::set<size_t>& rows);
+      virtual void setTableList(const std::set<std::string>& tables);
       virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument);
+      virtual void setOptionsHintStrategy(HintStrategy* hintStrategy);
 
       //Accessor methods
-      virtual std::vector<size_t> getSelectedRowIndexes() const;
+      virtual std::set<size_t> getSelectedRows() const;
       virtual std::string getSearchInstrument() const;
       virtual std::string getProcessInstrument() const;
       virtual std::string getWorkspaceToOpen() const;
@@ -79,6 +83,7 @@ namespace MantidQt
       Ui::reflMainWidget ui;
       //the workspace the user selected to open
       std::string m_toOpen;
+      QSignalMapper* m_openMap;
 
     private slots:
       void setModel(QString name);
@@ -89,6 +94,8 @@ namespace MantidQt
       void actionDeleteRow();
       void actionProcess();
       void actionGroupRows();
+      void actionExpandSelection();
+      void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);
     };
 
 

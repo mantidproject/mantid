@@ -17,6 +17,7 @@ const int ProcessFlag   = ReflMainView::ProcessFlag;
 const int AddRowFlag    = ReflMainView::AddRowFlag;
 const int DeleteRowFlag = ReflMainView::DeleteRowFlag;
 const int GroupRowsFlag = ReflMainView::GroupRowsFlag;
+const int ExpandSelectionFlag = ReflMainView::ExpandSelectionFlag;
 
 //Clean column ids for use within tests
 const int RunCol     = ReflMainViewPresenter::COL_RUNS;
@@ -34,6 +35,7 @@ class MockView : public ReflMainView
 public:
   MockView(){};
   virtual void showTable(Mantid::API::ITableWorkspace_sptr model){ m_model = model;}
+  virtual void setOptionsHintStrategy(HintStrategy*) {};
   MOCK_METHOD3(askUserString, std::string(const std::string& prompt, const std::string& title, const std::string& defaultValue));
   MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
@@ -41,9 +43,11 @@ public:
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
   MOCK_METHOD2(setProgressRange, void(int, int));
   MOCK_METHOD1(setProgress, void(int));
+  MOCK_METHOD1(setTableList, void(const std::set<std::string>& tableList));
   MOCK_METHOD2(setInstrumentList, void(const std::vector<std::string>& instruments, const std::string& defaultInstrument));
   MOCK_METHOD1(setInstrument, void(const std::string&));
-  MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
+  MOCK_METHOD1(setSelection, void(const std::set<size_t>& rows));
+  MOCK_CONST_METHOD0(getSelectedRows, std::set<size_t>());
   MOCK_CONST_METHOD0(getSearchInstrument, std::string());
   MOCK_CONST_METHOD0(getProcessInstrument, std::string());
   MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());

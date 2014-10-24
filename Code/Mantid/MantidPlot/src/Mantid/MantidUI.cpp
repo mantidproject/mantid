@@ -177,6 +177,9 @@ MantidUI::MantidUI(ApplicationWindow *aw):
   //connect(mantidMenu, SIGNAL(aboutToShow()), this, SLOT(mantidMenuAboutToShow()));
   mantidMenuAboutToShow();
 
+  QShortcut* sc = new QShortcut(QKeySequence(QKeySequence::Delete), m_appWindow);
+  connect(sc, SIGNAL(activated()), this, SLOT(deletePressEvent()));
+
   menuMantidMatrix = new QMenu(m_appWindow);
   connect(menuMantidMatrix, SIGNAL(aboutToShow()), this, SLOT(menuMantidMatrixAboutToShow()));
 
@@ -1247,6 +1250,14 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
 }
 
 /**
+ * Triggered by a delete key press, and attempts to delete a workspace if it passes the focus checks 
+ */
+void MantidUI::deletePressEvent()
+{
+  m_exploreMantid->deleteWorkspaces();
+}
+
+/**
  * Check if drop event can be accepted
  */
 bool MantidUI::canAcceptDrop(QDragEnterEvent *e)
@@ -1365,6 +1376,14 @@ void MantidUI::showAlgorithmDialog(const QString & algName, int version)
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
   if( !alg ) return;
   MantidQt::API::AlgorithmDialog* dlg = createAlgorithmDialog(alg);
+
+  if (algName == "Load")
+  {
+    // when loading files, we'll need to update the list of recent files
+    // hook up MantidUI::fileDialogAccept() to the LoadDialog dialog accepted() signal
+    connect(dlg, SIGNAL(accepted()), this, SLOT(loadFileDialogAccept()));
+  }
+
   dlg->show();
   dlg->raise();
   dlg->activateWindow();
@@ -1391,6 +1410,14 @@ void MantidUI::showAlgorithmDialog(QString algName, QHash<QString,QString> param
     alg->setPropertyValue(it.key().toStdString(),it.value().toStdString());
   }
   MantidQt::API::AlgorithmDialog* dlg = createAlgorithmDialog(alg);
+
+  if (algName == "Load") 
+  {
+    // when loading files, we'll need to update the list of recent files
+    // hook up MantidUI::fileDialogAccept() to the LoadDialog dialog accepted() signal
+    connect(dlg, SIGNAL(accepted()), this, SLOT(loadFileDialogAccept()));
+  }
+
   dlg->show();
   dlg->raise();
   dlg->activateWindow();
@@ -1757,6 +1784,21 @@ bool MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const boo
     }
     return true;
   }
+}
+
+/**
+* Slot to update the recent files list (from main appWindow) when accepting LoadDialog dialogs
+*/
+void MantidUI::loadFileDialogAccept()
+{
+  QObject* sender = QObject::sender();
+  MantidQt::API::AlgorithmDialog* dlg = reinterpret_cast<MantidQt::API::AlgorithmDialog*>(sender);
+  if (!dlg)
+    return;  // should never happen
+
+  QString fn = MantidQt::API::AlgorithmInputHistory::Instance().previousInput("Load", "Filename");
+  appWindow()->updateRecentFilesList(fn);
+  // recent files list updated. After this point, the Qt signal handler will go to LoadDialog::accept()
 }
 
 void MantidUI::handleLoadDAEFinishedNotification(const Poco::AutoPtr<Algorithm::FinishedNotification>& pNf)
