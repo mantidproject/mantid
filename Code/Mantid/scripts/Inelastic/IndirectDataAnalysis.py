@@ -1020,9 +1020,6 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
             CloneWorkspace(InputWorkspace=container, OutputWorkspace=scaled_container)
 
     if useCor:
-        if diffraction_run:
-            raise NotImplementedError("Applying absorption corrections is not currently supported for diffraction data.")
-
         if Verbose:
             text = 'Correcting sample ' + sample
             if container != '':
