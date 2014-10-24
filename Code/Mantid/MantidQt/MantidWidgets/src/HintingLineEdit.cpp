@@ -97,7 +97,11 @@ namespace MantidQt
     {
       QString hintList;
       for(auto mIt = m_matches.begin(); mIt != m_matches.end(); ++mIt)
-        hintList += QString::fromStdString(mIt->first) + " : " + QString::fromStdString(mIt->second) + "\n";
+      {
+        hintList += "<b>" + QString::fromStdString(mIt->first) + "</b><br />\n";
+        if(!mIt->second.empty())
+          hintList += QString::fromStdString(mIt->second) + "<br />\n";
+      }
 
       QToolTip::showText(mapToGlobal(QPoint(0, 5)), hintList.trimmed());
     }
