@@ -30,7 +30,7 @@ namespace Mantid
   namespace Kernel
   {
     //-------------------------------------------------------------------------
-    // Forward declations
+    // Forward declarations
     //-------------------------------------------------------------------------
     class Unit;
 

@@ -2,13 +2,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Rebin.h"
+
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/VisibleWhenProperty.h"
+
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+
 
 namespace Mantid
 {
@@ -93,16 +97,26 @@ namespace Mantid
                       "then the workspace gets converted to a Workspace2D histogram.");
 
       declareProperty("FullBinsOnly", false, "Omit the final bin if it's width is smaller than the step size");
-
+      //---------------------------------------------------------------
+      // 
       auto vsValidator = boost::make_shared<CompositeValidator>();
       vsValidator->add<InstrumentValidator>();
       vsValidator->add<WorkspaceUnitValidator>("TOF");
       vsValidator->add<HistogramValidator>();
       declareProperty(new WorkspaceProperty<>("FlatBkgWorkspace","",Direction::Input,API::PropertyMode::Optional,vsValidator),
         "An optional histogram workspace in the units of TOF, containing the same number of spectra as the \"InputWorkspace\" "
-        "and single Y value per each spectra, representing flat background in the time bin of this   "
+        "and single Y value per each spectra, representing flat background in this time bin. "
         "If such workspace is present, the value of the flat background provided by this workspace is removed "
-        "from each spectra of the rebinned workspace");
+        "from each spectra of the rebinned workspace. This works for histogram and event workspace when events are not retained 
+        "but actually useful for event workspace in the units different from TOF.");
+
+      std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
+      declareProperty("dEAnalysisMode",dE_modes[Kernel::DeltaEMode::Direct],boost::make_shared<Kernel::StringListValidator>(dE_modes),
+        "If FlatBkgWorkspace, this property is used to define the units conversion from TOF to the units of the InputWorkspace",Direction::Input);
+      setPropertySettings("dEAnalysisMode",
+                        new Kernel::VisibleWhenProperty("FlatBkgWorkspace", IS_NOT_EQUAL_TO, ""));
+
+
     }
 
 
