@@ -83,6 +83,11 @@ protected:
 
   
   void propagateMasks(API::MatrixWorkspace_const_sptr inputW, API::MatrixWorkspace_sptr outputW, int hist);
+
+private:
+  // method to check if removing background is requested and possible 
+  API::MatrixWorkspace_const_sptr  checkRemoveBackgroundParameters(const API::MatrixWorkspace_sptr &inputWS,int &eMode, bool PreserveEvents);
+
 };
 
 } // namespace Algorithms
