@@ -244,7 +244,7 @@ namespace MantidQt
       }
 
       std::set<size_t> rows = m_view->getSelectedRows();
-      if(rows.size() == 0)
+      if(rows.empty())
       {
         //Does the user want to abort?
         if(!m_view->askUserYesNo("This will process all rows in the table. Continue?","Process all rows?"))
@@ -763,7 +763,7 @@ namespace MantidQt
     void ReflMainViewPresenter::addRow()
     {
       std::set<size_t> rows = m_view->getSelectedRows();
-      if(rows.size() == 0)
+      if(rows.empty())
         insertRow(m_model->rowCount());
       else
         insertRow(*rows.rbegin() + 1);
