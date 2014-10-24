@@ -34,7 +34,7 @@ class MockView : public ReflMainView
 public:
   MockView(){};
   virtual void showTable(Mantid::API::ITableWorkspace_sptr model){ m_model = model;}
-  virtual void setOptionsHintStrategy(HintStrategy*) {};
+  virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy*) {};
   MOCK_METHOD3(askUserString, std::string(const std::string& prompt, const std::string& title, const std::string& defaultValue));
   MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
