@@ -52,6 +52,9 @@ namespace MantidQt
       //Allow rows to be reordered
       ui.viewTable->verticalHeader()->setMovable(true);
 
+      //Custom context menu for table
+      connect(ui.viewTable, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+
       connect(ui.actionSaveTable,       SIGNAL(triggered()), this, SLOT(actionSave()));
       connect(ui.actionSaveTableAs,     SIGNAL(triggered()), this, SLOT(actionSaveAs()));
       connect(ui.actionNewTable,        SIGNAL(triggered()), this, SLOT(actionNewTable()));
@@ -180,6 +183,23 @@ namespace MantidQt
       Q_UNUSED(topLeft);
       Q_UNUSED(bottomRight);
       m_presenter->notify(TableUpdatedFlag);
+    }
+
+    /**
+    This slot is triggered when the user right clicks on the table
+    @param pos : The position of the right click within the table
+    */
+    void QtReflMainView::showContextMenu(const QPoint& pos)
+    {
+      QModelIndex index = ui.viewTable->indexAt(pos);
+
+      //parent widget takes ownership of QMenu
+      QMenu* menu = new QMenu(this);
+      menu->addAction(ui.actionGroupRows);
+      menu->addSeparator();
+      menu->addAction(ui.actionDeleteRow);
+
+      menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
     }
 
     /**

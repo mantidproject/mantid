@@ -96,6 +96,7 @@ namespace MantidQt
       void actionGroupRows();
       void actionExpandSelection();
       void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+      void showContextMenu(const QPoint& pos);
     };
 
 
