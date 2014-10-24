@@ -102,6 +102,7 @@ namespace MantidQt
       for(auto it = tables.begin(); it != tables.end(); ++it)
       {
         QAction* openTable = ui.menuOpenTable->addAction(QString::fromStdString(*it));
+        openTable->setIcon(QIcon("://worksheet.png"));
 
         //Map this action to the table name
         m_openMap->setMapping(openTable, QString::fromStdString(*it));
