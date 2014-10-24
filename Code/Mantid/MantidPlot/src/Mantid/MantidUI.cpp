@@ -177,6 +177,9 @@ MantidUI::MantidUI(ApplicationWindow *aw):
   //connect(mantidMenu, SIGNAL(aboutToShow()), this, SLOT(mantidMenuAboutToShow()));
   mantidMenuAboutToShow();
 
+  QShortcut* sc = new QShortcut(QKeySequence(QKeySequence::Delete), m_appWindow);
+  connect(sc, SIGNAL(activated()), this, SLOT(deletePressEvent()));
+
   menuMantidMatrix = new QMenu(m_appWindow);
   connect(menuMantidMatrix, SIGNAL(aboutToShow()), this, SLOT(menuMantidMatrixAboutToShow()));
 
@@ -1244,6 +1247,14 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
   if(!t) return NULL;
   t->showNormal();
   return t;
+}
+
+/**
+ * Triggered by a delete key press, and attempts to delete a workspace if it passes the focus checks 
+ */
+void MantidUI::deletePressEvent()
+{
+  m_exploreMantid->deleteWorkspaces();
 }
 
 /**
