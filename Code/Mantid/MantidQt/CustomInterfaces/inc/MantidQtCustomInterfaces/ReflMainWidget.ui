@@ -397,7 +397,21 @@
     <addaction name="actionSaveTable"/>
     <addaction name="actionSaveTableAs"/>
    </widget>
+   <widget class="QMenu" name="menuRows">
+    <property name="title">
+     <string>Row</string>
+    </property>
+    <addaction name="actionProcess"/>
+    <addaction name="actionExpandSelection"/>
+    <addaction name="separator"/>
+    <addaction name="actionPrependRow"/>
+    <addaction name="actionAppendRow"/>
+    <addaction name="actionGroupRows"/>
+    <addaction name="separator"/>
+    <addaction name="actionDeleteRow"/>
+   </widget>
    <addaction name="menuTable"/>
+   <addaction name="menuRows"/>
   </widget>
   <action name="actionNewTable">
    <property name="icon">
