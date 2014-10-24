@@ -326,6 +326,120 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
 
+  void testPrependRow()
+  {
+    MockView mockView;
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
+
+    //The user hits "prepend row" twice with no rows selected
+    EXPECT_CALL(mockView, getSelectedRows()).Times(2).WillRepeatedly(Return(std::set<size_t>()));
+    presenter.notify(PrependRowFlag);
+    presenter.notify(PrependRowFlag);
+
+    //The user hits "save"
+    presenter.notify(SaveFlag);
+
+    //Check that the table has been modified correctly
+    ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 6);
+    TS_ASSERT_EQUALS(ws->Int(0, GroupCol), 2);
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 1);
+
+    //Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+  }
+
+  void testPrependRowSpecify()
+  {
+    MockView mockView;
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    std::set<size_t> rowlist;
+    rowlist.insert(1);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
+
+    //The user hits "prepend row" twice, with the second row selected
+    EXPECT_CALL(mockView, getSelectedRows()).Times(2).WillRepeatedly(Return(rowlist));
+    presenter.notify(PrependRowFlag);
+    presenter.notify(PrependRowFlag);
+
+    //The user hits "save"
+    presenter.notify(SaveFlag);
+
+    //Check that the table has been modified correctly
+    ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 6);
+    TS_ASSERT_EQUALS(ws->Int(0, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 2);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 1);
+
+    //Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+  }
+
+  void testPrependRowSpecifyPlural()
+  {
+    MockView mockView;
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    std::set<size_t> rowlist;
+    rowlist.insert(1);
+    rowlist.insert(2);
+    rowlist.insert(3);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
+
+    //The user hits "prepend row" once, with the second, third, and fourth row selected.
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(rowlist));
+    presenter.notify(PrependRowFlag);
+
+    //The user hits "save"
+    presenter.notify(SaveFlag);
+
+    //Check that the table was modified correctly
+    ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 5);
+    TS_ASSERT_EQUALS(ws->Int(0, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 1);
+
+    //Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+  }
+
   void testDeleteRowNone()
   {
     MockView mockView;
