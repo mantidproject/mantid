@@ -143,6 +143,9 @@ namespace Mantid
 
       // workspace independent determination of length
       const int histnumber = static_cast<int>(inputWS->getNumberHistograms());
+      
+      int eMode; // in convert units emode is still integer
+      const bool remove_background = checkRemoveBaclgroundParameters(inputWS,eMode);
 
       bool fullBinsOnly = getProperty("FullBinsOnly");
 
