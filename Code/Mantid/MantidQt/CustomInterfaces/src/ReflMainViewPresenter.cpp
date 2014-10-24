@@ -258,14 +258,32 @@ namespace MantidQt
       //Maps group numbers to the list of rows in that group we want to process
       std::map<int,std::vector<size_t> > groups;
       for(auto it = rows.begin(); it != rows.end(); ++it)
+        groups[m_model->Int(*it, COL_GROUP)].push_back(*it);
+
+      //Check each group and warn if we're only partially processing it
+      for(auto gIt = groups.begin(); gIt != groups.end(); ++gIt)
+      {
+        const int& groupId = gIt->first;
+        const std::vector<size_t>& groupRows = gIt->second;
+        //Are we only partially processing a group?
+        if(groupRows.size() < numRowsInGroup(gIt->first))
+        {
+          std::stringstream err;
+          err << "You have only selected " << groupRows.size() << " of the ";
+          err << numRowsInGroup(groupId) << " rows in group " << groupId << ".";
+          err << " Are you sure you want to continue?";
+          if(!m_view->askUserYesNo(err.str(), "Continue Processing?"))
+            return;
+        }
+      }
+
+      //Validate the rows
+      for(auto it = rows.begin(); it != rows.end(); ++it)
       {
         try
         {
           validateRow(*it);
           autofillRow(*it);
-
-          const int group = m_model->Int(*it, COL_GROUP);
-          groups[group].push_back(*it);
         }
         catch(std::exception& ex)
         {
@@ -284,17 +302,6 @@ namespace MantidQt
       for(auto gIt = groups.begin(); gIt != groups.end(); ++gIt)
       {
         const std::vector<size_t> groupRows = gIt->second;
-
-        //Are we only partially processing a group?
-        if(groupRows.size() < numRowsInGroup(gIt->first))
-        {
-          std::stringstream err;
-          err << "You have only selected " << groupRows.size() << " of the ";
-          err << numRowsInGroup(gIt->first) << " rows in group " << gIt->first << ".";
-          err << " Are you sure you want to continue?";
-          if(!m_view->askUserYesNo(err.str(), "Continue Processing?"))
-            return;
-        }
 
         //Reduce each row
         for(auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt)
