@@ -206,8 +206,12 @@ namespace MantidQt
 
       //parent widget takes ownership of QMenu
       QMenu* menu = new QMenu(this);
-      menu->addAction(ui.actionGroupRows);
       menu->addAction(ui.actionProcess);
+      menu->addAction(ui.actionExpandSelection);
+      menu->addSeparator();
+      menu->addAction(ui.actionPrependRow);
+      menu->addAction(ui.actionAppendRow);
+      menu->addAction(ui.actionGroupRows);
       menu->addSeparator();
       menu->addAction(ui.actionDeleteRow);
 
