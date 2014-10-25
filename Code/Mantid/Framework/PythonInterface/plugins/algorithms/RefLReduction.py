@@ -176,7 +176,7 @@ class RefLReduction(PythonAlgorithm):
         print '-> retrieving general informations'
         data_central_pixel = wks_utility.getCentralPixel(ws_event_data,
                                                          dataPeakRange,
-                                                         is_nexus_detector_rotated)
+                                                         is_nexus_detector_rotated_flag)
         # get the distance moderator-detector and sample-detector
         [dMD, dSD] = wks_utility.getDistances(ws_event_data)
         # get theta
