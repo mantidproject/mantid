@@ -166,6 +166,17 @@ public:
         TS_ASSERT_THROWS_NOTHING(factory.unsubscribeSpaceGroup("P-1"));
     }
 
+    void testSymmOps()
+    {
+        SpaceGroup_const_sptr fd3m = SpaceGroupFactory::Instance().createSpaceGroup("F d -3 m");
+
+        std::vector<SymmetryOperation> symOps = fd3m->getSymmetryOperations();
+        for(auto it = symOps.begin(); it != symOps.end(); ++it)
+        {
+            std::cout << (*it).identifier() << std::endl;
+        }
+    }
+
 private:
     class TestableSpaceGroupFactory : public SpaceGroupFactoryImpl
     {

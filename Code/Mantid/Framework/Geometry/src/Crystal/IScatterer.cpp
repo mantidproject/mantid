@@ -13,18 +13,26 @@ namespace Geometry
 
 using namespace Kernel;
 
-/// Default constructor, vector is wrapped to interval [0, 1).
-IScatterer::IScatterer(const Kernel::V3D &position) :
+/// Default constructor.
+IScatterer::IScatterer() :
     PropertyManager(),
-    m_position(getWrappedVector(position)),
-    m_cell(),
-    m_spaceGroup()
+    m_position(),
+    m_cell(UnitCell(1, 1, 1, 90, 90, 90)),
+    m_spaceGroup(),
+    m_isInitialized(false)
 {
     recalculateEquivalentPositions();
 }
 
+/// Initialization method that declares three basic properties and sets initialized state to true.
 void IScatterer::initialize()
 {
+    /* This is required for default behavior. It's not possible to call it
+     * from the constructure, because it's not guaranteed that the space group
+     * factory has been filled at the time the ScattererFactory is filled.
+     */
+    setSpaceGroup(SpaceGroupFactory::Instance().createSpaceGroup("P 1"));
+
     declareProperty(new Kernel::PropertyWithValue<V3D>("Position", V3D(0.0, 0.0, 0.0)), "Position of the scatterer");
 
     IValidator_sptr unitCellStringValidator = boost::make_shared<UnitCellStringValidator>();
@@ -34,6 +42,14 @@ void IScatterer::initialize()
     declareProperty(new Kernel::PropertyWithValue<std::string>("SpaceGroup", "P 1", spaceGroupValidator), "Space group.");
 
     declareProperties();
+
+    m_isInitialized = true;
+}
+
+/// Returns whether the instance has been initialized.
+bool IScatterer::isInitialized()
+{
+    return m_isInitialized;
 }
 
 /// Sets the position of the scatterer to the supplied coordinates - vector is wrapped to [0, 1) and equivalent positions are recalculated.
@@ -76,6 +92,31 @@ void IScatterer::setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup)
     recalculateEquivalentPositions();
 }
 
+/**
+ * Additional property processing
+ *
+ * Takes care of handling new property values, for example for construction of a space group
+ * from string and so on.
+ *
+ * Please note that derived classes should not re-implement this method, as
+ * the processing for the base properties is absolutely necessary. Instead, all deriving
+ * classes should override the method afterScattererPropertySet, which is called
+ * from this method.
+ */
+void IScatterer::afterPropertySet(const std::string &propertyName)
+{
+    if(propertyName == "Position") {
+        PropertyWithValue<V3D> *position = dynamic_cast<PropertyWithValue<V3D> *>(getPointerToProperty("Position"));
+        setPosition((*position)());
+    } else if(propertyName == "SpaceGroup") {
+        setSpaceGroup(SpaceGroupFactory::Instance().createSpaceGroup(getProperty("SpaceGroup")));
+    } else if(propertyName == "UnitCell") {
+        setCell(strToUnitCell(getProperty("UnitCell")));
+    }
+
+    afterScattererPropertySet(propertyName);
+}
+
 /// Returns the assigned space group.
 SpaceGroup_const_sptr IScatterer::getSpaceGroup() const
 {
@@ -94,17 +135,19 @@ void IScatterer::recalculateEquivalentPositions()
     }
 }
 
+/// Return a clone of the validator.
 IValidator_sptr UnitCellStringValidator::clone() const
 {
     return boost::make_shared<UnitCellStringValidator>(*this);
 }
 
+/// Check if the string is valid input for Geometry::strToUnitCell.
 std::string UnitCellStringValidator::checkValidity(const std::string &unitCellString) const
 {
-    boost::regex unitCellRegex("((\\d+\\.\\d+\\s+){2}|(\\d+\\.\\d+\\s+){5})(\\d+\\.\\d+\\s*)");
+    boost::regex unitCellRegex("((\\d+(\\.\\d+){0,1}\\s+){2}|(\\d+(\\.\\d+){0,1}\\s+){5})(\\d+(\\.\\d+){0,1}\\s*)");
 
     if(!boost::regex_match(unitCellString, unitCellRegex)) {
-        return "Unit cell string is invalid.";
+        return "Unit cell string is invalid: " + unitCellString;
     }
 
     return "";

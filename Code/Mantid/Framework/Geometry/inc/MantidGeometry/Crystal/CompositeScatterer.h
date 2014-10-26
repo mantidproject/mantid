@@ -1,5 +1,5 @@
-#ifndef MANTID_GEOMETRY_SCATTERERCOLLECTION_H_
-#define MANTID_GEOMETRY_SCATTERERCOLLECTION_H_
+﻿#ifndef MANTID_GEOMETRY_COMPOSITESCATTERER_H_
+#define MANTID_GEOMETRY_COMPOSITESCATTERER_H_
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/IScatterer.h"
@@ -26,6 +26,11 @@ namespace Geometry
     For structure factor calculations, all contributions from contained scatterers
     are summed. Contained scatterers may be CompositeScatterers themselves,
     so it's possible to build up elaborate structures.
+
+    There are two ways of creating instances of CompositeScatterer. The first
+    possibility is to use IScattererFactory, just like for other implementations
+    of IScatterer. Additionally there is a static method CompositeScatterer::create,
+    which creates a composite scatterer of the supplied vector of scatterers.
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 21/10/2014
@@ -63,10 +68,8 @@ public:
     static CompositeScatterer_sptr create();
     static CompositeScatterer_sptr create(const std::vector<IScatterer_sptr> &scatterers);
 
+    std::string name() const { return "CompositeScatterer"; }
     IScatterer_sptr clone() const;
-
-    void setCell(const UnitCell &cell);
-    void setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
 
     void addScatterer(const IScatterer_sptr &scatterer);
     size_t nScatterers() const;
@@ -76,6 +79,9 @@ public:
     StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const;
     
 protected:
+    void afterScattererPropertySet(const std::string &propertyName);
+    void propagateProperty(const std::string &propertyName);
+
     void setCommonProperties(IScatterer_sptr &scatterer);
 
     std::vector<IScatterer_sptr> m_scatterers;
@@ -86,4 +92,4 @@ protected:
 } // namespace Geometry
 } // namespace Mantid
 
-#endif  /* MANTID_GEOMETRY_SCATTERERCOLLECTION_H_ */
+#endif  /* MANTID_GEOMETRY_COMPOSITESCATTERER_H_ */

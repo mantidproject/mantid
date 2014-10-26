@@ -21,24 +21,26 @@ typedef std::complex<double> StructureFactor;
 
 /** IScatterer
 
-    General interface for any kind of scatterer. Position is expected to
-    be set as fractional coordinates with respect to the crystal axes.
+    IScatterer is a general interface for representing scatterers
+    in the unit cell of a periodic structure. Since there are many possibilities
+    of modelling scatterers, IScatterer is derived from PropertyManager.
+    This way, new scatterers with very different parameters can be
+    added easily.
 
+    In IScatterer, three basic properties are defined: Position, UnitCell
+    and SpaceGroup. Setting these properties is only possible through
+    the setProperty and setPropertyValue methods inherited from
+    PropertyManager. For retrieval there are however specialized methods,
+    since UnitCell and SpaceGroup properties are currently only stored
+    as strings.
+
+    New implementations must override the declareProperties method and
+    define any parameters there. It is called by the initialize method.
     Currently there are two implementations of this interface, IsotropicAtomScatterer
-    and CompositeScatterer (composite pattern).
+    and CompositeScatterer (composite pattern) - especially the latter
+    provides a good example on how to define new properties for a scatterer.
 
-    Most of the interface serves the purpose of providing necessary
-    infrastructure for calculating structure factors. This includes
-    information about unit cell and space group, as well as position
-    of the scatterer in the cell.
-
-    Please note the default behavior of the methods setPosition and setSpaceGroup.
-    When either of them is called, the equivalent positions are recalculated. For
-    more information on how this is done, please consult the documentation
-    of SpaceGroup.
-
-    If no space group is set, or it's P1, only one "equivalent" position is
-    generated - the position itself.
+    Construction of concrete scatterers is done through ScattererFactory.
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 20/10/2014
@@ -71,11 +73,13 @@ typedef boost::shared_ptr<IScatterer> IScatterer_sptr;
 class MANTID_GEOMETRY_DLL IScatterer : public Kernel::PropertyManager
 {
 public:
-    IScatterer(const Kernel::V3D &position = Kernel::V3D(0.0, 0.0, 0.0));
+    IScatterer();
     virtual ~IScatterer() { }
 
     void initialize();
+    bool isInitialized();
 
+    virtual std::string name() const = 0;
     virtual IScatterer_sptr clone() const = 0;
 
     Kernel::V3D getPosition() const;
@@ -90,7 +94,13 @@ protected:
     virtual void setCell(const UnitCell &cell);
     virtual void setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
 
+    void afterPropertySet(const std::string &propertyName);
+
+    /// Base implementation does nothing - for implementing classes only.
     virtual void declareProperties() { }
+
+    /// This method should be re-implemented by subclasses for additional parameter processing.
+    virtual void afterScattererPropertySet(const std::string &) { }
 
     void recalculateEquivalentPositions();
 
@@ -99,8 +109,17 @@ protected:
 
     UnitCell m_cell;
     SpaceGroup_const_sptr m_spaceGroup;
+
+    bool m_isInitialized;
 };
 
+/**
+ * Helper class for validating unit cell strings.
+ *
+ * This validator checks whether a string consists of either 3 or 6 numbers,
+ * possibly floating point numbers. It's required for the unit cell string
+ * property.
+ */
 class MANTID_GEOMETRY_DLL UnitCellStringValidator : public Kernel::TypedValidator<std::string>
 {
 protected:

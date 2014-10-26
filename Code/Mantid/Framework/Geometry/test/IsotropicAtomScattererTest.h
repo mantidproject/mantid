@@ -20,54 +20,65 @@ public:
 
     void testConstructor()
     {
-        TS_ASSERT_THROWS_NOTHING(IsotropicAtomScatterer scatterer("Si", V3D(0, 0, 0), 0.0));
+        TS_ASSERT_THROWS_NOTHING(IsotropicAtomScatterer scatterer);
+    }
 
-        // bad symbol - throws whatever PhysicalConstants::getAtom() throws
-        TS_ASSERT_THROWS_ANYTHING(IsotropicAtomScatterer scatterer("Random", V3D(0, 0, 0), 0.0));
+    void testProperties()
+    {
+        IsotropicAtomScatterer_sptr scatterer = boost::make_shared<IsotropicAtomScatterer>();
+
+        TS_ASSERT_THROWS_NOTHING(scatterer->initialize());
+
+        TS_ASSERT(scatterer->existsProperty("Position"));
+        TS_ASSERT(scatterer->existsProperty("SpaceGroup"));
+        TS_ASSERT(scatterer->existsProperty("UnitCell"));
+        TS_ASSERT(scatterer->existsProperty("U"));
+        TS_ASSERT(scatterer->existsProperty("Element"));
+        TS_ASSERT(scatterer->existsProperty("Occupancy"));
+
     }
 
     void testGetSetElement()
     {
-        IsotropicAtomScatterer scatterer("H", V3D(0, 0, 0), 0.0);
+        IsotropicAtomScatterer_sptr scatterer = getInitializedScatterer();
 
-        TS_ASSERT_THROWS_NOTHING(scatterer.setElement("Si"));
-        TS_ASSERT_EQUALS(scatterer.getElement(), "Si");
-        TS_ASSERT_EQUALS(scatterer.getNeutronAtom().z_number, 14);
+        TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("Element", "Si"));
+        TS_ASSERT_EQUALS(scatterer->getElement(), "Si");
+        TS_ASSERT_EQUALS(scatterer->getNeutronAtom().z_number, 14);
 
-        TS_ASSERT_THROWS_ANYTHING(scatterer.setElement("Random"));
+        TS_ASSERT_THROWS_ANYTHING(scatterer->setProperty("Element","Random"));
     }
 
     void testGetSetOccupancy()
     {
-        IsotropicAtomScatterer scatterer("H", V3D(0, 0, 0), 0.0);
+        IsotropicAtomScatterer_sptr scatterer = getInitializedScatterer();
 
-        TS_ASSERT_THROWS_NOTHING(scatterer.setOccupancy(0.3));
-        TS_ASSERT_EQUALS(scatterer.getOccupancy(), 0.3);
-        TS_ASSERT_THROWS_NOTHING(scatterer.setOccupancy(0.0));
-        TS_ASSERT_THROWS_NOTHING(scatterer.setOccupancy(1.0));
+        TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("Occupancy", 0.3));
+        TS_ASSERT_EQUALS(scatterer->getOccupancy(), 0.3);
+        TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("Occupancy", 0.0));
+        TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("Occupancy", 1.0));
 
-        TS_ASSERT_THROWS(scatterer.setOccupancy(-0.3), std::invalid_argument);
-        TS_ASSERT_THROWS(scatterer.setOccupancy(1.3), std::invalid_argument);
+        TS_ASSERT_THROWS(scatterer->setProperty("Occupancy", -0.3), std::invalid_argument);
+        TS_ASSERT_THROWS(scatterer->setProperty("Occupancy", 1.3), std::invalid_argument);
     }
 
     void testGetSetU()
     {
-        IsotropicAtomScatterer scatterer("H", V3D(0, 0, 0), 0.0);
+        IsotropicAtomScatterer_sptr scatterer = getInitializedScatterer();
 
-        TS_ASSERT_THROWS_NOTHING(scatterer.setU(0.0));
-        TS_ASSERT_THROWS_NOTHING(scatterer.setU(1.0));
-        TS_ASSERT_EQUALS(scatterer.getU(), 1.0);
+        TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("U", 0.0));
+        TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("U", 1.0));
+        TS_ASSERT_EQUALS(scatterer->getU(), 1.0);
 
-        TS_ASSERT_THROWS_NOTHING(scatterer.setU(1.23e12));
-        TS_ASSERT_THROWS_NOTHING(scatterer.setU(1.23e-2));
+        TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("U", 1.23e12));
+        TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("U", 1.23e-2));
 
-        TS_ASSERT_THROWS(scatterer.setU(-0.2), std::invalid_argument);
+        TS_ASSERT_THROWS(scatterer->setProperty("U", -0.2), std::invalid_argument);
     }
 
     void testCreate()
     {
-        IScatterer_sptr scatterer = IsotropicAtomScatterer::create("Si", V3D(0.3, 0.1, 0.12), 1.0, 0.5);
-        IsotropicAtomScatterer_sptr isotropic = boost::dynamic_pointer_cast<IsotropicAtomScatterer>(scatterer);
+        IsotropicAtomScatterer_sptr isotropic = getInitializedScatterer("Si", V3D(0.3, 0.1, 0.12), 1.0, 0.5);
 
         TS_ASSERT(isotropic);
         TS_ASSERT_EQUALS(isotropic->getElement(), "Si");
@@ -81,17 +92,17 @@ public:
         UnitCell cell(5.43, 5.43, 5.43);
         SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m");
 
-
-        IsotropicAtomScatterer_sptr scatterer = boost::make_shared<IsotropicAtomScatterer>("H", V3D(1.0, 0, 0), 0.0);
-        scatterer->setU(3.04);
-        scatterer->setOccupancy(0.5);
-        scatterer->setCell(cell);
-        scatterer->setSpaceGroup(spaceGroup);
+        IsotropicAtomScatterer_sptr scatterer = getInitializedScatterer("H", V3D(1.0, 0, 0), 0.0);
+        scatterer->setProperty("U", 3.04);
+        scatterer->setProperty("Occupancy", 0.5);
+        scatterer->setProperty("UnitCell", unitCellToStr(cell));
+        scatterer->setProperty("SpaceGroup", spaceGroup->hmSymbol());
 
         IScatterer_sptr clone = scatterer->clone();
+
         TS_ASSERT_EQUALS(clone->getPosition(), scatterer->getPosition());
         TS_ASSERT_EQUALS(clone->getCell().getG(), scatterer->getCell().getG());
-        TS_ASSERT_EQUALS(clone->getSpaceGroup(), scatterer->getSpaceGroup());
+        TS_ASSERT_EQUALS(clone->getSpaceGroup()->hmSymbol(), scatterer->getSpaceGroup()->hmSymbol());
 
         IsotropicAtomScatterer_sptr scattererClone = boost::dynamic_pointer_cast<IsotropicAtomScatterer>(clone);
         TS_ASSERT(scattererClone);
@@ -102,7 +113,7 @@ public:
 
     void testCalculateStructureFactor()
     {
-        IsotropicAtomScatterer_sptr scatterer = boost::make_shared<IsotropicAtomScatterer>("Si", V3D(0.0, 0.0, 0.0), 0.0);
+        IsotropicAtomScatterer_sptr scatterer = getInitializedScatterer("Si", V3D(0.0, 0.0, 0.0), 0.0);
 
         double bSi = scatterer->getNeutronAtom().coh_scatt_length_real;
 
@@ -120,8 +131,8 @@ public:
 
         // For using U, the cell needs to be set, because 1/d is required
         UnitCell cell(5.43, 5.43, 5.43);
-        scatterer->setCell(cell);
-        scatterer->setU(0.05);
+        scatterer->setProperty("UnitCell", unitCellToStr(cell));
+        scatterer->setProperty("U", 0.05);
 
         structureFactor = scatterer->calculateStructureFactor(hkl);
         /* Real part is reduced by exp(-U * 2*pi^2 * 1/d^2)
@@ -131,13 +142,13 @@ public:
         TS_ASSERT_EQUALS(structureFactor.real(), bSi * 0.96708061593352515459);
 
         // Occupancy goes in directly
-        scatterer->setOccupancy(0.5);
+        scatterer->setProperty("Occupancy", 0.5);
         structureFactor = scatterer->calculateStructureFactor(hkl);
         TS_ASSERT_EQUALS(structureFactor.real(), bSi * 0.5 * 0.96708061593352515459);
 
         // Set a space group with F-centering
         SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("F m -3 m");
-        scatterer->setSpaceGroup(spaceGroup);
+        scatterer->setProperty("SpaceGroup", spaceGroup->hmSymbol());
 
         /* Now there are 4 equivalent positions, the contributions cancel out for (1, 0, 0)
          * scalar products are:
@@ -167,6 +178,27 @@ public:
          * That means 4 * real * debye waller * occupation. d = 3.13...
          */
         TS_ASSERT_DELTA(structureFactor.real(), 4.0 * bSi * 0.90445723107190849637 * 0.5, 5e-16)
+    }
+
+private:
+    IsotropicAtomScatterer_sptr getInitializedScatterer()
+    {
+        IsotropicAtomScatterer_sptr scatterer = boost::make_shared<IsotropicAtomScatterer>();
+        scatterer->initialize();
+
+        return scatterer;
+    }
+
+    IsotropicAtomScatterer_sptr getInitializedScatterer(const std::string &element, const V3D &position, double U = 0.0, double occ = 1.0)
+    {
+        IsotropicAtomScatterer_sptr scatterer = getInitializedScatterer();
+
+        scatterer->setProperty("Element", element);
+        scatterer->setProperty("Position", position);
+        scatterer->setProperty("U", U);
+        scatterer->setProperty("Occupancy", occ);
+
+        return scatterer;
     }
 
 };

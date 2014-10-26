@@ -29,13 +29,23 @@ public:
         TS_ASSERT_THROWS_NOTHING(CompositeScatterer scatterers);
     }
 
+    void testProperties()
+    {
+        CompositeScatterer_sptr scatterer = boost::make_shared<CompositeScatterer>();
+        TS_ASSERT_THROWS_NOTHING(scatterer->initialize());
+
+        TS_ASSERT(scatterer->existsProperty("Position"));
+        TS_ASSERT(scatterer->existsProperty("SpaceGroup"));
+        TS_ASSERT(scatterer->existsProperty("UnitCell"));
+    }
+
     void testCreate()
     {
         TS_ASSERT_THROWS_NOTHING(CompositeScatterer_sptr scatterer = CompositeScatterer::create());
 
         std::vector<IScatterer_sptr> scatterers;
-        scatterers.push_back(IsotropicAtomScatterer::create("Si", V3D(0.35, 0, 0)));
-        scatterers.push_back(IsotropicAtomScatterer::create("Si", V3D(0.25, 0.25, 0.25)));
+        scatterers.push_back(getInitializedScatterer("Si", V3D(0.35, 0, 0)));
+        scatterers.push_back(getInitializedScatterer("Si", V3D(0.25, 0.25, 0.25)));
 
         CompositeScatterer_sptr scatterer = CompositeScatterer::create(scatterers);
         TS_ASSERT_EQUALS(scatterer->nScatterers(), 2);
@@ -46,8 +56,8 @@ public:
     void testClone()
     {
         CompositeScatterer_sptr scatterer = getCompositeScatterer();
-
         IScatterer_sptr clone = scatterer->clone();
+
         CompositeScatterer_sptr collectionClone = boost::dynamic_pointer_cast<CompositeScatterer>(clone);
 
         TS_ASSERT(collectionClone);
@@ -63,7 +73,7 @@ public:
         UnitCell cell(5.43, 5.43, 5.43);
         TS_ASSERT_DIFFERS(scatterer->getScatterer(0)->getCell().getG(), cell.getG());
 
-        scatterer->setCell(cell);
+        scatterer->setProperty("UnitCell", unitCellToStr(cell));
         TS_ASSERT_EQUALS(scatterer->getScatterer(0)->getCell().getG(), cell.getG());
         TS_ASSERT_EQUALS(scatterer->getScatterer(1)->getCell().getG(), cell.getG());
     }
@@ -74,13 +84,12 @@ public:
 
         SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
         TS_ASSERT(spaceGroup);
+        TS_ASSERT_DIFFERS(scatterer->getScatterer(0)->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
 
-        TS_ASSERT_DIFFERS(scatterer->getScatterer(0)->getSpaceGroup(), spaceGroup);
-
-        scatterer->setSpaceGroup(spaceGroup);
-        TS_ASSERT_EQUALS(scatterer->getSpaceGroup(), spaceGroup);
-        TS_ASSERT_EQUALS(scatterer->getScatterer(0)->getSpaceGroup(), spaceGroup);
-        TS_ASSERT_EQUALS(scatterer->getScatterer(1)->getSpaceGroup(), spaceGroup);
+        scatterer->setProperty("SpaceGroup", "P 1 2/m 1");
+        TS_ASSERT_EQUALS(scatterer->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
+        TS_ASSERT_EQUALS(scatterer->getScatterer(0)->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
+        TS_ASSERT_EQUALS(scatterer->getScatterer(1)->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
     }
 
     void testAddGetScatterer()
@@ -89,19 +98,19 @@ public:
         SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
 
         CompositeScatterer_sptr scatterer = CompositeScatterer::create();
-        scatterer->setCell(cell);
-        scatterer->setSpaceGroup(spaceGroup);
+        scatterer->setProperty("UnitCell", unitCellToStr(cell));
+        scatterer->setProperty("SpaceGroup", spaceGroup->hmSymbol());
 
-        IsotropicAtomScatterer_sptr siOne = IsotropicAtomScatterer::create("Si", V3D(0, 0, 0));
-        TS_ASSERT_DIFFERS(siOne->getSpaceGroup(), spaceGroup);
+        IsotropicAtomScatterer_sptr siOne = getInitializedScatterer("Si", V3D(0, 0, 0));
+        TS_ASSERT_DIFFERS(siOne->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
 
         size_t oldCount = scatterer->nScatterers();
         scatterer->addScatterer(siOne);
         TS_ASSERT_EQUALS(scatterer->nScatterers(), oldCount + 1);
 
         // The scatterer is cloned, so the new space group is not in siOne
-        TS_ASSERT_EQUALS(scatterer->getScatterer(0)->getSpaceGroup(), spaceGroup);
-        TS_ASSERT_DIFFERS(siOne->getSpaceGroup(), spaceGroup);
+        TS_ASSERT_EQUALS(scatterer->getScatterer(0)->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
+        TS_ASSERT_DIFFERS(siOne->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
 
         TS_ASSERT_THROWS(scatterer->getScatterer(2), std::out_of_range);
     }
@@ -132,11 +141,11 @@ public:
         UnitCell cell(5.43, 6.43, 7.43, 90.0, 103.0, 90.0);
         SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
 
-        CompositeScatterer_sptr coll = boost::make_shared<CompositeScatterer>();
-        coll->setSpaceGroup(spaceGroup);
-        coll->setCell(cell);
+        CompositeScatterer_sptr coll = CompositeScatterer::create();
+        coll->setProperty("SpaceGroup", spaceGroup->hmSymbol());
+        coll->setProperty("UnitCell", unitCellToStr(cell));
 
-        coll->addScatterer(boost::make_shared<IsotropicAtomScatterer>("Si", V3D(0.2, 0.3, 0.4), 0.01267));
+        coll->addScatterer(getInitializedScatterer("Si", V3D(0.2, 0.3, 0.4), 0.01267));
 
         // Load reference data, obtained with SHELXL-2014.
         std::map<V3D, double> referenceData = getCalculatedStructureFactors();
@@ -145,16 +154,29 @@ public:
             double ampl = std::abs(coll->calculateStructureFactor(it->first));
             double sqAmpl = ampl * ampl;
 
-            TS_ASSERT_DELTA(sqAmpl, it->second, 6e-3);
+            // F^2 is calculated to two decimal places, so the maximum deviation is 5e-3,
+            TS_ASSERT_DELTA(sqAmpl, it->second, 5.1e-3);
         }
     }
 
 private:
+    IsotropicAtomScatterer_sptr getInitializedScatterer(const std::string &element, const V3D &position, double U = 0.0, double occ = 1.0)
+    {
+        IsotropicAtomScatterer_sptr scatterer = boost::make_shared<IsotropicAtomScatterer>();
+        scatterer->initialize();
+        scatterer->setProperty("Element", element);
+        scatterer->setProperty("Position", position);
+        scatterer->setProperty("U", U);
+        scatterer->setProperty("Occupancy", occ);
+
+        return scatterer;
+    }
+
     CompositeScatterer_sptr getCompositeScatterer()
     {
         std::vector<IScatterer_sptr> scatterers;
-        scatterers.push_back(IsotropicAtomScatterer::create("Si", V3D(0.35, 0, 0)));
-        scatterers.push_back(IsotropicAtomScatterer::create("Si", V3D(0.25, 0.25, 0.25)));
+        scatterers.push_back(getInitializedScatterer("Si", V3D(0.35, 0, 0)));
+        scatterers.push_back(getInitializedScatterer("Si", V3D(0.25, 0.25, 0.25)));
 
         return CompositeScatterer::create(scatterers);
     }

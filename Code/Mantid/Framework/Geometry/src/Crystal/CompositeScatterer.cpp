@@ -1,4 +1,5 @@
 #include "MantidGeometry/Crystal/CompositeScatterer.h"
+#include "MantidGeometry/Crystal/ScattererFactory.h"
 #include <stdexcept>
 
 namespace Mantid
@@ -16,7 +17,10 @@ CompositeScatterer::CompositeScatterer() :
 /// Static method that creates a new instance of CompositeScatterer and returns it (wrapped by a smart pointer).
 CompositeScatterer_sptr CompositeScatterer::create()
 {
-    return boost::make_shared<CompositeScatterer>();
+    CompositeScatterer_sptr compositeScatterer = boost::make_shared<CompositeScatterer>();
+    compositeScatterer->initialize();
+
+    return compositeScatterer;
 }
 
 /// Creates and empty CompositeScatterer and adds all scatterers contained in the supplied vector.
@@ -34,36 +38,15 @@ CompositeScatterer_sptr CompositeScatterer::create(const std::vector<IScatterer_
 /// Recursively clones all contained scatterers and returns the resulting composite.
 IScatterer_sptr CompositeScatterer::clone() const
 {
-    boost::shared_ptr<CompositeScatterer> clone = boost::make_shared<CompositeScatterer>();
-    clone->setPosition(getPosition());
-    clone->setCell(getCell());
-    clone->setSpaceGroup(getSpaceGroup());
+    CompositeScatterer_sptr clone = boost::make_shared<CompositeScatterer>();
+    clone->initialize();    
+    clone->setProperties(this->asString(false, ';'));
 
     for(auto it = m_scatterers.begin(); it != m_scatterers.end(); ++it) {
         clone->addScatterer(*it);
     }
 
     return clone;
-}
-
-/// Assigns the unit cell and propagates it to all contained scatterers.
-void CompositeScatterer::setCell(const UnitCell &cell)
-{
-    IScatterer::setCell(cell);
-
-    for(auto it = m_scatterers.begin(); it != m_scatterers.end(); ++it) {
-        (*it)->setCell(cell);
-    }
-}
-
-/// Assigns the space group and propagates it to all contained scatterers.
-void CompositeScatterer::setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup)
-{
-    IScatterer::setSpaceGroup(spaceGroup);
-
-    for(auto it = m_scatterers.begin(); it != m_scatterers.end(); ++it) {
-        (*it)->setSpaceGroup(spaceGroup);
-    }
 }
 
 /// Clones the supplied scatterer, assigns the internal space group and unit cell to the clone and adds it to the composite.
@@ -118,14 +101,33 @@ StructureFactor CompositeScatterer::calculateStructureFactor(const Kernel::V3D &
     return sum;
 }
 
+/// Makes sure that space group and unit cell are propagated to all stored scatterers.
+void CompositeScatterer::afterScattererPropertySet(const std::string &propertyName)
+{
+    if(propertyName == "SpaceGroup" || propertyName == "UnitCell") {
+        propagateProperty(propertyName);
+    }
+}
+
+/// Propagates the given property to all contained scatterers.
+void CompositeScatterer::propagateProperty(const std::string &propertyName)
+{
+    for(auto it = m_scatterers.begin(); it != m_scatterers.end(); ++it) {
+        (*it)->setProperty(propertyName, getPropertyValue(propertyName));
+    }
+}
+
 /// Assigns the stored cell and space group to the supplied scatterer.
 void CompositeScatterer::setCommonProperties(IScatterer_sptr &scatterer)
 {
-    scatterer->setCell(getCell());
-    scatterer->setSpaceGroup(getSpaceGroup());
+    scatterer->setProperty("UnitCell", getPropertyValue("UnitCell"));
+
+    if(getSpaceGroup()) {
+        scatterer->setProperty("SpaceGroup", getPropertyValue("SpaceGroup"));
+    }
 }
 
-
+DECLARE_SCATTERER(CompositeScatterer)
 
 } // namespace Geometry
 } // namespace Mantid

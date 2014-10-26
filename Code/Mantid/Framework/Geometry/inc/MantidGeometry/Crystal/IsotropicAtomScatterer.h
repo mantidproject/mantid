@@ -58,9 +58,10 @@ namespace Geometry
     Fm-3m, Cu atoms occupy the position (0,0,0) and, because of the F-centering,
     also 3 additional positions.
 
-        IScatterer_sptr cu = IsotropicAtomScatterer::create("Cu", V3D(0, 0, 0));
-        cu->setSpaceGroup(spaceGroupCu);
-        cu->setCell(cellCu)
+        IScatterer_sptr cu = ScattererFactory::Instance().createScatterer(
+                                                            "IsotropicAtomScatterer",
+                                                            "Element=Cu; SpaceGroup=F m -3 m")
+        cu->setProperty("UnitCell", unitCellToStr(cellCu));
 
         StructureFactor F = cu->calculateStructureFactor(V3D(1, 1, 1));
 
@@ -100,38 +101,31 @@ typedef boost::shared_ptr<IsotropicAtomScatterer> IsotropicAtomScatterer_sptr;
 class MANTID_GEOMETRY_DLL IsotropicAtomScatterer : public IScatterer
 {
 public:
-    IsotropicAtomScatterer(const std::string &element,
-                           const Kernel::V3D &position,
-                           double U = 0.0, double occupancy = 1.0);
+    IsotropicAtomScatterer();
     virtual ~IsotropicAtomScatterer() { }
 
-    static IsotropicAtomScatterer_sptr create(const std::string &element,
-                           const Kernel::V3D &position,
-                           double U = 0.0, double occupancy = 1.0);
-
+    std::string name() const { return "IsotropicAtomScatterer"; }
     IScatterer_sptr clone() const;
 
-    void setElement(const std::string &element);
     std::string getElement() const;
     PhysicalConstants::NeutronAtom getNeutronAtom() const;
 
-    void setOccupancy(double occupancy);
     double getOccupancy() const;
-
-    void setU(double U);
     double getU() const;
 
     StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const;
 
 protected:
+    void setElement(const std::string &element);
+
+    void declareProperties();
+    void afterScattererPropertySet(const std::string &propertyName);
+
     double getDebyeWallerFactor(const Kernel::V3D &hkl) const;
     double getScatteringLength() const;
 
     PhysicalConstants::NeutronAtom m_atom;
     std::string m_label;
-
-    double m_occupancy;
-    double m_U;
 };
 
 typedef boost::shared_ptr<IsotropicAtomScatterer> IsotropicAtomScatterer_sptr;

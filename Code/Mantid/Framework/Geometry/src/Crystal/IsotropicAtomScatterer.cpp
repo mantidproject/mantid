@@ -2,35 +2,32 @@
 #include "MantidKernel/Atom.h"
 #include <stdexcept>
 
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+
+#include "MantidGeometry/Crystal/ScattererFactory.h"
+
 namespace Mantid
 {
 namespace Geometry
 {
 
-/// Constructor which takes an element symbol, fractional coordinates, isotropic atomic displacement parameter and occupancy.
-IsotropicAtomScatterer::IsotropicAtomScatterer(const std::string &element,
-                                               const Kernel::V3D &position,
-                                               double U, double occupancy) :
-    IScatterer(position)
-{
-    setU(U);
-    setOccupancy(occupancy);
-    setElement(element);
-}
+using namespace Kernel;
 
-/// Creates a new instance with the given parameters.
-IsotropicAtomScatterer_sptr IsotropicAtomScatterer::create(const std::string &element, const Kernel::V3D &position, double U, double occupancy)
+/// Constructor which takes an element symbol, fractional coordinates, isotropic atomic displacement parameter and occupancy.
+IsotropicAtomScatterer::IsotropicAtomScatterer() :
+    IScatterer(),
+    m_atom(),
+    m_label()
 {
-    return boost::make_shared<IsotropicAtomScatterer>(element, position, U, occupancy);
 }
 
 /// Clones the instance.
 IScatterer_sptr IsotropicAtomScatterer::clone() const
 {
-    IsotropicAtomScatterer_sptr clone = boost::make_shared<IsotropicAtomScatterer>(getElement(), getPosition(), getU(), getOccupancy());
-    clone->setPosition(getPosition());
-    clone->setCell(getCell());
-    clone->setSpaceGroup(getSpaceGroup());
+    IsotropicAtomScatterer_sptr clone = boost::make_shared<IsotropicAtomScatterer>();
+    clone->initialize();
+    clone->setProperties(this->asString(false, ';'));
 
     return clone;
 }
@@ -56,36 +53,16 @@ PhysicalConstants::NeutronAtom IsotropicAtomScatterer::getNeutronAtom() const
     return m_atom;
 }
 
-/// Set occupancy, which must be on the interval [0,1] - otherwise std::invalid_argument is thrown.
-void IsotropicAtomScatterer::setOccupancy(double occupancy)
-{
-    if(occupancy < 0.0 || occupancy > 1.0) {
-        throw std::invalid_argument("Allowed occupancies are on the interval [0, 1].");
-    }
-
-    m_occupancy = occupancy;
-}
-
 /// Returns the occupancy.
 double IsotropicAtomScatterer::getOccupancy() const
 {
-    return m_occupancy;
-}
-
-/// Sets the isotropic atomic displacement parameter in Angstrom^2, values less than zero cause an std::invalid_argument expression to be thrown.
-void IsotropicAtomScatterer::setU(double U)
-{
-    if(U < 0.0) {
-        throw std::invalid_argument("Negative atomic displacement parameter is not allowed.");
-    }
-
-    m_U = U;
+    return getProperty("Occupancy");
 }
 
 /// Returns the isotropic atomic displacement parameter.
 double IsotropicAtomScatterer::getU() const
 {
-    return m_U;
+    return getProperty("U");
 }
 
 /**
@@ -98,13 +75,13 @@ double IsotropicAtomScatterer::getU() const
  * @param hkl :: HKL for which the structure factor should be calculated
  * @return Structure factor (complex).
  */
-StructureFactor IsotropicAtomScatterer::calculateStructureFactor(const Kernel::V3D &hkl) const
+StructureFactor IsotropicAtomScatterer::calculateStructureFactor(const V3D &hkl) const
 {
     double amplitude = getOccupancy() * getDebyeWallerFactor(hkl) * getScatteringLength();
 
     StructureFactor sum(0.0, 0.0);
 
-    std::vector<Kernel::V3D> equivalentPositions = getEquivalentPositions();
+    std::vector<V3D> equivalentPositions = getEquivalentPositions();
     for(auto pos = equivalentPositions.begin(); pos != equivalentPositions.end(); ++pos) {
         double phase = 2.0 * M_PI * (*pos).scalar_prod(hkl);
         sum += amplitude * StructureFactor(cos(phase), sin(phase));
@@ -113,12 +90,46 @@ StructureFactor IsotropicAtomScatterer::calculateStructureFactor(const Kernel::V
     return sum;
 }
 
-/// Returns the Debye-Waller factor, using an isotropic atomic displacement and the stored unit cell.
-double IsotropicAtomScatterer::getDebyeWallerFactor(const Kernel::V3D &hkl) const
+/**
+ * Declares properties of this scatterer model
+ *
+ * In addition to the properties of IScatterer, this class implements three more properties,
+ * as described in the general class documentation, with some restrictions on allowed
+ * values:
+ *  - U must be 0 or greater
+ *  - Occupancy must be on the interval [0,1]
+ *  - Element must be present.
+ */
+void IsotropicAtomScatterer::declareProperties()
 {
-    Kernel::V3D dstar = getCell().getB() * hkl;
+    // Default behavior requires this.
+    setElement("H");
 
-    return exp(-2.0 * M_PI * M_PI * m_U * dstar.norm2());
+    boost::shared_ptr<BoundedValidator<double> > uValidator = boost::make_shared<BoundedValidator<double> >();
+    uValidator->setLower(0.0);
+
+    declareProperty(new PropertyWithValue<double>("U", 0.0, uValidator), "Isotropic atomic displacement in Angstrom^2");
+
+    IValidator_sptr occValidator = boost::make_shared<BoundedValidator<double> >(0.0, 1.0);
+    declareProperty(new PropertyWithValue<double>("Occupancy", 1.0, occValidator), "Site occupancy, values on interval [0,1].");
+
+    declareProperty(new PropertyWithValue<std::string>("Element", "H", boost::make_shared<MandatoryValidator<std::string> >()));
+}
+
+/// After setting the element as a string, the corresponding
+void IsotropicAtomScatterer::afterScattererPropertySet(const std::string &propertyName)
+{
+    if(propertyName == "Element") {
+        setElement(getPropertyValue(propertyName));
+    }
+}
+
+/// Returns the Debye-Waller factor, using an isotropic atomic displacement and the stored unit cell.
+double IsotropicAtomScatterer::getDebyeWallerFactor(const V3D &hkl) const
+{
+    V3D dstar = getCell().getB() * hkl;
+
+    return exp(-2.0 * M_PI * M_PI * getU() * dstar.norm2());
 }
 
 /// Returns the scattering length of the stored element.
@@ -127,7 +138,7 @@ double IsotropicAtomScatterer::getScatteringLength() const
     return m_atom.coh_scatt_length_real;
 }
 
-
+DECLARE_SCATTERER(IsotropicAtomScatterer)
 
 } // namespace Geometry
 } // namespace Mantid
