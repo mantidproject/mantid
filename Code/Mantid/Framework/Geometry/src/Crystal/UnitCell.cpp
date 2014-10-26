@@ -7,6 +7,9 @@
 #include <iostream>
 #include <cfloat>
 
+#include <boost/tokenizer.hpp>
+#include <boost/lexical_cast.hpp>
+
 namespace Mantid
 {
 namespace Geometry
@@ -731,6 +734,37 @@ namespace Geometry
           << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.errorgamma();
 
     return out;
+  }
+
+  std::string unitCellToStr(const UnitCell &unitCell)
+  {
+      std::ostringstream stream;
+      stream << std::setprecision(9);
+
+      stream << unitCell.a() << " " << unitCell.b() << " " << unitCell.c() << " " << unitCell.alpha() << " " << unitCell.beta() << " " << unitCell.gamma();
+
+      return stream.str();
+  }
+
+  UnitCell strToUnitCell(const std::string &unitCellString)
+  {
+      boost::char_separator<char> separator(" ");
+      boost::tokenizer<boost::char_separator<char> > cellTokens(unitCellString, separator);
+
+      std::vector<double> components;
+
+      for(boost::tokenizer<boost::char_separator<char>>::iterator token = cellTokens.begin(); token != cellTokens.end(); ++token) {
+          components.push_back(boost::lexical_cast<double>(*token));
+      }
+
+      switch(components.size()) {
+      case 3:
+          return UnitCell(components[0], components[1], components[2]);
+      case 6:
+          return UnitCell(components[0], components[1], components[2], components[3], components[4], components[5]);
+      default:
+          throw std::runtime_error("Failed to parse unit cell input string: " + unitCellString);
+      }
   }
 
 
