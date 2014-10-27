@@ -731,6 +731,7 @@ void ConfigDialog::initMantidOptionsTab()
   {
     m_reusePlotInstances->setChecked(false);
   }
+  m_reusePlotInstances->setToolTip("If on, the same plot instance will be re-used for every of the different plots available in the workspaces window (spectrum, slice, color fill, etc.)");
 
   //create a checkbox for invisible workspaces options
   m_invisibleWorkspaces = new QCheckBox("Show Invisible Workspaces");

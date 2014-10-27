@@ -769,9 +769,11 @@ void MantidUI::showSpectrumViewer()
         if (m_lastShownSpectrumViewerWin)
         {
           m_lastShownSpectrumViewerWin->close();
+          QPoint p = m_lastShownSpectrumViewerWin->pos();
           delete m_lastShownSpectrumViewerWin;
-
+          viewer->move(p);
         }
+
       }
       m_lastShownSpectrumViewerWin = viewer;
 
@@ -834,7 +836,11 @@ void MantidUI::showSliceViewer()
       if (m_lastShownSliceViewWin)
       {
         m_lastShownSliceViewWin->close();
+        QPoint p = m_lastShownSliceViewWin->pos();
+        // the factory keeps a list of all opened slice viewers
+        MantidQt::Factory::WidgetFactory::Instance()->closeSliceViewerWindow(m_lastShownSliceViewWin);
         delete m_lastShownSliceViewWin;
+        w->move(p);
       }
     }
     m_lastShownSliceViewWin = w;
@@ -2017,7 +2023,9 @@ void MantidUI::showMantidInstrument(const QString& wsName)
     if (m_lastShownInstrumentWin)
     {
       m_lastShownInstrumentWin->close();
+      QPoint p = m_lastShownInstrumentWin->pos();
       delete m_lastShownInstrumentWin;
+      insWin->move(p);
     }
   }
   m_lastShownInstrumentWin = insWin;
