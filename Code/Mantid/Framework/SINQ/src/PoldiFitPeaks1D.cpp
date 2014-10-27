@@ -26,6 +26,47 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
 
+RefinedRange::RefinedRange(const PoldiPeak_sptr &peak, double fwhmMultiples) :
+    m_peaks(1, peak)
+{
+    double width = peak->fwhm();
+    double extent = std::min(0.05, std::max(0.002, width)) * fwhmMultiples;
+
+    m_xStart = peak->q() - extent;
+    m_xEnd = peak->q() + extent;
+}
+
+RefinedRange::RefinedRange(double xStart, double xEnd, const std::vector<PoldiPeak_sptr> &peaks) :
+    m_peaks(peaks),
+    m_xStart(xStart),
+    m_xEnd(xEnd)
+{
+}
+
+bool RefinedRange::operator <(const RefinedRange &other) const
+{
+    return m_xStart < other.m_xStart;
+}
+
+bool RefinedRange::overlaps(const RefinedRange &other) const
+{
+    return    (other.m_xStart > m_xStart && other.m_xStart < m_xEnd)
+           || (other.m_xEnd > m_xStart && other.m_xEnd < m_xEnd)
+           || (other.m_xStart < m_xStart && other.m_xEnd > m_xEnd);
+}
+
+RefinedRange RefinedRange::merged(const RefinedRange &other) const
+{
+    std::vector<PoldiPeak_sptr> mergedPeaks(m_peaks);
+    mergedPeaks.insert(mergedPeaks.end(), other.m_peaks.begin(), other.m_peaks.end());
+
+    double mergedXStart = std::min(m_xStart, other.m_xStart);
+    double mergedXEnd = std::max(m_xEnd, other.m_xEnd);
+
+    return RefinedRange(mergedXStart, mergedXEnd, mergedPeaks);
+}
+
+
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PoldiFitPeaks1D)
 
@@ -91,6 +132,55 @@ PoldiPeakCollection_sptr PoldiFitPeaks1D::getInitializedPeakCollection(const Dat
     return peakCollection;
 }
 
+std::vector<RefinedRange> PoldiFitPeaks1D::getRefinedRanges(const PoldiPeakCollection_sptr &peaks) const
+{
+    std::vector<RefinedRange> ranges;
+    for(size_t i = 0; i < peaks->peakCount(); ++i) {
+        ranges.push_back(RefinedRange(peaks->peak(i), m_fwhmMultiples));
+    }
+
+    return ranges;
+}
+
+std::vector<RefinedRange> PoldiFitPeaks1D::getReducedRanges(const std::vector<RefinedRange> &ranges) const
+{
+    std::vector<RefinedRange> workingRanges(ranges);
+    std::sort(workingRanges.begin(), workingRanges.end());
+
+    if(!hasOverlappingRanges(workingRanges)) {
+        return ranges;
+    }
+
+    std::vector<RefinedRange> reducedRanges;
+
+    size_t i = 0;
+    while(i < (workingRanges.size() - 1) ) {
+        RefinedRange current = workingRanges[i];
+        RefinedRange next = workingRanges[i + 1];
+
+        if(!current.overlaps(next)) {
+            reducedRanges.push_back(current);
+            i += 1;
+        } else {
+            reducedRanges.push_back(current.merged(next));
+            i += 2;
+        }
+    }
+
+    return getReducedRanges(reducedRanges);
+}
+
+bool PoldiFitPeaks1D::hasOverlappingRanges(const std::vector<RefinedRange> &ranges) const
+{
+    for(size_t i = 0; i < ranges.size() - 1; ++i) {
+        if(ranges[i].overlaps(ranges[i+1])) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 IFunction_sptr PoldiFitPeaks1D::getPeakProfile(const PoldiPeak_sptr &poldiPeak) const {
     IPeakFunction_sptr clonedProfile = boost::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction(m_profileTemplate));
     clonedProfile->setCentre(poldiPeak->q());
@@ -142,15 +232,17 @@ void PoldiFitPeaks1D::exec()
     TableWorkspace_sptr poldiPeakTable = getProperty("PoldiPeakTable");    
     m_peaks = getInitializedPeakCollection(poldiPeakTable);
 
-
     g_log.information() << "Peaks to fit: " << m_peaks->peakCount() << std::endl;
+
+    std::vector<RefinedRange> rawRanges = getRefinedRanges(m_peaks);
+    std::vector<RefinedRange> reducedRanges = getReducedRanges(rawRanges);
+
+    g_log.information() << "Ranges used for fitting: " << reducedRanges.size() << std::endl;
 
     Workspace2D_sptr dataWorkspace = getProperty("InputWorkspace");
 
     m_fitCharacteristics = boost::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
     WorkspaceGroup_sptr fitPlotGroup(new WorkspaceGroup);
-
-
 
     for(size_t i = 0; i < m_peaks->peakCount(); ++i) {
         PoldiPeak_sptr currentPeak = m_peaks->peak(i);
