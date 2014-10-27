@@ -46,8 +46,15 @@ namespace MantidQt
   {
     class FitPropertyBrowser;
   }
+  namespace SliceViewer
+  {
+    class SliceViewerWindow;
+  }
+  namespace SpectrumView
+  {
+    class SpectrumView;
+  }
 }
-
 namespace Ui
 {
   class SequentialFitDialog;
@@ -500,6 +507,10 @@ private:
   ///extracts the files from a mimedata object that have a .py extension
   QStringList extractPyFiles(const QList<QUrl>& urlList) const;
 
+  // Whether new plots shoul re-use the same plot instance (for every different type of plot).
+  // The name comes from: these plots are normally opened from the context menu of the workspaces dock window
+  bool workspacesDockPlot1To1();
+
   // Private variables
 
   ApplicationWindow *m_appWindow;             // QtiPlot main ApplicationWindow
@@ -528,6 +539,13 @@ private:
   QMenu *mantidMenu;
   QMenu *menuMantidMatrix;             //  MantidMatrix specific menu
   AlgorithmMonitor *m_algMonitor;      //  Class for monitoring running algorithms
+
+  // keep track of the last shown, which will be killed if showing only one inst. window
+  InstrumentWindow *m_lastShownInstrumentWin;
+  MantidQt::SliceViewer::SliceViewerWindow *m_lastShownSliceViewWin;
+  MantidQt::SpectrumView::SpectrumView *m_lastShownSpectrumViewerWin;
+  MultiLayer *m_lastShownColorFillWin;
+  MultiLayer *m_lastShown1DPlotWin;
 
   // Map of <workspace_name,update_interval> pairs. Positive update_intervals mean
   // UpdateDAE must be launched after LoadDAE for this workspace
