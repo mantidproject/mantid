@@ -234,9 +234,9 @@
           <item>
            <layout class="QHBoxLayout" name="layoutTableButtons">
             <item>
-             <widget class="QToolButton" name="buttonAddRow">
+             <widget class="QToolButton" name="buttonAppendRow">
               <property name="text">
-               <string>AddRow</string>
+               <string>AppendRow</string>
               </property>
              </widget>
             </item>
@@ -283,6 +283,9 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="contextMenuPolicy">
+             <enum>Qt::CustomContextMenu</enum>
             </property>
             <property name="toolTip">
              <string>Runs to process</string>
@@ -342,24 +345,15 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="buttonProcess">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>Process the selected rows</string>
-              </property>
+             <widget class="QToolButton" name="buttonProcess">
               <property name="text">
                <string>Process</string>
+              </property>
+              <property name="toolButtonStyle">
+               <enum>Qt::ToolButtonTextBesideIcon</enum>
+              </property>
+              <property name="arrowType">
+               <enum>Qt::NoArrow</enum>
               </property>
              </widget>
             </item>
@@ -403,7 +397,21 @@
     <addaction name="actionSaveTable"/>
     <addaction name="actionSaveTableAs"/>
    </widget>
+   <widget class="QMenu" name="menuRows">
+    <property name="title">
+     <string>Row</string>
+    </property>
+    <addaction name="actionProcess"/>
+    <addaction name="actionExpandSelection"/>
+    <addaction name="separator"/>
+    <addaction name="actionPrependRow"/>
+    <addaction name="actionAppendRow"/>
+    <addaction name="actionGroupRows"/>
+    <addaction name="separator"/>
+    <addaction name="actionDeleteRow"/>
+   </widget>
    <addaction name="menuTable"/>
+   <addaction name="menuRows"/>
   </widget>
   <action name="actionNewTable">
    <property name="icon">
@@ -432,13 +440,28 @@
     <string>Save Table As</string>
    </property>
   </action>
-  <action name="actionAddRow">
+  <action name="actionAppendRow">
    <property name="icon">
     <iconset resource="../../../../MantidPlot/icons/icons.qrc">
      <normaloff>:/insert_row.png</normaloff>:/insert_row.png</iconset>
    </property>
    <property name="text">
-    <string>Add Row</string>
+    <string>Insert Row After</string>
+   </property>
+   <property name="toolTip">
+    <string>Insert Row After</string>
+   </property>
+  </action>
+  <action name="actionPrependRow">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/insert_row.png</normaloff>:/insert_row.png</iconset>
+   </property>
+   <property name="text">
+    <string>Insert Row Before</string>
+   </property>
+   <property name="toolTip">
+    <string>Insert Row Before</string>
    </property>
   </action>
   <action name="actionDeleteRow">
@@ -462,7 +485,7 @@
   <action name="actionProcess">
    <property name="icon">
     <iconset resource="../../../../MantidPlot/icons/icons.qrc">
-     <normaloff>:/play.png</normaloff>:/play.png</iconset>
+     <normaloff>:/stat_rows.png</normaloff>:/stat_rows.png</iconset>
    </property>
    <property name="text">
     <string>Process</string>
@@ -485,17 +508,9 @@
   <tabstop>comboSearchInstrument</tabstop>
   <tabstop>tableRuns</tabstop>
   <tabstop>viewTable</tabstop>
-  <tabstop>buttonProcess</tabstop>
  </tabstops>
  <resources>
   <include location="../../../../MantidPlot/icons/icons.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>buttonProcess</sender>
-   <signal>clicked()</signal>
-   <receiver>actionProcess</receiver>
-   <slot>trigger()</slot>
-  </connection>
- </connections>
+ <connections/>
 </ui>

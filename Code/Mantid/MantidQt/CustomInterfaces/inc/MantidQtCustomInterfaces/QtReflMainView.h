@@ -90,12 +90,14 @@ namespace MantidQt
       void actionNewTable();
       void actionSave();
       void actionSaveAs();
-      void actionAddRow();
+      void actionAppendRow();
+      void actionPrependRow();
       void actionDeleteRow();
       void actionProcess();
       void actionGroupRows();
       void actionExpandSelection();
       void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+      void showContextMenu(const QPoint& pos);
     };
 
 
