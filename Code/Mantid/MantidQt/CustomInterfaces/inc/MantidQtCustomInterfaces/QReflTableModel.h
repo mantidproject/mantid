@@ -77,6 +77,8 @@ namespace MantidQt
       static const QString SCALE;
       /// Label for group column
       static const QString GROUP;
+      /// Label for options column
+      static const QString OPTIONS;
 
     private:
       /// Index for run number column
@@ -95,6 +97,8 @@ namespace MantidQt
       static const int COL_SCALE;
       /// Index for group column
       static const int COL_GROUP;
+      /// Index for options column
+      static const int COL_OPTIONS;
 
       //cache for a row's data
       mutable std::vector<QString> m_dataCache;

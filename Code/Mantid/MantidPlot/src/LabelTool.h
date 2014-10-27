@@ -92,7 +92,8 @@ private slots:
   void xAxisClicked(const QwtPolygon &);
   void yAxisClicked(const QwtPolygon &);
 
-  void insertTextBox();
+	void insertLegend();
+	void insertTextBox();
   void insertXCoord();
   void insertYCoord();
   void insertDataCoord();

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_instrument.ui'
 #
-# Created: Thu Jun 27 16:46:08 2013
+# Created: Fri Oct 10 11:46:57 2014
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -398,6 +398,29 @@ class Ui_Frame(object):
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.verticalLayout_3 = QtGui.QVBoxLayout()
         self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.mask_side_layout = QtGui.QHBoxLayout()
+        self.mask_side_layout.setObjectName("mask_side_layout")
+        self.mask_side_label = QtGui.QLabel(self.groupBox)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.mask_side_label.sizePolicy().hasHeightForWidth())
+        self.mask_side_label.setSizePolicy(sizePolicy)
+        self.mask_side_label.setMinimumSize(QtCore.QSize(150, 0))
+        self.mask_side_label.setObjectName("mask_side_label")
+        self.mask_side_layout.addWidget(self.mask_side_label)
+        self.mask_side_none_radio = QtGui.QRadioButton(self.groupBox)
+        self.mask_side_none_radio.setObjectName("mask_side_none_radio")
+        self.mask_side_layout.addWidget(self.mask_side_none_radio)
+        self.mask_side_front_radio = QtGui.QRadioButton(self.groupBox)
+        self.mask_side_front_radio.setObjectName("mask_side_front_radio")
+        self.mask_side_layout.addWidget(self.mask_side_front_radio)
+        self.mask_side_back_radio = QtGui.QRadioButton(self.groupBox)
+        self.mask_side_back_radio.setObjectName("mask_side_back_radio")
+        self.mask_side_layout.addWidget(self.mask_side_back_radio)
+        spacerItem9 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.mask_side_layout.addItem(spacerItem9)
+        self.verticalLayout_3.addLayout(self.mask_side_layout)
         self.label_5 = QtGui.QLabel(self.groupBox)
         font = QtGui.QFont()
         font.setFamily("Bitstream Charter")
@@ -428,13 +451,13 @@ class Ui_Frame(object):
         self.mask_plot_button = QtGui.QPushButton(self.groupBox)
         self.mask_plot_button.setObjectName("mask_plot_button")
         self.horizontalLayout.addWidget(self.mask_plot_button)
-        spacerItem9 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem9)
+        spacerItem10 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem10)
         self.verticalLayout_3.addLayout(self.horizontalLayout)
         self.verticalLayout_2.addLayout(self.verticalLayout_3)
         self.verticalLayout_4.addWidget(self.groupBox)
-        spacerItem10 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_4.addItem(spacerItem10)
+        spacerItem11 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_4.addItem(spacerItem11)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.scrollArea)
 
@@ -501,6 +524,13 @@ class Ui_Frame(object):
         self.label_10.setText(QtGui.QApplication.translate("Frame", "Wavelength spread [ratio]", None, QtGui.QApplication.UnicodeUTF8))
         self.wavelength_spread_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the value of the neutron wavelength spread.", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("Frame", "Mask", None, QtGui.QApplication.UnicodeUTF8))
+        self.mask_side_label.setText(QtGui.QApplication.translate("Frame", "Mask detector side", None, QtGui.QApplication.UnicodeUTF8))
+        self.mask_side_none_radio.setToolTip(QtGui.QApplication.translate("Frame", "Select to keep both sides of the detector active [default].", None, QtGui.QApplication.UnicodeUTF8))
+        self.mask_side_none_radio.setText(QtGui.QApplication.translate("Frame", "None", None, QtGui.QApplication.UnicodeUTF8))
+        self.mask_side_front_radio.setToolTip(QtGui.QApplication.translate("Frame", "Select to mask the front panel of the detector.", None, QtGui.QApplication.UnicodeUTF8))
+        self.mask_side_front_radio.setText(QtGui.QApplication.translate("Frame", "Front", None, QtGui.QApplication.UnicodeUTF8))
+        self.mask_side_back_radio.setToolTip(QtGui.QApplication.translate("Frame", "Select to mask the back panel of the detector.", None, QtGui.QApplication.UnicodeUTF8))
+        self.mask_side_back_radio.setText(QtGui.QApplication.translate("Frame", "Back", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("Frame", "Choose a file to set your mask. Note that only the mask information, not the data, will be used in the reduction.\n"
 "The data is only used to help you setting the mask.\n"
 "The mask information is saved separately so that your data file will NOT be modified.", None, QtGui.QApplication.UnicodeUTF8))

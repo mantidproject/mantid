@@ -97,8 +97,8 @@ class MantidPlot1DPlotTest(unittest.TestCase):
         self.assertTrue(g is not None)
         self.g = g
 
-    def test_plotBin_with_invalid_raises_RuntimeError(self):
-        self.assertRaises(RuntimeError, plotBin, "fake", 100)
+    def test_plotBin_with_invalid_raises_ValueError(self):
+        self.assertRaises(ValueError, plotBin, "fake", 100)
         self.g = None
 
     def test_plotBin_command_with_list(self):

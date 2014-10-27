@@ -553,7 +553,8 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   connect(lv, SIGNAL(itemRenamed(Q3ListViewItem *, int, const QString &)),
       this, SLOT(renameWindow(Q3ListViewItem *, int, const QString &)));
 
-  connect(recent, SIGNAL(activated(int)), this, SLOT(openRecentProject(int)));
+  connect(recentProjectsMenu, SIGNAL(activated(int)), this, SLOT(openRecentProject(int)));
+  connect(recentFilesMenu, SIGNAL(activated(int)), this, SLOT(openRecentFile(int)));
 
   //apply user settings
   updateAppFonts();
@@ -829,6 +830,7 @@ void ApplicationWindow::initGlobalConstants()
   confirmClosePlot2D = false;
   confirmClosePlot3D = false;
   confirmCloseNotes = false;
+  d_inform_delete_workspace = true;
   d_inform_rename_table = false;
   confirmCloseInstrWindow=false;
 
@@ -1157,6 +1159,7 @@ void ApplicationWindow::insertTranslatedStrings()
   formatToolBar->setWindowTitle(tr("Format"));
 
   fileMenu->changeItem(recentMenuID, tr("&Recent Projects"));
+  fileMenu->changeItem(recentFilesMenuID, tr("R&ecent Files"));
 
   translateActionsStrings();
   customMenu(activeWindow());
@@ -1168,8 +1171,9 @@ void ApplicationWindow::initMainMenu()
   fileMenu->setObjectName("fileMenu");
   connect(fileMenu, SIGNAL(aboutToShow()), this, SLOT(fileMenuAboutToShow()));
 
-  recent = new QMenu(this);
   newMenu = new QMenu(this);
+  recentProjectsMenu = new QMenu(this);
+  recentFilesMenu = new QMenu(this);
   newMenu->setObjectName("newMenu");
   exportPlotMenu = new QMenu(this);
   exportPlotMenu->setObjectName("exportPlotMenu");
@@ -3086,6 +3090,11 @@ Table* ApplicationWindow::newTable(const QString& caption, int r, int c)
   return w;
 }
 
+bool ApplicationWindow::isDeleteWorkspacePromptEnabled()
+{
+  return d_inform_delete_workspace;
+}
+
 Table* ApplicationWindow::newTable(int r, int c, const QString& name, const QString& legend)
 {
   Table* w = new Table(scriptingEnv(), r, c, legend, this, 0);
@@ -3495,14 +3504,22 @@ void ApplicationWindow::convertTableToWorkspace()
 void ApplicationWindow::convertTableToMatrixWorkspace()
 {
   Table* t = dynamic_cast<Table*>(activeWindow(TableWindow));
-  if (!t) return;
-  if(auto *mt = dynamic_cast<MantidTable*>(t))
-  {
-    mt = convertTableToTableWorkspace(t);
-    QHash<QString,QString> params;
-    params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
-    mantidUI->showAlgorithmDialog(QString("ConvertTableToMatrixWorkspace"),params);
-  }
+	if (!t) return;
+
+	// dynamic_cast is successful when converting MantidTable to MatrixWorkspace
+	auto *mt = dynamic_cast<MantidTable*>(t);
+
+	if (!mt){
+	// if dynamic_cast is unsuccessful, create MantidTable from which to create MatrixWorkspace
+		mt = convertTableToTableWorkspace(t);
+	}
+
+	if (mt){
+		QHash<QString,QString> params;
+		params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
+		mantidUI->showAlgorithmDialog(QString("ConvertTableToMatrixWorkspace"),params);
+	}
+
 }
 
 /**
@@ -4454,9 +4471,30 @@ ApplicationWindow* ApplicationWindow::open(const QString& fn, bool factorySettin
   return app;
 }
 
+void ApplicationWindow::openRecentFile(int index)
+{
+  QString fn = recentFilesMenu->text(index);
+  int pos = fn.find(" ",0);
+  fn = fn.right(fn.length()-pos-1);
+
+  QFile f(fn);
+  if (!f.exists()){
+    QMessageBox::critical(this, tr("MantidPlot - File Open Error"),//Mantid
+                          tr("The file: <b> %1 </b> <p>is not there anymore!"
+                             "<p>It will be removed from the list of recent files.").arg(fn));
+
+    recentFiles.remove(fn);
+    updateRecentFilesList();
+    return;
+  }
+
+  loadDataFileByName(fn);
+  saveSettings();   // save new list of recent files
+}
+
 void ApplicationWindow::openRecentProject(int index)
 {
-  QString fn = recent->text(index);
+  QString fn = recentProjectsMenu->text(index);
   int pos = fn.find(" ",0);
   fn = fn.right(fn.length()-pos-1);
 
@@ -4464,7 +4502,7 @@ void ApplicationWindow::openRecentProject(int index)
   if (!f.exists()){
     QMessageBox::critical(this, tr("MantidPlot - File Open Error"),//Mantid
         tr("The file: <b> %1 </b> <p>does not exist anymore!"
-            "<p>It will be removed from the list.").arg(fn));
+            "<p>It will be removed from the list of recent projects.").arg(fn));
 
     recentProjects.remove(fn);
     updateRecentProjectsList();
@@ -4832,6 +4870,7 @@ void ApplicationWindow::readSettings()
   show_windows_policy = (ShowWindowsPolicy)settings.value("/ShowWindowsPolicy", ApplicationWindow::ActiveFolder).toInt();
 
   recentProjects = settings.value("/RecentProjects").toStringList();
+  recentFiles = settings.value("/RecentFiles").toStringList();
   //Follows an ugly hack added by Ion in order to fix Qt4 porting issues
   //(only needed on Windows due to a Qt bug?)
 #ifdef Q_OS_WIN
@@ -4842,9 +4881,18 @@ void ApplicationWindow::readSettings()
     if (s.remove(QRegExp("\\s")).isEmpty())
       recentProjects = QStringList();
   }
+
+  if (!recentFiles.isEmpty() && recentFiles[0].contains("^e"))
+    recentFiles = recentFiles[0].split("^e", QString::SkipEmptyParts);
+  else if (recentFiles.count() == 1){
+    QString s = recentFiles[0];
+    if (s.remove(QRegExp("\\s")).isEmpty())
+      recentFiles = QStringList();
+  }
 #endif
 
   updateRecentProjectsList();
+  updateRecentFilesList();
 
   changeAppStyle(settings.value("/Style", appStyle).toString());
   autoSave = settings.value("/AutoSave", false).toBool();
@@ -4961,6 +5009,7 @@ void ApplicationWindow::readSettings()
   confirmClosePlot2D = settings.value("/Plot2D", false).toBool();
   confirmClosePlot3D = settings.value("/Plot3D", false).toBool();
   confirmCloseNotes = settings.value("/Note", false).toBool();
+  d_inform_delete_workspace = settings.value("/DeleteWorkspace", true).toBool();
   d_inform_rename_table = settings.value("/RenameTable", false).toBool();
   confirmCloseInstrWindow=settings.value("/InstrumentWindow", false).toBool();
   settings.endGroup(); // Confirmations
@@ -5306,6 +5355,7 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/Language", appLanguage);
   settings.setValue("/ShowWindowsPolicy", show_windows_policy);
   settings.setValue("/RecentProjects", recentProjects);
+  settings.setValue("/RecentFiles", recentFiles);
   settings.setValue("/Style", appStyle);
   settings.setValue("/AutoSave", autoSave);
   settings.setValue("/AutoSaveTime", autoSaveTime);
@@ -5382,6 +5432,7 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/Plot2D", confirmClosePlot2D);
   settings.setValue("/Plot3D", confirmClosePlot3D);
   settings.setValue("/Note", confirmCloseNotes);
+  settings.setValue("/DeleteWorkspace",d_inform_delete_workspace);
   settings.setValue("/RenameTable", d_inform_rename_table);
   settings.value("/InstrumentWindow", confirmCloseInstrWindow).toBool();
   settings.endGroup(); // Confirmations
@@ -5998,7 +6049,7 @@ void ApplicationWindow::savetoNexusFile()
     savedatainNexusFormat(wsName,fileName.toStdString());
 
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(fileName).absoluteDir().path());
-
+    updateRecentFilesList(fileName);
   }
 }
 
@@ -6007,18 +6058,26 @@ void ApplicationWindow::loadDataFile()
   // Ask user for file
   QString fn = QFileDialog::getOpenFileName( 0, tr("Mantidplot - Open file to load"), AlgorithmInputHistory::Instance().getPreviousDirectory());
   if(fn != "") {
-     QFileInfo fnInfo(fn);
-     AlgorithmInputHistory::Instance().setPreviousDirectory(fnInfo.absoluteDir().path());
-     if( fnInfo.suffix() == "py")
-     { // We have a python file, just load it into script window
-       loadScript( fn, true );
-     }
-     else if(mantidUI)
-     {  // Run Load algorithm on file
-       QHash<QString,QString> params;
-       params["Filename"] = fn;
-       mantidUI->showAlgorithmDialog(QString("Load"),params);
-     }
+    loadDataFileByName(fn);
+  }
+  saveSettings();   // save new list of recent files
+}
+
+void ApplicationWindow::loadDataFileByName(QString fn)
+{
+  QFileInfo fnInfo(fn);
+  AlgorithmInputHistory::Instance().setPreviousDirectory(fnInfo.absoluteDir().path());
+  if( fnInfo.suffix() == "py")
+  {
+    // We have a python file, just load it into script window
+    loadScript( fn, true );
+  }
+  else if(mantidUI)
+  {
+    // Run Load algorithm on file
+    QHash<QString,QString> params;
+    params["Filename"] = fn;
+    mantidUI->showAlgorithmDialog(QString("Load"),params);
   }
 }
 
@@ -9013,7 +9072,9 @@ void ApplicationWindow::fileMenuAboutToShow()
   openMenu->addAction(actionOpenProj);
   openMenu->addAction(actionLoadFile);
 
-  recentMenuID = fileMenu->insertItem(tr("&Recent Projects"), recent);
+  recentMenuID = fileMenu->insertItem(tr("&Recent Projects"), recentProjectsMenu);
+
+  recentFilesMenuID = fileMenu->insertItem(tr("R&ecent Files"), recentFilesMenu);
 
   fileMenu->insertSeparator();
   fileMenu->addAction(actionManageDirs);
@@ -13326,10 +13387,24 @@ void ApplicationWindow::updateRecentProjectsList()
   while ((int)recentProjects.size() > MaxRecentProjects)
     recentProjects.pop_back();
 
-  recent->clear();
+  recentProjectsMenu->clear();
 
   for (int i = 0; i<(int)recentProjects.size(); i++ )
-    recent->insertItem("&" + QString::number(i+1) + " " + recentProjects[i]);
+    recentProjectsMenu->insertItem("&" + QString::number(i+1) + " " + recentProjects[i]);
+}
+
+void ApplicationWindow::updateRecentFilesList(QString fname)
+{
+  if (!fname.isEmpty()) {
+    recentFiles.remove(fname);
+    recentFiles.push_front(fname);
+  }
+  while ((int)recentFiles.size() > MaxRecentFiles)
+    recentFiles.pop_back();
+
+  recentFilesMenu->clear();
+  for (int i = 0; i<(int)recentFiles.size(); i++ )
+    recentFilesMenu->insertItem("&" + QString::number(i+1) + " " + recentFiles[i]);
 }
 
 void ApplicationWindow::translateCurveHor()

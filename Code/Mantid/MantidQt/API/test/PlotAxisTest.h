@@ -1,5 +1,5 @@
 #ifndef MANTID_API_PLOTAXISLABELTEST_H_
-#define MANTID_API_AXISLABELTEST_H_
+#define MANTID_API_PLOTAXISLABELTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -157,4 +157,4 @@ public:
 };
 
 
-#endif /* MANTID_API_AXISLABELTEST_H_ */
+#endif /* MANTID_API_PLOTAXISLABELTEST_H_ */

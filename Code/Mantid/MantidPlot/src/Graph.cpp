@@ -5170,8 +5170,8 @@ void Graph::changeIntensity(bool bIntensityChanged)
     }
   }
 }
-/* This method zooms the selected grpah using using zoom tool and mouse drag
- * @param on :: boolean parameter to   swicth on zooming
+/* This method zooms the selected graph using using zoom tool and mouse drag
+ * @param on :: boolean parameter to switch on zooming
  */
 void Graph::enablePanningMagnifier(bool on)
 {

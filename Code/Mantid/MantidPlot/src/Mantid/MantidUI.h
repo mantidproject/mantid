@@ -243,7 +243,8 @@ public:
       const std::vector<int>& indices, bool include_data = false);
     /// Create a table of detectors from a PeaksWorkspace
     Table* createDetectorTable(const QString & wsName, const Mantid::API::IPeaksWorkspace_sptr & ws);
-
+    /// Triggers a workspace delete check
+    void deletePressEvent();
 
     // Determine whether the workspace has a UB matrix
     bool hasUB(const QString& wsName);
@@ -439,6 +440,10 @@ public:
   void memoryImage2();
 #endif
 
+private slots:
+
+  // slot for file open dialogs created from the main app menu, or the workspaces dock window
+  void loadFileDialogAccept();
 
 private:
 

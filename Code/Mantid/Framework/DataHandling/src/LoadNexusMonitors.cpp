@@ -42,7 +42,7 @@ LoadNexusMonitors::~LoadNexusMonitors()
 {
 }
 
-/// Initialisation method.
+/// Initialization method.
 void LoadNexusMonitors::init()
 {
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
@@ -76,12 +76,12 @@ void LoadNexusMonitors::exec()
   string_map_t entries = file.getEntries();
   for (it = entries.begin(); it != entries.end(); ++it)
   {
-	if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") )
-	{
-		file.openGroup(it->first, it->second);
+  if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") )
+  {
+    file.openGroup(it->first, it->second);
         m_top_entry_name = it->first;
-		break;
-	}
+    break;
+  }
   }
   prog1.report();
 
@@ -353,14 +353,25 @@ void LoadNexusMonitors::exec()
   // Need to get the instrument name from the file
   std::string instrumentName;
   file.openGroup("instrument", "NXinstrument");
-  file.openData("name");
-  instrumentName = file.getStrData();
+  try
+  { 
+    file.openData("name");
+    instrumentName = file.getStrData();
+    // Now let's close the file as we don't need it anymore to load the instrument.
+    file.closeData();
+    file.closeGroup(); // Close the NXentry
+    file.close();
+
+  }
+  catch(std::runtime_error &) // no correct instrument definition (old ISIS file, fall back to isis_vms_compat)
+  {
+    file.closeGroup(); // Close the instrument NXentry
+    instrumentName =LoadEventNexus::readInstrumentFromISIS_VMSCompat(file);
+    file.close();
+  }
+
   g_log.debug() << "Instrument name read from NeXus file is " << instrumentName << std::endl;
 
-  // Now let's close the file as we don't need it anymore to load the instrument.
-  file.closeData();
-  file.closeGroup(); // Close the NXentry
-  file.close();
 
   this->WS->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
   this->WS->setYUnit("Counts");
@@ -460,6 +471,7 @@ void LoadNexusMonitors::runLoadLogs(const std::string filename, API::MatrixWorks
 {
     // do the actual work
     API::IAlgorithm_sptr loadLogs = createChildAlgorithm("LoadNexusLogs");
+
     // Now execute the Child Algorithm. Catch and log any error, but don't stop.
     try
     {
