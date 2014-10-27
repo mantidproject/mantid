@@ -751,11 +751,15 @@ void MantidUI::showSpectrumViewer()
       AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
     if ( wksp )
     {
-      MantidQt::SpectrumView::SpectrumView* viewer = new MantidQt::SpectrumView::SpectrumView(m_appWindow);
-      if(!viewer)
+      try
+      {
+        MantidQt::SpectrumView::SpectrumView* viewer = new MantidQt::SpectrumView::SpectrumView(m_appWindow);
+      }
+      catch (std::runtime_erro& e)
       {
         m_lastShownSpectrumViewerWin = NULL;
-        return;
+        g_log.error() << "Could not create spectrum viewer: " << e.what << "\n";
+        throw std::runtime_error(e);
       }
       viewer->setAttribute(Qt::WA_DeleteOnClose, false);
       viewer->resize( 1050, 800 );
@@ -812,13 +816,16 @@ void MantidUI::showSliceViewer()
   if (mdws)
   {
     // Create the slice viewer window
-    SliceViewerWindow * w = MantidQt::Factory::WidgetFactory::Instance()->
-      createSliceViewerWindow(wsName, "");
-
-    if(!w)
+    try
+    {
+      SliceViewerWindow * w = MantidQt::Factory::WidgetFactory::Instance()->
+        createSliceViewerWindow(wsName, "");
+    }
+    catch (std::runtime_error& e)
     {
       m_lastShownSliceViewWin = NULL;
-      return;
+      g_log.error() << "Could not create slice viewer: " << e.what << "\n";
+      throw std::runtime_error(e);
     }
 
     // Special options for viewing MatrixWorkspaces
