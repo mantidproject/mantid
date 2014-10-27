@@ -202,8 +202,6 @@ namespace MantidQt
     */
     void QtReflMainView::showContextMenu(const QPoint& pos)
     {
-      QModelIndex index = ui.viewTable->indexAt(pos);
-
       //parent widget takes ownership of QMenu
       QMenu* menu = new QMenu(this);
       menu->addAction(ui.actionProcess);
