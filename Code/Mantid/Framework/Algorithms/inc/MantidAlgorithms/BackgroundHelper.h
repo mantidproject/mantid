@@ -41,12 +41,30 @@ namespace Algorithms
   class DLLExport BackgroundHelper
   {
   public:
-    BackgroundHelper():m_emode(0){};
+    BackgroundHelper();
     void initialize(const API::MatrixWorkspace_const_sptr &bkgWS,const API::MatrixWorkspace_sptr &sourceWS,int emode);
 
     void removeBackground(int hist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data);
   private:
-    int m_emode;
+    // pointer to the units conversion class for the working workspace;
+    Kernel::Unit_sptr m_WSUnit;
+
+    // shared pointer to the workspace containing background
+    API::MatrixWorkspace_const_sptr m_bgWs;
+    // shared pointer to the workspace where background should be removed
+    API::MatrixWorkspace_const_sptr m_wkWS;
+
+    // if the background workspace is single value workspace
+    bool m_singleValueBackground;
+    // the intensity of the background for a given spectra of a background workspace
+    double m_Jack05;
+    // energy conversion mode
+    int m_Emode;
+    // source-sample distance
+    double m_L1;
+    // incident for direct or analysis for indirect energy for units conversion
+    double m_Efix;
+    Geometry::IComponent_const_sptr m_Sample;
 
   };
 

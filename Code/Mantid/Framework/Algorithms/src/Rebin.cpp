@@ -112,9 +112,9 @@ namespace Mantid
         "but actually useful mainly for removing background while rebinning an event workspace in the units different from TOF.");
 
       std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
-      declareProperty("dEAnalysisMode",dE_modes[Kernel::DeltaEMode::Direct],boost::make_shared<Kernel::StringListValidator>(dE_modes),
+      declareProperty("EMode",dE_modes[Kernel::DeltaEMode::Direct],boost::make_shared<Kernel::StringListValidator>(dE_modes),
         "If FlatBkgWorkspace, this property is used to define the units conversion from TOF to the units of the InputWorkspace",Direction::Input);
-      setPropertySettings("dEAnalysisMode",
+      setPropertySettings("EMode",
         new Kernel::VisibleWhenProperty("FlatBkgWorkspace", IS_NOT_EQUAL_TO, ""));
 
 
@@ -395,7 +395,7 @@ namespace Mantid
       }
 
 
-      const std::string emodeStr = getProperty("dEAnalysisMode");
+      const std::string emodeStr = getProperty("EMode");
       eMode = static_cast<int>(Kernel::DeltaEMode().fromString(emodeStr));
 
       return bkgWksp;

@@ -291,7 +291,7 @@ namespace Mantid
         }
       case(CnvrtToMD::ConvertByTOF):
         {
-      double delta(std::numeric_limits<double>::quiet_NaN());
+          double delta(std::numeric_limits<double>::quiet_NaN());
           m_TwoTheta = (*m_pTwoThetas)[i];
           m_L2       = (*m_pL2s)[i];
           double  Efix = m_Efix;
