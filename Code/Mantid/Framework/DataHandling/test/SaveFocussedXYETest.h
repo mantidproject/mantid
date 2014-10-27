@@ -219,15 +219,16 @@ public:
     std::string filename("SaveGSS.txt");
     saveGSS.setPropertyValue("Filename", filename);
     filename = saveGSS.getPropertyValue("Filename"); //absolute path
+		saveGSS.setProperty("Format", "RALF");
     saveGSS.setProperty("SplitFiles", false);
     saveGSS.setPropertyValue("Append", "0");
     saveGSS.setPropertyValue("MultiplyByBinWidth", "1");
 
-    TS_ASSERT_THROWS_NOTHING( saveGSS.execute());
+		TS_ASSERT_THROWS_NOTHING( saveGSS.execute());
     Poco::File focusfile(filename);
     TS_ASSERT_EQUALS( focusfile.exists(), true );
-
-    std::ifstream filestrm(filename.c_str());
+    
+		std::ifstream filestrm(filename.c_str());
     std::string line;
     int bin_no(1);
     while( getline(filestrm, line) )
@@ -238,23 +239,23 @@ public:
       if(str=="BANK") continue;
       double x(0.0), y(0.0), e(0.);
       std::istringstream is(line);
-      is >> x >> y >> e;
+			is >> x >> y >> e;
       switch( bin_no )
       {
       case 1:
-        TS_ASSERT_DELTA(x, 2.0, m_tol); //center of the bin
-        TS_ASSERT_DELTA(y, 4.0, m_tol); // width (2.0) * value (2.0)
-        TS_ASSERT_DELTA(e, 1.41421356*2.0, m_tol); //error (sqrt(2) * bin width (2.0)
+        TS_ASSERT_DELTA(x, 2.0, m_tol);        // center of the bin
+        TS_ASSERT_DELTA(y, 8.0, m_tol);        // y value (2.0) * bc4 (2.0) * xprev value (1) * bin width (2)
+        TS_ASSERT_DELTA(e, 5.65685425, m_tol); //error (sqrt(2) * bc4 (2.0) * xprev value (1) * bin width (2.0)
         break;
       case 2:
-        TS_ASSERT_DELTA(x, 4.0, m_tol);
-        TS_ASSERT_DELTA(y, 4.0, m_tol);
-        TS_ASSERT_DELTA(e, 1.41421356*2.0, m_tol);
+        TS_ASSERT_DELTA(x, 4.0, m_tol);         // center of the bin
+        TS_ASSERT_DELTA(y, 24.0, m_tol);        // y value (2.0) * bc4 (2.0) * xprev value (3) * bin width (2)
+        TS_ASSERT_DELTA(e, 16.97056275, m_tol); //error (sqrt(2) * bc4 (2.0) * xprev value (3) * bin width (2.0)
         break;
       case 3:
-        TS_ASSERT_DELTA(x, 6.0, m_tol);
-        TS_ASSERT_DELTA(y, 4.0, m_tol);
-        TS_ASSERT_DELTA(e, 1.41421356*2.0, m_tol);
+        TS_ASSERT_DELTA(x, 6.0, m_tol);         // center of the bin
+        TS_ASSERT_DELTA(y, 40.0, m_tol);        // y value (2.0) * bc4 (2.0) * xprev value (5) * bin width (2)
+        TS_ASSERT_DELTA(e, 28.28427125, m_tol); //error (sqrt(2) * bc4 (2.0) * xprev value (5) * bin width (2.0)
         break;
       default:
         TS_ASSERT( false );
@@ -319,26 +320,26 @@ public:
       double x(0.0), y(0.0), e(0.);
       std::istringstream is(line);
       is >> x >> y >> e;
-      switch( bin_no )
-      {
-      case 1:
-        TS_ASSERT_DELTA(x, 2.0, m_tol); //center of the bin
-        TS_ASSERT_DELTA(y, 2.0, m_tol); // width (2.0)
-        TS_ASSERT_DELTA(e, 1.41421356*1.0, m_tol); //error (sqrt(2)
-        break;
-      case 2:
-        TS_ASSERT_DELTA(x, 4.0, m_tol);
-        TS_ASSERT_DELTA(y, 2.0, m_tol);
-        TS_ASSERT_DELTA(e, 1.41421356*1.0, m_tol);
-        break;
-      case 3:
-        TS_ASSERT_DELTA(x, 6.0, m_tol);
-        TS_ASSERT_DELTA(y, 2.0, m_tol);
-        TS_ASSERT_DELTA(e, 1.41421356*1.0, m_tol);
-        break;
-      default:
-        TS_ASSERT( false );
-      }
+			switch( bin_no )
+			{
+			case 1:
+				TS_ASSERT_DELTA(x, 2.0, m_tol);        // center of the bin
+				TS_ASSERT_DELTA(y, 4.0, m_tol);        // y value (2.0) * bc4 (2.0) * xprev value (1)
+				TS_ASSERT_DELTA(e, 2.82842712, m_tol); //error (sqrt(2) * bc4 (2.0) * xprev value (1)
+				break;
+			case 2:
+				TS_ASSERT_DELTA(x, 4.0, m_tol);         // center of the bin
+				TS_ASSERT_DELTA(y, 12.0, m_tol);        // y value (2.0) * bc4 (2.0) * xprev value (3)
+				TS_ASSERT_DELTA(e, 8.48528137, m_tol);  //error (sqrt(2) * bc4 (2.0) * xprev value (3)
+				break;
+			case 3:
+				TS_ASSERT_DELTA(x, 6.0, m_tol);         // center of the bin
+				TS_ASSERT_DELTA(y, 20.0, m_tol);        // y value (2.0) * bc4 (2.0) * xprev value (5)
+				TS_ASSERT_DELTA(e, 14.14213562, m_tol); //error (sqrt(2) * bc4 (2.0) * xprev value (5)
+				break;
+			default:
+				TS_ASSERT( false );
+			}
       ++bin_no;
       if(bin_no==4)
         bin_no=1;

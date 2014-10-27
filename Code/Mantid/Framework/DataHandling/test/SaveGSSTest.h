@@ -175,8 +175,8 @@ public:
           double x, y, e;
           liness >> x >> y >> e;
           TS_ASSERT_DELTA(x, 8101.43, 0.01);
-          TS_ASSERT_DELTA(y, 688.18, 0.01);
-          TS_ASSERT_DELTA(e, 26.23, 0.01);
+          TS_ASSERT_DELTA(y, 55475.77, 0.01);
+          TS_ASSERT_DELTA(e, 2114.7, 0.01);
         }
         else if (linenumber == 111)
         {
@@ -191,8 +191,8 @@ public:
           double x, y, e;
           liness >> x >> y >> e;
           TS_ASSERT_DELTA(x, 8949.02, 0.01);
-          TS_ASSERT_DELTA(y, 1592.26, 0.01);
-          TS_ASSERT_DELTA(e, 39.90, 0.01);
+          TS_ASSERT_DELTA(y, 141782.95, 0.01);
+          TS_ASSERT_DELTA(e, 3553.17, 0.01);
         }
 
         ++ numlines;
