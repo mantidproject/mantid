@@ -364,14 +364,15 @@ namespace DataHandling
           }
 
           xValue = (2 * xValue) - xPrev;
-          if (multiplybybinwidth)
-          {
-            yValue = yValue / (xValue - xPrev);
-            eValue = eValue / (xValue - xPrev);
-          }
         }
 
-        // store read in data (x, y, e) to vector
+				if (multiplybybinwidth)
+				{
+					yValue = yValue / (xValue - xPrev);
+					eValue = eValue / (xValue - xPrev);
+				}
+
+				// store read in data (x, y, e) to vector
         vecX.push_back(xValue);
         vecY.push_back(yValue);
         vecE.push_back(eValue);

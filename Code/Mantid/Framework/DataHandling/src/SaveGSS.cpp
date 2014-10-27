@@ -539,22 +539,22 @@ namespace DataHandling
       //Calculate the error
       double Epos;
       if (MultiplyByBinWidth)
-        Epos = E[j] * (X[j + 1] - X[j]); // E[j]*X[j]*bc4;
+        Epos = E[j] * X[j] * bc4 *(X[j + 1] - X[j]);
       else
-        Epos = E[j];
+        Epos = E[j] * X[j] * bc4;
       Epos = fixErrorValue(Epos);
 
       //The center of the X bin.
-      out << std::fixed << std::setprecision(5) << std::setw(15) << 0.5 * (X[j] + X[j + 1]);
+      out << std::fixed << std::setprecision(5) << "\t" << 0.5 * (X[j] + X[j + 1]);
 
       // The Y value
       if (MultiplyByBinWidth)
-        out << std::fixed << std::setprecision(8) << std::setw(18) << Y[j] * (X[j + 1] - X[j]);
+        out << std::fixed << std::setprecision(8) << "\t" << Y[j] * X[j] * bc4 * (X[j + 1] - X[j]);
       else
-        out << std::fixed << std::setprecision(8) << std::setw(18) << Y[j];
+        out << std::fixed << std::setprecision(8) << "\t" << Y[j] * X[j] * bc4;
 
       //The error
-      out << std::fixed << std::setprecision(8) << std::setw(18) << Epos << "\n";
+      out << std::fixed << std::setprecision(8) << "\t" << Epos << "\n";
     }
 
     return;
@@ -595,9 +595,9 @@ namespace DataHandling
       }
       e = fixErrorValue(e);
 
-      out << "  " << std::fixed << std::setprecision(9) << std::setw(20) << 0.5 * (X[i] + X[i + 1])
-          << "  " << std::fixed << std::setprecision(9) << std::setw(20) << y << "  " << std::fixed
-          << std::setprecision(9) << std::setw(20) << e << std::setw(12) << " " << "\n"; // let it flush its own buffer
+      out << "  " << std::fixed << std::setprecision(9) << "\t" << 0.5 * (X[i] + X[i + 1])
+          << "  " << std::fixed << std::setprecision(9) << "\t" << y 
+					<< "  " << std::fixed << std::setprecision(9) << "\t" << e << "\n"; // let it flush its own buffer
     }
     out << std::flush;
 
