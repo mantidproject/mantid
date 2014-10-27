@@ -5,8 +5,9 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtCustomInterfaces/QReflTableModel.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
@@ -49,8 +50,10 @@ namespace MantidQt
       //Public for the purposes of unit testing
       static std::map<std::string,std::string> parseKeyValueString(const std::string& str);
     protected:
+      //the workspace the model is currently representing
+      Mantid::API::ITableWorkspace_sptr m_ws;
       //the model the table is currently representing
-      Mantid::API::ITableWorkspace_sptr m_model;
+      QReflTableModel_sptr m_model;
       //the name of the workspace/table/model in the ADS, blank if unsaved
       std::string m_wsName;
       //the view we're managing

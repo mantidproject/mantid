@@ -2,7 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEW_H
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtMantidWidgets/HintStrategy.h"
 
 namespace MantidQt
@@ -41,7 +41,7 @@ namespace MantidQt
       virtual ~ReflMainView() {};
 
       //Connect the model
-      virtual void showTable(Mantid::API::ITableWorkspace_sptr model) = 0;
+      virtual void showTable(QReflTableModel_sptr model) = 0;
 
       //Dialog/Prompt methods
       virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue) = 0;

@@ -5,6 +5,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include <boost/scoped_ptr.hpp>
 #include <QSignalMapper>
 #include "ui_ReflMainWidget.h"
@@ -49,7 +50,7 @@ namespace MantidQt
       static QString categoryInfo() { return "Reflectometry"; }
 
       //Connect the model
-      virtual void showTable(Mantid::API::ITableWorkspace_sptr model);
+      virtual void showTable(QReflTableModel_sptr model);
 
       //Dialog/Prompt methods
       virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue);
@@ -79,6 +80,8 @@ namespace MantidQt
       virtual void initLayout();
       //the presenter
       boost::shared_ptr<IReflPresenter> m_presenter;
+      //the model
+      QReflTableModel_sptr m_model;
       //the interface
       Ui::reflMainWidget ui;
       //the workspace the user selected to open

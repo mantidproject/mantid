@@ -79,12 +79,12 @@ namespace MantidQt
     Set a new model in the tableview
     @param model : the model to be attached to the tableview
     */
-    void QtReflMainView::showTable(ITableWorkspace_sptr model)
+    void QtReflMainView::showTable(QReflTableModel_sptr model)
     {
-      QAbstractItemModel* qModel = new QReflTableModel(model);
+      m_model = model;
       //So we can notify the presenter when the user updates the table
-      connect(qModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(tableUpdated(const QModelIndex&, const QModelIndex&)));
-      ui.viewTable->setModel(qModel);
+      connect(m_model.get(), SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(tableUpdated(const QModelIndex&, const QModelIndex&)));
+      ui.viewTable->setModel(m_model.get());
       ui.viewTable->resizeColumnsToContents();
     }
 
