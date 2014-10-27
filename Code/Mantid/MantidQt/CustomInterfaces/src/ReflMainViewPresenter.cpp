@@ -747,7 +747,7 @@ namespace MantidQt
 
     /**
     Inserts a new row in the specified location
-    @param before The index to insert the new row before
+    @param index The index to insert the new row before
     */
     void ReflMainViewPresenter::insertRow(int index)
     {

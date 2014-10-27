@@ -84,7 +84,7 @@ namespace MantidQt
       //Stitch some rows
       void stitchRows(std::set<int> rows);
       //insert a row in the model before the given index
-      virtual void insertRow(int before);
+      virtual void insertRow(int index);
       //add row(s) to the model
       virtual void addRow();
       //delete row(s) from the model
