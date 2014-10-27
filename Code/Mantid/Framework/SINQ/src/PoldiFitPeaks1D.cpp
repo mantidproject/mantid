@@ -78,12 +78,12 @@ void PoldiFitPeaks1D::init()
     m_profileTies = "f1.x0 = f0.PeakCentre";
 }
 
-void PoldiFitPeaks1D::setPeakFunction(std::string peakFunction)
+void PoldiFitPeaks1D::setPeakFunction(const std::string &peakFunction)
 {
     m_profileTemplate = peakFunction;
 }
 
-PoldiPeakCollection_sptr PoldiFitPeaks1D::getInitializedPeakCollection(TableWorkspace_sptr peakTable)
+PoldiPeakCollection_sptr PoldiFitPeaks1D::getInitializedPeakCollection(const DataObjects::TableWorkspace_sptr &peakTable) const
 {
     PoldiPeakCollection_sptr peakCollection(new PoldiPeakCollection(peakTable));
     peakCollection->setProfileFunctionName(m_profileTemplate);
@@ -91,7 +91,7 @@ PoldiPeakCollection_sptr PoldiFitPeaks1D::getInitializedPeakCollection(TableWork
     return peakCollection;
 }
 
-IFunction_sptr PoldiFitPeaks1D::getPeakProfile(PoldiPeak_sptr poldiPeak) {
+IFunction_sptr PoldiFitPeaks1D::getPeakProfile(const PoldiPeak_sptr &poldiPeak) const {
     IPeakFunction_sptr clonedProfile = boost::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction(m_profileTemplate));
     clonedProfile->setCentre(poldiPeak->q());
     clonedProfile->setFwhm(poldiPeak->fwhm(PoldiPeak::AbsoluteQ));
@@ -111,7 +111,7 @@ IFunction_sptr PoldiFitPeaks1D::getPeakProfile(PoldiPeak_sptr poldiPeak) {
     return totalProfile;
 }
 
-void PoldiFitPeaks1D::setValuesFromProfileFunction(PoldiPeak_sptr poldiPeak, IFunction_sptr fittedFunction)
+void PoldiFitPeaks1D::setValuesFromProfileFunction(PoldiPeak_sptr poldiPeak, const IFunction_sptr &fittedFunction) const
 {
     CompositeFunction_sptr totalFunction = boost::dynamic_pointer_cast<CompositeFunction>(fittedFunction);
 
@@ -126,7 +126,7 @@ void PoldiFitPeaks1D::setValuesFromProfileFunction(PoldiPeak_sptr poldiPeak, IFu
     }
 }
 
-double PoldiFitPeaks1D::getFwhmWidthRelation(IPeakFunction_sptr peakFunction)
+double PoldiFitPeaks1D::getFwhmWidthRelation(IPeakFunction_sptr peakFunction) const
 {
     return peakFunction->fwhm() / peakFunction->getParameter(2);
 }
@@ -142,12 +142,15 @@ void PoldiFitPeaks1D::exec()
     TableWorkspace_sptr poldiPeakTable = getProperty("PoldiPeakTable");    
     m_peaks = getInitializedPeakCollection(poldiPeakTable);
 
+
     g_log.information() << "Peaks to fit: " << m_peaks->peakCount() << std::endl;
 
     Workspace2D_sptr dataWorkspace = getProperty("InputWorkspace");
 
     m_fitCharacteristics = boost::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
     WorkspaceGroup_sptr fitPlotGroup(new WorkspaceGroup);
+
+
 
     for(size_t i = 0; i < m_peaks->peakCount(); ++i) {
         PoldiPeak_sptr currentPeak = m_peaks->peak(i);
@@ -174,7 +177,7 @@ void PoldiFitPeaks1D::exec()
     setProperty("FitPlotsWorkspace", fitPlotGroup);
 }
 
-IAlgorithm_sptr PoldiFitPeaks1D::getFitAlgorithm(Workspace2D_sptr dataWorkspace, PoldiPeak_sptr peak, IFunction_sptr profile)
+IAlgorithm_sptr PoldiFitPeaks1D::getFitAlgorithm(const Workspace2D_sptr &dataWorkspace, const PoldiPeak_sptr &peak, const IFunction_sptr &profile)
 {
     double width = peak->fwhm();
     double extent = std::min(0.05, std::max(0.002, width)) * m_fwhmMultiples;
@@ -194,7 +197,7 @@ IAlgorithm_sptr PoldiFitPeaks1D::getFitAlgorithm(Workspace2D_sptr dataWorkspace,
     return fitAlgorithm;
 }
 
-void PoldiFitPeaks1D::addPeakFitCharacteristics(ITableWorkspace_sptr fitResult)
+void PoldiFitPeaks1D::addPeakFitCharacteristics(const ITableWorkspace_sptr &fitResult)
 {
     if(m_fitCharacteristics->columnCount() == 0) {
         initializeFitResultWorkspace(fitResult);
@@ -209,7 +212,7 @@ void PoldiFitPeaks1D::addPeakFitCharacteristics(ITableWorkspace_sptr fitResult)
     }
 }
 
-void PoldiFitPeaks1D::initializeFitResultWorkspace(ITableWorkspace_sptr fitResult)
+void PoldiFitPeaks1D::initializeFitResultWorkspace(const API::ITableWorkspace_sptr &fitResult)
 {
     for(size_t i = 0; i < fitResult->rowCount(); ++i) {
         TableRow currentRow = fitResult->getRow(i);
@@ -217,7 +220,7 @@ void PoldiFitPeaks1D::initializeFitResultWorkspace(ITableWorkspace_sptr fitResul
     }
 }
 
-void PoldiFitPeaks1D::initializePeakResultWorkspace(TableWorkspace_sptr peakResultWorkspace)
+void PoldiFitPeaks1D::initializePeakResultWorkspace(const DataObjects::TableWorkspace_sptr &peakResultWorkspace) const
 {
     peakResultWorkspace->addColumn("str", "Q");
     peakResultWorkspace->addColumn("str", "d");
@@ -226,7 +229,7 @@ void PoldiFitPeaks1D::initializePeakResultWorkspace(TableWorkspace_sptr peakResu
     peakResultWorkspace->addColumn("str", "Intensity");
 }
 
-void PoldiFitPeaks1D::storePeakResult(TableRow tableRow, PoldiPeak_sptr peak)
+void PoldiFitPeaks1D::storePeakResult(TableRow tableRow, const PoldiPeak_sptr &peak) const
 {
     UncertainValue q = peak->q();
     UncertainValue d = peak->d();
@@ -238,7 +241,7 @@ void PoldiFitPeaks1D::storePeakResult(TableRow tableRow, PoldiPeak_sptr peak)
              << UncertainValueIO::toString(peak->intensity());
 }
 
-TableWorkspace_sptr PoldiFitPeaks1D::generateResultTable(PoldiPeakCollection_sptr peaks)
+TableWorkspace_sptr PoldiFitPeaks1D::generateResultTable(const PoldiPeakCollection_sptr &peaks) const
 {
     TableWorkspace_sptr outputTable = boost::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
     initializePeakResultWorkspace(outputTable);
