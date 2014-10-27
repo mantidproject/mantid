@@ -5808,7 +5808,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
             MantidMatrixCurve::Spectrum, tsv.asInt(4), tsv.asInt(5));
         setCurveType(curveID, tsv.asInt(6));
 
-        QStringList sl = QString::fromUtf8(tsv.lineAsString("MantidMatrixCurve").c_str()).split("\t");
+        QStringList sl = QString::fromUtf8(tsv.lineAsString("MantidMatrixCurve", i).c_str()).split("\t");
         CurveLayout cl = fillCurveSettings(sl, fileVersion, 3);
         updateCurveLayout(c,&cl);
       }
