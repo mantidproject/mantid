@@ -152,19 +152,38 @@ namespace Mantid
       // TODO: Write sample info
       // name
       
-      std::vector<double> rotationAngles(dims_array[0]);
       // Initialise rotations - if unknown, fill with equal steps from 0 to 180 over all frames.
-      // TODO: collect and use actual rotation values
-
-      double step = static_cast<double>(180/dims_array[0]);
-      rotationAngles[0] = step;
+      std::vector<double> rotationAngles(dims_array[0]);
+      std::string rotValues = "";
+      std::vector<std::string> rotSplit;
       
-      for(auto it = rotationAngles.begin()+1; it != rotationAngles.end(); ++it)
+      if(inputWS->run().hasProperty("Rotations"))
       {
-        *it = (*(it-1)) + step;
+        rotValues = inputWS->run().getLogData("Rotations")->value();
+        boost::split(rotSplit, rotValues, boost::is_any_of(","));
+      }      
+  
+      if(rotSplit.size() == static_cast<size_t>(dims_array[0]) )
+      {
+	      for(size_t i=0; i<rotSplit.size(); i++)
+	      {
+	        rotationAngles[i] = boost::lexical_cast<double>(rotSplit[i]);
+	      }
+      }
+      else
+      {
+	      // Make some fake values
+	      g_log.notice("Unable to find a correctly formatted rotation angle file with same entry count as input; creating fake values.");
+	      double step = static_cast<double>(180/dims_array[0]);
+		    rotationAngles[0] = step;
+		
+		    for(auto it = rotationAngles.begin()+1; it != rotationAngles.end(); ++it)
+		    {
+			    *it = (*(it-1)) + step;
+		    }
       }
 
-      nxFile.writeData("rotation_angle", rotationAngles);
+		  nxFile.writeData("rotation_angle", rotationAngles);
       
       // Create a link object for rotation_angle to use later
       nxFile.openData("rotation_angle");

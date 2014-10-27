@@ -17,6 +17,7 @@ const int ProcessFlag   = ReflMainView::ProcessFlag;
 const int AddRowFlag    = ReflMainView::AddRowFlag;
 const int DeleteRowFlag = ReflMainView::DeleteRowFlag;
 const int GroupRowsFlag = ReflMainView::GroupRowsFlag;
+const int ExpandSelectionFlag = ReflMainView::ExpandSelectionFlag;
 
 //Clean column ids for use within tests
 const int RunCol     = ReflMainViewPresenter::COL_RUNS;
@@ -45,7 +46,8 @@ public:
   MOCK_METHOD1(setTableList, void(const std::set<std::string>& tableList));
   MOCK_METHOD2(setInstrumentList, void(const std::vector<std::string>& instruments, const std::string& defaultInstrument));
   MOCK_METHOD1(setInstrument, void(const std::string&));
-  MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
+  MOCK_METHOD1(setSelection, void(const std::set<size_t>& rows));
+  MOCK_CONST_METHOD0(getSelectedRows, std::set<size_t>());
   MOCK_CONST_METHOD0(getSearchInstrument, std::string());
   MOCK_CONST_METHOD0(getProcessInstrument, std::string());
   MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());

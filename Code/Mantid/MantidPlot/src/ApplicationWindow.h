@@ -199,6 +199,9 @@ public:
 
   int matrixUndoStackSize(){return d_matrix_undo_stack_size;};
   void setMatrixUndoStackSize(int size);
+    
+  // Check if delete workspace prompt is enabled
+  bool isDeleteWorkspacePromptEnabled();
 
   QString endOfLine();
   bool autoUpdateTableValues(){return d_auto_update_table_values;};
@@ -413,6 +416,7 @@ public slots:
   //@{
   //! Creates an empty table
   Table* newTable();
+
   //! Used when loading a table from a project file
   Table* newTable(const QString& caption,int r, int c);
   Table* newTable(int r, int c, const QString& name = QString(),const QString& legend = QString());
@@ -1226,7 +1230,7 @@ public:
   QPoint d_script_win_pos;
   QSize d_script_win_size;
   bool d_script_win_arrow;
-  bool d_inform_rename_table;
+  bool d_inform_rename_table, d_inform_delete_workspace;
   QString d_export_col_separator;
   bool d_export_col_names, d_export_table_selection, d_export_col_comment;
 

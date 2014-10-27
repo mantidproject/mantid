@@ -39,6 +39,7 @@ namespace MantidQt
       ui.buttonAddRow->setDefaultAction(ui.actionAddRow);
       ui.buttonDeleteRow->setDefaultAction(ui.actionDeleteRow);
       ui.buttonGroupRows->setDefaultAction(ui.actionGroupRows);
+      ui.buttonExpandSelection->setDefaultAction(ui.actionExpandSelection);
 
       //Expand the process runs column at the expense of the search column
       ui.splitterTables->setStretchFactor(0, 0);
@@ -51,13 +52,14 @@ namespace MantidQt
       //Allow rows to be reordered
       ui.viewTable->verticalHeader()->setMovable(true);
 
-      connect(ui.actionSaveTable,   SIGNAL(triggered()), this, SLOT(actionSave()));
-      connect(ui.actionSaveTableAs, SIGNAL(triggered()), this, SLOT(actionSaveAs()));
-      connect(ui.actionNewTable,    SIGNAL(triggered()), this, SLOT(actionNewTable()));
-      connect(ui.actionAddRow,      SIGNAL(triggered()), this, SLOT(actionAddRow()));
-      connect(ui.actionDeleteRow,   SIGNAL(triggered()), this, SLOT(actionDeleteRow()));
-      connect(ui.actionProcess,     SIGNAL(triggered()), this, SLOT(actionProcess()));
-      connect(ui.actionGroupRows,   SIGNAL(triggered()), this, SLOT(actionGroupRows()));
+      connect(ui.actionSaveTable,       SIGNAL(triggered()), this, SLOT(actionSave()));
+      connect(ui.actionSaveTableAs,     SIGNAL(triggered()), this, SLOT(actionSaveAs()));
+      connect(ui.actionNewTable,        SIGNAL(triggered()), this, SLOT(actionNewTable()));
+      connect(ui.actionAddRow,          SIGNAL(triggered()), this, SLOT(actionAddRow()));
+      connect(ui.actionDeleteRow,       SIGNAL(triggered()), this, SLOT(actionDeleteRow()));
+      connect(ui.actionProcess,         SIGNAL(triggered()), this, SLOT(actionProcess()));
+      connect(ui.actionGroupRows,       SIGNAL(triggered()), this, SLOT(actionGroupRows()));
+      connect(ui.actionExpandSelection, SIGNAL(triggered()), this, SLOT(actionExpandSelection()));
 
       //Finally, create a presenter to do the thinking for us
       m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(this));
@@ -79,7 +81,10 @@ namespace MantidQt
     */
     void QtReflMainView::showTable(ITableWorkspace_sptr model)
     {
-      ui.viewTable->setModel(new QReflTableModel(model));
+      QAbstractItemModel* qModel = new QReflTableModel(model);
+      //So we can notify the presenter when the user updates the table
+      connect(qModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(tableUpdated(const QModelIndex&, const QModelIndex&)));
+      ui.viewTable->setModel(qModel);
       ui.viewTable->resizeColumnsToContents();
     }
 
@@ -152,11 +157,29 @@ namespace MantidQt
     }
 
     /**
-    This slot notifies the presenter that the "new table" button as been pressed
+    This slot notifies the presenter that the "new table" button has been pressed
     */
     void QtReflMainView::actionNewTable()
     {
       m_presenter->notify(NewTableFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "expand selection" button has been pressed
+    */
+    void QtReflMainView::actionExpandSelection()
+    {
+      m_presenter->notify(ExpandSelectionFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the table has been updated/changed by the user
+    */
+    void QtReflMainView::tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+    {
+      Q_UNUSED(topLeft);
+      Q_UNUSED(bottomRight);
+      m_presenter->notify(TableUpdatedFlag);
     }
 
     /**
@@ -241,6 +264,19 @@ namespace MantidQt
     }
 
     /**
+    Set which rows are selected
+    @param rows : The set of rows to select
+    */
+    void QtReflMainView::setSelection(const std::set<size_t>& rows)
+    {
+      ui.viewTable->clearSelection();
+      auto selectionModel = ui.viewTable->selectionModel();
+
+      for(auto row = rows.begin(); row != rows.end(); ++row)
+        selectionModel->select(ui.viewTable->model()->index((int)(*row), 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    }
+
+    /**
     Set the list of available instruments to search and process for
     @param instruments : The list of instruments available
     @param defaultInstrument : The instrument to have selected by default
@@ -293,16 +329,14 @@ namespace MantidQt
     Get the indices of the highlighted rows
     @returns a vector of unsigned ints contianing the highlighted row numbers
     */
-    std::vector<size_t> QtReflMainView::getSelectedRowIndexes() const
+    std::set<size_t> QtReflMainView::getSelectedRows() const
     {
       auto selectedRows = ui.viewTable->selectionModel()->selectedRows();
-      //auto selectedType = ui.viewTable->selectionModel()->;
-      std::vector<size_t> rowIndexes;
-      for (auto idx = selectedRows.begin(); idx != selectedRows.end(); ++idx)
-      {
-        rowIndexes.push_back(idx->row());
-      }
-      return rowIndexes;
+      std::set<size_t> rows;
+      for(auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
+        rows.insert(it->row());
+
+      return rows;
     }
 
     /**
