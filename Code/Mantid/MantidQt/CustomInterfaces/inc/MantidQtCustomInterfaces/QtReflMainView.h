@@ -63,13 +63,13 @@ namespace MantidQt
       virtual void setProgress(int progress);
 
       //Settor methods
-      virtual void setSelection(const std::set<size_t>& rows);
+      virtual void setSelection(const std::set<int>& rows);
       virtual void setTableList(const std::set<std::string>& tables);
       virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument);
       virtual void setOptionsHintStrategy(HintStrategy* hintStrategy);
 
       //Accessor methods
-      virtual std::set<size_t> getSelectedRows() const;
+      virtual std::set<int> getSelectedRows() const;
       virtual std::string getSearchInstrument() const;
       virtual std::string getProcessInstrument() const;
       virtual std::string getWorkspaceToOpen() const;

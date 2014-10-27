@@ -61,27 +61,27 @@ namespace MantidQt
       //process selected rows
       virtual void process();
       //Reduce a row
-      void reduceRow(size_t rowNo);
+      void reduceRow(int rowNo);
       //load a run into the ADS, or re-use one in the ADS if possible
       Mantid::API::Workspace_sptr loadRun(const std::string& run, const std::string& instrument);
       //get the run number of a TOF workspace
       std::string getRunNumber(const Mantid::API::Workspace_sptr& ws);
       //get an unused group id
-      int getUnusedGroup(std::set<size_t> ignoredRows = std::set<size_t>()) const;
+      int getUnusedGroup(std::set<int> ignoredRows = std::set<int>()) const;
       //make a transmission workspace
       Mantid::API::MatrixWorkspace_sptr makeTransWS(const std::string& transString);
       //Validate a row
-      void validateRow(size_t rowNo) const;
+      void validateRow(int rowNo) const;
       //Autofill a row with sensible values
-      void autofillRow(size_t rowNo);
+      void autofillRow(int rowNo);
       //calculates qmin and qmax
       static std::vector<double> calcQRange(Mantid::API::MatrixWorkspace_sptr ws, double theta);
       //get the number of rows in a group
       size_t numRowsInGroup(int groupId) const;
       //Stitch some rows
-      void stitchRows(std::set<size_t> rows);
+      void stitchRows(std::set<int> rows);
       //insert a row in the model before the given index
-      virtual void insertRow(size_t before);
+      virtual void insertRow(int before);
       //add row(s) to the model
       virtual void addRow();
       //delete row(s) from the model

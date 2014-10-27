@@ -174,12 +174,12 @@ namespace MantidQt
     /**
      * Finds the first unused group id
      */
-    int ReflMainViewPresenter::getUnusedGroup(std::set<size_t> ignoredRows) const
+    int ReflMainViewPresenter::getUnusedGroup(std::set<int> ignoredRows) const
     {
       std::set<int> usedGroups;
 
       //Scan through all the rows, working out which group ids are used
-      for(size_t idx = 0; idx < m_model->rowCount(); ++idx)
+      for(int idx = 0; idx < m_model->rowCount(); ++idx)
       {
         if(ignoredRows.find(idx) != ignoredRows.end())
           continue;
@@ -252,7 +252,7 @@ namespace MantidQt
         return;
       }
 
-      std::set<size_t> rows = m_view->getSelectedRows();
+      std::set<int> rows = m_view->getSelectedRows();
       if(rows.empty())
       {
         //Does the user want to abort?
@@ -260,12 +260,12 @@ namespace MantidQt
           return;
 
         //They want to process all rows, so populate rows with every index in the model
-        for(size_t idx = 0; idx < m_model->rowCount(); ++idx)
+        for(int idx = 0; idx < m_model->rowCount(); ++idx)
           rows.insert(idx);
       }
 
       //Map group numbers to the set of rows in that group we want to process
-      std::map<int,std::set<size_t> > groups;
+      std::map<int,std::set<int> > groups;
       for(auto it = rows.begin(); it != rows.end(); ++it)
         groups[m_model->Int(*it, COL_GROUP)].insert(*it);
 
@@ -273,7 +273,7 @@ namespace MantidQt
       for(auto gIt = groups.begin(); gIt != groups.end(); ++gIt)
       {
         const int& groupId = gIt->first;
-        const std::set<size_t>& groupRows = gIt->second;
+        const std::set<int>& groupRows = gIt->second;
         //Are we only partially processing a group?
         if(groupRows.size() < numRowsInGroup(gIt->first))
         {
@@ -296,7 +296,7 @@ namespace MantidQt
         }
         catch(std::exception& ex)
         {
-          const std::string rowNo = Mantid::Kernel::Strings::toString<size_t>(*it + 1);
+          const std::string rowNo = Mantid::Kernel::Strings::toString<int>(*it + 1);
           m_view->giveUserCritical("Error found in row " + rowNo + ":\n" + ex.what(), "Error");
           return;
         }
@@ -310,7 +310,7 @@ namespace MantidQt
 
       for(auto gIt = groups.begin(); gIt != groups.end(); ++gIt)
       {
-        const std::set<size_t> groupRows = gIt->second;
+        const std::set<int> groupRows = gIt->second;
 
         //Reduce each row
         for(auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt)
@@ -322,7 +322,7 @@ namespace MantidQt
           }
           catch(std::exception& ex)
           {
-            const std::string rowNo = Mantid::Kernel::Strings::toString<size_t>(*rIt + 1);
+            const std::string rowNo = Mantid::Kernel::Strings::toString<int>(*rIt + 1);
             const std::string message = "Error encountered while processing row " + rowNo + ":\n";
             m_view->giveUserCritical(message + ex.what(), "Error");
             m_view->setProgress(0);
@@ -353,7 +353,7 @@ namespace MantidQt
     @param rowNo : The row in the model to validate
     @throws std::invalid_argument if the row fails validation
     */
-    void ReflMainViewPresenter::validateRow(size_t rowNo) const
+    void ReflMainViewPresenter::validateRow(int rowNo) const
     {
       if(rowNo >= m_model->rowCount())
         throw std::invalid_argument("Invalid row");
@@ -367,7 +367,7 @@ namespace MantidQt
     @param rowNo : The row in the model to autofill
     @throws std::runtime_error if the row could not be auto-filled
     */
-    void ReflMainViewPresenter::autofillRow(size_t rowNo)
+    void ReflMainViewPresenter::autofillRow(int rowNo)
     {
       if(rowNo >= m_model->rowCount())
         throw std::runtime_error("Invalid row");
@@ -520,7 +520,7 @@ namespace MantidQt
     @param rowNo : The row in the model to reduce
     @throws std::runtime_error if reduction fails
     */
-    void ReflMainViewPresenter::reduceRow(size_t rowNo)
+    void ReflMainViewPresenter::reduceRow(int rowNo)
     {
       const std::string         run = m_model->String(rowNo, COL_RUNS);
       const std::string    transStr = m_model->String(rowNo, COL_TRANSMISSION);
@@ -633,7 +633,7 @@ namespace MantidQt
     Stitches the workspaces created by the given rows together.
     @param rows : the list of rows
     */
-    void ReflMainViewPresenter::stitchRows(std::set<size_t> rows)
+    void ReflMainViewPresenter::stitchRows(std::set<int> rows)
     {
       //If we can get away with doing nothing, do.
       if(rows.size() < 2)
@@ -758,7 +758,7 @@ namespace MantidQt
     Inserts a new row in the specified location
     @param before The index to insert the new row before
     */
-    void ReflMainViewPresenter::insertRow(size_t before)
+    void ReflMainViewPresenter::insertRow(int index)
     {
       const int groupId = getUnusedGroup();
       size_t row = m_model->insertRow(before);
@@ -775,7 +775,7 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::addRow()
     {
-      std::set<size_t> rows = m_view->getSelectedRows();
+      std::set<int> rows = m_view->getSelectedRows();
       if(rows.empty())
         insertRow(m_model->rowCount());
       else
@@ -788,7 +788,7 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::deleteRow()
     {
-      std::set<size_t> rows = m_view->getSelectedRows();
+      std::set<int> rows = m_view->getSelectedRows();
       for(auto row = rows.rbegin(); row != rows.rend(); ++row)
         m_model->removeRow(*row);
 
@@ -801,7 +801,7 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::groupRows()
     {
-      const std::set<size_t> rows = m_view->getSelectedRows();
+      const std::set<int> rows = m_view->getSelectedRows();
       //Find the first unused group id, ignoring the selected rows
       const int groupId = getUnusedGroup(rows);
 
@@ -1002,7 +1002,7 @@ namespace MantidQt
     size_t ReflMainViewPresenter::numRowsInGroup(int groupId) const
     {
       size_t count = 0;
-      for(size_t i = 0; i < m_model->rowCount(); ++i)
+      for(int i = 0; i < m_model->rowCount(); ++i)
         if(m_model->Int(i, COL_GROUP) == groupId)
           count++;
       return count;
@@ -1013,13 +1013,13 @@ namespace MantidQt
     {
       std::set<int> groupIds;
 
-      std::set<size_t> rows = m_view->getSelectedRows();
+      std::set<int> rows = m_view->getSelectedRows();
       for(auto row = rows.begin(); row != rows.end(); ++row)
         groupIds.insert(m_model->Int(*row, COL_GROUP));
 
-      std::set<size_t> selection;
+      std::set<int> selection;
 
-      for(size_t i = 0; i < m_model->rowCount(); ++i)
+      for(int i = 0; i < m_model->rowCount(); ++i)
         if(groupIds.find(m_model->Int(i, COL_GROUP)) != groupIds.end())
           selection.insert(i);
 
