@@ -50,7 +50,12 @@ namespace Mantid
 
 
     }
-
+    /**Method removes background from vectors which represent a histogram data for a single spectra 
+    * @param nHist   -- number (workspaceID) of the spectra in the workspace, where background going to be removed
+    * @param XValues -- the spectra x-values (presumably not in TOF units)
+    * @param y_data  -- the spectra signal
+    * @param e_data  -- the spectra errors
+    */
     void BackgroundHelper::removeBackground(int nHist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data)
     {
       double Jack05;
@@ -64,6 +69,7 @@ namespace Mantid
         const MantidVec& dataX = m_bgWs->dataX(nHist);
         Jack05 = dataY[0]/(dataX[1]-dataX[0]);
       }
+
       try
       {
         auto detector = m_wkWS->getDetector(nHist);
@@ -73,10 +79,11 @@ namespace Mantid
         double delta(std::numeric_limits<double>::quiet_NaN());
         //
         double tof1 = m_WSUnit->convertSingleToTOF(XValues[0], m_L1, L2,twoTheta, m_Emode, m_Efix,delta);
-        for(size_t i=1;i<XValues.size();i++)
+        for(size_t i=0;i<y_data.size();i++)
         {
-          double tof2=m_WSUnit->convertSingleToTOF(XValues[i], m_L1, L2,twoTheta, m_Emode, m_Efix, delta);
+          double tof2=m_WSUnit->convertSingleToTOF(XValues[i+1], m_L1, L2,twoTheta, m_Emode, m_Efix, delta);
           double normBkgrnd = (tof1-tof2)*Jack05;
+          tof1=tof2;
           double normErr    = std::sqrt(normBkgrnd);
           y_data[i-1] -=normBkgrnd;
           e_data[i-1] +=normErr;
@@ -85,7 +92,7 @@ namespace Mantid
       }
       catch(...)
       {
-        // no background removal for this detector;
+        // no background removal for this detector; How should it be reported?
       }
 
     }
