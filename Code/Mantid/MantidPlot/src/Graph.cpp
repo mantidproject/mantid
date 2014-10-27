@@ -5992,24 +5992,13 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     std::vector<std::string> specSections = tsv.sections("spectrogram");
     for(auto it = specSections.begin(); it != specSections.end(); ++it)
     {
-      //Take the first line off lines because it contains the workspace
-      //name that the spectrogram is graphing.
-      std::string lines = *it;
-      std::vector<std::string> lineVec;
-      boost::split(lineVec, lines, boost::is_any_of("\n"));
+      TSVSerialiser specTSV(*it);
 
-      std::string firstLine = lineVec.front();
-      std::vector<std::string> values;
-      boost::split(values, firstLine, boost::is_any_of("\t"));
-
-      if(values.size() < 2)
+      auto matrixSections = specTSV.sections("matrix");
+      if(matrixSections.empty())
         continue;
 
-      //Remove the first line from lines.
-      lineVec.erase(lineVec.begin());
-      lines = boost::algorithm::join(lineVec, "\n");
-
-      std::string wsName = values[1];
+      const std::string wsName = *matrixSections.begin();
       Mantid::API::IMDWorkspace_const_sptr wsPtr = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::IMDWorkspace>(wsName);
 
       //Check the pointer
@@ -6024,7 +6013,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
       */
       Spectrogram* s = new Spectrogram(QString::fromUtf8(wsName.c_str()), wsPtr);
       plotSpectrogram(s, Graph::ColorMap);
-      s->loadFromProject(lines);
+      s->loadFromProject(*it);
 
       curveID++;
     }
