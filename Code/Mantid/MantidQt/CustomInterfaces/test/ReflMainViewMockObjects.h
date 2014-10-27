@@ -3,6 +3,7 @@
 
 #include <gmock/gmock.h>
 #include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidAPI/TableRow.h"
 
 using namespace MantidQt::CustomInterfaces;
@@ -34,7 +35,8 @@ class MockView : public ReflMainView
 {
 public:
   MockView(){};
-  virtual void showTable(Mantid::API::ITableWorkspace_sptr model){ m_model = model;}
+  virtual ~MockView(){}
+  virtual void showTable(QReflTableModel_sptr model){ m_model = model;}
   virtual void setOptionsHintStrategy(HintStrategy*) {};
   MOCK_METHOD3(askUserString, std::string(const std::string& prompt, const std::string& title, const std::string& defaultValue));
   MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
@@ -46,26 +48,13 @@ public:
   MOCK_METHOD1(setTableList, void(const std::set<std::string>& tableList));
   MOCK_METHOD2(setInstrumentList, void(const std::vector<std::string>& instruments, const std::string& defaultInstrument));
   MOCK_METHOD1(setInstrument, void(const std::string&));
-  MOCK_METHOD1(setSelection, void(const std::set<size_t>& rows));
-  MOCK_CONST_METHOD0(getSelectedRows, std::set<size_t>());
+  MOCK_METHOD1(setSelection, void(const std::set<int>& rows));
+  MOCK_CONST_METHOD0(getSelectedRows, std::set<int>());
   MOCK_CONST_METHOD0(getSearchInstrument, std::string());
   MOCK_CONST_METHOD0(getProcessInstrument, std::string());
   MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
-  virtual ~MockView(){}
-  void addDataForTest()
-  {
-    TableRow row = m_model->appendRow();
-    row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << 1.0 << 3 << "";
-    row = m_model->appendRow();
-    row << "13462" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << 1.0 << 3 << "";
-    row = m_model->appendRow();
-    row << "13469" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << 1.0 << 1 << "";
-    row = m_model->appendRow();
-    row << "13470" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << 1.0 << 1 << "";
-    m_model->removeRow(0);
-  }
 private:
-  Mantid::API::ITableWorkspace_sptr m_model;
+  QReflTableModel_sptr m_model;
 };
 
 #endif /*MANTID_CUSTOMINTERFACES_REFLMAINVIEWMOCKOBJECTS_H*/
