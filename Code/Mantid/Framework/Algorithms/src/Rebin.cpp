@@ -105,11 +105,11 @@ namespace Mantid
       vsValidator->add<HistogramValidator>();
       declareProperty(new WorkspaceProperty<>("FlatBkgWorkspace","",Direction::Input,API::PropertyMode::Optional,vsValidator),
         "An optional histogram workspace in the units of TOF defined background for removal during rebinning."
-        "The workspace has to have single value or contain the same number of spectra as the \"InputWorkspace\" and single Y value per each spectra, 
-        "representing flat background in this time bin. "
+        "The workspace has to have single value or contain the same number of spectra as the \"InputWorkspace\" and single Y value per each spectra," 
+        "representing flat background in the background time region. "
         "If such workspace is present, the value of the flat background provided by this workspace is removed "
         "from each spectra of the rebinned workspace. This works for histogram and event workspace when events are not retained "
-        "but actually useful mainly for removing background from event workspace in the units different from TOF.");
+        "but actually useful mainly for removing background while rebinning an event workspace in the units different from TOF.");
 
       std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
       declareProperty("dEAnalysisMode",dE_modes[Kernel::DeltaEMode::Direct],boost::make_shared<Kernel::StringListValidator>(dE_modes),
@@ -145,9 +145,13 @@ namespace Mantid
       // workspace independent determination of length
       const int histnumber = static_cast<int>(inputWS->getNumberHistograms());
 
+      //-- Flat Background removal ----------------------------
       int eMode; // in convert units emode is still integer
       API::MatrixWorkspace_const_sptr bkgWS = checkRemoveBackgroundParameters(inputWS,eMode,PreserveEvents);
       const bool remove_background = bool(bkgWS);
+      if(remove_background)
+        m_BackgroundHelper.initialize(bkgWS,inputWS,eMode);
+      //-------------------------------------------------------
 
       bool fullBinsOnly = getProperty("FullBinsOnly");
 
@@ -219,6 +223,11 @@ namespace Mantid
               MantidVec y_data, e_data;
               // The EventList takes care of histogramming.
               el.generateHistogram(*XValues_new, y_data, e_data);
+              if(remove_background)
+              {
+                m_BackgroundHelper.removeBackground(i,*XValues_new,y_data,e_data);
+              }
+
 
               //Copy the data over.
               outputWS->dataY(i).assign(y_data.begin(), y_data.end());
@@ -279,7 +288,7 @@ namespace Mantid
           {
             PARALLEL_START_INTERUPT_REGION
               // get const references to input Workspace arrays (no copying)
-              const MantidVec& XValues = inputWS->readX(hist);
+            const MantidVec& XValues = inputWS->readX(hist);
             const MantidVec& YValues = inputWS->readY(hist);
             const MantidVec& YErrors = inputWS->readE(hist);
 
@@ -290,6 +299,10 @@ namespace Mantid
             // output data arrays are implicitly filled by function
             try {
               VectorHelper::rebin(XValues,YValues,YErrors,*XValues_new,YValues_new,YErrors_new, dist);
+              if(remove_background)
+              {
+                m_BackgroundHelper.removeBackground(hist,*XValues_new,YValues_new,YErrors_new);
+              }
             } catch (std::exception& ex)
             {
               g_log.error() << "Error in rebin function: " << ex.what() << std::endl;

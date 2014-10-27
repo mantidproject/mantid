@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/BackgroundHelper.h"
 
 namespace Mantid
 {
@@ -51,9 +52,9 @@ class DLLExport Rebin : public API::Algorithm
 {
 public:
   /// Default constructor
-  Rebin() : API::Algorithm() {};
+  Rebin() : API::Algorithm(),m_BackgroundHelper() {};
   /// Destructor
-  virtual ~Rebin() {};
+  virtual ~Rebin(){};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "Rebin";}
     ///Summary of algorithms purpose
@@ -87,6 +88,8 @@ protected:
 private:
   // method to check if removing background is requested and possible 
   API::MatrixWorkspace_const_sptr  checkRemoveBackgroundParameters(const API::MatrixWorkspace_sptr &inputWS,int &eMode, bool PreserveEvents);
+  // class responsible for background removal
+  BackgroundHelper m_BackgroundHelper;
 
 };
 
