@@ -10,14 +10,15 @@ using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
 
 //Clean flag aliases for use within tests.
-const int NewTableFlag  = ReflMainView::NewTableFlag;
-const int OpenTableFlag = ReflMainView::OpenTableFlag;
-const int SaveAsFlag    = ReflMainView::SaveAsFlag;
-const int SaveFlag      = ReflMainView::SaveFlag;
-const int ProcessFlag   = ReflMainView::ProcessFlag;
-const int AddRowFlag    = ReflMainView::AddRowFlag;
-const int DeleteRowFlag = ReflMainView::DeleteRowFlag;
-const int GroupRowsFlag = ReflMainView::GroupRowsFlag;
+const int NewTableFlag   = ReflMainView::NewTableFlag;
+const int OpenTableFlag  = ReflMainView::OpenTableFlag;
+const int SaveAsFlag     = ReflMainView::SaveAsFlag;
+const int SaveFlag       = ReflMainView::SaveFlag;
+const int ProcessFlag    = ReflMainView::ProcessFlag;
+const int AppendRowFlag  = ReflMainView::AppendRowFlag;
+const int PrependRowFlag = ReflMainView::PrependRowFlag;
+const int DeleteRowFlag  = ReflMainView::DeleteRowFlag;
+const int GroupRowsFlag  = ReflMainView::GroupRowsFlag;
 const int ExpandSelectionFlag = ReflMainView::ExpandSelectionFlag;
 
 //Clean column ids for use within tests
