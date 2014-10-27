@@ -2787,6 +2787,90 @@ std::string Graph3D::saveToProject(ApplicationWindow* app)
   tsv.writeLine(name().toStdString()) << birthDate();
   tsv.writeRaw(app->windowGeometryInfo(this));
 
+  QString surfFunc;
+  if(d_func)
+  {
+    surfFunc += d_func->saveToString() + "\t";
+  }
+  else if(d_surface)
+  {
+    surfFunc += d_surface->xFormula() + "," + d_surface->yFormula() + "," + d_surface->zFormula() + ",";
+    surfFunc += QString::number(d_surface->uStart(), 'e', 15) + ",";
+    surfFunc += QString::number(d_surface->uEnd(), 'e', 15) + ",";
+    surfFunc += QString::number(d_surface->vStart(), 'e', 15) + ",";
+    surfFunc += QString::number(d_surface->vEnd(), 'e', 15) + ",";
+    surfFunc += QString::number(d_surface->columns()) + ",";
+    surfFunc += QString::number(d_surface->rows()) + ",";
+    surfFunc += QString::number(d_surface->uPeriodic()) + ",";
+    surfFunc += QString::number(d_surface->vPeriodic());
+  }
+  else
+  {
+    surfFunc += plotAssociation + "\t";
+  }
+
+  double start, stop;
+  sp->coordinates()->axes[X1].limits(start,stop);
+  surfFunc += QString::number(start)+"\t";
+  surfFunc += QString::number(stop)+"\t";
+  sp->coordinates()->axes[Y1].limits(start,stop);
+  surfFunc += QString::number(start)+"\t";
+  surfFunc += QString::number(stop)+"\t";
+  sp->coordinates()->axes[Z1].limits(start,stop);
+  surfFunc += QString::number(start)+"\t";
+  surfFunc += QString::number(stop);
+
+  tsv.writeLine("SurfaceFunction") << surfFunc.toStdString();
+
+  tsv.writeLine("Style") << style_;
+
+  if(sp->coordinates()->style() == Qwt3D::NOCOORD)
+    tsv << "nocoord";
+  else if(sp->coordinates()->style() == Qwt3D::BOX)
+    tsv << "box";
+  else
+    tsv << "frame";
+
+  if(sp->floorStyle() == NOFLOOR)
+    tsv << "nofloor";
+  else if(sp->floorStyle() == FLOORISO)
+    tsv << "flooriso";
+  else if(sp->floorStyle() == FLOORDATA)
+    tsv << "floordata";
+
+  switch(sp->plotStyle())
+  {
+    case USER:
+      if(pointStyle == VerticalBars)
+        tsv << "bars" << barsRad;
+      else if(pointStyle == Dots)
+        tsv << "points" << d_point_size << d_smooth_points;
+      else if(pointStyle == Cones)
+        tsv << "cones" << conesRad << conesQuality;
+      else if(pointStyle == HairCross)
+        tsv << "cross" << crossHairRad << crossHairLineWidth << crossHairSmooth << crossHairBoxed;
+      break;
+
+    case WIREFRAME:
+      tsv << "wireframe";
+      break;
+
+    case HIDDENLINE:
+      tsv << "hiddenline";
+      break;
+
+    case FILLED:
+      tsv << "filled";
+      break;
+
+    case FILLEDMESH:
+      tsv << "filledmesh";
+      break;
+
+    default:
+      break;
+  }
+
   tsv.writeLine("grids") << sp->coordinates()->grids();
 
   tsv.writeLine("title");
