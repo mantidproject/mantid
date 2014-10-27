@@ -20,6 +20,23 @@ SliderHandler::SliderHandler( Ui_SpectrumViewer* sv_ui ) : ISliderHandler()
 
 
 /**
+ * Reconfigure the image scrollbars for the specified data and drawing area.
+ *
+ * @param draw_area    Rectangle specifiying the region where the image will
+ *                     be drawn
+ * @param data_source  SpectrumDataSource that provides the data to be drawn
+ */
+void SliderHandler::ReConfigureSliders( QRect            draw_area, 
+                                        SpectrumDataSource* data_source )
+{
+  QScrollBar* v_scroll = sv_ui->imageVerticalScrollBar;
+  double old_v_value = v_scroll->value();
+  int n_rows = (int)data_source->GetNRows();
+  ConfigureSlider( v_scroll, n_rows, draw_area.height(), old_v_value );
+}
+
+
+/**
  * Configure the image scrollbars for the specified data and drawing area.
  *
  * @param draw_area    Rectangle specifiying the region where the image will

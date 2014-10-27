@@ -14,6 +14,7 @@
 #include "MantidQtSpectrumViewer/ColorMaps.h"
 #include "MantidQtSpectrumViewer/QtUtils.h"
 #include "MantidQtSpectrumViewer/SVUtils.h"
+#include "MantidQtSpectrumViewer/SliderHandler.h"
 
 namespace MantidQt
 {
@@ -102,7 +103,7 @@ void SpectrumDisplay::SetDataSource( SpectrumDataSource* data_source )
   pointed_at_x = DBL_MAX;
   pointed_at_y = DBL_MAX;
 
-  int    n_rows = 500;         // get reasonable size initial image data
+  int    n_rows = total_y_max - total_y_min;         // get reasonable size initial image data
   int    n_cols = 500;     
                                // data_array is deleted in the SpectrumPlotItem
   data_array = data_source->GetDataArray( total_x_min, total_x_max,
@@ -181,6 +182,10 @@ void SpectrumDisplay::UpdateImage()
   {
     SetDataSource( data_source );   // re-initialize with the altered source
   }
+
+  QRect draw_area;
+  GetDisplayRectangle( draw_area );
+  dynamic_cast<SliderHandler*>(slider_handler)->ReConfigureSliders( draw_area, data_source );
 
   QRect display_rect;
   GetDisplayRectangle( display_rect );
@@ -495,7 +500,7 @@ void SpectrumDisplay::SetVGraph( double x )
  *  @param x  The x coordinate of the pointed at location on the image.
  *  @param y  The y coordinate of the pointed at location on the image.
  */
-void SpectrumDisplay::ShowInfoList( double x, double y )
+std::vector<std::string> SpectrumDisplay::ShowInfoList( double x, double y )
 {
   std::vector<std::string> info_list;
   data_source->GetInfoList( x, y, info_list );
@@ -520,6 +525,8 @@ void SpectrumDisplay::ShowInfoList( double x, double y )
   }
 
   image_table->resizeColumnsToContents();
+
+  return info_list;
 }
 
 
