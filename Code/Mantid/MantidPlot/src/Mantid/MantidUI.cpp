@@ -751,14 +751,15 @@ void MantidUI::showSpectrumViewer()
       AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
     if ( wksp )
     {
+      MantidQt::SpectrumView::SpectrumView* viewer;
       try
       {
-        MantidQt::SpectrumView::SpectrumView* viewer = new MantidQt::SpectrumView::SpectrumView(m_appWindow);
+        viewer = new MantidQt::SpectrumView::SpectrumView(m_appWindow);
       }
-      catch (std::runtime_erro& e)
+      catch (std::runtime_error& e)
       {
         m_lastShownSpectrumViewerWin = NULL;
-        g_log.error() << "Could not create spectrum viewer: " << e.what << "\n";
+        g_log.error() << "Could not create spectrum viewer: " << e.what() << "\n";
         throw std::runtime_error(e);
       }
       viewer->setAttribute(Qt::WA_DeleteOnClose, false);
@@ -816,15 +817,15 @@ void MantidUI::showSliceViewer()
   if (mdws)
   {
     // Create the slice viewer window
+    SliceViewerWindow * w;
     try
     {
-      SliceViewerWindow * w = MantidQt::Factory::WidgetFactory::Instance()->
-        createSliceViewerWindow(wsName, "");
+      w = MantidQt::Factory::WidgetFactory::Instance()->createSliceViewerWindow(wsName, "");
     }
     catch (std::runtime_error& e)
     {
       m_lastShownSliceViewWin = NULL;
-      g_log.error() << "Could not create slice viewer: " << e.what << "\n";
+      g_log.error() << "Could not create slice viewer: " << e.what() << "\n";
       throw std::runtime_error(e);
     }
 
@@ -3202,11 +3203,15 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
   if( (!reusePlots && NULL == window) ||
       (reusePlots && !m_lastShownColorFillWin) ) // needs to create a new window
   {
-    window = appWindow()->multilayerPlot(appWindow()->generateUniqueName( wsName + "-"));
-    if(!window)
+    try
+    {
+      window = appWindow()->multilayerPlot(appWindow()->generateUniqueName( wsName + "-"));
+    }
+    catch(std::runtime_error& e)
     {
       m_lastShownColorFillWin = NULL;
-      return NULL;
+      g_log.error() << "Could not create color fill plot: " << e.what() << "\n";
+      throw std::runtime_error(e);
     }
     window->setCloseOnEmpty(true);
     m_lastShownColorFillWin = window;
