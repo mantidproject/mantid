@@ -82,6 +82,15 @@ namespace
 
     return ws;
   }
+
+  ITableWorkspace_sptr createDefaultWorkspace()
+  {
+    //Create a blank workspace with one line and set the scale column to 1
+    auto ws = createWorkspace();
+    ws->appendRow();
+    ws->Double(0, MantidQt::CustomInterfaces::ReflMainViewPresenter::COL_SCALE) = 1.0;
+    return ws;
+  }
 }
 
 namespace MantidQt
@@ -866,12 +875,9 @@ namespace MantidQt
         if(!m_view->askUserYesNo("Your current table has unsaved changes. Are you sure you want to discard them?","Start New Table?"))
           return;
 
-      m_model = createWorkspace();
+      m_model = createDefaultWorkspace();
       m_wsName.clear();
       m_view->showTable(m_model);
-
-      //Start with one blank row
-      insertRow(0);
 
       m_tableDirty = false;
     }
