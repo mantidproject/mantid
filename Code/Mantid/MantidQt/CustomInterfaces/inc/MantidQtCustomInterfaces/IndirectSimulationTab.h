@@ -1,6 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTSIMULATIONTAB_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTSIMULATIONTAB_H_
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include <QSettings>

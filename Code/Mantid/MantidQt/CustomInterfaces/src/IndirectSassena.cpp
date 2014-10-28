@@ -26,10 +26,25 @@ namespace MantidQt
 		}
 
     /**
-     * TODO
+     * Configures and executes the LoadSassena algorithm.
      */
 		void IndirectSassena::run()
-		{
+    {
+      using namespace Mantid::API;
+
+			QString inputFileName = m_uiForm.mwInputFile->getFirstFilename();
+			QFileInfo inputFileInfo(inputFileName);
+      QString outWsName = inputFileInfo.baseName();
+
+      IAlgorithm_sptr sassenaAlg = AlgorithmManager::Instance().create("LoadSassena");
+      sassenaAlg->initialize();
+
+      sassenaAlg->setProperty("Filename", inputFileName.toStdString());
+      sassenaAlg->setProperty("SortByQVectors", m_uiForm.cbSortQ->isChecked());
+      sassenaAlg->setProperty("TimeUnit", m_uiForm.sbTimeUnit->value());
+      sassenaAlg->setProperty("OutputWorkspace", outWsName.toStdString());
+
+      runAlgorithm(sassenaAlg);
 		}
 
     /**

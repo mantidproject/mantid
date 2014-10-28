@@ -1,7 +1,5 @@
 #include "MantidQtCustomInterfaces/IndirectMolDyn.h"
 
-#include "MantidAPI/AlgorithmManager.h"
-
 #include <QFileInfo>
 #include <QString>
 
