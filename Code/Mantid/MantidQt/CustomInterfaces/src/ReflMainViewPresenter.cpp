@@ -1042,5 +1042,22 @@ namespace MantidQt
       auto options = new QtReflOptionsDialog(m_view, m_view->getPresenter());
       options->exec();
     }
+
+    /** Gets the options used by the presenter
+        @returns The options used by the presenter
+     */
+    const std::map<std::string,std::string>& ReflMainViewPresenter::options() const
+    {
+      return m_options;
+    }
+
+    /** Sets the options used by the presenter
+        @param options : The new options for the presenter to use
+     */
+    void ReflMainViewPresenter::setOptions(const std::map<std::string,std::string>& options)
+    {
+      //Optionally check the validity of the new options
+      m_options = options;
+    }
   }
 }

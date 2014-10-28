@@ -45,7 +45,8 @@ namespace MantidQt
       ReflMainViewPresenter(ReflMainView* view);
       virtual ~ReflMainViewPresenter();
       virtual void notify(int flag);
-
+      virtual const std::map<std::string,std::string>& options() const;
+      virtual void setOptions(const std::map<std::string,std::string>& options);
       //Public for the purposes of unit testing
       static std::map<std::string,std::string> parseKeyValueString(const std::string& str);
     protected:
@@ -57,6 +58,8 @@ namespace MantidQt
       ReflMainView* m_view;
       //stores whether or not the table has changed since it was last saved
       bool m_tableDirty;
+      //stores the user options for the presenter
+      std::map<std::string,std::string> m_options;
 
       //process selected rows
       virtual void process();

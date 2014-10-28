@@ -1,6 +1,9 @@
 #ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
 
+#include <map>
+#include <string>
+
 #include "MantidKernel/System.h"
 namespace MantidQt
 {
@@ -36,6 +39,8 @@ namespace MantidQt
       virtual ~IReflPresenter() {};
       //Tell the presenter something happened
       virtual void notify(int flag) = 0;
+      virtual const std::map<std::string,std::string>& options() const = 0;
+      virtual void setOptions(const std::map<std::string,std::string>& options) = 0;
     private:
 
     };
