@@ -3061,6 +3061,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
   }
   bool isGraphNew = false;
   MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, firstWsName, clearWindow);
+  ml->setName(appWindow()->generateUniqueName(firstWsName + "-"));
   m_lastShown1DPlotWin = ml;
 
   Graph *g = ml->activeGraph();
@@ -3221,7 +3222,7 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
       window = m_lastShownColorFillWin;
     }
     // start fresh layer
-    window->setWindowTitle(appWindow()->generateUniqueName( wsName + "-"));
+    window->setName(appWindow()->generateUniqueName( wsName + "-"));
     window->setLayersNumber(0);
     window->addLayer();
   }
