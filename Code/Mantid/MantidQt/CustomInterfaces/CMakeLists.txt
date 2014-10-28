@@ -51,6 +51,7 @@ set ( SRC_FILES
 	src/Muon/MuonAnalysisResultTableTab.cpp
 	src/QReflTableModel.cpp
 	src/QtReflMainView.cpp
+	src/QtReflOptionsDialog.cpp
 	src/QtWorkspaceMementoModel.cpp
 	src/Quasi.cpp
 	src/RawFileMemento.cpp
@@ -134,6 +135,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/ReflMainViewPresenter.h
 	inc/MantidQtCustomInterfaces/QReflTableModel.h
 	inc/MantidQtCustomInterfaces/QtReflMainView.h
+	inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
 	inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
 	inc/MantidQtCustomInterfaces/Quasi.h
 	inc/MantidQtCustomInterfaces/RawFileMemento.h
@@ -234,6 +236,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/CreateMDWorkspace.ui
                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/Quasi.ui
                inc/MantidQtCustomInterfaces/ReflMainWidget.ui
+               inc/MantidQtCustomInterfaces/ReflOptionsDialog.ui
                inc/MantidQtCustomInterfaces/ReflWindow.ui
                inc/MantidQtCustomInterfaces/ResNorm.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui

@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtCustomInterfaces/IReflPresenter.h"
 #include "MantidQtMantidWidgets/HintStrategy.h"
 
 namespace MantidQt
@@ -66,6 +67,8 @@ namespace MantidQt
       virtual std::string getProcessInstrument() const = 0;
       virtual std::string getWorkspaceToOpen() const = 0;
 
+      virtual boost::shared_ptr<IReflPresenter> getPresenter() const = 0;
+
       static const int NoFlags             = 0;
       static const int SaveFlag            = 1;
       static const int SaveAsFlag          = 2;
@@ -78,6 +81,7 @@ namespace MantidQt
       static const int NewTableFlag        = 9;
       static const int TableUpdatedFlag    = 10;
       static const int ExpandSelectionFlag = 11;
+      static const int OptionsDialogFlag   = 12;
     };
   }
 }

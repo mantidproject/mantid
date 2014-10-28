@@ -7,6 +7,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Utils.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtCustomInterfaces/QtReflOptionsDialog.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 
 #include <boost/regex.hpp>
@@ -836,6 +837,7 @@ namespace MantidQt
       case ReflMainView::NewTableFlag:        newTable();           break;
       case ReflMainView::TableUpdatedFlag:    m_tableDirty = true;  break;
       case ReflMainView::ExpandSelectionFlag: expandSelection();    break;
+      case ReflMainView::OptionsDialogFlag:   showOptionsDialog();  break;
 
       case ReflMainView::NoFlags:       return;
       }
@@ -1032,6 +1034,13 @@ namespace MantidQt
           selection.insert(i);
 
       m_view->setSelection(selection);
+    }
+
+    /** Shows the Refl Options dialog */
+    void ReflMainViewPresenter::showOptionsDialog()
+    {
+      auto options = new QtReflOptionsDialog(m_view, m_view->getPresenter());
+      options->exec();
     }
   }
 }

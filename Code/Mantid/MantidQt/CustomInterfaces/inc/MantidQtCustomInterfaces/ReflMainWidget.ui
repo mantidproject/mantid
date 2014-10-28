@@ -396,6 +396,8 @@
     <addaction name="actionNewTable"/>
     <addaction name="actionSaveTable"/>
     <addaction name="actionSaveTableAs"/>
+    <addaction name="separator"/>
+    <addaction name="actionOptionsDialog"/>
    </widget>
    <widget class="QMenu" name="menuRows">
     <property name="title">
@@ -501,6 +503,18 @@
    </property>
    <property name="toolTip">
     <string>Select an entire group</string>
+   </property>
+  </action>
+  <action name="actionOptionsDialog">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/configure.png</normaloff>:/configure.png</iconset>
+   </property>
+   <property name="text">
+    <string>Options...</string>
+   </property>
+   <property name="toolTip">
+    <string>Set options for the Reflectometry UI</string>
    </property>
   </action>
  </widget>
