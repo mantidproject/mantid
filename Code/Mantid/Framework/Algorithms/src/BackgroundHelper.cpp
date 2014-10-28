@@ -136,13 +136,13 @@ namespace Mantid
       catch(Kernel::Exception::NotFoundError &)
       {}
       // try to get Efixed as property on a workspace, obtained for indirect instrument
-      bool eFixedFound(false);
+      //bool eFixedFound(false);
       if (!EiFound)
       {
         try
         {
            Efi  =inputWS->run().getPropertyValueAsType<double>("eFixed");
-           eFixedFound = true;
+           //eFixedFound = true;
         }
         catch(Kernel::Exception::NotFoundError &)
         {}
