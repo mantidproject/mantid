@@ -68,6 +68,7 @@ namespace Mantid
     */
     void BackgroundHelper::removeBackground(int nHist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data)const
     {
+
       double dtBg,ErrSq,IBg;
       if(m_singleValueBackground)
       {
@@ -92,12 +93,13 @@ namespace Mantid
         double twoTheta = m_wkWS->detectorTwoTheta(detector);
         double L2 = detector->getDistance(*m_Sample);
         double delta(std::numeric_limits<double>::quiet_NaN());
-        //
-        m_WSUnit->initialize(m_L1, L2,twoTheta, m_Emode, m_Efix,delta);
-        double tof1 = m_WSUnit->singleToTOF(XValues[0]);
+        // clone unit conversion to avoid multithreading issues
+        auto unitCong = m_WSUnit->clone();
+        unitCong->initialize(m_L1, L2,twoTheta, m_Emode, m_Efix,delta);
+        double tof1 = unitCong->singleToTOF(XValues[0]);
         for(size_t i=0;i<y_data.size();i++)
         {
-          double tof2=m_WSUnit->singleToTOF(XValues[i+1]);
+          double tof2=unitCong->singleToTOF(XValues[i+1]);
           double Jack = std::fabs((tof2-tof1)/dtBg);
           double normBkgrnd = IBg*Jack;
           tof1=tof2;

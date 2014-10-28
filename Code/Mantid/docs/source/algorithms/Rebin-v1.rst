@@ -83,7 +83,7 @@ Remove Background during rebinning options
 ##########################################
 
 These options allow you to remove flat background, defined by the a single bin 
-historgram workspace with X-axis in the units of TOF from a workspace in any 
+histogram workspace with X-axis in the units of TOF from a workspace in any 
 units with known conversion into TOF. The background removal occurs during rebinning
 
 These options are especially useful during reduction 
@@ -186,9 +186,52 @@ presented on the following picture:
 
 .. image:: /images/BgRemoval.png
 
-Blue line on this image represents the results, obatined using Rebin with background removal obtained using the following script::
+Blue line on this image represents the results, obtained using Rebin with background removal. The results produced using 
+the script below and shifted by one to show that there is another result plotted on the image, as both results 
+are identical::
+
+  from mantid.simpleapi import *
+  from mantid import config
+  import numpy as np
+  import sys
+  import os
+  
+  
+  maps_dir = '/home/user/InstrumentFiles/let/'
+  data_dir ='/home/user/results'   
+  ref_data_dir = '/home/user/SystemTests/AnalysisTests/ReferenceResults' 
+  config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,maps_dir,ref_data_dir))
+  config['defaultsave.directory'] = data_dir # folder to save resulting spe/nxspe files. Defaults are in
+  
+  # the name of a workspace containing background
+  filename = 'LET0007438'
+  groupedFilename = filename+'rings';
+  #
+  Ei= 25
+  e_min = -20
+  e_max = 20
+  dE = 0.1
+  bgRange = [15000,18000]
 
 
+  if not(groupedFilename in mtd):
+    Load(Filename=filename+'.nxs', OutputWorkspace=filename, LoadMonitors=True)
+    GroupDetectors(InputWorkspace=filename, OutputWorkspace=groupedFilename , MapFile='LET_one2one_123.map', Behaviour='Average')
+   
+    
+  if not('Bg' in mtd):
+    Bg=Rebin(InputWorkspace=groupedFilename,  Params=[bgRange[0],bgRange[1]-bgRange[0],bgRange[1]],PreserveEvents=False)
+  else:
+    Bg = mtd['Bg']
+    
+  if  'resultEtransf' in mtd:
+    resultEtransf   = mtd['resultEtransf']
+  else:
+    resultEtransf   = ConvertUnits(groupedFilename,'DeltaE',Emode='Direct',EFixed=Ei)
+  
+    noBgWorkspace= Rebin(InputWorkspace=resultEtransf, Params=[e_min,dE,e_max],PreserveEvents=False,FlatBkgWorkspace='Bg',EMode='Direct')
+    nHist = Bg.getNumberHistograms()
+    removedBkgSum = SumSpectra(noBgWorkspace ,0,nHist);    
 
 .. _rebin-usage:
 
