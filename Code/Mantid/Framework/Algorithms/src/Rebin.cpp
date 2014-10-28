@@ -104,7 +104,7 @@ namespace Mantid
       vsValidator->add<WorkspaceUnitValidator>("TOF");
       vsValidator->add<HistogramValidator>();
       declareProperty(new WorkspaceProperty<>("FlatBkgWorkspace","",Direction::Input,API::PropertyMode::Optional,vsValidator),
-        "An optional histogram workspace in the units of TOF defined background for removal during rebinning."
+        "An optional histogram workspace in the units of TOF defining background for removal during rebinning."
         "The workspace has to have single value or contain the same number of spectra as the \"InputWorkspace\" and single Y value per each spectra," 
         "representing flat background in the background time region. "
         "If such workspace is present, the value of the flat background provided by this workspace is removed "
@@ -113,7 +113,7 @@ namespace Mantid
 
       std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
       declareProperty("EMode",dE_modes[Kernel::DeltaEMode::Direct],boost::make_shared<Kernel::StringListValidator>(dE_modes),
-        "If FlatBkgWorkspace, this property is used to define the units conversion from TOF to the units of the InputWorkspace",Direction::Input);
+        "If FlatBkgWorkspace is present, this property used to define the units conversion from TOF to the units of the InputWorkspace",Direction::Input);
       setPropertySettings("EMode",
         new Kernel::VisibleWhenProperty("FlatBkgWorkspace", IS_NOT_EQUAL_TO, ""));
 
@@ -239,6 +239,7 @@ namespace Mantid
             }
             PARALLEL_CHECK_INTERUPT_REGION
 
+
               //Copy all the axes
               for (int i=1; i<inputWS->axes(); i++)
               {
@@ -288,7 +289,7 @@ namespace Mantid
           {
             PARALLEL_START_INTERUPT_REGION
               // get const references to input Workspace arrays (no copying)
-            const MantidVec& XValues = inputWS->readX(hist);
+              const MantidVec& XValues = inputWS->readX(hist);
             const MantidVec& YValues = inputWS->readY(hist);
             const MantidVec& YErrors = inputWS->readE(hist);
 
@@ -344,6 +345,31 @@ namespace Mantid
             outputWS = ChildAlg->getProperty("OutputWorkspace");
           }
 
+          if(remove_background)
+          {
+            const std::list<int> &failedBkgRemoalList= m_BackgroundHelper.getFailingSpectrsList();
+            if(!failedBkgRemoalList.empty())
+            {
+              size_t nFailed = failedBkgRemoalList.size();
+              if(nFailed == histnumber)
+              {
+                g_log.warning()<<" has not been able to remove any background while rebinning workspace "<<inputWS->getName()<<
+                  "\n possible reasons: wrong instrument or units conversion mode\n";
+              }
+              else
+              {
+                g_log.debug()<<" has not removed background from  "<<nFailed<<" spectra\n";
+                if(nFailed<20)
+                {
+                  g_log.debug()<<" Spectra numbers are: ";
+                  for(auto it=failedBkgRemoalList.begin(); it !=failedBkgRemoalList.end();it++) g_log.debug()<<(*it);
+                  g_log.debug()<<"\n";
+                }
+              }
+            }
+          }
+
+
           // Assign it to the output workspace property
           setProperty("OutputWorkspace",outputWS);
 
@@ -390,8 +416,8 @@ namespace Mantid
 
       if(!(bkgWksp->getNumberHistograms() == 1 || inputWS->getNumberHistograms()==bkgWksp->getNumberHistograms()))
       {
-          g_log.warning()<<" Background Workspace: "<< bkgWksp->getName()<< " should have the same number of spectra as source workspace or be a single histogram workspace\n";
-          return API::MatrixWorkspace_const_sptr();
+        g_log.warning()<<" Background Workspace: "<< bkgWksp->getName()<< " should have the same number of spectra as source workspace or be a single histogram workspace\n";
+        return API::MatrixWorkspace_const_sptr();
       }
 
 
