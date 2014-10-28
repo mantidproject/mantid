@@ -376,6 +376,7 @@ void SVConnections::toggle_Hscroll()
   sv_ui->imageHorizontalScrollBar->setVisible( is_on );
   sv_ui->imageHorizontalScrollBar->setEnabled( is_on );
   spectrum_display->UpdateImage();
+  spectrum_display->HandleResize();
 }
 
 
@@ -385,6 +386,7 @@ void SVConnections::toggle_Vscroll()
   sv_ui->imageVerticalScrollBar->setVisible( is_on );
   sv_ui->imageVerticalScrollBar->setEnabled( is_on );
   spectrum_display->UpdateImage();
+  spectrum_display->HandleResize();
 }
 
 
@@ -430,6 +432,7 @@ void SVConnections::imageSplitter_moved()
   vgraph_sizes.append( sizes[1] );
   sv_ui->vgraphSplitter->setSizes( vgraph_sizes );
   spectrum_display->UpdateImage();
+  spectrum_display->HandleResize();
 }
 
 /**
