@@ -165,7 +165,7 @@ namespace Mantid
                            Kernel::V3D &scatterPt) const;
       std::pair<double, double> calculateE1Range(const double theta, const double en0) const;
       double partialDiffXSec(const double en0, const double en1, const double theta) const;
-      Kernel::V3D generateDetectorPos(const double l2, const double angle, const double energy) const;
+      Kernel::V3D generateDetectorPos(const Kernel::V3D & nominalPos, const double energy) const;
       double generateE1(const double angle, const double e1nom, const double e1res) const;
 
       // Member Variables

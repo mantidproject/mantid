@@ -601,6 +601,7 @@ namespace Mantid
       // -- Geometry --
       const auto instrument = m_inputWS->getInstrument();
       m_beamDir = instrument->getSample()->getPos() - instrument->getSource()->getPos();
+      m_beamDir.normalize();
 
       const auto rframe = instrument->getReferenceFrame();
       m_acrossIdx = rframe->pointingHorizontal();
@@ -830,8 +831,7 @@ namespace Mantid
 
       // track various variables during calculation
       std::vector<double> weights(nscatters, 1.0), // start at 1.0
-        tofs(nscatters, 0.0),
-        scAngs(nscatters, 0.0), // scattering angles between each order
+        tofs(nscatters, 0.0), // tof accumulates for each piece of the calculation
         en1(nscatters, 0.0);
 
       const double vel2 = sqrt(detpar.efixed/MASS_TO_MEV);
@@ -840,14 +840,12 @@ namespace Mantid
       tofs[0] = generateTOF(en1[0], respar.dtof, respar.dl1); // correction for resolution in l1
 
       // Neutron path
-      // Algorithm has initial direction pointing to origin
-      V3D particleDir = V3D() - srcPos;
-      particleDir.normalize();
-
-      // first scatter
-      std::vector<V3D> scatterPts(nscatters); // track origin of each scatter
+      std::vector<V3D> scatterPts(nscatters), // track origin of each scatter
+          neutronDirs(nscatters); // neutron directions
       V3D startPos(srcPos);
-      generateScatter(startPos, particleDir, weights[0], scatterPts[0]);
+      neutronDirs[0] = m_beamDir;
+
+      generateScatter(startPos, neutronDirs[0], weights[0], scatterPts[0]);
       double distFromStart = startPos.distance(scatterPts[0]);
       // Compute TOF for first scatter event
       const double vel0 = sqrt(en1[0]/MASS_TO_MEV);
@@ -860,20 +858,20 @@ namespace Mantid
         tofs[i] = tofs[i-1];
 
         // Generate a new direction of travel
-        V3D oldDir = particleDir;
+        const V3D & prevSc = scatterPts[i-1];
+        V3D & curSc = scatterPts[i-1];
+        const V3D & oldDir = neutronDirs[i-1];
+        V3D & newDir = neutronDirs[i];
         size_t ntries(0);
         do
         {
-          double randth = acos(2.0*m_randgen->flat() - 1.0);
-          double randphi = 2.0*M_PI*m_randgen->flat();
-
-          particleDir.azimuth_polar_SNS(1.0, randth, randphi);
-          particleDir.normalize();
-          scAngs[i-1] = particleDir.angle(oldDir);
+          const double randth = acos(2.0*m_randgen->flat() - 1.0);
+          const double randphi = 2.0*M_PI*m_randgen->flat();
+          newDir.azimuth_polar_SNS(1.0, randphi, randth);
 
           // Update weight
           const double wgt = weights[i];
-          if(generateScatter(scatterPts[i-1], particleDir, weights[i], scatterPts[i]))
+          if(generateScatter(prevSc, newDir, weights[i], curSc))
             break;
           else
           {
@@ -887,9 +885,10 @@ namespace Mantid
           throw std::runtime_error("Unable to generate scatter point in sample. Check sample shape.");
         }
 
-        auto e1range = calculateE1Range(scAngs[i-1], en1[i-1]);
+        const double scang = newDir.angle(oldDir);
+        auto e1range = calculateE1Range(scang, en1[i-1]);
         en1[i] = e1range.first + m_randgen->flat()*(e1range.second - e1range.first);
-        const double d2sig = partialDiffXSec(en1[i-1], en1[i], scAngs[i-1]);
+        const double d2sig = partialDiffXSec(en1[i-1], en1[i], scang);
         double weight = d2sig*4.0*M_PI*(e1range.second - e1range.first)/m_sampleProps->totalxsec;
         // accumulate total weight
         weightSum += weight;
@@ -897,41 +896,49 @@ namespace Mantid
 
         // Increment time of flight...
         const double veli = sqrt(en1[i]/MASS_TO_MEV);
-        tofs[i] += (scatterPts[i].distance(scatterPts[i-1])*1e6/veli);
+        tofs[i] += (curSc.distance(prevSc)*1e6/veli);
       }
 
       // force all orders in to current detector
       const auto & inX = m_inputWS->readX(0);
       for(size_t i = 0; i < nscatters; ++i)
       {
-        V3D detPos = generateDetectorPos(detpar.l2, detpar.theta, en1[i]);
-        // transform to sample frame
-        detPos.rotate(*m_goniometer);
-        // Distance to exit the sample for this order
-        V3D detDirection = detPos - scatterPts[i];
-        detDirection.normalize();
-        Geometry::Track scatterToDet(scatterPts[i], detDirection);
-        if(m_sampleShape->interceptSurface(scatterToDet) == 0)
+        V3D detPos;
+        double scang(0.0), distToExit(0.0);
+        size_t ntries(0);
+        do
         {
-          throw std::logic_error("CalculateMSVesuvio::calculateCounts() - "
-                                 "Logical error. No intersection with sample, despite track "
-                                 "originating from with sample.");
+          V3D detPos = generateDetectorPos(detpar.pos, en1[i]);
+          // transform to sample frame
+          detPos.rotate(*m_goniometer);
+          // Distance to exit the sample for this order
+          V3D scToDet = detPos - scatterPts[i];
+          scToDet.normalize();
+          Geometry::Track scatterToDet(scatterPts[i], scToDet);
+          if(m_sampleShape->interceptSurface(scatterToDet) > 0)
+          {
+            scang = neutronDirs[i].angle(scToDet);
+            const auto & link = scatterToDet.begin();
+            distToExit = link->distInsideObject;
+            break;
+          }
+          // if point is very close surface then there may be no valid intercept so try again
         }
-        // Calculate final scattering angle
-        scAngs[i] = detDirection.angle(scatterPts[i]);
-        const auto & link = scatterToDet.begin();
-        double distToExit = link->distInsideObject;
+        while(ntries < MAX_SCATTER_PT_TRIES);
+        if(ntries == MAX_SCATTER_PT_TRIES)
+        {
+          throw std::runtime_error("Unable to create track from sample to detector. "
+                                   "Detector shape may be too small.");
+        }
+
         // Weight by probability neutron leaves sample
         weights[i] *= exp(-m_sampleProps->mu*distToExit);
-
         // Weight by cross-section for the final energy
         const double efinal = generateE1(detpar.theta, detpar.efixed, m_foilRes);
-        weights[i] *= partialDiffXSec(en1[i], efinal, scAngs[i])/m_sampleProps->totalxsec;
-
+        weights[i] *= partialDiffXSec(en1[i], efinal, scang)/m_sampleProps->totalxsec;
         // final TOF
         const double veli = sqrt(efinal/MASS_TO_MEV);
         tofs[i] += detpar.t0 + (scatterPts[i].distance(detPos)*1e6)/veli;
-
         // "Bin" weight into appropriate place
         std::vector<double> &counts = simulation.counts[i];
         const double finalTOF = tofs[i];
@@ -944,7 +951,6 @@ namespace Mantid
             break;
           }
         }
-
       }
 
       return weightSum;
@@ -1064,13 +1070,13 @@ namespace Mantid
       // Select a random point on the track that is the actual scatter point
       // from the scattering probability distribution
       const double dist = -log(1.0 - m_randgen->flat()*scatterProb)/m_sampleProps->mu;
-      // From start point advance in direction of travel by computed distance to find scatter point
-      // Track is defined as set of links and exit point of first link is entry to sample!
+      const double fraction = dist/totalObjectDist;
+      // Scatter point is then entry point + fraction of width in each direction
       scatterPt = link->entryPoint;
-      scatterPt += direc*dist;
+      V3D edgeDistances = (link->exitPoint - link->entryPoint);
+      scatterPt += edgeDistances*fraction;
       // Update weight
       weight *= scatterProb;
-
       return true;
     }
 
@@ -1151,26 +1157,22 @@ namespace Mantid
 
     /**
      * Generate a random position within the final detector in the lab frame
-     * @param l2 The nominal distance from sample to detector
-     * @param angle The The scattering angle from the sample
+     * @param nominalPos The poisiton of the centre point of the detector
      * @param energy The final energy of the neutron
      * @return A new position in the detector
      */
-    V3D CalculateMSVesuvio::generateDetectorPos(const double l2, const double angle, const double energy) const
+    V3D CalculateMSVesuvio::generateDetectorPos(const V3D &nominalPos, const double energy) const
     {
       const double mu = 7430.0/sqrt(energy); // Inverse attenuation length (m-1) for vesuvio det.
-      const double ps = 1.0 - exp(-mu*m_detThick); // Probability of detection in path length YD.
-
-      const double width = -0.5*m_detWidth + m_detWidth*m_randgen->flat();
-      const double beam = -log(1.0 - m_randgen->flat()*ps)/mu;
-      const double height = -0.5*m_detHeight + m_detHeight*m_randgen->flat();
-      const double widthLab = (l2 + beam)*sin(angle) + width*cos(angle);
-      const double beamLab = (l2 + beam)*cos(angle) - width*sin(angle);
+      const double ps = 1.0 - exp(-mu*m_detThick); // Probability of detection in path thickness.
       V3D detPos;
-      detPos[m_beamIdx] = beamLab;
-      detPos[m_acrossIdx] = widthLab;
-      detPos[m_upIdx] = height;
-
+      // Beam direction by moving to front of "box"define by detector dimensions and then
+      // computing expected distance travelled based on probability
+      detPos[m_beamIdx] = (nominalPos[m_beamIdx] - 0.5*m_detThick) - \
+          (log(1.0 - m_randgen->flat()*ps)/mu);
+      // perturb away from nominal position
+      detPos[m_acrossIdx] = nominalPos[m_acrossIdx] + (m_randgen->flat() - 0.5)*m_detWidth;
+      detPos[m_upIdx] = nominalPos[m_upIdx] + (m_randgen->flat() - 0.5)*m_detHeight;
       return detPos;
     }
 
