@@ -337,7 +337,7 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
     QPoint newPoint = spectrum_display->GetPlotTransform(newPositionData);
     int newY = newPoint.y();
 
-    // see if we should react
+    // Ignore the event if the position is outside of the plot area
     if (newX < 0) return false;
     if (newY < 0) return false;
     const QSize canvasSize = sv_ui->spectrumPlot->canvas()->size();
@@ -354,6 +354,7 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
     sv_ui->spectrumPlot->canvas()->cursor().setPos(QPoint(canvasPos.x()+m_picker_x, canvasPos.y()+m_picker_y));
     // update the pointed at position
     spectrum_display->SetPointedAtPoint( QPoint(m_picker_x, m_picker_y) );
+
     // consume the event
     return true;
   }
