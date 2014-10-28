@@ -103,8 +103,8 @@ void SpectrumDisplay::SetDataSource( SpectrumDataSource* data_source )
   pointed_at_x = DBL_MAX;
   pointed_at_y = DBL_MAX;
 
-  int    n_rows = total_y_max - total_y_min;         // get reasonable size initial image data
-  int    n_cols = 500;     
+  int n_rows = static_cast<int>(total_y_max - total_y_min); // get reasonable size initial image data
+  int n_cols = 500;     
                                // data_array is deleted in the SpectrumPlotItem
   data_array = data_source->GetDataArray( total_x_min, total_x_max,
                                           total_y_min, total_y_max,
