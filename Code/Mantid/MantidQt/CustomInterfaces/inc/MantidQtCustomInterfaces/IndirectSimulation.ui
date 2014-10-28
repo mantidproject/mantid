@@ -31,6 +31,11 @@
        <string>MolDyn</string>
       </attribute>
      </widget>
+     <widget class="QWidget" name="sassena">
+      <attribute name="title">
+       <string>Sassena</string>
+      </attribute>
+     </widget>
     </widget>
    </item>
    <item>
