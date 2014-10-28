@@ -571,7 +571,6 @@ void MultiDatasetFit::initLayout()
   connect(m_functionBrowser,SIGNAL(localParameterButtonClicked(const QString&)),this,SLOT(editLocalParameterValues(const QString&)));
   connect(m_functionBrowser,SIGNAL(functionStructureChanged()),this,SLOT(reset()));
 
-  m_uiForm.progressBar->setValue(0);
   createPlotToolbar();
 }
 
@@ -813,7 +812,6 @@ void MultiDatasetFit::fit()
 
     m_fitRunner.reset( new API::AlgorithmRunner() );
     connect( m_fitRunner.get(),SIGNAL(algorithmComplete(bool)), this, SLOT(finishFit(bool)), Qt::QueuedConnection );
-    connect( m_fitRunner.get(),SIGNAL(algorithmProgress(double,const std::string&)),this,SLOT(progressFit(double,const std::string&)), Qt::QueuedConnection );
 
     m_fitRunner->startAlgorithm(fit);
 
@@ -910,14 +908,8 @@ void MultiDatasetFit::finishFit(bool)
 {
   m_plotController->clear();
   m_plotController->update();
-  m_uiForm.progressBar->setValue(0);
   Mantid::API::IFunction_sptr fun = m_fitRunner->getAlgorithm()->getProperty("Function");
   updateParameters( *fun );
-}
-
-void MultiDatasetFit::progressFit(double p,const std::string& msg)
-{
-  m_uiForm.progressBar->setValue( static_cast<int>(p*100) );
 }
 
 /**

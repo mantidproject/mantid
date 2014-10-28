@@ -92,7 +92,6 @@ private slots:
   void fit();
   void editLocalParameterValues(const QString& parName);
   void finishFit(bool);
-  void progressFit(double p,const std::string& msg);
   void updateLocalParameters(int index);
 
 protected:
@@ -179,6 +178,7 @@ private:
   QwtPlotPanner *m_panner;
   /// The magnifier
   QwtPlotMagnifier *m_magnifier;
+
   /// The workspace table
   QTableWidget *m_table;
   QComboBox *m_plotSelector;
