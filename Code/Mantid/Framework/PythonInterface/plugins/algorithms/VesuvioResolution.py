@@ -26,13 +26,36 @@ class VesuvioResolution(PythonAlgorithm):
 
         self.declareProperty(WorkspaceProperty(name='OutputWorkspaceTOF',
                                                defaultValue='',
-                                               direction=Direction.Output),
+                                               direction=Direction.Output,
+                                               optional=PropertyMode.Optional),
                              doc='Output resolution workspace in TOF')
 
         self.declareProperty(WorkspaceProperty(name='OutputWorkspaceYSpace',
                                                defaultValue='',
-                                               direction=Direction.Output),
+                                               direction=Direction.Output,
+                                               optional=PropertyMode.Optional),
                              doc='Output resolution workspace in ySpace')
+
+
+    def validateInputs(self):
+        """
+        Does basic validation for inputs.
+        """
+
+        issues = dict()
+
+        out_ws_tof = self.getPropertyValue('OutputWorkspaceTOF')
+        out_ws_ysp = self.getPropertyValue('OutputWorkspaceYSpace')
+
+        output_tof = (out_ws_tof != '')
+        output_ysp = (out_ws_ysp != '')
+
+        if not (output_tof or output_ysp):
+            warning_message = 'Must output in either time of flight or ySpace'
+            issues['OutputWorkspaceTOF'] = warning_message
+            issues['OutputWorkspaceYSpace'] = warning_message
+
+        return issues
 
 
     def PyExec(self):
@@ -44,6 +67,11 @@ class VesuvioResolution(PythonAlgorithm):
 
         output_tof = (out_ws_tof != '')
         output_ysp = (out_ws_ysp != '')
+
+        # Give a dummy name here since we will need resolution in time of flight
+        # in order to convert to ySpace
+        if not output_tof:
+            out_ws_tof = '__res_tof'
 
         function = 'name=VesuvioResolution, Mass=%f' % mass
         fit_naming_stem = '__vesuvio_res_fit'
@@ -111,7 +139,6 @@ class VesuvioResolution(PythonAlgorithm):
             extract2.execute()
             out_ws_ysp = extract2.getProperty('OutputWorkspace').value
 
-        if output_ysp:
             self.setProperty('OutputWorkspaceYSpace', out_ws_ysp)
 
 
