@@ -59,7 +59,7 @@ void SpectrumView::resizeEvent(QResizeEvent * event)
   QMainWindow::resizeEvent(event);
 
   if(m_data_source)
-    m_spectrum_display->UpdateImage();
+    m_spectrum_display->HandleResize();
 }
 
 void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)

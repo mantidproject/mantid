@@ -76,6 +76,9 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      /// Rebuild the scroll bars and image due to change of xmin, xmax, step
      void UpdateRange();
 
+     /// Updates scroll bars when window is resized
+     void HandleResize();
+
      /// Rebuild image from data source, due to resize or scroll bar movement
      void UpdateImage();
 

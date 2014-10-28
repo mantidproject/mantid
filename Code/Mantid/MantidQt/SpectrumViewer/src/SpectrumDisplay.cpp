@@ -166,6 +166,16 @@ void SpectrumDisplay::UpdateRange()
 }
 
 /**
+ * Updates the rnages of the scroll bars when the window is resized.
+ */
+void SpectrumDisplay::HandleResize()
+{
+  QRect draw_area;
+  GetDisplayRectangle( draw_area );
+  dynamic_cast<SliderHandler*>(slider_handler)->ReConfigureSliders( draw_area, data_source );
+}
+
+/**
  *  This will rebuild the image from the data source.  It should be invoked
  *  when the scroll bar is moved, the plot area is resize or the color or
  *  intensity tables are changed.  It should not be called directly from
@@ -182,10 +192,6 @@ void SpectrumDisplay::UpdateImage()
   {
     SetDataSource( data_source );   // re-initialize with the altered source
   }
-
-  QRect draw_area;
-  GetDisplayRectangle( draw_area );
-  dynamic_cast<SliderHandler*>(slider_handler)->ReConfigureSliders( draw_area, data_source );
 
   QRect display_rect;
   GetDisplayRectangle( display_rect );
