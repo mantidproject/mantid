@@ -119,7 +119,7 @@ public:
 
     const MantidVec & sampleX = SampleWS->readX(0);
     const MantidVec & sampleY = SampleWS->readY(0);
-    const MantidVec & sampleE = SampleWS->readE(0);
+    //const MantidVec & sampleE = SampleWS->readE(0);
     for(size_t i=0;i<sampleY.size();i++)
     {
       TS_ASSERT_DELTA(dataX[i],sampleX[i],1.e-7);

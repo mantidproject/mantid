@@ -117,7 +117,9 @@ namespace Mantid
       setPropertySettings("EMode",
         new Kernel::VisibleWhenProperty("FlatBkgWorkspace", IS_NOT_EQUAL_TO, ""));
 
-
+      std::string bgRemovalGrp("Remove Background during rebinning settings:");
+      setPropertyGroup("FlatBkgWorkspace", bgRemovalGrp);
+      setPropertyGroup("EMode", bgRemovalGrp);
     }
 
 
@@ -351,7 +353,7 @@ namespace Mantid
             if(!failedBkgRemoalList.empty())
             {
               size_t nFailed = failedBkgRemoalList.size();
-              if(nFailed == histnumber)
+              if(nFailed == static_cast<size_t>(histnumber))
               {
                 g_log.warning()<<" has not been able to remove any background while rebinning workspace "<<inputWS->getName()<<
                   "\n possible reasons: wrong instrument or units conversion mode\n";
