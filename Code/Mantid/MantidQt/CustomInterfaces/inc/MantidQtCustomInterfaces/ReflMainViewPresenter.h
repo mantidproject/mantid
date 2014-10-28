@@ -100,7 +100,8 @@ namespace MantidQt
       virtual void saveTable();
       virtual void saveTableAs();
       //options
-      virtual void showOptionsDialog();
+      void showOptionsDialog();
+      void initOptions();
 
       //List of workspaces the user can open
       std::set<std::string> m_workspaceList;

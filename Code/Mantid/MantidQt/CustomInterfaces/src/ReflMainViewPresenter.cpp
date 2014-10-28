@@ -98,6 +98,9 @@ namespace MantidQt
       m_renameObserver(*this, &ReflMainViewPresenter::handleRenameEvent),
       m_replaceObserver(*this, &ReflMainViewPresenter::handleReplaceEvent)
     {
+      //Initialise options
+      initOptions();
+
       //Set up the instrument selectors
       std::vector<std::string> instruments;
       instruments.push_back("INTER");
@@ -247,9 +250,12 @@ namespace MantidQt
       std::set<size_t> rows = m_view->getSelectedRows();
       if(rows.empty())
       {
-        //Does the user want to abort?
-        if(!m_view->askUserYesNo("This will process all rows in the table. Continue?","Process all rows?"))
-          return;
+        if(m_options["WarnProcessAll"] == "true")
+        {
+          //Does the user want to abort?
+          if(!m_view->askUserYesNo("This will process all rows in the table. Continue?","Process all rows?"))
+            return;
+        }
 
         //They want to process all rows, so populate rows with every index in the model
         for(size_t idx = 0; idx < m_model->rowCount(); ++idx)
@@ -1058,6 +1064,18 @@ namespace MantidQt
     {
       //Optionally check the validity of the new options
       m_options = options;
+    }
+
+    /** Load options from disk if possible, or set to defaults */
+    void ReflMainViewPresenter::initOptions()
+    {
+      m_options.clear();
+
+      //Set defaults
+      m_options["WarnProcessAll"] = "true";
+
+      //Load from disk
+      //TODO
     }
   }
 }

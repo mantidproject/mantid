@@ -39,11 +39,16 @@ namespace MantidQt
 
     class DLLExport QtReflOptionsDialog : public QDialog
     {
+    Q_OBJECT
     public:
       QtReflOptionsDialog(ReflMainView* view, boost::shared_ptr<IReflPresenter> presenter);
       virtual ~QtReflOptionsDialog();
     protected:
       void initLayout();
+    protected slots:
+      void saveOptions();
+      void loadOptions();
+    protected:
       //the interface
       Ui::reflOptionsDialog ui;
       //the presenter
