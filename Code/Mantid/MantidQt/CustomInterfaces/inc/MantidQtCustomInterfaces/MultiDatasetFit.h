@@ -14,6 +14,9 @@
 
 // Forward declarations
 class QwtPlot;
+class QwtPlotZoomer;
+class QwtPlotPanner;
+class QwtPlotMagnifier;
 class QTableWidget;
 class QComboBox;
 class QPushButton;
@@ -97,6 +100,7 @@ protected:
   virtual void initLayout();
 
 private:
+  void createPlotToolbar();
   void addWorkspaceSpectrum(const QString &wsName, int wsIndex);
   boost::shared_ptr<Mantid::API::IFunction> createFunction() const;
   void initLocalParameter(const QString& parName)const;
@@ -157,6 +161,9 @@ public:
   int getCurrentIndex() const {return m_currentIndex;}
 signals:
   void currentIndexChanged(int);
+public slots:
+  void enableZoom();
+  void enablePan();
 private slots:
   void tableUpdated();
   void prevPlot();
@@ -166,6 +173,12 @@ private:
   MultiDatasetFit *owner() const {return static_cast<MultiDatasetFit*>(parent());}
   /// The plot widget
   QwtPlot *m_plot;
+  /// The zoomer
+  QwtPlotZoomer *m_zoomer;
+  /// The panner
+  QwtPlotPanner *m_panner;
+  /// The magnifier
+  QwtPlotMagnifier *m_magnifier;
   /// The workspace table
   QTableWidget *m_table;
   QComboBox *m_plotSelector;

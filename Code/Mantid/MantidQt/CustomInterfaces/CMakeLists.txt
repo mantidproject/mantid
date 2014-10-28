@@ -265,8 +265,9 @@ else ( ${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3 )
 endif ( ${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} OPTIONS ${extra_options} )
+qt4_add_resources ( RES_FILES icons/icons.qrc )
 
-set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
+set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} ${RES_FILES})
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )

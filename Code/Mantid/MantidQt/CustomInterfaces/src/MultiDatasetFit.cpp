@@ -15,9 +15,14 @@
 #include <QDialog>
 #include <QHeaderView>
 #include <QMessageBox>
+#include <QToolBar>
+#include <QActionGroup>
 
 #include <boost/make_shared.hpp>
 #include <qwt_plot_curve.h>
+#include <qwt_plot_zoomer.h>
+#include <qwt_plot_panner.h>
+#include <qwt_plot_magnifier.h>
 #include <Poco/ActiveResult.h>
 
 #include <vector>
@@ -151,6 +156,7 @@ public:
   ~DatasetPlotData();
   void show(QwtPlot *plot);
   void hide();
+  QwtDoubleRect boundingRect() const;
 private:
   // no copying
   DatasetPlotData(const DatasetPlotData&);
@@ -289,6 +295,23 @@ void DatasetPlotData::hide()
   }
 }
 
+/**
+ * Get the bounding rect including all plotted data.
+ */
+QwtDoubleRect DatasetPlotData::boundingRect() const
+{
+  QwtDoubleRect rect = m_dataCurve->boundingRect();
+  if ( m_calcCurve )
+  {
+    rect = rect.united( m_calcCurve->boundingRect() );
+  }
+  if ( m_diffCurve )
+  {
+    rect = rect.united( m_diffCurve->boundingRect() );
+  }
+  return rect;
+}
+
 /*==========================================================================================*/
 /*                                PlotController                                            */
 /*==========================================================================================*/
@@ -300,6 +323,15 @@ PlotController::PlotController(MultiDatasetFit *parent,QwtPlot *plot, QTableWidg
   connect(prev,SIGNAL(clicked()),this,SLOT(prevPlot()));
   connect(next,SIGNAL(clicked()),this,SLOT(nextPlot()));
   connect(plotSelector,SIGNAL(currentIndexChanged(int)),this,SLOT(plotDataSet(int)));
+
+  m_zoomer = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
+      QwtPicker::DragSelection | QwtPicker::CornerToCorner, QwtPicker::AlwaysOff, plot->canvas());
+
+  m_panner = new QwtPlotPanner( plot->canvas() );
+  m_panner->setEnabled(false);
+
+  m_magnifier = new QwtPlotMagnifier( plot->canvas() );
+  m_magnifier->setEnabled( false );
 }
 
 PlotController::~PlotController()
@@ -359,6 +391,9 @@ void PlotController::nextPlot()
 void PlotController::plotDataSet(int index)
 {
   if ( index < 0 || index >= m_table->rowCount() ) return;
+  bool resetZoom = m_plotData.isEmpty();
+
+  // create data if index is displayed for the first time
   if ( !m_plotData.contains(index) )
   {
     QString wsName = m_table->item( index, wsColumn )->text();
@@ -371,12 +406,36 @@ void PlotController::plotDataSet(int index)
     auto value = boost::make_shared<DatasetPlotData>( wsName, wsIndex, outputWorkspaceName );
     m_plotData.insert(index, value );
   }
+
+  // hide the previously shown data
   if ( m_currentIndex > -1 ) 
   {
     m_plotData[m_currentIndex]->hide();
   }
+
+  // try to keep the zooming from the previous view
+  // but if zoom rect doesn't show any data reset zoom base to show all
+  auto dataRect = m_plotData[index]->boundingRect();
+  auto zoomRect = m_zoomer->zoomRect();
+  if ( !zoomRect.intersects( dataRect ) )
+  {
+    m_plot->setAxisAutoScale(QwtPlot::xBottom);
+    m_plot->setAxisAutoScale(QwtPlot::yLeft);
+  }
+
+  // show the new data
   m_plotData[index]->show( m_plot );
   m_plot->replot();
+  // the idea is to set the zoom base (the largest view) to the data's bounding rect
+  // but it looks like the base is set to the union of dataRect and current zoomRect
+  m_zoomer->setZoomBase( dataRect );
+  // if it's first data set ever set the zoomer's base
+  // if it's not done the base is set to some default rect that has nothing to do with the data
+  if ( resetZoom ) 
+  {
+    m_zoomer->setZoomBase(true);
+  }
+  // change the current data set index
   m_currentIndex = index;
   emit currentIndexChanged( index );
 }
@@ -389,6 +448,22 @@ void PlotController::clear()
 void PlotController::update()
 {
   plotDataSet( m_currentIndex );
+}
+
+void PlotController::enableZoom()
+{
+  m_zoomer->setEnabled(true);
+  m_panner->setEnabled(false);
+  m_magnifier->setEnabled(false);
+  m_plot->canvas()->setCursor(QCursor(Qt::CrossCursor));
+}
+
+void PlotController::enablePan()
+{
+  m_zoomer->setEnabled(false);
+  m_panner->setEnabled(true);
+  m_magnifier->setEnabled(true);
+  m_plot->canvas()->setCursor(Qt::pointingHandCursor);
 }
 
 /*==========================================================================================*/
@@ -497,6 +572,30 @@ void MultiDatasetFit::initLayout()
   connect(m_functionBrowser,SIGNAL(functionStructureChanged()),this,SLOT(reset()));
 
   m_uiForm.progressBar->setValue(0);
+  createPlotToolbar();
+}
+
+void MultiDatasetFit::createPlotToolbar()
+{
+  auto toolBar = new QToolBar(this);
+  auto group = new QActionGroup(this);
+ 
+  auto action = new QAction(this);
+  action->setIcon(QIcon(":/MultiDatasetFit/icons/zoom.png"));
+  action->setCheckable(true);
+  action->setChecked(true);
+  connect(action,SIGNAL(triggered()),m_plotController,SLOT(enableZoom()));
+  group->addAction(action);
+
+  action = new QAction(this);
+  action->setIcon(QIcon(":/MultiDatasetFit/icons/panning.png"));
+  action->setCheckable(true);
+  connect(action,SIGNAL(triggered()),m_plotController,SLOT(enablePan()));
+  group->addAction(action);
+
+  toolBar->addActions(group->actions());
+
+  m_uiForm.horizontalLayout->insertWidget(3,toolBar);
 }
 
 /**
