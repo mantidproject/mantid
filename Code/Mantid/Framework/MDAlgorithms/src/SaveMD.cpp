@@ -111,18 +111,19 @@ namespace MDAlgorithms
     if(update)  // workspace has its own file and ignores any changes to the algorithm parameters
     {
       if(!ws->isFileBacked())
-        throw std::runtime_error(" attemtp to update non-file backed workspace");
+        throw std::runtime_error(" attempt to update non-file backed workspace");
       filename = bc->getFileIO()->getFileName();
     }
 
     //-----------------------------------------------------------------------------------------------------
-    // create or open WS group and put there additional information about WS and its dimesnions
+    // create or open WS group and put there additional information about WS and its dimensions
     int nDims = static_cast<int>(nd);
-    auto file = file_holder_type(MDBoxFlatTree::createOrOpenMDWSgroup(filename,nDims,MDE::getTypeName(),false));
+    bool data_exist;
+    auto file = file_holder_type(MDBoxFlatTree::createOrOpenMDWSgroup(filename,nDims,MDE::getTypeName(),false,data_exist));
 
     // Save each NEW ExperimentInfo to a spot in the file
     MDBoxFlatTree::saveExperimentInfos(file.get(),ws);
-    if(!update)
+    if(!update || !data_exist )
     {
       MDBoxFlatTree::saveWSGenericInfo(file.get(),ws);
     }
@@ -131,7 +132,7 @@ namespace MDAlgorithms
 
     MDBoxFlatTree BoxFlatStruct;
     //-----------------------------------------------------------------------------------------------------
-    if(update) // the workspace is already file backed; We not usually use this mode but want to leave it for compartibility
+    if(update) // the workspace is already file backed;
     {
       // remove all boxes from the DiskBuffer. DB will calculate boxes positions on HDD.
       bc->getFileIO()->flushCache();

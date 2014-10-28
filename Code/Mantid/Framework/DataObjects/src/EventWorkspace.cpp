@@ -190,6 +190,7 @@ namespace Mantid
     {
       if (index >= m_noVectors)
         throw std::range_error("EventWorkspace::getSpectrum, workspace index out of range");
+      invalidateCommonBinsFlag();
       return data[index];
     }
 
@@ -613,6 +614,29 @@ namespace Mantid
         getSpectrum(i)->setDetectorID(pixelIDs[i]);
       }
     }
+
+	 /** Expands the workspace to a number of spectra corresponding to the number of
+     *  pixels/detectors contained in specList.
+     *  All events lists will be empty after calling this method.
+     */
+		void EventWorkspace::padSpectra(const std::vector<int32_t> & specList)
+		{
+			if (specList.empty())
+			{
+				padSpectra();
+			}
+			else
+			{
+				resizeTo(specList.size());
+				for (size_t i = 0; i < specList.size(); ++i)
+				{
+					// specList ranges from 1, ..., N
+					// detector ranges from 0, ..., N-1
+					getSpectrum(i)->setDetectorID(specList[i]-1);
+					getSpectrum(i)->setSpectrumNo(specList[i]);
+				}
+			}
+		}
 
     void EventWorkspace::deleteEmptyLists()
     {

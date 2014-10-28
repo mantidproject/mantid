@@ -973,7 +973,7 @@ class BaseRefWidget(BaseWidget):
             For REFM, this is X
             For REFL, this is Y
         """
-
+        
 #        run_number = self._summary.data_run_number_edit.text()
 #        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
 #
@@ -1246,7 +1246,8 @@ class BaseRefWidget(BaseWidget):
                 max_ctrl.setText("%-d" % int(xmax))
 
             # For REFL, Y is high-res
-            is_pixel_y = is_high_res
+
+            is_pixel_y =  is_high_res
             # For REFM it's the other way around
             if self.short_name == "REFM":
                 is_pixel_y = not is_pixel_y

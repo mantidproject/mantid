@@ -8,7 +8,11 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/ConfigService.h"
+#include <nexus/NeXusFile.hpp>
 #include <boost/shared_ptr.hpp>
+#include <Poco/File.h>
+#include <Poco/Path.h>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -89,6 +93,99 @@ public:
     ld.setPropertyValue("OutputWorkspace", outws_name);
     TS_ASSERT_THROWS_NOTHING( ld.execute() );
     TS_ASSERT( ld.isExecuted() );
+  }
+
+  void testBrokenISISFile()
+  {
+    // Just need to make sure it runs.
+    Mantid::API::FrameworkManager::Instance();
+    LoadNexusMonitors ld;
+    std::string outws_name = "LOQ_49886_monitors";
+    ld.initialize();
+    ld.setPropertyValue("Filename", "LOQ49886.nxs");
+    ld.setPropertyValue("OutputWorkspace", outws_name);
+    TS_ASSERT_THROWS_NOTHING( ld.execute() );
+    TS_ASSERT( ld.isExecuted() );
+
+    MatrixWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
+    //Valid WS and it is an MatrixWorkspace
+    TS_ASSERT( WS );
+    //Correct number of monitors found
+    TS_ASSERT_EQUALS( WS->getNumberHistograms(), 2 );
+    //Monitors data is correct
+    TS_ASSERT_EQUALS( WS->readY(0)[0], 0 );
+    TS_ASSERT_EQUALS( WS->readY(1)[0], 0 );
+
+    TS_ASSERT_EQUALS( WS->readX(0)[0], 5.0 );
+    TS_ASSERT_EQUALS( WS->readX(1)[5],19995.0 );
+
+  }
+
+  void test_10_monitors()
+  {
+    Poco::Path path(ConfigService::Instance().getTempDir().c_str());
+    path.append("LoadNexusMonitorsTestFile.nxs");
+    std::string filename = path.toString();
+
+    createFakeFile( filename );
+
+    LoadNexusMonitors ld;
+    std::string outws_name = "10monitors";
+    ld.initialize();
+    ld.setPropertyValue("Filename", filename);
+    ld.setPropertyValue("OutputWorkspace", outws_name);
+    ld.execute();
+    TS_ASSERT( ld.isExecuted() );
+
+    MatrixWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
+    //Valid WS and it is an MatrixWorkspace
+    TS_ASSERT( WS );
+    //Correct number of monitors found
+    TS_ASSERT_EQUALS( WS->getNumberHistograms(), 3 );
+    //Monitors are in the right order
+    TS_ASSERT_EQUALS( WS->readY(0)[0], 1 );
+    TS_ASSERT_EQUALS( WS->readY(1)[0], 2 );
+    TS_ASSERT_EQUALS( WS->readY(2)[0], 10 );
+
+    AnalysisDataService::Instance().clear();
+    Poco::File(filename).remove();
+  }
+
+  void createFakeFile( const std::string& filename )
+  {
+    NeXus::File file(filename, NXACC_CREATE5);
+
+    const bool openGroup = true;
+    file.makeGroup("raw_data_1","NXentry",openGroup);
+    {
+      addMonitor( file, 1 );
+      addMonitor( file, 10 );
+      addMonitor( file, 2 );
+
+      file.makeGroup("instrument","NXinstrument", openGroup);
+      file.writeData("name","FakeInstrument");
+      file.closeGroup();
+
+    }
+    file.closeGroup(); // raw_data_1
+    file.close();
+  }
+
+  void addMonitor(NeXus::File &file, int i)
+  {
+    const size_t nbins = 3;
+    std::string monitorName = "monitor_" + boost::lexical_cast<std::string>(i);
+    const bool openGroup = true;
+    file.makeGroup( monitorName, "NXmonitor", openGroup );
+    file.writeData("monitor_number", i);
+    file.writeData("spectrum_index", i);
+    std::vector<int> dims(3,1);
+    dims[2] = nbins;
+    std::vector<int> data(nbins,i);
+    file.writeData("data",data,dims);
+    std::vector<float> timeOfFlight(nbins+1);
+    file.writeData("time_of_flight", timeOfFlight);
+    file.closeGroup();
   }
 };
 

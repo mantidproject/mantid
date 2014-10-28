@@ -6,16 +6,12 @@
 # project settings should be included in the relevant CMakeLists.txt file
 # for that project.
 
-# Get the GCC version
-EXEC_PROGRAM(${CMAKE_CXX_COMPILER} ARGS --version | cut -d \" \" -f 3 OUTPUT_VARIABLE _compiler_output)
-STRING(REGEX REPLACE ".*([0-9]\\.[0-9]\\.[0-9]).*" "\\1" GCC_COMPILER_VERSION ${_compiler_output})
-MESSAGE(STATUS "gcc version: ${GCC_COMPILER_VERSION}")
-
-# Export the GCC compiler version globally
-set(GCC_COMPILER_VERSION ${GCC_COMPILER_VERSION} CACHE INTERNAL "")
+# Set our own compiler version flag from the cmake one and export it globally
+set( GCC_COMPILER_VERSION ${CMAKE_CXX_COMPILER_VERSION} CACHE INTERNAL "")
+message( STATUS "gcc version: ${GCC_COMPILER_VERSION}" )
 
 # Global warning flags.
-set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qual -Wcast-align -fno-common" ) 
+set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qual -Wcast-align -fno-common" )
 # Disable some warnings about deprecated headers and type conversions that
 # we can't do anything about
 # -Wno-deprecated: Do not warn about use of deprecated headers.
@@ -38,4 +34,3 @@ set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GNUFLAGS}" )
 set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GNUFLAGS} -Woverloaded-virtual -fno-operator-names -std=c++0x" )
 # Cleanup
 set ( GNUFLAGS )
-

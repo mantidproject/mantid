@@ -20,9 +20,10 @@ set ( SRC_FILES
 	src/ISISDataArchive.cpp
 	src/ISISRunLogs.cpp
 	src/Load.cpp
+	src/LoadANSTOHelper.cpp
 	src/LoadAscii.cpp
 	src/LoadAscii2.cpp
-        src/LoadBBY.cpp
+	src/LoadBBY.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
@@ -34,6 +35,7 @@ set ( SRC_FILES
 	src/LoadEventNexus.cpp
 	src/LoadEventPreNexus.cpp
 	src/LoadEventPreNexus2.cpp
+	src/LoadFITS.cpp
 	src/LoadFullprofResolution.cpp
 	src/LoadGSASInstrumentFile.cpp
 	src/LoadGSS.cpp
@@ -91,6 +93,7 @@ set ( SRC_FILES
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
 	src/LoadTOFRawNexus.cpp
+	src/LoadVulcanCalFile.cpp
 	src/MaskDetectors.cpp
 	src/MaskDetectorsInShape.cpp
 	src/MergeLogs.cpp
@@ -104,7 +107,6 @@ set ( SRC_FILES
 	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
 	src/SNSDataArchive.cpp
-	src/SNSDataArchiveICAT2.cpp
 	src/SaveANSTOAscii.cpp
 	src/SaveAscii.cpp
 	src/SaveAscii2.cpp
@@ -126,9 +128,12 @@ set ( SRC_FILES
 	src/SaveNXSPE.cpp
 	src/SaveNexus.cpp
 	src/SaveNexusProcessed.cpp
+	src/SaveNXTomo.cpp
 	src/SaveParameterFile.cpp
 	src/SavePAR.cpp
+	src/SavePDFGui.cpp
 	src/SavePHX.cpp
+	src/SaveParameterFile.cpp
 	src/SaveRKH.cpp
 	src/SaveReflTBL.cpp
 	src/SaveSPE.cpp
@@ -161,9 +166,10 @@ set ( INC_FILES
 	inc/MantidDataHandling/ISISDataArchive.h
 	inc/MantidDataHandling/ISISRunLogs.h
 	inc/MantidDataHandling/Load.h
+	inc/MantidDataHandling/LoadANSTOHelper.h
 	inc/MantidDataHandling/LoadAscii.h
 	inc/MantidDataHandling/LoadAscii2.h
-        inc/MantidDataHandling/LoadBBY.h
+	inc/MantidDataHandling/LoadBBY.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
@@ -175,6 +181,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
+	inc/MantidDataHandling/LoadFITS.h
 	inc/MantidDataHandling/LoadFullprofResolution.h
 	inc/MantidDataHandling/LoadGSASInstrumentFile.h
 	inc/MantidDataHandling/LoadGSS.h
@@ -227,6 +234,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
+	inc/MantidDataHandling/LoadVulcanCalFile.h
 	inc/MantidDataHandling/MaskDetectors.h
 	inc/MantidDataHandling/MaskDetectorsInShape.h
 	inc/MantidDataHandling/MergeLogs.h
@@ -240,7 +248,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
 	inc/MantidDataHandling/SNSDataArchive.h
-	inc/MantidDataHandling/SNSDataArchiveICAT2.h
 	inc/MantidDataHandling/SaveANSTOAscii.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveAscii2.h
@@ -262,9 +269,12 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveNXSPE.h
 	inc/MantidDataHandling/SaveNexus.h
 	inc/MantidDataHandling/SaveNexusProcessed.h
+	inc/MantidDataHandling/SaveNXTomo.h
 	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SavePAR.h
+	inc/MantidDataHandling/SavePDFGui.h
 	inc/MantidDataHandling/SavePHX.h
+	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SaveRKH.h
 	inc/MantidDataHandling/SaveReflTBL.h
 	inc/MantidDataHandling/SaveSPE.h
@@ -313,6 +323,7 @@ set ( TEST_FILES
 	LoadEventNexusTest.h
 	LoadEventPreNexus2Test.h
 	LoadEventPreNexusTest.h
+	LoadFITSTest.h
 	LoadFullprofResolutionTest.h
 	LoadGSASInstrumentFileTest.h
 	LoadGSSTest.h
@@ -360,6 +371,7 @@ set ( TEST_FILES
 	LoadSpice2dTest.h
 	LoadTOFRawNexusTest.h
 	LoadTest.h
+	LoadVulcanCalFileTest.h
 	MaskDetectorsInShapeTest.h
 	MaskDetectorsTest.h
 	MergeLogsTest.h
@@ -372,7 +384,6 @@ set ( TEST_FILES
 	RemoveLogsTest.h
 	RenameLogTest.h
 	RotateInstrumentComponentTest.h
-	SNSDataArchiveICAT2Test.h
 	SNSDataArchiveTest.h
 	SaveANSTOAsciiTest.h
 	SaveAscii2Test.h
@@ -394,9 +405,10 @@ set ( TEST_FILES
 	SaveNXSPETest.h
 	SaveNexusProcessedTest.h
 	SaveNexusTest.h
-	SaveParameterFileTest.h
 	SavePARTest.h
+	SavePDFGuiTest.h
 	SavePHXTest.h
+	SaveParameterFileTest.h
 	SaveRKHTest.h
 	SaveReflTBLTest.h
 	SaveSPETest.h
@@ -404,7 +416,7 @@ set ( TEST_FILES
 	SetSampleMaterialTest.h
 	SetScalingPSDTest.h
 	UpdateInstrumentFromFileTest.h
-	XMLlogfileTest.h
+	XMLInstrumentParameterTest.h
 )
 
 

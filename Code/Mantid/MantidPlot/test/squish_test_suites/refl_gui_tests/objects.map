@@ -1,0 +1,37 @@
+:1_HeaderViewItem	{container=':tableMain_QHeaderView' text='1' type='HeaderViewItem'}
+:2_HeaderViewItem	{container=':tableMain_QHeaderView' text='2' type='HeaderViewItem'}
+:Discard_QPushButton	{text='Discard' type='QPushButton' unnamed='1' visible='1' window=':_QMessageBox_2'}
+:Don't Save_QPushButton	{text='Don\\'t Save' type='QPushButton' unnamed='1' visible='1' window=':_QMessageBox_2'}
+:ISIS Reflectometry.File_QMenu	{name='menuFile' title='File' type='QMenu' visible='1' window=':ISIS Reflectometry_ReflGui'}
+:ISIS Reflectometry.Instrument:_QLabel	{name='labelInstrument' text='Instrument:' type='QLabel' visible='1' window=':ISIS Reflectometry_ReflGui'}
+:ISIS Reflectometry.menuBar_QMenuBar	{name='menuBar' type='QMenuBar' visible='1' window=':ISIS Reflectometry_ReflGui'}
+:ISIS Reflectometry.splitterList_QSplitter	{name='splitterList' type='QSplitter' visible='1' window=':ISIS Reflectometry_ReflGui'}
+:ISIS Reflectometry_ReflGui	{name='windowRefl' type='ReflGui' visible='1' windowTitle='ISIS Reflectometry'}
+:Interfaces.Reflectometry_QMenu	{name='ReflectometryMenu' title='Reflectometry' type='QMenu' visible='1' window=':MantidPlot - untitled.Interfaces_QMenu'}
+:MantidPlot - untitled.Interfaces_QMenu	{name='interfaceMenu' title='Interfaces' type='QMenu' visible='1' window=':MantidPlot - untitled_ApplicationWindow_2'}
+:MantidPlot - untitled.WorkspaceContextMenu_QMenu	{name='WorkspaceContextMenu' type='QMenu' visible='1' window=':MantidPlot - untitled_ApplicationWindow_2'}
+:MantidPlot - untitled.Workspaces_MantidDockWidget	{name='exploreMantid' type='MantidDockWidget' visible='1' window=':MantidPlot - untitled_ApplicationWindow_2' windowTitle='Workspaces'}
+:MantidPlot - untitled_ApplicationWindow	{name='main application' type='ApplicationWindow' visible='0' windowTitle='MantidPlot - untitled'}
+:MantidPlot - untitled_ApplicationWindow_2	{name='main application' type='ApplicationWindow' visible='1' windowTitle='MantidPlot - untitled'}
+:Open Table_QFileDialog	{name='QFileDialog' type='QFileDialog' visible='0' windowTitle='Open Table'}
+:RenameWorkspace input dialog.Run_QPushButton	{text='Run' type='QPushButton' unnamed='1' visible='1' window=':RenameWorkspace input dialog_MantidQt::API::GenericDialog'}
+:RenameWorkspace input dialog_MantidQt::API::GenericDialog	{type='MantidQt::API::GenericDialog' unnamed='1' visible='1' windowTitle='RenameWorkspace input dialog'}
+:RenameWorkspace input dialog_QPushButton	{type='QPushButton' unnamed='1' visible='1' window=':RenameWorkspace input dialog_MantidQt::API::GenericDialog'}
+:Workspaces.WorkspaceTree_MantidTreeWidget	{container=':MantidPlot - untitled.Workspaces_MantidDockWidget' name='WorkspaceTree' type='MantidTreeWidget' visible='1'}
+:_QMenuBar	{type='QMenuBar' unnamed='1' visible='1'}
+:_QMessageBox	{type='QMessageBox' unnamed='1' visible='0'}
+:_QMessageBox_2	{type='QMessageBox' unnamed='1' visible='1'}
+:comboInstrument_QComboBox	{buddy=':ISIS Reflectometry.Instrument:_QLabel' name='comboInstrument' type='QComboBox' visible='1'}
+:splitterList.Process_QPushButton	{container=':ISIS Reflectometry.splitterList_QSplitter' name='buttonProcess' text='Process' type='QPushButton' visible='1'}
+:splitterList.tableMain_QTableWidget	{container=':ISIS Reflectometry.splitterList_QSplitter' name='tableMain' type='QTableWidget' visible='1'}
+:splitterList.widgetBottomRight_QWidget	{container=':ISIS Reflectometry.splitterList_QSplitter' name='widgetBottomRight' type='QWidget' visible='1'}
+:tableMain.Plot_QPushButton	{container=':splitterList.tableMain_QTableWidget' text='Plot' type='QPushButton' unnamed='1' visible='1'}
+:tableMain.Yes_QPushButton	{container=':splitterList.tableMain_QTableWidget' text='Yes' type='QPushButton' unnamed='1' visible='1'}
+:tableMain_QCheckBox	{container=':splitterList.tableMain_QTableWidget' type='QCheckBox' unnamed='1' visible='1'}
+:tableMain_QExpandingLineEdit	{columnIndex='0' container=':splitterList.tableMain_QTableWidget' rowIndex='0' type='QExpandingLineEdit' unnamed='1' visible='1'}
+:tableMain_QExpandingLineEdit_2	{columnIndex='1' container=':splitterList.tableMain_QTableWidget' rowIndex='0' type='QExpandingLineEdit' unnamed='1' visible='1'}
+:tableMain_QExpandingLineEdit_3	{columnIndex='2' container=':splitterList.tableMain_QTableWidget' rowIndex='0' type='QExpandingLineEdit' unnamed='1' visible='1'}
+:tableMain_QExpandingLineEdit_4	{columnIndex='5' container=':splitterList.tableMain_QTableWidget' rowIndex='0' type='QExpandingLineEdit' unnamed='1' visible='1'}
+:tableMain_QExpandingLineEdit_5	{columnIndex='7' container=':splitterList.tableMain_QTableWidget' rowIndex='0' type='QExpandingLineEdit' unnamed='1' visible='1'}
+:tableMain_QHeaderView	{container=':splitterList.tableMain_QTableWidget' orientation='2' type='QHeaderView' unnamed='1' visible='1'}
+:tableMain_QScrollBar	{container=':splitterList.tableMain_QTableWidget' type='QScrollBar' unnamed='1' visible='1'}

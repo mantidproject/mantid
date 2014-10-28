@@ -16,12 +16,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/Timer.h"
-
-#ifndef _WIN32
-  #include <sys/resource.h>
-#endif
-
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -453,48 +449,24 @@ public:
     }
   }
 
-
-
-
-
-
-
-
-
-  //------------------------------------------------------------------------------
-  /// Linux-only method for getting memory usage
-  int memory_usage()
-  {
-    // Linux only memory test
-#ifdef _WIN32
-    //Temporarily disabled for non-linux OSs
-#else
-    char buf[30];
-    snprintf(buf, 30, "/proc/%u/statm", (unsigned)getpid());
-    FILE* pf = fopen(buf, "r");
-    if (pf) {
-        int size; //       total program size
-        int status = fscanf(pf, "%u" /* %u %u %u %u %u"*/, &size/*, &resident, &share, &text, &lib, &data*/);
-        (void) status;
-        fclose(pf);
-        return size*4; //On my system each number here = 4 kb
-    }
-    fclose(pf);
-#endif
-    return 0;
-  }
-
   //------------------------------------------------------------------------------
   void test_histogram_cache()
   {
     //Try caching and most-recently-used MRU list.
     EventWorkspace_const_sptr ew2 = boost::dynamic_pointer_cast<const EventWorkspace>(ew);
+
     //Are the returned arrays the right size?
     MantidVec data1 = ew2->dataY(1);
     TS_ASSERT_EQUALS( data1.size(), NUMBINS-1);
+    // A single cached value now
+    TS_ASSERT_EQUALS( ew2->MRUSize(), 1);
+
     //This should get the cached one
     MantidVec data2 = ew2->dataY(1);
     TS_ASSERT_EQUALS( data2.size(), NUMBINS-1);
+    // Still a single cached value
+    TS_ASSERT_EQUALS( ew2->MRUSize(), 1);
+
     //All elements are the same
     for (std::size_t i=0; i<data1.size();i++)
       TS_ASSERT_EQUALS( data1[i], data2[i]);
@@ -507,34 +479,23 @@ public:
     data1 = ew2->dataY(0);
     TS_ASSERT_DELTA( ew2->dataY(0)[1], 2.0, 1e-6);
     TS_ASSERT_DELTA( data1[1], 2.0, 1e-6);
+    // Cache should now be full
+    TS_ASSERT_EQUALS( ew2->MRUSize(), 50);
 
-    int mem1 = memory_usage();
-    int mem2 = 0;
     int last = 100;
-    //Read more; memory use should be the same?
-
+    //Read more;
     for (int i=last; i<last+100;i++)
       data1 = ew2->dataY(i);
 
-#ifndef WIN32
-    mem2 = memory_usage();
-    TS_ASSERT_LESS_THAN( mem2-mem1, 10); //Memory usage should be ~the same.
-#endif
+    // Cache should now be full still
+    TS_ASSERT_EQUALS( ew2->MRUSize(), 50);
 
-    //Do it some more
-    last=200; mem1=mem2;
+    // Do it some more
+    last=200;
     for (int i=last; i<last+100;i++)
       data1 = ew2->dataY(i);
-
-
-#ifndef WIN32
-    mem2 = memory_usage();
-    TS_ASSERT_LESS_THAN( mem2-mem1, 10); //Memory usage should be ~the same.
-#endif
-
 
     //----- Now we test that setAllX clears the memory ----
-    mem1=mem2;
 
     //Yes, our eventworkspace MRU is full
     TS_ASSERT_EQUALS( ew->MRUSize(), 50);
@@ -548,13 +509,6 @@ public:
     //MRU should have been cleared now
     TS_ASSERT_EQUALS( ew->MRUSize(), 0);
     TS_ASSERT_EQUALS( ew2->MRUSize(), 0);
-
-//#ifndef WIN32
-//    mem2 = memory_usage();
-//    std::cout << "Mem change " << mem2-mem1 << "\n";
-//    TS_ASSERT_LESS_THAN( mem2-mem1, 0); //Memory usage should be lower!.
-//#endif
-
   }
 
   //------------------------------------------------------------------------------

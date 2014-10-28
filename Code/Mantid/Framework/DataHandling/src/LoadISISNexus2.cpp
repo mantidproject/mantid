@@ -16,7 +16,6 @@
 #include "MantidAPI/RegisterFileLoader.h"
 
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/XMLlogfile.h"
 
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>

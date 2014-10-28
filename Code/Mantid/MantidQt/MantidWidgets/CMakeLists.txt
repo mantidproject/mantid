@@ -12,8 +12,9 @@ set ( SRC_FILES
 	src/FitPropertyBrowser.cpp
 	src/FormulaDialogEditor.cpp
 	src/FunctionBrowser.cpp
+	src/HintingLineEdit.cpp
 	src/InstrumentSelector.cpp
-    src/MantidHelpWindow.cpp
+        src/MantidHelpWindow.cpp
 	src/MWDiag.cpp
 	src/MWRunFiles.cpp
 	src/MessageDisplay.cpp
@@ -36,8 +37,9 @@ set ( SRC_FILES
 	src/UserFunctionDialog.cpp
 	src/WorkspaceEditorFactory.cpp
 	src/WorkspaceSelector.cpp
-    src/pqHelpWindow.cxx
+        src/pqHelpWindow.cxx
 	src/pythonCalc.cpp
+	src/LineEditWithClear.cpp
 )
 
 # Header files with Q_OBJECT that qmake will "moc"
@@ -52,6 +54,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/FindDialog.h
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h
     inc/MantidQtMantidWidgets/FunctionBrowser.h
+    inc/MantidQtMantidWidgets/HintingLineEdit.h
     inc/MantidQtMantidWidgets/CatalogSearch.h
     inc/MantidQtMantidWidgets/CatalogSelector.h
     inc/MantidQtMantidWidgets/InstrumentSelector.h
@@ -80,6 +83,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/UserFunctionDialog.h
     inc/MantidQtMantidWidgets/WorkspaceEditorFactory.h
     inc/MantidQtMantidWidgets/WorkspaceSelector.h
+    inc/MantidQtMantidWidgets/LineEditWithClear.h
 )
 
 # Add the include files are NOT already in MOC_FILES

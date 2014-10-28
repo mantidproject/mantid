@@ -29,6 +29,8 @@
 #ifndef DoubleSpinBox_H
 #define DoubleSpinBox_H
 
+#include <map>
+
 #include <QAbstractSpinBox>
 #include <QCheckBox>
 
@@ -53,6 +55,9 @@ public:
   void setMinimum(double min);
   void setRange(double min, double max);
 
+  double getMaximum();
+  double getMinimum();
+
   int decimals(){return d_prec;};
   void setDecimals(int prec){if (prec >= 0) d_prec = prec;};
 
@@ -60,6 +65,8 @@ public:
   bool setValue(double val);
 
   void setFormat(const char format, int prec = 1){d_format = format; setDecimals(prec);};
+
+  void addSpecialTextMapping(QString text, double value);
 
   QString textFromValue ( double value ) const;
   virtual QValidator::State validate ( QString & input, int & pos ) const;
@@ -84,6 +91,9 @@ private:
   double d_value;
   double d_step;
   int d_prec;
+
+  //A set of mappins from strings which the user can enter in the box to double values
+  std::map<QString, double> m_specialTextMappings;
 };
 
 //! A checkable DoubleSpinBox that can be used to select the limits of a double interval. 

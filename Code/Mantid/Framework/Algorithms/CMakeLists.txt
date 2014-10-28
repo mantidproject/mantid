@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/AddTimeSeriesLog.cpp
 	src/AlignDetectors.cpp
 	src/AlphaCalc.cpp
+	src/AnnularRingAbsorption.cpp
 	src/AnyShapeAbsorption.cpp
 	src/AppendSpectra.cpp
 	src/ApplyCalibration.cpp
@@ -134,6 +135,7 @@ set ( SRC_FILES
 	src/InterpolatingRebin.cpp
 	src/InvertMask.cpp
 	src/Logarithm.cpp
+	src/LorentzCorrection.cpp
 	src/MaskBins.cpp
 	src/MaskBinsFromTable.cpp
 	src/MaskDetectorsIf.cpp
@@ -221,6 +223,7 @@ set ( SRC_FILES
 	src/SpecularReflectionPositionCorrect.cpp
 	src/SphericalAbsorption.cpp
 	src/Stitch1D.cpp
+	src/Stitch1DMany.cpp
 	src/StripPeaks.cpp
 	src/StripVanadiumPeaks.cpp
 	src/StripVanadiumPeaks2.cpp
@@ -238,6 +241,7 @@ set ( SRC_FILES
 	src/WeightedMean.cpp
 	src/WeightedMeanOfWorkspace.cpp
 	src/WeightingStrategy.cpp
+	src/WienerSmooth.cpp
 	src/WorkspaceJoiners.cpp
 	src/XDataConverter.cpp
 )
@@ -253,6 +257,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AddTimeSeriesLog.h
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AlphaCalc.h
+	inc/MantidAlgorithms/AnnularRingAbsorption.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
 	inc/MantidAlgorithms/AppendSpectra.h
 	inc/MantidAlgorithms/ApplyCalibration.h
@@ -379,6 +384,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/InterpolatingRebin.h
 	inc/MantidAlgorithms/InvertMask.h
 	inc/MantidAlgorithms/Logarithm.h
+	inc/MantidAlgorithms/LorentzCorrection.h
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskBinsFromTable.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
@@ -466,6 +472,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SpecularReflectionPositionCorrect.h
 	inc/MantidAlgorithms/SphericalAbsorption.h
 	inc/MantidAlgorithms/Stitch1D.h
+	inc/MantidAlgorithms/Stitch1DMany.h
 	inc/MantidAlgorithms/StripPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks2.h
@@ -483,6 +490,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/WeightedMean.h
 	inc/MantidAlgorithms/WeightedMeanOfWorkspace.h
 	inc/MantidAlgorithms/WeightingStrategy.h
+	inc/MantidAlgorithms/WienerSmooth.h
 	inc/MantidAlgorithms/WorkspaceJoiners.h
 	inc/MantidAlgorithms/XDataConverter.h
 )
@@ -509,6 +517,7 @@ set ( TEST_FILES
 	AddTimeSeriesLogTest.h
 	AlignDetectorsTest.h
 	AlphaCalcTest.h
+	AnnularRingAbsorptionTest.h
 	AnyShapeAbsorptionTest.h
 	AppendSpectraTest.h
 	ApplyCalibrationTest.h
@@ -582,6 +591,7 @@ set ( TEST_FILES
 	DiffractionFocussingTest.h
 	DivideTest.h
 	EditInstrumentGeometryTest.h
+  ElasticWindowTest.h
 	EstimatePDDetectorResolutionTest.h
 	ExponentialCorrectionTest.h
 	ExponentialTest.h
@@ -625,6 +635,7 @@ set ( TEST_FILES
 	InterpolatingRebinTest.h
 	InvertMaskTest.h
 	LogarithmTest.h
+	LorentzCorrectionTest.h
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
 	MaxMinTest.h
@@ -714,6 +725,7 @@ set ( TEST_FILES
 	WeightedMeanOfWorkspaceTest.h
 	WeightedMeanTest.h
 	WeightingStrategyTest.h
+	WienerSmoothTest.h
 	WorkspaceCreationHelperTest.h
 	WorkspaceGroupTest.h
 )
