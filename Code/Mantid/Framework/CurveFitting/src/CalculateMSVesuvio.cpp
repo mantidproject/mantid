@@ -859,7 +859,7 @@ namespace Mantid
 
         // Generate a new direction of travel
         const V3D & prevSc = scatterPts[i-1];
-        V3D & curSc = scatterPts[i-1];
+        V3D & curSc = scatterPts[i];
         const V3D & oldDir = neutronDirs[i-1];
         V3D & newDir = neutronDirs[i];
         size_t ntries(0);
