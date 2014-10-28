@@ -108,8 +108,8 @@ MantidUI::MantidUI(ApplicationWindow *aw):
   m_workspaceGroupUpdateObserver(*this,&MantidUI::handleWorkspaceGroupUpdate),
   m_configServiceObserver(*this,&MantidUI::handleConfigServiceUpdate),
   m_appWindow(aw),
-  m_lastShownInstrumentWin(NULL), m_lastShownSliceViewWin(NULL),
-  m_lastShownSpectrumViewerWin(NULL), m_lastShown1DPlotWin(NULL),
+  m_lastShownInstrumentWin(NULL), m_lastShownSliceViewWin(NULL), m_lastShownSpectrumViewerWin(NULL), 
+  m_lastShownColorFillWin(NULL), m_lastShown1DPlotWin(NULL), 
   m_vatesSubWindow(NULL)//, m_spectrumViewWindow(NULL)
 {
 
