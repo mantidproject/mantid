@@ -24,22 +24,26 @@ class VesuvioResolution(PythonAlgorithm):
         self.declareProperty(name='Mass', defaultValue=100.0,
                              doc='The mass defining the recoil peak in AMU')
 
-        self.declareProperty(name='OutputMode', defaultValue='TOF',
-                             validator=StringListValidator(['TOF', 'y-Space']),
-                             doc='')
-
-        self.declareProperty(WorkspaceProperty(name='OutputWorkspace',
+        self.declareProperty(WorkspaceProperty(name='OutputWorkspaceTOF',
                                                defaultValue='',
                                                direction=Direction.Output),
-                             doc='Output resolution workspace')
+                             doc='Output resolution workspace in TOF')
+
+        self.declareProperty(WorkspaceProperty(name='OutputWorkspaceYSpace',
+                                               defaultValue='',
+                                               direction=Direction.Output),
+                             doc='Output resolution workspace in ySpace')
 
 
     def PyExec(self):
         sample_ws = self.getPropertyValue('Sample')
-        out_ws = self.getPropertyValue('OutputWorkspace')
+        out_ws_tof = self.getPropertyValue('OutputWorkspaceTOF')
+        out_ws_ysp = self.getPropertyValue('OutputWorkspaceYSpace')
         spectrum_index = self.getProperty('SpectraIndex').value
         mass = self.getProperty('Mass').value
-        output_mode = self.getPropertyValue('OutputMode')
+
+        output_tof = (out_ws_tof != '')
+        output_ysp = (out_ws_ysp != '')
 
         function = 'name=VesuvioResolution, Mass=%f' % mass
         fit_naming_stem = '__vesuvio_res_fit'
@@ -63,16 +67,52 @@ class VesuvioResolution(PythonAlgorithm):
         extract.setChild(True)
         extract.setLogging(False)
         extract.setProperty("InputWorkspace", fit_ws)
-        extract.setProperty("OutputWorkspace", out_ws)
+        extract.setProperty("OutputWorkspace", out_ws_tof)
         extract.setProperty("WorkspaceIndex", 1)
         extract.execute()
-        out_ws = extract.getProperty('OutputWorkspace').value
+        res_tof = extract.getProperty('OutputWorkspace').value
+
+        if output_tof:
+            self.setProperty('OutputWorkspaceTOF', res_tof)
 
         # Convert to y-Space if needed
-        if output_mode == 'y-Space':
-            pass
+        if output_ysp:
 
-        self.setProperty('OutputWorkspace', out_ws)
+            # Clone the raw workspace to use the instrument parameters for ySpace conversion
+            # taking only the spectra that was used for the time of flight resolution
+            extract2 = mantid.api.AlgorithmManager.createUnmanaged('ExtractSingleSpectrum')
+            extract2.initialize()
+            extract2.setChild(True)
+            extract2.setLogging(False)
+            extract2.setProperty("InputWorkspace", sample_ws)
+            extract2.setProperty("OutputWorkspace", '__raw_clone')
+            extract2.setProperty("WorkspaceIndex", spectrum_index)
+            extract2.execute()
+            raw_clone = extract2.getProperty('OutputWorkspace').value
+
+            # Get the resolution data in time of flight from the fit workspace
+            res_data_x = res_tof.dataX(0)
+            res_data_y = res_tof.dataY(0)
+            res_data_e = res_tof.dataE(0)
+
+            # Copy it to the cloned raw workspace spectrum
+            raw_clone.setX(0, res_data_x)
+            raw_clone.setY(0, res_data_y)
+            raw_clone.setE(0, res_data_e)
+
+            # Convert the cloned workspace to ySpace
+            extract2 = mantid.api.AlgorithmManager.createUnmanaged('ConvertToYSpace')
+            extract2.initialize()
+            extract2.setChild(True)
+            extract2.setLogging(False)
+            extract2.setProperty("InputWorkspace", raw_clone)
+            extract2.setProperty("OutputWorkspace", out_ws_ysp)
+            extract2.setProperty("Mass", mass)
+            extract2.execute()
+            out_ws_ysp = extract2.getProperty('OutputWorkspace').value
+
+        if output_ysp:
+            self.setProperty('OutputWorkspaceYSpace', out_ws_ysp)
 
 
 AlgorithmFactory.subscribe(VesuvioResolution)
