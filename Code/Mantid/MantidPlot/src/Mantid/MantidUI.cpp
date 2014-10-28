@@ -766,8 +766,6 @@ void MantidUI::showSpectrumViewer()
       viewer->resize( 1050, 800 );
       connect(m_appWindow, SIGNAL(shutting_down()), viewer, SLOT(close()));
 
-      // TODO TODO - refactor/combine into a private method  (all the ifs with lastShown...
-      // plotWindowThereCanOnlyBeOne(QWidget* --only needs close/virt. delete---, QWidget* !!!)
       if (workspacesDockPlot1To1())
       {
         // only one at any given time
