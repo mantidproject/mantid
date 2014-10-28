@@ -7,7 +7,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include <forward_list>
+#include <list>
 
 namespace Mantid
 {
@@ -48,7 +48,7 @@ namespace Algorithms
     void removeBackground(int hist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data)const;
 
     //returns the list of the failing detectors
-    std::forward_list<int> & getFailingSpectrsList()const{return FailingSpectraList;}
+    std::list<int> & getFailingSpectrsList()const{return FailingSpectraList;}
   private:
     // pointer to the units conversion class for the working workspace;
     Kernel::Unit_sptr m_WSUnit;
@@ -79,7 +79,7 @@ namespace Algorithms
 
 
     // list of the spectra numbers for which detectors retrieval has been unsuccessful
-    mutable std::forward_list<int> FailingSpectraList;
+    mutable std::list<int> FailingSpectraList;
   };
 
 }
