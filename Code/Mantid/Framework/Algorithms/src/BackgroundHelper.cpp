@@ -10,7 +10,7 @@ namespace Mantid
     BackgroundHelper::BackgroundHelper():
       m_WSUnit(),m_bgWs(),m_wkWS(),
       m_singleValueBackground(false),
-      m_Jack05(0),m_ErrSq(0),
+      m_NBg(0),m_dtBg(1),m_ErrSq(0),
       m_Emode(0),
       m_L1(0),m_Efix(0),
       m_Sample(),
@@ -26,6 +26,7 @@ namespace Mantid
     {
       m_bgWs = bkgWS;
       m_wkWS = sourceWS;
+      m_Emode = emode;
       FailingSpectraList.clear();
 
       std::string bgUnits = bkgWS->getAxis(0)->unit()->unitID();
@@ -52,7 +53,8 @@ namespace Mantid
       const MantidVec& dataX = bkgWS->dataX(0);
       const MantidVec& dataY = bkgWS->dataY(0);
       const MantidVec& dataE = bkgWS->dataE(0);
-      m_Jack05 = dataY[0]/(dataX[1]-dataX[0]);
+      m_NBg    = dataY[0];
+      m_dtBg   = dataX[1]-dataX[0];
       m_ErrSq  = dataE[0]*dataE[0]; // needs further clarification
 
 
@@ -66,19 +68,21 @@ namespace Mantid
     */
     void BackgroundHelper::removeBackground(int nHist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data)const
     {
-      double Jack05,ErrSq;
+      double dtBg,ErrSq,IBg;
       if(m_singleValueBackground)
       {
-        Jack05= m_Jack05;
-        ErrSq   = m_ErrSq;
+        dtBg  = m_dtBg;
+        ErrSq = m_ErrSq;
+        IBg   = m_NBg;
       }
       else
       {
         const MantidVec& dataX = m_bgWs->dataX(nHist);
         const MantidVec& dataY = m_bgWs->dataY(nHist);
         const MantidVec& dataE = m_bgWs->dataX(nHist);
-        Jack05 = dataY[0]/(dataX[1]-dataX[0]);
-        ErrSq  = dataE[0]*dataE[0]; // Needs further clarification
+        dtBg = (dataX[1]-dataX[0]);
+        IBg  = dataY[0];
+        ErrSq= dataE[0]*dataE[0]; // Needs further clarification
       }
 
       try
@@ -89,20 +93,22 @@ namespace Mantid
         double L2 = detector->getDistance(*m_Sample);
         double delta(std::numeric_limits<double>::quiet_NaN());
         //
-        double tof1 = m_WSUnit->convertSingleToTOF(XValues[0], m_L1, L2,twoTheta, m_Emode, m_Efix,delta);
+        m_WSUnit->initialize(m_L1, L2,twoTheta, m_Emode, m_Efix,delta);
+        double tof1 = m_WSUnit->singleToTOF(XValues[0]);
         for(size_t i=0;i<y_data.size();i++)
         {
-          double tof2=m_WSUnit->convertSingleToTOF(XValues[i+1], m_L1, L2,twoTheta, m_Emode, m_Efix, delta);
-          double normBkgrnd = (tof1-tof2)*Jack05;
+          double tof2=m_WSUnit->singleToTOF(XValues[i+1]);
+          double Jack = std::fabs((tof2-tof1)/dtBg);
+          double normBkgrnd = IBg*Jack;
           tof1=tof2;
           y_data[i] -=normBkgrnd;
-          e_data[i]  =std::sqrt((ErrSq+e_data[i]*e_data[i])/2.); // needs further clarification -- Gaussian error summation
+          e_data[i]  =std::sqrt((ErrSq*Jack*Jack+e_data[i]*e_data[i])/2.); // needs further clarification -- Gaussian error summation?
         }
 
       }
       catch(...)
       {
-        // no background removal for this spectra as it does not have a detector; How should it be reported?
+        // no background removal for this spectra as it does not have a detector or other reason; How should it be reported?
         FailingSpectraList.push_front(nHist);
       }
 

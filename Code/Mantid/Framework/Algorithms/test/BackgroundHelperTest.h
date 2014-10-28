@@ -73,7 +73,7 @@ public:
 
     unitsConv.execute();
 
-    SourceWS =  API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("sampleWSdE");
+    SourceWS =  API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("sourceWSdE");
 
 
   }
@@ -106,10 +106,25 @@ public:
   {
     Algorithms::BackgroundHelper bgRemoval;
 
-    auto SourceWS=API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("sourceWSdE");
     int emode = static_cast<int>(Kernel::DeltaEMode().fromString("Direct"));
-
     bgRemoval.initialize(BgWS,SourceWS,emode);
+
+    MantidVec& dataX = SourceWS->dataX(0);
+    MantidVec& dataY = SourceWS->dataY(0);
+    MantidVec& dataE = SourceWS->dataE(0);
+
+    bgRemoval.removeBackground(0,dataX,dataY,dataE);
+
+    auto SampleWS =  API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("sampleWSdE");
+
+    const MantidVec & sampleX = SampleWS->readX(0);
+    const MantidVec & sampleY = SampleWS->readY(0);
+    const MantidVec & sampleE = SampleWS->readE(0);
+    for(size_t i=0;i<sampleY.size();i++)
+    {
+      TS_ASSERT_DELTA(dataX[i],sampleX[i],1.e-7);
+      TS_ASSERT_DELTA(dataY[i],sampleY[i],1.e-7);
+    }
 
   }
 

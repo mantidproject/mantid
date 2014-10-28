@@ -60,8 +60,10 @@ namespace Algorithms
 
     // if the background workspace is single value workspace
     bool m_singleValueBackground;
-    // the intensity of the background for first spectra of a background workspace
-    double m_Jack05;
+    // average number of counts at background for first spectra of a background workspace
+    double m_NBg;
+    // time interval for measuring the background
+    double m_dtBg;
     // Squared error of the background for first spectra of a background workspace
     double m_ErrSq;
     // energy conversion mode
