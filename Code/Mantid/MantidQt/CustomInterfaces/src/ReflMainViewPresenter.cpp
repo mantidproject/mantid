@@ -1046,6 +1046,9 @@ namespace MantidQt
     void ReflMainViewPresenter::showOptionsDialog()
     {
       auto options = new QtReflOptionsDialog(m_view, m_view->getPresenter());
+      //By default the dialog is only destroyed when ReflMainView is and so they'll stack up.
+      //This way, they'll be deallocated as soon as they've been closed.
+      options->setAttribute(Qt::WA_DeleteOnClose, true);
       options->exec();
     }
 
