@@ -26,6 +26,7 @@ be no gaps between bins. Rebin ensures that any of these space filling
 bins cannot be less than 25% or more than 125% of the width that was
 specified.
 
+
 .. _rebin-example-strings:
 
 Example Rebin param strings
@@ -76,6 +77,118 @@ following will happen:
 -  **From 4** rebin in bins of size 3 **up to 10**.
 
 Hence the actual *Param* string used is "0, 2, 4, 3, 10".
+
+
+Remove Background during rebinning options
+##########################################
+
+These options allow you to remove flat background, defined by the a single bin 
+historgram workspace with X-axis in the units of TOF from a workspace in any 
+units with known conversion into TOF. The background removal occurs during rebinning
+
+These options are especially useful during reduction 
+of event workspaces in multirep mode, where different event regions are associated with 
+different incident energies and rebinned into appropriate energy range together with 
+background removal on-the-fly.
+
+The algorithm used during background removal is equivalent to the one, presented below, except 
+intermediate workspaces are not created and the background removal calculations
+performed during rebinning::
+
+  from mantid.simpleapi import *
+  from mantid import config
+  import numpy as np
+  import sys
+  import os
+  
+  
+  maps_dir = '/home/user/InstrumentFiles/let/'
+  data_dir ='/home/user/results'   
+  ref_data_dir = '/home/user/SystemTests/AnalysisTests/ReferenceResults' 
+  config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,maps_dir,ref_data_dir))
+  config['defaultsave.directory'] = data_dir # folder to save resulting spe/nxspe files. Defaults are in
+  
+  # the name of a workspace containing background
+  filename = 'LET0007438'
+  groupedFilename = filename+'rings';
+  #
+  Ei= 25
+  e_min = -20
+  e_max = 20
+  dE = 0.1
+  bgRange = [15000,18000]
+
+  if not("Tgrid" in mtd):
+
+    if not(groupedFilename in mtd):
+        Load(Filename=filename+'.nxs', OutputWorkspace=filename, LoadMonitors=True)
+        GroupDetectors(InputWorkspace=filename, OutputWorkspace=groupedFilename , MapFile='LET_one2one_123.map', Behaviour='Average')
+
+    wsParent = mtd[groupedFilename];
+    
+    nHist = wsParent.getNumberHistograms();
+    print "Parent workspace contains {0:10} histograms".format(nHist)
+    # Get the energy binning correspondent to the binning produced by rebin function (not to re-implement the same function)
+    ws1s = ExtractSingleSpectrum(wsParent,0);
+    ws1s = ConvertUnits(ws1s,'DeltaE','Direct',Ei);
+    ws1s = Rebin(ws1s,Params=[e_min,dE,e_max]);
+    e_bins = ws1s.dataX(0);
+    nBins =e_bins.size;
+
+    x=[e_bins[i] for i in xrange(0,nBins)]
+    y=[0 for xx in xrange(0,len(x)-1)]*nHist
+    x = x*nHist
+    DeleteWorkspace(ws1s);
+    
+    eGrid = CreateWorkspace(DataX=x,DataY=y,UnitX='DeltaE',NSpec=nHist,VerticalAxisUnit='SpectraNumber',ParentWorkspace=wsParent)
+    
+    Tgrid=ConvertUnits(eGrid,'TOF',Emode='Direct',EFixed=Ei)
+    
+  else:
+    Tgrid = mtd['Tgrid'];
+    eGrid = mtd['eGrid'];
+    nHist = Tgrid.getNumberHistograms();
+    nBins = Tgrid.dataX(0).size;
+
+  if not('Bg' in mtd):
+    Bg=Rebin(InputWorkspace=groupedFilename,  Params=[bgRange[0],bgRange[1]-bgRange[0],bgRange[1]],PreserveEvents=False)
+    #Bg=CalculateFlatBackground(InputWorkspace=groupedFilename, StartX=bgRange[0], EndX=bgRange[1], Mode='Mean', OutputMode='Return Background', SkipMonitors=True)
+  else:
+    Bg = mtd['Bg']
+    
+  # Assign constant background to the Time grid workspace, minding different time bin width
+  for nspec in xrange(0,nHist):
+    bg            = Bg.dataY(nspec)
+    if bg[0]>0:
+       bgT           = Bg.dataX(nspec)  
+       TimeScale     = Tgrid.dataX(nspec);
+       # jacobian for the unit conversion
+       Jac           = (TimeScale[1:nBins]-TimeScale[0:nBins-1])*(bg[0]/(bgT[1]-bgT[0]));  
+       error         = np.sqrt(Jac);
+       eGrid.setY(nspec, Jac)
+       eGrid.setE(nspec, error)
+    else:  # signal and error for background is 0 anyway.
+        pass
+    #print " bg at spectra {0} equal to : {1}".format(nspec,bg[0])
+
+        
+  background = eGrid;
+  resultEt   = ConvertUnits(groupedFilename,'DeltaE',Emode='Direct',EFixed=Ei)
+  result     = Rebin(InputWorkspace=resultEt, Params=[e_min,dE,e_max],PreserveEvents=False)
+  fr         = result-background;
+  #
+  sourceSum  = SumSpectra(result,0,nHist);
+  bckgrdSum  = SumSpectra(background ,0,nHist);
+  removedBkgSum = SumSpectra(fr ,0,nHist);
+
+The results of executing this script on workspace measuring background and the results of the removal are
+presented on the following picture:
+
+.. image:: /images/BgRemoval.png
+
+Blue line on this image represents the results, obatined using Rebin with background removal obtained using the following script::
+
+
 
 .. _rebin-usage:
 
