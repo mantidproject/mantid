@@ -284,9 +284,9 @@ public:
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
   virtual Unit * clone() const;
- ///@return -DBL_MAX as ToF convetanble to TOF for in any time range
+ ///@return -DBL_MAX as ToF convertible to TOF for in any time range
   virtual double conversionTOFMin()const;
- ///@return DBL_MAX as ToF convetanble to TOF for in any time range
+ ///@return DBL_MAX as ToF convertible  to TOF for in any time range
   virtual double conversionTOFMax()const;
 };
 

@@ -5,12 +5,16 @@ namespace Mantid
 {
   namespace Algorithms
   {
+  
     /// Constructor
     BackgroundHelper::BackgroundHelper():
+      m_WSUnit(),m_bgWs(),m_wkWS(),
       m_singleValueBackground(false),
+      m_Jack05(0),m_ErrSq(0),
       m_Emode(0),
-      m_Efix(0),
-      m_Jack05(0)
+      m_L1(0),m_Efix(0),
+      m_Sample(),
+      FailingSpectraList()
     {};
 
     /** Initialization method: 
@@ -22,6 +26,7 @@ namespace Mantid
     {
       m_bgWs = bkgWS;
       m_wkWS = sourceWS;
+      FailingSpectraList.clear();
 
       std::string bgUnits = bkgWS->getAxis(0)->unit()->unitID();
       if(bgUnits!="TOF")
@@ -44,11 +49,14 @@ namespace Mantid
       m_singleValueBackground = false;
       if(bkgWS->getNumberHistograms()==0)
         m_singleValueBackground = true;
-      const MantidVec& dataY = bkgWS->dataY(0);
       const MantidVec& dataX = bkgWS->dataX(0);
+      const MantidVec& dataY = bkgWS->dataY(0);
+      const MantidVec& dataE = bkgWS->dataE(0);
       m_Jack05 = dataY[0]/(dataX[1]-dataX[0]);
+      m_ErrSq  = dataE[0]*dataE[0]; // needs further clarification
 
 
+      m_Efix = this->getEi(sourceWS);
     }
     /**Method removes background from vectors which represent a histogram data for a single spectra 
     * @param nHist   -- number (workspaceID) of the spectra in the workspace, where background going to be removed
@@ -56,18 +64,21 @@ namespace Mantid
     * @param y_data  -- the spectra signal
     * @param e_data  -- the spectra errors
     */
-    void BackgroundHelper::removeBackground(int nHist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data)
+    void BackgroundHelper::removeBackground(int nHist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data)const
     {
-      double Jack05;
+      double Jack05,ErrSq;
       if(m_singleValueBackground)
       {
         Jack05= m_Jack05;
+        ErrSq   = m_ErrSq;
       }
       else
       {
-        const MantidVec& dataY = m_bgWs->dataY(nHist);
         const MantidVec& dataX = m_bgWs->dataX(nHist);
+        const MantidVec& dataY = m_bgWs->dataY(nHist);
+        const MantidVec& dataE = m_bgWs->dataX(nHist);
         Jack05 = dataY[0]/(dataX[1]-dataX[0]);
+        ErrSq  = dataE[0]*dataE[0]; // Needs further clarification
       }
 
       try
@@ -84,18 +95,59 @@ namespace Mantid
           double tof2=m_WSUnit->convertSingleToTOF(XValues[i+1], m_L1, L2,twoTheta, m_Emode, m_Efix, delta);
           double normBkgrnd = (tof1-tof2)*Jack05;
           tof1=tof2;
-          double normErr    = std::sqrt(normBkgrnd);
-          y_data[i-1] -=normBkgrnd;
-          e_data[i-1] +=normErr;
+          y_data[i] -=normBkgrnd;
+          e_data[i]  =std::sqrt((ErrSq+e_data[i]*e_data[i])/2.); // needs further clarification -- Gaussian error summation
         }
 
       }
       catch(...)
       {
-        // no background removal for this detector; How should it be reported?
+        // no background removal for this spectra as it does not have a detector; How should it be reported?
+        FailingSpectraList.push_front(nHist);
       }
 
     }
+    /** Method returns the efixed or Ei value stored in properties of the input workspace.
+     *  Indirect instruments can have eFxed and Direct instruments can have Ei defined as the properties of the workspace. 
+     *
+     *  This method provide guess for efixed for all other kind of instruments. Correct indirect instrument will overwrite 
+     *  this value while wrongly defined or different types of instruments will provide the value of "Ei" property (log value)
+     *  or undefined if "Ei" property is not found.
+     *
+     */
+    double BackgroundHelper::getEi(const API::MatrixWorkspace_const_sptr &inputWS)const
+    { 
+      double Efi = std::numeric_limits<double>::quiet_NaN();
+   
+    
+      // is Ei on workspace properties? (it can be defined for some reason if detectors do not have one, and then it would exist as Ei)
+      bool EiFound(false);
+      try
+      {
+         Efi =  inputWS->run().getPropertyValueAsType<double>("Ei");
+         EiFound = true;
+      }
+      catch(Kernel::Exception::NotFoundError &)
+      {}
+      // try to get Efixed as property on a workspace, obtained for indirect instrument
+      bool eFixedFound(false);
+      if (!EiFound)
+      {
+        try
+        {
+           Efi  =inputWS->run().getPropertyValueAsType<double>("eFixed");
+           eFixedFound = true;
+        }
+        catch(Kernel::Exception::NotFoundError &)
+        {}
+      }
+
+      //if (!(EiFound||eFixedFound))
+      //  g_log.debug()<<" Ei/eFixed requested but have not been found\n";
+
+      return Efi;
+    }
+
 
   } // end API
 } // end Mantid

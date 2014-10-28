@@ -73,13 +73,34 @@ public:
 
     unitsConv.execute();
 
+    SourceWS =  API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("sampleWSdE");
+
 
   }
 
   ~BackgroundHelperTest()
   {
     BgWS.reset();
+    SourceWS.reset();
   }
+  void testWrongInit()
+  {
+     Algorithms::BackgroundHelper bgRemoval;
+     // create workspace with units of energy transfer
+     auto bkgWS = WorkspaceCreationHelper::createProcessedInelasticWS(std::vector<double>(1,1.), std::vector<double>(1,20.), std::vector<double>(1,10.));
+     TSM_ASSERT_THROWS("Should throw if background workspace is not in TOF units",bgRemoval.initialize(bkgWS,SourceWS,0),std::invalid_argument);
+
+
+     bkgWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 15);
+     TSM_ASSERT_THROWS("Should throw if background is not 1 or equal to source",bgRemoval.initialize(bkgWS,SourceWS,0),std::invalid_argument);
+
+     auto sourceWS = WorkspaceCreationHelper::Create2DWorkspace(5,10);
+     TSM_ASSERT_THROWS("Should throw if source workspace does not have units",bgRemoval.initialize(BgWS,sourceWS,0),std::invalid_argument);
+
+     sourceWS ->getAxis(0)->setUnit("TOF");
+     TSM_ASSERT_THROWS("Should throw if source workspace does not have proper instrument",bgRemoval.initialize(BgWS,sourceWS,0),std::invalid_argument);
+  }
+
   
   void testBackgroundHelper()
   {
@@ -93,7 +114,8 @@ public:
   }
 
 private:
-  API::MatrixWorkspace_sptr BgWS;    
+  API::MatrixWorkspace_sptr BgWS;   
+  API::MatrixWorkspace_sptr SourceWS;
  
 };
 
