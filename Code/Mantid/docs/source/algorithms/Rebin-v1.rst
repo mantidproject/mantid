@@ -181,7 +181,7 @@ performed during rebinning::
   bckgrdSum  = SumSpectra(background ,0,nHist);
   removedBkgSum = SumSpectra(fr ,0,nHist);
 
-The results of executing this script on workspace measuring background and the results of the removal are
+The results of executing this script on workspace contained measured background and the results of the background removal are
 presented on the following picture:
 
 .. image:: /images/BgRemoval.png
@@ -345,4 +345,64 @@ Output:
    What type is the workspace after 1st rebin: <class 'mantid.api._api.IEventWorkspace'>
    What type is the workspace after 2nd rebin: <class 'mantid.api._api.MatrixWorkspace'>
 
+**Example -- Background removal during rebinning
+
+.. testcode:: ExRebinWithBkgRemoval
+
+   # Create sample workspace with events
+   Test=CreateSampleWorkspace(WorkspaceType='Event', Function='Flat background')
+   # Add sample log necessary for unit conversion
+   AddSampleLog(Test,'Ei',LogText='25.',LogType='Number');
+
+   # Calculate background
+   Bg = Rebin(Test,Params='15000,5000,20000',PreserveEvents=False);
+   
+   
+   # Convert event's units
+   Test_BgDE=ConvertUnits(Test,Target='DeltaE',EMode='Direct');
+   
+   # Calculate histograms for event workspace in energy binning
+   Sample = Rebin(Test_BgDE,Params='-20,2,20',PreserveEvents=False);
+   # Calculate histograms for event workspace in energy binning and background removed
+   Result   = Rebin(Test_BgDE,Params='-20,2,20',PreserveEvents=False,FlatBkgWorkspace='Bg',EMode='Direct');
+   
+   # Get access to the results
+   XS = Sample.dataX(0);
+   XR = Result .dataX(0);
+   
+   YS = Sample.dataY(0);
+   YR = Result .dataY(0);
+   
+   ES = Sample.dataE(0);
+   ER = Result .dataE(0);
+   
+   # print first spectra, Note invalid error calculations
+   print "| x sampl  | x result | S sample | S no bg  | Err samp | Err no_bg|"
+   for i in xrange(0,20):
+      print "|{0:10}|{1:10}|{2:10.4f}|{3:10.3f}|{4:10.3f}|{5:10.3f}|".format(XS[i],XR[i],YS[i],YR[i],ES[i],ER[i]);
+   
+.. testoutput:: ExRebinWithBkgRemoval
+
+   | x sampl  | x result | S sample | S no bg  | Err samp | Err no_bg|
+   |     -20.0|     -20.0|    1.0000|    -0.959|     1.000|    83.115|
+   |     -18.0|     -18.0|    2.0000|    -0.101|     1.414|    89.127|
+   |     -16.0|     -16.0|    3.0000|     0.740|     1.732|    95.900|
+   |     -14.0|     -14.0|    1.0000|    -1.441|     1.000|   103.568|
+   |     -12.0|     -12.0|    5.0000|     2.353|     2.236|   112.332|
+   |     -10.0|     -10.0|    2.0000|    -0.885|     1.414|   122.387|
+   |      -8.0|      -8.0|    5.0000|     1.841|     2.236|   134.052|
+   |      -6.0|      -6.0|    2.0000|    -1.481|     1.414|   147.684|
+   |      -4.0|      -4.0|    4.0000|     0.139|     2.000|   163.806|
+   |      -2.0|      -2.0|    3.0000|    -1.315|     1.732|   183.086|
+   |       0.0|       0.0|    6.0000|     1.133|     2.449|   206.478|
+   |       2.0|       2.0|    7.0000|     1.454|     2.646|   235.313|
+   |       4.0|       4.0|    5.0000|    -1.400|     2.236|   271.548|
+   |       6.0|       6.0|    7.0000|    -0.499|     2.646|   318.157|
+   |       8.0|       8.0|    9.0000|     0.047|     3.000|   379.833|
+   |      10.0|      10.0|   11.0000|     0.054|     3.317|   464.415|
+   |      12.0|      12.0|   16.0000|     2.190|     4.000|   585.907|
+   |      14.0|      14.0|   16.0000|    -2.188|     4.000|   771.675|
+   |      16.0|      16.0|   26.0000|     0.490|     5.099|  1082.292|
+   |      18.0|      18.0|   39.0000|    -0.581|     6.245|  1679.267|
+   
 .. categories::
