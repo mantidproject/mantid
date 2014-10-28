@@ -43,7 +43,8 @@ SpectrumDisplay::SpectrumDisplay(  QwtPlot*       spectrum_plot,
                              QTableWidget*  table_widget )
   : data_source(0), spectrum_plot(spectrum_plot), slider_handler(slider_handler),
     range_handler(range_handler), h_graph_display(h_graph), v_graph_display(v_graph),
-    image_table(table_widget)
+    image_table(table_widget),
+    m_lastY(0.0)
 {
   ColorMaps::GetColorMap( ColorMaps::HEAT,
                           256,
@@ -508,6 +509,8 @@ void SpectrumDisplay::SetVGraph( double x )
  */
 std::vector<std::string> SpectrumDisplay::ShowInfoList( double x, double y )
 {
+  m_lastY = y;
+
   std::vector<std::string> info_list;
   data_source->GetInfoList( x, y, info_list );
   int n_infos = (int)info_list.size() / 2;
@@ -533,6 +536,15 @@ std::vector<std::string> SpectrumDisplay::ShowInfoList( double x, double y )
   image_table->resizeColumnsToContents();
 
   return info_list;
+}
+
+
+/**
+ * Gets the last Y value (i.e. data row) the crosshair was pointed at.
+ */
+double SpectrumDisplay::GetLastY()
+{
+  return m_lastY;
 }
 
 

@@ -104,6 +104,9 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      QPoint GetPlotTransform( QPair<double, double> values );
      QPair<double, double> GetPlotInvTransform( QPoint point );
 
+     // Gets the last Y value pointed at
+     double GetLastY();
+
   protected:
      SpectrumPlotItem*    spectrum_plot_item;
 
@@ -140,6 +143,8 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      double               total_y_max;
      double               total_x_min;
      double               total_x_max;
+
+     double               m_lastY;
 };
 
 } // namespace SpectrumView

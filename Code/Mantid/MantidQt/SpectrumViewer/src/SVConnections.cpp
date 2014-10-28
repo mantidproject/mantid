@@ -309,18 +309,18 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
     if (m_picker_y < 0) return false;
 
     // Convert Y position to values so that a change of 1 corresponds to a change in spec. no by 1
-    QPair<double, double> newPositionData = spectrum_display->GetPlotInvTransform(QPoint(m_picker_x, m_picker_y));
     int newX = m_picker_x;
+    double lastY = spectrum_display->GetLastY();
 
     QKeyEvent *keyEvent = dynamic_cast<QKeyEvent *>(event);
     int key = keyEvent->key();
     switch (key)
     {
     case Qt::Key_Up:
-      newPositionData.second++;
+      lastY += 1.0;
       break;
     case Qt::Key_Down:
-      newPositionData.second--;
+      lastY -= 1.0;
       break;
     case Qt::Key_Left:
       newX--;
@@ -334,7 +334,7 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
     }
 
     // Convert Y position back to pixel position
-    QPoint newPoint = spectrum_display->GetPlotTransform(newPositionData);
+    QPoint newPoint = spectrum_display->GetPlotTransform(qMakePair(0.0, lastY));
     int newY = newPoint.y();
 
     // Ignore the event if the position is outside of the plot area
@@ -352,8 +352,13 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
     QPoint canvasPos = sv_ui->spectrumPlot->canvas()->mapToGlobal(QPoint(0,0));
     // move the cursor to the correct position
     sv_ui->spectrumPlot->canvas()->cursor().setPos(QPoint(canvasPos.x()+m_picker_x, canvasPos.y()+m_picker_y));
-    // update the pointed at position
-    spectrum_display->SetPointedAtPoint( QPoint(m_picker_x, m_picker_y) );
+
+    QPair<double, double> transPoints = spectrum_display->GetPlotInvTransform(QPoint(newX, newY));
+
+    spectrum_display->SetHGraph( lastY );
+    spectrum_display->SetVGraph( transPoints.first );
+
+    spectrum_display->ShowInfoList( transPoints.first, lastY );
 
     // consume the event
     return true;
