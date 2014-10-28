@@ -21,11 +21,12 @@ namespace Poldi
   public:
     RefinedRange(const PoldiPeak_sptr &peak, double fwhmMultiples);
     RefinedRange(double xStart, double xEnd, const std::vector<PoldiPeak_sptr> &peaks);
+    RefinedRange(const RefinedRange &other);
 
     bool operator <(const RefinedRange &other) const;
 
     bool overlaps(const RefinedRange &other) const;
-    RefinedRange merged(const RefinedRange &other) const;
+    void merge(const RefinedRange &other);
 
     const std::vector<PoldiPeak_sptr> getPeaks() const { return m_peaks; }
 
@@ -37,6 +38,10 @@ namespace Poldi
     double m_xStart;
     double m_xEnd;
   };
+
+  typedef boost::shared_ptr<RefinedRange> RefinedRange_sptr;
+
+  bool operator <(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs);
 
   /** PoldiFitPeaks1D :
     
@@ -82,10 +87,8 @@ namespace Poldi
     void setPeakFunction(const std::string &peakFunction);
     PoldiPeakCollection_sptr getInitializedPeakCollection(const DataObjects::TableWorkspace_sptr &peakTable) const;
 
-    std::vector<RefinedRange> getRefinedRanges(const PoldiPeakCollection_sptr &peaks) const;
-    std::vector<RefinedRange> getReducedRanges(const std::vector<RefinedRange> &ranges) const;
-    bool hasOverlappingRanges(const std::vector<RefinedRange> &ranges) const;
-
+    std::vector<RefinedRange_sptr> getRefinedRanges(const PoldiPeakCollection_sptr &peaks) const;
+    std::vector<RefinedRange_sptr> getReducedRanges(const std::vector<RefinedRange_sptr> &ranges) const;
 
     API::IFunction_sptr getPeakProfile(const PoldiPeak_sptr &poldiPeak) const;
     void setValuesFromProfileFunction(PoldiPeak_sptr poldiPeak, const API::IFunction_sptr &fittedFunction) const;

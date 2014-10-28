@@ -14,6 +14,7 @@
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
 
 #include "MantidAPI/CompositeFunction.h"
+#include <boost/make_shared.hpp>
 
 
 namespace Mantid
@@ -43,6 +44,14 @@ RefinedRange::RefinedRange(double xStart, double xEnd, const std::vector<PoldiPe
 {
 }
 
+RefinedRange::RefinedRange(const RefinedRange &other) :
+    m_peaks(other.m_peaks),
+    m_xStart(other.m_xStart),
+    m_xEnd(other.m_xEnd)
+{
+
+}
+
 bool RefinedRange::operator <(const RefinedRange &other) const
 {
     return m_xStart < other.m_xStart;
@@ -55,16 +64,19 @@ bool RefinedRange::overlaps(const RefinedRange &other) const
            || (other.m_xStart < m_xStart && other.m_xEnd > m_xEnd);
 }
 
-RefinedRange RefinedRange::merged(const RefinedRange &other) const
+void RefinedRange::merge(const RefinedRange &other)
 {
-    std::vector<PoldiPeak_sptr> mergedPeaks(m_peaks);
-    mergedPeaks.insert(mergedPeaks.end(), other.m_peaks.begin(), other.m_peaks.end());
+    m_peaks.insert(m_peaks.end(), other.m_peaks.begin(), other.m_peaks.end());
 
-    double mergedXStart = std::min(m_xStart, other.m_xStart);
-    double mergedXEnd = std::max(m_xEnd, other.m_xEnd);
-
-    return RefinedRange(mergedXStart, mergedXEnd, mergedPeaks);
+    m_xStart = std::min(m_xStart, other.m_xStart);
+    m_xEnd = std::max(m_xEnd, other.m_xEnd);
 }
+
+bool operator <(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs)
+{
+    return (*lhs) < (*rhs);
+}
+
 
 
 // Register the algorithm into the AlgorithmFactory
@@ -132,53 +144,36 @@ PoldiPeakCollection_sptr PoldiFitPeaks1D::getInitializedPeakCollection(const Dat
     return peakCollection;
 }
 
-std::vector<RefinedRange> PoldiFitPeaks1D::getRefinedRanges(const PoldiPeakCollection_sptr &peaks) const
+std::vector<RefinedRange_sptr> PoldiFitPeaks1D::getRefinedRanges(const PoldiPeakCollection_sptr &peaks) const
 {
-    std::vector<RefinedRange> ranges;
+    std::vector<RefinedRange_sptr> ranges;
     for(size_t i = 0; i < peaks->peakCount(); ++i) {
-        ranges.push_back(RefinedRange(peaks->peak(i), m_fwhmMultiples));
+        ranges.push_back(boost::make_shared<RefinedRange>(peaks->peak(i), m_fwhmMultiples));
     }
 
     return ranges;
 }
 
-std::vector<RefinedRange> PoldiFitPeaks1D::getReducedRanges(const std::vector<RefinedRange> &ranges) const
+std::vector<RefinedRange_sptr> PoldiFitPeaks1D::getReducedRanges(const std::vector<RefinedRange_sptr> &ranges) const
 {
-    std::vector<RefinedRange> workingRanges(ranges);
+    std::vector<RefinedRange_sptr> workingRanges(ranges);
     std::sort(workingRanges.begin(), workingRanges.end());
 
-    if(!hasOverlappingRanges(workingRanges)) {
-        return ranges;
-    }
+    std::vector<RefinedRange_sptr> reducedRanges;
+    reducedRanges.push_back(boost::make_shared<RefinedRange>(*(workingRanges.front())));
 
-    std::vector<RefinedRange> reducedRanges;
+    for(size_t i = 1; i < workingRanges.size(); ++i) {
+        RefinedRange_sptr lastReduced = reducedRanges.back();
+        RefinedRange_sptr current = workingRanges[i];
 
-    size_t i = 0;
-    while(i < (workingRanges.size() - 1) ) {
-        RefinedRange current = workingRanges[i];
-        RefinedRange next = workingRanges[i + 1];
-
-        if(!current.overlaps(next)) {
-            reducedRanges.push_back(current);
-            i += 1;
+        if(!lastReduced->overlaps(*current)) {
+            reducedRanges.push_back(boost::make_shared<RefinedRange>(*current));
         } else {
-            reducedRanges.push_back(current.merged(next));
-            i += 2;
+            lastReduced->merge(*current);
         }
     }
 
-    return getReducedRanges(reducedRanges);
-}
-
-bool PoldiFitPeaks1D::hasOverlappingRanges(const std::vector<RefinedRange> &ranges) const
-{
-    for(size_t i = 0; i < ranges.size() - 1; ++i) {
-        if(ranges[i].overlaps(ranges[i+1])) {
-            return true;
-        }
-    }
-
-    return false;
+    return reducedRanges;
 }
 
 IFunction_sptr PoldiFitPeaks1D::getPeakProfile(const PoldiPeak_sptr &poldiPeak) const {
@@ -234,8 +229,8 @@ void PoldiFitPeaks1D::exec()
 
     g_log.information() << "Peaks to fit: " << m_peaks->peakCount() << std::endl;
 
-    std::vector<RefinedRange> rawRanges = getRefinedRanges(m_peaks);
-    std::vector<RefinedRange> reducedRanges = getReducedRanges(rawRanges);
+    std::vector<RefinedRange_sptr> rawRanges = getRefinedRanges(m_peaks);
+    std::vector<RefinedRange_sptr> reducedRanges = getReducedRanges(rawRanges);
 
     g_log.information() << "Ranges used for fitting: " << reducedRanges.size() << std::endl;
 
@@ -344,7 +339,6 @@ TableWorkspace_sptr PoldiFitPeaks1D::generateResultTable(const PoldiPeakCollecti
 
     return outputTable;
 }
-
 
 } // namespace Poldi
 } // namespace Mantid
