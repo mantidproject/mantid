@@ -712,19 +712,8 @@ namespace Mantid
     {
       // Detector information
       DetectorParams detpar = ConvertToYSpace::getDetectorParameters(m_inputWS, wsIndex);
-      // t0 is stored in seconds by default, whereas here we want microseconds
-      detpar.t0 *= 1e6;
-
-      const Geometry::IDetector_const_sptr detector = m_inputWS->getDetector(wsIndex);
-      const auto & pmap = m_inputWS->instrumentParameters();
-      // Resolution information
-      ResolutionParams respar;
-      respar.dl1 = ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_l1");
-      respar.dl2 = ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_l2");
-      respar.dtof = ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_tof");
-      respar.dthe = ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_theta"); //radians
-      respar.dEnLorentz = ConvertToYSpace::getComponentParameter(detector, pmap, "hwhm_lorentz");
-      respar.dEnGauss = ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_gauss");
+      detpar.t0 *= 1e6; // t0 in microseconds here
+      ResolutionParams respar = VesuvioResolution::getResolutionParameters(m_inputWS, wsIndex);
 
       // Final counts averaged over all simulations
       const size_t nruns(NSIMULATIONS), nscatters(NSCATTERS), nevents(NEVENTS);
