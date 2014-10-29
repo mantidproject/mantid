@@ -5,6 +5,9 @@
 #include <string>
 
 #include "MantidKernel/System.h"
+
+class QVariant;
+
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -39,8 +42,8 @@ namespace MantidQt
       virtual ~IReflPresenter() {};
       //Tell the presenter something happened
       virtual void notify(int flag) = 0;
-      virtual const std::map<std::string,std::string>& options() const = 0;
-      virtual void setOptions(const std::map<std::string,std::string>& options) = 0;
+      virtual const std::map<std::string,QVariant>& options() const = 0;
+      virtual void setOptions(const std::map<std::string,QVariant>& options) = 0;
     private:
 
     };

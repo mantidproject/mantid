@@ -30,10 +30,10 @@ namespace MantidQt
     /** This slot saves the currently configured options to the presenter */
     void QtReflOptionsDialog::saveOptions()
     {
-      std::map<std::string,std::string> options = m_presenter->options();
+      std::map<std::string,QVariant> options = m_presenter->options();
 
       //Set the options map to match the UI
-      options["WarnProcessAll"] = ui.checkWarnProcessAll->isChecked() ? "true" : "false";
+      options["WarnProcessAll"] = ui.checkWarnProcessAll->isChecked();
 
       //Update the presenter's options
       m_presenter->setOptions(options);
@@ -42,10 +42,10 @@ namespace MantidQt
     /** This slot sets the ui to match the presenter's options */
     void QtReflOptionsDialog::loadOptions()
     {
-      std::map<std::string,std::string> options = m_presenter->options();
+      std::map<std::string,QVariant> options = m_presenter->options();
 
       //Set the values from the options
-      ui.checkWarnProcessAll->setChecked(options["WarnProcessAll"] == "true");
+      ui.checkWarnProcessAll->setChecked(options["WarnProcessAll"].toBool());
     }
 
   } //CustomInterfaces

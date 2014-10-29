@@ -250,7 +250,7 @@ namespace MantidQt
       std::set<size_t> rows = m_view->getSelectedRows();
       if(rows.empty())
       {
-        if(m_options["WarnProcessAll"] == "true")
+        if(m_options["WarnProcessAll"].toBool())
         {
           //Does the user want to abort?
           if(!m_view->askUserYesNo("This will process all rows in the table. Continue?","Process all rows?"))
@@ -1055,7 +1055,7 @@ namespace MantidQt
     /** Gets the options used by the presenter
         @returns The options used by the presenter
      */
-    const std::map<std::string,std::string>& ReflMainViewPresenter::options() const
+    const std::map<std::string,QVariant>& ReflMainViewPresenter::options() const
     {
       return m_options;
     }
@@ -1063,7 +1063,7 @@ namespace MantidQt
     /** Sets the options used by the presenter
         @param options : The new options for the presenter to use
      */
-    void ReflMainViewPresenter::setOptions(const std::map<std::string,std::string>& options)
+    void ReflMainViewPresenter::setOptions(const std::map<std::string,QVariant>& options)
     {
       //Optionally check the validity of the new options
       m_options = options;
@@ -1075,7 +1075,7 @@ namespace MantidQt
       m_options.clear();
 
       //Set defaults
-      m_options["WarnProcessAll"] = "true";
+      m_options["WarnProcessAll"] = true;
 
       //Load from disk
       //TODO
