@@ -61,12 +61,15 @@
       <item row="0" column="0">
        <widget class="QLabel" name="lblTimeUnit">
         <property name="text">
-         <string>Time Unit:</string>
+         <string>Time per Data Point:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
        <widget class="QDoubleSpinBox" name="sbTimeUnit">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The time in pico seconds between each consecutive data point.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="maximum">
          <double>1000.000000000000000</double>
         </property>
