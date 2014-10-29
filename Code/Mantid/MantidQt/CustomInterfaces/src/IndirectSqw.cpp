@@ -4,6 +4,8 @@
 
 #include <QFileInfo>
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -14,8 +16,8 @@ namespace CustomInterfaces
   IndirectSqw::IndirectSqw(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent)
   {
-    connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(sOfQwRebinE(bool)));
-    connect(m_uiForm.sqw_dsSampleInput, SIGNAL(loadClicked()), this, SLOT(sOfQwPlotInput()));
+    connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(energyRebinToggle(bool)));
+    connect(m_uiForm.sqw_dsSampleInput, SIGNAL(loadClicked()), this, SLOT(plotContour()));
 
     m_uiForm.sqw_leELow->setValidator(m_valDbl);
     m_uiForm.sqw_leEWidth->setValidator(m_valDbl);
@@ -24,16 +26,123 @@ namespace CustomInterfaces
     m_uiForm.sqw_leQWidth->setValidator(m_valDbl);
     m_uiForm.sqw_leQHigh->setValidator(m_valDbl);
   }
-    
+
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   IndirectSqw::~IndirectSqw()
   {
   }
-  
+
   void IndirectSqw::setup()
   {
+  }
+
+  bool IndirectSqw::validate()
+  {
+    bool valid = true;
+
+    UserInputValidator uiv;
+    uiv.checkDataSelectorIsValid("Sample", m_uiForm.sqw_dsSampleInput);
+    QString error = uiv.generateErrorMessage();
+
+    if(!error.isEmpty())
+    {
+      valid = false;
+      emit showMessageBox(error);
+    }
+
+    if(m_uiForm.sqw_ckRebinE->isChecked() && validateEnergyRebin())
+      valid = false;
+
+    if(!validateQRebin())
+      valid = false;
+
+    return valid;
+  }
+
+  /**
+   * Validates the Q rebinning parameters.
+   *
+   * @returns If the rebinning is valid
+   */
+  bool IndirectSqw::validateQRebin()
+  {
+    bool valid = true;
+
+    if ( m_uiForm.sqw_leQLow->text() == "" )
+    {
+      valid = false;
+      m_uiForm.sqw_valQLow->setText("*");
+    }
+    else
+    {
+      m_uiForm.sqw_valQLow->setText(" ");
+    }
+
+    if ( m_uiForm.sqw_leQWidth->text() == "" )
+    {
+      valid = false;
+      m_uiForm.sqw_valQWidth->setText("*");
+    }
+    else
+    {
+      m_uiForm.sqw_valQWidth->setText(" ");
+    }
+
+    if ( m_uiForm.sqw_leQHigh->text() == "" )
+    {
+      valid = false;
+      m_uiForm.sqw_valQHigh->setText("*");
+    }
+    else
+    {
+      m_uiForm.sqw_valQHigh->setText(" ");
+    }
+
+    return valid;
+  }
+
+  /**
+   * Validates the energy rebinning parameters.
+   *
+   * @returns If the rebinning is valid
+   */
+  bool IndirectSqw::validateEnergyRebin()
+  {
+    bool valid = true;
+
+    if ( m_uiForm.sqw_leELow->text() == "" )
+    {
+      valid = false;
+      m_uiForm.sqw_valELow->setText("*");
+    }
+    else
+    {
+      m_uiForm.sqw_valELow->setText(" ");
+    }
+
+    if ( m_uiForm.sqw_leEWidth->text() == "" )
+    {
+      valid = false;
+      m_uiForm.sqw_valEWidth->setText("*");
+    }
+    else
+    {
+      m_uiForm.sqw_valEWidth->setText(" ");
+    }
+
+    if ( m_uiForm.sqw_leEHigh->text() == "" )
+    {
+      valid = false;
+      m_uiForm.sqw_valEHigh->setText("*");
+    }
+    else
+    {
+      m_uiForm.sqw_valEHigh->setText(" ");
+    }
+
+    return valid;
   }
 
   void IndirectSqw::run()
@@ -114,92 +223,12 @@ namespace CustomInterfaces
     QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
   }
 
-  bool IndirectSqw::validate()
-  {
-    bool valid = true;
-
-    UserInputValidator uiv;
-    uiv.checkDataSelectorIsValid("Sample", m_uiForm.sqw_dsSampleInput);
-    QString error = uiv.generateErrorMessage();
-
-    if (!error.isEmpty())
-    {
-      valid = false;
-      emit showMessageBox(error);
-    }
-
-    if ( m_uiForm.sqw_ckRebinE->isChecked() )
-    {
-      if ( m_uiForm.sqw_leELow->text() == "" )
-      {
-        valid = false;
-        m_uiForm.sqw_valELow->setText("*");
-      }
-      else
-      {
-        m_uiForm.sqw_valELow->setText(" ");
-      }
-
-      if ( m_uiForm.sqw_leEWidth->text() == "" )
-      {
-        valid = false;
-        m_uiForm.sqw_valEWidth->setText("*");
-      }
-      else
-      {
-        m_uiForm.sqw_valEWidth->setText(" ");
-      }
-
-      if ( m_uiForm.sqw_leEHigh->text() == "" )
-      {
-        valid = false;
-        m_uiForm.sqw_valEHigh->setText("*");
-      }
-      else
-      {
-        m_uiForm.sqw_valEHigh->setText(" ");
-      }
-    }
-
-    if ( m_uiForm.sqw_leQLow->text() == "" )
-    {
-      valid = false;
-      m_uiForm.sqw_valQLow->setText("*");
-    }
-    else
-    {
-      m_uiForm.sqw_valQLow->setText(" ");
-    }
-
-    if ( m_uiForm.sqw_leQWidth->text() == "" )
-    {
-      valid = false;
-      m_uiForm.sqw_valQWidth->setText("*");
-    }
-    else
-    {
-      m_uiForm.sqw_valQWidth->setText(" ");
-    }
-
-    if ( m_uiForm.sqw_leQHigh->text() == "" )
-    {
-      valid = false;
-      m_uiForm.sqw_valQHigh->setText("*");
-    }
-    else
-    {
-      m_uiForm.sqw_valQHigh->setText(" ");
-    }
-
-    return valid;
-  }
-
   /**
    * Enabled/disables the rebin in energy UI widgets
    *
    * @param state :: True to enable RiE UI, false to disable
    */
-  void IndirectSqw::sOfQwRebinE(bool state)
+  void IndirectSqw::energyRebinToggle(bool state)
   {
     QString val;
     if ( state ) val = "*";
@@ -223,32 +252,28 @@ namespace CustomInterfaces
    *
    * Creates a colour 2D plot of the data
    */
-  void IndirectSqw::sOfQwPlotInput()
+  void IndirectSqw::plotContour()
   {
-    QString pyInput = "from mantid.simpleapi import *\n"
-      "from mantidplot import *\n";
-
     if (m_uiForm.sqw_dsSampleInput->isValid())
     {
-      if(m_uiForm.sqw_dsSampleInput->isFileSelectorVisible())
-      {
-        //Load file into workspacwe
-        pyInput += "filename = r'" + m_uiForm.sqw_dsSampleInput->getFullFilePath() + "'\n"
-          "(dir, file) = os.path.split(filename)\n"
-          "(sqwInput, ext) = os.path.splitext(file)\n"
-          "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
-      }
-      else
-      {
-        //Use existing workspace
-        pyInput += "sqwInput = '" + m_uiForm.sqw_dsSampleInput->getCurrentDataName() + "'\n";
-      }
+      QString sampleWsName = m_uiForm.sqw_dsSampleInput->getCurrentDataName();
 
-      pyInput += "ConvertSpectrumAxis(InputWorkspace=sqwInput, OutputWorkspace=sqwInput[:-4]+'_rqw', Target='ElasticQ', EMode='Indirect')\n"
-        "ws = importMatrixWorkspace(sqwInput[:-4]+'_rqw')\n"
-        "ws.plotGraph2D()\n";
+      QString convertedWsName = sampleWsName.left(sampleWsName.length() - 4) + "_rqw";
 
-      QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
+      IAlgorithm_sptr convertSpecAlg = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
+      convertSpecAlg->initialize();
+
+      convertSpecAlg->setProperty("InputWorkspace", sampleWsName.toStdString());
+      convertSpecAlg->setProperty("OutputWorkspace", convertedWsName.toStdString());
+      convertSpecAlg->setProperty("Target", "ElasticQ");
+      convertSpecAlg->setProperty("EMode", "Indirect");
+
+      convertSpecAlg->execute();
+
+      QString pyInput = "from mantidplot import plot2D\n"
+                        "plot2D('" + convertedWsName + "')\n";
+
+      m_pythonRunner.runPythonCode(pyInput).trimmed();
     }
     else
     {
