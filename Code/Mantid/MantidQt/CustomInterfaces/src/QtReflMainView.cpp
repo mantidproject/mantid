@@ -46,10 +46,6 @@ namespace MantidQt
       ui.splitterTables->setStretchFactor(0, 0);
       ui.splitterTables->setStretchFactor(1, 1);
 
-      //Zero out the progress bar
-      ui.progressBar->setRange(0, 100);
-      ui.progressBar->setValue(0);
-
       //Allow rows to be reordered
       ui.viewTable->verticalHeader()->setMovable(true);
 

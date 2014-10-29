@@ -322,7 +322,11 @@
              <number>1</number>
             </property>
             <item>
-             <widget class="QProgressBar" name="progressBar"/>
+             <widget class="QProgressBar" name="progressBar">
+              <property name="value">
+               <number>0</number>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QLabel" name="labelProcessInstrument">
