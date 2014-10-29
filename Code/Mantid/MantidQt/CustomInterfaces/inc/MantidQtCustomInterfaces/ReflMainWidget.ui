@@ -239,6 +239,7 @@
             <addaction name="actionAppendRow"/>
             <addaction name="actionDeleteRow"/>
             <addaction name="actionGroupRows"/>
+            <addaction name="actionClearSelected"/>
             <addaction name="actionExpandSelection"/>
            </widget>
           </item>
@@ -376,6 +377,7 @@
     <addaction name="actionPrependRow"/>
     <addaction name="actionAppendRow"/>
     <addaction name="actionGroupRows"/>
+    <addaction name="actionClearSelected"/>
     <addaction name="separator"/>
     <addaction name="actionDeleteRow"/>
    </widget>
@@ -482,6 +484,15 @@
    </property>
    <property name="toolTip">
     <string>Set options for the Reflectometry UI</string>
+   </property>
+  </action>
+  <action name="actionClearSelected">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/erase.png</normaloff>:/erase.png</iconset>
+   </property>
+   <property name="text">
+    <string>Clear Selected</string>
    </property>
   </action>
  </widget>

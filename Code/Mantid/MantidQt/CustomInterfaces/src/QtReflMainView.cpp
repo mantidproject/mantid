@@ -153,6 +153,14 @@ namespace MantidQt
     }
 
     /**
+    This slot notifies the presenter that the "clear selected" button has been pressed
+    */
+    void QtReflMainView::on_actionClearSelected_triggered()
+    {
+      m_presenter->notify(ClearSelectedFlag);
+    }
+
+    /**
     This slot notifies the presenter that the "new table" button has been pressed
     */
     void QtReflMainView::on_actionNewTable_triggered()
@@ -200,6 +208,7 @@ namespace MantidQt
       menu->addAction(ui.actionPrependRow);
       menu->addAction(ui.actionAppendRow);
       menu->addAction(ui.actionGroupRows);
+      menu->addAction(ui.actionClearSelected);
       menu->addSeparator();
       menu->addAction(ui.actionDeleteRow);
 

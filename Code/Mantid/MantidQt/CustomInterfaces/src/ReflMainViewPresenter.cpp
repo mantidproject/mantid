@@ -851,6 +851,7 @@ namespace MantidQt
       case ReflMainView::DeleteRowFlag:       deleteRow();          break;
       case ReflMainView::ProcessFlag:         process();            break;
       case ReflMainView::GroupRowsFlag:       groupRows();          break;
+      case ReflMainView::ClearSelectedFlag:   clearSelected();      break;
       case ReflMainView::OpenTableFlag:       openTable();          break;
       case ReflMainView::NewTableFlag:        newTable();           break;
       case ReflMainView::TableUpdatedFlag:    m_tableDirty = true;  break;
@@ -1051,6 +1052,29 @@ namespace MantidQt
           selection.insert(i);
 
       m_view->setSelection(selection);
+    }
+
+    /** Clear the currently selected rows */
+    void ReflMainViewPresenter::clearSelected()
+    {
+      std::set<int> rows = m_view->getSelectedRows();
+      std::set<int> ignore;
+      for(auto row = rows.begin(); row != rows.end(); ++row)
+      {
+        ignore.clear();
+        ignore.insert(*row);
+
+        m_model->setData(m_model->index(*row, COL_RUNS), "");
+        m_model->setData(m_model->index(*row, COL_ANGLE), "");
+        m_model->setData(m_model->index(*row, COL_TRANSMISSION), "");
+        m_model->setData(m_model->index(*row, COL_QMIN), "");
+        m_model->setData(m_model->index(*row, COL_QMAX), "");
+        m_model->setData(m_model->index(*row, COL_SCALE), 1.0);
+        m_model->setData(m_model->index(*row, COL_DQQ), "");
+        m_model->setData(m_model->index(*row, COL_GROUP), getUnusedGroup(ignore));
+        m_model->setData(m_model->index(*row, COL_OPTIONS), "");
+      }
+      m_tableDirty = true;
     }
 
     /** Shows the Refl Options dialog */

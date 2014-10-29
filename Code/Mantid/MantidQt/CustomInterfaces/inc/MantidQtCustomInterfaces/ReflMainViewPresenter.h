@@ -93,6 +93,8 @@ namespace MantidQt
       virtual void prependRow();
       //delete row(s) from the model
       virtual void deleteRow();
+      //clear selected row(s) in the model
+      virtual void clearSelected();
       //group selected rows together
       virtual void groupRows();
       //expand selection to group

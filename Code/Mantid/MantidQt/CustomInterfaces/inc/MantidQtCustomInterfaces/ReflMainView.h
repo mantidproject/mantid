@@ -82,6 +82,7 @@ namespace MantidQt
       static const int TableUpdatedFlag    = 10;
       static const int ExpandSelectionFlag = 11;
       static const int OptionsDialogFlag   = 12;
+      static const int ClearSelectedFlag   = 13;
     };
   }
 }
