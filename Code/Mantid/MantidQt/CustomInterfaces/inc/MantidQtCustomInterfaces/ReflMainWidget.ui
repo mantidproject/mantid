@@ -485,7 +485,7 @@
      <normaloff>:/drag_curves.png</normaloff>:/drag_curves.png</iconset>
    </property>
    <property name="text">
-    <string>Group Rows</string>
+    <string>Group Selected</string>
    </property>
   </action>
   <action name="actionProcess">
