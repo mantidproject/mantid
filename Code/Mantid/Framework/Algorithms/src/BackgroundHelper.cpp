@@ -83,7 +83,7 @@ namespace Mantid
         const MantidVec& dataE = m_bgWs->dataX(nHist);
         dtBg = (dataX[1]-dataX[0]);
         IBg  = dataY[0];
-        ErrSq= dataE[0]*dataE[0]; // Needs further clarification
+        //ErrSq= dataE[0]*dataE[0]; // Needs further clarification
       }
 
       try
