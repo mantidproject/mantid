@@ -25,6 +25,42 @@ namespace Kernel
 #define PRAGMA(x) _Pragma(#x)
 #endif //_MSC_VER
 
+
+/** Begins a block to skip processing is the algorithm has been interupted
+ * Note the end of the block if not defined that must be added by including
+ * PARALLEL_END_INTERUPT_REGION at the end of the loop
+ */
+#define PARALLEL_START_INTERUPT_REGION \
+                if (!m_parallelException && !m_cancel) { \
+                  try {
+
+/** Ends a block to skip processing is the algorithm has been interupted
+ * Note the start of the block if not defined that must be added by including
+ * PARALLEL_START_INTERUPT_REGION at the start of the loop
+ */
+#define PARALLEL_END_INTERUPT_REGION \
+                } /* End of try block in PARALLEL_START_INTERUPT_REGION */ \
+                catch(std::exception &ex) { \
+                  if (!m_parallelException) \
+                  { \
+                    m_parallelException = true; \
+                    g_log.error() << this->name() << ": " << ex.what() << "\n"; \
+                  } \
+                } \
+                catch(...) { m_parallelException = true; } \
+              } // End of if block in PARALLEL_START_INTERUPT_REGION
+
+/** Adds a check after a Parallel region to see if it was interupted
+ */
+#define PARALLEL_CHECK_INTERUPT_REGION \
+                if (m_parallelException) \
+                { \
+                  g_log.debug("Exception thrown in parallel region"); \
+                  throw std::runtime_error(this->name()+": error (see log)"); \
+                } \
+                interruption_point();
+
+
 // _OPENMP is automatically defined if openMP support is enabled in the compiler.
 #ifdef _OPENMP
 
@@ -92,40 +128,6 @@ namespace Kernel
 #define IF_NOT_PARALLEL \
                 if (omp_get_num_threads() == 1)
 
-/** Begins a block to skip processing is the algorithm has been interupted
-* Note the end of the block if not defined that must be added by including 
-* PARALLEL_END_INTERUPT_REGION at the end of the loop
-*/
-#define PARALLEL_START_INTERUPT_REGION \
-                if (!m_parallelException && !m_cancel) { \
-                  try {
-
-/** Ends a block to skip processing is the algorithm has been interupted
-* Note the start of the block if not defined that must be added by including 
-* PARALLEL_START_INTERUPT_REGION at the start of the loop
-*/
-#define PARALLEL_END_INTERUPT_REGION \
-                  } /* End of try block in PARALLEL_START_INTERUPT_REGION */ \
-                  catch(std::exception &ex) { \
-                    if (!m_parallelException) \
-                    { \
-                      m_parallelException = true; \
-                      g_log.error() << this->name() << ": " << ex.what() << "\n"; \
-                    } \
-                  } \
-                  catch(...) { m_parallelException = true; } \
-                } // End of if block in PARALLEL_START_INTERUPT_REGION
-
-/** Adds a check after a Parallel region to see if it was interupted
-*/
-#define PARALLEL_CHECK_INTERUPT_REGION \
-                if (m_parallelException) \
-                { \
-                  g_log.debug("Exception thrown in parallel region"); \
-                  throw std::runtime_error(this->name()+": error (see log)"); \
-                } \
-                interruption_point();
-
 /** Specifies that the next code line or block will only allow one thread through at a time
 */
 #define PARALLEL_CRITICAL(name) \
@@ -178,9 +180,6 @@ namespace Kernel
 #define PARALLEL_FOR3(workspace1, workspace2, workspace3)
 #define IF_PARALLEL if (false)
 #define IF_NOT_PARALLEL
-#define PARALLEL_START_INTERUPT_REGION
-#define PARALLEL_END_INTERUPT_REGION
-#define PARALLEL_CHECK_INTERUPT_REGION
 #define PARALLEL_CRITICAL(name)
 #define PARALLEL_ATOMIC
 #define PARALLEL_THREAD_NUMBER 0

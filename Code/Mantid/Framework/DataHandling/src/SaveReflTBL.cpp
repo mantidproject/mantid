@@ -111,7 +111,8 @@ namespace Mantid
         //now add dq/q and scale from the first row in the group
         TableRow row = ws->getRow(rowNos[0]);
         writeVal(row.cell<std::string>(5),file);
-        writeVal(row.cell<std::string>(6),file, false, true);
+        std::string scaleStr = boost::lexical_cast<std::string>(row.cell<double>(6));
+        writeVal(scaleStr, file, false, true);
       }
 
       //now do the same for the ungrouped
@@ -130,7 +131,8 @@ namespace Mantid
         }
         //now add dq/q and scale
         writeVal(row.cell<std::string>(5),file);
-        writeVal(row.cell<std::string>(6),file, false, true);
+        std::string scaleStr = boost::lexical_cast<std::string>(row.cell<double>(6));
+        writeVal(scaleStr, file, false, true);
       }
       file.close();
     }

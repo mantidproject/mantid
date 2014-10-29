@@ -35,15 +35,9 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      Stitch1DMany()
-      {
-      }
-      ;
+      Stitch1DMany() : m_numWorkspaces(0), m_manualScaleFactor(1.0), m_scaleRHSWorkspace(true), m_useManualScaleFactor(false) {};
       /// Destructor
-      virtual ~Stitch1DMany()
-      {
-      }
-      ;
+      virtual ~Stitch1DMany() {};
       /// Algorithm's name for identification. @see Algorithm::name
       virtual const std::string name() const
       {

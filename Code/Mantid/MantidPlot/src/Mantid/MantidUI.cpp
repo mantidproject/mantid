@@ -40,6 +40,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 
+
 #include <QMessageBox>
 #include <QTextEdit>
 #include <QListWidget>
@@ -175,6 +176,9 @@ MantidUI::MantidUI(ApplicationWindow *aw):
   // Ticket #672
   //connect(mantidMenu, SIGNAL(aboutToShow()), this, SLOT(mantidMenuAboutToShow()));
   mantidMenuAboutToShow();
+
+  QShortcut* sc = new QShortcut(QKeySequence(QKeySequence::Delete), m_appWindow);
+  connect(sc, SIGNAL(activated()), this, SLOT(deletePressEvent()));
 
   menuMantidMatrix = new QMenu(m_appWindow);
   connect(menuMantidMatrix, SIGNAL(aboutToShow()), this, SLOT(menuMantidMatrixAboutToShow()));
@@ -1097,13 +1101,19 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
   // Cache some frequently used values
   IComponent_const_sptr sample = ws->getInstrument()->getSample();
   bool signedThetaParamRetrieved(false), showSignedTwoTheta(false); //If true,  signedVersion of the two theta value should be displayed
+  QVector<QList<QVariant> > tableColValues;
+  tableColValues.resize(nrows);
+  PARALLEL_FOR1( ws )
   for( int row = 0; row < nrows; ++row )
   {
+    // Note PARALLEL_START_INTERUPT_REGION & friends apparently not needed (like in algorithms)
+    // as there's an extensive try...catch below. If it was need, using those macros would
+    // require data members and methods that are available in algorithm classed but not here,
+    // including m_cancel, m_parallelException, interrrupt_point().
+    QList<QVariant>& colValues = tableColValues[row];
     size_t wsIndex = indices.empty() ? static_cast<size_t>(row) : indices[row];
-    QList<QVariant> colValues;
     colValues << QVariant(static_cast<double>(wsIndex));
     const double dataY0(ws->readY(wsIndex)[0]), dataE0(ws->readE(wsIndex)[0]);
-
     try
     {
       ISpectrum *spectrum = ws->getSpectrum(wsIndex);
@@ -1139,7 +1149,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
       IDetector_const_sptr det = ws->getDetector(wsIndex);
       if(!signedThetaParamRetrieved)
       {
-        std::vector<std::string> parameters = det->getStringParameter("show-signed-theta", true); //recursive
+        const std::vector<std::string>& parameters = det->getStringParameter("show-signed-theta", true); //recursive
         showSignedTwoTheta = (!parameters.empty() && find(parameters.begin(), parameters.end(), "Always") != parameters.end());
         signedThetaParamRetrieved = true;
       }
@@ -1196,10 +1206,14 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
                 << QVariant("0") // rtp
                 << QVariant("n/a"); // monitor
     }// End catch for no spectrum
+  }
 
+  // This modifies widgets, so it needs to run in the Qt GUI thread: no openmp here
+  for( int row = 0; row < nrows; ++row ) {
+    const QList<QVariant>& colValues = tableColValues[row];
     for(int col = 0; col < ncols; ++col)
     {
-      const QVariant colValue = colValues[col];
+      const QVariant& colValue = colValues[col];
       if(QMetaType::QString == colValue.userType()) // Avoid a compiler warning with type() about comparing different enums...
       {
         t->setText(row, col, colValue.toString());
@@ -1210,8 +1224,8 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
       }
     }
   }
-
   t->showNormal();
+
   return t;
 }
 
@@ -1233,6 +1247,14 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
   if(!t) return NULL;
   t->showNormal();
   return t;
+}
+
+/**
+ * Triggered by a delete key press, and attempts to delete a workspace if it passes the focus checks 
+ */
+void MantidUI::deletePressEvent()
+{
+  m_exploreMantid->deleteWorkspaces();
 }
 
 /**
@@ -1354,6 +1376,14 @@ void MantidUI::showAlgorithmDialog(const QString & algName, int version)
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
   if( !alg ) return;
   MantidQt::API::AlgorithmDialog* dlg = createAlgorithmDialog(alg);
+
+  if (algName == "Load")
+  {
+    // when loading files, we'll need to update the list of recent files
+    // hook up MantidUI::fileDialogAccept() to the LoadDialog dialog accepted() signal
+    connect(dlg, SIGNAL(accepted()), this, SLOT(loadFileDialogAccept()));
+  }
+
   dlg->show();
   dlg->raise();
   dlg->activateWindow();
@@ -1380,6 +1410,14 @@ void MantidUI::showAlgorithmDialog(QString algName, QHash<QString,QString> param
     alg->setPropertyValue(it.key().toStdString(),it.value().toStdString());
   }
   MantidQt::API::AlgorithmDialog* dlg = createAlgorithmDialog(alg);
+
+  if (algName == "Load") 
+  {
+    // when loading files, we'll need to update the list of recent files
+    // hook up MantidUI::fileDialogAccept() to the LoadDialog dialog accepted() signal
+    connect(dlg, SIGNAL(accepted()), this, SLOT(loadFileDialogAccept()));
+  }
+
   dlg->show();
   dlg->raise();
   dlg->activateWindow();
@@ -1746,6 +1784,21 @@ bool MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const boo
     }
     return true;
   }
+}
+
+/**
+* Slot to update the recent files list (from main appWindow) when accepting LoadDialog dialogs
+*/
+void MantidUI::loadFileDialogAccept()
+{
+  QObject* sender = QObject::sender();
+  MantidQt::API::AlgorithmDialog* dlg = reinterpret_cast<MantidQt::API::AlgorithmDialog*>(sender);
+  if (!dlg)
+    return;  // should never happen
+
+  QString fn = MantidQt::API::AlgorithmInputHistory::Instance().previousInput("Load", "Filename");
+  appWindow()->updateRecentFilesList(fn);
+  // recent files list updated. After this point, the Qt signal handler will go to LoadDialog::accept()
 }
 
 void MantidUI::handleLoadDAEFinishedNotification(const Poco::AutoPtr<Algorithm::FinishedNotification>& pNf)

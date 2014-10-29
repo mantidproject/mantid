@@ -71,6 +71,7 @@ public:
     *@param loadFileData -- if true, the data on HDD and not yet in memory are loaded into memory before deleting fileBacked information, 
                             if false, all on HDD contents are discarded, which can break the data integrity (used by destructor)  */
     virtual void clearFileBacked(bool loadFileData)=0;
+    virtual void reserveMemoryForLoad(uint64_t)=0;
 
     /**Save the box at specific disk position using the class, respoinsible for the file IO. */
     virtual void saveAt(API::IBoxControllerIO *const /*saver */,  uint64_t /*position*/)const=0;
