@@ -52,7 +52,7 @@ namespace Mantid
         m_singleValueBackground = true;
       const MantidVec& dataX = bkgWS->dataX(0);
       const MantidVec& dataY = bkgWS->dataY(0);
-      const MantidVec& dataE = bkgWS->dataE(0);
+      //const MantidVec& dataE = bkgWS->dataE(0);
       m_NBg    = dataY[0];
       m_dtBg   = dataX[1]-dataX[0];
       //m_ErrSq  = dataE[0]*dataE[0]; // needs further clarification
@@ -80,7 +80,7 @@ namespace Mantid
       {
         const MantidVec& dataX = m_bgWs->dataX(nHist);
         const MantidVec& dataY = m_bgWs->dataY(nHist);
-        const MantidVec& dataE = m_bgWs->dataX(nHist);
+        //const MantidVec& dataE = m_bgWs->dataX(nHist);
         dtBg = (dataX[1]-dataX[0]);
         IBg  = dataY[0];
         //ErrSq= dataE[0]*dataE[0]; // Needs further clarification
