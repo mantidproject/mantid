@@ -152,6 +152,9 @@ namespace Mantid
                     const DetectorParams & detpar,
                     const ResolutionParams &respar,
                     Simulation & simulCounts) const;
+      void assignToOutput(const size_t nscatters,
+                          const SimulationWithErrors & avgCounts, API::ISpectrum & totalsc,
+                          API::ISpectrum & multsc) const;
       double calculateCounts(const size_t nscatters,
                              const DetectorParams & detpar,
                              const ResolutionParams &respar,

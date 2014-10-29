@@ -731,7 +731,41 @@ namespace Mantid
       // Average over all runs and assign to output workspaces
       SimulationWithErrors avgCounts = accumulator.average();
       avgCounts.normalise();
+      assignToOutput(nscatters, avgCounts, totalsc, multsc);
+    }
 
+    /**
+     * Perform a single simulation of a given number of events for up to a maximum number of
+     * scatterings on a chosen detector
+     * @param nevents The number of neutron events to simulate
+     * @param nscatters Maximum order of scattering that should be simulated
+     * @param detpar Detector information describing the final detector position
+     * @param respar Resolution information on the intrument as a whole
+     * @param simulCounts Simulation object used to storing the calculated number of counts
+     */
+    void CalculateMSVesuvio::simulate(const size_t nevents, const size_t nscatters,
+                                      const DetectorParams & detpar,
+                                      const ResolutionParams &respar,
+                                      Simulation & simulCounts) const
+    {
+      for(size_t i = 0; i < nevents; ++i)
+      {
+        calculateCounts(nscatters, detpar, respar, simulCounts);
+      }
+    }
+
+    /**
+     * Assign the averaged counts to the correct workspaces
+     * @param nscatters The highest order of scattering
+     * @param avgCounts Counts & errors separated for each scattering order
+     * @param totalsc A non-const reference to the spectrum for the total scattering calculation
+     * @param multsc A non-const reference to the spectrum for the multiple scattering contribution
+     */
+    void
+    CalculateMSVesuvio::assignToOutput(const size_t nscatters,
+                                       const CalculateMSVesuvio::SimulationWithErrors &avgCounts,
+                                       API::ISpectrum & totalsc, API::ISpectrum & multsc) const
+    {
       // Sum up all multiple scatter events
       auto & msscatY = multsc.dataY();
       auto & msscatE = multsc.dataE();
@@ -755,26 +789,6 @@ namespace Mantid
       const auto & errors0 = avgCounts.errors.front();
       std::transform(errors0.begin(), errors0.end(), msscatE.begin(), totalscE.begin(),
                      VectorHelper::SumGaussError<double>());
-    }
-
-    /**
-     * Perform a single simulation of a given number of events for up to a maximum number of
-     * scatterings on a chosen detector
-     * @param nevents The number of neutron events to simulate
-     * @param nscatters Maximum order of scattering that should be simulated
-     * @param detpar Detector information describing the final detector position
-     * @param respar Resolution information on the intrument as a whole
-     * @param simulCounts Simulation object used to storing the calculated number of counts
-     */
-    void CalculateMSVesuvio::simulate(const size_t nevents, const size_t nscatters,
-                                      const DetectorParams & detpar,
-                                      const ResolutionParams &respar,
-                                      Simulation & simulCounts) const
-    {
-      for(size_t i = 0; i < nevents; ++i)
-      {
-        calculateCounts(nscatters, detpar, respar, simulCounts);
-      }
     }
 
     /**
