@@ -36,9 +36,11 @@ namespace MantidQt
     {
       ui.setupUi(this);
 
-      ui.buttonAddRow->setDefaultAction(ui.actionAddRow);
+      ui.buttonAppendRow->setDefaultAction(ui.actionAppendRow);
       ui.buttonDeleteRow->setDefaultAction(ui.actionDeleteRow);
       ui.buttonGroupRows->setDefaultAction(ui.actionGroupRows);
+      ui.buttonExpandSelection->setDefaultAction(ui.actionExpandSelection);
+      ui.buttonProcess->setDefaultAction(ui.actionProcess);
 
       //Expand the process runs column at the expense of the search column
       ui.splitterTables->setStretchFactor(0, 0);
@@ -51,13 +53,18 @@ namespace MantidQt
       //Allow rows to be reordered
       ui.viewTable->verticalHeader()->setMovable(true);
 
-      connect(ui.actionSaveTable,   SIGNAL(triggered()), this, SLOT(actionSave()));
-      connect(ui.actionSaveTableAs, SIGNAL(triggered()), this, SLOT(actionSaveAs()));
-      connect(ui.actionNewTable,    SIGNAL(triggered()), this, SLOT(actionNewTable()));
-      connect(ui.actionAddRow,      SIGNAL(triggered()), this, SLOT(actionAddRow()));
-      connect(ui.actionDeleteRow,   SIGNAL(triggered()), this, SLOT(actionDeleteRow()));
-      connect(ui.actionProcess,     SIGNAL(triggered()), this, SLOT(actionProcess()));
-      connect(ui.actionGroupRows,   SIGNAL(triggered()), this, SLOT(actionGroupRows()));
+      //Custom context menu for table
+      connect(ui.viewTable, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+
+      connect(ui.actionSaveTable,       SIGNAL(triggered()), this, SLOT(actionSave()));
+      connect(ui.actionSaveTableAs,     SIGNAL(triggered()), this, SLOT(actionSaveAs()));
+      connect(ui.actionNewTable,        SIGNAL(triggered()), this, SLOT(actionNewTable()));
+      connect(ui.actionAppendRow,       SIGNAL(triggered()), this, SLOT(actionAppendRow()));
+      connect(ui.actionPrependRow,      SIGNAL(triggered()), this, SLOT(actionPrependRow()));
+      connect(ui.actionDeleteRow,       SIGNAL(triggered()), this, SLOT(actionDeleteRow()));
+      connect(ui.actionProcess,         SIGNAL(triggered()), this, SLOT(actionProcess()));
+      connect(ui.actionGroupRows,       SIGNAL(triggered()), this, SLOT(actionGroupRows()));
+      connect(ui.actionExpandSelection, SIGNAL(triggered()), this, SLOT(actionExpandSelection()));
 
       //Finally, create a presenter to do the thinking for us
       m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(this));
@@ -97,6 +104,7 @@ namespace MantidQt
       for(auto it = tables.begin(); it != tables.end(); ++it)
       {
         QAction* openTable = ui.menuOpenTable->addAction(QString::fromStdString(*it));
+        openTable->setIcon(QIcon("://worksheet.png"));
 
         //Map this action to the table name
         m_openMap->setMapping(openTable, QString::fromStdString(*it));
@@ -123,11 +131,19 @@ namespace MantidQt
     }
 
     /**
-    This slot notifies the presenter that the "add row" button has been pressed
+    This slot notifies the presenter that the "append row" button has been pressed
     */
-    void QtReflMainView::actionAddRow()
+    void QtReflMainView::actionAppendRow()
     {
-      m_presenter->notify(AddRowFlag);
+      m_presenter->notify(AppendRowFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "prepend row" button has been pressed
+    */
+    void QtReflMainView::actionPrependRow()
+    {
+      m_presenter->notify(PrependRowFlag);
     }
 
     /**
@@ -155,11 +171,19 @@ namespace MantidQt
     }
 
     /**
-    This slot notifies the presenter that the "new table" button as been pressed
+    This slot notifies the presenter that the "new table" button has been pressed
     */
     void QtReflMainView::actionNewTable()
     {
       m_presenter->notify(NewTableFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "expand selection" button has been pressed
+    */
+    void QtReflMainView::actionExpandSelection()
+    {
+      m_presenter->notify(ExpandSelectionFlag);
     }
 
     /**
@@ -170,6 +194,26 @@ namespace MantidQt
       Q_UNUSED(topLeft);
       Q_UNUSED(bottomRight);
       m_presenter->notify(TableUpdatedFlag);
+    }
+
+    /**
+    This slot is triggered when the user right clicks on the table
+    @param pos : The position of the right click within the table
+    */
+    void QtReflMainView::showContextMenu(const QPoint& pos)
+    {
+      //parent widget takes ownership of QMenu
+      QMenu* menu = new QMenu(this);
+      menu->addAction(ui.actionProcess);
+      menu->addAction(ui.actionExpandSelection);
+      menu->addSeparator();
+      menu->addAction(ui.actionPrependRow);
+      menu->addAction(ui.actionAppendRow);
+      menu->addAction(ui.actionGroupRows);
+      menu->addSeparator();
+      menu->addAction(ui.actionDeleteRow);
+
+      menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
     }
 
     /**
@@ -254,6 +298,19 @@ namespace MantidQt
     }
 
     /**
+    Set which rows are selected
+    @param rows : The set of rows to select
+    */
+    void QtReflMainView::setSelection(const std::set<size_t>& rows)
+    {
+      ui.viewTable->clearSelection();
+      auto selectionModel = ui.viewTable->selectionModel();
+
+      for(auto row = rows.begin(); row != rows.end(); ++row)
+        selectionModel->select(ui.viewTable->model()->index((int)(*row), 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    }
+
+    /**
     Set the list of available instruments to search and process for
     @param instruments : The list of instruments available
     @param defaultInstrument : The instrument to have selected by default
@@ -306,16 +363,14 @@ namespace MantidQt
     Get the indices of the highlighted rows
     @returns a vector of unsigned ints contianing the highlighted row numbers
     */
-    std::vector<size_t> QtReflMainView::getSelectedRowIndexes() const
+    std::set<size_t> QtReflMainView::getSelectedRows() const
     {
       auto selectedRows = ui.viewTable->selectionModel()->selectedRows();
-      //auto selectedType = ui.viewTable->selectionModel()->;
-      std::vector<size_t> rowIndexes;
-      for (auto idx = selectedRows.begin(); idx != selectedRows.end(); ++idx)
-      {
-        rowIndexes.push_back(idx->row());
-      }
-      return rowIndexes;
+      std::set<size_t> rows;
+      for(auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
+        rows.insert(it->row());
+
+      return rows;
     }
 
     /**

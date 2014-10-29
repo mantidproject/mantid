@@ -51,9 +51,6 @@ namespace MantidQt
       //Connect the model
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model);
 
-      //Set the list of available tables to open
-      virtual void setTableList(const std::set<std::string>& tables);
-
       //Dialog/Prompt methods
       virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue);
       virtual bool askUserYesNo(std::string prompt, std::string title);
@@ -66,11 +63,13 @@ namespace MantidQt
       virtual void setProgress(int progress);
 
       //Settor methods
+      virtual void setSelection(const std::set<size_t>& rows);
+      virtual void setTableList(const std::set<std::string>& tables);
       virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument);
       virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy* hintStrategy);
 
       //Accessor methods
-      virtual std::vector<size_t> getSelectedRowIndexes() const;
+      virtual std::set<size_t> getSelectedRows() const;
       virtual std::string getSearchInstrument() const;
       virtual std::string getProcessInstrument() const;
       virtual std::string getWorkspaceToOpen() const;
@@ -91,11 +90,14 @@ namespace MantidQt
       void actionNewTable();
       void actionSave();
       void actionSaveAs();
-      void actionAddRow();
+      void actionAppendRow();
+      void actionPrependRow();
       void actionDeleteRow();
       void actionProcess();
       void actionGroupRows();
+      void actionExpandSelection();
       void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+      void showContextMenu(const QPoint& pos);
     };
 
 

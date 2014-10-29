@@ -234,7 +234,7 @@ private:
   QLabel *lblScriptingLanguage, *lblInitWindow;
   QComboBox *boxScriptingLanguage, *boxInitWindow;
   QCheckBox *boxAntialiasing, *boxAutoscale3DPlots, *boxTableComments, *boxThousandsSeparator;
-  QCheckBox *boxPromptRenameTables, *boxBackupProject, *boxLabelsEditing;
+  QCheckBox *boxPromptRenameTables, *boxBackupProject, *boxLabelsEditing, *boxPromptDeleteWorkspace;
   QWidget *fileLocationsPage;
   QLabel *lblTranslationsPath, *lblHelpPath, *lblUndoStackSize, *lblEndOfLine;
   QLineEdit *translationsPathLine, *helpPathLine;
