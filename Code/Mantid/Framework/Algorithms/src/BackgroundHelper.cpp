@@ -69,7 +69,7 @@ namespace Mantid
     void BackgroundHelper::removeBackground(int nHist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data)const
     {
 
-      double dtBg,ErrSq,IBg;
+      double dtBg,IBg;
       if(m_singleValueBackground)
       {
         dtBg  = m_dtBg;
