@@ -49,6 +49,7 @@ namespace CustomInterfaces
   private slots:
     void energyRebinToggle(bool state);
     void plotContour();
+    void sqwAlgDone(bool error);
 
   private:
     bool validateQRebin();

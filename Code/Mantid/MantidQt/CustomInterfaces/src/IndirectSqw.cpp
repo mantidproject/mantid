@@ -17,15 +17,17 @@ namespace CustomInterfaces
   IndirectSqw::IndirectSqw(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent)
   {
-    connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(energyRebinToggle(bool)));
-    connect(m_uiForm.sqw_dsSampleInput, SIGNAL(loadClicked()), this, SLOT(plotContour()));
-
     m_uiForm.sqw_leELow->setValidator(m_valDbl);
     m_uiForm.sqw_leEWidth->setValidator(m_valDbl);
     m_uiForm.sqw_leEHigh->setValidator(m_valDbl);
     m_uiForm.sqw_leQLow->setValidator(m_valDbl);
     m_uiForm.sqw_leQWidth->setValidator(m_valDbl);
     m_uiForm.sqw_leQHigh->setValidator(m_valDbl);
+
+    connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(energyRebinToggle(bool)));
+    connect(m_uiForm.sqw_dsSampleInput, SIGNAL(loadClicked()), this, SLOT(plotContour()));
+
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sqwAlgDone(bool)));
   }
 
   //----------------------------------------------------------------------------------------------
@@ -231,21 +233,38 @@ namespace CustomInterfaces
     }
 
     m_batchAlgoRunner->executeBatch();
+  }
 
-    //TODO
-    /* if(m_uiForm.sqw_cbPlotType->currentText() == "Contour") */
-    /* { */
-    /*   pyInput += "importMatrixWorkspace(sqwOutput).plotGraph2D()\n"; */
-    /* } */
+  /**
+   * Handles plotting the S(Q, w) workspace when the algorithm chain is finished.
+   *
+   * @param error If the algorithm chain failed
+   */
+  void IndirectSqw::sqwAlgDone(bool error)
+  {
+    if(error)
+      return;
 
-    /* else if( m_uiForm.sqw_cbPlotType->currentText() == "Spectra") */
-    /* { */
-    /*   pyInput += */
-    /*     "nspec = mtd[sqwOutput].getNumberHistograms()\n" */
-    /*     "plotSpectrum(sqwOutput, range(0, nspec))\n"; */
-    /* } */
+    // Get the workspace name
+    QString sampleWsName = m_uiForm.sqw_dsSampleInput->getCurrentDataName();
+    QString sqwWsName = sampleWsName.left(sampleWsName.length() - 4) + "_sqw";
 
-    /* QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed(); */
+    QString pyInput = "sqw_ws = '" + sqwWsName + "'\n";
+    QString plotType = m_uiForm.sqw_cbPlotType->currentText();
+
+    if(plotType == "Contour")
+    {
+      pyInput += "plot2D(sqw_ws)\n";
+    }
+
+    else if(plotType == "Spectra")
+    {
+      pyInput +=
+        "n_spec = mtd[sqw_ws].getNumberHistograms()\n"
+        "plotSpectrum(sqw_ws, range(0, n_spec))\n";
+    }
+
+    m_pythonRunner.runPythonCode(pyInput).trimmed();
   }
 
   /**
@@ -256,8 +275,11 @@ namespace CustomInterfaces
   void IndirectSqw::energyRebinToggle(bool state)
   {
     QString val;
-    if ( state ) val = "*";
-    else val = " ";
+    if(state)
+      val = "*";
+    else
+      val = " ";
+
     m_uiForm.sqw_leELow->setEnabled(state);
     m_uiForm.sqw_leEWidth->setEnabled(state);
     m_uiForm.sqw_leEHigh->setEnabled(state);
@@ -279,7 +301,7 @@ namespace CustomInterfaces
    */
   void IndirectSqw::plotContour()
   {
-    if (m_uiForm.sqw_dsSampleInput->isValid())
+    if(m_uiForm.sqw_dsSampleInput->isValid())
     {
       QString sampleWsName = m_uiForm.sqw_dsSampleInput->getCurrentDataName();
 
@@ -295,9 +317,7 @@ namespace CustomInterfaces
 
       convertSpecAlg->execute();
 
-      QString pyInput = "from mantidplot import plot2D\n"
-                        "plot2D('" + convertedWsName + "')\n";
-
+      QString pyInput = "plot2D('" + convertedWsName + "')\n";
       m_pythonRunner.runPythonCode(pyInput).trimmed();
     }
     else
