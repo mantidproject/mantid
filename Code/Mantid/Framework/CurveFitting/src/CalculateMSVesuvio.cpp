@@ -903,39 +903,15 @@ namespace Mantid
       const auto & inX = m_inputWS->readX(0);
       for(size_t i = 0; i < nscatters; ++i)
       {
-        V3D detPos;
         double scang(0.0), distToExit(0.0);
-        size_t ntries(0);
-        do
-        {
-          V3D detPos = generateDetectorPos(detpar.pos, en1[i]);
-          // transform to sample frame
-          detPos.rotate(*m_goniometer);
-          // Distance to exit the sample for this order
-          V3D scToDet = detPos - scatterPts[i];
-          scToDet.normalize();
-          Geometry::Track scatterToDet(scatterPts[i], scToDet);
-          if(m_sampleShape->interceptSurface(scatterToDet) > 0)
-          {
-            scang = neutronDirs[i].angle(scToDet);
-            const auto & link = scatterToDet.begin();
-            distToExit = link->distInsideObject;
-            break;
-          }
-          // if point is very close surface then there may be no valid intercept so try again
-        }
-        while(ntries < MAX_SCATTER_PT_TRIES);
-        if(ntries == MAX_SCATTER_PT_TRIES)
-        {
-          throw std::runtime_error("Unable to create track from sample to detector. "
-                                   "Detector shape may be too small.");
-        }
-
+        V3D detPos = generateDetectorPos(detpar.pos, en1[i], scatterPts[i], neutronDirs[i],
+                                         scang, distToExit);
         // Weight by probability neutron leaves sample
-        weights[i] *= exp(-m_sampleProps->mu*distToExit);
+        double & curWgt = weights[i];
+        curWgt *= exp(-m_sampleProps->mu*distToExit);
         // Weight by cross-section for the final energy
         const double efinal = generateE1(detpar.theta, detpar.efixed, m_foilRes);
-        weights[i] *= partialDiffXSec(en1[i], efinal, scang)/m_sampleProps->totalxsec;
+        curWgt *= partialDiffXSec(en1[i], efinal, scang)/m_sampleProps->totalxsec;
         // final TOF
         const double veli = sqrt(efinal/MASS_TO_MEV);
         tofs[i] += detpar.t0 + (scatterPts[i].distance(detPos)*1e6)/veli;
@@ -947,7 +923,7 @@ namespace Mantid
         {
           if (inX[it] - 0.5*m_delt < finalTOF && finalTOF < inX[it] + 0.5*m_delt)
           {
-            counts[it] += weights[i];
+            counts[it] += curWgt;
             break;
           }
         }
@@ -1159,20 +1135,51 @@ namespace Mantid
      * Generate a random position within the final detector in the lab frame
      * @param nominalPos The poisiton of the centre point of the detector
      * @param energy The final energy of the neutron
+     * @param scatterPt The position of the scatter event that lead to this detector
+     * @param direcBeforeSc Directional vector that lead to scatter point that hit this detector
+     * @param scang [Output] The value of the scattering angle for the generated point
+     * @param distToExit [Output] The distance covered within the object from scatter to exit
      * @return A new position in the detector
      */
-    V3D CalculateMSVesuvio::generateDetectorPos(const V3D &nominalPos, const double energy) const
+    V3D CalculateMSVesuvio::generateDetectorPos(const V3D &nominalPos, const double energy,
+                                                const V3D &scatterPt, const V3D &direcBeforeSc,
+                                                double &scang, double &distToExit) const
     {
       const double mu = 7430.0/sqrt(energy); // Inverse attenuation length (m-1) for vesuvio det.
       const double ps = 1.0 - exp(-mu*m_detThick); // Probability of detection in path thickness.
       V3D detPos;
-      // Beam direction by moving to front of "box"define by detector dimensions and then
-      // computing expected distance travelled based on probability
-      detPos[m_beamIdx] = (nominalPos[m_beamIdx] - 0.5*m_detThick) - \
-          (log(1.0 - m_randgen->flat()*ps)/mu);
-      // perturb away from nominal position
-      detPos[m_acrossIdx] = nominalPos[m_acrossIdx] + (m_randgen->flat() - 0.5)*m_detWidth;
-      detPos[m_upIdx] = nominalPos[m_upIdx] + (m_randgen->flat() - 0.5)*m_detHeight;
+      scang = 0.0; distToExit = 0.0;
+      size_t ntries(0);
+      do
+      {
+        // Beam direction by moving to front of "box"define by detector dimensions and then
+        // computing expected distance travelled based on probability
+        detPos[m_beamIdx] = (nominalPos[m_beamIdx] - 0.5*m_detThick) - \
+            (log(1.0 - m_randgen->flat()*ps)/mu);
+        // perturb away from nominal position
+        detPos[m_acrossIdx] = nominalPos[m_acrossIdx] + (m_randgen->flat() - 0.5)*m_detWidth;
+        detPos[m_upIdx] = nominalPos[m_upIdx] + (m_randgen->flat() - 0.5)*m_detHeight;
+        detPos.rotate(*m_goniometer); // to sample frame
+
+        // Distance to exit the sample for this order
+        V3D scToDet = detPos - scatterPt;
+        scToDet.normalize();
+        Geometry::Track scatterToDet(scatterPt, scToDet);
+        if(m_sampleShape->interceptSurface(scatterToDet) > 0)
+        {
+          scang = direcBeforeSc.angle(scToDet);
+          const auto & link = scatterToDet.begin();
+          distToExit = link->distInsideObject;
+          break;
+        }
+        // if point is very close surface then there may be no valid intercept so try again
+      }
+      while(ntries < MAX_SCATTER_PT_TRIES);
+      if(ntries == MAX_SCATTER_PT_TRIES)
+      {
+        throw std::runtime_error("Unable to create track from sample to detector. "
+                                 "Detector shape may be too small.");
+      }
       return detPos;
     }
 
