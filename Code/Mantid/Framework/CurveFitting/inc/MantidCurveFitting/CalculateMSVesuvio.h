@@ -148,15 +148,12 @@ namespace Mantid
       void cacheInputs();
       void calculateMS(const size_t wsIndex, API::ISpectrum & totalsc,
                        API::ISpectrum & multsc) const;
-      void simulate(const size_t nevents, const size_t nscatters,
-                    const DetectorParams & detpar,
+      void simulate(const DetectorParams & detpar,
                     const ResolutionParams &respar,
                     Simulation & simulCounts) const;
-      void assignToOutput(const size_t nscatters,
-                          const SimulationWithErrors & avgCounts, API::ISpectrum & totalsc,
+      void assignToOutput(const SimulationWithErrors & avgCounts, API::ISpectrum & totalsc,
                           API::ISpectrum & multsc) const;
-      double calculateCounts(const size_t nscatters,
-                             const DetectorParams & detpar,
+      double calculateCounts(const DetectorParams & detpar,
                              const ResolutionParams &respar,
                              Simulation & simulation) const;
 
@@ -187,6 +184,10 @@ namespace Mantid
       double m_detHeight, m_detWidth, m_detThick; // (m)
       double m_tmin, m_tmax, m_delt; // min, max & dt TOF value
       double m_foilRes; // resolution in energy of foil
+
+      size_t m_nscatters; // highest order of scattering to generate
+      size_t m_nruns; // number of runs per spectrum
+      size_t m_nevents; // number of single events per run
 
       API::Progress *m_progress;
       API::MatrixWorkspace_sptr m_inputWS;

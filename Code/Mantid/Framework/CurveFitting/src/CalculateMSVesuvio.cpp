@@ -33,9 +33,6 @@ namespace Mantid
 
     namespace
     {
-      const size_t NSIMULATIONS = 10;
-      const size_t NEVENTS = 50000;
-      const size_t NSCATTERS = 3;
       const size_t MAX_SCATTER_PT_TRIES = 25;
       /// Conversion constant
       const double MASS_TO_MEV = 0.5*PhysicalConstants::NeutronMass/PhysicalConstants::meV;
@@ -474,6 +471,7 @@ namespace Mantid
       m_maxWidthSampleFrame(0.0), m_sampleShape(NULL), m_sampleProps(NULL),
       m_detHeight(-1.0), m_detWidth(-1.0), m_detThick(-1.0),
       m_tmin(-1.0), m_tmax(-1.0), m_delt(-1.0), m_foilRes(-1.0),
+      m_nscatters(0), m_nruns(0), m_nevents(0),
       m_progress(NULL), m_inputWS()
     {
     }
@@ -528,6 +526,16 @@ namespace Mantid
       // -- Algorithm --
       declareProperty("Seed", 123456789, positiveInt,
                       "Seed the random number generator with this value");
+      declareProperty("NumScatters", 3, positiveInt,
+                      "Number of scattering orders to calculate");
+      declareProperty("NumRuns", 10, positiveInt,
+                      "Number of simulated runs per spectrum");
+      declareProperty("NumEventsPerRun", 50000, positiveInt,
+                      "Number of events per run");
+      setPropertyGroup("Seed", "Algorithm");
+      setPropertyGroup("NumScatters", "Algorithm");
+      setPropertyGroup("NumRuns", "Algorithm");
+      setPropertyGroup("NumEventsPerRun", "Algorithm");
 
       // Outputs
       declareProperty(new WorkspaceProperty<>("TotalScatteringWS","", Direction::Output),
@@ -553,7 +561,7 @@ namespace Mantid
 
       // Setup progress
       const int64_t nhist = static_cast<int64_t>(m_inputWS->getNumberHistograms());
-      m_progress = new API::Progress(this, 0.0, 1.0, nhist*NSIMULATIONS*2);
+      m_progress = new API::Progress(this, 0.0, 1.0, nhist*m_nruns*2);
       for(int64_t i = 0; i < nhist; ++i)
       {
 
@@ -593,6 +601,14 @@ namespace Mantid
      */
     void CalculateMSVesuvio::cacheInputs()
     {
+      // Algorithm
+      int nscatters = getProperty("NumScatters");
+      m_nscatters = static_cast<size_t>(nscatters);
+      int nruns = getProperty("NumRuns");
+      m_nruns = static_cast<size_t>(nruns);
+      int nevents = getProperty("NumEventsPerRun");
+      m_nevents = static_cast<size_t>(nevents);
+      
       // -- Geometry --
       const auto instrument = m_inputWS->getInstrument();
       m_beamDir = instrument->getSample()->getPos() - instrument->getSource()->getPos();
@@ -716,14 +732,15 @@ namespace Mantid
       ResolutionParams respar = VesuvioResolution::getResolutionParameters(m_inputWS, wsIndex);
 
       // Final counts averaged over all simulations
-      const size_t nruns(NSIMULATIONS), nscatters(NSCATTERS), nevents(NEVENTS);
-      SimulationAggregator accumulator(nruns);
-      for(size_t i = 0; i < nruns; ++i)
+      SimulationAggregator accumulator(m_nruns);
+      for(size_t i = 0; i < m_nruns; ++i)
       {
         m_progress->report("MS calculation: idx=" + boost::lexical_cast<std::string>(wsIndex)
                            + ", run=" + boost::lexical_cast<std::string>(i));
-        simulate(nevents, nscatters, detpar, respar,
-                 accumulator.newSimulation(nscatters, m_inputWS->blocksize()));
+        
+        simulate(detpar, respar,
+                 accumulator.newSimulation(m_nscatters, m_inputWS->blocksize()));
+
         m_progress->report("MS calculation: idx=" + boost::lexical_cast<std::string>(wsIndex)
                            + ", run=" + boost::lexical_cast<std::string>(i));
       }
@@ -731,45 +748,40 @@ namespace Mantid
       // Average over all runs and assign to output workspaces
       SimulationWithErrors avgCounts = accumulator.average();
       avgCounts.normalise();
-      assignToOutput(nscatters, avgCounts, totalsc, multsc);
+      assignToOutput(avgCounts, totalsc, multsc);
     }
 
     /**
      * Perform a single simulation of a given number of events for up to a maximum number of
      * scatterings on a chosen detector
-     * @param nevents The number of neutron events to simulate
-     * @param nscatters Maximum order of scattering that should be simulated
      * @param detpar Detector information describing the final detector position
      * @param respar Resolution information on the intrument as a whole
      * @param simulCounts Simulation object used to storing the calculated number of counts
      */
-    void CalculateMSVesuvio::simulate(const size_t nevents, const size_t nscatters,
-                                      const DetectorParams & detpar,
+    void CalculateMSVesuvio::simulate(const DetectorParams & detpar,
                                       const ResolutionParams &respar,
                                       Simulation & simulCounts) const
     {
-      for(size_t i = 0; i < nevents; ++i)
+      for(size_t i = 0; i < m_nevents; ++i)
       {
-        calculateCounts(nscatters, detpar, respar, simulCounts);
+        calculateCounts(detpar, respar, simulCounts);
       }
     }
 
     /**
      * Assign the averaged counts to the correct workspaces
-     * @param nscatters The highest order of scattering
      * @param avgCounts Counts & errors separated for each scattering order
      * @param totalsc A non-const reference to the spectrum for the total scattering calculation
      * @param multsc A non-const reference to the spectrum for the multiple scattering contribution
      */
     void
-    CalculateMSVesuvio::assignToOutput(const size_t nscatters,
-                                       const CalculateMSVesuvio::SimulationWithErrors &avgCounts,
+    CalculateMSVesuvio::assignToOutput(const CalculateMSVesuvio::SimulationWithErrors &avgCounts,
                                        API::ISpectrum & totalsc, API::ISpectrum & multsc) const
     {
       // Sum up all multiple scatter events
       auto & msscatY = multsc.dataY();
       auto & msscatE = multsc.dataE();
-      for(size_t i = 1; i < nscatters; ++i) //(i >= 1 for multiple scatters)
+      for(size_t i = 1; i < m_nscatters; ++i) //(i >= 1 for multiple scatters)
       {
         const auto & counts = avgCounts.sim.counts[i];
         // equivalent to msscatY[j] += counts[j]
@@ -792,14 +804,12 @@ namespace Mantid
     }
 
     /**
-     *
-     * @param nscatters Maximum order of scattering that should be simulated
      * @param detpar Detector information describing the final detector position
      * @param respar Resolution information on the intrument as a whole
      * @param simulation [Output] Store the calculated counts here
      * @return The sum of the weights for all scatters
      */
-    double CalculateMSVesuvio::calculateCounts(const size_t nscatters, const DetectorParams &detpar,
+    double CalculateMSVesuvio::calculateCounts(const DetectorParams &detpar,
                                                const ResolutionParams &respar,
                                                Simulation &simulation) const
     {
@@ -814,9 +824,9 @@ namespace Mantid
       }
 
       // track various variables during calculation
-      std::vector<double> weights(nscatters, 1.0), // start at 1.0
-        tofs(nscatters, 0.0), // tof accumulates for each piece of the calculation
-        en1(nscatters, 0.0);
+      std::vector<double> weights(m_nscatters, 1.0), // start at 1.0
+        tofs(m_nscatters, 0.0), // tof accumulates for each piece of the calculation
+        en1(m_nscatters, 0.0);
 
       const double vel2 = sqrt(detpar.efixed/MASS_TO_MEV);
       const double t2 = detpar.l2/vel2;
@@ -824,8 +834,8 @@ namespace Mantid
       tofs[0] = generateTOF(en1[0], respar.dtof, respar.dl1); // correction for resolution in l1
 
       // Neutron path
-      std::vector<V3D> scatterPts(nscatters), // track origin of each scatter
-          neutronDirs(nscatters); // neutron directions
+      std::vector<V3D> scatterPts(m_nscatters), // track origin of each scatter
+          neutronDirs(m_nscatters); // neutron directions
       V3D startPos(srcPos);
       neutronDirs[0] = m_beamDir;
 
@@ -836,7 +846,7 @@ namespace Mantid
       tofs[0] += (distFromStart*1e6/vel0);
 
       // multiple scatter events within sample, i.e not including zeroth
-      for(size_t i = 1; i < nscatters; ++i)
+      for(size_t i = 1; i < m_nscatters; ++i)
       {
         weights[i] = weights[i-1];
         tofs[i] = tofs[i-1];
@@ -885,7 +895,7 @@ namespace Mantid
 
       // force all orders in to current detector
       const auto & inX = m_inputWS->readX(0);
-      for(size_t i = 0; i < nscatters; ++i)
+      for(size_t i = 0; i < m_nscatters; ++i)
       {
         double scang(0.0), distToExit(0.0);
         V3D detPos = generateDetectorPos(detpar.pos, en1[i], scatterPts[i], neutronDirs[i],
