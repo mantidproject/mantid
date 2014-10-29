@@ -70,7 +70,7 @@ FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller 
 
 FlatBkgWorkspace(Input) *MatrixWorkspace*       An optional histogram workspace in the units of TOF defining background for removal during rebinning.The workspace has to have single value or contain the same number of spectra as the "InputWorkspace" and single Y value per each spectra,representing flat background in the background time region. If such workspace is present, the value of the flat background provided by this workspace is removed from each spectra of the rebinned workspace. This works for histogram and event workspace when events are not retained but actually useful mainly for removing background while rebinning an event workspace in the units different from TOF.[]
 
-EMode(Input) *string*       If FlatBkgWorkspace is present, this property used to define the units conversion from TOF to the units of the InputWorkspace[Elastic, Direct, Indirect]
+EMode(Input) *string*       If FlatBkgWorkspace is present, this property used to define the units for conversion from the units of the InputWorkspace to TOF[Elastic, Direct, Indirect]
 """
         doc = simpleapi.rebin.__doc__
         self.assertTrue(len(doc) > 0 )

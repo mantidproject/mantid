@@ -113,7 +113,7 @@ namespace Mantid
 
       std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
       declareProperty("EMode",dE_modes[Kernel::DeltaEMode::Direct],boost::make_shared<Kernel::StringListValidator>(dE_modes),
-        "If FlatBkgWorkspace is present, this property used to define the units conversion from TOF to the units of the InputWorkspace",Direction::Input);
+        "If FlatBkgWorkspace is present, this property used to define the units for conversion from the units of the InputWorkspace to TOF" ,Direction::Input);
       setPropertySettings("EMode",
         new Kernel::VisibleWhenProperty("FlatBkgWorkspace", IS_NOT_EQUAL_TO, ""));
 

@@ -91,9 +91,11 @@ of event workspaces in multirep mode, where different event regions are associat
 different incident energies and rebinned into appropriate energy range together with 
 background removal on-the-fly.
 
-The algorithm used during background removal is equivalent to the one, presented below, except 
-intermediate workspaces are not created and the background removal calculations
-performed during rebinning::
+The algorithm used during background removal is equivalent to the proof-of concept one, 
+presented below, except intermediate workspaces are not created and the background removal calculations
+performed during rebinning.
+Errors of the background workspace are currently ignored and their value 
+is calculated as the square root of correspondent background signal::
 
   from mantid.simpleapi import *
   from mantid import config
@@ -231,7 +233,7 @@ are identical::
   
     noBgWorkspace= Rebin(InputWorkspace=resultEtransf, Params=[e_min,dE,e_max],PreserveEvents=False,FlatBkgWorkspace='Bg',EMode='Direct')
     nHist = Bg.getNumberHistograms()
-    removedBkgSum = SumSpectra(noBgWorkspace ,0,nHist);    
+    removedBkgSum = SumSpectra(noBgWorkspace ,0,nHist-1);    
 
 .. _rebin-usage:
 
