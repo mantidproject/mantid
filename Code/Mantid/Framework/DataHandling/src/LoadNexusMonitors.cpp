@@ -23,6 +23,15 @@ namespace DataHandling
 
 DECLARE_ALGORITHM(LoadNexusMonitors)
 
+namespace
+{
+  // Comparison class for sorting monitor group names according to their monitor_number
+  class MonitorNameSorter
+  {
+
+  public:
+  };
+}
 
 LoadNexusMonitors::LoadNexusMonitors() : Algorithm(),
 nMonitors(0)
@@ -33,7 +42,7 @@ LoadNexusMonitors::~LoadNexusMonitors()
 {
 }
 
-/// Initialisation method.
+/// Initialization method.
 void LoadNexusMonitors::init()
 {
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
@@ -67,12 +76,12 @@ void LoadNexusMonitors::exec()
   string_map_t entries = file.getEntries();
   for (it = entries.begin(); it != entries.end(); ++it)
   {
-	if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") )
-	{
-		file.openGroup(it->first, it->second);
+  if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") )
+  {
+    file.openGroup(it->first, it->second);
         m_top_entry_name = it->first;
-		break;
-	}
+    break;
+  }
   }
   prog1.report();
 
@@ -81,6 +90,8 @@ void LoadNexusMonitors::exec()
   std::vector<std::string> monitorNames;
   size_t numHistMon = 0;
   size_t numEventMon = 0;
+  // we want to sort monitors by monitor_number if they are present
+  std::map<int,std::string> monitorNumber2Name;
   prog1.report();
 
   API::Progress prog2(this, 0.2, 0.6, entries.size());
@@ -118,12 +129,24 @@ void LoadNexusMonitors::exec()
           continue;
         }
       }
-      file.closeGroup(); // close NXmonitor
 
       if (numEventThings == 3)
+      {
         numEventMon += 1;
+      }
       else
+      {
         numHistMon += 1;
+        if ( inner_entries.find("monitor_number") != inner_entries.end() )
+        {
+          specid_t monitorNo;
+          file.openData("monitor_number");
+          file.getData(&monitorNo);
+          file.closeData();
+          monitorNumber2Name[monitorNo] = entry_name;
+        }
+      }
+      file.closeGroup(); // close NXmonitor
     }
     prog2.report();
   }
@@ -139,6 +162,15 @@ void LoadNexusMonitors::exec()
     useEventMon = false;
     this->WS = API::WorkspaceFactory::Instance().create("Workspace2D",
                                                         this->nMonitors, 1, 1);
+    // if there is a distinct monitor number for each monitor sort them by that number
+    if ( monitorNumber2Name.size() == monitorNames.size() )
+    {
+      monitorNames.clear();
+      for(auto it = monitorNumber2Name.begin(); it != monitorNumber2Name.end(); ++it)
+      {
+        monitorNames.push_back( it->second );
+      }
+    }
   }
   else if (numEventMon == this->nMonitors)
   {
@@ -321,14 +353,25 @@ void LoadNexusMonitors::exec()
   // Need to get the instrument name from the file
   std::string instrumentName;
   file.openGroup("instrument", "NXinstrument");
-  file.openData("name");
-  instrumentName = file.getStrData();
+  try
+  { 
+    file.openData("name");
+    instrumentName = file.getStrData();
+    // Now let's close the file as we don't need it anymore to load the instrument.
+    file.closeData();
+    file.closeGroup(); // Close the NXentry
+    file.close();
+
+  }
+  catch(std::runtime_error &) // no correct instrument definition (old ISIS file, fall back to isis_vms_compat)
+  {
+    file.closeGroup(); // Close the instrument NXentry
+    instrumentName =LoadEventNexus::readInstrumentFromISIS_VMSCompat(file);
+    file.close();
+  }
+
   g_log.debug() << "Instrument name read from NeXus file is " << instrumentName << std::endl;
 
-  // Now let's close the file as we don't need it anymore to load the instrument.
-  file.closeData();
-  file.closeGroup(); // Close the NXentry
-  file.close();
 
   this->WS->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
   this->WS->setYUnit("Counts");
@@ -428,6 +471,7 @@ void LoadNexusMonitors::runLoadLogs(const std::string filename, API::MatrixWorks
 {
     // do the actual work
     API::IAlgorithm_sptr loadLogs = createChildAlgorithm("LoadNexusLogs");
+
     // Now execute the Child Algorithm. Catch and log any error, but don't stop.
     try
     {

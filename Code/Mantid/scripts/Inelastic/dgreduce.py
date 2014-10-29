@@ -45,7 +45,7 @@ def setup(instname=None,reload=False):
 def help(keyword=None) :
     """function returns help on reduction parameters.
 
-       Returns the list of the parameters availible if provided without arguments
+       Returns the list of the parameters available if provided without arguments
        or the description and the default value for the key requested
     """
     if Reducer == None:
@@ -54,7 +54,7 @@ def help(keyword=None) :
     Reducer.help(keyword)
 
 
-def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=None,**kwargs):
+def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=None,second_wb=None,**kwargs):
     """ One step conversion of run into workspace containing information about energy transfer
     Usage:
     >>arb_units(wb_run,sample_run,ei_guess,rebin)
@@ -190,7 +190,10 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
          wb_for_monovanadium = kwargs['wb_for_monovanadium']
          del kwargs['wb_for_monovanadium']
     else:
-         wb_for_monovanadium = wb_run;
+        if second_wb is None:
+             wb_for_monovanadium = wb_run;
+        else:
+             wb_for_monovanadium = second_wb;
 
 
 
@@ -256,7 +259,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
         #this sums the runs together before passing the summed file to the rest of the reduction
         #this circumvents the inbuilt method of summing which fails to sum the files for diag
 
-        #the D.E.C. tries to be too clever so we have to fool it into thinking the raw file is already exists as a workpsace
+        #the D.E.C. tries to be too clever so we have to fool it into thinking the raw file is already exists as a workspace
         sumfilename=Reducer.instr_name+str(sample_run[0])+'.raw'
         sample_run =sum_files(Reducer.instr_name,sumfilename, sample_run)
         common.apply_calibration(Reducer.instr_name,sample_run,Reducer.det_cal_file)
@@ -291,7 +294,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     if not   masks_done:
         print '########### Run diagnose for sample run ##############################'
         masking = Reducer.diagnose(wb_run,sample = mask_run,
-                                    second_white = None,print_results=True)
+                                    second_white=None,print_results=True)
         header = "Diag Processed workspace with {0:d} spectra and masked {1:d} bad spectra"
 
 
@@ -329,7 +332,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 
     # calculate absolute units integral and apply it to the workspace
     if monovan_run != None or Reducer.mono_correction_factor != None :
-        deltaE_wkspace_sample = apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_guess,wb_run)
+        deltaE_wkspace_sample = apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_guess,wb_for_monovanadium)
         # Hack for multirep
         #if isinstance(monovan_run,int):
         #    filename = common.find_file(monovan_run)
@@ -412,7 +415,7 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
     variation       -The number of medians the ratio of the first/second white beam can deviate from
                     the average by (default=1.1)
     bleed_test      - If true then the CreatePSDBleedMask algorithm is run
-    bleed_maxrate   - If the bleed test is on then this is the maximum framerate allowed in a tube
+    bleed_maxrate   - If the bleed test is on then this is the maximum frame rate allowed in a tube
     bleed_pixels    - If the bleed test is on then this is the number of pixels ignored within the
                     bleed test diagnostic
     print_results - If True then the results are printed to the screen
@@ -438,11 +441,10 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
 
     abs_units_van_range=[-40,40] integral range for absolute vanadium data
 
-    mono_correction_factor=float User specified correction factor for absolute units normalisation
+    mono_correction_factor=float User specified correction factor for absolute units normalization
     """
 
     kwargs['monovan_mapfile']    = monovan_mapfile
-    kwargs['wb_for_monovanadium']= wb_for_monovanadium
     kwargs['sample_mass']        = samp_mass
     kwargs['sample_rmm']         = samp_rmm
 
@@ -462,7 +464,7 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
 
 
     results_name = wksp_out
-    wksp_out = arb_units(wb_for_run,sample_run,ei_guess,rebin,map_file,monovan_run,**kwargs)
+    wksp_out = arb_units(wb_for_run,sample_run,ei_guess,rebin,map_file,monovan_run,wb_for_monovanadium,**kwargs)
 
 
     if  results_name != wksp_out.getName():
@@ -522,7 +524,7 @@ def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_gu
 
 def process_legacy_parameters(**kwargs) :
     """ The method to deal with old parameters which have logi c different from default and easy to process using
-        subprogram. All other parameters just copiet to output
+        subprogram. All other parameters just copied to output
     """
     params = dict();
     for key,value in kwargs.iteritems():
@@ -568,7 +570,7 @@ def get_abs_normalization_factor(Reducer,deltaE_wkspaceName,ei_monovan) :
      are different and accounted for by dividing each MV value by corresponding WBV value,
      the signal on a detector has poison distribution and the error for a detector is the square
      root of correspondent signal on a detector.
-     Error for WBV considered negligebly small wrt the error on MV
+     Error for WBV considered negligibly small wrt. the error on MV
     """
 
     van_mass=Reducer.van_mass;
@@ -627,7 +629,7 @@ def get_abs_normalization_factor(Reducer,deltaE_wkspaceName,ei_monovan) :
         weight      = err_sq/signal
         signal3_sum += err_sq
         weight3_sum += weight
-        # Guess which estimatnes value sum(n_i^2/Sigma_i^2)/sum(n_i/Sigma_i^2) TGP suggestion from 12-2012
+        # Guess which estimates value sum(n_i^2/Sigma_i^2)/sum(n_i/Sigma_i^2) TGP suggestion from 12-2012
         signal4_sum += signal*signal/err_sq
         weight4_sum += signal/err_sq
 
@@ -638,7 +640,7 @@ def get_abs_normalization_factor(Reducer,deltaE_wkspaceName,ei_monovan) :
    #---------------- Loop finished
 
     if( weight1_sum==0.0 or weight2_sum == 0.0 or weight3_sum == 0.0 or weight4_sum == 0.0) :
-        print "WB integral has been calculated incorrectrly, look at van_int workspace in the input workspace: ",deltaE_wkspaceName
+        print "WB integral has been calculated incorrectly, look at van_int workspace in the input workspace: ",deltaE_wkspaceName
         raise IOError(" divided by 0 weight")
 
     integral_monovanLibISIS=signal1_sum / weight1_sum
@@ -693,7 +695,7 @@ def get_abs_normalization_factor(Reducer,deltaE_wkspaceName,ei_monovan) :
 def sum_files(inst_name, accumulator, files):
     """ Custom sum for multiple runs
 
-        Left for compartibility as internal summation had some unspecified problems.
+        Left for compatibility as internal summation had some unspecified problems.
         Will go in a future
     """
     accum_name = accumulator

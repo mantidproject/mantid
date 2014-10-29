@@ -123,6 +123,10 @@ namespace Algorithms
 
     declareProperty("MinimumPeakHeight", DBL_MIN, "Minimum allowed peak height. ");
 
+    declareProperty("MinimumPeakHeightObs", 0.0, "Least value of the maximum observed Y value of a peak within "
+                    "specified region.  If any peak's maximum observed Y value is smaller, then "
+                    "this peak will not be fit.  It is designed for EventWorkspace with integer counts.");
+
     std::vector<std::string> costFuncOptions;
     costFuncOptions.push_back("Chi-Square");
     costFuncOptions.push_back("Rwp");
@@ -254,6 +258,8 @@ namespace Algorithms
     m_costFunction = getPropertyValue("CostFunction");
 
     m_useObsCentre = getProperty("StartFromObservedPeakCentre");
+
+    m_leastMaxObsY = getProperty("MinimumPeakHeightObs");
 
     return;
   }
@@ -890,6 +896,23 @@ namespace Algorithms
     const MantidVec& vecX = input->readX(spectrum);
     const MantidVec& vecY = input->readY(spectrum);
 
+    // Exclude peak with peak counts
+    bool hasHighCounts = false;
+    for (int i = i_min; i <= i_max; ++i)
+      if (vecY[i] > m_leastMaxObsY)
+       {
+        hasHighCounts = true;
+        break;
+      }
+    if (!hasHighCounts)
+    {
+      std::stringstream ess;
+      ess << "Peak supposed at " << vecY[i_centre] << " does not have enough counts as " << m_leastMaxObsY;
+      g_log.debug(ess.str());
+      addNonFitRecord(spectrum);
+      return;
+    }
+
     //-------------------------------------------------------------------------
     // Estimate peak and background parameters for better fitting
     //-------------------------------------------------------------------------
@@ -1093,6 +1116,10 @@ namespace Algorithms
     double tmpx = vecX[i_min];
     height = vecY[i_min] - (bg0 + bg1*tmpx + bg2*tmpx*tmpx);
     double lowest = height;
+
+    // Extreme case
+    if (i_max == vecY.size())
+        i_max = i_max - 1;
 
     // Searching
     for (size_t i = i_min+1; i <= i_max; ++i)

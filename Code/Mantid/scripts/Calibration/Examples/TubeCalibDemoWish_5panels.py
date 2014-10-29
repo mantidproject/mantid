@@ -43,7 +43,7 @@ def CalibrateWish( run_per_panel_list):
 
     for (run_number, panel_name) in run_per_panel_list:
         panel_name = str(panel_name)
-    run_number = str(run_number)
+        run_number = str(run_number)
         # load your data and integrate it
         ws = LoadRaw(run_number, OutputWorkspace=panel_name)
         ws = Integration(ws, 1, 20000, OutputWorkspace=panel_name)
@@ -58,7 +58,7 @@ def CalibrateWish( run_per_panel_list):
 
         # update kwargs
         kwargs['calibTable'] = calibrationTable # append calib to calibrationtable
-    kwargs['rangeList'] = high_range # calibrate only the upper tubes
+        kwargs['rangeList'] = high_range # calibrate only the upper tubes
 
         calibrationTable = tube.calibrate(ws, tube_set, upper_tube, funcForm, **kwargs)
         kwargs['calibTable'] = calibrationTable
@@ -67,7 +67,7 @@ def CalibrateWish( run_per_panel_list):
 
         # copy data from the current panel to the whole_instrument
         for i in range(tube_set.getNumTubes()):
-    	for spec_num in tube_set.getTube(i):
+            for spec_num in tube_set.getTube(i):
     		whole_instrument.setY(spec_num,ws.dataY(spec_num))
 
     # calibrate the whole_instrument with the last calibrated panel which has the calibration accumulation

@@ -15,8 +15,9 @@ The parameter file can then be inspected and or modified. It can also be loaded 
 Mantid using the `LoadParameterFile <http://mantidproject.org/LoadParameterFile>`__ algorithm.
 
 The LocationParameters property specifies whether or not to save any calibration parameters
-used to adjust the location of any components. Specifically, it will skip "x", "y", "z",
-"r-position", "t-position", "p-position", "rotx", "roty", and "rotz" parameters.
+used to adjust the location of any components. If enabled, SaveParameterFile may also output
+"x", "y", "z", "rotx", "roty", and "rotz" parameters when necessary to update the position and
+rotation of the components.
 
 Usage
 -----

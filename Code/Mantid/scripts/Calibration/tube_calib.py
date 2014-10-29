@@ -169,7 +169,7 @@ def fitGaussian(fitPar, index, ws, outputWs):
             StartX=str(start), EndX=str(end), Output='Z1')
         Fit(InputWorkspace='Z1_Workspace',Function='name=Gaussian,Height=%f,PeakCentre=%f,Sigma=%f' %(height, centre, width),
             WorkspaceIndex=2, StartX=str(start), EndX=str(end), Output=outputWs)
-    CloneWorkspace(outputWs+'_Workspace',OutputWorkspace='gauss_'+str(index))
+        CloneWorkspace(outputWs+'_Workspace',OutputWorkspace='gauss_'+str(index))
         peakIndex = 1
 
     return peakIndex
@@ -221,9 +221,9 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
       results.append(peakCentre)
 
       if showPlot:
-    ws = mtd[calibPointWs + '_Workspace']
-    fitt_y_values.append(copy.copy(ws.dataY(1)))
-    fitt_x_values.append(copy.copy(ws.dataX(1)))
+        ws = mtd[calibPointWs + '_Workspace']
+        fitt_y_values.append(copy.copy(ws.dataY(1)))
+        fitt_x_values.append(copy.copy(ws.dataX(1)))
 
     if showPlot:
         FittedData = CreateWorkspace(numpy.hstack(fitt_x_values),
@@ -409,13 +409,13 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
     for i in range(nDets):
         deti = ws.getDetector( whichTube[i])
         det_pos = deti.getPos()
-    pNew = pixels[i]
+        pNew = pixels[i]
         # again, the opeartion float * v3d is not defined, but v3d * float is,
         # so, I wrote the new pos as center + unit_vector * (float)
         newPos = center + unit_vector * pNew
 
-    detIDs.append( deti.getID() )
-    detPositions.append( newPos )
+        detIDs.append( deti.getID() )
+        detPositions.append( newPos )
         # print i, detIDs[i], detPositions[i]
 
     return detIDs, detPositions
@@ -595,8 +595,8 @@ def getCalibrationFromPeakFile ( ws, calibTable, iTube,  PeakFile ):
         #print len(wht)
         if( len(detIDList) == len(wht)): # We have corrected positions
             for j in range(len(wht)):
-            nextRow = {'Detector ID': detIDList[j], 'Detector Position': detPosList[j] }
-            calibTable.addRow ( nextRow )
+                nextRow = {'Detector ID': detIDList[j], 'Detector Position': detPosList[j] }
+                calibTable.addRow ( nextRow )
 
     if(nTubes == 0):
        return

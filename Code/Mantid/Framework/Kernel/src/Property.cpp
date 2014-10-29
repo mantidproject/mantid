@@ -4,6 +4,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/PropertyHistory.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <map>
 #include <sstream>
@@ -312,6 +313,50 @@ namespace DataObjects
 
 namespace Kernel
 {
+
+/**
+ * @param lhs Thing on the left
+ * @param rhs Thing on the right
+ * @return true if they are equal
+ */
+bool operator==( const Property & lhs, const Property & rhs )
+{
+  if (lhs.name() != rhs.name())
+    return false;
+  if (lhs.type() != rhs.type())
+    return false;
+
+  // check for TimeSeriesProperty specializations
+  auto lhs_tsp_float = dynamic_cast<const TimeSeriesProperty<float> *>(&lhs);
+  if (lhs_tsp_float)
+    return lhs_tsp_float->operator==(rhs);
+
+  auto lhs_tsp_double = dynamic_cast<const TimeSeriesProperty<double> *>(&lhs);
+  if (lhs_tsp_double)
+    return lhs_tsp_double->operator==(rhs);
+
+  auto lhs_tsp_string = dynamic_cast<const TimeSeriesProperty<std::string> *>(&lhs);
+  if (lhs_tsp_string)
+    return lhs_tsp_string->operator==(rhs);
+
+  auto lhs_tsp_bool = dynamic_cast<const TimeSeriesProperty<bool> *>(&lhs);
+  if (lhs_tsp_bool)
+    return lhs_tsp_bool->operator==(rhs);
+
+  // use fallthrough behavior
+  return (lhs.value() == rhs.value());
+}
+
+/**
+ * @param lhs Thing on the left
+ * @param rhs Thing on the right
+ * @return true if they are not equal
+ */
+bool operator!=( const Property & lhs, const Property & rhs )
+{
+  return (!(lhs == rhs));
+}
+
 /**
  * Get the unmangled name of the given typestring for some common types that we use. Note that
  * this is just a lookup and NOT an unmangling algorithm

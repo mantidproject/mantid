@@ -89,27 +89,8 @@ void SaveNexus::exec()
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("FileName");
   m_inputWorkspace = getProperty("InputWorkspace");
-  //retrieve the append property
-  bool bAppend = getProperty("Append");
-  // if bAppend is default (false) overwrite (delete )the .nxs file 
-  if (!bAppend)
-  {
-	  Poco::File file(m_filename);
-	  if (file.exists())
-	  { file.remove();
-	  }
-  }
 
-  m_filetype = "NexusProcessed";
-
-  if (m_filetype == "NexusProcessed")
-  {
-    runSaveNexusProcessed();
-  }
-  else
-  {
-    throw Exception::NotImplementedError("SaveNexus passed invalid filetype.");
-  }
+  runSaveNexusProcessed();
 
   return;
 }
@@ -183,5 +164,21 @@ void SaveNexus::runSaveNexusProcessed()
   //
   progress(1);
 }
+
+  /**
+  Overriden process groups.
+  */
+  bool SaveNexus::processGroups()
+  { 
+    this->exec();
+
+    // We finished successfully.
+    setExecuted(true);
+    notificationCenter().postNotification(new FinishedNotification(this,isExecuted()));
+
+    return true;
+  }
+
+
 } // namespace DataHandling
 } // namespace Mantid

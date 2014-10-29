@@ -1,6 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <stdexcept>
+
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidAPI/BinEdgeAxis.h"
@@ -127,7 +129,7 @@ void SofQW::exec()
       IDetector_const_sptr spectrumDet = inputWorkspace->getDetector(i);
       if( spectrumDet->isMonitor() ) continue;
 
-       const double efixed = m_EmodeProperties.getEFixed(spectrumDet);
+      const double efixed = m_EmodeProperties.getEFixed(spectrumDet);
 
       // For inelastic scattering the simple relationship q=4*pi*sinTheta/lambda does not hold. In order to
       // be completely general we must calculate the momentum transfer by calculating the incident and final
@@ -142,6 +144,7 @@ void SofQW::exec()
       {
         detectors.push_back(spectrumDet);
       }
+
       const size_t numDets = detectors.size();
       const double numDets_d = static_cast<double>(numDets); // cache to reduce number of static casts
       const MantidVec& Y = inputWorkspace->readY(i);
@@ -185,8 +188,12 @@ void SofQW::exec()
             }
 
           }
-          const V3D ki = beamDir*sqrt(energyToK*ei);
-          const V3D kf = scatterDir*(sqrt(energyToK*(ef)));
+
+          if(ei < 0)
+            throw std::runtime_error("Negative incident energy. Check binning.");
+
+          const V3D ki = beamDir * sqrt(energyToK * ei);
+          const V3D kf = scatterDir * (sqrt(energyToK * (ef)));
           const double q = (ki - kf).norm();
 
           // Test whether it's in range of the Q axis

@@ -186,6 +186,11 @@ namespace Algorithms
     declareProperty("MaxChiSq", 100., "Maximum chisq value for individual peak fit allowed. (Default: 100)");
 
     declareProperty("MinimumPeakHeight", 2.0, "Minimum value allowed for peak height.");
+
+    declareProperty("MinimumPeakHeightObs", 0.0, "Least value of the maximum observed Y value of a peak within "
+                    "specified region.  If any peak's maximum observed Y value is smaller, then "
+                    "this peak will not be fit.  It is designed for EventWorkspace with integer counts.");
+
     //Disable default gsl error handler (which is to call abort!)
     gsl_set_error_handler_off();
 
@@ -314,6 +319,7 @@ namespace Algorithms
     m_maxChiSq = this->getProperty("MaxChiSq");
     m_minPeakHeight = this->getProperty("MinimumPeakHeight");
     m_maxOffset=getProperty("MaxOffset");
+    m_leastMaxObsY = getProperty("MinimumPeakHeightObs");
 
     // Create output workspaces
     outputW = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());

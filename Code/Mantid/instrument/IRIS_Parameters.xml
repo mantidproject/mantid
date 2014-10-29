@@ -36,7 +36,7 @@
 </parameter>
 
 <!-- Reduction workflow parameters under this line -->
-<parameter name="Workflow.Monitor1-ID" >
+<parameter name="Workflow.Monitor1-SpectrumNumber" >
   <value val="0" />
 </parameter>
 <parameter name="Workflow.Monitor1-Area" >
@@ -51,7 +51,7 @@
 <parameter name="Workflow.Monitor1-ScalingFactor">
   <value val="1e6" />
 </parameter>
-<parameter name="Workflow.Monitor2-ID" >
+<parameter name="Workflow.Monitor2-SpectrumNumber" >
   <value val="1" />
 </parameter>
 <parameter name="Workflow.Monitor2-Area" >

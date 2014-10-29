@@ -35,7 +35,8 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
                               SpectrumView*      spectrum_view,
                               SpectrumDisplay*   spectrum_display,
                               GraphDisplay*   h_graph_display,
-                              GraphDisplay*   v_graph_display )
+                              GraphDisplay*   v_graph_display ) :
+  m_picker_x(-1), m_picker_y(-1)
 {
   sv_ui = ui;
                               // first disable a few un-implemented controls
@@ -146,8 +147,8 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
   image_picker->setSelectionFlags(QwtPicker::PointSelection | 
                                   QwtPicker::ClickSelection  );
 */
-  QObject::connect( image_picker, SIGNAL(mouseMoved()),
-                    this, SLOT(imagePicker_moved()) );
+  QObject::connect( image_picker, SIGNAL(mouseMoved(const QPoint &)),
+                    this, SLOT(imagePicker_moved(const QPoint &)) );
 
   QObject::connect(sv_ui->imageSplitter, SIGNAL(splitterMoved(int,int)),
                    this, SLOT(imageSplitter_moved()) );
@@ -249,8 +250,8 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
   h_graph_picker->setRubberBand(QwtPicker::CrossRubberBand);
   h_graph_picker->setSelectionFlags(QwtPicker::PointSelection |
                                   QwtPicker::DragSelection  );
-  QObject::connect( h_graph_picker, SIGNAL(mouseMoved()),
-                    this, SLOT(h_graphPicker_moved()) );
+  QObject::connect( h_graph_picker, SIGNAL(mouseMoved(const QPoint &)),
+                    this, SLOT(h_graphPicker_moved(const QPoint &)) );
 
   // NOTE: This initialization could be a (static?) method in TrackingPicker
   v_graph_picker = new TrackingPicker( sv_ui->v_graphPlot->canvas() );
@@ -260,8 +261,8 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
   v_graph_picker->setRubberBand(QwtPicker::CrossRubberBand);
   v_graph_picker->setSelectionFlags(QwtPicker::PointSelection |
                                     QwtPicker::DragSelection  );
-  QObject::connect( v_graph_picker, SIGNAL(mouseMoved()),
-                    this, SLOT(v_graphPicker_moved()) );
+  QObject::connect( v_graph_picker, SIGNAL(mouseMoved(const QPoint &)),
+                    this, SLOT(v_graphPicker_moved(const QPoint &)) );
 
   QObject::connect( sv_ui->actionOnline_Help_Page, SIGNAL(triggered()),
                     this, SLOT(online_help_slot()) );
@@ -301,6 +302,69 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
       }
     }
   }
+  else if (event->type() == QEvent::KeyPress)
+  {
+    // don't bother if the values aren't set
+    if (m_picker_x < 0) return false;
+    if (m_picker_y < 0) return false;
+
+    // Convert Y position to values so that a change of 1 corresponds to a change in spec. no by 1
+    int newX = m_picker_x;
+    double lastY = spectrum_display->GetLastY();
+
+    QKeyEvent *keyEvent = dynamic_cast<QKeyEvent *>(event);
+    int key = keyEvent->key();
+    switch (key)
+    {
+    case Qt::Key_Up:
+      lastY += 1.0;
+      break;
+    case Qt::Key_Down:
+      lastY -= 1.0;
+      break;
+    case Qt::Key_Left:
+      newX--;
+      break;
+    case Qt::Key_Right:
+      newX++;
+      break;
+    default:
+      // this is not the event we were looking for
+      return false;
+    }
+
+    // Convert Y position back to pixel position
+    QPoint newPoint = spectrum_display->GetPlotTransform(qMakePair(0.0, lastY));
+    int newY = newPoint.y();
+
+    // Ignore the event if the position is outside of the plot area
+    if (newX < 0) return false;
+    if (newY < 0) return false;
+    const QSize canvasSize = sv_ui->spectrumPlot->canvas()->size();
+    if (newX > canvasSize.width()) return false;
+    if (newY > canvasSize.height()) return false;
+
+    // make the changes real
+    m_picker_x = newX;
+    m_picker_y = newY;
+
+    // determine where the canvas is in global coords
+    QPoint canvasPos = sv_ui->spectrumPlot->canvas()->mapToGlobal(QPoint(0,0));
+    // move the cursor to the correct position
+    sv_ui->spectrumPlot->canvas()->cursor().setPos(QPoint(canvasPos.x()+m_picker_x, canvasPos.y()+m_picker_y));
+
+    QPair<double, double> transPoints = spectrum_display->GetPlotInvTransform(QPoint(newX, newY));
+
+    spectrum_display->SetHGraph( lastY );
+    spectrum_display->SetVGraph( transPoints.first );
+
+    spectrum_display->ShowInfoList( transPoints.first, lastY );
+
+    // consume the event
+    return true;
+  }
+
+  // don't filter the event
   return false;
 }
 
@@ -317,6 +381,7 @@ void SVConnections::toggle_Hscroll()
   sv_ui->imageHorizontalScrollBar->setVisible( is_on );
   sv_ui->imageHorizontalScrollBar->setEnabled( is_on );
   spectrum_display->UpdateImage();
+  spectrum_display->HandleResize();
 }
 
 
@@ -326,6 +391,7 @@ void SVConnections::toggle_Vscroll()
   sv_ui->imageVerticalScrollBar->setVisible( is_on );
   sv_ui->imageVerticalScrollBar->setEnabled( is_on );
   spectrum_display->UpdateImage();
+  spectrum_display->HandleResize();
 }
 
 
@@ -371,39 +437,39 @@ void SVConnections::imageSplitter_moved()
   vgraph_sizes.append( sizes[1] );
   sv_ui->vgraphSplitter->setSizes( vgraph_sizes );
   spectrum_display->UpdateImage();
+  spectrum_display->HandleResize();
 }
 
-
-void SVConnections::imagePicker_moved()
+/**
+ * Update the pointed at position for the image_picker.
+ *
+ * @param point The position moved to.
+ */
+void SVConnections::imagePicker_moved(const QPoint & point)
 {
-  QwtPolygon selected_points = image_picker->selection();
-  if ( selected_points.size() >= 1 )
-  {
-    int index = selected_points.size() - 1;
-    spectrum_display->SetPointedAtPoint( selected_points[index] );
-  }
+  m_picker_x = point.x();
+  m_picker_y = point.y();
+  spectrum_display->SetPointedAtPoint( point );
 }
 
-
-void SVConnections::h_graphPicker_moved()
+/**
+ * Update the pointed at position for the h_graph_display.
+ *
+ * @param point The position moved to.
+ */
+void SVConnections::h_graphPicker_moved(const QPoint & point)
 {
-  QwtPolygon selected_points = h_graph_picker->selection();
-  if ( selected_points.size() >= 1 )
-  {
-    int index = selected_points.size() - 1;
-    h_graph_display->SetPointedAtPoint( selected_points[index] );
-  }
+  h_graph_display->SetPointedAtPoint(point);
 }
 
-
-void SVConnections::v_graphPicker_moved()
+/**
+ * Update the pointed at position for the v_graph_display.
+ *
+ * @param point The position moved to.
+ */
+void SVConnections::v_graphPicker_moved(const QPoint & point)
 {
-  QwtPolygon selected_points = v_graph_picker->selection();
-  if ( selected_points.size() >= 1 )
-  {
-    int index = selected_points.size() - 1;
-    v_graph_display->SetPointedAtPoint( selected_points[index] );
-  }
+  v_graph_display->SetPointedAtPoint(point);
 }
 
 void SVConnections::intensity_slider_moved()
