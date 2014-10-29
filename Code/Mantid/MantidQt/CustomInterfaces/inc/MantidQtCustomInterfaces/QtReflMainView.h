@@ -88,17 +88,18 @@ namespace MantidQt
       QSignalMapper* m_openMap;
 
     private slots:
+      void on_actionNewTable_triggered();
+      void on_actionSaveTable_triggered();
+      void on_actionSaveTableAs_triggered();
+      void on_actionAppendRow_triggered();
+      void on_actionPrependRow_triggered();
+      void on_actionDeleteRow_triggered();
+      void on_actionProcess_triggered();
+      void on_actionGroupRows_triggered();
+      void on_actionExpandSelection_triggered();
+      void on_actionOptionsDialog_triggered();
+
       void setModel(QString name);
-      void actionNewTable();
-      void actionSave();
-      void actionSaveAs();
-      void actionAppendRow();
-      void actionPrependRow();
-      void actionDeleteRow();
-      void actionProcess();
-      void actionGroupRows();
-      void actionExpandSelection();
-      void actionOptionsDialog();
       void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);
       void showContextMenu(const QPoint& pos);
     };

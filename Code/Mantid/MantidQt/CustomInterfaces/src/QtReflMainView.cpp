@@ -56,17 +56,6 @@ namespace MantidQt
       //Custom context menu for table
       connect(ui.viewTable, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 
-      connect(ui.actionSaveTable,       SIGNAL(triggered()), this, SLOT(actionSave()));
-      connect(ui.actionSaveTableAs,     SIGNAL(triggered()), this, SLOT(actionSaveAs()));
-      connect(ui.actionNewTable,        SIGNAL(triggered()), this, SLOT(actionNewTable()));
-      connect(ui.actionAppendRow,       SIGNAL(triggered()), this, SLOT(actionAppendRow()));
-      connect(ui.actionPrependRow,      SIGNAL(triggered()), this, SLOT(actionPrependRow()));
-      connect(ui.actionDeleteRow,       SIGNAL(triggered()), this, SLOT(actionDeleteRow()));
-      connect(ui.actionProcess,         SIGNAL(triggered()), this, SLOT(actionProcess()));
-      connect(ui.actionGroupRows,       SIGNAL(triggered()), this, SLOT(actionGroupRows()));
-      connect(ui.actionExpandSelection, SIGNAL(triggered()), this, SLOT(actionExpandSelection()));
-      connect(ui.actionOptionsDialog,   SIGNAL(triggered()), this, SLOT(actionOptionsDialog()));
-
       //Finally, create a presenter to do the thinking for us
       m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(this));
     }
@@ -118,7 +107,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "save" button has been pressed
     */
-    void QtReflMainView::actionSave()
+    void QtReflMainView::on_actionSaveTable_triggered()
     {
       m_presenter->notify(SaveFlag);
     }
@@ -126,7 +115,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "save as" button has been pressed
     */
-    void QtReflMainView::actionSaveAs()
+    void QtReflMainView::on_actionSaveTableAs_triggered()
     {
       m_presenter->notify(SaveAsFlag);
     }
@@ -134,7 +123,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "append row" button has been pressed
     */
-    void QtReflMainView::actionAppendRow()
+    void QtReflMainView::on_actionAppendRow_triggered()
     {
       m_presenter->notify(AppendRowFlag);
     }
@@ -142,7 +131,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "prepend row" button has been pressed
     */
-    void QtReflMainView::actionPrependRow()
+    void QtReflMainView::on_actionPrependRow_triggered()
     {
       m_presenter->notify(PrependRowFlag);
     }
@@ -150,7 +139,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "delete" button has been pressed
     */
-    void QtReflMainView::actionDeleteRow()
+    void QtReflMainView::on_actionDeleteRow_triggered()
     {
       m_presenter->notify(DeleteRowFlag);
     }
@@ -158,7 +147,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "process" button has been pressed
     */
-    void QtReflMainView::actionProcess()
+    void QtReflMainView::on_actionProcess_triggered()
     {
       m_presenter->notify(ProcessFlag);
     }
@@ -166,7 +155,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "group rows" button has been pressed
     */
-    void QtReflMainView::actionGroupRows()
+    void QtReflMainView::on_actionGroupRows_triggered()
     {
       m_presenter->notify(GroupRowsFlag);
     }
@@ -174,7 +163,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "new table" button has been pressed
     */
-    void QtReflMainView::actionNewTable()
+    void QtReflMainView::on_actionNewTable_triggered()
     {
       m_presenter->notify(NewTableFlag);
     }
@@ -182,9 +171,17 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "expand selection" button has been pressed
     */
-    void QtReflMainView::actionExpandSelection()
+    void QtReflMainView::on_actionExpandSelection_triggered()
     {
       m_presenter->notify(ExpandSelectionFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "options..." button has been pressed
+    */
+    void QtReflMainView::on_actionOptionsDialog_triggered()
+    {
+      m_presenter->notify(OptionsDialogFlag);
     }
 
     /**
@@ -195,14 +192,6 @@ namespace MantidQt
       Q_UNUSED(topLeft);
       Q_UNUSED(bottomRight);
       m_presenter->notify(TableUpdatedFlag);
-    }
-
-    /**
-    This slot notifies the presenter that the "options..." button has been pressed
-    */
-    void QtReflMainView::actionOptionsDialog()
-    {
-      m_presenter->notify(OptionsDialogFlag);
     }
 
     /**
