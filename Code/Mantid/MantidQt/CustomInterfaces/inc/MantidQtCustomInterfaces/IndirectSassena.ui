@@ -70,6 +70,9 @@
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The time in pico seconds between each consecutive data point.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
+        <property name="suffix">
+         <string> ps</string>
+        </property>
         <property name="maximum">
          <double>1000.000000000000000</double>
         </property>
