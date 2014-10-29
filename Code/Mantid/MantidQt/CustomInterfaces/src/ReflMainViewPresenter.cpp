@@ -13,12 +13,16 @@
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 
+#include <QSettings>
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 namespace
 {
+  const QString ReflSettingsGroup = "Mantid/CustomInterfaces/ISISReflectometry";
+
   void validateModel(ITableWorkspace_sptr model)
   {
     if(!model)
@@ -1065,8 +1069,16 @@ namespace MantidQt
      */
     void ReflMainViewPresenter::setOptions(const std::map<std::string,QVariant>& options)
     {
-      //Optionally check the validity of the new options
-      m_options = options;
+      //Overwrite the given options
+      for(auto it = options.begin(); it != options.end(); ++it)
+        m_options[it->first] = it->second;
+
+      //Save any changes to disk
+      QSettings settings;
+      settings.beginGroup(ReflSettingsGroup);
+      for(auto it = m_options.begin(); it != m_options.end(); ++it)
+        settings.setValue(QString::fromStdString(it->first), it->second);
+      settings.endGroup();
     }
 
     /** Load options from disk if possible, or set to defaults */
@@ -1077,8 +1089,13 @@ namespace MantidQt
       //Set defaults
       m_options["WarnProcessAll"] = true;
 
-      //Load from disk
-      //TODO
+      //Load saved values from disk
+      QSettings settings;
+      settings.beginGroup(ReflSettingsGroup);
+      QStringList keys = settings.childKeys();
+      for(auto it = keys.begin(); it != keys.end(); ++it)
+        m_options[it->toStdString()] = settings.value(*it);
+      settings.endGroup();
     }
   }
 }
