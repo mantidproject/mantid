@@ -10,7 +10,7 @@ namespace Mantid
     BackgroundHelper::BackgroundHelper():
       m_WSUnit(),m_bgWs(),m_wkWS(),
       m_singleValueBackground(false),
-      m_NBg(0),m_dtBg(1),m_ErrSq(0),
+      m_NBg(0),m_dtBg(1), //m_ErrSq(0),
       m_Emode(0),
       m_L1(0),m_Efix(0),
       m_Sample(),
@@ -55,7 +55,7 @@ namespace Mantid
       const MantidVec& dataE = bkgWS->dataE(0);
       m_NBg    = dataY[0];
       m_dtBg   = dataX[1]-dataX[0];
-      m_ErrSq  = dataE[0]*dataE[0]; // needs further clarification
+      //m_ErrSq  = dataE[0]*dataE[0]; // needs further clarification
 
 
       m_Efix = this->getEi(sourceWS);
@@ -73,7 +73,7 @@ namespace Mantid
       if(m_singleValueBackground)
       {
         dtBg  = m_dtBg;
-        ErrSq = m_ErrSq;
+       // ErrSq = m_ErrSq;
         IBg   = m_NBg;
       }
       else

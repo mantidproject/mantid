@@ -65,7 +65,7 @@ namespace Algorithms
     // time interval for measuring the background
     double m_dtBg;
     // Squared error of the background for first spectra of a background workspace
-    double m_ErrSq;
+    //double m_ErrSq;
     // energy conversion mode
     int m_Emode;
     // source-sample distance
