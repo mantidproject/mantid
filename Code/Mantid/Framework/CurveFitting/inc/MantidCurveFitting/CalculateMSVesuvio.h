@@ -7,10 +7,6 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/V3D.h"
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/normal_distribution.hpp>
-#include <boost/random/uniform_real.hpp>
-
 namespace Mantid
 {
   namespace CurveFitting
@@ -20,6 +16,12 @@ namespace Mantid
     //-----------------------------------------------------------------------------
     struct DetectorParams;
     struct ResolutionParams;
+    namespace MSVesuvioHelper
+    {
+      class RandomNumberGenerator;
+      struct Simulation;
+      struct SimulationWithErrors;
+    }
 
     /**
       Calculates the multiple scattering & total scattering contributions
@@ -49,7 +51,6 @@ namespace Mantid
     class DLLExport CalculateMSVesuvio : public API::Algorithm
     {
     private:
-
       // Holds date on the compton scattering properties of an atom
       struct ComptonNeutronAtom
       {
@@ -59,7 +60,6 @@ namespace Mantid
         double sclength; // 4pi/xsec
         double profile; // s.d of J(y)
       };
-
       // Holds data about sample as a whole.
       struct SampleComptonProperties
       {
@@ -71,57 +71,6 @@ namespace Mantid
         double density; // g/cm^3
         double totalxsec; // total free-scattering cross section
         double mu; // attenuation factor (1/m)
-      };
-
-      // Produces random numbers with various probability distributions
-      class RandomNumberGenerator
-      {
-        typedef boost::uniform_real<double> uniform_double;
-        typedef boost::normal_distribution<double> gaussian_double;
-      public:
-        RandomNumberGenerator(const int seed);
-        /// Returns a flat random number between 0.0 & 1.0
-        double flat();
-        /// Returns a random number distributed  by a normal distribution
-        double gaussian(const double mean, const double sigma);
-
-      private:
-        RandomNumberGenerator();
-        boost::mt19937 m_generator;
-      };
-
-      // Stores counts for each scatter order
-      // for a "run" of a given number of events
-      struct Simulation
-      {
-        Simulation(const size_t order, const size_t ntimes);
-
-        std::vector<std::vector<double>> counts;
-        size_t maxorder;
-      };
-      // Stores counts for each scatter order with errors
-      struct SimulationWithErrors
-      {
-        SimulationWithErrors(const size_t order, const size_t ntimes) :
-          sim(order, ntimes), errors(order, std::vector<double>(ntimes)) {}
-
-        void normalise();
-        Simulation sim;
-        std::vector<std::vector<double>> errors;
-
-      };
-
-      // Accumulates and averages the results of a set of simulations
-      struct SimulationAggregator
-      {
-        SimulationAggregator(const size_t nruns);
-
-        // Creates a placeholder for a new simulation
-        Simulation & newSimulation(const size_t order,
-                                   const size_t ntimes);
-        SimulationWithErrors average() const;
-
-        std::vector<Simulation> results;
       };
 
     public:
@@ -150,12 +99,12 @@ namespace Mantid
                        API::ISpectrum & multsc) const;
       void simulate(const DetectorParams & detpar,
                     const ResolutionParams &respar,
-                    Simulation & simulCounts) const;
-      void assignToOutput(const SimulationWithErrors & avgCounts, API::ISpectrum & totalsc,
-                          API::ISpectrum & multsc) const;
+                    MSVesuvioHelper::Simulation & simulCounts) const;
+      void assignToOutput(const MSVesuvioHelper::SimulationWithErrors & avgCounts,
+                          API::ISpectrum & totalsc, API::ISpectrum & multsc) const;
       double calculateCounts(const DetectorParams & detpar,
                              const ResolutionParams &respar,
-                             Simulation & simulation) const;
+                             MSVesuvioHelper::Simulation & simulation) const;
 
       // single-event helpers
       Kernel::V3D generateSrcPos(const double l1) const;
@@ -172,7 +121,7 @@ namespace Mantid
       double generateE1(const double angle, const double e1nom, const double e1res) const;
 
       // Member Variables
-      RandomNumberGenerator *m_randgen; // random number generator
+      MSVesuvioHelper::RandomNumberGenerator *m_randgen; // random number generator
 
       size_t m_acrossIdx, m_upIdx, m_beamIdx; // indices of each direction
       Kernel::V3D m_beamDir; // Directional vector for beam
