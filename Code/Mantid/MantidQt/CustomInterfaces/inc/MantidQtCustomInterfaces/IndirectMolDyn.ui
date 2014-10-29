@@ -104,19 +104,21 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLineEdit" name="leMaxEnergy">
+         <widget class="QDoubleSpinBox" name="dspMaxEnergy">
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Crop the upper energy range of any workspaces with energy as the X unit (e.g. Sqw).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Crop the upper energy range of any workspaces with energy as the X unit (e.g. S(Q,w)).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
-          <property name="text">
-           <string>0</string>
+          <property name="suffix">
+           <string> meV</string>
           </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lblEnergyCropUnits">
-          <property name="text">
-           <string>meV</string>
+          <property name="maximum">
+           <double>1000.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -308,7 +310,7 @@
   <tabstop>mwRun</tabstop>
   <tabstop>leFunctionNames</tabstop>
   <tabstop>ckCropEnergy</tabstop>
-  <tabstop>leMaxEnergy</tabstop>
+  <tabstop>dspMaxEnergy</tabstop>
   <tabstop>ckResolution</tabstop>
   <tabstop>dsResolution</tabstop>
   <tabstop>ckVerbose</tabstop>
