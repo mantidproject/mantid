@@ -94,17 +94,19 @@ namespace Mantid
         double L2 = detector->getDistance(*m_Sample);
         double delta(std::numeric_limits<double>::quiet_NaN());
         // clone unit conversion to avoid multithreading issues
-        auto unitCong = m_WSUnit->clone();
+        auto unitConv = m_WSUnit->clone();
         unitCong->initialize(m_L1, L2,twoTheta, m_Emode, m_Efix,delta);
-        double tof1 = unitCong->singleToTOF(XValues[0]);
+        double tof1 = unitConv->singleToTOF(XValues[0]);
         for(size_t i=0;i<y_data.size();i++)
         {
-          double tof2=unitCong->singleToTOF(XValues[i+1]);
+          double tof2=unitConv->singleToTOF(XValues[i+1]);
           double Jack = std::fabs((tof2-tof1)/dtBg);
           double normBkgrnd = IBg*Jack;
           tof1=tof2;
           y_data[i] -=normBkgrnd;
-          e_data[i]  =std::sqrt((ErrSq*Jack*Jack+e_data[i]*e_data[i])/2.); // needs further clarification -- Gaussian error summation?
+          //e_data[i]  =std::sqrt((ErrSq*Jack*Jack+e_data[i]*e_data[i])/2.); // needs further clarification -- Gaussian error summation?
+          //--> assume error for background is sqrt(signal):
+          e_data[i]  =std::sqrt((normBkgrnd+e_data[i]*e_data[i])/2.); // needs further clarification -- Gaussian error summation?
         }
 
       }
