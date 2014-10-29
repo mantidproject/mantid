@@ -95,21 +95,8 @@ public:
     CalculateMSVesuvio alg;
     alg.initialize();
 
-    TS_ASSERT_THROWS(alg.setProperty("BeamUmbraRadius", -1.5), std::invalid_argument);
-    TS_ASSERT_THROWS(alg.setProperty("BeamUmbraRadius", 0.0), std::invalid_argument);
-    TS_ASSERT_THROWS(alg.setProperty("BeamPenumbraRadius", -1.5), std::invalid_argument);
-    TS_ASSERT_THROWS(alg.setProperty("BeamPenumbraRadius", 0.0), std::invalid_argument);
-  }
-
-  void test_setting_umbra_less_than_penumbra_throws_invalid_argument()
-  {
-    auto testWS = createFlatPlateSampleWS();
-    auto alg = createTestAlgorithm(testWS);
-
-    alg->setProperty("BeamUmbraRadius", 2.5);
-    alg->setProperty("BeamPenumbraRadius", 1.5);
-
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setProperty("BeamRadius", -1.5), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setProperty("BeamRadius", 0.0), std::invalid_argument);
   }
 
   void test_input_workspace_with_detector_that_has_no_shape_throws_exception()
@@ -134,8 +121,7 @@ private:
     const double sampleProps[9] = {1.007900, 0.9272392, 5.003738, 16.00000, 3.2587662E-02, 13.92299,
                                    27.50000, 4.0172841E-02, 15.07701};
     alg->setProperty("AtomicProperties", std::vector<double>(sampleProps, sampleProps + 9));
-    alg->setProperty("BeamUmbraRadius", 1.5);
-    alg->setProperty("BeamPenumbraRadius", 2.5);
+    alg->setProperty("BeamRadius", 2.5);
     // outputs
     alg->setPropertyValue("TotalScatteringWS", "__unused_for_child");
     alg->setPropertyValue("MultipleScatteringWS", "__unused_for_child");

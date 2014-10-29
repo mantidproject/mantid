@@ -469,7 +469,7 @@ namespace Mantid
     /// Constructor
     CalculateMSVesuvio::CalculateMSVesuvio() : Algorithm(),
       m_randgen(NULL),
-      m_acrossIdx(0), m_upIdx(1), m_beamIdx(3), m_beamDir(), m_srcR1(0.0), m_srcR2(0.0),
+      m_acrossIdx(0), m_upIdx(1), m_beamIdx(3), m_beamDir(), m_srcR2(0.0),
       m_halfSampleHeight(0.0), m_halfSampleWidth(0.0), m_halfSampleThick(0.0),
       m_maxWidthSampleFrame(0.0), m_sampleShape(NULL), m_sampleProps(NULL),
       m_detHeight(-1.0), m_detWidth(-1.0), m_detThick(-1.0),
@@ -522,12 +522,8 @@ namespace Mantid
       setPropertyGroup("AtomicProperties", "Sample");
 
       // -- Beam --
-      declareProperty("BeamUmbraRadius", -1.0, positiveNonZero,
-                      "Radius, in cm, of part in total shadow.");
-      declareProperty("BeamPenumbraRadius", -1.0, positiveNonZero,
-                      "Radius, in cm, of part in partial shadow.");
-      setPropertyGroup("BeamUmbraRadius", "Beam");
-      setPropertyGroup("BeamPenumbraRadius", "Beam");
+      declareProperty("BeamRadius", -1.0, positiveNonZero,
+                      "Radius, in cm, of beam");
 
       // -- Algorithm --
       declareProperty("Seed", 123456789, positiveInt,
@@ -607,18 +603,8 @@ namespace Mantid
       m_upIdx = rframe->pointingUp();
       m_beamIdx = rframe->pointingAlongBeam();
 
-      m_srcR1 = getProperty("BeamUmbraRadius");
-      m_srcR2 = getProperty("BeamPenumbraRadius");
-      if(m_srcR2 < m_srcR1)
-      {
-        std::ostringstream os;
-        os << "Invalid beam radius parameters. Penumbra value="
-           << m_srcR2 << " < Umbra value="
-           << m_srcR1;
-        throw std::invalid_argument(os.str());
-      }
+      m_srcR2 = getProperty("BeamRadius");
       // Convert to metres
-      m_srcR1 /= 100.0;
       m_srcR2 /= 100.0;
 
       // Sample shape
