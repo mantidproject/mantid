@@ -36,10 +36,6 @@ namespace MantidQt
     {
       ui.setupUi(this);
 
-      ui.buttonAppendRow->setDefaultAction(ui.actionAppendRow);
-      ui.buttonDeleteRow->setDefaultAction(ui.actionDeleteRow);
-      ui.buttonGroupRows->setDefaultAction(ui.actionGroupRows);
-      ui.buttonExpandSelection->setDefaultAction(ui.actionExpandSelection);
       ui.buttonProcess->setDefaultAction(ui.actionProcess);
 
       //Expand the process runs column at the expense of the search column
