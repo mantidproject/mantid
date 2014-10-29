@@ -95,7 +95,7 @@ namespace Mantid
         double delta(std::numeric_limits<double>::quiet_NaN());
         // clone unit conversion to avoid multithreading issues
         auto unitConv = m_WSUnit->clone();
-        unitCong->initialize(m_L1, L2,twoTheta, m_Emode, m_Efix,delta);
+        unitConv->initialize(m_L1, L2,twoTheta, m_Emode, m_Efix,delta);
         double tof1 = unitConv->singleToTOF(XValues[0]);
         for(size_t i=0;i<y_data.size();i++)
         {
