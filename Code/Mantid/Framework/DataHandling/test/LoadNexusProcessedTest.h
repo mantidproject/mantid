@@ -635,6 +635,39 @@ public:
      }
    }
 
+   void test_load_multiperiod_workspace()
+   {
+     LoadNexusProcessed loader;
+     loader.setChild(true);
+     loader.initialize();
+     loader.setPropertyValue("Filename", "POLREF00004699_nexus.nxs");
+     loader.setPropertyValue("OutputWorkspace", "ws");
+
+     TS_ASSERT( loader.execute() );
+
+     Workspace_sptr outWS = loader.getProperty("OutputWorkspace");
+     WorkspaceGroup_sptr asGroupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+     TSM_ASSERT("We expect a group workspace back", asGroupWS);
+     TSM_ASSERT_EQUALS("We expect the size to be 2", 2, asGroupWS->size());
+     MatrixWorkspace_sptr period1 = boost::dynamic_pointer_cast<MatrixWorkspace>(asGroupWS->getItem(0));
+     MatrixWorkspace_sptr period2 = boost::dynamic_pointer_cast<MatrixWorkspace>(asGroupWS->getItem(1));
+     TSM_ASSERT("We expect the group workspace is multiperiod", asGroupWS->isMultiperiod());
+     TSM_ASSERT_EQUALS("X-data should be identical", period1->readX(0), period2->readX(0));
+     TSM_ASSERT_DIFFERS("Y-data should be different", period1->readY(0), period2->readY(0));
+     TSM_ASSERT_DIFFERS("E-data should be different", period1->readE(0), period2->readE(0));
+
+     TS_ASSERT(period1->getInstrument());
+     TS_ASSERT(period2->getInstrument());
+
+     auto period1Logs = period1->run().getLogData();
+     auto period2Logs = period2->run().getLogData();
+
+     TSM_ASSERT_EQUALS("We expect to have the same number of log entries", period1Logs.size(), period2Logs.size());
+
+     TSM_ASSERT_THROWS("Should only have a period 1 entry", period1->run().getLogData("period 2"), Exception::NotFoundError& );
+     TSM_ASSERT_THROWS("Should only have a period 2 entry", period2->run().getLogData("period 1"), Exception::NotFoundError& );
+   }
+
 private:
   void doHistoryTest(MatrixWorkspace_sptr matrix_ws)
   {
