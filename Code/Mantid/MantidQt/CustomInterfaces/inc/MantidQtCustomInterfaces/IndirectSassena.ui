@@ -55,7 +55,7 @@
    <item>
     <widget class="QGroupBox" name="gbOptions">
      <property name="title">
-      <string>GroupBox</string>
+      <string>Options</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
@@ -111,61 +111,17 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QCheckBox" name="chkVerbose">
+       <widget class="QCheckBox" name="chkPlot">
         <property name="enabled">
          <bool>true</bool>
         </property>
         <property name="text">
-         <string>Verbose</string>
+         <string>Plot Result</string>
         </property>
        </widget>
       </item>
       <item>
-       <spacer name="spOutput1">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="lblPlot">
-        <property name="text">
-         <string>Plot Result: </string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="cbPlot">
-        <item>
-         <property name="text">
-          <string>None</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Spectrum</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Contour</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Both</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item>
-       <spacer name="spOutput2">
+       <spacer name="spOutput">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -200,8 +156,7 @@
   <tabstop>mwInputFile</tabstop>
   <tabstop>sbTimeUnit</tabstop>
   <tabstop>cbSortQ</tabstop>
-  <tabstop>chkVerbose</tabstop>
-  <tabstop>cbPlot</tabstop>
+  <tabstop>chkPlot</tabstop>
   <tabstop>chkSave</tabstop>
  </tabstops>
  <resources/>

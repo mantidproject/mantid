@@ -16,13 +16,13 @@ namespace MantidQt
     /**
      * Validate the form to check the program can be run.
      *
-     * @return :: Whether the form was valid
+     * @return Whether the form was valid
      */
 		bool IndirectSassena::validate()
 		{
-      //TODO
-
-			return true;
+      // There is very little to actually be invalid here
+      // that was not already done via restrictions on input
+      return true;
 		}
 
     /**
@@ -35,6 +35,7 @@ namespace MantidQt
 			QString inputFileName = m_uiForm.mwInputFile->getFirstFilename();
 			QFileInfo inputFileInfo(inputFileName);
       QString outWsName = inputFileInfo.baseName();
+      bool save = m_uiForm.chkSave->isChecked();
 
       IAlgorithm_sptr sassenaAlg = AlgorithmManager::Instance().create("LoadSassena");
       sassenaAlg->initialize();
@@ -44,7 +45,21 @@ namespace MantidQt
       sassenaAlg->setProperty("TimeUnit", m_uiForm.sbTimeUnit->value());
       sassenaAlg->setProperty("OutputWorkspace", outWsName.toStdString());
 
-      runAlgorithm(sassenaAlg);
+      sassenaAlg->execute();
+      /* runAlgorithm(sassenaAlg); */
+
+      if(save)
+      {
+        QString saveFilename = outWsName + ".nxs";
+
+        IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus");
+        saveAlg->initialize();
+
+        saveAlg->setProperty("InputWorkspace", outWsName.toStdString());
+        saveAlg->setProperty("Filename", saveFilename.toStdString());
+
+        saveAlg->execute();
+      }
 		}
 
     /**
