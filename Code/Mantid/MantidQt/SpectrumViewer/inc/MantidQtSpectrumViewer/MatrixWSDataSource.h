@@ -11,16 +11,16 @@
 #include "MantidAPI/MatrixWorkspace.h"
 
 /**
-    @class MatrixWSDataSource 
-  
-       This class provides a concrete implementation of an SpectrumDataSource
+    @class MatrixWSDataSource
+
+    This class provides a concrete implementation of an SpectrumDataSource
     that gets it's data from a matrix workspace.
- 
-    @author Dennis Mikkelson 
-    @date   2012-05-08 
-     
+
+    @author Dennis Mikkelson
+    @date   2012-05-08
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -35,8 +35,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
@@ -71,7 +71,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource: public SpectrumData
     /// Get DataArray covering full range of data in x, and y directions
     DataArray * GetDataArray( bool is_log_x );
 
-    /// Get DataArray covering restricted range of data 
+    /// Get DataArray covering restricted range of data
     DataArray * GetDataArray( double  xmin,
                               double  xmax,
                               double  ymin,
@@ -95,6 +95,6 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource: public SpectrumData
 };
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif // MATRIX_WS_DATA_SOURCE_H

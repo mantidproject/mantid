@@ -19,8 +19,8 @@ using namespace Mantid;
 
 /**
  * Display the specified string in an error message.
- * 
- * @param text   The string containing the text of the error message 
+ *
+ * @param text   The string containing the text of the error message
  */
 void ErrorHandler::Error( std::string  text )
 {
@@ -30,8 +30,8 @@ void ErrorHandler::Error( std::string  text )
 
 /**
  * Display the specified string in a warning message.
- * 
- * @param text   The string containing the text of the warning message 
+ *
+ * @param text   The string containing the text of the warning message
  */
 void ErrorHandler::Warning( std::string  text )
 {
@@ -41,8 +41,8 @@ void ErrorHandler::Warning( std::string  text )
 
 /**
  * Display the specified string in a warning message.
- * 
- * @param text   The string containing the text of the warning message 
+ *
+ * @param text   The string containing the text of the warning message
  */
 void ErrorHandler::Notice( std::string  text )
 {
@@ -51,4 +51,4 @@ void ErrorHandler::Notice( std::string  text )
 
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt

@@ -4,16 +4,16 @@
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
-    @class ErrorHandler 
-  
-      This class has static methods that do various basic calculations 
+    @class ErrorHandler
+
+    This class has static methods that do various basic calculations
     needed by other parts of the SpectrumView package.
- 
-    @author Dennis Mikkelson 
-    @date   2012-05-18 
-     
+
+    @author Dennis Mikkelson
+    @date   2012-05-18
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -28,8 +28,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
@@ -38,23 +38,22 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ErrorHandler 
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ErrorHandler
 {
   public:
 
-    /// Display the specified string in an error message 
-    static void Error( std::string  text );
+    /// Display the specified string in an error message
+    static void error( std::string  text );
 
-    /// Display the specified string in a warning message 
-    static void Warning( std::string  text );
+    /// Display the specified string in a warning message
+    static void warning( std::string  text );
 
-    /// Display the specified string in a notice message 
-    static void Notice( std::string  text );
+    /// Display the specified string in a notice message
+    static void notice( std::string  text );
 
 };
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif   // ERROR_HANLDER_H

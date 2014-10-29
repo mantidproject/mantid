@@ -6,17 +6,17 @@
 #include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 
 /**
-    @class ArrayDataSource 
-  
+    @class ArrayDataSource
+
     This class provides a wrapper around a simple 2-D array of doubles
     stored in row-major order in a 1-D array, so that the array can be
     viewed using the SpectrumView data viewer.
- 
-    @author Dennis Mikkelson 
-    @date   2012-05-14 
-     
+
+    @author Dennis Mikkelson
+    @date   2012-05-14
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -31,8 +31,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
@@ -59,7 +59,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ArrayDataSource: public SpectrumDataSou
     /// Get DataArray covering full range of data in x, and y directions
     DataArray * GetDataArray( bool is_log_x );
 
-    /// Get DataArray covering restricted range of data 
+    /// Get DataArray covering restricted range of data
     DataArray * GetDataArray( double  xmin,
                               double  xmax,
                               double  ymin,
@@ -72,11 +72,13 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ArrayDataSource: public SpectrumDataSou
     void GetInfoList( double x,
                       double y,
                       std::vector<std::string> &list );
+
   private:
-    float* data;  
+    float* m_data;
+
 };
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif // ARRAY_DATA_SOURCE_H

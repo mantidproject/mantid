@@ -13,12 +13,12 @@ namespace SpectrumView
 {
 
 /**
- *  Construct a RangeHandler object to manage min, max and step controls 
+ *  Construct a RangeHandler object to manage min, max and step controls
  *  in the specified UI
  */
-RangeHandler::RangeHandler( Ui_SpectrumViewer* sv_ui ) : IRangeHandler()
+RangeHandler::RangeHandler( Ui_SpectrumViewer* svUI )
+  : IRangeHandler(), m_svUI(svUI)
 {
-  this->sv_ui = sv_ui;
 }
 
 
@@ -27,20 +27,17 @@ RangeHandler::RangeHandler( Ui_SpectrumViewer* sv_ui ) : IRangeHandler()
  *
  * @param data_source  SpectrumDataSource that provides the data to be drawn
  */
-void RangeHandler::ConfigureRangeControls( SpectrumDataSource* data_source )
+void RangeHandler::configureRangeControls( SpectrumDataSource* dataSource )
 {
-  
-  total_min_x   = data_source->GetXMin();
-  total_max_x   = data_source->GetXMax();
-  total_n_steps = data_source->GetNCols();
+  m_totalMinX   = dataSource->getXMin();
+  m_totalMaxX   = dataSource->getXMax();
+  m_totalNSteps = dataSource->getNCols();
 
-  double default_step = (total_max_x - total_min_x)/(double)total_n_steps;
-  if ( total_n_steps > 2000 )
-  {
-    default_step = (total_max_x - total_min_x)/2000.0;
-  }
+  double defaultStep = (m_totalMaxX - m_totalMinX) / (double)m_totalNSteps;
+  if ( m_totalNSteps > 2000 )
+    defaultStep = (m_totalMaxX - m_totalMinX) / 2000.0;
 
-  SetRange( total_min_x, total_max_x, default_step );
+  setRange( m_totalMinX, m_totalMaxX, defaultStep );
 }
 
 
@@ -52,7 +49,7 @@ void RangeHandler::ConfigureRangeControls( SpectrumDataSource* data_source )
  *
  * @param min     On input, this should be the default value that the
  *                min should be set to, if getting the range fails.
- *                On output this is will be set to the x value at the 
+ *                On output this is will be set to the x value at the
  *                left edge of the first bin to display, if getting the
  *                range succeeds.
  * @param max     On input, this should be the default value that the
@@ -60,107 +57,101 @@ void RangeHandler::ConfigureRangeControls( SpectrumDataSource* data_source )
  *                On output, if getting the range succeeds, this will
  *                be set an x value at the right edge of the last bin
  *                to display.  This will be adjusted so that it is larger
- *                than min by an integer number of steps.  
+ *                than min by an integer number of steps.
  * @param step    On input this should be the default number of steps
  *                to use if getting the range information fails.
  *                On output, this is size of the step to use between
- *                min and max.  If it is less than zero, a log scale 
+ *                min and max.  If it is less than zero, a log scale
  *                is requested.
  */
-void RangeHandler::GetRange( double &min, double &max, double &step )
+void RangeHandler::getRange( double &min, double &max, double &step )
 {
-  double original_min  = min;
-  double original_max  = max;
-  double original_step = step;
+  double originalMin  = min;
+  double originalMax  = max;
+  double originalStep = step;
 
-  QLineEdit* min_control  = sv_ui->x_min_input;
-  QLineEdit* max_control  = sv_ui->x_max_input;
-  QLineEdit* step_control = sv_ui->step_input;
+  QLineEdit* minControl  = sv_ui->x_min_input;
+  QLineEdit* maxControl  = sv_ui->x_max_input;
+  QLineEdit* stepControl = sv_ui->step_input;
 
-  if ( !SVUtils::StringToDouble(  min_control->text().toStdString(), min ) )
+  if ( !SVUtils::StringToDouble(  minControl->text().toStdString(), min ) )
   {
     ErrorHandler::Error("X Min is not a NUMBER! Value reset.");
-    min = original_min;
+    min = originalMin;
   }
-  if ( !SVUtils::StringToDouble(  max_control->text().toStdString(), max ) )
+  if ( !SVUtils::StringToDouble(  maxControl->text().toStdString(), max ) )
   {
     ErrorHandler::Error("X Max is not a NUMBER! Value reset.");
-    max = original_max;
+    max = originalMax;
   }
-  if ( !SVUtils::StringToDouble(  step_control->text().toStdString(), step ) )
+  if ( !SVUtils::StringToDouble(  stepControl->text().toStdString(), step ) )
   {
     ErrorHandler::Error("Step is not a NUMBER! Value reset.");
-    step = original_step;
+    step = originalStep;
   }
 
-                                 // just require step to be non-zero, no other
-                                 // bounds. If zero, take a default step size  
-  if ( step == 0 ) 
+  // Just require step to be non-zero, no other bounds. If zero, take a default step size
+  if ( step == 0 )
   {
     ErrorHandler::Error("Step = 0, resetting to default step");
-    step = original_step;
+    step = originalStep;
   }
 
   if ( step > 0 )
   {
     if ( !SVUtils::FindValidInterval( min, max ) )
     {
-      ErrorHandler::Warning( 
-             "In GetRange: [Min,Max] interval invalid, values adjusted" );
-      min  = original_min;
-      max  = original_max;
-      step = original_step;
+      ErrorHandler::Warning( "In GetRange: [Min,Max] interval invalid, values adjusted" );
+      min  = originalMin;
+      max  = originalMax;
+      step = originalStep;
     }
   }
   else
   {
     if ( !SVUtils::FindValidLogInterval( min, max ) )
     {
-      ErrorHandler::Warning(
-          "In GetRange: [Min,Max] log interval invalid, values adjusted");
-      min  = original_min;
-      max  = original_max;
-      step = original_step;
+      ErrorHandler::Warning( "In GetRange: [Min,Max] log interval invalid, values adjusted");
+      min  = originalMin;
+      max  = originalMax;
+      step = originalStep;
     }
   }
 
-  SetRange( min, max, step );
+  setRange( min, max, step );
 }
 
 
 /**
- * Adjust the values to be consistent with the available data and 
+ * Adjust the values to be consistent with the available data and
  * diplay them in the controls.
  *
  * @param min     This is the x value at the left edge of the first bin.
  * @param max     This is an x value at the right edge of the last bin.
- * @param step    This is size of the step to use between min and max. 
+ * @param step    This is size of the step to use between min and max.
  *                If it is less than zero, a log scale is requested.
  */
-void RangeHandler::SetRange( double min, double max, double step )
+void RangeHandler::setRange( double min, double max, double step )
 {
   if ( !SVUtils::FindValidInterval( min, max ) )
-  {
-    ErrorHandler::Warning( 
-            "In SetRange: [Min,Max] interval invalid, values adjusted" );
-  }
+    ErrorHandler::Warning( "In SetRange: [Min,Max] interval invalid, values adjusted" );
 
-  if ( min < total_min_x || min > total_max_x )
+  if ( min < m_totalMinX || min > m_totalMaxX )
   {
 //    ErrorHandler::Warning("X Min out of range, resetting to range min.");
-    min = total_min_x;
+    min = m_totalMinX;
   }
 
-  if ( max < total_min_x || max > total_max_x )
+  if ( max < m_totalMinX || max > m_totalMaxX )
   {
 //    ErrorHandler::Warning("X Max out of range, resetting to range max.");
-    max = total_max_x;
+    max = m_totalMaxX;
   }
 
   if ( step == 0 )
   {
     ErrorHandler::Error("Step = 0, resetting to default step");
-    step = (max-min)/2000.0;
+    step = (max - min) / 2000.0;
   }
 
   QtUtils::SetText( 8, 2, min, sv_ui->x_min_input );
@@ -170,4 +161,4 @@ void RangeHandler::SetRange( double min, double max, double step )
 
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt

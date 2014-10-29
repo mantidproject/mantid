@@ -12,17 +12,17 @@
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
-    @class SpectrumView 
-  
-      This is the QMainWindow for the SpectrumView data viewer.  Data is
+    @class SpectrumView
+
+    This is the QMainWindow for the SpectrumView data viewer.  Data is
     displayed in an SpectrumView, by constructing the SpectrumView object and
     specifying a particular data source.
- 
-    @author Dennis Mikkelson 
-    @date   2012-04-03 
-     
+
+    @author Dennis Mikkelson
+    @date   2012-04-03
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -37,14 +37,14 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
 namespace Ui
 {
-class SpectrumViewer; // forward declaration of ui file
+class SpectrumViewer; // Forward declaration of UI file
 }
 
 namespace MantidQt
@@ -52,7 +52,7 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-// forward declarations
+// Forward declarations
 class EModeHandler;
 class RangeHandler;
 class SliderHandler;
@@ -63,10 +63,10 @@ class MatrixWSDataSource;
 class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumView : public QMainWindow, public MantidQt::API::WorkspaceObserver
 {
   Q_OBJECT
-public:
 
-  /// Construct an SpectrumView to display data from the specified data source
-  SpectrumView( QWidget * parent = 0);
+public:
+  /// Construct a SpectrumView to display data from the specified data source
+  SpectrumView( QWidget * parent = 0 );
 
   ~SpectrumView();
   void renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp);
@@ -81,23 +81,24 @@ protected:
   void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
 private:
-  void init(SpectrumDataSource* data_source);
-  void updateHandlers(SpectrumDataSource* data_source);
-  GraphDisplay*    h_graph;
-  GraphDisplay*    v_graph;
+  void init(SpectrumDataSource* dataSource);
+  void updateHandlers(SpectrumDataSource* dataSource);
 
-  MatrixWSDataSource *m_data_source;
+  GraphDisplay*    m_hGraph;
+  GraphDisplay*    m_vGraph;
 
-  // keep void pointers to the following objects, to avoid having to
-  // include ui_SpectrumView.h, which disappears by the time MantidPlot is
-  // being built.  We need the pointers so we can delete them in the
-  // destructor.
-  Ui::SpectrumViewer *m_ui; ///< Ui_SpectrumViewer*
-  SliderHandler      *m_slider_handler;   // SliderHandler*
-  RangeHandler       *m_range_handler;    // RangeHandler*
-  SpectrumDisplay    *m_spectrum_display; // SpectrumDisplay*
-  SVConnections      *m_sv_connections;   // SVConnections*
-  EModeHandler       *m_emode_handler;    // EModeHandler*
+  MatrixWSDataSource *m_dataSource;
+
+  /* Keep void pointers to the following objects, to avoid having to */
+  /* include ui_SpectrumView.h, which disappears by the time MantidPlot is */
+  /* being built.  We need the pointers so we can delete them in the */
+  /* destructor. */
+  Ui::SpectrumViewer *m_ui;              // Ui_SpectrumViewer*
+  SliderHandler      *m_sliderHandler;   // SliderHandler*
+  RangeHandler       *m_rangeHandler;    // RangeHandler*
+  SpectrumDisplay    *m_spectrumDisplay; // SpectrumDisplay*
+  SVConnections      *m_svConnections;   // SVConnections*
+  EModeHandler       *m_emodeHandler;    // EModeHandler*
 
 signals:
   void needToClose();
@@ -105,6 +106,6 @@ signals:
 };
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif   // SPECTRUM_VIEW_H

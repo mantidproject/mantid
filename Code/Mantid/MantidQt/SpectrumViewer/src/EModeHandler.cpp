@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <QLineEdit>
 
@@ -13,39 +12,39 @@ namespace SpectrumView
 {
 
 /**
- *  Construct an EModeHandler object to manage the E Mode and E Fixed controls 
+ *  Construct an EModeHandler object to manage the E Mode and E Fixed controls
  *  in the specified UI
  */
-EModeHandler::EModeHandler( Ui_SpectrumViewer* sv_ui )
+EModeHandler::EModeHandler( Ui_SpectrumViewer* svUI ):
+  m_svUI(svUI)
 {
-  this->sv_ui = sv_ui;
 }
 
 
 /**
  * Get the EMode value (0,1,2) from the GUI.
  */
-int EModeHandler::GetEMode()
+int EModeHandler::getEMode()
 {
-  return sv_ui->emode_combo_box->currentIndex();
+  return m_svUI->emode_combo_box->currentIndex();
 }
 
 
 /**
  * Set the EMode to display in the GUI.
  *
- * @param mode   Integer code for the emode type, 
+ * @param mode   Integer code for the emode type,
  *               0 = Diffractometer
  *               1 = Direct Geometry Spectrometer
  *               2 = Indirect Geometry Spectrometer
  *               NOTE: Any other value will be interpreted as 0
  *               and the gui will not be changed.
  */
-void EModeHandler::SetEMode( const int mode )
+void EModeHandler::setEMode( const int mode )
 {
   if ( mode >= 0 && mode <= 2 )
   {
-     sv_ui->emode_combo_box->setCurrentIndex( mode );
+     m_svUI->emode_combo_box->setCurrentIndex( mode );
   }
   else
   {
@@ -55,48 +54,48 @@ void EModeHandler::SetEMode( const int mode )
 
 
 /**
- *  Return the user specified EFixed value, OR 0, if no valid 
+ *  Return the user specified EFixed value, OR 0, if no valid
  *  EFixed value was set.
  */
-double EModeHandler::GetEFixed()
+double EModeHandler::getEFixed()
 {
-  double efixed;
-  std::string text = sv_ui->efixed_control->text().toStdString();
-  if ( !SVUtils::StringToDouble( text, efixed ) )
+  double eFixed;
+  std::string text = m_svUI->efixed_control->text().toStdString();
+  if ( !SVUtils::StringToDouble( text, eFixed ) )
   {
     ErrorHandler::Error("E Fixed is not a NUMBER! Value reset to default.");
-    efixed = 0;
+    eFixed = 0;
   }
-  else if ( efixed < 0 )
+  else if ( eFixed < 0 )
   {
     ErrorHandler::Error("E Fixed is negative, Value reset to default.");
-    efixed = 0;
+    eFixed = 0;
   }
 
-  SetEFixed( efixed );
-  return efixed;
+  setEFixed( eFixed );
+  return eFixed;
 }
 
 
 /**
  *  Set the EFixed value that is displayed in the UI.
  *
- *  @param efixed  The new efixed value to display in the
+ *  @param eFixed  The new efixed value to display in the
  *                 UI.  This must be positive, or the
  *                 displayed value will be set to zero.
  */
-void EModeHandler::SetEFixed( const double efixed )
+void EModeHandler::setEFixed( const double eFixed )
 {
-  double new_value = efixed;
-  if ( efixed < 0 )
+  double newValue = eFixed;
+  if ( eFixed < 0 )
   {
     ErrorHandler::Error("E Fixed is negative, reset to default.");
-    new_value = 0;
+    newValue = 0;
   }
 
-  QtUtils::SetText( 10, 4, new_value, sv_ui->efixed_control );
+  QtUtils::SetText( 10, 4, newValue, m_svUI->efixed_control );
 }
 
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
