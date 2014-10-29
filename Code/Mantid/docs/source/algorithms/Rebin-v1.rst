@@ -231,9 +231,9 @@ are identical::
   else:
     resultEtransf   = ConvertUnits(groupedFilename,'DeltaE',Emode='Direct',EFixed=Ei)
   
-    noBgWorkspace= Rebin(InputWorkspace=resultEtransf, Params=[e_min,dE,e_max],PreserveEvents=False,FlatBkgWorkspace='Bg',EMode='Direct')
-    nHist = Bg.getNumberHistograms()
-    removedBkgSum = SumSpectra(noBgWorkspace ,0,nHist-1);    
+  noBgWorkspace= Rebin(InputWorkspace=resultEtransf, Params=[e_min,dE,e_max],PreserveEvents=False,FlatBkgWorkspace='Bg',EMode='Direct')
+  nHist = Bg.getNumberHistograms()
+  removedBkgSum = SumSpectra(noBgWorkspace ,0,nHist-1);    
 
 .. _rebin-usage:
 
