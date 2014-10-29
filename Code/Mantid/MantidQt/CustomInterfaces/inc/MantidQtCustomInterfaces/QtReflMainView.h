@@ -75,6 +75,8 @@ namespace MantidQt
       virtual std::string getProcessInstrument() const;
       virtual std::string getWorkspaceToOpen() const;
 
+      virtual boost::shared_ptr<IReflPresenter> getPresenter() const;
+
     private:
       //initialise the interface
       virtual void initLayout();
@@ -99,6 +101,7 @@ namespace MantidQt
       void actionProcess();
       void actionGroupRows();
       void actionExpandSelection();
+      void actionOptionsDialog();
       void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);
       void showContextMenu(const QPoint& pos);
     };

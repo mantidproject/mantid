@@ -8,10 +8,13 @@
 #include "MantidKernel/Utils.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
+#include "MantidQtCustomInterfaces/QtReflOptionsDialog.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
+
+#include <QSettings>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -19,6 +22,8 @@ using namespace Mantid::Kernel;
 
 namespace
 {
+  const QString ReflSettingsGroup = "Mantid/CustomInterfaces/ISISReflectometry";
+
   void validateModel(ITableWorkspace_sptr model)
   {
     if(!model)
@@ -107,6 +112,9 @@ namespace MantidQt
       m_renameObserver(*this, &ReflMainViewPresenter::handleRenameEvent),
       m_replaceObserver(*this, &ReflMainViewPresenter::handleReplaceEvent)
     {
+      //Initialise options
+      initOptions();
+
       //Set up the instrument selectors
       std::vector<std::string> instruments;
       instruments.push_back("INTER");
@@ -256,9 +264,12 @@ namespace MantidQt
       std::set<int> rows = m_view->getSelectedRows();
       if(rows.empty())
       {
-        //Does the user want to abort?
-        if(!m_view->askUserYesNo("This will process all rows in the table. Continue?","Process all rows?"))
-          return;
+        if(m_options["WarnProcessAll"].toBool())
+        {
+          //Does the user want to abort?
+          if(!m_view->askUserYesNo("This will process all rows in the table. Continue?","Process all rows?"))
+            return;
+        }
 
         //They want to process all rows, so populate rows with every index in the model
         for(int idx = 0; idx < m_model->rowCount(); ++idx)
@@ -832,6 +843,7 @@ namespace MantidQt
       case ReflMainView::NewTableFlag:        newTable();           break;
       case ReflMainView::TableUpdatedFlag:    m_tableDirty = true;  break;
       case ReflMainView::ExpandSelectionFlag: expandSelection();    break;
+      case ReflMainView::OptionsDialogFlag:   showOptionsDialog();  break;
 
       case ReflMainView::NoFlags:       return;
       }
@@ -1027,6 +1039,58 @@ namespace MantidQt
           selection.insert(i);
 
       m_view->setSelection(selection);
+    }
+
+    /** Shows the Refl Options dialog */
+    void ReflMainViewPresenter::showOptionsDialog()
+    {
+      auto options = new QtReflOptionsDialog(m_view, m_view->getPresenter());
+      //By default the dialog is only destroyed when ReflMainView is and so they'll stack up.
+      //This way, they'll be deallocated as soon as they've been closed.
+      options->setAttribute(Qt::WA_DeleteOnClose, true);
+      options->exec();
+    }
+
+    /** Gets the options used by the presenter
+        @returns The options used by the presenter
+     */
+    const std::map<std::string,QVariant>& ReflMainViewPresenter::options() const
+    {
+      return m_options;
+    }
+
+    /** Sets the options used by the presenter
+        @param options : The new options for the presenter to use
+     */
+    void ReflMainViewPresenter::setOptions(const std::map<std::string,QVariant>& options)
+    {
+      //Overwrite the given options
+      for(auto it = options.begin(); it != options.end(); ++it)
+        m_options[it->first] = it->second;
+
+      //Save any changes to disk
+      QSettings settings;
+      settings.beginGroup(ReflSettingsGroup);
+      for(auto it = m_options.begin(); it != m_options.end(); ++it)
+        settings.setValue(QString::fromStdString(it->first), it->second);
+      settings.endGroup();
+    }
+
+    /** Load options from disk if possible, or set to defaults */
+    void ReflMainViewPresenter::initOptions()
+    {
+      m_options.clear();
+
+      //Set defaults
+      m_options["WarnProcessAll"] = true;
+
+      //Load saved values from disk
+      QSettings settings;
+      settings.beginGroup(ReflSettingsGroup);
+      QStringList keys = settings.childKeys();
+      for(auto it = keys.begin(); it != keys.end(); ++it)
+        m_options[it->toStdString()] = settings.value(*it);
+      settings.endGroup();
     }
   }
 }

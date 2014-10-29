@@ -65,6 +65,7 @@ namespace MantidQt
       connect(ui.actionProcess,         SIGNAL(triggered()), this, SLOT(actionProcess()));
       connect(ui.actionGroupRows,       SIGNAL(triggered()), this, SLOT(actionGroupRows()));
       connect(ui.actionExpandSelection, SIGNAL(triggered()), this, SLOT(actionExpandSelection()));
+      connect(ui.actionOptionsDialog,   SIGNAL(triggered()), this, SLOT(actionOptionsDialog()));
 
       //Finally, create a presenter to do the thinking for us
       m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(this));
@@ -194,6 +195,14 @@ namespace MantidQt
       Q_UNUSED(topLeft);
       Q_UNUSED(bottomRight);
       m_presenter->notify(TableUpdatedFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "options..." button has been pressed
+    */
+    void QtReflMainView::actionOptionsDialog()
+    {
+      m_presenter->notify(OptionsDialogFlag);
     }
 
     /**
@@ -380,6 +389,15 @@ namespace MantidQt
     std::string QtReflMainView::getWorkspaceToOpen() const
     {
       return m_toOpen;
+    }
+
+    /**
+    Get a pointer to the presenter that's currently controlling this view.
+    @returns A pointer to the presenter
+    */
+    boost::shared_ptr<IReflPresenter> QtReflMainView::getPresenter() const
+    {
+      return m_presenter;
     }
 
   } // namespace CustomInterfaces

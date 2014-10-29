@@ -54,6 +54,7 @@ public:
   MOCK_CONST_METHOD0(getSearchInstrument, std::string());
   MOCK_CONST_METHOD0(getProcessInstrument, std::string());
   MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
+  MOCK_CONST_METHOD0(getPresenter, boost::shared_ptr<IReflPresenter>());
 private:
   QReflTableModel_sptr m_model;
 };
