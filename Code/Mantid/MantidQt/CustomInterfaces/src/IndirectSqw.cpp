@@ -5,6 +5,7 @@
 #include <QFileInfo>
 
 using namespace Mantid::API;
+using MantidQt::API::BatchAlgorithmRunner;
 
 namespace MantidQt
 {
@@ -52,7 +53,7 @@ namespace CustomInterfaces
       emit showMessageBox(error);
     }
 
-    if(m_uiForm.sqw_ckRebinE->isChecked() && validateEnergyRebin())
+    if(m_uiForm.sqw_ckRebinE->isChecked() && !validateEnergyRebin())
       valid = false;
 
     if(!validateQRebin())
@@ -147,80 +148,104 @@ namespace CustomInterfaces
 
   void IndirectSqw::run()
   {
+    QString sampleWsName = m_uiForm.sqw_dsSampleInput->getCurrentDataName();
+    QString sqwWsName = sampleWsName.left(sampleWsName.length() - 4) + "_sqw";
+    QString eRebinWsName = sampleWsName.left(sampleWsName.length() - 4) + "_r";
+
     QString rebinString = m_uiForm.sqw_leQLow->text() + "," + m_uiForm.sqw_leQWidth->text() +
       "," + m_uiForm.sqw_leQHigh->text();
 
-    QString wsname;
-    if(m_uiForm.sqw_dsSampleInput->isFileSelectorVisible())
-    {
-      // Load Nexus file into workspace
-      QString filename = m_uiForm.sqw_dsSampleInput->getFullFilePath();
-      QFileInfo fi(filename);
-      wsname = fi.baseName();
-
-      if(!loadFile(filename, wsname))
-      {
-        emit showMessageBox("Could not load Nexus file");
-      }
-    }
-    else
-    {
-      // Get the workspace
-      wsname = m_uiForm.sqw_dsSampleInput->getCurrentDataName();
-    }
-
-    QString pyInput = "from mantid.simpleapi import *\n";
-
-    // Create output name before rebinning
-    pyInput += "sqwInput = '" + wsname + "'\n";
-    pyInput += "sqwOutput = sqwInput[:-3] + 'sqw'\n";
-
-    if ( m_uiForm.sqw_ckRebinE->isChecked() )
+    // Rebin in energy
+    bool rebinInEnergy = m_uiForm.sqw_ckRebinE->isChecked();
+    if(rebinInEnergy)
     {
       QString eRebinString = m_uiForm.sqw_leELow->text() + "," + m_uiForm.sqw_leEWidth->text() +
-        "," + m_uiForm.sqw_leEHigh->text();
+                             "," + m_uiForm.sqw_leEHigh->text();
 
-      pyInput += "Rebin(InputWorkspace=sqwInput, OutputWorkspace=sqwInput+'_r', Params='" + eRebinString + "')\n"
-        "sqwInput += '_r'\n";
+      IAlgorithm_sptr energyRebinAlg = AlgorithmManager::Instance().create("Rebin");
+      energyRebinAlg->initialize();
+
+      energyRebinAlg->setProperty("InputWorkspace", sampleWsName.toStdString());
+      energyRebinAlg->setProperty("OutputWorkspace", eRebinWsName.toStdString());
+      energyRebinAlg->setProperty("Params", eRebinString.toStdString());
+
+      m_batchAlgoRunner->addAlgorithm(energyRebinAlg);
     }
 
-    pyInput +=
-      "efixed = " + m_uiForm.leEfixed->text() + "\n"
-      "rebin = '" + rebinString + "'\n";
+    // Get correct S(Q, w) algorithm
+    QString efixed = m_uiForm.leEfixed->text();
 
+    IAlgorithm_sptr sqwAlg;
     QString rebinType = m_uiForm.sqw_cbRebinType->currentText();
+
     if(rebinType == "Centre (SofQW)")
-      pyInput += "SofQW(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
+      sqwAlg = AlgorithmManager::Instance().create("SofQW");
     else if(rebinType == "Parallelepiped (SofQW2)")
-      pyInput += "SofQW2(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
+      sqwAlg = AlgorithmManager::Instance().create("SofQW2");
     else if(rebinType == "Parallelepiped/Fractional Area (SofQW3)")
-      pyInput += "SofQW3(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
+      sqwAlg = AlgorithmManager::Instance().create("SofQW3");
 
-    pyInput += "AddSampleLog(Workspace=sqwOutput, LogName='rebin_type', LogType='String', LogText='"+rebinType+"')\n";
+    // S(Q, w) algorithm
+    sqwAlg->initialize();
 
-    if ( m_uiForm.sqw_ckSave->isChecked() )
+    BatchAlgorithmRunner::AlgorithmRuntimeProps sqwInputProps;
+    if(rebinInEnergy)
+      sqwInputProps["InputWorkspace"] = eRebinWsName.toStdString();
+    else
+      sqwInputProps["InputWorkspace"] = sampleWsName.toStdString();
+
+    sqwAlg->setProperty("OutputWorkspace", sqwWsName.toStdString());
+    sqwAlg->setProperty("QAxisBinning", rebinString.toStdString());
+    sqwAlg->setProperty("EMode", "Indirect");
+    sqwAlg->setProperty("EFixed", efixed.toStdString());
+
+    m_batchAlgoRunner->addAlgorithm(sqwAlg, sqwInputProps);
+
+    // Add sample log for S(Q, w) algorithm used
+    IAlgorithm_sptr sampleLogAlg = AlgorithmManager::Instance().create("AddSampleLog");
+    sampleLogAlg->initialize();
+
+    sampleLogAlg->setProperty("LogName", "rebin_type");
+    sampleLogAlg->setProperty("LogType", "String");
+    sampleLogAlg->setProperty("LogText", rebinType.toStdString());
+
+    BatchAlgorithmRunner::AlgorithmRuntimeProps inputToAddSampleLogProps;
+    inputToAddSampleLogProps["Workspace"] = sqwWsName.toStdString();
+
+    m_batchAlgoRunner->addAlgorithm(sampleLogAlg, inputToAddSampleLogProps);
+
+    // Save S(Q, w) workspace
+    if(m_uiForm.sqw_ckSave->isChecked())
     {
-      pyInput += "SaveNexus(InputWorkspace=sqwOutput, Filename=sqwOutput+'.nxs')\n";
+      QString saveFilename = sqwWsName + ".nxs";
 
-      if (m_uiForm.sqw_ckVerbose->isChecked())
-      {
-        pyInput += "logger.notice(\"Resolution file saved to default save directory.\")\n";
-      }
+      IAlgorithm_sptr saveNexusAlg = AlgorithmManager::Instance().create("SaveNexus");
+      saveNexusAlg->initialize();
+
+      saveNexusAlg->setProperty("Filename", saveFilename.toStdString());
+
+      BatchAlgorithmRunner::AlgorithmRuntimeProps inputToSaveNexusProps;
+      inputToSaveNexusProps["InputWorkspace"] = sqwWsName.toStdString();
+
+      m_batchAlgoRunner->addAlgorithm(saveNexusAlg, inputToSaveNexusProps);
     }
 
-    if ( m_uiForm.sqw_cbPlotType->currentText() == "Contour" )
-    {
-      pyInput += "importMatrixWorkspace(sqwOutput).plotGraph2D()\n";
-    }
+    m_batchAlgoRunner->executeBatch();
 
-    else if ( m_uiForm.sqw_cbPlotType->currentText() == "Spectra" )
-    {
-      pyInput +=
-        "nspec = mtd[sqwOutput].getNumberHistograms()\n"
-        "plotSpectrum(sqwOutput, range(0, nspec))\n";
-    }
+    //TODO
+    /* if(m_uiForm.sqw_cbPlotType->currentText() == "Contour") */
+    /* { */
+    /*   pyInput += "importMatrixWorkspace(sqwOutput).plotGraph2D()\n"; */
+    /* } */
 
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
+    /* else if( m_uiForm.sqw_cbPlotType->currentText() == "Spectra") */
+    /* { */
+    /*   pyInput += */
+    /*     "nspec = mtd[sqwOutput].getNumberHistograms()\n" */
+    /*     "plotSpectrum(sqwOutput, range(0, nspec))\n"; */
+    /* } */
+
+    /* QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed(); */
   }
 
   /**
