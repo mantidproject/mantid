@@ -710,12 +710,12 @@ public:
     //Check the table was updated as expected
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->String(0, ThetaCol), "0.7");
-    TS_ASSERT_EQUALS(ws->String(0,   DQQCol), "0.0340301395749668");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(0, DQQCol)), 0.034030, 1e-6);
     TS_ASSERT_EQUALS(ws->String(0,  QMinCol), "0.009");
     TS_ASSERT_EQUALS(ws->String(0,  QMaxCol), "0.154");
 
     TS_ASSERT_EQUALS(ws->String(1, ThetaCol), "2.3");
-    TS_ASSERT_EQUALS(ws->String(1,   DQQCol), "0.0340504661681226");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(1, DQQCol)), 0.034050, 1e-6);
     TS_ASSERT_EQUALS(ws->String(1,  QMinCol), "0.03");
     TS_ASSERT_EQUALS(ws->String(1,  QMaxCol), "0.504");
 
