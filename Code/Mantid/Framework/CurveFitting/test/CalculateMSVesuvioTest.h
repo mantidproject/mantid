@@ -31,28 +31,13 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
-  void test_exec_with_flat_plate_sample_and_no_goniometer()
+  void test_exec_with_flat_plate_sample()
   {
     auto alg = createTestAlgorithm(createFlatPlateSampleWS());
-
-    feenableexcept(FE_INVALID | FE_OVERFLOW);
-
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
-  }
-
-  void test_exec_with_flat_plate_sample_and_goniometer()
-  {
-    auto testWS = createFlatPlateSampleWS();
-    Mantid::Geometry::Goniometer sampleRot;
-    // 45.0 deg rotation around Y
-    sampleRot.pushAxis("phi", 0.0, 1.0, 0.0, 45.0,
-                       Mantid::Geometry::CW, Mantid::Geometry::angDegrees);
-    testWS->mutableRun().setGoniometer(sampleRot, false);
-    auto alg = createTestAlgorithm(testWS);
-
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    TS_ASSERT(alg->isExecuted());
+    
+    checkOutputValuesAsExpected(alg, 0.0113021908, 0.0028218125);
   }
 
   // ------------------------ Failure Cases -----------------------------------------
@@ -193,10 +178,10 @@ private:
       // replace instrument with one that has a detector with a shape
       const std::string shapeXML = \
         "<cuboid id=\"shape\">"
-        "<left-front-bottom-point x=\"0.01\" y=\"-0.05\" z=\"-0.0025\"  />"
-        "<left-front-top-point  x=\"0.01\" y=\"0.05\" z=\"-0.0025\"  />"
-        "<left-back-bottom-point  x=\"-0.01\" y=\"-0.05\" z=\"0.0025\"  />"
-        "<right-front-bottom-point  x=\"-0.01\" y=\"-0.05\" z=\"-0.0025\"  />"
+          "<left-front-bottom-point x=\"0.0125\" y=\"-0.0395\" z= \"0.0045\" />"
+          "<left-front-top-point x=\"0.0125\" y=\"0.0395\" z= \"0.0045\" />"
+          "<left-back-bottom-point x=\"0.0125\" y=\"-0.0395\" z= \"-0.0045\" />"
+          "<right-front-bottom-point x=\"-0.0125\" y=\"-0.0395\" z= \"0.0045\" />"
         "</cuboid>"
         "<algebra val=\"shape\" />";
       const auto pos = ws2d->getDetector(0)->getPos();
@@ -209,6 +194,29 @@ private:
     return ws2d;
   }
 
+  void checkOutputValuesAsExpected(const Mantid::API::IAlgorithm_sptr & alg,
+                                   const double expectedTotal, const double expectedMS)
+  {
+    using Mantid::API::MatrixWorkspace_sptr;
+    const size_t checkIdx = 100;
+    const double tolerance(1e-8);
+    
+    // Values for total scattering
+    MatrixWorkspace_sptr totScatter = alg->getProperty("TotalScatteringWS");
+    TS_ASSERT(totScatter);
+    const auto & totY = totScatter->readY(0);
+    TS_ASSERT_DELTA(expectedTotal, totY[checkIdx], tolerance);
+    const auto & totX = totScatter->readX(0);
+    TS_ASSERT_DELTA(150.0, totX[checkIdx], tolerance); // based on workspace setup
+
+    // Values for multiple scatters
+    MatrixWorkspace_sptr multScatter = alg->getProperty("MultipleScatteringWS");
+    TS_ASSERT(multScatter);
+    const auto & msY = multScatter->readY(0);
+    TS_ASSERT_DELTA(expectedMS, msY[checkIdx], tolerance);
+    const auto & msX = multScatter->readX(0);
+    TS_ASSERT_DELTA(150.0, msX[checkIdx], tolerance); // based on workspace setup
+  }
 };
 
 

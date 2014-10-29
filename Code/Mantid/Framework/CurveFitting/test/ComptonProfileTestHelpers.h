@@ -64,14 +64,14 @@ namespace ComptonProfileTestHelpers
     {
       double r(0.553), theta(66.5993), phi(138.6);
       Mantid::Kernel::V3D detPos;
-      detPos.spherical(r, theta, phi);
+      detPos.spherical_rad(r, theta*M_PI/180.0, phi*M_PI/180.0);
       ws2d->setInstrument(createTestInstrumentWithFoilChanger(id,detPos));
     }
     else
     {
       double r(0.55), theta(66.5993), phi(0.0);
       Mantid::Kernel::V3D detPos;
-      detPos.spherical(r, theta, phi);
+      detPos.spherical_rad(r, theta*M_PI/180.0, phi*M_PI/180.0);
       ws2d->setInstrument(createTestInstrumentWithNoFoilChanger(id,detPos));
     }
 
@@ -182,6 +182,7 @@ namespace ComptonProfileTestHelpers
     pmap.addDouble(compID, "t0", -0.32);
     pmap.addDouble(compID, "hwhm_lorentz", 24);
     pmap.addDouble(compID, "sigma_gauss", 73);
+    pmap.addDouble(compID, "sigma_tof", 0.3);
   }
 
   static void addFoilResolution(const Mantid::API::MatrixWorkspace_sptr & ws,

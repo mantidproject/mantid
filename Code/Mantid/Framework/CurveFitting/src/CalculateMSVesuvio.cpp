@@ -471,8 +471,7 @@ namespace Mantid
       m_randgen(NULL),
       m_acrossIdx(0), m_upIdx(1), m_beamIdx(3), m_beamDir(), m_srcR1(0.0), m_srcR2(0.0),
       m_halfSampleHeight(0.0), m_halfSampleWidth(0.0), m_halfSampleThick(0.0),
-      m_maxWidthSampleFrame(0.0), m_goniometer(NULL), m_sampleShape(NULL),
-      m_sampleProps(NULL),
+      m_maxWidthSampleFrame(0.0), m_sampleShape(NULL), m_sampleProps(NULL),
       m_detHeight(-1.0), m_detWidth(-1.0), m_detThick(-1.0),
       m_tmin(-1.0), m_tmax(-1.0), m_delt(-1.0), m_foilRes(-1.0),
       m_progress(NULL), m_inputWS()
@@ -591,7 +590,7 @@ namespace Mantid
 
       setProperty("TotalScatteringWS", totalsc);
       setProperty("MultipleScatteringWS", multsc);
-   }
+    }
 
     /**
      * Caches inputs insuitable form for speed in later calculations
@@ -622,8 +621,6 @@ namespace Mantid
       m_srcR1 /= 100.0;
       m_srcR2 /= 100.0;
 
-      // Sample rotation specified by a goniometer
-      m_goniometer = &(m_inputWS->run().getGoniometerMatrix());
       // Sample shape
       m_sampleShape = &(m_inputWS->sample().getShape());
       // We know the shape is valid from the property validator
@@ -821,8 +818,6 @@ namespace Mantid
 
       // moderator coord in lab frame
       V3D srcPos = generateSrcPos(detpar.l1);
-      // transform to sample frame
-      srcPos.rotate(*m_goniometer);
       if(fabs(srcPos[m_acrossIdx]) > m_halfSampleWidth ||
          fabs(srcPos[m_upIdx]) > m_halfSampleHeight)
       {
@@ -1159,7 +1154,6 @@ namespace Mantid
         // perturb away from nominal position
         detPos[m_acrossIdx] = nominalPos[m_acrossIdx] + (m_randgen->flat() - 0.5)*m_detWidth;
         detPos[m_upIdx] = nominalPos[m_upIdx] + (m_randgen->flat() - 0.5)*m_detHeight;
-        detPos.rotate(*m_goniometer); // to sample frame
 
         // Distance to exit the sample for this order
         V3D scToDet = detPos - scatterPt;

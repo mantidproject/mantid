@@ -179,7 +179,6 @@ namespace Mantid
       double m_srcR1, m_srcR2; // beam umbra, penumbra radius (m)
       double m_halfSampleHeight, m_halfSampleWidth, m_halfSampleThick; // (m)
       double m_maxWidthSampleFrame; // Maximum width in sample frame (m)
-      Kernel::DblMatrix const *m_goniometer; // sample rotation
       Geometry::Object const *m_sampleShape; // sample shape
       SampleComptonProperties *m_sampleProps; // description of sample properties
       double m_detHeight, m_detWidth, m_detThick; // (m)
