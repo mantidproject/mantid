@@ -28,6 +28,7 @@
 #include <Poco/Path.h>
 #include <Poco/StringTokenizer.h>
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid
 {
@@ -239,6 +240,8 @@ namespace Mantid
       API::Workspace_sptr tempWS = loadEntry(root, targetEntryName, 0, 1, spectraInfo /*Ignore to begin with*/
       , false /*Do not Ignore spectrum/instrument information inputs, write them*/);
 
+      g_log.warning("loaded tempws");
+
       if (nWorkspaceEntries == 1 || !bDefaultEntryNumber)
       {
         // We have what we need.
@@ -258,7 +261,9 @@ namespace Mantid
 
         //load names of each of the workspaces and check for a common stem
         std::vector<std::string> names(nWorkspaceEntries + 1);
-        bool commonStem = checkForCommonNameStem(root, names);
+        bool commonStem = bIsMultiPeriod || checkForCommonNameStem(root, names);
+
+        g_log.warning("got names");
 
         //remove existing workspace and replace with the one being loaded
         bool wsExists = AnalysisDataService::Instance().doesExist(base_name);
@@ -274,7 +279,11 @@ namespace Mantid
         base_name += "_";
         const std::string prop_name = "OutputWorkspace_";
         double nWorkspaceEntries_d = static_cast<double>(nWorkspaceEntries);
-        for (int64_t p = 1; p <= nWorkspaceEntries; ++p)
+
+        MatrixWorkspace_sptr tempWS2D = boost::dynamic_pointer_cast<MatrixWorkspace>(tempWS);
+
+        //PARALLEL_FOR_NO_WSP_CHECK()
+        for (int p = 1; p <= nWorkspaceEntries; ++p)
         {
           std::ostringstream os;
           os << p;
@@ -291,7 +300,12 @@ namespace Mantid
           }
           else
           {
+
+
+
             g_log.warning("Reading AS MULTIPERIOD");
+
+            /*
             // Clone the original workspace
             auto cloneAlg = this->createChildAlgorithm("CloneWorkspace");
             cloneAlg->setProperty("InputWorkspace", tempWS);
@@ -300,6 +314,27 @@ namespace Mantid
             MatrixWorkspace_sptr local_workspace_2d = boost::dynamic_pointer_cast<MatrixWorkspace>(
                 local_workspace);
             // Now overwrite the y, e and log values.
+             *
+             */
+
+
+
+            MatrixWorkspace_sptr local_workspace_2d = WorkspaceFactory::Instance().create(tempWS2D);
+            //PARALLEL_FOR_NO_WSP_CHECK()
+                for (int64_t i = 0; i < int64_t(local_workspace_2d->getNumberHistograms()); ++i)
+                {
+                  //PARALLEL_START_INTERUPT_REGION
+
+                  local_workspace_2d->setX(i,tempWS2D->refX(i));
+
+
+                 // PARALLEL_END_INTERUPT_REGION
+                }
+               // PARALLEL_CHECK_INTERUPT_REGION
+
+
+
+            local_workspace = local_workspace_2d;
 
             NXEntry mtdEntry = root.openEntry(basename + os.str());
             NXData wsEntry = mtdEntry.openNXData("workspace"); // TODO. hardcoded group_name is HACK
@@ -370,13 +405,18 @@ namespace Mantid
 
             // TODO need to handle spectrum intervals correctly.
 
+            // TODO reporting
+
           }
 
+          //(LoadNexusProcessed_multiperiodadd)
+          //{
           declareProperty(
               new WorkspaceProperty<API::Workspace>(prop_name + os.str(), wsName, Direction::Output));
           //wksp_group->add(base_name + os.str());
           wksp_group->addWorkspace(local_workspace);
           setProperty(prop_name + os.str(), local_workspace);
+          //}
         }
 
         // The group is the root property value
