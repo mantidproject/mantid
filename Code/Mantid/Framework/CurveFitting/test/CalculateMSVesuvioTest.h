@@ -37,7 +37,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
     
-    checkOutputValuesAsExpected(alg, 0.0113021908, 0.0028218125);
+    checkOutputValuesAsExpected(alg, 0.0099824991, 0.0020558473);
   }
 
   // ------------------------ Failure Cases -----------------------------------------
@@ -122,6 +122,9 @@ private:
                                    27.50000, 4.0172841E-02, 15.07701};
     alg->setProperty("AtomicProperties", std::vector<double>(sampleProps, sampleProps + 9));
     alg->setProperty("BeamRadius", 2.5);
+    // reduce number of events for test purposes
+    alg->setProperty("NumEventsPerRun", 10000);
+
     // outputs
     alg->setPropertyValue("TotalScatteringWS", "__unused_for_child");
     alg->setPropertyValue("MultipleScatteringWS", "__unused_for_child");
