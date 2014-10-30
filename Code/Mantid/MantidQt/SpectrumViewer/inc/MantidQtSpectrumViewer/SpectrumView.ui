@@ -22,12 +22,15 @@
       </property>
       <widget class="QSplitter" name="vgraphSplitter">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
        <widget class="QwtPlot" name="v_graphPlot">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -47,7 +50,7 @@
          <item>
           <widget class="QTableWidget" name="v_graph_table">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -188,7 +191,7 @@
         <item row="7" column="0">
          <widget class="QLabel" name="table_label">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Image Info</string>
@@ -198,14 +201,14 @@
         <item row="8" column="0">
          <widget class="QTableWidget" name="image_table">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
          </widget>
         </item>
         <item row="9" column="0">
          <widget class="QLabel" name="label">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Horizontal Graph Info</string>
@@ -215,7 +218,7 @@
         <item row="10" column="0">
          <widget class="QTableWidget" name="h_graph_table">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
          </widget>
         </item>

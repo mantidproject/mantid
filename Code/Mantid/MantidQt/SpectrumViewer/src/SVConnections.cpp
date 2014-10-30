@@ -148,8 +148,11 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
   QObject::connect( m_imagePicker, SIGNAL(mouseMoved(const QPoint &)),
                     this, SLOT(imagePickerMoved(const QPoint &)) );
 
-  QObject::connect(m_svUI->imageSplitter, SIGNAL(splitterMoved(int,int)),
+  QObject::connect(m_svUI->imageSplitter, SIGNAL(splitterMoved(int, int)),
                    this, SLOT(imageSplitterMoved()) );
+
+  QObject::connect(m_svUI->vgraphSplitter, SIGNAL(splitterMoved(int, int)),
+                   this, SLOT(vgraphSplitterMoved()) );
 
   QObject::connect(m_svUI->x_min_input, SIGNAL( returnPressed() ),
                    this, SLOT(imageHorizontalRangeChanged()) );
@@ -429,10 +432,28 @@ void SVConnections::hScrollBarMoved()
 void SVConnections::imageSplitterMoved()
 {
   QList<int> sizes = m_svUI->imageSplitter->sizes();
+
   QList<int> vgraph_sizes;
   vgraph_sizes.append( sizes[0] );
   vgraph_sizes.append( sizes[1] );
+
   m_svUI->vgraphSplitter->setSizes( vgraph_sizes );
+
+  m_spectrumDisplay->updateImage();
+  m_spectrumDisplay->handleResize();
+}
+
+
+void SVConnections::vgraphSplitterMoved()
+{
+  QList<int> sizes = m_svUI->vgraphSplitter->sizes();
+
+  QList<int> vgraph_sizes;
+  vgraph_sizes.append( sizes[0] );
+  vgraph_sizes.append( sizes[1] );
+
+  m_svUI->imageSplitter->setSizes( vgraph_sizes );
+
   m_spectrumDisplay->updateImage();
   m_spectrumDisplay->handleResize();
 }

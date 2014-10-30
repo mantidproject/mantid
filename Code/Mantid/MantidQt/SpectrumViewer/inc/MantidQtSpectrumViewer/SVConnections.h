@@ -80,6 +80,7 @@ public slots:
   void vScrollBarMoved();
   void hScrollBarMoved();
   void imageSplitterMoved();
+  void vgraphSplitterMoved();
   void imagePickerMoved(const QPoint &point);
   void hGraphPickerMoved(const QPoint &point);
   void vGraphPickerMoved(const QPoint & point);
