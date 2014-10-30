@@ -5,6 +5,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include <boost/scoped_ptr.hpp>
 #include <QSignalMapper>
 #include "ui_ReflMainWidget.h"
@@ -49,7 +50,7 @@ namespace MantidQt
       static QString categoryInfo() { return "Reflectometry"; }
 
       //Connect the model
-      virtual void showTable(Mantid::API::ITableWorkspace_sptr model);
+      virtual void showTable(QReflTableModel_sptr model);
 
       //Dialog/Prompt methods
       virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue);
@@ -63,13 +64,13 @@ namespace MantidQt
       virtual void setProgress(int progress);
 
       //Settor methods
-      virtual void setSelection(const std::set<size_t>& rows);
+      virtual void setSelection(const std::set<int>& rows);
       virtual void setTableList(const std::set<std::string>& tables);
       virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument);
       virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy* hintStrategy);
 
       //Accessor methods
-      virtual std::set<size_t> getSelectedRows() const;
+      virtual std::set<int> getSelectedRows() const;
       virtual std::string getSearchInstrument() const;
       virtual std::string getProcessInstrument() const;
       virtual std::string getWorkspaceToOpen() const;
@@ -81,6 +82,8 @@ namespace MantidQt
       virtual void initLayout();
       //the presenter
       boost::shared_ptr<IReflPresenter> m_presenter;
+      //the model
+      QReflTableModel_sptr m_model;
       //the interface
       Ui::reflMainWidget ui;
       //the workspace the user selected to open

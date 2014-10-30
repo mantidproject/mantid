@@ -2,8 +2,8 @@
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEW_H
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtMantidWidgets/HintStrategy.h"
 
 namespace MantidQt
@@ -42,7 +42,7 @@ namespace MantidQt
       virtual ~ReflMainView() {};
 
       //Connect the model
-      virtual void showTable(Mantid::API::ITableWorkspace_sptr model) = 0;
+      virtual void showTable(QReflTableModel_sptr model) = 0;
 
       //Dialog/Prompt methods
       virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue) = 0;
@@ -56,13 +56,13 @@ namespace MantidQt
       virtual void setProgress(int progress) = 0;
 
       //Settor methods
-      virtual void setSelection(const std::set<size_t>& rows) = 0;
+      virtual void setSelection(const std::set<int>& rows) = 0;
       virtual void setTableList(const std::set<std::string>& tables) = 0;
       virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument) = 0;
       virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy* hintStrategy) = 0;
 
       //Accessor methods
-      virtual std::set<size_t> getSelectedRows() const = 0;
+      virtual std::set<int> getSelectedRows() const = 0;
       virtual std::string getSearchInstrument() const = 0;
       virtual std::string getProcessInstrument() const = 0;
       virtual std::string getWorkspaceToOpen() const = 0;

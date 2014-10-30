@@ -5,8 +5,9 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtCustomInterfaces/QReflTableModel.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
@@ -50,8 +51,10 @@ namespace MantidQt
       //Public for the purposes of unit testing
       static std::map<std::string,std::string> parseKeyValueString(const std::string& str);
     protected:
+      //the workspace the model is currently representing
+      Mantid::API::ITableWorkspace_sptr m_ws;
       //the model the table is currently representing
-      Mantid::API::ITableWorkspace_sptr m_model;
+      QReflTableModel_sptr m_model;
       //the name of the workspace/table/model in the ADS, blank if unsaved
       std::string m_wsName;
       //the view we're managing
@@ -64,27 +67,27 @@ namespace MantidQt
       //process selected rows
       virtual void process();
       //Reduce a row
-      void reduceRow(size_t rowNo);
+      void reduceRow(int rowNo);
       //load a run into the ADS, or re-use one in the ADS if possible
       Mantid::API::Workspace_sptr loadRun(const std::string& run, const std::string& instrument);
       //get the run number of a TOF workspace
       std::string getRunNumber(const Mantid::API::Workspace_sptr& ws);
       //get an unused group id
-      int getUnusedGroup(std::set<size_t> ignoredRows = std::set<size_t>()) const;
+      int getUnusedGroup(std::set<int> ignoredRows = std::set<int>()) const;
       //make a transmission workspace
       Mantid::API::MatrixWorkspace_sptr makeTransWS(const std::string& transString);
       //Validate a row
-      void validateRow(size_t rowNo) const;
+      void validateRow(int rowNo) const;
       //Autofill a row with sensible values
-      void autofillRow(size_t rowNo);
+      void autofillRow(int rowNo);
       //calculates qmin and qmax
       static std::vector<double> calcQRange(Mantid::API::MatrixWorkspace_sptr ws, double theta);
       //get the number of rows in a group
       size_t numRowsInGroup(int groupId) const;
       //Stitch some rows
-      void stitchRows(std::set<size_t> rows);
+      void stitchRows(std::set<int> rows);
       //insert a row in the model before the given index
-      virtual void insertRow(size_t before);
+      virtual void insertRow(int index);
       //add row(s) to the model
       virtual void appendRow();
       virtual void prependRow();
