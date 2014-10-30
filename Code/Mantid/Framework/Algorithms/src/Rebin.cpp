@@ -97,29 +97,6 @@ namespace Mantid
         "then the workspace gets converted to a Workspace2D histogram.");
 
       declareProperty("FullBinsOnly", false, "Omit the final bin if it's width is smaller than the step size");
-      //---------------------------------------------------------------
-      // 
-      auto vsValidator = boost::make_shared<CompositeValidator>();
-      vsValidator->add<InstrumentValidator>();
-      vsValidator->add<WorkspaceUnitValidator>("TOF");
-      vsValidator->add<HistogramValidator>();
-      declareProperty(new WorkspaceProperty<>("FlatBkgWorkspace","",Direction::Input,API::PropertyMode::Optional,vsValidator),
-        "An optional histogram workspace in the units of TOF defining background for removal during rebinning."
-        "The workspace has to have single value or contain the same number of spectra as the \"InputWorkspace\" and single Y value per each spectra," 
-        "representing flat background in the background time region. "
-        "If such workspace is present, the value of the flat background provided by this workspace is removed "
-        "from each spectra of the rebinned workspace. This works for histogram and event workspace when events are not retained "
-        "but actually useful mainly for removing background while rebinning an event workspace in the units different from TOF.");
-
-      std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
-      declareProperty("EMode",dE_modes[Kernel::DeltaEMode::Direct],boost::make_shared<Kernel::StringListValidator>(dE_modes),
-        "If FlatBkgWorkspace is present, this property used to define the units for conversion from the units of the InputWorkspace to TOF" ,Direction::Input);
-      setPropertySettings("EMode",
-        new Kernel::VisibleWhenProperty("FlatBkgWorkspace", IS_NOT_EQUAL_TO, ""));
-
-      std::string bgRemovalGrp("Remove Background during rebinning settings:");
-      setPropertyGroup("FlatBkgWorkspace", bgRemovalGrp);
-      setPropertyGroup("EMode", bgRemovalGrp);
     }
 
 
@@ -147,16 +124,7 @@ namespace Mantid
       // workspace independent determination of length
       const int histnumber = static_cast<int>(inputWS->getNumberHistograms());
 
-      //-- Flat Background removal ----------------------------
-      int eMode; // in convert units emode is still integer
-      API::MatrixWorkspace_const_sptr bkgWS = checkRemoveBackgroundParameters(inputWS,eMode,PreserveEvents);
-      const bool remove_background = bool(bkgWS);
-      if(remove_background)
-      {
-        int nThreads = omp_get_max_threads();
-        m_BackgroundHelper.initialize(bkgWS,inputWS,eMode,nThreads);
-      }
-      //-------------------------------------------------------
+     //-------------------------------------------------------
 
       bool fullBinsOnly = getProperty("FullBinsOnly");
 
@@ -228,12 +196,6 @@ namespace Mantid
               MantidVec y_data, e_data;
               // The EventList takes care of histogramming.
               el.generateHistogram(*XValues_new, y_data, e_data);
-              if(remove_background)
-              {
-                int id = omp_get_thread_num();
-                m_BackgroundHelper.removeBackground(i,*XValues_new,y_data,e_data,id);
-              }
-
 
               //Copy the data over.
               outputWS->dataY(i).assign(y_data.begin(), y_data.end());
@@ -306,11 +268,6 @@ namespace Mantid
             // output data arrays are implicitly filled by function
             try {
               VectorHelper::rebin(XValues,YValues,YErrors,*XValues_new,YValues_new,YErrors_new, dist);
-              if(remove_background)
-              {
-                int id = omp_get_thread_num();
-                m_BackgroundHelper.removeBackground(hist,*XValues_new,YValues_new,YErrors_new,id);
-              }
             } catch (std::exception& ex)
             {
               g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
@@ -352,31 +309,6 @@ namespace Mantid
             outputWS = ChildAlg->getProperty("OutputWorkspace");
           }
 
-          if(remove_background)
-          {
-            const std::list<int> &failedBkgRemoalList= m_BackgroundHelper.getFailingSpectrsList();
-            if(!failedBkgRemoalList.empty())
-            {
-              size_t nFailed = failedBkgRemoalList.size();
-              if(nFailed == static_cast<size_t>(histnumber))
-              {
-                g_log.warning()<<" has not been able to remove any background while rebinning workspace "<<inputWS->getName()<<
-                  "\n possible reasons: wrong instrument or units conversion mode\n";
-              }
-              else
-              {
-                g_log.debug()<<" has not removed background from  "<<nFailed<<" spectra\n";
-                if(nFailed<20)
-                {
-                  g_log.debug()<<" Spectra numbers are: ";
-                  for(auto it=failedBkgRemoalList.begin(); it !=failedBkgRemoalList.end();it++) g_log.debug()<<(*it);
-                  g_log.debug()<<"\n";
-                }
-              }
-            }
-          }
-
-
           // Assign it to the output workspace property
           setProperty("OutputWorkspace",outputWS);
 
@@ -385,56 +317,6 @@ namespace Mantid
 
       return;
     }
-    /*** method checks if removing background is requested and possible 
-    and if yes sets up class parameter referring the workspace with flat background 
-
-    @param inputWS the input workspace where removing background is expected
-    @param eMode   the energy conversion mode, defined/requested for the instrument
-
-    @returns background  workspace if removal is expected
-    */
-    API::MatrixWorkspace_const_sptr Rebin::checkRemoveBackgroundParameters(const API::MatrixWorkspace_sptr &inputWS,int &eMode, bool PreserveEvents)
-    {
-      API::MatrixWorkspace_const_sptr bkgWksp = getProperty("FlatBkgWorkspace");
-
-      if (!bkgWksp)
-        return bkgWksp;
-
-      // can not remove background while preserving events
-      if(PreserveEvents)
-        return API::MatrixWorkspace_const_sptr();
-
-      // source workspace has to have full instrument defined to perform background removal using this procedure. 
-      auto pInstrument = inputWS->getInstrument();
-      if(pInstrument)
-      {
-        if(!pInstrument->getSample())
-        {
-          g_log.warning()<<" Workspace: "<< inputWS->getName()<< " to rebin does not have properly defined instrument. Background removal will not be performed";
-          return API::MatrixWorkspace_const_sptr();
-        }
-
-      }
-      else
-      {
-        g_log.warning()<<" Workspace: "<< inputWS->getName()<< " to rebin does not have instrument attached. Background removal will not be performed";
-        return API::MatrixWorkspace_const_sptr();
-      }
-
-      if(!(bkgWksp->getNumberHistograms() == 1 || inputWS->getNumberHistograms()==bkgWksp->getNumberHistograms()))
-      {
-        g_log.warning()<<" Background Workspace: "<< bkgWksp->getName()<< " should have the same number of spectra as source workspace or be a single histogram workspace\n";
-        return API::MatrixWorkspace_const_sptr();
-      }
-
-
-      const std::string emodeStr = getProperty("EMode");
-      eMode = static_cast<int>(Kernel::DeltaEMode().fromString(emodeStr));
-
-      return bkgWksp;
-    }
-
-
     //
     //    /** Continue execution for EventWorkspace scenario */
     //    void Rebin::execEvent()

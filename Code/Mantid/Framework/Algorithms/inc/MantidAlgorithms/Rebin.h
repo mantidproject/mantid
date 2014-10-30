@@ -52,13 +52,13 @@ class DLLExport Rebin : public API::Algorithm
 {
 public:
   /// Default constructor
-  Rebin() : API::Algorithm(),m_BackgroundHelper() {};
+  Rebin() : API::Algorithm() {};
   /// Destructor
   virtual ~Rebin(){};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "Rebin";}
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Rebins data with new X bin boundaries. For EventWorkspaces, you can very quickly rebin in-place by keeping the same output name and PreserveEvents=true.";}
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Rebins data with new X bin boundaries. For EventWorkspaces, you can very quickly rebin in-place by keeping the same output name and PreserveEvents=true.";}
 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1;}
@@ -84,12 +84,6 @@ protected:
 
   
   void propagateMasks(API::MatrixWorkspace_const_sptr inputW, API::MatrixWorkspace_sptr outputW, int hist);
-
-private:
-  // method to check if removing background is requested and possible 
-  API::MatrixWorkspace_const_sptr  checkRemoveBackgroundParameters(const API::MatrixWorkspace_sptr &inputWS,int &eMode, bool PreserveEvents);
-  // class responsible for background removal
-  BackgroundHelper m_BackgroundHelper;
 
 };
 
