@@ -152,7 +152,10 @@ namespace Mantid
       API::MatrixWorkspace_const_sptr bkgWS = checkRemoveBackgroundParameters(inputWS,eMode,PreserveEvents);
       const bool remove_background = bool(bkgWS);
       if(remove_background)
-        m_BackgroundHelper.initialize(bkgWS,inputWS,eMode);
+      {
+        int nThreads = omp_get_max_threads();
+        m_BackgroundHelper.initialize(bkgWS,inputWS,eMode,nThreads);
+      }
       //-------------------------------------------------------
 
       bool fullBinsOnly = getProperty("FullBinsOnly");
@@ -227,7 +230,8 @@ namespace Mantid
               el.generateHistogram(*XValues_new, y_data, e_data);
               if(remove_background)
               {
-                m_BackgroundHelper.removeBackground(i,*XValues_new,y_data,e_data);
+                int id = omp_get_thread_num();
+                m_BackgroundHelper.removeBackground(i,*XValues_new,y_data,e_data,id);
               }
 
 
@@ -304,7 +308,8 @@ namespace Mantid
               VectorHelper::rebin(XValues,YValues,YErrors,*XValues_new,YValues_new,YErrors_new, dist);
               if(remove_background)
               {
-                m_BackgroundHelper.removeBackground(hist,*XValues_new,YValues_new,YErrors_new);
+                int id = omp_get_thread_num();
+                m_BackgroundHelper.removeBackground(hist,*XValues_new,YValues_new,YErrors_new,id);
               }
             } catch (std::exception& ex)
             {

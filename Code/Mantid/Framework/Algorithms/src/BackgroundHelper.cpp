@@ -8,7 +8,8 @@ namespace Mantid
   
     /// Constructor
     BackgroundHelper::BackgroundHelper():
-      m_WSUnit(),m_bgWs(),m_wkWS(),
+      m_WSUnit(),
+      m_bgWs(),m_wkWS(),
       m_singleValueBackground(false),
       m_NBg(0),m_dtBg(1), //m_ErrSq(0),
       m_Emode(0),
@@ -16,19 +17,39 @@ namespace Mantid
       m_Sample(),
       FailingSpectraList()
     {};
+    BackgroundHelper::~BackgroundHelper()
+    {
+      this->deleteUnitsConverters();
+    }
+
+  /** The method deletes all units converter allocated*/
+  void BackgroundHelper::deleteUnitsConverters()
+  {
+      for(size_t i=0;i<m_WSUnit.size();i++)
+      {
+        if(m_WSUnit[i])
+        {
+          delete m_WSUnit[i];
+          m_WSUnit[i]=NULL;
+        }
+      }
+
+  }
 
     /** Initialization method: 
     @param bkgWS    -- shared pointer to the workspace which contains background 
     @param sourceWS -- shared pointer to the workspace to remove background from
-    @param emode    -- energy conversion mode used during internal units conversion (0 -- elastic, 1-direct, 2 indirect, as defined in 
+    @param emode    -- energy conversion mode used during internal units conversion (0 -- elastic, 1-direct, 2 indirect, as defined in Units conversion
+    @param nThreads -- number of threads to be used for background removal
     */
-    void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,const API::MatrixWorkspace_sptr &sourceWS,int emode)
+    void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,const API::MatrixWorkspace_sptr &sourceWS,int emode,int nThreads)
     {
       m_bgWs = bkgWS;
       m_wkWS = sourceWS;
       m_Emode = emode;
       FailingSpectraList.clear();
 
+ 
       std::string bgUnits = bkgWS->getAxis(0)->unit()->unitID();
       if(bgUnits!="TOF")
         throw std::invalid_argument(" Background Workspace: "+bkgWS->getName()+" should be in the units of TOF");
@@ -36,8 +57,8 @@ namespace Mantid
       if(!(bkgWS->getNumberHistograms() == 1 || sourceWS->getNumberHistograms()==bkgWS->getNumberHistograms()))
         throw std::invalid_argument(" Background Workspace: "+bkgWS->getName()+" should have the same number of spectra as source workspace or be a single histogram workspace");  
 
-      m_WSUnit = sourceWS->getAxis(0)->unit();
-      if(!m_WSUnit)
+      auto WSUnit = sourceWS->getAxis(0)->unit();
+      if(!WSUnit)
         throw std::invalid_argument(" Source Workspace: "+sourceWS->getName()+" should have units");
 
       Geometry::IComponent_const_sptr source = sourceWS->getInstrument()->getSource();
@@ -46,6 +67,14 @@ namespace Mantid
         throw std::invalid_argument("Instrument on Source workspace:"+sourceWS->getName()+"is not sufficiently defined: failed to get source and/or sample");
       m_L1 = source->getDistance(*m_Sample);
 
+      // just in case. 
+      this->deleteUnitsConverters();
+      // allocate the array of units converters to avoid units reallocation within a loop
+      m_WSUnit.assign(nThreads,NULL);
+      for(int i=0;i<nThreads;i++)
+      {
+        m_WSUnit[i]=WSUnit->clone();
+      }
 
       m_singleValueBackground = false;
       if(bkgWS->getNumberHistograms()==0)
@@ -65,8 +94,9 @@ namespace Mantid
     * @param XValues -- the spectra x-values (presumably not in TOF units)
     * @param y_data  -- the spectra signal
     * @param e_data  -- the spectra errors
+    * @param threadNum--number of thread doing conversion
     */
-    void BackgroundHelper::removeBackground(int nHist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data)const
+    void BackgroundHelper::removeBackground(int nHist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data,int threadNum)const
     {
 
       double dtBg,IBg;
@@ -85,7 +115,7 @@ namespace Mantid
         IBg  = dataY[0];
         //ErrSq= dataE[0]*dataE[0]; // Needs further clarification
       }
-      Kernel::Unit * unitConv;
+     
       try
       {
         auto detector = m_wkWS->getDetector(nHist);
@@ -94,7 +124,7 @@ namespace Mantid
         double L2 = detector->getDistance(*m_Sample);
         double delta(std::numeric_limits<double>::quiet_NaN());
         // clone unit conversion to avoid multithreading issues
-        unitConv = m_WSUnit->clone();
+        Kernel::Unit * unitConv = m_WSUnit[threadNum];
         unitConv->initialize(m_L1, L2,twoTheta, m_Emode, m_Efix,delta);
         double tof1 = unitConv->singleToTOF(XValues[0]);
         for(size_t i=0;i<y_data.size();i++)
@@ -115,7 +145,6 @@ namespace Mantid
         // no background removal for this spectra as it does not have a detector or other reason; How should it be reported?
         FailingSpectraList.push_front(nHist);
       }
-      delete unitConv;
 
     }
     /** Method returns the efixed or Ei value stored in properties of the input workspace.

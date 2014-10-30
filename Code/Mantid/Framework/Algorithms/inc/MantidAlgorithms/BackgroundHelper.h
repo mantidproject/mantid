@@ -43,15 +43,16 @@ namespace Algorithms
   {
   public:
     BackgroundHelper();
-    void initialize(const API::MatrixWorkspace_const_sptr &bkgWS,const API::MatrixWorkspace_sptr &sourceWS,int emode);
+   ~BackgroundHelper();
+    void initialize(const API::MatrixWorkspace_const_sptr &bkgWS,const API::MatrixWorkspace_sptr &sourceWS,int emode,int nTreads=1);
 
-    void removeBackground(int hist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data)const;
+    void removeBackground(int hist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data,int tread_num=0)const;
 
     //returns the list of the failing detectors
     std::list<int> & getFailingSpectrsList()const{return FailingSpectraList;}
   private:
-    // pointer to the units conversion class for the working workspace;
-    Kernel::Unit_sptr m_WSUnit;
+    //vector of pointers to the units conversion class for the working workspace;
+    std::vector<Kernel::Unit *> m_WSUnit;
 
     // shared pointer to the workspace containing background
     API::MatrixWorkspace_const_sptr m_bgWs;
@@ -74,12 +75,14 @@ namespace Algorithms
     double m_Efix;
     // shared pointer to the sample
     Geometry::IComponent_const_sptr m_Sample;
-    // get Ei attached to direct or indirect instrument workspace
-    double getEi(const API::MatrixWorkspace_const_sptr &inputWS)const;
-
 
     // list of the spectra numbers for which detectors retrieval has been unsuccessful
     mutable std::list<int> FailingSpectraList;
+
+    // get Ei attached to direct or indirect instrument workspace
+    double getEi(const API::MatrixWorkspace_const_sptr &inputWS)const;
+    // the procedure user to delete existing unit converter pointers
+    void deleteUnitsConverters();
   };
 
 }
