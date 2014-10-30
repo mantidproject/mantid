@@ -66,7 +66,7 @@ namespace MantidQt
       virtual void setSelection(const std::set<size_t>& rows);
       virtual void setTableList(const std::set<std::string>& tables);
       virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument);
-      virtual void setOptionsHintStrategy(HintStrategy* hintStrategy);
+      virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy* hintStrategy);
 
       //Accessor methods
       virtual std::set<size_t> getSelectedRows() const;
