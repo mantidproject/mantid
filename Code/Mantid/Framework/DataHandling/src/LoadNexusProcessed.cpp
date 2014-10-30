@@ -281,6 +281,7 @@ namespace Mantid
         double nWorkspaceEntries_d = static_cast<double>(nWorkspaceEntries);
 
         MatrixWorkspace_sptr tempWS2D = boost::dynamic_pointer_cast<MatrixWorkspace>(tempWS);
+        tempWS2D->mutableRun().clearLogs(); // Strip out any loaded logs.
 
         //PARALLEL_FOR_NO_WSP_CHECK()
         for (int p = 1; p <= nWorkspaceEntries; ++p)
@@ -300,38 +301,12 @@ namespace Mantid
           }
           else
           {
-
-
-
-            g_log.warning("Reading AS MULTIPERIOD");
-
-            /*
-            // Clone the original workspace
-            auto cloneAlg = this->createChildAlgorithm("CloneWorkspace");
-            cloneAlg->setProperty("InputWorkspace", tempWS);
-            cloneAlg->execute();
-            local_workspace = cloneAlg->getProperty("OutputWorkspace");
-            MatrixWorkspace_sptr local_workspace_2d = boost::dynamic_pointer_cast<MatrixWorkspace>(
-                local_workspace);
-            // Now overwrite the y, e and log values.
-             *
-             */
-
-
-
             MatrixWorkspace_sptr local_workspace_2d = WorkspaceFactory::Instance().create(tempWS2D);
-            //PARALLEL_FOR_NO_WSP_CHECK()
-                for (int64_t i = 0; i < int64_t(local_workspace_2d->getNumberHistograms()); ++i)
-                {
-                  //PARALLEL_START_INTERUPT_REGION
 
-                  local_workspace_2d->setX(i,tempWS2D->refX(i));
-
-
-                 // PARALLEL_END_INTERUPT_REGION
-                }
-               // PARALLEL_CHECK_INTERUPT_REGION
-
+            for (int64_t i = 0; i < int64_t(local_workspace_2d->getNumberHistograms()); ++i)
+            {
+              local_workspace_2d->setX(i, tempWS2D->refX(i));
+            }
 
 
             local_workspace = local_workspace_2d;
@@ -362,7 +337,7 @@ namespace Mantid
 
             for (; histIndex < readStop;)
             {
-              if(histIndex >= readOptimumStop)
+              if (histIndex >= readOptimumStop)
               {
                 blockSize = finalBlockSize;
               }
@@ -391,6 +366,18 @@ namespace Mantid
                 ++wsIndex;
                 ++histIndex;
               }
+            }
+
+            std::string parameterStr;
+            m_cppFile->openPath(mtdEntry.path());
+            try
+            {
+              // This loads logs, sample, and instrument.
+              local_workspace_2d->loadSampleAndLogInfoNexus(m_cppFile);
+            } catch (std::exception & e)
+            {
+              g_log.information("Error loading Instrument section of nxs file");
+              g_log.information(e.what());
             }
 
             // TODO deal with this not being a workspace2D
