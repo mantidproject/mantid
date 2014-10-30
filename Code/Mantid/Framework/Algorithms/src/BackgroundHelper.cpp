@@ -85,7 +85,7 @@ namespace Mantid
         IBg  = dataY[0];
         //ErrSq= dataE[0]*dataE[0]; // Needs further clarification
       }
-
+      Kernel::Unit * unitConv;
       try
       {
         auto detector = m_wkWS->getDetector(nHist);
@@ -94,7 +94,7 @@ namespace Mantid
         double L2 = detector->getDistance(*m_Sample);
         double delta(std::numeric_limits<double>::quiet_NaN());
         // clone unit conversion to avoid multithreading issues
-        auto unitConv = m_WSUnit->clone();
+        unitConv = m_WSUnit->clone();
         unitConv->initialize(m_L1, L2,twoTheta, m_Emode, m_Efix,delta);
         double tof1 = unitConv->singleToTOF(XValues[0]);
         for(size_t i=0;i<y_data.size();i++)
@@ -115,6 +115,7 @@ namespace Mantid
         // no background removal for this spectra as it does not have a detector or other reason; How should it be reported?
         FailingSpectraList.push_front(nHist);
       }
+      delete unitConv;
 
     }
     /** Method returns the efixed or Ei value stored in properties of the input workspace.
