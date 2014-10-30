@@ -71,16 +71,16 @@ public:
 
 protected:
   int                   m_bufferID;       // set to 0 or 1 to select buffer
-  DataArray*            m_dataArray0;     // these provide double buffers
-  DataArray*            m_dataArray1;     // for the float data.
+  DataArray           * m_dataArray0;     // these provide double buffers
+  DataArray           * m_dataArray1;     // for the float data.
 
 private:
   /* This class just uses the following */
   /* but they are created and deleted */
   /* in the upper level classes */
-  std::vector<QRgb>*    m_positiveColorTable;
-  std::vector<QRgb>*    m_negativeColorTable;
-  std::vector<double>*  m_intensityTable;
+  std::vector<QRgb>   * m_positiveColorTable;
+  std::vector<QRgb>   * m_negativeColorTable;
+  std::vector<double> * m_intensityTable;
 
 };
 

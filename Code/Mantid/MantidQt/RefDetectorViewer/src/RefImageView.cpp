@@ -25,7 +25,7 @@ namespace RefDetectorViewer
  *  parts of the SpectrumView are constructed here and are deleted when the
  *  SpectrumView destructor is called.
  *
- *  @param data_source  The source of the data that will be displayed. 
+ *  @param data_source  The source of the data that will be displayed.
  *  @param peak_min The min peak value
  *  @param peak_max The max peak value
  *  @param back_min The min background value
@@ -36,7 +36,7 @@ namespace RefDetectorViewer
 RefImageView::RefImageView( SpectrumView::SpectrumDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max)
 {
   Ui_RefImageViewer* ui = new Ui_RefImageViewer();
-  saved_ui          = ui; 
+  saved_ui          = ui;
 
   QMainWindow* window = this;
 
@@ -44,7 +44,7 @@ RefImageView::RefImageView( SpectrumView::SpectrumDataSource* data_source, int p
   window->resize( 1050, 800 );
   window->show();
   window->setAttribute(Qt::WA_DeleteOnClose);  // We just need to close the
-                                               // window to trigger the 
+                                               // window to trigger the
                                                // destructor and clean up
   window->setWindowTitle(QString::fromUtf8("Reflector Detector Viewer"));
 
@@ -70,10 +70,10 @@ RefImageView::RefImageView( SpectrumView::SpectrumDataSource* data_source, int p
                                                   ui->image_table);
   saved_image_display = image_display;
 
-  RefIVConnections * iv_connections = new RefIVConnections( ui, this, 
-                                                     image_display, 
+  RefIVConnections * iv_connections = new RefIVConnections( ui, this,
+                                                     image_display,
                                                      h_graph, v_graph );
-  
+
   // Set validators on the QLineEdits to restrict them to integers
   ui->lineEdit_peakLeft->setValidator(new QIntValidator(this));
   ui->lineEdit_peakRight->setValidator(new QIntValidator(this));
@@ -89,16 +89,16 @@ RefImageView::RefImageView( SpectrumView::SpectrumDataSource* data_source, int p
   limits_handler->setBackRight(back_max);
   limits_handler->setTOFmin(tof_min);
   limits_handler->setTOFmax(tof_max);
-    
+
   saved_iv_connections = iv_connections;
 
-    image_display->UpdateImage();
+    image_display->updateImage();
     iv_connections->peak_back_tof_range_update();
 
-    
-  image_display->SetDataSource( data_source );
+
+  image_display->setDataSource( data_source );
 }
-    
+
   RefIVConnections* RefImageView::getIVConnections()
   {
     return saved_iv_connections;
@@ -122,7 +122,7 @@ RefImageView::~RefImageView()
                              static_cast<RefRangeHandler*>(saved_range_handler);
   delete  range_handler;
 
-  RefIVConnections* iv_connections = 
+  RefIVConnections* iv_connections =
                              static_cast<RefIVConnections*>(saved_iv_connections);
   delete  iv_connections;
 
@@ -132,4 +132,4 @@ RefImageView::~RefImageView()
 
 
 } // namespace RefDetectorViewer
-} // namespace MantidQt 
+} // namespace MantidQt

@@ -21,7 +21,7 @@ namespace RefDetectorViewer
  * @param limits_handler  The object that manages the limits
  * @param h_graph         The GraphDisplay for the graph showing horizontal
  *                        cuts through the image at the bottom of the image.
- * @param v_graph         The GraphDisplay for the graph showing vertical 
+ * @param v_graph         The GraphDisplay for the graph showing vertical
  *                        cuts through the image at the left side of the image.
  * @param table_widget    The widget where the information about a pointed
  *                        at location will be displayed.
@@ -38,8 +38,8 @@ RefImageDisplay::RefImageDisplay(  QwtPlot*       image_plot,
 {
   // We need a different SpectrumPlotItem class, so delete the one created in the
   // base class constructor and create the one we want
-  delete spectrum_plot_item;
-  spectrum_plot_item = new RefImagePlotItem(limits_handler);
+  delete m_spectrumPlotItem;
+  m_spectrumPlotItem = new RefImagePlotItem(limits_handler);
   setupSpectrumPlotItem();
 }
 
@@ -52,7 +52,7 @@ RefImageDisplay::~RefImageDisplay()
  * show those as graphs in the horizontal and vertical graphs and show
  * information about the specified point.
  *
- * @param point  The point that the user is currently pointing at with 
+ * @param point  The point that the user is currently pointing at with
  *               the mouse.
  * @param mouseClick Which mouse button was clicked
  * @return A pair containing the (x,y) values in the graph of the point
@@ -60,17 +60,17 @@ RefImageDisplay::~RefImageDisplay()
 QPair<double,double> RefImageDisplay::SetPointedAtPoint( QPoint point, int mouseClick)
 {
   // Call the base class method for most of the work
-  QPair<double,double> xy = SpectrumDisplay::SetPointedAtPoint( point, mouseClick );
+  QPair<double,double> xy = SpectrumDisplay::setPointedAtPoint( point, mouseClick );
 
   // Now, for a left click, set the position in the appropriate lineedit
   if (mouseClick == 1)  //left click
   {
     m_limitsHandler->setActiveValue( xy.first, xy.second );
-    UpdateImage(); //force refresh of the plot
+    updateImage(); //force refresh of the plot
   }
-  
+
   return xy;
 }
 
 } // namespace RefDetectorViewer
-} // namespace MantidQt 
+} // namespace MantidQt

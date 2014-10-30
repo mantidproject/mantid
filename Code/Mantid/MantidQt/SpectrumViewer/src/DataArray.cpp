@@ -53,10 +53,10 @@ DataArray::DataArray( double xMin,     double xMax,
     {
       value = data[index];
 
-      if ( value < data_min )
+      if ( value < m_dataMin )
         m_dataMin = value;
 
-      else if ( value > data_max )
+      else if ( value > m_dataMax )
         m_dataMax = value;
 
       index++;

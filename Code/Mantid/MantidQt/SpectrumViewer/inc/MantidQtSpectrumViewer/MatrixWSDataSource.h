@@ -52,46 +52,47 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource: public SpectrumData
     /// Construct a DataSource object around the specifed MatrixWorkspace
     MatrixWSDataSource( Mantid::API::MatrixWorkspace_const_sptr mat_ws );
 
-   ~MatrixWSDataSource();
+    ~MatrixWSDataSource();
 
     virtual bool hasData(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
 
     /// OVERRIDES: Get the smallest 'x' value covered by the data
-    virtual double GetXMin();
+    virtual double getXMin();
 
     /// OVERRIDES: Get the largest 'x' value covered by the data
-    virtual double GetXMax();
+    virtual double getXMax();
 
     /// OVERRIDES: Get the largest 'y' value covered by the data
-    virtual double GetYMax();
+    virtual double getYMax();
 
     /// OVERRIDES: Get the total number of rows of data
-    virtual size_t GetNRows();
+    virtual size_t getNRows();
 
     /// Get DataArray covering full range of data in x, and y directions
-    DataArray * GetDataArray( bool is_log_x );
+    DataArray * getDataArray( bool isLogX );
 
     /// Get DataArray covering restricted range of data
-    DataArray * GetDataArray( double  xmin,
-                              double  xmax,
-                              double  ymin,
-                              double  ymax,
-                              size_t  n_rows,
-                              size_t  n_cols,
-                              bool    is_log_x );
+    DataArray * getDataArray( double  xMin,
+                              double  xMax,
+                              double  yMin,
+                              double  yMax,
+                              size_t  nRows,
+                              size_t  nCols,
+                              bool    isLogX );
 
     /// Set the class that gets the emode & efixed info from the user.
-    void SetEModeHandler( EModeHandler* emode_handler );
+    void setEModeHandler( EModeHandler* emodeHandler );
 
     /// Get a list containing pairs of strings with information about x,y
-    void GetInfoList( double x,
+    void getInfoList( double x,
                       double y,
                       std::vector<std::string> &list );
 
 
   private:
-    Mantid::API::MatrixWorkspace_const_sptr  mat_ws;
-    EModeHandler* saved_emode_handler;
+    Mantid::API::MatrixWorkspace_const_sptr m_matWs;
+    EModeHandler* m_emodeHandler;
+
 };
 
 } // namespace SpectrumView

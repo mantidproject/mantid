@@ -26,48 +26,48 @@ RefSliderHandler::RefSliderHandler( Ui_RefImageViewer* iv_ui )
  *                     be drawn
  * @param data_source  SpectrumDataSource that provides the data to be drawn
  */
-void RefSliderHandler::ConfigureSliders( QRect            draw_area,
+void RefSliderHandler::configureSliders( QRect            draw_area,
                                       SpectrumView::SpectrumDataSource* data_source )
 {
   QScrollBar* v_scroll = iv_ui->imageVerticalScrollBar;
-  int n_rows = (int)data_source->GetNRows();
-  ConfigureSlider( v_scroll, n_rows, draw_area.height(), n_rows );
+  int n_rows = (int)data_source->getNRows();
+  configureSlider( v_scroll, n_rows, draw_area.height(), n_rows );
 
-  ConfigureHSlider( 2000, draw_area.width() );   // initial default, 2000 bins
+  configureHSlider( 2000, draw_area.width() );   // initial default, 2000 bins
 }
 
 
 /**
- *  Public method to configure the horizontal scrollbar to cover the 
+ *  Public method to configure the horizontal scrollbar to cover the
  *  specified range of data columns, displayed in the specified number of
- *  pixels.  
+ *  pixels.
  *
- *  @param n_data_steps  The number of columns in the data that should be 
+ *  @param n_data_steps  The number of columns in the data that should be
  *                       displayed
  *  @param n_pixels      The number of pixels avaliable to show the data
  */
-void RefSliderHandler::ConfigureHSlider( int         n_data_steps,
+void RefSliderHandler::configureHSlider( int         n_data_steps,
                                       int         n_pixels )
 {
   QScrollBar* h_scroll = iv_ui->imageHorizontalScrollBar;
-  ConfigureSlider( h_scroll, n_data_steps, n_pixels, 0 );
+  configureSlider( h_scroll, n_data_steps, n_pixels, 0 );
 }
 
 
 /**
  *  Configure the specified scrollbar to cover the specified range of data
- *  steps, displayed in the specified number of pixels.  
+ *  steps, displayed in the specified number of pixels.
  *
  *  @param scroll_bar    The scroll bar that will be configured
- *  @param n_data_steps  The number of bins in the data that should be 
+ *  @param n_data_steps  The number of bins in the data that should be
  *                       displayed
  *  @param n_pixels      The number of pixels avaliable to show the data
  *  @param val           The initial position of the scrollbar, between 0 and
  *                       n_data_steps.
  */
-void RefSliderHandler::ConfigureSlider( QScrollBar* scroll_bar,
-                                     int         n_data_steps, 
-                                     int         n_pixels, 
+void RefSliderHandler::configureSlider( QScrollBar* scroll_bar,
+                                     int         n_data_steps,
+                                     int         n_pixels,
                                      int         val )
 {
   int step = n_pixels;
@@ -106,7 +106,7 @@ void RefSliderHandler::ConfigureSlider( QScrollBar* scroll_bar,
 /**
  * Return true if the image horizontal scrollbar is enabled.
  */
-bool RefSliderHandler::HSliderOn()
+bool RefSliderHandler::hSliderOn()
 {
   return iv_ui->imageHorizontalScrollBar->isEnabled();
 }
@@ -115,7 +115,7 @@ bool RefSliderHandler::HSliderOn()
 /**
  * Return true if the image vertical scrollbar is enabled.
  */
-bool RefSliderHandler::VSliderOn()
+bool RefSliderHandler::vSliderOn()
 {
   return iv_ui->imageVerticalScrollBar->isEnabled();
 }
@@ -131,14 +131,14 @@ bool RefSliderHandler::VSliderOn()
  * @param x_max   This will be set to the last bin number to display in the
  *                x direction
  */
-void RefSliderHandler::GetHSliderInterval( int &x_min, int &x_max )
+void RefSliderHandler::getHSliderInterval( int &x_min, int &x_max )
 {
   QScrollBar* h_scroll = iv_ui->imageHorizontalScrollBar;
   int step  = h_scroll->pageStep();
   int value = h_scroll->value();
 
-  x_min = value;     
-  x_max = x_min + step;       
+  x_min = value;
+  x_max = x_min + step;
 }
 
 
@@ -152,18 +152,18 @@ void RefSliderHandler::GetHSliderInterval( int &x_min, int &x_max )
  * @param y_max   This will be set to the last bin number to display in the
  *                y direction
  */
-void RefSliderHandler::GetVSliderInterval( int &y_min, int &y_max )
+void RefSliderHandler::getVSliderInterval( int &y_min, int &y_max )
 {
   QScrollBar* v_scroll = iv_ui->imageVerticalScrollBar;
   int max   = v_scroll->maximum();
   int step  = v_scroll->pageStep();
   int value = v_scroll->value();
-                                
-  y_min = max - value;        // invert value since scale increases from 
+
+  y_min = max - value;        // invert value since scale increases from
   y_max = y_min + step;       // bottom to top, but scroll bar increases
                               // the other way.
 }
 
 
 } // namespace RefDetectorViewer
-} // namespace MantidQt 
+} // namespace MantidQt

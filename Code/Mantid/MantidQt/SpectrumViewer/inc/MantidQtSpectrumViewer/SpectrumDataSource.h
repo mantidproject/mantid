@@ -48,7 +48,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDataSource
 {
   public:
 
-    /// construct data source with specified total range and data size
+    /// Construct data source with specified total range and data size
     SpectrumDataSource( double totalXmin, double totalXmax,
                         double totalYmin, double totalYmax,
                         size_t totalRows, size_t totalCols );
@@ -108,12 +108,12 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDataSource
                               std::vector<std::string> &list ) = 0;
 
   protected:
-    double m_totalXmin;
-    double m_totalXmax;
-    double m_totalYmin;
-    double m_totalYmax;
-    size_t m_totalrows;
-    size_t m_totalcols;
+    double m_totalXMin;
+    double m_totalXMax;
+    double m_totalYMin;
+    double m_totalYMax;
+    size_t m_totalRows;
+    size_t m_totalCols;
 
 };
 

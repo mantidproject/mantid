@@ -35,8 +35,8 @@ ArrayDataSource::ArrayDataSource( double m_totalXMin, double m_totalXMax,
                                   size_t m_totalRows, size_t m_totalCols,
                                   float* data ) :
   SpectrumDataSource( m_totalXMin, m_totalXMax,
-				              m_totalYMin, m_totalYMax,
-            		      m_totalRows, m_totalCols ),
+                      m_totalYMin, m_totalYMax,
+                      m_totalRows, m_totalCols ),
   m_data(data)
 {
 }
@@ -115,7 +115,7 @@ DataArray * ArrayDataSource::getDataArray( double xMin,   double  xMax,
 
       size_t sourceCol = (size_t)xIndex;
 
-      newData[index] = data[sourceRow * m_totalCols + sourceCol];
+      newData[index] = m_data[sourceRow * m_totalCols + sourceCol];
       index++;
     }
   }
@@ -138,10 +138,10 @@ DataArray * ArrayDataSource::getDataArray( double xMin,   double  xMax,
  *                support rebinning to a log axis, so the DataArray is
  *                always returned with isLogX = false.
  */
-DataArray * ArrayDataSource::GetDataArray( bool isLogX )
+DataArray * ArrayDataSource::getDataArray( bool isLogX )
 {
   isLogX = false;
-  return GetDataArray( m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax,
+  return getDataArray( m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax,
                        m_totalRows, m_totalCols, isLogX );
 }
 
@@ -156,7 +156,7 @@ DataArray * ArrayDataSource::GetDataArray( bool isLogX )
  * @param y    The y-coordinate of the point of interest in the data.
  * @param list Vector that will be filled out with the information strings.
  */
-void ArrayDataSource::GetInfoList( double x,
+void ArrayDataSource::getInfoList( double x,
                                    double y,
                                    std::vector<std::string> &list )
 {

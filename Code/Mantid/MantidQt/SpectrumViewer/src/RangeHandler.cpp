@@ -70,9 +70,9 @@ void RangeHandler::getRange( double &min, double &max, double &step )
   double originalMax  = max;
   double originalStep = step;
 
-  QLineEdit* minControl  = sv_ui->x_min_input;
-  QLineEdit* maxControl  = sv_ui->x_max_input;
-  QLineEdit* stepControl = sv_ui->step_input;
+  QLineEdit* minControl  = m_svUI->x_min_input;
+  QLineEdit* maxControl  = m_svUI->x_max_input;
+  QLineEdit* stepControl = m_svUI->step_input;
 
   if ( !SVUtils::StringToDouble(  minControl->text().toStdString(), min ) )
   {
@@ -154,9 +154,9 @@ void RangeHandler::setRange( double min, double max, double step )
     step = (max - min) / 2000.0;
   }
 
-  QtUtils::SetText( 8, 2, min, sv_ui->x_min_input );
-  QtUtils::SetText( 8, 2, max, sv_ui->x_max_input );
-  QtUtils::SetText( 8, 6, step, sv_ui->step_input );
+  QtUtils::SetText( 8, 2, min, m_svUI->x_min_input );
+  QtUtils::SetText( 8, 2, max, m_svUI->x_max_input );
+  QtUtils::SetText( 8, 6, step, m_svUI->step_input );
 }
 
 

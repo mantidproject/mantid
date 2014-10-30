@@ -85,7 +85,7 @@ public slots:
   void vGraphPickerMoved(const QPoint & point);
   void intensitySliderMoved();
   void loadColorMap();
-  void onlineHelpSlot();
+  void openOnlineHelp();
 
   void heatColorScale();
   void grayColorScale();

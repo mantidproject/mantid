@@ -43,13 +43,13 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ErrorHandler
   public:
 
     /// Display the specified string in an error message
-    static void error( std::string  text );
+    static void Error( std::string  text );
 
     /// Display the specified string in a warning message
-    static void warning( std::string  text );
+    static void Warning( std::string  text );
 
     /// Display the specified string in a notice message
-    static void notice( std::string  text );
+    static void Notice( std::string  text );
 
 };
 

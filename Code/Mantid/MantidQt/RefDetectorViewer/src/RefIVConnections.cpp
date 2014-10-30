@@ -19,18 +19,18 @@ namespace RefDetectorViewer
  * The objects passed in must be constructed elsewhere and must be deleted
  * elsewhere, when the SpectrumViewer is closed.
  *
- * @param ui               The object containing the gui components for 
+ * @param ui               The object containing the gui components for
  *                         the ImageView viewer.
  * @param iv_main_window   The main window.
  * @param image_display    The SpectrumDisplay object that will dispaly the
  *                         image
- * @param h_graph_display  The GraphDisplay object that will display 
+ * @param h_graph_display  The GraphDisplay object that will display
  *                         horizontal cuts through the image
- * @param v_graph_display  The GraphDisplay object that will display 
+ * @param v_graph_display  The GraphDisplay object that will display
  *                         vertical cuts through the image
  *
  */
-RefIVConnections::RefIVConnections( Ui_RefImageViewer* ui, 
+RefIVConnections::RefIVConnections( Ui_RefImageViewer* ui,
                               RefImageView*     iv_main_window,
                               RefImageDisplay*  image_display,
                               GraphDisplay*  h_graph_display,
@@ -45,11 +45,11 @@ RefIVConnections::RefIVConnections( Ui_RefImageViewer* ui,
   iv_ui->actionOffset_Diagonally->setDisabled(true);
   iv_ui->actionGraph_Rebinned_Data->setDisabled(true);
   iv_ui->menuHelp->setDisabled(true);
- 
+
   this->iv_main_window = iv_main_window;
   QObject::connect( iv_ui->actionClose, SIGNAL(triggered()),
                     this, SLOT(close_viewer()) );
- 
+
                               // now set up the gui components
   this->image_display   = image_display;
   this->h_graph_display = h_graph_display;
@@ -111,15 +111,15 @@ RefIVConnections::RefIVConnections( Ui_RefImageViewer* ui,
     image_picker->setTrackerMode(QwtPicker::ActiveOnly);
     image_picker->setRubberBandPen(QColor(Qt::blue));
 
-    
+
 /* // point selections & connection works on mouse release
 */
   image_picker->setRubberBand(QwtPicker::CrossRubberBand);
-  image_picker->setSelectionFlags(QwtPicker::PointSelection | 
+  image_picker->setSelectionFlags(QwtPicker::PointSelection |
                                   QwtPicker::DragSelection  );
 
     image_picker2->setRubberBand(QwtPicker::CrossRubberBand);
-    image_picker2->setSelectionFlags(QwtPicker::PointSelection | 
+    image_picker2->setSelectionFlags(QwtPicker::PointSelection |
                                     QwtPicker::DragSelection  );
 
     /*
@@ -130,17 +130,17 @@ RefIVConnections::RefIVConnections( Ui_RefImageViewer* ui,
 /*  // point selection works on mouse click, NO CROSSHAIRS...
 
   image_picker->setRubberBand(QwtPicker::CrossRubberBand);
-  image_picker->setSelectionFlags(QwtPicker::PointSelection | 
+  image_picker->setSelectionFlags(QwtPicker::PointSelection |
                                   QwtPicker::ClickSelection  );
   QObject::connect( image_picker, SIGNAL(selected(const QwtPolygon &)),
                     this, SLOT(imagePickerSelectedPoint()) );
 */
 
 /*  // rect selection calls SLOT on mouse release
-  
+
   image_picker->setMousePattern(QwtPicker::MouseSelect1, Qt::MidButton);
   image_picker->setRubberBand(QwtPicker::RectRubberBand);
-  image_picker->setSelectionFlags(QwtPicker::RectSelection | 
+  image_picker->setSelectionFlags(QwtPicker::RectSelection |
                                   QwtPicker::DragSelection  );
   QObject::connect( image_picker, SIGNAL(selected(const QwtPolygon &)),
                     this, SLOT(imagePickerSelectedPoint()) );
@@ -148,7 +148,7 @@ RefIVConnections::RefIVConnections( Ui_RefImageViewer* ui,
 
 /*
   image_picker->setRubberBand(QwtPicker::CrossRubberBand);
-  image_picker->setSelectionFlags(QwtPicker::PointSelection | 
+  image_picker->setSelectionFlags(QwtPicker::PointSelection |
                                   QwtPicker::ClickSelection  );
 */
 
@@ -173,8 +173,8 @@ RefIVConnections::RefIVConnections( Ui_RefImageViewer* ui,
                      this, SLOT(edit_manual_input()) );
     QObject::connect(iv_ui->lineEdit_TOFmax, SIGNAL(returnPressed()),
                      this, SLOT(edit_manual_input()) );
-                     
-  QObject::connect(iv_ui->imageSplitter, SIGNAL(splitterMoved(int,int)), 
+
+  QObject::connect(iv_ui->imageSplitter, SIGNAL(splitterMoved(int,int)),
                    this, SLOT(imageSplitter_moved()) );
 
   QObject::connect(iv_ui->x_min_input, SIGNAL( returnPressed() ),
@@ -204,7 +204,7 @@ RefIVConnections::RefIVConnections( Ui_RefImageViewer* ui,
 //  QObject::connect(iv_ui->graph_max_slider, SIGNAL(valueChanged(int)),
 //                   this, SLOT(graph_range_changed()) );
 
-                                                     // color scale selections 
+                                                     // color scale selections
   iv_ui->actionHeat->setCheckable(true);
   iv_ui->actionHeat->setChecked(true);
   iv_ui->actionGray->setCheckable(true);
@@ -308,7 +308,7 @@ void RefIVConnections::toggle_Hscroll()
   bool is_on = iv_ui->action_Hscroll->isChecked();
   iv_ui->imageHorizontalScrollBar->setVisible( is_on );
   iv_ui->imageHorizontalScrollBar->setEnabled( is_on );
-  image_display->UpdateImage();
+  image_display->updateImage();
 }
 
 
@@ -317,13 +317,13 @@ void RefIVConnections::toggle_Vscroll()
   bool is_on = iv_ui->action_Vscroll->isChecked();
   iv_ui->imageVerticalScrollBar->setVisible( is_on );
   iv_ui->imageVerticalScrollBar->setEnabled( is_on );
-  image_display->UpdateImage();
+  image_display->updateImage();
 }
 
 
 void RefIVConnections::image_horizontal_range_changed()
 {
-  image_display->UpdateRange();
+  image_display->updateRange();
 }
 
 
@@ -337,8 +337,8 @@ void RefIVConnections::graph_range_changed()
 //  if ( range_scale < 0.01 )
 //    range_scale = 0.01;
 //
-//  h_graph_display->SetRangeScale( range_scale );
-//  v_graph_display->SetRangeScale( range_scale );
+//  h_graph_display->setRangeScale( range_scale );
+//  v_graph_display->setRangeScale( range_scale );
 }
 
 void RefIVConnections::peak_back_tof_range_update()
@@ -348,39 +348,39 @@ void RefIVConnections::peak_back_tof_range_update()
 
     QLineEdit * peak_right_control = iv_ui->lineEdit_peakRight;
     double peakmax = peak_right_control->text().toDouble();
-    
+
     QLineEdit * back_left_control = iv_ui->lineEdit_backLeft;
     double backmin = back_left_control->text().toDouble();
-    
+
     QLineEdit * back_right_control = iv_ui->lineEdit_backRight;
     double backmax = back_right_control->text().toDouble();
-    
+
     QLineEdit * tof_min_control = iv_ui->lineEdit_TOFmin;
     double tofmin = tof_min_control->text().toDouble();
-    
+
     QLineEdit * tof_max_control = iv_ui->lineEdit_TOFmax;
     double tofmax = tof_max_control->text().toDouble();
-    
+
     emit peak_back_tof_range_update(peakmin, peakmax, backmin, backmax, tofmin, tofmax);
 }
 
 void RefIVConnections::edit_manual_input()
 {
-    image_display->UpdateImage();
+    image_display->updateImage();
     peak_back_tof_range_update();
 
 }
-    
-    
+
+
 void RefIVConnections::v_scroll_bar_moved()
 {
-  image_display->UpdateImage();
+  image_display->updateImage();
 }
 
 
 void RefIVConnections::h_scroll_bar_moved()
 {
-  image_display->UpdateImage();
+  image_display->updateImage();
 }
 
 
@@ -392,7 +392,7 @@ void RefIVConnections::imageSplitter_moved()
   vgraph_sizes.append( 30 );
   vgraph_sizes.append( sizes[1] );
   iv_ui->vgraphSplitter->setSizes( vgraph_sizes );
-  image_display->UpdateImage();
+  image_display->updateImage();
 }
 
 
@@ -403,7 +403,7 @@ void RefIVConnections::imagePicker_moved()
   if ( selected_points.size() >= 1 )
   {
     int index = selected_points.size() - 1;
-    image_display->SetPointedAtPoint( selected_points[index] );
+    image_display->setPointedAtPoint( selected_points[index] );
   }
 }
 
@@ -415,8 +415,8 @@ void RefIVConnections::imagePicker2_moved()
     {
       peak_back_tof_range_update();
         int index = selected_points.size() - 1;
-        int mouseClick = 1; 
-        image_display->SetPointedAtPoint( selected_points[index], mouseClick );
+        int mouseClick = 1;
+        image_display->setPointedAtPoint( selected_points[index], mouseClick );
         peak_back_tof_range_update();
 
     }
@@ -429,7 +429,7 @@ void RefIVConnections::h_graphPicker_moved()
   if ( selected_points.size() >= 1 )
   {
     int index = selected_points.size() - 1;
-    h_graph_display->SetPointedAtPoint( selected_points[index]);
+    h_graph_display->setPointedAtPoint( selected_points[index]);
   }
 }
 
@@ -440,7 +440,7 @@ void RefIVConnections::v_graphPicker_moved()
   if ( selected_points.size() >= 1 )
   {
     int index = selected_points.size() - 1;
-    v_graph_display->SetPointedAtPoint( selected_points[index] );
+    v_graph_display->setPointedAtPoint( selected_points[index] );
   }
 }
 
@@ -451,7 +451,7 @@ void RefIVConnections::intensity_slider_moved()
   double max   = (double)iv_ui->intensity_slider->maximum();
 
   double scaled_value = 100.0*(value - min)/(max - min);
-  image_display->SetIntensity( scaled_value );
+  image_display->setIntensity( scaled_value );
 }
 
 void RefIVConnections::heat_color_scale()
@@ -462,7 +462,7 @@ void RefIVConnections::heat_color_scale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  image_display->setColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
@@ -474,7 +474,7 @@ void RefIVConnections::gray_color_scale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::HEAT, 256, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  image_display->setColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
@@ -486,7 +486,7 @@ void RefIVConnections::negative_gray_color_scale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::HEAT, 256, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  image_display->setColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
@@ -498,7 +498,7 @@ void RefIVConnections::green_yellow_color_scale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  image_display->setColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
@@ -510,7 +510,7 @@ void RefIVConnections::rainbow_color_scale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  image_display->setColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
@@ -522,7 +522,7 @@ void RefIVConnections::optimal_color_scale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  image_display->setColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
@@ -534,7 +534,7 @@ void RefIVConnections::multi_color_scale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  image_display->setColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
@@ -546,7 +546,7 @@ void RefIVConnections::spectrum_color_scale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  image_display->setColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
@@ -555,9 +555,9 @@ void RefIVConnections::spectrum_color_scale()
  *  Set the pix map that shows the color scale from the specified positive
  *  and negative color tables.
  *
- *  @param positive_color_table  The new color table used to map positive data 
+ *  @param positive_color_table  The new color table used to map positive data
  *                               values to an RGB color.
- *  @param negative_color_table  The new color table used to map negative data 
+ *  @param negative_color_table  The new color table used to map negative data
  *                               values to an RGB color.  This must have the
  *                               same number of entries as the positive
  *                               color table.
@@ -565,7 +565,7 @@ void RefIVConnections::spectrum_color_scale()
 void RefIVConnections::ShowColorScale( std::vector<QRgb> & positive_color_table,
                                     std::vector<QRgb> & negative_color_table )
 {
-  size_t total_colors = positive_color_table.size() + 
+  size_t total_colors = positive_color_table.size() +
                         negative_color_table.size();
 
   unsigned int *rgb_data = new unsigned int[ total_colors ];
@@ -594,4 +594,4 @@ void RefIVConnections::ShowColorScale( std::vector<QRgb> & positive_color_table,
 }
 
 } // namespace RefDetectorViewer
-} // namespace MantidQt 
+} // namespace MantidQt

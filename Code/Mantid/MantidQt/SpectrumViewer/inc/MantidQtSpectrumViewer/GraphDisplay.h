@@ -52,7 +52,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER GraphDisplay
                  QTableWidget* graphTable,
                  bool          isVertical );
 
-  ~GraphDisplay();
+   ~GraphDisplay();
 
    /// Set the source of information for the table of position information
    void setDataSource( SpectrumDataSource* dataSource );
@@ -78,16 +78,16 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER GraphDisplay
    /// Show information about the point (x, y) on the graph, in the info table
    void showInfoList( double x, double y );
 
-   QwtPlot*             m_graphPlot;
-   QwtPlotCurve*        m_curve;
-   QTableWidget*        m_graphTable;
-   SpectrumDataSource*  m_dataSource;
+   QwtPlot            * m_graphPlot;
+   QwtPlotCurve       * m_curve;
+   QTableWidget       * m_graphTable;
+   SpectrumDataSource * m_dataSource;
 
    bool   m_isVertical;
    bool   m_isLogX;
    double m_imageX;
    double m_imageY;
-   double m_rangeScale;         // fraction of data range to be graphed
+   double m_rangeScale;  // Fraction of data range to be graphed
    double m_minX;
    double m_maxX;
    double m_minY;

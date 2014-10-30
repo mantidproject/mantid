@@ -28,15 +28,14 @@ RefRangeHandler::RefRangeHandler( Ui_RefImageViewer* iv_ui )
  *
  * @param data_source  SpectrumDataSource that provides the data to be drawn
  */
-void RefRangeHandler::ConfigureRangeControls( SpectrumDataSource* data_source )
+void RefRangeHandler::configureRangeControls( SpectrumDataSource* data_source )
 {
-  
-    //x axis
-  total_min_x   = data_source->GetXMin();
-  total_max_x   = data_source->GetXMax();
-  total_n_steps = data_source->GetNCols();
-  total_min_y   = data_source->GetYMin();
-  total_max_y   = data_source->GetYMax();
+  // X axis
+  total_min_x   = data_source->getXMin();
+  total_max_x   = data_source->getXMax();
+  total_n_steps = data_source->getNCols();
+  total_min_y   = data_source->getYMin();
+  total_max_y   = data_source->getYMax();
 
   double defaultx_step = (total_max_x - total_min_x)/(double)total_n_steps;
   if ( total_n_steps > 2000 )
@@ -44,22 +43,20 @@ void RefRangeHandler::ConfigureRangeControls( SpectrumDataSource* data_source )
     defaultx_step = (total_max_x - total_min_x)/2000.0;
   }
 
-  SetRange( total_min_x, total_max_x, defaultx_step, 'x');
+  setRange( total_min_x, total_max_x, defaultx_step, 'x');
 
-    //y axis
-    total_min_y   = data_source->GetYMin();
-    total_max_y   = data_source->GetYMax();
-    total_n_steps = data_source->GetNCols();
-    
-    double defaulty_step = (total_max_y - total_min_y)/(double)total_n_steps;
-    if ( total_n_steps > 2000 )
-    {
-        defaulty_step = (total_max_y - total_min_y)/2000.0;
-    }
-    
-    SetRange( total_min_y, total_max_y, defaulty_step, 'y' );
+  // Y axis
+  total_min_y   = data_source->getYMin();
+  total_max_y   = data_source->getYMax();
+  total_n_steps = data_source->getNCols();
 
+  double defaulty_step = (total_max_y - total_min_y)/(double)total_n_steps;
+  if ( total_n_steps > 2000 )
+  {
+      defaulty_step = (total_max_y - total_min_y)/2000.0;
+  }
 
+  setRange( total_min_y, total_max_y, defaulty_step, 'y' );
 }
 
 
@@ -71,7 +68,7 @@ void RefRangeHandler::ConfigureRangeControls( SpectrumDataSource* data_source )
  *
  * @param min     On input, this should be the default value that the
  *                min should be set to, if getting the range fails.
- *                On output this is will be set to the x value at the 
+ *                On output this is will be set to the x value at the
  *                left edge of the first bin to display, if getting the
  *                range succeeds.
  * @param max     On input, this should be the default value that the
@@ -79,15 +76,15 @@ void RefRangeHandler::ConfigureRangeControls( SpectrumDataSource* data_source )
  *                On output, if getting the range succeeds, this will
  *                be set an x value at the right edge of the last bin
  *                to display.  This will be adjusted so that it is larger
- *                than min by an integer number of steps.  
+ *                than min by an integer number of steps.
  * @param step    On input this should be the default number of steps
  *                to use if getting the range information fails.
  *                On output, this is size of the step to use between
- *                min and max.  If it is less than zero, a log scale 
+ *                min and max.  If it is less than zero, a log scale
  *                is requested.
  */
-void RefRangeHandler::GetRange( double &min, double &max, double &step )
-{ 
+void RefRangeHandler::getRange( double &min, double &max, double &step )
+{
    double original_min  = min;
   double original_max  = max;
   double original_step = step;
@@ -113,8 +110,8 @@ void RefRangeHandler::GetRange( double &min, double &max, double &step )
 //  }
 
                                  // just require step to be non-zero, no other
-                                 // bounds. If zero, take a default step size  
-  if ( step == 0 ) 
+                                 // bounds. If zero, take a default step size
+  if ( step == 0 )
   {
     ErrorHandler::Error("Step = 0, resetting to default step");
     step = original_step;
@@ -124,7 +121,7 @@ void RefRangeHandler::GetRange( double &min, double &max, double &step )
   {
     if ( !SVUtils::FindValidInterval( min, max ) )
     {
-      ErrorHandler::Warning( 
+      ErrorHandler::Warning(
              "In GetRange: [Min,Max] interval invalid, values adjusted" );
       min  = original_min;
       max  = original_max;
@@ -143,28 +140,28 @@ void RefRangeHandler::GetRange( double &min, double &max, double &step )
     }
   }
 
-  SetRange( min, max, step, 'x' );
+  setRange( min, max, step, 'x' );
 }
 
 
 /**
- * Adjust the values to be consistent with the available data and 
+ * Adjust the values to be consistent with the available data and
  * diplay them in the controls.
  *
  * @param min     This is the x value at the left edge of the first bin.
  * @param max     This is an x value at the right edge of the last bin.
- * @param step    This is size of the step to use between min and max. 
+ * @param step    This is size of the step to use between min and max.
  *                If it is less than zero, a log scale is requested.
  * @param type    x or y
  */
-void RefRangeHandler::SetRange( double min, double max, double step, char type )
+void RefRangeHandler::setRange( double min, double max, double step, char type )
 {
-    if (type == 'x') {  
-    
+    if (type == 'x') {
+
   if ( !SVUtils::FindValidInterval( min, max ) )
   {
-    ErrorHandler::Warning( 
-            "In SetRange: [XMin,XMax] interval invalid, values adjusted" );
+    ErrorHandler::Warning(
+            "In setRange: [XMin,XMax] interval invalid, values adjusted" );
   }
 
   if ( min < total_min_x || min > total_max_x )
@@ -188,43 +185,43 @@ void RefRangeHandler::SetRange( double min, double max, double step, char type )
   QtUtils::SetText( 8, 2, min, iv_ui->x_min_input );
   QtUtils::SetText( 8, 2, max, iv_ui->x_max_input );
 //  QtUtils::SetText( 8, 4, step, iv_ui->step_input );
-        
-    } 
-    
-    if (type == 'y') {  
-        
+
+    }
+
+    if (type == 'y') {
+
         if ( !SVUtils::FindValidInterval( min, max ) )
         {
-            ErrorHandler::Warning( 
-                                  "In SetRange: [YMin,YMax] interval invalid, values adjusted" );
+            ErrorHandler::Warning(
+                                  "In setRange: [YMin,YMax] interval invalid, values adjusted" );
         }
-        
+
         if ( min < total_min_y || min > total_max_y )
         {
             //    ErrorHandler::Warning("Y Min out of range, resetting to range min.");
             min = total_min_y;
         }
-        
+
         if ( max < total_min_y || max > total_max_y )
         {
             //    ErrorHandler::Warning("Y Max out of range, resetting to range max.");
             max = total_max_y;
         }
-        
+
         if ( step == 0 )
         {
             ErrorHandler::Error("Step = 0, resetting to default step");
             step = (max-min)/2000.0;
         }
-        
+
         QtUtils::SetText( 8, 2, min, iv_ui->y_min_input );
         QtUtils::SetText( 8, 2, max, iv_ui->y_max_input );
         //  QtUtils::SetText( 8, 4, step, iv_ui->step_input );
-        
-    } 
-    
+
+    }
+
 }
 
 
 } // namespace RefDetectorViewer
-} // namespace MantidQt 
+} // namespace MantidQt
