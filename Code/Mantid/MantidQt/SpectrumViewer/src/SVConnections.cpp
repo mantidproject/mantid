@@ -431,12 +431,12 @@ void SVConnections::imageSplitterMoved()
   QList<int> sizes = m_svUI->imageSplitter->sizes();
   QList<int> vgraph_sizes;
   vgraph_sizes.append( sizes[0] );
-  vgraph_sizes.append( 30 );
   vgraph_sizes.append( sizes[1] );
   m_svUI->vgraphSplitter->setSizes( vgraph_sizes );
   m_spectrumDisplay->updateImage();
   m_spectrumDisplay->handleResize();
 }
+
 
 /**
  * Update the pointed at position for the m_imagePicker.
@@ -450,6 +450,7 @@ void SVConnections::imagePickerMoved(const QPoint & point)
   m_spectrumDisplay->setPointedAtPoint( point );
 }
 
+
 /**
  * Update the pointed at position for the m_hGraphDisplay.
  *
@@ -459,6 +460,7 @@ void SVConnections::hGraphPickerMoved(const QPoint & point)
 {
   m_hGraphDisplay->setPointedAtPoint(point);
 }
+
 
 /**
  * Update the pointed at position for the m_vGraphDisplay.
@@ -470,6 +472,7 @@ void SVConnections::vGraphPickerMoved(const QPoint & point)
   m_vGraphDisplay->setPointedAtPoint(point);
 }
 
+
 void SVConnections::intensitySliderMoved()
 {
   double value = (double)m_svUI->intensity_slider->value();
@@ -479,6 +482,7 @@ void SVConnections::intensitySliderMoved()
   double scaled_value = 100.0*(value - min)/(max - min);
   m_spectrumDisplay->setIntensity( scaled_value );
 }
+
 
 void SVConnections::heatColorScale()
 {

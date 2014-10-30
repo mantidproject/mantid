@@ -28,7 +28,12 @@ SpectrumView::SpectrumView(QWidget *parent) :
   QMainWindow(parent, 0),
   WorkspaceObserver(),
   m_dataSource(NULL),
-  m_ui(new Ui::SpectrumViewer())
+  m_ui(new Ui::SpectrumViewer()),
+  m_sliderHandler(NULL),
+  m_rangeHandler(NULL),
+  m_spectrumDisplay(NULL),
+  m_svConnections(NULL),
+  m_emodeHandler(NULL)
 {
   m_ui->setupUi(this);
 }
@@ -59,6 +64,9 @@ void SpectrumView::resizeEvent(QResizeEvent * event)
 
   if(m_dataSource)
     m_spectrumDisplay->handleResize();
+
+  if(m_svConnections)
+    m_svConnections->imageSplitterMoved();
 }
 
 

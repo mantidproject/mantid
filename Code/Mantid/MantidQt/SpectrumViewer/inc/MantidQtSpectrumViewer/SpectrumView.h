@@ -77,8 +77,8 @@ protected slots:
 
 protected:
   virtual void resizeEvent(QResizeEvent * event);
-  void preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
-  void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void preDeleteHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void afterReplaceHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
 
 private:
   void init(SpectrumDataSource* dataSource);
@@ -89,16 +89,12 @@ private:
 
   MatrixWSDataSource *m_dataSource;
 
-  /* Keep void pointers to the following objects, to avoid having to */
-  /* include ui_SpectrumView.h, which disappears by the time MantidPlot is */
-  /* being built.  We need the pointers so we can delete them in the */
-  /* destructor. */
-  Ui::SpectrumViewer *m_ui;              // Ui_SpectrumViewer*
-  SliderHandler      *m_sliderHandler;   // SliderHandler*
-  RangeHandler       *m_rangeHandler;    // RangeHandler*
-  SpectrumDisplay    *m_spectrumDisplay; // SpectrumDisplay*
-  SVConnections      *m_svConnections;   // SVConnections*
-  EModeHandler       *m_emodeHandler;    // EModeHandler*
+  Ui::SpectrumViewer *m_ui;
+  SliderHandler      *m_sliderHandler;
+  RangeHandler       *m_rangeHandler;
+  SpectrumDisplay    *m_spectrumDisplay;
+  SVConnections      *m_svConnections;
+  EModeHandler       *m_emodeHandler;
 
 signals:
   void needToClose();
