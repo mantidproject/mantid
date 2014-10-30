@@ -86,7 +86,7 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
 
   // set the window title
   std::string title = "SpectrumView (" + wksp->getTitle() + ")";
-  this->setWindowTitle(QString::fromStdString(title));
+  this->setWindowTitle(QString::fromStdString(title).simplified());
 
   m_hGraph = new GraphDisplay( m_ui->h_graphPlot, m_ui->h_graph_table, false );
   m_vGraph = new GraphDisplay( m_ui->v_graphPlot, m_ui->v_graph_table, true );

@@ -20,7 +20,7 @@ void QtUtils::SetTableEntry(       int           row,
                              const std::string & string,
                                    QTableWidget* table )
 {
-  QString qString = QString::fromStdString( string );
+  QString qString = QString::fromStdString( string ).simplified();
   QTableWidgetItem *item = new QTableWidgetItem( qString );
   table->setItem( row, col, item );
 }
