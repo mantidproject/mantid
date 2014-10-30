@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <numeric>
 
+#include <boost/random/variate_generator.hpp>
+
 namespace Mantid { namespace CurveFitting
 {
   namespace MSVesuvioHelper
@@ -279,14 +281,18 @@ namespace Mantid { namespace CurveFitting
     /// Returns a flat random number between 0.0 & 1.0
     double RandomNumberGenerator::flat()
     {
-      return uniform_double()(m_generator,
-                              uniform_double::param_type(0.0, 1.0));
+      typedef boost::variate_generator<boost::mt19937&,
+                                       uniform_double> uniform_generator;
+      return uniform_generator(m_generator,
+                               uniform_double(0.0, 1.0))();
     }
     /// Returns a random number distributed  by a normal distribution
     double RandomNumberGenerator::gaussian(const double mean, const double sigma)
     {
-      return gaussian_double()(m_generator,
-                               gaussian_double::param_type(mean, sigma));
+      typedef boost::variate_generator<boost::mt19937&,
+                                       gaussian_double> gauss_generator;
+      return gauss_generator(m_generator,
+                             gaussian_double(mean, sigma))();
     }
     
     //-------------------------------------------------------------------------

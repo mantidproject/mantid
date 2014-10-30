@@ -7,7 +7,6 @@
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/uniform_real.hpp>
 
-
 namespace Mantid { namespace CurveFitting
 {
   namespace MSVesuvioHelper
