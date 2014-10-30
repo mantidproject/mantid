@@ -34,6 +34,14 @@ namespace MantidQt
       m_bindings.clear();
 
       m_bindings["WarnProcessAll"] = "checkWarnProcessAll";
+      m_bindings["RoundAngle"] = "checkRoundAngle";
+      m_bindings["RoundQMin"] = "checkRoundQMin";
+      m_bindings["RoundQMax"] = "checkRoundQMax";
+      m_bindings["RoundDQQ"] = "checkRoundDQQ";
+      m_bindings["RoundAnglePrecision"] = "spinAnglePrecision";
+      m_bindings["RoundQMinPrecision"] = "spinQMinPrecision";
+      m_bindings["RoundQMaxPrecision"] = "spinQMaxPrecision";
+      m_bindings["RoundDQQPrecision"] = "spinDQQPrecision";
     }
 
     /** This slot saves the currently configured options to the presenter */
