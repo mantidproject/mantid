@@ -39,10 +39,18 @@
                  <http://doxygen.mantidproject.org>
  */
 
+namespace Ui
+{
+class RefImageViewer;
+}
+
 namespace MantidQt
 {
 namespace RefDetectorViewer
 {
+class RefSliderHandler;
+class RefRangeHandler;
+class RefImageDisplay;
 class RefIVConnections;
 
 class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageView : public QMainWindow
@@ -63,15 +71,11 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageView : public QMainWindow
     SpectrumView::GraphDisplay* m_hGraph;
     SpectrumView::GraphDisplay* m_vGraph;
 
-    // keep void pointers to the following objects, to avoid having to
-    // include ui_RefImageView.h, which disappears by the time MantidPlot is
-    // being built.  We need the pointers so we can delete them in the
-    // destructor.
-    void*             m_ui;              // Ui_RefImageViewer*
-    void*             m_sliderHandler;   // SliderHandler*
-    void*             m_rangeHandler;    // RangeHandler*
-    void*             m_imageDisplay;    // RefImageDisplay*
-    RefIVConnections* m_ivConnections;   // IVConnections*
+    Ui::RefImageViewer* m_ui;
+    RefSliderHandler*   m_sliderHandler;
+    RefRangeHandler*    m_rangeHandler;
+    RefImageDisplay*    m_imageDisplay;
+    RefIVConnections*   m_ivConnections;
 
 };
 

@@ -36,13 +36,11 @@ RefImageView::RefImageView( SpectrumView::SpectrumDataSource* dataSource,
                             int peakMin, int peakMax,
                             int backMin, int backMax,
                             int tofMin,  int tofMax)
+  : m_ui(new Ui::RefImageViewer())
 {
-  Ui_RefImageViewer* ui = new Ui_RefImageViewer();
-  m_ui = ui;
-
   QMainWindow* window = this;
 
-  ui->setupUi( window );
+  m_ui->setupUi( window );
   window->resize( 1050, 800 );
   window->show();
   window->setAttribute(Qt::WA_DeleteOnClose);  // We just need to close the
@@ -50,39 +48,39 @@ RefImageView::RefImageView( SpectrumView::SpectrumDataSource* dataSource,
                                                // destructor and clean up
   window->setWindowTitle(QString::fromUtf8("Reflector Detector Viewer"));
 
-  RefSliderHandler* slider_handler = new RefSliderHandler( ui );
+  RefSliderHandler* slider_handler = new RefSliderHandler( m_ui );
   m_sliderHandler = slider_handler;
 
-  RefRangeHandler* range_handler = new RefRangeHandler( ui );
+  RefRangeHandler* range_handler = new RefRangeHandler( m_ui );
   m_rangeHandler = range_handler;
 
   // Create the handler for comminicating peak/background/tof values to/from the ui
   // This ends up being owned by the RefImagePlotItem instance
-  RefLimitsHandler* limits_handler = new RefLimitsHandler(ui);
+  RefLimitsHandler* limits_handler = new RefLimitsHandler(m_ui);
 
-  m_hGraph = new SpectrumView::GraphDisplay( ui->h_graphPlot, NULL, false );
-  m_vGraph = new SpectrumView::GraphDisplay( ui->v_graphPlot, NULL, true );
+  m_hGraph = new SpectrumView::GraphDisplay( m_ui->h_graphPlot, NULL, false );
+  m_vGraph = new SpectrumView::GraphDisplay( m_ui->v_graphPlot, NULL, true );
 
 
-  RefImageDisplay* image_display = new RefImageDisplay( ui->imagePlot,
+  RefImageDisplay* image_display = new RefImageDisplay( m_ui->imagePlot,
                                                         slider_handler,
                                                         range_handler,
                                                         limits_handler,
                                                         m_hGraph, m_vGraph,
-                                                        ui->image_table);
+                                                        m_ui->image_table);
   m_imageDisplay = image_display;
 
-  RefIVConnections * iv_connections = new RefIVConnections( ui, this,
+  RefIVConnections * iv_connections = new RefIVConnections( m_ui, this,
                                                             image_display,
                                                             m_hGraph, m_vGraph );
 
   // Set validators on the QLineEdits to restrict them to integers
-  ui->lineEdit_peakLeft->setValidator(new QIntValidator(this));
-  ui->lineEdit_peakRight->setValidator(new QIntValidator(this));
-  ui->lineEdit_backLeft->setValidator(new QIntValidator(this));
-  ui->lineEdit_backRight->setValidator(new QIntValidator(this));
-  ui->lineEdit_TOFmin->setValidator(new QIntValidator(this));
-  ui->lineEdit_TOFmax->setValidator(new QIntValidator(this));
+  m_ui->lineEdit_peakLeft->setValidator(new QIntValidator(this));
+  m_ui->lineEdit_peakRight->setValidator(new QIntValidator(this));
+  m_ui->lineEdit_backLeft->setValidator(new QIntValidator(this));
+  m_ui->lineEdit_backRight->setValidator(new QIntValidator(this));
+  m_ui->lineEdit_TOFmin->setValidator(new QIntValidator(this));
+  m_ui->lineEdit_TOFmax->setValidator(new QIntValidator(this));
 
   //populate widgets with peak, back and tof values
   limits_handler->setPeakLeft(peakMin);
@@ -106,20 +104,11 @@ RefImageView::~RefImageView()
   delete m_hGraph;
   delete m_vGraph;
 
-  RefImageDisplay* image_display = static_cast<RefImageDisplay*>(m_imageDisplay);
-  delete image_display;
-
-  RefSliderHandler* slider_handler = static_cast<RefSliderHandler*>(m_sliderHandler);
-  delete slider_handler;
-
-  RefRangeHandler* range_handler = static_cast<RefRangeHandler*>(m_rangeHandler);
-  delete range_handler;
-
-  RefIVConnections* iv_connections =  static_cast<RefIVConnections*>(m_ivConnections);
-  delete iv_connections;
-
-  Ui_RefImageViewer* ui = static_cast<Ui_RefImageViewer*>(m_ui);
-  delete ui;
+  delete m_imageDisplay;
+  delete m_sliderHandler;
+  delete m_rangeHandler;
+  delete m_ivConnections;
+  delete m_ui;
 }
 
 
