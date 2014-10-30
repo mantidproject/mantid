@@ -899,7 +899,7 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::newTable()
     {
-      if(m_tableDirty)
+      if(m_tableDirty && m_options["WarnDiscardChanges"].toBool())
         if(!m_view->askUserYesNo("Your current table has unsaved changes. Are you sure you want to discard them?","Start New Table?"))
           return;
 
@@ -918,7 +918,7 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::openTable()
     {
-      if(m_tableDirty)
+      if(m_tableDirty && m_options["WarnDiscardChanges"].toBool())
         if(!m_view->askUserYesNo("Your current table has unsaved changes. Are you sure you want to discard them?","Open Table?"))
           return;
 
@@ -1099,6 +1099,7 @@ namespace MantidQt
 
       //Set defaults
       m_options["WarnProcessAll"] = true;
+      m_options["WarnDiscardChanges"] = true;
       m_options["RoundAngle"] = false;
       m_options["RoundQMin"] = false;
       m_options["RoundQMax"] = false;

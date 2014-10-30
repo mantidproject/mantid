@@ -34,6 +34,7 @@ namespace MantidQt
       m_bindings.clear();
 
       m_bindings["WarnProcessAll"] = "checkWarnProcessAll";
+      m_bindings["WarnDiscardChanges"] = "checkWarnDiscardChanges";
       m_bindings["RoundAngle"] = "checkRoundAngle";
       m_bindings["RoundQMin"] = "checkRoundQMin";
       m_bindings["RoundQMax"] = "checkRoundQMax";
