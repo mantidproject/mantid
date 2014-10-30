@@ -95,7 +95,7 @@ RefImageView::RefImageView( SpectrumView::SpectrumDataSource* dataSource,
   m_ivConnections = iv_connections;
 
   image_display->updateImage();
-  iv_connections->peak_back_tof_range_update();
+  iv_connections->peakBackTofRangeUpdate();
 
   image_display->setDataSource( dataSource );
 }
