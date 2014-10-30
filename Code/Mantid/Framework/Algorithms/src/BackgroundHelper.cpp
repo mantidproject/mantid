@@ -94,7 +94,7 @@ namespace Mantid
     * @param XValues -- the spectra x-values (presumably not in TOF units)
     * @param y_data  -- the spectra signal
     * @param e_data  -- the spectra errors
-    * @param threadNum--number of thread doing conversion
+    * @param threadNum -- number of thread doing conversion (by default 0, single thread)
     */
     void BackgroundHelper::removeBackground(int nHist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data,int threadNum)const
     {
@@ -123,7 +123,7 @@ namespace Mantid
         double twoTheta = m_wkWS->detectorTwoTheta(detector);
         double L2 = detector->getDistance(*m_Sample);
         double delta(std::numeric_limits<double>::quiet_NaN());
-        // clone unit conversion to avoid multithreading issues
+        // use thread-specific unit conversion class to avoid multithreading issues
         Kernel::Unit * unitConv = m_WSUnit[threadNum];
         unitConv->initialize(m_L1, L2,twoTheta, m_Emode, m_Efix,delta);
         double tof1 = unitConv->singleToTOF(XValues[0]);
