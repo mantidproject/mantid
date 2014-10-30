@@ -4,6 +4,7 @@
 #include "MantidCurveFitting/MSVesuvioHelpers.h"
 
 #include <algorithm>
+#include <numeric>
 
 namespace Mantid { namespace CurveFitting
 {
