@@ -4,7 +4,14 @@
 #include "MantidQtSpectrumViewer/EModeHandler.h"
 #include "MantidQtSpectrumViewer/QtUtils.h"
 #include "MantidQtSpectrumViewer/SVUtils.h"
-#include "MantidQtSpectrumViewer/ErrorHandler.h"
+#include "MantidKernel/Logger.h"
+
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("SpectrumView");
+}
+
 
 namespace MantidQt
 {
@@ -48,7 +55,7 @@ void EModeHandler::setEMode( const int mode )
   }
   else
   {
-    ErrorHandler::Error("Mode number invalid: " + mode );
+    g_log.error("Mode number invalid: " + mode );
   }
 }
 
@@ -63,12 +70,12 @@ double EModeHandler::getEFixed()
   std::string text = m_svUI->efixed_control->text().toStdString();
   if ( !SVUtils::StringToDouble( text, eFixed ) )
   {
-    ErrorHandler::Error("E Fixed is not a NUMBER! Value reset to default.");
+    g_log.information("E Fixed is not a NUMBER! Value reset to default.");
     eFixed = 0;
   }
   else if ( eFixed < 0 )
   {
-    ErrorHandler::Error("E Fixed is negative, Value reset to default.");
+    g_log.information("E Fixed is negative, Value reset to default.");
     eFixed = 0;
   }
 
@@ -89,7 +96,7 @@ void EModeHandler::setEFixed( const double eFixed )
   double newValue = eFixed;
   if ( eFixed < 0 )
   {
-    ErrorHandler::Error("E Fixed is negative, reset to default.");
+    g_log.information("E Fixed is negative, reset to default.");
     newValue = 0;
   }
 

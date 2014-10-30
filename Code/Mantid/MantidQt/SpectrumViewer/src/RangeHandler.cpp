@@ -1,11 +1,17 @@
-
 #include <iostream>
 #include <QLineEdit>
 
 #include "MantidQtSpectrumViewer/RangeHandler.h"
 #include "MantidQtSpectrumViewer/QtUtils.h"
 #include "MantidQtSpectrumViewer/SVUtils.h"
-#include "MantidQtSpectrumViewer/ErrorHandler.h"
+#include "MantidKernel/Logger.h"
+
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("SpectrumView");
+}
+
 
 namespace MantidQt
 {
@@ -76,24 +82,24 @@ void RangeHandler::getRange( double &min, double &max, double &step )
 
   if ( !SVUtils::StringToDouble(  minControl->text().toStdString(), min ) )
   {
-    ErrorHandler::Error("X Min is not a NUMBER! Value reset.");
+    g_log.information("X Min is not a NUMBER! Value reset.");
     min = originalMin;
   }
   if ( !SVUtils::StringToDouble(  maxControl->text().toStdString(), max ) )
   {
-    ErrorHandler::Error("X Max is not a NUMBER! Value reset.");
+    g_log.information("X Max is not a NUMBER! Value reset.");
     max = originalMax;
   }
   if ( !SVUtils::StringToDouble(  stepControl->text().toStdString(), step ) )
   {
-    ErrorHandler::Error("Step is not a NUMBER! Value reset.");
+    g_log.information("Step is not a NUMBER! Value reset.");
     step = originalStep;
   }
 
   // Just require step to be non-zero, no other bounds. If zero, take a default step size
   if ( step == 0 )
   {
-    ErrorHandler::Error("Step = 0, resetting to default step");
+    g_log.information("Step = 0, resetting to default step");
     step = originalStep;
   }
 
@@ -101,7 +107,7 @@ void RangeHandler::getRange( double &min, double &max, double &step )
   {
     if ( !SVUtils::FindValidInterval( min, max ) )
     {
-      ErrorHandler::Warning( "In GetRange: [Min,Max] interval invalid, values adjusted" );
+      g_log.information( "In GetRange: [Min,Max] interval invalid, values adjusted" );
       min  = originalMin;
       max  = originalMax;
       step = originalStep;
@@ -111,7 +117,7 @@ void RangeHandler::getRange( double &min, double &max, double &step )
   {
     if ( !SVUtils::FindValidLogInterval( min, max ) )
     {
-      ErrorHandler::Warning( "In GetRange: [Min,Max] log interval invalid, values adjusted");
+      g_log.information( "In GetRange: [Min,Max] log interval invalid, values adjusted");
       min  = originalMin;
       max  = originalMax;
       step = originalStep;
@@ -134,23 +140,23 @@ void RangeHandler::getRange( double &min, double &max, double &step )
 void RangeHandler::setRange( double min, double max, double step )
 {
   if ( !SVUtils::FindValidInterval( min, max ) )
-    ErrorHandler::Warning( "In SetRange: [Min,Max] interval invalid, values adjusted" );
+    g_log.information("In SetRange: [Min,Max] interval invalid, values adjusted" );
 
   if ( min < m_totalMinX || min > m_totalMaxX )
   {
-//    ErrorHandler::Warning("X Min out of range, resetting to range min.");
+    g_log.information("X Min out of range, resetting to range min.");
     min = m_totalMinX;
   }
 
   if ( max < m_totalMinX || max > m_totalMaxX )
   {
-//    ErrorHandler::Warning("X Max out of range, resetting to range max.");
+    g_log.information("X Max out of range, resetting to range max.");
     max = m_totalMaxX;
   }
 
   if ( step == 0 )
   {
-    ErrorHandler::Error("Step = 0, resetting to default step");
+    g_log.information("Step = 0, resetting to default step");
     step = (max - min) / 2000.0;
   }
 

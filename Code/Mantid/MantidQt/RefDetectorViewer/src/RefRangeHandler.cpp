@@ -1,11 +1,17 @@
-
 #include <iostream>
 #include <QLineEdit>
 
 #include "MantidQtRefDetectorViewer/RefRangeHandler.h"
 #include "MantidQtSpectrumViewer/QtUtils.h"
 #include "MantidQtSpectrumViewer/SVUtils.h"
-#include "MantidQtSpectrumViewer/ErrorHandler.h"
+#include "MantidKernel/Logger.h"
+
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("SpectrumView");
+}
+
 
 namespace MantidQt
 {
@@ -89,24 +95,24 @@ void RefRangeHandler::getRange( double &min, double &max, double &step )
 
   if ( !SVUtils::StringToDouble(  min_control->text().toStdString(), min ) )
   {
-    ErrorHandler::Error("X Min is not a NUMBER! Value reset.");
+    g_log.information("X Min is not a NUMBER! Value reset.");
     min = originalMin;
   }
   if ( !SVUtils::StringToDouble(  max_control->text().toStdString(), max ) )
   {
-    ErrorHandler::Error("X Max is not a NUMBER! Value reset.");
+    g_log.information("X Max is not a NUMBER! Value reset.");
     max = originalMax;
   }
 //  if ( !SVUtils::StringToDouble(  step_control->text().toStdString(), step ) )
 //  {
-//    ErrorHandler::Error("Step is not a NUMBER! Value reset.");
+//    g_log.information("Step is not a NUMBER! Value reset.");
 //    step = originalStep;
 //  }
 
   // Just require step to be non-zero, no other bounds. If zero, take a default step size
   if ( step == 0 )
   {
-    ErrorHandler::Error("Step = 0, resetting to default step");
+    g_log.information("Step = 0, resetting to default step");
     step = originalStep;
   }
 
@@ -114,8 +120,7 @@ void RefRangeHandler::getRange( double &min, double &max, double &step )
   {
     if ( !SVUtils::FindValidInterval( min, max ) )
     {
-      ErrorHandler::Warning(
-             "In GetRange: [Min,Max] interval invalid, values adjusted" );
+      g_log.information("In GetRange: [Min,Max] interval invalid, values adjusted");
       min  = originalMin;
       max  = originalMax;
       step = originalStep;
@@ -125,8 +130,7 @@ void RefRangeHandler::getRange( double &min, double &max, double &step )
   {
     if ( !SVUtils::FindValidLogInterval( min, max ) )
     {
-      ErrorHandler::Warning(
-          "In GetRange: [Min,Max] log interval invalid, values adjusted");
+      g_log.information("In GetRange: [Min,Max] log interval invalid, values adjusted");
       min  = originalMin;
       max  = originalMax;
       step = originalStep;
@@ -152,26 +156,23 @@ void RefRangeHandler::setRange( double min, double max, double step, char type )
   if (type == 'x') {
 
     if ( !SVUtils::FindValidInterval( min, max ) )
-    {
-      ErrorHandler::Warning(
-          "In setRange: [XMin,XMax] interval invalid, values adjusted" );
-    }
+      g_log.information("In setRange: [XMin,XMax] interval invalid, values adjusted");
 
     if ( min < m_totalMinX || min > m_totalMaxX )
     {
-      //    ErrorHandler::Warning("X Min out of range, resetting to range min.");
+      g_log.information("X Min out of range, resetting to range min.");
       min = m_totalMinX;
     }
 
     if ( max < m_totalMinX || max > m_totalMaxX )
     {
-      //    ErrorHandler::Warning("X Max out of range, resetting to range max.");
+      g_log.information("X Max out of range, resetting to range max.");
       max = m_totalMaxX;
     }
 
     if ( step == 0 )
     {
-      ErrorHandler::Error("Step = 0, resetting to default step");
+      g_log.information("Step = 0, resetting to default step");
       step = (max-min)/2000.0;
     }
 
@@ -184,26 +185,23 @@ void RefRangeHandler::setRange( double min, double max, double step, char type )
   if (type == 'y') {
 
     if ( !SVUtils::FindValidInterval( min, max ) )
-    {
-      ErrorHandler::Warning(
-          "In setRange: [YMin,YMax] interval invalid, values adjusted" );
-    }
+      g_log.information("In setRange: [YMin,YMax] interval invalid, values adjusted");
 
     if ( min < m_totalMinY || min > m_totalMaxY )
     {
-      //    ErrorHandler::Warning("Y Min out of range, resetting to range min.");
+      g_log.information("Y Min out of range, resetting to range min.");
       min = m_totalMinY;
     }
 
     if ( max < m_totalMinY || max > m_totalMaxY )
     {
-      //    ErrorHandler::Warning("Y Max out of range, resetting to range max.");
+      g_log.information("Y Max out of range, resetting to range max.");
       max = m_totalMaxY;
     }
 
     if ( step == 0 )
     {
-      ErrorHandler::Error("Step = 0, resetting to default step");
+      g_log.information("Step = 0, resetting to default step");
       step = (max-min)/2000.0;
     }
 

@@ -16,7 +16,6 @@ set ( SRC_FILES
        src/MatrixWSDataSource.cpp
        src/MatrixWSSpectrumView.cpp
        src/ArrayDataSource.cpp
-       src/ErrorHandler.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -40,7 +39,6 @@ set ( INC_FILES
        inc/MantidQtSpectrumViewer/MatrixWSDataSource.h
        inc/MantidQtSpectrumViewer/MatrixWSSpectrumView.h
        inc/MantidQtSpectrumViewer/ArrayDataSource.h
-       inc/MantidQtSpectrumViewer/ErrorHandler.h
 )
 
 set ( MOC_FILES 

@@ -4,7 +4,6 @@
 
 #include "MantidQtRefDetectorViewer/RefIVConnections.h"
 #include "MantidQtSpectrumViewer/ColorMaps.h"
-#include "MantidQtSpectrumViewer/ErrorHandler.h"
 
 namespace MantidQt
 {

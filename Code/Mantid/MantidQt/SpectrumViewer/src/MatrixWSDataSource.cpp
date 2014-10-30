@@ -14,15 +14,21 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/Run.h"
-#include "MantidQtSpectrumViewer/ErrorHandler.h"
 
 
 using namespace Mantid;
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+
+
+namespace
+{
+  Kernel::Logger g_log("SpectrumView");
+}
 
 
 namespace MantidQt
@@ -266,50 +272,50 @@ void MatrixWSDataSource::getInfoList( double x,
     list.push_back(boost::lexical_cast<std::string>(id));
   }
 
-  IDetector_const_sptr det;          // now try to do various unit conversions
-  try                                // to get equivalent info
-  {                                  // first make sure we can get the needed
-                                     // information
+  /* Now try to do various unit conversions to get equivalent info */
+  /* first make sure we can get the needed information */
+  IDetector_const_sptr det;
+  try
+  {
+
     if ( old_unit == 0 )
     {
-      ErrorHandler::Error("No UNITS on MatrixWorkspace X-axis");
+      g_log.debug("No UNITS on MatrixWorkspace X-axis");
       return;
     }
 
     Instrument_const_sptr instrument = m_matWs->getInstrument();
     if ( instrument == 0 )
     {
-      ErrorHandler::Error("No INSTRUMENT on MatrixWorkspace");
+      g_log.debug("No INSTRUMENT on MatrixWorkspace");
       return;
     }
 
     IComponent_const_sptr source = instrument->getSource();
     if ( source == 0 )
     {
-      ErrorHandler::Error("No SOURCE on instrument in MatrixWorkspace");
+      g_log.debug("No SOURCE on instrument in MatrixWorkspace");
       return;
     }
 
     IComponent_const_sptr sample = instrument->getSample();
     if ( sample == 0 )
     {
-      ErrorHandler::Error("No SAMPLE on instrument in MatrixWorkspace");
+      g_log.debug("No SAMPLE on instrument in MatrixWorkspace");
       return;
     }
 
     det = m_matWs->getDetector( row );
     if ( det == 0 )
     {
-      std::ostringstream message;
-      message << "No DETECTOR for row " << row << " in MatrixWorkspace";
-      ErrorHandler::Error( message.str() );
+      g_log.debug() << "No DETECTOR for row " << row << " in MatrixWorkspace" << std::endl;
       return;
     }
 
     double l1        = source->getDistance(*sample);
-    double l2        = 0.;
-    double two_theta = 0.;
-    double azi       = 0.;
+    double l2        = 0.0;
+    double two_theta = 0.0;
+    double azi       = 0.0;
     if ( det->isMonitor() )
     {
       l2 = det->getDistance(*source);
@@ -325,16 +331,14 @@ void MatrixWSDataSource::getInfoList( double x,
     SVUtils::PushNameValue( "TwoTheta", 8, 2, two_theta*180./M_PI, list );
     SVUtils::PushNameValue( "Azimuthal", 8, 2, azi*180./M_PI, list );
 
-                        // For now, only support diffractometers and monitors.
-                        // We need a portable way to determine emode and
-                        // and efixed that will work for any matrix workspace!
+    /* For now, only support diffractometers and monitors. */
+    /* We need a portable way to determine emode and */
+    /* and efixed that will work for any matrix workspace! */
     int    emode  = 0;
-    double efixed = 0.;
-    double delta  = 0.;
+    double efixed = 0.0;
+    double delta  = 0.0;
 
-//  std::cout << "Start of checks for emode" << std::endl;
-
-                        // First try to get emode & efixed from the user
+    // First try to get emode & efixed from the user
     if ( m_emodeHandler != NULL )
     {
       efixed = m_emodeHandler->getEFixed();
@@ -343,19 +347,16 @@ void MatrixWSDataSource::getInfoList( double x,
         emode = m_emodeHandler->getEMode();
         if ( emode == 0 )
         {
-          ErrorHandler::Error("EMode invalid, spectrometer needed if emode != 0");
-          ErrorHandler::Error("Assuming Direct Geometry Spectrometer....");
+          g_log.information("EMode invalid, spectrometer needed if emode != 0");
+          g_log.information("Assuming Direct Geometry Spectrometer....");
           emode = 1;
         }
       }
     }
 
-//  std::cout << "Done with calls to GetEFixed and GetEMode" << std::endl;
-//  std::cout << "EMode  = " << emode  << std::endl;
-//  std::cout << "EFixed = " << efixed << std::endl;
-
-    if ( efixed == 0 )    // Did NOT get emode & efixed from user, try getting
-    {                     // direct geometry information from the run object
+    // Did NOT get emode & efixed from user, try getting direct geometry information from the run object
+    if ( efixed == 0 )
+    {
       const API::Run & run = m_matWs->run();
       if ( run.hasProperty("Ei") )
       {
@@ -377,12 +378,9 @@ void MatrixWSDataSource::getInfoList( double x,
       }
     }
 
-//  std::cout << "Done with getting info from run" << std::endl;
-//  std::cout << "EMode  = " << emode  << std::endl;
-//  std::cout << "EFixed = " << efixed << std::endl;
-
-    if ( efixed == 0 )    // finally, try getting indirect geometry information
-    {                     // from the detector object
+    // Finally, try getting indirect geometry information from the detector object
+    if ( efixed == 0 )
+    {
       if ( !(det->isMonitor() && det->hasParameter("Efixed")))
       {
         try
@@ -397,23 +395,15 @@ void MatrixWSDataSource::getInfoList( double x,
         }
         catch ( std::runtime_error& )
         {
-          std::ostringstream message;
-          message << "Failed to get Efixed from detector ID: "
-                  << det->getID() << " in MatrixWSDataSource";
-          ErrorHandler::Error( message.str() );
+          g_log.debug() << "Failed to get Efixed from detector ID: "
+                        << det->getID() << " in MatrixWSDataSource" << std::endl;
           efixed = 0;
         }
       }
     }
 
-//  std::cout << "Done with getting info from detector" << std::endl;
-//  std::cout << "EMode  = " << emode  << std::endl;
-//  std::cout << "EFixed = " << efixed << std::endl;
-
     if ( efixed == 0 )
-    {
       emode = 0;
-    }
 
     if ( m_emodeHandler != NULL )
     {
@@ -424,9 +414,7 @@ void MatrixWSDataSource::getInfoList( double x,
     double tof = old_unit->convertSingleToTOF( x, l1, l2, two_theta,
                                                emode, efixed, delta );
     if ( ! (x_label == "Time-of-flight") )
-    {
       SVUtils::PushNameValue( "Time-of-flight", 8, 1, tof, list );
-    }
 
     if ( ! (x_label == "Wavelength") )
     {
@@ -470,8 +458,7 @@ void MatrixWSDataSource::getInfoList( double x,
   }
   catch (std::exception & e)
   {
-    ErrorHandler::Notice("Failed to get information from Workspace:");
-    ErrorHandler::Notice( e.what() );
+    g_log.debug() << "Failed to get information from Workspace:" << e.what() << std::endl;
   }
 }
 
