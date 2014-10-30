@@ -6,7 +6,7 @@
 
 #include "MantidKernel/System.h"
 
-class QVariant;
+#include <QVariant>
 
 namespace MantidQt
 {

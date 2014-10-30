@@ -19,6 +19,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using namespace MantidQt::MantidWidgets;
 
 namespace
 {

@@ -6,7 +6,7 @@
 
 namespace MantidQt
 {
-  namespace CustomInterfaces
+  namespace MantidWidgets
   {
     /** HintStrategy : Provides an interface for generating hints to be used by a HintingLineEdit.
 
