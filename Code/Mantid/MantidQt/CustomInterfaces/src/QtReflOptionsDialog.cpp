@@ -11,6 +11,7 @@ namespace MantidQt
       m_presenter(presenter)
     {
       initLayout();
+      initBindings();
       loadOptions();
     }
 
@@ -27,13 +28,40 @@ namespace MantidQt
       connect(ui.buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked()), this, SLOT(saveOptions()));
     }
 
+    /** Bind options to their widgets */
+    void QtReflOptionsDialog::initBindings()
+    {
+      m_bindings.clear();
+
+      m_bindings["WarnProcessAll"] = "checkWarnProcessAll";
+    }
+
     /** This slot saves the currently configured options to the presenter */
     void QtReflOptionsDialog::saveOptions()
     {
       std::map<std::string,QVariant> options = m_presenter->options();
 
-      //Set the options map to match the UI
-      options["WarnProcessAll"] = ui.checkWarnProcessAll->isChecked();
+      //Iterate through all our bound widgets, pushing their value into the options map
+      for(auto it = m_bindings.begin(); it != m_bindings.end(); ++it)
+      {
+        QString widgetName = it->second;
+        if(widgetName.isEmpty())
+          continue;
+
+        QCheckBox* checkbox = findChild<QCheckBox*>(widgetName);
+        if(checkbox)
+        {
+          options[it->first] = checkbox->isChecked();
+          continue;
+        }
+
+        QSpinBox* spinbox = findChild<QSpinBox*>(widgetName);
+        if(spinbox)
+        {
+          options[it->first] = spinbox->value();
+          continue;
+        }
+      }
 
       //Update the presenter's options
       m_presenter->setOptions(options);
@@ -45,7 +73,26 @@ namespace MantidQt
       std::map<std::string,QVariant> options = m_presenter->options();
 
       //Set the values from the options
-      ui.checkWarnProcessAll->setChecked(options["WarnProcessAll"].toBool());
+      for(auto it = options.begin(); it != options.end(); ++it)
+      {
+        QString widgetName = m_bindings[it->first];
+        if(widgetName.isEmpty())
+          continue;
+
+        QCheckBox* checkbox = findChild<QCheckBox*>(widgetName);
+        if(checkbox)
+        {
+          checkbox->setChecked(it->second.toBool());
+          continue;
+        }
+
+        QSpinBox* spinbox = findChild<QSpinBox*>(widgetName);
+        if(spinbox)
+        {
+          spinbox->setValue(it->second.toInt());
+          continue;
+        }
+      }
     }
 
   } //CustomInterfaces
