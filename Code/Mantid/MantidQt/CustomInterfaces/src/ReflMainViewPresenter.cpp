@@ -415,7 +415,10 @@ namespace MantidQt
           throw std::runtime_error("Value for two theta could not be found in log.");
 
         //Update the model
-        m_model->setData(m_model->index(rowNo, COL_ANGLE), Utils::roundToDP(thetaVal, 3));
+        if(m_options["RoundAngle"].toBool())
+          thetaVal = Utils::roundToDP(thetaVal, m_options["RoundAnglePrecision"].toInt());
+
+        m_model->setData(m_model->index(rowNo, COL_ANGLE), thetaVal);
         m_tableDirty = true;
       }
 
@@ -429,6 +432,10 @@ namespace MantidQt
 
         //Update the model
         double dqqVal = calcResAlg->getProperty("Resolution");
+
+        if(m_options["RoundDQQ"].toBool())
+          dqqVal = Utils::roundToDP(dqqVal, m_options["RoundDQQPrecision"].toInt());
+
         m_model->setData(m_model->index(rowNo, COL_DQQ), dqqVal);
         m_tableDirty = true;
       }
@@ -629,8 +636,12 @@ namespace MantidQt
 
       double qmin = 4 * M_PI / lmax * sin(theta * M_PI / 180.0);
       double qmax = 4 * M_PI / lmin * sin(theta * M_PI / 180.0);
-      qmin = Utils::roundToDP(qmin, 3);
-      qmax = Utils::roundToDP(qmax, 3);
+
+      if(m_options["RoundQMin"].toBool())
+        qmin = Utils::roundToDP(qmin, m_options["RoundQMinPrecision"].toInt());
+
+      if(m_options["RoundQMax"].toBool())
+        qmax = Utils::roundToDP(qmax, m_options["RoundQMaxPrecision"].toInt());
 
       std::vector<double> ret;
       ret.push_back(qmin);
@@ -885,7 +896,7 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::newTable()
     {
-      if(m_tableDirty)
+      if(m_tableDirty && m_options["WarnDiscardChanges"].toBool())
         if(!m_view->askUserYesNo("Your current table has unsaved changes. Are you sure you want to discard them?","Start New Table?"))
           return;
 
@@ -902,7 +913,7 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::openTable()
     {
-      if(m_tableDirty)
+      if(m_tableDirty && m_options["WarnDiscardChanges"].toBool())
         if(!m_view->askUserYesNo("Your current table has unsaved changes. Are you sure you want to discard them?","Open Table?"))
           return;
 
@@ -1084,6 +1095,15 @@ namespace MantidQt
 
       //Set defaults
       m_options["WarnProcessAll"] = true;
+      m_options["WarnDiscardChanges"] = true;
+      m_options["RoundAngle"] = false;
+      m_options["RoundQMin"] = false;
+      m_options["RoundQMax"] = false;
+      m_options["RoundDQQ"] = false;
+      m_options["RoundAnglePrecision"] = 3;
+      m_options["RoundQMinPrecision"] = 3;
+      m_options["RoundQMaxPrecision"] = 3;
+      m_options["RoundDQQPrecision"] = 3;
 
       //Load saved values from disk
       QSettings settings;

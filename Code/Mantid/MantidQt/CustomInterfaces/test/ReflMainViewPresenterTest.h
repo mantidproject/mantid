@@ -709,15 +709,15 @@ public:
 
     //Check the table was updated as expected
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
-    TS_ASSERT_EQUALS(ws->String(0, ThetaCol), "0.7");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(0, DQQCol)), 0.034030, 1e-6);
-    TS_ASSERT_EQUALS(ws->String(0,  QMinCol), "0.009");
-    TS_ASSERT_EQUALS(ws->String(0,  QMaxCol), "0.154");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(0, ThetaCol)), 0.70002, 1e-5);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(0, DQQCol)), 0.03402, 1e-5);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(0, QMinCol)), 0.00903, 1e-5);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(0, QMaxCol)), 0.15352, 1e-5);
 
-    TS_ASSERT_EQUALS(ws->String(1, ThetaCol), "2.3");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(1, DQQCol)), 0.034050, 1e-6);
-    TS_ASSERT_EQUALS(ws->String(1,  QMinCol), "0.03");
-    TS_ASSERT_EQUALS(ws->String(1,  QMaxCol), "0.504");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(1, ThetaCol)), 2.3, 1e-5);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(1, DQQCol)), 0.03405, 1e-5);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(1, QMinCol)), 0.02966, 1e-5);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(1, QMaxCol)), 0.50431, 1e-5);
 
     //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
