@@ -1026,6 +1026,63 @@ public:
     //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
+
+  void testClearRows()
+  {
+    MockView mockView;
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    std::set<int> rowlist;
+    rowlist.insert(1);
+    rowlist.insert(2);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
+
+    //The user hits "clear selected" with the second and third rows selected
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(rowlist));
+    presenter.notify(ClearSelectedFlag);
+
+    //The user hits "save"
+    presenter.notify(SaveFlag);
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 4);
+    //Check the unselected rows were unaffected
+    TS_ASSERT_EQUALS(ws->String(0, RunCol), "13460");
+    TS_ASSERT_EQUALS(ws->String(3, RunCol), "13470");
+
+    //Check the group ids have been set correctly
+    TS_ASSERT_EQUALS(ws->Int(0, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 2);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 1);
+
+    //Make sure the selected rows are clear
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "");
+    TS_ASSERT_EQUALS(ws->String(2, RunCol), "");
+    TS_ASSERT_EQUALS(ws->String(1, ThetaCol), "");
+    TS_ASSERT_EQUALS(ws->String(2, ThetaCol), "");
+    TS_ASSERT_EQUALS(ws->String(1, TransCol), "");
+    TS_ASSERT_EQUALS(ws->String(2, TransCol), "");
+    TS_ASSERT_EQUALS(ws->String(1, QMinCol), "");
+    TS_ASSERT_EQUALS(ws->String(2, QMinCol), "");
+    TS_ASSERT_EQUALS(ws->String(1, QMaxCol), "");
+    TS_ASSERT_EQUALS(ws->String(2, QMaxCol), "");
+    TS_ASSERT_EQUALS(ws->String(1, DQQCol), "");
+    TS_ASSERT_EQUALS(ws->String(2, DQQCol), "");
+    TS_ASSERT_EQUALS(ws->Double(1, ScaleCol), 1.0);
+    TS_ASSERT_EQUALS(ws->Double(2, ScaleCol), 1.0);
+
+    //Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+  }
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H */

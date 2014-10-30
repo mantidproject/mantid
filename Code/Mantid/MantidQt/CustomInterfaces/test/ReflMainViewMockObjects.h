@@ -19,6 +19,7 @@ const int AppendRowFlag  = ReflMainView::AppendRowFlag;
 const int PrependRowFlag = ReflMainView::PrependRowFlag;
 const int DeleteRowFlag  = ReflMainView::DeleteRowFlag;
 const int GroupRowsFlag  = ReflMainView::GroupRowsFlag;
+const int ClearSelectedFlag   = ReflMainView::ClearSelectedFlag;
 const int ExpandSelectionFlag = ReflMainView::ExpandSelectionFlag;
 
 //Clean column ids for use within tests
