@@ -143,9 +143,9 @@ namespace Mantid
       m_randgen = new MSVesuvioHelper::RandomNumberGenerator(getProperty("Seed"));
 
       // Setup progress
-      const int64_t nhist = static_cast<int64_t>(m_inputWS->getNumberHistograms());
+      const size_t nhist = m_inputWS->getNumberHistograms();
       m_progress = new API::Progress(this, 0.0, 1.0, nhist*m_nruns*2);
-      for(int64_t i = 0; i < nhist; ++i)
+      for(size_t i = 0; i < nhist; ++i)
       {
 
         // Copy over the X-values
