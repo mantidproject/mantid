@@ -11,15 +11,15 @@ namespace MantidQt
 {
 namespace RefDetectorViewer
 {
-  using namespace SpectrumView;
+
+using namespace SpectrumView;
 
 /**
  *  Construct a RefRangeHandler object to manage min, max and step controls
  *  in the specified UI
  */
-RefRangeHandler::RefRangeHandler( Ui_RefImageViewer* iv_ui )
+RefRangeHandler::RefRangeHandler( Ui_RefImageViewer* ivUI ) : m_ivUI(ivUI)
 {
-  this->iv_ui = iv_ui;
 }
 
 
@@ -31,32 +31,26 @@ RefRangeHandler::RefRangeHandler( Ui_RefImageViewer* iv_ui )
 void RefRangeHandler::configureRangeControls( SpectrumDataSource* data_source )
 {
   // X axis
-  total_min_x   = data_source->getXMin();
-  total_max_x   = data_source->getXMax();
-  total_n_steps = data_source->getNCols();
-  total_min_y   = data_source->getYMin();
-  total_max_y   = data_source->getYMax();
+  m_totalMinX   = data_source->getXMin();
+  m_totalMaxX   = data_source->getXMax();
+  m_totalNSteps = data_source->getNCols();
 
-  double defaultx_step = (total_max_x - total_min_x)/(double)total_n_steps;
-  if ( total_n_steps > 2000 )
-  {
-    defaultx_step = (total_max_x - total_min_x)/2000.0;
-  }
+  double defaultStepX = (m_totalMaxX - m_totalMinX) / (double)m_totalNSteps;
+  if(m_totalNSteps > 2000)
+    defaultStepX = (m_totalMaxX - m_totalMinX) / 2000.0;
 
-  setRange( total_min_x, total_max_x, defaultx_step, 'x');
+  setRange(m_totalMinX, m_totalMaxX, defaultStepX, 'x');
 
   // Y axis
-  total_min_y   = data_source->getYMin();
-  total_max_y   = data_source->getYMax();
-  total_n_steps = data_source->getNCols();
+  m_totalMinY   = data_source->getYMin();
+  m_totalMaxY   = data_source->getYMax();
+  m_totalNSteps = data_source->getNCols();
 
-  double defaulty_step = (total_max_y - total_min_y)/(double)total_n_steps;
-  if ( total_n_steps > 2000 )
-  {
-      defaulty_step = (total_max_y - total_min_y)/2000.0;
-  }
+  double defaultStepY = (m_totalMaxY - m_totalMinY) / (double)m_totalNSteps;
+  if(m_totalNSteps > 2000)
+    defaultStepY = (m_totalMaxY - m_totalMinY) / 2000.0;
 
-  setRange( total_min_y, total_max_y, defaulty_step, 'y' );
+  setRange(m_totalMinY, m_totalMaxY, defaultStepY, 'y' );
 }
 
 
@@ -85,36 +79,35 @@ void RefRangeHandler::configureRangeControls( SpectrumDataSource* data_source )
  */
 void RefRangeHandler::getRange( double &min, double &max, double &step )
 {
-   double original_min  = min;
-  double original_max  = max;
-  double original_step = step;
+  double originalMin  = min;
+  double originalMax  = max;
+  double originalStep = step;
 
-  QLineEdit* min_control  = iv_ui->x_min_input;
-  QLineEdit* max_control  = iv_ui->x_max_input;
-//  QLineEdit* step_control = iv_ui->step_input;
+  QLineEdit* min_control  = m_ivUI->x_min_input;
+  QLineEdit* max_control  = m_ivUI->x_max_input;
+//  QLineEdit* step_control = m_ivUI->step_input;
 
   if ( !SVUtils::StringToDouble(  min_control->text().toStdString(), min ) )
   {
     ErrorHandler::Error("X Min is not a NUMBER! Value reset.");
-    min = original_min;
+    min = originalMin;
   }
   if ( !SVUtils::StringToDouble(  max_control->text().toStdString(), max ) )
   {
     ErrorHandler::Error("X Max is not a NUMBER! Value reset.");
-    max = original_max;
+    max = originalMax;
   }
 //  if ( !SVUtils::StringToDouble(  step_control->text().toStdString(), step ) )
 //  {
 //    ErrorHandler::Error("Step is not a NUMBER! Value reset.");
-//    step = original_step;
+//    step = originalStep;
 //  }
 
-                                 // just require step to be non-zero, no other
-                                 // bounds. If zero, take a default step size
+  // Just require step to be non-zero, no other bounds. If zero, take a default step size
   if ( step == 0 )
   {
     ErrorHandler::Error("Step = 0, resetting to default step");
-    step = original_step;
+    step = originalStep;
   }
 
   if ( step > 0 )
@@ -123,9 +116,9 @@ void RefRangeHandler::getRange( double &min, double &max, double &step )
     {
       ErrorHandler::Warning(
              "In GetRange: [Min,Max] interval invalid, values adjusted" );
-      min  = original_min;
-      max  = original_max;
-      step = original_step;
+      min  = originalMin;
+      max  = originalMax;
+      step = originalStep;
     }
   }
   else
@@ -134,9 +127,9 @@ void RefRangeHandler::getRange( double &min, double &max, double &step )
     {
       ErrorHandler::Warning(
           "In GetRange: [Min,Max] log interval invalid, values adjusted");
-      min  = original_min;
-      max  = original_max;
-      step = original_step;
+      min  = originalMin;
+      max  = originalMax;
+      step = originalStep;
     }
   }
 
@@ -156,70 +149,68 @@ void RefRangeHandler::getRange( double &min, double &max, double &step )
  */
 void RefRangeHandler::setRange( double min, double max, double step, char type )
 {
-    if (type == 'x') {
+  if (type == 'x') {
 
-  if ( !SVUtils::FindValidInterval( min, max ) )
-  {
-    ErrorHandler::Warning(
-            "In setRange: [XMin,XMax] interval invalid, values adjusted" );
-  }
-
-  if ( min < total_min_x || min > total_max_x )
-  {
-//    ErrorHandler::Warning("X Min out of range, resetting to range min.");
-    min = total_min_x;
-  }
-
-  if ( max < total_min_x || max > total_max_x )
-  {
-//    ErrorHandler::Warning("X Max out of range, resetting to range max.");
-    max = total_max_x;
-  }
-
-  if ( step == 0 )
-  {
-    ErrorHandler::Error("Step = 0, resetting to default step");
-    step = (max-min)/2000.0;
-  }
-
-  QtUtils::SetText( 8, 2, min, iv_ui->x_min_input );
-  QtUtils::SetText( 8, 2, max, iv_ui->x_max_input );
-//  QtUtils::SetText( 8, 4, step, iv_ui->step_input );
-
+    if ( !SVUtils::FindValidInterval( min, max ) )
+    {
+      ErrorHandler::Warning(
+          "In setRange: [XMin,XMax] interval invalid, values adjusted" );
     }
 
-    if (type == 'y') {
-
-        if ( !SVUtils::FindValidInterval( min, max ) )
-        {
-            ErrorHandler::Warning(
-                                  "In setRange: [YMin,YMax] interval invalid, values adjusted" );
-        }
-
-        if ( min < total_min_y || min > total_max_y )
-        {
-            //    ErrorHandler::Warning("Y Min out of range, resetting to range min.");
-            min = total_min_y;
-        }
-
-        if ( max < total_min_y || max > total_max_y )
-        {
-            //    ErrorHandler::Warning("Y Max out of range, resetting to range max.");
-            max = total_max_y;
-        }
-
-        if ( step == 0 )
-        {
-            ErrorHandler::Error("Step = 0, resetting to default step");
-            step = (max-min)/2000.0;
-        }
-
-        QtUtils::SetText( 8, 2, min, iv_ui->y_min_input );
-        QtUtils::SetText( 8, 2, max, iv_ui->y_max_input );
-        //  QtUtils::SetText( 8, 4, step, iv_ui->step_input );
-
+    if ( min < m_totalMinX || min > m_totalMaxX )
+    {
+      //    ErrorHandler::Warning("X Min out of range, resetting to range min.");
+      min = m_totalMinX;
     }
 
+    if ( max < m_totalMinX || max > m_totalMaxX )
+    {
+      //    ErrorHandler::Warning("X Max out of range, resetting to range max.");
+      max = m_totalMaxX;
+    }
+
+    if ( step == 0 )
+    {
+      ErrorHandler::Error("Step = 0, resetting to default step");
+      step = (max-min)/2000.0;
+    }
+
+    QtUtils::SetText( 8, 2, min, m_ivUI->x_min_input );
+    QtUtils::SetText( 8, 2, max, m_ivUI->x_max_input );
+    //  QtUtils::SetText( 8, 4, step, m_ivUI->step_input );
+
+  }
+
+  if (type == 'y') {
+
+    if ( !SVUtils::FindValidInterval( min, max ) )
+    {
+      ErrorHandler::Warning(
+          "In setRange: [YMin,YMax] interval invalid, values adjusted" );
+    }
+
+    if ( min < m_totalMinY || min > m_totalMaxY )
+    {
+      //    ErrorHandler::Warning("Y Min out of range, resetting to range min.");
+      min = m_totalMinY;
+    }
+
+    if ( max < m_totalMinY || max > m_totalMaxY )
+    {
+      //    ErrorHandler::Warning("Y Max out of range, resetting to range max.");
+      max = m_totalMaxY;
+    }
+
+    if ( step == 0 )
+    {
+      ErrorHandler::Error("Step = 0, resetting to default step");
+      step = (max-min)/2000.0;
+    }
+
+    QtUtils::SetText( 8, 2, min, m_ivUI->y_min_input );
+    QtUtils::SetText( 8, 2, max, m_ivUI->y_max_input );
+    //  QtUtils::SetText( 8, 4, step, m_ivUI->step_input );
+  }
 }
 
 

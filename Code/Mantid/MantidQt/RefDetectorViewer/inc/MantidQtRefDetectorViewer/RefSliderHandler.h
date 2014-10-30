@@ -47,17 +47,16 @@ namespace RefDetectorViewer
 class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefSliderHandler : public SpectrumView::ISliderHandler
 {
   public:
-
     /// Construct object to manage image scrollbars from the specified UI
-    RefSliderHandler( Ui_RefImageViewer* iv_ui );
+    RefSliderHandler( Ui_RefImageViewer* ivUI );
 
     /// Configure the image scrollbars for the specified data and drawing area
-    void configureSliders( QRect            draw_area,
-                           SpectrumView::SpectrumDataSource* data_source );
+    void configureSliders( QRect                              drawArea,
+                           SpectrumView::SpectrumDataSource*  dataSource );
 
     /// Configure the horizontal scrollbar to cover the specified range
-    void configureHSlider( int         n_data_steps,
-                           int         n_pixels );
+    void configureHSlider( int nDataSteps,
+                           int nPixels );
 
     /// Return true if the image horizontal scrollbar is enabled.
     bool hSliderOn();
@@ -66,19 +65,20 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefSliderHandler : public SpectrumVi
     bool vSliderOn();
 
     /// Get the range of columns to display in the image.
-    void getHSliderInterval( int &x_min, int &x_max );
+    void getHSliderInterval( int &xMin, int &xMax );
 
     /// Get the range of rows to display in the image.
-    void getVSliderInterval( int &y_min, int &y_max );
+    void getVSliderInterval( int &yMin, int &yMax );
 
   private:
     /// Configure the specified scrollbar to cover the specified range
-    void configureSlider( QScrollBar* scroll_bar,
-                          int         n_data_steps,
-                          int         n_pixels,
+    void configureSlider( QScrollBar* scrollBar,
+                          int         nDataSteps,
+                          int         nPixels,
                           int         val );
 
-    Ui_RefImageViewer*   iv_ui;
+    Ui_RefImageViewer*   m_ivUI;
+
 };
 
 } // namespace RefDetectorViewer

@@ -10,6 +10,7 @@ RefImagePlotItem::RefImagePlotItem(const RefLimitsHandler * const limitsHandler)
 {
 }
 
+
 RefImagePlotItem::~RefImagePlotItem()
 {
   delete m_limitsHandler;
@@ -125,7 +126,6 @@ void RefImagePlotItem::draw(       QPainter    * painter,
     tof_value = int(coeff_left * coeff_bottom_right + float(pix_x_min));
     painter->drawLine(QPoint(tof_value,pix_y_min), QPoint(tof_value,pix_y_max));
   }
-
 }
 
 } // namespace RefDetectorViewer
