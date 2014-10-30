@@ -482,9 +482,8 @@ V3D::cross_prod(const V3D& v) const
 double
 V3D::distance(const V3D& v) const
 {
-  V3D dif(*this);
-  dif-=v;
-  return dif.norm();
+  const double dx(x-v.x), dy(y-v.y), dz(z-v.z);
+  return sqrt(dx*dx +dy*dy + dz*dz);
 }
 
 /** Calculates the zenith angle (theta) of this vector with respect to another
