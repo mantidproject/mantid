@@ -5,8 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAlgorithms/BackgroundHelper.h"
-
 namespace Mantid
 {
 namespace Algorithms
