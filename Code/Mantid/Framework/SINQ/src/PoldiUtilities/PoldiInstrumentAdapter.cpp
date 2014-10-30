@@ -255,8 +255,6 @@ AbstractDoubleValueExtractor_sptr PoldiInstrumentAdapter::getExtractorForPropert
 
     std::string propertyType = chopperSpeedProperty->type();
 
-    std::cout << propertyType << std::endl;
-
     return m_extractors[propertyType];
 }
 
