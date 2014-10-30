@@ -165,21 +165,14 @@ namespace Mantid
 
       // Get distance and tilt angle stored in nexus file
       // Mantid way
-      //	auto angleProp = dynamic_cast<PropertyWithValue<double>*>(m_localWorkspace->run().getProperty("dan.value"));
+      ////	auto angleProp = dynamic_cast<PropertyWithValue<double>*>(m_localWorkspace->run().getProperty("dan.value"));
       // Nexus way
       double angle = firstEntry.getFloat("instrument/dan/value");	// detector angle in degrees
       double distance = firstEntry.getFloat("instrument/det/value");	// detector distance in millimeter
-      distance /= 1000;	// convert to meter
+
+      distance /= 1000.0;	// convert to meter
       g_log.debug() << "Moving detector at angle " << angle << " and distance " << distance << std::endl;
       placeDetector(distance, angle);
-
-      // 2) Center, (must be done after move)
-
-      int par1_101 = firstEntry.getInt("instrument/PSD/nx");
-      // "Note: first iteration of D17 nexus file used PSD/ny instead of PSD/nx.
-      double xCenter = 0.1325 / par1_101;	// As in lamp, but in meter
-      g_log.debug() << "Centering detector on " << xCenter << std::endl;
-      centerDetector(xCenter);
 
       // Set the channel width property
       auto channel_width = dynamic_cast<PropertyWithValue<double>*>(m_localWorkspace->run().getProperty(
@@ -381,19 +374,13 @@ namespace Mantid
       // 2) Compute tof values
       for (size_t timechannelnumber = 0; timechannelnumber <= m_numberOfChannels; ++timechannelnumber)
       {
-
         double t_TOF1 = (static_cast<int>(timechannelnumber) + 0.5) * m_channelWidth + tof_delay;
-
-        //g_log.debug() << "t_TOF1: " << t_TOF1 << std::endl;
-
         m_localWorkspace->dataX(0)[timechannelnumber] = t_TOF1 + t_TOF2;
-
       }
 
       // Load monitors
       for (size_t im = 0; im < nb_monitors; im++)
       {
-
         if (im > 0)
         {
           m_localWorkspace->dataX(im) = m_localWorkspace->readX(0);
@@ -416,9 +403,8 @@ namespace Mantid
           // just copy the time binning axis to every spectra
           m_localWorkspace->dataX(spec + nb_monitors) = m_localWorkspace->readX(0);
 
-          // Assign Y [IN TEST: in reverse order]
-          //int* data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-          int* data_p = &data(static_cast<int>(m_numberOfTubes-1-i), static_cast<int>(j), 0);
+          //// Assign Y
+          int* data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
           m_localWorkspace->dataY(spec + nb_monitors).assign(data_p, data_p + m_numberOfChannels);
 
           // Assign Error
@@ -478,16 +464,14 @@ namespace Mantid
      */
     void LoadILLReflectometry::placeDetector(double distance /* meter */, double angle /* degree */)
     {
-
+      const double deg2rad = M_PI/180.0;
       std::string componentName("uniq_detector");
       V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
+//      double r, theta, phi;
+//      pos.getSpherical(r, theta, phi);
 
-      double r, theta, phi;
-      pos.getSpherical(r, theta, phi);
-
-      V3D newpos;
-      newpos.spherical(distance, angle, phi);
-
+      double angle_rad = angle*deg2rad;
+      V3D newpos(distance*sin(angle_rad), pos.Y(), distance*cos(angle_rad));
       m_loader.moveComponent(m_localWorkspace, componentName, newpos);
 
       // Apply a local rotation to stay perpendicular to the beam
