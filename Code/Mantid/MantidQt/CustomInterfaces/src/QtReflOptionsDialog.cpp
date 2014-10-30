@@ -33,16 +33,15 @@ namespace MantidQt
     {
       m_bindings.clear();
 
-      m_bindings["WarnProcessAll"] = "checkWarnProcessAll";
-      m_bindings["WarnDiscardChanges"] = "checkWarnDiscardChanges";
-      m_bindings["RoundAngle"] = "checkRoundAngle";
-      m_bindings["RoundQMin"] = "checkRoundQMin";
-      m_bindings["RoundQMax"] = "checkRoundQMax";
-      m_bindings["RoundDQQ"] = "checkRoundDQQ";
-      m_bindings["RoundAnglePrecision"] = "spinAnglePrecision";
-      m_bindings["RoundQMinPrecision"] = "spinQMinPrecision";
-      m_bindings["RoundQMaxPrecision"] = "spinQMaxPrecision";
-      m_bindings["RoundDQQPrecision"] = "spinDQQPrecision";
+      //Check all the widgets for the "reflOptionName" property.
+      //If it exists, bind the named option to that widget.
+      QList<QWidget*> widgets = findChildren<QWidget*>();
+      for(auto it = widgets.begin(); it != widgets.end(); ++it)
+      {
+        QVariant binding = (*it)->property("reflOptionName");
+        if(binding.isValid())
+          m_bindings[binding.toString().toStdString()] = (*it)->objectName();
+      }
     }
 
     /** This slot saves the currently configured options to the presenter */
