@@ -57,6 +57,7 @@ namespace MantidQt
       std::map<std::string,std::string> m_matches;
       std::map<std::string,std::string> m_hints;
       bool m_dontComplete;
+      QLabel* m_hintLabel;
     protected slots:
       void updateHints(const QString& text);
     };

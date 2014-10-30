@@ -41,10 +41,7 @@ namespace MantidQt
     {
     public:
       HintingLineEditFactory(HintStrategy* hintStrategy) : m_strategy(hintStrategy) {};
-      virtual ~HintingLineEditFactory()
-      {
-        delete m_strategy;
-      };
+      virtual ~HintingLineEditFactory() {};
       virtual QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
       {
         Q_UNUSED(option);
@@ -56,7 +53,7 @@ namespace MantidQt
         return editor;
       }
     protected:
-      HintStrategy* m_strategy;
+      boost::scoped_ptr<HintStrategy> m_strategy;
     };
   }
 }

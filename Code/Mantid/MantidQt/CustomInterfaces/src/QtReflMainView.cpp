@@ -85,12 +85,12 @@ namespace MantidQt
     Set a new model in the tableview
     @param model : the model to be attached to the tableview
     */
-    void QtReflMainView::showTable(ITableWorkspace_sptr model)
+    void QtReflMainView::showTable(QReflTableModel_sptr model)
     {
-      QAbstractItemModel* qModel = new QReflTableModel(model);
+      m_model = model;
       //So we can notify the presenter when the user updates the table
-      connect(qModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(tableUpdated(const QModelIndex&, const QModelIndex&)));
-      ui.viewTable->setModel(qModel);
+      connect(m_model.get(), SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(tableUpdated(const QModelIndex&, const QModelIndex&)));
+      ui.viewTable->setModel(m_model.get());
       ui.viewTable->resizeColumnsToContents();
     }
 
@@ -310,13 +310,13 @@ namespace MantidQt
     Set which rows are selected
     @param rows : The set of rows to select
     */
-    void QtReflMainView::setSelection(const std::set<size_t>& rows)
+    void QtReflMainView::setSelection(const std::set<int>& rows)
     {
       ui.viewTable->clearSelection();
       auto selectionModel = ui.viewTable->selectionModel();
 
       for(auto row = rows.begin(); row != rows.end(); ++row)
-        selectionModel->select(ui.viewTable->model()->index((int)(*row), 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+        selectionModel->select(ui.viewTable->model()->index((*row), 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
     }
 
     /**
@@ -372,10 +372,10 @@ namespace MantidQt
     Get the indices of the highlighted rows
     @returns a vector of unsigned ints contianing the highlighted row numbers
     */
-    std::set<size_t> QtReflMainView::getSelectedRows() const
+    std::set<int> QtReflMainView::getSelectedRows() const
     {
       auto selectedRows = ui.viewTable->selectionModel()->selectedRows();
-      std::set<size_t> rows;
+      std::set<int> rows;
       for(auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
         rows.insert(it->row());
 
