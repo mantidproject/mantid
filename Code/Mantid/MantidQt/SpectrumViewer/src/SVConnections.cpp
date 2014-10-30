@@ -52,7 +52,7 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
   m_svUI->menuHelp->setDisabled(false);
 
   QObject::connect( m_svUI->actionClose, SIGNAL(triggered()),
-                    this, SLOT(close_viewer()) );
+                    this, SLOT(closeViewer()) );
 
   // Now set up the GUI components
   QList<int> image_sizes;
