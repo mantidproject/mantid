@@ -15,12 +15,13 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
 // Initializing static variables for DoubleValueExtractors
-const std::string PoldiInstrumentAdapter::m_chopperSpeedPropertyName = "ChopperSpeed";
+const std::string PoldiInstrumentAdapter::m_chopperSpeedPropertyName = "chopperspeed";
 const std::string PoldiInstrumentAdapter::m_chopperSpeedTargetPropertyName = "ChopperSpeedTarget";
 
 std::map<std::string, AbstractDoubleValueExtractor_sptr> PoldiInstrumentAdapter::m_extractors =
         boost::assign::map_list_of
         ("dbl list", boost::static_pointer_cast<AbstractDoubleValueExtractor>(boost::make_shared<VectorDoubleValueExtractor>()))
+        ("int list", boost::static_pointer_cast<AbstractDoubleValueExtractor>(boost::make_shared<VectorIntValueExtractor>()))
         ("number", boost::static_pointer_cast<AbstractDoubleValueExtractor>(boost::make_shared<NumberDoubleValueExtractor>()));
 
 /** Constructor with workspace argument
@@ -253,6 +254,8 @@ AbstractDoubleValueExtractor_sptr PoldiInstrumentAdapter::getExtractorForPropert
     }
 
     std::string propertyType = chopperSpeedProperty->type();
+
+    std::cout << propertyType << std::endl;
 
     return m_extractors[propertyType];
 }

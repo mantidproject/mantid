@@ -35,6 +35,9 @@ public:
         std::vector<double> chopperSpeed(1, 10000.0);
         m_run.addProperty<std::vector<double> >("chopperspeed_vector", chopperSpeed);
 
+        std::vector<int> chopperSpeedTargetsInt(1, 10000);
+        m_run.addProperty<std::vector<int> >("chopperspeed_target_int_vector", chopperSpeedTargetsInt);
+
         // add string property, for which there is no extractor
         m_stringRun.addProperty<std::string>(getChopperSpeedPropertyName(), "10000.0");
         m_stringRun.addProperty<std::string>(getChopperSpeedTargetPropertyName(), "10000.0");
@@ -57,6 +60,20 @@ public:
 
         // check that the value comes out correctly
         TS_ASSERT_EQUALS((*extractorGood)(const_cast<const Run &>(m_run), "chopperspeed_vector"), 10000.0);
+    }
+
+    void testVectorIntValueExtractor()
+    {
+        // Extract vector value with vector value extractor - this should work.
+        AbstractDoubleValueExtractor_sptr extractorGood(new VectorIntValueExtractor);
+        TS_ASSERT_THROWS_NOTHING((*extractorGood)(const_cast<const Run &>(m_run), "chopperspeed_target_int_vector"));
+
+        // this should not work, because it's a "number" property (see constructor above)
+        AbstractDoubleValueExtractor_sptr extractorBad(new VectorDoubleValueExtractor);
+        TS_ASSERT_THROWS((*extractorBad)(const_cast<const Run &>(m_run), "chopperspeed_double"), std::invalid_argument);
+
+        // check that the value comes out correctly
+        TS_ASSERT_EQUALS((*extractorGood)(const_cast<const Run &>(m_run), "chopperspeed_target_int_vector"), 10000.0);
     }
 
     void testNumberDoubleValueExtractor()

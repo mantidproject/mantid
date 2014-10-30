@@ -77,6 +77,19 @@ public:
     }
 };
 
+class VectorIntValueExtractor : public AbstractDoubleValueExtractor
+{
+public:
+    VectorIntValueExtractor() :
+        AbstractDoubleValueExtractor()
+    { }
+    virtual ~VectorIntValueExtractor() { }
+
+    virtual double operator()(const API::Run &runInformation, const std::string &propertyName) const {
+        return static_cast<double>(runInformation.getPropertyValueAsType<std::vector<int> >(propertyName).front());
+    }
+};
+
 class MANTID_SINQ_DLL PoldiInstrumentAdapter
 {
 public:
