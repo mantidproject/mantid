@@ -224,10 +224,11 @@ namespace Mantid
     }
     /**Method removes background from vectors which represent a histogram data for a single spectra 
     * @param nHist   -- number (workspaceID) of the spectra in the workspace, where background going to be removed
-    * @param XValues -- the spectra x-values (presumably not in TOF units)
+    * @param x_data  -- the spectra x-values (presumably not in TOF units)
     * @param y_data  -- the spectra signal
     * @param e_data  -- the spectra errors
-    * @param threadNum -- number of thread doing conversion (by default 0, single thread)
+    * @param threadNum -- the number of thread doing conversion (by default 0, single thread, in multithreading -- result of 
+    *                      omp_get_thread_num() )
     */
     void BackgroundHelper::removeBackground(int nHist,MantidVec &x_data,MantidVec &y_data,MantidVec &e_data,int threadNum)const
     {
