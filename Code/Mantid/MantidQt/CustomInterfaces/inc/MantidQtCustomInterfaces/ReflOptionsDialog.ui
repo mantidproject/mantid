@@ -40,13 +40,23 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
+       <item row="2" column="0">
         <widget class="QCheckBox" name="checkWarnDiscardChanges">
          <property name="text">
           <string>Warn when discarding unsaved changes</string>
          </property>
          <property name="reflOptionName" stdset="0">
           <string>WarnDiscardChanges</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="checkWarnProcessPartialGroup">
+         <property name="text">
+          <string>Warn when processing only part of a group</string>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>WarnProcessPartialGroup</string>
          </property>
         </widget>
        </item>
