@@ -5,7 +5,9 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include <boost/scoped_ptr.hpp>
+#include <QSignalMapper>
 #include "ui_ReflMainWidget.h"
 
 namespace MantidQt
@@ -48,7 +50,7 @@ namespace MantidQt
       static QString categoryInfo() { return "Reflectometry"; }
 
       //Connect the model
-      virtual void showTable(Mantid::API::ITableWorkspace_sptr model);
+      virtual void showTable(QReflTableModel_sptr model);
 
       //Dialog/Prompt methods
       virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue);
@@ -61,29 +63,47 @@ namespace MantidQt
       virtual void setProgressRange(int min, int max);
       virtual void setProgress(int progress);
 
+      //Settor methods
+      virtual void setSelection(const std::set<int>& rows);
+      virtual void setTableList(const std::set<std::string>& tables);
+      virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument);
+      virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy* hintStrategy);
+
       //Accessor methods
-      virtual std::vector<size_t> getSelectedRowIndexes() const;
+      virtual std::set<int> getSelectedRows() const;
       virtual std::string getSearchInstrument() const;
       virtual std::string getProcessInstrument() const;
+      virtual std::string getWorkspaceToOpen() const;
+
+      virtual boost::shared_ptr<IReflPresenter> getPresenter() const;
 
     private:
       //initialise the interface
       virtual void initLayout();
-      virtual void setInstrumentList(const std::vector<std::string>& instruments);
       //the presenter
-      boost::scoped_ptr<IReflPresenter> m_presenter;
+      boost::shared_ptr<IReflPresenter> m_presenter;
+      //the model
+      QReflTableModel_sptr m_model;
       //the interface
       Ui::reflMainWidget ui;
+      //the workspace the user selected to open
+      std::string m_toOpen;
+      QSignalMapper* m_openMap;
 
     private slots:
       void setModel(QString name);
-      void setNew();
+      void actionNewTable();
       void actionSave();
       void actionSaveAs();
-      void actionAddRow();
+      void actionAppendRow();
+      void actionPrependRow();
       void actionDeleteRow();
       void actionProcess();
       void actionGroupRows();
+      void actionExpandSelection();
+      void actionOptionsDialog();
+      void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+      void showContextMenu(const QPoint& pos);
     };
 
 

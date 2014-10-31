@@ -21,7 +21,7 @@ namespace IDA
    *
    * @param parent :: the parent widget (an IndirectDataAnalysis object).
    */
-  IDATab::IDATab(QWidget * parent) : QWidget(parent), m_parent(NULL)
+  IDATab::IDATab(QWidget * parent) : QWidget(parent), m_algRunner(new MantidQt::API::AlgorithmRunner(parent)), m_parent(NULL)
   {
     m_parent = dynamic_cast<IndirectDataAnalysis*>(parent);
   }
@@ -102,6 +102,17 @@ namespace IDA
   QString IDATab::runPythonCode(const QString & code, bool no_output)
   {
     return m_parent->runPythonCode(code, no_output);
+  }
+
+  /**
+   * Runs an algorithm async
+   *
+   * @param algorithm :: The algorithm to be run
+   */
+  void IDATab::runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm)
+  {
+    algorithm->setRethrows(true);
+    m_algRunner->startAlgorithm(algorithm);
   }
 
   /**

@@ -14,6 +14,7 @@
 #include "MantidQtSpectrumViewer/ColorMaps.h"
 #include "MantidQtSpectrumViewer/QtUtils.h"
 #include "MantidQtSpectrumViewer/SVUtils.h"
+#include "MantidQtSpectrumViewer/SliderHandler.h"
 
 namespace MantidQt
 {
@@ -42,7 +43,8 @@ SpectrumDisplay::SpectrumDisplay(  QwtPlot*       spectrum_plot,
                              QTableWidget*  table_widget )
   : data_source(NULL), data_array(NULL), spectrum_plot(spectrum_plot), slider_handler(slider_handler),
     range_handler(range_handler), h_graph_display(h_graph), v_graph_display(v_graph),
-    image_table(table_widget)
+    image_table(table_widget),
+    m_lastY(0.0)
 {
   ColorMaps::GetColorMap( ColorMaps::HEAT,
                           256,
@@ -102,8 +104,8 @@ void SpectrumDisplay::SetDataSource( SpectrumDataSource* data_source )
   pointed_at_x = DBL_MAX;
   pointed_at_y = DBL_MAX;
 
-  int    n_rows = 500;         // get reasonable size initial image data
-  int    n_cols = 500;     
+  int n_rows = static_cast<int>(total_y_max - total_y_min); // get reasonable size initial image data
+  int n_cols = 500;     
                                // data_array is deleted in the SpectrumPlotItem
   data_array = data_source->GetDataArray( total_x_min, total_x_max,
                                           total_y_min, total_y_max,
@@ -162,6 +164,16 @@ void SpectrumDisplay::UpdateRange()
   slider_handler->ConfigureHSlider( n_bins, display_rect.width() );
 
   UpdateImage();
+}
+
+/**
+ * Updates the rnages of the scroll bars when the window is resized.
+ */
+void SpectrumDisplay::HandleResize()
+{
+  QRect draw_area;
+  GetDisplayRectangle( draw_area );
+  dynamic_cast<SliderHandler*>(slider_handler)->ReConfigureSliders( draw_area, data_source );
 }
 
 /**
@@ -352,6 +364,24 @@ void SpectrumDisplay::SetIntensity( double control_parameter )
 }
 
 
+QPoint SpectrumDisplay::GetPlotTransform( QPair<double, double> values )
+{
+  double x = spectrum_plot->transform( QwtPlot::xBottom, values.first );
+  double y = spectrum_plot->transform( QwtPlot::yLeft, values.second );
+
+  return QPoint((int)x, (int)y);
+}
+
+
+QPair<double, double> SpectrumDisplay::GetPlotInvTransform( QPoint point )
+{
+  double x = spectrum_plot->invTransform( QwtPlot::xBottom, point.x() );
+  double y = spectrum_plot->invTransform( QwtPlot::yLeft, point.y() );
+
+  return qMakePair(x,y);
+}
+
+
 /**
  * Extract data from horizontal and vertical cuts across the image and
  * show those as graphs in the horizontal and vertical graphs and show
@@ -369,15 +399,14 @@ QPair<double,double> SpectrumDisplay::SetPointedAtPoint( QPoint point, int /*mou
     return qMakePair(0.0,0.0);
   }
 
-  double x = spectrum_plot->invTransform( QwtPlot::xBottom, point.x() );
-  double y = spectrum_plot->invTransform( QwtPlot::yLeft, point.y() );
+  QPair<double, double> transPoints = GetPlotInvTransform(point);
 
-  SetHGraph( y );
-  SetVGraph( x );
+  SetHGraph( transPoints.second );
+  SetVGraph( transPoints.first );
 
-  ShowInfoList( x, y );
+  ShowInfoList( transPoints.first, transPoints.second );
 
-  return qMakePair(x,y);
+  return transPoints;
 }
 
 /*
@@ -478,8 +507,10 @@ void SpectrumDisplay::SetVGraph( double x )
  *  @param x  The x coordinate of the pointed at location on the image.
  *  @param y  The y coordinate of the pointed at location on the image.
  */
-void SpectrumDisplay::ShowInfoList( double x, double y )
+std::vector<std::string> SpectrumDisplay::ShowInfoList( double x, double y )
 {
+  m_lastY = y;
+
   std::vector<std::string> info_list;
   data_source->GetInfoList( x, y, info_list );
   int n_infos = (int)info_list.size() / 2;
@@ -503,6 +534,17 @@ void SpectrumDisplay::ShowInfoList( double x, double y )
   }
 
   image_table->resizeColumnsToContents();
+
+  return info_list;
+}
+
+
+/**
+ * Gets the last Y value (i.e. data row) the crosshair was pointed at.
+ */
+double SpectrumDisplay::GetLastY()
+{
+  return m_lastY;
 }
 
 
