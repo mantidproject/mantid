@@ -51,15 +51,15 @@ public:
   MOCK_CONST_METHOD0(getSelectedRows, std::set<int>());
 
   //Calls we don't care about
-  virtual void showTable(QReflTableModel_sptr model) {(void)model;}
+  virtual void showTable(QReflTableModel_sptr) {};
   virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy*) {};
-  virtual void setProgressRange(int min, int max) {(void)min; (void)max; }
-  virtual void setProgress(int progress) {(void)progress;}
-  virtual void setTableList(const std::set<std::string>& tableList) {(void)tableList;}
-  virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument) {(void)instruments; (void)defaultInstrument;}
+  virtual void setProgressRange(int,int) {};
+  virtual void setProgress(int) {};
+  virtual void setTableList(const std::set<std::string>&) {};
+  virtual void setInstrumentList(const std::vector<std::string>&, const std::string&) {};
   virtual std::string getProcessInstrument() const {return "FAKE";}
   virtual std::string getSearchInstrument() const {return "FAKE";}
-  virtual boost::shared_ptr<IReflPresenter> getPresenter() const {return nullptr;}
+  virtual boost::shared_ptr<IReflPresenter> getPresenter() const {return 0;}
 };
 
 #endif /*MANTID_CUSTOMINTERFACES_REFLMAINVIEWMOCKOBJECTS_H*/
