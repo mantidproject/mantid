@@ -82,7 +82,7 @@ namespace Mantid
       /// @copydoc Algorithm::version
       virtual int version() const { return 1; }
       /// @copydoc Algorithm::category
-      virtual const std::string category() const { return "Corrections"; }
+      virtual const std::string category() const { return "ISIS"; }
       /// @copydoc Algorithm::summary
       virtual const std::string summary() const
       {
