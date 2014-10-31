@@ -608,7 +608,7 @@ namespace MDAlgorithms
     // claculate the integration points and save them in the x-vactors of integrFlux
     double xMin = flux.getEventXMin();
     double xMax = flux.getEventXMax();
-    double dx = ( xMax - xMin ) / ( integrFlux.blocksize() - 1 );
+    double dx = ( xMax - xMin ) / static_cast<double>( integrFlux.blocksize() - 1 );
     auto &X = integrFlux.dataX(0);
     auto ix = X.begin();
     // x-values are equally spaced between the min and max tof in the first flux spectrum
