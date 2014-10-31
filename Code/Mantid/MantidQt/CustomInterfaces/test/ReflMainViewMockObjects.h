@@ -59,7 +59,7 @@ public:
   virtual void setInstrumentList(const std::vector<std::string>&, const std::string&) {};
   virtual std::string getProcessInstrument() const {return "FAKE";}
   virtual std::string getSearchInstrument() const {return "FAKE";}
-  virtual boost::shared_ptr<IReflPresenter> getPresenter() const {return 0;}
+  virtual boost::shared_ptr<IReflPresenter> getPresenter() const {return boost::shared_ptr<IReflPresenter>();}
 };
 
 #endif /*MANTID_CUSTOMINTERFACES_REFLMAINVIEWMOCKOBJECTS_H*/
