@@ -86,8 +86,8 @@ namespace Mantid
       /// @copydoc Algorithm::summary
       virtual const std::string summary() const
       {
-        return "Corrects for the effects of multiple scattering "
-               "on a flat plate or cylindrical sample.";
+        return "Calculates the contributions of multiple scattering "
+               "on a flat plate sample for VESUVIO";
       }
 
     private:
