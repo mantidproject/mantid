@@ -3,6 +3,7 @@
 
 #include <QScrollBar>
 #include "MantidQtSpectrumViewer/SliderHandler.h"
+#include "MantidQtSpectrumViewer/SVUtils.h"
 
 namespace MantidQt
 {
@@ -16,6 +17,30 @@ namespace SpectrumView
 SliderHandler::SliderHandler( Ui_SpectrumViewer* sv_ui ) : ISliderHandler()
 {
   this->sv_ui = sv_ui;
+}
+
+
+/**
+ * Reconfigure the image scrollbars for the specified data and drawing area.
+ *
+ * Used when the size of the plot area has changed.
+ *
+ * @param draw_area    Rectangle specifiying the region where the image will
+ *                     be drawn
+ * @param data_source  SpectrumDataSource that provides the data to be drawn
+ */
+void SliderHandler::ReConfigureSliders( QRect            draw_area, 
+                                        SpectrumDataSource* data_source )
+{
+  QScrollBar* v_scroll = sv_ui->imageVerticalScrollBar;
+
+  int old_v_value = v_scroll->value();
+  int n_rows = (int)data_source->GetNRows();
+  int step  = v_scroll->pageStep();
+
+  ConfigureSlider( v_scroll, n_rows, draw_area.height(), old_v_value );
+
+  v_scroll->setValue(old_v_value + (step / 2));
 }
 
 

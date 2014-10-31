@@ -52,26 +52,16 @@ class IndirectResolution(DataProcessorAlgorithm):
         StartTime('IndirectResolution')
         self._setup()
 
-        # TODO: Replace with InelasticIndirectReduction algorithm
-        reducer = inelastic_indirect_reducer.IndirectReducer()
-        reducer.set_instrument_name(self._instrument)
-        reducer.set_detector_range(int(self._detector_range[0]) - 1, int(self._detector_range[1]) - 1)
-        for in_file in self._input_files:
-            reducer.append_data_file(in_file)
-        parfile = config['instrumentDefinition.directory']
-        parfile += self._instrument + "_" + self._analyser + "_" + self._reflection + "_Parameters.xml"
-        reducer.set_parameter_file(parfile)
-        reducer.set_grouping_policy('All')
-        reducer.set_sum_files(True)
+        InelasticIndirectReduction(Instrument=self._instrument,
+                                   Analyser=self._analyser,
+                                   Reflection=self._reflection,
+                                   Grouping='All',
+                                   SumFiles=True,
+                                   InputFiles=self._input_files,
+                                   DetectorRange=self._detector_range,
+                                   OutputWorkspaceGroup='__icon_ws_group')
 
-        try:
-            reducer.reduce()
-        except Exception, ex:
-            logger.error('IndirectResolution failed with error: ' + str(ex))
-            EndTime('IndirectResolution')
-            return
-
-        icon_ws = reducer.get_result_workspaces()[0]
+        icon_ws = mtd['__icon_ws_group'].getItem(0).getName()
 
         if self._out_ws == "":
             self._out_ws = getWSprefix(icon_ws) + 'res'

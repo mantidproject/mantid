@@ -1948,7 +1948,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
              </sizepolicy>
             </property>
             <property name="autoLoad" stdset="0">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="loadLabelText" stdset="0">
              <string>Plot Input</string>

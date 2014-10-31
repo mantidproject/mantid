@@ -171,7 +171,7 @@ namespace Mantid
             std::string name = loader->name();
             int version = loader->version();
 
-            std::string ext = fileNames[0].substr(fileNames[0].find_last_of("."));
+            //std::string ext = fileNames[0].substr(fileNames[0].find_last_of("."));
             
             auto ifl = boost::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(loader);
             auto iflNexus = boost::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(loader);                     
@@ -181,10 +181,11 @@ namespace Mantid
               // If it's loading into a single file, perform a cursory check on file extensions only.              
               if((ifl && ifl->loadMutipleAsOne()) || (iflNexus && iflNexus->loadMutipleAsOne()))
               {
-                if( fileNames[i].substr(fileNames[i].find_last_of(".")) != ext)
+                // Currently disabled for ticket http://trac.mantidproject.org/mantid/ticket/10397 : should be put back in when completing 10231
+                /*  if( fileNames[i].substr(fileNames[i].find_last_of(".")) != ext)
                 {
                   throw std::runtime_error("Cannot load multiple files when more than one Loader is needed.");   
-                }
+                }*/
               }
               else
               {
@@ -320,6 +321,7 @@ namespace Mantid
       exts.push_back(".h5");
       exts.push_back(".hd5");
       exts.push_back(".sqw");
+      exts.push_back(".fits");
 
       declareProperty(new MultipleFileProperty("Filename", exts),
         "The name of the file(s) to read, including the full or relative "

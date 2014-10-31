@@ -308,32 +308,36 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
     if (m_picker_x < 0) return false;
     if (m_picker_y < 0) return false;
 
-    // temporary variables so we can step back to previous state
+    // Convert Y position to values so that a change of 1 corresponds to a change in spec. no by 1
     int newX = m_picker_x;
-    int newY = m_picker_y;
+    double lastY = spectrum_display->GetLastY();
 
     QKeyEvent *keyEvent = dynamic_cast<QKeyEvent *>(event);
     int key = keyEvent->key();
     switch (key)
     {
     case Qt::Key_Up:
-      newY += -1;
+      lastY += 1.0;
       break;
     case Qt::Key_Down:
-      newY += 1;
+      lastY -= 1.0;
       break;
     case Qt::Key_Left:
-      newX += -1;
+      newX--;
       break;
     case Qt::Key_Right:
-      newX += 1;
+      newX++;
       break;
     default:
       // this is not the event we were looking for
       return false;
     }
 
-    // see if we should react
+    // Convert Y position back to pixel position
+    QPoint newPoint = spectrum_display->GetPlotTransform(qMakePair(0.0, lastY));
+    int newY = newPoint.y();
+
+    // Ignore the event if the position is outside of the plot area
     if (newX < 0) return false;
     if (newY < 0) return false;
     const QSize canvasSize = sv_ui->spectrumPlot->canvas()->size();
@@ -348,8 +352,14 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
     QPoint canvasPos = sv_ui->spectrumPlot->canvas()->mapToGlobal(QPoint(0,0));
     // move the cursor to the correct position
     sv_ui->spectrumPlot->canvas()->cursor().setPos(QPoint(canvasPos.x()+m_picker_x, canvasPos.y()+m_picker_y));
-    // update the pointed at position
-    spectrum_display->SetPointedAtPoint( QPoint(m_picker_x, m_picker_y) );
+
+    QPair<double, double> transPoints = spectrum_display->GetPlotInvTransform(QPoint(newX, newY));
+
+    spectrum_display->SetHGraph( lastY );
+    spectrum_display->SetVGraph( transPoints.first );
+
+    spectrum_display->ShowInfoList( transPoints.first, lastY );
+
     // consume the event
     return true;
   }
@@ -371,6 +381,7 @@ void SVConnections::toggle_Hscroll()
   sv_ui->imageHorizontalScrollBar->setVisible( is_on );
   sv_ui->imageHorizontalScrollBar->setEnabled( is_on );
   spectrum_display->UpdateImage();
+  spectrum_display->HandleResize();
 }
 
 
@@ -380,6 +391,7 @@ void SVConnections::toggle_Vscroll()
   sv_ui->imageVerticalScrollBar->setVisible( is_on );
   sv_ui->imageVerticalScrollBar->setEnabled( is_on );
   spectrum_display->UpdateImage();
+  spectrum_display->HandleResize();
 }
 
 
@@ -425,6 +437,7 @@ void SVConnections::imageSplitter_moved()
   vgraph_sizes.append( sizes[1] );
   sv_ui->vgraphSplitter->setSizes( vgraph_sizes );
   spectrum_display->UpdateImage();
+  spectrum_display->HandleResize();
 }
 
 /**
