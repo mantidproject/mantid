@@ -194,6 +194,103 @@ namespace Mantid
       declareProperty(new PropertyWithValue<bool>("FastMultiPeriod", true, Direction::Input), "For multiperiod workspaces. Copy instrument, parameter and x-data rather than loading it directly for each workspace. Y, E and log information is always loaded." );
     }
 
+    /**
+     * Loading specifically for mulitperiod group workspaces
+     * @param root : NXRoot ref
+     * @param entryName : Entry name to load.
+     * @param tempMatrixWorkspace : Template workspace to base the next multiperiod entry off.
+     * @param nWorkspaceEntries : N entries in the file
+     * @param i : index + 1 being processed.
+     * @return Next multiperiod group workspace
+     */
+    Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(NXRoot & root, const std::string & entryName, MatrixWorkspace_sptr& tempMatrixWorkspace, const int64_t nWorkspaceEntries, const int64_t i)
+    {
+
+      MatrixWorkspace_sptr periodWorkspace = WorkspaceFactory::Instance().create(tempMatrixWorkspace);
+
+      const size_t nHistograms = periodWorkspace->getNumberHistograms();
+      for (size_t i = 0; i < nHistograms; ++i)
+      {
+        periodWorkspace->setX(i, tempMatrixWorkspace->refX(i));
+      }
+
+      NXEntry mtdEntry = root.openEntry(entryName);
+      NXData wsEntry = mtdEntry.openNXData("workspace"); // TODO. hardcoded group_name is HACK
+
+      NXDataSetTyped<double> data = wsEntry.openDoubleData();
+      NXDataSetTyped<double> errors = wsEntry.openNXDouble("errors");
+
+      const int nSpectra = data.dim0();
+      const int nChannels = data.dim1();
+
+      int64_t blockSize = 8; // Read block size. Set to 8 for efficiency. i.e. read 8 histograms at a time.
+      const int64_t nFullBlocks = nHistograms / blockSize; // Truncated number of full blocks to read. Remainder removed
+      const int64_t nRemainder = nHistograms % blockSize; // Remainder
+      const int64_t readOptimumStop = (nFullBlocks * blockSize);
+      const int64_t readStop = m_spec_max - 1; // HACK
+      const int64_t finalBlockSize = readStop - readOptimumStop;
+
+      int64_t wsIndex = 0;
+      int64_t histIndex = 0; // HACK. This needs to be calculated.
+
+      for (; histIndex < readStop;)
+      {
+        if (histIndex >= readOptimumStop)
+        {
+          blockSize = finalBlockSize;
+        }
+
+        data.load(static_cast<int>(blockSize), static_cast<int>(histIndex));
+        errors.load(static_cast<int>(blockSize), static_cast<int>(histIndex));
+
+        double *dataStart = data();
+        double *dataEnd = dataStart + nChannels;
+
+        double *errorStart = errors();
+        double *errorEnd = errorStart + nChannels;
+
+        int64_t final(histIndex + blockSize);
+        while (histIndex < final)
+        {
+          MantidVec& Y = periodWorkspace->dataY(wsIndex);
+          Y.assign(dataStart, dataEnd);
+          dataStart += nChannels;
+          dataEnd += nChannels;
+          MantidVec& E = periodWorkspace->dataE(wsIndex);
+          E.assign(errorStart, errorEnd);
+          errorStart += nChannels;
+          errorEnd += nChannels;
+
+          ++wsIndex;
+          ++histIndex;
+        }
+      }
+
+      std::string parameterStr;
+      m_cppFile->openPath(mtdEntry.path());
+      try
+      {
+        // This loads logs, sample, and instrument.
+        periodWorkspace->loadSampleAndLogInfoNexus(m_cppFile);
+      }
+      catch (std::exception & e)
+      {
+        g_log.information("Error loading Instrument section of nxs file");
+        g_log.information(e.what());
+      }
+
+      // TODO deal with fractional area.
+
+      // TODO need to handle spectrum intervals correctly.
+
+      // TODO remove spectraInfo.
+
+      const double fractionComplete = double(i-1)/double(nWorkspaceEntries);
+      progress(fractionComplete, "Loading multiperiod entry");
+      return periodWorkspace;
+
+    }
+
 //-------------------------------------------------------------------------------------------------
     /** Executes the algorithm. Reading in the file and creating and populating
      *  the output workspace
@@ -241,8 +338,6 @@ namespace Mantid
       API::Workspace_sptr tempWS = loadEntry(root, targetEntryName, 0, 1, spectraInfo /*Ignore to begin with*/
       , false /*Do not Ignore spectrum/instrument information inputs, write them*/);
 
-      g_log.warning("loaded tempws");
-
       if (nWorkspaceEntries == 1 || !bDefaultEntryNumber)
       {
         // We have what we need.
@@ -265,8 +360,6 @@ namespace Mantid
         std::vector<std::string> names(nWorkspaceEntries + 1);
         bool commonStem = bIsMultiPeriod || checkForCommonNameStem(root, names);
 
-        g_log.warning("got names");
-
         //remove existing workspace and replace with the one being loaded
         bool wsExists = AnalysisDataService::Instance().doesExist(base_name);
         if (wsExists)
@@ -282,12 +375,12 @@ namespace Mantid
         const std::string prop_name = "OutputWorkspace_";
         double nWorkspaceEntries_d = static_cast<double>(nWorkspaceEntries);
 
-        MatrixWorkspace_sptr tempWS2D = boost::dynamic_pointer_cast<MatrixWorkspace>(tempWS);
+        MatrixWorkspace_sptr tempMatrixWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(tempWS);
         bool bAccelleratedMultiPeriodLoading = false;
-        if (tempWS2D)
+        if (tempMatrixWorkspace)
         {
           bAccelleratedMultiPeriodLoading = bIsMultiPeriod && bFastMultiPeriod;
-          tempWS2D->mutableRun().clearLogs(); // Strip out any loaded logs. That way we don't pay for copying that information around.
+          tempMatrixWorkspace->mutableRun().clearLogs(); // Strip out any loaded logs. That way we don't pay for copying that information around.
         }
 
         if(bAccelleratedMultiPeriodLoading)
@@ -315,95 +408,7 @@ namespace Mantid
            */
           if (bAccelleratedMultiPeriodLoading)
           {
-            MatrixWorkspace_sptr local_workspace_2d = WorkspaceFactory::Instance().create(tempWS2D);
-
-            for (int64_t i = 0; i < int64_t(local_workspace_2d->getNumberHistograms()); ++i)
-            {
-              local_workspace_2d->setX(i, tempWS2D->refX(i));
-            }
-
-            local_workspace = local_workspace_2d;
-
-            NXEntry mtdEntry = root.openEntry(basename + os.str());
-            NXData wsEntry = mtdEntry.openNXData("workspace"); // TODO. hardcoded group_name is HACK
-
-            NXDataSetTyped<double> data = wsEntry.openDoubleData();
-            NXDataSetTyped<double> errors = wsEntry.openNXDouble("errors");
-
-            const int nSpectra = data.dim0();
-            const int nChannels = data.dim1();
-
-            //// validate the optional spectrum parameters, if set
-            checkOptionalProperties(nSpectra);
-            // Actual number of spectra in output workspace (if only a range was going to be loaded)
-            const size_t nHistograms = calculateWorkspacesize(nSpectra);
-
-            int64_t blockSize = 8; // Read block size. Set to 8 for efficiency. i.e. read 8 histograms at a time.
-            const int64_t nFullBlocks = nHistograms / blockSize; // Truncated number of full blocks to read. Remainder removed
-            const int64_t nRemainder = nHistograms % blockSize; // Remainder
-            const int64_t readOptimumStop = (nFullBlocks * blockSize);
-            const int64_t readStop = m_spec_max - 1; // HACK
-            const int64_t finalBlockSize = readStop - readOptimumStop;
-
-            int64_t wsIndex = 0;
-            int64_t histIndex = 0; // HACK. This needs to be calculated.
-
-            for (; histIndex < readStop;)
-            {
-              if (histIndex >= readOptimumStop)
-              {
-                blockSize = finalBlockSize;
-              }
-
-              data.load(static_cast<int>(blockSize), static_cast<int>(histIndex));
-              errors.load(static_cast<int>(blockSize), static_cast<int>(histIndex));
-
-              double *dataStart = data();
-              double *dataEnd = dataStart + nChannels;
-
-              double *errorStart = errors();
-              double *errorEnd = errorStart + nChannels;
-
-              int64_t final(histIndex + blockSize);
-              while (histIndex < final)
-              {
-                MantidVec& Y = local_workspace_2d->dataY(wsIndex);
-                Y.assign(dataStart, dataEnd);
-                dataStart += nChannels;
-                dataEnd += nChannels;
-                MantidVec& E = local_workspace_2d->dataE(wsIndex);
-                E.assign(errorStart, errorEnd);
-                errorStart += nChannels;
-                errorEnd += nChannels;
-
-                ++wsIndex;
-                ++histIndex;
-              }
-            }
-
-            std::string parameterStr;
-            m_cppFile->openPath(mtdEntry.path());
-            try
-            {
-              // This loads logs, sample, and instrument.
-              local_workspace_2d->loadSampleAndLogInfoNexus(m_cppFile);
-            } catch (std::exception & e)
-            {
-              g_log.information("Error loading Instrument section of nxs file");
-              g_log.information(e.what());
-            }
-
-            // TODO deal with fractional area.
-
-            // TODO need to handle spectrum intervals correctly.
-
-            // TODO remove spectraInfo.
-
-            // TODO LoadNexus needs to forward "FastMultiPeriod".
-
-            const double fractionComplete = double(p-1)/double(nWorkspaceEntries);
-            progress(fractionComplete, "Loading multiperiod entry");
-
+            local_workspace = doAccelleratedMultiPeriodLoading(root, basename + os.str(), tempMatrixWorkspace, nWorkspaceEntries, p);
           }
           else // Fall-back for generic loading
           {
