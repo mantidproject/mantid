@@ -113,8 +113,9 @@ namespace Mantid
         for (int hist=0; hist <  histnumber;++hist)
         {
           PARALLEL_START_INTERUPT_REGION
-            // get const references to input Workspace arrays (no copying)
-            const MantidVec& XValues = outputWS->readX(hist);
+            // get references to output Workspace X-arrays. 
+            MantidVec& XValues = outputWS->dataX(hist);
+          // get references to output workspace data and error. If it is new workspace, data will be copied there, if old, modified in-place
           MantidVec& YValues = outputWS->dataY(hist);
           MantidVec& YErrors = outputWS->dataE(hist);
 
@@ -228,7 +229,7 @@ namespace Mantid
     * @param e_data  -- the spectra errors
     * @param threadNum -- number of thread doing conversion (by default 0, single thread)
     */
-    void BackgroundHelper::removeBackground(int nHist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data,int threadNum)const
+    void BackgroundHelper::removeBackground(int nHist,MantidVec &x_data,MantidVec &y_data,MantidVec &e_data,int threadNum)const
     {
 
       double dtBg,IBg;
@@ -256,6 +257,7 @@ namespace Mantid
         double L2 = detector->getDistance(*m_Sample);
         double delta(std::numeric_limits<double>::quiet_NaN());
         // get access to source workspace in case if target is different from source
+        const MantidVec& XValues = m_wkWS->readX(nHist);
         const MantidVec& YValues = m_wkWS->readY(nHist);
         const MantidVec& YErrors = m_wkWS->readE(nHist);
 
@@ -264,10 +266,12 @@ namespace Mantid
         unitConv->initialize(m_L1, L2,twoTheta, m_Emode, m_Efix,delta);
 
 
-        double tof1 = unitConv->singleToTOF(XValues[0]);
+        x_data[0]   = XValues[0];
+        double tof1 = unitConv->singleToTOF(x_data[0]);
         for(size_t i=0;i<y_data.size();i++)
         {
-          double tof2=unitConv->singleToTOF(XValues[i+1]);
+          double X=XValues[i+1];
+          double tof2=unitConv->singleToTOF(X);
           double Jack = std::fabs((tof2-tof1)/dtBg);
           double normBkgrnd = IBg*Jack;
           tof1=tof2;
@@ -280,8 +284,9 @@ namespace Mantid
           }
           else
           {
+            x_data[i+1] =X;
             y_data[i] =YValues[i]-normBkgrnd;
-            e_data[i]  =std::sqrt((normBkgrnd+YErrors[i]*YErrors[i])/2.); // needs further clarification -- Gaussian error summation?
+            e_data[i]  =std::sqrt((normBkgrnd+YErrors[i]*YErrors[i])/2.);
           }
 
         }

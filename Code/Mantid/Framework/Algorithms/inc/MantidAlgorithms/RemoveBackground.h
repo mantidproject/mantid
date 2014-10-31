@@ -45,7 +45,7 @@ namespace Mantid
 
       void initialize(const API::MatrixWorkspace_const_sptr &bkgWS,const API::MatrixWorkspace_sptr &sourceWS,
                       int emode,Kernel::Logger *pLog=NULL,int nTreads=1,bool inPlace=true);
-      void removeBackground(int hist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data,
+      void removeBackground(int hist,MantidVec &XValues,MantidVec &y_data,MantidVec &e_data,
                             int tread_num=0)const;
 
     private:
