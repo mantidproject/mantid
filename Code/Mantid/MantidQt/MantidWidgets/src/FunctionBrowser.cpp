@@ -1823,5 +1823,10 @@ void FunctionBrowser::parameterButtonClicked(QtProperty *prop)
   emit localParameterButtonClicked(getIndex(prop) + prop->propertyName());
 }
 
+bool FunctionBrowser::hasFunction() const
+{
+  return ! m_functionManager->properties().isEmpty();
+}
+
 } // MantidWidgets
 } // MantidQt

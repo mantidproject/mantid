@@ -93,6 +93,8 @@ public:
   QString getFunctionString();
   /// Return the function
   Mantid::API::IFunction_sptr getFunction(QtProperty* prop = NULL, bool attributesOnly = false);
+  /// Check if a function is set
+  bool hasFunction() const;
   /// Get a list of names of global parameters
   QStringList getGlobalParameters() const;
   /// Get a list of names of local parameters

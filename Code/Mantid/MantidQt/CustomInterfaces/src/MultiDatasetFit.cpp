@@ -115,7 +115,7 @@ void AddWorkspaceDialog::accept()
   m_workspaceName = m_uiForm.cbWorkspaceName->currentText();
   m_wsIndices.clear();
   QString indexInput = m_uiForm.leWSIndices->text();
-  if ( !indexInput.isEmpty() )
+  if ( !m_workspaceName.isEmpty() && !indexInput.isEmpty() )
   {
     auto validator = boost::make_shared<Mantid::Kernel::ArrayBoundedValidator<int>>(0,m_maxIndex);
     Mantid::Kernel::ArrayProperty<int> prop("Indices",validator);
@@ -390,7 +390,13 @@ void PlotController::nextPlot()
  */
 void PlotController::plotDataSet(int index)
 {
-  if ( index < 0 || index >= m_table->rowCount() ) return;
+  if ( index < 0 || index >= m_table->rowCount() )
+  {
+    clear();
+    m_plot->replot();
+    return;
+  }
+
   bool resetZoom = m_plotData.isEmpty();
 
   // create data if index is displayed for the first time
@@ -456,6 +462,7 @@ void PlotController::enableZoom()
   m_panner->setEnabled(false);
   m_magnifier->setEnabled(false);
   m_plot->canvas()->setCursor(QCursor(Qt::CrossCursor));
+  owner()->showPlotInfo();
 }
 
 void PlotController::enablePan()
@@ -464,6 +471,17 @@ void PlotController::enablePan()
   m_panner->setEnabled(true);
   m_magnifier->setEnabled(true);
   m_plot->canvas()->setCursor(Qt::pointingHandCursor);
+  owner()->showPlotInfo();
+}
+
+bool PlotController::isZoomEnabled() const
+{
+  return m_zoomer->isEnabled();
+}
+
+bool PlotController::isPanEnabled() const
+{
+  return m_panner->isEnabled();
 }
 
 /*==========================================================================================*/
@@ -572,6 +590,13 @@ void MultiDatasetFit::initLayout()
   connect(m_functionBrowser,SIGNAL(functionStructureChanged()),this,SLOT(reset()));
 
   createPlotToolbar();
+
+  // filters
+  m_functionBrowser->installEventFilter( this );
+  m_uiForm.plot->installEventFilter( this );
+  m_uiForm.dataTable->installEventFilter( this );
+
+  showInfo( "Add some data, define fitting function" );
 }
 
 void MultiDatasetFit::createPlotToolbar()
@@ -583,12 +608,14 @@ void MultiDatasetFit::createPlotToolbar()
   action->setIcon(QIcon(":/MultiDatasetFit/icons/zoom.png"));
   action->setCheckable(true);
   action->setChecked(true);
+  action->setToolTip("Zooming tool");
   connect(action,SIGNAL(triggered()),m_plotController,SLOT(enableZoom()));
   group->addAction(action);
 
   action = new QAction(this);
   action->setIcon(QIcon(":/MultiDatasetFit/icons/panning.png"));
   action->setCheckable(true);
+  action->setToolTip("Panning tool");
   connect(action,SIGNAL(triggered()),m_plotController,SLOT(enablePan()));
   group->addAction(action);
 
@@ -606,6 +633,8 @@ void MultiDatasetFit::addWorkspace()
   if ( dialog.exec() == QDialog::Accepted )
   {
     QString wsName = dialog.workspaceName().stripWhiteSpace();
+    // if name is empty assume that there are no workspaces in the ADS
+    if ( wsName.isEmpty() ) return;
     if ( Mantid::API::AnalysisDataService::Instance().doesExist( wsName.toStdString()) )
     {
       auto indices = dialog.workspaceIndices();
@@ -789,6 +818,12 @@ boost::shared_ptr<Mantid::API::IFunction> MultiDatasetFit::createFunction() cons
  */
 void MultiDatasetFit::fit()
 {
+  if ( !m_functionBrowser->hasFunction() )
+  {
+    QMessageBox::warning( this, "MantidPlot - Warning","Function wasn't set." );
+    return;
+  }
+
   try
   {
     auto fun = createFunction();
@@ -959,6 +994,77 @@ void MultiDatasetFit::updateLocalParameters(int index)
   {
     m_functionBrowser->setParameter( par, getLocalParameterValue( par, index ) );
   }
+}
+
+/**
+ * Show a message in the info bar at the bottom of the interface.
+ */
+void MultiDatasetFit::showInfo(const QString& text)
+{
+  m_uiForm.infoBar->setText(text);
+}
+
+bool MultiDatasetFit::eventFilter(QObject *widget, QEvent *evn)
+{
+  if ( evn->type() == QEvent::Enter )
+  {
+    if ( qobject_cast<QObject*>( m_functionBrowser ) == widget )
+    {
+      showFunctionBrowserInfo();
+    }
+    else if ( qobject_cast<QObject*>( m_uiForm.plot ) == widget )
+    {
+      showPlotInfo();
+    }
+    else if ( qobject_cast<QObject*>( m_uiForm.dataTable ) == widget )
+    {
+      showTableInfo();
+    }
+    else
+    {
+      showInfo("");
+    }
+  }
+  return false;
+}
+
+/**
+ * Show info about the function browser.
+ */
+void MultiDatasetFit::showFunctionBrowserInfo()
+{
+  if ( m_functionBrowser->hasFunction() )
+  {
+    showInfo( "Use context menu to add more functions. Set parameters and attributes." );
+  }
+  else
+  {
+    showInfo( "Use context menu to add a function." );
+  }
+}
+
+/**
+ * Show info about the plot.
+ */
+void MultiDatasetFit::showPlotInfo()
+{
+  QString text = "Use Alt+. and Alt+, to change the data set. ";
+
+  if ( m_plotController->isZoomEnabled() )
+  {
+    text += "Click and drag to zoom in. Use middle or right button to zoom out";
+  }
+  else if ( m_plotController->isPanEnabled() )
+  {
+    text += "Click and drag to move. Use mouse wheel to zoom in and out.";
+  }
+  
+  showInfo( text );
+}
+
+void MultiDatasetFit::showTableInfo()
+{
+  showInfo("Select spectra by selecting rows. For multiple selection use Shift or Ctrl keys.");
 }
 
 /*==========================================================================================*/
