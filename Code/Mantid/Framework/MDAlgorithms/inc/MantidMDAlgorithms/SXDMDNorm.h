@@ -6,6 +6,10 @@
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
 namespace Mantid
 {
+namespace DataObjects
+{
+  class EventWorkspace;
+}
 namespace MDAlgorithms
 {
 
@@ -50,6 +54,11 @@ namespace MDAlgorithms
 
     /// function to calculate intersections of teh trajectory with MDBoxes
     std::vector<Mantid::Kernel::VMD> calculateIntersections(Mantid::Geometry::IDetector_const_sptr detector);
+    /// Integrate flux spectra
+    void integrateFlux( const DataObjects::EventWorkspace& flux, API::MatrixWorkspace &integrFlux );
+    /// Use interpolation to calculate integrals
+    void calcIntegralsForIntersections( const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux, size_t sp, std::vector<double> &yValues ) const;
+
     /// number of MD dimensions
     size_t m_nDims;
     /// Normalization workspace

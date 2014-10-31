@@ -16,10 +16,17 @@ namespace MDAlgorithms
   using namespace Mantid::API;
   using namespace Mantid::Kernel;
 
+  namespace{
+
   ///function to  compare two intersections (h,k,l,Momentum) by Momentum
   bool compareMomentum(const Mantid::Kernel::VMD &v1, const Mantid::Kernel::VMD &v2)
   {
     return (v1[3]<v2[3]);
+  }
+
+  // size of the interpolation tables for the integrated flux spectra
+  const size_t interpolationSize = 1000;
+
   }
 
   // Register the algorithm into the AlgorithmFactory
@@ -262,6 +269,14 @@ namespace MDAlgorithms
       KincidentMax=fluxW->getEventXMax();
       Mantid::API::MatrixWorkspace_const_sptr sA=getProperty("SolidAngleWorkspace");
 
+      // a workspace to store integrated flux spectra
+      // the spectra sizes are smaller than in fW for efficeiency
+      // actual integrals are linearly interpolated between points in integrFlux
+      auto integrFlux = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        API::WorkspaceFactory::Instance().create("Workspace2D", fW->getNumberHistograms(),interpolationSize,interpolationSize) );
+
+      // integrate spectra in flixW and store the results in integrFlux
+      integrateFlux( *fluxW, *integrFlux );
 
       if (skipProcessing)
       {
@@ -305,28 +320,44 @@ namespace MDAlgorithms
                       //add to the correct signal at that particular index
                       //NOTE: if parallel it has to be atomic/critical
 
-                      //get event vector
+                      //get flux spectrum number
                       size_t sp=d2m.find(detIDS[i])->second;
-                      std::vector<Mantid::DataObjects::WeightedEventNoTime> el=fluxW->getEventList(sp).getWeightedEventsNoTime();
-                      //get iterator to the first event that has momentum >= (*intersections.begin())[3]
-                      std::vector<Mantid::DataObjects::WeightedEventNoTime>::iterator start=el.begin();
-                      // check that el isn't empty
-                      if ( start == el.end() ) continue;
-                      while((*start).tof()<(*intersections.begin())[3]) ++start;
-
+                      // get the solid angle
                       double solid=sA->readY(d2mSA.find(detIDS[i])->second)[0]*PC;
 
                       const size_t sizeOfMVD = intersections.front().size();
                       // pre-allocate for efficiency
                       std::vector<coord_t> pos( sizeOfMVD + otherValues.size() );
 
-                      for (auto it=intersections.begin()+1;it!=intersections.end();++it)
+                      auto intersectionsBegin = intersections.begin();
+
+                      // calculate integrals for the intersection
+
+                      // momentum values at intersections
+                      std::vector<double> xValues( intersections.size() );
+                      // buffer for the integrals
+                      std::vector<double> yValues( intersections.size() );
+                      {
+                        // copy momenta to xValues
+                        auto x = xValues.begin();
+                        for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x)
+                        {
+                          *x = (*it)[3];
+                        }
+                      }
+                      // calculate integrals at momenta from xValues by interpolating between points in spectrum sp
+                      // of workspace integrFlux. The result is stored in yValues
+                      calcIntegralsForIntersections( xValues, *integrFlux, sp, yValues );
+
+                      for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it)
                       {
                           //Mantid::Kernel::VMD deltav=(*it)-(*(it-1));//difference between consecutive intersections
                           // the full vector isn't used so compute only what is necessary
-                          double delta = (*it)[3] - (*(it-1))[3];
+                          const double xStart = (*(it-1))[3];
+                          const double xEnd = (*it)[3];
+                          const double delta = xEnd - xStart;
+                          const double eps=1e-7;//do not integrate if momemntum difference is smaller than eps, assume contribution is 0
 
-                          double eps=1e-7;//do not integrate if momemntum difference is smaller than eps, assume contribution is 0
                           if (delta > eps)
                           {
                               //Mantid::Kernel::VMD avev=((*it)+(*(it-1)))*0.5;//average between two intersection (to get position)
@@ -342,14 +373,10 @@ namespace MDAlgorithms
 
                               if(linIndex!=size_t(-1))
                               {
-                                  double signal=0.;
-                                  while((*start).tof()<(*it)[3])
-                                  {
-                                      if (start==el.end())
-                                          break;
-                                      signal+=(*start).weight();
-                                      ++start;
-                                  }
+                                  // index of the current intersection
+                                  size_t k = static_cast<size_t>( std::distance( intersectionsBegin, it ) );
+                                  // signal = integral between two consecutive intersections
+                                  double signal = yValues[k] - yValues[k - 1];
                                   signal*=solid;
 
                                   PARALLEL_CRITICAL(updateMD)
@@ -566,6 +593,141 @@ namespace MDAlgorithms
         std::stable_sort<IterType,bool (*)(const Mantid::Kernel::VMD&,const Mantid::Kernel::VMD&)>(intersections.begin(),intersections.end(),compareMomentum);
 
         return intersections;
+  }
+
+  /**
+   * Integrate spectra in flux at x-values in integrFlux and save the results in y-vectors of integrFlux.
+   * @param flux :: A workspace to integrate.
+   * @param integrFlux :: A workspace to store the results.
+   */
+  void SXDMDNorm::integrateFlux( const DataObjects::EventWorkspace& flux, API::MatrixWorkspace &integrFlux )
+  {
+    size_t nSpec = flux.getNumberHistograms();
+    assert( nSpec == integrFlux.getNumberHistograms() );
+
+    // claculate the integration points and save them in the x-vactors of integrFlux
+    double xMin = flux.getEventXMin();
+    double xMax = flux.getEventXMax();
+    double dx = ( xMax - xMin ) / ( integrFlux.blocksize() - 1 );
+    auto &X = integrFlux.dataX(0);
+    auto ix = X.begin();
+    // x-values are equally spaced between the min and max tof in the first flux spectrum
+    for(double x = xMin; ix != X.end(); ++ix, x += dx)
+    {
+      *ix = x;
+    }
+
+    // loop overr the spectra and integrate
+    for(size_t sp = 0; sp < nSpec; ++sp)
+    {
+      if ( sp > 0 )
+      {
+        integrFlux.setX(sp,X);
+      }
+      std::vector<Mantid::DataObjects::WeightedEventNoTime> el = flux.getEventList(sp).getWeightedEventsNoTime();
+      auto &outY = integrFlux.dataY(sp);
+      double sum = 0;
+      auto x = X.begin() + 1;
+      size_t i = 1;
+      // the integral is a running sum of the event weights in the spectrum
+      for(auto evnt = el.begin(); evnt != el.end(); ++evnt)
+      {
+        double tof = evnt->tof();
+        while( x != X.end() && *x < tof )
+        {
+          ++x; ++i;
+        }
+        if ( x == X.end() ) break;
+        sum += evnt->weight();
+        outY[i] = sum;
+      }
+    }
+  }
+
+  /**
+   * LInearly interpolate between the points in integrFlux at xValues and save the results in yValues.
+   * @param xValues :: X-values at which to interpolate
+   * @param integrFlux :: A workspace with the spectra to interpolate
+   * @param sp :: A workspace index for a spectrum in integrFlux to interpolate.
+   * @param yValues :: A vector to save the results.
+   */
+  void SXDMDNorm::calcIntegralsForIntersections( const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux, size_t sp, std::vector<double> &yValues ) const
+  {
+    assert( xValues.size() == yValues.size() );
+
+    // the x-data from the workspace
+    auto &xData = integrFlux.readX(sp);
+    const double xStart = xData.front();
+    const double xEnd = xData.back();
+
+    // the values in integrFlux are expected to be integrals of a non-negative function
+    // ie they must make a non-decreasing function
+    auto &yData = integrFlux.readY(sp);
+    size_t spSize = yData.size();
+
+    const double yMin = 0.0;
+    const double yMax = yData.back();
+
+    size_t nData = xValues.size();
+    // all integrals below xStart must be 0
+    if (xValues[nData-1] < xStart)
+    {
+      std::fill( yValues.begin(), yValues.end(), yMin );
+      return;
+    }
+
+    // all integrals above xEnd must be equal tp yMax
+    if ( xValues[0] > xEnd )
+    {
+      std::fill( yValues.begin(), yValues.end(), yMax );
+      return;
+    }
+
+    size_t i = 0;
+    // integrals below xStart must be 0
+    while(i < nData - 1 && xValues[i] < xStart)
+    {
+      yValues[i] = yMin;
+      i++;
+    }
+    size_t j = 0;
+    for(;i<nData;i++)
+    {
+      // integrals above xEnd must be equal tp yMax
+      if (j >= spSize - 1)
+      {
+        yValues[i] = yMax;
+      }
+      else
+      {
+        double xi = xValues[i];
+        while(j < spSize - 1 && xi > xData[j]) j++;
+        // if x falls onto an interpolation point return the corresponding y
+        if (xi == xData[j])
+        {
+          yValues[i] = yData[j];
+        }
+        else if (j == spSize - 1)
+        {
+          // if we get above xEnd it's yMax
+          yValues[i] = yMax;
+        }
+        else if (j > 0)
+        {
+          // interpolate between the consecutive points
+          double x0 = xData[j-1];
+          double x1 = xData[j];
+          double y0 = yData[j-1];
+          double y1 = yData[j];
+          yValues[i] = y0 + (y1 - y0)*(xi - x0)/(x1 - x0);
+        }
+        else // j == 0
+        {
+          yValues[i] = yMin;
+        }
+      }
+    }
+
   }
 
 } // namespace MDAlgorithms
