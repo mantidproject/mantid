@@ -671,64 +671,6 @@ public:
     AnalysisDataService::Instance().remove("TRANS_13463_13464");
   }
 
-  /*
-   * Test autofilling workspace values.
-   */
-  void testAutofill()
-  {
-    auto ws = createWorkspace("TestWorkspace");
-    //Autofill everything we can
-    TableRow row = ws->appendRow();
-    row << "13460" << "" << "13463,13464" << "" << "" << "" << 1.0 << 1;
-    row = ws->appendRow();
-    row << "13462" << "" << "13463,13464" << "" << "" << "" << 1.0 << 1;
-
-    MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
-    ReflMainViewPresenter presenter(&mockView);
-    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(OpenTableFlag);
-
-    std::set<int> rowlist;
-    rowlist.insert(0);
-    rowlist.insert(1);
-
-    //We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
-
-    //The user hits the "process" button with the first two rows selected
-    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(rowlist));
-    EXPECT_CALL(mockView, getProcessInstrument()).WillRepeatedly(Return("INTER"));
-    EXPECT_CALL(mockView, setProgressRange(_,_));
-    EXPECT_CALL(mockView, setProgress(_)).Times(4);
-    presenter.notify(ProcessFlag);
-
-    //The user hits the "save" button
-    presenter.notify(SaveFlag);
-
-    //Check the table was updated as expected
-    ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(0, ThetaCol)), 0.70002, 1e-5);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(0, DQQCol)), 0.03402, 1e-5);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(0, QMinCol)), 0.00903, 1e-5);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(0, QMaxCol)), 0.15352, 1e-5);
-
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(1, ThetaCol)), 2.3, 1e-5);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(1, DQQCol)), 0.03405, 1e-5);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(1, QMinCol)), 0.02966, 1e-5);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(1, QMaxCol)), 0.50431, 1e-5);
-
-    //Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("TRANS_13463_13464");
-    AnalysisDataService::Instance().remove("TOF_13460");
-    AnalysisDataService::Instance().remove("TOF_13463");
-    AnalysisDataService::Instance().remove("TOF_13464");
-    AnalysisDataService::Instance().remove("IvsQ_13460");
-    AnalysisDataService::Instance().remove("IvsLam_13460");
-  }
-
   void testBadWorkspaceType()
   {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
