@@ -138,7 +138,7 @@ public:
     bkgRem.initialize();
     bkgRem.setPropertyValue("InputWorkspace","TestWS");
     bkgRem.setPropertyValue("OutputWorkspace","TestWS");
-    bkgRem.setPropertyValue("FlatBkgWorkspace",BgWS->getName());
+    bkgRem.setPropertyValue("BkgWorkspace",BgWS->getName());
     bkgRem.setPropertyValue("EMode","Direct");
 
     TS_ASSERT_THROWS_NOTHING(bkgRem.execute());
@@ -170,7 +170,7 @@ public:
     bkgRem.initialize();
     bkgRem.setPropertyValue("InputWorkspace","TestWS");
     bkgRem.setPropertyValue("OutputWorkspace","TestWS2");
-    bkgRem.setPropertyValue("FlatBkgWorkspace",BgWS->getName());
+    bkgRem.setPropertyValue("BkgWorkspace",BgWS->getName());
     bkgRem.setPropertyValue("EMode","Direct");
 
     TS_ASSERT_THROWS_NOTHING(bkgRem.execute());
@@ -234,7 +234,7 @@ public:
     bkgRem.initialize();
     bkgRem.setPropertyValue("InputWorkspace","sourceWSdE");
     bkgRem.setPropertyValue("OutputWorkspace","sourceWSdE");
-    bkgRem.setPropertyValue("FlatBkgWorkspace",BgWS->getName());
+    bkgRem.setPropertyValue("BkgWorkspace",BgWS->getName());
     bkgRem.setPropertyValue("EMode","Direct");
 
     TS_ASSERT_THROWS_NOTHING(bkgRem.execute());

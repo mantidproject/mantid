@@ -47,7 +47,7 @@ namespace Mantid
       auto vsValidator = boost::make_shared<CompositeValidator>();
       vsValidator->add<WorkspaceUnitValidator>("TOF");
       vsValidator->add<HistogramValidator>();
-      declareProperty(new WorkspaceProperty<>("FlatBkgWorkspace","",Direction::Input,vsValidator),
+      declareProperty(new WorkspaceProperty<>("BkgWorkspace","",Direction::Input,vsValidator),
         "An optional histogram workspace in the units of TOF defining background for removal during rebinning."
         "The workspace has to have single value or contain the same number of spectra as the \"InputWorkspace\" and single Y value per each spectra," 
         "representing flat background in the background time region. "
@@ -57,7 +57,7 @@ namespace Mantid
 
       std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
       declareProperty("EMode",dE_modes[Kernel::DeltaEMode::Direct],boost::make_shared<Kernel::StringListValidator>(dE_modes),
-        "If FlatBkgWorkspace is present, this property used to define the units for conversion from the units of the InputWorkspace to TOF" ,Direction::Input);
+        "The energy conversion mode used to define the conversion from the units of the InputWorkspace to TOF" ,Direction::Input);
     }
 
 
@@ -72,7 +72,7 @@ namespace Mantid
       MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
       MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
-      API::MatrixWorkspace_const_sptr bkgWksp = getProperty("FlatBkgWorkspace");
+      API::MatrixWorkspace_const_sptr bkgWksp = getProperty("BkgWorkspace");
 
 
       // source workspace has to have full instrument defined to perform background removal using this procedure. 

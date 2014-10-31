@@ -159,7 +159,7 @@ are identical::
     resultEtransf   = ConvertUnits(groupedFilename,'DeltaE',Emode='Direct',EFixed=Ei)
   
   noBgWorkspace = Rebin(InputWorkspace=resultEtransf, Params=[e_min,dE,e_max],PreserveEvents=False)
-  noBgWorkspace= Rebin(InputWorkspace=noBgWorkspace,FlatBkgWorkspace='Bg',EMode='Direct')
+  noBgWorkspace= Rebin(InputWorkspace=noBgWorkspace,BkgWorkspace='Bg',EMode='Direct')
   nHist = Bg.getNumberHistograms()
   removedBkgSum = SumSpectra(noBgWorkspace ,0,nHist-1);    
 
@@ -189,7 +189,7 @@ Usage
    # Calculate histograms for event workspace in energy binning    
    Result   = Rebin(Test_BgDE,Params='-20,2,20',PreserveEvents=False);
    # Remove flat background in-place
-   Result   = RemoveBackground(Result,FlatBkgWorkspace='Bg',EMode='Direct');
+   Result   = RemoveBackground(Result,BkgWorkspace='Bg',EMode='Direct');
    
    # Get access to the results
    XS = Sample.dataX(0);
