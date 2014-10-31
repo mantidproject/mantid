@@ -61,7 +61,7 @@ void  QtUtils::SetText( const std::string & string,
                               QLineEdit*    lineEdit )
 {
   QString qString = QString::fromStdString( string );
-  lineEdit->setText( qString );
+  lineEdit->setText( qString.trimmed() );
 }
 
 
