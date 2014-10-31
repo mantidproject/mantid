@@ -23,6 +23,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/shared_array.hpp>
 #include <cmath>
 #include <Poco/DateTimeParser.h>
 #include <Poco/Path.h>
@@ -46,6 +47,64 @@ namespace Mantid
 
     namespace
     {
+
+      // Helper typedef
+      typedef boost::shared_array<int> IntArray_shared;
+
+      // Struct to contain spectrum information.
+      struct SpectraInfo
+      {
+        // Number of spectra
+        int nSpectra;
+        // Do we have any spectra
+        bool hasSpectra;
+        // Contains spectrum numbers for each workspace index
+        IntArray_shared spectraNumbers;
+        // Index of the detector in the workspace.
+        IntArray_shared detectorIndex;
+        // Number of detectors associated with each spectra
+        IntArray_shared detectorCount;
+        // Detector list contains a list of all of the detector numbers
+        IntArray_shared detectorList;
+
+        SpectraInfo() :
+            nSpectra(0), hasSpectra(false)
+        {
+        }
+
+        SpectraInfo(int _nSpectra, bool _hasSpectra, IntArray_shared _spectraNumbers,
+            IntArray_shared _detectorIndex, IntArray_shared _detectorCount,
+            IntArray_shared _detectorList) :
+            nSpectra(_nSpectra), hasSpectra(_hasSpectra), spectraNumbers(_spectraNumbers), detectorIndex(
+                _detectorIndex), detectorCount(_detectorCount), detectorList(_detectorList)
+        {
+        }
+
+        SpectraInfo(const SpectraInfo& other) : nSpectra(other.nSpectra), hasSpectra(other.hasSpectra), spectraNumbers(other.spectraNumbers), detectorIndex(
+            other.detectorIndex), detectorCount(other.detectorCount), detectorList(other.detectorList)
+        {
+        }
+
+        /*
+        SpectraInfo& operator=(const SpectraInfo& other)
+        {
+          if (&other != this)
+          {
+            nSpectra = other.nSpectra;
+            hasSpectra = other.hasSpectra;
+            spectraNumbers = other.spectraNumbers;
+            detectorIndex = other.detectorIndex;
+            detectorCount = other.detectorCount;
+            detectorList = other.detectorList;
+          }
+          return *this;
+        }
+        */
+      };
+
+      // Helper typdef.
+      typedef boost::optional<SpectraInfo> SpectraInfo_optional;
+
 
       /**
        * Extract ALL the detector, spectrum number and workspace index mapping information.
@@ -334,9 +393,7 @@ namespace Mantid
       const std::string targetEntryName = os.str();
 
       // Take the first real workspace obtainable. We need it even if loading groups.
-      SpectraInfo_optional spectraInfo;
-      API::Workspace_sptr tempWS = loadEntry(root, targetEntryName, 0, 1, spectraInfo /*Ignore to begin with*/
-      , false /*Do not Ignore spectrum/instrument information inputs, write them*/);
+      API::Workspace_sptr tempWS = loadEntry(root, targetEntryName, 0, 1);
 
       if (nWorkspaceEntries == 1 || !bDefaultEntryNumber)
       {
@@ -413,8 +470,7 @@ namespace Mantid
           else // Fall-back for generic loading
           {
             local_workspace = loadEntry(root, basename + os.str(),
-                static_cast<double>(p - 1) / nWorkspaceEntries_d, 1. / nWorkspaceEntries_d, spectraInfo,
-                ignoreSpecInfo);
+                static_cast<double>(p - 1) / nWorkspaceEntries_d, 1. / nWorkspaceEntries_d);
           }
 
           declareProperty(
@@ -1064,13 +1120,10 @@ int64_t          index_start = indices[wi];
      * @param entry_name :: The entry name
      * @param progressStart :: The percentage value to start the progress reporting for this entry
      * @param progressRange :: The percentage range that the progress reporting should cover
-     * @param specInfo :: Spectrum information object
-     * @param ignoreSpecInfo :: true to skip reading and wrting to optional specInfo
      * @returns A 2D workspace containing the loaded data
      */
     API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::string & entry_name,
-        const double& progressStart, const double& progressRange, SpectraInfo_optional& specInfo,
-        bool ignoreSpecInfo)
+        const double& progressStart, const double& progressRange)
     {
       progress(progressStart, "Opening entry " + entry_name + "...");
 
@@ -1426,7 +1479,7 @@ int64_t          index_start = indices[wi];
       }
 
       // Now assign the spectra-detector map
-      readInstrumentGroup(mtd_entry, local_workspace, specInfo, ignoreSpecInfo);
+      readInstrumentGroup(mtd_entry, local_workspace);
 
       // Parameter map parsing
       progress(progressStart + 0.11 * progressRange, "Reading the parameter maps...");
@@ -1460,19 +1513,13 @@ int64_t          index_start = indices[wi];
      * Read the instrument group
      * @param mtd_entry :: The node for the current workspace
      * @param local_workspace :: The workspace to attach the instrument
-     * @param inOutSpecInfo :: Spectrum information
-     * @param ignoreSpecInfo :: If True ignore input spectrum info and obtain it yourself.
      */
     void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry,
-        API::MatrixWorkspace_sptr local_workspace, SpectraInfo_optional& inOutSpecInfo,
-        bool ignoreSpecInfo)
+        API::MatrixWorkspace_sptr local_workspace)
     {
       // Get spectrum information for the current entry.
 
-      const bool bUseExistingInfo = inOutSpecInfo.is_initialized() && !ignoreSpecInfo;
-
-      SpectraInfo spectraInfo =
-          bUseExistingInfo ? inOutSpecInfo.get() : extractMappingInfo(mtd_entry, this->g_log);
+      SpectraInfo spectraInfo = extractMappingInfo(mtd_entry, this->g_log);
 
       //Now build the spectra list
       int index = 0;
@@ -1509,12 +1556,6 @@ int64_t          index_start = indices[wi];
               std::set<detid_t>(spectraInfo.detectorList.get() + start,
                   spectraInfo.detectorList.get() + end));
         }
-      }
-
-      // We can write the spec info under the following conditions.
-      if (!inOutSpecInfo.is_initialized() && !ignoreSpecInfo)
-      {
-        inOutSpecInfo = spectraInfo;
       }
     }
 
