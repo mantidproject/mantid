@@ -393,6 +393,7 @@ void PlotController::plotDataSet(int index)
   if ( index < 0 || index >= m_table->rowCount() )
   {
     clear();
+    owner()->checkDataSets();
     m_plot->replot();
     return;
   }
@@ -409,8 +410,18 @@ void PlotController::plotDataSet(int index)
     {
       outputWorkspaceName += QString("_%1").arg(index);
     }
-    auto value = boost::make_shared<DatasetPlotData>( wsName, wsIndex, outputWorkspaceName );
-    m_plotData.insert(index, value );
+    try
+    {
+      auto value = boost::make_shared<DatasetPlotData>( wsName, wsIndex, outputWorkspaceName );
+      m_plotData.insert(index, value );
+    }
+    catch(...)
+    {
+      clear();
+      owner()->checkDataSets();
+      m_plot->replot();
+      return;
+    }
   }
 
   // hide the previously shown data
@@ -697,12 +708,7 @@ void MultiDatasetFit::removeSelectedSpectra()
       rows.push_back( row );
     }
   }
-  std::sort( rows.begin(), rows.end() );
-  for(auto row = rows.rbegin(); row != rows.rend(); ++row)
-  {
-    m_uiForm.dataTable->removeRow( *row );
-  }
-  emit dataTableUpdated();
+  removeDataSets( rows );
 }
 
 /**
@@ -1064,7 +1070,53 @@ void MultiDatasetFit::showPlotInfo()
 
 void MultiDatasetFit::showTableInfo()
 {
-  showInfo("Select spectra by selecting rows. For multiple selection use Shift or Ctrl keys.");
+  if ( getNumberOfSpectra() > 0 )
+  {
+    showInfo("Select spectra by selecting rows. For multiple selection use Shift or Ctrl keys.");
+  }
+  else
+  {
+    showInfo("Add some data sets. Click \"Add Workspace\" button.");
+  }
+}
+
+/**
+ * Check that the data sets in the table are valid and remove invalid ones.
+ */
+void MultiDatasetFit::checkDataSets()
+{
+  std::vector<int> rows;
+  int nrows = getNumberOfSpectra();
+  auto& ADS = Mantid::API::AnalysisDataService::Instance();
+  for( int row = 0; row < nrows; ++row)
+  {
+    auto wsName = getWorkspaceName( row );
+    auto i = getWorkspaceIndex( row );
+    if ( !ADS.doesExist( wsName ) )
+    {
+      rows.push_back( row );
+      continue;
+    }
+    auto ws = ADS.retrieveWS<Mantid::API::MatrixWorkspace>( wsName );
+    if ( !ws || i >= ws->getNumberHistograms() )
+    {
+      rows.push_back( row );
+      continue;
+    }
+  }
+
+  removeDataSets( rows );
+}
+
+void MultiDatasetFit::removeDataSets( std::vector<int>& rows )
+{
+  if ( rows.empty() ) return;
+  std::sort( rows.begin(), rows.end() );
+  for(auto row = rows.rbegin(); row != rows.rend(); ++row)
+  {
+    m_uiForm.dataTable->removeRow( *row );
+  }
+  emit dataTableUpdated();
 }
 
 /*==========================================================================================*/
