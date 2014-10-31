@@ -176,7 +176,7 @@ def GetThetaQ(ws):
         q = k0 * np.sin(0.5 * np.radians(theta))
 
     # If axis is in Q need to calculate back to angles and just return axis values
-    else if axis.isNumeric() and axis.getUnit().unitID() == 'MomentumTransfer':
+    elif axis.isNumeric() and axis.getUnit().unitID() == 'MomentumTransfer':
         q = axis.extractValues()
         theta = 2.0 * np.degrees(np.arcsin(q / k0))
 
