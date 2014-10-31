@@ -170,6 +170,7 @@ namespace Mantid
     @param bkgWS    -- shared pointer to the workspace which contains background 
     @param sourceWS -- shared pointer to the workspace to remove background from
     @param emode    -- energy conversion mode used during internal units conversion (0 -- elastic, 1-direct, 2 indirect, as defined in Units conversion
+    @param pLog     -- pointer to the logger class which would report errors 
     @param nThreads -- number of threads to be used for background removal
     @param inPlace  -- if the background removal occurs from the existing workspace or target workspace has to be cloned.
     */
