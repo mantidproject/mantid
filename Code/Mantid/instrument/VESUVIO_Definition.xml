@@ -322,22 +322,22 @@
   
   <type name="pixel forward" is="detector">
     <cuboid id="shape">
-      <left-front-bottom-point x="0.0125" y="-0.04" z="0.0"  />
-      <left-front-top-point  x="0.0125" y="-0.04" z="0.003"  />
-      <left-back-bottom-point  x="-0.0125" y="-0.04" z="0.0"  />
-      <right-front-bottom-point  x="0.0125" y="0.04" z="0.0"  />
+      <left-front-bottom-point x="0.0125" y="-0.0395" z= "0.0045" />
+      <left-front-top-point x="0.0125" y="0.0395" z= "0.0045" />
+      <left-back-bottom-point x="0.0125" y="-0.0395" z= "-0.0045" />
+      <right-front-bottom-point x="-0.0125" y="-0.0395" z= "0.0045" />
     </cuboid>
     <algebra val="shape" />
   </type>  
 
   <type name="pixel back" is="detector">
-    <cuboid id="shape">
-      <left-front-bottom-point x="0.01" y="-0.02" z="0.0"  />
-      <left-front-top-point  x="0.01" y="-0.02" z="0.003"  />
-      <left-back-bottom-point  x="-0.01" y="-0.02" z="0.0"  />
-      <right-front-bottom-point  x="0.01" y="0.02" z="0.0"  />
+    <cuboid id="shape" >
+      <left-front-bottom-point x="0.0125" y="-0.04" z= "0.0045" />
+      <left-front-top-point x="0.0125" y="0.04" z= "0.0045" />
+      <left-back-bottom-point x="0.0125" y="-0.04" z= "-0.0045" />
+      <right-front-bottom-point x="-0.0125" y="-0.04" z= "0.0045" />
     </cuboid>
-    <algebra val="shape" />
+  <algebra val="shape" />
   </type>  
   
   <!-- DETECTOR ID LISTS -->

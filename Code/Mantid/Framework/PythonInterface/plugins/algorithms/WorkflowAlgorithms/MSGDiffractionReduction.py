@@ -19,6 +19,9 @@ class MSGDiffractionReduction(PythonAlgorithm):
         self.declareProperty(name='SumFiles', defaultValue=False,
                              doc='Enabled to sum spectra from each input file.')
 
+        self.declareProperty(name='IndividualGrouping', defaultValue=False,
+                             doc='Do not group results into a single spectra.')
+
         self.declareProperty(name='Instrument', defaultValue='IRIS',
                              validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'VESUVIO']),
                              doc='Instrument used for run')
@@ -77,6 +80,7 @@ class MSGDiffractionReduction(PythonAlgorithm):
 
         input_files = self.getProperty('InputFiles').value
         sum_files = self.getProperty('SumFiles').value
+        individual_grouping = self.getProperty('IndividualGrouping').value
         instrument_name = self.getPropertyValue('Instrument')
         mode = self.getPropertyValue('Mode')
         detector_range = self.getProperty('DetectorRange').value
@@ -92,6 +96,9 @@ class MSGDiffractionReduction(PythonAlgorithm):
         reducer.set_parameter_file(ipf_filename)
         reducer.set_sum_files(sum_files)
         reducer.set_save_formats(save_formats)
+
+        if individual_grouping:
+            reducer.set_grouping_policy('Individual')
 
         for in_file in input_files:
             reducer.append_data_file(in_file)

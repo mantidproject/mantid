@@ -165,9 +165,15 @@ namespace Mantid
 
         // ---- Pre-counting events per pixel ID ----
         auto & outputWS = *(alg->WS);
-
         if (alg->precount)
         {
+
+				if ( alg->m_specMin !=EMPTY_INT() && alg->m_specMax !=EMPTY_INT() )
+				{
+					m_min_id = alg->m_specMin;
+					m_max_id = alg->m_specMax;
+				}
+
           std::vector<size_t> counts(m_max_id-m_min_id+1, 0);
           for (size_t i=0; i < numEvents; i++)
           {
@@ -1108,7 +1114,14 @@ namespace Mantid
       setPropertyGroup("FilterMonByTimeStart", grp4);
       setPropertyGroup("FilterMonByTimeStop", grp4);
 
-      declareProperty(
+			declareProperty("SpectrumMin",(int32_t)EMPTY_INT(), mustBePositive, 
+			"The number of the first spectrum to read.");
+		declareProperty("SpectrumMax",(int32_t)EMPTY_INT(), mustBePositive, 
+			"The number of the last spectrum to read.");
+		declareProperty(new ArrayProperty<int32_t>("SpectrumList"),	
+			"A comma-separated list of individual spectra to read.");
+
+		declareProperty(
         new PropertyWithValue<bool>("MetaDataOnly", false, Direction::Input),
         "If true, only the meta data and sample logs will be loaded.");
 
@@ -1785,6 +1798,40 @@ namespace Mantid
       }
       file.closeData();
 
+      // get the experiment identifier
+      try {
+        file.openData("experiment_identifier");
+        string expId("");
+        if (file.getInfo().type == ::NeXus::CHAR)
+        {
+          expId = file.getStrData();
+        }
+        if (!expId.empty()) {
+          WS->mutableRun().addProperty("experiment_identifier", expId);
+        }
+        file.closeData();
+      } catch (::NeXus::Exception &) {
+        // let it drop on floor
+      }
+
+      // get the sample name
+      try {
+        file.openGroup("sample", "NXsample");
+        file.openData("name");
+        string name("");
+        if (file.getInfo().type == ::NeXus::CHAR)
+        {
+          name = file.getStrData();
+        }
+        if (!name.empty()) {
+          WS->mutableSample().setName(name);
+        }
+        file.closeData();
+        file.closeGroup();
+      } catch (::NeXus::Exception &) {
+        // let it drop on floor
+      }
+
       // get the duration
       file.openData("duration");
       std::vector<double> duration;
@@ -2134,6 +2181,10 @@ namespace Mantid
       const bool monitorsOnly, const std::vector<std::string> &bankNames)
     {
       bool spectramap = false;
+	m_specMin = getProperty("SpectrumMin");
+	m_specMax = getProperty("SpectrumMax");
+	m_specList = getProperty("SpectrumList");
+
       // set up the
       if( !monitorsOnly && !bankNames.empty() )
       {
@@ -2174,8 +2225,10 @@ namespace Mantid
       if( !spectramap )
       {
         g_log.debug() << "No custom spectra mapping found, continuing with default 1:1 mapping of spectrum:detectorID\n";
+		auto specList= WS->getInstrument()->getDetectorIDs(true);
+		createSpectraList(*std::min_element(specList.begin(),specList.end()),*std::max_element(specList.begin(),specList.end()));
         // The default 1:1 will suffice but exclude the monitors as they are always in a separate workspace
-        WS->padSpectra();
+		WS->padSpectra(m_specList);
         g_log.debug() << "Populated 1:1 spectra map for the whole instrument \n";
       }
     }
@@ -2332,23 +2385,43 @@ namespace Mantid
       }
       else
       {
-        g_log.debug() << "Loading only detector spectra from " << filename << "\n";
-        SpectrumDetectorMapping mapping(spec,udet, monitors);
-        WS->resizeTo(mapping.getMapping().size());
-        // Make sure spectrum numbers are correct
-        auto uniqueSpectra = mapping.getSpectrumNumbers();
-        auto itend = uniqueSpectra.end();
-        size_t counter = 0;
-        for(auto it = uniqueSpectra.begin(); it != itend; ++it)
-        {
-          WS->getSpectrum(counter)->setSpectrumNo(*it);
-          ++counter;
-        }
-        // Fill detectors based on this mapping
-        WS->updateSpectraUsing(mapping);
-      }
-      return true;
-    }
+				g_log.debug() << "Loading only detector spectra from " << filename << "\n";
+
+				// If optional spectra are provided, if so, m_specList is initialized. spec is used if necessary
+				createSpectraList(*std::min_element(spec.begin(),spec.end()), *std::max_element(spec.begin(),spec.end()));
+
+				if ( !m_specList.empty() ) {
+					int i=0;
+					std::vector<int32_t> spec_temp, udet_temp;
+					for(auto it=spec.begin(); it!=spec.end(); it++)
+					{
+						if ( find(m_specList.begin(),m_specList.end(),*it)!= m_specList.end() ) // spec element *it is not in spec_list
+						{
+							spec_temp.push_back( *it );
+							udet_temp.push_back( udet.at(i) );
+						}
+						i++;
+					}
+					spec=spec_temp;
+					udet=udet_temp;
+				}
+
+				SpectrumDetectorMapping mapping(spec,udet, monitors);
+				WS->resizeTo(mapping.getMapping().size());
+				// Make sure spectrum numbers are correct
+				auto uniqueSpectra = mapping.getSpectrumNumbers();
+				auto itend = uniqueSpectra.end();
+				size_t counter = 0;
+				for(auto it = uniqueSpectra.begin(); it != itend; ++it)
+				{
+					WS->getSpectrum(counter)->setSpectrumNo(*it);
+					++counter;
+				}
+				// Fill detectors based on this mapping
+				WS->updateSpectraUsing(mapping);
+			}
+			return true;
+		}
 
     /**
     * Set the filters on TOF.
@@ -2728,6 +2801,82 @@ namespace Mantid
       return out;
     }
 
+/**
+* Check the validity of the optional spectrum range/list provided and identify if partial data should be loaded.
+*
+* @param min :: The minimum spectrum number read from file
+* @param max :: The maximum spectrum number read from file
+*/
+
+void LoadEventNexus::createSpectraList(int32_t min, int32_t max){
+
+	// check if range [SpectrumMin, SpectrumMax] was supplied
+	if( m_specMin != EMPTY_INT() || m_specMax != EMPTY_INT() )
+	{
+		if ( m_specMax == EMPTY_INT() )
+		{
+			m_specMax = max;
+		}
+		if ( m_specMin == EMPTY_INT() )
+		{
+			m_specMin = min;
+		}
+
+		if ( m_specMax > max )
+		{
+			throw std::invalid_argument("Inconsistent range property: SpectrumMax is larger than maximum spectrum found in file.");
+		}
+
+		// Sanity checks for min/max
+		if ( m_specMin > m_specMax ) 
+		{
+			throw std::invalid_argument("Inconsistent range property: SpectrumMin is larger than SpectrumMax.");
+		}
+
+		// Populate spec_list
+		for (int32_t i=m_specMin; i<=m_specMax; i++)
+			m_specList.push_back(i);
+	}
+	else{
+		// Check if SpectrumList was supplied
+
+		if ( !m_specList.empty() )
+		{
+			// Check no negative/zero numbers have been passed
+			std::vector<int32_t>::iterator itr = std::find_if(m_specList.begin(), m_specList.end(), std::bind2nd(std::less<int32_t>(), 1));
+			if( itr != m_specList.end() )
+			{
+				throw std::invalid_argument("Negative/Zero SpectraList property encountered.");
+			}
+			
+			// Check range and set m_specMax to maximum value in m_specList
+			if ( (m_specMax=*std::max_element(m_specList.begin(),m_specList.end())) > *std::max_element(m_specList.begin(),m_specList.end()) )
+			{
+				throw std::invalid_argument("Inconsistent range property: SpectrumMax is larger than number of spectra.");
+			}
+
+			// Set m_specMin to minimum value in m_specList
+			m_specMin=*std::min_element(m_specList.begin(),m_specList.end());
+		}
+
+	}
+
+	if ( !m_specList.empty() ) {
+
+		 // Check that spectra supplied by user do not correspond to monitors
+		auto nmonitors = WS->getInstrument()->getMonitors().size();
+
+		for( size_t i = 0; i < nmonitors; ++i )
+		{
+			if ( std::find(m_specList.begin(),m_specList.end(),i+1)!= m_specList.end() )
+			{
+				throw std::invalid_argument("Inconsistent range property: some of the selected spectra correspond to monitors.");
+			}
+		}
+
+	}
+
+}
 
   } // namespace DataHandling
 } // namespace Mantid

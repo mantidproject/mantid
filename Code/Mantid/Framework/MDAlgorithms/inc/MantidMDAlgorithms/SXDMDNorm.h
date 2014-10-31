@@ -66,6 +66,8 @@ namespace MDAlgorithms
     double KincidentMin,KincidentMax;
     ///index of h,k,l dimensions in the output workspaces
     size_t hIndex,kIndex,lIndex;
+    /// cached x values along dimensions h,k,l
+    std::vector<double> m_hX, m_kX, m_lX;
   };
 
 
