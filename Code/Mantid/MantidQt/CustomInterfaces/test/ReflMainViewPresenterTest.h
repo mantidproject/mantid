@@ -104,7 +104,21 @@ public:
     FrameworkManager::Instance();
   }
 
-  void testSave()
+  void testSaveNew()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(&mockView);
+
+    presenter.notify(NewTableFlag);
+
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillOnce(Return("TestWorkspace"));
+    presenter.notify(SaveFlag);
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TestWorkspace"));
+    AnalysisDataService::Instance().remove("TestWorkspace");
+  }
+
+  void testSaveExisting()
   {
     MockView mockView;
     ReflMainViewPresenter presenter(&mockView);
@@ -113,7 +127,9 @@ public:
     EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(OpenTableFlag);
 
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(0);
     presenter.notify(SaveFlag);
+
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
 
@@ -126,9 +142,6 @@ public:
     EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(OpenTableFlag);
 
-    //We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
-
     //The user hits "save as" but cancels when choosing a name
     EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillOnce(Return(""));
     presenter.notify(SaveAsFlag);
@@ -137,42 +150,8 @@ public:
     EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillOnce(Return("Workspace"));
     presenter.notify(SaveAsFlag);
 
-    //Check that the workspace was saved
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
 
-    //Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("Workspace");
-  }
-
-  void testSaveProcess()
-  {
-    MockView mockView;
-    ReflMainViewPresenter presenter(&mockView);
-
-    createPrefilledWorkspace("TestWorkspace");
-    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
-    presenter.notify(OpenTableFlag);
-
-    //We should not receive any errors
-    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
-
-    //The user hits "save as" but cancels when choosing a name
-    EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillOnce(Return(""));
-    presenter.notify(SaveAsFlag);
-
-    //The user hits "save as" and and enters "Workspace" for a name
-    EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillOnce(Return("Workspace"));
-    presenter.notify(SaveAsFlag);
-
-    //The user hits "save" and is not asked to enter a workspace name
-    EXPECT_CALL(mockView, askUserString(_,_,_)).Times(0);
-    presenter.notify(SaveFlag);
-
-    //Check that the workspace was saved
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
-
-    //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("Workspace");
   }
