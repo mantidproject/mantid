@@ -778,8 +778,7 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::pbRunEditing()
   {
-    m_uiForm.pbRun->setEnabled(false);
-    m_uiForm.pbRun->setText("Editing...");
+    emit updateRunButton(false, "Editing...", "Run numbers are curently being edited.");
   }
 
   /**
@@ -787,7 +786,7 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::pbRunFinding()
   {
-    m_uiForm.pbRun->setText("Finding files...");
+    emit updateRunButton(false, "Finding files...", "Searchig for data files for the run numbers entered...");
     m_uiForm.ind_runFiles->setEnabled(false);
   }
 
@@ -798,13 +797,13 @@ namespace CustomInterfaces
   {
     if(!m_uiForm.ind_runFiles->isValid())
     {
-      m_uiForm.pbRun->setText("Invalid Run");
+      emit updateRunButton(false, "Invalid Run(s)", "Cannot find data files for some of the run numbers enetered.");
     }
     else
     {
-      m_uiForm.pbRun->setText("Run");
-      m_uiForm.pbRun->setEnabled(true);
+      emit updateRunButton();
     }
+
     m_uiForm.ind_runFiles->setEnabled(true);
   }
 
