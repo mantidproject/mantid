@@ -274,7 +274,21 @@ namespace Mantid
       }
 
       NXEntry mtdEntry = root.openEntry(entryName);
-      NXData wsEntry = mtdEntry.openNXData("workspace"); // TODO. hardcoded group_name is HACK
+      const std::string groupName = "workspace";
+      if (!mtdEntry.containsGroup(groupName))
+      {
+        std::stringstream buffer;
+        buffer << "Group entry " << i - 1 << " is not a workspace 2D. Retry with FastMultiPeriod option set off." << std::endl;
+        throw std::runtime_error(buffer.str());
+      }
+
+      NXData wsEntry = mtdEntry.openNXData(groupName);
+      if (wsEntry.isValid("frac_area"))
+      {
+        std::stringstream buffer;
+        buffer << "Group entry " << i - 1 << " has fractional area present. Try reloading with FastMultiPeriod set off." << std::endl;
+        throw std::runtime_error(buffer.str());
+      }
 
       NXDataSetTyped<double> data = wsEntry.openDoubleData();
       NXDataSetTyped<double> errors = wsEntry.openNXDouble("errors");
