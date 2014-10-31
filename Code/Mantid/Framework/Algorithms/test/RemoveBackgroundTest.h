@@ -1,32 +1,30 @@
-#ifndef BACKGROUDHELPER_TEST_H_
-#define BACKGROUDHELPER_TEST_H_
+#ifndef REMOVE_BACKGROUD_TEST_H_
+#define REMOVE_BACKGROUD_TEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/BackgroundHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-
+#include "MantidAlgorithms/RemoveBackground.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CalculateFlatBackground.h"
 
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 using namespace Mantid;
 
-class BackgroundHelperTest : public CxxTest::TestSuite
+class RemoveBackgroundTest : public CxxTest::TestSuite
 {
 public:
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BackgroundHelperTest *createSuite() { return new BackgroundHelperTest(); }
-  static void destroySuite( BackgroundHelperTest *suite ) { delete suite; }
+  static RemoveBackgroundTest *createSuite() { return new RemoveBackgroundTest(); }
+  static void destroySuite( RemoveBackgroundTest *suite ) { delete suite; }
 
-  BackgroundHelperTest()
+  RemoveBackgroundTest()
   {
 
     DataObjects::Workspace2D_sptr theWS  = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 15000);
 
-    Algorithms::Rebin rebinner;
     std::string wsName = theWS->getName();
     if(wsName.empty())
     {
@@ -37,6 +35,7 @@ public:
 
     API::AnalysisDataService::Instance().addOrReplace(wsName,theWS);
 
+    Algorithms::Rebin rebinner;
     rebinner.initialize();
     rebinner.setPropertyValue("InputWorkspace",theWS->getName());
     rebinner.setPropertyValue("OutputWorkspace","Background");
@@ -78,7 +77,7 @@ public:
 
   }
 
-  ~BackgroundHelperTest()
+  ~RemoveBackgroundTest()
   {
     BgWS.reset();
     SourceWS.reset();

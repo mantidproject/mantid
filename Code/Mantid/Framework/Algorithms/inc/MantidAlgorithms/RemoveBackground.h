@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_REBIN_H_
-#define MANTID_ALGORITHMS_REBIN_H_
+#ifndef MANTID_ALGORITHMS_REMOVEBACKGROUND_H_
+#define MANTID_ALGORITHMS_REMOVEBACKGROUND_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -35,16 +35,18 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
+
     /**Class actually performing background removal from a workspace spectra */
     class DLLExport BackgroundHelper
     {
     public:
       BackgroundHelper();
       ~BackgroundHelper();
+
       void initialize(const API::MatrixWorkspace_const_sptr &bkgWS,const API::MatrixWorkspace_sptr &sourceWS,
-                      int emode,int nTreads=1,bool inPlace=true);
+                      int emode,Kernel::Logger *pLog=NULL,int nTreads=1,bool inPlace=true);
       void removeBackground(int hist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data,
-                            int tread_num=0,Kernel::Logger *pLog=NULL)const;
+                            int tread_num=0)const;
 
     private:
       //vector of pointers to the units conversion class for the working workspace;
@@ -55,6 +57,8 @@ namespace Mantid
       // shared pointer to the workspace where background should be removed
       API::MatrixWorkspace_const_sptr m_wkWS;
 
+      // logger from the hosting algorithm
+      Kernel::Logger *m_pgLog;
       // perform background removal in-place
       bool m_inPlace;
 

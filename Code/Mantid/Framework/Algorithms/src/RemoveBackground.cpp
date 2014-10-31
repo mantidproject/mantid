@@ -95,13 +95,6 @@ namespace Mantid
 
       // Removing background in-place
       bool inPlace = (inputWS == outputWS);
-      //
-      int nThreads = omp_get_max_threads();
-      m_BackgroundHelper.initialize(bkgWksp,inputWS,eMode,nThreads,inPlace);
-
-
-
-
       // workspace independent determination of length
       const int histnumber = static_cast<int>(inputWS->getNumberHistograms());
 
@@ -111,33 +104,30 @@ namespace Mantid
         outputWS = API::WorkspaceFactory::Instance().create(inputWS);
       }
 
-
+      //
+      int nThreads = PARALLEL_NUMBER_OF_THREADS;
+      m_BackgroundHelper.initialize(bkgWksp,inputWS,eMode,&g_log,nThreads,inPlace);
 
       Progress prog(this,0.0,1.0,histnumber);
       PARALLEL_FOR2(inputWS,outputWS)
         for (int hist=0; hist <  histnumber;++hist)
         {
           PARALLEL_START_INTERUPT_REGION
-          // get const references to input Workspace arrays (no copying)
-          const MantidVec& XValues = outputWS->readX(hist);
+            // get const references to input Workspace arrays (no copying)
+            const MantidVec& XValues = outputWS->readX(hist);
           MantidVec& YValues = outputWS->dataY(hist);
           MantidVec& YErrors = outputWS->dataE(hist);
 
           // output data arrays are implicitly filled by function
-          int id = omp_get_thread_num();
-          m_BackgroundHelper.removeBackground(hist,XValues,YValues,YErrors,id,&g_log);
+          int id = PARALLEL_THREAD_NUMBER;
+          m_BackgroundHelper.removeBackground(hist,XValues,YValues,YErrors,id);
 
           prog.report(name());
           PARALLEL_END_INTERUPT_REGION
         }
         PARALLEL_CHECK_INTERUPT_REGION
-
-
-
           // Assign it to the output workspace property
           setProperty("OutputWorkspace",outputWS);
-
-
 
         return;
     }
@@ -148,6 +138,7 @@ namespace Mantid
     BackgroundHelper::BackgroundHelper():
       m_WSUnit(),
       m_bgWs(),m_wkWS(),
+      m_pgLog(NULL),
       m_inPlace(true),
       m_singleValueBackground(false),
       m_NBg(0),m_dtBg(1), //m_ErrSq(0),
@@ -155,7 +146,7 @@ namespace Mantid
       m_L1(0),m_Efix(0),
       m_Sample()
     {};
-    /// Desctructoe
+    /// Destructor
     BackgroundHelper::~BackgroundHelper()
     {
       this->deleteUnitsConverters();
@@ -182,12 +173,12 @@ namespace Mantid
     @param nThreads -- number of threads to be used for background removal
     @param inPlace  -- if the background removal occurs from the existing workspace or target workspace has to be cloned.
     */
-    void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,const API::MatrixWorkspace_sptr &sourceWS,int emode,int nThreads,bool inPlace)
+    void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,const API::MatrixWorkspace_sptr &sourceWS,int emode,Kernel::Logger *pLog,int nThreads,bool inPlace)
     {
       m_bgWs = bkgWS;
       m_wkWS = sourceWS;
       m_Emode = emode;
-
+      m_pgLog = pLog;
 
       std::string bgUnits = bkgWS->getAxis(0)->unit()->unitID();
       if(bgUnits!="TOF")
@@ -235,7 +226,7 @@ namespace Mantid
     * @param e_data  -- the spectra errors
     * @param threadNum -- number of thread doing conversion (by default 0, single thread)
     */
-    void BackgroundHelper::removeBackground(int nHist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data,int threadNum,Kernel::Logger *pLog)const
+    void BackgroundHelper::removeBackground(int nHist,const MantidVec &XValues,MantidVec &y_data,MantidVec &e_data,int threadNum)const
     {
 
       double dtBg,IBg;
@@ -297,8 +288,8 @@ namespace Mantid
       catch(...)
       {
         // no background removal for this spectra as it does not have a detector or other reason
-        if(pLog)
-          pLog->debug()<<" Can not remove background for the spectra with number (id)"<<nHist;
+        if(m_pgLog)
+          m_pgLog->debug()<<" Can not remove background for the spectra with number (id)"<<nHist;
       }
 
     }
