@@ -82,26 +82,15 @@ private:
   ITableWorkspace_sptr createPrefilledWorkspace(const std::string& wsName)
   {
     auto ws = createWorkspace(wsName);
-
     TableRow row = ws->appendRow();
-    row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << 1.0 << 3 << "";
+    row << "13460" << "0.7" << "" << "0.1" << "1.6" << "0.04" << 1.0 << 3 << "";
     row = ws->appendRow();
-    row << "13462" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << 1.0 << 3 << "";
+    row << "13462" << "2.3" << "" << "1.4" << "2.9" << "0.04" << 1.0 << 3 << "";
     row = ws->appendRow();
-    row << "13469" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << 1.0 << 1 << "";
+    row << "13469" << "0.7" << "" << "0.01" << "0.06" << "0.04" << 1.0 << 1 << "";
     row = ws->appendRow();
-    row << "13470" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << 1.0 << 1 << "";
+    row << "13470" << "2.3" << "" << "0.035" << "0.3" << "0.04" << 1.0 << 1 << "";
     return ws;
-  }
-
-  Workspace_sptr loadWorkspace(const std::string& filename, const std::string& wsName)
-  {
-    IAlgorithm_sptr algLoad = AlgorithmManager::Instance().create("Load");
-    algLoad->initialize();
-    algLoad->setProperty("Filename", filename);
-    algLoad->setProperty("OutputWorkspace", wsName);
-    algLoad->execute();
-    return algLoad->getProperty("OutputWorkspace");
   }
 
 public:
@@ -599,6 +588,9 @@ public:
     rowlist.insert(0);
     rowlist.insert(1);
 
+    createTOFWorkspace("TOF_13460", "13460");
+    createTOFWorkspace("TOF_13462", "13462");
+
     //We should not receive any errors
     EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
@@ -617,7 +609,6 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_13462"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460_13462"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463_13464"));
 
     //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -628,7 +619,6 @@ public:
     AnalysisDataService::Instance().remove("IvsLam_13462");
     AnalysisDataService::Instance().remove("TOF_13462");
     AnalysisDataService::Instance().remove("IvsQ_13460_13462");
-    AnalysisDataService::Instance().remove("TRANS_13463_13464");
   }
 
   /*
@@ -639,19 +629,12 @@ public:
   {
     auto ws = createWorkspace("TestWorkspace");
     TableRow row = ws->appendRow();
-    row << "dataA" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << 1.0 << 1;
+    row << "dataA" << "0.7" << "" << "0.1" << "1.6" << "0.04" << 1.0 << 1;
     row = ws->appendRow();
-    row << "dataB" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << 1.0 << 1;
+    row << "dataB" << "2.3" << "" << "1.4" << "2.9" << "0.04" << 1.0 << 1;
 
-    loadWorkspace("INTER13460", "dataA");
-    loadWorkspace("INTER13462", "dataB");
-
-    //Remove the `run_number` entry from dataA's log so its run number cannot be determined that way
-    IAlgorithm_sptr algDelLog = AlgorithmManager::Instance().create("DeleteLog");
-    algDelLog->initialize();
-    algDelLog->setProperty("Workspace", "dataA");
-    algDelLog->setProperty("Name", "run_number");
-    algDelLog->execute();
+    createTOFWorkspace("dataA");
+    createTOFWorkspace("dataB", "13462");
 
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
@@ -690,7 +673,6 @@ public:
     AnalysisDataService::Instance().remove("IvsQ_13462");
     AnalysisDataService::Instance().remove("IvsLam_13462");
     AnalysisDataService::Instance().remove("IvsQ_dataA_13462");
-    AnalysisDataService::Instance().remove("TRANS_13463_13464");
   }
 
   void testBadWorkspaceType()
