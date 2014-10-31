@@ -259,10 +259,10 @@ namespace Mantid
      * @param entryName : Entry name to load.
      * @param tempMatrixWorkspace : Template workspace to base the next multiperiod entry off.
      * @param nWorkspaceEntries : N entries in the file
-     * @param i : index + 1 being processed.
+     * @param p : index + 1 being processed.
      * @return Next multiperiod group workspace
      */
-    Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(NXRoot & root, const std::string & entryName, MatrixWorkspace_sptr& tempMatrixWorkspace, const int64_t nWorkspaceEntries, const int64_t i)
+    Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(NXRoot & root, const std::string & entryName, MatrixWorkspace_sptr& tempMatrixWorkspace, const int64_t nWorkspaceEntries, const int64_t p)
     {
 
       MatrixWorkspace_sptr periodWorkspace = WorkspaceFactory::Instance().create(tempMatrixWorkspace);
@@ -278,7 +278,7 @@ namespace Mantid
       if (!mtdEntry.containsGroup(groupName))
       {
         std::stringstream buffer;
-        buffer << "Group entry " << i - 1 << " is not a workspace 2D. Retry with FastMultiPeriod option set off." << std::endl;
+        buffer << "Group entry " << p - 1 << " is not a workspace 2D. Retry with FastMultiPeriod option set off." << std::endl;
         throw std::runtime_error(buffer.str());
       }
 
@@ -286,21 +286,19 @@ namespace Mantid
       if (wsEntry.isValid("frac_area"))
       {
         std::stringstream buffer;
-        buffer << "Group entry " << i - 1 << " has fractional area present. Try reloading with FastMultiPeriod set off." << std::endl;
+        buffer << "Group entry " << p - 1 << " has fractional area present. Try reloading with FastMultiPeriod set off." << std::endl;
         throw std::runtime_error(buffer.str());
       }
 
       NXDataSetTyped<double> data = wsEntry.openDoubleData();
       NXDataSetTyped<double> errors = wsEntry.openNXDouble("errors");
 
-      const int nSpectra = data.dim0();
       const int nChannels = data.dim1();
 
       int64_t blockSize = 8; // Read block size. Set to 8 for efficiency. i.e. read 8 histograms at a time.
       const int64_t nFullBlocks = nHistograms / blockSize; // Truncated number of full blocks to read. Remainder removed
-      const int64_t nRemainder = nHistograms % blockSize; // Remainder
       const int64_t readOptimumStop = (nFullBlocks * blockSize);
-      const int64_t readStop = m_spec_max - 1; // HACK
+      const int64_t readStop = m_spec_max - 1;
       const int64_t finalBlockSize = readStop - readOptimumStop;
 
       int64_t wsIndex = 0;
@@ -352,7 +350,7 @@ namespace Mantid
         g_log.information(e.what());
       }
 
-      const double fractionComplete = double(i-1)/double(nWorkspaceEntries);
+      const double fractionComplete = double(p-1)/double(nWorkspaceEntries);
       progress(fractionComplete, "Loading multiperiod entry");
       return periodWorkspace;
 
@@ -412,8 +410,7 @@ namespace Mantid
       {
         // We already know that this is a group workspace. Is it a true multiperiod workspace.
         const bool bFastMultiPeriod = this->getProperty("FastMultiPeriod");
-        const bool bIsMultiPeriod = isMultiPeriodFile(nWorkspaceEntries, tempWS, g_log);
-        const bool ignoreSpecInfo = !bIsMultiPeriod; // Multiperiod groups can reuse it.
+        const bool bIsMultiPeriod = isMultiPeriodFile(static_cast<int>(nWorkspaceEntries), tempWS, g_log);
         Property * specListProp = this->getProperty("SpectrumList");
         m_list = !specListProp->isDefault();
 
