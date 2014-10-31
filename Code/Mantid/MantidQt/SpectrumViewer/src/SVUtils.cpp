@@ -10,23 +10,6 @@ namespace SpectrumView
 {
 
 /**
- * Extract a double from the specified string, if possible.
- *
- * @param text   The string containing a double value
- * @param value  Set to the value from the string if the conversion
- *               worked.
- * @return true if the string could be successfully converted to a double,
- *         and return false otherwise.
- */
-bool SVUtils::StringToDouble( std::string  text,
-                              double      &value )
-{
-  std::istringstream strs(text);
-  return ( strs >> value );
-}
-
-
-/**
  *  Get a formatted string form of the specified double precision value.
  *
  *  @param width     The total number of characters to be used in the

@@ -91,23 +91,24 @@ void RefRangeHandler::getRange( double &min, double &max, double &step )
 
   QLineEdit* min_control  = m_ivUI->x_min_input;
   QLineEdit* max_control  = m_ivUI->x_max_input;
-//  QLineEdit* step_control = m_ivUI->step_input;
 
-  if ( !SVUtils::StringToDouble(  min_control->text().toStdString(), min ) )
+  bool minIsNumber = false;
+  bool maxIsNumber = false;
+
+  min = min_control->text().toDouble(&minIsNumber);
+  max = max_control->text().toDouble(&maxIsNumber);
+
+  if(!minIsNumber)
   {
     g_log.information("X Min is not a NUMBER! Value reset.");
     min = originalMin;
   }
-  if ( !SVUtils::StringToDouble(  max_control->text().toStdString(), max ) )
+
+  if(!maxIsNumber)
   {
     g_log.information("X Max is not a NUMBER! Value reset.");
     max = originalMax;
   }
-//  if ( !SVUtils::StringToDouble(  step_control->text().toStdString(), step ) )
-//  {
-//    g_log.information("Step is not a NUMBER! Value reset.");
-//    step = originalStep;
-//  }
 
   // Just require step to be non-zero, no other bounds. If zero, take a default step size
   if ( step == 0 )

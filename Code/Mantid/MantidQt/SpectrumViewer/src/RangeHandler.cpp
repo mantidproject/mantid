@@ -80,17 +80,27 @@ void RangeHandler::getRange( double &min, double &max, double &step )
   QLineEdit* maxControl  = m_svUI->x_max_input;
   QLineEdit* stepControl = m_svUI->step_input;
 
-  if ( !SVUtils::StringToDouble(  minControl->text().toStdString(), min ) )
+  bool minIsNumber = false;
+  bool maxIsNumber = false;
+  bool stepIsNumber = false;
+
+  min = minControl->text().toDouble(&minIsNumber);
+  max = maxControl->text().toDouble(&maxIsNumber);
+  step = stepControl->text().toDouble(&stepIsNumber);
+
+  if(!minIsNumber)
   {
     g_log.information("X Min is not a NUMBER! Value reset.");
     min = originalMin;
   }
-  if ( !SVUtils::StringToDouble(  maxControl->text().toStdString(), max ) )
+
+  if(!maxIsNumber)
   {
     g_log.information("X Max is not a NUMBER! Value reset.");
     max = originalMax;
   }
-  if ( !SVUtils::StringToDouble(  stepControl->text().toStdString(), step ) )
+
+  if(!stepIsNumber)
   {
     g_log.information("Step is not a NUMBER! Value reset.");
     step = originalStep;

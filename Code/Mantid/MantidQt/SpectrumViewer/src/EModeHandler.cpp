@@ -3,7 +3,6 @@
 
 #include "MantidQtSpectrumViewer/EModeHandler.h"
 #include "MantidQtSpectrumViewer/QtUtils.h"
-#include "MantidQtSpectrumViewer/SVUtils.h"
 #include "MantidKernel/Logger.h"
 
 
@@ -66,9 +65,10 @@ void EModeHandler::setEMode( const int mode )
  */
 double EModeHandler::getEFixed()
 {
-  double eFixed;
-  std::string text = m_svUI->efixed_control->text().toStdString();
-  if ( !SVUtils::StringToDouble( text, eFixed ) )
+  QString text = m_svUI->efixed_control->text();
+  bool isNumber = false;
+  double eFixed = text.toDouble(&isNumber);
+  if(!isNumber)
   {
     g_log.information("E Fixed is not a NUMBER! Value reset to default.");
     eFixed = 0;

@@ -43,11 +43,6 @@ namespace SpectrumView
 class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SVUtils
 {
   public:
-    /// Get the double value stored in a string, if possible
-    static bool StringToDouble( std::string  text,
-                                double      &value );
-
-
     /// Get a formatted string representation of a double
     static void Format( int            width,
                         int            precision,
