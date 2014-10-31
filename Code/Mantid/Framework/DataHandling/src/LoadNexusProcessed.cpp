@@ -290,7 +290,7 @@ namespace Mantid
       const int64_t finalBlockSize = readStop - readOptimumStop;
 
       int64_t wsIndex = 0;
-      int64_t histIndex = 0; // HACK. This needs to be calculated.
+      int64_t histIndex = m_spec_min - 1;
 
       for (; histIndex < readStop;)
       {
@@ -432,7 +432,7 @@ namespace Mantid
         const std::string prop_name = "OutputWorkspace_";
         double nWorkspaceEntries_d = static_cast<double>(nWorkspaceEntries);
 
-        MatrixWorkspace_sptr tempMatrixWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(tempWS);
+        MatrixWorkspace_sptr tempMatrixWorkspace = boost::dynamic_pointer_cast<Workspace2D>(tempWS);
         bool bAccelleratedMultiPeriodLoading = false;
         if (tempMatrixWorkspace)
         {
@@ -1160,7 +1160,6 @@ int64_t          index_start = indices[wi];
       // Axis information
       // "X" axis
 
-      // ---- START NOT REQUIRED PER PERIOD ---
       NXDouble xbins = wksp_cls.openNXDouble("axis1");
       xbins.load();
       std::string unit1 = xbins.attributes("units");
@@ -1174,7 +1173,7 @@ int64_t          index_start = indices[wi];
       else if (xbins.rank() == 1)
       {
         xlength = xbins.dim0();
-        m_shared_bins = true; //SHOULD BE THE CASE FOR MULTIPERIOD DATA!!!!!
+        m_shared_bins = true;
         xbins.load();
         m_xbins.access().assign(xbins(), xbins() + xlength);
       }
@@ -1182,13 +1181,11 @@ int64_t          index_start = indices[wi];
       {
         throw std::runtime_error("Unknown axis1 dimension encountered.");
       }
-      // ---- END NOT REQUIRED PER PERIOD ---
 
-      // ---- START NOT REQUIRED PER PERIOD ---
       // MatrixWorkspace axis 1
       NXDouble axis2 = wksp_cls.openNXDouble("axis2");
       std::string unit2 = axis2.attributes("units");
-      // ---- END NOT REQUIRED PER PERIOD ---
+
 
       // The workspace being worked on
       API::MatrixWorkspace_sptr local_workspace;
@@ -1241,7 +1238,7 @@ int64_t          index_start = indices[wi];
 
         readBinMasking(wksp_cls, local_workspace);
         NXDataSetTyped<double> errors = wksp_cls.openNXDouble("errors");
-        NXDataSetTyped<double> fracarea = wksp_cls.openNXDouble("errors");
+        NXDataSetTyped<double> fracarea = errors;
         if (hasFracArea)
         {
           fracarea = wksp_cls.openNXDouble("frac_area");
