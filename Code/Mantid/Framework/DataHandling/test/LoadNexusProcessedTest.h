@@ -48,6 +48,15 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void testFastMultiPeriodDefault()
+  {
+    LoadNexusProcessed alg;
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized());
+    const bool bFastMultiPeriod = alg.getProperty("FastMultiPeriod");
+    TSM_ASSERT("Should defalt to offering fast multiperiod loading", bFastMultiPeriod);
+  }
+
   void testProcessedFile()
   {
 

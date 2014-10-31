@@ -191,6 +191,7 @@ namespace Mantid
       declareProperty("EntryNumber", (int64_t) 0, mustBePositive,
           "The particular entry number to read. Default load all workspaces and creates a workspacegroup (default: read all entries).");
       declareProperty("LoadHistory", true, "If true, the workspace history will be loaded");
+      declareProperty(new PropertyWithValue<bool>("FastMultiPeriod", true, Direction::Input), "For multiperiod workspaces. Copy instrument, parameter and x-data rather than loading it directly for each workspace. Y, E and log information is always loaded." );
     }
 
 //-------------------------------------------------------------------------------------------------
@@ -250,6 +251,7 @@ namespace Mantid
       else
       {
         // We already know that this is a group workspace. Is it a true multiperiod workspace.
+        const bool bFastMultiPeriod = this->getProperty("FastMultiPeriod");
         const bool bIsMultiPeriod = isMultiPeriodFile(nWorkspaceEntries, tempWS, g_log);
         const bool ignoreSpecInfo = !bIsMultiPeriod; // Multiperiod groups can reuse it.
 
@@ -281,10 +283,23 @@ namespace Mantid
         double nWorkspaceEntries_d = static_cast<double>(nWorkspaceEntries);
 
         MatrixWorkspace_sptr tempWS2D = boost::dynamic_pointer_cast<MatrixWorkspace>(tempWS);
-        tempWS2D->mutableRun().clearLogs(); // Strip out any loaded logs.
+        bool bAccelleratedMultiPeriodLoading = false;
+        if (tempWS2D)
+        {
+          bAccelleratedMultiPeriodLoading = bIsMultiPeriod && bFastMultiPeriod;
+          tempWS2D->mutableRun().clearLogs(); // Strip out any loaded logs. That way we don't pay for copying that information around.
+        }
 
-        //PARALLEL_FOR_NO_WSP_CHECK()
-        for (int p = 1; p <= nWorkspaceEntries; ++p)
+        if(bAccelleratedMultiPeriodLoading)
+        {
+          g_log.information("Accelerated multiperiod loading");
+        }
+        else
+        {
+          g_log.information("Individual group loading");
+        }
+
+        for (int64_t p = 1; p <= nWorkspaceEntries; ++p)
         {
           std::ostringstream os;
           os << p;
@@ -293,13 +308,12 @@ namespace Mantid
           std::string wsName = buildWorkspaceName(names[p], base_name, p, commonStem);
 
           Workspace_sptr local_workspace;
-          if (!bIsMultiPeriod)
-          {
-            local_workspace = loadEntry(root, basename + os.str(),
-                static_cast<double>(p - 1) / nWorkspaceEntries_d, 1. / nWorkspaceEntries_d, spectraInfo,
-                ignoreSpecInfo);
-          }
-          else
+
+          /*
+           For multiperiod workspaces we can accelerate the loading by making resonable assumptions about the differences between the workspaces
+           Only Y, E and log data entries should vary. Therefore we can clone our temp workspace, and overwrite those things we are interested in.
+           */
+          if (bAccelleratedMultiPeriodLoading)
           {
             MatrixWorkspace_sptr local_workspace_2d = WorkspaceFactory::Instance().create(tempWS2D);
 
@@ -307,7 +321,6 @@ namespace Mantid
             {
               local_workspace_2d->setX(i, tempWS2D->refX(i));
             }
-
 
             local_workspace = local_workspace_2d;
 
@@ -380,30 +393,31 @@ namespace Mantid
               g_log.information(e.what());
             }
 
-            // TODO deal with this not being a workspace2D
-
             // TODO deal with fractional area.
-
-            // TODO need to do the same as above, but to handle the remainder, so do same as above, but with blockSize = finalBlocSize;
-
-            // TODO need to copy log values
-
-            // TODO need to guarantee m_shared_bins, or do we just assume this?
 
             // TODO need to handle spectrum intervals correctly.
 
-            // TODO reporting
+            // TODO remove spectraInfo.
+
+            // TODO LoadNexus needs to forward "FastMultiPeriod".
+
+            const double fractionComplete = double(p-1)/double(nWorkspaceEntries);
+            progress(fractionComplete, "Loading multiperiod entry");
 
           }
+          else // Fall-back for generic loading
+          {
+            local_workspace = loadEntry(root, basename + os.str(),
+                static_cast<double>(p - 1) / nWorkspaceEntries_d, 1. / nWorkspaceEntries_d, spectraInfo,
+                ignoreSpecInfo);
+          }
 
-          //(LoadNexusProcessed_multiperiodadd)
-          //{
           declareProperty(
               new WorkspaceProperty<API::Workspace>(prop_name + os.str(), wsName, Direction::Output));
-          //wksp_group->add(base_name + os.str());
+
           wksp_group->addWorkspace(local_workspace);
           setProperty(prop_name + os.str(), local_workspace);
-          //}
+
         }
 
         // The group is the root property value
