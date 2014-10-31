@@ -352,12 +352,6 @@ namespace Mantid
         g_log.information(e.what());
       }
 
-      // TODO deal with fractional area.
-
-      // TODO need to handle spectrum intervals correctly.
-
-      // TODO remove spectraInfo.
-
       const double fractionComplete = double(i-1)/double(nWorkspaceEntries);
       progress(fractionComplete, "Loading multiperiod entry");
       return periodWorkspace;
@@ -420,6 +414,8 @@ namespace Mantid
         const bool bFastMultiPeriod = this->getProperty("FastMultiPeriod");
         const bool bIsMultiPeriod = isMultiPeriodFile(nWorkspaceEntries, tempWS, g_log);
         const bool ignoreSpecInfo = !bIsMultiPeriod; // Multiperiod groups can reuse it.
+        Property * specListProp = this->getProperty("SpectrumList");
+        m_list = !specListProp->isDefault();
 
         // Load all first level entries
         WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
@@ -450,7 +446,8 @@ namespace Mantid
         bool bAccelleratedMultiPeriodLoading = false;
         if (tempMatrixWorkspace)
         {
-          bAccelleratedMultiPeriodLoading = bIsMultiPeriod && bFastMultiPeriod;
+          // We only accelerate for simple scenarios for now. Spectrum lists are too complicated to bother with.
+          bAccelleratedMultiPeriodLoading = bIsMultiPeriod && bFastMultiPeriod && !m_list;
           tempMatrixWorkspace->mutableRun().clearLogs(); // Strip out any loaded logs. That way we don't pay for copying that information around.
         }
 
