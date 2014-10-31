@@ -23,6 +23,7 @@ namespace CustomInterfaces
       m_properties(),
       m_dblManager(new QtDoublePropertyManager()), m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()),
+      m_batchAlgoRunner(NULL),
       m_uiForm(uiForm)
   {
     m_parentWidget = dynamic_cast<QWidget *>(parent);
@@ -323,9 +324,12 @@ namespace CustomInterfaces
     if(cID == "")
       cID = plotID;
 
-    //check if we can plot
+    // Check if we can plot
     if( wsIndex >= workspace->getNumberHistograms() || workspace->readX(0).size() < 2 )
+    {
+      g_log.error("Spectrum index out of range for this workspace");
       return;
+    }
 
     QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), false);
 
