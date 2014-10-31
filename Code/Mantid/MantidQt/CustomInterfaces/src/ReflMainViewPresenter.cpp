@@ -288,7 +288,7 @@ namespace MantidQt
         const int& groupId = gIt->first;
         const std::set<int>& groupRows = gIt->second;
         //Are we only partially processing a group?
-        if(groupRows.size() < numRowsInGroup(gIt->first))
+        if(groupRows.size() < numRowsInGroup(gIt->first) && m_options["WarnProcessPartialGroup"].toBool())
         {
           std::stringstream err;
           err << "You have only selected " << groupRows.size() << " of the ";
@@ -1096,6 +1096,7 @@ namespace MantidQt
       //Set defaults
       m_options["WarnProcessAll"] = true;
       m_options["WarnDiscardChanges"] = true;
+      m_options["WarnProcessPartialGroup"] = true;
       m_options["RoundAngle"] = false;
       m_options["RoundQMin"] = false;
       m_options["RoundQMax"] = false;
