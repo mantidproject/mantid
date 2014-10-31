@@ -53,7 +53,7 @@ void MantidSampleMaterialDialog::updateMaterial()
   QTreeWidgetItem *subSubItem;
 
   item = new QTreeWidgetItem();
-  item->setText(0, "Name");
+  item->setText(0, "Formula");
   item->setText(1, QString::fromStdString(material.name()));
   m_uiForm.treeMaterialProperties->addTopLevelItem(item);
 
