@@ -810,16 +810,18 @@ namespace Mantid
       {
         (*vc)->acceptVisitor(LI);
       }
-      const std::vector<Kernel::V3D>& IPts(LI.getPoints());
-      const std::vector<double>& dPts(LI.getDistance());
+      const auto& IPts(LI.getPoints());
+      const auto& dPts(LI.getDistance());
 
-      for (unsigned int i = 0; i < IPts.size(); i++)
+      auto ditr = dPts.begin();
+      auto itrEnd = IPts.end();
+      for (auto iitr = IPts.begin(); iitr != itrEnd; ++iitr, ++ditr)
       {
-        if (dPts[i] > 0.0) // only interested in forward going points
+        if (*ditr > 0.0) // only interested in forward going points
         {
           // Is the point and enterance/exit Point
-          const int flag = calcValidType(IPts[i], UT.direction());
-          UT.addPoint(flag, IPts[i], *this);
+          const int flag = calcValidType(*iitr, UT.direction());
+          UT.addPoint(flag, *iitr, *this);
         }
       }
       UT.buildLink();
