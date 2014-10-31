@@ -180,6 +180,7 @@ namespace Mantid
       m_wkWS = sourceWS;
       m_Emode = emode;
       m_pgLog = pLog;
+      m_inPlace = inPlace;
 
       std::string bgUnits = bkgWS->getAxis(0)->unit()->unitID();
       if(bgUnits!="TOF")

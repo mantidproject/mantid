@@ -10,15 +10,14 @@ Description
 -----------
 Algorithm removes flat background, defined by the a single bin 
 histogram workspace with X-axis in the units of TOF from a histogram workspace in any 
-units with known conversion into TOF.
+units with known conversion to TOF.
 
 These options are especially useful during reduction 
 of event workspaces in multirep mode, where different event regions are associated with 
 different incident energies and rebinned into appropriate energy range.
 
 The algorithm used during background removal is equivalent to the proof-of concept one, 
-presented below, except intermediate workspaces are not created and the background removal calculations
-performed during rebinning.
+presented below, except intermediate workspaces are not created.
 
 Errors of the background workspace are currently ignored and their value 
 is calculated as the square root of correspondent background signal.
@@ -92,7 +91,7 @@ Proof of concept background removal algorithm::
     if bg[0]>0:
        bgT           = Bg.dataX(nspec)  
        TimeScale     = Tgrid.dataX(nspec);
-       # jacobian for the unit conversion
+       # Jacobian for the unit conversion
        Jac           = (TimeScale[1:nBins]-TimeScale[0:nBins-1])*(bg[0]/(bgT[1]-bgT[0]));  
        error         = np.sqrt(Jac);
        eGrid.setY(nspec, Jac)
@@ -116,7 +115,7 @@ presented on the following picture:
 
 .. image:: /images/BgRemoval.png
 
-Blue line on this image represents the results, obtained using Rebin with background removal. The results produced using 
+Blue line on this image represents the results, obtained using Rebin and Background removal after that. The results produced using 
 the script below and shifted by one to show that there is another result plotted on the image, as both results 
 are identical::
 
@@ -159,11 +158,11 @@ are identical::
   else:
     resultEtransf   = ConvertUnits(groupedFilename,'DeltaE',Emode='Direct',EFixed=Ei)
   
-  noBgWorkspace= Rebin(InputWorkspace=resultEtransf, Params=[e_min,dE,e_max],PreserveEvents=False,FlatBkgWorkspace='Bg',EMode='Direct')
+  noBgWorkspace = Rebin(InputWorkspace=resultEtransf, Params=[e_min,dE,e_max],PreserveEvents=False)
+  noBgWorkspace= Rebin(InputWorkspace=noBgWorkspace,FlatBkgWorkspace='Bg',EMode='Direct')
   nHist = Bg.getNumberHistograms()
   removedBkgSum = SumSpectra(noBgWorkspace ,0,nHist-1);    
 
-.. _rebin-usage:
 
 Usage
 -----
@@ -171,7 +170,7 @@ Usage
 
 **Example - Background removal from a workspace in energy transfer units**
 
-.. testcode:: ExRebinWithBkgRemoval
+.. testcode:: ExFlatBkgRemoval
 
    # Create sample workspace with events
    Test=CreateSampleWorkspace(WorkspaceType='Event', Function='Flat background')
@@ -207,7 +206,7 @@ Usage
    for i in xrange(0,20):
       print "|{0:10}|{1:10}|{2:10.4f}|{3:10.3f}|{4:10.3f}|{5:10.3f}|".format(XS[i],XR[i],YS[i],YR[i],ES[i],ER[i]);
    
-.. testoutput:: ExRebinWithBkgRemoval
+.. testoutput:: ExFlatBkgRemoval
 
    | x sampl  | x result | S sample | S no bg  | Err samp | Err no_bg|
    |     -20.0|     -20.0|    1.0000|    -0.959|     1.000|     1.216|
