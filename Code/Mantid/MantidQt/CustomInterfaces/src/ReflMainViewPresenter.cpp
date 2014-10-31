@@ -7,17 +7,24 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Utils.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtCustomInterfaces/QReflTableModel.h"
+#include "MantidQtCustomInterfaces/QtReflOptionsDialog.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 
+#include <QSettings>
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using namespace MantidQt::MantidWidgets;
 
 namespace
 {
+  const QString ReflSettingsGroup = "Mantid/CustomInterfaces/ISISReflectometry";
+
   void validateModel(ITableWorkspace_sptr model)
   {
     if(!model)
@@ -82,6 +89,15 @@ namespace
 
     return ws;
   }
+
+  ITableWorkspace_sptr createDefaultWorkspace()
+  {
+    //Create a blank workspace with one line and set the scale column to 1
+    auto ws = createWorkspace();
+    ws->appendRow();
+    ws->Double(0, MantidQt::CustomInterfaces::ReflMainViewPresenter::COL_SCALE) = 1.0;
+    return ws;
+  }
 }
 
 namespace MantidQt
@@ -97,6 +113,9 @@ namespace MantidQt
       m_renameObserver(*this, &ReflMainViewPresenter::handleRenameEvent),
       m_replaceObserver(*this, &ReflMainViewPresenter::handleReplaceEvent)
     {
+      //Initialise options
+      initOptions();
+
       //Set up the instrument selectors
       std::vector<std::string> instruments;
       instruments.push_back("INTER");
@@ -165,18 +184,18 @@ namespace MantidQt
     /**
      * Finds the first unused group id
      */
-    int ReflMainViewPresenter::getUnusedGroup(std::set<size_t> ignoredRows) const
+    int ReflMainViewPresenter::getUnusedGroup(std::set<int> ignoredRows) const
     {
       std::set<int> usedGroups;
 
       //Scan through all the rows, working out which group ids are used
-      for(size_t idx = 0; idx < m_model->rowCount(); ++idx)
+      for(int idx = 0; idx < m_model->rowCount(); ++idx)
       {
         if(ignoredRows.find(idx) != ignoredRows.end())
           continue;
 
         //This is an unselected row. Add it to the list of used group ids
-        usedGroups.insert(m_model->Int(idx, COL_GROUP));
+        usedGroups.insert(m_model->data(m_model->index(idx, COL_GROUP)).toInt());
       }
 
       int groupId = 0;
@@ -243,30 +262,33 @@ namespace MantidQt
         return;
       }
 
-      std::set<size_t> rows = m_view->getSelectedRows();
+      std::set<int> rows = m_view->getSelectedRows();
       if(rows.empty())
       {
-        //Does the user want to abort?
-        if(!m_view->askUserYesNo("This will process all rows in the table. Continue?","Process all rows?"))
-          return;
+        if(m_options["WarnProcessAll"].toBool())
+        {
+          //Does the user want to abort?
+          if(!m_view->askUserYesNo("This will process all rows in the table. Continue?","Process all rows?"))
+            return;
+        }
 
         //They want to process all rows, so populate rows with every index in the model
-        for(size_t idx = 0; idx < m_model->rowCount(); ++idx)
+        for(int idx = 0; idx < m_model->rowCount(); ++idx)
           rows.insert(idx);
       }
 
       //Map group numbers to the set of rows in that group we want to process
-      std::map<int,std::set<size_t> > groups;
+      std::map<int,std::set<int> > groups;
       for(auto it = rows.begin(); it != rows.end(); ++it)
-        groups[m_model->Int(*it, COL_GROUP)].insert(*it);
+        groups[m_model->data(m_model->index(*it, COL_GROUP)).toInt()].insert(*it);
 
       //Check each group and warn if we're only partially processing it
       for(auto gIt = groups.begin(); gIt != groups.end(); ++gIt)
       {
         const int& groupId = gIt->first;
-        const std::set<size_t>& groupRows = gIt->second;
+        const std::set<int>& groupRows = gIt->second;
         //Are we only partially processing a group?
-        if(groupRows.size() < numRowsInGroup(gIt->first))
+        if(groupRows.size() < numRowsInGroup(gIt->first) && m_options["WarnProcessPartialGroup"].toBool())
         {
           std::stringstream err;
           err << "You have only selected " << groupRows.size() << " of the ";
@@ -287,7 +309,7 @@ namespace MantidQt
         }
         catch(std::exception& ex)
         {
-          const std::string rowNo = Mantid::Kernel::Strings::toString<size_t>(*it + 1);
+          const std::string rowNo = Mantid::Kernel::Strings::toString<int>(*it + 1);
           m_view->giveUserCritical("Error found in row " + rowNo + ":\n" + ex.what(), "Error");
           return;
         }
@@ -301,7 +323,7 @@ namespace MantidQt
 
       for(auto gIt = groups.begin(); gIt != groups.end(); ++gIt)
       {
-        const std::set<size_t> groupRows = gIt->second;
+        const std::set<int> groupRows = gIt->second;
 
         //Reduce each row
         for(auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt)
@@ -313,7 +335,7 @@ namespace MantidQt
           }
           catch(std::exception& ex)
           {
-            const std::string rowNo = Mantid::Kernel::Strings::toString<size_t>(*rIt + 1);
+            const std::string rowNo = Mantid::Kernel::Strings::toString<int>(*rIt + 1);
             const std::string message = "Error encountered while processing row " + rowNo + ":\n";
             m_view->giveUserCritical(message + ex.what(), "Error");
             m_view->setProgress(0);
@@ -344,12 +366,12 @@ namespace MantidQt
     @param rowNo : The row in the model to validate
     @throws std::invalid_argument if the row fails validation
     */
-    void ReflMainViewPresenter::validateRow(size_t rowNo) const
+    void ReflMainViewPresenter::validateRow(int rowNo) const
     {
       if(rowNo >= m_model->rowCount())
         throw std::invalid_argument("Invalid row");
 
-      if(m_model->String(rowNo, COL_RUNS).empty())
+      if(m_model->data(m_model->index(rowNo, COL_RUNS)).toString().isEmpty())
         throw std::invalid_argument("Run column may not be empty.");
     }
 
@@ -358,16 +380,16 @@ namespace MantidQt
     @param rowNo : The row in the model to autofill
     @throws std::runtime_error if the row could not be auto-filled
     */
-    void ReflMainViewPresenter::autofillRow(size_t rowNo)
+    void ReflMainViewPresenter::autofillRow(int rowNo)
     {
       if(rowNo >= m_model->rowCount())
         throw std::runtime_error("Invalid row");
 
-      const std::string runStr = m_model->String(rowNo, COL_RUNS);
+      const std::string runStr = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
       MatrixWorkspace_sptr run = boost::dynamic_pointer_cast<MatrixWorkspace>(loadRun(runStr, m_view->getProcessInstrument()));
 
       //Fetch two theta from the log if needed
-      if(m_model->String(rowNo, COL_ANGLE).empty())
+      if(m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().isEmpty())
       {
         Property* logData = NULL;
 
@@ -393,26 +415,30 @@ namespace MantidQt
           throw std::runtime_error("Value for two theta could not be found in log.");
 
         //Update the model
-        m_model->String(rowNo, COL_ANGLE) = Strings::toString<double>(Utils::roundToDP(thetaVal, 3));
+        if(m_options["RoundAngle"].toBool())
+          thetaVal = Utils::roundToDP(thetaVal, m_options["RoundAnglePrecision"].toInt());
+
+        m_model->setData(m_model->index(rowNo, COL_ANGLE), thetaVal);
         m_tableDirty = true;
       }
 
       //If we need to calculate the resolution, do.
-      if(m_model->String(rowNo, COL_DQQ).empty())
+      if(m_model->data(m_model->index(rowNo, COL_DQQ)).toString().isEmpty())
       {
         IAlgorithm_sptr calcResAlg = AlgorithmManager::Instance().create("CalculateResolution");
         calcResAlg->setProperty("Workspace", run);
-        calcResAlg->setProperty("TwoTheta", m_model->String(rowNo, COL_ANGLE));
+        calcResAlg->setProperty("TwoTheta", m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().toStdString());
         calcResAlg->execute();
 
         //Update the model
         double dqqVal = calcResAlg->getProperty("Resolution");
-        m_model->String(rowNo, COL_DQQ) = Strings::toString<double>(dqqVal);
+
+        if(m_options["RoundDQQ"].toBool())
+          dqqVal = Utils::roundToDP(dqqVal, m_options["RoundDQQPrecision"].toInt());
+
+        m_model->setData(m_model->index(rowNo, COL_DQQ), dqqVal);
         m_tableDirty = true;
       }
-
-      //Make sure the view updates
-      m_view->showTable(m_model);
     }
 
     /**
@@ -511,18 +537,18 @@ namespace MantidQt
     @param rowNo : The row in the model to reduce
     @throws std::runtime_error if reduction fails
     */
-    void ReflMainViewPresenter::reduceRow(size_t rowNo)
+    void ReflMainViewPresenter::reduceRow(int rowNo)
     {
-      const std::string         run = m_model->String(rowNo, COL_RUNS);
-      const std::string    transStr = m_model->String(rowNo, COL_TRANSMISSION);
-      const std::string     options = m_model->String(rowNo, COL_OPTIONS);
+      const std::string      run = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
+      const std::string transStr = m_model->data(m_model->index(rowNo, COL_TRANSMISSION)).toString().toStdString();
+      const std::string  options = m_model->data(m_model->index(rowNo, COL_OPTIONS)).toString().toStdString();
 
       double theta = 0;
 
-      const bool thetaGiven = !m_model->String(rowNo, COL_ANGLE).empty();
+      const bool thetaGiven = !m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().isEmpty();
 
       if(thetaGiven)
-        Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_ANGLE), theta);
+        theta = m_model->data(m_model->index(rowNo, COL_ANGLE)).toDouble();
 
       Workspace_sptr runWS = loadRun(run, m_view->getProcessInstrument());
       const std::string runNo = getRunNumber(runWS);
@@ -559,7 +585,7 @@ namespace MantidQt
       if(!algReflOne->isExecuted())
         throw std::runtime_error("Failed to run ReflectometryReductionOneAuto.");
 
-      const double scale = m_model->Double(rowNo, COL_SCALE);
+      const double scale = m_model->data(m_model->index(rowNo, COL_SCALE)).toDouble();
       if(scale != 1.0)
       {
         IAlgorithm_sptr algScale = AlgorithmManager::Instance().create("Scale");
@@ -574,19 +600,18 @@ namespace MantidQt
       }
 
       //Reduction has completed. Put Qmin and Qmax into the table if needed, for stitching.
-      if(m_model->String(rowNo, COL_QMIN).empty() || m_model->String(rowNo, COL_QMAX).empty())
+      if(m_model->data(m_model->index(rowNo, COL_QMIN)).toString().isEmpty() || m_model->data(m_model->index(rowNo, COL_QMAX)).toString().isEmpty())
       {
         MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IvsQ_" + runNo);
         std::vector<double> qrange = calcQRange(ws, theta);
 
-        if(m_model->String(rowNo, COL_QMIN).empty())
-          m_model->String(rowNo, COL_QMIN) = Strings::toString<double>(qrange[0]);
+        if(m_model->data(m_model->index(rowNo, COL_QMIN)).toString().isEmpty())
+          m_model->setData(m_model->index(rowNo, COL_QMIN), qrange[0]);
 
-        if(m_model->String(rowNo, COL_QMAX).empty())
-          m_model->String(rowNo, COL_QMAX) = Strings::toString<double>(qrange[1]);
+        if(m_model->data(m_model->index(rowNo, COL_QMAX)).toString().isEmpty())
+          m_model->setData(m_model->index(rowNo, COL_QMAX), qrange[1]);
 
         m_tableDirty = true;
-        m_view->showTable(m_model);
       }
     }
 
@@ -611,8 +636,12 @@ namespace MantidQt
 
       double qmin = 4 * M_PI / lmax * sin(theta * M_PI / 180.0);
       double qmax = 4 * M_PI / lmin * sin(theta * M_PI / 180.0);
-      qmin = Utils::roundToDP(qmin, 3);
-      qmax = Utils::roundToDP(qmax, 3);
+
+      if(m_options["RoundQMin"].toBool())
+        qmin = Utils::roundToDP(qmin, m_options["RoundQMinPrecision"].toInt());
+
+      if(m_options["RoundQMax"].toBool())
+        qmax = Utils::roundToDP(qmax, m_options["RoundQMaxPrecision"].toInt());
 
       std::vector<double> ret;
       ret.push_back(qmin);
@@ -624,7 +653,7 @@ namespace MantidQt
     Stitches the workspaces created by the given rows together.
     @param rows : the list of rows
     */
-    void ReflMainViewPresenter::stitchRows(std::set<size_t> rows)
+    void ReflMainViewPresenter::stitchRows(std::set<int> rows)
     {
       //If we can get away with doing nothing, do.
       if(rows.size() < 2)
@@ -641,13 +670,9 @@ namespace MantidQt
       //Go through each row and prepare the properties
       for(auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt)
       {
-        const std::string  runStr = m_model->String(*rowIt, COL_RUNS);
-        const std::string qMinStr = m_model->String(*rowIt, COL_QMIN);
-        const std::string qMaxStr = m_model->String(*rowIt, COL_QMAX);
-
-        double qmin, qmax;
-        Mantid::Kernel::Strings::convert<double>(qMinStr, qmin);
-        Mantid::Kernel::Strings::convert<double>(qMaxStr, qmax);
+        const std::string  runStr = m_model->data(m_model->index(*rowIt, COL_RUNS)).toString().toStdString();
+        const double         qmin = m_model->data(m_model->index(*rowIt, COL_QMIN)).toDouble();
+        const double         qmax = m_model->data(m_model->index(*rowIt, COL_QMAX)).toDouble();
 
         Workspace_sptr runWS = loadRun(runStr);
         if(runWS)
@@ -664,9 +689,7 @@ namespace MantidQt
         endOverlaps.push_back(qmax);
       }
 
-      double dqq;
-      std::string dqqStr = m_model->String(*(rows.begin()), COL_DQQ);
-      Mantid::Kernel::Strings::convert<double>(dqqStr, dqq);
+      double dqq = m_model->data(m_model->index(*(rows.begin()), COL_DQQ)).toDouble();
 
       //params are qmin, -dqq, qmax for the final output
       params.push_back(*std::min_element(startOverlaps.begin(), startOverlaps.end()));
@@ -747,26 +770,25 @@ namespace MantidQt
 
     /**
     Inserts a new row in the specified location
-    @param before The index to insert the new row before
+    @param index The index to insert the new row before
     */
-    void ReflMainViewPresenter::insertRow(size_t before)
+    void ReflMainViewPresenter::insertRow(int index)
     {
       const int groupId = getUnusedGroup();
-      size_t row = m_model->insertRow(before);
+      if(!m_model->insertRow(index))
+        return;
       //Set the default scale to 1.0
-      m_model->Double(row, COL_SCALE) = 1.0;
+      m_model->setData(m_model->index(index, COL_SCALE), 1.0);
       //Set the group id of the new row
-      m_model->Int(row, COL_GROUP) = groupId;
-      //Make sure the view updates
-      m_view->showTable(m_model);
+      m_model->setData(m_model->index(index, COL_GROUP), groupId);
     }
 
     /**
-    Add row(s) to the model
+    Insert a row after the last selected row
     */
-    void ReflMainViewPresenter::addRow()
+    void ReflMainViewPresenter::appendRow()
     {
-      std::set<size_t> rows = m_view->getSelectedRows();
+      std::set<int> rows = m_view->getSelectedRows();
       if(rows.empty())
         insertRow(m_model->rowCount());
       else
@@ -775,15 +797,27 @@ namespace MantidQt
     }
 
     /**
+    Insert a row before the first selected row
+    */
+    void ReflMainViewPresenter::prependRow()
+    {
+      std::set<int> rows = m_view->getSelectedRows();
+      if(rows.empty())
+        insertRow(0);
+      else
+        insertRow(*rows.begin());
+      m_tableDirty = true;
+    }
+
+    /**
     Delete row(s) from the model
     */
     void ReflMainViewPresenter::deleteRow()
     {
-      std::set<size_t> rows = m_view->getSelectedRows();
+      std::set<int> rows = m_view->getSelectedRows();
       for(auto row = rows.rbegin(); row != rows.rend(); ++row)
         m_model->removeRow(*row);
 
-      m_view->showTable(m_model);
       m_tableDirty = true;
     }
 
@@ -792,16 +826,14 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::groupRows()
     {
-      const std::set<size_t> rows = m_view->getSelectedRows();
+      const std::set<int> rows = m_view->getSelectedRows();
       //Find the first unused group id, ignoring the selected rows
       const int groupId = getUnusedGroup(rows);
 
       //Now we just have to set the group id on the selected rows
       for(auto it = rows.begin(); it != rows.end(); ++it)
-        m_model->Int(*it, COL_GROUP) = groupId;
+        m_model->setData(m_model->index(*it, COL_GROUP), groupId);
 
-      //Make sure the view updates
-      m_view->showTable(m_model);
       m_tableDirty = true;
     }
 
@@ -812,16 +844,18 @@ namespace MantidQt
     {
       switch(flag)
       {
-      case ReflMainView::SaveAsFlag:    saveTableAs(); break;
-      case ReflMainView::SaveFlag:      saveTable();   break;
-      case ReflMainView::AddRowFlag:    addRow();      break;
-      case ReflMainView::DeleteRowFlag: deleteRow();   break;
-      case ReflMainView::ProcessFlag:   process();     break;
-      case ReflMainView::GroupRowsFlag: groupRows();   break;
-      case ReflMainView::OpenTableFlag: openTable();   break;
-      case ReflMainView::NewTableFlag:  newTable();    break;
+      case ReflMainView::SaveAsFlag:          saveTableAs();        break;
+      case ReflMainView::SaveFlag:            saveTable();          break;
+      case ReflMainView::AppendRowFlag:       appendRow();          break;
+      case ReflMainView::PrependRowFlag:      prependRow();         break;
+      case ReflMainView::DeleteRowFlag:       deleteRow();          break;
+      case ReflMainView::ProcessFlag:         process();            break;
+      case ReflMainView::GroupRowsFlag:       groupRows();          break;
+      case ReflMainView::OpenTableFlag:       openTable();          break;
+      case ReflMainView::NewTableFlag:        newTable();           break;
       case ReflMainView::TableUpdatedFlag:    m_tableDirty = true;  break;
       case ReflMainView::ExpandSelectionFlag: expandSelection();    break;
+      case ReflMainView::OptionsDialogFlag:   showOptionsDialog();  break;
 
       case ReflMainView::NoFlags:       return;
       }
@@ -835,7 +869,7 @@ namespace MantidQt
     {
       if(!m_wsName.empty())
       {
-        AnalysisDataService::Instance().addOrReplace(m_wsName,boost::shared_ptr<ITableWorkspace>(m_model->clone()));
+        AnalysisDataService::Instance().addOrReplace(m_wsName,boost::shared_ptr<ITableWorkspace>(m_ws->clone()));
         m_tableDirty = false;
       }
       else
@@ -862,16 +896,14 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::newTable()
     {
-      if(m_tableDirty)
+      if(m_tableDirty && m_options["WarnDiscardChanges"].toBool())
         if(!m_view->askUserYesNo("Your current table has unsaved changes. Are you sure you want to discard them?","Start New Table?"))
           return;
 
-      m_model = createWorkspace();
+      m_ws = createDefaultWorkspace();
+      m_model.reset(new QReflTableModel(m_ws));
       m_wsName.clear();
       m_view->showTable(m_model);
-
-      //Start with one blank row
-      insertRow(0);
 
       m_tableDirty = false;
     }
@@ -881,7 +913,7 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::openTable()
     {
-      if(m_tableDirty)
+      if(m_tableDirty && m_options["WarnDiscardChanges"].toBool())
         if(!m_view->askUserYesNo("Your current table has unsaved changes. Are you sure you want to discard them?","Open Table?"))
           return;
 
@@ -900,11 +932,12 @@ namespace MantidQt
       ITableWorkspace_sptr origTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(toOpen);
 
       //We create a clone of the table for live editing. The original is not updated unless we explicitly save.
-      ITableWorkspace_sptr newModel = boost::shared_ptr<ITableWorkspace>(origTable->clone());
+      ITableWorkspace_sptr newTable = boost::shared_ptr<ITableWorkspace>(origTable->clone());
       try
       {
-        validateModel(newModel);
-        m_model = newModel;
+        validateModel(newTable);
+        m_ws = newTable;
+        m_model.reset(new QReflTableModel(m_ws));
         m_wsName = toOpen;
         m_view->showTable(m_model);
         m_tableDirty = false;
@@ -996,8 +1029,8 @@ namespace MantidQt
     size_t ReflMainViewPresenter::numRowsInGroup(int groupId) const
     {
       size_t count = 0;
-      for(size_t i = 0; i < m_model->rowCount(); ++i)
-        if(m_model->Int(i, COL_GROUP) == groupId)
+      for(int i = 0; i < m_model->rowCount(); ++i)
+        if(m_model->data(m_model->index(i, COL_GROUP)).toInt() == groupId)
           count++;
       return count;
     }
@@ -1007,17 +1040,79 @@ namespace MantidQt
     {
       std::set<int> groupIds;
 
-      std::set<size_t> rows = m_view->getSelectedRows();
+      std::set<int> rows = m_view->getSelectedRows();
       for(auto row = rows.begin(); row != rows.end(); ++row)
-        groupIds.insert(m_model->Int(*row, COL_GROUP));
+        groupIds.insert(m_model->data(m_model->index(*row, COL_GROUP)).toInt());
 
-      std::set<size_t> selection;
+      std::set<int> selection;
 
-      for(size_t i = 0; i < m_model->rowCount(); ++i)
-        if(groupIds.find(m_model->Int(i, COL_GROUP)) != groupIds.end())
+      for(int i = 0; i < m_model->rowCount(); ++i)
+        if(groupIds.find(m_model->data(m_model->index(i, COL_GROUP)).toInt()) != groupIds.end())
           selection.insert(i);
 
       m_view->setSelection(selection);
+    }
+
+    /** Shows the Refl Options dialog */
+    void ReflMainViewPresenter::showOptionsDialog()
+    {
+      auto options = new QtReflOptionsDialog(m_view, m_view->getPresenter());
+      //By default the dialog is only destroyed when ReflMainView is and so they'll stack up.
+      //This way, they'll be deallocated as soon as they've been closed.
+      options->setAttribute(Qt::WA_DeleteOnClose, true);
+      options->exec();
+    }
+
+    /** Gets the options used by the presenter
+        @returns The options used by the presenter
+     */
+    const std::map<std::string,QVariant>& ReflMainViewPresenter::options() const
+    {
+      return m_options;
+    }
+
+    /** Sets the options used by the presenter
+        @param options : The new options for the presenter to use
+     */
+    void ReflMainViewPresenter::setOptions(const std::map<std::string,QVariant>& options)
+    {
+      //Overwrite the given options
+      for(auto it = options.begin(); it != options.end(); ++it)
+        m_options[it->first] = it->second;
+
+      //Save any changes to disk
+      QSettings settings;
+      settings.beginGroup(ReflSettingsGroup);
+      for(auto it = m_options.begin(); it != m_options.end(); ++it)
+        settings.setValue(QString::fromStdString(it->first), it->second);
+      settings.endGroup();
+    }
+
+    /** Load options from disk if possible, or set to defaults */
+    void ReflMainViewPresenter::initOptions()
+    {
+      m_options.clear();
+
+      //Set defaults
+      m_options["WarnProcessAll"] = true;
+      m_options["WarnDiscardChanges"] = true;
+      m_options["WarnProcessPartialGroup"] = true;
+      m_options["RoundAngle"] = false;
+      m_options["RoundQMin"] = false;
+      m_options["RoundQMax"] = false;
+      m_options["RoundDQQ"] = false;
+      m_options["RoundAnglePrecision"] = 3;
+      m_options["RoundQMinPrecision"] = 3;
+      m_options["RoundQMaxPrecision"] = 3;
+      m_options["RoundDQQPrecision"] = 3;
+
+      //Load saved values from disk
+      QSettings settings;
+      settings.beginGroup(ReflSettingsGroup);
+      QStringList keys = settings.childKeys();
+      for(auto it = keys.begin(); it != keys.end(); ++it)
+        m_options[it->toStdString()] = settings.value(*it);
+      settings.endGroup();
     }
   }
 }

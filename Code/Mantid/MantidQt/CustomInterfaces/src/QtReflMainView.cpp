@@ -36,30 +36,17 @@ namespace MantidQt
     {
       ui.setupUi(this);
 
-      ui.buttonAddRow->setDefaultAction(ui.actionAddRow);
-      ui.buttonDeleteRow->setDefaultAction(ui.actionDeleteRow);
-      ui.buttonGroupRows->setDefaultAction(ui.actionGroupRows);
-      ui.buttonExpandSelection->setDefaultAction(ui.actionExpandSelection);
+      ui.buttonProcess->setDefaultAction(ui.actionProcess);
 
       //Expand the process runs column at the expense of the search column
       ui.splitterTables->setStretchFactor(0, 0);
       ui.splitterTables->setStretchFactor(1, 1);
 
-      //Zero out the progress bar
-      ui.progressBar->setRange(0, 100);
-      ui.progressBar->setValue(0);
-
       //Allow rows to be reordered
       ui.viewTable->verticalHeader()->setMovable(true);
 
-      connect(ui.actionSaveTable,       SIGNAL(triggered()), this, SLOT(actionSave()));
-      connect(ui.actionSaveTableAs,     SIGNAL(triggered()), this, SLOT(actionSaveAs()));
-      connect(ui.actionNewTable,        SIGNAL(triggered()), this, SLOT(actionNewTable()));
-      connect(ui.actionAddRow,          SIGNAL(triggered()), this, SLOT(actionAddRow()));
-      connect(ui.actionDeleteRow,       SIGNAL(triggered()), this, SLOT(actionDeleteRow()));
-      connect(ui.actionProcess,         SIGNAL(triggered()), this, SLOT(actionProcess()));
-      connect(ui.actionGroupRows,       SIGNAL(triggered()), this, SLOT(actionGroupRows()));
-      connect(ui.actionExpandSelection, SIGNAL(triggered()), this, SLOT(actionExpandSelection()));
+      //Custom context menu for table
+      connect(ui.viewTable, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 
       //Finally, create a presenter to do the thinking for us
       m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(this));
@@ -79,12 +66,12 @@ namespace MantidQt
     Set a new model in the tableview
     @param model : the model to be attached to the tableview
     */
-    void QtReflMainView::showTable(ITableWorkspace_sptr model)
+    void QtReflMainView::showTable(QReflTableModel_sptr model)
     {
-      QAbstractItemModel* qModel = new QReflTableModel(model);
+      m_model = model;
       //So we can notify the presenter when the user updates the table
-      connect(qModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(tableUpdated(const QModelIndex&, const QModelIndex&)));
-      ui.viewTable->setModel(qModel);
+      connect(m_model.get(), SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(tableUpdated(const QModelIndex&, const QModelIndex&)));
+      ui.viewTable->setModel(m_model.get());
       ui.viewTable->resizeColumnsToContents();
     }
 
@@ -99,6 +86,7 @@ namespace MantidQt
       for(auto it = tables.begin(); it != tables.end(); ++it)
       {
         QAction* openTable = ui.menuOpenTable->addAction(QString::fromStdString(*it));
+        openTable->setIcon(QIcon("://worksheet.png"));
 
         //Map this action to the table name
         m_openMap->setMapping(openTable, QString::fromStdString(*it));
@@ -111,7 +99,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "save" button has been pressed
     */
-    void QtReflMainView::actionSave()
+    void QtReflMainView::on_actionSaveTable_triggered()
     {
       m_presenter->notify(SaveFlag);
     }
@@ -119,23 +107,31 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "save as" button has been pressed
     */
-    void QtReflMainView::actionSaveAs()
+    void QtReflMainView::on_actionSaveTableAs_triggered()
     {
       m_presenter->notify(SaveAsFlag);
     }
 
     /**
-    This slot notifies the presenter that the "add row" button has been pressed
+    This slot notifies the presenter that the "append row" button has been pressed
     */
-    void QtReflMainView::actionAddRow()
+    void QtReflMainView::on_actionAppendRow_triggered()
     {
-      m_presenter->notify(AddRowFlag);
+      m_presenter->notify(AppendRowFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "prepend row" button has been pressed
+    */
+    void QtReflMainView::on_actionPrependRow_triggered()
+    {
+      m_presenter->notify(PrependRowFlag);
     }
 
     /**
     This slot notifies the presenter that the "delete" button has been pressed
     */
-    void QtReflMainView::actionDeleteRow()
+    void QtReflMainView::on_actionDeleteRow_triggered()
     {
       m_presenter->notify(DeleteRowFlag);
     }
@@ -143,7 +139,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "process" button has been pressed
     */
-    void QtReflMainView::actionProcess()
+    void QtReflMainView::on_actionProcess_triggered()
     {
       m_presenter->notify(ProcessFlag);
     }
@@ -151,7 +147,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "group rows" button has been pressed
     */
-    void QtReflMainView::actionGroupRows()
+    void QtReflMainView::on_actionGroupRows_triggered()
     {
       m_presenter->notify(GroupRowsFlag);
     }
@@ -159,7 +155,7 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "new table" button has been pressed
     */
-    void QtReflMainView::actionNewTable()
+    void QtReflMainView::on_actionNewTable_triggered()
     {
       m_presenter->notify(NewTableFlag);
     }
@@ -167,9 +163,17 @@ namespace MantidQt
     /**
     This slot notifies the presenter that the "expand selection" button has been pressed
     */
-    void QtReflMainView::actionExpandSelection()
+    void QtReflMainView::on_actionExpandSelection_triggered()
     {
       m_presenter->notify(ExpandSelectionFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "options..." button has been pressed
+    */
+    void QtReflMainView::on_actionOptionsDialog_triggered()
+    {
+      m_presenter->notify(OptionsDialogFlag);
     }
 
     /**
@@ -180,6 +184,26 @@ namespace MantidQt
       Q_UNUSED(topLeft);
       Q_UNUSED(bottomRight);
       m_presenter->notify(TableUpdatedFlag);
+    }
+
+    /**
+    This slot is triggered when the user right clicks on the table
+    @param pos : The position of the right click within the table
+    */
+    void QtReflMainView::showContextMenu(const QPoint& pos)
+    {
+      //parent widget takes ownership of QMenu
+      QMenu* menu = new QMenu(this);
+      menu->addAction(ui.actionProcess);
+      menu->addAction(ui.actionExpandSelection);
+      menu->addSeparator();
+      menu->addAction(ui.actionPrependRow);
+      menu->addAction(ui.actionAppendRow);
+      menu->addAction(ui.actionGroupRows);
+      menu->addSeparator();
+      menu->addAction(ui.actionDeleteRow);
+
+      menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
     }
 
     /**
@@ -267,13 +291,13 @@ namespace MantidQt
     Set which rows are selected
     @param rows : The set of rows to select
     */
-    void QtReflMainView::setSelection(const std::set<size_t>& rows)
+    void QtReflMainView::setSelection(const std::set<int>& rows)
     {
       ui.viewTable->clearSelection();
       auto selectionModel = ui.viewTable->selectionModel();
 
       for(auto row = rows.begin(); row != rows.end(); ++row)
-        selectionModel->select(ui.viewTable->model()->index((int)(*row), 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+        selectionModel->select(ui.viewTable->model()->index((*row), 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
     }
 
     /**
@@ -329,10 +353,10 @@ namespace MantidQt
     Get the indices of the highlighted rows
     @returns a vector of unsigned ints contianing the highlighted row numbers
     */
-    std::set<size_t> QtReflMainView::getSelectedRows() const
+    std::set<int> QtReflMainView::getSelectedRows() const
     {
       auto selectedRows = ui.viewTable->selectionModel()->selectedRows();
-      std::set<size_t> rows;
+      std::set<int> rows;
       for(auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
         rows.insert(it->row());
 
@@ -346,6 +370,15 @@ namespace MantidQt
     std::string QtReflMainView::getWorkspaceToOpen() const
     {
       return m_toOpen;
+    }
+
+    /**
+    Get a pointer to the presenter that's currently controlling this view.
+    @returns A pointer to the presenter
+    */
+    boost::shared_ptr<IReflPresenter> QtReflMainView::getPresenter() const
+    {
+      return m_presenter;
     }
 
   } // namespace CustomInterfaces

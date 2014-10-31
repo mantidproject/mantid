@@ -1798,6 +1798,40 @@ namespace Mantid
       }
       file.closeData();
 
+      // get the experiment identifier
+      try {
+        file.openData("experiment_identifier");
+        string expId("");
+        if (file.getInfo().type == ::NeXus::CHAR)
+        {
+          expId = file.getStrData();
+        }
+        if (!expId.empty()) {
+          WS->mutableRun().addProperty("experiment_identifier", expId);
+        }
+        file.closeData();
+      } catch (::NeXus::Exception &) {
+        // let it drop on floor
+      }
+
+      // get the sample name
+      try {
+        file.openGroup("sample", "NXsample");
+        file.openData("name");
+        string name("");
+        if (file.getInfo().type == ::NeXus::CHAR)
+        {
+          name = file.getStrData();
+        }
+        if (!name.empty()) {
+          WS->mutableSample().setName(name);
+        }
+        file.closeData();
+        file.closeGroup();
+      } catch (::NeXus::Exception &) {
+        // let it drop on floor
+      }
+
       // get the duration
       file.openData("duration");
       std::vector<double> duration;

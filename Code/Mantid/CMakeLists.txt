@@ -121,6 +121,7 @@ set ( CORE_MANTIDLIBS Kernel Geometry API )
 
 # Add a target for all GUI tests
 add_custom_target ( GUITests )
+add_dependencies ( GUITests MantidWidgetsTest)
 add_dependencies ( check GUITests )
 # Collect all tests together
 add_custom_target ( AllTests )

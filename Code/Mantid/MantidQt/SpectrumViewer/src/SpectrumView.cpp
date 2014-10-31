@@ -3,7 +3,6 @@
 #include  "MantidQtSpectrumViewer/SpectrumView.h"
 #include  "MantidQtSpectrumViewer/ColorMaps.h"
 
-#include "ui_SpectrumView.h"
 #include "MantidQtSpectrumViewer/SVConnections.h"
 #include "MantidQtSpectrumViewer/SpectrumDisplay.h"
 #include "MantidQtSpectrumViewer/SliderHandler.h"
@@ -30,6 +29,7 @@ namespace SpectrumView
 SpectrumView::SpectrumView(QWidget *parent) :
   QMainWindow(parent, 0),
   WorkspaceObserver(),
+  m_data_source(NULL),
   m_ui(new Ui::SpectrumViewer())
 {
   m_ui->setupUi(this);
@@ -39,23 +39,33 @@ SpectrumView::~SpectrumView()
 {
 //  std::cout << "SpectrumView destructor called" << std::endl;
 
-  delete  h_graph;
-  delete  v_graph;
+  delete h_graph;
+  delete v_graph;
 
-  delete  m_ui;
-  delete  m_slider_handler;
-  delete  m_range_handler;
-  delete  m_spectrum_display;
-  delete  m_sv_connections;
+  delete m_ui;
+  delete m_slider_handler;
+  delete m_range_handler;
+  delete m_spectrum_display;
+  delete m_sv_connections;
+  delete m_data_source;
   if ( m_emode_handler)
   {
     delete m_emode_handler;
   }
 }
+
+void SpectrumView::resizeEvent(QResizeEvent * event)
+{
+  QMainWindow::resizeEvent(event);
+
+  if(m_data_source)
+    m_spectrum_display->HandleResize();
+}
+
 void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
 {
-  MatrixWSDataSource* data_source = new MatrixWSDataSource(wksp);
-  this->updateHandlers(data_source);
+  m_data_source = new MatrixWSDataSource(wksp);
+  this->updateHandlers(m_data_source);
 
   // Watch for the deletion of the associated workspace
   observeAfterReplace();
@@ -84,7 +94,7 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
   m_sv_connections = new SVConnections( m_ui, this, m_spectrum_display,
                                         h_graph, v_graph );
 
-  m_spectrum_display->SetDataSource( data_source );
+  m_spectrum_display->SetDataSource( m_data_source );
 }
 
 /// Setup the various handlers (energy-mode, slider, range)
@@ -109,7 +119,6 @@ void SpectrumView::updateHandlers(SpectrumDataSource* data_source)
 
   m_slider_handler = new SliderHandler( m_ui );
   m_range_handler = new RangeHandler( m_ui );
-
 }
 
 /** Slot to close the window */

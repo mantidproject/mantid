@@ -172,7 +172,7 @@ public:
     AnalysisDataService::Instance().remove("Workspace");
   }
 
-  void testAddRow()
+  void testAppendRow()
   {
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
@@ -195,10 +195,10 @@ public:
     TS_ASSERT_THROWS(ws->Int(5, GroupCol), std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(6, GroupCol), std::runtime_error);
 
-    //The user hits "add row" twice with no rows selected
-    EXPECT_CALL(mockView, getSelectedRows()).Times(2).WillRepeatedly(Return(std::set<size_t>()));
-    presenter.notify(AddRowFlag);
-    presenter.notify(AddRowFlag);
+    //The user hits "append row" twice with no rows selected
+    EXPECT_CALL(mockView, getSelectedRows()).Times(2).WillRepeatedly(Return(std::set<int>()));
+    presenter.notify(AppendRowFlag);
+    presenter.notify(AppendRowFlag);
 
     //The user hits "save"
     presenter.notify(SaveFlag);
@@ -218,7 +218,7 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
 
-  void testAddRowSpecify()
+  void testAppendRowSpecify()
   {
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
@@ -229,7 +229,7 @@ public:
     EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(OpenTableFlag);
 
-    std::set<size_t> rowlist;
+    std::set<int> rowlist;
     rowlist.insert(1);
 
     //We should not receive any errors
@@ -246,10 +246,10 @@ public:
     TS_ASSERT_THROWS(ws->Int(5, GroupCol), std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(6, GroupCol), std::runtime_error);
 
-    //The user hits "add row" twice, with the second row selected
+    //The user hits "append row" twice, with the second row selected
     EXPECT_CALL(mockView, getSelectedRows()).Times(2).WillRepeatedly(Return(rowlist));
-    presenter.notify(AddRowFlag);
-    presenter.notify(AddRowFlag);
+    presenter.notify(AppendRowFlag);
+    presenter.notify(AppendRowFlag);
 
     //The user hits "save"
     presenter.notify(SaveFlag);
@@ -271,7 +271,7 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
 
-  void testAddRowSpecifyPlural()
+  void testAppendRowSpecifyPlural()
   {
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
@@ -282,7 +282,7 @@ public:
     EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(OpenTableFlag);
 
-    std::set<size_t> rowlist;
+    std::set<int> rowlist;
     rowlist.insert(1);
     rowlist.insert(2);
     rowlist.insert(3);
@@ -302,9 +302,9 @@ public:
     TS_ASSERT_THROWS(ws->Int(6, GroupCol), std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(7, GroupCol), std::runtime_error);
 
-    //The user hits "add row" once, with the second, third, and fourth row selected.
+    //The user hits "append row" once, with the second, third, and fourth row selected.
     EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(rowlist));
-    presenter.notify(AddRowFlag);
+    presenter.notify(AppendRowFlag);
 
     //The user hits "save"
     presenter.notify(SaveFlag);
@@ -321,6 +321,120 @@ public:
     TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 1);
     TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 0);
     TS_ASSERT_THROWS(ws->Int(5, GroupCol), std::runtime_error);
+
+    //Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+  }
+
+  void testPrependRow()
+  {
+    MockView mockView;
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
+
+    //The user hits "prepend row" twice with no rows selected
+    EXPECT_CALL(mockView, getSelectedRows()).Times(2).WillRepeatedly(Return(std::set<int>()));
+    presenter.notify(PrependRowFlag);
+    presenter.notify(PrependRowFlag);
+
+    //The user hits "save"
+    presenter.notify(SaveFlag);
+
+    //Check that the table has been modified correctly
+    ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 6);
+    TS_ASSERT_EQUALS(ws->Int(0, GroupCol), 2);
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 1);
+
+    //Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+  }
+
+  void testPrependRowSpecify()
+  {
+    MockView mockView;
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    std::set<int> rowlist;
+    rowlist.insert(1);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
+
+    //The user hits "prepend row" twice, with the second row selected
+    EXPECT_CALL(mockView, getSelectedRows()).Times(2).WillRepeatedly(Return(rowlist));
+    presenter.notify(PrependRowFlag);
+    presenter.notify(PrependRowFlag);
+
+    //The user hits "save"
+    presenter.notify(SaveFlag);
+
+    //Check that the table has been modified correctly
+    ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 6);
+    TS_ASSERT_EQUALS(ws->Int(0, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 2);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 1);
+
+    //Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+  }
+
+  void testPrependRowSpecifyPlural()
+  {
+    MockView mockView;
+    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
+    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    std::set<int> rowlist;
+    rowlist.insert(1);
+    rowlist.insert(2);
+    rowlist.insert(3);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
+
+    //The user hits "prepend row" once, with the second, third, and fourth row selected.
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(rowlist));
+    presenter.notify(PrependRowFlag);
+
+    //The user hits "save"
+    presenter.notify(SaveFlag);
+
+    //Check that the table was modified correctly
+    ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 5);
+    TS_ASSERT_EQUALS(ws->Int(0, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 1);
 
     //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -347,7 +461,7 @@ public:
     TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 3);
 
     //The user hits "delete row" with no rows selected
-    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(std::set<size_t>()));
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(std::set<int>()));
     presenter.notify(DeleteRowFlag);
 
     //The user hits save
@@ -374,7 +488,7 @@ public:
     EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(OpenTableFlag);
 
-    std::set<size_t> rowlist;
+    std::set<int> rowlist;
     rowlist.insert(1);
 
     //We should not receive any errors
@@ -414,7 +528,7 @@ public:
     EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(OpenTableFlag);
 
-    std::set<size_t> rowlist;
+    std::set<int> rowlist;
     rowlist.insert(0);
     rowlist.insert(1);
     rowlist.insert(2);
@@ -459,7 +573,7 @@ public:
     EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(OpenTableFlag);
 
-    std::set<size_t> rowlist;
+    std::set<int> rowlist;
     rowlist.insert(0);
     rowlist.insert(1);
 
@@ -524,7 +638,7 @@ public:
     EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(OpenTableFlag);
 
-    std::set<size_t> rowlist;
+    std::set<int> rowlist;
     rowlist.insert(0);
     rowlist.insert(1);
 
@@ -576,7 +690,7 @@ public:
     EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(OpenTableFlag);
 
-    std::set<size_t> rowlist;
+    std::set<int> rowlist;
     rowlist.insert(0);
     rowlist.insert(1);
 
@@ -595,15 +709,15 @@ public:
 
     //Check the table was updated as expected
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
-    TS_ASSERT_EQUALS(ws->String(0, ThetaCol), "0.7");
-    TS_ASSERT_EQUALS(ws->String(0,   DQQCol), "0.0340301");
-    TS_ASSERT_EQUALS(ws->String(0,  QMinCol), "0.009");
-    TS_ASSERT_EQUALS(ws->String(0,  QMaxCol), "0.154");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(0, ThetaCol)), 0.70002, 1e-5);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(0, DQQCol)), 0.03402, 1e-5);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(0, QMinCol)), 0.00903, 1e-5);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(0, QMaxCol)), 0.15352, 1e-5);
 
-    TS_ASSERT_EQUALS(ws->String(1, ThetaCol), "2.3");
-    TS_ASSERT_EQUALS(ws->String(1,   DQQCol), "0.0340505");
-    TS_ASSERT_EQUALS(ws->String(1,  QMinCol), "0.03");
-    TS_ASSERT_EQUALS(ws->String(1,  QMaxCol), "0.504");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(1, ThetaCol)), 2.3, 1e-5);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(1, DQQCol)), 0.03405, 1e-5);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(1, QMinCol)), 0.02966, 1e-5);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(ws->String(1, QMaxCol)), 0.50431, 1e-5);
 
     //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -700,16 +814,16 @@ public:
     TS_ASSERT_THROWS(ReflMainViewPresenter::parseKeyValueString("=,=,="), std::runtime_error);
   }
 
-  void testPromptSaveAfterAddRow()
+  void testPromptSaveAfterAppendRow()
   {
     MockView mockView;
     EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
     EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
-    //User hits "add row"
-    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(std::set<size_t>()));
-    presenter.notify(AddRowFlag);
+    //User hits "append row"
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(std::set<int>()));
+    presenter.notify(AppendRowFlag);
 
     //The user will decide not to discard their changes
     EXPECT_CALL(mockView, askUserYesNo(_,_)).Times(1).WillOnce(Return(false));
@@ -733,17 +847,17 @@ public:
     EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
-    //User hits "add row" a couple of times
-    EXPECT_CALL(mockView, getSelectedRows()).Times(2).WillRepeatedly(Return(std::set<size_t>()));
-    presenter.notify(AddRowFlag);
-    presenter.notify(AddRowFlag);
+    //User hits "append row" a couple of times
+    EXPECT_CALL(mockView, getSelectedRows()).Times(2).WillRepeatedly(Return(std::set<int>()));
+    presenter.notify(AppendRowFlag);
+    presenter.notify(AppendRowFlag);
 
     //The user saves
     EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillOnce(Return("Workspace"));
     presenter.notify(SaveFlag);
 
     //...then deletes the 2nd row
-    std::set<size_t> rows;
+    std::set<int> rows;
     rows.insert(1);
     EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(rows));
     presenter.notify(DeleteRowFlag);
@@ -769,10 +883,10 @@ public:
     EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
-    //User hits "add row" a couple of times
-    EXPECT_CALL(mockView, getSelectedRows()).Times(2).WillRepeatedly(Return(std::set<size_t>()));
-    presenter.notify(AddRowFlag);
-    presenter.notify(AddRowFlag);
+    //User hits "append row" a couple of times
+    EXPECT_CALL(mockView, getSelectedRows()).Times(2).WillRepeatedly(Return(std::set<int>()));
+    presenter.notify(AppendRowFlag);
+    presenter.notify(AppendRowFlag);
 
     //Then hits "new table", and decides to discard
     EXPECT_CALL(mockView, askUserYesNo(_,_)).Times(1).WillOnce(Return(true));
@@ -792,9 +906,9 @@ public:
 
     createPrefilledWorkspace("TestWorkspace");
 
-    //User hits "add row"
-    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(std::set<size_t>()));
-    presenter.notify(AddRowFlag);
+    //User hits "append row"
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(std::set<int>()));
+    presenter.notify(AppendRowFlag);
 
     //and tries to open a workspace, but gets prompted and decides not to discard
     EXPECT_CALL(mockView, askUserYesNo(_,_)).Times(1).WillOnce(Return(false));
@@ -846,8 +960,8 @@ public:
     //We should not receive any errors
     EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
-    std::set<size_t> selection;
-    std::set<size_t> expected;
+    std::set<int> selection;
+    std::set<int> expected;
 
     selection.insert(0);
     expected.insert(0);
