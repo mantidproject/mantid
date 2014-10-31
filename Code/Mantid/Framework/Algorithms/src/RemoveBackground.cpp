@@ -105,7 +105,7 @@ namespace Mantid
       }
 
       //
-      int nThreads = PARALLEL_NUMBER_OF_THREADS;
+      int nThreads = PARALLEL_GET_MAX_THREADS;
       m_BackgroundHelper.initialize(bkgWksp,inputWS,eMode,&g_log,nThreads,inPlace);
 
       Progress prog(this,0.0,1.0,histnumber);
