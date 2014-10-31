@@ -48,14 +48,10 @@ int EModeHandler::getEMode()
  */
 void EModeHandler::setEMode( const int mode )
 {
-  if ( mode >= 0 && mode <= 2 )
-  {
-     m_svUI->emode_combo_box->setCurrentIndex( mode );
-  }
+  if(mode >= 0 && mode <= 2)
+    m_svUI->emode_combo_box->setCurrentIndex( mode );
   else
-  {
-    g_log.error("Mode number invalid: " + mode );
-  }
+    g_log.error() << "Mode number invalid: " << QString::number(mode).toStdString() << std::endl;
 }
 
 
