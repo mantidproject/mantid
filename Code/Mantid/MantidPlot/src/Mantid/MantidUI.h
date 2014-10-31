@@ -541,11 +541,12 @@ private:
   AlgorithmMonitor *m_algMonitor;      //  Class for monitoring running algorithms
 
   // keep track of the last shown, which will be refreshed or killed/rebuilt if showing only one inst. window
-  InstrumentWindow *m_lastShownInstrumentWin;
-  MantidQt::SliceViewer::SliceViewerWindow *m_lastShownSliceViewWin;
-  MantidQt::SpectrumView::SpectrumView *m_lastShownSpectrumViewerWin;
-  MultiLayer *m_lastShownColorFillWin;
-  MultiLayer *m_lastShown1DPlotWin;
+  // QPointer handles when events, etc. destroy these windows
+  QPointer<InstrumentWindow> m_lastShownInstrumentWin;
+  QPointer<MantidQt::SliceViewer::SliceViewerWindow> m_lastShownSliceViewWin;
+  QPointer<MantidQt::SpectrumView::SpectrumView> m_lastShownSpectrumViewerWin;
+  QPointer<MultiLayer> m_lastShownColorFillWin;
+  QPointer<MultiLayer> m_lastShown1DPlotWin;
 
   // Map of <workspace_name,update_interval> pairs. Positive update_intervals mean
   // UpdateDAE must be launched after LoadDAE for this workspace
