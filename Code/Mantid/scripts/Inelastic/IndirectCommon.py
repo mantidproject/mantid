@@ -157,15 +157,34 @@ def GetWSangles(inWS):
     return angles
 
 def GetThetaQ(ws):
-    nhist = mtd[ws].getNumberHistograms()    					# get no. of histograms/groups
-    efixed = getEfixed(ws)
-    wavelas = math.sqrt(81.787/efixed)    				   # elastic wavelength
-    k0 = 4.0*math.pi/wavelas
+    """
+    Returns the theta and elastic Q for each spectrum in a given workspace.
 
-    theta = np.array(GetWSangles(ws))
-    Q = k0 * np.sin(0.5 * np.radians(theta))
+    @param ws Wotkspace to get theta and Q for
+    @returns A tuple containing a list of theta values and a list of Q values
+    """
 
-    return theta, Q
+    eFixed = getEfixed(ws)
+    wavelas = math.sqrt(81.787 / eFixed)  # Elastic wavelength
+    k0 = 4.0 * math.pi / wavelas
+
+    axis = mtd[ws].getAxis(1)
+
+    # If axis is in spec number need to retrieve angles and calculate Q
+    if axis.isSpectra():
+        theta = np.array(GetWSangles(ws))
+        q = k0 * np.sin(0.5 * np.radians(theta))
+
+    # If axis is in Q need to calculate back to angles and just return axis values
+    else if axis.isNumeric() and axis.getUnit().unitID() == 'MomentumTransfer':
+        q = axis.extractValues()
+        theta = 2.0 * np.degrees(np.arcsin(q / k0))
+
+    # Out of options here
+    else:
+        raise RuntimeError('Cannot get theta and Q for workspace %s' % ws)
+
+    return theta, q
 
 def ExtractFloat(data_string):
     """ Extract float values from an ASCII string"""
