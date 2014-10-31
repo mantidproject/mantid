@@ -5,6 +5,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <map>
 #include <sstream>
 #include <string>
@@ -99,14 +100,32 @@ namespace DataHandling
     /// Parses the header values for the FITS file
     bool parseHeader(FITSInfo &headerInfo);
     /// Load data from a number of files into the workspace
-    void loadChunkOfBinsFromFile(Mantid::API::MatrixWorkspace_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, size_t spetraCount, int bitsPerPixel, size_t binChunkStartIndex);
+    void loadChunkOfBinsFromFile(DataObjects::Workspace2D_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, size_t spetraCount, int bitsPerPixel, size_t binChunkStartIndex);
     /// Initialises a workspace with IDF and fills it with data
-    API::MatrixWorkspace_sptr initAndPopulateHistogramWorkspace();
-    /// Creates a comma separated string of rotations from a file
-    std::string ReadRotations(std::string rotFilePath, size_t fileCount);
+    DataObjects::Workspace2D_sptr initAndPopulateHistogramWorkspace();
+    /// Creates a vector of all rotations from a file
+    std::vector<double> ReadRotations(std::string rotFilePath, size_t fileCount);
     
+    DataObjects::Workspace2D_sptr addWorkspace(size_t fileInd, size_t &newFileNumber, void *&bufferAny, API::MantidImage &imageY, API::MantidImage &imageE,const vector<double> &rotations,const DataObjects::Workspace2D_sptr parent); 
+
+    size_t fetchNumber(std::string name);
+    std::string padZeros(size_t number, size_t totalDigitCount);
+
+    //API::MatrixWorkspace_sptr createWorkspace(const FITSInfo& fileInfo);
+     void readFileToWorkspace(DataObjects::Workspace2D_sptr ws, const FITSInfo& fileInfo, API::MantidImage &imageY, API::MantidImage &imageE, void *&bufferAny);
+
+   
+
     vector<FITSInfo> m_allHeaderInfo;
     size_t m_binChunkSize;
+    string m_baseName; 
+    string m_propName;    
+    size_t m_spectraCount;
+    
+    API::WorkspaceGroup_sptr m_wsGroup;
+
+
+
     static const int FIXED_HEADER_SIZE = 2880;    
   };
   

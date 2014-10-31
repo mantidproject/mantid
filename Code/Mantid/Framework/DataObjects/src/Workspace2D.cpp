@@ -8,6 +8,7 @@
 #include "MantidKernel/VectorHelper.h"
 
 using Mantid::API::ISpectrum;
+using Mantid::API::MantidImage;
 
 namespace Mantid
 {
@@ -100,6 +101,166 @@ namespace Mantid
       return (data.size() > 0) ? data[0]->dataY().size() : 0;
     }
 
+    /**
+      * Copy data from an image.
+      * @param dataVec :: A method returning non-const references to data vectors to copy the image to.
+      * @param imageY :: An image to copy the data from.
+      * @param imageE :: An image to copy the errors from.
+      * @param start :: Startinf workspace indx to copy data to.
+      * @param parallelExecution :: Should inner loop run as parallel operation
+      */
+    void Workspace2D::setImage(const MantidImage &imageY, const MantidImage &imageE, size_t start, bool parallelExecution )
+    {
+      if ( imageY.empty() && imageE.empty() ) return;
+      if ( imageY.empty() && imageE[0].empty())  return;
+      if ( imageE.empty() && imageY[0].empty())  return;
+      //if ( imageY.size() > 0 && imageE.size(
+
+
+      if ( blocksize() != 1 )
+      {
+        throw std::runtime_error("Cannot set image: a single bin workspace is expected.");
+      }
+
+      size_t height; 
+      size_t width;  
+
+      if(!imageY.empty())
+      {
+        height = imageY.size();
+        width = imageY.front().size();
+      }
+      else
+      {
+        height = imageE.size();
+        width = imageE.front().size();
+      }
+      size_t dataSize = width * height;
+
+      if ( start + dataSize > getNumberHistograms() )
+      {
+        throw std::runtime_error("Cannot set image: image is bigger than workspace.");
+      }
+            
+      
+      PARALLEL_FOR_IF(parallelExecution)
+      for(int i = 0; i < static_cast<int>(height); ++i)
+      {
+        const auto &rowY = imageY[i];
+        const auto &rowE = imageE[i];
+
+ /*       if ( (!imageY.empty() && rowY.size() != width) || (!imageE.empty() && rowE.size() != width)  )
+        {
+          throw std::runtime_error("Canot set image: image is corrupted.");
+        }*/
+        size_t spec = start + static_cast<size_t>(i) * width;
+        auto rowYEnd = rowY.end();
+        auto rowEEnd = rowE.end();
+
+        auto pixelE = rowE.begin();
+        for(auto pixelY = rowY.begin(); pixelY != rowYEnd && pixelE != rowEEnd; ++pixelY,++pixelE,++spec)
+        {
+          if(rowY.begin() != rowY.end())
+            (*data[spec]).dataY()[0] = *pixelY;
+          if(rowE.begin() != rowE.end())
+            (*data[spec]).dataE()[0] = *pixelE;
+        }
+      }
+
+
+      
+      //////////PARALLEL_FOR_IF(parallelExecution)
+      //////////for(int specInd=0; specInd < dataSize; ++specInd)
+      //////////{
+      //////////  //const auto &rowY = imageY[i];
+      //////////  //const auto &rowE = imageE[i];
+
+      //////////  //if ( (!imageY.empty() && rowY.size() != width) || (!imageE.empty() && rowE.size() != width)  )
+      //////////  //{
+      //////////   // throw std::runtime_error("Canot set image: image is corrupted.");
+      ////////// // }
+      //////////  
+
+      //////////  size_t yInd = floor(specInd/width);
+      //////////  size_t xInd = specInd - (yInd*width);
+
+      //////////  if(!imageY.empty())
+      //////////    data[specInd]->dataY()[0] = imageY[yInd][xInd];
+      //////////  if(!imageE.empty()) 
+      //////////    data[specInd]->dataE()[0] = imageE[yInd][xInd];
+      //////////  
+      //////////  //size_t spec = start + static_cast<size_t>(i) * width;
+      //////////  
+      ////////// // auto rowYEnd = rowY.end();
+      ////////////  for(auto pixel = row.begin(); pixel != rowEnd; ++pixel,++spec)
+      ////////// // {
+      //////////    ///if(setY)
+      //////////   //   (*data[spec]).dataY()[0] = *pixel;
+      //////////  //  else
+      //////////    //  (*data[spec]).dataE()[0] = *pixel;
+      //////////  //}
+      //////////}
+
+
+      //PARALLEL_FOR_IF(parallelExecution)
+      //for(int i = 0; i < static_cast<int>(height); ++i)
+      //{
+      //  const auto &rowY = imageY[i];
+      //  const auto &rowE = imageE[i];
+
+      //  if ( (!imageY.empty() && rowY.size() != width) || (!imageE.empty() && rowE.size() != width)  )
+      //  {
+      //    throw std::runtime_error("Canot set image: image is corrupted.");
+      //  }
+      //  size_t spec = start + static_cast<size_t>(i) * width;
+      //  auto rowYEnd = rowY.end();
+      //  for(auto pixel = row.begin(); pixel != rowEnd; ++pixel,++spec)
+      //  {
+      //    if(setY)
+      //      (*data[spec]).dataY()[0] = *pixel;
+      //    else
+      //      (*data[spec]).dataE()[0] = *pixel;
+      //  }
+      //}
+    }
+
+    /**
+      * Copy the data (Y's) from an image to this workspace.
+      * @param image :: An image to copy the data from.
+      * @param start :: Startinf workspace indx to copy data to.
+      * @param parallelExecution :: Should inner loop run as parallel operation
+      */
+    void Workspace2D::setImageY( const MantidImage &image, size_t start, bool parallelExecution )
+    {
+      MantidImage m;
+      setImage(image, m, start, parallelExecution );
+    }
+
+    /**
+      * Copy the data from an image to this workspace's errors.
+      * @param image :: An image to copy the data from.
+      * @param start :: Startinf workspace indx to copy data to.
+      * @param parallelExecution :: Should inner loop run as parallel operation
+      */
+    void Workspace2D::setImageE( const MantidImage &image, size_t start, bool parallelExecution )
+    {
+      MantidImage m;
+      setImage(m, image, start, parallelExecution );
+    }
+
+
+    /**
+      * Copy the data from an image to the (Y's) and the errors for this workspace.
+      * @param imageY :: An image to copy the data from.
+      * @param imageE :: An image to copy the errors from.
+      * @param start :: Startinf workspace indx to copy data to.
+      * @param parallelExecution :: Should inner loop run as parallel operation
+      */
+    
+    void Workspace2D::setImageYAndE( const API::MantidImage &imageY, const API::MantidImage &imageE, size_t start, bool parallelExecution)
+    {
+      setImage(imageY, imageE, start, parallelExecution);
+    }
 
     //--------------------------------------------------------------------------------------------
     /// Return the underlying ISpectrum ptr at the given workspace index.

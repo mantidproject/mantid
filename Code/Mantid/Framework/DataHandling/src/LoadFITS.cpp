@@ -8,6 +8,7 @@
 #include <fstream>
 
 using namespace Mantid::DataHandling;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace std;
@@ -16,6 +17,9 @@ using Poco::BinaryReader;
 
 namespace 
 {    
+  // Number of digits which will be appended to a workspace name, i.e. 4 = workspace_0001
+  const size_t DIGIT_SIZE_APPEND = 4;
+
   /**
   * Used with find_if to check a string isn't a fits file (by checking extension)
   * @param s string to check for extension
@@ -64,7 +68,7 @@ namespace DataHandling
     declareProperty(new MultipleFileProperty("Filename", exts), "The input filename of the stored data");
     declareProperty(new PropertyWithValue<size_t>("FileChunkSize", 100, Direction::Input), "Number of files to read into memory at a time - use lower values for machines with low memory");
     
-    declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "", Kernel::Direction::Output));    
+    declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace", "", Kernel::Direction::Output));    
   }
 
   /**
@@ -77,6 +81,9 @@ namespace DataHandling
     string fName = getPropertyValue("Filename");
     boost::split(paths, fName, boost::is_any_of(","));
     m_binChunkSize = getProperty("FileChunkSize");
+    m_baseName = "";
+    m_propName = "";
+    m_spectraCount = 0;
     
     // If paths contains a non fits file, assume (for now) that it contains information about the rotations
     std::string rotFilePath = "";
@@ -157,24 +164,88 @@ namespace DataHandling
     {
       // No extension is set, therefore it's the standard format which we can parse.
       
-      // Delete the output workspace name if it existed
-      std::string outName = getPropertyValue("OutputWorkspace");
-      if (AnalysisDataService::Instance().doesExist(outName))   AnalysisDataService::Instance().remove(outName);
-            
-      MatrixWorkspace_sptr ws;
-      
-      ws = initAndPopulateHistogramWorkspace();    
+      if(m_allHeaderInfo[0].numberOfAxis > 0) m_spectraCount += m_allHeaderInfo[0].axisPixelLengths[0];
 
-      // Set info in WS log to hold rotational information
-      if(rotFilePath != "")
+      // Presumably 2 axis, but futureproofing.
+      for(int i=1;i<m_allHeaderInfo[0].numberOfAxis;++i)
       {
-        string csvRotations = ReadRotations(rotFilePath, paths.size());
-        Run &theRun = ws->mutableRun();
-        theRun.addLogData(new PropertyWithValue<std::string>("Rotations", csvRotations));  
+        m_spectraCount *= m_allHeaderInfo[0].axisPixelLengths[i];
       }
 
-      // Assign it to the output workspace property
-      setProperty("OutputWorkspace",ws);
+      MantidImage imageY(m_allHeaderInfo[0].axisPixelLengths[0], vector<double>(m_allHeaderInfo[0].axisPixelLengths[1]));
+      MantidImage imageE(m_allHeaderInfo[0].axisPixelLengths[0], vector<double>(m_allHeaderInfo[0].axisPixelLengths[1]));;
+      
+      void * bufferAny = NULL;    
+      bufferAny = malloc ((m_allHeaderInfo[0].bitsPerPixel/8)*m_spectraCount);
+      if (bufferAny == NULL) 
+      {
+        throw std::runtime_error("FITS loader couldn't allocate enough memory to run.");	
+      }
+      
+      // Set info in WS log to hold rotational information
+      vector<double> rotations;
+      if(rotFilePath != "")
+         rotations = ReadRotations(rotFilePath, paths.size());
+      
+      // Create a group for these new workspaces, if the group already exists, add to it.
+      string groupName = getPropertyValue("OutputWorkspace");
+
+      // This forms the name of the group
+      m_baseName = getPropertyValue("OutputWorkspace") + "_";
+      m_propName = "OutputWorkspace_";
+
+      size_t fileNumberInGroup = 0;
+
+      if (!AnalysisDataService::Instance().doesExist(groupName))
+      {
+        m_wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup);
+        m_wsGroup->setTitle(groupName);       
+      }
+      else
+      {
+        // Get the name of the latest file in group to start numbering from
+        auto wsObjects = AnalysisDataService::Instance().getObjects();
+        for(auto it = wsObjects.begin(); it != wsObjects.end(); ++it)
+        {
+          if((*it)->getName() == groupName)
+          {
+            m_wsGroup = dynamic_pointer_cast<WorkspaceGroup>(*it);
+            break;
+          }
+        }
+
+        std::string latestName = m_wsGroup->getNames().back();
+        // Set next file number
+        fileNumberInGroup = fetchNumber(latestName) + 1;
+      }             
+
+      // Create First workspace with instrument definition
+      Workspace2D_sptr firstWS;
+      firstWS = addWorkspace(0,fileNumberInGroup,bufferAny,imageY,imageE,rotations,firstWS);     
+
+      try
+      {
+        IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument"); 
+        std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
+        directoryName = directoryName + "/IMAT_Definition.xml";      
+        loadInst->setPropertyValue("Filename", directoryName);   
+        loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", dynamic_pointer_cast<MatrixWorkspace>(firstWS));
+        loadInst->execute();
+      } 
+      catch (std::exception & ex) 
+      {
+        g_log.information("Cannot load the instrument definition. " + string(ex.what()) );
+      }   
+      
+      PARALLEL_FOR_NO_WSP_CHECK()
+      for(int64_t i = 1; i < m_allHeaderInfo.size(); ++i)
+      {        
+        addWorkspace(i,fileNumberInGroup,bufferAny,imageY,imageE,rotations,firstWS);
+      }
+
+      free(bufferAny);
+
+      setProperty("OutputWorkspace",  m_wsGroup);  
     }
     else
     {
@@ -183,8 +254,121 @@ namespace DataHandling
     }    
   }
 
+
+  Workspace2D_sptr LoadFITS::addWorkspace(size_t fileInd, size_t &newFileNumber, void *&bufferAny, MantidImage &imageY, MantidImage &imageE,const vector<double> &rotations,const Workspace2D_sptr parent)
+  {
+    // Create ws        
+    Workspace2D_sptr ws;
+    if(!parent)
+      ws = dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D",m_spectraCount,2,1));
+    else
+      ws = dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(parent));
+       
+    string currNumberS = padZeros(newFileNumber, DIGIT_SIZE_APPEND);
+    ++newFileNumber;
+
+    string propName = m_propName + currNumberS;
+    string baseName = m_baseName + currNumberS; 
+    
+    ws->setTitle(baseName);
+
+    // set data        
+    readFileToWorkspace(ws, m_allHeaderInfo[fileInd], imageY, imageE, bufferAny);
+
+    // Add rotational data to log. Clear first from copied WS
+    ws->mutableRun().removeLogData("Rotation",true);
+    if(rotations.size() > 0)
+      ws->mutableRun().addLogData(new PropertyWithValue<double>("Rotation", rotations.at(fileInd)));  
+    
+    //declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(propName,baseName, Kernel::Direction::Output));  
+    //setProperty(propName,ws);
+
+    // Add to group
+    m_wsGroup->addWorkspace(ws);
+    //AnalysisDataService::Instance().addToGroup(m_wsGroup->getName(), baseName);
+    
+    return ws;
+  }
+
+  // Returns the trailing number from a string minus leading 0's (so 25 from workspace_00025)
+  size_t LoadFITS::fetchNumber(std::string name)
+  {
+    string tmpStr = "";
+    for(auto it = name.end()-1; isdigit(*it); --it)
+    {
+      tmpStr.insert(0, 1, *it);
+    }
+    while(tmpStr.length() > 0 && tmpStr[0] == '0' )
+    {
+      tmpStr.erase(tmpStr.begin());
+    }
+    return (tmpStr.length() > 0) ? lexical_cast<size_t>(tmpStr) : 0;
+  }
+
+  // Adds 0's to the front of a number to create a string of size totalDigitCount including number
+  std::string LoadFITS::padZeros(size_t number, size_t totalDigitCount)
+  {
+    std::ostringstream ss;
+    ss << std::setw( totalDigitCount ) << std::setfill( '0' ) << number;
+    
+    return ss.str();
+  }
+
+  void LoadFITS::readFileToWorkspace(Workspace2D_sptr ws, const FITSInfo& fileInfo, MantidImage &imageY, MantidImage &imageE, void *&bufferAny)
+  {        
+    uint8_t *buffer8 = NULL;
+    uint16_t *buffer16 = NULL;
+    uint32_t *buffer32 = NULL;
+    
+    // create pointer of correct data type to void pointer of the buffer:
+    buffer8 = static_cast<uint8_t*>(bufferAny);
+    buffer16 = static_cast<uint16_t*>(bufferAny);
+    buffer32 = static_cast<uint32_t*>(bufferAny);    
+      
+    // Read Data
+    bool fileErr = false;
+    FILE * currFile = fopen ( fileInfo.filePath.c_str(), "rb" );
+    if (currFile==NULL) fileErr = true;    
+
+    size_t result = 0;
+    if(!fileErr)
+    {
+      fseek (currFile , FIXED_HEADER_SIZE , SEEK_CUR);
+      result = fread(bufferAny, fileInfo.bitsPerPixel/8, m_spectraCount, currFile);
+    }
+
+    if (result != m_spectraCount) fileErr = true;			
+
+    if(fileErr)
+    {
+      throw std::runtime_error("Error reading file; possibly invalid data.");	
+    }
+
+    for(size_t i=0; i<fileInfo.axisPixelLengths[0];++i)
+    {
+      for(size_t j=0; j<fileInfo.axisPixelLengths[1];++j)
+      {
+        double val = 0;
+        if(fileInfo.bitsPerPixel == 8) val = static_cast<double>(buffer8[(i*fileInfo.axisPixelLengths[0]) + j]);
+        if(fileInfo.bitsPerPixel == 16) val = static_cast<double>(buffer16[(i*fileInfo.axisPixelLengths[0]) + j]);
+        if(fileInfo.bitsPerPixel == 32) val = static_cast<double>(buffer32[(i*fileInfo.axisPixelLengths[0]) + j]);
+
+        imageY[i][j] = val;
+        imageE[i][j] = sqrt(val);      
+      }				
+    }
+
+    // Set in WS
+    ws->setImageYAndE(imageY,imageE,0,false);
+    
+    // Clear memory associated with the file load
+    fclose (currFile);    
+  }
+
+
+
   /**
-  * Read a single files header and populate an object with the information
+  * Read a single files header and populate an object with the ignformation
   * @param headerInfo A FITSInfo file object to parse header information into
   * @returns A bool specifying succes of the operation
   */
@@ -234,11 +418,12 @@ namespace DataHandling
     return ranSuccessfully;
   }
 
+
   /**
   * Create histogram workspace
   * @returns Created workspace
   */
-  MatrixWorkspace_sptr LoadFITS::initAndPopulateHistogramWorkspace()
+  Workspace2D_sptr LoadFITS::initAndPopulateHistogramWorkspace()
   {		
     MantidVecPtr x;
     x.access().resize(m_allHeaderInfo.size() + 1);
@@ -260,7 +445,7 @@ namespace DataHandling
       spectraCount *= m_allHeaderInfo[0].axisPixelLengths[i];
     }
 
-    MatrixWorkspace_sptr retVal(new DataObjects::Workspace2D);
+    Workspace2D_sptr retVal(new DataObjects::Workspace2D);
     retVal->initialize(spectraCount, m_allHeaderInfo.size()+1, m_allHeaderInfo.size());
         
     IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
@@ -271,7 +456,7 @@ namespace DataHandling
       directoryName = directoryName + "/IMAT_Definition.xml";
       
       loadInst->setPropertyValue("Filename", directoryName);
-      loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", retVal);
+      loadInst->setProperty<Workspace2D_sptr>("Workspace", retVal);
       loadInst->execute();
     } 
     catch (std::exception & ex) 
@@ -346,7 +531,7 @@ namespace DataHandling
   * @param bitsPerPixel Number of bits used to represent one data point 
   * @param binChunkStartIndex Index for the first file to be processed in this chunk 
   */
-  void LoadFITS::loadChunkOfBinsFromFile(MatrixWorkspace_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, size_t spectraCount, int bitsPerPixel, size_t binChunkStartIndex)
+  void LoadFITS::loadChunkOfBinsFromFile(Workspace2D_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, size_t spectraCount, int bitsPerPixel, size_t binChunkStartIndex)
   {
     size_t binsThisChunk = m_binChunkSize;
     if((binChunkStartIndex + m_binChunkSize) > m_allHeaderInfo.size())
@@ -419,16 +604,16 @@ namespace DataHandling
   }		
 
   /**
-  * Reads a file containing rotation values for each image into a comma separated string
+  * Reads a file containing rotation values for each image into a vector of doubles
   * @param rotFilePath The path to a file containing rotation values
   * @param fileCount number of images which should have corresponding rotation values in the file
   *
-  * @returns string A comma separated string of doubles
+  * @returns vector<double> A vector of all the rotation values
   */
-  std::string LoadFITS::ReadRotations(std::string rotFilePath, size_t fileCount)
+  std::vector<double> LoadFITS::ReadRotations(std::string rotFilePath, size_t fileCount)
   {
+    std::vector<double> allRotations;
     ifstream fStream(rotFilePath.c_str());
-    std::string csvRotations = "";
 
     try
     {
@@ -445,12 +630,9 @@ namespace DataHandling
           boost::split(lineSplit,line, boost::is_any_of("\t"));
 
           if(ind==0 || lineSplit[0] == "")
-            continue; // Skip first iteration or where rotation value is empty
-         
-          if(ind!=1) // append a comma to separate values if not the first index
-            csvRotations += ",";
-
-          csvRotations += lineSplit[1];          
+            continue; // Skip first iteration or where rotation value is empty         
+ 
+          allRotations.push_back(lexical_cast<double>(lineSplit[1]));
         }
 
         // Check the number of rotations in file matches number of files
@@ -469,7 +651,7 @@ namespace DataHandling
       throw std::runtime_error("Invalid file path or file format: Expected a file with a line separated list of rotations with the same number of entries as other files.");
     }
 
-    return csvRotations;
+    return allRotations;
   }
 
 }
