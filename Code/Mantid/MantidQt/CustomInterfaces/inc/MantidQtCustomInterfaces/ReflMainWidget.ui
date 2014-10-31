@@ -232,49 +232,15 @@
            <number>1</number>
           </property>
           <item>
-           <layout class="QHBoxLayout" name="layoutTableButtons">
-            <item>
-             <widget class="QToolButton" name="buttonAppendRow">
-              <property name="text">
-               <string>AppendRow</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="buttonDeleteRow">
-              <property name="text">
-               <string>DeleteRow</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="buttonGroupRows">
-              <property name="text">
-               <string>GroupRows</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="buttonExpandSelection">
-              <property name="text">
-               <string>ExpandSelection</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="spacerTableButtons">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
+           <widget class="QToolBar" name="rowToolBar">
+            <property name="styleSheet">
+             <string>QToolBar{border: none;}</string>
+            </property>
+            <addaction name="actionAppendRow"/>
+            <addaction name="actionDeleteRow"/>
+            <addaction name="actionGroupRows"/>
+            <addaction name="actionExpandSelection"/>
+           </widget>
           </item>
           <item>
            <widget class="QTableView" name="viewTable">
@@ -319,7 +285,11 @@
              <number>1</number>
             </property>
             <item>
-             <widget class="QProgressBar" name="progressBar"/>
+             <widget class="QProgressBar" name="progressBar">
+              <property name="value">
+               <number>0</number>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QLabel" name="labelProcessInstrument">
@@ -478,7 +448,7 @@
      <normaloff>:/drag_curves.png</normaloff>:/drag_curves.png</iconset>
    </property>
    <property name="text">
-    <string>Group Rows</string>
+    <string>Group Selected</string>
    </property>
   </action>
   <action name="actionProcess">
