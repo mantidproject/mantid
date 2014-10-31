@@ -77,13 +77,12 @@ public slots:
   void toggleVScroll();
   void imageHorizontalRangeChanged();
   void graphRangeChanged();
-  void vScrollBarMoved();
-  void hScrollBarMoved();
+  void scrollBarMoved();
   void imageSplitterMoved();
   void vgraphSplitterMoved();
   void imagePickerMoved(const QPoint &point);
   void hGraphPickerMoved(const QPoint &point);
-  void vGraphPickerMoved(const QPoint & point);
+  void vGraphPickerMoved(const QPoint &point);
   void intensitySliderMoved();
   void loadColorMap();
   void openOnlineHelp();

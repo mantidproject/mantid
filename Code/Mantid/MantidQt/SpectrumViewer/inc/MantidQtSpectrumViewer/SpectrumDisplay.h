@@ -100,12 +100,17 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      /// Show information about the point (x, y) on the image in the table
      std::vector<std::string> showInfoList( double x, double y );
 
+     /// Gets a point on the graph area for a set of axis values
      QPoint getPlotTransform( QPair<double, double> values );
 
+     /// Gets a set of axis values for a point on the graph area
      QPair<double, double> getPlotInvTransform( QPoint point );
 
-     // Gets the last Y value pointed at
-     double getLastY();
+     // Gets the X value pointed at
+     double getPointedAtX();
+
+     // Gets the Y value pointed at
+     double getPointedAtY();
 
   protected:
      SpectrumPlotItem*    m_spectrumPlotItem;
@@ -145,7 +150,6 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      double               m_totalXMin;
      double               m_totalXMax;
 
-     double               m_lastY;
 };
 
 } // namespace SpectrumView

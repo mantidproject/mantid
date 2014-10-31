@@ -164,10 +164,10 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
                    this, SLOT(imageHorizontalRangeChanged()) );
 
   QObject::connect(m_svUI->imageVerticalScrollBar, SIGNAL(valueChanged(int)),
-                   this, SLOT(vScrollBarMoved()) );
+                   this, SLOT(scrollBarMoved()) );
 
   QObject::connect(m_svUI->imageHorizontalScrollBar, SIGNAL(valueChanged(int)),
-                   this, SLOT(hScrollBarMoved()) );
+                   this, SLOT(scrollBarMoved()) );
 
   QObject::connect(m_svUI->action_Hscroll, SIGNAL(changed()),
                    this, SLOT(toggleHScroll()) );
@@ -279,7 +279,10 @@ SVConnections::~SVConnections()
   delete m_colorGroup;
 }
 
+
 /**
+ * Handle events.
+ *
  * @param object Object that the event came from.
  * @param event The event being filtered.
  * @return true if the event was consumed.
@@ -311,7 +314,7 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
 
     // Convert Y position to values so that a change of 1 corresponds to a change in spec. no by 1
     int newX = m_pickerX;
-    double lastY = m_spectrumDisplay->getLastY();
+    double lastY = m_spectrumDisplay->getPointedAtY();
 
     QKeyEvent *keyEvent = dynamic_cast<QKeyEvent *>(event);
     int key = keyEvent->key();
@@ -370,12 +373,18 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
 }
 
 
+/**
+ * Slot to handle closing the window.
+ */
 void SVConnections::closeViewer()
 {
   m_svMainWindow->close();
 }
 
 
+/**
+ * Toggles the horizontal scroll bar.
+ */
 void SVConnections::toggleHScroll()
 {
   bool is_on = m_svUI->action_Hscroll->isChecked();
@@ -386,6 +395,9 @@ void SVConnections::toggleHScroll()
 }
 
 
+/**
+ * Toggles the vertical scroll bar.
+ */
 void SVConnections::toggleVScroll()
 {
   bool is_on = m_svUI->action_Vscroll->isChecked();
@@ -396,6 +408,9 @@ void SVConnections::toggleVScroll()
 }
 
 
+/**
+ * Update X range when range selection changed.
+ */
 void SVConnections::imageHorizontalRangeChanged()
 {
   m_spectrumDisplay->updateRange();
@@ -417,18 +432,21 @@ void SVConnections::graphRangeChanged()
 }
 
 
-void SVConnections::vScrollBarMoved()
+/**
+ * Handles updating the image when a scroll bar is moved.
+ */
+void SVConnections::scrollBarMoved()
 {
   m_spectrumDisplay->updateImage();
 }
 
 
-void SVConnections::hScrollBarMoved()
-{
-  m_spectrumDisplay->updateImage();
-}
-
-
+/**
+ * Handle the image splitter being moved.
+ *
+ * This moves the vertical graph slitter to the same position
+ * in ordetr to keep the graphs in alignment.
+ */
 void SVConnections::imageSplitterMoved()
 {
   QList<int> sizes = m_svUI->imageSplitter->sizes();
@@ -444,6 +462,12 @@ void SVConnections::imageSplitterMoved()
 }
 
 
+/**
+ * Handle the vertical graph splitter being moved.
+ *
+ * This moves the image slitter to the same position
+ * in ordetr to keep the graphs in alignment.
+ */
 void SVConnections::vgraphSplitterMoved()
 {
   QList<int> sizes = m_svUI->vgraphSplitter->sizes();
@@ -494,6 +518,9 @@ void SVConnections::vGraphPickerMoved(const QPoint & point)
 }
 
 
+/**
+ * Slot to handle the intensity slider being moved.
+ */
 void SVConnections::intensitySliderMoved()
 {
   double value = (double)m_svUI->intensity_slider->value();
@@ -505,6 +532,9 @@ void SVConnections::intensitySliderMoved()
 }
 
 
+/**
+ * Set the heat color scale.
+ */
 void SVConnections::heatColorScale()
 {
   std::vector<QRgb> positive_color_table;
@@ -517,6 +547,10 @@ void SVConnections::heatColorScale()
   showColorScale( positive_color_table, negative_color_table );
 }
 
+
+/**
+ * Set the gray color scale.
+ */
 void SVConnections::grayColorScale()
 {
   std::vector<QRgb> positive_color_table;
@@ -529,6 +563,10 @@ void SVConnections::grayColorScale()
   showColorScale( positive_color_table, negative_color_table );
 }
 
+
+/**
+ * Set the inverse gray color scale.
+ */
 void SVConnections::negativeGrayColorScale()
 {
   std::vector<QRgb> positive_color_table;
@@ -541,6 +579,10 @@ void SVConnections::negativeGrayColorScale()
   showColorScale( positive_color_table, negative_color_table );
 }
 
+
+/**
+ * Set the green and yellow color scale.
+ */
 void SVConnections::greenYellowColorScale()
 {
   std::vector<QRgb> positive_color_table;
@@ -553,6 +595,10 @@ void SVConnections::greenYellowColorScale()
   showColorScale( positive_color_table, negative_color_table );
 }
 
+
+/**
+ * Set the rainbow color scale.
+ */
 void SVConnections::rainbowColorScale()
 {
   std::vector<QRgb> positive_color_table;
@@ -565,6 +611,10 @@ void SVConnections::rainbowColorScale()
   showColorScale( positive_color_table, negative_color_table );
 }
 
+
+/**
+ * Set the optimal color scale.
+ */
 void SVConnections::optimalColorScale()
 {
   std::vector<QRgb> positive_color_table;
@@ -577,6 +627,10 @@ void SVConnections::optimalColorScale()
   showColorScale( positive_color_table, negative_color_table );
 }
 
+
+/**
+ * Set the multi color scale.
+ */
 void SVConnections::multiColorScale()
 {
   std::vector<QRgb> positive_color_table;
@@ -589,6 +643,10 @@ void SVConnections::multiColorScale()
   showColorScale( positive_color_table, negative_color_table );
 }
 
+
+/**
+ * Set the spectrum color scale.
+ */
 void SVConnections::spectrumColorScale()
 {
   std::vector<QRgb> positive_color_table;
@@ -602,6 +660,9 @@ void SVConnections::spectrumColorScale()
 }
 
 
+/**
+ * Slot to handle loading a color map from file.
+ */
 void SVConnections::loadColorMap()
 {
   QString file_name = MantidColorMap::loadMapDialog( "", m_svMainWindow );
@@ -670,10 +731,12 @@ void SVConnections::showColorScale( std::vector<QRgb> & positive_color_table,
 }
 
 
+/**
+ * Slot to open the online help webapge for the interface.
+ */
 void SVConnections::openOnlineHelp()
 {
   QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot:_ImageViewer"));
-
 }
 
 } // namespace SpectrumView
