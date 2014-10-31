@@ -37,26 +37,29 @@ class MockView : public ReflMainView
 public:
   MockView(){};
   virtual ~MockView(){}
-  virtual void showTable(QReflTableModel_sptr model){ m_model = model;}
-  virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy*) {};
+
+  //Prompts
   MOCK_METHOD3(askUserString, std::string(const std::string& prompt, const std::string& title, const std::string& defaultValue));
   MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-  MOCK_METHOD2(setProgressRange, void(int, int));
-  MOCK_METHOD1(setProgress, void(int));
-  MOCK_METHOD1(setTableList, void(const std::set<std::string>& tableList));
-  MOCK_METHOD2(setInstrumentList, void(const std::vector<std::string>& instruments, const std::string& defaultInstrument));
-  MOCK_METHOD1(setInstrument, void(const std::string&));
+
+  //IO
+  MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
   MOCK_METHOD1(setSelection, void(const std::set<int>& rows));
   MOCK_CONST_METHOD0(getSelectedRows, std::set<int>());
-  MOCK_CONST_METHOD0(getSearchInstrument, std::string());
-  MOCK_CONST_METHOD0(getProcessInstrument, std::string());
-  MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
-  MOCK_CONST_METHOD0(getPresenter, boost::shared_ptr<IReflPresenter>());
-private:
-  QReflTableModel_sptr m_model;
+
+  //Calls we don't care about
+  virtual void showTable(QReflTableModel_sptr model) {(void)model;}
+  virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy*) {};
+  virtual void setProgressRange(int min, int max) {(void)min; (void)max; }
+  virtual void setProgress(int progress) {(void)progress;}
+  virtual void setTableList(const std::set<std::string>& tableList) {(void)tableList;}
+  virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument) {(void)instruments; (void)defaultInstrument;}
+  virtual std::string getProcessInstrument() const {return "FAKE";}
+  virtual std::string getSearchInstrument() const {return "FAKE";}
+  virtual boost::shared_ptr<IReflPresenter> getPresenter() const {return nullptr;}
 };
 
 #endif /*MANTID_CUSTOMINTERFACES_REFLMAINVIEWMOCKOBJECTS_H*/

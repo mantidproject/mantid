@@ -107,8 +107,6 @@ public:
   void testSave()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -122,8 +120,6 @@ public:
   void testSaveAs()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -152,8 +148,6 @@ public:
   void testSaveProcess()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -186,8 +180,6 @@ public:
   void testAppendRow()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -224,8 +216,6 @@ public:
   void testAppendRowSpecify()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -265,8 +255,6 @@ public:
   void testAppendRowSpecifyPlural()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -304,8 +292,6 @@ public:
   void testPrependRow()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -340,8 +326,6 @@ public:
   void testPrependRowSpecify()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -379,8 +363,6 @@ public:
   void testPrependRowSpecifyPlural()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -418,8 +400,6 @@ public:
   void testDeleteRowNone()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -447,8 +427,6 @@ public:
   void testDeleteRowSingle()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -480,8 +458,6 @@ public:
   void testDeleteRowPlural()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -516,8 +492,6 @@ public:
   void testProcess()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -536,9 +510,6 @@ public:
 
     //The user hits the "process" button with the first two rows selected
     EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(rowlist));
-    EXPECT_CALL(mockView, getProcessInstrument()).WillRepeatedly(Return("INTER"));
-    EXPECT_CALL(mockView, setProgressRange(_,_));
-    EXPECT_CALL(mockView, setProgress(_)).Times(4);
     presenter.notify(ProcessFlag);
 
     //Check output workspaces were created as expected
@@ -577,8 +548,6 @@ public:
     createTOFWorkspace("dataB", "12346");
 
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
     EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(OpenTableFlag);
@@ -592,9 +561,6 @@ public:
 
     //The user hits the "process" button with the first two rows selected
     EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(rowlist));
-    EXPECT_CALL(mockView, getProcessInstrument()).WillRepeatedly(Return("INTER"));
-    EXPECT_CALL(mockView, setProgressRange(_,_));
-    EXPECT_CALL(mockView, setProgress(_)).Times(4);
     presenter.notify(ProcessFlag);
 
     //Check output workspaces were created as expected
@@ -633,8 +599,6 @@ public:
     AnalysisDataService::Instance().addOrReplace("TestWorkspace", ws);
 
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     //We should receive an error
@@ -649,8 +613,6 @@ public:
   void testBadWorkspaceLength()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     //Because we to open twice, get an error twice
@@ -703,8 +665,6 @@ public:
   void testPromptSaveAfterAppendRow()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     //User hits "append row"
@@ -729,8 +689,6 @@ public:
   void testPromptSaveAfterDeleteRow()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     //User hits "append row" a couple of times
@@ -765,8 +723,6 @@ public:
   void testPromptSaveAndDiscard()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     //User hits "append row" a couple of times
@@ -786,8 +742,6 @@ public:
   void testPromptSaveOnOpen()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -836,8 +790,6 @@ public:
     row << "" << "" << "" << "" << "" << "" << 1.0 << 5 << ""; //Row 9
 
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
