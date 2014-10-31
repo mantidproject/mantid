@@ -1,22 +1,22 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H
 
+#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <boost/make_shared.hpp>
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidQtCustomInterfaces/ReflMainView.h"
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
 
 #include "ReflMainViewMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using namespace testing;
 
 //=====================================================================================
@@ -55,6 +55,28 @@ private:
       AnalysisDataService::Instance().addOrReplace(wsName, ws);
 
     return ws;
+  }
+
+  void createTOFWorkspace(const std::string& wsName, const std::string& runNumber = "")
+  {
+    auto tinyWS = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+    auto inst = tinyWS->getInstrument();
+
+    inst->getParameterMap()->addDouble(inst.get(), "I0MonitorIndex", 1.0);
+    inst->getParameterMap()->addDouble(inst.get(), "PointDetectorStart", 1.0);
+    inst->getParameterMap()->addDouble(inst.get(), "PointDetectorStop", 1.0);
+    inst->getParameterMap()->addDouble(inst.get(), "LambdaMin", 0.0);
+    inst->getParameterMap()->addDouble(inst.get(), "LambdaMax", 10.0);
+    inst->getParameterMap()->addDouble(inst.get(), "MonitorBackgroundMin", 0.0);
+    inst->getParameterMap()->addDouble(inst.get(), "MonitorBackgroundMax", 10.0);
+    inst->getParameterMap()->addDouble(inst.get(), "MonitorIntegralMin", 0.0);
+    inst->getParameterMap()->addDouble(inst.get(), "MonitorIntegralMax", 10.0);
+
+    tinyWS->mutableRun().addLogData(new PropertyWithValue<double>("Theta", 0.12345));
+    if(!runNumber.empty())
+      tinyWS->mutableRun().addLogData(new PropertyWithValue<std::string>("run_number", runNumber));
+
+    AnalysisDataService::Instance().addOrReplace(wsName, tinyWS);
   }
 
   ITableWorkspace_sptr createPrefilledWorkspace(const std::string& wsName)
