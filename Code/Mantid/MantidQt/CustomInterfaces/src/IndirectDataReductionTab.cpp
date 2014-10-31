@@ -133,8 +133,14 @@ namespace CustomInterfaces
     // Get the instrument workspace
     MatrixWorkspace_sptr instWorkspace = loadInstrumentIfNotExist(instrumentName, analyser, reflection);
 
+    // In the IRIS IPF there is no fmica component
+    if(instrumentName == "IRIS" && analyser == "fmica")
+      analyser = "mica";
+
     // Get the instrument
-    Instrument_const_sptr instrument = instWorkspace->getInstrument();
+    auto instrument = instWorkspace->getInstrument()->getComponentByName(analyser);
+    if(instrument == NULL)
+      return instDetails;
 
     // For each parameter we want to get
     for(auto it = ipfElements.begin(); it != ipfElements.end(); ++it)

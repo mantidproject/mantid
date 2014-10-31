@@ -589,6 +589,14 @@ namespace MDAlgorithms
   }
 
   /** Calculate if this Q is on a detector
+   * Define edges for each instrument by masking. For CORELLI, tubes 1 and 16, and pixels 0 and 255.
+   * Get Q in the lab frame for every peak, call it C
+   * For every point on the edge, the trajectory in reciprocal space is a straight line, going through O=V3D(0,0,0).
+   * Calculate a point at a fixed momentum, say k=1. Q in the lab frame E=V3D(-k*sin(tt)*cos(ph),-k*sin(tt)*sin(ph),k-k*cos(ph)).
+   * Normalize E to 1: E=E*(1./E.norm())
+   * The distance from C to OE is given by dv=C-E*(C.scalar_prod(E))
+   * If dv.norm<integration_radius, one of the detector trajectories on the edge is too close to the peak
+   * This method is applied to all masked pixels. If there are masked pixels trajectories inside an integration volume, the peak must be rejected.
    *
    * @param QLabFrame: The Peak center.
    * @param r: Peak radius.

@@ -59,7 +59,7 @@ namespace MantidQt
     void QReflTableModel::invalidateDataCache(const int row) const
     {
       //If the row is in the cache, invalidate the cache.
-      if(row == m_dataCachePeakIndex)
+      if(row == m_dataCachePeakIndex || row == -1)
         m_dataCachePeakIndex = -1;
     }
 
@@ -83,7 +83,7 @@ namespace MantidQt
       m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_QMIN)));
       m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_QMAX)));
       m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_DQQ)));
-      m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_SCALE)));
+      m_dataCache.push_back(QString::number(tableRow.cell<double>(COL_SCALE)));
       m_dataCache.push_back(QString::number(tableRow.cell<int>(COL_GROUP)));
       m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_OPTIONS)));
 
@@ -137,7 +137,10 @@ namespace MantidQt
     {
       if (role == Qt::TextAlignmentRole)
       {
-        return Qt::AlignRight;
+        if(index.column() == COL_OPTIONS)
+          return Qt::AlignLeft;
+        else
+          return Qt::AlignRight;
       }
       else if( role != Qt::DisplayRole && role != Qt::EditRole)
       {
@@ -167,13 +170,14 @@ namespace MantidQt
         const int colNumber = index.column();
         const int rowNumber = index.row();
 
-        if (colNumber == COL_GROUP)
+        switch(colNumber)
         {
-          m_tWS->Int(rowNumber, COL_GROUP) = str.toInt();
-        }
-        else
-        {
-          m_tWS->String(rowNumber, colNumber) = str.toStdString();
+        case COL_GROUP:
+          m_tWS->Int(rowNumber, COL_GROUP) = str.toInt(); break;
+        case COL_SCALE:
+          m_tWS->Double(rowNumber, COL_SCALE) = str.toDouble(); break;
+        default:
+          m_tWS->String(rowNumber, colNumber) = str.toStdString(); break;
         }
 
         invalidateDataCache(rowNumber);
@@ -215,6 +219,52 @@ namespace MantidQt
     {
       if (!index.isValid()) return 0;
       return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
+    }
+
+    /**
+    Insert the given number of rows at the specified position
+    @param row : The row to insert before
+    @param count : The number of rows to insert
+    @param parent : The parent index
+    */
+    bool QReflTableModel::insertRows(int row, int count, const QModelIndex& parent)
+    {
+      if(count < 1)
+        return true;
+
+      if(row < 0)
+        return false;
+
+      beginInsertRows(parent, row, row + count - 1);
+      for(int i = 0; i < count; ++i)
+        m_tWS->insertRow(row + i);
+      endInsertRows();
+
+      invalidateDataCache(-1);
+      return true;
+    }
+
+    /**
+    Remove the given number of rows from the specified position
+    @param row : The row index to remove from
+    @param count : The number of rows to remove
+    @param parent : The parent index
+    */
+    bool QReflTableModel::removeRows(int row, int count, const QModelIndex& parent)
+    {
+      if(count < 1)
+        return true;
+
+      if(row < 0)
+        return false;
+
+      beginRemoveRows(parent, row, row + count - 1);
+      for(int i = 0; i < count; ++i)
+        m_tWS->removeRow(row);
+      endRemoveRows();
+
+      invalidateDataCache(-1);
+      return true;
     }
 
   } // namespace CustomInterfaces

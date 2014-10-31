@@ -28,9 +28,9 @@ namespace Mantid
     }
 
     /**
-     * Returns the value of the form factor for the given \f$Q^2\f$ in \f$\AA^-2\f$ taking into account the
+     * Returns the value of the form factor for the given \f$Q^2\f$ in \f$\mbox{\AA}^-2\f$ taking into account the
      * number of terms given by the value of j & l
-     * @param qsqr :: The square of the momentum transfer in \f$\AA^-2\f$
+     * @param qsqr :: The square of the momentum transfer in \f$\mbox{\AA}^-2\f$
      * @param j :: The total angular momentum
      * @param l :: The orbital angular momentum
      * @return

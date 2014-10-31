@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
   ConjoinSpectraTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
+  CreateCalibrationWorkspaceTest.py
   CreateWorkspaceTest.py
   DakotaChiSquaredTest.py
   DensityOfStatesTest.py
@@ -39,6 +40,7 @@ set ( TEST_PY_FILES
   Stitch1DManyTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
+  SymmetriseTest.py
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
   TimeSliceTest.py

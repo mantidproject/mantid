@@ -48,6 +48,7 @@ namespace CustomInterfaces
     virtual bool validate();
 
   private slots:
+    void algorithmsComplete(bool error);
     void calPlotRaw();
     void calPlotEnergy();
     void calMinChanged(double);
@@ -61,6 +62,8 @@ namespace CustomInterfaces
 
   private:
     void createRESfile(const QString& file);
+
+    QString m_lastCalPlotFilename;
 
   };
 } // namespace CustomInterfaces

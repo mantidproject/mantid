@@ -9,10 +9,6 @@ namespace Mantid
 namespace Geometry
 {
 
-boost::regex SymmetryOperationSymbolParser::m_tokenRegex = boost::regex("[+\\-]?((x|y|z)|(\\d/\\d))", boost::regex::icase);
-boost::regex SymmetryOperationSymbolParser::m_matrixRowRegex = boost::regex("^[+\\-]?(x|y|z)", boost::regex::icase);
-boost::regex SymmetryOperationSymbolParser::m_vectorComponentRegex = boost::regex("^[+\\-]?(\\d/\\d)", boost::regex::icase);
-
 /// Default constructor
 SymmetryOperationSymbolParser::SymmetryOperationSymbolParser()
 {
@@ -157,17 +153,23 @@ std::pair<std::vector<int>, RationalNumber> SymmetryOperationSymbolParser::parse
 
     size_t totalMatchedLength = 0;
 
+    // Regular expressions for different token types
+    boost::regex tokenRegex("[+\\-]?((x|y|z)|(\\d/\\d))", boost::regex::icase);
+    boost::regex matrixRowRegex("^[+\\-]?(x|y|z)", boost::regex::icase);
+    boost::regex vectorComponentRegex("^[+\\-]?(\\d/\\d)", boost::regex::icase);
+
+
     // Check how many tokens this string is composed of and iterate through them
-    boost::sregex_iterator iter(component.begin(), component.end(), m_tokenRegex);
+    boost::sregex_iterator iter(component.begin(), component.end(), tokenRegex);
     boost::sregex_iterator end;
     for(; iter != end; ++iter) {
         std::string currentString = iter->str();
         totalMatchedLength += currentString.size();
 
         // Try to handle the current token as either a matrix row (x, y, z) or a vector component (a/b)
-        if(boost::regex_match(currentString, m_matrixRowRegex)) {
+        if(boost::regex_match(currentString, matrixRowRegex)) {
             processMatrixRowToken(currentString, matrixRow);
-        } else if(boost::regex_match(currentString, m_vectorComponentRegex)) {
+        } else if(boost::regex_match(currentString, vectorComponentRegex)) {
             processVectorComponentToken(currentString, vectorComponent);
         } else {
             throw std::runtime_error("Failed to parse input: " + component);
