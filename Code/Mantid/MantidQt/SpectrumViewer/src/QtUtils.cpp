@@ -54,8 +54,8 @@ void  QtUtils::SetTableEntry( int           row,
 /**
  * Set the specified string into the specified QLineEdit widget.
  *
- * @param string       The string that will be placed in the widget.
- * @param q_line_edit  Pointer to the QLineEdit widget.
+ * @param string    The string that will be placed in the widget.
+ * @param lineEdit  Pointer to the QLineEdit widget.
  */
 void  QtUtils::SetText( const std::string & string,
                               QLineEdit*    lineEdit )
@@ -69,11 +69,11 @@ void  QtUtils::SetText( const std::string & string,
  * Format and set the specified double as the text in the specified
  * QLineEdit widget.
  *
- * @param width       The number of spaces to use when formatting the value.
- * @param precision    The number of significant figures to use when formatting
- *                    the value.
- * @param value       The number to be formatted and placed in the table.
- * @param q_line_edit Pointer to the QLineEdit widget.
+ * @param width      The number of spaces to use when formatting the value.
+ * @param precision  The number of significant figures to use when formatting
+ *                   the value.
+ * @param value      The number to be formatted and placed in the table.
+ * @param lineEdit   Pointer to the QLineEdit widget.
  */
 void  QtUtils::SetText( int        width,
                         int        precision,

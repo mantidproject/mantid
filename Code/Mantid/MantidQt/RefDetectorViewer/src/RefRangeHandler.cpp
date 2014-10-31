@@ -32,7 +32,7 @@ RefRangeHandler::RefRangeHandler( Ui_RefImageViewer* ivUI ) : m_ivUI(ivUI)
 /**
  * Configure the min, max and step controls for the specified data source.
  *
- * @param data_source  SpectrumDataSource that provides the data to be drawn
+ * @param dataSource  SpectrumDataSource that provides the data to be drawn
  */
 void RefRangeHandler::configureRangeControls( SpectrumDataSource* data_source )
 {
