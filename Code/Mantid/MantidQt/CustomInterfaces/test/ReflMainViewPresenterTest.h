@@ -847,8 +847,6 @@ public:
   void testClearRows()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, setInstrumentList(_,_)).Times(1);
-    EXPECT_CALL(mockView, setTableList(_)).Times(AnyNumber());
     ReflMainViewPresenter presenter(&mockView);
 
     createPrefilledWorkspace("TestWorkspace");
@@ -872,13 +870,13 @@ public:
     auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 4);
     //Check the unselected rows were unaffected
-    TS_ASSERT_EQUALS(ws->String(0, RunCol), "13460");
-    TS_ASSERT_EQUALS(ws->String(3, RunCol), "13470");
+    TS_ASSERT_EQUALS(ws->String(0, RunCol), "12345");
+    TS_ASSERT_EQUALS(ws->String(3, RunCol), "24682");
 
     //Check the group ids have been set correctly
-    TS_ASSERT_EQUALS(ws->Int(0, GroupCol), 3);
-    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
-    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 2);
+    TS_ASSERT_EQUALS(ws->Int(0, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 2);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 3);
     TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 1);
 
     //Make sure the selected rows are clear
