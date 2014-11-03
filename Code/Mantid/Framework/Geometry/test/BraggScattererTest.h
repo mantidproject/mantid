@@ -1,31 +1,31 @@
-#ifndef MANTID_GEOMETRY_ISCATTERERTEST_H_
-#define MANTID_GEOMETRY_ISCATTERERTEST_H_
+#ifndef MANTID_GEOMETRY_BRAGGSCATTERERTEST_H_
+#define MANTID_GEOMETRY_BRAGGSCATTERERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "MantidGeometry/Crystal/IScatterer.h"
+#include "MantidGeometry/Crystal/BraggScatterer.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-class IScattererTest : public CxxTest::TestSuite
+class BraggScattererTest : public CxxTest::TestSuite
 {
 public:
     // This pair of boilerplate methods prevent the suite being created statically
     // This means the constructor isn't called when running other tests
-    static IScattererTest *createSuite() { return new IScattererTest(); }
-    static void destroySuite( IScattererTest *suite ) { delete suite; }
+    static BraggScattererTest *createSuite() { return new BraggScattererTest(); }
+    static void destroySuite( BraggScattererTest *suite ) { delete suite; }
 
     void testConstruction()
     {
-        TS_ASSERT_THROWS_NOTHING(MockIScatterer scatterer);
+        TS_ASSERT_THROWS_NOTHING(MockBraggScatterer scatterer);
     }
 
     void testInitialization()
     {
-        IScatterer_sptr scatterer = getDefaultScatterer();
+        BraggScatterer_sptr scatterer = getDefaultScatterer();
 
         TS_ASSERT(!scatterer->isInitialized());
         TS_ASSERT_THROWS_NOTHING(scatterer->initialize());
@@ -38,14 +38,14 @@ public:
 
     void testAfterScattererPropertySet()
     {
-        //IScatterer_sptr scatterer = getInitializedScatterer();
-        //MockIScatterer *mockScatterer = dynamic_cast<MockIScatterer *>(scatterer.get());
+        //BraggScatterer_sptr scatterer = getInitializedScatterer();
+        //MockBraggScatterer *mockScatterer = dynamic_cast<MockBraggScatterer *>(scatterer.get());
         //EXPECT_CALL(mockScatterer, afterScattererPropertySet)
     }
 
     void testGetSetPosition()
     {
-        IScatterer_sptr scatterer = getInitializedScatterer();
+        BraggScatterer_sptr scatterer = getInitializedScatterer();
 
         V3D goodPosition(0.2, 0.4, 0.3);
         TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("Position", goodPosition));
@@ -63,7 +63,7 @@ public:
 
     void testGetSetCell()
     {
-        IScatterer_sptr scatterer = getInitializedScatterer();
+        BraggScatterer_sptr scatterer = getInitializedScatterer();
 
         UnitCell cell(5.43, 5.43, 5.43);
 
@@ -73,7 +73,7 @@ public:
 
     void testGetSetSpaceGroup()
     {
-        IScatterer_sptr scatterer = getInitializedScatterer();
+        BraggScatterer_sptr scatterer = getInitializedScatterer();
 
         SpaceGroup_const_sptr testGroup = SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m");
 
@@ -83,7 +83,7 @@ public:
 
     void testEquivalentPositions()
     {
-        IScatterer_sptr scatterer = getInitializedScatterer();
+        BraggScatterer_sptr scatterer = getInitializedScatterer();
 
         V3D generalPosition(0.3, 0.32, 0.45);
 
@@ -127,31 +127,31 @@ public:
     }
 
 private:
-    IScatterer_sptr getDefaultScatterer()
+    BraggScatterer_sptr getDefaultScatterer()
     {
-        return boost::make_shared<MockIScatterer>();
+        return boost::make_shared<MockBraggScatterer>();
     }
 
-    IScatterer_sptr getInitializedScatterer()
+    BraggScatterer_sptr getInitializedScatterer()
     {
-        IScatterer_sptr raw = getDefaultScatterer();
+        BraggScatterer_sptr raw = getDefaultScatterer();
         raw->initialize();
 
         return raw;
     }
 
-    class MockIScatterer : public IScatterer
+    class MockBraggScatterer : public BraggScatterer
     {
     public:
-        MockIScatterer() : IScatterer() { }
-        ~MockIScatterer() { }
+        MockBraggScatterer() : BraggScatterer() { }
+        ~MockBraggScatterer() { }
 
         MOCK_CONST_METHOD0(name, std::string());
-        MOCK_CONST_METHOD0(clone, IScatterer_sptr());
+        MOCK_CONST_METHOD0(clone, BraggScatterer_sptr());
         MOCK_CONST_METHOD1(calculateStructureFactor, StructureFactor(const V3D&));
         MOCK_METHOD1(afterScattererPropertySet, void(const std::string &));
     };
 };
 
 
-#endif /* MANTID_GEOMETRY_ISCATTERERTEST_H_ */
+#endif /* MANTID_GEOMETRY_BRAGGSCATTERERTEST_H_ */

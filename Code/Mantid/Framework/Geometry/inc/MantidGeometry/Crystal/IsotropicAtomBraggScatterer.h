@@ -1,7 +1,7 @@
-#ifndef MANTID_GEOMETRY_ISOTROPICATOMSCATTERER_H_
-#define MANTID_GEOMETRY_ISOTROPICATOMSCATTERER_H_
+#ifndef MANTID_GEOMETRY_ISOTROPICATOMBRAGGSCATTERER_H_
+#define MANTID_GEOMETRY_ISOTROPICATOMBRAGGSCATTERER_H_
 
-#include "MantidGeometry/Crystal/IScatterer.h"
+#include "MantidGeometry/Crystal/BraggScatterer.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/NeutronAtom.h"
 
@@ -10,9 +10,9 @@ namespace Mantid
 namespace Geometry
 {
 
-/** IsotropicAtomScatterer
+/** IsotropicAtomBraggScatterer
 
-    IsotropicAtomScatterer calculates the structure factor for
+    IsotropicAtomBraggScatterer calculates the structure factor for
     a given HKL using the following equation, which gives the
     structure factor for the j-th atom in the unit cell:
 
@@ -58,8 +58,8 @@ namespace Geometry
     Fm-3m, Cu atoms occupy the position (0,0,0) and, because of the F-centering,
     also 3 additional positions.
 
-        IScatterer_sptr cu = ScattererFactory::Instance().createScatterer(
-                                                            "IsotropicAtomScatterer",
+        BraggScatterer_sptr cu = BraggScattererFactory::Instance().createScatterer(
+                                                            "IsotropicAtomBraggScatterer",
                                                             "Element=Cu; SpaceGroup=F m -3 m")
         cu->setProperty("UnitCell", unitCellToStr(cellCu));
 
@@ -94,18 +94,18 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class IsotropicAtomScatterer;
+class IsotropicAtomBraggScatterer;
 
-typedef boost::shared_ptr<IsotropicAtomScatterer> IsotropicAtomScatterer_sptr;
+typedef boost::shared_ptr<IsotropicAtomBraggScatterer> IsotropicAtomBraggScatterer_sptr;
 
-class MANTID_GEOMETRY_DLL IsotropicAtomScatterer : public IScatterer
+class MANTID_GEOMETRY_DLL IsotropicAtomBraggScatterer : public BraggScatterer
 {
 public:
-    IsotropicAtomScatterer();
-    virtual ~IsotropicAtomScatterer() { }
+    IsotropicAtomBraggScatterer();
+    virtual ~IsotropicAtomBraggScatterer() { }
 
-    std::string name() const { return "IsotropicAtomScatterer"; }
-    IScatterer_sptr clone() const;
+    std::string name() const { return "IsotropicAtomBraggScatterer"; }
+    BraggScatterer_sptr clone() const;
 
     std::string getElement() const;
     PhysicalConstants::NeutronAtom getNeutronAtom() const;
@@ -128,10 +128,10 @@ protected:
     std::string m_label;
 };
 
-typedef boost::shared_ptr<IsotropicAtomScatterer> IsotropicAtomScatterer_sptr;
+typedef boost::shared_ptr<IsotropicAtomBraggScatterer> IsotropicAtomBraggScatterer_sptr;
 
 
 } // namespace Geometry
 } // namespace Mantid
 
-#endif  /* MANTID_GEOMETRY_ISOTROPICATOMSCATTERER_H_ */
+#endif  /* MANTID_GEOMETRY_ISOTROPICATOMBRAGGSCATTERER_H_ */

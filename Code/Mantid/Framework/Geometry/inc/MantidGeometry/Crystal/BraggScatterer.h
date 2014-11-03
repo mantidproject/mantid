@@ -1,5 +1,5 @@
-#ifndef MANTID_GEOMETRY_ISCATTERER_H_
-#define MANTID_GEOMETRY_ISCATTERER_H_
+#ifndef MANTID_GEOMETRY_BRAGGSCATTERER_H_
+#define MANTID_GEOMETRY_BRAGGSCATTERER_H_
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
@@ -19,15 +19,15 @@ namespace Geometry
 
 typedef std::complex<double> StructureFactor;
 
-/** IScatterer
+/** BraggScatterer
 
-    IScatterer is a general interface for representing scatterers
+    BraggScatterer is a general interface for representing scatterers
     in the unit cell of a periodic structure. Since there are many possibilities
-    of modelling scatterers, IScatterer is derived from PropertyManager.
+    of modelling scatterers, BraggScatterer is derived from PropertyManager.
     This way, new scatterers with very different parameters can be
     added easily.
 
-    In IScatterer, three basic properties are defined: Position, UnitCell
+    In BraggScatterer, three basic properties are defined: Position, UnitCell
     and SpaceGroup. Setting these properties is only possible through
     the setProperty and setPropertyValue methods inherited from
     PropertyManager. For retrieval there are however specialized methods,
@@ -66,21 +66,21 @@ typedef std::complex<double> StructureFactor;
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-class IScatterer;
+class BraggScatterer;
 
-typedef boost::shared_ptr<IScatterer> IScatterer_sptr;
+typedef boost::shared_ptr<BraggScatterer> BraggScatterer_sptr;
 
-class MANTID_GEOMETRY_DLL IScatterer : public Kernel::PropertyManager
+class MANTID_GEOMETRY_DLL BraggScatterer : public Kernel::PropertyManager
 {
 public:
-    IScatterer();
-    virtual ~IScatterer() { }
+    BraggScatterer();
+    virtual ~BraggScatterer() { }
 
     void initialize();
     bool isInitialized();
 
     virtual std::string name() const = 0;
-    virtual IScatterer_sptr clone() const = 0;
+    virtual BraggScatterer_sptr clone() const = 0;
 
     Kernel::V3D getPosition() const;
     std::vector<Kernel::V3D> getEquivalentPositions() const;
@@ -130,4 +130,4 @@ protected:
 } // namespace Geometry
 } // namespace Mantid
 
-#endif  /* MANTID_GEOMETRY_ISCATTERER_H_ */
+#endif  /* MANTID_GEOMETRY_BRAGGSCATTERER_H_ */

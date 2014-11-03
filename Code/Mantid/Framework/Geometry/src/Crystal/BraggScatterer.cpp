@@ -1,4 +1,4 @@
-#include "MantidGeometry/Crystal/IScatterer.h"
+#include "MantidGeometry/Crystal/BraggScatterer.h"
 #include <stdexcept>
 
 #include <boost/regex.hpp>
@@ -14,7 +14,7 @@ namespace Geometry
 using namespace Kernel;
 
 /// Default constructor.
-IScatterer::IScatterer() :
+BraggScatterer::BraggScatterer() :
     PropertyManager(),
     m_position(),
     m_cell(UnitCell(1, 1, 1, 90, 90, 90)),
@@ -25,7 +25,7 @@ IScatterer::IScatterer() :
 }
 
 /// Initialization method that declares three basic properties and sets initialized state to true.
-void IScatterer::initialize()
+void BraggScatterer::initialize()
 {
     /* This is required for default behavior. It's not possible to call it
      * from the constructure, because it's not guaranteed that the space group
@@ -47,13 +47,13 @@ void IScatterer::initialize()
 }
 
 /// Returns whether the instance has been initialized.
-bool IScatterer::isInitialized()
+bool BraggScatterer::isInitialized()
 {
     return m_isInitialized;
 }
 
 /// Sets the position of the scatterer to the supplied coordinates - vector is wrapped to [0, 1) and equivalent positions are recalculated.
-void IScatterer::setPosition(const Kernel::V3D &position)
+void BraggScatterer::setPosition(const Kernel::V3D &position)
 {
     m_position = getWrappedVector(position);
 
@@ -61,31 +61,31 @@ void IScatterer::setPosition(const Kernel::V3D &position)
 }
 
 /// Returns the position of the scatterer.
-Kernel::V3D IScatterer::getPosition() const
+Kernel::V3D BraggScatterer::getPosition() const
 {
     return m_position;
 }
 
 /// Returns all equivalent positions of the scatterer according to the assigned space group.
-std::vector<Kernel::V3D> IScatterer::getEquivalentPositions() const
+std::vector<Kernel::V3D> BraggScatterer::getEquivalentPositions() const
 {
     return m_equivalentPositions;
 }
 
 /// Assigns a unit cell, which may be required for certain calculations.
-void IScatterer::setCell(const UnitCell &cell)
+void BraggScatterer::setCell(const UnitCell &cell)
 {
     m_cell = cell;
 }
 
 /// Returns the cell which is currently set.
-UnitCell IScatterer::getCell() const
+UnitCell BraggScatterer::getCell() const
 {
     return m_cell;
 }
 
 /// Sets the space group, which is required for calculation of equivalent positions.
-void IScatterer::setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup)
+void BraggScatterer::setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup)
 {
     m_spaceGroup = spaceGroup;
 
@@ -103,7 +103,7 @@ void IScatterer::setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup)
  * classes should override the method afterScattererPropertySet, which is called
  * from this method.
  */
-void IScatterer::afterPropertySet(const std::string &propertyName)
+void BraggScatterer::afterPropertySet(const std::string &propertyName)
 {
     if(propertyName == "Position") {
         PropertyWithValue<V3D> *position = dynamic_cast<PropertyWithValue<V3D> *>(getPointerToProperty("Position"));
@@ -118,13 +118,13 @@ void IScatterer::afterPropertySet(const std::string &propertyName)
 }
 
 /// Returns the assigned space group.
-SpaceGroup_const_sptr IScatterer::getSpaceGroup() const
+SpaceGroup_const_sptr BraggScatterer::getSpaceGroup() const
 {
     return m_spaceGroup;
 }
 
 /// Uses the stored space group to calculate all equivalent positions or if present.
-void IScatterer::recalculateEquivalentPositions()
+void BraggScatterer::recalculateEquivalentPositions()
 {
     m_equivalentPositions.clear();
 

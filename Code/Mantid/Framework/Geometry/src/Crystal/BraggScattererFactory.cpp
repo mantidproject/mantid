@@ -1,4 +1,4 @@
-#include "MantidGeometry/Crystal/ScattererFactory.h"
+#include "MantidGeometry/Crystal/BraggScattererFactory.h"
 #include "MantidKernel/LibraryManager.h"
 
 namespace Mantid
@@ -20,9 +20,9 @@ namespace Geometry
  * @param properties :: Semi-colon separated "name=value"-pairs.
  * @return Initialized scatterer object.
  */
-IScatterer_sptr ScattererFactoryImpl::createScatterer(const std::string &name, const std::string &properties)
+BraggScatterer_sptr BraggScattererFactoryImpl::createScatterer(const std::string &name, const std::string &properties)
 {
-    IScatterer_sptr scatterer = create(name);
+    BraggScatterer_sptr scatterer = create(name);
     scatterer->initialize();
 
     if(!properties.empty()) {
@@ -33,7 +33,7 @@ IScatterer_sptr ScattererFactoryImpl::createScatterer(const std::string &name, c
 }
 
 /// Private constructor.
-ScattererFactoryImpl::ScattererFactoryImpl()
+BraggScattererFactoryImpl::BraggScattererFactoryImpl()
 {
     Kernel::LibraryManager::Instance();
 }

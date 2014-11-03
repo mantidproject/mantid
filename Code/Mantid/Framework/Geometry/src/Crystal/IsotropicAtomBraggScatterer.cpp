@@ -1,11 +1,11 @@
-#include "MantidGeometry/Crystal/IsotropicAtomScatterer.h"
+#include "MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h"
 #include "MantidKernel/Atom.h"
 #include <stdexcept>
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-#include "MantidGeometry/Crystal/ScattererFactory.h"
+#include "MantidGeometry/Crystal/BraggScattererFactory.h"
 
 namespace Mantid
 {
@@ -15,17 +15,17 @@ namespace Geometry
 using namespace Kernel;
 
 /// Constructor which takes an element symbol, fractional coordinates, isotropic atomic displacement parameter and occupancy.
-IsotropicAtomScatterer::IsotropicAtomScatterer() :
-    IScatterer(),
+IsotropicAtomBraggScatterer::IsotropicAtomBraggScatterer() :
+    BraggScatterer(),
     m_atom(),
     m_label()
 {
 }
 
 /// Clones the instance.
-IScatterer_sptr IsotropicAtomScatterer::clone() const
+BraggScatterer_sptr IsotropicAtomBraggScatterer::clone() const
 {
-    IsotropicAtomScatterer_sptr clone = boost::make_shared<IsotropicAtomScatterer>();
+    IsotropicAtomBraggScatterer_sptr clone = boost::make_shared<IsotropicAtomBraggScatterer>();
     clone->initialize();
     clone->setProperties(this->asString(false, ';'));
 
@@ -33,7 +33,7 @@ IScatterer_sptr IsotropicAtomScatterer::clone() const
 }
 
 /// Tries to obtain element specific data for the given symbol using PhysicalConstants::getAtom.
-void IsotropicAtomScatterer::setElement(const std::string &element)
+void IsotropicAtomBraggScatterer::setElement(const std::string &element)
 {
     PhysicalConstants::Atom atom = PhysicalConstants::getAtom(element);
 
@@ -42,25 +42,25 @@ void IsotropicAtomScatterer::setElement(const std::string &element)
 }
 
 /// Returns the string representation of the contained element.
-std::string IsotropicAtomScatterer::getElement() const
+std::string IsotropicAtomBraggScatterer::getElement() const
 {
     return m_label;
 }
 
 /// Returns the internally stored NeutronAtom that holds element specific data.
-PhysicalConstants::NeutronAtom IsotropicAtomScatterer::getNeutronAtom() const
+PhysicalConstants::NeutronAtom IsotropicAtomBraggScatterer::getNeutronAtom() const
 {
     return m_atom;
 }
 
 /// Returns the occupancy.
-double IsotropicAtomScatterer::getOccupancy() const
+double IsotropicAtomBraggScatterer::getOccupancy() const
 {
     return getProperty("Occupancy");
 }
 
 /// Returns the isotropic atomic displacement parameter.
-double IsotropicAtomScatterer::getU() const
+double IsotropicAtomBraggScatterer::getU() const
 {
     return getProperty("U");
 }
@@ -75,7 +75,7 @@ double IsotropicAtomScatterer::getU() const
  * @param hkl :: HKL for which the structure factor should be calculated
  * @return Structure factor (complex).
  */
-StructureFactor IsotropicAtomScatterer::calculateStructureFactor(const V3D &hkl) const
+StructureFactor IsotropicAtomBraggScatterer::calculateStructureFactor(const V3D &hkl) const
 {
     double amplitude = getOccupancy() * getDebyeWallerFactor(hkl) * getScatteringLength();
 
@@ -93,14 +93,14 @@ StructureFactor IsotropicAtomScatterer::calculateStructureFactor(const V3D &hkl)
 /**
  * Declares properties of this scatterer model
  *
- * In addition to the properties of IScatterer, this class implements three more properties,
+ * In addition to the properties of BraggScatterer, this class implements three more properties,
  * as described in the general class documentation, with some restrictions on allowed
  * values:
  *  - U must be 0 or greater
  *  - Occupancy must be on the interval [0,1]
  *  - Element must be present.
  */
-void IsotropicAtomScatterer::declareProperties()
+void IsotropicAtomBraggScatterer::declareProperties()
 {
     // Default behavior requires this.
     setElement("H");
@@ -117,7 +117,7 @@ void IsotropicAtomScatterer::declareProperties()
 }
 
 /// After setting the element as a string, the corresponding
-void IsotropicAtomScatterer::afterScattererPropertySet(const std::string &propertyName)
+void IsotropicAtomBraggScatterer::afterScattererPropertySet(const std::string &propertyName)
 {
     if(propertyName == "Element") {
         setElement(getPropertyValue(propertyName));
@@ -125,7 +125,7 @@ void IsotropicAtomScatterer::afterScattererPropertySet(const std::string &proper
 }
 
 /// Returns the Debye-Waller factor, using an isotropic atomic displacement and the stored unit cell.
-double IsotropicAtomScatterer::getDebyeWallerFactor(const V3D &hkl) const
+double IsotropicAtomBraggScatterer::getDebyeWallerFactor(const V3D &hkl) const
 {
     V3D dstar = getCell().getB() * hkl;
 
@@ -133,12 +133,12 @@ double IsotropicAtomScatterer::getDebyeWallerFactor(const V3D &hkl) const
 }
 
 /// Returns the scattering length of the stored element.
-double IsotropicAtomScatterer::getScatteringLength() const
+double IsotropicAtomBraggScatterer::getScatteringLength() const
 {
     return m_atom.coh_scatt_length_real;
 }
 
-DECLARE_SCATTERER(IsotropicAtomScatterer)
+DECLARE_BRAGGSCATTERER(IsotropicAtomBraggScatterer)
 
 } // namespace Geometry
 } // namespace Mantid

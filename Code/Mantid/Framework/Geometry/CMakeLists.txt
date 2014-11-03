@@ -1,14 +1,15 @@
 set ( SRC_FILES
 	src/ComponentParser.cpp
+        src/Crystal/BraggScatterer.cpp
+        src/Crystal/BraggScattererFactory.cpp
 	src/Crystal/CenteringGroup.cpp
-        src/Crystal/CompositeScatterer.cpp
+        src/Crystal/CompositeBraggScatterer.cpp
 	src/Crystal/ConventionalCell.cpp
 	src/Crystal/CrystalStructure.cpp
 	src/Crystal/CyclicGroup.cpp
 	src/Crystal/Group.cpp
-	src/Crystal/IScatterer.cpp
 	src/Crystal/IndexingUtils.cpp
-	src/Crystal/IsotropicAtomScatterer.cpp
+        src/Crystal/IsotropicAtomBraggScatterer.cpp
 	src/Crystal/NiggliCell.cpp
 	src/Crystal/OrientedLattice.cpp
 	src/Crystal/PointGroup.cpp
@@ -17,7 +18,6 @@ set ( SRC_FILES
 	src/Crystal/ReducedCell.cpp
 	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/ScalarUtils.cpp
-        src/Crystal/ScattererFactory.cpp
 	src/Crystal/SpaceGroup.cpp
 	src/Crystal/SpaceGroupFactory.cpp
 	src/Crystal/SymmetryOperation.cpp
@@ -115,15 +115,16 @@ set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
         
 set ( INC_FILES
 	inc/MantidGeometry/ComponentParser.h
+        inc/MantidGeometry/Crystal/BraggScatterer.h
+        inc/MantidGeometry/Crystal/BraggScattererFactory.h
 	inc/MantidGeometry/Crystal/CenteringGroup.h
-        inc/MantidGeometry/Crystal/CompositeScatterer.h
+        inc/MantidGeometry/Crystal/CompositeBraggScatterer.h
 	inc/MantidGeometry/Crystal/ConventionalCell.h
 	inc/MantidGeometry/Crystal/CrystalStructure.h
 	inc/MantidGeometry/Crystal/CyclicGroup.h
 	inc/MantidGeometry/Crystal/Group.h
-	inc/MantidGeometry/Crystal/IScatterer.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
-	inc/MantidGeometry/Crystal/IsotropicAtomScatterer.h
+        inc/MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h
 	inc/MantidGeometry/Crystal/NiggliCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
 	inc/MantidGeometry/Crystal/PointGroup.h
@@ -132,7 +133,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
 	inc/MantidGeometry/Crystal/ScalarUtils.h
-        inc/MantidGeometry/Crystal/ScattererFactory.h
 	inc/MantidGeometry/Crystal/SpaceGroup.h
 	inc/MantidGeometry/Crystal/SpaceGroupFactory.h
 	inc/MantidGeometry/Crystal/SymmetryOperation.h
@@ -226,13 +226,15 @@ set ( TEST_FILES
 	AlgebraTest.h
 	BnIdTest.h
 	BoundingBoxTest.h
+        BraggScattererFactoryTest.h
+        BraggScattererTest.h
 	CenteringGroupTest.h
 	CompAssemblyTest.h
 	ComponentHelperTest.h
 	ComponentParserTest.h
 	ComponentTest.h
+        CompositeBraggScattererTest.h
 	CompositeImplicitFunctionTest.h
-        CompositeScattererTest.h
 	ConeTest.h
 	ConventionalCellTest.h
 	ConvexPolygonTest.h
@@ -248,12 +250,11 @@ set ( TEST_FILES
 	IDFObjectTest.h
 	IMDDimensionFactoryTest.h
 	IMDDimensionTest.h
-	IScattererTest.h
 	IndexingUtilsTest.h
 	InstrumentDefinitionParserTest.h
 	InstrumentRayTracerTest.h
 	InstrumentTest.h
-	IsotropicAtomScattererTest.h
+        IsotropicAtomBraggScattererTest.h
 	LaszloIntersectionTest.h
 	LineIntersectVisitTest.h
 	LineTest.h
@@ -302,7 +303,6 @@ set ( TEST_FILES
 	RulesTest.h
 	RulesUnionTest.h
 	ScalarUtilsTest.h
-        ScattererFactoryTest.h
 	ShapeFactoryTest.h
 	SpaceGroupFactoryTest.h
 	SpaceGroupTest.h

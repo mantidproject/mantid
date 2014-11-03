@@ -1,37 +1,37 @@
-#ifndef MANTID_GEOMETRY_SCATTERERCOLLECTIONTEST_H_
-#define MANTID_GEOMETRY_SCATTERERCOLLECTIONTEST_H_
+#ifndef MANTID_GEOMETRY_BRAGGSCATTERERCOLLECTIONTEST_H_
+#define MANTID_GEOMETRY_BRAGGSCATTERERCOLLECTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Crystal/CompositeScatterer.h"
+#include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
-#include "MantidGeometry/Crystal/IsotropicAtomScatterer.h"
+#include "MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h"
 #include <map>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 
-class CompositeScattererTest : public CxxTest::TestSuite
+class CompositeBraggScattererTest : public CxxTest::TestSuite
 {
 public:
     // This pair of boilerplate methods prevent the suite being created statically
     // This means the constructor isn't called when running other tests
-    static CompositeScattererTest *createSuite() { return new CompositeScattererTest(); }
-    static void destroySuite( CompositeScattererTest *suite ) { delete suite; }
+    static CompositeBraggScattererTest *createSuite() { return new CompositeBraggScattererTest(); }
+    static void destroySuite( CompositeBraggScattererTest *suite ) { delete suite; }
 
 
     void testConstructor()
     {
-        TS_ASSERT_THROWS_NOTHING(CompositeScatterer scatterers);
+        TS_ASSERT_THROWS_NOTHING(CompositeBraggScatterer scatterers);
     }
 
     void testProperties()
     {
-        CompositeScatterer_sptr scatterer = boost::make_shared<CompositeScatterer>();
+        CompositeBraggScatterer_sptr scatterer = boost::make_shared<CompositeBraggScatterer>();
         TS_ASSERT_THROWS_NOTHING(scatterer->initialize());
 
         TS_ASSERT(scatterer->existsProperty("Position"));
@@ -41,13 +41,13 @@ public:
 
     void testCreate()
     {
-        TS_ASSERT_THROWS_NOTHING(CompositeScatterer_sptr scatterer = CompositeScatterer::create());
+        TS_ASSERT_THROWS_NOTHING(CompositeBraggScatterer_sptr scatterer = CompositeBraggScatterer::create());
 
-        std::vector<IScatterer_sptr> scatterers;
+        std::vector<BraggScatterer_sptr> scatterers;
         scatterers.push_back(getInitializedScatterer("Si", V3D(0.35, 0, 0)));
         scatterers.push_back(getInitializedScatterer("Si", V3D(0.25, 0.25, 0.25)));
 
-        CompositeScatterer_sptr scatterer = CompositeScatterer::create(scatterers);
+        CompositeBraggScatterer_sptr scatterer = CompositeBraggScatterer::create(scatterers);
         TS_ASSERT_EQUALS(scatterer->nScatterers(), 2);
         TS_ASSERT_EQUALS(scatterer->getScatterer(0)->getPosition(), V3D(0.35, 0, 0));
         TS_ASSERT_EQUALS(scatterer->getScatterer(1)->getPosition(), V3D(0.25, 0.25, 0.25));
@@ -55,10 +55,10 @@ public:
 
     void testClone()
     {
-        CompositeScatterer_sptr scatterer = getCompositeScatterer();
-        IScatterer_sptr clone = scatterer->clone();
+        CompositeBraggScatterer_sptr scatterer = getCompositeScatterer();
+        BraggScatterer_sptr clone = scatterer->clone();
 
-        CompositeScatterer_sptr collectionClone = boost::dynamic_pointer_cast<CompositeScatterer>(clone);
+        CompositeBraggScatterer_sptr collectionClone = boost::dynamic_pointer_cast<CompositeBraggScatterer>(clone);
 
         TS_ASSERT(collectionClone);
         TS_ASSERT_EQUALS(collectionClone->nScatterers(), 2);
@@ -68,7 +68,7 @@ public:
 
     void testSetCell()
     {
-        CompositeScatterer_sptr scatterer = getCompositeScatterer();
+        CompositeBraggScatterer_sptr scatterer = getCompositeScatterer();
 
         UnitCell cell(5.43, 5.43, 5.43);
         TS_ASSERT_DIFFERS(scatterer->getScatterer(0)->getCell().getG(), cell.getG());
@@ -80,7 +80,7 @@ public:
 
     void testSetSpaceGroup()
     {
-        CompositeScatterer_sptr scatterer = getCompositeScatterer();
+        CompositeBraggScatterer_sptr scatterer = getCompositeScatterer();
 
         SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
         TS_ASSERT(spaceGroup);
@@ -97,11 +97,11 @@ public:
         UnitCell cell(5.43, 5.43, 5.43);
         SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
 
-        CompositeScatterer_sptr scatterer = CompositeScatterer::create();
+        CompositeBraggScatterer_sptr scatterer = CompositeBraggScatterer::create();
         scatterer->setProperty("UnitCell", unitCellToStr(cell));
         scatterer->setProperty("SpaceGroup", spaceGroup->hmSymbol());
 
-        IsotropicAtomScatterer_sptr siOne = getInitializedScatterer("Si", V3D(0, 0, 0));
+        IsotropicAtomBraggScatterer_sptr siOne = getInitializedScatterer("Si", V3D(0, 0, 0));
         TS_ASSERT_DIFFERS(siOne->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
 
         size_t oldCount = scatterer->nScatterers();
@@ -117,7 +117,7 @@ public:
 
     void testRemoveScatterer()
     {
-        CompositeScatterer_sptr scattererCollection = getCompositeScatterer();
+        CompositeBraggScatterer_sptr scattererCollection = getCompositeScatterer();
         size_t oldCount = scattererCollection->nScatterers();
 
         TS_ASSERT_THROWS_NOTHING(scattererCollection->getScatterer(oldCount - 1));
@@ -141,7 +141,7 @@ public:
         UnitCell cell(5.43, 6.43, 7.43, 90.0, 103.0, 90.0);
         SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
 
-        CompositeScatterer_sptr coll = CompositeScatterer::create();
+        CompositeBraggScatterer_sptr coll = CompositeBraggScatterer::create();
         coll->setProperty("SpaceGroup", spaceGroup->hmSymbol());
         coll->setProperty("UnitCell", unitCellToStr(cell));
 
@@ -160,9 +160,9 @@ public:
     }
 
 private:
-    IsotropicAtomScatterer_sptr getInitializedScatterer(const std::string &element, const V3D &position, double U = 0.0, double occ = 1.0)
+    IsotropicAtomBraggScatterer_sptr getInitializedScatterer(const std::string &element, const V3D &position, double U = 0.0, double occ = 1.0)
     {
-        IsotropicAtomScatterer_sptr scatterer = boost::make_shared<IsotropicAtomScatterer>();
+        IsotropicAtomBraggScatterer_sptr scatterer = boost::make_shared<IsotropicAtomBraggScatterer>();
         scatterer->initialize();
         scatterer->setProperty("Element", element);
         scatterer->setProperty("Position", position);
@@ -172,13 +172,13 @@ private:
         return scatterer;
     }
 
-    CompositeScatterer_sptr getCompositeScatterer()
+    CompositeBraggScatterer_sptr getCompositeScatterer()
     {
-        std::vector<IScatterer_sptr> scatterers;
+        std::vector<BraggScatterer_sptr> scatterers;
         scatterers.push_back(getInitializedScatterer("Si", V3D(0.35, 0, 0)));
         scatterers.push_back(getInitializedScatterer("Si", V3D(0.25, 0.25, 0.25)));
 
-        return CompositeScatterer::create(scatterers);
+        return CompositeBraggScatterer::create(scatterers);
     }
 
     std::map<V3D, double> getCalculatedStructureFactors()
@@ -243,4 +243,4 @@ private:
 };
 
 
-#endif /* MANTID_GEOMETRY_SCATTERERCOLLECTIONTEST_H_ */
+#endif /* MANTID_GEOMETRY_BRAGGSCATTERERCOLLECTIONTEST_H_ */

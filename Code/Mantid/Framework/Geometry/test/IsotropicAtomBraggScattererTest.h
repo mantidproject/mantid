@@ -1,31 +1,31 @@
-#ifndef MANTID_GEOMETRY_ISOTROPICATOMSCATTERERTEST_H_
-#define MANTID_GEOMETRY_ISOTROPICATOMSCATTERERTEST_H_
+#ifndef MANTID_GEOMETRY_ISOTROPICATOMBRAGGSCATTERERTEST_H_
+#define MANTID_GEOMETRY_ISOTROPICATOMBRAGGSCATTERERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Crystal/IsotropicAtomScatterer.h"
+#include "MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-class IsotropicAtomScattererTest : public CxxTest::TestSuite
+class IsotropicAtomBraggScattererTest : public CxxTest::TestSuite
 {
 public:
     // This pair of boilerplate methods prevent the suite being created statically
     // This means the constructor isn't called when running other tests
-    static IsotropicAtomScattererTest *createSuite() { return new IsotropicAtomScattererTest(); }
-    static void destroySuite( IsotropicAtomScattererTest *suite ) { delete suite; }
+    static IsotropicAtomBraggScattererTest *createSuite() { return new IsotropicAtomBraggScattererTest(); }
+    static void destroySuite( IsotropicAtomBraggScattererTest *suite ) { delete suite; }
 
 
     void testConstructor()
     {
-        TS_ASSERT_THROWS_NOTHING(IsotropicAtomScatterer scatterer);
+        TS_ASSERT_THROWS_NOTHING(IsotropicAtomBraggScatterer scatterer);
     }
 
     void testProperties()
     {
-        IsotropicAtomScatterer_sptr scatterer = boost::make_shared<IsotropicAtomScatterer>();
+        IsotropicAtomBraggScatterer_sptr scatterer = boost::make_shared<IsotropicAtomBraggScatterer>();
 
         TS_ASSERT_THROWS_NOTHING(scatterer->initialize());
 
@@ -40,7 +40,7 @@ public:
 
     void testGetSetElement()
     {
-        IsotropicAtomScatterer_sptr scatterer = getInitializedScatterer();
+        IsotropicAtomBraggScatterer_sptr scatterer = getInitializedScatterer();
 
         TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("Element", "Si"));
         TS_ASSERT_EQUALS(scatterer->getElement(), "Si");
@@ -51,7 +51,7 @@ public:
 
     void testGetSetOccupancy()
     {
-        IsotropicAtomScatterer_sptr scatterer = getInitializedScatterer();
+        IsotropicAtomBraggScatterer_sptr scatterer = getInitializedScatterer();
 
         TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("Occupancy", 0.3));
         TS_ASSERT_EQUALS(scatterer->getOccupancy(), 0.3);
@@ -64,7 +64,7 @@ public:
 
     void testGetSetU()
     {
-        IsotropicAtomScatterer_sptr scatterer = getInitializedScatterer();
+        IsotropicAtomBraggScatterer_sptr scatterer = getInitializedScatterer();
 
         TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("U", 0.0));
         TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("U", 1.0));
@@ -78,7 +78,7 @@ public:
 
     void testCreate()
     {
-        IsotropicAtomScatterer_sptr isotropic = getInitializedScatterer("Si", V3D(0.3, 0.1, 0.12), 1.0, 0.5);
+        IsotropicAtomBraggScatterer_sptr isotropic = getInitializedScatterer("Si", V3D(0.3, 0.1, 0.12), 1.0, 0.5);
 
         TS_ASSERT(isotropic);
         TS_ASSERT_EQUALS(isotropic->getElement(), "Si");
@@ -92,19 +92,19 @@ public:
         UnitCell cell(5.43, 5.43, 5.43);
         SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m");
 
-        IsotropicAtomScatterer_sptr scatterer = getInitializedScatterer("H", V3D(1.0, 0, 0), 0.0);
+        IsotropicAtomBraggScatterer_sptr scatterer = getInitializedScatterer("H", V3D(1.0, 0, 0), 0.0);
         scatterer->setProperty("U", 3.04);
         scatterer->setProperty("Occupancy", 0.5);
         scatterer->setProperty("UnitCell", unitCellToStr(cell));
         scatterer->setProperty("SpaceGroup", spaceGroup->hmSymbol());
 
-        IScatterer_sptr clone = scatterer->clone();
+        BraggScatterer_sptr clone = scatterer->clone();
 
         TS_ASSERT_EQUALS(clone->getPosition(), scatterer->getPosition());
         TS_ASSERT_EQUALS(clone->getCell().getG(), scatterer->getCell().getG());
         TS_ASSERT_EQUALS(clone->getSpaceGroup()->hmSymbol(), scatterer->getSpaceGroup()->hmSymbol());
 
-        IsotropicAtomScatterer_sptr scattererClone = boost::dynamic_pointer_cast<IsotropicAtomScatterer>(clone);
+        IsotropicAtomBraggScatterer_sptr scattererClone = boost::dynamic_pointer_cast<IsotropicAtomBraggScatterer>(clone);
         TS_ASSERT(scattererClone);
 
         TS_ASSERT_EQUALS(scattererClone->getU(), scatterer->getU());
@@ -113,7 +113,7 @@ public:
 
     void testCalculateStructureFactor()
     {
-        IsotropicAtomScatterer_sptr scatterer = getInitializedScatterer("Si", V3D(0.0, 0.0, 0.0), 0.0);
+        IsotropicAtomBraggScatterer_sptr scatterer = getInitializedScatterer("Si", V3D(0.0, 0.0, 0.0), 0.0);
 
         double bSi = scatterer->getNeutronAtom().coh_scatt_length_real;
 
@@ -181,17 +181,17 @@ public:
     }
 
 private:
-    IsotropicAtomScatterer_sptr getInitializedScatterer()
+    IsotropicAtomBraggScatterer_sptr getInitializedScatterer()
     {
-        IsotropicAtomScatterer_sptr scatterer = boost::make_shared<IsotropicAtomScatterer>();
+        IsotropicAtomBraggScatterer_sptr scatterer = boost::make_shared<IsotropicAtomBraggScatterer>();
         scatterer->initialize();
 
         return scatterer;
     }
 
-    IsotropicAtomScatterer_sptr getInitializedScatterer(const std::string &element, const V3D &position, double U = 0.0, double occ = 1.0)
+    IsotropicAtomBraggScatterer_sptr getInitializedScatterer(const std::string &element, const V3D &position, double U = 0.0, double occ = 1.0)
     {
-        IsotropicAtomScatterer_sptr scatterer = getInitializedScatterer();
+        IsotropicAtomBraggScatterer_sptr scatterer = getInitializedScatterer();
 
         scatterer->setProperty("Element", element);
         scatterer->setProperty("Position", position);
@@ -204,4 +204,4 @@ private:
 };
 
 
-#endif /* MANTID_GEOMETRY_ISOTROPICATOMSCATTERERTEST_H_ */
+#endif /* MANTID_GEOMETRY_ISOTROPICATOMBRAGGSCATTERERTEST_H_ */

@@ -1,8 +1,8 @@
-﻿#ifndef MANTID_GEOMETRY_COMPOSITESCATTERER_H_
-#define MANTID_GEOMETRY_COMPOSITESCATTERER_H_
+﻿#ifndef MANTID_GEOMETRY_COMPOSITEBRAGGSCATTERER_H_
+#define MANTID_GEOMETRY_COMPOSITEBRAGGSCATTERER_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Crystal/IScatterer.h"
+#include "MantidGeometry/Crystal/BraggScatterer.h"
 
 
 namespace Mantid
@@ -10,9 +10,9 @@ namespace Mantid
 namespace Geometry
 {
 
-/** CompositeScatterer
+/** CompositeBraggScatterer
 
-    CompositeScatterer accumulates scatterers, for easier calculation
+    CompositeBraggScatterer accumulates scatterers, for easier calculation
     of structure factors. Scatterers can be added through the method
     addScatterer. The supplied scatterer is not stored directly,
     it is cloned instead, so there is a new instance. The original instance
@@ -24,12 +24,12 @@ namespace Geometry
     can not contain members that belong to a different crystal structure.
 
     For structure factor calculations, all contributions from contained scatterers
-    are summed. Contained scatterers may be CompositeScatterers themselves,
+    are summed. Contained scatterers may be CompositeBraggScatterers themselves,
     so it's possible to build up elaborate structures.
 
-    There are two ways of creating instances of CompositeScatterer. The first
-    possibility is to use IScattererFactory, just like for other implementations
-    of IScatterer. Additionally there is a static method CompositeScatterer::create,
+    There are two ways of creating instances of CompositeBraggScatterer. The first
+    possibility is to use BraggScattererFactory, just like for other implementations
+    of BraggScatterer. Additionally there is a static method CompositeBraggScatterer::create,
     which creates a composite scatterer of the supplied vector of scatterers.
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
@@ -55,25 +55,25 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class CompositeScatterer;
+class CompositeBraggScatterer;
 
-typedef boost::shared_ptr<CompositeScatterer> CompositeScatterer_sptr;
+typedef boost::shared_ptr<CompositeBraggScatterer> CompositeBraggScatterer_sptr;
 
-class MANTID_GEOMETRY_DLL CompositeScatterer : public IScatterer
+class MANTID_GEOMETRY_DLL CompositeBraggScatterer : public BraggScatterer
 {
 public:
-    CompositeScatterer();
-    virtual ~CompositeScatterer() { }
+    CompositeBraggScatterer();
+    virtual ~CompositeBraggScatterer() { }
 
-    static CompositeScatterer_sptr create();
-    static CompositeScatterer_sptr create(const std::vector<IScatterer_sptr> &scatterers);
+    static CompositeBraggScatterer_sptr create();
+    static CompositeBraggScatterer_sptr create(const std::vector<BraggScatterer_sptr> &scatterers);
 
-    std::string name() const { return "CompositeScatterer"; }
-    IScatterer_sptr clone() const;
+    std::string name() const { return "CompositeBraggScatterer"; }
+    BraggScatterer_sptr clone() const;
 
-    void addScatterer(const IScatterer_sptr &scatterer);
+    void addScatterer(const BraggScatterer_sptr &scatterer);
     size_t nScatterers() const;
-    IScatterer_sptr getScatterer(size_t i) const;
+    BraggScatterer_sptr getScatterer(size_t i) const;
     void removeScatterer(size_t i);
 
     StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const;
@@ -82,9 +82,9 @@ protected:
     void afterScattererPropertySet(const std::string &propertyName);
     void propagateProperty(const std::string &propertyName);
 
-    void setCommonProperties(IScatterer_sptr &scatterer);
+    void setCommonProperties(BraggScatterer_sptr &scatterer);
 
-    std::vector<IScatterer_sptr> m_scatterers;
+    std::vector<BraggScatterer_sptr> m_scatterers;
 };
 
 
@@ -92,4 +92,4 @@ protected:
 } // namespace Geometry
 } // namespace Mantid
 
-#endif  /* MANTID_GEOMETRY_COMPOSITESCATTERER_H_ */
+#endif  /* MANTID_GEOMETRY_COMPOSITEBRAGGSCATTERER_H_ */

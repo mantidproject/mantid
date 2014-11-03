@@ -1,28 +1,28 @@
-#ifndef MANTID_GEOMETRY_SCATTERERFACTORY_H_
-#define MANTID_GEOMETRY_SCATTERERFACTORY_H_
+#ifndef MANTID_GEOMETRY_BRAGGSCATTERERFACTORY_H_
+#define MANTID_GEOMETRY_BRAGGSCATTERERFACTORY_H_
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidGeometry/Crystal/IScatterer.h"
+#include "MantidGeometry/Crystal/BraggScatterer.h"
 
 namespace Mantid
 {
 namespace Geometry
 {
 
-/** ScattererFactory :
+/** BraggScattererFactory :
 
-    This class implements a factory for concrete IScatterer classes.
-    When a new scatterer is derived from IScatterer, it should be registered
+    This class implements a factory for concrete BraggScatterer classes.
+    When a new scatterer is derived from BraggScatterer, it should be registered
     in the factory. Like other factories in Mantid, a macro is provided for
     this purpose:
 
-        DECLARE_SCATTERER(NewScattererClass)
+        DECLARE_BRAGGSCATTERER(NewScattererClass)
 
     At runtime, instances of this class can be created like this:
 
-        IScatterer_sptr scatterer = ScattererFactory::Instance().createScatterer("NewScattererClass");
+        BraggScatterer_sptr scatterer = BraggScattererFactory::Instance().createScatterer("NewScattererClass");
 
     The returned object is initialized, which is required for using the
     Kernel::Property-based system of setting parameters for the scatterer.
@@ -30,13 +30,13 @@ namespace Geometry
     a string with "name=value" pairs, separated by semi-colons, which assigns
     property values. This is similar to the way FunctionFactory::createInitialized works:
 
-        IScatterer_sptr s = ScattererFactory::Instance()
+        BraggScatterer_sptr s = BraggScattererFactory::Instance()
                                                .createScatterer(
                                                     "NewScatterer",
                                                     "SpaceGroup=F m -3 m; Position=[0.1,0.2,0.3]");
 
     If you choose to use the raw create/createUnwrapped methods, you have to
-    make sure to call IScatterer::initialize() on the created instance.
+    make sure to call BraggScatterer::initialize() on the created instance.
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 26/10/2014
@@ -61,43 +61,43 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_GEOMETRY_DLL ScattererFactoryImpl : public Kernel::DynamicFactory<IScatterer>
+class MANTID_GEOMETRY_DLL BraggScattererFactoryImpl : public Kernel::DynamicFactory<BraggScatterer>
 {
 public:
-    IScatterer_sptr createScatterer(const std::string &name, const std::string &properties = "");
+    BraggScatterer_sptr createScatterer(const std::string &name, const std::string &properties = "");
 
     /// Subscribes a scatterer class into the factory.
     template<class C>
     void subscribeScatterer()
     {
-        Kernel::Instantiator<C, IScatterer> *instantiator = new Kernel::Instantiator<C, IScatterer>;
-        IScatterer_sptr scatterer = instantiator->createInstance();
+        Kernel::Instantiator<C, BraggScatterer> *instantiator = new Kernel::Instantiator<C, BraggScatterer>;
+        BraggScatterer_sptr scatterer = instantiator->createInstance();
 
         subscribe(scatterer->name(), instantiator);
     }
 
 private:
-    friend struct Mantid::Kernel::CreateUsingNew<ScattererFactoryImpl>;
+    friend struct Mantid::Kernel::CreateUsingNew<BraggScattererFactoryImpl>;
 
-    ScattererFactoryImpl();
+    BraggScattererFactoryImpl();
 };
 
 // This is taken from FuncMinimizerFactory
 #ifdef _WIN32
-    template class MANTID_GEOMETRY_DLL Mantid::Kernel::SingletonHolder<ScattererFactoryImpl>;
+    template class MANTID_GEOMETRY_DLL Mantid::Kernel::SingletonHolder<BraggScattererFactoryImpl>;
 #endif
 
-typedef Mantid::Kernel::SingletonHolder<ScattererFactoryImpl> ScattererFactory;
+typedef Mantid::Kernel::SingletonHolder<BraggScattererFactoryImpl> BraggScattererFactory;
 
 
 } // namespace Geometry
 } // namespace Mantid
 
-#define DECLARE_SCATTERER(classname) \
+#define DECLARE_BRAGGSCATTERER(classname) \
         namespace { \
     Mantid::Kernel::RegistrationHelper register_scatterer_##classname( \
-  ((Mantid::Geometry::ScattererFactory::Instance().subscribeScatterer<classname>()) \
+  ((Mantid::Geometry::BraggScattererFactory::Instance().subscribeScatterer<classname>()) \
     , 0)); \
     }
 
-#endif  /* MANTID_GEOMETRY_ISCATTERERFACTORY_H_ */
+#endif  /* MANTID_GEOMETRY_BRAGGSCATTERERFACTORY_H_ */
