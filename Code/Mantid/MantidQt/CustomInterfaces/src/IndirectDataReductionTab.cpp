@@ -21,6 +21,7 @@ namespace CustomInterfaces
   IndirectDataReductionTab::IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QObject* parent) : IndirectTab(parent),
       m_uiForm(uiForm)
   {
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
   }
 
   //----------------------------------------------------------------------------------------------
@@ -28,6 +29,20 @@ namespace CustomInterfaces
    */
   IndirectDataReductionTab::~IndirectDataReductionTab()
   {
+  }
+
+  void IndirectDataReductionTab::runTab()
+  {
+    if(validate())
+    {
+      m_tabRunning = true;
+      emit updateRunButton(false, "Running...", "Running data reduction...");
+      run();
+    }
+    else
+    {
+      g_log.warning("Failed to validate indirect tab input!");
+    }
   }
 
   /**

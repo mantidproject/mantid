@@ -146,6 +146,13 @@ namespace CustomInterfaces
     // Validate the value entered in scale factor option whenever it changes
     connect(m_uiForm.cal_leIntensityScaleMultiplier, SIGNAL(textChanged(const QString &)), this, SLOT(calibValidateIntensity(const QString &)));
 
+    // Shows message on run buton when user is inputting a run number
+    connect(m_uiForm.cal_leRunNo, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
+    // Shows message on run button when Mantid is finding the file for a given run number
+    connect(m_uiForm.cal_leRunNo, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
+    // Reverts run button back to normal when file finding has finished
+    connect(m_uiForm.cal_leRunNo, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
+
     // Nudge resCheck to ensure res range selectors are only shown when Create RES file is checked
     resCheck(m_uiForm.cal_ckRES->isChecked());
   }
@@ -605,6 +612,40 @@ namespace CustomInterfaces
     {
       m_uiForm.cal_valIntensityScaleMultiplier->setText("*");
     }
+  }
+
+  /**
+   * Called when a user starts to type / edit the runs to load.
+   */
+  void IndirectCalibration::pbRunEditing()
+  {
+    emit updateRunButton(false, "Editing...", "Run numbers are curently being edited.");
+  }
+
+  /**
+   * Called when the FileFinder starts finding the files.
+   */
+  void IndirectCalibration::pbRunFinding()
+  {
+    emit updateRunButton(false, "Finding files...", "Searchig for data files for the run numbers entered...");
+    m_uiForm.cal_leRunNo->setEnabled(false);
+  }
+
+  /**
+   * Called when the FileFinder has finished finding the files.
+   */
+  void IndirectCalibration::pbRunFinished()
+  {
+    if(!m_uiForm.cal_leRunNo->isValid())
+    {
+      emit updateRunButton(false, "Invalid Run(s)", "Cannot find data files for some of the run numbers enetered.");
+    }
+    else
+    {
+      emit updateRunButton();
+    }
+
+    m_uiForm.cal_leRunNo->setEnabled(true);
   }
 
 } // namespace CustomInterfaces

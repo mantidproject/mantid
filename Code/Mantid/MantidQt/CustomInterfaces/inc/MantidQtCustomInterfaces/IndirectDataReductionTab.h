@@ -77,6 +77,9 @@ namespace CustomInterfaces
     IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QObject * parent = 0);
     virtual ~IndirectDataReductionTab();
 
+  public slots:
+    void runTab();
+
   protected:
     Mantid::API::MatrixWorkspace_sptr loadInstrumentIfNotExist(std::string instrumentName, std::string analyser="", std::string reflection="");
     /// Get information about the operation modes of an indirect instrument
@@ -88,6 +91,13 @@ namespace CustomInterfaces
 
   protected:
     Ui::IndirectDataReduction m_uiForm;
+
+  signals:
+    /// Update the Run button on the IDR main window
+    void updateRunButton(bool enabled = true, QString message = "Run", QString tooltip = "");
+
+  private slots:
+    void tabExecutionComplete(bool error);
 
   };
 } // namespace CustomInterfaces
