@@ -2,6 +2,7 @@
 #if defined(_WIN32) || defined(_WIN64)
 
 #include "MantidKernel/NetworkProxy.h"
+#include <windows.h>
 #include <Winhttp.h>
 
 namespace Mantid
