@@ -216,18 +216,7 @@ namespace Mantid
     {
       try
       {
-
-        auto det = m_inputWS->getDetector(index);
-        const auto & pmap = m_inputWS->constInstrumentParameters();
-        auto detPos = det->getPos();
-
-        // -- Setup detector & resolution parameters --
-        DetectorParams detPar;
-        detPar.l1 = m_l1;
-        detPar.l2 = m_samplePos.distance(detPos);
-        detPar.theta = m_inputWS->detectorTwoTheta(det); //radians
-        detPar.t0 = getComponentParameter(det, pmap, "t0")*1e-06; // seconds
-        detPar.efixed = getComponentParameter(det, pmap,"efixed");
+        DetectorParams detPar = getDetectorParameters(m_inputWS, index);
         const double v1 = std::sqrt(detPar.efixed/MASS_TO_MEV);
         const double k1 = std::sqrt(detPar.efixed/PhysicalConstants::E_mev_toNeutronWavenumberSq);
 
