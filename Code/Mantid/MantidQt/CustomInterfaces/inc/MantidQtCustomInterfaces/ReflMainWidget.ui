@@ -243,6 +243,7 @@
             <addaction name="separator"/>
             <addaction name="actionGroupRows"/>
             <addaction name="actionCopySelected"/>
+            <addaction name="actionPasteSelected"/>
             <addaction name="actionClearSelected"/>
            </widget>
           </item>
@@ -382,6 +383,7 @@
     <addaction name="separator"/>
     <addaction name="actionGroupRows"/>
     <addaction name="actionCopySelected"/>
+    <addaction name="actionPasteSelected"/>
     <addaction name="actionClearSelected"/>
     <addaction name="separator"/>
     <addaction name="actionDeleteRow"/>
@@ -510,6 +512,18 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionPasteSelected">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/paste.png</normaloff>:/paste.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste Selected</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
    </property>
   </action>
  </widget>

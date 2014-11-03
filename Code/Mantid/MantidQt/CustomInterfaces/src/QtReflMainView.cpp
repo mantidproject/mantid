@@ -169,6 +169,14 @@ namespace MantidQt
     }
 
     /**
+    This slot notifies the presenter that the "paste selection" button has been pressed
+    */
+    void QtReflMainView::on_actionPasteSelected_triggered()
+    {
+      m_presenter->notify(PasteSelectedFlag);
+    }
+
+    /**
     This slot notifies the presenter that the "new table" button has been pressed
     */
     void QtReflMainView::on_actionNewTable_triggered()
@@ -218,6 +226,7 @@ namespace MantidQt
       menu->addSeparator();
       menu->addAction(ui.actionGroupRows);
       menu->addAction(ui.actionCopySelected);
+      menu->addAction(ui.actionPasteSelected);
       menu->addAction(ui.actionClearSelected);
       menu->addSeparator();
       menu->addAction(ui.actionDeleteRow);

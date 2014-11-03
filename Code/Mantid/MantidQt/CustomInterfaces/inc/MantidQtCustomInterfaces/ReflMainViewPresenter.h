@@ -97,6 +97,8 @@ namespace MantidQt
       virtual void clearSelected();
       //copy selected rows to clipboard
       virtual void copySelected();
+      //paste clipboard into selected rows
+      virtual void pasteSelected();
       //group selected rows together
       virtual void groupRows();
       //expand selection to group

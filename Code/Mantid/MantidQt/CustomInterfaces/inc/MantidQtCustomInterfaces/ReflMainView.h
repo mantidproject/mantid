@@ -84,6 +84,7 @@ namespace MantidQt
       static const int OptionsDialogFlag   = 12;
       static const int ClearSelectedFlag   = 13;
       static const int CopySelectedFlag    = 14;
+      static const int PasteSelectedFlag   = 16;
     };
   }
 }

@@ -854,6 +854,7 @@ namespace MantidQt
       case ReflMainView::GroupRowsFlag:       groupRows();          break;
       case ReflMainView::ClearSelectedFlag:   clearSelected();      break;
       case ReflMainView::CopySelectedFlag:    copySelected();       break;
+      case ReflMainView::PasteSelectedFlag:   pasteSelected();      break;
       case ReflMainView::OpenTableFlag:       openTable();          break;
       case ReflMainView::NewTableFlag:        newTable();           break;
       case ReflMainView::TableUpdatedFlag:    m_tableDirty = true;  break;
@@ -1095,6 +1096,40 @@ namespace MantidQt
 
       const std::string output = boost::algorithm::join(lines, "\n");
       QApplication::clipboard()->setText(QString::fromStdString(output));
+    }
+
+    /** Paste the contents of the clipboard into the currently selected rows, or append new rows */
+    void ReflMainViewPresenter::pasteSelected()
+    {
+      const std::string text = QApplication::clipboard()->text().toStdString();
+      std::vector<std::string> lines;
+      boost::split(lines, text, boost::is_any_of("\n"));
+
+      //If we have rows selected, we'll overwrite them. If not, we'll append new rows to write to.
+      std::set<int> rows = m_view->getSelectedRows();
+      if(rows.empty())
+      {
+        //Add as many new rows as required
+        for(size_t i = 0; i < lines.size(); ++i)
+        {
+          int index = m_model->rowCount();
+          insertRow(index);
+          rows.insert(index);
+        }
+      }
+
+      //Iterate over rows and lines simultaneously, stopping when we reach the end of either
+      auto rowIt = rows.begin();
+      auto lineIt = lines.begin();
+      for(; rowIt != rows.end() && lineIt != lines.end(); rowIt++, lineIt++)
+      {
+        std::vector<std::string> values;
+        boost::split(values, *lineIt, boost::is_any_of("\t"));
+
+        //Paste as many columns as we can from this line
+        for(int col = COL_RUNS; col <= COL_OPTIONS && col < static_cast<int>(values.size()); ++col)
+          m_model->setData(m_model->index(*rowIt, col), QString::fromStdString(values[col]));
+      }
     }
 
     /** Shows the Refl Options dialog */
