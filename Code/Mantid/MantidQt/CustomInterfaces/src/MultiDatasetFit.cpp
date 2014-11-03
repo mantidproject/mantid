@@ -1098,7 +1098,7 @@ void MultiDatasetFit::checkDataSets()
       continue;
     }
     auto ws = ADS.retrieveWS<Mantid::API::MatrixWorkspace>( wsName );
-    if ( !ws || i >= ws->getNumberHistograms() )
+    if ( !ws || i >= static_cast<int>( ws->getNumberHistograms() ) )
     {
       rows.push_back( row );
       continue;
