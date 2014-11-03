@@ -337,7 +337,6 @@ namespace Mantid
         }
       }
 
-      std::string parameterStr;
       m_cppFile->openPath(mtdEntry.path());
       try
       {
