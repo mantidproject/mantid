@@ -236,11 +236,14 @@
             <property name="styleSheet">
              <string>QToolBar{border: none;}</string>
             </property>
+            <addaction name="actionExpandSelection"/>
+            <addaction name="separator"/>
             <addaction name="actionAppendRow"/>
             <addaction name="actionDeleteRow"/>
+            <addaction name="separator"/>
             <addaction name="actionGroupRows"/>
+            <addaction name="actionCopySelected"/>
             <addaction name="actionClearSelected"/>
-            <addaction name="actionExpandSelection"/>
            </widget>
           </item>
           <item>
@@ -376,7 +379,9 @@
     <addaction name="separator"/>
     <addaction name="actionPrependRow"/>
     <addaction name="actionAppendRow"/>
+    <addaction name="separator"/>
     <addaction name="actionGroupRows"/>
+    <addaction name="actionCopySelected"/>
     <addaction name="actionClearSelected"/>
     <addaction name="separator"/>
     <addaction name="actionDeleteRow"/>
@@ -493,6 +498,18 @@
    </property>
    <property name="text">
     <string>Clear Selected</string>
+   </property>
+  </action>
+  <action name="actionCopySelected">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/copy.png</normaloff>:/copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy Selected</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
    </property>
   </action>
  </widget>

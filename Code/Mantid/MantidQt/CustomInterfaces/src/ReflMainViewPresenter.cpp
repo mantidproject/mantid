@@ -14,6 +14,7 @@
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 
+#include <QClipboard>
 #include <QSettings>
 
 using namespace Mantid::API;
@@ -852,6 +853,7 @@ namespace MantidQt
       case ReflMainView::ProcessFlag:         process();            break;
       case ReflMainView::GroupRowsFlag:       groupRows();          break;
       case ReflMainView::ClearSelectedFlag:   clearSelected();      break;
+      case ReflMainView::CopySelectedFlag:    copySelected();       break;
       case ReflMainView::OpenTableFlag:       openTable();          break;
       case ReflMainView::NewTableFlag:        newTable();           break;
       case ReflMainView::TableUpdatedFlag:    m_tableDirty = true;  break;
@@ -1075,6 +1077,24 @@ namespace MantidQt
         m_model->setData(m_model->index(*row, COL_OPTIONS), "");
       }
       m_tableDirty = true;
+    }
+
+    /** Copy the currently selected rows to the clipboard */
+    void ReflMainViewPresenter::copySelected()
+    {
+      std::vector<std::string> lines;
+
+      std::set<int> rows = m_view->getSelectedRows();
+      for(auto row : rows)
+      {
+        std::vector<std::string> line;
+        for(int col = COL_RUNS; col <= COL_OPTIONS; ++col)
+          line.push_back(m_model->data(m_model->index(row, col)).toString().toStdString());
+        lines.push_back(boost::algorithm::join(line, "\t"));
+      }
+
+      const std::string output = boost::algorithm::join(lines, "\n");
+      QApplication::clipboard()->setText(QString::fromStdString(output));
     }
 
     /** Shows the Refl Options dialog */

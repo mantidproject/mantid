@@ -95,6 +95,8 @@ namespace MantidQt
       virtual void deleteRow();
       //clear selected row(s) in the model
       virtual void clearSelected();
+      //copy selected rows to clipboard
+      virtual void copySelected();
       //group selected rows together
       virtual void groupRows();
       //expand selection to group

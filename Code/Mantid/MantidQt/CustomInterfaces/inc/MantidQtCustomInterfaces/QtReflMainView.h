@@ -100,6 +100,7 @@ namespace MantidQt
       void on_actionProcess_triggered();
       void on_actionGroupRows_triggered();
       void on_actionClearSelected_triggered();
+      void on_actionCopySelected_triggered();
       void on_actionExpandSelection_triggered();
       void on_actionOptionsDialog_triggered();
 
