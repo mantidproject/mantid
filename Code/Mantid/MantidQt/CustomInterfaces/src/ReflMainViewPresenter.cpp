@@ -559,9 +559,9 @@ namespace MantidQt
 
       IAlgorithm_sptr algReflOne = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
       algReflOne->initialize();
-      algReflOne->setProperty("InputWorkspace", runWS);
+      algReflOne->setProperty("InputWorkspace", runWS->name());
       if(transWS)
-        algReflOne->setProperty("FirstTransmissionRun", transWS);
+        algReflOne->setProperty("FirstTransmissionRun", transWS->name());
       algReflOne->setProperty("OutputWorkspace", "IvsQ_" + runNo);
       algReflOne->setProperty("OutputWorkspaceWaveLength", "IvsLam_" + runNo);
       algReflOne->setProperty("ThetaIn", theta);
