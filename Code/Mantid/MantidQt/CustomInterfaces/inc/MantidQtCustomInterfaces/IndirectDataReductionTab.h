@@ -84,6 +84,8 @@ namespace CustomInterfaces
     /// Function to get details about the instrument configuration defined on C2E tab
     std::map<QString, QString> getInstrumentDetails();
 
+    std::map<std::string, double> getRangesFromInstrument(QString instName = "", QString analyser = "", QString reflection = "");
+
   protected:
     Ui::IndirectDataReduction m_uiForm;
 
