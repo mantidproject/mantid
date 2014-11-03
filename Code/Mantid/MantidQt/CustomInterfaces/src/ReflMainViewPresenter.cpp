@@ -150,8 +150,7 @@ namespace MantidQt
       ads.notificationCenter.addObserver(m_clearObserver);
       ads.notificationCenter.addObserver(m_replaceObserver);
 
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
 
       //Provide autocompletion hints for the options column. We use the algorithm's properties minus
       //those we blacklist. We blacklist any useless properties or ones we're handling that the user
