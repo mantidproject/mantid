@@ -1087,11 +1087,11 @@ namespace MantidQt
       std::vector<std::string> lines;
 
       std::set<int> rows = m_view->getSelectedRows();
-      for(auto row : rows)
+      for(auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt)
       {
         std::vector<std::string> line;
         for(int col = COL_RUNS; col <= COL_OPTIONS; ++col)
-          line.push_back(m_model->data(m_model->index(row, col)).toString().toStdString());
+          line.push_back(m_model->data(m_model->index(*rowIt, col)).toString().toStdString());
         lines.push_back(boost::algorithm::join(line, "\t"));
       }
 
