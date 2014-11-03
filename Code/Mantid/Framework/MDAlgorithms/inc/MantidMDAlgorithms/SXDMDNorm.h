@@ -8,8 +8,6 @@ namespace Mantid
 {
   namespace MDAlgorithms
   {
-    bool compareMomentum(Mantid::Kernel::VMD v1, Mantid::Kernel::VMD v2);
-    
     /**
      
      SXDMDNorm : Generate MD normalization for single crystal diffraction
@@ -47,16 +45,19 @@ namespace Mantid
     private:
       void init();
       void exec();
+
+      /// Retrieve the energy transfer mode of the input workspace data
+      std::string inputEnergyMode() const;
       
       /// function to calculate intersections of teh trajectory with MDBoxes
-      std::vector<Mantid::Kernel::VMD> calculateIntersections(Mantid::Geometry::IDetector_const_sptr detector);
+      std::vector<Kernel::VMD> calculateIntersections(Mantid::Geometry::IDetector_const_sptr detector);
 
       /// number of MD dimensions
       size_t m_nDims;
       /// Normalization workspace
-      Mantid::MDEvents::MDHistoWorkspace_sptr m_normWS;
+      MDEvents::MDHistoWorkspace_sptr m_normWS;
       /// Input workspace
-      Mantid::API::IMDEventWorkspace_sptr m_inputWS;
+      API::IMDEventWorkspace_sptr m_inputWS;
       ///limits for h,k,l dimensions
       coord_t hMin,hMax,kMin,kMax,lMin,lMax;
       ///flag for integrated h,k,l dimensions

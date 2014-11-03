@@ -17,18 +17,22 @@ namespace Mantid
     using namespace Mantid::API;
     using namespace Mantid::Kernel;
     
-    ///function to  compare two intersections (h,k,l,Momentum) by Momentum
-    bool compareMomentum(const Mantid::Kernel::VMD &v1, const Mantid::Kernel::VMD &v2)
+    namespace
     {
-      return (v1[3]<v2[3]);
+      //function to  compare two intersections (h,k,l,Momentum) by Momentum
+      bool compareMomentum(const Mantid::Kernel::VMD &v1, const Mantid::Kernel::VMD &v2)
+      {
+        return (v1[3] < v2[3]);
+      }
     }
     
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(SXDMDNorm)
     
     //----------------------------------------------------------------------------------------------
-    /** Constructor
-   */
+    /**
+     * Constructor
+     */
     SXDMDNorm::SXDMDNorm() :
       m_nDims(0), m_normWS(), m_inputWS(), hMin(0.0f), hMax(0.0f),
       kMin(0.0f), kMax(0.0f), lMin(0.0f), lMax(0.0f), hIntegrated(true),
@@ -54,8 +58,9 @@ namespace Mantid
     const std::string SXDMDNorm::name() const { return "SXDMDNorm"; }
     
     //----------------------------------------------------------------------------------------------
-    /** Initialize the algorithm's properties.
-   */
+    /**
+      * Initialize the algorithm's properties.
+      */
     void SXDMDNorm::init()
     {
       declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input),
@@ -89,38 +94,15 @@ namespace Mantid
     }
     
     //----------------------------------------------------------------------------------------------
-    /** Execute the algorithm.
-   */
+    /**
+     * Execute the algorithm.
+     */
     void SXDMDNorm::exec()
     {
-      bool skipProcessing = false;
       m_inputWS = getProperty("InputWorkspace");
-      WorkspaceHistory hist = m_inputWS->getHistory();
-      std::string dEMode("");
-      if (hist.lastAlgorithm()->name()=="ConvertToMD")
+      if( inputEnergyMode() != "Elastic" )
       {
-        dEMode = hist.lastAlgorithm()->getPropertyValue("dEAnalysisMode");
-      }
-      else if ( ((hist.lastAlgorithm()->name() == "Load") || (hist.lastAlgorithm()->name() == "LoadMD")) &&
-                (hist.getAlgorithmHistory(hist.size()-2)->name() == "ConvertToMD") )
-      {
-        //get dEAnalysisMode
-        PropertyHistories histvec = hist.getAlgorithmHistory(hist.size()-2)->getProperties();
-        for(auto it = histvec.begin();it != histvec.end(); ++it)
-        {
-          if((*it)->name()=="dEAnalysisMode")
-          {
-            dEMode=(*it)->value();
-          }
-        }
-      }
-      else
-      {
-        throw std::runtime_error("The last algorithm in the history of the input workspace is not ConvertToMD");
-      }
-      if (dEMode!="Elastic")
-      {
-        throw std::runtime_error("This is not elastic scattering data");
+        throw std::invalid_argument("Invalid energy transfer mode. Algorithm currently only supports elastic data.");
       }
       hMin = m_inputWS->getDimension(0)->getMinimum();
       kMin = m_inputWS->getDimension(1)->getMinimum();
@@ -138,16 +120,18 @@ namespace Mantid
       lIndex = -1;
       
       //check for other dimensions if we could measure anything in the original data
+      bool skipProcessing = false;
+      const auto exptInfoZero = m_inputWS->getExperimentInfo(0);
       std::vector<coord_t> otherValues;
-      for(size_t i = 3;i < m_inputWS->getNumDims(); i++)
+      for(size_t i = 3; i < m_inputWS->getNumDims(); i++)
       {
-        float dimMin = static_cast<float>(m_inputWS->getDimension(i)->getMinimum());
-        float dimMax = static_cast<float>(m_inputWS->getDimension(i)->getMaximum());
-        Kernel::TimeSeriesProperty<double> *run_property = \
-            dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_inputWS->getExperimentInfo(0)->run().getProperty(m_inputWS->getDimension(i)->getName()));
-        if (run_property!=NULL)
+        const auto dimension = m_inputWS->getDimension(i);
+        float dimMin = static_cast<float>(dimension->getMinimum());
+        float dimMax = static_cast<float>(dimension->getMaximum());
+        auto *dimProp = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(exptInfoZero->run().getProperty(dimension->getName()));
+        if (dimProp)
         {
-          coord_t value = static_cast<coord_t>(run_property->firstValue());
+          coord_t value = static_cast<coord_t>(dimProp->firstValue());
           otherValues.push_back(value);
           //in the original MD data no time was spent measuring between dimMin and dimMax
           if (value < dimMin || value > dimMax)
@@ -155,7 +139,6 @@ namespace Mantid
             skipProcessing = true;
           }
         }
-        delete run_property;
       }
       
       // Run BinMD
@@ -174,13 +157,13 @@ namespace Mantid
       this->setProperty("OutputWorkspace", outputWS);
       
       //copy the MDHisto workspace, and change signals and errors to 0.
-      m_normWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(*(boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS))));
+      m_normWS = boost::make_shared<MDHistoWorkspace>(*(boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS)));
       m_normWS->setTo(0.,0.,0.);
       
       //get indices of the original dimensions in the output workspace, and if not found, the corresponding dimension is integrated
-      Mantid::Kernel::Matrix<coord_t> mat = m_normWS->getTransformFromOriginal(0)->makeAffineMatrix();
+      Kernel::Matrix<coord_t> mat = m_normWS->getTransformFromOriginal(0)->makeAffineMatrix();
       
-      for (size_t row = 0; row<mat.numRows()-1; row++)//affine matrix, ignore last row
+      for (size_t row = 0; row < mat.numRows()-1; row++)//affine matrix, ignore last row
       {
         if(mat[row][0]==1.)
         {
@@ -188,39 +171,39 @@ namespace Mantid
           hIndex = row;
           if(hMin<m_normWS->getDimension(row)->getMinimum()) hMin = m_normWS->getDimension(row)->getMinimum();
           if(hMax>m_normWS->getDimension(row)->getMaximum()) hMax = m_normWS->getDimension(row)->getMaximum();
-          if((hMin>m_normWS->getDimension(row)->getMaximum())||(hMax<m_normWS->getDimension(row)->getMinimum()))
+          if((hMin>m_normWS->getDimension(row)->getMaximum()) || (hMax<m_normWS->getDimension(row)->getMinimum()))
           {
             skipProcessing = true;
           }
         }
-        if(mat[row][1]==1.)
+        if(mat[row][1] == 1.)
         {
           kIntegrated = false;
           kIndex = row;
           if(kMin<m_normWS->getDimension(row)->getMinimum()) kMin = m_normWS->getDimension(row)->getMinimum();
           if(kMax>m_normWS->getDimension(row)->getMaximum()) kMax = m_normWS->getDimension(row)->getMaximum();
-          if((kMin>m_normWS->getDimension(row)->getMaximum())||(kMax<m_normWS->getDimension(row)->getMinimum()))
+          if((kMin>m_normWS->getDimension(row)->getMaximum()) || (kMax<m_normWS->getDimension(row)->getMinimum()))
           {
             skipProcessing = true;
           }
         }
-        if(mat[row][2]==1.)
+        if(mat[row][2] == 1.)
         {
           lIntegrated = false;
           lIndex = row;
           if(lMin<m_normWS->getDimension(row)->getMinimum()) lMin = m_normWS->getDimension(row)->getMinimum();
           if(lMax>m_normWS->getDimension(row)->getMaximum()) lMax = m_normWS->getDimension(row)->getMaximum();
-          if((lMin>m_normWS->getDimension(row)->getMaximum())||(lMax<m_normWS->getDimension(row)->getMinimum()))
+          if((lMin>m_normWS->getDimension(row)->getMaximum()) || (lMax<m_normWS->getDimension(row)->getMinimum()))
           {
             skipProcessing = true;
           }
           
-          for(size_t col = 3;col<mat.numCols()-1;col++) //affine matrix, ignore last column
+          for(size_t col = 3;col < mat.numCols()-1; col++) //affine matrix, ignore last column
           {
-            if(mat[row][col]==1.)
+            if(mat[row][col] == 1.)
             {
-              double val = otherValues.at(col-3);
-              if((val>m_normWS->getDimension(row)->getMaximum())||(val<m_normWS->getDimension(row)->getMinimum()))
+              double val = otherValues.at(col - 3);
+              if((val>m_normWS->getDimension(row)->getMaximum()) || (val<m_normWS->getDimension(row)->getMinimum()))
               {
                 skipProcessing = true;
               }
@@ -250,14 +233,13 @@ namespace Mantid
         m_lX[i] = lDim.getX(i);
       }
       
-      Mantid::API::MatrixWorkspace_const_sptr fW = getProperty("FluxWorkspace");
-      Mantid::DataObjects::EventWorkspace_const_sptr fluxW = boost::dynamic_pointer_cast<const Mantid::DataObjects::EventWorkspace>(fW);
+      API::MatrixWorkspace_const_sptr fW = getProperty("FluxWorkspace");
+      DataObjects::EventWorkspace_const_sptr fluxW = boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(fW);
       KincidentMin = fluxW->getEventXMin();
       KincidentMax = fluxW->getEventXMax();
-      Mantid::API::MatrixWorkspace_const_sptr sA = getProperty("SolidAngleWorkspace");
-      
-      
-      if (skipProcessing)
+      API::MatrixWorkspace_const_sptr sA = getProperty("SolidAngleWorkspace");
+
+      if(skipProcessing)
       {
         g_log.warning("Binning limits are outside the limits of the MDWorkspace\n");
       }
@@ -287,8 +269,9 @@ namespace Mantid
         for(int64_t i = 0;i < static_cast<int64_t>(detIDS.size()); i++)
         {
           PARALLEL_START_INTERUPT_REGION
-              Mantid::Geometry::IDetector_const_sptr detector = instrument->getDetector(detIDS[i]);
-          if(!detector->isMonitor()&&!detector->isMasked())
+
+          Mantid::Geometry::IDetector_const_sptr detector = instrument->getDetector(detIDS[i]);
+          if(!detector->isMonitor() && !detector->isMasked())
           {
             //get intersections
             std::vector<Mantid::Kernel::VMD> intersections = calculateIntersections(detector);
@@ -358,20 +341,63 @@ namespace Mantid
             }
           }
           prog->report();
+          
           PARALLEL_END_INTERUPT_REGION
         }
         PARALLEL_CHECK_INTERUPT_REGION
-            delete prog;
+
+       delete prog;
       }
       
       this->setProperty("OutputNormalizationWorkspace",m_normWS);
       
     }
     
-    
-    std::vector<Mantid::Kernel::VMD> SXDMDNorm::calculateIntersections(Mantid::Geometry::IDetector_const_sptr detector)
+    /**
+     * Currently looks for the ConvertToMD algorithm in the history
+     * @return A string donating the energy transfer mode of the input workspace
+     */
+    std::string SXDMDNorm::inputEnergyMode() const
     {
-      std::vector<Mantid::Kernel::VMD> intersections;
+      const auto & hist = m_inputWS->getHistory();
+      const size_t nalgs = hist.size();
+      const auto & lastAlgorithm = hist.lastAlgorithm();
+
+      std::string emode("");
+      if(lastAlgorithm->name() == "ConvertToMD")
+      {
+        emode = lastAlgorithm->getPropertyValue("dEAnalysisMode");
+      }
+      else if ( (lastAlgorithm->name() == "Load" || hist.lastAlgorithm()->name() == "LoadMD") &&
+                hist.getAlgorithmHistory(nalgs - 2)->name() == "ConvertToMD" )
+      {
+        //get dEAnalysisMode
+        PropertyHistories histvec = hist.getAlgorithmHistory(nalgs - 2)->getProperties();
+        for(auto it = histvec.begin(); it != histvec.end(); ++it)
+        {
+          if((*it)->name() == "dEAnalysisMode")
+          {
+            emode = (*it)->value();
+            break;
+          }
+        }
+      }
+      else
+      {
+        throw std::invalid_argument("The last algorithm in the history of the input workspace is not ConvertToMD");
+      }
+      return emode;
+    }
+
+    /**
+     * Calculate the points of intersection for the given detector with cuboid surrounding the
+     * detector position in HKL
+     * @param detector A pointer to a detectir object
+     * @return A list of intersections in HKL space
+     */
+    std::vector<Kernel::VMD> SXDMDNorm::calculateIntersections(Mantid::Geometry::IDetector_const_sptr detector)
+    {
+      std::vector<Kernel::VMD> intersections;
       double th = detector->getTwoTheta(V3D(0,0,0),V3D(0,0,1));
       double phi = detector->getPhi();
       V3D q(-sin(th)*cos(phi),-sin(th)*sin(phi),1.-cos(th));
@@ -385,10 +411,10 @@ namespace Mantid
       auto hNBins = m_hX.size();
       auto kNBins = m_kX.size();
       auto lNBins = m_lX.size();
-      intersections.reserve( hNBins + kNBins + lNBins + 8 );
+      intersections.reserve(hNBins + kNBins + lNBins + 8);
       
       //calculate intersections with planes perpendicular to h
-      if (fabs(hStart-hEnd)>eps)
+      if (fabs(hStart-hEnd) > eps)
       {
         double fmom=(KincidentMax-KincidentMin)/(hEnd-hStart);
         double fk=(kEnd-kStart)/(hEnd-hStart);
@@ -398,7 +424,7 @@ namespace Mantid
           for(size_t i = 0;i<hNBins;i++)
           {
             double hi = m_hX[i];
-            if ((hi>=hMin)&&(hi<=hMax)&&((hStart-hi)*(hEnd-hi)<0))
+            if((hi>=hMin)&&(hi<=hMax) && ((hStart-hi)*(hEnd-hi)<0))
             {
               // if hi is between hStart and hEnd, then ki and li will be between kStart, kEnd and lStart, lEnd and momi will be between KincidentMin and KnincidemtmMax
               double ki = fk*(hi-hStart)+kStart;
