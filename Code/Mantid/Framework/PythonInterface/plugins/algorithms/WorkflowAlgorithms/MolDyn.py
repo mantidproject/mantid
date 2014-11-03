@@ -97,7 +97,7 @@ class MolDyn(PythonAlgorithm):
         sample_filename = self.getPropertyValue('Filename')
         function_list = self.getProperty('Functions').value
         res_ws = self.getPropertyValue('Resolution')
-        emax = self.getProperty('MaxEnergy')
+        e_max = self.getPropertyValue('MaxEnergy')
 
         if len(function_list) == 0 and os.path.splitext(sample_filename)[1] == 'cdl':
             issues['Functions'] = 'Must specify at least one function when loading a CDL file'
@@ -105,7 +105,7 @@ class MolDyn(PythonAlgorithm):
         if len(function_list) > 0 and os.path.splitext(sample_filename)[1] == 'dat':
             issues['Functions'] = 'Cannot specify functions when loading an ASCII file'
 
-        if res_ws is not '' and emax is '':
+        if res_ws is not '' and e_max is '':
             issues['MaxEnergy'] = 'MaxEnergy must be set when convolving with an instrument resolution'
 
         return issues

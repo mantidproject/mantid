@@ -29,7 +29,7 @@ Usage
 
 .. testcode:: ExLoadCDLFile
 
-    out_ws_group = MolDyn(Filename='NaF_DISF.cdl', Functions=['Fqt-total', 'Fqt-Na'])
+    out_ws_group = MolDyn(Filename='NaF_DISF.cdl', Functions=['Fqt-total', 'Sqw-total'])
 
     for ws_name in out_ws_group.getNames():
       print ws_name
@@ -39,6 +39,6 @@ Output:
 .. testoutput:: ExLoadCDLFile
 
     NaF_DISF_Fqt-total
-    NaF_DISF_Fqt-Na
+    NaF_DISF_Sqw-total
 
 .. categories::
