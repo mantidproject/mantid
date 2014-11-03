@@ -26,35 +26,17 @@ namespace Mantid
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(SXDMDNorm)
     
-    
-    
     //----------------------------------------------------------------------------------------------
     /** Constructor
    */
-    SXDMDNorm::SXDMDNorm()
-    {
-      hIndex = -1;
-      kIndex = -1;
-      lIndex = -1;
-      hIntegrated = true;
-      kIntegrated = true;
-      lIntegrated = true;
-      m_nDims = 0;
-      transf = Mantid::Kernel::DblMatrix(3,3);
-      KincidentMin = 0;
-      KincidentMax = EMPTY_DBL();
-    }
-    
-    //----------------------------------------------------------------------------------------------
-    /** Destructor
-   */
-    SXDMDNorm::~SXDMDNorm()
+    SXDMDNorm::SXDMDNorm() :
+      m_nDims(0), m_normWS(), m_inputWS(), hMin(0.0f), hMax(0.0f),
+      kMin(0.0f), kMax(0.0f), lMin(0.0f), lMax(0.0f), hIntegrated(true),
+      kIntegrated(true), lIntegrated(true), transf(3,3),
+      KincidentMin(0.0), KincidentMax(EMPTY_DBL()), hIndex(-1), kIndex(-1), lIndex(-1),
+      m_hX(), m_kX(), m_lX()
     {
     }
-    
-    
-    //----------------------------------------------------------------------------------------------
-    
     
     /// Algorithm's version for identification. @see Algorithm::version
     int SXDMDNorm::version() const { return 1; }
