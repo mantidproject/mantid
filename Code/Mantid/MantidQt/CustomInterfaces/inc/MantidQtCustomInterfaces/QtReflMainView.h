@@ -101,6 +101,7 @@ namespace MantidQt
       void on_actionGroupRows_triggered();
       void on_actionClearSelected_triggered();
       void on_actionCopySelected_triggered();
+      void on_actionCutSelected_triggered();
       void on_actionPasteSelected_triggered();
       void on_actionExpandSelection_triggered();
       void on_actionOptionsDialog_triggered();

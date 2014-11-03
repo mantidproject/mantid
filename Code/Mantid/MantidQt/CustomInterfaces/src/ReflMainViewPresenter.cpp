@@ -854,6 +854,7 @@ namespace MantidQt
       case ReflMainView::GroupRowsFlag:       groupRows();          break;
       case ReflMainView::ClearSelectedFlag:   clearSelected();      break;
       case ReflMainView::CopySelectedFlag:    copySelected();       break;
+      case ReflMainView::CutSelectedFlag:     cutSelected();        break;
       case ReflMainView::PasteSelectedFlag:   pasteSelected();      break;
       case ReflMainView::OpenTableFlag:       openTable();          break;
       case ReflMainView::NewTableFlag:        newTable();           break;
@@ -1096,6 +1097,13 @@ namespace MantidQt
 
       const std::string output = boost::algorithm::join(lines, "\n");
       QApplication::clipboard()->setText(QString::fromStdString(output));
+    }
+
+    /** Copy currently selected rows to the clipboard, and then delete them. */
+    void ReflMainViewPresenter::cutSelected()
+    {
+      copySelected();
+      deleteRow();
     }
 
     /** Paste the contents of the clipboard into the currently selected rows, or append new rows */
