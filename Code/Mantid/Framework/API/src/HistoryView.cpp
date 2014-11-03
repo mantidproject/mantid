@@ -179,7 +179,7 @@ void HistoryView::filterBetweenExecDate(Mantid::Kernel::DateAndTime start, Manti
     Mantid::Kernel::DateAndTime algExecutionDate = it->getAlgorithmHistory()->executionDate();
 
     // If the algorithm is outside of the time range, remove it and keep iterating
-    if(algExecutionDate < start || algExecutionDate >= end)
+    if(algExecutionDate < start || algExecutionDate > end)
     {
       it = m_historyItems.erase(it);
       --it;

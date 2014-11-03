@@ -300,7 +300,7 @@ public:
     TS_ASSERT_EQUALS(view.size(), 7);
 
     // Filter by time with a start and end time
-    TS_ASSERT_THROWS_NOTHING( view.filterBetweenExecDate(DateAndTime(200, 0), DateAndTime(212, 0)) );
+    TS_ASSERT_THROWS_NOTHING( view.filterBetweenExecDate(DateAndTime(200, 0), DateAndTime(211, 0)) );
     TS_ASSERT_EQUALS(view.size(), 3);
 
     // Get algorithm list and compare results
