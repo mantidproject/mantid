@@ -961,8 +961,7 @@ namespace MantidQt
         return;
 
       m_workspaceList.insert(name);
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
     }
 
     /**
@@ -972,8 +971,7 @@ namespace MantidQt
     {
       const std::string name = pNf->objectName();
       m_workspaceList.erase(name);
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
     }
 
     /**
@@ -982,8 +980,7 @@ namespace MantidQt
     void ReflMainViewPresenter::handleClearEvent(Mantid::API::ClearADSNotification_ptr)
     {
       m_workspaceList.clear();
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
     }
 
     /**
@@ -1000,8 +997,7 @@ namespace MantidQt
 
       m_workspaceList.erase(name);
       m_workspaceList.insert(newName);
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
     }
 
     /**
@@ -1017,8 +1013,7 @@ namespace MantidQt
       if(isValidModel(pNf->object()))
         m_workspaceList.insert(name);
 
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
     }
 
     /** Returns how many rows there are in a given group
