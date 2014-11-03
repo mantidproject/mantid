@@ -170,7 +170,7 @@ namespace Mantid
       run.addLogData( new PropertyWithValue<std::string>("run_number", run_num) );
     }
     /**reads workspace dimensions,number of periods etc from raw data
-     * @param numberOfSpectra :: number of spectrums
+     * @param numberOfSpectra :: number of spectra
      * @param numberOfPeriods :: number of periods
      * @param lengthIn :: size of workspace vectors
      * @param noTimeRegimes :: number of time regime.
@@ -237,11 +237,11 @@ namespace Mantid
      *@param numberOfPeriods :: total number of periods from raw file
      *@param lengthIn :: size of workspace vectors
      *@param title :: title of the workspace
-
+     *@param pAlg   :: pointer to the algorithm, this method works with.
      */
     void LoadRawHelper::createMonitorWorkspace(DataObjects::Workspace2D_sptr& monws_sptr,DataObjects::Workspace2D_sptr& normalws_sptr,
         WorkspaceGroup_sptr& mongrp_sptr,const int64_t mwsSpecs,const int64_t nwsSpecs,
-        const int64_t numberOfPeriods,const int64_t lengthIn,const std::string title)
+        const int64_t numberOfPeriods,const int64_t lengthIn,const std::string title,API::Algorithm *const pAlg)
     {
       try
       { 
@@ -262,31 +262,31 @@ namespace Mantid
         }
         if(!monws_sptr) return ;
 
-        std::string wsName= getPropertyValue("OutputWorkspace");
+        std::string wsName= pAlg->getPropertyValue("OutputWorkspace");
         // if the normal output workspace size>0 then set the workspace as "MonitorWorkspace"
         // otherwise  set the workspace as "OutputWorkspace"
         if (nwsSpecs> 0)
         {               
           std::string monitorwsName = wsName + "_monitors";
-          declareProperty(new WorkspaceProperty<Workspace> ("MonitorWorkspace", monitorwsName,
+          pAlg->declareProperty(new WorkspaceProperty<Workspace> ("MonitorWorkspace", monitorwsName,
               Direction::Output));
-          setWorkspaceProperty("MonitorWorkspace", title, mongrp_sptr, monws_sptr,numberOfPeriods, true);
+          setWorkspaceProperty("MonitorWorkspace", title, mongrp_sptr, monws_sptr,numberOfPeriods, true,pAlg);
         }
         else
         { 
           //if only monitors range selected
-          //then set the monitor workspace as the outputworkspace
-          setWorkspaceProperty("OutputWorkspace", title, mongrp_sptr, monws_sptr,numberOfPeriods, false);
+          //then set the monitor workspace as the output workspace
+          setWorkspaceProperty("OutputWorkspace", title, mongrp_sptr, monws_sptr,numberOfPeriods, false,pAlg);
         }
 
       }
       catch(std::out_of_range& )
       {
-        g_log.debug()<<"Error in creating monitor workspace"<<std::endl;
+        pAlg->getLogger().debug()<<"Error in creating monitor workspace"<<std::endl;
       }
       catch(std::runtime_error& )
       {
-        g_log.debug()<<"Error in creating monitor workspace"<<std::endl;
+        pAlg->getLogger().debug()<<"Error in creating monitor workspace"<<std::endl;
       }
     }
 
@@ -305,16 +305,17 @@ namespace Mantid
      *  @param grpws_sptr :: shared pointer to  group workspace
      *  @param  period period number
      *  @param bmonitors :: boolean flag to name  the workspaces
+     *  @param pAlg      :: pointer to algorithm this method works with.
      */
     void LoadRawHelper::setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr, WorkspaceGroup_sptr grpws_sptr,
-        const int64_t period, bool bmonitors)
+        const int64_t period, bool bmonitors, API::Algorithm *const pAlg)
     {
       if(!ws_sptr) return;
       if(!grpws_sptr) return;
       std::string wsName;
       std::string outws;
       std::string outputWorkspace;
-      std::string localWSName = getProperty("OutputWorkspace");
+      std::string localWSName = pAlg->getProperty("OutputWorkspace");
       std::stringstream suffix;
       suffix << (period + 1);
       if (bmonitors)
@@ -328,8 +329,8 @@ namespace Mantid
         outputWorkspace = "OutputWorkspace";
       }
       outws = outputWorkspace + "_" + suffix.str();
-      declareProperty(new WorkspaceProperty<Workspace> (outws, wsName, Direction::Output));
-      setProperty(outws, boost::static_pointer_cast<Workspace>(ws_sptr));
+      pAlg->declareProperty(new WorkspaceProperty<Workspace> (outws, wsName, Direction::Output));
+      pAlg->setProperty(outws, boost::static_pointer_cast<Workspace>(ws_sptr));
       grpws_sptr->addWorkspace( ws_sptr );
     }
 
@@ -338,14 +339,15 @@ namespace Mantid
      *  @param title :: title of the workspace
      *  @param grpws_sptr ::  shared pointer to group workspace
      *  @param ws_sptr ::  shared pointer to workspace
-     *  @param numberOfPeriods :: numer periods in the raw file
+     *  @param numberOfPeriods :: number periods in the raw file
      *  @param  bMonitor to identify the workspace is an output workspace or monitor workspace
+     *  @param pAlg         :: pointer to algorithm this method works with.
      */
     void LoadRawHelper::setWorkspaceProperty(const std::string& propertyName, const std::string& title,
-        WorkspaceGroup_sptr grpws_sptr, DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods, bool bMonitor)
+        WorkspaceGroup_sptr grpws_sptr, DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods, bool bMonitor, API::Algorithm *const pAlg)
     {
       UNUSED_ARG(bMonitor);
-      Property *ws = getProperty("OutputWorkspace");
+      Property *ws = pAlg->getProperty("OutputWorkspace");
       if(!ws) return;
       if(!grpws_sptr) return;
       if(!ws_sptr)return;
@@ -353,18 +355,18 @@ namespace Mantid
       ws_sptr->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
       if (numberOfPeriods > 1)
       {
-        setProperty(propertyName, boost::dynamic_pointer_cast<Workspace>(grpws_sptr));
+        pAlg->setProperty(propertyName, boost::dynamic_pointer_cast<Workspace>(grpws_sptr));
       }
       else
       {
-        setProperty(propertyName, boost::dynamic_pointer_cast<Workspace>(ws_sptr));
+        pAlg->setProperty(propertyName, boost::dynamic_pointer_cast<Workspace>(ws_sptr));
       }
     }
 
     /** This method sets the raw file data to workspace vectors
      *  @param newWorkspace ::  shared pointer to the  workspace
      *  @param timeChannelsVec ::  vector holding the X data
-     *  @param  wsIndex  variable used for indexing the ouputworkspace
+     *  @param  wsIndex  variable used for indexing the output workspace
      *  @param  nspecNum  spectrum number
      *  @param noTimeRegimes ::   regime no.
      *  @param lengthIn :: length of the workspace
@@ -1287,6 +1289,63 @@ namespace Mantid
         }
       }
       return true;
+    }
+
+    /** This method checks the value of LoadMonitors property and returns true or false
+     *  @return true if Exclude Monitors option is selected,otherwise false
+     */
+    bool LoadRawHelper::isExcludeMonitors(const std::string &monitorOption)
+    {
+      bool bExclude;
+      monitorOption.compare("Exclude") ? (bExclude = false) : (bExclude = true);
+      return bExclude;
+    }
+
+    /**This method checks the value of LoadMonitors property and returns true or false
+     * @return true if Include Monitors option is selected,otherwise false
+     */
+    bool LoadRawHelper::isIncludeMonitors(const std::string &monitorOption)
+    {
+      bool bExclude;
+      monitorOption.compare("Include") ? (bExclude = false) : (bExclude = true);
+ 
+      return bExclude;
+    }
+
+    /** This method checks the value of LoadMonitors property and returns true or false
+     *  @return true if Separate Monitors option is selected,otherwise false
+     */
+    bool LoadRawHelper::isSeparateMonitors(const std::string &monitorOption)
+    {
+      bool bSeparate;
+      monitorOption.compare("Separate") ? (bSeparate = false) : (bSeparate = true);
+      return bSeparate;
+    }
+    /**The method to interpret LoadMonitors property options and convert then into boolean values
+     * @param bincludeMonitors  :: if monitors requested to be included with workspace
+     * @param bseparateMonitors :: if monitors requested to be loaded separately from the workspace
+     * @param bexcludeMonitors  :: if monitors should not be loaded at all. 
+     * @param pAlgo             :: pointer to the algorithm, which has LoadMonitors property.
+     */ 
+    void LoadRawHelper::ProcessLoadMonitorOptions(bool &bincludeMonitors,bool &bseparateMonitors,bool &bexcludeMonitors,API::Algorithm *pAlgo)
+    {
+      // process monitor option
+      std::string monitorOption = pAlgo->getProperty("LoadMonitors");
+      if (monitorOption =="1")
+        monitorOption = "Separate";
+      if (monitorOption=="0")
+        monitorOption = "Exclude";
+
+      bincludeMonitors = LoadRawHelper::isIncludeMonitors(monitorOption);
+      bseparateMonitors = false;
+      bexcludeMonitors = false;
+      if (!bincludeMonitors)
+      {
+        bseparateMonitors = LoadRawHelper::isSeparateMonitors(monitorOption);
+        bexcludeMonitors = LoadRawHelper::isExcludeMonitors(monitorOption);
+      }
+      //
+
     }
 
   } // namespace DataHandling

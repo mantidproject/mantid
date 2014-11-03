@@ -20,9 +20,13 @@ namespace CustomInterfaces
    */
   IndirectDataReductionTab::IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QObject* parent) : QObject(parent),
       m_plots(), m_curves(), m_rangeSelectors(),
+      m_tabRunning(false),
       m_properties(),
-      m_dblManager(new QtDoublePropertyManager()), m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
+      m_dblManager(new QtDoublePropertyManager()),
+      m_blnManager(new QtBoolPropertyManager()),
+      m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()),
+      m_batchAlgoRunner(NULL),
       m_uiForm(uiForm)
   {
     m_parentWidget = dynamic_cast<QWidget *>(parent);
@@ -36,6 +40,8 @@ namespace CustomInterfaces
     m_valPosDbl->setBottom(tolerance);
 
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmFinished(bool)));
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
+
     connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   }
 
@@ -49,9 +55,15 @@ namespace CustomInterfaces
   void IndirectDataReductionTab::runTab()
   {
     if(validate())
+    {
+      m_tabRunning = true;
+      emit updateRunButton(false, "Running...", "Running data reduction...");
       run();
+    }
     else
+    {
       g_log.warning("Failed to validate indirect tab input!");
+    }
   }
 
   void IndirectDataReductionTab::setupTab()
@@ -62,6 +74,22 @@ namespace CustomInterfaces
   void IndirectDataReductionTab::validateTab()
   {
     validate();
+  }
+
+  /**
+   * Slot used to update the run button when an algorithm that was strted by the Run button complete.
+   *
+   * @param error Unused
+   */
+  void IndirectDataReductionTab::tabExecutionComplete(bool error)
+  {
+    UNUSED_ARG(error);
+
+    if(m_tabRunning)
+    {
+      m_tabRunning = false;
+      emit updateRunButton();
+    }
   }
 
   /**
@@ -197,6 +225,10 @@ namespace CustomInterfaces
     // Get the instrument workspace
     MatrixWorkspace_sptr instWorkspace = loadInstrumentIfNotExist(instrumentName, analyser, reflection);
 
+    // In the IRIS IPF there is no fmica component
+    if(instrumentName == "IRIS" && analyser == "fmica")
+      analyser = "mica";
+
     // Get the instrument
     auto instrument = instWorkspace->getInstrument()->getComponentByName(analyser);
     if(instrument == NULL)
@@ -319,9 +351,12 @@ namespace CustomInterfaces
     if(cID == "")
       cID = plotID;
 
-    //check if we can plot
+    // Check if we can plot
     if( wsIndex >= workspace->getNumberHistograms() || workspace->readX(0).size() < 2 )
+    {
+      g_log.error("Spectrum index out of range for this workspace");
       return;
+    }
 
     QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), false);
 

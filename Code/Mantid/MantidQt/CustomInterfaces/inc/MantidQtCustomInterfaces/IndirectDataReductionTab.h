@@ -131,6 +131,9 @@ namespace CustomInterfaces
     /// Tree of the properties
     std::map<QString, QtTreePropertyBrowser *> m_propTrees;
 
+    /// If algorithms are currently running on this tab
+    bool m_tabRunning;
+
     /// Internal list of the properties
     QMap<QString, QtProperty*> m_properties;
 
@@ -157,11 +160,15 @@ namespace CustomInterfaces
     /// Validator for positive double inputs
     QDoubleValidator *m_valPosDbl;
 
+    Ui::IndirectDataReduction m_uiForm;
+
   signals:
     /// Send signal to parent window to show a message box to user
     void showMessageBox(const QString& message);
     /// Run a python script
     void runAsPythonScript(const QString & code, bool no_output);
+    /// Update the Run button on the IDR main window
+    void updateRunButton(bool enabled = true, QString message = "Run", QString tooltip = "");
 
   private:
     /// Overidden by child class.
@@ -171,8 +178,8 @@ namespace CustomInterfaces
     /// Overidden by child class.
     virtual bool validate() = 0;
 
-  protected:
-    Ui::IndirectDataReduction m_uiForm;
+  private slots:
+    void tabExecutionComplete(bool error);
 
   };
 } // namespace CustomInterfaces

@@ -9,6 +9,7 @@
 #include "MantidKernel/System.h"
 
 #include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAlgorithms/ConvertSpectrumAxis.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/ElasticWindow.h"
 #include "MantidAlgorithms/Rebin.h"
@@ -65,6 +66,23 @@ public:
   }
 
   /**
+   * Converts the generated sample workspace spectra axis to Q.
+   */
+  void convertSampleWsToQ()
+  {
+    ConvertSpectrumAxis convQAlg;
+    convQAlg.initialize();
+
+    TS_ASSERT_THROWS_NOTHING( convQAlg.setProperty("InputWorkspace", "__ElasticWindowTest_sample") );
+    TS_ASSERT_THROWS_NOTHING( convQAlg.setProperty("Target", "MomentumTransfer") );
+    TS_ASSERT_THROWS_NOTHING( convQAlg.setProperty("EMode", "Indirect") );
+    TS_ASSERT_THROWS_NOTHING( convQAlg.setProperty("OutputWorkspace", "__ElasticWindowTest_sample") );
+
+    TS_ASSERT_THROWS_NOTHING( convQAlg.execute() );
+    TS_ASSERT( convQAlg.isExecuted() );
+  }
+
+  /**
    * Test initialization of the algorithm is successful.
    */
   void test_init()
@@ -75,9 +93,9 @@ public:
   }
 
   /**
-   * Test running ElasticWindow with just the peak range defined.
+   * Test running ElasticWindow with just the peak range defined using reduced data.
    */
-  void test_peakOnly()
+  void test_redPeakOnly()
   {
     ElasticWindow elwinAlg;
     elwinAlg.initialize();
@@ -96,9 +114,33 @@ public:
   }
 
   /**
-   * Test running ElasticWindow with both the peak and background ranges defined.
+   * Test running ElasticWindow with just the peak range defined using S(Q,w) data.
    */
-  void test_peakAndBackground()
+  void test_sqwPeakOnly()
+  {
+    // First convert the sample workspace from spectra number to elastic Q
+    convertSampleWsToQ();
+
+    ElasticWindow elwinAlg;
+    elwinAlg.initialize();
+
+    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("InputWorkspace", "__ElasticWindowTest_sample") );
+    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("Range1Start", -0.1) );
+    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("Range1End", 0.1) );
+    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("OutputInQ", "__ElasticWindowTest_outputQ") );
+    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("OutputInQSquared", "__ElasticWindowTest_outputQsq") );
+
+    TS_ASSERT_THROWS_NOTHING( elwinAlg.execute() );
+    TS_ASSERT( elwinAlg.isExecuted() );
+
+    MatrixWorkspace_sptr qWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__ElasticWindowTest_outputQ");
+    verifyQworkspace(qWs);
+  }
+
+  /**
+   * Test running ElasticWindow with both the peak and background ranges defined using reduced data.
+   */
+  void test_redPeakAndBackground()
   {
     ElasticWindow elwinAlg;
     elwinAlg.initialize();
