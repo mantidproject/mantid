@@ -46,11 +46,13 @@ namespace Mantid
       void init();
       void exec();
 
-      /// Retrieve the energy transfer mode of the input workspace data
       std::string inputEnergyMode() const;
-      
-      /// function to calculate intersections of teh trajectory with MDBoxes
-      std::vector<Kernel::VMD> calculateIntersections(Mantid::Geometry::IDetector_const_sptr detector);
+      void initCaches();
+      std::vector<coord_t> getValuesFromOtherDimensions(bool & skipNormalization) const;
+      MDEvents::MDHistoWorkspace_sptr binInputWS();
+
+      /// function to calculate intersections of the trajectory with MDBoxes
+      std::vector<Kernel::VMD> calculateIntersections(const Geometry::IDetector_const_sptr &detector);
 
       /// number of MD dimensions
       size_t m_nDims;
@@ -58,17 +60,17 @@ namespace Mantid
       MDEvents::MDHistoWorkspace_sptr m_normWS;
       /// Input workspace
       API::IMDEventWorkspace_sptr m_inputWS;
-      ///limits for h,k,l dimensions
-      coord_t hMin,hMax,kMin,kMax,lMin,lMax;
-      ///flag for integrated h,k,l dimensions
-      bool hIntegrated,kIntegrated,lIntegrated;
-      ///(2*PiRUBW)^-1
-      Mantid::Kernel::DblMatrix transf;
+      /// limits for h,k,l dimensions
+      coord_t m_hmin, m_hmax, m_kmin, m_kmax, m_lmin, m_lmax;
+      /// flag for integrated h,k,l dimensions
+      bool m_hIntegrated, m_kIntegrated, m_lIntegrated;
+      /// (2*PiRUBW)^-1
+      Mantid::Kernel::DblMatrix m_rubw;
       /// limits for momentum
-      double KincidentMin,KincidentMax;
+      double m_kiMin, m_kiMax;
       ///index of h,k,l dimensions in the output workspaces
-      size_t hIndex,kIndex,lIndex;
-      /// cached x values along dimensions h,k,l
+      size_t m_hIdx, m_kIdx, m_lIdx;
+      /// cached X values along dimensions h,k,l
       std::vector<double> m_hX, m_kX, m_lX;
     };
 
