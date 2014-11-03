@@ -617,7 +617,7 @@ namespace Mantid
       if(it_found != m_map.end())
       {
         pmap_cit itr, itr_end;
-        boost::tie(itr,itr_end) = m_map.equal_range(id);
+        std::tie(itr,itr_end) = m_map.equal_range(id);
         for(; itr != itr_end; ++itr)
         {
           const Parameter_sptr & param = itr->second;
@@ -681,7 +681,7 @@ namespace Mantid
           if (it_found != m_map.end())
           {
             pmap_it itr, itr_end;
-            boost::tie(itr,itr_end) = m_map.equal_range(id);
+            std::tie(itr,itr_end) = m_map.equal_range(id);
             for( ; itr != itr_end; ++itr )
             {
               Parameter_sptr param = itr->second;
@@ -714,7 +714,7 @@ namespace Mantid
           if (it_found != m_map.end())
           {
             pmap_cit itr, itr_end;
-            boost::tie(itr,itr_end) = m_map.equal_range(id);
+            std::tie(itr,itr_end) = m_map.equal_range(id);
             for( ; itr != itr_end; ++itr )
             {
               Parameter_sptr param = itr->second;
@@ -750,7 +750,7 @@ namespace Mantid
              if (it_found->first)
              {
                 pmap_cit itr, itr_end;
-                boost::tie(itr,itr_end) = m_map.equal_range(id);
+                std::tie(itr,itr_end) = m_map.equal_range(id);
                 for( ; itr != itr_end; ++itr )
                 {
                     Parameter_sptr param = itr->second;
@@ -865,7 +865,7 @@ namespace Mantid
       }
 
       pmap_cit itr, itr_end;
-      boost::tie(itr,itr_end) = m_map.equal_range(id);
+      std::tie(itr,itr_end) = m_map.equal_range(id);
       for(pmap_cit it = itr; it != itr_end; ++it)
       {
         paramNames.insert(it->second->name());
