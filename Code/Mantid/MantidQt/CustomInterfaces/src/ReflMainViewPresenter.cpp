@@ -14,7 +14,6 @@
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 
-#include <QClipboard>
 #include <QSettings>
 
 using namespace Mantid::API;
@@ -1095,8 +1094,7 @@ namespace MantidQt
         lines.push_back(boost::algorithm::join(line, "\t"));
       }
 
-      const std::string output = boost::algorithm::join(lines, "\n");
-      QApplication::clipboard()->setText(QString::fromStdString(output));
+      m_view->setClipboard(boost::algorithm::join(lines, "\n"));
     }
 
     /** Copy currently selected rows to the clipboard, and then delete them. */
@@ -1109,7 +1107,7 @@ namespace MantidQt
     /** Paste the contents of the clipboard into the currently selected rows, or append new rows */
     void ReflMainViewPresenter::pasteSelected()
     {
-      const std::string text = QApplication::clipboard()->text().toStdString();
+      const std::string text = m_view->getClipboard();
       std::vector<std::string> lines;
       boost::split(lines, text, boost::is_any_of("\n"));
 

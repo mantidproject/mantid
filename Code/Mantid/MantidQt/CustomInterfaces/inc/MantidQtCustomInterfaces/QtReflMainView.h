@@ -68,12 +68,14 @@ namespace MantidQt
       virtual void setTableList(const std::set<std::string>& tables);
       virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument);
       virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy* hintStrategy);
+      virtual void setClipboard(const std::string& text);
 
       //Accessor methods
       virtual std::set<int> getSelectedRows() const;
       virtual std::string getSearchInstrument() const;
       virtual std::string getProcessInstrument() const;
       virtual std::string getWorkspaceToOpen() const;
+      virtual std::string getClipboard() const;
 
       virtual boost::shared_ptr<IReflPresenter> getPresenter() const;
 

@@ -369,6 +369,15 @@ namespace MantidQt
     }
 
     /**
+    Sets the contents of the system's clipboard
+    @param text The contents of the clipboard
+    */
+    void QtReflMainView::setClipboard(const std::string& text)
+    {
+      QApplication::clipboard()->setText(QString::fromStdString(text));
+    }
+
+    /**
     Get the selected instrument for searching
     @returns the selected instrument to search for
     */
@@ -416,6 +425,15 @@ namespace MantidQt
     boost::shared_ptr<IReflPresenter> QtReflMainView::getPresenter() const
     {
       return m_presenter;
+    }
+
+    /**
+    Gets the contents of the system's clipboard
+    @returns The contents of the clipboard
+    */
+    std::string QtReflMainView::getClipboard() const
+    {
+      return QApplication::clipboard()->text().toStdString();
     }
 
   } // namespace CustomInterfaces
