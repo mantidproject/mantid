@@ -9,7 +9,7 @@ class QT_QTPROPERTYBROWSER_EXPORT ButtonEditor: public QPushButton
   Q_OBJECT
 public:
   ButtonEditor(QtProperty *property, QWidget *parent):
-    QPushButton(parent), m_property(property)
+    QPushButton("...",parent), m_property(property)
   {
     connect(this,SIGNAL(clicked()),this,SLOT(sendClickedSignal()));
   }
