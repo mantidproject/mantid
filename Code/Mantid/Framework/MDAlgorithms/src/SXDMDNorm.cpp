@@ -284,7 +284,7 @@ namespace Mantid
         auto instrument = m_normWS->getExperimentInfo(0)->getInstrument();
         
         PARALLEL_FOR1(m_normWS)
-            for(int i = 0;i<static_cast<int>(detIDS.size());i++)
+        for(int64_t i = 0;i < static_cast<int64_t>(detIDS.size()); i++)
         {
           PARALLEL_START_INTERUPT_REGION
               Mantid::Geometry::IDetector_const_sptr detector = instrument->getDetector(detIDS[i]);
