@@ -152,7 +152,7 @@ namespace CustomInterfaces
     /// Run a python script
     void runAsPythonScript(const QString & code, bool no_output);
 
-  private:
+  protected:
     /// Overidden by child class.
     virtual void setup() = 0;
     /// Overidden by child class.

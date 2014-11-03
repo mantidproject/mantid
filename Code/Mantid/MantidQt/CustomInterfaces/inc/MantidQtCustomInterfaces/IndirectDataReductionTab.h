@@ -89,12 +89,14 @@ namespace CustomInterfaces
 
     std::map<std::string, double> getRangesFromInstrument(QString instName = "", QString analyser = "", QString reflection = "");
 
-  protected:
     Ui::IndirectDataReduction m_uiForm;
 
   signals:
     /// Update the Run button on the IDR main window
     void updateRunButton(bool enabled = true, QString message = "Run", QString tooltip = "");
+
+  private:
+    bool m_tabRunning;
 
   private slots:
     void tabExecutionComplete(bool error);

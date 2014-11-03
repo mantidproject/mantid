@@ -46,6 +46,21 @@ namespace CustomInterfaces
   }
 
   /**
+   * Slot used to update the run button when an algorithm that was strted by the Run button complete.
+   *
+   * @param error Unused
+   */
+  void IndirectDataReductionTab::tabExecutionComplete(bool error)
+  {
+    UNUSED_ARG(error);
+    if(m_tabRunning)
+    {
+      m_tabRunning = false;
+      emit updateRunButton();
+    }
+  }
+
+  /**
    * Loads an empty instrument into a workspace (__empty_INST) unless the workspace already exists.
    *
    * If an analyser and reflection are supplied then the corresponding IPF is also loaded.

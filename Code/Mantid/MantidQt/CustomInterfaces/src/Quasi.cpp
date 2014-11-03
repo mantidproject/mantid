@@ -192,7 +192,7 @@ namespace MantidQt
       MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName.toStdString());
       TextAxis* axis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
 
-      for(int histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
+      for(size_t histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
       {
         QString specName = QString::fromStdString(axis->label(histIndex));
 
