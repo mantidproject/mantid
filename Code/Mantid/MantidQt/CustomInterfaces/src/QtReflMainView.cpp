@@ -436,5 +436,14 @@ namespace MantidQt
       return QApplication::clipboard()->text().toStdString();
     }
 
+    /**
+    Get the string the user wants to search for.
+    @returns The search string
+    */
+    std::string QtReflMainView::getSearchString() const
+    {
+      return ui.textSearch->text().toStdString();
+    }
+
   } // namespace CustomInterfaces
 } // namespace Mantid

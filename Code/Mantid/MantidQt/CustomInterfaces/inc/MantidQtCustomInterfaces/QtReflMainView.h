@@ -76,6 +76,7 @@ namespace MantidQt
       virtual std::string getProcessInstrument() const;
       virtual std::string getWorkspaceToOpen() const;
       virtual std::string getClipboard() const;
+      virtual std::string getSearchString() const;
 
       virtual boost::shared_ptr<IReflPresenter> getPresenter() const;
 

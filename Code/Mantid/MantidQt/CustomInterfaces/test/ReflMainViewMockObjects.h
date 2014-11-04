@@ -39,6 +39,8 @@ public:
   MOCK_CONST_METHOD0(getSelectedRows, std::set<int>());
   MOCK_METHOD1(setClipboard, void(const std::string& text));
   MOCK_CONST_METHOD0(getClipboard, std::string());
+  MOCK_CONST_METHOD0(getSearchString, std::string());
+  MOCK_CONST_METHOD0(getSearchInstrument, std::string());
 
   //Calls we don't care about
   virtual void showTable(QReflTableModel_sptr) {};
@@ -48,7 +50,6 @@ public:
   virtual void setTableList(const std::set<std::string>&) {};
   virtual void setInstrumentList(const std::vector<std::string>&, const std::string&) {};
   virtual std::string getProcessInstrument() const {return "FAKE";}
-  virtual std::string getSearchInstrument() const {return "FAKE";}
   virtual boost::shared_ptr<IReflPresenter> getPresenter() const {return boost::shared_ptr<IReflPresenter>();}
 };
 
