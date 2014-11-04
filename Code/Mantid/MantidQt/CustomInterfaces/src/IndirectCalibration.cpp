@@ -176,7 +176,9 @@ namespace CustomInterfaces
     QString firstFile = m_uiForm.cal_leRunNo->getFirstFilename();
     QString filenames = m_uiForm.cal_leRunNo->getFilenames().join(",");
 
-    QString detectorRange = m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text();
+    auto instDetails = getInstrumentDetails();
+    QString detectorRange = instDetails["spectra-min"] + "," + instDetails["spectra-max"];
+
     QString peakRange = m_properties["CalPeakMin"]->valueText() + "," + m_properties["CalPeakMax"]->valueText();
     QString backgroundRange = m_properties["CalBackMin"]->valueText() + "," + m_properties["CalBackMax"]->valueText();
 
@@ -329,7 +331,10 @@ namespace CustomInterfaces
     QFileInfo fi(filename);
     QString wsname = fi.baseName();
 
-    if(!loadFile(filename, wsname, m_uiForm.leSpectraMin->text().toInt(), m_uiForm.leSpectraMax->text().toInt()))
+    int specMin = getInstrumentDetails()["spectra-min"].toInt();
+    int specMax = getInstrumentDetails()["spectra-max"].toInt();
+
+    if(!loadFile(filename, wsname, specMin, specMax))
     {
       emit showMessageBox("Unable to load file.\nCheck whether your file exists and matches the selected instrument in the Energy Transfer tab.");
       return;
@@ -369,7 +374,6 @@ namespace CustomInterfaces
     QFileInfo fi(m_uiForm.cal_leRunNo->getFirstFilename());
     QString outWS = fi.baseName() + "_" + m_uiForm.cbAnalyser->currentText() +
         m_uiForm.cbReflection->currentText() + "_red";
-    /* outWS = outWS.toLower(); */
 
     QString detRange = QString::number(m_dblManager->value(m_properties["ResSpecMin"])) + ","
         + QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
@@ -381,7 +385,6 @@ namespace CustomInterfaces
     reductionAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
     reductionAlg->setProperty("InputFiles", files.toStdString());
     reductionAlg->setProperty("DetectorRange", detRange.toStdString());
-    /* reductionAlg->setProperty("", ""); */
     reductionAlg->execute();
 
     Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
