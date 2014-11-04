@@ -100,90 +100,34 @@ namespace Mantid
     void SXDMDNorm::exec()
     {
       initCaches();
+      auto outputWS = binInputWS();
+      setProperty<Workspace_sptr>("OutputWorkspace", outputWS);
+      createNormalizationWS(*outputWS);
 
       // Check for other dimensions if we could measure anything in the original data
       bool skipNormalization = false;
       const std::vector<coord_t> otherValues = getValuesFromOtherDimensions(skipNormalization);
-      auto outputWS = binInputWS();
-      this->setProperty<Workspace_sptr>("OutputWorkspace", outputWS);
-      
-      // Copy the MDHisto workspace, and change signals and errors to 0.
-      m_normWS = boost::make_shared<MDHistoWorkspace>(*outputWS);
-      m_normWS->setTo(0.,0.,0.);
-      
-      //get indices of the original dimensions in the output workspace, and if not found, the corresponding dimension is integrated
-      Kernel::Matrix<coord_t> mat = m_normWS->getTransformFromOriginal(0)->makeAffineMatrix();
-      
-      for (size_t row = 0; row < mat.numRows()-1; row++)//affine matrix, ignore last row
-      {
-        if(mat[row][0]==1.)
-        {
-          m_hIntegrated = false;
-          m_hIdx = row;
-          if(m_hmin<m_normWS->getDimension(row)->getMinimum()) m_hmin = m_normWS->getDimension(row)->getMinimum();
-          if(m_hmax>m_normWS->getDimension(row)->getMaximum()) m_hmax = m_normWS->getDimension(row)->getMaximum();
-          if((m_hmin>m_normWS->getDimension(row)->getMaximum()) || (m_hmax<m_normWS->getDimension(row)->getMinimum()))
-          {
-            skipNormalization = true;
-          }
-        }
-        if(mat[row][1] == 1.)
-        {
-          m_kIntegrated = false;
-          m_kIdx = row;
-          if(m_kmin<m_normWS->getDimension(row)->getMinimum()) m_kmin = m_normWS->getDimension(row)->getMinimum();
-          if(m_kmax>m_normWS->getDimension(row)->getMaximum()) m_kmax = m_normWS->getDimension(row)->getMaximum();
-          if((m_kmin>m_normWS->getDimension(row)->getMaximum()) || (m_kmax<m_normWS->getDimension(row)->getMinimum()))
-          {
-            skipNormalization = true;
-          }
-        }
-        if(mat[row][2] == 1.)
-        {
-          m_lIntegrated = false;
-          m_lIdx = row;
-          if(m_lmin<m_normWS->getDimension(row)->getMinimum()) m_lmin = m_normWS->getDimension(row)->getMinimum();
-          if(m_lmax>m_normWS->getDimension(row)->getMaximum()) m_lmax = m_normWS->getDimension(row)->getMaximum();
-          if((m_lmin>m_normWS->getDimension(row)->getMaximum()) || (m_lmax<m_normWS->getDimension(row)->getMinimum()))
-          {
-            skipNormalization = true;
-          }
-          
-          for(size_t col = 3;col < mat.numCols()-1; col++) //affine matrix, ignore last column
-          {
-            if(mat[row][col] == 1.)
-            {
-              double val = otherValues.at(col - 3);
-              if((val>m_normWS->getDimension(row)->getMaximum()) || (val<m_normWS->getDimension(row)->getMinimum()))
-              {
-                skipNormalization = true;
-              }
-            }
-          }
-        }
-      }
-      
+      const auto affineMat = findIntergratedDimensions(otherValues, skipNormalization);
+
       auto &hDim = *m_normWS->getDimension(m_hIdx);
       m_hX.resize( hDim.getNBins() );
       for(size_t i = 0; i < m_hX.size(); ++i)
       {
         m_hX[i] = hDim.getX(i);
       }
-      
       auto &kDim = *m_normWS->getDimension(m_kIdx);
       m_kX.resize( kDim.getNBins() );
       for(size_t i = 0; i < m_kX.size(); ++i)
       {
         m_kX[i] = kDim.getX(i);
       }
-      
       auto &lDim = *m_normWS->getDimension(m_lIdx);
       m_lX.resize( lDim.getNBins() );
       for(size_t i = 0; i < m_lX.size(); ++i)
       {
         m_lX[i] = lDim.getX(i);
       }
-      
+
       API::MatrixWorkspace_const_sptr fW = getProperty("FluxWorkspace");
       DataObjects::EventWorkspace_const_sptr fluxW = boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(fW);
       m_kiMin = fluxW->getEventXMin();
@@ -265,7 +209,7 @@ namespace Mantid
                   std::transform( pos.begin(), pos.begin() + sizeOfMVD, pos.begin(), std::bind2nd( std::multiplies<coord_t>(), 0.5 ) );
                   std::copy( otherValues.begin(), otherValues.end(), pos.begin() + sizeOfMVD );
                   
-                  std::vector<coord_t> posNew = mat*pos;
+                  std::vector<coord_t> posNew = affineMat*pos;
                   size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
                   
                   if(linIndex!=size_t(-1))
@@ -303,7 +247,28 @@ namespace Mantid
       this->setProperty("OutputNormalizationWorkspace",m_normWS);
       
     }
-    
+
+    /**
+     * Set up starting values for cached variables
+     */
+    void SXDMDNorm::initCaches()
+    {
+      m_inputWS = getProperty("InputWorkspace");
+      if( inputEnergyMode() != "Elastic" )
+      {
+        throw std::invalid_argument("Invalid energy transfer mode. Algorithm currently only supports elastic data.");
+      }
+      // Min/max dimension values
+      const auto hdim(m_inputWS->getDimension(0)), kdim(m_inputWS->getDimension(1)),
+          ldim(m_inputWS->getDimension(2));
+      m_hmin = hdim->getMinimum();
+      m_kmin = kdim->getMinimum();
+      m_lmin = ldim->getMinimum();
+      m_hmax = hdim->getMaximum();
+      m_kmax = kdim->getMaximum();
+      m_lmax = ldim->getMaximum();
+    }
+
     /**
      * Currently looks for the ConvertToMD algorithm in the history
      * @return A string donating the energy transfer mode of the input workspace
@@ -341,24 +306,38 @@ namespace Mantid
     }
 
     /**
-     * Set up starting values for cached variables
+     * Runs the BinMD algorithm on the input to provide the output workspace
+     * All slicing algorithm properties are passed along
+     * @return MDHistoWorkspace as a result of the binning
      */
-    void SXDMDNorm::initCaches()
+    MDHistoWorkspace_sptr SXDMDNorm::binInputWS()
     {
-      m_inputWS = getProperty("InputWorkspace");
-      if( inputEnergyMode() != "Elastic" )
+      const auto & props = getProperties();
+      IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
+      binMD->setPropertyValue("AxisAligned","1");
+      for(auto it = props.begin(); it != props.end(); ++it)
       {
-        throw std::invalid_argument("Invalid energy transfer mode. Algorithm currently only supports elastic data.");
+        const auto & propName = (*it)->name();
+        if(propName != "FluxWorkspace" && propName != "SolidAngleWorkspace" &&
+           propName != "OutputNormalizationWorkspace")
+        {
+          binMD->setPropertyValue(propName,(*it)->value());
+        }
       }
-      // Min/max dimension values
-      const auto hdim(m_inputWS->getDimension(0)), kdim(m_inputWS->getDimension(1)),
-          ldim(m_inputWS->getDimension(2));
-      m_hmin = hdim->getMinimum();
-      m_kmin = kdim->getMinimum();
-      m_lmin = ldim->getMinimum();
-      m_hmax = hdim->getMaximum();
-      m_kmax = kdim->getMaximum();
-      m_lmax = ldim->getMaximum();
+      binMD->executeAsChildAlg();
+      Workspace_sptr outputWS = binMD->getProperty("OutputWorkspace");
+      return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+    }
+    
+    /**
+     * Create & cached the normalization workspace
+     * @param dataWS The binned workspace that will be used for the data
+     */
+    void SXDMDNorm::createNormalizationWS(const MDHistoWorkspace &dataWS)
+    {
+      // Copy the MDHisto workspace, and change signals and errors to 0.
+      m_normWS = boost::make_shared<MDHistoWorkspace>(dataWS);
+      m_normWS->setTo(0.,0.,0.);
     }
 
     /**
@@ -393,27 +372,73 @@ namespace Mantid
     }
 
     /**
-     * Runs the BinMD algorithm on the input to provide the output workspace
-     * All slicing algorithm properties are passed along
-     * @return MDHistoWorkspace as a result of the binning
+     * Checks the normalization workspace against the indices of the original dimensions.
+     * If not found, the corresponding dimension is integrated
+     * @param otherDimValues Values from non-HKL dimensions
+     * @param skipNormalization [InOut] Sets the flag true if normalization values are outside of original inputs
+     * @return Affine trasform matrix
      */
-    MDHistoWorkspace_sptr SXDMDNorm::binInputWS()
+    Kernel::Matrix<coord_t> SXDMDNorm::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues, 
+                                                                    bool &skipNormalization)
     {
-      const auto & props = getProperties();
-      IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
-      binMD->setPropertyValue("AxisAligned","1");
-      for(auto it = props.begin(); it != props.end(); ++it)
+      // Get indices of the original dimensions in the output workspace,
+      // and if not found, the corresponding dimension is integrated
+      Kernel::Matrix<coord_t> affineMat = m_normWS->getTransformFromOriginal(0)->makeAffineMatrix();
+
+      const size_t nrm1 = affineMat.numRows() - 1;
+      const size_t ncm1 = affineMat.numCols() - 1;
+      for( size_t row = 0; row < nrm1; row++ ) //affine matrix, ignore last row
       {
-        const auto & propName = (*it)->name();
-        if(propName != "FluxWorkspace" && propName != "SolidAngleWorkspace" &&
-           propName != "OutputNormalizationWorkspace")
+        const auto dimen = m_normWS->getDimension(row);
+        const auto dimMin(dimen->getMinimum()), dimMax(dimen->getMaximum());
+        if(affineMat[row][0] == 1.)
         {
-          binMD->setPropertyValue(propName,(*it)->value());
+          m_hIntegrated = false;
+          m_hIdx = row;
+          if( m_hmin < dimMin ) m_hmin = dimMin;
+          if( m_hmax > dimMax ) m_hmax = dimMax;
+          if( m_hmin > dimMax || m_hmax < dimMin)
+          {
+            skipNormalization = true;
+          }
+        }
+        if(affineMat[row][1] == 1.)
+        {
+          m_kIntegrated = false;
+          m_kIdx = row;
+          if( m_kmin < dimMin ) m_kmin = dimMin;
+          if( m_kmax > dimMax ) m_kmax = dimMax;
+          if( m_kmin > dimMax || m_kmax < dimMin )
+          {
+            skipNormalization = true;
+          }
+        }
+        if(affineMat[row][2] == 1.)
+        {
+          m_lIntegrated = false;
+          m_lIdx = row;
+          if( m_lmin < dimMin ) m_lmin = dimMin;
+          if( m_lmax > dimMax ) m_lmax = dimMax;
+          if( m_lmin > dimMax || m_lmax < dimMin )
+          {
+            skipNormalization = true;
+          }
+
+          for(size_t col = 3; col < ncm1; col++) //affine matrix, ignore last column
+          {
+            if(affineMat[row][col] == 1.)
+            {
+              double val = otherDimValues.at(col - 3);
+              if( val > dimMax || val < dimMin )
+              {
+                skipNormalization = true;
+              }
+            }
+          }
         }
       }
-      binMD->executeAsChildAlg();
-      Workspace_sptr outputWS = binMD->getProperty("OutputWorkspace");
-      return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+      
+      return affineMat;
     }
 
     /**

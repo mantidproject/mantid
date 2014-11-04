@@ -46,11 +46,13 @@ namespace Mantid
       void init();
       void exec();
 
-      std::string inputEnergyMode() const;
       void initCaches();
-      std::vector<coord_t> getValuesFromOtherDimensions(bool & skipNormalization) const;
+      std::string inputEnergyMode() const;
       MDEvents::MDHistoWorkspace_sptr binInputWS();
-
+      void createNormalizationWS(const MDEvents::MDHistoWorkspace & dataWS);
+      std::vector<coord_t> getValuesFromOtherDimensions(bool & skipNormalization) const;
+      Kernel::Matrix<coord_t> findIntergratedDimensions(const std::vector<coord_t> & otherDimValues,
+                                                        bool & skipNormalization);
       /// function to calculate intersections of the trajectory with MDBoxes
       std::vector<Kernel::VMD> calculateIntersections(const Geometry::IDetector_const_sptr &detector);
 
