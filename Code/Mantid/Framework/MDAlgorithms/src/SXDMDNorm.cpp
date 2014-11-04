@@ -393,7 +393,7 @@ namespace Mantid
 
         // get event vector
         size_t wsIdx = d2m.find(detID)->second;
-        std::vector<DataObjects::WeightedEventNoTime> events = fluxEventWS->getEventList(wsIdx).getWeightedEventsNoTime();
+        const auto &events = fluxEventWS->getEventList(wsIdx).getWeightedEventsNoTime();
         if(events.empty()) continue;
         //get iterator to the first event that has momentum >= (*intersections.begin())[3]
         auto eventStart = events.begin();
