@@ -16449,7 +16449,7 @@ ApplicationWindow::~ApplicationWindow()
   }
   delete current_folder;
 
-  QApplication::clipboard()->clear(QClipboard::Clipboard);
+  
 
   btnPointer->setChecked(true);
   delete mantidUI;
