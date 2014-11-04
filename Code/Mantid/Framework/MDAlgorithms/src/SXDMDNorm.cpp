@@ -5,6 +5,7 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid
 {
@@ -399,49 +400,44 @@ namespace Mantid
         auto eventStart = events.begin();
         const auto & firstIntersectTime = intersections.front()[3];
         while(eventStart->tof() < firstIntersectTime) ++eventStart;
-        
+        // Get solid angle for this contribution
         double solid = solidAngleWS->readY(d2mSA.find(detID)->second)[0]*protonCharge;
-        
-        const size_t sizeOfMVD = intersections.front().size();
-        // pre-allocate for efficiency
-        std::vector<coord_t> pos(sizeOfMVD + otherValues.size());
-        
+        // Compute final position in HKL
+        const size_t vmdDims = intersections.front().size();
+        // pre-allocate for efficiency and copy non-hkl dim values into place
+        std::vector<coord_t> pos(vmdDims + otherValues.size());
+        std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
+
         for (auto it = intersections.begin() + 1; it != intersections.end(); ++it)
         {
+          const auto & curIntSec = *it;
+          const auto & prevIntSec = *(it-1);
           // the full vector isn't used so compute only what is necessary
-          double delta = (*it)[3] - (*(it-1))[3];
+          double delta = curIntSec[3] - prevIntSec[3];
+          if(delta < 1e-07) continue; // Assume zero contribution if difference is small
+          
+          // Average between two intersections for final position
+          std::transform(curIntSec.getBareArray(), curIntSec.getBareArray() + vmdDims,
+                         prevIntSec.getBareArray(), pos.begin(),
+                         VectorHelper::SimpleAverage<coord_t>());
+          std::vector<coord_t> posNew = affineTrans*pos;
+          size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
+          if(linIndex == size_t(-1)) continue;
 
-          if (delta > 1e-07) //no integration if momemntum difference is smaller than eps, assume contribution is 0
+          double signal = 0.;
+          while(eventStart->tof() < (*it)[3])
           {
-            //Mantid::Kernel::VMD avev=((*it)+(*(it-1)))*0.5;//average between two intersection (to get position)
-            //std::vector<coord_t> pos = avev.toVector<coord_t>();
-            //pos.insert(pos.end()-1,otherValues.begin(),otherValues.end());
-            // a bit longer and less readable but faster version of the above
-            std::transform( it->getBareArray(), it->getBareArray() + sizeOfMVD, (it-1)->getBareArray(), pos.begin(), std::plus<coord_t>() );
-            std::transform( pos.begin(), pos.begin() + sizeOfMVD, pos.begin(), std::bind2nd( std::multiplies<coord_t>(), 0.5 ) );
-            std::copy( otherValues.begin(), otherValues.end(), pos.begin() + sizeOfMVD );
+            if (eventStart == events.end())
+              break;
+            signal += (*eventStart).weight();
+            ++eventStart;
+          }
+          signal *= solid;
             
-            std::vector<coord_t> posNew = affineTrans*pos;
-            size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
-            
-            if(linIndex!=size_t(-1))
-            {
-              double signal = 0.;
-              while(eventStart->tof() < (*it)[3])
-              {
-                if (eventStart == events.end())
-                  break;
-                signal += (*eventStart).weight();
-                ++eventStart;
-              }
-              signal *= solid;
-              
-              PARALLEL_CRITICAL(updateMD)
-              {
-                signal += m_normWS->getSignalAt(linIndex);
-                m_normWS->setSignalAt(linIndex,signal);
-              }
-            }
+          PARALLEL_CRITICAL(updateMD)
+          {
+            signal += m_normWS->getSignalAt(linIndex);
+            m_normWS->setSignalAt(linIndex, signal);
           }
         }
         prog->report();
