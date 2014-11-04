@@ -178,6 +178,11 @@ namespace MantidQt
       {
         QString specName = QString::fromStdString(axis->label(histIndex));
 
+        if(specName == "Data")
+        {
+          plotMiniPlot(outputWorkspace, histIndex, "JumpFitPlot", specName);
+        }
+
         if(specName == "Calc")
         {
           plotMiniPlot(outputWorkspace, histIndex, "JumpFitPlot", specName);
@@ -229,18 +234,16 @@ namespace MantidQt
 
 				std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
 				plotMiniPlot(filename, m_spectraList[currentWidth], "JumpFitPlot", "RawPlotCurve");
+        m_curves["RawPlotCurve"]->setPen(QColor(Qt::cyan));
+
 				std::pair<double,double> res;
 				std::pair<double,double> range = getCurveRange("RawPlotCurve");
 
-				//Use the values from the instrument parameter file if we can
+				// Use the values from the instrument parameter file if we can
 				if(getInstrumentResolution(filename, res))
-				{
 					setMiniPlotGuides("JumpFitQ", m_properties["QMin"], m_properties["QMax"], res);
-				}
 				else
-				{
 					setMiniPlotGuides("JumpFitQ", m_properties["QMin"], m_properties["QMax"], range);
-				}
 
 				setPlotRange("JumpFitQ", m_properties["QMin"], m_properties["QMax"], range);
 			}
@@ -324,6 +327,7 @@ namespace MantidQt
 				if(validate())
 				{
 					plotMiniPlot(sampleName, m_spectraList[text.toStdString()], "JumpFitPlot", "RawPlotCurve");
+          m_curves["RawPlotCurve"]->setPen(QColor(Qt::cyan));
 				}
 			}
 		}

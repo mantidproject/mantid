@@ -105,7 +105,7 @@ class JumpFit(PythonAlgorithm):
 
         # Run fit function
         if self._out_name is "":
-            self._out_name = self._in_ws[:-10] + '_' + self._jump_function + 'fit'
+            self._out_name = self._in_ws[:-7] + '_' + self._jump_function + '_fit'
 
         Fit(Function=function, InputWorkspace=spectrum_ws, CreateOutput=True, Output=self._out_name,
             StartX=self._q_min, EndX=self._q_max)
@@ -142,6 +142,7 @@ class JumpFit(PythonAlgorithm):
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
 
+
     def _process_output(self, workspace):
         if self._save:
             from mantid.simpleapi import SaveNexusProcessed
@@ -157,6 +158,7 @@ class JumpFit(PythonAlgorithm):
             from IndirectImport import import_mantidplot
             mtd_plot = import_mantidplot()
             mtd_plot.plotSpectrum(workspace, [0, 1, 2], True)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(JumpFit)
