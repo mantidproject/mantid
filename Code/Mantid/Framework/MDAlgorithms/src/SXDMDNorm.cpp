@@ -99,159 +99,32 @@ namespace Mantid
      */
     void SXDMDNorm::exec()
     {
-      initCaches();
+      cacheInputs();
       auto outputWS = binInputWS();
       setProperty<Workspace_sptr>("OutputWorkspace", outputWS);
       createNormalizationWS(*outputWS);
+      setProperty("OutputNormalizationWorkspace", m_normWS);
 
       // Check for other dimensions if we could measure anything in the original data
       bool skipNormalization = false;
       const std::vector<coord_t> otherValues = getValuesFromOtherDimensions(skipNormalization);
-      const auto affineMat = findIntergratedDimensions(otherValues, skipNormalization);
+      const auto affineTrans = findIntergratedDimensions(otherValues, skipNormalization);
+      cacheDimensionXValues();
 
-      auto &hDim = *m_normWS->getDimension(m_hIdx);
-      m_hX.resize( hDim.getNBins() );
-      for(size_t i = 0; i < m_hX.size(); ++i)
+      if(!skipNormalization)
       {
-        m_hX[i] = hDim.getX(i);
-      }
-      auto &kDim = *m_normWS->getDimension(m_kIdx);
-      m_kX.resize( kDim.getNBins() );
-      for(size_t i = 0; i < m_kX.size(); ++i)
-      {
-        m_kX[i] = kDim.getX(i);
-      }
-      auto &lDim = *m_normWS->getDimension(m_lIdx);
-      m_lX.resize( lDim.getNBins() );
-      for(size_t i = 0; i < m_lX.size(); ++i)
-      {
-        m_lX[i] = lDim.getX(i);
-      }
-
-      API::MatrixWorkspace_const_sptr fW = getProperty("FluxWorkspace");
-      DataObjects::EventWorkspace_const_sptr fluxW = boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(fW);
-      m_kiMin = fluxW->getEventXMin();
-      m_kiMax = fluxW->getEventXMax();
-      API::MatrixWorkspace_const_sptr sA = getProperty("SolidAngleWorkspace");
-
-      if(skipNormalization)
-      {
-        g_log.warning("Binning limits are outside the limits of the MDWorkspace\n");
+        calculateNormalization(otherValues, affineTrans);
       }
       else
       {
-        double PC = m_normWS->getExperimentInfo(0)->run().getProtonCharge();
-        Kernel::PropertyWithValue< std::vector<double> > *prop = dynamic_cast< Mantid::Kernel::PropertyWithValue<std::vector<double> >*>(m_normWS->getExperimentInfo(0)->getLog("RUBW_MATRIX"));
-        if (prop==NULL)
-        {
-          throw std::runtime_error("No RUBW_MATRIX");
-        }
-        else
-        {
-          Mantid::Kernel::DblMatrix RUBW((*prop)()); //includes the 2*pi factor but not goniometer for now :)
-          m_rubw = m_normWS->getExperimentInfo(0)->run().getGoniometerMatrix()*RUBW;
-          m_rubw.Invert();
-        }
-        //FIXME: the detector positions are from the IDF. Need to account for calibration
-        std::vector<detid_t> detIDS = m_normWS->getExperimentInfo(0)->getInstrument()->getDetectorIDs(true);
-        
-        Mantid::API::Progress *prog = new Mantid::API::Progress(this,0.3,1,static_cast<int64_t>(detIDS.size()));
-        const detid2index_map d2m = fluxW->getDetectorIDToWorkspaceIndexMap();
-        const detid2index_map d2mSA = sA->getDetectorIDToWorkspaceIndexMap();
-        auto instrument = m_normWS->getExperimentInfo(0)->getInstrument();
-        
-        PARALLEL_FOR1(m_normWS)
-        for(int64_t i = 0; i < static_cast<int64_t>(detIDS.size()); i++)
-        {
-          PARALLEL_START_INTERUPT_REGION
-
-          Mantid::Geometry::IDetector_const_sptr detector = instrument->getDetector(detIDS[i]);
-          if(!detector->isMonitor() && !detector->isMasked())
-          {
-            //get intersections
-            std::vector<Mantid::Kernel::VMD> intersections = calculateIntersections(detector);
-            
-            if(!intersections.empty())
-            {
-              //calculate indices
-              //add to the correct signal at that particular index
-              //NOTE: if parallel it has to be atomic/critical
-              
-              //get event vector
-              size_t sp = d2m.find(detIDS[i])->second;
-              std::vector<Mantid::DataObjects::WeightedEventNoTime> el = fluxW->getEventList(sp).getWeightedEventsNoTime();
-              //get iterator to the first event that has momentum >= (*intersections.begin())[3]
-              std::vector<Mantid::DataObjects::WeightedEventNoTime>::iterator start = el.begin();
-              // check that el isn't empty
-              if ( start == el.end() ) continue;
-              while((*start).tof()<(*intersections.begin())[3]) ++start;
-              
-              double solid = sA->readY(d2mSA.find(detIDS[i])->second)[0]*PC;
-              
-              const size_t sizeOfMVD = intersections.front().size();
-              // pre-allocate for efficiency
-              std::vector<coord_t> pos( sizeOfMVD + otherValues.size() );
-              
-              for (auto it = intersections.begin()+1;it!=intersections.end();++it)
-              {
-                //Mantid::Kernel::VMD deltav=(*it)-(*(it-1));//difference between consecutive intersections
-                // the full vector isn't used so compute only what is necessary
-                double delta = (*it)[3] - (*(it-1))[3];
-                
-                double eps = 1e-7;//do not integrate if momemntum difference is smaller than eps, assume contribution is 0
-                if (delta > eps)
-                {
-                  //Mantid::Kernel::VMD avev=((*it)+(*(it-1)))*0.5;//average between two intersection (to get position)
-                  //std::vector<coord_t> pos = avev.toVector<coord_t>();
-                  //pos.insert(pos.end()-1,otherValues.begin(),otherValues.end());
-                  // a bit longer and less readable but faster version of the above
-                  std::transform( it->getBareArray(), it->getBareArray() + sizeOfMVD, (it-1)->getBareArray(), pos.begin(), std::plus<coord_t>() );
-                  std::transform( pos.begin(), pos.begin() + sizeOfMVD, pos.begin(), std::bind2nd( std::multiplies<coord_t>(), 0.5 ) );
-                  std::copy( otherValues.begin(), otherValues.end(), pos.begin() + sizeOfMVD );
-                  
-                  std::vector<coord_t> posNew = affineMat*pos;
-                  size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
-                  
-                  if(linIndex!=size_t(-1))
-                  {
-                    double signal = 0.;
-                    while((*start).tof()<(*it)[3])
-                    {
-                      if (start==el.end())
-                        break;
-                      signal+=(*start).weight();
-                      ++start;
-                    }
-                    signal*=solid;
-                    
-                    PARALLEL_CRITICAL(updateMD)
-                    {
-                      signal+=m_normWS->getSignalAt(linIndex);
-                      m_normWS->setSignalAt(linIndex,signal);
-                    }
-                  }
-                }
-              }
-              
-            }
-          }
-          prog->report();
-          
-          PARALLEL_END_INTERUPT_REGION
-        }
-        PARALLEL_CHECK_INTERUPT_REGION
-
-       delete prog;
+        g_log.warning("Binning limits are outside the limits of the MDWorkspace. Not applying normalization.");
       }
-      
-      this->setProperty("OutputNormalizationWorkspace",m_normWS);
-      
     }
 
     /**
      * Set up starting values for cached variables
      */
-    void SXDMDNorm::initCaches()
+    void SXDMDNorm::cacheInputs()
     {
       m_inputWS = getProperty("InputWorkspace");
       if( inputEnergyMode() != "Elastic" )
@@ -395,9 +268,9 @@ namespace Mantid
         {
           m_hIntegrated = false;
           m_hIdx = row;
-          if( m_hmin < dimMin ) m_hmin = dimMin;
-          if( m_hmax > dimMax ) m_hmax = dimMax;
-          if( m_hmin > dimMax || m_hmax < dimMin)
+          if(m_hmin < dimMin) m_hmin = dimMin;
+          if(m_hmax > dimMax) m_hmax = dimMax;
+          if(m_hmin > dimMax || m_hmax < dimMin)
           {
             skipNormalization = true;
           }
@@ -406,9 +279,9 @@ namespace Mantid
         {
           m_kIntegrated = false;
           m_kIdx = row;
-          if( m_kmin < dimMin ) m_kmin = dimMin;
-          if( m_kmax > dimMax ) m_kmax = dimMax;
-          if( m_kmin > dimMax || m_kmax < dimMin )
+          if(m_kmin < dimMin) m_kmin = dimMin;
+          if(m_kmax > dimMax) m_kmax = dimMax;
+          if(m_kmin > dimMax || m_kmax < dimMin)
           {
             skipNormalization = true;
           }
@@ -417,9 +290,9 @@ namespace Mantid
         {
           m_lIntegrated = false;
           m_lIdx = row;
-          if( m_lmin < dimMin ) m_lmin = dimMin;
-          if( m_lmax > dimMax ) m_lmax = dimMax;
-          if( m_lmin > dimMax || m_lmax < dimMin )
+          if(m_lmin < dimMin) m_lmin = dimMin;
+          if(m_lmax > dimMax) m_lmax = dimMax;
+          if(m_lmin > dimMax || m_lmax < dimMin)
           {
             skipNormalization = true;
           }
@@ -429,7 +302,7 @@ namespace Mantid
             if(affineMat[row][col] == 1.)
             {
               double val = otherDimValues.at(col - 3);
-              if( val > dimMax || val < dimMin )
+              if(val > dimMax || val < dimMin)
               {
                 skipNormalization = true;
               }
@@ -439,6 +312,145 @@ namespace Mantid
       }
       
       return affineMat;
+    }
+
+    /**
+     * Stores the X values from each H,K,L dimension as member variables
+     */
+    void SXDMDNorm::cacheDimensionXValues()
+    {
+      auto &hDim = *m_normWS->getDimension(m_hIdx);
+      m_hX.resize(hDim.getNBins());
+      for(size_t i = 0; i < m_hX.size(); ++i)
+      {
+        m_hX[i] = hDim.getX(i);
+      }
+      auto &kDim = *m_normWS->getDimension(m_kIdx);
+      m_kX.resize( kDim.getNBins() );
+      for(size_t i = 0; i < m_kX.size(); ++i)
+      {
+        m_kX[i] = kDim.getX(i);
+      }
+      auto &lDim = *m_normWS->getDimension(m_lIdx);
+      m_lX.resize( lDim.getNBins() );
+      for(size_t i = 0; i < m_lX.size(); ++i)
+      {
+        m_lX[i] = lDim.getX(i);
+      }
+    }
+
+    /**
+     * Computed the normalization for the input workspace. Results are stored in m_normWS
+     * @param otherValues
+     * @param affineTrans
+     */
+    void SXDMDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
+                                           const Kernel::Matrix<coord_t> &affineTrans)
+    {
+      API::MatrixWorkspace_const_sptr fluxMatrixWS = getProperty("FluxWorkspace");
+      auto fluxEventWS = boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(fluxMatrixWS);
+      m_kiMin = fluxEventWS->getEventXMin();
+      m_kiMax = fluxEventWS->getEventXMax();
+      API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
+      
+      const auto & exptInfoZero = *(m_normWS->getExperimentInfo(0));
+      typedef Kernel::PropertyWithValue<std::vector<double> > VectorDoubleProperty;
+      auto *rubwLog = dynamic_cast<VectorDoubleProperty*>(exptInfoZero.getLog("RUBW_MATRIX"));
+      if(!rubwLog)
+      {
+        throw std::runtime_error("Wokspace does not contain a log entry for the RUBW matrix."
+                                 "Cannot continue.");
+      }
+      else
+      {
+        Kernel::DblMatrix rubwValue((*rubwLog)()); //includes the 2*pi factor but not goniometer for now :)
+        m_rubw = exptInfoZero.run().getGoniometerMatrix()*rubwValue;
+        m_rubw.Invert();
+      }
+      const double protonCharge = exptInfoZero.run().getProtonCharge();
+      auto instrument = exptInfoZero.getInstrument();
+      std::vector<detid_t> detIDS = instrument->getDetectorIDs(true);
+      const int64_t ndets = static_cast<int64_t>(detIDS.size());
+      // detector->workspace index map
+      const detid2index_map d2m = fluxEventWS->getDetectorIDToWorkspaceIndexMap();
+      const detid2index_map d2mSA = solidAngleWS->getDetectorIDToWorkspaceIndexMap();
+
+      auto *prog = new API::Progress(this, 0.3, 1.0, ndets);
+      PARALLEL_FOR1(m_normWS)
+      for(int64_t i = 0; i < ndets; i++)
+      {
+        PARALLEL_START_INTERUPT_REGION
+
+        const auto detID = detIDS[i];
+        auto detector = instrument->getDetector(detID);
+        if(detector->isMonitor() || detector->isMasked()) continue;
+
+        std::vector<Mantid::Kernel::VMD> intersections = calculateIntersections(detector);
+        if(intersections.empty()) continue;
+
+        //calculate indices
+        //add to the correct signal at that particular index
+
+        // get event vector
+        size_t wsIdx = d2m.find(detID)->second;
+        std::vector<DataObjects::WeightedEventNoTime> events = fluxEventWS->getEventList(wsIdx).getWeightedEventsNoTime();
+        if(events.empty()) continue;
+        //get iterator to the first event that has momentum >= (*intersections.begin())[3]
+        auto eventStart = events.begin();
+        const auto & firstIntersectTime = intersections.front()[3];
+        while(eventStart->tof() < firstIntersectTime) ++eventStart;
+        
+        double solid = solidAngleWS->readY(d2mSA.find(detID)->second)[0]*protonCharge;
+        
+        const size_t sizeOfMVD = intersections.front().size();
+        // pre-allocate for efficiency
+        std::vector<coord_t> pos(sizeOfMVD + otherValues.size());
+        
+        for (auto it = intersections.begin() + 1; it != intersections.end(); ++it)
+        {
+          // the full vector isn't used so compute only what is necessary
+          double delta = (*it)[3] - (*(it-1))[3];
+
+          if (delta > 1e-07) //no integration if momemntum difference is smaller than eps, assume contribution is 0
+          {
+            //Mantid::Kernel::VMD avev=((*it)+(*(it-1)))*0.5;//average between two intersection (to get position)
+            //std::vector<coord_t> pos = avev.toVector<coord_t>();
+            //pos.insert(pos.end()-1,otherValues.begin(),otherValues.end());
+            // a bit longer and less readable but faster version of the above
+            std::transform( it->getBareArray(), it->getBareArray() + sizeOfMVD, (it-1)->getBareArray(), pos.begin(), std::plus<coord_t>() );
+            std::transform( pos.begin(), pos.begin() + sizeOfMVD, pos.begin(), std::bind2nd( std::multiplies<coord_t>(), 0.5 ) );
+            std::copy( otherValues.begin(), otherValues.end(), pos.begin() + sizeOfMVD );
+            
+            std::vector<coord_t> posNew = affineTrans*pos;
+            size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
+            
+            if(linIndex!=size_t(-1))
+            {
+              double signal = 0.;
+              while(eventStart->tof() < (*it)[3])
+              {
+                if (eventStart == events.end())
+                  break;
+                signal += (*eventStart).weight();
+                ++eventStart;
+              }
+              signal *= solid;
+              
+              PARALLEL_CRITICAL(updateMD)
+              {
+                signal += m_normWS->getSignalAt(linIndex);
+                m_normWS->setSignalAt(linIndex,signal);
+              }
+            }
+          }
+        }
+        prog->report();
+
+        PARALLEL_END_INTERUPT_REGION
+      }
+      PARALLEL_CHECK_INTERUPT_REGION
+
+     delete prog;
     }
 
     /**
@@ -453,9 +465,9 @@ namespace Mantid
       double phi = detector->getPhi();
       V3D q(-sin(th)*cos(phi),-sin(th)*sin(phi),1.-cos(th));
       q = m_rubw*q;
-      double hStart = q.X()*m_kiMin,hEnd = q.X()*m_kiMax;
-      double kStart = q.Y()*m_kiMin,kEnd = q.Y()*m_kiMax;
-      double lStart = q.Z()*m_kiMin,lEnd = q.Z()*m_kiMax;
+      double hStart = q.X()*m_kiMin, hEnd = q.X()*m_kiMax;
+      double kStart = q.Y()*m_kiMin, kEnd = q.Y()*m_kiMax;
+      double lStart = q.Z()*m_kiMin, lEnd = q.Z()*m_kiMax;
       
       double eps = 1e-7;
       
