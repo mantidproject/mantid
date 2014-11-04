@@ -477,31 +477,6 @@ namespace CustomInterfaces
     scaleMultiplierCheck(m_uiForm.ckScaleMultiplier->isChecked());
 
     QString instName = m_uiForm.cbInst->currentText();
-    auto instModes = getInstrumentModes(instName.toStdString());
-
-    for(auto modesIt = instModes.begin(); modesIt != instModes.end(); ++modesIt)
-    {
-      QString analyser = QString::fromStdString(modesIt->first);
-      std::vector<std::string> reflections = modesIt->second;
-
-      if(analyser != "diffraction") // Do not put diffraction into the analyser list
-      {
-        if(reflections.size() > 0)
-        {
-          QStringList reflectionsList;
-          for(auto reflIt = reflections.begin(); reflIt != reflections.end(); ++reflIt)
-            reflectionsList.push_back(QString::fromStdString(*reflIt));
-          QVariant data = QVariant(reflectionsList);
-          m_uiForm.cbAnalyser->addItem(analyser, data);
-        }
-        else
-        {
-          m_uiForm.cbAnalyser->addItem(analyser);
-        }
-      }
-    }
-
-    analyserSelected(m_uiForm.cbAnalyser->currentIndex());
   }
 
   /**

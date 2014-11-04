@@ -82,8 +82,6 @@ namespace CustomInterfaces
   protected slots:
     /// Slot to handle when an algorithm finishes running
     virtual void algorithmFinished(bool error);
-    /// Emitted when the instrument setup is changed
-    void newInstrumentConfiguration(QString instrumentName, QString analyser, QString reflection);
 
   protected:
     /// Run the load algorithm with the given file name, output name and spectrum range
@@ -169,6 +167,8 @@ namespace CustomInterfaces
     void runAsPythonScript(const QString & code, bool no_output);
     /// Update the Run button on the IDR main window
     void updateRunButton(bool enabled = true, QString message = "Run", QString tooltip = "");
+    /// Emitted when the instrument setup is changed
+    void newInstrumentConfiguration(QString instrumentName, QString analyser, QString reflection);
 
   private:
     /// Overidden by child class.
