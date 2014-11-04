@@ -57,9 +57,8 @@ namespace Mantid
       ~SaveAscii2() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "SaveAscii"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Saves a 2D workspace to a ascii file.";}
-
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Saves a 2D workspace to a ascii file.";}
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 2; }
       /// Algorithm's category for identification overriding a virtual method

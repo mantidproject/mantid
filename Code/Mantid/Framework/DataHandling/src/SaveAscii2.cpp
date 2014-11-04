@@ -55,7 +55,7 @@ namespace Mantid
           "It is always written for workspaces with multiple spectra.");
 
       declareProperty("CommentIndicator", "#", "Character(s) to put in front of comment lines.");
-
+      
       // For the ListValidator
       std::string spacers[6][2] = { {"CSV", ","}, {"Tab", "\t"}, {"Space", " "}, 
       {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"} };
@@ -80,6 +80,7 @@ namespace Mantid
 
       declareProperty("AppendToFile", false, "If true, don't overwrite the file. Append to the end of it. ");
 
+      declareProperty("RaggedWorkspace", true, "If true, ensure that more than one xspectra is used. "); //in testing
     }
 
     /** 
@@ -101,8 +102,9 @@ namespace Mantid
       int spec_max = getProperty("WorkspaceIndexMax");
       bool writeHeader = getProperty("ColumnHeader");
       bool appendToFile = getProperty("AppendToFile");
-
+      //here we need to check for ragged?
       // Check whether we need to write the fourth column
+      bool checkRagged = getProperty("RaggedWorkspace"); //in testing
       m_writeDX = getProperty("WriteXError");
       std::string choice = getPropertyValue("Separator");
       std::string custom = getPropertyValue("CustomSeparator");
@@ -154,6 +156,7 @@ namespace Mantid
           idx.insert(i);
         }
       }
+      //figure out how to read in readX and have them be seperate lists
 
       // Add spectra list into the index list
       if (!spec_list.empty())
@@ -240,7 +243,7 @@ namespace Mantid
       auto spec = m_ws->getSpectrum(*spectraItr);
       auto specNo = spec->getSpectrumNo();
       if (m_writeID) file << specNo << std::endl;
-
+      
       for(int bin=0;bin<m_nBins;bin++)                                                                                                                                                                                                                                                                     
       {
 
