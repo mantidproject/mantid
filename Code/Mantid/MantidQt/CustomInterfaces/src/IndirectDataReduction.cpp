@@ -128,10 +128,10 @@ void IndirectDataReduction::initLayout()
   /* m_tabs["Energy Transfer"] = new IndirectConvertToEnergy(m_uiForm, this); */
   /* m_tabs["Calibration"] = new IndirectCalibration(m_uiForm, this); */
   /* m_tabs["Diagnostics"] = new IndirectDiagnostics(m_uiForm, this); */
-  /* m_tabs["Transmission"] = new IndirectTransmission(m_uiForm, this); */
-  /* m_tabs["Symmetrise"] = new IndirectSymmetrise(m_uiForm, this); */
+  m_tabs["Transmission"] = new IndirectTransmission(m_uiForm, this);
+  m_tabs["Symmetrise"] = new IndirectSymmetrise(m_uiForm, this);
   /* m_tabs["S(Q, w)"] = new IndirectSqw(m_uiForm, this); */
-  /* m_tabs["Moments"] = new IndirectMoments(m_uiForm, this); */
+  m_tabs["Moments"] = new IndirectMoments(m_uiForm, this);
 
   // Handle the instrument being changed
   connect(m_uiForm.cbInst, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(instrumentSelected(const QString&)));
@@ -149,7 +149,6 @@ void IndirectDataReduction::initLayout()
 
   // Reset the Run button state when the tab is changed
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(updateRunButton()));
-
 
   // Connect tab signals and run any setup code
   for(auto it = m_tabs.begin(); it != m_tabs.end(); ++it)
