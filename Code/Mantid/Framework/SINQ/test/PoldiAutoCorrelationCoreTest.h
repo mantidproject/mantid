@@ -212,7 +212,6 @@ public:
         autoCorrelationCore.setCountData(testWorkspace);
 
         TS_ASSERT_EQUALS(autoCorrelationCore.m_countData->getNumberHistograms(), 2);
-        TS_ASSERT_EQUALS(autoCorrelationCore.m_elementsMaxIndex, 1);
 
         TS_ASSERT_EQUALS(autoCorrelationCore.getCounts(0, 0), 0.0);
         TS_ASSERT_EQUALS(autoCorrelationCore.getCounts(0, 1), 0.0);
@@ -225,7 +224,7 @@ public:
         Workspace2D_sptr testWorkspace = WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
 
         TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
-        autoCorrelationCore.setCountData(testWorkspace);
+        autoCorrelationCore.setNormCountData(testWorkspace);
 
         TS_ASSERT_EQUALS(autoCorrelationCore.getNormCounts(0, 0), 1.0);
         TS_ASSERT_EQUALS(autoCorrelationCore.getNormCounts(0, 1), 1.0);
@@ -239,6 +238,7 @@ public:
 
         TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
         autoCorrelationCore.setCountData(testWorkspace);
+        autoCorrelationCore.setNormCountData(testWorkspace);
 
         int elements[] = {0, 1};
         std::vector<int> elementVector(elements, elements + 2);
@@ -252,6 +252,7 @@ public:
 
         Workspace2D_sptr testWorkspace = WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
         autoCorrelationCore.setCountData(testWorkspace);
+        autoCorrelationCore.setNormCountData(testWorkspace);
 
         EXPECT_CALL(*mockChopper, zeroOffset())
                 .WillRepeatedly(Return(0.0));

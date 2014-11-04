@@ -29,7 +29,7 @@ PoldiAutoCorrelationCore::PoldiAutoCorrelationCore(Kernel::Logger &g_log) :
     m_weightsForD(),
     m_tofsFor1Angstrom(),
     m_countData(),
-    m_elementsMaxIndex(0),
+    m_normCountData(),
     m_sumOfWeights(0.0),
     m_correlationBackground(0.0),
     m_damp(0.0),
@@ -42,7 +42,7 @@ PoldiAutoCorrelationCore::PoldiAutoCorrelationCore(Kernel::Logger &g_log) :
   * @param detector :: Instance of PoldiAbstractDetector.
   * @param chopper :: Instance of PoldiAbstractChopper.
   */
-void PoldiAutoCorrelationCore::setInstrument(boost::shared_ptr<PoldiAbstractDetector> detector, boost::shared_ptr<PoldiAbstractChopper> chopper)
+void PoldiAutoCorrelationCore::setInstrument(const PoldiAbstractDetector_sptr &detector, const PoldiAbstractChopper_sptr &chopper)
 {
     m_detector = detector;
     m_chopper = chopper;
@@ -65,13 +65,19 @@ void PoldiAutoCorrelationCore::setWavelengthRange(double lambdaMin, double lambd
   * @param countData :: Instance of Workspace2D with POLDI data.
   * @return A workspace containing the correlation spectrum.
   */
-DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::Workspace2D_sptr countData)
+DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(const DataObjects::Workspace2D_sptr &countData, const DataObjects::Workspace2D_sptr &normCountData)
 {
     m_logger.information() << "Starting Autocorrelation method..." << std::endl;
 
     if(m_detector && m_chopper) {
         m_logger.information() << "  Assigning count data..." << std::endl;
         setCountData(countData);
+
+        if(normCountData) {
+            setNormCountData(normCountData);
+        } else {
+            setNormCountData(countData);
+        }
 
         /* Calculations related to experiment timings
          *  - width of time bins (deltaT)
@@ -374,14 +380,23 @@ int PoldiAutoCorrelationCore::cleanIndex(int index, int maximum) const
     return cleanIndex;
 }
 
-/** Assigns workspace pointer containing count data to class member, stores maximum histogram index
+/** Assigns workspace pointer containing count data to class member
   *
   * @param countData :: Workspace containing count data
   */
-void PoldiAutoCorrelationCore::setCountData(DataObjects::Workspace2D_sptr countData)
+void PoldiAutoCorrelationCore::setCountData(const DataObjects::Workspace2D_sptr &countData)
 {
     m_countData = countData;
-    m_elementsMaxIndex = static_cast<int>(countData->getNumberHistograms()) - 1;
+}
+
+
+/** Assigns workspace pointer containing norm count data to class member
+  *
+  * @param countData :: Workspace containing norm count data
+  */
+void PoldiAutoCorrelationCore::setNormCountData(const DataObjects::Workspace2D_sptr &normCountData)
+{
+    m_normCountData = normCountData;
 }
 
 double PoldiAutoCorrelationCore::correctedIntensity(double intensity, double weight) const
@@ -476,7 +491,7 @@ double PoldiAutoCorrelationCore::getCounts(int x, int y) const
   */
 double PoldiAutoCorrelationCore::getNormCounts(int x, int y) const
 {
-    return std::max(1.0, m_countData->readY(x)[y]);
+    return std::max(1.0, m_normCountData->readY(x)[y]);
 }
 
 /** Returns detector element index for given index
