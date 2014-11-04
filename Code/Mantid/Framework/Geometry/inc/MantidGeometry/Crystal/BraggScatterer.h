@@ -3,8 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Crystal/UnitCell.h"
-#include "MantidGeometry/Crystal/SpaceGroup.h"
+
 
 #include <complex>
 #include <boost/shared_ptr.hpp>
@@ -27,18 +26,17 @@ typedef std::complex<double> StructureFactor;
     This way, new scatterers with very different parameters can be
     added easily.
 
-    In BraggScatterer, three basic properties are defined: Position, UnitCell
-    and SpaceGroup. Setting these properties is only possible through
-    the setProperty and setPropertyValue methods inherited from
-    PropertyManager. For retrieval there are however specialized methods,
-    since UnitCell and SpaceGroup properties are currently only stored
-    as strings.
-
     New implementations must override the declareProperties method and
-    define any parameters there. It is called by the initialize method.
-    Currently there are two implementations of this interface, IsotropicAtomScatterer
-    and CompositeScatterer (composite pattern) - especially the latter
-    provides a good example on how to define new properties for a scatterer.
+    define any parameters there. For most applications it should be easier
+    to inherit from BraggScattererInCrystalStructure, which provides some
+    default properties that are useful in many cases. CompositeBraggScatterer
+    is designed to combine several scatterers.
+
+    CompositeBraggScatterer does not declare any properties by itself. For
+    some properties it makes sense to be equal for all scatterers in the
+    composite. This behavior can be achieved by calling the method
+    makePropertyPropagating after it has been declared. Examples are
+    the UnitCell and SpaceGroup properties in BraggScattererInCrystalStructure.
 
     Construction of concrete scatterers is done through ScattererFactory.
 
@@ -82,49 +80,26 @@ public:
     virtual std::string name() const = 0;
     virtual BraggScatterer_sptr clone() const = 0;
 
-    Kernel::V3D getPosition() const;
-    std::vector<Kernel::V3D> getEquivalentPositions() const;
-    UnitCell getCell() const;
-    SpaceGroup_const_sptr getSpaceGroup() const;
-
     virtual StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const = 0;
+
+    bool isPropertyExposedToComposite(const std::string &propertyName) const;
+    bool isPropertyExposedToComposite(Kernel::Property *property) const;
     
 protected:
-    virtual void setPosition(const Kernel::V3D &position);
-    virtual void setCell(const UnitCell &cell);
-    virtual void setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
-
-    void afterPropertySet(const std::string &propertyName);
+    /// Base implementation does nothing, can be re-implemented by subclasses.
+    void afterPropertySet(const std::string &) { }
 
     /// Base implementation does nothing - for implementing classes only.
     virtual void declareProperties() { }
 
-    /// This method should be re-implemented by subclasses for additional parameter processing.
-    virtual void afterScattererPropertySet(const std::string &) { }
+    void exposePropertyToComposite(const std::string &propertyName);
+    void unexposePropertyFromComposite(const std::string &propertyName);
 
-    void recalculateEquivalentPositions();
+    const std::string &getPropagatingGroupName() const;
 
-    Kernel::V3D m_position;
-    std::vector<Kernel::V3D> m_equivalentPositions;
-
-    UnitCell m_cell;
-    SpaceGroup_const_sptr m_spaceGroup;
-
+private:
+    std::string m_propagatingGroupName;
     bool m_isInitialized;
-};
-
-/**
- * Helper class for validating unit cell strings.
- *
- * This validator checks whether a string consists of either 3 or 6 numbers,
- * possibly floating point numbers. It's required for the unit cell string
- * property.
- */
-class MANTID_GEOMETRY_DLL UnitCellStringValidator : public Kernel::TypedValidator<std::string>
-{
-protected:
-    Kernel::IValidator_sptr clone() const;
-    virtual std::string checkValidity(const std::string &unitCellString) const;
 };
 
 } // namespace Geometry

@@ -98,7 +98,10 @@ public:
         scatterer->setProperty("UnitCell", unitCellToStr(cell));
         scatterer->setProperty("SpaceGroup", spaceGroup->hmSymbol());
 
-        BraggScatterer_sptr clone = scatterer->clone();
+        BraggScatterer_sptr baseclone = scatterer->clone();
+        BraggScattererInCrystalStructure_sptr clone = boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(baseclone);
+
+        TS_ASSERT(clone)
 
         TS_ASSERT_EQUALS(clone->getPosition(), scatterer->getPosition());
         TS_ASSERT_EQUALS(clone->getCell().getG(), scatterer->getCell().getG());

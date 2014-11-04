@@ -1,7 +1,7 @@
 #ifndef MANTID_GEOMETRY_ISOTROPICATOMBRAGGSCATTERER_H_
 #define MANTID_GEOMETRY_ISOTROPICATOMBRAGGSCATTERER_H_
 
-#include "MantidGeometry/Crystal/BraggScatterer.h"
+#include "MantidGeometry/Crystal/BraggScattererInCrystalStructure.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/NeutronAtom.h"
 
@@ -98,7 +98,7 @@ class IsotropicAtomBraggScatterer;
 
 typedef boost::shared_ptr<IsotropicAtomBraggScatterer> IsotropicAtomBraggScatterer_sptr;
 
-class MANTID_GEOMETRY_DLL IsotropicAtomBraggScatterer : public BraggScatterer
+class MANTID_GEOMETRY_DLL IsotropicAtomBraggScatterer : public BraggScattererInCrystalStructure
 {
 public:
     IsotropicAtomBraggScatterer();
@@ -118,7 +118,7 @@ public:
 protected:
     void setElement(const std::string &element);
 
-    void declareProperties();
+    void declareScattererProperties();
     void afterScattererPropertySet(const std::string &propertyName);
 
     double getDebyeWallerFactor(const Kernel::V3D &hkl) const;

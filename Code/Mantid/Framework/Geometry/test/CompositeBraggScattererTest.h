@@ -29,16 +29,6 @@ public:
         TS_ASSERT_THROWS_NOTHING(CompositeBraggScatterer scatterers);
     }
 
-    void testProperties()
-    {
-        CompositeBraggScatterer_sptr scatterer = boost::make_shared<CompositeBraggScatterer>();
-        TS_ASSERT_THROWS_NOTHING(scatterer->initialize());
-
-        TS_ASSERT(scatterer->existsProperty("Position"));
-        TS_ASSERT(scatterer->existsProperty("SpaceGroup"));
-        TS_ASSERT(scatterer->existsProperty("UnitCell"));
-    }
-
     void testCreate()
     {
         TS_ASSERT_THROWS_NOTHING(CompositeBraggScatterer_sptr scatterer = CompositeBraggScatterer::create());
@@ -49,8 +39,8 @@ public:
 
         CompositeBraggScatterer_sptr scatterer = CompositeBraggScatterer::create(scatterers);
         TS_ASSERT_EQUALS(scatterer->nScatterers(), 2);
-        TS_ASSERT_EQUALS(scatterer->getScatterer(0)->getPosition(), V3D(0.35, 0, 0));
-        TS_ASSERT_EQUALS(scatterer->getScatterer(1)->getPosition(), V3D(0.25, 0.25, 0.25));
+        TS_ASSERT_EQUALS(boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(scatterer->getScatterer(0))->getPosition(), V3D(0.35, 0, 0));
+        TS_ASSERT_EQUALS(boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(scatterer->getScatterer(1))->getPosition(), V3D(0.25, 0.25, 0.25));
     }
 
     void testClone()
@@ -62,34 +52,8 @@ public:
 
         TS_ASSERT(collectionClone);
         TS_ASSERT_EQUALS(collectionClone->nScatterers(), 2);
-        TS_ASSERT_EQUALS(collectionClone->getScatterer(0)->getPosition(), V3D(0.35, 0, 0));
-        TS_ASSERT_EQUALS(collectionClone->getScatterer(1)->getPosition(), V3D(0.25, 0.25, 0.25));
-    }
-
-    void testSetCell()
-    {
-        CompositeBraggScatterer_sptr scatterer = getCompositeScatterer();
-
-        UnitCell cell(5.43, 5.43, 5.43);
-        TS_ASSERT_DIFFERS(scatterer->getScatterer(0)->getCell().getG(), cell.getG());
-
-        scatterer->setProperty("UnitCell", unitCellToStr(cell));
-        TS_ASSERT_EQUALS(scatterer->getScatterer(0)->getCell().getG(), cell.getG());
-        TS_ASSERT_EQUALS(scatterer->getScatterer(1)->getCell().getG(), cell.getG());
-    }
-
-    void testSetSpaceGroup()
-    {
-        CompositeBraggScatterer_sptr scatterer = getCompositeScatterer();
-
-        SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
-        TS_ASSERT(spaceGroup);
-        TS_ASSERT_DIFFERS(scatterer->getScatterer(0)->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
-
-        scatterer->setProperty("SpaceGroup", "P 1 2/m 1");
-        TS_ASSERT_EQUALS(scatterer->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
-        TS_ASSERT_EQUALS(scatterer->getScatterer(0)->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
-        TS_ASSERT_EQUALS(scatterer->getScatterer(1)->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
+        TS_ASSERT_EQUALS(boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(collectionClone->getScatterer(0))->getPosition(), V3D(0.35, 0, 0));
+        TS_ASSERT_EQUALS(boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(collectionClone->getScatterer(1))->getPosition(), V3D(0.25, 0.25, 0.25));
     }
 
     void testAddGetScatterer()
@@ -98,18 +62,23 @@ public:
         SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
 
         CompositeBraggScatterer_sptr scatterer = CompositeBraggScatterer::create();
-        scatterer->setProperty("UnitCell", unitCellToStr(cell));
-        scatterer->setProperty("SpaceGroup", spaceGroup->hmSymbol());
+        TS_ASSERT_EQUALS(scatterer->propertyCount(), 0);
 
         IsotropicAtomBraggScatterer_sptr siOne = getInitializedScatterer("Si", V3D(0, 0, 0));
         TS_ASSERT_DIFFERS(siOne->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
 
         size_t oldCount = scatterer->nScatterers();
         scatterer->addScatterer(siOne);
+        TS_ASSERT_EQUALS(scatterer->propertyCount(), 2);
+
         TS_ASSERT_EQUALS(scatterer->nScatterers(), oldCount + 1);
 
+        // Properties are propagated.
+        scatterer->setProperty("UnitCell", unitCellToStr(cell));
+        scatterer->setProperty("SpaceGroup", spaceGroup->hmSymbol());
+
         // The scatterer is cloned, so the new space group is not in siOne
-        TS_ASSERT_EQUALS(scatterer->getScatterer(0)->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
+        TS_ASSERT_EQUALS(boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(scatterer->getScatterer(0))->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
         TS_ASSERT_DIFFERS(siOne->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
 
         TS_ASSERT_THROWS(scatterer->getScatterer(2), std::out_of_range);
@@ -127,6 +96,11 @@ public:
 
         TS_ASSERT_THROWS(scattererCollection->getScatterer(oldCount - 1), std::out_of_range);
         TS_ASSERT_THROWS(scattererCollection->removeScatterer(10), std::out_of_range);
+
+        scattererCollection->removeScatterer(0);
+
+        // Unused properties are removed, so when there are no scatterers, there are no properties.
+        TS_ASSERT_EQUALS(scattererCollection->propertyCount(), 0);
     }
 
     void testStructureFactorCalculation()
@@ -142,10 +116,10 @@ public:
         SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
 
         CompositeBraggScatterer_sptr coll = CompositeBraggScatterer::create();
+        coll->addScatterer(getInitializedScatterer("Si", V3D(0.2, 0.3, 0.4), 0.01267));
+
         coll->setProperty("SpaceGroup", spaceGroup->hmSymbol());
         coll->setProperty("UnitCell", unitCellToStr(cell));
-
-        coll->addScatterer(getInitializedScatterer("Si", V3D(0.2, 0.3, 0.4), 0.01267));
 
         // Load reference data, obtained with SHELXL-2014.
         std::map<V3D, double> referenceData = getCalculatedStructureFactors();

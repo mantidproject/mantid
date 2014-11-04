@@ -16,7 +16,7 @@ using namespace Kernel;
 
 /// Constructor which takes an element symbol, fractional coordinates, isotropic atomic displacement parameter and occupancy.
 IsotropicAtomBraggScatterer::IsotropicAtomBraggScatterer() :
-    BraggScatterer(),
+    BraggScattererInCrystalStructure(),
     m_atom(),
     m_label()
 {
@@ -100,7 +100,7 @@ StructureFactor IsotropicAtomBraggScatterer::calculateStructureFactor(const V3D 
  *  - Occupancy must be on the interval [0,1]
  *  - Element must be present.
  */
-void IsotropicAtomBraggScatterer::declareProperties()
+void IsotropicAtomBraggScatterer::declareScattererProperties()
 {
     // Default behavior requires this.
     setElement("H");

@@ -2,6 +2,7 @@ set ( SRC_FILES
 	src/ComponentParser.cpp
         src/Crystal/BraggScatterer.cpp
         src/Crystal/BraggScattererFactory.cpp
+	src/Crystal/BraggScattererInCrystalStructure.cpp
 	src/Crystal/CenteringGroup.cpp
         src/Crystal/CompositeBraggScatterer.cpp
 	src/Crystal/ConventionalCell.cpp
@@ -117,6 +118,7 @@ set ( INC_FILES
 	inc/MantidGeometry/ComponentParser.h
         inc/MantidGeometry/Crystal/BraggScatterer.h
         inc/MantidGeometry/Crystal/BraggScattererFactory.h
+	inc/MantidGeometry/Crystal/BraggScattererInCrystalStructure.h
 	inc/MantidGeometry/Crystal/CenteringGroup.h
         inc/MantidGeometry/Crystal/CompositeBraggScatterer.h
 	inc/MantidGeometry/Crystal/ConventionalCell.h
@@ -227,6 +229,7 @@ set ( TEST_FILES
 	BnIdTest.h
 	BoundingBoxTest.h
         BraggScattererFactoryTest.h
+        BraggScattererInCrystalStructureTest.h
         BraggScattererTest.h
 	CenteringGroupTest.h
 	CompAssemblyTest.h

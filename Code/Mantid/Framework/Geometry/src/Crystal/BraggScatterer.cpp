@@ -1,10 +1,5 @@
 #include "MantidGeometry/Crystal/BraggScatterer.h"
-#include <stdexcept>
 
-#include <boost/regex.hpp>
-#include <boost/make_shared.hpp>
-#include "MantidKernel/ListValidator.h"
-#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
 namespace Mantid
 {
@@ -16,31 +11,14 @@ using namespace Kernel;
 /// Default constructor.
 BraggScatterer::BraggScatterer() :
     PropertyManager(),
-    m_position(),
-    m_cell(UnitCell(1, 1, 1, 90, 90, 90)),
-    m_spaceGroup(),
+    m_propagatingGroupName("PropagatingProperty"),
     m_isInitialized(false)
 {
-    recalculateEquivalentPositions();
 }
 
-/// Initialization method that declares three basic properties and sets initialized state to true.
+/// Initialization method that calls declareProperties() and sets initialized state to true.
 void BraggScatterer::initialize()
 {
-    /* This is required for default behavior. It's not possible to call it
-     * from the constructure, because it's not guaranteed that the space group
-     * factory has been filled at the time the ScattererFactory is filled.
-     */
-    setSpaceGroup(SpaceGroupFactory::Instance().createSpaceGroup("P 1"));
-
-    declareProperty(new Kernel::PropertyWithValue<V3D>("Position", V3D(0.0, 0.0, 0.0)), "Position of the scatterer");
-
-    IValidator_sptr unitCellStringValidator = boost::make_shared<UnitCellStringValidator>();
-    declareProperty(new Kernel::PropertyWithValue<std::string>("UnitCell", "1.0 1.0 1.0 90.0 90.0 90.0", unitCellStringValidator), "Unit cell.");
-
-    IValidator_sptr spaceGroupValidator = boost::make_shared<ListValidator<std::string> >(SpaceGroupFactory::Instance().subscribedSpaceGroupSymbols());
-    declareProperty(new Kernel::PropertyWithValue<std::string>("SpaceGroup", "P 1", spaceGroupValidator), "Space group.");
-
     declareProperties();
 
     m_isInitialized = true;
@@ -52,105 +30,48 @@ bool BraggScatterer::isInitialized()
     return m_isInitialized;
 }
 
-/// Sets the position of the scatterer to the supplied coordinates - vector is wrapped to [0, 1) and equivalent positions are recalculated.
-void BraggScatterer::setPosition(const Kernel::V3D &position)
+/// Checks whether a property with the given name is exposed to BraggScattererComposite.
+bool BraggScatterer::isPropertyExposedToComposite(const std::string &propertyName) const
 {
-    m_position = getWrappedVector(position);
+    Property *property = getProperty(propertyName);
 
-    recalculateEquivalentPositions();
+    return isPropertyExposedToComposite(property);
 }
 
-/// Returns the position of the scatterer.
-Kernel::V3D BraggScatterer::getPosition() const
+/// Checks if a property is exposed to BraggScattererComposite or throws std::invalid_argument if a null-pointer is supplied.
+bool BraggScatterer::isPropertyExposedToComposite(Property *property) const
 {
-    return m_position;
-}
+    if(!property) {
+        throw std::invalid_argument("Cannot determine propagation behavior of null-property.");
+    }
 
-/// Returns all equivalent positions of the scatterer according to the assigned space group.
-std::vector<Kernel::V3D> BraggScatterer::getEquivalentPositions() const
-{
-    return m_equivalentPositions;
-}
-
-/// Assigns a unit cell, which may be required for certain calculations.
-void BraggScatterer::setCell(const UnitCell &cell)
-{
-    m_cell = cell;
-}
-
-/// Returns the cell which is currently set.
-UnitCell BraggScatterer::getCell() const
-{
-    return m_cell;
-}
-
-/// Sets the space group, which is required for calculation of equivalent positions.
-void BraggScatterer::setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup)
-{
-    m_spaceGroup = spaceGroup;
-
-    recalculateEquivalentPositions();
+    return property->getGroup() == getPropagatingGroupName();
 }
 
 /**
- * Additional property processing
+ * Exposes the property with the supplied name to BraggScattererComposite
  *
- * Takes care of handling new property values, for example for construction of a space group
- * from string and so on.
+ * When a property is marked to be exposed to BraggScattererComposite, the composite
+ * also declares this property and tries to propagate the value assigned to the
+ * composite's property to all its members.
  *
- * Please note that derived classes should not re-implement this method, as
- * the processing for the base properties is absolutely necessary. Instead, all deriving
- * classes should override the method afterScattererPropertySet, which is called
- * from this method.
+ * @param propertyName :: Name of the parameter that should be exposed.
  */
-void BraggScatterer::afterPropertySet(const std::string &propertyName)
+void BraggScatterer::exposePropertyToComposite(const std::string &propertyName)
 {
-    if(propertyName == "Position") {
-        PropertyWithValue<V3D> *position = dynamic_cast<PropertyWithValue<V3D> *>(getPointerToProperty("Position"));
-        setPosition((*position)());
-    } else if(propertyName == "SpaceGroup") {
-        setSpaceGroup(SpaceGroupFactory::Instance().createSpaceGroup(getProperty("SpaceGroup")));
-    } else if(propertyName == "UnitCell") {
-        setCell(strToUnitCell(getProperty("UnitCell")));
-    }
-
-    afterScattererPropertySet(propertyName);
+    setPropertyGroup(propertyName, m_propagatingGroupName);
 }
 
-/// Returns the assigned space group.
-SpaceGroup_const_sptr BraggScatterer::getSpaceGroup() const
+/// Removes exposure to composite for specified property.
+void BraggScatterer::unexposePropertyFromComposite(const std::string &propertyName)
 {
-    return m_spaceGroup;
+    setPropertyGroup(propertyName, "");
 }
 
-/// Uses the stored space group to calculate all equivalent positions or if present.
-void BraggScatterer::recalculateEquivalentPositions()
+/// Returns the group name that is used to mark properties that are propagated.
+const std::string &BraggScatterer::getPropagatingGroupName() const
 {
-    m_equivalentPositions.clear();
-
-    if(m_spaceGroup) {
-        m_equivalentPositions = m_spaceGroup * m_position;
-    } else {
-        m_equivalentPositions.push_back(m_position);
-    }
-}
-
-/// Return a clone of the validator.
-IValidator_sptr UnitCellStringValidator::clone() const
-{
-    return boost::make_shared<UnitCellStringValidator>(*this);
-}
-
-/// Check if the string is valid input for Geometry::strToUnitCell.
-std::string UnitCellStringValidator::checkValidity(const std::string &unitCellString) const
-{
-    boost::regex unitCellRegex("((\\d+(\\.\\d+){0,1}\\s+){2}|(\\d+(\\.\\d+){0,1}\\s+){5})(\\d+(\\.\\d+){0,1}\\s*)");
-
-    if(!boost::regex_match(unitCellString, unitCellRegex)) {
-        return "Unit cell string is invalid: " + unitCellString;
-    }
-
-    return "";
+    return m_propagatingGroupName;
 }
 
 

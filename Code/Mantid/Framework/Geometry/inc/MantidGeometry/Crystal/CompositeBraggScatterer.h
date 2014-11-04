@@ -18,11 +18,6 @@ namespace Geometry
     it is cloned instead, so there is a new instance. The original instance
     is not modified at all.
 
-    This is important for the behavior of setCell and setSpaceGroup. They
-    propagate the supplied value to all internally stored scatterers. This
-    makes sense from a crystallographic point of view, since a group of scatterers
-    can not contain members that belong to a different crystal structure.
-
     For structure factor calculations, all contributions from contained scatterers
     are summed. Contained scatterers may be CompositeBraggScatterers themselves,
     so it's possible to build up elaborate structures.
@@ -31,6 +26,13 @@ namespace Geometry
     possibility is to use BraggScattererFactory, just like for other implementations
     of BraggScatterer. Additionally there is a static method CompositeBraggScatterer::create,
     which creates a composite scatterer of the supplied vector of scatterers.
+
+    CompositeBraggScatterer does not declare any methods by itself, instead it exposes
+    some properties of the contained scatterers (those which were marked using
+    exposePropertyToComposite). When these properties are set, their values
+    are propagated to all members of the composite. The default behavior when
+    new properties are declared in subclasses of BraggScatterer is not to expose
+    them in this way.
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 21/10/2014
@@ -79,10 +81,12 @@ public:
     StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const;
     
 protected:
-    void afterScattererPropertySet(const std::string &propertyName);
+    void afterPropertySet(const std::string &propertyName);
     void propagateProperty(const std::string &propertyName);
+    void propagatePropertyToScatterer(BraggScatterer_sptr &scatterer, const std::string &propertyName, const std::string &propertyValue);
 
-    void setCommonProperties(BraggScatterer_sptr &scatterer);
+    void redeclareProperties();
+    std::map<std::string, size_t> getPropertyCountMap() const;
 
     std::vector<BraggScatterer_sptr> m_scatterers;
 };
