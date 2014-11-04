@@ -119,7 +119,6 @@ public:
     void addPythonScriptsDirs();
     void addPythonPluginDirs();
     void addInstrumentDir();
-    void addParameterDir();
     void enableButtons();
     void itemCheckedChanged(QTreeWidgetItem* item);
     void updateChildren(std::map<std::string, std::string> &programKeysAndDetails, QTreeWidgetItem* program);
@@ -187,7 +186,6 @@ private:
   QLineEdit* lePythonScriptsDirs;///< pythonscripts.directories
   QLineEdit* lePythonPluginsDirs;///< python plugins directories
   QLineEdit* leInstrumentDir;///< instrumentDefinition.directory
-  QLineEdit* leParameterDir;///< parameterDefinition.directory
   // Mantid curve fitting page
   QWidget *curveFittingPage;
   QComboBox *backgroundFunctions;

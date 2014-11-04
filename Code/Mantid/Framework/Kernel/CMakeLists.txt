@@ -364,7 +364,7 @@ set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 
 target_link_libraries ( Kernel ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} )
 if ( WIN32 )
-  target_link_libraries ( Kernel Psapi.lib ) # For memory usage queries
+  target_link_libraries ( Kernel Psapi.lib shell32.lib ) # For memory usage queries
 endif()
 
 # Add the unit tests directory
