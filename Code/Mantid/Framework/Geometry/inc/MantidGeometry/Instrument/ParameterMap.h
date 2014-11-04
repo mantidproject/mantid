@@ -62,11 +62,11 @@ namespace Geometry
   {
   public:
     /// Parameter map typedef
-      typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
+    typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
     /// Parameter map iterator typedef
-      typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator pmap_it;
+    typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator pmap_it;
     /// Parameter map iterator typedef
-      typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_cit;
+    typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_cit;
     /// Default constructor
     ParameterMap();
     /// Returns true if the map is empty, false otherwise
