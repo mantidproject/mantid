@@ -130,7 +130,7 @@ void IndirectDataReduction::initLayout()
   /* m_tabs["Diagnostics"] = new IndirectDiagnostics(m_uiForm, this); */
   m_tabs["Transmission"] = new IndirectTransmission(m_uiForm, this);
   m_tabs["Symmetrise"] = new IndirectSymmetrise(m_uiForm, this);
-  /* m_tabs["S(Q, w)"] = new IndirectSqw(m_uiForm, this); */
+  m_tabs["S(Q, w)"] = new IndirectSqw(m_uiForm, this);
   m_tabs["Moments"] = new IndirectMoments(m_uiForm, this);
 
   // Handle the instrument being changed
