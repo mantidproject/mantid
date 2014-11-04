@@ -88,8 +88,6 @@ namespace CustomInterfaces
     bool loadFile(const QString& filename, const QString& outputName, const int specMin = -1, const int specMax = -1);
 
     Mantid::API::MatrixWorkspace_sptr loadInstrumentIfNotExist(std::string instrumentName, std::string analyser="", std::string reflection="");
-    /// Get information about the operation modes of an indirect instrument
-    std::vector<std::pair<std::string, std::vector<std::string> > > getInstrumentModes(std::string instrumentName);
     /// Function to get details about the instrument configuration defined on C2E tab
     std::map<QString, QString> getInstrumentDetails();
 
@@ -167,6 +165,8 @@ namespace CustomInterfaces
     void runAsPythonScript(const QString & code, bool no_output);
     /// Update the Run button on the IDR main window
     void updateRunButton(bool enabled = true, QString message = "Run", QString tooltip = "");
+    /// Emitted when the instrument setup is changed
+    void newInstrumentConfiguration();
 
   private:
     /// Overidden by child class.
@@ -175,6 +175,8 @@ namespace CustomInterfaces
     virtual void run() = 0;
     /// Overidden by child class.
     virtual bool validate() = 0;
+
+    QString getInstrumentParameterFrom(Mantid::Geometry::IComponent_const_sptr comp, std::string param);
 
   private slots:
     void tabExecutionComplete(bool error);
