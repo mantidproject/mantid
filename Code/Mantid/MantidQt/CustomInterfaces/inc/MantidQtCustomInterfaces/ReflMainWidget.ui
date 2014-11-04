@@ -152,7 +152,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QTableWidget" name="tableRuns">
+         <widget class="QTableWidget" name="tableSearchResults">
           <property name="toolTip">
            <string>Search results</string>
           </property>
@@ -540,14 +540,40 @@
     <string>Ctrl+X</string>
    </property>
   </action>
+  <action name="actionSearch">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/folder.png</normaloff>:/folder.png</iconset>
+   </property>
+   <property name="text">
+    <string>Search</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>comboSearchInstrument</tabstop>
-  <tabstop>tableRuns</tabstop>
+  <tabstop>tableSearchResults</tabstop>
   <tabstop>viewTable</tabstop>
  </tabstops>
  <resources>
   <include location="../../../../MantidPlot/icons/icons.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>buttonSearch</sender>
+   <signal>clicked()</signal>
+   <receiver>actionSearch</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>217</x>
+     <y>143</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>217</x>
+     <y>143</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

@@ -209,6 +209,14 @@ namespace MantidQt
     }
 
     /**
+    This slot notifies the presenter that the "search" button has been pressed
+    */
+    void QtReflMainView::on_actionSearch_triggered()
+    {
+      m_presenter->notify(IReflPresenter::SearchFlag);
+    }
+
+    /**
     This slot notifies the presenter that the table has been updated/changed by the user
     */
     void QtReflMainView::tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight)

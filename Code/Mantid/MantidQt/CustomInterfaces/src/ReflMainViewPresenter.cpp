@@ -859,6 +859,7 @@ namespace MantidQt
       case IReflPresenter::CopySelectedFlag:    copySelected();      break;
       case IReflPresenter::CutSelectedFlag:     cutSelected();       break;
       case IReflPresenter::PasteSelectedFlag:   pasteSelected();     break;
+      case IReflPresenter::SearchFlag:          search();            break;
       }
       //Not having a 'default' case is deliberate. gcc issues a warning if there's a flag we aren't handling.
     }
@@ -1128,6 +1129,12 @@ namespace MantidQt
         for(int col = COL_RUNS; col <= COL_OPTIONS && col < static_cast<int>(values.size()); ++col)
           m_model->setData(m_model->index(*rowIt, col), QString::fromStdString(values[col]));
       }
+    }
+
+    /** Searches for runs that can be used */
+    void ReflMainViewPresenter::search()
+    {
+      m_view->giveUserInfo("You just searched for: '" + m_view->getSearchString() + "' on " + m_view->getSearchInstrument(), "Search");
     }
 
     /** Shows the Refl Options dialog */
