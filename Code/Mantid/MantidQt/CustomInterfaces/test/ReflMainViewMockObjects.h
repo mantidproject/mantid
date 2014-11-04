@@ -19,6 +19,10 @@ const int AppendRowFlag  = ReflMainView::AppendRowFlag;
 const int PrependRowFlag = ReflMainView::PrependRowFlag;
 const int DeleteRowFlag  = ReflMainView::DeleteRowFlag;
 const int GroupRowsFlag  = ReflMainView::GroupRowsFlag;
+const int ClearSelectedFlag   = ReflMainView::ClearSelectedFlag;
+const int CopySelectedFlag    = ReflMainView::CopySelectedFlag;
+const int CutSelectedFlag     = ReflMainView::CutSelectedFlag;
+const int PasteSelectedFlag   = ReflMainView::PasteSelectedFlag;
 const int ExpandSelectionFlag = ReflMainView::ExpandSelectionFlag;
 
 //Clean column ids for use within tests
@@ -49,6 +53,8 @@ public:
   MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
   MOCK_METHOD1(setSelection, void(const std::set<int>& rows));
   MOCK_CONST_METHOD0(getSelectedRows, std::set<int>());
+  MOCK_METHOD1(setClipboard, void(const std::string& text));
+  MOCK_CONST_METHOD0(getClipboard, std::string());
 
   //Calls we don't care about
   virtual void showTable(QReflTableModel_sptr) {};

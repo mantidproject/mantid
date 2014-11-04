@@ -851,6 +851,10 @@ namespace MantidQt
       case ReflMainView::DeleteRowFlag:       deleteRow();          break;
       case ReflMainView::ProcessFlag:         process();            break;
       case ReflMainView::GroupRowsFlag:       groupRows();          break;
+      case ReflMainView::ClearSelectedFlag:   clearSelected();      break;
+      case ReflMainView::CopySelectedFlag:    copySelected();       break;
+      case ReflMainView::CutSelectedFlag:     cutSelected();        break;
+      case ReflMainView::PasteSelectedFlag:   pasteSelected();      break;
       case ReflMainView::OpenTableFlag:       openTable();          break;
       case ReflMainView::NewTableFlag:        newTable();           break;
       case ReflMainView::TableUpdatedFlag:    m_tableDirty = true;  break;
@@ -1051,6 +1055,87 @@ namespace MantidQt
           selection.insert(i);
 
       m_view->setSelection(selection);
+    }
+
+    /** Clear the currently selected rows */
+    void ReflMainViewPresenter::clearSelected()
+    {
+      std::set<int> rows = m_view->getSelectedRows();
+      std::set<int> ignore;
+      for(auto row = rows.begin(); row != rows.end(); ++row)
+      {
+        ignore.clear();
+        ignore.insert(*row);
+
+        m_model->setData(m_model->index(*row, COL_RUNS), "");
+        m_model->setData(m_model->index(*row, COL_ANGLE), "");
+        m_model->setData(m_model->index(*row, COL_TRANSMISSION), "");
+        m_model->setData(m_model->index(*row, COL_QMIN), "");
+        m_model->setData(m_model->index(*row, COL_QMAX), "");
+        m_model->setData(m_model->index(*row, COL_SCALE), 1.0);
+        m_model->setData(m_model->index(*row, COL_DQQ), "");
+        m_model->setData(m_model->index(*row, COL_GROUP), getUnusedGroup(ignore));
+        m_model->setData(m_model->index(*row, COL_OPTIONS), "");
+      }
+      m_tableDirty = true;
+    }
+
+    /** Copy the currently selected rows to the clipboard */
+    void ReflMainViewPresenter::copySelected()
+    {
+      std::vector<std::string> lines;
+
+      std::set<int> rows = m_view->getSelectedRows();
+      for(auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt)
+      {
+        std::vector<std::string> line;
+        for(int col = COL_RUNS; col <= COL_OPTIONS; ++col)
+          line.push_back(m_model->data(m_model->index(*rowIt, col)).toString().toStdString());
+        lines.push_back(boost::algorithm::join(line, "\t"));
+      }
+
+      m_view->setClipboard(boost::algorithm::join(lines, "\n"));
+    }
+
+    /** Copy currently selected rows to the clipboard, and then delete them. */
+    void ReflMainViewPresenter::cutSelected()
+    {
+      copySelected();
+      deleteRow();
+    }
+
+    /** Paste the contents of the clipboard into the currently selected rows, or append new rows */
+    void ReflMainViewPresenter::pasteSelected()
+    {
+      const std::string text = m_view->getClipboard();
+      std::vector<std::string> lines;
+      boost::split(lines, text, boost::is_any_of("\n"));
+
+      //If we have rows selected, we'll overwrite them. If not, we'll append new rows to write to.
+      std::set<int> rows = m_view->getSelectedRows();
+      if(rows.empty())
+      {
+        //Add as many new rows as required
+        for(size_t i = 0; i < lines.size(); ++i)
+        {
+          int index = m_model->rowCount();
+          insertRow(index);
+          rows.insert(index);
+        }
+      }
+
+      //Iterate over rows and lines simultaneously, stopping when we reach the end of either
+      auto rowIt = rows.begin();
+      auto lineIt = lines.begin();
+      for(; rowIt != rows.end() && lineIt != lines.end(); rowIt++, lineIt++)
+      {
+        std::vector<std::string> values;
+        boost::split(values, *lineIt, boost::is_any_of("\t"));
+
+        //Paste as many columns as we can from this line
+        for(int col = COL_RUNS; col <= COL_OPTIONS && col < static_cast<int>(values.size()); ++col)
+          m_model->setData(m_model->index(*rowIt, col), QString::fromStdString(values[col]));
+      }
     }
 
     /** Shows the Refl Options dialog */

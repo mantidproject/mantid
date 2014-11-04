@@ -153,6 +153,38 @@ namespace MantidQt
     }
 
     /**
+    This slot notifies the presenter that the "clear selected" button has been pressed
+    */
+    void QtReflMainView::on_actionClearSelected_triggered()
+    {
+      m_presenter->notify(ClearSelectedFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "copy selection" button has been pressed
+    */
+    void QtReflMainView::on_actionCopySelected_triggered()
+    {
+      m_presenter->notify(CopySelectedFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "cut selection" button has been pressed
+    */
+    void QtReflMainView::on_actionCutSelected_triggered()
+    {
+      m_presenter->notify(CutSelectedFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "paste selection" button has been pressed
+    */
+    void QtReflMainView::on_actionPasteSelected_triggered()
+    {
+      m_presenter->notify(PasteSelectedFlag);
+    }
+
+    /**
     This slot notifies the presenter that the "new table" button has been pressed
     */
     void QtReflMainView::on_actionNewTable_triggered()
@@ -199,7 +231,12 @@ namespace MantidQt
       menu->addSeparator();
       menu->addAction(ui.actionPrependRow);
       menu->addAction(ui.actionAppendRow);
+      menu->addSeparator();
       menu->addAction(ui.actionGroupRows);
+      menu->addAction(ui.actionCopySelected);
+      menu->addAction(ui.actionCutSelected);
+      menu->addAction(ui.actionPasteSelected);
+      menu->addAction(ui.actionClearSelected);
       menu->addSeparator();
       menu->addAction(ui.actionDeleteRow);
 
@@ -332,6 +369,15 @@ namespace MantidQt
     }
 
     /**
+    Sets the contents of the system's clipboard
+    @param text The contents of the clipboard
+    */
+    void QtReflMainView::setClipboard(const std::string& text)
+    {
+      QApplication::clipboard()->setText(QString::fromStdString(text));
+    }
+
+    /**
     Get the selected instrument for searching
     @returns the selected instrument to search for
     */
@@ -379,6 +425,15 @@ namespace MantidQt
     boost::shared_ptr<IReflPresenter> QtReflMainView::getPresenter() const
     {
       return m_presenter;
+    }
+
+    /**
+    Gets the contents of the system's clipboard
+    @returns The contents of the clipboard
+    */
+    std::string QtReflMainView::getClipboard() const
+    {
+      return QApplication::clipboard()->text().toStdString();
     }
 
   } // namespace CustomInterfaces

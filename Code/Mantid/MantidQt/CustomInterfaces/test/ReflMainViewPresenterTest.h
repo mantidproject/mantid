@@ -843,6 +843,351 @@ public:
     //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
+
+  void testClearRows()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    std::set<int> rowlist;
+    rowlist.insert(1);
+    rowlist.insert(2);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
+
+    //The user hits "clear selected" with the second and third rows selected
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(rowlist));
+    presenter.notify(ClearSelectedFlag);
+
+    //The user hits "save"
+    presenter.notify(SaveFlag);
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 4);
+    //Check the unselected rows were unaffected
+    TS_ASSERT_EQUALS(ws->String(0, RunCol), "12345");
+    TS_ASSERT_EQUALS(ws->String(3, RunCol), "24682");
+
+    //Check the group ids have been set correctly
+    TS_ASSERT_EQUALS(ws->Int(0, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 2);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 1);
+
+    //Make sure the selected rows are clear
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "");
+    TS_ASSERT_EQUALS(ws->String(2, RunCol), "");
+    TS_ASSERT_EQUALS(ws->String(1, ThetaCol), "");
+    TS_ASSERT_EQUALS(ws->String(2, ThetaCol), "");
+    TS_ASSERT_EQUALS(ws->String(1, TransCol), "");
+    TS_ASSERT_EQUALS(ws->String(2, TransCol), "");
+    TS_ASSERT_EQUALS(ws->String(1, QMinCol), "");
+    TS_ASSERT_EQUALS(ws->String(2, QMinCol), "");
+    TS_ASSERT_EQUALS(ws->String(1, QMaxCol), "");
+    TS_ASSERT_EQUALS(ws->String(2, QMaxCol), "");
+    TS_ASSERT_EQUALS(ws->String(1, DQQCol), "");
+    TS_ASSERT_EQUALS(ws->String(2, DQQCol), "");
+    TS_ASSERT_EQUALS(ws->Double(1, ScaleCol), 1.0);
+    TS_ASSERT_EQUALS(ws->Double(2, ScaleCol), 1.0);
+
+    //Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+  }
+
+  void testCopyRow()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    std::set<int> rowlist;
+    rowlist.insert(1);
+
+    const std::string expected = "12346\t1.5\t\t1.4\t2.9\t0.04\t1\t0\t";
+
+    //The user hits "copy selected" with the second and third rows selected
+    EXPECT_CALL(mockView, setClipboard(expected));
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(rowlist));
+    presenter.notify(CopySelectedFlag);
+  }
+
+  void testCopyRows()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    std::set<int> rowlist;
+    rowlist.insert(0);
+    rowlist.insert(1);
+    rowlist.insert(2);
+    rowlist.insert(3);
+
+    const std::string expected = "12345\t0.5\t\t0.1\t1.6\t0.04\t1\t0\t\n"
+                                 "12346\t1.5\t\t1.4\t2.9\t0.04\t1\t0\t\n"
+                                 "24681\t0.5\t\t0.1\t1.6\t0.04\t1\t1\t\n"
+                                 "24682\t1.5\t\t1.4\t2.9\t0.04\t1\t1\t";
+
+    //The user hits "copy selected" with the second and third rows selected
+    EXPECT_CALL(mockView, setClipboard(expected));
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(rowlist));
+    presenter.notify(CopySelectedFlag);
+  }
+
+  void testCutRow()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    std::set<int> rowlist;
+    rowlist.insert(1);
+
+    const std::string expected = "12346\t1.5\t\t1.4\t2.9\t0.04\t1\t0\t";
+
+    //The user hits "copy selected" with the second and third rows selected
+    EXPECT_CALL(mockView, setClipboard(expected));
+    EXPECT_CALL(mockView, getSelectedRows()).Times(2).WillRepeatedly(Return(rowlist));
+    presenter.notify(CutSelectedFlag);
+
+    //The user hits "save"
+    presenter.notify(SaveFlag);
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 3);
+    //Check the unselected rows were unaffected
+    TS_ASSERT_EQUALS(ws->String(0, RunCol), "12345");
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "24681");
+    TS_ASSERT_EQUALS(ws->String(2, RunCol), "24682");
+  }
+
+  void testCutRows()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    std::set<int> rowlist;
+    rowlist.insert(0);
+    rowlist.insert(1);
+    rowlist.insert(2);
+
+    const std::string expected = "12345\t0.5\t\t0.1\t1.6\t0.04\t1\t0\t\n"
+                                 "12346\t1.5\t\t1.4\t2.9\t0.04\t1\t0\t\n"
+                                 "24681\t0.5\t\t0.1\t1.6\t0.04\t1\t1\t";
+
+    //The user hits "copy selected" with the second and third rows selected
+    EXPECT_CALL(mockView, setClipboard(expected));
+    EXPECT_CALL(mockView, getSelectedRows()).Times(2).WillRepeatedly(Return(rowlist));
+    presenter.notify(CutSelectedFlag);
+
+    //The user hits "save"
+    presenter.notify(SaveFlag);
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 1);
+    //Check the only unselected row is left behind
+    TS_ASSERT_EQUALS(ws->String(0, RunCol), "24682");
+  }
+
+  void testPasteRow()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    std::set<int> rowlist;
+    rowlist.insert(1);
+
+    const std::string clipboard = "123\t0.5\t456\t1.2\t3.4\t3.14\t5\t6\tabc";
+
+    //The user hits "copy selected" with the second and third rows selected
+    EXPECT_CALL(mockView, getClipboard()).Times(1).WillRepeatedly(Return(clipboard));
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(rowlist));
+    presenter.notify(PasteSelectedFlag);
+
+    //The user hits "save"
+    presenter.notify(SaveFlag);
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 4);
+    //Check the unselected rows were unaffected
+    TS_ASSERT_EQUALS(ws->String(0, RunCol), "12345");
+    TS_ASSERT_EQUALS(ws->String(2, RunCol), "24681");
+    TS_ASSERT_EQUALS(ws->String(3, RunCol), "24682");
+
+    //Check the values were pasted correctly
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "123");
+    TS_ASSERT_EQUALS(ws->String(1, ThetaCol), "0.5");
+    TS_ASSERT_EQUALS(ws->String(1, TransCol), "456");
+    TS_ASSERT_EQUALS(ws->String(1, QMinCol), "1.2");
+    TS_ASSERT_EQUALS(ws->String(1, QMaxCol), "3.4");
+    TS_ASSERT_EQUALS(ws->String(1, DQQCol), "3.14");
+    TS_ASSERT_EQUALS(ws->Double(1, ScaleCol), 5.0);
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 6);
+    TS_ASSERT_EQUALS(ws->String(1, OptionsCol), "abc");
+  }
+
+  void testPasteNewRow()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    const std::string clipboard = "123\t0.5\t456\t1.2\t3.4\t3.14\t5\t6\tabc";
+
+    //The user hits "copy selected" with the second and third rows selected
+    EXPECT_CALL(mockView, getClipboard()).Times(1).WillRepeatedly(Return(clipboard));
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(std::set<int>()));
+    presenter.notify(PasteSelectedFlag);
+
+    //The user hits "save"
+    presenter.notify(SaveFlag);
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 5);
+    //Check the unselected rows were unaffected
+    TS_ASSERT_EQUALS(ws->String(0, RunCol), "12345");
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "12346");
+    TS_ASSERT_EQUALS(ws->String(2, RunCol), "24681");
+    TS_ASSERT_EQUALS(ws->String(3, RunCol), "24682");
+
+    //Check the values were pasted correctly
+    TS_ASSERT_EQUALS(ws->String(4, RunCol), "123");
+    TS_ASSERT_EQUALS(ws->String(4, ThetaCol), "0.5");
+    TS_ASSERT_EQUALS(ws->String(4, TransCol), "456");
+    TS_ASSERT_EQUALS(ws->String(4, QMinCol), "1.2");
+    TS_ASSERT_EQUALS(ws->String(4, QMaxCol), "3.4");
+    TS_ASSERT_EQUALS(ws->String(4, DQQCol), "3.14");
+    TS_ASSERT_EQUALS(ws->Double(4, ScaleCol), 5.0);
+    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 6);
+    TS_ASSERT_EQUALS(ws->String(4, OptionsCol), "abc");
+  }
+
+  void testPasteRows()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    std::set<int> rowlist;
+    rowlist.insert(1);
+    rowlist.insert(2);
+
+    const std::string clipboard = "123\t0.5\t456\t1.2\t3.4\t3.14\t5\t6\tabc\n"
+                                  "345\t2.7\t123\t2.1\t4.3\t2.17\t3\t2\tdef";
+
+    //The user hits "copy selected" with the second and third rows selected
+    EXPECT_CALL(mockView, getClipboard()).Times(1).WillRepeatedly(Return(clipboard));
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(rowlist));
+    presenter.notify(PasteSelectedFlag);
+
+    //The user hits "save"
+    presenter.notify(SaveFlag);
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 4);
+    //Check the unselected rows were unaffected
+    TS_ASSERT_EQUALS(ws->String(0, RunCol), "12345");
+    TS_ASSERT_EQUALS(ws->String(3, RunCol), "24682");
+
+    //Check the values were pasted correctly
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "123");
+    TS_ASSERT_EQUALS(ws->String(1, ThetaCol), "0.5");
+    TS_ASSERT_EQUALS(ws->String(1, TransCol), "456");
+    TS_ASSERT_EQUALS(ws->String(1, QMinCol), "1.2");
+    TS_ASSERT_EQUALS(ws->String(1, QMaxCol), "3.4");
+    TS_ASSERT_EQUALS(ws->String(1, DQQCol), "3.14");
+    TS_ASSERT_EQUALS(ws->Double(1, ScaleCol), 5.0);
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 6);
+    TS_ASSERT_EQUALS(ws->String(1, OptionsCol), "abc");
+
+    TS_ASSERT_EQUALS(ws->String(2, RunCol), "345");
+    TS_ASSERT_EQUALS(ws->String(2, ThetaCol), "2.7");
+    TS_ASSERT_EQUALS(ws->String(2, TransCol), "123");
+    TS_ASSERT_EQUALS(ws->String(2, QMinCol), "2.1");
+    TS_ASSERT_EQUALS(ws->String(2, QMaxCol), "4.3");
+    TS_ASSERT_EQUALS(ws->String(2, DQQCol), "2.17");
+    TS_ASSERT_EQUALS(ws->Double(2, ScaleCol), 3.0);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 2);
+    TS_ASSERT_EQUALS(ws->String(2, OptionsCol), "def");
+  }
+
+  void testPasteNewRows()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(OpenTableFlag);
+
+    const std::string clipboard = "123\t0.5\t456\t1.2\t3.4\t3.14\t5\t6\tabc\n"
+                                  "345\t2.7\t123\t2.1\t4.3\t2.17\t3\t2\tdef";
+
+    //The user hits "copy selected" with the second and third rows selected
+    EXPECT_CALL(mockView, getClipboard()).Times(1).WillRepeatedly(Return(clipboard));
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(std::set<int>()));
+    presenter.notify(PasteSelectedFlag);
+
+    //The user hits "save"
+    presenter.notify(SaveFlag);
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 6);
+    //Check the unselected rows were unaffected
+    TS_ASSERT_EQUALS(ws->String(0, RunCol), "12345");
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "12346");
+    TS_ASSERT_EQUALS(ws->String(2, RunCol), "24681");
+    TS_ASSERT_EQUALS(ws->String(3, RunCol), "24682");
+
+    //Check the values were pasted correctly
+    TS_ASSERT_EQUALS(ws->String(4, RunCol), "123");
+    TS_ASSERT_EQUALS(ws->String(4, ThetaCol), "0.5");
+    TS_ASSERT_EQUALS(ws->String(4, TransCol), "456");
+    TS_ASSERT_EQUALS(ws->String(4, QMinCol), "1.2");
+    TS_ASSERT_EQUALS(ws->String(4, QMaxCol), "3.4");
+    TS_ASSERT_EQUALS(ws->String(4, DQQCol), "3.14");
+    TS_ASSERT_EQUALS(ws->Double(4, ScaleCol), 5.0);
+    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 6);
+    TS_ASSERT_EQUALS(ws->String(4, OptionsCol), "abc");
+
+    TS_ASSERT_EQUALS(ws->String(5, RunCol), "345");
+    TS_ASSERT_EQUALS(ws->String(5, ThetaCol), "2.7");
+    TS_ASSERT_EQUALS(ws->String(5, TransCol), "123");
+    TS_ASSERT_EQUALS(ws->String(5, QMinCol), "2.1");
+    TS_ASSERT_EQUALS(ws->String(5, QMaxCol), "4.3");
+    TS_ASSERT_EQUALS(ws->String(5, DQQCol), "2.17");
+    TS_ASSERT_EQUALS(ws->Double(5, ScaleCol), 3.0);
+    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 2);
+    TS_ASSERT_EQUALS(ws->String(5, OptionsCol), "def");
+  }
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H */
