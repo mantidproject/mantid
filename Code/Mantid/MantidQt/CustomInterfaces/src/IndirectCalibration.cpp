@@ -120,6 +120,9 @@ namespace CustomInterfaces
     m_uiForm.cal_valIntensityScaleMultiplier->setText(" ");
 
     // SIGNAL/SLOT CONNECTIONS
+    // Update instrument information when a new instrument config is selected
+    connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setDefaultInstDetails()));
+
     connect(m_rangeSelectors["ResPeak"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["ResBackground"], SLOT(setRange(double, double)));
 
     // Update property map when a range seclector is moved

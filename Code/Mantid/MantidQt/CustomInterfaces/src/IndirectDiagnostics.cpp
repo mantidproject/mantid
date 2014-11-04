@@ -90,6 +90,9 @@ namespace CustomInterfaces
 
     // SIGNAL/SLOT CONNECTIONS
 
+    // Update instrument information when a new instrument config is selected
+    connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setDefaultInstDetails()));
+
     // Update properties when a range selector is changed
     connect(m_rangeSelectors["SlicePeak"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rangeSelectorDropped(double, double)));
     connect(m_rangeSelectors["SliceBackground"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rangeSelectorDropped(double, double)));
