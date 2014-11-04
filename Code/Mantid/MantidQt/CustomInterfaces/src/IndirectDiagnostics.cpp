@@ -252,7 +252,10 @@ namespace CustomInterfaces
       QFileInfo fi(filename);
       QString wsname = fi.baseName();
 
-      if(!loadFile(filename, wsname, m_uiForm.leSpectraMin->text().toInt(), m_uiForm.leSpectraMax->text().toInt()))
+      int specMin = static_cast<int>(m_dblManager->value(m_properties["SpecMin"]));
+      int specMax = static_cast<int>(m_dblManager->value(m_properties["SpecMax"]));
+
+      if(!loadFile(filename, wsname, specMin, specMax))
       {
         emit showMessageBox("Unable to load file.\nCheck whether your file exists and matches the selected instrument in the EnergyTransfer tab.");
         return;

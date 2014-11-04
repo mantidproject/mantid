@@ -139,7 +139,7 @@ namespace CustomInterfaces
     std::string idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
 
     // If the workspace does not exist in ADS then load an ampty instrument
-    if(AnalysisDataService::Instance().doesExist(instWorkspaceName))
+    if(!AnalysisDataService::Instance().doesExist(instWorkspaceName))
     {
       std::string parameterFilename = idfDirectory + instrumentName + "_Definition.xml";
       IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
