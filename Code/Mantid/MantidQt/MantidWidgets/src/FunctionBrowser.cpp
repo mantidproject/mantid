@@ -406,6 +406,7 @@ FunctionBrowser::AProperty FunctionBrowser::addParameterProperty(QtProperty* par
     throw std::runtime_error("Unexpected error in FunctionBrowser [3]");
   }
   QtProperty* prop = m_parameterManager->addProperty(paramName);
+  m_parameterManager->setDecimals(prop,6);
   m_parameterManager->setValue(prop,paramValue);
   if ( m_multiDataset )
   {
