@@ -273,10 +273,6 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
 
 SVConnections::~SVConnections()
 {
-  delete m_imagePicker;
-  delete m_hGraphPicker;
-  delete m_vGraphPicker;
-  delete m_colorGroup;
 }
 
 
@@ -337,7 +333,7 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
       return false;
     }
 
-    // Convert Y position back to pixel position
+    // Convert Y position back to unsigned pixel position
     QPoint newPoint = m_spectrumDisplay->getPlotTransform(qMakePair(0.0, lastY));
     int newY = newPoint.y();
 
@@ -692,42 +688,39 @@ void SVConnections::loadColorMap()
  *  Set the pix map that shows the color scale from the specified positive
  *  and negative color tables.
  *
- *  @param positive_color_table  The new color table used to map positive data
- *                               values to an RGB color.
- *  @param negative_color_table  The new color table used to map negative data
- *                               values to an RGB color.  This must have the
- *                               same number of entries as the positive
- *                               color table.
+ *  @param positiveColorTable  The new color table used to map positive data
+ *                             values to an RGB color.
+ *  @param negativeColorTable  The new color table used to map negative data
+ *                             values to an RGB color.  This must have the
+ *                             same number of entries as the positive
+ *                             color table.
  */
-void SVConnections::showColorScale( std::vector<QRgb> & positive_color_table,
-                                    std::vector<QRgb> & negative_color_table )
+void SVConnections::showColorScale( std::vector<QRgb> & positiveColorTable,
+                                    std::vector<QRgb> & negativeColorTable )
 {
-  size_t total_colors = positive_color_table.size() +
-                        negative_color_table.size();
+  size_t totalColors = positiveColorTable.size() + negativeColorTable.size();
 
-  unsigned int *rgb_data = new unsigned int[ total_colors ];
+  QImage image((int)totalColors, 1, QImage::Format_RGB32);
+  int index = 0;
 
-  size_t index = 0;
-  size_t n_colors = negative_color_table.size();
-  for ( size_t i = 0; i < n_colors; i++ )
+  size_t numColors = negativeColorTable.size();
+  for(size_t i = 0; i < numColors; i++)
   {
-    rgb_data[index] = negative_color_table[ n_colors - 1 - i ];
+    unsigned int pixel = static_cast<unsigned int>(negativeColorTable[numColors - 1 - i]);
+    image.setPixel(index, 0, pixel);
     index++;
   }
 
-  n_colors = positive_color_table.size();
-  for ( size_t i = 0; i < n_colors; i++ )
+  numColors = positiveColorTable.size();
+  for(size_t i = 0; i < numColors; i++)
   {
-    rgb_data[index] = positive_color_table[i];
+    unsigned int pixel = static_cast<unsigned int>(positiveColorTable[i]);
+    image.setPixel(index, 0, pixel);
     index++;
   }
 
-  uchar *buffer = (uchar*)rgb_data;
-  QImage image( buffer, (int)total_colors, 1, QImage::Format_RGB32 );
   QPixmap pixmap = QPixmap::fromImage(image);
   m_svUI->color_scale->setPixmap( pixmap );
-
-  delete[] rgb_data;
 }
 
 

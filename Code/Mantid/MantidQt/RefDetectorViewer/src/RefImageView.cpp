@@ -61,17 +61,15 @@ RefImageView::RefImageView( SpectrumView::SpectrumDataSource* dataSource,
   m_hGraph = new SpectrumView::GraphDisplay( m_ui->h_graphPlot, NULL, false );
   m_vGraph = new SpectrumView::GraphDisplay( m_ui->v_graphPlot, NULL, true );
 
-
-  RefImageDisplay* image_display = new RefImageDisplay( m_ui->imagePlot,
-                                                        slider_handler,
-                                                        range_handler,
-                                                        limits_handler,
-                                                        m_hGraph, m_vGraph,
-                                                        m_ui->image_table);
-  m_imageDisplay = image_display;
+  m_imageDisplay = new RefImageDisplay( m_ui->imagePlot,
+                                        slider_handler,
+                                        range_handler,
+                                        limits_handler,
+                                        m_hGraph, m_vGraph,
+                                        m_ui->image_table);
 
   RefIVConnections * iv_connections = new RefIVConnections( m_ui, this,
-                                                            image_display,
+                                                            m_imageDisplay,
                                                             m_hGraph, m_vGraph );
 
   // Set validators on the QLineEdits to restrict them to integers
@@ -92,10 +90,10 @@ RefImageView::RefImageView( SpectrumView::SpectrumDataSource* dataSource,
 
   m_ivConnections = iv_connections;
 
-  image_display->updateImage();
+  m_imageDisplay->updateImage();
   iv_connections->peakBackTofRangeUpdate();
 
-  image_display->setDataSource( dataSource );
+  m_imageDisplay->setDataSource( dataSource );
 }
 
 

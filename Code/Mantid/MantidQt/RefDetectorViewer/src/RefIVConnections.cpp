@@ -280,11 +280,6 @@ RefIVConnections::RefIVConnections( Ui_RefImageViewer*  ui,
 
 RefIVConnections::~RefIVConnections()
 {
-  delete m_imagePicker;
-  delete m_imagePicker2;
-  delete m_hGraphPicker;
-  delete m_vGraphPicker;
-  delete m_colorGroup;
 }
 
 
@@ -569,30 +564,29 @@ void RefIVConnections::spectrumColorScale()
 void RefIVConnections::showColorScale( std::vector<QRgb> & positiveColorTable,
                                        std::vector<QRgb> & negativeColorTable )
 {
-  size_t total_colors = positiveColorTable.size() + negativeColorTable.size();
-  unsigned int *rgb_data = new unsigned int[ total_colors ];
+  size_t totalColors = positiveColorTable.size() + negativeColorTable.size();
 
-  size_t index = 0;
+  QImage image((int)totalColors, 1, QImage::Format_RGB32);
+  int index = 0;
+
   size_t numColors = negativeColorTable.size();
-  for ( size_t i = 0; i < numColors; i++ )
+  for(size_t i = 0; i < numColors; i++)
   {
-    rgb_data[index] = negativeColorTable[ numColors - 1 - i ];
+    unsigned int pixel = static_cast<unsigned int>(negativeColorTable[numColors - 1 - i]);
+    image.setPixel(index, 0, pixel);
     index++;
   }
 
   numColors = positiveColorTable.size();
-  for ( size_t i = 0; i < numColors; i++ )
+  for(size_t i = 0; i < numColors; i++)
   {
-    rgb_data[index] = positiveColorTable[i];
+    unsigned int pixel = static_cast<unsigned int>(positiveColorTable[i]);
+    image.setPixel(index, 0, pixel);
     index++;
   }
 
-  uchar *buffer = (uchar*)rgb_data;
-  QImage image( buffer, (int)total_colors, 1, QImage::Format_RGB32 );
   QPixmap pixmap = QPixmap::fromImage(image);
-  m_ivUI->color_scale->setPixmap( pixmap );
-
-  delete[] rgb_data;
+  m_ivUI->color_scale->setPixmap(pixmap);
 }
 
 } // namespace RefDetectorViewer
