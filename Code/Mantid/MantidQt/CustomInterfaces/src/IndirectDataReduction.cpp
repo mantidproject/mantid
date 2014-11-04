@@ -89,6 +89,8 @@ void IndirectDataReduction::helpClicked()
     url += "Calibration";
   else if ( tabName == "Diagnostics" )
     url += "Diagnostics";
+  else if (tabName == "Symmetrise")
+    url += "Symmetrise";
   else if ( tabName == "S(Q, w)" )
     url += "SofQW";
   else if (tabName == "Transmission")
@@ -125,7 +127,7 @@ void IndirectDataReduction::initLayout()
     instrumentSelected(m_uiForm.cbInst->currentText());
 
   // Create the tabs
-  /* m_tabs["Energy Transfer"] = new IndirectConvertToEnergy(m_uiForm, this); */
+  m_tabs["Energy Transfer"] = new IndirectConvertToEnergy(m_uiForm, this);
   m_tabs["Calibration"] = new IndirectCalibration(m_uiForm, this);
   m_tabs["Diagnostics"] = new IndirectDiagnostics(m_uiForm, this);
   m_tabs["Transmission"] = new IndirectTransmission(m_uiForm, this);
@@ -156,7 +158,7 @@ void IndirectDataReduction::initLayout()
     connect(it->second, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
     connect(it->second, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
     connect(it->second, SIGNAL(updateRunButton(bool, QString, QString)), this, SLOT(updateRunButton(bool, QString, QString)));
-    connect(this, SIGNAL(newInstrumentConfiguration(QString, QString, QString)), it->second, SIGNAL(newInstrumentConfiguration(QString, QString, QString))),
+    connect(this, SIGNAL(newInstrumentConfiguration()), it->second, SIGNAL(newInstrumentConfiguration())),
     it->second->setupTab();
   }
 }
@@ -188,7 +190,7 @@ void IndirectDataReduction::instrumentSetupChanged()
   if(instrumentName != "" && analyser != "" && reflection != "")
   {
     loadInstrumentIfNotExist(instrumentName.toStdString(), analyser.toStdString(), reflection.toStdString());
-    emit newInstrumentConfiguration(instrumentName, analyser, reflection);
+    emit newInstrumentConfiguration();
   }
 }
 

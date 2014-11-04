@@ -75,7 +75,7 @@ namespace MantidQt
 
     signals:
       /// Emitted when the instrument setup is changed
-      void newInstrumentConfiguration(QString instrumentName, QString analyser, QString reflection);
+      void newInstrumentConfiguration();
 
     private slots:
       /// Opens the help page for the current tab

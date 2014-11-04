@@ -168,7 +168,7 @@ namespace CustomInterfaces
     /// Update the Run button on the IDR main window
     void updateRunButton(bool enabled = true, QString message = "Run", QString tooltip = "");
     /// Emitted when the instrument setup is changed
-    void newInstrumentConfiguration(QString instrumentName, QString analyser, QString reflection);
+    void newInstrumentConfiguration();
 
   private:
     /// Overidden by child class.
