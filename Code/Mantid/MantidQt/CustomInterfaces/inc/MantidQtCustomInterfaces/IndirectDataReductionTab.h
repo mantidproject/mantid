@@ -176,6 +176,8 @@ namespace CustomInterfaces
     /// Overidden by child class.
     virtual bool validate() = 0;
 
+    QString getInstrumentParameterFrom(Mantid::Geometry::IComponent_const_sptr comp, std::string param);
+
   private slots:
     void tabExecutionComplete(bool error);
 

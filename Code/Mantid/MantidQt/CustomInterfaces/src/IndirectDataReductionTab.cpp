@@ -181,9 +181,12 @@ namespace CustomInterfaces
       analyser = "mica";
 
     // Get the instrument
-    auto instrument = instWorkspace->getInstrument()->getComponentByName(analyser);
+    auto instrument = instWorkspace->getInstrument();
     if(instrument == NULL)
       return instDetails;
+
+    // Get the analyser component
+    auto component = instrument->getComponentByName(analyser);
 
     // For each parameter we want to get
     for(auto it = ipfElements.begin(); it != ipfElements.end(); ++it)
@@ -191,16 +194,11 @@ namespace CustomInterfaces
       try
       {
         std::string key = *it;
-        QString value;
 
-        // Determint it's type and call the corresponding get function
-        std::string paramType = instrument->getParameterType(key);
+        QString value = getInstrumentParameterFrom(instrument, key);
 
-        if(paramType == "string")
-          value = QString::fromStdString(instrument->getStringParameter(key)[0]);
-
-        if(paramType == "double")
-          value = QString::number(instrument->getNumberParameter(key)[0]);
+        if(value.isEmpty() && component != NULL)
+          QString value = getInstrumentParameterFrom(component, key);
 
         instDetails[QString::fromStdString(key)] = value;
       }
@@ -213,6 +211,25 @@ namespace CustomInterfaces
     }
 
     return instDetails;
+  }
+
+  QString IndirectDataReductionTab::getInstrumentParameterFrom(Mantid::Geometry::IComponent_const_sptr comp, std::string param)
+  {
+    QString value;
+
+    if(!comp->hasParameter(param))
+      return "";
+
+    // Determine it's type and call the corresponding get function
+    std::string paramType = comp->getParameterType(param);
+
+    if(paramType == "string")
+      value = QString::fromStdString(comp->getStringParameter(param)[0]);
+
+    if(paramType == "double")
+      value = QString::number(comp->getNumberParameter(param)[0]);
+
+    return value;
   }
 
   /**
