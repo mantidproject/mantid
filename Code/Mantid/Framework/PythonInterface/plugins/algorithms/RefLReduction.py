@@ -90,7 +90,6 @@ class RefLReduction(PythonAlgorithm):
             if _mt.find('_reflectivity') != -1:
                 DeleteWorkspace(_mt)
 
-
         # retrieve settings from GUI
         print '-> Retrieving settings from GUI'
 
@@ -131,7 +130,7 @@ class RefLReduction(PythonAlgorithm):
             TOFrange = [0, 200000]
         # TOF binning parameters
         binTOFrange = [0, 200000]
-        binTOFsteps = 50
+        binTOFsteps = 40
 
         # geometry correction
         geometryCorrectionFlag = self.getProperty("GeometryCorrectionFlag").value
@@ -143,10 +142,6 @@ class RefLReduction(PythonAlgorithm):
 
         # angle offset
         angleOffsetDeg = self.getProperty("AngleOffset").value
-
-        #dimension of the detector (256 by 304 pixels)
-        maxX = 304
-        maxY = 256
 
         h = 6.626e-34  #m^2 kg s^-1
         m = 1.675e-27     #kg
@@ -165,11 +160,23 @@ class RefLReduction(PythonAlgorithm):
         # load data
         ws_event_data = wks_utility.loadNeXus(dataRunNumbers, 'data')
 
+        is_nexus_detector_rotated_flag = wks_utility.isNexusTakeAfterRefDate(ws_event_data.getRun().getProperty('run_start').value)
+        print '-> is NeXus taken with new detector geometry: ' + str(is_nexus_detector_rotated_flag)
+
+        #dimension of the detector (256 by 304 pixels)
+        if is_nexus_detector_rotated_flag:
+            maxX = 256
+            maxY = 304
+        else:
+            maxX = 304
+            maxY = 256
+
         ## retrieve general informations
         # calculate the central pixel (using weighted average)
         print '-> retrieving general informations'
         data_central_pixel = wks_utility.getCentralPixel(ws_event_data,
-                                                         dataPeakRange)
+                                                         dataPeakRange,
+                                                         is_nexus_detector_rotated_flag)
         # get the distance moderator-detector and sample-detector
         [dMD, dSD] = wks_utility.getDistances(ws_event_data)
         # get theta
@@ -201,7 +208,8 @@ class RefLReduction(PythonAlgorithm):
         # integrate over low resolution range
         [data_tof_axis, data_y_axis, data_y_error_axis] = wks_utility.integrateOverLowResRange(ws_histo_data,
                                                             dataLowResRange,
-                                                            'data')
+                                                            'data',
+                                                            is_nexus_detector_rotated_flag)
 
 #        #DEBUG ONLY
 #        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/data_file_after_low_resolution_integration.txt',
@@ -256,7 +264,8 @@ class RefLReduction(PythonAlgorithm):
         # integrate over low resolution range
         [norm_tof_axis, norm_y_axis, norm_y_error_axis] = wks_utility.integrateOverLowResRange(ws_histo_norm,
                                                             normLowResRange,
-                                                            'normalization')
+                                                            'normalization',
+                                                            is_nexus_detector_rotated_flag)
 
         # substract background
         [norm_y_axis, norm_y_error_axis] = wks_utility.substractBackground(norm_tof_axis[0:-1],
@@ -321,7 +330,6 @@ class RefLReduction(PythonAlgorithm):
                                                                                      y_axis,
                                                                                      y_error_axis,
                                                                                      peak_range = dataPeakRange,
-                                                                                     central_pixel = data_central_pixel,
                                                                                      source_to_detector_distance = dMD,
                                                                                      sample_to_detector_distance = dSD,
                                                                                      theta = theta,

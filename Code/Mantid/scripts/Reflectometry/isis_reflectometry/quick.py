@@ -58,7 +58,7 @@ class NullCorrectionStrategy(CorrectionStrategy):
         return _out
 
 
-def quick(run, theta=0, pointdet=True,roi=[0,0], db=[0,0], trans='', polcorr=False, usemon=-1,outputType='pd',
+def quick(run, theta=None, pointdet=True,roi=[0,0], db=[0,0], trans='', polcorr=False, usemon=-1,outputType='pd',
           debug=False, stitch_start_overlap=10, stitch_end_overlap=12, stitch_params=[1.5, 0.02, 17],
           detector_component_name='point-detector', sample_component_name='some-surface-holder',
           correct_positions=True, tof_prefix="_"):
@@ -101,7 +101,7 @@ def quick(run, theta=0, pointdet=True,roi=[0,0], db=[0,0], trans='', polcorr=Fal
 
 
 def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_min, background_max, int_min, int_max,
-                   point_detector_start=0, point_detector_stop=0, multi_detector_start=0, theta=0,
+                   point_detector_start=0, point_detector_stop=0, multi_detector_start=0, theta=None,
                    pointdet=True,roi=[0,0], db=[0,0], trans='', debug=False, correction_strategy=NullCorrectionStrategy(),
                    stitch_start_overlap=None, stitch_end_overlap=None, stitch_params=None,
                    polcorr=False, crho=None, calpha=None, cAp=None, cPp=None, detector_component_name='point-detector',
@@ -181,10 +181,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
 
         # Convert to I vs Q
         # check if detector in direct beam
-        if (theta == 0 or theta == ''):
-            if (theta == ''):
-                theta = 0
-            print "given theta = ",theta
+        if (theta == None or theta == 0 or theta == ''):
             inst = groupGet('IvsLam','inst')
             detLocation=inst.getComponentByName(detector_component_name).getPos()
             sampleLocation=inst.getComponentByName(sample_component_name).getPos()

@@ -15,13 +15,14 @@ set ( SRC_FILES
 	src/ConvertToDiffractionMDWorkspace.cpp
 	src/ConvertToDiffractionMDWorkspace2.cpp
 	src/ConvertToMD.cpp
-	src/ConvertToMDParent.cpp    
 	src/ConvertToMDMinMaxGlobal.cpp
-	src/ConvertToMDMinMaxLocal.cpp    
+	src/ConvertToMDMinMaxLocal.cpp
+	src/ConvertToMDParent.cpp
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
+	src/EvaluateMDFunction.cpp
 	src/ExponentialMD.cpp
 	src/FakeMDEventData.cpp
 	src/FindPeaksMD.cpp
@@ -32,11 +33,11 @@ set ( SRC_FILES
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
 	src/LessThanMD.cpp
+	src/LoadILLAscii.cpp
+	src/LoadILLAsciiHelper.cpp
 	src/LoadMD.cpp
 	src/LoadSQW.cpp
 	src/LogarithmMD.cpp
-	src/LoadILLAscii.cpp
-	src/LoadILLAsciiHelper.cpp
 	src/MaskMD.cpp
 	src/MergeMD.cpp
 	src/MergeMDFiles.cpp
@@ -53,15 +54,16 @@ set ( SRC_FILES
 	src/Quantification/ForegroundModelFactory.cpp
 	src/Quantification/MDResolutionConvolution.cpp
 	src/Quantification/MDResolutionConvolutionFactory.cpp
+	src/Quantification/Models/MullerAnsatz.cpp
 	src/Quantification/Models/QCoordinate.cpp
 	src/Quantification/Models/Strontium122.cpp
-    src/Quantification/Models/MullerAnsatz.cpp 
 	src/Quantification/Resolution/ModeratorChopperResolution.cpp
 	src/Quantification/Resolution/TobyFitBMatrix.cpp
 	src/Quantification/Resolution/TobyFitResolutionModel.cpp
 	src/Quantification/Resolution/TobyFitYVector.cpp
 	src/Quantification/ResolutionConvolvedCrossSection.cpp
 	src/Quantification/SimulateResolutionConvolvedModel.cpp
+	src/SXDMDNorm.cpp
 	src/SaveMD.cpp
 	src/SaveZODS.cpp
 	src/SetMDUsingMask.cpp
@@ -93,30 +95,31 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h
 	inc/MantidMDAlgorithms/ConvertToMD.h
-	inc/MantidMDAlgorithms/ConvertToMDParent.h    
 	inc/MantidMDAlgorithms/ConvertToMDMinMaxGlobal.h
-	inc/MantidMDAlgorithms/ConvertToMDMinMaxLocal.h    
+	inc/MantidMDAlgorithms/ConvertToMDMinMaxLocal.h
+	inc/MantidMDAlgorithms/ConvertToMDParent.h
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/CreateMDWorkspace.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/DllConfig.h
 	inc/MantidMDAlgorithms/EqualToMD.h
 	inc/MantidMDAlgorithms/ExponentialMD.h
+	inc/MantidMDAlgorithms/EvaluateMDFunction.h
 	inc/MantidMDAlgorithms/FakeMDEventData.h
 	inc/MantidMDAlgorithms/FindPeaksMD.h
+	inc/MantidMDAlgorithms/GSLFunctions.h
 	inc/MantidMDAlgorithms/GreaterThanMD.h
-    inc/MantidMDAlgorithms/GSLFunctions.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD2.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/LessThanMD.h
+	inc/MantidMDAlgorithms/LoadILLAscii.h
+	inc/MantidMDAlgorithms/LoadILLAsciiHelper.h
 	inc/MantidMDAlgorithms/LoadMD.h
 	inc/MantidMDAlgorithms/LoadSQW.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
-	inc/MantidMDAlgorithms/LoadILLAscii.h
-    inc/MantidMDAlgorithms/LoadILLAsciiHelper.h
 	inc/MantidMDAlgorithms/MaskMD.h
 	inc/MantidMDAlgorithms/MergeMD.h
 	inc/MantidMDAlgorithms/MergeMDFiles.h
@@ -133,15 +136,16 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Quantification/ForegroundModelFactory.h
 	inc/MantidMDAlgorithms/Quantification/MDResolutionConvolution.h
 	inc/MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h
+	inc/MantidMDAlgorithms/Quantification/Models/MullerAnsatz.h
 	inc/MantidMDAlgorithms/Quantification/Models/QCoordinate.h
 	inc/MantidMDAlgorithms/Quantification/Models/Strontium122.h
-    inc/MantidMDAlgorithms/Quantification/Models/MullerAnsatz.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h
 	inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
 	inc/MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h
+	inc/MantidMDAlgorithms/SXDMDNorm.h
 	inc/MantidMDAlgorithms/SaveMD.h
 	inc/MantidMDAlgorithms/SaveZODS.h
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
@@ -165,8 +169,8 @@ set ( TEST_FILES
 	AndMDTest.h
 	BooleanBinaryOperationMDTest.h
 	CachedExperimentInfoTest.h
-	CentroidPeaksMDTest.h
 	CentroidPeaksMD2Test.h
+	CentroidPeaksMDTest.h
 	CloneMDWorkspaceTest.h
 	CompareMDWorkspacesTest.h
 	ConvertEventsToMDTest.h
@@ -175,7 +179,7 @@ set ( TEST_FILES
 	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToMDComponentsTest.h
 	ConvertToMDMinMaxGlobalTest.h
-	ConvertToMDMinMaxLocalTest.h    
+	ConvertToMDMinMaxLocalTest.h
 	ConvertToMDTest.h
 	ConvertToQ3DdETest.h
 	CreateMDHistoWorkspaceTest.h
@@ -183,13 +187,14 @@ set ( TEST_FILES
 	DivideMDTest.h
 	EqualToMDTest.h
 	ExponentialMDTest.h
+	EvaluateMDFunctionTest.h
 	FakeMDEventDataTest.h
 	FindPeaksMDTest.h
 	FitResolutionConvolvedModelTest.h
 	ForegroundModelTest.h
 	GreaterThanMDTest.h
-	IntegratePeaksMDTest.h
 	IntegratePeaksMD2Test.h
+	IntegratePeaksMDTest.h
 	InvalidParameterParserTest.h
 	InvalidParameterTest.h
 	LessThanMDTest.h
@@ -202,14 +207,15 @@ set ( TEST_FILES
 	MergeMDTest.h
 	MinusMDTest.h
 	ModeratorChopperResolutionTest.h
+	MullerAnsatzTest.h
 	MultiplyMDTest.h
-	MullerAnsatzTest.h 
 	NotMDTest.h
 	OrMDTest.h
 	PlusMDTest.h
 	PowerMDTest.h
 	PreprocessDetectorsToMDTest.h
 	ResolutionConvolvedCrossSectionTest.h
+	SXDMDNormTest.h
 	SaveMDTest.h
 	SaveZODSTest.h
 	SetMDUsingMaskTest.h

@@ -15,6 +15,7 @@
 #include <sstream>
 #include <fstream>
 
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
 
 
@@ -40,7 +41,7 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  LoadVulcanCalFile::LoadVulcanCalFile()
+  LoadVulcanCalFile::LoadVulcanCalFile() : m_doAlignEventWS(false)
   {
   }
     
@@ -279,6 +280,7 @@ namespace DataHandling
     */
   void LoadVulcanCalFile::setupMaskWorkspace()
   {
+
     // Skip if bad pixel file is not given
     if (m_badPixFilename.size() == 0) return;
 
@@ -293,21 +295,24 @@ namespace DataHandling
     string line;
     while (std::getline(maskss, line))
     {
-      // Get the bad pixel's detector ID.  One per line
-      stringstream liness(line);
-
-      try
+      boost::algorithm::trim(line);
+      if (!line.empty())
       {
-        int pixelid;
-        liness >> pixelid;
+        // Get the bad pixel's detector ID.  One per line
+        stringstream liness(line);
+        try
+        {
+          int pixelid;
+          liness >> pixelid;
 
-        // Set mask
-        m_maskWS->setValue(pixelid, 1.0);
-      }
-      catch (const std::invalid_argument& e)
-      {
-        g_log.debug() << "Unable to parse line " << line << ".  Error message: " << e.what() << "\n";
-        continue;
+          // Set mask
+          m_maskWS->setValue(pixelid, 1.0);
+        }
+        catch (const std::invalid_argument& e)
+        {
+          g_log.debug() << "Unable to parse line " << line << ".  Error message: " << e.what() << "\n";
+          continue;
+        }
       }
     }
     maskss.close();
@@ -322,6 +327,7 @@ namespace DataHandling
         m_maskWS->dataY(i)[0] = 1.0;
         msg << "Spectrum " << i << " is masked. DataY = " << m_maskWS->readY(i)[0] << "\n";
       }
+
     }
     g_log.information(msg.str());
 
@@ -572,6 +578,7 @@ namespace DataHandling
     // FIXME - The simple version of the algorithm to calculate 2theta is used here.
     //         A check will be made to raise exception if the condition is not met to use the simple version.
     double s_r, s_2theta, s_phi;
+    s_r = s_2theta = s_phi = 0.;
     samplePos.spherical(s_r, s_2theta, s_phi);
     if (fabs(beamline.X()) > 1.0E-20 || fabs(beamline.Y()) > 1.0E-20 || s_r > 1.0E-20)
       throw runtime_error("Source is not at (0, 0, Z) or sample is not at (0, 0, 0).  "

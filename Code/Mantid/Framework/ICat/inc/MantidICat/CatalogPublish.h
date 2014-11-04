@@ -1,5 +1,5 @@
 #ifndef MANTID_ICAT_CATALOGPUBLISH_H
-#define MATIND_ICAT_CATALOGPUBLISH_H
+#define MANTID_ICAT_CATALOGPUBLISH_H
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ICatalogInfoService.h"

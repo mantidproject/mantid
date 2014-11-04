@@ -130,7 +130,7 @@ public:
 
     TS_ASSERT_EQUALS( props[0]->name(), "Workspace" );
     TS_ASSERT( props[0]->isDefault() );
-    TS_ASSERT( dynamic_cast<WorkspaceProperty<>* >(props[0]) );
+    TS_ASSERT( dynamic_cast<WorkspaceProperty<Workspace>* >(props[0]) );
 
     TS_ASSERT_EQUALS( props[1]->name(), "SpectraList" );
     TS_ASSERT( props[1]->isDefault() );
