@@ -88,8 +88,6 @@ namespace CustomInterfaces
     bool loadFile(const QString& filename, const QString& outputName, const int specMin = -1, const int specMax = -1);
 
     Mantid::API::MatrixWorkspace_sptr loadInstrumentIfNotExist(std::string instrumentName, std::string analyser="", std::string reflection="");
-    /// Get information about the operation modes of an indirect instrument
-    std::vector<std::pair<std::string, std::vector<std::string> > > getInstrumentModes(std::string instrumentName);
     /// Function to get details about the instrument configuration defined on C2E tab
     std::map<QString, QString> getInstrumentDetails();
 

@@ -334,8 +334,9 @@ namespace CustomInterfaces
     QFileInfo fi(filename);
     QString wsname = fi.baseName();
 
-    int specMin = getInstrumentDetails()["spectra-min"].toInt();
-    int specMax = getInstrumentDetails()["spectra-max"].toInt();
+    auto instDetails = getInstrumentDetails();
+    int specMin = instDetails["spectra-min"].toInt();
+    int specMax = instDetails["spectra-max"].toInt();
 
     if(!loadFile(filename, wsname, specMin, specMax))
     {

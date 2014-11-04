@@ -135,65 +135,12 @@ namespace CustomInterfaces
   Mantid::API::MatrixWorkspace_sptr IndirectDataReductionTab::loadInstrumentIfNotExist(std::string instrumentName,
       std::string analyser, std::string reflection)
   {
-    std::string instWorkspaceName = "__empty_" + instrumentName;
-    std::string idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
+    IndirectDataReduction* parentIDR = dynamic_cast<IndirectDataReduction*>(m_parentWidget);
 
-    // If the workspace does not exist in ADS then load an ampty instrument
-    if(!AnalysisDataService::Instance().doesExist(instWorkspaceName))
-    {
-      std::string parameterFilename = idfDirectory + instrumentName + "_Definition.xml";
-      IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
-      loadAlg->initialize();
-      loadAlg->setProperty("Filename", parameterFilename);
-      loadAlg->setProperty("OutputWorkspace", instWorkspaceName);
-      loadAlg->execute();
-    }
+    if(parentIDR == NULL)
+      throw std::runtime_error("IndirectDataReductionTab must be a child of IndirectDataReduction");
 
-    // Load the IPF if given an analyser and reflection
-    if(!analyser.empty() && !reflection.empty())
-    {
-      std::string ipfFilename = idfDirectory + instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
-      IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
-      loadParamAlg->initialize();
-      loadParamAlg->setProperty("Filename", ipfFilename);
-      loadParamAlg->setProperty("Workspace", instWorkspaceName);
-      loadParamAlg->execute();
-    }
-
-    // Get the workspace, which should exist now
-    MatrixWorkspace_sptr instWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instWorkspaceName);
-
-    return instWorkspace;
-  }
-
-  /**
-   * Gets the operation modes for a given instrument as defined in it's parameter file.
-   *
-   * @param instrumentName The name of an indirect instrument (IRIS, OSIRIS, TOSCA, VESUVIO)
-   * @returns A list of analysers and a vector of reflections that can be used with each
-   */
-  std::vector<std::pair<std::string, std::vector<std::string> > > IndirectDataReductionTab::getInstrumentModes(std::string instrumentName)
-  {
-    std::vector<std::pair<std::string, std::vector<std::string> > > modes;
-    MatrixWorkspace_sptr instWorkspace = loadInstrumentIfNotExist(instrumentName);
-    Instrument_const_sptr instrument = instWorkspace->getInstrument();
-
-    std::vector<std::string> analysers;
-    boost::split(analysers, instrument->getStringParameter("analysers")[0], boost::is_any_of(","));
-
-    for(auto it = analysers.begin(); it != analysers.end(); ++it)
-    {
-      std::string analyser = *it;
-      std::string ipfReflections = instrument->getStringParameter("refl-" + analyser)[0];
-
-      std::vector<std::string> reflections;
-      boost::split(reflections, ipfReflections, boost::is_any_of(","), boost::token_compress_on);
-
-      std::pair<std::string, std::vector<std::string> > data(analyser, reflections);
-      modes.push_back(data);
-    }
-
-    return modes;
+    return parentIDR->loadInstrumentIfNotExist(instrumentName, analyser, reflection);
   }
 
   /**
@@ -209,6 +156,10 @@ namespace CustomInterfaces
     std::string instrumentName = m_uiForm.cbInst->currentText().toStdString();
     std::string analyser = m_uiForm.cbAnalyser->currentText().toStdString();
     std::string reflection = m_uiForm.cbReflection->currentText().toStdString();
+
+    instDetails["instrument"] = QString::fromStdString(instrumentName);
+    instDetails["analyser"] = QString::fromStdString(analyser);
+    instDetails["reflection"] = QString::fromStdString(reflection);
 
     // List of values to get from IPF
     std::vector<std::string> ipfElements;
@@ -279,6 +230,7 @@ namespace CustomInterfaces
 
     return std::make_pair(m_curves[curveID]->data().x(0), m_curves[curveID]->data().x(npts-1));
   }
+
 
   /**
    * Set the range of an axis on a miniplot

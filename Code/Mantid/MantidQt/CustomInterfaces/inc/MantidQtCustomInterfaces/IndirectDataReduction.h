@@ -73,6 +73,11 @@ namespace MantidQt
       /// Handled configuration changes
       void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
+      Mantid::API::MatrixWorkspace_sptr loadInstrumentIfNotExist(std::string instrumentName,
+          std::string analyser = "", std::string reflection = "");
+
+      std::vector<std::pair<std::string, std::vector<std::string> > > getInstrumentModes();
+
     signals:
       /// Emitted when the instrument setup is changed
       void newInstrumentConfiguration();
@@ -101,11 +106,6 @@ namespace MantidQt
       void instrumentSetupChanged();
 
     private:
-      Mantid::API::MatrixWorkspace_sptr loadInstrumentIfNotExist(std::string instrumentName,
-          std::string analyser = "", std::string reflection = "");
-
-      std::vector<std::pair<std::string, std::vector<std::string> > > getInstrumentModes();
-
       void updateAnalyserList();
 
       void readSettings();
