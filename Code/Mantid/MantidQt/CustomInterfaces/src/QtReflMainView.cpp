@@ -59,7 +59,7 @@ namespace MantidQt
     void QtReflMainView::setModel(QString name)
     {
       m_toOpen = name.toStdString();
-      m_presenter->notify(OpenTableFlag);
+      m_presenter->notify(IReflPresenter::OpenTableFlag);
     }
 
     /**
@@ -101,7 +101,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionSaveTable_triggered()
     {
-      m_presenter->notify(SaveFlag);
+      m_presenter->notify(IReflPresenter::SaveFlag);
     }
 
     /**
@@ -109,7 +109,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionSaveTableAs_triggered()
     {
-      m_presenter->notify(SaveAsFlag);
+      m_presenter->notify(IReflPresenter::SaveAsFlag);
     }
 
     /**
@@ -117,7 +117,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionAppendRow_triggered()
     {
-      m_presenter->notify(AppendRowFlag);
+      m_presenter->notify(IReflPresenter::AppendRowFlag);
     }
 
     /**
@@ -125,7 +125,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionPrependRow_triggered()
     {
-      m_presenter->notify(PrependRowFlag);
+      m_presenter->notify(IReflPresenter::PrependRowFlag);
     }
 
     /**
@@ -133,7 +133,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionDeleteRow_triggered()
     {
-      m_presenter->notify(DeleteRowFlag);
+      m_presenter->notify(IReflPresenter::DeleteRowFlag);
     }
 
     /**
@@ -141,7 +141,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionProcess_triggered()
     {
-      m_presenter->notify(ProcessFlag);
+      m_presenter->notify(IReflPresenter::ProcessFlag);
     }
 
     /**
@@ -149,7 +149,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionGroupRows_triggered()
     {
-      m_presenter->notify(GroupRowsFlag);
+      m_presenter->notify(IReflPresenter::GroupRowsFlag);
     }
 
     /**
@@ -157,7 +157,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionClearSelected_triggered()
     {
-      m_presenter->notify(ClearSelectedFlag);
+      m_presenter->notify(IReflPresenter::ClearSelectedFlag);
     }
 
     /**
@@ -165,7 +165,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionCopySelected_triggered()
     {
-      m_presenter->notify(CopySelectedFlag);
+      m_presenter->notify(IReflPresenter::CopySelectedFlag);
     }
 
     /**
@@ -173,7 +173,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionCutSelected_triggered()
     {
-      m_presenter->notify(CutSelectedFlag);
+      m_presenter->notify(IReflPresenter::CutSelectedFlag);
     }
 
     /**
@@ -181,7 +181,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionPasteSelected_triggered()
     {
-      m_presenter->notify(PasteSelectedFlag);
+      m_presenter->notify(IReflPresenter::PasteSelectedFlag);
     }
 
     /**
@@ -189,7 +189,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionNewTable_triggered()
     {
-      m_presenter->notify(NewTableFlag);
+      m_presenter->notify(IReflPresenter::NewTableFlag);
     }
 
     /**
@@ -197,7 +197,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionExpandSelection_triggered()
     {
-      m_presenter->notify(ExpandSelectionFlag);
+      m_presenter->notify(IReflPresenter::ExpandSelectionFlag);
     }
 
     /**
@@ -205,7 +205,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionOptionsDialog_triggered()
     {
-      m_presenter->notify(OptionsDialogFlag);
+      m_presenter->notify(IReflPresenter::OptionsDialogFlag);
     }
 
     /**
@@ -215,7 +215,7 @@ namespace MantidQt
     {
       Q_UNUSED(topLeft);
       Q_UNUSED(bottomRight);
-      m_presenter->notify(TableUpdatedFlag);
+      m_presenter->notify(IReflPresenter::TableUpdatedFlag);
     }
 
     /**

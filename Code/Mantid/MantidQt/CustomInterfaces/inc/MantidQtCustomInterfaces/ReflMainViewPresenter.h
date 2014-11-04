@@ -45,7 +45,7 @@ namespace MantidQt
     public:
       ReflMainViewPresenter(ReflMainView* view);
       virtual ~ReflMainViewPresenter();
-      virtual void notify(int flag);
+      virtual void notify(IReflPresenter::Flag flag);
       virtual const std::map<std::string,QVariant>& options() const;
       virtual void setOptions(const std::map<std::string,QVariant>& options);
       //Public for the purposes of unit testing
