@@ -105,7 +105,8 @@ class JumpFit(PythonAlgorithm):
 
         # Run fit function
         if self._out_name is "":
-            self._out_name = self._in_ws[:-7] + '_' + self._jump_function + '_fit'
+            ws_suffix_index = self._in_ws.rfind('_')
+            self._out_name = self._in_ws[:ws_suffix_index] + '_' + self._jump_function + '_fit'
 
         Fit(Function=function, InputWorkspace=spectrum_ws, CreateOutput=True, Output=self._out_name,
             StartX=self._q_min, EndX=self._q_max)
