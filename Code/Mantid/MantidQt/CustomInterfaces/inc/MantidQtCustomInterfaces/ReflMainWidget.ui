@@ -93,7 +93,7 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="labelRB">
+           <widget class="QLabel" name="labelInvestigationId">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -101,7 +101,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>RB Search:</string>
+             <string>Investigation Id:</string>
             </property>
             <property name="buddy">
              <cstring>textSearch</cstring>
@@ -152,12 +152,18 @@
          </layout>
         </item>
         <item>
-         <widget class="QTableWidget" name="tableSearchResults">
-          <property name="toolTip">
-           <string>Search results</string>
+         <widget class="QTableView" name="tableSearchResults">
+          <property name="selectionMode">
+           <enum>QAbstractItemView::ExtendedSelection</enum>
           </property>
-          <attribute name="horizontalHeaderHighlightSections">
-           <bool>false</bool>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <attribute name="horizontalHeaderDefaultSectionSize">
+           <number>60</number>
+          </attribute>
+          <attribute name="horizontalHeaderMinimumSectionSize">
+           <number>20</number>
           </attribute>
           <attribute name="horizontalHeaderStretchLastSection">
            <bool>true</bool>
@@ -165,19 +171,9 @@
           <attribute name="verticalHeaderVisible">
            <bool>false</bool>
           </attribute>
-          <attribute name="verticalHeaderHighlightSections">
-           <bool>false</bool>
+          <attribute name="verticalHeaderDefaultSectionSize">
+           <number>20</number>
           </attribute>
-          <column>
-           <property name="text">
-            <string>Run #</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Title</string>
-           </property>
-          </column>
          </widget>
         </item>
         <item>
@@ -570,8 +566,24 @@
      <y>143</y>
     </hint>
     <hint type="destinationlabel">
-     <x>217</x>
-     <y>143</y>
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>textSearch</sender>
+   <signal>returnPressed()</signal>
+   <receiver>actionSearch</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>228</x>
+     <y>112</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>

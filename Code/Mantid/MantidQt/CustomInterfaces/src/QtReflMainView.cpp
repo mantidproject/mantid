@@ -76,6 +76,17 @@ namespace MantidQt
     }
 
     /**
+    Set a new model for search results
+    @param model : the model to be attached to the search results
+    */
+    void QtReflMainView::showSearch(ReflSearchModel_sptr model)
+    {
+      m_searchModel = model;
+      ui.tableSearchResults->setModel(m_searchModel.get());
+      ui.tableSearchResults->resizeColumnsToContents();
+    }
+
+    /**
     Set the list of tables the user is offered to open
     @param tables : the names of the tables in the ADS
     */

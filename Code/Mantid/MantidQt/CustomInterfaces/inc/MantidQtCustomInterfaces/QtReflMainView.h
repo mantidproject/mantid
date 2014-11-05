@@ -5,6 +5,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include <boost/scoped_ptr.hpp>
 #include <QSignalMapper>
@@ -51,6 +52,7 @@ namespace MantidQt
 
       //Connect the model
       virtual void showTable(QReflTableModel_sptr model);
+      virtual void showSearch(ReflSearchModel_sptr model);
 
       //Dialog/Prompt methods
       virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue);
@@ -85,8 +87,9 @@ namespace MantidQt
       virtual void initLayout();
       //the presenter
       boost::shared_ptr<IReflPresenter> m_presenter;
-      //the model
+      //the models
       QReflTableModel_sptr m_model;
+      ReflSearchModel_sptr m_searchModel;
       //the interface
       Ui::reflMainWidget ui;
       //the workspace the user selected to open

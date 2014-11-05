@@ -8,6 +8,7 @@
 #include "MantidKernel/Utils.h"
 #include "MantidQtCustomInterfaces/ReflCatalogSearcher.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtCustomInterfaces/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/QtReflOptionsDialog.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
@@ -1143,8 +1144,8 @@ namespace MantidQt
       try
       {
         auto results = m_searcher->search(m_view->getSearchString(), m_view->getSearchInstrument());
-        AnalysisDataService::Instance().addOrReplace("SearchResults", results);
-        //TODO, instantiate a model and give it to ReflMainView
+        ReflSearchModel_sptr model(new ReflSearchModel(results));
+        m_view->showSearch(model);
       }
       catch(std::runtime_error& e)
       {

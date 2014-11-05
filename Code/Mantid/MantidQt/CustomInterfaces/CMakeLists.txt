@@ -58,6 +58,7 @@ set ( SRC_FILES
 	src/RawFileMemento.cpp
 	src/ReflCatalogSearcher.cpp
 	src/ReflMainViewPresenter.cpp
+	src/ReflSearchModel.cpp
 	src/ResNorm.cpp
 	src/SANSAddFiles.cpp
 	src/SANSDiagnostics.cpp
@@ -138,6 +139,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/ReflCatalogSearcher.h
 	inc/MantidQtCustomInterfaces/ReflMainView.h
 	inc/MantidQtCustomInterfaces/ReflMainViewPresenter.h
+	inc/MantidQtCustomInterfaces/ReflSearchModel.h
 	inc/MantidQtCustomInterfaces/QReflTableModel.h
 	inc/MantidQtCustomInterfaces/QtReflMainView.h
 	inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
@@ -209,6 +211,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
+                inc/MantidQtCustomInterfaces/ReflSearchModel.h
                 inc/MantidQtCustomInterfaces/QReflTableModel.h
                 inc/MantidQtCustomInterfaces/QtReflMainView.h
                 inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h

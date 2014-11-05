@@ -3,6 +3,7 @@
 
 #include <gmock/gmock.h>
 #include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtCustomInterfaces/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidAPI/TableRow.h"
 
@@ -44,6 +45,7 @@ public:
 
   //Calls we don't care about
   virtual void showTable(QReflTableModel_sptr) {};
+  virtual void showSearch(ReflSearchModel_sptr) {};
   virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy*) {};
   virtual void setProgressRange(int,int) {};
   virtual void setProgress(int) {};
