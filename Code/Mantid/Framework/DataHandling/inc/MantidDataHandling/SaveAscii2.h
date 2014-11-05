@@ -89,6 +89,7 @@ namespace Mantid
       bool m_writeDX;
       bool m_writeID;
       bool m_isHistogram;
+      bool m_isCommonBins;
       API::MatrixWorkspace_const_sptr m_ws;
     };
   } // namespace DataHandling
