@@ -44,7 +44,7 @@ class DLLExport DampingMinimizer : public API::IFuncMinimizer
 {
 public:
   /// Constructor
-  DampingMinimizer();
+  DampingMinimizer(double relTol = 0.0001);
   /// Name of the minimizer.
   std::string name() const {return "DampingMinimizer";}
 
@@ -58,6 +58,8 @@ public:
 private:
   /// Pointer to the cost function. Must be the least squares.
   boost::shared_ptr<CostFuncLeastSquares> m_leastSquares;
+  /// Relative tolerance.
+  double m_relTol;
   /// The damping mu parameter in the Levenberg-Marquardt method.
   //double m_damping;
 };
