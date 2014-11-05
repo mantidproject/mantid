@@ -206,9 +206,6 @@ public:
     auto directories = ConfigService::Instance().getInstrumentDirectories();
 	TS_ASSERT_LESS_THAN(1,directories.size());
 	//the first entry should be the AppDataDir + instrument
-	std::cout<<std::endl<<directories[0]<<std::endl;
-	std::cout<<std::endl<<ConfigService::Instance().getAppDataDir()<<std::endl;
-	std::cout<<std::endl<<directories[0].find("instruxxment")<<std::endl;
 	TSM_ASSERT_LESS_THAN("Could not find the appData directory in getInstrumentDirectories()[0]",directories[0].find(ConfigService::Instance().getAppDataDir()),directories[0].size());
 	TSM_ASSERT_LESS_THAN("Could not find the 'instrument' directory in getInstrumentDirectories()[0]",directories[0].find("instrument"),directories[0].size());
 
