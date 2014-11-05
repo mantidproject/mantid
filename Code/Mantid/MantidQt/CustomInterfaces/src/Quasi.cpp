@@ -137,14 +137,17 @@ namespace MantidQt
 			QString resName = m_uiForm.dsResolution->getCurrentDataName();
 
 			QString program = m_uiForm.cbProgram->currentText();
+      QString plotWsPorgramName;
 
 			if(program == "Lorentzians")
 			{
 				program = "QL";
+        plotWsPorgramName = "QLr";
 			}
 			else
 			{
 				program = "QSe";
+        plotWsPorgramName = "QSe";
 			}
 
 			// Collect input from fit options section
@@ -188,7 +191,7 @@ namespace MantidQt
 			runPythonScript(pyInput);
 
       //Update mini plot
-      QString outWsName = sampleName.left(sampleName.size() - 3) + "QLr_Workspace_0";
+      QString outWsName = sampleName.left(sampleName.size() - 3) + plotWsPorgramName + "_Workspace_0";
       MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName.toStdString());
       TextAxis* axis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
 
