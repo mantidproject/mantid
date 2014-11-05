@@ -136,18 +136,18 @@ namespace MantidQt
 			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
 			QString resName = m_uiForm.dsResolution->getCurrentDataName();
 
+      // Should be either "red", "sqw" or "res"
+      QString resType = resName.right(3);
+
 			QString program = m_uiForm.cbProgram->currentText();
-      QString plotWsPorgramName;
 
 			if(program == "Lorentzians")
 			{
 				program = "QL";
-        plotWsPorgramName = "QLr";
 			}
 			else
 			{
 				program = "QSe";
-        plotWsPorgramName = "QSe";
 			}
 
 			// Collect input from fit options section
@@ -170,7 +170,7 @@ namespace MantidQt
 
 			QString fitOps = "[" + elasticPeak + ", '" + background + "', " + fixedWidth + ", " + useResNorm + "]";
 
-			//Collect input from the properties browser
+			// Collect input from the properties browser
 			QString eMin = m_properties["EMin"]->valueText();
 			QString eMax = m_properties["EMax"]->valueText();
 			QString eRange = "[" + eMin + "," + eMax + "]";
@@ -179,7 +179,7 @@ namespace MantidQt
 			QString resBins = m_properties["ResBinning"]->valueText();
 			QString nBins = "[" + sampleBins + "," + resBins + "]";
 
-			//Output options
+			// Output options
 			if(m_uiForm.chkVerbose->isChecked()) { verbose = "True"; }
 			if(m_uiForm.chkSave->isChecked()) { save = "True"; }
 			QString plot = m_uiForm.cbPlot->currentText();
@@ -190,8 +190,17 @@ namespace MantidQt
 
 			runPythonScript(pyInput);
 
-      //Update mini plot
-      QString outWsName = sampleName.left(sampleName.size() - 3) + plotWsPorgramName + "_Workspace_0";
+      // Get the correct workspace name based on the type of resolution file
+      if(program == "QL")
+      {
+        if(resType == "res")
+          program += "r";
+        else
+          program += "d";
+      }
+
+      // Update mini plot
+      QString outWsName = sampleName.left(sampleName.size() - 3) + program + "_Workspace_0";
       MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName.toStdString());
       TextAxis* axis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
 
