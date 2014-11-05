@@ -56,6 +56,7 @@ set ( SRC_FILES
 	src/QtWorkspaceMementoModel.cpp
 	src/Quasi.cpp
 	src/RawFileMemento.cpp
+	src/ReflCatalogSearcher.cpp
 	src/ReflMainViewPresenter.cpp
 	src/ResNorm.cpp
 	src/SANSAddFiles.cpp
@@ -108,6 +109,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IndirectSymmetrise.h
 	inc/MantidQtCustomInterfaces/IndirectTransmission.h
 	inc/MantidQtCustomInterfaces/IReflPresenter.h
+	inc/MantidQtCustomInterfaces/IReflSearcher.h
 	inc/MantidQtCustomInterfaces/JumpFit.h
 	inc/MantidQtCustomInterfaces/MSDFit.h
 	inc/MantidQtCustomInterfaces/MantidEV.h
@@ -133,6 +135,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
+	inc/MantidQtCustomInterfaces/ReflCatalogSearcher.h
 	inc/MantidQtCustomInterfaces/ReflMainView.h
 	inc/MantidQtCustomInterfaces/ReflMainViewPresenter.h
 	inc/MantidQtCustomInterfaces/QReflTableModel.h

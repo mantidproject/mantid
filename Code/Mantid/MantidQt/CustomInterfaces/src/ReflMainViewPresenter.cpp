@@ -6,6 +6,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Utils.h"
+#include "MantidQtCustomInterfaces/ReflCatalogSearcher.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/QtReflOptionsDialog.h"
@@ -104,9 +105,10 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view):
+    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view, boost::shared_ptr<IReflSearcher> searcher):
       m_view(view),
       m_tableDirty(false),
+      m_searcher(searcher),
       m_addObserver(*this, &ReflMainViewPresenter::handleAddEvent),
       m_remObserver(*this, &ReflMainViewPresenter::handleRemEvent),
       m_clearObserver(*this, &ReflMainViewPresenter::handleClearEvent),
@@ -165,6 +167,10 @@ namespace MantidQt
       blacklist.insert("FirstTransmissionRun");
       blacklist.insert("SecondTransmissionRun");
       m_view->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, blacklist));
+
+      //If we don't have a searcher yet, use ReflCatalogSearcher
+      if(!m_searcher)
+        m_searcher.reset(new ReflCatalogSearcher());
 
       //Start with a blank table
       newTable();
@@ -1134,7 +1140,16 @@ namespace MantidQt
     /** Searches for runs that can be used */
     void ReflMainViewPresenter::search()
     {
-      m_view->giveUserInfo("You just searched for: '" + m_view->getSearchString() + "' on " + m_view->getSearchInstrument(), "Search");
+      try
+      {
+        auto results = m_searcher->search(m_view->getSearchString(), m_view->getSearchInstrument());
+        AnalysisDataService::Instance().addOrReplace("SearchResults", results);
+        //TODO, instantiate a model and give it to ReflMainView
+      }
+      catch(std::runtime_error& e)
+      {
+        m_view->giveUserCritical("Error running search:\n" + std::string(e.what()), "Search Failed");
+      }
     }
 
     /** Shows the Refl Options dialog */

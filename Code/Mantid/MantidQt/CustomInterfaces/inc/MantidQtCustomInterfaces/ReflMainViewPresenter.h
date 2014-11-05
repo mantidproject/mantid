@@ -6,6 +6,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/IReflSearcher.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 
@@ -43,7 +44,7 @@ namespace MantidQt
     class DLLExport ReflMainViewPresenter: public IReflPresenter
     {
     public:
-      ReflMainViewPresenter(ReflMainView* view);
+      ReflMainViewPresenter(ReflMainView* view, boost::shared_ptr<IReflSearcher> searcher = boost::shared_ptr<IReflSearcher>(nullptr));
       virtual ~ReflMainViewPresenter();
       virtual void notify(IReflPresenter::Flag flag);
       virtual const std::map<std::string,QVariant>& options() const;
@@ -63,6 +64,8 @@ namespace MantidQt
       bool m_tableDirty;
       //stores the user options for the presenter
       std::map<std::string,QVariant> m_options;
+      //the search implementation
+      boost::shared_ptr<IReflSearcher> m_searcher;
 
       //process selected rows
       virtual void process();
