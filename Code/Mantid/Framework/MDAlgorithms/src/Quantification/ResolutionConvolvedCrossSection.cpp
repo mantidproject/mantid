@@ -142,12 +142,9 @@ namespace Mantid
         {
           OMP_START_INTERRUPT
 
-          const double avgSignal = functionMD(*boxIterator);
-          const size_t resultIndex = resultsOffset + boxIndex;
-          PARALLEL_CRITICAL(ResolutionConvolvedCrossSection_function)
-          {
-            values.setCalculated(resultIndex, avgSignal);
-          }
+          storeCalculatedWithMutex(resultsOffset + boxIndex,
+                                   functionMD(*boxIterator),
+                                   values);
           ++boxIndex;
 
           OMP_END_INTERRUPT
@@ -335,6 +332,19 @@ namespace Mantid
       {
         this->declareAttribute(*iter, fgModel.getAttribute(*iter));
       }
+    }
+
+    /**
+     * @param index Index value into functionValues array
+     * @param signal Calculated signal value
+     * @param functionValues [InOut] Final calculated values
+     */
+    void
+    ResolutionConvolvedCrossSection::storeCalculatedWithMutex(const size_t index, const double signal,
+                                                              API::FunctionValues& functionValues) const
+    {
+      Poco::FastMutex::ScopedLock lock(m_valuesMutex);
+      functionValues.setCalculated(index, signal);
     }
 
   }
