@@ -10,7 +10,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Cache.h"
 
-#include <boost/unordered_map.hpp>
+#include <map>
 #include <vector>
 #include <typeinfo>
 
@@ -54,19 +54,19 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-   /// Parameter map iterator typedef
-   typedef boost::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator component_map_it;
-   typedef boost::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator component_map_cit;
+  /// Parameter map iterator typedef
+  typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator component_map_it;
+  typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator component_map_cit;
 
   class MANTID_GEOMETRY_DLL ParameterMap
   {
   public:
     /// Parameter map typedef
-    typedef boost::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
+    typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
     /// Parameter map iterator typedef
-    typedef boost::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator pmap_it;
+    typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator pmap_it;
     /// Parameter map iterator typedef
-    typedef boost::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_cit;
+    typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_cit;
     /// Default constructor
     ParameterMap();
     /// Returns true if the map is empty, false otherwise
