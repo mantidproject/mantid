@@ -28,13 +28,13 @@ CrystalStructure::CrystalStructure(const UnitCell &unitCell,
 /// SpaceGroup/Scatterers constructor
 CrystalStructure::CrystalStructure(const UnitCell &unitCell,
                                    const SpaceGroup_const_sptr &spaceGroup,
-                                   const CompositeScatterer_sptr &scatterers)
+                                   const CompositeBraggScatterer_sptr &scatterers)
 {
     initializeScatterers();
 
+    setScatterers(scatterers);
     setCell(unitCell);
     setSpaceGroup(spaceGroup);
-    setScatterers(scatterers);
 }
 
 /// Returns the unit cell of the structure
@@ -121,21 +121,24 @@ ReflectionCondition_sptr CrystalStructure::centering() const
     return m_centering;
 }
 
-CompositeScatterer_sptr CrystalStructure::getScatterers() const
+CompositeBraggScatterer_sptr CrystalStructure::getScatterers() const
 {
-    IScatterer_sptr clone = m_scatterers->clone();
+    BraggScatterer_sptr clone = m_scatterers->clone();
 
-    return boost::dynamic_pointer_cast<CompositeScatterer>(clone);
+    return boost::dynamic_pointer_cast<CompositeBraggScatterer>(clone);
 }
 
 /// Adds all scatterers in the supplied collection into the internal one (scatterers are copied).
-void CrystalStructure::setScatterers(const CompositeScatterer_sptr &scatterers)
+void CrystalStructure::setScatterers(const CompositeBraggScatterer_sptr &scatterers)
 {
     size_t count = scatterers->nScatterers();
 
     for(size_t i = 0; i < count; ++i) {
         m_scatterers->addScatterer(scatterers->getScatterer(i));
     }
+
+    assignUnitCellToScatterers(m_cell);
+    assignSpaceGroupToScatterers(m_spaceGroup);
 }
 
 /// Returns a vector with all allowed HKLs in the given d-range
@@ -267,7 +270,9 @@ void CrystalStructure::assignSpaceGroupToScatterers(const SpaceGroup_const_sptr 
         throw std::runtime_error("Scatterer collection is a null pointer. Aborting.");
     }
 
-    m_scatterers->setSpaceGroup(spaceGroup);
+    if(m_spaceGroup && m_scatterers->existsProperty("SpaceGroup")) {
+        m_scatterers->setProperty("SpaceGroup", spaceGroup->hmSymbol());
+    }
 }
 
 /// Assigns the cell to all scatterers
@@ -277,14 +282,16 @@ void CrystalStructure::assignUnitCellToScatterers(const UnitCell &unitCell)
         throw std::runtime_error("Scatterer collection is a null pointer. Aborting.");
     }
 
-    m_scatterers->setCell(unitCell);
+    if(m_scatterers->existsProperty("UnitCell")) {
+        m_scatterers->setProperty("UnitCell", unitCellToStr(unitCell));
+    }
 }
 
 /// Initializes the internal storage for scatterers
 void CrystalStructure::initializeScatterers()
 {
     if(!m_scatterers) {
-        m_scatterers = CompositeScatterer::create();
+        m_scatterers = CompositeBraggScatterer::create();
     }
 }
 

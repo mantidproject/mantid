@@ -7,8 +7,8 @@
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
-#include "MantidGeometry/Crystal/CompositeScatterer.h"
-#include "MantidGeometry/Crystal/IsotropicAtomScatterer.h"
+#include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
+#include "MantidGeometry/Crystal/BraggScattererFactory.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -28,8 +28,8 @@ public:
   {
       m_spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("I m -3 m");
 
-      m_scatterers = CompositeScatterer::create();
-      m_scatterers->addScatterer(IsotropicAtomScatterer::create("Si", V3D(0.0, 0.0, 0.0)));
+      m_scatterers = CompositeBraggScatterer::create();
+      m_scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Si;Position=[0,0,0]"));
   }
 
 
@@ -68,14 +68,25 @@ public:
 
       // Space group is null
       TS_ASSERT(!structure.spaceGroup());
-      TS_ASSERT(!structure.getScatterers()->getSpaceGroup());
+      TS_ASSERT_THROWS(std::string sg = structure.getScatterers()->getProperty("SpaceGroup"), Exception::NotFoundError);
 
       TS_ASSERT_THROWS_NOTHING(structure.setSpaceGroup(m_spaceGroup));
 
       // Not null anymore
       TS_ASSERT(structure.spaceGroup())
-      // Space group on scatterer collection should be the same
-      TS_ASSERT_EQUALS(structure.getScatterers()->getSpaceGroup()->hmSymbol(), "I m -3 m");
+
+      // No Scatterers present, so space group is not set.
+      TS_ASSERT_THROWS(std::string sg = structure.getScatterers()->getProperty("SpaceGroup"), Exception::NotFoundError);
+
+      // Adding a scatterer should set space group for all scatterers.
+      std::vector<BraggScatterer_sptr> scatterer(1, BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Si;Position=[0,0,0]"));
+      structure.setScatterers(CompositeBraggScatterer::create(scatterer));
+
+      std::string sg;
+      TS_ASSERT_THROWS_NOTHING(sg = structure.getScatterers()->getPropertyValue("SpaceGroup"));
+
+      // Symbol of test space group is I m -3 m
+      TS_ASSERT_EQUALS(sg, "I m -3 m")
 
       // pointers are different
       TS_ASSERT_DIFFERS(structure.pointGroup(), m_pg);
@@ -278,8 +289,8 @@ public:
       // Crystal structure with cell, space group, scatterers - must be a space group without glides/screws.
       SpaceGroup_const_sptr sgSi = SpaceGroupFactory::Instance().createSpaceGroup("F m -3 m");
       // With an atom at (x, x, x) there are no extra conditions.
-      CompositeScatterer_sptr scatterers = CompositeScatterer::create();
-      scatterers->addScatterer(IsotropicAtomScatterer::create("Si", V3D(0.3, 0.3, 0.3)));
+      CompositeBraggScatterer_sptr scatterers = CompositeBraggScatterer::create();
+      scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Si;Position=[0.3,0.3,0.3]"));
 
       CrystalStructure siUseStructureFactors(cellSi, sgSi, scatterers);
       std::vector<V3D> hklsStructureFactors = siUseStructureFactors.getUniqueHKLs(0.6, 10.0, CrystalStructure::UseStructureFactor);
@@ -302,7 +313,7 @@ private:
     ReflectionCondition_sptr m_centering;
 
     SpaceGroup_const_sptr m_spaceGroup;
-    CompositeScatterer_sptr m_scatterers;
+    CompositeBraggScatterer_sptr m_scatterers;
 
     class TestableCrystalStructure : public CrystalStructure
     {

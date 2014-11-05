@@ -7,7 +7,7 @@
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
-#include "MantidGeometry/Crystal/CompositeScatterer.h"
+#include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
 
 #include <boost/make_shared.hpp>
 
@@ -146,7 +146,7 @@ public:
 
     CrystalStructure(const UnitCell &unitCell,
                      const SpaceGroup_const_sptr &spaceGroup,
-                     const CompositeScatterer_sptr &scatterers);
+                     const CompositeBraggScatterer_sptr &scatterers);
 
     virtual ~CrystalStructure() { }
 
@@ -163,8 +163,8 @@ public:
     void setCentering(const ReflectionCondition_sptr &centering);
     ReflectionCondition_sptr centering() const;
 
-    CompositeScatterer_sptr getScatterers() const;
-    void setScatterers(const CompositeScatterer_sptr &scatterers);
+    CompositeBraggScatterer_sptr getScatterers() const;
+    void setScatterers(const CompositeBraggScatterer_sptr &scatterers);
 
     std::vector<Kernel::V3D> getHKLs(double dMin, double dMax, ReflectionConditionMethod method = UseCentering) const;
     std::vector<Kernel::V3D> getUniqueHKLs(double dMin, double dMax, ReflectionConditionMethod method = UseCentering) const;
@@ -193,7 +193,7 @@ protected:
 
     UnitCell m_cell;
     SpaceGroup_const_sptr m_spaceGroup;
-    CompositeScatterer_sptr m_scatterers;
+    CompositeBraggScatterer_sptr m_scatterers;
     PointGroup_sptr m_pointGroup;
     ReflectionCondition_sptr m_centering;
     
