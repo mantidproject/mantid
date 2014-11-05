@@ -230,7 +230,8 @@ void Table::print(const QString& fileName)
 
   // print header
   p.setFont(hHeader->font());
-  QRect br=p.boundingRect(br,Qt::AlignCenter,	hHeader->label(0));
+  QRect br;
+  br=p.boundingRect(br,Qt::AlignCenter,	hHeader->label(0));
   p.drawLine(right,height,right,height+br.height());
   QRect tr(br);
 

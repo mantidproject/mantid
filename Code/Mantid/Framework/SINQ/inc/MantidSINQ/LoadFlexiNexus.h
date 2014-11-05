@@ -95,7 +95,6 @@ private:
   int safeOpenpath(NeXus::File *fin, std::string path);
   int calculateCAddress(int *pos, int* dim, int rank);
   int calculateF77Address(int *pos, int rank);
-  size_t *indexMaker;
 };
 
 #endif /*FLEXINEXUSLOADER_H_*/
