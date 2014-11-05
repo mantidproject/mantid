@@ -275,11 +275,6 @@ class ISISRAW
 {
 private:
 	ISISCRPT_STRUCT* m_crpt; ///< CRPT from ICP
-// these are used for caching on updates
-	int m_ntc1;	///< dunno
-	int m_nsp1;	///< dunno
-	int m_nper;	///< dunno
-
 	item_struct<char> m_char_items;	///< dunno
 	item_struct<float> m_real_items;	///< dunno
 	item_struct<int> m_int_items;	///< dunno

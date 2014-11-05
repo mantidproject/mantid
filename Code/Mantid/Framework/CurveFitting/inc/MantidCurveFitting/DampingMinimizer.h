@@ -58,8 +58,6 @@ public:
 private:
   /// Pointer to the cost function. Must be the least squares.
   boost::shared_ptr<CostFuncLeastSquares> m_leastSquares;
-  /// Relative tolerance.
-  double m_relTol;
   /// The damping mu parameter in the Levenberg-Marquardt method.
   //double m_damping;
 };

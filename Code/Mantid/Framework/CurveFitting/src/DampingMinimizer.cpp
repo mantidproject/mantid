@@ -30,8 +30,7 @@ DECLARE_FUNCMINIMIZER(DampingMinimizer,Damping)
 
 /// Constructor
 DampingMinimizer::DampingMinimizer():
-IFuncMinimizer(),
-m_relTol(1e-6)
+IFuncMinimizer()
 {
   declareProperty("Damping",0.0,"The damping parameter.");
 }

@@ -32,7 +32,7 @@ namespace Mantid
     using API::FileProperty;
     using Geometry::Instrument_const_sptr;
 
-    CreateCalFileByNames::CreateCalFileByNames():API::Algorithm(),group_no(0)
+    CreateCalFileByNames::CreateCalFileByNames():API::Algorithm()
     {
     }
 

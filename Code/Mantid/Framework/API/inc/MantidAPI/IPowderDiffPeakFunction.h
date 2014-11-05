@@ -151,11 +151,6 @@ protected:
 
   size_t LATTICEINDEX;
   size_t HEIGHTINDEX;
-
-private:
-  /// Peak intensity
-  double m_intensity;
-
 };
 
 typedef boost::shared_ptr<IPowderDiffPeakFunction> IPowderDiffPeakFunction_sptr;
