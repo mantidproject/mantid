@@ -251,7 +251,7 @@ namespace Mantid
           file << m_ws->readX(*spectraItr)[bin];
         }
 
-        if (m_isHistogram & m_isCommonBins) // bin centres
+        if (m_isHistogram  & m_isCommonBins) // bin centres
         {
           file << ( m_ws->readX(0)[bin] + m_ws->readX(0)[bin+1] )/2; 
         }
@@ -296,7 +296,7 @@ namespace Mantid
       {
         if (m_isHistogram & m_isCommonBins) // bin centres
         {
-          file << ( m_ws->readX(0)[bin] + m_ws->readX(1)[bin+1] )/2;
+          file << ( m_ws->readX(0)[bin] + m_ws->readX(0)[bin+1] )/2;
         }
         if (!m_isCommonBins) //checking for ragged workspace
         {
