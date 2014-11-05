@@ -77,6 +77,7 @@ public:
     size_t nScatterers() const;
     BraggScatterer_sptr getScatterer(size_t i) const;
     void removeScatterer(size_t i);
+    void removeAllScatterers();
 
     StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const;
     
