@@ -72,7 +72,7 @@ public:
     // TODO: Check the results
     
     // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
+    AnalysisDataService::Instance().clear();
   }
   
 };

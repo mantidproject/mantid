@@ -223,6 +223,15 @@ namespace Mantid
       return copy;
     };
 
+    /**
+     * Sort.
+     * @param criteria : a vector with a list of pairs: column name, bool;
+     *        where bool = true for ascending, false for descending sort.
+     */
+    void TableWorkspace::sort(std::vector< std::pair<std::string, bool> > & criteria)
+    {
+    }
+
 //    template<>
 //    boost::tuples::null_type TableWorkspace::make_TupleRef< boost::tuples::null_type >(size_t j,const std::vector<std::string>& names,size_t i)
 //    {return boost::tuples::null_type();}
