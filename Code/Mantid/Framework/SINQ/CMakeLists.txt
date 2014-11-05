@@ -2,6 +2,7 @@ set ( SRC_FILES
 	src/InvertMDDim.cpp
 	src/LoadFlexiNexus.cpp
 	src/MDHistoToWorkspace2D.cpp
+	src/PoldiAnalyseResiduals.cpp
 	src/PoldiAutoCorrelation5.cpp
         src/PoldiCalculateSpectrum2D.cpp
 	src/PoldiFitPeaks1D.cpp
@@ -44,6 +45,7 @@ set ( INC_FILES
 	inc/MantidSINQ/InvertMDDim.h
 	inc/MantidSINQ/LoadFlexiNexus.h
 	inc/MantidSINQ/MDHistoToWorkspace2D.h
+	inc/MantidSINQ/PoldiAnalyseResiduals.h
 	inc/MantidSINQ/PoldiAutoCorrelation5.h
         inc/MantidSINQ/PoldiCalculateSpectrum2D.h
 	inc/MantidSINQ/PoldiFitPeaks1D.h
@@ -93,6 +95,7 @@ set ( TEST_FILES
 	MillerIndicesTest.h
         PeakFunctionIntegratorTest.h
 	Poldi2DFunctionTest.h
+	PoldiAnalyseResidualsTest.h
 	PoldiAutoCorrelationCoreTest.h
 	PoldiBasicChopperTest.h
         PoldiCalculateSpectrum2DTest.h
