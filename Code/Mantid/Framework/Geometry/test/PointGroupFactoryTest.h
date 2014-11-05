@@ -165,7 +165,6 @@ public:
       TS_ASSERT_THROWS_NOTHING(checkSpaceGroupSymbol("P 62/d"));
       TS_ASSERT_THROWS_NOTHING(checkSpaceGroupSymbol("I d -3"));
       TS_ASSERT_THROWS_NOTHING(checkSpaceGroupSymbol("I 4/c"));
-
   }
 
 
