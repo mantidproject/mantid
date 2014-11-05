@@ -840,28 +840,26 @@ namespace MantidQt
     /**
     Used by the view to tell the presenter something has changed
     */
-    void ReflMainViewPresenter::notify(int flag)
+    void ReflMainViewPresenter::notify(IReflPresenter::Flag flag)
     {
       switch(flag)
       {
-      case ReflMainView::SaveAsFlag:          saveTableAs();        break;
-      case ReflMainView::SaveFlag:            saveTable();          break;
-      case ReflMainView::AppendRowFlag:       appendRow();          break;
-      case ReflMainView::PrependRowFlag:      prependRow();         break;
-      case ReflMainView::DeleteRowFlag:       deleteRow();          break;
-      case ReflMainView::ProcessFlag:         process();            break;
-      case ReflMainView::GroupRowsFlag:       groupRows();          break;
-      case ReflMainView::ClearSelectedFlag:   clearSelected();      break;
-      case ReflMainView::CopySelectedFlag:    copySelected();       break;
-      case ReflMainView::CutSelectedFlag:     cutSelected();        break;
-      case ReflMainView::PasteSelectedFlag:   pasteSelected();      break;
-      case ReflMainView::OpenTableFlag:       openTable();          break;
-      case ReflMainView::NewTableFlag:        newTable();           break;
-      case ReflMainView::TableUpdatedFlag:    m_tableDirty = true;  break;
-      case ReflMainView::ExpandSelectionFlag: expandSelection();    break;
-      case ReflMainView::OptionsDialogFlag:   showOptionsDialog();  break;
-
-      case ReflMainView::NoFlags:       return;
+      case IReflPresenter::SaveAsFlag:          saveTableAs();       break;
+      case IReflPresenter::SaveFlag:            saveTable();         break;
+      case IReflPresenter::AppendRowFlag:       appendRow();         break;
+      case IReflPresenter::PrependRowFlag:      prependRow();        break;
+      case IReflPresenter::DeleteRowFlag:       deleteRow();         break;
+      case IReflPresenter::ProcessFlag:         process();           break;
+      case IReflPresenter::GroupRowsFlag:       groupRows();         break;
+      case IReflPresenter::OpenTableFlag:       openTable();         break;
+      case IReflPresenter::NewTableFlag:        newTable();          break;
+      case IReflPresenter::TableUpdatedFlag:    m_tableDirty = true; break;
+      case IReflPresenter::ExpandSelectionFlag: expandSelection();   break;
+      case IReflPresenter::OptionsDialogFlag:   showOptionsDialog(); break;
+      case IReflPresenter::ClearSelectedFlag:   clearSelected();     break;
+      case IReflPresenter::CopySelectedFlag:    copySelected();      break;
+      case IReflPresenter::CutSelectedFlag:     cutSelected();       break;
+      case IReflPresenter::PasteSelectedFlag:   pasteSelected();     break;
       }
       //Not having a 'default' case is deliberate. gcc issues a warning if there's a flag we aren't handling.
     }
