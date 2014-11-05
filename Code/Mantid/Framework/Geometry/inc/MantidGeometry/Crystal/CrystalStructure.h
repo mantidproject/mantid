@@ -142,7 +142,7 @@ public:
 
     CrystalStructure(const UnitCell &unitCell,
                      const PointGroup_sptr &pointGroup = PointGroupFactory::Instance().createPointGroup("-1"),
-                     const ReflectionCondition_sptr &centering = boost::make_shared<ReflectionConditionPrimitive>());
+                     const ReflectionCondition_sptr &centering = ReflectionCondition_sptr(new ReflectionConditionPrimitive));
 
     CrystalStructure(const UnitCell &unitCell,
                      const SpaceGroup_const_sptr &spaceGroup,
