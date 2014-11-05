@@ -25,9 +25,6 @@ namespace Mantid
 // Register the algorithm into the AlgorithmFactory
     DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry);
 
-// PI again !
-    const double PI = 3.14159265358979323846264338327950288419716939937510582;
-
 //----------------------------------------------------------------------------------------------
     /** Constructor
      */

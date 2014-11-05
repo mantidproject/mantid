@@ -145,11 +145,15 @@ namespace Mantid
 
         // Add spectra list into the index list
         if (!spec_list.empty())
+        {
             for(size_t i=0;i<spec_list.size();i++)
-                if (spec_list[i] >= nSpectra) throw std::invalid_argument("Inconsistent spectra list");
+            {
+                if (spec_list[i] >= nSpectra)
+                  throw std::invalid_argument("Inconsistent spectra list");
                 else
-                    idx.insert(spec_list[i]);
-
+                  idx.insert(spec_list[i]);
+            }
+        }
         if (!idx.empty()) nSpectra = static_cast<int>(idx.size());
 
         if (nBins == 0 || nSpectra == 0) throw std::runtime_error("Trying to save an empty workspace");

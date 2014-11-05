@@ -45,7 +45,7 @@ namespace Mantid
     using namespace Geometry;
     using namespace DataObjects;
 
-    CreateDummyCalFile::CreateDummyCalFile():API::Algorithm(),group_no(0)
+    CreateDummyCalFile::CreateDummyCalFile():API::Algorithm()
     {
     }
 

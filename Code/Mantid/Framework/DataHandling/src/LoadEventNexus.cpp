@@ -139,7 +139,7 @@ namespace Mantid
         detid_t min_event_id, detid_t max_event_id)
         : Task(), alg(alg), entry_name(entry_name), pixelID_to_wi_vector(alg->pixelID_to_wi_vector),
         pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
-        prog(prog), scheduler(scheduler),
+        prog(prog),
         event_id(event_id), event_time_of_flight(event_time_of_flight), numEvents(numEvents), startAt(startAt),
         event_index(event_index),
         thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
@@ -391,8 +391,6 @@ namespace Mantid
       detid_t pixelID_to_wi_offset;
       /// Progress reporting
       Progress * prog;
-      /// ThreadScheduler running this task
-      ThreadScheduler * scheduler;
       /// event pixel ID array
       boost::shared_array<uint32_t> event_id;
       /// event TOF array
@@ -444,7 +442,6 @@ namespace Mantid
         Progress * prog, boost::shared_ptr<Mutex> ioMutex, ThreadScheduler * scheduler)
         : Task(),
         alg(alg), entry_name(entry_name), entry_type(entry_type),
-        pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
         // prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL), m_loadError(false),
         prog(prog), scheduler(scheduler), m_loadError(false),
         m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(), m_event_id(NULL),
@@ -919,10 +916,6 @@ namespace Mantid
       std::string entry_name;
       /// NXS type
       std::string entry_type;
-      /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace index)
-      const std::vector<size_t> & pixelID_to_wi_vector;
-      /// Offset in the pixelID_to_wi_vector to use.
-      detid_t pixelID_to_wi_offset;
       /// Progress reporting
       Progress * prog;
       /// ThreadScheduler running this task
