@@ -286,7 +286,7 @@ namespace Mantid
     @param spectraIndex :: an integer relating to a workspace ID
     @param file :: the file writer object
     */
-    void SaveAscii2::writeSpectra(const int & spectraIndex, std::ofstream & file) //<- shouldnt be here
+    void SaveAscii2::writeSpectra(const int & spectraIndex, std::ofstream & file) 
     {
       auto spec = m_ws->getSpectrum(spectraIndex);
       auto specNo = spec->getSpectrumNo();
