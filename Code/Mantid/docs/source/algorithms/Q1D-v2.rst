@@ -103,7 +103,7 @@ spans more than one :math:`Q` bin :math:`I`, it is split assuming a
 uniform distribution of the counts in :math:`\lambda`. The normalization
 takes any `bin masking <http://www.mantidproject.org/MaskBins>`_ into account.
 
-Some corrections with be both pixel and wavelength dependent, for example 
+Some corrections will be both pixel and wavelength dependent, for example an
 angle transmission correction. Such corrections can be taken into account by
 specifying WavePixelAdj. 
 
@@ -148,6 +148,11 @@ large diameter beams, or where the sample generates Bragg peaks at
 low-Q. The best recourse is to check the wavelength overlap. If it is
 not too bad it may be possible to improve the data presentation simply
 by altering :math:`Q{min}` and the binning scheme.*
+
+Examples
+######################
+For an example of how Q1D is used see 
+`ISIS SANS data reduction <http://www.mantidproject.org/SANS_ISIS_Data_Reduction>`_.
 
 **References**
 
