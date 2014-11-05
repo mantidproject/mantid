@@ -88,6 +88,7 @@ namespace Mantid
       AlgorithmID getAlgorithmID() const;
 
       void initialize();
+      bool checkGroups();
       std::map<std::string, std::string> validateInputs();
       bool execute();
       void executeAsChildAlg() { throw std::runtime_error("Not implemented."); }

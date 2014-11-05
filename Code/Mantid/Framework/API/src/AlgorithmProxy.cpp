@@ -56,6 +56,12 @@ namespace Mantid
       return AlgorithmID(const_cast<AlgorithmProxy*>(this));
     }
 
+    bool AlgorithmProxy::checkGroups()
+    {
+      if (!m_alg) createConcreteAlg();
+      return m_alg->checkGroups();
+    }
+
     /** Perform whole-input validation */
     std::map<std::string, std::string> AlgorithmProxy::validateInputs()
     {
