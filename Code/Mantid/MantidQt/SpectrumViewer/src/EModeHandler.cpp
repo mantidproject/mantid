@@ -49,7 +49,7 @@ void EModeHandler::SetEMode( const int mode )
   }
   else
   {
-      ErrorHandler::Error("Mode number invalid: " + boost::lexical_cast<std::string>(mode) );
+    ErrorHandler::Error("Mode number invalid: " + boost::lexical_cast<std::string>(mode) );
   }
 }
 

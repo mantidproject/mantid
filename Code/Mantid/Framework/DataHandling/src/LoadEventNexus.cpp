@@ -129,7 +129,7 @@ namespace Mantid
       * @return
       */
       ProcessBankData(LoadEventNexus * alg, std::string entry_name,
-        Progress * prog, ThreadScheduler * scheduler,
+        Progress * prog,
         boost::shared_array<uint32_t> event_id,
         boost::shared_array<float> event_time_of_flight,
         size_t numEvents, size_t startAt,
@@ -878,14 +878,14 @@ namespace Mantid
         if (alg->splitProcessing)
           mid_id = (m_max_id + m_min_id) / 2;
 
-        ProcessBankData * newTask1 = new ProcessBankData(alg, entry_name, prog,scheduler,
+        ProcessBankData * newTask1 = new ProcessBankData(alg, entry_name, prog,
           event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
           thisBankPulseTimes, m_have_weight, event_weight_shrd,
           m_min_id, mid_id);
         scheduler->push(newTask1);
         if (alg->splitProcessing)
         {
-          ProcessBankData * newTask2 = new ProcessBankData(alg, entry_name, prog,scheduler,
+          ProcessBankData * newTask2 = new ProcessBankData(alg, entry_name, prog,
             event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
             thisBankPulseTimes, m_have_weight, event_weight_shrd,
             (mid_id+1), m_max_id);
