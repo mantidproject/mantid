@@ -24,30 +24,17 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="pushButton_browse">
     <property name="geometry">
      <rect>
-      <x>560</x>
+      <x>530</x>
       <y>30</y>
-      <width>98</width>
+      <width>61</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
-     <string>Load</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>30</y>
-      <width>66</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>File Name</string>
+     <string>Browse</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit">
@@ -58,6 +45,9 @@
       <width>381</width>
       <height>27</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The name of the NeXus file or the run number to load. &lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Run number should be InstrumentName_RunNumber (for example, NOM_11788)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
    <widget class="QSlider" name="horizontalSlider">
@@ -97,7 +87,7 @@
      <rect>
       <x>130</x>
       <y>80</y>
-      <width>381</width>
+      <width>461</width>
       <height>27</height>
      </rect>
     </property>
@@ -105,7 +95,7 @@
    <widget class="QPushButton" name="pushButton_3">
     <property name="geometry">
      <rect>
-      <x>560</x>
+      <x>610</x>
       <y>80</y>
       <width>98</width>
       <height>27</height>
@@ -892,7 +882,7 @@
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="widget">
      <attribute name="title">
       <string>Error Message</string>
      </attribute>
@@ -970,7 +960,7 @@
    <widget class="QLabel" name="label_error">
     <property name="geometry">
      <rect>
-      <x>700</x>
+      <x>730</x>
       <y>20</y>
       <width>81</width>
       <height>41</height>
@@ -986,6 +976,38 @@
     </property>
     <property name="text">
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;ERROR!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_logname_2">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>111</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The name of the NeXus file or the run number to load&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="whatsThis">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Label for file name or run number&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>File / Run </string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_load">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>30</y>
+      <width>98</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Load</string>
     </property>
    </widget>
   </widget>
