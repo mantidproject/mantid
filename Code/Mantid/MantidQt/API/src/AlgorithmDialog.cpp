@@ -361,24 +361,38 @@ bool AlgorithmDialog::setPropertyValues(const QStringList & skipList)
   // But only if the individual validation passed
   if ( allValid )
   {
-    std::map<std::string, std::string> errs = m_algorithm->validateInputs();
-    for (auto it = errs.begin(); it != errs.end(); it++)
+    // find out if there are workspace groups
+    bool hasGroups(false);
+    try {
+      hasGroups = m_algorithm->checkGroups();
+    }
+    catch(std::exception& ex)
     {
-      // only count as an error if the named property exists
-      if (m_algorithm->existsProperty(it->first))
+      hasGroups = true;
+    }
+
+    // don't check in the gui for errors - it will be done in execute
+    if (!hasGroups)
+    {
+      std::map<std::string, std::string> errs = m_algorithm->validateInputs();
+      for (auto it = errs.begin(); it != errs.end(); it++)
       {
-        const QString pName = QString::fromStdString(it->first);
-        const QString value = QString::fromStdString(it->second);
-        if (m_errors.contains(pName))
+        // only count as an error if the named property exists
+        if (m_algorithm->existsProperty(it->first))
         {
-          if (!m_errors[pName].isEmpty())
-            m_errors[pName] += "\n";
-          m_errors[pName] += value;
+          const QString pName = QString::fromStdString(it->first);
+          const QString value = QString::fromStdString(it->second);
+          if (m_errors.contains(pName))
+          {
+            if (!m_errors[pName].isEmpty())
+              m_errors[pName] += "\n";
+            m_errors[pName] += value;
+          }
+          else
+            m_errors[pName] = value;
+          // There is at least one whole-algo error
+          allValid = false;
         }
-        else
-          m_errors[pName] = value;
-        // There is at least one whole-algo error
-        allValid = false;
       }
     }
   }
