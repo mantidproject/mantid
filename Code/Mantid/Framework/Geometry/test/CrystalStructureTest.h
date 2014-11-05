@@ -80,7 +80,7 @@ public:
 
       // Adding a scatterer should set space group for all scatterers.
       std::vector<BraggScatterer_sptr> scatterer(1, BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Si;Position=[0,0,0]"));
-      structure.setScatterers(CompositeBraggScatterer::create(scatterer));
+      structure.addScatterers(CompositeBraggScatterer::create(scatterer));
 
       std::string sg;
       TS_ASSERT_THROWS_NOTHING(sg = structure.getScatterers()->getPropertyValue("SpaceGroup"));
@@ -111,8 +111,7 @@ public:
       TS_ASSERT_EQUALS(structure.cell().a(), Si.a());
   }
 
-  void testPointGroupGetSet()
-  {
+  void testPointGroupGetSet()  {
       CrystalStructure structure(m_CsCl, m_pg);
       TS_ASSERT_EQUALS(structure.pointGroup(), m_pg);
       TS_ASSERT_EQUALS(structure.crystalSystem(), m_pg->crystalSystem());
@@ -160,7 +159,7 @@ public:
 
       // Structure factor requires at least one scatterer - otherwise all hkl are "forbidden"
       TS_ASSERT(!structure.isStateSufficientForHKLGeneration(CrystalStructure::UseStructureFactor));
-      structure.setScatterers(m_scatterers);
+      structure.addScatterers(m_scatterers);
       TS_ASSERT(structure.isStateSufficientForHKLGeneration(CrystalStructure::UseStructureFactor));
 
       // centering does not matter for this
@@ -193,7 +192,7 @@ public:
 
       // Structure factor requires at least one scatterer - otherwise all hkl are "forbidden"
       TS_ASSERT(!structure.isStateSufficientForUniqueHKLGeneration(CrystalStructure::UseStructureFactor));
-      structure.setScatterers(m_scatterers);
+      structure.addScatterers(m_scatterers);
       TS_ASSERT(structure.isStateSufficientForUniqueHKLGeneration(CrystalStructure::UseStructureFactor));
 
       // point group is required anyway
@@ -290,7 +289,7 @@ public:
       SpaceGroup_const_sptr sgSi = SpaceGroupFactory::Instance().createSpaceGroup("F m -3 m");
       // With an atom at (x, x, x) there are no extra conditions.
       CompositeBraggScatterer_sptr scatterers = CompositeBraggScatterer::create();
-      scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Si;Position=[0.3,0.3,0.3]"));
+      scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Si;Position=[0.3,0.3,0.3];U=0.05"));
 
       CrystalStructure siUseStructureFactors(cellSi, sgSi, scatterers);
       std::vector<V3D> hklsStructureFactors = siUseStructureFactors.getUniqueHKLs(0.6, 10.0, CrystalStructure::UseStructureFactor);
@@ -304,7 +303,24 @@ public:
           TS_ASSERT_EQUALS(hklsCentering[i], hklsCenteringAlternative[i]);
       }
 
+      /* Add another scatterer and use setScatterers to replace old scatterers of siUseStructureFactors
+       *
+       * At this point the advantage of using the structure factor method is very clear. When an atom is
+       * added at a different position (for example [0.4, 0.4, 0.4]), some reflections become 0.
+       *
+       * When the atom is slightly shifted like in the case below, the same reflections as above are
+       * allowed.
+       */
+      scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Si;Position=[0.42,0.42,0.42];U=0.05"));
+      siUseStructureFactors.setScatterers(scatterers);
 
+      TS_ASSERT_EQUALS(siUseStructureFactors.getScatterers()->getPropertyValue("SpaceGroup"), "F m -3 m");
+
+      hklsStructureFactors = siUseStructureFactors.getUniqueHKLs(0.6, 10.0, CrystalStructure::UseStructureFactor);
+
+      for(size_t i = 0; i < hklsCentering.size(); ++i) {
+          TS_ASSERT_EQUALS(hklsCentering[i], hklsStructureFactors[i]);
+      }
   }
 
 private:

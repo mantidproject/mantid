@@ -165,6 +165,7 @@ public:
 
     CompositeBraggScatterer_sptr getScatterers() const;
     void setScatterers(const CompositeBraggScatterer_sptr &scatterers);
+    void addScatterers(const CompositeBraggScatterer_sptr &scatterers);
 
     std::vector<Kernel::V3D> getHKLs(double dMin, double dMax, ReflectionConditionMethod method = UseCentering) const;
     std::vector<Kernel::V3D> getUniqueHKLs(double dMin, double dMax, ReflectionConditionMethod method = UseCentering) const;

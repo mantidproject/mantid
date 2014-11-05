@@ -32,7 +32,7 @@ CrystalStructure::CrystalStructure(const UnitCell &unitCell,
 {
     initializeScatterers();
 
-    setScatterers(scatterers);
+    addScatterers(scatterers);
     setCell(unitCell);
     setSpaceGroup(spaceGroup);
 }
@@ -121,6 +121,7 @@ ReflectionCondition_sptr CrystalStructure::centering() const
     return m_centering;
 }
 
+/// Return a clone of the internal CompositeBraggScatterer instance.
 CompositeBraggScatterer_sptr CrystalStructure::getScatterers() const
 {
     BraggScatterer_sptr clone = m_scatterers->clone();
@@ -128,8 +129,16 @@ CompositeBraggScatterer_sptr CrystalStructure::getScatterers() const
     return boost::dynamic_pointer_cast<CompositeBraggScatterer>(clone);
 }
 
-/// Adds all scatterers in the supplied collection into the internal one (scatterers are copied).
+/// Remove all scatterers and set the supplied ones as new scatterers.
 void CrystalStructure::setScatterers(const CompositeBraggScatterer_sptr &scatterers)
+{
+    m_scatterers->removeAllScatterers();
+
+    addScatterers(scatterers);
+}
+
+/// Adds all scatterers in the supplied collection into the internal one (scatterers are copied).
+void CrystalStructure::addScatterers(const CompositeBraggScatterer_sptr &scatterers)
 {
     size_t count = scatterers->nScatterers();
 
