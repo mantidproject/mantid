@@ -13,7 +13,7 @@ namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
-		JumpFit::JumpFit(QWidget * parent) : 
+		JumpFit::JumpFit(QWidget * parent) :
 			IndirectBayesTab(parent)
 		{
 			m_uiForm.setupUi(parent);
@@ -34,7 +34,7 @@ namespace MantidQt
 
 			m_properties["QMin"] = m_dblManager->addProperty("QMin");
 			m_properties["QMax"] = m_dblManager->addProperty("QMax");
-			
+
 			m_dblManager->setDecimals(m_properties["QMin"], NUM_DECIMALS);
 			m_dblManager->setDecimals(m_properties["QMax"], NUM_DECIMALS);
 
@@ -58,7 +58,7 @@ namespace MantidQt
 
 		/**
 		 * Validate the form to check the program can be run
-		 * 
+		 *
 		 * @return :: Whether the form was valid
 		 */
 		bool JumpFit::validate()
@@ -86,7 +86,7 @@ namespace MantidQt
 		 * Collect the settings on the GUI and build a python
 		 * script that runs JumpFit
 		 */
-		void JumpFit::run() 
+		void JumpFit::run()
 		{
 			bool verbose = m_uiForm.chkVerbose->isChecked();
 			bool save = m_uiForm.chkSave->isChecked();
@@ -178,11 +178,6 @@ namespace MantidQt
       {
         QString specName = QString::fromStdString(axis->label(histIndex));
 
-        if(specName == "Data")
-        {
-          plotMiniPlot(outputWorkspace, histIndex, "JumpFitPlot", specName);
-        }
-
         if(specName == "Calc")
         {
           plotMiniPlot(outputWorkspace, histIndex, "JumpFitPlot", specName);
@@ -195,14 +190,14 @@ namespace MantidQt
           m_curves[specName]->setPen(QColor(Qt::green));
         }
       }
-  
+
       replot("JumpFitPlot");
     }
 
 		/**
 		 * Set the data selectors to use the default save directory
 		 * when browsing for input files.
-		 *  
+		 *
      * @param settings :: The current settings
 		 */
 		void JumpFit::loadSettings(const QSettings& settings)
@@ -213,7 +208,7 @@ namespace MantidQt
 		/**
 		 * Plots the loaded file to the miniplot and sets the guides
 		 * and the range
-		 * 
+		 *
 		 * @param filename :: The name of the workspace to plot
 		 */
 		void JumpFit::handleSampleInputReady(const QString& filename)
@@ -223,18 +218,25 @@ namespace MantidQt
 			disconnect(m_uiForm.cbFunction, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(runPreviewAlgorithm()));
 			disconnect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(runPreviewAlgorithm()));
 
+      // Scale to convert to HWHM
+      IAlgorithm_sptr scaleAlg = AlgorithmManager::Instance().create("Scale");
+      scaleAlg->initialize();
+      scaleAlg->setProperty("InputWorkspace", filename.toStdString());
+      scaleAlg->setProperty("OutputWorkspace", filename.toStdString());
+      scaleAlg->setProperty("Factor", 0.5);
+      scaleAlg->execute();
+
 			auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(filename.toStdString());
 			auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 
 			findAllWidths(mws);
-			
+
 			if(m_spectraList.size() > 0)
 			{
 				m_uiForm.cbWidth->setEnabled(true);
 
 				std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
 				plotMiniPlot(filename, m_spectraList[currentWidth], "JumpFitPlot", "RawPlotCurve");
-        m_curves["RawPlotCurve"]->setPen(QColor(Qt::cyan));
 
 				std::pair<double,double> res;
 				std::pair<double,double> range = getCurveRange("RawPlotCurve");
@@ -263,8 +265,8 @@ namespace MantidQt
 		}
 
 		/**
-		 * Find all of the spectra in the workspace that have width data 
-		 * 
+		 * Find all of the spectra in the workspace that have width data
+		 *
 		 * @param ws :: The workspace to search
 		 */
 		void JumpFit::findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws)
@@ -277,7 +279,7 @@ namespace MantidQt
 				auto axis = dynamic_cast<Mantid::API::TextAxis*>(ws->getAxis(1));
 				std::string title = axis->label(i);
 
-				//check if the axis labels indicate this spectrum is width data 
+				//check if the axis labels indicate this spectrum is width data
 				size_t qLinesWidthIndex = title.find(".Width");
 				size_t convFitWidthIndex = title.find(".FWHM");
 
@@ -289,7 +291,7 @@ namespace MantidQt
 				{
 					std::string cbItemName = "";
 					size_t substrIndex = 0;
-					
+
 					if (qLinesWidth)
 					{
 						substrIndex = qLinesWidthIndex;
@@ -302,7 +304,7 @@ namespace MantidQt
 					cbItemName = title.substr(0, substrIndex);
 					m_spectraList[cbItemName] = static_cast<int>(i);
 					m_uiForm.cbWidth->addItem(QString(cbItemName.c_str()));
-					
+
 					//display widths f1.f1, f2.f1 and f2.f2
 					if (m_uiForm.cbWidth->count() == 3)
 					{
@@ -314,7 +316,7 @@ namespace MantidQt
 
 		/**
 		 * Plots the loaded file to the miniplot when the selected spectrum changes
-		 * 
+		 *
 		 * @param text :: The name spectrum index to plot
 		 */
 		void JumpFit::handleWidthChange(const QString& text)
@@ -327,7 +329,6 @@ namespace MantidQt
 				if(validate())
 				{
 					plotMiniPlot(sampleName, m_spectraList[text.toStdString()], "JumpFitPlot", "RawPlotCurve");
-          m_curves["RawPlotCurve"]->setPen(QColor(Qt::cyan));
 				}
 			}
 		}

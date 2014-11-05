@@ -12,7 +12,7 @@ class JumpFit(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
-                doc='Input workspace')
+                doc='Input workspace in HWHM')
 
         valid_functions = ['ChudleyElliot', 'HallRoss', 'FickDiffusion', 'TeixeiraWater']
         self.declareProperty(name='Function', defaultValue=valid_functions[0],
@@ -50,9 +50,6 @@ class JumpFit(PythonAlgorithm):
         # Select the width we wish to fit
         spectrum_ws = "__" + self._in_ws
         ExtractSingleSpectrum(InputWorkspace=self._in_ws, OutputWorkspace=spectrum_ws, WorkspaceIndex=self._width)
-
-        # Convert to HWHM
-        Scale(InputWorkspace=spectrum_ws, Factor=0.5, OutputWorkspace=spectrum_ws)
 
         if self._verbose:
             logger.notice('Cropping from Q= ' + str(self._q_min) + ' to ' + str(self._q_max))
