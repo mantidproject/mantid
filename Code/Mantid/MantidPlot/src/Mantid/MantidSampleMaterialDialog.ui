@@ -22,9 +22,17 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTreeWidget" name="treeMaterialProperties">
+     <attribute name="headerDefaultSectionSize">
+      <number>200</number>
+     </attribute>
      <column>
       <property name="text">
-       <string notr="true">1</string>
+       <string>Property</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Value</string>
       </property>
      </column>
     </widget>

@@ -28,10 +28,6 @@ MantidSampleMaterialDialog::MantidSampleMaterialDialog(const QString & wsName, M
 {
   m_uiForm.setupUi(this);
 
-  QStringList titles;
-  titles << "Property" << "Value";
-  m_uiForm.treeMaterialProperties->setHeaderLabels(titles);
-
   connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
 
   connect(m_uiForm.pbSetMaterial, SIGNAL(clicked()), this, SLOT(handleSetMaterial()));
@@ -105,9 +101,6 @@ void MantidSampleMaterialDialog::updateMaterial()
 
   // Expand the Scattering section
   subItem->setExpanded(true);
-
-  // Resize Property column to names
-  m_uiForm.treeMaterialProperties->resizeColumnToContents(0);
 }
 
 /**
