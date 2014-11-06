@@ -597,6 +597,22 @@ private:
   Spectrogram(const Spectrogram&);
 };
 
+class QwtPlotCurve  // /PyName = PlotCurve/
+{
+%TypeHeaderCode
+#include <qwt_plot_curve.h>
+%End
+public:
+   QwtPlotCurve();
+
+   double minXValue() const;
+   double maxXValue() const;
+   double minYValue() const;
+   double maxYValue() const;
+
+private:
+   QwtPlotCurve(const QwtPlotCurve&);
+};
 
 class Grid : QObject // : QwtPlotGrid
 {
@@ -696,6 +712,7 @@ public:
   void removeCurve(int);
   void removeCurve(const QString&);
   int curves() /PyName=numCurves/;
+  QwtPlotCurve* curve(int index);
   QString curveTitle(int);
 
   void setCurveLineColor(int, int);
