@@ -93,6 +93,34 @@ private:
     return ws;
   }
 
+  //Produces a TableWorkspace like one returned by ReflCatalogSearcher
+  ITableWorkspace_sptr createSearchResults()
+  {
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+
+    ws->addColumn("str","Name");
+    ws->addColumn("str","Location");
+    ws->addColumn("str","Create Time");
+    ws->addColumn("long64","Id");
+    ws->addColumn("long64","File size(bytes)");
+    ws->addColumn("str","File size");
+    ws->addColumn("str","Description");
+
+    TableRow row = ws->appendRow();
+    row << "22194" << "" << "2013-11-20 16:45:27" << (int64_t)43754640 << (int64_t)24064 << "23KB" << "Scanning axis fine_z";
+    row = ws->appendRow();
+    row << "22203" << "" << "2013-11-20 16:45:29" << (int64_t)43754964 << (int64_t)26112 << "25KB" << "T2 run again Si / C8 layer / D2O th=2.3";
+    row = ws->appendRow();
+    row << "22202" << "" << "2013-11-20 16:45:28" << (int64_t)43754928 << (int64_t)24064 << "23KB" << "T2 run again Si / C8 layer / D2O th=0.7";
+    row = ws->appendRow();
+    row << "22215" << "" << "2013-11-20 16:45:30" << (int64_t)43755396 << (int64_t)26624 << "26KB" << "T1 Si / h-DOPC 0.1 mg/ml washed after 30 min / D2O th=2.3";
+    row = ws->appendRow();
+    row << "22255" << "" << "2013-11-20 16:45:38" << (int64_t)43756836 << (int64_t)24576 << "24KB" << "Trans small slits SM in 0.25 theta";
+    row = ws->appendRow();
+    row << "22253" << "" << "2013-11-20 16:45:37" << (int64_t)43756764 << (int64_t)24576 << "24KB" << "Trans run slits SM in 0.25 theta";
+    return ws;
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -1187,6 +1215,23 @@ public:
     TS_ASSERT_EQUALS(ws->Double(5, ScaleCol), 3.0);
     TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 2);
     TS_ASSERT_EQUALS(ws->String(5, OptionsCol), "def");
+  }
+
+  void testSearchModel()
+  {
+    auto results = createSearchResults();
+    ReflSearchModel model(results);
+
+    TS_ASSERT_EQUALS(model.columnCount(), 2);
+    TS_ASSERT_EQUALS(model.rowCount(), 6);
+
+    //Check the data has been sorted correctly
+    TS_ASSERT_EQUALS(model.data(model.index(0,0)).toString().toStdString(), "22194");
+    TS_ASSERT_EQUALS(model.data(model.index(1,0)).toString().toStdString(), "22202");
+    TS_ASSERT_EQUALS(model.data(model.index(2,0)).toString().toStdString(), "22203");
+    TS_ASSERT_EQUALS(model.data(model.index(3,0)).toString().toStdString(), "22215");
+    TS_ASSERT_EQUALS(model.data(model.index(4,0)).toString().toStdString(), "22253");
+    TS_ASSERT_EQUALS(model.data(model.index(5,0)).toString().toStdString(), "22255");
   }
 };
 
