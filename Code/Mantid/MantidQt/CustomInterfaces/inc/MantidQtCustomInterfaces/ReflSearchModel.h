@@ -51,8 +51,11 @@ namespace MantidQt
       Qt::ItemFlags flags(const QModelIndex &index) const;
 
     protected:
-      //The table we're wrapping
-      Mantid::API::ITableWorkspace_sptr m_tWS;
+      //vector of the run numbers
+      std::vector<std::string> m_runs;
+
+      //maps each run number to its description
+      std::map<std::string,std::string> m_descriptions;
     };
 
     /// Typedef for a shared pointer to \c ReflSearchModel

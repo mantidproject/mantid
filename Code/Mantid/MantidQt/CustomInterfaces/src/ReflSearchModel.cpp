@@ -10,10 +10,21 @@ namespace MantidQt
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
-    @param tableWorkspace : The table workspace to wrap
+    @param tableWorkspace : The table workspace to copy data from
     */
-    ReflSearchModel::ReflSearchModel(ITableWorkspace_sptr tableWorkspace) : m_tWS(tableWorkspace)
+    ReflSearchModel::ReflSearchModel(ITableWorkspace_sptr tableWorkspace)
     {
+      //Copy the data from the input table workspace
+      for(size_t i = 0; i < tableWorkspace->rowCount(); ++i)
+      {
+        const std::string run = tableWorkspace->String(i,0);
+        const std::string description = tableWorkspace->String(i,6);
+        m_runs.push_back(run);
+        m_descriptions[run] = description;
+      }
+
+      //By sorting the vector of runs, we sort the entire table
+      std::sort(m_runs.begin(), m_runs.end());
     }
 
     //----------------------------------------------------------------------------------------------
@@ -28,7 +39,7 @@ namespace MantidQt
     */
     int ReflSearchModel::rowCount(const QModelIndex &) const
     {
-      return static_cast<int>(m_tWS->rowCount());
+      return static_cast<int>(m_runs.size());
     }
 
     /**
@@ -52,9 +63,18 @@ namespace MantidQt
       const int colNumber = index.column();
       const int rowNumber = index.row();
 
-      TableRow tableRow = m_tWS->getRow(rowNumber);
-      //run column, or description column
-      return QString::fromStdString(tableRow.cell<std::string>(colNumber == 0 ? 0 : 6));
+      if(rowNumber < 0 || rowNumber >= static_cast<int>(m_runs.size()))
+        return QVariant();
+
+      const std::string run = m_runs[rowNumber];
+
+      if(colNumber == 0)
+        return QString::fromStdString(run);
+
+      if(colNumber == 1)
+        return QString::fromStdString(m_descriptions.find(run)->second);
+
+      return QVariant();
     }
 
     /**
