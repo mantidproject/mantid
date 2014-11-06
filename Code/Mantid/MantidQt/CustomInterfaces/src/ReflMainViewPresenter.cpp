@@ -867,6 +867,7 @@ namespace MantidQt
       case IReflPresenter::CutSelectedFlag:     cutSelected();       break;
       case IReflPresenter::PasteSelectedFlag:   pasteSelected();     break;
       case IReflPresenter::SearchFlag:          search();            break;
+      case IReflPresenter::TransferFlag:        transfer();          break;
       }
       //Not having a 'default' case is deliberate. gcc issues a warning if there's a flag we aren't handling.
     }
@@ -1151,6 +1152,12 @@ namespace MantidQt
       {
         m_view->giveUserCritical("Error running search:\n" + std::string(e.what()), "Search Failed");
       }
+    }
+
+    /** Transfers the selected runs in the search results to the processing table */
+    void ReflMainViewPresenter::transfer()
+    {
+      m_view->giveUserInfo("You hit transfer", "Transfer");
     }
 
     /** Shows the Refl Options dialog */

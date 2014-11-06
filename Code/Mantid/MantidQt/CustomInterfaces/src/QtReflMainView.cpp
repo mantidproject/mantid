@@ -37,6 +37,7 @@ namespace MantidQt
       ui.setupUi(this);
 
       ui.buttonProcess->setDefaultAction(ui.actionProcess);
+      ui.buttonTransfer->setDefaultAction(ui.actionTransfer);
 
       //Expand the process runs column at the expense of the search column
       ui.splitterTables->setStretchFactor(0, 0);
@@ -225,6 +226,14 @@ namespace MantidQt
     void QtReflMainView::on_actionSearch_triggered()
     {
       m_presenter->notify(IReflPresenter::SearchFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "transfer" button has been pressed
+    */
+    void QtReflMainView::on_actionTransfer_triggered()
+    {
+      m_presenter->notify(IReflPresenter::TransferFlag);
     }
 
     /**

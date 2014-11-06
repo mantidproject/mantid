@@ -192,18 +192,12 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="buttonTransfer">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="toolTip">
-             <string>Add the selected run to the table</string>
-            </property>
+           <widget class="QToolButton" name="buttonTransfer">
             <property name="text">
-             <string>Add Run</string>
+             <string>Transfer</string>
+            </property>
+            <property name="toolButtonStyle">
+             <enum>Qt::ToolButtonTextBesideIcon</enum>
             </property>
            </widget>
           </item>
@@ -543,6 +537,18 @@
    </property>
    <property name="text">
     <string>Search</string>
+   </property>
+  </action>
+  <action name="actionTransfer">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/append_drag_curves.png</normaloff>:/append_drag_curves.png</iconset>
+   </property>
+   <property name="text">
+    <string>Transfer</string>
+   </property>
+   <property name="toolTip">
+    <string>Transfer the selected run(s) to the processing table.</string>
    </property>
   </action>
  </widget>

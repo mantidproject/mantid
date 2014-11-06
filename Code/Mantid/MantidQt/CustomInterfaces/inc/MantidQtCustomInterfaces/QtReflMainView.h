@@ -112,6 +112,7 @@ namespace MantidQt
       void on_actionExpandSelection_triggered();
       void on_actionOptionsDialog_triggered();
       void on_actionSearch_triggered();
+      void on_actionTransfer_triggered();
 
       void setModel(QString name);
       void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);

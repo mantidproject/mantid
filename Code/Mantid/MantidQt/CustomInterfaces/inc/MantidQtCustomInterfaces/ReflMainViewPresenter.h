@@ -115,6 +115,7 @@ namespace MantidQt
       virtual void saveTableAs();
       //searching
       virtual void search();
+      virtual void transfer();
       //options
       void showOptionsDialog();
       void initOptions();
