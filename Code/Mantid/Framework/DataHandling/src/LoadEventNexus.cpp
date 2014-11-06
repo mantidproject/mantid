@@ -115,7 +115,6 @@ namespace Mantid
       * @param alg :: LoadEventNexus
       * @param entry_name :: name of the bank
       * @param prog :: Progress reporter
-      * @param scheduler :: ThreadScheduler running this task
       * @param event_id :: array with event IDs
       * @param event_time_of_flight :: array with event TOFS
       * @param numEvents :: how many events in the arrays
