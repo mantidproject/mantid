@@ -1610,6 +1610,11 @@ bool ConfigServiceImpl::addDirectoryifExists(const std::string& directoryName, s
   {
     g_log.information("Unable to locate directory at: " + directoryName);
     return false;
+  }   
+  catch (Poco::FileNotFoundException&)
+  {
+    g_log.information("Unable to locate directory at: " + directoryName);
+    return false;
   } 
 }
 
