@@ -382,9 +382,12 @@ namespace Mantid
       const double protonCharge = exptInfoZero.run().getProtonCharge();
 
       auto instrument = exptInfoZero.getInstrument();
-      std::vector<detid_t> detIDS = instrument->getDetectorIDs(true);
-      const int64_t ndets = static_cast<int64_t>(detIDS.size());
-      // detector->workspace index map
+      std::vector<detid_t> detIDs = instrument->getDetectorIDs(true);
+      // Prune out those that are part of a group and simply leave the head of the group
+      detIDs = removeGroupedIDs(exptInfoZero, detIDs);
+
+      // Mappings
+      const int64_t ndets = static_cast<int64_t>(detIDs.size());
       const detid2index_map fluxDetToIdx = fluxEventWS->getDetectorIDToWorkspaceIndexMap();
       const detid2index_map solidAngDetToIdx = solidAngleWS->getDetectorIDToWorkspaceIndexMap();
 
@@ -394,12 +397,11 @@ namespace Mantid
       {
         PARALLEL_START_INTERUPT_REGION
 
-        const auto detID = detIDS[i];
-        auto detector = instrument->getDetector(detID);
-        if(detector->isMonitor() || detector->isMasked()) continue;
-
-        const double theta = detector->getTwoTheta(m_samplePos, m_beamDir);
-        const double phi = detector->getPhi();
+        const auto detID = detIDs[i];
+        double theta(0.0), phi(0.0);
+        auto spectrum = getThetaPhi(detID, exptInfoZero, theta, phi);
+        if(spectrum->isMonitor() || spectrum->isMasked()) continue;
+        // Intersections
         auto intersections = calculateIntersections(theta, phi);
         if(intersections.empty()) continue;
 
@@ -458,7 +460,50 @@ namespace Mantid
       }
       PARALLEL_CHECK_INTERUPT_REGION
 
-     delete prog;
+      delete prog;
+    }
+
+    /**
+     * Checks for IDs that are actually part of the same group and just keeps one from the group.
+     * For a 1:1 map, none will be removed.
+     * @param exptInfo An ExperimentInfo object that defines the grouping
+     * @param detIDs A list of existing IDs
+     * @return A new list of IDs
+     */
+    std::vector<detid_t> SXDMDNorm::removeGroupedIDs(const ExperimentInfo &exptInfo, const std::vector<detid_t> &detIDs)
+    {
+      const size_t ntotal = detIDs.size();
+      std::vector<detid_t> singleIDs;
+      singleIDs.reserve(ntotal/2); // reserve half. In the case of 1:1 it will double to the correct size once
+      
+      for(auto iter = detIDs.begin(); iter != detIDs.end(); ++iter)
+      {
+        const auto & members = exptInfo.getGroupMembers(*iter);
+        singleIDs.push_back(members.front());
+      }
+      
+      return singleIDs;
+    }
+
+    /**
+     * Get the theta and phi angles for the given ID. If the detector was part of a group,
+     * as defined in the ExperimentInfo object, then the theta/phi are for the whole set.
+     * @param detID A reference to a single ID
+     * @param exptInfo A reference to the ExperimentInfo that defines that spectrum->detector mapping
+     * @param theta [Output] Set to the theta angle for the detector (set)
+     * @param phi [Output] Set to the phi angle for the detector (set)
+     * @return A poiner to the Detector object for this spectrum as a whole
+     *         (may be a single pixel or group)
+     */
+    Geometry::IDetector_const_sptr
+    SXDMDNorm::getThetaPhi(const detid_t detID,
+                           const ExperimentInfo &exptInfo,
+                           double &theta, double &phi)
+    {
+      const auto spectrum = exptInfo.getDetectorByID(detID);
+      theta = spectrum->getTwoTheta(m_samplePos, m_beamDir);
+      phi = spectrum->getPhi();
+      return spectrum;
     }
 
     /**
