@@ -174,7 +174,7 @@ void HistoryView::roll(std::list<HistoryItem>::iterator it)
  */
 void HistoryView::filterBetweenExecDate(Mantid::Kernel::DateAndTime start, Mantid::Kernel::DateAndTime end)
 {
-  for (auto it = m_historyItems.begin(); it != m_historyItems.end(); ++it)
+  for(auto it = m_historyItems.begin(); it != m_historyItems.end();)
   {
     Mantid::Kernel::DateAndTime algExecutionDate = it->getAlgorithmHistory()->executionDate();
 
@@ -182,7 +182,10 @@ void HistoryView::filterBetweenExecDate(Mantid::Kernel::DateAndTime start, Manti
     if(algExecutionDate < start || algExecutionDate > end)
     {
       it = m_historyItems.erase(it);
-      --it;
+    }
+    else
+    {
+      ++it;
     }
   }
 }
