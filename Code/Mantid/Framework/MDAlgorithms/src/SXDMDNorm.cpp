@@ -39,7 +39,7 @@ namespace Mantid
       m_kmin(0.0f), m_kmax(0.0f), m_lmin(0.0f), m_lmax(0.0f), m_hIntegrated(true),
       m_kIntegrated(true), m_lIntegrated(true), m_rubw(3,3),
       m_kiMin(0.0), m_kiMax(EMPTY_DBL()), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1),
-      m_hX(), m_kX(), m_lX()
+      m_hX(), m_kX(), m_lX(), m_samplePos(), m_beamDir()
     {
     }
     
@@ -141,6 +141,17 @@ namespace Mantid
       m_hmax = hdim->getMaximum();
       m_kmax = kdim->getMaximum();
       m_lmax = ldim->getMaximum();
+      
+      const auto & exptInfoZero = *(m_inputWS->getExperimentInfo(0));
+      auto source = exptInfoZero.getInstrument()->getSource();
+      auto sample = exptInfoZero.getInstrument()->getSample();
+      if(source == NULL || sample == NULL)
+      {
+        throw Kernel::Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
+      }
+      m_samplePos = sample->getPos();
+      m_beamDir = m_samplePos - source->getPos();
+      m_beamDir.normalize();
     }
 
     /**
@@ -369,15 +380,16 @@ namespace Mantid
         m_rubw.Invert();
       }
       const double protonCharge = exptInfoZero.run().getProtonCharge();
+
       auto instrument = exptInfoZero.getInstrument();
       std::vector<detid_t> detIDS = instrument->getDetectorIDs(true);
       const int64_t ndets = static_cast<int64_t>(detIDS.size());
       // detector->workspace index map
-      const detid2index_map d2m = fluxEventWS->getDetectorIDToWorkspaceIndexMap();
-      const detid2index_map d2mSA = solidAngleWS->getDetectorIDToWorkspaceIndexMap();
+      const detid2index_map fluxDetToIdx = fluxEventWS->getDetectorIDToWorkspaceIndexMap();
+      const detid2index_map solidAngDetToIdx = solidAngleWS->getDetectorIDToWorkspaceIndexMap();
 
       auto *prog = new API::Progress(this, 0.3, 1.0, ndets);
-      PARALLEL_FOR1(m_normWS)
+      PARALLEL_FOR1(fluxEventWS)
       for(int64_t i = 0; i < ndets; i++)
       {
         PARALLEL_START_INTERUPT_REGION
@@ -386,14 +398,14 @@ namespace Mantid
         auto detector = instrument->getDetector(detID);
         if(detector->isMonitor() || detector->isMasked()) continue;
 
-        std::vector<Mantid::Kernel::VMD> intersections = calculateIntersections(detector);
+        const double theta = detector->getTwoTheta(m_samplePos, m_beamDir);
+        const double phi = detector->getPhi();
+        auto intersections = calculateIntersections(theta, phi);
         if(intersections.empty()) continue;
 
         //calculate indices
         //add to the correct signal at that particular index
-
-        // get event vector
-        size_t wsIdx = d2m.find(detID)->second;
+        size_t wsIdx = fluxDetToIdx.find(detID)->second;
         const auto &events = fluxEventWS->getEventList(wsIdx).getWeightedEventsNoTime();
         if(events.empty()) continue;
         //get iterator to the first event that has momentum >= (*intersections.begin())[3]
@@ -401,7 +413,7 @@ namespace Mantid
         const auto & firstIntersectTime = intersections.front()[3];
         while(eventStart->tof() < firstIntersectTime) ++eventStart;
         // Get solid angle for this contribution
-        double solid = solidAngleWS->readY(d2mSA.find(detID)->second)[0]*protonCharge;
+        double solid = solidAngleWS->readY(solidAngDetToIdx.find(detID)->second)[0]*protonCharge;
         // Compute final position in HKL
         const size_t vmdDims = intersections.front().size();
         // pre-allocate for efficiency and copy non-hkl dim values into place
@@ -452,14 +464,13 @@ namespace Mantid
     /**
      * Calculate the points of intersection for the given detector with cuboid surrounding the
      * detector position in HKL
-     * @param detector A pointer to a detector object
+     * @param theta Polar angle withd detector
+     * @param phi Azimuthal angle with detector
      * @return A list of intersections in HKL space
      */
-    std::vector<Kernel::VMD> SXDMDNorm::calculateIntersections(const Geometry::IDetector_const_sptr & detector)
+    std::vector<Kernel::VMD> SXDMDNorm::calculateIntersections(const double theta, const double phi)
     {
-      double th = detector->getTwoTheta(V3D(0,0,0),V3D(0,0,1));
-      double phi = detector->getPhi();
-      V3D q(-sin(th)*cos(phi),-sin(th)*sin(phi),1.-cos(th));
+      V3D q(-sin(theta)*cos(phi), -sin(theta)*sin(phi), 1.-cos(theta));
       q = m_rubw*q;
       double hStart = q.X()*m_kiMin, hEnd = q.X()*m_kiMax;
       double kStart = q.Y()*m_kiMin, kEnd = q.Y()*m_kiMax;

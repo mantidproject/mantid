@@ -56,7 +56,7 @@ namespace Mantid
       void cacheDimensionXValues();
       void calculateNormalization(const std::vector<coord_t> &otherValues,
                                   const Kernel::Matrix<coord_t> &affineTrans);
-      std::vector<Kernel::VMD> calculateIntersections(const Geometry::IDetector_const_sptr &detector);
+      std::vector<Kernel::VMD> calculateIntersections(const double theta, const double phi);
 
       /// number of MD dimensions
       size_t m_nDims;
@@ -76,6 +76,10 @@ namespace Mantid
       size_t m_hIdx, m_kIdx, m_lIdx;
       /// cached X values along dimensions h,k,l
       std::vector<double> m_hX, m_kX, m_lX;
+      /// Sample position
+      Kernel::V3D m_samplePos;
+      /// Beam direction
+      Kernel::V3D m_beamDir;
     };
 
   } // namespace MDAlgorithms
