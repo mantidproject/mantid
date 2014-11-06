@@ -11,9 +11,6 @@ namespace MantidQt
   {
     ITableWorkspace_sptr ReflCatalogSearcher::search(const std::string& text, const std::string& instrument)
     {
-      //Currently unused
-      (void)instrument;
-
       auto sessions = CatalogManager::Instance().getActiveSessions();
       if(sessions.empty())
         throw std::runtime_error("You are not logged into any catalogs.");
@@ -32,8 +29,6 @@ namespace MantidQt
 
       //Now, tidy up the data
       std::set<size_t> toRemove;
-
-      //Traverse backwards so removals don't trip us up
       for(size_t i = 0; i < results->rowCount(); ++i)
       {
         std::string& run = results->String(i,0);
