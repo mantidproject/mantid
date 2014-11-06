@@ -57,16 +57,16 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ArrayDataSource: public SpectrumDataSou
                          const boost::shared_ptr<Mantid::API::Workspace> ws);
 
     /// Get DataArray covering full range of data in x, and y directions
-    DataArray * getDataArray( bool is_log_x );
+    DataArray_const_sptr getDataArray( bool is_log_x );
 
     /// Get DataArray covering restricted range of data
-    DataArray * getDataArray( double  xMin,
-                              double  xMax,
-                              double  yMin,
-                              double  yMax,
-                              size_t  nRows,
-                              size_t  nCols,
-                              bool    isLogX );
+    DataArray_const_sptr getDataArray( double  xMin,
+                                       double  xMax,
+                                       double  yMin,
+                                       double  yMax,
+                                       size_t  nRows,
+                                       size_t  nCols,
+                                       bool    isLogX );
 
     /// Get a list containing pairs of strings with information about x,y
     void getInfoList( double x,

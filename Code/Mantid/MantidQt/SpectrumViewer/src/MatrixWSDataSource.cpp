@@ -138,10 +138,10 @@ size_t MatrixWSDataSource::getNRows()
  * @param isLogX  Flag indicating whether or not the data should be
  *                binned logarithmically.
  */
-DataArray* MatrixWSDataSource::getDataArray( double xMin,    double  xMax,
-                                             double yMin,    double  yMax,
-                                             size_t numRows, size_t  numCols,
-                                             bool   isLogX )
+DataArray_const_sptr MatrixWSDataSource::getDataArray( double xMin,    double  xMax,
+                                                       double yMin,    double  yMax,
+                                                       size_t numRows, size_t  numCols,
+                                                       bool   isLogX )
 {
   /* Since we're rebinning, the columns can be arbitrary */
   /* but rows must be aligned to get whole spectra */
@@ -198,10 +198,10 @@ DataArray* MatrixWSDataSource::getDataArray( double xMin,    double  xMax,
   }
 
   // The calling code is responsible for deleting the DataArray when it is done with it
-  DataArray* newDataArray = new DataArray( xMin, xMax, yMin, yMax,
-                                           isLogX,
-                                           numRows, numCols,
-                                           newData);
+  DataArray_const_sptr newDataArray( new DataArray( xMin, xMax, yMin, yMax,
+                                                    isLogX,
+                                                    numRows, numCols,
+                                                    newData) );
 
   return newDataArray;
 }
@@ -213,7 +213,7 @@ DataArray* MatrixWSDataSource::getDataArray( double xMin,    double  xMax,
  * @param isLogX  Flag indicating whether or not the data should be
  *                binned logarithmically.
  */
-DataArray * MatrixWSDataSource::getDataArray( bool isLogX )
+DataArray_const_sptr MatrixWSDataSource::getDataArray( bool isLogX )
 {
   return getDataArray( m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax,
                        m_totalRows, m_totalCols, isLogX );

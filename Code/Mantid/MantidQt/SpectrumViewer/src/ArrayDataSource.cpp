@@ -74,10 +74,10 @@ bool ArrayDataSource::hasData(const std::string& wsName,
  *                  DataSource does not support rebinning to a log axis, so
  *                  the DataArray is always returned with isLogX = false.
  */
-DataArray * ArrayDataSource::getDataArray( double xMin,   double  xMax,
-                                           double yMin,   double  yMax,
-                                           size_t nRows,  size_t  nCols,
-                                           bool   isLogX )
+DataArray_const_sptr ArrayDataSource::getDataArray( double xMin,   double  xMax,
+                                                    double yMin,   double  yMax,
+                                                    size_t nRows,  size_t  nCols,
+                                                    bool   isLogX )
 {
   size_t firstCol;
   SVUtils::CalculateInterval( m_totalXMin, m_totalXMax, m_totalCols,
@@ -120,8 +120,8 @@ DataArray * ArrayDataSource::getDataArray( double xMin,   double  xMax,
 
   // The calling code is responsible for deleting the DataArray
   isLogX = false;
-  DataArray* newDataArray = new DataArray( xMin, xMax, yMin, yMax,
-                                           isLogX, nRows, nCols, newData);
+  DataArray_const_sptr newDataArray( new DataArray( xMin, xMax, yMin, yMax,
+                                           isLogX, nRows, nCols, newData) );
   return newDataArray;
 }
 
@@ -136,7 +136,7 @@ DataArray * ArrayDataSource::getDataArray( double xMin,   double  xMax,
  *                support rebinning to a log axis, so the DataArray is
  *                always returned with isLogX = false.
  */
-DataArray * ArrayDataSource::getDataArray( bool isLogX )
+DataArray_const_sptr ArrayDataSource::getDataArray( bool isLogX )
 {
   isLogX = false;
   return getDataArray( m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax,

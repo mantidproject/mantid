@@ -69,16 +69,16 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource: public SpectrumData
     virtual size_t getNRows();
 
     /// Get DataArray covering full range of data in x, and y directions
-    DataArray * getDataArray( bool isLogX );
+    DataArray_const_sptr getDataArray( bool isLogX );
 
     /// Get DataArray covering restricted range of data
-    DataArray * getDataArray( double  xMin,
-                              double  xMax,
-                              double  yMin,
-                              double  yMax,
-                              size_t  nRows,
-                              size_t  nCols,
-                              bool    isLogX );
+    DataArray_const_sptr getDataArray( double  xMin,
+                                       double  xMax,
+                                       double  yMin,
+                                       double  yMax,
+                                       size_t  nRows,
+                                       size_t  nCols,
+                                       bool    isLogX );
 
     /// Set the class that gets the emode & efixed info from the user.
     void setEModeHandler( EModeHandler* emodeHandler );

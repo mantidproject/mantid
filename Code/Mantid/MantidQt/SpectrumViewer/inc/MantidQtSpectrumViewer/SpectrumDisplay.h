@@ -127,7 +127,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      std::vector<double>  m_intensityTable;
 
      SpectrumDataSource*  m_dataSource;
-     DataArray*           m_dataArray;
+     DataArray_const_sptr m_dataArray;
 
      QwtPlot*             m_spectrumPlot;
 

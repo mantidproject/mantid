@@ -151,7 +151,7 @@ void SpectrumDataSource::restrictCol( int & col )
 /**
  *  Convenience method to get all the data at the maximum resolution.
  */
-DataArray* SpectrumDataSource::getDataArray( bool isLogX )
+DataArray_const_sptr SpectrumDataSource::getDataArray( bool isLogX )
 {
   return getDataArray( m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax,
                        m_totalRows, m_totalCols, isLogX );

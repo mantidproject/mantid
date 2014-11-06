@@ -56,7 +56,7 @@ public:
   virtual ~SpectrumPlotItem();
 
   /// Specify the data to be plotted and the color table to use
-  void setData( DataArray*         dataArray,
+  void setData( DataArray_const_sptr dataArray,
                 std::vector<QRgb>* positiveColorTable,
                 std::vector<QRgb>* negativeColorTable );
 
@@ -70,9 +70,9 @@ public:
                     const QRect       & canvasRect) const;
 
 protected:
-  int                   m_bufferID;       // set to 0 or 1 to select buffer
-  DataArray           * m_dataArray0;     // these provide double buffers
-  DataArray           * m_dataArray1;     // for the float data.
+  int m_bufferID;       // set to 0 or 1 to select buffer
+  DataArray_const_sptr m_dataArray0;     // these provide double buffers
+  DataArray_const_sptr m_dataArray1;     // for the float data.
 
 private:
   /* This class just uses the following */

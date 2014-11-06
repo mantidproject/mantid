@@ -4,6 +4,8 @@
 #include <cstddef>
 #include <vector>
 
+#include <boost/shared_ptr.hpp>
+
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
@@ -130,6 +132,9 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER DataArray
     std::vector<float> m_data;
 
 };
+
+typedef boost::shared_ptr<DataArray> DataArray_sptr;
+typedef boost::shared_ptr<const DataArray> DataArray_const_sptr;
 
 } // namespace SpectrumView
 } // namespace MantidQt

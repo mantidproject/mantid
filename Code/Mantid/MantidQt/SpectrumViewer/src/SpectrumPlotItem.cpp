@@ -13,8 +13,8 @@ namespace SpectrumView
  */
 SpectrumPlotItem::SpectrumPlotItem() :
   m_bufferID(0),
-  m_dataArray0(NULL),
-  m_dataArray1(NULL),
+  /* m_dataArray0(NULL), */
+  /* m_dataArray1(NULL), */
   m_positiveColorTable(NULL),
   m_negativeColorTable(NULL),
   m_intensityTable(NULL)
@@ -24,11 +24,6 @@ SpectrumPlotItem::SpectrumPlotItem() :
 
 SpectrumPlotItem::~SpectrumPlotItem()
 {
-  if(m_dataArray0)
-    delete m_dataArray0;
-
-  if(m_dataArray1)
-    delete m_dataArray1;
 }
 
 
@@ -45,30 +40,22 @@ SpectrumPlotItem::~SpectrumPlotItem()
  *                            must have the same number of entries as the
  *                            positive color table.
  */
-void SpectrumPlotItem::setData( DataArray*         dataArray,
+void SpectrumPlotItem::setData( DataArray_const_sptr dataArray,
                                 std::vector<QRgb>* positiveColorTable,
                                 std::vector<QRgb>* negativeColorTable )
 {
   if ( m_bufferID == 0 )
   {
-    if ( m_dataArray1 )         // we must be done using array 1, so delete it
-    {
-      delete m_dataArray1;
-    }
     m_dataArray1 = dataArray;  // put new data in array 1, and switch to it
-                                // leaving array 0 intact for now, in case it's
-                                // being drawn.
+                               // leaving array 0 intact for now, in case it's
+                               // being drawn.
     m_bufferID = 1;
   }
   else
   {
-    if ( m_dataArray0 )         // we must be done using array 0, so delete it
-    {
-      delete m_dataArray0;
-    }
     m_dataArray0 = dataArray;  // put new data in array 0, and switch to it
-                                // leaving array 1 intact for now, in case it's
-                                // being drawn.
+                               // leaving array 1 intact for now, in case it's
+                               // being drawn.
     m_bufferID = 0;
   }
 
@@ -115,7 +102,7 @@ void SpectrumPlotItem::draw(QPainter    * painter,
   if(!m_positiveColorTable)
     return;
 
-  DataArray* dataArray;
+  DataArray_const_sptr dataArray;
   if ( m_bufferID == 0 )
     dataArray = m_dataArray0;
   else

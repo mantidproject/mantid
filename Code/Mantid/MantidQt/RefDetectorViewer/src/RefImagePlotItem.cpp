@@ -32,16 +32,16 @@ RefImagePlotItem::~RefImagePlotItem()
  *                      parameter is NOT USED by the SpectrumPlotItem, but is
  *                      passed in when QWT calls this method.
  */
-void RefImagePlotItem::draw(       QPainter    * painter,
-                          const QwtScaleMap & xMap,
-                          const QwtScaleMap & yMap,
-                          const QRect       & canvasRect) const
+void RefImagePlotItem::draw( QPainter    * painter,
+                       const QwtScaleMap & xMap,
+                       const QwtScaleMap & yMap,
+                       const QRect       & canvasRect) const
 {
   SpectrumPlotItem::draw(painter,xMap,yMap,canvasRect);
 
   //////////////////////////////////////////////////////////////////////////////////
   // TODO: Eliminate the code duplication (from SpectrumPlotItem::draw) in this section
-  SpectrumView::DataArray* data_array;
+  SpectrumView::DataArray_const_sptr data_array;
   if ( m_bufferID == 0 )
     data_array = m_dataArray0;
   else

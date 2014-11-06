@@ -91,16 +91,16 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDataSource
     /// Get a DataArray roughly spaning the specified rectangle.  NOTE: The
     /// actual size and number of steps returned in the DataArray will be
     /// adjusted to match the underlying data.
-    virtual DataArray* getDataArray( double  xMin,
-                                     double  xMax,
-                                     double  yMin,
-                                     double  yMax,
-                                     size_t  nRows,
-                                     size_t  nCols,
-                                     bool    isLogX ) = 0;
+    virtual DataArray_const_sptr getDataArray( double  xMin,
+                                               double  xMax,
+                                               double  yMin,
+                                               double  yMax,
+                                               size_t  nRows,
+                                               size_t  nCols,
+                                               bool    isLogX ) = 0;
 
     /// Convenience method to get data covering the full range at max resolution
-    virtual DataArray* getDataArray( bool is_log_x );
+    virtual DataArray_const_sptr getDataArray( bool is_log_x );
 
     /// Get list of pairs of strings with info about the data at location x, y
     virtual void getInfoList( double x,
