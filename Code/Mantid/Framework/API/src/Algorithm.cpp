@@ -195,16 +195,14 @@ namespace Mantid
     */
     void Algorithm::addObserver(const Poco::AbstractObserver& observer)const
     {
-      const Poco::AbstractObserver* o = &observer;
+      auto it = std::find(m_externalObservers.begin(), m_externalObservers.end(), &observer);
 
-      for(auto it = m_externalObservers.begin(); it != m_externalObservers.end(); ++it)
+      // Add the observer if it is not in the list of observers already added
+      if(it == m_externalObservers.end())
       {
-        if(*it == o)
-          return;
+        notificationCenter().addObserver(observer);
+        m_externalObservers.push_back(&observer);
       }
-
-      notificationCenter().addObserver(observer);
-      m_externalObservers.push_back(o);
     }
 
     /**  Remove an observer
@@ -212,19 +210,10 @@ namespace Mantid
     */
     void Algorithm::removeObserver(const Poco::AbstractObserver& observer)const
     {
-      bool found = false;
+      auto it = std::find(m_externalObservers.begin(), m_externalObservers.end(), &observer);
 
-      auto it = m_externalObservers.begin();
-      for(; it != m_externalObservers.end(); ++it)
-      {
-        if(*it == &observer)
-        {
-          found = true;
-          break;
-        }
-      }
-
-      if(found)
+      // Remove the observer if it is in the list of observers already added
+      if(it != m_externalObservers.end())
       {
         notificationCenter().removeObserver(observer);
         m_externalObservers.erase(it);
