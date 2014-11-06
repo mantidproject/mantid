@@ -34,12 +34,12 @@ RefRangeHandler::RefRangeHandler( Ui_RefImageViewer* ivUI ) : m_ivUI(ivUI)
  *
  * @param dataSource  SpectrumDataSource that provides the data to be drawn
  */
-void RefRangeHandler::configureRangeControls( SpectrumDataSource* data_source )
+void RefRangeHandler::configureRangeControls( SpectrumDataSource_sptr dataSource )
 {
   // X axis
-  m_totalMinX   = data_source->getXMin();
-  m_totalMaxX   = data_source->getXMax();
-  m_totalNSteps = data_source->getNCols();
+  m_totalMinX   = dataSource->getXMin();
+  m_totalMaxX   = dataSource->getXMax();
+  m_totalNSteps = dataSource->getNCols();
 
   double defaultStepX = (m_totalMaxX - m_totalMinX) / (double)m_totalNSteps;
   if(m_totalNSteps > 2000)
@@ -48,9 +48,9 @@ void RefRangeHandler::configureRangeControls( SpectrumDataSource* data_source )
   setRange(m_totalMinX, m_totalMaxX, defaultStepX, 'x');
 
   // Y axis
-  m_totalMinY   = data_source->getYMin();
-  m_totalMaxY   = data_source->getYMax();
-  m_totalNSteps = data_source->getNCols();
+  m_totalMinY   = dataSource->getYMin();
+  m_totalMaxY   = dataSource->getYMax();
+  m_totalNSteps = dataSource->getNCols();
 
   double defaultStepY = (m_totalMaxY - m_totalMinY) / (double)m_totalNSteps;
   if(m_totalNSteps > 2000)

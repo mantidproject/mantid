@@ -58,10 +58,11 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wpsName,
       data[px * sz + tof] = static_cast<float>(yAxis[tof]);
   }
 
-  SpectrumView::ArrayDataSource* source = new SpectrumView::ArrayDataSource(totalXMin, totalXMax,
-                                                                            totalYMin, totalYMax,
-                                                                            totalRows, totalCols,
-                                                                            data);
+  SpectrumView::ArrayDataSource_sptr source =
+    SpectrumView::ArrayDataSource_sptr( new SpectrumView::ArrayDataSource(totalXMin, totalXMax,
+                                                                          totalYMin, totalYMax,
+                                                                          totalRows, totalCols,
+                                                                          data) );
 
   m_imageView = new RefImageView( source,
                                   peakMin, peakMax,

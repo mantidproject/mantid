@@ -33,7 +33,7 @@ RangeHandler::RangeHandler( Ui_SpectrumViewer* svUI )
  *
  * @param dataSource  SpectrumDataSource that provides the data to be drawn
  */
-void RangeHandler::configureRangeControls( SpectrumDataSource* dataSource )
+void RangeHandler::configureRangeControls( SpectrumDataSource_sptr dataSource )
 {
   m_totalMinX   = dataSource->getXMin();
   m_totalMaxX   = dataSource->getXMax();

@@ -55,7 +55,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER GraphDisplay
    ~GraphDisplay();
 
    /// Set the source of information for the table of position information
-   void setDataSource( SpectrumDataSource* dataSource );
+   void setDataSource( SpectrumDataSource_sptr dataSource );
 
    /// Set the actual data that will be displayed on the graph
    void setData( const QVector<double> & xData,
@@ -81,7 +81,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER GraphDisplay
    QwtPlot            * m_graphPlot;
    QwtPlotCurve       * m_curve;
    QTableWidget       * m_graphTable;
-   SpectrumDataSource * m_dataSource;
+   SpectrumDataSource_sptr m_dataSource;
 
    bool   m_isVertical;
    bool   m_isLogX;

@@ -70,7 +70,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      void setupSpectrumPlotItem();
 
      /// Set the source of the image data and information for the table
-     void setDataSource( SpectrumDataSource* dataSource );
+     void setDataSource( SpectrumDataSource_sptr dataSource );
 
      /// Rebuild the scroll bars and image due to change of xmin, xmax, step
      void updateRange();
@@ -126,7 +126,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      std::vector<QRgb>    m_negativeColorTable;
      std::vector<double>  m_intensityTable;
 
-     SpectrumDataSource*  m_dataSource;
+     SpectrumDataSource_sptr m_dataSource;
      DataArray_const_sptr m_dataArray;
 
      QwtPlot*             m_spectrumPlot;

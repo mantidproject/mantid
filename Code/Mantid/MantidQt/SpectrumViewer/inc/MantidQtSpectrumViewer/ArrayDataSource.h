@@ -78,6 +78,9 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ArrayDataSource: public SpectrumDataSou
 
 };
 
+typedef boost::shared_ptr<ArrayDataSource> ArrayDataSource_sptr;
+typedef boost::shared_ptr<const ArrayDataSource> ArrayDataSource_const_sptr;
+
 } // namespace SpectrumView
 } // namespace MantidQt
 

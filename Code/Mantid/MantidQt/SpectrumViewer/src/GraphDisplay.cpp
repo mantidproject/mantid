@@ -30,7 +30,6 @@ GraphDisplay::GraphDisplay( QwtPlot*      graphPlot,
   m_graphPlot(graphPlot),
   m_curve(new QwtPlotCurve("Curve 1")),
   m_graphTable(graphTable),
-  m_dataSource(NULL),
   m_isVertical(isVertical),
   m_isLogX(false),
   m_imageX(0.0), m_imageY(0.0),
@@ -54,7 +53,7 @@ GraphDisplay::~GraphDisplay()
  * @param dataSource The SpectrumDataSource that provides information for
  *                   the table.
  */
-void GraphDisplay::setDataSource( SpectrumDataSource* dataSource )
+void GraphDisplay::setDataSource( SpectrumDataSource_sptr dataSource )
 {
   m_dataSource = dataSource;
 }

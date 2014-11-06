@@ -41,7 +41,7 @@ public:
   virtual ~IRangeHandler() {}
 
   /// Configure min, max and step controls for the specified data source
-  virtual void configureRangeControls( SpectrumDataSource* dataSource ) = 0;
+  virtual void configureRangeControls( SpectrumDataSource_sptr dataSource ) = 0;
 
   /// Get the range of data to display in the image, from GUI controls
   virtual void getRange( double &min, double &max, double &step ) = 0;

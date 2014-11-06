@@ -51,8 +51,8 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefSliderHandler : public SpectrumVi
     RefSliderHandler( Ui_RefImageViewer* ivUI );
 
     /// Configure the image scrollbars for the specified data and drawing area
-    void configureSliders( QRect                              drawArea,
-                           SpectrumView::SpectrumDataSource*  dataSource );
+    void configureSliders( QRect drawArea,
+                           SpectrumView::SpectrumDataSource_sptr dataSource );
 
     /// Configure the horizontal scrollbar to cover the specified range
     void configureHSlider( int nDataSteps,

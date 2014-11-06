@@ -25,8 +25,8 @@ RefSliderHandler::RefSliderHandler( Ui_RefImageViewer* ivUI ) : m_ivUI(ivUI)
  *                    be drawn
  * @param dataSource  SpectrumDataSource that provides the data to be drawn
  */
-void RefSliderHandler::configureSliders( QRect                             drawArea,
-                                         SpectrumView::SpectrumDataSource* dataSource )
+void RefSliderHandler::configureSliders( QRect drawArea,
+                                         SpectrumView::SpectrumDataSource_sptr dataSource )
 {
   QScrollBar* v_scroll = m_ivUI->imageVerticalScrollBar;
   int n_rows = (int)dataSource->getNRows();

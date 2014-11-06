@@ -28,8 +28,8 @@ SliderHandler::SliderHandler( Ui_SpectrumViewer* svUI )
  *                    be drawn
  * @param dataSource  SpectrumDataSource that provides the data to be drawn
  */
-void SliderHandler::reConfigureSliders( QRect               drawArea,
-                                        SpectrumDataSource* dataSource )
+void SliderHandler::reConfigureSliders( QRect drawArea,
+                                        SpectrumDataSource_sptr dataSource )
 {
   QScrollBar* vScroll = m_svUI->imageVerticalScrollBar;
 
@@ -50,8 +50,8 @@ void SliderHandler::reConfigureSliders( QRect               drawArea,
  *                    be drawn
  * @param dataSource  SpectrumDataSource that provides the data to be drawn
  */
-void SliderHandler::configureSliders( QRect               drawArea,
-                                      SpectrumDataSource* dataSource )
+void SliderHandler::configureSliders( QRect drawArea,
+                                      SpectrumDataSource_sptr dataSource )
 {
   QScrollBar* vScroll = m_svUI->imageVerticalScrollBar;
   int numRows = (int)dataSource->getNRows();

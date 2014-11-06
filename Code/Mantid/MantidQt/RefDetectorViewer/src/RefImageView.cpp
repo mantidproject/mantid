@@ -32,7 +32,7 @@ namespace RefDetectorViewer
  *  @param tofMin      The min time of flight value
  *  @param tofMax      The max time of flight value
  */
-RefImageView::RefImageView( SpectrumView::SpectrumDataSource* dataSource,
+RefImageView::RefImageView( SpectrumView::SpectrumDataSource_sptr dataSource,
                             int peakMin, int peakMax,
                             int backMin, int backMax,
                             int tofMin,  int tofMax)
@@ -48,11 +48,8 @@ RefImageView::RefImageView( SpectrumView::SpectrumDataSource* dataSource,
                                                // destructor and clean up
   window->setWindowTitle(QString::fromUtf8("Reflector Detector Viewer"));
 
-  RefSliderHandler* slider_handler = new RefSliderHandler( m_ui );
-  m_sliderHandler = slider_handler;
-
-  RefRangeHandler* range_handler = new RefRangeHandler( m_ui );
-  m_rangeHandler = range_handler;
+  m_sliderHandler = new RefSliderHandler( m_ui );
+  m_rangeHandler = new RefRangeHandler( m_ui );
 
   // Create the handler for comminicating peak/background/tof values to/from the ui
   // This ends up being owned by the RefImagePlotItem instance
@@ -62,8 +59,8 @@ RefImageView::RefImageView( SpectrumView::SpectrumDataSource* dataSource,
   m_vGraph = new SpectrumView::GraphDisplay( m_ui->v_graphPlot, NULL, true );
 
   m_imageDisplay = new RefImageDisplay( m_ui->imagePlot,
-                                        slider_handler,
-                                        range_handler,
+                                        m_sliderHandler,
+                                        m_rangeHandler,
                                         limits_handler,
                                         m_hGraph, m_vGraph,
                                         m_ui->image_table);
@@ -99,9 +96,6 @@ RefImageView::RefImageView( SpectrumView::SpectrumDataSource* dataSource,
 
 RefImageView::~RefImageView()
 {
-  delete m_hGraph;
-  delete m_vGraph;
-
   delete m_imageDisplay;
   delete m_sliderHandler;
   delete m_rangeHandler;

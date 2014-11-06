@@ -5,7 +5,6 @@
 
 #include "MantidQtSpectrumViewer/DataArray.h"
 #include "MantidQtSpectrumViewer/SpectrumDataSource.h"
-#include "MantidQtSpectrumViewer/EModeHandler.h"
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -44,6 +43,7 @@ namespace MantidQt
 {
 namespace SpectrumView
 {
+class EModeHandler;
 
 class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource: public SpectrumDataSource
 {
@@ -94,6 +94,9 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource: public SpectrumData
     EModeHandler* m_emodeHandler;
 
 };
+
+typedef boost::shared_ptr<MatrixWSDataSource> MatrixWSDataSource_sptr;
+typedef boost::shared_ptr<const MatrixWSDataSource> MatrixWSDataSource_const_sptr;
 
 } // namespace SpectrumView
 } // namespace MantidQt

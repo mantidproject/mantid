@@ -9,6 +9,7 @@
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
 #include "MantidQtSpectrumViewer/SpectrumDataSource.h"
+#include "MantidQtSpectrumViewer/MatrixWSDataSource.h"
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
@@ -81,13 +82,13 @@ protected:
   void afterReplaceHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
 
 private:
-  void init(SpectrumDataSource* dataSource);
-  void updateHandlers(SpectrumDataSource* dataSource);
+  void init(SpectrumDataSource_sptr dataSource);
+  void updateHandlers(SpectrumDataSource_sptr dataSource);
 
-  GraphDisplay*    m_hGraph;
-  GraphDisplay*    m_vGraph;
+  GraphDisplay* m_hGraph;
+  GraphDisplay* m_vGraph;
 
-  MatrixWSDataSource *m_dataSource;
+  MatrixWSDataSource_sptr m_dataSource;
 
   Ui::SpectrumViewer *m_ui;
   SliderHandler      *m_sliderHandler;

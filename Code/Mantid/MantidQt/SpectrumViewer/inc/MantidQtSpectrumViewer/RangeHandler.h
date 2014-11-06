@@ -48,7 +48,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER RangeHandler : public IRangeHandler
     RangeHandler( Ui_SpectrumViewer* svUI );
 
     /// Configure min, max and step controls for the specified data source
-    void configureRangeControls( SpectrumDataSource* dataSource );
+    void configureRangeControls( SpectrumDataSource_sptr dataSource );
 
     /// Get the range of data to display in the image, from GUI controls
     void getRange( double &min, double &max, double &step );

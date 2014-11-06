@@ -27,7 +27,6 @@ namespace SpectrumView
 SpectrumView::SpectrumView(QWidget *parent) :
   QMainWindow(parent, 0),
   WorkspaceObserver(),
-  m_dataSource(NULL),
   m_ui(new Ui::SpectrumViewer()),
   m_sliderHandler(NULL),
   m_rangeHandler(NULL),
@@ -41,17 +40,8 @@ SpectrumView::SpectrumView(QWidget *parent) :
 
 SpectrumView::~SpectrumView()
 {
-//  std::cout << "SpectrumView destructor called" << std::endl;
-
-  delete m_hGraph;
-  delete m_vGraph;
-
-  delete m_ui;
-  delete m_sliderHandler;
-  delete m_rangeHandler;
   delete m_spectrumDisplay;
   delete m_svConnections;
-  delete m_dataSource;
 
   if(m_emodeHandler)
     delete m_emodeHandler;
@@ -62,9 +52,6 @@ void SpectrumView::resizeEvent(QResizeEvent * event)
 {
   QMainWindow::resizeEvent(event);
 
-  if(m_dataSource)
-    m_spectrumDisplay->handleResize();
-
   if(m_svConnections)
     m_svConnections->imageSplitterMoved();
 }
@@ -72,7 +59,7 @@ void SpectrumView::resizeEvent(QResizeEvent * event)
 
 void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
 {
-  m_dataSource = new MatrixWSDataSource(wksp);
+  m_dataSource = MatrixWSDataSource_sptr(new MatrixWSDataSource(wksp));
   updateHandlers(m_dataSource);
 
   // Watch for the deletion of the associated workspace
@@ -95,7 +82,7 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
                                            m_sliderHandler,
                                            m_rangeHandler,
                                            m_hGraph, m_vGraph,
-                                           m_ui->image_table );
+                                           m_ui->image_table);
 
   m_svConnections = new SVConnections( m_ui, this, m_spectrumDisplay,
                                        m_hGraph, m_vGraph );
@@ -105,14 +92,15 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
 
 
 /// Setup the various handlers (energy-mode, slider, range)
-void SpectrumView::updateHandlers(SpectrumDataSource* dataSource)
+void SpectrumView::updateHandlers(SpectrumDataSource_sptr dataSource)
 {
   // If we have a MatrixWSDataSource give it the handler for the
   // EMode, so the user can set EMode and EFixed.  NOTE: we could avoid
   // this type checking if we made the ui in the calling code and passed
   // it in.  We would need a common base class for this class and
   // the ref-viewer UI.
-  MatrixWSDataSource* matrixWsDataSource = dynamic_cast<MatrixWSDataSource*>( dataSource );
+  MatrixWSDataSource_sptr matrixWsDataSource = boost::dynamic_pointer_cast<MatrixWSDataSource>( dataSource );
+
   if ( matrixWsDataSource != NULL )
   {
     m_emodeHandler = new EModeHandler( m_ui );

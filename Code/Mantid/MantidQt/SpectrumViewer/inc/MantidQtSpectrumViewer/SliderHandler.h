@@ -51,12 +51,12 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SliderHandler : public ISliderHandler
     SliderHandler( Ui_SpectrumViewer* svUI );
 
     /// Configure the image scrollbars for the specified data and drawing area
-    void configureSliders( QRect               drawArea,
-                           SpectrumDataSource* dataSource );
+    void configureSliders( QRect drawArea,
+                           SpectrumDataSource_sptr dataSource );
 
     /// Configure the image scrollbars for the specified drawing area
-    void reConfigureSliders( QRect               drawArea,
-                             SpectrumDataSource* dataSource );
+    void reConfigureSliders( QRect drawArea,
+                             SpectrumDataSource_sptr dataSource );
 
     /// Configure the horizontal scrollbar to cover the specified range
     void configureHSlider( int nDataSteps,

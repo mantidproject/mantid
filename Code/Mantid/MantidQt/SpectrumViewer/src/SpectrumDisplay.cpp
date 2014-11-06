@@ -94,7 +94,7 @@ void SpectrumDisplay::setupSpectrumPlotItem()
  * @param dataSource The SpectrumDataSource that provides the array of values
  *                    and information for the table.
  */
-void SpectrumDisplay::setDataSource( SpectrumDataSource* dataSource )
+void SpectrumDisplay::setDataSource( SpectrumDataSource_sptr dataSource )
 {
   m_dataSource = dataSource;
 
