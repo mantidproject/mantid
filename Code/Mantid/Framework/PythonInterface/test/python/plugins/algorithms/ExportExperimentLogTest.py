@@ -20,10 +20,10 @@ class ExportExperimentLogTest(unittest.TestCase):
         # Test algorithm
         alg_test = run_algorithm("ExportExperimentLog",
             InputWorkspace = "TestMatrixWS",
-            OutputFilename = "TestRecord.txt",
-            SampleLogNames = ["run_number", "duration", "proton_charge"],
-            SampleLogTitles = ["RUN", "Duration", "ProtonCharge"],
-            SampleLogOperation = [None, None, "sum"],
+            OutputFilename = "TestRecord001.txt",
+            SampleLogNames = ["run_number", "duration", "proton_charge", "proton_charge", "proton_charge"],
+            SampleLogTitles = ["RUN", "Duration", "ProtonCharge", "MinPCharge", "MeanPCharge"],
+            SampleLogOperation = [None, None, "sum", "min", "average"],
             FileMode = "new")
 
         # Validate
@@ -51,7 +51,22 @@ class ExportExperimentLogTest(unittest.TestCase):
         # Check line
         firstdataline = lines[1]
         terms = firstdataline.strip().split("\t")
-        self.assertEquals(len(terms), 3)
+        self.assertEquals(len(terms), 5)
+
+        # Get property
+        pchargelog = ws.getRun().getProperty("proton_charge").value
+        sumpcharge = numpy.sum(pchargelog)
+        minpcharge = numpy.min(pchargelog)
+        avgpcharge = numpy.average(pchargelog)
+
+        v2 = float(terms[2])
+        self.assertAlmostEqual(sumpcharge, v2)
+        v3 = float(terms[3])
+        self.assertAlmostEqual(minpcharge, v3)
+        v4 = float(terms[4])
+        self.assertAlmostEqual(avgpcharge, v4)
+
+
 
         #
         # # Remove generated files
