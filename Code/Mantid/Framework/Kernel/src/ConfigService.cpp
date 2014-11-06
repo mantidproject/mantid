@@ -1272,9 +1272,9 @@ std::string ConfigServiceImpl::getTempDir()
 */
 std::string ConfigServiceImpl::getAppDataDir()
 {
-  const std::string vendorName = "mantidproject"; 
   const std::string applicationName = "mantid";
 #if POCO_OS == POCO_OS_WINDOWS_NT
+  const std::string vendorName = "mantidproject"; 
   std::string appdata = std::getenv("APPDATA");
   Poco::Path path(appdata);
   path.makeDirectory();
