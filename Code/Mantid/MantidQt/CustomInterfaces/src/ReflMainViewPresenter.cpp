@@ -1171,7 +1171,7 @@ namespace MantidQt
         m_model->setData(m_model->index(index, COL_GROUP), groupId);
 
         //If we can, let's try to extract theta from the description
-        if(description.contains("th=") || description.contains(" theta"))
+        if(m_options["TransferExtractTheta"].toBool())
         {
           static boost::regex shortTheta("th=([0-9.]+)");
           static boost::regex longTheta("in ([0-9.]+) theta");
@@ -1236,6 +1236,7 @@ namespace MantidQt
       m_options["RoundQMinPrecision"] = 3;
       m_options["RoundQMaxPrecision"] = 3;
       m_options["RoundDQQPrecision"] = 3;
+      m_options["TransferExtractTheta"] = true;
 
       //Load saved values from disk
       QSettings settings;
