@@ -93,7 +93,7 @@ namespace Mantid
       int nSpectra = static_cast<int>(m_ws->getNumberHistograms());
       m_nBins = static_cast<int>(m_ws->blocksize());
       m_isHistogram = m_ws->isHistogramData();
-      m_isCommonBins = m_ws->isCommonBins(); //checking for ragged workspace
+      //m_isCommonBins = m_ws->isCommonBins(); //checking for ragged workspace
       m_writeID = getProperty("WriteSpectrumID");
       if (nSpectra != 1) m_writeID = true;
 
@@ -246,12 +246,12 @@ namespace Mantid
       
       for(int bin=0;bin<m_nBins;bin++)                                                                                                                                                                                                                                                                     
       {
-        if (!m_isCommonBins) //checking for ragged workspace
-        {
-          file << m_ws->readX(*spectraItr)[bin];
-        }
+        //if (!m_isCommonBins) //checking for ragged workspace
+        //{
+        //  file << m_ws->readX(*spectraItr)[bin];
+        //}
 
-        if (m_isHistogram  & m_isCommonBins) // bin centres
+        if (m_isHistogram  ) // bin centres,& m_isCommonBins
         {
           file << ( m_ws->readX(0)[bin] + m_ws->readX(0)[bin+1] )/2; 
         }
@@ -294,14 +294,14 @@ namespace Mantid
 
       for(int bin=0;bin<m_nBins;bin++)
       {
-        if (m_isHistogram & m_isCommonBins) // bin centres
+        if (m_isHistogram ) // bin centres, & m_isCommonBins
         {
           file << ( m_ws->readX(0)[bin] + m_ws->readX(0)[bin+1] )/2;
         }
-        if (!m_isCommonBins) //checking for ragged workspace
-        {
-          file << m_ws->readX(spectraIndex)[bin];
-        }
+        //if (!m_isCommonBins) //checking for ragged workspace
+        //{
+        //  file << m_ws->readX(spectraIndex)[bin];
+        //}
         else // data points
         {
           file << m_ws->readX(0)[bin];
