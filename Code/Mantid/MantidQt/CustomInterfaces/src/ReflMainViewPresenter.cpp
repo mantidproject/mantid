@@ -1157,7 +1157,7 @@ namespace MantidQt
     /** Transfers the selected runs in the search results to the processing table */
     void ReflMainViewPresenter::transfer()
     {
-      m_view->giveUserInfo("You hit transfer", "Transfer");
+      m_view->giveUserInfo("You hit transfer with " + boost::lexical_cast<std::string>(m_view->getSelectedSearchRows().size()) + " rows selected.", "Transfer");
     }
 
     /** Shows the Refl Options dialog */

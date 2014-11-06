@@ -38,6 +38,7 @@ public:
   MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
   MOCK_METHOD1(setSelection, void(const std::set<int>& rows));
   MOCK_CONST_METHOD0(getSelectedRows, std::set<int>());
+  MOCK_CONST_METHOD0(getSelectedSearchRows, std::set<int>());
   MOCK_METHOD1(setClipboard, void(const std::string& text));
   MOCK_CONST_METHOD0(getClipboard, std::string());
   MOCK_CONST_METHOD0(getSearchString, std::string());

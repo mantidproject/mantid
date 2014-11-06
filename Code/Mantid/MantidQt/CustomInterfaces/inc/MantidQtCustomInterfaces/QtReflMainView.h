@@ -74,6 +74,7 @@ namespace MantidQt
 
       //Accessor methods
       virtual std::set<int> getSelectedRows() const;
+      virtual std::set<int> getSelectedSearchRows() const;
       virtual std::string getSearchInstrument() const;
       virtual std::string getProcessInstrument() const;
       virtual std::string getWorkspaceToOpen() const;

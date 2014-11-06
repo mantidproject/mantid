@@ -425,15 +425,35 @@ namespace MantidQt
 
     /**
     Get the indices of the highlighted rows
-    @returns a vector of unsigned ints contianing the highlighted row numbers
+    @returns a set of ints containing the highlighted row numbers
     */
     std::set<int> QtReflMainView::getSelectedRows() const
     {
-      auto selectedRows = ui.viewTable->selectionModel()->selectedRows();
       std::set<int> rows;
-      for(auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
-        rows.insert(it->row());
+      auto selectionModel = ui.viewTable->selectionModel();
+      if(selectionModel)
+      {
+        auto selectedRows = selectionModel->selectedRows();
+        for(auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
+          rows.insert(it->row());
+      }
+      return rows;
+    }
 
+    /**
+    Get the indices of the highlighted search result rows
+    @returns a set of ints containing the selected row numbers
+    */
+    std::set<int> QtReflMainView::getSelectedSearchRows() const
+    {
+      std::set<int> rows;
+      auto selectionModel = ui.tableSearchResults->selectionModel();
+      if(selectionModel)
+      {
+        auto selectedRows = selectionModel->selectedRows();
+        for(auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
+          rows.insert(it->row());
+      }
       return rows;
     }
 
