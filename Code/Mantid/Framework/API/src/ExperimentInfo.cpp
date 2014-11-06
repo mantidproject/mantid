@@ -817,7 +817,7 @@ namespace API
     std::string instrument(Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
 
     // Get the search directory for XML instrument definition files (IDFs)
-    std::vector<std::string> directoryNames = Kernel::ConfigService::Instance().getInstrumentDirectories();
+    const std::vector<std::string>& directoryNames = Kernel::ConfigService::Instance().getInstrumentDirectories();
 
     boost::regex regex(instrument+"_Definition.*\\.xml", boost::regex_constants::icase);
     Poco::DirectoryIterator end_iter;
