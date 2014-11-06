@@ -1146,21 +1146,7 @@ void ConfigDialog::initDirSearchTab()
 
   connect( button, SIGNAL(clicked()), this, SLOT(addInstrumentDir()) );
 
-  /// parameterDefinition.directory
-  label = new QLabel(tr("Parameter definitions"));
-  grid->addWidget(label, 3, 0);
-
-  str = Mantid::Kernel::ConfigService::Instance().getString("parameterDefinition.directory");
-  leParameterDir = new QLineEdit();
-  leParameterDir->setText(QString::fromStdString(str));
-  grid->addWidget(leParameterDir, 3, 1);
-
-  button = new QPushButton();
-  button->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
-  grid->addWidget(button, 3, 2);
-
-  connect( button, SIGNAL(clicked()), this, SLOT(addParameterDir()) );
-  grid->setRowStretch(4,1);
+  grid->setRowStretch(3,1);
 }
 
 void ConfigDialog::initCurveFittingTab()
@@ -2227,10 +2213,6 @@ void ConfigDialog::updateDirSearchSettings()
   setting.replace('\\','/');
   mantid_config.setString("instrumentDefinition.directory",setting.toStdString());
 
-  setting = leParameterDir->text();
-  setting.replace('\\','/');
-  mantid_config.setString("parameterDefinition.directory",setting.toStdString());
-
 }
 
 void ConfigDialog::updateCurveFitSettings()
@@ -2634,13 +2616,4 @@ void ConfigDialog::addInstrumentDir()
   }
 }
 
-void ConfigDialog::addParameterDir()
-{
-  QString dir = QFileDialog::getExistingDirectory(this, tr("Select new parameter definition directory"),
-    "", 0);
-  if (!dir.isEmpty())
-  {
-    leParameterDir->setText(dir);
-  }
-}
 

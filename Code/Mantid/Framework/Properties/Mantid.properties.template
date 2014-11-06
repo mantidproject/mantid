@@ -37,9 +37,6 @@ python.plugins.directories = @PYTHONPLUGIN_DIRS@
 # Where to load instrument definition files from
 instrumentDefinition.directory = @MANTID_ROOT@/instrument
 
-# Where to load parameter definition files from
-parameterDefinition.directory = @MANTID_ROOT@/instrument
-
 # Where to load Grouping files (that are shipped with Mantid) from
 groupingFiles.directory = @MANTID_ROOT@/instrument/Grouping
 
