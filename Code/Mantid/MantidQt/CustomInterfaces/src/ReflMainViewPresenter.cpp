@@ -1145,8 +1145,8 @@ namespace MantidQt
       try
       {
         auto results = m_searcher->search(m_view->getSearchString(), m_view->getSearchInstrument());
-        ReflSearchModel_sptr model(new ReflSearchModel(results));
-        m_view->showSearch(model);
+        m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(results));
+        m_view->showSearch(m_searchModel);
       }
       catch(std::runtime_error& e)
       {
@@ -1157,7 +1157,31 @@ namespace MantidQt
     /** Transfers the selected runs in the search results to the processing table */
     void ReflMainViewPresenter::transfer()
     {
-      m_view->giveUserInfo("You hit transfer with " + boost::lexical_cast<std::string>(m_view->getSelectedSearchRows().size()) + " rows selected.", "Transfer");
+      int groupId = getUnusedGroup();
+      auto rows = m_view->getSelectedSearchRows();
+      for(auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt)
+      {
+        const int row = *rowIt;
+        const QString run = m_searchModel->data(m_searchModel->index(row, 0)).toString();
+        const QString description = m_searchModel->data(m_searchModel->index(row, 1)).toString();
+
+        int index = m_model->rowCount();
+        insertRow(index);
+        m_model->setData(m_model->index(index, COL_RUNS), run);
+        m_model->setData(m_model->index(index, COL_GROUP), groupId);
+
+        //If we can, let's try to extract theta from the description
+        if(description.contains("th=") || description.contains(" theta"))
+        {
+          static boost::regex shortTheta("th=([0-9.]+)");
+          static boost::regex longTheta("in ([0-9.]+) theta");
+          boost::smatch matches;
+
+          if(boost::regex_search(description.toStdString(), matches, shortTheta)
+          || boost::regex_search(description.toStdString(), matches, longTheta))
+            m_model->setData(m_model->index(index, COL_ANGLE), QString::fromStdString(matches[1].str()));
+        }
+      }
     }
 
     /** Shows the Refl Options dialog */

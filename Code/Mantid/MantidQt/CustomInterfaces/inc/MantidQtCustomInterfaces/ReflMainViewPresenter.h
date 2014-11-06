@@ -54,8 +54,9 @@ namespace MantidQt
     protected:
       //the workspace the model is currently representing
       Mantid::API::ITableWorkspace_sptr m_ws;
-      //the model the table is currently representing
+      //the models
       QReflTableModel_sptr m_model;
+      ReflSearchModel_sptr m_searchModel;
       //the name of the workspace/table/model in the ADS, blank if unsaved
       std::string m_wsName;
       //the view we're managing
