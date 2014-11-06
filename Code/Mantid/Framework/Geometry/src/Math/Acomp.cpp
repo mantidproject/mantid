@@ -1086,9 +1086,11 @@ namespace Mantid
       {
         if (*dx>=0 && DNFscore[*dx]==1)        // EPI (definately)
         {
-          for(px=PIactive.begin();
-            px!=PIactive.end() && !Grid[*px][*dx];++px)
-              ;
+          for(px=PIactive.begin();px!=PIactive.end();++px)
+          {
+           if(Grid[*px][*dx])
+              break;
+          }
 
             EPI.push_back(PIform[*px]);
           // remove all minterm that the EPI covered
@@ -1152,8 +1154,11 @@ namespace Mantid
 
           for(di=0;di<Dsize;di++)   //check each orignal position
           {
-            for(vecI=0;vecI<Icount &&!Cmat[Index[vecI]][di];vecI++)
-                ;
+            for(vecI=0;vecI<Icount;vecI++)
+            {
+              if(Cmat[Index[vecI]][di])
+                  break;
+            }
             if (vecI==Icount)
               break;
           }
