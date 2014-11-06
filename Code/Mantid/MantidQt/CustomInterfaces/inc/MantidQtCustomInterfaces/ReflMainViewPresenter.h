@@ -8,6 +8,7 @@
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/IReflSearcher.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtCustomInterfaces/ReflTransferStrategy.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 
 #include <Poco/AutoPtr.h>
@@ -67,6 +68,7 @@ namespace MantidQt
       std::map<std::string,QVariant> m_options;
       //the search implementation
       boost::shared_ptr<IReflSearcher> m_searcher;
+      boost::shared_ptr<ReflTransferStrategy> m_transferStrategy;
 
       //process selected rows
       virtual void process();

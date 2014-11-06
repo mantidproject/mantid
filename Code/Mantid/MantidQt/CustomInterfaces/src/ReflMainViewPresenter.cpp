@@ -7,6 +7,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Utils.h"
 #include "MantidQtCustomInterfaces/ReflCatalogSearcher.h"
+#include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
@@ -110,6 +111,7 @@ namespace MantidQt
       m_view(view),
       m_tableDirty(false),
       m_searcher(searcher),
+      m_transferStrategy(new ReflLegacyTransferStrategy()),
       m_addObserver(*this, &ReflMainViewPresenter::handleAddEvent),
       m_remObserver(*this, &ReflMainViewPresenter::handleRemEvent),
       m_clearObserver(*this, &ReflMainViewPresenter::handleClearEvent),
@@ -1157,33 +1159,33 @@ namespace MantidQt
     /** Transfers the selected runs in the search results to the processing table */
     void ReflMainViewPresenter::transfer()
     {
-      int groupId = getUnusedGroup();
-      auto rows = m_view->getSelectedSearchRows();
-      for(auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt)
+      //Build the input for the transfer strategy
+      std::map<std::string,std::string> runs;
+      auto selectedRows = m_view->getSelectedSearchRows();
+      for(auto rowIt = selectedRows.begin(); rowIt != selectedRows.end(); ++rowIt)
       {
-        //If the user wants, get a new group id per run
-        if(!m_options["TransferGroupRuns"].toBool())
-          groupId = getUnusedGroup();
         const int row = *rowIt;
-        const QString run = m_searchModel->data(m_searchModel->index(row, 0)).toString();
-        const QString description = m_searchModel->data(m_searchModel->index(row, 1)).toString();
+        const std::string run = m_searchModel->data(m_searchModel->index(row, 0)).toString().toStdString();
+        const std::string description = m_searchModel->data(m_searchModel->index(row, 1)).toString().toStdString();
+        runs[run] = description;
+      }
 
-        int index = m_model->rowCount();
-        insertRow(index);
-        m_model->setData(m_model->index(index, COL_RUNS), run);
-        m_model->setData(m_model->index(index, COL_GROUP), groupId);
+      auto newRows = m_transferStrategy->transferRuns(runs);
 
-        //If we can, let's try to extract theta from the description
-        if(m_options["TransferExtractTheta"].toBool())
-        {
-          static boost::regex shortTheta("th=([0-9.]+)");
-          static boost::regex longTheta("in ([0-9.]+) theta");
-          boost::smatch matches;
+      std::map<std::string,int> groups;
+      for(auto rowIt = newRows.begin(); rowIt != newRows.end(); ++rowIt)
+      {
+        auto& row = *rowIt;
 
-          if(boost::regex_search(description.toStdString(), matches, shortTheta)
-          || boost::regex_search(description.toStdString(), matches, longTheta))
-            m_model->setData(m_model->index(index, COL_ANGLE), QString::fromStdString(matches[1].str()));
-        }
+        if(groups.count(row["group"]) == 0)
+          groups[row["group"]] = getUnusedGroup();
+
+        const int rowIndex = m_model->rowCount();
+        m_model->insertRow(rowIndex);
+        m_model->setData(m_model->index(rowIndex, COL_RUNS), QString::fromStdString(row["runs"]));
+        m_model->setData(m_model->index(rowIndex, COL_ANGLE), QString::fromStdString(row["theta"]));
+        m_model->setData(m_model->index(rowIndex, COL_SCALE), 1.0);
+        m_model->setData(m_model->index(rowIndex, COL_GROUP), groups[row["group"]]);
       }
     }
 

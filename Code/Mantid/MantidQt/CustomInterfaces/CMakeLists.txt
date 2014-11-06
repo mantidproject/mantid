@@ -57,6 +57,7 @@ set ( SRC_FILES
 	src/Quasi.cpp
 	src/RawFileMemento.cpp
 	src/ReflCatalogSearcher.cpp
+	src/ReflLegacyTransferStrategy.cpp
 	src/ReflMainViewPresenter.cpp
 	src/ReflSearchModel.cpp
 	src/ResNorm.cpp
@@ -137,9 +138,11 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
 	inc/MantidQtCustomInterfaces/ReflCatalogSearcher.h
+	inc/MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h
 	inc/MantidQtCustomInterfaces/ReflMainView.h
 	inc/MantidQtCustomInterfaces/ReflMainViewPresenter.h
 	inc/MantidQtCustomInterfaces/ReflSearchModel.h
+	inc/MantidQtCustomInterfaces/ReflTransferStrategy.h
 	inc/MantidQtCustomInterfaces/QReflTableModel.h
 	inc/MantidQtCustomInterfaces/QtReflMainView.h
 	inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
