@@ -42,6 +42,8 @@ class ExportExperimentLog(PythonAlgorithm):
                 "With this option, the posfix of the output file is .csv automatically. "
         self.declareProperty("FileFormat", "tab", mantid.kernel.StringListValidator(fileformates), des)
 
+        self.declareProperty("OrderByTitle", "", "Log file will be ordered by the value of this title from low to high.") 
+
         # Time zone
         timezones = ["UTC", "America/New_York"]
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))
@@ -81,6 +83,10 @@ class ExportExperimentLog(PythonAlgorithm):
         # Append the new experiment log
         self._appendExpLog(valuedict)
 
+        # Order the record file
+        if self._orderRecord is True:
+            self._orderRecordFile()
+
         return
 
     def _processInputs(self):
@@ -109,24 +115,6 @@ class ExportExperimentLog(PythonAlgorithm):
         if len(self._headerTitles) > 0 and len(self._headerTitles) != len(self._sampleLogNames):
             raise NotImplementedError("Input header titles have a different length to sample log names")
 
-        # Determine file mode
-        if os.path.exists(self._logfilename) is False:
-            self._filemode = "new"
-            if len(self._headerTitles) == 0:
-                raise NotImplementedError("Without specifying header title, unable to new a file.")
-        else:
-            self._filemode = self.getProperty("FileMode").value
-
-        # Examine the file mode
-        if self._filemode == "new" or self._filemode == "append":
-            if len(self._headerTitles) != len(self._sampleLogNames):
-                raise NotImplementedError("In mode new or append, there must be same number of sample titles and names")
-
-        self.log().notice("File mode is %s. " % (self._filemode))
-
-        # This is left for a feature that might be needed in future.
-        self._reorderOld = False
-
         # Output file format
         self._fileformat = self.getProperty("FileFormat").value
         if self._fileformat == "tab":
@@ -141,7 +129,39 @@ class ExportExperimentLog(PythonAlgorithm):
                 # Force the extension of the output file to be .csv
                 self._logfilename = "%s.csv" % (fileName)
 
+        # Determine file mode
+        if os.path.exists(self._logfilename) is False:
+            self._filemode = "new"
+            if len(self._headerTitles) == 0:
+                raise NotImplementedError("Without specifying header title, unable to new a file.")
+            self.log().debug("[DB] Log file %s does not exist. So file mode is NEW." % (self._logfilename))
+        else:
+            self._filemode = self.getProperty("FileMode").value
+            self.log().debug("[DB] FileMode is from user specified value.")
+
+        # Examine the file mode
+        if self._filemode == "new" or self._filemode == "append":
+            if len(self._headerTitles) != len(self._sampleLogNames):
+                raise NotImplementedError("In mode new or append, there must be same number of sample titles and names")
+
+        self.log().notice("File mode is %s. " % (self._filemode))
+
+        # This is left for a feature that might be needed in future.
+        self._reorderOld = False
+
+
         self._timezone = self.getProperty("TimeZone").value
+
+        # Determine whether output log-record file should be ordered by value of some log
+        self._orderRecord = False
+        self._titleToOrder = None
+        if self._filemode != "new":
+            ordertitle = self.getProperty("OrderByTitle").value 
+            if ordertitle in self._headerTitles:
+                self._orderRecord = True
+                self.titleToOrder = ordertitle
+            else:
+                self.log().warning("Specified title to order by (%s) is not in given log titles." % (ordertitle))
 
         return
 
@@ -256,12 +276,85 @@ class ExportExperimentLog(PythonAlgorithm):
 
         return
 
+    def _orderRecordFile(self):
+        """ Check and order (if necessary) record file 
+        by value of specified log by title
+        """
+        self.log().notice("[DB] Order Record File!")
+
+        # Read line
+        lfile = open(self._logfilename, "r")
+        lines = lfile.readlines()
+        lfile.close()
+
+        # Create dictionary for the log value
+        titlelines = []
+        linedict = {}
+        ilog = self._headerTitles.index(self.titleToOrder)
+
+        for line in lines:
+            cline = line.strip()
+            if len(cline) == 0:
+                continue
+
+            if cline.startswith(self._headerTitles[0]) is True or cline.startswith('#'):
+                # title line or comment line
+                titlelines.append(line)
+            else:
+                # value line
+                try: 
+                    keyvalue = line.split(self._valuesep)[ilog]
+                except IndexError:
+                    self.log().error("Order record failed.")
+                    return
+                linedict[keyvalue] = line
+            # ENDIFELSE
+        # ENDFOR
+
+        # Check needs to re-order
+        if linedict.keys() != sorted(linedict.keys()):
+            # Re-write file
+            wbuf = ""
+            
+            # title line
+            for line in titlelines:
+                wbuf += line
+
+            # log entry line
+            iline = 0
+            numlines = len(linedict.keys())
+            for ivalue in sorted(linedict.keys()):
+                wbuf += linedict[ivalue]
+                # Add extra \n in case reordered
+                if iline != numlines-1 and wbuf[-1] != '\n':
+                    wbuf += '\n'
+                iline += 1
+            # ENDFOR
+
+            # Last line should not ends with \n
+            if wbuf[-1] == '\n':
+                wbuf = wbuf[0:-1]
+
+            # Remove unsupported character which may cause importing error of GNUMERIC
+            wbuf = wbuf.translate(None, chr(0))
+
+            # Re-write file
+            ofile = open(self._logfilename, "w")
+            ofile.write(wbuf)
+            ofile.close()
+
+        # ENDIF
+
+        return
+
+
     def _reorderExistingFile(self):
         """ Re-order the columns of the existing experimental log file
         """
         raise NotImplementedError("Too complicated")
 
         return
+
 
     def _getSampleLogsValue(self):
         """ From the workspace to get the value
