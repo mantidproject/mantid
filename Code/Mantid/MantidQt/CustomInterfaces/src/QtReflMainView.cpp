@@ -48,6 +48,7 @@ namespace MantidQt
 
       //Custom context menu for table
       connect(ui.viewTable, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+      connect(ui.tableSearchResults, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showSearchContextMenu(const QPoint&)));
 
       //Finally, create a presenter to do the thinking for us
       m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(this));
@@ -269,6 +270,21 @@ namespace MantidQt
       menu->addAction(ui.actionDeleteRow);
 
       menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
+    }
+
+    /**
+    This slot is triggered when the user right clicks on the search results table
+    @param pos : The position of the right click within the table
+    */
+    void QtReflMainView::showSearchContextMenu(const QPoint& pos)
+    {
+      if(!ui.tableSearchResults->indexAt(pos).isValid())
+        return;
+
+      //parent widget takes ownership of QMenu
+      QMenu* menu = new QMenu(this);
+      menu->addAction(ui.actionTransfer);
+      menu->popup(ui.tableSearchResults->viewport()->mapToGlobal(pos));
     }
 
     /**

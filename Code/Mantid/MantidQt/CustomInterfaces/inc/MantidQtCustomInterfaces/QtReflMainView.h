@@ -118,6 +118,7 @@ namespace MantidQt
       void setModel(QString name);
       void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);
       void showContextMenu(const QPoint& pos);
+      void showSearchContextMenu(const QPoint& pos);
     };
 
 
