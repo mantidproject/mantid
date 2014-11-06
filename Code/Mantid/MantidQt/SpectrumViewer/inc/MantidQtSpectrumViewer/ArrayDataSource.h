@@ -49,7 +49,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ArrayDataSource: public SpectrumDataSou
     ArrayDataSource( double total_xmin, double total_xmax,
                      double total_ymin, double total_ymax,
                      size_t total_rows, size_t total_cols,
-                     float* data );
+                     std::vector<float> data );
 
     ~ArrayDataSource();
 
@@ -74,7 +74,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ArrayDataSource: public SpectrumDataSou
                       std::vector<std::string> &list );
 
   private:
-    float* m_data;
+    std::vector<float> m_data;
 
 };
 

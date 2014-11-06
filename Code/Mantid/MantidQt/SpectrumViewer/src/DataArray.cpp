@@ -36,13 +36,13 @@ DataArray::DataArray( double xMin,     double xMax,
                       double yMin,     double yMax,
                       bool   isLogX,
                       size_t nRows,    size_t nCols,
-                      float *data ):
+                      std::vector<float> data ):
   m_xMin(xMin), m_xMax(xMax),
   m_yMin(yMin), m_yMax(yMax),
   m_isLogX(isLogX),
   m_nRows(nRows), m_nCols(nCols),
-  m_data(data),
-  m_dataMin(data[0]), m_dataMax(data[0])
+  m_dataMin(data[0]), m_dataMax(data[0]),
+  m_data(data)
 {
   double value;
   size_t index = 0;
@@ -66,8 +66,6 @@ DataArray::DataArray( double xMin,     double xMax,
 
 DataArray::~DataArray()
 {
-  if(m_data != NULL)
-    delete[] m_data;
 }
 
 /**
@@ -152,7 +150,7 @@ size_t DataArray::getNCols() const
 /**
  * Get the list of all values, packed in a 1-D array, in row-major order
  */
-float * DataArray::getData() const
+std::vector<float> DataArray::getData() const
 {
   return m_data;
 }

@@ -428,7 +428,7 @@ void SpectrumDisplay::setHGraph( double y )
 
   m_pointedAtY = y;
 
-  float *data   = m_dataArray->getData();
+  std::vector<float>data   = m_dataArray->getData();
 
   size_t n_cols = m_dataArray->getNCols();
 
@@ -473,7 +473,7 @@ void SpectrumDisplay::setVGraph( double x )
 
   m_pointedAtX = x;
 
-  float *data   = m_dataArray->getData();
+  std::vector<float> data   = m_dataArray->getData();
 
   size_t n_rows = m_dataArray->getNRows();
   size_t n_cols = m_dataArray->getNCols();

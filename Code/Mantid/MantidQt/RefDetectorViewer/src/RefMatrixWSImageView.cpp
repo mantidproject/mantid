@@ -47,27 +47,21 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wpsName,
   double totalXMin = xAxis[0];
   double totalXMax = xAxis[sz];
 
-  float *data = new float[static_cast<size_t>(totalYMax) * sz];
-
-//  std::cout << "Starting the for loop " << std::endl;
-//  std::cout << "total_xmax: " << total_xmax << std::endl;
-//  std::cout << "sz is : " << sz << std::endl;
+  std::vector<float> data(static_cast<size_t>(totalYMax) * sz);
 
   std::vector<double> yAxis;
   for (size_t px = 0; px < totalYMax; px++)
   {
-    // Retrievedata now
+    // Retrieve data now
     yAxis = ws->readY(px);
     for (size_t tof = 0; tof < sz; tof++)
-      data[px*sz + tof] = static_cast<float>(yAxis[tof]);
+      data[px * sz + tof] = static_cast<float>(yAxis[tof]);
   }
 
   SpectrumView::ArrayDataSource* source = new SpectrumView::ArrayDataSource(totalXMin, totalXMax,
                                                                             totalYMin, totalYMax,
                                                                             totalRows, totalCols,
                                                                             data);
-
-//    std::cout << "ws->readX(0).size(): " << ws->readX(0).size() << std::endl;
 
   m_imageView = new RefImageView( source,
                                   peakMin, peakMax,

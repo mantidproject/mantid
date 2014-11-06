@@ -149,60 +149,61 @@ DataArray* MatrixWSDataSource::getDataArray( double xMin,    double  xMax,
   SVUtils::CalculateInterval( m_totalYMin, m_totalYMax, m_totalRows,
                               first_row, yMin, yMax, numRows );
 
-  // This array is deleted in the DataArrray destructor
-  float* new_data = new float[numRows * numCols];
+  std::vector<float> newData(numRows * numCols);
 
-  MantidVec x_scale;
-  x_scale.resize(numCols+1);
+  MantidVec xScale;
+  xScale.resize(numCols + 1);
   if ( isLogX )
   {
     for ( size_t i = 0; i < numCols+1; i++ )
     {
-      x_scale[i] = xMin * exp ( (double)i / (double)numCols * log(xMax/xMin) );
+      xScale[i] = xMin * exp ( (double)i / (double)numCols * log(xMax/xMin) );
     }
   }
   else
   {
-    double dx = (xMax - xMin)/((double)numCols + 1.0);
+    double dx = (xMax - xMin) / ((double)numCols + 1.0);
     for ( size_t i = 0; i < numCols+1; i++ )
     {
-      x_scale[i] = xMin + (double)i * dx;
+      xScale[i] = xMin + (double)i * dx;
     }
-  }                                                // choose spectra from
-                                                   // required range of
-                                                   // spectrum indexes
-  double y_step = (yMax - yMin) / (double)numRows;
-  double d_y_index;
+  }
 
-  MantidVec y_vals;
+  // Choose spectra from required range of spectrum indexes
+  double yStep = (yMax - yMin) / (double)numRows;
+  double dYIndex;
+
+  MantidVec yVals;
   MantidVec err;
-  y_vals.resize(numCols);
+  yVals.resize(numCols);
   err.resize(numCols);
   size_t index = 0;
   for ( size_t i = 0; i < numRows; i++ )
   {
-    double mid_y = yMin + ((double)i + 0.5) * y_step;
-    SVUtils::Interpolate( m_totalYMin, m_totalYMax, mid_y,
-                                 0.0, (double)m_totalRows, d_y_index );
-    size_t source_row = (size_t)d_y_index;
-    y_vals.clear();
+    double midY = yMin + ((double)i + 0.5) * yStep;
+    SVUtils::Interpolate( m_totalYMin, m_totalYMax,         midY,
+                          0.0,         (double)m_totalRows, dYIndex );
+    size_t sourceRow = (size_t)dYIndex;
+    yVals.clear();
     err.clear();
-    y_vals.resize(numCols,0);
-    err.resize(numCols,0);
+    yVals.resize(numCols, 0);
+    err.resize(numCols, 0);
 
-    m_matWs->generateHistogram( source_row, x_scale, y_vals, err, true );
+    m_matWs->generateHistogram( sourceRow, xScale, yVals, err, true );
     for ( size_t col = 0; col < numCols; col++ )
     {
-      new_data[index] = (float)y_vals[col];
+      newData[index] = (float)yVals[col];
       index++;
     }
   }
-                                // The calling code is responsible for deleting
-                                // the DataArray when it is done with it
-  DataArray* new_data_array = new DataArray( xMin, xMax, yMin, yMax,
-                                             isLogX,
-                                             numRows, numCols, new_data);
-  return new_data_array;
+
+  // The calling code is responsible for deleting the DataArray when it is done with it
+  DataArray* newDataArray = new DataArray( xMin, xMax, yMin, yMax,
+                                           isLogX,
+                                           numRows, numCols,
+                                           newData);
+
+  return newDataArray;
 }
 
 

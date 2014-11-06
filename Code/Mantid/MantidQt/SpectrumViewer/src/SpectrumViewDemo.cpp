@@ -54,10 +54,10 @@ float * MakeTestData( double total_xmin, double total_xmax,
      data[ row_offset+total_cols + col ] = 0;
   }
                                                  // mark a col 1/10 way over
-  point = (total_xmax - total_xmin)/10 + total_xmin;
+  point = (total_xmax - total_xmin) / 10 + total_xmin;
   double mark_col = 0;
-  SVUtils::Interpolate( total_xmin, total_xmax, point,
-                               0.0, (double)total_cols, mark_col );
+  SVUtils::Interpolate( total_xmin, total_xmax,         point,
+                        0.0,        (double)total_cols, mark_col );
 
   size_t col_offset = (int)( mark_col );
   for ( size_t row = 0; row < total_rows; row++ )

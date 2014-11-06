@@ -2,6 +2,7 @@
 #define DATA_ARRAY_H
 
 #include <cstddef>
+#include <vector>
 
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
@@ -49,7 +50,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER DataArray
                double yMin,    double yMax,
                bool   isLogX,
                size_t nRows,   size_t nCols,
-               float *data );
+               std::vector<float> data );
 
     ~DataArray();
 
@@ -80,8 +81,8 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER DataArray
     /// Get the actual number of columns in this DataArray
     size_t getNCols() const;
 
-    /// Get simple array containing all values, packed in a 1-D array
-    float* getData() const;
+    /// Get vector containing all values, packed in a 1-D array
+    std::vector<float> getData() const;
 
     /// Get the value at the specified row and column
     double getValue( int row, int col ) const;
@@ -123,15 +124,10 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER DataArray
     size_t m_nRows;
     size_t m_nCols;
 
-    /*
-     * This is given a reference to the data block,
-     * which is allocated in the SpectrumDataSource,
-     * but will be deleted in this object's Destructor
-     */
-    float *m_data;
-
     double m_dataMin;
     double m_dataMax;
+
+    std::vector<float> m_data;
 
 };
 

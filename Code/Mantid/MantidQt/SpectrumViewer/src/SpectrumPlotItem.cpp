@@ -136,7 +136,7 @@ void SpectrumPlotItem::draw(QPainter    * painter,
   const double y_min  = dataArray->getYMin();
   const double y_max  = dataArray->getYMax();
 
-  float *data   = dataArray->getData();
+  std::vector<float> data   = dataArray->getData();
                                             // find the actual plot region
                                             // using the scale maps.
   const int pix_x_min = (int)xMap.transform( x_min );

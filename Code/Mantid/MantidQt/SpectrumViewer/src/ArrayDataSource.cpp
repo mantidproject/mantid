@@ -33,7 +33,7 @@ namespace SpectrumView
 ArrayDataSource::ArrayDataSource( double m_totalXMin, double m_totalXMax,
                                   double m_totalYMin, double m_totalYMax,
                                   size_t m_totalRows, size_t m_totalCols,
-                                  float* data ) :
+                                  std::vector<float> data ) :
   SpectrumDataSource( m_totalXMin, m_totalXMax,
                       m_totalYMin, m_totalYMax,
                       m_totalRows, m_totalCols ),
@@ -44,7 +44,6 @@ ArrayDataSource::ArrayDataSource( double m_totalXMin, double m_totalXMax,
 
 ArrayDataSource::~ArrayDataSource()
 {
-  delete[] m_data;
 }
 
 bool ArrayDataSource::hasData(const std::string& wsName,
@@ -88,11 +87,10 @@ DataArray * ArrayDataSource::getDataArray( double xMin,   double  xMax,
   SVUtils::CalculateInterval( m_totalYMin, m_totalYMax, m_totalRows,
                               firstRow, yMin, yMax, nRows );
 
-  float* newData = new float[nRows * nCols];   // This is deleted in the
-                                                  // DataArray destructor
+  std::vector<float> newData(nRows * nCols);
 
-  double x_step = (xMax - xMin) / (double)nCols;
-  double y_step = (yMax - yMin) / (double)nRows;
+  double xStep = (xMax - xMin) / (double)nCols;
+  double yStep = (yMax - yMin) / (double)nRows;
 
   double xIndex;
   double yIndex;
@@ -102,16 +100,16 @@ DataArray * ArrayDataSource::getDataArray( double xMin,   double  xMax,
   /* each destination position */
   for ( size_t row = 0; row < nRows; row++ )
   {
-    double midY = yMin + ((double)row + 0.5) * y_step;
-    SVUtils::Interpolate( m_totalYMin, m_totalYMax, midY,
-                          0.0, (double)m_totalRows, yIndex );
+    double midY = yMin + ((double)row + 0.5) * yStep;
+    SVUtils::Interpolate( m_totalYMin, m_totalYMax,         midY,
+                          0.0,         (double)m_totalRows, yIndex );
 
     size_t sourceRow = (size_t)yIndex;
     for ( size_t col = 0; col < nCols; col++ )
     {
-      double midX = xMin + ((double)col + 0.5) * x_step;
-      SVUtils::Interpolate( m_totalXMin, m_totalXMax, midX,
-                            0.0, (double)m_totalCols, xIndex );
+      double midX = xMin + ((double)col + 0.5) * xStep;
+      SVUtils::Interpolate( m_totalXMin, m_totalXMax,         midX,
+                            0.0,         (double)m_totalCols, xIndex );
 
       size_t sourceCol = (size_t)xIndex;
 
