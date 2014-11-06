@@ -192,6 +192,16 @@
          </property>
         </widget>
        </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="checkTransferGroupRuns">
+         <property name="text">
+          <string>Group simultaneously transferred runs</string>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>TransferGroupRuns</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </widget>

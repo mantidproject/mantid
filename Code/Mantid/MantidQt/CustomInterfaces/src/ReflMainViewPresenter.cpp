@@ -1161,6 +1161,9 @@ namespace MantidQt
       auto rows = m_view->getSelectedSearchRows();
       for(auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt)
       {
+        //If the user wants, get a new group id per run
+        if(!m_options["TransferGroupRuns"].toBool())
+          groupId = getUnusedGroup();
         const int row = *rowIt;
         const QString run = m_searchModel->data(m_searchModel->index(row, 0)).toString();
         const QString description = m_searchModel->data(m_searchModel->index(row, 1)).toString();
@@ -1237,6 +1240,7 @@ namespace MantidQt
       m_options["RoundQMaxPrecision"] = 3;
       m_options["RoundDQQPrecision"] = 3;
       m_options["TransferExtractTheta"] = true;
+      m_options["TransferGroupRuns"] = true;
 
       //Load saved values from disk
       QSettings settings;
