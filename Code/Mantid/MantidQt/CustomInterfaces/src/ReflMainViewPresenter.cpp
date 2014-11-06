@@ -1241,8 +1241,6 @@ namespace MantidQt
       m_options["RoundQMinPrecision"] = 3;
       m_options["RoundQMaxPrecision"] = 3;
       m_options["RoundDQQPrecision"] = 3;
-      m_options["TransferExtractTheta"] = true;
-      m_options["TransferGroupRuns"] = true;
 
       //Load saved values from disk
       QSettings settings;

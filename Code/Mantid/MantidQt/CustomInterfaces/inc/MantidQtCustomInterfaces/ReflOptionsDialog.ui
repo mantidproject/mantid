@@ -177,33 +177,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab">
-      <attribute name="title">
-       <string>Search</string>
-      </attribute>
-      <layout class="QFormLayout" name="formLayout_2">
-       <item row="0" column="0">
-        <widget class="QCheckBox" name="checkTransferExtractTheta">
-         <property name="text">
-          <string>Extract Theta from run description during transfer</string>
-         </property>
-         <property name="reflOptionName" stdset="0">
-          <string>TransferExtractTheta</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QCheckBox" name="checkTransferGroupRuns">
-         <property name="text">
-          <string>Group simultaneously transferred runs</string>
-         </property>
-         <property name="reflOptionName" stdset="0">
-          <string>TransferGroupRuns</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
     </widget>
    </item>
    <item>
