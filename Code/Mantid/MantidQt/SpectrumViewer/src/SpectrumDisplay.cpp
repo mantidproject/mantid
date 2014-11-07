@@ -41,7 +41,6 @@ SpectrumDisplay::SpectrumDisplay(  QwtPlot*         spectrumPlot,
                                    GraphDisplay*    hGraph,
                                    GraphDisplay*    vGraph,
                                    QTableWidget*    tableWidget ) :
-  m_dataSource(NULL),
   m_spectrumPlot(spectrumPlot),
   m_sliderHandler(sliderHandler),
   m_rangeHandler(rangeHander),
