@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
 
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
@@ -68,6 +69,7 @@ namespace MantidQt
         row["group"] = groupsByDesc[run->first];
         output.push_back(row);
       }
+      std::sort(output.begin(), output.end());
       return output;
     }
   }
