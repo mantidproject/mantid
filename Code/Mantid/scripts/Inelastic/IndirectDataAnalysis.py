@@ -74,7 +74,7 @@ def calculateEISF(params_table):
 
 ##############################################################################
 
-def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin=0, specMax=None, Verbose=False, Plot='None', Save=False):
+def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin=0, specMax=None, convolve=True, Verbose=False, Plot='None', Save=False):
     StartTime('ConvFit')
 
     bgd = bgd[:-2]
@@ -105,7 +105,7 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
                        OutputWorkspace=output_workspace, Function=func,
                        StartX=startX, EndX=endX, FitType='Sequential',
                        CreateOutput=True, OutputCompositeMembers=True,
-                       ConvolveMembers=True)
+                       ConvolveMembers=convolve)
 
     DeleteWorkspace(output_workspace + '_NormalisedCovarianceMatrices')
     DeleteWorkspace(output_workspace + '_Parameters')
@@ -122,6 +122,7 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
     axis.setUnit("MomentumTransfer")
 
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=wsname)
+    AddSampleLog(Workspace=wsname, LogName='convolve_members', LogType='String', LogText=str(convolve))
     AddSampleLog(Workspace=wsname, LogName="fit_program", LogType="String", LogText='ConvFit')
     AddSampleLog(Workspace=wsname, LogName='background', LogType='String', LogText=str(bgd))
     AddSampleLog(Workspace=wsname, LogName='delta_function', LogType='String', LogText=str(using_delta_func))

@@ -64,6 +64,12 @@ namespace IDA
     m_rangeSelectors["ConvFitHWHM"]->setColour(Qt::red);
 
     // Populate Property Widget
+
+    // Option to convolve members
+    m_cfProp["Convolve"] = m_blnManager->addProperty("Convolve");
+    m_cfTree->addProperty(m_properties["Convolve"]);
+    m_blnManager->setValue(m_properties["Convolve"], true);
+
     m_properties["FitRange"] = m_grpManager->addProperty("Fitting Range");
     m_properties["StartX"] = m_dblManager->addProperty("StartX");
     m_dblManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
@@ -176,6 +182,9 @@ namespace IDA
 
     pyInput += uiForm().confit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
 
+    if ( m_cfBlnMng->value(m_cfProp["Convolve"]) ) pyInput += "convolve = True\n";
+    else pyInput += "convolve = False\n";
+
     if ( uiForm().confit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
 
@@ -193,7 +202,7 @@ namespace IDA
     pyInput +=    
       "bg = '" + bg + "'\n"
       "ftype = '" + ftype + "'\n"
-      "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, Verbose=verbose, Plot=plot, Save=save)\n";
+      "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, convolve, Verbose=verbose, Plot=plot, Save=save)\n";
 
     QString pyOutput = runPythonCode(pyInput);
   }

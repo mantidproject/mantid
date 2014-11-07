@@ -1,7 +1,13 @@
 #ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
 
+#include <map>
+#include <string>
+
 #include "MantidKernel/System.h"
+
+#include <QVariant>
+
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -34,10 +40,31 @@ namespace MantidQt
     {
     public:
       virtual ~IReflPresenter() {};
-      //Tell the presenter something happened
-      virtual void notify(int flag) = 0;
-    private:
 
+      enum Flag
+      {
+        SaveFlag,
+        SaveAsFlag,
+        AppendRowFlag,
+        PrependRowFlag,
+        DeleteRowFlag,
+        ProcessFlag,
+        GroupRowsFlag,
+        OpenTableFlag,
+        NewTableFlag,
+        TableUpdatedFlag,
+        ExpandSelectionFlag,
+        OptionsDialogFlag,
+        ClearSelectedFlag,
+        CopySelectedFlag,
+        CutSelectedFlag,
+        PasteSelectedFlag,
+      };
+
+      //Tell the presenter something happened
+      virtual void notify(IReflPresenter::Flag flag) = 0;
+      virtual const std::map<std::string,QVariant>& options() const = 0;
+      virtual void setOptions(const std::map<std::string,QVariant>& options) = 0;
     };
   }
 }

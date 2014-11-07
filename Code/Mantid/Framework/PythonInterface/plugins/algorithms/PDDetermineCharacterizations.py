@@ -143,11 +143,14 @@ class PDDetermineCharacterizations(PythonAlgorithm):
             # Convert comma-delimited list to array, else return the original 
             # value.
             if type("") == type(val):
-                try: 
-                    val = [float(x) for x in val.split(',')]
-                except ValueError, err:
-                    self.log().error("Error to parse key = %s value = %s. " % (str(key), str(val)))
-                    raise NotImplementedError(str(err))
+                if (len(val)==0) and  (key in DEF_INFO.keys()):
+                    val = DEF_INFO[key]
+                else:
+                    try:
+                        val = [float(x) for x in val.split(',')]
+                    except ValueError, err:
+                        self.log().error("Error to parse key: '%s' value = '%s'. " % (str(key), str(val)))
+                        raise NotImplementedError(str(err))
 
             try:
                 prop_man[key] = val

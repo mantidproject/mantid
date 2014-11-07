@@ -7,106 +7,111 @@
   <parameter name="monitor_spectrum">
     <value val="1"/>
   </parameter>
-  
+
   <!-- Back scattering spectrum numbers -->
   <parameter name="backward_scatter_spectra" type="string">
     <value val="3-134"/>
   </parameter>
-  
+
   <!-- Forward scattering spectrum numbers -->
   <parameter name="forward_scatter_spectra" type="string">
     <value val="135-198"/>
   </parameter>
-  
+
   <!-- Maximum TOF for loaded raw data (monitors use mon_tof_max below) -->
   <parameter name="tof_max">
     <value val="600"/>
   </parameter>
-  
+
   <!-- Maximum TOF for loaded monitor data -->
   <parameter name="monitor_tof_max">
     <value val="700"/>
   </parameter>
-  
+
   <!-- Constant that sets the monitor scale -->
   <parameter name="monitor_scale">
     <value val="1000"/>
   </parameter>
-  
+
   <!-- Double-difference mixing parameter (beta) -->
   <parameter name="double_diff_mixing">
     <value val="0.28"/>
   </parameter>
-  
+
   <!-- ======== Normalisation ranges. ========
     These are different depending for the forward/backward scattering banks.
   -->
-  
+
   <!-- Backward Scattering -->
-  
+
   <!-- Sum over lower range   -->
   <parameter name="backward_period_sum1" type="string">
     <value val="300-400"/>
   </parameter>
-  
+
   <!-- Sum over upper range   -->
   <parameter name="backward_period_sum2" type="string">
     <value val="550-600"/>
   </parameter>
-  
+
   <!-- Monitor normalisation -->
   <parameter name="backward_monitor_norm" type="string">
     <value val="600-700"/>
   </parameter>
-  
+
   <!-- Normalisation by foil out -->
   <parameter name="backward_foil_out_norm" type="string">
     <value val="410-430"/>
   </parameter>
-  
+
   <!-- ====================================================== -->
-  
+
   <!-- Forward Scattering -->
   <!-- Sum over lower range   -->
   <parameter name="forward_period_sum1" type="string">
     <value val="100-400"/>
   </parameter>
-  
+
   <!-- Sum over upper range   -->
   <parameter name="forward_period_sum2" type="string">
     <value val="550-600"/>
   </parameter>
-  
+
   <!-- Monitor normalisation -->
   <parameter name="forward_monitor_norm" type="string">
     <value val="600-700"/>
   </parameter>
-  
+
   <!-- Normalisation by foil out -->
   <parameter name="forward_foil_out_norm" type="string">
     <value val="400-450"/>
   </parameter>
-  
+
   <!-- ======== Resolution parameters ========
     Defined at two levels: Instrument level for the common parameters
     then at component level below for the component specific ones
   -->
-  
+
   <!-- Standard deviation of source-sample distribution (metres) -->
   <parameter name="sigma_l1">
     <value val="0.021"/>
   </parameter>
-  
+
   <!-- Standard deviation of sample-detector distribution (metres) -->
   <parameter name="sigma_l2">
     <value val="0.023"/>
   </parameter>
-  
+
+  <!-- Standard deviation of tof measurement (microseconds) -->
+  <parameter name="sigma_tof">
+    <value val="0.3"/>
+  </parameter>
+
   <!-- Standard deviation of detector theta distribution (radians) -->
   <parameter name="sigma_theta">
     <value val="0.028"/>
   </parameter>
-  
+
   <!-- Final energy of neutrons (meV) (Currently common but should it be?) -->
   <parameter name="efixed">
     <value val="4908"/>
@@ -117,7 +122,7 @@
     <value val="24"/>
   </parameter>
 
-  <!-- Gaussian standard deviation of the analyser energy (efixed) (meV) 
+  <!-- Gaussian standard deviation of the analyser energy (efixed) (meV)
        Note that this is not the HWHM but the standard deviation unlike the
        Lorentzian parameter -->
   <parameter name="sigma_gauss">
@@ -132,7 +137,35 @@
     <value val="diffspec" />
   </parameter>
 
-</component-link> 
+  <!-- Monitor workflow parameters -->
+  <parameter name="Workflow.Monitor1-SpectrumNumber" >
+    <value val="0" />
+  </parameter>
+
+  <!-- Area, thickness, attenuation and scale factor taken from TOSCA. -->
+  <!-- By lack of actual data and the fact the monitors would have been installed at -->
+  <!-- a similar time this is a reasonable guess. -->
+  <parameter name="Workflow.Monitor1-Area" >
+    <value val="5.391011e-5" />
+  </parameter>
+
+  <parameter name="Workflow.Monitor1-Thickness" >
+    <value val="0.013" />
+  </parameter>
+
+  <parameter name="Workflow.Monitor1-Attenuation" >
+    <value val="8.3" />
+  </parameter>
+
+  <parameter name="Workflow.Monitor1-ScalingFactor">
+    <value val="1e9" />
+  </parameter>
+
+  <parameter name="Workflow.NamingConvention" type="string">
+    <value val="AnalyserReflection" />
+  </parameter>
+
+</component-link>
 <!-- End VESUVIO link -->
 
 <!-- ======================= Energy widths for foils ================================= -->
@@ -143,7 +176,7 @@
     <value val="144"/>
   </parameter>
 
-  <!-- Gaussian standard deviation of the foil energy (meV) 
+  <!-- Gaussian standard deviation of the foil energy (meV)
        Note that this is not the HWHM but the standard deviation unlike the
        Lorentzian parameter -->
   <parameter name="sigma_gauss">
@@ -156,8 +189,8 @@
   <parameter name="hwhm_lorentz">
     <value val="144"/>
   </parameter>
-  
-  <!-- Gaussian standard deviation of the foil energy (meV) 
+
+  <!-- Gaussian standard deviation of the foil energy (meV)
        Note that this is not the HWHM but the standard deviation unlike the
        Lorentzian parameter -->
   <parameter name="sigma_gauss">

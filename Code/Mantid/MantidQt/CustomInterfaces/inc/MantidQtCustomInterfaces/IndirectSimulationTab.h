@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_INDIRECTSIMULATIONTAB_H_
 
 #include "MantidKernel/System.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
 #include <QSettings>
 #include <QWidget>
 
@@ -15,6 +16,8 @@ namespace MantidQt
 			shared member functions.
     
 			@author Samuel Jackson, STFC
+
+      TODO: Make this inherit from IndirectTab (#10277)
 
 			Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -62,6 +65,10 @@ namespace MantidQt
 
 		protected:
 			void runPythonScript(const QString& pyInput);
+      void runAlgorithm(const Mantid::API::IAlgorithm_sptr alg);
+
+    private:
+      MantidQt::API::AlgorithmRunner m_algoRunner;
 
 		};
 	} // namespace CustomInterfaces

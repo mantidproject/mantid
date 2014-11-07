@@ -17,7 +17,7 @@ namespace MDAlgorithms
   using namespace Mantid::Kernel;
 
   ///function to  compare two intersections (h,k,l,Momentum) by Momentum
-  bool compareMomentum(Mantid::Kernel::VMD v1, Mantid::Kernel::VMD v2)
+  bool compareMomentum(const Mantid::Kernel::VMD &v1, const Mantid::Kernel::VMD &v2)
   {
     return (v1[3]<v2[3]);
   }
@@ -32,6 +32,16 @@ namespace MDAlgorithms
    */
   SXDMDNorm::SXDMDNorm()
   {
+      hIndex=-1;
+      kIndex=-1;
+      lIndex=-1;
+      hIntegrated=true;
+      kIntegrated=true;
+      lIntegrated=true;
+      m_nDims=0;
+      transf=Mantid::Kernel::DblMatrix(3,3);
+      KincidentMin=0;
+      KincidentMax=EMPTY_DBL();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -141,16 +151,17 @@ namespace MDAlgorithms
       {
           float dimMin=static_cast<float>(m_inputWS->getDimension(i)->getMinimum());
           float dimMax=static_cast<float>(m_inputWS->getDimension(i)->getMaximum());
-
           Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_inputWS->getExperimentInfo(0)->run().getProperty(m_inputWS->getDimension(i)->getName()));
-          coord_t value=static_cast<coord_t>(run_property->firstValue());
-          otherValues.push_back(value);
-          //in the original MD data no time was spent measuring between dimMin and dimMax
-          if ((value<dimMin)||(value>dimMax))
+          if (run_property!=NULL)
           {
+            coord_t value=static_cast<coord_t>(run_property->firstValue());
+            otherValues.push_back(value);
+            //in the original MD data no time was spent measuring between dimMin and dimMax
+            if ((value<dimMin)||(value>dimMax))
+            {
               skipProcessing=true;
+            }
           }
-
           delete run_property;
       }
 
@@ -224,6 +235,27 @@ namespace MDAlgorithms
           }
       }
 
+      auto &hDim = *m_normWS->getDimension(hIndex);
+      m_hX.resize( hDim.getNBins() );
+      for(size_t i = 0; i < m_hX.size(); ++i)
+      {
+        m_hX[i] = hDim.getX(i);
+      }
+
+      auto &kDim = *m_normWS->getDimension(kIndex);
+      m_kX.resize( kDim.getNBins() );
+      for(size_t i = 0; i < m_kX.size(); ++i)
+      {
+        m_kX[i] = kDim.getX(i);
+      }
+
+      auto &lDim = *m_normWS->getDimension(lIndex);
+      m_lX.resize( lDim.getNBins() );
+      for(size_t i = 0; i < m_lX.size(); ++i)
+      {
+        m_lX[i] = lDim.getX(i);
+      }
+
       Mantid::API::MatrixWorkspace_const_sptr fW=getProperty("FluxWorkspace");
       Mantid::DataObjects::EventWorkspace_const_sptr fluxW = boost::dynamic_pointer_cast<const Mantid::DataObjects::EventWorkspace>(fW);
       KincidentMin=fluxW->getEventXMin();
@@ -239,25 +271,34 @@ namespace MDAlgorithms
       {
           double PC=m_normWS->getExperimentInfo(0)->run().getProtonCharge();
           Kernel::PropertyWithValue< std::vector<double> > *prop=dynamic_cast< Mantid::Kernel::PropertyWithValue<std::vector<double> >*>(m_normWS->getExperimentInfo(0)->getLog("RUBW_MATRIX"));
-          Mantid::Kernel::DblMatrix RUBW((*prop)()); //includes the 2*pi factor but not goniometer for now :)
-          transf=m_normWS->getExperimentInfo(0)->run().getGoniometerMatrix()*RUBW;
-          transf.Invert();
+          if (prop==NULL)
+          {
+              throw std::runtime_error("No RUBW_MATRIX");
+          }
+          else
+          {
+              Mantid::Kernel::DblMatrix RUBW((*prop)()); //includes the 2*pi factor but not goniometer for now :)
+              transf=m_normWS->getExperimentInfo(0)->run().getGoniometerMatrix()*RUBW;
+              transf.Invert();
+          }
           //FIXME: the detector positions are from the IDF. Need to account for calibration
           std::vector<detid_t> detIDS=m_normWS->getExperimentInfo(0)->getInstrument()->getDetectorIDs(true);
 
           Mantid::API::Progress *prog=new Mantid::API::Progress(this,0.3,1,static_cast<int64_t>(detIDS.size()));
           const detid2index_map d2m=fluxW->getDetectorIDToWorkspaceIndexMap();
           const detid2index_map d2mSA=sA->getDetectorIDToWorkspaceIndexMap();
+          auto instrument = m_normWS->getExperimentInfo(0)->getInstrument();
 
           PARALLEL_FOR1(m_normWS)
           for(int i=0;i<static_cast<int>(detIDS.size());i++)
           {
               PARALLEL_START_INTERUPT_REGION
-              Mantid::Geometry::IDetector_const_sptr detector=m_normWS->getExperimentInfo(0)->getInstrument()->getDetector(detIDS[i]);
+              Mantid::Geometry::IDetector_const_sptr detector=instrument->getDetector(detIDS[i]);
               if(!detector->isMonitor()&&!detector->isMasked())
               {
                   //get intersections
                   std::vector<Mantid::Kernel::VMD> intersections=calculateIntersections(detector);
+
                   if(!intersections.empty())
                   {
                       //calculate indices
@@ -269,30 +310,44 @@ namespace MDAlgorithms
                       std::vector<Mantid::DataObjects::WeightedEventNoTime> el=fluxW->getEventList(sp).getWeightedEventsNoTime();
                       //get iterator to the first event that has momentum >= (*intersections.begin())[3]
                       std::vector<Mantid::DataObjects::WeightedEventNoTime>::iterator start=el.begin();
+                      // check that el isn't empty
+                      if ( start == el.end() ) continue;
                       while((*start).tof()<(*intersections.begin())[3]) ++start;
 
                       double solid=sA->readY(d2mSA.find(detIDS[i])->second)[0]*PC;
-                      std::vector<Mantid::Kernel::VMD>::iterator it;
-                      for (it=intersections.begin()+1;it!=intersections.end();++it)
+
+                      const size_t sizeOfMVD = intersections.front().size();
+                      // pre-allocate for efficiency
+                      std::vector<coord_t> pos( sizeOfMVD + otherValues.size() );
+
+                      for (auto it=intersections.begin()+1;it!=intersections.end();++it)
                       {
-                          Mantid::Kernel::VMD deltav=(*it)-(*(it-1));//difference between consecutive intersections
-                          Mantid::Kernel::VMD avev=((*it)+(*(it-1)))*0.5;//average between two intersection (to get position)
+                          //Mantid::Kernel::VMD deltav=(*it)-(*(it-1));//difference between consecutive intersections
+                          // the full vector isn't used so compute only what is necessary
+                          double delta = (*it)[3] - (*(it-1))[3];
+
                           double eps=1e-7;//do not integrate if momemntum difference is smaller than eps, assume contribution is 0
-                          if (deltav[3]>eps)
+                          if (delta > eps)
                           {
-                              std::vector<coord_t> pos=avev.toVector<coord_t>();
-                              pos.insert(pos.end()-1,otherValues.begin(),otherValues.end());
-                              VMD posNew=mat*pos;
-                              size_t linIndex=m_normWS->getLinearIndexAtCoord(posNew.toVector<coord_t>().data());
+                              //Mantid::Kernel::VMD avev=((*it)+(*(it-1)))*0.5;//average between two intersection (to get position)
+                              //std::vector<coord_t> pos=avev.toVector<coord_t>();
+                              //pos.insert(pos.end()-1,otherValues.begin(),otherValues.end());
+                              // a bit longer and less readable but faster version of the above
+                              std::transform( it->getBareArray(), it->getBareArray() + sizeOfMVD, (it-1)->getBareArray(), pos.begin(), std::plus<coord_t>() );
+                              std::transform( pos.begin(), pos.begin() + sizeOfMVD, pos.begin(), std::bind2nd( std::multiplies<coord_t>(), 0.5 ) );
+                              std::copy( otherValues.begin(), otherValues.end(), pos.begin() + sizeOfMVD );
+
+                              std::vector<coord_t> posNew = mat*pos;
+                              size_t linIndex=m_normWS->getLinearIndexAtCoord(posNew.data());
 
                               if(linIndex!=size_t(-1))
                               {
                                   double signal=0.;
                                   while((*start).tof()<(*it)[3])
                                   {
-                                      signal+=(*start).weight();
                                       if (start==el.end())
                                           break;
+                                      signal+=(*start).weight();
                                       ++start;
                                   }
                                   signal*=solid;
@@ -312,10 +367,11 @@ namespace MDAlgorithms
               PARALLEL_END_INTERUPT_REGION
           }
           PARALLEL_CHECK_INTERUPT_REGION
-
+          delete prog;
       }
 
       this->setProperty("OutputNormalizationWorkspace",m_normWS);
+
   }
 
 
@@ -332,6 +388,11 @@ namespace MDAlgorithms
 
         double eps=1e-7;
 
+        auto hNBins = m_hX.size();
+        auto kNBins = m_kX.size();
+        auto lNBins = m_lX.size();
+        intersections.reserve( hNBins + kNBins + lNBins + 8 );
+
         //calculate intersections with planes perpendicular to h
         if (fabs(hStart-hEnd)>eps)
         {
@@ -340,9 +401,9 @@ namespace MDAlgorithms
             double fl=(lEnd-lStart)/(hEnd-hStart);
             if(!hIntegrated)
             {
-              for(size_t i=0;i<m_normWS->getDimension(hIndex)->getNBins();i++)
+              for(size_t i=0;i<hNBins;i++)
               {
-                double hi=m_normWS->getDimension(hIndex)->getX(i);
+                double hi = m_hX[i];
                 if ((hi>=hMin)&&(hi<=hMax)&&((hStart-hi)*(hEnd-hi)<0))
                 {
                     // if hi is between hStart and hEnd, then ki and li will be between kStart, kEnd and lStart, lEnd and momi will be between KincidentMin and KnincidemtmMax
@@ -392,9 +453,9 @@ namespace MDAlgorithms
             double fl=(lEnd-lStart)/(kEnd-kStart);
             if(!kIntegrated)
             {
-              for(size_t i=0;i<m_normWS->getDimension(kIndex)->getNBins();i++)
+              for(size_t i=0;i<kNBins;i++)
               {
-                double ki=m_normWS->getDimension(kIndex)->getX(i);
+                double ki = m_kX[i];
                 if ((ki>=kMin)&&(ki<=kMax)&&((kStart-ki)*(kEnd-ki)<0))
                 {
                     // if ki is between kStart and kEnd, then hi and li will be between hStart, hEnd and lStart, lEnd
@@ -444,9 +505,9 @@ namespace MDAlgorithms
             double fk=(kEnd-kStart)/(lEnd-lStart);
             if(!lIntegrated)
             {
-              for(size_t i=0;i<m_normWS->getDimension(lIndex)->getNBins();i++)
+              for(size_t i=0;i<lNBins;i++)
               {
-                double li=m_normWS->getDimension(lIndex)->getX(i);
+                double li = m_lX[i];
                 if ((li>=lMin)&&(li<=lMax)&&((lStart-li)*(lEnd-li)<0))
                 {
                     // if li is between lStart and lEnd, then hi and ki will be between hStart, hEnd and kStart, kEnd
@@ -501,7 +562,9 @@ namespace MDAlgorithms
         }
 
         //sort intersections by momentum
-        std::stable_sort(intersections.begin(),intersections.end(),compareMomentum);
+        typedef std::vector<Mantid::Kernel::VMD>::iterator IterType;
+        std::stable_sort<IterType,bool (*)(const Mantid::Kernel::VMD&,const Mantid::Kernel::VMD&)>(intersections.begin(),intersections.end(),compareMomentum);
+
         return intersections;
   }
 

@@ -156,7 +156,7 @@ namespace CustomInterfaces
     /// Send signal to parent window to execute python script
     void executePythonScript(const QString& pyInput, bool output);
 
-  private:
+  protected:
     /// Overidden by child class.
     virtual void setup() = 0;
     /// Overidden by child class.

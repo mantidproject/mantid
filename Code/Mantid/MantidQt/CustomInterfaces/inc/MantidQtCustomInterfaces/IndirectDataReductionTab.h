@@ -77,15 +77,31 @@ namespace CustomInterfaces
     IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QObject * parent = 0);
     virtual ~IndirectDataReductionTab();
 
+  public slots:
+    void runTab();
+
   protected:
     Mantid::API::MatrixWorkspace_sptr loadInstrumentIfNotExist(std::string instrumentName, std::string analyser="", std::string reflection="");
-    /// Get information about the operation modes of an indirect instrument
-    std::vector<std::pair<std::string, std::vector<std::string> > > getInstrumentModes(std::string instrumentName);
     /// Function to get details about the instrument configuration defined on C2E tab
     std::map<QString, QString> getInstrumentDetails();
 
-  protected:
+    std::map<std::string, double> getRangesFromInstrument(QString instName = "", QString analyser = "", QString reflection = "");
+
     Ui::IndirectDataReduction m_uiForm;
+
+  signals:
+    /// Update the Run button on the IDR main window
+    void updateRunButton(bool enabled = true, QString message = "Run", QString tooltip = "");
+    /// Emitted when the instrument setup is changed
+    void newInstrumentConfiguration();
+
+  private:
+    bool m_tabRunning;
+
+    QString getInstrumentParameterFrom(Mantid::Geometry::IComponent_const_sptr comp, std::string param);
+
+  private slots:
+    void tabExecutionComplete(bool error);
 
   };
 } // namespace CustomInterfaces

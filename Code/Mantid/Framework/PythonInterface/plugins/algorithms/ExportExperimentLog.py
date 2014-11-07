@@ -242,7 +242,10 @@ class ExportExperimentLog(PythonAlgorithm):
             logname = self._sampleLogNames[il]
             optype = self._sampleLogOperations[il]
             key = logname + "-" + optype
-            value = logvaluedict[key]
+            if key in logvaluedict.keys():
+                value = logvaluedict[key]
+            elif logname in logvaluedict.keys():
+                value = logvaluedict[logname]
             wbuf += "%s%s" % (str(value), self._valuesep)
         wbuf = wbuf[0:-1]
 

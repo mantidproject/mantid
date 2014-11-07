@@ -72,8 +72,8 @@ namespace Mantid
         m_shape = newShape;
     }
 
-    /** 
-     * Return the material of the component. Currently 
+    /**
+     * Return the material of the component. Currently
      * unaffected by parametrization
      */
     const Kernel::Material_const_sptr ObjComponent::material() const
@@ -132,7 +132,7 @@ namespace Mantid
         //use the scale factor
         out *= getScaleFactor();
         out += this->getPos();
-        track.addLink(in,out,out.distance(track.startPoint()),this->getComponentID());
+        track.addLink(in,out,out.distance(track.startPoint()), *(this->shape()), this->getComponentID());
       }
 
       return intercepts;
@@ -160,18 +160,18 @@ namespace Mantid
       }
     }
 
-    
+
   /**
     * Given an input estimate of the axis aligned (AA) bounding box (BB), return an improved set of values.
     * The AA BB is determined in the frame of the object and the initial estimate will be transformed there.
     * The returned BB will be the frame of the ObjComponent and may not be optimal.
     * @param absoluteBB :: [InOut] The bounding box for this object component will be stored here.
-    * if BB alignment is different from axis alignment, the system of coordinates to alighn is taken fron  
+    * if BB alignment is different from axis alignment, the system of coordinates to alighn is taken fron
     * the absoluteBB
     */
   void ObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
   {
- 
+
 // Start with the box in the shape's coordinates
       const Object_const_sptr s = shape();
       if ( ! s ){
@@ -200,22 +200,22 @@ namespace Mantid
       // Rotate
       (this->getRotation()).rotateBB(absoluteBB.xMin(),absoluteBB.yMin(),absoluteBB.zMin(),
         absoluteBB.xMax(),absoluteBB.yMax(),absoluteBB.zMax());
-    
-  
+
+
       // Shift
       const V3D localPos = this->getPos();
-      absoluteBB.xMin() += localPos.X(); 
+      absoluteBB.xMin() += localPos.X();
       absoluteBB.xMax() += localPos.X();
-      absoluteBB.yMin() += localPos.Y(); 
+      absoluteBB.yMin() += localPos.Y();
       absoluteBB.yMax() += localPos.Y();
-      absoluteBB.zMin() += localPos.Z(); 
+      absoluteBB.zMin() += localPos.Z();
       absoluteBB.zMax() += localPos.Z();
 
       if(!Coord_system.empty()){
         absoluteBB.realign(&Coord_system);
-      }  
+      }
   }
- 
+
     /**
     * Gets the Height of the object by querying the underlying BoundingBox.
     * @return height of object
@@ -235,7 +235,7 @@ namespace Mantid
       const BoundingBox & bbox = shape()->getBoundingBox();
       return ( bbox.xMax() - bbox.xMin() ) / getScaleFactor().X();
     }
-    
+
     /**
     * Gets the Depth of the object by querying the underlying BoundingBox.
     * @return depth of object
