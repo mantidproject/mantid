@@ -45,6 +45,7 @@ namespace MantidQt
       virtual ~QtReflOptionsDialog();
     protected:
       void initLayout();
+      void initBindings();
     protected slots:
       void saveOptions();
       void loadOptions();
@@ -53,6 +54,8 @@ namespace MantidQt
       Ui::reflOptionsDialog ui;
       //the presenter
       boost::shared_ptr<IReflPresenter> m_presenter;
+      //maps option names to widget names
+      std::map<std::string,QString> m_bindings;
     };
 
   } //CustomInterfaces

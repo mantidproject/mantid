@@ -68,12 +68,14 @@ namespace MantidQt
       virtual void setTableList(const std::set<std::string>& tables);
       virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument);
       virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy* hintStrategy);
+      virtual void setClipboard(const std::string& text);
 
       //Accessor methods
       virtual std::set<int> getSelectedRows() const;
       virtual std::string getSearchInstrument() const;
       virtual std::string getProcessInstrument() const;
       virtual std::string getWorkspaceToOpen() const;
+      virtual std::string getClipboard() const;
 
       virtual boost::shared_ptr<IReflPresenter> getPresenter() const;
 
@@ -91,17 +93,22 @@ namespace MantidQt
       QSignalMapper* m_openMap;
 
     private slots:
+      void on_actionNewTable_triggered();
+      void on_actionSaveTable_triggered();
+      void on_actionSaveTableAs_triggered();
+      void on_actionAppendRow_triggered();
+      void on_actionPrependRow_triggered();
+      void on_actionDeleteRow_triggered();
+      void on_actionProcess_triggered();
+      void on_actionGroupRows_triggered();
+      void on_actionClearSelected_triggered();
+      void on_actionCopySelected_triggered();
+      void on_actionCutSelected_triggered();
+      void on_actionPasteSelected_triggered();
+      void on_actionExpandSelection_triggered();
+      void on_actionOptionsDialog_triggered();
+
       void setModel(QString name);
-      void actionNewTable();
-      void actionSave();
-      void actionSaveAs();
-      void actionAppendRow();
-      void actionPrependRow();
-      void actionDeleteRow();
-      void actionProcess();
-      void actionGroupRows();
-      void actionExpandSelection();
-      void actionOptionsDialog();
       void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);
       void showContextMenu(const QPoint& pos);
     };

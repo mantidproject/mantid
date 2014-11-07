@@ -1,6 +1,8 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/IndirectSimulationTab.h"
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
 	namespace CustomInterfaces
@@ -9,9 +11,9 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
      */
-    IndirectSimulationTab::IndirectSimulationTab(QWidget * parent) : QWidget(parent)
+    IndirectSimulationTab::IndirectSimulationTab(QWidget * parent) : QWidget(parent),
+      m_algoRunner(parent)
     {
-
     }
 
     //----------------------------------------------------------------------------------------------
@@ -41,5 +43,16 @@ namespace MantidQt
     {
       emit executePythonScript(pyInput, false);
     }
+
+    /**
+     * Runs an algorithm async from the UI thread.
+     *
+     * @param alg Configured algorithm to run
+     */
+    void IndirectSimulationTab::runAlgorithm(const IAlgorithm_sptr alg)
+    {
+      m_algoRunner.startAlgorithm(alg);
+    }
+
   }
 } // namespace MantidQt

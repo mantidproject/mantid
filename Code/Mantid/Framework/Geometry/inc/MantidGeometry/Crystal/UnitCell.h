@@ -178,6 +178,10 @@ namespace Geometry
   };
 
   MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream &out, const UnitCell& unitCell);
+
+  MANTID_GEOMETRY_DLL UnitCell strToUnitCell(const std::string &unitCellString);
+  MANTID_GEOMETRY_DLL std::string unitCellToStr(const UnitCell &unitCell);
+
 } // namespace Mantid
 } // namespace Geometry
 

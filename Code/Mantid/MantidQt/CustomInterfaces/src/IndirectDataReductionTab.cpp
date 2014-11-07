@@ -20,9 +20,13 @@ namespace CustomInterfaces
    */
   IndirectDataReductionTab::IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QObject* parent) : QObject(parent),
       m_plots(), m_curves(), m_rangeSelectors(),
+      m_tabRunning(false),
       m_properties(),
-      m_dblManager(new QtDoublePropertyManager()), m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
+      m_dblManager(new QtDoublePropertyManager()),
+      m_blnManager(new QtBoolPropertyManager()),
+      m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()),
+      m_batchAlgoRunner(NULL),
       m_uiForm(uiForm)
   {
     m_parentWidget = dynamic_cast<QWidget *>(parent);
@@ -36,6 +40,8 @@ namespace CustomInterfaces
     m_valPosDbl->setBottom(tolerance);
 
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmFinished(bool)));
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
+
     connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   }
 
@@ -49,9 +55,15 @@ namespace CustomInterfaces
   void IndirectDataReductionTab::runTab()
   {
     if(validate())
+    {
+      m_tabRunning = true;
+      emit updateRunButton(false, "Running...", "Running data reduction...");
       run();
+    }
     else
+    {
       g_log.warning("Failed to validate indirect tab input!");
+    }
   }
 
   void IndirectDataReductionTab::setupTab()
@@ -62,6 +74,22 @@ namespace CustomInterfaces
   void IndirectDataReductionTab::validateTab()
   {
     validate();
+  }
+
+  /**
+   * Slot used to update the run button when an algorithm that was strted by the Run button complete.
+   *
+   * @param error Unused
+   */
+  void IndirectDataReductionTab::tabExecutionComplete(bool error)
+  {
+    UNUSED_ARG(error);
+
+    if(m_tabRunning)
+    {
+      m_tabRunning = false;
+      emit updateRunButton();
+    }
   }
 
   /**
@@ -107,65 +135,12 @@ namespace CustomInterfaces
   Mantid::API::MatrixWorkspace_sptr IndirectDataReductionTab::loadInstrumentIfNotExist(std::string instrumentName,
       std::string analyser, std::string reflection)
   {
-    std::string instWorkspaceName = "__empty_" + instrumentName;
-    std::string idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
+    IndirectDataReduction* parentIDR = dynamic_cast<IndirectDataReduction*>(m_parentWidget);
 
-    // If the workspace does not exist in ADS then load an ampty instrument
-    if(AnalysisDataService::Instance().doesExist(instWorkspaceName))
-    {
-      std::string parameterFilename = idfDirectory + instrumentName + "_Definition.xml";
-      IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
-      loadAlg->initialize();
-      loadAlg->setProperty("Filename", parameterFilename);
-      loadAlg->setProperty("OutputWorkspace", instWorkspaceName);
-      loadAlg->execute();
-    }
+    if(parentIDR == NULL)
+      throw std::runtime_error("IndirectDataReductionTab must be a child of IndirectDataReduction");
 
-    // Load the IPF if given an analyser and reflection
-    if(!analyser.empty() && !reflection.empty())
-    {
-      std::string ipfFilename = idfDirectory + instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
-      IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
-      loadParamAlg->initialize();
-      loadParamAlg->setProperty("Filename", ipfFilename);
-      loadParamAlg->setProperty("Workspace", instWorkspaceName);
-      loadParamAlg->execute();
-    }
-
-    // Get the workspace, which should exist now
-    MatrixWorkspace_sptr instWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instWorkspaceName);
-
-    return instWorkspace;
-  }
-
-  /**
-   * Gets the operation modes for a given instrument as defined in it's parameter file.
-   *
-   * @param instrumentName The name of an indirect instrument (IRIS, OSIRIS, TOSCA, VESUVIO)
-   * @returns A list of analysers and a vector of reflections that can be used with each
-   */
-  std::vector<std::pair<std::string, std::vector<std::string> > > IndirectDataReductionTab::getInstrumentModes(std::string instrumentName)
-  {
-    std::vector<std::pair<std::string, std::vector<std::string> > > modes;
-    MatrixWorkspace_sptr instWorkspace = loadInstrumentIfNotExist(instrumentName);
-    Instrument_const_sptr instrument = instWorkspace->getInstrument();
-
-    std::vector<std::string> analysers;
-    boost::split(analysers, instrument->getStringParameter("analysers")[0], boost::is_any_of(","));
-
-    for(auto it = analysers.begin(); it != analysers.end(); ++it)
-    {
-      std::string analyser = *it;
-      std::string ipfReflections = instrument->getStringParameter("refl-" + analyser)[0];
-
-      std::vector<std::string> reflections;
-      boost::split(reflections, ipfReflections, boost::is_any_of(","), boost::token_compress_on);
-
-      std::pair<std::string, std::vector<std::string> > data(analyser, reflections);
-      modes.push_back(data);
-    }
-
-    return modes;
+    return parentIDR->loadInstrumentIfNotExist(instrumentName, analyser, reflection);
   }
 
   /**
@@ -181,6 +156,10 @@ namespace CustomInterfaces
     std::string instrumentName = m_uiForm.cbInst->currentText().toStdString();
     std::string analyser = m_uiForm.cbAnalyser->currentText().toStdString();
     std::string reflection = m_uiForm.cbReflection->currentText().toStdString();
+
+    instDetails["instrument"] = QString::fromStdString(instrumentName);
+    instDetails["analyser"] = QString::fromStdString(analyser);
+    instDetails["reflection"] = QString::fromStdString(reflection);
 
     // List of values to get from IPF
     std::vector<std::string> ipfElements;
@@ -202,9 +181,12 @@ namespace CustomInterfaces
       analyser = "mica";
 
     // Get the instrument
-    auto instrument = instWorkspace->getInstrument()->getComponentByName(analyser);
+    auto instrument = instWorkspace->getInstrument();
     if(instrument == NULL)
       return instDetails;
+
+    // Get the analyser component
+    auto component = instrument->getComponentByName(analyser);
 
     // For each parameter we want to get
     for(auto it = ipfElements.begin(); it != ipfElements.end(); ++it)
@@ -212,16 +194,11 @@ namespace CustomInterfaces
       try
       {
         std::string key = *it;
-        QString value;
 
-        // Determint it's type and call the corresponding get function
-        std::string paramType = instrument->getParameterType(key);
+        QString value = getInstrumentParameterFrom(instrument, key);
 
-        if(paramType == "string")
-          value = QString::fromStdString(instrument->getStringParameter(key)[0]);
-
-        if(paramType == "double")
-          value = QString::number(instrument->getNumberParameter(key)[0]);
+        if(value.isEmpty() && component != NULL)
+          QString value = getInstrumentParameterFrom(component, key);
 
         instDetails[QString::fromStdString(key)] = value;
       }
@@ -234,6 +211,25 @@ namespace CustomInterfaces
     }
 
     return instDetails;
+  }
+
+  QString IndirectDataReductionTab::getInstrumentParameterFrom(Mantid::Geometry::IComponent_const_sptr comp, std::string param)
+  {
+    QString value;
+
+    if(!comp->hasParameter(param))
+      return "";
+
+    // Determine it's type and call the corresponding get function
+    std::string paramType = comp->getParameterType(param);
+
+    if(paramType == "string")
+      value = QString::fromStdString(comp->getStringParameter(param)[0]);
+
+    if(paramType == "double")
+      value = QString::number(comp->getNumberParameter(param)[0]);
+
+    return value;
   }
 
   /**
@@ -251,6 +247,7 @@ namespace CustomInterfaces
 
     return std::make_pair(m_curves[curveID]->data().x(0), m_curves[curveID]->data().x(npts-1));
   }
+
 
   /**
    * Set the range of an axis on a miniplot
@@ -323,9 +320,12 @@ namespace CustomInterfaces
     if(cID == "")
       cID = plotID;
 
-    //check if we can plot
+    // Check if we can plot
     if( wsIndex >= workspace->getNumberHistograms() || workspace->readX(0).size() < 2 )
+    {
+      g_log.error("Spectrum index out of range for this workspace");
       return;
+    }
 
     QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), false);
 

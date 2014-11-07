@@ -718,12 +718,27 @@ void ConfigDialog::initMantidOptionsTab()
   widgetLayout->addWidget(frame);
   QGridLayout *grid = new QGridLayout(frame);
 
+  // if on, for example all plotSpectrum will go to the same window.
+  m_reusePlotInstances =  new QCheckBox("Re-use plot instances for different types of plots");
+  m_reusePlotInstances->setChecked(false);
+  grid->addWidget(m_reusePlotInstances,0,0);
+  QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.ReusePlotInstances"));
+  if(!setting.compare("On"))
+  {
+    m_reusePlotInstances->setChecked(true);
+  }
+  else if(!setting.compare("Off"))
+  {
+    m_reusePlotInstances->setChecked(false);
+  }
+  m_reusePlotInstances->setToolTip("If on, the same plot instance will be re-used for every of the different plots available in the workspaces window (spectrum, slice, color fill, etc.)");
+
   //create a checkbox for invisible workspaces options
   m_invisibleWorkspaces = new QCheckBox("Show Invisible Workspaces");
   m_invisibleWorkspaces->setChecked(false);
-  grid->addWidget(m_invisibleWorkspaces,0,0);
+  grid->addWidget(m_invisibleWorkspaces,1,0);
 
-  QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InvisibleWorkspaces"));
+  setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InvisibleWorkspaces"));
   if(!setting.compare("1"))
   {
     m_invisibleWorkspaces->setChecked(true);
@@ -739,13 +754,13 @@ void ConfigDialog::initMantidOptionsTab()
   treeCategories->setSortingEnabled(false);
   treeCategories->setHeaderLabel("Show Algorithm Categories");
 
-  grid->addWidget(treeCategories,1,0);
+  grid->addWidget(treeCategories,2,0);
   refreshTreeCategories();
 
   // create a checkbox for the instrument view OpenGL option
   m_useOpenGL = new QCheckBox("Use OpenGL in Instrument View");
   m_useOpenGL->setChecked(true);
-  grid->addWidget(m_useOpenGL,3,0);
+  grid->addWidget(m_useOpenGL,4,0);
 
   setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().
     getString("MantidOptions.InstrumentView.UseOpenGL")).toUpper();
@@ -1146,21 +1161,7 @@ void ConfigDialog::initDirSearchTab()
 
   connect( button, SIGNAL(clicked()), this, SLOT(addInstrumentDir()) );
 
-  /// parameterDefinition.directory
-  label = new QLabel(tr("Parameter definitions"));
-  grid->addWidget(label, 3, 0);
-
-  str = Mantid::Kernel::ConfigService::Instance().getString("parameterDefinition.directory");
-  leParameterDir = new QLineEdit();
-  leParameterDir->setText(QString::fromStdString(str));
-  grid->addWidget(leParameterDir, 3, 1);
-
-  button = new QPushButton();
-  button->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
-  grid->addWidget(button, 3, 2);
-
-  connect( button, SIGNAL(clicked()), this, SLOT(addParameterDir()) );
-  grid->setRowStretch(4,1);
+  grid->setRowStretch(3,1);
 }
 
 void ConfigDialog::initCurveFittingTab()
@@ -2227,10 +2228,6 @@ void ConfigDialog::updateDirSearchSettings()
   setting.replace('\\','/');
   mantid_config.setString("instrumentDefinition.directory",setting.toStdString());
 
-  setting = leParameterDir->text();
-  setting.replace('\\','/');
-  mantid_config.setString("parameterDefinition.directory",setting.toStdString());
-
 }
 
 void ConfigDialog::updateCurveFitSettings()
@@ -2272,16 +2269,12 @@ void ConfigDialog::updateMantidOptionsTab()
 {
   Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
 
+  // re-use plot instances (spectra, slice, color-fill, etc.)
+  QString reusePlotInst = m_reusePlotInstances->isChecked()? "On" : "Off";
+  mantid_config.setString("MantidOptions.ReusePlotInstances",reusePlotInst.toStdString());
+
   //invisible workspaces options
-  QString showinvisible_ws;
-  if(m_invisibleWorkspaces->isChecked())
-  {
-    showinvisible_ws="1";
-  }
-  else
-  {
-    showinvisible_ws="0";
-  }
+  QString showinvisible_ws = m_invisibleWorkspaces->isChecked()? "1" : "0";
   mantid_config.setString("MantidOptions.InvisibleWorkspaces",showinvisible_ws.toStdString());
 
   //OpenGL option
@@ -2634,13 +2627,4 @@ void ConfigDialog::addInstrumentDir()
   }
 }
 
-void ConfigDialog::addParameterDir()
-{
-  QString dir = QFileDialog::getExistingDirectory(this, tr("Select new parameter definition directory"),
-    "", 0);
-  if (!dir.isEmpty())
-  {
-    leParameterDir->setText(dir);
-  }
-}
 
