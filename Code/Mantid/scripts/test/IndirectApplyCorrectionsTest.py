@@ -233,16 +233,24 @@ class ApplyCorrectionsTests(unittest.TestCase):
         workspace_names = []
         ass_workspace = self.make_dummy_workspace("name=LinearBackground, A0=0.922948, A1=0;", 
                                                   x_unit='Wavelength', output_name='corr_ass')
+        AddSampleLog(ass_workspace, LogName='sample_shape', LogType='String', LogText='cylinder')
+
         if using_can:
             workspace_names.append(ass_workspace)
+
             assc_workspace = self.make_dummy_workspace("name=LinearBackground, A0=0.921233, A1=-0.007078;", 
                                                        x_unit='Wavelength', output_name='corr_assc')
+            AddSampleLog(assc_workspace, LogName='sample_shape', LogType='String', LogText='cylinder')
             workspace_names.append(assc_workspace)
+
             acsc_workspace = self.make_dummy_workspace("name=LinearBackground, A0=0.933229, A1=-0.010020;", 
                                                        x_unit='Wavelength', output_name='corr_acsc')
+            AddSampleLog(acsc_workspace, LogName='sample_shape', LogType='String', LogText='cylinder')
             workspace_names.append(acsc_workspace)
+
             acc_workspace = self.make_dummy_workspace("name=LinearBackground, A0=0.995029, A1=-0.010694;", 
                                                       x_unit='Wavelength', output_name='corr_acc')
+            AddSampleLog(acc_workspace, LogName='sample_shape', LogType='String', LogText='cylinder')
             workspace_names.append(acc_workspace)
 
             workspace_names = ','.join(workspace_names)

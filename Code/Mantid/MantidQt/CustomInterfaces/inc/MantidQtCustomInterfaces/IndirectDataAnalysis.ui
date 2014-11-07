@@ -1388,13 +1388,11 @@
             <property name="workspaceSuffixes" stdset="0">
              <stringlist>
               <string>_red</string>
-              <string>_sqw</string>
              </stringlist>
             </property>
             <property name="fileBrowserSuffixes" stdset="0">
              <stringlist>
               <string>_red.nxs</string>
-              <string>_sqw.nxs</string>
              </stringlist>
             </property>
             <property name="showLoad" stdset="0">
@@ -1423,13 +1421,11 @@
             <property name="workspaceSuffixes" stdset="0">
              <stringlist>
               <string>_red</string>
-              <string>_sqw</string>
              </stringlist>
             </property>
             <property name="fileBrowserSuffixes" stdset="0">
              <stringlist>
               <string>_red.nxs</string>
-              <string>_sqw.nxs</string>
              </stringlist>
             </property>
             <property name="showLoad" stdset="0">
@@ -2896,14 +2892,14 @@
   <tabstop>confit_ckSaveSeq</tabstop>
   <tabstop>absp_ckUseCan</tabstop>
   <tabstop>absp_cbShape</tabstop>
-  <tabstop>absp_leavar</tabstop>
-  <tabstop>absp_lewidth</tabstop>
   <tabstop>absp_lets</tabstop>
   <tabstop>absp_letc1</tabstop>
   <tabstop>absp_letc2</tabstop>
   <tabstop>absp_ler1</tabstop>
   <tabstop>absp_ler2</tabstop>
   <tabstop>absp_ler3</tabstop>
+  <tabstop>absp_leavar</tabstop>
+  <tabstop>absp_lewidth</tabstop>
   <tabstop>absp_lesamden</tabstop>
   <tabstop>absp_cbSampleInputType</tabstop>
   <tabstop>absp_lesamsigs</tabstop>
