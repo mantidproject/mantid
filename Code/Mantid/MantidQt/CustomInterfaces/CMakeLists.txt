@@ -270,6 +270,7 @@ set ( TEST_FILES
 	IO_MuonGroupingTest.h
 	MuonAnalysisHelperTest.h
 	RawFileMementoTest.h
+	ReflLegacyTransferStrategyTest.h
 	ReflMainViewPresenterTest.h
 	WorkspaceInADSTest.h
 	WorkspaceMementoTest.h
