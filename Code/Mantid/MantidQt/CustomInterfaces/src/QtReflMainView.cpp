@@ -224,6 +224,10 @@ namespace MantidQt
     */
     void QtReflMainView::showContextMenu(const QPoint& pos)
     {
+      //If the user didn't right-click on anything, don't show a context menu.
+      if(!ui.viewTable->indexAt(pos).isValid())
+        return;
+
       //parent widget takes ownership of QMenu
       QMenu* menu = new QMenu(this);
       menu->addAction(ui.actionProcess);
