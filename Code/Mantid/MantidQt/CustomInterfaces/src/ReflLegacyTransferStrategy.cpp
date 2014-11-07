@@ -33,7 +33,7 @@ namespace MantidQt
         std::string cleanDesc = desc;
 
         //See if theta is in the description
-        static boost::regex regexTheta("th[:=](?<theta>[0-9.]+)|in (?<theta>[0-9.]+) theta");
+        static boost::regex regexTheta("(?|th[:=](?<theta>[0-9.]+)|in (?<theta>[0-9.]+) theta)");
         boost::smatch matches;
         if(boost::regex_search(desc, matches, regexTheta))
         {
