@@ -95,13 +95,6 @@ namespace Mantid
         }
       }
        
-      // Number of energy bins
-      //this->m_nBins = inputWS->blocksize();
-
-      // Get a pointer to the sample
-      //Geometry::IComponent_const_sptr sample =
-      //    inputWS->getInstrument()->getSample();
-
       // Retrieve the filename from the properties
       this->m_filename = getPropertyValue("Filename");
             
@@ -133,8 +126,7 @@ namespace Mantid
         writeSingle(*it,nxFile);               
         progress.report();              
       }
-
-      nxFile.close();
+      
     }
 
    /**
@@ -148,8 +140,7 @@ namespace Mantid
     {      
       // Try and open the file, if it doesn't exist, create it.     
       NXhandle fileHandle;
-      NXstatus status = NX_ERROR;
-      status = NXopen(this->m_filename.c_str(), NXACC_RDWR, &fileHandle);
+      NXstatus status = NXopen(this->m_filename.c_str(), NXACC_RDWR, &fileHandle);
       
       std::vector<double> prevData, prevError, rotationAngles;
       //std::map<std::string, std::string> prevLogVals; 
@@ -384,9 +375,9 @@ namespace Mantid
       
       double *dataArr = new double[m_spectraCount];
 
-      for(size_t i=0; i<m_dimensions[1];++i)
+      for(int64_t i=0; i<m_dimensions[1];++i)
       {
-        for(size_t j=0; j<m_dimensions[2];++j)
+        for(int64_t j=0; j<m_dimensions[2];++j)
         {
           dataArr[i*m_dimensions[1]+j] = workspace->dataY(i*m_dimensions[1]+j)[0];
         }
@@ -399,6 +390,8 @@ namespace Mantid
       nxFile.putAttr("NumFiles", ++numFiles);
 
       nxFile.closeGroup();
+
+      free(dataArr);
     }
 
 
@@ -467,7 +460,7 @@ namespace Mantid
         std::string name = getPropertyValue("InputWorkspaces");
         WorkspaceGroup_sptr groupWS = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);     
         
-        for(size_t i = 0; i<groupWS->getNumberOfEntries();++i)
+        for(int i = 0; i<groupWS->getNumberOfEntries();++i)
         {
           m_workspaces.push_back(boost::dynamic_pointer_cast<Workspace2D>(groupWS->getItem(i)));
         }   

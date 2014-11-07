@@ -103,8 +103,6 @@ private:
   Workspace2D& operator=(const Workspace2D&);
 
   virtual std::size_t getHistogramNumberHelper() const;
-  /// Copy data from an image.
-  void setImage(const API::MantidImage &imageY, const API::MantidImage &imageE, size_t start, bool parallelExecution );
 };
 
 ///shared pointer to the Workspace2D class

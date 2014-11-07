@@ -361,7 +361,7 @@ namespace Mantid
       /// Create an MantidImage instance.
       MantidImage_sptr getImage(const MantidVec& (MatrixWorkspace::*read)(std::size_t const) const, size_t start, size_t stop, size_t width, size_t indexStart, size_t indexEnd) const;
       /// Copy data from an image.
-      virtual void setImage( MantidVec& (MatrixWorkspace::*dataVec)(const std::size_t), const MantidImage &image, size_t start, bool parallelExecution );
+      void setImage( MantidVec& (MatrixWorkspace::*dataVec)(const std::size_t), const MantidImage &image, size_t start, bool parallelExecution );
 
       /// Has this workspace been initialised?
       bool m_isInitialized;

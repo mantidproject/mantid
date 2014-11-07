@@ -125,7 +125,6 @@ namespace DataHandling
     std::vector<std::string> m_headerAxisNameKeys;
 
     string m_baseName; 
-    string m_propName;    
     size_t m_spectraCount;
     API::Progress *m_progress;
     

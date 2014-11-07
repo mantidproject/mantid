@@ -105,7 +105,6 @@ namespace DataHandling
     string fName = getPropertyValue("Filename");
     boost::split(paths, fName, boost::is_any_of(","));
     m_baseName = "";
-    m_propName = "";
     m_spectraCount = 0;
     
     // If paths contains a non fits file, assume (for now) that it contains information about the rotations
@@ -210,7 +209,6 @@ namespace DataHandling
 
       // This forms the name of the group
       m_baseName = getPropertyValue("OutputWorkspace") + "_";
-      m_propName = "OutputWorkspace_";
 
       size_t fileNumberInGroup = 0;
       WorkspaceGroup_sptr wsGroup;
@@ -260,7 +258,7 @@ namespace DataHandling
       for(int64_t i = 1; i < allHeaderInfo.size(); ++i)
       {        
         double rot = (rotations.size() > i) ? rotations[i] : -1;
-        latestWS = addWorkspace(allHeaderInfo[i],fileNumberInGroup,bufferAny,imageY,imageE,rotations[i],latestWS);
+        latestWS = addWorkspace(allHeaderInfo[i],fileNumberInGroup,bufferAny,imageY,imageE,rot,latestWS);
         wsOrdered[i] = latestWS;
       }
       
@@ -304,7 +302,6 @@ namespace DataHandling
     string currNumberS = padZeros(newFileNumber, DIGIT_SIZE_APPEND);
     ++newFileNumber;
 
-    string propName = m_propName + currNumberS;
     string baseName = m_baseName + currNumberS; 
     
     ws->setTitle(baseName);
