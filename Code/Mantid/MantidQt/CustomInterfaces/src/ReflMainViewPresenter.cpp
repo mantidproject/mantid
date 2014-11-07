@@ -1144,9 +1144,16 @@ namespace MantidQt
     /** Searches for runs that can be used */
     void ReflMainViewPresenter::search()
     {
+      const std::string searchString = m_view->getSearchString();
+      const std::string searchInstr  = m_view->getSearchInstrument();
+
+      //Don't bother searching if they're not searching for anything
+      if(searchString.empty())
+        return;
+
       try
       {
-        auto results = m_searcher->search(m_view->getSearchString(), m_view->getSearchInstrument());
+        auto results = m_searcher->search(searchString, searchInstr);
         m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(results));
         m_view->showSearch(m_searchModel);
       }
