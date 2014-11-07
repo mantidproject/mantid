@@ -211,7 +211,7 @@ def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, 
         source: workspace or name of a workspace
         indices: workspace index, or tuple or list of workspace indices to plot
         error_bars: bool, set to True to add error bars.
-        type: Plot style
+        type: curve style for plot (-1: unspecified; 0: line, default; 1: scatter/dots)
         window: window used for plotting. If None a new one will be created
         clearWindow: if is True, the window specified will be cleared before adding new curve
     Returns:
