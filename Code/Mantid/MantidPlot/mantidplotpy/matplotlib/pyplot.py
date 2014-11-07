@@ -1,4 +1,167 @@
+"""============================================================================
+New Python command line interface for plotting in Mantid (ala matplotlib)
+============================================================================
 
+The idea behind this new module is to provide a simpler, more
+homogeneous command line interface (CLI) to the Mantid plotting
+functionality. This new interface is meant to resemble MatPlotLib as
+far as possible, and provide a more manageable, limited number of plot
+options.
+
+The module is at a very early stage of development and provides
+limited functionality. This is very much work in progress at the
+moment. Feedback is very much welcome!
+
+To use this new functionality you first need to import the new pyplot module:
+
+    from mantidplot.future.pyplot import *
+
+Please do not forget this step, otherwise you may get arcane error
+messages from functions of the old mantidplot Python CLI.
+
+Simple plots can be created and manipulated with a handul of
+commands. See the following examples.
+
+Plot an array (python list)
+---------------------------
+
+    plot([0.1, 0.3, 0.2, 4])
+    # The list of values will be inserted in a workspace named 'array_dummy_workspace'
+
+
+Plot a Mantid workspace
+-----------------------
+
+    # first, load a workspace. You can do this with a Load command or just from the GUI menus
+    ws=Load("MAR11060.nxs", OutputWorkspace="foo")
+    plot(ws)
+
+The list of values will be inserted in a workspace named
+'array_dummy_workspace'
+
+
+The plot commands accept a list of options (kwargs) as parameters
+passed by name. With these options you can modify plot properties,
+such as line styles, colors, axis scale, etc. The following example
+illustrates the use of a few options. You can refer to the list of
+options provided further down in this document. In principle, any
+combination of options is supported, as long as it makes sense!
+
+Plot an array with a different style
+------------------------------------
+
+    a = [0.1, 0.3, 0.2, 4]
+    plot(a)
+    import numpy as np
+    y = np.sin(np.linspace(-2.28, 2.28, 1000))
+    plot(y)
+
+
+If you have used the traditional Mantid command line interface in
+Python you will probably remember the plotSpectrum, plotBin and plotMD
+functions. These are supported in this new interface as shown in the
+following examples.
+
+Plot spectra using workspace objects and workspace names
+--------------------------------------------------------
+
+    # please make sure that you use the right path and file name
+    mar=Load('/path/to/MAR11060.raw', , OutputWorkspace="MAR11060")
+    plot('MAR11060', [10,100,500])
+    plot(mar,[3, 500, 800])
+
+Let's load one more workspace so we can see some examples with list of workspaces
+
+    loq=Load('/path/to/LOQ48097.raw', OutputWorkspace="LOQ48097")
+
+The next lines are all equivalent, you can use workspace objects or
+names in the list passed to plot:
+
+    plot([mar, 'LOQ48097'], [800, 900])
+    plot([mar, loq], [800, 900])
+    plot(['MAR11060', loq], [800, 900])
+
+Here, plot is making a guess and plotting the spectra of these
+workspaces. You can make that choice more explicit by specifying the
+'tool' argument:
+
+    plot(['MAR11060', loq], [800, 900], tool='plot_spectrum')
+
+Plotting bins
+-------------
+
+    plot_bin(ws, [1, 5, 7, 100], linewidth=5):
+
+Ploting MD workspaces
+---------------------
+
+    plot_md(md_ws):
+
+Changing style properties
+-------------------------
+
+You can modify the style of your plots. For example like this (for a
+full list of options currently supported, see below).
+
+    lines=plot(loq, [1, 4], tool='plot_spectrum', linestyle='-.', marker='*')
+
+Notice that the plot function returns a list of lines, which
+correspond to the spectra lines. At present the lines have limited
+functionality. Essentially, the data underlying these lines data can
+be retrieved as follows:
+
+    lines[0].get_xdata()
+    lines[0].get_ydata()
+
+If you use plot_spectrum, the number of elements in the output lines
+should be equal to the number of bins in the corresponding
+workspace. Conversely, if you use plot_bin, the number of elements in
+the output lines should be equal to the number of spectra in the
+workspace.
+
+Other properties can be modified using different functions, as in
+matplotlib's pyplot. For example:
+
+    title('Test plot of LOQ')
+    xlabel('ToF')
+    ylabel('ToF')
+    ylim(0, 8)
+    xlim(1e3, 4e4)
+    grid('on')
+
+
+Style options supported as keyword arguments
+--------------------------------------------
+
+Unless otherwise stated, these options are in principle supported in
+all the plot variants. These options have the same (or as closed as
+possible) meaning as in matplotlib.
+
+============  ================
+Option name   Values supported
+------------  ----------------
+linewidth     real values
+linestyle     '-', '--', '-.' '.'
+marker        'o', 'v', '^', '<', '>', 's', '*', 'h', '|', '_'
+color         color character or string ('b', 'blue', 'g', 'green', 'k', 'black', etc.)
+============  ================
+
+Functions that modify plot properties
+-------------------------------------
+
+Here is a list of the functions supported at the moment. The offer the
+same functionality as their counterparts in matplotlib's pyplot.
+
+- title
+- xlabel
+- ylabel
+- ylim
+- xlim
+- axis
+- grid
+- savefig
+
+"""
 try:
     import _qti
 except ImportError:
