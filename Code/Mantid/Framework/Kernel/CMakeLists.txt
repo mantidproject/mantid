@@ -7,6 +7,7 @@ set ( SRC_FILES
 	src/BinFinder.cpp
 	src/CPUTimer.cpp
 	src/CatalogInfo.cpp
+	src/ChecksumHelper.cpp
 	src/CompositeValidator.cpp
 	src/ConfigService.cpp
 	src/DataItem.cpp
@@ -125,6 +126,7 @@ set ( INC_FILES
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
 	inc/MantidKernel/CatalogInfo.h
+	inc/MantidKernel/ChecksumHelper.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ConfigService.h
 	inc/MantidKernel/DataItem.h
@@ -257,6 +259,7 @@ set ( TEST_FILES
 	CPUTimerTest.h
 	CacheTest.h
 	CatalogInfoTest.h
+	ChecksumHelperTest.h
 	CompositeValidatorTest.h
 	ConfigServiceTest.h
 	DataServiceTest.h
