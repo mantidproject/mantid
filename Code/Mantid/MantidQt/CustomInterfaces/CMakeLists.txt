@@ -4,7 +4,7 @@ set ( SRC_FILES
 	src/ConvFit.cpp
 	src/CreateMDWorkspace.cpp
 	src/CreateMDWorkspaceAlgDialog.cpp
-  src/DirectConvertToEnergy.cpp
+	src/DirectConvertToEnergy.cpp
 	src/Elwin.cpp
 	src/EventNexusFileMemento.cpp
 	src/Fury.cpp
@@ -13,12 +13,12 @@ set ( SRC_FILES
 	src/IDATab.cpp
 	src/IndirectBayes.cpp
 	src/IndirectBayesTab.cpp
-  src/IndirectCalibration.cpp
-  src/IndirectConvertToEnergy.cpp
+	src/IndirectCalibration.cpp
+	src/IndirectConvertToEnergy.cpp
 	src/IndirectDataAnalysis.cpp
-  src/IndirectDataReduction.cpp
-  src/IndirectDataReductionTab.cpp
-  src/IndirectDiagnostics.cpp
+	src/IndirectDataReduction.cpp
+	src/IndirectDataReductionTab.cpp
+	src/IndirectDiagnostics.cpp
 	src/IndirectDiffractionReduction.cpp
 	src/IndirectLoadAscii.cpp
 	src/IndirectLoadAsciiTab.cpp
@@ -27,8 +27,9 @@ set ( SRC_FILES
 	src/IndirectNeutron.cpp
 	src/IndirectSimulation.cpp
 	src/IndirectSimulationTab.cpp
-  src/IndirectSqw.cpp
-  src/IndirectTransmission.cpp
+	src/IndirectSqw.cpp
+	src/IndirectSymmetrise.cpp
+	src/IndirectTransmission.cpp
 	src/JumpFit.cpp
 	src/MSDFit.cpp
 	src/MantidEV.cpp
@@ -51,14 +52,11 @@ set ( SRC_FILES
 	src/Muon/MuonAnalysisResultTableTab.cpp
 	src/QReflTableModel.cpp
 	src/QtReflMainView.cpp
+	src/QtReflOptionsDialog.cpp
 	src/QtWorkspaceMementoModel.cpp
 	src/Quasi.cpp
 	src/RawFileMemento.cpp
-	src/ReflBlankMainViewPresenter.cpp
-	src/ReflLoadedMainViewPresenter.cpp
-	src/ReflMainView.cpp
 	src/ReflMainViewPresenter.cpp
-	src/ReflNullMainViewPresenter.cpp
 	src/ResNorm.cpp
 	src/SANSAddFiles.cpp
 	src/SANSDiagnostics.cpp
@@ -82,7 +80,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/ConvFit.h
 	inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
 	inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
-  inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
+	inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/DllConfig.h
 	inc/MantidQtCustomInterfaces/Elwin.h
 	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h
@@ -92,11 +90,11 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IDATab.h
 	inc/MantidQtCustomInterfaces/IndirectBayes.h
 	inc/MantidQtCustomInterfaces/IndirectBayesTab.h
-  inc/MantidQtCustomInterfaces/IndirectCalibration.h
-  inc/MantidQtCustomInterfaces/IndirectConvertToEnergy.h
+	inc/MantidQtCustomInterfaces/IndirectCalibration.h
+	inc/MantidQtCustomInterfaces/IndirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
-  inc/MantidQtCustomInterfaces/IndirectDataReduction.h
-  inc/MantidQtCustomInterfaces/IndirectDataReductionTab.h
+	inc/MantidQtCustomInterfaces/IndirectDataReduction.h
+ 	inc/MantidQtCustomInterfaces/IndirectDataReductionTab.h
 	inc/MantidQtCustomInterfaces/IndirectDiagnostics.h
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
 	inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
@@ -107,7 +105,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IndirectSimulation.h
 	inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
 	inc/MantidQtCustomInterfaces/IndirectSqw.h
-  inc/MantidQtCustomInterfaces/IndirectTransmission.h
+	inc/MantidQtCustomInterfaces/IndirectSymmetrise.h
+	inc/MantidQtCustomInterfaces/IndirectTransmission.h
 	inc/MantidQtCustomInterfaces/IReflPresenter.h
 	inc/MantidQtCustomInterfaces/JumpFit.h
 	inc/MantidQtCustomInterfaces/MSDFit.h
@@ -134,13 +133,11 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
-	inc/MantidQtCustomInterfaces/ReflBlankMainViewPresenter.h
-	inc/MantidQtCustomInterfaces/ReflLoadedMainViewPresenter.h
 	inc/MantidQtCustomInterfaces/ReflMainView.h
 	inc/MantidQtCustomInterfaces/ReflMainViewPresenter.h
-	inc/MantidQtCustomInterfaces/ReflNullMainViewPresenter.h
 	inc/MantidQtCustomInterfaces/QReflTableModel.h
 	inc/MantidQtCustomInterfaces/QtReflMainView.h
+	inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
 	inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
 	inc/MantidQtCustomInterfaces/Quasi.h
 	inc/MantidQtCustomInterfaces/RawFileMemento.h
@@ -190,6 +187,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectSimulation.h
                 inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
                 inc/MantidQtCustomInterfaces/IndirectSqw.h
+                inc/MantidQtCustomInterfaces/IndirectSymmetrise.h
                 inc/MantidQtCustomInterfaces/IndirectTransmission.h
                 inc/MantidQtCustomInterfaces/JumpFit.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
@@ -210,6 +208,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
                 inc/MantidQtCustomInterfaces/QReflTableModel.h
                 inc/MantidQtCustomInterfaces/QtReflMainView.h
+                inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
                 inc/MantidQtCustomInterfaces/Quasi.h
                 inc/MantidQtCustomInterfaces/ResNorm.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
@@ -241,6 +240,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/CreateMDWorkspace.ui
                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/Quasi.ui
                inc/MantidQtCustomInterfaces/ReflMainWidget.ui
+               inc/MantidQtCustomInterfaces/ReflOptionsDialog.ui
                inc/MantidQtCustomInterfaces/ReflWindow.ui
                inc/MantidQtCustomInterfaces/ResNorm.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui
@@ -261,8 +261,7 @@ set ( TEST_FILES
 	IO_MuonGroupingTest.h
 	MuonAnalysisHelperTest.h
 	RawFileMementoTest.h
-	ReflBlankMainViewPresenterTest.h
-	ReflLoadedMainViewPresenterTest.h
+	ReflMainViewPresenterTest.h
 	WorkspaceInADSTest.h
 	WorkspaceMementoTest.h
 )
@@ -314,10 +313,3 @@ add_subdirectory ( test )
 ###########################################################################
 
 install ( TARGETS CustomInterfaces ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR}/qtplugins/mantid )
-
-set ( TEST_FILES
-	QReflTableModelTest.h
-	QtReflMainViewTest.h
-	ReflBlankMainViewPresenterTest.h
-	ReflLoadedMainViewPresenterTest.h
-)

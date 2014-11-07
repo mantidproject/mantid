@@ -34,10 +34,10 @@ namespace Mantid
 
     //----------------------------------------------------------------------------------------------
     /// Algorithm's name for identification. @see Algorithm::name
-    const std::string ConvertToYSpace::name() const { return "ConvertToYSpace";};
+    const std::string ConvertToYSpace::name() const { return "ConvertToYSpace";}
 
     /// Algorithm's version for identification. @see Algorithm::version
-    int ConvertToYSpace::version() const { return 1;};
+    int ConvertToYSpace::version() const { return 1;}
 
     /// Algorithm's category for identification. @see Algorithm::category
     const std::string ConvertToYSpace::category() const { return "Transforms\\Units";}
@@ -75,6 +75,7 @@ namespace Mantid
       const auto & pmap = ws->constInstrumentParameters();
       detpar.l1 = sample->getDistance(*source);
       detpar.l2 = det->getDistance(*sample);
+      detpar.pos = det->getPos();
       detpar.theta = ws->detectorTwoTheta(det);
       detpar.t0 = ConvertToYSpace::getComponentParameter(det, pmap, "t0")*1e-6; // Convert to seconds
       detpar.efixed = ConvertToYSpace::getComponentParameter(det, pmap, "efixed");
@@ -215,18 +216,7 @@ namespace Mantid
     {
       try
       {
-
-        auto det = m_inputWS->getDetector(index);
-        const auto & pmap = m_inputWS->constInstrumentParameters();
-        auto detPos = det->getPos();
-
-        // -- Setup detector & resolution parameters --
-        DetectorParams detPar;
-        detPar.l1 = m_l1;
-        detPar.l2 = m_samplePos.distance(detPos);
-        detPar.theta = m_inputWS->detectorTwoTheta(det); //radians
-        detPar.t0 = getComponentParameter(det, pmap, "t0")*1e-06; // seconds
-        detPar.efixed = getComponentParameter(det, pmap,"efixed");
+        DetectorParams detPar = getDetectorParameters(m_inputWS, index);
         const double v1 = std::sqrt(detPar.efixed/MASS_TO_MEV);
         const double k1 = std::sqrt(detPar.efixed/PhysicalConstants::E_mev_toNeutronWavenumberSq);
 

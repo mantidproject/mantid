@@ -1,17 +1,16 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLNULLMAINVIEWPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_REFLNULLMAINVIEWPRESENTER_H
+#ifndef MANTID_MANTIDWIDGETS_HINTSTRATEGY_H
+#define MANTID_MANTIDWIDGETS_HINTSTRATEGY_H
 
-#include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/IReflPresenter.h"
+#include <map>
+#include <string>
+
 namespace MantidQt
 {
-  namespace CustomInterfaces
+  namespace MantidWidgets
   {
-    /** @class ReflNullMainViewPresenter
+    /** HintStrategy : Provides an interface for generating hints to be used by a HintingLineEdit.
 
-    ReflNullMainViewPresenter is a Null object that supports all the IReflPresenter interfaces but raises a runtime error if any are called.
-
-    Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -28,17 +27,22 @@ namespace MantidQt
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
+    File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-    class DLLExport ReflNullMainViewPresenter: public IReflPresenter
+    */
+    class HintStrategy
     {
     public:
-      virtual ~ReflNullMainViewPresenter();
-      virtual void notify(int flag);
-    private:
+      HintStrategy() {};
+      virtual ~HintStrategy() {};
 
+      /** Create a list of hints for auto completion
+
+          @returns A map of keywords to short descriptions for the keyword.
+       */
+      virtual std::map<std::string,std::string> createHints() = 0;
     };
   }
 }
-#endif
+
+#endif /* MANTID_MANTIDWIDGETS_HINTSTRATEGY_H */

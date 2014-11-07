@@ -32,48 +32,23 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
     else:
         return workspaces
 
-def resolution(files, iconOpt, rebinParam, bground,
-        instrument, analyser, reflection,
-        Res=True, factor=None, Plot=False, Verbose=False, Save=False):
-    reducer = inelastic_indirect_reducer.IndirectReducer()
-    reducer.set_instrument_name(instrument)
-    reducer.set_detector_range(iconOpt['first']-1,iconOpt['last']-1)
-    for file in files:
-        reducer.append_data_file(file)
-    parfile = instrument +"_"+ analyser +"_"+ reflection +"_Parameters.xml"
-    reducer.set_parameter_file(parfile)
-    reducer.set_grouping_policy('All')
-    reducer.set_sum_files(True)
-
-    try:
-        reducer.reduce()
-    except Exception, e:
-        logger.error(str(e))
-        return
-
-    iconWS = reducer.get_result_workspaces()[0]
-
-    if factor != None:
-        Scale(InputWorkspace=iconWS, OutputWorkspace=iconWS, Factor = factor)
-
-    if Res:
-        name = getWSprefix(iconWS) + 'res'
-        CalculateFlatBackground(InputWorkspace=iconWS, OutputWorkspace=name, StartX=bground[0], EndX=bground[1],
-            Mode='Mean', OutputMode='Subtract Background')
-        Rebin(InputWorkspace=name, OutputWorkspace=name, Params=rebinParam)
-
-        if Save:
-            if Verbose:
-                logger.notice("Resolution file saved to default save directory.")
-            SaveNexusProcessed(InputWorkspace=name, Filename=name+'.nxs')
-
-        if Plot:
-            graph = mp.plotSpectrum(name, 0)
-        return name
-    else:
-        if Plot:
-            graph = mp.plotSpectrum(iconWS, 0)
-        return iconWS
+def createMappingFile(groupFile, ngroup, nspec, first):
+    if ( ngroup == 1 ): return 'All'
+    if ( nspec == 1 ): return 'Individual'
+    filename = config['defaultsave.directory']
+    filename = os.path.join(filename, groupFile)
+    handle = open(filename, 'w')
+    handle.write(str(ngroup) +  "\n" )
+    for n in range(0, ngroup):
+        n1 = n * nspec + first
+        handle.write(str(n+1) +  '\n' )
+        handle.write(str(nspec) +  '\n')
+        for i in range(1, nspec+1):
+            n3 = n1 + i - 1
+            handle.write(str(n3).center(4) + ' ')
+        handle.write('\n')
+    handle.close()
+    return filename
 
 
 def getInstrumentDetails(instrument):

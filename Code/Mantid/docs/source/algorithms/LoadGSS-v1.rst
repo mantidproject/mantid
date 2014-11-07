@@ -11,7 +11,7 @@ Description
 
 Loads a GSS file such as that saved by :ref:`algm-SaveGSS`.
 
-Two types of GSAS files are supported
+Two types of GSAS files (.fxye) are supported
 
 | ``* RALF``
 | ``* SLOG``

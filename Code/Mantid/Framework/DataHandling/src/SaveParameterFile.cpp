@@ -105,10 +105,10 @@ namespace DataHandling
       const std::string  pType = (*paramsIt).second->type();
       const std::string pValue = (*paramsIt).second->asString();
 
-      if(pName == "x"          || pName == "y"          || pName == "z"          ||
-         pName == "r-position" || pName == "t-position" || pName == "p-position" ||
-         pName == "rotx"       || pName == "roty"       || pName == "rotz"        )
-      {
+			if(pName == "x"          || pName == "y"          || pName == "z"          ||
+				pName == "r-position" || pName == "t-position" || pName == "p-position" ||
+				pName == "rotx"       || pName == "roty"       || pName == "rotz"        )
+			{
         g_log.warning() << "The parameter name '" << pName << "' is reserved and has not been saved. "
                         << "Please contact the Mantid team for more information.";
         continue;
@@ -192,14 +192,16 @@ namespace DataHandling
     //document out of them.
     for(auto paramsIt = toSave.begin(); paramsIt != toSave.end(); ++paramsIt)
     {
-      //Component data
+
+			
+			//Component data
       const ComponentID cID = boost::get<0>(*paramsIt);
       const std::string cFullName = cID->getFullName();
       const IDetector* cDet = dynamic_cast<IDetector*>(cID);
       const detid_t cDetID = (cDet) ? cDet->getID() : 0;
       const std::string cDetIDStr = boost::lexical_cast<std::string>(cDetID);
 
-      //Parameter data
+			//Parameter data
       const std::string pName = boost::get<1>(*paramsIt);
       const std::string pType = boost::get<2>(*paramsIt);
       const std::string pValue = boost::get<3>(*paramsIt);
@@ -229,9 +231,8 @@ namespace DataHandling
         compMap[cID] = compElem;
       }
 
-      //Create the parameter and value elements
+      //Create the parameter element
       XML::AutoPtr<XML::Element> paramElem = xmlDoc->createElement("parameter");
-      XML::AutoPtr<XML::Element> valueElem = xmlDoc->createElement("value");
 
       //Set the attributes
       compElem->setAttribute("name", cFullName);
@@ -242,19 +243,43 @@ namespace DataHandling
         compElem->setAttribute("id", cDetIDStr);
       }
 
-      paramElem->setAttribute("name", pName);
 
-      //For strings, we specify their type.
-      if(pType == "string")
-      {
-        paramElem->setAttribute("type", "string");
-      }
+			if(pType == "fitting")
+			{
+				// We need some parameter information as function, formula, units, and result units
+				auto param = params->get(cID,pName,pType);
+				const Mantid::Geometry::FitParameter& fitParam = param->value<FitParameter>();
 
-      valueElem->setAttribute("val", pValue);
+				// For fitting parameters we specify their type
+				paramElem->setAttribute("name", std::string(fitParam.getFunction()+":"+fitParam.getName()));
+				paramElem->setAttribute("type", pType);
 
-      //Insert the elements into the document
-      compElem->appendChild(paramElem);
-      paramElem->appendChild(valueElem);
+				XML::AutoPtr<XML::Element> formulaElem = xmlDoc->createElement("formula");
+				formulaElem->setAttribute("eq", fitParam.getFormula());
+				formulaElem->setAttribute("unit", fitParam.getFormulaUnit());
+				formulaElem->setAttribute("result-unit", fitParam.getResultUnit());
+
+				//Insert the elements into the document
+				compElem->appendChild(paramElem);
+				paramElem->appendChild(formulaElem);
+			}
+			else
+			{
+				paramElem->setAttribute("name", pName);
+
+				//For strings, we specify their type.
+				if(pType == "string")
+				{
+					paramElem->setAttribute("type", "string");
+				}
+				XML::AutoPtr<XML::Element> valueElem = xmlDoc->createElement("value");
+				valueElem->setAttribute("val", pValue);
+
+				//Insert the elements into the document
+				compElem->appendChild(paramElem);
+				paramElem->appendChild(valueElem);
+			}
+
 
       progress((double)std::distance(toSave.begin(), paramsIt) / (double)progressSteps * 0.6 + 0.3, "Building XML graph");
     }

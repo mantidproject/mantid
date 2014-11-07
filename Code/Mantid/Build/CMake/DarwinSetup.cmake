@@ -128,9 +128,7 @@ else()
  set ( PYQT4_PYTHONPATH /usr/local/lib/python${PY_VER}/site-packages/PyQt4 )
  set ( SITEPACKAGES /usr/local/lib/python${PY_VER}/site-packages )
  # use homebrew OpenSSL package
- EXEC_PROGRAM( brew ARGS info openssl | grep openssl: | cut -c 17-22 OUTPUT_VARIABLE _openssl_version )
- MESSAGE(STATUS "OpenSSL version: ${_openssl_version}")
- set ( OPENSSL_ROOT_DIR /usr/local/Cellar/openssl/${_openssl_version}/ )
+ set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
 endif()
 
 # Python packages
