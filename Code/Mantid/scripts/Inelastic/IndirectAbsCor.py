@@ -99,7 +99,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
     CheckSize(size,geom,ncan,Verbose)
     CheckDensity(density,ncan)
 
-    det = GetWSangles(inputWS)
+    det, _ = GetThetaQ(inputWS)
     ndet = len(det)
     efixed = getEfixed(inputWS)
 
