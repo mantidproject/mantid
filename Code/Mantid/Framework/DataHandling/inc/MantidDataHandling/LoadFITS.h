@@ -99,33 +99,38 @@ namespace DataHandling
     void exec();    
     /// Parses the header values for the FITS file
     bool parseHeader(FITSInfo &headerInfo);
-    /// Load data from a number of files into the workspace
-    void loadChunkOfBinsFromFile(DataObjects::Workspace2D_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, size_t spetraCount, int bitsPerPixel, size_t binChunkStartIndex);
-    /// Initialises a workspace with IDF and fills it with data
-    DataObjects::Workspace2D_sptr initAndPopulateHistogramWorkspace();
-    /// Creates a vector of all rotations from a file
-    std::vector<double> ReadRotations(std::string rotFilePath, size_t fileCount);
-    
-    DataObjects::Workspace2D_sptr addWorkspace(size_t fileInd, size_t &newFileNumber, void *&bufferAny, API::MantidImage &imageY, API::MantidImage &imageE,const vector<double> &rotations,const DataObjects::Workspace2D_sptr parent); 
 
+    /// Creates a vector of all rotations from a file
+    std::vector<double> readRotations(std::string rotFilePath, size_t fileCount);
+
+    /// Initialises a workspace with IDF and fills it with data
+    DataObjects::Workspace2D_sptr addWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber, void *&bufferAny, API::MantidImage &imageY, API::MantidImage &imageE, double rotation,const DataObjects::Workspace2D_sptr parent); 
+
+    /// Returns the trailing number from a string minus leading 0's (so 25 from workspace_00025)
     size_t fetchNumber(std::string name);
+    
+    // Adds a number of leading 0's to another number up to the totalDigitCount.
     std::string padZeros(size_t number, size_t totalDigitCount);
 
-    //API::MatrixWorkspace_sptr createWorkspace(const FITSInfo& fileInfo);
-     void readFileToWorkspace(DataObjects::Workspace2D_sptr ws, const FITSInfo& fileInfo, API::MantidImage &imageY, API::MantidImage &imageE, void *&bufferAny);
+    // Reads the data from a single FITS file into a workspace
+    void readFileToWorkspace(DataObjects::Workspace2D_sptr ws, const FITSInfo& fileInfo, API::MantidImage &imageY, API::MantidImage &imageE, void *&bufferAny);
+    
+    // Maps the header keys to specified values
+    void mapHeaderKeys();
 
-   
+    // Strings used to map header keys
+    string m_headerBitDepthKey;
+    string m_headerRotationKey;
+    string m_mapFile;
+    std::vector<std::string> m_headerAxisNameKeys;
 
-    vector<FITSInfo> m_allHeaderInfo;
-    size_t m_binChunkSize;
     string m_baseName; 
     string m_propName;    
     size_t m_spectraCount;
+    API::Progress *m_progress;
     
-    API::WorkspaceGroup_sptr m_wsGroup;
-
-
-
+    // Number of digits which will be appended to a workspace name, i.e. 4 = workspace_0001
+    static const size_t DIGIT_SIZE_APPEND = 4;
     static const int FIXED_HEADER_SIZE = 2880;    
   };
   

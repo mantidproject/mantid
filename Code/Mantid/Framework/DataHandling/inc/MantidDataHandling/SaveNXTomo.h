@@ -4,8 +4,10 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include "vector"
+#include <vector>
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+
 
 namespace Mantid
 {
@@ -55,7 +57,7 @@ namespace Mantid
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const {  return "SaveNXTomo"; }
 
-      ///Summary of algorithms purpose
+      /// Summary of algorithms purpose
       virtual const std::string summary() const {return "Writes a MatrixWorkspace to a file in the NXTomo format.";}
 
       /// Algorithm's version
@@ -64,40 +66,45 @@ namespace Mantid
       /// Algorithm's category for identification
       virtual const std::string category() const { return "DataHandling\\Nexus;DataHandling\\Tomo;Diffraction";  }
 
+      /// Run instead of exec when operating on groups
+      bool processGroups();
+
     private:      
       /// Initialisation code
       void init();
-      /// Execution code
+      /// Execution code : Single workspace
       void exec();
 
-      /// Save all data to file
+      /// Creates the format for the output file if it doesn't exist
+      ::NeXus::File setupFile(bool resizeData = false);
 
-      /// Save batch of images to the file
+      /// Writes a single workspace into the file
+      void writeSingle(const DataObjects::Workspace2D_sptr workspace, ::NeXus::File &nxFile);
+
+      /// Main exec routine, called for group or individual workspace processing.
+      void processAll();
 
       /// Fetch all rectangular Detector objects defined for an instrument
       std::vector<boost::shared_ptr<const Mantid::Geometry::RectangularDetector>> getRectangularDetectors(const Geometry::Instrument_const_sptr &instrument);
 
       /// Populate dims_array with the dimensions defined in the rectangular detector in the instrument
       std::vector<int64_t> getDimensionsFromDetector(const std::vector<boost::shared_ptr<const Mantid::Geometry::RectangularDetector>> &rectDetectors, size_t useDetectorIndex = 0);
-
-      // Number of rows to 
-      size_t m_numberOfRows;
-
+           
       // Include error data in the written file
       bool m_includeError;
-
-      ///the number of bins in each histogram, as the histogram must have common bins this shouldn't change
-      //size_t m_nBins;
+      bool m_overwriteFile;
+      size_t m_spectraCount;
+      std::vector<int64_t> m_slabStart;
+      std::vector<int64_t> m_slabSize;
       /// The filename of the output file
-      std::string m_filename;      
+      std::string m_filename;                     
+      // Dimensions for axis in nxTomo file.
+      std::vector<int64_t> m_dimensions;
 
-      // Some constants to be written for masked values.
-      /// Value for data if pixel is masked
-      static const double MASK_FLAG;
-      /// Value for error if pixel is masked
-      static const double MASK_ERROR;
       /// file format version
       static const std::string NXTOMO_VER;
+    
+      std::vector<const DataObjects::Workspace2D_sptr> m_workspaces;    
     };
 
   } // namespace DataHandling
