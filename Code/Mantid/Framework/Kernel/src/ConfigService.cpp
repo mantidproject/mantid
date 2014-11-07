@@ -728,6 +728,8 @@ void ConfigServiceImpl::createUserPropertiesFile() const
     filestr << std::endl;
     filestr << "## Show invisible workspaces" << std::endl;
     filestr << "#MantidOptions.InvisibleWorkspaces=0" << std::endl;
+    filestr << "## Re-use plot instances for different plot types" << std::endl;
+    filestr << "#MantidOptions.ReusePlotInstances=Off" << std::endl;
     filestr << std::endl;
     filestr << "## Uncomment to disable use of OpenGL to render unwrapped instrument views" << std::endl;
     filestr << "#MantidOptions.InstrumentView.UseOpenGL=Off" << std::endl;
