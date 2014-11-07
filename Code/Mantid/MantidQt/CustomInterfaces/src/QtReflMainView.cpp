@@ -59,7 +59,7 @@ namespace MantidQt
     void QtReflMainView::setModel(QString name)
     {
       m_toOpen = name.toStdString();
-      m_presenter->notify(OpenTableFlag);
+      m_presenter->notify(IReflPresenter::OpenTableFlag);
     }
 
     /**
@@ -101,7 +101,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionSaveTable_triggered()
     {
-      m_presenter->notify(SaveFlag);
+      m_presenter->notify(IReflPresenter::SaveFlag);
     }
 
     /**
@@ -109,7 +109,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionSaveTableAs_triggered()
     {
-      m_presenter->notify(SaveAsFlag);
+      m_presenter->notify(IReflPresenter::SaveAsFlag);
     }
 
     /**
@@ -117,7 +117,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionAppendRow_triggered()
     {
-      m_presenter->notify(AppendRowFlag);
+      m_presenter->notify(IReflPresenter::AppendRowFlag);
     }
 
     /**
@@ -125,7 +125,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionPrependRow_triggered()
     {
-      m_presenter->notify(PrependRowFlag);
+      m_presenter->notify(IReflPresenter::PrependRowFlag);
     }
 
     /**
@@ -133,7 +133,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionDeleteRow_triggered()
     {
-      m_presenter->notify(DeleteRowFlag);
+      m_presenter->notify(IReflPresenter::DeleteRowFlag);
     }
 
     /**
@@ -141,7 +141,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionProcess_triggered()
     {
-      m_presenter->notify(ProcessFlag);
+      m_presenter->notify(IReflPresenter::ProcessFlag);
     }
 
     /**
@@ -149,7 +149,39 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionGroupRows_triggered()
     {
-      m_presenter->notify(GroupRowsFlag);
+      m_presenter->notify(IReflPresenter::GroupRowsFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "clear selected" button has been pressed
+    */
+    void QtReflMainView::on_actionClearSelected_triggered()
+    {
+      m_presenter->notify(IReflPresenter::ClearSelectedFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "copy selection" button has been pressed
+    */
+    void QtReflMainView::on_actionCopySelected_triggered()
+    {
+      m_presenter->notify(IReflPresenter::CopySelectedFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "cut selection" button has been pressed
+    */
+    void QtReflMainView::on_actionCutSelected_triggered()
+    {
+      m_presenter->notify(IReflPresenter::CutSelectedFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "paste selection" button has been pressed
+    */
+    void QtReflMainView::on_actionPasteSelected_triggered()
+    {
+      m_presenter->notify(IReflPresenter::PasteSelectedFlag);
     }
 
     /**
@@ -157,7 +189,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionNewTable_triggered()
     {
-      m_presenter->notify(NewTableFlag);
+      m_presenter->notify(IReflPresenter::NewTableFlag);
     }
 
     /**
@@ -165,7 +197,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionExpandSelection_triggered()
     {
-      m_presenter->notify(ExpandSelectionFlag);
+      m_presenter->notify(IReflPresenter::ExpandSelectionFlag);
     }
 
     /**
@@ -173,7 +205,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionOptionsDialog_triggered()
     {
-      m_presenter->notify(OptionsDialogFlag);
+      m_presenter->notify(IReflPresenter::OptionsDialogFlag);
     }
 
     /**
@@ -183,7 +215,7 @@ namespace MantidQt
     {
       Q_UNUSED(topLeft);
       Q_UNUSED(bottomRight);
-      m_presenter->notify(TableUpdatedFlag);
+      m_presenter->notify(IReflPresenter::TableUpdatedFlag);
     }
 
     /**
@@ -199,7 +231,12 @@ namespace MantidQt
       menu->addSeparator();
       menu->addAction(ui.actionPrependRow);
       menu->addAction(ui.actionAppendRow);
+      menu->addSeparator();
       menu->addAction(ui.actionGroupRows);
+      menu->addAction(ui.actionCopySelected);
+      menu->addAction(ui.actionCutSelected);
+      menu->addAction(ui.actionPasteSelected);
+      menu->addAction(ui.actionClearSelected);
       menu->addSeparator();
       menu->addAction(ui.actionDeleteRow);
 
@@ -332,6 +369,15 @@ namespace MantidQt
     }
 
     /**
+    Sets the contents of the system's clipboard
+    @param text The contents of the clipboard
+    */
+    void QtReflMainView::setClipboard(const std::string& text)
+    {
+      QApplication::clipboard()->setText(QString::fromStdString(text));
+    }
+
+    /**
     Get the selected instrument for searching
     @returns the selected instrument to search for
     */
@@ -379,6 +425,15 @@ namespace MantidQt
     boost::shared_ptr<IReflPresenter> QtReflMainView::getPresenter() const
     {
       return m_presenter;
+    }
+
+    /**
+    Gets the contents of the system's clipboard
+    @returns The contents of the clipboard
+    */
+    std::string QtReflMainView::getClipboard() const
+    {
+      return QApplication::clipboard()->text().toStdString();
     }
 
   } // namespace CustomInterfaces

@@ -236,10 +236,16 @@
             <property name="styleSheet">
              <string>QToolBar{border: none;}</string>
             </property>
+            <addaction name="actionExpandSelection"/>
+            <addaction name="separator"/>
             <addaction name="actionAppendRow"/>
             <addaction name="actionDeleteRow"/>
+            <addaction name="separator"/>
             <addaction name="actionGroupRows"/>
-            <addaction name="actionExpandSelection"/>
+            <addaction name="actionCopySelected"/>
+            <addaction name="actionCutSelected"/>
+            <addaction name="actionPasteSelected"/>
+            <addaction name="actionClearSelected"/>
            </widget>
           </item>
           <item>
@@ -375,7 +381,12 @@
     <addaction name="separator"/>
     <addaction name="actionPrependRow"/>
     <addaction name="actionAppendRow"/>
+    <addaction name="separator"/>
     <addaction name="actionGroupRows"/>
+    <addaction name="actionCopySelected"/>
+    <addaction name="actionCutSelected"/>
+    <addaction name="actionPasteSelected"/>
+    <addaction name="actionClearSelected"/>
     <addaction name="separator"/>
     <addaction name="actionDeleteRow"/>
    </widget>
@@ -482,6 +493,51 @@
    </property>
    <property name="toolTip">
     <string>Set options for the Reflectometry UI</string>
+   </property>
+  </action>
+  <action name="actionClearSelected">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/erase.png</normaloff>:/erase.png</iconset>
+   </property>
+   <property name="text">
+    <string>Clear Selected</string>
+   </property>
+  </action>
+  <action name="actionCopySelected">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/copy.png</normaloff>:/copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy Selected</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionPasteSelected">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/paste.png</normaloff>:/paste.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste Selected</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionCutSelected">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/cut.png</normaloff>:/cut.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cut Selected</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
    </property>
   </action>
  </widget>

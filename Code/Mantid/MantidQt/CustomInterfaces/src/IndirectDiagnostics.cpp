@@ -90,6 +90,9 @@ namespace CustomInterfaces
 
     // SIGNAL/SLOT CONNECTIONS
 
+    // Update instrument information when a new instrument config is selected
+    connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setDefaultInstDetails()));
+
     // Update properties when a range selector is changed
     connect(m_rangeSelectors["SlicePeak"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rangeSelectorDropped(double, double)));
     connect(m_rangeSelectors["SliceBackground"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rangeSelectorDropped(double, double)));
@@ -252,7 +255,10 @@ namespace CustomInterfaces
       QFileInfo fi(filename);
       QString wsname = fi.baseName();
 
-      if(!loadFile(filename, wsname, m_uiForm.leSpectraMin->text().toInt(), m_uiForm.leSpectraMax->text().toInt()))
+      int specMin = static_cast<int>(m_dblManager->value(m_properties["SpecMin"]));
+      int specMax = static_cast<int>(m_dblManager->value(m_properties["SpecMax"]));
+
+      if(!loadFile(filename, wsname, specMin, specMax))
       {
         emit showMessageBox("Unable to load file.\nCheck whether your file exists and matches the selected instrument in the EnergyTransfer tab.");
         return;

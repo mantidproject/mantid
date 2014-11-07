@@ -749,6 +749,7 @@ namespace Mantid
           break;
         }
         // if point is very close surface then there may be no valid intercept so try again
+        ++ntries;
       }
       while(ntries < MAX_SCATTER_PT_TRIES);
       if(ntries == MAX_SCATTER_PT_TRIES)

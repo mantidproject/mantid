@@ -344,9 +344,6 @@ namespace DataHandling
         {
           // RALF
           xValue = (2 * xValue) - xPrev;
-          yValue = yValue / (xPrev * bc4);
-          eValue = eValue / (xPrev * bc4);
-
         }
         else if (filetype == 's')
         {
@@ -364,12 +361,13 @@ namespace DataHandling
           }
 
           xValue = (2 * xValue) - xPrev;
-          if (multiplybybinwidth)
-          {
-            yValue = yValue / (xValue - xPrev);
-            eValue = eValue / (xValue - xPrev);
-          }
         }
+
+				if (multiplybybinwidth)
+				{
+					yValue = yValue / (xValue - xPrev);
+					eValue = eValue / (xValue - xPrev);
+				}
 
         // store read in data (x, y, e) to vector
         vecX.push_back(xValue);
