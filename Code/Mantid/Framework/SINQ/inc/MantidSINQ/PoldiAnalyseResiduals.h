@@ -1,8 +1,11 @@
 #ifndef MANTID_SINQ_POLDIANALYSERESIDUALS_H_
 #define MANTID_SINQ_POLDIANALYSERESIDUALS_H_
 
-#include "MantidKernel/System.h"
+#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 
 namespace Mantid
 {
@@ -31,7 +34,7 @@ namespace Poldi
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport PoldiAnalyseResiduals  : public API::Algorithm
+class MANTID_SINQ_DLL PoldiAnalyseResiduals  : public API::Algorithm
 {
 public:
     PoldiAnalyseResiduals();
@@ -42,11 +45,21 @@ public:
     virtual const std::string category() const;
     virtual const std::string summary() const;
 
+
+protected:
+    void setMeasuredCounts(const DataObjects::Workspace2D_const_sptr &measuredCounts);
+    void setFittedCounts(const DataObjects::Workspace2D_const_sptr &fittedCounts);
+    void setInstrumentFromWorkspace(const DataObjects::Workspace2D_const_sptr &instrumentWorkspace);
+
 private:
     void init();
     void exec();
 
+    DataObjects::Workspace2D_const_sptr m_measured;
+    DataObjects::Workspace2D_const_sptr m_fitted;
+    DataObjects::Workspace2D_sptr m_difference;
 
+    PoldiInstrumentAdapter_sptr m_instrument;
 };
 
 
