@@ -368,7 +368,6 @@ bool AlgorithmDialog::setPropertyValues(const QStringList & skipList)
     }
     catch(std::exception& ex)
     {
-      UNUSED_ARG(ex); // let it drop on the floor
       hasGroups = true;
     }
 
