@@ -60,28 +60,16 @@ namespace MantidQt
       virtual void setTableList(const std::set<std::string>& tables) = 0;
       virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument) = 0;
       virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy* hintStrategy) = 0;
+      virtual void setClipboard(const std::string& text) = 0;
 
       //Accessor methods
       virtual std::set<int> getSelectedRows() const = 0;
       virtual std::string getSearchInstrument() const = 0;
       virtual std::string getProcessInstrument() const = 0;
       virtual std::string getWorkspaceToOpen() const = 0;
+      virtual std::string getClipboard() const = 0;
 
       virtual boost::shared_ptr<IReflPresenter> getPresenter() const = 0;
-
-      static const int NoFlags             = 0;
-      static const int SaveFlag            = 1;
-      static const int SaveAsFlag          = 2;
-      static const int AppendRowFlag       = 3;
-      static const int PrependRowFlag      = 4;
-      static const int DeleteRowFlag       = 5;
-      static const int ProcessFlag         = 6;
-      static const int GroupRowsFlag       = 7;
-      static const int OpenTableFlag       = 8;
-      static const int NewTableFlag        = 9;
-      static const int TableUpdatedFlag    = 10;
-      static const int ExpandSelectionFlag = 11;
-      static const int OptionsDialogFlag   = 12;
     };
   }
 }

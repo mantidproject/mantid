@@ -14,19 +14,19 @@
 
 
 /**
-    @class SVConnections 
-  
-       This class provides the connections between the SpectrumView GUI components
+    @class SVConnections
+
+    This class provides the connections between the SpectrumView GUI components
     made using QtDesigner and the classes that do the actual work for the
-    SpectrumView.  It basically provides SLOTS that are called by the GUI 
-   components' SIGNALS and in turn call methods on the SpectrumView 
-   implementation objects.
- 
-    @author Dennis Mikkelson 
-    @date   2012-04-03 
-     
+    SpectrumView.  It basically provides SLOTS that are called by the GUI
+    components' SIGNALS and in turn call methods on the SpectrumView
+    implementation objects.
+
+    @author Dennis Mikkelson
+    @date   2012-04-03
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -41,8 +41,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
@@ -50,7 +50,6 @@ namespace MantidQt
 {
 namespace SpectrumView
 {
-
 
 class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SVConnections: public QWidget
 {
@@ -60,63 +59,66 @@ public:
 
   /// Construct the object that links the GUI components to the other specifed
   /// higher level objects.
-  SVConnections( Ui_SpectrumViewer* ui, 
-                 SpectrumView*     spectrum_view,
-                 SpectrumDisplay*  spectrum_display,
-                 GraphDisplay*  h_graph_display,
-                 GraphDisplay*  v_graph_display );
+  SVConnections( Ui_SpectrumViewer* ui,
+                 SpectrumView*      spectrumView,
+                 SpectrumDisplay*   spectrumDisplay,
+                 GraphDisplay*      hGraphDisplay,
+                 GraphDisplay*      vGraphDisplay );
 
   ~SVConnections();
 
   /// Set the pix map that shows the color scale from the specified color maps
-  void ShowColorScale( std::vector<QRgb> & positive_color_table,
-                       std::vector<QRgb> & negative_color_table );
+  void showColorScale( std::vector<QRgb> & positiveColorTable,
+                       std::vector<QRgb> & negativeColorTable );
 
 public slots:
-  void close_viewer();
-  void toggle_Hscroll();
-  void toggle_Vscroll();
-  void image_horizontal_range_changed();
-  void graph_range_changed();
-  void v_scroll_bar_moved();
-  void h_scroll_bar_moved();
-  void imageSplitter_moved();
-  void imagePicker_moved(const QPoint &point);
-  void h_graphPicker_moved(const QPoint &point);
-  void v_graphPicker_moved(const QPoint & point);
-  void intensity_slider_moved();
-  void heat_color_scale();
-  void gray_color_scale();
-  void negative_gray_color_scale();
-  void green_yellow_color_scale();
-  void rainbow_color_scale();
-  void optimal_color_scale();
-  void multi_color_scale();
-  void spectrum_color_scale();
-  void load_color_map();
-  void online_help_slot();
- 
+  void closeViewer();
+  void toggleHScroll();
+  void toggleVScroll();
+  void imageHorizontalRangeChanged();
+  void graphRangeChanged();
+  void scrollBarMoved();
+  void imageSplitterMoved();
+  void vgraphSplitterMoved();
+  void imagePickerMoved(const QPoint &point);
+  void hGraphPickerMoved(const QPoint &point);
+  void vGraphPickerMoved(const QPoint &point);
+  void intensitySliderMoved();
+  void loadColorMap();
+  void openOnlineHelp();
+
+  void heatColorScale();
+  void grayColorScale();
+  void negativeGrayColorScale();
+  void greenYellowColorScale();
+  void rainbowColorScale();
+  void optimalColorScale();
+  void multiColorScale();
+  void spectrumColorScale();
+
 private:
   /// Event filter for mouse wheel capture
   bool eventFilter(QObject *object, QEvent *event);
 
-  Ui_SpectrumViewer*  sv_ui;
-  SpectrumView*       sv_main_window;
-  SpectrumDisplay*    spectrum_display;
-  GraphDisplay*    h_graph_display;
-  GraphDisplay*    v_graph_display;
-  TrackingPicker*  image_picker;
-  TrackingPicker*  h_graph_picker;
-  TrackingPicker*  v_graph_picker;
-  QActionGroup*    color_group;
+  Ui_SpectrumViewer*  m_svUI;
+  SpectrumView*       m_svMainWindow;
+  SpectrumDisplay*    m_spectrumDisplay;
+  GraphDisplay*       m_hGraphDisplay;
+  GraphDisplay*       m_vGraphDisplay;
+  TrackingPicker*     m_imagePicker;
+  TrackingPicker*     m_hGraphPicker;
+  TrackingPicker*     m_vGraphPicker;
+  QActionGroup*       m_colorGroup;
+
   /// Last known cursor position in the data (x-direction).
-  int m_picker_x;
+  int m_pickerX;
+
   /// Last known cursor position in the data (y-direction).
-  int m_picker_y;
+  int m_pickerY;
 
 };
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif  // SV_CONNECTIONS_H

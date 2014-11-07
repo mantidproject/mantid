@@ -28,10 +28,8 @@ namespace CustomInterfaces
     m_uiForm.entryRebinHigh->setValidator(m_valDbl);
 
     // SIGNAL/SLOT CONNECTIONS
-    // Updates current analyser when analyser is selected from drop down
-    connect(m_uiForm.cbAnalyser, SIGNAL(activated(int)), this, SLOT(analyserSelected(int)));
-    // Updates current reflection when reflection is selected from drop down
-    connect(m_uiForm.cbReflection, SIGNAL(activated(int)), this, SLOT(reflectionSelected(int)));
+    // Update instrument information when a new instrument config is selected
+    connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrumentDefault()));
     // Shows required mapping option UI widgets when a new mapping option is selected from drop down
     connect(m_uiForm.cbMappingOptions, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(mappingOptionSelected(const QString&)));
     // Shows background removal dialog when user clicks Background Removal
@@ -82,6 +80,11 @@ namespace CustomInterfaces
 
   void IndirectConvertToEnergy::setup()
   {
+    detailedBalanceCheck(m_uiForm.ckDetailedBalance->isChecked());
+    scaleMultiplierCheck(m_uiForm.ckScaleMultiplier->isChecked());
+
+    // Load the default instrument parameters
+    setInstrumentDefault();
   }
 
   void IndirectConvertToEnergy::run()
@@ -318,48 +321,15 @@ namespace CustomInterfaces
     return valid;
   }
 
-  /**
-   * This function is called when the user selects an analyser from the cbAnalyser QComboBox
-   * object. It's main purpose is to initialise the values for the Reflection ComboBox.
-   * @param index :: Index of the value selected in the combo box.
-   */
-  void IndirectConvertToEnergy::analyserSelected(int index)
-  {
-    // populate Reflection combobox with correct values for Analyser selected.
-    m_uiForm.cbReflection->clear();
-    clearReflectionInfo();
-
-    QVariant currentData = m_uiForm.cbAnalyser->itemData(index);
-    if ( currentData == QVariant::Invalid )
-    {
-      m_uiForm.lbReflection->setEnabled(false);
-      m_uiForm.cbReflection->setEnabled(false);
-      return;
-    }
-    else
-    {
-      m_uiForm.lbReflection->setEnabled(true);
-      m_uiForm.cbReflection->setEnabled(true);
-      QStringList reflections = currentData.toStringList();
-      for ( int i = 0; i < reflections.count(); i++ )
-      {
-        m_uiForm.cbReflection->addItem(reflections[i]);
-      }
-    }
-
-    reflectionSelected(m_uiForm.cbReflection->currentIndex());
-  }
 
   /**
-   * This function is called when the user selects a reflection from the cbReflection QComboBox
-   * object.
-   * @param index :: Index of the value selected in the combo box.
+   * Called when the instrument has changed, used to update default values.
    */
-  void IndirectConvertToEnergy::reflectionSelected(int index)
+  void IndirectConvertToEnergy::setInstrumentDefault()
   {
-    UNUSED_ARG(index);
-    // first, clear values in assosciated boxes:
-    clearReflectionInfo();
+    m_uiForm.leSpectraMin->clear();
+    m_uiForm.leSpectraMax->clear();
+    m_uiForm.leEfixed->clear();
 
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
@@ -454,65 +424,6 @@ namespace CustomInterfaces
       m_uiForm.pbBack_2->setText("Background Removal (On)");
     else
       m_uiForm.pbBack_2->setText("Background Removal (Off)");
-  }
-
-  /**
-   * This function holds any steps that must be performed on the selection of an instrument,
-   * for example loading values from the Instrument Definition File (IDF).
-   * @param prefix :: The selected instruments prefix in Mantid.
-   */
-  void IndirectConvertToEnergy::setIDFValues(const QString & prefix)
-  {
-    UNUSED_ARG(prefix);
-
-    // empty ComboBoxes, LineEdits,etc of previous values
-    m_uiForm.cbAnalyser->clear();
-    m_uiForm.cbReflection->clear();
-    clearReflectionInfo();
-
-    rebinEntryToggle(m_uiForm.rebin_ckDNR->isChecked());
-    detailedBalanceCheck(m_uiForm.ckDetailedBalance->isChecked());
-    /* resCheck(m_uiForm.cal_ckRES->isChecked()); */
-
-    scaleMultiplierCheck(m_uiForm.ckScaleMultiplier->isChecked());
-
-    QString instName = m_uiForm.cbInst->currentText();
-    auto instModes = getInstrumentModes(instName.toStdString());
-
-    for(auto modesIt = instModes.begin(); modesIt != instModes.end(); ++modesIt)
-    {
-      QString analyser = QString::fromStdString(modesIt->first);
-      std::vector<std::string> reflections = modesIt->second;
-
-      if(analyser != "diffraction") // Do not put diffraction into the analyser list
-      {
-        if(reflections.size() > 0)
-        {
-          QStringList reflectionsList;
-          for(auto reflIt = reflections.begin(); reflIt != reflections.end(); ++reflIt)
-            reflectionsList.push_back(QString::fromStdString(*reflIt));
-          QVariant data = QVariant(reflectionsList);
-          m_uiForm.cbAnalyser->addItem(analyser, data);
-        }
-        else
-        {
-          m_uiForm.cbAnalyser->addItem(analyser);
-        }
-      }
-    }
-
-    analyserSelected(m_uiForm.cbAnalyser->currentIndex());
-  }
-
-  /**
-   * This function clears the values of the QLineEdit objec  ts used to hold Reflection-specific
-   * information.
-   */
-  void IndirectConvertToEnergy::clearReflectionInfo()
-  {
-    m_uiForm.leSpectraMin->clear();
-    m_uiForm.leSpectraMax->clear();
-    m_uiForm.leEfixed->clear();
   }
 
   /**
@@ -778,8 +689,7 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::pbRunEditing()
   {
-    m_uiForm.pbRun->setEnabled(false);
-    m_uiForm.pbRun->setText("Editing...");
+    emit updateRunButton(false, "Editing...", "Run numbers are curently being edited.");
   }
 
   /**
@@ -787,7 +697,7 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::pbRunFinding()
   {
-    m_uiForm.pbRun->setText("Finding files...");
+    emit updateRunButton(false, "Finding files...", "Searchig for data files for the run numbers entered...");
     m_uiForm.ind_runFiles->setEnabled(false);
   }
 
@@ -798,13 +708,13 @@ namespace CustomInterfaces
   {
     if(!m_uiForm.ind_runFiles->isValid())
     {
-      m_uiForm.pbRun->setText("Invalid Run");
+      emit updateRunButton(false, "Invalid Run(s)", "Cannot find data files for some of the run numbers enetered.");
     }
     else
     {
-      m_uiForm.pbRun->setText("Run");
-      m_uiForm.pbRun->setEnabled(true);
+      emit updateRunButton();
     }
+
     m_uiForm.ind_runFiles->setEnabled(true);
   }
 

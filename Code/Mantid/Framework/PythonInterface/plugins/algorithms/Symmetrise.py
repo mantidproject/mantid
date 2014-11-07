@@ -205,7 +205,7 @@ class Symmetrise(PythonAlgorithm):
         sample_x = mtd[input_workspace_name].readX(0)
 
         if x_max > sample_x[len(sample_x) - 1]:
-            issues['XMax'] = 'XMax value (%f) is greater than largest X value (%f)' % (self._x_max, sample_x[len(sample_x) - 1])
+            issues['XMax'] = 'XMax value (%f) is greater than largest X value (%f)' % (x_max, sample_x[len(sample_x) - 1])
 
         if -x_min < sample_x[0]:
             issues['XMin'] = 'Negative XMin value (%f) is less than smallest X value (%f)' % (-x_min, sample_x[0])
