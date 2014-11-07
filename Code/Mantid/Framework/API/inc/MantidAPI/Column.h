@@ -9,9 +9,10 @@
 #ifndef Q_MOC_RUN
 # include <boost/shared_ptr.hpp>
 #endif
+#include <cstring>
 #include <string>
-#include <typeinfo>
 #include <limits>
+#include <typeinfo>
 #include <vector>
 
 namespace Mantid
@@ -114,7 +115,7 @@ public:
     {
         return *static_cast<T*>(void_pointer(index));
     }
- 
+
 
     /// Templated method for returning a value (const version). No type checks are done.
     template<class T>
@@ -127,17 +128,17 @@ public:
     template<class T>
     bool isType()const
     {
-        return get_type_info() == typeid(T);
+      return !std::strcmp(get_type_info().name(), typeid(T).name());
     }
 
-    /// get plot type 
-    /// @return See description of setPlotType() for the interpretation of the returned int   
+    /// get plot type
+    /// @return See description of setPlotType() for the interpretation of the returned int
     int getPlotType() const
     {
        return m_plotType;
     }
 
-    /// Set plot type where 
+    /// Set plot type where
     void setPlotType(int t);
 
     /**
@@ -169,7 +170,7 @@ protected:
     std::string m_name;///< name
     std::string m_type;///< type
 
-    /// plot type where 
+    /// plot type where
     /// None = 0 (means it has specifically been set to 'no plot type')
     /// NotSet = -1000 (this is the default and means plot style has not been set)
     /// X = 1, Y = 2, Z = 3, xErr = 4, yErr = 5, Label = 6
@@ -184,7 +185,7 @@ protected:
 };
 
 /**  @class Boolean
-    As TableColumn stores its data in a std::vector bool type cannot be used 
+    As TableColumn stores its data in a std::vector bool type cannot be used
     in the same way as the other types. Class Boolean is used instead.
 */
 struct MANTID_API_DLL Boolean
@@ -197,7 +198,7 @@ struct MANTID_API_DLL Boolean
     operator bool(){return value;}
     /// equal to operator
     bool operator==(const Boolean& b)const
-    {return(this->value==b.value);		
+    {return(this->value==b.value);
     }
     //
     operator double(void)const{return double(this->value);}

@@ -76,6 +76,9 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      /// Rebuild the scroll bars and image due to change of xmin, xmax, step
      void UpdateRange();
 
+     /// Updates scroll bars when window is resized
+     void HandleResize();
+
      /// Rebuild image from data source, due to resize or scroll bar movement
      void UpdateImage();
 
@@ -95,8 +98,17 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      /// Set vertical graph with data from the array at the specified x value
      void SetVGraph( double x );
 
+     /// Show information about the point (x, y) on the image in the table
+     std::vector<std::string> ShowInfoList( double x, double y );
+
+     QPoint GetPlotTransform( QPair<double, double> values );
+     QPair<double, double> GetPlotInvTransform( QPoint point );
+
+     // Gets the last Y value pointed at
+     double GetLastY();
+
   protected:
-     SpectrumPlotItem*       spectrum_plot_item;
+     SpectrumPlotItem*    spectrum_plot_item;
 
   private:
      /// Check if the DataSource has been changed under us
@@ -105,20 +117,17 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      /// Get the rectangle currently covered by the image in pixel coordinates
      void GetDisplayRectangle( QRect &rect );
 
-     /// Show information about the point (x, y) on the image in the table
-     void ShowInfoList( double x, double y );
-
      std::vector<QRgb>    positive_color_table;
      std::vector<QRgb>    negative_color_table;
      std::vector<double>  intensity_table;
 
-     SpectrumDataSource*     data_source;
+     SpectrumDataSource*  data_source;
      DataArray*           data_array;
 
      QwtPlot*             spectrum_plot;
 
-     ISliderHandler*       slider_handler;
-     IRangeHandler*        range_handler;
+     ISliderHandler*      slider_handler;
+     IRangeHandler*       range_handler;
 
      GraphDisplay*        h_graph_display;
      GraphDisplay*        v_graph_display;
@@ -134,6 +143,8 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      double               total_y_max;
      double               total_x_min;
      double               total_x_max;
+
+     double               m_lastY;
 };
 
 } // namespace SpectrumView

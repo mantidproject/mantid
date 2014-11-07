@@ -14,6 +14,7 @@ namespace CurveFitting
   {
     double l1; ///< source-sample distance in metres
     double l2; ///< sample-detector distance in metres
+    Kernel::V3D pos; ///< Full 3D position
     double theta; ///< scattering angle in radians
     double t0; ///< time delay in seconds
     double efixed; ///< final energy

@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/FitPropertyBrowser.cpp
 	src/FormulaDialogEditor.cpp
 	src/FunctionBrowser.cpp
+	src/HintingLineEdit.cpp
 	src/InstrumentSelector.cpp
         src/MantidHelpWindow.cpp
 	src/MWDiag.cpp
@@ -53,6 +54,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/FindDialog.h
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h
     inc/MantidQtMantidWidgets/FunctionBrowser.h
+    inc/MantidQtMantidWidgets/HintingLineEdit.h
     inc/MantidQtMantidWidgets/CatalogSearch.h
     inc/MantidQtMantidWidgets/CatalogSelector.h
     inc/MantidQtMantidWidgets/InstrumentSelector.h
@@ -87,8 +89,10 @@ set ( MOC_FILES
 # Add the include files are NOT already in MOC_FILES
 set ( INC_FILES
 	${MOC_FILES}
+	inc/MantidQtMantidWidgets/AlgorithmHintStrategy.h
 	inc/MantidQtMantidWidgets/CatalogHelper.h
 	inc/MantidQtMantidWidgets/WidgetDllOption.h
+	inc/MantidQtMantidWidgets/HintStrategy.h
 )
 
 # QtDesigner UI files to process
@@ -111,6 +115,10 @@ set ( UI_FILES
 # Python unit tests
 set ( TEST_PY_FILES
   test/MWRunFilesTest.py
+)
+
+set ( TEST_FILES
+  AlgorithmHintStrategyTest.h
 )
 
 find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
@@ -141,12 +149,10 @@ target_link_libraries ( MantidWidgets MantidQtAPI QtPropertyBrowser
     )
 
 ###########################################################################
-# Unit tests setup
+# Testing
 ###########################################################################
 
-if ( PYUNITTEST_FOUND )
-  pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR}/test MantidWidgetsTest ${TEST_PY_FILES} )
-endif ()
+add_subdirectory ( test )
 
 ###########################################################################
 # Installation settings

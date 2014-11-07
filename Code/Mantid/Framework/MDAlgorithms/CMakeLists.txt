@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/CreateMDWorkspace.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
+	src/EvaluateMDFunction.cpp
 	src/ExponentialMD.cpp
 	src/FakeMDEventData.cpp
 	src/FindPeaksMD.cpp
@@ -103,6 +104,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/DllConfig.h
 	inc/MantidMDAlgorithms/EqualToMD.h
 	inc/MantidMDAlgorithms/ExponentialMD.h
+	inc/MantidMDAlgorithms/EvaluateMDFunction.h
 	inc/MantidMDAlgorithms/FakeMDEventData.h
 	inc/MantidMDAlgorithms/FindPeaksMD.h
 	inc/MantidMDAlgorithms/GSLFunctions.h
@@ -185,6 +187,7 @@ set ( TEST_FILES
 	DivideMDTest.h
 	EqualToMDTest.h
 	ExponentialMDTest.h
+	EvaluateMDFunctionTest.h
 	FakeMDEventDataTest.h
 	FindPeaksMDTest.h
 	FitResolutionConvolvedModelTest.h

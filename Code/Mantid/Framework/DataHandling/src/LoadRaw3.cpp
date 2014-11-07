@@ -74,7 +74,7 @@ namespace Mantid
       "Allowed options are Include,Exclude, Separate.\n"
       "Include:The default is Include option which loads the monitors into the output workspace.\n"
       "Exclude:The Exclude option excludes monitors from the output workspace.\n"
-      "Separate:The Separate option loads monitors into a separate workspace called OutputWorkspace_Monitor.\n"
+      "Separate:The Separate option loads monitors into a separate workspace called OutputWorkspace_monitor.\n"
       "Defined aliases:\n"
       "1:  Equivalent to Separate.\n"
       "0:  Equivalent to Exclude.\n");
@@ -95,22 +95,9 @@ namespace Mantid
 
       bool bLoadlogFiles = getProperty("LoadLogFiles");
 
-      // process monitor option
-      std::string monitorOption = getProperty("LoadMonitors");
-      if (monitorOption =="1")
-        monitorOption = "Separate";
-      if (monitorOption=="0")
-         monitorOption = "Exclude";
+      bool bincludeMonitors,bseparateMonitors, bexcludeMonitors;
+      LoadRawHelper::ProcessLoadMonitorOptions(bincludeMonitors,bseparateMonitors, bexcludeMonitors,this);
 
-      bool bincludeMonitors = isIncludeMonitors(monitorOption);
-      bool bseparateMonitors = false;
-      bool bexcludeMonitors = false;
-      if (!bincludeMonitors)
-      {
-        bseparateMonitors = isSeparateMonitors(monitorOption);
-        bexcludeMonitors = isExcludeMonitors(monitorOption);
-      }
-      //
 
       std::string title;
       //read workspace title from raw file
@@ -172,7 +159,7 @@ namespace Mantid
 
       if (bincludeMonitors)
       {
-        setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace,m_numberOfPeriods, false);
+        setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace,m_numberOfPeriods, false,this);
       }
       else
       {
@@ -194,13 +181,13 @@ namespace Mantid
         if(normalwsSpecs > 0)
         {
           localWorkspace = createWorkspace(localWorkspace,normalwsSpecs,m_lengthIn,m_lengthIn-1);
-          setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace,m_numberOfPeriods,false);
+          setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace,m_numberOfPeriods,false,this);
         }
         //now create monitor workspace if separateMonitors selected
         if (bseparateMonitors)
         {
           createMonitorWorkspace(monitorWorkspace,localWorkspace,monitorws_grp,monitorwsSpecs,
-              normalwsSpecs,m_numberOfPeriods,m_lengthIn,title);
+              normalwsSpecs,m_numberOfPeriods,m_lengthIn,title,this);
         }
       }
 
@@ -298,18 +285,18 @@ namespace Mantid
             if(normalwsSpecs > 0)
             {
               // declare and set monitor workspace for each period
-              setWorkspaceProperty(monitorWorkspace, monitorws_grp, period, true);
+              setWorkspaceProperty(monitorWorkspace, monitorws_grp, period, true,this);
             }
             else
             {
               localWorkspace = monitorWorkspace;
             }
             // declare and set output workspace for each period
-            setWorkspaceProperty(localWorkspace, ws_grp, period, false);
+            setWorkspaceProperty(localWorkspace, ws_grp, period, false,this);
           }
           else
           {
-            setWorkspaceProperty(localWorkspace, ws_grp, period, false);
+            setWorkspaceProperty(localWorkspace, ws_grp, period, false,this);
           }
           // progress for workspace groups
           setProg ( static_cast<double>(period) / static_cast<double>(m_numberOfPeriods - 1) );
@@ -576,36 +563,6 @@ namespace Mantid
         }
       }
 
-    }
-    /** This method checks the value of LoadMonitors property and returns true or false
-     *  @return true if Exclude Monitors option is selected,otherwise false
-     */
-    bool LoadRaw3::isExcludeMonitors(const std::string &monitorOption)
-    {
-      bool bExclude;
-      monitorOption.compare("Exclude") ? (bExclude = false) : (bExclude = true);
-      return bExclude;
-    }
-
-    /**This method checks the value of LoadMonitors property and returns true or false
-     * @return true if Include Monitors option is selected,otherwise false
-     */
-    bool LoadRaw3::isIncludeMonitors(const std::string &monitorOption)
-    {
-      bool bExclude;
-      monitorOption.compare("Include") ? (bExclude = false) : (bExclude = true);
- 
-      return bExclude;
-    }
-
-    /** This method checks the value of LoadMonitors property and returns true or false
-     *  @return true if Separate Monitors option is selected,otherwise false
-     */
-    bool LoadRaw3::isSeparateMonitors(const std::string &monitorOption)
-    {
-      bool bSeparate;
-      monitorOption.compare("Separate") ? (bSeparate = false) : (bSeparate = true);
-      return bSeparate;
     }
 
     /** This method checks given spectrum is a monitor

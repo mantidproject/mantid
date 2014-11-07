@@ -122,6 +122,7 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
     axis.setUnit("MomentumTransfer")
 
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=wsname)
+    AddSampleLog(Workspace=wsname, LogName='convolve_members', LogType='String', LogText=str(convolve))
     AddSampleLog(Workspace=wsname, LogName="fit_program", LogType="String", LogText='ConvFit')
     AddSampleLog(Workspace=wsname, LogName='background', LogType='String', LogText=str(bgd))
     AddSampleLog(Workspace=wsname, LogName='delta_function', LogType='String', LogText=str(using_delta_func))
