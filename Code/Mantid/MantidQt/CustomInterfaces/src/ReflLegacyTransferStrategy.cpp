@@ -28,8 +28,8 @@ namespace MantidQt
       //Iterate over the input and build the maps
       for(auto rowIt = runRows.begin(); rowIt != runRows.end(); ++rowIt)
       {
-        std::string run = rowIt->first;
-        std::string desc = rowIt->second;
+        const std::string run = rowIt->first;
+        const std::string desc = rowIt->second;
         std::string cleanDesc = desc;
 
         //See if theta is in the description
@@ -39,13 +39,15 @@ namespace MantidQt
         {
           //We have theta. Let's get a clean description
           size_t matchOffset = matches.position("theta");
-          std::string theta = matches["theta"].str();
-          cleanDesc = desc.substr(0, matchOffset) + "?" + desc.substr(matchOffset + theta.length(), desc.length() - (matchOffset + theta.length()));
+          const std::string theta = matches["theta"].str();
+          const std::string descPreTheta = desc.substr(0, matchOffset);
+          const std::string descPostTheta = desc.substr(matchOffset + theta.length(), std::string::npos);
+          cleanDesc = descPreTheta + "?" + descPostTheta;
           thetaByDesc[desc] = theta;
         }
 
         //map the description to the run, making sure to join with a + if one already exists
-        std::string prevRun = runsByDesc[desc];
+        const std::string prevRun = runsByDesc[desc];
         if(prevRun.empty())
           runsByDesc[desc] = run;
         else
