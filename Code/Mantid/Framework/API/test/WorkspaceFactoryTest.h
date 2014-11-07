@@ -63,6 +63,7 @@ public:
     // AppleClang gives warning if the result is unused.
     WorkspaceTester* useMe;
     TS_ASSERT_THROWS_NOTHING( useMe = dynamic_cast<WorkspaceTester*>(space.get()) );
+    useMe->init(10,10,10);
   }
 
   /** Make a parent, have the child be created with the same sizes */
