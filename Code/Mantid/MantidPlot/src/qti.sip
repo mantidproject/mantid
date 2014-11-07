@@ -384,6 +384,21 @@ private:
   Matrix(const Matrix&);
 };
 
+class QwtData /PyName = CurveData/
+{
+%TypeHeaderCode
+#include <qwt_data.h>
+%End
+
+public:
+   virtual unsigned int size() const = 0;
+   virtual double x(unsigned int i) const = 0;
+   virtual double y(unsigned int i) const = 0;
+
+private:
+   QwtData(const QwtData&);
+};
+
 class QwtSymbol /PyName = PlotSymbol/
 {
 %TypeHeaderCode
@@ -609,6 +624,7 @@ public:
    double maxXValue() const;
    double minYValue() const;
    double maxYValue() const;
+   const QwtData &data() const;
 
 private:
    QwtPlotCurve(const QwtPlotCurve&);
