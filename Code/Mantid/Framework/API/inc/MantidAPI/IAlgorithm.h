@@ -100,8 +100,6 @@ public:
    */
   virtual void initialize() = 0;
 
-  virtual bool checkGroups() = 0;
-
   /// Method checking errors on ALL the inputs, before execution. For use mostly in dialogs.
   virtual std::map<std::string, std::string> validateInputs() = 0;
 
