@@ -20,13 +20,13 @@ public:
   static void destroySuite( ChecksumHelperTest *suite ) { delete suite; }
 
 
-  void xtestSha1FromString()
+  void testSha1FromString()
   {
     std::string response = ChecksumHelper::sha1FromString("Test this string out for size");
     TSM_ASSERT_EQUALS("The calculated SHA-1 hash is not as expected", "c1c9af231c340826bdabd33eae076d5e532eba08", response);
   }
 
-  void xtestSha1FromFile()
+  void testSha1FromFile()
   {
     const std::string filename("ChecksumHelperTest_testSha1FromFile.txt");
     const std::string data = "ChecksumHelperTest_testSha1FromFile Test this string out for size in a file";
@@ -37,7 +37,7 @@ public:
     Poco::File(filename).remove();
   }
 
-  void xtestGitSha1FromFile()
+  void testGitSha1FromFile()
   {
     const std::string filename("ChecksumHelperTest_testGitSha1FromFile.txt");
     const std::string data = "ChecksumHelperTest_testGitSha1FromFile Test this string out for size in a file";
@@ -48,7 +48,7 @@ public:
     Poco::File(filename).remove();
   }  
   
-  void xtestGitSha1FromFileWithLinuxLineEndings()
+  void testGitSha1FromFileWithLinuxLineEndings()
   {
     const std::string filename("ChecksumHelperTest_testGitSha1FromFileWithLinuxLineEndings.txt");
     const std::string data = "ChecksumHelperTest_testGitSha1FromFileWithLinuxLineEndings\nTest this string out for size\n in a file";

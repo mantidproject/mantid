@@ -18,12 +18,19 @@ namespace Kernel
 
 namespace ChecksumHelper
 {
-
+  /** Creates a SHA-1 checksum from a string
+  * @param input The string to checksum
+  * @returns a checksum string
+  **/
   std::string DLLExport sha1FromString(const std::string& input)
   {
-    return processSha1(NULL, 0,input.c_str(), input.size());
+    return ChecksumHelper::processSha1(NULL, 0,input.c_str(), input.size());
   }
 
+  /** Creates a SHA-1 checksum from a file
+  * @param filepath The path to the file
+  * @returns a checksum string
+  **/
   std::string DLLExport sha1FromFile(const std::string& filepath)
   {
     if (filepath.size() > 0)
@@ -41,11 +48,18 @@ namespace ChecksumHelper
 	    boost::shared_array<char> temp_buf(new char[length]);
       file_ptr->read(temp_buf.get(), length);
 	    file_ptr.reset();
-      return processSha1(temp_buf.get(), length);
+      return ChecksumHelper::processSha1(temp_buf.get(), length);
     }
     return "";
   }
 
+  /** Creates a git checksum from a file (these match the git hash-object command).
+  * This works by reading in the file, converting all line endings into linux style endings,
+  * then the following is prepended to the file contents "blob <content_length>\0",  
+  * the result is then ran through a SHA-1 checksum.
+  * @param filepath The path to the file
+  * @returns a checksum string
+  **/
   std::string DLLExport gitSha1FromFile(const std::string& filepath)
   {
     std::string retVal = "";
@@ -58,7 +72,7 @@ namespace ChecksumHelper
 
       //get the full length (including overallocation for \r\n)
       file_ptr->seekg (0, file_ptr->end);
-      int bufferlength = file_ptr->tellg();
+      auto bufferlength = file_ptr->tellg();
       file_ptr->seekg (0, file_ptr->beg);
 
       //data
@@ -78,12 +92,19 @@ namespace ChecksumHelper
       std::copy(header.begin(),header.end(),headerData);
       headerData[headerLength -1] = '\0';
 
-      retVal = processSha1(temp_buf.get(), length, headerData,headerLength);
+      retVal = ChecksumHelper::processSha1(temp_buf.get(), length, headerData,headerLength);
       delete[] headerData;
     }
     return retVal;
   }
 
+  /** internal method for processing sha1 checksums.
+  * @param data The data to checksum
+  * @param dataLength The length of the data to checksum
+  * @param header The header to checksum
+  * @param headerLength The length of header to checksum
+  * @returns a checksum string
+  **/
   std::string DLLExport processSha1(const char* data, const size_t dataLength, const char* header, const size_t headerLength)
   {
     boost::uuids::detail::sha1 hasher;
@@ -111,11 +132,8 @@ namespace ChecksumHelper
 		  bin[i * 4 + 3] = tmp[i * 4    ];
 	  }
       
-	  return sha1ToString(bin);
-  }
+    char* hash = &bin[0];
 
-  std::string DLLExport sha1ToString(const char *hash)
-  {
 	  char str[128] = { 0 };
 	  char *ptr = str;
 	  std::string ret;
@@ -130,8 +148,7 @@ namespace ChecksumHelper
     std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);
 	  return ret;
   }
-
-
+  
 } // namespace ChecksumHelper
 } // namespace Kernel
 } // namespace Mantid

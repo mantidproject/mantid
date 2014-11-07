@@ -2,6 +2,7 @@
 #define MANTID_KERNEL_CHECKSUMHELPER_H_
 
 #include "MantidKernel/DllConfig.h"
+#include <string>
 
 
 namespace Mantid
@@ -33,13 +34,15 @@ namespace Kernel
 */
 namespace ChecksumHelper 
 {
+  ///create a SHA-1 checksum from a string
   std::string MANTID_KERNEL_DLL sha1FromString(const std::string& input);
+  ///create a SHA-1 checksum from a file
   std::string MANTID_KERNEL_DLL sha1FromFile(const std::string& filepath);
+  ///create a git checksum from a file (these match the git hash-object command)
   std::string MANTID_KERNEL_DLL gitSha1FromFile(const std::string& filepath);
 
-  
+  /// internal method for processing sha1 checksums
   std::string MANTID_KERNEL_DLL processSha1(const char* data, const size_t dataLength, const char* header = NULL, const size_t headerLength = 0);
-  std::string MANTID_KERNEL_DLL sha1ToString(const char *hash);
 };
 
 
