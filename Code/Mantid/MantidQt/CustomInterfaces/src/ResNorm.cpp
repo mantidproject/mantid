@@ -10,10 +10,21 @@ namespace MantidQt
 		{
 			m_uiForm.setupUi(parent);
 
-			//add the plot to the ui form
-			m_uiForm.plotSpace->addWidget(m_plot);
-			//add the properties browser to the ui form
+			// Create the plot
+      m_plots["ResNormPlot"] = new QwtPlot(m_parentWidget);
+      m_plots["ResNormPlot"]->setCanvasBackground(Qt::white);
+      m_plots["ResNormPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
+      m_plots["ResNormPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
+			m_uiForm.plotSpace->addWidget(m_plots["ResNormPlot"]);
+
+      // Create range selector
+      m_rangeSelectors["ResNormERange"] = new MantidWidgets::RangeSelector(m_plots["ResNormPlot"]);
+      connect(m_rangeSelectors["ResNormERange"], SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
+      connect(m_rangeSelectors["ResNormERange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
+
+			// Add the properties browser to the ui form
 			m_uiForm.treeSpace->addWidget(m_propTree);
+
 			m_properties["EMin"] = m_dblManager->addProperty("EMin");
 			m_properties["EMax"] = m_dblManager->addProperty("EMax");
 			m_properties["VanBinning"] = m_dblManager->addProperty("Van Binning");
@@ -33,6 +44,10 @@ namespace MantidQt
 			// Connect data selector to handler method
 			connect(m_uiForm.dsVanadium, SIGNAL(dataReady(const QString&)), this, SLOT(handleVanadiumInputReady(const QString&)));
 		}
+
+    void ResNorm::setup()
+    {
+    }
 
 		/**
 		 * Validate the form to check the program can be run
@@ -110,9 +125,9 @@ namespace MantidQt
 		 */
 		void ResNorm::handleVanadiumInputReady(const QString& filename)
 		{
-			plotMiniPlot(filename, 0);
+			plotMiniPlot(filename, 0, "ResNormPlot", "RawPlotCurve");
 			std::pair<double,double> res;
-			std::pair<double,double> range = getCurveRange();
+			std::pair<double,double> range = getCurveRange("RawPlotCurve");
 
 			//Use the values from the instrument parameter file if we can
 			if(getInstrumentResolution(filename, res))
@@ -121,14 +136,14 @@ namespace MantidQt
 				res.first = res.first * 10;
 				res.second = res.second * 10;
 
-				setMiniPlotGuides(m_properties["EMin"], m_properties["EMax"], res);
+				setMiniPlotGuides("ResNormERange", m_properties["EMin"], m_properties["EMax"], res);
 			}
 			else
 			{
-				setMiniPlotGuides(m_properties["EMin"], m_properties["EMax"], range);
+				setMiniPlotGuides("ResNormERange", m_properties["EMin"], m_properties["EMax"], range);
 			}
 
-			setPlotRange(m_properties["EMin"], m_properties["EMax"], range);
+			setPlotRange("ResNormERange", m_properties["EMin"], m_properties["EMax"], range);
 		}
 
 		/**
@@ -161,11 +176,11 @@ namespace MantidQt
     {
     	if(prop == m_properties["EMin"])
     	{
-				updateLowerGuide(m_properties["EMin"], m_properties["EMax"], val);
+				updateLowerGuide(m_rangeSelectors["ResNormERange"], m_properties["EMin"], m_properties["EMax"], val);
     	}
     	else if (prop == m_properties["EMax"])
     	{
-    		updateUpperGuide(m_properties["EMin"], m_properties["EMax"], val);
+    		updateUpperGuide(m_rangeSelectors["ResNormERange"], m_properties["EMin"], m_properties["EMax"], val);
 			}
     }
 	} // namespace CustomInterfaces
