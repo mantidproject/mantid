@@ -2,7 +2,8 @@
 #define MANTID_CUSTOMINTERFACES_REFLLEGACYTRANSFERSTRATEGYTEST_H
 
 #include <cxxtest/TestSuite.h>
-#include <algorithm>
+#include <map>
+#include <vector>
 
 #include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
 
