@@ -1,6 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLLEGACYTRANSFERSTRATEGY_H
 #define MANTID_CUSTOMINTERFACES_REFLLEGACYTRANSFERSTRATEGY_H
 
+#include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/ReflTransferStrategy.h"
 
 namespace MantidQt
@@ -30,7 +31,7 @@ namespace MantidQt
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class ReflLegacyTransferStrategy : public ReflTransferStrategy
+    class DLLExport ReflLegacyTransferStrategy : public ReflTransferStrategy
     {
     public:
       std::vector<std::map<std::string,std::string> > transferRuns(const std::map<std::string,std::string>& runRows);
