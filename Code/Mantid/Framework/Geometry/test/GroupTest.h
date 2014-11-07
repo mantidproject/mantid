@@ -177,10 +177,13 @@ public:
 
         // Make sure that null-pointer do not work
         Group_const_sptr null;
+        
+        //AppleClang gives a warning if we don't use the result;
+        bool useResult;
 
         TS_ASSERT_THROWS(null * null, std::invalid_argument);
-        TS_ASSERT_THROWS(null == null, std::invalid_argument);
-        TS_ASSERT_THROWS(null != null, std::invalid_argument);
+        TS_ASSERT_THROWS(useResult = (null == null), std::invalid_argument);
+        TS_ASSERT_THROWS(useResult = (null != null), std::invalid_argument);
         TS_ASSERT_THROWS(three * null, std::invalid_argument);
         TS_ASSERT_THROWS(null * three, std::invalid_argument);
 

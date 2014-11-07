@@ -1785,7 +1785,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
       <attribute name="title">
        <string>Symmetrise</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_15">
+      <layout class="QVBoxLayout" name="verticalLayout_151">
        <item>
         <widget class="QGroupBox" name="gbSymmInput">
          <property name="title">
@@ -1876,7 +1876,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
          <property name="title">
           <string>Output</string>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout">
+         <layout class="QHBoxLayout" name="horizontalLayout1">
           <property name="margin">
            <number>6</number>
           </property>
