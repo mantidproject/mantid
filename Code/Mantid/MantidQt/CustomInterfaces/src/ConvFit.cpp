@@ -66,7 +66,7 @@ namespace IDA
     // Populate Property Widget
 
     // Option to convolve members
-    m_cfProp["Convolve"] = m_blnManager->addProperty("Convolve");
+    m_properties["Convolve"] = m_blnManager->addProperty("Convolve");
     m_cfTree->addProperty(m_properties["Convolve"]);
     m_blnManager->setValue(m_properties["Convolve"], true);
 
@@ -182,7 +182,7 @@ namespace IDA
 
     pyInput += uiForm().confit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
 
-    if ( m_cfBlnMng->value(m_cfProp["Convolve"]) ) pyInput += "convolve = True\n";
+    if ( m_blnManager->value(m_properties["Convolve"]) ) pyInput += "convolve = True\n";
     else pyInput += "convolve = False\n";
 
     if ( uiForm().confit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
