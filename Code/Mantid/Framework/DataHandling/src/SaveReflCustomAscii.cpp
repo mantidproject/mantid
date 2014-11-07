@@ -31,10 +31,10 @@ namespace Mantid
       auto samp = m_ws->run();
       std::string title = getProperty("Title");
 
-      if (title) //if is toggled
-      { 
-        file << "#" << title << std::endl;
-      }
+      //if (title) //if is toggled
+      //{ 
+      //  file << "#" << title << std::endl;
+      //}
 
       const std::vector<std::string> logList = getProperty("LogList");
       ///logs
