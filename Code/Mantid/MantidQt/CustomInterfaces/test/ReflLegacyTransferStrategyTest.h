@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <map>
+#include <string>
 #include <vector>
 
 #include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
