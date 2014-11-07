@@ -1,5 +1,6 @@
 #include "MantidKernel/DirectoryValidator.h"
 #include <algorithm>
+#include <Poco/Exception.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <iostream>
@@ -51,10 +52,17 @@ std::string DirectoryValidator::checkValidity(const std::string& value) const
   //If the path is required to exist check it is there
   if ( m_testExist )
   {
-   if ( value.empty() || !Poco::File(value).exists() )
-    return "Directory \"" + value + "\" not found";
-   if (!Poco::File(value).isDirectory())
-     return "Directory \"" + value + "\" specified is actually a file";
+    try
+    {
+      if ( value.empty() || !Poco::File(value).exists() )
+        return "Directory \"" + value + "\" not found";
+      if (!Poco::File(value).isDirectory())
+        return "Directory \"" + value + "\" specified is actually a file";
+    }
+    catch ( Poco::FileException & )
+    {
+      return "Error accessing directory \"" + value + "\"";
+    }
   }
 
   //Otherwise we are okay, file extensions are just a suggestion so no validation on them is necessary
