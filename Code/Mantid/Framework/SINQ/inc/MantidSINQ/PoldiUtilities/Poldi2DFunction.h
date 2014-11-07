@@ -50,6 +50,10 @@ public:
     virtual void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian);
     
     virtual void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::FunctionValues &values) const;
+
+    void iterationFinished();
+protected:
+    size_t m_iterations;
 };
 
 

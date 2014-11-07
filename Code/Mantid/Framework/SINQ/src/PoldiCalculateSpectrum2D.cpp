@@ -180,10 +180,14 @@ namespace Poldi
       fit->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(mdFunction));
       fit->setProperty("InputWorkspace", matrixWorkspace);
       fit->setProperty("CreateOutput", true);
-      fit->setProperty("MaxIterations", 0);
+      fit->setProperty("MaxIterations", 100);
       fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
 
       fit->execute();
+
+      for(size_t i = 0; i < mdFunction->nParams(); ++i) {
+          std::cout << mdFunction->parameterName(i) << " " << mdFunction->getParameter(i) << " " << mdFunction->getError(i) << std::endl;
+      }
 
       MatrixWorkspace_sptr outputWs = fit->getProperty("OutputWorkspace");
 

@@ -52,11 +52,13 @@ void SeqDomainSpectrumCreator::createDomain(boost::shared_ptr<FunctionDomain> &d
 
     size_t numberOfHistograms = m_matrixWorkspace->getNumberHistograms();
     for(size_t i = 0; i < numberOfHistograms; ++i) {
-        FunctionDomain1DSpectrumCreator *spectrumDomain = new FunctionDomain1DSpectrumCreator;
-        spectrumDomain->setMatrixWorkspace(m_matrixWorkspace);
-        spectrumDomain->setWorkspaceIndex(i);
+        if(!m_matrixWorkspace->getDetector(i)->isMasked()) {
+            FunctionDomain1DSpectrumCreator *spectrumDomain = new FunctionDomain1DSpectrumCreator;
+            spectrumDomain->setMatrixWorkspace(m_matrixWorkspace);
+            spectrumDomain->setWorkspaceIndex(i);
 
-        seqDomain->addCreator(IDomainCreator_sptr(spectrumDomain));
+            seqDomain->addCreator(IDomainCreator_sptr(spectrumDomain));
+        }
     }
 
     domain.reset(seqDomain);
@@ -109,15 +111,21 @@ Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(const std::string
         seqDomain->getDomainAndValues(i, localDomain, localValues);
         function->function(*localDomain, *localValues);
 
-        const MantidVec& originalXValue = m_matrixWorkspace->readX(i);
-        MantidVec& xValues = outputWs->dataX(i);
-        assert(xValues.size() == originalXValue.size());
-        MantidVec& yValues = outputWs->dataY(i);
+        boost::shared_ptr<FunctionDomain1DSpectrum> spectrumDomain = boost::dynamic_pointer_cast<FunctionDomain1DSpectrum>(localDomain);
 
-        xValues.assign( originalXValue.begin(), originalXValue.end() );
+        MantidVec& yValues = outputWs->dataY(spectrumDomain->getWorkspaceIndex());
+
         for(size_t j = 0; j < yValues.size(); ++j) {
             yValues[j] = localValues->getCalculated(j);
         }
+    }
+
+    for(size_t i = 0; i < m_matrixWorkspace->getNumberHistograms(); ++i) {
+        const MantidVec& originalXValue = m_matrixWorkspace->readX(i);
+        MantidVec& xValues = outputWs->dataX(i);
+        assert(xValues.size() == originalXValue.size());
+        xValues.assign( originalXValue.begin(), originalXValue.end() );
+
     }
 
     if(m_manager && !outputWorkspacePropertyName.empty()) {
