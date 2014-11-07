@@ -410,6 +410,101 @@ class ExportExperimentLogTest(unittest.TestCase):
 
         return
 
+    def test_sortRecordFileOverride(self):
+        """ Test to append logs and sort the log record file
+        """
+        # Record 0
+        ws1 = self.createTestWorkspace(run=10000)
+        AnalysisDataService.addOrReplace("TestMatrixWS1", ws1)
+
+        alg_test = run_algorithm("ExportExperimentLog",
+            InputWorkspace = "TestMatrixWS1",
+            OutputFilename = "TestRecord10.txt",
+            SampleLogNames = ["run_number", "duration", "proton_charge", "proton_charge"],
+            SampleLogTitles = ["RUN", "Duration", "ProtonCharge", "ProtonCharge-Avg"],
+            SampleLogOperation = [None, None, "min", "average"],
+            FileMode = "new",
+            FileFormat = "tab",
+            OverrideLogValue = ["Duration", "12345", "ProtonCharge-Avg", "32.921"],
+            OrderByTitle = 'RUN')
+
+
+        # Record 1
+        ws2 = self.createTestWorkspace(run=11000)
+        AnalysisDataService.addOrReplace("TestMatrixWS2", ws2)
+
+        alg_test = run_algorithm("ExportExperimentLog",
+            InputWorkspace = "TestMatrixWS2",
+            OutputFilename = "TestRecord10.txt",
+            SampleLogNames = ["run_number", "duration", "proton_charge", "proton_charge"],
+            SampleLogTitles = ["RUN", "Duration", "ProtonCharge", "ProtonCharge-Avg"],
+            SampleLogOperation = [None, None, "min", "average"],
+            FileMode = "fastappend",
+            FileFormat = "tab",
+            OverrideLogValue = ["Duration", "23456", "ProtonCharge-Avg", "22.921"],
+            OrderByTitle = 'RUN')
+
+        # Record 2
+        ws3 = self.createTestWorkspace(run=10023)
+        AnalysisDataService.addOrReplace("TestMatrixWS3", ws3)
+
+        alg_test = run_algorithm("ExportExperimentLog",
+            InputWorkspace = "TestMatrixWS3",
+            OutputFilename = "TestRecord10.txt",
+            SampleLogNames = ["run_number", "duration", "proton_charge", "proton_charge"],
+            SampleLogTitles = ["RUN", "Duration", "ProtonCharge", "ProtonCharge-Avg"],
+            SampleLogOperation = [None, None, "min", "average"],
+            FileMode = "fastappend",
+            FileFormat = "tab",
+            OverrideLogValue = ["Duration", "34567", "ProtonCharge-Avg", "12.921"],
+            OrderByTitle = 'RUN')
+
+        # Verify
+        # Locate file
+        outfilename = alg_test.getProperty("OutputFilename").value
+        try:
+            ifile = open(outfilename)
+            lines = ifile.readlines()
+            ifile.close()
+        except IOError as err:
+            print "Unable to open file %s. " % (outfilename)
+            self.assertTrue(False)
+            return
+
+        # Last line cannot be empty, i.e., before EOF '\n' is not allowed
+        lastline = lines[-1]
+        self.assertTrue(len(lastline.strip()) > 0)
+
+        # Number of lines
+        self.assertEquals(len(lines), 4)
+
+        # Check value
+        for i in xrange(1, 3):
+            currline = lines[i]
+            curr_run = int(currline.split("\t")[0])
+            curr_min = float(currline.split("\t")[2])
+            nextline = lines[i+1]
+            next_run = int(nextline.split('\t')[0])
+            next_min = float(nextline.split('\t')[2])
+            self.assertTrue(curr_run < next_run)
+            self.assertTrue(curr_min < next_min)
+
+        line2 = lines[2]
+        terms = line2.split("\t")
+        duration = int(terms[1])
+        self.assertEquals(duration, 34567)
+        pchargeavg = float(terms[3])
+        self.assertAlmostEqual(pchargeavg, 12.921)
+
+
+        # Remove generated files
+        os.remove(outfilename)
+        AnalysisDataService.remove("TestMatrixWS1")
+        AnalysisDataService.remove("TestMatrixWS2")
+        AnalysisDataService.remove("TestMatrixWS3")
+
+        return
+
 
     def createTestWorkspace(self, run=23456):
         """ Create a workspace for testing against with ideal log values

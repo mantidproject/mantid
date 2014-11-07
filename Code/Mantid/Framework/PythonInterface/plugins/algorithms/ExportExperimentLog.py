@@ -44,6 +44,9 @@ class ExportExperimentLog(PythonAlgorithm):
 
         self.declareProperty("OrderByTitle", "", "Log file will be ordered by the value of this title from low to high.") 
 
+        overrideprop = StringArrayProperty("OverrideLogValue", values=[], direction=Direction.Input)
+        self.declareProperty(overrideprop, "List of paired strings as log title and value to override values from workspace.")
+
         # Time zone
         timezones = ["UTC", "America/New_York"]
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))
@@ -149,7 +152,6 @@ class ExportExperimentLog(PythonAlgorithm):
         # This is left for a feature that might be needed in future.
         self._reorderOld = False
 
-
         self._timezone = self.getProperty("TimeZone").value
 
         # Determine whether output log-record file should be ordered by value of some log
@@ -162,6 +164,19 @@ class ExportExperimentLog(PythonAlgorithm):
                 self.titleToOrder = ordertitle
             else:
                 self.log().warning("Specified title to order by (%s) is not in given log titles." % (ordertitle))
+
+        # Override log values: it will not work in fastappend mode to override
+        overridelist = self.getProperty("OverrideLogValue").value
+        if len(self._headerTitles) > 0:
+            if len(overridelist) % 2 != 0:
+                raise NotImplementedError("Number of items in OverrideLogValue must be even.")
+            self._ovrdTitleValueDict = {}
+            for i in xrange(len(overridelist)/2):
+                title = overridelist[2*i]
+                if title in self._headerTitles:
+                    self._ovrdTitleValueDict[title] = overridelist[2*i+1]
+                else:
+                    self.log().warning("Override title %s is not recognized. " % (title))
 
         return
 
@@ -210,10 +225,14 @@ class ExportExperimentLog(PythonAlgorithm):
 
         # Examine
         titles = titleline.split()
+        self.log().notice("[DB] Examine finds titles: %s" % (titles))
 
         same = True
         if len(titles) != len(self._headerTitles):
-            same = False
+            if len(self._headerTitles) == 0:
+                self._headerTitles = titles[:]
+            else: 
+                same = False
         for ititle in xrange(len(titles)):
             title1 = titles[ititle]
             title2 = self._headerTitles[ititle]
@@ -258,14 +277,33 @@ class ExportExperimentLog(PythonAlgorithm):
         # Write to a buffer
         wbuf = ""
 
+        self.log().notice("[DB] Samlpe Log Names: %s" % (self._sampleLogNames))
+        self.log().notice("[DB] Title      Names: %s" % (self._headerTitles))
+
+        if len(self._headerTitles) == 0:
+            skip = True
+        else:
+            skip = False
+        
+        headertitle = None
         for il in xrange(len(self._sampleLogNames)):
-            logname = self._sampleLogNames[il]
-            optype = self._sampleLogOperations[il]
-            key = logname + "-" + optype
-            if key in logvaluedict.keys():
-                value = logvaluedict[key]
-            elif logname in logvaluedict.keys():
-                value = logvaluedict[logname]
+            if skip is False: 
+                headertitle = self._headerTitles[il]
+            if headertitle is not None and headertitle in self._ovrdTitleValueDict.keys():
+                # overriden
+                value = self._ovrdTitleValueDict[headertitle]
+
+            else:
+                # from input workspace
+                logname = self._sampleLogNames[il]
+                optype = self._sampleLogOperations[il]
+                key = logname + "-" + optype
+                if key in logvaluedict.keys():
+                    value = logvaluedict[key]
+                elif logname in logvaluedict.keys():
+                    value = logvaluedict[logname]
+            # ENDIFELSE
+
             wbuf += "%s%s" % (str(value), self._valuesep)
         wbuf = wbuf[0:-1]
 
