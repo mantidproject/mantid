@@ -53,6 +53,9 @@ void export_ConfigService()
     .def("getInstrumentDirectory", &ConfigServiceImpl::getInstrumentDirectory,
          "Returns the directory used for the instrument definitions")
 
+	.def("getInstrumentDirectories", &ConfigServiceImpl::getInstrumentDirectories, return_value_policy<reference_existing_object>(), 
+         "Returns the list of directories searched for the instrument definitions")
+
     .def("getFacilityNames", &ConfigServiceImpl::getFacilityNames, "Returns the default facility")
 
     .def("getFacilities", &ConfigServiceImpl::getFacilities, "Returns the default facility")
