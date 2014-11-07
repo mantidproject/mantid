@@ -199,6 +199,9 @@ public:
 
   int matrixUndoStackSize(){return d_matrix_undo_stack_size;};
   void setMatrixUndoStackSize(int size);
+    
+  // Check if delete workspace prompt is enabled
+  bool isDeleteWorkspacePromptEnabled();
 
   QString endOfLine();
   bool autoUpdateTableValues(){return d_auto_update_table_values;};
@@ -213,8 +216,13 @@ public slots:
   ApplicationWindow* open(const QString& fn, bool factorySettings = false, bool newProject = true);
   ApplicationWindow* openProject(const QString& fn, bool factorySettings = false, bool newProject = true);
   ApplicationWindow* importOPJ(const QString& fn, bool factorySettings = false, bool newProject = true);
-  /// Load mantid data files using generic load algorithm
+  /// Load mantid data files using generic load algorithm, opening user dialog
   void loadDataFile();
+  /// Load mantid data files (generic load algorithm)
+  void loadDataFileByName(QString fn);
+  /// Open from the list of recent files
+  void openRecentFile(int index);
+
   /**
   * \brief Create a new project from a data file.
   *
@@ -408,6 +416,7 @@ public slots:
   //@{
   //! Creates an empty table
   Table* newTable();
+
   //! Used when loading a table from a project file
   Table* newTable(const QString& caption,int r, int c);
   Table* newTable(int r, int c, const QString& name = QString(),const QString& legend = QString());
@@ -619,6 +628,7 @@ public slots:
   Graph3D* openSurfacePlot(ApplicationWindow* app, const QStringList &lst);
   Graph* openGraph(ApplicationWindow* app, MultiLayer *plot, const QStringList &list);
   void openRecentProject(int index);
+
   //@}
 
   //! \name Table Tools
@@ -852,7 +862,11 @@ public slots:
   void custom3DGrids(int grids);
   //@}
 
+  //! Updates the recent projects list and menu (but doesn't insert anything)
   void updateRecentProjectsList();
+
+  //! Inserts file name in the list of recent files (if fname not empty) and updates the "recent files" menu
+  void updateRecentFilesList(QString fname="");
 
   //!  connected to the done(bool) signal of the http object
   //void receivedVersionFile(bool error);
@@ -1216,7 +1230,7 @@ public:
   QPoint d_script_win_pos;
   QSize d_script_win_size;
   bool d_script_win_arrow;
-  bool d_inform_rename_table;
+  bool d_inform_rename_table, d_inform_delete_workspace;
   QString d_export_col_separator;
   bool d_export_col_names, d_export_table_selection, d_export_col_comment;
 
@@ -1279,6 +1293,7 @@ public:
   //! Describes which windows are shown when the folder becomes the current folder
   ShowWindowsPolicy show_windows_policy;
   enum {MaxRecentProjects = 10};
+  enum {MaxRecentFiles = MaxRecentProjects};
   //! File version code used when opening project files (= maj * 100 + min * 10 + patch)
   int d_file_version;
 
@@ -1327,9 +1342,9 @@ public:
   QColor tableBkgdColor, tableTextColor, tableHeaderColor;
   QString projectname, columnSeparator, helpFilePath, appLanguage;
   QString configFilePath, fitPluginsPath, fitModelsPath, asciiDirPath, imagesDirPath, scriptsDirPath;
-  int ignoredLines, savingTimerId, plot3DResolution, recentMenuID;
+  int ignoredLines, savingTimerId, plot3DResolution, recentMenuID, recentFilesMenuID;
   bool renameColumns, strip_spaces, simplify_spaces;
-  QStringList recentProjects;
+  QStringList recentProjects, recentFiles;
   bool saved, showPlot3DProjection, showPlot3DLegend, orthogonal3DPlots, autoscale3DPlots;
   QStringList plot3DColors, locales;
   QStringList functions; //user-defined functions;
@@ -1413,7 +1428,8 @@ private:
 
   QWidget* catalogSearch;
 
-  QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent, *interfaceMenu;
+  QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit;
+  QMenu *recentProjectsMenu, *recentFilesMenu, *interfaceMenu;
   
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;

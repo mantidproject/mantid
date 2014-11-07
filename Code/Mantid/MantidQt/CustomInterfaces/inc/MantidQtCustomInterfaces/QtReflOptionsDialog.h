@@ -1,18 +1,20 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLLOADEDMAINVIEWPRESENTER_H_
-#define MANTID_CUSTOMINTERFACES_REFLLOADEDMAINVIEWPRESENTER_H_
+#ifndef MANTID_CUSTOMINTERFACES_QTREFLOPTIONSDIALOG_H
+#define MANTID_CUSTOMINTERFACES_QTREFLOPTIONSDIALOG_H
 
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtCustomInterfaces/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
+
+#include <QDialog>
+
+#include "ui_ReflOptionsDialog.h"
 
 namespace MantidQt
 {
   namespace CustomInterfaces
   {
 
-    /** ReflLoadedMainViewPresenter : Handles presentation logic for the reflectometry interface
-    when a table workspace is loaded as the active table.
+    /** QtReflOptionsDialog : Provides a dialog for setting Reflectometry UI options.
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -34,21 +36,29 @@ namespace MantidQt
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport ReflLoadedMainViewPresenter: public ReflMainViewPresenter
+
+    class DLLExport QtReflOptionsDialog : public QDialog
     {
+    Q_OBJECT
     public:
-      ReflLoadedMainViewPresenter(Mantid::API::ITableWorkspace_sptr model, ReflMainView* view);
-      ReflLoadedMainViewPresenter(std::string model, ReflMainView* view);
-      virtual ~ReflLoadedMainViewPresenter();
+      QtReflOptionsDialog(ReflMainView* view, boost::shared_ptr<IReflPresenter> presenter);
+      virtual ~QtReflOptionsDialog();
     protected:
-      //press changes to the same item in the ADS
-      virtual void save();
-      //press changes to a new item in the ADS
-      virtual void saveAs();
+      void initLayout();
+      void initBindings();
+    protected slots:
+      void saveOptions();
+      void loadOptions();
+    protected:
+      //the interface
+      Ui::reflOptionsDialog ui;
+      //the presenter
+      boost::shared_ptr<IReflPresenter> m_presenter;
+      //maps option names to widget names
+      std::map<std::string,QString> m_bindings;
     };
 
+  } //CustomInterfaces
+} //MantidQt
 
-  } // namespace CustomInterfaces
-} // namespace Mantid
-
-#endif  /* MANTID_CUSTOMINTERFACES_REFLLOADEDMAINVIEWPRESENTER_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_QTREFLOPTIONSDIALOG_H */

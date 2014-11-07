@@ -58,6 +58,7 @@ class RangeHandler;
 class SliderHandler;
 class SpectrumDisplay;
 class SVConnections;
+class MatrixWSDataSource;
 
 class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumView : public QMainWindow, public MantidQt::API::WorkspaceObserver
 {
@@ -75,6 +76,7 @@ protected slots:
   void updateWorkspace();
 
 protected:
+  virtual void resizeEvent(QResizeEvent * event);
   void preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
   void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
@@ -83,6 +85,8 @@ private:
   void updateHandlers(SpectrumDataSource* data_source);
   GraphDisplay*    h_graph;
   GraphDisplay*    v_graph;
+
+  MatrixWSDataSource *m_data_source;
 
   // keep void pointers to the following objects, to avoid having to
   // include ui_SpectrumView.h, which disappears by the time MantidPlot is

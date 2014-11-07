@@ -146,6 +146,25 @@ public:
     }
   }
 
+  void testStrToUnitCell()
+  {
+      UnitCell cell(2.0, 4.0, 5.0, 90.0, 100.0, 102.0);
+      std::string cellString = unitCellToStr(cell);
+      UnitCell other = strToUnitCell(cellString);
+
+      TS_ASSERT_EQUALS(cell.getG(), other.getG());
+
+      UnitCell precisionLimit(2.1234567891, 3.0, 4.1234567891, 90.0, 90.0, 90.0);
+      std::string precisionLimitString = unitCellToStr(precisionLimit);
+      UnitCell precisionLimitOther = strToUnitCell(precisionLimitString);
+
+      TS_ASSERT_DIFFERS(precisionLimit.a(), precisionLimitOther.a());
+      TS_ASSERT_DELTA(precisionLimit.a(), precisionLimitOther.a(), 1e-9);
+
+      TS_ASSERT_DIFFERS(precisionLimit.c(), precisionLimitOther.c());
+      TS_ASSERT_DELTA(precisionLimit.c(), precisionLimitOther.c(), 1e-9);
+  }
+
 };
 
 
