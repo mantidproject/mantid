@@ -197,6 +197,8 @@ class Line2D():
     def get_ydata(self):
         return self._ydata
 
+
+# TODO: no 'hold' support for now. How to handle multi-plots with different types/tools? Does it make sense at all?
 __hold_status = False
 
 __last_shown_graph = None
