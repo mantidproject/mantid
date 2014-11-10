@@ -402,8 +402,6 @@ def __apply_plot_args(graph, *args):
     if None==graph or None==args or ((),) == args:
         return
 
-    print "got args: ", args
-    print "args len: ", len(args)
     for a in range(0, len(args)):
         if isinstance(a, basestring):
             for i, c in enumeraterange(0,len(s)):
@@ -501,11 +499,22 @@ def __plot_as_array(*args, **kwargs):
     return __list_of_lines_from_graph(graph)
 
 def __plot_with_tool(tool, *args, **kwargs):
-    if 'plot_bin' == tool:
-        return plot_bin(args[0], args[1], args[2:], **kwargs)
-    elif 'plot_md' == tool:
+    bin_tool_name = 'plot_bin'
+    spectrum_tool_name = 'plot_spectrum'
+    md_tool_name = 'plot_md'
+
+    if bin_tool_name == tool or spectrum_tool_name == tool:
+        if len(args) < 2:
+            raise ValueError("To plot using %s you need to give at least two parameters"%tool)
+
+    if bin_tool_name == tool:
+        other_args = []
+        if len(args) <=2:
+            raise ValueError("To use plot_bin: '" + tool + ";. Cannot plot this. ")
+        return plot_bin(args[0], args[1], other_args, **kwargs)
+    elif md_tool_name == tool:
         return plot_md(args[0], args[1:], **kwargs)
-    elif 'plot_spectrum' == tool:
+    elif spectrum_tool_name == tool:
         return plot_spectrum(args[0], args[1], args[2:], **kwargs)
     # here you would add slice/spectrum/instrument viewer, etc. and maybe you'll want to put them in a dict
     else:
@@ -586,6 +595,8 @@ def plot(*args, **kwargs):
         raise ValueError("Must provide data to plot")
 
     # TODO: multiline
+
+    # TODO: support x-y plots like plot(x, y)?
 
     # normally guess; exception if e.g. a parameter tool='plot_bin' is given
     try:
