@@ -47,12 +47,8 @@ namespace CustomInterfaces
     virtual void run();
     virtual bool validate();
 
-    void setIDFValues(const QString & prefix);
-
   private slots:
-    void clearReflectionInfo(); ///< clear various line edit boxes
-    void analyserSelected(int index); ///< set up cbReflection based on Analyser selection
-    void reflectionSelected(int index); ///< set up parameter file values based on reflection
+    void setInstrumentDefault(); ///< Sets default parameters for current instrument
     void mappingOptionSelected(const QString& groupType); ///< change ui to display appropriate options
     void backgroundClicked(); ///< handles showing and hiding m_backgroundDialog
     void backgroundRemoval(); ///< handles data from BG

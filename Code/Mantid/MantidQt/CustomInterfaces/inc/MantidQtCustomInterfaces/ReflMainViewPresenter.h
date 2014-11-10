@@ -45,7 +45,7 @@ namespace MantidQt
     public:
       ReflMainViewPresenter(ReflMainView* view);
       virtual ~ReflMainViewPresenter();
-      virtual void notify(int flag);
+      virtual void notify(IReflPresenter::Flag flag);
       virtual const std::map<std::string,QVariant>& options() const;
       virtual void setOptions(const std::map<std::string,QVariant>& options);
       //Public for the purposes of unit testing
@@ -93,6 +93,14 @@ namespace MantidQt
       virtual void prependRow();
       //delete row(s) from the model
       virtual void deleteRow();
+      //clear selected row(s) in the model
+      virtual void clearSelected();
+      //copy selected rows to clipboard
+      virtual void copySelected();
+      //copy selected rows to clipboard and then delete them
+      virtual void cutSelected();
+      //paste clipboard into selected rows
+      virtual void pasteSelected();
       //group selected rows together
       virtual void groupRows();
       //expand selection to group

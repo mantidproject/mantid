@@ -150,8 +150,7 @@ namespace MantidQt
       ads.notificationCenter.addObserver(m_clearObserver);
       ads.notificationCenter.addObserver(m_replaceObserver);
 
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
 
       //Provide autocompletion hints for the options column. We use the algorithm's properties minus
       //those we blacklist. We blacklist any useless properties or ones we're handling that the user
@@ -288,7 +287,7 @@ namespace MantidQt
         const int& groupId = gIt->first;
         const std::set<int>& groupRows = gIt->second;
         //Are we only partially processing a group?
-        if(groupRows.size() < numRowsInGroup(gIt->first))
+        if(groupRows.size() < numRowsInGroup(gIt->first) && m_options["WarnProcessPartialGroup"].toBool())
         {
           std::stringstream err;
           err << "You have only selected " << groupRows.size() << " of the ";
@@ -559,9 +558,9 @@ namespace MantidQt
 
       IAlgorithm_sptr algReflOne = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
       algReflOne->initialize();
-      algReflOne->setProperty("InputWorkspace", runWS);
+      algReflOne->setProperty("InputWorkspace", runWS->name());
       if(transWS)
-        algReflOne->setProperty("FirstTransmissionRun", transWS);
+        algReflOne->setProperty("FirstTransmissionRun", transWS->name());
       algReflOne->setProperty("OutputWorkspace", "IvsQ_" + runNo);
       algReflOne->setProperty("OutputWorkspaceWaveLength", "IvsLam_" + runNo);
       algReflOne->setProperty("ThetaIn", theta);
@@ -840,24 +839,26 @@ namespace MantidQt
     /**
     Used by the view to tell the presenter something has changed
     */
-    void ReflMainViewPresenter::notify(int flag)
+    void ReflMainViewPresenter::notify(IReflPresenter::Flag flag)
     {
       switch(flag)
       {
-      case ReflMainView::SaveAsFlag:          saveTableAs();        break;
-      case ReflMainView::SaveFlag:            saveTable();          break;
-      case ReflMainView::AppendRowFlag:       appendRow();          break;
-      case ReflMainView::PrependRowFlag:      prependRow();         break;
-      case ReflMainView::DeleteRowFlag:       deleteRow();          break;
-      case ReflMainView::ProcessFlag:         process();            break;
-      case ReflMainView::GroupRowsFlag:       groupRows();          break;
-      case ReflMainView::OpenTableFlag:       openTable();          break;
-      case ReflMainView::NewTableFlag:        newTable();           break;
-      case ReflMainView::TableUpdatedFlag:    m_tableDirty = true;  break;
-      case ReflMainView::ExpandSelectionFlag: expandSelection();    break;
-      case ReflMainView::OptionsDialogFlag:   showOptionsDialog();  break;
-
-      case ReflMainView::NoFlags:       return;
+      case IReflPresenter::SaveAsFlag:          saveTableAs();       break;
+      case IReflPresenter::SaveFlag:            saveTable();         break;
+      case IReflPresenter::AppendRowFlag:       appendRow();         break;
+      case IReflPresenter::PrependRowFlag:      prependRow();        break;
+      case IReflPresenter::DeleteRowFlag:       deleteRow();         break;
+      case IReflPresenter::ProcessFlag:         process();           break;
+      case IReflPresenter::GroupRowsFlag:       groupRows();         break;
+      case IReflPresenter::OpenTableFlag:       openTable();         break;
+      case IReflPresenter::NewTableFlag:        newTable();          break;
+      case IReflPresenter::TableUpdatedFlag:    m_tableDirty = true; break;
+      case IReflPresenter::ExpandSelectionFlag: expandSelection();   break;
+      case IReflPresenter::OptionsDialogFlag:   showOptionsDialog(); break;
+      case IReflPresenter::ClearSelectedFlag:   clearSelected();     break;
+      case IReflPresenter::CopySelectedFlag:    copySelected();      break;
+      case IReflPresenter::CutSelectedFlag:     cutSelected();       break;
+      case IReflPresenter::PasteSelectedFlag:   pasteSelected();     break;
       }
       //Not having a 'default' case is deliberate. gcc issues a warning if there's a flag we aren't handling.
     }
@@ -962,8 +963,7 @@ namespace MantidQt
         return;
 
       m_workspaceList.insert(name);
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
     }
 
     /**
@@ -973,8 +973,7 @@ namespace MantidQt
     {
       const std::string name = pNf->objectName();
       m_workspaceList.erase(name);
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
     }
 
     /**
@@ -983,8 +982,7 @@ namespace MantidQt
     void ReflMainViewPresenter::handleClearEvent(Mantid::API::ClearADSNotification_ptr)
     {
       m_workspaceList.clear();
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
     }
 
     /**
@@ -1001,8 +999,7 @@ namespace MantidQt
 
       m_workspaceList.erase(name);
       m_workspaceList.insert(newName);
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
     }
 
     /**
@@ -1018,8 +1015,7 @@ namespace MantidQt
       if(isValidModel(pNf->object()))
         m_workspaceList.insert(name);
 
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
     }
 
     /** Returns how many rows there are in a given group
@@ -1051,6 +1047,87 @@ namespace MantidQt
           selection.insert(i);
 
       m_view->setSelection(selection);
+    }
+
+    /** Clear the currently selected rows */
+    void ReflMainViewPresenter::clearSelected()
+    {
+      std::set<int> rows = m_view->getSelectedRows();
+      std::set<int> ignore;
+      for(auto row = rows.begin(); row != rows.end(); ++row)
+      {
+        ignore.clear();
+        ignore.insert(*row);
+
+        m_model->setData(m_model->index(*row, COL_RUNS), "");
+        m_model->setData(m_model->index(*row, COL_ANGLE), "");
+        m_model->setData(m_model->index(*row, COL_TRANSMISSION), "");
+        m_model->setData(m_model->index(*row, COL_QMIN), "");
+        m_model->setData(m_model->index(*row, COL_QMAX), "");
+        m_model->setData(m_model->index(*row, COL_SCALE), 1.0);
+        m_model->setData(m_model->index(*row, COL_DQQ), "");
+        m_model->setData(m_model->index(*row, COL_GROUP), getUnusedGroup(ignore));
+        m_model->setData(m_model->index(*row, COL_OPTIONS), "");
+      }
+      m_tableDirty = true;
+    }
+
+    /** Copy the currently selected rows to the clipboard */
+    void ReflMainViewPresenter::copySelected()
+    {
+      std::vector<std::string> lines;
+
+      std::set<int> rows = m_view->getSelectedRows();
+      for(auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt)
+      {
+        std::vector<std::string> line;
+        for(int col = COL_RUNS; col <= COL_OPTIONS; ++col)
+          line.push_back(m_model->data(m_model->index(*rowIt, col)).toString().toStdString());
+        lines.push_back(boost::algorithm::join(line, "\t"));
+      }
+
+      m_view->setClipboard(boost::algorithm::join(lines, "\n"));
+    }
+
+    /** Copy currently selected rows to the clipboard, and then delete them. */
+    void ReflMainViewPresenter::cutSelected()
+    {
+      copySelected();
+      deleteRow();
+    }
+
+    /** Paste the contents of the clipboard into the currently selected rows, or append new rows */
+    void ReflMainViewPresenter::pasteSelected()
+    {
+      const std::string text = m_view->getClipboard();
+      std::vector<std::string> lines;
+      boost::split(lines, text, boost::is_any_of("\n"));
+
+      //If we have rows selected, we'll overwrite them. If not, we'll append new rows to write to.
+      std::set<int> rows = m_view->getSelectedRows();
+      if(rows.empty())
+      {
+        //Add as many new rows as required
+        for(size_t i = 0; i < lines.size(); ++i)
+        {
+          int index = m_model->rowCount();
+          insertRow(index);
+          rows.insert(index);
+        }
+      }
+
+      //Iterate over rows and lines simultaneously, stopping when we reach the end of either
+      auto rowIt = rows.begin();
+      auto lineIt = lines.begin();
+      for(; rowIt != rows.end() && lineIt != lines.end(); rowIt++, lineIt++)
+      {
+        std::vector<std::string> values;
+        boost::split(values, *lineIt, boost::is_any_of("\t"));
+
+        //Paste as many columns as we can from this line
+        for(int col = COL_RUNS; col <= COL_OPTIONS && col < static_cast<int>(values.size()); ++col)
+          m_model->setData(m_model->index(*rowIt, col), QString::fromStdString(values[col]));
+      }
     }
 
     /** Shows the Refl Options dialog */
@@ -1096,6 +1173,7 @@ namespace MantidQt
       //Set defaults
       m_options["WarnProcessAll"] = true;
       m_options["WarnDiscardChanges"] = true;
+      m_options["WarnProcessPartialGroup"] = true;
       m_options["RoundAngle"] = false;
       m_options["RoundQMin"] = false;
       m_options["RoundQMax"] = false;

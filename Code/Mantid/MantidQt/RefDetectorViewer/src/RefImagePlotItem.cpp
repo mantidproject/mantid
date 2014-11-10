@@ -4,11 +4,12 @@ namespace MantidQt
 {
 namespace RefDetectorViewer
 {
- 
+
 RefImagePlotItem::RefImagePlotItem(const RefLimitsHandler * const limitsHandler)
   : SpectrumView::SpectrumPlotItem(), m_limitsHandler(limitsHandler)
 {
 }
+
 
 RefImagePlotItem::~RefImagePlotItem()
 {
@@ -25,35 +26,31 @@ RefImagePlotItem::~RefImagePlotItem()
  *                      columns in the actual displayed image
  *  @param  yMap        The QwtScaleMap used by QWT to map y-values to pixel
  *                      rows in the actual displayed image
- *  @param  canvasRect  rectangle containing the pixel region where QWT will 
+ *  @param  canvasRect  rectangle containing the pixel region where QWT will
  *                      draw the image.  This rectangle is slightly larger
  *                      than the actual rectangle used for the image.  This
  *                      parameter is NOT USED by the SpectrumPlotItem, but is
- *                      passed in when QWT calls this method. 
+ *                      passed in when QWT calls this method.
  */
-void RefImagePlotItem::draw(       QPainter    * painter,
-                          const QwtScaleMap & xMap, 
-                          const QwtScaleMap & yMap,
-                          const QRect       & canvasRect) const
+void RefImagePlotItem::draw( QPainter    * painter,
+                       const QwtScaleMap & xMap,
+                       const QwtScaleMap & yMap,
+                       const QRect       & canvasRect) const
 {
   SpectrumPlotItem::draw(painter,xMap,yMap,canvasRect);
 
   //////////////////////////////////////////////////////////////////////////////////
   // TODO: Eliminate the code duplication (from SpectrumPlotItem::draw) in this section
-  SpectrumView::DataArray* data_array;
-  if ( buffer_ID == 0 )
-  {
-    data_array = data_array_0;
-  }
+  SpectrumView::DataArray_const_sptr data_array;
+  if ( m_bufferID == 0 )
+    data_array = m_dataArray0;
   else
-  {
-    data_array = data_array_1;
-  }
+    data_array = m_dataArray1;
 
-  const double x_min  = data_array->GetXMin();
-  const double x_max  = data_array->GetXMax();
-  const double y_min  = data_array->GetYMin();
-  const double y_max  = data_array->GetYMax();
+  const double x_min  = data_array->getXMin();
+  const double x_max  = data_array->getXMax();
+  const double y_min  = data_array->getYMin();
+  const double y_max  = data_array->getYMax();
 
                                             // find the actual plot region
                                             // using the scale maps.
@@ -129,8 +126,7 @@ void RefImagePlotItem::draw(       QPainter    * painter,
     tof_value = int(coeff_left * coeff_bottom_right + float(pix_x_min));
     painter->drawLine(QPoint(tof_value,pix_y_min), QPoint(tof_value,pix_y_max));
   }
-
 }
 
 } // namespace RefDetectorViewer
-} // namespace MantidQt 
+} // namespace MantidQt

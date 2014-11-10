@@ -13,6 +13,10 @@
 
 namespace MantidQt
 {
+  namespace SliceViewer
+  {
+    class SliceViewerWindow;
+  }
 namespace Factory
 {
 
@@ -53,6 +57,7 @@ namespace Factory
     MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
     MantidQt::SliceViewer::SliceViewerWindow* getSliceViewerWindow(const QString& wsName, const QString& label);
     void closeAllSliceViewerWindows();
+    void closeSliceViewerWindow(SliceViewer::SliceViewerWindow* w);
 
     MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
 
@@ -61,7 +66,7 @@ namespace Factory
 
   protected:
     /// List of the open SliceViewerWindows
-    std::vector<QPointer<MantidQt::SliceViewer::SliceViewerWindow> > m_windows;
+    std::list<QPointer<MantidQt::SliceViewer::SliceViewerWindow> > m_windows;
     /// Singleton instance
     static WidgetFactory * m_pInstance;
   };

@@ -211,11 +211,11 @@ void FitPropertyBrowser::init()
   m_minimizers << "Levenberg-Marquardt"
                << "Levenberg-MarquardtMD"
                << "Simplex"
+               << "FABADA"
                << "Conjugate gradient (Fletcher-Reeves imp.)"
                << "Conjugate gradient (Polak-Ribiere imp.)"
                << "BFGS"
-               << "Damping"
-               << "Fake";
+               << "Damping";
 
   m_ignoreInvalidData = m_boolManager->addProperty("Ignore invalid data");
   setIgnoreInvalidData( settings.value("Ignore invalid data",false).toBool() );
@@ -1126,26 +1126,33 @@ std::string FitPropertyBrowser::minimizer(bool withProperties)const
   {
     foreach(QtProperty* prop,m_minimizerProperties)
     {
-      minimStr += "," + prop->propertyName() + "=";
-      if ( prop->propertyManager() == m_intManager )
+      if ( prop->propertyManager() == m_stringManager )
       {
-        minimStr += QString::number( m_intManager->value(prop) );
-      }
-      else if ( prop->propertyManager() == m_doubleManager )
-      {
-        minimStr += QString::number( m_doubleManager->value(prop) );
-      }
-      else if ( prop->propertyManager() == m_boolManager )
-      {
-        minimStr += QString::number( m_boolManager->value(prop) );
-      }
-      else if ( prop->propertyManager() == m_stringManager )
-      {
-        minimStr += m_stringManager->value(prop);
+        QString value = m_stringManager->value(prop);
+        if ( !value.isEmpty() )
+        {
+          minimStr += "," + prop->propertyName() + "=" + value;
+        }
       }
       else
       {
-        throw std::runtime_error("The fit browser doesn't support the type of minimizer's property " + prop->propertyName().toStdString() );
+        minimStr += "," + prop->propertyName() + "=";
+        if ( prop->propertyManager() == m_intManager )
+        {
+          minimStr += QString::number( m_intManager->value(prop) );
+        }
+        else if ( prop->propertyManager() == m_doubleManager )
+        {
+          minimStr += QString::number( m_doubleManager->value(prop) );
+        }
+        else if ( prop->propertyManager() == m_boolManager )
+        {
+          minimStr += QString::number( m_boolManager->value(prop) );
+        }
+        else
+        {
+          throw std::runtime_error("The fit browser doesn't support the type of minimizer's property " + prop->propertyName().toStdString() );
+        }
       }
     }
   }
@@ -3225,6 +3232,8 @@ void FitPropertyBrowser::minimizerChanged()
         QMessageBox::warning(this,"MantidPlot - Error","Type of minimizer's property " + propName + " is not yet supported by the browser.");
         continue;
     }
+
+    if ( !prop ) continue;
     // set the tooltip from property doc string
     QString toolTip = QString::fromStdString( (**it).documentation() );
     if ( !toolTip.isEmpty() )

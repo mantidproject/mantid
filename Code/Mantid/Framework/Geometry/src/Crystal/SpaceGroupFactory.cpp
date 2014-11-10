@@ -229,6 +229,7 @@ DECLARE_GENERATED_SPACE_GROUP(194, "P 63/m m c", "-y,x-y,z; -x,-y,z+1/2; y,x,-z;
 
 DECLARE_GENERATED_SPACE_GROUP(221, "P m -3 m", "-x,-y,z; -x,y,-z; z,x,y; y,x,-z; -x,-y,-z")
 DECLARE_GENERATED_SPACE_GROUP(225, "F m -3 m", "-x,-y,z; -x,y,-z; z,x,y; y,x,-z; -x,-y,-z")
+DECLARE_GENERATED_SPACE_GROUP(227, "F d -3 m", "-x,-y+1/2,z+1/2; -x+1/2,y+1/2,-z; z,x,y; y+3/4,x+1/4,-z+3/4; -x+1/4,-y+1/4,-z+1/4")
 DECLARE_GENERATED_SPACE_GROUP(229, "I m -3 m", "-x,-y,z; -x,y,-z; z,x,y; y,x,-z; -x,-y,-z")
 
 } // namespace Geometry

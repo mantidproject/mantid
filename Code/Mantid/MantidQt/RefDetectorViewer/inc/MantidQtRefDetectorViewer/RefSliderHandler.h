@@ -9,16 +9,16 @@
 #include "MantidQtRefDetectorViewer/DllOption.h"
 
 /**
-    @class SliderHandler 
-  
+    @class SliderHandler
+
     This manages the horizontal and vertical scroll bars for the
-    SpectrumView data viewer. 
- 
-    @author Dennis Mikkelson 
-    @date   2012-04-03 
-     
+    SpectrumView data viewer.
+
+    @author Dennis Mikkelson
+    @date   2012-04-03
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -33,8 +33,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
@@ -47,41 +47,41 @@ namespace RefDetectorViewer
 class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefSliderHandler : public SpectrumView::ISliderHandler
 {
   public:
-
     /// Construct object to manage image scrollbars from the specified UI
-  RefSliderHandler( Ui_RefImageViewer* iv_ui );
+    RefSliderHandler( Ui_RefImageViewer* ivUI );
 
     /// Configure the image scrollbars for the specified data and drawing area
-    void ConfigureSliders( QRect            draw_area, 
-                           SpectrumView::SpectrumDataSource* data_source );
+    void configureSliders( QRect drawArea,
+                           SpectrumView::SpectrumDataSource_sptr dataSource );
 
     /// Configure the horizontal scrollbar to cover the specified range
-    void ConfigureHSlider( int         n_data_steps, 
-                           int         n_pixels );
+    void configureHSlider( int nDataSteps,
+                           int nPixels );
 
     /// Return true if the image horizontal scrollbar is enabled.
-    bool HSliderOn();
+    bool hSliderOn();
 
     /// Return true if the image vertical scrollbar is enabled.
-    bool VSliderOn();
+    bool vSliderOn();
 
     /// Get the range of columns to display in the image.
-    void GetHSliderInterval( int &x_min, int &x_max );
+    void getHSliderInterval( int &xMin, int &xMax );
 
     /// Get the range of rows to display in the image.
-    void GetVSliderInterval( int &y_min, int &y_max );
+    void getVSliderInterval( int &yMin, int &yMax );
 
   private:
     /// Configure the specified scrollbar to cover the specified range
-    void ConfigureSlider( QScrollBar* scroll_bar, 
-                          int         n_data_steps,
-                          int         n_pixels,
+    void configureSlider( QScrollBar* scrollBar,
+                          int         nDataSteps,
+                          int         nPixels,
                           int         val );
 
-    Ui_RefImageViewer*   iv_ui;
+    Ui_RefImageViewer*   m_ivUI;
+
 };
 
 } // namespace RefDetectorViewer
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif // REF_SLIDER_HANDLER_H
