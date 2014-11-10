@@ -2083,13 +2083,7 @@ QString MantidUI::saveToString(const std::string& workingDir)
         wsNames+=QString::fromStdString(secondLevelItems[j]);
         std::string fileName(workingDir + "//" + secondLevelItems[j] + ".nxs");
         //saving to  nexus file
-        try
-        {
-          savedatainNexusFormat(fileName,secondLevelItems[j]);
-        }
-        catch(...)
-        {
-        }
+        savedatainNexusFormat(fileName,secondLevelItems[j]);
       }
     }
     else
@@ -2099,13 +2093,7 @@ QString MantidUI::saveToString(const std::string& workingDir)
 
       std::string fileName(workingDir + "//" + wsName.toStdString() + ".nxs");
       //saving to  nexus file
-      try
-      {
-        savedatainNexusFormat(fileName,wsName.toStdString());
-      }
-      catch(...)
-      {
-      }
+      savedatainNexusFormat(fileName,wsName.toStdString());
     }
   }
   wsNames+="\n</mantidworkspaces>\n";
@@ -3261,9 +3249,18 @@ Table* MantidUI::createTableFromSelectedColumns(MantidMatrix *m, bool errs)
 */
 void MantidUI::savedatainNexusFormat(const std::string& fileName,const std::string & wsName)
 { 
+  auto inputWorkspace = AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
+
+  //Typically, we use SaveNexusProcessed to save a workspace
+  QString algorithm = "SaveNexusProcessed";
+
+  //...but if it's an MD workspace, we use SaveMD instead
+  if(boost::dynamic_pointer_cast<const IMDEventWorkspace>(inputWorkspace) || boost::dynamic_pointer_cast<const IMDHistoWorkspace>(inputWorkspace))
+    algorithm = "SaveMD";
+
   try
   {
-    Mantid::API::IAlgorithm_sptr alg =createAlgorithm("SaveNexusProcessed");
+    Mantid::API::IAlgorithm_sptr alg = createAlgorithm(algorithm);
     alg->setPropertyValue("Filename",fileName);
     alg->setPropertyValue("InputWorkspace",wsName);
     alg->execute();
