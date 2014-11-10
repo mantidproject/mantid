@@ -21,9 +21,9 @@
 #include <vector>
 
 #if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
- typedef std::unique_ptr< Mantid::API::IBoxControllerIO>  file_holder_type;
+typedef std::unique_ptr< Mantid::API::IBoxControllerIO>  file_holder_type;
 #else
- typedef std::auto_ptr< Mantid::API::IBoxControllerIO>  file_holder_type;
+typedef std::auto_ptr< Mantid::API::IBoxControllerIO>  file_holder_type;
 #endif
 
 using namespace Mantid::Kernel;
@@ -56,10 +56,10 @@ namespace Mantid
 
 
     /**
-     * Return the confidence with with this algorithm can load the file
-     * @param descriptor A descriptor for the file
-     * @returns An integer specifying the confidence level. 0 indicates it will not be used
-     */
+    * Return the confidence with which this algorithm can load the file
+    * @param descriptor A descriptor for the file
+    * @returns An integer specifying the confidence level. 0 indicates it will not be used
+    */
     int LoadMD::confidence(Kernel::NexusDescriptor & descriptor) const
     {
       int confidence(0);
@@ -91,7 +91,7 @@ namespace Mantid
         "Load Box structure and other metadata without events. The loaded workspace will be empty and not file-backed.");
 
       declareProperty(new Kernel::PropertyWithValue<bool>("BoxStructureOnly", false),
-        "Load partial information aboug the boxes and events. Redundant property currently equivalent to  MetadataOnly");
+        "Load partial information about the boxes and events. Redundant property currently equivalent to  MetadataOnly");
 
       declareProperty(new PropertyWithValue<bool>("FileBackEnd", false),
         "Set to true to load the data only on demand.");
@@ -123,19 +123,19 @@ namespace Mantid
         m_BoxStructureAndMethadata  = true;
       }
 
-     // Nexus constructor/desctructors throw, so can not be used with scoped pointers directrly 
+      // Nexus constructor/destructor throw, so can not be used with scoped pointers directly 
       //(do they lock file because of this and this code is useless?)  
       std::string for_access;
       if (fileBacked)
       {
 
-         for_access="for Read/Write access";
-         m_file.reset(new ::NeXus::File(m_filename, NXACC_RDWR));
+        for_access="for Read/Write access";
+        m_file.reset(new ::NeXus::File(m_filename, NXACC_RDWR));
       }
       else
       {
-         for_access="for Read access";
-         m_file.reset(new ::NeXus::File(m_filename, NXACC_READ));
+        for_access="for Read access";
+        m_file.reset(new ::NeXus::File(m_filename, NXACC_READ));
       }
 
       if(!m_file)
@@ -196,13 +196,13 @@ namespace Mantid
     }
 
     /**
-     * Load a slab of double data into a bare array.
-     * Checks that the size is correct.
-     * @param name
-     * @param data bare pointer to doublel array
-     * @param ws
-     * @param dataType
-     */
+    * Load a slab of double data into a bare array.
+    * Checks that the size is correct.
+    * @param name
+    * @param data bare pointer to double array
+    * @param ws
+    * @param dataType
+    */
     void LoadMD::loadSlab(std::string name, void * data, MDHistoWorkspace_sptr ws, NeXus::NXnumtype dataType)
     {
       m_file->openData(name);
@@ -212,7 +212,13 @@ namespace Mantid
         throw std::runtime_error("Inconsistency between the number of points in '" + name + "' and the number of bins defined by the dimensions.");
       std::vector<int> start(1,0);
       std::vector<int> size(1, static_cast<int>(ws->getNPoints()));
-      m_file->getSlab(data, start, size);
+      try
+      {
+        m_file->getSlab(data, start, size);
+      }catch(...)
+      {
+        std::cout<<" start: "<<start[0]<<" size: "<<size[0]<<std::endl;
+      }
       m_file->closeData();
     }
 
@@ -304,36 +310,37 @@ namespace Mantid
 
 
       // ----------------------------------------- Box Structure ------------------------------
+      prog->report("Reading box structure from HDD.");
       MDBoxFlatTree FlatBoxTree;
-      int nDims = static_cast<int>(nd); // should be safe
+      int nDims = static_cast<int>(nd); // should be safe            
       FlatBoxTree.loadBoxStructure(m_filename,nDims,MDE::getTypeName());
 
       BoxController_sptr bc = ws->getBoxController();
       bc->fromXMLString(FlatBoxTree.getBCXMLdescr());
 
+      prog->report("Restoring box structure and connectivity");
       std::vector<API::IMDNode *> boxTree;
-   //   uint64_t totalNumEvents = FlatBoxTree.restoreBoxTree<MDE,nd>(boxTree,bc,fileBackEnd,bMetadataOnly);
-      FlatBoxTree.restoreBoxTree(boxTree,bc,fileBackEnd,m_BoxStructureAndMethadata);
+      FlatBoxTree.restoreBoxTree(boxTree,bc,fileBackEnd,m_BoxStructureAndMethadata); 
       size_t numBoxes = boxTree.size();
 
-    // ---------------------------------------- DEAL WITH BOXES  ------------------------------------
+      // ---------------------------------------- DEAL WITH BOXES  ------------------------------------
       if (fileBackEnd)
       { // TODO:: call to the file format factory
-          auto loader = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNeXusIO(bc.get()));
-          loader->setDataType(sizeof(coord_t),MDE::getTypeName());
-          bc->setFileBacked(loader,m_filename);
-          // boxes have been already made file-backed when restoring the boxTree;
-      // How much memory for the cache?
+        auto loader = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNeXusIO(bc.get()));
+        loader->setDataType(sizeof(coord_t),MDE::getTypeName());
+        bc->setFileBacked(loader,m_filename);
+        // boxes have been already made file-backed when restoring the boxTree;
+        // How much memory for the cache?
         {
-        // TODO: Clean up, only a write buffer now
+          // TODO: Clean up, only a write buffer now
           double mb = getProperty("Memory");
-       
-          // Defaults have changed, defauld disk buffer size should be 10 data chunks TODO: find optimal, 100 may be better. 
+
+          // Defaults have changed, default disk buffer size should be 10 data chunks TODO: find optimal, 100 may be better. 
           if (mb <= 0) mb = double(10*loader->getDataChunk()* sizeof(MDE))/double(1024*1024);
 
           // Express the cache memory in units of number of events.
           uint64_t cacheMemory = static_cast<uint64_t>((mb * 1024. * 1024.) / sizeof(MDE))+1;
-              
+
           // Set these values in the diskMRU
           bc->getFileIO()->setWriteBufferSize(cacheMemory);
 
@@ -343,7 +350,7 @@ namespace Mantid
       else if (!m_BoxStructureAndMethadata)
       {
         // ---------------------------------------- READ IN THE BOXES ------------------------------------
-       // TODO:: call to the file format factory
+        // TODO:: call to the file format factory
         auto loader = file_holder_type(new MDEvents::BoxControllerNeXusIO(bc.get()));
         loader->setDataType(sizeof(coord_t),MDE::getTypeName());
 
@@ -359,12 +366,15 @@ namespace Mantid
           if(!box)continue;
 
           if(BoxEventIndex[2*i+1]>0) // Load in memory NOT using the file as the back-end,
-              boxTree[i]->loadAndAddFrom(loader.get(),BoxEventIndex[2*i],static_cast<size_t>(BoxEventIndex[2*i+1]));
+          {
+            boxTree[i]->reserveMemoryForLoad(BoxEventIndex[2*i+1]);
+            boxTree[i]->loadAndAddFrom(loader.get(),BoxEventIndex[2*i],static_cast<size_t>(BoxEventIndex[2*i+1]));
+          }
 
         }
         loader->closeFile();
       }
-      else // box structure and methadata only
+      else // box structure and metadata only
       {
       }
       g_log.debug() << tim << " to create all the boxes and fill them with events." << std::endl;
@@ -385,64 +395,64 @@ namespace Mantid
       delete prog;
     }
 
-  /**
-   * Load all of the affine matricies from the file, create the
-   * appropriate coordinate transform and set those on the workspace.
-   * @param ws : workspace to set the coordinate transforms on
-   */
-  void LoadMD::loadAffineMatricies(IMDWorkspace_sptr ws)
-  {
-    std::map<std::string, std::string> entries;
-    m_file->getEntries(entries);
+    /**
+    * Load all of the affine matrices from the file, create the
+    * appropriate coordinate transform and set those on the workspace.
+    * @param ws : workspace to set the coordinate transforms on
+    */
+    void LoadMD::loadAffineMatricies(IMDWorkspace_sptr ws)
+    {
+      std::map<std::string, std::string> entries;
+      m_file->getEntries(entries);
 
-    if (entries.find("transform_to_orig") != entries.end())
-    {
-      CoordTransform *transform = this->loadAffineMatrix("transform_to_orig");
-      ws->setTransformToOriginal(transform);
+      if (entries.find("transform_to_orig") != entries.end())
+      {
+        CoordTransform *transform = this->loadAffineMatrix("transform_to_orig");
+        ws->setTransformToOriginal(transform);
+      }
+      if (entries.find("transform_from_orig") != entries.end())
+      {
+        CoordTransform *transform = this->loadAffineMatrix("transform_from_orig");
+        ws->setTransformFromOriginal(transform);
+      }
     }
-    if (entries.find("transform_from_orig") != entries.end())
-    {
-      CoordTransform *transform = this->loadAffineMatrix("transform_from_orig");
-      ws->setTransformFromOriginal(transform);
-    }
-  }
 
-  /**
-   * Do that actual loading and manipulating of the read data to create
-   * the affine matrix and then the appropriate transformation. This is
-   * currently limited to CoordTransformAffine transforms.
-   * @param entry_name : the entry point in the NeXus file to read
-   * @return the coordinate transform object
-   */
-  CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name)
-  {
-    m_file->openData(entry_name);
-    std::vector<coord_t> vec;
-    m_file->getData<coord_t>(vec);
-    std::string type;
-    int inD(0);
-    int outD(0);
-    m_file->getAttr("type", type);
-    m_file->getAttr<int>("rows", outD);
-    m_file->getAttr<int>("columns", inD);
-    m_file->closeData();
-    // Adjust dimensions
-    inD--;
-    outD--;
-    Matrix<coord_t> mat(vec);
-    CoordTransform *transform = NULL;
-    if ("CoordTransformAffine" == type)
+    /**
+    * Do that actual loading and manipulating of the read data to create
+    * the affine matrix and then the appropriate transformation. This is
+    * currently limited to CoordTransformAffine transforms.
+    * @param entry_name : the entry point in the NeXus file to read
+    * @return the coordinate transform object
+    */
+    CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name)
     {
-      CoordTransformAffine *affine = new CoordTransformAffine(inD, outD);
-      affine->setMatrix(mat);
-      transform = affine;
+      m_file->openData(entry_name);
+      std::vector<coord_t> vec;
+      m_file->getData<coord_t>(vec);
+      std::string type;
+      int inD(0);
+      int outD(0);
+      m_file->getAttr("type", type);
+      m_file->getAttr<int>("rows", outD);
+      m_file->getAttr<int>("columns", inD);
+      m_file->closeData();
+      // Adjust dimensions
+      inD--;
+      outD--;
+      Matrix<coord_t> mat(vec);
+      CoordTransform *transform = NULL;
+      if ("CoordTransformAffine" == type)
+      {
+        CoordTransformAffine *affine = new CoordTransformAffine(inD, outD);
+        affine->setMatrix(mat);
+        transform = affine;
+      }
+      else
+      {
+        g_log.information("Do not know how to process coordinate transform " + type);
+      }
+      return transform;
     }
-    else
-    {
-      g_log.information("Do not know how to process coordinate transform " + type);
-    }
-    return transform;
-  }
 
   } // namespace Mantid
 } // namespace MDEvents

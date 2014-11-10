@@ -5,7 +5,7 @@ namespace MantidQt
 namespace RefDetectorViewer
 {
 
-RefLimitsHandler::RefLimitsHandler( Ui_RefImageViewer* iv_ui ) : m_ui(iv_ui)
+RefLimitsHandler::RefLimitsHandler( Ui_RefImageViewer* ivUI ) : m_ui(ivUI)
 {
 }
 

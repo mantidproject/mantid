@@ -91,9 +91,8 @@ namespace Geometry
 
       static bool isValidMatrixRow(const std::vector<int> &matrixRow);
 
-      static boost::regex m_tokenRegex;
-      static boost::regex m_matrixRowRegex;
-      static boost::regex m_vectorComponentRegex;
+      static bool regexMembersInitialized();
+      static void initializeRegexMembers();
   };
 
 

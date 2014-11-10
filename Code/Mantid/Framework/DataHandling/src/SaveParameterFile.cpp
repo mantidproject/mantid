@@ -95,10 +95,10 @@ namespace DataHandling
       const std::string  pType = (*paramsIt).second->type();
       const std::string pValue = (*paramsIt).second->asString();
 
-      if(pName == "x"          || pName == "y"          || pName == "z"          ||
-         pName == "r-position" || pName == "t-position" || pName == "p-position" ||
-         pName == "rotx"       || pName == "roty"       || pName == "rotz"        )
-      {
+			if(pName == "x"          || pName == "y"          || pName == "z"          ||
+				pName == "r-position" || pName == "t-position" || pName == "p-position" ||
+				pName == "rotx"       || pName == "roty"       || pName == "rotz"        )
+			{
         g_log.warning() << "The parameter name '" << pName << "' is reserved and has not been saved. "
                         << "Please contact the Mantid team for more information.";
         continue;
@@ -107,7 +107,22 @@ namespace DataHandling
       //If it isn't a position or rotation parameter, we can just add it to the list to save directly and move on.
       if(pName != "pos" && pName != "rot")
       {
-        toSave[cID].push_back(boost::make_tuple(pName, pType, pValue));
+        if(pType == "fitting")
+        {
+          //With fitting parameters we do something special (i.e. silly)
+          //We create an entire XML element to be inserted into the output, instead of just giving a single fixed value
+          const FitParameter& fitParam = paramsIt->second->value<FitParameter>();
+          const std::string fpName = fitParam.getFunction() + ":" + fitParam.getName();
+          std::stringstream fpValue;
+          fpValue << "<formula";
+          fpValue <<          " eq=\"" << fitParam.getFormula() << "\"";
+          fpValue <<        " unit=\"" << fitParam.getFormulaUnit() << "\"";
+          fpValue << " result-unit=\"" << fitParam.getResultUnit() << "\"";
+          fpValue << "/>";
+          toSave[cID].push_back(boost::make_tuple(fpName, "fitting", fpValue.str()));
+        }
+        else
+          toSave[cID].push_back(boost::make_tuple(pName, pType, pValue));
       }
     }
 
@@ -166,8 +181,7 @@ namespace DataHandling
     file << " valid-from=\"" << instrument->getValidFromDate().toISO8601String() << "\">\n";
 
     prog.resetNumSteps((int64_t)toSave.size(), 0.6, 1.0);
-    //Iterate through all the parameters we want to save and build an XML
-    //document out of them.
+    //Iterate through all the parameters we want to save and build an XML document out of them.
     for(auto compIt = toSave.begin(); compIt != toSave.end(); ++compIt)
     {
       if(prog.hasCancellationBeenRequested())
@@ -185,13 +199,23 @@ namespace DataHandling
       file << " name=\"" << cFullName << "\">\n";
       for(auto paramIt = compIt->second.begin(); paramIt != compIt->second.end(); ++paramIt)
       {
-        const std::string pName = boost::get<0>(*paramIt);
-        const std::string pType = boost::get<1>(*paramIt);
-        const std::string pValue = boost::get<2>(*paramIt);
+        const std::string pName = paramIt->get<0>();
+        const std::string pType = paramIt->get<1>();
+        const std::string pValue = paramIt->get<2>();
 
-        file << "		<parameter name=\"" << pName << "\"" << (pType == "string" ? " type = \"string\"" : "") << ">\n";
-        file << "			<value val=\"" << pValue << "\"/>\n";
-        file << "		</parameter>\n";
+        //With fitting parameters, we're actually inserting an entire element, as constructed above
+        if(pType == "fitting")
+        {
+          file << "		<parameter name=\"" << pName << "\" type=\"fitting\" >\n";
+          file << "   " << pValue << "\n";
+          file << "		</parameter>\n";
+        }
+        else
+        {
+          file << "		<parameter name=\"" << pName << "\"" << (pType == "string" ? " type=\"string\"" : "") << ">\n";
+          file << "			<value val=\"" << pValue << "\"/>\n";
+          file << "		</parameter>\n";
+        }
       }
       file << "	</component-link>\n";
     }

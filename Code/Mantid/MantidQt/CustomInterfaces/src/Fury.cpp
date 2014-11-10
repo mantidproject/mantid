@@ -10,6 +10,14 @@
 
 #include <cmath>
 
+namespace
+{
+  Mantid::Kernel::Logger g_log("Fury");
+}
+
+using Mantid::API::MatrixWorkspace;
+using Mantid::API::MatrixWorkspace_const_sptr;
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -17,9 +25,10 @@ namespace CustomInterfaces
 namespace IDA
 {
   Fury::Fury(QWidget * parent) : IDATab(parent),
-    m_furPlot(NULL), m_furRange(NULL), m_furCurve(NULL), m_furTree(NULL), 
+    m_furPlot(NULL), m_furRange(NULL), m_furCurve(NULL), m_furTree(NULL),
     m_furProp(), m_furDblMng(NULL), m_furyResFileType()
-  {}
+  {
+  }
 
   void Fury::setup()
   {
@@ -34,79 +43,198 @@ namespace IDA
     m_furPlot->setAxisFont(QwtPlot::xBottom, this->font());
     m_furPlot->setAxisFont(QwtPlot::yLeft, this->font());
 
+    // Create and configure properties
     m_furProp["ELow"] = m_furDblMng->addProperty("ELow");
     m_furDblMng->setDecimals(m_furProp["ELow"], NUM_DECIMALS);
+
     m_furProp["EWidth"] = m_furDblMng->addProperty("EWidth");
     m_furDblMng->setDecimals(m_furProp["EWidth"], NUM_DECIMALS);
+    m_furProp["EWidth"]->setEnabled(false);
+
     m_furProp["EHigh"] = m_furDblMng->addProperty("EHigh");
     m_furDblMng->setDecimals(m_furProp["EHigh"], NUM_DECIMALS);
+
+    m_furProp["SampleBinning"] = m_furDblMng->addProperty("SampleBinning");
+    m_furDblMng->setDecimals(m_furProp["SampleBinning"], 0);
+
+    m_furProp["SampleBins"] = m_furDblMng->addProperty("SampleBins");
+    m_furDblMng->setDecimals(m_furProp["SampleBins"], 0);
+    m_furProp["SampleBins"]->setEnabled(false);
+
+    m_furProp["ResolutionBins"] = m_furDblMng->addProperty("ResolutionBins");
+    m_furDblMng->setDecimals(m_furProp["ResolutionBins"], 0);
+    m_furProp["ResolutionBins"]->setEnabled(false);
 
     m_furTree->addProperty(m_furProp["ELow"]);
     m_furTree->addProperty(m_furProp["EWidth"]);
     m_furTree->addProperty(m_furProp["EHigh"]);
+    m_furTree->addProperty(m_furProp["SampleBinning"]);
+    m_furTree->addProperty(m_furProp["SampleBins"]);
+    m_furTree->addProperty(m_furProp["ResolutionBins"]);
+
+    m_furDblMng->setValue(m_furProp["SampleBinning"], 10);
 
     m_furTree->setFactoryForManager(m_furDblMng, doubleEditorFactory());
 
     m_furRange = new MantidQt::MantidWidgets::RangeSelector(m_furPlot);
-    m_furRange->setInfoOnly(true);
 
     // signals / slots & validators
-    connect(m_furRange, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
-    connect(m_furRange, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
+    connect(m_furRange, SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rsRangeChangedLazy(double, double)));
     connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
+    connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
     connect(uiForm().fury_dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput(const QString&)));
+    connect(uiForm().fury_dsResInput, SIGNAL(dataReady(const QString&)), this, SLOT(calculateBinning()));
   }
 
   void Fury::run()
   {
-    QString pyInput =
-      "from IndirectDataAnalysis import fury\n";
+    using namespace Mantid::API;
+
+    calculateBinning();
 
     QString wsName = uiForm().fury_dsInput->getCurrentDataName();
     QString resName = uiForm().fury_dsResInput->getCurrentDataName();
 
-    if(uiForm().fury_dsResInput->isFileSelectorVisible())
-    {
-      runLoadNexus(uiForm().fury_dsResInput->getFullFilePath(), resName);
-    }
+    double energyMin = m_furDblMng->value(m_furProp["ELow"]);
+    double energyMax = m_furDblMng->value(m_furProp["EHigh"]);
+    long numBins = static_cast<long>(m_furDblMng->value(m_furProp["SampleBinning"]));
 
-    pyInput += "samples = [r'" + wsName + "']\n"
-      "resolution = r'" + resName + "'\n"
-      "rebin = '" + m_furProp["ELow"]->valueText() +","+ m_furProp["EWidth"]->valueText() +","+m_furProp["EHigh"]->valueText()+"'\n";
+    bool plot = uiForm().fury_ckPlot->isChecked();
+    bool verbose = uiForm().fury_ckVerbose->isChecked();
+    bool save = uiForm().fury_ckSave->isChecked();
 
-    if ( uiForm().fury_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
+    IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("Fury", -1);
+    furyAlg->initialize();
 
-    if ( uiForm().fury_ckPlot->isChecked() ) pyInput += "plot = True\n";
-    else pyInput += "plot = False\n";
+    furyAlg->setProperty("Sample", wsName.toStdString());
+    furyAlg->setProperty("Resolution", resName.toStdString());
 
-    if ( uiForm().fury_ckSave->isChecked() ) pyInput += "save = True\n";
-    else pyInput += "save = False\n";
+    furyAlg->setProperty("EnergyMin", energyMin);
+    furyAlg->setProperty("EnergyMax", energyMax);
+    furyAlg->setProperty("NumBins", numBins);
 
-    pyInput +=
-      "fury_ws = fury(samples, resolution, rebin, Save=save, Verbose=verbose, Plot=plot)\n";
-    QString pyOutput = runPythonCode(pyInput).trimmed();
+    furyAlg->setProperty("Plot", plot);
+    furyAlg->setProperty("Verbose", verbose);
+    furyAlg->setProperty("Save", save);
+    furyAlg->setProperty("DryRun", false);
+
+    runAlgorithm(furyAlg);
   }
 
   /**
-   * Ensure we have present and valid file/ws inputs.  The underlying Fourier transform of Fury
+   * Ensure we have present and valid file/ws inputs.
+   *
+   * The underlying Fourier transform of Fury
    * also means we must enforce several rules on the parameters.
    */
   QString Fury::validate()
   {
     UserInputValidator uiv;
 
-    double eLow   = m_furDblMng->value(m_furProp["ELow"]);
-    double eWidth = m_furDblMng->value(m_furProp["EWidth"]);
-    double eHigh  = m_furDblMng->value(m_furProp["EHigh"]);
-
-    uiv.checkBins(eLow, eWidth, eHigh);
     uiv.checkDataSelectorIsValid("Sample", uiForm().fury_dsInput);
     uiv.checkDataSelectorIsValid("Resolution", uiForm().fury_dsResInput);
 
     QString message = uiv.generateErrorMessage();
 
     return message;
+  }
+
+  /**
+   * Ensures that absolute min and max energy are equal.
+   *
+   * @param prop Qt property that was changed
+   * @param val New value of that property
+   */
+  void Fury::updatePropertyValues(QtProperty *prop, double val)
+  {
+    disconnect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
+
+    if(prop == m_furProp["EHigh"])
+    {
+      // If the user enters a negative value for EHigh assume they did not mean to add a -
+      if(val < 0)
+      {
+        val = -val;
+        m_furDblMng->setValue(m_furProp["EHigh"], val);
+      }
+
+      m_furDblMng->setValue(m_furProp["ELow"], -val);
+    }
+    else if(prop == m_furProp["ELow"])
+    {
+      // If the user enters a positive value for ELow, assume they ment to add a
+      if(val > 0)
+      {
+        val = -val;
+        m_furDblMng->setValue(m_furProp["ELow"], val);
+      }
+
+      m_furDblMng->setValue(m_furProp["EHigh"], -val);
+    }
+
+    connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
+
+    calculateBinning();
+  }
+
+  /**
+   * Calculates binning parameters.
+   */
+  void Fury::calculateBinning()
+  {
+    using namespace Mantid::API;
+
+    disconnect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
+
+    QString wsName = uiForm().fury_dsInput->getCurrentDataName();
+    QString resName = uiForm().fury_dsResInput->getCurrentDataName();
+
+    double energyMin = m_furDblMng->value(m_furProp["ELow"]);
+    double energyMax = m_furDblMng->value(m_furProp["EHigh"]);
+    long numBins = static_cast<long>(m_furDblMng->value(m_furProp["SampleBinning"]));
+
+    if(wsName.isEmpty() || resName.isEmpty() || numBins == 0)
+      return;
+
+    bool verbose = uiForm().fury_ckVerbose->isChecked();
+
+    IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("Fury");
+    furyAlg->initialize();
+
+    furyAlg->setProperty("Sample", wsName.toStdString());
+    furyAlg->setProperty("Resolution", resName.toStdString());
+    furyAlg->setProperty("ParameterWorkspace", "__FuryProperties_temp");
+
+    furyAlg->setProperty("EnergyMin", energyMin);
+    furyAlg->setProperty("EnergyMax", energyMax);
+    furyAlg->setProperty("NumBins", numBins);
+
+    furyAlg->setProperty("Plot", false);
+    furyAlg->setProperty("Verbose", verbose);
+    furyAlg->setProperty("Save", false);
+    furyAlg->setProperty("DryRun", true);
+
+    furyAlg->execute();
+
+    // Get property table from algorithm
+    ITableWorkspace_sptr propsTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("__FuryProperties_temp");
+
+    // Get data from property table
+    double energyWidth = propsTable->getColumn("EnergyWidth")->cell<float>(0);
+    int sampleBins = propsTable->getColumn("SampleOutputBins")->cell<int>(0);
+    int resolutionBins = propsTable->getColumn("ResolutionBins")->cell<int>(0);
+
+    // Update data in property editor
+    m_furDblMng->setValue(m_furProp["EWidth"], energyWidth);
+    m_furDblMng->setValue(m_furProp["ResolutionBins"], resolutionBins);
+    m_furDblMng->setValue(m_furProp["SampleBins"], sampleBins);
+
+    connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
+
+    // Warn for low number of resolution bins
+    int numResolutionBins = static_cast<int>(m_furDblMng->value(m_furProp["ResolutionBins"]));
+    if(numResolutionBins < 5)
+      showInformationBox("Number of resolution bins is less than 5.\nResults may be inaccurate.");
   }
 
   void Fury::loadSettings(const QSettings & settings)
@@ -117,9 +245,6 @@ namespace IDA
 
   void Fury::plotInput(const QString& wsname)
   {
-    using Mantid::API::MatrixWorkspace;
-    using Mantid::API::MatrixWorkspace_const_sptr;
-
     MatrixWorkspace_const_sptr workspace;
     try
     {
@@ -134,9 +259,9 @@ namespace IDA
     m_furCurve = plotMiniplot(m_furPlot, m_furCurve, workspace, 0);
     try
     {
-      const std::pair<double, double> range = getCurveRange(m_furCurve);    
-      double rounded_min = floor(range.first*10+0.5)/10.0;
-      double rounded_max = floor(range.second*10+0.5)/10.0;
+      const std::pair<double, double> range = getCurveRange(m_furCurve);
+      double rounded_min = floor(range.first * 10 + 0.5) / 10.0;
+      double rounded_max = floor(range.second * 10 + 0.5) / 10.0;
 
       //corrections for if nearest value is outside of range
       if (rounded_max > range.second)
@@ -170,25 +295,36 @@ namespace IDA
     {
       showInformationBox(exc.what());
     }
+
+    calculateBinning();
   }
 
-  void Fury::maxChanged(double val)
+  /**
+   * Updates the range selectors and properties when range selector is moved.
+   *
+   * @param min Range selector min value
+   * @param max Range selector amx value
+   */
+  void Fury::rsRangeChangedLazy(double min, double max)
   {
-    m_furDblMng->setValue(m_furProp["EHigh"], val);
-  }
+    double oldMin = m_furDblMng->value(m_furProp["ELow"]);
+    double oldMax = m_furDblMng->value(m_furProp["EHigh"]);
 
-  void Fury::minChanged(double val)
-  {
-    m_furDblMng->setValue(m_furProp["ELow"], val);
+    if(fabs(oldMin - min) > 0.0000001)
+      m_furDblMng->setValue(m_furProp["ELow"], min);
+
+    if(fabs(oldMax - max) > 0.0000001)
+      m_furDblMng->setValue(m_furProp["EHigh"], max);
   }
 
   void Fury::updateRS(QtProperty* prop, double val)
   {
-    if ( prop == m_furProp["ELow"] )
+    if(prop == m_furProp["ELow"])
       m_furRange->setMinimum(val);
-    else if ( prop == m_furProp["EHigh"] )
+    else if(prop == m_furProp["EHigh"])
       m_furRange->setMaximum(val);
   }
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

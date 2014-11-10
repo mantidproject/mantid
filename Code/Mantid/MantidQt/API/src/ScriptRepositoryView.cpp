@@ -151,7 +151,7 @@ namespace API
 
     ConfigServiceImpl & config = ConfigService::Instance();
     QString loc = QString::fromStdString(config.getString("ScriptLocalRepository"));
-    QString loc_info = "<html><head/><body><p><a href=\"file://%1\"><span style=\" text-decoration: underline; color:#0000ff;\">%2</span></a></p></body></html>";
+    QString loc_info = "<html><head/><body><p><a href=\"%1\"><span style=\" text-decoration: underline; color:#0000ff;\">%2</span></a></p></body></html>";
     QString path_label; 
     if (loc.size()<50)
       path_label = loc; 
@@ -520,8 +520,26 @@ bool  ScriptRepositoryView::RemoveEntryDelegate::editorEvent(QEvent *event,
   }   
 }
 
+/**
+ * Attempt to open the given folder link using an appropriate application.
+ *
+ * @param link :: the folder link to open.
+ */
 void ScriptRepositoryView::openFolderLink(QString link){
-  QDesktopServices::openUrl(QUrl(link));
+  const std::string error_msg = "Unable to open \"" + link.toStdString() + "\".  Reason: ";
+
+  // QUrl::fromLocalFile seems to be the most robust way of constructing QUrls on
+  // the local file system for all platforms.
+  const QUrl url = QUrl::fromLocalFile(link);
+  if( !url.isValid() )
+  {
+    g_log.error() << error_msg << "Invalid (malformed) URL." << std::endl;
+    return;
+  }
+
+  const bool openSuccessful = QDesktopServices::openUrl(url);
+  if( !openSuccessful )
+    g_log.error() << error_msg << "Could not find directory." << std::endl;
 }
 
 } // namespace API

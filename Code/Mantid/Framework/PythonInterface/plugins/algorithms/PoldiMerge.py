@@ -5,8 +5,12 @@ from mantid.api import *
 import numpy as np
 
 class PoldiMerge(PythonAlgorithm):
-    comparedPropertyNames = ["TablePositionX", "TablePositionY", "TablePositionZ", "ChopperSpeed"]
+    comparedPropertyNames = ["TablePositionX", "TablePositionY", "TablePositionZ"]
+    comparedInstrumentParameters = [("detector", "two_theta"),
+                                    ("chopper", "t0"),
+                                    ("chopper", "t0_const")]
     outputWorkspaceName = None
+    checkInstruments = True
 
     def category(self):
         return "SINQ\\Poldi"
@@ -27,38 +31,37 @@ class PoldiMerge(PythonAlgorithm):
                                                direction=Direction.Output),
                              doc="Workspace where all counts from the list workspaces have been added")
 
+        self.declareProperty("CheckInstruments", True, "If checked, only workspaces with equal instrument parameters are merged. Do not disable without a very good reason.")
+
     def PyExec(self):
+        self.checkInstruments = self.getProperty("CheckInstruments").value
+
         workspaceNames = self.getProperty("WorkspaceNames").value
         self.outputWorkspaceName = self.getProperty("OutputWorkspace").valueAsStr
 
         self.log().information("Workspaces to merge: %i" % (len(workspaceNames)))
 
-        if False in [AnalysisDataService.doesExist(x) for x in workspaceNames]:
-            raise KeyError("Not all strings in the input list are valid workspace names.")
+        workspaces = []
 
-        workspaces = [AnalysisDataService.retrieve(x) for x in workspaceNames]
+        for wsName in workspaceNames:
+            if not AnalysisDataService.doesExist(wsName):
+                raise KeyError("Not all strings in the input list are valid workspace names.")
 
-        # Create a target workspace for the summation. It inherits the log of
-        # the first workspace used in the summation.
-        output = WorkspaceFactory.create(workspaces[0])
+            ws = AnalysisDataService.retrieve(wsName)
+            workspaces += self.getWorkspacesRecursive(ws)
 
-        xdata = workspaces[0].dataX(0)
-        ydata = np.zeros(len(xdata))
 
-        for h in range(output.getNumberHistograms()):
-            output.setX(h, xdata)
-            output.setY(h, ydata)
+        workspaceCount = len(workspaces)
 
-        AnalysisDataService.addOrReplace(self.outputWorkspaceName, output)
+        for i in range(workspaceCount):
+            currentWorkspace = workspaces[i]
+            for j in range(i + 1, workspaceCount):
+                try:
+                    self.canMerge(currentWorkspace, workspaces[j])
+                except RuntimeError as error:
+                    self.handleError(error)
 
-        while workspaces:
-            current = workspaces.pop(0)
-
-            try:
-                if self.canMerge(output, current):
-                    output += current
-            except RuntimeError as error:
-                self.handleError(error)
+        output = MergeRuns(workspaceNames)
 
         self.setProperty("OutputWorkspace", output)
 
@@ -69,7 +72,10 @@ class PoldiMerge(PythonAlgorithm):
         leftRun = leftWorkspace.getRun()
         rightRun = rightWorkspace.getRun()
 
-        return self.propertiesMatch(leftRun, rightRun)
+        if not self.chopperSpeedsMatch(leftRun, rightRun):
+            raise RuntimeError("Chopper speeds do not match (" + '&'.join((leftWorkspace.getName(), rightWorkspace.getName())) + ")")
+
+        return self.propertiesMatch(leftRun, rightRun) and self.instrumentsMatch(leftWorkspace, rightWorkspace)
 
     def timingsMatch(self, leftXData, rightXData):
         leftDeltaX = leftXData[1] - leftXData[0]
@@ -77,9 +83,43 @@ class PoldiMerge(PythonAlgorithm):
 
         return abs(leftDeltaX - rightDeltaX) < 1e-4 and abs(rightXData[0] - leftXData[0]) < 1e-4
 
+    def chopperSpeedsMatch(self, leftRun, rightRun):
+        chopperSpeedLeft = self.makePlausibleChopperSpeed(self.getPropertyValue(leftRun.getProperty("ChopperSpeed")))
+        chopperSpeedRight = self.makePlausibleChopperSpeed(self.getPropertyValue(rightRun.getProperty("ChopperSpeed")))
+
+        return abs(chopperSpeedLeft - chopperSpeedRight) < 1e-4
+
+    def makePlausibleChopperSpeed(self, chopperSpeed):
+        # This is related to ticket #10090, where a new field in new data is used
+        # when that ticket is finished, new data files will not need this
+        # cleanup method anymore.
+        return np.floor((chopperSpeed + 250.0) / 500.0) * 500.0;
+
+    def instrumentsMatch(self, leftWorkspace, rightWorkspace):
+        leftInstrument = leftWorkspace.getInstrument()
+        rightInstrument = rightWorkspace.getInstrument()
+
+        return (not self.checkInstruments) or self.instrumentParametersMatch(leftInstrument, rightInstrument)
+
+    def instrumentParametersMatch(self, leftInstrument, rightInstrument):
+        if not (leftInstrument.getDetector(0).getPos() == rightInstrument.getDetector(0).getPos()):
+            raise RuntimeError("Detector positions are not equal")
+
+        for parameterTuple in self.comparedInstrumentParameters:
+            leftValue = self.getParameterValue(leftInstrument, parameterTuple)
+            rightValue = self.getParameterValue(rightInstrument, parameterTuple)
+
+            if abs(leftValue - rightValue) > 1e-12:
+                raise RuntimeError("Instrument parameter '%s'/'%s' does not match" % parameterTuple)
+
+        return True;
+
+    def getParameterValue(self, instrument, parameterTuple):
+        return instrument.getComponentByName(parameterTuple[0]).getNumberParameter(parameterTuple[1])[0]
+
     def propertiesMatch(self, leftRun, rightRun):
         for propertyName in self.comparedPropertyNames:
-            if abs(self.getPropertyValue(leftRun.getProperty(propertyName)) - self.getPropertyValue(rightRun.getProperty(propertyName))) > 1e-4:
+            if abs(self.getPropertyValue(leftRun.getProperty(propertyName)) - self.getPropertyValue(rightRun.getProperty(propertyName))) > 5e-3:
                 raise RuntimeError("Property '%s' does not match" % (propertyName))
 
         return True
@@ -95,5 +135,19 @@ class PoldiMerge(PythonAlgorithm):
             AnalysisDataService.remove(self.outputWorkspaceName)
 
         raise RuntimeError("Workspaces can not be merged. %s. Aborting." % (str(error)))
+
+    def getWorkspacesRecursive(self, workspace):
+      returnList = []
+      if isinstance(workspace, WorkspaceGroup):
+        for i in range(workspace.getNumberOfEntries()):
+          returnList += self.getWorkspacesRecursive(workspace.getItem(i))
+
+      elif isinstance(workspace, MatrixWorkspace):
+        returnList.append(workspace)
+
+      else:
+        raise RuntimeError("Can only merge MatrixWorkspaces, this is " + type(workspace))
+
+      return returnList
 
 AlgorithmFactory.subscribe(PoldiMerge)
