@@ -287,7 +287,7 @@ namespace Mantid
       std::vector<const Poco::AbstractObserver*>::reverse_iterator o = m_externalObservers.rbegin();
       for(;o != m_externalObservers.rend();++o)
         m_alg->addObserver(**o);
-      /* m_externalObservers.clear(); */
+      m_externalObservers.clear();
     }
 
     ///setting the child start progress
