@@ -236,6 +236,7 @@
             <property name="styleSheet">
              <string>QToolBar{border: none;}</string>
             </property>
+            <addaction name="actionProcess"/>
             <addaction name="actionExpandSelection"/>
             <addaction name="separator"/>
             <addaction name="actionAppendRow"/>
@@ -354,7 +355,7 @@
    </property>
    <widget class="QMenu" name="menuTable">
     <property name="title">
-     <string>Table</string>
+     <string>&amp;Reflectometry</string>
     </property>
     <widget class="QMenu" name="menuOpenTable">
      <property name="title">
@@ -374,7 +375,7 @@
    </widget>
    <widget class="QMenu" name="menuRows">
     <property name="title">
-     <string>Row</string>
+     <string>&amp;Edit</string>
     </property>
     <addaction name="actionProcess"/>
     <addaction name="actionExpandSelection"/>
