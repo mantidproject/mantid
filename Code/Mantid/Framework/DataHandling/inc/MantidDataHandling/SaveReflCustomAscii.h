@@ -53,6 +53,8 @@ namespace Mantid
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
 
+      void SaveReflCustomAscii::data(std::ofstream & file, const std::vector<double> & XData){}
+
     private:
       
       /// Return the file extension this algorthm should output.
