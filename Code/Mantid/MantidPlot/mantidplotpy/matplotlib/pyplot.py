@@ -26,7 +26,7 @@ Plot an array (python list)
 ---------------------------
 
     plot([0.1, 0.3, 0.2, 4])
-    # The list of values will be inserted in a workspace named 'array_dummy_workspace'
+    # The array values will be inserted in a workspace named 'array_dummy_workspace'
 
 
 Plot a Mantid workspace
@@ -66,7 +66,7 @@ Plot spectra using workspace objects and workspace names
 --------------------------------------------------------
 
     # please make sure that you use the right path and file name
-    mar=Load('/path/to/MAR11060.raw', , OutputWorkspace="MAR11060")
+    mar=Load('/path/to/MAR11060.raw', OutputWorkspace="MAR11060")
     plot('MAR11060', [10,100,500])
     plot(mar,[3, 500, 800])
 
@@ -90,7 +90,7 @@ workspaces. You can make that choice more explicit by specifying the
 Plotting bins
 -------------
 
-    plot_bin(ws, [1, 5, 7, 100], linewidth=5):
+    plot_bin(ws, [1, 5, 7, 100], linewidth=4):
 
 Ploting MD workspaces
 ---------------------
@@ -103,7 +103,7 @@ Changing style properties
 You can modify the style of your plots. For example like this (for a
 full list of options currently supported, see below).
 
-    lines=plot(loq, [1, 4], tool='plot_spectrum', linestyle='-.', marker='*')
+    lines=plot(loq, [100, 104], tool='plot_spectrum', linestyle='-.', marker='*')
 
 Notice that the plot function returns a list of lines, which
 correspond to the spectra lines. At present the lines have limited
@@ -124,7 +124,7 @@ matplotlib's pyplot. For example:
 
     title('Test plot of LOQ')
     xlabel('ToF')
-    ylabel('ToF')
+    ylabel('Counts')
     ylim(0, 8)
     xlim(1e3, 4e4)
     grid('on')
@@ -162,6 +162,7 @@ same functionality as their counterparts in matplotlib's pyplot.
 - savefig
 
 """
+
 try:
     import _qti
 except ImportError:
@@ -172,6 +173,12 @@ from PyQt4 import Qt, QtGui, QtCore
 from mantid.api import (MatrixWorkspace as MatrixWorkspace, AlgorithmManager as AlgorithmManager, AnalysisDataService as ADS)
 from mantid.simpleapi import CreateWorkspace as CreateWorkspace
 import mantidplot  
+
+print ("You are loading '" + __name__ + "', which is an experimental module." +
+"""
+Please note: this module is at a very early stage of development and
+provides limited functionality. This is work in progress and feedback
+is very much welcome! Please let us know any wishes and suggestions.""")
 
 class Line2D():
     """
@@ -185,11 +192,12 @@ class Line2D():
         class.
     """
 
-    def __init__(self, graph, index, x_data, y_data):
+    def __init__(self, graph, index, x_data, y_data, fig=None):
         self._graph = graph
         self._index = index   # will (may) be needed to change properties of this line
         self._xdata = x_data
         self._ydata = y_data
+        self._fig = None
 
     def get_xdata(self):
         return self._xdata
@@ -197,27 +205,106 @@ class Line2D():
     def get_ydata(self):
         return self._ydata
 
+    def figure(self):
+        return self._fig
+
+class Figure():
+    """
+    A very minimal replica of matplotlib.figure.Figure. This class is
+    here to support manipulation of multiple figures from the command
+    line.
+    """
+
+    """For the moment this is just a very crude wrapper for Graph
+    (proxy to qti Multilayer), and it is here just to hide (the rather
+    obscure) Graph from users.
+    """
+    # Holds the set of figure ids (integers) as they're being created and/or destroyed
+    __figures = {}
+    # Always increasing seq number, not necessarily the number of figures in the dict
+    __figures_seq = 0
+
+    def __init__(self, num):
+        if isinstance(num, int):
+            # normal matplotlib use, like figure(2)
+            missing = -1
+            fig = __figures.get(num, missing)
+            if missing == fig:
+                self._graph = Figure.__empty_graph()
+                __figures[num] = self
+                if num > __figures_seq:
+                    __figures_seq = num
+            else:
+                if None == fig._graph._getHeldObject():
+                    # has been destroyed!
+                    self._graph = Figure.__empty_graph()
+                else:
+                    self._graph = fig._graph
+        elif isinstance(num, mantidplot.proxies.Graph):
+            if None == num._getHeldObject():
+                # deleted Graph!
+                self._graph = Figure.__empty_graph()
+            else:
+                self._graph = num
+            num = Figure.__make_new_fig_number()
+            Figure.__figures[num] = self
+        else:
+            raise ValueError("To create a Figure you need to specify a figure number or a Graph object." )
+
+    @classmethod
+    def __make_new_fig_number(cls):
+        num = cls.__figures_seq + 1
+        avail = False
+        while not avail:
+            missing = -1
+            fig = cls.__figures.get(num, missing)
+            if missing == fig:
+                avail = True   # break
+            else:
+                num += 1
+        return num
+
+    @staticmethod
+    def __empty_graph():
+        """
+        Helper function, just create a new Graph with an 'empty' plot
+        """
+        lines = plot([0])
+        return lines._graph
+
+    @classmethod
+    def __empty_fig(cls):
+        """
+        Helper function/static method, for the functional interface.
+        """
+        lines = plot([0])
+        return cls(lines._graph)
+
 
 # TODO: no 'hold' support for now. How to handle multi-plots with different types/tools? Does it make sense at all?
 __hold_status = False
 
-__last_shown_graph = None
+__last_shown_fig = None
 
-def __empty_graph():
+def __last_fig():
     """
         Helper function, especially for the functional interface.
+        Returns :: last figure, creating new one if there was none
     """
-    lines = plot([0])
+    global __last_shown_fig
+    if not __last_shown_fig:
+        f = Figure.__empty_fig()
+        __last_shown_fig = f
+    return __last_shown_fig
 
-def __last_graph():
+def __update_last_shown_fig(g):
     """
         Helper function, especially for the functional interface.
+        Returns :: new last fig
     """
-    global __last_shown_graph
-    if not __last_shown_graph:
-        __last_shown_graph = __empty_graph()
-    return __last_shown_graph
-
+    global __last_shown_fig
+    __last_shown_fig = Figure(g)
+    return __last_shown_fig
 
 def __is_array(arg):
     """
@@ -259,7 +346,7 @@ def __create_workspace(x, y, name="array_dummy_workspace"):
     alg = AlgorithmManager.create("CreateWorkspace")
     alg.setChild(True) 
     alg.initialize()
-    # fake empty workspace (when doing plot([]), cause setProperty needs non-empty data )
+    # fake empty workspace (when doing plot([]), cause setProperty needs non-empty data)
     if [] == x:
         x = [0]
     if [] == y:
@@ -276,7 +363,9 @@ def __create_workspace(x, y, name="array_dummy_workspace"):
 def __list_of_lines_from_graph(g):
     """
         Produces a python list of line objects, with one object per line plotted on the passed graph
-        Note: at the moment these objects are of class PlotCurve != matplotlib.lines.Line2D
+        Note: at the moment these objects are of class Line2D which is much simpler than matplotlib.lines.Line2D
+        This function should always be part of the process of creating a new figure/graph, and it guarantees
+        that this figure being created is registered as the last shown figure.
 
         @param g :: graph (with several plot layers = qti Multilayer)
 
@@ -296,8 +385,9 @@ def __list_of_lines_from_graph(g):
             y_data.append(d.y(i))
         res.append(Line2D(g, i, x_data, y_data))
 
-    global __last_shown_graph
-    __last_shown_graph = g
+    fig = __update_last_shown_fig(g)
+    for lines in res:
+        lines._fig = fig
 
     return res;
 
@@ -360,14 +450,17 @@ def __apply_marker_kwarg(graph, marker):
         l.setCurveSymbol(i, sym)
 
 __color_char_to_color_idx = {
-    'k': 0, 'b': 1, 'g': 2, 'r': 3
+    'k': 0, 'b': 1, 'g': 2, 'r': 3, 'm': 4
 }
 
 def __apply_line_color(graph, c):
     l = graph.activeLayer()
-    col_idx = __color_char_to_color_idx[c]
+    inex = 'inexistent'
+    col_idx = __color_char_to_color_idx.get(c, inex)
+    if inex == col_idx:
+        col_idx = QtGui.QColor(c)
     for i in range(0, l.numCurves()):
-        l.setCurveLineColor(i, col_idx)  # beware this is not Qt.Qt.black
+        l.setCurveLineColor(i, col_idx)  # beware this is not Qt.Qt.black, but could be faked with QtGui.QColor("orange")
 
 def __apply_linestyle(graph, linestyle):
     l = graph.activeLayer()
@@ -450,9 +543,9 @@ def __plot_as_workspace(*args, **kwargs):
 
         Returns :: List of line objects
     """
-    # normally expects: args[0]: workspace(s), args[1]: one or more spectra indices
-    if len(args) < 2:
-        args = args + ([0],)
+#    # normally expects: args[0]: workspace(s), args[1]: one or more spectra indices
+#    if len(args) < 2:
+#        raise ValueError("Error while trying to plot spectra using plot_spectrum: you need to specify the spectra indices as second parameter.")
     return plot_spectrum(args[0], args[1], *args[2:], **kwargs)
 
 def __plot_as_workspaces_list(*args, **kwargs):
@@ -484,7 +577,7 @@ def __plot_as_array(*args, **kwargs):
     else:
         x = range(0, len(y), 1) # 0 to n, incremented by 1.
         ws = __create_workspace(x, y)
-    lines = __plot_as_workspace(ws, **kwargs)
+    lines = __plot_as_workspace(ws, [0], **kwargs)
     graph = None
     if len(lines) > 0:
         graph = lines[0]._graph
@@ -505,13 +598,10 @@ def __plot_with_tool(tool, *args, **kwargs):
 
     if bin_tool_name == tool or spectrum_tool_name == tool:
         if len(args) < 2:
-            raise ValueError("To plot using %s you need to give at least two parameters"%tool)
+            raise ValueError("To plot using %s as a tool you need to give at least two parameters"%tool)
 
     if bin_tool_name == tool:
-        other_args = []
-        if len(args) <=2:
-            raise ValueError("To use plot_bin: '" + tool + ";. Cannot plot this. ")
-        return plot_bin(args[0], args[1], other_args, **kwargs)
+        return plot_bin(args[0], args[1], args[2:], **kwargs)
     elif md_tool_name == tool:
         return plot_md(args[0], args[1:], **kwargs)
     elif spectrum_tool_name == tool:
@@ -532,63 +622,86 @@ def __plot_with_best_guess(*args, **kwargs):
         # mantidplot.plotSpectrum can handle workspace names (strings)
         return __plot_as_workspace(*args, **kwargs)
 
-def plot_bin(source, indices, *args, **kwargs):
+def plot_bin(workspaces, indices, *args, **kwargs):
     """
     1D plot of a MDWorkspace.
 
-    @param source :: workspace or list of workspaces (both workspace objects and names accepted)
+    @param workspaces :: workspace or list of workspaces (both workspace objects and names accepted)
     @param indices :: indices of the bin(s) to plot
 
     Returns :: the list of curves included in the plot
     """
-    graph = mantidplot.plotBin(source, indices)  # TODO fix window param
+    graph = mantidplot.plotBin(workspaces, indices)  # TODO fix window param
     __apply_plot_args(graph, *args)
     __apply_plot_kwargs(graph, **kwargs)
     return __list_of_lines_from_graph(graph)
 
 
-def plot_md(source, *args, **kwargs):
+def plot_md(workspaces, *args, **kwargs):
     """
     1D plot of an MDWorkspace.
 
-    @param source :: workspace or list of workspaces (both workspace objects and names accepted)
+    @param workspaces :: workspace or list of workspaces (both workspace objects and names accepted)
 
     Returns :: the list of curves included in the plot
     """
-    graph = mantidplot.plotMD(source)  # TODO fix window param
+    graph = mantidplot.plotMD(workspaces)  # TODO fix window param
     __apply_plot_args(graph, *args)
     __apply_plot_kwargs(graph, **kwargs)
     return __list_of_lines_from_graph(graph)
 
 
-def plot_spectrum(source, indices, *args, **kwargs):
-    """
-    1D Plot of a spectrum in a workspace.
+def plot_spectrum(workspaces, indices, *args, **kwargs):
+    """1D Plot of a spectrum in a workspace.
 
-    This plots one or more spectra, using X as the bin boundaries,
-    and Y as the counts in each bin.
+    Plots one or more spectra, selected by indices, using X as bin
+    boundaries and Y as the counts in each bin.
 
-    @param source :: workspace or list of workspaces (both workspace objects and names accepted)
+    @param workspaces :: workspace or list of workspaces (both workspace objects and names accepted)
     @param indices :: indices of the spectra to plot, given as a list
 
     Returns :: the list of curves included in the plot
+
     """
-    graph = mantidplot.plotSpectrum(source, indices)  # TODO fix window param
+    graph = mantidplot.plotSpectrum(workspaces, indices)  # TODO fix window param
     __apply_plot_args(graph, *args)
     __apply_plot_kwargs(graph, **kwargs)
     return __list_of_lines_from_graph(graph)
 
 
 def plot(*args, **kwargs):
-    """
-        Plot the data in various forms depending on what arguments are passed.
-        Currently supported inputs: arrays (as Python lists or numpy arrays) and workspaces
-        (by name or workspace objects).
+    """Plot the data in various forms depending on what arguments are passed.  Currently supported
+       inputs: arrays (as Python lists or numpy arrays) and workspaces (by name or workspace objects).
 
         @param args :: curve data and options
         @param kwargs :: plot line options
-        
+
         Returns :: the list of curves included in the plot
+
+        args can take different forms depending on what you plot. You can plot:
+        - a python list or array (x) for example like this:
+            plot(x)
+        - a workspace (ws) for example like this:
+            plot(ws, [100,101])  # this will plot spectra 100 and 101
+        - a list of workspaces (ws, ws2, ws3, etc.) for example like this:
+            plot([ws, ws2, ws3], [100,101])
+        - workspaces identified by their names:
+            plot(['HRP39182', 'MAR11060.nxs'], [100,101])
+
+        You can also pass matplotlib/pyplot style strings as arguments, for example:
+        - plot(x, '-.')
+
+        As keyword arguments (kwargs) you can specify multiple
+        parameters, for example: linewidth, linestyle, marker, color.
+
+        An important keyword argument is tool. At the moment the
+        following values are supported:
+        - plot_spectrum  (default for workspaces)
+        - plot_bin
+        - plot_md
+
+        Please see the documentation of this module (use help()) for more details.
+
     """
     nargs = len(args)
     if nargs < 1:
@@ -607,7 +720,9 @@ def plot(*args, **kwargs):
         return __plot_with_best_guess(*args, **kwargs)
 
 
-# Functions, pyplot / old matlab style
+#=============================================================================
+# Functions, for pyplot / old matlab style manipulation of figures
+#=============================================================================
 
 """
    Set the boundaries of the x axis
@@ -616,7 +731,7 @@ def plot(*args, **kwargs):
    @param xmax :: maximum value
 """
 def xlim(xmin, xmax):
-    l = __last_graph().activeLayer()
+    l = __last_fig()._graph.activeLayer()
     l.setAxisScale(0, xmin, xmax)
 
 """
@@ -626,7 +741,7 @@ def xlim(xmin, xmax):
    @param ymax :: maximum value
 """
 def ylim(ymin, ymax):
-    l = __last_graph().activeLayer()
+    l = __last_fig()._graph.activeLayer()
     l.setAxisScale(1, ymin, ymax)
 
 """
@@ -635,7 +750,7 @@ def ylim(ymin, ymax):
    @param lbl :: x axis lbl
 """
 def xlabel(lbl):
-    l = __last_graph().activeLayer()
+    l = __last_fig()._graph.activeLayer()
     l.setXTitle(lbl)
 
 """
@@ -643,8 +758,8 @@ def xlabel(lbl):
 
    @param lbl :: y axis lbl
 """
-def xlabel(lbl):
-    l = __last_graph().activeLayer()
+def ylabel(lbl):
+    l = __last_fig()._graph.activeLayer()
     l.setYTitle(lbl)
 
 """
@@ -653,7 +768,7 @@ def xlabel(lbl):
    @param title :: title string
 """
 def title(title):
-    l = __last_graph().activeLayer()
+    l = __last_fig()._graph.activeLayer()
     l.setTitle(title)
 
 """
@@ -662,23 +777,43 @@ def title(title):
    @param lims :: list or vector specifying min x, max x, min y, max y
 """
 def axis(lims):
-    l = __last_graph().activeLayer()
+    l = __last_fig()._graph.activeLayer()
     if 4 != len(lims):
         raise ValueError("Error: 4 real values are required for the x and y axes limits")
-    l.setScale(lims)
+    l.setScale(*lims)
 
 """
    Set title of active plot
 
    @param title :: title string
 """
-def grid(opt):
-    l = __last_graph().activeLayer()
+def grid(opt='on'):
+    l = __last_fig()._graph.activeLayer()
     if None == opt or 'on' == opt:
         l.showGrid()
     elif 'off' == opt:
         # TODO is there support for a 'hideGrid' in qti?
         print "Sorry, disabling grids is currenlty not supported"
+
+"""
+   Return Figure object for a new figure or an existing one (if there is any
+   with the number passed as parameter).
+
+   @param num :: figure number (optional). If empty, a new figure is created.
+"""
+def figure(num=None):
+    if not num:
+        return Figure.__empty_fig()
+    else:
+        if num < 0:
+            raise ValueError("The figure number cannot be negative")
+
+    missing = None
+    fig = __figures.get(num, None)
+    if None == fig:
+        return Figure.__empty_fig()
+    else:
+        return fig
 
 """
    Save current plot into a file. The format is guessed from the file extension (.eps, .png, .jpg, etc.)
