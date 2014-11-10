@@ -370,13 +370,29 @@ class ExportExperimentLog(PythonAlgorithm):
 
             # log entry line
             numlines = 0
+
+            # consider the mode to remove duplicate
+            if self._removeDupRecord is True:
+                totnumlines = len(linedict.keys())
+
             for ivalue in sorted(linedict.keys()):
-                for line in linedict[ivalue]: 
+                if self._removeDupRecord is True:
+                    # If duplicated records is to be removed, only consider the last record
+                    line = linedict[ivalue][-1]
                     wbuf += line
-                    # Add extra \n in case reordered
                     if numlines != totnumlines-1 and wbuf[-1] != '\n':
                         wbuf += '\n'
                     numlines += 1
+
+                else:
+                    # Consider all! 
+                    for line in linedict[ivalue]: 
+                        wbuf += line
+                        # Add extra \n in case reordered
+                        if numlines != totnumlines-1 and wbuf[-1] != '\n':
+                            wbuf += '\n'
+                        numlines += 1
+                    # ENDFOR
                 # ENDFOR
             # ENDFOR
 
