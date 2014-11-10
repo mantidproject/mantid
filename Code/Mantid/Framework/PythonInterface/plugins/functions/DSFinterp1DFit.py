@@ -1,4 +1,4 @@
-''' 
+'''
 @author Jose Borreguero, NScD
 @date October 06, 2013
 
@@ -28,9 +28,6 @@ from mantid.simpleapi import mtd
 from mantid import logger
 import numpy
 from scipy.interpolate import interp1d
-from pdb import set_trace as tr
-
-#from pdb import set_trace as tr
 
 class DSFinterp1DFit(IFunction1D):
 
@@ -117,7 +114,7 @@ class DSFinterp1DFit(IFunction1D):
           raise IndexError(message)
       # check number of input workspaces and parameters is the same
       if len(self._ParameterValues) != len(self._InputWorkspaces):
-        message = 'Number of InputWorkspaces and ParameterValues should be the same. Found {0} and {1}, respectively'.format(len(self._ParameterValues), len(self._InputWorkspaces))
+        message = 'Number of InputWorkspaces and ParameterValues should be the same. Found {0} and {1}, respectively'.format(len(self._InputWorkspaces), len(self._ParameterValues))
         logger.error(message)
         raise ValueError(message)
       # check the regression type is valid

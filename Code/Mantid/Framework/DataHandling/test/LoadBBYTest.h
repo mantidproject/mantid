@@ -42,7 +42,7 @@ public:
     // Should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(algToBeTested.execute(),std::runtime_error);
         
-    inputFile = "Bilby_EOS.bin";
+    inputFile = "BBY0000014.tar";
     algToBeTested.setPropertyValue("Filename", inputFile);
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());    
     TS_ASSERT( algToBeTested.isExecuted() );
@@ -56,7 +56,7 @@ public:
     for (size_t i = 0; i < output->getNumberHistograms(); i++)
       sum += output->readY(i)[0];
     sum *= 1.0e22;
-    TS_ASSERT_DELTA(sum / 1.0E27,0.9639,0.0001); 
+    TS_ASSERT_DELTA(sum / 1.0E27,0.9981,0.0001); 
   
   }
 

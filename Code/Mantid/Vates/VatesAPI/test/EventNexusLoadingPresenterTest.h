@@ -74,7 +74,7 @@ void testExecution()
   EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
   EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
-  MockProgressAction mockLoadingProgressUpdate;
+  NiceMock<MockProgressAction> mockLoadingProgressUpdate;
   MockProgressAction mockDrawingProgressUpdate;
 
   //Create the presenter and runit!

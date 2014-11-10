@@ -60,6 +60,9 @@ public:
   void apply();
   bool valid();
 
+signals:
+  void axisShowChanged(bool enabled);
+    
 private slots:
   void enableFormulaBox();
   void showAxis();

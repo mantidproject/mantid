@@ -97,9 +97,15 @@ if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" )
 							             "  ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/launch_mantidplot.sh $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot\n"
                                                                      "fi\n"
 	)
-	file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh "#!/bin/sh\n"
-								      "scl enable mantidlibs \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}/MantidPlot_exe $*\" \n"
+        if ( "${UNIX_CODENAME}" MATCHES "Santiago" ) # el6
+            file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh "#!/bin/sh\n"
+	           "scl enable mantidlibs \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}/MantidPlot_exe $*\" \n"
 	)
+        else ()
+            file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh "#!/bin/sh\n"
+	           "LD_LIBRARY_PATH=/usr/lib64/paraview:${LD_LIBRARY_PATH} ${CMAKE_INSTALL_PREFIX}/${BIN_DIR}/MantidPlot_exe $* \n"
+	)
+	endif()
 
     install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh
           DESTINATION ${BIN_DIR}

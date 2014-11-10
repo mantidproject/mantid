@@ -40,7 +40,7 @@ class PDDetermineCharacterizationsTest(unittest.TestCase):
         # table columns
         labels = ["frequency", "wavelength", "bank", "vanadium", "container",
                   "empty", "d_min", "d_max", "tof_min", "tof_max"]
-        types =  ["double",    "double",     "int",  "int",      "int", 
+        types =  ["double",    "double",     "int",  "int",      "int",
                   "int",   "str",   "str",   "double",  "double"]
 
         # create the table
@@ -50,7 +50,7 @@ class PDDetermineCharacterizationsTest(unittest.TestCase):
 
         if full:
             rows = [[60., 0.533, 1, 17702, 17711, 0, "0.05",  "2.20",  0000.00, 16666.67],
-                    [60., 1.333, 3, 17703, 17712, 0, "0.43",  "5.40", 12500.00, 29166.67],	
+                    [60., 1.333, 3, 17703, 17712, 0, "0.43",  "5.40", 12500.00, 29166.67],
                     [60., 2.665, 4, 17704, 17713, 0, "1.15",  "9.20", 33333.33, 50000.00],
                     [60., 4.797, 5, 17705, 17714, 0, "2.00", "15.35", 66666.67, 83333.67]]
             for row in rows:

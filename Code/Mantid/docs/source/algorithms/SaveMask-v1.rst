@@ -23,7 +23,7 @@ There are two types of mask workspace that can serve as input.
 In this case, :ref:`algm-SaveMask` will read Y values to determine
 which detectors are masked;
 
-2. A non-\ `MaskWorkspace <http://www.mantidproject.org/MaskWorkspace>`__ `MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`__ containing `Instrument <http://www.mantidproject.org/Instrument>`__
+2. A non-\ `MaskWorkspace <http://www.mantidproject.org/MaskWorkspace>`__ :ref:`MatrixWorkspace <MatrixWorkspace>` containing :ref:`Instrument <Instrument>`
 ################################################################################################################################################################################################################
 
 In this case, :ref:`algm-SaveMask` will scan through all detectors to

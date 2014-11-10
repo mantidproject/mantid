@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/Bk2BkExpConvPV.cpp
 	src/BoundaryConstraint.cpp
 	src/CalculateGammaBackground.cpp
+	src/CalculateMSVesuvio.cpp
 	src/Chebyshev.cpp
 	src/ComptonPeakProfile.cpp
 	src/ComptonProfile.cpp
@@ -32,6 +33,7 @@ set ( SRC_FILES
 	src/ExpDecay.cpp
 	src/ExpDecayMuon.cpp
 	src/ExpDecayOsc.cpp
+	src/FABADAMinimizer.cpp
 	src/FRConjugateGradientMinimizer.cpp
 	src/Fit.cpp
 	src/Fit1D.cpp
@@ -56,6 +58,7 @@ set ( SRC_FILES
 	src/LogNormal.cpp
 	src/Lorentzian.cpp
 	src/Lorentzian1D.cpp
+	src/MSVesuvioHelpers.cpp
 	src/MultiDomainCreator.cpp
 	src/MuonFInteraction.cpp
 	src/NeutronBk2BkExpConvPVoigt.cpp
@@ -94,9 +97,10 @@ set ( SRC_FILES
 	src/ThermalNeutronDtoTOFFunction.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
+  src/VesuvioResolution.cpp
 	src/Voigt.cpp
 )
-                
+
 set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES
@@ -113,6 +117,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Bk2BkExpConvPV.h
 	inc/MantidCurveFitting/BoundaryConstraint.h
 	inc/MantidCurveFitting/CalculateGammaBackground.h
+	inc/MantidCurveFitting/CalculateMSVesuvio.h
 	inc/MantidCurveFitting/Chebyshev.h
 	inc/MantidCurveFitting/ComptonPeakProfile.h
 	inc/MantidCurveFitting/ComptonProfile.h
@@ -127,13 +132,14 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DampingMinimizer.h
 	inc/MantidCurveFitting/DeltaFunction.h
 	inc/MantidCurveFitting/DerivMinimizer.h
-	inc/MantidCurveFitting/DiffSphere.h
 	inc/MantidCurveFitting/DiffRotDiscreteCircle.h
+	inc/MantidCurveFitting/DiffSphere.h
 	inc/MantidCurveFitting/DllConfig.h
 	inc/MantidCurveFitting/EndErfc.h
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
 	inc/MantidCurveFitting/ExpDecayOsc.h
+	inc/MantidCurveFitting/FABADAMinimizer.h
 	inc/MantidCurveFitting/FRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/Fit.h
 	inc/MantidCurveFitting/Fit1D.h
@@ -161,6 +167,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/LogNormal.h
 	inc/MantidCurveFitting/Lorentzian.h
 	inc/MantidCurveFitting/Lorentzian1D.h
+	inc/MantidCurveFitting/MSVesuvioHelpers.h
 	inc/MantidCurveFitting/MultiDomainCreator.h
 	inc/MantidCurveFitting/MuonFInteraction.h
 	inc/MantidCurveFitting/NeutronBk2BkExpConvPVoigt.h
@@ -199,9 +206,10 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ThermalNeutronDtoTOFFunction.h
 	inc/MantidCurveFitting/UserFunction.h
 	inc/MantidCurveFitting/UserFunction1D.h
+  inc/MantidCurveFitting/VesuvioResolution.h
 	inc/MantidCurveFitting/Voigt.h
 )
-              
+
 set ( TEST_FILES
 	# ChebyshevPolynomialBackgroundTest.h
 	# RefinePowderInstrumentParametersTest.h
@@ -215,6 +223,7 @@ set ( TEST_FILES
 	Bk2BkExpConvPVTest.h
 	BoundaryConstraintTest.h
 	CalculateGammaBackgroundTest.h
+	CalculateMSVesuvioTest.h
 	ChebyshevTest.h
 	CompositeFunctionTest.h
 	ComptonPeakProfileTest.h
@@ -232,9 +241,11 @@ set ( TEST_FILES
 	ExpDecayMuonTest.h
 	ExpDecayOscTest.h
 	ExpDecayTest.h
+	FABADAMinimizerTest.h
 	FRConjugateGradientTest.h
-	FitMWTest.h
-	FitPowderDiffPeaksTest.h
+  FitMWTest.h
+  FitTest.h
+  FitPowderDiffPeaksTest.h
 	FlatBackgroundTest.h
 	FullprofPolynomialTest.h
 	FunctionDomain1DSpectrumCreatorTest.h
@@ -290,6 +301,7 @@ set ( TEST_FILES
 	ThermalNeutronDtoTOFFunctionTest.h
 	UserFunction1DTest.h
 	UserFunctionTest.h
+  VesuvioResolutionTest.h
 	VoigtTest.h
 )
 

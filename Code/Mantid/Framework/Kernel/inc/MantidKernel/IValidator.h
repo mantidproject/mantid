@@ -14,9 +14,10 @@
 # include <boost/type_traits/is_convertible.hpp>
 # include <boost/type_traits/is_pointer.hpp>
 #endif
-#include <set>
+#include <vector>
 #include <string>
 #include <sstream>
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -106,7 +107,15 @@ public:
    *  Overridden in applicable concrete validators; the base class just returns an empty set.
    *  @return The set of allowed values that this validator may have or an empty set
    */
-  virtual std::set<std::string> allowedValues() const { return std::set<std::string>(); }
+  virtual std::vector<std::string> allowedValues() const { return std::vector<std::string>(); }
+
+  /**
+   * Implement this method for validators which wish to support aliasing for alloeed values.
+   * @param alias :: A string representation of an alias.
+   * @return :: A string representation of an aliased value. Should throw std::invalid_argument
+   *    is the given alias is invalid.
+   */
+  virtual std::string getValueForAlias(const std::string& alias) const { UNUSED_ARG(alias); throw std::invalid_argument("Validator does'n support value aliasing.") ;}
   
   /// Make a copy of the present type of validator
   virtual IValidator_sptr clone() const = 0;

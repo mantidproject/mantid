@@ -1,6 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/ParaViewVersion.h"
@@ -32,6 +33,7 @@
 #include <Poco/PipeStream.h>
 #include <Poco/StreamCopier.h>
 
+
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/regex.hpp>
@@ -45,6 +47,7 @@
 #ifdef __APPLE__
   #include <mach-o/dyld.h>
 #endif
+
 
 namespace Mantid
 {
@@ -179,7 +182,7 @@ ConfigServiceImpl::ConfigServiceImpl() :
 #else
   m_user_properties_file_name("Mantid.user.properties"),
 #endif
-  m_DataSearchDirs(), m_UserSearchDirs(), m_instr_prefixes(), m_removedFlag("@@REMOVED@@")
+  m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(), m_instr_prefixes(), m_removedFlag("@@REMOVED@@")
 {
   //getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration> ;
@@ -215,13 +218,20 @@ ConfigServiceImpl::ConfigServiceImpl() :
     }
   }
 
+  //Assert that the appdata and the instrument subdirectory exists
+  std::string appDataDir = getAppDataDir();
+  Poco::Path path(appDataDir);
+  path.pushDirectory("instrument");
+  Poco::File file(path);
+  //createdirectories will fail gracefully if it is already present
+  file.createDirectories();
+
   //Fill the list of possible relative path keys that may require conversion to absolute paths
   m_ConfigPaths.insert(std::make_pair("mantidqt.python_interfaces_directory", true));
   m_ConfigPaths.insert(std::make_pair("plugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("pvplugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("mantidqt.plugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("instrumentDefinition.directory", true));
-  m_ConfigPaths.insert(std::make_pair("parameterDefinition.directory", true));
   m_ConfigPaths.insert(std::make_pair("groupingFiles.directory", true));
   m_ConfigPaths.insert(std::make_pair("maskFiles.directory", true));
   m_ConfigPaths.insert(std::make_pair("colormaps.directory", true));
@@ -647,28 +657,82 @@ void ConfigServiceImpl::createUserPropertiesFile() const
         std::fstream::out);
 
     filestr << "# This file can be used to override any properties for this installation." << std::endl;
-    filestr
-        << "# Any properties found in this file will override any that are found in the Mantid.Properties file"
-        << std::endl;
-    filestr
-        << "# As this file will not be replaced with futher installations of Mantid it is a safe place to put "
-        << std::endl;
+    filestr << "# Any properties found in this file will override any that are found in the Mantid.Properties file" << std::endl;
+    filestr << "# As this file will not be replaced with futher installations of Mantid it is a safe place to put " << std::endl;
     filestr << "# properties that suit your particular installation." << std::endl;
-    filestr << "" << std::endl;
-    filestr << "#for example" << std::endl;
-    filestr
-        << "#uncommenting the line below will set the number of algorithms to retain interim results for to be 90"
-        << std::endl;
-    filestr << "#overriding any value set in the Mantid.properties file" << std::endl;
-    filestr << "#algorithms.retained = 90" << std::endl;
-
+    filestr << "#" << std::endl;
+    filestr << "# See here for a list of possible options:" << std::endl;
+    filestr << "# http://www.mantidproject.org/Properties_File#Mantid.User.Properties" << std::endl;
     filestr << std::endl;
-    filestr << "#uncomment to enable archive search - ICat and Orbiter" << std::endl;
-    filestr << "#datasearch.searcharchive = On" << std::endl;
-
+    filestr << "##" << std::endl;
+    filestr << "## GENERAL" << std::endl;
+    filestr << "##" << std::endl;
     filestr << std::endl;
-    filestr << "#uncomment to change logging level. Valid values are: error, warning, notice, information, debug" << std::endl;
-    filestr << "#logging.loggers.root.level = information" << std::endl;
+    filestr << "## Set the number of algorithm properties to retain" << std::endl;
+    filestr << "#algorithms.retained=90" << std::endl;
+    filestr << std::endl;
+    filestr << "## Hides catagories from the algorithm list in MantidPlot" << std::endl;
+    filestr << "#algorithms.catagories.hidden=Muons,Inelastic" << std::endl;
+    filestr << std::endl;
+    filestr << "## Set the maximum number of coures used to run algorithms over" << std::endl;
+    filestr << "#MultiThreaded.MaxCores=4" << std::endl;
+    filestr << std::endl;
+    filestr << "##" << std::endl;
+    filestr << "## FACILITY AND INSTRUMENT" << std::endl;
+    filestr << "##" << std::endl;
+    filestr << std::endl;
+    filestr << "## Sets the default facility" << std::endl;
+    filestr << "## e.g.: ISIS, SNS, ILL" << std::endl;
+    filestr << "default.facility=" << std::endl;
+    filestr << std::endl;
+    filestr << "## Stes the default instrument" << std::endl;
+    filestr << "## e.g. IRIS, HET, NIMROD" << std::endl;
+    filestr << "default.instrument=" << std::endl;
+    filestr << std::endl;
+    filestr << "##" << std::endl;
+    filestr << "## DIRECTORIES" << std::endl;
+    filestr << "##" << std::endl;
+    filestr << std::endl;
+    filestr << "## Sets a list of directories (separated by semi colons) to search for data" << std::endl;
+    filestr << "#datasearch.directories=../data;../isis/data" << std::endl;
+    filestr << std::endl;
+    filestr << "## Set a list (separated by semi colons) of directories to look for additional Python scripts" << std::endl;
+    filestr << "#pythonscripts.directories=../scripts;../docs/MyScripts" << std::endl;
+    filestr << std::endl;
+    filestr << "## Uncomment to enable archive search - ICat and Orbiter" << std::endl;
+    filestr << "#datasearch.searcharchive=On" << std::endl;
+    filestr << std::endl;
+    filestr << "## Sets default save directory" << std::endl;
+    filestr << "#defaultsave.directory=../data" << std::endl;
+    filestr << std::endl;
+    filestr << "##" << std::endl;
+    filestr << "## LOGGING" << std::endl;
+    filestr << "##" << std::endl;
+    filestr << std::endl;
+    filestr << "## Uncomment to change logging level" << std::endl;
+    filestr << "## Default is information" << std::endl;
+    filestr << "## Valid values are: error, warning, notice, information, debug" << std::endl;
+    filestr << "#logging.loggers.root.level=information" << std::endl;
+    filestr << std::endl;
+    filestr << "## Sets the lowest level messages to be logged to file" << std::endl;
+    filestr << "## Default is warning" << std::endl;
+    filestr << "## Valid values are: error, warning, notice, information, debug" << std::endl;
+    filestr << "#logging.channels.fileFilterChannel.level=debug" << std::endl;
+    filestr << std::endl;
+    filestr << "## Sets the file to write logs to" << std::endl;
+    filestr << "#logging.channels.fileChannel.path=../mantid.log" << std::endl;
+    filestr << std::endl;
+    filestr << "##" << std::endl;
+    filestr << "## MantidPlot" << std::endl;
+    filestr << "##" << std::endl;
+    filestr << std::endl;
+    filestr << "## Show invisible workspaces" << std::endl;
+    filestr << "#MantidOptions.InvisibleWorkspaces=0" << std::endl;
+    filestr << "## Re-use plot instances for different plot types" << std::endl;
+    filestr << "#MantidOptions.ReusePlotInstances=Off" << std::endl;
+    filestr << std::endl;
+    filestr << "## Uncomment to disable use of OpenGL to render unwrapped instrument views" << std::endl;
+    filestr << "#MantidOptions.InstrumentView.UseOpenGL=Off" << std::endl;
 
     filestr.close();
   } catch (std::runtime_error& ex)
@@ -768,6 +832,7 @@ void ConfigServiceImpl::updateConfig(const std::string& filename, const bool app
     cacheDataSearchPaths();
     appendDataSearchDir(getString("defaultsave.directory"));
     cacheUserSearchPaths();
+    cacheInstrumentPaths();
   }
 }
 
@@ -1076,6 +1141,10 @@ void ConfigServiceImpl::setString(const std::string & key, const std::string & v
   else if (key == "usersearch.directories")
   {
     cacheUserSearchPaths();
+  }  
+  else if (key == "instrumentDefinition.directory")
+  {
+    cacheInstrumentPaths();
   }
   else if (key == "defaultsave.directory")
   {
@@ -1197,6 +1266,28 @@ std::string ConfigServiceImpl::getCurrentDir() const
 std::string ConfigServiceImpl::getTempDir()
 {
   return m_pSysConfig->getString("system.tempDir");
+}
+
+/** Gets the absolute path of the appdata directory
+*
+* @returns The absolute path of the appdata directory
+*/
+std::string ConfigServiceImpl::getAppDataDir()
+{
+  const std::string applicationName = "mantid";
+#if POCO_OS == POCO_OS_WINDOWS_NT
+  const std::string vendorName = "mantidproject"; 
+  std::string appdata = std::getenv("APPDATA");
+  Poco::Path path(appdata);
+  path.makeDirectory();
+  path.pushDirectory(vendorName);
+  path.pushDirectory(applicationName);
+  return path.toString();
+#else //linux and mac
+  Poco::Path path(Poco::Path::home());
+  path.pushDirectory("." + applicationName);
+  return path.toString();
+#endif
 }
 
 /**
@@ -1449,26 +1540,84 @@ const std::vector<std::string>& ConfigServiceImpl::getUserSearchDirs() const
 }
 
 /**
- * Return the search directory for XML instrument definition files (IDFs)
- * @returns Full path of instrument search directory
+ * Return the search directories for XML instrument definition files (IDFs)
+ * @returns An ordered list of paths for instrument searching
+ */
+const std::vector<std::string>& ConfigServiceImpl::getInstrumentDirectories() const
+{
+  return m_InstrumentDirs;
+}
+
+/**
+ * Return the base search directories for XML instrument definition files (IDFs)
+ * @returns a last entry of getInstrumentDirectories
  */
 const std::string ConfigServiceImpl::getInstrumentDirectory() const
 {
-  // Determine the search directory for XML instrument definition files (IDFs)
-  std::string directoryName = getString("instrumentDefinition.directory");
-  if (directoryName.empty())
-  {
-    // This is the assumed deployment directory for IDFs, where we need to be relative to the
-    // directory of the executable, not the current working directory.
-    directoryName = Poco::Path(getPropertiesDir()).resolve("../instrument").toString();
-  }
+  return m_InstrumentDirs[m_InstrumentDirs.size()-1];
+}
 
-  if (!Poco::File(directoryName).isDirectory())
-  {
-    g_log.error("Unable to locate instrument search directory at: " + directoryName);
-  }
+/**
+ * Fills the internal cache of instrument definition directories
+ */
+void ConfigServiceImpl::cacheInstrumentPaths()
+{
+    m_InstrumentDirs.clear();
+    Poco::Path path(getAppDataDir());
+    path.makeDirectory();
+    path.pushDirectory("instrument");
+    std::string appdatadir =  path.toString();
+    addDirectoryifExists(appdatadir,m_InstrumentDirs);
 
-  return directoryName;
+#ifndef _WIN32
+    std::string etcdatadir =  "/etc/mantid/instrument";
+    addDirectoryifExists(etcdatadir,m_InstrumentDirs);
+#endif
+
+    // Determine the search directory for XML instrument definition files (IDFs)
+    std::string directoryName = getString("instrumentDefinition.directory");
+    if (directoryName.empty())
+    {
+      // This is the assumed deployment directory for IDFs, where we need to be relative to the
+      // directory of the executable, not the current working directory.
+      directoryName = Poco::Path(getPropertiesDir()).resolve("../instrument").toString();
+    }
+    addDirectoryifExists(directoryName,m_InstrumentDirs);
+}
+
+
+
+/**
+ * Verifies the directory exists and add it to the back of the directory list if valid
+ * @param directoryName the directory name to add
+ * @param directoryList the list to add the directory to
+ * @returns true if the directory was valid and added to the list
+ */
+bool ConfigServiceImpl::addDirectoryifExists(const std::string& directoryName, std::vector<std::string>& directoryList)
+{
+  try
+  {
+    if (Poco::File(directoryName).isDirectory())
+    {
+      directoryList.push_back(directoryName);
+      return true;
+    }
+    else
+    {
+      g_log.information("Unable to locate directory at: " + directoryName);
+      return false;
+    }
+  }
+  catch (Poco::PathNotFoundException&)
+  {
+    g_log.information("Unable to locate directory at: " + directoryName);
+    return false;
+  }   
+  catch (Poco::FileNotFoundException&)
+  {
+    g_log.information("Unable to locate directory at: " + directoryName);
+    return false;
+  } 
 }
 
 /**
@@ -1637,7 +1786,7 @@ const FacilityInfo& ConfigServiceImpl::getFacility(const std::string& facilityNa
       return **it;
     }
   }
-  g_log.error("Facility " + facilityName + " not found");
+
   throw Exception::NotFoundError("Facilities", facilityName);
 }
 

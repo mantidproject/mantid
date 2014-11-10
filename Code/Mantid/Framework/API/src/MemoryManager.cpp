@@ -7,7 +7,7 @@
 #include "MantidKernel/Memory.h"
 
 #ifdef USE_TCMALLOC
-#include "google/malloc_extension.h"
+#include "gperftools/malloc_extension.h"
 #endif
 
 #include <ostream> //for endl

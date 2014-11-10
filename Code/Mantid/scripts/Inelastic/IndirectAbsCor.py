@@ -38,7 +38,7 @@ def WaveRange(inWS, efixed):
 def CheckSize(size,geom,ncan,Verbose):
     if geom == 'cyl':
         if (size[1] - size[0]) < 1e-4:
-            error = 'Sample outer radius not > inner radius'			
+            error = 'Sample outer radius not > inner radius'
             logger.notice('ERROR *** '+error)
             sys.exit(error)
         else:
@@ -47,7 +47,7 @@ def CheckSize(size,geom,ncan,Verbose):
                 logger.notice(message)
     if geom == 'flt':
         if size[0] < 1e-4:
-            error = 'Sample thickness is zero'			
+            error = 'Sample thickness is zero'
             logger.notice('ERROR *** '+error)
             sys.exit(error)
         else:
@@ -56,7 +56,7 @@ def CheckSize(size,geom,ncan,Verbose):
     if ncan == 2:
         if geom == 'cyl':
             if (size[2] - size[1]) < 1e-4:
-                error = 'Can inner radius not > sample outer radius'			
+                error = 'Can inner radius not > sample outer radius'
                 logger.notice('ERROR *** '+error)
                 sys.exit(error)
             else:
@@ -65,7 +65,7 @@ def CheckSize(size,geom,ncan,Verbose):
                     logger.notice(message)
         if geom == 'flt':
             if size[1] < 1e-4:
-                error = 'Can thickness is zero'			
+                error = 'Can thickness is zero'
                 logger.notice('ERROR *** '+error)
                 sys.exit(error)
             else:
@@ -74,12 +74,12 @@ def CheckSize(size,geom,ncan,Verbose):
 
 def CheckDensity(density,ncan):
     if density[0] < 1e-5:
-        error = 'Sample density is zero'			
+        error = 'Sample density is zero'
         logger.notice('ERROR *** '+error)
         sys.exit(error)
     if ncan == 2:
         if density[1] < 1e-5:
-            error = 'Can density is zero'			
+            error = 'Can density is zero'
             logger.notice('ERROR *** '+error)
             sys.exit(error)
 
@@ -92,7 +92,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
     # check that there is data
     Xin = mtd[inputWS].readX(0)
     if len(Xin) == 0:
-        error = 'Sample file has no data'			
+        error = 'Sample file has no data'
         logger.notice('ERROR *** '+error)
         sys.exit(error)
 
@@ -108,7 +108,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
     nw = len(waves)
 
     run_name = getWSprefix(inputWS)
-    
+
     if Verbose:
         message = 'Sam : sigt = '+str(sigs[0])+' ; siga = '+str(siga[0])+' ; rho = '+str(density[0])
         logger.notice(message)
@@ -124,11 +124,11 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
 
         message = 'Detector angles : '+str(ndet)+' from '+str(det[0])+' to '+str(det[ndet-1])
         logger.notice(message)
-                   
+
     name = run_name + geom
     wrk = workdir + run_name
     wrk.ljust(120,' ')
-    
+
     dataA1 = []
     dataA2 = []
     dataA3 = []
@@ -141,20 +141,20 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
         #geometry is flat
         if geom == 'flt':
             angles = [avar, det[n]]
-            (A1,A2,A3,A4) = FlatAbs(ncan, size, density, sigs, siga, angles, waves)	
+            (A1,A2,A3,A4) = FlatAbs(ncan, size, density, sigs, siga, angles, waves)
             kill = 0
 
         #geometry is a cylinder
         elif geom == 'cyl':
             astep = avar
             if (astep) < 1e-5:
-                error = 'Step size is zero'			
+                error = 'Step size is zero'
                 logger.notice('ERROR *** '+error)
                 sys.exit(error)
-            
+
             nstep = int((size[1] - size[0])/astep)
             if nstep < 20:
-                error = 'Number of steps ( '+str(nstep)+' ) should be >= 20'			
+                error = 'Number of steps ( '+str(nstep)+' ) should be >= 20'
                 logger.notice('ERROR *** '+error)
                 sys.exit(error)
 
@@ -228,26 +228,26 @@ def plotAbs(workspaces, plotOpt):
         graph.activeLayer().setAxisTitle(mp.Layer.Bottom, 'Angle')
 
 
-def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=None, sampleFormula=None, canFormula=None, sigs=None, siga=None,
-                 plotOpt='None', Verbose=False,Save=False):
+def AbsRunFeeder(input_ws, can_ws, geom, ncan, size, avar, density, beam_width=None, sample_formula=None, can_formula=None, sigs=None, siga=None,
+                 plot_opt='None', verbose=False, save=False):
     """
         Handles the feeding of input and plotting of output for the F2PY
         absorption correction routine.
 
-        @param inputWS - workspace to generate corrections for
+        @param input_ws - workspace to generate corrections for
         @param geom - type of geometry used (flat plate or cylinder)
         @param beam_width - width of the beam used. If None this will be taken from the IPF
         @param ncan - number of cans used.
         @param size - sample & can thickness
-        @param sampleFormula - optional, chemical formula for the sample
-        @param camFormula - optional, chemical formula for the can
+        @param sample_formula - optional, chemical formula for the sample
+        @param cam_formula - optional, chemical formula for the can
         @param density - density of the sample and cans(s)
         @param sigs - scattering for sample and can(s)
         @param siga - absorption for sample and can(s)
         @param avar - sample angle
-        @param plotOpt - whether to plot output
-        @param Verbose - whether to show extra verbose output
-        @param Save - whether to save the output to file
+        @param plot_opt - whether to plot output
+        @param verbose - whether to show extra verbose output
+        @param save - whether to save the output to file
     """
 
     StartTime('CalculateCorrections')
@@ -255,12 +255,12 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
 
     #attempt to find beam width if none given
     if beam_width is None:
-        beam_width = getInstrumentParameter(inputWS, 'Workflow.beam-width')
+        beam_width = getInstrumentParameter(input_ws, 'Workflow.beam-width')
         beam_width = float(beam_width)
 
     #attempt to find beam height from parameter file
     try:
-        beam_height = getInstrumentParameter(inputWS, 'Workflow.beam-height')
+        beam_height = getInstrumentParameter(input_ws, 'Workflow.beam-height')
         beam_height = float(beam_height)
     except ValueError:
         # fall back on default value for beam height
@@ -273,14 +273,14 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
     # beam[7:8]  hsdown,hsup    bottom and top of scattered beam from sample b.
     beam = [beam_height, 0.5 * beam_width, -0.5 * beam_width, (beam_width / 2), -(beam_width / 2), 0.0, beam_height, 0.0, beam_height]
 
-    if sampleFormula is None and (sigs is None or siga is None):
+    if sample_formula is None and (sigs is None or siga is None):
         raise ValueError("Either a formula for the sample or values for the cross sections must be supplied.")
 
     #set sample material based on input or formula
-    if sampleFormula is not None:
-        SetSampleMaterial(InputWorkspace=inputWS, ChemicalFormula=sampleFormula, SampleNumberDensity=density[0])
+    if sample_formula is not None:
+        SetSampleMaterial(InputWorkspace=input_ws, ChemicalFormula=sample_formula, SampleNumberDensity=density[0])
 
-        sample = mtd[inputWS].sample()
+        sample = mtd[input_ws].sample()
         sam_mat = sample.getMaterial()
 
         # total scattering x-section
@@ -288,11 +288,11 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
         # absorption x-section
         siga[0] = sam_mat.absorbXSection()
 
-    if canFormula is not None and ncan == 2:
+    if can_formula is not None and ncan == 2:
         #set can material based on input or formula
-        SetSampleMaterial(InputWorkspace=canWS, ChemicalFormula=canFormula, SampleNumberDensity=density[1])
+        SetSampleMaterial(InputWorkspace=can_ws, ChemicalFormula=can_formula, SampleNumberDensity=density[1])
 
-        can_sample = mtd[canWS].sample()
+        can_sample = mtd[can_ws].sample()
         can_mat = can_sample.getMaterial()
 
         # total scattering x-section for can
@@ -302,20 +302,20 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
         siga[1] = can_mat.absorbXSection()
         siga[2] = can_mat.absorbXSection()
 
-    workspaces = AbsRun(inputWS, geom, beam, ncan, size, density,
-                        sigs, siga, avar, Verbose, Save)
+    workspaces = AbsRun(input_ws, geom, beam, ncan, size, density,
+                        sigs, siga, avar, verbose, save)
 
     EndTime('CalculateCorrections')
-    plotAbs(workspaces, plotOpt)
+    plotAbs(workspaces, plot_opt)
 
 
 def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
-    """ 
+    """
         FlatAbs - calculate flat plate absorption factors
-        
+
         For more information See:
-          - MODES User Guide: http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf  
-          - C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)  
+          - MODES User Guide: http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf
+          - C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)
 
         @param sigs - list of scattering  cross-sections
         @param siga - list of absorption cross-sections
@@ -349,13 +349,13 @@ def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
     else:
         #sample & can scattering x-section
         sampleScatt, canScatt = sigs[:2]
-        #sample & can absorption x-section                           
+        #sample & can absorption x-section
         sampleAbs, canAbs = siga[:2]
-        #sample & can density                           
+        #sample & can density
         sampleDensity, canDensity = density[:2]
         #thickness of the sample and can
         samThickness, canThickness1, canThickness2 = thick
-        
+
         tsec = tsec*PICONV
 
         sec1 = 1./math.cos(canAngle)

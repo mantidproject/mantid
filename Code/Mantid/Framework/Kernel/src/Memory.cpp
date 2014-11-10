@@ -6,13 +6,13 @@
 #include <sstream>
 
 #ifdef USE_TCMALLOC
-#include "google/malloc_extension.h"
+#include "gperftools/malloc_extension.h"
 #endif
 
 #ifdef __linux__
   #include <unistd.h>
   #include <fstream>
-  #include<malloc.h>
+  #include <malloc.h>
 #endif
 #ifdef __APPLE__
   #include <malloc/malloc.h>

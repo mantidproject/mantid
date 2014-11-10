@@ -11,7 +11,7 @@ Description
 
 This algorithm converts from a `MatrixWorkspace <http://mantidproject.org/MatrixWorkspace>`__ (in
 detector/time-of-flight space) to a
-`MDEventWorkspace <http://mantidproject.org/MDEventWorkspace>`__ containing events in reciprocal
+`MDEventWorkspace <http://mantidproject.org/MDWorkspace>`__ containing events in reciprocal
 space.
 
 The calculations apply only to elastic diffraction experiments. The
@@ -20,7 +20,7 @@ to HKL of the crystal.
 
 If the OutputWorkspace does NOT already exist, a default one is created.
 In order to define more precisely the parameters of the
-`MDEventWorkspace <http://mantidproject.org/MDEventWorkspace>`__, use the
+`MDEventWorkspace <http://mantidproject.org/MDWorkspace>`__, use the
 :ref:`algm-CreateMDWorkspace` algorithm first.
 
 Types of Conversion
@@ -87,4 +87,27 @@ Performance Notes
 -  32-core AMD Opteron 2.7 GHz computer: measured between 8 and 9
    million events per second (400-1000 million event workspaces).
 
+Usage 
+
+**Example - Convert re-binned MARI 2D workspace to 3D MD workspace for further analysis/merging with data at different temperatures :**
+
+.. testcode:: ExConvertToDiffractionMDWorkspace
+
+   # create or load event workspace
+   events = CreateSampleWorkspace(OutputWorkspace='events', WorkspaceType='Event', Function='Multiple Peaks')
+   # convert to  MD workspace
+   md = ConvertToDiffractionMDWorkspace(InputWorkspace=events, OutputWorkspace='md', OneEventPerBin=False, LorentzCorrection=True, SplitThreshold=150, Version=1)
+
+   # A way to look at these results as a text:
+   print "Resulting MD workspace has {0} events and {1} dimensions".format(md.getNEvents(),md.getNumDims())
+   print "Workspace Type is: ",md.id()
+
+
+**Output:**
+
+.. testoutput:: ExConvertToDiffractionMDWorkspace
+
+   Resulting MD workspace has 520128 events and 3 dimensions
+   Workspace Type is:  MDEventWorkspace<MDLeanEvent,3>
+   
 .. categories::

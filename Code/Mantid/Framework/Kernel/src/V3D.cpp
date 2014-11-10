@@ -482,9 +482,8 @@ V3D::cross_prod(const V3D& v) const
 double
 V3D::distance(const V3D& v) const
 {
-  V3D dif(*this);
-  dif-=v;
-  return dif.norm();
+  const double dx(x-v.x), dy(y-v.y), dz(z-v.z);
+  return sqrt(dx*dx +dy*dy + dz*dz);
 }
 
 /** Calculates the zenith angle (theta) of this vector with respect to another
@@ -556,15 +555,10 @@ V3D::rotate(const Kernel::Matrix<double>& A)
     @param A :: Rotation matrix (needs to be >3x3)
   */
 {
-  Matrix<double> Pv(3,1);
-  Pv[0][0]=x;
-  Pv[1][0]=y;
-  Pv[2][0]=z;
-  Matrix<double> Po=A*Pv;
-  x=Po[0][0];
-  y=Po[1][0];
-  z=Po[2][0];
-  return;
+  double xold(x), yold(y), zold(z);
+  x = A[0][0]*xold + A[0][1]*yold + A[0][2]*zold;
+  y = A[1][0]*xold + A[1][1]*yold + A[1][2]*zold;
+  z = A[2][0]*xold + A[2][1]*yold + A[2][2]*zold;
 }
 
 /**
@@ -875,6 +869,23 @@ bool V3D::CompareMagnitude( const V3D & v1, const V3D & v2 )
   double mag_sq_1 = v1[0]*v1[0] + v1[1]*v1[1] + v1[2]*v1[2];
   double mag_sq_2 = v2[0]*v2[0] + v2[1]*v2[1] + v2[2]*v2[2];
   return (mag_sq_1 < mag_sq_2);
+}
+
+/**
+ * Get direction angles from direction cosines.
+ * @param inDegrees : optional argument for specifying in radians (false). Defaults to true.
+ * @return V3D containing anlges.
+ */
+V3D V3D::directionAngles(bool inDegrees) const
+{
+  double conversionFactor = 1.0;
+  if(inDegrees)
+  {
+    conversionFactor = 180.0/M_PI;
+  }
+  const double divisor = this->norm();
+  return V3D(conversionFactor*acos(x/divisor), conversionFactor*acos(y/divisor), conversionFactor*acos(z/divisor));
+
 }
 
 

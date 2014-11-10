@@ -718,12 +718,27 @@ void ConfigDialog::initMantidOptionsTab()
   widgetLayout->addWidget(frame);
   QGridLayout *grid = new QGridLayout(frame);
 
+  // if on, for example all plotSpectrum will go to the same window.
+  m_reusePlotInstances =  new QCheckBox("Re-use plot instances for different types of plots");
+  m_reusePlotInstances->setChecked(false);
+  grid->addWidget(m_reusePlotInstances,0,0);
+  QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.ReusePlotInstances"));
+  if(!setting.compare("On"))
+  {
+    m_reusePlotInstances->setChecked(true);
+  }
+  else if(!setting.compare("Off"))
+  {
+    m_reusePlotInstances->setChecked(false);
+  }
+  m_reusePlotInstances->setToolTip("If on, the same plot instance will be re-used for every of the different plots available in the workspaces window (spectrum, slice, color fill, etc.)");
+
   //create a checkbox for invisible workspaces options
   m_invisibleWorkspaces = new QCheckBox("Show Invisible Workspaces");
   m_invisibleWorkspaces->setChecked(false);
-  grid->addWidget(m_invisibleWorkspaces,0,0);
+  grid->addWidget(m_invisibleWorkspaces,1,0);
 
-  QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InvisibleWorkspaces"));
+  setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InvisibleWorkspaces"));
   if(!setting.compare("1"))
   {
     m_invisibleWorkspaces->setChecked(true);
@@ -739,13 +754,13 @@ void ConfigDialog::initMantidOptionsTab()
   treeCategories->setSortingEnabled(false);
   treeCategories->setHeaderLabel("Show Algorithm Categories");
 
-  grid->addWidget(treeCategories,1,0);
+  grid->addWidget(treeCategories,2,0);
   refreshTreeCategories();
 
   // create a checkbox for the instrument view OpenGL option
   m_useOpenGL = new QCheckBox("Use OpenGL in Instrument View");
   m_useOpenGL->setChecked(true);
-  grid->addWidget(m_useOpenGL,3,0);
+  grid->addWidget(m_useOpenGL,4,0);
 
   setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().
     getString("MantidOptions.InstrumentView.UseOpenGL")).toUpper();
@@ -1146,21 +1161,7 @@ void ConfigDialog::initDirSearchTab()
 
   connect( button, SIGNAL(clicked()), this, SLOT(addInstrumentDir()) );
 
-  /// parameterDefinition.directory
-  label = new QLabel(tr("Parameter definitions"));
-  grid->addWidget(label, 3, 0);
-
-  str = Mantid::Kernel::ConfigService::Instance().getString("parameterDefinition.directory");
-  leParameterDir = new QLineEdit();
-  leParameterDir->setText(QString::fromStdString(str));
-  grid->addWidget(leParameterDir, 3, 1);
-
-  button = new QPushButton();
-  button->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
-  grid->addWidget(button, 3, 2);
-
-  connect( button, SIGNAL(clicked()), this, SLOT(addParameterDir()) );
-  grid->setRowStretch(4,1);
+  grid->setRowStretch(3,1);
 }
 
 void ConfigDialog::initCurveFittingTab()
@@ -1656,11 +1657,13 @@ void ConfigDialog::initConfirmationsPage()
   boxPromptRenameTables = new QCheckBox();
   boxPromptRenameTables->setChecked(app->d_inform_rename_table);
 
-
+  boxPromptDeleteWorkspace = new QCheckBox();
+  boxPromptDeleteWorkspace->setChecked(app->d_inform_delete_workspace);
 
 
   QVBoxLayout * confirmPageLayout = new QVBoxLayout( confirm );
   confirmPageLayout->addWidget(groupBoxConfirm);
+  confirmPageLayout->addWidget(boxPromptDeleteWorkspace);
   confirmPageLayout->addWidget(boxPromptRenameTables);
   confirmPageLayout->addStretch();
 }
@@ -1819,6 +1822,7 @@ void ConfigDialog::languageChange()
   buttonNumbersFont->setText( tr( "Axes &Numbers" ) );
   buttonLegendFont->setText( tr( "&Legend" ) );
   buttonTitleFont->setText( tr( "T&itle" ) );
+  boxPromptDeleteWorkspace->setText( tr( "Prompt when deleting Workspaces" ) );
   boxPromptRenameTables->setText( tr( "Prompt on &renaming tables when appending projects" ) );
   //application page
   appTabWidget->setTabText(appTabWidget->indexOf(application), tr("Application"));
@@ -1962,18 +1966,18 @@ void ConfigDialog::languageChange()
 
   //Fitting page
   cbEnableQtiPlotFitting->setText(tr("Enable QtiPlot fitting"));
+  cbEnableQtiPlotFitting->setToolTip(tr("Takes effect after reopening a plot window"));
   groupBoxFittingCurve->setTitle(tr("Generated Fit Curve"));
   generatePointsBtn->setText(tr("Uniform X Function"));
   lblPoints->setText( tr("Points") );
   samePointsBtn->setText( tr( "Same X as Fitting Data" ) );
   linearFit2PointsBox->setText( tr( "2 points for linear fits" ) );
-
   groupBoxMultiPeak->setTitle(tr("Display Peak Curves for Multi-peak Fits"));
-
   groupBoxFitParameters->setTitle(tr("Parameters Output"));
   lblPrecision->setText(tr("Significant Digits"));
   logBox->setText(tr("Write Parameters to Result Log"));
   plotLabelBox->setText(tr("Paste Parameters to Plot"));
+  plotLabelBox->setToolTip(tr("Adds a text box to the plot with details of fitting parameters"));
   scaleErrorsBox->setText(tr("Scale Errors with sqrt(Chi^2/doF)"));
   groupBoxMultiPeak->setTitle(tr("Display Peak Curves for Multi-peak Fits"));
   lblPeaksColor->setText(tr("Peaks Color"));
@@ -1997,7 +2001,6 @@ void ConfigDialog::apply()
   sep.replace("\\t", "\t");
   sep.replace(tr("SPACE"), " ");
   sep.replace("\\s", " ");
-
 
   if (sep.contains(QRegExp("[0-9.eE+-]"))!=0){
     QMessageBox::warning(0, tr("MantidPlot - Import options error"),
@@ -2047,8 +2050,6 @@ void ConfigDialog::apply()
       app->d_axes_scales[i] = combo->currentText();
     }
   }
-
-
 
   // 2D plots page: curves tab
   app->defaultCurveStyle = curveStyle();
@@ -2127,6 +2128,7 @@ void ConfigDialog::apply()
       QApplication::restoreOverrideCursor();
   }
   // general page: confirmations tab
+  app->d_inform_delete_workspace = boxPromptDeleteWorkspace->isChecked();
   app->d_inform_rename_table = boxPromptRenameTables->isChecked();
   app->confirmCloseFolder = boxFolders->isChecked();
   app->updateConfirmOptions(boxTables->isChecked(), boxMatrices->isChecked(),
@@ -2226,10 +2228,6 @@ void ConfigDialog::updateDirSearchSettings()
   setting.replace('\\','/');
   mantid_config.setString("instrumentDefinition.directory",setting.toStdString());
 
-  setting = leParameterDir->text();
-  setting.replace('\\','/');
-  mantid_config.setString("parameterDefinition.directory",setting.toStdString());
-
 }
 
 void ConfigDialog::updateCurveFitSettings()
@@ -2265,23 +2263,18 @@ void ConfigDialog::updateCurveFitSettings()
   mantid_config.setString("curvefitting.peakRadius", setting);
 
   app->mantidUI->fitFunctionBrowser()->setDecimals(decimals->value());
-
 }
 
 void ConfigDialog::updateMantidOptionsTab()
 {
   Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
 
+  // re-use plot instances (spectra, slice, color-fill, etc.)
+  QString reusePlotInst = m_reusePlotInstances->isChecked()? "On" : "Off";
+  mantid_config.setString("MantidOptions.ReusePlotInstances",reusePlotInst.toStdString());
+
   //invisible workspaces options
-  QString showinvisible_ws;
-  if(m_invisibleWorkspaces->isChecked())
-  {
-    showinvisible_ws="1";
-  }
-  else
-  {
-    showinvisible_ws="0";
-  }
+  QString showinvisible_ws = m_invisibleWorkspaces->isChecked()? "1" : "0";
   mantid_config.setString("MantidOptions.InvisibleWorkspaces",showinvisible_ws.toStdString());
 
   //OpenGL option
@@ -2634,13 +2627,4 @@ void ConfigDialog::addInstrumentDir()
   }
 }
 
-void ConfigDialog::addParameterDir()
-{
-  QString dir = QFileDialog::getExistingDirectory(this, tr("Select new parameter definition directory"),
-    "", 0);
-  if (!dir.isEmpty())
-  {
-    leParameterDir->setText(dir);
-  }
-}
 

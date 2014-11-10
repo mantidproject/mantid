@@ -146,6 +146,20 @@ namespace Mantid
     }
 
     /**
+     * Deep comparison.
+     * @param right The other property to compare to.
+     * @return true if the are equal.
+     */
+    template<typename TYPE>
+    bool TimeSeriesProperty<TYPE>::operator==( const Property & right ) const
+    {
+      auto rhs_tsp = dynamic_cast<const TimeSeriesProperty<TYPE> *>(&right);
+      if (!rhs_tsp)
+        return false;
+      return this->operator==(*rhs_tsp);
+    }
+
+    /**
      * Deep comparison (not equal).
      * @param right The other property to compare to.
      * @return true if the are not equal.
@@ -156,7 +170,18 @@ namespace Mantid
       return !(*this == right);
     }
 
-    /*
+    /**
+     * Deep comparison (not equal).
+     * @param right The other property to compare to.
+     * @return true if the are not equal.
+     */
+    template<typename TYPE>
+    bool TimeSeriesProperty<TYPE>::operator!=( const Property & right ) const
+    {
+      return !(*this == right);
+    }
+
+    /**
      * Set name of the property
      */
     template <typename TYPE>
@@ -1785,6 +1810,9 @@ namespace Mantid
         prevtime = currtime;
         ++ vit;
       }
+
+      // update m_size
+      countSize();
 
       // 3. Finish
       g_log.warning() << "Log " << this->name() << " has " << numremoved << " entries removed due to duplicated time. " << "\n";

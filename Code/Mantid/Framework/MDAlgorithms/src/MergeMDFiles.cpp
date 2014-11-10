@@ -149,27 +149,34 @@ namespace MDAlgorithms
       g_log.notice() << totalEvents << " events in " << m_Filenames.size() << " files." << std::endl;
   }
 
-  /** Task that loads all of the events from correspondend boxes of all files
+  /** Task that loads all of the events from corresponded boxes of all files
     * that is being merged into a particular box in the output workspace.
   */
 
   uint64_t MergeMDFiles::loadEventsFromSubBoxes(API::IMDNode *TargetBox)
   {
-    /// get rid of the events and averages which are in the memory erroneously (from clonning)
+    /// get rid of the events and averages which are in the memory erroneously (from cloning)
     TargetBox->clear();
 
     uint64_t nBoxEvents(0);
+    std::vector<size_t> numFileEvents(m_EventLoader.size());
+
     for (size_t iw=0; iw<this->m_EventLoader.size(); iw++)
     {
       size_t ID = TargetBox->getID();
+      numFileEvents[iw] = static_cast<size_t>(m_fileComponentsStructure[iw].getEventIndex()[2*ID+1]);
+      nBoxEvents += numFileEvents[iw];
+    }
 
-       uint64_t fileLocation   = m_fileComponentsStructure[iw].getEventIndex()[2*ID+0];
-       size_t   numFileEvents  = static_cast<size_t>(m_fileComponentsStructure[iw].getEventIndex()[2*ID+1]);
-       if(numFileEvents==0)continue;
-       //TODO: it is possible to avoid the reallocation of the memory at each load 
-      TargetBox->loadAndAddFrom(m_EventLoader[iw],fileLocation,numFileEvents);
+    // At this point memory required is known, so it is reserved all in one go
+    TargetBox->reserveMemoryForLoad(nBoxEvents);
 
-       nBoxEvents += numFileEvents;
+    for (size_t iw=0; iw<this->m_EventLoader.size(); iw++)
+    {
+      size_t ID = TargetBox->getID();
+      uint64_t fileLocation   = m_fileComponentsStructure[iw].getEventIndex()[2*ID+0];
+      if(numFileEvents[iw]==0) continue;
+      TargetBox->loadAndAddFrom(m_EventLoader[iw],fileLocation,numFileEvents[iw]);
     }
 
     return nBoxEvents;
@@ -255,7 +262,7 @@ namespace MDAlgorithms
       if(DiskBuf)
       {
         if(box->getDataInMemorySize()>0)
-        {  // data position has been already precalculated 
+        {  // data position has been already pre-calculated 
             box->getISaveable()->save();
             box->clearDataFromMemory();
             //Kernel::ISaveable *Saver = box->getISaveable();
@@ -315,8 +322,9 @@ namespace MDAlgorithms
     if (!outputFile.empty())
     {
       g_log.notice() << "Starting SaveMD to update the file back-end." << std::endl;
-   // create or open WS group and put there additional information about WS and its dimesnions
-      boost::scoped_ptr< ::NeXus::File>  file(MDBoxFlatTree::createOrOpenMDWSgroup(outputFile,m_nDims,m_MDEventType,false));
+   // create or open WS group and put there additional information about WS and its dimensions
+      bool old_data_there;
+      boost::scoped_ptr< ::NeXus::File>  file(MDBoxFlatTree::createOrOpenMDWSgroup(outputFile,m_nDims,m_MDEventType,false,old_data_there));
       this->progress(0.94, "Saving ws history and dimensions");    
       MDBoxFlatTree::saveWSGenericInfo(file.get(),m_OutIWS);
     // Save each ExperimentInfo to a spot in the file
@@ -326,7 +334,7 @@ namespace MDAlgorithms
       file->closeGroup();
       file->close();
      // -------------- Save Box Structure  -------------------------------------
-     // OK, we've filled these big arrays of data representing flat box structrre. Save them.
+     // OK, we've filled these big arrays of data representing flat box structure. Save them.
       progress(0.91, "Writing Box Data");
       prog->resetNumSteps(8, 0.92, 1.00);
 
@@ -347,7 +355,7 @@ namespace MDAlgorithms
   void MergeMDFiles::exec()
   {
     // clear disk buffer which can remain from previous runs 
-    // the existance/ usage of the buffer idicates if the algorithm works with file based or memory based target workspaces;
+    // the existence/ usage of the buffer indicates if the algorithm works with file based or memory based target workspaces;
    // pDiskBuffer = NULL;
     MultipleFileProperty * multiFileProp = dynamic_cast<MultipleFileProperty*>(getPointerToProperty("Filenames"));
     m_Filenames = MultipleFileProperty::flattenFileNames(multiFileProp->operator()());

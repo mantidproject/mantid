@@ -88,8 +88,11 @@ namespace Mantid
       /// sets non workspace properties for the algorithm
       void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
 
+    protected:
 
-		
+      /// Override process groups
+      virtual bool processGroups();
+
     };
 
   } // namespace DataHandling

@@ -9,11 +9,11 @@
 Description
 -----------
 
-This algorithm merges several `MDWorkspaces <http://www.mantidproject.org/MDWorkspace>`_ together
+This algorithm merges several :ref:`MDWorkspaces <MDWorkspace>` together
 into one by adding their events together.
 
 The algorithm starts by going through the list of
-`MDWorkspaces <http://www.mantidproject.org/MDWorkspace>`_ to find the extents that fully encompass
+:ref:`MDWorkspaces <MDWorkspace>` to find the extents that fully encompass
 all input workspaces in each dimension. The number and names of
 dimensions must match for all input workspaces.
 
@@ -69,13 +69,12 @@ Usage
    ****************************************************************
    workspace 1 has 2 dimensions with 18231 points and 18231 events
    with d1 min_max=0.0:5.0, d2 min_max=-10.0:10.0
-   workspace 2 has 2 dimensions with 15606 points and 15606 events
+   workspace 2 has 2 dimensions with 18360 points and 18360 events
    with d1 min_max=0.0:10.0, d2 min_max=-5.0:15.0
    ****************************************************************
-   Merged WS has   2 dimensions with 33837 points and 33837 events
+   Merged WS has   2 dimensions with 36591 points and 36591 events
    with d1 min_max=0.0:10.0, d2 min_max=-10.0:15.0
    ****************************************************************
-
 
 
 .. categories::

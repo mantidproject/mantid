@@ -43,7 +43,7 @@ def focus(filename):
     DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                          GroupingWorkspace="grouping", PreserveEvents=False)
     return mtd[wksp]
-    
+
 
 CreateGroupingWorkspace(InstrumentName='NOMAD', GroupNames='NOMAD', OutputWorkspace="grouping")
 ##CreateGroupingWorkspace(InstrumentName='NOMAD', OldCalFilename=calib, OutputWorkspace="grouping")

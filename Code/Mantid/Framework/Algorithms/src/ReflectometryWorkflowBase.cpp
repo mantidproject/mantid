@@ -129,7 +129,7 @@ namespace Mantid
      * Determine if the property value is the same as the default value.
      * This can be used to determine if the property has not been set.
      * @param propertyName : Name of property to query
-     * @return: True only if the property has it's default value.
+     * @return: True only if the property has its default value.
      */
     bool ReflectometryWorkflowBase::isPropertyDefault(const std::string& propertyName) const
     {
@@ -219,7 +219,8 @@ namespace Mantid
         throw std::invalid_argument("FirstTransmissionRun must be either in TOF or Wavelength");
       }
 
-      const bool bInWavelength = (!wavelengthValidator.isValid(firstTransmissionRun).empty());
+      const auto message = wavelengthValidator.isValid(firstTransmissionRun);
+      const bool bInWavelength = message.empty();
       return bInWavelength;
     }
 
@@ -232,7 +233,14 @@ namespace Mantid
         const bool firstTransmissionInWavelength) const
     {
       // Verify that all the required inputs for the second transmission run are now given.
-      if (isPropertyDefault("FirstTransmissionRun"))
+
+      //Check if the first transmission run has been set
+      bool ftrDefault = isPropertyDefault("FirstTransmissionRun");
+      MatrixWorkspace_sptr ws = this->getProperty("FirstTransmissionRun");
+      if(ws)
+        ftrDefault = false;
+
+      if(ftrDefault)
       {
         if (firstTransmissionInWavelength)
         {
@@ -384,6 +392,7 @@ namespace Mantid
           boost::assign::list_of(0).convert_to_container<std::vector<int> >());
       correctMonitorsAlg->setProperty("StartX", backgroundMinMax.get<0>());
       correctMonitorsAlg->setProperty("EndX", backgroundMinMax.get<1>());
+      correctMonitorsAlg->setProperty("SkipMonitors",false);
       correctMonitorsAlg->execute();
       monitorWS = correctMonitorsAlg->getProperty("OutputWorkspace");
 

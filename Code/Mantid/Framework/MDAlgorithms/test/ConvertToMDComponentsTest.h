@@ -115,9 +115,7 @@ public:
     // this is the problems with alg, as ws has to be added to data service to be avail to algorithm.
     pAlg->setSourceWS(ws2DNew);
 
-    TS_ASSERT_THROWS(pAlg->preprocessDetectorsPositions(ws2DNew),std::runtime_error);
-    AnalysisDataService::Instance().addOrReplace("testWSProcessed2",ws2DNew);
-
+    // Ei is not defined
     TSM_ASSERT_THROWS("WS has to have input energy for indirect methods",pAlg->preprocessDetectorsPositions(ws2DNew),std::invalid_argument);
     ws2DNew->mutableRun().addProperty("Ei",130.,"meV",true);
 
@@ -125,6 +123,11 @@ public:
     TS_ASSERT(TableWS6.get()!=TableWS5.get());
     TS_ASSERT_EQUALS(9,TableWS6->rowCount());
     TS_ASSERT_EQUALS(4,TableWS5->rowCount());
+
+    // Trow on  running the test again if the workspace does not have energy attached.
+    ws2DNew->mutableRun().removeProperty("Ei");
+    TSM_ASSERT_THROWS("WS has to have input energy for indirect methods despite the table workspace is already calculated",pAlg->preprocessDetectorsPositions(ws2DNew),std::invalid_argument);
+
 
 
   }

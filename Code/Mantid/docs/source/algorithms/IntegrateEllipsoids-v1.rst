@@ -13,7 +13,7 @@ Overview and similar algorithms
 ###############################
 
 This algorithm will integrate disjoint single crystal Bragg peaks by
-summing the number of raw events in a 3D ellipsoidal peak region in
+summing the number of raw or weighted events in a 3D ellipsoidal peak region in
 reciprocal space and subtracting an estimate of the background obtained
 from an ellipsoidal shell. In some ways it is similar to the
 :ref:`algm-IntegratePeaksMD` algorithm. In particular the size parameters to
@@ -22,7 +22,7 @@ background subtraction is done in the same way for both the intensity
 and the estimated standard deviations. However, this algorithm differs
 from :ref:`algm-IntegratePeaksMD` in several critical ways.
 
--  This algorithm works directly with raw, un-weighted events 
+-  This algorithm works directly with raw or weighted events 
    while :ref:`algm-IntegratePeaksMD` uses **MDEvents** from 
    `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_.
 -  This algorithm uses 3D ellipsoidal regions with aspect ratios that
@@ -44,7 +44,7 @@ Explanation of Inputs
 #####################
 
 -  The event data to be integrated is obtained from an ordinary
-   `EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_ 
+   :ref:`EventWorkspace <EventWorkspace>` 
    with an X-axis in time-of-flight, as loaded from a
    NeXus event file. This algorithm maps the events to reciprocal space 
    using *PeaksWorkwpace* with indexed peaks to determine the parameters 
@@ -101,7 +101,7 @@ Detailed Algorithm Description
 
 This algorithm will integrate a list of indexed single-crystal
 diffraction peaks from a *PeaksWorkspace*, using events from an
-( `EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_ ).
+( :ref:`EventWorkspace <EventWorkspace>` ).
 The indexed peaks are first used to determine a UB
 matrix. The inverse of that UB matrix is then used to form lists of
 events that are close to peaks in reciprocal space. An event will be

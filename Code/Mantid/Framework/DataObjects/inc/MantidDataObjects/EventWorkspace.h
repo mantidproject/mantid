@@ -89,6 +89,10 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 
   Mantid::Kernel::DateAndTime getPulseTimeMax() const;
 
+  Mantid::Kernel::DateAndTime getTimeAtSampleMin(double tofOffset = 0) const;
+
+  Mantid::Kernel::DateAndTime getTimeAtSampleMax(double tofOffset = 0) const;
+
   double getEventXMin() const;
   double getEventXMax() const;
   void getEventXMinMax(double &xmin, double &xmax) const;
@@ -148,6 +152,8 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   void resizeTo(const std::size_t numSpectra);
   // Pad pixels in the workspace using the loaded spectra. Requires a non-empty spectra-detector map
   void padSpectra();
+  // Pad pixels in the workspace using specList. Requires a non-empty vector
+  void padSpectra(const std::vector<int32_t> & specList); 
   // Remove pixels in the workspace that do not contain events.
   void deleteEmptyLists();
   

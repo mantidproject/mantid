@@ -219,22 +219,28 @@ void FileProperty::setUp(const std::string & defExt)
  * run file extensions, false otherwise
  */
 bool FileProperty::extsMatchRunFiles()
-{
-  Kernel::FacilityInfo facilityInfo = Kernel::ConfigService::Instance().getFacility();
-  const std::vector<std::string>  facilityExts = facilityInfo.extensions();
-  std::vector<std::string>::const_iterator facilityExtsBegin = facilityExts.begin();
-  std::vector<std::string>::const_iterator facilityExtsEnd = facilityExts.end();
-  const std::set<std::string> allowedExts = this->allowedValues();
-
+{  
   bool match(false);
-  for( std::set<std::string>::const_iterator it = allowedExts.begin(); it != allowedExts.end(); ++it )
+  try
   {
-    if( std::find(facilityExtsBegin, facilityExtsEnd, *it) != facilityExtsEnd )
+    Kernel::FacilityInfo facilityInfo = Kernel::ConfigService::Instance().getFacility();
+    const std::vector<std::string>  facilityExts = facilityInfo.extensions();
+    std::vector<std::string>::const_iterator facilityExtsBegin = facilityExts.begin();
+    std::vector<std::string>::const_iterator facilityExtsEnd = facilityExts.end();
+    const std::vector<std::string> allowedExts = this->allowedValues();
+
+
+    for( auto it = allowedExts.begin(); it != allowedExts.end(); ++it )
     {
-      match = true;
-      break;
+      if( std::find(facilityExtsBegin, facilityExtsEnd, *it) != facilityExtsEnd )
+      {
+        match = true;
+        break;
+      }
     }
   }
+  catch (Mantid::Kernel::Exception::NotFoundError&)
+  {} //facility could not be found, do nothing this will return the default match of false
 
   return match;
 }
@@ -271,7 +277,7 @@ std::string FileProperty::setLoadProperty(const std::string & propValue)
   {
     if( m_runFileProp ) // runfiles go through FileFinder::findRun
     {
-      std::set<std::string> allowedExts(allowedValues());
+      std::vector<std::string> allowedExts(allowedValues());
       std::vector<std::string> exts;
       if (!m_defaultExt.empty())
       {
@@ -285,7 +291,7 @@ std::string FileProperty::setLoadProperty(const std::string & propValue)
         std::transform(m_defaultExt.begin(), m_defaultExt.end(), upper.begin(), toupper);
         addExtension(upper, exts);
       }
-      for(std::set<std::string>::iterator it = allowedExts.begin();it!=allowedExts.end();++it)
+      for(auto it = allowedExts.begin();it!=allowedExts.end();++it)
       {
         std::string lower(*it);
         std::string upper(*it);

@@ -20,7 +20,72 @@ using namespace Mantid::DataHandling;
 
 DECLARE_ALGORITHM(RawFileInfo)
 
-/// Initialise
+/**
+ * Return the run title from the raw data structure
+ * @param isisRaw A reference to the ISISRAW data structure
+ * @return A string containing the title
+ */
+const std::string RawFileInfo::runTitle(const ISISRAW &isisRaw)
+{
+  return std::string(isisRaw.r_title, 80);
+}
+
+/**
+ * Return the run header from the raw data structure
+ * @param isisRaw A reference to the ISISRAW data structure
+ * @return A string containing the header
+ */
+const std::string RawFileInfo::runHeader(const ISISRAW &isisRaw)
+{
+  // coverity doesn't like assuming that the whole hdr struct
+  // has each array of characters laid out consecutively in memory
+  // so we shouldn't just do:
+  // header(isis_raw.hdr.hd_run, 69) to pull out everything
+
+  // Separate each section with a character. 80 chars + 6 separators
+  const auto & rawHdr = isisRaw.hdr;
+  char header[86] = {};
+  const size_t byte = sizeof(char);
+  const char fieldSep(' ');
+  char * start = header;
+
+  memcpy(start, rawHdr.inst_abrv, 3*byte);
+  start += 3;
+  memset(start, fieldSep, byte); // insert separator
+  start += 1;
+
+  memcpy(start, rawHdr.hd_run, 5*byte);
+  start += 5;
+  memset(start, fieldSep, byte);
+  start += 1;
+
+  memcpy(start, rawHdr.hd_user, 20*byte);
+  start += 20;
+  memset(start, fieldSep, byte);
+  start += 1;
+
+  memcpy(start, rawHdr.hd_title, 24*byte);
+  start += 24;
+  memset(start, fieldSep, byte);
+  start += 1;
+
+  memcpy(start, rawHdr.hd_date, 12*byte);
+  start += 12;
+  memset(start, fieldSep, byte);
+  start += 1;
+
+  memcpy(start, rawHdr.hd_time, 8*byte);
+  start += 8;
+  memset(start, fieldSep, byte);
+  start += 1;
+
+  memcpy(start, rawHdr.hd_dur, 8*byte);
+  // final field so no space afterward
+
+  return std::string(header, header + 86);
+}
+
+/// Create properties
 void RawFileInfo::init()
 {
   std::vector<std::string> exts;
@@ -48,15 +113,9 @@ void RawFileInfo::exec()
     throw Exception::FileError("Unable to open File:", filename);
   }
   
-  const std::string title(isis_raw.r_title,80);
+  const std::string title = RawFileInfo::runTitle(isis_raw);
+  const std::string header = RawFileInfo::runHeader(isis_raw);
 
-  //  First get the general information about the run
-  std::string header(isis_raw.hdr.hd_run, 69);
-  // Insert some spaces to tidy the string up a bit
-  header.insert(5, " ");
-  header.insert(26, " ");
-  header.insert(51, " ");
-  
   g_log.debug() << "Properties retrieved from " << filename << "\n"
 		<< "\tRun title: " << title
 		<< "\n\tRun header: " << header << "\n";

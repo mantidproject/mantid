@@ -53,6 +53,7 @@ namespace API
     if (m_handler)
     {
       delete m_handler;
+      m_handler=NULL;
     }
   }
 

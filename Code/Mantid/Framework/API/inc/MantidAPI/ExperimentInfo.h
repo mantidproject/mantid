@@ -155,7 +155,7 @@ namespace API
   private:
     /// Fill with given instrument parameter
     void populateWithParameter(Geometry::ParameterMap & paramMap,
-                               const std::string & name, const Geometry::XMLlogfile & paramInfo,
+                               const std::string & name, const Geometry::XMLInstrumentParameter & paramInfo,
                                const Run & runData);
 
     /// Detector grouping information

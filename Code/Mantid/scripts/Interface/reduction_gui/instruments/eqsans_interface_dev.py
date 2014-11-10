@@ -30,27 +30,27 @@ class EQSANSInterface(InstrumentInterface):
         Defines the widgets for EQSANS reduction
     """
     data_type = "Data files *.nxs *.dat (*.nxs *.dat)"
-    
+
     def __init__(self, name, settings):
         super(EQSANSInterface, self).__init__(name, settings)
-        
-        self.ERROR_REPORT_NAME = "sans_error_report.xml"    
-        self.LAST_REDUCTION_NAME = ".mantid_last_reduction.xml"    
-        
-        # Scripter object to interface with Mantid 
-        self.scripter = EQSANSReductionScripter(name=name, settings = self._settings)        
+
+        self.ERROR_REPORT_NAME = "sans_error_report.xml"
+        self.LAST_REDUCTION_NAME = ".mantid_last_reduction.xml"
+
+        # Scripter object to interface with Mantid
+        self.scripter = EQSANSReductionScripter(name=name, settings = self._settings)
 
         # Instrument description
         self.attach(SANSInstrumentWidget(settings = self._settings, data_proxy=DataProxy, data_type = self.data_type))
-        
+
         # Detector
-        self.attach(DetectorWidget(settings = self._settings, data_proxy=None, 
+        self.attach(DetectorWidget(settings = self._settings, data_proxy=None,
                                    data_type = self.data_type, use_sample_dc=True,
                                    options_callback = self.scripter.set_options))
 
         # Sample
         self.attach(DataSetsWidget(settings = self._settings, data_proxy=None, data_type = self.data_type))
-        
+
         # Catalog
         self.attach(SANSCatalogWidget(settings = self._settings, catalog_cls=DataCatalog))
 
@@ -61,7 +61,7 @@ class EQSANSInterface(InstrumentInterface):
 
         # Reduction output
         self.attach(OutputWidget(settings = self._settings))
-        
+
         # Tabs that only make sense within MantidPlot
         if IS_IN_MANTIDPLOT:
             # Remote jobs status
@@ -73,7 +73,7 @@ class EQSANSInterface(InstrumentInterface):
             Returns true if the instrument has simple and advanced views
         """
         return False
-    
+
     def is_cluster_enabled(self):
         """
             Returns true if the instrument is compatible with remote submission

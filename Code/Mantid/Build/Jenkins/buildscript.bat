@@ -8,6 +8,20 @@
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 "C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" --version 
+echo %sha1%
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Check the required build configuration
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+set BUILD_CONFIG=
+if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
+    set BUILD_CONFIG=Debug
+) else (
+if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
+    set BUILD_CONFIG=RelWithDbg
+) else (
+    set BUILD_CONFIG=Release
+    ))
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Get or update the third party dependencies
@@ -16,7 +30,7 @@ cd %WORKSPACE%\Code
 call fetch_Third_Party win64
 cd %WORKSPACE%
 
-set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib\win64\Python27;%PARAVIEW_DIR%\bin\Release;%PATH%
+set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib\win64\Python27;%PARAVIEW_DIR%\bin\%BUILD_CONFIG%;%PATH%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check whether this is a clean build (must have 'clean' in the job name)
@@ -45,16 +59,17 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=Release Mantid.sln
+
+msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=%BUILD_CONFIG% Mantid.sln
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the tests
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-"C:\Program Files (x86)\CMake 2.8\bin\ctest.exe" -C Release -j%BUILD_THREADS% --schedule-random --output-on-failure -E MantidPlot
+"C:\Program Files (x86)\CMake 2.8\bin\ctest.exe" -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure -E MantidPlot
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: Run GUI tests serially
-ctest -C Release --output-on-failure -R MantidPlot
+ctest -C %BUILD_CONFIG% --output-on-failure -R MantidPlot
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -62,9 +77,9 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if "%CLEANBUILD%" EQU "yes" (
     :: Build offline documentation
-    msbuild /nologo /nr:false /p:Configuration=Release docs/docs-qthelp.vcxproj
+    msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxproj
 
     :: ignore errors as the exit code of the build isn't correct
     ::if ERRORLEVEL 1 exit /B %ERRORLEVEL%
-    cpack -C Release --config CPackConfig.cmake
+    cpack -C %BUILD_CONFIG% --config CPackConfig.cmake
 )

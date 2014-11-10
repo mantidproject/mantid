@@ -201,6 +201,9 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 
@@ -219,6 +222,8 @@ namespace
 {
   /// static logger
   Mantid::Kernel::Logger g_log("ApplicationWindow");
+  /// ParaView plugins key
+  const char * PVPLUGINS_DIR_KEY = "pvplugins.directory";
 }
 
 extern "C"
@@ -355,10 +360,16 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   trySetParaviewPath(args);
 
   using Mantid::Kernel::ConfigService;
-  ConfigService::Instance(); // Starts logging
+  auto & config = ConfigService::Instance(); // Starts logging
   resultsLog->attachLoggingChannel(); // Must be done after logging starts
   using Mantid::API::FrameworkManager;
-  FrameworkManager::Instance(); // Starts logging
+  auto & framework = FrameworkManager::Instance(); // Loads framework libraries
+  // Load Paraview plugin libraries if possible
+  if(config.quickParaViewCheck())
+  {
+    // load paraview plugins
+    framework.loadPluginsUsingKey(PVPLUGINS_DIR_KEY);
+  }
 
   // Create UI object
   mantidUI = new MantidUI(this);
@@ -540,7 +551,8 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   connect(lv, SIGNAL(itemRenamed(Q3ListViewItem *, int, const QString &)),
       this, SLOT(renameWindow(Q3ListViewItem *, int, const QString &)));
 
-  connect(recent, SIGNAL(activated(int)), this, SLOT(openRecentProject(int)));
+  connect(recentProjectsMenu, SIGNAL(activated(int)), this, SLOT(openRecentProject(int)));
+  connect(recentFilesMenu, SIGNAL(activated(int)), this, SLOT(openRecentFile(int)));
 
   //apply user settings
   updateAppFonts();
@@ -574,13 +586,29 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   }
 
   // Need to show first time setup dialog?
-  using Mantid::Kernel::ConfigServiceImpl;
-  ConfigServiceImpl& config = ConfigService::Instance();
   std::string facility = config.getString("default.facility");
   std::string instrument = config.getString("default.instrument");
   if ( facility.empty() || instrument.empty() )
   {
     showFirstTimeSetup();
+  }
+  else
+  {
+    //check we can get the facility and instrument
+    try
+    {
+      const Mantid::Kernel::FacilityInfo& facilityInfo = config.getFacility(facility);
+      const Mantid::Kernel::InstrumentInfo& instrumentInfo = config.getInstrument(instrument);
+      g_log.information()<<"Default facility '" << facilityInfo.name() 
+        << "', instrument '" << instrumentInfo.name() << "'" << std::endl;
+    }
+    catch (Mantid::Kernel::Exception::NotFoundError&)
+    {
+      //failed to find the facility or instrument
+      g_log.error()<<"Could not find your default facility '" << facility 
+        <<"' or instrument '" << instrument << "' in facilities.xml, showing please select again." << std::endl;
+      showFirstTimeSetup();
+    }
   }
   using namespace Mantid::API;
   // Do this as late as possible to avoid unnecessary updates
@@ -784,6 +812,7 @@ void ApplicationWindow::initGlobalConstants()
     d_locale.setNumberOptions(QLocale::OmitGroupSeparator);
 
   d_decimal_digits = 13;
+  d_graphing_digits = 3;
 
   d_extended_open_dialog = true;
   d_extended_export_dialog = true;
@@ -799,6 +828,7 @@ void ApplicationWindow::initGlobalConstants()
   confirmClosePlot2D = false;
   confirmClosePlot3D = false;
   confirmCloseNotes = false;
+  d_inform_delete_workspace = true;
   d_inform_rename_table = false;
   confirmCloseInstrWindow=false;
 
@@ -879,15 +909,17 @@ void ApplicationWindow::initGlobalConstants()
   d_ASCII_import_read_only = false;
   d_ASCII_import_preview = true;
   d_preview_lines = 100;
+
 #ifdef Q_OS_MAC
-  d_ASCII_end_line = CR;
   d_eol = CR;
 #else
-  d_ASCII_end_line = LF;
+#ifdef _WIN32
+  d_eol = CRLF;
+#else
   d_eol = LF;
 #endif
+#endif
 
-  d_export_col_separator = "\t";
   d_export_col_names = false;
   d_export_col_comment = false;
   d_export_table_selection = false;
@@ -900,7 +932,6 @@ void ApplicationWindow::initGlobalConstants()
   // QPrinter constructor hangs and doesn't timeout.
 
   //	QPrinterInfo::availablePrinters();
-
 
   //	d_export_resolution = QPrinter().resolution();
   d_export_color = true;
@@ -931,7 +962,7 @@ void ApplicationWindow::initToolBars()
   addToolBar( Qt::TopToolBarArea, standardTools );
 
   standardTools->addAction(actionLoadFile);
-   standardTools->addSeparator ();
+  standardTools->addSeparator ();
   standardTools->addAction(actionNewProject);
   standardTools->addAction(actionOpenProj);
   standardTools->addAction(actionSaveProject);
@@ -1126,6 +1157,7 @@ void ApplicationWindow::insertTranslatedStrings()
   formatToolBar->setWindowTitle(tr("Format"));
 
   fileMenu->changeItem(recentMenuID, tr("&Recent Projects"));
+  fileMenu->changeItem(recentFilesMenuID, tr("R&ecent Files"));
 
   translateActionsStrings();
   customMenu(activeWindow());
@@ -1137,8 +1169,9 @@ void ApplicationWindow::initMainMenu()
   fileMenu->setObjectName("fileMenu");
   connect(fileMenu, SIGNAL(aboutToShow()), this, SLOT(fileMenuAboutToShow()));
 
-  recent = new QMenu(this);
   newMenu = new QMenu(this);
+  recentProjectsMenu = new QMenu(this);
+  recentFilesMenu = new QMenu(this);
   newMenu->setObjectName("newMenu");
   exportPlotMenu = new QMenu(this);
   exportPlotMenu->setObjectName("exportPlotMenu");
@@ -1310,7 +1343,7 @@ void ApplicationWindow::tableMenuAboutToShow()
   Table *table = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!table)
     return;
-  
+
   bool isFixedColumns = table->isFixedColumns();
   bool isEditable = table->isEditable();
 
@@ -1334,7 +1367,7 @@ void ApplicationWindow::tableMenuAboutToShow()
   if (isEditable) tableMenu->addAction(actionShowColumnValuesDialog);
   if (isEditable) tableMenu->addAction(actionTableRecalculate);
 
-  if (isEditable) 
+  if (isEditable)
   {
     fillMenu = tableMenu->addMenu (tr("&Fill Columns With"));
     fillMenu->addAction(actionSetAscValues);
@@ -3061,6 +3094,11 @@ Table* ApplicationWindow::newTable(const QString& caption, int r, int c)
   return w;
 }
 
+bool ApplicationWindow::isDeleteWorkspacePromptEnabled()
+{
+  return d_inform_delete_workspace;
+}
+
 Table* ApplicationWindow::newTable(int r, int c, const QString& name, const QString& legend)
 {
   Table* w = new Table(scriptingEnv(), r, c, legend, this, 0);
@@ -3473,14 +3511,22 @@ void ApplicationWindow::convertTableToWorkspace()
 void ApplicationWindow::convertTableToMatrixWorkspace()
 {
   Table* t = dynamic_cast<Table*>(activeWindow(TableWindow));
-  if (!t) return;
-  if(auto *mt = dynamic_cast<MantidTable*>(t))
-  {
-    mt = convertTableToTableWorkspace(t);
-    QHash<QString,QString> params;
-    params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
-    mantidUI->showAlgorithmDialog(QString("ConvertTableToMatrixWorkspace"),params);
-  }
+	if (!t) return;
+
+	// dynamic_cast is successful when converting MantidTable to MatrixWorkspace
+	auto *mt = dynamic_cast<MantidTable*>(t);
+
+	if (!mt){
+	// if dynamic_cast is unsuccessful, create MantidTable from which to create MatrixWorkspace
+		mt = convertTableToTableWorkspace(t);
+	}
+
+	if (mt){
+		QHash<QString,QString> params;
+		params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
+		mantidUI->showAlgorithmDialog(QString("ConvertTableToMatrixWorkspace"),params);
+	}
+
 }
 
 /**
@@ -4134,7 +4180,7 @@ ApplicationWindow * ApplicationWindow::plotFile(const QString& fn)
 
   t->importASCII(fn, app->columnSeparator, 0, app->renameColumns, app->strip_spaces, app->simplify_spaces,
       app->d_ASCII_import_comments, app->d_ASCII_comment_string,
-      app->d_ASCII_import_read_only, Table::Overwrite, app->d_ASCII_end_line);
+      app->d_ASCII_import_read_only, Table::Overwrite, app->d_eol);
   t->setCaptionPolicy(MdiSubWindow::Both);
   app->multilayerPlot(t, t->YColumns(),Graph::LineSymbols);
   QApplication::restoreOverrideCursor();
@@ -4160,7 +4206,7 @@ void ApplicationWindow::importASCII()
   d_ASCII_comment_string = import_dialog->commentString();
   d_ASCII_import_comments = import_dialog->importComments();
   d_ASCII_import_read_only = import_dialog->readOnly();
-  d_ASCII_end_line = (EndLineChar)import_dialog->endLineChar();
+  d_eol = (EndLineChar)import_dialog->endLineChar();
   saveSettings();
 
   importASCII(import_dialog->selectedFiles(),
@@ -4432,9 +4478,30 @@ ApplicationWindow* ApplicationWindow::open(const QString& fn, bool factorySettin
   return app;
 }
 
+void ApplicationWindow::openRecentFile(int index)
+{
+  QString fn = recentFilesMenu->text(index);
+  int pos = fn.find(" ",0);
+  fn = fn.right(fn.length()-pos-1);
+
+  QFile f(fn);
+  if (!f.exists()){
+    QMessageBox::critical(this, tr("MantidPlot - File Open Error"),//Mantid
+                          tr("The file: <b> %1 </b> <p>is not there anymore!"
+                             "<p>It will be removed from the list of recent files.").arg(fn));
+
+    recentFiles.remove(fn);
+    updateRecentFilesList();
+    return;
+  }
+
+  loadDataFileByName(fn);
+  saveSettings();   // save new list of recent files
+}
+
 void ApplicationWindow::openRecentProject(int index)
 {
-  QString fn = recent->text(index);
+  QString fn = recentProjectsMenu->text(index);
   int pos = fn.find(" ",0);
   fn = fn.right(fn.length()-pos-1);
 
@@ -4442,7 +4509,7 @@ void ApplicationWindow::openRecentProject(int index)
   if (!f.exists()){
     QMessageBox::critical(this, tr("MantidPlot - File Open Error"),//Mantid
         tr("The file: <b> %1 </b> <p>does not exist anymore!"
-            "<p>It will be removed from the list.").arg(fn));
+            "<p>It will be removed from the list of recent projects.").arg(fn));
 
     recentProjects.remove(fn);
     updateRecentProjectsList();
@@ -4472,6 +4539,7 @@ void ApplicationWindow::openRecentProject(int index)
     //close();
   }
 }
+
 
 ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factorySettings, bool newProject)
 {
@@ -5010,6 +5078,7 @@ void ApplicationWindow::readSettings()
   show_windows_policy = (ShowWindowsPolicy)settings.value("/ShowWindowsPolicy", ApplicationWindow::ActiveFolder).toInt();
 
   recentProjects = settings.value("/RecentProjects").toStringList();
+  recentFiles = settings.value("/RecentFiles").toStringList();
   //Follows an ugly hack added by Ion in order to fix Qt4 porting issues
   //(only needed on Windows due to a Qt bug?)
 #ifdef Q_OS_WIN
@@ -5020,9 +5089,18 @@ void ApplicationWindow::readSettings()
     if (s.remove(QRegExp("\\s")).isEmpty())
       recentProjects = QStringList();
   }
+
+  if (!recentFiles.isEmpty() && recentFiles[0].contains("^e"))
+    recentFiles = recentFiles[0].split("^e", QString::SkipEmptyParts);
+  else if (recentFiles.count() == 1){
+    QString s = recentFiles[0];
+    if (s.remove(QRegExp("\\s")).isEmpty())
+      recentFiles = QStringList();
+  }
 #endif
 
   updateRecentProjectsList();
+  updateRecentFilesList();
 
   changeAppStyle(settings.value("/Style", appStyle).toString());
   autoSave = settings.value("/AutoSave", false).toBool();
@@ -5139,6 +5217,7 @@ void ApplicationWindow::readSettings()
   confirmClosePlot2D = settings.value("/Plot2D", false).toBool();
   confirmClosePlot3D = settings.value("/Plot3D", false).toBool();
   confirmCloseNotes = settings.value("/Note", false).toBool();
+  d_inform_delete_workspace = settings.value("/DeleteWorkspace", true).toBool();
   d_inform_rename_table = settings.value("/RenameTable", false).toBool();
   confirmCloseInstrWindow=settings.value("/InstrumentWindow", false).toBool();
   settings.endGroup(); // Confirmations
@@ -5356,12 +5435,9 @@ void ApplicationWindow::readSettings()
   d_ASCII_import_read_only = settings.value("/ImportReadOnly", false).toBool();
   d_ASCII_import_preview = settings.value("/Preview", true).toBool();
   d_preview_lines = settings.value("/PreviewLines", 100).toInt();
-  d_ASCII_end_line = (EndLineChar)settings.value("/EndLineCharacter", d_ASCII_end_line).toInt();
   settings.endGroup(); // Import ASCII
 
   settings.beginGroup("/ExportASCII");
-  d_export_col_separator = settings.value("/ColumnSeparator", "\\t").toString();
-  d_export_col_separator.replace("\\t", "\t").replace("\\s", " ");
   d_export_col_names = settings.value("/ExportLabels", false).toBool();
   d_export_col_comment = settings.value("/ExportComments", false).toBool();
 
@@ -5487,6 +5563,7 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/Language", appLanguage);
   settings.setValue("/ShowWindowsPolicy", show_windows_policy);
   settings.setValue("/RecentProjects", recentProjects);
+  settings.setValue("/RecentFiles", recentFiles);
   settings.setValue("/Style", appStyle);
   settings.setValue("/AutoSave", autoSave);
   settings.setValue("/AutoSaveTime", autoSaveTime);
@@ -5563,6 +5640,7 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/Plot2D", confirmClosePlot2D);
   settings.setValue("/Plot3D", confirmClosePlot3D);
   settings.setValue("/Note", confirmCloseNotes);
+  settings.setValue("/DeleteWorkspace",d_inform_delete_workspace);
   settings.setValue("/RenameTable", d_inform_rename_table);
   settings.value("/InstrumentWindow", confirmCloseInstrWindow).toBool();
   settings.endGroup(); // Confirmations
@@ -5744,12 +5822,9 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/ImportReadOnly", d_ASCII_import_read_only);
   settings.setValue("/Preview", d_ASCII_import_preview);
   settings.setValue("/PreviewLines", d_preview_lines);
-  settings.setValue("/EndLineCharacter", (int)d_ASCII_end_line);
   settings.endGroup(); // ImportASCII
 
   settings.beginGroup("/ExportASCII");
-  sep = d_export_col_separator;
-  settings.setValue("/ColumnSeparator", sep.replace("\t", "\\t").replace(" ", "\\s"));
   settings.setValue("/ExportLabels", d_export_col_names);
   settings.setValue("/ExportComments", d_export_col_comment);
   settings.setValue("/ExportSelection", d_export_table_selection);
@@ -6186,7 +6261,7 @@ void ApplicationWindow::savetoNexusFile()
     savedatainNexusFormat(wsName,fileName.toStdString());
 
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(fileName).absoluteDir().path());
-
+    updateRecentFilesList(fileName);
   }
 }
 
@@ -6195,18 +6270,26 @@ void ApplicationWindow::loadDataFile()
   // Ask user for file
   QString fn = QFileDialog::getOpenFileName( 0, tr("Mantidplot - Open file to load"), AlgorithmInputHistory::Instance().getPreviousDirectory());
   if(fn != "") {
-     QFileInfo fnInfo(fn);
-     AlgorithmInputHistory::Instance().setPreviousDirectory(fnInfo.absoluteDir().path());
-     if( fnInfo.suffix() == "py")
-     { // We have a python file, just load it into script window
-       loadScript( fn, true );
-     }
-     else if(mantidUI)
-     {  // Run Load algorithm on file
-       QHash<QString,QString> params;
-       params["Filename"] = fn;
-       mantidUI->showAlgorithmDialog(QString("Load"),params);
-     }
+    loadDataFileByName(fn);
+  }
+  saveSettings();   // save new list of recent files
+}
+
+void ApplicationWindow::loadDataFileByName(QString fn)
+{
+  QFileInfo fnInfo(fn);
+  AlgorithmInputHistory::Instance().setPreviousDirectory(fnInfo.absoluteDir().path());
+  if( fnInfo.suffix() == "py")
+  {
+    // We have a python file, just load it into script window
+    loadScript( fn, true );
+  }
+  else if(mantidUI)
+  {
+    // Run Load algorithm on file
+    QHash<QString,QString> params;
+    params["Filename"] = fn;
+    mantidUI->showAlgorithmDialog(QString("Load"),params);
   }
 }
 
@@ -6563,6 +6646,7 @@ void ApplicationWindow::showExportASCIIDialog()
 
     ExportDialog* ed = new ExportDialog(tableName, this, Qt::WindowContextHelpButtonHint);
     ed->setAttribute(Qt::WA_DeleteOnClose);
+    ed->setColumnSeparator(columnSeparator);
     ed->exec();
   }
 }
@@ -6887,7 +6971,7 @@ void ApplicationWindow::showColMenu(int c)
   Table *w = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!w)
     return;
-  
+
   bool isSortable = w->isSortable();
   bool isFixedColumns = w->isFixedColumns();
   bool isEditable = w->isEditable();
@@ -9256,7 +9340,9 @@ void ApplicationWindow::fileMenuAboutToShow()
   openMenu->addAction(actionOpenProj);
   openMenu->addAction(actionLoadFile);
 
-  recentMenuID = fileMenu->insertItem(tr("&Recent Projects"), recent);
+  recentMenuID = fileMenu->insertItem(tr("&Recent Projects"), recentProjectsMenu);
+
+  recentFilesMenuID = fileMenu->insertItem(tr("R&ecent Files"), recentFilesMenu);
 
   fileMenu->insertSeparator();
   fileMenu->addAction(actionManageDirs);
@@ -10147,7 +10233,7 @@ void ApplicationWindow::showTableContextMenu(bool selection)
   Table *t = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!t)
     return;
-  
+
   bool isEditable = t->isEditable();
   bool isFixedColumns = t->isFixedColumns();
 
@@ -14414,10 +14500,24 @@ void ApplicationWindow::updateRecentProjectsList()
   while ((int)recentProjects.size() > MaxRecentProjects)
     recentProjects.pop_back();
 
-  recent->clear();
+  recentProjectsMenu->clear();
 
   for (int i = 0; i<(int)recentProjects.size(); i++ )
-    recent->insertItem("&" + QString::number(i+1) + " " + recentProjects[i]);
+    recentProjectsMenu->insertItem("&" + QString::number(i+1) + " " + recentProjects[i]);
+}
+
+void ApplicationWindow::updateRecentFilesList(QString fname)
+{
+  if (!fname.isEmpty()) {
+    recentFiles.remove(fname);
+    recentFiles.push_front(fname);
+  }
+  while ((int)recentFiles.size() > MaxRecentFiles)
+    recentFiles.pop_back();
+
+  recentFilesMenu->clear();
+  for (int i = 0; i<(int)recentFiles.size(); i++ )
+    recentFilesMenu->insertItem("&" + QString::number(i+1) + " " + recentFiles[i]);
 }
 
 void ApplicationWindow::translateCurveHor()
@@ -14637,34 +14737,14 @@ void ApplicationWindow::fitMultiPeak(int profile)
   }
 }
 
-//void ApplicationWindow::showSupportPage()
-//{
-//	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/contracts.html"));
-//}
-
-
-//void ApplicationWindow::showDonationsPage()
-//{
-//	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/why_donate.html"));
-//}
-
-//void ApplicationWindow::downloadManual()
-//{
-//	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/manuals.html"));
-//}
-//
-//void ApplicationWindow::downloadTranslation()
-//{
-//	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/translations.html"));
-//}
-
 void ApplicationWindow::showHomePage()
 {
   QDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
 }
 void ApplicationWindow::showMantidConcepts()
 {
-  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Category:Concepts"));
+  //QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Category:Concepts"));
+  HelpWindow::showConcept(this);
 }
 void ApplicationWindow::showalgorithmDescriptions()
 {
@@ -14695,12 +14775,6 @@ void ApplicationWindow::showmantidplotHelp()
   HelpWindow::showPage(this);
 }
 
-//
-//void ApplicationWindow::showForums()
-//{
-//	QDesktopServices::openUrl(QUrl("https://developer.berlios.de/forum/?group_id=6626"));
-//}
-
 void ApplicationWindow::showBugTracker()
 {
   QDesktopServices::openUrl(QUrl("mailto:mantid-help@mantidproject.org"));
@@ -14725,18 +14799,18 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
     return;
   }
 
+  bool exec(false), quit(false), default_settings(false),
+       unknown_opt_found(false);
+  QString file_name;
   QString str;
-  bool exec = false;
-  bool quit = false;
-  bool default_settings = false;
+  int filename_argindex(0), counter(0);
   foreach(str, args) {
     if( (str == "-v" || str == "--version") ||
         (str == "-r" || str == "--revision") ||
         (str == "-a" || str == "--about") ||
         (str == "-h" || str == "--help") )
     {
-      QMessageBox::critical(this, tr("MantidPlot - Error"),//Mantid
-          tr("<b> %1 </b>: This command line option must be used without other arguments!").arg(str));
+      g_log.warning() << str.ascii() << ": This command line option must be used without other arguments!";
     }
     else if( (str == "-d" || str == "--default-settings"))
     {
@@ -14751,24 +14825,36 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
     {
       exec = true;
       quit = true;
-      // Minimize ourselves
-      this->showMinimized();
     }
-    else if (str.startsWith("-") || str.startsWith("--"))
+    // if filename not found yet then these are all program arguments so we should
+    // know what they all are
+    else if (file_name.isEmpty() && (str.startsWith("-") || str.startsWith("--")))
     {
-      QMessageBox::critical(this, tr("MantidPlot - Error"),//Mantid
-          tr("<b> %1 </b> unknown command line option!").arg(str) + "\n" + tr("Type %1 to see the list of the valid options.").arg("'MantidPlot -h'"));
+      g_log.warning() << "'" << str.ascii() << "' unknown command line option!\n"
+                      << "Type 'MantidPlot -h'' to see the list of the valid options.";
+      unknown_opt_found = true;
+      break;
     }
+    else
+    {
+      // First option that doesn't start "-" is considered a filename and the rest arguments to that file
+      if(file_name.isEmpty())
+      {
+        file_name = str;
+        filename_argindex = counter;
+      }
+    }
+    ++counter;
   }
 
-  QString file_name = args[num_args-1]; // last argument
-  if(file_name.startsWith("-")){// no file name given
+  if(unknown_opt_found || file_name.isEmpty())
+  {// no file name given
     initWindow();
     savedProject();
     return;
   }
-
-  if (!file_name.isEmpty()){
+  else
+  {
     QFileInfo fi(file_name);
     if (fi.isDir()){
       QMessageBox::critical(this, tr("MantidPlot - Error opening file"),//Mantid
@@ -14787,10 +14873,17 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
     workingDir = fi.dirPath(true);
     saveSettings();//the recent projects must be saved
 
+    QStringList cmdArgs = args;
+    cmdArgs.erase(cmdArgs.begin(), cmdArgs.begin() + filename_argindex);
+    // Set as arguments in script environment
+    scriptingEnv()->setSysArgs(cmdArgs);
+
     if (exec)
     {
       if(quit)
       {
+        // Minimize ourselves
+        this->showMinimized();
         try
         {
           executeScriptFile(file_name, Script::Asynchronous);
@@ -16356,7 +16449,7 @@ ApplicationWindow::~ApplicationWindow()
   }
   delete current_folder;
 
-  QApplication::clipboard()->clear(QClipboard::Clipboard);
+  
 
   btnPointer->setChecked(true);
   delete mantidUI;
@@ -16473,7 +16566,7 @@ ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool existi
  *  Runs a script from a file. Mainly useful for automatically running scripts
  * @param filename The full path to the file
  * @param execMode How should the script be executed. If asynchronous
- * this method waits on the thread finishing
+ *                 this method waits on the thread finishing
  */
 void ApplicationWindow::executeScriptFile(const QString & filename, const Script::ExecutionMode execMode)
 {
@@ -17837,7 +17930,7 @@ void ApplicationWindow::changeToDocked(MdiSubWindow* w)
   {
     fw->removeMdiSubWindow();
     removeFloatingWindow(fw);
-    // main window must be closed or application will freeze 
+    // main window must be closed or application will freeze
     fw->close();
     // create the outer docked window.
     addMdiSubWindowAsDocked(w);
@@ -17996,9 +18089,9 @@ void ApplicationWindow::activateNewWindow()
       if (w->widget() != static_cast<QWidget*>(current))
       {
         MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(w->widget());
-          if (sw && 
-              sw->status() != MdiSubWindow::Minimized && 
-              sw->status() != MdiSubWindow::Hidden && 
+          if (sw &&
+              sw->status() != MdiSubWindow::Minimized &&
+              sw->status() != MdiSubWindow::Hidden &&
               folder->hasWindow(sw))
         {
           newone = sw;
@@ -18172,7 +18265,7 @@ bool ApplicationWindow::hasTiledWindowOpen()
 }
 
 /**
- * Return a pointer to the topmost TiledWindow that contains a point. 
+ * Return a pointer to the topmost TiledWindow that contains a point.
  * If the TiledWindow is overlapped by another window return NULL.
  * If there is no TiledWindows or the point doesn't fall inside
  * of any of them return NULL.

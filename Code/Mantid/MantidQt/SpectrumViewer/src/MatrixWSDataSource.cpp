@@ -2,6 +2,7 @@
  *  File: MatrixWSDataSource.cpp
  */
 
+#include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <sstream>
 #include <math.h>
@@ -9,18 +10,27 @@
 #include <QThread>
 
 #include "MantidQtSpectrumViewer/MatrixWSDataSource.h"
+#include "MantidQtSpectrumViewer/EModeHandler.h"
 #include "MantidQtSpectrumViewer/SVUtils.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/Run.h"
-#include "MantidQtSpectrumViewer/ErrorHandler.h"
+
 
 using namespace Mantid;
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+
+
+namespace
+{
+  Kernel::Logger g_log("SpectrumView");
+}
+
 
 namespace MantidQt
 {
@@ -30,24 +40,21 @@ namespace SpectrumView
 /**
  * Construct a DataSource object around the specifed MatrixWorkspace.
  *
- * @param mat_ws  Shared pointer to the matrix workspace being "wrapped"
+ * @param matWs  Shared pointer to the matrix workspace being "wrapped"
  */
-MatrixWSDataSource::MatrixWSDataSource( MatrixWorkspace_const_sptr mat_ws )
-                 :SpectrumDataSource( 0.0, 1.0, 0.0, 1.0, 0, 0 )  // some defaults
+MatrixWSDataSource::MatrixWSDataSource( MatrixWorkspace_const_sptr matWs ) :
+  SpectrumDataSource( 0.0, 1.0, 0.0, 1.0, 0, 0 ),
+  m_matWs(matWs),
+  m_emodeHandler(NULL)
 {
-  this->mat_ws = mat_ws;
+  m_totalXMin = matWs->getXMin();
+  m_totalXMax = matWs->getXMax();
 
-  total_xmin = mat_ws->getXMin(); 
-  total_xmax = mat_ws->getXMax(); 
+  m_totalYMin = 0;  // Y direction is spectrum index
+  m_totalYMax = (double)matWs->getNumberHistograms();
 
-  total_ymin = 0;                 // y direction is spectrum index
-  total_ymax = (double)mat_ws->getNumberHistograms();
-
-  total_rows = mat_ws->getNumberHistograms();
-
-  total_cols = 1000000;              // Default data resolution
-
-  saved_emode_handler = 0;
+  m_totalRows = matWs->getNumberHistograms();
+  m_totalCols = 1000000;  // Default data resolution
 }
 
 
@@ -55,28 +62,29 @@ MatrixWSDataSource::~MatrixWSDataSource()
 {
 }
 
+
 bool MatrixWSDataSource::hasData(const std::string& wsName,
                                  const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
-  if (mat_ws->getName() == wsName)
+  if (m_matWs->getName() == wsName)
     return true;
 
-  Mantid::API::MatrixWorkspace_const_sptr other
-      = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+  Mantid::API::MatrixWorkspace_const_sptr other = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   if (!other)
     return false;
 
-  return (mat_ws == other);
+  return (m_matWs == other);
 }
+
 
 /**
  * Get the smallest 'x' value covered by the data.  Must override base class
  * method, since the DataSource can be changed!
  */
-double MatrixWSDataSource::GetXMin()
+double MatrixWSDataSource::getXMin()
 {
-  total_xmin = mat_ws->getXMin(); 
-  return total_xmin;
+  m_totalXMin = m_matWs->getXMin();
+  return m_totalXMin;
 }
 
 
@@ -84,10 +92,10 @@ double MatrixWSDataSource::GetXMin()
  * Get the largest 'x' value covered by the data.  Must override base class
  * method, since the DataSource can be changed!
  */
-double MatrixWSDataSource::GetXMax()
+double MatrixWSDataSource::getXMax()
 {
-  total_xmax = mat_ws->getXMax(); 
-  return total_xmax;
+  m_totalXMax = m_matWs->getXMax();
+  return m_totalXMax;
 }
 
 
@@ -95,10 +103,10 @@ double MatrixWSDataSource::GetXMax()
  * Get the largest 'y' value covered by the data.  Must override base class
  * method, since the DataSource can be changed!
  */
-double MatrixWSDataSource::GetYMax()
+double MatrixWSDataSource::getYMax()
 {
-  total_ymax = (double)mat_ws->getNumberHistograms();
-  return total_ymax;
+  m_totalYMax = (double)m_matWs->getNumberHistograms();
+  return m_totalYMax;
 }
 
 
@@ -106,161 +114,152 @@ double MatrixWSDataSource::GetYMax()
  * Get the total number of rows the data is divided into.  Must override base
  * class method, since the DataSource can be changed!
  */
-size_t MatrixWSDataSource::GetNRows()
+size_t MatrixWSDataSource::getNRows()
 {
-  total_ymax = (double)mat_ws->getNumberHistograms();
-  return total_rows;
+  m_totalYMax = (double)m_matWs->getNumberHistograms();
+  return m_totalRows;
 }
 
 
 /**
  * Get a data array covering the specified range of data, at the specified
- * resolution.  NOTE: The calling code is responsible for deleting the 
+ * resolution.  NOTE: The calling code is responsible for deleting the
  * DataArray that is constructed in and returned by this method.
  *
- * @param xmin      Left edge of region to be covered.
- * @param xmax      Right edge of region to be covered.
- * @param ymin      Bottom edge of region to be covered.
- * @param ymax      Top edge of region to be covered.
- * @param n_rows    Number of rows to return. If the number of rows is less
- *                  than the actual number of data rows in [ymin,ymax], the 
- *                  data will be subsampled, and only the specified number 
- *                  of rows will be returned.
- * @param n_cols    The specrum data will be rebinned using the specified
- *                  number of colums.
- * @param is_log_x  Flag indicating whether or not the data should be
- *                  binned logarithmically. 
+ * @param xMin    Left edge of region to be covered.
+ * @param xMax    Right edge of region to be covered.
+ * @param yMin    Bottom edge of region to be covered.
+ * @param yMax    Top edge of region to be covered.
+ * @param numRows Number of rows to return. If the number of rows is less
+ *                than the actual number of data rows in [yMin,yMax], the
+ *                data will be subsampled, and only the specified number
+ *                of rows will be returned.
+ * @param numCols The specrum data will be rebinned using the specified
+ *                number of colums.
+ * @param isLogX  Flag indicating whether or not the data should be
+ *                binned logarithmically.
  */
-DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
-                                             double ymin,   double  ymax,
-                                             size_t n_rows, size_t  n_cols,
-                                             bool   is_log_x )
+DataArray_const_sptr MatrixWSDataSource::getDataArray( double xMin,    double  xMax,
+                                                       double yMin,    double  yMax,
+                                                       size_t numRows, size_t  numCols,
+                                                       bool   isLogX )
 {
-/*
-  std::cout << "Start MatrixWSDataSource::GetDataArray " << std::endl;
-  std::cout << "  xmin   = " << xmin 
-            << "  xmax   = " << xmax 
-            << "  ymin   = " << ymin 
-            << "  ymax   = " << ymax 
-            << "  n_rows = " << n_rows
-            << "  n_cols = " << n_cols << std::endl;
-*/
-                                                  // since we're rebinning, the
-                                                  // columns can be arbitrary
-                                                  // but rows must be aligned 
-                                                  // to get whole spectra
+  /* Since we're rebinning, the columns can be arbitrary */
+  /* but rows must be aligned to get whole spectra */
   size_t first_row;
-  SVUtils::CalculateInterval( total_ymin, total_ymax, total_rows,
-                              first_row, ymin, ymax, n_rows );
+  SVUtils::CalculateInterval( m_totalYMin, m_totalYMax, m_totalRows,
+                              first_row, yMin, yMax, numRows );
 
-  float* new_data = new float[n_rows * n_cols];   // this array is deleted in
-                                                  // the DataArrray destructor
-  MantidVec x_scale;
-  x_scale.resize(n_cols+1);
-  if ( is_log_x )
+  std::vector<float> newData(numRows * numCols);
+
+  MantidVec xScale;
+  xScale.resize(numCols + 1);
+  if ( isLogX )
   {
-    for ( size_t i = 0; i < n_cols+1; i++ )
+    for ( size_t i = 0; i < numCols+1; i++ )
     {
-      x_scale[i] = xmin * exp ( (double)i / (double)n_cols * log(xmax/xmin) );  
+      xScale[i] = xMin * exp ( (double)i / (double)numCols * log(xMax/xMin) );
     }
   }
   else
   {
-    double dx = (xmax - xmin)/((double)n_cols + 1.0);
-    for ( size_t i = 0; i < n_cols+1; i++ )
+    double dx = (xMax - xMin) / ((double)numCols + 1.0);
+    for ( size_t i = 0; i < numCols+1; i++ )
     {
-      x_scale[i] = xmin + (double)i * dx;
+      xScale[i] = xMin + (double)i * dx;
     }
-  }                                                // choose spectra from  
-                                                   // required range of 
-                                                   // spectrum indexes 
-  double y_step = (ymax - ymin) / (double)n_rows;
-  double d_y_index;
+  }
 
-  MantidVec y_vals;
+  // Choose spectra from required range of spectrum indexes
+  double yStep = (yMax - yMin) / (double)numRows;
+  double dYIndex;
+
+  MantidVec yVals;
   MantidVec err;
-  y_vals.resize(n_cols);
-  err.resize(n_cols);
+  yVals.resize(numCols);
+  err.resize(numCols);
   size_t index = 0;
-  for ( size_t i = 0; i < n_rows; i++ )
+  for ( size_t i = 0; i < numRows; i++ )
   {
-    double mid_y = ymin + ((double)i + 0.5) * y_step;
-    SVUtils::Interpolate( total_ymin, total_ymax, mid_y,
-                                 0.0, (double)total_rows, d_y_index );
-    size_t source_row = (size_t)d_y_index;
-    y_vals.clear();
+    double midY = yMin + ((double)i + 0.5) * yStep;
+    SVUtils::Interpolate( m_totalYMin, m_totalYMax,         midY,
+                          0.0,         (double)m_totalRows, dYIndex );
+    size_t sourceRow = (size_t)dYIndex;
+    yVals.clear();
     err.clear();
-    y_vals.resize(n_cols,0);
-    err.resize(n_cols,0);
+    yVals.resize(numCols, 0);
+    err.resize(numCols, 0);
 
-    mat_ws->generateHistogram( source_row, x_scale, y_vals, err, true );
-    for ( size_t col = 0; col < n_cols; col++ )
+    m_matWs->generateHistogram( sourceRow, xScale, yVals, err, true );
+    for ( size_t col = 0; col < numCols; col++ )
     {
-      new_data[index] = (float)y_vals[col];
+      newData[index] = (float)yVals[col];
       index++;
     }
   }
-                                // The calling code is responsible for deleting 
-                                // the DataArray when it is done with it      
-  DataArray* new_data_array = new DataArray( xmin, xmax, ymin, ymax,
-                                             is_log_x, 
-                                             n_rows, n_cols, new_data);
-  return new_data_array;
+
+  // The calling code is responsible for deleting the DataArray when it is done with it
+  DataArray_const_sptr newDataArray( new DataArray( xMin, xMax, yMin, yMax,
+                                                    isLogX,
+                                                    numRows, numCols,
+                                                    newData) );
+
+  return newDataArray;
 }
 
 
 /**
  * Get a data array covering the full range of data.
  *
- * @param is_log_x  Flag indicating whether or not the data should be
- *                  binned logarithmically.
+ * @param isLogX  Flag indicating whether or not the data should be
+ *                binned logarithmically.
  */
-DataArray * MatrixWSDataSource::GetDataArray( bool is_log_x )
+DataArray_const_sptr MatrixWSDataSource::getDataArray( bool isLogX )
 {
-  return GetDataArray( total_xmin, total_xmax, total_ymin, total_ymax,
-                       total_rows, total_cols, is_log_x );
+  return getDataArray( m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax,
+                       m_totalRows, m_totalCols, isLogX );
 }
 
 
 /**
  * Set the class that gets the emode & efixed info from the user.
  *
- * @param emode_handler  Pointer to the user interface handler that
- *                       can provide user values for emode and efixed.
+ * @param emodeHandler  Pointer to the user interface handler that
+ *                      can provide user values for emode and efixed.
  */
-void MatrixWSDataSource::SetEModeHandler( EModeHandler* emode_handler )
+void MatrixWSDataSource::setEModeHandler( EModeHandler* emodeHandler )
 {
-  saved_emode_handler = emode_handler;
+  m_emodeHandler = emodeHandler;
 }
 
 
 /**
  * Clear the vector of strings and then add pairs of strings giving information
- * about the specified point, x, y.  The first string in a pair should 
+ * about the specified point, x, y.  The first string in a pair should
  * generally be a string describing the value being presented and the second
  * string should contain the value.
- *  
+ *
  * @param x    The x-coordinate of the point of interest in the data.
  * @param y    The y-coordinate of the point of interest in the data.
  * @param list Vector that will be filled out with the information strings.
  */
-void MatrixWSDataSource::GetInfoList( double x, 
+void MatrixWSDataSource::getInfoList( double x,
                                       double y,
                                       std::vector<std::string> &list )
 {
+  // First get the info that is always available for any matrix workspace
   list.clear();
-                                        // first get the info that is always
-                                        // available for any matrix workspace
-  int row = (int)y;
-  RestrictRow( row );
 
-  const ISpectrum* spec = mat_ws->getSpectrum( row );
+  int row = (int)y;
+  restrictRow( row );
+
+  const ISpectrum* spec = m_matWs->getSpectrum( row );
 
   double spec_num = spec->getSpectrumNo();
   SVUtils::PushNameValue( "Spec Num", 8, 0, spec_num, list );
 
   std::string x_label = "";
-  Unit_sptr& old_unit = mat_ws->getAxis(0)->unit();
+  Unit_sptr& old_unit = m_matWs->getAxis(0)->unit();
   if ( old_unit != 0 )
   {
     x_label = old_unit->caption();
@@ -270,54 +269,55 @@ void MatrixWSDataSource::GetInfoList( double x,
   std::set<detid_t> ids = spec->getDetectorIDs();
   if ( !ids.empty() )
   {
-    std::set<detid_t>::iterator it = ids.begin();
-    double d_id = (double)*it;
-    SVUtils::PushNameValue( "Det ID", 8, 0, d_id, list );
+    list.push_back("Det ID");
+    const int64_t id = static_cast<int64_t>(*(ids.begin()));
+    list.push_back(boost::lexical_cast<std::string>(id));
   }
 
-  IDetector_const_sptr det;          // now try to do various unit conversions
-  try                                // to get equivalent info
-  {                                  // first make sure we can get the needed
-                                     // information
+  /* Now try to do various unit conversions to get equivalent info */
+  /* first make sure we can get the needed information */
+  IDetector_const_sptr det;
+  try
+  {
+
     if ( old_unit == 0 )
     {
-      ErrorHandler::Error("No UNITS on MatrixWorkspace X-axis");
+      g_log.debug("No UNITS on MatrixWorkspace X-axis");
       return;
     }
 
-    Instrument_const_sptr instrument = mat_ws->getInstrument();
+    Instrument_const_sptr instrument = m_matWs->getInstrument();
     if ( instrument == 0 )
     {
-      ErrorHandler::Error("No INSTRUMENT on MatrixWorkspace");
+      g_log.debug("No INSTRUMENT on MatrixWorkspace");
       return;
     }
 
     IComponent_const_sptr source = instrument->getSource();
     if ( source == 0 )
     {
-      ErrorHandler::Error("No SOURCE on instrument in MatrixWorkspace");
+      g_log.debug("No SOURCE on instrument in MatrixWorkspace");
       return;
     }
 
     IComponent_const_sptr sample = instrument->getSample();
     if ( sample == 0 )
     {
-      ErrorHandler::Error("No SAMPLE on instrument in MatrixWorkspace");
+      g_log.debug("No SAMPLE on instrument in MatrixWorkspace");
       return;
     }
 
-    det = mat_ws->getDetector( row );
+    det = m_matWs->getDetector( row );
     if ( det == 0 )
     {
-      std::ostringstream message;
-      message << "No DETECTOR for row " << row << " in MatrixWorkspace";
-      ErrorHandler::Error( message.str() );
+      g_log.debug() << "No DETECTOR for row " << row << " in MatrixWorkspace" << std::endl;
       return;
     }
 
     double l1        = source->getDistance(*sample);
-    double l2        = 0;
-    double two_theta = 0;
+    double l2        = 0.0;
+    double two_theta = 0.0;
+    double azi       = 0.0;
     if ( det->isMonitor() )
     {
       l2 = det->getDistance(*source);
@@ -326,71 +326,68 @@ void MatrixWSDataSource::GetInfoList( double x,
     else
     {
       l2 = det->getDistance(*sample);
-      two_theta = mat_ws->detectorTwoTheta(det);
+      two_theta = m_matWs->detectorTwoTheta(det);
+      azi = det->getPhi();
     }
-                        // For now, only support diffractometers and monitors.
-                        // We need a portable way to determine emode and
-                        // and efixed that will work for any matrix workspace!
+    SVUtils::PushNameValue( "L2", 8, 4, l2, list );
+    SVUtils::PushNameValue( "TwoTheta", 8, 2, two_theta*180./M_PI, list );
+    SVUtils::PushNameValue( "Azimuthal", 8, 2, azi*180./M_PI, list );
+
+    /* For now, only support diffractometers and monitors. */
+    /* We need a portable way to determine emode and */
+    /* and efixed that will work for any matrix workspace! */
     int    emode  = 0;
-    double efixed = 0;
-    double delta  = 0;
+    double efixed = 0.0;
+    double delta  = 0.0;
 
-//  std::cout << "Start of checks for emode" << std::endl;
-
-                        // First try to get emode & efixed from the user
-    if ( saved_emode_handler != 0 )
+    // First try to get emode & efixed from the user
+    if ( m_emodeHandler != NULL )
     {
-      efixed = saved_emode_handler->GetEFixed();
+      efixed = m_emodeHandler->getEFixed();
       if ( efixed != 0 )
       {
-        emode = saved_emode_handler->GetEMode();
+        emode = m_emodeHandler->getEMode();
         if ( emode == 0 )
         {
-          ErrorHandler::Error("EMode invalid, spectrometer needed if emode != 0");
-          ErrorHandler::Error("Assuming Direct Geometry Spectrometer....");
+          g_log.information("EMode invalid, spectrometer needed if emode != 0");
+          g_log.information("Assuming Direct Geometry Spectrometer....");
           emode = 1;
         }
       }
     }
 
-//  std::cout << "Done with calls to GetEFixed and GetEMode" << std::endl;
-//  std::cout << "EMode  = " << emode  << std::endl;
-//  std::cout << "EFixed = " << efixed << std::endl;
-
-    if ( efixed == 0 )    // Did NOT get emode & efixed from user, try getting 
-    {                     // direct geometry information from the run object
-      const API::Run & run = mat_ws->run(); 
-      if ( run.hasProperty("Ei") )              
+    // Did NOT get emode & efixed from user, try getting direct geometry information from the run object
+    if ( efixed == 0 )
+    {
+      const API::Run & run = m_matWs->run();
+      if ( run.hasProperty("Ei") )
       {
         Kernel::Property* prop = run.getProperty("Ei");
         efixed = boost::lexical_cast<double,std::string>(prop->value());
-        emode  = 1;                         // only correct if direct geometry 
+        emode  = 1;                         // only correct if direct geometry
       }
       else if ( run.hasProperty("EnergyRequested") )
       {
         Kernel::Property* prop = run.getProperty("EnergyRequested");
         efixed = boost::lexical_cast<double,std::string>(prop->value());
-        emode  = 1;     
+        emode  = 1;
       }
       else if ( run.hasProperty("EnergyEstimate") )
       {
         Kernel::Property* prop = run.getProperty("EnergyEstimate");
         efixed = boost::lexical_cast<double,std::string>(prop->value());
-        emode  = 1;     
+        emode  = 1;
       }
     }
 
-//  std::cout << "Done with getting info from run" << std::endl;
-//  std::cout << "EMode  = " << emode  << std::endl;
-//  std::cout << "EFixed = " << efixed << std::endl;
-
-    if ( efixed == 0 )    // finally, try getting indirect geometry information 
-    {                     // from the detector object
+    // Finally, try getting indirect geometry information from the detector object
+    if ( efixed == 0 )
+    {
       if ( !(det->isMonitor() && det->hasParameter("Efixed")))
       {
         try
         {
-          const ParameterMap& pmap = mat_ws->constInstrumentParameters();
+          const ParameterMap& pmap = m_matWs->constInstrumentParameters();
           Parameter_sptr par = pmap.getRecursive(det.get(),"Efixed");
           if (par)
           {
@@ -400,36 +397,26 @@ void MatrixWSDataSource::GetInfoList( double x,
         }
         catch ( std::runtime_error& )
         {
-          std::ostringstream message;
-          message << "Failed to get Efixed from detector ID: " 
-                  << det->getID() << " in MatrixWSDataSource";
-          ErrorHandler::Error( message.str() );
+          g_log.debug() << "Failed to get Efixed from detector ID: "
+                        << det->getID() << " in MatrixWSDataSource" << std::endl;
           efixed = 0;
         }
-      } 
+      }
     }
 
-//  std::cout << "Done with getting info from detector" << std::endl;
-//  std::cout << "EMode  = " << emode  << std::endl;
-//  std::cout << "EFixed = " << efixed << std::endl;
- 
     if ( efixed == 0 )
-    {
       emode = 0;
-    }
-    
-    if ( saved_emode_handler != 0 )
+
+    if ( m_emodeHandler != NULL )
     {
-      saved_emode_handler -> SetEFixed( efixed );  
-      saved_emode_handler -> SetEMode ( emode );  
+      m_emodeHandler -> setEFixed( efixed );
+      m_emodeHandler -> setEMode ( emode );
     }
 
-    double tof = old_unit->convertSingleToTOF( x, l1, l2, two_theta, 
+    double tof = old_unit->convertSingleToTOF( x, l1, l2, two_theta,
                                                emode, efixed, delta );
     if ( ! (x_label == "Time-of-flight") )
-    {
       SVUtils::PushNameValue( "Time-of-flight", 8, 1, tof, list );
-    }
 
     if ( ! (x_label == "Wavelength") )
     {
@@ -473,11 +460,10 @@ void MatrixWSDataSource::GetInfoList( double x,
   }
   catch (std::exception & e)
   {
-    ErrorHandler::Notice("Failed to get information from Workspace:");
-    ErrorHandler::Notice( e.what() );
+    g_log.debug() << "Failed to get information from Workspace:" << e.what() << std::endl;
   }
 }
 
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt

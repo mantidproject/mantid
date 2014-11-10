@@ -137,6 +137,7 @@ public:
     Mantid::API::FrameworkManager::Instance();
     ConvertToMDMinMaxLocal alg;
     Mantid::API::MatrixWorkspace_sptr  ws=MakeWorkspace(-2.5,0.05,true,0,5);
+
     WorkspaceCreationHelper::storeWS(WSName,ws);
 
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -253,8 +254,8 @@ private:
           pmap.addDouble(physicalPixel,"Efixed",Ef);
           ws->replaceInstrumentParameters(pmap);
       }
-
-      ws->mutableSample().setOrientedLattice(new Mantid::Geometry::OrientedLattice(2,3,4,90,90,90));
+      Mantid::Geometry::OrientedLattice latt(2,3,4,90,90,90);
+      ws->mutableSample().setOrientedLattice(&latt);
 
       Mantid::Kernel::TimeSeriesProperty<double> * p = new Mantid::Kernel::TimeSeriesProperty<double>("doubleProp");
       TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:00",9.99) );

@@ -51,7 +51,7 @@ public:
   IValidator_sptr clone() const;
 
   /// Returns the set of allowed extensions.
-  virtual std::set<std::string> allowedValues() const;
+  virtual std::vector<std::string> allowedValues() const;
 
 protected:
   /// FileValidator instance used for validating multiple files.

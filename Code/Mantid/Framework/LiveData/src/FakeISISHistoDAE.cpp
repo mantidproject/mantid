@@ -37,9 +37,9 @@ typedef struct
 }  isisds_open_t;
 
 /** used for sends and replies once a connection open
- * try to align to 64 bits (8 bytes) boundaries 
+ * try to align to 64 bits (8 bytes) boundaries
  */
-typedef struct 
+typedef struct
 {
 	int len;  /* of this structure plus any additional data (in bytes) */
  	int type; /* ISISDSDataType */
@@ -58,6 +58,8 @@ class TestServerConnection: public Poco::Net::TCPServerConnection
   int m_nPeriods;
   int m_nSpectra;
   int m_nBins;
+  int m_nMonitors;
+  int m_nMonitorBins;
 public:
   /**
    * Constructor. Defines the simulated dataset dimensions.
@@ -70,7 +72,9 @@ public:
   Poco::Net::TCPServerConnection(soc),
   m_nPeriods(nper),
   m_nSpectra(nspec),
-  m_nBins(nbins)
+  m_nBins(nbins),
+  m_nMonitors(3),
+  m_nMonitorBins(nbins * 2)
   {
     char buffer[1024];
     socket().receiveBytes(&buffer,1024);
@@ -132,17 +136,17 @@ public:
   {
     int period = 0;
     int istart = spec;
-    const int ns1 = m_nSpectra + 1;
-    const int nb1 = m_nBins + 1;
+    const int ns1 = m_nSpectra + m_nMonitors + 1;
     if ( m_nPeriods > 1 )
     {
       period = spec / ns1;
       istart = spec - period * ns1;
-      if ( period >= m_nPeriods || istart + nos > ns1 )
-      {
-        sendOK();
-      }
     }
+    if ( period >= m_nPeriods || istart + nos > ns1 )
+    {
+      sendOK();
+    }
+    const int nb1 = (istart <= m_nSpectra? m_nBins : m_nMonitorBins) + 1;
     const int ndata = nos * nb1;
     std::vector<int> data( ndata );
     for(int i = 0; i < nos; ++i)
@@ -212,13 +216,13 @@ public:
       catch(...)
       {
         break;
-      } 
+      }
       if ( comm.type == ISISDSChar )
       {
         std::string command(buffer, n);
         if ( command == "NAME" )
         {
-          sendString("TESTHISTOLISTENER");
+          sendString("MUSR");
         }
         else if ( command == "NPER" )
         {
@@ -228,19 +232,42 @@ public:
         {
           sendInt( m_nSpectra );
         }
+        else if ( command == "NSP2" )
+        {
+          sendInt( m_nMonitors );
+        }
         else if ( command == "NTC1" )
         {
           sendInt( m_nBins );
         }
+        else if ( command == "NTC2" )
+        {
+          sendInt( m_nMonitorBins );
+        }
         else if ( command == "NDET" )
         {
-          sendInt( m_nSpectra );
+          sendInt( m_nSpectra + m_nMonitors );
+        }
+        else if ( command == "NMON" )
+        {
+          sendInt( m_nMonitors );
         }
         else if ( command == "RTCB1" )
         {
           std::vector<float> bins( m_nBins + 1 );
-          const float dx = 0.1f;
-          float x = 0;
+          const float dx = 100.0f;
+          float x = 10000.0f;
+          for(auto b = bins.begin(); b != bins.end(); ++b, x += dx)
+          {
+            *b = x;
+          };
+          sendFloatArray( bins );
+        }
+        else if ( command == "RTCB2" || (command.size() > 5 && command.substr(0,5) == "RTCB_") )
+        {
+          std::vector<float> bins( m_nMonitorBins + 1 );
+          const float dx = 10.0f;
+          float x = 10000.0f;
           for(auto b = bins.begin(); b != bins.end(); ++b, x += dx)
           {
             *b = x;
@@ -255,8 +282,8 @@ public:
         }
         else if ( command == "UDET" )
         {
-          std::vector<int> udet( m_nSpectra );
-          for(int i = 0; i < m_nSpectra; ++i)
+          std::vector<int> udet( m_nSpectra  + m_nMonitors );
+          for(int i = 0; i < static_cast<int>(udet.size()); ++i)
           {
             udet[i] = (int)( 1000 + i + 1 );
           }
@@ -264,19 +291,28 @@ public:
         }
         else if ( command == "SPEC" )
         {
-          std::vector<int> spec( m_nSpectra );
-          for(int i = 0; i < m_nSpectra; ++i)
+          std::vector<int> spec( m_nSpectra  + m_nMonitors );
+          for(int i = 0; i < static_cast<int>(spec.size()); ++i)
           {
             spec[i] = (int)( i + 1 );
           }
           sendIntArray( spec );
+        }
+        else if ( command == "MDET" )
+        {
+          std::vector<int> mdet( m_nMonitors );
+          for(int i = 0; i < m_nMonitors; ++i)
+          {
+            mdet[i] = (int)( m_nSpectra + i + 1 );
+          }
+          sendIntArray( mdet );
         }
         else
         {
           sendOK();
         }
       }
-      else 
+      else
       {
         std::string command(comm.command);
         if ( command == "GETDAT" )
@@ -310,8 +346,8 @@ public:
    * @param nspec :: Number of spectra in the simulated dataset.
    * @param nbins :: Number of bins in the simulated dataset.
    */
-  TestServerConnectionFactory(int nper = 1, int nspec = 100, int nbins = 30): 
-  Poco::Net::TCPServerConnectionFactory(), 
+  TestServerConnectionFactory(int nper = 1, int nspec = 100, int nbins = 30):
+  Poco::Net::TCPServerConnectionFactory(),
   m_nPeriods(nper),
   m_nSpectra(nspec),
   m_nBins(nbins)
@@ -330,12 +366,12 @@ using namespace Kernel;
 using namespace API;
 
 /// (Empty) Constructor
-FakeISISHistoDAE::FakeISISHistoDAE():m_server(NULL) 
+FakeISISHistoDAE::FakeISISHistoDAE():m_server(NULL)
 {
 }
 
 /// Destructor
-FakeISISHistoDAE::~FakeISISHistoDAE() 
+FakeISISHistoDAE::~FakeISISHistoDAE()
 {
   if ( m_server )
   {
@@ -352,6 +388,7 @@ void FakeISISHistoDAE::init()
   declareProperty(new PropertyWithValue<int>("NPeriods", 1, Direction::Input),"Number of periods.");
   declareProperty(new PropertyWithValue<int>("NSpectra", 100, Direction::Input),"Number of spectra.");
   declareProperty(new PropertyWithValue<int>("NBins", 30, Direction::Input),"Number of bins.");
+  declareProperty(new PropertyWithValue<int>("Port", 56789, Direction::Input),"The port to broadcast on (default 56789, ISISDAE 6789).");
 }
 
 /**
@@ -359,12 +396,15 @@ void FakeISISHistoDAE::init()
  */
 void FakeISISHistoDAE::exec()
 {
-  Mutex::ScopedLock lock(m_mutex);
-  Poco::Net::ServerSocket socket(6789);
-  socket.listen();
   int nper = getProperty("NPeriods");
   int nspec = getProperty("NSpectra");
   int nbins = getProperty("NBins");
+  int port = getProperty("Port");
+
+  Mutex::ScopedLock lock(m_mutex);
+  Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));
+  socket.listen();
+
   m_server = new Poco::Net::TCPServer(TestServerConnectionFactory::Ptr( new TestServerConnectionFactory(nper,nspec,nbins) ), socket );
   m_server->start();
   // Keep going until you get cancelled
