@@ -127,6 +127,7 @@ namespace Mantid
         progress.report();              
       }
       
+      nxFile.close();
     }
 
    /**

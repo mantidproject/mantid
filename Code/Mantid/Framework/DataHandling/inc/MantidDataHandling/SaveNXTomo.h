@@ -104,7 +104,7 @@ namespace Mantid
       /// file format version
       static const std::string NXTOMO_VER;
     
-      std::vector<const DataObjects::Workspace2D_sptr> m_workspaces;    
+      std::vector<DataObjects::Workspace2D_sptr> m_workspaces;    
     };
 
   } // namespace DataHandling
