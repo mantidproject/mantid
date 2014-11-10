@@ -844,6 +844,7 @@ namespace DataHandling
     * @param column :: [input] column of the output table workspace 
     * @param ws :: [input/output] the group workspace parameters are to be put in
     * @param nProf :: the PROF Number, which is used to determine fitting function for the parameters.
+    * @param parameterXMLString :: string where the XML document filename is stored
     */
   void LoadFullprofResolution::putParametersIntoWorkspace( API::Column_const_sptr column, API::MatrixWorkspace_sptr ws, int nProf, std::string & parameterXMLString)
   {  
