@@ -184,7 +184,7 @@ namespace DataHandling
       if(allHeaderInfo[0].numberOfAxis > 0) m_spectraCount += allHeaderInfo[0].axisPixelLengths[0];
 
       // Presumably 2 axis, but futureproofing.
-      for(size_t i=1;i<allHeaderInfo[0].numberOfAxis;++i)
+      for(int i=1;i<allHeaderInfo[0].numberOfAxis;++i)
       {
         m_spectraCount *= allHeaderInfo[0].axisPixelLengths[i];
       }
