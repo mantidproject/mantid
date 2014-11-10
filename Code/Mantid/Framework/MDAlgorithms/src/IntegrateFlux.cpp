@@ -2,6 +2,9 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/BoundedValidator.h"
+
+#include <boost/make_shared.hpp>
 
 namespace Mantid
 {
@@ -34,7 +37,9 @@ namespace MDAlgorithms
   void IntegrateFlux::init()
   {
     declareProperty(new WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace","",Direction::Input), "An input workspace.");
-    declareProperty("NPoints", 1000, "Number of points per output spectrum.");
+    auto validator = boost::make_shared<Kernel::BoundedValidator<int>>();
+    validator->setLower(2);
+    declareProperty("NPoints", 1000, validator, "Number of points per output spectrum.");
     declareProperty(new WorkspaceProperty<API::Workspace>("OutputWorkspace","",Direction::Output), "An output workspace.");
   }
 

@@ -120,12 +120,10 @@ public:
     auto inputWS = createInputWorkspace(inWSName);
 
     IntegrateFlux alg;
-    alg.setRethrows(true);
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", inWSName);
     alg.setPropertyValue("OutputWorkspace", outWSName);
-    alg.setProperty("NPoints", 1);
-    TS_ASSERT_THROWS( alg.execute(), std::runtime_error );
+    TS_ASSERT_THROWS( alg.setProperty("NPoints", 1), std::invalid_argument );
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().clear();

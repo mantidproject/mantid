@@ -92,13 +92,15 @@ namespace MDAlgorithms
                "Enter it as a comma-separated list of values with the format: 'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
       }
 
-      auto wsValidator = boost::make_shared<CompositeValidator>();
-      wsValidator->add<WorkspaceUnitValidator>("Momentum");
-      wsValidator->add<InstrumentValidator>();
-      wsValidator->add<CommonBinsValidator>();
+      auto fluxValidator = boost::make_shared<CompositeValidator>();
+      fluxValidator->add<WorkspaceUnitValidator>("Momentum");
+      fluxValidator->add<InstrumentValidator>();
+      fluxValidator->add<CommonBinsValidator>();
+      auto solidAngleValidator = fluxValidator->clone();
+      fluxValidator->add<IncreasingDataValidator>();
 
-      declareProperty(new WorkspaceProperty<>("FluxWorkspace","",Direction::Input,wsValidator), "An input workspace containing momentum dependent flux.");
-      declareProperty(new WorkspaceProperty<>("SolidAngleWorkspace","",Direction::Input,wsValidator->clone()), "An input workspace containing momentum integrated vanadium (a measure of the solid angle).");
+      declareProperty(new WorkspaceProperty<>("FluxWorkspace","",Direction::Input,fluxValidator), "An input workspace containing integrated momentum dependent flux.");
+      declareProperty(new WorkspaceProperty<>("SolidAngleWorkspace","",Direction::Input,solidAngleValidator), "An input workspace containing momentum integrated vanadium (a measure of the solid angle).");
 
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "A name for the output data MDHistoWorkspace.");
       declareProperty(new WorkspaceProperty<Workspace>("OutputNormalizationWorkspace","",Direction::Output), "A name for the output normalization MDHistoWorkspace.");
