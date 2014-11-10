@@ -391,6 +391,7 @@ class QwtData /PyName = CurveData/
 %End
 
 public:
+   // Note these 'unsigned int' should be size_t
    virtual unsigned int size() const = 0;
    virtual double x(unsigned int i) const = 0;
    virtual double y(unsigned int i) const = 0;
