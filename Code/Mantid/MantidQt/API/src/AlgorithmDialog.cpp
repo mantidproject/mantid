@@ -1054,7 +1054,7 @@ void AlgorithmDialog::setPreviousValue(QWidget* widget, const QString& propName)
  *
  * All notifications will be observed.
  *
- * @Param observer Pointer to the AlgorithmObserver to add.
+ * @param observer Pointer to the AlgorithmObserver to add.
  */
 void AlgorithmDialog::addAlgorithmObserver(Mantid::API::AlgorithmObserver *observer)
 {
