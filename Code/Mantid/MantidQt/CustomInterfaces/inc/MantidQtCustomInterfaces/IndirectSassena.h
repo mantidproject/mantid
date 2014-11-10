@@ -16,8 +16,11 @@ namespace MantidQt
 			IndirectSassena(QWidget * parent = 0);
 
 			QString help() { return "IndirectSassena"; };
+
+      void setup();
 			bool validate();
 			void run();
+
 			/// Load default settings into the interface
 			void loadSettings(const QSettings& settings);
 

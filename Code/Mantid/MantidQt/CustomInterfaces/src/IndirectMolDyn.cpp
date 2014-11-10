@@ -18,6 +18,10 @@ namespace MantidQt
       connect(m_uiForm.ckResolution, SIGNAL(toggled(bool)), m_uiForm.dsResolution, SLOT(setEnabled(bool)));
     }
 
+    void IndirectMolDyn::setup()
+    {
+    }
+
     /**
      * Validate the form to check the program can be run
      *

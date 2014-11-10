@@ -30,7 +30,7 @@ IndirectSimulation::~IndirectSimulation()
 void IndirectSimulation::initLayout()
 {
 	m_uiForm.setupUi(this);
-	
+
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
@@ -104,18 +104,14 @@ void IndirectSimulation::loadSettings()
 /**
  * Slot to run the underlying algorithm code based on the currently selected
  * tab.
- * 
+ *
  * This method checks the tabs validate method is passing before calling
  * the run method.
  */
 void IndirectSimulation::runClicked()
 {
 	int tabIndex = m_uiForm.IndirectSimulationTabs->currentIndex();
-
-	if(m_simulationTabs[tabIndex]->validate())
-	{
-		m_simulationTabs[tabIndex]->run();
-	}
+  m_simulationTabs[tabIndex]->runTab();
 }
 
 /**
@@ -143,7 +139,7 @@ void IndirectSimulation::manageUserDirectories()
 /**
  * Slot to wrap the protected showInformationBox method defined
  * in UserSubWindow and provide access to composed tabs.
- * 
+ *
  * @param message :: The message to display in the message box
  */
 void IndirectSimulation::showMessageBox(const QString& message)

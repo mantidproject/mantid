@@ -13,6 +13,10 @@ namespace MantidQt
 			m_uiForm.setupUi(parent);
 		}
 
+    void IndirectSassena::setup()
+    {
+    }
+
     /**
      * Validate the form to check the program can be run.
      *
