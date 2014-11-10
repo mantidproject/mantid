@@ -74,10 +74,11 @@ namespace MDAlgorithms
       nX = nEvents;
     }
 
-    // and not 0
-    if ( nX == 0 )
+    // and not 0 or 1 as they are to be used for interpolation
+    if ( nX < 2 )
     {
-      throw std::runtime_error("Zero size of output spectra.");
+      throw std::runtime_error("Failed to create output."
+        "Output spectra should have at least two points.");
     }
 
     // crate empty output workspace
