@@ -14,8 +14,8 @@ namespace MantidQt
     {
       m_uiForm.setupUi(parent);
 
+      connect(m_uiForm.ckCropEnergy, SIGNAL(toggled(bool)), m_uiForm.dspMaxEnergy, SLOT(setEnabled(bool)));
       connect(m_uiForm.ckResolution, SIGNAL(toggled(bool)), m_uiForm.dsResolution, SLOT(setEnabled(bool)));
-      connect(m_uiForm.ckCropEnergy, SIGNAL(toggled(bool)), m_uiForm.leMaxEnergy, SLOT(setEnabled(bool)));
     }
 
     /**
@@ -48,14 +48,6 @@ namespace MantidQt
         return false;
       }
 
-      bool energyIsNumber = false;
-      m_uiForm.leMaxEnergy->text().toDouble(&energyIsNumber);
-      if(m_uiForm.ckCropEnergy->isChecked() && !energyIsNumber)
-      {
-        emit showMessageBox("Max energy must be a number.");
-        return false;
-      }
-
       return true;
     }
 
@@ -80,7 +72,7 @@ namespace MantidQt
 
       // Set energy crop option
       if(m_uiForm.ckCropEnergy->isChecked())
-        molDynAlg->setProperty("MaxEnergy", m_uiForm.leMaxEnergy->text().toStdString());
+        molDynAlg->setProperty("MaxEnergy", QString::number(m_uiForm.dspMaxEnergy->value()).toStdString());
 
       // Set instrument resolution option
       if(m_uiForm.ckResolution->isChecked())

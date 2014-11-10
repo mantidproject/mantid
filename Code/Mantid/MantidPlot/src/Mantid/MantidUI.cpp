@@ -107,7 +107,10 @@ MantidUI::MantidUI(ApplicationWindow *aw):
   m_ungroupworkspaceObserver(*this,&MantidUI::handleUnGroupWorkspace),
   m_workspaceGroupUpdateObserver(*this,&MantidUI::handleWorkspaceGroupUpdate),
   m_configServiceObserver(*this,&MantidUI::handleConfigServiceUpdate),
-  m_appWindow(aw), m_vatesSubWindow(NULL)//, m_spectrumViewWindow(NULL)
+  m_appWindow(aw),
+  m_lastShownInstrumentWin(NULL), m_lastShownSliceViewWin(NULL), m_lastShownSpectrumViewerWin(NULL), 
+  m_lastShownColorFillWin(NULL), m_lastShown1DPlotWin(NULL), 
+  m_vatesSubWindow(NULL)//, m_spectrumViewWindow(NULL)
 {
 
   // To be able to use them in queued signals they need to be registered
@@ -748,10 +751,34 @@ void MantidUI::showSpectrumViewer()
       AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
     if ( wksp )
     {
-      MantidQt::SpectrumView::SpectrumView* viewer = new MantidQt::SpectrumView::SpectrumView(m_appWindow);
+      MantidQt::SpectrumView::SpectrumView* viewer;
+      try
+      {
+        viewer = new MantidQt::SpectrumView::SpectrumView(m_appWindow);
+      }
+      catch (std::runtime_error& e)
+      {
+        m_lastShownSpectrumViewerWin = NULL;
+        g_log.error() << "Could not create spectrum viewer: " << e.what() << "\n";
+        throw std::runtime_error(e);
+      }
       viewer->setAttribute(Qt::WA_DeleteOnClose, false);
       viewer->resize( 1050, 800 );
       connect(m_appWindow, SIGNAL(shutting_down()), viewer, SLOT(close()));
+
+      if (workspacesDockPlot1To1())
+      {
+        // only one at any given time
+        if (m_lastShownSpectrumViewerWin)
+        {
+          m_lastShownSpectrumViewerWin->close();
+          QPoint p = m_lastShownSpectrumViewerWin->pos();
+          delete m_lastShownSpectrumViewerWin;
+          viewer->move(p);
+        }
+
+      }
+      m_lastShownSpectrumViewerWin = viewer;
 
       viewer->show();
       viewer->renderWorkspace(wksp);
@@ -788,8 +815,17 @@ void MantidUI::showSliceViewer()
   if (mdws)
   {
     // Create the slice viewer window
-    SliceViewerWindow * w = MantidQt::Factory::WidgetFactory::Instance()->
-      createSliceViewerWindow(wsName, "");
+    SliceViewerWindow * w;
+    try
+    {
+      w = MantidQt::Factory::WidgetFactory::Instance()->createSliceViewerWindow(wsName, "");
+    }
+    catch (std::runtime_error& e)
+    {
+      m_lastShownSliceViewWin = NULL;
+      g_log.error() << "Could not create slice viewer: " << e.what() << "\n";
+      throw std::runtime_error(e);
+    }
 
     // Special options for viewing MatrixWorkspaces
     if (mw)
@@ -799,6 +835,21 @@ void MantidUI::showSliceViewer()
 
     // Connect the MantidPlot close() event with the the window's close().
     QObject::connect(appWindow(), SIGNAL(destroyed()), w, SLOT(close()));
+
+    if (workspacesDockPlot1To1())
+    {
+      // only one at any given time
+      if (m_lastShownSliceViewWin)
+      {
+        m_lastShownSliceViewWin->close();
+        QPoint p = m_lastShownSliceViewWin->pos();
+        // the factory keeps a list of all opened slice viewers
+        MantidQt::Factory::WidgetFactory::Instance()->closeSliceViewerWindow(m_lastShownSliceViewWin);
+        delete m_lastShownSliceViewWin;
+        w->move(p);
+      }
+    }
+    m_lastShownSliceViewWin = w;
 
     // Pop up the window
     w->show();
@@ -1968,8 +2019,23 @@ void MantidUI::showMantidInstrument(const QString& wsName)
   InstrumentWindow *insWin = getInstrumentView(wsName);
   if (!insWin)
   {
+    m_lastShownInstrumentWin = NULL;
     return;
   }
+
+  if (workspacesDockPlot1To1())
+  {
+    // replace last one
+    if (m_lastShownInstrumentWin)
+    {
+      m_lastShownInstrumentWin->close();
+      QPoint p = m_lastShownInstrumentWin->pos();
+      delete m_lastShownInstrumentWin;
+      insWin->move(p);
+    }
+  }
+  m_lastShownInstrumentWin = insWin;
+
   if (!insWin->isVisible())
   {
     insWin->show();
@@ -2985,8 +3051,18 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
 
   const QString& firstWsName = toPlot.constBegin().key();
 
+  if(workspacesDockPlot1To1())
+  {
+    if (m_lastShown1DPlotWin)
+    {
+      plotWindow = m_lastShown1DPlotWin;
+      clearWindow = true;
+    }
+  }
   bool isGraphNew = false;
   MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, firstWsName, clearWindow);
+  ml->setName(appWindow()->generateUniqueName(firstWsName + "-"));
+  m_lastShown1DPlotWin = ml;
 
   Graph *g = ml->activeGraph();
 
@@ -3121,15 +3197,32 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
   if(!workspace) return NULL;
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  if(window == NULL)
+
+  bool reusePlots = workspacesDockPlot1To1();
+  if( (!reusePlots && NULL == window) ||
+      (reusePlots && !m_lastShownColorFillWin) ) // needs to create a new window
   {
-    window = appWindow()->multilayerPlot(appWindow()->generateUniqueName( wsName + "-"));
+    try
+    {
+      window = appWindow()->multilayerPlot(appWindow()->generateUniqueName( wsName + "-"));
+    }
+    catch(std::runtime_error& e)
+    {
+      m_lastShownColorFillWin = NULL;
+      g_log.error() << "Could not create color fill plot: " << e.what() << "\n";
+      throw std::runtime_error(e);
+    }
     window->setCloseOnEmpty(true);
-  }
-  else
-  {
+    m_lastShownColorFillWin = window;
+  } else {
+    if (NULL == window)
+    {
+      if (NULL == m_lastShownColorFillWin)
+        return NULL;
+      window = m_lastShownColorFillWin;
+    }
     // start fresh layer
-    window->setWindowTitle(appWindow()->generateUniqueName( wsName + "-"));
+    window->setName(appWindow()->generateUniqueName( wsName + "-"));
     window->setLayersNumber(0);
     window->addLayer();
   }
@@ -3335,6 +3428,11 @@ MantidMatrix* MantidUI::openMatrixWorkspace(ApplicationWindow* parent,const QStr
   appWindow()->addMdiSubWindow(w);
 
   return w;
+}
+
+bool MantidUI::workspacesDockPlot1To1()
+{
+  return "On" == Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.ReusePlotInstances");
 }
 
 //=========================================================================

@@ -232,49 +232,21 @@
            <number>1</number>
           </property>
           <item>
-           <layout class="QHBoxLayout" name="layoutTableButtons">
-            <item>
-             <widget class="QToolButton" name="buttonAppendRow">
-              <property name="text">
-               <string>AppendRow</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="buttonDeleteRow">
-              <property name="text">
-               <string>DeleteRow</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="buttonGroupRows">
-              <property name="text">
-               <string>GroupRows</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="buttonExpandSelection">
-              <property name="text">
-               <string>ExpandSelection</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="spacerTableButtons">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
+           <widget class="QToolBar" name="rowToolBar">
+            <property name="styleSheet">
+             <string>QToolBar{border: none;}</string>
+            </property>
+            <addaction name="actionExpandSelection"/>
+            <addaction name="separator"/>
+            <addaction name="actionAppendRow"/>
+            <addaction name="actionDeleteRow"/>
+            <addaction name="separator"/>
+            <addaction name="actionGroupRows"/>
+            <addaction name="actionCopySelected"/>
+            <addaction name="actionCutSelected"/>
+            <addaction name="actionPasteSelected"/>
+            <addaction name="actionClearSelected"/>
+           </widget>
           </item>
           <item>
            <widget class="QTableView" name="viewTable">
@@ -286,9 +258,6 @@
             </property>
             <property name="contextMenuPolicy">
              <enum>Qt::CustomContextMenu</enum>
-            </property>
-            <property name="toolTip">
-             <string>Runs to process</string>
             </property>
             <property name="editTriggers">
              <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
@@ -322,7 +291,11 @@
              <number>1</number>
             </property>
             <item>
-             <widget class="QProgressBar" name="progressBar"/>
+             <widget class="QProgressBar" name="progressBar">
+              <property name="value">
+               <number>0</number>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QLabel" name="labelProcessInstrument">
@@ -396,6 +369,8 @@
     <addaction name="actionNewTable"/>
     <addaction name="actionSaveTable"/>
     <addaction name="actionSaveTableAs"/>
+    <addaction name="separator"/>
+    <addaction name="actionOptionsDialog"/>
    </widget>
    <widget class="QMenu" name="menuRows">
     <property name="title">
@@ -406,7 +381,12 @@
     <addaction name="separator"/>
     <addaction name="actionPrependRow"/>
     <addaction name="actionAppendRow"/>
+    <addaction name="separator"/>
     <addaction name="actionGroupRows"/>
+    <addaction name="actionCopySelected"/>
+    <addaction name="actionCutSelected"/>
+    <addaction name="actionPasteSelected"/>
+    <addaction name="actionClearSelected"/>
     <addaction name="separator"/>
     <addaction name="actionDeleteRow"/>
    </widget>
@@ -479,7 +459,7 @@
      <normaloff>:/drag_curves.png</normaloff>:/drag_curves.png</iconset>
    </property>
    <property name="text">
-    <string>Group Rows</string>
+    <string>Group Selected</string>
    </property>
   </action>
   <action name="actionProcess">
@@ -501,6 +481,63 @@
    </property>
    <property name="toolTip">
     <string>Select an entire group</string>
+   </property>
+  </action>
+  <action name="actionOptionsDialog">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/configure.png</normaloff>:/configure.png</iconset>
+   </property>
+   <property name="text">
+    <string>Options...</string>
+   </property>
+   <property name="toolTip">
+    <string>Set options for the Reflectometry UI</string>
+   </property>
+  </action>
+  <action name="actionClearSelected">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/erase.png</normaloff>:/erase.png</iconset>
+   </property>
+   <property name="text">
+    <string>Clear Selected</string>
+   </property>
+  </action>
+  <action name="actionCopySelected">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/copy.png</normaloff>:/copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy Selected</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionPasteSelected">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/paste.png</normaloff>:/paste.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste Selected</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionCutSelected">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/cut.png</normaloff>:/cut.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cut Selected</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
    </property>
   </action>
  </widget>

@@ -55,7 +55,7 @@ namespace Mantid
           "It is always written for workspaces with multiple spectra.");
 
       declareProperty("CommentIndicator", "#", "Character(s) to put in front of comment lines.");
-
+      
       // For the ListValidator
       std::string spacers[6][2] = { {"CSV", ","}, {"Tab", "\t"}, {"Space", " "}, 
       {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"} };
@@ -80,6 +80,7 @@ namespace Mantid
 
       declareProperty("AppendToFile", false, "If true, don't overwrite the file. Append to the end of it. ");
 
+      declareProperty("RaggedWorkspace", true, "If true, ensure that more than one xspectra is used. "); //in testing
     }
 
     /** 
@@ -92,6 +93,7 @@ namespace Mantid
       int nSpectra = static_cast<int>(m_ws->getNumberHistograms());
       m_nBins = static_cast<int>(m_ws->blocksize());
       m_isHistogram = m_ws->isHistogramData();
+      m_isCommonBins = m_ws->isCommonBins(); //checking for ragged workspace
       m_writeID = getProperty("WriteSpectrumID");
       if (nSpectra != 1) m_writeID = true;
 
@@ -154,6 +156,7 @@ namespace Mantid
           idx.insert(i);
         }
       }
+      //figure out how to read in readX and have them be seperate lists
 
       // Add spectra list into the index list
       if (!spec_list.empty())
@@ -235,25 +238,31 @@ namespace Mantid
     @param spectraItr :: a set<int> iterator pointing to a set of workspace IDs to be saved
     @param file :: the file writer object
     */
-    void SaveAscii2::writeSpectra(const std::set<int>::const_iterator & spectraItr, std::ofstream & file)
+    void SaveAscii2::writeSpectra(const std::set<int>::const_iterator & spectraItr, std::ofstream & file) 
     {
       auto spec = m_ws->getSpectrum(*spectraItr);
       auto specNo = spec->getSpectrumNo();
       if (m_writeID) file << specNo << std::endl;
-
+      
       for(int bin=0;bin<m_nBins;bin++)                                                                                                                                                                                                                                                                     
       {
-
-        if (m_isHistogram) // bin centres
+        if (!m_isCommonBins) //checking for ragged workspace
         {
-          file << ( m_ws->readX(0)[bin] + m_ws->readX(0)[bin+1] )/2;
+          file << (m_ws->readX(*spectraItr)[bin] + m_ws->readX(*spectraItr)[bin+1] )/2;
         }
-        else // data points
+
+        else if (m_isHistogram & m_isCommonBins) // bin centres,  
+        {
+          file << ( m_ws->readX(0)[bin] + m_ws->readX(0)[bin+1] )/2; 
+        }
+
+        else 
         {
           file << m_ws->readX(0)[bin];
         }
         file << m_sep;
         file << m_ws->readY(*spectraItr)[bin];
+
         file << m_sep;
         file << m_ws->readE(*spectraItr)[bin];
         if (m_writeDX)
@@ -277,7 +286,7 @@ namespace Mantid
     @param spectraIndex :: an integer relating to a workspace ID
     @param file :: the file writer object
     */
-    void SaveAscii2::writeSpectra(const int & spectraIndex, std::ofstream & file)
+    void SaveAscii2::writeSpectra(const int & spectraIndex, std::ofstream & file) 
     {
       auto spec = m_ws->getSpectrum(spectraIndex);
       auto specNo = spec->getSpectrumNo();
@@ -285,9 +294,13 @@ namespace Mantid
 
       for(int bin=0;bin<m_nBins;bin++)
       {
-        if (m_isHistogram) // bin centres
+        if (m_isHistogram & m_isCommonBins) // bin centres, 
         {
           file << ( m_ws->readX(0)[bin] + m_ws->readX(0)[bin+1] )/2;
+        }
+        else if (!m_isCommonBins) //checking for ragged workspace
+        {
+         file << ( m_ws->readX(spectraIndex)[bin] + m_ws->readX(spectraIndex)[bin+1] )/2;
         }
         else // data points
         {
@@ -295,6 +308,7 @@ namespace Mantid
         }
         file << m_sep;
         file << m_ws->readY(spectraIndex)[bin];
+
         file << m_sep;
         file << m_ws->readE(spectraIndex)[bin];
         if (m_writeDX)

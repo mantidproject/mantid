@@ -60,15 +60,11 @@ class Symmetrise(PythonAlgorithm):
 
         sample_x = mtd[self._sample].readX(0)
 
-        if self._x_max > sample_x[len(sample_x) - 1]:
-            raise ValueError('XMax value (%f) is greater than largest X value (%f)' %
-                             (self._x_max, sample_x[len(sample_x) - 1]))
-
-        if self._x_min < sample_x[0]:
-            raise ValueError('XMin value (%f) is less than smallest X value (%f)' %
-                             (self._x_min, sample_x[0]))
-
-        self._calculate_array_points(sample_x, sample_array_len)
+        # Get slice bounds of array
+        try:
+            self._calculate_array_points(sample_x, sample_array_len)
+        except Exception as e:
+            raise RuntimeError('Failed to calculate array slice boundaries: %s' % e.message)
 
         max_sample_index = sample_array_len - 1
         centre_range_len = self._positive_min_index + self._negative_min_index
@@ -103,7 +99,6 @@ class Symmetrise(PythonAlgorithm):
         # Copy logs and properties from sample workspace
         CopyLogs(InputWorkspace=self._sample, OutputWorkspace=temp_ws_name)
         CopyInstrumentParameters(InputWorkspace=self._sample, OutputWorkspace=temp_ws_name)
-        # CopySample(InputWorkspace=self._sample, OutputWorkspace=temp_ws_name)
 
         # For each spectrum copy positive values to the negative
         output_spectrum_index = 0
@@ -205,6 +200,15 @@ class Symmetrise(PythonAlgorithm):
         if x_max < x_min:
             issues['XMin'] = 'XMin must be less than XMax'
             issues['XMax'] = 'XMax must be greater than XMin'
+
+        # Valudate X range against workspace X range
+        sample_x = mtd[input_workspace_name].readX(0)
+
+        if x_max > sample_x[len(sample_x) - 1]:
+            issues['XMax'] = 'XMax value (%f) is greater than largest X value (%f)' % (x_max, sample_x[len(sample_x) - 1])
+
+        if -x_min < sample_x[0]:
+            issues['XMin'] = 'Negative XMin value (%f) is less than smallest X value (%f)' % (-x_min, sample_x[0])
 
         return issues
 

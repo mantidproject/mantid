@@ -28,9 +28,10 @@ set ( SRC_FILES
 	src/IndirectSassena.cpp
 	src/IndirectSimulation.cpp
 	src/IndirectSimulationTab.cpp
-	src/IndirectSqw.cpp
+  src/IndirectSqw.cpp
 	src/IndirectSymmetrise.cpp
-	src/IndirectTransmission.cpp
+	src/IndirectTab.cpp
+  src/IndirectTransmission.cpp
 	src/JumpFit.cpp
 	src/MSDFit.cpp
 	src/MantidEV.cpp
@@ -53,6 +54,7 @@ set ( SRC_FILES
 	src/Muon/MuonAnalysisResultTableTab.cpp
 	src/QReflTableModel.cpp
 	src/QtReflMainView.cpp
+	src/QtReflOptionsDialog.cpp
 	src/QtWorkspaceMementoModel.cpp
 	src/Quasi.cpp
 	src/RawFileMemento.cpp
@@ -107,7 +109,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
 	inc/MantidQtCustomInterfaces/IndirectSqw.h
 	inc/MantidQtCustomInterfaces/IndirectSymmetrise.h
-	inc/MantidQtCustomInterfaces/IndirectTransmission.h
+  inc/MantidQtCustomInterfaces/IndirectTransmission.h
+  inc/MantidQtCustomInterfaces/IndirectTab.h
 	inc/MantidQtCustomInterfaces/IReflPresenter.h
 	inc/MantidQtCustomInterfaces/JumpFit.h
 	inc/MantidQtCustomInterfaces/MSDFit.h
@@ -138,6 +141,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/ReflMainViewPresenter.h
 	inc/MantidQtCustomInterfaces/QReflTableModel.h
 	inc/MantidQtCustomInterfaces/QtReflMainView.h
+	inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
 	inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
 	inc/MantidQtCustomInterfaces/Quasi.h
 	inc/MantidQtCustomInterfaces/RawFileMemento.h
@@ -190,6 +194,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectSqw.h
                 inc/MantidQtCustomInterfaces/IndirectSymmetrise.h
                 inc/MantidQtCustomInterfaces/IndirectTransmission.h
+                inc/MantidQtCustomInterfaces/IndirectTab.h
                 inc/MantidQtCustomInterfaces/JumpFit.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
                 inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
@@ -209,6 +214,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
                 inc/MantidQtCustomInterfaces/QReflTableModel.h
                 inc/MantidQtCustomInterfaces/QtReflMainView.h
+                inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
                 inc/MantidQtCustomInterfaces/Quasi.h
                 inc/MantidQtCustomInterfaces/ResNorm.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
@@ -241,6 +247,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/CreateMDWorkspace.ui
                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/Quasi.ui
                inc/MantidQtCustomInterfaces/ReflMainWidget.ui
+               inc/MantidQtCustomInterfaces/ReflOptionsDialog.ui
                inc/MantidQtCustomInterfaces/ReflWindow.ui
                inc/MantidQtCustomInterfaces/ResNorm.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui
