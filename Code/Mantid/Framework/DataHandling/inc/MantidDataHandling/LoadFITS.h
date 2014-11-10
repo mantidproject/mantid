@@ -18,7 +18,7 @@ struct FITSInfo {
   map<string, string> headerKeys;
   int bitsPerPixel;
   int numberOfAxis;
-  vector<int> axisPixelLengths;
+  vector<size_t> axisPixelLengths;
   double tof;
   double timeBin;
   long int countsInImage;

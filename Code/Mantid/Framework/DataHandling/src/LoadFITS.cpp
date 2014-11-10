@@ -140,7 +140,7 @@ namespace DataHandling
       
           for(int j=0; allHeaderInfo.size() > i && j<allHeaderInfo[i].numberOfAxis; ++j)
           {
-            allHeaderInfo[i].axisPixelLengths.push_back(lexical_cast<int>(allHeaderInfo[i].headerKeys[m_headerAxisNameKeys[j]]));
+            allHeaderInfo[i].axisPixelLengths.push_back(lexical_cast<size_t>(allHeaderInfo[i].headerKeys[m_headerAxisNameKeys[j]]));
           }
 
           //m_allHeaderInfo[i].tof = lexical_cast<double>(m_allHeaderInfo[i].headerKeys["TOF"]);
@@ -184,7 +184,7 @@ namespace DataHandling
       if(allHeaderInfo[0].numberOfAxis > 0) m_spectraCount += allHeaderInfo[0].axisPixelLengths[0];
 
       // Presumably 2 axis, but futureproofing.
-      for(int i=1;i<allHeaderInfo[0].numberOfAxis;++i)
+      for(size_t i=1;i<allHeaderInfo[0].numberOfAxis;++i)
       {
         m_spectraCount *= allHeaderInfo[0].axisPixelLengths[i];
       }
@@ -255,9 +255,9 @@ namespace DataHandling
       }   
             
       PARALLEL_FOR_NO_WSP_CHECK()
-      for(int64_t i = 1; i < allHeaderInfo.size(); ++i)
+      for(int64_t i = 1; i < static_cast<int64_t>(allHeaderInfo.size()); ++i)
       {        
-        double rot = (rotations.size() > i) ? rotations[i] : -1;
+        double rot = (static_cast<int64_t>(rotations.size()) > i) ? rotations[i] : -1;
         latestWS = addWorkspace(allHeaderInfo[i],fileNumberInGroup,bufferAny,imageY,imageE,rot,latestWS);
         wsOrdered[i] = latestWS;
       }
@@ -351,7 +351,7 @@ namespace DataHandling
   std::string LoadFITS::padZeros(size_t number, size_t totalDigitCount)
   {
     std::ostringstream ss;
-    ss << std::setw( totalDigitCount ) << std::setfill( '0' ) << number;
+    ss << std::setw(static_cast<int>(totalDigitCount) ) << std::setfill( '0' ) << static_cast<int>(number);
     
     return ss.str();
   }

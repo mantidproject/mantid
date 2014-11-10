@@ -392,7 +392,7 @@ namespace Mantid
 
       nxFile.closeGroup();
 
-      free(dataArr);
+      delete[] dataArr;
     }
 
 
