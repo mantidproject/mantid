@@ -81,21 +81,45 @@ names in the list passed to plot:
     plot([mar, loq], [800, 900])
     plot(['MAR11060', loq], [800, 900])
 
-Here, plot is making a guess and plotting the spectra of these
-workspaces. You can make that choice more explicit by specifying the
-'tool' argument:
+Here, the plot function is making a guess and plotting the spectra of
+these workspaces (instead of the bins or anything else). You can make
+that choice more explicit by specifying the 'tool' argument:
 
     plot(['MAR11060', loq], [800, 900], tool='plot_spectrum')
+
+Alternatively, you can use the plot_spectrum command, which is
+equivalent to the plot command with the keyword argument
+tool='plot_spectrum':
+
+    plot_spectrum(['MAR11060', loq], [800, 900])
 
 Plotting bins
 -------------
 
-    plot_bin(ws, [1, 5, 7, 100], linewidth=4):
+To plot workspace bins you can use the keyword 'tool' with the value 'plot_bin', like this:
+
+    plot(ws, [1, 5, 7, 100], tool='plot_bin')
+
+or, alternatively, you can use the plot_bin command:
+
+    plot_bin(ws, [1, 5, 7, 100], linewidth=4)
 
 Ploting MD workspaces
 ---------------------
 
-    plot_md(md_ws):
+Similarly, to plot MD workspaces you can use the keyword 'tool' with the value 'plot_md', like this:
+
+    simple_md_ws = CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace=MDWWorkspaceName)
+    plot(simple_md_ws, tool='plot_md')
+
+or a specific plot_md command:
+
+    plot_md(simple_md_wsws)
+
+For simplicity, these examples use a dummy MD workspace. Please refer
+to the Mantid (http://www.mantidproject.org/MBC_MDWorkspaces) for a
+more real example, which necessarily gets more complicated and data
+intensive.
 
 Changing style properties
 -------------------------
@@ -300,6 +324,7 @@ def __last_fig():
 def __update_last_shown_fig(g):
     """
         Helper function, especially for the functional interface.
+        @param g :: graph object
         Returns :: new last fig
     """
     global __last_shown_fig
@@ -311,9 +336,32 @@ def __is_array(arg):
         Is the argument a python or numpy list?
         @param arg :: argument
         
-        Returns :: True if the argument a python or numpy list
+        Returns :: True if the argument is a python or numpy list
     """
     return isinstance(arg, list) or isinstance(arg, np.ndarray) 
+
+def __is_array_or_int(arg):
+    """
+        Is the argument a valid workspace index/indices, which is to say:
+        Is the argument an int, or python or numpy list?
+        @param arg :: argument
+
+        Returns :: True if the argument is an integer, or a python or numpy list
+    """
+    return isinstance(arg, int) or __is_array(arg)
+
+def __is_data_pair(a, b):
+    """
+        Are the two arguments passed (a and b) a valid data pair for plotting, like in plot(x, y) or
+        plot(ws, [0, 1, 2])?
+        @param a :: first argument
+        @param b :: second argument
+
+        Returns :: True if the arguments can be used to plot something is an integer, or a python or numpy list
+    """
+    # workspace, indices  or   x, y
+    return __is_workspace(a) and __is_array_or_int(b) or __is_array_or_int(a) and __is_array_or_int(b)
+
 
 def __is_workspace(arg):
     """
@@ -521,18 +569,74 @@ def __apply_plot_kwargs(graph, **kwargs):
         return
 
     for key in kwargs:
-        print "kwarg, keyword arg: %s: %s" % (key, kwargs[key])
         if 'linestyle' == key:
             __apply_linestyle_kwarg(graph, kwargs[key])
 
         elif 'linewidth' == key:
-            print 'linewidth'
             l = graph.activeLayer()
             for i in range(0, l.numCurves()):
                 l.setCurveLineWidth(i, kwargs[key])
 
         elif 'marker' == key:
             __apply_marker_kwarg(graph, kwargs[key])
+
+def __is_multiplot_command(*args, **kwargs):
+    """
+        Finds out if the passed *args make a valid multi-plot command. At the same time, splits the
+        multi-plot command line into individual plot commands.
+
+        @param args :: curve data and options.
+        @param kwargs :: plot keyword options
+
+        Returns :: tuple: (boolean: whether it is a multiplot command, list of single plot commands as tuples)
+    """
+    # A minimum multi-plot command would be plot(x, y, z, w) or plot(ws1, idx1, ws2, idx2)
+    nargs = len(args)
+    # this will be a list with the sequence of individual plots (a tuples, each describing a single plot)
+    plots_seq = []
+    if nargs < 4:
+        return (False, [])
+    i = 0
+    while i < nargs:
+        a = []
+        b = []
+        style = ''
+        if (nargs-i) >= 3:
+            if __is_data_pair(args[i], args[i+1]):
+                a = args[i]
+                b = args[i+1]
+                i += 2
+            else:
+                return (False, []);
+            # can have style string
+            if isinstance(args[i], basestring):
+                style = args[i]
+                i += 1
+            plots_seq.append((a,b,c))
+
+        if (nargs-i) >= 2:
+            if __is_data_pair(args[i], args[i+1]):
+                a = args[i]
+                b = args[i+1]
+                i += 2
+            else:
+                return (False, [])
+            plots_seq.append((a, b, ''))
+
+    return (i == nargs-1, seq_append)
+
+def __process_multiplot_command(plots_seq, **kwargs):
+    """
+        Make one plot at a time.
+        @param plots_seq :: list of individual plot parameters
+        @param kwargs :: plot style options
+
+        Returns :: the list of curves included in the plot
+    """
+    lines = []
+    for i in range(0, len(plots_seq)):
+        lines.append(plot(*(plots_seq[i])))   # TODO: fix window/hold param so this works as expected
+    return lines
 
 def __plot_as_workspace(*args, **kwargs):
     """
@@ -705,11 +809,16 @@ def plot(*args, **kwargs):
     """
     nargs = len(args)
     if nargs < 1:
-        raise ValueError("Must provide data to plot")
+        raise ValueError("You did not pass any argument. You must provide data to plot.")
 
-    # TODO: multiline
+    # TOTHINK: should there be an exception if it's plot_md (tool='plot_md')
+    (is_it, plots_seq) = __is_multiplot_command(*args, **kwargs)
+    if is_it:
+        __process_multiplot_command(plots_seq, **kwargs)
+    elif len(args) > 3:
+        raise ValueError("Could not interpret the arguments passed. You passed more than 3 positional arguments but this does not seem to be a correct multi-plot command. Please check your command.")
 
-    # TODO: support x-y plots like plot(x, y)?
+    # TOTHINK: support x-y plots like plot(x, y)?
 
     # normally guess; exception if e.g. a parameter tool='plot_bin' is given
     try:
@@ -724,84 +833,84 @@ def plot(*args, **kwargs):
 # Functions, for pyplot / old matlab style manipulation of figures
 #=============================================================================
 
-"""
-   Set the boundaries of the x axis
-
-   @param xmin :: minimum value
-   @param xmax :: maximum value
-"""
 def xlim(xmin, xmax):
+    """
+    Set the boundaries of the x axis
+
+    @param xmin :: minimum value
+    @param xmax :: maximum value
+    """
     l = __last_fig()._graph.activeLayer()
     l.setAxisScale(0, xmin, xmax)
 
-"""
-   Set the boundaries of the y axis
-
-   @param ymin :: minimum value
-   @param ymax :: maximum value
-"""
 def ylim(ymin, ymax):
+    """
+    Set the boundaries of the y axis
+
+    @param ymin :: minimum value
+    @param ymax :: maximum value
+    """
     l = __last_fig()._graph.activeLayer()
     l.setAxisScale(1, ymin, ymax)
 
-"""
-   Set the label or title of the x axis
-
-   @param lbl :: x axis lbl
-"""
 def xlabel(lbl):
+    """
+    Set the label or title of the x axis
+
+    @param lbl :: x axis lbl
+    """
     l = __last_fig()._graph.activeLayer()
     l.setXTitle(lbl)
 
-"""
-   Set the label or title of the y axis
-
-   @param lbl :: y axis lbl
-"""
 def ylabel(lbl):
+    """
+    Set the label or title of the y axis
+
+    @param lbl :: y axis lbl
+    """
     l = __last_fig()._graph.activeLayer()
     l.setYTitle(lbl)
 
-"""
-   Set title of active plot
-
-   @param title :: title string
-"""
 def title(title):
+    """
+    Set title of active plot
+
+    @param title :: title string
+    """
     l = __last_fig()._graph.activeLayer()
     l.setTitle(title)
 
-"""
-   Set the boundaries of the x and y axes
-
-   @param lims :: list or vector specifying min x, max x, min y, max y
-"""
 def axis(lims):
+    """
+    Set the boundaries of the x and y axes
+
+    @param lims :: list or vector specifying min x, max x, min y, max y
+    """
     l = __last_fig()._graph.activeLayer()
     if 4 != len(lims):
         raise ValueError("Error: 4 real values are required for the x and y axes limits")
     l.setScale(*lims)
 
-"""
-   Set title of active plot
-
-   @param title :: title string
-"""
 def grid(opt='on'):
+    """
+    Set title of active plot
+
+    @param title :: title string
+    """
     l = __last_fig()._graph.activeLayer()
     if None == opt or 'on' == opt:
         l.showGrid()
     elif 'off' == opt:
-        # TODO is there support for a 'hideGrid' in qti?
+        # TODO is there support for a 'hideGrid' in qti? Apparently not.
         print "Sorry, disabling grids is currenlty not supported"
 
-"""
-   Return Figure object for a new figure or an existing one (if there is any
-   with the number passed as parameter).
-
-   @param num :: figure number (optional). If empty, a new figure is created.
-"""
 def figure(num=None):
+    """
+    Return Figure object for a new figure or an existing one (if there is any
+    with the number passed as parameter).
+
+    @param num :: figure number (optional). If empty, a new figure is created.
+    """
     if not num:
         return Figure.__empty_fig()
     else:
@@ -815,12 +924,12 @@ def figure(num=None):
     else:
         return fig
 
-"""
-   Save current plot into a file. The format is guessed from the file extension (.eps, .png, .jpg, etc.)
-
-   @param name :: file name
-"""
 def savefig(name):
+    """
+    Save current plot into a file. The format is guessed from the file extension (.eps, .png, .jpg, etc.)
+
+    @param name :: file name
+    """
     if not name:
         raise ValueError("Error: you need to specify a non-empty file name")
     l = __last_graph().activeLayer()
