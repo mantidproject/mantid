@@ -43,9 +43,11 @@ class ExportExperimentLog(PythonAlgorithm):
         self.declareProperty("FileFormat", "tab", mantid.kernel.StringListValidator(fileformates), des)
 
         self.declareProperty("OrderByTitle", "", "Log file will be ordered by the value of this title from low to high.") 
+        self.declareProperty("RemoveDuplicateRecord", False, "Coupled with OrderByTitle, duplicated record will be removed.")
 
         overrideprop = StringArrayProperty("OverrideLogValue", values=[], direction=Direction.Input)
         self.declareProperty(overrideprop, "List of paired strings as log title and value to override values from workspace.")
+
 
         # Time zone
         timezones = ["UTC", "America/New_York"]
@@ -161,9 +163,13 @@ class ExportExperimentLog(PythonAlgorithm):
             ordertitle = self.getProperty("OrderByTitle").value 
             if ordertitle in self._headerTitles:
                 self._orderRecord = True
+                self._removeDupRecord = self.getProperty("RemoveDuplicateRecord").value
                 self.titleToOrder = ordertitle
             else:
                 self.log().warning("Specified title to order by (%s) is not in given log titles." % (ordertitle))
+
+        if self._orderRecord is False:
+            self._removeDupRecord = False
 
         # Override log values: it will not work in fastappend mode to override
         overridelist = self.getProperty("OverrideLogValue").value
@@ -330,6 +336,7 @@ class ExportExperimentLog(PythonAlgorithm):
         linedict = {}
         ilog = self._headerTitles.index(self.titleToOrder)
 
+        totnumlines = 0
         for line in lines:
             cline = line.strip()
             if len(cline) == 0:
@@ -341,11 +348,14 @@ class ExportExperimentLog(PythonAlgorithm):
             else:
                 # value line
                 try: 
-                    keyvalue = line.split(self._valuesep)[ilog]
+                    keyvalue = line.split(self._valuesep)[ilog].strip()
                 except IndexError:
                     self.log().error("Order record failed.")
                     return
-                linedict[keyvalue] = line
+                if linedict.has_key(keyvalue) is False: 
+                    linedict[keyvalue] = []
+                linedict[keyvalue].append(line)
+                totnumlines += 1
             # ENDIFELSE
         # ENDFOR
 
@@ -359,14 +369,15 @@ class ExportExperimentLog(PythonAlgorithm):
                 wbuf += line
 
             # log entry line
-            iline = 0
-            numlines = len(linedict.keys())
+            numlines = 0
             for ivalue in sorted(linedict.keys()):
-                wbuf += linedict[ivalue]
-                # Add extra \n in case reordered
-                if iline != numlines-1 and wbuf[-1] != '\n':
-                    wbuf += '\n'
-                iline += 1
+                for line in linedict[ivalue]: 
+                    wbuf += line
+                    # Add extra \n in case reordered
+                    if numlines != totnumlines-1 and wbuf[-1] != '\n':
+                        wbuf += '\n'
+                    numlines += 1
+                # ENDFOR
             # ENDFOR
 
             # Last line should not ends with \n
