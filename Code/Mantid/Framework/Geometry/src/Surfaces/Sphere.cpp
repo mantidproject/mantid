@@ -101,10 +101,10 @@ namespace Mantid
       else if (item.length()==1)
       {
         int index;
-        for(index=0;index<3 && Mantid::Kernel::Strings::section(Line,cent[index]);
-          index++);
-          if (index!=3)
-            return -5;
+        for(index=0;index<3 && Mantid::Kernel::Strings::section(Line,cent[index]);index++)
+          ;
+        if (index!=3)
+          return -5;
       }
       else
         return -6;

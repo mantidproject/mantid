@@ -127,7 +127,6 @@ namespace Mantid
       Kernel::V3D m_beamDir; // Directional vector for beam
       double m_srcR2; // beam penumbra radius (m)
       double m_halfSampleHeight, m_halfSampleWidth, m_halfSampleThick; // (m)
-      double m_maxWidthSampleFrame; // Maximum width in sample frame (m)
       Geometry::Object const *m_sampleShape; // sample shape
       SampleComptonProperties *m_sampleProps; // description of sample properties
       double m_detHeight, m_detWidth, m_detThick; // (m)

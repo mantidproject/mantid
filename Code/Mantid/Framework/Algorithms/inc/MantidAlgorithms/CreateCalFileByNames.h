@@ -91,8 +91,6 @@ private:
   std::string groups;
   /// Calibration map used if the *.cal file exist. All entries in the *.cal file are registered with the udet number as the key and the <Number,Offset,Select,Group> as the tuple value.
   instrcalmap instrcalib;
-  /// Number of groups
-  int group_no;
 };
 
 } // namespace Algorithms

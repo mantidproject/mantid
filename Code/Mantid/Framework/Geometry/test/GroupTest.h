@@ -177,13 +177,17 @@ public:
 
         // Make sure that null-pointer do not work
         Group_const_sptr null;
+        
+        //AppleClang gives a warning if we don't use the result;
+        bool useResult(false);
+        TS_ASSERT(!useResult)
 
         TS_ASSERT_THROWS(null * null, std::invalid_argument);
-        TS_ASSERT_THROWS(null == null, std::invalid_argument);
-        TS_ASSERT_THROWS(null != null, std::invalid_argument);
+        TS_ASSERT_THROWS(useResult = (null == null), std::invalid_argument);
+        TS_ASSERT_THROWS(useResult = (null != null), std::invalid_argument);
         TS_ASSERT_THROWS(three * null, std::invalid_argument);
         TS_ASSERT_THROWS(null * three, std::invalid_argument);
-
+        
         Mantid::Kernel::V3D coords(0.4, 0.3, 0.1);
         TS_ASSERT_THROWS(null * coords, std::invalid_argument);
     }

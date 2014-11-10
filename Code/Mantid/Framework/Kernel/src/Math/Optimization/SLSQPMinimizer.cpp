@@ -2717,67 +2717,6 @@ namespace
       return ret_val;
   } /* ddot_sl__ */
 
-  double dnrm1_(int *, double *x, int *i__, int *j)
-  {
-      /* Initialized data */
-
-      static double zero = 0.;
-      static double one = 1.;
-
-      /* System generated locals */
-      int i__1;
-      double ret_val, d__1, d__2, d__3;
-
-      /* Local variables */
-      static int k;
-      static double sum, temp, scale, snormx;
-
-      /* Parameter adjustments */
-      --x;
-
-      /* Function Body */
-  /*      DNRM1 - COMPUTES THE I-NORM OF A VECTOR */
-  /*              BETWEEN THE ITH AND THE JTH ELEMENTS */
-  /*      INPUT - */
-  /*      N       LENGTH OF VECTOR */
-  /*      X       VECTOR OF LENGTH N */
-  /*      I       INITIAL ELEMENT OF VECTOR TO BE USED */
-  /*      J       FINAL ELEMENT TO USE */
-  /*      OUTPUT - */
-  /*      DNRM1   NORM */
-      snormx = zero;
-      i__1 = *j;
-      for (k = *i__; k <= i__1; ++k) {
-  /* L10: */
-  /* Computing MAX */
-    d__2 = snormx, d__3 = (d__1 = x[k], std::abs(d__1));
-    snormx = std::max(d__2,d__3);
-      }
-      ret_val = snormx;
-      if (snormx == zero) {
-    return ret_val;
-      }
-      scale = snormx;
-      if (snormx >= one) {
-    scale = sqrt(snormx);
-      }
-      sum = zero;
-      i__1 = *j;
-      for (k = *i__; k <= i__1; ++k) {
-    temp = zero;
-    if ((d__1 = x[k], std::abs(d__1)) + scale != scale) {
-        temp = x[k] / snormx;
-    }
-    if (one + temp != one) {
-        sum += temp * temp;
-    }
-  /* L20: */
-      }
-      sum = sqrt(sum);
-      ret_val = snormx * sum;
-      return ret_val;
-  } /* dnrm1_ */
-
   double dnrm2___(int *n, double *dx, int *incx)
   {
       /* Initialized data */
