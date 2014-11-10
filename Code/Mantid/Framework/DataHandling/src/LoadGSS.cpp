@@ -370,6 +370,11 @@ namespace DataHandling
 
           xValue = (2 * xValue) - xPrev;
         }
+        else
+        {
+          g_log.error() << "Unsupported GSAS File Type: " << filetype << "\n";
+          throw Exception::FileError("Not a GSAS file", filename);
+        }
 
 				if (multiplybybinwidth)
 				{
