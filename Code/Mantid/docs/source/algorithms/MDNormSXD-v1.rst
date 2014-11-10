@@ -22,9 +22,9 @@ Usage
     autotestdata\UsageData and the following tag unindented
     .. include:: ../usagedata-note.txt
 
-**Example - SXDMDNorm**
+**Example - MDNormSXD**
 
-.. testcode:: SXDMDNormExample
+.. testcode:: MDNormSXDExample
 
   try:
     # Setting up the workspaces containing information about the flux and the solid angle (from a vanadium run)
@@ -65,7 +65,7 @@ Usage
     SaveMD(InputWorkspace=MDdata, Filename="/home/3y9/Desktop/TOPAZ/MDdata.nxs")
     
     #running the algorithm
-    SXDMDNorm(InputWorkspace='MDdata',
+    MDNormSXD(InputWorkspace='MDdata',
         AlignedDim0='[H,0,0],-8,8,100',
         AlignedDim1='[0,K,0],-8,8,100',
         AlignedDim2='[0,0,L],-8,8,100',

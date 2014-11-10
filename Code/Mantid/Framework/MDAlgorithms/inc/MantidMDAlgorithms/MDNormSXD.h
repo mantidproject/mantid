@@ -1,5 +1,5 @@
-#ifndef MANTID_MDALGORITHMS_SXDMDNORM_H_
-#define MANTID_MDALGORITHMS_SXDMDNORM_H_
+#ifndef MANTID_MDALGORITHMS_MDNORMSXD_H_
+#define MANTID_MDALGORITHMS_MDNORMSXD_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -13,7 +13,7 @@ namespace DataObjects
 namespace MDAlgorithms
 {
 
-  /** SXDMDNorm : Generate MD normalization for single crystal diffraction
+  /** MDNormSXD : Generate MD normalization for single crystal diffraction
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -35,13 +35,11 @@ namespace MDAlgorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  bool compareMomentum(Mantid::Kernel::VMD v1, Mantid::Kernel::VMD v2);
-
-  class DLLExport SXDMDNorm  :public SlicingAlgorithm
+  class DLLExport MDNormSXD  :public SlicingAlgorithm
   {
   public:
-    SXDMDNorm();
-    virtual ~SXDMDNorm();
+    MDNormSXD();
+    virtual ~MDNormSXD();
     
     virtual const std::string name() const;
     virtual int version() const;
@@ -83,4 +81,4 @@ namespace MDAlgorithms
 } // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_MDALGORITHMS_SXDMDNORM_H_ */
+#endif  /* MANTID_MDALGORITHMS_MDNORMSXD_H_ */

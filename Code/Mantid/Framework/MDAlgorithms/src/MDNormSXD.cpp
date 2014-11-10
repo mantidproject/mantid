@@ -1,4 +1,4 @@
-#include "MantidMDAlgorithms/SXDMDNorm.h"
+#include "MantidMDAlgorithms/MDNormSXD.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -30,14 +30,14 @@ namespace MDAlgorithms
   }
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(SXDMDNorm)
+  DECLARE_ALGORITHM(MDNormSXD)
 
 
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  SXDMDNorm::SXDMDNorm()
+  MDNormSXD::MDNormSXD()
   {
       hIndex=-1;
       kIndex=-1;
@@ -54,7 +54,7 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  SXDMDNorm::~SXDMDNorm()
+  MDNormSXD::~MDNormSXD()
   {
   }
 
@@ -63,21 +63,21 @@ namespace MDAlgorithms
 
 
   /// Algorithm's version for identification. @see Algorithm::version
-  int SXDMDNorm::version() const { return 1;}
+  int MDNormSXD::version() const { return 1;}
 
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string SXDMDNorm::category() const { return "MDAlgorithms";}
+  const std::string MDNormSXD::category() const { return "MDAlgorithms";}
 
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-  const std::string SXDMDNorm::summary() const { return "Calculate normalization for an MDEvent workspace for single crystal diffraction.";}
+  const std::string MDNormSXD::summary() const { return "Calculate normalization for an MDEvent workspace for single crystal diffraction.";}
 
   /// Algorithm's name for use in the GUI and help. @see Algorithm::name
-  const std::string SXDMDNorm::name() const { return "SXDMDNorm";}
+  const std::string MDNormSXD::name() const { return "MDNormSXD";}
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void SXDMDNorm::init()
+  void MDNormSXD::init()
   {
       declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input), "An input MDWorkspace.");
 
@@ -107,7 +107,7 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void SXDMDNorm::exec()
+  void MDNormSXD::exec()
   {
       bool skipProcessing=false;
       m_inputWS=getProperty("InputWorkspace");
@@ -402,7 +402,7 @@ namespace MDAlgorithms
   }
 
 
-  std::vector<Mantid::Kernel::VMD> SXDMDNorm::calculateIntersections(Mantid::Geometry::IDetector_const_sptr detector)
+  std::vector<Mantid::Kernel::VMD> MDNormSXD::calculateIntersections(Mantid::Geometry::IDetector_const_sptr detector)
   {
         std::vector<Mantid::Kernel::VMD> intersections;
         double th=detector->getTwoTheta(V3D(0,0,0),V3D(0,0,1));
@@ -600,7 +600,7 @@ namespace MDAlgorithms
    * @param flux :: A workspace to integrate.
    * @param integrFlux :: A workspace to store the results.
    */
-  void SXDMDNorm::integrateFlux( const DataObjects::EventWorkspace& flux, API::MatrixWorkspace &integrFlux )
+  void MDNormSXD::integrateFlux( const DataObjects::EventWorkspace& flux, API::MatrixWorkspace &integrFlux )
   {
     size_t nSpec = flux.getNumberHistograms();
     assert( nSpec == integrFlux.getNumberHistograms() );
@@ -651,7 +651,7 @@ namespace MDAlgorithms
    * @param sp :: A workspace index for a spectrum in integrFlux to interpolate.
    * @param yValues :: A vector to save the results.
    */
-  void SXDMDNorm::calcIntegralsForIntersections( const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux, size_t sp, std::vector<double> &yValues ) const
+  void MDNormSXD::calcIntegralsForIntersections( const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux, size_t sp, std::vector<double> &yValues ) const
   {
     assert( xValues.size() == yValues.size() );
 

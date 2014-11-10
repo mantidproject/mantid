@@ -1,25 +1,25 @@
-#ifndef MANTID_MDALGORITHMS_SXDMDNORMTEST_H_
-#define MANTID_MDALGORITHMS_SXDMDNORMTEST_H_
+#ifndef MANTID_MDALGORITHMS_MDNORMSXDTEST_H_
+#define MANTID_MDALGORITHMS_MDNORMSXDTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/SXDMDNorm.h"
+#include "MantidMDAlgorithms/MDNormSXD.h"
 
-using Mantid::MDAlgorithms::SXDMDNorm;
+using Mantid::MDAlgorithms::MDNormSXD;
 using namespace Mantid::API;
 
-class SXDMDNormTest : public CxxTest::TestSuite
+class MDNormSXDTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SXDMDNormTest *createSuite() { return new SXDMDNormTest(); }
-  static void destroySuite( SXDMDNormTest *suite ) { delete suite; }
+  static MDNormSXDTest *createSuite() { return new MDNormSXDTest(); }
+  static void destroySuite( MDNormSXDTest *suite ) { delete suite; }
 
 
   void test_Init()
   {
-    SXDMDNorm alg;
+    MDNormSXD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -28,9 +28,9 @@ public:
   void test_exec()
   {
     // Name of the output workspace.
-    /*std::string outWSName("SXDMDNormTest_OutputWS");
+    /*std::string outWSName("MDNormSXDTest_OutputWS");
 
-    SXDMDNorm alg;
+    MDNormSXD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
@@ -54,4 +54,4 @@ public:
 };
 
 
-#endif /* MANTID_MDALGORITHMS_SXDMDNORMTEST_H_ */
+#endif /* MANTID_MDALGORITHMS_MDNORMSXDTEST_H_ */
