@@ -15,9 +15,8 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "FakeAlgorithms.h"
 #include <map>
-#include <Poco/NObserver.h>
 
-using namespace Mantid::Kernel;
+using namespace Mantid::Kernel; 
 using namespace Mantid::API;
 
 class StubbedWorkspaceAlgorithm : public Algorithm
@@ -93,7 +92,7 @@ public:
   const std::string workspaceMethodName() const { return "methodname"; }
   const std::string workspaceMethodOnTypes() const { return "MatrixWorkspace;ITableWorkspace"; }
   const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
-
+  
   void init()
   {
     declareProperty("PropertyA", 12);
@@ -170,7 +169,7 @@ public:
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm",1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithmTwo", 1);
   }
-
+  
   void testAlgorithm()
   {
     std::string theName = alg.name();
@@ -240,31 +239,6 @@ public:
     TS_ASSERT( myAlg.isExecuted() );
   }
 
-  void testDuplicateObserverAdd()
-  {
-    ToyAlgorithm myAlg;
-
-    Poco::NObserver<AlgorithmTest, Algorithm::FinishedNotification> finishObserver1(*this, &AlgorithmTest::_finishHandle);
-    Poco::NObserver<AlgorithmTest, Algorithm::FinishedNotification> finishObserver2(*this, &AlgorithmTest::_finishHandle);
-    Poco::NObserver<AlgorithmTest, Algorithm::FinishedNotification> finishObserver3(*this, &AlgorithmTest::_finishHandle);
-
-    myAlg.addObserver(finishObserver1);
-    myAlg.addObserver(finishObserver2);
-    myAlg.addObserver(finishObserver3);
-    myAlg.addObserver(finishObserver1);
-    myAlg.removeObserver(finishObserver3);
-
-    // Duplicate observers should be discarded
-    TS_ASSERT_EQUALS(myAlg.numberOfObservers(), 2);
-  }
-
-  /** A dummy finish handle for use in the abov est case.
-   * @param pNf Poco notification
-   */
-  void _finishHandle(const Poco::AutoPtr<Algorithm::FinishedNotification>& pNf)
-  {
-    UNUSED_ARG(pNf)
-  }
 
   void testSetPropertyValue()
   {
@@ -277,15 +251,15 @@ public:
     TS_ASSERT( alg.existsProperty("prop1") )
     TS_ASSERT( ! alg.existsProperty("notThere") )
   }
-
+  
   void testGetPropertyValue()
   {
     std::string value;
     TS_ASSERT_THROWS_NOTHING( value = alg.getPropertyValue("prop2") )
     TS_ASSERT( ! value.compare("1") )
-    TS_ASSERT_THROWS(alg.getPropertyValue("ghjkgh"), Exception::NotFoundError )
+    TS_ASSERT_THROWS(alg.getPropertyValue("ghjkgh"), Exception::NotFoundError )    
   }
-
+  
   void testGetProperties()
   {
     std::vector<Property*> vec = alg.getProperties();
@@ -360,7 +334,7 @@ public:
     IAlgorithm_sptr testAlg = runFromString("ToyAlgorithm.1");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 1);
-
+    
     // No brackets
     testAlg = runFromString("ToyAlgorithm.1");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
@@ -372,7 +346,7 @@ public:
     IAlgorithm_sptr testAlg = runFromString("ToyAlgorithm.1()");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 1);
-
+    
     // No brackets
     testAlg = runFromString("ToyAlgorithm.1");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
@@ -385,7 +359,7 @@ public:
     IAlgorithm_sptr testAlg = runFromString("ToyAlgorithm.2(prop1=val1,prop2=8,prop3=10.0,Binning=0.2,0.2,1.4)");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
-
+    
     // On gcc we get ambiguous function calls doing
     // std::string s;
     // s = getProperty(...);
@@ -640,7 +614,7 @@ public:
     {
       TS_ASSERT( !alg.isExecuted() );
       return WorkspaceGroup_sptr();
-    }
+    } 
     TS_ASSERT( alg.isExecuted() )
     Workspace_sptr out1 = AnalysisDataService::Instance().retrieve("D");
     WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(out1);
@@ -806,6 +780,6 @@ private:
   MatrixWorkspace_sptr ws3;
 };
 
-
+ 
 
 #endif /*ALGORITHMTEST_H_*/

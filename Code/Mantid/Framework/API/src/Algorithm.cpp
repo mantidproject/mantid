@@ -195,16 +195,7 @@ namespace Mantid
     */
     void Algorithm::addObserver(const Poco::AbstractObserver& observer)const
     {
-      const Poco::AbstractObserver* o = &observer;
-
-      for(auto it = m_externalObservers.begin(); it != m_externalObservers.end(); ++it)
-      {
-        if(*it == o)
-          return;
-      }
-
       notificationCenter().addObserver(observer);
-      m_externalObservers.push_back(o);
     }
 
     /**  Remove an observer
@@ -212,31 +203,7 @@ namespace Mantid
     */
     void Algorithm::removeObserver(const Poco::AbstractObserver& observer)const
     {
-      bool found = false;
-
-      auto it = m_externalObservers.begin();
-      for(; it != m_externalObservers.end(); ++it)
-      {
-        if(*it == &observer)
-        {
-          found = true;
-          break;
-        }
-      }
-
-      if(found)
-      {
-        notificationCenter().removeObserver(observer);
-        m_externalObservers.erase(it);
-      }
-    }
-
-    /** Gets the number of added observers.
-     * @returns Observer count
-     */
-    size_t Algorithm::numberOfObservers() const
-    {
-      return m_externalObservers.size();
+      notificationCenter().removeObserver(observer);
     }
 
     //---------------------------------------------------------------------------------------------

@@ -219,10 +219,9 @@ public:
 
   /// Add an observer for a notification
   void addObserver(const Poco::AbstractObserver& observer) const;
+
   /// Remove an observer
   void removeObserver(const Poco::AbstractObserver& observer) const;
-  /// Gets the number of added observers
-  size_t numberOfObservers() const;
 
   /// Raises the cancel flag.
   virtual void cancel();
@@ -404,9 +403,6 @@ private:
   bool m_groupsHaveSimilarNames;
   /// A non-recursive mutex for thread-safety
   mutable Kernel::Mutex m_mutex;
-
-  /// Vector storing added observers
-  mutable std::vector<const Poco::AbstractObserver*> m_externalObservers;
 };
 
 ///Typedef for a shared pointer to an Algorithm
