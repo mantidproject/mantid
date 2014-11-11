@@ -15,7 +15,10 @@ namespace DataObjects
 namespace MDAlgorithms
 {
 
-  /** IntegrateFlux : TODO: DESCRIPTION
+  /** Algorithm IntegrateFlux.
+
+    Calculates indefinite integral of the spectra in the input workspace sampled at a regular grid.
+    The input workspace is expected to be an event workspace with weighted-no-time events.
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

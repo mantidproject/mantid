@@ -36,7 +36,7 @@ public:
     std::string outWSName("IntegrateFluxTest_OutputWS");
 
     // Create an input workspace
-    auto inputWS = createInputWorkspace(inWSName);
+    createInputWorkspace(inWSName);
 
     IntegrateFlux alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -81,7 +81,7 @@ public:
     std::string outWSName("IntegrateFluxTest_OutputWS");
 
     // Create an input workspace
-    auto inputWS = createInputWorkspace(inWSName);
+    createInputWorkspace(inWSName);
 
     IntegrateFlux alg;
     alg.initialize();
@@ -120,7 +120,7 @@ public:
     std::string outWSName("IntegrateFluxTest_OutputWS");
 
     // Create an input workspace
-    auto inputWS = createInputWorkspace(inWSName);
+    createInputWorkspace(inWSName);
 
     IntegrateFlux alg;
     alg.initialize();
@@ -132,9 +132,30 @@ public:
     AnalysisDataService::Instance().clear();
   }
   
+  void test_bad_input_workspace()
+  {
+    // Name of the input workspace.
+    std::string inWSName("IntegrateFluxTest_InputWS");
+    // Name of the output workspace.
+    std::string outWSName("IntegrateFluxTest_OutputWS");
+
+    // Create an input workspace
+    createBadInputWorkspace(inWSName);
+
+    IntegrateFlux alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    alg.setPropertyValue("InputWorkspace", inWSName);
+    alg.setPropertyValue("OutputWorkspace", outWSName);
+    TS_ASSERT_THROWS( alg.execute(), std::runtime_error );
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().clear();
+  }
+  
 private:
 
-  Workspace_sptr createInputWorkspace(const std::string& wsName)
+  void createInputWorkspace(const std::string& wsName)
   {
     auto alg = Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
     alg->initialize();
@@ -157,12 +178,26 @@ private:
     alg->setPropertyValue("OutputWorkspace",wsName);
     alg->setProperty("Tolerance",1.0);
     alg->execute();
-
-    auto ws = AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
-    return ws;
   }
 
+  void createBadInputWorkspace(const std::string& wsName)
+  {
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
+    alg->initialize();
+    alg->setPropertyValue("WorkspaceType","Event");
+    alg->setPropertyValue("Function","User Defined");
+    alg->setPropertyValue("UserDefinedFunction","name=LinearBackground,A0=1,A1=2");
+    alg->setProperty("NumEvents",10000);
+    alg->setProperty("NumBanks",1);
+    alg->setProperty("BankPixelWidth",2);
+    alg->setProperty("XMin",0.0);
+    alg->setProperty("XMax",100.0);
+    alg->setPropertyValue("XUnit","Momentum");
+    alg->setProperty("BinWidth",1.0);
+    alg->setProperty("OutputWorkspace",wsName);
+    alg->execute();
 
+  }
 };
 
 

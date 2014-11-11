@@ -48,6 +48,7 @@ Usage
         el=flux.getEventList(i)
         el.divide(flux.readY(i)[0],0)
     flux=Rebin(InputWorkspace=flux,Params='1.85,10,10')
+    flux=IntegrateFlux(flux)
     SaveNexus(InputWorkspace=flux, Filename="/home/3y9/Desktop/TOPAZ/spectra.nxs")
     
     #data

@@ -10,35 +10,38 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+If a spectrum in the input workspace contains function :math:`f(x)` then the corresponding spectrum in
+the output workspace has its indefinite integral:
+
+:math:`\int_{x_0}^x f(\xi)d\xi`.
+
+The input workspace is expected to be an event workspace with weighted-no-time events.
 
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - IntegrateFlux**
 
 .. testcode:: IntegrateFluxExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = IntegrateFlux()
-
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+    # Create an event workspace
+    ws = CreateSampleWorkspace("Event")
+    # Make evet type weighted-no-time.
+    ws = CompressEvents( ws )
+    # Integrate all spectra.
+    wsOut = IntegrateFlux( ws )
+    
+    # Print the result
+    print "The input workspace has %i spectra" % ws.getNumberHistograms()
+    print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
 
 Output:
 
 .. testoutput:: IntegrateFluxExample
 
-  The output workspace has ?? spectra
+    The input workspace has 200 spectra
+    The output workspace has 200 spectra
 
 .. categories::
 
