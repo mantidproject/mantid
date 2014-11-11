@@ -48,7 +48,7 @@ class DensityOfStates(PythonAlgorithm):
             doc="Sum the partial density of states into a single workspace.")
 
         self.declareProperty(name='ScaleByCrossSection', defaultValue=False,
-            doc="Sum the partial density of states by the incoh scattering corss section.")
+            doc="Sum the partial density of states by the incoh scattering cross section.")
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
             doc="Name to give the output workspace.")
