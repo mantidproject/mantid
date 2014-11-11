@@ -42,7 +42,7 @@ void IndirectSimulation::initLayout()
 	std::map<unsigned int, IndirectSimulationTab*>::iterator iter;
 	for (iter = m_simulationTabs.begin(); iter != m_simulationTabs.end(); ++iter)
 	{
-		connect(iter->second, SIGNAL(executePythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
+		connect(iter->second, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
 		connect(iter->second, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
 	}
 

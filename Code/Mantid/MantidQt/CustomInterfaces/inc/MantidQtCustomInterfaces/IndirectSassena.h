@@ -24,9 +24,15 @@ namespace MantidQt
 			/// Load default settings into the interface
 			void loadSettings(const QSettings& settings);
 
+    private slots:
+      /// Handle completion of the algorithm batch
+      void handleAlgorithmFinish(bool error);
+
 		private:
-			// The ui form
+			/// The ui form
 			Ui::IndirectSassena m_uiForm;
+      /// Name of the output workspace group
+      QString m_outWsName;
 
 		};
 	} // namespace CustomInterfaces
