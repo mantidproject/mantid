@@ -61,7 +61,7 @@ namespace Mantid
       /// write any extra information required
       virtual void extraHeaders(std::ofstream & file) = 0;
       /// write the main content of the data
-      virtual void data(std::ofstream & file, const std::vector<double> & XData);
+      virtual void data(std::ofstream & file, const std::vector<double> & XData, bool exportDeltaQ = true);
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method
