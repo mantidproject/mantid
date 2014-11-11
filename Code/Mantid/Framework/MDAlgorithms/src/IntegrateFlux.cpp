@@ -17,6 +17,18 @@ namespace MDAlgorithms
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(IntegrateFlux)
 
+namespace{
+
+  /// Void deleter for shared pointers
+class NoEventWorkspaceDeleting
+{
+public:
+    /// deleting operator. Does nothing
+  void operator()(const DataObjects::EventWorkspace*){}
+};
+
+}
+
   //----------------------------------------------------------------------------------------------
 
   /// Algorithms name for identification. @see Algorithm::name
@@ -87,7 +99,9 @@ namespace MDAlgorithms
     }
 
     // crate empty output workspace
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create( "Workspace2D", nSpec, nX, nX );
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create( 
+      boost::shared_ptr<const DataObjects::EventWorkspace>(&eventWS,NoEventWorkspaceDeleting()), 
+      nSpec, nX, nX );
 
     // claculate the integration points and save them in the x-vactors of integrFlux
     double xMin = eventWS.getEventXMin();

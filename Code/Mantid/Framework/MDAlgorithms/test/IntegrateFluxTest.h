@@ -52,6 +52,9 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
 
+    auto inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>( inWSName );
+    
+    TS_ASSERT( ws->getAxis(0)->unit() == inWS->getAxis(0)->unit() );
     TS_ASSERT_EQUALS( ws->getNumberHistograms(), 4 );
 
     auto &x = ws->readX(0);
@@ -143,6 +146,7 @@ private:
     alg->setProperty("BankPixelWidth",2);
     alg->setProperty("XMin",0.0);
     alg->setProperty("XMax",100.0);
+    alg->setPropertyValue("XUnit","Momentum");
     alg->setProperty("BinWidth",1.0);
     alg->setProperty("OutputWorkspace",wsName);
     alg->execute();

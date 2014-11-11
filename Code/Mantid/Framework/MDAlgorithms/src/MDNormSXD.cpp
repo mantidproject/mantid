@@ -265,20 +265,9 @@ namespace MDAlgorithms
         m_lX[i] = lDim.getX(i);
       }
 
-      Mantid::API::MatrixWorkspace_const_sptr fW=getProperty("FluxWorkspace");
-      Mantid::DataObjects::EventWorkspace_const_sptr fluxW = boost::dynamic_pointer_cast<const Mantid::DataObjects::EventWorkspace>(fW);
-      KincidentMin=fluxW->getEventXMin();
-      KincidentMax=fluxW->getEventXMax();
+      Mantid::API::MatrixWorkspace_const_sptr integrFlux = getProperty("FluxWorkspace");
+      integrFlux->getXMinMax(KincidentMin,KincidentMax);
       Mantid::API::MatrixWorkspace_const_sptr sA=getProperty("SolidAngleWorkspace");
-
-      // a workspace to store integrated flux spectra
-      // the spectra sizes are smaller than in fW for efficeiency
-      // actual integrals are linearly interpolated between points in integrFlux
-      auto integrFlux = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-        API::WorkspaceFactory::Instance().create("Workspace2D", fW->getNumberHistograms(),interpolationSize,interpolationSize) );
-
-      // integrate spectra in flixW and store the results in integrFlux
-      integrateFlux( *fluxW, *integrFlux );
 
       if (skipProcessing)
       {
@@ -302,8 +291,8 @@ namespace MDAlgorithms
           std::vector<detid_t> detIDS=m_normWS->getExperimentInfo(0)->getInstrument()->getDetectorIDs(true);
 
           Mantid::API::Progress *prog=new Mantid::API::Progress(this,0.3,1,static_cast<int64_t>(detIDS.size()));
-          const detid2index_map d2m=fluxW->getDetectorIDToWorkspaceIndexMap();
-          const detid2index_map d2mSA=sA->getDetectorIDToWorkspaceIndexMap();
+          const detid2index_map d2m = integrFlux->getDetectorIDToWorkspaceIndexMap();
+          const detid2index_map d2mSA = sA->getDetectorIDToWorkspaceIndexMap();
           auto instrument = m_normWS->getExperimentInfo(0)->getInstrument();
 
           PARALLEL_FOR1(m_normWS)
