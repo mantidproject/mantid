@@ -83,7 +83,8 @@ namespace IDA
     pyInput +=
       "msdfit(input, startX, endX, spec_min=specMin, spec_max=specMax, Save=save, Verbose=verbose, Plot=plot)\n";
 
-    runPythonCode(pyInput).trimmed();
+    QString pyOutput = runPythonCode(pyInput);
+    UNUSED_ARG(pyOutput);
   }
 
   void MSDFit::singleFit()
