@@ -27,6 +27,13 @@ class CutMD(DataProcessorAlgorithm):
         if not coord_system == SpecialCoordinateSystem.HKL:
             raise ValueError("Input Workspace must be in reciprocal lattice dimensions (HKL)")
         
-        self.setProperty("OutputWorkspace", to_cut)
+        clone_alg = AlgorithmManager.Instance().create("CloneMDWorkspace")
+        clone_alg.setChild(True)
+        clone_alg.initialize()
+        clone_alg.setProperty("InputWorkspace", to_cut)
+        clone_alg.setPropertyValue("OutputWorkspace", "cloned")
+        clone_alg.execute()
+        cloned = clone_alg.getProperty("OutputWorkspace").value
+        self.setProperty("OutputWorkspace", cloned)
         
 AlgorithmFactory.subscribe(CutMD)
