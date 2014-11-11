@@ -90,6 +90,9 @@
             <property name="toolTip">
              <string>Select the instrument to search with</string>
             </property>
+            <property name="whatsThis">
+             <string>Specifies which instrument you're searching for data from.</string>
+            </property>
            </widget>
           </item>
           <item row="1" column="0">
@@ -125,6 +128,9 @@
             <property name="toolTip">
              <string>Investigation to search for</string>
             </property>
+            <property name="whatsThis">
+             <string>Specifies the investigation id that you are searching for runs from.</string>
+            </property>
             <property name="inputMethodHints">
              <set>Qt::ImhDigitsOnly</set>
             </property>
@@ -143,6 +149,9 @@
             </property>
             <property name="toolTip">
              <string>Search</string>
+            </property>
+            <property name="whatsThis">
+             <string>Searches ICAT for runs from the given instrument with the given investigation id.</string>
             </property>
             <property name="text">
              <string>Search</string>
@@ -552,6 +561,9 @@
    </property>
    <property name="toolTip">
     <string>Transfer the selected run(s) to the processing table.</string>
+   </property>
+   <property name="whatsThis">
+    <string>Transfers the selected runs into the processing table.</string>
    </property>
   </action>
  </widget>
