@@ -19,9 +19,8 @@ namespace Mantid
     void SaveReflCustomAscii::extraProps()
     {
       declareProperty(new ArrayProperty<std::string>("LogList"),"List of logs to write to file.");
-      declareProperty("UserContact", "", "Text to be written to the User-local contact field");
       declareProperty("Title", "", "Text to be written to the Title field");
-      declareProperty("WriteXError", false, "If true, the error on X will be written as the fourth column."); //deltaQ
+      declareProperty("WriteDeltaQ", false, "If true, the error on DeltaQ will be written as the fourth column."); 
     }
 
     /** virtual method to add information to the file before the data
@@ -52,9 +51,14 @@ namespace Mantid
       {
         file << boost::lexical_cast<std::string>(*log) << ": " << boost::lexical_cast<std::string>(samp.getLogData(*log)->value()) << std::endl;
       }
-
+    }
+    
+    void SaveReflCustomAscii::data(std::ofstream & file, const std::vector<double> & XData, bool exportDeltaQ)
+    {
+     
+      AsciiPointBase::data(file, XData, getProperty("WriteDeltaQ"));
     }
 
-   
+
   } // namespace DataHandling
 } // namespace Mantid

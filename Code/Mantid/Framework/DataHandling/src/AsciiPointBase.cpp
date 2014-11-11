@@ -84,25 +84,25 @@ namespace Mantid
       const std::vector<double> & eData = m_ws->readE(0);
       if (exportDeltaQ)
       {
-      for (size_t i = 0; i < m_xlength; ++i)
-      {
-        double dq = XData[i]*m_qres;
-        outputval(XData[i], file, leadingSep());
-        outputval(yData[i], file);
-        outputval(eData[i], file);
-        outputval(dq, file);
-        file << std::endl;
-      }
+        for (size_t i = 0; i < m_xlength; ++i)
+        {
+          double dq = XData[i]*m_qres;
+          outputval(XData[i], file, leadingSep());
+          outputval(yData[i], file);
+          outputval(eData[i], file);
+          outputval(dq, file);
+          file << std::endl;
+        }
       }
       else 
       {
         for (size_t i = 0; i < m_xlength; ++i)
-      {
-        outputval(XData[i], file, leadingSep());
-        outputval(yData[i], file);
-        outputval(eData[i], file);
-        file << std::endl;
-      }
+        {
+          outputval(XData[i], file, leadingSep());
+          outputval(yData[i], file);
+          outputval(eData[i], file);
+          file << std::endl;
+        }
       }
     }
 
