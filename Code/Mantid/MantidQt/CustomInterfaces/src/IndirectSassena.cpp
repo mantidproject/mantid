@@ -35,6 +35,7 @@ namespace MantidQt
 		void IndirectSassena::run()
     {
       using namespace Mantid::API;
+      using MantidQt::API::BatchAlgorithmRunner;
 
 			QString inputFileName = m_uiForm.mwInputFile->getFirstFilename();
 			QFileInfo inputFileInfo(inputFileName);
@@ -49,8 +50,10 @@ namespace MantidQt
       sassenaAlg->setProperty("TimeUnit", m_uiForm.sbTimeUnit->value());
       sassenaAlg->setProperty("OutputWorkspace", outWsName.toStdString());
 
-      sassenaAlg->execute();
-      /* runAlgorithm(sassenaAlg); */
+      m_batchAlgoRunner->addAlgorithm(sassenaAlg);
+
+      BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromSassenaAlg;
+      inputFromSassenaAlg["InputWorkspace"] = outWsName.toStdString();
 
       if(save)
       {
@@ -59,11 +62,12 @@ namespace MantidQt
         IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus");
         saveAlg->initialize();
 
-        saveAlg->setProperty("InputWorkspace", outWsName.toStdString());
         saveAlg->setProperty("Filename", saveFilename.toStdString());
 
-        saveAlg->execute();
+        m_batchAlgoRunner->addAlgorithm(saveAlg, inputFromSassenaAlg);
       }
+
+      m_batchAlgoRunner->executeBatch();
 		}
 
     /**
