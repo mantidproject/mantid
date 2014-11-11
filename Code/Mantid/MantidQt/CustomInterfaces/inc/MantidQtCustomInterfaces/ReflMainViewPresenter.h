@@ -68,6 +68,8 @@ namespace MantidQt
       virtual void process();
       //Reduce a row
       void reduceRow(int rowNo);
+      //prepare a run or list of runs for processing
+      Mantid::API::Workspace_sptr prepareRunWorkspace(const std::string& run);
       //load a run into the ADS, or re-use one in the ADS if possible
       Mantid::API::Workspace_sptr loadRun(const std::string& run, const std::string& instrument);
       //get the run number of a TOF workspace
