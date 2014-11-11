@@ -3272,38 +3272,17 @@ void MantidUI::savedatainNexusFormat(const std::string& fileName,const std::stri
 /** Loads data from nexus file
 * @param wsName :: Name of the workspace to be created
 * @param fileName :: name of the nexus file
-* @param project :: if true, load stops GUI execution
 */
-void MantidUI::loaddataFromNexusFile(const std::string& wsName,const std::string& fileName,bool project)
+void MantidUI::loadWSFromFile(const std::string& wsName, const std::string& fileName)
 {
-  if(fileName.empty()) return ;
+  if(fileName.empty())
+    return;
   try
   {
-    Mantid::API::IAlgorithm_sptr alg =createAlgorithm("LoadNexus");
+    Mantid::API::IAlgorithm_sptr alg = createAlgorithm("Load");
     alg->setPropertyValue("Filename",fileName);
     alg->setPropertyValue("OutputWorkspace",wsName);
-    if(project)alg->execute();
-    else executeAlgorithmAsync(alg);
-  }
-  catch(...)
-  {
-  }
-}
-/** Loads data from raw file
-* @param wsName :: Name of the workspace to be created
-* @param fileName :: name of the raw file
-* @param project :: if true, load stops GUI execution
-*/
-void MantidUI::loadadataFromRawFile(const std::string& wsName,const std::string& fileName,bool project)
-{
-  if(fileName.empty()) return ;
-  try
-  {
-    Mantid::API::IAlgorithm_sptr alg =createAlgorithm("LoadRaw");
-    alg->setPropertyValue("Filename",fileName);
-    alg->setPropertyValue("OutputWorkspace",wsName);
-    if(project)alg->execute();
-    else executeAlgorithmAsync(alg);
+    alg->execute();
   }
   catch(...)
   {

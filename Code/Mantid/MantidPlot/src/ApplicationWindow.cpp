@@ -11165,13 +11165,7 @@ void ApplicationWindow::loadWsToMantidTree(const std::string & wsName)
   }
   std::string fileName(workingDir.toStdString()+"/"+wsName);
   fileName.append(".nxs");
-  try
-  {
-    mantidUI->loaddataFromNexusFile(wsName,fileName,true);
-  }
-  catch(...)
-  {
-  }
+  mantidUI->loadWSFromFile(wsName,fileName);
 }
 
 void ApplicationWindow::openTable(const std::string& lines, const int fileVersion)

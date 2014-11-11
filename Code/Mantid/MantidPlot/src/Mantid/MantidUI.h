@@ -281,11 +281,7 @@ public:
   */
   void savedatainNexusFormat(const std::string& fileName,const std::string & wsName);
 
-  /** load data from nexus file.This method is useful 
-  when a project is opened  from mantidplot
-  */
-  void loaddataFromNexusFile(const std::string& wsname,const std::string& fileName,bool project=false);
-  void loadadataFromRawFile(const std::string& wsname,const std::string& fileName,bool project=false);
+  void loadWSFromFile(const std::string& wsname,const std::string& fileName);
 
   MantidMatrix* openMatrixWorkspace(const std::string& wsName, int lower, int upper);
 
