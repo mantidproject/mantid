@@ -38,6 +38,9 @@ namespace MantidQt
 
       ui.buttonProcess->setDefaultAction(ui.actionProcess);
 
+      //Create a whats this button
+      ui.rowToolBar->addAction(QWhatsThis::createAction(this));
+
       //Expand the process runs column at the expense of the search column
       ui.splitterTables->setStretchFactor(0, 0);
       ui.splitterTables->setStretchFactor(1, 1);
