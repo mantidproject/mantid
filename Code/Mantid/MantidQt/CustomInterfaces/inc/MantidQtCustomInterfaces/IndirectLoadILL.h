@@ -21,9 +21,11 @@ namespace MantidQt
 			IndirectLoadILL(QWidget * parent = 0);
 
 			// Inherited methods from IndirectLoadAsciiTab
-			QString help() { return "Indirect_Neutron"; };
+			QString help() { return "LoadILL"; };
+
 			bool validate();
 			void run();
+
 			/// Load default settings into the interface
 			void loadSettings(const QSettings& settings);
 
