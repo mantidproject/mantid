@@ -134,7 +134,15 @@ namespace DataHandling
         {
           string tmpBitPix = allHeaderInfo[i].headerKeys[m_headerBitDepthKey];
           if(boost::contains(tmpBitPix, "-")) 
+          {
             boost::erase_all(tmpBitPix,"-");
+            allHeaderInfo[i].isFloat = true;
+          }
+          else
+          {
+            allHeaderInfo[i].isFloat = false;
+          }
+
           allHeaderInfo[i].bitsPerPixel = lexical_cast<int>(tmpBitPix);
           allHeaderInfo[i].numberOfAxis = static_cast<int>(m_headerAxisNameKeys.size());
       
@@ -370,11 +378,11 @@ namespace DataHandling
     uint8_t *buffer8 = NULL;
     uint16_t *buffer16 = NULL;
     uint32_t *buffer32 = NULL;
-    
+
     // create pointer of correct data type to void pointer of the buffer:
     buffer8 = static_cast<uint8_t*>(bufferAny);
     buffer16 = static_cast<uint16_t*>(bufferAny);
-    buffer32 = static_cast<uint32_t*>(bufferAny);    
+    buffer32 = static_cast<uint32_t*>(bufferAny);
       
     // Read Data
     bool fileErr = false;
@@ -400,12 +408,12 @@ namespace DataHandling
       for(size_t j=0; j<fileInfo.axisPixelLengths[1];++j)
       {
         double val = 0;
-        if(fileInfo.bitsPerPixel == 8) val = static_cast<double>(buffer8[(i*fileInfo.axisPixelLengths[0]) + j]);
-        if(fileInfo.bitsPerPixel == 16) val = static_cast<double>(buffer16[(i*fileInfo.axisPixelLengths[0]) + j]);
-        if(fileInfo.bitsPerPixel == 32) val = static_cast<double>(buffer32[(i*fileInfo.axisPixelLengths[0]) + j]);
-
+        if(fileInfo.bitsPerPixel == 8) val = static_cast<double>(buffer8[(i*fileInfo.axisPixelLengths[1]) + j]);
+        if(fileInfo.bitsPerPixel == 16) val = static_cast<double>(buffer16[(i*fileInfo.axisPixelLengths[1]) + j]);
+        if(fileInfo.bitsPerPixel == 32) val = static_cast<double>(buffer32[(i*fileInfo.axisPixelLengths[1]) + j]);
+        
         imageY[i][j] = val;
-        imageE[i][j] = sqrt(val);      
+        imageE[i][j] = sqrt(val); 
       }				
     }
 
@@ -418,7 +426,7 @@ namespace DataHandling
 
   
   /**
-  * Read a single files header and populate an object with the ignformation
+  * Read a single files header and populate an object with the information
   * @param headerInfo A FITSInfo file object to parse header information into
   * @returns A bool specifying succes of the operation
   */

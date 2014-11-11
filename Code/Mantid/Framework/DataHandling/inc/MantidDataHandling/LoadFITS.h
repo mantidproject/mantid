@@ -25,6 +25,7 @@ struct FITSInfo {
   long int numberOfTriggers;
   string extension;
   string filePath;
+  bool isFloat;
 }; 
 
 namespace Mantid
