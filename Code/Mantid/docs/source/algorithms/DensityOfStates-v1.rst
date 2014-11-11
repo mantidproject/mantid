@@ -57,7 +57,7 @@ Output:
 
     sum_ws = sum_group.getName() + '_Total'
 
-    print CheckWorkspacesMatch(total_ws, sum_ws, Tolerance=1e-12, CheckSpectraMap=False)
+    print CheckWorkspacesMatch(total_ws, sum_ws, Tolerance=1e-12)
 
 Output:
 

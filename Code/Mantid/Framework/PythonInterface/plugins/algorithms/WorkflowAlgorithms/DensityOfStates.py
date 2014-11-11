@@ -7,7 +7,7 @@ import re
 import os.path
 import math
 
-class DensityOfStates(PythonAlgorithm):
+class DensityOfStates(DataProcessorAlgorithm):
 
     def summary(self):
         return "Calculates phonon densities of states, Raman and IR spectrum."
@@ -97,7 +97,9 @@ class DensityOfStates(PythonAlgorithm):
 
         # We want to calculate a partial DoS
         if self._calc_partial and self._spec_type == 'DOS':
-            prog_reporter.report("Calculating partial density of states")
+            logger.notice('Calculating partial density of states')
+            prog_reporter.report('Calculating partial density of states')
+
             eigenvectors = file_data[4]
 
             # Filter the dict of all ions to only those the user cares about
@@ -108,6 +110,7 @@ class DensityOfStates(PythonAlgorithm):
 
             partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors, weights)
 
+            # Discard the summed workspace if the user does not want it
             if self._sum_contributions:
                 partial_workspaces.append(sum_workspace)
             else:
@@ -118,8 +121,11 @@ class DensityOfStates(PythonAlgorithm):
 
         # We want to calculate a total DoS with scaled intensities
         elif self._spec_type == 'DOS' and self._scale_by_cross_section:
-            prog_reporter.report("Calculating density of states")
+            logger.notice('Calculating summed density of states with scaled intensities')
+            prog_reporter.report('Calculating density of states')
+
             eigenvectors = file_data[4]
+
             partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(self._ion_dict, frequencies, eigenvectors, weights)
 
             # Discard the partial workspaces
@@ -131,7 +137,9 @@ class DensityOfStates(PythonAlgorithm):
 
         # We want to calculate a total DoS without scaled intensities
         elif self._spec_type == 'DOS':
-            prog_reporter.report("Calculating density of states")
+            logger.notice('Calculating summed density of states without scaled intensities')
+            prog_reporter.report('Calculating density of states')
+
             self._compute_DOS(frequencies, np.ones_like(frequencies), weights)
             mtd[self._ws_name].setYUnit('(D/A)^2/amu')
             mtd[self._ws_name].setYUnitLabel('Intensity')
@@ -141,7 +149,9 @@ class DensityOfStates(PythonAlgorithm):
             if ir_intensities.size == 0:
                 raise ValueError("Could not load any IR intensities from file.")
 
-            prog_reporter.report("Calculating IR intensities")
+            logger.notice('Calculating IR intensities')
+            prog_reporter.report('Calculating IR intensities')
+
             self._compute_DOS(frequencies, ir_intensities, weights)
             mtd[self._ws_name].setYUnit('(D/A)^2/amu')
             mtd[self._ws_name].setYUnitLabel('Intensity')
@@ -151,7 +161,9 @@ class DensityOfStates(PythonAlgorithm):
             if raman_intensities.size == 0:
                 raise ValueError("Could not load any Raman intensities from file.")
 
-            prog_reporter.report("Calculating Raman intensities")
+            logger.notice('Calculating Raman intensities')
+            prog_reporter.report('Calculating Raman intensities')
+
             self._compute_raman(frequencies, raman_intensities, weights)
             mtd[self._ws_name].setYUnit('A^4')
             mtd[self._ws_name].setYUnitLabel('Intensity')
@@ -235,6 +247,8 @@ class DensityOfStates(PythonAlgorithm):
 
         # Output each contribution to it's own workspace
         for ion_name, ions in partial_ions.items():
+            partial_ws_name = self._ws_name + '_' + ion_name
+
             self._compute_partial(ions, frequencies, eigenvectors, weights)
 
             # Set correct units on partial workspace
@@ -249,7 +263,6 @@ class DensityOfStates(PythonAlgorithm):
                 scattering_x_section = mtd[self._ws_name].mutableSample().getMaterial().incohScatterXSection()
                 Scale(InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name, Operation='Multiply', Factor=scattering_x_section)
 
-            partial_ws_name = self._ws_name + '_' + ion_name
             partial_workspaces.append(partial_ws_name)
             RenameWorkspace(self._ws_name, OutputWorkspace=partial_ws_name)
 
@@ -257,14 +270,19 @@ class DensityOfStates(PythonAlgorithm):
 
         # If there is more than one partial workspace need to sum first spectrum of all
         if len(partial_workspaces) > 1:
+            sum_workspace = '__dos_sum'
+
             # Collect spectra into a single workspace
-            AppendSpectra(OutputWorkspace=self._ws_name, InputWorkspace1=partial_workspaces[0], InputWorkspace2=partial_workspaces[1])
+            AppendSpectra(OutputWorkspace=sum_workspace, InputWorkspace1=partial_workspaces[0], InputWorkspace2=partial_workspaces[1])
             for ws_idx in xrange(2, len(partial_workspaces)):
-                AppendSpectra(OutputWorkspace=self._ws_name, InputWorkspace1=self._ws_name, InputWorkspace2=partial_workspaces[ws_idx])
+                AppendSpectra(OutputWorkspace=sum_workspace, InputWorkspace1=sum_workspace, InputWorkspace2=partial_workspaces[ws_idx])
 
             # Sum all spectra
-            SumSpectra(InputWorkspace=self._ws_name, OutputWorkspace=total_workspace)
-            DeleteWorkspace(self._ws_name)
+            SumSpectra(InputWorkspace=sum_workspace, OutputWorkspace=total_workspace)
+            mtd[total_workspace].getSpectrum(0).setSpectrumNo(1)
+
+            # Remove workspace used to sum spectra
+            DeleteWorkspace(sum_workspace)
 
         # Otherwise just repackage the WS we have as the total
         else:
@@ -581,13 +599,13 @@ class DensityOfStates(PythonAlgorithm):
 
                 vector_match = eigenvectors_regex.match(line)
                 if vector_match:
-                    if self._calc_partial:
-                        #parse eigenvectors for partial dos
+                    if self._calc_partial or (self._spec_type == 'DOS' and self._scale_by_cross_section):
+                        # Parse eigenvectors for partial dos
                         vectors = self._parse_phonon_eigenvectors(f_handle)
                         eigenvectors.append(vectors)
                     else:
-                        #skip over eigenvectors
-                        for _ in xrange(self._num_ions*self._num_branches):
+                        # Skip over eigenvectors
+                        for _ in xrange(self._num_ions * self._num_branches):
                             line = f_handle.readline()
                             if not line:
                                 raise IOError("Bad file format. Uexpectedly reached end of file.")
