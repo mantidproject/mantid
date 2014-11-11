@@ -141,6 +141,8 @@ private:
   *m_convertToMatrixWorkspace,
   *m_convertMDHistoToMatrixWorkspace,
   *m_clearUB;
+  
+  ApplicationWindow *m_appParent;
 
   QAtomicInt m_updateCount;
   bool m_treeUpdating;

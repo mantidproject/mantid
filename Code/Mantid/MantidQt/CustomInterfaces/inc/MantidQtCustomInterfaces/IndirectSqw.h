@@ -47,8 +47,13 @@ namespace CustomInterfaces
     virtual bool validate();
 
   private slots:
-    void sOfQwRebinE(bool state);
-    void sOfQwPlotInput();
+    void energyRebinToggle(bool state);
+    void plotContour();
+    void sqwAlgDone(bool error);
+
+  private:
+    bool validateQRebin();
+    bool validateEnergyRebin();
 
   };
 } // namespace CustomInterfaces

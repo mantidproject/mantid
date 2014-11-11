@@ -202,14 +202,17 @@ namespace Mantid
       {
         // Not found, so search the other places were it may occur
         Kernel::ConfigServiceImpl & configService = Kernel::ConfigService::Instance();
-        std::string directoryName = configService.getString("parameterDefinition.directory");
-        if (directoryName.empty())
+        std::vector<std::string> directoryNames = configService.getInstrumentDirectories();
+
+        for ( auto instDirs_itr = directoryNames.begin(); instDirs_itr != directoryNames.end(); ++instDirs_itr)
         {
-          // This is the assumed deployment directory for parameter files, where we need to be 
-          // relative to the directory of the executable, not the current working directory.
-          directoryName = Poco::Path(configService.getPropertiesDir()).resolve("../instrument").toString();
+          //This will iterate around the directories from user ->etc ->install, and find the first beat file
+          std::string directoryName = *instDirs_itr;
+          fullPathParamIDF = getFullPathParamIDF( directoryName );
+          //stop when you find the first one
+          if (!fullPathParamIDF.empty())
+            break;
         }
-        fullPathParamIDF = getFullPathParamIDF( directoryName );
       }
 
       if(!fullPathParamIDF.empty()) {

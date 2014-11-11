@@ -471,6 +471,7 @@ void LoadNexusMonitors::runLoadLogs(const std::string filename, API::MatrixWorks
 {
     // do the actual work
     API::IAlgorithm_sptr loadLogs = createChildAlgorithm("LoadNexusLogs");
+
     // Now execute the Child Algorithm. Catch and log any error, but don't stop.
     try
     {

@@ -107,8 +107,11 @@ class MSGReducer(reducer.Reducer):
         Note: This is *not* the base parameter file, ie "IRIS_Parameters.xml"
         but, rather, the additional parameter file.
         """
-        self._parameter_file = \
-            os.path.join(config["parameterDefinition.directory"], file_name)
+        self._parameter_file = file_name
+        for directory in config.getInstrumentDirectories():
+            if os.path.isfile(os.path.join(directory, file_name)):
+                self._parameter_file = os.path.join(directory, file_name)
+                return 
 
     def set_rebin_string(self, rebin):
         """Sets the rebin string to be used with the Rebin algorithm.

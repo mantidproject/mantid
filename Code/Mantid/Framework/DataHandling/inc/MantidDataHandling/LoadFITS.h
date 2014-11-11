@@ -102,7 +102,9 @@ namespace DataHandling
     void loadChunkOfBinsFromFile(Mantid::API::MatrixWorkspace_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, size_t spetraCount, int bitsPerPixel, size_t binChunkStartIndex);
     /// Initialises a workspace with IDF and fills it with data
     API::MatrixWorkspace_sptr initAndPopulateHistogramWorkspace();
-
+    /// Creates a comma separated string of rotations from a file
+    std::string ReadRotations(std::string rotFilePath, size_t fileCount);
+    
     vector<FITSInfo> m_allHeaderInfo;
     size_t m_binChunkSize;
     static const int FIXED_HEADER_SIZE = 2880;    

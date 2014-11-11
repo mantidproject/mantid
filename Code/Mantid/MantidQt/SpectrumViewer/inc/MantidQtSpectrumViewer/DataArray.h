@@ -2,20 +2,23 @@
 #define DATA_ARRAY_H
 
 #include <cstddef>
+#include <vector>
+
+#include <boost/shared_ptr.hpp>
 
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
-    @class DataArray 
-  
+    @class DataArray
+
        This class provides a simple immutable wrapper around a block of data
     returned from an SpectrumDataSource.
- 
-    @author Dennis Mikkelson 
-    @date   2012-04-03 
-     
+
+    @author Dennis Mikkelson
+    @date   2012-04-03
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -30,8 +33,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
@@ -45,91 +48,95 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER DataArray
   public:
 
     /// Construct a DataArray "wrapper" around the data and region info
-    DataArray( double xmin,     double xmax,
-               double ymin,     double ymax,
-               bool   is_log_x,
-               size_t n_rows,   size_t n_cols,
-               float *data );
+    DataArray( double xMin,    double xMax,
+               double yMin,    double yMax,
+               bool   isLogX,
+               size_t nRows,   size_t nCols,
+               std::vector<float> data );
 
     ~DataArray();
 
     /// Get the smallest 'x' value actually covered by this DataArray
-    double GetXMin()    const;
+    double getXMin() const;
 
     /// Get the largest 'x' value actually covered by this DataArray
-    double GetXMax()    const;
+    double getXMax() const;
 
     /// Get the smallest 'y' value actually covered by this DataArray
-    double GetYMin()    const;
+    double getYMin() const;
 
     /// Get the largest 'y' value actually covered by this DataArray
-    double GetYMax()    const;
+    double getYMax() const;
 
     /// Check if the returned array is binned logarithmically in 'x'
-    bool IsLogX()  const;
+    bool isLogX() const;
 
     /// Get smallest value recorded in this DataArray
-    double GetDataMin() const;
+    double getDataMin() const;
 
     /// Get largest value recorded in this DataArray
-    double GetDataMax() const;
+    double getDataMax() const;
 
     // Get the actual number of rows in this DataArray
-    size_t GetNRows()   const;
+    size_t getNRows() const;
 
     /// Get the actual number of columns in this DataArray
-    size_t GetNCols()   const;
+    size_t getNCols() const;
 
-    /// Get simple array containing all values, packed in a 1-D array
-    float* GetData()    const;
+    /// Get vector containing all values, packed in a 1-D array
+    std::vector<float> getData() const;
 
     /// Get the value at the specified row and column
-    double GetValue( int row, int col ) const;
+    double getValue( int row, int col ) const;
 
     /// Get the value from the row and column containing the specified point
-    double GetValue( double x, double y ) const;
+    double getValue( double x, double y ) const;
 
     /// Clamp x to the interval of x-values covered by this DataArray
-    void RestrictX( double & x ) const;
-  
+    void restrictX( double & x ) const;
+
     /// Clamp y to the interval of y-values covered by this DataArray
-    void RestrictY( double & y ) const;
+    void restrictY( double & y ) const;
 
     /// Clamp row to a valid row number for this DataArray
-    void RestrictRow( int & row ) const;
+    void restrictRow( int & row ) const;
 
     /// Clamp col to a valid column number for this DataArray
-    void RestrictCol( int & col ) const;
+    void restrictCol( int & col ) const;
 
     /// Calculate the column number containing the specified x
-    size_t ColumnOfX( double x ) const;
+    size_t columnOfX( double x ) const;
 
     /// Calculate the x-value at the center of the specified column
-    double XOfColumn( size_t col ) const;
+    double xOfColumn( size_t col ) const;
 
     /// Calculate the row number containing the specified y
-    size_t RowOfY( double y ) const;
+    size_t rowOfY( double y ) const;
 
-    /// Calculate the y-value at the center of the specified row 
-    double YOfRow( size_t row ) const;
+    /// Calculate the y-value at the center of the specified row
+    double yOfRow( size_t row ) const;
 
 
   private:
-    double xmin; 
-    double xmax;
-    double ymin;
-    double ymax;
-    bool   is_log_x;
-    double data_min; 
-    double data_max;
-    size_t n_rows;   
-    size_t n_cols;
-    float *data;        // This is given a reference to the data block,
-                        // which is allocated in the SpectrumDataSource,
-                        // but will be deleted in this object's Destructor
+    double m_xMin;
+    double m_xMax;
+    double m_yMin;
+    double m_yMax;
+    bool   m_isLogX;
+    size_t m_nRows;
+    size_t m_nCols;
+
+    double m_dataMin;
+    double m_dataMax;
+
+    std::vector<float> m_data;
+
 };
 
+typedef boost::shared_ptr<DataArray> DataArray_sptr;
+typedef boost::shared_ptr<const DataArray> DataArray_const_sptr;
+
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif // DATA_ARRAY_H

@@ -57,13 +57,14 @@ valid-to="2100-01-31 23:59:59" last-modified="2014-05-26 14:06:31">
   </component>
   <!-- Detector Panels -->
   <type name="detectors">
-    <component type="uniq_detector" idstart="2" idfillbyfirst="x" idstep="1" idstepbyrow="256" name="uniq_detector">
-      <location z="3.100000" />
+    <component type="uniq_detector" idstart="257" idfillbyfirst="x" idstep="-1" idstepbyrow="256" name="uniq_detector">
+      <location z="1.000" />
     </component>
   </type>
   <!-- Definition of the detector -->
-  <!-- Back detector: 30.7 x 42.9 mm -->
-  <type name="uniq_detector" is="rectangular_detector" type="pixel" xpixels="256" xstart="0.000000" xstep="0.001200" ypixels="1" ystart="-0.003350" ystep="0.006700">
+  <type name="uniq_detector" is="rectangular_detector" type="pixel"
+       xpixels="256" xstart="-0.153600" xstep="0.001200"
+       ypixels="1"   ystart="-0.003350" ystep="0.006700">
     <properties />
   </type>
   <!-- Pixel size = tubePixelSize * tubeWidth-->
