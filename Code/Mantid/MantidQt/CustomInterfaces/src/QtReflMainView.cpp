@@ -42,8 +42,9 @@ namespace MantidQt
       ui.splitterTables->setStretchFactor(0, 0);
       ui.splitterTables->setStretchFactor(1, 1);
 
-      //Allow rows to be reordered
+      //Allow rows and columns to be reordered
       ui.viewTable->verticalHeader()->setMovable(true);
+      ui.viewTable->horizontalHeader()->setMovable(true);
 
       //Custom context menu for table
       connect(ui.viewTable, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
