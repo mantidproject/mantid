@@ -115,7 +115,7 @@ class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
 
     def test_lines_get_data(self):
         y = [0.2, 0.5, 0.1, 0.6]
-        # not this assumes that plot will make a dummy workspace using 0,1,2... as X
+        # note this assumes that plot will make a dummy workspace using 0,1,2... as X
         x = range(0, len(y), 1)
 
         lines = plot(y)
@@ -163,6 +163,24 @@ class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
         self.check_output_lines(lines, 2)
         self.close_win(lines)
 
+    def test_plot_with_style_args(self):
+        lines = plot(WorkspaceName2D, [0,1], '--g', tool='plot_spectrum')
+        self.check_output_lines(lines, 2)
+        self.close_win(lines)
+
+        lines = plot(WorkspaceName2D, [0,1], 'y:>', tool='plot_spectrum')
+        self.check_output_lines(lines, 2)
+        self.close_win(lines)
+
+    def test_plot_with_style_args_and_kwargs(self):
+        lines = plot(WorkspaceName2D, [0,1], '-.g', tool='plot_spectrum')
+        self.check_output_lines(lines, 2)
+        self.close_win(lines)
+
+        lines = plot(WorkspaceName2D, [0,1], 'r-.>', tool='plot_spectrum')
+        self.check_output_lines(lines, 2)
+        self.close_win(lines)
+
     def test_plot_with_kwargs(self):
         lines = plot(WorkspaceName2D, [0,1], tool='plot_spectrum', linewidth=3, linestyle='-.', marker='v')
         self.check_output_lines(lines, 2)
@@ -174,6 +192,12 @@ class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
 
         lines = plot(SecondWorkspaceName2D, [0,1, 2], tool='plot_spectrum', linewidth=3, linestyle='-.', marker='v')
         self.check_output_lines(lines, 3)
+        self.close_win(lines)
+
+    def test_wrong_kwargs(self):
+        # funny kwargs should have no big consequences
+        lines = plot(WorkspaceName2D, [0,1], tool='plot_spectrum', linewidth=3, linestyle='-.', marker='v', funny_foo='bar', funny_baz='qux')
+        self.check_output_lines(lines, 2)
         self.close_win(lines)
 
     def test_multi_plot_commands(self):
