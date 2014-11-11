@@ -1,7 +1,7 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTNEUTRON_H_
-#define MANTIDQTCUSTOMINTERFACES_INDIRECTNEUTRON_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTLOADILL_H_
+#define MANTIDQTCUSTOMINTERFACES_INDIRECTLOADILL_H_
 
-#include "ui_IndirectNeutron.h"
+#include "ui_IndirectLoadILL.h"
 #include "MantidQtCustomInterfaces/IndirectLoadAsciiTab.h"
 #include "MantidAPI/ExperimentInfo.h"
 
@@ -13,12 +13,12 @@ namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
-		class DLLExport IndirectNeutron : public IndirectLoadAsciiTab
+		class DLLExport IndirectLoadILL : public IndirectLoadAsciiTab
 		{
 			Q_OBJECT
 
 		public:
-			IndirectNeutron(QWidget * parent = 0);
+			IndirectLoadILL(QWidget * parent = 0);
 
 			// Inherited methods from IndirectLoadAsciiTab
 			QString help() { return "Indirect_Neutron"; };
@@ -41,7 +41,7 @@ namespace MantidQt
 			/// Map to store instrument analysers and reflections for this instrument
 			QMap<QString, QStringList> m_paramMap;
 			/// The ui form
-			Ui::IndirectNeutron m_uiForm;
+			Ui::IndirectLoadILL m_uiForm;
 
 		};
 	} // namespace CustomInterfaces
