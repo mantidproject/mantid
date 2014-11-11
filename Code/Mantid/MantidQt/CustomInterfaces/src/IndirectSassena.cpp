@@ -43,6 +43,10 @@ namespace MantidQt
       m_outWsName = inputFileInfo.baseName();
       bool save = m_uiForm.chkSave->isChecked();
 
+      // If the workspace group already exists then remove it
+      if(AnalysisDataService::Instance().doesExist(m_outWsName.toStdString()))
+        AnalysisDataService::Instance().deepRemoveGroup(m_outWsName.toStdString());
+
       IAlgorithm_sptr sassenaAlg = AlgorithmManager::Instance().create("LoadSassena");
       sassenaAlg->initialize();
 
