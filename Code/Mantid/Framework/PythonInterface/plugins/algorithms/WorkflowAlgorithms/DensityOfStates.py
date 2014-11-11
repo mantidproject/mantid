@@ -58,6 +58,33 @@ class DensityOfStates(PythonAlgorithm):
 
 #----------------------------------------------------------------------------------------
 
+    def validateInputs(self):
+        """
+        Performs input validation.
+
+        Used to ensure the user is requesting a valid mode.
+        """
+        issues = dict()
+
+        spec_type = self.getPropertyValue('SpectrumType')
+        sum_contributions = self.getProperty('SumContributions').value
+        scale_by_cross_section = self.getProperty('ScaleByCrossSection').value
+        ions = self.getProperty('Ions').value
+        calc_partial = (len(ions) > 0)
+
+        if spec_type != 'DOS' and calc_partial:
+            issues['Ions'] = 'Cannot calculate partial density of states when using %s' % spec_type
+
+        if spec_type != 'DOS' and scale_by_cross_section:
+            issues['ScaleByCrossSection'] = 'Cannot scale contributions by cross sections when using %s' % spec_type
+
+        if not calc_partial and sum_contributions:
+            issues['SumContributions'] = 'Cannot sum contributions when not calculating partial density of states'
+
+        return issues
+
+#----------------------------------------------------------------------------------------
+
     def PyExec(self):
         # Run the algorithm
         self._get_properties()
