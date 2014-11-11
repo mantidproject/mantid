@@ -73,6 +73,7 @@ class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
         return True
 
     def check_output_lines(self, lines, expected_len):
+        """ Check that the lines returned by a plot are correctly built """
         self.assertTrue(expected_len==len(lines))
         for i in range(0, len(lines)):
             self.assertTrue(isinstance(lines[i], Line2D))
@@ -111,6 +112,19 @@ class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
             for i in range(0, len(lines)):
                 self.assertTrue(lines[i].get_xdata() == lines2_bin[i].get_xdata())
                 self.assertTrue(lines[i].get_ydata() == lines2_bin[i].get_ydata())
+
+    def test_lines_get_data(self):
+        y = [0.2, 0.5, 0.1, 0.6]
+        # not this assumes that plot will make a dummy workspace using 0,1,2... as X
+        x = range(0, len(y), 1)
+
+        lines = plot(y)
+        self.check_output_lines(lines, 1)
+        # and here also check the values
+        if 1==len(lines):
+            self.assertTrue(lines[0].get_xdata() == x)
+            self.assertTrue(lines[0].get_ydata() == y)
+        self.close_win(lines)
 
     def test_plot_md_ok(self):
         lines = plot(MDWWorkspaceName, tool='plot_md')
