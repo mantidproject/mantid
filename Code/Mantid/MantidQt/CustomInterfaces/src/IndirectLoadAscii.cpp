@@ -31,7 +31,7 @@ void IndirectLoadAscii::initLayout()
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
 	//insert each tab into the interface on creation
-	m_loadAsciiTabs.insert(std::make_pair(NEUTRON, new IndirectLoadILL(m_uiForm.IndirectLoadAsciiTabs->widget(NEUTRON))));
+	m_loadAsciiTabs.insert(std::make_pair(LOAD_ILL, new IndirectLoadILL(m_uiForm.IndirectLoadAsciiTabs->widget(LOAD_ILL))));
 
 	//Connect each tab to the actions available in this GUI
 	std::map<unsigned int, IndirectLoadAsciiTab*>::iterator iter;
