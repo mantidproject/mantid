@@ -53,6 +53,11 @@ std::map<std::string, std::string> CorelliCrossCorrelate::validateInputs() {
 
   inputWS = getProperty("InputWorkspace");
 
+  // check for null pointers - this is to protect against workspace groups
+  if (!inputWS) {
+    return errors;
+  }
+
   // This algorithm will only work for CORELLI, check for CORELLI.
   if (inputWS->getInstrument()->getName() != "CORELLI")
     errors["InputWorkspace"] = "This Algorithm will only work for Corelli.";
