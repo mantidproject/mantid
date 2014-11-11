@@ -60,14 +60,20 @@ namespace Algorithms
 
     // Time (general) range
     declareProperty("StartTime", "",
-        "The start time, in (a) seconds, (b) nanoseconds or (c) percentage of total run time\n"
-        "since the start of the run. OR (d) absolute time. \n"
-        "Events before this time are filtered out.");
+                    "The start time, such that all event before this time are filtered out. "
+                    "It could be (1) relative time to run start time "
+                    "in unit as specified property 'UnitOfTime' or "
+                    "(2) absolute time. "
+                    "Absolute time takes a string in format as 1990-01-01T00:00:00, "
+                    "while the relative time takes integer or float. ");
 
     declareProperty("StopTime", "",
-        "The stop time, in (2) seconds, (b) nanoseconds or (c) percentage of total run time\n"
-        "since the start of the run. OR (d) absolute time. \n"
-        "Events at or after this time are filtered out.");
+                    "The stop time, such that all events after this time are filtered out. "
+                    "It could be (1) relative time to run start time "
+                    "in unit as specified property 'UnitOfTime' or "
+                    "(2) absolute time. "
+                    "Absolute time takes a string in format as 1990-01-01T00:00:00, "
+                    "while the relative time takes integer or float. ");
 
     // Split by time (only) in steps
     declareProperty("TimeInterval", EMPTY_DBL(),
@@ -81,8 +87,8 @@ namespace Algorithms
     timeoptions.push_back("Percent");
     declareProperty("UnitOfTime", "Seconds", boost::make_shared<Kernel::StringListValidator>(timeoptions),
                     "StartTime, StopTime and DeltaTime can be given in various unit."
-                    "The unit can be second or nanosecond from run start time."
-                    "They can also be defined as percentage of total run time.");
+                    "The unit can be 'Seconds' or 'Nanoseconds' from run start time."
+                    "They can also be defined as 'Percentage' of total run time.");
 
     // Split by log value (only) in steps
     declareProperty("LogName", "",
@@ -103,13 +109,22 @@ namespace Algorithms
     setPropertySettings("LogValueInterval",
                         new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
 
+    /*
+      Documentation doesn't include property options in property descriptions or anywhere else.
+     For example, FilterLogValueByChangingDirection doesn't let me know that Increasing and Decreasing
+    are valid options without using the MantidPlotGui to open the algorithm dialog.
+
+      */
+
     std::vector<std::string> filteroptions;
     filteroptions.push_back("Both");
     filteroptions.push_back("Increase");
     filteroptions.push_back("Decrease");
     declareProperty("FilterLogValueByChangingDirection", "Both",
                     boost::make_shared<Kernel::StringListValidator>(filteroptions),
-                    "d(log value)/dt can be positive and negative.  They can be put to different splitters.");
+                    "d(log value)/dt can be positive and negative.  They can be put to different splitters."
+                    "There are 3 options, 'Both', 'Increase' and 'Decrease' corresponding to "
+                    "d(log value)/dt can be any value, positive only and negative only respectively.");
     setPropertySettings("FilterLogValueByChangingDirection",
                         new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
 
@@ -125,7 +140,8 @@ namespace Algorithms
     logboundoptions.push_back("Other");
     auto logvalidator = boost::make_shared<StringListValidator>(logboundoptions);
     declareProperty("LogBoundary", "Centre", logvalidator,
-                    "How to treat log values as being measured in the centre of time.");
+                    "How to treat log values as being measured in the centre of time. "
+                    "There are three options, 'Centre', 'Left' and 'Other'. ");
     setPropertySettings("LogBoundary",
                         new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
 
