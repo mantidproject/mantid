@@ -1991,6 +1991,15 @@ bool ConfigServiceImpl::quickVatesCheck() const
   return found;
 }
 
+/**
+ * Gets the path to ParaView.
+ * @returns The ParaView path.
+ */
+const std::string ConfigServiceImpl::getParaViewPath() const
+{
+	return getString("paraview.path");
+}
+
 /// \cond TEMPLATE
 template DLLExport int ConfigServiceImpl::getValue(const std::string&, double&);
 template DLLExport int ConfigServiceImpl::getValue(const std::string&, std::string&);
