@@ -45,8 +45,11 @@ SecondWorkspaceName2D = 'another fake ws'
 CreateWorkspace(OutputWorkspace=SecondWorkspaceName2D, DataX=list(sec_X), DataY=list(sec_Y), DataE=list(sec_E), NSpec=3,
                 UnitX="TOF", YUnitLabel="Counts",  WorkspaceTitle="Test/faked data Workspace, 3 spectra")
 
+# plot_md needs an MD workspace with a single non-integrated dimension
 MDWWorkspaceName = 'mdw'
-CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace=MDWWorkspaceName)
+mdSignal = np.sin(range(0,100,1))
+errInput = mdSignal/20.5
+CreateMDHistoWorkspace(Dimensionality="1", Names='x', Units='m', Extents='0,10', NumberOfBins=len(mdSignal), SignalInput=mdSignal, ErrorInput=errInput, OutputWorkspace=MDWWorkspaceName)
 
 class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
 
@@ -96,8 +99,8 @@ class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
 
         if self.assertTrue(len(lines) == len(lines_spec)):
             for i in range(0, len(lines)):
-                self.assertTrue(lines[i].get_xdata() == lines_spec[i].get_xdata())
-                self.assertTrue(lines[i].get_ydata() == lines_spec[i].get_ydata())
+                self.assertEqual(lines[i].get_xdata(), lines_spec[i].get_xdata())
+                self.assertEqual(lines[i].get_ydata(), lines_spec[i].get_ydata())
 
     def test_plot_bin_ok(self):
         lines = plot(WorkspaceName2D, [0, 1, 2], tool='plot_bin')
@@ -110,8 +113,8 @@ class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
 
         if self.assertTrue(len(lines) == len(lines_bin)):
             for i in range(0, len(lines)):
-                self.assertTrue(lines[i].get_xdata() == lines2_bin[i].get_xdata())
-                self.assertTrue(lines[i].get_ydata() == lines2_bin[i].get_ydata())
+                self.assertEqual(lines[i].get_xdata(), lines2_bin[i].get_xdata())
+                self.assertEqual(lines[i].get_ydata(), lines2_bin[i].get_ydata())
 
     def test_lines_get_data(self):
         y = [0.2, 0.5, 0.1, 0.6]
@@ -122,15 +125,16 @@ class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
         self.check_output_lines(lines, 1)
         # and here also check the values
         if 1==len(lines):
-            self.assertTrue(lines[0].get_xdata() == x)
-            self.assertTrue(lines[0].get_ydata() == y)
+            self.assertEqual(lines[0].get_xdata(), x)
+            self.assertEqual(lines[0].get_ydata(), y)
         self.close_win(lines)
 
     def test_plot_md_ok(self):
-        lines = plot(MDWWorkspaceName, tool='plot_md')
+        lines = plot_md(MDWWorkspaceName)
+        self.assertEqual(len(lines), 1)
         self.close_win(lines)
 
-        lines = plot_md(MDWWorkspaceName)
+        lines = plot(MDWWorkspaceName, tool='plot_md')
         self.close_win(lines)
 
         # now see what happens with non-md workspaces
@@ -173,7 +177,7 @@ class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
         self.close_win(lines)
 
     def test_plot_with_style_args_and_kwargs(self):
-        lines = plot(WorkspaceName2D, [0,1], '-.g', tool='plot_spectrum')
+        lines = plot(WorkspaceName2D, [0,1], '-.m', tool='plot_spectrum')
         self.check_output_lines(lines, 2)
         self.close_win(lines)
 
