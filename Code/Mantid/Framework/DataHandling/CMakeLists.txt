@@ -10,6 +10,7 @@ set ( SRC_FILES
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
+	src/DownloadInstrument.cpp
 	src/ExtractMonitorWorkspace.cpp
 	src/FilterEventsByLogValuePreNexus.cpp
 	src/FindDetectorsInShape.cpp
@@ -126,10 +127,9 @@ set ( SRC_FILES
 	src/SaveMask.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
+	src/SaveNXTomo.cpp
 	src/SaveNexus.cpp
 	src/SaveNexusProcessed.cpp
-	src/SaveNXTomo.cpp
-	src/SaveParameterFile.cpp
 	src/SavePAR.cpp
 	src/SavePDFGui.cpp
 	src/SavePHX.cpp
@@ -156,6 +156,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
+	inc/MantidDataHandling/DownloadInstrument.h
 	inc/MantidDataHandling/ExtractMonitorWorkspace.h
 	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
@@ -267,10 +268,9 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveMask.h
 	inc/MantidDataHandling/SaveNISTDAT.h
 	inc/MantidDataHandling/SaveNXSPE.h
+	inc/MantidDataHandling/SaveNXTomo.h
 	inc/MantidDataHandling/SaveNexus.h
 	inc/MantidDataHandling/SaveNexusProcessed.h
-	inc/MantidDataHandling/SaveNXTomo.h
-	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SavePAR.h
 	inc/MantidDataHandling/SavePDFGui.h
 	inc/MantidDataHandling/SavePHX.h
@@ -301,6 +301,7 @@ set ( TEST_FILES
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
+	DownloadInstrumentTest.h
 	ExtractMonitorWorkspaceTest.h
 	FilterEventsByLogValuePreNexusTest.h
 	FindDetectorsInShapeTest.h
