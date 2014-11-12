@@ -22,9 +22,9 @@ set ( SRC_FILES
 	src/IndirectDiffractionReduction.cpp
 	src/IndirectLoadAscii.cpp
 	src/IndirectLoadAsciiTab.cpp
+  src/IndirectLoadILL.cpp
 	src/IndirectMolDyn.cpp
 	src/IndirectMoments.cpp
-	src/IndirectNeutron.cpp
 	src/IndirectSassena.cpp
 	src/IndirectSimulation.cpp
 	src/IndirectSimulationTab.cpp
@@ -104,9 +104,9 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
 	inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
 	inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
+  inc/MantidQtCustomInterfaces/IndirectLoadILL.h
 	inc/MantidQtCustomInterfaces/IndirectMolDyn.h
 	inc/MantidQtCustomInterfaces/IndirectMoments.h
-	inc/MantidQtCustomInterfaces/IndirectNeutron.h
 	inc/MantidQtCustomInterfaces/IndirectSassena.h
 	inc/MantidQtCustomInterfaces/IndirectSimulation.h
 	inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
@@ -193,7 +193,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
                 inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
                 inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
-                inc/MantidQtCustomInterfaces/IndirectNeutron.h
+                inc/MantidQtCustomInterfaces/IndirectLoadILL.h
                 inc/MantidQtCustomInterfaces/IndirectMolDyn.h
                 inc/MantidQtCustomInterfaces/IndirectMoments.h
                 inc/MantidQtCustomInterfaces/IndirectSassena.h
@@ -244,7 +244,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/CreateMDWorkspace.ui
                inc/MantidQtCustomInterfaces/IndirectDataReduction.ui
                inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.ui
                inc/MantidQtCustomInterfaces/IndirectLoadAscii.ui
-               inc/MantidQtCustomInterfaces/IndirectNeutron.ui
+               inc/MantidQtCustomInterfaces/IndirectLoadILL.ui
                inc/MantidQtCustomInterfaces/IndirectMolDyn.ui
                inc/MantidQtCustomInterfaces/IndirectSassena.ui
                inc/MantidQtCustomInterfaces/IndirectSimulation.ui

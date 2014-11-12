@@ -3,7 +3,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidQtCustomInterfaces/IndirectNeutron.h"
+#include "MantidQtCustomInterfaces/IndirectLoadILL.h"
 
 #include <QFileInfo>
 #include <QStringList>
@@ -12,7 +12,7 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    IndirectNeutron::IndirectNeutron(QWidget * parent) : 
+    IndirectLoadILL::IndirectLoadILL(QWidget * parent) : 
       IndirectLoadAsciiTab(parent)
     {
       m_uiForm.setupUi(parent);
@@ -31,7 +31,7 @@ namespace MantidQt
      * 
      * @return :: Whether the form was valid
      */
-    bool IndirectNeutron::validate()
+    bool IndirectLoadILL::validate()
     {
       QString filename = m_uiForm.mwRun->getFirstFilename();
       QFileInfo finfo(filename);
@@ -48,9 +48,9 @@ namespace MantidQt
 
     /**
      * Collect the settings on the GUI and build a python
-     * script that runs IndirectNeutron
+     * script that runs IndirectLoadILL
      */
-    void IndirectNeutron::run() 
+    void IndirectLoadILL::run() 
     {
       QString verbose("False");
       QString plot("False");
@@ -123,7 +123,7 @@ namespace MantidQt
      *  
      * @param settings :: The settings to loading into the interface
      */
-    void IndirectNeutron::loadSettings(const QSettings& settings)
+    void IndirectLoadILL::loadSettings(const QSettings& settings)
     {
       m_uiForm.mwRun->readSettings(settings.group());
     }
@@ -133,7 +133,7 @@ namespace MantidQt
      *  
      * @param instrument :: The name of the instrument
      */
-    void IndirectNeutron::instrumentChanged(const QString& instrument)
+    void IndirectLoadILL::instrumentChanged(const QString& instrument)
     {
       using namespace Mantid::API;
 
@@ -195,7 +195,7 @@ namespace MantidQt
      * @param instrument :: The name of the instrument
      * @return Pointer to the instrument
      */
-    Mantid::Geometry::Instrument_const_sptr IndirectNeutron::getInstrument(const QString& instrument)
+    Mantid::Geometry::Instrument_const_sptr IndirectLoadILL::getInstrument(const QString& instrument)
     {
       using namespace Mantid::API;
 
@@ -236,7 +236,7 @@ namespace MantidQt
      *  
      * @param analyser :: The name of the analyser
      */
-    void IndirectNeutron::analyserChanged(const QString& analyser)
+    void IndirectLoadILL::analyserChanged(const QString& analyser)
     {
       using namespace Mantid::API;
 
@@ -253,7 +253,7 @@ namespace MantidQt
      *
      * Assumes that names have the form \<instrument\>_\<run-number\>.\<ext\>
      */
-    void IndirectNeutron::handleFilesFound()
+    void IndirectLoadILL::handleFilesFound()
     {
       //get first part of basename
       QString filename = m_uiForm.mwRun->getFirstFilename();

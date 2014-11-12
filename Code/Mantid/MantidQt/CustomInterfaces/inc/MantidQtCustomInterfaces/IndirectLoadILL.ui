@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectNeutron</class>
- <widget class="QWidget" name="IndirectNeutron">
+ <class>IndirectLoadILL</class>
+ <widget class="QWidget" name="IndirectLoadILL">
   <property name="geometry">
    <rect>
     <x>0</x>
