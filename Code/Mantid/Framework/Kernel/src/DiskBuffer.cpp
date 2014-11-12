@@ -428,6 +428,10 @@ namespace Kernel
     {
         std::vector<uint64_t>::iterator it_next = boost::next(it);
 
+        if (*it == 0 && *it_next == 0) {
+            continue; // Not really a free space block!
+        }
+
         FreeBlock newBlock(*it, *it_next);
         m_free.insert(newBlock);
     }
