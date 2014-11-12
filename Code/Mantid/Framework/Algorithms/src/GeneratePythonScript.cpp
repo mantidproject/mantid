@@ -26,22 +26,25 @@ DECLARE_ALGORITHM(GeneratePythonScript)
 */
 void GeneratePythonScript::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input), "An input workspace.");
+  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input), "An input workspace.");
 
   std::vector<std::string> exts;
   exts.push_back(".py");
 
-  declareProperty(new API::FileProperty("Filename","", API::FileProperty::OptionalSave, exts),
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::OptionalSave, exts),
   "The name of the file into which the workspace history will be generated.");
   declareProperty("ScriptText", std::string(""), "Saves the history of the workspace to a variable.", Direction::Output);
 
   declareProperty("UnrollAll", false, "Unroll all algorithms to show just their child algorithms.", Direction::Input);
 
+  declareProperty("StartTimestamp", std::string(""), "The filter start time in the format YYYY-MM-DD HH:mm:ss", Direction::Input);
+  declareProperty("EndTimestamp", std::string(""), "The filter end time in the format YYYY-MM-DD HH:mm:ss", Direction::Input);
+
   std::vector<std::string> saveVersions;
   saveVersions.push_back("Specify Old");
   saveVersions.push_back("Specify All");
   saveVersions.push_back("Specify None");
-  declareProperty("SpecifyAlgorithmVersions","Specify Old",boost::make_shared<StringListValidator>(saveVersions),
+  declareProperty("SpecifyAlgorithmVersions", "Specify Old", boost::make_shared<StringListValidator>(saveVersions),
       "When to specify which algorithm version was used by Mantid.");
 }
 
@@ -52,6 +55,8 @@ void GeneratePythonScript::exec()
 {
   const Workspace_const_sptr ws = getProperty("InputWorkspace");
   const bool unrollAll = getProperty("UnrollAll");
+  const std::string startTime = getProperty("StartTimestamp");
+  const std::string endTime = getProperty("EndTimestamp");
   const std::string saveVersions = getProperty("SpecifyAlgorithmVersions");
 
   // Get the algorithm histories of the workspace.
@@ -62,6 +67,20 @@ void GeneratePythonScript::exec()
   if(unrollAll)
   {
     view->unrollAll();
+  }
+
+  // Need at least a start time to do time filter
+  if(startTime != "")
+  {
+    if(endTime == "")
+    {
+      // If no end time was given then filter up to now
+      view->filterBetweenExecDate(DateAndTime(startTime));
+    }
+    else
+    {
+      view->filterBetweenExecDate(DateAndTime(startTime), DateAndTime(endTime));
+    }
   }
 
   std::string versionSpecificity;
