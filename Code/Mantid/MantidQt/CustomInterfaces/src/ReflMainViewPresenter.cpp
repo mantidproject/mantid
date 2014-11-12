@@ -496,6 +496,8 @@ namespace MantidQt
     */
     Workspace_sptr ReflMainViewPresenter::prepareRunWorkspace(const std::string& runStr)
     {
+      const std::string instrument = m_view->getProcessInstrument();
+
       std::vector<std::string> runs;
       boost::split(runs, runStr, boost::is_any_of("+"));
 
@@ -506,13 +508,16 @@ namespace MantidQt
       for(auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
         boost::trim(*runIt);
 
+      //If we're only given one run, just return that
+      if(runs.size() == 1)
+        return loadRun(runs[0], instrument);
+
       const std::string outputName = "TOF_" + boost::algorithm::join(runs, "_");
 
       //Check if we've already prepared it
       if(AnalysisDataService::Instance().doesExist(outputName))
         return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
 
-      const std::string instrument = m_view->getProcessInstrument();
 
       /* Ideally, this should be executed as a child algorithm to keep the ADS tidy, but
        * that doesn't preserve history nicely, so we'll just take care of tidying up in
