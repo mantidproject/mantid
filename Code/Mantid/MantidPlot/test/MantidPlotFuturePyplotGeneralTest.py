@@ -135,6 +135,7 @@ class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
         self.close_win(lines)
 
         lines = plot(MDWWorkspaceName, tool='plot_md')
+        self.assertEqual(len(lines), 1)
         self.close_win(lines)
 
         # now see what happens with non-md workspaces
