@@ -57,7 +57,10 @@ set ( SRC_FILES
 	src/QtWorkspaceMementoModel.cpp
 	src/Quasi.cpp
 	src/RawFileMemento.cpp
+	src/ReflCatalogSearcher.cpp
+	src/ReflLegacyTransferStrategy.cpp
 	src/ReflMainViewPresenter.cpp
+	src/ReflSearchModel.cpp
 	src/ResNorm.cpp
 	src/SANSAddFiles.cpp
 	src/SANSDiagnostics.cpp
@@ -110,6 +113,7 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/IndirectTransmission.h
   inc/MantidQtCustomInterfaces/IndirectTab.h
 	inc/MantidQtCustomInterfaces/IReflPresenter.h
+	inc/MantidQtCustomInterfaces/IReflSearcher.h
 	inc/MantidQtCustomInterfaces/JumpFit.h
 	inc/MantidQtCustomInterfaces/MSDFit.h
 	inc/MantidQtCustomInterfaces/MantidEV.h
@@ -135,8 +139,12 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
+	inc/MantidQtCustomInterfaces/ReflCatalogSearcher.h
+	inc/MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h
 	inc/MantidQtCustomInterfaces/ReflMainView.h
 	inc/MantidQtCustomInterfaces/ReflMainViewPresenter.h
+	inc/MantidQtCustomInterfaces/ReflSearchModel.h
+	inc/MantidQtCustomInterfaces/ReflTransferStrategy.h
 	inc/MantidQtCustomInterfaces/QReflTableModel.h
 	inc/MantidQtCustomInterfaces/QtReflMainView.h
 	inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
@@ -209,6 +217,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
+                inc/MantidQtCustomInterfaces/ReflSearchModel.h
                 inc/MantidQtCustomInterfaces/QReflTableModel.h
                 inc/MantidQtCustomInterfaces/QtReflMainView.h
                 inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
@@ -264,6 +273,7 @@ set ( TEST_FILES
 	IO_MuonGroupingTest.h
 	MuonAnalysisHelperTest.h
 	RawFileMementoTest.h
+	ReflLegacyTransferStrategyTest.h
 	ReflMainViewPresenterTest.h
 	WorkspaceInADSTest.h
 	WorkspaceMementoTest.h

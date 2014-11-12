@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtMantidWidgets/HintStrategy.h"
 
@@ -43,6 +44,7 @@ namespace MantidQt
 
       //Connect the model
       virtual void showTable(QReflTableModel_sptr model) = 0;
+      virtual void showSearch(ReflSearchModel_sptr model) = 0;
 
       //Dialog/Prompt methods
       virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue) = 0;
@@ -64,10 +66,12 @@ namespace MantidQt
 
       //Accessor methods
       virtual std::set<int> getSelectedRows() const = 0;
+      virtual std::set<int> getSelectedSearchRows() const = 0;
       virtual std::string getSearchInstrument() const = 0;
       virtual std::string getProcessInstrument() const = 0;
       virtual std::string getWorkspaceToOpen() const = 0;
       virtual std::string getClipboard() const = 0;
+      virtual std::string getSearchString() const = 0;
 
       virtual boost::shared_ptr<IReflPresenter> getPresenter() const = 0;
     };

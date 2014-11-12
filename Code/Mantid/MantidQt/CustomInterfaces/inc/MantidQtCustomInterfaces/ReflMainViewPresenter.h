@@ -6,7 +6,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/IReflSearcher.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtCustomInterfaces/ReflTransferStrategy.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 
 #include <Poco/AutoPtr.h>
@@ -43,7 +45,7 @@ namespace MantidQt
     class DLLExport ReflMainViewPresenter: public IReflPresenter
     {
     public:
-      ReflMainViewPresenter(ReflMainView* view);
+      ReflMainViewPresenter(ReflMainView* view, boost::shared_ptr<IReflSearcher> searcher = boost::shared_ptr<IReflSearcher>());
       virtual ~ReflMainViewPresenter();
       virtual void notify(IReflPresenter::Flag flag);
       virtual const std::map<std::string,QVariant>& options() const;
@@ -53,8 +55,9 @@ namespace MantidQt
     protected:
       //the workspace the model is currently representing
       Mantid::API::ITableWorkspace_sptr m_ws;
-      //the model the table is currently representing
+      //the models
       QReflTableModel_sptr m_model;
+      ReflSearchModel_sptr m_searchModel;
       //the name of the workspace/table/model in the ADS, blank if unsaved
       std::string m_wsName;
       //the view we're managing
@@ -63,6 +66,9 @@ namespace MantidQt
       bool m_tableDirty;
       //stores the user options for the presenter
       std::map<std::string,QVariant> m_options;
+      //the search implementation
+      boost::shared_ptr<IReflSearcher> m_searcher;
+      boost::shared_ptr<ReflTransferStrategy> m_transferStrategy;
 
       //process selected rows
       virtual void process();
@@ -110,6 +116,9 @@ namespace MantidQt
       virtual void openTable();
       virtual void saveTable();
       virtual void saveTableAs();
+      //searching
+      virtual void search();
+      virtual void transfer();
       //options
       void showOptionsDialog();
       void initOptions();

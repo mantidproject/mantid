@@ -5,6 +5,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include <boost/scoped_ptr.hpp>
 #include <QSignalMapper>
@@ -51,6 +52,7 @@ namespace MantidQt
 
       //Connect the model
       virtual void showTable(QReflTableModel_sptr model);
+      virtual void showSearch(ReflSearchModel_sptr model);
 
       //Dialog/Prompt methods
       virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue);
@@ -72,10 +74,12 @@ namespace MantidQt
 
       //Accessor methods
       virtual std::set<int> getSelectedRows() const;
+      virtual std::set<int> getSelectedSearchRows() const;
       virtual std::string getSearchInstrument() const;
       virtual std::string getProcessInstrument() const;
       virtual std::string getWorkspaceToOpen() const;
       virtual std::string getClipboard() const;
+      virtual std::string getSearchString() const;
 
       virtual boost::shared_ptr<IReflPresenter> getPresenter() const;
 
@@ -84,8 +88,9 @@ namespace MantidQt
       virtual void initLayout();
       //the presenter
       boost::shared_ptr<IReflPresenter> m_presenter;
-      //the model
+      //the models
       QReflTableModel_sptr m_model;
+      ReflSearchModel_sptr m_searchModel;
       //the interface
       Ui::reflMainWidget ui;
       //the workspace the user selected to open
@@ -107,10 +112,13 @@ namespace MantidQt
       void on_actionPasteSelected_triggered();
       void on_actionExpandSelection_triggered();
       void on_actionOptionsDialog_triggered();
+      void on_actionSearch_triggered();
+      void on_actionTransfer_triggered();
 
       void setModel(QString name);
       void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);
       void showContextMenu(const QPoint& pos);
+      void showSearchContextMenu(const QPoint& pos);
     };
 
 
