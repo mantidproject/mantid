@@ -238,7 +238,9 @@ except ImportError:
 
 import numpy as np
 from PyQt4 import Qt, QtGui, QtCore
-from mantid.api import (MatrixWorkspace as MatrixWorkspace, AlgorithmManager as AlgorithmManager, AnalysisDataService as ADS)
+from mantid.api import (IMDWorkspace as IMDWorkspace, MatrixWorkspace as MatrixWorkspace, AlgorithmManager as AlgorithmManager, AnalysisDataService as ADS)
+from mantid.api import mtd
+#    return __is_workspace(arg) or (mantid.api.mtd.doesExist(arg) and isinstance(mantid.api.mtd[arg], mantid.api.IMDWorkspace))
 from mantid.simpleapi import CreateWorkspace as CreateWorkspace
 import mantidplot  
 
@@ -397,18 +399,66 @@ def __is_array_or_int(arg):
     """
     return isinstance(arg, int) or __is_array(arg)
 
+
+def __is_registered_workspace_name(arg):
+    """"
+        Check whether the argument passed is the name of a registered workspace
+
+        @param arg :: argument (supposedly a workspace name)
+
+        Returns :: True if arg is a correct workspace name
+    """
+    return (mtd.doesExist(arg) and isinstance(mtd[arg], IMDWorkspace))
+
+def __is_valid_single_workspace_arg(arg):
+    """"
+        Check whether the argument passed can be used as a workspace input. Note that this differs from
+        __is_workspace() in that workspace names are also accepted. Throws ValueError with informative
+        message if arg is not a valid workspace object or name.
+
+        @param arg :: argument (supposedly one workspace, possibly given by name)
+
+        Returns :: True if arg can be accepted as a workspace
+    """
+    if __is_workspace(arg) or __is_registered_workspace_name(arg):
+        return True
+    else:
+         raise ValueError("This parameter is not a valid workspace: " + str(arg))
+
+def __is_valid_workspaces_arg(arg):
+    """"
+        Check whether the argument passed can be used as a workspace(s) input. Note that this differs from
+        __is_workspace() in that lists of workspaces and workspace names are also accepted.
+
+        @param arg :: argument (supposedly one or more workspaces, possibly given by name)
+
+        Returns :: True if arg can be accepted as a workspace or a list of workspaces
+    """
+    if 0 == len(arg):
+        return False
+
+    if isinstance(arg, basestring):
+        return __is_valid_single_workspace_arg(arg)
+    else:
+        for name in arg:
+            # name can be a workspace name or a workspace object
+            try:
+                __is_valid_single_workspace_arg(name)
+            except:
+                raise ValueError("This parameter passed in a list of workspaces is not a valid workspace: " + str(name))
+    return True
+
 def __is_data_pair(a, b):
     """
         Are the two arguments passed (a and b) a valid data pair for plotting, like in plot(x, y) or
         plot(ws, [0, 1, 2])?
-        @param a :: first argument
-        @param b :: second argument
+        @param a :: first argument passed (supposedly array or workspace(s))
+        @param b :: second argument (supposedly an array of values, or indices)
 
         Returns :: True if the arguments can be used to plot something is an integer, or a python or numpy list
     """
-    # workspace, indices  or   x, y
-    return __is_workspace(a) and __is_array_or_int(b) or __is_array_or_int(a) and __is_array_or_int(b)
-
+    res = (__is_array(a) and __is_array(a)) or (__is_valid_workspaces_arg(a) and __is_array_or_int(b))
+    return res
 
 def __is_workspace(arg):
     """
@@ -456,7 +506,7 @@ def __create_workspace(x, y, name="array_dummy_workspace"):
     return ws
 
 
-def __list_of_lines_from_graph(g):
+def __list_of_lines_from_graph(g, first_line=0):
     """
         Produces a python list of line objects, with one object per line plotted on the passed graph
         Note: at the moment these objects are of class Line2D which is much simpler than matplotlib.lines.Line2D
@@ -464,6 +514,7 @@ def __list_of_lines_from_graph(g):
         that this figure being created is registered as the last shown figure.
 
         @param g :: graph (with several plot layers = qti Multilayer)
+        @param first_line :: index to start from (useful for hold='on', multi-plots, etc.)
 
         Returns :: List of line objects
     """
@@ -472,7 +523,7 @@ def __list_of_lines_from_graph(g):
     # assume we use a single layer
     active = g.activeLayer()
     res = []
-    for i in range(0, active.numCurves()):
+    for i in range(first_line, active.numCurves()):
         x_data = []
         y_data = []
         d = active.curve(i).data()
@@ -576,7 +627,7 @@ def __apply_marker(graph, marker, first_line=0):
     wrong = 'inexistent'
     sym_code = __marker_to_plotsymbol.get(marker, wrong)
     if wrong == sym_code:
-        raise ValueError("Warning: unrecognized marker: " + marker)
+        raise ValueError("Warning: unrecognized marker: " + str(marker))
     sym = _qti.PlotSymbol(sym_code, QtGui.QBrush(), QtGui.QPen(), QtCore.QSize(5,5))
     l = graph.activeLayer()
     for idx in range(first_line, l.numCurves()):
@@ -630,7 +681,7 @@ def __apply_plot_args(graph, first_line, *args):
 
         Returns :: nothing, just uses kwargs to modify properties of the layer passed
     """
-    if None==graph or ((),) == args or len(args) < 1:
+    if None==graph or len(args) < 1 or ((),) == args:
         return
 
     for a in args:
@@ -651,9 +702,9 @@ def __apply_plot_args(graph, first_line, *args):
                     i += 1
                 else:
                     # TOTHINK - error here? like this? sure? or just a warning?
-                    raise ValueError("Unrecognized character in input string: " + c)
+                    raise ValueError("Unrecognized character in input string: " + str(a[i]))
         else:
-            raise ValueError("Unrecognized input parameter: " + str(args[a]) + ", of type: " + str(type(a)))
+            raise ValueError("Expecting style string, but got an unrecognized input parameter: " + str(a) + ", of type: " + str(type(a)))
 
 def __apply_plot_kwargs(graph, first_line=0, **kwargs):
     """
@@ -675,10 +726,10 @@ def __apply_plot_kwargs(graph, first_line=0, **kwargs):
                 l.setCurveLineWidth(i, kwargs[key])
 
         elif 'color' == key:
-            __apply_line_color(graph, first_line, kwargs[key])
+            __apply_line_color(graph, kwargs[key], first_line)
 
         elif 'marker' == key:
-            __apply_marker(graph, first_line, kwargs[key])
+            __apply_marker(graph, kwargs[key], first_line)
 
 def __is_multiplot_command(*args, **kwargs):
     """
@@ -708,8 +759,8 @@ def __is_multiplot_command(*args, **kwargs):
                 i += 2
             else:
                 return (False, []);
-            # can have style string
-            if isinstance(args[i], basestring):
+            # can have style string, but don't get confused with single workspace name strings!
+            if (not __is_registered_workspace_name(args[i])) and isinstance(args[i], basestring):
                 style = args[i]
                 i += 1
             plots_seq.append((a,b,style))
@@ -726,20 +777,25 @@ def __is_multiplot_command(*args, **kwargs):
         elif (nargs-i) > 0:
             raise ValueError("Not plottable. I do not know what to do with this last parameter: " + args[i] + ", of type " + str(type(args)))
 
-    return (i == nargs-1, plots_seq)
+    return (i == nargs, plots_seq)
 
 def __process_multiplot_command(plots_seq, **kwargs):
     """
-        Make one plot at a time.
+        Make one plot at a time when given a multi-plot command.
+
         @param plots_seq :: list of individual plot parameters
         @param kwargs :: plot style options
 
         Returns :: the list of curves included in the plot
     """
     lines = []
-    for i in range(0, len(plots_seq)):
-        kwargs['hold'] = 'True'
-        lines.append(plot(*(plots_seq[i])))
+    if len(plots_seq) >= 1:
+        if not 'hold' in kwargs:
+            kwargs['hold'] = 'off'
+        lines = plot(*(plots_seq[0]), **kwargs)
+    for i in range(1, len(plots_seq)):
+        kwargs['hold'] = 'on'
+        lines.extend(plot(*(plots_seq[i]), **kwargs))
     return lines
 
 def __translate_hold_kwarg(**kwargs):
@@ -808,7 +864,7 @@ def __plot_as_workspaces_list(*args, **kwargs):
         
         Returns :: List of line objects
     """
-    # plotSpectrum can already handle 1 or more input workspaces.
+    # mantidplot.plotSpectrum can already handle 1 or more input workspaces.
     return __plot_as_workspace(*args, **kwargs)
 
 
@@ -821,7 +877,7 @@ def __plot_as_array(*args, **kwargs):
         Returns :: the list of curves (1) included in the plot
     """
     y = args[0]
-    idx_style = -1   # have to guess if we get plot(x,'r'), or plot(x, y, 'r') or no style string
+    idx_style = len(args)   # have to guess if we get plot(x,'r'), or plot(x, y, 'r') or no style string
     if len(args) > 1:
         if __is_array(args[1]):
             ws = __create_workspace(y, args[1])
@@ -836,7 +892,8 @@ def __plot_as_array(*args, **kwargs):
     else:
         x = range(0, len(y), 1)
         ws = __create_workspace(x, y)
-    lines = __plot_as_workspace(ws, [0], **kwargs)
+
+    lines = __plot_as_workspace(ws, [0], *args[idx_style:], **kwargs)
     graph = None
     if len(lines) > 0:
         graph = lines[0]._graph
@@ -845,10 +902,8 @@ def __plot_as_array(*args, **kwargs):
     # something to improve: if the C++ Graph class provided a plot1D that doesn't do show(), so that
     # we could modify properties behind the scene and at the end do the show(). Con: do we really need
     # to load the qti layer with more methods because of outer layers like here?
-    __matplotlib_defaults(graph.activeLayer())
-    if idx_style > 0:
-        __apply_plot_args(graph, *args[idx_style:])
-    __apply_plot_kwargs(graph, **kwargs)
+    if 0 == len(kwargs):
+        __matplotlib_defaults(graph.activeLayer())
     return __list_of_lines_from_graph(graph)
 
 def __plot_with_tool(tool, *args, **kwargs):
@@ -861,11 +916,11 @@ def __plot_with_tool(tool, *args, **kwargs):
             raise ValueError("To plot using %s as a tool you need to give at least two parameters"%tool)
 
     if bin_tool_name == tool:
-        return plot_bin(args[0], args[1], args[2:], **kwargs)
+        return plot_bin(args[0], args[1], *args[2:], **kwargs)
     elif md_tool_name == tool:
-        return plot_md(args[0], args[1:], **kwargs)
+        return plot_md(args[0], *args[1:], **kwargs)
     elif spectrum_tool_name == tool:
-        return plot_spectrum(args[0], args[1], args[2:], **kwargs)
+        return plot_spectrum(args[0], args[1], *args[2:], **kwargs)
     # here you would add slice/spectrum/instrument viewer, etc. and maybe you'll want to put them in a dict
     else:
         raise ValueError("Unrecognized tool specified: '" + tool + ";. Cannot plot this. ")
@@ -900,14 +955,14 @@ def plot_bin(workspaces, indices, *args, **kwargs):
     # to change properties on the new lines being added
     first_line = 0
     if None != window_val:
-        first_line = window_val.numCurves()
+        first_line = window_val.activeLayer().numCurves()
 
     graph = mantidplot.plotBin(workspaces, indices, error_bars=bars_val, type=-1, window=window_val, clearWindow=clearWindow_val)
 
-    __apply_plot_args(graph, *args)
-    __apply_plot_kwargs(graph, **kwargs)
+    __apply_plot_args(graph, first_line, *args)
+    __apply_plot_kwargs(graph, first_line, **kwargs)
 
-    return __list_of_lines_from_graph(graph)
+    return __list_of_lines_from_graph(graph, first_line)
 
 
 def plot_md(workspaces, *args, **kwargs):
@@ -925,14 +980,14 @@ def plot_md(workspaces, *args, **kwargs):
     # to change properties on the new lines being added
     first_line = 0
     if None != window_val:
-        first_line = window_val.numCurves()
+        first_line = window_val.activeLayer().numCurves()
 
-    graph = mantidplot.plotMD(workspaces, normalization=DEFAULT_MD_NORMALIZATION, error_bars=bars_val, window=window_val, clearWindow=clearWindow_val)
+    graph = mantidplot.plotMD(workspaces, normalization=mantidplot.DEFAULT_MD_NORMALIZATION, error_bars=bars_val, window=window_val, clearWindow=clearWindow_val)
 
-    __apply_plot_args(graph, *args)
-    __apply_plot_kwargs(graph, **kwargs)
+    __apply_plot_args(graph, first_line, *args)
+    __apply_plot_kwargs(graph, first_line, **kwargs)
 
-    return __list_of_lines_from_graph(graph)
+    return __list_of_lines_from_graph(graph, first_line)
 
 
 def plot_spectrum(workspaces, indices, *args, **kwargs):
@@ -954,14 +1009,14 @@ def plot_spectrum(workspaces, indices, *args, **kwargs):
     # to change properties on the new lines being added
     first_line = 0
     if None != window_val:
-        first_line = window_val.numCurves()
+        first_line = window_val.activeLayer().numCurves()
 
     graph = mantidplot.plotSpectrum(workspaces, indices, error_bars=bars_val, type=-1, window=window_val, clearWindow=clearWindow_val)
 
     __apply_plot_args(graph, first_line, *args)
     __apply_plot_kwargs(graph, first_line, **kwargs)
 
-    return __list_of_lines_from_graph(graph)
+    return __list_of_lines_from_graph(graph, first_line)
 
 
 def plot(*args, **kwargs):
@@ -1005,15 +1060,15 @@ def plot(*args, **kwargs):
     # TOTHINK: should there be an exception if it's plot_md (tool='plot_md')
     (is_it, plots_seq) = __is_multiplot_command(*args, **kwargs)
     if is_it:
-        __process_multiplot_command(plots_seq, **kwargs)
+        return __process_multiplot_command(plots_seq, **kwargs)
     elif len(args) > 3:
-        raise ValueError("Could not interpret the arguments passed. You passed more than 3 positional arguments but this does not seem to be a correct multi-plot command. Please check your command.")
+        raise ValueError("Could not interpret the arguments passed. You passed more than 3 positional arguments but this does not seem to be a correct multi-plot command. Please check your command and make sure that the workspaces given are correct.")
 
     # normally guess; exception if e.g. a parameter tool='plot_bin' is given
     try:
-        tool = kwargs['tool']
+        tool_val = kwargs['tool']
         del kwargs['tool']
-        return __plot_with_tool(tool, *args, **kwargs)
+        return __plot_with_tool(tool_val, *args, **kwargs)
     except KeyError:
         return __plot_with_best_guess(*args, **kwargs)
 
