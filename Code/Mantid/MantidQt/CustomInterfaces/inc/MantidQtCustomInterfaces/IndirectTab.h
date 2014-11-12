@@ -150,7 +150,7 @@ namespace CustomInterfaces
     /// Send signal to parent window to show a message box to user
     void showMessageBox(const QString& message);
     /// Run a python script
-    void runAsPythonScript(const QString & code, bool no_output);
+    void runAsPythonScript(const QString & code, bool noOutput = false);
 
   protected:
     /// Overidden by child class.

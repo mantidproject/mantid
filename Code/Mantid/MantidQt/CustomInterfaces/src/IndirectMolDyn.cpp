@@ -1,7 +1,5 @@
 #include "MantidQtCustomInterfaces/IndirectMolDyn.h"
 
-#include "MantidAPI/AlgorithmManager.h"
-
 #include <QFileInfo>
 #include <QString>
 
@@ -18,6 +16,10 @@ namespace MantidQt
 
       connect(m_uiForm.ckCropEnergy, SIGNAL(toggled(bool)), m_uiForm.dspMaxEnergy, SLOT(setEnabled(bool)));
       connect(m_uiForm.ckResolution, SIGNAL(toggled(bool)), m_uiForm.dsResolution, SLOT(setEnabled(bool)));
+    }
+
+    void IndirectMolDyn::setup()
+    {
     }
 
     /**
