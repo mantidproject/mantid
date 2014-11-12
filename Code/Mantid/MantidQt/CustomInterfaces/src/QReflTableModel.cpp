@@ -213,6 +213,7 @@ namespace MantidQt
             return QString(
                 "<b>Angle used during the run.</b><br />"
                 "<i>optional</i><br />"
+                "Unit: degrees<br />"
                 "If left blank, this is set to the last value for 'THETA' in the run's sample log. "
                 "If multiple runs were given in the Run(s) column, the first listed run's sample log will be used. "
                 "<br /><br /><b>Example:</b> <samp>0.7</samp>"
@@ -229,6 +230,7 @@ namespace MantidQt
             return QString(
                 "<b>Minimum value of Q to be used</b><br />"
                 "<i>optional</i><br />"
+                "Unit: &#197;<sup>-1</sup><br />"
                 "Data with a value of Q lower than this will be discarded. "
                 "If left blank, this is set to the lowest Q value found. "
                 "This is useful for discarding noisy data. "
@@ -238,6 +240,7 @@ namespace MantidQt
             return QString(
                 "<b>Maximum value of Q to be used</b><br />"
                 "<i>optional</i><br />"
+                "Unit: &#197;<sup>-1</sup><br />"
                 "Data with a value of Q higher than this will be discarded. "
                 "If left blank, this is set to the highest Q value found. "
                 "This is useful for discarding noisy data. "
