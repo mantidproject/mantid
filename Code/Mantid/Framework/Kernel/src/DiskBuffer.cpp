@@ -421,6 +421,9 @@ namespace Kernel
   {
     m_free.clear();
 
+    if (free.size() % 2 != 0)
+        throw std::length_error("Free vector size is not a factor of 2.");
+
     for (std::vector<uint64_t>::iterator it = free.begin(); it != free.end(); it += 2)
     {
         std::vector<uint64_t>::iterator it_next = boost::next(it);
