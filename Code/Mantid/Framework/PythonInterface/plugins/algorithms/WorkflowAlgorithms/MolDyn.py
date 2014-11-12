@@ -77,6 +77,9 @@ class MolDyn(PythonAlgorithm):
         self.declareProperty(name='MaxEnergy', defaultValue='',
                              doc='Crop the result spectra at a given energy (leave blank for no crop)')
 
+        self.declareProperty(name='SymmetriseEnergy', defaultValue=True,
+                             doc='Symmetrise functions in energy about x=0')
+
         self.declareProperty(name='Plot', defaultValue='None',
                              validator=StringListValidator(['None', 'Spectra', 'Contour', 'Both']),
                              doc='Plot result workspace')
@@ -96,6 +99,7 @@ class MolDyn(PythonAlgorithm):
 
         sample_filename = self.getPropertyValue('Filename')
         function_list = self.getProperty('Functions').value
+        symm = self.getProperty('SymmetriseEnergy').value
         res_ws = self.getPropertyValue('Resolution')
         e_max = self.getPropertyValue('MaxEnergy')
 
@@ -107,6 +111,9 @@ class MolDyn(PythonAlgorithm):
 
         if res_ws is not '' and e_max is '':
             issues['MaxEnergy'] = 'MaxEnergy must be set when convolving with an instrument resolution'
+
+        if res_ws is not '' and not symm:
+            issues['SymmetriseEnergy'] = 'Must symmetrise energy when convolving with instrument resolution'
 
         return issues
 
@@ -147,9 +154,9 @@ class MolDyn(PythonAlgorithm):
             # Remove the generated resolution workspace
             DeleteWorkspace(resolution_ws)
 
-        # Do energy crop
+        # Do processing specific to workspaces in energy
         if self._emax is not None:
-            self._energy_crop()
+            self._process_energy_workspaces()
 
         # Save result workspace group
         if self._save:
@@ -185,6 +192,7 @@ class MolDyn(PythonAlgorithm):
         self._save = self.getProperty('Save').value
 
         self._sam_path = self.getPropertyValue('Filename')
+        self._symmetrise = self.getProperty('SymmetriseEnergy').value
 
         raw_functions = self.getProperty('Functions').value
         self._functions = [x.strip() for x in raw_functions]
@@ -520,32 +528,10 @@ class MolDyn(PythonAlgorithm):
         return resolution_ws
 
 
-    def _convolve_with_res(self, resolution_ws, function_ws_name):
-        """
-        Performs convolution with an instrument resolution workspace.
-
-        @param resolution_ws The resolution workspace to convolve with
-        @param function_ws_name The workspace name for the function to convolute
-        """
-
-        if self._verbose:
-            logger.notice('Convoluting sample %s with resolution %s'
-                          % (function_ws_name, resolution_ws))
-
-        # Symmetrise the sample WS in x=0 as nMOLDYN only gives positive energy values
-        Symmetrise(Sample=function_ws_name, XMin=0, XMax=self._emax,
-                   Verbose=self._verbose, Plot=False, Save=False,
-                   OutputWorkspace=function_ws_name)
-
-        # Convolve the symmetrised sample with the resolution
-        ConvolveWorkspaces(OutputWorkspace=function_ws_name,
-                           Workspace1=function_ws_name, Workspace2=resolution_ws)
-
-
-    def _energy_crop(self):
+    def _process_energy_workspaces(self):
         """
         For each workspace in the result that has an X unit in Energy, apply
-        a crop to MaxEnergy
+        a crop to MaxEnergy and Symmetrise about x=0 if requested by the user.
         """
 
         if self._verbose:
@@ -558,12 +544,38 @@ class MolDyn(PythonAlgorithm):
                     logger.debug('Workspace %s has energy on X axis, will crop to %f'
                                  % (ws_name, self._emax))
 
-                CropWorkspace(InputWorkspace=ws_name, OutputWorkspace=ws_name,
-                              XMax=self._emax)
+                # If we are going to Symmetrise then there is no need to crop
+                # as the Symmetrise algorithm will do this
+                if self._symmetrise:
+                    # Symmetrise the sample workspace in x=0
+                    Symmetrise(Sample=ws_name, XMin=0, XMax=self._emax,
+                               Verbose=self._verbose, Plot=False, Save=False,
+                               OutputWorkspace=ws_name)
+                else:
+                    CropWorkspace(InputWorkspace=ws_name, OutputWorkspace=ws_name,
+                                  XMax=self._emax)
+
             else:
                 if self._verbose:
-                    logger.debug('Workspace %s does not have energy on X axis, will not crop.'
+                    logger.debug('Workspace %s does not have energy on X axis, will not crop or symmetrise.'
                                  % ws_name)
+
+
+    def _convolve_with_res(self, resolution_ws, function_ws_name):
+        """
+        Performs convolution with an instrument resolution workspace.
+
+        @param resolution_ws The resolution workspace to convolve with
+        @param function_ws_name The workspace name for the function to convolute
+        """
+
+        if self._verbose:
+            logger.notice('Convoluting sample %s with resolution %s'
+                          % (function_ws_name, resolution_ws))
+
+        # Convolve the symmetrised sample with the resolution
+        ConvolveWorkspaces(OutputWorkspace=function_ws_name,
+                           Workspace1=function_ws_name, Workspace2=resolution_ws)
 
 
     def _plot_spectra(self, ws_name):
