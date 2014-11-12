@@ -502,6 +502,10 @@ namespace MantidQt
       if(runs.empty())
         throw std::runtime_error("No runs given");
 
+      //Remove leading/trailing whitespace from each run
+      for(auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
+        boost::trim(*runIt);
+
       const std::string outputName = "TOF_" + boost::algorithm::join(runs, "_");
 
       //Check if we've already prepared it
@@ -510,29 +514,40 @@ namespace MantidQt
 
       const std::string instrument = m_view->getProcessInstrument();
 
-      //Load the first run
-      auto runWs = loadRun(runs[0], instrument);
+      /* Ideally, this should be executed as a child algorithm to keep the ADS tidy, but
+       * that doesn't preserve history nicely, so we'll just take care of tidying up in
+       * the event of failure.
+       */
+      IAlgorithm_sptr algPlus = AlgorithmManager::Instance().create("Plus");
+      algPlus->initialize();
+      algPlus->setProperty("LHSWorkspace", loadRun(runs[0], instrument)->name());
+      algPlus->setProperty("OutputWorkspace", outputName);
 
       //Drop the first run from the runs list
       runs.erase(runs.begin());
 
-      IAlgorithm_sptr algPlus = AlgorithmManager::Instance().create("Plus");
-      algPlus->initialize();
-      algPlus->setProperty("LHSWorkspace", runWs->name());
-      algPlus->setProperty("OutputWorkspace", outputName);
-
-      //Iterate through all the remaining runs, adding them to the first run
-      for(auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
+      try
       {
-        auto ws = loadRun(*runIt, instrument);
-        algPlus->setProperty("RHSWorkspace", ws->name());
-        algPlus->execute();
+        //Iterate through all the remaining runs, adding them to the first run
+        for(auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
+        {
+          algPlus->setProperty("RHSWorkspace", loadRun(*runIt, instrument)->name());
+          algPlus->execute();
 
-        //After the first execution we replace the LHS with the previous output
-        algPlus->setProperty("LHSWorkspace", outputName);
+          //After the first execution we replace the LHS with the previous output
+          algPlus->setProperty("LHSWorkspace", outputName);
+        }
+      }
+      catch(...)
+      {
+        //If we're unable to create the full workspace, discard the partial version
+        AnalysisDataService::Instance().remove(outputName);
+
+        //We've tidied up, now re-throw.
+        throw;
       }
 
-      return runWs;
+      return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
     }
 
 
