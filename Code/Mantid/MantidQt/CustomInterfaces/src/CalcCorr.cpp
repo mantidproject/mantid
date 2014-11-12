@@ -148,18 +148,10 @@ namespace IDA
     allFields = positiveDoubleFields;
     allFields += uiForm().absp_leavar;
 
-    // Connect up all fields to inputChanged method of IDATab (calls validate).
-    foreach(QLineEdit * field, allFields)
-    {
-      connect(field, SIGNAL(textEdited(const QString &)), this, SLOT(inputChanged()));
-    }
-
     QRegExp regex("[A-Za-z0-9\\-\\(\\)]*");
     QValidator *formulaValidator = new QRegExpValidator(regex, this);
     uiForm().absp_leSampleFormula->setValidator(formulaValidator);
     uiForm().absp_leCanFormula->setValidator(formulaValidator);
-    connect(uiForm().absp_leSampleFormula, SIGNAL(textEdited(const QString &)), this, SLOT(inputChanged()));
-    connect(uiForm().absp_leCanFormula, SIGNAL(textEdited(const QString &)), this, SLOT(inputChanged()));
 
     // "Nudge" color of title of QGroupBox to change.
     useCanChecked(uiForm().absp_ckUseCan->isChecked());
