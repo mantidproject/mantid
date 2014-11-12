@@ -197,7 +197,7 @@ namespace MantidQt
     */
     QVariant QReflTableModel::headerData(int section, Qt::Orientation orientation, int role) const
     {
-      if(role == Qt::WhatsThisRole)
+      if(role == Qt::WhatsThisRole && orientation == Qt::Horizontal)
       {
         switch(section)
         {
