@@ -303,7 +303,16 @@ def plotMD(source, plot_axis=-2, normalization = DEFAULT_MD_NORMALIZATION, error
             raise ValueError("%s is not an IMDWorkspace" % name)
         non_integrated_dims = mantid.api.mtd[name].getNonIntegratedDimensions()
         if not len(non_integrated_dims) == 1:
-            raise ValueError("%s must have a single non-integrated dimension in order to be rendered via plotMD" % name)
+            raise ValueError("'%s' must have a single non-integrated dimension in order to be rendered via plotMD" % name)
+
+    # check axis index
+    for name in workspace_names:
+        ws = workspace(name)
+        if hasattr(ws, "axes"):
+            max_axis = workspace(name).axes()
+            # see choice in MantidQwtIMDWorkspaceData::setPlotAxisChoice, -2: auto, -1: distance
+            if plot_axis < -2 or plot_axis > max_axis:
+                raise ValueError("Incorrect axis index given for workspace '%s': %d, should be < %d" % (name, plot_axis, max_axis))
 
     # Unwrap the window object, if any specified
     if window != None:
