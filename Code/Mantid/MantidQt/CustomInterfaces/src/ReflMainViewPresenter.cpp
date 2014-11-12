@@ -6,7 +6,10 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Utils.h"
+#include "MantidQtCustomInterfaces/ReflCatalogSearcher.h"
+#include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtCustomInterfaces/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/QtReflOptionsDialog.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
@@ -104,9 +107,11 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view):
+    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view, boost::shared_ptr<IReflSearcher> searcher):
       m_view(view),
       m_tableDirty(false),
+      m_searcher(searcher),
+      m_transferStrategy(new ReflLegacyTransferStrategy()),
       m_addObserver(*this, &ReflMainViewPresenter::handleAddEvent),
       m_remObserver(*this, &ReflMainViewPresenter::handleRemEvent),
       m_clearObserver(*this, &ReflMainViewPresenter::handleClearEvent),
@@ -165,6 +170,10 @@ namespace MantidQt
       blacklist.insert("FirstTransmissionRun");
       blacklist.insert("SecondTransmissionRun");
       m_view->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, blacklist));
+
+      //If we don't have a searcher yet, use ReflCatalogSearcher
+      if(!m_searcher)
+        m_searcher.reset(new ReflCatalogSearcher());
 
       //Start with a blank table
       newTable();
@@ -859,6 +868,8 @@ namespace MantidQt
       case IReflPresenter::CopySelectedFlag:    copySelected();      break;
       case IReflPresenter::CutSelectedFlag:     cutSelected();       break;
       case IReflPresenter::PasteSelectedFlag:   pasteSelected();     break;
+      case IReflPresenter::SearchFlag:          search();            break;
+      case IReflPresenter::TransferFlag:        transfer();          break;
       }
       //Not having a 'default' case is deliberate. gcc issues a warning if there's a flag we aren't handling.
     }
@@ -1127,6 +1138,61 @@ namespace MantidQt
         //Paste as many columns as we can from this line
         for(int col = COL_RUNS; col <= COL_OPTIONS && col < static_cast<int>(values.size()); ++col)
           m_model->setData(m_model->index(*rowIt, col), QString::fromStdString(values[col]));
+      }
+    }
+
+    /** Searches for runs that can be used */
+    void ReflMainViewPresenter::search()
+    {
+      const std::string searchString = m_view->getSearchString();
+      const std::string searchInstr  = m_view->getSearchInstrument();
+
+      //Don't bother searching if they're not searching for anything
+      if(searchString.empty())
+        return;
+
+      try
+      {
+        auto results = m_searcher->search(searchString, searchInstr);
+        m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(results));
+        m_view->showSearch(m_searchModel);
+      }
+      catch(std::runtime_error& e)
+      {
+        m_view->giveUserCritical("Error running search:\n" + std::string(e.what()), "Search Failed");
+      }
+    }
+
+    /** Transfers the selected runs in the search results to the processing table */
+    void ReflMainViewPresenter::transfer()
+    {
+      //Build the input for the transfer strategy
+      std::map<std::string,std::string> runs;
+      auto selectedRows = m_view->getSelectedSearchRows();
+      for(auto rowIt = selectedRows.begin(); rowIt != selectedRows.end(); ++rowIt)
+      {
+        const int row = *rowIt;
+        const std::string run = m_searchModel->data(m_searchModel->index(row, 0)).toString().toStdString();
+        const std::string description = m_searchModel->data(m_searchModel->index(row, 1)).toString().toStdString();
+        runs[run] = description;
+      }
+
+      auto newRows = m_transferStrategy->transferRuns(runs);
+
+      std::map<std::string,int> groups;
+      for(auto rowIt = newRows.begin(); rowIt != newRows.end(); ++rowIt)
+      {
+        auto& row = *rowIt;
+
+        if(groups.count(row["group"]) == 0)
+          groups[row["group"]] = getUnusedGroup();
+
+        const int rowIndex = m_model->rowCount();
+        m_model->insertRow(rowIndex);
+        m_model->setData(m_model->index(rowIndex, COL_RUNS), QString::fromStdString(row["runs"]));
+        m_model->setData(m_model->index(rowIndex, COL_ANGLE), QString::fromStdString(row["theta"]));
+        m_model->setData(m_model->index(rowIndex, COL_SCALE), 1.0);
+        m_model->setData(m_model->index(rowIndex, COL_GROUP), groups[row["group"]]);
       }
     }
 

@@ -59,6 +59,8 @@ namespace MantidQt
         CopySelectedFlag,
         CutSelectedFlag,
         PasteSelectedFlag,
+        SearchFlag,
+        TransferFlag,
       };
 
       //Tell the presenter something happened
