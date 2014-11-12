@@ -26,18 +26,19 @@ Plot an array (python list)
 ---------------------------
 
     plot([0.1, 0.3, 0.2, 4])
-    # The array values will be inserted in a workspace named 'array_dummy_workspace'
+    # The array values will be inserted in a workspace named 'array_dummy_workspace_...'
 
 
 Plot a Mantid workspace
 -----------------------
 
     # first, load a workspace. You can do this with a Load command or just from the GUI menus
-    ws=Load("MAR11060.nxs", OutputWorkspace="foo")
-    plot(ws)
+    ws=Load("/path/to/MAR11060.raw", OutputWorkspace="foo")
+    plot(ws, [100])
 
-The list of values will be inserted in a workspace named
-'array_dummy_workspace'
+The list or array of values will be inserted in a workspace named
+'array_dummy_workspace_...', for example: array_dummy_workspace_1,
+array_dummy_workspace_2, as you create new plots.
 
 
 The plot commands accept a list of options (kwargs) as parameters
@@ -98,13 +99,14 @@ Plotting bins
 
 To plot workspace bins you can use the keyword 'tool' with the value 'plot_bin', like this:
 
+    ws=Load('/path/to/HRP39182.RAW', OutputWorkspace="HRP39182")
     plot(ws, [1, 5, 7, 100], tool='plot_bin')
 
 or, alternatively, you can use the plot_bin command:
 
-    plot_bin(ws, [1, 5, 7, 100], linewidth=4)
+    plot_bin(ws, [1, 5, 7, 100], linewidth=4, linestyle=':')
 
-Ploting MD workspaces
+Plotting MD workspaces
 ---------------------
 
 Similarly, to plot MD workspaces you can use the keyword 'tool' with the value 'plot_md', like this:
@@ -127,7 +129,7 @@ Changing style properties
 You can modify the style of your plots. For example like this (for a
 full list of options currently supported, see below).
 
-    lines=plot(loq, [100, 104], tool='plot_spectrum', linestyle='-.', marker='*')
+    lines=plot(loq, [100, 104], tool='plot_spectrum', linestyle='-.', marker='*', color='red')
 
 Notice that the plot function returns a list of lines, which
 correspond to the spectra lines. At present the lines have limited
@@ -153,6 +155,48 @@ matplotlib's pyplot. For example:
     xlim(1e3, 4e4)
     grid('on')
 
+You can also save the current figure into a file like this:
+
+    savefig('example_saved_figure.png')
+
+where the file format is guessed from the file extension. The same
+extensions as in the MantidPlot figure export dialog are supported,
+including jpg, png, tif, ps, and svg.
+
+Additional options supported as keyword arguments (kwargs):
+-----------------------------------------------------------
+
+There is a couple of important plot options that are set as keyword
+arguments:
+
+============  ================
+Option name   Values supported
+------------  ----------------
+error_bars    True, False (default)
+hold          on, off
+
+error_bars has the same meaning as in the traditional mantidplot plot
+functions: it defines whether error bars should be added to the
+plots. hold has the same behavior as in matplotlib and pyplot. If the
+value of hold is 'on' in a plot command, the new plot will be drawn on
+top of the current plot window, without clearing it. This makes it
+possible to make plots incrementally.
+
+Multi-plot commands
+-------------------
+
+In this version of future.pyplot there is limited support for
+multi-plot commands (as in pyplot and matlab). For example, you can
+type commands like the following:
+
+plot(ws, [100, 101], 'r', ws, [200, 201], 'b', tool='plot_spectrum')
+
+This command will plot spectra 100 and 101 in red and spectra 200 and
+201 in blue on the same figure. You can also combine different
+workspaces, for example:
+
+plot(ws, [100, 101], 'r', mar, [50, 41], 'b', tool='plot_spectrum')
+
 
 Style options supported as keyword arguments
 --------------------------------------------
@@ -167,7 +211,7 @@ Option name   Values supported
 linewidth     real values
 linestyle     '-', '--', '-.' '.'
 marker        'o', 'v', '^', '<', '>', 's', '*', 'h', '|', '_'
-color         color character or string ('b', 'blue', 'g', 'green', 'k', 'black', etc.)
+color         color character or string ('b', 'blue', 'g', 'green', 'k', 'black', 'y', 'yellow', 'c', 'cyan', 'r', 'red'. 'm', 'magenta', etc.). RGB colors are not supported at the moment.
 ============  ================
 
 Functions that modify plot properties
@@ -276,7 +320,13 @@ class Figure():
             raise ValueError("To create a Figure you need to specify a figure number or a Graph object." )
 
     @classmethod
+    def fig_seq(cls):
+        """ Helper method, returns the current sequence number for figures"""
+        return cls.__figures_seq
+
+    @classmethod
     def __make_new_fig_number(cls):
+        """ Helper method, creates and return a new figure number"""
         num = cls.__figures_seq + 1
         avail = False
         while not avail:
@@ -286,26 +336,22 @@ class Figure():
                 avail = True   # break
             else:
                 num += 1
+        cls.__figures_seq = num
         return num
 
     @staticmethod
     def __empty_graph():
-        """
-        Helper function, just create a new Graph with an 'empty' plot
-        """
+        """Helper method, just create a new Graph with an 'empty' plot"""
         lines = plot([0])
         return lines._graph
 
-    @classmethod
-    def __empty_fig(cls):
-        """
-        Helper function/static method, for the functional interface.
-        """
-        lines = plot([0])
-        return cls(lines._graph)
 
+def __empty_fig():
+    """Helper function, for the functional interface. Makes a blank/empty figure"""
+    lines = plot([0]) # for the very first figure, this would generate infinite recursion!
+    return Figure(lines[0]._graph)
 
-# TODO: no 'hold' support for now. How to handle multi-plots with different types/tools? Does it make sense at all?
+# TODO/TOTHINK: no 'hold' function support for now. How to handle multi-plots with different types/tools? Does it make sense at all?
 __hold_status = False
 
 __last_shown_fig = None
@@ -313,11 +359,12 @@ __last_shown_fig = None
 def __last_fig():
     """
         Helper function, especially for the functional interface.
+        Avoid using it inside the plot_spectrum, plot_bin, etc. as there's risk of infinite recursion
         Returns :: last figure, creating new one if there was none
     """
     global __last_shown_fig
     if not __last_shown_fig:
-        f = Figure.__empty_fig()
+        f = __empty_fig()
         __last_shown_fig = f
     return __last_shown_fig
 
@@ -401,6 +448,7 @@ def __create_workspace(x, y, name="array_dummy_workspace"):
         y = [0]
     alg.setProperty("DataX", x)
     alg.setProperty("DataY", y)
+    name = name + "_" + str(Figure.fig_seq())
     alg.setPropertyValue("OutputWorkspace", name) 
     alg.execute()
     ws = alg.getProperty("OutputWorkspace").value
@@ -441,8 +489,8 @@ def __list_of_lines_from_graph(g):
 
 def __matplotlib_defaults(l):
     """
-        Tries to approximately mimic the default plot properties of a pylab.plot()
-        @param l :: layer (plot)
+        Tries to (approximately) mimic the default plot properties of a pylab.plot()
+        @param l :: layer (plot) from a mantidplot Graph object
 
         Returns :: nothing, just modifies properties of the layer passed
     """
@@ -450,29 +498,10 @@ def __matplotlib_defaults(l):
         raise ValueError("Got empty Layer object, cannot modify its properties." )
     l.removeLegend()
     for i in range(0, l.numCurves()):
-        l.setCurveLineColor(i, 0)  # beware this is not Qt.Qt.black
+        l.setCurveLineColor(i, __color_char_to_color_idx['b'])
     l.setTitle(' ')
     l.setXTitle(' ')
     l.setYTitle(' ')
-
-def __apply_linestyle_kwarg(graph, linestyle):
-    """
-        Applies a linestyle to all the curves of the active layer of the graph passed
-        @param l :: graph (figure)
-
-        Returns :: nothing, just modifies the line styles of the active layer of the graph passed
-    """
-    linestyle_to_qt_penstyle = {
-        '-': QtCore.Qt.SolidLine, '--': QtCore.Qt.DashLine,
-        '-.': QtCore.Qt.DashDotLine, '-.': QtCore.Qt.DotLine
-    } # other available: Qt.DashDotDotLine, Qt.CustomDashLine
-    wrong = 'inexistent'
-    penstyle = linestyle_to_qt_penstyle.get(linestyle, wrong)
-    if wrong == penstyle:
-        raise ValueError("Wrong linestyle given, unrecognized: " + linestyle)
-    l = graph.activeLayer()
-    for i in range(0, l.numCurves()):
-        l.setCurveLineStyle(0, penstyle)
 
 __marker_to_plotsymbol = {
     'o': _qti.PlotSymbol.Ellipse, 'v': _qti.PlotSymbol.DTriangle, '^': _qti.PlotSymbol.UTriangle,
@@ -481,84 +510,152 @@ __marker_to_plotsymbol = {
     '_': _qti.PlotSymbol.HLine
 }
 
-def __apply_marker_kwarg(graph, marker):
-    """
-        Sets the marker of all the curves of the active layer of the graph passed
-        @param graph :: a graph or figure that can hold multiple layers
+"""Contains all the supported line styles"""
+__linestyle_to_qt_penstyle = {
+    '-': QtCore.Qt.SolidLine, '--': QtCore.Qt.DashLine,
+    '-.': QtCore.Qt.DashDotLine, ':': QtCore.Qt.DotLine
+} # other available: Qt.DashDotDotLine, Qt.CustomDashLine
 
-        Returns :: nothing, just modifies the line markers of the active layer of the graph passed
+def __apply_linestyle(graph, linestyle, first_line=0):
     """
+        Sets the linestyle of lines/curves of the active layer of the graph passed
+
+        @param graph :: mantidplot graph (figure)
+        @param linestyle :: linestyle string
+        @param first_line :: index of first line to which the linestyle will apply
+                             (useful when in hold mode / adding lines)
+
+        Returns :: nothing, just modifies the line styles of the active layer of the graph passed
+    """
+    global __linestyle_to_qt_penstyle
     wrong = 'inexistent'
-    sym_code = __marker_to_plotsymbol.get(marker, wrong)
-    if wrong == sym_code:
-        raise ValueError("Wrong marker given, unrecognized: " + marker)
+    penstyle = __linestyle_to_qt_penstyle.get(linestyle, wrong)
+    if wrong == penstyle:
+        raise ValueError("Wrong linestyle given, unrecognized: " + linestyle)
     l = graph.activeLayer()
-    for i in range(0, l.numCurves()):
-        sym = _qti.PlotSymbol(sym_code, QtGui.QBrush(), QtGui.QPen(), QtCore.QSize(5,5))
-        l.setCurveSymbol(i, sym)
+    for i in range(first_line, l.numCurves()):
+        l.setCurveLineStyle(i, penstyle)
 
+# beware this is not Qt.Qt.color_name (black, etc.)
 __color_char_to_color_idx = {
-    'k': 0, 'b': 1, 'g': 2, 'r': 3, 'm': 4
+    'k': 0, 'r': 1, 'g': 2, 'b': 3, 'c': 4, 'm': 5, 'y': 18,
+    'black': 0, 'red': 1, 'green': 2, 'blue': 3, 'cyan': 4, 'magenta': 5, 'orange': 6,
+    'purple': 7, 'darkGreen': 8, 'darkBlue': 9, 'brown': 10, 'gray': 17, 'yellow': 18
 }
 
-def __apply_line_color(graph, c):
-    l = graph.activeLayer()
+def __apply_line_color(graph, c, first_line=0):
+    """
+        Sets the color of curves of the active layer of the graph passed
+
+        @param graph :: mantidplot graph (figure)
+        @param c :: color string
+        @param first_line :: index of first line to which the color will apply
+                             (useful when in hold mode / adding lines)
+
+        Returns :: nothing, just modifies the line styles of the active layer of the graph passed
+    """
     inex = 'inexistent'
     col_idx = __color_char_to_color_idx.get(c, inex)
     if inex == col_idx:
         col_idx = QtGui.QColor(c)
-    for i in range(0, l.numCurves()):
-        l.setCurveLineColor(i, col_idx)  # beware this is not Qt.Qt.black, but could be faked with QtGui.QColor("orange")
-
-def __apply_linestyle(graph, linestyle):
     l = graph.activeLayer()
-    idx = l.numCurves()-1
-    l.setCurveLineStyle(idx, linestyle)
+    for i in range(first_line, l.numCurves()):
+        l.setCurveLineColor(i, col_idx) # beware this is not Qt.Qt.black, but could be faked with QtGui.QColor("orange")
 
-def __apply_marker(graph, marker):
-    l = graph.activeLayer()
+def __apply_marker(graph, marker, first_line=0):
+    """
+        Sets the marker of curves of the active layer of the graph passed
+
+        @param graph :: mantidplot graph (figure)
+        @param marker :: line marker character
+        @param first_line :: index of first line to which the color will apply
+                             (useful when in hold mode / adding lines)
+
+        Returns :: nothing
+    """
     wrong = 'inexistent'
     sym_code = __marker_to_plotsymbol.get(marker, wrong)
     if wrong == sym_code:
-        raise ValueError("Warning: ignoring unrecognized marker: " + marker)
-    sym = PlotSymbol(sym_code, QtGui.QBrush(), QtGui.QPen(), QtCore.QSize(5,5))
-    idx = l.numCurves()-1
-    l.setCurveSymbol(idx, sym)
+        raise ValueError("Warning: unrecognized marker: " + marker)
+    sym = _qti.PlotSymbol(sym_code, QtGui.QBrush(), QtGui.QPen(), QtCore.QSize(5,5))
+    l = graph.activeLayer()
+    for idx in range(first_line, l.numCurves()):
+        l.setCurveSymbol(idx, sym)
 
-def __is_marker(c):
+def __is_marker(char):
+    """ Is it a marker character
+        @param char :: suspected marker character coming from a linestyle string
+        Returns :: True if it's a marker character
+    """
     inex = 'inexistent'
-    m = __marker_to_plotsymbol.get(marker, inex)
+    m = __marker_to_plotsymbol.get(char, inex)
     return m != inex
 
-def __is_linestyle(c):
-    return '.'==c or '-'==c
+__linestyle_to_qt_penstyle = {
+    '-': QtCore.Qt.SolidLine, '--': QtCore.Qt.DashLine,
+    '-.': QtCore.Qt.DashDotLine, ':': QtCore.Qt.DotLine
+} # other available: Qt.DashDotDotLine, Qt.CustomDashLine
 
-def __apply_plot_args(graph, *args):
+def __is_linestyle(s, i):
+    """
+        Check if we have a linestyle string in string s at position i
+        @param s :: input (style) string
+        @param i :: index where to start checking in string s
+
+        Returns :: 0 if no linestyle string is identified, length of the string (1 or 2) otherwise
+    """
+    global __linestyle_to_qt_penstyle
+
+    if len(s) <= i:
+        return 0
+
+    if len(s) > len(s) + 1:
+        # can check 2 chars
+        wrong = 'inexistent'
+        penstyle = __linestyle_to_qt_penstyle.get(linestyle, wrong)
+        if wrong != penstyle:
+            return 2
+
+    if '-'==s[i] or ':'==s[i]:
+        return 1
+    else:
+        return 0
+
+def __apply_plot_args(graph, first_line, *args):
     """
         Applies args, like '-r' etc.
         @param graph :: a graph (or figure) that can contain multiple layers
+        @param first_line :: first line to which the options will apply (useful when in hold mode / adding lines)
+        @param args :: plot arguments
 
         Returns :: nothing, just uses kwargs to modify properties of the layer passed
     """
-    if None==graph or None==args or ((),) == args:
+    if None==graph or ((),) == args or len(args) < 1:
         return
 
-    for a in range(0, len(args)):
+    for a in args:
         if isinstance(a, basestring):
-            for i, c in enumeraterange(0,len(s)):
-                if __is_linestyle(c):   # TODO: this will be fooled!!! <- FIX
-                    __apply_linestyle(a[i:])
-                elif c.isalpha():
-                    __apply_line_color(graph, c)
-                elif __is_marker(c):
-                    __apply_marker(graph, a[i:])
+            # this will eat characters as they come, without minding much the past/previous characters
+            # users can chain as many modifiers as they wish. It could be modified to be more strict/picky
+            i = 0
+            while i < len(a):
+                linestyle_len = __is_linestyle(a,i)
+                if linestyle_len > 0:
+                    __apply_linestyle(graph, a[i:i+linestyle_len], first_line)
+                    i += 2
+                elif __is_marker(a[i]):
+                    __apply_marker(graph, a[i:], first_line)
+                    i += 1
+                elif a[i].isalpha():
+                    __apply_line_color(graph, a[i], first_line)
+                    i += 1
                 else:
-                    # TODO - decide - error here? like this? sure?
+                    # TOTHINK - error here? like this? sure? or just a warning?
                     raise ValueError("Unrecognized character in input string: " + c)
         else:
             raise ValueError("Unrecognized input parameter: " + str(args[a]) + ", of type: " + str(type(a)))
 
-def __apply_plot_kwargs(graph, **kwargs):
+def __apply_plot_kwargs(graph, first_line=0, **kwargs):
     """
         Applies kwargs
         @param graph :: a graph (or figure) that can contain multiple layers
@@ -570,15 +667,18 @@ def __apply_plot_kwargs(graph, **kwargs):
 
     for key in kwargs:
         if 'linestyle' == key:
-            __apply_linestyle_kwarg(graph, kwargs[key])
+            __apply_linestyle(graph, kwargs[key])
 
         elif 'linewidth' == key:
             l = graph.activeLayer()
-            for i in range(0, l.numCurves()):
+            for i in range(first_line, l.numCurves()):
                 l.setCurveLineWidth(i, kwargs[key])
 
+        elif 'color' == key:
+            __apply_line_color(graph, first_line, kwargs[key])
+
         elif 'marker' == key:
-            __apply_marker_kwarg(graph, kwargs[key])
+            __apply_marker(graph, first_line, kwargs[key])
 
 def __is_multiplot_command(*args, **kwargs):
     """
@@ -612,9 +712,9 @@ def __is_multiplot_command(*args, **kwargs):
             if isinstance(args[i], basestring):
                 style = args[i]
                 i += 1
-            plots_seq.append((a,b,c))
+            plots_seq.append((a,b,style))
 
-        if (nargs-i) >= 2:
+        elif (nargs-i) >= 2:
             if __is_data_pair(args[i], args[i+1]):
                 a = args[i]
                 b = args[i+1]
@@ -623,7 +723,10 @@ def __is_multiplot_command(*args, **kwargs):
                 return (False, [])
             plots_seq.append((a, b, ''))
 
-    return (i == nargs-1, seq_append)
+        elif (nargs-i) > 0:
+            raise ValueError("Not plottable. I do not know what to do with this last parameter: " + args[i] + ", of type " + str(type(args)))
+
+    return (i == nargs-1, plots_seq)
 
 def __process_multiplot_command(plots_seq, **kwargs):
     """
@@ -635,22 +738,67 @@ def __process_multiplot_command(plots_seq, **kwargs):
     """
     lines = []
     for i in range(0, len(plots_seq)):
-        lines.append(plot(*(plots_seq[i])))   # TODO: fix window/hold param so this works as expected
+        kwargs['hold'] = 'True'
+        lines.append(plot(*(plots_seq[i])))
     return lines
+
+def __translate_hold_kwarg(**kwargs):
+    """
+    Helper function to translate from hold='on'/'off' kwarg to a True/False value for the 
+    mantidplot window and window error_bars
+
+    @param kwargs :: keyword arguments passed to a plot function, this function only cares about hold. Any
+                     value different from 'on' will be considered as 'off'
+
+    Returns :: tuple with a couple of values: True/False value for window, and True/False for clearWindow, 
+               to be used with plotSpectrum, plotBin, etc.
+    """
+    # window and clearWindow
+    window_val = None
+    clearWindow_val = False
+    hold_name = 'hold'
+    missing_off = -1
+    str_val = kwargs.get(hold_name, missing_off)
+    if str_val != missing_off and str_val == 'on':
+        if None == __last_shown_fig:
+            window_val = None
+        else:
+            window_val = __last_fig()._graph
+        clearWindow_val = False
+
+    return window_val, clearWindow_val
+
+def __translate_error_bars_kwarg(**kwargs):
+    """
+    Helper function to translate from error_bars=True/False kwarg to a True/False value for the 
+    mantidplot error_bars argument
+
+    @param kwargs :: keyword arguments passed to a plot function. This function only cares about 'error_bars'.
+                     Any value different from 'True' will be considered as 'False'
+
+    Returns :: True/False value for error_bars, to be used with plotSpectrum, plotBin, etc.
+
+    """
+    # error_bars param
+    bars_val = False
+    bars_name = 'error_bars'
+    missing_off = -1
+    str_val = kwargs.get(bars_name, missing_off)
+    if str_val != missing_off and str_val == 'True':
+        bars_val = True
+
+    return bars_val
 
 def __plot_as_workspace(*args, **kwargs):
     """
-        plotSpectrum via qti plotting framework to plot a workspace.
+        plot spectrum via qti plotting framework to plot a workspace.
 
         @param args :: curve data and options.
         @param kwargs :: plot line options
 
         Returns :: List of line objects
     """
-#    # normally expects: args[0]: workspace(s), args[1]: one or more spectra indices
-#    if len(args) < 2:
-#        raise ValueError("Error while trying to plot spectra using plot_spectrum: you need to specify the spectra indices as second parameter.")
-    return plot_spectrum(args[0], args[1], *args[2:], **kwargs)
+    return plot_spectrum(*args, **kwargs)
 
 def __plot_as_workspaces_list(*args, **kwargs):
     """
@@ -673,13 +821,20 @@ def __plot_as_array(*args, **kwargs):
         Returns :: the list of curves (1) included in the plot
     """
     y = args[0]
+    idx_style = -1   # have to guess if we get plot(x,'r'), or plot(x, y, 'r') or no style string
     if len(args) > 1:
         if __is_array(args[1]):
-            ws = __create_workspace(args[1], y)
+            ws = __create_workspace(y, args[1])
+            idx_style = 2
+        elif isinstance(args[1], basestring):
+            x = range(0, len(y), 1) # 0 to n, incremented by 1.
+            ws = __create_workspace(x, y)
+            # have to assume that args[1] is a style string
+            idx_style = 1
         else:
             raise ValueError("Inputs are of type: " + str(type(args)) + ". Not plottable." )
     else:
-        x = range(0, len(y), 1) # 0 to n, incremented by 1.
+        x = range(0, len(y), 1)
         ws = __create_workspace(x, y)
     lines = __plot_as_workspace(ws, [0], **kwargs)
     graph = None
@@ -691,7 +846,8 @@ def __plot_as_array(*args, **kwargs):
     # we could modify properties behind the scene and at the end do the show(). Con: do we really need
     # to load the qti layer with more methods because of outer layers like here?
     __matplotlib_defaults(graph.activeLayer())
-    __apply_plot_args(graph, *args[1:])
+    if idx_style > 0:
+        __apply_plot_args(graph, *args[idx_style:])
     __apply_plot_kwargs(graph, **kwargs)
     return __list_of_lines_from_graph(graph)
 
@@ -716,7 +872,6 @@ def __plot_with_tool(tool, *args, **kwargs):
 
 def __plot_with_best_guess(*args, **kwargs):
     y = args[0]
-    print type(y)
     if __is_array(y):
         if __is_array_of_workspaces(y):
             return __plot_as_workspaces_list(*args, **kwargs)
@@ -728,48 +883,84 @@ def __plot_with_best_guess(*args, **kwargs):
 
 def plot_bin(workspaces, indices, *args, **kwargs):
     """
-    1D plot of a MDWorkspace.
+    X-Y plot of the bin counts in a workspace.
+
+    Plots one or more bin, selected by indices, using spectra numbers as x-axis and bin counts for 
+    each spectrum as y-axis.
 
     @param workspaces :: workspace or list of workspaces (both workspace objects and names accepted)
     @param indices :: indices of the bin(s) to plot
 
     Returns :: the list of curves included in the plot
     """
-    graph = mantidplot.plotBin(workspaces, indices)  # TODO fix window param
+    # Find optional params to plotBin
+    bars_val = __translate_error_bars_kwarg(**kwargs)
+    window_val, clearWindow_val = __translate_hold_kwarg(**kwargs)
+
+    # to change properties on the new lines being added
+    first_line = 0
+    if None != window_val:
+        first_line = window_val.numCurves()
+
+    graph = mantidplot.plotBin(workspaces, indices, error_bars=bars_val, type=-1, window=window_val, clearWindow=clearWindow_val)
+
     __apply_plot_args(graph, *args)
     __apply_plot_kwargs(graph, **kwargs)
+
     return __list_of_lines_from_graph(graph)
 
 
 def plot_md(workspaces, *args, **kwargs):
     """
-    1D plot of an MDWorkspace.
+    X-Y plot of an MDWorkspace.
 
     @param workspaces :: workspace or list of workspaces (both workspace objects and names accepted)
 
     Returns :: the list of curves included in the plot
     """
-    graph = mantidplot.plotMD(workspaces)  # TODO fix window param
+    # Find optional params to plotBin
+    bars_val = __translate_error_bars_kwarg(**kwargs)
+    window_val, clearWindow_val = __translate_hold_kwarg(**kwargs)
+
+    # to change properties on the new lines being added
+    first_line = 0
+    if None != window_val:
+        first_line = window_val.numCurves()
+
+    graph = mantidplot.plotMD(workspaces, normalization=DEFAULT_MD_NORMALIZATION, error_bars=bars_val, window=window_val, clearWindow=clearWindow_val)
+
     __apply_plot_args(graph, *args)
     __apply_plot_kwargs(graph, **kwargs)
+
     return __list_of_lines_from_graph(graph)
 
 
 def plot_spectrum(workspaces, indices, *args, **kwargs):
-    """1D Plot of a spectrum in a workspace.
+    """X-Y Plot of spectra in a workspace.
 
-    Plots one or more spectra, selected by indices, using X as bin
-    boundaries and Y as the counts in each bin.
+    Plots one or more spectra, selected by indices, using bin boundaries as x-axis
+    and the spectra values in each bin as y-axis.
 
     @param workspaces :: workspace or list of workspaces (both workspace objects and names accepted)
-    @param indices :: indices of the spectra to plot, given as a list
+    @param indices :: indices of the spectra to plot, given as a single integer or a list of integers
 
     Returns :: the list of curves included in the plot
 
     """
-    graph = mantidplot.plotSpectrum(workspaces, indices)  # TODO fix window param
-    __apply_plot_args(graph, *args)
-    __apply_plot_kwargs(graph, **kwargs)
+    # Find optional params to plotSpectrum
+    bars_val = __translate_error_bars_kwarg(**kwargs)
+    window_val, clearWindow_val = __translate_hold_kwarg(**kwargs)
+
+    # to change properties on the new lines being added
+    first_line = 0
+    if None != window_val:
+        first_line = window_val.numCurves()
+
+    graph = mantidplot.plotSpectrum(workspaces, indices, error_bars=bars_val, type=-1, window=window_val, clearWindow=clearWindow_val)
+
+    __apply_plot_args(graph, first_line, *args)
+    __apply_plot_kwargs(graph, first_line, **kwargs)
+
     return __list_of_lines_from_graph(graph)
 
 
@@ -818,8 +1009,6 @@ def plot(*args, **kwargs):
     elif len(args) > 3:
         raise ValueError("Could not interpret the arguments passed. You passed more than 3 positional arguments but this does not seem to be a correct multi-plot command. Please check your command.")
 
-    # TOTHINK: support x-y plots like plot(x, y)?
-
     # normally guess; exception if e.g. a parameter tool='plot_bin' is given
     try:
         tool = kwargs['tool']
@@ -841,7 +1030,7 @@ def xlim(xmin, xmax):
     @param xmax :: maximum value
     """
     l = __last_fig()._graph.activeLayer()
-    l.setAxisScale(0, xmin, xmax)
+    l.setAxisScale(2, xmin, xmax)
 
 def ylim(ymin, ymax):
     """
@@ -851,7 +1040,7 @@ def ylim(ymin, ymax):
     @param ymax :: maximum value
     """
     l = __last_fig()._graph.activeLayer()
-    l.setAxisScale(1, ymin, ymax)
+    l.setAxisScale(0, ymin, ymax)
 
 def xlabel(lbl):
     """
@@ -902,7 +1091,7 @@ def grid(opt='on'):
         l.showGrid()
     elif 'off' == opt:
         # TODO is there support for a 'hideGrid' in qti? Apparently not.
-        print "Sorry, disabling grids is currenlty not supported"
+        print "Sorry, hiding/disabling grids is currenlty not supported"
 
 def figure(num=None):
     """
@@ -912,15 +1101,15 @@ def figure(num=None):
     @param num :: figure number (optional). If empty, a new figure is created.
     """
     if not num:
-        return Figure.__empty_fig()
+        return __empty_fig()
     else:
         if num < 0:
             raise ValueError("The figure number cannot be negative")
 
     missing = None
-    fig = __figures.get(num, None)
+    fig = Figure.__figures.get(num, None)
     if None == fig:
-        return Figure.__empty_fig()
+        return __empty_fig()
     else:
         return fig
 
@@ -932,5 +1121,5 @@ def savefig(name):
     """
     if not name:
         raise ValueError("Error: you need to specify a non-empty file name")
-    l = __last_graph().activeLayer()
+    l = __last_fig()._graph.activeLayer()
     l.saveImage(name);
