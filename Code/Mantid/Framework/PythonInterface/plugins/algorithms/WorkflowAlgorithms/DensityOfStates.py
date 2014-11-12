@@ -110,14 +110,19 @@ class DensityOfStates(DataProcessorAlgorithm):
 
             partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors, weights)
 
-            # Discard the summed workspace if the user does not want it
             if self._sum_contributions:
-                partial_workspaces.append(sum_workspace)
+                # Discard the partial workspaces
+                for partial_ws in partial_workspaces:
+                    DeleteWorkspace(partial_ws)
+
+                # Rename the summed workspace, this will be the output
+                RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._ws_name)
+
             else:
                 DeleteWorkspace(sum_workspace)
 
-            group = ','.join(partial_workspaces)
-            GroupWorkspaces(group, OutputWorkspace=self._ws_name)
+                group = ','.join(partial_workspaces)
+                GroupWorkspaces(group, OutputWorkspace=self._ws_name)
 
         # We want to calculate a total DoS with scaled intensities
         elif self._spec_type == 'DOS' and self._scale_by_cross_section:

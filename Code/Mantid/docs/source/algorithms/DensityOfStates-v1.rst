@@ -52,10 +52,8 @@ Output:
 
 .. testcode:: ExDensityOfStatesPartialSummed
 
-    sum_group = DensityOfStates(File='squaricn.phonon', Ions=['H', 'C', 'O'], SumContributions=True)
+    sum_ws = DensityOfStates(File='squaricn.phonon', Ions=['H', 'C', 'O'], SumContributions=True)
     total_ws = DensityOfStates(File='squaricn.phonon')
-
-    sum_ws = sum_group.getName() + '_Total'
 
     print CheckWorkspacesMatch(total_ws, sum_ws, Tolerance=1e-12)
 

@@ -107,9 +107,7 @@ class DensityOfStatesTest(unittest.TestCase):
         summed = DensityOfStates(File=self._file_name, SpectrumType=spec_type, Ions='H,C,O', SumContributions=True)
         total = DensityOfStates(File=self._file_name,  SpectrumType=spec_type)
 
-        summed_ws = summed.getName() + '_Total'
-
-        self.assertEquals(CheckWorkspacesMatch(summed_ws, total, tolerance), 'Success!')
+        self.assertEquals(CheckWorkspacesMatch(summed, total, tolerance), 'Success!')
 
     def test_partial_cross_section_scale(self):
         spec_type = 'DOS'
@@ -126,9 +124,7 @@ class DensityOfStatesTest(unittest.TestCase):
         summed = DensityOfStates(File=self._file_name, SpectrumType=spec_type, Ions='H,C,O', SumContributions=True, ScaleByCrossSection=True)
         total = DensityOfStates(File=self._file_name,  SpectrumType=spec_type, ScaleByCrossSection=True)
 
-        summed_ws = summed.getName() + '_Total'
-
-        self.assertEquals(CheckWorkspacesMatch(summed_ws, total, tolerance), 'Success!')
+        self.assertEquals(CheckWorkspacesMatch(summed, total, tolerance), 'Success!')
 
 
 if __name__=="__main__":
