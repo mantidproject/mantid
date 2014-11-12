@@ -2676,6 +2676,22 @@ Later steps in the process (saving, renaming) will not be done.</string>
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="pbPythonExport">
+       <property name="maximumSize">
+        <size>
+         <width>25</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Export a Python script for the algorithms run on this tab.</string>
+       </property>
+       <property name="text">
+        <string>Py</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_1">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

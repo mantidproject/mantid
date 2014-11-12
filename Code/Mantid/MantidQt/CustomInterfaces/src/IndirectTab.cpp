@@ -5,6 +5,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 namespace
 {
@@ -22,7 +23,8 @@ namespace CustomInterfaces
       m_plots(), m_curves(), m_rangeSelectors(),
       m_properties(),
       m_dblManager(new QtDoublePropertyManager()), m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
-      m_dblEdFac(new DoubleEditorFactory())
+      m_dblEdFac(new DoubleEditorFactory()),
+      m_tabStartTime(DateAndTime::getCurrentTime()), m_tabEndTime(DateAndTime::maximum())
   {
     m_parentWidget = dynamic_cast<QWidget *>(parent);
 
@@ -48,9 +50,14 @@ namespace CustomInterfaces
   void IndirectTab::runTab()
   {
     if(validate())
+    {
+      m_tabStartTime = DateAndTime::getCurrentTime();
       run();
+    }
     else
+    {
       g_log.warning("Failed to validate indirect tab input!");
+    }
   }
 
   void IndirectTab::setupTab()
@@ -61,6 +68,38 @@ namespace CustomInterfaces
   bool IndirectTab::validateTab()
   {
     return validate();
+  }
+
+  /**
+   * Handles generating a Python script for the algorithms run on the current tab.
+   */
+  void IndirectTab::exportPythonScript()
+  {
+    g_log.information() << "Python export for workspace: " << m_tabResultWorkspace <<
+      ", between " << m_tabStartTime << " and " << m_tabEndTime << std::endl;
+
+    // Nothing can be done if no workspace is provided by the tab
+    if(m_tabResultWorkspace.empty())
+    {
+      g_log.error("This tab has not specified a result workspace name. Python script export is not possible.");
+      return;
+    }
+
+    // Take the search times to be a second either side of the actual times, just in case
+    DateAndTime startSearchTime = m_tabStartTime - 1.0;
+    DateAndTime endSearchTime = m_tabEndTime + 1.0;
+
+    Algorithm_sptr pyExportAlg = AlgorithmManager::Instance().createUnmanaged("GeneratePythonScript");
+    pyExportAlg->initialize();
+
+    pyExportAlg->setProperty("Filename", "temp.py");
+    pyExportAlg->setProperty("InputWorkspace", m_tabResultWorkspace);
+    pyExportAlg->setProperty("SpecifyAlgorithmVersions", "Specify All");
+    pyExportAlg->setProperty("UnrollAll", true);
+    pyExportAlg->setProperty("StartTimestamp", startSearchTime.toISO8601String());
+    pyExportAlg->setProperty("EndTimestamp", endSearchTime.toISO8601String());
+
+    pyExportAlg->execute();
   }
 
   /**
@@ -269,6 +308,8 @@ namespace CustomInterfaces
    */
   void IndirectTab::algorithmFinished(bool error)
   {
+    m_tabEndTime = DateAndTime::getCurrentTime();
+
     if(error)
     {
       emit showMessageBox("Error running algorithm. \nSee results log for details.");

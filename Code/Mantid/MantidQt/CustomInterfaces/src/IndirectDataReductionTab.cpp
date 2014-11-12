@@ -5,6 +5,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 namespace
 {
@@ -35,6 +36,7 @@ namespace CustomInterfaces
   {
     if(validate())
     {
+      m_tabStartTime = DateAndTime::getCurrentTime();
       m_tabRunning = true;
       emit updateRunButton(false, "Running...", "Running data reduction...");
       run();
