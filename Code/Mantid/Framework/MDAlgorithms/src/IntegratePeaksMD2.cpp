@@ -432,7 +432,15 @@ namespace MDAlgorithms
         }
       }
 
-      if (profileFunction.compare("NoFit") != 0)
+      if (profileFunction.compare("NoFit") == 0)
+      {
+        for (size_t j = 0; j < numSteps; j++)
+        {
+            if (j < peakMin || j > peakMax)
+              background_total = background_total + wsProfile2D->dataY(i)[j];
+         }
+      }
+      else
       {
           API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
           findpeaks->setProperty("InputWorkspace", wsProfile2D);
@@ -554,7 +562,8 @@ namespace MDAlgorithms
 
       g_log.information() << "Peak " << i << " at " << pos << ": signal "
         << signal << " (sig^2 " << errorSquared << "), with background "
-        << bgSignal << " (sig^2 " << bgErrorSquared << ") subtracted."
+        << bgSignal + ratio * background_total << " (sig^2 " 
+        << bgErrorSquared+ ratio * ratio * std::fabs(background_total) << ") subtracted."
         << std::endl;
 
     }
