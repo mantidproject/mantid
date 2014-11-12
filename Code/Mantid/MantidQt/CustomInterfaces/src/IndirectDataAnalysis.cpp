@@ -88,7 +88,7 @@ namespace IDA
     for(auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab)
     {
       tab->second->setupTab();
-      connect(tab->second, SIGNAL(executePythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
+      connect(tab->second, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
       connect(tab->second, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
     }
 
