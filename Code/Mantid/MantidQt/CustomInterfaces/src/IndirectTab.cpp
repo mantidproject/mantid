@@ -35,7 +35,7 @@ namespace CustomInterfaces
     m_valPosDbl->setBottom(tolerance);
 
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmFinished(bool)));
-    connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(executePythonScript(const QString&, bool)));
+    connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   }
 
   //----------------------------------------------------------------------------------------------
