@@ -5,6 +5,7 @@
 #include "ImportWorkspaceDlg.h"
 #include "AlgorithmMonitor.h"
 #include "MantidSampleLogDialog.h"
+#include "MantidSampleMaterialDialog.h"
 #include "AlgorithmHistoryWindow.h"
 #include "MantidMatrixCurve.h"
 #include "MantidMDCurve.h"
@@ -1447,15 +1448,12 @@ void MantidUI::showAlgorithmDialog(const QString & algName, int version)
 * @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
 * @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
 */
-void MantidUI::showAlgorithmDialog(QString algName, QHash<QString,QString> paramList,Mantid::API::AlgorithmObserver* obs)
+void MantidUI::showAlgorithmDialog(QString algName, QHash<QString,QString> paramList, Mantid::API::AlgorithmObserver *obs)
 {
   //Get latest version of the algorithm
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
   if( !alg ) return;
-  if (obs)
-  {
-    obs->observeFinish(alg);
-  }
+
   for(QHash<QString,QString>::Iterator it = paramList.begin(); it != paramList.end(); ++it)
   {
     alg->setPropertyValue(it.key().toStdString(),it.value().toStdString());
@@ -1467,6 +1465,11 @@ void MantidUI::showAlgorithmDialog(QString algName, QHash<QString,QString> param
     // when loading files, we'll need to update the list of recent files
     // hook up MantidUI::fileDialogAccept() to the LoadDialog dialog accepted() signal
     connect(dlg, SIGNAL(accepted()), this, SLOT(loadFileDialogAccept()));
+  }
+
+  if (obs)
+  {
+    dlg->addAlgorithmObserver(obs);
   }
 
   dlg->show();
@@ -1489,7 +1492,7 @@ void MantidUI::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg)
 * @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
 * @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
 */
-void MantidUI::executeAlgorithm(const QString & algName, const QString & paramList,Mantid::API::AlgorithmObserver* obs)
+void MantidUI::executeAlgorithm(const QString & algName, const QString & paramList, Mantid::API::AlgorithmObserver* obs)
 {
   //Get latest version of the algorithm
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
@@ -2207,6 +2210,10 @@ void MantidUI::menuMantidMatrixAboutToShow()
   connect(action,SIGNAL(triggered()),this,SLOT(showLogFileWindow()));
   menuMantidMatrix->addAction(action);
 
+  action = new QAction("Sample Material...", this);
+  connect(action,SIGNAL(triggered()),this,SLOT(showSampleMaterialWindow()));
+  menuMantidMatrix->addAction(action);
+
   action = new QAction("Show History", this);
   connect(action,SIGNAL(triggered()),this,SLOT(showAlgorithmHistory()));
   menuMantidMatrix->addAction(action);
@@ -2765,6 +2772,16 @@ void MantidUI::showLogFileWindow()
   dlg->setAttribute(Qt::WA_DeleteOnClose);
   dlg->show();
   dlg->setFocus();
+}
+
+void MantidUI::showSampleMaterialWindow()
+{
+  MantidSampleMaterialDialog *dlg = new MantidSampleMaterialDialog(getSelectedWorkspaceName(), this);
+  dlg->setModal(false);
+  dlg->setAttribute(Qt::WA_DeleteOnClose);
+  dlg->show();
+  dlg->setFocus();
+  dlg->updateMaterial();
 }
 
 //  *****      Plotting Methods     *****  //
