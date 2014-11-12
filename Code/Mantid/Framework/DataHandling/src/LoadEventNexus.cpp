@@ -360,16 +360,15 @@ namespace Mantid
           "monotonically increasing pulse times" << std::endl;
 
         //Join back up the tof limits to the global ones
-        PARALLEL_CRITICAL(tof_limits)
+        //This is not thread safe, so only one thread at a time runs this.
         {
-          //This is not thread safe, so only one thread at a time runs this.
+          Poco::FastMutex::ScopedLock _lock(alg->m_tofMutex);
           if (my_shortest_tof < alg->shortest_tof) { alg->shortest_tof = my_shortest_tof;}
           if (my_longest_tof > alg->longest_tof ) { alg->longest_tof  = my_longest_tof;}
           alg->bad_tofs += badTofs;
           alg->discarded_events += my_discarded_events;
         }
-
-
+      
         // For Linux with tcmalloc, make sure memory goes back;
         // but don't call if more than 15% of memory is still available, since that slows down the loading.
         MemoryManager::Instance().releaseFreeMemoryIfAbove(0.85);
