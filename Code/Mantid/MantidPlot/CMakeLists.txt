@@ -840,6 +840,15 @@ copy_python_files_to_dir ( "${MTDPLOTPY_FILES}"
                             ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotpy
                             ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplotpy
                             MTDPLOT_INSTALL_FILES )
+                            
+set( FUTURE_FILES
+  __init__.py
+  pyplot.py
+)
+copy_python_files_to_dir ( "${FUTURE_FILES}"
+                            ${CMAKE_CURRENT_SOURCE_DIR}/mantidplot/future
+                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplot/future
+                            MTDPLOT_FUTURE_INSTALL_FILES )
 
 # IPython scripts
 set( IPY_FILES
