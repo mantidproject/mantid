@@ -47,6 +47,7 @@
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp> 
 #include <boost/regex.hpp>
+#include <boost/lexical_cast.hpp>
 
 using namespace Poco::Net;
 using boost::property_tree::ptree;
@@ -114,10 +115,18 @@ namespace Mantid
       }
       catch (Mantid::Kernel::Exception::InternetError & ex)
       {
-        //log the failure at Notice Level
-        g_log.notice()<< "Internet Connection Failed - cannot update instrument definitions." << std::endl;
-        //log this error at information level
-        g_log.information() << ex.what() <<std::endl;
+        std::string errorText(ex.what());
+        if (errorText.find("rate limit") != std::string::npos)
+        {
+          g_log.notice()<< "Instrument Definition Update: " << errorText << std::endl;
+        }
+        else
+        {
+          //log the failure at Notice Level
+          g_log.notice()<< "Internet Connection Failed - cannot update instrument definitions." << std::endl;
+          //log this error at information level
+          g_log.information() << errorText <<std::endl;
+        }
         return;
       }
 
@@ -367,7 +376,7 @@ namespace Mantid
       try {
         // initialize ssl
         Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pHandler = new AcceptCertificateHandler(true); // was false
-        Context::Ptr pContext = new Context(Context::CLIENT_USE, "", Context::VERIFY_NONE);
+        Context::Ptr pContext = new Context(Context::CLIENT_USE, "", "", "", Context::VERIFY_NONE);
         SSLManager::instance().initializeClient(0, pHandler, pContext);
 
         // Session takes ownership of socket
@@ -395,6 +404,23 @@ namespace Mantid
         retStatus = res.getStatus();
         g_log.debug() << "Answer from web: " << res.getStatus() << " "
           << res.getReason() << std::endl;
+        
+        //get github api rate limit information if available;
+        int rateLimitLimit;
+        int rateLimitRemaining;
+        Mantid::Kernel::DateAndTime rateLimitReset;
+        try 
+        {
+          rateLimitLimit = boost::lexical_cast<int>( res.get("X-RateLimit-Limit","-1") );
+          rateLimitRemaining = boost::lexical_cast<int>( res.get("X-RateLimit-Remaining","-1") );
+          rateLimitReset.set_from_time_t(boost::lexical_cast<int>( res.get("X-RateLimit-Reset","0")));
+        }
+        catch( boost::bad_lexical_cast const& ) 
+        {
+          rateLimitLimit = -1;
+          rateLimitRemaining = -1;
+        }
+
         if (res.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
         {
           if (localFilePath.empty())
@@ -424,6 +450,11 @@ namespace Mantid
         else if (res.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_MODIFIED)
         {
           //do nothing - just return the status
+        }        
+        else if ((res.getStatus() == Poco::Net::HTTPResponse::HTTP_FORBIDDEN) && (rateLimitRemaining == 0))
+        {
+          throw Mantid::Kernel::Exception::InternetError("The Github API rate limit has been reached, try again after " + 
+            rateLimitReset.toSimpleString(),res.getStatus());
         }
         else
         {
