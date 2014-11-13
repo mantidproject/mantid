@@ -51,10 +51,8 @@ namespace Mantid
       virtual const std::string summary() const {return "Saves a 2D workspace to a ascii file.";}
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
-      
-
-      ///
-      void data(std::ofstream & file, const std::vector<double> & XData);
+      ///Algorithm's version for data output overriding a virtual method
+      void data(std::ofstream & file, const std::vector<double> & XData,  bool exportDeltaQ);
 
     private:
       

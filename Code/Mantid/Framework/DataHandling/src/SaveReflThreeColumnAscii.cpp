@@ -38,7 +38,6 @@ namespace Mantid
       {
         subtitle = "";
       }
-      ////git change!!!!!!!!
       if (title != "") //if is toggled
       { 
         file << "#" << title << std::endl;
@@ -52,9 +51,9 @@ namespace Mantid
       }
     }
     
-    void SaveReflThreeColumnAscii::data(std::ofstream & file, const std::vector<double> & XData)
+    void SaveReflThreeColumnAscii::data(std::ofstream & file, const std::vector<double> & XData,  bool exportDeltaQ)
     {
-      AsciiPointBase::data(file, XData, false);
+      AsciiPointBase::data(file, XData, false); //toggled false permantly because only to show 3 columns
     }
 
 
