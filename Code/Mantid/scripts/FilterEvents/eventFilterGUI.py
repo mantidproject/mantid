@@ -105,14 +105,14 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.horizontalSlider.setRange(0, 100)
         self.ui.horizontalSlider.setValue(self._leftSlideValue)
         self.ui.horizontalSlider.setTracking(True)
-        self.ui.horizontalSlider.setTickPosition(QSlider.TicksAbove)
+        self.ui.horizontalSlider.setTickPosition(QSlider.NoTicks)
         self.connect(self.ui.horizontalSlider, SIGNAL('valueChanged(int)'), self.move_leftSlider)
 
 
         self.ui.horizontalSlider_2.setRange(0, 100)
         self.ui.horizontalSlider_2.setValue(self._rightSlideValue)
         self.ui.horizontalSlider_2.setTracking(True)
-        self.ui.horizontalSlider_2.setTickPosition(QSlider.TicksAbove)
+        self.ui.horizontalSlider_2.setTickPosition(QSlider.NoTicks)
         self.connect(self.ui.horizontalSlider_2, SIGNAL('valueChanged(int)'), self.move_rightSlider)
         
         # self.connect(self.ui.lineEdit_3, QtCore.SIGNAL("textChanged(QString)"), 
@@ -637,6 +637,9 @@ class MainWindow(QtGui.QMainWindow):
             self._importDataWorkspace(dataws)
             self._defaultdir = os.path.dirname(str(filename))
 
+        # Reset GUI
+        self._resetGUI(resetfilerun=False)
+
         return
 
 
@@ -650,6 +653,9 @@ class MainWindow(QtGui.QMainWindow):
             self._importDataWorkspace(dataws)
         except KeyError: 
             pass
+
+        # Reset GUI
+        self._resetGUI(resetfilerun=True)
 
         return
 
@@ -1120,3 +1126,54 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.label_error.show()
 
         return
+
+
+    def _resetGUI(self, resetfilerun=False, resetwslist=False):
+        """ Reset GUI including all text edits and etc. 
+        """
+        if resetfilerun is True:
+            self.ui.lineEdit.clear()
+
+        # Plot related
+        self.ui.lineEdit_3.clear()
+        self.ui.lineEdit_4.clear()
+        self.ui.horizontalSlider.setValue(0)
+        self.ui.horizontalSlider_2.setValue(100)
+
+
+        self.ui.lineEdit_outwsname.clear()
+        self.ui.lineEdit_title.clear()
+
+        # Filter by log value
+        self.ui.lineEdit_5.clear()
+        self.ui.lineEdit_6.clear()
+
+        self.ui.verticalSlider_2.setValue(0)
+        self.ui.verticalSlider.setValue(100)
+
+        self.ui.lineEdit_7.clear()
+        self.ui.lineEdit_8.clear()
+        self.ui.lineEdit_9.clear()
+
+        # Filter by time
+        self.ui.lineEdit_timeInterval.clear()
+
+        # Advanced setup
+        self.ui.comboBox_tofCorr.setCurrentIndex(0)
+        self.ui.lineEdit_Ei.clear()
+
+        self.ui.checkBox_fastLog.setCheckState(False)
+        self.ui.checkBox_doParallel.setCheckState(False)
+
+        self.ui.comboBox_skipSpectrum.setCurrentIndex(0)
+        
+        self.ui.checkBox_filterByPulse.setCheckState(False)
+        self.ui.checkBox_from1.setCheckState(False)
+        self.ui.checkBox_groupWS.setCheckState(True)
+        self.ui.checkBox_splitLog.setCheckState(False)
+
+        # Error message
+        self.ui.plainTextEdit_ErrorMsg.clear()
+
+        return
+
