@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -1168,6 +1169,11 @@ namespace MantidQt
       //Don't bother searching if they're not searching for anything
       if(searchString.empty())
         return;
+
+      //This is breaking the abstraction provided by IReflSearcher, but provides a nice usability win
+      //If we're not logged into a catalog, prompt the user to do so
+      if(CatalogManager::Instance().getActiveSessions().empty())
+        m_view->showAlgorithmDialog("CatalogLogin");
 
       try
       {
