@@ -1,16 +1,31 @@
 set ( SRC_FILES
 	src/ComponentParser.cpp
+        src/Crystal/BraggScatterer.cpp
+        src/Crystal/BraggScattererFactory.cpp
+	src/Crystal/BraggScattererInCrystalStructure.cpp
+	src/Crystal/CenteringGroup.cpp
+        src/Crystal/CompositeBraggScatterer.cpp
 	src/Crystal/ConventionalCell.cpp
 	src/Crystal/CrystalStructure.cpp
+	src/Crystal/CyclicGroup.cpp
+	src/Crystal/Group.cpp
 	src/Crystal/IndexingUtils.cpp
+        src/Crystal/IsotropicAtomBraggScatterer.cpp
 	src/Crystal/NiggliCell.cpp
 	src/Crystal/OrientedLattice.cpp
 	src/Crystal/PointGroup.cpp
+	src/Crystal/PointGroupFactory.cpp
+	src/Crystal/ProductOfCyclicGroups.cpp
 	src/Crystal/ReducedCell.cpp
 	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/ScalarUtils.cpp
+	src/Crystal/SpaceGroup.cpp
+	src/Crystal/SpaceGroupFactory.cpp
 	src/Crystal/SymmetryOperation.cpp
+	src/Crystal/SymmetryOperationFactory.cpp
+	src/Crystal/SymmetryOperationSymbolParser.cpp
 	src/Crystal/UnitCell.cpp
+	src/Crystal/V3R.cpp
 	src/IObjComponent.cpp
 	src/Instrument.cpp
 	src/Instrument/CompAssembly.cpp
@@ -32,7 +47,7 @@ set ( SRC_FILES
 	src/Instrument/RectangularDetector.cpp
 	src/Instrument/RectangularDetectorPixel.cpp
 	src/Instrument/ReferenceFrame.cpp
-	src/Instrument/XMLlogfile.cpp
+	src/Instrument/XMLInstrumentParameter.cpp
 	src/MDGeometry/CompositeImplicitFunction.cpp
 	src/MDGeometry/IMDDimension.cpp
 	src/MDGeometry/IMDDimensionFactory.cpp
@@ -88,30 +103,45 @@ set ( SRC_FILES
 )
 
 set ( OPENCASCADE_SRC
-	src/Rendering/OCGeometryGenerator.cpp
-	src/Rendering/OCGeometryHandler.cpp
-	src/Rendering/OCGeometryRenderer.cpp
+  src/Rendering/OCGeometryGenerator.cpp
+  src/Rendering/OCGeometryHandler.cpp
+  src/Rendering/OCGeometryRenderer.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
-        src/Instrument/ObjCompAssembly.cpp 
-        src/Rendering/OCGeometryHandler.cpp
-        src/Rendering/OCGeometryRenderer.cpp
-        )
+  src/Instrument/ObjCompAssembly.cpp 
+  src/Rendering/OCGeometryHandler.cpp
+  src/Rendering/OCGeometryRenderer.cpp
+)
         
 set ( INC_FILES
 	inc/MantidGeometry/ComponentParser.h
+        inc/MantidGeometry/Crystal/BraggScatterer.h
+        inc/MantidGeometry/Crystal/BraggScattererFactory.h
+	inc/MantidGeometry/Crystal/BraggScattererInCrystalStructure.h
+	inc/MantidGeometry/Crystal/CenteringGroup.h
+        inc/MantidGeometry/Crystal/CompositeBraggScatterer.h
 	inc/MantidGeometry/Crystal/ConventionalCell.h
 	inc/MantidGeometry/Crystal/CrystalStructure.h
+	inc/MantidGeometry/Crystal/CyclicGroup.h
+	inc/MantidGeometry/Crystal/Group.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
+        inc/MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h
 	inc/MantidGeometry/Crystal/NiggliCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
 	inc/MantidGeometry/Crystal/PointGroup.h
+	inc/MantidGeometry/Crystal/PointGroupFactory.h
+	inc/MantidGeometry/Crystal/ProductOfCyclicGroups.h
 	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
 	inc/MantidGeometry/Crystal/ScalarUtils.h
+	inc/MantidGeometry/Crystal/SpaceGroup.h
+	inc/MantidGeometry/Crystal/SpaceGroupFactory.h
 	inc/MantidGeometry/Crystal/SymmetryOperation.h
+	inc/MantidGeometry/Crystal/SymmetryOperationFactory.h
+	inc/MantidGeometry/Crystal/SymmetryOperationSymbolParser.h
 	inc/MantidGeometry/Crystal/UnitCell.h
+	inc/MantidGeometry/Crystal/V3R.h
 	inc/MantidGeometry/DllConfig.h
 	inc/MantidGeometry/ICompAssembly.h
 	inc/MantidGeometry/IComponent.h
@@ -140,7 +170,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/RectangularDetector.h
 	inc/MantidGeometry/Instrument/RectangularDetectorPixel.h
 	inc/MantidGeometry/Instrument/ReferenceFrame.h
-	inc/MantidGeometry/Instrument/XMLlogfile.h
+	inc/MantidGeometry/Instrument/XMLInstrumentParameter.h
 	inc/MantidGeometry/MDGeometry/CompositeImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/IMDDimension.h
 	inc/MantidGeometry/MDGeometry/IMDDimensionFactory.h
@@ -198,21 +228,28 @@ set ( TEST_FILES
 	AlgebraTest.h
 	BnIdTest.h
 	BoundingBoxTest.h
+        BraggScattererFactoryTest.h
+        BraggScattererInCrystalStructureTest.h
+        BraggScattererTest.h
+	CenteringGroupTest.h
 	CompAssemblyTest.h
 	ComponentHelperTest.h
 	ComponentParserTest.h
 	ComponentTest.h
+        CompositeBraggScattererTest.h
 	CompositeImplicitFunctionTest.h
 	ConeTest.h
 	ConventionalCellTest.h
 	ConvexPolygonTest.h
 	CrystalStructureTest.h
+	CyclicGroupTest.h
 	CylinderTest.h
 	DetectorGroupTest.h
 	DetectorTest.h
 	FitParameterTest.h
 	GeneralTest.h
 	GoniometerTest.h
+	GroupTest.h
 	IDFObjectTest.h
 	IMDDimensionFactoryTest.h
 	IMDDimensionTest.h
@@ -220,6 +257,7 @@ set ( TEST_FILES
 	InstrumentDefinitionParserTest.h
 	InstrumentRayTracerTest.h
 	InstrumentTest.h
+        IsotropicAtomBraggScattererTest.h
 	LaszloIntersectionTest.h
 	LineIntersectVisitTest.h
 	LineTest.h
@@ -234,11 +272,11 @@ set ( TEST_FILES
 	MathSupportTest.h
 	NearestNeighboursFactoryTest.h
 	NearestNeighboursTest.h
+	NiggliCellTest.h
 	NullImplicitFunctionTest.h
 	ObjCompAssemblyTest.h
 	ObjComponentTest.h
 	ObjectTest.h
-	NiggliCellTest.h
 	OrientedLatticeTest.h
 	ParCompAssemblyTest.h
 	ParComponentFactoryTest.h
@@ -249,8 +287,10 @@ set ( TEST_FILES
 	ParameterMapTest.h
 	ParametrizedComponentTest.h
 	PlaneTest.h
+	PointGroupFactoryTest.h
 	PointGroupTest.h
 	PolygonEdgeTest.h
+	ProductOfCyclicGroupsTest.h
 	QuadrilateralTest.h
 	RectangularDetectorPixelTest.h
 	RectangularDetectorTest.h
@@ -267,21 +307,26 @@ set ( TEST_FILES
 	RulesUnionTest.h
 	ScalarUtilsTest.h
 	ShapeFactoryTest.h
+	SpaceGroupFactoryTest.h
+	SpaceGroupTest.h
 	SphereTest.h
 	SurfaceFactoryTest.h
 	SurfaceTest.h
+	SymmetryOperationFactoryTest.h
+	SymmetryOperationSymbolParserTest.h
 	SymmetryOperationTest.h
 	TorusTest.h
 	TrackTest.h
 	TripleTest.h
 	UnitCellTest.h
+	V3RTest.h
 	Vertex2DListTest.h
 	Vertex2DTest.h
-	XMLlogfileTest.h
+	XMLInstrumentParameterTest.h
 )
 
 set ( GMOCK_TEST_FILES
-    MDGeometryXMLBuilderTest.h
+  MDGeometryXMLBuilderTest.h
 )
 
 

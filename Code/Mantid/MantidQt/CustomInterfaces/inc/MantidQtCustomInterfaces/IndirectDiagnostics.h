@@ -69,10 +69,17 @@ namespace CustomInterfaces
     void slicePlotRaw();
     void sliceTwoRanges(QtProperty*, bool);
     void sliceCalib(bool state);
-    void sliceMinChanged(double val);
-    void sliceMaxChanged(double val);
+    void rangeSelectorDropped(double, double);
     void sliceUpdateRS(QtProperty*, double);
     void setDefaultInstDetails();
+    void updatePreviewPlot();
+    void sliceAlgDone(bool error);
+    void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
+    void pbRunFinding();  //< Called when the FileFinder starts finding the files.
+    void pbRunFinished(); //< Called when the FileFinder has finished finding the files.
+
+  private:
+    QString m_lastDiagFilename;
 
   };
 } // namespace CustomInterfaces

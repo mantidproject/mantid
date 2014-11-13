@@ -10,6 +10,10 @@
 #include "Preferences.h"
 #include "../pixmaps.h"
 
+
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/RefAxis.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ReadLock.h"
 
@@ -1166,7 +1170,7 @@ double MantidMatrixModel::data(int row, int col) const
 
 QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation, int role ) const
 {
-  if (role != Qt::DisplayRole) return QVariant();
+  if (!(role == Qt::DisplayRole || role == Qt::ToolTipRole)) return QVariant();
   if (orientation == Qt::Vertical && m_workspace->axes() > 1)
   {
     Mantid::API::TextAxis* xAxis = dynamic_cast<Mantid::API::TextAxis*>(m_workspace->getAxis(1));
@@ -1175,7 +1179,132 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
       return QString::fromStdString(xAxis->label(section));
     }
   }
+
+  //initialise with horizontal values
+  int axisIndex = 0;
+  QString toolTipSeperator = "\n";
+  QString headerSeperator = "\n";
+  if (orientation == Qt::Vertical) 
+  {
+    axisIndex = 1;
+    toolTipSeperator = "\n";
+    headerSeperator = " ";
+  }
+
+  if (m_workspace->axes() > axisIndex) //if the axis exists
+  {
+    Mantid::API::Axis* axis = m_workspace->getAxis(axisIndex);
+    Mantid::API::TextAxis* textAxis = dynamic_cast<Mantid::API::TextAxis*>(axis);
+    if (textAxis) //just return the text label
+    {
+      return QString::fromStdString(textAxis->label(section));
+    }
+
+    Mantid::API::SpectraAxis* spAxis = dynamic_cast<Mantid::API::SpectraAxis*>(axis);
+    if (spAxis)
+    {
+      if (role == Qt::ToolTipRole) 
+      {
+        return QString("index %1%2spectra no %3").arg(QString::number(section), toolTipSeperator, 
+          QString::number(m_workspace->getSpectrum(section)->getSpectrumNo()));          
+      }
+      else
+      {
+        return QString("%1%2sp-%3").arg(QString::number(section), headerSeperator,
+          QString::number(m_workspace->getSpectrum(section)->getSpectrumNo()));
+      }
+    }
+
+    
+    QString unit = QString::fromStdWString( axis->unit()->label().utf8());
+
+    Mantid::API::RefAxis* refAxis = dynamic_cast<Mantid::API::RefAxis*>(axis);
+    if (refAxis)
+    {
+      //still need to protect from ragged workspaces
+      if (m_type==X)
+      {
+        if (role == Qt::ToolTipRole) 
+        {
+          return QString("index %1").arg(QString::number(section));
+        }
+        else
+        {
+          return section;
+        }
+      }
+
+      if (!m_workspace->isCommonBins())
+      {
+        if (role == Qt::ToolTipRole) 
+        {
+          return QString("index %1%2bin centre value varies%3Rebin to set common bins").arg(QString::number(section),toolTipSeperator,toolTipSeperator);
+        }
+        else
+        {
+          return QString("%1%2bins vary").arg(QString::number(section),headerSeperator);
+        }
+      }
+
+      //get bin centre value
+      double binCentreValue;
+      const Mantid::MantidVec xVec = m_workspace->readX(0);
+      if (m_workspace->isHistogramData())
+      {
+        if ((section+1) >= static_cast<int>(xVec.size())) return section;
+        binCentreValue= (xVec[section] + xVec[section+1])/2.0;
+      }
+      else
+      {
+        if (section >= static_cast<int>(xVec.size())) return section;
+        binCentreValue = xVec[section];
+      }
+
+      if (role == Qt::ToolTipRole) 
+      {
+        return QString("index %1%2%3 %4%5 (bin centre)").arg(QString::number(section), toolTipSeperator,
+          QString::fromStdString(axis->unit()->caption()),
+          QString::number(binCentreValue), unit);
+      }
+      else
+      {
+        return QString("%1%2%3%4").arg(QString::number(section), headerSeperator,
+          QString::number(binCentreValue), unit);
+      }
+    }
+
+    Mantid::API::NumericAxis* numAxis = dynamic_cast<Mantid::API::NumericAxis*>(axis);
+    if (numAxis)
+    {
+      QString valueString;
+      try
+      {
+        valueString = QString::number(numAxis->getValue(section));          
+      }
+      catch (Mantid::Kernel::Exception::IndexError&)
+      {
+        valueString="";
+      }
+
+      if (role == Qt::ToolTipRole) 
+      {
+        return QString("index %1%2%3 %4%5").arg(QString::number(section), toolTipSeperator, 
+            QString::fromStdString(axis->unit()->caption()),
+            valueString, unit);          
+      }
+      else
+      {
+        if (headerSeperator == " ") headerSeperator = "   ";
+        return QString("%1%2%3%4").arg(QString::number(section), headerSeperator, 
+          valueString, unit);
+      }
+    }
+
+  }
+  // fall through value, just return the section value
   return section;
+
+
 }
 
 Qt::ItemFlags MantidMatrixModel::flags(const QModelIndex & index ) const
@@ -1237,7 +1366,7 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
 bool MantidMatrixModel::checkMonitorCache(int row) const
 {
   row += m_startRow; //correctly offset the row
-  if (m_workspace->getAxis(1)->isSpectra())
+  if (m_workspace->axes() > 1 && m_workspace->getAxis(1)->isSpectra())
   {
     bool isMon = false;
     if (m_monCache.contains(row))
@@ -1326,8 +1455,8 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy)
 
   if (maxy == miny)
   {
-      if ( maxy == 0.0 ) maxy += 1.0;
-      else
-          maxy += fabs(miny);
+    if ( maxy == 0.0 ) maxy += 1.0;
+    else
+      maxy += fabs(miny);
   }
 }

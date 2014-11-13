@@ -28,11 +28,12 @@ namespace RefDetectorViewer
 
     Code Documentation is available at <http://doxygen.mantidproject.org>
  */
+
 class RefLimitsHandler
 {
 public:
   /// Construct object to manage range (peak/back/TOF) controls in the UI
-  RefLimitsHandler( Ui_RefImageViewer* iv_ui );
+  RefLimitsHandler( Ui_RefImageViewer* ivUI );
 
   /// get peak, back and tof values
   int getPeakLeft() const;
@@ -53,6 +54,7 @@ public:
 
 private:
   const Ui_RefImageViewer* const m_ui;
+
 };
 
 } // namespace RefDetectorViewer

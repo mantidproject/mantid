@@ -25,11 +25,11 @@ namespace Mantid
     //------------------------------------------------------------------
     // Forward declarations
     //------------------------------------------------------------------
-    class XMLlogfile;
+    class XMLInstrumentParameter;
     class ParameterMap;
     class ReferenceFrame;
     /// Convenience typedef
-    typedef std::map<std::pair<std::string,const IComponent*>, boost::shared_ptr<XMLlogfile> > InstrumentParameterCache;
+    typedef std::map<std::pair<std::string,const IComponent*>, boost::shared_ptr<XMLInstrumentParameter> > InstrumentParameterCache;
 
     /**
     Base Instrument Class.

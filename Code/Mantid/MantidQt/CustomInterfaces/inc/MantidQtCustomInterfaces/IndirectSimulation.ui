@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>IndirectSimulation</class>
- <widget class="QWidget" name="IndirectSimulation">
+ <widget class="QMainWindow" name="IndirectSimulation">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>504</width>
-    <height>277</height>
+    <width>445</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Indirect Simulation</string>
   </property>
+  <widget class="QWidget" name="centralwidget">
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTabWidget" name="IndirectSimulationTabs">
@@ -28,6 +29,11 @@
      <widget class="QWidget" name="molDyn">
       <attribute name="title">
        <string>MolDyn</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="sassena">
+      <attribute name="title">
+       <string>Sassena</string>
       </attribute>
      </widget>
     </widget>
@@ -99,6 +105,7 @@
     </layout>
    </item>
   </layout>
+  </widget>
  </widget>
  <resources/>
  <connections/>

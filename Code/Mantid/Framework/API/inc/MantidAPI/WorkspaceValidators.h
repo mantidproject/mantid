@@ -222,20 +222,8 @@ private:
   std::string checkValidity( const MatrixWorkspace_sptr& value ) const
   {
     if ( !value ) return "Enter an existing workspace"; 
-    //there being only one or zero histograms is accepted as not being an error
-    if ( !value->blocksize() || value->getNumberHistograms() < 2) return "";
-    //otherwise will compare some of the data, to save time just check two the first and the last
-    const size_t lastSpec = value->getNumberHistograms() - 1;
-    // Quickest check is to see if they are actually the same vector
-    if ( &(value->readX(0)[0]) == &(value->readX(lastSpec)[0]) ) return "";
-    // Now check numerically
-    const double first = std::accumulate(value->readX(0).begin(),value->readX(0).end(),0.);
-    const double last = std::accumulate(value->readX(lastSpec).begin(),value->readX(lastSpec).end(),0.);
-    if ( std::abs(first-last)/std::abs(first+last) > 1.0E-9 )
-    {
-      return "The workspace must have common bin boundaries for all histograms";
-    }
-    return "";
+    if ( value->isCommonBins() ) return "";
+    else return "The workspace must have common bin boundaries for all histograms";
   }
 
 };
@@ -379,6 +367,44 @@ private:
       return "";
       
   }
+};
+
+//===============================================================================================
+/**
+ * A validator which checks whether data in each spectrum of the input workspace are monotonically increasing.
+ */
+class DLLExport IncreasingDataValidator : public MatrixWorkspaceValidator
+{
+public:
+  ///Gets the type of the validator
+  std::string getType() const { return "increasingdata"; }
+  /// Clone the current state
+  Kernel::IValidator_sptr clone() const { return boost::make_shared<IncreasingDataValidator>(*this); }
+
+private:
+  /** Validate a workspace.
+  *  @param value :: The workspace to test
+  *  @return A message for users with negative results, otherwise ""
+  */
+  std::string checkValidity( const MatrixWorkspace_sptr& value ) const
+  {
+    if ( value->blocksize() < 2 ) 
+    {
+      return "Spectra must have two or more data points (bins).";
+    }
+    for(size_t spec = 0; spec < value->getNumberHistograms(); ++spec)
+    {
+      auto &Y = value->readY( spec );
+      double y = Y.front();
+      for(auto it = Y.begin() + 1; it != Y.end(); ++it)
+      {
+        if ( y > *it ) return "Data in the workspace must monotonically increase.";
+        y = *it;
+      }
+    }
+    return "";
+  }
+
 };
 
 } // namespace API

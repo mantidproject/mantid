@@ -6,7 +6,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
-#include "MantidDataHandling/LoadParameterFile.h"
 
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
@@ -38,6 +37,8 @@ namespace DataHandling
 {
 
   DECLARE_ALGORITHM(LoadFullprofResolution)
+
+	std::map<std::string, size_t> LoadFullprofResolution::m_rowNumbers;
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -214,7 +215,7 @@ namespace DataHandling
       }
       else // Numbers match, so put parameters into workspaces.
       { 
-        getTableRowNumbers( outTabWs, m_rowNumbers);
+        getTableRowNumbers( outTabWs, LoadFullprofResolution::m_rowNumbers);
         for (size_t i=0; i < vec_bankids.size(); ++i)
         {
           int bankId = vec_bankids[i];
@@ -223,7 +224,15 @@ namespace DataHandling
           auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
               // Get column from table workspace
           API::Column_const_sptr OutTabColumn = outTabWs->getColumn( i+1 );
-          putParametersIntoWorkspace( OutTabColumn, workspace, nProf );  
+					std::string parameterXMLString;
+					putParametersIntoWorkspace( OutTabColumn, workspace, nProf, parameterXMLString );  
+
+					// Load the string into the workspace
+					Algorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
+					loadParamAlg->setProperty("ParameterXML", parameterXMLString);
+					loadParamAlg->setProperty("Workspace", workspace);
+					loadParamAlg->execute();
+
         }
       } 
     }
@@ -836,7 +845,7 @@ namespace DataHandling
     * @param ws :: [input/output] the group workspace parameters are to be put in
     * @param nProf :: the PROF Number, which is used to determine fitting function for the parameters.
     */
-  void LoadFullprofResolution::putParametersIntoWorkspace( API::Column_const_sptr column, API::MatrixWorkspace_sptr ws, int nProf)
+  void LoadFullprofResolution::putParametersIntoWorkspace( API::Column_const_sptr column, API::MatrixWorkspace_sptr ws, int nProf, std::string & parameterXMLString)
   {  
 
     // Get instrument name from matrix workspace
@@ -883,16 +892,12 @@ namespace DataHandling
     // Convert DOM XML document into string
     std::ostringstream outFile;
     writer.writeNode(outFile, mDoc);  
-    std::string parameterXMLString = outFile.str();
+    parameterXMLString = outFile.str();
 
     // Useful code for testing upgrades commented out for production use
     //std::ofstream outfileDebug("C:/Temp/test4_fullprof.xml");
     //outfileDebug << parameterXMLString;
     //outfileDebug.close();
-
-
-    // Load the string into the workspace
-    LoadParameterFile::execManually(true, "", parameterXMLString, ws);
 
   }
 
@@ -1040,7 +1045,7 @@ namespace DataHandling
   */
   std::string LoadFullprofResolution::getXMLEqValue( const API::Column_const_sptr column, const std::string& name )
   {
-    size_t paramNumber = m_rowNumbers[name];
+    size_t paramNumber = LoadFullprofResolution::m_rowNumbers[name];
     //API::Column_const_sptr column = tablews->getColumn( columnIndex );
     double eqValue = column->cell<double>(paramNumber);
     return boost::lexical_cast<std::string>(eqValue);
@@ -1052,7 +1057,7 @@ namespace DataHandling
   */
   std::string LoadFullprofResolution::getXMLSquaredEqValue( const API::Column_const_sptr column, const std::string& name )
   {
-    size_t paramNumber = m_rowNumbers[name];
+    size_t paramNumber = LoadFullprofResolution::m_rowNumbers[name];
     //API::Column_const_sptr column = tablews->getColumn( columnIndex );
     double eqValue = column->cell<double>(paramNumber);
     return boost::lexical_cast<std::string>(eqValue*eqValue);

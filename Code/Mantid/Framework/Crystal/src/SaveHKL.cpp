@@ -196,9 +196,11 @@ namespace Crystal
     else if (smu != EMPTY_DBL() && amu != EMPTY_DBL()) //Save input in Sample with wrong atomic number and name
     {
       NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
-    			0.0, 0.0, smu, 0.0, smu, amu);
-      Material mat("SetInAnvredCorrection", neutron, 1.0);
-      ws->mutableSample().setMaterial(mat);
+                          0.0, 0.0, smu, 0.0, smu, amu);
+      Object shape = ws->sample().getShape(); // copy
+      shape.setMaterial(Material("SetInSaveHKL", neutron, 1.0));
+      ws->mutableSample().setShape(shape);
+    
     }
     if (smu != EMPTY_DBL() && amu != EMPTY_DBL())
       g_log.notice() << "LinearScatteringCoef = " << smu << " 1/cm\n"
