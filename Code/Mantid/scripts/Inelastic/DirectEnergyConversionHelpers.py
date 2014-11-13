@@ -1,3 +1,33 @@
+"""
+Set of functions to assist with processing instrument parameters relevant to reduction. 
+"""
+
+def get_default_parameter(instrument, name):
+        """ Function gets the value of a default instrument parameter and 
+            assign proper(the one defined in IPF ) type to this parameter 
+            @param instrument -- 
+        """ 
+
+        if instrument is None:
+            raise ValueError("Cannot initiate default parameter, instrument has not been properly defined.")
+
+        type_name = instrument.getParameterType(name)
+        if type_name == "double":
+            val = instrument.getNumberParameter(name)
+        elif type_name == "bool":
+            val = instrument.getBoolParameter(name)
+        elif type_name == "string":
+            val = instrument.getStringParameter(name)
+            if val[0] == "None" :
+                return None
+        elif type_name == "int" :
+              val = instrument.getIntParameter(name)
+        else :
+            raise KeyError(" Instrument: {0} does not have parameter with name: {1}".format(instrument.getName(),name))
+
+        return val[0]
+
+
 
 def build_coupled_keys_dict(pInstrument,par_names,synonims) :
     """function to build the dictionary of the keys which are expressed through other keys values
@@ -5,7 +35,7 @@ def build_coupled_keys_dict(pInstrument,par_names,synonims) :
        e.g. to substitute key1 = key2,key3  with key = [value[key1],value[key2]]
     """
     if pInstrument  is None:
-            raise ValueError("Cannot initialize default parameter, instrument has not been loaded.")
+       raise ValueError("Cannot initialize default parameter, instrument has not been loaded.")
 
     # dictionary used for substituting composite keys values.
     composite_keys_subst = dict();
@@ -39,13 +69,13 @@ def build_coupled_keys_dict(pInstrument,par_names,synonims) :
 
 
 def build_subst_dictionary(synonims_list=None) :
-    """Method to process the field "synonims_list" in the parameters string
+    """Function to process "synonims_list" in the instrument parameters string, used to support synonyms in the reduction script
 
-           it takes string of synonyms in the form key1=subs1=subst2=subts3;key2=subst4 and returns the dictionary
-           in the form dict[subs1]=key1 ; dict[subst2] = key1 ... dict[subst4]=key2
+       it takes string of synonyms in the form key1=subs1=subst2=subts3;key2=subst4 and returns the dictionary
+       in the form dict[subs1]=key1 ; dict[subst2] = key1 ... dict[subst4]=key2
 
-           e.g. if one wants to use the IDF key word my_detector instead of e.g. norm-mon1-spec, he has to type
-           norm-mon1-spec=my_detector in the synonyms field of the IDF parameters file.
+       e.g. if one wants to use the IDF key word my_detector instead of e.g. norm-mon1-spec, he has to type
+       norm-mon1-spec=my_detector in the synonyms field of the IDF parameters file.
     """
     if not synonims_list :  # nothing to do
             return dict();

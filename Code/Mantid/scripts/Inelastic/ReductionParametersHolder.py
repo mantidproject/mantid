@@ -352,28 +352,6 @@ class ReductionParametersHolder():
 
 
 
-    def get_default_parameter(self, name):
-        """ Method gets the value of a default instrument parameter """ 
-        instr = self.instrument;
-        if instr is None:
-            raise ValueError("Cannot init default parameter, instrument has not been loaded.")
-
-        type_name = instr.getParameterType(name)
-        if type_name == "double":
-            val = instr.getNumberParameter(name)
-        elif type_name == "bool":
-            val = instr.getBoolParameter(name)
-        elif type_name == "string":
-            val = instr.getStringParameter(name)
-            if val[0] == "None" :
-                return None
-        elif type_name == "int" :
-              val = instr.getIntParameter(name)
-        else :
-            raise KeyError(" Can not find property with name "+name)
-
-        return val[0]
-
     def _set_input_parameters(self,synonims,composite_keys_set,composite_keys_subst,**kwargs):
         """ Method analyzes input parameters list, substitutes the synonyms in this list with predefined synonyms
             and sets the existing class parameters with its non-default values taken from input
