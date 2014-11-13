@@ -408,6 +408,24 @@ namespace MantidQt
     }
 
     /**
+    Plot a workspace
+    */
+    void QtReflMainView::plotWorkspaces(const std::set<std::string>& workspaces)
+    {
+      if(workspaces.empty())
+        return;
+
+      std::stringstream pythonSrc;
+      pythonSrc << "base_graph = None\n";
+      for(auto ws = workspaces.begin(); ws != workspaces.end(); ++ws)
+        pythonSrc << "base_graph = plotSpectrum(\"" << *ws << "\", 0, True, window = base_graph)\n";
+
+      pythonSrc << "base_graph.activeLayer().logLogAxes()\n";
+
+      runPythonCode(QString::fromStdString(pythonSrc.str()));
+    }
+
+    /**
     Set the range of the progress bar
     @param min : The minimum value of the bar
     @param max : The maxmimum value of the bar
