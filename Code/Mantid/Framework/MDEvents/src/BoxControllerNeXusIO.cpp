@@ -281,8 +281,6 @@ namespace MDEvents
   /** Load free space blocks from the data file or create the NeXus place to read/write them*/
   void BoxControllerNeXusIO::getDiskBufferFileData()
   {
-     Kernel::Logger debug_logger("ian_log");
-
      std::vector<uint64_t> freeSpaceBlocks;
      this->getFreeSpaceVector(freeSpaceBlocks);
      if (freeSpaceBlocks.empty())
@@ -303,10 +301,6 @@ namespace MDEvents
           {
               m_File->readData(g_DBDataName, freeSpaceBlocks);
               this->setFreeSpaceVector(freeSpaceBlocks);
-              std::ostringstream oss;
-              std::copy(freeSpaceBlocks.begin(), freeSpaceBlocks.end()-1, std::ostream_iterator<int>(oss, ","));
-              oss << freeSpaceBlocks.back();
-              debug_logger.notice() << "free space blocks:" << oss.str() << std::endl;
           }
       }
       else  // create and open the group
