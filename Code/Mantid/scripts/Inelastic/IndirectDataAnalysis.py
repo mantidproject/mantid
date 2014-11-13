@@ -1036,7 +1036,12 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
             if Verbose:
                 logger.notice('Output file created : '+cred_path)
         calc_plot = [cor_result + ext, sample]
-        res_plot = cor_result+'_rqw'
+
+        if not diffraction_run:
+            res_plot = cor_result + '_rqw'
+        else:
+            res_plot = cor_result + '_red'
+
     else:
         if scaled_container == '':
             raise RuntimeError('Invalid options - nothing to do!')
