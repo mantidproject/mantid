@@ -303,6 +303,9 @@ namespace MantidQt
       menu->addAction(ui.actionProcess);
       menu->addAction(ui.actionExpandSelection);
       menu->addSeparator();
+      menu->addAction(ui.actionPlotRow);
+      menu->addAction(ui.actionPlotGroup);
+      menu->addSeparator();
       menu->addAction(ui.actionPrependRow);
       menu->addAction(ui.actionAppendRow);
       menu->addSeparator();
