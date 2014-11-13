@@ -837,8 +837,8 @@ set( MTDPLOTPY_FILES
   proxies.py
 )
 copy_python_files_to_dir ( "${MTDPLOTPY_FILES}"
-                            ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotpy
-                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplotpy
+                            ${CMAKE_CURRENT_SOURCE_DIR}/mantidplot
+                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplot
                             MTDPLOT_INSTALL_FILES )
                             
 set( FUTURE_FILES
@@ -867,7 +867,7 @@ copy_python_files_to_dir ( "${IPY_FILES}"
 add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS}
 							${RES_FILES} ${MANTID_RC_FILE}
-							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${IPYTHON_INSTALL_FILES}
+							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${MTDPLOT_FUTURE_INSTALL_FILES} ${IPYTHON_INSTALL_FILES}
 )
 
 # Library dependencies
@@ -1001,7 +1001,7 @@ install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR}
 # Ship required files. Explicit so some can be disabled easily if necessary
 install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )
 foreach(PY_FILE ${MTDPLOTPY_FILES} )
-  install ( FILES mantidplotpy/${PY_FILE} DESTINATION ${BIN_DIR}/mantidplotpy )
+  install ( FILES mantidplot/${PY_FILE} DESTINATION ${BIN_DIR}/mantidplot )
 endforeach()
 foreach(PY_FILE ${IPY_FILES} )
   install ( FILES ipython_widget/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_widget )
