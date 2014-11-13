@@ -85,10 +85,14 @@ FrameworkManagerImpl::FrameworkManagerImpl()
   g_log.debug() << "FrameworkManager created." << std::endl;
 
   int updateInstrumentDefinitions = 0;
-  int reVal = Kernel::ConfigService::Instance().getValue("UpdateInstrumentDefnitions.OnStartup",updateInstrumentDefinitions);
+  int reVal = Kernel::ConfigService::Instance().getValue("UpdateInstrumentDefinitions.OnStartup",updateInstrumentDefinitions);
   if ((reVal == 1) &&  (updateInstrumentDefinitions == 1))
   {
     UpdateInstrumentDefinitions();
+  }
+  else
+  {
+    g_log.information() << "Instrument updates disabled - cannot update instrument definitions." << std::endl;
   }
 }
 
@@ -102,12 +106,12 @@ void FrameworkManagerImpl::UpdateInstrumentDefinitions()
 {
   try
   {
-    IAlgorithm* algDownloadInstrument = this->createAlgorithm("DowndloadInstrument");
+    IAlgorithm* algDownloadInstrument = this->createAlgorithm("DownloadInstrument");
     Poco::ActiveResult<bool> result = algDownloadInstrument->executeAsync();
   }
   catch (Kernel::Exception::NotFoundError &)
   {
-      g_log.debug() << "DowndloadInstrument algorithm is not available - not updating instrument definitions." << std::endl;
+      g_log.debug() << "DowndloadInstrument algorithm is not available - cannot update instrument definitions." << std::endl;
   }
 }
 

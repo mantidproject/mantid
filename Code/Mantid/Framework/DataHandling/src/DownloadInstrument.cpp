@@ -11,6 +11,7 @@
 #include <Poco/URI.h>
 #include <Poco/Net/SSLManager.h>
 #include <Poco/Net/AcceptCertificateHandler.h>
+#include <Poco/Net/PrivateKeyPassphraseHandler.h>
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/SecureStreamSocket.h>
@@ -90,14 +91,14 @@ namespace Mantid
     const std::string DownloadInstrument::category() const { return "DataHandling\\Instrument";}
 
     /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-    const std::string DownloadInstrument::summary() const { return "Downloads one or more instruments from the Mantid instrument repository";};
+    const std::string DownloadInstrument::summary() const { return "Checks the Mantid instrument repository against the local instrument files, and downloads updates as appropriate.";};
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
     */
     void DownloadInstrument::init()
     {
-
+      declareProperty("FileDownloadCount",0,"The number of files downloaded by this algorithm", Direction::Output);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -105,21 +106,43 @@ namespace Mantid
     */
     void DownloadInstrument::exec()
     {
+      String2StringMap fileMap;
+      setProperty("FileDownloadCount",0);
+      try
+      {
+        fileMap = processRepository();
+      }
+      catch (Mantid::Kernel::Exception::InternetError & ex)
+      {
+        //log the failure at Notice Level
+        g_log.notice()<< "Internet Connection Failed - cannot update instrument definitions." << std::endl;
+        //log this error at information level
+        g_log.information() << ex.what() <<std::endl;
+        return;
+      }
 
-      Remote2LocalFileMap& fileMap = processRepository();
+      if (fileMap.size() == 0)
+      {
+        g_log.notice("All instrument definitions up to date");
+      }
+      else
+      {
+        std::string s = (fileMap.size()>1)?"s":"";
+        g_log.notice()<<"Downloading " << fileMap.size() << " file" << s << " from the instrument repository" << std::endl;
+      }
 
       for (auto itMap = fileMap.begin(); itMap != fileMap.end(); ++itMap)
       {
         //download a file
         doDownloadFile(itMap->first, itMap->second);
       }
+      
+      setProperty("FileDownloadCount",static_cast<int>(fileMap.size()));
     }
-
-
-    Remote2LocalFileMap DownloadInstrument::processRepository()
+    
+    String2StringMap DownloadInstrument::processRepository()
     {
-      Remote2LocalFileMap fileMap;
-
+      String2StringMap fileMap;
 
       //get the instrument directories
       auto instrumentDirs = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
@@ -128,6 +151,31 @@ namespace Mantid
       Poco::Path localPath(instrumentDirs[0]);
       localPath.makeDirectory();
 
+      //get the date of the local github.json file if it exists
+      Poco::Path gitHubJson(localPath);
+      gitHubJson.append("github.json");
+      Poco::File gitHubJsonFile(gitHubJson);
+      Poco::DateTime gitHubJsonDate;
+      if (gitHubJsonFile.exists() && gitHubJsonFile.isFile())
+      {
+        gitHubJsonDate = gitHubJsonFile.getLastModified();
+      }
+
+      //get the file list from github
+      std::map<std::string,std::string> headers;
+      headers.insert(std::make_pair("if-modified-since",Poco::DateTimeFormatter::format(gitHubJsonDate, Poco::DateTimeFormat::HTTP_FORMAT)));
+      std::string gitHubInstrumentRepoUrl = Kernel::ConfigService::Instance().getString("UpdateInstrumentDefinitions.URL");
+      if (gitHubInstrumentRepoUrl == "")
+      {
+        throw std::runtime_error("Property UpdateInstrumentDefinitions.URL is not defined, this should point to the location of the instrument directory in the github API." 
+          " eg. https://api.github.com/repos/mantidproject/mantid/contents/Code/Mantid/instrument.");
+      }
+      if (doDownloadFile(gitHubInstrumentRepoUrl, gitHubJson.toString(),headers) == Poco::Net::HTTPResponse::HTTP_NOT_MODIFIED)
+      {
+        //No changes since last time - return immediately
+        return fileMap;
+      }
+
       //update local repo files
       Poco::Path installRepoFile(localPath);
       installRepoFile.append("install.json");
@@ -135,11 +183,6 @@ namespace Mantid
       Poco::Path localRepoFile(localPath);
       localRepoFile.append("local.json");
       updateJsonFile(localPath.toString(),localRepoFile.toString());
-
-      //get the file list from github
-      Poco::Path gitHubJson(localPath);
-      gitHubJson.append("github.json").toString();
-      doDownloadFile("https://api.github.com/repos/mantidproject/mantid/contents/Code/Mantid/instrument", gitHubJson.toString());
 
       //Parse the server JSON response
       ptree ptGithub; 
@@ -158,14 +201,13 @@ namespace Mantid
           std::string path = repoFile.second.get("path","");
           std::string sha = repoFile.second.get("sha","");
           std::string htmlUrl = repoFile.second.get("html_url","");
-          htmlUrl += "?raw=1";
-
+          htmlUrl = getDownloadableRepoUrl(htmlUrl);
+          
           Poco::Path filePath(localPath);
           filePath.append(name);
           if (filePath.getExtension() == "xml")
           {
             //decide if we want to download this file
-
             std::string keyBase = MangleFileName(name);
             //read sha from local directories
             std::string localSha = ptLocal.get(keyBase + ".sha","");
@@ -188,10 +230,7 @@ namespace Mantid
       {
         throw std::runtime_error(ex.what());
       }
-
-
-      return fileMap;
-
+    return fileMap;
     }
 
     /** creates or updates the json file of a directories contents
@@ -255,7 +294,6 @@ namespace Mantid
         g_log.error() << "DownloadInstrument: failed to parse the directory: " << directoryPath << " : "
           << ex.className() << " : " << ex.displayText() << std::endl;
         // silently ignore this exception.
-        // throw ScriptRepoException(ex.displayText());
       } catch (std::exception & ex)
       {
         std::stringstream ss;
@@ -283,8 +321,19 @@ namespace Mantid
       ss << entryName << "_" << entryExt;
       return ss.str();
     }
-//https://github.com/mantidproject/mantid/blob/master/Code/Mantid/instrument/ALF_Definition.xml
-//https://raw.githubusercontent.com/mantidproject/mantid/master/Code/Mantid/instrument/ALF_Definition.xml
+
+    /** Converts a github file page to a downloadable url for the file.
+    * @param a github file page url
+    * @returns a downloadable url for the file
+    **/
+    const std::string DownloadInstrument::getDownloadableRepoUrl(const std::string& filename) const
+    {
+      return filename + "?raw=1";;
+    }
+
+
+
+
     /** Download a url and fetch it inside the local path given.
 
     This method was initially modelled on doDownloadFile from the ScriptRepositoryImpl 
@@ -304,11 +353,13 @@ namespace Mantid
     @param localFilePath [optional] : Provide the destination of the file downloaded at the url_file.
     the connection and the download was done correctly.
 
-    @exception std::runtime_error : For any unexpected behaviour.
+    @exception Mantid::Kernel::Exception::InternetError : For any unexpected behaviour.
     */
-    void DownloadInstrument::doDownloadFile(const std::string & urlFile,
-      const std::string & localFilePath)
+    int DownloadInstrument::doDownloadFile(const std::string & urlFile,
+      const std::string & localFilePath,
+      const String2StringMap & headers)
     {
+      int retStatus = 0;
       g_log.debug() << "DoDownloadFile : " << urlFile << " to file: " << localFilePath << std::endl;
 
       Poco::URI uri(urlFile);
@@ -332,11 +383,16 @@ namespace Mantid
         // create a request
         HTTPRequest req(HTTPRequest::HTTP_GET, uri.getPathAndQuery(),
           HTTPMessage::HTTP_1_1);
-        req.set("User-Agent","MANTID-Instrument-Repo");
+        req.set("User-Agent","MANTID");
+        for (auto itHeaders = headers.begin(); itHeaders != headers.end(); ++itHeaders)
+        {
+          req.set(itHeaders->first,itHeaders->second);
+        }
         session.sendRequest(req);
 
         Poco::Net::HTTPResponse res;
         std::istream & rs = session.receiveResponse(res);
+        retStatus = res.getStatus();
         g_log.debug() << "Answer from web: " << res.getStatus() << " "
           << res.getReason() << std::endl;
         if (res.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
@@ -346,7 +402,7 @@ namespace Mantid
             // ignore the answer, throw it away
             Poco::NullOutputStream null;
             Poco::StreamCopier::copyStream(rs, null);
-            return;
+            return retStatus;
           }
           else
           {
@@ -362,8 +418,12 @@ namespace Mantid
           std::string newLocation = res.get("location","");
           if (newLocation != "")
           {
-            doDownloadFile(newLocation,localFilePath);
+            retStatus = doDownloadFile(newLocation,localFilePath);
           }
+        }
+        else if (res.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_MODIFIED)
+        {
+          //do nothing - just return the status
         }
         else
         {
@@ -380,7 +440,7 @@ namespace Mantid
             info << res.getReason();
             info << ss.str();
           }
-          throw std::runtime_error(info.str() + ss.str());
+          throw Mantid::Kernel::Exception::InternetError(info.str() + ss.str(),res.getStatus());
         }
       } catch (Poco::Net::HostNotFoundException & ex)
       {
@@ -388,13 +448,14 @@ namespace Mantid
         std::stringstream info;
         info << "Failed to download " << urlFile << " because there is no connection to the host "
           << ex.message() << ".\nHint: Check your connection following this link: <a href=\""
-          << urlFile << "\">" << urlFile << "</a>";
-        throw std::runtime_error(info.str() + ex.displayText());
+          << urlFile << "\">" << urlFile << "</a> ";
+        throw Mantid::Kernel::Exception::InternetError(info.str() + ex.displayText());
 
       } catch (Poco::Exception & ex)
       {
-        throw Poco::Exception("Connection and request failed", ex);
+        throw Mantid::Kernel::Exception::InternetError("Connection and request failed " + ex.displayText());
       }
+      return retStatus;
     }
 
 

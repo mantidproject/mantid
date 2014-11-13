@@ -378,6 +378,46 @@ const char* NullPointerException::what() const throw()
   return outMessage.c_str();
 }
 
+//-------------------------
+// InternetError Error class
+//-------------------------
+
+/**
+  Constructor
+  @param V :: Value of index
+  @param B :: Maximum value
+  @param Place :: Location of Error
+*/
+InternetError::InternetError(const std::string& message, const int& errorCode) :
+  std::runtime_error(message)
+{
+  std::stringstream cx;
+  cx << "InternetError: ";
+  if (errorCode!=0)
+  {
+    cx << "[" << errorCode << "] ";
+  } 
+  cx << message;
+  outMessage = cx.str();
+}
+
+/**
+  Copy Constructor
+  @param A :: IndexError to copy
+*/
+InternetError::InternetError(const InternetError& A) :
+  std::runtime_error(A)
+{}
+
+/**
+  Writes out the range and limits
+  @return the error string
+*/
+const char* InternetError::what() const throw()
+{
+  return outMessage.c_str();
+}
+
 } // namespace Exception
 } // namespace Kernel
 } // namespace Mantid

@@ -10,7 +10,7 @@ namespace Mantid
 {
 namespace DataHandling
 {
-  typedef std::map<std::string,std::string> Remote2LocalFileMap;
+  typedef std::map<std::string,std::string> String2StringMap;
 
   /** DownloadInstrument : Downloads one or more instrument files to the local instrument cache from the instrument repository
 
@@ -48,11 +48,12 @@ namespace DataHandling
   private:
     void init();
     void exec();
-    void doDownloadFile(const std::string& urlFile, const std::string& localFilePath = "");
+    virtual int doDownloadFile(const std::string& urlFile, const std::string& localFilePath = "", const String2StringMap& headers = String2StringMap());
     void updateJsonFile(const std::string& directoryPath, const std::string& filePath);
     const std::string MangleFileName(const std::string& filename) const;
+    const std::string getDownloadableRepoUrl(const std::string& filename) const;
 
-    Remote2LocalFileMap processRepository();
+    String2StringMap processRepository();
 
 
 
