@@ -88,6 +88,10 @@ namespace IDA
 
     uiForm().abscor_ckUseCorrections->setEnabled(!isSqw);
 
+    removeCurve("CalcCurve");
+    removeCurve("CanCurve");
+    // removeCurve would usually need a replot() but this is done in plotMiniPlot()
+
     plotMiniPlot(dataName, 0, "ApplyCorrPlot", "ApplyCorrSampleCurve");
 
     MatrixWorkspace_const_sptr sampleWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(dataName.toStdString());
