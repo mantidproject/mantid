@@ -34,6 +34,8 @@ public:
   MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
 
+  MOCK_METHOD1(showAlgorithmDialog, void(const std::string&));
+
   //IO
   MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
   MOCK_METHOD1(setSelection, void(const std::set<int>& rows));

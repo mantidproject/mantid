@@ -116,6 +116,8 @@ namespace MantidQt
       virtual void openTable();
       virtual void saveTable();
       virtual void saveTableAs();
+      virtual void importTable();
+      virtual void exportTable();
       //searching
       virtual void search();
       virtual void transfer();
