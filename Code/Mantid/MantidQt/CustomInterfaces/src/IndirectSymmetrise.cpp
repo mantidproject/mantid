@@ -202,6 +202,9 @@ namespace CustomInterfaces
     symmetriseAlg->setProperty("Save", save);
     symmetriseAlg->setProperty("OutputWorkspace", outputWorkspaceName.toStdString());
 
+    // Set the workspace name for Python script export
+    m_tabResultWorkspace = outputWorkspaceName.toStdString();
+
     // Execute algorithm on seperate thread
     runAlgorithm(symmetriseAlg);
   }
