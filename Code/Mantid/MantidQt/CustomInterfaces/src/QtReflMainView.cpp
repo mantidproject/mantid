@@ -279,6 +279,22 @@ namespace MantidQt
     }
 
     /**
+    This slot notifies the presenter that the "plot selected rows" button has been pressed
+    */
+    void QtReflMainView::on_actionPlotRow_triggered()
+    {
+      m_presenter->notify(IReflPresenter::PlotRowFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "plot selected groups" button has been pressed
+    */
+    void QtReflMainView::on_actionPlotGroup_triggered()
+    {
+      m_presenter->notify(IReflPresenter::PlotGroupFlag);
+    }
+
+    /**
     This slot notifies the presenter that the table has been updated/changed by the user
     */
     void QtReflMainView::tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight)

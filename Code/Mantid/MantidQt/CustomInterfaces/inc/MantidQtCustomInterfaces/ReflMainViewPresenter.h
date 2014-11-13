@@ -123,6 +123,9 @@ namespace MantidQt
       //searching
       void search();
       void transfer();
+      //plotting
+      void plotRow();
+      void plotGroup();
       //options
       void showOptionsDialog();
       void initOptions();

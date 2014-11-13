@@ -121,6 +121,8 @@ namespace MantidQt
       void on_actionImportTable_triggered();
       void on_actionExportTable_triggered();
       void on_actionHelp_triggered();
+      void on_actionPlotRow_triggered();
+      void on_actionPlotGroup_triggered();
 
       void on_comboSearchInstrument_currentIndexChanged(int index);
       void on_comboProcessInstrument_currentIndexChanged(int index);

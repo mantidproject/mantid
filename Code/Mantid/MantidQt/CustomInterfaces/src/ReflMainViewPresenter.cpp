@@ -941,6 +941,8 @@ namespace MantidQt
       case IReflPresenter::TransferFlag:        transfer();          break;
       case IReflPresenter::ImportTableFlag:     importTable();       break;
       case IReflPresenter::ExportTableFlag:     exportTable();       break;
+      case IReflPresenter::PlotRowFlag:         plotRow();           break;
+      case IReflPresenter::PlotGroupFlag:       plotGroup();         break;
       }
       //Not having a 'default' case is deliberate. gcc issues a warning if there's a flag we aren't handling.
     }
@@ -1286,6 +1288,55 @@ namespace MantidQt
         m_model->setData(m_model->index(rowIndex, COL_SCALE), 1.0);
         m_model->setData(m_model->index(rowIndex, COL_GROUP), groups[row["group"]]);
       }
+    }
+
+    /** Plots any currently selected rows */
+    void ReflMainViewPresenter::plotRow()
+    {
+      auto selectedRows = m_view->getSelectedRows();
+
+      if(selectedRows.empty())
+        return;
+
+      std::set<std::string> workspaces;
+
+      for(auto row = selectedRows.begin(); row != selectedRows.end(); ++row)
+        workspaces.insert("IvsQ_" + m_model->data(m_model->index(*row, COL_RUNS)).toString().toStdString());
+
+      m_view->plotWorkspaces(workspaces);
+    }
+
+    /** Plots any currently selected groups */
+    void ReflMainViewPresenter::plotGroup()
+    {
+      auto selectedRows = m_view->getSelectedRows();
+
+      if(selectedRows.empty())
+        return;
+
+      std::set<int> selectedGroups;
+      for(auto row = selectedRows.begin(); row != selectedRows.end(); ++row)
+        selectedGroups.insert(m_model->data(m_model->index(*row, COL_GROUP)).toInt());
+
+      //Now, get the names of the stitched workspace, one per group
+      std::map<int,std::vector<std::string>> runsByGroup;
+      const int numRows = m_model->rowCount();
+      for(int row = 0; row < numRows; ++row)
+      {
+        int group = m_model->data(m_model->index(row, COL_GROUP)).toInt();
+
+        //Skip groups we don't care about
+        if(selectedGroups.find(group) == selectedGroups.end())
+          continue;
+
+        //Add this to the list of runs
+        runsByGroup[group].push_back(m_model->data(m_model->index(row, COL_RUNS)).toString().toStdString());
+      }
+
+      std::set<std::string> workspaces;
+      for(auto runsMap = runsByGroup.begin(); runsMap != runsByGroup.end(); ++runsMap)
+        workspaces.insert("IvsQ_" + boost::algorithm::join(runsMap->second, "_"));
+      m_view->plotWorkspaces(workspaces);
     }
 
     /** Shows the Refl Options dialog */
