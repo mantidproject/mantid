@@ -51,9 +51,14 @@ namespace Mantid
       }
     }
     
+    /** virtual method to add information to the file before the data
+     *  @param file :: pointer to output file stream
+     *  @param XData :: pointer to a std::vector<double> containing the point data to be printed
+     *  @param exportDeltaQ :: bool on whether deltaQ column to be printed (permanantly false in this case)
+     */
     void SaveReflThreeColumnAscii::data(std::ofstream & file, const std::vector<double> & XData,  bool exportDeltaQ)
     {
-      AsciiPointBase::data(file, XData, false); //toggled false permantly because only to show 3 columns
+      AsciiPointBase::data(file, XData, false); 
     }
 
 
