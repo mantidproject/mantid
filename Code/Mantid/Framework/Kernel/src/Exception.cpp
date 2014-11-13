@@ -384,9 +384,8 @@ const char* NullPointerException::what() const throw()
 
 /**
   Constructor
-  @param V :: Value of index
-  @param B :: Maximum value
-  @param Place :: Location of Error
+  @param message :: The error message
+  @param errorCode :: The HTTP error code if available
 */
 InternetError::InternetError(const std::string& message, const int& errorCode) :
   std::runtime_error(message)

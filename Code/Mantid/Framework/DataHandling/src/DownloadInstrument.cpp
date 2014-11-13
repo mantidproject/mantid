@@ -206,7 +206,6 @@ namespace Mantid
         BOOST_FOREACH(ptree::value_type & repoFile, ptGithub)
         {
           std::string name = repoFile.second.get("name","");
-          std::string path = repoFile.second.get("path","");
           std::string sha = repoFile.second.get("sha","");
           std::string htmlUrl = repoFile.second.get("html_url","");
           htmlUrl = getDownloadableRepoUrl(htmlUrl);
@@ -273,7 +272,6 @@ namespace Mantid
           if (entryExt == "xml")
           {
             //get current values
-            std::string entryName = entryPath.getBaseName();
             Poco::LocalDateTime dateTime(it->getLastModified());
             size_t entrySize = it->getSize();
 
@@ -331,7 +329,7 @@ namespace Mantid
     }
 
     /** Converts a github file page to a downloadable url for the file.
-    * @param a github file page url
+    * @param filename a github file page url
     * @returns a downloadable url for the file
     **/
     const std::string DownloadInstrument::getDownloadableRepoUrl(const std::string& filename) const
@@ -361,6 +359,8 @@ namespace Mantid
     @param localFilePath [optional] : Provide the destination of the file downloaded at the url_file.
     the connection and the download was done correctly.
 
+    @param headers [optional] : A key value pair map of any additional headers to include in the request.
+
     @exception Mantid::Kernel::Exception::InternetError : For any unexpected behaviour.
     */
     int DownloadInstrument::doDownloadFile(const std::string & urlFile,
@@ -371,7 +371,6 @@ namespace Mantid
       g_log.debug() << "DoDownloadFile : " << urlFile << " to file: " << localFilePath << std::endl;
 
       Poco::URI uri(urlFile);
-      std::stringstream answer;
       try {
         // initialize ssl
         Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> certificateHandler = new Poco::Net::AcceptCertificateHandler(true);
@@ -416,18 +415,18 @@ namespace Mantid
           << res.getReason() << std::endl;
         
         //get github api rate limit information if available;
-        int rateLimitLimit;
+        //int rateLimitLimit;
         int rateLimitRemaining;
         Mantid::Kernel::DateAndTime rateLimitReset;
         try 
         {
-          rateLimitLimit = boost::lexical_cast<int>( res.get("X-RateLimit-Limit","-1") );
+          //rateLimitLimit = boost::lexical_cast<int>( res.get("X-RateLimit-Limit","-1") );
           rateLimitRemaining = boost::lexical_cast<int>( res.get("X-RateLimit-Remaining","-1") );
           rateLimitReset.set_from_time_t(boost::lexical_cast<int>( res.get("X-RateLimit-Reset","0")));
         }
         catch( boost::bad_lexical_cast const& ) 
         {
-          rateLimitLimit = -1;
+          //rateLimitLimit = -1;
           rateLimitRemaining = -1;
         }
 
