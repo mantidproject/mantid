@@ -12,7 +12,7 @@ set ( SRC_FILES
 	src/ConfigService.cpp
 	src/DataItem.cpp
 	src/DateAndTime.cpp
-	src/DateTimeValidator.cpp
+	src/DateTimeValidator.cpp 
 	src/DateValidator.cpp
 	src/DeltaEMode.cpp
 	src/DirectoryValidator.cpp
