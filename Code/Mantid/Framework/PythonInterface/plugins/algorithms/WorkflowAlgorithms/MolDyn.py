@@ -138,28 +138,29 @@ class MolDyn(PythonAlgorithm):
             raise RuntimeError('Unrecognised file format: %s' % ext)
 
         # Do processing specific to workspaces in energy
-        for ws_name in mtd[self._out_ws].getNames():
-            if mtd[ws_name].getAxis(0).getUnit().unitID() == 'Energy':
-                # Get an XMax value, default to max energy if not cropping
-                e_max = mtd[ws_name].dataX(0).max()
-                logger.debug('Max energy in workspace %s: %f' % (ws_name, e_max))
+        if isinstance(mtd[self._out_ws], WorkspaceGroup):
+            for ws_name in mtd[self._out_ws].getNames():
+                if mtd[ws_name].getAxis(0).getUnit().unitID() == 'Energy':
+                    # Get an XMax value, default to max energy if not cropping
+                    e_max = mtd[ws_name].dataX(0).max()
+                    logger.debug('Max energy in workspace %s: %f' % (ws_name, e_max))
 
-                if self._emax is not None:
-                    if self._emax > e_max:
-                        raise ValueError('MaxEnergy crop is out of energy range for function %s' % ws_name)
-                    e_max = self._emax
+                    if self._emax is not None:
+                        if self._emax > e_max:
+                            raise ValueError('MaxEnergy crop is out of energy range for function %s' % ws_name)
+                        e_max = self._emax
 
-                # If we are going to Symmetrise then there is no need to crop
-                # as the Symmetrise algorithm will do this
-                if self._symmetrise:
-                    # Symmetrise the sample workspace in x=0
-                    Symmetrise(Sample=ws_name, XMin=0, XMax=e_max,
-                               Verbose=self._verbose, Plot=False, Save=False,
-                               OutputWorkspace=ws_name)
+                    # If we are going to Symmetrise then there is no need to crop
+                    # as the Symmetrise algorithm will do this
+                    if self._symmetrise:
+                        # Symmetrise the sample workspace in x=0
+                        Symmetrise(Sample=ws_name, XMin=0, XMax=e_max,
+                                   Verbose=self._verbose, Plot=False, Save=False,
+                                   OutputWorkspace=ws_name)
 
-                elif self._emax is not None:
-                    CropWorkspace(InputWorkspace=ws_name, OutputWorkspace=ws_name,
-                                  XMax=self._emax)
+                    elif self._emax is not None:
+                        CropWorkspace(InputWorkspace=ws_name, OutputWorkspace=ws_name,
+                                      XMax=self._emax)
 
         # Do convolution if given a resolution workspace
         if self._res_ws is not '':
