@@ -3,11 +3,13 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/ProxyInfo.h"
 
 #include <map>
 
 namespace Mantid
 {
+
 namespace DataHandling
 {
   typedef std::map<std::string,std::string> String2StringMap;
@@ -55,9 +57,8 @@ namespace DataHandling
 
     String2StringMap processRepository();
 
-
-
-    std::string remote_url;
+    bool m_isProxySet;
+    Mantid::Kernel::ProxyInfo m_proxyInfo;
 
   };
 

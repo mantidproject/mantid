@@ -2,7 +2,6 @@
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/NetworkProxy.h"
-#include "MantidKernel/ProxyInfo.h"
 
 // from poco
 #include <Poco/Path.h>
@@ -68,7 +67,7 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    DownloadInstrument::DownloadInstrument():remote_url("api.github.com")
+    DownloadInstrument::DownloadInstrument():m_isProxySet(false),m_proxyInfo()
     {
     }
 
@@ -164,7 +163,7 @@ namespace Mantid
       Poco::Path gitHubJson(localPath);
       gitHubJson.append("github.json");
       Poco::File gitHubJsonFile(gitHubJson);
-      Poco::DateTime gitHubJsonDate;
+      Poco::DateTime gitHubJsonDate(1900,1,1);
       if (gitHubJsonFile.exists() && gitHubJsonFile.isFile())
       {
         gitHubJsonDate = gitHubJsonFile.getLastModified();
@@ -375,18 +374,29 @@ namespace Mantid
       std::stringstream answer;
       try {
         // initialize ssl
-        Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pHandler = new AcceptCertificateHandler(true); // was false
-        Context::Ptr pContext = new Context(Context::CLIENT_USE, "", "", "", Context::VERIFY_NONE);
-        SSLManager::instance().initializeClient(0, pHandler, pContext);
+        Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> certificateHandler = new Poco::Net::AcceptCertificateHandler(true);
+        // Currently do not use any means of authentication. This should be updated IDS has signed certificate.
+        const Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE);
+        // Create a singleton for holding the default context. E.g. any future requests to publish are made to this certificate and context.
+        Poco::Net::SSLManager::instance().initializeClient(NULL, certificateHandler,context);
 
-        // Session takes ownership of socket
-        HTTPSClientSession session(uri.getHost(), uri.getPort(), pContext);
-        Mantid::Kernel::NetworkProxy proxyHelper;
-        Mantid::Kernel::ProxyInfo proxyInfo = proxyHelper.getHttpProxy(remote_url);
-        if (!proxyInfo.emptyProxy())
+        //Session takes ownership of socket
+        Poco::Net::SecureStreamSocket* socket = new Poco::Net::SecureStreamSocket(context);
+        Poco::Net::HTTPSClientSession session(*socket);
+        session.setHost(uri.getHost());
+        session.setPort(uri.getPort());
+
+        //set the proxy
+        if (!m_isProxySet)
         {
-          session.setProxyHost(proxyInfo.host());
-          session.setProxyPort(proxyInfo.port());
+          Mantid::Kernel::NetworkProxy proxyHelper;
+          m_proxyInfo = proxyHelper.getHttpProxy(uri.getHost());
+          m_isProxySet = true;
+        }
+        if (!m_proxyInfo.emptyProxy())
+        {
+          session.setProxyHost(m_proxyInfo.host());
+          session.setProxyPort(m_proxyInfo.port());
         }
 
         // create a request
