@@ -18,7 +18,7 @@
     <widget class="QTableWidget" name="tableWidget">
      <column>
       <property name="text">
-       <string>Index</string>
+       <string>Parameter</string>
       </property>
      </column>
      <column>

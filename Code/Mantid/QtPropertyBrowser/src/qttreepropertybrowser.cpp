@@ -124,6 +124,7 @@ public:
       auto state = isChecked() ? QStyle::State_On : QStyle::State_Off;
       opt.state |= state;
       opt.rect = rect();
+      opt.rect.setWidth(opt.rect.height());
       QPainter painter(this);
       QApplication::style()->drawPrimitive(QStyle::PE_IndicatorCheckBox,&opt,&painter);
   }
@@ -499,6 +500,7 @@ void QtPropertyEditorDelegate::paint(QPainter *painter, const QStyleOptionViewIt
         auto state = property->checkOption(optionName) ? QStyle::State_On : QStyle::State_Off;
         opt.state |= state;
         opt.rect = option.rect;
+        opt.rect.setWidth(opt.rect.height());
         QApplication::style()->drawPrimitive(QStyle::PE_IndicatorCheckBox,&opt,painter);
       }
     }
