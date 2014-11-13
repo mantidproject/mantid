@@ -699,6 +699,13 @@ class MainWindow(QtGui.QMainWindow):
 
         setp(self.mainline, xdata=vecreltimes, ydata=vecvalue) 
 
+        samunit = samplelog.units
+        if len(samunit) == 0:
+            ylabel = logname
+        else:
+            ylabel = "%s (%s)" % (logname, samunit)
+        self.ui.theplot.set_ylabel(ylabel, fontsize=13)
+
         # assume that all logs are on almost same X-range.  Only Y need to be reset
         setp(self.leftslideline, ydata=ylim)
         setp(self.rightslideline, ydata=ylim)
@@ -914,9 +921,12 @@ class MainWindow(QtGui.QMainWindow):
         ymin = min(vecy)
         ymax = max(vecy)
 
-        # Reset graph
+        # Reset graph  
         self.ui.theplot.set_xlim(xmin, xmax)
         self.ui.theplot.set_ylim(ymin, ymax)
+
+        self.ui.theplot.set_xlabel('Time (seconds)', fontsize=13)
+        self.ui.theplot.set_ylabel('Counts', fontsize=13)
 
         # Set up main line
         setp(self.mainline, xdata=vecx, ydata=vecy) 
