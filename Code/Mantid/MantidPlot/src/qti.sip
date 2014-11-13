@@ -384,6 +384,13 @@ private:
   Matrix(const Matrix&);
 };
 
+%If (WS_WIN)
+typedef uint size_t;
+%End
+%If (!WS_WIN)
+typedef unsigned int size_t;
+%End
+
 class QwtData /PyName = CurveData/
 {
 %TypeHeaderCode
@@ -391,10 +398,9 @@ class QwtData /PyName = CurveData/
 %End
 
 public:
-   // Note these 'unsigned int' should be size_t
-   virtual unsigned int size() const = 0;
-   virtual double x(unsigned int i) const = 0;
-   virtual double y(unsigned int i) const = 0;
+   virtual size_t size() const = 0;
+   virtual double x(size_t i) const = 0;
+   virtual double y(size_t i) const = 0;
 
 private:
    QwtData(const QwtData&);
