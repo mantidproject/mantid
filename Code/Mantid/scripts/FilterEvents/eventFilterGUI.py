@@ -538,7 +538,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             setLineEdit = True
 
-        # Move the upper value bar
+        # Move the upper value bar: upperx and uppery are real value (float but not (0,100)) of the figure
         ylim = self.ui.theplot.get_ylim()
         newy = ylim[0] + inewy*(ylim[1] - ylim[0])*0.01
         upperx = self.ui.theplot.get_xlim() 
@@ -895,10 +895,14 @@ class MainWindow(QtGui.QMainWindow):
             if timeres < 1.0:
                 timeres = 1.0
 
-            sumws = api.RebinByPulseTimes(InputWorkspace=wksp, OutputWorkspace = "Summed_%s"%(str(wksp)), 
-                Params="0, %f, %d"%(timeres, timeduration))
-            sumws = api.SumSpectra(InputWorkspace=sumws, OutputWorkspace=str(sumws))
-            sumws = api.ConvertToPointData(InputWorkspace=sumws, OutputWorkspace=str(sumws))
+            sumwsname = "_Summed_%s"%(str(wksp))
+            if AnalysisDataService.doesExist(sumwsname) is False:
+                sumws = api.RebinByPulseTimes(InputWorkspace=wksp, OutputWorkspace = sumwsname, 
+                    Params="0, %f, %d"%(timeres, timeduration))
+                sumws = api.SumSpectra(InputWorkspace=sumws, OutputWorkspace=str(sumws))
+                sumws = api.ConvertToPointData(InputWorkspace=sumws, OutputWorkspace=str(sumws))
+            else:
+                sumws = AnalysisDataService.retrieve(sumwsname)
         except Exception as e:
             return str(e)
 
@@ -1150,6 +1154,14 @@ class MainWindow(QtGui.QMainWindow):
 
         self.ui.verticalSlider_2.setValue(0)
         self.ui.verticalSlider.setValue(100)
+
+        ylim = self.ui.theplot.get_ylim()
+        miny = ylim[0]
+        maxy = ylim[1]
+        xlim = self.ui.theplot.get_xlim() 
+        setp(self.lowerslideline, xdata=xlim, ydata=[miny, miny])
+        setp(self.upperslideline, xdata=xlim, ydata=[maxy, maxy])
+        self.ui.graphicsView.draw()
 
         self.ui.lineEdit_7.clear()
         self.ui.lineEdit_8.clear()
