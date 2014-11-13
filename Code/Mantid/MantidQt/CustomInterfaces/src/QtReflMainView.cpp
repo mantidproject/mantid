@@ -242,6 +242,22 @@ namespace MantidQt
     }
 
     /**
+    This slot notifies the presenter that the "export table" button has been pressed
+    */
+    void QtReflMainView::on_actionExportTable_triggered()
+    {
+      m_presenter->notify(IReflPresenter::ExportTableFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "import table" button has been pressed
+    */
+    void QtReflMainView::on_actionImportTable_triggered()
+    {
+      m_presenter->notify(IReflPresenter::ImportTableFlag);
+    }
+
+    /**
     This slot notifies the presenter that the table has been updated/changed by the user
     */
     void QtReflMainView::tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight)
@@ -355,6 +371,19 @@ namespace MantidQt
       if(ok)
         return text.toStdString();
       return "";
+    }
+
+    /**
+    Show the user the dialog for an algorithm
+    */
+    void QtReflMainView::showAlgorithmDialog(const std::string& algorithm)
+    {
+      std::stringstream pythonSrc;
+      pythonSrc << "try:\n";
+      pythonSrc << "  " << algorithm << "Dialog()\n";
+      pythonSrc << "except:\n";
+      pythonSrc << "  pass\n";
+      runPythonCode(QString::fromStdString(pythonSrc.str()));
     }
 
     /**

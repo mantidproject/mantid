@@ -52,6 +52,7 @@ namespace MantidQt
       virtual void giveUserInfo(std::string prompt, std::string title) = 0;
       virtual void giveUserWarning(std::string prompt, std::string title) = 0;
       virtual void giveUserCritical(std::string prompt, std::string title) = 0;
+      virtual void showAlgorithmDialog(const std::string& algorithm) = 0;
 
       //Set the status of the progress bar
       virtual void setProgressRange(int min, int max) = 0;

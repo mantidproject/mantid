@@ -61,6 +61,8 @@ namespace MantidQt
         PasteSelectedFlag,
         SearchFlag,
         TransferFlag,
+        ImportTableFlag,
+        ExportTableFlag,
       };
 
       //Tell the presenter something happened
