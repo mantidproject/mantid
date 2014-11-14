@@ -1,13 +1,14 @@
 #include "MantidKernel/ChecksumHelper.h"
 
-#include <boost/uuid/sha1.hpp>
-#include <boost/smart_ptr/scoped_ptr.hpp>
+#include <boost/regex.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/shared_array.hpp>
 
-#include <iostream>
-#include <sstream>
+#include <Poco/SHA1Engine.h>
+#include <Poco/DigestStream.h>
+
 #include <fstream>
-#include <algorithm>
+#include <sstream>
 #include <string>
 
 namespace Mantid
@@ -15,42 +16,66 @@ namespace Mantid
 namespace Kernel
 {
 
-
 namespace ChecksumHelper
 {
+  namespace //anonymous
+  {
+    /**
+     * Load contents of file into a string. The line endings are preserved
+     * @param filepath Full path to the file to be opened
+     */
+    std::string loadFile(const std::string & filepath)
+    {
+      std::ifstream filein(filepath, std::ios::in | std::ios::binary);
+      if(!filein) return "";
+
+      std::string contents;
+      filein.seekg(0, std::ios::end);
+      contents.resize(filein.tellg());
+      filein.seekg(0, std::ios::beg);
+      filein.read(&contents[0], contents.size());
+      filein.close();
+
+      return contents;
+    }
+
+    /**
+     * Create sha1 out of data and an optional header
+     * @param data Contents as a string
+     * @param header An optional string to prepend to the data
+     */
+    std::string createSHA1(const std::string & data, const std::string & header = "")
+    {
+      using Poco::DigestEngine;
+      using Poco::SHA1Engine;
+      using Poco::DigestOutputStream;
+
+      SHA1Engine sha1;
+      DigestOutputStream outstr(sha1);
+      outstr << header << data;
+      outstr.flush(); //to pass everything to the digest engine
+      return DigestEngine::digestToHex(sha1.digest());
+    }
+  }
+
+
   /** Creates a SHA-1 checksum from a string
   * @param input The string to checksum
   * @returns a checksum string
   **/
-  std::string DLLExport sha1FromString(const std::string& input)
+  std::string sha1FromString(const std::string& input)
   {
-    return ChecksumHelper::processSha1(NULL, 0,input.c_str(), input.size());
+    return ChecksumHelper::createSHA1(input);
   }
 
   /** Creates a SHA-1 checksum from a file
   * @param filepath The path to the file
   * @returns a checksum string
   **/
-  std::string DLLExport sha1FromFile(const std::string& filepath)
+  std::string sha1FromFile(const std::string& filepath)
   {
-    if (filepath.size() > 0)
-    {
-	    boost::scoped_ptr<std::ifstream> file_ptr(
-		    new std::ifstream(filepath, std::fstream::in| std::fstream::binary));
-	    if (!file_ptr->is_open())
-		    return "";
-
-      // get length of file:
-      file_ptr->seekg (0, file_ptr->end);
-      auto length = file_ptr->tellg();
-      file_ptr->seekg (0, file_ptr->beg);
-
-	    boost::shared_array<char> temp_buf(new char[length]);
-      file_ptr->read(temp_buf.get(), length);
-	    file_ptr.reset();
-      return ChecksumHelper::processSha1(temp_buf.get(), length);
-    }
-    return "";
+    if(filepath.empty()) return "";
+    return ChecksumHelper::createSHA1(loadFile(filepath));
   }
 
   /** Creates a git checksum from a file (these match the git hash-object command).
@@ -60,93 +85,13 @@ namespace ChecksumHelper
   * @param filepath The path to the file
   * @returns a checksum string
   **/
-  std::string DLLExport gitSha1FromFile(const std::string& filepath)
+  std::string gitSha1FromFile(const std::string& filepath)
   {
-    std::string retVal = "";
-    if (filepath.size() > 0)
-    {
-	    boost::scoped_ptr<std::ifstream> file_ptr(
-		    new std::ifstream(filepath, std::fstream::in));
-	    if (!file_ptr->is_open())
-		    return retVal;
-
-      //get the full length (including overallocation for \r\n)
-      file_ptr->seekg (0, file_ptr->end);
-      auto bufferlength = file_ptr->tellg();
-      file_ptr->seekg (0, file_ptr->beg);
-
-      //data
-	    boost::shared_array<char> temp_buf(new char[bufferlength]);
-      file_ptr->read(temp_buf.get(), bufferlength);
-      // get real length of stream
-      auto length = file_ptr->gcount();
-	    file_ptr.reset();
-
-      // header
-      std::stringstream ss;
-      ss << "blob " << length;
-      std::string header = ss.str();
-
-      size_t headerLength = header.size() +1;
-      char* headerData = new char[headerLength];
-      std::copy(header.begin(),header.end(),headerData);
-      headerData[headerLength -1] = '\0';
-
-      retVal = ChecksumHelper::processSha1(temp_buf.get(), length, headerData,headerLength);
-      delete[] headerData;
-    }
-    return retVal;
-  }
-
-  /** internal method for processing sha1 checksums.
-  * @param data The data to checksum
-  * @param dataLength The length of the data to checksum
-  * @param header The header to checksum
-  * @param headerLength The length of header to checksum
-  * @returns a checksum string
-  **/
-  std::string DLLExport processSha1(const char* data, const size_t dataLength, const char* header, const size_t headerLength)
-  {
-    boost::uuids::detail::sha1 hasher;
-	  boost::shared_array<unsigned int> digest;
-	  
-    if ((headerLength > 0) && (header != NULL))
-    {
-      hasher.process_bytes(header, headerLength);
-    }
-    if ((dataLength > 0) && (data != NULL))
-    {
-      hasher.process_bytes(data, dataLength);
-    }
-	
-	  digest.reset(new unsigned int [5]);
-	  char bin[20];
-
-	  hasher.get_digest(reinterpret_cast<boost::uuids::detail::sha1::digest_type>(*digest.get()));
-	  for(int i = 0; i < 5; ++i)
-	  {
-		  const char* tmp = reinterpret_cast<char*>(digest.get());
-		  bin[i * 4    ] = tmp[i * 4 + 3];
-		  bin[i * 4 + 1] = tmp[i * 4 + 2];
-		  bin[i * 4 + 2] = tmp[i * 4 + 1];
-		  bin[i * 4 + 3] = tmp[i * 4    ];
-	  }
-      
-    char* hash = &bin[0];
-
-	  char str[128] = { 0 };
-	  char *ptr = str;
-	  std::string ret;
-
-	  for (int i = 0; i < 20; i++)
-	  {
-		  sprintf(ptr, "%02X", (unsigned char)*hash);
-		  ptr += 2;
-		  hash++;
-	  }
-	  ret = str;
-    std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);
-	  return ret;
+    if(filepath.empty()) return "";
+    std::string contents = loadFile(filepath);
+    std::stringstream header;
+    header << "blob " << contents.size() << '\0';
+    return ChecksumHelper::createSHA1(contents, header.str());
   }
   
 } // namespace ChecksumHelper

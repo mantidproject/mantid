@@ -35,14 +35,11 @@ namespace Kernel
 namespace ChecksumHelper 
 {
   ///create a SHA-1 checksum from a string
-  std::string MANTID_KERNEL_DLL sha1FromString(const std::string& input);
+  MANTID_KERNEL_DLL std::string sha1FromString(const std::string& input);
   ///create a SHA-1 checksum from a file
-  std::string MANTID_KERNEL_DLL sha1FromFile(const std::string& filepath);
+  MANTID_KERNEL_DLL std::string sha1FromFile(const std::string& filepath);
   ///create a git checksum from a file (these match the git hash-object command)
-  std::string MANTID_KERNEL_DLL gitSha1FromFile(const std::string& filepath);
-
-  /// internal method for processing sha1 checksums
-  std::string MANTID_KERNEL_DLL processSha1(const char* data, const size_t dataLength, const char* header = NULL, const size_t headerLength = 0);
+  MANTID_KERNEL_DLL std::string gitSha1FromFile(const std::string& filepath);
 };
 
 
