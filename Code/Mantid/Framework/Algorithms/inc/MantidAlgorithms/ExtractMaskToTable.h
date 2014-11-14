@@ -87,13 +87,6 @@ namespace Algorithms
 
     /// Input workspace type
     bool m_inputIsMask;
-
-    /// Minimum X range
-    double m_XMin;
-
-    /// Maximum X range
-    double m_XMax;
-    
   };
 
 
