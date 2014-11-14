@@ -257,23 +257,7 @@ namespace MDAlgorithms
       // Do not integrate if sphere is off edge of detector
       if (BackgroundOuterRadius > PeakRadius)
       {
-        if (!detectorQ(p.getQLabFrame(), BackgroundOuterRadius))
-          {
-             g_log.warning() << "Warning: sphere/cylinder for integration is off edge of detector for peak " << i << std::endl;
-             if (!integrateEdge)
-             {
-               if (replaceIntensity)
-               {
-                  p.setIntensity(0.0);
-                  p.setSigmaIntensity( 0.0 );
-               }
-               continue;
-             }
-          }
-      }
-      else
-      {
-        if (!detectorQ(p.getQLabFrame(), PeakRadius))
+        if (!detectorQ(p.getQLabFrame(), std::max(BackgroundOuterRadius, PeakRadius)))
           {
              g_log.warning() << "Warning: sphere/cylinder for integration is off edge of detector for peak " << i << std::endl;
              if (!integrateEdge)
