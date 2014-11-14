@@ -24,4 +24,4 @@ set pref_file=Mantid.user.properties
 
 if exist %pref_file%. del %pref_file%. else echo %pref_file% not found
 
-python.exe qt_settings_editor.py -fc
+python.exe mantid_qt_settings_editor.py -fc

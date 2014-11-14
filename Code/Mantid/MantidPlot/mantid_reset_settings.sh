@@ -32,4 +32,4 @@ else
 fi
 
 # Remove all Qt preferences for MantidPlot
-python ./qt_settings_editor.py -fc
+python ./mantid_qt_settings_editor.py -fc

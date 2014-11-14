@@ -822,9 +822,9 @@ endif ()
 ###########################################################################
 
 if ( WIN32 )
-  set ( CONFIG_RESET_SCRIPT reset_settings.bat )
+  set ( CONFIG_RESET_SCRIPT mantid_reset_settings.bat )
 else ()
-  set ( CONFIG_RESET_SCRIPT reset_settings.sh )
+  set ( CONFIG_RESET_SCRIPT mantid_reset_settings.sh )
 endif ()
 
 copy_files_to_dir ( "${CONFIG_RESET_SCRIPT}"
@@ -837,7 +837,7 @@ copy_files_to_dir ( "${CONFIG_RESET_SCRIPT}"
 ###########################################################################
 
 # Top-level python scripts
-set( PY_FILES mantidplotrc.py mantidplot.py qt_settings_editor.py )
+set( PY_FILES mantidplotrc.py mantidplot.py mantid_qt_settings_editor.py )
 copy_files_to_dir ( "${PY_FILES}"
                      ${CMAKE_CURRENT_SOURCE_DIR}
                      ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
