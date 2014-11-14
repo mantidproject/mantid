@@ -12,7 +12,7 @@ import numpy as np
 from PyQt4 import QtGui, QtCore
 
 # Future pyplot
-from mantidplot.future.pyplot import *
+from pymantidplot.future.pyplot import *
 
 # =============== Create fake workspaces to plot =======================
 X1 = np.linspace(0,10, 100)
