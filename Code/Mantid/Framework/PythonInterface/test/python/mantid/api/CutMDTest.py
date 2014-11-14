@@ -57,7 +57,7 @@ class CutMDTest(unittest.TestCase):
         # Incorrect number of rows i.e. zero in this case as none added.
         self.assertRaises(RuntimeError, CutMD, InputWorkspace=self.__in_md, Projection=projection, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1])
         
-    def test_non_orthogonal_slice_with_scaling(self):
+    def test_orthogonal_slice_with_scaling(self):
         # We create a fake workspace around and check to see that the extents get scaled with the new coordinate system when sliced
         to_cut = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-1,1,-1,1], Names='H,K,L', Units='U,U,U')
         
@@ -91,6 +91,42 @@ class CutMDTest(unittest.TestCase):
         self.assertEquals("['2.00zeta', 0, 0]",  out_md.getDimension(0).getName() )
         self.assertEquals("[0, '2.00eta', 0]",  out_md.getDimension(1).getName() )
         self.assertEquals("[0, 0, '-4.00xi']",  out_md.getDimension(2).getName() )
+        
+        
+    def test_non_orthogonal_slice_with_scaling(self):
+         # We create a fake workspace around and check to see that the extents get scaled with the new coordinate system when sliced
+        to_cut = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-1,1,-1,1], Names='H,K,L', Units='U,U,U')
+        
+        SetSpecialCoordinates(InputWorkspace=to_cut, SpecialCoordinates='HKL')
+        
+        projection = CreateEmptyTableWorkspace()
+        # Correct number of columns, and names
+        projection.addColumn("double", "u")
+        projection.addColumn("double", "v")
+        projection.addColumn("double", "w")
+        projection.addColumn("double", "offsets")
+        projection.addColumn("str", "type")
+        projection.addRow([1,-1, 0, 0, "aaa"])
+        projection.addRow([1, 1, 0, 0, "aaa"])  
+        projection.addRow([0, 0, 1, 0, "aaa"])  
+                    
+        out_md = CutMD(to_cut, Projection=projection, P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1])
+        
+        '''
+        Here we check that the corners in HKL end up in the expected positions when transformed into the new scaled basis
+        provided by the W transform (projection table)
+        '''
+        self.assertEquals(-1, out_md.getDimension(0).getMinimum()) 
+        self.assertEquals(1, out_md.getDimension(0).getMaximum())
+        self.assertEquals(-1, out_md.getDimension(1).getMinimum())
+        self.assertEquals(1, out_md.getDimension(1).getMaximum())
+        self.assertEquals(-1, out_md.getDimension(2).getMinimum())
+        self.assertEquals(1, out_md.getDimension(2).getMaximum())
+        self.assertEquals("['zeta', 'zeta', 0]",  out_md.getDimension(0).getName() )
+        self.assertEquals("['-eta', 'eta', 0]",  out_md.getDimension(1).getName() )
+        self.assertEquals("[0, 0, 'xi']",  out_md.getDimension(2).getName() )
+        
+        
                     
 
 if __name__ == '__main__':

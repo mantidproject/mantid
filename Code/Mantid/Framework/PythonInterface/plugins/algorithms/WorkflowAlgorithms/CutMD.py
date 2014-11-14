@@ -105,9 +105,13 @@ class CutMD(DataProcessorAlgorithm):
         if not isinstance(projection_table, ITableWorkspace):
             I = np.identity(3)
             return (I[0, :], I[1, :], I[2, :])
+        column_names = projection_table.getColumnNames()
         u = np.array(projection_table.column('u'))
         v = np.array(projection_table.column('v'))
-        w = np.cross(v,u)
+        if not 'w' in column_names:
+            w = np.cross(v,u)
+        else:
+            w = np.array(projection_table.column('w'))
         return (u, v, w)
     
     def __make_labels(self, projection):
@@ -149,11 +153,11 @@ class CutMD(DataProcessorAlgorithm):
         projection_table = self.getProperty("Projection").value
         if isinstance(projection_table, ITableWorkspace):
             column_names = set(projection_table.getColumnNames())
-            logger.warning(str(column_names))
+            logger.warning(str(column_names)) 
             if not column_names == set(['u', 'v', 'type']):
-                if not column_names == set(['u', 'v', 'offsets', 'type']):
-                    if not column_names == set(['u', 'v', 'w', 'offsets', 'type']):
-                        raise ValueError("Projection table schema is wrong")
+                    if not column_names == set(['u', 'v', 'offsets', 'type']):
+                        if not column_names == set(['u', 'v', 'w', 'offsets', 'type']):
+                            raise ValueError("Projection table schema is wrong! Column names received: " + str(column_names) )
             if projection_table.rowCount() != 3:
                 raise ValueError("Projection table expects 3 rows")
             
