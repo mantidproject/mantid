@@ -1243,20 +1243,28 @@ std::string ConfigServiceImpl::getOSVersion()
 
 /// @returns The name of the current user as reported by the environment.
 std::string ConfigServiceImpl::getUsername() {
+  std::string username;
+
   // mac and favorite way to get username on linux
-  std::string username = m_pSysConfig->getString("system.env.USER");
-  if (!username.empty()) {
-    return username;
+  try {
+    username = m_pSysConfig->getString("system.env.USER");
+    if (!username.empty()) {
+      return username;
+    }
+  }
+  catch (Poco::NotFoundException &e) {
+    UNUSED_ARG(e); // let it drop on the floor
   }
 
   // windoze and alternate linux username variable
-  username = m_pSysConfig->getString("system.env.USERNAME");
-  if (!username.empty()) {
-    return username;
+  try {
+    username = m_pSysConfig->getString("system.env.USERNAME");
+    if (!username.empty()) {
+      return username;
+    }
   }
-  username = m_pSysConfig->getString("system.env.username");
-  if (!username.empty()) {
-    return username;
+  catch (Poco::NotFoundException &e) {
+    UNUSED_ARG(e); // let it drop on the floor
   }
 
   // give up and return an empty string
