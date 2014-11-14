@@ -841,8 +841,8 @@ copy_files_to_dir ( "${CONFIG_RESET_SCRIPT}"
 ###########################################################################
 
 # Top-level python scripts
-set( PY_FILES mantidplotrc.py)
-copy_python_files_to_dir ( "${PY_FILES}"
+set( PY_FILES mantidplotrc.py mantid_qt_settings_editor.py)
+copy_files_to_dir ( "${PY_FILES}"
                             ${CMAKE_CURRENT_SOURCE_DIR}
                             ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
                             PYTHON_INSTALL_FILES )
@@ -851,7 +851,7 @@ set( MTDPLOTPY_FILES
   __init__.py
   proxies.py
 )
-copy_python_files_to_dir ( "${MTDPLOTPY_FILES}"
+copy_files_to_dir ( "${MTDPLOTPY_FILES}"
                             ${CMAKE_CURRENT_SOURCE_DIR}/mantidplot
                             ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplot
                             MTDPLOT_INSTALL_FILES )
@@ -860,7 +860,7 @@ set( FUTURE_FILES
   __init__.py
   pyplot.py
 )
-copy_python_files_to_dir ( "${FUTURE_FILES}"
+copy_files_to_dir ( "${FUTURE_FILES}"
                             ${CMAKE_CURRENT_SOURCE_DIR}/mantidplot/future
                             ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplot/future
                             MTDPLOT_FUTURE_INSTALL_FILES )
@@ -882,7 +882,7 @@ copy_files_to_dir ( "${IPY_FILES}"
 add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS}
 							${RES_FILES} ${MANTID_RC_FILE}
-							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${MTDPLOT_FUTURE_INSTALL_FILES} ${IPYTHON_INSTALL_FILES}
+							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${CONFIG_RESET_SCRIPT_FILE} ${MTDPLOT_FUTURE_INSTALL_FILES} ${IPYTHON_INSTALL_FILES}
 )
 
 # Library dependencies
