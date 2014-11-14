@@ -395,7 +395,7 @@ namespace Mantid
         if (!m_proxyInfo.emptyProxy())
         {
           session.setProxyHost(m_proxyInfo.host());
-          session.setProxyPort(m_proxyInfo.port());
+          session.setProxyPort(static_cast<Poco::UInt16>(m_proxyInfo.port()));
         }
 
         // create a request
