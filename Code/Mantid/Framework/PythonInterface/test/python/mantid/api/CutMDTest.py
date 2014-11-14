@@ -27,7 +27,7 @@ class CutMDTest(unittest.TestCase):
         self.assertRaises(RuntimeError, CutMD, InputWorkspace=test_md, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1])
         
     def test_slice_to_original(self):
-        out_md = CutMD(self.__in_md, P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1])
+        out_md = CutMD(self.__in_md, P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=False)
         self.assertTrue(isinstance(out_md, IMDEventWorkspace), "Should default to producing an IMDEventWorkspace.")
         # No rotation. Basis vectors should have been left the same, so no extent changes.
         self.assertEquals(self.__in_md.getDimension(0).getMinimum(), out_md.getDimension(0).getMinimum())
@@ -45,7 +45,7 @@ class CutMDTest(unittest.TestCase):
         projection = CreateEmptyTableWorkspace()
         projection.addColumn("double", "u")
         # missing other columns
-        self.assertRaises(RuntimeError, CutMD, InputWorkspace=self.__in_md, Projection=projection, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1])
+        self.assertRaises(RuntimeError, CutMD, InputWorkspace=self.__in_md, Projection=projection, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=False)
         
     def test_wrong_table_workspace_format_wrong_row_numbers(self):
         projection = CreateEmptyTableWorkspace()
@@ -56,7 +56,7 @@ class CutMDTest(unittest.TestCase):
         projection.addColumn("double", "offset")
         projection.addColumn("string", "type")
         # Incorrect number of rows i.e. zero in this case as none added.
-        self.assertRaises(RuntimeError, CutMD, InputWorkspace=self.__in_md, Projection=projection, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1])
+        self.assertRaises(RuntimeError, CutMD, InputWorkspace=self.__in_md, Projection=projection, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=False)
         
     def test_orthogonal_slice_with_scaling(self):
         # We create a fake workspace around and check to see that the extents get scaled with the new coordinate system when sliced

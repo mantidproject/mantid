@@ -3,6 +3,7 @@ from mantid.api import *
 from mantid.simpleapi import *
 import numpy as np
 import os.path
+import re
 
 
 class CutMD(DataProcessorAlgorithm):
@@ -36,6 +37,8 @@ class CutMD(DataProcessorAlgorithm):
                              doc='Output cut workspace')
         
         self.declareProperty(name="NoPix", defaultValue=False, doc="If False creates a full MDEventWorkspaces as output. True to create an MDHistoWorkspace as output. This is DND only in Horace terminology.")
+        
+        self.declareProperty(name="CheckAxes", defaultValue=True, doc="Check that the axis look to be correct, and abort if not.")
         
         
     def __to_mantid_slicing_binning(self, horace_binning, to_cut, dimension_index):
@@ -141,17 +144,28 @@ class CutMD(DataProcessorAlgorithm):
             labels.append( [cmapping.replace(x) for x in projection[i]  ] )
         
         return labels
-            
-        
-    def PyExec(self):
-        to_cut = self.getProperty("InputWorkspace").value
-        nopix = self.getProperty("NoPix").value
+    
+    
+    def __verify_input_workspace(self, to_cut):
         coord_system = to_cut.getSpecialCoordinateSystem()
         if not coord_system == SpecialCoordinateSystem.HKL:
             raise ValueError("Input Workspace must be in reciprocal lattice dimensions (HKL)")
         
+        ndims = to_cut.getNumDims()
+        if ndims < 3 or ndims > 4:
+            raise ValueError("Input Workspace should be 3 or 4 dimensional")
         
-        projection_table = self.getProperty("Projection").value
+        # Try to sanity check the order of the dimensions. This is important.
+        axes_check = self.getProperty("CheckAxes").value
+        if axes_check:
+            predicates = ["^(H.*)|(\\[H,0,0\\].*)$","^(K.*)|(\\[0,K,0\\].*)$","^(L.*)|(\\[0,0,L\\].*)$"]  
+            for i in range(ndims):
+                dimension = to_cut.getDimension(i)
+                p = re.compile(predicates[i])
+                if not p.match( dimension.getName() ):
+                    raise ValueError("Dimensions must be in order H, K, L")
+
+    def __verify_projection_input(self, projection_table):
         if isinstance(projection_table, ITableWorkspace):
             column_names = set(projection_table.getColumnNames())
             logger.warning(str(column_names)) 
@@ -161,6 +175,14 @@ class CutMD(DataProcessorAlgorithm):
                             raise ValueError("Projection table schema is wrong! Column names received: " + str(column_names) )
             if projection_table.rowCount() != 3:
                 raise ValueError("Projection table expects 3 rows")
+        
+    def PyExec(self):
+        to_cut = self.getProperty("InputWorkspace").value
+        self.__verify_input_workspace(to_cut)
+        nopix = self.getProperty("NoPix").value
+        
+        projection_table = self.getProperty("Projection").value
+        self.__verify_projection_input(projection_table)
             
         p1_bins = self.getProperty("P1Bin").value
         p2_bins = self.getProperty("P2Bin").value
@@ -179,8 +201,6 @@ class CutMD(DataProcessorAlgorithm):
          
         extents = self.__calculate_extents(v, u, w, to_cut)
         
-        
-            
         projection_labels = self.__make_labels(projection)
         
         cut_alg_name = "BinMD" if nopix else "SliceMD"
