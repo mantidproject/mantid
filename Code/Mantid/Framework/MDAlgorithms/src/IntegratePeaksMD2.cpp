@@ -255,22 +255,20 @@ namespace MDAlgorithms
         pos = p.getHKL();
 
       // Do not integrate if sphere is off edge of detector
-      if (BackgroundOuterRadius > PeakRadius)
-      {
-        if (!detectorQ(p.getQLabFrame(), std::max(BackgroundOuterRadius, PeakRadius)))
-          {
-             g_log.warning() << "Warning: sphere/cylinder for integration is off edge of detector for peak " << i << std::endl;
-             if (!integrateEdge)
+
+      if (!detectorQ(p.getQLabFrame(), std::max(BackgroundOuterRadius, PeakRadius)))
+        {
+           g_log.warning() << "Warning: sphere/cylinder for integration is off edge of detector for peak " << i << std::endl;
+           if (!integrateEdge)
+           {
+             if (replaceIntensity)
              {
-               if (replaceIntensity)
-               {
-                  p.setIntensity(0.0);
-                  p.setSigmaIntensity( 0.0 );
-               }
-               continue;
+                p.setIntensity(0.0);
+                p.setSigmaIntensity( 0.0 );
              }
-          }
-      }
+             continue;
+           }
+        }
 
       // Build the sphere transformation
       bool dimensionsUsed[nd];
