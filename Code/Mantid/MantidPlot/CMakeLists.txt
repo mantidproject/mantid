@@ -822,6 +822,21 @@ if ( APPLE )
 endif ()
 
 ###########################################################################
+# Config reset scripts
+###########################################################################
+
+if ( WIN32 )
+  set ( CONFIG_RESET_SCRIPT mantid_reset_settings.bat )
+else ()
+  set ( CONFIG_RESET_SCRIPT mantid_reset_settings.sh )
+endif ()
+
+copy_files_to_dir ( "${CONFIG_RESET_SCRIPT}"
+                     ${CMAKE_CURRENT_SOURCE_DIR}
+                     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+                     CONFIG_RESET_SCRIPT_FILE )
+
+###########################################################################
 # Required Python config files
 ###########################################################################
 
@@ -855,10 +870,10 @@ set( IPY_FILES
   __init__.py
   mantid_ipython_widget.py
 )
-copy_python_files_to_dir ( "${IPY_FILES}"
-                            ${CMAKE_CURRENT_SOURCE_DIR}/ipython_widget
-                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_widget
-                            IPYTHON_INSTALL_FILES )
+copy_files_to_dir ( "${IPY_FILES}"
+                     ${CMAKE_CURRENT_SOURCE_DIR}/ipython_widget
+                     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_widget
+                     IPYTHON_INSTALL_FILES )
 
 ###########################################################################
 # MantidPlot executable
@@ -1006,6 +1021,7 @@ endforeach()
 foreach(PY_FILE ${IPY_FILES} )
   install ( FILES ipython_widget/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_widget )
 endforeach()
+install ( FILES ${CONFIG_RESET_SCRIPT} DESTINATION ${BIN_DIR} )
 
 if ( APPLE )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
@@ -1015,3 +1031,4 @@ if ( APPLE )
 
   install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake )
 endif ()
+
