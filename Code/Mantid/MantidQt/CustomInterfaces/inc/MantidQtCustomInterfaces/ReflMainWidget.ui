@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>825</width>
-    <height>275</height>
+    <width>959</width>
+    <height>346</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -354,7 +354,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>825</width>
+     <width>959</width>
      <height>23</height>
     </rect>
    </property>
@@ -378,6 +378,9 @@
     <addaction name="actionNewTable"/>
     <addaction name="actionSaveTable"/>
     <addaction name="actionSaveTableAs"/>
+    <addaction name="separator"/>
+    <addaction name="actionImportTable"/>
+    <addaction name="actionExportTable"/>
     <addaction name="separator"/>
     <addaction name="actionOptionsDialog"/>
    </widget>
@@ -613,6 +616,36 @@
    </property>
    <property name="whatsThis">
     <string>Transfers the selected runs into the processing table.</string>
+   </property>
+  </action>
+  <action name="actionImportTable">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/open_template.png</normaloff>:/open_template.png</iconset>
+   </property>
+   <property name="text">
+    <string>Import .TBL</string>
+   </property>
+   <property name="toolTip">
+    <string>Import a .TBL file</string>
+   </property>
+   <property name="whatsThis">
+    <string>Imports a .TBL file to a workspace using the LoadReflTBL algorithm. The resulting workspace can then be loaded as a table as normal.</string>
+   </property>
+  </action>
+  <action name="actionExportTable">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/save_template.png</normaloff>:/save_template.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export .TBL</string>
+   </property>
+   <property name="toolTip">
+    <string>Export a .TBL file</string>
+   </property>
+   <property name="whatsThis">
+    <string>Exports a table workspace to a .TBL file that can be used by the ISIS Reflectometry UI in older versions of Mantid.</string>
    </property>
   </action>
  </widget>

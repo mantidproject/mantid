@@ -870,6 +870,8 @@ namespace MantidQt
       case IReflPresenter::PasteSelectedFlag:   pasteSelected();     break;
       case IReflPresenter::SearchFlag:          search();            break;
       case IReflPresenter::TransferFlag:        transfer();          break;
+      case IReflPresenter::ImportTableFlag:     importTable();       break;
+      case IReflPresenter::ExportTableFlag:     exportTable();       break;
       }
       //Not having a 'default' case is deliberate. gcc issues a warning if there's a flag we aren't handling.
     }
@@ -958,6 +960,22 @@ namespace MantidQt
       {
         m_view->giveUserCritical("Could not open workspace: " + std::string(e.what()), "Error");
       }
+    }
+
+    /**
+    Import a table from TBL file
+    */
+    void ReflMainViewPresenter::importTable()
+    {
+      m_view->showAlgorithmDialog("LoadReflTBL");
+    }
+
+    /**
+    Export a table to TBL file
+    */
+    void ReflMainViewPresenter::exportTable()
+    {
+      m_view->showAlgorithmDialog("SaveReflTBL");
     }
 
     /**
