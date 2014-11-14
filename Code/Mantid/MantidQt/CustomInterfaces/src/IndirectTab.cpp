@@ -2,6 +2,8 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtAPI/AlgorithmDialog.h"
+#include "MantidQtAPI/InterfaceManager.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -78,28 +80,36 @@ namespace CustomInterfaces
     g_log.information() << "Python export for workspace: " << m_tabResultWorkspace <<
       ", between " << m_tabStartTime << " and " << m_tabEndTime << std::endl;
 
-    // Nothing can be done if no workspace is provided by the tab
-    if(m_tabResultWorkspace.empty())
-    {
-      g_log.error("This tab has not specified a result workspace name. Python script export is not possible.");
-      return;
-    }
-
     // Take the search times to be a second either side of the actual times, just in case
     DateAndTime startSearchTime = m_tabStartTime - 1.0;
     DateAndTime endSearchTime = m_tabEndTime + 1.0;
 
-    Algorithm_sptr pyExportAlg = AlgorithmManager::Instance().createUnmanaged("GeneratePythonScript");
-    pyExportAlg->initialize();
+    // Don't let the user change the time range
+    QStringList enabled;
+    enabled << "Filename" << "InputWorkspace" << "UnrollAll" << "SpecifyAlgorithmVersions";
 
-    pyExportAlg->setProperty("Filename", "temp.py");
-    pyExportAlg->setProperty("InputWorkspace", m_tabResultWorkspace);
-    pyExportAlg->setProperty("SpecifyAlgorithmVersions", "Specify All");
-    pyExportAlg->setProperty("UnrollAll", true);
-    pyExportAlg->setProperty("StartTimestamp", startSearchTime.toISO8601String());
-    pyExportAlg->setProperty("EndTimestamp", endSearchTime.toISO8601String());
+    // Give some indication to the user that they will have to specify the workspace
+    if(m_tabResultWorkspace.empty())
+      g_log.warning("This tab has not specified a result workspace name.");
 
-    pyExportAlg->execute();
+    // Set default properties
+    QHash<QString, QString> props;
+    props["Filename"] = "IndirectInterfacePythonExport.py";
+    props["InputWorkspace"] = QString::fromStdString(m_tabResultWorkspace);
+    props["SpecifyAlgorithmVersions"] = "Specify All";
+    props["UnrollAll"] = "1";
+    props["StartTimestamp"] = QString::fromStdString(startSearchTime.toISO8601String());
+    props["EndTimestamp"] = QString::fromStdString(endSearchTime.toISO8601String());
+
+    // Create an algorithm dialog for the script export algorithm
+    MantidQt::API::InterfaceManager interfaceManager;
+    MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialogFromName("GeneratePythonScript", -1,
+        NULL, false, props, "", enabled);
+
+    // Show the dialog
+    dlg->show();
+    dlg->raise();
+    dlg->activateWindow();
   }
 
   /**
