@@ -14,7 +14,7 @@ moment. Feedback is very much welcome!
 
 To use this new functionality you first need to import the new pyplot module:
 
-    from mantidplot.future.pyplot import *
+    from pymantidplot.future.pyplot import *
 
 Please do not forget this step, otherwise you may get arcane error
 messages from functions of the old mantidplot Python CLI.
