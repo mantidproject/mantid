@@ -23,8 +23,9 @@ namespace ChecksumHelper
     /**
      * Load contents of file into a string. The line endings are preserved
      * @param filepath Full path to the file to be opened
+     * @param unixEOL If true convert all lineendings to Unix-style \n
      */
-    std::string loadFile(const std::string & filepath)
+    std::string loadFile(const std::string & filepath, const bool unixEOL = false)
     {
       std::ifstream filein(filepath, std::ios::in | std::ios::binary);
       if(!filein) return "";
@@ -36,6 +37,11 @@ namespace ChecksumHelper
       filein.read(&contents[0], contents.size());
       filein.close();
 
+      if(unixEOL)
+      {
+        static boost::regex eol("\\R"); // \R is Perl syntax for matching any EOL sequence
+        contents = boost::regex_replace(contents, eol, "\n"); // converts all to LF
+      }
       return contents;
     }
 
@@ -88,7 +94,8 @@ namespace ChecksumHelper
   std::string gitSha1FromFile(const std::string& filepath)
   {
     if(filepath.empty()) return "";
-    std::string contents = loadFile(filepath);
+    const bool unixEOL(true);
+    std::string contents = loadFile(filepath, unixEOL);
     std::stringstream header;
     header << "blob " << contents.size() << '\0';
     return ChecksumHelper::createSHA1(contents, header.str());
