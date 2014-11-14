@@ -297,11 +297,8 @@ namespace MDEvents
       if(groupEntries.find(g_DBDataName)!=groupEntries.end()) // data exist, open it
       {
           // Read the free space blocks in from the existing file
-          if(!m_ReadOnly)
-          {
-              m_File->readData(g_DBDataName, freeSpaceBlocks);
-              this->setFreeSpaceVector(freeSpaceBlocks);
-          }
+          m_File->readData(g_DBDataName, freeSpaceBlocks);
+          this->setFreeSpaceVector(freeSpaceBlocks);
       }
       else  // create and open the group
       {
