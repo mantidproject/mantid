@@ -1241,6 +1241,24 @@ std::string ConfigServiceImpl::getOSVersion()
   return m_pSysConfig->getString("system.osVersion");
 }
 
+/// @returns The name of the current user as reported by the environment.
+std::string ConfigServiceImpl::getUsername() {
+  // mac and favorite way to get username on linux
+  std::string username = m_pSysConfig->getString("system.env.USER");
+  if (!username.empty()) {
+    return username;
+  }
+
+  // windoze and alternate linux username variable
+  username = m_pSysConfig->getString("system.env.USERNAME");
+  if (!username.empty()) {
+    return username;
+  }
+
+  // give up and return an empty string
+  return std::string();
+}
+
 /** Gets the absolute path of the current directory containing the dll
  *
  * @returns The absolute path of the current directory containing the dll

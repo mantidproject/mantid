@@ -152,6 +152,8 @@ namespace Mantid
       std::string getOSArchitecture();
       /// Returns the OS version
       std::string getOSVersion();
+      /// Returns the username
+      std::string getUsername();
       /// Returns the current directory
       std::string getCurrentDir();
       /// Returns the current directory
