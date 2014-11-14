@@ -18,9 +18,12 @@ struct FITSInfo {
   map<string, string> headerKeys;
   int bitsPerPixel;
   int numberOfAxis;
+  int offset;  
+  int headerSizeMultiplier;
   vector<size_t> axisPixelLengths;
   double tof;
   double timeBin;
+  double scale;
   long int countsInImage;
   long int numberOfTriggers;
   string extension;
@@ -120,6 +123,8 @@ namespace DataHandling
     void mapHeaderKeys();
 
     // Strings used to map header keys
+    string m_headerScaleKey;
+    string m_headerOffsetKey;
     string m_headerBitDepthKey;
     string m_headerRotationKey;
     string m_mapFile;
@@ -131,7 +136,7 @@ namespace DataHandling
     
     // Number of digits which will be appended to a workspace name, i.e. 4 = workspace_0001
     static const size_t DIGIT_SIZE_APPEND = 4;
-    static const int FIXED_HEADER_SIZE = 2880;    
+    static const int BASE_HEADER_SIZE = 2880;    
   };
   
 

@@ -80,7 +80,7 @@ namespace DataHandling
       "Name for the rotation header key.");
     declareProperty(new PropertyWithValue<string>(AXIS_NAMES_NAME, "NAXIS1,NAXIS2", Kernel::Direction::Input),
       "Names for the axis header keys, comma separated string of all axis.");
-
+    
     declareProperty(new FileProperty(HEADER_MAP_NAME, "", FileProperty::OptionalDirectory, "", Kernel::Direction::Input), 
       "A file mapping header keys to the ones used by ISIS [line separated values in the format KEY=VALUE, e.g. BitDepthName=BITPIX ");
 
@@ -92,6 +92,8 @@ namespace DataHandling
   void LoadFITS::exec()
   {	   
     // Init header info - setup some defaults just in case
+    m_headerScaleKey = "BSCALE";
+    m_headerOffsetKey = "BZERO";
     m_headerBitDepthKey = "BITPIX";
     m_headerRotationKey = "ROTATION";
     m_mapFile = "";
@@ -164,6 +166,9 @@ namespace DataHandling
           throw std::runtime_error("Unable to locate one or more valid BITPIX, NAXIS, TOF, TIMEBIN, N_COUNTS or N_TRIGS values in the FITS file header.");
         }
 
+        allHeaderInfo[i].scale = (allHeaderInfo[i].headerKeys[m_headerScaleKey] == "") ? 1 : lexical_cast<double>(allHeaderInfo[i].headerKeys[m_headerScaleKey]);
+        allHeaderInfo[i].offset = (allHeaderInfo[i].headerKeys[m_headerOffsetKey] == "") ? 0 : lexical_cast<int>(allHeaderInfo[i].headerKeys[m_headerOffsetKey]);
+
         if(allHeaderInfo[i].extension != "") headerValid = false;
         if(allHeaderInfo[i].numberOfAxis != 2) headerValid = false;
 
@@ -179,11 +184,9 @@ namespace DataHandling
     }
 
     // Check that the files use bit depths of either 8, 16 or 32
-    if(allHeaderInfo[0].bitsPerPixel != 8 && allHeaderInfo[0].bitsPerPixel != 16 && allHeaderInfo[0].bitsPerPixel != 32) 
-    {
-       throw std::runtime_error("FITS loader only supports 8, 16 or 32 bits per pixel.");
-    }
-
+    if(allHeaderInfo[0].bitsPerPixel != 8 && allHeaderInfo[0].bitsPerPixel != 16 && allHeaderInfo[0].bitsPerPixel != 32 && allHeaderInfo[0].bitsPerPixel != 64) 
+      throw std::runtime_error("FITS loader only supports 8, 16, 32 or 64 bits per pixel.");
+            
     // Check the format is correct and create the Workspace  
     if(headerValid)
     {
@@ -376,13 +379,9 @@ namespace DataHandling
   void LoadFITS::readFileToWorkspace(Workspace2D_sptr ws, const FITSInfo& fileInfo, MantidImage &imageY, MantidImage &imageE, void *&bufferAny)
   {        
     uint8_t *buffer8 = NULL;
-    uint16_t *buffer16 = NULL;
-    uint32_t *buffer32 = NULL;
 
     // create pointer of correct data type to void pointer of the buffer:
     buffer8 = static_cast<uint8_t*>(bufferAny);
-    buffer16 = static_cast<uint16_t*>(bufferAny);
-    buffer32 = static_cast<uint32_t*>(bufferAny);
       
     // Read Data
     bool fileErr = false;
@@ -392,27 +391,37 @@ namespace DataHandling
     size_t result = 0;
     if(!fileErr)
     {
-      if(fseek(currFile , FIXED_HEADER_SIZE , SEEK_CUR) == 0)
-        result = fread(bufferAny, fileInfo.bitsPerPixel/8, m_spectraCount, currFile);
+      if(fseek(currFile , BASE_HEADER_SIZE*fileInfo.headerSizeMultiplier , SEEK_CUR) == 0)
+        result = fread(buffer8, 1, m_spectraCount*(fileInfo.bitsPerPixel/8), currFile);
     }
 
-    if (result != m_spectraCount) fileErr = true;			
+    if (result != m_spectraCount*(fileInfo.bitsPerPixel/8)) fileErr = true;			
 
     if(fileErr)
-    {
       throw std::runtime_error("Error reading file; possibly invalid data.");	
-    }
-
+    
+    char *tmp = new char[fileInfo.bitsPerPixel/8];
+    
     for(size_t i=0; i<fileInfo.axisPixelLengths[0];++i)
     {
       for(size_t j=0; j<fileInfo.axisPixelLengths[1];++j)
       {
         double val = 0;
-        if(fileInfo.bitsPerPixel == 8) val = static_cast<double>(buffer8[(i*fileInfo.axisPixelLengths[1]) + j]);
-        if(fileInfo.bitsPerPixel == 16) val = static_cast<double>(buffer16[(i*fileInfo.axisPixelLengths[1]) + j]);
-        if(fileInfo.bitsPerPixel == 32) val = static_cast<double>(buffer32[(i*fileInfo.axisPixelLengths[1]) + j]);
+        size_t start = ((i*(fileInfo.bitsPerPixel/8))*fileInfo.axisPixelLengths[1]) + (j*(fileInfo.bitsPerPixel/8));
         
-        imageY[i][j] = val;
+        // Reverse byte order of current value
+        std::reverse_copy(buffer8 + start, buffer8+start+(fileInfo.bitsPerPixel/8),tmp);         
+
+        if(fileInfo.bitsPerPixel == 8 )                      val = static_cast<double>(*reinterpret_cast<uint8_t*>(tmp));
+        if(fileInfo.bitsPerPixel == 16)                      val = static_cast<double>(*reinterpret_cast<uint16_t*>(tmp));
+        if(fileInfo.bitsPerPixel == 32 && !fileInfo.isFloat) val = static_cast<double>(*reinterpret_cast<uint32_t*>(tmp));
+        if(fileInfo.bitsPerPixel == 32 && fileInfo.isFloat)  val = static_cast<double>(*reinterpret_cast<float*>(tmp));
+        if(fileInfo.bitsPerPixel == 64 && !fileInfo.isFloat) val = static_cast<double>(*reinterpret_cast<uint64_t*>(tmp));
+        if(fileInfo.bitsPerPixel == 64 && fileInfo.isFloat)  val = *reinterpret_cast<double*>(tmp);
+                
+        val = fileInfo.scale * val - fileInfo.offset; 
+
+        imageY[i][j] = val; 
         imageE[i][j] = sqrt(val); 
       }				
     }
@@ -433,6 +442,8 @@ namespace DataHandling
   bool LoadFITS::parseHeader(FITSInfo &headerInfo)
   {		
     bool ranSuccessfully = true;
+    bool endFound = false;
+    headerInfo.headerSizeMultiplier = 0;
     try
     {
       ifstream istr(headerInfo.filePath.c_str(), ios::binary);
@@ -440,30 +451,38 @@ namespace DataHandling
   
       // Iterate 80 bytes at a time until header is parsed | 2880 bytes is the fixed header length of FITS
       // 2880/80 = 36 iterations required
-      for(int i=0; i < 36; ++i)
-      {   
-        // Keep vect of each header item, including comments, and also keep a map of individual keys.
-        string part;
-        reader.readRaw(80,part);  
-        headerInfo.headerItems.push_back(part);
+      while(!endFound)
+      {
+        headerInfo.headerSizeMultiplier++;
+        for(int i=0; i < 36; ++i)
+        {   
+          // Keep vect of each header item, including comments, and also keep a map of individual keys.
+          string part;
+          reader.readRaw(80,part);  
+          headerInfo.headerItems.push_back(part);
     
-        // Add key/values - these are separated by the = symbol. 
-        // If it doesn't have an = it's a comment to ignore. All keys should be unique
-        auto eqPos = part.find('=');
-        if(eqPos > 0)
-        {        
-          string key = part.substr(0, eqPos);
-          string value = part.substr(eqPos+1);
+          // Add key/values - these are separated by the = symbol. 
+          // If it doesn't have an = it's a comment to ignore. All keys should be unique
+          auto eqPos = part.find('=');
+          if(eqPos > 0)
+          {        
+            string key = part.substr(0, eqPos);
+            string value = part.substr(eqPos+1);
         
-          // Comments are added after the value separated by a / symbol. Remove.
-          auto slashPos = value.find('/');
-          if(slashPos > 0) value = value.substr(0, slashPos);
+            // Comments are added after the value separated by a / symbol. Remove.
+            auto slashPos = value.find('/');
+            if(slashPos > 0) value = value.substr(0, slashPos);
  
-          boost::trim(key);
-          boost::trim(value);
-          if(key!="")
-            headerInfo.headerKeys[key] = value;
-        }    
+            boost::trim(key);
+            boost::trim(value);
+
+            if(key == "END")
+              endFound = true;
+
+            if(key!="")
+              headerInfo.headerKeys[key] = value;
+          }    
+        }
       }
 
       istr.close();

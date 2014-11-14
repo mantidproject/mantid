@@ -41,17 +41,17 @@ public:
     TS_ASSERT_EQUALS(ws1->getNumberHistograms(), SPECTRA_COUNT);  // Number of spectra
     // Sum the two bins from the last spectra - should be 70400
     double sumY = ws1->readY(SPECTRA_COUNT-1)[0] + ws2->readY(SPECTRA_COUNT-1)[0];   
-    TS_ASSERT_EQUALS(sumY, 70400);   
+    TS_ASSERT_EQUALS(sumY, 275);   
     // Check the sum of the error values for the last spectra in each file - should be 375.183
     double sumE = ws1->readE(SPECTRA_COUNT-1)[0] + ws2->readE(SPECTRA_COUNT-1)[0];
-    TS_ASSERT_LESS_THAN(abs(sumE-375.1830), 0.0001);  // Include a small tolerance check with the assert - not exactly 375.183
+    TS_ASSERT_LESS_THAN(abs(sumE-23.4489), 0.0001);  // Include a small tolerance check with the assert - not exactly 375.183
   }
 
 private:
   LoadFITS algToBeTested;
   std::string inputFile;
   std::string outputSpace;
-  const static size_t SPECTRA_COUNT = 262144;
+  const static size_t SPECTRA_COUNT = 262144; // Based on the 512*512 test image
 };
 
 
