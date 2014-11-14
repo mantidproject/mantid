@@ -12,7 +12,7 @@ class CutMD(DataProcessorAlgorithm):
         return 'MDAlgorithms'
 
     def summary(self):
-        return 'Slices multidimensional workspaces using input projection information'
+        return 'Slices multidimensional workspaces using input projection information and binning limits.'
 
     def PyInit(self):
         self.declareProperty(IMDEventWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
@@ -42,6 +42,7 @@ class CutMD(DataProcessorAlgorithm):
         
         
     def __to_mantid_slicing_binning(self, horace_binning, to_cut, dimension_index):
+        
         dim = to_cut.getDimension(dimension_index)
         min = dim.getMinimum()
         max = dim.getMaximum()
@@ -73,19 +74,34 @@ class CutMD(DataProcessorAlgorithm):
          if np.absolute(a) < np.absolute(b):
              return b
          return b
+     
+    def __calculate_inner_extents(self, boundaries_a, boundaries_b, ws):
+        
+        extents = (self.__innermost_boundary(boundaries_a[0], boundaries_b[0]), 
+                   self.__innermost_boundary(boundaries_a[1], boundaries_b[1]), 
+                   self.__innermost_boundary(boundaries_a[2], boundaries_b[2]),
+                   self.__innermost_boundary(boundaries_a[3], boundaries_b[3]),
+                   self.__innermost_boundary(boundaries_a[4], boundaries_b[4]),
+                   self.__innermost_boundary(boundaries_a[5], boundaries_b[5])
+                   )
+        
+            # Copy extents for non crystallographic dimensions    
+        non_crystallographic_dimensions = ws.getNumDims() - 3
+        if non_crystallographic_dimensions > 0:
+            for i in range(0, non_crystallographic_dimensions):
+                extents.append(ws.getDimension(i + 3).getMinimum())
+                extents.append(ws.getDimension(i + 3).getMaximum())
+        
+        return extents
     
     
-    def __calculate_extents(self, v, u, w, ws, h_bins, k_bins, l_bins):
+    def __calculate_extents(self, v, u, w, limits):
         M=np.array([u,v,w])
         Minv=np.linalg.inv(M)
-        
-        # We are assuming that the workspace has dimensions H, K, L in that order. The workspace MUST have 3 dimensions at least for the following to work.
-        Hrange=[self.__innermost_boundary(ws.getDimension(0).getMinimum(), h_bins[0]), self.__innermost_boundary(ws.getDimension(0).getMaximum(), h_bins[1])]
-        Krange=[self.__innermost_boundary(ws.getDimension(1).getMinimum(), k_bins[0]), self.__innermost_boundary(ws.getDimension(1).getMaximum(), k_bins[1])]
-        Lrange=[self.__innermost_boundary(ws.getDimension(2).getMinimum(), l_bins[0]), self.__innermost_boundary(ws.getDimension(2).getMaximum(), l_bins[1])]
-        
-        print "Ranges", Hrange, Krange, Lrange
-        
+    
+        # unpack limits
+        Hrange, Krange, Lrange = limits
+    
         # Create a numpy 2D array. Makes finding minimums and maximums for each transformed coordinates over every corner easier.
         new_coords = np.empty([8, 3])
         counter = 0
@@ -102,13 +118,6 @@ class CutMD(DataProcessorAlgorithm):
             # Vertical slice down each corner for each dimension, then determine the max, min and use as extents
             extents.append(np.amin(new_coords[:,i]))
             extents.append(np.amax(new_coords[:,i]))
-        
-            # Copy extents for non crystallographic dimensions    
-        non_crystallographic_dimensions = ws.getNumDims() - 3
-        if non_crystallographic_dimensions > 0:
-            for i in range(0, non_crystallographic_dimensions):
-                extents.append(ws.getDimension(i + 3).getMinimum())
-                extents.append(ws.getDimension(i + 3).getMaximum())
         
         return extents
     
@@ -213,10 +222,21 @@ class CutMD(DataProcessorAlgorithm):
         projection = self.__uvw_from_projection_table(projection_table)
         u,v,w = projection
          
-        extents = self.__calculate_extents(v, u, w, to_cut, xbins, ybins, zbins)
+        h_limits_ws = (to_cut.getDimension(0).getMinimum(), to_cut.getDimension(0).getMaximum())
+        k_limits_ws = (to_cut.getDimension(1).getMinimum(), to_cut.getDimension(1).getMaximum())
+        l_limits_ws = (to_cut.getDimension(2).getMinimum(), to_cut.getDimension(2).getMaximum())
+        
+        extents_by_ws = self.__calculate_extents(v, u, w, (h_limits_ws, k_limits_ws, l_limits_ws))
+        
+        extents_by_bin_limits = self.__calculate_extents(v, u, w, ( (xbins[0], xbins[1]), (ybins[0], ybins[1]), (zbins[0], zbins[1])))
+        
+        extents = self.__calculate_inner_extents(extents_by_ws, extents_by_bin_limits, to_cut)
         
         projection_labels = self.__make_labels(projection)
         
+        '''
+        Actually perform the binning operation
+        '''
         cut_alg_name = "BinMD" if nopix else "SliceMD"
         cut_alg = AlgorithmManager.Instance().create(cut_alg_name)
         cut_alg.setChild(True)
