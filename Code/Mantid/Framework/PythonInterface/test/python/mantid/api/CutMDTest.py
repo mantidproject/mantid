@@ -70,7 +70,7 @@ class CutMDTest(unittest.TestCase):
         self.assertRaises(RuntimeError, CutMD, InputWorkspace=self.__in_md, Projection=projection, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=False)
         
     def test_orthogonal_slice_with_scaling(self):
-        # We create a fake workspace around and check to see that the extents get scaled with the new coordinate system when sliced
+        # We create a fake workspace and check to see that the extents get scaled with the new coordinate system when sliced
         to_cut = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-1,1,-1,1], Names='H,K,L', Units='U,U,U')
         
         SetSpecialCoordinates(InputWorkspace=to_cut, SpecialCoordinates='HKL')
@@ -105,8 +105,8 @@ class CutMDTest(unittest.TestCase):
         self.assertEquals("[0, 0, '-4.00xi']",  out_md.getDimension(2).getName() )
         
         
-    def test_non_orthogonal_slice_with_scaling(self):
-         # We create a fake workspace around and check to see that the extents get scaled with the new coordinate system when sliced
+    def test_non_orthogonal_slice(self):
+         # We create a fake workspace and check to see that the extents get transformed to the new coordinate system.
         to_cut = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-1,1,-1,1], Names='H,K,L', Units='U,U,U')
         
         SetSpecialCoordinates(InputWorkspace=to_cut, SpecialCoordinates='HKL')
@@ -136,6 +136,44 @@ class CutMDTest(unittest.TestCase):
         self.assertEquals(1, out_md.getDimension(2).getMaximum())
         self.assertEquals("['zeta', 'zeta', 0]",  out_md.getDimension(0).getName() )
         self.assertEquals("['-eta', 'eta', 0]",  out_md.getDimension(1).getName() )
+        self.assertEquals("[0, 0, 'xi']",  out_md.getDimension(2).getName() )
+        
+        self.assertTrue(isinstance(out_md, IMDHistoWorkspace), "Expect that the output was an IMDHistoWorkspace given the NoPix flag.")
+        
+    def test_orthogonal_slice_with_cropping(self):
+         # We create a fake workspace and check to see that using bin inputs for cropping works
+        to_cut = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-1,1,-1,1], Names='H,K,L', Units='U,U,U')
+        
+        SetSpecialCoordinates(InputWorkspace=to_cut, SpecialCoordinates='HKL')
+        
+        projection = CreateEmptyTableWorkspace()
+        # Correct number of columns, and names
+        projection.addColumn("double", "u")
+        projection.addColumn("double", "v")
+        projection.addColumn("double", "w")
+        projection.addColumn("double", "offsets")
+        projection.addColumn("str", "type")
+        projection.addRow([1, 0, 0, 0, "aaa"])
+        projection.addRow([0, 1, 0, 0, "aaa"])  
+        projection.addRow([0, 0, 1, 0, "aaa"])  
+                    
+        '''
+        Specify the cropping boundaries as part of the bin inputs.
+        '''
+        out_md = CutMD(to_cut, Projection=projection, P1Bin=[-0.5,0.5], P2Bin=[-0.1,0.1], P3Bin=[-0.3,0.3], NoPix=True)
+        
+        '''
+        Here we check that the corners in HKL end up in the expected positions when transformed into the new scaled basis
+        provided by the W transform (projection table)
+        '''
+        self.assertAlmostEqual(-0.5, out_md.getDimension(0).getMinimum(), 6) 
+        self.assertAlmostEqual(0.5, out_md.getDimension(0).getMaximum(), 6) 
+        self.assertAlmostEqual(-0.1, out_md.getDimension(1).getMinimum(), 6) 
+        self.assertAlmostEqual(0.1, out_md.getDimension(1).getMaximum(), 6) 
+        self.assertAlmostEqual(-0.3, out_md.getDimension(2).getMinimum(), 6) 
+        self.assertAlmostEqual(0.3, out_md.getDimension(2).getMaximum(), 6) 
+        self.assertEquals("['zeta', 0, 0]",  out_md.getDimension(0).getName() )
+        self.assertEquals("[0, 'eta', 0]",  out_md.getDimension(1).getName() )
         self.assertEquals("[0, 0, 'xi']",  out_md.getDimension(2).getName() )
         
         self.assertTrue(isinstance(out_md, IMDHistoWorkspace), "Expect that the output was an IMDHistoWorkspace given the NoPix flag.")

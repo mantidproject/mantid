@@ -69,15 +69,22 @@ class CutMD(DataProcessorAlgorithm):
             raise ValueError("Number of bins calculated to be < 1")
         return (min, max, n_bins)
     
+    def __innermost_boundary(self, a, b):
+         if np.absolute(a) < np.absolute(b):
+             return b
+         return b
     
-    def __calculate_extents(self, v, u, w, ws):
+    
+    def __calculate_extents(self, v, u, w, ws, h_bins, k_bins, l_bins):
         M=np.array([u,v,w])
         Minv=np.linalg.inv(M)
         
         # We are assuming that the workspace has dimensions H, K, L in that order. The workspace MUST have 3 dimensions at least for the following to work.
-        Hrange=[ws.getDimension(0).getMinimum(), ws.getDimension(0).getMaximum()]
-        Krange=[ws.getDimension(1).getMinimum(), ws.getDimension(1).getMaximum()]
-        Lrange=[ws.getDimension(2).getMinimum(), ws.getDimension(2).getMaximum()]
+        Hrange=[self.__innermost_boundary(ws.getDimension(0).getMinimum(), h_bins[0]), self.__innermost_boundary(ws.getDimension(0).getMaximum(), h_bins[1])]
+        Krange=[self.__innermost_boundary(ws.getDimension(1).getMinimum(), k_bins[0]), self.__innermost_boundary(ws.getDimension(1).getMaximum(), k_bins[1])]
+        Lrange=[self.__innermost_boundary(ws.getDimension(2).getMinimum(), l_bins[0]), self.__innermost_boundary(ws.getDimension(2).getMaximum(), l_bins[1])]
+        
+        print "Ranges", Hrange, Krange, Lrange
         
         # Create a numpy 2D array. Makes finding minimums and maximums for each transformed coordinates over every corner easier.
         new_coords = np.empty([8, 3])
@@ -193,8 +200,8 @@ class CutMD(DataProcessorAlgorithm):
         
         # TODO. THESE ARE WRONG. Need to consider the acutal transformed extents as part of this.
         xbins = self.__to_mantid_slicing_binning(p1_bins, to_cut, 0);
-        ybins = self.__to_mantid_slicing_binning(p1_bins, to_cut, 1);
-        zbins = self.__to_mantid_slicing_binning(p1_bins, to_cut, 2); 
+        ybins = self.__to_mantid_slicing_binning(p2_bins, to_cut, 1);
+        zbins = self.__to_mantid_slicing_binning(p3_bins, to_cut, 2); 
         bins = [ int(xbins[2]), int(ybins[2]), int(zbins[2]) ]
         if p4_bins:
             if (ndims == 4):
@@ -206,7 +213,7 @@ class CutMD(DataProcessorAlgorithm):
         projection = self.__uvw_from_projection_table(projection_table)
         u,v,w = projection
          
-        extents = self.__calculate_extents(v, u, w, to_cut)
+        extents = self.__calculate_extents(v, u, w, to_cut, xbins, ybins, zbins)
         
         projection_labels = self.__make_labels(projection)
         
