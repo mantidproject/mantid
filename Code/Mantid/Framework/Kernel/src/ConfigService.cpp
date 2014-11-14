@@ -1254,6 +1254,10 @@ std::string ConfigServiceImpl::getUsername() {
   if (!username.empty()) {
     return username;
   }
+  username = m_pSysConfig->getString("system.env.username");
+  if (!username.empty()) {
+    return username;
+  }
 
   // give up and return an empty string
   return std::string();
