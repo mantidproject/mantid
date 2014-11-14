@@ -179,6 +179,8 @@ class CutMD(DataProcessorAlgorithm):
     def PyExec(self):
         to_cut = self.getProperty("InputWorkspace").value
         self.__verify_input_workspace(to_cut)
+        ndims = to_cut.getNumDims()
+        
         nopix = self.getProperty("NoPix").value
         
         projection_table = self.getProperty("Projection").value
@@ -187,15 +189,20 @@ class CutMD(DataProcessorAlgorithm):
         p1_bins = self.getProperty("P1Bin").value
         p2_bins = self.getProperty("P2Bin").value
         p3_bins = self.getProperty("P3Bin").value
-        p4_bins = self.getProperty("P4Bin").value # TODO handle 3D only slicing.
+        p4_bins = self.getProperty("P4Bin").value 
         
         # TODO. THESE ARE WRONG. Need to consider the acutal transformed extents as part of this.
         xbins = self.__to_mantid_slicing_binning(p1_bins, to_cut, 0);
         ybins = self.__to_mantid_slicing_binning(p1_bins, to_cut, 1);
-        zbins = self.__to_mantid_slicing_binning(p1_bins, to_cut, 2);
-        #ebins = self.__to_mantid_slicing_binning(p1_bins, to_cut, 3); # TODO. cannot guarantee this one is here
+        zbins = self.__to_mantid_slicing_binning(p1_bins, to_cut, 2); 
+        bins = [ int(xbins[2]), int(ybins[2]), int(zbins[2]) ]
+        if p4_bins:
+            if (ndims == 4):
+                ebins = self.__to_mantid_slicing_binning(p1_bins, to_cut, 3); 
+                bins.append(int(ebins[2]))
+            else:
+                raise ValueError("Cannot specify P4Bins unless the workspace is of sufficient dimensions")
         
-        # TODO. check that workspace is x=H, y=K, z=L before using the projections and slicing.
         projection = self.__uvw_from_projection_table(projection_table)
         u,v,w = projection
          
@@ -222,7 +229,6 @@ class CutMD(DataProcessorAlgorithm):
             if i > 2:
                 raise RuntimeError("Not implmented yet for non-crystallographic basis vector generation.")
         cut_alg.setProperty("OutputExtents", extents)
-        bins = [ int(xbins[2]), int(ybins[2]), int(zbins[2]) ] # Again this is a hack for 3 dimensional data only.
         cut_alg.setProperty("OutputBins", bins)
          
         cut_alg.execute()

@@ -24,7 +24,18 @@ class CutMDTest(unittest.TestCase):
         test_md = CreateMDWorkspace(Dimensions=3, Extents=[-10,10,-10,10,-10,10], Names="A,B,C", Units="U,U,U")
         # Explicitly set the coordinate system to lab Q.
         SetSpecialCoordinates(InputWorkspace=test_md, SpecialCoordinates='Q (lab frame)')
-        self.assertRaises(RuntimeError, CutMD, InputWorkspace=test_md, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1])
+        self.assertRaises(RuntimeError, CutMD, InputWorkspace=test_md, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=False)
+        
+    def test_exec_throws_if_set_to_be_a_hkl_workspace_but_with_missaligned_dimension_names(self):
+        test_md = CreateMDWorkspace(Dimensions=3, Extents=[-10,10,-10,10,-10,10], Names="K,H,L", Units="U,U,U") # K,H,L are the dimension names
+        SetSpecialCoordinates(InputWorkspace=test_md, SpecialCoordinates='HKL')
+        self.assertRaises(RuntimeError, CutMD, InputWorkspace=test_md, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=True)
+        
+    def test_exec_throws_if_giving_4th_binning_parameter_when_workspace_is_3D(self):
+        test_md = CreateMDWorkspace(Dimensions=3, Extents=[-10,10,-10,10,-10,10], Names="H,K,L", Units="U,U,U")
+        # Explicitly set the coordinate system to lab Q.
+        SetSpecialCoordinates(InputWorkspace=test_md, SpecialCoordinates='HKL')
+        self.assertRaises(RuntimeError, CutMD, InputWorkspace=test_md, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], P4Bin=[0.1])
         
     def test_slice_to_original(self):
         out_md = CutMD(self.__in_md, P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=False)
