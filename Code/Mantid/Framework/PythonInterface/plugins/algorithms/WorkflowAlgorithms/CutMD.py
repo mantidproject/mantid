@@ -86,7 +86,6 @@ class CutMD(DataProcessorAlgorithm):
         
         # Get the min max extents
         extents = list()
-        print new_coords
         for i in range(0,3):
             # Vertical slice down each corner for each dimension, then determine the max, min and use as extents
             extents.append(np.amin(new_coords[:,i]))
@@ -99,6 +98,7 @@ class CutMD(DataProcessorAlgorithm):
                 extents.append(ws.getDimension(i + 3).getMinimum())
                 extents.append(ws.getDimension(i + 3).getMaximum())
         
+        print extents
         return extents
     
     def __uvw_from_projection_table(self, projection_table):
@@ -118,8 +118,15 @@ class CutMD(DataProcessorAlgorithm):
                 self.__replace = replace
                 
             def replace(self, entry):
-                if entry > 0:
-                    return self.__replace 
+                if np.absolute(entry) == 1:
+                    if entry > 0:
+                        return self.__replace 
+                    else:
+                        return "-" + self.__replace
+                elif entry == 0:
+                    return 0
+                else:
+                    return "%.2f%s" % ( entry, self.__replace )
                 return entry
                 
         crystallographic_names = ['zeta', 'eta', 'xi' ]  
@@ -184,14 +191,12 @@ class CutMD(DataProcessorAlgorithm):
         cut_alg.setProperty("AxisAligned", False)
         # Now for the basis vectors.
         for i in range(0, to_cut.getNumDims()):
-            logger.warning("WARNING....")
             if i <= 2:
                 label = projection_labels[i]
                 unit = "TODO" # Haven't figured out how to do this yet.
                 vec = projection[i]
                 value = "%s, %s, %s" % ( label, unit, ",".join(map(str, vec))) 
                 cut_alg.setPropertyValue("BasisVector{0}".format(i) , value)
-                logger.warning("BasisVector{0}".format(i))
             if i > 2:
                 raise RuntimeError("Not implmented yet for non-crystallographic basis vector generation.")
         cut_alg.setProperty("OutputExtents", extents)
