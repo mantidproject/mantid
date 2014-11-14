@@ -415,8 +415,12 @@ namespace DataHandling
         if(fileInfo.bitsPerPixel == 8 )                      val = static_cast<double>(*reinterpret_cast<uint8_t*>(tmp));
         if(fileInfo.bitsPerPixel == 16)                      val = static_cast<double>(*reinterpret_cast<uint16_t*>(tmp));
         if(fileInfo.bitsPerPixel == 32 && !fileInfo.isFloat) val = static_cast<double>(*reinterpret_cast<uint32_t*>(tmp));
+        if(fileInfo.bitsPerPixel == 64 && !fileInfo.isFloat) val = static_cast<double>(*reinterpret_cast<uint64_t*>(tmp)); 
+        
+        // cppcheck doesn't realise that these are safe casts
+        // cppcheck-suppress invalidPointerCast
         if(fileInfo.bitsPerPixel == 32 && fileInfo.isFloat)  val = static_cast<double>(*reinterpret_cast<float*>(tmp));
-        if(fileInfo.bitsPerPixel == 64 && !fileInfo.isFloat) val = static_cast<double>(*reinterpret_cast<uint64_t*>(tmp));
+        // cppcheck-suppress invalidPointerCast
         if(fileInfo.bitsPerPixel == 64 && fileInfo.isFloat)  val = *reinterpret_cast<double*>(tmp);
                 
         val = fileInfo.scale * val - fileInfo.offset; 
@@ -442,7 +446,6 @@ namespace DataHandling
   bool LoadFITS::parseHeader(FITSInfo &headerInfo)
   {		
     bool ranSuccessfully = true;
-    bool endFound = false;
     headerInfo.headerSizeMultiplier = 0;
     try
     {
@@ -451,6 +454,7 @@ namespace DataHandling
   
       // Iterate 80 bytes at a time until header is parsed | 2880 bytes is the fixed header length of FITS
       // 2880/80 = 36 iterations required
+      bool endFound = false;
       while(!endFound)
       {
         headerInfo.headerSizeMultiplier++;
