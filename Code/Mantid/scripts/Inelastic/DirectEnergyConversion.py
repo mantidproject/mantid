@@ -993,7 +993,7 @@ class DirectEnergyConversion(object):
                               'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation',\
                               'diag_bleed_test','diag_bleed_pixels','diag_bleed_maxrate','diag_hard_mask_file','diag_use_hard_mask_only','diag_background_test_range']
 
-        # before starting long run, makes sence to verify if all files requested for the run are in fact available. Here we specify the properties which describe these files
+        # before starting long run, makes sense to verify if all files requested for the run are in fact available. Here we specify the properties which describe these files
         self.__file_properties = ['det_cal_file','map_file','hard_mask_file']
         self.__abs_norm_file_properties = ['monovan_mapfile']
 
