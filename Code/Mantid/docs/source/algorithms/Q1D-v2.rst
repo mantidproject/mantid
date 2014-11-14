@@ -9,10 +9,20 @@
 Description
 -----------
 
+Output unit
+###########
+
+The unit of the output workspace is 1/cm. Assuming this algorithm is called with
+the appropriate input correction workspaces, include accounting for absolute 
+scaling, the output is meant to represent a macroscopic cross section, hence the 
+reason the output unit is 1/cm.
+
 Q Unit Conversion
 #################
 
-The equation for :math:`Q` as function of wavelength, :math:`\lambda`,
+Section includes explanation for the effect of setting AccountForGravity to true.
+
+The equation for :math:`Q` as a function of wavelength, :math:`\lambda`,
 and neglecting gravity, is
 
 .. math:: Q = \frac{4\pi}{\lambda} sin(\theta)
@@ -34,15 +44,18 @@ constant <http://en.wikipedia.org/wiki/Planks_constant>`__ (this assumes
 neutrons are all travelling in horizontal at sample, and that
 :math:`x=y=0` would be beam centre at :math:`\lambda = 0`).
 
-Normalized Intensity
-####################
+Normalizing the input workspace
+###############################
 
-This :ref:`algorithm <Algorithm>` takes a workspace of number of neutron
+This section describes the normalisation/scaling/correction of the input
+workspace using PixelAdj, WavelengthAdj and WavePixelAdj.
+
+This :ref:`algorithm <Algorithm>` takes as input a workspace of neutron
 counts against `wavelength <http://www.mantidproject.org/Units>`_ and creates a workspace of cross
 section against Q. The output Q bins boundaries are defined by setting
 the property OutputBinning.
 
-Below is the formula used to calculate the cross section,
+Below is the formula used to calculate the cross section, here denoted
 :math:`P_I(Q)`, for one bin in the output workspace whose bin number is
 denoted by I, when the input workspace has just one detector. Each bin
 is calculated from the sum of all input wavelength bins, n, that
@@ -90,9 +103,9 @@ spans more than one :math:`Q` bin :math:`I`, it is split assuming a
 uniform distribution of the counts in :math:`\lambda`. The normalization
 takes any `bin masking <http://www.mantidproject.org/MaskBins>`_ into account.
 
-Although the units on the y-axis of the output workspace space are
-quoted in 1/cm note that conversion to a cross section requires scaling
-by an :ref:`instrument <instrument>` dependent absolute units constant.
+Some corrections will be both pixel and wavelength dependent, for example an
+angle transmission correction. Such corrections can be taken into account by
+specifying WavePixelAdj. 
 
 Resolution and Cutoffs
 ######################
@@ -135,6 +148,11 @@ large diameter beams, or where the sample generates Bragg peaks at
 low-Q. The best recourse is to check the wavelength overlap. If it is
 not too bad it may be possible to improve the data presentation simply
 by altering :math:`Q{min}` and the binning scheme.*
+
+Examples
+######################
+For an example of how Q1D is used see 
+`ISIS SANS data reduction <http://www.mantidproject.org/SANS_ISIS_Data_Reduction>`_.
 
 **References**
 
