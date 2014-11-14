@@ -43,6 +43,9 @@ public:
 private:
   void init();
   void exec();
+  void generateHeader();
+
+  static std::string g_header;
 };
 
 } // namespace WorkflowAlgorithms

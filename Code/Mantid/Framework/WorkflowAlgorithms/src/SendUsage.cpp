@@ -17,6 +17,8 @@ using std::string;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SendUsage)
 
+string SendUsage::g_header = string();
+
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -56,7 +58,24 @@ void SendUsage::init() {
 /** Execute the algorithm.
  */
 void SendUsage::exec() {
-  // buffer the json document
+  this->generateHeader();
+
+  // close up the json
+  g_log.warning() << g_header << "}" << std::endl;
+}
+
+/**
+ * This puts together the system information for the json document.
+ * The only thing it is missing is a closing brace '}' so it can
+ * be reused for other status messages at a later date.
+ */
+void SendUsage::generateHeader() {
+  // see if the information is cached
+  if (!g_header.empty()) {
+    return;
+  }
+
+  // buffer for the json document
   std::stringstream buffer;
   buffer << "{";
 
@@ -80,20 +99,18 @@ void SendUsage::exec() {
 
   // paraview version or zero
   buffer << "\"ParaView\":\"";
-  if (ConfigService::Instance().quickParaViewCheck())
+  if (ConfigService::Instance().quickParaViewCheck()) {
     buffer << Kernel::ParaViewVersion::targetVersion();
-  else
+  } else {
     buffer << 0;
+  }
   buffer << "\",";
 
   // mantid version and sha1
   buffer << "\"mantidVersion\":\"" << MantidVersion::version() << "\","
          << "\"mantidSha1\":\"" << MantidVersion::revisionFull() << "\"";
 
-  // close up the json
-  buffer << "}";
-
-  g_log.warning() << buffer.str() << std::endl;
+  g_header = buffer.str();
 }
 
 } // namespace WorkflowAlgorithms
