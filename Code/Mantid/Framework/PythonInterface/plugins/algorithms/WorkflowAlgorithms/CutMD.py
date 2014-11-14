@@ -35,6 +35,8 @@ class CutMD(DataProcessorAlgorithm):
                              direction=Direction.Output),
                              doc='Output cut workspace')
         
+        self.declareProperty(name="NoPix", defaultValue=False, doc="If False creates a full MDEventWorkspaces as output. True to create an MDHistoWorkspace as output. This is DND only in Horace terminology.")
+        
         
     def __to_mantid_slicing_binning(self, horace_binning, to_cut, dimension_index):
         dim = to_cut.getDimension(dimension_index)
@@ -98,7 +100,6 @@ class CutMD(DataProcessorAlgorithm):
                 extents.append(ws.getDimension(i + 3).getMinimum())
                 extents.append(ws.getDimension(i + 3).getMaximum())
         
-        print extents
         return extents
     
     def __uvw_from_projection_table(self, projection_table):
@@ -144,7 +145,7 @@ class CutMD(DataProcessorAlgorithm):
         
     def PyExec(self):
         to_cut = self.getProperty("InputWorkspace").value
-        
+        nopix = self.getProperty("NoPix").value
         coord_system = to_cut.getSpecialCoordinateSystem()
         if not coord_system == SpecialCoordinateSystem.HKL:
             raise ValueError("Input Workspace must be in reciprocal lattice dimensions (HKL)")
@@ -178,14 +179,11 @@ class CutMD(DataProcessorAlgorithm):
          
         extents = self.__calculate_extents(v, u, w, to_cut)
         
-        nopix = True # TODO from input parameter.
-       
-        cut_alg_name = "SliceMD"
-        if nopix:
-            cut_alg_name= "BinMD"
+        
             
         projection_labels = self.__make_labels(projection)
         
+        cut_alg_name = "BinMD" if nopix else "SliceMD"
         cut_alg = AlgorithmManager.Instance().create(cut_alg_name)
         cut_alg.setChild(True)
         cut_alg.initialize()

@@ -2,7 +2,7 @@ import unittest
 import testhelpers
 import numpy as np
 from mantid.simpleapi import *
-from mantid.api import IMDHistoWorkspace
+from mantid.api import IMDHistoWorkspace, IMDEventWorkspace
 
 
 class CutMDTest(unittest.TestCase):
@@ -28,7 +28,7 @@ class CutMDTest(unittest.TestCase):
         
     def test_slice_to_original(self):
         out_md = CutMD(self.__in_md, P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1])
-        self.assertTrue(isinstance(out_md, IMDHistoWorkspace))
+        self.assertTrue(isinstance(out_md, IMDEventWorkspace), "Should default to producing an IMDEventWorkspace.")
         # No rotation. Basis vectors should have been left the same, so no extent changes.
         self.assertEquals(self.__in_md.getDimension(0).getMinimum(), out_md.getDimension(0).getMinimum())
         self.assertEquals(self.__in_md.getDimension(0).getMaximum(), out_md.getDimension(0).getMaximum())
@@ -39,6 +39,7 @@ class CutMDTest(unittest.TestCase):
         self.assertEquals("['zeta', 0, 0]",  out_md.getDimension(0).getName() )
         self.assertEquals("[0, 'eta', 0]",  out_md.getDimension(1).getName() )
         self.assertEquals("[0, 0, 'xi']",  out_md.getDimension(2).getName() )
+        self.assertTrue(isinstance(out_md, IMDEventWorkspace), "nopix defaults to True. Should get an IMDEventWorkspace")
         
     def test_wrong_projection_workspace_format_wrong_column_numbers(self):
         projection = CreateEmptyTableWorkspace()
@@ -110,7 +111,7 @@ class CutMDTest(unittest.TestCase):
         projection.addRow([1, 1, 0, 0, "aaa"])  
         projection.addRow([0, 0, 1, 0, "aaa"])  
                     
-        out_md = CutMD(to_cut, Projection=projection, P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1])
+        out_md = CutMD(to_cut, Projection=projection, P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], NoPix=True)
         
         '''
         Here we check that the corners in HKL end up in the expected positions when transformed into the new scaled basis
@@ -125,6 +126,8 @@ class CutMDTest(unittest.TestCase):
         self.assertEquals("['zeta', 'zeta', 0]",  out_md.getDimension(0).getName() )
         self.assertEquals("['-eta', 'eta', 0]",  out_md.getDimension(1).getName() )
         self.assertEquals("[0, 0, 'xi']",  out_md.getDimension(2).getName() )
+        
+        self.assertTrue(isinstance(out_md, IMDHistoWorkspace), "Expect that the output was an IMDHistoWorkspace given the NoPix flag.")
         
         
                     
