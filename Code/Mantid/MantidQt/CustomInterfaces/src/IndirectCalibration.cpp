@@ -213,7 +213,7 @@ namespace CustomInterfaces
     m_batchAlgoRunner->addAlgorithm(calibrationAlg);
 
     // Initially take the calibration workspace as the result
-    m_tabResultWorkspace = calibrationWsName.toStdString();
+    m_pythonExportWsName = calibrationWsName.toStdString();
 
     // Properties for algorithms that use data from calibration as an input
     BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromCalProps;
@@ -268,7 +268,7 @@ namespace CustomInterfaces
       m_batchAlgoRunner->addAlgorithm(resAlg);
 
       // When creating resolution file take the resolution workspace as the result
-      m_tabResultWorkspace = resolutionWsName.toStdString();
+      m_pythonExportWsName = resolutionWsName.toStdString();
     }
 
     m_batchAlgoRunner->executeBatchAsync();

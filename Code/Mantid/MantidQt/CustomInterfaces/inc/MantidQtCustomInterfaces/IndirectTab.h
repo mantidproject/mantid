@@ -164,7 +164,7 @@ namespace CustomInterfaces
 
     Mantid::Kernel::DateAndTime m_tabStartTime;
     Mantid::Kernel::DateAndTime m_tabEndTime;
-    std::string m_tabResultWorkspace;
+    std::string m_pythonExportWsName;
 
   };
 } // namespace CustomInterfaces

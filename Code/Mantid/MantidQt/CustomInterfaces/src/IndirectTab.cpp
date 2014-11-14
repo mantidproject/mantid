@@ -77,7 +77,7 @@ namespace CustomInterfaces
    */
   void IndirectTab::exportPythonScript()
   {
-    g_log.information() << "Python export for workspace: " << m_tabResultWorkspace <<
+    g_log.information() << "Python export for workspace: " << m_pythonExportWsName <<
       ", between " << m_tabStartTime << " and " << m_tabEndTime << std::endl;
 
     // Take the search times to be a second either side of the actual times, just in case
@@ -89,13 +89,13 @@ namespace CustomInterfaces
     enabled << "Filename" << "InputWorkspace" << "UnrollAll" << "SpecifyAlgorithmVersions";
 
     // Give some indication to the user that they will have to specify the workspace
-    if(m_tabResultWorkspace.empty())
+    if(m_pythonExportWsName.empty())
       g_log.warning("This tab has not specified a result workspace name.");
 
     // Set default properties
     QHash<QString, QString> props;
     props["Filename"] = "IndirectInterfacePythonExport.py";
-    props["InputWorkspace"] = QString::fromStdString(m_tabResultWorkspace);
+    props["InputWorkspace"] = QString::fromStdString(m_pythonExportWsName);
     props["SpecifyAlgorithmVersions"] = "Specify All";
     props["UnrollAll"] = "1";
     props["StartTimestamp"] = QString::fromStdString(startSearchTime.toISO8601String());

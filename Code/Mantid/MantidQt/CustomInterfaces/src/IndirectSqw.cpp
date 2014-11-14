@@ -233,7 +233,7 @@ namespace CustomInterfaces
     }
 
     // Set the name of the result workspace for Python export
-    m_tabResultWorkspace = sqwWsName.toStdString();
+    m_pythonExportWsName = sqwWsName.toStdString();
 
     m_batchAlgoRunner->executeBatch();
   }

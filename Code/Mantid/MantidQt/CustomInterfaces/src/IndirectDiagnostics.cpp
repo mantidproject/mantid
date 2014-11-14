@@ -175,7 +175,7 @@ namespace CustomInterfaces
     QString firstFilename = m_uiForm.slice_inputFile->getFirstFilename();
     QFileInfo firstFileInfo(firstFilename);
     QString resultWorkspace = firstFileInfo.baseName() + suffix;
-    m_tabResultWorkspace = resultWorkspace.toStdString();
+    m_pythonExportWsName = resultWorkspace.toStdString();
 
     runAlgorithm(sliceAlg);
   }
