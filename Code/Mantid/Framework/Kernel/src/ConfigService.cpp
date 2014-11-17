@@ -25,6 +25,7 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/Notification.h>
 #include <Poco/Environment.h>
+#include <Poco/File.h>
 #include <Poco/Process.h>
 #include <Poco/String.h>
 #ifdef _WIN32
@@ -1239,6 +1240,80 @@ std::string ConfigServiceImpl::getComputerName()
 std::string ConfigServiceImpl::getOSVersion()
 {
   return m_pSysConfig->getString("system.osVersion");
+}
+
+/// @returns true if the file exists and can be read
+bool canRead(const std::string &filename) {
+  // check for existence of the file
+  Poco::File pocoFile(filename);
+  if (!pocoFile.exists()) {
+    return false;
+  }
+
+  // just return if it is readable
+  return pocoFile.canRead();
+}
+
+/**
+ * Gets the name of the operating system version in a human readable form.
+ *
+ * @returns The operating system desciption
+ */
+std::string ConfigServiceImpl::getOSVersionReadable() {
+  std::string description;
+
+#ifdef __linux__
+  // read os-release
+  static const std::string OS_RELEASE("/etc/os-release");
+  if (canRead(OS_RELEASE)) {
+    static const std::string PRETTY_NAME("PRETTY_NAME=");
+
+    // open it to see if it has the magic line
+    std::ifstream handle(OS_RELEASE.c_str(), std::ios::in);
+
+    // go through the file
+    std::string line;
+    while (std::getline(handle, line)) {
+      if (line.find(PRETTY_NAME) != std::string::npos) {
+        if (line.length() > PRETTY_NAME.length() + 1) {
+          size_t length = line.length() - PRETTY_NAME.length() - 2;
+          description = line.substr(PRETTY_NAME.length() + 1, length);
+        }
+        break;
+      }
+    }
+
+    // cleanup
+    handle.close();
+    if (!description.empty()) {
+      return description;
+    }
+  }
+
+  // read redhat-release
+  static const std::string REDHAT_RELEASE("/etc/redhat-release");
+  if (canRead(REDHAT_RELEASE)) {
+    // open it to see if it has the magic line
+    std::ifstream handle(REDHAT_RELEASE.c_str(), std::ios::in);
+
+    // go through the file
+    std::string line;
+    while (std::getline(handle, line)) {
+      if (!line.empty()) {
+        description = line;
+        break;
+      }
+    }
+
+    // cleanup
+    handle.close();
+    if (!description.empty()) {
+      return description;
+    }
+  }
+#endif
+
+  return description;
 }
 
 /// @returns The name of the current user as reported by the environment.
