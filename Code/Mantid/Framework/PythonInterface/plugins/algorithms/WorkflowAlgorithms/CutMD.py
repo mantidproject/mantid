@@ -73,33 +73,7 @@ class CutMD(DataProcessorAlgorithm):
         if n_bins < 1:
             raise ValueError("Number of bins calculated to be < 1")
         return (dim_min, dim_max, n_bins)
-    
-    
-    def __innermost_boundary(self, a, b):
-         if np.absolute(a) < np.absolute(b):
-             return b
-         return b
-     
-    def __calculate_inner_extents(self, boundaries_a, boundaries_b, ws):
-        
-        extents = (self.__innermost_boundary(boundaries_a[0], boundaries_b[0]), 
-                   self.__innermost_boundary(boundaries_a[1], boundaries_b[1]), 
-                   self.__innermost_boundary(boundaries_a[2], boundaries_b[2]),
-                   self.__innermost_boundary(boundaries_a[3], boundaries_b[3]),
-                   self.__innermost_boundary(boundaries_a[4], boundaries_b[4]),
-                   self.__innermost_boundary(boundaries_a[5], boundaries_b[5])
-                   )
-        
-            # Copy extents for non crystallographic dimensions    
-        non_crystallographic_dimensions = ws.getNumDims() - 3
-        if non_crystallographic_dimensions > 0:
-            for i in range(0, non_crystallographic_dimensions):
-                extents.append(ws.getDimension(i + 3).getMinimum())
-                extents.append(ws.getDimension(i + 3).getMaximum())
-        
-        return extents
-    
-    
+      
     def __calculate_extents(self, v, u, w, limits):
         M=np.array([u,v,w])
         Minv=np.linalg.inv(M)
@@ -212,7 +186,6 @@ class CutMD(DataProcessorAlgorithm):
         p3_bins = self.getProperty("P3Bin").value
         p4_bins = self.getProperty("P4Bin").value 
         
-        # TODO. THESE ARE WRONG. Need to consider the actual transformed extents as part of this.
         xbins = self.__to_mantid_slicing_binning(p1_bins, to_cut, 0);
         ybins = self.__to_mantid_slicing_binning(p2_bins, to_cut, 1);
         zbins = self.__to_mantid_slicing_binning(p3_bins, to_cut, 2); 
@@ -226,16 +199,9 @@ class CutMD(DataProcessorAlgorithm):
         
         projection = self.__uvw_from_projection_table(projection_table)
         u,v,w = projection
-         
-        h_limits_ws = (to_cut.getDimension(0).getMinimum(), to_cut.getDimension(0).getMaximum())
-        k_limits_ws = (to_cut.getDimension(1).getMinimum(), to_cut.getDimension(1).getMaximum())
-        l_limits_ws = (to_cut.getDimension(2).getMinimum(), to_cut.getDimension(2).getMaximum())
-        
-        extents_by_ws = self.__calculate_extents(v, u, w, (h_limits_ws, k_limits_ws, l_limits_ws))
-        
-        extents_by_bin_limits = self.__calculate_extents(v, u, w, ( (xbins[0], xbins[1]), (ybins[0], ybins[1]), (zbins[0], zbins[1])))
-        
-        extents = self.__calculate_inner_extents(extents_by_ws, extents_by_bin_limits, to_cut)
+   
+        # Calculate the extents based on the bin limits only.
+        extents = self.__calculate_extents(v, u, w, ( (xbins[0], xbins[1]), (ybins[0], ybins[1]), (zbins[0], zbins[1])))
         
         projection_labels = self.__make_labels(projection)
         
