@@ -182,8 +182,8 @@ interfaces.categories.hidden =
 UploaderWebServer = @MANTIDPUBLISHER@
 # Local system path for the script repository.
 ScriptLocalRepository =
-# Url for the remote script repository.
-ScriptRepository = https://github.com/mantidproject/scriptrepository
+# Base Url for the remote script repository. Not necessarily accessible, it is used to construct longer URLs
+ScriptRepository = http://download.mantidproject.org/scriptrepository/
 # Pattern given to ScriptRepository that is used to hide entries from repository to the users. It is a csv string separated with ';'
 ScriptRepositoryIgnore = *pyc;
 
