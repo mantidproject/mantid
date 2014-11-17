@@ -8,8 +8,8 @@ try:
 except ImportError:
     raise ImportError('The "mantidplot" module can only be used from within MantidPlot.')
 
-import mantidplot.proxies as proxies
-from mantidplot.proxies import threadsafe_call, new_proxy, getWorkspaceNames
+import pymantidplot.proxies as proxies
+from pymantidplot.proxies import threadsafe_call, new_proxy, getWorkspaceNames
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
