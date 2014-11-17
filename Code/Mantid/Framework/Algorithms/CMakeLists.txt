@@ -14,6 +14,7 @@ set ( SRC_FILES
 	src/AppendSpectra.cpp
 	src/ApplyCalibration.cpp
 	src/ApplyDeadTimeCorr.cpp
+	src/PhaseQuadMuon.cpp
 	src/ApplyDetailedBalance.cpp
 	src/ApplyTransmissionCorrection.cpp
 	src/AsymmetryCalc.cpp
@@ -262,6 +263,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AppendSpectra.h
 	inc/MantidAlgorithms/ApplyCalibration.h
 	inc/MantidAlgorithms/ApplyDeadTimeCorr.h
+	inc/MantidAlgorithms/PhaseQuadMuon.h
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
 	inc/MantidAlgorithms/AsymmetryCalc.h
