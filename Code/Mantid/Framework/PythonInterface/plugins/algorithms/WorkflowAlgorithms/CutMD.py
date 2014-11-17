@@ -44,31 +44,36 @@ class CutMD(DataProcessorAlgorithm):
     def __to_mantid_slicing_binning(self, horace_binning, to_cut, dimension_index):
         
         dim = to_cut.getDimension(dimension_index)
-        min = dim.getMinimum()
-        max = dim.getMaximum()
+        dim_min = dim.getMinimum()
+        dim_max = dim.getMaximum()
         n_arguments = len(horace_binning)
         if n_arguments == 0:
             raise ValueError("binning parameter cannot be empty")
         elif n_arguments == 1:
             step_size = horace_binning[0]
-            n_bins = (max - min) / step_size
+            n_bins = int( (dim_max - dim_min) / step_size)
+            # Calculate the maximum based on step size and number of bins
+            dim_max = dim_min + ( n_bins * step_size )
         elif n_arguments == 2:
-            min = horace_binning[0]
-            max = horace_binning[1]
+            dim_min = horace_binning[0]
+            dim_max = horace_binning[1]
             n_bins = 1
         elif n_arguments == 3:
+            dim_min = horace_binning[0]
+            dim_max = horace_binning[2]
             step_size = horace_binning[1]
-            n_bins = (max - min) / step_size
-            min = horace_binning[0]
-            max = horace_binning[2]
-            pass
+            n_bins = int( (dim_max - dim_min) / step_size)
+            dim_max = dim_min + ( n_bins * step_size )
+            #if dim_max != horace_binning[2]:
+            #    pass # TODO, we should generate a warning at this point.
         else:
             raise ValueError("Too many arguments given to the binning parameter")
-        if min >= max:
+        if dim_min >= dim_max:
             raise ValueError("Dimension Min >= Max value. Min %.2f Max %.2f", min, max)
         if n_bins < 1:
             raise ValueError("Number of bins calculated to be < 1")
-        return (min, max, n_bins)
+        return (dim_min, dim_max, n_bins)
+    
     
     def __innermost_boundary(self, a, b):
          if np.absolute(a) < np.absolute(b):
@@ -207,7 +212,7 @@ class CutMD(DataProcessorAlgorithm):
         p3_bins = self.getProperty("P3Bin").value
         p4_bins = self.getProperty("P4Bin").value 
         
-        # TODO. THESE ARE WRONG. Need to consider the acutal transformed extents as part of this.
+        # TODO. THESE ARE WRONG. Need to consider the actual transformed extents as part of this.
         xbins = self.__to_mantid_slicing_binning(p1_bins, to_cut, 0);
         ybins = self.__to_mantid_slicing_binning(p2_bins, to_cut, 1);
         zbins = self.__to_mantid_slicing_binning(p3_bins, to_cut, 2); 
