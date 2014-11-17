@@ -1055,15 +1055,33 @@ namespace Mantid
         // Loop over the output workspaces
         for (outWS = outputWorkspaces.begin(); outWS != outputWorkspaces.end(); ++outWS)
         {
+          WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(*outWS);
+
           // Loop over the input workspaces, making the call that copies their history to the output ones
           // (Protection against copy to self is in WorkspaceHistory::copyAlgorithmHistory)
           for (inWS = inputWorkspaces.begin(); inWS != inputWorkspaces.end(); ++inWS)
           {
             (*outWS)->history().addHistory( (*inWS)->getHistory() );
+
+            if(wsGroup)
+            {
+              for(size_t i = 0; i < wsGroup->size(); i++)
+              {
+                wsGroup->getItem(i)->history().addHistory( (*inWS)->getHistory() );
+              }
+            }
           }
 
           // Add the history for the current algorithm to all the output workspaces
           (*outWS)->history().addHistory(m_history);
+
+          if(wsGroup)
+          {
+            for(size_t i = 0; i < wsGroup->size(); i++)
+            {
+              wsGroup->getItem(i)->history().addHistory(m_history);
+            }
+          }
         }
       }
       //this is a child algorithm, but we still want to keep the history.
