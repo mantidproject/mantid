@@ -5,7 +5,16 @@ import numpy as np
 import os.path
 import re
 
-
+class Projection(object):
+    u = "u"
+    v = "v"
+    w = "w"
+    
+class ProjectionUnit(object):
+    r = "r"
+    a = "a"
+    
+    
 class CutMD(DataProcessorAlgorithm):
     
     def category(self):
@@ -111,13 +120,21 @@ class CutMD(DataProcessorAlgorithm):
             I = np.identity(3)
             return (I[0, :], I[1, :], I[2, :])
         column_names = projection_table.getColumnNames()
-        u = np.array(projection_table.column('u'))
-        v = np.array(projection_table.column('v'))
-        if not 'w' in column_names:
+        u = np.array(projection_table.column(Projection.u))
+        v = np.array(projection_table.column(Projection.v))
+        if not Projection.w in column_names:
             w = np.cross(v,u)
         else:
-            w = np.array(projection_table.column('w'))
+            w = np.array(projection_table.column(Projection.w))
         return (u, v, w)
+    
+    def __units_from_projection_table(self, projection_table):
+        if not isinstance(projection_table, ITableWorkspace) or not "type" in projection_table.getColumnNames():
+            units = (ProjectionUnit.r, ProjectionUnit.r, ProjectionUnit.r)
+        else:
+            units = tuple(projection_table.column("type"))
+        return units
+            
     
     def __make_labels(self, projection):
 
@@ -170,9 +187,9 @@ class CutMD(DataProcessorAlgorithm):
         if isinstance(projection_table, ITableWorkspace):
             column_names = set(projection_table.getColumnNames())
             logger.warning(str(column_names)) 
-            if not column_names == set(['u', 'v', 'type']):
-                    if not column_names == set(['u', 'v', 'offsets', 'type']):
-                        if not column_names == set(['u', 'v', 'w', 'offsets', 'type']):
+            if not column_names == set([Projection.u, Projection.v, 'type']):
+                    if not column_names == set([Projection.u, Projection.v, 'offsets', 'type']):
+                        if not column_names == set([Projection.u, Projection.v, Projection.w, 'offsets', 'type']):
                             raise ValueError("Projection table schema is wrong! Column names received: " + str(column_names) )
             if projection_table.rowCount() != 3:
                 raise ValueError("Projection table expects 3 rows")
@@ -204,6 +221,7 @@ class CutMD(DataProcessorAlgorithm):
                 raise ValueError("Cannot specify P4Bins unless the workspace is of sufficient dimensions")
         
         projection = self.__uvw_from_projection_table(projection_table)
+        units = self.__units_from_projection_table(projection_table)
         u,v,w = projection
    
         # Calculate the extents based on the bin limits only.
