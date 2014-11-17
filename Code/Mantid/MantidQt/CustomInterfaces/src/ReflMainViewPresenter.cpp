@@ -394,7 +394,7 @@ namespace MantidQt
         throw std::runtime_error("Invalid row");
 
       const std::string runStr = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
-      MatrixWorkspace_sptr run = boost::dynamic_pointer_cast<MatrixWorkspace>(loadRun(runStr, m_view->getProcessInstrument()));
+      MatrixWorkspace_sptr run = boost::dynamic_pointer_cast<MatrixWorkspace>(prepareRunWorkspace(runStr));
 
       //Fetch two theta from the log if needed
       if(m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().isEmpty())
@@ -498,6 +498,74 @@ namespace MantidQt
     }
 
     /**
+    Takes a user specified run, or list of runs, and returns a pointer to the desired TOF workspace
+    @param runStr : The run or list of runs (separated by '+')
+    @throws std::runtime_error if the workspace could not be prepared
+    @returns a shared pointer to the workspace
+    */
+    Workspace_sptr ReflMainViewPresenter::prepareRunWorkspace(const std::string& runStr)
+    {
+      const std::string instrument = m_view->getProcessInstrument();
+
+      std::vector<std::string> runs;
+      boost::split(runs, runStr, boost::is_any_of("+"));
+
+      if(runs.empty())
+        throw std::runtime_error("No runs given");
+
+      //Remove leading/trailing whitespace from each run
+      for(auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
+        boost::trim(*runIt);
+
+      //If we're only given one run, just return that
+      if(runs.size() == 1)
+        return loadRun(runs[0], instrument);
+
+      const std::string outputName = "TOF_" + boost::algorithm::join(runs, "_");
+
+      //Check if we've already prepared it
+      if(AnalysisDataService::Instance().doesExist(outputName))
+        return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
+
+
+      /* Ideally, this should be executed as a child algorithm to keep the ADS tidy, but
+       * that doesn't preserve history nicely, so we'll just take care of tidying up in
+       * the event of failure.
+       */
+      IAlgorithm_sptr algPlus = AlgorithmManager::Instance().create("Plus");
+      algPlus->initialize();
+      algPlus->setProperty("LHSWorkspace", loadRun(runs[0], instrument)->name());
+      algPlus->setProperty("OutputWorkspace", outputName);
+
+      //Drop the first run from the runs list
+      runs.erase(runs.begin());
+
+      try
+      {
+        //Iterate through all the remaining runs, adding them to the first run
+        for(auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
+        {
+          algPlus->setProperty("RHSWorkspace", loadRun(*runIt, instrument)->name());
+          algPlus->execute();
+
+          //After the first execution we replace the LHS with the previous output
+          algPlus->setProperty("LHSWorkspace", outputName);
+        }
+      }
+      catch(...)
+      {
+        //If we're unable to create the full workspace, discard the partial version
+        AnalysisDataService::Instance().remove(outputName);
+
+        //We've tidied up, now re-throw.
+        throw;
+      }
+
+      return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
+    }
+
+
+    /**
     Loads a run from disk or fetches it from the AnalysisDataService
     @param run : The name of the run
     @param instrument : The instrument the run belongs to
@@ -515,7 +583,7 @@ namespace MantidQt
       {
         std::string wsName;
 
-        //Look "TOF_<run_number>" in the ADS
+        //Look for "TOF_<run_number>" in the ADS
         wsName = "TOF_" + run;
         if(AnalysisDataService::Instance().doesExist(wsName))
           return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
@@ -547,7 +615,7 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::reduceRow(int rowNo)
     {
-      const std::string      run = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
+      const std::string   runStr = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
       const std::string transStr = m_model->data(m_model->index(rowNo, COL_TRANSMISSION)).toString().toStdString();
       const std::string  options = m_model->data(m_model->index(rowNo, COL_OPTIONS)).toString().toStdString();
 
@@ -558,7 +626,7 @@ namespace MantidQt
       if(thetaGiven)
         theta = m_model->data(m_model->index(rowNo, COL_ANGLE)).toDouble();
 
-      Workspace_sptr runWS = loadRun(run, m_view->getProcessInstrument());
+      Workspace_sptr runWS = prepareRunWorkspace(runStr);
       const std::string runNo = getRunNumber(runWS);
 
       MatrixWorkspace_sptr transWS;
@@ -682,7 +750,7 @@ namespace MantidQt
         const double         qmin = m_model->data(m_model->index(*rowIt, COL_QMIN)).toDouble();
         const double         qmax = m_model->data(m_model->index(*rowIt, COL_QMAX)).toDouble();
 
-        Workspace_sptr runWS = loadRun(runStr);
+        Workspace_sptr runWS = prepareRunWorkspace(runStr);
         if(runWS)
         {
           const std::string runNo = getRunNumber(runWS);
@@ -870,6 +938,8 @@ namespace MantidQt
       case IReflPresenter::PasteSelectedFlag:   pasteSelected();     break;
       case IReflPresenter::SearchFlag:          search();            break;
       case IReflPresenter::TransferFlag:        transfer();          break;
+      case IReflPresenter::ImportTableFlag:     importTable();       break;
+      case IReflPresenter::ExportTableFlag:     exportTable();       break;
       }
       //Not having a 'default' case is deliberate. gcc issues a warning if there's a flag we aren't handling.
     }
@@ -958,6 +1028,22 @@ namespace MantidQt
       {
         m_view->giveUserCritical("Could not open workspace: " + std::string(e.what()), "Error");
       }
+    }
+
+    /**
+    Import a table from TBL file
+    */
+    void ReflMainViewPresenter::importTable()
+    {
+      m_view->showAlgorithmDialog("LoadReflTBL");
+    }
+
+    /**
+    Export a table to TBL file
+    */
+    void ReflMainViewPresenter::exportTable()
+    {
+      m_view->showAlgorithmDialog("SaveReflTBL");
     }
 
     /**

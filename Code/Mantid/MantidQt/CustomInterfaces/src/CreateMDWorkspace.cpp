@@ -208,7 +208,7 @@ void CreateMDWorkspace::findUBMatrixClicked()
 
     command = command.arg(args);
     // Run peak indexing
-    runPythonCode(command).trimmed();
+    runPythonCode(command);
   }
   catch(std::invalid_argument& ex)
   {

@@ -267,7 +267,7 @@ namespace CustomInterfaces
         "plotSpectrum(sqw_ws, range(0, n_spec))\n";
     }
 
-    m_pythonRunner.runPythonCode(pyInput).trimmed();
+    m_pythonRunner.runPythonCode(pyInput);
   }
 
   /**
@@ -321,7 +321,7 @@ namespace CustomInterfaces
       convertSpecAlg->execute();
 
       QString pyInput = "plot2D('" + convertedWsName + "')\n";
-      m_pythonRunner.runPythonCode(pyInput).trimmed();
+      m_pythonRunner.runPythonCode(pyInput);
     }
     else
     {

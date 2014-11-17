@@ -78,6 +78,7 @@ IndirectDataReduction::~IndirectDataReduction()
  */
 void IndirectDataReduction::helpClicked()
 {
+
   QString tabName = m_uiForm.tabWidget->tabText(
       m_uiForm.tabWidget->currentIndex());
 

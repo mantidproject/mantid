@@ -115,7 +115,6 @@ namespace Mantid
       * @param alg :: LoadEventNexus
       * @param entry_name :: name of the bank
       * @param prog :: Progress reporter
-      * @param scheduler :: ThreadScheduler running this task
       * @param event_id :: array with event IDs
       * @param event_time_of_flight :: array with event TOFS
       * @param numEvents :: how many events in the arrays
@@ -129,7 +128,7 @@ namespace Mantid
       * @return
       */
       ProcessBankData(LoadEventNexus * alg, std::string entry_name,
-        Progress * prog, ThreadScheduler * scheduler,
+        Progress * prog,
         boost::shared_array<uint32_t> event_id,
         boost::shared_array<float> event_time_of_flight,
         size_t numEvents, size_t startAt,
@@ -139,7 +138,7 @@ namespace Mantid
         detid_t min_event_id, detid_t max_event_id)
         : Task(), alg(alg), entry_name(entry_name), pixelID_to_wi_vector(alg->pixelID_to_wi_vector),
         pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
-        prog(prog), scheduler(scheduler),
+        prog(prog),
         event_id(event_id), event_time_of_flight(event_time_of_flight), numEvents(numEvents), startAt(startAt),
         event_index(event_index),
         thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
@@ -360,16 +359,15 @@ namespace Mantid
           "monotonically increasing pulse times" << std::endl;
 
         //Join back up the tof limits to the global ones
-        PARALLEL_CRITICAL(tof_limits)
+        //This is not thread safe, so only one thread at a time runs this.
         {
-          //This is not thread safe, so only one thread at a time runs this.
+          Poco::FastMutex::ScopedLock _lock(alg->m_tofMutex);
           if (my_shortest_tof < alg->shortest_tof) { alg->shortest_tof = my_shortest_tof;}
           if (my_longest_tof > alg->longest_tof ) { alg->longest_tof  = my_longest_tof;}
           alg->bad_tofs += badTofs;
           alg->discarded_events += my_discarded_events;
         }
-
-
+      
         // For Linux with tcmalloc, make sure memory goes back;
         // but don't call if more than 15% of memory is still available, since that slows down the loading.
         MemoryManager::Instance().releaseFreeMemoryIfAbove(0.85);
@@ -391,8 +389,6 @@ namespace Mantid
       detid_t pixelID_to_wi_offset;
       /// Progress reporting
       Progress * prog;
-      /// ThreadScheduler running this task
-      ThreadScheduler * scheduler;
       /// event pixel ID array
       boost::shared_array<uint32_t> event_id;
       /// event TOF array
@@ -444,7 +440,6 @@ namespace Mantid
         Progress * prog, boost::shared_ptr<Mutex> ioMutex, ThreadScheduler * scheduler)
         : Task(),
         alg(alg), entry_name(entry_name), entry_type(entry_type),
-        pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
         // prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL), m_loadError(false),
         prog(prog), scheduler(scheduler), m_loadError(false),
         m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(), m_event_id(NULL),
@@ -881,14 +876,14 @@ namespace Mantid
         if (alg->splitProcessing)
           mid_id = (m_max_id + m_min_id) / 2;
 
-        ProcessBankData * newTask1 = new ProcessBankData(alg, entry_name, prog,scheduler,
+        ProcessBankData * newTask1 = new ProcessBankData(alg, entry_name, prog,
           event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
           thisBankPulseTimes, m_have_weight, event_weight_shrd,
           m_min_id, mid_id);
         scheduler->push(newTask1);
         if (alg->splitProcessing)
         {
-          ProcessBankData * newTask2 = new ProcessBankData(alg, entry_name, prog,scheduler,
+          ProcessBankData * newTask2 = new ProcessBankData(alg, entry_name, prog,
             event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
             thisBankPulseTimes, m_have_weight, event_weight_shrd,
             (mid_id+1), m_max_id);
@@ -919,10 +914,6 @@ namespace Mantid
       std::string entry_name;
       /// NXS type
       std::string entry_type;
-      /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace index)
-      const std::vector<size_t> & pixelID_to_wi_vector;
-      /// Offset in the pixelID_to_wi_vector to use.
-      detid_t pixelID_to_wi_offset;
       /// Progress reporting
       Progress * prog;
       /// ThreadScheduler running this task

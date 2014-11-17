@@ -1,15 +1,24 @@
-#ifndef MANTID_MDALGORITHMS_SXDMDNORM_H_
-#define MANTID_MDALGORITHMS_SXDMDNORM_H_
+#ifndef MANTID_MDALGORITHMS_INTEGRATEFLUX_H_
+#define MANTID_MDALGORITHMS_INTEGRATEFLUX_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidMDAlgorithms/SlicingAlgorithm.h"
+
 namespace Mantid
 {
+
+namespace DataObjects
+{
+  class EventWorkspace;
+}
+
 namespace MDAlgorithms
 {
 
-  /** SXDMDNorm : Generate MD normalization for single crystal diffraction
+  /** Algorithm IntegrateFlux.
+
+    Calculates indefinite integral of the spectra in the input workspace sampled at a regular grid.
+    The input workspace is expected to be an event workspace with weighted-no-time events.
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -31,14 +40,10 @@ namespace MDAlgorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  bool compareMomentum(Mantid::Kernel::VMD v1, Mantid::Kernel::VMD v2);
-
-  class DLLExport SXDMDNorm  :public SlicingAlgorithm
+  class DLLExport IntegrateFlux  : public API::Algorithm
   {
   public:
-    SXDMDNorm();
-    virtual ~SXDMDNorm();
-    
+
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
@@ -48,30 +53,13 @@ namespace MDAlgorithms
     void init();
     void exec();
 
-    /// function to calculate intersections of teh trajectory with MDBoxes
-    std::vector<Mantid::Kernel::VMD> calculateIntersections(Mantid::Geometry::IDetector_const_sptr detector);
-    /// number of MD dimensions
-    size_t m_nDims;
-    /// Normalization workspace
-    Mantid::MDEvents::MDHistoWorkspace_sptr m_normWS;
-    /// Input workspace
-    Mantid::API::IMDEventWorkspace_sptr m_inputWS;
-    ///limits for h,k,l dimensions
-    coord_t hMin,hMax,kMin,kMax,lMin,lMax;
-    ///flag for integrated h,k,l dimensions
-    bool hIntegrated,kIntegrated,lIntegrated;
-    ///(2*PiRUBW)^-1
-    Mantid::Kernel::DblMatrix transf;
-    /// limits for momentum
-    double KincidentMin,KincidentMax;
-    ///index of h,k,l dimensions in the output workspaces
-    size_t hIndex,kIndex,lIndex;
-    /// cached x values along dimensions h,k,l
-    std::vector<double> m_hX, m_kX, m_lX;
+    boost::shared_ptr<API::MatrixWorkspace> createOutputWorkspace( const DataObjects::EventWorkspace& eventWS, size_t nX ) const;
+    void integrateSpectra( const DataObjects::EventWorkspace& eventWS, API::MatrixWorkspace &integrWS );
+
   };
 
 
 } // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_MDALGORITHMS_SXDMDNORM_H_ */
+#endif  /* MANTID_MDALGORITHMS_INTEGRATEFLUX_H_ */

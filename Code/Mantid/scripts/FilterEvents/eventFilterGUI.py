@@ -17,6 +17,8 @@ import mantid.simpleapi as api
 import mantid.kernel
 from mantid.simpleapi import AnalysisDataService 
 
+from mantid.kernel import ConfigService
+
 import os
 
 HUGE_FAST = 10000
@@ -45,11 +47,16 @@ class MainWindow(QtGui.QMainWindow):
 
         
         # Version 2.0 + Import
+        import matplotlib
+        from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+        from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+        from matplotlib.figure import Figure
+
         self.figure = Figure((4.0, 3.0), dpi=100)
         self.theplot = self.figure.add_subplot(111)
         self.graphicsView = FigureCanvas(self.figure)
         self.graphicsView.setParent(self.centralwidget)
-        self.graphicsView.setGeometry(QtCore.QRect(40, 230, 721, 411))
+        self.graphicsView.setGeometry(QtCore.QRect(20, 150, 741, 411))
         self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
 
     """ 
@@ -59,6 +66,10 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Base class
         QtGui.QMainWindow.__init__(self,parent)
+
+        # Mantid configuration
+        config = ConfigService.Instance()
+        self._instrument = config["default.instrument"]
 
         # Central widget 
         self.centralwidget = QtGui.QWidget(self)
@@ -117,7 +128,8 @@ class MainWindow(QtGui.QMainWindow):
         # File loader
         self.scanEventWorkspaces()
         self.connect(self.ui.pushButton_refreshWS, SIGNAL('clicked()'), self.scanEventWorkspaces)
-        self.connect(self.ui.pushButton_2, SIGNAL('clicked()'), self.browse_openFile)
+        self.connect(self.ui.pushButton_browse, SIGNAL('clicked()'), self.browse_File)
+        self.connect(self.ui.pushButton_load, SIGNAL('clicked()'), self.load_File)
         self.connect(self.ui.pushButton_3, SIGNAL('clicked()'), self.use_existWS)
 
         # Set up time
@@ -594,7 +606,7 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def browse_openFile(self):
+    def browse_File(self):
         """ Open a file dialog to get file
         """
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Input File Dialog', 
@@ -602,12 +614,28 @@ class MainWindow(QtGui.QMainWindow):
 
         self.ui.lineEdit.setText(str(filename))
 
-        print "Selected file: ", filename
+        # print "Selected file: ", filename
+
+        return
+
+    def load_File(self):
+        """ Load the file by file name or run number
+        """
+        # Get file name from line editor
+        filename = str(self.ui.lineEdit.text())
+
+        # Find out it is relative path or absolute path
+        if os.path.abspath(filename) == filename:
+            isabspath = True
+        else:
+            isabspath = False
 
         dataws = self._loadFile(str(filename))
-        self._importDataWorkspace(dataws)
-
-        self._defaultdir = os.path.dirname(str(filename))
+        if dataws is None:
+            print "Unable to locate run %s in default directory %s." % (filename, self._defaultdir)
+        else:
+            self._importDataWorkspace(dataws)
+            self._defaultdir = os.path.dirname(str(filename))
 
         return
 
@@ -779,17 +807,53 @@ class MainWindow(QtGui.QMainWindow):
         # ENDFOR
 
         if len(eventwsnames) > 0: 
+            self.ui.comboBox.clear()
             self.ui.comboBox.addItems(eventwsnames)
 
         return
 
 
     def _loadFile(self, filename):
-        """ Load file
+        """ Load file or run
         File will be loaded to a workspace shown in MantidPlot
         """
-        wsname = os.path.splitext(os.path.split(filename)[1])[0]
+        config = ConfigService
 
+        # Check input file name and output workspace name
+        if filename.isdigit() is True:
+            # Construct a file name from run number
+            runnumber = int(filename)
+            if runnumber <= 0:
+                print "Run number cannot be less or equal to zero.  User gives %s. " % (filename)
+                return None
+            else: 
+                ishort = config.getInstrument(self._instrument).shortName()
+                filename = "%s_%s" %(ishort, filename)
+                wsname = filename + "_event"
+
+        elif filename.count(".") > 0:
+            # A proper file name
+            wsname = os.path.splitext(os.path.split(filename)[1])[0]
+
+        elif filename.count("_") == 1:
+            # A short one as instrument_runnumber
+            iname = filename.split("_")[0]
+            str_runnumber = filename.split("_")[1]
+            if str_runnumber.isdigit() is True and int(str_runnumber) > 0:
+                # Acccepted format
+                ishort = config.getInstrument(iname).shortName()
+                wsname = "%s_%s_event" % (ishort, str_runnumber)
+            else:
+                # Non-supported
+                print "File name / run number in such format %s is not supported. " % (filename)
+                return None
+
+        else:
+            # Unsupported format
+            print "File name / run number in such format %s is not supported. " % (filename)
+            return None
+
+        # Load
         try: 
             ws = api.Load(Filename=filename, OutputWorkspace=wsname)
         except:

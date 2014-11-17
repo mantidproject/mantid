@@ -60,6 +60,7 @@ namespace MantidQt
       virtual void giveUserInfo(std::string prompt, std::string title);
       virtual void giveUserWarning(std::string prompt, std::string title);
       virtual void giveUserCritical(std::string prompt, std::string title);
+      virtual void showAlgorithmDialog(const std::string& algorithm);
 
       //Set the status of the progress bar
       virtual void setProgressRange(int min, int max);
@@ -114,6 +115,8 @@ namespace MantidQt
       void on_actionOptionsDialog_triggered();
       void on_actionSearch_triggered();
       void on_actionTransfer_triggered();
+      void on_actionImportTable_triggered();
+      void on_actionExportTable_triggered();
 
       void setModel(QString name);
       void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);

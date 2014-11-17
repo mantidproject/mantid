@@ -148,18 +148,10 @@ namespace IDA
     allFields = positiveDoubleFields;
     allFields += uiForm().absp_leavar;
 
-    // Connect up all fields to inputChanged method of IDATab (calls validate).
-    foreach(QLineEdit * field, allFields)
-    {
-      connect(field, SIGNAL(textEdited(const QString &)), this, SLOT(inputChanged()));
-    }
-
     QRegExp regex("[A-Za-z0-9\\-\\(\\)]*");
     QValidator *formulaValidator = new QRegExpValidator(regex, this);
     uiForm().absp_leSampleFormula->setValidator(formulaValidator);
     uiForm().absp_leCanFormula->setValidator(formulaValidator);
-    connect(uiForm().absp_leSampleFormula, SIGNAL(textEdited(const QString &)), this, SLOT(inputChanged()));
-    connect(uiForm().absp_leCanFormula, SIGNAL(textEdited(const QString &)), this, SLOT(inputChanged()));
 
     // "Nudge" color of title of QGroupBox to change.
     useCanChecked(uiForm().absp_ckUseCan->isChecked());
@@ -288,10 +280,11 @@ namespace IDA
       "canFormula = " + canFormula + "\n"
       "IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plot_opt=plotOpt, save=save, verbose=verbose)\n";
 
-    QString pyOutput = runPythonCode(pyInput).trimmed();
+    QString pyOutput = runPythonCode(pyInput);
+    UNUSED_ARG(pyOutput);
   }
 
-  QString CalcCorr::validate()
+  bool CalcCorr::validate()
   {
     UserInputValidator uiv;
     bool useCan = uiForm().absp_ckUseCan->isChecked();
@@ -390,7 +383,10 @@ namespace IDA
       }
     }
 
-    return uiv.generateErrorMessage();
+    QString error = uiv.generateErrorMessage();
+    showMessageBox(error);
+
+    return error.isEmpty();
   }
 
   void CalcCorr::loadSettings(const QSettings & settings)
@@ -478,7 +474,7 @@ namespace IDA
     
     if (!ws)
     {
-      showInformationBox("Failed to find workspace " + wsname);
+      showMessageBox("Failed to find workspace " + wsname);
       return; 
     }
 
