@@ -2,6 +2,55 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
 
+from IndirectCommon import getInstrRun
+
+
+def _get_temperature(ws_name, log_name):
+    """
+    Gets the sample temperature for a given workspace.
+
+    @param ws_name Name of workspace
+    @param log_name Name of the sample environment log entry
+    @returns Temperature in Kelvin or None if not found
+    """
+
+    instr, run_number = getInstrRun(ws_name)
+
+    facility = config.getFacility()
+    pad_num = facility.instrument(instr).zeroPadding(int(run_number))
+    zero_padding = '0' * (pad_num - len(run_number))
+
+    run_name = instr + zero_padding + run_number
+    log_name = run_name.upper() + '.log'
+
+    run = mtd[ws_name].getRun()
+
+    if log_name in run:
+        # Look for temperature in logs in workspace
+        tmp = run[log_name].value
+        temp = tmp[len(tmp) - 1]
+        logger.debug('Temperature %d K found for run :%s' % (temp, run_name))
+        return temp
+
+    else:
+        # Logs not in workspace, try loading from file
+        logger.information('Log parameter not found in workspace. Searching for log file.')
+        log_path = FileFinder.getFullPath(log_name)
+
+        if log_path != '':
+            # Get temperature from log file
+            LoadLog(Workspace=ws_name, Filename=log_path)
+            run_logs = mtd[ws_name].getRun()
+            tmp = run_logs[log_name].value
+            temp = tmp[len(tmp) - 1]
+            logger.debug('Temperature %d K found for run :%s' % (temp, run_name))
+            return temp
+
+        else:
+            # Can't find log file
+            logger.warning('No temperature fround for run :%s' % run_name)
+            return None
+
 
 class ElasticWindowMultiple(DataProcessorAlgorithm):
 
@@ -23,6 +72,8 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self.declareProperty(name='Range2Start', defaultValue='', doc='Range 2 start')
         self.declareProperty(name='Range2End', defaultValue='', doc='Range 2 end')
 
+        self.declareProperty(name='SampleEnvironmentLogName', defaultValue='sample', doc='Name of the sample environment log entry')
+
         self.declareProperty(WorkspaceProperty('OutputInQ', '', Direction.Output),
                              doc='Output workspace in Q')
 
@@ -30,7 +81,10 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                              doc='Output workspace in Q Squared')
 
         self.declareProperty(WorkspaceProperty('OutputELF', '', Direction.Output, PropertyMode.Optional),
-                             doc='Output workspace')
+                             doc='Output workspace ELF')
+
+        self.declareProperty(WorkspaceProperty('OutputELT', '', Direction.Output, PropertyMode.Optional),
+                             doc='Output workspace ELT')
 
         self.declareProperty(name='Plot', defaultValue=False, doc='Plot result spectra')
 
@@ -67,7 +121,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import getInstrRun
         from IndirectImport import import_mantidplot
 
         # Do setup
@@ -78,9 +131,12 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         q_workspaces = list()
         q2_workspaces = list()
         run_numbers = list()
+        temperatures = list()
 
         # Perform the ElasticWindow algorithms
         for input_ws in input_workspace_names:
+            logger.information('Running ElasticWindow for workspace: %s' % input_ws)
+
             q_ws = input_ws + '_q'
             q2_ws = input_ws + '_q2'
 
@@ -99,11 +155,18 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             run_no = getInstrRun(input_ws)[1]
             run_numbers.append(run_no)
 
+            # Get the sample temperature
+            temp = _get_temperature(input_ws, self._sample_log_name)
+            if temp is not None:
+                temperatures.append(temp)
+
         # Must have two of each type of workspace to continue
         if len(q_workspaces) < 2:
             raise RuntimeError('Have less than 2 result workspaces in Q')
         if len(q2_workspaces) < 2:
             raise RuntimeError('Hvae less than 2 result workspaces in Q^2')
+
+        logger.information('Creating Q and Q^2 workspaces')
 
         # Append the spectra of the first two workspaces
         AppendSpectra(InputWorkspace1=q_workspaces[0], InputWorkspace2=q_workspaces[1], OutputWorkspace=self._q_workspace)
@@ -120,8 +183,17 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         for q2_ws in q2_workspaces:
             DeleteWorkspace(q2_ws)
 
-        # Set the verical axis axis
-        unit = ('Run No', 'last 3 digits')
+        logger.information('Setting vertical axis units and values')
+
+        # Set the verical axis units
+        v_axis_is_temp = len(input_workspace_names) == len(temperatures)
+
+        if v_axis_is_temp:
+            logger.notice('Vertical axis is in temperature')
+            unit = ('Temperature', 'K')
+        else:
+            logger.notice('Vertical axis is in run number')
+            unit = ('Run No', 'last 3 digits')
 
         q_ws_axis = mtd[self._q_workspace].getAxis(1)
         q_ws_axis.setUnit("Label").setLabel(unit[0], unit[1])
@@ -129,12 +201,18 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         q2_ws_axis = mtd[self._q2_workspace].getAxis(1)
         q2_ws_axis.setUnit("Label").setLabel(unit[0], unit[1])
 
-        for idx in range(0, len(run_numbers)):
-            q_ws_axis.setValue(idx, float(run_numbers[idx][-3:]))
-            q2_ws_axis.setValue(idx, float(run_numbers[idx][-3:]))
+        # Set the vertical axis values
+        for idx in range(0, len(input_workspace_names)):
+            if v_axis_is_temp:
+                q_ws_axis.setValue(idx, float(temperatures[idx]))
+                q2_ws_axis.setValue(idx, float(temperatures[idx]))
+            else:
+                q_ws_axis.setValue(idx, float(run_numbers[idx][-3:]))
+                q2_ws_axis.setValue(idx, float(run_numbers[idx][-3:]))
 
         # Process the ELF workspace
         if self._elf_workspace != '':
+            logger.information('Creating ELF workspace')
             Transpose(InputWorkspace=self._q_workspace, OutputWorkspace=self._elf_workspace)
             SortXAxis(InputWorkspace=self._elf_workspace, OutputWorkspace=self._elf_workspace)
             self.setProperty('OutputELF', self._elf_workspace)
@@ -160,11 +238,13 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         """
 
         self._plot = self.getProperty('Plot').value
+        self._sample_log_name = self.getPropertyValue('SampleEnvironmentLogName')
 
         self._input_workspaces = self.getProperty('InputWorkspaces').value
         self._q_workspace = self.getPropertyValue('OutputInQ')
         self._q2_workspace = self.getPropertyValue('OutputInQSquared')
         self._elf_workspace = self.getPropertyValue('OutputELF')
+        self._elt_workspace = self.getPropertyValue('OutputELT')
 
         self._range_1_start = self.getProperty('Range1Start').value
         self._range_1_end = self.getProperty('Range1End').value
