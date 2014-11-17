@@ -59,6 +59,28 @@ namespace Mantid
     using Mantid::Kernel::Direction;
     using Mantid::API::WorkspaceProperty;
 
+    namespace
+    {
+
+      /**
+       * Circumvents a bug in the Poco HTTPS session stack whereby an exception
+       * is thrown from a destructor while another is aleady active.
+       * This simply calls abort() on the session when this object is destroyed
+       * to ensure the disconnection happens early enough
+       */
+      struct AutoAbortedHTTPSSession : public Poco::Net::HTTPSClientSession
+      {
+        AutoAbortedHTTPSSession(const std::string& host, Poco::UInt16 port)
+          : Poco::Net::HTTPSClientSession(host, port) {}
+
+        ~AutoAbortedHTTPSSession()
+        {
+          this->abort();
+        }
+      };
+
+    }
+
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(DownloadInstrument)
 
@@ -322,7 +344,7 @@ namespace Mantid
     {
       Poco::Path entryPath(filename);
       std::string entryExt = entryPath.getExtension();
-      std::string entryName = entryPath.getBaseName();              
+      std::string entryName = entryPath.getBaseName();
       std::stringstream ss;
       ss << entryName << "_" << entryExt;
       return ss.str();
@@ -378,12 +400,8 @@ namespace Mantid
         const Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE);
         // Create a singleton for holding the default context. E.g. any future requests to publish are made to this certificate and context.
         Poco::Net::SSLManager::instance().initializeClient(NULL, certificateHandler,context);
-
-        //Session takes ownership of socket
-        Poco::Net::SecureStreamSocket* socket = new Poco::Net::SecureStreamSocket(context);
-        Poco::Net::HTTPSClientSession session(*socket);
-        session.setHost(uri.getHost());
-        session.setPort(uri.getPort());
+        // Create the session
+        AutoAbortedHTTPSSession session(uri.getHost(), static_cast<Poco::UInt16>(uri.getPort()));
 
         //set the proxy
         if (!m_isProxySet)
