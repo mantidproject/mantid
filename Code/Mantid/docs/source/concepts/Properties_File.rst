@@ -143,7 +143,7 @@ ScriptRepository Properties
 +=======================+===============================================+================================================================+
 |ScriptLocalRepository  |Directory where ScriptRepository is Installed. |c:\MantidInstall\MyScriptRepository                             |
 +-----------------------+-----------------------------------------------+----------------------------------------------------------------+
-|ScriptRepository       |URL for the remote script repository.          |http://download.mantidproject.org/scriptrepository/             |
+|ScriptRepository       |URL for the remote script repository.          |https://github.com/mantidproject/scriptrepository               |
 +-----------------------+-----------------------------------------------+----------------------------------------------------------------+
 |UploaderWebServer      |URL for uploading scripts.                     |http://upload.mantidproject.org/scriptrepository/payload/publish|
 +-----------------------+-----------------------------------------------+----------------------------------------------------------------+
