@@ -121,7 +121,7 @@ void EQSANSDarkCurrentSubtraction::exec()
     }
 
     std::string darkWSOutputName = getPropertyValue("OutputDarkCurrentWorkspace");
-    if (!darkWSOutputName.size()==0)
+    if (!(darkWSOutputName.size()==0))
       setProperty("OutputDarkCurrentWorkspace", darkWS);
     AnalysisDataService::Instance().addOrReplace(darkWSName, darkWS);
     reductionManager->declareProperty(new WorkspaceProperty<>(entryName,"",Direction::Output));

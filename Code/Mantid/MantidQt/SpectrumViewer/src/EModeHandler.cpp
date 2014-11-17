@@ -54,7 +54,6 @@ void EModeHandler::setEMode( const int mode )
     g_log.error() << "Mode number invalid: " << QString::number(mode).toStdString() << std::endl;
 }
 
-
 /**
  *  Return the user specified EFixed value, OR 0, if no valid
  *  EFixed value was set.

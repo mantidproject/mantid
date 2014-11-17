@@ -72,7 +72,12 @@ namespace DataHandling
   std::map<std::string, std::string> SavePDFGui::validateInputs(){
     std::map<std::string, std::string> result;
 
+    // check for null pointers - this is to protect against workspace groups
     API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+    if (!inputWS){
+      return result;
+    }
+
     const int nHist = static_cast<int> (inputWS->getNumberHistograms());
     if (nHist != 1)
     {

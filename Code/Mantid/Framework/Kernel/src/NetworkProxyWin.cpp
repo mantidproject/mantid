@@ -2,6 +2,9 @@
 #if defined(_WIN32) || defined(_WIN64)
 
 #include "MantidKernel/NetworkProxy.h"
+// std
+#include <sstream>
+// windows
 #include <windows.h>
 #include <Winhttp.h>
 

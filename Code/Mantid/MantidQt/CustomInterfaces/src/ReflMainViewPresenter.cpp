@@ -6,7 +6,10 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Utils.h"
+#include "MantidQtCustomInterfaces/ReflCatalogSearcher.h"
+#include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtCustomInterfaces/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/QtReflOptionsDialog.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
@@ -104,9 +107,11 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view):
+    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view, boost::shared_ptr<IReflSearcher> searcher):
       m_view(view),
       m_tableDirty(false),
+      m_searcher(searcher),
+      m_transferStrategy(new ReflLegacyTransferStrategy()),
       m_addObserver(*this, &ReflMainViewPresenter::handleAddEvent),
       m_remObserver(*this, &ReflMainViewPresenter::handleRemEvent),
       m_clearObserver(*this, &ReflMainViewPresenter::handleClearEvent),
@@ -165,6 +170,10 @@ namespace MantidQt
       blacklist.insert("FirstTransmissionRun");
       blacklist.insert("SecondTransmissionRun");
       m_view->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, blacklist));
+
+      //If we don't have a searcher yet, use ReflCatalogSearcher
+      if(!m_searcher)
+        m_searcher.reset(new ReflCatalogSearcher());
 
       //Start with a blank table
       newTable();
@@ -385,7 +394,7 @@ namespace MantidQt
         throw std::runtime_error("Invalid row");
 
       const std::string runStr = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
-      MatrixWorkspace_sptr run = boost::dynamic_pointer_cast<MatrixWorkspace>(loadRun(runStr, m_view->getProcessInstrument()));
+      MatrixWorkspace_sptr run = boost::dynamic_pointer_cast<MatrixWorkspace>(prepareRunWorkspace(runStr));
 
       //Fetch two theta from the log if needed
       if(m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().isEmpty())
@@ -489,6 +498,74 @@ namespace MantidQt
     }
 
     /**
+    Takes a user specified run, or list of runs, and returns a pointer to the desired TOF workspace
+    @param runStr : The run or list of runs (separated by '+')
+    @throws std::runtime_error if the workspace could not be prepared
+    @returns a shared pointer to the workspace
+    */
+    Workspace_sptr ReflMainViewPresenter::prepareRunWorkspace(const std::string& runStr)
+    {
+      const std::string instrument = m_view->getProcessInstrument();
+
+      std::vector<std::string> runs;
+      boost::split(runs, runStr, boost::is_any_of("+"));
+
+      if(runs.empty())
+        throw std::runtime_error("No runs given");
+
+      //Remove leading/trailing whitespace from each run
+      for(auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
+        boost::trim(*runIt);
+
+      //If we're only given one run, just return that
+      if(runs.size() == 1)
+        return loadRun(runs[0], instrument);
+
+      const std::string outputName = "TOF_" + boost::algorithm::join(runs, "_");
+
+      //Check if we've already prepared it
+      if(AnalysisDataService::Instance().doesExist(outputName))
+        return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
+
+
+      /* Ideally, this should be executed as a child algorithm to keep the ADS tidy, but
+       * that doesn't preserve history nicely, so we'll just take care of tidying up in
+       * the event of failure.
+       */
+      IAlgorithm_sptr algPlus = AlgorithmManager::Instance().create("Plus");
+      algPlus->initialize();
+      algPlus->setProperty("LHSWorkspace", loadRun(runs[0], instrument)->name());
+      algPlus->setProperty("OutputWorkspace", outputName);
+
+      //Drop the first run from the runs list
+      runs.erase(runs.begin());
+
+      try
+      {
+        //Iterate through all the remaining runs, adding them to the first run
+        for(auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
+        {
+          algPlus->setProperty("RHSWorkspace", loadRun(*runIt, instrument)->name());
+          algPlus->execute();
+
+          //After the first execution we replace the LHS with the previous output
+          algPlus->setProperty("LHSWorkspace", outputName);
+        }
+      }
+      catch(...)
+      {
+        //If we're unable to create the full workspace, discard the partial version
+        AnalysisDataService::Instance().remove(outputName);
+
+        //We've tidied up, now re-throw.
+        throw;
+      }
+
+      return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
+    }
+
+
+    /**
     Loads a run from disk or fetches it from the AnalysisDataService
     @param run : The name of the run
     @param instrument : The instrument the run belongs to
@@ -506,7 +583,7 @@ namespace MantidQt
       {
         std::string wsName;
 
-        //Look "TOF_<run_number>" in the ADS
+        //Look for "TOF_<run_number>" in the ADS
         wsName = "TOF_" + run;
         if(AnalysisDataService::Instance().doesExist(wsName))
           return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
@@ -538,7 +615,7 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::reduceRow(int rowNo)
     {
-      const std::string      run = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
+      const std::string   runStr = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
       const std::string transStr = m_model->data(m_model->index(rowNo, COL_TRANSMISSION)).toString().toStdString();
       const std::string  options = m_model->data(m_model->index(rowNo, COL_OPTIONS)).toString().toStdString();
 
@@ -549,7 +626,7 @@ namespace MantidQt
       if(thetaGiven)
         theta = m_model->data(m_model->index(rowNo, COL_ANGLE)).toDouble();
 
-      Workspace_sptr runWS = loadRun(run, m_view->getProcessInstrument());
+      Workspace_sptr runWS = prepareRunWorkspace(runStr);
       const std::string runNo = getRunNumber(runWS);
 
       MatrixWorkspace_sptr transWS;
@@ -673,7 +750,7 @@ namespace MantidQt
         const double         qmin = m_model->data(m_model->index(*rowIt, COL_QMIN)).toDouble();
         const double         qmax = m_model->data(m_model->index(*rowIt, COL_QMAX)).toDouble();
 
-        Workspace_sptr runWS = loadRun(runStr);
+        Workspace_sptr runWS = prepareRunWorkspace(runStr);
         if(runWS)
         {
           const std::string runNo = getRunNumber(runWS);
@@ -859,6 +936,10 @@ namespace MantidQt
       case IReflPresenter::CopySelectedFlag:    copySelected();      break;
       case IReflPresenter::CutSelectedFlag:     cutSelected();       break;
       case IReflPresenter::PasteSelectedFlag:   pasteSelected();     break;
+      case IReflPresenter::SearchFlag:          search();            break;
+      case IReflPresenter::TransferFlag:        transfer();          break;
+      case IReflPresenter::ImportTableFlag:     importTable();       break;
+      case IReflPresenter::ExportTableFlag:     exportTable();       break;
       }
       //Not having a 'default' case is deliberate. gcc issues a warning if there's a flag we aren't handling.
     }
@@ -947,6 +1028,22 @@ namespace MantidQt
       {
         m_view->giveUserCritical("Could not open workspace: " + std::string(e.what()), "Error");
       }
+    }
+
+    /**
+    Import a table from TBL file
+    */
+    void ReflMainViewPresenter::importTable()
+    {
+      m_view->showAlgorithmDialog("LoadReflTBL");
+    }
+
+    /**
+    Export a table to TBL file
+    */
+    void ReflMainViewPresenter::exportTable()
+    {
+      m_view->showAlgorithmDialog("SaveReflTBL");
     }
 
     /**
@@ -1127,6 +1224,61 @@ namespace MantidQt
         //Paste as many columns as we can from this line
         for(int col = COL_RUNS; col <= COL_OPTIONS && col < static_cast<int>(values.size()); ++col)
           m_model->setData(m_model->index(*rowIt, col), QString::fromStdString(values[col]));
+      }
+    }
+
+    /** Searches for runs that can be used */
+    void ReflMainViewPresenter::search()
+    {
+      const std::string searchString = m_view->getSearchString();
+      const std::string searchInstr  = m_view->getSearchInstrument();
+
+      //Don't bother searching if they're not searching for anything
+      if(searchString.empty())
+        return;
+
+      try
+      {
+        auto results = m_searcher->search(searchString, searchInstr);
+        m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(results));
+        m_view->showSearch(m_searchModel);
+      }
+      catch(std::runtime_error& e)
+      {
+        m_view->giveUserCritical("Error running search:\n" + std::string(e.what()), "Search Failed");
+      }
+    }
+
+    /** Transfers the selected runs in the search results to the processing table */
+    void ReflMainViewPresenter::transfer()
+    {
+      //Build the input for the transfer strategy
+      std::map<std::string,std::string> runs;
+      auto selectedRows = m_view->getSelectedSearchRows();
+      for(auto rowIt = selectedRows.begin(); rowIt != selectedRows.end(); ++rowIt)
+      {
+        const int row = *rowIt;
+        const std::string run = m_searchModel->data(m_searchModel->index(row, 0)).toString().toStdString();
+        const std::string description = m_searchModel->data(m_searchModel->index(row, 1)).toString().toStdString();
+        runs[run] = description;
+      }
+
+      auto newRows = m_transferStrategy->transferRuns(runs);
+
+      std::map<std::string,int> groups;
+      for(auto rowIt = newRows.begin(); rowIt != newRows.end(); ++rowIt)
+      {
+        auto& row = *rowIt;
+
+        if(groups.count(row["group"]) == 0)
+          groups[row["group"]] = getUnusedGroup();
+
+        const int rowIndex = m_model->rowCount();
+        m_model->insertRow(rowIndex);
+        m_model->setData(m_model->index(rowIndex, COL_RUNS), QString::fromStdString(row["runs"]));
+        m_model->setData(m_model->index(rowIndex, COL_ANGLE), QString::fromStdString(row["theta"]));
+        m_model->setData(m_model->index(rowIndex, COL_SCALE), 1.0);
+        m_model->setData(m_model->index(rowIndex, COL_GROUP), groups[row["group"]]);
       }
     }
 

@@ -10,7 +10,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class Elwin : public IDATab
+  class DLLExport Elwin : public IDATab
   {
     Q_OBJECT
 
@@ -20,7 +20,7 @@ namespace IDA
   private:
     virtual void setup();
     virtual void run();
-    virtual QString validate();
+    virtual bool validate();
     virtual void loadSettings(const QSettings & settings);
     virtual QString helpURL() {return "Elwin";}
     void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
@@ -34,15 +34,8 @@ namespace IDA
     void updateRS(QtProperty * prop, double val);
 
   private:
-    QwtPlot* m_elwPlot;
-    MantidWidgets::RangeSelector* m_elwR1;
-    MantidWidgets::RangeSelector* m_elwR2;
-    QwtPlotCurve* m_elwDataCurve;
     QtTreePropertyBrowser* m_elwTree;
-    QMap<QString, QtProperty*> m_elwProp;
-    QtDoublePropertyManager* m_elwDblMng;
-    QtBoolPropertyManager* m_elwBlnMng;
-    QtGroupPropertyManager* m_elwGrpMng;
+
   };
 } // namespace IDA
 } // namespace CustomInterfaces

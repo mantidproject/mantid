@@ -1938,8 +1938,9 @@ namespace Mantid
        * @param dataVec :: A method returning non-const references to data vectors to copy the image to.
        * @param image :: An image to copy the data from.
        * @param start :: Startinf workspace indx to copy data to.
+       * @param parallelExecution :: Should inner loop run as parallel operation
        */
-      void MatrixWorkspace::setImage( MantidVec& (MatrixWorkspace::*dataVec)(const std::size_t), const MantidImage &image, size_t start )
+      void MatrixWorkspace::setImage( MantidVec& (MatrixWorkspace::*dataVec)(const std::size_t), const MantidImage &image, size_t start, bool parallelExecution )
       {
 
         if ( image.empty() ) return;
@@ -1959,7 +1960,7 @@ namespace Mantid
           throw std::runtime_error("Cannot set image: image is bigger than workspace.");
         }
 
-        PARALLEL_FOR_NO_WSP_CHECK()
+        PARALLEL_FOR_IF(parallelExecution)
         for(int i = 0; i < static_cast<int>(height); ++i)
         {
           auto &row = image[i];
@@ -1979,21 +1980,23 @@ namespace Mantid
       /**
        * Copy the data (Y's) from an image to this workspace.
        * @param image :: An image to copy the data from.
-       * @param start :: Startinf workspace indx to copy data to.
+       * @param start :: Startinf workspace indx to copy data to.       
+       * @param parallelExecution :: Should inner loop run as parallel operation
        */
-      void MatrixWorkspace::setImageY( const MantidImage &image, size_t start )
+      void MatrixWorkspace::setImageY( const MantidImage &image, size_t start, bool parallelExecution )
       {
-        setImage( &MatrixWorkspace::dataY, image, start );
+        setImage( &MatrixWorkspace::dataY, image, start, parallelExecution );
       }
 
       /**
        * Copy the data from an image to this workspace's errors.
        * @param image :: An image to copy the data from.
        * @param start :: Startinf workspace indx to copy data to.
+       * @param parallelExecution :: Should inner loop run as parallel operation
        */
-      void MatrixWorkspace::setImageE( const MantidImage &image, size_t start )
+      void MatrixWorkspace::setImageE( const MantidImage &image, size_t start, bool parallelExecution )
       {
-        setImage( &MatrixWorkspace::dataE, image, start );
+        setImage( &MatrixWorkspace::dataE, image, start, parallelExecution );
       }
 
 

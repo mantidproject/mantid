@@ -395,7 +395,7 @@ QString Homer::openFileDia(const bool save, const QStringList &exts)
     {
       filter.append("*." + exts[i] + " ");
     }
-    filter.trimmed();
+    filter = filter.trimmed();
   }
   filter.append(";;All Files (*.*)");
 

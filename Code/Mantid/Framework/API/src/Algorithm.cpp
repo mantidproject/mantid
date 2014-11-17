@@ -523,30 +523,55 @@ namespace Mantid
         }
       }
 
-      // ----- Perform validation of the whole set of properties -------------
-      std::map<std::string, std::string> errors = this->validateInputs();
-      if (!errors.empty())
+      // ----- Check for processing groups -------------
+      // default true so that it has the right value at the check below the catch block should checkGroups throw
+      bool callProcessGroups = true;
+      try
       {
-        size_t numErrors = errors.size();
-        // Log each issue
-        auto & errorLog = getLogger().error();
-        auto & warnLog = getLogger().warning();
-        for (auto it = errors.begin(); it != errors.end(); it++)
+        // Checking the input is a group. Throws if the sizes are wrong
+        callProcessGroups = this->checkGroups();
+      }
+      catch(std::exception& ex)
+      {
+        getLogger().error() << "Error in execution of algorithm "<< this->name() << "\n"
+                            << ex.what() << "\n";
+        notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
+        m_running = false;
+        if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         {
-          if (this->existsProperty(it->first))
-            errorLog << "Invalid value for " << it->first << ": " << it->second << "\n";
-          else
-          {
-            numErrors -= 1; // don't count it as an error
-            warnLog << "validateInputs() references non-existant property \""
-                    << it->first << "\"\n";
-          }
+          m_runningAsync = false;
+          throw;
         }
-        // Throw because something was invalid
-        if (numErrors > 0)
+        return false;
+      }
+
+      // ----- Perform validation of the whole set of properties -------------
+      if (!callProcessGroups) // for groups this is called on each workspace separately
+      {
+        std::map<std::string, std::string> errors = this->validateInputs();
+        if (!errors.empty())
         {
-          notificationCenter().postNotification(new ErrorNotification(this,"Some invalid Properties found"));
-          throw std::runtime_error("Some invalid Properties found");
+          size_t numErrors = errors.size();
+          // Log each issue
+          auto & errorLog = getLogger().error();
+          auto & warnLog = getLogger().warning();
+          for (auto it = errors.begin(); it != errors.end(); it++)
+          {
+            if (this->existsProperty(it->first))
+              errorLog << "Invalid value for " << it->first << ": " << it->second << "\n";
+            else
+            {
+              numErrors -= 1; // don't count it as an error
+              warnLog << "validateInputs() references non-existant property \""
+                      << it->first << "\"\n";
+            }
+          }
+          // Throw because something was invalid
+          if (numErrors > 0)
+          {
+            notificationCenter().postNotification(new ErrorNotification(this,"Some invalid Properties found"));
+            throw std::runtime_error("Some invalid Properties found");
+          }
         }
       }
 
@@ -562,50 +587,29 @@ namespace Mantid
         m_history = boost::make_shared<AlgorithmHistory>(algHist);
       }
 
-      // ----- Check for processing groups -------------
-      // default true so that it has the right value at the check below the catch block should checkGroups throw
-      bool callProcessGroups = true;
-      try
-      {
-        // Checking the input is a group. Throws if the sizes are wrong
-        callProcessGroups = this->checkGroups();
-        if (callProcessGroups)
-        {
-          // This calls this->execute() again on each member of the group.
-          start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
-          // Start a timer
-          Timer timer;
-          // Call the concrete algorithm's exec method
-          const bool completed = processGroups();
-          // Check for a cancellation request in case the concrete algorithm doesn't
-          interruption_point();			
-          // Get how long this algorithm took to run
-          const float duration = timer.elapsed();
-          
-          if(completed)
-          {
-            // Log that execution has completed.
-            reportCompleted(duration, true/*indicat that this is for group processing*/);
-          }
-          return completed;
-        }
-      }
-      catch(std::exception& ex)
-      {
-        getLogger().error() << "Error in execution of algorithm "<< this->name() << std::endl
-                      << ex.what()<<std::endl;
-        notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
-        m_running = false;
-        if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-        {
-          m_runningAsync = false;
-          throw;
-        }
-      }
+      // ----- Process groups -------------
       // If checkGroups() threw an exception but there ARE group workspaces
       // (means that the group sizes were incompatible)
       if (callProcessGroups)
-        return false;
+      {
+        // This calls this->execute() again on each member of the group.
+        start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
+        // Start a timer
+        Timer timer;
+        // Call the concrete algorithm's exec method
+        const bool completed = processGroups();
+        // Check for a cancellation request in case the concrete algorithm doesn't
+        interruption_point();
+        // Get how long this algorithm took to run
+        const float duration = timer.elapsed();
+
+        if(completed)
+        {
+          // Log that execution has completed.
+          reportCompleted(duration, true/*indicat that this is for group processing*/);
+        }
+        return completed;
+      }
 
       // Read or write locks every input/output workspace
       this->lockWorkspaces();

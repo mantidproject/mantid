@@ -92,6 +92,8 @@ namespace CustomInterfaces
     void plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex, const QString& plotID, const QString& curveID = "");
     /// Function to replot a miniplot
     void replot(const QString& plotID);
+    /// Function to remove a curve from a plot
+    void removeCurve(const QString& curveID);
 
     /// Function to get the range of the curve displayed on the mini plot
     std::pair<double, double> getCurveRange(const QString& plotID);
@@ -107,6 +109,8 @@ namespace CustomInterfaces
 
     /// Function to run an algorithm on a seperate thread
     void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
+
+    QString runPythonCode(QString vode, bool no_output = false);
 
     /// Parent QWidget (if applicable)
     QWidget *m_parentWidget;
@@ -150,7 +154,7 @@ namespace CustomInterfaces
     /// Send signal to parent window to show a message box to user
     void showMessageBox(const QString& message);
     /// Run a python script
-    void runAsPythonScript(const QString & code, bool no_output);
+    void runAsPythonScript(const QString & code, bool noOutput = false);
 
   protected:
     /// Overidden by child class.

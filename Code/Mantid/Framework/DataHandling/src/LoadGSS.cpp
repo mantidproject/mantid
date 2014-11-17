@@ -337,17 +337,25 @@ namespace DataHandling
         }
 
         std::istringstream inputLine(currentLine, std::ios::in);
-        inputLine >> xValue >> yValue >> eValue;
 
         // It is different for the definition of X, Y, Z in SLOG and RALF format
         if (filetype == 'r')
         {
           // RALF
+          // LoadGSS produces overlapping columns for some datasets, due to std::setw
+          // For this reason we need to read the column values as string and then convert to double
+          std::string xString, yString, eString;
+          inputLine >> std::setw(11) >> xString >> std::setw(18) >> yString >> std::setw(18) >> eString;
+          xValue = boost::lexical_cast<double>(xString);
+          yValue = boost::lexical_cast<double>(yString);
+          eValue = boost::lexical_cast<double>(eString);
           xValue = (2 * xValue) - xPrev;
+
         }
         else if (filetype == 's')
         {
           // SLOG
+          inputLine >> xValue >> yValue >> eValue;
           if (calslogx0)
           {
             // calculation of x0 must use the x'[0]
@@ -361,6 +369,11 @@ namespace DataHandling
           }
 
           xValue = (2 * xValue) - xPrev;
+        }
+        else
+        {
+          g_log.error() << "Unsupported GSAS File Type: " << filetype << "\n";
+          throw Exception::FileError("Not a GSAS file", filename);
         }
 
 				if (multiplybybinwidth)

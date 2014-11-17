@@ -1188,6 +1188,22 @@ public:
     TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 2);
     TS_ASSERT_EQUALS(ws->String(5, OptionsCol), "def");
   }
+
+  void testImportTable()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(&mockView);
+    EXPECT_CALL(mockView, showAlgorithmDialog("LoadReflTBL"));
+    presenter.notify(IReflPresenter::ImportTableFlag);
+  }
+
+  void testExportTable()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(&mockView);
+    EXPECT_CALL(mockView, showAlgorithmDialog("SaveReflTBL"));
+    presenter.notify(IReflPresenter::ExportTableFlag);
+  }
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H */
