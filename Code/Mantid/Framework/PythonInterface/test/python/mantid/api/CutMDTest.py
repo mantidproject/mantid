@@ -59,6 +59,12 @@ class CutMDTest(unittest.TestCase):
         self.assertEqual(2, dim.getNBins(), "Wrong calculated number of bins")
         self.assertAlmostEqual(0.6, dim.getMaximum(), 6, "Wrong calculated maximum")
         
+    def test_truncate_extents(self):
+        out_md = CutMD(self.__in_md, P1Bin=[0, 1.1, 1], P2Bin=[21], P3Bin=[0.1], CheckAxes=False, NoPix=True)
+  
+        self.assertEqual(1, out_md.getDimension(0).getNBins(), "Step is beyond range. Should just be integrated")
+        self.assertEqual(1, out_md.getDimension(1).getNBins(), "Step is beyond range. Should just be integrated")
+        
         
     def test_wrong_projection_workspace_format_wrong_column_numbers(self):
         projection = CreateEmptyTableWorkspace()

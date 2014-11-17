@@ -46,12 +46,15 @@ class CutMD(DataProcessorAlgorithm):
         dim = to_cut.getDimension(dimension_index)
         dim_min = dim.getMinimum()
         dim_max = dim.getMaximum()
+        dim_range = dim_max - dim_min
         n_arguments = len(horace_binning)
         if n_arguments == 0:
             raise ValueError("binning parameter cannot be empty")
         elif n_arguments == 1:
             step_size = horace_binning[0]
-            n_bins = int( (dim_max - dim_min) / step_size)
+            if step_size > dim_range:
+                 step_size = dim_range
+            n_bins = int( dim_range / step_size)
             # Calculate the maximum based on step size and number of bins
             dim_max = dim_min + ( n_bins * step_size )
         elif n_arguments == 2:
@@ -62,7 +65,10 @@ class CutMD(DataProcessorAlgorithm):
             dim_min = horace_binning[0]
             dim_max = horace_binning[2]
             step_size = horace_binning[1]
-            n_bins = int( (dim_max - dim_min) / step_size)
+            dim_range = dim_max - dim_min
+            if step_size > dim_range:
+                 step_size = dim_range
+            n_bins = int( dim_range / step_size)
             dim_max = dim_min + ( n_bins * step_size )
             #if dim_max != horace_binning[2]:
             #    pass # TODO, we should generate a warning at this point.
