@@ -841,7 +841,7 @@ copy_files_to_dir ( "${CONFIG_RESET_SCRIPT}"
 ###########################################################################
 
 # Top-level python scripts
-set( PY_FILES mantidplotrc.py mantid_qt_settings_editor.py)
+set( PY_FILES mantidplot.py mantidplotrc.py mantid_qt_settings_editor.py)
 copy_files_to_dir ( "${PY_FILES}"
                             ${CMAKE_CURRENT_SOURCE_DIR}
                             ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
