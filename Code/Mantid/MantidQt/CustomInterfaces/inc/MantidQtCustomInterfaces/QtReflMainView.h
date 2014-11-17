@@ -117,6 +117,7 @@ namespace MantidQt
       void on_actionTransfer_triggered();
       void on_actionImportTable_triggered();
       void on_actionExportTable_triggered();
+      void on_actionHelp_triggered();
 
       void setModel(QString name);
       void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);

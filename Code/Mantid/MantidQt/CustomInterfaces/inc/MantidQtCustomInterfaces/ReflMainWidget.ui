@@ -249,6 +249,7 @@
             <addaction name="actionCutSelected"/>
             <addaction name="actionPasteSelected"/>
             <addaction name="actionClearSelected"/>
+            <addaction name="actionHelp"/>
            </widget>
           </item>
           <item>
@@ -646,6 +647,24 @@
    </property>
    <property name="whatsThis">
     <string>Exports a table workspace to a .TBL file that can be used by the ISIS Reflectometry UI in older versions of Mantid.</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/help.png</normaloff>:/help.png</iconset>
+   </property>
+   <property name="text">
+    <string>Help</string>
+   </property>
+   <property name="toolTip">
+    <string>Opens the documentation.</string>
+   </property>
+   <property name="whatsThis">
+    <string>Opens the interface's documentation in the Qt Help Browser.</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
    </property>
   </action>
  </widget>
