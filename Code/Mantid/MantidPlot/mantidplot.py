@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------
 
 try:
-    import mantidplot
+    import pymantidplot
     from pymantidplot import *
 except ImportError:
     raise ImportError('Could not import mantidplot (when trying to import pymantidplot). Something is broken in this installation, please check.')
