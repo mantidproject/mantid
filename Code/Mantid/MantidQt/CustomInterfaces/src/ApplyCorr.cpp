@@ -18,7 +18,7 @@ namespace CustomInterfaces
 namespace IDA
 {
   ApplyCorr::ApplyCorr(QWidget * parent) : 
-    IDATab(parent), m_valPosDbl(NULL)
+    IDATab(parent)
   {
   }
 
