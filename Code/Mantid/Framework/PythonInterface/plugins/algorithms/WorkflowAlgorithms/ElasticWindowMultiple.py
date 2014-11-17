@@ -29,6 +29,9 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputInQSquared', '', Direction.Output),
                              doc='Output workspace in Q Squared')
 
+        self.declareProperty(WorkspaceProperty('OutputELF', '', Direction.Output, PropertyMode.Optional),
+                             doc='Output workspace')
+
         self.declareProperty(name='Plot', defaultValue=False, doc='Plot result spectra')
 
 
@@ -64,6 +67,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
 
     def PyExec(self):
+        from IndirectCommon import getInstrRun
         from IndirectImport import import_mantidplot
 
         # Do setup
@@ -73,6 +77,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         input_workspace_names = self._input_workspaces.getNames()
         q_workspaces = list()
         q2_workspaces = list()
+        run_numbers = list()
 
         # Perform the ElasticWindow algorithms
         for input_ws in input_workspace_names:
@@ -90,6 +95,10 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             q_workspaces.append(q_ws)
             q2_workspaces.append(q2_ws)
 
+            # Get the run number
+            run_no = getInstrRun(input_ws)[1]
+            run_numbers.append(run_no)
+
         # Must have two of each type of workspace to continue
         if len(q_workspaces) < 2:
             raise RuntimeError('Have less than 2 result workspaces in Q')
@@ -101,7 +110,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         AppendSpectra(InputWorkspace1=q2_workspaces[0], InputWorkspace2=q2_workspaces[1], OutputWorkspace=self._q2_workspace)
 
         # Append to the spectra of each remaining workspace
-        for idx in xrange(2, len(input_workspace_names)):
+        for idx in range(2, len(input_workspace_names)):
             AppendSpectra(InputWorkspace1=self._q_workspace, InputWorkspace2=q_workspaces[idx], OutputWorkspace=self._q_workspace)
             AppendSpectra(InputWorkspace1=self._q2_workspace, InputWorkspace2=q2_workspaces[idx], OutputWorkspace=self._q2_workspace)
 
@@ -111,6 +120,25 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         for q2_ws in q2_workspaces:
             DeleteWorkspace(q2_ws)
 
+        # Set the verical axis axis
+        unit = ('Run No', 'last 3 digits')
+
+        q_ws_axis = mtd[self._q_workspace].getAxis(1)
+        q_ws_axis.setUnit("Label").setLabel(unit[0], unit[1])
+
+        q2_ws_axis = mtd[self._q2_workspace].getAxis(1)
+        q2_ws_axis.setUnit("Label").setLabel(unit[0], unit[1])
+
+        for idx in range(0, len(run_numbers)):
+            q_ws_axis.setValue(idx, float(run_numbers[idx][-3:]))
+            q2_ws_axis.setValue(idx, float(run_numbers[idx][-3:]))
+
+        # Process the ELF workspace
+        if self._elf_workspace != '':
+            Transpose(InputWorkspace=self._q_workspace, OutputWorkspace=self._elf_workspace)
+            SortXAxis(InputWorkspace=self._elf_workspace, OutputWorkspace=self._elf_workspace)
+            self.setProperty('OutputELF', self._elf_workspace)
+
         # Set the output workspace
         self.setProperty('OutputInQ', self._q_workspace)
         self.setProperty('OutputInQSquared', self._q2_workspace)
@@ -118,8 +146,12 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         # Plot spectra plots
         if self._plot:
             self._mtd_plot = import_mantidplot()
+
             self._plot_spectra(self._q_workspace)
             self._plot_spectra(self._q2_workspace)
+
+            if self._elf_workspace != '':
+                self._plot_spectra(self._elf_workspace)
 
 
     def _setup(self):
@@ -132,6 +164,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self._input_workspaces = self.getProperty('InputWorkspaces').value
         self._q_workspace = self.getPropertyValue('OutputInQ')
         self._q2_workspace = self.getPropertyValue('OutputInQSquared')
+        self._elf_workspace = self.getPropertyValue('OutputELF')
 
         self._range_1_start = self.getProperty('Range1Start').value
         self._range_1_end = self.getProperty('Range1End').value
