@@ -29,16 +29,16 @@ namespace Mantid
     void SaveReflCustomAscii::extraHeaders(std::ofstream & file)
     {
       auto samp = m_ws->run();
-      std::string subtitle;
+      //std::string subtitle;
       std::string title = getProperty("Title");
-      try
+      /*try
       {
         subtitle = samp.getLogData("run_title")->value();
       }
       catch (Kernel::Exception::NotFoundError &)
       {
         subtitle = "";
-      }
+      }*/
 
       if (title != "") //if is toggled
       { 
