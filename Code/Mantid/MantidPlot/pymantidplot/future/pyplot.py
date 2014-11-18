@@ -230,11 +230,29 @@ same functionality as their counterparts in matplotlib's pyplot.
 - savefig
 
 """
+# Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+#
+# This file is part of Mantid.
+# Mantid is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Mantid is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# File change history is stored at: <https://github.com/mantidproject/mantid>.
+# Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 try:
     import _qti
 except ImportError:
-    raise ImportError('The \'mantidplot\' module can only be used from within MantidPlot.')
+    raise ImportError('The \'mantidplot\' and \'pymantidplot.future.pyplot\' modules can only be used from within MantidPlot.')
 
 import numpy as np
 from PyQt4 import Qt, QtGui, QtCore
@@ -252,14 +270,14 @@ is very much welcome! Please let us know any wishes and suggestions.""")
 
 class Line2D():
     """
-        A very minimal replica of matplotlib.Line.Line2D. The true Line2D
-        is a sublcass of matplotlib.artist and provides tons of
-        functionality. At the moment this just provides get_xdata()
-        and get_ydata().  It also holds its Graph object and through
-        it it would be possible to provide additional selected
-        functionality. Keep in mind that providing GUI line/plot
-        manipulation functionality would require a proxy for this
-        class.
+    A very minimal replica of matplotlib.Line.Line2D. The true Line2D
+    is a sublcass of matplotlib.artist and provides tons of
+    functionality. At the moment this just provides get_xdata(),
+    get_ydata(), and figure() methods.  It also holds its Graph
+    object and through it it would be possible to provide
+    additional selected functionality. Keep in mind that providing
+    GUI line/plot manipulation functionality would require a proxy
+    for this class.
     """
 
     def __init__(self, graph, index, x_data, y_data, fig=None):
