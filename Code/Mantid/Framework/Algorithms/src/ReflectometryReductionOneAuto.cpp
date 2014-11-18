@@ -127,8 +127,19 @@ namespace Mantid
       {
         if (analysis_mode == "PointDetectorAnalysis")
         {
-          const int detStart = static_cast<int>(instrument->getNumberParameter("PointDetectorStart")[0]);
-          const int detStop  = static_cast<int>(instrument->getNumberParameter("PointDetectorStop")[0]);
+          std::vector<double> pointStart = instrument->getNumberParameter("PointDetectorStart");
+          std::vector<double> pointStop  = instrument->getNumberParameter("PointDetectorStop");
+
+          if(pointStart.empty() || pointStop.empty())
+            throw std::runtime_error(
+                "If ProcessingInstructions is not specified, BOTH PointDetectorStart "
+                "and PointDetectorStop must exist as instrument parameters.\n"
+                "Please check if you meant to enter ProcessingInstructions or "
+                "if your instrument parameter file is correct."
+                );
+
+          const int detStart = static_cast<int>(pointStart[0]);
+          const int detStop  = static_cast<int>(pointStop[0]);
 
           if(detStart == detStop)
           {
@@ -143,7 +154,15 @@ namespace Mantid
         }
         else
         {
-          processing_commands = boost::lexical_cast<std::string>(static_cast<int>(instrument->getNumberParameter("MultiDetectorStart")[0]))
+          std::vector<double> multiStart = instrument->getNumberParameter("MultiDetectorStart");
+          if(multiStart.empty())
+            throw std::runtime_error(
+                "If ProcessingInstructions is not specified, MultiDetectorStart"
+                "must exist as an instrument parameter.\n"
+                "Please check if you meant to enter ProcessingInstructions or "
+                "if your instrument parameter file is correct."
+                );
+          processing_commands = boost::lexical_cast<std::string>(static_cast<int>(multiStart[0]))
             + ":" + boost::lexical_cast<std::string>(in_ws->getNumberHistograms() - 1);
         }
       }
