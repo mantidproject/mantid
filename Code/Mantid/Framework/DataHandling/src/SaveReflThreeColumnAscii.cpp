@@ -28,9 +28,9 @@ namespace Mantid
     void SaveReflThreeColumnAscii::extraHeaders(std::ofstream & file)
     {
       auto samp = m_ws->run();
-      std::string subtitle;
+      //std::string subtitle;
       std::string title = getProperty("Title");
-      try
+      /*try
       {
         subtitle = samp.getLogData("run_title")->value();
       }
@@ -41,7 +41,7 @@ namespace Mantid
       if (title != "") //if is toggled
       { 
         file << "#" << title << std::endl;
-      }
+      }*/
 
       const std::vector<std::string> logList = getProperty("LogList");
       ///logs
