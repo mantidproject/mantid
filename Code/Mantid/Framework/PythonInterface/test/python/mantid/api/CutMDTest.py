@@ -13,6 +13,8 @@ class CutMDTest(unittest.TestCase):
         data_ws = CreateMDWorkspace(Dimensions=3, Extents=[-10,10,-10,10,-10,10], Names="A,B,C", Units="U,U,U")
         # Mark the workspace as being in HKL
         SetSpecialCoordinates(InputWorkspace=data_ws, SpecialCoordinates='HKL')
+        # Set the UB
+        SetUB(Workspace=data_ws, a = 1, b = 1, c = 1, alpha =90, beta=90, gamma = 90)
         # Add some data to the workspace
         FakeMDEventData(InputWorkspace=data_ws, PeakParams=[10000,0,0,0,1])
         self.__in_md  = data_ws
@@ -86,6 +88,8 @@ class CutMDTest(unittest.TestCase):
     def test_orthogonal_slice_with_scaling(self):
         # We create a fake workspace and check to see that the extents get scaled with the new coordinate system when sliced
         to_cut = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-1,1,-1,1], Names='H,K,L', Units='U,U,U')
+        # Set the UB
+        SetUB(Workspace=to_cut, a = 1, b = 1, c = 1, alpha =90, beta=90, gamma = 90)
         
         SetSpecialCoordinates(InputWorkspace=to_cut, SpecialCoordinates='HKL')
         
@@ -97,9 +101,9 @@ class CutMDTest(unittest.TestCase):
         projection.addColumn("double", "u")
         projection.addColumn("double", "v")
         projection.addColumn("str", "type")
-        projection.addRow([scale_x,0,"aaa"])
-        projection.addRow([0,scale_y,"aaa"])  
-        projection.addRow([0,0,"aaa"])   
+        projection.addRow([scale_x,0,"r"])
+        projection.addRow([0,scale_y,"r"])  
+        projection.addRow([0,0,"r"])   
                     
         out_md = CutMD(to_cut, Projection=projection, P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1])
         
@@ -122,7 +126,8 @@ class CutMDTest(unittest.TestCase):
     def test_non_orthogonal_slice(self):
          # We create a fake workspace and check to see that the extents get transformed to the new coordinate system.
         to_cut = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-1,1,-1,1], Names='H,K,L', Units='U,U,U')
-        
+        # Set the UB
+        SetUB(Workspace=to_cut, a = 1, b = 1, c = 1, alpha =90, beta=90, gamma = 90)
         SetSpecialCoordinates(InputWorkspace=to_cut, SpecialCoordinates='HKL')
         
         projection = CreateEmptyTableWorkspace()
@@ -132,9 +137,9 @@ class CutMDTest(unittest.TestCase):
         projection.addColumn("double", "w")
         projection.addColumn("double", "offsets")
         projection.addColumn("str", "type")
-        projection.addRow([1,-1, 0, 0, "aaa"])
-        projection.addRow([1, 1, 0, 0, "aaa"])  
-        projection.addRow([0, 0, 1, 0, "aaa"])  
+        projection.addRow([1,-1, 0, 0, "r"])
+        projection.addRow([1, 1, 0, 0, "r"])  
+        projection.addRow([0, 0, 1, 0, "r"])  
                     
         out_md = CutMD(to_cut, Projection=projection, P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], NoPix=True)
         
@@ -157,7 +162,8 @@ class CutMDTest(unittest.TestCase):
     def test_orthogonal_slice_with_cropping(self):
          # We create a fake workspace and check to see that using bin inputs for cropping works
         to_cut = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-1,1,-1,1], Names='H,K,L', Units='U,U,U')
-        
+        # Set the UB
+        SetUB(Workspace=to_cut, a = 1, b = 1, c = 1, alpha =90, beta=90, gamma = 90)
         SetSpecialCoordinates(InputWorkspace=to_cut, SpecialCoordinates='HKL')
         
         projection = CreateEmptyTableWorkspace()
@@ -167,9 +173,9 @@ class CutMDTest(unittest.TestCase):
         projection.addColumn("double", "w")
         projection.addColumn("double", "offsets")
         projection.addColumn("str", "type")
-        projection.addRow([1, 0, 0, 0, "aaa"])
-        projection.addRow([0, 1, 0, 0, "aaa"])  
-        projection.addRow([0, 0, 1, 0, "aaa"])  
+        projection.addRow([1, 0, 0, 0, "r"])
+        projection.addRow([0, 1, 0, 0, "r"])  
+        projection.addRow([0, 0, 1, 0, "r"])  
                     
         '''
         Specify the cropping boundaries as part of the bin inputs.

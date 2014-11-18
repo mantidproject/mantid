@@ -49,45 +49,53 @@ class CutMD(DataProcessorAlgorithm):
         
         self.declareProperty(name="CheckAxes", defaultValue=True, doc="Check that the axis look to be correct, and abort if not.")
         
+    
+    def __calculate_steps(self, extents, horace_binning ):
+        # Because the step calculations may involve moving the extents, we re-publish the extents.
+        out_extents = extents
+        out_n_bins = list()
+        for i in range(len(horace_binning)):
+
+            n_arguments = len(horace_binning[i])
+            max_extent_index = (i*2) + 1
+            min_extent_index = (i*2)
+            dim_range = extents[ max_extent_index ] - extents[ min_extent_index ]
+            
+            if n_arguments == 0:
+                raise ValueError("binning parameter cannot be empty")
+            elif n_arguments == 1:
+                step_size = horace_binning[i][0]
+                if step_size > dim_range:
+                     step_size = dim_range
+                n_bins = int( dim_range / step_size)
+                # Correct the max extent to fit n * step_size
+                out_extents[max_extent_index] = extents[min_extent_index] + ( n_bins * step_size )
+            elif n_arguments == 2:
+                out_extents[ min_extent_index ] = horace_binning[i][0]
+                out_extents[ max_extent_index ] = horace_binning[i][1]
+                n_bins = 1
+            elif n_arguments == 3:
+                dim_min = horace_binning[i][0]
+                dim_max = horace_binning[i][2]
+                step_size = horace_binning[i][1]
+                dim_range = dim_max - dim_min
+                if step_size > dim_range:
+                     step_size = dim_range
+                n_bins = int( dim_range / step_size)
+                # Correct the max extent to fit n * step_size
+                out_extents[ max_extent_index ] = dim_min  + ( n_bins * step_size )
+                out_extents[ min_extent_index ] = dim_min
+            if n_bins < 1:
+                raise ValueError("Number of bins calculated to be < 1")
+            out_n_bins.append( n_bins )
+        return out_extents, out_n_bins
         
-    def __to_mantid_slicing_binning(self, horace_binning, to_cut, dimension_index):
+    def __extents_in_current_projection(self, to_cut, dimension_index):
         
         dim = to_cut.getDimension(dimension_index)
         dim_min = dim.getMinimum()
         dim_max = dim.getMaximum()
-        dim_range = dim_max - dim_min
-        n_arguments = len(horace_binning)
-        if n_arguments == 0:
-            raise ValueError("binning parameter cannot be empty")
-        elif n_arguments == 1:
-            step_size = horace_binning[0]
-            if step_size > dim_range:
-                 step_size = dim_range
-            n_bins = int( dim_range / step_size)
-            # Calculate the maximum based on step size and number of bins
-            dim_max = dim_min + ( n_bins * step_size )
-        elif n_arguments == 2:
-            dim_min = horace_binning[0]
-            dim_max = horace_binning[1]
-            n_bins = 1
-        elif n_arguments == 3:
-            dim_min = horace_binning[0]
-            dim_max = horace_binning[2]
-            step_size = horace_binning[1]
-            dim_range = dim_max - dim_min
-            if step_size > dim_range:
-                 step_size = dim_range
-            n_bins = int( dim_range / step_size)
-            dim_max = dim_min + ( n_bins * step_size )
-            #if dim_max != horace_binning[2]:
-            #    pass # TODO, we should generate a warning at this point.
-        else:
-            raise ValueError("Too many arguments given to the binning parameter")
-        if dim_min >= dim_max:
-            raise ValueError("Dimension Min >= Max value. Min %.2f Max %.2f", min, max)
-        if n_bins < 1:
-            raise ValueError("Number of bins calculated to be < 1")
-        return (dim_min, dim_max, n_bins)
+        return (dim_min, dim_max)
       
     def __calculate_extents(self, v, u, w, limits):
         M=np.array([u,v,w])
@@ -114,7 +122,7 @@ class CutMD(DataProcessorAlgorithm):
             extents.append(np.amax(new_coords[:,i]))
         
         return extents
-    
+        
     def __uvw_from_projection_table(self, projection_table):
         if not isinstance(projection_table, ITableWorkspace):
             I = np.identity(3)
@@ -193,6 +201,29 @@ class CutMD(DataProcessorAlgorithm):
                             raise ValueError("Projection table schema is wrong! Column names received: " + str(column_names) )
             if projection_table.rowCount() != 3:
                 raise ValueError("Projection table expects 3 rows")
+            
+            
+    def __scale_projection(self, (u, v, w), origin_units, target_units, to_cut):
+        
+        if set(origin_units) == set(target_units):
+            return (u,v,w) # Nothing to do.
+        
+        ol = to_cut.getExperimentInfo(0).run().sample().getOrientedLattice()
+        
+        d_star_w = 2 * np.pi * ol.dstar(u, v, w)
+        projection_scaled = [u, v, w]
+        
+        to_from_pairs = zip(origin_units, target_units)
+        for i in range(len(to_from_pairs)) :
+            from_unit, to_unit = to_from_pairs[i]
+            if from_unit == to_unit:
+                continue
+            elif from_unit == ProjectionUnit.a: # From inverse Angstroms to rlu
+                projection_scaled[i] *= d_star_w
+            else: # From rlu to inverse Anstroms
+                projection_scaled[i] /= d_star_w 
+        return projection_scaled
+            
         
     def PyExec(self):
         to_cut = self.getProperty("InputWorkspace").value
@@ -209,25 +240,29 @@ class CutMD(DataProcessorAlgorithm):
         p3_bins = self.getProperty("P3Bin").value
         p4_bins = self.getProperty("P4Bin").value 
         
-        xbins = self.__to_mantid_slicing_binning(p1_bins, to_cut, 0);
-        ybins = self.__to_mantid_slicing_binning(p2_bins, to_cut, 1);
-        zbins = self.__to_mantid_slicing_binning(p3_bins, to_cut, 2); 
-        bins = [ int(xbins[2]), int(ybins[2]), int(zbins[2]) ]
+        x_extents = self.__extents_in_current_projection(to_cut, 0);
+        y_extents = self.__extents_in_current_projection(to_cut, 1);
+        z_extents = self.__extents_in_current_projection(to_cut, 2); 
+        
+        projection = self.__uvw_from_projection_table(projection_table)
+        target_units = self.__units_from_projection_table(projection_table)
+        origin_units = (ProjectionUnit.r, ProjectionUnit.r, ProjectionUnit.r) # TODO. This is a hack!
+    
+        u,v,w = self.__scale_projection(projection, origin_units, target_units, to_cut)
+   
+        extents = self.__calculate_extents(v, u, w, ( x_extents, y_extents, z_extents ) )
+        extents, bins = self.__calculate_steps( extents, ( p1_bins, p2_bins, p3_bins ) )
         if p4_bins:
             if (ndims == 4):
                 ebins = self.__to_mantid_slicing_binning(p1_bins, to_cut, 3); 
+                e_units = to_cut.getDimension(3).getUnits()
                 bins.append(int(ebins[2]))
+                target_units.append(e_units)
             else:
                 raise ValueError("Cannot specify P4Bins unless the workspace is of sufficient dimensions")
         
-        projection = self.__uvw_from_projection_table(projection_table)
-        units = self.__units_from_projection_table(projection_table)
-        u,v,w = projection
-   
-        # Calculate the extents based on the bin limits only.
-        extents = self.__calculate_extents(v, u, w, ( (xbins[0], xbins[1]), (ybins[0], ybins[1]), (zbins[0], zbins[1])))
-        
         projection_labels = self.__make_labels(projection)
+        
         
         '''
         Actually perform the binning operation
@@ -244,16 +279,19 @@ class CutMD(DataProcessorAlgorithm):
         for i in range(0, to_cut.getNumDims()):
             if i <= 2:
                 label = projection_labels[i]
-                unit = "TODO" # Haven't figured out how to do this yet.
+                unit = target_units[i]
                 vec = projection[i]
                 value = "%s, %s, %s" % ( label, unit, ",".join(map(str, vec))) 
                 cut_alg.setPropertyValue("BasisVector{0}".format(i) , value)
             if i > 2:
-                raise RuntimeError("Not implmented yet for non-crystallographic basis vector generation.")
+                raise RuntimeError("Not implemented yet for non-crystallographic basis vector generation.")
         cut_alg.setProperty("OutputExtents", extents)
         cut_alg.setProperty("OutputBins", bins)
          
         cut_alg.execute()
+        
+        # TODO. The projection matrix should be written to the output workspace at this point.
+    
         slice = cut_alg.getProperty("OutputWorkspace").value
         self.setProperty("OutputWorkspace", slice)
         
