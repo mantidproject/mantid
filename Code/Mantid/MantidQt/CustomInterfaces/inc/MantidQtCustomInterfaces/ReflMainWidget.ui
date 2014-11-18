@@ -11,31 +11,13 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>ISIS Reflectometry</string>
+   <string>ISIS Reflectometry (Polref)</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="layoutMain">
     <property name="margin">
      <number>1</number>
     </property>
-    <item>
-     <widget class="QLabel" name="labelPrototype">
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-        <underline>false</underline>
-       </font>
-      </property>
-      <property name="text">
-       <string>PROTOTYPE</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
     <item>
      <widget class="QSplitter" name="splitterTables">
       <property name="sizePolicy">

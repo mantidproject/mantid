@@ -1,7 +1,7 @@
-ISIS Reflectometry Interface
-============================
+ISIS Reflectometry (Polref) Interface
+=====================================
 
-.. interface:: New ISIS Reflectometry (Prototype)
+.. interface:: ISIS Reflectometry (Polref)
 
 Menu bar
 --------
