@@ -4,5 +4,5 @@
 
 .. module:`pymantidplot.proxies`
 
-.. autofunction:: mantidplotpy.proxies.threadsafe_call
+.. autofunction:: pymantidplot.proxies.threadsafe_call
 
