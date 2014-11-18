@@ -5,51 +5,21 @@ from mantid.api import *
 from IndirectCommon import getInstrRun
 
 
-def _get_temperature(ws_name, log_name):
+def _normalize_to_lowest_temp(elt_ws_name):
     """
-    Gets the sample temperature for a given workspace.
+    Normalise a workspace to the lowest temperature run.
 
-    @param ws_name Name of workspace
-    @param log_name Name of the sample environment log entry
-    @returns Temperature in Kelvin or None if not found
+    @param elt_ws_name Name of the ELT workspace
     """
 
-    instr, run_number = getInstrRun(ws_name)
+    num_hist = mtd[elt_ws_name].getNumberHistograms()
 
-    facility = config.getFacility()
-    pad_num = facility.instrument(instr).zeroPadding(int(run_number))
-    zero_padding = '0' * (pad_num - len(run_number))
-
-    run_name = instr + zero_padding + run_number
-    log_name = run_name.upper() + '.log'
-
-    run = mtd[ws_name].getRun()
-
-    if log_name in run:
-        # Look for temperature in logs in workspace
-        tmp = run[log_name].value
-        temp = tmp[len(tmp) - 1]
-        logger.debug('Temperature %d K found for run :%s' % (temp, run_name))
-        return temp
-
-    else:
-        # Logs not in workspace, try loading from file
-        logger.information('Log parameter not found in workspace. Searching for log file.')
-        log_path = FileFinder.getFullPath(log_name)
-
-        if log_path != '':
-            # Get temperature from log file
-            LoadLog(Workspace=ws_name, Filename=log_path)
-            run_logs = mtd[ws_name].getRun()
-            tmp = run_logs[log_name].value
-            temp = tmp[len(tmp) - 1]
-            logger.debug('Temperature %d K found for run :%s' % (temp, run_name))
-            return temp
-
-        else:
-            # Can't find log file
-            logger.warning('No temperature fround for run :%s' % run_name)
-            return None
+    # Normalize each spectrum in the workspace
+    for idx in range(0, num_hist):
+        y_vals = mtd[elt_ws_name].readY(idx)
+        scale = 1.0 / y_vals[0]
+        y_vals_scaled = scale * y_vals
+        mtd[elt_ws_name].setY(idx, y_vals_scaled)
 
 
 class ElasticWindowMultiple(DataProcessorAlgorithm):
@@ -148,6 +118,8 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 ElasticWindow(InputWorkspace=input_ws, OutputInQ=q_ws, OutputInQSquared=q2_ws,
                               Range1Start=self._range_1_start, Range1End=self._range_1_end)
 
+            Logarithm(InputWorkspace=q2_ws, OutputWorkspace=q2_ws)
+
             q_workspaces.append(q_ws)
             q2_workspaces.append(q2_ws)
 
@@ -156,7 +128,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             run_numbers.append(run_no)
 
             # Get the sample temperature
-            temp = _get_temperature(input_ws, self._sample_log_name)
+            temp = self._get_temperature(input_ws)
             if temp is not None:
                 temperatures.append(temp)
 
@@ -213,9 +185,26 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         # Process the ELF workspace
         if self._elf_workspace != '':
             logger.information('Creating ELF workspace')
+
             Transpose(InputWorkspace=self._q_workspace, OutputWorkspace=self._elf_workspace)
             SortXAxis(InputWorkspace=self._elf_workspace, OutputWorkspace=self._elf_workspace)
+
             self.setProperty('OutputELF', self._elf_workspace)
+
+        # Do temperature normalisation
+        if self._elt_workspace != '':
+            logger.information('Creating ELT workspace')
+
+            # If the ELT workspace wqas not already created then crate it here, otherwise just clone it
+            if self._elf_workspace == '':
+                Transpose(InputWorkspace=self._q_workspace, OutputWorkspace=self._elt_workspace)
+                SortXAxis(InputWorkspace=self._elt_workspace, OutputWorkspace=self._elt_workspace)
+            else:
+                CloneWorkspace(InputWorkspace=self._elf_workspace, OutputWorkspace=self._elt_workspace)
+
+            _normalize_to_lowest_temp(self._elt_workspace)
+
+            self.setProperty('OutputELT', self._elt_workspace)
 
         # Set the output workspace
         self.setProperty('OutputInQ', self._q_workspace)
@@ -230,6 +219,9 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
             if self._elf_workspace != '':
                 self._plot_spectra(self._elf_workspace)
+
+            if self._elt_workspace != '':
+                self._plot_spectra(self._elt_workspace)
 
 
     def _setup(self):
@@ -272,6 +264,53 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             plot_list.append(i)
 
         self._mtd_plot.plotSpectrum(ws_name, plot_list)
+
+
+    def _get_temperature(self, ws_name):
+        """
+        Gets the sample temperature for a given workspace.
+
+        @param ws_name Name of workspace
+        @returns Temperature in Kelvin or None if not found
+        """
+
+        instr, run_number = getInstrRun(ws_name)
+
+        facility = config.getFacility()
+        pad_num = facility.instrument(instr).zeroPadding(int(run_number))
+        zero_padding = '0' * (pad_num - len(run_number))
+
+        run_name = instr + zero_padding + run_number
+        log_filename = run_name.upper() + '.log'
+
+        run = mtd[ws_name].getRun()
+
+        if self._sample_log_name in run:
+            # Look for temperature in logs in workspace
+            tmp = run[self._sample_log_name].value
+            temp = tmp[len(tmp) - 1]
+            logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
+            return temp
+
+        else:
+            # Logs not in workspace, try loading from file
+            logger.information('Log parameter not found in workspace. Searching for log file.')
+            log_path = FileFinder.getFullPath(log_filename)
+
+            if log_path != '':
+                # Get temperature from log file
+                LoadLog(Workspace=ws_name, Filename=log_path)
+                run_logs = mtd[ws_name].getRun()
+                tmp = run_logs[self._sample_log_name].value
+                temp = tmp[len(tmp) - 1]
+                logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
+                return temp
+
+            else:
+                # Can't find log file
+                logger.warning('Log file for run %s not found' % run_name)
+                logger.warning('No temperature found for run: %s' % run_name)
+                return None
 
 
 # Register algorithm with Mantid
