@@ -210,4 +210,49 @@ the behaviour of the interface.
 |                               | decimal places.                                      |
 +-------------------------------+------------------------------------------------------+
 
+
+Troubleshooting
+---------------
+
+When I try to process I get an error: "Invalid value for property Filename (list of str lists) ..."
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This occurs when Mantid is unable to load a run. If the run was given as a
+workspace name, check the spelling. If the run was given as a number, check
+that the run number is correct. If the run number is incorrect, check the
+number given in the *Run(s)* or *Transmission Run(s)* columns. If the run
+number is correct, check the instrument named in the error message is correct.
+If the instrument is incorrect, check that the processing instrument selector
+(at the bottom right of the interface) is correct.
+
+If the run still isn't loading check Mantid's user directories are set
+correctly, and that the desired run is in one of the given directories. To
+manage the user directories, open *File -> Manage User Directories*.
+
+When I try to process I get an error: "Invalid key value pair, '...'"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This occurs when the contents of the options column are invalid.
+Key value pairs must be given in the form ``key = value``, and if the value
+contains commas it **must** be quoted, like so: ``key = "v,a,l,u,e"``.
+
+The *Open Table* menu doesn't do anything
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The *Open Table* menu contains a list of valid table workspaces to open in the
+processing table. If a workspace is not compatible, it will not be listed. So,
+if there are no compatible workspaces the *Open Table* menu will be empty.
+
+My IvsQ workspaces are not being stitched correctly
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Stitching is controlled by the group a row is in. For stitching to occur, the
+rows must be in the same group, and be processed simultaneously.
+
+An easy way to check the runs are in the same group is to select one of the
+rows you want stitched, and then in the menu bar select *Edit -> Expand Selection*.
+All the rows in that group will be selected. If you have another row that you
+would like to add to the group, you can do this easily by adding it to the
+selection, and then in the menu bar selecting *Edit -> Group Selected*.
+
 .. categories:: Interfaces Reflectometry
