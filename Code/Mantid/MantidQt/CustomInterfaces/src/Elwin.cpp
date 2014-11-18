@@ -92,18 +92,22 @@ namespace IDA
 
   void Elwin::run()
   {
+    QStringList inputFilenames = uiForm().elwin_inputFile->getFilenames();
+    inputFilenames.sort();
+
     // Get workspace names
-
-    //TODO
-    QString qWorkspace = "q";
-    QString qSquaredWorkspace = "q2";
-    QString elfWorkspace = "elf";
-    QString eltWorkspace = "elt";
-
     std::string inputGroupWsName = "IDA_Elwin_Input";
 
+    QFileInfo firstFileInfo(inputFilenames[0]);
+    QString filename = firstFileInfo.baseName();
+    QString workspaceBaseName = filename.left(filename.lastIndexOf("_")) + "_elwin_";
+
+    QString qWorkspace = workspaceBaseName + "q";
+    QString qSquaredWorkspace = workspaceBaseName + "q2";
+    QString elfWorkspace = workspaceBaseName + "elf";
+    QString eltWorkspace = workspaceBaseName + "elt";
+
     // Load input files
-    QStringList inputFilenames = uiForm().elwin_inputFile->getFilenames();
     std::vector<std::string> inputWorkspaceNames;
 
     for(auto it = inputFilenames.begin(); it != inputFilenames.end(); ++it)
