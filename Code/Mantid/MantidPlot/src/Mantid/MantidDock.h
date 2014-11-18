@@ -134,13 +134,15 @@ private:
   *m_showDetectors, *m_showBoxData, *m_showVatesGui,
   *m_showSpectrumViewer,
   *m_showSliceViewer,
-  *m_colorFill, *m_showLogs, *m_showHist, *m_showMDPlot, *m_showListData,
+  *m_colorFill, *m_showLogs, *m_showSampleMaterial,  *m_showHist, *m_showMDPlot, *m_showListData,
   *m_saveNexus, *m_rename, *m_delete,
   *m_program, * m_ascendingSortAction,
   *m_descendingSortAction, *m_byNameChoice, *m_byLastModifiedChoice, *m_showTransposed,
   *m_convertToMatrixWorkspace,
   *m_convertMDHistoToMatrixWorkspace,
   *m_clearUB;
+  
+  ApplicationWindow *m_appParent;
 
   QAtomicInt m_updateCount;
   bool m_treeUpdating;

@@ -26,6 +26,8 @@ set ( EXPORT_FILES
   src/Exports/Object.cpp
   src/Exports/PointGroup.cpp
   src/Exports/PointGroupFactory.cpp
+  src/Exports/SpaceGroup.cpp
+  src/Exports/SpaceGroupFactory.cpp
   src/Exports/SymmetryOperation.cpp
   src/Exports/SymmetryOperationFactory.cpp
 )  
@@ -57,8 +59,8 @@ if(CMAKE_GENERATOR STREQUAL Xcode)
   set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/geometry )
 endif()
 
-copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
-                           PYTHON_INSTALL_FILES )
+copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
+                     PYTHON_INSTALL_FILES )
 
 #############################################################################################
 # Create the target for this directory

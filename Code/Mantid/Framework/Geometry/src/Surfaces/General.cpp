@@ -8,8 +8,6 @@ namespace Mantid
 namespace Geometry
 {
 
-const double GTolerance(1e-6);  ///< Tolerance
-
 General::General() : Quadratic()
   /**
     Standard Constructor

@@ -508,7 +508,7 @@
              </sizepolicy>
             </property>
             <property name="autoLoad" stdset="0">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="workspaceSuffixes" stdset="0">
              <stringlist>
@@ -2423,6 +2423,13 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
+        <widget class="QGroupBox" name="abscor_gbInput">
+         <property name="title">
+          <string>Input</string>
+         </property>
+         <layout class="QVBoxLayout" name="abscor_loInput">
+
+       <item>
         <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsSample" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -2450,6 +2457,17 @@
          </property>
         </widget>
        </item>
+
+     </layout>
+    </widget>
+   </item>
+
+       <item>
+        <widget class="QGroupBox" name="abscor_gbOptions">
+         <property name="title">
+          <string>Options</string>
+         </property>
+         <layout class="QHBoxLayout" name="abscor_loOptions">
        <item>
         <layout class="QGridLayout" name="gridLayout_4">
          <item row="0" column="0">
@@ -2492,7 +2510,7 @@
             </sizepolicy>
            </property>
            <property name="autoLoad" stdset="0">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
             <stringlist>
@@ -2574,65 +2592,83 @@
          </item>
         </layout>
        </item>
-       <item>
-        <spacer name="abscor_verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
+        </layout>
+        </widget>
        </item>
+
+
+        <item>
+         <widget class="QGroupBox" name="abscor_gbPreview">
+          <property name="title">
+           <string>Preview</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_11">
+           <item>
+            <layout class="QVBoxLayout" name="abscor_plotPreview"/>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="abscor_plotLegend">
+             <item>
+              <widget class="QLabel" name="abscor_plotLSample">
+               <property name="text">
+                <string>Sample</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="abscor_plotLCan">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text">
+                <string>Can</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="abscor_plotLCorr">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(0, 255, 0);</string>
+               </property>
+               <property name="text">
+                <string>Corrected</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="abscor_lbPreviewSPec">
+               <property name="text">
+                <string>Spectrum:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="abscor_spPreviewSpec"/>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
        <item>
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
           <string>Output Options</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_33">
-            <item>
-             <spacer name="horizontalSpacer_9">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="abscor_ckPlotContrib">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>Plot Contributions</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_25">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </item>
           <item>
            <layout class="QHBoxLayout" name="abscor_layoutPlotOutput">
             <item>
@@ -2880,7 +2916,6 @@
   <tabstop>abscor_ckScaleMultiplier</tabstop>
   <tabstop>abscor_leScaleMultiplier</tabstop>
   <tabstop>abscor_ckUseCorrections</tabstop>
-  <tabstop>abscor_ckPlotContrib</tabstop>
   <tabstop>abscor_ckVerbose</tabstop>
   <tabstop>abscor_ckSave</tabstop>
  </tabstops>

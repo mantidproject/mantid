@@ -13,6 +13,16 @@
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 
+namespace boost{
+  template<class CharType, class CharTrait>
+  std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& out, optional<std::pair<double,double> > const& maybe)
+  {
+    if (maybe)
+        out << maybe->first << ", " << maybe->second;
+    return out;
+  }
+}
+
 class MockALCDataLoadingView : public IALCDataLoadingView
 {
   // XXX: A workaround, needed because of the way the comma is treated in a macro

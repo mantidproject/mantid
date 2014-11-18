@@ -11,6 +11,7 @@ set ( TEST_PY_FILES
   ReferenceFrameTest.py
   UnitCellTest.py
   PointGroupTest.py
+  SpaceGroupTest.py
   SymmetryOperationTest.py
 )
 

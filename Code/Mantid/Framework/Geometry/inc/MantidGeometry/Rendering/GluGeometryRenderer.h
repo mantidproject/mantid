@@ -42,8 +42,6 @@ namespace Mantid
     */
     class MANTID_GEOMETRY_DLL GluGeometryRenderer
     {
-    private:
-      int                                                  mErrorCode; ///< The lastest error code
     public:
       GluGeometryRenderer();       ///< Constructor
       ~GluGeometryRenderer();      ///< Destructor

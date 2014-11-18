@@ -1,7 +1,7 @@
 
 #include <iostream>
 
-#include <qapplication.h>                                                        
+#include <qapplication.h>
 #include <QMainWindow>
 #include <QtGui>
 
@@ -14,30 +14,30 @@ using namespace RefDetectorViewer;
 
 /**
  * Construct an array of test data over the specified region with the
- * specified region using the specified number of rows and columns. 
+ * specified region using the specified number of rows and columns.
  *
  * @param total_xmin   The x-coordinate at the left edge of the data region
  * @param total_xmax   The x-coordinate at the right edge of the data region
  * @param total_ymin   The y-coordinate at the bottom edge of the data region
  * @param total_ymax   The y-coordinate at the top edge of the data region
  * @param total_rows   The number of rows the test data should be divided into
- * @param total_cols   The number of columns the test data should be divided 
+ * @param total_cols   The number of columns the test data should be divided
  *                     into
  */
-float * MakeTestData( double total_xmin, double total_xmax,
-                      double total_ymin, double total_ymax,
-                      size_t total_rows, size_t total_cols )
+std::vector<float> makeTestData( double total_xmin, double total_xmax,
+                                 double total_ymin, double total_ymax,
+                                 size_t total_rows, size_t total_cols )
 {
-                                        // make some test data in array data[]
   double x;
   double y;
-  float* data = new float[total_rows*total_cols];
+  std::vector<float> data(total_rows*total_cols);
+
   for ( size_t row = 0; row < total_rows; row++ )
     for ( size_t col = 0; col < total_cols; col++ )
     {
        x = ((double)col - (double)total_cols/2.0)/(double)total_cols;
        y = ((double)row - (double)total_rows/2.0)/(double)total_rows;
-       data[ row * total_cols + col ] = 
+       data[ row * total_cols + col ] =
                                      (float)(1000.0 * cos( (x*x + y*y)*20.0 ));
     }
                                                 // mark a row 1/4 way up
@@ -75,10 +75,10 @@ int main( int argc, char **argv )
 {
   QApplication a( argc, argv );
 
-  float * data = MakeTestData( 10, 110, 220, 320, 2000, 2000 );
+  std::vector<float> data = makeTestData( 10, 110, 220, 320, 2000, 2000 );
 
-  SpectrumView::ArrayDataSource* source =
-                   new SpectrumView::ArrayDataSource( 10, 110, 220, 320, 2000, 2000, data );
+  SpectrumView::ArrayDataSource_sptr source =
+                   SpectrumView::ArrayDataSource_sptr( new SpectrumView::ArrayDataSource( 10, 110, 220, 320, 2000, 2000, data ) );
 
   MantidQt::RefDetectorViewer::RefImageView image_view( source, 10, 110, 220, 320, 200, 500 );
 

@@ -1,6 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/ParaViewVersion.h"
@@ -32,6 +33,7 @@
 #include <Poco/PipeStream.h>
 #include <Poco/StreamCopier.h>
 
+
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/regex.hpp>
@@ -45,6 +47,7 @@
 #ifdef __APPLE__
   #include <mach-o/dyld.h>
 #endif
+
 
 namespace Mantid
 {
@@ -179,7 +182,7 @@ ConfigServiceImpl::ConfigServiceImpl() :
 #else
   m_user_properties_file_name("Mantid.user.properties"),
 #endif
-  m_DataSearchDirs(), m_UserSearchDirs(), m_instr_prefixes(), m_removedFlag("@@REMOVED@@")
+  m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(), m_instr_prefixes(), m_removedFlag("@@REMOVED@@")
 {
   //getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration> ;
@@ -215,13 +218,20 @@ ConfigServiceImpl::ConfigServiceImpl() :
     }
   }
 
+  //Assert that the appdata and the instrument subdirectory exists
+  std::string appDataDir = getAppDataDir();
+  Poco::Path path(appDataDir);
+  path.pushDirectory("instrument");
+  Poco::File file(path);
+  //createdirectories will fail gracefully if it is already present
+  file.createDirectories();
+
   //Fill the list of possible relative path keys that may require conversion to absolute paths
   m_ConfigPaths.insert(std::make_pair("mantidqt.python_interfaces_directory", true));
   m_ConfigPaths.insert(std::make_pair("plugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("pvplugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("mantidqt.plugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("instrumentDefinition.directory", true));
-  m_ConfigPaths.insert(std::make_pair("parameterDefinition.directory", true));
   m_ConfigPaths.insert(std::make_pair("groupingFiles.directory", true));
   m_ConfigPaths.insert(std::make_pair("maskFiles.directory", true));
   m_ConfigPaths.insert(std::make_pair("colormaps.directory", true));
@@ -718,6 +728,8 @@ void ConfigServiceImpl::createUserPropertiesFile() const
     filestr << std::endl;
     filestr << "## Show invisible workspaces" << std::endl;
     filestr << "#MantidOptions.InvisibleWorkspaces=0" << std::endl;
+    filestr << "## Re-use plot instances for different plot types" << std::endl;
+    filestr << "#MantidOptions.ReusePlotInstances=Off" << std::endl;
     filestr << std::endl;
     filestr << "## Uncomment to disable use of OpenGL to render unwrapped instrument views" << std::endl;
     filestr << "#MantidOptions.InstrumentView.UseOpenGL=Off" << std::endl;
@@ -820,6 +832,7 @@ void ConfigServiceImpl::updateConfig(const std::string& filename, const bool app
     cacheDataSearchPaths();
     appendDataSearchDir(getString("defaultsave.directory"));
     cacheUserSearchPaths();
+    cacheInstrumentPaths();
   }
 }
 
@@ -1128,6 +1141,10 @@ void ConfigServiceImpl::setString(const std::string & key, const std::string & v
   else if (key == "usersearch.directories")
   {
     cacheUserSearchPaths();
+  }  
+  else if (key == "instrumentDefinition.directory")
+  {
+    cacheInstrumentPaths();
   }
   else if (key == "defaultsave.directory")
   {
@@ -1224,6 +1241,36 @@ std::string ConfigServiceImpl::getOSVersion()
   return m_pSysConfig->getString("system.osVersion");
 }
 
+/// @returns The name of the current user as reported by the environment.
+std::string ConfigServiceImpl::getUsername() {
+  std::string username;
+
+  // mac and favorite way to get username on linux
+  try {
+    username = m_pSysConfig->getString("system.env.USER");
+    if (!username.empty()) {
+      return username;
+    }
+  }
+  catch (Poco::NotFoundException &e) {
+    UNUSED_ARG(e); // let it drop on the floor
+  }
+
+  // windoze and alternate linux username variable
+  try {
+    username = m_pSysConfig->getString("system.env.USERNAME");
+    if (!username.empty()) {
+      return username;
+    }
+  }
+  catch (Poco::NotFoundException &e) {
+    UNUSED_ARG(e); // let it drop on the floor
+  }
+
+  // give up and return an empty string
+  return std::string();
+}
+
 /** Gets the absolute path of the current directory containing the dll
  *
  * @returns The absolute path of the current directory containing the dll
@@ -1249,6 +1296,28 @@ std::string ConfigServiceImpl::getCurrentDir() const
 std::string ConfigServiceImpl::getTempDir()
 {
   return m_pSysConfig->getString("system.tempDir");
+}
+
+/** Gets the absolute path of the appdata directory
+*
+* @returns The absolute path of the appdata directory
+*/
+std::string ConfigServiceImpl::getAppDataDir()
+{
+  const std::string applicationName = "mantid";
+#if POCO_OS == POCO_OS_WINDOWS_NT
+  const std::string vendorName = "mantidproject"; 
+  std::string appdata = std::getenv("APPDATA");
+  Poco::Path path(appdata);
+  path.makeDirectory();
+  path.pushDirectory(vendorName);
+  path.pushDirectory(applicationName);
+  return path.toString();
+#else //linux and mac
+  Poco::Path path(Poco::Path::home());
+  path.pushDirectory("." + applicationName);
+  return path.toString();
+#endif
 }
 
 /**
@@ -1501,26 +1570,84 @@ const std::vector<std::string>& ConfigServiceImpl::getUserSearchDirs() const
 }
 
 /**
- * Return the search directory for XML instrument definition files (IDFs)
- * @returns Full path of instrument search directory
+ * Return the search directories for XML instrument definition files (IDFs)
+ * @returns An ordered list of paths for instrument searching
+ */
+const std::vector<std::string>& ConfigServiceImpl::getInstrumentDirectories() const
+{
+  return m_InstrumentDirs;
+}
+
+/**
+ * Return the base search directories for XML instrument definition files (IDFs)
+ * @returns a last entry of getInstrumentDirectories
  */
 const std::string ConfigServiceImpl::getInstrumentDirectory() const
 {
-  // Determine the search directory for XML instrument definition files (IDFs)
-  std::string directoryName = getString("instrumentDefinition.directory");
-  if (directoryName.empty())
-  {
-    // This is the assumed deployment directory for IDFs, where we need to be relative to the
-    // directory of the executable, not the current working directory.
-    directoryName = Poco::Path(getPropertiesDir()).resolve("../instrument").toString();
-  }
+  return m_InstrumentDirs[m_InstrumentDirs.size()-1];
+}
 
-  if (!Poco::File(directoryName).isDirectory())
-  {
-    g_log.error("Unable to locate instrument search directory at: " + directoryName);
-  }
+/**
+ * Fills the internal cache of instrument definition directories
+ */
+void ConfigServiceImpl::cacheInstrumentPaths()
+{
+    m_InstrumentDirs.clear();
+    Poco::Path path(getAppDataDir());
+    path.makeDirectory();
+    path.pushDirectory("instrument");
+    std::string appdatadir =  path.toString();
+    addDirectoryifExists(appdatadir,m_InstrumentDirs);
 
-  return directoryName;
+#ifndef _WIN32
+    std::string etcdatadir =  "/etc/mantid/instrument";
+    addDirectoryifExists(etcdatadir,m_InstrumentDirs);
+#endif
+
+    // Determine the search directory for XML instrument definition files (IDFs)
+    std::string directoryName = getString("instrumentDefinition.directory");
+    if (directoryName.empty())
+    {
+      // This is the assumed deployment directory for IDFs, where we need to be relative to the
+      // directory of the executable, not the current working directory.
+      directoryName = Poco::Path(getPropertiesDir()).resolve("../instrument").toString();
+    }
+    addDirectoryifExists(directoryName,m_InstrumentDirs);
+}
+
+
+
+/**
+ * Verifies the directory exists and add it to the back of the directory list if valid
+ * @param directoryName the directory name to add
+ * @param directoryList the list to add the directory to
+ * @returns true if the directory was valid and added to the list
+ */
+bool ConfigServiceImpl::addDirectoryifExists(const std::string& directoryName, std::vector<std::string>& directoryList)
+{
+  try
+  {
+    if (Poco::File(directoryName).isDirectory())
+    {
+      directoryList.push_back(directoryName);
+      return true;
+    }
+    else
+    {
+      g_log.information("Unable to locate directory at: " + directoryName);
+      return false;
+    }
+  }
+  catch (Poco::PathNotFoundException&)
+  {
+    g_log.information("Unable to locate directory at: " + directoryName);
+    return false;
+  }   
+  catch (Poco::FileNotFoundException&)
+  {
+    g_log.information("Unable to locate directory at: " + directoryName);
+    return false;
+  } 
 }
 
 /**

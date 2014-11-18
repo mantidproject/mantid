@@ -146,6 +146,20 @@ namespace Mantid
     }
 
     /**
+     * Deep comparison.
+     * @param right The other property to compare to.
+     * @return true if the are equal.
+     */
+    template<typename TYPE>
+    bool TimeSeriesProperty<TYPE>::operator==( const Property & right ) const
+    {
+      auto rhs_tsp = dynamic_cast<const TimeSeriesProperty<TYPE> *>(&right);
+      if (!rhs_tsp)
+        return false;
+      return this->operator==(*rhs_tsp);
+    }
+
+    /**
      * Deep comparison (not equal).
      * @param right The other property to compare to.
      * @return true if the are not equal.
@@ -156,7 +170,18 @@ namespace Mantid
       return !(*this == right);
     }
 
-    /*
+    /**
+     * Deep comparison (not equal).
+     * @param right The other property to compare to.
+     * @return true if the are not equal.
+     */
+    template<typename TYPE>
+    bool TimeSeriesProperty<TYPE>::operator!=( const Property & right ) const
+    {
+      return !(*this == right);
+    }
+
+    /**
      * Set name of the property
      */
     template <typename TYPE>
@@ -1363,8 +1388,8 @@ namespace Mantid
         else
         {
           // 3. Regular
-          DateAndTime startT = m_values[n].time();
-          DateAndTime endT = m_values[n+1].time();
+            DateAndTime startT = m_values[static_cast<std::size_t>(n)].time();
+            DateAndTime endT = m_values[static_cast<std::size_t>(n)+1].time();
           TimeInterval dt(startT, endT);
           deltaT = dt;
         }
@@ -1383,8 +1408,8 @@ namespace Mantid
         else if (static_cast<size_t>(n) == m_filterQuickRef.back().second+1)
         {
           // 2. n = size of the allowed region, duplicate the last one
-          size_t ind_t1 = m_filterQuickRef.back().first;
-          size_t ind_t2 = ind_t1-1;
+          long ind_t1 = static_cast<long>(m_filterQuickRef.back().first);
+          long ind_t2 = ind_t1-1;
           Kernel::DateAndTime t1 = (m_values.begin()+ind_t1)->time();
           Kernel::DateAndTime t2 = (m_values.begin()+ind_t2)->time();
           time_duration d = t1-t2;
@@ -1480,12 +1505,12 @@ namespace Mantid
         // 3. Situation 1:  No filter
         if (static_cast<size_t>(n) < m_values.size())
         {
-          TimeValueUnit<TYPE> entry = m_values[n];
+          TimeValueUnit<TYPE> entry = m_values[static_cast<std::size_t>(n)];
           value = entry.value();
         }
         else
         {
-          TimeValueUnit<TYPE> entry = m_values[m_size-1];
+          TimeValueUnit<TYPE> entry = m_values[static_cast<std::size_t>(m_size)-1];
           value = entry.value();
         }
       }
@@ -1511,7 +1536,7 @@ namespace Mantid
           {
             throw std::logic_error("Not consider out of boundary case here. ");
           }
-          size_t ilog = m_filterQuickRef[refindex+1].first + (n-m_filterQuickRef[refindex].second);
+          size_t ilog = m_filterQuickRef[refindex+1].first + (static_cast<std::size_t>(n)-m_filterQuickRef[refindex].second);
           value = m_values[ilog].value();
         } // END-IF-ELSE Cases
       }
@@ -1539,7 +1564,7 @@ namespace Mantid
       if (n < 0 || n >= static_cast<int>(m_values.size()))
         n = static_cast<int>(m_values.size())-1;
 
-      return m_values[n].time();
+      return m_values[static_cast<size_t>(n)].time();
     }
 
     /* Divide the property into  allowed and disallowed time intervals according to \a filter.
@@ -1990,7 +2015,7 @@ namespace Mantid
             {
               numintervals = m_filterQuickRef.back().second;
             }
-            if (m_filter[ift].first < m_values[icurlog].time())
+            if (m_filter[ift].first < m_values[static_cast<std::size_t>(icurlog)].time())
             {
               if (icurlog == 0)
               {

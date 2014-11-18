@@ -57,6 +57,8 @@ public:
   virtual const std::string category() const { return "Utility\\Workspaces"; } ///< @return the algorithms category
   virtual int version() const { return (1); } ///< @return version number of algorithm
 
+  virtual std::map<std::string, std::string> validateInputs();
+
 private:
   
   /// Initialise the Algorithm (declare properties)

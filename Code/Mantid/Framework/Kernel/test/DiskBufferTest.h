@@ -525,6 +525,48 @@ public:
     TS_ASSERT_EQUALS( dbuf.allocate(55), 1000 );
     TS_ASSERT_EQUALS( dbuf.getFileLength(), 1055 );
   }
+
+  //// Test for setting the DiskBuffer
+  void test_set_free_space_blocks()
+  {
+      DiskBuffer dbuf(0);
+      DiskBuffer::freeSpace_t &map = dbuf.getFreeSpaceMap();
+
+      uint64_t freeSpaceBlocksArray[] = {1,3,6,5};
+      std::vector<uint64_t> freeSpaceBlocksVector(freeSpaceBlocksArray, freeSpaceBlocksArray + sizeof(freeSpaceBlocksArray) / sizeof(uint64_t));
+      dbuf.setFreeSpaceVector(freeSpaceBlocksVector);
+
+      TS_ASSERT_EQUALS(map.size(), 2);
+
+      std::vector<uint64_t> assignedVector;
+      dbuf.getFreeSpaceVector(assignedVector);
+      TS_ASSERT_EQUALS(assignedVector, freeSpaceBlocksVector);
+  }
+
+  //// Test for setting the DiskBuffer with an invalid vector
+  void test_set_free_space_blocks_with_odd_sized_vector_throws_exception()
+  {
+      DiskBuffer dbuf(0);
+
+      uint64_t freeSpaceBlocksArray[] = {1,3,6};
+      std::vector<uint64_t> freeSpaceBlocksVector(freeSpaceBlocksArray, freeSpaceBlocksArray + sizeof(freeSpaceBlocksArray) / sizeof(uint64_t));
+
+      TS_ASSERT_THROWS(dbuf.setFreeSpaceVector(freeSpaceBlocksVector), std::length_error);
+  }
+
+  //// Test for setting the DiskBuffer with a zero sized vector
+  void test_set_free_space_blocks_with_zero_sized_vector()
+  {
+      DiskBuffer dbuf(0);
+      DiskBuffer::freeSpace_t &map = dbuf.getFreeSpaceMap();
+
+      std::vector<uint64_t> freeSpaceBlocksVector;
+
+      dbuf.setFreeSpaceVector(freeSpaceBlocksVector);
+
+      TS_ASSERT_EQUALS(map.size(), 0);
+  }
+
   ////--------------------------------------------------------------------------------
   ////--------------------------------------------------------------------------------
   ////--------------------------------------------------------------------------------
@@ -878,5 +920,5 @@ public:
 
 };
 
-
 #endif /* MANTID_KERNEL_DISKBUFFERTEST_H_ */
+
