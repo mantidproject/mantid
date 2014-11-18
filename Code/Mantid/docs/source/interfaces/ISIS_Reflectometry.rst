@@ -1,7 +1,7 @@
-.. _ISIS Reflectometry:
-
 ISIS Reflectometry Interface
 ============================
+
+.. interface:: New ISIS Reflectometry (Prototype)
 
 Menu bar
 --------
