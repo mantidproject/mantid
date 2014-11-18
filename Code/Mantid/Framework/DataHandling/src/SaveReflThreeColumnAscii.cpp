@@ -18,8 +18,8 @@ namespace Mantid
     /// virtual method to set the extra properties required for this algorithm
    void SaveReflThreeColumnAscii::extraProps()
     {
-      declareProperty(new ArrayProperty<std::string>("LogList"),"List of logs to write to file.");
       declareProperty("Title", "", "Text to be written to the Title field");
+      declareProperty(new ArrayProperty<std::string>("LogList"),"List of logs to write to file.");
     }
 
     /** virtual method to add information to the file before the data
@@ -28,20 +28,12 @@ namespace Mantid
     void SaveReflThreeColumnAscii::extraHeaders(std::ofstream & file)
     {
       auto samp = m_ws->run();
-      //std::string subtitle;
       std::string title = getProperty("Title");
-      /*try
-      {
-        subtitle = samp.getLogData("run_title")->value();
-      }
-      catch (Kernel::Exception::NotFoundError &)
-      {
-        subtitle = "";
-      }
+
       if (title != "") //if is toggled
       { 
         file << "#" << title << std::endl;
-      }*/
+      }
 
       const std::vector<std::string> logList = getProperty("LogList");
       ///logs

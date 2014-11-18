@@ -13,10 +13,10 @@ namespace Mantid
   namespace DataHandling
   {
     /**
-    Saves a file in ILL Cosmos format  from a 2D workspace
-    (Workspace2D class). SaveILLCosmosAscii is an algorithm but inherits frrm the
+    Saves a file in three column format  from a 2D workspace
+    (Workspace2D class). SaveReflThreeColumnAscii is an algorithm but inherits from the
     AsciiPointBase class which provides the main implementation for the init() & exec() methods.
-    Output is tab delimited Ascii point data with dq/q and extra header information.
+    Output is tab delimited Ascii point data without dq/q and with extra header information.
 
     Copyright &copy; 2007-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

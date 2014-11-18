@@ -59,18 +59,13 @@ public:
     TS_ASSERT( Poco::File(m_long_filename).exists() );
     std::ifstream in(m_long_filename.c_str());
     std::string fullline;
-    headingsTests(in, fullline);
     getline(in,fullline);
-
     std::vector<std::string> columns;
     boost::split(columns, fullline, boost::is_any_of("\t"), boost::token_compress_on);
-    TS_ASSERT_EQUALS(columns.size(),3); ///////
-    //the first is black due to the leading tab
-    TS_ASSERT(columns.at(0) == "");
+    TS_ASSERT_EQUALS(columns.size(),4); //first blank
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(4)), 0.6, 0.01);
     in.close();
 
     cleanupafterwards();
@@ -94,17 +89,13 @@ public:
     TS_ASSERT( Poco::File(m_long_filename).exists() );
     std::ifstream in(m_long_filename.c_str());
     std::string fullline;
-    headingsTests(in, fullline);
     getline(in,fullline);
     std::vector<std::string> columns;
     boost::split(columns, fullline, boost::is_any_of("\t"), boost::token_compress_on);
-    TS_ASSERT_EQUALS(columns.size(),5);
-    //the first is black due to the leading tab
-    TS_ASSERT(columns.at(0) == "");
+    TS_ASSERT_EQUALS(columns.size(),4); //first blank
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 0, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
-    TS_ASSERT((columns.at(4) == "nan") || (columns.at(4) == "inf"));
+    //TS_ASSERT((columns.at(3) == "nan") || (columns.at(3) == "inf"));
     in.close();
 
     cleanupafterwards();
@@ -128,17 +119,13 @@ public:
     TS_ASSERT( Poco::File(m_long_filename).exists() );
     std::ifstream in(m_long_filename.c_str());
     std::string fullline;
-    headingsTests(in, fullline);
     getline(in,fullline);
     std::vector<std::string> columns;
     boost::split(columns, fullline, boost::is_any_of("\t"), boost::token_compress_on);
-    TS_ASSERT_EQUALS(columns.size(),5);
-    //the first is black due to the leading tab
-    TS_ASSERT(columns.at(0) == "");
+    TS_ASSERT_EQUALS(columns.size(),4); //first blank
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);  
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(4)), 0.6, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0, 0.01);  
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
     in.close();
 
     cleanupafterwards();
@@ -162,60 +149,21 @@ public:
     TS_ASSERT( Poco::File(m_long_filename).exists() );
     std::ifstream in(m_long_filename.c_str());
     std::string fullline;
-    headingsTests(in, fullline);
     getline(in,fullline);
     std::vector<std::string> columns;
     boost::split(columns, fullline, boost::is_any_of("\t"), boost::token_compress_on);
-    TS_ASSERT_EQUALS(columns.size(),5);
-    //the first is black due to the leading tab
-    TS_ASSERT(columns.at(0) == "");
+    TS_ASSERT_EQUALS(columns.size(),4); //first blank
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(4)), 0.6, 0.01);
     in.close();
 
     cleanupafterwards();
   }
-  void testParameters()
-  {
-    //create a new workspace and then delete it later on
-    createWS(false,false,false,true);
 
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveReflThreeColumnAscii");
-    alg->setPropertyValue("InputWorkspace", m_name);
-    alg->setPropertyValue("Filename", m_filename);
-    alg->setPropertyValue("Title", "Testing this algorithm");
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-
-    if ( ! alg->isExecuted() )
-    {
-      TS_FAIL("Could not run SaveReflThreeColumnAscii");
-    }
-    m_long_filename= alg->getPropertyValue("Filename");
-    // has the algorithm written a file to disk?
-    TS_ASSERT( Poco::File(m_long_filename).exists() );
-    std::ifstream in(m_long_filename.c_str());
-    std::string fullline;
-    headingsTests(in, fullline,true);
-    getline(in,fullline);
-
-    std::vector<std::string> columns;
-    boost::split(columns, fullline, boost::is_any_of("\t"), boost::token_compress_on);
-    TS_ASSERT_EQUALS(columns.size(),5);
-    //the first is black due to the leading tab
-    TS_ASSERT(columns.at(0) == "");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(4)), 0.6, 0.01);
-    in.close();
-
-    cleanupafterwards();
-  }
   void test_fail_invalid_workspace()
   {
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveReflCustomAscii");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveReflThreeColumnAscii");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -227,27 +175,9 @@ public:
     TS_ASSERT( !Poco::File(m_long_filename).exists() );
   }
 private:
-  void headingsTests(std::ifstream & in,std::string & fullline, bool propertiesLogs = false)
-  {
-    if (propertiesLogs)
-    {
-      getline(in,fullline);
-      TS_ASSERT(fullline == "Title: Testing this algorithm");
-      getline(in,fullline);
-      TS_ASSERT(fullline == "Subtitle: SaveReflThreeColumnAscii save test");
-    }
-    else
-    {
-    }
-  }
-  void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false, bool createLogs = false)
+  void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false)
   {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(1,10);
-
-    if (createLogs)
-    {
-    }
-
     AnalysisDataService::Instance().addOrReplace(m_name, ws);
     //Check if any of X, Y or E should be zeroed to check for divide by zero or similiar
     if (zeroX)
@@ -285,4 +215,6 @@ private:
   std::string m_filename, m_name, m_long_filename;
   std::vector<double> m_dataX, m_dataY, m_dataE, m_data0;
 };
+
+
 #endif /*SAVEREFLTHREECOLUMNASCIITEST_H_*/

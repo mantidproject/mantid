@@ -413,6 +413,7 @@ set ( TEST_FILES
 	SaveParameterFileTest.h
 	SaveRKHTest.h
 	SaveReflTBLTest.h
+	SaveReflThreeColumnAsciiTest.h
 	SaveSPETest.h
 	SaveToSNSHistogramNexusTest.h
 	SetSampleMaterialTest.h
