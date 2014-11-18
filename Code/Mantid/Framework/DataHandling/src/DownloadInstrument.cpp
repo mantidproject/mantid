@@ -3,93 +3,58 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/NetworkProxy.h"
 
-// from poco
-#include <Poco/Path.h>
-#include <Poco/File.h>
-#include <Poco/TemporaryFile.h>
-#include <Poco/URI.h>
-#include <Poco/Net/SSLManager.h>
+// Poco
+#include <Poco/DateTimeFormat.h>
+#include <Poco/DateTimeFormatter.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/DirectoryIterator.h>
 #include <Poco/Net/AcceptCertificateHandler.h>
-#include <Poco/Net/PrivateKeyPassphraseHandler.h>
-#include <Poco/Net/HTTPClientSession.h>
-#include <Poco/Net/HTTPSClientSession.h>
-#include <Poco/Net/SecureStreamSocket.h>
-#include <Poco/Net/HTTPRequest.h>
-#include <Poco/Exception.h>
-#include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/NetException.h>
-#include "Poco/Net/FilePartSource.h"
+#include <Poco/Net/HTTPRequest.h>
+#include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/HTTPSClientSession.h>
+#include <Poco/Net/PrivateKeyPassphraseHandler.h>
+#include <Poco/Net/SecureStreamSocket.h>
+#include <Poco/Net/SSLManager.h>
 // Visual Studio complains with the inclusion of Poco/FileStream
 // disabling this warning.
 #if defined(_WIN32) || defined(_WIN64)
 #pragma warning( push )
 #pragma warning( disable : 4250 )
-#include <Poco/FileStream.h>
-#include <Poco/NullStream.h>
-#include <Winhttp.h>
+ #include <Poco/FileStream.h>
+ #include <Poco/NullStream.h>
+ #include <Winhttp.h>
 #pragma warning( pop )
 #else
-#include <Poco/FileStream.h>
-#include <Poco/NullStream.h>
-#include <stdlib.h>
+ #include <Poco/FileStream.h>
+ #include <Poco/NullStream.h>
+ #include <stdlib.h>
 #endif
 #include <Poco/StreamCopier.h>
-#include <Poco/Net/NetException.h>
-#include <Poco/DirectoryIterator.h>
-#include <Poco/DateTimeParser.h>
-#include <Poco/DateTimeFormatter.h>
-#include <Poco/DateTimeFormat.h>
+#include <Poco/URI.h>
 
 // from boost
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp> 
-#include <boost/regex.hpp>
+#include <boost/foreach.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
 #include <boost/lexical_cast.hpp>
-
-using namespace Poco::Net;
-using boost::property_tree::ptree;
 
 namespace Mantid
 {
   namespace DataHandling
   {
-
-    using Mantid::Kernel::Direction;
-    using Mantid::API::WorkspaceProperty;
-
-    namespace
-    {
-
-      /**
-       * Circumvents a bug in the Poco HTTPS session stack whereby an exception
-       * is thrown from a destructor while another is aleady active.
-       * This simply calls abort() on the session when this object is destroyed
-       * to ensure the disconnection happens early enough
-       */
-      struct AutoAbortedHTTPSSession : public Poco::Net::HTTPSClientSession
-      {
-        AutoAbortedHTTPSSession(const std::string& host, Poco::UInt16 port)
-          : Poco::Net::HTTPSClientSession(host, port) {}
-
-        ~AutoAbortedHTTPSSession()
-        {
-          this->abort();
-        }
-      };
-
-    }
+    using namespace Kernel;
+    using namespace Poco::Net;
+    using boost::property_tree::ptree;
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(DownloadInstrument)
 
-
-
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    DownloadInstrument::DownloadInstrument():m_isProxySet(false),m_proxyInfo()
+    DownloadInstrument::DownloadInstrument() : m_proxyInfo(), m_isProxySet(false)
     {
     }
 
@@ -100,27 +65,33 @@ namespace Mantid
     {
     }
 
-
     //----------------------------------------------------------------------------------------------
 
     /// Algorithms name for identification. @see Algorithm::name
     const std::string DownloadInstrument::name() const { return "DownloadInstrument"; }
 
     /// Algorithm's version for identification. @see Algorithm::version
-    int DownloadInstrument::version() const { return 1;};
+    int DownloadInstrument::version() const { return 1;}
 
     /// Algorithm's category for identification. @see Algorithm::category
     const std::string DownloadInstrument::category() const { return "DataHandling\\Instrument";}
 
     /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-    const std::string DownloadInstrument::summary() const { return "Checks the Mantid instrument repository against the local instrument files, and downloads updates as appropriate.";};
+    const std::string DownloadInstrument::summary() const
+    { 
+      return "Checks the Mantid instrument repository against the local "
+             "instrument files, and downloads updates as appropriate.";
+    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
     */
     void DownloadInstrument::init()
     {
-      declareProperty("FileDownloadCount",0,"The number of files downloaded by this algorithm", Direction::Output);
+      using Kernel::Direction;
+
+      declareProperty("FileDownloadCount", 0,
+                      "The number of files downloaded by this algorithm", Direction::Output);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -128,7 +99,7 @@ namespace Mantid
     */
     void DownloadInstrument::exec()
     {
-      String2StringMap fileMap;
+      StringToStringMap fileMap;
       setProperty("FileDownloadCount",0);
       try
       {
@@ -170,10 +141,8 @@ namespace Mantid
       setProperty("FileDownloadCount",static_cast<int>(fileMap.size()));
     }
     
-    String2StringMap DownloadInstrument::processRepository()
+    DownloadInstrument::StringToStringMap DownloadInstrument::processRepository()
     {
-      String2StringMap fileMap;
-
       //get the instrument directories
       auto instrumentDirs = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
       Poco::Path installPath(instrumentDirs[instrumentDirs.size()-1]);
@@ -192,17 +161,21 @@ namespace Mantid
       }
 
       //get the file list from github
-      std::map<std::string,std::string> headers;
-      headers.insert(std::make_pair("if-modified-since",Poco::DateTimeFormatter::format(gitHubJsonDate, Poco::DateTimeFormat::HTTP_FORMAT)));
-      std::string gitHubInstrumentRepoUrl = Kernel::ConfigService::Instance().getString("UpdateInstrumentDefinitions.URL");
+      StringToStringMap headers;
+      headers.insert(std::make_pair("if-modified-since",
+                                    Poco::DateTimeFormatter::format(gitHubJsonDate, Poco::DateTimeFormat::HTTP_FORMAT)));
+      std::string gitHubInstrumentRepoUrl = ConfigService::Instance().getString("UpdateInstrumentDefinitions.URL");
       if (gitHubInstrumentRepoUrl == "")
       {
-        throw std::runtime_error("Property UpdateInstrumentDefinitions.URL is not defined, this should point to the location of the instrument directory in the github API." 
-          " eg. https://api.github.com/repos/mantidproject/mantid/contents/Code/Mantid/instrument.");
+        throw std::runtime_error("Property UpdateInstrumentDefinitions.URL is not defined, "
+                                 "this should point to the location of the instrument "
+                                 "directory in the github API "
+                                 "e.g. https://api.github.com/repos/mantidproject/mantid/contents/Code/Mantid/instrument.");
       }
-      if (doDownloadFile(gitHubInstrumentRepoUrl, gitHubJson.toString(),headers) == Poco::Net::HTTPResponse::HTTP_NOT_MODIFIED)
+      StringToStringMap fileMap;
+      if (doDownloadFile(gitHubInstrumentRepoUrl, gitHubJson.toString(),headers) == HTTPResponse::HTTP_NOT_MODIFIED)
       {
-        //No changes since last time - return immediately
+        //No changes since last time
         return fileMap;
       }
 
@@ -237,7 +210,7 @@ namespace Mantid
           if (filePath.getExtension() == "xml")
           {
             //decide if we want to download this file
-            std::string keyBase = MangleFileName(name);
+            std::string keyBase = mangleFileName(name);
             //read sha from local directories
             std::string localSha = ptLocal.get(keyBase + ".sha","");
             std::string installSha = ptInstall.get(keyBase + ".sha","");
@@ -298,7 +271,7 @@ namespace Mantid
             size_t entrySize = it->getSize();
 
             //read previous values
-            std::string keyBase = MangleFileName(it->path());
+            std::string keyBase = mangleFileName(it->path());
             size_t previousSize = pt.get(keyBase + ".size",0);
             std::string pdtString = pt.get(keyBase + ".lastModified","1900-01-01 00:00:00");
             int tzd(0);
@@ -340,7 +313,7 @@ namespace Mantid
     * @param filename The filename and extension with or without path
     * @returns a mangled filename that is valid for use as a property tree key
     **/
-    const std::string DownloadInstrument::MangleFileName(const std::string& filename) const
+    const std::string DownloadInstrument::mangleFileName(const std::string& filename) const
     {
       Poco::Path entryPath(filename);
       std::string entryExt = entryPath.getExtension();
@@ -358,9 +331,6 @@ namespace Mantid
     {
       return filename + "?raw=1";;
     }
-
-
-
 
     /** Download a url and fetch it inside the local path given.
 
@@ -387,7 +357,7 @@ namespace Mantid
     */
     int DownloadInstrument::doDownloadFile(const std::string & urlFile,
       const std::string & localFilePath,
-      const String2StringMap & headers)
+      const StringToStringMap & headers)
     {
       int retStatus = 0;
       g_log.debug() << "DoDownloadFile : " << urlFile << " to file: " << localFilePath << std::endl;
@@ -395,13 +365,16 @@ namespace Mantid
       Poco::URI uri(urlFile);
       try {
         // initialize ssl
-        Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> certificateHandler = new Poco::Net::AcceptCertificateHandler(true);
+        Poco::SharedPtr<InvalidCertificateHandler> certificateHandler = \
+          new AcceptCertificateHandler(true);
         // Currently do not use any means of authentication. This should be updated IDS has signed certificate.
-        const Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE);
-        // Create a singleton for holding the default context. E.g. any future requests to publish are made to this certificate and context.
-        Poco::Net::SSLManager::instance().initializeClient(NULL, certificateHandler,context);
+        const Context::Ptr context = \
+          new Context(Context::CLIENT_USE, "", "", "", Context::VERIFY_NONE);
+        // Create a singleton for holding the default context.
+        // e.g. any future requests to publish are made to this certificate and context.
+        SSLManager::instance().initializeClient(NULL, certificateHandler, context);
         // Create the session
-        AutoAbortedHTTPSSession session(uri.getHost(), static_cast<Poco::UInt16>(uri.getPort()));
+        HTTPSClientSession session(uri.getHost(), static_cast<Poco::UInt16>(uri.getPort()));
 
         //set the proxy
         if (!m_isProxySet)
@@ -418,7 +391,7 @@ namespace Mantid
 
         // create a request
         HTTPRequest req(HTTPRequest::HTTP_GET, uri.getPathAndQuery(),
-          HTTPMessage::HTTP_1_1);
+                        HTTPMessage::HTTP_1_1);
         req.set("User-Agent","MANTID");
         for (auto itHeaders = headers.begin(); itHeaders != headers.end(); ++itHeaders)
         {
@@ -426,29 +399,26 @@ namespace Mantid
         }
         session.sendRequest(req);
 
-        Poco::Net::HTTPResponse res;
+        HTTPResponse res;
         std::istream & rs = session.receiveResponse(res);
         retStatus = res.getStatus();
         g_log.debug() << "Answer from web: " << res.getStatus() << " "
-          << res.getReason() << std::endl;
+                      << res.getReason() << std::endl;
         
         //get github api rate limit information if available;
-        //int rateLimitLimit;
         int rateLimitRemaining;
-        Mantid::Kernel::DateAndTime rateLimitReset;
+        DateAndTime rateLimitReset;
         try 
         {
-          //rateLimitLimit = boost::lexical_cast<int>( res.get("X-RateLimit-Limit","-1") );
           rateLimitRemaining = boost::lexical_cast<int>( res.get("X-RateLimit-Remaining","-1") );
           rateLimitReset.set_from_time_t(boost::lexical_cast<int>( res.get("X-RateLimit-Reset","0")));
         }
         catch( boost::bad_lexical_cast const& ) 
         {
-          //rateLimitLimit = -1;
           rateLimitRemaining = -1;
         }
 
-        if (res.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+        if (res.getStatus() == HTTPResponse::HTTP_OK)
         {
           if (localFilePath.empty())
           {
@@ -465,7 +435,7 @@ namespace Mantid
             _out.close();
           }
         }
-        else if (res.getStatus() == Poco::Net::HTTPResponse::HTTP_FOUND)
+        else if (res.getStatus() == HTTPResponse::HTTP_FOUND)
         {
           //extract the new location
           std::string newLocation = res.get("location","");
@@ -474,21 +444,21 @@ namespace Mantid
             retStatus = doDownloadFile(newLocation,localFilePath);
           }
         }
-        else if (res.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_MODIFIED)
+        else if (res.getStatus() == HTTPResponse::HTTP_NOT_MODIFIED)
         {
           //do nothing - just return the status
         }        
-        else if ((res.getStatus() == Poco::Net::HTTPResponse::HTTP_FORBIDDEN) && (rateLimitRemaining == 0))
+        else if ((res.getStatus() == HTTPResponse::HTTP_FORBIDDEN) && (rateLimitRemaining == 0))
         {
-          throw Mantid::Kernel::Exception::InternetError("The Github API rate limit has been reached, try again after " + 
-            rateLimitReset.toSimpleString(),res.getStatus());
+          throw Exception::InternetError("The Github API rate limit has been reached, try again after " + 
+                                         rateLimitReset.toSimpleString(),res.getStatus());
         }
         else
         {
           std::stringstream info;
           std::stringstream ss;
           Poco::StreamCopier::copyStream(rs, ss);
-          if (res.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND)
+          if (res.getStatus() == HTTPResponse::HTTP_NOT_FOUND)
             info << "Failed to download " << urlFile
             << " because it failed to find this file at the link " << "<a href=\"" << urlFile
             << "\">.\n" << "Hint. Check that link is correct</a>";
@@ -498,20 +468,20 @@ namespace Mantid
             info << res.getReason();
             info << ss.str();
           }
-          throw Mantid::Kernel::Exception::InternetError(info.str() + ss.str(),res.getStatus());
+          throw Exception::InternetError(info.str() + ss.str(),res.getStatus());
         }
-      } catch (Poco::Net::HostNotFoundException & ex)
+      } catch (HostNotFoundException & ex)
       {
         // this exception occurs when the pc is not connected to the internet
         std::stringstream info;
         info << "Failed to download " << urlFile << " because there is no connection to the host "
           << ex.message() << ".\nHint: Check your connection following this link: <a href=\""
           << urlFile << "\">" << urlFile << "</a> ";
-        throw Mantid::Kernel::Exception::InternetError(info.str() + ex.displayText());
+        throw Exception::InternetError(info.str() + ex.displayText());
 
       } catch (Poco::Exception & ex)
       {
-        throw Mantid::Kernel::Exception::InternetError("Connection and request failed " + ex.displayText());
+        throw Exception::InternetError("Connection and request failed " + ex.displayText());
       }
       return retStatus;
     }

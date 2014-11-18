@@ -1,7 +1,6 @@
 #ifndef MANTID_DATAHANDLING_DOWNLOADINSTRUMENT_H_
 #define MANTID_DATAHANDLING_DOWNLOADINSTRUMENT_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/ProxyInfo.h"
 
@@ -12,8 +11,6 @@ namespace Mantid
 
 namespace DataHandling
 {
-  typedef std::map<std::string,std::string> String2StringMap;
-
   /** DownloadInstrument : Downloads one or more instrument files to the local instrument cache from the instrument repository
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -48,18 +45,20 @@ namespace DataHandling
     virtual const std::string summary() const;
 
   private:
+    // Convenience typedef
+    typedef std::map<std::string, std::string> StringToStringMap;
+
     void init();
     void exec();
-    virtual int doDownloadFile(const std::string& urlFile, const std::string& localFilePath = "", const String2StringMap& headers = String2StringMap());
+    virtual int doDownloadFile(const std::string& urlFile, const std::string& localFilePath = "",
+                               const StringToStringMap& headers = StringToStringMap());
     void updateJsonFile(const std::string& directoryPath, const std::string& filePath);
-    const std::string MangleFileName(const std::string& filename) const;
+    const std::string mangleFileName(const std::string& filename) const;
     const std::string getDownloadableRepoUrl(const std::string& filename) const;
+    StringToStringMap processRepository();
 
-    String2StringMap processRepository();
-
+    Kernel::ProxyInfo m_proxyInfo;
     bool m_isProxySet;
-    Mantid::Kernel::ProxyInfo m_proxyInfo;
-
   };
 
 
