@@ -272,6 +272,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         @param ws_name Name of workspace
         @returns Temperature in Kelvin or None if not found
         """
+        from IndirectCommon import getInstrRun
 
         instr, run_number = getInstrRun(ws_name)
 
