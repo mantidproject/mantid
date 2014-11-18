@@ -138,7 +138,7 @@ namespace Mantid
           else
           {
             //Otherwise, we create a range.
-            processing_commands = boost::lexical_cast<std::string>(detStart) + ":" + boost::lexical_cast<std::string>(detStop);
+            processing_commands = boost::lexical_cast<std::string>(detStart) + "-" + boost::lexical_cast<std::string>(detStop);
           }
         }
         else
