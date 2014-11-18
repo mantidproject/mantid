@@ -39,7 +39,7 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      PhaseQuadMuon() : API::Algorithm(), m_muLife(2.19703E-06) {};
+      PhaseQuadMuon() : API::Algorithm(), m_muLife(2.19703), m_bigNumber(1e10) {};
       /// Destructor
       virtual ~PhaseQuadMuon() {};
       /// Algorithm's name for identification overriding a virtual method
@@ -72,12 +72,16 @@ namespace Mantid
       /// Load the PhaseTable
       void loadPhaseTable(const std::string& filename);
       /// TODO
+      void normaliseAlphas (std::vector<HistData>& m_histData);
+      /// Remove exponential decay from input histograms
       void removeExponentialDecay (API::MatrixWorkspace_sptr inputWs, API::MatrixWorkspace_sptr outputWs);
-      /// TODO
-      void squash(API::MatrixWorkspace_sptr inputWs, API::MatrixWorkspace_sptr outputWs);
-      /// Number of histograms (spectra)
+      /// Remove exponential decay from input histograms
+      void loseExponentialDecay (API::MatrixWorkspace_sptr inputWs, API::MatrixWorkspace_sptr outputWs);
+      /// Create squashograms
+      void squash(API::MatrixWorkspace_sptr tempWs, API::MatrixWorkspace_sptr outputWs);
+      /// Number of input histograms
       size_t m_nHist;
-      /// Number of datapoints in each histogram
+      /// Number of datapoints per histogram
       size_t m_nData;
       /// TODO
       double m_res;
@@ -93,8 +97,10 @@ namespace Mantid
       double m_tau;
       /// Freq (of silver run)
       double m_w;
-      /// Mu life
+      /// Muon lifetime
       double m_muLife;
+      /// Poisson limit
+      double m_poissonLim;
       /// TODO
       double m_bigNumber;
       /// Vector of histograms data
