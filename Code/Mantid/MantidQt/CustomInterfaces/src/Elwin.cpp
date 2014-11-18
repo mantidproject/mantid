@@ -42,6 +42,7 @@ namespace IDA
     m_dblManager->setDecimals(m_properties["R2E"], NUM_DECIMALS);
 
     m_properties["UseTwoRanges"] = m_blnManager->addProperty("Use Two Ranges");
+    m_properties["Normalise"] = m_blnManager->addProperty("Normalise to Lowest Temp");
 
     m_properties["Range1"] = m_grpManager->addProperty("Range One");
     m_properties["Range1"]->addSubProperty(m_properties["R1S"]);
@@ -53,6 +54,7 @@ namespace IDA
     m_elwTree->addProperty(m_properties["Range1"]);
     m_elwTree->addProperty(m_properties["UseTwoRanges"]);
     m_elwTree->addProperty(m_properties["Range2"]);
+    m_elwTree->addProperty(m_properties["Normalise"]);
 
     // Create Slice Plot Widget for Range Selection
     m_plots["ElwinPlot"] = new QwtPlot(m_parentWidget);
@@ -77,7 +79,7 @@ namespace IDA
   
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(twoRanges(QtProperty*, bool)));
-    twoRanges(0, false);
+    twoRanges(m_properties["UseTwoRanges"], false);
 
     connect(uiForm().elwin_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
     connect(uiForm().elwin_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
@@ -100,10 +102,10 @@ namespace IDA
 
     QFileInfo firstFileInfo(inputFilenames[0]);
     QString filename = firstFileInfo.baseName();
-    QString workspaceBaseName = filename.left(filename.lastIndexOf("_")) + "_elwin_";
+    QString workspaceBaseName = filename.left(filename.lastIndexOf("_")) + "_elwin-mult_";
 
-    QString qWorkspace = workspaceBaseName + "q";
-    QString qSquaredWorkspace = workspaceBaseName + "q2";
+    QString qWorkspace = workspaceBaseName + "eq";
+    QString qSquaredWorkspace = workspaceBaseName + "eq2";
     QString elfWorkspace = workspaceBaseName + "elf";
     QString eltWorkspace = workspaceBaseName + "elt";
 
@@ -153,7 +155,7 @@ namespace IDA
       elwinMultAlg->setProperty("Range2End", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["R1E"])));
     }
     
-    if(uiForm().elwin_ckNormalise->isChecked())
+    if(m_blnManager->value(m_properties["Normalise"]))
     {
       elwinMultAlg->setProperty("OutputELT", eltWorkspace.toStdString());
     }
@@ -170,7 +172,7 @@ namespace IDA
       addSaveAlgorithm(qSquaredWorkspace);
       addSaveAlgorithm(elfWorkspace);
 
-      if(uiForm().elwin_ckNormalise->isChecked())
+      if(m_blnManager->value(m_properties["Normalise"]))
         addSaveAlgorithm(eltWorkspace);
     }
 
@@ -309,9 +311,10 @@ namespace IDA
     }
   }
 
-  void Elwin::twoRanges(QtProperty*, bool val)
+  void Elwin::twoRanges(QtProperty* prop, bool val)
   {
-    m_rangeSelectors["ElwinRange2"]->setVisible(val);
+    if(prop == m_properties["UseTwoRanges"])
+      m_rangeSelectors["ElwinRange2"]->setVisible(val);
   }
 
   void Elwin::minChanged(double val)
