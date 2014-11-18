@@ -388,6 +388,7 @@ namespace CustomInterfaces
     reductionAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
     reductionAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
     reductionAlg->setProperty("InputFiles", files.toStdString());
+    reductionAlg->setProperty("OutputWorkspace", "__IndirectCalibration_reduction");
     reductionAlg->setProperty("DetectorRange", detRange.toStdString());
     reductionAlg->execute();
 
