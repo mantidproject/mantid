@@ -2661,6 +2661,12 @@ Later steps in the process (saving, renaming) will not be done.</string>
     <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
       <widget class="QPushButton" name="pbHelp">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="maximumSize">
         <size>
          <width>25</width>
@@ -2677,6 +2683,12 @@ Later steps in the process (saving, renaming) will not be done.</string>
      </item>
      <item>
       <widget class="QPushButton" name="pbPythonExport">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="maximumSize">
         <size>
          <width>25</width>
@@ -2698,7 +2710,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
+         <width>30</width>
          <height>20</height>
         </size>
        </property>
