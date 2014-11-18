@@ -106,8 +106,8 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         for input_ws in input_workspace_names:
             logger.information('Running ElasticWindow for workspace: %s' % input_ws)
 
-            q_ws = input_ws + '_q'
-            q2_ws = input_ws + '_q2'
+            q_ws = '__' + input_ws + '_q'
+            q2_ws = '__' + input_ws + '_q2'
 
             if self._range_2_start != '' and self._range_2_end != '':
                 ElasticWindow(InputWorkspace=input_ws, OutputInQ=q_ws, OutputInQSquared=q2_ws,
