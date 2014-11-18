@@ -14,9 +14,16 @@ Description
    This algorithm is being developed for a specific instrument. It might get changed or even 
    removed without a notification, should instrument scientists decide to do so.
 
-The pattern is specified by providing a list of dSpacing values where Bragg peaks are expected. The
-algorithm then fits peaks in those areas, emitting a dSpacing to TOF conversion coefficients for 
-every peak. Those dSpacing to TOF relationships are then fitted to a linear function.
+The pattern is specified by providing a list of dSpacing values where Bragg peaks are expected. Assuming Guassian shape, the algorithm then fits peaks in those areas. The dSpacing values for ExpectedPeaks are then converted by
+"""
+dSpacingToTof = lambda d: 252.816 * 2 * (50 + detL2) * math.sin(detTwoTheta / 2.0) * d
+"""
+These values are used as start peak position in fit. It is these adjusted peak TOF value positions that are fitted against ExpectedPeaks dSpacing values according to:
+"""
+TOF = DifC*d + Zero.
+"""
+
+ZERO and Difc can then be used within the GSAS program.
 
 Usage
 -----
