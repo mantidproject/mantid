@@ -473,6 +473,14 @@ void SetupHFIRReduction::init()
   declareProperty("ErrorWeighting", false,
                   "Choose whether each pixel contribution will be weighted by 1/error^2.");
 
+  // Wedge options
+  declareProperty("NumberOfWedges", 2, positiveInt,
+                  "Number of wedges to calculate.");
+  declareProperty("WedgeAngle", 30.0,
+                  "Opening angle of each wedge, in degrees.");
+  declareProperty("WedgeOffset", 0.0,
+                  "Angular offset for the wedges, in degrees.");
+
   declareProperty("Do2DReduction", true);
   declareProperty("IQ2DNumberOfBins", 100, positiveInt,
                   "Number of I(qx,qy) bins.");
@@ -690,6 +698,10 @@ void SetupHFIRReduction::exec()
     const std::string n_subpix = getPropertyValue("NumberOfSubpixels");
     const bool err_weighting = getProperty("ErrorWeighting");
 
+    const std::string n_wedges = getPropertyValue("NumberOfWedges");
+    const double wedge_angle = getProperty("WedgeAngle");
+    const double wedge_offset = getProperty("WedgeOffset");
+
     IAlgorithm_sptr iqAlg = createChildAlgorithm("SANSAzimuthalAverage1D");
     iqAlg->setPropertyValue("Binning", binning);
     iqAlg->setPropertyValue("NumberOfBins", n_bins);
@@ -697,6 +709,9 @@ void SetupHFIRReduction::exec()
     iqAlg->setPropertyValue("NumberOfSubpixels", n_subpix);
     iqAlg->setProperty("ErrorWeighting", err_weighting);
     iqAlg->setProperty("ComputeResolution", true);
+    iqAlg->setProperty("NumberOfWedges", n_wedges);
+    iqAlg->setProperty("WedgeAngle", wedge_angle);
+    iqAlg->setProperty("WedgeOffset", wedge_offset);
     iqAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
     algProp = new AlgorithmProperty("IQAlgorithm");

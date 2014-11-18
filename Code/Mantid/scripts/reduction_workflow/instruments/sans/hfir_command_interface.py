@@ -355,6 +355,17 @@ def DivideByThickness(thickness=1.0):
     else:
         ReductionSingleton().reduction_properties["SampleThickness"] = thickness
 
+def SetWedges(number_of_wedges=2, wedge_angle=30.0, wedge_offset=0.0):
+    """
+        Set the wedge properties
+        @param number_of_wedges: number of wedges to calculate
+        @param wedge_angle: augular opening of each wedge, in degrees
+        @param wedge_offset: angular offset for the wedges, in degrees
+    """
+    ReductionSingleton().reduction_properties["NumberOfWedges"] = number_of_wedges
+    ReductionSingleton().reduction_properties["WedgeAngle"] = wedge_angle
+    ReductionSingleton().reduction_properties["WedgeOffset"] = wedge_offset
+
 def Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
            scale=None, save_output=False):
     """

@@ -255,6 +255,8 @@ class HFIRSANSReduction(PythonAlgorithm):
             alg.setProperty("InputWorkspace", output_ws)
             alg.setProperty("OutputWorkspace", iq_output)
             alg.setProperty("ReductionProperties", property_manager_name)
+            if alg.existsProperty("WedgeWorkspace"):
+                alg.setProperty("WedgeWorkspace", iq_output+'_wedges')
             alg.execute()
             if alg.existsProperty("OutputMessage"):
                 output_msg += alg.getProperty("OutputMessage").value+'\n'

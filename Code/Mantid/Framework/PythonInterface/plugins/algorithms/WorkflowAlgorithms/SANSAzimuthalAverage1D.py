@@ -34,6 +34,13 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
                                                      direction = Direction.Output),
                              "I(q) workspace")
+        
+        self.declareProperty("NumberOfWedges", 2, "Number of wedges to calculate")
+        self.declareProperty("WedgeAngle", 30.0, "Angular opening of each wedge, in degrees")
+        self.declareProperty("WedgeOffset", 0.0, "Angular offset for the wedges, in degrees")
+        self.declareProperty(WorkspaceGroupProperty("WedgeWorkspace", "",
+                                                     direction = Direction.Output),
+                             "I(q) wedge workspaces")
         self.declareProperty("OutputMessage", "",
                              direction=Direction.Output, doc = "Output message")
 
@@ -102,8 +109,18 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         alg.setProperty("PixelSizeY", pixel_size_y)
         alg.setProperty("ErrorWeighting", error_weighting)
         alg.setPropertyValue("OutputWorkspace", output_ws_name)
+        wedge_ws_name = self.getPropertyValue("WedgeWorkspace")
+        n_wedges = self.getProperty("NumberOfWedges").value
+        wedge_angle = self.getProperty("WedgeAngle").value
+        wedge_offset = self.getProperty("WedgeOffset").value
+        alg.setPropertyValue("WedgeWorkspace", wedge_ws_name)
+        alg.setProperty("NumberOfWedges", n_wedges)
+        alg.setProperty("WedgeAngle", wedge_angle)
+        alg.setProperty("WedgeOffset", wedge_offset)
         alg.execute()
         output_ws = alg.getProperty("OutputWorkspace").value
+        wedge_ws = alg.getProperty("WedgeWorkspace").value
+        self.setProperty("WedgeWorkspace", wedge_ws)
 
         alg = AlgorithmManager.create("ReplaceSpecialValues")
         alg.initialize()
