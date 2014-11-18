@@ -2,8 +2,6 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
 
-from IndirectCommon import getInstrRun
-
 
 def _normalize_to_lowest_temp(elt_ws_name):
     """
@@ -92,6 +90,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
     def PyExec(self):
         from IndirectImport import import_mantidplot
+        from IndirectCommon import getInstrRun
 
         # Do setup
         self._setup()
