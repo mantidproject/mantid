@@ -5,11 +5,7 @@ import os
 class InterfaceDirective(BaseDirective):
 
     """
-    Inserts details of a custom interface
-
-    Adds:
-     - A screenshot of the interface
-     - Table of contents
+    Adds a screenshot of the custom interface
 
     It requires a SCREENSHOTS_DIR environment variable to be set to the
     directory where a screenshot should be generated. If it is not set then
@@ -36,17 +32,10 @@ class InterfaceDirective(BaseDirective):
         """
         picture = self._create_screenshot()
         self._insert_screenshot_link(picture)
-        self._insert_toc()
         return []
 
     def interface_name(self):
         return self.arguments[0]
-
-    def _insert_toc(self):
-        """
-        Outputs a title for the page
-        """
-        self.add_rst(".. contents:: Table of Contents\n    :local:\n")
 
     def _create_screenshot(self):
         """

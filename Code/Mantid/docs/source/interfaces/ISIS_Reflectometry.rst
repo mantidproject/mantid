@@ -3,6 +3,9 @@ ISIS Reflectometry (Polref) Interface
 
 .. interface:: ISIS Reflectometry (Polref)
 
+.. contents:: Table of Contents
+  :local:
+
 Menu bar
 --------
 
