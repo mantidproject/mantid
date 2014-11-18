@@ -1063,6 +1063,7 @@ namespace Mantid
           {
             (*outWS)->history().addHistory( (*inWS)->getHistory() );
 
+            // Add history to each child of output workspace group
             if(wsGroup)
             {
               for(size_t i = 0; i < wsGroup->size(); i++)
@@ -1075,6 +1076,7 @@ namespace Mantid
           // Add the history for the current algorithm to all the output workspaces
           (*outWS)->history().addHistory(m_history);
 
+          // Add history to each child of output workspace group
           if(wsGroup)
           {
             for(size_t i = 0; i < wsGroup->size(); i++)
