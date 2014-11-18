@@ -34,6 +34,7 @@ namespace IDA
     void updateRS(QtProperty * prop, double val);
 
   private:
+    void addSaveAlgorithm(QString workspaceName, QString filename="");
     QtTreePropertyBrowser* m_elwTree;
 
   };
