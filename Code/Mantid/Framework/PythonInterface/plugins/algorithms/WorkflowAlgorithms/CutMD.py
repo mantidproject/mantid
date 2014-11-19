@@ -208,20 +208,23 @@ class CutMD(DataProcessorAlgorithm):
         if set(origin_units) == set(target_units):
             return (u,v,w) # Nothing to do.
         
-        ol = to_cut.getExperimentInfo(0).run().sample().getOrientedLattice()
+        ol = to_cut.getExperimentInfo(0).sample().getOrientedLattice()
         
-        d_star_w = 2 * np.pi * ol.dstar(u, v, w)
         projection_scaled = [u, v, w]
         
         to_from_pairs = zip(origin_units, target_units)
         for i in range(len(to_from_pairs)) :
+            
+            proj = projection_scaled[i]
+            d_star =  2 * np.pi * ol.dstar( float(proj[0]), float(proj[1]), float(proj[2]) )
+            
             from_unit, to_unit = to_from_pairs[i]
             if from_unit == to_unit:
                 continue
             elif from_unit == ProjectionUnit.a: # From inverse Angstroms to rlu
-                projection_scaled[i] *= d_star_w
+                projection_scaled[i] *= d_star
             else: # From rlu to inverse Anstroms
-                projection_scaled[i] /= d_star_w 
+                projection_scaled[i] /= d_star
         return projection_scaled
             
         
