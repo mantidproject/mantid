@@ -102,7 +102,7 @@ namespace IDA
 
     QFileInfo firstFileInfo(inputFilenames[0]);
     QString filename = firstFileInfo.baseName();
-    QString workspaceBaseName = filename.left(filename.lastIndexOf("_")) + "_elwin-mult_";
+    QString workspaceBaseName = filename.left(filename.lastIndexOf("_")) + "_elwin_";
 
     QString qWorkspace = workspaceBaseName + "eq";
     QString qSquaredWorkspace = workspaceBaseName + "eq2";
