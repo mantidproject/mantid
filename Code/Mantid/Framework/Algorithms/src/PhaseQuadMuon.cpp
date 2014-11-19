@@ -1,7 +1,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/PhaseQuadMuon.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IFileLoader.h"
@@ -75,12 +74,9 @@ void PhaseQuadMuon::exec()
   regainExponential(outputWs);
   
   setProperty("OutputWorkspace", outputWs);
-  //setProperty("OutputWorkspace1", tempWs1); // TODO: change this
-  //setProperty("OutputWorkspace2", tempWs2); // TODO: change this
-  // TODO remove temporary workspace tempWs
-  //Mantid::API::FrameworkManager::Instance().deleteWorkspace(tempWs);
 
-
+  // Remove temporary workspace tempWs
+  Mantid::API::FrameworkManager::Instance().deleteWorkspace("");
 }
 
 //----------------------------------------------------------------------------------------------
