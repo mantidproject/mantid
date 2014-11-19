@@ -1254,6 +1254,22 @@ bool canRead(const std::string &filename) {
   return pocoFile.canRead();
 }
 
+/// @returns the value associated with the key.
+std::string getValueFromStdOut(const std::string &orig, const std::string &key) {
+  size_t start = orig.find(key);
+  if (start == std::string::npos) {
+    return std::string();
+  }
+  start += key.size();
+
+  size_t stop = orig.find("\n", start);
+  if (stop == std::string::npos) {
+    return std::string();
+  }
+
+  return Mantid::Kernel::Strings::strip(orig.substr(start, stop-start-1));
+}
+
 /**
  * Gets the name of the operating system version in a human readable form.
  *
@@ -1334,13 +1350,20 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
           Poco::Process::launch(cmd, args, 0, &outPipe, &errorPipe);
       const int rc = ph.wait();
       // Only if the command returned successfully.
-      if (rc == 1) {
+      if (rc == 0) {
         Poco::PipeInputStream pipeStream(outPipe);
         std::stringstream stringStream;
         Poco::StreamCopier::copyStream(pipeStream, stringStream);
-        // TODO process the result
-        //        std::cout << "***" << stringStream.str() << "***" <<
-        // std::endl;
+        const std::string result = stringStream.str();
+#ifdef __APPLE__
+        const std::string product_name = getValueFromStdOut(result, "ProductName:");
+        const std::string product_vers = getValueFromStdOut(result, "ProductVersion:");
+          
+        description = product_name + " " + product_vers;
+#elif _WIN32
+        description = getValueFromStdOut(result, "Caption=");
+        // std::cout << "***" << stringStream.str() << "***" << std::endl;
+#endif
       } else {
         std::stringstream messageStream;
         messageStream << "command \"" << cmd << "\" failed with code: " << rc;
