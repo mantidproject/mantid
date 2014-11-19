@@ -10,6 +10,7 @@ set( SRC_FILES
 	src/StopRemoteTransaction.cpp
 	src/SubmitRemoteJob.cpp
 	src/UploadRemoteFile.cpp
+	src/SCARFTomoReconstruction.cpp
 )
 
 set( INC_FILES
@@ -24,6 +25,7 @@ set( INC_FILES
 	inc/MantidRemoteAlgorithms/StopRemoteTransaction.h
 	inc/MantidRemoteAlgorithms/SubmitRemoteJob.h
 	inc/MantidRemoteAlgorithms/UploadRemoteFile.h
+	inc/MantidRemoteAlgorithms/SCARFTomoReconstruction.h
 )
 
 #set ( TEST_FILES
