@@ -2,6 +2,7 @@ ISIS Reflectometry (Polref) Interface
 =====================================
 
 .. interface:: ISIS Reflectometry (Polref)
+  :align: left
 
 .. contents:: Table of Contents
   :local:
@@ -23,6 +24,10 @@ pertaining to the processing table.
 
 Search Interface
 ----------------
+
+.. interface:: ISIS Reflectometry (Polref)
+  :widget: groupSearchPane
+  :align: right
 
 To search for runs, select the instrument the runs are from, enter the id of
 the investigation the runs are part of, and hit *Search*.
@@ -51,11 +56,15 @@ behaviour of this is as follows:
 Processing Table
 ----------------
 
+.. interface:: ISIS Reflectometry (Polref)
+  :widget: groupProcessPane
+
 The processing table is where the bulk of the work takes place. It is used to
 specify which runs to process, the parameters that should be used to process
 them, and how the different runs should be joined together.
 
 Above the processing table is a tool bar providing a number of useful actions.
+
 Below the table is a progress bar, showing the current progress of any
 processing that is taking place, and a processing instrument selector.
 The processing instrument is used by the interface to help load the correct
@@ -63,6 +72,11 @@ files from disk when processing.
 
 Actions
 ~~~~~~~
+
+This table details the behaviour of the actions in the tool bar, from left to right.
+
+.. interface:: ISIS Reflectometry (Polref)
+  :widget: rowToolBar
 
 .. WARNING If you're updating this documentation, you probably also want to update the "What's This" tips in ReflMainWidget.ui
 
@@ -97,10 +111,10 @@ Actions
 | Clear Rows       | Resets the cells in any selected rows to their initial   |
 |                  | value, in other words, blank.                            |
 +------------------+----------------------------------------------------------+
+| Help             | Opens this documentation for viewing.                    |
++------------------+----------------------------------------------------------+
 | Whats This       | Provides guidance on what various parts of the interface |
 |                  | are for.                                                 |
-+------------------+----------------------------------------------------------+
-| Help             | Opens this documentation for viewing.                    |
 +------------------+----------------------------------------------------------+
 
 Columns
