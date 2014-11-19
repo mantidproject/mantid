@@ -1,14 +1,16 @@
 ISIS Reflectometry (Polref) Interface
 =====================================
 
-.. interface:: ISIS Reflectometry (Polref)
-  :align: left
-
 .. contents:: Table of Contents
   :local:
 
+Layout
+------
+
+.. interface:: ISIS Reflectometry (Polref)
+
 Menu bar
---------
+~~~~~~~~
 
 At the top of the interface is a menu bar. Through this menu bar you can
 start a new table, open an existing table from a :ref:`workspace <Workspace>`,
@@ -23,7 +25,7 @@ The menu bar also provides access to the options menu, and many actions
 pertaining to the processing table.
 
 Search Interface
-----------------
+~~~~~~~~~~~~~~~~
 
 .. interface:: ISIS Reflectometry (Polref)
   :widget: groupSearchPane
@@ -54,7 +56,7 @@ behaviour of this is as follows:
   in the format, ``123+124+125``.
 
 Processing Table
-----------------
+~~~~~~~~~~~~~~~~
 
 .. interface:: ISIS Reflectometry (Polref)
   :widget: groupProcessPane
@@ -196,7 +198,7 @@ Columns
 +---------------------+-----------+-----------------------------------------------+
 
 Options
--------
+~~~~~~~
 
 Through the options menu, a small number of options may be configured to adjust
 the behaviour of the interface.
@@ -215,7 +217,7 @@ the behaviour of the interface.
 |                               | asked if you're sure you that's what you intended to |
 |                               | do.                                                  |
 +-------------------------------+------------------------------------------------------+
-| Warn when discarding unsaved  | If this is neabled and you try to open an existing   |
+| Warn when discarding unsaved  | If this is enabled and you try to open an existing   |
 | changes                       | table, or start a new table, with unsaved changes to |
 |                               | the current table, you will be asked if you're sure  |
 |                               | you want to discard the current table.               |
@@ -227,6 +229,64 @@ the behaviour of the interface.
 |                               | decimal places.                                      |
 +-------------------------------+------------------------------------------------------+
 
+Example Workflow
+----------------
+
+To follow this example you will need to ISIS reflectometry example materials:
+
+* ``INTER_NR_test2.tbl``
+* ``INTER00013460.nxs``
+* ``INTER00013462.nxs``
+* ``INTER00013463.nxs``
+* ``INTER00013464.nxs``
+* ``INTER00013469.nxs``
+* ``INTER00013470.nxs``
+
+These can be downloaded as part of the `ISIS example data <http://download.mantidproject.org/>`.
+
+Once they are downloaded, place the nxs files in one of Mantid's user directories.
+(To see a list of directories, click on *File -> Manager User Directories*)
+The tbl file can be left anywhere you like, as long as you know where it is.
+
+You can then open MantidPlot, and open the ISIS Reflectometry (Polref) interface.
+(*Interfaces -> Reflectometry -> ISIS Reflectometry (Polref)*)
+
+Within the interface, we first want to import the tbl file as a TableWorkspace.
+To do this, go to *Reflectometry -> Import .TBL*. A :ref:`LoadReflTBL <algm-LoadReflTBL>`
+dialog will open. Select ``INTER_NR_test2.tbl`` as the file, and enter ``MyTable``
+as the output workspace.
+
+A table workspace called ``MyTable`` should now exist in the :ref:`ADS <Analysis Data Service>`.
+To open the table workspace go to *Reflectometry -> Open Table -> MyTable*.
+The processing table (shown below) should now contain four rows (13460, 13462, 13469, 13470).
+
+.. interface:: ISIS Reflectometry (Polref)
+  :widget: viewTable
+
+We want to process the first two rows, which are in group 1. The simplest way to do this is
+simply to select the two rows we want to process, and then press *Process*. If you receive
+an error, consult the `_Troubleshooting` section of this document for guidance on fixing it.
+
+If the processing was successful, you should now have ten more workspaces in the ADS.
+
+Among them shall be:
+
+TOF_13460
+  This is the data before processing.
+
+TRANS_13463_13464
+  This is a transmission run, created by running :ref:`CreateTransmissionWorkspace <algm-CreateTransmissionWorkspace>`
+  on ``TOF_13463`` and ``TOF_13464``.
+
+IvsQ_13460
+  This is the output workspace of :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`.
+
+IvsLam_13460
+  This is the wavelength output workspace of :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`.
+
+IvsQ_13460_13462
+  This is the result of stitching ``IvsQ_13460`` and ``IvsQ_13462`` together using
+  :ref:`Stitch1D <algm-Stitch1D>`.
 
 Troubleshooting
 ---------------
