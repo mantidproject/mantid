@@ -1311,7 +1311,47 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
       return description;
     }
   }
+
 #endif
+
+  // try system calls
+  std::string cmd;
+  std::vector<std::string> args;
+#ifdef __APPLE__
+  cmd = "sw_vers"; // mac
+#elif _WIN32
+  cmd = "wmic";              // windows
+  args.push_back("os");      // windows
+  args.push_back("get");     // windows
+  args.push_back("Caption"); // windows
+  args.push_back("/value");  // windows
+#endif
+
+  if (!cmd.empty()) {
+    try {
+      Poco::Pipe outPipe, errorPipe;
+      Poco::ProcessHandle ph =
+          Poco::Process::launch(cmd, args, 0, &outPipe, &errorPipe);
+      const int rc = ph.wait();
+      // Only if the command returned successfully.
+      if (rc == 1) {
+        Poco::PipeInputStream pipeStream(outPipe);
+        std::stringstream stringStream;
+        Poco::StreamCopier::copyStream(pipeStream, stringStream);
+        // TODO process the result
+        //        std::cout << "***" << stringStream.str() << "***" <<
+        // std::endl;
+      } else {
+        std::stringstream messageStream;
+        messageStream << "command \"" << cmd << "\" failed with code: " << rc;
+        g_log.debug(messageStream.str());
+      }
+    }
+    catch (Poco::SystemException &e) {
+      g_log.debug("command \"" + cmd + "\" failed");
+      g_log.debug(e.what());
+    }
+  }
 
   return description;
 }
