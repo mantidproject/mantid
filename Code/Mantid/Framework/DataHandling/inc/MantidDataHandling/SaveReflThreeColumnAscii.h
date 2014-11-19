@@ -52,7 +52,7 @@ namespace Mantid
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       ///Algorithm's version for data output overriding a virtual method
-      void data(std::ofstream & file, const std::vector<double> & XData,  bool exportDeltaQ);
+      void data(std::ofstream & file, const std::vector<double> & XData, bool exportDeltaQ = false);
 
     private:
       

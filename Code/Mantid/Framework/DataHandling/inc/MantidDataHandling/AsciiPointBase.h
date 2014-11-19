@@ -80,6 +80,7 @@ namespace Mantid
       virtual void data(std::ofstream & file, const std::vector<double> & XData, bool exportDeltaQ = true);
       double m_qres;
       size_t m_xlength;
+
       API::MatrixWorkspace_const_sptr m_ws;
     };
 
