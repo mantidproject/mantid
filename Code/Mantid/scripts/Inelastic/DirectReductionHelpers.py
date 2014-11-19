@@ -40,11 +40,12 @@ def get_default_idf_param_list(pInstrument,synonims_list=None):
 
 
 
-def build_coupled_keys_dict(param_map,synonims) :
+def build_properties_dict(param_map,synonims) :
     """function to build the dictionary of the keys which are expressed through other keys
 
        e.g. builds dictionary from strings in a form key1 = key2:key3  
        in the form key1 = ['key2','key3'] 
+
     """
  
     # dictionary used for substituting composite keys.
@@ -160,6 +161,8 @@ def gen_setter(keyval_dict,key,val):
     if key in keyval_dict:
         test_key = keyval_dict[key];
         if not isinstance(test_key,list):
+            # this is temporary check, disallowing assigning values to complex properties 
+            # As such, it also prohibits properties from having list values. TODO: Should be done more intelligently
             if isinstance(val,list):
                 raise KeyError(' Key {0} can not assigned a list value'.format(key));
             else:
@@ -178,3 +181,66 @@ def gen_setter(keyval_dict,key,val):
         return;
     else:
         raise KeyError(' key with name: {0} is not in the data dictionary'.format(key));
+
+
+
+def check_instrument_name(old_name,new_name):
+    """ function checks if new instrument name is acceptable instrument name"""
+
+
+    if new_name is None:
+       if not(old_name is None):
+            return
+       else:
+            raise KeyError("No instrument name is defined")
+
+    if old_name == new_name:
+       return;
+
+    # Instrument name might be a prefix, query Mantid for the full name
+    short_name=''
+    full_name=''
+    try :
+        instrument = config.getFacility().instrument(new_name)
+        short_name = instrument.shortName()
+        full_name = instrument.name()
+    except:
+        # it is possible to have wrong facility:
+        facilities = config.getFacilities()
+        old_facility = str(config.getFacility())
+        for facility in facilities:
+               config.setString('default.facility',facility.name())
+               try :
+                   instrument = facility.instrument(new_name)
+                   short_name = instrument.shortName()
+                   full_name = instrument.name()
+                   if len(short_name)>0 :
+                       break
+               except:
+                   pass
+        if len(short_name)==0 :
+           config.setString('default.facility',old_facility)
+           raise KeyError(" Can not find/set-up the instrument: "+new_name+' in any supported facility')
+
+    new_name = short_name
+    facility = str(config.getFacility())
+
+    config['default.instrument'] = full_name
+    return (new_name,full_name,facility);
+
+
+
+       #if not hasattr(self,'instrument') or self.instrument.getName() != instr_name :
+       #     # Load an empty instrument if one isn't already there
+       #     idf_dir = config.getString('instrumentDefinition.directory')
+       #     try:
+       #         idf_file=api.ExperimentInfo.getInstrumentFilename(new_name)
+       #         tmp_ws_name = '__empty_' + new_name
+       #         if not mtd.doesExist(tmp_ws_name):
+       #             LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
+       #         self.instrument = mtd[tmp_ws_name].getInstrument()
+       #     except:
+       #         self.instrument = None
+       #         self._instr_name = None
+       #         raise RuntimeError('Cannot load instrument for prefix "%s"' % new_name)
+

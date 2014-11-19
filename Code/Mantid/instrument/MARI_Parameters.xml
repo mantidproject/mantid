@@ -44,7 +44,7 @@
 </parameter>
 
 <!-- Energy conversion mode direct/indirect/elastic (the one the reducer understands) -->
-<parameter name="deltaE-mode" type="string">
+<parameter name="deltaE_mode" type="string">
   <value val="direct"/>
 </parameter>
 
