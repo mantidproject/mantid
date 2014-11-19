@@ -33,12 +33,11 @@
 #include <Poco/StreamCopier.h>
 #include <Poco/URI.h>
 
-// from boost
-#include <boost/algorithm/string.hpp> 
-#include <boost/foreach.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/lexical_cast.hpp>
+// jsoncpp
+#include <jsoncpp/json/json.h>
+
+// std
+#include <fstream>
 
 namespace Mantid
 {
@@ -46,7 +45,6 @@ namespace Mantid
   {
     using namespace Kernel;
     using namespace Poco::Net;
-    using boost::property_tree::ptree;
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(DownloadInstrument)
@@ -55,13 +53,6 @@ namespace Mantid
     /** Constructor
     */
     DownloadInstrument::DownloadInstrument() : m_proxyInfo(), m_isProxySet(false)
-    {
-    }
-
-    //----------------------------------------------------------------------------------------------
-    /** Destructor
-    */
-    DownloadInstrument::~DownloadInstrument()
     {
     }
 
@@ -151,8 +142,7 @@ namespace Mantid
       localPath.makeDirectory();
 
       //get the date of the local github.json file if it exists
-      Poco::Path gitHubJson(localPath);
-      gitHubJson.append("github.json");
+      Poco::Path gitHubJson(localPath, "github.json");
       Poco::File gitHubJsonFile(gitHubJson);
       Poco::DateTime gitHubJsonDate(1900,1,1);
       if (gitHubJsonFile.exists() && gitHubJsonFile.isFile())
@@ -180,117 +170,143 @@ namespace Mantid
       }
 
       //update local repo files
-      Poco::Path installRepoFile(localPath);
-      installRepoFile.append("install.json");
-      updateJsonFile(installPath.toString(),installRepoFile.toString());      
-      Poco::Path localRepoFile(localPath);
-      localRepoFile.append("local.json");
-      updateJsonFile(localPath.toString(),localRepoFile.toString());
+      Poco::Path installRepoFile(localPath, "install.json");
+      StringToStringMap installShas = updateJsonFile(installPath.toString(), installRepoFile.toString());
+      Poco::Path localRepoFile(localPath, "local.json");
+      StringToStringMap localShas = updateJsonFile(localPath.toString(), localRepoFile.toString());
 
-      //Parse the server JSON response
-      ptree ptGithub; 
-      //and the local JSON files
-      ptree ptLocal;      
-      ptree ptInstall;
-      try
+      // Parse the server JSON response
+      Json::Reader reader;
+      Json::Value serverContents;
+      Poco::FileStream fileStream(gitHubJson.toString(), std::ios::in);
+      if(!reader.parse(fileStream, serverContents))
       {
-        read_json(gitHubJson.toString(), ptGithub);
-        read_json(installRepoFile.toString(), ptInstall);
-        read_json(localRepoFile.toString(), ptLocal);
-
-        BOOST_FOREACH(ptree::value_type & repoFile, ptGithub)
-        {
-          std::string name = repoFile.second.get("name","");
-          std::string sha = repoFile.second.get("sha","");
-          std::string htmlUrl = repoFile.second.get("html_url","");
-          htmlUrl = getDownloadableRepoUrl(htmlUrl);
-          
-          Poco::Path filePath(localPath);
-          filePath.append(name);
-          if (filePath.getExtension() == "xml")
-          {
-            //decide if we want to download this file
-            std::string keyBase = mangleFileName(name);
-            //read sha from local directories
-            std::string localSha = ptLocal.get(keyBase + ".sha","");
-            std::string installSha = ptInstall.get(keyBase + ".sha","");
-
-            // Different sha1 on github cf local and global
-            // this will also catch when file is only present on github (as local sha will be "")
-            if ((sha != installSha) && (sha != localSha))
-            {
-              fileMap.insert(std::make_pair(htmlUrl, filePath.toString())); // ACTION - DOWNLOAD to localPath
-            }
-            else if ((localSha != "") && (sha == installSha) && (sha != localSha)) // matches install, but different local
-            {
-              fileMap.insert(std::make_pair(htmlUrl, filePath.toString())); // ACTION - DOWNLOAD to localPath and overwrite
-            }
-          }
-        }
-      } 
-      catch (boost::property_tree::json_parser_error & ex)
-      {
-        throw std::runtime_error(ex.what());
+        throw std::runtime_error("Unable to parse server JSON file \"" + gitHubJson.toString() + "\"");
       }
-    return fileMap;
+      fileStream.close();
+
+      for(Json::ArrayIndex i = 0; i < serverContents.size(); ++i)
+      {
+        const auto & serverElement = serverContents[i];
+        std::string name = serverElement.get("name", "").asString();
+        Poco::Path filePath(localPath, name);
+        if(filePath.getExtension() != "xml") continue;
+        std::string sha = serverElement.get("sha","").asString();
+        std::string htmlUrl = getDownloadableRepoUrl(serverElement.get("html_url","").asString());
+
+        // Find shas
+        std::string localSha = getValueOrDefault(localShas, name, "");
+        std::string installSha = getValueOrDefault(installShas, name, "");
+        // Different sha1 on github cf local and global
+        // this will also catch when file is only present on github (as local sha will be "")
+        if ((sha != installSha) && (sha != localSha))
+        {
+          fileMap.insert(std::make_pair(htmlUrl, filePath.toString())); // ACTION - DOWNLOAD to localPath
+        }
+        else if ((localSha != "") && (sha == installSha) && (sha != localSha)) // matches install, but different local
+        {
+          fileMap.insert(std::make_pair(htmlUrl, filePath.toString())); // ACTION - DOWNLOAD to localPath and overwrite
+        }
+      }
+      return fileMap;
     }
 
-    /** creates or updates the json file of a directories contents
+    /**
+     *
+     * @param mapping A map of string keys to string values
+     * @param key A string representing a key
+     * @param defaultValue A default to return if the key is not present
+     * @return The value of the key or the default if the key does not exist
+     */
+    std::string
+    DownloadInstrument::getValueOrDefault(const DownloadInstrument::StringToStringMap &mapping,
+                                          const std::string &key, const std::string &defaultValue) const
+    {
+      auto element = mapping.find(key);
+      return (element != mapping.end()) ? element->second : defaultValue;
+    }
+
+    /** Creates or updates the json file of a directories contents
     * @param directoryPath The path to catalog
     * @param filePath The path of the file containing the datalog
+    * @return A map of file names to sha1 values
     **/
-    void DownloadInstrument::updateJsonFile(const std::string& directoryPath, const std::string& filePath)
+    DownloadInstrument::StringToStringMap
+    DownloadInstrument::updateJsonFile(const std::string& directoryPath, const std::string& filePath)
     {
-      ptree pt;
+      Json::Value root;
+      Json::Reader reader;
       //check if the file exists
       Poco::File catalogFile(filePath);
       if (catalogFile.exists() && catalogFile.isFile())
       {
-        try
+        std::ifstream catalogStream(filePath, std::ios::in);
+        if (!reader.parse(catalogStream, root))
         {
-          read_json(filePath, pt);
-        } 
-        catch (boost::property_tree::json_parser_error & ex)
-        {
-          throw std::runtime_error(ex.what());
+          throw std::runtime_error("Unable to parse JSON file \"" + filePath + "\"");
         }
       }
+      
+      // -- File layout -- 
+      // 
+      // [
+      //   {
+      //     "name": "ALF_Definition.xml",
+      //     "lastModified": "1900-01-01 00:00:00",
+      //     "path": "/path/to/file.xml"
+      //     "sha": "fff6fe3a23bf1c8ea0692b4a883af99bee26fd3b",
+      //     "size": 625
+      //   },
+      // ...
+      // ]
 
-      using Poco::DirectoryIterator;
-      DirectoryIterator end;
+      StringToStringMap filesToSha;
       try
       {
+        using Poco::DirectoryIterator;
+        DirectoryIterator end;
         for (DirectoryIterator it(directoryPath); it != end; ++it)
         {
-          Poco::Path entryPath = it->path();
-          std::string entryExt = entryPath.getExtension();
-          if (entryExt == "xml")
-          {
-            //get current values
-            Poco::LocalDateTime dateTime(it->getLastModified());
-            size_t entrySize = it->getSize();
+          const auto & entryPath = Poco::Path(it->path());
+          if (entryPath.getExtension() != "xml") continue;
 
-            //read previous values
-            std::string keyBase = mangleFileName(it->path());
-            size_t previousSize = pt.get(keyBase + ".size",0);
-            std::string pdtString = pt.get(keyBase + ".lastModified","1900-01-01 00:00:00");
-            int tzd(0);
-            Poco::DateTime previousDateTime;
-            Poco::DateTimeParser::tryParse(Poco::DateTimeFormat::SORTABLE_FORMAT, pdtString, previousDateTime, tzd);
-            previousDateTime += Poco::Timespan(1,0); //add a second as milliseconds are truncated off in the file
-            std::string prevSha = pt.get(keyBase + ".sha","");
+          Json::Value & element = root.append(Json::Value());
+          element["name"] = entryPath.getFileName();
+          element["lastModified"] = Poco::DateTimeFormatter::format(it->getLastModified(), 
+                                                                    Poco::DateTimeFormat::SORTABLE_FORMAT);
+          element["path"] = entryPath.toString();
+          std::string sha1 = ChecksumHelper::gitSha1FromFile(entryPath.toString());
+          element["sha"] = sha1;
+          element["size"] = static_cast<Json::UInt64>(it->getSize());
+          // Track sha1
+          filesToSha.insert(std::make_pair(entryPath.getFileName(), sha1));
 
-            //update and generate sha if anything has changed
-            if ((entrySize != previousSize) || (dateTime > previousDateTime) || (prevSha == ""))
-            {
-              pt.put(keyBase + ".size",entrySize);
-              pt.put(keyBase + ".path",entryPath.toString());
-              pt.put(keyBase + ".lastModified",Poco::DateTimeFormatter::format(dateTime, Poco::DateTimeFormat::SORTABLE_FORMAT));
-              pt.put(keyBase + ".sha",Kernel::ChecksumHelper::gitSha1FromFile(entryPath.toString()));
-            }
-          }
+//          //get current values
+//          Poco::LocalDateTime dateTime(it->getLastModified());
+//          size_t entrySize = it->getSize();
+          
+//          //  read previous values
+//          std::string keyBase = mangleFileName(it->path());
+//          Json::UInt64 previousSize = pt.get(keyBase + ".size", 0).asUInt64();
+//          std::string pdtString = pt.get(keyBase + ".lastModified","1900-01-01 00:00:00").asString();
+//          int tzd(0);
+//          Poco::DateTime previousDateTime;
+//          Poco::DateTimeParser::tryParse(Poco::DateTimeFormat::SORTABLE_FORMAT, pdtString, previousDateTime, tzd);
+//          previousDateTime += Poco::Timespan(1,0); //add a second as milliseconds are truncated off in the file
+//          std::string prevSha = pt.get(keyBase + ".sha","");
+          
+//          //update and generate sha if anything has changed
+//          if ((entrySize != previousSize) || (dateTime > previousDateTime) || (prevSha == ""))
+//          {
+                
+//            pt.put(keyBase + ".size", static_cast<Json::UInt64>(entrySize));
+//            pt.put(keyBase + ".path", entryPath.toString());
+//            pt.put(keyBase + ".lastModified", Poco::DateTimeFormatter::format(dateTime, Poco::DateTimeFormat::SORTABLE_FORMAT));
+//            pt.put(keyBase + ".sha", ChecksumHelper::gitSha1FromFile(entryPath.toString()));
+//          }
         }
-      } catch (Poco::Exception & ex)
+      }
+      catch (Poco::Exception & ex)
       {
         g_log.error() << "DownloadInstrument: failed to parse the directory: " << directoryPath << " : "
           << ex.className() << " : " << ex.displayText() << std::endl;
@@ -299,14 +315,15 @@ namespace Mantid
       {
         std::stringstream ss;
         ss << "unknown exception while checking local file system. " << ex.what() << ". Input = "
-          << directoryPath;
-        g_log.error() << "DownloadInstrument: " << ss.str() << std::endl;
+           << directoryPath;
         throw std::runtime_error(ss.str());
       }
 
-      //now write the updated file
-      write_json(filePath, pt);
+      // Persist file contents
+      Poco::FileStream fileOut(filePath, std::ios::out);
+      fileOut << root;
 
+      return filesToSha;
     }
 
     /** Converts a filename into a valid key for a boost property tree.
@@ -329,7 +346,7 @@ namespace Mantid
     **/
     const std::string DownloadInstrument::getDownloadableRepoUrl(const std::string& filename) const
     {
-      return filename + "?raw=1";;
+      return filename + "?raw=1";
     }
 
     /** Download a url and fetch it inside the local path given.

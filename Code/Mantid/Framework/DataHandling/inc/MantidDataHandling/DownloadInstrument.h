@@ -37,25 +37,28 @@ namespace DataHandling
   {
   public:
     DownloadInstrument();
-    virtual ~DownloadInstrument();
     
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
     virtual const std::string summary() const;
 
-  private:
+  protected:
     // Convenience typedef
     typedef std::map<std::string, std::string> StringToStringMap;
-
+    
+  private:
     void init();
     void exec();
     virtual int doDownloadFile(const std::string& urlFile, const std::string& localFilePath = "",
                                const StringToStringMap& headers = StringToStringMap());
-    void updateJsonFile(const std::string& directoryPath, const std::string& filePath);
+    StringToStringMap updateJsonFile(const std::string& directoryPath, const std::string& filePath);
     const std::string mangleFileName(const std::string& filename) const;
     const std::string getDownloadableRepoUrl(const std::string& filename) const;
     StringToStringMap processRepository();
+    std::string getValueOrDefault(const StringToStringMap & mapping,
+                                  const std::string & key,
+                                  const std::string & defaultValue) const;
 
     Kernel::ProxyInfo m_proxyInfo;
     bool m_isProxySet;
