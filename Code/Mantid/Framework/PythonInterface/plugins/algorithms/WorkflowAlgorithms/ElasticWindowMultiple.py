@@ -135,7 +135,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         if len(q_workspaces) < 2:
             raise RuntimeError('Have less than 2 result workspaces in Q')
         if len(q2_workspaces) < 2:
-            raise RuntimeError('Hvae less than 2 result workspaces in Q^2')
+            raise RuntimeError('Have less than 2 result workspaces in Q^2')
 
         logger.information('Creating Q and Q^2 workspaces')
 
@@ -194,7 +194,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         if self._elt_workspace != '':
             logger.information('Creating ELT workspace')
 
-            # If the ELT workspace wqas not already created then crate it here, otherwise just clone it
+            # If the ELT workspace was not already created then create it here, otherwise just clone it
             if self._elf_workspace == '':
                 Transpose(InputWorkspace=self._q_workspace, OutputWorkspace=self._elt_workspace)
                 SortXAxis(InputWorkspace=self._elt_workspace, OutputWorkspace=self._elt_workspace)
