@@ -74,17 +74,15 @@ namespace Mantid
       /// Rescale detector efficiency to maximum value
       void normaliseAlphas (std::vector<HistData>& m_histData);
       /// Remove exponential decay from input histograms
-      void removeExponentialDecay (API::MatrixWorkspace_sptr inputWs, API::MatrixWorkspace_sptr outputWs);
-      /// Remove exponential decay from input histograms
       void loseExponentialDecay (API::MatrixWorkspace_sptr inputWs, API::MatrixWorkspace_sptr outputWs);
       /// Create squashograms
       void squash(API::MatrixWorkspace_sptr tempWs, API::MatrixWorkspace_sptr outputWs);
       /// Put back in exponential decay
       void regainExponential(API::MatrixWorkspace_sptr outputWs);
       /// Number of input histograms
-      size_t m_nHist;
+      int m_nHist;
       /// Number of datapoints per histogram
-      size_t m_nData;
+      int m_nData;
       /// TODO: remove if not necessary
       double m_res;
       /// Mean of time-shifts TODO: remove if not necessary

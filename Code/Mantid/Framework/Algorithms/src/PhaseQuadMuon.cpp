@@ -46,7 +46,7 @@ void PhaseQuadMuon::exec()
   loadPhaseTable ( filename );
 
   // Set number of data points per histogram
-  m_nData = inputWs->getSpectrum(0)->readY().size();
+  m_nData = int(inputWs->getSpectrum(0)->readY().size());
 
   // Check number of histograms in inputWs match number of detectors in phase table
   if (m_nHist != inputWs->getNumberHistograms())
@@ -59,8 +59,7 @@ void PhaseQuadMuon::exec()
     API::WorkspaceFactory::Instance().create("Workspace2D", m_nHist, m_nData+1, m_nData));
 
   // Create output workspace with two spectra (squashograms)
-  API::MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
-  outputWs = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+  API::MatrixWorkspace_sptr outputWs = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
     API::WorkspaceFactory::Instance().create("Workspace2D", 2, m_nData+1, m_nData));
   outputWs->getAxis(0)->unit() = inputWs->getAxis(0)->unit();
 
@@ -172,48 +171,6 @@ void PhaseQuadMuon::normaliseAlphas (std::vector<HistData>& histData)
   }
 }
 
-
-//----------------------------------------------------------------------------------------------
-/** Remove exponential decay from input histograms, i.e., calculate asymmetry
-* @param inputWs :: input workspace containing the spectra
-* @param outputWs :: output workspace to hold temporary results
-*/
-void PhaseQuadMuon::removeExponentialDecay (API::MatrixWorkspace_sptr inputWs, API::MatrixWorkspace_sptr outputWs)
-{
-  // Muon decay: N(t) = N0 exp(-t/tau) [ 1 + a P(t) ]
-  // N(t) - N0 exp(-t/tau) = 1 + a P(t)
-  // Int N(t) dt = N0 Int exp(-t/tau) dt
-
-  for (size_t h=0; h<inputWs->getNumberHistograms(); h++)
-  {
-    auto specIn = inputWs->getSpectrum(h);
-    auto specOut = outputWs->getSpectrum(h);
-
-    specOut->dataX()=specIn->readX();
-
-    double sum1, sum2;
-    sum1=sum2=0;
-    for(int i=0; i<m_nData; i++)
-    {
-      if ( specIn->readX()[i]>=0 )
-      {
-        sum1 += specIn->dataY()[i];
-        sum2 += exp( -((specIn->dataX()[i+1]-specIn->dataX()[i])*0.5+specIn->dataX()[i])/m_muLife);
-      }
-    }
-    double N0 = sum1/sum2;
-
-    for (int i=0; i<m_nData; i++)
-    {
-      if ( specIn->readX()[i]>=0 )
-      {
-        specOut->dataY()[i] = specIn->dataY()[i] - N0*exp(-((specIn->dataX()[i+1]-specIn->dataX()[i])*0.5+specIn->dataX()[i])/m_muLife);
-        specOut->dataE()[i] = ( specIn->readY()[i] > m_poissonLim) ? specIn->readE()[i] : sqrt(N0*exp(-specIn->readX()[i]/m_muLife));
-      }
-    }
-  } // Histogram loop
-
-}
 
 //----------------------------------------------------------------------------------------------
 /** Remove exponential decay from input histograms, i.e., calculate asymmetry
