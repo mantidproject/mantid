@@ -94,7 +94,8 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
 
 //-----------------------------------------------------------------------------
 /// Copy constructor
-MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData& data)
+MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData& data) :
+  m_minPositive(0.0)
 {
   this->operator =(data);
 }
