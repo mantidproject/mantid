@@ -95,7 +95,7 @@ class LoadSPICEAscii(PythonAlgorithm):
 
 		elif cline.endswith('scan completed.'):
 		    # Run end
-		    infodict['runend'] = cline.split('scan')[0]
+		    infodict['runend'] = cline.split('scan')[0].strip()
 
 		else:
 		    # Not supported
