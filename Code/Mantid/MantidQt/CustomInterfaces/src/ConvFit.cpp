@@ -211,7 +211,7 @@ namespace IDA
     // Set the result workspace for Python script export
     QString inputWsName = QString::fromStdString(m_cfInputWS->getName());
     QString resultWsName = inputWsName.left(inputWsName.lastIndexOf("_")) + "_conv_" + fitType + bgType + specMin + "_to_" + specMax + "_Workspaces";
-    m_pythonExportWsName  = resultWsName.toStdString();
+    m_pythonExportWsName = resultWsName.toStdString();
   }
 
   /**
