@@ -1278,7 +1278,6 @@ std::string getValueFromStdOut(const std::string &orig, const std::string &key) 
 std::string ConfigServiceImpl::getOSVersionReadable() {
   std::string description;
 
-#ifdef __linux__
   // read os-release
   static const std::string OS_RELEASE("/etc/os-release");
   if (canRead(OS_RELEASE)) {
@@ -1327,8 +1326,6 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
       return description;
     }
   }
-
-#endif
 
   // try system calls
   std::string cmd;
