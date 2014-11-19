@@ -35,7 +35,7 @@ namespace
   private:
     virtual int doDownloadFile(const std::string& urlFile, 
       const std::string& localFilePath = "", 
-      const String2StringMap& headers = String2StringMap())
+      const StringToStringMap& headers = StringToStringMap())
     {
       std::string dateTime;   
       auto it = headers.find("if-modified-since");
