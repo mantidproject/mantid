@@ -250,7 +250,6 @@ public:
       // cache some iterators
       auto inXbegin = inX.begin();
       auto inXend = inX.end();
-      auto inYbegin = inY.begin();
       auto x0 = inXbegin; // iterator over x in input workspace
       // loop over the iteration points starting from the second one
       for(auto outX = X.begin()+1; outX != X.end(); ++outX,++outY)
@@ -372,7 +371,6 @@ public:
       // cache some iterators
       auto inXbegin = inX.begin();
       auto inXend = inX.end();
-      auto inYbegin = inY.begin();
       auto x0 = inXbegin; // iterator over x in input workspace
 
       // loop over the iteration points starting from the second one
