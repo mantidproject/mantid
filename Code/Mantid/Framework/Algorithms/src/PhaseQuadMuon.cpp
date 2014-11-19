@@ -46,10 +46,10 @@ void PhaseQuadMuon::exec()
   loadPhaseTable ( filename );
 
   // Set number of data points per histogram
-  m_nData = int(inputWs->getSpectrum(0)->readY().size());
+  m_nData = static_cast<int>(inputWs->getSpectrum(0)->readY().size());
 
   // Check number of histograms in inputWs match number of detectors in phase table
-  if (m_nHist != inputWs->getNumberHistograms())
+  if (m_nHist != static_cast<int>(inputWs->getNumberHistograms()))
   {
     throw std::runtime_error("PhaseQuad: Number of histograms in phase table does not match number of spectra in workspace");
   }
@@ -153,7 +153,7 @@ void PhaseQuadMuon::loadPhaseTable(const std::string& filename )
 void PhaseQuadMuon::normaliseAlphas (std::vector<HistData>& histData)
 {
   double max=0;
-  for (size_t h=0; h<m_nHist; h++)
+  for (int h=0; h<m_nHist; h++)
   {
     if (histData[h].alpha>max)
     {
@@ -165,7 +165,7 @@ void PhaseQuadMuon::normaliseAlphas (std::vector<HistData>& histData)
     throw std::runtime_error("PhaseQuad: Could not rescale efficiencies");
   }
 
-  for (size_t h=0; h<m_nHist; h++)
+  for (int h=0; h<m_nHist; h++)
   {
     histData[h].alpha /= max;
   }
@@ -237,7 +237,7 @@ void PhaseQuadMuon::squash(API::MatrixWorkspace_sptr tempWs, API::MatrixWorkspac
   double syy=0;
   double sxy=0;
 
-  for (size_t h=0; h<m_nHist; h++)
+  for (int h=0; h<m_nHist; h++)
   {
     auto data = m_histData[h];
     double X = data.detOK * data.alpha * cos(data.phi);
@@ -253,7 +253,7 @@ void PhaseQuadMuon::squash(API::MatrixWorkspace_sptr tempWs, API::MatrixWorkspac
   double mu2  = 2 * sxx / (sxx*syy - sxy*sxy);
   std::vector<double> aj, bj;
 
-  for (size_t h=0; h<m_nHist; h++)
+  for (int h=0; h<m_nHist; h++)
   {
     auto data = m_histData[h];
     double X = data.detOK * data.alpha * cos(data.phi);
@@ -264,9 +264,9 @@ void PhaseQuadMuon::squash(API::MatrixWorkspace_sptr tempWs, API::MatrixWorkspac
 
   std::vector<double> data1(m_nData,0), data2(m_nData,0);
   std::vector<double> sigm1(m_nData,0), sigm2(m_nData,0);
-  for (size_t i=0; i<m_nData; i++)
+  for (int i=0; i<m_nData; i++)
   {
-    for (size_t h=0; h<m_nHist; h++)
+    for (int h=0; h<m_nHist; h++)
     {
       auto spec = tempWs->getSpectrum(h);
       data1[i] += aj[h] * spec->readY()[i];
@@ -297,7 +297,7 @@ void PhaseQuadMuon::regainExponential(API::MatrixWorkspace_sptr outputWs)
   auto specRe = outputWs->getSpectrum(0);
   auto specIm = outputWs->getSpectrum(1);
 
-  for (size_t i=0; i<m_nData; i++)
+  for (int i=0; i<m_nData; i++)
   {
     double x = outputWs->getSpectrum(0)->readX()[i];
     double xp= outputWs->getSpectrum(0)->readX()[i+1];
