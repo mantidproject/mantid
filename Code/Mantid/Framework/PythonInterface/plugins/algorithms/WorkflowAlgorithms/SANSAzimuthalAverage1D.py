@@ -18,11 +18,12 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
                                                      direction=Direction.Input))
 
         self.declareProperty(FloatArrayProperty("Binning", values=[0.,0.,0.],
-                             direction=Direction.InOut), "Positive is linear bins, negative is logorithmic")
+                             direction=Direction.InOut), "Positive is linear bins, negative is logarithmic")
 
         self.declareProperty("NumberOfBins", 100, validator=IntBoundedValidator(lower=1),
                              doc="Number of Q bins to use if binning is not supplied")
         self.declareProperty("LogBinning", False, "Produce log binning in Q when true and binning wasn't supplied")
+        self.declareProperty("AlignWithDecades", False, "If True and log binning was chosen, the Q points will be aligned with Q decades")
         self.declareProperty("NumberOfSubpixels", 1, "Number of sub-pixels per side of a detector pixel: use with care")
         self.declareProperty("ErrorWeighting", False, "Backward compatibility option: use with care")
         self.declareProperty('ComputeResolution', False, 'If true the Q resolution will be computed')
@@ -62,6 +63,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
 
         # Q binning options
         binning = self.getProperty("Binning").value
+        binning_prop = self.getPropertyValue("Binning")
 
         workspace = self.getProperty("InputWorkspace").value
         output_ws_name = self.getPropertyValue("OutputWorkspace")
@@ -81,9 +83,13 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             if wavelength_min==0 or wavelength_max==0:
                 raise RuntimeError, "Azimuthal averaging needs positive wavelengths"
             qmin, qstep, qmax = self._get_binning(workspace, wavelength_min, wavelength_max)
-            binning = [qmin, qstep, qmax]
-            tmp_binning = "%g, %g, %g" % (qmin, qstep, qmax)
-            self.setPropertyValue("Binning", tmp_binning)
+            align = self.getProperty("AlignWithDecades").value
+            log_binning = self.getProperty("LogBinning").value
+            if log_binning and align:
+                binning_prop = self._get_aligned_binning(qmin, qmax)
+            else:
+                binning_prop = "%g, %g, %g" % (qmin, qstep, qmax)
+            self.setPropertyValue("Binning", binning_prop)
         else:
             qmin = binning[0]
             qmax = binning[2]
@@ -103,8 +109,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         alg.initialize()
         alg.setChild(True)
         alg.setProperty("InputWorkspace", workspace)
-        tmp_binning = "%g, %g, %g" % (binning[0], binning[1], binning[2])
-        alg.setPropertyValue("OutputBinning", tmp_binning)
+        alg.setPropertyValue("OutputBinning", binning_prop)
         alg.setProperty("NPixelDivision", n_subpix)
         alg.setProperty("PixelSizeX", pixel_size_x)
         alg.setProperty("PixelSizeY", pixel_size_y)
@@ -203,6 +208,29 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             if f_step-n_step>10e-10:
                 qmax = math.pow(10.0, math.log10(qmin)+qstep*n_step)
             return qmin, -(math.pow(10.0,qstep)-1.0), qmax
+        
+    def _get_aligned_binning(self, qmin, qmax):
+        npts = self.getProperty("NumberOfBins").value
+
+        x_min = math.pow(10,math.floor(npts*math.log10(qmin))/npts)
+        x_max = math.pow(10,math.ceil(npts*math.log10(qmax))/npts)
+        b = 1.0/npts
+        nsteps = int(1+math.ceil(npts*math.log10(x_max/x_min)))
+        
+        binning = str(x_min)
+        x_bound = x_min - ( x_min*math.pow(10,b) - x_min )/2.0
+        binning2 = str(x_bound)
+        
+        x = x_min
+        for i in range(nsteps):
+            x_bound = 2*x-x_bound
+            x *= math.pow(10,b)
+            binning += ",%g,%g" % (x,x)
+            binning2 += ",%g,%g" % (x_bound,x_bound)
+            
+        return binning2
+
+
 #############################################################################################
 
 AlgorithmFactory.subscribe(SANSAzimuthalAverage1D)

@@ -190,11 +190,24 @@ void Q1DWeighted::exec()
         int iq = 0;
 
         // Bin assignment depends on whether we have log or linear bins
-        if(binParams[1]>0.0)
+        if (binParams.size()==3)
         {
-          iq = (int)floor( (q-binParams[0])/ binParams[1] );
+          if(binParams[1]>0.0)
+          {
+            iq = (int)floor( (q-binParams[0])/ binParams[1] );
+          } else {
+            iq = (int)floor(log(q/binParams[0])/log(1.0-binParams[1]));
+          }
+        // If we got a more complicated binning, find the q bin the slow way
         } else {
-          iq = (int)floor(log(q/binParams[0])/log(1.0-binParams[1]));
+          for ( int i_qbin=0; i_qbin<(int)XOut.access().size()-1; i_qbin++)
+          {
+            if (q >= XOut.access()[i_qbin] && q < XOut.access()[(i_qbin+1)])
+            {
+              iq = i_qbin;
+              break;
+            }
+          }
         }
 
         if (iq>=0 && iq < sizeOut-1)

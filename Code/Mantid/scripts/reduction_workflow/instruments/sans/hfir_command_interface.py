@@ -112,7 +112,7 @@ def NoSolidAngle():
     ReductionSingleton().reduction_properties["SolidAngleCorrection"]=False
 
 def AzimuthalAverage(binning=None, suffix="_Iq", error_weighting=False,
-                     n_bins=100, n_subpix=1, log_binning=False):
+                     n_bins=100, n_subpix=1, log_binning=False, align_log_with_decades=False):
     # Suffix is no longer used but kept for backward compatibility
     ReductionSingleton().reduction_properties["DoAzimuthalAverage"]=True
     if binning is not None:
@@ -123,6 +123,7 @@ def AzimuthalAverage(binning=None, suffix="_Iq", error_weighting=False,
     ReductionSingleton().reduction_properties["IQLogBinning"]=log_binning
     ReductionSingleton().reduction_properties["NumberOfSubpixels"]=n_subpix
     ReductionSingleton().reduction_properties["ErrorWeighting"]=error_weighting
+    ReductionSingleton().reduction_properties["IQAlignLogWithDecades"]=align_log_with_decades
 
 def NoTransmission():
     if ReductionSingleton().reduction_properties.has_key("TransmissionValue"):

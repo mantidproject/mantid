@@ -34,6 +34,9 @@ class ReductionOptions(BaseOptions):
     
     # Turn off the wedges
     n_wedges = 0
+    
+    # Turn off log binning alignment with decades
+    align_log_with_decades = False
 
     # Normalize to beam monitor
     use_beam_monitor = False
@@ -65,6 +68,7 @@ class ReductionOptions(BaseOptions):
 
         self.perform_TOF_correction = True
         self.n_wedges = ReductionOptions.n_wedges
+        self.align_log_with_decades = ReductionOptions.align_log_with_decades
         self.use_beam_monitor = False
         self.beam_monitor_reference = ''
 

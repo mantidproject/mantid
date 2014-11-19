@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_instrument.ui'
 #
-# Created: Tue Nov 18 14:48:24 2014
+# Created: Wed Nov 19 14:25:58 2014
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -310,6 +310,15 @@ class Ui_Frame(object):
         self.log_binning_radio.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.log_binning_radio.setObjectName("log_binning_radio")
         self.horizontalLayout_9.addWidget(self.log_binning_radio)
+        self.align_check = QtGui.QCheckBox(self.reduction_options_group)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.align_check.sizePolicy().hasHeightForWidth())
+        self.align_check.setSizePolicy(sizePolicy)
+        self.align_check.setMinimumSize(QtCore.QSize(160, 0))
+        self.align_check.setObjectName("align_check")
+        self.horizontalLayout_9.addWidget(self.align_check)
         spacerItem8 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_9.addItem(spacerItem8)
         self.verticalLayout_6.addLayout(self.horizontalLayout_9)
@@ -565,6 +574,7 @@ class Ui_Frame(object):
 "in each direction and will create 9 sub-pixels.", None, QtGui.QApplication.UnicodeUTF8))
         self.log_binning_radio.setToolTip(QtGui.QApplication.translate("Frame", "Select to use logarithmic binning for I(Q).", None, QtGui.QApplication.UnicodeUTF8))
         self.log_binning_radio.setText(QtGui.QApplication.translate("Frame", "Log binning", None, QtGui.QApplication.UnicodeUTF8))
+        self.align_check.setText(QtGui.QApplication.translate("Frame", "Align log to decades", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("Frame", "Wedge averaging", None, QtGui.QApplication.UnicodeUTF8))
         self.label_8.setText(QtGui.QApplication.translate("Frame", "Number of wedges", None, QtGui.QApplication.UnicodeUTF8))
         self.n_wedges_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the number of wedges to calculate.", None, QtGui.QApplication.UnicodeUTF8))
