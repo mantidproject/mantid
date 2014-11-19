@@ -13,7 +13,7 @@ class InterfaceDirective(BaseDirective):
     """
 
     required_arguments, optional_arguments = 1, 0
-    option_spec = {"widget" : str}
+    option_spec = {"widget" : str, "align" : str}
 
     def run(self):
         """
@@ -32,7 +32,7 @@ class InterfaceDirective(BaseDirective):
         Called by Sphinx when the ..interface:: directive is encountered
         """
         picture = self._create_screenshot(widget_name = self.options.get("widget", None))
-        self._insert_screenshot_link(picture)
+        self._insert_screenshot_link(picture, align = self.options.get("align", None))
         return []
 
     def interface_name(self):
@@ -67,7 +67,7 @@ class InterfaceDirective(BaseDirective):
 
         return picture
 
-    def _insert_screenshot_link(self, picture):
+    def _insert_screenshot_link(self, picture, align = None):
         """
         Outputs an image link with a custom :class: style. The filename is
         extracted from the path given and then a relative link to the
@@ -76,13 +76,16 @@ class InterfaceDirective(BaseDirective):
 
         Args:
           picture (Screenshot): A Screenshot object
+          align: The alignment to use, None for block, "left" or "right" for flowing
         """
         env = self.state.document.settings.env
         format_str = ".. figure:: %s\n"\
                      "   :class: screenshot\n"\
-                     "   :width: %dpx\n"\
-                     "   :align: left\n\n"\
-                     "   %s\n\n"
+                     "   :width: %dpx"
+        if align != None:
+            format_str += "\n   :align: " + align
+
+        format_str += "\n\n"
 
         # Sphinx assumes that an absolute path is actually relative to the directory containing the
         # conf.py file and a relative path is relative to the directory where the current rst file
@@ -103,8 +106,7 @@ class InterfaceDirective(BaseDirective):
             path = "/images/ImageNotFound.png"
             width = 200
 
-        caption = "**" + self.interface_name() + "** interface."
-        self.add_rst(format_str % (path, width, caption))
+        self.add_rst(format_str % (path, width))
 
     def _screenshot_directory(self):
         """
