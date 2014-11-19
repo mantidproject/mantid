@@ -928,9 +928,15 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         transrun_named = self.__name_trans(transrun)
         # Look for existing transmission workspaces that match the name
         transmission_ws = None
-        if mtd.doesExist(transrun_named) and mtd[transrun_named].getAxis(0).getUnit().unitID() == "Wavelength":
-            logger.notice('Reusing transmission workspace ' + transrun_named)
-            transmission_ws = mtd[transrun_named]
+        if mtd.doesExist(transrun_named):
+            if isinstance(mtd[transrun_named], WorkspaceGroup):
+                unit = mtd[transrun_named][0].getAxis(0).getUnit().unitID()
+            else:
+                unit = mtd[transrun_named].getAxis(0).getUnit().unitID()
+
+            if unit == "Wavelength":
+                logger.notice('Reusing transmission workspace ' + transrun_named)
+                transmission_ws = mtd[transrun_named]
 
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
 
@@ -984,7 +990,10 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             runno = runno.split(':')[0]
         if ',' in runno:
             runno = runno.split(',')[0]
-        inst = wq.getInstrument()
+        if isinstance(wq, WorkspaceGroup):
+            inst = wq[0].getInstrument()
+        else:
+            inst = wq.getInstrument()
         #NOTE: In the new Refl UI, these adjustments to lmin/lmax are NOT made. This has been
         #noted in the parameter files for INTER/CRIST/POLREF/SURF.
         lmin = inst.getNumberParameter('LambdaMin')[0] + 1
