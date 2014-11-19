@@ -158,7 +158,7 @@ public:
   }
 
   /**
-   * Integrate spectra in eventWS at x-values in integrWS and save the results in y-vectors of integrWS.
+   * Integrate spectra in inputWS at x-values in integrWS and save the results in y-vectors of integrWS.
    * @param inputWS :: An event workspace to integrate.
    * @param integrWS :: A workspace to store the results.
    */
@@ -195,7 +195,7 @@ public:
   }
 
   /**
-   * Integrate spectra in eventWS at x-values in integrWS and save the results in y-vectors of integrWS.
+   * Integrate spectra in inputWS at x-values in integrWS and save the results in y-vectors of integrWS.
    * @param inputWS :: A 2d workspace to integrate.
    * @param integrWS :: A workspace to store the results.
    */
@@ -214,7 +214,7 @@ public:
   }
 
   /**
-   * Integrate spectra in eventWS at x-values in integrWS and save the results in y-vectors of integrWS.
+   * Integrate spectra in inputWS at x-values in integrWS and save the results in y-vectors of integrWS.
    * @param inputWS :: A 2d workspace to integrate.
    * @param integrWS :: A workspace to store the results.
    */
@@ -346,7 +346,7 @@ public:
   }
 
   /**
-   * Integrate spectra in eventWS at x-values in integrWS and save the results in y-vectors of integrWS.
+   * Integrate spectra in inputWS at x-values in integrWS and save the results in y-vectors of integrWS.
    * @param inputWS :: A 2d workspace to integrate.
    * @param integrWS :: A workspace to store the results.
    */
