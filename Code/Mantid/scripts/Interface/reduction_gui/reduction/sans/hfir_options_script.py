@@ -123,7 +123,8 @@ class ReductionOptions(BaseScriptElement):
         script += "AzimuthalAverage(n_bins=%g, n_subpix=%g, log_binning=%s)\n" % (self.n_q_bins, self.n_sub_pix, str(self.log_binning))
         script += "IQxQy(nbins=%g)\n" % self.n_q_bins
         
-        script += "SetWedges(number_of_wedges=%g, wedge_angle=%g, wedge_offset=%g)\n" % (self.n_wedges, self.wedge_angle, self.wedge_offset)
+        if self.n_wedges>0:
+            script += "SetWedges(number_of_wedges=%g, wedge_angle=%g, wedge_offset=%g)\n" % (self.n_wedges, self.wedge_angle, self.wedge_offset)
 
         # Mask
         #   Detector plane

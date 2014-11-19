@@ -31,6 +31,9 @@ class ReductionOptions(BaseOptions):
 
     # Perform EQSANS TOF correction
     perform_TOF_correction = True
+    
+    # Turn off the wedges
+    n_wedges = 0
 
     # Normalize to beam monitor
     use_beam_monitor = False
@@ -61,6 +64,7 @@ class ReductionOptions(BaseOptions):
         self.sample_aperture_diameter = ReductionOptions.sample_aperture_diameter
 
         self.perform_TOF_correction = True
+        self.n_wedges = ReductionOptions.n_wedges
         self.use_beam_monitor = False
         self.beam_monitor_reference = ''
 

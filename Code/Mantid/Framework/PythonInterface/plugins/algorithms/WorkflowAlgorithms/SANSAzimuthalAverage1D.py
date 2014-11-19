@@ -39,7 +39,8 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         self.declareProperty("WedgeAngle", 30.0, "Angular opening of each wedge, in degrees")
         self.declareProperty("WedgeOffset", 0.0, "Angular offset for the wedges, in degrees")
         self.declareProperty(WorkspaceGroupProperty("WedgeWorkspace", "",
-                                                     direction = Direction.Output),
+                                                     Direction.Output,
+                                                     PropertyMode.Optional),
                              "I(q) wedge workspaces")
         self.declareProperty("OutputMessage", "",
                              direction=Direction.Output, doc = "Output message")
