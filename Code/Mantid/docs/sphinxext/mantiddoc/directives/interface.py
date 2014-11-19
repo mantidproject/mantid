@@ -13,6 +13,7 @@ class InterfaceDirective(BaseDirective):
     """
 
     required_arguments, optional_arguments = 1, 0
+    option_spec = {"widget" : str}
 
     def run(self):
         """
@@ -30,14 +31,14 @@ class InterfaceDirective(BaseDirective):
         """
         Called by Sphinx when the ..interface:: directive is encountered
         """
-        picture = self._create_screenshot()
+        picture = self._create_screenshot(widget_name = self.options.get("widget", None))
         self._insert_screenshot_link(picture)
         return []
 
     def interface_name(self):
         return self.arguments[0]
 
-    def _create_screenshot(self):
+    def _create_screenshot(self, widget_name = None):
         """
         Creates a screenshot for the named interface in the "images/screenshots"
         subdirectory.
@@ -58,7 +59,7 @@ class InterfaceDirective(BaseDirective):
             os.makedirs(screenshots_dir)
 
         try:
-            picture = custominterface_screenshot(self.interface_name(), screenshots_dir)
+            picture = custominterface_screenshot(self.interface_name(), screenshots_dir, widget_name = widget_name)
         except RuntimeError, exc:
             env = self.state.document.settings.env
             env.warn(env.docname, "Unable to generate screenshot for '%s' - %s" % (self.interface_name(), str(exc)))

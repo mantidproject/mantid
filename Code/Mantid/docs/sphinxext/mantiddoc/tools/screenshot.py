@@ -60,7 +60,7 @@ def algorithm_screenshot(name, directory, version = -1, ext = ".png"):
 
 #--------------------------------------------------------------------------
 
-def custominterface_screenshot(name, directory, ext = ".png"):
+def custominterface_screenshot(name, directory, ext = ".png", widget_name = None):
     """
     Takes a snapshot of a custom interface and saves it as an image
     named "name.png"
@@ -79,11 +79,16 @@ def custominterface_screenshot(name, directory, ext = ".png"):
 
     import mantidqtpython as mantidqt
     from mantidplot import threadsafe_call
+    from PyQt4.QtGui import QWidget
 
     iface_mgr = mantidqt.MantidQt.API.InterfaceManager()
     # threadsafe_call required for MantidPlot
     dlg = threadsafe_call(iface_mgr.createSubWindow, name, None)
 
-    picture = Screenshot(dlg, name.replace(' ','_') + "_interface" + ext, directory)
+    if widget_name:
+      widget = dlg.findChild(QWidget, widget_name)
+      picture = Screenshot(widget, name.replace(' ','_') + "_" + widget_name + "_widget" + ext, directory)
+    else:
+      picture = Screenshot(dlg, name.replace(' ','_') + "_interface" + ext, directory)
     threadsafe_call(dlg.close)
     return picture
