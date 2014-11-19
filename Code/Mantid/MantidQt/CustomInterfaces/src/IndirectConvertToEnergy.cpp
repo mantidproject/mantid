@@ -177,7 +177,7 @@ namespace CustomInterfaces
         break;
     }
 
-    m_batchAlgoRunner->addAlgorithm(reductionAlg);
+    m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
     m_batchAlgoRunner->executeBatchAsync();
   }
 

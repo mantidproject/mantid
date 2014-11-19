@@ -238,10 +238,10 @@ RefIVConnections::RefIVConnections( Ui_RefImageViewer*  ui,
       this, SLOT(grayColorScale()) );
 
   QObject::connect(m_ivUI->actionNegative_Gray, SIGNAL(triggered()),
-      this, SLOT(negative_grayColorScale()) );
+      this, SLOT(negativeGrayColorScale()) );
 
   QObject::connect(m_ivUI->actionGreen_Yellow, SIGNAL(triggered()),
-      this, SLOT(green_yellowColorScale()) );
+      this, SLOT(greenYellowColorScale()) );
 
   QObject::connect(m_ivUI->actionRainbow, SIGNAL(triggered()),
       this, SLOT(rainbowColorScale()) );

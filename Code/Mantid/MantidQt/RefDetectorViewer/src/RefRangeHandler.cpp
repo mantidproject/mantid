@@ -24,7 +24,11 @@ using namespace SpectrumView;
  *  Construct a RefRangeHandler object to manage min, max and step controls
  *  in the specified UI
  */
-RefRangeHandler::RefRangeHandler( Ui_RefImageViewer* ivUI ) : m_ivUI(ivUI)
+RefRangeHandler::RefRangeHandler( Ui_RefImageViewer* ivUI ) :
+  m_ivUI(ivUI),
+  m_totalMinX(0.0), m_totalMaxX(0.0),
+  m_totalMinY(0.0), m_totalMaxY(0.0),
+  m_totalNSteps(0)
 {
 }
 
