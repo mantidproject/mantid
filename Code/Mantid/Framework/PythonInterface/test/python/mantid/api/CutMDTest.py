@@ -67,7 +67,6 @@ class CutMDTest(unittest.TestCase):
         self.assertEqual(1, out_md.getDimension(0).getNBins(), "Step is beyond range. Should just be integrated")
         self.assertEqual(1, out_md.getDimension(1).getNBins(), "Step is beyond range. Should just be integrated")
         
-        
     def test_wrong_projection_workspace_format_wrong_column_numbers(self):
         projection = CreateEmptyTableWorkspace()
         projection.addColumn("double", "u")
@@ -158,6 +157,11 @@ class CutMDTest(unittest.TestCase):
         self.assertEquals("[0, 0, 'xi']",  out_md.getDimension(2).getName() )
         
         self.assertTrue(isinstance(out_md, IMDHistoWorkspace), "Expect that the output was an IMDHistoWorkspace given the NoPix flag.")
+        
+        run = out_md.getExperimentInfo(0).run()
+        w_matrix = run.getLogData("W_MATRIX").value
+        w_matrix = list(w_matrix)
+        self.assertEquals([1,1,0,-1,1,0,0,0,1], w_matrix, "W-matrix should have been set, but should be an identity matrix")
         
     def test_orthogonal_slice_with_cropping(self):
          # We create a fake workspace and check to see that using bin inputs for cropping works

@@ -263,7 +263,6 @@ class CutMD(DataProcessorAlgorithm):
         
         projection_labels = self.__make_labels(projection)
         
-        
         '''
         Actually perform the binning operation
         '''
@@ -290,9 +289,15 @@ class CutMD(DataProcessorAlgorithm):
          
         cut_alg.execute()
         
-        # TODO. The projection matrix should be written to the output workspace at this point.
-    
         slice = cut_alg.getProperty("OutputWorkspace").value
+        
+         # Attach the w-matrix (projection matrix)
+        if slice.getNumExperimentInfo() > 0:
+            u, v, w = projection
+            w_matrix = np.array([u, v, w]).flatten().tolist()
+            info = slice.getExperimentInfo(0)
+            info.run().addProperty("W_MATRIX", w_matrix, True)
+            
         self.setProperty("OutputWorkspace", slice)
         
 AlgorithmFactory.subscribe(CutMD)
