@@ -349,7 +349,7 @@ public:
     std::string processingInstructions = findPropertyValue<std::string>(vecPropertyHistories,
         "ProcessingInstructions");
     std::vector<std::string> pointDetectorStartStop;
-    boost::split(pointDetectorStartStop, processingInstructions, boost::is_any_of("-"));
+    boost::split(pointDetectorStartStop, processingInstructions, boost::is_any_of(":"));
 
     TS_ASSERT_EQUALS(inst->getNumberParameter("LambdaMin")[0], wavelengthMin);
     TS_ASSERT_EQUALS(inst->getNumberParameter("LambdaMax")[0], wavelengthMax);
