@@ -972,7 +972,28 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
             ws = ConvertToWavelength.to_workspace(loadedRun, ws_prefix="")
 
-            wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ', OutputWorkspaceWavelength=runno+'_IvsLam',)
+            #If we're dealing with a workspace group, we'll manually map execution over each group member
+            #We do this so we can get ThetaOut correctly (see ticket #10597 for why we can't at the moment)
+            if isinstance(ws, WorkspaceGroup):
+                wqGroup = []
+                wlamGroup = []
+                thetaGroup = []
+
+                group_trans_ws = transmission_ws
+                for i in range(0, ws.size()):
+                    #If the transmission workspace is a group, we'll use it pair-wise with the tof workspace group
+                    if isinstance(transmission_ws, WorkspaceGroup):
+                        group_trans_ws = transmission_ws[i]
+                    wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ_'+str(i+1), OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),)
+                    wqGroup.append(wq)
+                    wlamGroup.append(wlam)
+                    thetaGroup.append(th)
+
+                wq = GroupWorkspaces(InputWorkspaces=wqGroup, OutputWorkspace=runno+'_IvsQ')
+                wlam = GroupWorkspaces(InputWorkspaces=wlamGroup, OutputWorkspace=runno+'_IvsLam')
+                th = thetaGroup[0]
+            else:
+                wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ', OutputWorkspaceWavelength=runno+'_IvsLam',)
 
             cleanup()
         else:
