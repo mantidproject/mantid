@@ -5,6 +5,7 @@
 #include "MantidAlgorithms/PhaseQuadMuon.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/FrameworkManager.h"
 
 namespace Mantid
 {
@@ -29,12 +30,6 @@ void PhaseQuadMuon::init()
   declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "", Direction::Output), 
     "Name of the output workspace" );
 
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace1","", Direction::Output), 
-    "Name of the output workspace" );
-
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace2","", Direction::Output), 
-    "Name of the output workspace" );
-
   declareProperty(new API::FileProperty("PhaseTable", "", API::FileProperty::Load, ".INF"),
     "The name of the list of phases for each spectrum");
 }
@@ -44,8 +39,6 @@ void PhaseQuadMuon::init()
  */
 void PhaseQuadMuon::exec()
 {
-	// TODO
-
 	// Get input workspace
   API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
 
@@ -53,51 +46,46 @@ void PhaseQuadMuon::exec()
   std::string filename = getPropertyValue("PhaseTable");
   loadPhaseTable ( filename );
 
+  // Set number of data points per histogram
   m_nData = inputWs->getSpectrum(0)->readY().size();
-  m_nHist = inputWs->getNumberHistograms();
+
+  // Check number of histograms in inputWs match number of detectors in phase table
+  if (m_nHist != inputWs->getNumberHistograms())
+  {
+    throw std::runtime_error("PhaseQuad: Number of histograms in phase table does not match number of spectra in workspace");
+  }
 
   // Create temporary workspace to perform operations on it
-  API::MatrixWorkspace_sptr tempWs1 = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-    API::WorkspaceFactory::Instance().create("Workspace2D", inputWs->getNumberHistograms(), inputWs->getSpectrum(0)->readX().size(), inputWs->getSpectrum(0)->readY().size()));
-  // Create temporary workspace to perform operations on it
-  API::MatrixWorkspace_sptr tempWs2 = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-    API::WorkspaceFactory::Instance().create("Workspace2D", inputWs->getNumberHistograms(), inputWs->getSpectrum(0)->readX().size(), inputWs->getSpectrum(0)->readY().size()));
+  API::MatrixWorkspace_sptr tempWs = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+    API::WorkspaceFactory::Instance().create("Workspace2D", m_nHist, m_nData+1, m_nData));
 
-  // Create output workspace with two spectra
+  // Create output workspace with two spectra (squashograms)
   API::MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
   outputWs = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-    API::WorkspaceFactory::Instance().create("Workspace2D", 2, inputWs->getSpectrum(0)->readX().size(), inputWs->getSpectrum(0)->readY().size()));
+    API::WorkspaceFactory::Instance().create("Workspace2D", 2, m_nData+1, m_nData));
   outputWs->getAxis(0)->unit() = inputWs->getAxis(0)->unit();
 
+  // Rescale detector efficiency to maximum value
   normaliseAlphas(m_histData);
-  removeExponentialDecay(inputWs,tempWs1);
-  loseExponentialDecay(inputWs,tempWs2);
-  squash (tempWs2, outputWs);
+  // Remove exponential decay and save results into tempWs
+  loseExponentialDecay(inputWs,tempWs);
+  // Compute squashograms
+  squash (tempWs, outputWs);
+  // Regain exponential decay
+  regainExponential(outputWs);
   
-  setProperty("OutputWorkspace", outputWs); // TODO: change this
-  setProperty("OutputWorkspace1", tempWs1); // TODO: change this
-  setProperty("OutputWorkspace2", tempWs2); // TODO: change this
-}
+  setProperty("OutputWorkspace", outputWs);
+  //setProperty("OutputWorkspace1", tempWs1); // TODO: change this
+  //setProperty("OutputWorkspace2", tempWs2); // TODO: change this
+  // TODO remove temporary workspace tempWs
+  //Mantid::API::FrameworkManager::Instance().deleteWorkspace(tempWs);
 
-void PhaseQuadMuon::normaliseAlphas (std::vector<HistData>& histData)
-{
-  double max=0;
-  for (size_t h=0; h<m_nHist; h++)
-  {
-    if (histData[h].alpha>max)
-    {
-      max = histData[h].alpha;
-    }
-  }
-  for (size_t h=0; h<m_nHist; h++)
-  {
-    histData[h].alpha /= max;
-  }
+
 }
 
 //----------------------------------------------------------------------------------------------
 /** Load PhaseTable file to a vector of HistData.
-* @param filename :: phase table .inf filename
+* @param filename :: [input] phase table .inf filename
 */
 void PhaseQuadMuon::loadPhaseTable(const std::string& filename )
 {
@@ -132,24 +120,25 @@ void PhaseQuadMuon::loadPhaseTable(const std::string& filename )
       // Read first useful line
       input >> m_nHist >> m_tValid >> m_tNoPulse >> m_meanLag;
 
+      // Read histogram data
       int cont=0;
-      while( !input.eof() )
+      HistData tempData;
+      while( input >> tempData.detOK >> tempData.alpha >> tempData.phi >> tempData.lag >> tempData.dead >> tempData.deadm )
       {
-        // Read histogram data
-        HistData tempData;
-        input >> tempData.n0 >> tempData.alpha >> tempData.phi >> tempData.lag >> tempData.dead >> tempData.deadm;
         m_histData.push_back (tempData);
         cont++;
       }
 
-      if ( cont!= m_nHist )
+      if ( cont != m_nHist )
       {
-        throw Exception::FileError("PhaseQuad: File was not in expected format", filename); // TODO: specify that number of lines is wrong
-      }
-
-      if ( cont<3 )
-      {
-        throw std::runtime_error("PhaseQuad: Found less than 4 histograms");
+        if ( cont < m_nHist )
+        {
+          throw Exception::FileError("PhaseQuad: Lines missing in phase table ", filename);
+        }
+        else
+        {
+          throw Exception::FileError("PhaseQuad: Extra lines in phase table ", filename);
+        }
       }
 
     }
@@ -162,6 +151,31 @@ void PhaseQuadMuon::loadPhaseTable(const std::string& filename )
 
 }
 
+//----------------------------------------------------------------------------------------------
+/** Rescale detector efficiencies to maximum value.
+* @param histData :: vector of HistData containing detector efficiencies
+*/
+void PhaseQuadMuon::normaliseAlphas (std::vector<HistData>& histData)
+{
+  double max=0;
+  for (size_t h=0; h<m_nHist; h++)
+  {
+    if (histData[h].alpha>max)
+    {
+      max = histData[h].alpha;
+    }
+  }
+  if ( !max )
+  {
+    throw std::runtime_error("PhaseQuad: Could not rescale efficiencies");
+  }
+
+  for (size_t h=0; h<m_nHist; h++)
+  {
+    histData[h].alpha /= max;
+  }
+}
+
 
 //----------------------------------------------------------------------------------------------
 /** Remove exponential decay from input histograms, i.e., calculate asymmetry
@@ -170,49 +184,38 @@ void PhaseQuadMuon::loadPhaseTable(const std::string& filename )
 */
 void PhaseQuadMuon::removeExponentialDecay (API::MatrixWorkspace_sptr inputWs, API::MatrixWorkspace_sptr outputWs)
 {
+  // Muon decay: N(t) = N0 exp(-t/tau) [ 1 + a P(t) ]
+  // N(t) - N0 exp(-t/tau) = 1 + a P(t)
+  // Int N(t) dt = N0 Int exp(-t/tau) dt
 
-  if ( m_nHist != inputWs->getNumberHistograms() )
+  for (size_t h=0; h<inputWs->getNumberHistograms(); h++)
   {
-    throw std::runtime_error("InputWorkspace and PhaseTable do not have the same number of spectra");
-  }
-  else
-  {
+    auto specIn = inputWs->getSpectrum(h);
+    auto specOut = outputWs->getSpectrum(h);
 
-    // Muon decay: N(t) = N0 exp(-t/tau) [ 1 + a P(t) ]
-    // N(t) - N0 exp(-t/tau) = 1 + a P(t)
-    // N0?
-    // Int N(t) dt = N0 Int exp(-t/tau) dt
+    specOut->dataX()=specIn->readX();
 
-    for (size_t h=0; h<inputWs->getNumberHistograms(); h++)
+    double sum1, sum2;
+    sum1=sum2=0;
+    for(int i=0; i<m_nData; i++)
     {
-      auto specIn = inputWs->getSpectrum(h);
-      auto specOut = outputWs->getSpectrum(h);
-
-      specOut->dataX()=specIn->readX();
-
-      double sum1, sum2;
-      sum1=sum2=0;
-      for(int i=0; i<m_nData; i++)
+      if ( specIn->readX()[i]>=0 )
       {
-        if ( specIn->readX()[i]>=0 )
-        {
-          sum1 += specIn->dataY()[i];
-          sum2 += exp( -((specIn->dataX()[i+1]-specIn->dataX()[i])*0.5+specIn->dataX()[i])/m_muLife);
-        }
+        sum1 += specIn->dataY()[i];
+        sum2 += exp( -((specIn->dataX()[i+1]-specIn->dataX()[i])*0.5+specIn->dataX()[i])/m_muLife);
       }
-      double N0 = sum1/sum2;
+    }
+    double N0 = sum1/sum2;
 
-      for (int i=0; i<m_nData; i++)
+    for (int i=0; i<m_nData; i++)
+    {
+      if ( specIn->readX()[i]>=0 )
       {
-        if ( specIn->readX()[i]>=0 )
-        {
-          specOut->dataY()[i] = specIn->dataY()[i] - N0*exp(-((specIn->dataX()[i+1]-specIn->dataX()[i])*0.5+specIn->dataX()[i])/m_muLife);
-          specOut->dataE()[i] = ( specIn->readY()[i] > m_poissonLim) ? specIn->readE()[i] : sqrt(N0*exp(-specIn->readX()[i]/m_muLife));
-        }
+        specOut->dataY()[i] = specIn->dataY()[i] - N0*exp(-((specIn->dataX()[i+1]-specIn->dataX()[i])*0.5+specIn->dataX()[i])/m_muLife);
+        specOut->dataE()[i] = ( specIn->readY()[i] > m_poissonLim) ? specIn->readE()[i] : sqrt(N0*exp(-specIn->readX()[i]/m_muLife));
       }
-    } // Histogram loop
-
-  }// else
+    }
+  } // Histogram loop
 
 }
 
@@ -223,62 +226,57 @@ void PhaseQuadMuon::removeExponentialDecay (API::MatrixWorkspace_sptr inputWs, A
 */
 void PhaseQuadMuon::loseExponentialDecay (API::MatrixWorkspace_sptr inputWs, API::MatrixWorkspace_sptr outputWs)
 {
-
-  if ( m_nHist != inputWs->getNumberHistograms() )
+  for (size_t h=0; h<inputWs->getNumberHistograms(); h++)
   {
-    throw std::runtime_error("InputWorkspace and PhaseTable do not have the same number of spectra");
-  }
-  else
-  {
+    auto specIn = inputWs->getSpectrum(h);
+    auto specOut = outputWs->getSpectrum(h);
 
-    for (size_t h=0; h<inputWs->getNumberHistograms(); h++)
+    specOut->dataX()=specIn->readX();
+
+    for(int i=0; i<m_nData; i++)
     {
-      auto specIn = inputWs->getSpectrum(h);
-      auto specOut = outputWs->getSpectrum(h);
-
-      specOut->dataX()=specIn->readX();
-
-      for(int i=0; i<m_nData; i++)
+      if ( specIn->readX()[i]>=0 )
       {
-        if ( specIn->readX()[i]>=0 )
-        {
-          double usey = specIn->readY()[i];
-          double oops = ( (usey<=0) || (specIn->readE()[i]>=m_bigNumber));
-          specOut->dataY()[i] = oops ? 0 : log(usey);
-          specOut->dataE()[i] = oops ? m_bigNumber : specIn->readE()[i]/usey;
-        }
+        double usey = specIn->readY()[i];
+        double oops = ( (usey<=0) || (specIn->readE()[i]>=m_bigNumber));
+        specOut->dataY()[i] = oops ? 0 : log(usey);
+        specOut->dataE()[i] = oops ? m_bigNumber : specIn->readE()[i]/usey;
       }
+    }
 
-      double s, sx, sy, sig;
-      s = sx = sy =0;
-      for (int i=0; i<m_nData; i++)
+    double s, sx, sy, sig;
+    s = sx = sy =0;
+    for (int i=0; i<m_nData; i++)
+    {
+      if ( specIn->readX()[i]>=0 )
       {
-        if ( specIn->readX()[i]>=0 )
-        {
-          sig = specOut->readE()[i]*specOut->readE()[i];
-          s += 1./sig;
-          sx+= specOut->readX()[i]/sig;
-          sy+= specOut->readY()[i]/sig;
-        }
+        sig = specOut->readE()[i]*specOut->readE()[i];
+        s += 1./sig;
+        sx+= specOut->readX()[i]/sig;
+        sy+= specOut->readY()[i]/sig;
       }
-      double N0 = (sy+sx/m_muLife)/s;
-      N0=exp(N0);
+    }
+    double N0 = (sy+sx/m_muLife)/s;
+    N0=exp(N0);
 
-      for (int i=0; i<m_nData; i++)
+    for (int i=0; i<m_nData; i++)
+    {
+      if ( specIn->readX()[i]>=0 )
       {
-        if ( specIn->readX()[i]>=0 )
-        {
-          specOut->dataY()[i] = specIn->dataY()[i] - N0 *exp(-specIn->readX()[i]/m_muLife);
-          specOut->dataE()[i] = ( specIn->readY()[i] > m_poissonLim) ? specIn->readE()[i] : sqrt(N0*exp(-specIn->readX()[i]/m_muLife));
-        }
+        specOut->dataY()[i] = specIn->dataY()[i] - N0 *exp(-specIn->readX()[i]/m_muLife);
+        specOut->dataE()[i] = ( specIn->readY()[i] > m_poissonLim) ? specIn->readE()[i] : sqrt(N0*exp(-specIn->readX()[i]/m_muLife));
       }
-    } // Histogram loop
-
-  }// else
+    }
+  } // Histogram loop
 
 }
 
 
+//----------------------------------------------------------------------------------------------
+/** Compute Squashograms
+* @param tempWs :: input workspace containing the asymmetry in the lab frame
+* @param outputWs :: output workspace to hold squashograms
+*/
 void PhaseQuadMuon::squash(API::MatrixWorkspace_sptr tempWs, API::MatrixWorkspace_sptr outputWs)
 {
 
@@ -286,11 +284,11 @@ void PhaseQuadMuon::squash(API::MatrixWorkspace_sptr tempWs, API::MatrixWorkspac
   double syy=0;
   double sxy=0;
 
-  for (size_t h=0; h<tempWs->getNumberHistograms(); h++)
+  for (size_t h=0; h<m_nHist; h++)
   {
     auto data = m_histData[h];
-    double X = data.n0 * data.alpha * cos(data.phi);
-    double Y = data.n0 * data.alpha * sin(data.phi);
+    double X = data.detOK * data.alpha * cos(data.phi);
+    double Y = data.detOK * data.alpha * sin(data.phi);
     sxx += X*X;
     syy += Y*Y;
     sxy += X*Y;
@@ -305,8 +303,8 @@ void PhaseQuadMuon::squash(API::MatrixWorkspace_sptr tempWs, API::MatrixWorkspac
   for (size_t h=0; h<m_nHist; h++)
   {
     auto data = m_histData[h];
-    double X = data.n0 * data.alpha * cos(data.phi);
-    double Y = data.n0 * data.alpha * sin(data.phi);
+    double X = data.detOK * data.alpha * cos(data.phi);
+    double Y = data.detOK * data.alpha * sin(data.phi);
     aj.push_back( (lam1 * X + mu1 * Y)*0.5 );
     bj.push_back( (lam2 * X + mu2 * Y)*0.5 );
   }
@@ -327,17 +325,6 @@ void PhaseQuadMuon::squash(API::MatrixWorkspace_sptr tempWs, API::MatrixWorkspac
     sigm2[i] = sqrt(sigm2[i]);
   }
 
-  for (size_t i=0; i<m_nData; i++)
-  {
-    double x = tempWs->getSpectrum(0)->readX()[i];
-    double xp= tempWs->getSpectrum(0)->readX()[i+1];
-    double e = exp(-( (xp-x)*0.5+x )/m_muLife);
-    data1[i] /= e;
-    data2[i] /= e;
-    sigm1[i] /= e;
-    sigm2[i] /= e;
-  }
-
   outputWs->getSpectrum(0)->dataX() = tempWs->getSpectrum(0)->readX();
   outputWs->getSpectrum(0)->dataY() = data1;
   outputWs->getSpectrum(0)->dataE() = sigm1;
@@ -347,6 +334,27 @@ void PhaseQuadMuon::squash(API::MatrixWorkspace_sptr tempWs, API::MatrixWorkspac
 
 }
 
+
+//----------------------------------------------------------------------------------------------
+/** Put back in exponential decay
+* @param outputWs :: output workspace with squashograms to update
+*/
+void PhaseQuadMuon::regainExponential(API::MatrixWorkspace_sptr outputWs)
+{
+  auto specRe = outputWs->getSpectrum(0);
+  auto specIm = outputWs->getSpectrum(1);
+
+  for (size_t i=0; i<m_nData; i++)
+  {
+    double x = outputWs->getSpectrum(0)->readX()[i];
+    double xp= outputWs->getSpectrum(0)->readX()[i+1];
+    double e = exp(-( (xp-x)*0.5+x )/m_muLife);
+    specRe->dataY()[i] /= e;
+    specIm->dataY()[i] /= e;
+    specRe->dataE()[i] /= e;
+    specIm->dataE()[i] /= e;
+  }
+}
 
 }
 }

@@ -45,7 +45,7 @@ namespace Mantid
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "PhaseQuad";}
       ///Summary of algorithms purpose
-      virtual const std::string summary() const {return "Calculate Muon spectra from PhaseTable.";}
+      virtual const std::string summary() const {return "Calculate Muon squashograms from inputWorkspace and PhaseTable.";}
 
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
@@ -56,13 +56,13 @@ namespace Mantid
 
       class HistData { // TODO: do I need all the members?
       public:
-        double n0;    // 
-        double alpha; // Efective asymmetry
-        double phi;   // Phase
-        double lag;   // Time-shift
-        double dead;  // 
-        double deadm; //
-        double chisq; // Of silver fit
+        bool detOK;   // Detector is OK
+        double alpha; // Detector efficiency
+        double phi;   // Detector phase
+        double lag;   // Detector time-shift
+        double dead;  // Dead TODO remove if not used
+        double deadm; // Dead TODO remove if not used
+        double chisq; // Of silver fit TODO remove if not used
       };
 
       /// Initialise the properties
@@ -71,7 +71,7 @@ namespace Mantid
       void exec();
       /// Load the PhaseTable
       void loadPhaseTable(const std::string& filename);
-      /// TODO
+      /// Rescale detector efficiency to maximum value
       void normaliseAlphas (std::vector<HistData>& m_histData);
       /// Remove exponential decay from input histograms
       void removeExponentialDecay (API::MatrixWorkspace_sptr inputWs, API::MatrixWorkspace_sptr outputWs);
@@ -79,31 +79,33 @@ namespace Mantid
       void loseExponentialDecay (API::MatrixWorkspace_sptr inputWs, API::MatrixWorkspace_sptr outputWs);
       /// Create squashograms
       void squash(API::MatrixWorkspace_sptr tempWs, API::MatrixWorkspace_sptr outputWs);
+      /// Put back in exponential decay
+      void regainExponential(API::MatrixWorkspace_sptr outputWs);
       /// Number of input histograms
       size_t m_nHist;
       /// Number of datapoints per histogram
       size_t m_nData;
-      /// TODO
+      /// TODO: remove if not necessary
       double m_res;
-      /// Mean of time-shifts
+      /// Mean of time-shifts TODO: remove if not necessary
       double m_meanLag;
-      /// Good muons from here on (bin no)
+      /// Good muons from here on (bin no) TODO: remove if not necessary
       size_t m_tValid;
-      /// Pulse definitely finished by here (bin no)
+      /// Pulse definitely finished by here (bin no) TODO: remove if not necessary
       size_t m_tNoPulse;
-      /// Double-pulse flag
+      /// Double-pulse flag TODO: remove if not necessary
       bool m_isDouble;
-      /// Muon decay curve
+      /// Muon decay curve TODO: remove if not necessary
       double m_tau;
-      /// Freq (of silver run)
+      /// Freq (of silver run) TODO: remove if not necessary
       double m_w;
       /// Muon lifetime
       double m_muLife;
-      /// Poisson limit
+      /// Poisson limit TODO: remove if not necessary
       double m_poissonLim;
-      /// TODO
+      /// Maximum counts expected
       double m_bigNumber;
-      /// Vector of histograms data
+      /// Vector of detector data
       std::vector<HistData> m_histData;
     };
 

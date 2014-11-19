@@ -14,7 +14,6 @@ set ( SRC_FILES
 	src/AppendSpectra.cpp
 	src/ApplyCalibration.cpp
 	src/ApplyDeadTimeCorr.cpp
-	src/PhaseQuadMuon.cpp
 	src/ApplyDetailedBalance.cpp
 	src/ApplyTransmissionCorrection.cpp
 	src/AsymmetryCalc.cpp
@@ -161,6 +160,7 @@ set ( SRC_FILES
 	src/PDFFourierTransform.cpp
 	src/Pause.cpp
 	src/PerformIndexOperations.cpp
+	src/PhaseQuadMuon.cpp
 	src/PlotAsymmetryByLogValue.cpp
 	src/Plus.cpp
 	src/PointByPointVCorrection.cpp
@@ -263,7 +263,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AppendSpectra.h
 	inc/MantidAlgorithms/ApplyCalibration.h
 	inc/MantidAlgorithms/ApplyDeadTimeCorr.h
-	inc/MantidAlgorithms/PhaseQuadMuon.h
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
 	inc/MantidAlgorithms/AsymmetryCalc.h
@@ -411,6 +410,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PDFFourierTransform.h
 	inc/MantidAlgorithms/Pause.h
 	inc/MantidAlgorithms/PerformIndexOperations.h
+	inc/MantidAlgorithms/PhaseQuadMuon.h
 	inc/MantidAlgorithms/PlotAsymmetryByLogValue.h
 	inc/MantidAlgorithms/Plus.h
 	inc/MantidAlgorithms/PointByPointVCorrection.h
@@ -658,6 +658,7 @@ set ( TEST_FILES
 	PDFFourierTransformTest.h
 	PauseTest.h
 	PerformIndexOperationsTest.h
+  PhaseQuadMuonTest.h
 	PlotAsymmetryByLogValueTest.h
 	PlusTest.h
 	PointByPointVCorrectionTest.h
