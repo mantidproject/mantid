@@ -45,7 +45,7 @@ namespace Mantid
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "PhaseQuad";}
       ///Summary of algorithms purpose
-      virtual const std::string summary() const {return "Calculate Muon squashograms from inputWorkspace and PhaseTable.";}
+      virtual const std::string summary() const {return "Calculate Muon squashograms from InputWorkspace and PhaseTable.";}
 
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}

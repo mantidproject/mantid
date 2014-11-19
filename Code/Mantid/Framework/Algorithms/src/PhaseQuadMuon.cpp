@@ -25,13 +25,13 @@ void PhaseQuadMuon::init()
 {
 
   declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "", Direction::Input), 
-    "Name of the input workspace");
+    "Name of the input workspace containing the spectra");
 
   declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "", Direction::Output), 
-    "Name of the output workspace" );
+    "Name of the output workspace to hold squashograms" );
 
   declareProperty(new API::FileProperty("PhaseTable", "", API::FileProperty::Load, ".INF"),
-    "The name of the list of phases for each spectrum");
+    "A space-delimited text file with a six-row header");
 }
 
 /** Executes the algorithm
