@@ -14,7 +14,7 @@ using namespace Mantid::API;
 
 namespace
 {
-  enum WorkspaceType { Tof, Weighted, WeightedNoTime, Histogram, HistogramNonUniform, Distribution, PointData, PointDataNonUniform };
+  enum WorkspaceType { Tof, /*Weighted,*/ WeightedNoTime, Histogram, HistogramNonUniform, Distribution, PointData, PointDataNonUniform };
 
   struct TestingFunction
   {
@@ -24,7 +24,7 @@ namespace
     TestingFunction(const MatrixWorkspace& ws, WorkspaceType t):
       workspace(ws),
       type(t),
-      dx((ws.getXMax()-ws.getXMin())/ws.blocksize())
+      dx((ws.getXMax()-ws.getXMin())/ static_cast<double>(ws.blocksize()))
     {}
     double operator()(double x) const
     {
