@@ -76,14 +76,15 @@ public:
     testWS->setYUnitLabel("Counts");
 
     std::string expected = \
-        "WorkspaceTester\n"
-        "Title: A test run\n"
-        "Histograms: 1\n"
-        "Bins: 1\n"
-        "Histogram\n"
-        "X axis: Time-of-flight / microsecond\n"
-        "Y axis: Counts\n"
-        "Instrument:  (1990-Jan-01 to 1990-Jan-01)\n";
+      "WorkspaceTester\n"
+      "Title: A test run\n"
+      "Histograms: 1\n"
+      "Bins: 1\n"
+      "Histogram\n"
+      "X axis: Time-of-flight / microsecond\n"
+      "Y axis: Counts\n"
+      "Distribution: False\n"
+      "Instrument:  (1990-Jan-01 to 1990-Jan-01)\n";
 
     TS_ASSERT_EQUALS(expected, testWS->toString());
   }
