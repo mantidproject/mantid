@@ -16,49 +16,51 @@ This interface also strives to be transparent, making it clear how your
 data is being processed, and easy to adjust any of the options used.
 
 Integration with data archives is also provided, allowing for data to
-be located and prepared in the processing table automatically.
+be located and prepared for reduction automatically.
+
+Information on how to resolve common problems can be found in the
+`Troubleshooting`_ section of this document.
 
 Example Workflow
 ----------------
 
-To follow this example you will need to ISIS reflectometry example materials:
+To follow this example you will need the ISIS reflectometry example materials:
 
 * ``INTER_NR_test2.tbl``
 * ``INTER00013460.nxs``
 * ``INTER00013462.nxs``
 * ``INTER00013463.nxs``
 * ``INTER00013464.nxs``
-* ``INTER00013469.nxs``
-* ``INTER00013470.nxs``
 
 These can be downloaded as part of the `ISIS example data <http://download.mantidproject.org/>`_.
 
 Once they are downloaded, place the nxs files in one of Mantid's user directories.
-(To see a list of directories, click on *File -> Manager User Directories*)
-The tbl file can be left anywhere you like, as long as you know where it is.
+To see a list of directories, click on **File -> Manage User Directories**.
+``INTER_NR_test2.tbl`` can be saved anywhere you like, as long as you know where it is.
 
-You can then open MantidPlot, and open the ISIS Reflectometry (Polref) interface.
-(*Interfaces -> Reflectometry -> ISIS Reflectometry (Polref)*)
+Open MantidPlot, and open the ISIS Reflectometry (Polref) interface.
+**Interfaces -> Reflectometry -> ISIS Reflectometry (Polref)**
 
 Within the interface, we first want to import the tbl file as a TableWorkspace.
-To do this, go to *Reflectometry -> Import .TBL*. A :ref:`LoadReflTBL <algm-LoadReflTBL>`
+To do this, click on **Reflectometry -> Import .TBL**. A :ref:`LoadReflTBL <algm-LoadReflTBL>`
 dialog will open. Select ``INTER_NR_test2.tbl`` as the file, and enter ``MyTable``
 as the output workspace.
 
 A table workspace called ``MyTable`` should now exist in the ADS (:ref:`Analysis Data Service <Analysis Data Service>`).
-To open the table workspace go to *Reflectometry -> Open Table -> MyTable*.
+To open the table workspace go to **Reflectometry -> Open Table -> MyTable**.
 The processing table (shown below) should now contain four rows (13460, 13462, 13469, 13470).
 
 .. interface:: ISIS Reflectometry (Polref)
   :widget: viewTable
 
-We want to process the first two rows, which are in group 1. The simplest way to do this is
-simply to select the two rows we want to process, and then press *Process*.
+Let's process the first group, which consists of the first two rows of the
+table (13460 and 13462). The simplest way to do this is simply to select the
+two rows we want to process, and then click on **Process**.
 
 .. tip::
   If you receive an error, consult the `Troubleshooting`_ section of this document for guidance on fixing it.
 
-If the processing was successful, you should now have ten more workspaces in the ADS.
+You should now have eleven workspaces in the ADS.
 
 Amongst them should be:
 
@@ -94,43 +96,12 @@ start a new table, open an existing table from a :ref:`workspace <Workspace>`,
 or save your current table to a :ref:`workspace <Workspace>`.
 
 You are also able to import or export .TBL files from disk using the
-*Import .TBL* and *Export .TBL* options. These options will run the
+**Import .TBL** and **Export .TBL** options. These options will run the
 :ref:`LoadReflTBL <algm-LoadReflTBL>` and :ref:`SaveReflTBL <algm-SaveReflTBL>`
 algorithms as appropriate.
 
 The menu bar also provides access to the options menu, and many actions
 pertaining to the processing table.
-
-Search Interface
-~~~~~~~~~~~~~~~~
-
-.. interface:: ISIS Reflectometry (Polref)
-  :widget: groupSearchPane
-  :align: right
-
-To search for runs, select the instrument the runs are from, enter the id of
-the investigation the runs are part of, and hit *Search*.
-
-In the table below, valid runs and their descriptions will be listed. You
-can then transfer runs to the processing table by selecting the runs you
-wish to transfer, and hit the *Transfer* button. You can also right-click
-on one of the selected runs and select *Transfer* in the context menu that
-appears.
-
-If a run's description contains the text ``in 0.7 theta``, or ``th=0.7``, or
-``th:0.7``, then the interface will deduce that the run's angle (also known
-as theta), was ``0.7``, and enter this value into the angle column for you.
-This holds true for any numeric value.
-
-When multiple runs are selected and transferred simultaneously, the interface
-will attempt to organise them appropriately in the processing table. The exact
-behaviour of this is as follows:
-
-- Any runs with the same description, excluding their theta value, will be
-  placed into the same group.
-- Any runs with the same description, including their theta value, will be
-  merged into a single row, with all the runs listed in the *Run(s)* column
-  in the format, ``123+124+125``.
 
 Processing Table
 ~~~~~~~~~~~~~~~~
@@ -139,15 +110,22 @@ Processing Table
   :widget: groupProcessPane
 
 The processing table is where the bulk of the work takes place. It is used to
-specify which runs to process, the parameters that should be used to process
+specify which runs to process, the properties that should be used to process
 them, and how the different runs should be joined together.
 
-Above the processing table is a tool bar providing a number of useful actions.
+Each row represents a single reduction (i.e. execution of
+:ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`).
+Rows may be grouped together by setting their **Group** column to the same
+value. Rows that are grouped together will have their output stitched
+together using :ref:`Stitch1D <algm-Stitch1D>`.
 
-Below the table is a progress bar, showing the current progress of any
-processing that is taking place, and a processing instrument selector.
-The processing instrument is used by the interface to help load the correct
-files from disk when processing.
+Above the processing table is a tool bar containing various actions for
+manipulating the processing table.
+
+Below the table is a progress bar, which shows the current progress of any
+processing that is in progress. And at the bottom right, by the **Process**
+button is the processing instrument selector. The processing instrument is
+used to help identify the correct data to load when processing runs.
 
 Actions
 ~~~~~~~
@@ -192,7 +170,7 @@ This table details the behaviour of the actions in the tool bar, from left to ri
 +------------------+----------------------------------------------------------+
 | Help             | Opens this documentation for viewing.                    |
 +------------------+----------------------------------------------------------+
-| Whats This       | Provides guidance on what various parts of the interface |
+| What's This      | Provides guidance on what various parts of the interface |
 |                  | are for.                                                 |
 +------------------+----------------------------------------------------------+
 
@@ -204,7 +182,7 @@ Columns
 +---------------------+-----------+-----------------------------------------------+
 | Column Title        | Required? |  Description                                  |
 +=====================+===========+===============================================+
-| Run(s)              | Yes       | Contains the sample runs to be processed.     |
+| Run(s)              | **Yes**   | Contains the sample runs to be processed.     |
 |                     |           | Runs may be given as run numbers or workspace |
 |                     |           | names. Multiple runs may be added together by |
 |                     |           | separating them with a '+'.                   |
@@ -213,7 +191,7 @@ Columns
 +---------------------+-----------+-----------------------------------------------+
 | Angle               | No        | Contains the angle used during the run, in    |
 |                     |           | degrees. If left blank, this is set to the    |
-|                     |           | last value for 'THETA' in the run's sample    |
+|                     |           | last value for ``THETA`` in the run's sample  |
 |                     |           | log. If multiple runs were given in the Run(s)|
 |                     |           | column, the first listed run's sample log will|
 |                     |           | be used.                                      |
@@ -251,22 +229,25 @@ Columns
 |                     |           |                                               |
 |                     |           | Example: ``0.9``                              |
 +---------------------+-----------+-----------------------------------------------+
-| Scale               | Yes       | Contains the factor used to scale output      |
+| Scale               | **Yes**   | Contains the factor used to scale output      |
 |                     |           | IvsQ workspaces. The IvsQ workspaces are      |
 |                     |           | scaled by ``1/i`` where i is the value of     |
 |                     |           | this column.                                  |
 |                     |           |                                               |
 |                     |           | Example: ``1.0``                              |
 +---------------------+-----------+-----------------------------------------------+
-| Group               | Yes       | Contains the group number used for stitching  |
+| Group               | **Yes**   | Contains the group number used for stitching  |
 |                     |           | output workspaces. The value of this column   |
 |                     |           | determines which other rows this row's output |
 |                     |           | will be stitched with. All rows with the same |
 |                     |           | group number are stitched together.           |
 +---------------------+-----------+-----------------------------------------------+
 | Options             | No        | Contains options that allow you to override   |
-|                     |           | ReflectometryReductionOne's properties.       |
-|                     |           | Options are given as ``key=value`` pairs,     |
+|                     |           | ReflectometryReductionOne's properties. To    |
+|                     |           | override a property, just use the property's  |
+|                     |           | name as a key, and the desired value as the   |
+|                     |           | value.                                        |
+|                     |           | Options are specified in ``key=value`` pairs, |
 |                     |           | separated by commas. Values containing commas |
 |                     |           | must be quoted.                               |
 |                     |           |                                               |
@@ -274,23 +255,55 @@ Columns
 |                     |           | ``RegionOfDirectBeam="0,2", Params="1,2,3"``  |
 +---------------------+-----------+-----------------------------------------------+
 
+Search Interface
+~~~~~~~~~~~~~~~~
+
+.. interface:: ISIS Reflectometry (Polref)
+  :widget: groupSearchPane
+  :align: right
+
+To search for runs, select the instrument the runs are from, enter the id of
+the investigation the runs are part of, and click on **Search**.
+
+In the table below, valid runs and their descriptions will be listed. You
+can then transfer runs to the processing table by selecting the runs you
+wish to transfer, and click the **Transfer** button. You can also right-click
+on one of the selected runs and select *Transfer* in the context menu that
+appears.
+
+If a run's description contains the text ``in 0.7 theta``, or ``th=0.7``, or
+``th:0.7``, then the interface will deduce that the run's angle (also known
+as theta), was ``0.7``, and enter this value into the angle column for you.
+This holds true for any numeric value.
+
+When multiple runs are selected and transferred simultaneously, the interface
+will attempt to organise them appropriately in the processing table. The exact
+behaviour of this is as follows:
+
+- Any runs with the same description, excluding their theta value, will be
+  placed into the same group.
+- Any runs with the same description, including their theta value, will be
+  merged into a single row, with all the runs listed in the **Run(s)** column
+  in the format, ``123+124+125``.
+
 Options
 ~~~~~~~
 
 Through the options menu, a small number of options may be configured to adjust
 the behaviour of the interface.
 
+To open the options menu, click on **Reflectometry -> Options**.
 
 +-------------------------------+------------------------------------------------------+
 | Name                          | Description                                          |
 +===============================+======================================================+
-| Warn when processing all rows | When the *Process* button is pressed with no rows    |
+| Warn when processing all rows | When the **Process** button is pressed with no rows  |
 |                               | selected, all rows will be processed.                |
 |                               | If this is enabled, you will be asked if you're sure |
 |                               | you want to process all rows first.                  |
 +-------------------------------+------------------------------------------------------+
-| Warn when processing only     | If this is enabled and you press *Process* with only |
-| part of a group               | a subset of a group's rows selected, you will be     |
+| Warn when processing only     | If this is enabled and you press **Process** with    |
+| part of a group               | only a subset of a group's rows selected, you will be|
 |                               | asked if you're sure you that's what you intended to |
 |                               | do.                                                  |
 +-------------------------------+------------------------------------------------------+
@@ -315,14 +328,14 @@ When I try to process I get an error: "Invalid value for property Filename (list
 This occurs when Mantid is unable to load a run. If the run was given as a
 workspace name, check the spelling. If the run was given as a number, check
 that the run number is correct. If the run number is incorrect, check the
-number given in the *Run(s)* or *Transmission Run(s)* columns. If the run
+number given in the **Run(s)** or **Transmission Run(s)** columns. If the run
 number is correct, check the instrument named in the error message is correct.
 If the instrument is incorrect, check that the processing instrument selector
 (at the bottom right of the interface) is correct.
 
 If the run still isn't loading check Mantid's user directories are set
 correctly, and that the desired run is in one of the given directories. To
-manage the user directories, open *File -> Manage User Directories*.
+manage the user directories, open **File -> Manage User Directories**.
 
 When I try to process I get an error: "Invalid key value pair, '...'"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -334,9 +347,9 @@ contains commas it **must** be quoted, like so: ``key = "v,a,l,u,e"``.
 The *Open Table* menu doesn't do anything
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The *Open Table* menu contains a list of valid table workspaces to open in the
+The **Open Table** menu contains a list of valid table workspaces to open in the
 processing table. If a workspace is not compatible, it will not be listed. So,
-if there are no compatible workspaces the *Open Table* menu will be empty.
+if there are no compatible workspaces the **Open Table** menu will be empty.
 
 My IvsQ workspaces are not being stitched correctly
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -345,9 +358,9 @@ Stitching is controlled by the group a row is in. For stitching to occur, the
 rows must be in the same group, and be processed simultaneously.
 
 An easy way to check the runs are in the same group is to select one of the
-rows you want stitched, and then in the menu bar select *Edit -> Expand Selection*.
+rows you want stitched, and then in the menu bar select **Edit -> Expand Selection**.
 All the rows in that group will be selected. If you have another row that you
 would like to add to the group, you can do this easily by adding it to the
-selection, and then in the menu bar selecting *Edit -> Group Selected*.
+selection, and then in the menu bar selecting **Edit -> Group Selected**.
 
 .. categories:: Interfaces Reflectometry
