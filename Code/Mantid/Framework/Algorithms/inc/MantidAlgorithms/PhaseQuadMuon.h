@@ -69,8 +69,10 @@ namespace Mantid
       void init();
       /// Run the algorithm
       void exec();
-      /// Load the PhaseTable
-      void loadPhaseTable(const std::string& filename);
+      /// Load the Phase Table
+      void loadPhaseTable(API::ITableWorkspace_sptr phaseTable);
+      /// Load the Phase List
+      void loadPhaseList(const std::string& filename);
       /// Rescale detector efficiency to maximum value
       void normaliseAlphas (std::vector<HistData>& m_histData);
       /// Remove exponential decay from input histograms

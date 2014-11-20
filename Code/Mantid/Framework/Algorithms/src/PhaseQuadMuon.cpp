@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/PhaseQuadMuon.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/FrameworkManager.h"
 
 namespace Mantid
@@ -29,7 +30,10 @@ void PhaseQuadMuon::init()
   declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "", Direction::Output), 
     "Name of the output workspace to hold squashograms" );
 
-  declareProperty(new API::FileProperty("PhaseTable", "", API::FileProperty::Load, ".INF"),
+  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>("PhaseTable", "", Direction::Input, API::PropertyMode::Optional), 
+    "Name of the Phase Table");
+
+  declareProperty(new API::FileProperty("PhaseList", "", API::FileProperty::OptionalLoad, ".INF", Direction::Input),
     "A space-delimited text file with a six-row header");
 }
 
@@ -41,9 +45,24 @@ void PhaseQuadMuon::exec()
 	// Get input workspace
   API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
 
-  // Get phase table
-  std::string filename = getPropertyValue("PhaseTable");
-  loadPhaseTable ( filename );
+  // Get input phase table
+  API::ITableWorkspace_sptr phaseTable = getProperty("PhaseTable");
+
+  // Get input phase table
+  std::string filename = getPropertyValue("PhaseList");
+
+  if ( phaseTable )
+  {
+    loadPhaseTable(phaseTable);
+  }
+  else if ( filename != "" )
+  {
+    loadPhaseList ( filename );
+  }
+  else
+  {
+    throw std::runtime_error("PhaseQuad: You must provide either PhaseTable or PhaseList");
+  }
 
   // Set number of data points per histogram
   m_nData = static_cast<int>(inputWs->getSpectrum(0)->readY().size());
@@ -82,7 +101,49 @@ void PhaseQuadMuon::exec()
 /** Load PhaseTable file to a vector of HistData.
 * @param filename :: [input] phase table .inf filename
 */
-void PhaseQuadMuon::loadPhaseTable(const std::string& filename )
+void PhaseQuadMuon::loadPhaseTable(API::ITableWorkspace_sptr phaseTable)
+{
+  if ( phaseTable->rowCount() )
+  {
+    if ( phaseTable->columnCount()<3 )
+    {
+      throw std::invalid_argument("PhaseQuad: PhaseTable must contain at least three columns");
+    }
+
+    m_nHist = static_cast<int>(phaseTable->rowCount());
+
+    for (size_t i=0; i<phaseTable->rowCount(); ++i)
+    {
+      API::TableRow phaseRow = phaseTable->getRow(i);
+
+      HistData tempHist;
+      tempHist.alpha = phaseRow.Double(1);
+      tempHist.phi   = phaseRow.Double(2);
+
+      // Read first column as double
+      // If it is exactly 0, set detOK to false
+      // Set detOK to true otherwise
+      if ( phaseRow.Double(0)==0 )
+        tempHist.detOK = false;
+      else
+        tempHist.detOK = true;
+
+      m_histData.push_back(tempHist);
+    }
+
+  }
+  else
+  {
+    throw std::invalid_argument("PhaseQuad: PhaseTable is empty");
+  }
+
+}
+
+//----------------------------------------------------------------------------------------------
+/** Load PhaseTable file to a vector of HistData.
+* @param filename :: [input] phase list .inf filename
+*/
+void PhaseQuadMuon::loadPhaseList(const std::string& filename )
 {
 
   std::ifstream input(filename.c_str(), std::ios_base::in);
@@ -92,7 +153,7 @@ void PhaseQuadMuon::loadPhaseTable(const std::string& filename )
 
     if ( input.eof() )
     {
-      throw Exception::FileError("PhaseQuad: File is empty", filename);
+      throw Exception::FileError("PhaseQuad: File is empty.", filename);
     }
     else
     {

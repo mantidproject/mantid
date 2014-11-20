@@ -40,10 +40,10 @@ public:
 
     MatrixWorkspace_sptr inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("EMU6473");
     
-    std::string filename("TestPhaseTable.txt");
-    generatePhaseTable(filename);
+    std::string filename("TestPhaseList.txt");
+    generatePhaseList(filename);
 
-    TS_ASSERT_THROWS_NOTHING( phaseQuadMuon.setProperty("PhaseTable", "TestPhaseTable.txt") );
+    TS_ASSERT_THROWS_NOTHING( phaseQuadMuon.setProperty("PhaseList", "TestPhaseList.txt") );
     TS_ASSERT_THROWS_NOTHING( phaseQuadMuon.setProperty("InputWorkspace", "EMU6473") );
     TS_ASSERT_THROWS_NOTHING( phaseQuadMuon.setProperty("OutputWorkspace", "EMU6473_out") );
 
@@ -60,10 +60,10 @@ public:
 
     AnalysisDataService::Instance().remove("EMU6473"); // remove inputWs
     AnalysisDataService::Instance().remove("EMU6473_out"); // remove OutputWs
-    Poco::File("TestPhaseTable.txt").remove(); // remove phase table
+    Poco::File("TestPhaseList.txt").remove(); // remove phase table
   }
 
-  void generatePhaseTable (std::string filename)
+  void generatePhaseList (std::string filename)
   {
     std::ofstream ofile;
     ofile.open(filename.c_str());
