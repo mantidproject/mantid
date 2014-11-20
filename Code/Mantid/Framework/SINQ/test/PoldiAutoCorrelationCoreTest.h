@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <boost/assign.hpp>
 
 #include "MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h"
 
@@ -292,6 +293,33 @@ public:
 
         TS_ASSERT_EQUALS(autoCorrelationCore.reduceChopperSlitList(badList, 1.0), 0.0);
     }
+
+    void testFinalizeCalculation()
+    {
+        TestablePoldiAutoCorrelationCore core(m_log);
+
+        MantidVec dValues = boost::assign::list_of(0.5)(0.6)(0.7)(0.8).convert_to_container<MantidVec>();
+        MantidVec intensities = boost::assign::list_of(1.0)(2.0)(3.0)(4.0).convert_to_container<MantidVec>();
+
+        DataObjects::Workspace2D_sptr output = core.finalizeCalculation(intensities, dValues);
+
+        TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
+
+        const MantidVec &qValues = output->readX(0);
+        // qvalues should be reversed.
+        TS_ASSERT_EQUALS(qValues[0], Conversions::dToQ(dValues[3]));
+        TS_ASSERT_EQUALS(qValues[1], Conversions::dToQ(dValues[2]));
+        TS_ASSERT_EQUALS(qValues[2], Conversions::dToQ(dValues[1]));
+        TS_ASSERT_EQUALS(qValues[3], Conversions::dToQ(dValues[0]));
+
+        const MantidVec &outputIntensities = output->readY(0);
+        // intensities are not reversed, they should be reversed already.
+        TS_ASSERT_EQUALS(outputIntensities[0], intensities[0]);
+        TS_ASSERT_EQUALS(outputIntensities[1], intensities[1]);
+        TS_ASSERT_EQUALS(outputIntensities[2], intensities[2]);
+        TS_ASSERT_EQUALS(outputIntensities[3], intensities[3]);
+    }
+
 private:
     Mantid::Kernel::Logger m_log;
 };
