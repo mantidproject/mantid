@@ -76,10 +76,10 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
         reducer.set_detector_range(int(self._detector_range[0]) - 1, int(self._detector_range[1]) - 1)
 
-        self._use_calib_ws = self._calib_ws.value is not None
+        self._use_calib_ws = self._calib_ws_name != ''
         if self._use_calib_ws:
-            logger.debug('Using calibration workspace')
-            reducer.set_calibration_workspace(self._calib_ws.valueAsStr)
+            logger.information('Using calibration workspace: %s' % self._calib_ws_name)
+            reducer.set_calibration_workspace(self._calib_ws_name)
 
         if len(self._background_range) == 2:
             logger.debug('Using background range: ' + str(self._background_range))
@@ -169,7 +169,6 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         self._detector_range = self.getProperty('DetectorRange').value
         self._background_range = self.getProperty('BackgroundRange').value
 
-        self._calib_ws = self.getProperty('CalibrationWorkspace')
         self._calib_ws_name = self.getPropertyValue('CalibrationWorkspace')
 
         self._detailed_balance = self.getProperty('DetailedBalance').value
