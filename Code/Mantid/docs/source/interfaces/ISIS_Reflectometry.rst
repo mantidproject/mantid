@@ -4,6 +4,20 @@ ISIS Reflectometry (Polref) Interface
 .. contents:: Table of Contents
   :local:
 
+Purpose
+-------
+This user interface allows for batch processing of data reduction for
+reflectometry data. The actual data reduction is performed with
+:ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`.
+Wherever possible, this interface attempts to use reasonable defaults,
+either loaded from the instruments' parameter files, or calculated from
+the provided data, to minimise the amount of user input required.
+This interface also strives to be transparent, making it clear how your
+data is being processed, and easy to adjust any of the options used.
+
+Integration with data archives is also provided, allowing for data to
+be located and prepared in the processing table automatically.
+
 Layout
 ------
 
