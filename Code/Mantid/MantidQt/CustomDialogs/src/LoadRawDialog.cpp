@@ -35,7 +35,8 @@ using namespace MantidQt::CustomDialogs;
 /**
  * Constructor
  */
-LoadRawDialog::LoadRawDialog(QWidget *parent) : AlgorithmDialog(parent)
+LoadRawDialog::LoadRawDialog(QWidget *parent) : AlgorithmDialog(parent),
+  m_pathBox(NULL), m_wsBox(NULL)
 {
 }
 
