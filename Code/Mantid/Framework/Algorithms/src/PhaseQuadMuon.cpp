@@ -99,7 +99,7 @@ void PhaseQuadMuon::exec()
 
 //----------------------------------------------------------------------------------------------
 /** Load PhaseTable file to a vector of HistData.
-* @param filename :: [input] phase table .inf filename
+* @param phaseTable :: [input] phase table containing detector info
 */
 void PhaseQuadMuon::loadPhaseTable(API::ITableWorkspace_sptr phaseTable)
 {
