@@ -724,11 +724,11 @@ namespace MantidQt
       std::vector<std::string> IvLamToGroup;
 
       //Now, iterate over the sample/transmission runs provided
-      for(size_t i = 0; i < runVec.size() && i < transVec.size(); ++i)
+      for(size_t i = 0; i < runVec.size(); ++i)
       {
         const std::string suffix = runVec.size() > 1 ? "_" + boost::lexical_cast<std::string>(i+1) : "";
         algReflOne->setProperty("InputWorkspace", runVec[i]->name());
-        if(transWS)
+        if(i < transVec.size())
           algReflOne->setProperty("FirstTransmissionRun", transVec[i]->name());
         algReflOne->setProperty("OutputWorkspace", "IvsQ_" + runNo + suffix);
         algReflOne->setProperty("OutputWorkspaceWaveLength", "IvsLam_" + runNo + suffix);
