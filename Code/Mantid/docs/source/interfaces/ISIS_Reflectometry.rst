@@ -91,17 +91,40 @@ Layout
 Menu bar
 ~~~~~~~~
 
-At the top of the interface is a menu bar. Through this menu bar you can
-start a new table, open an existing table from a :ref:`workspace <Workspace>`,
-or save your current table to a :ref:`workspace <Workspace>`.
+.. interface:: ISIS Reflectometry (Polref)
+  :widget: menuBar
 
-You are also able to import or export .TBL files from disk using the
-**Import .TBL** and **Export .TBL** options. These options will run the
-:ref:`LoadReflTBL <algm-LoadReflTBL>` and :ref:`SaveReflTBL <algm-SaveReflTBL>`
-algorithms as appropriate.
+The **Reflectometry** menu provides access to the following functionality:
 
-The menu bar also provides access to the options menu, and many actions
-pertaining to the processing table.
++------------------+----------------------------------------------------------+
+| Action           | Effect                                                   |
++==================+==========================================================+
+| Open Table       | Opens a valid *TableWorkspace* in the `Processing Table`_|
+|                  | for processing.                                          |
++------------------+----------------------------------------------------------+
+| New Table        | Discards the current contents of the `Processing Table`_,|
+|                  | presenting a blank table.                                |
++------------------+----------------------------------------------------------+
+| Save Table       | Saves the current contents of the `Processing Table`_ to |
+|                  | the *TableWorkspace* it came from. If no such workspace  |
+|                  | already exists, a new one can be created.                |
++------------------+----------------------------------------------------------+
+| Save Table As    | Saves the current contents of the `Processing Table`_ to |
+|                  | a new *TableWorkspace*.                                  |
++------------------+----------------------------------------------------------+
+| Import .TBL      | Opens a :ref:`LoadReflTBL <algm-LoadReflTBL>` dialog,    |
+|                  | enabling you to load a ``.tbl`` file into a              |
+|                  | *TableWorkspace*.                                        |
++------------------+----------------------------------------------------------+
+| Export .TBL      | Opens a :ref:`SaveReflTBL <algm-SaveReflTBL>` dialog,    |
+|                  | enabling you to save a *TableWorkspace* to a ``.tbl``    |
+|                  | file.                                                    |
++------------------+----------------------------------------------------------+
+| Options          | Opens the `Options`_ menu.                               |
++------------------+----------------------------------------------------------+
+
+The **Edit** menu provides access to the same actions found in the tool bar.
+These are documented in the `Tool Bar`_ section of this document.
 
 Processing Table
 ~~~~~~~~~~~~~~~~
@@ -127,8 +150,8 @@ processing that is in progress. And at the bottom right, by the **Process**
 button is the processing instrument selector. The processing instrument is
 used to help identify the correct data to load when processing runs.
 
-Actions
-~~~~~~~
+Tool Bar
+~~~~~~~~
 
 This table details the behaviour of the actions in the tool bar, from left to right.
 
