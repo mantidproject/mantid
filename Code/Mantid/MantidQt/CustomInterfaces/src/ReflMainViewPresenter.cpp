@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Strings.h"
@@ -394,7 +395,16 @@ namespace MantidQt
         throw std::runtime_error("Invalid row");
 
       const std::string runStr = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
-      MatrixWorkspace_sptr run = boost::dynamic_pointer_cast<MatrixWorkspace>(prepareRunWorkspace(runStr));
+      auto runWS = prepareRunWorkspace(runStr);
+      auto runMWS = boost::dynamic_pointer_cast<MatrixWorkspace>(runWS);
+      auto runWSG = boost::dynamic_pointer_cast<WorkspaceGroup>(runWS);
+
+      //If we've got a workspace group, use the first workspace in it
+      if(!runMWS && runWSG)
+        runMWS = boost::dynamic_pointer_cast<MatrixWorkspace>(runWSG->getItem(0));
+
+      if(!runMWS)
+        throw std::runtime_error("Could not convert " + runWS->name() + " to a MatrixWorkspace.");
 
       //Fetch two theta from the log if needed
       if(m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().isEmpty())
@@ -404,7 +414,7 @@ namespace MantidQt
         //First try TwoTheta
         try
         {
-          logData = run->mutableRun().getLogData("Theta");
+          logData = runMWS->mutableRun().getLogData("Theta");
         }
         catch(std::exception&)
         {
@@ -434,7 +444,7 @@ namespace MantidQt
       if(m_model->data(m_model->index(rowNo, COL_DQQ)).toString().isEmpty())
       {
         IAlgorithm_sptr calcResAlg = AlgorithmManager::Instance().create("CalculateResolution");
-        calcResAlg->setProperty("Workspace", run);
+        calcResAlg->setProperty("Workspace", runMWS);
         calcResAlg->setProperty("TwoTheta", m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().toStdString());
         calcResAlg->execute();
 
@@ -629,7 +639,7 @@ namespace MantidQt
       Workspace_sptr runWS = prepareRunWorkspace(runStr);
       const std::string runNo = getRunNumber(runWS);
 
-      MatrixWorkspace_sptr transWS;
+      Workspace_sptr transWS;
       if(!transStr.empty())
         transWS = makeTransWS(transStr);
 
@@ -678,7 +688,7 @@ namespace MantidQt
       //Reduction has completed. Put Qmin and Qmax into the table if needed, for stitching.
       if(m_model->data(m_model->index(rowNo, COL_QMIN)).toString().isEmpty() || m_model->data(m_model->index(rowNo, COL_QMAX)).toString().isEmpty())
       {
-        MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IvsQ_" + runNo);
+        Workspace_sptr ws = AnalysisDataService::Instance().retrieveWS<Workspace>("IvsQ_" + runNo);
         std::vector<double> qrange = calcQRange(ws, theta);
 
         if(m_model->data(m_model->index(rowNo, COL_QMIN)).toString().isEmpty())
@@ -696,12 +706,22 @@ namespace MantidQt
     @param ws : The workspace to fetch the instrument values from
     @param theta : The value of two theta to use in calculations
     */
-    std::vector<double> ReflMainViewPresenter::calcQRange(MatrixWorkspace_sptr ws, double theta)
+    std::vector<double> ReflMainViewPresenter::calcQRange(Workspace_sptr ws, double theta)
     {
+      auto mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+      auto wsg = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+
+      //If we've got a workspace group, use the first workspace in it
+      if(!mws && wsg)
+        mws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(0));
+
+      if(!mws)
+        throw std::runtime_error("Could not convert " + ws->name() + " to a MatrixWorkspace.");
+
       double lmin, lmax;
       try
       {
-        const Instrument_const_sptr instrument = ws->getInstrument();
+        const Instrument_const_sptr instrument = mws->getInstrument();
         lmin = instrument->getNumberParameter("LambdaMin")[0];
         lmax = instrument->getNumberParameter("LambdaMax")[0];
       }
@@ -797,7 +817,7 @@ namespace MantidQt
     Create a transmission workspace
     @param transString : the numbers of the transmission runs to use
     */
-    MatrixWorkspace_sptr ReflMainViewPresenter::makeTransWS(const std::string& transString)
+    Workspace_sptr ReflMainViewPresenter::makeTransWS(const std::string& transString)
     {
       const size_t maxTransWS = 2;
 
@@ -818,7 +838,7 @@ namespace MantidQt
       //If the transmission workspace is already in the ADS, re-use it
       std::string lastName = "TRANS_" + boost::algorithm::join(transVec, "_");
       if(AnalysisDataService::Instance().doesExist(lastName))
-        return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(lastName);
+        return AnalysisDataService::Instance().retrieveWS<Workspace>(lastName);
 
       //We have the runs, so we can create a TransWS
       IAlgorithm_sptr algCreateTrans = AlgorithmManager::Instance().create("CreateTransmissionWorkspaceAuto");
@@ -841,7 +861,7 @@ namespace MantidQt
       if(!algCreateTrans->isExecuted())
         throw std::runtime_error("CreateTransmissionWorkspaceAuto failed to execute");
 
-      return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+      return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
     }
 
     /**
