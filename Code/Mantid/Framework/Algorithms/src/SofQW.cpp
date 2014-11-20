@@ -92,6 +92,7 @@ void SofQW::exec()
   MatrixWorkspace_sptr outputWorkspace = setUpOutputWorkspace(inputWorkspace, getProperty("QAxisBinning"), verticalAxis);
   setProperty("OutputWorkspace",outputWorkspace);
 
+  // Holds the spectrum-detector mapping
   std::vector<specid_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
 
@@ -205,7 +206,7 @@ void SofQW::exec()
           if ( q < verticalAxis.front() || q > verticalAxis.back() ) continue;
           // Find which q bin this point lies in
           const MantidVec::difference_type qIndex =
-              std::upper_bound(verticalAxis.begin(),verticalAxis.end(),q) - verticalAxis.begin() - 1;
+              std::upper_bound(verticalAxis.begin(), verticalAxis.end(), q) - verticalAxis.begin() - 1;
 
           // Add this spectra-detector pair to the mapping
           specNumberMapping.push_back(outputWorkspace->getSpectrum(qIndex)->getSpectrumNo());
