@@ -1128,7 +1128,7 @@ void SliceViewer::copyImageToClipboard()
 /**
  * Adds .png extension if not already included
  *
- * @param filename :: a file name to save an (png) image
+ * @param fname :: a file name to save an (png) image
  * @return input file name with '.png' appended if needed
  **/
 QString SliceViewer::ensurePngExtension(const QString& fname) const
