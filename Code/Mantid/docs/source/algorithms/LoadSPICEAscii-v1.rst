@@ -14,12 +14,28 @@ data acquisition software used in HFIR ,
 and record the data and run information to TableWorkspaces.
 
 Format of SPICE data file
-#############################################
+#########################
 
 There are two parts of content in SPICE data file. 
 One is the run information, in which line that starts with #. 
+
+In most cases, the run information is give as 
+
+# run info name = run info value
+
 The other is the experimental data.  
 The first item is an integer as the index of experimental data point. 
+
+Output Worskpaces
+#################
+
+Two table worskpaces will be exported from the algorith. 
+
+'OutputWorkspace' is the table workspace containing the measured experimental data. 
+Each row of it contains all the measured parameters of one data point.  
+
+'RunInfoWorkspace' is the table workspace that 
+stores the run information, such as scan number, IPTS, sample information and etc. 
 
 
 Usage
@@ -33,8 +49,14 @@ Usage
 	OutputWorkspace = 'HB2A_0231_0001_Data',
 	RunInfoWorkspace = 'HB2A_0231_Info')
 
-  datatbws = mtd['HB2A_exp0231_scan0001.dat'] 
-  infotablews = mtd[HB2A_0231_Info')
+  datatbws = mtd['HB2A_0231_0001_Data'] 
+  infotablews = mtd['HB2A_0231_Info']
+
+  print "Number of measuring points = %d" % (datatbws.rowCount())
+  print "Number of columns in data workspace = %d" % (datatbws.columnCount())
+  print "Number of run information = %d" % (infotablews.rowCount())
+  print "%s = %s" % (infotablews.cell(0, 0), infotablews.cell(0, 1))
+  print "%s = %s" % (infotablews.cell(31, 0), infotablews.cell(31, 1))
 
 .. testcleanup:: ExLoadHB2AData
 
@@ -44,6 +66,15 @@ Usage
 Output:
 
 .. testoutput:: ExLoadHB2AData
+
+  datatbws = mtd['HB2A_0231_0001_Data'] 
+  infotablews = mtd['HB2A_0231_Info']
+  
+  print "Number of measuring points = %d" % (datatbws.rowCount())
+  print "Number of columns in data workspace = %d" % (datatbws.columnCount())
+  print "Number of run information = %d" % (infotablews.rowCount())
+  print "%s = %s" % (infotablews.cell(0, 0), infotablews.cell(0, 1))
+  print "%s = %s" % (infotablews.cell(31, 0), infotablews.cell(31, 1))
 
 
 .. categories::
