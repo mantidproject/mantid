@@ -49,10 +49,10 @@ namespace Mantid
      *  @param exportDeltaQ :: bool on whether deltaQ column to be printed (permanantly false in this case)
      */
     void SaveReflThreeColumnAscii::data(std::ofstream & file, const std::vector<double> & XData,  bool exportDeltaQ)
-    {
-      AsciiPointBase::data(file, XData, false); 
+    { 
+      exportDeltaQ = false;
+      AsciiPointBase::data(file, XData, exportDeltaQ); 
     }
-
 
   } // namespace DataHandling
 } // namespace Mantid
