@@ -241,6 +241,13 @@ class sfCalculator():
         
         self.is_nexus_detector_rotated_flag = self.isNexusTakeAfterRefDate(EventDataWks.getRun().getProperty('run_start').value)
 
+        if self.is_nexus_detector_rotated_flag:
+            self.alpha_pixel_nbr = 304
+            self.beta_pixel_nbr = 256
+        else:
+            alpha_pixel_nbr = 256
+            beta_pixel_nbr = 304  #will be integrated over this dimension
+
         proton_charge = self._getProtonCharge(EventDataWks)
         print '----> rebinning '
         HistoDataWks = Rebin(InputWorkspace=EventDataWks,
