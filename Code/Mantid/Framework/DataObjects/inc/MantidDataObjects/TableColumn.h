@@ -258,8 +258,8 @@ void TableColumn<Type>::sortIndex( size_t start, size_t end, std::vector<size_t>
     return;
   }
 
-  auto iBegin = indexVec.begin();
-  auto iEnd   = indexVec.end();
+  auto iBegin = indexVec.begin() + start;
+  auto iEnd   = indexVec.begin() + end;
 
   std::stable_sort( iBegin, iEnd, CompareValues<Type>(*this) );
 
