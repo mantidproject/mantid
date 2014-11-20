@@ -3,6 +3,7 @@
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidKernel/ConfigService.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -37,16 +38,22 @@ namespace MantidQt
       ui.setupUi(this);
 
       ui.buttonProcess->setDefaultAction(ui.actionProcess);
+      ui.buttonTransfer->setDefaultAction(ui.actionTransfer);
+
+      //Create a whats this button
+      ui.rowToolBar->addAction(QWhatsThis::createAction(this));
 
       //Expand the process runs column at the expense of the search column
       ui.splitterTables->setStretchFactor(0, 0);
       ui.splitterTables->setStretchFactor(1, 1);
 
-      //Allow rows to be reordered
+      //Allow rows and columns to be reordered
       ui.viewTable->verticalHeader()->setMovable(true);
+      ui.viewTable->horizontalHeader()->setMovable(true);
 
       //Custom context menu for table
       connect(ui.viewTable, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+      connect(ui.tableSearchResults, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showSearchContextMenu(const QPoint&)));
 
       //Finally, create a presenter to do the thinking for us
       m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(this));
@@ -59,7 +66,7 @@ namespace MantidQt
     void QtReflMainView::setModel(QString name)
     {
       m_toOpen = name.toStdString();
-      m_presenter->notify(OpenTableFlag);
+      m_presenter->notify(IReflPresenter::OpenTableFlag);
     }
 
     /**
@@ -73,6 +80,17 @@ namespace MantidQt
       connect(m_model.get(), SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(tableUpdated(const QModelIndex&, const QModelIndex&)));
       ui.viewTable->setModel(m_model.get());
       ui.viewTable->resizeColumnsToContents();
+    }
+
+    /**
+    Set a new model for search results
+    @param model : the model to be attached to the search results
+    */
+    void QtReflMainView::showSearch(ReflSearchModel_sptr model)
+    {
+      m_searchModel = model;
+      ui.tableSearchResults->setModel(m_searchModel.get());
+      ui.tableSearchResults->resizeColumnsToContents();
     }
 
     /**
@@ -101,7 +119,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionSaveTable_triggered()
     {
-      m_presenter->notify(SaveFlag);
+      m_presenter->notify(IReflPresenter::SaveFlag);
     }
 
     /**
@@ -109,7 +127,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionSaveTableAs_triggered()
     {
-      m_presenter->notify(SaveAsFlag);
+      m_presenter->notify(IReflPresenter::SaveAsFlag);
     }
 
     /**
@@ -117,7 +135,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionAppendRow_triggered()
     {
-      m_presenter->notify(AppendRowFlag);
+      m_presenter->notify(IReflPresenter::AppendRowFlag);
     }
 
     /**
@@ -125,7 +143,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionPrependRow_triggered()
     {
-      m_presenter->notify(PrependRowFlag);
+      m_presenter->notify(IReflPresenter::PrependRowFlag);
     }
 
     /**
@@ -133,7 +151,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionDeleteRow_triggered()
     {
-      m_presenter->notify(DeleteRowFlag);
+      m_presenter->notify(IReflPresenter::DeleteRowFlag);
     }
 
     /**
@@ -141,7 +159,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionProcess_triggered()
     {
-      m_presenter->notify(ProcessFlag);
+      m_presenter->notify(IReflPresenter::ProcessFlag);
     }
 
     /**
@@ -149,7 +167,39 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionGroupRows_triggered()
     {
-      m_presenter->notify(GroupRowsFlag);
+      m_presenter->notify(IReflPresenter::GroupRowsFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "clear selected" button has been pressed
+    */
+    void QtReflMainView::on_actionClearSelected_triggered()
+    {
+      m_presenter->notify(IReflPresenter::ClearSelectedFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "copy selection" button has been pressed
+    */
+    void QtReflMainView::on_actionCopySelected_triggered()
+    {
+      m_presenter->notify(IReflPresenter::CopySelectedFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "cut selection" button has been pressed
+    */
+    void QtReflMainView::on_actionCutSelected_triggered()
+    {
+      m_presenter->notify(IReflPresenter::CutSelectedFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "paste selection" button has been pressed
+    */
+    void QtReflMainView::on_actionPasteSelected_triggered()
+    {
+      m_presenter->notify(IReflPresenter::PasteSelectedFlag);
     }
 
     /**
@@ -157,7 +207,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionNewTable_triggered()
     {
-      m_presenter->notify(NewTableFlag);
+      m_presenter->notify(IReflPresenter::NewTableFlag);
     }
 
     /**
@@ -165,7 +215,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionExpandSelection_triggered()
     {
-      m_presenter->notify(ExpandSelectionFlag);
+      m_presenter->notify(IReflPresenter::ExpandSelectionFlag);
     }
 
     /**
@@ -173,7 +223,47 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionOptionsDialog_triggered()
     {
-      m_presenter->notify(OptionsDialogFlag);
+      m_presenter->notify(IReflPresenter::OptionsDialogFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "search" button has been pressed
+    */
+    void QtReflMainView::on_actionSearch_triggered()
+    {
+      m_presenter->notify(IReflPresenter::SearchFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "transfer" button has been pressed
+    */
+    void QtReflMainView::on_actionTransfer_triggered()
+    {
+      m_presenter->notify(IReflPresenter::TransferFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "export table" button has been pressed
+    */
+    void QtReflMainView::on_actionExportTable_triggered()
+    {
+      m_presenter->notify(IReflPresenter::ExportTableFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "import table" button has been pressed
+    */
+    void QtReflMainView::on_actionImportTable_triggered()
+    {
+      m_presenter->notify(IReflPresenter::ImportTableFlag);
+    }
+
+    /**
+    This slot opens the documentation when the "help" button has been pressed
+    */
+    void QtReflMainView::on_actionHelp_triggered()
+    {
+      MantidQt::API::HelpWindow::showPage(this, QString("qthelp://org.mantidproject/doc/interfaces/ISIS_Reflectometry.html"));
     }
 
     /**
@@ -183,7 +273,7 @@ namespace MantidQt
     {
       Q_UNUSED(topLeft);
       Q_UNUSED(bottomRight);
-      m_presenter->notify(TableUpdatedFlag);
+      m_presenter->notify(IReflPresenter::TableUpdatedFlag);
     }
 
     /**
@@ -192,6 +282,10 @@ namespace MantidQt
     */
     void QtReflMainView::showContextMenu(const QPoint& pos)
     {
+      //If the user didn't right-click on anything, don't show a context menu.
+      if(!ui.viewTable->indexAt(pos).isValid())
+        return;
+
       //parent widget takes ownership of QMenu
       QMenu* menu = new QMenu(this);
       menu->addAction(ui.actionProcess);
@@ -199,11 +293,31 @@ namespace MantidQt
       menu->addSeparator();
       menu->addAction(ui.actionPrependRow);
       menu->addAction(ui.actionAppendRow);
+      menu->addSeparator();
       menu->addAction(ui.actionGroupRows);
+      menu->addAction(ui.actionCopySelected);
+      menu->addAction(ui.actionCutSelected);
+      menu->addAction(ui.actionPasteSelected);
+      menu->addAction(ui.actionClearSelected);
       menu->addSeparator();
       menu->addAction(ui.actionDeleteRow);
 
       menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
+    }
+
+    /**
+    This slot is triggered when the user right clicks on the search results table
+    @param pos : The position of the right click within the table
+    */
+    void QtReflMainView::showSearchContextMenu(const QPoint& pos)
+    {
+      if(!ui.tableSearchResults->indexAt(pos).isValid())
+        return;
+
+      //parent widget takes ownership of QMenu
+      QMenu* menu = new QMenu(this);
+      menu->addAction(ui.actionTransfer);
+      menu->popup(ui.tableSearchResults->viewport()->mapToGlobal(pos));
     }
 
     /**
@@ -266,6 +380,19 @@ namespace MantidQt
       if(ok)
         return text.toStdString();
       return "";
+    }
+
+    /**
+    Show the user the dialog for an algorithm
+    */
+    void QtReflMainView::showAlgorithmDialog(const std::string& algorithm)
+    {
+      std::stringstream pythonSrc;
+      pythonSrc << "try:\n";
+      pythonSrc << "  " << algorithm << "Dialog()\n";
+      pythonSrc << "except:\n";
+      pythonSrc << "  pass\n";
+      runPythonCode(QString::fromStdString(pythonSrc.str()));
     }
 
     /**
@@ -332,6 +459,15 @@ namespace MantidQt
     }
 
     /**
+    Sets the contents of the system's clipboard
+    @param text The contents of the clipboard
+    */
+    void QtReflMainView::setClipboard(const std::string& text)
+    {
+      QApplication::clipboard()->setText(QString::fromStdString(text));
+    }
+
+    /**
     Get the selected instrument for searching
     @returns the selected instrument to search for
     */
@@ -351,15 +487,35 @@ namespace MantidQt
 
     /**
     Get the indices of the highlighted rows
-    @returns a vector of unsigned ints contianing the highlighted row numbers
+    @returns a set of ints containing the highlighted row numbers
     */
     std::set<int> QtReflMainView::getSelectedRows() const
     {
-      auto selectedRows = ui.viewTable->selectionModel()->selectedRows();
       std::set<int> rows;
-      for(auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
-        rows.insert(it->row());
+      auto selectionModel = ui.viewTable->selectionModel();
+      if(selectionModel)
+      {
+        auto selectedRows = selectionModel->selectedRows();
+        for(auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
+          rows.insert(it->row());
+      }
+      return rows;
+    }
 
+    /**
+    Get the indices of the highlighted search result rows
+    @returns a set of ints containing the selected row numbers
+    */
+    std::set<int> QtReflMainView::getSelectedSearchRows() const
+    {
+      std::set<int> rows;
+      auto selectionModel = ui.tableSearchResults->selectionModel();
+      if(selectionModel)
+      {
+        auto selectedRows = selectionModel->selectedRows();
+        for(auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
+          rows.insert(it->row());
+      }
       return rows;
     }
 
@@ -379,6 +535,24 @@ namespace MantidQt
     boost::shared_ptr<IReflPresenter> QtReflMainView::getPresenter() const
     {
       return m_presenter;
+    }
+
+    /**
+    Gets the contents of the system's clipboard
+    @returns The contents of the clipboard
+    */
+    std::string QtReflMainView::getClipboard() const
+    {
+      return QApplication::clipboard()->text().toStdString();
+    }
+
+    /**
+    Get the string the user wants to search for.
+    @returns The search string
+    */
+    std::string QtReflMainView::getSearchString() const
+    {
+      return ui.textSearch->text().toStdString();
     }
 
   } // namespace CustomInterfaces

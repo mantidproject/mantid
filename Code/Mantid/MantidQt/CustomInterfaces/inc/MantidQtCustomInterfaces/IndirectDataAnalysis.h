@@ -6,6 +6,7 @@
 //----------------------
 #include "ui_IndirectDataAnalysis.h"
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtCustomInterfaces/IndirectTab.h"
 
 #include <Poco/NObserver.h>
 #include "MantidKernel/ConfigService.h"
@@ -80,6 +81,8 @@ namespace IDA
     void openDirectoryDialog();
     /// Opens the Mantid Wiki web page of the current tab.
     void help();
+    /// Slot showing a message box to the user
+    void showMessageBox(const QString& message);
 
   private:
     /// UI form containing all Qt elements.
@@ -99,6 +102,7 @@ namespace IDA
 
     /// Map of unsigned int (TabChoice enum values) to tabs.
     std::map<unsigned int, IDATab*> m_tabs;
+
   };
 } // namespace IDA
 } // namespace CustomInterfaces

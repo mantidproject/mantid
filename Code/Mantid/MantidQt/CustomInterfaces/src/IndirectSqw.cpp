@@ -175,7 +175,7 @@ namespace CustomInterfaces
     }
 
     // Get correct S(Q, w) algorithm
-    QString efixed = m_uiForm.leEfixed->text();
+    QString eFixed = getInstrumentDetails()["efixed-val"];
 
     IAlgorithm_sptr sqwAlg;
     QString rebinType = m_uiForm.sqw_cbRebinType->currentText();
@@ -199,7 +199,7 @@ namespace CustomInterfaces
     sqwAlg->setProperty("OutputWorkspace", sqwWsName.toStdString());
     sqwAlg->setProperty("QAxisBinning", rebinString.toStdString());
     sqwAlg->setProperty("EMode", "Indirect");
-    sqwAlg->setProperty("EFixed", efixed.toStdString());
+    sqwAlg->setProperty("EFixed", eFixed.toStdString());
 
     m_batchAlgoRunner->addAlgorithm(sqwAlg, sqwInputProps);
 
@@ -264,7 +264,7 @@ namespace CustomInterfaces
         "plotSpectrum(sqw_ws, range(0, n_spec))\n";
     }
 
-    m_pythonRunner.runPythonCode(pyInput).trimmed();
+    m_pythonRunner.runPythonCode(pyInput);
   }
 
   /**
@@ -318,7 +318,7 @@ namespace CustomInterfaces
       convertSpecAlg->execute();
 
       QString pyInput = "plot2D('" + convertedWsName + "')\n";
-      m_pythonRunner.runPythonCode(pyInput).trimmed();
+      m_pythonRunner.runPythonCode(pyInput);
     }
     else
     {

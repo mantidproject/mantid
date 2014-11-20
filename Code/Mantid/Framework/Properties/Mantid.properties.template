@@ -37,9 +37,6 @@ python.plugins.directories = @PYTHONPLUGIN_DIRS@
 # Where to load instrument definition files from
 instrumentDefinition.directory = @MANTID_ROOT@/instrument
 
-# Where to load parameter definition files from
-parameterDefinition.directory = @MANTID_ROOT@/instrument
-
 # Where to load Grouping files (that are shipped with Mantid) from
 groupingFiles.directory = @MANTID_ROOT@/instrument/Grouping
 
@@ -185,7 +182,7 @@ interfaces.categories.hidden =
 UploaderWebServer = @MANTIDPUBLISHER@
 # Local system path for the script repository.
 ScriptLocalRepository =
-# Url for the remote script repository.
+# Base Url for the remote script repository. Not necessarily accessible, it is used to construct longer URLs
 ScriptRepository = http://download.mantidproject.org/scriptrepository/
 # Pattern given to ScriptRepository that is used to hide entries from repository to the users. It is a csv string separated with ';'
 ScriptRepositoryIgnore = *pyc;

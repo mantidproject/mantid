@@ -6,7 +6,10 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Utils.h"
+#include "MantidQtCustomInterfaces/ReflCatalogSearcher.h"
+#include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtCustomInterfaces/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/QtReflOptionsDialog.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
@@ -104,9 +107,11 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view):
+    ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view, boost::shared_ptr<IReflSearcher> searcher):
       m_view(view),
       m_tableDirty(false),
+      m_searcher(searcher),
+      m_transferStrategy(new ReflLegacyTransferStrategy()),
       m_addObserver(*this, &ReflMainViewPresenter::handleAddEvent),
       m_remObserver(*this, &ReflMainViewPresenter::handleRemEvent),
       m_clearObserver(*this, &ReflMainViewPresenter::handleClearEvent),
@@ -150,8 +155,7 @@ namespace MantidQt
       ads.notificationCenter.addObserver(m_clearObserver);
       ads.notificationCenter.addObserver(m_replaceObserver);
 
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
 
       //Provide autocompletion hints for the options column. We use the algorithm's properties minus
       //those we blacklist. We blacklist any useless properties or ones we're handling that the user
@@ -166,6 +170,10 @@ namespace MantidQt
       blacklist.insert("FirstTransmissionRun");
       blacklist.insert("SecondTransmissionRun");
       m_view->setOptionsHintStrategy(new AlgorithmHintStrategy(alg, blacklist));
+
+      //If we don't have a searcher yet, use ReflCatalogSearcher
+      if(!m_searcher)
+        m_searcher.reset(new ReflCatalogSearcher());
 
       //Start with a blank table
       newTable();
@@ -386,7 +394,7 @@ namespace MantidQt
         throw std::runtime_error("Invalid row");
 
       const std::string runStr = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
-      MatrixWorkspace_sptr run = boost::dynamic_pointer_cast<MatrixWorkspace>(loadRun(runStr, m_view->getProcessInstrument()));
+      MatrixWorkspace_sptr run = boost::dynamic_pointer_cast<MatrixWorkspace>(prepareRunWorkspace(runStr));
 
       //Fetch two theta from the log if needed
       if(m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().isEmpty())
@@ -490,6 +498,74 @@ namespace MantidQt
     }
 
     /**
+    Takes a user specified run, or list of runs, and returns a pointer to the desired TOF workspace
+    @param runStr : The run or list of runs (separated by '+')
+    @throws std::runtime_error if the workspace could not be prepared
+    @returns a shared pointer to the workspace
+    */
+    Workspace_sptr ReflMainViewPresenter::prepareRunWorkspace(const std::string& runStr)
+    {
+      const std::string instrument = m_view->getProcessInstrument();
+
+      std::vector<std::string> runs;
+      boost::split(runs, runStr, boost::is_any_of("+"));
+
+      if(runs.empty())
+        throw std::runtime_error("No runs given");
+
+      //Remove leading/trailing whitespace from each run
+      for(auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
+        boost::trim(*runIt);
+
+      //If we're only given one run, just return that
+      if(runs.size() == 1)
+        return loadRun(runs[0], instrument);
+
+      const std::string outputName = "TOF_" + boost::algorithm::join(runs, "_");
+
+      //Check if we've already prepared it
+      if(AnalysisDataService::Instance().doesExist(outputName))
+        return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
+
+
+      /* Ideally, this should be executed as a child algorithm to keep the ADS tidy, but
+       * that doesn't preserve history nicely, so we'll just take care of tidying up in
+       * the event of failure.
+       */
+      IAlgorithm_sptr algPlus = AlgorithmManager::Instance().create("Plus");
+      algPlus->initialize();
+      algPlus->setProperty("LHSWorkspace", loadRun(runs[0], instrument)->name());
+      algPlus->setProperty("OutputWorkspace", outputName);
+
+      //Drop the first run from the runs list
+      runs.erase(runs.begin());
+
+      try
+      {
+        //Iterate through all the remaining runs, adding them to the first run
+        for(auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
+        {
+          algPlus->setProperty("RHSWorkspace", loadRun(*runIt, instrument)->name());
+          algPlus->execute();
+
+          //After the first execution we replace the LHS with the previous output
+          algPlus->setProperty("LHSWorkspace", outputName);
+        }
+      }
+      catch(...)
+      {
+        //If we're unable to create the full workspace, discard the partial version
+        AnalysisDataService::Instance().remove(outputName);
+
+        //We've tidied up, now re-throw.
+        throw;
+      }
+
+      return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
+    }
+
+
+    /**
     Loads a run from disk or fetches it from the AnalysisDataService
     @param run : The name of the run
     @param instrument : The instrument the run belongs to
@@ -507,7 +583,7 @@ namespace MantidQt
       {
         std::string wsName;
 
-        //Look "TOF_<run_number>" in the ADS
+        //Look for "TOF_<run_number>" in the ADS
         wsName = "TOF_" + run;
         if(AnalysisDataService::Instance().doesExist(wsName))
           return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
@@ -539,7 +615,7 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::reduceRow(int rowNo)
     {
-      const std::string      run = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
+      const std::string   runStr = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
       const std::string transStr = m_model->data(m_model->index(rowNo, COL_TRANSMISSION)).toString().toStdString();
       const std::string  options = m_model->data(m_model->index(rowNo, COL_OPTIONS)).toString().toStdString();
 
@@ -550,7 +626,7 @@ namespace MantidQt
       if(thetaGiven)
         theta = m_model->data(m_model->index(rowNo, COL_ANGLE)).toDouble();
 
-      Workspace_sptr runWS = loadRun(run, m_view->getProcessInstrument());
+      Workspace_sptr runWS = prepareRunWorkspace(runStr);
       const std::string runNo = getRunNumber(runWS);
 
       MatrixWorkspace_sptr transWS;
@@ -559,9 +635,9 @@ namespace MantidQt
 
       IAlgorithm_sptr algReflOne = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
       algReflOne->initialize();
-      algReflOne->setProperty("InputWorkspace", runWS);
+      algReflOne->setProperty("InputWorkspace", runWS->name());
       if(transWS)
-        algReflOne->setProperty("FirstTransmissionRun", transWS);
+        algReflOne->setProperty("FirstTransmissionRun", transWS->name());
       algReflOne->setProperty("OutputWorkspace", "IvsQ_" + runNo);
       algReflOne->setProperty("OutputWorkspaceWaveLength", "IvsLam_" + runNo);
       algReflOne->setProperty("ThetaIn", theta);
@@ -674,7 +750,7 @@ namespace MantidQt
         const double         qmin = m_model->data(m_model->index(*rowIt, COL_QMIN)).toDouble();
         const double         qmax = m_model->data(m_model->index(*rowIt, COL_QMAX)).toDouble();
 
-        Workspace_sptr runWS = loadRun(runStr);
+        Workspace_sptr runWS = prepareRunWorkspace(runStr);
         if(runWS)
         {
           const std::string runNo = getRunNumber(runWS);
@@ -840,24 +916,30 @@ namespace MantidQt
     /**
     Used by the view to tell the presenter something has changed
     */
-    void ReflMainViewPresenter::notify(int flag)
+    void ReflMainViewPresenter::notify(IReflPresenter::Flag flag)
     {
       switch(flag)
       {
-      case ReflMainView::SaveAsFlag:          saveTableAs();        break;
-      case ReflMainView::SaveFlag:            saveTable();          break;
-      case ReflMainView::AppendRowFlag:       appendRow();          break;
-      case ReflMainView::PrependRowFlag:      prependRow();         break;
-      case ReflMainView::DeleteRowFlag:       deleteRow();          break;
-      case ReflMainView::ProcessFlag:         process();            break;
-      case ReflMainView::GroupRowsFlag:       groupRows();          break;
-      case ReflMainView::OpenTableFlag:       openTable();          break;
-      case ReflMainView::NewTableFlag:        newTable();           break;
-      case ReflMainView::TableUpdatedFlag:    m_tableDirty = true;  break;
-      case ReflMainView::ExpandSelectionFlag: expandSelection();    break;
-      case ReflMainView::OptionsDialogFlag:   showOptionsDialog();  break;
-
-      case ReflMainView::NoFlags:       return;
+      case IReflPresenter::SaveAsFlag:          saveTableAs();       break;
+      case IReflPresenter::SaveFlag:            saveTable();         break;
+      case IReflPresenter::AppendRowFlag:       appendRow();         break;
+      case IReflPresenter::PrependRowFlag:      prependRow();        break;
+      case IReflPresenter::DeleteRowFlag:       deleteRow();         break;
+      case IReflPresenter::ProcessFlag:         process();           break;
+      case IReflPresenter::GroupRowsFlag:       groupRows();         break;
+      case IReflPresenter::OpenTableFlag:       openTable();         break;
+      case IReflPresenter::NewTableFlag:        newTable();          break;
+      case IReflPresenter::TableUpdatedFlag:    m_tableDirty = true; break;
+      case IReflPresenter::ExpandSelectionFlag: expandSelection();   break;
+      case IReflPresenter::OptionsDialogFlag:   showOptionsDialog(); break;
+      case IReflPresenter::ClearSelectedFlag:   clearSelected();     break;
+      case IReflPresenter::CopySelectedFlag:    copySelected();      break;
+      case IReflPresenter::CutSelectedFlag:     cutSelected();       break;
+      case IReflPresenter::PasteSelectedFlag:   pasteSelected();     break;
+      case IReflPresenter::SearchFlag:          search();            break;
+      case IReflPresenter::TransferFlag:        transfer();          break;
+      case IReflPresenter::ImportTableFlag:     importTable();       break;
+      case IReflPresenter::ExportTableFlag:     exportTable();       break;
       }
       //Not having a 'default' case is deliberate. gcc issues a warning if there's a flag we aren't handling.
     }
@@ -949,6 +1031,22 @@ namespace MantidQt
     }
 
     /**
+    Import a table from TBL file
+    */
+    void ReflMainViewPresenter::importTable()
+    {
+      m_view->showAlgorithmDialog("LoadReflTBL");
+    }
+
+    /**
+    Export a table to TBL file
+    */
+    void ReflMainViewPresenter::exportTable()
+    {
+      m_view->showAlgorithmDialog("SaveReflTBL");
+    }
+
+    /**
     Handle ADS add events
     */
     void ReflMainViewPresenter::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf)
@@ -962,8 +1060,7 @@ namespace MantidQt
         return;
 
       m_workspaceList.insert(name);
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
     }
 
     /**
@@ -973,8 +1070,7 @@ namespace MantidQt
     {
       const std::string name = pNf->objectName();
       m_workspaceList.erase(name);
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
     }
 
     /**
@@ -983,8 +1079,7 @@ namespace MantidQt
     void ReflMainViewPresenter::handleClearEvent(Mantid::API::ClearADSNotification_ptr)
     {
       m_workspaceList.clear();
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
     }
 
     /**
@@ -1001,8 +1096,7 @@ namespace MantidQt
 
       m_workspaceList.erase(name);
       m_workspaceList.insert(newName);
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
     }
 
     /**
@@ -1018,8 +1112,7 @@ namespace MantidQt
       if(isValidModel(pNf->object()))
         m_workspaceList.insert(name);
 
-      if(m_view)
-        m_view->setTableList(m_workspaceList);
+      m_view->setTableList(m_workspaceList);
     }
 
     /** Returns how many rows there are in a given group
@@ -1051,6 +1144,142 @@ namespace MantidQt
           selection.insert(i);
 
       m_view->setSelection(selection);
+    }
+
+    /** Clear the currently selected rows */
+    void ReflMainViewPresenter::clearSelected()
+    {
+      std::set<int> rows = m_view->getSelectedRows();
+      std::set<int> ignore;
+      for(auto row = rows.begin(); row != rows.end(); ++row)
+      {
+        ignore.clear();
+        ignore.insert(*row);
+
+        m_model->setData(m_model->index(*row, COL_RUNS), "");
+        m_model->setData(m_model->index(*row, COL_ANGLE), "");
+        m_model->setData(m_model->index(*row, COL_TRANSMISSION), "");
+        m_model->setData(m_model->index(*row, COL_QMIN), "");
+        m_model->setData(m_model->index(*row, COL_QMAX), "");
+        m_model->setData(m_model->index(*row, COL_SCALE), 1.0);
+        m_model->setData(m_model->index(*row, COL_DQQ), "");
+        m_model->setData(m_model->index(*row, COL_GROUP), getUnusedGroup(ignore));
+        m_model->setData(m_model->index(*row, COL_OPTIONS), "");
+      }
+      m_tableDirty = true;
+    }
+
+    /** Copy the currently selected rows to the clipboard */
+    void ReflMainViewPresenter::copySelected()
+    {
+      std::vector<std::string> lines;
+
+      std::set<int> rows = m_view->getSelectedRows();
+      for(auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt)
+      {
+        std::vector<std::string> line;
+        for(int col = COL_RUNS; col <= COL_OPTIONS; ++col)
+          line.push_back(m_model->data(m_model->index(*rowIt, col)).toString().toStdString());
+        lines.push_back(boost::algorithm::join(line, "\t"));
+      }
+
+      m_view->setClipboard(boost::algorithm::join(lines, "\n"));
+    }
+
+    /** Copy currently selected rows to the clipboard, and then delete them. */
+    void ReflMainViewPresenter::cutSelected()
+    {
+      copySelected();
+      deleteRow();
+    }
+
+    /** Paste the contents of the clipboard into the currently selected rows, or append new rows */
+    void ReflMainViewPresenter::pasteSelected()
+    {
+      const std::string text = m_view->getClipboard();
+      std::vector<std::string> lines;
+      boost::split(lines, text, boost::is_any_of("\n"));
+
+      //If we have rows selected, we'll overwrite them. If not, we'll append new rows to write to.
+      std::set<int> rows = m_view->getSelectedRows();
+      if(rows.empty())
+      {
+        //Add as many new rows as required
+        for(size_t i = 0; i < lines.size(); ++i)
+        {
+          int index = m_model->rowCount();
+          insertRow(index);
+          rows.insert(index);
+        }
+      }
+
+      //Iterate over rows and lines simultaneously, stopping when we reach the end of either
+      auto rowIt = rows.begin();
+      auto lineIt = lines.begin();
+      for(; rowIt != rows.end() && lineIt != lines.end(); rowIt++, lineIt++)
+      {
+        std::vector<std::string> values;
+        boost::split(values, *lineIt, boost::is_any_of("\t"));
+
+        //Paste as many columns as we can from this line
+        for(int col = COL_RUNS; col <= COL_OPTIONS && col < static_cast<int>(values.size()); ++col)
+          m_model->setData(m_model->index(*rowIt, col), QString::fromStdString(values[col]));
+      }
+    }
+
+    /** Searches for runs that can be used */
+    void ReflMainViewPresenter::search()
+    {
+      const std::string searchString = m_view->getSearchString();
+      const std::string searchInstr  = m_view->getSearchInstrument();
+
+      //Don't bother searching if they're not searching for anything
+      if(searchString.empty())
+        return;
+
+      try
+      {
+        auto results = m_searcher->search(searchString, searchInstr);
+        m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(results));
+        m_view->showSearch(m_searchModel);
+      }
+      catch(std::runtime_error& e)
+      {
+        m_view->giveUserCritical("Error running search:\n" + std::string(e.what()), "Search Failed");
+      }
+    }
+
+    /** Transfers the selected runs in the search results to the processing table */
+    void ReflMainViewPresenter::transfer()
+    {
+      //Build the input for the transfer strategy
+      std::map<std::string,std::string> runs;
+      auto selectedRows = m_view->getSelectedSearchRows();
+      for(auto rowIt = selectedRows.begin(); rowIt != selectedRows.end(); ++rowIt)
+      {
+        const int row = *rowIt;
+        const std::string run = m_searchModel->data(m_searchModel->index(row, 0)).toString().toStdString();
+        const std::string description = m_searchModel->data(m_searchModel->index(row, 1)).toString().toStdString();
+        runs[run] = description;
+      }
+
+      auto newRows = m_transferStrategy->transferRuns(runs);
+
+      std::map<std::string,int> groups;
+      for(auto rowIt = newRows.begin(); rowIt != newRows.end(); ++rowIt)
+      {
+        auto& row = *rowIt;
+
+        if(groups.count(row["group"]) == 0)
+          groups[row["group"]] = getUnusedGroup();
+
+        const int rowIndex = m_model->rowCount();
+        m_model->insertRow(rowIndex);
+        m_model->setData(m_model->index(rowIndex, COL_RUNS), QString::fromStdString(row["runs"]));
+        m_model->setData(m_model->index(rowIndex, COL_ANGLE), QString::fromStdString(row["theta"]));
+        m_model->setData(m_model->index(rowIndex, COL_SCALE), 1.0);
+        m_model->setData(m_model->index(rowIndex, COL_GROUP), groups[row["group"]]);
+      }
     }
 
     /** Shows the Refl Options dialog */

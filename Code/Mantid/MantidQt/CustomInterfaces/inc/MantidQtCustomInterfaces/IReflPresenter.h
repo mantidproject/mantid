@@ -40,12 +40,35 @@ namespace MantidQt
     {
     public:
       virtual ~IReflPresenter() {};
+
+      enum Flag
+      {
+        SaveFlag,
+        SaveAsFlag,
+        AppendRowFlag,
+        PrependRowFlag,
+        DeleteRowFlag,
+        ProcessFlag,
+        GroupRowsFlag,
+        OpenTableFlag,
+        NewTableFlag,
+        TableUpdatedFlag,
+        ExpandSelectionFlag,
+        OptionsDialogFlag,
+        ClearSelectedFlag,
+        CopySelectedFlag,
+        CutSelectedFlag,
+        PasteSelectedFlag,
+        SearchFlag,
+        TransferFlag,
+        ImportTableFlag,
+        ExportTableFlag,
+      };
+
       //Tell the presenter something happened
-      virtual void notify(int flag) = 0;
+      virtual void notify(IReflPresenter::Flag flag) = 0;
       virtual const std::map<std::string,QVariant>& options() const = 0;
       virtual void setOptions(const std::map<std::string,QVariant>& options) = 0;
-    private:
-
     };
   }
 }

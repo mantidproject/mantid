@@ -5,6 +5,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include <boost/scoped_ptr.hpp>
 #include <QSignalMapper>
@@ -45,12 +46,13 @@ namespace MantidQt
       virtual ~QtReflMainView();
 
       /// Name of the interface
-      static std::string name() { return "New ISIS Reflectometry (Prototype)"; }
+      static std::string name() { return "ISIS Reflectometry (Polref)"; }
       // This interface's categories.
       static QString categoryInfo() { return "Reflectometry"; }
 
       //Connect the model
       virtual void showTable(QReflTableModel_sptr model);
+      virtual void showSearch(ReflSearchModel_sptr model);
 
       //Dialog/Prompt methods
       virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue);
@@ -58,6 +60,7 @@ namespace MantidQt
       virtual void giveUserInfo(std::string prompt, std::string title);
       virtual void giveUserWarning(std::string prompt, std::string title);
       virtual void giveUserCritical(std::string prompt, std::string title);
+      virtual void showAlgorithmDialog(const std::string& algorithm);
 
       //Set the status of the progress bar
       virtual void setProgressRange(int min, int max);
@@ -68,12 +71,16 @@ namespace MantidQt
       virtual void setTableList(const std::set<std::string>& tables);
       virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument);
       virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy* hintStrategy);
+      virtual void setClipboard(const std::string& text);
 
       //Accessor methods
       virtual std::set<int> getSelectedRows() const;
+      virtual std::set<int> getSelectedSearchRows() const;
       virtual std::string getSearchInstrument() const;
       virtual std::string getProcessInstrument() const;
       virtual std::string getWorkspaceToOpen() const;
+      virtual std::string getClipboard() const;
+      virtual std::string getSearchString() const;
 
       virtual boost::shared_ptr<IReflPresenter> getPresenter() const;
 
@@ -82,8 +89,9 @@ namespace MantidQt
       virtual void initLayout();
       //the presenter
       boost::shared_ptr<IReflPresenter> m_presenter;
-      //the model
+      //the models
       QReflTableModel_sptr m_model;
+      ReflSearchModel_sptr m_searchModel;
       //the interface
       Ui::reflMainWidget ui;
       //the workspace the user selected to open
@@ -99,12 +107,22 @@ namespace MantidQt
       void on_actionDeleteRow_triggered();
       void on_actionProcess_triggered();
       void on_actionGroupRows_triggered();
+      void on_actionClearSelected_triggered();
+      void on_actionCopySelected_triggered();
+      void on_actionCutSelected_triggered();
+      void on_actionPasteSelected_triggered();
       void on_actionExpandSelection_triggered();
       void on_actionOptionsDialog_triggered();
+      void on_actionSearch_triggered();
+      void on_actionTransfer_triggered();
+      void on_actionImportTable_triggered();
+      void on_actionExportTable_triggered();
+      void on_actionHelp_triggered();
 
       void setModel(QString name);
       void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);
       void showContextMenu(const QPoint& pos);
+      void showSearchContextMenu(const QPoint& pos);
     };
 
 

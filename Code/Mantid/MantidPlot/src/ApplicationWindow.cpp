@@ -9720,7 +9720,7 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 {
   if(scriptingWindow && scriptingWindow->isExecuting())
   {
-    if( ! QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", tr("Yes"), tr("No")) == 0 )
+    if( ! (QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", tr("Yes"), tr("No")) == 0) )
     {
       ce->ignore();
       return;
@@ -16449,7 +16449,7 @@ ApplicationWindow::~ApplicationWindow()
   }
   delete current_folder;
 
-  QApplication::clipboard()->clear(QClipboard::Clipboard);
+  
 
   btnPointer->setChecked(true);
   delete mantidUI;

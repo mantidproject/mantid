@@ -1008,8 +1008,8 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
         calc_plot = [cor_result + ext, sample]
         res_plot = cor_result+'_rqw'
     else:
-        if ( scaled_container == '' ):
-            sys.exit('ERROR *** Invalid options - nothing to do!')
+        if scaled_container == '':
+            raise RuntimeError('Invalid options - nothing to do!')
         else:
             sub_result = sam_name +'Subtract_'+ can_run
             if Verbose:
@@ -1036,10 +1036,10 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
             else:
                 res_plot = sub_result + '_red'
 
-    if (PlotResult != 'None'):
+    if PlotResult != 'None':
         plotCorrResult(res_plot, PlotResult)
 
-    if ( mtd.doesExist(scaled_container) ):
+    if mtd.doesExist(scaled_container):
         sws = mtd[sample]
         cws = mtd[scaled_container]
         names = 'Sample,Can,Calc'
@@ -1077,7 +1077,9 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
                 logger.notice('Output file created : '+res_path)
 
         DeleteWorkspace(cws)
+
     EndTime('ApplyCorrections')
+    return res_plot
 
 def plotCorrResult(inWS,PlotResult):
     nHist = mtd[inWS].getNumberHistograms()

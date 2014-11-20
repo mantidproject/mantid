@@ -51,7 +51,7 @@ namespace Mantid
       m_randgen(NULL),
       m_acrossIdx(0), m_upIdx(1), m_beamIdx(3), m_beamDir(), m_srcR2(0.0),
       m_halfSampleHeight(0.0), m_halfSampleWidth(0.0), m_halfSampleThick(0.0),
-      m_maxWidthSampleFrame(0.0), m_sampleShape(NULL), m_sampleProps(NULL),
+      m_sampleShape(NULL), m_sampleProps(NULL),
       m_detHeight(-1.0), m_detWidth(-1.0), m_detThick(-1.0),
       m_tmin(-1.0), m_tmax(-1.0), m_delt(-1.0), m_foilRes(-1.0),
       m_nscatters(0), m_nruns(0), m_nevents(0),
@@ -749,6 +749,7 @@ namespace Mantid
           break;
         }
         // if point is very close surface then there may be no valid intercept so try again
+        ++ntries;
       }
       while(ntries < MAX_SCATTER_PT_TRIES);
       if(ntries == MAX_SCATTER_PT_TRIES)

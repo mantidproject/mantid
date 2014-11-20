@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtMantidWidgets/HintStrategy.h"
 
@@ -43,6 +44,7 @@ namespace MantidQt
 
       //Connect the model
       virtual void showTable(QReflTableModel_sptr model) = 0;
+      virtual void showSearch(ReflSearchModel_sptr model) = 0;
 
       //Dialog/Prompt methods
       virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue) = 0;
@@ -50,6 +52,7 @@ namespace MantidQt
       virtual void giveUserInfo(std::string prompt, std::string title) = 0;
       virtual void giveUserWarning(std::string prompt, std::string title) = 0;
       virtual void giveUserCritical(std::string prompt, std::string title) = 0;
+      virtual void showAlgorithmDialog(const std::string& algorithm) = 0;
 
       //Set the status of the progress bar
       virtual void setProgressRange(int min, int max) = 0;
@@ -60,28 +63,18 @@ namespace MantidQt
       virtual void setTableList(const std::set<std::string>& tables) = 0;
       virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument) = 0;
       virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy* hintStrategy) = 0;
+      virtual void setClipboard(const std::string& text) = 0;
 
       //Accessor methods
       virtual std::set<int> getSelectedRows() const = 0;
+      virtual std::set<int> getSelectedSearchRows() const = 0;
       virtual std::string getSearchInstrument() const = 0;
       virtual std::string getProcessInstrument() const = 0;
       virtual std::string getWorkspaceToOpen() const = 0;
+      virtual std::string getClipboard() const = 0;
+      virtual std::string getSearchString() const = 0;
 
       virtual boost::shared_ptr<IReflPresenter> getPresenter() const = 0;
-
-      static const int NoFlags             = 0;
-      static const int SaveFlag            = 1;
-      static const int SaveAsFlag          = 2;
-      static const int AppendRowFlag       = 3;
-      static const int PrependRowFlag      = 4;
-      static const int DeleteRowFlag       = 5;
-      static const int ProcessFlag         = 6;
-      static const int GroupRowsFlag       = 7;
-      static const int OpenTableFlag       = 8;
-      static const int NewTableFlag        = 9;
-      static const int TableUpdatedFlag    = 10;
-      static const int ExpandSelectionFlag = 11;
-      static const int OptionsDialogFlag   = 12;
     };
   }
 }

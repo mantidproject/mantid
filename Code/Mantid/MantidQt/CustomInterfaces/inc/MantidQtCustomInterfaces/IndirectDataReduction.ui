@@ -19,6 +19,80 @@
     <number>9</number>
    </property>
    <item>
+    <widget class="QGroupBox" name="gbC2EInstrument">
+     <property name="title">
+      <string>Instrument</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_27">
+      <property name="topMargin">
+       <number>1</number>
+      </property>
+      <item>
+       <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInst">
+        <property name="techniques" stdset="0">
+         <stringlist>
+          <string>TOF Indirect Geometry Spectroscopy</string>
+         </stringlist>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="lbAnalyser">
+        <property name="text">
+         <string>Analyser</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbAnalyser">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Select Analyser bank to use.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lbReflection">
+        <property name="text">
+         <string>Reflection</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbReflection">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Select Reflection used for experiment(s).</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -43,80 +117,6 @@
        <string>Energy Transfer</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QGroupBox" name="gbC2EInstrument">
-         <property name="title">
-          <string>Instrument</string>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_27">
-          <property name="topMargin">
-           <number>1</number>
-          </property>
-          <item>
-           <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInst">
-            <property name="techniques" stdset="0">
-             <stringlist>
-              <string>TOF Indirect Geometry Spectroscopy</string>
-             </stringlist>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="lbAnalyser">
-            <property name="text">
-             <string>Analyser</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="cbAnalyser">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="toolTip">
-             <string>Select Analyser bank to use.</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lbReflection">
-            <property name="text">
-             <string>Reflection</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="cbReflection">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="toolTip">
-             <string>Select Reflection used for experiment(s).</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
        <item>
         <widget class="QGroupBox" name="gbConvertToEnergyInput">
          <property name="title">
@@ -920,6 +920,19 @@ p, li { white-space: pre-wrap; }
           </layout>
          </widget>
         </widget>
+       </item>
+       <item>
+         <spacer name="etLayoutSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
        </item>
        <item>
         <widget class="QGroupBox" name="gbSave">
@@ -1772,7 +1785,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
       <attribute name="title">
        <string>Symmetrise</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_15">
+      <layout class="QVBoxLayout" name="verticalLayout_151">
        <item>
         <widget class="QGroupBox" name="gbSymmInput">
          <property name="title">
@@ -1863,7 +1876,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
          <property name="title">
           <string>Output</string>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout">
+         <layout class="QHBoxLayout" name="horizontalLayout1">
           <property name="margin">
            <number>6</number>
           </property>

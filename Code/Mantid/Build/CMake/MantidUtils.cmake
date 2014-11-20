@@ -61,29 +61,29 @@ endfunction( SET_TARGET_OUTPUT_DIRECTORY )
 #######################################################################
 
 #
-# NAME: COPY_PYTHON_FILES_TO_DIR
-# Adds a set of custom commands for each python file to copy
+# NAME: COPY_FILES_TO_DIR
+# Adds a set of custom commands for each file to copy
 # the given file to the destination directory
-#   - PY_FILES :: A list of python files to copy. Note you will have
+#   - FILES :: A list of files to copy. Note you will have
 #                 to quote an expanded list
 #   - SRC_DIR :: The src directory of the files to be copied
 #   - DEST_DIR :: The final directory for the copied files
 #   - INSTALLED_FILES :: An output variable containing the list of copied
 #                        files including their full paths
-function( COPY_PYTHON_FILES_TO_DIR PY_FILES SRC_DIR DEST_DIR INSTALLED_FILES )
+function( COPY_FILES_TO_DIR FILES SRC_DIR DEST_DIR INSTALLED_FILES )
     set ( COPIED_FILES ${${INSTALLED_FILES}} )
-    foreach ( PYFILE ${PY_FILES} )
-        get_filename_component( _basefilename ${PYFILE} NAME_WE )
-        set( _py_src ${SRC_DIR}/${PYFILE} )
-        set( _py_bin ${DEST_DIR}/${PYFILE} )
-        add_custom_command ( OUTPUT ${_py_bin}
-                             DEPENDS ${_py_src}
+    foreach ( _FILE ${FILES} )
+        get_filename_component( _basefilename ${_FILE} NAME_WE )
+        set( _src ${SRC_DIR}/${_FILE} )
+        set( _bin ${DEST_DIR}/${_FILE} )
+        add_custom_command ( OUTPUT ${_bin}
+                             DEPENDS ${_src}
                              COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                               ${_py_src} ${_py_bin} )
-    set ( COPIED_FILES ${COPIED_FILES} ${_py_bin} )
-    endforeach ( PYFILE )
+                               ${_src} ${_bin} )
+    set ( COPIED_FILES ${COPIED_FILES} ${_bin} )
+    endforeach ( _FILE )
     set ( ${INSTALLED_FILES} ${COPIED_FILES} PARENT_SCOPE )
-endfunction( COPY_PYTHON_FILES_TO_DIR )
+endfunction( COPY_FILES_TO_DIR )
 
 #######################################################################
 

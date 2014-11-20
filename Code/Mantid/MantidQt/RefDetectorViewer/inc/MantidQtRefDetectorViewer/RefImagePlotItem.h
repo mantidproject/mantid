@@ -31,6 +31,7 @@ namespace RefDetectorViewer
 
     Code Documentation is available at <http://doxygen.mantidproject.org>
  */
+
 class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImagePlotItem : public SpectrumView::SpectrumPlotItem
 {
 
@@ -39,19 +40,20 @@ public:
   RefImagePlotItem(const RefLimitsHandler * const limitsHandler);
 
   ~RefImagePlotItem();
-  
+
   /// Draw the image (this is called by QWT and must not be called directly.)
   virtual void draw(      QPainter    * painter,
-                    const QwtScaleMap & xMap, 
+                    const QwtScaleMap & xMap,
                     const QwtScaleMap & yMap,
                     const QRect       & canvasRect) const;
 
 private:
   const RefLimitsHandler * const m_limitsHandler;
+
 };
 
 } // namespace RefDetectorViewer
-} // namespace MantidQt 
+} // namespace MantidQt
 
 
-#endif  // REF_IMAGE_PLOT_ITEM_H 
+#endif  // REF_IMAGE_PLOT_ITEM_H

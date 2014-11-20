@@ -68,10 +68,10 @@ class Symmetrise(PythonAlgorithm):
 
         max_sample_index = sample_array_len - 1
         centre_range_len = self._positive_min_index + self._negative_min_index
-        posiive_diff_range_len = max_sample_index - self._positive_max_index
+        positive_diff_range_len = max_sample_index - self._positive_max_index
 
-        output_cut_index = max_sample_index - self._positive_min_index - posiive_diff_range_len
-        new_array_len = 2 * max_sample_index - centre_range_len - 2 * posiive_diff_range_len
+        output_cut_index = max_sample_index - self._positive_min_index - positive_diff_range_len - 1
+        new_array_len = 2 * max_sample_index - centre_range_len - 2 * positive_diff_range_len - 1
 
         if self._verbose:
             logger.notice('Sample array length = %d' % sample_array_len)
@@ -117,9 +117,9 @@ class Symmetrise(PythonAlgorithm):
             e_out = np.zeros(new_array_len)
 
             # Left hand side (reflected)
-            x_out[:output_cut_index] = -x_in[self._positive_max_index:self._positive_min_index:-1]
-            y_out[:output_cut_index] = y_in[self._positive_max_index:self._positive_min_index:-1]
-            e_out[:output_cut_index] = e_in[self._positive_max_index:self._positive_min_index:-1]
+            x_out[:output_cut_index] = -x_in[self._positive_max_index - 1:self._positive_min_index:-1]
+            y_out[:output_cut_index] = y_in[self._positive_max_index - 1:self._positive_min_index:-1]
+            e_out[:output_cut_index] = e_in[self._positive_max_index - 1:self._positive_min_index:-1]
 
             # Right hand side (copied)
             x_out[output_cut_index:] = x_in[self._negative_min_index:self._positive_max_index]
@@ -203,12 +203,14 @@ class Symmetrise(PythonAlgorithm):
 
         # Valudate X range against workspace X range
         sample_x = mtd[input_workspace_name].readX(0)
+        sample_x_min = sample_x.min()
+        sample_x_max = sample_x.max()
 
-        if x_max > sample_x[len(sample_x) - 1]:
-            issues['XMax'] = 'XMax value (%f) is greater than largest X value (%f)' % (self._x_max, sample_x[len(sample_x) - 1])
+        if x_max > sample_x_max:
+            issues['XMax'] = 'XMax value (%f) is greater than largest X value (%f)' % (x_max, sample_x_max)
 
-        if -x_min < sample_x[0]:
-            issues['XMin'] = 'Negative XMin value (%f) is less than smallest X value (%f)' % (-x_min, sample_x[0])
+        if -x_min < sample_x_min:
+            issues['XMin'] = 'Negative XMin value (%f) is less than smallest X value (%f)' % (-x_min, sample_x_min)
 
         return issues
 

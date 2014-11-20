@@ -69,12 +69,6 @@ namespace CurveFitting
 
     /// Polynomial order
     int m_n;
-
-    /// Lower x boundary.
-    double m_StartX;
-
-    /// Upper x boundary
-    double m_EndX;
   };
 
   typedef boost::shared_ptr<Polynomial> Polynomial_sptr;
