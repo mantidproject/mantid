@@ -40,7 +40,7 @@ def get_default_idf_param_list(pInstrument,synonims_list=None):
 
 
 
-def build_properties_dict(param_map,synonims) :
+def build_properties_dict(param_map,synonims,preffix='') :
     """function to build the dictionary of the keys which are expressed through other keys
 
        e.g. builds dictionary from strings in a form key1 = key2:key3  
@@ -53,18 +53,18 @@ def build_properties_dict(param_map,synonims) :
 
     for name in param_map:
        if name in synonims:
-          final_name = synonims[name];
+          final_name = preffix+str(synonims[name]);
        else:
-          final_name = name
+          final_name = preffix+str(name)
        composite_keys[final_name]=None;
 
     param_keys = composite_keys.keys();
 
     for name,val in param_map.items() :
         if name in synonims:
-            final_name = synonims[name];
+            final_name = preffix+str(synonims[name]);
         else:
-            final_name = name
+            final_name = preffix+str(name)
 
         if isinstance(val,str):  
                val = val.strip()
@@ -75,9 +75,9 @@ def build_properties_dict(param_map,synonims) :
                    composite_keys[final_name]= list();
                    for key in keys_candidates :
                        if key in synonims:
-                           rkey = synonims[key];
+                           rkey = preffix+str(synonims[key]);
                        else:
-                           rkey = key;
+                           rkey = preffix+str(key);
                        if rkey in param_keys:
                           composite_keys[final_name].append(rkey);
                        else:
@@ -159,8 +159,8 @@ def gen_setter(keyval_dict,key,val):
     """
 
     if key in keyval_dict:
-        test_key = keyval_dict[key];
-        if not isinstance(test_key,list):
+        test_val = keyval_dict[key];
+        if not isinstance(test_val,list):
             # this is temporary check, disallowing assigning values to complex properties 
             # As such, it also prohibits properties from having list values. TODO: Should be done more intelligently
             if isinstance(val,list):
@@ -170,18 +170,18 @@ def gen_setter(keyval_dict,key,val):
             return;
 
         if isinstance(val,list):
-            if len(val) != len(test_key):
-                raise KeyError('Property: {0} needs list of the length {1} to be assigned to it'.format(key,len(test_key)))
+            if len(val) != len(test_val):
+                raise KeyError('Property: {0} needs list of the length {1} to be assigned to it'.format(key,len(test_val)))
         else:
             raise KeyError(' You can not assign non-list value to list property {0}'.format(key));
         pass
 
-        for i,key in enumerate(test_key):
+
+        for i,key in enumerate(test_val):
             keyval_dict[key] = val[i];
         return;
     else:
         raise KeyError(' key with name: {0} is not in the data dictionary'.format(key));
-
 
 
 def check_instrument_name(old_name,new_name):

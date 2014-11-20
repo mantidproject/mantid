@@ -31,9 +31,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
                LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
         return mtd[tmp_ws_name].getInstrument();
 
-   #def test_build_coupled_keys_dict_simple(self):
-   #    params = ["];
-
+ 
     def test_init_reducer(self):
         
         propman=self.prop_man;
@@ -76,13 +74,13 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(len(propman.changed_properties),0);
 
         self.assertAlmostEqual(propman.van_rmm,50.9415,9);
-        self.assertRaises(KeyError,setattr,propman,'van_rmm',100);
+        self.assertRaises(AttributeError,setattr,propman,'van_rmm',100);
 
         self.assertTrue(propman.det_cal_file is None);
         propman.det_cal_file = 'a_data_file.dat'
         self.assertEqual(propman.det_cal_file,'a_data_file.dat');
 
-        #self.assertTrue(propman.map_file is not None, it is defined in IDF);
+        self.assertTrue(propman.map_file is not None, 'it is defined in IDF');
         propman.map_file = 'a_map_file'
         self.assertEqual(propman.map_file,'a_map_file.map');
 

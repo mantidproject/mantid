@@ -9,13 +9,13 @@ import os
 class DirectReductionProperties(object):
     """ Class describes basic properties, used in reduction
 
-        These properties describe basic set of properties, user should set up 
-        for reduction to work with defaults
+        These properties are main set of properties, user have to set up 
+        for reduction to work with defaults. 
     """
     def __init__(self): 
         self._wb_for_monovan_run = None;
         self._monovanadium_run   = None;
-        pass
+
 
     @property 
     def ei(self):
@@ -83,23 +83,80 @@ class DirectReductionProperties(object):
             return self._wb_for_monovan_run;
         else:
             return self._white_beam_run;
+#-----------------------------------------------------------------------------------------
+# Descriptors, providing overloads for some complex properties
+#-----------------------------------------------------------------------------------------
+class VanadiumRMM(object):
+    def __get__(self,instance,owner=None):
+        """ return rmm for vanadium """
+        return 50.9415;
+    def __set__(self,instance,value):
+        raise AttributeError(("Can not change vanadium rmm"));
+#end VanadiumRMM
+#
+class DetCalFile(object):
+    def __set__(self,instance,owner):
+          return prop_helpers.gen_getter(instance.__dict__,'det_cal_file');
 
+    def __set__(self,instance,val):
+       if val is None:
+          prop_helpers.gen_setter(instance.__dict__,'det_cal_file',None);
+          return;
+
+       if isinstance(val,api.Workspace):
+         # workspace provided
+          prop_helpers.gen_setter(instance.__dict__,'det_cal_file',val);
+          return;
+
+        # workspace name
+       if str(val) in mtd:
+          ws = mtd[str(val)];
+          prop_helpers.gen_setter(instance.__dict__,'det_cal_file',val);
+          return;
+
+       # file name probably provided
+       if isinstance(val,str):
+          prop_helpers.gen_setter(instance.__dict__,'det_cal_file',val);
+          return;
+
+
+       if isinstance(val,int):
+          file_name= common.find_file(val);
+          prop_helpers.gen_setter(instance.__dict__,'det_cal_file',file_name);
+          return;
+
+       raise NameError('Detector calibration file name can be a workspace name present in Mantid or string describing an file name');
+#end DetCalFile
+#
+class MapMaskFile(object):
+    def __init__(self,field_name,file_ext):
+        self._field_name=field_name;
+        self._file_ext  =file_ext;
+
+    def __get__(self,instance,type=None):
+          return prop_helpers.gen_getter(instance.__dict__,self._field_name);
+
+    def __set__(self,instance,value):
+        if value != None:
+           fileName, fileExtension = os.path.splitext(value)
+           if (not fileExtension):
+               value=value+self._file_ext;
+        prop_helpers.gen_setter(instance.__dict__,self._field_name,value);
+#end MapMaskFile
 
 
 
 class DirectPropertyManager(DirectReductionProperties):
     """Class provides interface to all reduction properties, present in IDF
 
-       These properties are responsible for accurate turning of the reduction
-
+       These properties are responsible for accurate turning up of the reduction
     """
 
     _class_wrapper ='_DirectPropertyManager__';
     def __init__(self,pInstrument):
 
 
-        private_properties = {'special_properties':{},
-        'subst_dict':{},'prop_allowed_values':{},'changed_properties':set(),
+        private_properties = {'descriptors':[],'subst_dict':{},'prop_allowed_values':{},'changed_properties':set(),
         'instrument':None,'file_properties':[],'abs_norm_file_properties':[],
         'prop_allowed_values':{},'abs_units_par_to_change':[],'instr_par_located':[]};
         #
@@ -121,6 +178,9 @@ class DirectPropertyManager(DirectReductionProperties):
         self.__dict__.update(param_list)
 
         # ---------------------------------------------------------------------------------------------
+        # overloaded descriptors: Their generation should be automated
+        self.__descriptors = ['van_rmm','det_cal_file','map_file','monovan_mapfile','hard_mask_file'];
+
         # file properties
         self.__file_properties = ['det_cal_file','map_file','hard_mask_file']
         self.__abs_norm_file_properties = ['monovan_mapfile']
@@ -133,13 +193,7 @@ class DirectPropertyManager(DirectReductionProperties):
 
         # properties with special(overloaded and non-standard) setters/getters: Properties name dictionary returning tuple(getter,setter)
         # if some is None, standard one is used. 
-        # TODO: this should be implemented using descriptors?
-        self.__special_properties['van_rmm']=(lambda: 50.9415,lambda val : self._raiseError('Can not change vanadium rmm')  );
-        self.__special_properties['monovan_integr_range']=(self._get_monovan_integr_range,lambda val : self._set_monovan_integr_range(val));
-        self.__special_properties['det_cal_file']=(None,lambda name: self._set_det_cal_file(name));
-        self.__special_properties['map_file']=(None,lambda name: self._set_map_file(name));
-        self.__special_properties['monovan_mapfile']=(None,lambda name: self._set_monovan_mapfile(name));
-        self.__special_properties['hard_mask_file']=(None,lambda name: self._set_hard_mask_file(name));
+        #self.__special_properties['monovan_integr_range']=(self._get_monovan_integr_range,lambda val : self._set_monovan_integr_range(val));
 
         # list of the parameters which should usually be changed by user and if not, user should be warn about it.
         self.__abs_units_par_to_change=['sample_mass','sample_rmm']
@@ -168,37 +222,26 @@ class DirectPropertyManager(DirectReductionProperties):
         #end if
 
 
-
-    def __setattr__(self,name,val):
+    def __setattr__(self,name0,val):
         """ Overloaded generic set method, disallowing non-existing properties being set.
                
            It also provides common checks for generic properties groups """ 
 
-        if self._is_private_property(name):
-            self.__dict__[name] = val;
+        if self._is_private_property(name0):
+            self.__dict__[name0] = val;
             return
 
-        # process synonyms
-        if name in self.__subst_dict:
-            name = self.__subst_dict[name]
+        if name0 in self.__subst_dict:
+            name = self.__subst_dict[name0]
+        else:
+            name =name0;
         #end
-
         # redefine generic substitutions for None
         if type(val) is str and (val is 'None' or val is 'none'):
             val = None;
         if type(val) is list and len(val) == 0:
             val = None;
-
-        # check overloaded setters:
-        if name in self.__special_properties:
-            special_getter,special_setter = self.__special_properties[name];
-            if special_setter:
-               special_setter(val);
-               self.__changed_properties.add(name);
-               return;                
-            else:
-                pass
-  
+ 
 
         # Check allowed values property if value allowed
         if name in self.__prop_allowed_values:
@@ -208,7 +251,10 @@ class DirectPropertyManager(DirectReductionProperties):
 
 
         # set property value:
-        prop_helpers.gen_setter(self.__dict__,name,val);
+        if name in self.__descriptors:
+            super(DirectPropertyManager,self).__setattr__(name,val)
+        else:
+            prop_helpers.gen_setter(self.__dict__,name,val);
         # record parameter change
         self.__changed_properties.add(name);
 
@@ -225,15 +271,6 @@ class DirectPropertyManager(DirectReductionProperties):
                 name = subst_dict[name]
            #end
 
-           # check overloaded getters:
-           overloads = tDict[self._class_wrapper+'special_properties'];
-           if name in overloads:
-                special_getter,special_setter = overloads[name];
-                if special_getter:
-                    return special_getter();
-                else:
-                    pass
-
            return prop_helpers.gen_getter(tDict,name)
        pass
 #----------------------------------------------------------------------------------------------------------------
@@ -242,47 +279,21 @@ class DirectPropertyManager(DirectReductionProperties):
         return self.__dict__[self._class_wrapper+'changed_properties'];
     changed_properties = property(getChangedProperties);
 
-#----------------------------------------------------------------------------------------------------------------
-#   special overloads
-#----------------------------------------------------------------------------------------------------------------
-    @staticmethod
-    def _raiseError(ErrorCode):
-        raise KeyError(ErrorCode)
-
 #----------------------------------------------------------------------------------
 #              Overloaded setters/getters
 #----------------------------------------------------------------------------------
-    def _set_det_cal_file(self,val):
-
-       if val is None:
-          prop_helpers.gen_setter(self.__dict__,'det_cal_file',None);
-          return;
-
-       if isinstance(val,api.Workspace):
-         # workspace provided
-          prop_helpers.gen_setter(self.__dict__,'det_cal_file',val);
-          return;
-
-        # workspace name
-       if str(val) in mtd:
-          ws = mtd[str(val)];
-          prop_helpers.gen_setter(self.__dict__,'det_cal_file',val);
-          return;
-
-       # file name probably provided
-       if isinstance(val,str):
-          prop_helpers.gen_setter(self.__dict__,'det_cal_file',val);
-          return;
-
-
-       if isinstance(val,int):
-          fiel_name= common.find_file(val);
-          prop_helpers.gen_setter(self.__dict__,'det_cal_file',fiel_name);
-          return;
-
-       raise NameError('Detector calibration file name can be a workspace name present in Mantid or string describing an file name');
-
-
+    #
+    van_rmm = VanadiumRMM();
+    #
+    det_cal_file    = DetCalFile();
+    #
+    map_file        = MapMaskFile('map_file','.map');
+    #
+    monovan_mapfile = MapMaskFile('monovan_mapfile','.map');
+    #
+    hard_mask_file  = MapMaskFile('hard_mask_file','.msk');
+    #
+ 
 
     # integration range for monochromatic vanadium,
     def _get_monovan_integr_range(self):
@@ -336,30 +347,7 @@ class DirectPropertyManager(DirectReductionProperties):
         self._save_format.append(value);
 
   
-    def _set_map_file(self,value):
-        if value != None:
-           fileName, fileExtension = os.path.splitext(value)
-           if (not fileExtension):
-               value=value+'.map'
-           prop_helpers.gen_setter(self.__dict__,'map_file',value);
 
-
-    def _set_monovan_mapfile(self,value):
-        """ set monovanadium map file name """
-        if value != None:
-           fileName, fileExtension = os.path.splitext(value)
-           if (not fileExtension):
-               value=value+'.map'
-           prop_helpers.gen_setter(self.__dict__,'monovan_mapfile',value);
-
-
-
-    def _set_hard_mask_file(self,value):
-        if value != None:
-           fileName, fileExtension = os.path.splitext(value)
-           if (not fileExtension):
-               value=value+'.msk'
-           prop_helpers.gen_setter(self.__dict__,'hard_mask_file',value);
 
 
     @property
