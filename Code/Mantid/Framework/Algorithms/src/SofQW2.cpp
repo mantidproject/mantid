@@ -96,6 +96,7 @@ namespace Mantid
         const double thetaLower = theta - halfWidth;
         const double thetaUpper = theta + halfWidth;
         const double efixed = m_EmodeProperties.getEFixed(inputWS->getDetector(i));
+
         for(size_t j = 0; j < nenergyBins; ++j)
         {
           m_progress->report("Computing polygon intersections");

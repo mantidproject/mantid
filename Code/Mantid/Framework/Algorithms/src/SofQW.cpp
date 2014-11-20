@@ -208,7 +208,7 @@ void SofQW::exec()
               std::upper_bound(verticalAxis.begin(),verticalAxis.end(),q) - verticalAxis.begin() - 1;
 
           // Add this spectra-detector pair to the mapping
-          specNumberMapping.push_back(qIndex);
+          specNumberMapping.push_back(outputWorkspace->getSpectrum(qIndex)->getSpectrumNo());
           detIDMapping.push_back(det->getID());
 
           // And add the data and it's error to that bin, taking into account the number of detectors contributing to this bin
