@@ -37,7 +37,7 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
   "PV_PLUGIN_PATH=${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}\n"
   "PATH=$PATH:$MANTIDPATH\n"
   "PYTHONPATH=$MANTIDPATH:$PYTHONPATH\n"
-  "LD_PRELOAD=${EXTRA_LDPRELOAD_LIBS}:$LD_PRELOAD\n"
+  "LD_PRELOAD=\n"
   "export MANTIDPATH PV_PLUGIN_PATH PATH PYTHONPATH LD_PRELOAD\n"
 )
 
@@ -47,7 +47,7 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
   "setenv MANTIDPATH \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
   "setenv PV_PLUGIN_PATH \"${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}\"\n"
   "setenv PATH \"\${PATH}:\${MANTIDPATH}\"\n"
-  "setenv LD_PRELOAD \"${EXTRA_LDPRELOAD_LIBS}:\${LD_PRELOAD}\"\n"
+  "setenv LD_PRELOAD \"\"\n"
   "if ($?PYTHONPATH) then\n"
   "  setenv PYTHONPATH \"\${MANTIDPATH}:\${PYTHONPATH}\"\n"
   "else\n"
@@ -55,112 +55,85 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
   "endif\n"
 )
 
+install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
+  ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
+  DESTINATION ${ETC_DIR}
+)
+
 ############################################################################
-# Pre/Post install/uninstall scripts
+# Setup file variables for pre/post installation
+# These are very different depending on the distribution so are contained
+# in the Packaging/*/scripts directory as CMake templates
 ############################################################################
-
-if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedora" ) # RHEL/Fedora
-  file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh
-    "#!/bin/sh\n"
-    "if [ ! -e $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot ]; then\n"
-    "  ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
-    "fi\n"
-    "if [ -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot ]; then\n"
-    "  mv $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot_exe\n"
-    "  ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/launch_mantidplot.sh $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot\n"
-    "fi\n"
-  )
-  # Link profile scripts on install
-  if ( ENVVARS_ON_INSTALL )
-    file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh
-      "\n"
-      "ln -s $RPM_INSTALL_PREFIX0/${ETC_DIR}/mantid.sh /etc/profile.d/mantid.sh\n"
-      "ln -s $RPM_INSTALL_PREFIX0/${ETC_DIR}/mantid.csh /etc/profile.d/mantid.csh\n"
-    )
-  endif()
-  # Uninstall
-  file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_pre_uninstall.sh "#!/bin/sh\n"
-    "if [ ! -f $RPM_INSTALL_PREFIX0/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}/libMantidParaViewSplatterPlotSMPlugin.so ];then\n"
-    "  rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
-    "fi\n"
-    "if [ -h /etc/profile.d/mantid.sh ]; then\n"
-    "  rm /etc/profile.d/mantid.sh\n"
-    "fi\n"
-    "if [ -h /etc/profile.d/mantid.csh ]; then\n"
-    "  rm /etc/profile.d/mantid.csh\n"
-    "fi\n"
-    "if [ -f $RPM_INSTALL_PREFIX0/${BIN_DIR}MantidPlot_exe  ]; then\n"
-    "  rm $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot_exe\n"
-    "fi\n"
-  )
-
-  file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh "#!/bin/sh\n"
-    "if [ ! -f $RPM_INSTALL_PREFIX0/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}/libMantidParaViewSplatterPlotSMPlugin.so ];then\n"
-    "  rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
-    "fi\n"
-    "if [ -h /etc/profile.d/mantid.sh ]; then\n"
-    "  rm /etc/profile.d/mantid.sh\n"
-    "fi\n"
-    "if [ -h /etc/profile.d/mantid.csh ]; then\n"
-    "  rm /etc/profile.d/mantid.csh\n"
-    "fi\n"
-  )
-  file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh "#!/bin/sh\n"
-    "if [ ! -f $RPM_INSTALL_PREFIX0/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}/libMantidParaViewSplatterPlotSMPlugin.so ];then\n"
-    "  rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
-    "fi\n"
-    )
-  file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh "#!/bin/sh\n"
-    "# If the install prefix contains mantid then prune empty directories.\n"
-    "# Begin extra cautious here just in case some has set the something like Prefix=/usr\n"
-    "if echo \"$RPM_INSTALL_PREFIX0\" | grep -qi mantid; then\n"
-    "  find $RPM_INSTALL_PREFIX0 -mindepth 1 -type d -empty -delete\n"
-    "  rmdir --ignore-fail-on-non-empty -p $RPM_INSTALL_PREFIX0\n"
-    "else\n"
-    "    echo Install prefix does not contain the word mantid. Empty directories NOT removed.\n"
-    "    exit 1\n"
-    "fi\n"
-  )
-  if ( "${UNIX_CODENAME}" MATCHES "Santiago" ) # el6
-    file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh "#!/bin/sh\n"
-           "scl enable mantidlibs \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}/MantidPlot_exe $*\" \n"
-         )
-  else()
-    file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh "#!/bin/sh\n"
-           "LD_LIBRARY_PATH=/usr/lib64/paraview:${LD_LIBRARY_PATH} ${CMAKE_INSTALL_PREFIX}/${BIN_DIR}/MantidPlot_exe $* \n"
-         )
-  endif()
-
-  install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh
-            DESTINATION ${BIN_DIR}
-            PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-                        GROUP_EXECUTE GROUP_READ
-                        WORLD_EXECUTE WORLD_READ
-  )
-  install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh 
-                     ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
-            DESTINATION ${ETC_DIR}
-  )
+if ( NOT MPI_BUILD )
+  set ( ENVVARS_ON_INSTALL ON CACHE BOOL
+        "Whether to include the scripts in /etc/profile.d to set the MANTIDPATH variable and add it to PATH. Turning this off allows installing locally without being root." )
+endif()
+# for shell maintainer scripts as ENVVARS_ON_INSTALL could have ON, OFF, True, False etc
+if ( ENVVARS_ON_INSTALL )
+  set ( ENVVARS_ON_INSTALL_INT 1 )
+else ()
+  set ( ENVVARS_ON_INSTALL_INT 0 )
 endif()
 
-# unset all install/uninstall scripts
-unset ( CPACK_RPM_PRE_INSTALL_SCRIPT_FILE )
-unset ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE )
-unset ( CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE )
-unset ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE )
+# Common filenames to hold maintainer scripts
+set ( PRE_INSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/preinst )
+set ( POST_INSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postinst )
+set ( PRE_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/prerm )
+set ( PRE_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postrm )
 
-# set install/uninstall scripts as desired
-if ( NOT MPI_BUILD )
-  set ( ENVVARS_ON_INSTALL ON CACHE BOOL "Whether to include the scripts in /etc/profile.d to set the MANTIDPATH variable and add it to PATH. Turning this off allows installing locally without being root." )
-  if ( ENVVARS_ON_INSTALL )
-    set ( CPACK_RPM_PRE_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh )
-    set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh )
-    set ( CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_pre_uninstall.sh )
-    set ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh )
-  else ( ENVVARS_ON_INSTALL )
-    set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh )
-    set ( CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh )
-    set ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh )
-  endif ()
-endif ( NOT MPI_BUILD )
+if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedora" ) # RHEL/Fedora
+  set ( PKG_INSTALL_PREFIX \$RPM_INSTALL_PREFIX0 ) # used in mainter scripts
 
+  if ( NOT MPI_BUILD )
+    configure_file ( Packages/rpm/scripts/rpm_pre_install.sh.in ${PRE_INSTALL_FILE} )
+    configure_file ( Packages/rpm/scripts/rpm_post_install.sh.in ${POST_INSTALL_FILE} )
+    configure_file ( Packages/rpm/scripts/rpm_pre_uninstall.sh.in ${PRE_UNINSTALL_FILE} )
+    configure_file ( Packages/rpm/scripts/rpm_post_install.sh.in ${POST_UNINSTALL_FILE} )
+    # CPack variables
+    set ( CPACK_RPM_PRE_INSTALL_SCRIPT_FILE ${PRE_INSTALL_FILE} )
+    set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${POST_INSTALL_FILE} )
+    set ( CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE ${PRE_UNINSTALL_FILE} )
+    set ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${POST_UNINSTALL_FILE} )
+  endif()
+
+  if ( "${UNIX_CODENAME}" MATCHES "Santiago" ) # el6
+    set ( MANTIDPLOT_LAUNCHER_PREFIX
+          "LD_PRELOAD=\${EXTRA_LDPRELOAD_LIBS} scl enable mantidlibs" )
+  else()
+    set ( MANTIDPLOT_LAUNCHER_PREFIX
+          "LD_PRELOAD=\${EXTRA_LDPRELOAD_LIBS} LD_LIBRARY_PATH=/usr/lib64/paraview:${LD_LIBRARY_PATH}" ) # LD_PATH hack for non-official ParaView
+  endif()
+elseif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
+  set ( PKG_INSTALL_PREFIX \$ )
+  set ( MANTIDPLOT_LAUNCHER_PREFIX
+        "LD_PRELOAD=${EXTRA_LDPRELOAD_LIBS}" )
+endif()
+
+############################################################################
+# MantidPlot launcher script
+############################################################################
+# Local dev version
+file ( WRITE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh "#!/bin/sh\n"
+  "#\n"
+  "# Launch Mantidplot using any necessary LD_PRELOAD or software collection behaviour\n"
+  "#\n"
+  "${MANTIDPLOT_LAUNCHER_PREFIX} \"./MantidPlot $*\" \n"
+)
+# Needs to be executable
+execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh"
+                  OUTPUT_QUIET ERROR_QUIET )
+# Package version
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install "#!/bin/sh\n"
+  "#\n"
+  "# Launch Mantidplot using any necessary LD_PRELOAD or software collection behaviour\n"
+  "#\n"
+  "${MANTIDPLOT_LAUNCHER_PREFIX} \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}/MantidPlot_exe $*\" \n"
+)
+
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install
+          DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh
+          PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+          GROUP_EXECUTE GROUP_READ
+          WORLD_EXECUTE WORLD_READ
+)
