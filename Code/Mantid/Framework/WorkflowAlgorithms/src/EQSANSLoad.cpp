@@ -102,7 +102,7 @@ std::string EQSANSLoad::findConfigFile(const int& run)
     Poco::DirectoryIterator end;
     for (; file_it != end; ++file_it)
     {
-      if (boost::regex_match(file_it.name(), matches, re1))
+      if (boost::regex_search(file_it.name(), matches, re1))
       {
         std::string s = matches[1];
 	int run_number = 0;
@@ -126,11 +126,11 @@ void EQSANSLoad::readRectangularMasks(const std::string& line)
   // Rectangular mask         = 7, 0; 7, 255
   boost::regex re_key("rectangular mask", boost::regex::icase);
   boost::regex re_key_alt("elliptical mask", boost::regex::icase);
-  if (boost::regex_match(line, re_key) || boost::regex_match(line, re_key_alt))
+  if (boost::regex_search(line, re_key) || boost::regex_search(line, re_key_alt))
   {
     boost::regex re_sig("=[ ]*([0-9]+)[ ]*[ ,][ ]*([0-9]+)[ ]*[ ;,][ ]*([0-9]+)[ ]*[ ,][ ]*([0-9]+)");
     boost::smatch posVec;
-    if (boost::regex_match(line, posVec, re_sig))
+    if (boost::regex_search(line, posVec, re_sig))
     {
       if (posVec.size()==5)
       {
@@ -151,11 +151,11 @@ void EQSANSLoad::readRectangularMasks(const std::string& line)
 void EQSANSLoad::readTOFcuts(const std::string& line)
 {
   boost::regex re_key("tof edge discard", boost::regex::icase);
-  if (boost::regex_match(line, re_key))
+  if (boost::regex_search(line, re_key))
   {
     boost::regex re_sig("=[ ]*([0-9]+)[ ]*[ ,][ ]*([0-9]+)");
     boost::smatch posVec;
-    if (boost::regex_match(line, posVec, re_sig))
+    if (boost::regex_search(line, posVec, re_sig))
     {
       if (posVec.size()==3)
       {
@@ -173,11 +173,11 @@ void EQSANSLoad::readTOFcuts(const std::string& line)
 void EQSANSLoad::readBeamCenter(const std::string& line)
 {
   boost::regex re_key("spectrum center", boost::regex::icase);
-  if (boost::regex_match(line, re_key))
+  if (boost::regex_search(line, re_key))
   {
     boost::regex re_sig("=[ ]*([0-9]+.[0-9]*)[ ]*[ ,][ ]*([0-9]+.[0-9]+)");
     boost::smatch posVec;
-    if (boost::regex_match(line, posVec, re_sig))
+    if (boost::regex_search(line, posVec, re_sig))
     {
       if (posVec.size()==3)
       {
@@ -195,11 +195,11 @@ void EQSANSLoad::readBeamCenter(const std::string& line)
 void EQSANSLoad::readModeratorPosition(const std::string& line)
 {
   boost::regex re_key("sample location", boost::regex::icase);
-  if (boost::regex_match(line, re_key))
+  if (boost::regex_search(line, re_key))
   {
     boost::regex re_sig("=[ ]*([0-9]+)");
     boost::smatch posVec;
-    if (boost::regex_match(line, posVec, re_sig))
+    if (boost::regex_search(line, posVec, re_sig))
     {
       if (posVec.size()==2)
       {
@@ -216,11 +216,11 @@ void EQSANSLoad::readModeratorPosition(const std::string& line)
 void EQSANSLoad::readSourceSlitSize(const std::string& line)
 {
   boost::regex re_key("wheel", boost::regex::icase);
-  if (boost::regex_match(line, re_key))
+  if (boost::regex_search(line, re_key))
   {
     boost::regex re_sig("([1-8]) wheel[ ]*([1-3])[ \\t]*=[ \\t]*(\\w+)");
     boost::smatch posVec;
-    if (boost::regex_match(line, posVec, re_sig))
+    if (boost::regex_search(line, posVec, re_sig))
     {
       if (posVec.size()==4)
       {
@@ -237,7 +237,7 @@ void EQSANSLoad::readSourceSlitSize(const std::string& line)
         num_str = posVec[3];
 	boost::regex re_size("\\w*?([0-9]+)mm");
         int slit_size = 0;
-	boost::regex_match(num_str, posVec, re_size);
+	boost::regex_search(num_str, posVec, re_size);
         if (posVec.size()==2)
         {
           num_str = posVec[1];
