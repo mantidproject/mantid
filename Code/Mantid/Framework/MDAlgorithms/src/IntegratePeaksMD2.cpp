@@ -432,7 +432,19 @@ namespace MDAlgorithms
         }
       }
 
-      if (profileFunction.compare("NoFit") != 0)
+      if (profileFunction.compare("NoFit") == 0)
+      {
+        signal = 0.;
+        for (size_t j = 0; j < numSteps; j++)
+        {
+            if (j < peakMin || j > peakMax)
+              background_total = background_total + wsProfile2D->dataY(i)[j];
+            else
+              signal = signal + wsProfile2D->dataY(i)[j];
+         }
+        errorSquared = std::fabs(signal);
+      }
+      else
       {
           API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
           findpeaks->setProperty("InputWorkspace", wsProfile2D);
@@ -514,7 +526,7 @@ namespace MDAlgorithms
         signal = 0.0;
         if (integrationOption.compare("Sum") == 0)
         {
-          for (size_t j = 0; j < numSteps; j++) if ( !boost::math::isnan(yy[j]) && !boost::math::isinf(yy[j]))signal+= yy[j];
+          for (size_t j = peakMin; j <= peakMax; j++) if ( !boost::math::isnan(yy[j]) && !boost::math::isinf(yy[j]))signal+= yy[j];
         }
         else
         {
@@ -527,7 +539,7 @@ namespace MDAlgorithms
           F.function = &Mantid::MDAlgorithms::f_eval2;
           F.params = &fun;
 
-          gsl_integration_qags (&F, x[0], x[numSteps-1], 0, 1e-7, 1000,
+          gsl_integration_qags (&F, x[peakMin], x[peakMax], 0, 1e-7, 1000,
                      w, &signal, &error);
 
           gsl_integration_workspace_free (w);
@@ -554,7 +566,8 @@ namespace MDAlgorithms
 
       g_log.information() << "Peak " << i << " at " << pos << ": signal "
         << signal << " (sig^2 " << errorSquared << "), with background "
-        << bgSignal << " (sig^2 " << bgErrorSquared << ") subtracted."
+        << bgSignal + ratio * background_total << " (sig^2 " 
+        << bgErrorSquared+ ratio * ratio * std::fabs(background_total) << ") subtracted."
         << std::endl;
 
     }
