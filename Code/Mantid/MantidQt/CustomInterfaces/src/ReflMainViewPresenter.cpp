@@ -318,6 +318,10 @@ namespace MantidQt
         }
         catch(std::exception& ex)
         {
+          //Allow two theta to be blank
+          if(ex.what() == std::string("Value for two theta could not be found in log."))
+            continue;
+
           const std::string rowNo = Mantid::Kernel::Strings::toString<int>(*it + 1);
           m_view->giveUserCritical("Error found in row " + rowNo + ":\n" + ex.what(), "Error");
           return;
@@ -631,7 +635,7 @@ namespace MantidQt
 
       double theta = 0;
 
-      const bool thetaGiven = !m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().isEmpty();
+      bool thetaGiven = !m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().isEmpty();
 
       if(thetaGiven)
         theta = m_model->data(m_model->index(rowNo, COL_ANGLE)).toDouble();
@@ -695,7 +699,8 @@ namespace MantidQt
 
       IAlgorithm_sptr algReflOne = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
       algReflOne->initialize();
-      algReflOne->setProperty("ThetaIn", theta);
+      if(thetaGiven)
+        algReflOne->setProperty("ThetaIn", theta);
 
       //Parse and set any user-specified options
       auto optionsMap = parseKeyValueString(options);
@@ -730,6 +735,12 @@ namespace MantidQt
         IvQToGroup.push_back("IvsQ_" + runNo + suffix);
         IvLamToGroup.push_back("IvsLam_" + runNo + suffix);
         algReflOne->execute();
+
+        if(!thetaGiven)
+        {
+          theta = algReflOne->getProperty("ThetaOut");
+          thetaGiven = true;
+        }
 
         const double scale = m_model->data(m_model->index(rowNo, COL_SCALE)).toDouble();
         if(scale != 1.0)
@@ -769,6 +780,10 @@ namespace MantidQt
 
         m_tableDirty = true;
       }
+
+      //Also fill in theta if needed
+      if(m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().isEmpty() && thetaGiven)
+        m_model->setData(m_model->index(rowNo, COL_ANGLE), theta);
     }
 
     /**
