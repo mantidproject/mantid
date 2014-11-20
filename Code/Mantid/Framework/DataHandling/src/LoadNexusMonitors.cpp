@@ -55,11 +55,6 @@ void LoadNexusMonitors::init()
         Kernel::Direction::Output),
     "The name of the output workspace in which to load the NeXus monitors." );
 
-  /*  declareProperty(
-    new API::WorkspaceProperty<bool>("MonitorsAsEvents", true,
-        Kernel::Direction::Input),
-        "If enabled (by default), load the monitors as events (into an EventWorkspace), as long as there is event data. If disabled, load monitors as spectra (into a Workspace2D, regardless of whether event data is found.");
-  */
   declareProperty(
     new Kernel::PropertyWithValue<bool>("MonitorsAsEvents", true, Kernel::Direction::Input),
         "If enabled (by default), load the monitors as events (into an EventWorkspace), as long as there is event data. If disabled, load monitors as spectra (into a Workspace2D, regardless of whether event data is found.");
@@ -164,8 +159,8 @@ void LoadNexusMonitors::exec()
   // only use if using event monitors
   EventWorkspace_sptr eventWS;
 
-  // With property you can make the exception that even if there's event data, monitors will be loaded as
-  // histograms (if set to false)
+  // With this property you can make the exception that even if there's event data, monitors will be loaded
+  // as histograms (if set to false)
   bool monitorsAsEvents = getProperty("MonitorsAsEvents");
   // Create the output workspace
   bool useEventMon;

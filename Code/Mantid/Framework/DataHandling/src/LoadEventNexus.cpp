@@ -1216,8 +1216,7 @@ namespace Mantid
         }
         else
         {
-          g_log.warning() << " this->runLoadMonitors !!!" << endl;
-          // this resorts to algorithm 'LoadNexusMonitors', passing the property 'MonitorsAsEvents'
+          // this resorts to child algorithm 'LoadNexusMonitors', passing the property 'MonitorsAsEvents'
           this->runLoadMonitors();
         }
       }
