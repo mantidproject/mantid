@@ -242,7 +242,7 @@ void Q1DWeighted::exec()
               center_angle += wedgeOffset;
               V3D sub_pix = V3D(pos.X(), pos.Y(), 0.0);
               double angle = fabs(sub_pix.angle( V3D(cos(center_angle), sin(center_angle), 0.0) ));
-              if ( angle < M_PI/180.0*wedgeAngle || (!isCone && fabs(M_PI-angle) < M_PI/180.0*wedgeAngle) )
+              if ( angle < M_PI/180.0*wedgeAngle/2.0 || (!isCone && fabs(M_PI-angle) < M_PI/180.0*wedgeAngle/2.0) )
               {
                 wedge_lambda_iq[iWedge][iq] += YIn[j]*w;
                 wedge_lambda_iq_err[iWedge][iq] += w*w*EIn[j]*EIn[j];

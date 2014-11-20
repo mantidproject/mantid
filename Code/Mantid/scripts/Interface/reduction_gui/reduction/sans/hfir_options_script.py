@@ -124,7 +124,12 @@ class ReductionOptions(BaseScriptElement):
         script += "AzimuthalAverage(n_bins=%g, n_subpix=%g, log_binning=%s" % (self.n_q_bins, self.n_sub_pix, str(self.log_binning))
         if self.align_log_with_decades: script += ", align_log_with_decades=%s" % str(self.align_log_with_decades)
         script += ")\n"
-        script += "IQxQy(nbins=%g)\n" % self.n_q_bins
+        
+        # If we align we decades, use more points for I(qx,qy)
+        n_xy_bins = self.n_q_bins
+        if self.log_binning and self.align_log_with_decades:
+            n_xy_bins = int(3*self.n_q_bins)
+        script += "IQxQy(nbins=%g)\n" % n_xy_bins
         
         if self.n_wedges>0:
             script += "SetWedges(number_of_wedges=%g, wedge_angle=%g, wedge_offset=%g)\n" % (self.n_wedges, self.wedge_angle, self.wedge_offset)
@@ -427,6 +432,8 @@ class ReductionOptions(BaseScriptElement):
 
         self.sample_detector_distance = ReductionOptions.sample_detector_distance
         self.detector_offset = ReductionOptions.detector_offset
+        if self.instrument_name.upper() == "GPSANS":
+            self.detector_offset = 711.0
         self.wavelength = ReductionOptions.wavelength
         self.wavelength_spread = ReductionOptions.wavelength_spread
 
