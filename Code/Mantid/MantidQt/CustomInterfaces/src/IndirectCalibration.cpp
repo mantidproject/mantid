@@ -279,6 +279,11 @@ namespace CustomInterfaces
     if(error)
       return;
 
+    QString firstFile = m_uiForm.cal_leRunNo->getFirstFilename();
+    QFileInfo firstFileInfo(firstFile);
+    QString calFileName = firstFileInfo.baseName() + "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_calib.nxs";
+
+    m_uiForm.ind_calibFile->setFileTextWithSearch(calFileName);
     m_uiForm.ckUseCalib->setChecked(true);
 
     disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmsComplete(bool)));
@@ -428,6 +433,7 @@ namespace CustomInterfaces
     reductionAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
     reductionAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
     reductionAlg->setProperty("InputFiles", files.toStdString());
+    reductionAlg->setProperty("OutputWorkspace", "__IndirectCalibration_reduction");
     reductionAlg->setProperty("DetectorRange", detRange.toStdString());
     reductionAlg->execute();
 

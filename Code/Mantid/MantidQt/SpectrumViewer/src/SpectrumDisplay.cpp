@@ -46,7 +46,10 @@ SpectrumDisplay::SpectrumDisplay(  QwtPlot*         spectrumPlot,
   m_rangeHandler(rangeHander),
   m_hGraphDisplay(hGraph),
   m_vGraphDisplay(vGraph),
-  m_imageTable(tableWidget)
+  m_pointedAtX(0.0), m_pointedAtY(0.0),
+  m_imageTable(tableWidget),
+  m_totalXMin(0.0), m_totalXMax(0.0),
+  m_totalYMin(0.0), m_totalYMax(0.0)
 {
   ColorMaps::GetColorMap( ColorMaps::HEAT,
                           256,

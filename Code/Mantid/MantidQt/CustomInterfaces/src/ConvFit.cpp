@@ -894,15 +894,7 @@ namespace IDA
     {
       // Two Lorentz
 			QString pref = prefBase;
-
-			if ( usingCompositeFunc )
-			{
-				pref += "f" + QString::number(funcIndex) + ".f" + QString::number(subIndex) + ".";
-			}
-			else
-			{
-				pref += "f" + QString::number(subIndex) + ".";
-			}
+	   	pref += "f" + QString::number(funcIndex) + ".f" + QString::number(subIndex) + ".";
 
       m_dblManager->setValue(m_properties["Lorentzian 2.Amplitude"], parameters[pref+"Amplitude"]);
       m_dblManager->setValue(m_properties["Lorentzian 2.PeakCentre"], parameters[pref+"PeakCentre"]);

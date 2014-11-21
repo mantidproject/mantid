@@ -277,7 +277,10 @@ namespace MantidQt
 			for (size_t i = 0; i < ws->getNumberHistograms(); ++i)
 			{
 				auto axis = dynamic_cast<Mantid::API::TextAxis*>(ws->getAxis(1));
-				std::string title = axis->label(i);
+        if(!axis)
+          return;
+
+        std::string title = axis->label(i);
 
 				//check if the axis labels indicate this spectrum is width data
 				size_t qLinesWidthIndex = title.find(".Width");

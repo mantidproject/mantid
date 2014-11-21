@@ -34,7 +34,9 @@ namespace IDA
    * @param parent :: the parent QWidget.
    */
   IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent) :
-    UserSubWindow(parent), m_dblEdFac(NULL), m_blnEdFac(NULL),
+    UserSubWindow(parent),
+    m_valInt(NULL), m_valDbl(NULL),
+    m_dblEdFac(NULL), m_blnEdFac(NULL),
     m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange)
   {
     // Allows us to get a handle on a tab using an enum, for example "m_tabs[ELWIN]".

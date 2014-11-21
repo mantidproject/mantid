@@ -84,6 +84,10 @@ namespace Mantid
       os << "\n"
         << "Y axis: " << YUnitLabel() << "\n";
 
+      os << "Distribution: "
+        << (isDistribution()? "True" : "False")
+        << "\n";
+
       os << ExperimentInfo::toString();
       return os.str();
     }

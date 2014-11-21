@@ -17,7 +17,7 @@ namespace CustomInterfaces
 namespace IDA
 {
   MSDFit::MSDFit(QWidget * parent) : IDATab(parent),
-    m_msdTree(NULL)
+    m_currentWsName(""), m_msdTree(NULL)
   {
   }
 
@@ -167,7 +167,7 @@ namespace IDA
     int minIndex = 0;
     int maxIndex = nHist - 1;
 
-    if (currentWsName == wsname)
+    if (m_currentWsName == wsname)
     {
       if (!plotSpec.isEmpty() && plotSpec.toInt() < nHist)
       {
@@ -214,7 +214,7 @@ namespace IDA
       showMessageBox(exc.what());
     }
 
-    currentWsName = wsname;
+    m_currentWsName = wsname;
   }
 
   void MSDFit::minChanged(double val)

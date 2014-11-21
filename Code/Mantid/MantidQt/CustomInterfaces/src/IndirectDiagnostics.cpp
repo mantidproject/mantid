@@ -156,6 +156,7 @@ namespace CustomInterfaces
     sliceAlg->setProperty("Plot", m_uiForm.slice_ckPlot->isChecked());
     sliceAlg->setProperty("Save", m_uiForm.slice_ckSave->isChecked());
     sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
+    sliceAlg->setProperty("OutputWorkspace", "IndirectDiagnostics_Workspaces");
 
     if(m_uiForm.slice_ckUseCalib->isChecked())
     {
@@ -371,6 +372,7 @@ namespace CustomInterfaces
     sliceAlg->setProperty("Plot", false);
     sliceAlg->setProperty("Save", false);
     sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
+    sliceAlg->setProperty("OutputWorkspace", "IndirectDiagnostics_Workspaces");
 
     if(m_uiForm.slice_ckUseCalib->isChecked())
     {
