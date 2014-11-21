@@ -11,6 +11,7 @@
 #include "MantidKernel/StdoutChannel.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/NetworkProxy.h"
 
 #include <Poco/Util/LoggingConfigurator.h>
 #include <Poco/Util/SystemConfiguration.h>
@@ -27,6 +28,7 @@
 #include <Poco/Environment.h>
 #include <Poco/Process.h>
 #include <Poco/String.h>
+#include <Poco/URI.h>
 #ifdef _WIN32
   #pragma warning( disable: 4250 )
 #endif
@@ -182,7 +184,8 @@ ConfigServiceImpl::ConfigServiceImpl() :
 #else
   m_user_properties_file_name("Mantid.user.properties"),
 #endif
-  m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(), m_instr_prefixes(), m_removedFlag("@@REMOVED@@")
+  m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(), m_instr_prefixes(), m_removedFlag("@@REMOVED@@"),
+  m_proxyInfo(),m_isProxySet(false)
 {
   //getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration> ;
@@ -2019,6 +2022,36 @@ bool ConfigServiceImpl::quickVatesCheck() const
     ++it;
   }
   return found;
+}
+
+/*
+Gets the system proxy information
+@url A url to match the proxy to
+@return the proxy information.
+*/
+Kernel::ProxyInfo& ConfigServiceImpl::getProxy(const std::string& url)
+{
+  if (!m_isProxySet)
+  {  
+    //set the proxy
+    //first check if the proxy is defined in the properties file
+    std::string proxyHost;
+    int proxyPort;
+    if ((getValue("proxy.host",proxyHost) == 1) && (getValue("proxy.port",proxyPort) == 1))
+    {
+      //set it from the config values
+      m_proxyInfo = ProxyInfo(proxyHost,proxyPort,true);
+    }
+    else
+    {
+      //get the system proxy
+      Poco::URI uri(url);
+      Mantid::Kernel::NetworkProxy proxyHelper;
+      m_proxyInfo = proxyHelper.getHttpProxy(uri.toString());
+    }      
+    m_isProxySet = true;
+  }
+  return m_proxyInfo;
 }
 
 /// \cond TEMPLATE
