@@ -12,9 +12,16 @@ namespace Mantid
 namespace Poldi
 {
 
-/** PoldiAnalyseResiduals : TODO: DESCRIPTION
+/** PoldiAnalyseResiduals
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    An algorithm that performs residual analysis for
+    POLDI data. It uses a modified version of the correlation
+    method implemented in PoldiAutoCorrelation.
+
+        @author Michael Wedel, Paul Scherrer Institut - SINQ
+        @date 21/11/2014
+
+    Copyright © 2014 PSI-MSS
 
     This file is part of Mantid.
 
@@ -45,11 +52,21 @@ public:
     virtual const std::string category() const;
     virtual const std::string summary() const;
 
-
 protected:
     double sumCounts(const DataObjects::Workspace2D_sptr &workspace, const std::vector<int> &workspaceIndices) const;
     size_t numberOfPoints(const DataObjects::Workspace2D_sptr &workspace, const std::vector<int> &workspaceIndices) const;
     void addValue(DataObjects::Workspace2D_sptr &workspace, double value, const std::vector<int> &workspaceIndices) const;
+
+    DataObjects::Workspace2D_sptr calculateResidualWorkspace(const DataObjects::Workspace2D_sptr &measured, const DataObjects::Workspace2D_sptr &calculated);
+    void normalizeResiduals(DataObjects::Workspace2D_sptr &residuals, const std::vector<int> &validWorkspaceIndices);
+    double relativeCountChange(const DataObjects::Workspace2D_sptr &sum, double totalMeasuredCounts);
+
+    DataObjects::Workspace2D_sptr addWorkspaces(const DataObjects::Workspace2D_sptr &lhs, const DataObjects::Workspace2D_sptr &rhs);
+    void logIteration(int iteration, double relativeChange);
+
+    bool nextIterationAllowed(int iterations, double relativeChange);
+    bool relativeChangeIsLargerThanLimit(double relativeChange);
+    bool iterationLimitReached(int iterations);
 
 private:
     void init();
