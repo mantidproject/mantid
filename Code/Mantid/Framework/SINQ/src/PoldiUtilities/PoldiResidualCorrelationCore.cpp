@@ -118,8 +118,8 @@ void PoldiResidualCorrelationCore::correctCountData() const
     double ratio = sumOfResiduals / numberOfCells;
 
     PARALLEL_FOR_NO_WSP_CHECK()
-    for(int i = 0; i < static_cast<int>(m_indices.size()); ++i) {
-        int element = getElementFromIndex(m_indices[i]);
+    for(int i = 0; i < static_cast<int>(m_detectorElements.size()); ++i) {
+        int element = m_detectorElements[i];
         for(int j = 0; j < m_timeBinCount; ++j) {
             addToCountData(element, j, -ratio);
         }
