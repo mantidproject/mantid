@@ -940,7 +940,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
 
-        if len(angle) > 1:
+        if len(angle) > 0:
             angle = float(angle)
         else:
             angle = None
