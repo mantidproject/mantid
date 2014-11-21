@@ -5,6 +5,24 @@ from mantid import config
 import math
 
 
+def _get_instrument_property_list(instrument, property_name):
+    """
+    Gets a list of properties from an instrument string property.
+
+    @param instrument Instrument object
+    @param property_name Name of property
+    @return A list of string values
+    """
+
+    raw_property_list = instrument.getStringParameter(property_name)
+    if raw_property_list is None or len(raw_property_list) == 0:
+        raise RuntimeError('Got empty list for parameter %s' % property_name)
+
+    property_list = raw_property_list[0].split(',')
+
+    return property_list
+
+
 class IndirectTransmission(PythonAlgorithm):
 
     def category(self):
@@ -16,13 +34,64 @@ class IndirectTransmission(PythonAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(name='Instrument', defaultValue='IRIS', validator=StringListValidator(['IRIS', 'OSIRIS']), doc='Instrument')
-        self.declareProperty(name='Analyser', defaultValue='graphite', validator=StringListValidator(['graphite', 'fmica']), doc='Analyser')
-        self.declareProperty(name='Reflection', defaultValue='002', validator=StringListValidator(['002', '004']), doc='Reflection')
-        self.declareProperty(name='ChemicalFormula', defaultValue='', validator=StringMandatoryValidator(), doc='Sample chemical formula')
-        self.declareProperty(name='NumberDensity', defaultValue=0.1, doc='Number denisty. Default=0.1')
-        self.declareProperty(name='Thickness', defaultValue=0.1, doc='Sample thickness. Default=0.1')
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', "", Direction.Output), doc="The name of the output workspace.")
+        self.declareProperty(name='Instrument', defaultValue='IRIS',
+                             validator=StringListValidator(['IRIS', 'OSIRIS', 'BASIS']),
+                             doc='Instrument')
+
+        self.declareProperty(name='Analyser', defaultValue='graphite',
+                             validator=StringListValidator(['graphite', 'mica', 'fmica', 'silicon']),
+                             doc='Analyser')
+
+        self.declareProperty(name='Reflection', defaultValue='002',
+                             validator=StringListValidator(['002', '004', '006', '111']),
+                             doc='Reflection')
+
+        self.declareProperty(name='ChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
+                             doc='Sample chemical formula')
+
+        self.declareProperty(name='NumberDensity', defaultValue=0.1,
+                             doc='Number denisty. Default=0.1')
+
+        self.declareProperty(name='Thickness', defaultValue=0.1,
+                             doc='Sample thickness. Default=0.1')
+
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', "", Direction.Output),
+                             doc="The name of the output workspace.")
+
+
+    def validateInputs(self):
+        """
+        Performs validation on the analyser and reflection for the selected instrument.
+        """
+        issues = dict()
+
+        instrument_name = self.getPropertyValue('Instrument')
+        analyser = self.getPropertyValue('Analyser')
+        reflection = self.getPropertyValue('Reflection')
+
+        # Get the requested instrument
+        workspace = self._create_instrument_workspace(instrument_name)
+        instrument = mtd[workspace].getInstrument()
+
+        # Check the analyser is valid for the instrument
+        valid_analysers = _get_instrument_property_list(instrument, 'analysers')
+        logger.debug('Valid analysers for instrument %s: %s' % (instrument_name, str(valid_analysers)))
+
+        if analyser not in valid_analysers:
+            issues['Analyser'] = 'Analyser is not a valid for selected instrument'
+        else:
+            # If the analyser was valid then we can check the reflection
+            reflections_param_name = 'refl-%s' % analyser
+            valid_reflections = _get_instrument_property_list(instrument, reflections_param_name)
+            logger.debug('Valid reflections for analyser %s: %s' % (analyser, str(valid_reflections)))
+
+            if reflection not in valid_reflections:
+                issues['Reflection'] = 'Reflection is not valid for selected analyser'
+
+        # Remove idf/ipf workspace
+        DeleteWorkspace(workspace)
+
+        return issues
 
 
     def PyExec(self):
@@ -37,13 +106,11 @@ class IndirectTransmission(PythonAlgorithm):
         density = self.getPropertyValue('NumberDensity')
         thickness = self.getPropertyValue('Thickness')
 
-        # Load instrument defintion file
-        idf_directory = config['instrumentDefinition.directory']
-        idf_filename = idf_directory + instrument_name + '_Definition.xml'
-        workspace = '__empty_' + instrument_name
-        LoadEmptyInstrument(OutputWorkspace=workspace, Filename=idf_filename)
+        # Create an empty instrument workspace
+        workspace = self._create_instrument_workspace(instrument_name)
 
         # Load instrument parameter file
+        idf_directory = config['instrumentDefinition.directory']
         name_stem = instrument_name + '_' + analyser + '_' + reflection
         ipf_filename = idf_directory + name_stem + '_Parameters.xml'
         LoadParameterFile(Workspace=workspace, Filename=ipf_filename)
@@ -93,8 +160,30 @@ class IndirectTransmission(PythonAlgorithm):
 
         # Remove idf/ipf workspace
         DeleteWorkspace(workspace)
+
         self.setProperty("OutputWorkspace", table_ws)
+
         EndTime('IndirectTransmission')
+
+
+    def _create_instrument_workspace(self, instrument_name):
+        """
+        Creates a workspace with the most recent version of the given instrument attached to it.
+
+        @param instrument_name Name of the instrument to load
+        @return Name of the created workspace
+        """
+
+        # Get the filename for the most recent instrument defintion
+        CreateSampleWorkspace(OutputWorkspace='__temp')
+        idf_filename = mtd['__temp'].getInstrumentFilename(instrument_name)
+        DeleteWorkspace('__temp')
+
+        # Load instrument defintion file
+        workspace = '__empty_' + instrument_name
+        LoadEmptyInstrument(OutputWorkspace=workspace, Filename=idf_filename)
+
+        return workspace
 
 
 # Register algorithm with Mantid
