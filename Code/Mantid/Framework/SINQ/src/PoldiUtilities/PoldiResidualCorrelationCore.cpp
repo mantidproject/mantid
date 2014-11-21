@@ -5,15 +5,28 @@ namespace Mantid
 namespace Poldi
 {
 
-PoldiResidualCorrelationCore::PoldiResidualCorrelationCore(Kernel::Logger &g_log) :
-    PoldiAutoCorrelationCore(g_log)
+PoldiResidualCorrelationCore::PoldiResidualCorrelationCore(Kernel::Logger &g_log, double weight) :
+    PoldiAutoCorrelationCore(g_log),
+    m_weight(weight)
 {
+}
+
+/// Returns the weight that is added to normalization counts
+double PoldiResidualCorrelationCore::getWeight() const
+{
+    return m_weight;
+}
+
+/// Sets the weight that is added to normalization counts.
+void PoldiResidualCorrelationCore::setWeight(double newWeight)
+{
+    m_weight = newWeight;
 }
 
 /// Returns norm counts (with an added weight).
 double PoldiResidualCorrelationCore::getNormCounts(int x, int y) const
 {
-    return fabs(m_normCountData->readY(x)[y]) + 0.1;
+    return fabs(m_normCountData->readY(x)[y]) + m_weight;
 }
 
 /// Calculates a scaled and weighted average signal/noise value from the supplied list.
@@ -22,18 +35,32 @@ double PoldiResidualCorrelationCore::reduceChopperSlitList(const std::vector<Man
     std::vector<double> signalToNoise(valuesWithSigma.size());
     std::transform(valuesWithSigma.begin(), valuesWithSigma.end(), signalToNoise.begin(), &UncertainValue::valueToErrorRatio);
 
-    double numberOfElements = static_cast<double>(valuesWithSigma.size());
-    double average = std::accumulate(signalToNoise.begin(), signalToNoise.end(), 0.0) / numberOfElements;
+    double average = calculateAverage(signalToNoise);
+    double absoluteAverage = fabs(average);
+    double averageDeviation = calculateAverageDeviationFromValue(signalToNoise, average);
 
-    std::vector<double> deviationFromAverage(signalToNoise.size());
-    for(size_t i = 0; i < signalToNoise.size(); ++i) {
-        deviationFromAverage[i] = fabs(signalToNoise[i] - average);
+    return average * absoluteAverage/(averageDeviation + absoluteAverage) * static_cast<double>(signalToNoise.size()) * weight;
+}
+
+/// Calculates the average of the values in a vector.
+double PoldiResidualCorrelationCore::calculateAverage(const std::vector<double> &values) const
+{
+    if(values.size() == 0) {
+        throw std::runtime_error("Cannot calculate average of 0 values.");
     }
 
-    double averageDeviation = std::accumulate(deviationFromAverage.begin(), deviationFromAverage.end(), 0.0) / numberOfElements;
+    return std::accumulate(values.begin(), values.end(), 0.0) / static_cast<double>(values.size());
+}
 
-    double absoluteAverage = fabs(average);
-    return average * absoluteAverage/(averageDeviation + absoluteAverage) * numberOfElements * weight;
+/// Calculates the average absolute deviation from the supplied value
+double PoldiResidualCorrelationCore::calculateAverageDeviationFromValue(const std::vector<double> &values, double value) const
+{
+    std::vector<double> deviationFromValue(values.size());
+    for(size_t i = 0; i < values.size(); ++i) {
+        deviationFromValue[i] = fabs(values[i] - value);
+    }
+
+    return calculateAverage(deviationFromValue);
 }
 
 /// Background is the sum of correlation counts, sum of counts is discarded.
@@ -44,23 +71,8 @@ double PoldiResidualCorrelationCore::calculateCorrelationBackground(double sumOf
     return sumOfCorrelationCounts;
 }
 
-/**
- * Distributes correlation counts into count data and corrects correlation spectrum
- *
- * This method does three things: First it distributes the intensity of the correlation spectrum
- * for a given d-value over all places in the detector where it may belong. After that it sums
- * the new residuals and distributes them equally over all points of the 2D data.
- *
- * After a new summation of those corrected residuals, the correlation spectrum is corrected
- * accordingly.
- *
- * Please note that this method modifies the stored count data.
- *
- * @param correctedCorrelatedIntensities :: Corrected correlation spectrum of the residuals.
- * @param dValues :: d-values in reverse order.
- * @return Final corrected correlation spectrum of residuals.
- */
-DataObjects::Workspace2D_sptr PoldiResidualCorrelationCore::finalizeCalculation(const std::vector<double> &correctedCorrelatedIntensities, const std::vector<double> &dValues) const
+/// Distributes correlation counts over all points that are possible for a given d-value.
+void PoldiResidualCorrelationCore::distributeCorrelationCounts(const std::vector<double> &correctedCorrelatedIntensities, const std::vector<double> &dValues) const
 {
     const std::vector<double> chopperSlits(m_chopper->slitTimes());
 
@@ -96,9 +108,13 @@ DataObjects::Workspace2D_sptr PoldiResidualCorrelationCore::finalizeCalculation(
             }
         }
     }
+}
 
+/// Modifies count data so that the sum is zero.
+void PoldiResidualCorrelationCore::correctCountData() const
+{
     double sumOfResiduals = getSumOfCounts(m_timeBinCount, m_detectorElements);
-    double numberOfCells = static_cast<double>(m_timeBinCount * (m_detectorElements.size()));
+    double numberOfCells = static_cast<double>(m_timeBinCount * m_detectorElements.size());
     double ratio = sumOfResiduals / numberOfCells;
 
     PARALLEL_FOR_NO_WSP_CHECK()
@@ -108,8 +124,30 @@ DataObjects::Workspace2D_sptr PoldiResidualCorrelationCore::finalizeCalculation(
             addToCountData(element, j, -ratio);
         }
     }
+}
 
-    sumOfResiduals = getSumOfCounts(m_timeBinCount, m_detectorElements);
+/**
+ * Distributes correlation counts into count data and corrects correlation spectrum
+ *
+ * This method does three things: First it distributes the intensity of the correlation spectrum
+ * for a given d-value over all places in the detector where it may belong. After that it sums
+ * the new residuals and distributes them equally over all points of the 2D data.
+ *
+ * After a new summation of those corrected residuals, the correlation spectrum is corrected
+ * accordingly.
+ *
+ * Please note that this method modifies the stored count data.
+ *
+ * @param correctedCorrelatedIntensities :: Corrected correlation spectrum of the residuals.
+ * @param dValues :: d-values in reverse order.
+ * @return Final corrected correlation spectrum of residuals.
+ */
+DataObjects::Workspace2D_sptr PoldiResidualCorrelationCore::finalizeCalculation(const std::vector<double> &correctedCorrelatedIntensities, const std::vector<double> &dValues) const
+{
+    distributeCorrelationCounts(correctedCorrelatedIntensities, dValues);
+    correctCountData();
+
+    double sumOfResiduals = getSumOfCounts(m_timeBinCount, m_detectorElements);
 
     std::vector<double> newCorrected(correctedCorrelatedIntensities.size());
     for(size_t i = 0; i < correctedCorrelatedIntensities.size(); ++i) {
