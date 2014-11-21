@@ -47,23 +47,13 @@ public:
 
 
 protected:
-    void setMeasuredCounts(const DataObjects::Workspace2D_sptr &measuredCounts);
-    void setFittedCounts(const DataObjects::Workspace2D_sptr &fittedCounts);
-    void setInstrumentFromWorkspace(const DataObjects::Workspace2D_const_sptr &instrumentWorkspace);
-
-    double sumCounts(const DataObjects::Workspace2D_sptr &workspace) const;
-    size_t numberOfPoints(const DataObjects::Workspace2D_sptr &workspace) const;
-    void addValue(DataObjects::Workspace2D_sptr &workspace, double value) const;
+    double sumCounts(const DataObjects::Workspace2D_sptr &workspace, const std::vector<int> &workspaceIndices) const;
+    size_t numberOfPoints(const DataObjects::Workspace2D_sptr &workspace, const std::vector<int> &workspaceIndices) const;
+    void addValue(DataObjects::Workspace2D_sptr &workspace, double value, const std::vector<int> &workspaceIndices) const;
 
 private:
     void init();
     void exec();
-
-    DataObjects::Workspace2D_sptr m_measured;
-    DataObjects::Workspace2D_sptr m_fitted;
-    DataObjects::Workspace2D_sptr m_difference;
-
-    PoldiInstrumentAdapter_sptr m_instrument;
 };
 
 

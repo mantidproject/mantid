@@ -23,11 +23,7 @@ DECLARE_ALGORITHM(PoldiAnalyseResiduals)
 /** Constructor
    */
 PoldiAnalyseResiduals::PoldiAnalyseResiduals() :
-    Algorithm(),
-    m_measured(),
-    m_fitted(),
-    m_difference(),
-    m_instrument()
+    Algorithm()
 {
 }
 
@@ -53,55 +49,37 @@ const std::string PoldiAnalyseResiduals::category() const { return "SINQ\\Poldi"
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string PoldiAnalyseResiduals::summary() const { return "Analysis of residuals after fitting POLDI 2D-spectra."; }
 
-void PoldiAnalyseResiduals::setMeasuredCounts(const DataObjects::Workspace2D_sptr &measuredCounts)
-{
-    m_measured = measuredCounts;
-}
-
-void PoldiAnalyseResiduals::setFittedCounts(const DataObjects::Workspace2D_sptr &fittedCounts)
-{
-    m_fitted = fittedCounts;
-}
-
-void PoldiAnalyseResiduals::setInstrumentFromWorkspace(const DataObjects::Workspace2D_const_sptr &instrumentWorkspace)
-{
-    m_instrument = boost::make_shared<PoldiInstrumentAdapter>(instrumentWorkspace);
-}
-
-double PoldiAnalyseResiduals::sumCounts(const DataObjects::Workspace2D_sptr &workspace) const
+/// Sums the counts of all spectra specified by the supplied list of workspace indices.
+double PoldiAnalyseResiduals::sumCounts(const DataObjects::Workspace2D_sptr &workspace, const std::vector<int> &workspaceIndices) const
 {
     double sum = 0.0;
-    for(size_t i = 0; i < workspace->getNumberHistograms(); ++i) {
-        if(!workspace->getDetector(i)->isMasked()) {
-            const MantidVec &counts = workspace->readY(i);
-            sum += std::accumulate(counts.begin(), counts.end(), 0.0);
-        }
+    for(size_t i = 0; i < workspaceIndices.size(); ++i) {
+        const MantidVec &counts = workspace->readY(workspaceIndices[i]);
+        sum += std::accumulate(counts.begin(), counts.end(), 0.0);
     }
 
     return sum;
 }
 
-size_t PoldiAnalyseResiduals::numberOfPoints(const DataObjects::Workspace2D_sptr &workspace) const
+/// Counts the number of values in each spectrum specified by the list of workspace indices.
+size_t PoldiAnalyseResiduals::numberOfPoints(const DataObjects::Workspace2D_sptr &workspace, const std::vector<int> &workspaceIndices) const
 {
     size_t sum = 0;
-    for(size_t i = 0; i < workspace->getNumberHistograms(); ++i) {
-        if(!workspace->getDetector(i)->isMasked()) {
-            const MantidVec &counts = workspace->readY(i);
-            sum += counts.size();
-        }
+    for(size_t i = 0; i < workspaceIndices.size(); ++i) {
+        const MantidVec &counts = workspace->readY(workspaceIndices[i]);
+        sum += counts.size();
     }
 
-    return sum;// - 500;
+    return sum;
 }
 
-void PoldiAnalyseResiduals::addValue(DataObjects::Workspace2D_sptr &workspace, double value) const
+/// Adds the specified value to all spectra specified by the given workspace indices.
+void PoldiAnalyseResiduals::addValue(DataObjects::Workspace2D_sptr &workspace, double value, const std::vector<int> &workspaceIndices) const
 {
-    for(size_t i = 0; i < workspace->getNumberHistograms(); ++i) {
-        if(!workspace->getDetector(i)->isMasked()) {
-            MantidVec &counts = workspace->dataY(i);
-            for(size_t i = 0; i < counts.size(); ++i) {
-                counts[i] += value;
-            }
+    for(size_t i = 0; i < workspaceIndices.size(); ++i) {
+        MantidVec &counts = workspace->dataY(workspaceIndices[i]);
+        for(size_t j = 0; j < counts.size(); ++j) {
+            counts[j] += value;
         }
     }
 }
@@ -125,34 +103,38 @@ void PoldiAnalyseResiduals::init()
    */
 void PoldiAnalyseResiduals::exec()
 {
-    setMeasuredCounts(getProperty("MeasuredCountData"));
-    setFittedCounts(getProperty("FittedCountData"));
+    DataObjects::Workspace2D_sptr measured = getProperty("MeasuredCountData");
+    DataObjects::Workspace2D_sptr calculated = getProperty("FittedCountData");
 
-    setInstrumentFromWorkspace(m_measured);
+    PoldiInstrumentAdapter_sptr poldiInstrument = boost::make_shared<PoldiInstrumentAdapter>(measured);
+    // Dead wires need to be taken into account
+    PoldiAbstractDetector_sptr deadWireDetector = boost::make_shared<PoldiDeadWireDecorator>(measured->getInstrument(), poldiInstrument->detector());
 
-    PoldiResidualCorrelationCore core(g_log);
-    core.setInstrument(PoldiAbstractDetector_sptr(new PoldiDeadWireDecorator(m_measured->getInstrument(), m_instrument->detector())), m_instrument->chopper());
-    core.setWavelengthRange(1.1, 5.0);
+    // Since the valid workspace indices are required for some calculations, we extract and keep them
+    const std::vector<int> &validWorkspaceIndices = deadWireDetector->availableElements();
 
-    double totalMeasured = sumCounts(m_measured);
-    double totalFitted = sumCounts(m_fitted);
-    double numberOfDataPoints = static_cast<double>(numberOfPoints(m_measured));
+    double totalMeasured = sumCounts(measured, validWorkspaceIndices);
+    double totalFitted = sumCounts(calculated, validWorkspaceIndices);
+    double numberOfDataPoints = static_cast<double>(numberOfPoints(measured, validWorkspaceIndices));
 
     double difference = (totalMeasured - totalFitted) / numberOfDataPoints;
 
     //DataObjects::Workspace2D_sptr fittedDifference
-    addValue(m_fitted, difference);
+    addValue(calculated, difference, validWorkspaceIndices);
 
 
     IAlgorithm_sptr minus = createChildAlgorithm("Minus");
-    minus->setProperty("LHSWorkspace", m_measured);
-    minus->setProperty("RHSWorkspace", m_fitted);
+    minus->setProperty("LHSWorkspace", measured);
+    minus->setProperty("RHSWorkspace", calculated);
     minus->execute();
 
     MatrixWorkspace_sptr fg = minus->getProperty("OutputWorkspace");
     DataObjects::Workspace2D_sptr residuals = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(fg);
 
-    DataObjects::Workspace2D_sptr sum = core.calculate(residuals, m_fitted);
+    PoldiResidualCorrelationCore core(g_log, 0.1);
+    core.setInstrument(deadWireDetector, poldiInstrument->chopper());
+    core.setWavelengthRange(1.1, 5.0);
+    DataObjects::Workspace2D_sptr sum = core.calculate(residuals, calculated);
 
     const MantidVec &corrCounts = sum->readY(0);
     double csum = 0.0;
@@ -171,7 +153,7 @@ void PoldiAnalyseResiduals::exec()
     size_t iterations = 1;
 
     while(percChange > 1.0 && iterations < maxIterations) {
-        DataObjects::Workspace2D_sptr corr = core.calculate(residuals, m_fitted);
+        DataObjects::Workspace2D_sptr corr = core.calculate(residuals, calculated);
 
         const MantidVec &corrCounts = corr->readY(0);
         double csum = 0.0;
@@ -191,7 +173,7 @@ void PoldiAnalyseResiduals::exec()
         ++iterations;
     }
 
-    addValue(m_fitted, -difference);
+    addValue(calculated, -difference, validWorkspaceIndices);
 
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(sum));
 }
