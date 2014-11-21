@@ -102,23 +102,24 @@ if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedor
           "LD_PRELOAD=\${EXTRA_LDPRELOAD_LIBS} scl enable mantidlibs" )
   else()
     set ( MANTIDPLOT_LAUNCHER_PREFIX
-          "LD_PRELOAD=\${EXTRA_LDPRELOAD_LIBS} LD_LIBRARY_PATH=/usr/lib64/paraview:${LD_LIBRARY_PATH}" ) # LD_PATH hack for non-official ParaView
+          "LD_PRELOAD=\${EXTRA_LDPRELOAD_LIBS} LD_LIBRARY_PATH=/usr/lib64/paraview:${LD_LIBRARY_PATH} eval" ) # LD_PATH hack for non-official ParaView
   endif()
 elseif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
   set ( PKG_INSTALL_PREFIX \$ )
   set ( MANTIDPLOT_LAUNCHER_PREFIX
-        "LD_PRELOAD=${EXTRA_LDPRELOAD_LIBS}" )
+        "LD_PRELOAD=${EXTRA_LDPRELOAD_LIBS} eval" )
 endif()
 
 ############################################################################
 # MantidPlot launcher script
 ############################################################################
 # Local dev version
-file ( WRITE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh "#!/bin/sh\n"
+file ( WRITE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh "#!/bin/bash\n"
   "#\n"
   "# Launch Mantidplot using any necessary LD_PRELOAD or software collection behaviour\n"
   "#\n"
-  "${MANTIDPLOT_LAUNCHER_PREFIX} \"./MantidPlot $*\" \n"
+  "SCRIPTDIR=$(dirname $(readlink -f \"$0\"))\n"
+  "${MANTIDPLOT_LAUNCHER_PREFIX} \"\$SCRIPTDIR/MantidPlot $*\" \n"
 )
 # Needs to be executable
 execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh"
