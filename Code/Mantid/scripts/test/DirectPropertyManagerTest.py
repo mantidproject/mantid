@@ -17,7 +17,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
     def setUp(self):
         if self.prop_man == None or type(self.prop_man) != type(DirectPropertyManager):
-            self.prop_man  = DirectPropertyManager(self.getInstrument("MAR"));
+            self.prop_man  = DirectPropertyManager("MAR");
     def tearDown(self):
         pass
 
@@ -91,6 +91,8 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertFalse(propman.monovan_mapfile is None," Monovan map file by default is defined");
         propman.monovan_mapfile = 'a_monovan_map_file'
         self.assertEqual(propman.monovan_mapfile,'a_monovan_map_file.map');
+        propman.monovan_mapfile = 'the_monovan_map_file.rst'
+        self.assertEqual(propman.monovan_mapfile,'the_monovan_map_file.rst');
 
 
         prop_changed = propman.changed_properties;
@@ -122,6 +124,35 @@ class DirectPropertyManagerTest(unittest.TestCase):
     #    self.assertEqual(tReducer.van_mass,200);
     #    self.assertEqual(tReducer.det_cal_file,None);
     #    self.assertAlmostEqual(tReducer.van_sig,1.,7)
+
+    def test_set_spectra_to_mon(self):
+        propman = self.prop_man
+
+        self.assertTrue(propman.spectra_to_monitors_list is None);
+
+        propman.spectra_to_monitors_list = 35;
+        self.assertTrue(isinstance(propman.spectra_to_monitors_list,list));
+        self.assertEquals(35,propman.spectra_to_monitors_list[0]);
+
+        propman.spectra_to_monitors_list = None;
+        self.assertTrue(propman.spectra_to_monitors_list is None);
+        propman.spectra_to_monitors_list = 'None';
+        self.assertTrue(propman.spectra_to_monitors_list is None);
+        propman.spectra_to_monitors_list = [];
+        self.assertTrue(propman.spectra_to_monitors_list is None);
+
+        propman.spectra_to_monitors_list = '467';
+        self.assertEquals(467,propman.spectra_to_monitors_list[0]);
+
+        propman.spectra_to_monitors_list = '467,444';
+        self.assertEquals(467,propman.spectra_to_monitors_list[0]);
+        self.assertEquals(444,propman.spectra_to_monitors_list[1]);
+
+        propman.spectra_to_monitors_list = ['467','444'];
+        self.assertEquals(467,propman.spectra_to_monitors_list[0]);
+        self.assertEquals(444,propman.spectra_to_monitors_list[1]);
+
+
 
 
 
@@ -322,35 +353,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
     #    tReducer.test_name='';
     #    tReducer.save_results(pws,'ofn')
     #    self.assertEquals(file_long_name,tReducer.test_name)
-
-    #def test_set_spectra_to_mon(self):
-    #    tReducer = self.reducer;
-
-    #    self.assertTrue(tReducer.spectra_to_monitors_list is None);
-
-    #    tReducer.spectra_to_monitors_list = 35;
-    #    self.assertTrue(isinstance(tReducer.spectra_to_monitors_list,list));
-    #    self.assertEquals(35,tReducer.spectra_to_monitors_list[0]);
-
-    #    tReducer.spectra_to_monitors_list = None;
-    #    self.assertTrue(tReducer.spectra_to_monitors_list is None);
-    #    tReducer.spectra_to_monitors_list = 'None';
-    #    self.assertTrue(tReducer.spectra_to_monitors_list is None);
-    #    tReducer.spectra_to_monitors_list = [];
-    #    self.assertTrue(tReducer.spectra_to_monitors_list is None);
-
-    #    tReducer.spectra_to_monitors_list = '467';
-    #    self.assertEquals(467,tReducer.spectra_to_monitors_list[0]);
-
-    #    tReducer.spectra_to_monitors_list = '467,444';
-    #    self.assertEquals(467,tReducer.spectra_to_monitors_list[0]);
-    #    self.assertEquals(444,tReducer.spectra_to_monitors_list[1]);
-
-    #    tReducer.spectra_to_monitors_list = ['467','444'];
-    #    self.assertEquals(467,tReducer.spectra_to_monitors_list[0]);
-    #    self.assertEquals(444,tReducer.spectra_to_monitors_list[1]);
-
-
 
 
     #def test_process_copy_spectra_to_monitors(self):

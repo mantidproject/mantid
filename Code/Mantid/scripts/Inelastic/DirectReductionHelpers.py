@@ -1,6 +1,30 @@
 """
 Set of functions to assist with processing instrument parameters relevant to reduction. 
 """
+class ComplexProperty(object):
+    """ Class describes property which depends on other properties and have values, stored in other properties """ 
+    def __init__(self,other_prop_list):
+        self._other_prop = other_prop_list;
+ 
+    def __get__(self,spec_dict,owner=None):
+        """ return complex properties list """
+        rez = list();
+        for key in self._other_prop:
+            rez.append(spec_dict[key]);
+        return rez;
+    def __set__(self,spec_dict,value):
+        if len(value) != len(self._other_prop):
+            raise KeyError("Complex property values can be set equal to the same length values list");
+
+        for i,key in enumerate(self._other_prop):
+                spec_dict[key] =value[i];
+        return;
+
+    def len(self):
+        return len(self._other_prop);
+#end ComplexProperty
+
+
 
 def get_default_parameter(instrument, name):
         """ Function gets the value of a default instrument parameter and 
@@ -41,24 +65,28 @@ def get_default_idf_param_list(pInstrument,synonims_list=None):
 
 
 def build_properties_dict(param_map,synonims,preffix='') :
-    """function to build the dictionary of the keys which are expressed through other keys
+    """ function builds the properties list from the properties strings obtained from Insturment_Parameters.xml file
+              
+       The properties, which have simple values are added to dictionary in the form:
+       properties_dict[prop_name]=(False,value);
 
-       e.g. builds dictionary from strings in a form key1 = key2:key3  
-       in the form key1 = ['key2','key3'] 
+       The properties, expressed trough the values of other properties 
+       e.g. strings in a form key1 = key2:key3  
+       are added to the dictionary in the form:
+       in the form properties_dict[key1]=(True,['key2','key3'])
 
-    """
- 
+    """ 
     # dictionary used for substituting composite keys.
-    composite_keys = dict();
+    properties_dict = dict();
 
     for name in param_map:
        if name in synonims:
           final_name = preffix+str(synonims[name]);
        else:
           final_name = preffix+str(name)
-       composite_keys[final_name]=None;
+       properties_dict[final_name]=None;
 
-    param_keys = composite_keys.keys();
+    param_keys = properties_dict.keys();
 
     for name,val in param_map.items() :
         if name in synonims:
@@ -72,24 +100,34 @@ def build_properties_dict(param_map,synonims,preffix='') :
                n_keys = len(keys_candidates)
                #
                if n_keys>1 : # this is the property we want to modify
-                   composite_keys[final_name]= list();
+                   result=list();
                    for key in keys_candidates :
                        if key in synonims:
                            rkey = preffix+str(synonims[key]);
                        else:
                            rkey = preffix+str(key);
                        if rkey in param_keys:
-                          composite_keys[final_name].append(rkey);
+                          result.append(rkey);
                        else:
                           raise KeyError('Substitution key : {0} is not in the list of allowed keys'.format(rkey));
+                   properties_dict[final_name]=ComplexProperty(result)
                else:
-                   composite_keys[final_name] = keys_candidates[0];
+                   properties_dict[final_name] =keys_candidates[0];
         else:
-            composite_keys[final_name]=val;
+            properties_dict[final_name]=val;
 
-    return composite_keys
+    return properties_dict
 
 
+def extract_non_system_names(names_list):
+    """ The function processes the input list and returns 
+        the list with names which do not have the system framing (leading __)                  
+    """
+    result = list();
+    for name in names_list:
+        if name[:2] != '__':
+            result.append(name)
+    return result
 
 def build_subst_dictionary(synonims_list=None) :
     """Function to process "synonims_list" in the instrument parameters string, used to support synonyms in the reduction script
@@ -134,19 +172,19 @@ def gen_getter(keyval_dict,key):
     """
 
     if key in keyval_dict:
-        test_val = keyval_dict[key];
- 
+        a_val= keyval_dict[key];
+        if type(a_val) is ComplexProperty:
+            return a_val.__get__(keyval_dict);
+        else:
+            return a_val
 
-        if not isinstance(test_val,list):
             return test_val;
-
-        fin_val = list();
-        for ik in test_val:
-            fin_val.append(keyval_dict[ik]);
-        return fin_val;
-
+        #end
     else:
-        raise KeyError(' key with name: {0} is not in the data dictionary'.format(key));
+        raise KeyError('Property with name: {0} is not among the class properties '.format(key));
+    #end
+
+
 
 def gen_setter(keyval_dict,key,val):
     """ function sets value to dictionary with substitution 
@@ -160,28 +198,16 @@ def gen_setter(keyval_dict,key,val):
 
     if key in keyval_dict:
         test_val = keyval_dict[key];
-        if not isinstance(test_val,list):
-            # this is temporary check, disallowing assigning values to complex properties 
-            # As such, it also prohibits properties from having list values. TODO: Should be done more intelligently
-            if isinstance(val,list):
-                raise KeyError(' Key {0} can not assigned a list value'.format(key));
-            else:
-                keyval_dict[key] = val;
-            return;
-
-        if isinstance(val,list):
-            if len(val) != len(test_val):
-                raise KeyError('Property: {0} needs list of the length {1} to be assigned to it'.format(key,len(test_val)))
+        if type(test_val) is ComplexProperty:
+            if not isinstance(val,list):
+                raise KeyError(' You can not assign non-list value to complex property {0}'.format(key));
+            pass
+            # Assigning values for composite function to the function components
+            test_val.__set__(keyval_dict,val);
         else:
-            raise KeyError(' You can not assign non-list value to list property {0}'.format(key));
-        pass
-
-
-        for i,key in enumerate(test_val):
-            keyval_dict[key] = val[i];
-        return;
+           keyval_dict[key] = val;
     else:
-        raise KeyError(' key with name: {0} is not in the data dictionary'.format(key));
+        raise KeyError(' Property with name: {0} is not among defined properties '.format(key));
 
 
 def check_instrument_name(old_name,new_name):

@@ -1,7 +1,7 @@
 from mantid.simpleapi import *
 from mantid import api
 import DirectReductionHelpers as prop_helpers
-import inspect
+import CommonFunctions as common
 import os
 
 
@@ -12,10 +12,20 @@ class DirectReductionProperties(object):
         These properties are main set of properties, user have to set up 
         for reduction to work with defaults. 
     """
-    def __init__(self): 
-        self._wb_for_monovan_run = None;
-        self._monovanadium_run   = None;
+    def __init__(self,InsturmentName,run_number=None,wb_run_number=None): 
+        object.__setattr__(self,'_run_number',run_number);
+        object.__setattr__(self,'_wb_run_number',wb_run_number);
 
+        object.__setattr__(self,'_monovan_run_number',None);
+        object.__setattr__(self,'_wb_for_monovan_run',None);
+
+        object.__setattr__(self,'_ei',None)
+
+        object.__setattr__(self,'_pInstrument',self._set_instrument(InsturmentName,run_number,wb_run_number));
+
+    @property 
+    def instrument(self):
+        return self._pInstrument;
 
     @property 
     def ei(self):
@@ -49,6 +59,8 @@ class DirectReductionProperties(object):
     @property
     def run_number(self):
         """ run number to process or list of the run numbers """
+        if self._run_number is None:
+            raise KeyError("Run number has not been set")
         return _run_number;
 
     @run_number.setter
@@ -58,7 +70,10 @@ class DirectReductionProperties(object):
 
     @property
     def wb_run_number(self):
+        if self._wb_run_number is None:
+            raise KeyError("White beam run number has not been set")
         return _wb_run_number;
+
     @wb_run_number.setter
     def wb_run_number(self,value):
         pass;
@@ -67,7 +82,10 @@ class DirectReductionProperties(object):
     @property 
     def monovanadium_run(self): 
         """ run number for monochromatic vanadium used in normalization """
-        return _monovanadium_run;
+        if self._wb_run_number is None:
+            raise KeyError("White beam run number has not been set")
+
+        return _monovan_run;
 
     @monovanadium_run.setter
     def monovanadium_run(self,value): 
@@ -83,10 +101,23 @@ class DirectReductionProperties(object):
             return self._wb_for_monovan_run;
         else:
             return self._white_beam_run;
+    # 
+    def _set_instrument(self,InstrumentName,run_number,wb_run_number):
+        """ test method used to obtain default instrument for testing """
+        idf_dir = config.getString('instrumentDefinition.directory')
+        idf_file=api.ExperimentInfo.getInstrumentFilename(InstrumentName)
+        tmp_ws_name = '__empty_' + InstrumentName
+        if not mtd.doesExist(tmp_ws_name):
+               LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
+        return mtd[tmp_ws_name].getInstrument();
+
+
+
 #-----------------------------------------------------------------------------------------
-# Descriptors, providing overloads for some complex properties
+# Descriptors, providing overloads for some complex properties in DirectPropertyManager
 #-----------------------------------------------------------------------------------------
 class VanadiumRMM(object):
+    """ define constant static rmm for vanadium """ 
     def __get__(self,instance,owner=None):
         """ return rmm for vanadium """
         return 50.9415;
@@ -95,13 +126,11 @@ class VanadiumRMM(object):
 #end VanadiumRMM
 #
 class DetCalFile(object):
+    """ property describes various sources for the detector calibration file """
     def __set__(self,instance,owner):
           return prop_helpers.gen_getter(instance.__dict__,'det_cal_file');
 
     def __set__(self,instance,val):
-       if val is None:
-          prop_helpers.gen_setter(instance.__dict__,'det_cal_file',None);
-          return;
 
        if isinstance(val,api.Workspace):
          # workspace provided
@@ -129,9 +158,12 @@ class DetCalFile(object):
 #end DetCalFile
 #
 class MapMaskFile(object):
-    def __init__(self,field_name,file_ext):
+    """ common method to wrap around an auxiliary file name """
+    def __init__(self,field_name,file_ext,doc_string=None):
         self._field_name=field_name;
         self._file_ext  =file_ext;
+        if not(doc_string is None):
+            self.__doc__ = doc_string;
 
     def __get__(self,instance,type=None):
           return prop_helpers.gen_getter(instance.__dict__,self._field_name);
@@ -144,8 +176,83 @@ class MapMaskFile(object):
         prop_helpers.gen_setter(instance.__dict__,self._field_name,value);
 #end MapMaskFile
 
+class MonovanIntegrationRange(object):
+    """ integration range for monochromatic vanadium 
+
+        Defined either directly or as the function of the incident energy(s)
+
+        If list of incident energies is provided, map or ranges is returned 
+    """
+    def __init__(self):
+        pass
+
+    def __get__(self,instance,type=None):
+        if self.monovan_integr_range is None:
+            ei = instance.incident_energy
+            range = [instance.monovan_lo_frac*ei,instance.monovan_hi_frac*ei]
+            return range
+        else:
+            return self.monovan_integr_range
 
 
+
+    def __set__(self,instance,value):
+        if value != None:
+           fileName, fileExtension = os.path.splitext(value)
+           if (not fileExtension):
+               value=value+self._file_ext;
+        prop_helpers.gen_setter(instance.__dict__,'monovan_integr_range',value);
+#end MonovanIntegrationRange
+
+
+class SpectraToMonitorsList(object):
+   """ property describes list of spectra, used as monitors to estimate incident energy
+      in a direct instrument
+
+      Written to work with old IDF too, where this property is absent.
+   """ 
+   def __init__(self):
+       pass
+
+   def __get__(self,instance,type=None):
+       try:
+           return  prop_helpers.gen_getter(instance.__dict__,'spectra_to_monitors_list');
+       except KeyError:
+           return None
+   def __set__(self,instance,spectra_list):
+        """ Sets copy spectra to monitors variable as a list of monitors using different forms of input """
+        if spectra_list is None:
+            prop_helpers.gen_setter(instance.__dict__,'spectra_to_monitors_list',None);
+            return;
+
+        result = None;
+        if isinstance(spectra_list,str):
+            if spectra_list.lower() is 'none':
+                result = None;
+            else:
+                spectra = spectra_list.split(',');
+                result = [];
+                for spectum in spectra :
+                    result.append(int(spectum));
+
+        else:
+            if isinstance(spectra_list,list):
+                if len(spectra_list) == 0:
+                    result=None;
+                else:
+                    result=[];
+                    for i in range(0,len(spectra_list)):
+                        result.append(int(spectra_list[i]));
+            else:
+                result =[int(spectra_list)];
+
+        prop_helpers.gen_setter(instance.__dict__,'spectra_to_monitors_list',result);
+        return;
+#end SpectraToMonitorsList
+
+#-----------------------------------------------------------------------------------------
+# END Descriptors, Direct property manager itself
+#-----------------------------------------------------------------------------------------
 class DirectPropertyManager(DirectReductionProperties):
     """Class provides interface to all reduction properties, present in IDF
 
@@ -153,18 +260,23 @@ class DirectPropertyManager(DirectReductionProperties):
     """
 
     _class_wrapper ='_DirectPropertyManager__';
-    def __init__(self,pInstrument):
-
+    def __init__(self,InstrumentName,run_number=None,wb_run_number=None):
+        #
+        DirectReductionProperties.__init__(self,InstrumentName,run_number,wb_run_number);
+        #
 
         private_properties = {'descriptors':[],'subst_dict':{},'prop_allowed_values':{},'changed_properties':set(),
-        'instrument':None,'file_properties':[],'abs_norm_file_properties':[],
-        'prop_allowed_values':{},'abs_units_par_to_change':[],'instr_par_located':[]};
+        'file_properties':[],'abs_norm_file_properties':[],
+        'abs_units_par_to_change':[],'':[]};
         #
         self._set_private_properties(private_properties);
+        # ---------------------------------------------------------------------------------------------
+        # overloaded descriptors: Their generation should be automated
+        all_methods = dir(self);
+        self.__descriptors = prop_helpers.extract_non_system_names(all_methods);
 
-        self.__instrument = pInstrument;
 
-        param_list = prop_helpers.get_default_idf_param_list(pInstrument);
+        param_list = prop_helpers.get_default_idf_param_list(self.instrument);
 
         # build and use substitution dictionary
         if 'synonims' in param_list:
@@ -174,12 +286,10 @@ class DirectPropertyManager(DirectReductionProperties):
             del param_list['synonims']
         #end
 
+
         param_list =  prop_helpers.build_properties_dict(param_list,self.__subst_dict)
         self.__dict__.update(param_list)
 
-        # ---------------------------------------------------------------------------------------------
-        # overloaded descriptors: Their generation should be automated
-        self.__descriptors = ['van_rmm','det_cal_file','map_file','monovan_mapfile','hard_mask_file'];
 
         # file properties
         self.__file_properties = ['det_cal_file','map_file','hard_mask_file']
@@ -198,7 +308,7 @@ class DirectPropertyManager(DirectReductionProperties):
         # list of the parameters which should usually be changed by user and if not, user should be warn about it.
         self.__abs_units_par_to_change=['sample_mass','sample_rmm']
         # list of the parameters which should always be taken from IDF unless explicitly set from elsewhere. These parameters MUST have setters and getters
-        self.__instr_par_located =['ei_mon_spectra']
+        self.__idf_param_located =['ei_mon_spectra']
         # dictionary of the special setters & getters:
 
         # list of the properties which have been changed:
@@ -236,6 +346,7 @@ class DirectPropertyManager(DirectReductionProperties):
         else:
             name =name0;
         #end
+
         # redefine generic substitutions for None
         if type(val) is str and (val is 'None' or val is 'none'):
             val = None;
@@ -248,14 +359,14 @@ class DirectPropertyManager(DirectReductionProperties):
             allowed_values = self.__prop_with_allowed_values[name];
             if not(val in allowed_values):
                 raise KeyError(" Property {0} can not have value: {1}".format(name,val));
-
+        #end
 
         # set property value:
         if name in self.__descriptors:
             super(DirectPropertyManager,self).__setattr__(name,val)
         else:
             prop_helpers.gen_setter(self.__dict__,name,val);
-        # record parameter change
+        # record changes in parameter
         self.__changed_properties.add(name);
 
    # ----------------------------
@@ -287,27 +398,15 @@ class DirectPropertyManager(DirectReductionProperties):
     #
     det_cal_file    = DetCalFile();
     #
-    map_file        = MapMaskFile('map_file','.map');
+    map_file        = MapMaskFile('map_file','.map',"Spectra to detector mapping file for the sample run");
     #
-    monovan_mapfile = MapMaskFile('monovan_mapfile','.map');
+    monovan_mapfile = MapMaskFile('monovan_mapfile','.map',"Spectra to detector mapping file for the monovanadium integrals calculation");
     #
-    hard_mask_file  = MapMaskFile('hard_mask_file','.msk');
+    hard_mask_file  = MapMaskFile('hard_mask_file','.msk',"Hard mask file");
     #
- 
-
-    # integration range for monochromatic vanadium,
-    def _get_monovan_integr_range(self):
-        if self.monovan_integr_range is None:
-            ei = self.incident_energy
-            range = [self.monovan_lo_frac*ei,self.monovan_hi_frac*ei]
-            return range
-        else:
-            return self.monovan_integr_range
-
-    def _set_monovan_integr_range(self,value):
-        prop_helpers.gen_setter(self.__dict__,'monovan_integr_range',value);
-
-
+    monovan_integr_range     = MonovanIntegrationRange();
+    #
+    spectra_to_monitors_list = SpectraToMonitorsList();
 
     # format to save data
     @property
@@ -358,41 +457,6 @@ class DirectPropertyManager(DirectReductionProperties):
             return False
     
         
-    @property
-    def spectra_to_monitors_list(self):
-        """ property used when a """ 
-        if not hasattr(self,'_spectra_to_monitors_list'):
-           return None;
-        return self._spectra_to_monitors_list;
-    @spectra_to_monitors_list.setter
-    def spectra_to_monitors_list(self,spectra_list):
-        """ Sets copy spectra to monitors variable as a list of monitors using different forms of input
-
-        """
-        if spectra_list is None:
-            self._spectra_to_monitors_list=None;
-            return;
-
-        if isinstance(spectra_list,str):
-            if spectra_list is 'None':
-                self._spectra_to_monitors_list=None;
-            else:
-                spectra = spectra_list.split(',');
-                self._spectra_to_monitors_list = [];
-                for spectum in spectra :
-                    self._spectra_to_monitors_list.append(int(spectum));
-        else:
-            if isinstance(spectra_list,list):
-                if len(spectra_list) == 0:
-                    self._spectra_to_monitors_list=None;
-                else:
-                    self._spectra_to_monitors_list=[];
-                    for i in range(0,len(spectra_list)):
-                        self._spectra_to_monitors_list.append(int(spectra_list[i]));
-            else:
-                self._spectra_to_monitors_list =[int(spectra_list)];
-        return;
-
 
     @property
     def background_test_range(self):
@@ -501,25 +565,6 @@ class DirectPropertyManager(DirectReductionProperties):
             self.normalise_method  = 'current'
 
 
-
-        # special property -- synonyms -- how to treat external parameters.
-        try:
-            synonims = self.get_default_parameter("synonyms")
-        except Exception:
-            synonims=dict();
-
-        par_names = self.pInstrument.getParameterNames()
-        if len(par_names) == 0 :
-            raise RuntimeError("Can not obtain instrument parameters describing inelastic conversion ")
-
-        # build the dictionary of necessary allowed substitution names and substitute parameters with their values
-        synonims = build_subst_dictionary(synonims)
-
-        # build the dictionary which allows to process coupled property, namely the property, expressed through other properties values
-        composite_keys_subst,composite_keys_set= build_coupled_keys_dict(self.pInstrument,par_names,synonims)
-
-        # Add IDF parameters as properties to the reducer
-        self.build_idf_parameters(par_names)
 
         if reinitialize_parameters:
             # clear Instrument Parameters defined fields:
