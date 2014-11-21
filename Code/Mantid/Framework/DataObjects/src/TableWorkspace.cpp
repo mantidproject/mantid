@@ -5,7 +5,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include <iostream>
-#include <stack>
+#include <queue>
 
 namespace Mantid
 {
@@ -236,6 +236,9 @@ namespace Mantid
       const size_t nRows = rowCount();
       if ( nRows == 0 ) return;
 
+      // first sort an array of indices according to criteria then put the rows
+      // in order of the sorted indices
+
       std::vector<size_t> indexVec( nRows );
       // initialize the index vector with consecutive numbers
       for(auto i = indexVec.begin()+1; i != indexVec.end(); ++i)
@@ -243,30 +246,62 @@ namespace Mantid
         *i = *(i-1) + 1;
       }
 
+      // struct to keep record on what rows to sort and according to which criteria
       struct SortIterationRecord
       {
         SortIterationRecord(size_t ki, size_t is, size_t ie):keyIndex(ki),iStart(is),iEnd(ie){}
-        size_t keyIndex;
-        size_t iStart;
-        size_t iEnd;
+        size_t keyIndex; // index in criteria vector
+        size_t iStart;   // start row to sort
+        size_t iEnd;     // end row to sort (on past last)
       };
 
-      std::stack<SortIterationRecord> sortRecords;
+      // dynamically populate and use a queue of records for iteratively sort all rows
+      std::queue<SortIterationRecord> sortRecords;
+      // start with first pair in criteria and sort all rows
       sortRecords.push( SortIterationRecord(0, 0, nRows) );
-
-      std::string columnName = criteria.front().first;
-      bool ascending = criteria.front().second;
 
       // maximum possible number of calls to Column::sortIndex (I think)
       const size_t maxNLoops = criteria.size() * nRows / 2;
+      // loop over sortRecords and sort indexVec
       for( size_t counter = 0; counter < maxNLoops; ++counter )
       {
-        SortIterationRecord record = sortRecords.top();
+        // get the record from the fron of the queue
+        SortIterationRecord record = sortRecords.front();
+        sortRecords.pop();
+        // define the arguments for Column::sortIndex
         auto& crt = criteria[record.keyIndex];
+        const std::string columnName = crt.first;
+        const bool ascending = crt.second;
         auto& column = *getColumn( columnName );
         std::vector<std::pair<size_t,size_t>> equalRanges;
-        //column.sortIndex( iStart, iEnd, indexVec, equalRanges );
 
+        // sort indexVec
+        column.sortIndex( ascending, record.iStart, record.iEnd, indexVec, equalRanges );
+
+        // if column had 1 or more ranges of equal values and there is next item in criteria
+        // add more records to the back of the queue
+        if ( record.keyIndex < criteria.size() - 1 )
+        {
+          size_t keyIndex = record.keyIndex + 1;
+          for(auto range = equalRanges.begin(); range != equalRanges.end(); ++range)
+          {
+            sortRecords.push( SortIterationRecord(keyIndex, range->first, range->second) );
+          }
+        }
+
+        if ( sortRecords.empty() )
+        {
+          // there is nothing to do
+          break;
+        }
+
+      }
+
+      // finally sort the rows
+      const size_t nCols = columnCount();
+      for( size_t i = 0; i < nCols; ++i)
+      {
+        getColumn( i )->sortValues( indexVec );
       }
 
     }
