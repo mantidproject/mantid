@@ -972,11 +972,10 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             else:
                 raise RuntimeError("Up to 2 transmission runs can be specified. No more than that.")
 
+        #Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
+        ws = ConvertToWavelength.to_workspace(loadedRun, ws_prefix="")
+
         if self.__alg_use:
-            #Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
-
-            ws = ConvertToWavelength.to_workspace(loadedRun, ws_prefix="")
-
             #If we're dealing with a workspace group, we'll manually map execution over each group member
             #We do this so we can get ThetaOut correctly (see ticket #10597 for why we can't at the moment)
             if isinstance(ws, WorkspaceGroup):
@@ -1004,7 +1003,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         else:
             wlam, wq, th = quick(loadedRun, trans=transmission_ws, theta=angle, tof_prefix="")
 
-        if self.__group_tof_workspaces:
+        if self.__group_tof_workspaces and not isinstance(ws, WorkspaceGroup):
             if "TOF" in mtd:
                 tof_group = mtd["TOF"]
                 if not tof_group.contains(loadedRun):
