@@ -1136,14 +1136,10 @@ QString SliceViewer::ensurePngExtension(const QString& fname) const
   const QString goodExt = "png";
 
   QString res = fname;
-  qDebug() << "fname: " << fname;
-  qDebug() << "res before: " << res;
-  qDebug() << "suffix: " << QFileInfo(fname).suffix();
   if (QFileInfo(fname).suffix() != goodExt)
   {
     res = res + "." + goodExt;
   }
-  qDebug() << "returning: " << res;
   return res;
 }
 
