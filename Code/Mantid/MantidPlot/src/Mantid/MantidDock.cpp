@@ -1371,6 +1371,16 @@ void MantidDockWidget::treeSelectionChanged()
 
   if(m_saveButton)
     m_saveButton->setEnabled(Items.size() > 0);
+
+  if (Items.size() > 0)
+  {
+    auto item = *(Items.begin());
+    m_mantidUI->enableSaveNexus(item->text(0));
+  }
+  else
+  {
+    m_mantidUI->disableSaveNexus();
+  }
 }
 
 /**

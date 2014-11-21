@@ -15,8 +15,6 @@ the output workspace has its indefinite integral:
 
 :math:`\int_{x_0}^x f(\xi)d\xi`.
 
-The input workspace is expected to be an event workspace with weighted-no-time events.
-
 
 Usage
 -----
@@ -27,8 +25,6 @@ Usage
 
     # Create an event workspace
     ws = CreateSampleWorkspace("Event")
-    # Make evet type weighted-no-time.
-    ws = CompressEvents( ws )
     # Integrate all spectra.
     wsOut = IntegrateFlux( ws )
     
