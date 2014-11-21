@@ -52,13 +52,11 @@ void SeqDomainSpectrumCreator::createDomain(boost::shared_ptr<FunctionDomain> &d
 
     size_t numberOfHistograms = m_matrixWorkspace->getNumberHistograms();
     for(size_t i = 0; i < numberOfHistograms; ++i) {
-        if(!m_matrixWorkspace->getDetector(i)->isMasked()) {
-            FunctionDomain1DSpectrumCreator *spectrumDomain = new FunctionDomain1DSpectrumCreator;
-            spectrumDomain->setMatrixWorkspace(m_matrixWorkspace);
-            spectrumDomain->setWorkspaceIndex(i);
+        FunctionDomain1DSpectrumCreator *spectrumDomain = new FunctionDomain1DSpectrumCreator;
+        spectrumDomain->setMatrixWorkspace(m_matrixWorkspace);
+        spectrumDomain->setWorkspaceIndex(i);
 
-            seqDomain->addCreator(IDomainCreator_sptr(spectrumDomain));
-        }
+        seqDomain->addCreator(IDomainCreator_sptr(spectrumDomain));
     }
 
     domain.reset(seqDomain);
@@ -111,21 +109,15 @@ Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(const std::string
         seqDomain->getDomainAndValues(i, localDomain, localValues);
         function->function(*localDomain, *localValues);
 
-        boost::shared_ptr<FunctionDomain1DSpectrum> spectrumDomain = boost::dynamic_pointer_cast<FunctionDomain1DSpectrum>(localDomain);
-
-        MantidVec& yValues = outputWs->dataY(spectrumDomain->getWorkspaceIndex());
-
-        for(size_t j = 0; j < yValues.size(); ++j) {
-            yValues[j] = localValues->getCalculated(j);
-        }
-    }
-
-    for(size_t i = 0; i < m_matrixWorkspace->getNumberHistograms(); ++i) {
         const MantidVec& originalXValue = m_matrixWorkspace->readX(i);
         MantidVec& xValues = outputWs->dataX(i);
         assert(xValues.size() == originalXValue.size());
-        xValues.assign( originalXValue.begin(), originalXValue.end() );
+        MantidVec& yValues = outputWs->dataY(i);
 
+        xValues.assign( originalXValue.begin(), originalXValue.end() );
+        for(size_t j = 0; j < yValues.size(); ++j) {
+            yValues[j] = localValues->getCalculated(j);
+        }
     }
 
     if(m_manager && !outputWorkspacePropertyName.empty()) {

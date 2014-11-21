@@ -8,8 +8,7 @@ using namespace API;
 
 Poldi2DFunction::Poldi2DFunction() :
     IFunction1DSpectrum(),
-    CompositeFunction(),
-    m_iterations(0)
+    CompositeFunction()
 {
 }
 
@@ -25,12 +24,6 @@ Poldi2DFunction::Poldi2DFunction() :
 void Poldi2DFunction::function(const FunctionDomain &domain, FunctionValues &values) const
 {
     CompositeFunction::function(domain, values);
-
-    if(m_iterations > 0) {
-        for(size_t i = 0; i < values.size(); ++i) {
-            values.setFitWeight(i, 1.0/sqrt(values.getCalculated(i) + 0.1));
-        }
-    }
 }
 
 /**
@@ -55,11 +48,6 @@ void Poldi2DFunction::function1DSpectrum(const FunctionDomain1DSpectrum &domain,
 {
     UNUSED_ARG(domain);
     UNUSED_ARG(values);
-}
-
-void Poldi2DFunction::iterationFinished()
-{
-    ++m_iterations;
 }
 
 

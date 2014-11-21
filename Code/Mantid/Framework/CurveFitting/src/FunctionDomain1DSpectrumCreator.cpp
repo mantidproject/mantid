@@ -66,11 +66,11 @@ void FunctionDomain1DSpectrumCreator::createDomain(boost::shared_ptr<FunctionDom
     }
 
     const MantidVec &yData = m_matrixWorkspace->readY(m_workspaceIndex);
-    //const MantidVec &eData = m_matrixWorkspace->readE(m_workspaceIndex);
+    const MantidVec &eData = m_matrixWorkspace->readE(m_workspaceIndex);
 
     for(size_t i = 0; i < yData.size(); ++i) {
         values->setFitData(i, yData[i]);
-        values->setFitWeight(i, 1.0/sqrt(yData[i] + 1.0));
+        values->setFitWeight(i, eData[i] != 0 ? eData[i] : 1.0);
     }
 }
 
