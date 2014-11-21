@@ -11,6 +11,11 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
+namespace
+{
+  Mantid::Kernel::Logger g_log("GeneratePythonScript");
+}
+
 namespace Mantid
 {
 namespace Algorithms
@@ -61,6 +66,7 @@ void GeneratePythonScript::exec()
 
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();
+  g_log.information() << "Number of history items: " << wsHistory.size() << std::endl;
 
   auto view = wsHistory.createView();
 

@@ -333,9 +333,9 @@ namespace Mantid
       /// Create an image of Es.
       MantidImage_sptr getImageE (size_t start = 0, size_t stop = 0, size_t width = 0, double startX = EMPTY_DBL(), double endX = EMPTY_DBL() ) const;
       /// Copy the data (Y's) from an image to this workspace.
-      void setImageY( const MantidImage &image, size_t start = 0 );
+      virtual void setImageY( const MantidImage &image, size_t start = 0, bool parallelExecution=true);
       /// Copy the data from an image to this workspace's errors.
-      void setImageE( const MantidImage &image, size_t start = 0 );
+      virtual void setImageE( const MantidImage &image, size_t start = 0, bool parallelExecution=true );
 
       //=====================================================================================
       // End image methods
@@ -361,7 +361,7 @@ namespace Mantid
       /// Create an MantidImage instance.
       MantidImage_sptr getImage(const MantidVec& (MatrixWorkspace::*read)(std::size_t const) const, size_t start, size_t stop, size_t width, size_t indexStart, size_t indexEnd) const;
       /// Copy data from an image.
-      void setImage( MantidVec& (MatrixWorkspace::*dataVec)(const std::size_t), const MantidImage &image, size_t start );
+      void setImage( MantidVec& (MatrixWorkspace::*dataVec)(const std::size_t), const MantidImage &image, size_t start, bool parallelExecution );
 
       /// Has this workspace been initialised?
       bool m_isInitialized;

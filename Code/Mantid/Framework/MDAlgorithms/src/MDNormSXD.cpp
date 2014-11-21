@@ -97,7 +97,6 @@ namespace MDAlgorithms
       fluxValidator->add<InstrumentValidator>();
       fluxValidator->add<CommonBinsValidator>();
       auto solidAngleValidator = fluxValidator->clone();
-      fluxValidator->add<IncreasingDataValidator>();
 
       declareProperty(new WorkspaceProperty<>("FluxWorkspace","",Direction::Input,fluxValidator), "An input workspace containing integrated momentum dependent flux.");
       declareProperty(new WorkspaceProperty<>("SolidAngleWorkspace","",Direction::Input,solidAngleValidator), "An input workspace containing momentum integrated vanadium (a measure of the solid angle).");

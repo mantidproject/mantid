@@ -38,15 +38,6 @@ cost function as
 
 , which p is the index of a peak whose position is within MinD and MaxD.
 
-Spectra to mask
-###############
-
--  Empty spectrum marked as "empty det"
-
--  Spectrum with counts less than :math:`10^{-3}` in defined d-range as "dead
-   det"
-
--  Calculated offset exceeds the user-defined maximum offset.
 
 Criteria on peaks
 #################
@@ -61,11 +52,14 @@ A peak will not be used if
 -  its :math:`\chi^2` of peak fitting is larger than pre-defined maximum
    value;
 -  its height is lower than pre-defined lowest peak height;
+-  its observed maximum value corrected by background is smaller than user specified value; 
 -  its signal/noise ratio is less than 5
    :math:`H\cdot FWHM\_To\_SIGMA/width < 5`;
 -  its height is not outside of error bars of background
    :math:`H < \sqrt{H + B}/2`;
--  its z-value on :math:`\frac{\delta d}{d}` is larger than 2.0.
+-  its z-value on :math:`\frac{\delta d}{d}` is larger than 2.0;
+-  its offset from theoretical position exceeds the limitation specified by user; 
+-  its resolution (:math:`\Delta(d)/d`) is out of user-specified range. 
 
 Generate fit window
 ###################
@@ -80,8 +74,8 @@ Generate fit window
 
 where :math:`X0_i` is the centre of i-th peak.
 
-Fitting Quality
----------------
+Quality of Fitting
+------------------
 
 GetDetOffsetsMultiPeaks have 2 levels of fitting. First it will call
 FindPeaks to fit Bragg peaks within d-range. Then it will fit offsets
@@ -173,6 +167,26 @@ And it is unitless.
 
 By this mean, the error of all peaks should be close if they are fitted
 correctly.
+
+
+Spectra to be masked
+--------------------
+
+A MaskWorskpace is output from the algorithm.  Along with it, a TableWorkspace is output
+to describe the status of offset calculation. 
+
+Here are the cases that a spectra (i.e., a detector) will be masked in the output MaskWorkspace. 
+
+-  An empty spectrum (i.e., the corresponding EventList is empty).  It is noted as "empty det";
+
+-  A dead detector, i.e., the corresponding spectrum has counts less than :math:`10^{-3}` in defined d-range.  It isnoted as "dead det";
+
+-  A spectrum that does not have peak within specified d-range.  It is noted as "no peaks". Here is the criteria for this case.
+  * Algorithm FindPeaks fails to find any peak;
+  * No peak found has height larger than specified 'MinimumPeakHeight';
+  * No peak found has observed height larger than specified 'MinimumPeakHeightObs';
+  * No peak found has resolution within specified range;
+  * No peak found whose calculated offset is smaller than the user-defined maximum offset.
 
 Usage
 -----

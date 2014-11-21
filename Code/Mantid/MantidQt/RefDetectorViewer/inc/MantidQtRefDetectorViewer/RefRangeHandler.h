@@ -62,8 +62,8 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefRangeHandler : public SpectrumVie
 
     double m_totalMinX;
     double m_totalMaxX;
-    double m_totalMaxY;
     double m_totalMinY;
+    double m_totalMaxY;
     size_t m_totalNSteps;
 
 };

@@ -44,7 +44,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", mdWsName) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("FluxWorkspace", fluxGoodWsName) );
-    TS_ASSERT_THROWS( alg.setProperty("FluxWorkspace", fluxBadWsName), std::invalid_argument );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("FluxWorkspace", fluxBadWsName) ); // it isn't bad any more
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("SolidAngleWorkspace", saWsName) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "OutWSName") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputNormalizationWorkspace", "OutNormWSName") );

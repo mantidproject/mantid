@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
@@ -15,6 +16,7 @@ namespace Mantid
 
   namespace DataHandling
   {
+
     /**
 
     Loads a workspace from a NeXus Processed entry in a NeXus file.
@@ -155,6 +157,9 @@ namespace Mantid
 
       /// calculates the workspace size
       std::size_t calculateWorkspacesize(const std::size_t numberofspectra);
+
+      /// Accellerated multiperiod loading
+      Mantid::API::Workspace_sptr doAccelleratedMultiPeriodLoading(Mantid::NeXus::NXRoot & root, const std::string & entryName, Mantid::API::MatrixWorkspace_sptr& tempMatrixWorkspace, const int64_t nWorkspaceEntries, const int64_t i);
      
       /// Does the current workspace have uniform binning
       bool m_shared_bins;

@@ -1412,7 +1412,10 @@ void MantidUI::executeSaveNexus()
 {
   QString wsName = getSelectedWorkspaceName();
   QHash<QString,QString> presets;
-  presets["InputWorkspace"] = wsName;
+  if (!wsName.isEmpty())
+  {
+    presets["InputWorkspace"] = wsName;
+  }
   showAlgorithmDialog("SaveNexus", presets);
 }
 
@@ -2118,10 +2121,17 @@ void MantidUI::saveProject(bool saved)
   }
   Mantid::API::FrameworkManager::Instance().clear();
 }
+
 void MantidUI::enableSaveNexus(const QString& wsName)
 {
-  appWindow()->enablesaveNexus(wsName);
+  appWindow()->enableSaveNexus(wsName);
 }
+
+void MantidUI::disableSaveNexus()
+{
+  appWindow()->disableSaveNexus();
+}
+
 
 /** This method is sueful for saving the currently loaded workspaces to project file on save.
 *  saves the names of all the workspaces loaded into mantid workspace tree
