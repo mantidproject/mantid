@@ -447,6 +447,10 @@ public:
     TS_ASSERT_EQUALS("TableWorkspace", Mantid::Kernel::getUnmangledTypeName(*property.type_info()));
   }
 
+  void test_sort()
+  {
+  }
+
 };
 
 

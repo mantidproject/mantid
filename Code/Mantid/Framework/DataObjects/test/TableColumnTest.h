@@ -40,7 +40,8 @@ public:
 
     auto indexVec = makeIndexVector( column.size() );
     std::vector<std::pair<size_t,size_t>> eqRanges;
-    column.sortIndex( 0, column.size(), indexVec, eqRanges );
+    bool ascending = true;
+    column.sortIndex( ascending, 0, column.size(), indexVec, eqRanges );
 
     TS_ASSERT_EQUALS( data[0], 5.0 );
     TS_ASSERT_EQUALS( data[1], 7.0 );
@@ -105,10 +106,10 @@ public:
 
     auto indexVec = makeIndexVector( column.size() );
     std::vector<std::pair<size_t,size_t>> eqRanges;
-    column.sortIndex( 0, column.size(), indexVec, eqRanges );
-
     bool ascending = true;
-    column.sortValues( indexVec, ascending );
+    column.sortIndex( ascending, 0, column.size(), indexVec, eqRanges );
+
+    column.sortValues( indexVec );
 
     TS_ASSERT_EQUALS( data[0], 0 );
     TS_ASSERT_EQUALS( data[1], 1 );
@@ -121,7 +122,7 @@ public:
     TS_ASSERT_EQUALS( data[8], 12 );
     TS_ASSERT_EQUALS( data[9], 12 );
 
-    column2.sortValues( indexVec, ascending );
+    column2.sortValues( indexVec );
 
     TS_ASSERT_EQUALS( data2[0], "zero" );
     TS_ASSERT_EQUALS( data2[1], "one" );
@@ -169,10 +170,10 @@ public:
 
     auto indexVec = makeIndexVector( column.size() );
     std::vector<std::pair<size_t,size_t>> eqRanges;
-    column.sortIndex( 0, column.size(), indexVec, eqRanges );
-
     bool ascending = false;
-    column.sortValues( indexVec, ascending );
+    column.sortIndex( ascending, 0, column.size(), indexVec, eqRanges );
+
+    column.sortValues( indexVec );
 
     TS_ASSERT_EQUALS( data[0], 12 );
     TS_ASSERT_EQUALS( data[1], 12 );
@@ -185,15 +186,15 @@ public:
     TS_ASSERT_EQUALS( data[8], 1 );
     TS_ASSERT_EQUALS( data[9], 0 );
 
-    column2.sortValues( indexVec, ascending );
+    column2.sortValues( indexVec );
 
-    TS_ASSERT_EQUALS( data2[0], "twelve (2)" );
-    TS_ASSERT_EQUALS( data2[1], "twelve (1)" );
+    TS_ASSERT_EQUALS( data2[0], "twelve (1)" );
+    TS_ASSERT_EQUALS( data2[1], "twelve (2)" );
     TS_ASSERT_EQUALS( data2[2], "seven" );
     TS_ASSERT_EQUALS( data2[3], "six" );
     TS_ASSERT_EQUALS( data2[4], "five" );
-    TS_ASSERT_EQUALS( data2[5], "three (2)" );
-    TS_ASSERT_EQUALS( data2[6], "three (1)" );
+    TS_ASSERT_EQUALS( data2[5], "three (1)" );
+    TS_ASSERT_EQUALS( data2[6], "three (2)" );
     TS_ASSERT_EQUALS( data2[7], "two" );
     TS_ASSERT_EQUALS( data2[8], "one" );
     TS_ASSERT_EQUALS( data2[9], "zero" );
@@ -234,9 +235,8 @@ public:
 
     auto indexVec = makeIndexVector( column1.size() );
     std::vector<std::pair<size_t,size_t>> eqRanges;
-    column1.sortIndex( 0, column1.size(), indexVec, eqRanges );
-
     bool ascending = true;
+    column1.sortIndex( ascending, 0, column1.size(), indexVec, eqRanges );
 
     TS_ASSERT_EQUALS( data1[indexVec[0]], 0 );
     TS_ASSERT_EQUALS( data1[indexVec[1]], 1 );
@@ -261,13 +261,13 @@ public:
     TS_ASSERT_EQUALS( data2[indexVec[9]], "twelve (1)" );
 
     std::vector<std::pair<size_t,size_t>> eqRanges2;
-    column2.sortIndex( eqRanges[0].first, eqRanges[0].second, indexVec, eqRanges2 );
+    column2.sortIndex( ascending, eqRanges[0].first, eqRanges[0].second, indexVec, eqRanges2 );
     TS_ASSERT( eqRanges2.empty() );
-    column2.sortIndex( eqRanges[1].first, eqRanges[1].second, indexVec, eqRanges2 );
+    column2.sortIndex( ascending, eqRanges[1].first, eqRanges[1].second, indexVec, eqRanges2 );
     TS_ASSERT( eqRanges2.empty() );
 
-    column1.sortValues( indexVec, ascending );
-    column2.sortValues( indexVec, ascending );
+    column1.sortValues( indexVec );
+    column2.sortValues( indexVec );
 
     TS_ASSERT_EQUALS( data1[0], 0 );
     TS_ASSERT_EQUALS( data1[1], 1 );

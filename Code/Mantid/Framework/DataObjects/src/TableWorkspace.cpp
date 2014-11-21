@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include <iostream>
+#include <stack>
 
 namespace Mantid
 {
@@ -230,6 +231,44 @@ namespace Mantid
      */
     void TableWorkspace::sort(std::vector< std::pair<std::string, bool> > & criteria)
     {
+      if ( criteria.empty() ) return;
+
+      const size_t nRows = rowCount();
+      if ( nRows == 0 ) return;
+
+      std::vector<size_t> indexVec( nRows );
+      // initialize the index vector with consecutive numbers
+      for(auto i = indexVec.begin()+1; i != indexVec.end(); ++i)
+      {
+        *i = *(i-1) + 1;
+      }
+
+      struct SortIterationRecord
+      {
+        SortIterationRecord(size_t ki, size_t is, size_t ie):keyIndex(ki),iStart(is),iEnd(ie){}
+        size_t keyIndex;
+        size_t iStart;
+        size_t iEnd;
+      };
+
+      std::stack<SortIterationRecord> sortRecords;
+      sortRecords.push( SortIterationRecord(0, 0, nRows) );
+
+      std::string columnName = criteria.front().first;
+      bool ascending = criteria.front().second;
+
+      // maximum possible number of calls to Column::sortIndex (I think)
+      const size_t maxNLoops = criteria.size() * nRows / 2;
+      for( size_t counter = 0; counter < maxNLoops; ++counter )
+      {
+        SortIterationRecord record = sortRecords.top();
+        auto& crt = criteria[record.keyIndex];
+        auto& column = *getColumn( columnName );
+        std::vector<std::pair<size_t,size_t>> equalRanges;
+        //column.sortIndex( iStart, iEnd, indexVec, equalRanges );
+
+      }
+
     }
 
 //    template<>

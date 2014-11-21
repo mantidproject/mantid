@@ -110,6 +110,7 @@ public:
 
     /// Sort all or part of a vector of indices according to values in corresponding cells of this column.
     /// Fill in a vector of ranges of equal values. A range is a [begin,end) pair of indices in indexVec.
+    /// @param ascending :: Sort in ascending (true) or descending (false) order.
     /// @param start :: Starting index in indexVec to be sorted.
     /// @param end :: Ending index (one past last) in indexVec to be sorted.
     /// @param indexVec :: A vector of indices. On input it must contain all indices from 0 to this->size()-1. 
@@ -118,10 +119,10 @@ public:
     /// @param equalRanges :: Output only vector. For each pair p in equalRanges 
     ///          cell(indexVec[p.first]) == cell(indexVec[p.first+1]) == ... == cell(indexVec[p.end-1]).
     ///          If equalRanges is empty then there are no equal velues in this column.
-    virtual void sortIndex( size_t start, size_t end, std::vector<size_t>& indexVec, std::vector<std::pair<size_t,size_t>>& equalRanges ) const;
+    virtual void sortIndex( bool ascending, size_t start, size_t end, std::vector<size_t>& indexVec, std::vector<std::pair<size_t,size_t>>& equalRanges ) const;
 
     /// Re-arrange values in this column according to indices in indexVec
-    virtual void sortValues( const std::vector<size_t>& indexVec, bool ascending );
+    virtual void sortValues( const std::vector<size_t>& indexVec );
 
     /// Templated method for returning a value. No type checks are done.
     template<class T>

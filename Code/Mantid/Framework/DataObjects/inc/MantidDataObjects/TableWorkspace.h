@@ -269,7 +269,7 @@ namespace DataObjects
         return static_cast<U>(spCol->operator[](nRow));
     }
 
-    /// Sort this table.
+    /// Sort this table. @see ITableWorkspace::sort
     void sort(std::vector< std::pair<std::string, bool> > & criteria);
 
 private:

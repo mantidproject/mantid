@@ -194,10 +194,10 @@ public:
     }
 
     /// Sort a vector of indices according to values in corresponding cells of this column.
-    virtual void sortIndex( size_t start, size_t end, std::vector<size_t>& indexVec, std::vector<std::pair<size_t,size_t>>& equalRanges ) const;
+    virtual void sortIndex( bool ascending, size_t start, size_t end, std::vector<size_t>& indexVec, std::vector<std::pair<size_t,size_t>>& equalRanges ) const;
 
     /// Re-arrange values in this column according to indices in indexVec
-    virtual void sortValues( const std::vector<size_t>& indexVec, bool ascending );
+    virtual void sortValues( const std::vector<size_t>& indexVec );
 
 
 protected:
@@ -237,18 +237,19 @@ namespace{
   class CompareValues
   {
     const std::vector<Type> &m_data;
+    const bool m_ascending;
   public:
-    CompareValues(const TableColumn<Type> &column):m_data(column.data()){}
+    CompareValues(const TableColumn<Type> &column, bool ascending):m_data(column.data()),m_ascending(ascending){}
     bool operator()(size_t i, size_t j)
     {
-      return m_data[i] < m_data[j];
+      return m_ascending? m_data[i] < m_data[j] : !(m_data[i] < m_data[j] || m_data[i] == m_data[j]);
     }
   };
 }
 
-/// Sort a vector of indices according to values in corresponding cells of this column.
+/// Sort a vector of indices according to values in corresponding cells of this column. @see Column::sortIndex
 template<typename Type>
-void TableColumn<Type>::sortIndex( size_t start, size_t end, std::vector<size_t>& indexVec, std::vector<std::pair<size_t,size_t>>& equalRanges ) const
+void TableColumn<Type>::sortIndex( bool ascending, size_t start, size_t end, std::vector<size_t>& indexVec, std::vector<std::pair<size_t,size_t>>& equalRanges ) const
 {
   equalRanges.clear();
 
@@ -261,7 +262,7 @@ void TableColumn<Type>::sortIndex( size_t start, size_t end, std::vector<size_t>
   auto iBegin = indexVec.begin() + start;
   auto iEnd   = indexVec.begin() + end;
 
-  std::stable_sort( iBegin, iEnd, CompareValues<Type>(*this) );
+  std::stable_sort( iBegin, iEnd, CompareValues<Type>(*this,ascending) );
 
   bool same = false;
   size_t eqStart = 0;
@@ -297,25 +298,15 @@ void TableColumn<Type>::sortIndex( size_t start, size_t end, std::vector<size_t>
 
 /// Re-arrange values in this column in order of indices in indexVec
 template<typename Type>
-void TableColumn<Type>::sortValues( const std::vector<size_t>& indexVec, bool ascending )
+void TableColumn<Type>::sortValues( const std::vector<size_t>& indexVec )
 {
   assert( m_data.size() == indexVec.size() );
   std::vector<Type> sortedData( m_data.size() );
-  if ( ascending )
+
+  auto sortedIt = sortedData.begin();
+  for(auto idx = indexVec.begin(); idx != indexVec.end(); ++idx, ++sortedIt)
   {
-    auto sortedIt = sortedData.begin();
-    for(auto idx = indexVec.begin(); idx != indexVec.end(); ++idx, ++sortedIt)
-    {
-      *sortedIt = m_data[*idx];
-    }
-  }
-  else
-  {
-    auto sortedIt = sortedData.rbegin();
-    for(auto idx = indexVec.begin(); idx != indexVec.end(); ++idx, ++sortedIt)
-    {
-      *sortedIt = m_data[*idx];
-    }
+    *sortedIt = m_data[*idx];
   }
 
   std::swap( m_data, sortedData );
