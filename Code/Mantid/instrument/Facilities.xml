@@ -152,7 +152,6 @@
   <instrument name="TFXA" shortname="TFX">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Indirect Geometry Spectroscopy</technique>
-    <livedata address="NDXTOSCA:6789" />
   </instrument>
 
   <instrument name="TOSCA" shortname="TSC">
