@@ -89,10 +89,12 @@ void PoldiAnalyseResiduals::init()
 {
     declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("MeasuredCountData", "", Direction::Input), "Input workspace containing the measured data.");
     declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("FittedCountData", "", Direction::Input), "Input workspace containing the fitted data.");
-    declareProperty("MaxIterations", 0, Direction::Input);
-    declareProperty("MaxRelativeChange", 1.0, Direction::Input);
+    declareProperty("LambdaMin", 1.1, "Minimum wavelength to be considered.");
+    declareProperty("LambdaMax", 5.0, "Maximum wavelength to be considered.");
+    declareProperty("MaxIterations", 0, "Maximum number of iterations. Default 0 does not limit number of iterations.");
+    declareProperty("MaxRelativeChange", 1.0, "Relative change in counts (in percent) that should be reached.");
 
-    declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace", "", Direction::Output), "An output workspace.");
+    declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace", "", Direction::Output), "Workspace containing the residual correlation spectrum.");
 }
 
 /// Create workspace that contains the residuals.
@@ -200,7 +202,10 @@ void PoldiAnalyseResiduals::exec()
     // Residual correlation core which will be used iteratively.
     PoldiResidualCorrelationCore core(g_log, 0.1);
     core.setInstrument(deadWireDetector, poldiInstrument->chopper());
-    core.setWavelengthRange(1.1, 5.0);
+
+    double lambdaMin = getProperty("LambdaMin");
+    double lambdaMax = getProperty("LambdaMax");
+    core.setWavelengthRange(lambdaMin, lambdaMax);
 
     // One iteration is always necessary
     DataObjects::Workspace2D_sptr sum = core.calculate(residuals, calculated);

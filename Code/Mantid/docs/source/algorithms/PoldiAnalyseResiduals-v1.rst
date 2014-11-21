@@ -10,35 +10,9 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+After fitting a model to POLDI 2D-data the residuals have to be analysed in order to determine whether the data are described by the model. Since this is very hard to see in the two dimensional residual data, the analysis involves a procedure that is very similar to the correlation method implemented in :refs:`algm-PoldiAutoCorrelation`. The method is slightly different because the residual at a given point may be either positive or negative.
 
-
-Usage
------
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
-
-**Example - PoldiAnalyseResiduals**
-
-.. testcode:: PoldiAnalyseResidualsExample
-
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = PoldiAnalyseResiduals()
-
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
-
-Output:
-
-.. testoutput:: PoldiAnalyseResidualsExample
-
-  The output workspace has ?? spectra
+The algorithm iteratively calculates the correlation spectrum of the residual data, distributes the correlation counts over the 2D residual data and normalizes the residuals so that their sum is equal to zero. The correlation spectra of all steps are accumulated and returned as output. In the spectrum it's for example possible to spot additional peaks, which may have been hidden in by larger peaks in a first data analysis.
 
 .. categories::
 
