@@ -187,7 +187,7 @@ if ( ENABLE_CPACK )
       # rhel requirements
       set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,nexus-python,gsl,glibc,qwtplot3d-qt4,muParser,numpy" )
       # OCE
-      set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE_ocaf,OCE-visualization")
+      set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
       # Qwt is qwt5-qt4 in RHEL7
       if( "${UNIX_CODENAME}" MATCHES "Maipo" )
         set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qwt5-qt4" )
