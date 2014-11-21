@@ -6,6 +6,13 @@ import time
 import os
 from scripter import BaseReductionScripter
 
+HAS_MANTID = False
+try:
+    import mantidplot
+    HAS_MANTID = True
+except:
+    pass
+
 class HFIRReductionScripter(BaseReductionScripter):
     """
         Organizes the set of reduction parameters that will be used to
@@ -49,4 +56,22 @@ class HFIRReductionScripter(BaseReductionScripter):
 
         return script
 
+    def set_options(self):
+        """
+            Set up the reduction options, without executing
+        """
+        if HAS_MANTID:
+            self.update()
+            table_ws = "__patch_options"
+            script = "SetupHFIRReduction(\n"
+            for item in self._observers:
+                if item.state() is not None:
+                    if hasattr(item.state(), "options"):
+                        script += item.state().options()
+
+            script += "ReductionProperties='%s')" % table_ws
+            mantidplot.runPythonScript(script, True)
+            return table_ws
+        else:
+            raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
 

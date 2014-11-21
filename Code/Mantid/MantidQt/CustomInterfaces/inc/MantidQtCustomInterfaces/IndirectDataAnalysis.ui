@@ -84,13 +84,6 @@
        </item>
        <item>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="4">
-          <widget class="QCheckBox" name="elwin_ckNormalise">
-           <property name="text">
-            <string>Normalise to Lowest Temperature</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="3">
           <spacer name="horizontalSpacer_28">
            <property name="orientation">
@@ -139,19 +132,6 @@
           <string>Output</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
-          <item>
-           <widget class="QCheckBox" name="elwin_ckVerbose">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="text">
-             <string>Verbose</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item>
            <spacer name="horizontalSpacer_8">
             <property name="orientation">
@@ -2854,8 +2834,8 @@
  </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
+  <tabstop>elwin_inputFile</tabstop>
   <tabstop>elwin_pbPlotInput</tabstop>
-  <tabstop>elwin_ckVerbose</tabstop>
   <tabstop>elwin_ckPlot</tabstop>
   <tabstop>elwin_ckSave</tabstop>
   <tabstop>msd_ckVerbose</tabstop>
@@ -2876,8 +2856,6 @@
   <tabstop>pbHelp</tabstop>
   <tabstop>pbRun</tabstop>
   <tabstop>pbManageDirs</tabstop>
-  <tabstop>elwin_inputFile</tabstop>
-  <tabstop>elwin_ckNormalise</tabstop>
   <tabstop>leLogName</tabstop>
   <tabstop>furyfit_inputFile</tabstop>
   <tabstop>furyfit_pbPlotInput</tabstop>
