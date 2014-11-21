@@ -83,7 +83,6 @@ namespace Mantid
       fluxValidator->add<InstrumentValidator>();
       fluxValidator->add<CommonBinsValidator>();
       auto solidAngleValidator = fluxValidator->clone();
-      fluxValidator->add<IncreasingDataValidator>();
       
       declareProperty(new WorkspaceProperty<>("FluxWorkspace","",Direction::Input, fluxValidator), 
                       "An input workspace containing momentum dependent flux.");
