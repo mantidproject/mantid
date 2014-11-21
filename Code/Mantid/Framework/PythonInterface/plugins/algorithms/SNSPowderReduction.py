@@ -1,3 +1,5 @@
+import mantid
+import mantid.api
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -248,7 +250,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 returned = self._focusChunks(samRun, SUFFIX, timeFilterWall, calib, self._splitws,
                         preserveEvents=preserveEvents)
 
-                if returned.__class__.__name__ == "list":
+                if isinstance(returned, list):
                     # Returned with a list of workspaces
                     focusedwksplist = returned
                     irun = 0
@@ -272,9 +274,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         for samRun in samwksplist:
             samRun = mtd[str(samRun)]
             try:
-                self.log().information("[F1136] Sample Run %s:  number of events = %d" % (str(samRun), samRun.getNumberEvents()))
+                self.log().information("Sample Run %s:  starting number of events = %d" % (str(samRun), samRun.getNumberEvents()))
             except Exception as e:
-                self.log().information("[F1136] Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e)))
+                self.log().information("Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e)))
 
             # Get run number
             runnumber = samRun.getRunNumber()
@@ -482,7 +484,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # filter bad pulses
         if self._filterBadPulses > 0.:
-            isEventWS = str(type(wksp)).count("IEvent") > 0
+            isEventWS = isinstance(wksp, mantid.api._api.IEventWorkspace)
             if isEventWS is True:
                 # Event workspace: record original number of events
                 numeventsbefore =  wksp.getNumberEvents()
@@ -579,7 +581,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # Load chunk
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
-            if str(type(temp)).count("IEvent") > 0:
+            if isinstance(temp, mantid.api._api.IEventWorkspace) is True:
                 # Event workspace
                 self.log().debug("F1141C There are %d events after data is loaded in workspace %s." % (
                     temp.getNumberEvents(), str(temp)))
@@ -649,10 +651,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             for itemp in xrange(numwksp):
                 temp = tempwslist[itemp]
                 # Align and focus
-                self.log().information("Begin to align and focus workspace %s; Number of events = %d of chunk %d with RemovePromptPulseWidth = %s, LowResSpectrumOffset = %s" % (str(temp), 
-                    temp.getNumberEvents(), ichunk, str(self._removePromptPulseWidth), str(self._lowResTOFoffset)))
-                # api.CloneWorkspace(InputWorkspace=temp, OutputWorkspace="_"+str(temp)+"_Phase1")
-
                 focuspos = self._focusPos
                 temp = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, CalFileName=calib,
                     Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
@@ -665,9 +663,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     spec = temp.getSpectrum(iws)
                     self.log().debug("[DBx131] ws %d: spectrum ID = %d. " % (iws, spec.getSpectrumNo()))
 
-                self.log().information("After being aligned and focussed workspace %s; Number of events = %d of chunk %d " % (str(temp), 
-                    temp.getNumberEvents(), ichunk))
-                # api.CloneWorkspace(InputWorkspace=temp, OutputWorkspace="_"+str(temp)+"_Phase2")
+                if preserveEvents is True and isinstance(temp, mantid.api._api.IEventWorkspace) is True:
+                    self.log().information("After being aligned and focussed workspace %s; Number of events = %d of chunk %d " % (str(temp), 
+                        temp.getNumberEvents(), ichunk))
 
                 # Rename and/or add to workspace of same splitter but different chunk
                 wkspname = wksp

@@ -1125,6 +1125,24 @@ void SliceViewer::copyImageToClipboard()
   QApplication::clipboard()->setImage(pix, QClipboard::Clipboard);
 }
 
+/**
+ * Adds .png extension if not already included
+ *
+ * @param fname :: a file name to save an (png) image
+ * @return input file name with '.png' appended if needed
+ **/
+QString SliceViewer::ensurePngExtension(const QString& fname) const
+{
+  const QString goodExt = "png";
+
+  QString res = fname;
+  if (QFileInfo(fname).suffix() != goodExt)
+  {
+    res = res + "." + goodExt;
+  }
+  return res;
+}
+
 //------------------------------------------------------------------------------------
 /** Save the rendered 2D slice to an image file.
  *
@@ -1147,10 +1165,13 @@ void SliceViewer::saveImage(const QString & filename)
   else
     fileselection = filename;
 
+  // append '.png' if needed
+  QString finalName = ensurePngExtension(fileselection);
+
   // Create the image
   QPixmap pix = this->getImage();
   // And save to the file
-  pix.save(fileselection);
+  pix.save(finalName);
 
 }
 

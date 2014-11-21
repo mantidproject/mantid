@@ -203,6 +203,8 @@ private:
 
   /// Minimum peak height
   double m_minHeight;
+  /// Minimum value of peak's observed maximum Y value
+  double m_leastMaxObsY;
 
   /// Start values
   bool m_useObsCentre;

@@ -4,12 +4,11 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Exception.h"
-#include <cxxtest/TestSuite.h>
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -29,39 +28,23 @@ public:
   }
 
   //--------------------------------------------------------------------------------------------
-  Object_sptr createCappedCylinder(double radius, double height, const V3D & baseCentre, const V3D & axis, const std::string & id)
-  {
-    std::ostringstream xml;
-    xml << "<cylinder id=\"" << id << "\">"
-      << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\"" << baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\"/>"
-      << "<axis x=\"" << axis.X() << "\" y=\"" << axis.Y() << "\" z=\"" << axis.Z() << "\"/>"
-      << "<radius val=\"" << radius << "\" />"
-      << "<height val=\"" << height << "\" />"  << "</cylinder>";
-    ShapeFactory shapeMaker;
-    return shapeMaker.createShape(xml.str());
-  }
-  ObjComponent * createSingleObjectComponent()
-  {
-    Object_sptr pixelShape = createCappedCylinder(0.5, 1.5, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube");
-    return new ObjComponent("pixel", pixelShape);
-  }
 
   void testShape()
   {
-    Object_sptr shape_sptr = 
-      createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
+    Object_sptr shape_sptr = \
+      ComponentCreationHelper::createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
     Sample sample;
     TS_ASSERT_THROWS_NOTHING(sample.setShape(*shape_sptr))
     const Object & sampleShape = sample.getShape();
     TS_ASSERT_EQUALS(shape_sptr->getName(), sampleShape.getName());
   }
 
-  void test_That_An_Setting_An_Invalid_Shape_Throws_An_Invalid_Argument()
+  void test_Setting_Default_Shape_Is_Accepted()
   {
     Sample sample;
     Object object;
     TS_ASSERT_EQUALS(object.hasValidShape(), false);
-    TS_ASSERT_THROWS(sample.setShape(object), std::invalid_argument);
+    TS_ASSERT_THROWS_NOTHING(sample.setShape(object));
   }
 
   void test_That_Requests_For_An_Undefined_Environment_Throw()
@@ -75,14 +58,14 @@ public:
     Sample sample;
     const std::string envName("TestKit");
     SampleEnvironment *kit = new SampleEnvironment(envName);
-    kit->add(createSingleObjectComponent());
-    
+    kit->add(Object());
+
     TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(kit));
-    
+
     const SampleEnvironment & sampleKit = sample.getEnvironment();
     // Test that this references the correct object
     TS_ASSERT_EQUALS(&sampleKit, kit);
-    TS_ASSERT_EQUALS(sampleKit.getName(), envName);
+    TS_ASSERT_EQUALS(sampleKit.name(), envName);
     TS_ASSERT_EQUALS(sampleKit.nelements(), 1);
   }
 
@@ -229,7 +212,9 @@ public:
   {
     Material vanBlock("vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
     Sample sample;
-    sample.setMaterial(vanBlock);
+    Object shape;
+    shape.setMaterial(vanBlock);
+    sample.setShape(shape);
 
     const Material& mat = sample.getMaterial();
     const double lambda(2.1);
@@ -261,7 +246,7 @@ public:
     sample.setName("test name for test_Multiple_Sample");
     boost::shared_ptr<Sample> sample2 = boost::shared_ptr<Sample>(new Sample());
     sample2->setName("test name for test_Multiple_Sample - 2");
-    
+
     TS_ASSERT_EQUALS(sample.size(),1);
     sample.addSample(sample2);
     TS_ASSERT_EQUALS(sample.size(),2);
@@ -274,7 +259,7 @@ public:
       TS_ASSERT(sample[1].getName()==sample2->getName());
       TS_ASSERT(sample[2].getName()==sample2->getName());
     );
-    
+
     TS_ASSERT_THROWS_ANYTHING(Sample& sampleRef = sample[3]; (void) sampleRef; );
   }
 
@@ -283,7 +268,8 @@ public:
     NexusTestHelper th(true);
     th.createFile("SampleTest.nxs");
 
-    Object_sptr shape_sptr = createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
+    Object_sptr shape_sptr = \
+        ComponentCreationHelper::createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
     Sample sample;
     sample.setShape(*shape_sptr);
     sample.setName("NameOfASample");
@@ -316,7 +302,7 @@ public:
 
   }
 
-  
+
 };
 
 #endif /*TESTSAMPLE_H_*/

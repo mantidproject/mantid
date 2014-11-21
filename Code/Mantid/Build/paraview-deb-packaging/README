@@ -1,14 +1,19 @@
 --Author: Owen Arnold
---Date: 06/March/2012
+--Date: 06/March/2012, updated 14/Nov/2014
 
 Info:
 The bash script in this directory is used to build and package ParaView to Debian packages for Ubuntu platforms.
-At the time of writing custom deployment is necessary for these reasons:
+At the time of writing custom deployment is necessary for two reasons:
 
-1) Current versions of Ubuntu distribute much older versions of ParaView from their repositories
-2) The distributed source version of ParaView 3.10.1 contains bugs which we have fixed in our modified source code. This script can be used with our patched source. Currently available at http://download.mantidproject.org/VatesDownload.psp
-3) The default ParaView packaging puts libraries in subdirectories of lib and they therefore cannot be found by Mantid without manually modifying the LD_LIBRARY_PATH. This packaging script will fix that issue.
+1) We distribute a slightly modified source version of ParaView 3.98.1. This script can be used with our patched source.
+   Currently available at http://download.mantidproject.org
+2) The default ParaView packaging puts libraries in subdirectories of lib and they therefore cannot be found by Mantid
+   without manually modifying the LD_LIBRARY_PATH. This packaging script will fix that issue.
 
 Usage:
-In order to build the binary packages. Place the *.tar.gz  paraview source compressed file from http://download.mantidproject.org/VatesDownload.psp into an empty directory. Copy the accompanying *.sh script associated with this README into the same directory. Run the bash script. The packaged .*Deb binaries will appear in the /paraview/install directory at the end of the process.
 
+- In order to build the binary packages. Place the *.tar.gz  paraview source compressed file from
+   http://download.mantidproject.org into an empty directory.
+
+- Copy the accompanying *.sh script associated with this README into the same directory. Run the bash script.
+  The packaged .*Deb binaries will appear in the /paraview/install directory at the end of the process.

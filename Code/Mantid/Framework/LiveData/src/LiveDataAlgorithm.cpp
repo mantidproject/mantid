@@ -3,6 +3,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "boost/tokenizer.hpp"
@@ -165,7 +166,7 @@ namespace LiveData
 
     // Not stored? Need to create it
     std::string inst = this->getPropertyValue("Instrument");
-    m_listener = LiveListenerFactory::Instance().create(inst, true);
+    m_listener = LiveListenerFactory::Instance().create(inst, true, this);
 
     // Start at the given date/time
     m_listener->start( this->getStartTime() );

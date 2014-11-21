@@ -62,7 +62,7 @@ public:
 
 private:
   
-  /// Initialisation code
+  /// Initialization code
   void init();
   ///Execution code
   void exec();
@@ -75,13 +75,21 @@ private:
   void writeValue(const double value, FILE * const outFile) const;
   void logMissingMasked(const std::vector<int> &inds, const size_t nonMasked, const int masked) const;
   
-  ///the SPE files have a constant number of numbers writen on each line, but depending on the number of bins there will be some "spare" numbers at the end of the block, this holds that number of spares
+  ///the SPE files have a constant number of numbers written on each line, but depending on the number of bins there will be some "spare" numbers at the end of the block, this holds that number of spares
   int m_remainder;
   ///the number of bins in each histogram, as the histogram must have common bins this shouldn't change
   size_t m_nBins;
 
   /// the error value (=0.0) for spectra whose detectors are all masked, from the SPE specification http://www.mantidproject.org/images/3/3d/Spe_file_format.pdf
   static const double MASK_ERROR;
+
+  // temporary variable to keep verified signal values for current spectra
+  mutable MantidVec m_tSignal;
+  // temporary variable to keep verified error values for current spectra
+  mutable MantidVec m_tError;
+
+  // method verifies if a spectra contains any NaN or Inf values and replaces these values with SPE-specified constants
+  void check_and_copy_spectra(const MantidVec &inSignal,const MantidVec &inErr,MantidVec &Signal,MantidVec &Error)const;
 };
 
 } // namespace DataHandling

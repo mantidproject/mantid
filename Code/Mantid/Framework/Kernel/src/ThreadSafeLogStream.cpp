@@ -48,10 +48,8 @@ int ThreadSafeLogStreamBuf::writeToDevice(char c)
   }
   else 
   {
-    PARALLEL_CRITICAL(logstream)
-    {
-      m_messages[Poco::Thread::currentTid()] += c;
-    }
+    Poco::FastMutex::ScopedLock lock(m_mutex);
+    m_messages[Poco::Thread::currentTid()] += c;
   }
   return static_cast<int>(c);
 }

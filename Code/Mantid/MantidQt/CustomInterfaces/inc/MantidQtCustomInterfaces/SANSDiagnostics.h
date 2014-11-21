@@ -43,7 +43,7 @@ namespace CustomInterfaces
   {
   public:
     /// constructor
-    RectDetectorDetails(){}
+    RectDetectorDetails(): m_minDetId(0), m_maxDetId(0) {}
     ///destructor
     ~RectDetectorDetails(){}
     /// set minimum detector id
