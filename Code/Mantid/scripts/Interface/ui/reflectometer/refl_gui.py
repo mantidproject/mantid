@@ -707,7 +707,12 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 if len(two_theta_str) > 0:
                                     two_theta = float(two_theta_str)
 
-                                dqq, two_theta = CalculateResolution(Workspace = loadedRun, TwoTheta = two_theta)
+                                #Make sure we only ever run calculate resolution on a non-group workspace.
+                                #If we're given a group workspace, we can just run it on the first member of the group instead
+                                thetaRun = loadedRun
+                                if isinstance(thetaRun, WorkspaceGroup):
+                                  thetaRun = thetaRun[0]
+                                dqq, two_theta = CalculateResolution(Workspace = thetaRun, TwoTheta = two_theta)
 
                                 #Put the calculated resolution into the table
                                 resItem = QtGui.QTableWidgetItem()
