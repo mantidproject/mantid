@@ -326,7 +326,7 @@ void CostFuncLeastSquares::addValDerivHessian(
   if (evalFunction)
   {
     PARALLEL_ATOMIC
-    m_value += m_factor * fVal;
+    m_value += 0.5 * fVal;
   }
 
   if (!evalHessian) return;
