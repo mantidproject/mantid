@@ -2,7 +2,7 @@
 Set of functions to assist with processing instrument parameters relevant to reduction. 
 """
 class ComplexProperty(object):
-    """ Class describes property which depends on other properties and have values, stored in other properties """ 
+    """ Class describes property which depends on other properties and stores/receives values in other properties """ 
     def __init__(self,other_prop_list):
         self._other_prop = other_prop_list;
  
@@ -77,16 +77,17 @@ def build_properties_dict(param_map,synonims,preffix='') :
 
     """ 
     # dictionary used for substituting composite keys.
-    properties_dict = dict();
+    prelim_dict = dict();
 
     for name in param_map:
        if name in synonims:
           final_name = preffix+str(synonims[name]);
        else:
           final_name = preffix+str(name)
-       properties_dict[final_name]=None;
+       prelim_dict[final_name]=None;
 
-    param_keys = properties_dict.keys();
+    param_keys = prelim_dict.keys();
+    properties_dict = dict();
 
     for name,val in param_map.items() :
         if name in synonims:
@@ -110,7 +111,7 @@ def build_properties_dict(param_map,synonims,preffix='') :
                           result.append(rkey);
                        else:
                           raise KeyError('Substitution key : {0} is not in the list of allowed keys'.format(rkey));
-                   properties_dict[final_name]=ComplexProperty(result)
+                   properties_dict['_'+final_name]=ComplexProperty(result)
                else:
                    properties_dict[final_name] =keys_candidates[0];
         else:
@@ -170,19 +171,22 @@ def gen_getter(keyval_dict,key):
         gen_getter(keyval_dict,A) == 10;  gen_getter(keyval_dict,B) == 20;
         and gen_getter(keyval_dict,C) == [10,20];
     """
-
-    if key in keyval_dict:
-        a_val= keyval_dict[key];
-        if type(a_val) is ComplexProperty:
-            return a_val.__get__(keyval_dict);
-        else:
-            return a_val
-
-            return test_val;
-        #end
+    if not(key in keyval_dict):
+        name = '_'+key
+        if not(name in keyval_dict):
+            raise KeyError('Property with name: {0} is not among the class properties '.format(key));
     else:
-        raise KeyError('Property with name: {0} is not among the class properties '.format(key));
+        name = key
+
+    a_val= keyval_dict[name];
+    if isinstance(a_val,ComplexProperty):
+        return a_val.__get__(keyval_dict);
+    else:
+        return a_val
+
+
     #end
+#end
 
 
 
@@ -196,18 +200,22 @@ def gen_setter(keyval_dict,key,val):
         and gen_getter(keyval_dict,C,[1,2]) causes keyval_dict[A] == 1 and keyval_dict[B] == 2
     """
 
-    if key in keyval_dict:
-        test_val = keyval_dict[key];
-        if type(test_val) is ComplexProperty:
-            if not isinstance(val,list):
-                raise KeyError(' You can not assign non-list value to complex property {0}'.format(key));
-            pass
-            # Assigning values for composite function to the function components
-            test_val.__set__(keyval_dict,val);
-        else:
-           keyval_dict[key] = val;
+    if not(key in keyval_dict):
+        name = '_'+key;
+        if not(name in keyval_dict):
+            raise KeyError(' Property name: {0} is not defined'.format(key));
     else:
-        raise KeyError(' Property with name: {0} is not among defined properties '.format(key));
+        name = key
+
+    test_val = keyval_dict[name];
+    if isinstance(test_val,ComplexProperty):
+       if not isinstance(val,list):
+          raise KeyError(' You can not assign non-list value to complex property {0}'.format(key));
+       pass
+            # Assigning values for composite function to the function components
+       test_val.__set__(keyval_dict,val);
+    else:
+       keyval_dict[key] = val;
 
 
 def check_instrument_name(old_name,new_name):

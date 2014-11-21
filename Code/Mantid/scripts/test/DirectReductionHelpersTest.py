@@ -75,7 +75,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
 
         self.assertEqual(len(subst_dict),6);
 
-        val = subst_dict['first'];
+        val = subst_dict['_first'];
         self.assertTrue(type(val) is helpers.ComplexProperty)
 
         #self.assertEqual(val[0],'kkk1');
@@ -85,7 +85,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
         self.assertFalse(type(val) is helpers.ComplexProperty)
         self.assertEqual(val,'unrelated');
 
-        val = subst_dict['second']
+        val = subst_dict['_second']
 
         self.assertTrue(type(val) is helpers.ComplexProperty)
         #self.assertTrue(isinstance(val,list))
@@ -111,7 +111,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
 
         self.assertEqual(len(prop_dict),6);
 
-        val = prop_dict['_first']
+        val = prop_dict['__first']
         self.assertTrue(type(val) is helpers.ComplexProperty)
 
         #elf.assertEqual(val[0],'_kkk1');
@@ -121,7 +121,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
         self.assertFalse(type(val) is helpers.ComplexProperty)
         self.assertEqual(val,'unrelated');
 
-        val = prop_dict['_second']
+        val = prop_dict['__second']
         self.assertTrue(type(val) is helpers.ComplexProperty)
 
         #self.assertEqual(val[0],'_kkk1')
@@ -154,7 +154,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
 
         self.assertEqual(len(subst_dict),6);
 
-        val = subst_dict['1']
+        val = subst_dict['_1']
         self.assertTrue(type(val) is helpers.ComplexProperty)
 
         #self.assertEqual(val[0],'kkk1');
@@ -164,7 +164,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
         self.assertFalse(type(val) is helpers.ComplexProperty)
         self.assertEqual(val,'unrelated');
 
-        val = subst_dict['2']
+        val = subst_dict['_2']
         self.assertTrue(type(val) is helpers.ComplexProperty)
 
         #self.assertEqual(val[0],'kkk1')
@@ -257,6 +257,8 @@ class DirectReductionHelpersTest(unittest.TestCase):
 
         # Very bad -- fails silently
         t1.A[0] = 10;
+        self.assertEqual(t1.A,[1,10]);
+
 
     def test_class_property_setter2(self):
         class test_class(object):

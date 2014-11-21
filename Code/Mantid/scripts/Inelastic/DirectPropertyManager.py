@@ -12,6 +12,16 @@ class DirectReductionProperties(object):
         These properties are main set of properties, user have to set up 
         for reduction to work with defaults. 
     """
+
+    # logging levels available for user
+    log_options = \
+        { "error" :       lambda (msg):   logger.error(msg),
+          "warning" :     lambda (msg):   logger.warning(msg),
+          "notice" :      lambda (msg):   logger.notice(msg),
+          "information" : lambda (msg):   logger.information(msg),
+          "debug" :       lambda (msg):   logger.debug(msg)}
+
+
     def __init__(self,InsturmentName,run_number=None,wb_run_number=None): 
         object.__setattr__(self,'_run_number',run_number);
         object.__setattr__(self,'_wb_run_number',wb_run_number);
@@ -19,37 +29,82 @@ class DirectReductionProperties(object):
         object.__setattr__(self,'_monovan_run_number',None);
         object.__setattr__(self,'_wb_for_monovan_run',None);
 
-        object.__setattr__(self,'_ei',None)
+        object.__setattr__(self,'_incident_energy',None)
 
+        object.__setattr__(self,'_energy_bins',None);
+
+        #
         object.__setattr__(self,'_pInstrument',self._set_instrument(InsturmentName,run_number,wb_run_number));
+        # Helper properties, defining logging options 
+        object.__setattr__(self,'_log_level','notice');
+        object.__setattr__(self,'_log_to_mantid',True);
+
+    #end
+
+    def getDefaultParameterValue(self,par_name):
+        """ method to get default parameter value, specified in IDF """
+        return prop_helpers.get_default_parameter(self.instrument,par_name);
 
     @property 
     def instrument(self):
         return self._pInstrument;
 
     @property 
-    def ei(self):
+    def incident_energy(self):
         """ incident energy or list of incident energies """ 
-        return self._ei;
+        return self._incident_energy;
 
-    @ei.setter
-    def ei(self,value):
-        pass
-
+    @incident_energy.setter
+    def incident_energy(self,value):
+       """ Set up incident energy in a range of various formats """
+       if value != None:
+          if isinstance(value,str):
+             en_list = str.split(value,',');
+             if len(en_list)>1:                 
+                rez = list;
+                for en_str in en_list:
+                    val = float(en_str);
+                    rez.append(val)
+                self._incident_energy=rez;
+             else:
+               self._incident_energy=float(value);
+          else:
+            if isinstance(value,list):
+                self._incident_energy = []
+                for val in value:
+                    en_val = float(val);
+                    if en_val<=0:
+                        raise KeyError("Incident energy has to be positive, got numberL {0} ".format(en_val));
+                    else:
+                     self._incident_energy.append(en_val);
+            else:
+               self._incident_energy =float(value);
+       else:
+         raise KeyError("Incident energy have to be positive number of list of positive numbers. Got None")       
+       if isinstance(self._incident_energy,list):
+           for en in self._incident_energy:
+               if en<= 0:
+                 raise KeyError("Incident energy have to be positive number of list of positive numbers."+
+                           " For input argument {0} got negative value {1}".format(value,en))     
+       else:
+         if self._incident_energy<= 0:
+            raise KeyError("Incident energy have to be positive number of list of positive numbers."+
+                           " For value {0} got negative {1}".format(value,self._incident_energy))
     @property 
     def energy_bins(self):
         """ binning range for the result of convertToenergy procedure or list of such ranges """
-        pass
+        return self._energy_bins
 
     @energy_bins.setter
     def energy_bins(self,values):
-       if value != None:
-          if isinstance(value,str):
-             list = str.split(value,',');
+       if values != None:
+          if isinstance(values,str):
+             list = str.split(values,',');
              nBlocks = len(list);
              for i in xrange(0,nBlocks,3):
                 value = [float(list[i]),float(list[i+1]),float(list[i+2])]
           else:
+              value = values;
               nBlocks = len(value);
           if nBlocks%3 != 0:
                raise KeyError("Energy_bin value has to be either list of n-blocks of 3 number each or string representation of this list with numbers separated by commas")
@@ -66,7 +121,7 @@ class DirectReductionProperties(object):
     @run_number.setter
     def run_number(self,value):
         """ sets a run number to process or list of run numbers """
-        pass
+        self._run_number = value
 
     @property
     def wb_run_number(self):
@@ -76,7 +131,7 @@ class DirectReductionProperties(object):
 
     @wb_run_number.setter
     def wb_run_number(self,value):
-        pass;
+        self._wb_run_number = value
 
 
     @property 
@@ -90,7 +145,7 @@ class DirectReductionProperties(object):
     @monovanadium_run.setter
     def monovanadium_run(self,value): 
         """ run number for monochromatic vanadium used in normalization """
-        pass
+        self._monovan_run = value
 
     @property 
     def wb_for_monovan_run(self):
@@ -101,6 +156,15 @@ class DirectReductionProperties(object):
             return self._wb_for_monovan_run;
         else:
             return self._white_beam_run;
+
+    @wb_for_monovan_run.setter
+    def wb_for_monovan_run(self,value): 
+        """ run number for monochromatic vanadium used in normalization """
+        if value == self._white_beam_run:
+            self._wb_for_monovan_run = None;
+        else:
+            self._wb_for_monovan_run = value
+
     # 
     def _set_instrument(self,InstrumentName,run_number,wb_run_number):
         """ test method used to obtain default instrument for testing """
@@ -110,6 +174,16 @@ class DirectReductionProperties(object):
         if not mtd.doesExist(tmp_ws_name):
                LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
         return mtd[tmp_ws_name].getInstrument();
+
+
+    def log(self, msg,level="notice"):
+        """Send a log message to the location defined
+        """
+        if self._log_to_mantid:
+            DirectReductionProperties.log_options[level](msg)
+        else:
+            print msg
+
 
 
 
@@ -181,35 +255,42 @@ class MonovanIntegrationRange(object):
 
         Defined either directly or as the function of the incident energy(s)
 
-        If list of incident energies is provided, map or ranges is returned 
+        If list of incident energies is provided, map of ranges in the form 'ei'=range is returned 
     """
     def __init__(self):
         pass
 
     def __get__(self,instance,type=None):
-        if self.monovan_integr_range is None:
+        def_range = prop_helpers.gen_getter(instance.__dict__,'monovan_integr_range');
+        if def_range is None:
             ei = instance.incident_energy
-            range = [instance.monovan_lo_frac*ei,instance.monovan_hi_frac*ei]
+            lo_frac = instance.monovan_lo_frac;
+            hi_frac = instance.monovan_hi_frac;
+            if isinstance(ei,list):
+                range = dict();
+                for en in ei:
+                    range[en] = [lo_frac*en,hi_frac*en]
+            else:
+                range = [lo_frac*ei,hi_frac*ei]
             return range
         else:
-            return self.monovan_integr_range
-
-
+            return def_range;
 
     def __set__(self,instance,value):
         if value != None:
-           fileName, fileExtension = os.path.splitext(value)
-           if (not fileExtension):
-               value=value+self._file_ext;
+            raise NotImplementedError('Changing monovan_integr_range is not yet implemented. Try to set up monovan_lo_frac and monovan_hi_frac, which would specify energy limits') 
         prop_helpers.gen_setter(instance.__dict__,'monovan_integr_range',value);
 #end MonovanIntegrationRange
 
 
 class SpectraToMonitorsList(object):
    """ property describes list of spectra, used as monitors to estimate incident energy
-      in a direct instrument
+       in a direct scattering experiment. 
 
-      Written to work with old IDF too, where this property is absent.
+       Necessary when a detector working in event mode is used as monitor. Specifying this number would copy 
+       correspondent spectra to monitor workspace and rebin it according to monitors binning
+
+       Written to work with old IDF too, where this property is absent.
    """ 
    def __init__(self):
        pass
@@ -249,6 +330,50 @@ class SpectraToMonitorsList(object):
         prop_helpers.gen_setter(instance.__dict__,'spectra_to_monitors_list',result);
         return;
 #end SpectraToMonitorsList
+    # format to save data
+class SaveFormat(object):
+   # formats available for saving
+   save_formats = ['spe','nxspe','nxs'];
+
+   def __get__(self,instance,type=None):
+        formats=  prop_helpers.gen_getter(instance.__dict__,'save_format');
+        if formats is None:
+            return set();
+        else:
+            return formats;
+
+   def __set__(self,instance,value):
+        """ user can clear save formats by setting save_format=None or save_format = [] or save_format=''
+            if empty string or empty list is provided as part of the list, all save_format-s set up earlier are cleared"""
+
+        # clear format by using None 
+        if value is None:
+            prop_helpers.gen_setter(instance.__dict__,'save_format',set());
+            return
+
+        # check string, if it is empty, clear save format, if not -- continue
+        if isinstance(value,str):
+            if value[:1] == '.':
+                value = value[1:];
+
+            if not(value in SaveFormat.save_formats):
+                instance.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur for this format")
+                return 
+        elif isinstance(value,list):
+            # set single default save format recursively
+             for val in value:
+                    self.__set__(instance,val);
+             return;
+        else:
+            raise KeyError(' Attempting to set unknown saving format type. Allowed values can be spe,nxspe or nxs');
+        if instance.__dict__['save_format'] is None:
+            ts = set()
+            ts.add(value);
+            instance.__dict__['save_format'] = ts;
+        else:
+            instance.__dict__['save_format'].add(value);
+#end SaveFormat
+
 
 #-----------------------------------------------------------------------------------------
 # END Descriptors, Direct property manager itself
@@ -297,7 +422,6 @@ class DirectPropertyManager(DirectReductionProperties):
 
         # properties with allowed values
         self.__prop_allowed_values['normalise_method']=[None,'monitor-1','monitor-2','current']  # 'uamph', peak -- disabled/unknown at the moment
-        self.__prop_allowed_values['save_format']=[None,'.spe','.nxspe','.nxs']
         self.__prop_allowed_values['deltaE_mode']=['direct'] # I do not think we should try other modes
 
 
@@ -348,7 +472,7 @@ class DirectPropertyManager(DirectReductionProperties):
         #end
 
         # redefine generic substitutions for None
-        if type(val) is str and (val is 'None' or val is 'none'):
+        if type(val) is str and (val is 'None' or val is 'none' or len(val) == 0):
             val = None;
         if type(val) is list and len(val) == 0:
             val = None;
@@ -356,7 +480,7 @@ class DirectPropertyManager(DirectReductionProperties):
 
         # Check allowed values property if value allowed
         if name in self.__prop_allowed_values:
-            allowed_values = self.__prop_with_allowed_values[name];
+            allowed_values = self.__prop_allowed_values[name];
             if not(val in allowed_values):
                 raise KeyError(" Property {0} can not have value: {1}".format(name,val));
         #end
@@ -407,44 +531,8 @@ class DirectPropertyManager(DirectReductionProperties):
     monovan_integr_range     = MonovanIntegrationRange();
     #
     spectra_to_monitors_list = SpectraToMonitorsList();
-
-    # format to save data
-    @property
-    def save_format(self):
-        return self._save_format
-    @save_format.setter
-    def save_format(self, value):
-    # user can clear save formats by setting save_format=None or save_format = [] or save_format=''
-    # if empty string or empty list is provided as part of the list, all save_format-s set up earlier are cleared
-
-    # clear format by using None
-        if value is None:
-            self._save_format = None
-            return
-    # check string, if it is empty, clear save format, if not -- continue
-        if isinstance(value,str):
-            if value not in self.__save_formats :
-                self.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur for this format")
-                if len(value) == 0: # user wants to clear internal save formats
-                   self._save_format = None
-                return
-        elif isinstance(value,list):
-            if len(value) > 0 :
-                # set single default save format recursively
-                for val in value:
-                    self.save_format = val
-                return;
-      # clear all previous formats by providing empty list
-            else:
-                self._save_format = None;
-                return
-
-        # here we came to setting list of save formats
-        if self._save_format is None:
-            self._save_format = [];
-
-        self._save_format.append(value);
-
+    # 
+    save_format = SaveFormat();
   
 
 
@@ -612,20 +700,6 @@ class DirectPropertyManager(DirectReductionProperties):
 
 
 
-
-    def log(self, msg,level="notice"):
-        """Send a log message to the location defined
-        """
-        log_options = \
-        {"notice" :      lambda (msg):   logger.notice(msg),
-         "warning" :     lambda (msg):   logger.warning(msg),
-         "error" :       lambda (msg):   logger.error(msg),
-         "information" : lambda (msg):   logger.information(msg),
-         "debug" :       lambda (msg):   logger.debug(msg)}
-        if self._to_stdout:
-            print msg
-        if self._log_to_mantid:
-            log_options[level](msg)
 
     def help(self,keyword=None) :
         """function returns help on reduction parameters.

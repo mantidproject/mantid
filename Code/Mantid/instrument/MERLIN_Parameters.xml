@@ -91,16 +91,16 @@
 
 <!-- First spectra number (monitor number) to use when measuring incident energy
     Should be spectra with well defined energy peak -->
-<parameter name="ei-mon1-spec"  type="int">
+<parameter name="ei_mon1_spec"  type="int">
   <value val="69634"/>
 </parameter>
 <!-- Second spectra number (monitor number) to use when measuring incident energy
      Should be spectra with well defined energy peak -->
-<parameter name="ei-mon2-spec"  type="int">
+<parameter name="ei_mon2_spec"  type="int">
   <value val="69638"/>
 </parameter>
 <parameter name="ei_mon_spectra"  type="string">
-  <value val="ei-mon1-spec:ei-mon2-spec"/>
+  <value val="ei_mon1_spec:ei_mon2_spec"/>
 </parameter>
   
 <!--if you use some detectors as monitors and work in event mode, one needs to specify the comma separated list of these detectors here 
@@ -332,7 +332,7 @@
 <!--  ****************************************  Workflow control **************************** -->
 
 <!-- This parameter controls the format of output data written by reducer. 
-     Three values are currently supported, namely spe, nxspe, and nexus (mantid workspace) (.nxs)
+    Three values are currently supported, namely .spe, .nxspe, and nexus (mantid workspace) (.nxs)
      Three possible values for this are defined inin DirectEnergyConversion init routine as recognized by save method 
      If None is there, no internal script saving occurs and one needs to use external save operations -->  
 <parameter name="save_format" type="string">
@@ -410,9 +410,10 @@
        samp_sig   = diag_samp_median_sigma=diag_samp_sig;
        variation  = diag_variation;
        bleed_test = bleed = diag_bleed_test;
-       bleed_maxrate = diag_bleed_maxrate;
-       bleed_pixels  = diag_bleed_pixels;
-       ei-mon2-spec = test_ei2_mon_spectra;
+       bleed_maxrate= diag_bleed_maxrate;
+       bleed_pixels = diag_bleed_pixels;
+       ei_mon1_spec = ei-mon1-spec;       
+       ei_mon2_spec = test_ei2_mon_spectra=ei-mon2-spec;
        ei_mon_spectra=test_mon_spectra_composite"
     />
 </parameter>
