@@ -460,7 +460,7 @@ bool LoadNexusMonitors::allMonitorsHaveHistoData(::NeXus::File& file,
       file.closeGroup();
     }
   }
-  catch (std::exception e)
+  catch (::NeXus::Exception&)
   {
     file.closeGroup();
     res = false;
