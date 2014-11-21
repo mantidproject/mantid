@@ -1209,7 +1209,7 @@ namespace Mantid
         if (monitorsAsEvents && !this->hasEventMonitors()) {
           g_log.warning() << "The property MonitorsAsEvents has been enabled but this file does not seem to have monitors with events." << endl;
         }
-        if(monitorsAsEvents)
+        if(monitorsAsEvents && this->hasEventMonitors())
         {
           // no matter whether the file has events or not, the user has requested to load events from monitors
           this->runLoadMonitorsAsEvents(&prog);
