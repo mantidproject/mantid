@@ -167,7 +167,8 @@ class DirectReductionProperties(object):
 
     # 
     def _set_instrument(self,InstrumentName,run_number,wb_run_number):
-        """ test method used to obtain default instrument for testing """
+        """ simple method used to obtain default instrument for testing """
+        # TODO: implement advanced instrument setter, used in DirectEnergy conversion
         idf_dir = config.getString('instrumentDefinition.directory')
         idf_file=api.ExperimentInfo.getInstrumentFilename(InstrumentName)
         tmp_ws_name = '__empty_' + InstrumentName
