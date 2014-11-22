@@ -183,11 +183,11 @@ Here are the cases that a spectra (i.e., a detector) will be masked in the outpu
 
 -  A spectrum that does not have peak within specified d-range.  It is noted as "no peaks". Here is the criteria for this case.
 
-  * Algorithm FindPeaks fails to find any peak;
-  * No peak found has height larger than specified 'MinimumPeakHeight';
-  * No peak found has observed height larger than specified 'MinimumPeakHeightObs';
-  * No peak found has resolution within specified range;
-  * No peak found whose calculated offset is smaller than the user-defined maximum offset.
+ - Algorithm FindPeaks fails to find any peak;
+ - No peak found has height larger than specified 'MinimumPeakHeight';
+ - No peak found has observed height larger than specified 'MinimumPeakHeightObs';
+ - No peak found has resolution within specified range;
+ - No peak found whose calculated offset is smaller than the user-defined maximum offset.
 
 Usage
 -----
