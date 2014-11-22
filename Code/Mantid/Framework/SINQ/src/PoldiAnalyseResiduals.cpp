@@ -5,6 +5,8 @@
 #include "MantidSINQ/PoldiUtilities/PoldiResidualCorrelationCore.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 
+#include <numeric>
+
 namespace Mantid
 {
 namespace Poldi
