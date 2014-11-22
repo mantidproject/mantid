@@ -60,21 +60,18 @@ Usage
 
 .. testcleanup:: ExLoadHB2AData
 
-  DeleteWorkspace(runinfowsP
+  DeleteWorkspace(infotablews)
   DeleteWorkspace(datatbws)
 
 Output:
 
 .. testoutput:: ExLoadHB2AData
 
-  datatbws = mtd['HB2A_0231_0001_Data'] 
-  infotablews = mtd['HB2A_0231_Info']
-  
-  print "Number of measuring points = %d" % (datatbws.rowCount())
-  print "Number of columns in data workspace = %d" % (datatbws.columnCount())
-  print "Number of run information = %d" % (infotablews.rowCount())
-  print "%s = %s" % (infotablews.cell(0, 0), infotablews.cell(0, 1))
-  print "%s = %s" % (infotablews.cell(31, 0), infotablews.cell(31, 1))
+   Number of measuring points = 61
+   Number of columns in data workspace = 70
+   Number of run information = 32
+   scan = 1
+   builtin_command = scan 2theta 6 12 .1 preset time 30
 
 
 .. categories::
