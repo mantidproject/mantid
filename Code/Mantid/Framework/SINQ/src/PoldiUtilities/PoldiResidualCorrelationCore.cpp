@@ -1,4 +1,6 @@
 #include "MantidSINQ/PoldiUtilities/PoldiResidualCorrelationCore.h"
+#include <algorithm>
+#include <numeric>
 
 namespace Mantid
 {
