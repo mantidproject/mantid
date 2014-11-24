@@ -233,6 +233,11 @@ namespace Mantid
     {
       if ( criteria.empty() ) return;
 
+      if ( criteria.size() > columnCount() )
+      {
+        throw std::runtime_error("Too many column names given.");
+      }
+
       const size_t nRows = rowCount();
       if ( nRows == 0 ) return;
 
@@ -252,7 +257,7 @@ namespace Mantid
         SortIterationRecord(size_t ki, size_t is, size_t ie):keyIndex(ki),iStart(is),iEnd(ie){}
         size_t keyIndex; // index in criteria vector
         size_t iStart;   // start row to sort
-        size_t iEnd;     // end row to sort (on past last)
+        size_t iEnd;     // end row to sort (one past last)
       };
 
       // dynamically populate and use a queue of records for iteratively sort all rows
@@ -265,7 +270,7 @@ namespace Mantid
       // loop over sortRecords and sort indexVec
       for( size_t counter = 0; counter < maxNLoops; ++counter )
       {
-        // get the record from the fron of the queue
+        // get the record from the front of the queue
         SortIterationRecord record = sortRecords.front();
         sortRecords.pop();
         // define the arguments for Column::sortIndex

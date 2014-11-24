@@ -63,6 +63,11 @@ namespace DataHandling
     std::vector<std::string> columns = getProperty("Columns");
     std::vector<int> ascending = getProperty("Ascending");
 
+    if ( columns.empty() )
+    {
+      throw std::invalid_argument("No column names given.");
+    }
+
     // if "Ascending" contains a single value - it's common for all columns.
     if ( ascending.size() == 1 )
     {
