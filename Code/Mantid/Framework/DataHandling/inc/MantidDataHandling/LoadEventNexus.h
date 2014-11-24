@@ -168,6 +168,9 @@ namespace DataHandling
     /// Was the instrument loaded?
     bool instrument_loaded_correctly;
 
+    /// Mutex protecting tof limits
+    Poco::FastMutex m_tofMutex;
+      
     /// Limits found to tof
     double longest_tof;
     /// Limits found to tof

@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-
+#include "MantidGeometry/Instrument/FitParameter.h"
 namespace Mantid
 {
 

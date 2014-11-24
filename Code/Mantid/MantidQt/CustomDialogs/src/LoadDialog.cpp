@@ -90,7 +90,7 @@ namespace MantidQt
       if( m_form.fileWidget->isValid() )
       {
         if( m_form.fileWidget->getFilenames().size() == 1 )
-          suggestion = QFileInfo(m_form.fileWidget->getFirstFilename()).baseName();
+          suggestion = QFileInfo(m_form.fileWidget->getFirstFilename()).completeBaseName();
         else
           suggestion = "MultiFiles";
       }

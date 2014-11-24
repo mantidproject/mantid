@@ -7,7 +7,7 @@ class InelasticIndirectReductionTest(unittest.TestCase):
 
     def test_basic(self):
         InelasticIndirectReduction(InputFiles='IRS26176.RAW',
-                                   OutputWorkspaceGroup='IndirectReductions',
+                                   OutputWorkspace='IndirectReductions',
                                    Instrument='IRIS',
                                    Analyser='graphite',
                                    Reflection='002',

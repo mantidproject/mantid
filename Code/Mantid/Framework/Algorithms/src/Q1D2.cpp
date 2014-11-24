@@ -42,17 +42,17 @@ void Q1D2::init()
         "this can be followed by a comma and more widths and last boundary pairs.\n"
         "Negative width values indicate logarithmic binning.");
   declareProperty(new WorkspaceProperty<>("PixelAdj","", Direction::Input, PropertyMode::Optional),
-    "The scaling to apply to each spectrum e.g. for detector efficiency, must have\n"
+    "Scaling to apply to each spectrum. Must have\n"
     "the same number of spectra as the DetBankWorkspace");
   auto wavVal = boost::make_shared<CompositeValidator>();
   wavVal->add<WorkspaceUnitValidator>("Wavelength");
   wavVal->add<HistogramValidator>();
   declareProperty(new WorkspaceProperty<>("WavelengthAdj", "", Direction::Input, PropertyMode::Optional, wavVal),
-    "The scaling to apply to each bin to account for monitor counts, transmission\n"
-    "fraction, etc");
+    "Scaling to apply to each bin.\n"
+    "Must have the same number of bins as the DetBankWorkspace");
   declareProperty(new WorkspaceProperty<>("WavePixelAdj", "", Direction::Input, PropertyMode::Optional, dataVal), 
-    "The scaling to apply to the normalization factor. It gathers the corrections that depend on pixel and wavelength together.\n"
-     "Currently, it takes in account the angle transmission correction.");
+    "Scaling that depends on both pixel and wavelength together.\n"
+     "Must have the same number of bins and spectra as the DetBankWorkspace.");
   declareProperty("AccountForGravity",false,
     "Whether to correct for the effects of gravity");
   declareProperty("SolidAngleWeighting",true,

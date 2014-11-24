@@ -127,6 +127,19 @@
         </item>
        </layout>
       </item>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="ckSymmetrise">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Symmetrise functions in energy about the Y axis.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Symmetrise Energy</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

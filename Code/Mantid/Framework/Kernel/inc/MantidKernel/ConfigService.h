@@ -152,6 +152,10 @@ namespace Mantid
       std::string getOSArchitecture();
       /// Returns the OS version
       std::string getOSVersion();
+      /// Returns a human readable version of the OS version
+      std::string getOSVersionReadable();
+      /// Returns the username
+      std::string getUsername();
       /// Returns the current directory
       std::string getCurrentDir();
       /// Returns the current directory
@@ -224,6 +228,9 @@ namespace Mantid
 
       /// Quick check to determine if vates has been installed.
       bool quickVatesCheck() const;
+
+      /// Get the ParaViewPath
+      const std::string getParaViewPath() const;
 
     private:
       friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;

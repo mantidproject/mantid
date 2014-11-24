@@ -35,7 +35,7 @@ namespace
   {
   public:
     /// Constructor
-    SimpleJacobian(size_t nData,size_t nParams):m_nData(nData),m_nParams(nParams),m_data(nData*nParams){}
+    SimpleJacobian(size_t nData,size_t nParams):m_nParams(nParams),m_data(nData*nParams){}
     /// Setter
     virtual void set(size_t iY, size_t iP, double value)
     {
@@ -47,7 +47,6 @@ namespace
       return m_data[iY * m_nParams + iP];
     }
   private:
-    size_t m_nData; ///< size of the data / first dimension
     size_t m_nParams; ///< number of parameters / second dimension
     std::vector<double> m_data; ///< data storage
   };

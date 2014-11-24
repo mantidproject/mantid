@@ -3,6 +3,7 @@
 
 #include <gmock/gmock.h>
 #include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtCustomInterfaces/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidAPI/TableRow.h"
 
@@ -33,22 +34,27 @@ public:
   MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
 
+  MOCK_METHOD1(showAlgorithmDialog, void(const std::string&));
+
   //IO
   MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
   MOCK_METHOD1(setSelection, void(const std::set<int>& rows));
   MOCK_CONST_METHOD0(getSelectedRows, std::set<int>());
+  MOCK_CONST_METHOD0(getSelectedSearchRows, std::set<int>());
   MOCK_METHOD1(setClipboard, void(const std::string& text));
   MOCK_CONST_METHOD0(getClipboard, std::string());
+  MOCK_CONST_METHOD0(getSearchString, std::string());
+  MOCK_CONST_METHOD0(getSearchInstrument, std::string());
 
   //Calls we don't care about
   virtual void showTable(QReflTableModel_sptr) {};
+  virtual void showSearch(ReflSearchModel_sptr) {};
   virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy*) {};
   virtual void setProgressRange(int,int) {};
   virtual void setProgress(int) {};
   virtual void setTableList(const std::set<std::string>&) {};
   virtual void setInstrumentList(const std::vector<std::string>&, const std::string&) {};
   virtual std::string getProcessInstrument() const {return "FAKE";}
-  virtual std::string getSearchInstrument() const {return "FAKE";}
   virtual boost::shared_ptr<IReflPresenter> getPresenter() const {return boost::shared_ptr<IReflPresenter>();}
 };
 

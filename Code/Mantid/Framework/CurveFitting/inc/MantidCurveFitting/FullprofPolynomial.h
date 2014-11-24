@@ -70,12 +70,6 @@ namespace CurveFitting
 
     /// Background origin position
     double m_bkpos;
-
-    /// Lower x boundary.
-    double m_StartX;
-
-    /// Upper x boundary
-    double m_EndX;
   };
 
   typedef boost::shared_ptr<FullprofPolynomial> FullprofPolynomial_sptr;

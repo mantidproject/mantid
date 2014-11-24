@@ -49,6 +49,10 @@ Diaphragme2plus0=/entry1/POLDI/diaphragm2/zplus_zero
 ChopperName=/entry1/POLDI/chopper/name
 ChopperPhase=/entry1/POLDI/chopper/chopper_phase
 ChopperSpeed=/entry1/POLDI/chopper/rotation_speed
+
+# There seems to be an issue with this field in some data files.
+# Once this is fixed, it can be reactivated.
+#ChopperSpeedTarget=/entry1/POLDI/chopper/rotation_speed_target
 #
 SampleName=/entry1/POLDI/name
 #
