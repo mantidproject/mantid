@@ -10,6 +10,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
@@ -553,7 +554,120 @@ public:
     Poco::File(outputFileName).remove();
   }
 
+  void testSaveTableColumn()
+  {
+    std::string outputFileName = "SaveNexusProcessedTest_testSaveTable.nxs";
+
+    // Create a table which we will save
+    auto table = boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(WorkspaceFactory::Instance().createTable());
+    table->setRowCount(3);
+    table->addColumn("int", "IntColumn");
+    {
+      auto& data = table->getColVector<int>("IntColumn");
+      data[0] = 5;
+      data[1] = 2;
+      data[2] = 3;
+    }
+    table->addColumn("double", "DoubleColumn");
+    {
+      auto& data = table->getColVector<double>("DoubleColumn");
+      data[0] = 0.5;
+      data[1] = 0.2;
+      data[2] = 0.3;
+    }
+    table->addColumn("float", "FloatColumn");
+    {
+      auto& data = table->getColVector<float>("FloatColumn");
+      data[0] = 10.5f;
+      data[1] = 10.2f;
+      data[2] = 10.3f;
+    }
+
+    SaveNexusProcessed alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", table);
+    alg.setPropertyValue("Filename", outputFileName);
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    if ( ! alg.isExecuted() )
+      return; // Nothing to check
+
+    // Get full output file path
+    outputFileName = alg.getPropertyValue("Filename");
+
+    NeXus::File savedNexus(outputFileName);
+
+    savedNexus.openGroup("mantid_workspace_1", "NXentry");
+    savedNexus.openGroup("table_workspace", "NXdata");
+
+    {
+      savedNexus.openData("column_1");
+      doTestColumnInfo( savedNexus, NX_INT32, "An integer", "IntColumn" );
+      std::vector<int> data;
+      savedNexus.getData(data);
+
+      TS_ASSERT_EQUALS( data.size(), 3 );
+      TS_ASSERT_EQUALS( data[0], 5 );
+      TS_ASSERT_EQUALS( data[1], 2 );
+      TS_ASSERT_EQUALS( data[2], 3 );
+    }
+
+    {
+      savedNexus.openData("column_2");
+      doTestColumnInfo( savedNexus, NX_FLOAT64, "A double", "DoubleColumn" );
+      std::vector<double> data;
+      savedNexus.getData(data);
+
+      TS_ASSERT_EQUALS( data.size(), 3 );
+      TS_ASSERT_EQUALS( data[0], 0.5 );
+      TS_ASSERT_EQUALS( data[1], 0.2 );
+      TS_ASSERT_EQUALS( data[2], 0.3 );
+    }
+
+    {
+      savedNexus.openData("column_3");
+      doTestColumnInfo( savedNexus, NX_FLOAT32, "A float", "FloatColumn" );
+      std::vector<float> data;
+      savedNexus.getData(data);
+
+      TS_ASSERT_EQUALS( data.size(), 3 );
+      TS_ASSERT_EQUALS( data[0], 10.5f );
+      TS_ASSERT_EQUALS( data[1], 10.2f );
+      TS_ASSERT_EQUALS( data[2], 10.3f );
+    }
+
+
+    //Poco::File(outputFileName).remove();
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
+
+  void doTestColumnInfo(NeXus::File& file, int type, const std::string& interpret_as, const std::string& name )
+  {
+      NeXus::Info columnInfo = file.getInfo();
+      TS_ASSERT_EQUALS( columnInfo.dims.size(), 1 );
+      TS_ASSERT_EQUALS( columnInfo.dims[0], 3 );
+      TS_ASSERT_EQUALS( columnInfo.type, type );
+
+      std::vector<NeXus::AttrInfo> attrInfos = file.getAttrInfos();
+      TS_ASSERT_EQUALS( attrInfos.size(), 3 );
+
+      if ( attrInfos.size() == 3 )
+      {
+        TS_ASSERT_EQUALS( attrInfos[1].name, "interpret_as");
+        TS_ASSERT_EQUALS( file.getStrAttr(attrInfos[1]), interpret_as );
+
+        TS_ASSERT_EQUALS( attrInfos[2].name, "name");
+        TS_ASSERT_EQUALS( file.getStrAttr(attrInfos[2]), name );
+
+        TS_ASSERT_EQUALS( attrInfos[0].name, "units");
+        TS_ASSERT_EQUALS( file.getStrAttr(attrInfos[0]), "Not known" );
+      }
+  }
+
   std::string outputFile;
   std::string entryName;
   std::string dataName;

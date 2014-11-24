@@ -197,6 +197,10 @@ namespace Mantid
       void writeNexusVectorColumn(const boost::shared_ptr< const DataObjects::VectorColumn<Type> >& column,
                                   const std::string& columnName, int nexusType,
                                   const std::string& typeName) const;
+
+      /// Save a numeric columns of a TableWorkspace to currently open nexus file.
+      template<typename T>
+      void writeTableColumn(int type, const std::string& interpret_as, const API::Column& col, const std::string& columnName) const;
     };
     
     /**
@@ -442,6 +446,7 @@ namespace Mantid
 
       NXclosedata(fileID);
     }
+
 
     /// Helper typedef for a shared pointer of a NexusFileIO.
     typedef boost::shared_ptr<NexusFileIO> NexusFileIO_sptr;

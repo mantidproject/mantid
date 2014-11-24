@@ -513,6 +513,36 @@ namespace Mantid
       return ((status == NX_ERROR) ? 3 : 0);
     }
 
+    /** 
+      * Save a numeric columns of a TableWorkspace to currently open nexus file.
+      * @param type :: Nexus code for the element data type.
+      * @param interpret_as :: Value of the interpret_as attribute.
+      * @param col :: Reference to the column being svaed.
+      * @param columnName :: Name of the nexus data set in which the column values are saved.
+      */
+    template<typename T>
+    void NexusFileIO::writeTableColumn(int type, const std::string& interpret_as, const API::Column& col, const std::string& columnName) const
+    {
+      const int nRows = static_cast<int>(col.size());
+      int dims_array[1] = { nRows };
+
+      T* toNexus = new T[nRows];
+      for (int ii = 0; ii < nRows; ii++)
+        toNexus[ii] = col.cell<T>(ii);
+      NXwritedata(columnName.c_str(), type, 1, dims_array, (void *) (toNexus), false);
+      delete[] toNexus;
+
+      // attributes
+      NXopendata(fileID, columnName.c_str());
+      std::string units = "Not known";
+      NXputattr(fileID, "units", reinterpret_cast<void*>(const_cast<char*>(units.c_str())),
+          static_cast<int>(units.size()), NX_CHAR);
+      NXputattr(fileID, "interpret_as",
+          reinterpret_cast<void*>(const_cast<char*>(interpret_as.c_str())),
+          static_cast<int>(interpret_as.size()), NX_CHAR);
+      NXclosedata(fileID);
+    }
+
     //-------------------------------------------------------------------------------------
     /** Write out a table Workspace's
      */
@@ -548,41 +578,27 @@ namespace Mantid
 
         if (col->isType<double>())
         {
-          double * toNexus = new double[nRows];
-          for (int ii = 0; ii < nRows; ii++)
-            toNexus[ii] = col->cell<double>(ii);
-          NXwritedata(str.c_str(), NX_FLOAT64, 1, dims_array, (void *) (toNexus), false);
-          delete[] toNexus;
-
-          // attributes
-          NXopendata(fileID, str.c_str());
-          std::string units = "Not known";
-          std::string interpret_as = "A double";
-          NXputattr(fileID, "units", reinterpret_cast<void*>(const_cast<char*>(units.c_str())),
-              static_cast<int>(units.size()), NX_CHAR);
-          NXputattr(fileID, "interpret_as",
-              reinterpret_cast<void*>(const_cast<char*>(interpret_as.c_str())),
-              static_cast<int>(interpret_as.size()), NX_CHAR);
-          NXclosedata(fileID);
+          writeTableColumn<double>(NX_FLOAT64,"A double",*col,str);
+        }
+        else if (col->isType<float>())
+        {
+          writeTableColumn<float>(NX_FLOAT32,"A float",*col,str);
         }
         else if (col->isType<int>())
         {
-          int * toNexus = new int[nRows];
-          for (int ii = 0; ii < nRows; ii++)
-            toNexus[ii] = col->cell<int>(ii);
-          NXwritedata(str.c_str(), NX_INT32, 1, dims_array, (void *) (toNexus), false);
-          delete[] toNexus;
-
-          // attributes
-          NXopendata(fileID, str.c_str());
-          std::string units = "Not known";
-          std::string interpret_as = "An integer";
-          NXputattr(fileID, "units", reinterpret_cast<void*>(const_cast<char*>(units.c_str())),
-              static_cast<int>(units.size()), NX_CHAR);
-          NXputattr(fileID, "interpret_as",
-              reinterpret_cast<void*>(const_cast<char*>(interpret_as.c_str())),
-              static_cast<int>(interpret_as.size()), NX_CHAR);
-          NXclosedata(fileID);
+          writeTableColumn<int>(NX_INT32,"An integer",*col,str);
+        }
+        else if (col->isType<int32_t>())
+        {
+          writeTableColumn<int32_t>(NX_INT32,"An integer",*col,str);
+        }
+        else if (col->isType<int64_t>())
+        {
+          writeTableColumn<int64_t>(NX_INT64,"An integer",*col,str);
+        }
+        else if (col->isType<size_t>())
+        {
+          writeTableColumn<size_t>(NX_UINT64,"An integer",*col,str);
         }
         else if (col->isType<std::string>())
         {
