@@ -19,12 +19,12 @@ Usage
 .. testcode:: ExMSGDiffractionReductionSimple
 
     MSGDiffractionReduction(InputFiles='IRS21360.raw',
-                            OutputWorkspaceGroup='DiffOut',
+                            OutputWorkspace='DiffractionReductions',
                             Instrument='IRIS',
                             Mode='diffspec',
                             DetectorRange=[105,112])
 
-    ws = mtd['DiffOut'].getItem(0)
+    ws = mtd['DiffractionReductions'].getItem(0)
 
     print 'Workspace name: %s' % ws.getName()
     print 'Number of spectra: %d' % ws.getNumberHistograms()

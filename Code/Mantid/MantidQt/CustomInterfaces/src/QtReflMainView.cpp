@@ -258,6 +258,18 @@ namespace MantidQt
       m_presenter->notify(IReflPresenter::ImportTableFlag);
     }
 
+    /** This slot is used to syncrhonise the two instrument selection widgets */
+    void QtReflMainView::on_comboProcessInstrument_currentIndexChanged(int index)
+    {
+      ui.comboSearchInstrument->setCurrentIndex(index);
+    }
+
+    /** This slot is used to syncrhonise the two instrument selection widgets */
+    void QtReflMainView::on_comboSearchInstrument_currentIndexChanged(int index)
+    {
+      ui.comboProcessInstrument->setCurrentIndex(index);
+    }
+
     /**
     This slot opens the documentation when the "help" button has been pressed
     */

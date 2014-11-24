@@ -1359,7 +1359,8 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
         description = product_name + " " + product_vers;
 #elif _WIN32
         description = getValueFromStdOut(result, "Caption=");
-        // std::cout << "***" << stringStream.str() << "***" << std::endl;
+#else
+        UNUSED_ARG(result); // only used on mac and windows
 #endif
       } else {
         std::stringstream messageStream;

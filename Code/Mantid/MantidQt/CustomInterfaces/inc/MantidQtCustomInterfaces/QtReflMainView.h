@@ -119,6 +119,9 @@ namespace MantidQt
       void on_actionExportTable_triggered();
       void on_actionHelp_triggered();
 
+      void on_comboSearchInstrument_currentIndexChanged(int index);
+      void on_comboProcessInstrument_currentIndexChanged(int index);
+
       void setModel(QString name);
       void tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight);
       void showContextMenu(const QPoint& pos);
