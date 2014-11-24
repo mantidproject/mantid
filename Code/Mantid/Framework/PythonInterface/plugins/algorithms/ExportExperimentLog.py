@@ -139,17 +139,17 @@ class ExportExperimentLog(PythonAlgorithm):
             self._filemode = "new"
             if len(self._headerTitles) == 0:
                 raise NotImplementedError("Without specifying header title, unable to new a file.")
-            self.log().debug("[DB] Log file %s does not exist. So file mode is NEW." % (self._logfilename))
+            self.log().debug("Log file %s does not exist. So file mode is NEW." % (self._logfilename))
         else:
             self._filemode = self.getProperty("FileMode").value
-            self.log().debug("[DB] FileMode is from user specified value.")
+            self.log().debug("FileMode is from user specified value.")
 
         # Examine the file mode
         if self._filemode == "new" or self._filemode == "append":
             if len(self._headerTitles) != len(self._sampleLogNames):
                 raise NotImplementedError("In mode new or append, there must be same number of sample titles and names")
 
-        self.log().notice("File mode is %s. " % (self._filemode))
+        self.log().information("File mode is %s. " % (self._filemode))
 
         # This is left for a feature that might be needed in future.
         self._reorderOld = False
@@ -231,7 +231,7 @@ class ExportExperimentLog(PythonAlgorithm):
 
         # Examine
         titles = titleline.split()
-        self.log().notice("[DB] Examine finds titles: %s" % (titles))
+        self.log().debug("Examine finds titles: %s" % (titles))
 
         same = True
         if len(titles) != len(self._headerTitles):
@@ -283,8 +283,8 @@ class ExportExperimentLog(PythonAlgorithm):
         # Write to a buffer
         wbuf = ""
 
-        self.log().notice("[DB] Samlpe Log Names: %s" % (self._sampleLogNames))
-        self.log().notice("[DB] Title      Names: %s" % (self._headerTitles))
+        self.log().debug("Samlpe Log Names: %s" % (self._sampleLogNames))
+        self.log().debug("Title      Names: %s" % (self._headerTitles))
 
         if len(self._headerTitles) == 0:
             skip = True
@@ -324,7 +324,7 @@ class ExportExperimentLog(PythonAlgorithm):
         """ Check and order (if necessary) record file 
         by value of specified log by title
         """
-        self.log().notice("[DB] Order Record File!")
+        self.log().debug("Order Record File!")
 
         # Read line
         lfile = open(self._logfilename, "r")
