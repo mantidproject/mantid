@@ -1301,7 +1301,11 @@ namespace MantidQt
       std::set<std::string> workspaces;
 
       for(auto row = selectedRows.begin(); row != selectedRows.end(); ++row)
-        workspaces.insert("IvsQ_" + getRunNumber(prepareRunWorkspace(m_model->data(m_model->index(*row, COL_RUNS)).toString().toStdString())));
+      {
+        const std::string wsName = "IvsQ_" + getRunNumber(prepareRunWorkspace(m_model->data(m_model->index(*row, COL_RUNS)).toString().toStdString()));
+        if(AnalysisDataService::Instance().doesExist(wsName))
+          workspaces.insert(wsName);
+      }
 
       m_view->plotWorkspaces(workspaces);
     }
@@ -1335,7 +1339,11 @@ namespace MantidQt
 
       std::set<std::string> workspaces;
       for(auto runsMap = runsByGroup.begin(); runsMap != runsByGroup.end(); ++runsMap)
-        workspaces.insert("IvsQ_" + boost::algorithm::join(runsMap->second, "_"));
+      {
+        const std::string wsName = "IvsQ_" + boost::algorithm::join(runsMap->second, "_");
+        if(AnalysisDataService::Instance().doesExist(wsName))
+          workspaces.insert(wsName);
+      }
       m_view->plotWorkspaces(workspaces);
     }
 
