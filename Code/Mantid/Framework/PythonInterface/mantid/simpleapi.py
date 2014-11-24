@@ -134,7 +134,7 @@ def LoadDialog(*args, **kwargs):
 
     Additional arguments available here (as keyword only) are:
       - Enable :: A CSV list of properties to keep enabled in the dialog
-      - Disable :: A CSV list of properties to keep enabled in the dialog
+      - Disable :: A CSV list of properties to disable in the dialog
       - Message :: An optional message string
     """
     arguments = {}
@@ -229,7 +229,7 @@ def FitDialog(*args, **kwargs):
 
     Additional arguments available here (as keyword only) are:
       - Enable :: A CSV list of properties to keep enabled in the dialog
-      - Disable :: A CSV list of properties to keep enabled in the dialog
+      - Disable :: A CSV list of properties to disable in the dialog
       - Message :: An optional message string
     """
     arguments = {}
