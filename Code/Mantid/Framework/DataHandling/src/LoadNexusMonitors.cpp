@@ -498,7 +498,7 @@ void LoadNexusMonitors::runLoadLogs(const std::string filename, API::MatrixWorks
  * Helper method to make sure that a file is / can be openend as a NeXus file
  *
  * @param: fname :: name of the file
- * Returns true if opening the file as NeXus and retrieving entries succeeds
+ * @return True if opening the file as NeXus and retrieving entries succeeds
  **/
 bool LoadNexusMonitors::canOpenAsNeXus(const std::string& fname)
 {
