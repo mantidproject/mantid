@@ -248,6 +248,7 @@ def AbsRunFeeder(input_ws, can_ws, geom, ncan, size, avar, density, beam_width=N
         @param plot_opt - whether to plot output
         @param verbose - whether to show extra verbose output
         @param save - whether to save the output to file
+        @return A list of result workspaces
     """
 
     StartTime('CalculateCorrections')
@@ -307,6 +308,8 @@ def AbsRunFeeder(input_ws, can_ws, geom, ncan, size, avar, density, beam_width=N
 
     EndTime('CalculateCorrections')
     plotAbs(workspaces, plot_opt)
+
+    return ','.join(workspaces)
 
 
 def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):

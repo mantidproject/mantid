@@ -278,10 +278,13 @@ namespace IDA
       "plotOpt = '" + uiForm().absp_cbPlotOutput->currentText() + "'\n"
       "sampleFormula = " + sampleFormula + "\n"
       "canFormula = " + canFormula + "\n"
-      "IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plot_opt=plotOpt, save=save, verbose=verbose)\n";
+      "print IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plot_opt=plotOpt, save=save, verbose=verbose)\n";
 
     QString pyOutput = runPythonCode(pyInput);
-    UNUSED_ARG(pyOutput);
+    QStringList resultWorkspaces = pyOutput.split(",");
+
+    // Set the result workspace for Python script export
+    m_pythonExportWsName = resultWorkspaces[0].toStdString();
   }
 
   bool CalcCorr::validate()
