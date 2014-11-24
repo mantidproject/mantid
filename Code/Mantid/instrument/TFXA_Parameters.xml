@@ -34,6 +34,10 @@
       <value val="inst_abrv, run_number, user_name, run_title, hd_dur" />
     </parameter>
 
+    <parameter name="rebin-default" type="string">
+      <value val="-3,-0.005,500" />
+    </parameter>
+
     <parameter name="Workflow.Monitor1-SpectrumNumber" >
       <value val="29" />
     </parameter>
