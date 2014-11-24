@@ -67,6 +67,11 @@ void LoadNexusMonitors::exec()
 
   API::Progress prog1(this, 0.0, 0.2, 2);
 
+  if (!canOpenAsNeXus(this->filename))
+  {
+    throw std::runtime_error("Failed to recognize this file as a NeXus file, cannot continue.");
+  }
+
   // top level file information
   ::NeXus::File file(this->filename);
 
@@ -160,6 +165,9 @@ void LoadNexusMonitors::exec()
   if (numHistMon == this->nMonitors)
   {
     useEventMon = false;
+    if (this->nMonitors == 0)
+          throw std::runtime_error("Not loading event data. Trying to load histogram data but failed to find monitors with histogram data or could not interpret the data. This file may be corrupted or it may not be supported");
+
     this->WS = API::WorkspaceFactory::Instance().create("Workspace2D",
                                                         this->nMonitors, 1, 1);
     // if there is a distinct monitor number for each monitor sort them by that number
@@ -484,6 +492,33 @@ void LoadNexusMonitors::runLoadLogs(const std::string filename, API::MatrixWorks
     {
       g_log.error() << "Error while loading Logs from Nexus. Some sample logs may be missing." << std::endl;
     }
+}
+
+/**
+ * Helper method to make sure that a file is / can be openend as a NeXus file
+ *
+ * @param: fname :: name of the file
+ * Returns true if opening the file as NeXus and retrieving entries succeeds
+ **/
+bool LoadNexusMonitors::canOpenAsNeXus(const std::string& fname)
+{
+  bool res = true;
+  ::NeXus::File* f = NULL;
+  try
+  {
+    f = new ::NeXus::File(fname);
+    if (f)
+      f->getEntries();
+  }
+  catch(::NeXus::Exception& e)
+  {
+    g_log.error() << "Failed to open as a NeXus file: '" << fname <<
+      "', error description: " << e.what() << std::endl;
+    res = false;
+  }
+  if (f)
+    delete f;
+  return res;
 }
 
 } // end DataHandling
