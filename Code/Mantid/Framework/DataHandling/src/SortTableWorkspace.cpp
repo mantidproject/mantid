@@ -68,6 +68,12 @@ namespace DataHandling
       throw std::invalid_argument("No column names given.");
     }
 
+    // by default sort all columns in ascending order
+    if ( ascending.empty() )
+    {
+      ascending.push_back(1);
+    }
+
     // if "Ascending" contains a single value - it's common for all columns.
     if ( ascending.size() == 1 )
     {
