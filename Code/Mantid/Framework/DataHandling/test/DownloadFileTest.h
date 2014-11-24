@@ -30,6 +30,8 @@ namespace
                           std::ostream& responseStream,
                           const StringToStringMap& headers = StringToStringMap())
     {
+      UNUSED_ARG(url);
+      UNUSED_ARG(headers);
       responseStream << "HTTPS request succeeded";
       return 200;
     }
@@ -37,6 +39,8 @@ namespace
                               std::ostream& responseStream,
                               const StringToStringMap& headers = StringToStringMap())
     {
+      UNUSED_ARG(url);
+      UNUSED_ARG(headers);
       responseStream << "HTTP request succeeded";
       return 200;
     }
@@ -48,7 +52,7 @@ namespace
   class MockedDownloadFile : public DownloadFile
   {
   public:
-    MockedDownloadFile::MockedDownloadFile()
+    MockedDownloadFile()
     {
       delete m_internetHelper;
       m_internetHelper = new MockedInternetHelper();
