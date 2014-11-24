@@ -224,7 +224,7 @@ def check_instrument_name(old_name,new_name):
 
     if new_name is None:
        if not(old_name is None):
-            return
+            return (None,None,str(config.getFacility()))
        else:
             raise KeyError("No instrument name is defined")
 

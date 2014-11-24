@@ -76,6 +76,7 @@ class DgreduceTest(unittest.TestCase):
         self.assertEqual(len(params),2)
         self.assertEqual(params["hard_mask_file"],'SomeFileName');
         self.assertEqual(params['use_hard_mask_only'],False)
+
     def test_setup(self):
 
 

@@ -11,6 +11,8 @@ class DirectReductionProperties(object):
 
         These properties are main set of properties, user have to set up 
         for reduction to work with defaults. 
+
+        It also contains various auxiliary non-IDF properties. 
     """
 
     # logging levels available for user
@@ -50,10 +52,21 @@ class DirectReductionProperties(object):
         return self._pInstrument;
 
     @property 
+    def instr_name(self):
+        if self._pInstrument is None:
+            raise KeyError("Attempt to use uninitialized property manager");
+        else:
+            name = self._pInstrument.getName();
+            return name[0:3];
+    @property 
+    def psi(self):
+        return 0;
+
+
+    @property 
     def incident_energy(self):
         """ incident energy or list of incident energies """ 
         return self._incident_energy;
-
     @incident_energy.setter
     def incident_energy(self,value):
        """ Set up incident energy in a range of various formats """
@@ -164,6 +177,23 @@ class DirectReductionProperties(object):
             self._wb_for_monovan_run = None;
         else:
             self._wb_for_monovan_run = value
+
+    @property 
+    def apply_kikf_correction(self):
+        """ Parameter specifies if ki/kf correction should be applied to the reduction result"""
+        if not hasattr(self,'_apply_kikf_correction'):
+            return True;
+        else:
+            return self._apply_kikf_correction;
+
+    @apply_kikf_correction.setter 
+    def apply_kikf_correction(self,value):
+        """ Set up option if ki/kf correction should be applied to the reduction result (default -- true) """
+        if isinstance(value,str):
+            val = value.lower() in ['true','t','yes','y','1']
+        else:
+            val = bool(value)
+        object.__setattr__(self,'_apply_kikf_correction',val);
 
     # 
     def _set_instrument(self,InstrumentName,run_number,wb_run_number):
@@ -366,10 +396,10 @@ class SaveFormat(object):
                     self.__set__(instance,val);
              return;
         else:
-            raise KeyError(' Attempting to set unknown saving format type. Allowed values can be spe,nxspe or nxs');
+            raise KeyError(' Attempting to set unknown saving format type. Allowed values can be spe, nxspe or nxs');
         if instance.__dict__['save_format'] is None:
-            ts = set()
-            ts.add(value);
+            ts = set();
+            ts.add(value)
             instance.__dict__['save_format'] = ts;
         else:
             instance.__dict__['save_format'].add(value);

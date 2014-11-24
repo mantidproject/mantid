@@ -21,45 +21,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_build_subst_dictionary(self):
-       self.assertEqual(dict(), DirectEnergyConversion.build_subst_dictionary(""))
-       self.assertEqual(dict(),DirectEnergyConversion.build_subst_dictionary())
-
-       self.assertRaises(AttributeError,DirectEnergyConversion.build_subst_dictionary,10)
-       self.assertRaises(AttributeError,DirectEnergyConversion.build_subst_dictionary,"A=")
-       self.assertRaises(AttributeError,DirectEnergyConversion.build_subst_dictionary,"B=C;A=")
-
-       rez=dict();
-       rez['A']='B';
-       self.assertEqual(rez, DirectEnergyConversion.build_subst_dictionary(rez))
-
-       myDict =  DirectEnergyConversion.build_subst_dictionary("A=B")
-       self.assertEqual(myDict['B'],'A')
-
-       myDict =  DirectEnergyConversion.build_subst_dictionary("A=B;C=DD")
-       self.assertEqual(myDict['B'],'A')
-       self.assertEqual(myDict['DD'],'C')
-       myDict =  DirectEnergyConversion.build_subst_dictionary("A=B=C=DD")
-       self.assertEqual(myDict['B'],'A')
-       self.assertEqual(myDict['DD'],'A')
-       self.assertEqual(myDict['C'],'A')
-
-       myDict =  DirectEnergyConversion.build_subst_dictionary("A = B = C=DD")
-       self.assertEqual(myDict['B'],'A')
-       self.assertEqual(myDict['DD'],'A')
-       self.assertEqual(myDict['C'],'A')
-
-   #def test_build_coupled_keys_dict_simple(self):
-   #    params = ["];
-
-    def test_init_reducer(self):
-        tReducer = self.reducer
-        self.assertTrue(tReducer._idf_values_read)
-
-        tReducer.initialise("MAP",True);
-        self.assertEqual(tReducer.instr_name,"MAP")
-
-        self.assertRaises(KeyError,setattr,tReducer,'instr_name','NonExistingInstrument')
 
 
     def test_set_non_default_wrong_value(self):

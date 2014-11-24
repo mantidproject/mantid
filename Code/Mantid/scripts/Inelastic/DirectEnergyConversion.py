@@ -40,6 +40,7 @@ import glob
 import sys
 import os.path
 import math
+from DirectPropertyManager import DirectPropertyManager;
 
 def setup_reducer(inst_name):
     """
@@ -858,26 +859,38 @@ class DirectEnergyConversion(object):
         else:
             pass
 
-        if formats is None:
-            formats = self.save_format
-        if type(formats) == str:
-            formats = [formats]
+        prop_man = self.prop_man;
+        if not(formats is None):
+            # clear up existing save formats
+            prop_man.save_format=None;
+            # parse & set up new save formats 
+            prop_man.save_format = formats;
+
+        formats = prop_man.save_format;
 
 
+          
+        save_file,ext = os.path.splitext(save_file)
+        if len(ext)>1:
+            formats.add(ext[1:]);
 
-        # if ext is none, no need to write anything
-        if formats is None:
-            return
 
-        save_file = os.path.splitext(save_file)[0]
-        # this is mainly for debugging purposes as real save do not return anything
-
-        for ext in formats:
-            if ext in self.__save_formats :
-                filename = save_file + ext
-                self.__save_formats[ext](workspace,filename)
-            else:
-                self.log("Unknown file format {0} requested while saving results.".format(ext))
+        for file_format  in formats:
+            for case in switch(file_format):
+                if case('nxspe'):
+                    filename = save_file +'.nxspe';
+                    SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=prop_man.apply_kikf_correction,psi=prop_man.psi)
+                    break
+                if case('spe'):
+                    filename = save_file +'.spe';
+                    SaveSPE(InputWorkspace=workspace,Filename= filename)
+                    break
+                if case('nxs'):
+                    filename = save_file +'.nxs';
+                    SaveNexus(InputWorkspace=workspace,Filename= filename)
+                    break
+                if case(): # default, could also just omit condition or 'if True'
+                    prop_man.log("Unknown file format {0} requested to save results. No saving performed this format".format(file_format));
 
     #-------------------------------------------------------------------------------
     def load_data(self, runs,new_ws_name=None,keep_previous_ws=False):
@@ -961,19 +974,19 @@ class DirectEnergyConversion(object):
         """
         Constructor
         """
-        self._to_stdout = True
-        self.__in_white_normalization=False; # variable use in normalize method to check if normalization can be changed from the requested;
-        self._log_to_mantid = False
-        self._idf_values_read = False
-        self._keep_wb_workspace=False #  when input data for reducer is wb workspace rather then run number, we want to keep this workspace. But usually not
-        self.spectra_masks = None;
+        self.initialise(instr_name);
 
-        if not (instr_name is None or len(instr_name)==0 or instr_name == '__empty_') : # first time run or empty run
-            self.initialise(instr_name)
-        else: # just reinitialize idf parameters to defaults
-            self.init_idf_params(True);
-
-
+    @property 
+    def prop_man(self):
+        """ Return property manager containing DirectEnergyConversion parameters """
+        return self._propMan;
+    @prop_man.setter
+    def prop_man(self,value):
+        """ Assign new instance of direct property manager to provide DirectEnergyConversion parameters """
+        if isinstance(value,DirectPropertyManager):
+            self._propMan = value;
+        else:
+            raise KeyError("Property manager can be initialized by an instance of DirectProperyManager only")
 
     def initialise(self, instr_name,reload_instrument=False):
         """
@@ -982,30 +995,17 @@ class DirectEnergyConversion(object):
 
         # Instrument and default parameter setup
         # formats available for saving. As the reducer has to have a method to process one of this, it is private property
-        self.__save_formats = {}
-        self.__save_formats['.spe']   = lambda workspace,filename : SaveSPE(InputWorkspace=workspace,Filename= filename)
-        self.__save_formats['.nxspe'] = lambda workspace,filename : SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=self.apply_kikf_correction,Psi=self.psi)
-        self.__save_formats['.nxs']   = lambda workspace,filename : SaveNexus(InputWorkspace=workspace,Filename= filename)
         ## Detector diagnosis
         # Diag parameters -- keys used by diag method to pick from default parameters. Diag cuts these keys removing diag_ word
         # and tries to get rest from the correspondent Direct Energy conversion attributes.
         self.__diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
                               'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation',\
                               'diag_bleed_test','diag_bleed_pixels','diag_bleed_maxrate','diag_hard_mask_file','diag_use_hard_mask_only','diag_background_test_range']
-
-        # before starting long run, makes sense to verify if all files requested for the run are in fact available. Here we specify the properties which describe these files
-        self.__file_properties = ['det_cal_file','map_file','hard_mask_file']
-        self.__abs_norm_file_properties = ['monovan_mapfile']
-
-        self.__normalization_methods=['none','monitor-1','monitor-2','current'] # 'uamph', peak -- disabled/unknown at the moment
-
-        # list of the parameters which should usually be changed by user and if not, user should be warn about it.
-        self.__abs_units_par_to_change=['sample_mass','sample_rmm']
-        # list of the parameters which should always be taken from IDF unless explicitly set from elsewhere. These parameters MUST have setters and getters
-        self.__instr_par_located =['ei_mon_spectra']
-
-        # set/reset instrument name in case if this function is called separately. May call lengthy procedure of changing instrument
-        self.instr_name = instr_name
+        if hasattr(self,'_propMan'):
+            if self._propMan is None or instr_name != self._propMan.instrument.getName() or reload_instrument:
+                self._propMan = DirectPropertyManager(instr_name);
+        else:
+            self._propMan = DirectPropertyManager(instr_name);
 
     def setup_mtd_instrument(self, workspace = None,reload_instrument=False):
         if workspace != None:
@@ -1040,7 +1040,26 @@ class DirectEnergyConversion(object):
         return ''.join(str(arg) for arg in argi if arg is not None)
 
 
+class switch(object):
+    """ Helper class providing nice switch statement""" 
+    def __init__(self, value):
+        self.value = value
+        self.fall = False
 
+    def __iter__(self):
+        """Return the match method once, then stop"""
+        yield self.match
+        raise StopIteration
+    
+    def match(self, *args):
+        """Indicate whether or not to enter a case suite"""
+        if self.fall or not args:
+            return True
+        elif self.value in args: # changed for v1.5, see below
+            self.fall = True
+            return True
+        else:
+            return False
 
 #-----------------------------------------------------------------
 if __name__=="__main__":
