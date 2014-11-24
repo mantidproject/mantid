@@ -3,12 +3,13 @@
 from mantid.simpleapi import *
 from numpy import zeros, unique, arange, sqrt, size
 import os.path
-import sys
 import math
 
 PRECISION = 0.020
 
 class sfCalculator():
+
+    ref_date = '2014-10-01' # when the detector has been rotated
 
     INDEX = 0
 
@@ -62,6 +63,8 @@ class sfCalculator():
     y_axis_ratio = None
     y_axis_error_ratio = None
     x_axis_ratio = None
+
+    is_nexus_detector_rotated_flag = True
 
     def __init__(self, numerator=None, denominator=None,
                  tof_range=None):
@@ -201,6 +204,18 @@ class sfCalculator():
             new_y_axis_error_ratio[i] = self.y_axis_ratio[i]* tmp_value
         self.y_axis_error_ratio = new_y_axis_error_ratio
 
+    def isNexusTakeAfterRefDate(self, nexus_date):
+        '''
+        This function parses the output.date and returns true if this date is after the ref date
+        '''
+        nexus_date_acquisition = nexus_date.split('T')[0]
+        
+        if nexus_date_acquisition > self.ref_date:
+            return True
+        else:
+            return False
+
+
     def _calculateFinalYAxis(self, bNumerator=True):
         """
         run full calculation for numerator or denominator
@@ -223,8 +238,15 @@ class sfCalculator():
         nexus_file_numerator = file
         print '----> loading nexus file: ' + nexus_file_numerator
         EventDataWks = LoadEventNexus(Filename=nexus_file_numerator)
-#                       OutputWorkspace='EventDataWks')
-#        mt1 = mtd['EventDataWks']
+        
+        self.is_nexus_detector_rotated_flag = self.isNexusTakeAfterRefDate(EventDataWks.getRun().getProperty('run_start').value)
+
+        if self.is_nexus_detector_rotated_flag:
+            self.alpha_pixel_nbr = 304
+            self.beta_pixel_nbr = 256
+        else:
+            alpha_pixel_nbr = 256
+            beta_pixel_nbr = 304  #will be integrated over this dimension
 
         proton_charge = self._getProtonCharge(EventDataWks)
         print '----> rebinning '
@@ -374,8 +396,6 @@ class sfCalculator():
 
         print 'done with _calculateFinalAxis'
 
-
-
     def _createIntegratedWorkspace(self,
                                    InputWorkspace=None,
                                    OutputWorkspace=None,
@@ -403,33 +423,23 @@ class sfCalculator():
 #                y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *
 #                                        (InputWorkspace.readE(index)[:]))
 
-        #case 1
-        print 'using case 1'
-        for x in range(304):
-            for y in y_range:
-                index = int(y+x*256)
-#                y_axis[y, :] += InputWorkspace.readY(index)[:]
-                y_axis[y, :] += InputWorkspace.readY(index)[:]
-                y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *
-                                        (InputWorkspace.readE(index)[:]))
-
-##        case 2
-#        for x in range(304):
-#            for y in range(256):
-#                index = int(x+y*304)
-##                y_axis[y, :] += InputWorkspace.readY(index)[:]
-#                y_axis[y, :] += InputWorkspace.readY(index)[:]
-#                y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *
-#                                        (InputWorkspace.readE(index)[:]))
-
-
-#        for x in range(self.alpha_pixel_nbr):
-#            for y in range(256):
-#                index = int(self.beta_pixel_nbr * x + y)
-##                y_axis[y, :] += InputWorkspace.readY(index)[:]
-#                y_axis[y, :] += InputWorkspace.readY(index)[:]
-#                y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *
-#                                        (InputWorkspace.readE(index)[:]))
+        if self.is_nexus_detector_rotated_flag:
+            for x in range(256):
+                for y in y_range:
+                    index = int(y+x*304)
+    #                y_axis[y, :] += InputWorkspace.readY(index)[:]
+                    y_axis[y, :] += InputWorkspace.readY(index)[:]
+                    y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *
+                                            (InputWorkspace.readE(index)[:]))
+            
+        else:
+            for x in range(304):
+                for y in y_range:
+                    index = int(y+x*256)
+    #                y_axis[y, :] += InputWorkspace.readY(index)[:]
+                    y_axis[y, :] += InputWorkspace.readY(index)[:]
+                    y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *
+                                            (InputWorkspace.readE(index)[:]))
 
 #        #DEBUG
 #        f=open('/home/j35/myASCIIfromCode.txt','w')
@@ -539,11 +549,19 @@ class sfCalculator():
         nbr_tof = len(tof_axis)-1
 
         # make big array of data
-        data = zeros((256,nbr_tof))
-        error = zeros((256,nbr_tof))
-        for x in range(256):
-            data[x,:] = InputWorkspace.readY(x)[:]
-            error[x,:] = InputWorkspace.readE(x)[:]
+        if self.is_nexus_detector_rotated_flag:
+            data = zeros((304,nbr_tof))
+            error = zeros((304,nbr_tof))
+            for x in range(304):
+                data[x,:] = InputWorkspace.readY(x)[:]
+                error[x,:] = InputWorkspace.readE(x)[:]
+
+        else:
+            data = zeros((256,nbr_tof))
+            error = zeros((256,nbr_tof))
+            for x in range(256):
+                data[x,:] = InputWorkspace.readY(x)[:]
+                error[x,:] = InputWorkspace.readE(x)[:]
 
         peak_array = zeros(nbr_tof)
         peak_array_error = zeros(nbr_tof)
@@ -1184,10 +1202,6 @@ def help():
     print ' > sfCalculator.calculate(string_runs="55889:0, 55890:1, 55891:1, 55892:2",'
     print '                          list_'
 
-
-
-
-
 #if __name__ == '__main__':
 def calculate(string_runs=None,
 #              list_attenuator=None,
@@ -1388,4 +1402,5 @@ def calculate(string_runs=None,
         sort the files
         """
         pass
+
 

@@ -164,6 +164,8 @@ namespace CustomInterfaces
     reductionAlg->setProperty("SaveCM1", m_uiForm.ckCm1Units->isChecked());
     reductionAlg->setProperty("SaveFormats", getSaveFormats());
 
+    reductionAlg->setProperty("OutputWorkspace", "IndirectInergyTransfer_Workspaces");
+
     // Plot Output options
     switch(m_uiForm.ind_cbPlotOutput->currentIndex())
     {
@@ -177,7 +179,7 @@ namespace CustomInterfaces
         break;
     }
 
-    m_batchAlgoRunner->addAlgorithm(reductionAlg);
+    m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
     m_batchAlgoRunner->executeBatchAsync();
   }
 

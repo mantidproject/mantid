@@ -122,33 +122,33 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      /// Get the rectangle currently covered by the image in pixel coordinates
      void getDisplayRectangle( QRect &rect );
 
-     std::vector<QRgb>    m_positiveColorTable;
-     std::vector<QRgb>    m_negativeColorTable;
-     std::vector<double>  m_intensityTable;
+     std::vector<QRgb> m_positiveColorTable;
+     std::vector<QRgb> m_negativeColorTable;
+     std::vector<double> m_intensityTable;
 
      SpectrumDataSource_sptr m_dataSource;
      DataArray_const_sptr m_dataArray;
 
-     QwtPlot*             m_spectrumPlot;
+     QwtPlot* m_spectrumPlot;
 
-     ISliderHandler*      m_sliderHandler;
-     IRangeHandler*       m_rangeHandler;
+     ISliderHandler* m_sliderHandler;
+     IRangeHandler* m_rangeHandler;
 
-     GraphDisplay*        m_hGraphDisplay;
-     GraphDisplay*        m_vGraphDisplay;
+     GraphDisplay* m_hGraphDisplay;
+     GraphDisplay* m_vGraphDisplay;
 
-     double               m_pointedAtX;
-     double               m_pointedAtY;
+     double m_pointedAtX;
+     double m_pointedAtY;
 
      /* Save current total data range */
      /* so we can reset the data source */
      /* if we detect a change of range */
-     QTableWidget*        m_imageTable;
+     QTableWidget* m_imageTable;
 
-     double               m_totalYMin;
-     double               m_totalYMax;
-     double               m_totalXMin;
-     double               m_totalXMax;
+     double m_totalXMin;
+     double m_totalXMax;
+     double m_totalYMin;
+     double m_totalYMax;
 
 };
 

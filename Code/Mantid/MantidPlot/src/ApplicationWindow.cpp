@@ -17592,11 +17592,19 @@ void ApplicationWindow::savedatainNexusFormat(const std::string& wsName,const st
   {
   }
 }
-void ApplicationWindow::enablesaveNexus(const QString &wsName)
+
+void ApplicationWindow::enableSaveNexus(const QString &wsName)
 {
-  if(actionSaveFile) actionSaveFile->setEnabled(true);
+  if (actionSaveFile) actionSaveFile->setEnabled(true);
   m_nexusInputWSName=wsName;
 }
+
+void ApplicationWindow::disableSaveNexus()
+{
+  if (actionSaveFile)
+    actionSaveFile->setEnabled(false);
+}
+
 /* For zooming the selected graph using the drag canvas tool and mouse drag.
  */
 void ApplicationWindow::panOnPlot()

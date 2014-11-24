@@ -3,6 +3,7 @@
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidKernel/ConfigService.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -255,6 +256,26 @@ namespace MantidQt
     void QtReflMainView::on_actionImportTable_triggered()
     {
       m_presenter->notify(IReflPresenter::ImportTableFlag);
+    }
+
+    /** This slot is used to syncrhonise the two instrument selection widgets */
+    void QtReflMainView::on_comboProcessInstrument_currentIndexChanged(int index)
+    {
+      ui.comboSearchInstrument->setCurrentIndex(index);
+    }
+
+    /** This slot is used to syncrhonise the two instrument selection widgets */
+    void QtReflMainView::on_comboSearchInstrument_currentIndexChanged(int index)
+    {
+      ui.comboProcessInstrument->setCurrentIndex(index);
+    }
+
+    /**
+    This slot opens the documentation when the "help" button has been pressed
+    */
+    void QtReflMainView::on_actionHelp_triggered()
+    {
+      MantidQt::API::HelpWindow::showPage(this, QString("qthelp://org.mantidproject/doc/interfaces/ISIS_Reflectometry.html"));
     }
 
     /**
