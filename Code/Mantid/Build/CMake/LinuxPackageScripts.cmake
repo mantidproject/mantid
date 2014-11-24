@@ -86,10 +86,14 @@ if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedor
   set ( PKG_INSTALL_PREFIX \$RPM_INSTALL_PREFIX0 ) # used in mainter scripts
 
   if ( NOT MPI_BUILD )
-    configure_file ( Packages/rpm/scripts/rpm_pre_install.sh.in ${PRE_INSTALL_FILE} )
-    configure_file ( Packages/rpm/scripts/rpm_post_install.sh.in ${POST_INSTALL_FILE} )
-    configure_file ( Packages/rpm/scripts/rpm_pre_uninstall.sh.in ${PRE_UNINSTALL_FILE} )
-    configure_file ( Packages/rpm/scripts/rpm_post_install.sh.in ${POST_UNINSTALL_FILE} )
+    configure_file ( ${CMAKE_MODULE_PATH}/Packaging/rpm/scripts/rpm_pre_install.sh.in
+                     ${PRE_INSTALL_FILE} )
+    configure_file ( ${CMAKE_MODULE_PATH}/Packaging/rpm/scripts/rpm_post_install.sh.in
+                     ${POST_INSTALL_FILE} )
+    configure_file ( ${CMAKE_MODULE_PATH}/Packaging/rpm/scripts/rpm_pre_uninstall.sh.in
+                     ${PRE_UNINSTALL_FILE} )
+    configure_file ( ${CMAKE_MODULE_PATH}/Packaging/rpm/scripts/rpm_post_install.sh.in
+                     ${POST_UNINSTALL_FILE} )
     # CPack variables
     set ( CPACK_RPM_PRE_INSTALL_SCRIPT_FILE ${PRE_INSTALL_FILE} )
     set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${POST_INSTALL_FILE} )
@@ -105,9 +109,17 @@ if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedor
           "LD_PRELOAD=\${EXTRA_LDPRELOAD_LIBS} LD_LIBRARY_PATH=/usr/lib64/paraview:${LD_LIBRARY_PATH} eval" ) # LD_PATH hack for non-official ParaView
   endif()
 elseif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
-  set ( PKG_INSTALL_PREFIX \$ )
-  set ( MANTIDPLOT_LAUNCHER_PREFIX
-        "LD_PRELOAD=${EXTRA_LDPRELOAD_LIBS} eval" )
+  set ( MANTIDPLOT_LAUNCHER_PREFIX "LD_PRELOAD=${EXTRA_LDPRELOAD_LIBS} eval" )
+
+  if ( NOT MPI_BUILD )
+    configure_file ( ${CMAKE_MODULE_PATH}/Packaging/deb/scripts/deb_post_inst.in
+                     ${POST_INSTALL_FILE} )
+    # CPack variables
+    set ( CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+          "${POST_INSTALL_FILE}" )
+  endif()
+  # Launcher prefix
+  set ( MANTIDPLOT_LAUNCHER_PREFIX "LD_PRELOAD=\${EXTRA_LDPRELOAD_LIBS} eval" )
 endif()
 
 ############################################################################
