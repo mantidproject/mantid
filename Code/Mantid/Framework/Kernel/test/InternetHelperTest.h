@@ -31,6 +31,8 @@ namespace
                           std::ostream& responseStream,
                           const StringToStringMap& headers = StringToStringMap())
     {
+      UNUSED_ARG(url);
+      UNUSED_ARG(headers);
       responseStream << "HTTPS request succeeded";
       return 200;
     }
@@ -38,6 +40,8 @@ namespace
                               std::ostream& responseStream,
                               const StringToStringMap& headers = StringToStringMap())
     {
+      UNUSED_ARG(url);
+      UNUSED_ARG(headers);
       responseStream << "HTTP request succeeded";
       return 200;
     }
@@ -84,6 +88,7 @@ public:
     std::string url = "http://www.google.com";
     Poco::TemporaryFile tmpFile;
     int response = internetHelper.downloadFile(url,tmpFile.path());
+    TS_ASSERT_EQUALS (200, response);
     TSM_ASSERT("File has not been created.",tmpFile.exists()); 
     TSM_ASSERT("File is not a file.",tmpFile.isFile()); 
     std::fstream fs;
@@ -104,6 +109,7 @@ public:
     std::string httpsUrl = "https://api.github.com/repos/mantidproject/mantid/contents";
     Poco::TemporaryFile tmpFile;
     int response = internetHelper.downloadFile(httpsUrl,tmpFile.path());
+    TS_ASSERT_EQUALS (200, response);
     TSM_ASSERT("File has not been created.",tmpFile.exists()); 
     TSM_ASSERT("File is not a file.",tmpFile.isFile()); 
     std::fstream fs;
