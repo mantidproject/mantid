@@ -14,6 +14,8 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
+using namespace Mantid::API;
+
 namespace
 {
   Mantid::Kernel::Logger g_log("ConvFit");
@@ -122,7 +124,7 @@ namespace IDA
 
     // Replot input automatically when file / spec no changes
     connect(uiForm().confit_spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
-    connect(uiForm().confit_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput()));
+    connect(uiForm().confit_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded()));
     
     connect(uiForm().confit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
     connect(uiForm().confit_cbBackground, SIGNAL(currentIndexChanged(int)), this, SLOT(bgTypeSelection(int)));
@@ -233,6 +235,29 @@ namespace IDA
   {
     uiForm().confit_dsSampleInput->readSettings(settings.group());
     uiForm().confit_dsResInput->readSettings(settings.group());
+  }
+
+  /**
+   * Called when new data has been loaded by the data selector.
+   *
+   * Configures ranges for spin boxes before raw plot is done.
+   */
+  void ConvFit::newDataLoaded()
+  {
+    if(uiForm().confit_dsSampleInput->getCurrentDataName() != m_cfInputWSName)
+    {      
+      m_cfInputWSName = uiForm().confit_dsSampleInput->getCurrentDataName();
+      m_cfInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_cfInputWSName.toStdString()); 
+    }
+
+    int maxSpecIndex = static_cast<int>(m_cfInputWS->getNumberHistograms()) - 1;
+
+    uiForm().confit_spPlotSpectrum->setMaximum(maxSpecIndex);
+    uiForm().confit_spSpectraMin->setMaximum(maxSpecIndex);
+    uiForm().confit_spSpectraMax->setMaximum(maxSpecIndex);
+    uiForm().confit_spSpectraMax->setValue(maxSpecIndex);
+
+    plotInput();
   }
 
   namespace
@@ -636,23 +661,13 @@ namespace IDA
 
   void ConvFit::plotInput()
   {
-    using Mantid::API::MatrixWorkspace;
-    using Mantid::API::AnalysisDataService;
     using Mantid::Kernel::Exception::NotFoundError;
 
     const bool plotGuess = uiForm().confit_ckPlotGuess->isChecked();
     uiForm().confit_ckPlotGuess->setChecked(false);
 
-    if(uiForm().confit_dsSampleInput->getCurrentDataName() != m_cfInputWSName)
-    {      
-      m_cfInputWSName = uiForm().confit_dsSampleInput->getCurrentDataName();
-      m_cfInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_cfInputWSName.toStdString());
-      
-      if(!m_cfInputWS)
-      {
-        showMessageBox("Could not find the workspace in ADS. See log for details.");
-      }
-    }
+    if(!m_cfInputWS)
+      showMessageBox("Could not find the workspace in ADS. See log for details.");
 
     int specNo = uiForm().confit_spPlotSpectrum->text().toInt();
     // Set spectra max value
@@ -694,6 +709,10 @@ namespace IDA
       m_dblManager->setValue(m_properties["Lorentzian 1.FWHM"], resolution);
       m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], resolution);
     }
+
+    // Remove the old fit curve
+    removeCurve("CFCalcCurve");
+    replot("ConvFitPlot");
   }
 
   void ConvFit::plotGuess(QtProperty*)

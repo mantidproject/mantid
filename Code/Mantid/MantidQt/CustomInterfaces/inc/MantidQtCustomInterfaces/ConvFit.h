@@ -30,6 +30,7 @@ namespace IDA
   private slots:
     void typeSelection(int index);
     void bgTypeSelection(int index);
+    void newDataLoaded();
     void plotInput();
     void plotGuess(QtProperty*);
     void singleFit();
