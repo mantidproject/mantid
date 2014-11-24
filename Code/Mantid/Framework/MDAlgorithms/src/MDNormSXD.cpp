@@ -568,8 +568,15 @@ namespace Mantid
       
       for(auto iter = detIDs.begin(); iter != detIDs.end(); ++iter)
       {
-        const auto & members = exptInfo.getGroupMembers(*iter);
-        singleIDs.push_back(members.front());
+        detid_t frontID = *iter;
+        try
+        {
+          const auto & members = exptInfo.getGroupMembers(*iter);
+          frontID = members.front();
+        }
+        catch (std::runtime_error &)
+        {}
+        singleIDs.push_back(frontID);
       }
       
       return singleIDs;
