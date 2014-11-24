@@ -32,7 +32,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(WorkspaceGroupProperty('InputWorkspaces', '', Direction.Input),
-                             doc='Resolution workspace')
+                             doc='Grouped input workspaces')
 
         self.declareProperty(name='Range1Start', defaultValue=0.0, doc='Range 1 start')
         self.declareProperty(name='Range1End', defaultValue=0.0, doc='Range 1 end')
@@ -59,10 +59,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-
-        input_workspaces = self.getProperty('InputWorkspaces').value
-        if len(input_workspaces.getNames()) < 2:
-            issues['InputWorkspaces'] = 'Input workspace group must contain at least 2 workspaces'
 
         range_2_start = self.getPropertyValue('Range2Start')
         range_2_end = self.getPropertyValue('Range2End')
@@ -95,8 +91,12 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         # Do setup
         self._setup()
 
-        # Lists of input and output workspaces
+        logger.debug('in_ws:'+str(type(self._input_workspaces)))
+
+        # Get input workspaces
         input_workspace_names = self._input_workspaces.getNames()
+
+        # Lists of input and output workspaces
         q_workspaces = list()
         q2_workspaces = list()
         run_numbers = list()
@@ -131,28 +131,27 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             if temp is not None:
                 temperatures.append(temp)
 
-        # Must have two of each type of workspace to continue
-        if len(q_workspaces) < 2:
-            raise RuntimeError('Have less than 2 result workspaces in Q')
-        if len(q2_workspaces) < 2:
-            raise RuntimeError('Have less than 2 result workspaces in Q^2')
-
         logger.information('Creating Q and Q^2 workspaces')
 
-        # Append the spectra of the first two workspaces
-        AppendSpectra(InputWorkspace1=q_workspaces[0], InputWorkspace2=q_workspaces[1], OutputWorkspace=self._q_workspace)
-        AppendSpectra(InputWorkspace1=q2_workspaces[0], InputWorkspace2=q2_workspaces[1], OutputWorkspace=self._q2_workspace)
+        if len(input_workspace_names) == 1:
+            # Just rename single workspaces
+            RenameWorkspace(InputWorkspace=q_workspaces[0], OutputWorkspace=self._q_workspace)
+            RenameWorkspace(InputWorkspace=q2_workspaces[0], OutputWorkspace=self._q2_workspace)
+        else:
+            # Append the spectra of the first two workspaces
+            AppendSpectra(InputWorkspace1=q_workspaces[0], InputWorkspace2=q_workspaces[1], OutputWorkspace=self._q_workspace)
+            AppendSpectra(InputWorkspace1=q2_workspaces[0], InputWorkspace2=q2_workspaces[1], OutputWorkspace=self._q2_workspace)
 
-        # Append to the spectra of each remaining workspace
-        for idx in range(2, len(input_workspace_names)):
-            AppendSpectra(InputWorkspace1=self._q_workspace, InputWorkspace2=q_workspaces[idx], OutputWorkspace=self._q_workspace)
-            AppendSpectra(InputWorkspace1=self._q2_workspace, InputWorkspace2=q2_workspaces[idx], OutputWorkspace=self._q2_workspace)
+            # Append to the spectra of each remaining workspace
+            for idx in range(2, len(input_workspace_names)):
+                AppendSpectra(InputWorkspace1=self._q_workspace, InputWorkspace2=q_workspaces[idx], OutputWorkspace=self._q_workspace)
+                AppendSpectra(InputWorkspace1=self._q2_workspace, InputWorkspace2=q2_workspaces[idx], OutputWorkspace=self._q2_workspace)
 
-        # Delete the output workspaces from the ElasticWindow algorithms
-        for q_ws in q_workspaces:
-            DeleteWorkspace(q_ws)
-        for q2_ws in q2_workspaces:
-            DeleteWorkspace(q2_ws)
+            # Delete the output workspaces from the ElasticWindow algorithms
+            for q_ws in q_workspaces:
+                DeleteWorkspace(q_ws)
+            for q2_ws in q2_workspaces:
+                DeleteWorkspace(q2_ws)
 
         logger.information('Setting vertical axis units and values')
 
