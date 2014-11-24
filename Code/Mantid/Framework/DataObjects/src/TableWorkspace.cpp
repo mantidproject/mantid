@@ -15,6 +15,16 @@ namespace Mantid
     {
       /// static logger
       Kernel::Logger g_log("TableWorkspace");
+
+      // struct to keep record on what rows to sort and according to which criteria
+      struct SortIterationRecord
+      {
+        SortIterationRecord(size_t ki, size_t is, size_t ie):keyIndex(ki),iStart(is),iEnd(ie){}
+        size_t keyIndex; // index in criteria vector
+        size_t iStart;   // start row to sort
+        size_t iEnd;     // end row to sort (one past last)
+      };
+
     }
 
     DECLARE_WORKSPACE(TableWorkspace)
@@ -250,15 +260,6 @@ namespace Mantid
       {
         *i = *(i-1) + 1;
       }
-
-      // struct to keep record on what rows to sort and according to which criteria
-      struct SortIterationRecord
-      {
-        SortIterationRecord(size_t ki, size_t is, size_t ie):keyIndex(ki),iStart(is),iEnd(ie){}
-        size_t keyIndex; // index in criteria vector
-        size_t iStart;   // start row to sort
-        size_t iEnd;     // end row to sort (one past last)
-      };
 
       // dynamically populate and use a queue of records for iteratively sort all rows
       std::queue<SortIterationRecord> sortRecords;
