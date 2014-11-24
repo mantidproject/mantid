@@ -2,6 +2,7 @@
 #include "MantidKernel/Logger.h"
 #include <algorithm>
 #include <iostream>
+#include <stdexcept>
 
 namespace Mantid
 {
