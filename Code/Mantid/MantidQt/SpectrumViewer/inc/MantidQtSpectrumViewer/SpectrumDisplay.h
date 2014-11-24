@@ -15,16 +15,16 @@
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
-    @class SpectrumDisplay 
-  
+    @class SpectrumDisplay
+
     This class provides the image display and coordinates the image and
     graph displays for the SpectrumView data viewer.
- 
-    @author Dennis Mikkelson 
-    @date   2012-04-03 
-     
+
+    @author Dennis Mikkelson
+    @date   2012-04-03
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -39,8 +39,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
@@ -49,18 +49,17 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-
 class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
 {
   public:
 
-     /// Make an SpectrumDisplay to display with the given widgets and controls 
-     SpectrumDisplay( QwtPlot*       spectrum_plot,
-                   ISliderHandler* slider_handler,
-                   IRangeHandler*  range_handler,
-                   GraphDisplay*  h_graph,
-                   GraphDisplay*  v_graph,
-                   QTableWidget*  table_widget );
+     /// Make an SpectrumDisplay to display with the given widgets and controls
+     SpectrumDisplay( QwtPlot*        spectrumPlot,
+                      ISliderHandler* sliderHandler,
+                      IRangeHandler*  rangeHandler,
+                      GraphDisplay*   hGraph,
+                      GraphDisplay*   vGraph,
+                      QTableWidget*   tableWidget );
 
      virtual ~SpectrumDisplay();
 
@@ -71,72 +70,89 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      void setupSpectrumPlotItem();
 
      /// Set the source of the image data and information for the table
-     void SetDataSource( SpectrumDataSource* data_source );
+     void setDataSource( SpectrumDataSource_sptr dataSource );
 
      /// Rebuild the scroll bars and image due to change of xmin, xmax, step
-     void UpdateRange();
+     void updateRange();
+
+     /// Updates scroll bars when window is resized
+     void handleResize();
 
      /// Rebuild image from data source, due to resize or scroll bar movement
-     void UpdateImage();
+     void updateImage();
 
      /// Change the color tables used to map intensity to color
-     void SetColorScales( std::vector<QRgb> & positive_color_table,
-                          std::vector<QRgb> & negative_color_table );
+     void setColorScales( std::vector<QRgb> & positiveColorTable,
+                          std::vector<QRgb> & negativeColorTable );
 
      /// Change the control parameter (0...100) used to brighten the image
-     void SetIntensity( double control_parameter );
-   
+     void setIntensity( double controlParameter );
+
      /// Record the point that the user is currently pointing at with the mouse
-     virtual QPair<double,double> SetPointedAtPoint( QPoint point, int mouseClick = 2 );
+     virtual QPair<double,double> setPointedAtPoint( QPoint point, int mouseClick = 2 );
 
      /// Set horizontal graph wit data from the array at the specified y value
-     void SetHGraph( double y );
+     void setHGraph( double y );
 
      /// Set vertical graph with data from the array at the specified x value
-     void SetVGraph( double x );
+     void setVGraph( double x );
+
+     /// Show information about the point (x, y) on the image in the table
+     std::vector<std::string> showInfoList( double x, double y );
+
+     /// Gets a point on the graph area for a set of axis values
+     QPoint getPlotTransform( QPair<double, double> values );
+
+     /// Gets a set of axis values for a point on the graph area
+     QPair<double, double> getPlotInvTransform( QPoint point );
+
+     // Gets the X value pointed at
+     double getPointedAtX();
+
+     // Gets the Y value pointed at
+     double getPointedAtY();
 
   protected:
-     SpectrumPlotItem*       spectrum_plot_item;
+     SpectrumPlotItem*    m_spectrumPlotItem;
 
   private:
      /// Check if the DataSource has been changed under us
-     bool DataSourceRangeChanged();
+     bool dataSourceRangeChanged();
 
      /// Get the rectangle currently covered by the image in pixel coordinates
-     void GetDisplayRectangle( QRect &rect );
+     void getDisplayRectangle( QRect &rect );
 
-     /// Show information about the point (x, y) on the image in the table
-     void ShowInfoList( double x, double y );
+     std::vector<QRgb> m_positiveColorTable;
+     std::vector<QRgb> m_negativeColorTable;
+     std::vector<double> m_intensityTable;
 
-     std::vector<QRgb>    positive_color_table;
-     std::vector<QRgb>    negative_color_table;
-     std::vector<double>  intensity_table;
+     SpectrumDataSource_sptr m_dataSource;
+     DataArray_const_sptr m_dataArray;
 
-     SpectrumDataSource*     data_source;
-     DataArray*           data_array;
+     QwtPlot* m_spectrumPlot;
 
-     QwtPlot*             spectrum_plot;
+     ISliderHandler* m_sliderHandler;
+     IRangeHandler* m_rangeHandler;
 
-     ISliderHandler*       slider_handler;
-     IRangeHandler*        range_handler;
+     GraphDisplay* m_hGraphDisplay;
+     GraphDisplay* m_vGraphDisplay;
 
-     GraphDisplay*        h_graph_display;
-     GraphDisplay*        v_graph_display;
+     double m_pointedAtX;
+     double m_pointedAtY;
 
-     double               pointed_at_x;
-     double               pointed_at_y;
+     /* Save current total data range */
+     /* so we can reset the data source */
+     /* if we detect a change of range */
+     QTableWidget* m_imageTable;
 
-     QTableWidget*        image_table;
-                                           // save current total data range
-                                           // so we can reset the data source
-                                           // if we detect a change of range
-     double               total_y_min;
-     double               total_y_max;
-     double               total_x_min;
-     double               total_x_max;
+     double m_totalXMin;
+     double m_totalXMax;
+     double m_totalYMin;
+     double m_totalYMax;
+
 };
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif   // SPECTRUM_DISPLAY_H

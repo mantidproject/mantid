@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>ALCInterface</class>
- <widget class="QWidget" name="ALCInterface">
+ <widget class="QMainWindow" name="ALCInterface">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,6 +13,7 @@
   <property name="windowTitle">
    <string>ALC Analysis</string>
   </property>
+  <widget class="QWidget" name="centralwidget">
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QStackedWidget" name="stepView">
@@ -107,6 +108,7 @@
     </layout>
    </item>
   </layout>
+  </widget>
  </widget>
  <resources/>
  <connections/>

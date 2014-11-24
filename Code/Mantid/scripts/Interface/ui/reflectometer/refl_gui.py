@@ -65,6 +65,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.__column_settings = "Mantid/ISISReflGui/Columns"
         self.__icat_download_key = "icat_download"
         self.__ads_use_key = "AlgUse"
+        self.__alg_migration_key="AlgUseReset"
         self.__live_data_frequency_key = "frequency"
         self.__live_data_method_key = "method"
         self.__group_tof_workspaces_key = "group_tof_workspaces"
@@ -92,13 +93,20 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
         settings.beginGroup(self.__generic_settings)
         
-        self.alg_use = settings.value(self.__ads_use_key, False, type=bool)
+        self.__alg_migrate = settings.value(self.__alg_migration_key, True, type=bool)
+        if self.__alg_migrate:
+            self.__alg_use = True # We will use the algorithms by default rather than the quick scripts
+            self.__alg_migrate = False # Never do this again. We only want to reset once.
+        else:
+            self.__alg_use = settings.value(self.__ads_use_key, True, type=bool)
+    
         self.__icat_download = settings.value(self.__icat_download_key, False, type=bool)
         self.__group_tof_workspaces = settings.value(self.__group_tof_workspaces_key, True, type=bool)
         
-        settings.setValue(self.__ads_use_key, self.alg_use)
+        settings.setValue(self.__ads_use_key, self.__alg_use)
         settings.setValue(self.__icat_download_key, self.__icat_download)
         settings.setValue(self.__group_tof_workspaces_key, self.__group_tof_workspaces)
+        settings.setValue(self.__alg_migration_key, self.__alg_migrate)
 
 
         settings.endGroup()
@@ -953,7 +961,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             else:
                 raise RuntimeError("Up to 2 transmission runs can be specified. No more than that.")
 
-        if self.alg_use:
+        if self.__alg_use:
             #Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
 
             ws = ConvertToWavelength.to_workspace(loadedRun, ws_prefix="")
@@ -977,6 +985,8 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         if ',' in runno:
             runno = runno.split(',')[0]
         inst = wq.getInstrument()
+        #NOTE: In the new Refl UI, these adjustments to lmin/lmax are NOT made. This has been
+        #noted in the parameter files for INTER/CRIST/POLREF/SURF.
         lmin = inst.getNumberParameter('LambdaMin')[0] + 1
         lmax = inst.getNumberParameter('LambdaMax')[0] - 2
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
@@ -1150,14 +1160,14 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         try:
             
             dialog_controller = refl_options.ReflOptions(def_method = self.live_method, def_freq = self.live_freq, 
-                                                         def_alg_use = self.alg_use, def_icat_download=self.__icat_download,
+                                                         def_alg_use = self.__alg_use, def_icat_download=self.__icat_download,
                                                          def_group_tof_workspaces = self.__group_tof_workspaces)
             if dialog_controller.exec_():
 
                 # Fetch the settings back off the controller
                 self.live_freq = dialog_controller.frequency()
                 self.live_method = dialog_controller.method()
-                self.alg_use = dialog_controller.useAlg()
+                self.__alg_use = dialog_controller.useAlg()
                 self.__icat_download = dialog_controller.icatDownload()
                 self.__group_tof_workspaces = dialog_controller.groupTOFWorkspaces()
 
@@ -1168,7 +1178,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 settings.setValue(self.__live_data_method_key, self.live_method)
                 settings.endGroup()
                 settings.beginGroup(self.__generic_settings)
-                settings.setValue(self.__ads_use_key, self.alg_use)
+                settings.setValue(self.__ads_use_key, self.__alg_use)
                 settings.setValue(self.__icat_download_key, self.__icat_download)
                 settings.setValue(self.__group_tof_workspaces_key, self.__group_tof_workspaces)
                 settings.endGroup()

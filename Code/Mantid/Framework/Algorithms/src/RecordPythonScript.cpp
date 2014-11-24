@@ -89,7 +89,13 @@ void RecordPythonScript::startingHandle(API::IAlgorithm_sptr alg)
   std::string algString;
   for(auto p = props.begin() ; p != props.end(); ++p)
   {
-    std::string paramString = (**p).name() + "='" + (**p).value() + "'";
+    std::string opener = "='"; 
+    if ((**p).value().find('\\') != std::string::npos )
+    {
+      opener= "=r'";
+    }
+
+    std::string paramString = (**p).name() + opener + (**p).value() + "'";
 
     // Miss out parameters that are empty.
     if(paramString.length() != 0)

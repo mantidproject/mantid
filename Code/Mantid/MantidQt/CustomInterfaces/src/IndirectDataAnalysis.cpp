@@ -34,7 +34,9 @@ namespace IDA
    * @param parent :: the parent QWidget.
    */
   IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent) :
-    UserSubWindow(parent), m_dblEdFac(NULL), m_blnEdFac(NULL),
+    UserSubWindow(parent),
+    m_valInt(NULL), m_valDbl(NULL),
+    m_dblEdFac(NULL), m_blnEdFac(NULL),
     m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange)
   {
     // Allows us to get a handle on a tab using an enum, for example "m_tabs[ELWIN]".
@@ -84,10 +86,13 @@ namespace IDA
     m_dblEdFac = new DoubleEditorFactory(this);
     m_blnEdFac = new QtCheckBoxFactory(this);
 
-    // Set up all tabs.
-    auto tab = m_tabs.begin();
-    for( ; tab != m_tabs.end(); ++tab )
+    // Set up all tabs
+    for(auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab)
+    {
       tab->second->setupTab();
+      connect(tab->second, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
+      connect(tab->second, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
+    }
 
     connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
     connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
@@ -152,6 +157,18 @@ namespace IDA
     QString url = m_tabs[currentTab]->tabHelpURL();
     QDesktopServices::openUrl(QUrl(url));
   }
+
+  /**
+   * Slot to wrap the protected showInformationBox method defined
+   * in UserSubWindow and provide access to composed tabs.
+   * 
+   * @param message The message to display in the message box
+   */
+  void IndirectDataAnalysis::showMessageBox(const QString& message)
+  {
+    showInformationBox(message);
+  }
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

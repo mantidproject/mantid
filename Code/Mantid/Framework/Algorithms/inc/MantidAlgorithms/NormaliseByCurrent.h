@@ -71,9 +71,6 @@ private:
   void exec();
   // Extract the charge value from the logs.
   double extractCharge(boost::shared_ptr<Mantid::API::MatrixWorkspace> inputWs) const;
-  /// Progress reporting
-  API::Progress* m_progress;
-  
 };
 
 } // namespace Algorithm

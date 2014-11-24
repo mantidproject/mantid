@@ -10,6 +10,9 @@ set ( TEST_PY_FILES
   RectangularDetectorTest.py
   ReferenceFrameTest.py
   UnitCellTest.py
+  PointGroupTest.py
+  SpaceGroupTest.py
+  SymmetryOperationTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

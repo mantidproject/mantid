@@ -10,6 +10,8 @@
 #include "MantidAPI/TableRow.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
+
 #include <stdexcept>
 
 using namespace Mantid::Poldi;
@@ -277,7 +279,7 @@ public:
     void testStructureConstructor()
     {
         UnitCell CsCl(4.126, 4.126, 4.126);
-        PointGroup_sptr m3m = boost::make_shared<PointGroupLaue13>();
+        PointGroup_sptr m3m = PointGroupFactory::Instance().createPointGroup("m-3m");
 
         CrystalStructure_sptr structure = boost::make_shared<CrystalStructure>(CsCl, m3m);
 
@@ -315,7 +317,7 @@ public:
     void testSetPeaks()
     {
         UnitCell CsCl(4.126, 4.126, 4.126);
-        PointGroup_sptr m3m = boost::make_shared<PointGroupLaue13>();
+        PointGroup_sptr m3m = PointGroupFactory::Instance().createPointGroup("m-3m");
 
         CrystalStructure_sptr structure = boost::make_shared<CrystalStructure>(CsCl, m3m);
 

@@ -16,11 +16,11 @@ public:
 
   class UserTestJacobian: public Jacobian
   {
-    int m_nData,m_nParams;
+    int m_nParams;
     std::vector<double> m_buffer;
   public:
     UserTestJacobian(int nData,int nParams)
-      :m_nData(nData),m_nParams(nParams)
+      : m_nParams(nParams)
     {
       m_buffer.resize(nData*nParams);
     }

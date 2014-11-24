@@ -69,10 +69,10 @@ public:
     ITableWorkspace_sptr ws = CreateWorkspace();
 
     TableRow row = ws->appendRow();
-    row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "2" << 4;
+    row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << 2.0 << 4;
 
     row = ws->appendRow();
-    row << "13470" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "2" << 5;
+    row << "13470" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << 2.0 << 5;
 
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveReflTBL");
     alg->setRethrows(true);
@@ -111,7 +111,7 @@ public:
     ITableWorkspace_sptr ws = CreateWorkspace();
 
     TableRow row = ws->appendRow();
-    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << "2" << 1;
+    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << 2.0 << 1;
 
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveReflTBL");
     alg->setRethrows(true);
@@ -135,7 +135,7 @@ public:
     auto colQmin = ws->addColumn("str","Qmin");
     auto colQmax = ws->addColumn("str","Qmax");
     auto colDqq = ws->addColumn("str","dq/q");
-    auto colScale = ws->addColumn("str","Scale");
+    auto colScale = ws->addColumn("double","Scale");
 
     colRuns->setPlotType(0);
     colTheta->setPlotType(0);
@@ -146,13 +146,13 @@ public:
     colScale->setPlotType(0);
 
     TableRow row = ws->appendRow();
-    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << "2";
+    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << 2.0;
 
     row = ws->appendRow();
-    row << "13462" << "2.3" << "13463" << "0.035" << "0.3" << "0.04" << "2";
+    row << "13462" << "2.3" << "13463" << "0.035" << "0.3" << "0.04" << 2.0;
 
     row = ws->appendRow();
-    row << "13470" << "2.3" << "13463" << "0.035" << "0.3" << "0.04" << "2";
+    row << "13470" << "2.3" << "13463" << "0.035" << "0.3" << "0.04" << 2.0;
 
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveReflTBL");
     alg->setRethrows(true);
@@ -214,7 +214,7 @@ private:
     auto colQmin = ws->addColumn("str","Qmin");
     auto colQmax = ws->addColumn("str","Qmax");
     auto colDqq = ws->addColumn("str","dq/q");
-    auto colScale = ws->addColumn("str","Scale");
+    auto colScale = ws->addColumn("double","Scale");
     auto colStitch = ws->addColumn("int","StitchGroup");
 
     colRuns->setPlotType(0);
@@ -227,32 +227,32 @@ private:
     colStitch->setPlotType(0);
 
     TableRow row = ws->appendRow();
-    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << "2" << 1;
+    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << 2.0 << 1;
 
     row = ws->appendRow();
-    row << "13462" << "2.3" << "13463" << "0.035" << "0.3" << "0.04" << "2" << 1;
+    row << "13462" << "2.3" << "13463" << "0.035" << "0.3" << "0.04" << 2.0 << 1;
 
     row = ws->appendRow();
-    row << "13470" << "2.3" << "13463" << "0.035" << "0.3" << "0.04" << "2" << 1;
+    row << "13470" << "2.3" << "13463" << "0.035" << "0.3" << "0.04" << 2.0 << 1;
 
     row = ws->appendRow();
-    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << "2" << 2;
+    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << 2.0 << 2;
 
     row = ws->appendRow();
-    row << "13462" << "2.3" << "13463" << "0.035" << "0.3" << "0.04" << "2" << 2;
+    row << "13462" << "2.3" << "13463" << "0.035" << "0.3" << "0.04" << 2.0 << 2;
 
     row = ws->appendRow();
-    row << "13470" << "2.3" << "13463" << "0.035" << "0.3" << "0.04" << "2" << 3;
+    row << "13470" << "2.3" << "13463" << "0.035" << "0.3" << "0.04" << 2.0 << 3;
 
     row = ws->appendRow();
-    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << "2" << 0;
+    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << 2.0 << 0;
 
     //this row's last two cells will show in the tableworkspace, but the first row in stich group 3's will take priority when saving
     row = ws->appendRow();
-    row << "13462" << "2.3" << "13463" << "0.035" << "0.3" << "0.4" << "3" << 3;
+    row << "13462" << "2.3" << "13463" << "0.035" << "0.3" << "0.4" << 3.0 << 3;
 
     row = ws->appendRow();
-    row << "13470" << "2.3" << "13463" << "0.035" << "0.3" << "0.04" << "2" << 4;
+    row << "13470" << "2.3" << "13463" << "0.035" << "0.3" << "0.04" << 2.0 << 4;
 
     return ws;
   }

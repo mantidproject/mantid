@@ -33,18 +33,18 @@ namespace Mantid
 
 
       /// Parameter names, same order as above
-      static char * PAR_NAMES[NPARAMS];
+      static const char * PAR_NAMES[NPARAMS];
       /// N attrs
       enum {NATTS = 3};
       /// Attribute names
-      static char * ATTR_NAMES[NATTS];
+      static const char * ATTR_NAMES[NATTS];
 
     };
     MullerAnsatz::MullerAnsatz():
       m_ChainDirection(Along_c),m_FFDirection(Isotropic)
     {}
-    char* AnsatzParameters::PAR_NAMES[AnsatzParameters::NPARAMS] = {"Amplitude","J_coupling"};
-    char* AnsatzParameters::ATTR_NAMES[AnsatzParameters::NATTS] = {"IonName","ChainDirection","MagneticFFDirection"};
+    const char* AnsatzParameters::PAR_NAMES[AnsatzParameters::NPARAMS] = {"Amplitude","J_coupling"};
+    const char* AnsatzParameters::ATTR_NAMES[AnsatzParameters::NATTS] = {"IonName","ChainDirection","MagneticFFDirection"};
     //static 
     /**
     * Initialize the model

@@ -7,16 +7,16 @@
 #include "DllOption.h"
 
 /**
-    @class RangeHandler 
-  
-    This manages the min, max and step range controls for the SpectrumView 
-    data viewer. 
- 
-    @author Dennis Mikkelson 
-    @date   2012-04-25 
-     
+    @class RangeHandler
+
+    This manages the min, max and step range controls for the SpectrumView
+    data viewer.
+
+    @author Dennis Mikkelson
+    @date   2012-04-25
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -31,8 +31,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
@@ -41,33 +41,34 @@ namespace MantidQt
 namespace RefDetectorViewer
 {
 
-
 class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefRangeHandler : public SpectrumView::IRangeHandler
 {
   public:
 
     /// Construct object to manage min, max and step controls in the UI
-    RefRangeHandler( Ui_RefImageViewer* iv_ui );
+    RefRangeHandler( Ui_RefImageViewer* ivUI );
 
     /// Configure min, max and step controls for the specified data source
-    void ConfigureRangeControls( SpectrumView::SpectrumDataSource* data_source );
+    void configureRangeControls( SpectrumView::SpectrumDataSource_sptr dataSource );
 
     /// Get the range of data to display in the image, from GUI controls
-    void GetRange( double &min, double &max, double &step );
+    void getRange( double &min, double &max, double &step );
 
     /// Set the values displayed in the GUI controls
-    void SetRange( double min, double max, double step, char type );
+    void setRange( double min, double max, double step, char type );
 
   private:
-    Ui_RefImageViewer* iv_ui;
-    double         total_min_x;
-    double         total_max_x;
-    double         total_max_y;
-    double         total_min_y;
-    size_t         total_n_steps;
+    Ui_RefImageViewer* m_ivUI;
+
+    double m_totalMinX;
+    double m_totalMaxX;
+    double m_totalMinY;
+    double m_totalMaxY;
+    size_t m_totalNSteps;
+
 };
 
 } // namespace RefDetectorViewer
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif // REF_RANGE_HANDLER_H

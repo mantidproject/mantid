@@ -174,6 +174,8 @@ namespace Kernel
     m_start = start;
     m_end = end;
     m_i = 0;
+    m_last_reported = 0;
+    m_timeElapsed->reset();
     setNumSteps(nsteps);
   }
 

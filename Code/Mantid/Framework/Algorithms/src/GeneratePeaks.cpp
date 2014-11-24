@@ -28,47 +28,6 @@ namespace Mantid
 {
 namespace Algorithms
 {
-  namespace
-  { // anonymous name space
-    /**
-   * Determine if the table contains raw parameters.
-   */
-    bool isRawTable(const std::vector<std::string> & colNames)
-    {
-      if (colNames.size() != 6)
-        return true;
-      if (colNames[0].compare("centre") != 0)
-        return true;
-      if (colNames[1].compare("width") != 0)
-        return true;
-      if (colNames[2].compare("height") != 0)
-        return true;
-      if (colNames[3].compare("backgroundintercept") != 0)
-        return true;
-      if (colNames[4].compare("backgroundslope") != 0)
-        return true;
-      if (colNames[5].compare("A2") != 0)
-        return true;
-      return false;
-    }
-
-    /**
-    * Determine how many parameters are in the peak function.
-   */
-    std::size_t getBkgOffset(const std::vector<std::string> & colNames, const bool isRaw)
-    {
-      if (!isRaw)
-        return 3;
-
-      for (std::size_t i = 0; i < colNames.size(); i++)
-      {
-        if (colNames[i].substr(0,3).compare("f1.") == 0)
-          return i;
-      }
-      return colNames.size(); // shouldn't get here
-    }
-  }
-
   DECLARE_ALGORITHM(GeneratePeaks)
 
   //----------------------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>SANSRunWindow</class>
- <widget class="QWidget" name="SANSRunWindow">
+ <widget class="QMainWindow" name="SANSRunWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -31,6 +31,7 @@
   <property name="windowTitle">
    <string>ISIS SANS</string>
   </property>
+  <widget class="QWidget" name="centralwidget">
   <layout class="QGridLayout" name="gridLayout_27">
    <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_20">
@@ -4166,6 +4167,7 @@ p, li { white-space: pre-wrap; }
     </widget>
    </item>
   </layout>
+  </widget>
  </widget>
  <customwidgets>
   <customwidget>

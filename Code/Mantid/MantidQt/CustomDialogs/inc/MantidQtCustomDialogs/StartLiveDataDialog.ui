@@ -482,6 +482,24 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
         </layout>
        </item>
        <item>
+        <widget class="QGroupBox" name="listenerProps">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }
+QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; } 
+</string>
+         </property>
+         <property name="title">
+          <string>Listener Properties</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -506,7 +524,7 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayoutProcessing">
         <item>
-         <widget class="MantidQt::MantidWidgets::ProcessingAlgoWidget" name="processingAlgo">
+         <widget class="MantidQt::MantidWidgets::ProcessingAlgoWidget" name="processingAlgo" native="true">
           <property name="editorVisible" stdset="0">
            <bool>false</bool>
           </property>
@@ -524,7 +542,7 @@ In the python script 'input' is a reference to the input workspace and 'output' 
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayoutPostProcessing">
         <item>
-         <widget class="MantidQt::MantidWidgets::ProcessingAlgoWidget" name="postAlgo">
+         <widget class="MantidQt::MantidWidgets::ProcessingAlgoWidget" name="postAlgo" native="true">
           <property name="infoString" stdset="0">
            <string>Select either Algorithm or Python Script under &quot;Post Processing&quot; to perform processing on the accumulated data, after each chunk is added.
 In the python script 'input' is a reference to the input workspace and 'output' is a string of the name of the output workspace.

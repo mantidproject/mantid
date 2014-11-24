@@ -11,8 +11,8 @@ set ( SRC_FILES
 	src/ConfigService.cpp
 	src/DataItem.cpp
 	src/DateAndTime.cpp
-	src/DateValidator.cpp
 	src/DateTimeValidator.cpp
+	src/DateValidator.cpp
 	src/DeltaEMode.cpp
 	src/DirectoryValidator.cpp
 	src/DiskBuffer.cpp
@@ -65,6 +65,7 @@ set ( SRC_FILES
 	src/PropertyManager.cpp
 	src/PropertyManagerOwner.cpp
 	src/PropertyWithValue.cpp
+	src/ProxyInfo.cpp
 	src/PseudoRandomNumberGenerator.cpp
 	src/Quat.cpp
 	src/ReadLock.cpp
@@ -129,8 +130,8 @@ set ( INC_FILES
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTime.h
-	inc/MantidKernel/DateValidator.h
 	inc/MantidKernel/DateTimeValidator.h
+	inc/MantidKernel/DateValidator.h
 	inc/MantidKernel/DeltaEMode.h
 	inc/MantidKernel/DirectoryValidator.h
 	inc/MantidKernel/DiskBuffer.h
@@ -185,6 +186,7 @@ set ( INC_FILES
 	inc/MantidKernel/MultiThreaded.h
 	inc/MantidKernel/NDPseudoRandomNumberGenerator.h
 	inc/MantidKernel/NDRandomNumberGenerator.h
+	inc/MantidKernel/NetworkProxy.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
 	inc/MantidKernel/NullValidator.h
@@ -197,6 +199,7 @@ set ( INC_FILES
 	inc/MantidKernel/PropertyManager.h
 	inc/MantidKernel/PropertyManagerOwner.h
 	inc/MantidKernel/PropertyWithValue.h
+	inc/MantidKernel/ProxyInfo.h
 	inc/MantidKernel/PseudoRandomNumberGenerator.h
 	inc/MantidKernel/QuasiRandomNumberSequence.h
 	inc/MantidKernel/Quat.h
@@ -310,6 +313,7 @@ set ( TEST_FILES
 	PropertyManagerTest.h
 	PropertyTest.h
 	PropertyWithValueTest.h
+	ProxyInfoTest.h
 	QuatTest.h
 	ReadLockTest.h
 	RebinHistogramTest.h
@@ -344,6 +348,16 @@ set ( TEST_FILES
 	WriteLockTest.h
 )
 
+if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    LIST( APPEND SRC_FILES src/NetworkProxyOSX.cpp )
+    SET( NETWORK_LIBRARIES "-framework SystemConfiguration" "-framework CoreFoundation"  "-framework CoreServices")
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    LIST( APPEND SRC_FILES src/NetworkProxyWin.cpp )
+    SET( NETWORK_LIBRARIES Winhttp )
+else()
+    LIST( APPEND SRC_FILES src/NetworkProxyLinux.cpp )
+endif()
+
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(Kernel SRC_FILES SRC_UNITY_IGNORE_FILES 10)
@@ -362,7 +376,8 @@ set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
 # Add to the 'Framework' group in VS
 set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Kernel ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} )
+target_link_libraries ( Kernel ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES}
+                        ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} )
 if ( WIN32 )
   target_link_libraries ( Kernel Psapi.lib ) # For memory usage queries
 endif()

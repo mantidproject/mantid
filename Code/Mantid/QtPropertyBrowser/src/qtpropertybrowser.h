@@ -145,6 +145,10 @@ public:
     void addSubProperty(QtProperty *property);
     void insertSubProperty(QtProperty *property, QtProperty *afterProperty);
     void removeSubProperty(QtProperty *property);
+
+    bool hasOption(const QString &opt) const;
+    bool checkOption(const QString &opt) const;
+    void setOption(const QString &opt, bool on);
 protected:
     explicit QtProperty(QtAbstractPropertyManager *manager);
     void propertyChanged();
@@ -205,6 +209,10 @@ protected Q_SLOTS:
 };
 
 template <class PropertyManager>
+class CompositeEditorFactory;
+
+
+template <class PropertyManager>
 class QtAbstractEditorFactory : public QtAbstractEditorFactoryBase
 {
 public:
@@ -255,6 +263,7 @@ public:
         return 0;
     }
 protected:
+    friend class CompositeEditorFactory<PropertyManager>;
     virtual void connectPropertyManager(PropertyManager *manager) = 0;
     virtual QWidget *createEditor(PropertyManager *manager, QtProperty *property,
                 QWidget *parent) = 0;

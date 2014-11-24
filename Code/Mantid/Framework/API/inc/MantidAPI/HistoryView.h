@@ -7,6 +7,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/HistoryItem.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidKernel/DateAndTime.h"
 
 #include <list>
 #include <vector>
@@ -55,13 +56,14 @@ public:
   void unrollAll();
   void roll(size_t index);
   void rollAll();
+  void filterBetweenExecDate(Mantid::Kernel::DateAndTime start, Mantid::Kernel::DateAndTime end = Mantid::Kernel::DateAndTime::getCurrentTime());
   const std::vector<HistoryItem> getAlgorithmsList() const;
   size_t size() const { return m_historyItems.size(); }
 
 private:
   void unroll(std::list<HistoryItem>::iterator it);
   void roll(std::list<HistoryItem>::iterator it);
-  
+
   const WorkspaceHistory m_wsHist;
   std::list<HistoryItem> m_historyItems;
 };

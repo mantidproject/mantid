@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadIDFFromNexus.h"
-#include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FileProperty.h"
 
@@ -80,16 +79,25 @@ void LoadIDFFromNexus::exec()
   if ( parameterString.empty() )
   {
     // Create the 'fallback' parameter file name to look for
-    const std::string directory = ConfigService::Instance().getString("parameterDefinition.directory");
+    std::vector<std::string> directoryNames = ConfigService::Instance().getInstrumentDirectories();
     const std::string instrumentName = localWorkspace->getInstrument()->getName();
-    const std::string paramFile = directory + instrumentName + "_Parameters.xml";
+    for ( auto instDirs_itr = directoryNames.begin(); instDirs_itr != directoryNames.end(); ++instDirs_itr)
+    {
+      //This will iterate around the directories from user ->etc ->install, and find the first beat file
+      std::string directoryName = *instDirs_itr;
+      const std::string paramFile = directoryName + instrumentName + "_Parameters.xml";
 
-    try {
-      // load and also populate instrument parameters from this 'fallback' parameter file 
-      LoadParameterFile::execManually(false, paramFile,"", localWorkspace);
-      g_log.notice() << "Instrument parameter file: " << paramFile << " has been loaded" << std::endl;
-    } catch ( std::runtime_error& ) {
-      g_log.debug() << "Instrument parameter file: " << paramFile << " not found or un-parsable. ";
+      try {
+        // load and also populate instrument parameters from this 'fallback' parameter file 
+        Algorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
+        loadParamAlg->setProperty("Filename", paramFile);
+        loadParamAlg->setProperty("Workspace", localWorkspace);
+        loadParamAlg->execute();
+        g_log.notice() << "Instrument parameter file: " << paramFile << " has been loaded" << std::endl;
+        break; //stop at the first one
+      } catch ( std::runtime_error& ) {
+        g_log.debug() << "Instrument parameter file: " << paramFile << " not found or un-parsable. ";
+      }
     }
   }
   else

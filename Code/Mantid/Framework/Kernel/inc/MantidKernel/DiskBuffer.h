@@ -94,6 +94,7 @@ namespace Kernel
 
     // For reporting and saving
     void getFreeSpaceVector(std::vector<uint64_t> & free) const;
+    void setFreeSpaceVector(std::vector<uint64_t> & free);
     std::string getMemoryStr() const;
 
 

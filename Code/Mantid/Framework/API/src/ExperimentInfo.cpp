@@ -8,7 +8,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/Instrument/XMLlogfile.h"
+#include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -213,7 +213,7 @@ namespace API
    
     struct ParameterValue
     {
-      ParameterValue(const Geometry::XMLlogfile & paramInfo, 
+      ParameterValue(const Geometry::XMLInstrumentParameter & paramInfo, 
                      const API::Run & run) 
         : info(paramInfo), runData(run) {}
       
@@ -234,7 +234,7 @@ namespace API
         else if(boost::iequals(info.m_value, "yes")) return true;
         else return false;
       }
-      const Geometry::XMLlogfile & info;
+      const Geometry::XMLInstrumentParameter & info;
       const Run & runData;
     };
     ///@endcond
@@ -817,7 +817,7 @@ namespace API
     std::string instrument(Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
 
     // Get the search directory for XML instrument definition files (IDFs)
-    std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
+    const std::vector<std::string>& directoryNames = Kernel::ConfigService::Instance().getInstrumentDirectories();
 
     boost::regex regex(instrument+"_Definition.*\\.xml", boost::regex_constants::icase);
     Poco::DirectoryIterator end_iter;
@@ -826,38 +826,43 @@ namespace API
     std::string mostRecentIDF; // store most recently starting matching IDF if found, else most recently starting IDF.
     DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most recently starting IDF, if none match 
     DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine the most recently starting matching IDF 
-    for ( Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter; ++dir_itr )
+    for ( auto instDirs_itr = directoryNames.begin(); instDirs_itr != directoryNames.end(); ++instDirs_itr)
     {
-      if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
-
-      std::string l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
-      if ( regex_match(l_filenamePart, regex) )
+      //This will iterate around the directories from user ->etc ->install, and find the first beat file
+      std::string directoryName = *instDirs_itr;
+      for ( Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter; ++dir_itr )
       {
-        g_log.debug() << "Found file: '" << dir_itr->path() << "'\n";
-        std::string validFrom, validTo;
-        getValidFromTo(dir_itr->path(), validFrom, validTo);
-        g_log.debug() << "File '" << dir_itr->path() << " valid dates: from '" << validFrom << "' to '" << validTo << "'\n";
-        DateAndTime from(validFrom);
-        // Use a default valid-to date if none was found.
-        DateAndTime to;
-        if (validTo.length() > 0)
-          to.setFromISO8601(validTo);
-        else
-          to.setFromISO8601("2100-01-01T00:00:00");
+        if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
 
-        if ( from <= d && d <= to )
+        std::string l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
+        if ( regex_match(l_filenamePart, regex) )
         {
-          if( from > refDateGoodFile ) 
-          { // We'd found a matching file more recently starting than any other matching file found
-            foundGoodFile = true;
-            refDateGoodFile = from;
+          g_log.debug() << "Found file: '" << dir_itr->path() << "'\n";
+          std::string validFrom, validTo;
+          getValidFromTo(dir_itr->path(), validFrom, validTo);
+          g_log.debug() << "File '" << dir_itr->path() << " valid dates: from '" << validFrom << "' to '" << validTo << "'\n";
+          DateAndTime from(validFrom);
+          // Use a default valid-to date if none was found.
+          DateAndTime to;
+          if (validTo.length() > 0)
+            to.setFromISO8601(validTo);
+          else
+            to.setFromISO8601("2100-01-01T00:00:00");
+
+          if ( from <= d && d <= to )
+          {
+            if( from > refDateGoodFile ) 
+            { // We'd found a matching file more recently starting than any other matching file found
+              foundGoodFile = true;
+              refDateGoodFile = from;
+              mostRecentIDF = dir_itr->path();
+            }
+          }
+          if ( !foundGoodFile && ( from > refDate ) )
+          {  // Use most recently starting file, in case we don't find a matching file.
+            refDate = from;
             mostRecentIDF = dir_itr->path();
           }
-        }
-        if ( !foundGoodFile && ( from > refDate ) )
-        {  // Use most recently starting file, in case we don't find a matching file.
-          refDate = from;
-          mostRecentIDF = dir_itr->path();
         }
       }
     }
@@ -1099,7 +1104,7 @@ namespace API
    * @param runData A reference to the run object, which stores log value entries
    */
   void ExperimentInfo::populateWithParameter(Geometry::ParameterMap & paramMap,
-                                             const std::string & name, const Geometry::XMLlogfile & paramInfo,
+                                             const std::string & name, const Geometry::XMLInstrumentParameter & paramInfo,
                                              const Run & runData)
   {
     const std::string & category = paramInfo.m_type;
