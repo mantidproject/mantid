@@ -281,10 +281,9 @@ namespace IDA
       "print IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plot_opt=plotOpt, save=save, verbose=verbose)\n";
 
     QString pyOutput = runPythonCode(pyInput);
-    QStringList resultWorkspaces = pyOutput.split(",");
 
     // Set the result workspace for Python script export
-    m_pythonExportWsName = resultWorkspaces[0].toStdString();
+    m_pythonExportWsName = pyOutput.trimmed().toStdString();
   }
 
   bool CalcCorr::validate()
