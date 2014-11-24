@@ -64,7 +64,7 @@ public:
     std::string url = "http://www.google.com";
 
     std::stringstream ss;
-    int response;
+    int response = 0;
     TS_ASSERT_THROWS_NOTHING (response = internetHelper.sendRequest(url, ss);)
     TS_ASSERT_EQUALS (200, response);
     TS_ASSERT_EQUALS ("HTTP request succeeded", ss.str());
@@ -76,7 +76,7 @@ public:
     std::string httpsUrl = "https://api.github.com/repos/mantidproject/mantid/contents";
     
     std::stringstream ss;
-    int response;
+    int response = 0;
     TS_ASSERT_THROWS_NOTHING (response = internetHelper.sendRequest(httpsUrl, ss);)
     TS_ASSERT_EQUALS (200, response);
     TS_ASSERT_EQUALS ("HTTPS request succeeded", ss.str());
