@@ -52,8 +52,7 @@ namespace DataHandling
     void exec();
     virtual int doDownloadFile(const std::string& urlFile, const std::string& localFilePath = "",
                                const StringToStringMap& headers = StringToStringMap());
-    StringToStringMap updateJsonFile(const std::string& directoryPath, const std::string& filePath);
-    const std::string mangleFileName(const std::string& filename) const;
+    StringToStringMap getFileShas(const std::string& directoryPath, const std::string& filePath);
     const std::string getDownloadableRepoUrl(const std::string& filename) const;
     StringToStringMap processRepository();
     std::string getValueOrDefault(const StringToStringMap & mapping,
