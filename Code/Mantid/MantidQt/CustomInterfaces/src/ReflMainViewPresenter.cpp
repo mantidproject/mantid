@@ -1301,7 +1301,7 @@ namespace MantidQt
       std::set<std::string> workspaces;
 
       for(auto row = selectedRows.begin(); row != selectedRows.end(); ++row)
-        workspaces.insert("IvsQ_" + m_model->data(m_model->index(*row, COL_RUNS)).toString().toStdString());
+        workspaces.insert("IvsQ_" + getRunNumber(prepareRunWorkspace(m_model->data(m_model->index(*row, COL_RUNS)).toString().toStdString())));
 
       m_view->plotWorkspaces(workspaces);
     }
@@ -1330,7 +1330,7 @@ namespace MantidQt
           continue;
 
         //Add this to the list of runs
-        runsByGroup[group].push_back(m_model->data(m_model->index(row, COL_RUNS)).toString().toStdString());
+        runsByGroup[group].push_back(getRunNumber(prepareRunWorkspace(m_model->data(m_model->index(row, COL_RUNS)).toString().toStdString())));
       }
 
       std::set<std::string> workspaces;
