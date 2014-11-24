@@ -29,22 +29,13 @@
       <value val="Show" />
     </parameter>
 
-    <!-- This parameter will be taken as a default value for the rebinning of
-            the data in DeltaE. The existence of the parameter will make rebinning
-            the default, as opposed to not rebinning.
-            This is necessary so that the spectra can be grouped.
-    -->
-    <parameter name="rebin-default" type="string">
-      <value val="-2.5,0.015,3,-0.005,1000" />
-    </parameter>
-
     <!-- Reduction workflow parameters under this line -->
     <parameter name="Workflow.InfoTable" type="string">
       <value val="inst_abrv, run_number, user_name, run_title, hd_dur" />
     </parameter>
 
     <parameter name="Workflow.Monitor1-SpectrumNumber" >
-      <value val="28" />
+      <value val="29" />
     </parameter>
 
     <parameter name="Workflow.Monitor1-Area" >

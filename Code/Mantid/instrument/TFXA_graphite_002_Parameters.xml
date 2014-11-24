@@ -12,7 +12,7 @@
     </parameter>
 
     <parameter name="spectra-max">
-      <value val="36" />
+      <value val="28" />
     </parameter>
 
     <parameter name="efixed-val">
