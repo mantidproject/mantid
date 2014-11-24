@@ -52,6 +52,7 @@
 #include <pqCommandLineOptionsBehavior.h>
 #include <pqCrashRecoveryBehavior.h>
 #include <pqDataTimeStepBehavior.h>
+#include <pqDataRepresentation.h>
 #include <pqDefaultViewBehavior.h>
 #include <pqDeleteBehavior.h>
 #include <pqFixPathsInStateFilesBehavior.h>
@@ -60,15 +61,19 @@
 #include <pqObjectPickingBehavior.h>
 //#include <pqPersistentMainWindowStateBehavior.h>
 #include <pqPipelineContextMenuBehavior.h>
+#include <pqPipelineSource.h>
 //#include <pqPluginActionGroupBehavior.h>
 //#include <pqPluginDockWidgetsBehavior.h>
 #include <pqPluginManager.h>
 #include <pqPVNewSourceBehavior.h>
 #include <pqQtMessageHandlerBehavior.h>
+#include <pqServer.h>
+#include <pqServerManagerModel.h>
 #include <pqSpreadSheetVisibilityBehavior.h>
 #include <pqStandardPropertyWidgetInterface.h>
 #include <pqStandardViewModules.h>
 #include <pqUndoRedoBehavior.h>
+#include <pqView.h>
 #include <pqViewFrameActionsBehavior.h>
 #include <pqViewStreamingBehavior.h>
 #include <pqVerifyRequiredPluginBehavior.h>
@@ -450,6 +455,11 @@ void MdViewerWidget::setParaViewComponentsForView()
                    SLOT(onParallelProjection(bool)));
 }
 
+
+
+
+
+
 /**
  * This function loads and renders data from the given source for the
  * standalone mode.
@@ -471,7 +481,7 @@ void MdViewerWidget::renderingDone()
   if (this->viewSwitched)
   {
     this->viewSwitched = false;
-    this->currentView->setColorsForView();
+    this->currentView->setColorsForView(this->ui.colorSelectionWidget);
   }
 }
 
@@ -713,9 +723,10 @@ void MdViewerWidget::setupPluginMode()
 void MdViewerWidget::renderAndFinalSetup()
 {
   this->currentView->render();
-  this->currentView->setColorsForView();
+  this->currentView->setColorsForView(this->ui.colorSelectionWidget);
   this->currentView->checkView(this->initialView);
   this->currentView->updateAnimationControls();
+  this->setVisibilityListener();
 }
 
 /**
@@ -734,7 +745,7 @@ void MdViewerWidget::checkForUpdates()
 
   if (strcmp(proxy->GetXMLName(), "MDEWRebinningCutter") == 0)
   {
-    this->currentView->onAutoScale();
+    this->currentView->onAutoScale(this->ui.colorSelectionWidget);
     this->currentView->updateAnimationControls();
     this->currentView->updateView();
     this->currentView->updateUI();
@@ -780,10 +791,11 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->hiddenView->destroyView();
   delete this->hiddenView;
   this->currentView->render();
-  this->currentView->setColorsForView();
+  this->currentView->setColorsForView(this->ui.colorSelectionWidget);
   this->currentView->checkViewOnSwitch();
   this->updateAppState();
   this->initialView = v; 
+  this->setVisibilityListener();
 }
 
 /**
@@ -959,7 +971,7 @@ void MdViewerWidget::disconnectDialogs()
  */
 void MdViewerWidget::connectColorSelectionWidget()
 {
-  // Set color selection widget <-> view signals/slots
+  // Set the color selection widget signal -> view slot connection
   QObject::connect(this->ui.colorSelectionWidget,
                    SIGNAL(colorMapChanged(const pqColorMapModel *)),
                    this->currentView,
@@ -968,16 +980,22 @@ void MdViewerWidget::connectColorSelectionWidget()
                    SIGNAL(colorScaleChanged(double, double)),
                    this->currentView,
                    SLOT(onColorScaleChange(double, double)));
+
+
+  // Set the view signal -> color selection widget slot connection
   QObject::connect(this->currentView, SIGNAL(dataRange(double, double)),
                    this->ui.colorSelectionWidget,
                    SLOT(setColorScaleRange(double, double)));
-  QObject::connect(this->ui.colorSelectionWidget, SIGNAL(autoScale()),
-                   this->currentView, SLOT(onAutoScale()));
+  QObject::connect(this->ui.colorSelectionWidget, SIGNAL(autoScale(ColorSelectionWidget*)),
+                   this->currentView, SLOT(onAutoScale(ColorSelectionWidget*)));
   QObject::connect(this->ui.colorSelectionWidget, SIGNAL(logScale(int)),
                    this->currentView, SLOT(onLogScale(int)));
   QObject::connect(this->currentView, SIGNAL(lockColorControls(bool)),
                    this->ui.colorSelectionWidget,
                    SLOT(enableControls(bool)));
+
+  QObject::connect(this->currentView,SIGNAL(setLogScale(bool)),
+                   this->ui.colorSelectionWidget, SLOT(onSetLogScale(bool)));
 }
 
 /**
@@ -1060,7 +1078,7 @@ void MdViewerWidget::afterReplaceHandle(const std::string &wsName,
     srcProxy->UpdatePipelineInformation();
     src->updatePipeline();
 
-    this->currentView->setColorsForView();
+    this->currentView->setColorsForView(this->ui.colorSelectionWidget);
     this->currentView->renderAll();;
   }
 }
@@ -1092,6 +1110,29 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
     emit this->requestClose();
   }
 }
+
+/**
+ * Set the listener for the visibility of the representations
+ */
+void MdViewerWidget::setVisibilityListener()
+{
+  // Set the connection to listen to a visibility change of the representation.
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources;
+  sources = smModel->findItems<pqPipelineSource *>(server);
+
+  pqView* activeView = pqActiveObjects::instance().activeView();
+
+  // Attach the visibilityChanged signal for all sources.
+  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
+  {
+    QObject::connect((*source), SIGNAL(visibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
+                     this->currentView, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
+                     Qt::UniqueConnection);
+  }
+}
+
 
 } // namespace SimpleGui
 } // namespace Vates

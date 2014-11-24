@@ -49,6 +49,8 @@ namespace Mantid
       virtual void setAxisLabels(vtkDataSet* visualDataSet);
       virtual void makeNonOrthogonal(vtkDataSet* visualDataSet);
       virtual ~MDHWLoadingPresenter();
+      virtual const std::string& getInstrument();
+
     protected:
       /*---------------------------------------------------------------------------
       Common/shared operations and members for all MDHW file-type loading.
@@ -68,8 +70,8 @@ namespace Mantid
       double m_time;
       bool m_loadInMemory;
       bool m_firstLoad;
+      std::string m_instrument;
     };
-
   }
 }
 

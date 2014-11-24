@@ -1,15 +1,20 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
+#include "MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
 #endif
 
+#include <pqActiveObjects.h>
+#include <pqApplicationCore.h>
 #include <pqChartValue.h>
 #include <pqColorMapModel.h>
+#include <pqDataRepresentation.h>
 #include <pqPipelineRepresentation.h>
 #include <pqScalarsToColors.h>
+#include <pqServerManagerModel.h>
 #include <pqSMAdaptor.h>
 #include <vtkSMProxy.h>
 
@@ -29,7 +34,7 @@ namespace Vates
 {
 namespace SimpleGui
 {
-
+  
 ColorUpdater::ColorUpdater() :
   autoScaleState(true),
   logScaleState(false),
@@ -42,26 +47,24 @@ ColorUpdater::~ColorUpdater()
 {
 }
 
-QPair<double, double> ColorUpdater::autoScale(pqPipelineRepresentation *repr)
+/**
+ * Set the lookup table to the autoscale values.
+ * @returns A struct which contains the parameters of the looup table.
+ */
+VsiColorScale ColorUpdater::autoScale()
 {
-  QPair<double, double> range = repr->getColorFieldRange();
-  if (0 == range.first && 1 == range.second)
-  {
-    throw std::invalid_argument("Bad color scale given");
-  }
-  pqScalarsToColors *stc = repr->getLookupTable();
-  if (NULL != stc)
-  {
-    stc->setScalarRange(range.first, range.second);
-    this->minScale = range.first;
-    this->maxScale = range.second;
-  }
-  else
-  {
-    throw std::invalid_argument("Cannot get LUT for representation");
-  }
-  repr->getProxy()->UpdateVTKObjects();
-  return range;
+  // Get the custom auto scale.
+  VsiColorScale vsiColorScale =  this->autoScaleRangeGenerator.getColorScale();
+
+  // Set the color scale for all sources
+  this->minScale = vsiColorScale.minValue;
+  this->maxScale = vsiColorScale.maxValue;
+  this->logScaleState = vsiColorScale.useLogScale;
+
+  // Update the lookup tables, i.e. react to a color scale change
+  colorScaleChange(this->minScale, this->maxScale);
+
+  return vsiColorScale;
 }
 
 void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
@@ -101,41 +104,88 @@ void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
   lutProxy->UpdateVTKObjects();
 }
 
-void ColorUpdater::colorScaleChange(pqPipelineRepresentation *repr,
-                                    double min, double max)
+/**
+ * React to a change of the color scale settings.
+ * @param min The lower end of the color scale.
+ * @param max The upper end of the color scale.
+ */
+void ColorUpdater::colorScaleChange(double min, double max)
 {
-  if (NULL == repr)
+  this->minScale = min;
+  this->maxScale = max;
+
+  try
   {
-    return;
+    // Update for all sources and all reps
+    pqServer *server = pqActiveObjects::instance().activeServer();
+    pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+    QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+    QList<pqPipelineSource *>::Iterator source;
+
+    // For all sources
+    for(QList<pqPipelineSource*>::iterator source = sources.begin(); source != sources.end(); ++source)
+    {
+      QList<pqView*> views = (*source)->getViews();
+
+      // For all views
+      for (QList<pqView*>::iterator view = views.begin(); view != views.end(); ++view)
+      {
+        QList<pqDataRepresentation*> reps =  (*source)->getRepresentations((*view));
+
+        // For all representations
+        for (QList<pqDataRepresentation*>::iterator rep = reps.begin(); rep != reps.end(); ++rep)
+        {
+          this->updateLookupTable(*rep);
+        }
+      }
+    }
   }
-  pqScalarsToColors *stc = repr->getLookupTable();
-  if (NULL != stc)
+  catch(std::invalid_argument &)
   {
-    stc->setScalarRange(min, max);
-    repr->getProxy()->UpdateVTKObjects();
-    this->minScale = min;
-    this->maxScale = max;
+
+    return;
   }
 }
 
-void ColorUpdater::logScale(pqPipelineRepresentation *repr, int state)
+/**
+ * Update the lookup table.
+ * @param representation The representation for which the lookup table is updated.
+ */
+void ColorUpdater::updateLookupTable(pqDataRepresentation* representation)
 {
-  pqScalarsToColors *lut = repr->getLookupTable();
-  if (NULL == lut)
+  pqScalarsToColors* lookupTable = representation->getLookupTable();
+
+  if (NULL != lookupTable)
   {
-    // Got a bad proxy, so just return
-    return;
-  }
-  QPair<double, double> bounds = lut->getScalarRange();
-  // Handle "bug" with lower limit being dropped.
-  if (bounds.first != this->minScale)
+    // Set the scalar range values
+    lookupTable->setScalarRange(this->minScale, this->maxScale);
+
+    // Set the logarithmic scale
+    pqSMAdaptor::setElementProperty(lookupTable->getProxy()->GetProperty("UseLogScale"),
+                                     this->logScaleState);
+
+    // Need to set a lookup table lock here. This does not affect setScalarRange, 
+    // but blocks setWholeScalarRange which gets called by ParaView overrides our
+    // setting when a workspace is loaded for the first time.
+    lookupTable->setScalarRangeLock(TRUE);
+
+    representation->getProxy()->UpdateVTKObjects();
+    representation->renderViewEventually();
+  } else
   {
-    lut->setScalarRange(this->minScale, this->maxScale);
+    throw std::invalid_argument("Cannot get LUT for representation");
   }
-  pqSMAdaptor::setElementProperty(lut->getProxy()->GetProperty("UseLogScale"),
-                                  state);
-  lut->getProxy()->UpdateVTKObjects();
+}
+
+/**
+ * React to changing the log scale option
+ * @param The state to which the log scale is being changed.
+ */
+void ColorUpdater::logScale(int state)
+{
   this->logScaleState = state;
+
+  this->colorScaleChange(this->minScale, this->maxScale);
 }
 
 /**

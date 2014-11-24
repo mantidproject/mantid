@@ -23,7 +23,8 @@ namespace Mantid
     m_time(-1),
     m_recursionDepth(0),
     m_loadInMemory(false),
-    m_firstLoad(true)
+    m_firstLoad(true),
+    m_instrument("")
     {
       Mantid::API::FrameworkManager::Instance();
     }
@@ -230,6 +231,15 @@ namespace Mantid
         throw std::runtime_error("Have not yet run ::extractMetaData!");
       }
       return tDimension->getName() + " (" + tDimension->getUnits().ascii() + ")";
+    }
+
+    /**
+     * Getter for the instrument.
+     * @returns The name of the instrument which is associated with the workspace.
+     */
+    const std::string& MDEWLoadingPresenter::getInstrument()
+    {
+      return m_instrument;
     }
   }
 }

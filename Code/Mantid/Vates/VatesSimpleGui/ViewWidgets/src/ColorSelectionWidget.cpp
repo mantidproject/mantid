@@ -159,12 +159,15 @@ void ColorSelectionWidget::autoOrManualScaling(int state)
   {
   case Qt::Unchecked:
     this->setEditorStatus(true);
+    emit this->autoScale(this);
     break;
   case Qt::Checked:
     this->setEditorStatus(false);
-    emit this->autoScale();
+    emit this->autoScale(this);
     break;
   }
+  
+  
 }
 
 /**
@@ -231,6 +234,15 @@ void ColorSelectionWidget::useLogScaling(int state)
     state -= 1;
   }
   emit this->logScale(state);
+}
+
+/**
+ * Slot to set the checkbox if the logscaling behaviour has been set programatically
+ * @param state Flag whether the checkbox should be checked or not
+ */
+void ColorSelectionWidget::onSetLogScale(bool state)
+{
+    ui.useLogScaleCheckBox->setChecked(state);
 }
 
 /**

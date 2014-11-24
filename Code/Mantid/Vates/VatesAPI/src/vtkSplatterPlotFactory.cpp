@@ -1,10 +1,12 @@
 #include "MantidVatesAPI/vtkSplatterPlotFactory.h"
+#include "MantidVatesAPI/MetaDataExtractorUtils.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/Common.h"
 
@@ -19,6 +21,7 @@
 
 #include <algorithm>
 #include <boost/math/special_functions/fpclassify.hpp>
+#include "qwt/qwt_double_interval.h"
 
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;
@@ -55,7 +58,8 @@ namespace VATES
   m_numPoints(numPoints), m_percentToUse(percentToUse),
   m_buildSortedList(true), m_wsName(""), dataSet(NULL),
   slice(false), sliceMask(NULL), sliceImplicitFunction(NULL),
-  m_time(0.0)
+  m_time(0.0),
+  m_metaDataExtractor(new MetaDataExtractorUtils())
   {
   }
 
@@ -526,10 +530,18 @@ namespace VATES
       this->slice = false;
     }
 
+    // Set the bounds 
+    QwtDoubleInterval minMaxValue = m_metaDataExtractor->getMinAndMax(m_workspace);
+    m_minValue = minMaxValue.minValue();
+    m_maxValue = minMaxValue.maxValue();
+
+    // Set the instrument
+    m_instrument = m_metaDataExtractor->extractInstrument(m_workspace);
+
     // Check for the workspace type, i.e. if it is MDHisto or MDEvent
     IMDEventWorkspace_sptr eventWorkspace = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
     IMDHistoWorkspace_sptr histoWorkspace = boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_workspace);
-  
+
     if (eventWorkspace)
     {
       // Macro to call the right instance of the
@@ -636,5 +648,31 @@ namespace VATES
     m_time = time;
   }
 
+    /**
+    * Getter for the minimum value;
+    * @return The minimum value of the data set.
+    */
+  double vtkSplatterPlotFactory::getMinValue()
+  {
+    return m_minValue;
+  }
+
+  /**
+  * Getter for the maximum value;
+  * @return The maximum value of the data set.
+  */
+  double vtkSplatterPlotFactory::getMaxValue()
+  {
+    return m_maxValue;
+  }
+
+  /**
+  * Getter for the instrument.
+  * @returns The name of the instrument which is associated with the workspace.
+  */
+  const std::string& vtkSplatterPlotFactory::getInstrument()
+  {
+    return m_instrument;
+  }
 }
 }

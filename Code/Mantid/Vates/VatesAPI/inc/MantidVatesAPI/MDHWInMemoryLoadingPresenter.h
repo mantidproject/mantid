@@ -37,7 +37,9 @@ namespace Mantid
 
     class MDLoadingView;
     class WorkspaceProvider;
+    class MetaDataExtractorUtils;
     class vtkDataSetFactory;
+    
     class DLLExport MDHWInMemoryLoadingPresenter : public MDHWLoadingPresenter
     {
     public:
@@ -48,6 +50,10 @@ namespace Mantid
       virtual bool canReadFile() const;
       virtual std::string getWorkspaceTypeName();
       virtual int getSpecialCoordinates();
+      virtual double getMinValue();
+      virtual double getMaxValue();
+
+
     private:
       /// Repository for accessing workspaces. At this level, does not specify how or where from.
       boost::scoped_ptr<WorkspaceProvider> m_repository;
@@ -55,6 +61,10 @@ namespace Mantid
       const std::string m_wsName;
       std::string m_wsTypeName;
       int m_specialCoords;
+      double m_minValue;
+      double m_maxValue;
+      /// Meta data extractor
+      boost::scoped_ptr<MetaDataExtractorUtils> m_metaDataExtractor;
     };
   }
 }

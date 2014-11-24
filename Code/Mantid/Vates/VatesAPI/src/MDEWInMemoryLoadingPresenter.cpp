@@ -1,9 +1,11 @@
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingView.h"
+#include "MantidVatesAPI/MetaDataExtractorUtils.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "qwt/qwt_double_interval.h"
 #include <vtkUnstructuredGrid.h>
 
 namespace Mantid
@@ -20,7 +22,8 @@ namespace Mantid
     @throw invalid_argument if the repository is null
     @throw invalid_arument if view is null
     */
-  MDEWInMemoryLoadingPresenter::MDEWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName) : MDEWLoadingPresenter(view), m_repository(repository), m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1)
+  MDEWInMemoryLoadingPresenter::MDEWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName) : MDEWLoadingPresenter(view), 
+    m_repository(repository), m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1), m_metaDataExtractor(new MetaDataExtractorUtils())
     {
       if(m_wsName.empty())
       {
@@ -98,6 +101,15 @@ namespace Mantid
       IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws);
       m_wsTypeName = eventWs->id();
       m_specialCoords = eventWs->getSpecialCoordinateSystem();
+
+      // Set the minimum and maximum of the workspace data.
+      QwtDoubleInterval minMaxContainer = m_metaDataExtractor->getMinAndMax(eventWs);
+      m_minValue = minMaxContainer.minValue();
+      m_maxValue = minMaxContainer.maxValue();
+
+      // Set the instrument which is associated with the workspace.
+      m_instrument = m_metaDataExtractor->extractInstrument(eventWs);
+
       //Call base-class extraction method.
       this->extractMetadata(eventWs);
     }
@@ -124,6 +136,24 @@ namespace Mantid
     int MDEWInMemoryLoadingPresenter::getSpecialCoordinates()
     {
       return m_specialCoords;
+    }
+
+   /**
+    * Getter for the minimum value;
+    * @return The minimum value of the data set.
+    */
+    double MDEWInMemoryLoadingPresenter::getMinValue()
+    {
+      return m_minValue;
+    }
+
+   /**
+    * Getter for the maximum value;
+    * @return The maximum value of the data set.
+    */
+    double MDEWInMemoryLoadingPresenter::getMaxValue()
+    {
+      return m_maxValue;
     }
   }
 }

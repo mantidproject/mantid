@@ -1,9 +1,11 @@
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingView.h"
+#include "MantidVatesAPI/MetaDataExtractorUtils.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "qwt/qwt_double_interval.h"
 #include <vtkUnstructuredGrid.h>
 
 namespace Mantid
@@ -20,21 +22,22 @@ namespace Mantid
     @throw invalid_argument if the repository is null
     @throw invalid_arument if view is null
     */
-  MDHWInMemoryLoadingPresenter::MDHWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName) : MDHWLoadingPresenter(view), m_repository(repository), m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1)
+  MDHWInMemoryLoadingPresenter::MDHWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName) : MDHWLoadingPresenter(view),
+     m_repository(repository), m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1), m_metaDataExtractor(new MetaDataExtractorUtils())
+  {
+    if(m_wsName.empty())
     {
-      if(m_wsName.empty())
-      {
-        throw std::invalid_argument("The workspace name is empty.");
-      }
-      if(NULL == repository)
-      {
-        throw std::invalid_argument("The repository is NULL");
-      }
-      if(NULL == m_view)
-      {
-        throw std::invalid_argument("View is NULL.");
-      }
+      throw std::invalid_argument("The workspace name is empty.");
     }
+    if(NULL == repository)
+    {
+      throw std::invalid_argument("The repository is NULL");
+    }
+    if(NULL == m_view)
+    {
+      throw std::invalid_argument("View is NULL.");
+    }
+   }
 
      /*
     Indicates whether this presenter is capable of handling the type of file that is attempted to be loaded.
@@ -98,6 +101,15 @@ namespace Mantid
       IMDHistoWorkspace_sptr histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws);
       m_wsTypeName = histoWs->id();
       m_specialCoords = histoWs->getSpecialCoordinateSystem();
+      
+      // Set the minimum and maximum of the workspace data.
+      QwtDoubleInterval minMaxContainer =  m_metaDataExtractor->getMinAndMax(histoWs);
+      m_minValue = minMaxContainer.minValue();
+      m_maxValue = minMaxContainer.maxValue();
+
+      // Set the instrument which is associated with the workspace.
+      m_instrument =m_metaDataExtractor->extractInstrument(histoWs);
+
       //Call base-class extraction method.
       this->extractMetadata(histoWs);
     }
@@ -124,6 +136,24 @@ namespace Mantid
     int MDHWInMemoryLoadingPresenter::getSpecialCoordinates()
     {
       return m_specialCoords;
+    }
+
+   /**
+     * Getter for the minimum value;
+     * @return The minimum value of the data set.
+     */
+    double MDHWInMemoryLoadingPresenter::getMinValue()
+    {
+      return m_minValue;
+    }
+
+   /**
+    * Getter for the maximum value;
+    * @return The maximum value of the data set.
+    */
+    double MDHWInMemoryLoadingPresenter::getMaxValue()
+    {
+      return m_maxValue;
     }
   }
 }

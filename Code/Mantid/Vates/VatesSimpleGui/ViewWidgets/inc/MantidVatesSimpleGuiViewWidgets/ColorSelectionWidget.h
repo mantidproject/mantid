@@ -75,7 +75,7 @@ signals:
   /**
    * Signal to let views know that autoscaling is on.
    */
-  void autoScale();
+  void autoScale(ColorSelectionWidget*);
   /**
    * Signal to pass on information about a change to the color map.
    * @param model the color map to send
@@ -103,6 +103,8 @@ protected slots:
   void loadPreset();
   /// Set log color scaling.
   void useLogScaling(int state);
+  /// Set log scaling button
+  void onSetLogScale(bool state);
 
 private:
   /// Add color maps from XML files.

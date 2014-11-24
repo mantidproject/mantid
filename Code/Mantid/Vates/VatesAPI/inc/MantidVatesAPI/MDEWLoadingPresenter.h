@@ -48,6 +48,7 @@ namespace Mantid
       virtual std::string getTimeStepLabel() const;
       virtual void setAxisLabels(vtkDataSet* visualDataSet);
       virtual ~MDEWLoadingPresenter();
+      virtual const std::string& getInstrument();
     protected:
       /*---------------------------------------------------------------------------
       Common/shared operations and members for all MDEW file-type loading.
@@ -66,10 +67,8 @@ namespace Mantid
       size_t m_recursionDepth;
       bool m_loadInMemory;
       bool m_firstLoad;
+      std::string m_instrument;
     };
-
-    
-
   }
 }
 

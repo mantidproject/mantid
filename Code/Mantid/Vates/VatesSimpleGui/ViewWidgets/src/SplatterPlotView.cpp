@@ -184,7 +184,7 @@ void SplatterPlotView::render()
   this->resetDisplay();
   if (this->peaksSource.isEmpty())
   {
-    this->onAutoScale();
+    this->setAutoColorScale();
   }
   else
   {
