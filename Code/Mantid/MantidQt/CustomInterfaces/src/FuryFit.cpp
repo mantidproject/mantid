@@ -15,13 +15,15 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
 namespace CustomInterfaces
 {
 namespace IDA
 {
-  FuryFit::FuryFit(QWidget * parent) : 
+  FuryFit::FuryFit(QWidget * parent) :
     IDATab(parent),
     m_stringManager(NULL), m_ffTree(NULL),
     m_ffRangeManager(NULL),
@@ -31,21 +33,21 @@ namespace IDA
     m_ties()
   {
   }
-      
+
   void FuryFit::setup()
   {
     m_stringManager = new QtStringPropertyManager(m_parentWidget);
 
     m_ffTree = new QtTreePropertyBrowser(m_parentWidget);
     uiForm().furyfit_properties->addWidget(m_ffTree);
-  
+
     // Setup FuryFit Plot Window
     m_plots["FuryFitPlot"] = new QwtPlot(m_parentWidget);
     m_plots["FuryFitPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
     m_plots["FuryFitPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
     uiForm().furyfit_vlPlot->addWidget(m_plots["FuryFitPlot"]);
     m_plots["FuryFitPlot"]->setCanvasBackground(QColor(255,255,255));
-  
+
     m_rangeSelectors["FuryFitRange"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["FuryFitPlot"]);
     connect(m_rangeSelectors["FuryFitRange"], SIGNAL(minValueChanged(double)), this, SLOT(xMinSelected(double)));
     connect(m_rangeSelectors["FuryFitRange"], SIGNAL(maxValueChanged(double)), this, SLOT(xMaxSelected(double)));
@@ -58,7 +60,7 @@ namespace IDA
 
     // setupTreePropertyBrowser
     m_ffRangeManager = new QtDoublePropertyManager(m_parentWidget);
-  
+
     m_ffTree->setFactoryForManager(m_dblManager, doubleEditorFactory());
     m_ffTree->setFactoryForManager(m_ffRangeManager, doubleEditorFactory());
 
@@ -77,7 +79,7 @@ namespace IDA
 
     m_properties["Exponential1"] = createExponential("Exponential1");
     m_properties["Exponential2"] = createExponential("Exponential2");
-  
+
     m_properties["StretchedExp"] = createStretchedExp("StretchedExp");
 
     m_ffRangeManager->setMinimum(m_properties["BackgroundA0"], 0);
@@ -98,17 +100,16 @@ namespace IDA
     connect(m_dblManager, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(plotGuess(QtProperty*)));
 
     // Signal/slot ui connections
-    connect(uiForm().furyfit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(plotInput()));
+    connect(uiForm().furyfit_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded(const QString&)));
     connect(uiForm().furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
-    connect(uiForm().furyfit_spPlotSpectrum, SIGNAL(editingFinished()), this, SLOT(plotInput()));
-    connect(uiForm().furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().furyfit_swInput, SLOT(setCurrentIndex(int)));  
     connect(uiForm().furyfit_pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
 
-    //plot input connections
-    connect(uiForm().furyfit_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
-    connect(uiForm().furyfit_wsIqt, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
-    connect(uiForm().furyfit_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
-    connect(uiForm().furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
+    connect(uiForm().furyfit_dsSampleInput, SIGNAL(filesFound()), this, SLOT(plotInput()));
+
+    connect(uiForm().furyfit_spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
+
+    connect(uiForm().furyfit_spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));
+    connect(uiForm().furyfit_spSpectraMax, SIGNAL(valueChanged(int)), this, SLOT(specMaxChanged(int)));
 
     // Set a custom handler for the QTreePropertyBrowser's ContextMenu event
     m_ffTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -124,16 +125,16 @@ namespace IDA
 
     const bool constrainBeta = uiForm().furyfit_ckConstrainBeta->isChecked();
     const bool constrainIntens = uiForm().furyfit_ckConstrainIntensities->isChecked();
-    Mantid::API::CompositeFunction_sptr func = createFunction();
+    CompositeFunction_sptr func = createFunction();
     func->tie("f0.A1", "0");
-    
+
     if ( constrainIntens )
     {
       constrainIntensities(func);
     }
-    
+
     func->applyTies();
-    
+
     std::string function = std::string(func->asString());
     QString pyInput = "from IndirectDataAnalysis import furyfitSeq, furyfitMult\n"
       "input = '" + m_ffInputWSName + "'\n"
@@ -163,38 +164,15 @@ namespace IDA
     {
       pyInput += "furyfitMult(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
     }
-  
+
     QString pyOutput = runPythonCode(pyInput);
   }
 
   bool FuryFit::validate()
   {
-    using namespace Mantid::API;
-
     UserInputValidator uiv;
 
-    switch( uiForm().furyfit_cbInputType->currentIndex() )
-    {
-    case 0:
-      uiv.checkMWRunFilesIsValid("Input", uiForm().furyfit_inputFile); 
-
-      //file should already be loaded by this point, but attempt to recover if not.
-      if(!AnalysisDataService::Instance().doesExist(m_ffInputWSName.toStdString()))
-      {
-        //attempt to reload the nexus file.
-        QString filename = uiForm().furyfit_inputFile->getFirstFilename();
-        QFileInfo fi(filename);
-        QString wsname = fi.baseName();
-
-        loadFile(filename, wsname);
-        m_ffInputWSName = wsname;
-        m_ffInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname.toStdString());
-      }
-
-      break;
-    case 1:
-      uiv.checkWorkspaceSelectorIsNotEmpty("Input", uiForm().furyfit_wsIqt); break;
-    }
+    uiv.checkDataSelectorIsValid("Sample", uiForm().furyfit_dsSampleInput);
 
     auto range = std::make_pair(m_ffRangeManager->value(m_properties["StartX"]), m_ffRangeManager->value(m_properties["EndX"]));
     uiv.checkValidRange("Ranges", range);
@@ -207,21 +185,48 @@ namespace IDA
 
   void FuryFit::loadSettings(const QSettings & settings)
   {
-    uiForm().furyfit_inputFile->readSettings(settings.group());
+    uiForm().furyfit_dsSampleInput->readSettings(settings.group());
   }
 
-  Mantid::API::CompositeFunction_sptr FuryFit::createFunction(bool tie)
+  /**
+   * Called when new data has been loaded by the data selector.
+   *
+   * Configures ranges for spin boxes before raw plot is done.
+   *
+   * @param wsName Name of new workspace loaded
+   */
+  void FuryFit::newDataLoaded(const QString wsName)
   {
-    Mantid::API::CompositeFunction_sptr result( new Mantid::API::CompositeFunction );
+    m_ffInputWSName = wsName;
+    m_ffInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_ffInputWSName.toStdString());
+
+    int maxSpecIndex = static_cast<int>(m_ffInputWS->getNumberHistograms()) - 1;
+
+    uiForm().furyfit_spPlotSpectrum->setMaximum(maxSpecIndex);
+    uiForm().furyfit_spPlotSpectrum->setMinimum(0);
+
+    uiForm().furyfit_spSpectraMin->setMaximum(maxSpecIndex);
+    uiForm().furyfit_spSpectraMin->setMinimum(0);
+
+    uiForm().furyfit_spSpectraMax->setMaximum(maxSpecIndex);
+    uiForm().furyfit_spSpectraMax->setMinimum(0);
+    uiForm().furyfit_spSpectraMax->setValue(maxSpecIndex);
+
+    plotInput();
+  }
+
+  CompositeFunction_sptr FuryFit::createFunction(bool tie)
+  {
+    CompositeFunction_sptr result( new CompositeFunction );
     QString fname;
     const int fitType = uiForm().furyfit_cbFitType->currentIndex();
 
-    Mantid::API::IFunction_sptr func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
+    IFunction_sptr func = FunctionFactory::Instance().createFunction("LinearBackground");
     func->setParameter("A0", m_ffRangeManager->value(m_properties["BackgroundA0"]));
     result->addFunction(func);
     result->tie("f0.A1", "0");
     if ( tie ) { result->tie("f0.A0", m_properties["BackgroundA0"]->valueText().toStdString()); }
-  
+
     if ( fitType == 2 ) { fname = "StretchedExp"; }
     else { fname = "Exponential1"; }
 
@@ -239,15 +244,15 @@ namespace IDA
     return result;
   }
 
-  Mantid::API::IFunction_sptr FuryFit::createUserFunction(const QString & name, bool tie)
+  IFunction_sptr FuryFit::createUserFunction(const QString & name, bool tie)
   {
-    Mantid::API::IFunction_sptr result = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");  
+    IFunction_sptr result = FunctionFactory::Instance().createFunction("UserFunction");
     std::string formula;
 
     if ( name.startsWith("Exp") ) { formula = "Intensity*exp(-(x/Tau))"; }
     else { formula = "Intensity*exp(-(x/Tau)^Beta)"; }
 
-    Mantid::API::IFunction::Attribute att(formula);  
+    IFunction::Attribute att(formula);
     result->setAttribute("Formula", att);
 
     QList<QtProperty*> props = m_properties[name]->subProperties();
@@ -255,7 +260,7 @@ namespace IDA
     {
       std::string name = props[i]->propertyName().toStdString();
       result->setParameter(name, m_dblManager->value(props[i]));
-      
+
       //add tie if parameter is fixed
       if ( tie || ! props[i]->subProperties().isEmpty() )
       {
@@ -263,7 +268,7 @@ namespace IDA
         result->tie(name, value);
       }
     }
-    
+
     result->applyTies();
     return result;
   }
@@ -320,7 +325,7 @@ namespace IDA
     m_ffTree->addProperty(m_properties["StartX"]);
     m_ffTree->addProperty(m_properties["EndX"]);
     m_ffTree->addProperty(m_properties["LinearBackground"]);
-    
+
     //option should only be available with a single stretched exponential
     uiForm().furyfit_ckConstrainBeta->setEnabled((index == 2));
     if (!uiForm().furyfit_ckConstrainBeta->isEnabled())
@@ -351,7 +356,7 @@ namespace IDA
       {
         uiForm().furyfit_cbPlotOutput->addItem("Beta");
       }
-      
+
       break;
     case 3:
       m_ffTree->addProperty(m_properties["Exponential1"]);
@@ -371,82 +376,16 @@ namespace IDA
 
   void FuryFit::plotInput()
   {
-    using namespace Mantid::API;
-    switch ( uiForm().furyfit_cbInputType->currentIndex() )
-    {
-    case 0: // "File"
-      {
-        if ( ! uiForm().furyfit_inputFile->isValid() )
-        {
-          return;
-        }
-        else
-        {
-          QFileInfo fi(uiForm().furyfit_inputFile->getFirstFilename());
-          QString wsname = fi.baseName();
-          if ( (m_ffInputWS == NULL) || ( wsname != m_ffInputWSName ) )
-          {
-            m_ffInputWSName = wsname;
-            QString filename = uiForm().furyfit_inputFile->getFirstFilename();
-            // get the output workspace
-            loadFile(filename, m_ffInputWSName);
-            m_ffInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_ffInputWSName.toStdString());
-            if(!m_ffInputWS)
-            {
-              return;
-            }
-          }
-        }
-      }
-      break;
-    case 1: // Workspace
-      {
-        m_ffInputWSName = uiForm().furyfit_wsIqt->currentText();
-        if(m_ffInputWSName.isEmpty())
-        {
-          return;
-        }
-        try
-        {
-          m_ffInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_ffInputWSName.toStdString());
-        }
-        catch ( Mantid::Kernel::Exception::NotFoundError & )
-        {
-          QString msg = "Workspace: '" + m_ffInputWSName + "' could not be "
-            "found in the Analysis Data Service.";
-          showMessageBox(msg);
-          return;
-        }
-      }
-      break;
-    }
-
-    int specNo = uiForm().furyfit_spPlotSpectrum->text().toInt();
-    int nHist = static_cast<int>(m_ffInputWS->getNumberHistograms());
-    int specMin = 0;
-    int specMax = nHist - 1;
-
-    if( specNo < 0 || specNo >= nHist )
-    {
-      if (specNo < 0)
-      {
-        specNo = 0;
-      }
-      else
-      {
-        specNo = nHist-1;
-      }
-      /* uiForm().furyfit_spPlotSpectrum->setText(QString::number(specNo)); */
-    }
-
+    int specNo = uiForm().furyfit_spPlotSpectrum->value();
     plotMiniPlot(m_ffInputWS, specNo, "FuryFitPlot", "FF_DataCurve");
+
     try
     {
       const std::pair<double, double> range = getCurveRange("FF_DataCurve");
       m_rangeSelectors["FuryFitRange"]->setRange(range.first, range.second);
       m_ffRangeManager->setRange(m_properties["StartX"], range.first, range.second);
       m_ffRangeManager->setRange(m_properties["EndX"], range.first, range.second);
-      
+
       setDefaultParameters("Exponential1");
       setDefaultParameters("Exponential2");
       setDefaultParameters("StretchedExp");
@@ -477,6 +416,30 @@ namespace IDA
 
     m_dblManager->setValue(m_properties[name+".Tau"], tau);
     m_dblManager->setValue(m_properties[name+".Beta"], 1.0);
+  }
+
+  /**
+   * Handles the user entering a new minimum spectrum index.
+   *
+   * Prevents the user entering an overlapping spectra range.
+   *
+   * @param value Minimum spectrum index
+   */
+  void FuryFit::specMinChanged(int value)
+  {
+    uiForm().furyfit_spSpectraMax->setMinimum(value);
+  }
+
+  /**
+   * Handles the user entering a new maximum spectrum index.
+   *
+   * Prevents the user entering an overlapping spectra range.
+   *
+   * @param value Maximum spectrum index
+   */
+  void FuryFit::specMaxChanged(int value)
+  {
+    uiForm().furyfit_spSpectraMin->setMaximum(value);
   }
 
   void FuryFit::xMinSelected(double val)
@@ -514,8 +477,8 @@ namespace IDA
       m_dblManager->setValue(m_properties["Exponential2.Intensity"], 1.0-val);
       m_dblManager->setValue(m_properties["StretchedExp.Intensity"], 1.0-val);
     }
-    else if( prop == m_properties["Exponential1.Intensity"] 
-      || prop == m_properties["Exponential2.Intensity"] 
+    else if( prop == m_properties["Exponential1.Intensity"]
+      || prop == m_properties["Exponential2.Intensity"]
       || prop == m_properties["StretchedExp.Intensity"])
     {
       m_rangeSelectors["FuryFitBackground"]->setMinimum(1.0-val);
@@ -525,7 +488,7 @@ namespace IDA
     }
   }
 
-  void FuryFit::constrainIntensities(Mantid::API::CompositeFunction_sptr func)
+  void FuryFit::constrainIntensities(CompositeFunction_sptr func)
   {
     std::string paramName = "f1.Intensity";
     size_t index = func->parameterIndex(paramName);
@@ -541,7 +504,7 @@ namespace IDA
       else
       {
         std::string paramValue = boost::lexical_cast<std::string>(func->getParameter(paramName));
-        func->tie(paramName, paramValue); 
+        func->tie(paramName, paramValue);
         func->tie("f0.A0", "1-"+paramName);
       }
       break;
@@ -598,7 +561,7 @@ namespace IDA
     std::string output = outputNm.toStdString();
 
     // Create the Fit Algorithm
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     alg->setPropertyValue("Function", function->asString());
     alg->setPropertyValue("InputWorkspace", m_ffInputWSName.toStdString());
@@ -623,7 +586,7 @@ namespace IDA
     m_curves["FF_FitCurve"]->setPen(fitPen);
     replot("FuryFitPlot");
 
-    Mantid::API::IFunction_sptr outputFunc = alg->getProperty("Function");
+    IFunction_sptr outputFunc = alg->getProperty("Function");
 
     // Get params.
     QMap<QString,double> parameters;
@@ -637,13 +600,13 @@ namespace IDA
       parameters[QString(parNames[i].c_str())] = parVals[i];
 
     m_ffRangeManager->setValue(m_properties["BackgroundA0"], parameters["f0.A0"]);
-  
+
     if ( fitType != 2 )
     {
       // Exp 1
       m_dblManager->setValue(m_properties["Exponential1.Intensity"], parameters["f1.Intensity"]);
       m_dblManager->setValue(m_properties["Exponential1.Tau"], parameters["f1.Tau"]);
-    
+
       if ( fitType == 1 )
       {
         // Exp 2
@@ -651,14 +614,14 @@ namespace IDA
         m_dblManager->setValue(m_properties["Exponential2.Tau"], parameters["f2.Tau"]);
       }
     }
-  
+
     if ( fitType > 1 )
     {
       // Str
       QString fval;
       if ( fitType == 2 ) { fval = "f1."; }
       else { fval = "f2."; }
-    
+
       m_dblManager->setValue(m_properties["StretchedExp.Intensity"], parameters[fval+"Intensity"]);
       m_dblManager->setValue(m_properties["StretchedExp.Tau"], parameters[fval+"Tau"]);
       m_dblManager->setValue(m_properties["StretchedExp.Beta"], parameters[fval+"Beta"]);
@@ -672,7 +635,7 @@ namespace IDA
       return;
     }
 
-    Mantid::API::CompositeFunction_sptr function = createFunction(true);
+    CompositeFunction_sptr function = createFunction(true);
 
     // Create the double* array from the input workspace
     const size_t binIndxLow = m_ffInputWS->binIndexOf(m_ffRangeManager->value(m_properties["StartX"]));
@@ -693,8 +656,8 @@ namespace IDA
         inputXData[i] = XValues[binIndxLow+i];
     }
 
-    Mantid::API::FunctionDomain1DVector domain(inputXData);
-    Mantid::API::FunctionValues outputData(domain);
+    FunctionDomain1DVector domain(inputXData);
+    FunctionValues outputData(domain);
     function->function(domain, outputData);
 
     QVector<double> dataX;
@@ -731,7 +694,7 @@ namespace IDA
     // is it already fixed?
     bool fixed = prop->propertyManager() != m_dblManager;
 
-    if ( fixed && prop->propertyManager() != m_stringManager ) 
+    if ( fixed && prop->propertyManager() != m_stringManager )
       return;
 
     // Create the menu
@@ -778,7 +741,7 @@ namespace IDA
 
     QtProperty* prop = item->property();
     if ( prop->subProperties().empty() )
-    { 
+    {
       item = item->parent();
       prop = item->property();
     }

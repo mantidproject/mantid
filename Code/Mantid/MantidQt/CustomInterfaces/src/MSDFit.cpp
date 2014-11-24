@@ -52,9 +52,12 @@ namespace IDA
     connect(m_rangeSelectors["MSDRange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
 
-    connect(uiForm().msd_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded()));
+    connect(uiForm().msd_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded(const QString&)));
     connect(uiForm().msd_pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
     connect(uiForm().msd_spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
+
+    connect(uiForm().msd_spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));
+    connect(uiForm().msd_spSpectraMax, SIGNAL(valueChanged(int)), this, SLOT(specMaxChanged(int)));
   }
 
   void MSDFit::run()
@@ -107,7 +110,7 @@ namespace IDA
   bool MSDFit::validate()
   {
     UserInputValidator uiv;
-    
+
     uiv.checkDataSelectorIsValid("Sample input", uiForm().msd_dsSampleInput);
 
     auto range = std::make_pair(m_dblManager->value(m_properties["Start"]), m_dblManager->value(m_properties["End"]));
@@ -147,11 +150,12 @@ namespace IDA
    * Called when new data has been loaded by the data selector.
    *
    * Configures ranges for spin boxes before raw plot is done.
+   *
+   * @param wsName Name of new workspace loaded
    */
-  void MSDFit::newDataLoaded()
+  void MSDFit::newDataLoaded(const QString wsName)
   {
-    QString wsname = uiForm().msd_dsSampleInput->getCurrentDataName();
-    auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsname.toStdString());
+    auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsName.toStdString());
     int maxSpecIndex = static_cast<int>(ws->getNumberHistograms()) - 1;
 
     uiForm().msd_spPlotSpectrum->setMaximum(maxSpecIndex);
@@ -184,6 +188,30 @@ namespace IDA
     }
 
     m_currentWsName = wsname;
+  }
+
+  /**
+   * Handles the user entering a new minimum spectrum index.
+   *
+   * Prevents the user entering an overlapping spectra range.
+   *
+   * @param value Minimum spectrum index
+   */
+  void MSDFit::specMinChanged(int value)
+  {
+    uiForm().msd_spSpectraMax->setMinimum(value);
+  }
+
+  /**
+   * Handles the user entering a new maximum spectrum index.
+   *
+   * Prevents the user entering an overlapping spectra range.
+   *
+   * @param value Maximum spectrum index
+   */
+  void MSDFit::specMaxChanged(int value)
+  {
+    uiForm().msd_spSpectraMin->setMaximum(value);
   }
 
   void MSDFit::minChanged(double val)
