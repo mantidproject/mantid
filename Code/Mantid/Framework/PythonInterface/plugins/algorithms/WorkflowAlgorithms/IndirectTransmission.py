@@ -59,41 +59,6 @@ class IndirectTransmission(PythonAlgorithm):
                              doc="The name of the output workspace.")
 
 
-    def validateInputs(self):
-        """
-        Performs validation on the analyser and reflection for the selected instrument.
-        """
-        issues = dict()
-
-        instrument_name = self.getPropertyValue('Instrument')
-        analyser = self.getPropertyValue('Analyser')
-        reflection = self.getPropertyValue('Reflection')
-
-        # Get the requested instrument
-        workspace = self._create_instrument_workspace(instrument_name)
-        instrument = mtd[workspace].getInstrument()
-
-        # Check the analyser is valid for the instrument
-        valid_analysers = _get_instrument_property_list(instrument, 'analysers')
-        logger.debug('Valid analysers for instrument %s: %s' % (instrument_name, str(valid_analysers)))
-
-        if analyser not in valid_analysers:
-            issues['Analyser'] = 'Analyser is not a valid for selected instrument'
-        else:
-            # If the analyser was valid then we can check the reflection
-            reflections_param_name = 'refl-%s' % analyser
-            valid_reflections = _get_instrument_property_list(instrument, reflections_param_name)
-            logger.debug('Valid reflections for analyser %s: %s' % (analyser, str(valid_reflections)))
-
-            if reflection not in valid_reflections:
-                issues['Reflection'] = 'Reflection is not valid for selected analyser'
-
-        # Remove idf/ipf workspace
-        DeleteWorkspace(workspace)
-
-        return issues
-
-
     def PyExec(self):
         from IndirectCommon import StartTime, EndTime
 
@@ -108,6 +73,23 @@ class IndirectTransmission(PythonAlgorithm):
 
         # Create an empty instrument workspace
         workspace = self._create_instrument_workspace(instrument_name)
+
+        # Do some validation on the analyser and reflection
+        instrument = mtd[workspace].getInstrument()
+        valid_analysers = _get_instrument_property_list(instrument, 'analysers')
+        logger.debug('Valid analysers for instrument %s: %s' % (instrument_name, str(valid_analysers)))
+
+        # Check the analyser is valid for the instrument
+        if analyser not in valid_analysers:
+            raise RuntimeError('Analyser %s not valid for instrument %s' % (analyser, instrument_name))
+        else:
+            # If the analyser was valid then we can check the reflection
+            reflections_param_name = 'refl-%s' % analyser
+            valid_reflections = _get_instrument_property_list(instrument, reflections_param_name)
+            logger.debug('Valid reflections for analyser %s: %s' % (analyser, str(valid_reflections)))
+
+            if reflection not in valid_reflections:
+                raise RuntimeError('Reflection %s not valid for analyser %s on instrument %s' % (reflection, analyser, instrument_name))
 
         # Load instrument parameter file
         idf_directory = config['instrumentDefinition.directory']
