@@ -26,6 +26,7 @@ namespace IDA
   private slots:
     void singleFit();
     void plotFit(QString wsName);
+    void newDataLoaded();
     void plotInput();
     void minChanged(double val);
     void maxChanged(double val);

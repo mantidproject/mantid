@@ -100,7 +100,7 @@ namespace IDA
     // Signal/slot ui connections
     connect(uiForm().furyfit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(plotInput()));
     connect(uiForm().furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
-    connect(uiForm().furyfit_lePlotSpectrum, SIGNAL(editingFinished()), this, SLOT(plotInput()));
+    connect(uiForm().furyfit_spPlotSpectrum, SIGNAL(editingFinished()), this, SLOT(plotInput()));
     connect(uiForm().furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().furyfit_swInput, SLOT(setCurrentIndex(int)));  
     connect(uiForm().furyfit_pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
 
@@ -109,11 +109,6 @@ namespace IDA
     connect(uiForm().furyfit_wsIqt, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
     connect(uiForm().furyfit_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
     connect(uiForm().furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
-
-    // apply validators - furyfit
-    uiForm().furyfit_lePlotSpectrum->setValidator(m_valInt);
-    uiForm().furyfit_leSpectraMin->setValidator(m_valInt);
-    uiForm().furyfit_leSpectraMax->setValidator(m_valInt);
 
     // Set a custom handler for the QTreePropertyBrowser's ContextMenu event
     m_ffTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -147,11 +142,9 @@ namespace IDA
       "startx = " + m_properties["StartX"]->valueText() + "\n"
       "endx = " + m_properties["EndX"]->valueText() + "\n"
       "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n"
-      "spec_min = " + uiForm().furyfit_leSpectraMin->text() + "\n"
+      "spec_min = " + uiForm().furyfit_spSpectraMin->text() + "\n"
+      "spec_max = " + uiForm().furyfit_spSpectraMax->text() + "\n"
       "spec_max = None\n";
-    
-    if(uiForm().furyfit_leSpectraMax->text() != "")
-        pyInput += "spec_max = " + uiForm().furyfit_leSpectraMax->text() + "\n";
 
     if (constrainIntens) pyInput += "constrain_intens = True \n";
     else pyInput += "constrain_intens = False \n";
@@ -428,14 +421,10 @@ namespace IDA
       break;
     }
 
-    int specNo = uiForm().furyfit_lePlotSpectrum->text().toInt();
+    int specNo = uiForm().furyfit_spPlotSpectrum->text().toInt();
     int nHist = static_cast<int>(m_ffInputWS->getNumberHistograms());
     int specMin = 0;
     int specMax = nHist - 1;
-
-    m_valInt->setRange(specMin, specMax);
-    uiForm().furyfit_leSpectraMin->setText(QString::number(specMin));
-    uiForm().furyfit_leSpectraMax->setText(QString::number(specMax));
 
     if( specNo < 0 || specNo >= nHist )
     {
@@ -447,7 +436,7 @@ namespace IDA
       {
         specNo = nHist-1;
       }
-      uiForm().furyfit_lePlotSpectrum->setText(QString::number(specNo));
+      /* uiForm().furyfit_spPlotSpectrum->setText(QString::number(specNo)); */
     }
 
     plotMiniPlot(m_ffInputWS, specNo, "FuryFitPlot", "FF_DataCurve");
@@ -605,7 +594,7 @@ namespace IDA
     QString pyInput = "from IndirectCommon import getWSprefix\nprint getWSprefix('%1')\n";
     pyInput = pyInput.arg(m_ffInputWSName);
     QString outputNm = runPythonCode(pyInput).trimmed();
-    outputNm += QString("fury_") + ftype + uiForm().furyfit_lePlotSpectrum->text();
+    outputNm += QString("fury_") + ftype + uiForm().furyfit_spPlotSpectrum->text();
     std::string output = outputNm.toStdString();
 
     // Create the Fit Algorithm
@@ -613,7 +602,7 @@ namespace IDA
     alg->initialize();
     alg->setPropertyValue("Function", function->asString());
     alg->setPropertyValue("InputWorkspace", m_ffInputWSName.toStdString());
-    alg->setProperty("WorkspaceIndex", uiForm().furyfit_lePlotSpectrum->text().toInt());
+    alg->setProperty("WorkspaceIndex", uiForm().furyfit_spPlotSpectrum->text().toInt());
     alg->setProperty("StartX", m_ffRangeManager->value(m_properties["StartX"]));
     alg->setProperty("EndX", m_ffRangeManager->value(m_properties["EndX"]));
     alg->setProperty("Ties", m_ties.toStdString());
