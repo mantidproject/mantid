@@ -92,7 +92,7 @@ public:
     TSM_ASSERT("File has not been created.",tmpFile.exists()); 
     TSM_ASSERT("File is not a file.",tmpFile.isFile()); 
     std::fstream fs;
-    TS_ASSERT_THROWS_NOTHING (fs.open (tmpFile.path(), std::fstream::in ));
+    TS_ASSERT_THROWS_NOTHING (fs.open (tmpFile.path().c_str(), std::fstream::in ));
     
     TSM_ASSERT("Cannot open file.",fs.is_open()); 
     
@@ -113,7 +113,7 @@ public:
     TSM_ASSERT("File has not been created.",tmpFile.exists()); 
     TSM_ASSERT("File is not a file.",tmpFile.isFile()); 
     std::fstream fs;
-    TS_ASSERT_THROWS_NOTHING (fs.open (tmpFile.path(), std::fstream::in ));
+    TS_ASSERT_THROWS_NOTHING (fs.open (tmpFile.path().c_str(), std::fstream::in ));
     
     TSM_ASSERT("Cannot open file.",fs.is_open()); 
     
