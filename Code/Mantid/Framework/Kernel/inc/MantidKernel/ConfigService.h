@@ -225,8 +225,8 @@ namespace Mantid
       /// Quick check to determine if vates has been installed.
       bool quickVatesCheck() const;
 
-			/// Get the ParaViewPath
-			const std::string getParaViewPath() const;
+      /// Get the ParaViewPath
+      const std::string getParaViewPath() const;
 
     private:
       friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;

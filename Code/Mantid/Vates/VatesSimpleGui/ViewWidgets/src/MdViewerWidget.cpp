@@ -100,8 +100,8 @@ using namespace MantidQt::API;
 
 namespace
 {
-    /// Static logger
-    Kernel::Logger g_log("MdViewerWidget");
+  /// Static logger
+  Kernel::Logger g_log("MdViewerWidget");
 }
 
 REGISTER_VATESGUI(MdViewerWidget)
@@ -251,16 +251,16 @@ void MdViewerWidget::createAppCoreForPlugin()
 {
   if (!pqApplicationCore::instance())
   {
-		// Provide ParaView's application core with a path to ParaView
-		int argc = 1;
+    // Provide ParaView's application core with a path to ParaView
+    int argc = 1;
 
-		std::string paraviewPath = Mantid::Kernel::ConfigService::Instance().getParaViewPath();
-		std::vector<char> argvConversion(paraviewPath.begin(), paraviewPath.end());
-		argvConversion.push_back('\0');
+    std::string paraviewPath = Mantid::Kernel::ConfigService::Instance().getParaViewPath();
+    std::vector<char> argvConversion(paraviewPath.begin(), paraviewPath.end());
+    argvConversion.push_back('\0');
 
-		char *argv[] = {&argvConversion[0]};
+    char *argv[] = {&argvConversion[0]};
 
-		g_log.debug() << "Intialize pqApplicationCore with " << argv << "\n";
+    g_log.debug() << "Intialize pqApplicationCore with " << argv << "\n";
 
     new pqPVApplicationCore(argc, argv);
   }

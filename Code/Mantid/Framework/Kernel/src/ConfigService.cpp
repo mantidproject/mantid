@@ -1997,7 +1997,7 @@ bool ConfigServiceImpl::quickVatesCheck() const
  */
 const std::string ConfigServiceImpl::getParaViewPath() const
 {
-	return getString("paraview.path");
+  return getString("paraview.path");
 }
 
 /// \cond TEMPLATE

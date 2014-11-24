@@ -36,16 +36,16 @@ namespace SimpleGui
 {
 namespace
 {
-    /// Static logger
-    Kernel::Logger g_log("ThreeSliceView");
+  /// Static logger
+  Kernel::Logger g_log("ThreeSliceView");
 }
 ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
 {
   this->ui.setupUi(this);
 
-	// We need to load the QuadView.dll plugin. The Windows system requires the full
+  // We need to load the QuadView.dll plugin. The Windows system requires the full
   // path information. The DLL is located in the apropriate executeable path of paraview.
-	const Poco::Path paraviewPath(Mantid::Kernel::ConfigService::Instance().getParaViewPath());
+  const Poco::Path paraviewPath(Mantid::Kernel::ConfigService::Instance().getParaViewPath());
 
   Poco::Path quadViewFullPath(paraviewPath, QUADVIEW_LIBRARY.toStdString());
 
@@ -57,7 +57,7 @@ ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
   pm->loadExtension(pqActiveObjects::instance().activeServer(),
                     quadViewLibrary, &error, false);
 
-	g_log.debug() << "Loading QuadView.dll from " << quadViewLibrary.toStdString() << "\n";
+  g_log.debug() << "Loading QuadView.dll from " << quadViewLibrary.toStdString() << "\n";
 
   this->mainView = this->createRenderView(this->ui.mainRenderFrame,
                                           QString("pqQuadView"));
