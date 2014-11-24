@@ -26,8 +26,8 @@ namespace CustomInterfaces
       m_properties(),
       m_dblManager(new QtDoublePropertyManager()), m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()),
-      m_tabStartTime(DateAndTime::getCurrentTime()), m_tabEndTime(DateAndTime::maximum()),
-      m_pythonRunner()
+      m_pythonRunner(),
+      m_tabStartTime(DateAndTime::getCurrentTime()), m_tabEndTime(DateAndTime::maximum())
   {
     m_parentWidget = dynamic_cast<QWidget *>(parent);
 
