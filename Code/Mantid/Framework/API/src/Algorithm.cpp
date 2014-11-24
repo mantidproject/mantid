@@ -84,7 +84,8 @@ namespace Mantid
       m_progressObserver(NULL),
       m_isInitialized(false), m_isExecuted(false),m_isChildAlgorithm(false), m_recordHistoryForChild(false),
       m_alwaysStoreInADS(false),m_runningAsync(false),
-      m_running(false), m_rethrow(false), m_algorithmID(this), m_singleGroup(-1), m_groupsHaveSimilarNames(false)
+      m_running(false), m_rethrow(false), m_isAlgStartupLoggingEnabled(true),
+      m_algorithmID(this), m_singleGroup(-1), m_groupsHaveSimilarNames(false)
     {
     }
 
@@ -1034,6 +1035,7 @@ namespace Mantid
       m_algorithmID = proxy.getAlgorithmID();
       setLogging(proxy.isLogging());
       setLoggingOffset(proxy.getLoggingOffset());
+      setAlgStartupLogging(proxy.getAlgStartupLogging());
       setChild(proxy.isChild());
     }
 
@@ -1209,7 +1211,10 @@ namespace Mantid
     {
       auto & logger = getLogger();
 
-      logger.notice() << name() << " started";
+      if (m_isAlgStartupLoggingEnabled)
+      {
+        logger.notice() << name() << " started";
+      }
       if (this->isChild())
         logger.notice() << " (child)";
       logger.notice() << std::endl;
@@ -1662,8 +1667,11 @@ namespace Mantid
 
       if (!m_isChildAlgorithm || m_alwaysStoreInADS)
       {
-        getLogger().notice() << name() << " successful, Duration "
-              << std::fixed << std::setprecision(2) << duration << " seconds" << optionalMessage << std::endl;
+        if (m_isAlgStartupLoggingEnabled)
+        {
+          getLogger().notice() << name() << " successful, Duration "
+                << std::fixed << std::setprecision(2) << duration << " seconds" << optionalMessage << std::endl;
+        }
       }
       
       else
@@ -1673,8 +1681,21 @@ namespace Mantid
       m_running = false;
     }
 
+    /** Enable or disable Logging of start and end messages
+    @param enabled : true to enable logging, false to disable
+    */ 
+    void Algorithm::setAlgStartupLogging(const bool enabled) 
+    {
+      m_isAlgStartupLoggingEnabled = enabled;
+    }
 
-
+    /** return the state of logging of start and end messages
+    @returns : true to logging is enabled
+    */ 
+    bool Algorithm::getAlgStartupLogging() const
+    {
+      return m_isAlgStartupLoggingEnabled;
+    }
   } // namespace API
 
   //---------------------------------------------------------------------------
