@@ -8,8 +8,7 @@ class LoadSPICEAscii(PythonAlgorithm):
     def category(self):
         """
         """
-        return "Utility;Text"
-
+        return 'DataHandling'
 
     def name(self):
         """
