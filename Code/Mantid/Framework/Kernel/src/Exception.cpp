@@ -398,6 +398,7 @@ InternetError::InternetError(const std::string& message, const int& errorCode) :
   } 
   cx << message;
   outMessage = cx.str();
+  m_errorCode = errorCode;
 }
 
 /**
@@ -415,6 +416,15 @@ InternetError::InternetError(const InternetError& A) :
 const char* InternetError::what() const throw()
 {
   return outMessage.c_str();
+}
+
+/**
+  Writes out the range and limits
+  @return the error string
+*/
+const int& InternetError::errorCode() const
+{
+  return m_errorCode;
 }
 
 } // namespace Exception

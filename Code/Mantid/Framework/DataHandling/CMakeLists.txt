@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
 	src/DownloadInstrument.cpp
+	src/DownloadFile.cpp
 	src/ExtractMonitorWorkspace.cpp
 	src/FilterEventsByLogValuePreNexus.cpp
 	src/FindDetectorsInShape.cpp
@@ -157,7 +158,11 @@ set ( INC_FILES
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
+<<<<<<< HEAD
 	inc/MantidDataHandling/DownloadInstrument.h
+=======
+	inc/MantidDataHandling/DownloadFile.h
+>>>>>>> 8450787b233cb81fee1cb7776982d04dc4e0b2a4
 	inc/MantidDataHandling/ExtractMonitorWorkspace.h
 	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
@@ -303,7 +308,11 @@ set ( TEST_FILES
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
+<<<<<<< HEAD
 	DownloadInstrumentTest.h
+=======
+	DownloadFileTest.h
+>>>>>>> 8450787b233cb81fee1cb7776982d04dc4e0b2a4
 	ExtractMonitorWorkspaceTest.h
 	FilterEventsByLogValuePreNexusTest.h
 	FindDetectorsInShapeTest.h

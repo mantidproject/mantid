@@ -833,7 +833,6 @@ namespace Mantid
         // inserting the file
         FilePartSource * m_file = new FilePartSource(absolute_path);
         form.addPart("file", m_file);
-        form.prepareSubmit(req);
 
         // get the size of everything
         std::stringstream sst;
@@ -844,6 +843,7 @@ namespace Mantid
         // set the size
         req.setContentLength((int) sst.str().size());
 
+        form.prepareSubmit(req);
         std::ostream& ostr = session.sendRequest(req);
         // send the request.
         ostr << sst.str();

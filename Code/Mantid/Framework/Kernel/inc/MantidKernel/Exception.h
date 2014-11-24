@@ -357,6 +357,7 @@ class MANTID_KERNEL_DLL OpenGLError: public std::runtime_error
   private:
     /// The message returned by what()
     std::string outMessage;
+    int m_errorCode; ///< The message reported by what()
 
   public:
     InternetError(const std::string& message, const int& errorCode = 0);
@@ -367,6 +368,7 @@ class MANTID_KERNEL_DLL OpenGLError: public std::runtime_error
 
     /// Overloaded reporting method
     const char* what() const throw();
+    const int& errorCode() const;
   };
 
 } //namespace Exception
