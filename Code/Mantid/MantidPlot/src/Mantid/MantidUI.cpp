@@ -3094,7 +3094,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
     catch(std::exception& ex)
     {
       // can happen, nothing to worry about
-      gWs = NULL;  // make sure, anyway
+      gWs = WorkspaceGroup_const_sptr();  // make sure, anyway
     }
   }
   if (gWs)
