@@ -12925,7 +12925,7 @@ void ApplicationWindow::createActions()
   connect(actionShowConfigureDialog, SIGNAL(activated()), this, SLOT(showPreferencesDialog()));
 
   actionShowCurvesDialog = new QAction(QIcon(getQPixmap("curves_xpm")), tr("Add/Remove &Curve..."), this);
-  actionShowCurvesDialog->setShortcut( tr("ALT+C") );
+  actionShowCurvesDialog->setShortcut( tr("Ctrl+Alt+C") );
   connect(actionShowCurvesDialog, SIGNAL(activated()), this, SLOT(showCurvesDialog()));
 
   actionAddErrorBars = new QAction(QIcon(getQPixmap("errors_xpm")), tr("Add &Error Bars..."), this);
