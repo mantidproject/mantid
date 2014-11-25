@@ -39,6 +39,7 @@
     <parameter name="Workflow.InfoTable" type="string">
       <value val="inst_abrv, run_number, user_name, run_title, hd_dur" />
     </parameter>
+    <!-- This is actually spectrum index, NOT spectrum number -->
     <parameter name="Workflow.Monitor1-SpectrumNumber" >
       <value val="140" />
     </parameter>

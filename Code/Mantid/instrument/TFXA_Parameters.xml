@@ -38,8 +38,9 @@
       <value val="-3,0.005,500" />
     </parameter>
 
+    <!-- This is actually spectrum index, NOT spectrum number -->
     <parameter name="Workflow.Monitor1-SpectrumNumber" >
-      <value val="33" />
+      <value val="32" />
     </parameter>
 
     <parameter name="Workflow.Monitor1-Area" >
