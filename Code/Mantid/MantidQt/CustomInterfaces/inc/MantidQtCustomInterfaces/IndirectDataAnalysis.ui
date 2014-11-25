@@ -225,6 +225,47 @@
             <layout class="QVBoxLayout" name="msd_plot"/>
            </item>
            <item>
+            <layout class="QHBoxLayout" name="msd_gpLegend">
+             <item>
+              <widget class="QPushButton" name="msd_pbSingle">
+               <property name="text">
+                <string>Fit Single Spectrum</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="msd_spLegendSpace">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="msd_lbLegendSample">
+               <property name="text">
+                <string>Sample</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="msd_lbLegendFit">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text">
+                <string>Fit</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
               <widget class="QLabel" name="label_51">
@@ -283,30 +324,6 @@
              </item>
              <item>
               <widget class="QSpinBox" name="msd_spSpectraMax" />
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_15">
-             <item>
-              <widget class="QPushButton" name="msd_pbSingle">
-               <property name="text">
-                <string>Fit Single Spectrum</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
              </item>
             </layout>
            </item>
@@ -684,6 +701,47 @@
             <layout class="QVBoxLayout" name="furyfit_vlPlot"/>
            </item>
            <item>
+            <layout class="QHBoxLayout" name="furyfit_gpLegend">
+             <item>
+              <widget class="QPushButton" name="furyfit_pbSingle">
+               <property name="text">
+                <string>Fit Single Spectrum</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="furyfit_spLegendSpace">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="furyfit_lbLegendSample">
+               <property name="text">
+                <string>Sample</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="furyfit_lbLegendFit">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text">
+                <string>Fit</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="horizontalLayout_27">
              <item>
               <widget class="QLabel" name="furyfit_lbSpectra">
@@ -727,30 +785,6 @@
              </item>
              <item>
               <widget class="QSpinBox" name="furyfit_spSpectraMax"/>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_14">
-             <item>
-              <widget class="QPushButton" name="furyfit_pbSingle">
-               <property name="text">
-                <string>Fit Single Spectum</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
              </item>
             </layout>
            </item>
@@ -1070,6 +1104,47 @@
             <layout class="QHBoxLayout" name="confit_plot"/>
            </item>
            <item>
+            <layout class="QHBoxLayout" name="confit_gpLegend">
+             <item>
+              <widget class="QPushButton" name="confit_pbSingle">
+               <property name="text">
+                <string>Fit Single Spectrum</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="confit_spLegendSpace">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="confit_lbLegendSample">
+               <property name="text">
+                <string>Sample</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="confit_lbLegendFit">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text">
+                <string>Fit</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="confit_layoutSpectra">
              <item>
               <widget class="QLabel" name="label_5">
@@ -1113,30 +1188,6 @@
              </item>
              <item>
               <widget class="QSpinBox" name="confit_spSpectraMax" />
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_13">
-             <item>
-              <widget class="QPushButton" name="confit_pbSingle">
-               <property name="text">
-                <string>Fit Single Spectrum</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_2">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
              </item>
             </layout>
            </item>
