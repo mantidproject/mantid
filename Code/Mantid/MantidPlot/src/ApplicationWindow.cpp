@@ -13758,7 +13758,7 @@ void ApplicationWindow::translateActionsStrings()
   actionShowConfigureDialog->setMenuText(tr("&Preferences..."));
 
   actionShowCurvesDialog->setMenuText(tr("Add/Remove &Curve..."));
-  actionShowCurvesDialog->setShortcut(tr("ALT+C"));
+  actionShowCurvesDialog->setShortcut(tr("Ctrl+Alt+C"));
   actionShowCurvesDialog->setToolTip(tr("Add curve to graph"));
 
   actionAddErrorBars->setMenuText(tr("Add &Error Bars..."));
