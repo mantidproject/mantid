@@ -83,7 +83,13 @@ set ( PRE_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/prerm )
 set ( POST_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postrm )
 
 if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedora" ) # RHEL/Fedora
-  set ( PKG_INSTALL_PREFIX \$RPM_INSTALL_PREFIX0 ) # used in mainter scripts
+  if ( "${UNIX_CODENAME}" MATCHES "Santiago" ) # el6
+    set ( MANTIDPLOT_LAUNCHER_PREFIX
+          "LD_PRELOAD=\${EXTRA_LDPRELOAD_LIBS} scl enable mantidlibs" )
+  else()
+    set ( MANTIDPLOT_LAUNCHER_PREFIX
+          "LD_PRELOAD=\${EXTRA_LDPRELOAD_LIBS} LD_LIBRARY_PATH=/usr/lib64/paraview:${LD_LIBRARY_PATH} eval" ) # LD_PATH hack for non-official ParaView
+  endif()
 
   if ( NOT MPI_BUILD )
     configure_file ( ${CMAKE_MODULE_PATH}/Packaging/rpm/scripts/rpm_pre_install.sh.in
@@ -99,14 +105,6 @@ if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedor
     set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${POST_INSTALL_FILE} )
     set ( CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE ${PRE_UNINSTALL_FILE} )
     set ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${POST_UNINSTALL_FILE} )
-  endif()
-
-  if ( "${UNIX_CODENAME}" MATCHES "Santiago" ) # el6
-    set ( MANTIDPLOT_LAUNCHER_PREFIX
-          "LD_PRELOAD=\${EXTRA_LDPRELOAD_LIBS} scl enable mantidlibs" )
-  else()
-    set ( MANTIDPLOT_LAUNCHER_PREFIX
-          "LD_PRELOAD=\${EXTRA_LDPRELOAD_LIBS} LD_LIBRARY_PATH=/usr/lib64/paraview:${LD_LIBRARY_PATH} eval" ) # LD_PATH hack for non-official ParaView
   endif()
 elseif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
   set ( MANTIDPLOT_LAUNCHER_PREFIX "LD_PRELOAD=${EXTRA_LDPRELOAD_LIBS} eval" )

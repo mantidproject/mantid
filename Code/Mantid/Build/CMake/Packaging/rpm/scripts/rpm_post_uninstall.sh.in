@@ -6,9 +6,9 @@
 
 # If the install prefix contains mantid then prune empty directories.
 # Begin extra cautious here just in case some has set the something like Prefix=/usr
-if echo \"@PKG_INSTALL_PREFIX@\" | grep -qi mantid; then
-  find @PKG_INSTALL_PREFIX@ -mindepth 1 -type d -empty -delete
-  rmdir --ignore-fail-on-non-empty -p @PKG_INSTALL_PREFIX@
+if echo \"$RPM_INSTALL_PREFIX0\" | grep -qi mantid; then
+  find $RPM_INSTALL_PREFIX0 -mindepth 1 -type d -empty -delete
+  rmdir --ignore-fail-on-non-empty -p $RPM_INSTALL_PREFIX0
 else
   echo Install prefix does not contain the word mantid. Empty directories NOT removed.
 fi

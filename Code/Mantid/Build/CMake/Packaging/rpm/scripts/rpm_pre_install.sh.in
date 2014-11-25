@@ -6,8 +6,8 @@
 #
 ENVVARS_ON_INSTALL=@ENVVARS_ON_INSTALL_INT@
 
-if [  -h @PKG_INSTALL_PREFIX@/@BIN_DIR@/mantidplot ]; then
-  rm @PKG_INSTALL_PREFIX@/@BIN_DIR@/mantidplot
+if [  -h $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot ]; then
+  rm $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot
 fi
 
 if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
