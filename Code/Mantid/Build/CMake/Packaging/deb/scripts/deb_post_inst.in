@@ -16,6 +16,9 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+# Configured by cmake
+ENVVARS_ON_INSTALL=@ENVVARS_ON_INSTALL_INT@
+
 case "$1" in
 
   configure)
@@ -34,6 +37,12 @@ case "$1" in
       if [ ! -s @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/mantidplot ]; then
         ln -s @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/launch_mantidplot.sh @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/mantidplot
       fi
+    fi
+    # Environment updates if required
+    if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
+	# Link profiles to /etc/profile.d
+	ln -s @PKG_INSTALL_PREFIX@/@ETC_DIR@/mantid.sh /etc/profile.d/mantid.sh
+	ln -s @PKG_INSTALL_PREFIX@/@ETC_DIR@/mantid.csh /etc/profile.d/mantid.csh
     fi
   ;;
 
