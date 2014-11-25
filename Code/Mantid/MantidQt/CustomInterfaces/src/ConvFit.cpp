@@ -251,6 +251,7 @@ namespace IDA
 
     uiForm().confit_spPlotSpectrum->setMaximum(maxSpecIndex);
     uiForm().confit_spPlotSpectrum->setMinimum(0);
+    uiForm().confit_spPlotSpectrum->setValue(0);
 
     uiForm().confit_spSpectraMin->setMaximum(maxSpecIndex);
     uiForm().confit_spSpectraMin->setMinimum(0);
@@ -665,11 +666,14 @@ namespace IDA
   {
     using Mantid::Kernel::Exception::NotFoundError;
 
+    if(!m_cfInputWS)
+    {
+      g_log.error("No workspace loaded, cannot create preview plot.");
+      return;
+    }
+
     const bool plotGuess = uiForm().confit_ckPlotGuess->isChecked();
     uiForm().confit_ckPlotGuess->setChecked(false);
-
-    if(!m_cfInputWS)
-      showMessageBox("Could not find the workspace in ADS. See log for details.");
 
     int specNo = uiForm().confit_spPlotSpectrum->text().toInt();
     // Set spectra max value

@@ -17,6 +17,11 @@
 
 using namespace Mantid::API;
 
+namespace
+{
+  Mantid::Kernel::Logger g_log("FuryFit");
+}
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -204,6 +209,7 @@ namespace IDA
 
     uiForm().furyfit_spPlotSpectrum->setMaximum(maxSpecIndex);
     uiForm().furyfit_spPlotSpectrum->setMinimum(0);
+    uiForm().furyfit_spPlotSpectrum->setValue(0);
 
     uiForm().furyfit_spSpectraMin->setMaximum(maxSpecIndex);
     uiForm().furyfit_spSpectraMin->setMinimum(0);
@@ -376,6 +382,12 @@ namespace IDA
 
   void FuryFit::plotInput()
   {
+    if(!m_ffInputWS)
+    {
+      g_log.error("No workspace loaded, cannot create preview plot.");
+      return;
+    }
+
     int specNo = uiForm().furyfit_spPlotSpectrum->value();
     plotMiniPlot(m_ffInputWS, specNo, "FuryFitPlot", "FF_DataCurve");
 

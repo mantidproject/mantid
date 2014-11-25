@@ -11,6 +11,11 @@
 
 using namespace Mantid::API;
 
+namespace
+{
+  Mantid::Kernel::Logger g_log("MSDFit");
+}
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -162,8 +167,14 @@ namespace IDA
     int maxSpecIndex = static_cast<int>(ws->getNumberHistograms()) - 1;
 
     uiForm().msd_spPlotSpectrum->setMaximum(maxSpecIndex);
+    uiForm().msd_spPlotSpectrum->setMinimum(0);
+    uiForm().msd_spPlotSpectrum->setValue(0);
+
     uiForm().msd_spSpectraMin->setMaximum(maxSpecIndex);
+    uiForm().msd_spSpectraMin->setMinimum(0);
+
     uiForm().msd_spSpectraMax->setMaximum(maxSpecIndex);
+    uiForm().msd_spSpectraMax->setMinimum(0);
     uiForm().msd_spSpectraMax->setValue(maxSpecIndex);
 
     plotInput();
@@ -172,7 +183,14 @@ namespace IDA
   void MSDFit::plotInput()
   {
     QString wsname = uiForm().msd_dsSampleInput->getCurrentDataName();
-    auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsname.toStdString());
+
+    if(!AnalysisDataService::Instance().doesExist(wsname.toStdString()))
+    {
+      g_log.error("No workspace loaded, cannot create preview plot.");
+      return;
+    }
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsname.toStdString());
 
     int wsIndex = uiForm().msd_spPlotSpectrum->value();
     plotMiniPlot(ws, wsIndex, "MSDPlot", "MSDDataCurve");
