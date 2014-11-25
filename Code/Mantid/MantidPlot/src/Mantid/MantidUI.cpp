@@ -3091,7 +3091,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
       gWs = boost::dynamic_pointer_cast<const WorkspaceGroup>
         (Mantid::API::AnalysisDataService::Instance().retrieve(sel.toStdString()));
     }
-    catch(std::exception& ex)
+    catch(std::exception&)
     {
       // can happen, nothing to worry about
       gWs = WorkspaceGroup_const_sptr();  // make sure, anyway
