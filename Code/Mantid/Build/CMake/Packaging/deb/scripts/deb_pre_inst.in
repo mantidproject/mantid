@@ -1,0 +1,52 @@
+#!/bin/sh
+# postinst script for mantid
+#
+
+set -e
+
+# summary of how this script can be called:
+#        * <new-preinst> `install'
+#        * <new-preinst> `install' <old-version>
+#        * <new-preinst> `upgrade' <old-version>
+#        * <old-preinst> `abort-upgrade' <new-version>
+# for details, see http://www.debian.org/doc/debian-policy/ or
+# the debian-policy package
+
+# Configured by cmake
+ENVVARS_ON_INSTALL=@ENVVARS_ON_INSTALL_INT@
+
+case "$1" in
+    install|upgrade)
+	# Remove stale links if left around
+	if [  -h @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/mantidplot ]; then
+	    rm @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/mantidplot
+	fi
+	if [  -h @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot ]; then
+	    rm @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot
+	fi
+	# Stale _exe
+	if [  -f @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot_exe ]; then
+	    rm @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot_exe
+	fi
+
+	if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
+	    # Profiles
+	    if [ -h /etc/profile.d/mantid.sh ]; then
+		rm /etc/profile.d/mantid.sh
+	    fi
+	    if [ -h /etc/profile.d/mantid.csh ]; then
+		rm /etc/profile.d/mantid.csh
+	    fi
+	fi
+	;;
+
+    abort-upgrade)
+	;;
+
+    *)
+	echo "preinst called with unknown argument \`$1'" >&2
+	exit 1
+    ;;
+esac
+
+exit 0

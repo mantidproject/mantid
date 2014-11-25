@@ -80,20 +80,20 @@ endif()
 set ( PRE_INSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/preinst )
 set ( POST_INSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postinst )
 set ( PRE_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/prerm )
-set ( PRE_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postrm )
+set ( POST_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postrm )
 
 if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedora" ) # RHEL/Fedora
   set ( PKG_INSTALL_PREFIX \$RPM_INSTALL_PREFIX0 ) # used in mainter scripts
 
   if ( NOT MPI_BUILD )
     configure_file ( ${CMAKE_MODULE_PATH}/Packaging/rpm/scripts/rpm_pre_install.sh.in
-                     ${PRE_INSTALL_FILE} )
+                     ${PRE_INSTALL_FILE} @ONLY )
     configure_file ( ${CMAKE_MODULE_PATH}/Packaging/rpm/scripts/rpm_post_install.sh.in
-                     ${POST_INSTALL_FILE} )
+                     ${POST_INSTALL_FILE} @ONLY )
     configure_file ( ${CMAKE_MODULE_PATH}/Packaging/rpm/scripts/rpm_pre_uninstall.sh.in
-                     ${PRE_UNINSTALL_FILE} )
+                     ${PRE_UNINSTALL_FILE} @ONLY )
     configure_file ( ${CMAKE_MODULE_PATH}/Packaging/rpm/scripts/rpm_post_install.sh.in
-                     ${POST_UNINSTALL_FILE} )
+                     ${POST_UNINSTALL_FILE} @ONLY )
     # CPack variables
     set ( CPACK_RPM_PRE_INSTALL_SCRIPT_FILE ${PRE_INSTALL_FILE} )
     set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${POST_INSTALL_FILE} )
@@ -112,11 +112,17 @@ elseif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
   set ( MANTIDPLOT_LAUNCHER_PREFIX "LD_PRELOAD=${EXTRA_LDPRELOAD_LIBS} eval" )
 
   if ( NOT MPI_BUILD )
+    configure_file ( ${CMAKE_MODULE_PATH}/Packaging/deb/scripts/deb_pre_inst.in
+                     ${PRE_INSTALL_FILE} @ONLY )
     configure_file ( ${CMAKE_MODULE_PATH}/Packaging/deb/scripts/deb_post_inst.in
-                     ${POST_INSTALL_FILE} )
+                     ${POST_INSTALL_FILE} @ONLY )
+    configure_file ( ${CMAKE_MODULE_PATH}/Packaging/deb/scripts/deb_pre_rm.in
+                     ${PRE_UNINSTALL_FILE} @ONLY )
+    # No postrm script as dpkg removes empty directories if everything else is tidied away.
+
     # CPack variables
     set ( CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
-          "${POST_INSTALL_FILE}" )
+          "${PRE_INSTALL_FILE};${POST_INSTALL_FILE};${PRE_UNINSTALL_FILE}" )
   endif()
   # Launcher prefix
   set ( MANTIDPLOT_LAUNCHER_PREFIX "LD_PRELOAD=\${EXTRA_LDPRELOAD_LIBS} eval" )
