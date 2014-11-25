@@ -4,18 +4,22 @@
 # Remove links to mantidplot & /etc/profile.d
 #
 
+# Configured by CMake
+ENVVARS_ON_INSTALL=@ENVVARS_ON_INSTALL_INT@
+
+# Remove link and exe
 if [ -h @PKG_INSTALL_PREFIX@/@BIN_DIR@/mantidplot ]; then
-  rm @PKG_INSTALL_PREFIX@/@BIN_DIR@/mantidplot
+    rm @PKG_INSTALL_PREFIX@/@BIN_DIR@/mantidplot
+fi
+if [ -f @PKG_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot_exe  ]; then
+    rm @PKG_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot_exe
 fi
 
-if [ -h /etc/profile.d/mantid.sh ]; then
-  rm /etc/profile.d/mantid.sh
-fi
-
-if [ -h /etc/profile.d/mantid.csh ]; then
-  rm /etc/profile.d/mantid.csh
-fi
-
-if [ -f @PKG_INSTALL_PREFIX@/@BIN_DIR@MantidPlot_exe  ]; then
-  rm @PKG_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot_exe
+if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
+    if [ -h /etc/profile.d/mantid.sh ]; then
+	rm /etc/profile.d/mantid.sh
+    fi
+    if [ -h /etc/profile.d/mantid.csh ]; then
+	rm /etc/profile.d/mantid.csh
+    fi
 fi
