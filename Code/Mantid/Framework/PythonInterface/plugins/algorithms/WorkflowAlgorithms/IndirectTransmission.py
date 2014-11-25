@@ -81,7 +81,10 @@ class IndirectTransmission(PythonAlgorithm):
 
         # Check the analyser is valid for the instrument
         if analyser not in valid_analysers:
+            # Remove idf/ipf workspace
+            DeleteWorkspace(workspace)
             raise RuntimeError('Analyser %s not valid for instrument %s' % (analyser, instrument_name))
+
         else:
             # If the analyser was valid then we can check the reflection
             reflections_param_name = 'refl-%s' % analyser
@@ -89,6 +92,8 @@ class IndirectTransmission(PythonAlgorithm):
             logger.debug('Valid reflections for analyser %s: %s' % (analyser, str(valid_reflections)))
 
             if reflection not in valid_reflections:
+                # Remove idf/ipf workspace
+                DeleteWorkspace(workspace)
                 raise RuntimeError('Reflection %s not valid for analyser %s on instrument %s' % (reflection, analyser, instrument_name))
 
         # Load instrument parameter file
