@@ -146,6 +146,7 @@ namespace IDA
   {
     if ( m_cfInputWS == NULL )
     {
+      g_log.error("No workspace loaded");
       return;
     }
 
@@ -774,6 +775,9 @@ namespace IDA
 
   void ConvFit::singleFit()
   {
+    if(!validate())
+      return;
+
     plotInput();
 
     if ( m_curves["CFDataCurve"] == NULL )

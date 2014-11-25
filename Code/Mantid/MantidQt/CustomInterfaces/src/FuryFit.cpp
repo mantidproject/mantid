@@ -526,6 +526,9 @@ namespace IDA
 
   void FuryFit::singleFit()
   {
+    if(!validate())
+      return;
+
     // First create the function
     auto function = createFunction();
 
