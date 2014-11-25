@@ -209,6 +209,10 @@ namespace IDA
     }
 
     m_currentWsName = wsname;
+
+    // Remove the old fit curve
+    removeCurve("MSDFitCurve");
+    replot("MSDPlot");
   }
 
   /**
