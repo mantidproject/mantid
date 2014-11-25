@@ -62,13 +62,6 @@
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QPushButton" name="elwin_pbPlotInput">
-            <property name="text">
-             <string>Plot Input</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -78,7 +71,39 @@
           <layout class="QVBoxLayout" name="elwin_properties"/>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="elwin_plot"/>
+          <layout class="QVBoxLayout" name="elwin_loPlotAndOptions">
+           <item>
+            <layout class="QHBoxLayout" name="elwin_loPreviewSelection">
+             <item>
+              <widget class="QLabel" name="elwin_lbPreviewFile">
+               <property name="text">
+                <string>Preview file:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="elwin_cbPreviewFile"/>
+             </item>
+             <item>
+              <widget class="QLabel" name="elwin_lbPreviewSpec">
+               <property name="text">
+                <string>Spectrum:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="elwin_spPreviewSpec">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="elwin_plot"/>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>
@@ -2819,7 +2844,8 @@
   <tabstop>tabWidget</tabstop>
   <tabstop>elwin_inputFile</tabstop>
   <tabstop>leLogName</tabstop>
-  <tabstop>elwin_pbPlotInput</tabstop>
+  <tabstop>elwin_cbPreviewFile</tabstop>
+  <tabstop>elwin_spPreviewSpec</tabstop>
   <tabstop>elwin_ckPlot</tabstop>
   <tabstop>elwin_ckSave</tabstop>
   <tabstop>msd_spPlotSpectrum</tabstop>
