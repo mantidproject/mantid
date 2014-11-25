@@ -1,3 +1,5 @@
+import mantid
+import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 from mantid.api import AnalysisDataService
@@ -24,11 +26,24 @@ class LoadSPICEAscii(PythonAlgorithm):
         self.declareProperty(FileProperty("Filename", "", FileAction.Load, ['.dat']),
                 "Name of SPICE data file.")
 
+        strspckeyprop = StringArrayProperty("StringSampleLogNames", values=[], direction=Direction.Input)
+        self.declareProperty(strspckeyprop, "List of log names that will be imported as string property.")
+
+        intspckeyprop = IntArrayProperty("IntSampleLogNames", values=[], direction=Direction.Input)
+        self.declareProperty(intspckeyprop, "List of log names that will be imported as integer property.")
+
+        floatspckeyprop = FloatArrayProperty("FloatSampleLogNames", values=[], direction=Direction.Input)
+        self.declareProperty(floatspckeyprop, "List of log names that will be imported as float property.")
+
         self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),
                 "Name of TableWorkspace containing experimental data.")
 
-        self.declareProperty(ITableWorkspaceProperty("RunInfoWorkspace", "", Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty("RunInfoWorkspace", "", Direction.Output),
                 "Name of TableWorkspace containing experimental information.")
+
+        self.declareProperty("IgnoreUnlistedLogs", False, 
+                "If it is true, all log names are not listed in any of above 3 input lists will be ignored.  \
+                        Otherwise, any log name is not listed will be treated as string property.")
 
         return
 
@@ -38,6 +53,14 @@ class LoadSPICEAscii(PythonAlgorithm):
         # Input
         filename = self.getPropertyValue("Filename")
 
+        strlognames = self.getPropertyValue("StringSampleLogNames")
+        intlognames = self.getPropertyValue("IntSampleLogNames")
+        floatlognames = self.getPropertyValue("FloatSampleLogNames")
+
+        valid = self.validateLogNamesType(floatlognames, intlognames, strlognames)
+        if valid is False:
+            raise RuntimeError("At one log name appears in multiple log type lists")
+
 	# Parse 
 	datalist, titles, runinfodict = self.parseSPICEAscii(filename)
 
@@ -45,7 +68,7 @@ class LoadSPICEAscii(PythonAlgorithm):
 	outws = self.createDataWS(datalist, titles)
 
 	# Build run information workspace
-	runinfows = self.createRunInfoWS(runinfodict)
+	runinfows = self.createRunInfoWS(runinfodict, floatlognames, intloagnames, strlognames)
 
 	# Set properties
         self.setProperty("OutputWorkspace", outws)
@@ -137,21 +160,47 @@ class LoadSPICEAscii(PythonAlgorithm):
         return tablews
 
 
-    def createRunInfoWS(self, runinfodict):
+    def createRunInfoWS(self, runinfodict, floatlognamelist, intlognamelist, strlognamelist, ignoreunlisted):
 	""" Create run information workspace
 	"""
         # Create an empty workspace
-        tablews = WorkspaceFactory.createTable()
+        matrixws = api.CreateWorkspace(DataX=[1,2], DataY=[1], DataE=[1], NSpce=1, VerticalAxisUnit="SpectraNumber")
 
-	tablews.addColumn("str", "title")
-	tablews.addColumn("str", "value")
+        run = matrixws.getRun()
+        
+        for title in runinfodict.keys():
+            tmpvalue = runinfodict[title]
+            if title in floatlognamelist:
+                tmpproperty = FloatTimeSeriesProperty(title)
+                tmpproperty.addValue(runnend, float(tmpvalue))
+            elif title in intlognamelist: 
+                tmpproperty = IntTimeSeriesProperty(title)
+                tmpproperty.addValue(runnend, int(tmpvalue))
+            elif title in strlognamelist or ignoreunlisted is False:
+                tmpproperty = StringProperty(title)
+                tmpproperty.addValue(runnend, tmpvalue)
 
-	# Add for
-	for title in runinfodict.keys():
-	    tablews.addRow([title, runinfodict[title]])
-	# ENDFOR
+            run.addProperty(title, tmpproperty, False)
+        # ENDIF
 
-	return tablews
+	return matrixws
+
+
+    def validateLogNamesType(self, floatlognames, intlognames, strlognames):
+        """ Check whether 3 sets of values have intersection
+        """
+        logsets = []
+        logsets.append(set(floatlognames))
+        logsets.append(set(intlognames))
+        logsets.append(set(strlognames))
+
+        for (i, j) in [(0, 1), (0, 2), (1, 2)]:
+            if len(logsets[i] - logsets[j]) > 0 or len(logsets[j] - logsets[i]) > 0:
+                return False
+
+        return True
+
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(LoadSPICEAscii)
