@@ -275,7 +275,14 @@
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="msd_spPlotSpectrum" />
+              <widget class="QSpinBox" name="msd_spPlotSpectrum">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+              </widget>
              </item>
              <item>
               <spacer name="horizontalSpacer_24">
@@ -307,7 +314,14 @@
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="msd_spSpectraMin" />
+              <widget class="QSpinBox" name="msd_spSpectraMin">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QLabel" name="label_41">
@@ -323,7 +337,14 @@
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="msd_spSpectraMax" />
+              <widget class="QSpinBox" name="msd_spSpectraMax">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
@@ -751,7 +772,14 @@
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="furyfit_spPlotSpectrum" />
+              <widget class="QSpinBox" name="furyfit_spPlotSpectrum">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+              </widget>
              </item>
              <item>
               <spacer name="horizontalSpacer_13">
@@ -774,7 +802,14 @@
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="furyfit_spSpectraMin"/>
+              <widget class="QSpinBox" name="furyfit_spSpectraMin">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QLabel" name="label_4">
@@ -784,7 +819,14 @@
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="furyfit_spSpectraMax"/>
+              <widget class="QSpinBox" name="furyfit_spSpectraMax">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
@@ -1154,7 +1196,14 @@
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="confit_spPlotSpectrum" />
+              <widget class="QSpinBox" name="confit_spPlotSpectrum">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+              </widget>
              </item>
              <item>
               <spacer name="horizontalSpacer_15">
@@ -1177,7 +1226,14 @@
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="confit_spSpectraMin" />
+              <widget class="QSpinBox" name="confit_spSpectraMin">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QLabel" name="confit_lbTo">
@@ -1187,7 +1243,14 @@
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="confit_spSpectraMax" />
+              <widget class="QSpinBox" name="confit_spSpectraMax">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
