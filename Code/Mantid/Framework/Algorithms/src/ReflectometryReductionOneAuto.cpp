@@ -315,5 +315,125 @@ namespace Mantid
       }
     }
 
+    bool ReflectometryReductionOneAuto::checkGroups()
+    {
+      std::string wsName = getPropertyValue("InputWorkspace");
+
+      try
+      {
+        auto ws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
+        if(ws)
+          return true;
+      } catch(...) {}
+      return false;
+    }
+
+    bool ReflectometryReductionOneAuto::processGroups()
+    {
+      auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getPropertyValue("InputWorkspace"));
+      const std::string outputIvsQ = this->getPropertyValue("OutputWorkspace");
+      const std::string outputIvsLam = this->getPropertyValue("OutputWorkspaceWavelength");
+
+      //create algorithm
+      Algorithm_sptr alg = this->createChildAlgorithm(this->name(),-1,-1,this->isLogging(),this->version());
+      alg->setChild(false);
+      alg->setRethrows(true);
+
+      //Copy all the non-workspace properties over
+      std::vector<Property*> props = this->getProperties();
+      for(auto prop = props.begin(); prop != props.end(); ++prop)
+      {
+        if(*prop)
+        {
+          IWorkspaceProperty* wsProp = dynamic_cast<IWorkspaceProperty*>(*prop);
+          if(!wsProp)
+            alg->setPropertyValue((*prop)->name(), (*prop)->value());
+        }
+      }
+
+      //Check if the transmission runs are groups or not
+      const std::string firstTrans = this->getPropertyValue("FirstTransmissionRun");
+      WorkspaceGroup_sptr firstTransG;
+      if(!firstTrans.empty())
+      {
+        auto firstTransWS = AnalysisDataService::Instance().retrieveWS<Workspace>(firstTrans);
+        firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
+
+        if(!firstTransG)
+          alg->setProperty("FirstTransmissionRun", firstTrans);
+        else if(group->size() != firstTransG->size())
+            throw std::runtime_error("FirstTransmissionRun WorkspaceGroup must be the same size as the InputWorkspace WorkspaceGroup");
+      }
+
+      const std::string secondTrans = this->getPropertyValue("SecondTransmissionRun");
+      WorkspaceGroup_sptr secondTransG;
+      if(!secondTrans.empty())
+      {
+        auto secondTransWS = AnalysisDataService::Instance().retrieveWS<Workspace>(secondTrans);
+        secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
+
+        if(!secondTransG)
+          alg->setProperty("SecondTransmissionRun", secondTrans);
+        else if(group->size() != secondTransG->size())
+            throw std::runtime_error("SecondTransmissionRun WorkspaceGroup must be the same size as the InputWorkspace WorkspaceGroup");
+      }
+
+      std::vector<std::string> IvsQGroup, IvsLamGroup;
+
+      //Execute algorithm over each period
+      size_t numMembers = group->size();
+      for(size_t i = 0; i < numMembers; ++i)
+      {
+        const std::string IvsQName = outputIvsQ + "_" + boost::lexical_cast<std::string>(i+1);
+        const std::string IvsLamName = outputIvsLam + "_" + boost::lexical_cast<std::string>(i+1);
+
+        alg->setProperty("InputWorkspace", group->getItem(i)->name());
+        alg->setProperty("OutputWorkspace", IvsQName);
+        alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
+
+        //Handle transmission runs
+        if(firstTransG)
+          alg->setProperty("FirstTransmissionRun", firstTransG->getItem(i)->name());
+        if(secondTransG)
+          alg->setProperty("SecondTransmissionRun", secondTransG->getItem(i)->name());
+
+        alg->execute();
+
+        IvsQGroup.push_back(IvsQName);
+        IvsLamGroup.push_back(IvsLamName);
+
+        //We use the first period for our thetaout
+        if(i == 0)
+          this->setPropertyValue("ThetaOut", alg->getPropertyValue("ThetaOut"));
+      }
+
+      Algorithm_sptr groupAlg = this->createChildAlgorithm("GroupWorkspaces");
+      groupAlg->setChild(false);
+      groupAlg->setRethrows(true);
+
+      groupAlg->setProperty("InputWorkspaces", IvsLamGroup);
+      groupAlg->setProperty("OutputWorkspace", outputIvsLam);
+      groupAlg->execute();
+
+      if(group->isMultiperiod())
+      {
+        //perform polarizationcorrection on IvsLam workspaces
+        //recalculate IvsQ using new IvsLam as input
+      }
+
+      groupAlg->setProperty("InputWorkspaces", IvsQGroup);
+      groupAlg->setProperty("OutputWorkspace", outputIvsQ);
+      groupAlg->execute();
+
+      this->setPropertyValue("OutputWorkspace", outputIvsQ);
+      this->setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
+
+      // We finished successfully.
+      setExecuted(true);
+      notificationCenter().postNotification(new FinishedNotification(this,isExecuted()));
+
+      return true;
+    }
+
   } // namespace Algorithms
 } // namespace Mantid

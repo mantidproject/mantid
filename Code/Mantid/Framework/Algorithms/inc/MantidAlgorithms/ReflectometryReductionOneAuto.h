@@ -44,6 +44,10 @@ namespace Mantid
       virtual const std::string category() const;
       virtual const std::string summary() const;
 
+      //For (multiperiod) workspace groups
+      virtual bool checkGroups();
+      virtual bool processGroups();
+
     private:
       void init();
       void exec();
