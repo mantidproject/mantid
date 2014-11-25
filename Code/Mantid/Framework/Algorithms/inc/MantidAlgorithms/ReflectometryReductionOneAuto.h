@@ -56,6 +56,14 @@ namespace Mantid
         boost::optional<T> isSet(std::string propName) const;
 
       double checkForDefault(std::string propName, Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name="") const;
+
+      std::string pNRLabel() const { return "PNR"; }
+      std::string pALabel() const { return "PA"; }
+      std::string crhoLabel() const { return "CRHo"; }
+      std::string cppLabel() const { return "CPp"; }
+      std::string cAlphaLabel() const { return "CAlpha"; }
+      std::string cApLabel() const { return "CAp"; }
+      std::string noPolarizationCorrectionMode() const { return "None"; }
     };
 
 
