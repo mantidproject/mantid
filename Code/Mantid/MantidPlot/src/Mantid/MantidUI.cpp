@@ -3083,7 +3083,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
   // (which will be the first workspace included in the group - not
   // the best title).
   const QString& sel = m_exploreMantid->getSelectedWorkspaceName();
-  WorkspaceGroup_const_sptr gWs = NULL;
+  WorkspaceGroup_const_sptr gWs;
   if (!sel.isEmpty() && AnalysisDataService::Instance().doesExist(sel.toStdString()))
   {
     try
