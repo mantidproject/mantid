@@ -35,7 +35,7 @@
     </parameter>
 
     <parameter name="rebin-default" type="string">
-      <value val="-3,-0.005,500" />
+      <value val="-3,0.005,500" />
     </parameter>
 
     <parameter name="Workflow.Monitor1-SpectrumNumber" >
@@ -65,14 +65,6 @@
     <parameter name="Workflow.ChopDataIfGreaterThan">
       <value val="40000" />
     </parameter>
-
-    <!-- <parameter name="Workflow.GroupingMethod" type="string"> -->
-    <!--   <value val="File" /> -->
-    <!-- </parameter> -->
-
-    <!-- <parameter name="Workflow.GroupingFile" type="string"> -->
-      <!-- <value val="TOSCA_Grouping.xml" /> -->
-    <!-- </parameter> -->
 
     <parameter name="Workflow.Masking" type="string">
       <value val="IdentifyNoisyDetectors" />

@@ -3,8 +3,8 @@
      see http://www.mantidproject.org/IDF -->
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
   name="TFXA"
-  valid-from="1985-01-01 00:00:00"
-  valid-to="1993-10-06 18:50:00"
+  valid-from="1993-10-06 18:50:00"
+  valid-to="1998-05-26 12:04:46"
   last-modified="2011-03-21 00:00:00" >
 
   <defaults>
@@ -57,6 +57,10 @@
 
   <!-- DETECTORS -->
   <component type="front" idlist="front">
+    <location />
+  </component>
+
+  <component type="diffraction" idlist="diffraction">
     <location />
   </component>
 
@@ -200,10 +204,23 @@
       <location r="0.713300" t="0" p="0" rot="90.000000" name="Detector #28"/>
       <parameter name="Efixed"> <value val="4.310600" /> </parameter>
     </component>
+  </type>
 
-    <component type="tube">
-      <location r="0.713400" t="0" p="0" rot="90.000000" name="Detector #29"/>
-      <parameter name="Efixed"> <value val="4.320600" /> </parameter>
+  <type name="diffraction">
+    <component type="tube" >
+      <location r="0.0" t="0.0" p="0.0" rot="177.09" name="Diff #1" />
+    </component>
+
+    <component type="tube" >
+      <location r="0.0" t="0.0" p="0.0" rot="178.1" name="Diff #2" />
+    </component>
+
+    <component type="tube" >
+      <location r="0.0" t="0.0" p="0.0" rot="178.1" name="Diff #3" />
+    </component>
+
+    <component type="tube" >
+      <location r="0.0" t="0.0" p="0.0" rot="177.09" name="Diff #4" />
     </component>
   </type>
 
@@ -219,12 +236,20 @@
 
   <!-- DETECTOR ID LISTS -->
   <idlist idname="front">
-    <id start="1" end="15" />
-    <id start="19" end="32" />
+    <id start="1" end="28" />
   </idlist>
 
   <idlist idname="monitor1">
+    <id val="29" />
+  </idlist>
+
+  <idlist idname="diffraction">
+    <id val="30" />
+    <id val="31" />
+    <!-- Detector 32 faulty -->
     <id val="33" />
+    <!-- Detector 34 faulty -->
+    <id val="35" />
   </idlist>
 
 </instrument>
