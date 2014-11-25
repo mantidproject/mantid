@@ -41,8 +41,8 @@ case "$1" in
     # Environment updates if required
     if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
 	# Link profiles to /etc/profile.d
-	ln -s @PKG_INSTALL_PREFIX@/@ETC_DIR@/mantid.sh /etc/profile.d/mantid.sh
-	ln -s @PKG_INSTALL_PREFIX@/@ETC_DIR@/mantid.csh /etc/profile.d/mantid.csh
+	ln -s @CMAKE_INSTALL_PREFIX@/@ETC_DIR@/mantid.sh /etc/profile.d/mantid.sh
+	ln -s @CMAKE_INSTALL_PREFIX@/@ETC_DIR@/mantid.csh /etc/profile.d/mantid.csh
     fi
   ;;
 
