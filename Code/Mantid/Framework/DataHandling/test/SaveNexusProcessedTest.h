@@ -582,6 +582,27 @@ public:
       data[1] = 10.2f;
       data[2] = 10.3f;
     }
+    table->addColumn("int32_t", "Int32Column");
+    {
+      auto& data = table->getColVector<int32_t>("Int32Column");
+      data[0] = 15;
+      data[1] = 12;
+      data[2] = 13;
+    }
+    table->addColumn("long64", "Int64Column");
+    {
+      auto& data = table->getColVector<int64_t>("Int64Column");
+      data[0] = 25;
+      data[1] = 22;
+      data[2] = 23;
+    }
+    table->addColumn("size_t", "SizeColumn");
+    {
+      auto& data = table->getColVector<size_t>("SizeColumn");
+      data[0] = 35;
+      data[1] = 32;
+      data[2] = 33;
+    }
 
     SaveNexusProcessed alg;
     alg.initialize();
@@ -605,37 +626,43 @@ public:
     {
       savedNexus.openData("column_1");
       doTestColumnInfo( savedNexus, NX_INT32, "An integer", "IntColumn" );
-      std::vector<int> data;
-      savedNexus.getData(data);
-
-      TS_ASSERT_EQUALS( data.size(), 3 );
-      TS_ASSERT_EQUALS( data[0], 5 );
-      TS_ASSERT_EQUALS( data[1], 2 );
-      TS_ASSERT_EQUALS( data[2], 3 );
+      int expectedData[] = { 5, 2, 3 };
+      doTestColumnData( savedNexus, expectedData );
     }
 
     {
       savedNexus.openData("column_2");
       doTestColumnInfo( savedNexus, NX_FLOAT64, "A double", "DoubleColumn" );
-      std::vector<double> data;
-      savedNexus.getData(data);
-
-      TS_ASSERT_EQUALS( data.size(), 3 );
-      TS_ASSERT_EQUALS( data[0], 0.5 );
-      TS_ASSERT_EQUALS( data[1], 0.2 );
-      TS_ASSERT_EQUALS( data[2], 0.3 );
+      double expectedData[] = { 0.5, 0.2, 0.3 };
+      doTestColumnData( savedNexus, expectedData );
     }
 
     {
       savedNexus.openData("column_3");
       doTestColumnInfo( savedNexus, NX_FLOAT32, "A float", "FloatColumn" );
-      std::vector<float> data;
-      savedNexus.getData(data);
+      float expectedData[] = { 10.5f, 10.2f, 10.3f };
+      doTestColumnData( savedNexus, expectedData );
+    }
 
-      TS_ASSERT_EQUALS( data.size(), 3 );
-      TS_ASSERT_EQUALS( data[0], 10.5f );
-      TS_ASSERT_EQUALS( data[1], 10.2f );
-      TS_ASSERT_EQUALS( data[2], 10.3f );
+    {
+      savedNexus.openData("column_4");
+      doTestColumnInfo( savedNexus, NX_INT32, "An integer", "Int32Column" );
+      int32_t expectedData[] = { 15, 12, 13 };
+      doTestColumnData( savedNexus, expectedData );
+    }
+
+    {
+      savedNexus.openData("column_5");
+      doTestColumnInfo( savedNexus, NX_INT64, "An integer", "Int64Column" );
+      int64_t expectedData[] = { 25, 22, 23 };
+      doTestColumnData( savedNexus, expectedData );
+    }
+
+    {
+      savedNexus.openData("column_6");
+      doTestColumnInfo( savedNexus, NX_UINT64, "An integer", "SizeColumn" );
+      size_t expectedData[] = { 35, 32, 33 };
+      doTestColumnData( savedNexus, expectedData );
     }
 
 
@@ -666,6 +693,18 @@ private:
         TS_ASSERT_EQUALS( attrInfos[0].name, "units");
         TS_ASSERT_EQUALS( file.getStrAttr(attrInfos[0]), "Not known" );
       }
+  }
+
+  template<typename T>
+  void doTestColumnData( NeXus::File& file, const T expectedData[] )
+  {
+    std::vector<T> data;
+    file.getData(data);
+
+    TS_ASSERT_EQUALS( data.size(), 3 );
+    TS_ASSERT_EQUALS( data[0], expectedData[0] );
+    TS_ASSERT_EQUALS( data[1], expectedData[1] );
+    TS_ASSERT_EQUALS( data[2], expectedData[2] );
   }
 
   std::string outputFile;
