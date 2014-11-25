@@ -41,6 +41,9 @@ class DirectReductionProperties(object):
         object.__setattr__(self,'_log_level','notice');
         object.__setattr__(self,'_log_to_mantid',True);
 
+        object.__setattr__(self,'_psi',float('NaN'));
+        object.__setattr__(self,'_second_white',None);
+
     #end
 
     def getDefaultParameterValue(self,par_name):
@@ -60,8 +63,18 @@ class DirectReductionProperties(object):
             return name[0:3];
     @property 
     def psi(self):
-        return 0;
+        """ rotation angle (not available from IDF)"""
+        return self._psi;
 
+    @psi.setter 
+    def psi(self,value):
+        """set rotation angle (not available from IDF). This value will be saved into NXSpe file"""
+        self._psi = value
+
+    @property 
+    def seclond_white(self):
+        """ Second white beam currently unused in workflow """
+        return self._second_white;
 
     @property 
     def incident_energy(self):
@@ -278,8 +291,22 @@ class MapMaskFile(object):
            fileName, fileExtension = os.path.splitext(value)
            if (not fileExtension):
                value=value+self._file_ext;
+        else:
+            if self._field_name=='hard_mask_file':
+                if instance.use_hard_mask_only:
+                    instance.run_diagnostics = False;
+            
         prop_helpers.gen_setter(instance.__dict__,self._field_name,value);
 #end MapMaskFile
+
+class HardMaskOnly(object):
+    def __get__(self,instance,type=None):
+          return prop_helpers.gen_getter(instance.__dict__,'use_hard_mask_only');
+    def __set__(self,instance,value):
+        prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',value);
+        if not(value) and instance.hard_mask_file is None:
+            instance.run_diagnostics = False;
+#end HardMaskOnly
 
 class MonovanIntegrationRange(object):
     """ integration range for monochromatic vanadium 
@@ -405,6 +432,26 @@ class SaveFormat(object):
             instance.__dict__['save_format'].add(value);
 #end SaveFormat
 
+class DiagSpectra(object):
+    """ class describes spectra list which can be used in diagnostics """
+    def __get__(self,instance,type=None):
+       try:
+           return  prop_helpers.gen_getter(instance.__dict__,'spectra_to_monitors_list');
+       except KeyError:
+           return None
+    def __set__(self,instance,spectra_list):
+            self.diag_spectra.split(";")
+            bank_spectra = []
+            for b in banks:
+                token = b.split(",")  # b = "(,)"
+                if len(token) != 2:
+                    raise ValueError("Invalid bank spectra specification in diag %s" % self.diag_spectra)
+                start = int(token[0].lstrip('('))
+                end = int(token[1].rstrip(')'))
+                bank_spectra.append((start,end))
+#end DiagSpectra
+
+
 
 #-----------------------------------------------------------------------------------------
 # END Descriptors, Direct property manager itself
@@ -442,7 +489,7 @@ class DirectPropertyManager(DirectReductionProperties):
             del param_list['synonims']
         #end
 
-
+        # set up properties which have default parameters
         param_list =  prop_helpers.build_properties_dict(param_list,self.__subst_dict)
         self.__dict__.update(param_list)
 
@@ -453,7 +500,7 @@ class DirectPropertyManager(DirectReductionProperties):
 
         # properties with allowed values
         self.__prop_allowed_values['normalise_method']=[None,'monitor-1','monitor-2','current']  # 'uamph', peak -- disabled/unknown at the moment
-        self.__prop_allowed_values['deltaE_mode']=['direct'] # I do not think we should try other modes
+        self.__prop_allowed_values['deltaE_mode']=['direct'] # I do not think we should try other modes here
 
 
         # properties with special(overloaded and non-standard) setters/getters: Properties name dictionary returning tuple(getter,setter)
@@ -463,7 +510,7 @@ class DirectPropertyManager(DirectReductionProperties):
         # list of the parameters which should usually be changed by user and if not, user should be warn about it.
         self.__abs_units_par_to_change=['sample_mass','sample_rmm']
         # list of the parameters which should always be taken from IDF unless explicitly set from elsewhere. These parameters MUST have setters and getters
-        self.__idf_param_located =['ei_mon_spectra']
+        #self.__idf_param_located =['ei_mon_spectra']
         # dictionary of the special setters & getters:
 
         # list of the properties which have been changed:
@@ -503,8 +550,13 @@ class DirectPropertyManager(DirectReductionProperties):
         #end
 
         # redefine generic substitutions for None
-        if type(val) is str and (val is 'None' or val is 'none' or len(val) == 0):
-            val = None;
+        if type(val) is str :
+           val = val.lower()
+           if (val == 'none' or len(val) == 0):
+              val = None;
+           if val == 'default':
+              val = self.getDefaultParameterValue(name0);
+
         if type(val) is list and len(val) == 0:
             val = None;
  
@@ -564,7 +616,10 @@ class DirectPropertyManager(DirectReductionProperties):
     spectra_to_monitors_list = SpectraToMonitorsList();
     # 
     save_format = SaveFormat();
-  
+    #
+    use_hard_mask_only = HardMaskOnly();
+    #
+    diag_spectra = DiagSpectra();
 
 
 
@@ -597,60 +652,18 @@ class DirectPropertyManager(DirectReductionProperties):
 
 
 
-    def _set_input_parameters(self,synonims,composite_keys_set,composite_keys_subst,**kwargs):
-        """ Method analyzes input parameters list, substitutes the synonyms in this list with predefined synonyms
-            and sets the existing class parameters with its non-default values taken from input
+    def set_input_parameters(self,**kwargs):
+        """ Set input properties from a dictionary of parameters
 
-            returns the list of changed properties.
+            Auxiliary methods used in old interface.
+            Returns the list of changed properties.
         """
 
-        properties_changed=[];
         for par_name,value in kwargs.items() :
 
-            if par_name in synonims :
-                par_name = synonims[par_name]
-            # may be a problem, one tries to set up non-existing value
-            if not (hasattr(self,par_name) or hasattr(self,'_'+par_name)):
-                # it still can be a composite key which sets parts of the composite property
-                if par_name in self.composite_keys_subst :
-                    composite_prop_name,index,nc = composite_keys_subst[par_name]
-                    val = getattr(self,composite_prop_name)
-                    val[index] = value;
-                    setattr(self,composite_prop_name,val)
-                    properties_changed.append(composite_prop_name)
-                    continue
-                else:
-                    raise KeyError("Attempt to set unknown parameter: "+par_name)
-            # whole composite key is modified by input parameters
-            if par_name in composite_keys_set :
-               default_value = getattr(self,par_name) # get default value
-               if isinstance(value,str) and value.lower()[0:7] == 'default' : # Property changed but default value requested explicitly
-                   value = default_value
-               if type(default_value) != type(value):
-                   raise KeyError("Attempt to change range property: "+par_name+" of type : "+str(type(default_value))+ " with wrong type value: "+str(type(value)))
-               if len(default_value) != len(value) :
-                    raise KeyError("Attempt to change range property : "+par_name+" with default value: ["+",".join(str(vv) for vv in val)+
-                                   "] to wrong length value: ["+",".join(str(vv) for vv in value)+"]\n")
-               else:
-                   setattr(self,par_name,value)
-                   properties_changed.append(par_name)
-                   continue
+            setattr(self,par_name,value);
 
-            # simple case of setting simple value
-            if isinstance(value,str) and value.lower()[0:7] == 'default' : # Property changed but default value requested explicitly
-                value = getattr(self,par_name)
-
-
-            setattr(self,par_name,value)
-            properties_changed.append(par_name)
-
-        # some properties have collective meaning
-        if self.use_hard_mask_only and self.hard_mask_file is None:
-          if self.run_diagnostics:
-              self.run_diagnostics=False;
-              properties_changed.append('run_diagnostics');
-
-        return properties_changed
+        return self.getChangedProperties();
 
 
   

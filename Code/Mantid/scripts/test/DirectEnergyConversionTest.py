@@ -104,14 +104,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
 
 
-    #def test_set_non_default_wrong_value(self):
-    #    tReducer = self.reducer
-    #    # should do nothing as already initialized above
-    #    tReducer.initialise("MAP")
-
-    #    # non-existing property can not be set!
-    #    self.assertRaises(KeyError,tReducer.set_input_parameters,non_existing_property="Something_Meaningfull")
-
     #def test_set_non_default_simple_value(self):
     #    tReducer = self.reducer
     #    # should do nothing as already initialized above

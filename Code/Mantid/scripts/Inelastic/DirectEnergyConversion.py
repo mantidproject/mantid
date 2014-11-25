@@ -107,11 +107,15 @@ class DirectEnergyConversion(object):
         else:
             var_name = "diag_mask"
 
-        # Check for any keywords that have not been supplied and put in the values set on reducer
-        for par in self.__diag_params:
-            arg = par.lstrip('diag_')
-            if arg not in kwargs:
-                kwargs[arg] = getattr(self, arg)
+        prop_man = selt.prop_man;
+        diag_params = prop_man.getDiagnosticsParameters();
+        for key,val in kwargs.iteritems():
+            diag_params[key]=val;
+        ## Check for any keywords that have not been supplied and put in the values set on reducer
+        #for par in self.__diag_params:
+        #    arg = par.lstrip('diag_')
+        #    if arg not in kwargs:
+        #        kwargs[arg] = getattr(self, arg)
 
         # if input parameter is workspace rather then run, we want to keep it
         self._keep_wb_workspace = False
@@ -120,12 +124,9 @@ class DirectEnergyConversion(object):
         if isinstance(white,api.Workspace) : # it is workspace itself
             self._keep_wb_workspace = True
 
-        # If we have a hard_mask, check the instrument name is defined
-        if 'hard_mask_file' in kwargs:
-            if 'instrument_name' not in kwargs:
-                kwargs['instrument_name'] = self.instr_name
-
-        if kwargs['use_hard_mask_only'] :
+             
+        # TODO: primitive cache is used here. Improve
+        if prop_man.use_hard_mask_only:
             if mtd.doesExist('hard_mask_ws'):
                 diag_mask = mtd['hard_mask_ws']
             else: # build hard mask
@@ -137,7 +138,7 @@ class DirectEnergyConversion(object):
                 # Load
                 white_data = self.load_data(white,whitews_name,self._keep_wb_workspace)
 
-                diag_mask= LoadMask(Instrument=self.instr_name,InputFile=kwargs['hard_mask_file'],
+                diag_mask= LoadMask(Instrument=self.instr_name,InputFile=prop_man.hard_mask_file,
                                OutputWorkspace='hard_mask_ws')
                 MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
                 diag_mask,masked_list = ExtractMask(InputWorkspace=white_data)
@@ -147,13 +148,10 @@ class DirectEnergyConversion(object):
 
         # Get the white beam vanadium integrals
         whiteintegrals = self.do_white(white, None, None,None) # No grouping yet
-        if 'second_white' in kwargs:
-            second_white = kwargs['second_white']
-            if second_white is None:
-                del kwargs['second_white']
-            else:
-                other_whiteintegrals = self.do_white(second_white, None, None,None) # No grouping yet
-                kwargs['second_white'] = other_whiteintegrals
+        if prop_man.second_white:
+            second_white = prop_man.second_white;
+            other_whiteintegrals = self.do_white(second_white, None, None,None) # No grouping yet
+            prop_man.second_white = other_whiteintegrals;
 
 
         # Get the background/total counts from the sample if present
@@ -161,7 +159,7 @@ class DirectEnergyConversion(object):
             sample = kwargs['sample']
             del kwargs['sample']
             # If the bleed test is requested then we need to pass in the sample_run as well
-            if kwargs.get('bleed_test', False):
+            if prop_man.bleed_test:
                 kwargs['sample_run'] = sample
 
             # Set up the background integrals
@@ -178,7 +176,7 @@ class DirectEnergyConversion(object):
             total_counts = Integration(result_ws, IncludePartialBins=True)
             background_int = ConvertUnits(background_int, "Energy", AlignBins=0)
             self.log("Diagnose: finished convertUnits ")
-            background_int *= self.scale_factor
+            background_int *= prop_man.scale_factor;
             diagnostics.normalise_background(background_int, whiteintegrals, kwargs.get('second_white',None))
             kwargs['background_int'] = background_int
             kwargs['sample_counts'] = total_counts
