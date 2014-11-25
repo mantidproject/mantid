@@ -32,6 +32,7 @@ set ( SRC_FILES
 	src/IPropertyManager.cpp
 	src/ISaveable.cpp
 	src/InstrumentInfo.cpp
+	src/InternetHelper.cpp
 	src/Interpolation.cpp
 	src/LibraryManager.cpp
 	src/LibraryWrapper.cpp
@@ -160,6 +161,7 @@ set ( INC_FILES
 	inc/MantidKernel/IValidator.h
 	inc/MantidKernel/Instantiator.h
 	inc/MantidKernel/InstrumentInfo.h
+	inc/MantidKernel/InternetHelper.h
 	inc/MantidKernel/Interpolation.h
 	inc/MantidKernel/LibraryManager.h
 	inc/MantidKernel/LibraryWrapper.h
@@ -284,6 +286,7 @@ set ( TEST_FILES
 	ISaveableTest.h
 	IValidatorTest.h
 	InstrumentInfoTest.h
+	InternetHelperTest.h
 	InterpolationTest.h
 	ListValidatorTest.h
 	LogFilterTest.h
