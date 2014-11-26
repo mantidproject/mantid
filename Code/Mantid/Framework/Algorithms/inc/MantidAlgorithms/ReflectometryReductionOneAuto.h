@@ -59,7 +59,7 @@ namespace Mantid
 
       std::string pNRLabel() const { return "PNR"; }
       std::string pALabel() const { return "PA"; }
-      std::string crhoLabel() const { return "CRHo"; }
+      std::string crhoLabel() const { return "CRho"; }
       std::string cppLabel() const { return "CPp"; }
       std::string cAlphaLabel() const { return "CAlpha"; }
       std::string cApLabel() const { return "CAp"; }
