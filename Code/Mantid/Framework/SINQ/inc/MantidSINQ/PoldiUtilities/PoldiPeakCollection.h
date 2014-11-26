@@ -87,7 +87,7 @@ protected:
     bool checkColumns(const DataObjects::TableWorkspace_sptr &tableWorkspace);
 
     void recoverDataFromLog(const DataObjects::TableWorkspace_sptr &TableWorkspace);
-    void setPeaks(const std::vector<Kernel::V3D> &hkls, const std::vector<double> &dValues);
+    void setPeaks(const std::vector<Kernel::V3D> &hkls, const std::vector<double> &dValues, const std::vector<double> &fSquared);
 
     std::string getIntensityTypeFromLog(const API::LogManager_sptr &tableLog);
     std::string getProfileFunctionNameFromLog(const API::LogManager_sptr &tableLog);

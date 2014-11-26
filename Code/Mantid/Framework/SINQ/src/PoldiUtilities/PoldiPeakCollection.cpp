@@ -37,7 +37,7 @@ PoldiPeakCollection::PoldiPeakCollection(const TableWorkspace_sptr &workspace) :
 
 PoldiPeakCollection::PoldiPeakCollection(const Geometry::CrystalStructure_sptr &crystalStructure, double dMin, double dMax) :
     m_peaks(),
-    m_intensityType(Maximum),
+    m_intensityType(Integral),
     m_profileFunctionName(),
     m_pointGroup()
 {
@@ -47,10 +47,11 @@ PoldiPeakCollection::PoldiPeakCollection(const Geometry::CrystalStructure_sptr &
 
     m_pointGroup = pointGroupFromString(pointGroupToString(crystalStructure->pointGroup()));
 
-    std::vector<V3D> uniqueHKL = crystalStructure->getUniqueHKLs(dMin, dMax);
+    std::vector<V3D> uniqueHKL = crystalStructure->getUniqueHKLs(dMin, dMax, Geometry::CrystalStructure::UseStructureFactor);
     std::vector<double> dValues = crystalStructure->getDValues(uniqueHKL);
+    std::vector<double> structureFactors = crystalStructure->getFSquared(uniqueHKL);
 
-    setPeaks(uniqueHKL, dValues);
+    setPeaks(uniqueHKL, dValues, structureFactors);
 }
 
 
@@ -201,7 +202,7 @@ bool PoldiPeakCollection::checkColumns(const TableWorkspace_sptr &tableWorkspace
     return columnNames == shouldNames;
 }
 
-void PoldiPeakCollection::setPeaks(const std::vector<V3D> &hkls, const std::vector<double> &dValues)
+void PoldiPeakCollection::setPeaks(const std::vector<V3D> &hkls, const std::vector<double> &dValues, const std::vector<double> &fSquared)
 {
     if(hkls.size() != dValues.size()) {
         throw std::invalid_argument("hkl-vector and d-vector do not have the same length.");
@@ -210,7 +211,8 @@ void PoldiPeakCollection::setPeaks(const std::vector<V3D> &hkls, const std::vect
     m_peaks.clear();
 
     for(size_t i = 0; i < hkls.size(); ++i) {
-        addPeak(PoldiPeak::create(MillerIndices(hkls[i]), UncertainValue(dValues[i]), UncertainValue(1.0), UncertainValue(0.0)));
+        double multiplicity = static_cast<double>(m_pointGroup->getEquivalents(hkls[i]).size());
+        addPeak(PoldiPeak::create(MillerIndices(hkls[i]), UncertainValue(dValues[i]), UncertainValue(multiplicity * fSquared[i]), UncertainValue(0.0)));
     }
 }
 
