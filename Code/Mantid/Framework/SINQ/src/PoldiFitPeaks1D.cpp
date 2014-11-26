@@ -16,22 +16,25 @@
 #include "MantidAPI/CompositeFunction.h"
 #include <boost/make_shared.hpp>
 
+#include <functional>
+#include <boost/math/distributions/normal.hpp>
+
 
 namespace Mantid
 {
 namespace Poldi
 {
 
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
-using namespace Mantid::DataObjects;
-using namespace Mantid::CurveFitting;
+using namespace Kernel;
+using namespace API;
+using namespace DataObjects;
+using namespace CurveFitting;
 
 RefinedRange::RefinedRange(const PoldiPeak_sptr &peak, double fwhmMultiples) :
     m_peaks(1, peak)
 {
     double width = peak->fwhm();
-    double extent = std::min(0.05, std::max(0.002, width)) * fwhmMultiples;
+    double extent = std::max(0.002, width) * fwhmMultiples;
 
     m_xStart = peak->q() - extent;
     m_xEnd = peak->q() + extent;
@@ -86,10 +89,8 @@ DECLARE_ALGORITHM(PoldiFitPeaks1D)
 PoldiFitPeaks1D::PoldiFitPeaks1D() :
     m_peaks(),
     m_profileTemplate(),
-    m_backgroundTemplate(),
-    m_profileTies(),
-    m_fitCharacteristics(),
     m_peakResultOutput(),
+    m_fitplots(new WorkspaceGroup),
     m_fwhmMultiples(1.0)
 {
 
@@ -124,11 +125,7 @@ void PoldiFitPeaks1D::init()
 
     declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace","RefinedPeakTable",Direction::Output), "Output workspace with refined peak data.");
     declareProperty(new WorkspaceProperty<TableWorkspace>("ResultTableWorkspace","ResultTable",Direction::Output), "Fit results.");
-    declareProperty(new WorkspaceProperty<TableWorkspace>("FitCharacteristicsWorkspace","FitCharacteristics",Direction::Output), "Fit characteristics for each peak.");
     declareProperty(new WorkspaceProperty<Workspace>("FitPlotsWorkspace","FitPlots",Direction::Output), "Plots of all peak fits.");
-
-    m_backgroundTemplate = FunctionFactory::Instance().createInitialized("name=UserFunction, Formula=A0 + A1*(x - x0)^2");
-    m_profileTies = "f1.x0 = f0.PeakCentre";
 }
 
 void PoldiFitPeaks1D::setPeakFunction(const std::string &peakFunction)
@@ -176,44 +173,137 @@ std::vector<RefinedRange_sptr> PoldiFitPeaks1D::getReducedRanges(const std::vect
     return reducedRanges;
 }
 
+API::IFunction_sptr PoldiFitPeaks1D::getRangeProfile(const RefinedRange_sptr &range, int n) const
+{
+    CompositeFunction_sptr totalProfile(new CompositeFunction);
+    totalProfile->initialize();
+
+    std::vector<PoldiPeak_sptr> peaks = range->getPeaks();
+    for(auto it = peaks.begin(); it != peaks.end(); ++it) {
+        totalProfile->addFunction(getPeakProfile(*it));
+    }
+
+    totalProfile->addFunction(FunctionFactory::Instance().createInitialized("name=Chebyshev,n=" + boost::lexical_cast<std::string>(n)
+                                                                                   + ",StartX=" + boost::lexical_cast<std::string>(range->getXStart())
+                                                                                   + ",EndX=" + boost::lexical_cast<std::string>(range->getXEnd())));
+
+    return totalProfile;
+}
+
 IFunction_sptr PoldiFitPeaks1D::getPeakProfile(const PoldiPeak_sptr &poldiPeak) const {
     IPeakFunction_sptr clonedProfile = boost::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction(m_profileTemplate));
     clonedProfile->setCentre(poldiPeak->q());
     clonedProfile->setFwhm(poldiPeak->fwhm(PoldiPeak::AbsoluteQ));
     clonedProfile->setHeight(poldiPeak->intensity());
 
-    IFunction_sptr clonedBackground = m_backgroundTemplate->clone();
-
-    CompositeFunction_sptr totalProfile(new CompositeFunction);
-    totalProfile->initialize();
-    totalProfile->addFunction(clonedProfile);
-    totalProfile->addFunction(clonedBackground);
-
-    if(!m_profileTies.empty()) {
-        totalProfile->addTies(m_profileTies);
-    }
-
-    return totalProfile;
+    return clonedProfile;
 }
 
 void PoldiFitPeaks1D::setValuesFromProfileFunction(PoldiPeak_sptr poldiPeak, const IFunction_sptr &fittedFunction) const
 {
-    CompositeFunction_sptr totalFunction = boost::dynamic_pointer_cast<CompositeFunction>(fittedFunction);
+    IPeakFunction_sptr peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(fittedFunction);
 
-    if(totalFunction) {
-        IPeakFunction_sptr peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(totalFunction->getFunction(0));
-
-        if(peakFunction) {
-            poldiPeak->setIntensity(UncertainValue(peakFunction->height(), peakFunction->getError(0)));
-            poldiPeak->setQ(UncertainValue(peakFunction->centre(), peakFunction->getError(1)));
-            poldiPeak->setFwhm(UncertainValue(peakFunction->fwhm(), getFwhmWidthRelation(peakFunction) * peakFunction->getError(2)));
-        }
+    if(peakFunction) {
+        poldiPeak->setIntensity(UncertainValue(peakFunction->height(), peakFunction->getError(0)));
+        poldiPeak->setQ(UncertainValue(peakFunction->centre(), peakFunction->getError(1)));
+        poldiPeak->setFwhm(UncertainValue(peakFunction->fwhm(), getFwhmWidthRelation(peakFunction) * peakFunction->getError(2)));
     }
 }
 
 double PoldiFitPeaks1D::getFwhmWidthRelation(IPeakFunction_sptr peakFunction) const
 {
     return peakFunction->fwhm() / peakFunction->getParameter(2);
+}
+
+PoldiPeakCollection_sptr PoldiFitPeaks1D::fitPeaks(const PoldiPeakCollection_sptr &peaks)
+{
+    g_log.information() << "Peaks to fit: " << peaks->peakCount() << std::endl;
+
+    std::vector<RefinedRange_sptr> rawRanges = getRefinedRanges(peaks);
+    std::vector<RefinedRange_sptr> reducedRanges = getReducedRanges(rawRanges);
+
+    g_log.information() << "Ranges used for fitting: " << reducedRanges.size() << std::endl;
+
+    Workspace2D_sptr dataWorkspace = getProperty("InputWorkspace");
+    m_fitplots->removeAll();
+
+    for(size_t i = 0; i < reducedRanges.size(); ++i) {
+        RefinedRange_sptr currentRange = reducedRanges[i];
+        int nMin = getBestChebyshevPolynomialDegree(dataWorkspace, currentRange);
+
+        if(nMin > -1) {
+            IAlgorithm_sptr fit = getFitAlgorithm(dataWorkspace, currentRange, nMin);
+            fit->execute();
+
+            IFunction_sptr fitFunction = fit->getProperty("Function");
+            CompositeFunction_sptr composite = boost::dynamic_pointer_cast<CompositeFunction>(fitFunction);
+
+            if(!composite) {
+                throw std::runtime_error("Not a composite function!");
+            }
+
+            std::vector<PoldiPeak_sptr> peaks = currentRange->getPeaks();
+            for(size_t i = 0; i < peaks.size(); ++i) {
+                setValuesFromProfileFunction(peaks[i], composite->getFunction(i));
+                MatrixWorkspace_sptr fpg = fit->getProperty("OutputWorkspace");
+                m_fitplots->addWorkspace(fpg);
+            }
+        }
+    }
+
+    return getReducedPeakCollection(peaks);
+}
+
+int PoldiFitPeaks1D::getBestChebyshevPolynomialDegree(const Workspace2D_sptr &dataWorkspace, const RefinedRange_sptr &range)
+{
+    int n = 0;
+    double chiSquareMin = 1e10;
+    int nMin = -1;
+
+    while((n < 3)) {
+        IAlgorithm_sptr fit = getFitAlgorithm(dataWorkspace, range, n);
+        bool fitSuccess = fit->execute();
+
+        if(fitSuccess) {
+            ITableWorkspace_sptr fitCharacteristics = fit->getProperty("OutputParameters");
+            TableRow row = fitCharacteristics->getRow(fitCharacteristics->rowCount() - 1);
+
+            double chiSquare = row.Double(1);
+
+
+            if(fabs(chiSquare - 1) < fabs(chiSquareMin - 1)) {
+                chiSquareMin = chiSquare;
+                nMin = n;
+            }
+        }
+
+        ++n;
+    }
+
+    g_log.information() << "Chi^2 for range [" << range->getXStart() << " - " << range->getXEnd() << "] is minimal at n = " << nMin << " with Chi^2 = " << chiSquareMin << std::endl;
+
+    return nMin;
+}
+
+PoldiPeakCollection_sptr PoldiFitPeaks1D::getReducedPeakCollection(const PoldiPeakCollection_sptr &peaks) const
+{
+    PoldiPeakCollection_sptr reducedPeaks = boost::make_shared<PoldiPeakCollection>();
+    reducedPeaks->setProfileFunctionName(peaks->getProfileFunctionName());
+
+    for(size_t i = 0; i < peaks->peakCount(); ++i) {
+        PoldiPeak_sptr currentPeak = peaks->peak(i);
+
+        if(peakIsAcceptable(currentPeak)) {
+            reducedPeaks->addPeak(currentPeak);
+        }
+    }
+
+    return reducedPeaks;
+}
+
+bool PoldiFitPeaks1D::peakIsAcceptable(const PoldiPeak_sptr &peak) const
+{
+    return peak->intensity() > 0 && peak->fwhm(PoldiPeak::Relative) < 0.02;
 }
 
 void PoldiFitPeaks1D::exec()
@@ -227,84 +317,36 @@ void PoldiFitPeaks1D::exec()
     TableWorkspace_sptr poldiPeakTable = getProperty("PoldiPeakTable");    
     m_peaks = getInitializedPeakCollection(poldiPeakTable);
 
-    g_log.information() << "Peaks to fit: " << m_peaks->peakCount() << std::endl;
-
-    std::vector<RefinedRange_sptr> rawRanges = getRefinedRanges(m_peaks);
-    std::vector<RefinedRange_sptr> reducedRanges = getReducedRanges(rawRanges);
-
-    g_log.information() << "Ranges used for fitting: " << reducedRanges.size() << std::endl;
-
-    Workspace2D_sptr dataWorkspace = getProperty("InputWorkspace");
-
-    m_fitCharacteristics = boost::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
-    WorkspaceGroup_sptr fitPlotGroup(new WorkspaceGroup);
-
-    for(size_t i = 0; i < m_peaks->peakCount(); ++i) {
-        PoldiPeak_sptr currentPeak = m_peaks->peak(i);
-        IFunction_sptr currentProfile = getPeakProfile(currentPeak);
-
-        IAlgorithm_sptr fit = getFitAlgorithm(dataWorkspace, currentPeak, currentProfile);
-
-        bool fitSuccess = fit->execute();
-
-        if(fitSuccess) {
-            setValuesFromProfileFunction(currentPeak, fit->getProperty("Function"));
-            addPeakFitCharacteristics(fit->getProperty("OutputParameters"));
-
-            MatrixWorkspace_sptr fpg = fit->getProperty("OutputWorkspace");
-            fitPlotGroup->addWorkspace(fpg);
-        }
+    PoldiPeakCollection_sptr fittedPeaksNew = fitPeaks(m_peaks);
+    PoldiPeakCollection_sptr fittedPeaksOld = m_peaks;
+    while(fittedPeaksNew->peakCount() < fittedPeaksOld->peakCount()) {
+        fittedPeaksOld = fittedPeaksNew;
+        fittedPeaksNew = fitPeaks(fittedPeaksOld);
     }
 
-    m_peakResultOutput = generateResultTable(m_peaks);
+    m_peakResultOutput = generateResultTable(fittedPeaksNew);
 
     setProperty("OutputWorkspace", m_peaks->asTableWorkspace());
-    setProperty("FitCharacteristicsWorkspace", m_fitCharacteristics);
     setProperty("ResultTableWorkspace", m_peakResultOutput);
-    setProperty("FitPlotsWorkspace", fitPlotGroup);
+    setProperty("FitPlotsWorkspace", m_fitplots);
 }
 
-IAlgorithm_sptr PoldiFitPeaks1D::getFitAlgorithm(const Workspace2D_sptr &dataWorkspace, const PoldiPeak_sptr &peak, const IFunction_sptr &profile)
+IAlgorithm_sptr PoldiFitPeaks1D::getFitAlgorithm(const Workspace2D_sptr &dataWorkspace, const RefinedRange_sptr &range, int n)
 {
-    double width = peak->fwhm();
-    double extent = std::min(0.05, std::max(0.002, width)) * m_fwhmMultiples;
-
-    std::pair<double, double> xBorders(peak->q() - extent, peak->q() + extent);
+    IFunction_sptr rangeProfile = getRangeProfile(range, n);
 
     IAlgorithm_sptr fitAlgorithm = createChildAlgorithm("Fit", -1, -1, false);
     fitAlgorithm->setProperty("CreateOutput", true);
     fitAlgorithm->setProperty("Output", "FitPeaks1D");
     fitAlgorithm->setProperty("CalcErrors", true);
-    fitAlgorithm->setProperty("Function", profile);
+    fitAlgorithm->setProperty("OutputCompositeMembers", true);
+    fitAlgorithm->setProperty("Function", rangeProfile);
     fitAlgorithm->setProperty("InputWorkspace", dataWorkspace);
     fitAlgorithm->setProperty("WorkspaceIndex", 0);
-    fitAlgorithm->setProperty("StartX", xBorders.first);
-    fitAlgorithm->setProperty("EndX", xBorders.second);
+    fitAlgorithm->setProperty("StartX", range->getXStart());
+    fitAlgorithm->setProperty("EndX", range->getXEnd());
 
     return fitAlgorithm;
-}
-
-void PoldiFitPeaks1D::addPeakFitCharacteristics(const ITableWorkspace_sptr &fitResult)
-{
-    if(m_fitCharacteristics->columnCount() == 0) {
-        initializeFitResultWorkspace(fitResult);
-    }
-
-    TableRow newRow = m_fitCharacteristics->appendRow();
-
-    for(size_t i = 0; i < fitResult->rowCount(); ++i) {
-        TableRow currentRow = fitResult->getRow(i);
-
-        newRow << UncertainValueIO::toString(UncertainValue(currentRow.Double(1), currentRow.Double(2)));
-    }
-}
-
-void PoldiFitPeaks1D::initializeFitResultWorkspace(const API::ITableWorkspace_sptr &fitResult)
-{
-    for(size_t i = 0; i < fitResult->rowCount(); ++i) {
-        TableRow currentRow = fitResult->getRow(i);
-        m_fitCharacteristics->addColumn("str", currentRow.cell<std::string>(0));
-    }
 }
 
 void PoldiFitPeaks1D::initializePeakResultWorkspace(const DataObjects::TableWorkspace_sptr &peakResultWorkspace) const
