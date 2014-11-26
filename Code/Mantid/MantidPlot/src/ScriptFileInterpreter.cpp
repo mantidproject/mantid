@@ -9,9 +9,11 @@
 #include <QMenu>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <q3cstring.h>
 #include <qscilexer.h>
 
 #include <stdexcept>
+
 
 /**
  * Construct a widget
@@ -93,7 +95,7 @@ void ScriptFileInterpreter::tabsToSpaces()
     spaces = spaces + " ";
 
   text = text.replace("\t", spaces, Qt::CaseInsensitive);
-  m_editor->replaceSelectedText(text);
+  replaceSelectedText(m_editor, text);
 }
 
 /// Convert spaces in selection to tabs
@@ -114,7 +116,7 @@ void ScriptFileInterpreter::spacesToTabs()
     spaces = spaces + " ";
 
   text = text.replace(spaces, "\t", Qt::CaseInsensitive);
-  m_editor->replaceSelectedText(text);
+  replaceSelectedText(m_editor, text);
 }
 
 /// Set a font
@@ -186,8 +188,7 @@ void ScriptFileInterpreter::toggleComment(bool addComment)
   // Get selected text  
   std::string whitespaces (" \t\f\r");
   int selFromLine, selFromInd, selToLine, selToInd;
-  int firstChar, lastChar;
-
+  
   m_editor->getSelection(&selFromLine, &selFromInd, &selToLine, &selToInd);    
 
   // Expand selection to first character on start line to the end char on second line.
@@ -195,17 +196,26 @@ void ScriptFileInterpreter::toggleComment(bool addComment)
   {
     m_editor->getCursorPosition(&selFromLine, &selFromInd);
     selToLine = selFromLine;
-    selToInd = selFromInd;
   }
-  
-  std::string firstTmp = m_editor->text(selFromLine).toUtf8().constData();
-  std::string lastTmp = m_editor->text(selToLine).toUtf8().constData();
-
-  firstChar = static_cast<int>(firstTmp.find_first_not_of(whitespaces + "\n"));
-  lastChar = static_cast<int>(lastTmp.find_last_not_of(whitespaces + "\n"));
-  
+    
   // For each line, select it, copy the line into a new string minus the comment
   QString replacementText = "";
+
+  // If it's adding comment, check all lines to find the lowest index for a non space character
+  int minInd = -1;
+  if(addComment)
+  { 
+    for(int i=selFromLine;i<=selToLine;++i)
+    {
+      std::string thisLine = m_editor->text(i).toUtf8().constData();   
+      int lineFirstChar = static_cast<int>(thisLine.find_first_not_of(whitespaces + "\n"));
+     
+  	  if(minInd == -1 || (lineFirstChar != -1 && lineFirstChar < minInd))
+      {
+          minInd = lineFirstChar;
+      }
+    }
+  }
 
   for(int i=selFromLine;i<=selToLine;++i)
   {
@@ -214,10 +224,10 @@ void ScriptFileInterpreter::toggleComment(bool addComment)
     int lineFirstChar = static_cast<int>(thisLine.find_first_not_of(whitespaces + "\n"));
      
     if(lineFirstChar != -1)
-    {
-      if(addComment)
+    {     
+      if(addComment) 
       { 
-        thisLine.insert(lineFirstChar,"#");
+        thisLine.insert(minInd,"#");
       }
       else
       { 
@@ -231,10 +241,19 @@ void ScriptFileInterpreter::toggleComment(bool addComment)
 
     replacementText = replacementText + QString::fromStdString(thisLine);
   }
-  
-  m_editor->setSelection(selFromLine,0,selToLine, m_editor->lineLength(selToLine));
-  m_editor->replaceSelectedText(replacementText);
+
+  m_editor->setSelection(selFromLine,0,selToLine, m_editor->lineLength(selToLine));  
+  replaceSelectedText(m_editor, replacementText);
   m_editor->setCursorPosition(selFromLine,selFromInd);
+}
+
+// Replaces the currently selected text in the editor
+// Reimplementation of .replaceSelectedText from QScintilla. Added as osx + rhel builds are
+// using an older version(2.4.6) of the library missing the method, and too close to code freeze to update.
+inline void ScriptFileInterpreter::replaceSelectedText(const ScriptEditor *editor, const QString &text)
+{
+  const char *b = (( editor->SCI_GETCODEPAGE == CP_UTF8) ? text.utf8().constData() : text.latin1());    
+  editor->SendScintilla( editor->SCI_REPLACESEL, b );
 }
 
 /**

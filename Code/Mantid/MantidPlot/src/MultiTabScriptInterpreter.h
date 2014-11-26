@@ -244,6 +244,8 @@ private:
   int m_tabWhitespaceCount;
   // Font to use for script window
   QString m_fontFamily;
+  // Save the code folding preference
+  bool m_codeFolding;
 };
 
 #endif

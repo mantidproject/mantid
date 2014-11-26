@@ -102,6 +102,7 @@ void ScriptingWindow::saveSettings()
   settings.setValue("/ReplaceTabs", m_manager->m_replaceTabs);
   settings.setValue("/TabWhitespaceCount", m_manager->m_tabWhitespaceCount);
   settings.setValue("/ScriptFontFamily", m_manager->m_fontFamily);
+  settings.setValue("/CodeFolding", m_toggleFolding->isChecked());
 
   settings.endGroup();
 }
@@ -123,12 +124,13 @@ void ScriptingWindow::readSettings()
   m_toggleProgress->setChecked(settings.value("ProgressArrow", true).toBool());
   m_manager->setRecentScripts(settings.value("/RecentScripts").toStringList());
   m_manager->m_globalZoomLevel = settings.value("ZoomLevel",0).toInt();
-  m_toggleWhitespace->setChecked(settings.value("ShowWhitespace", true).toBool());
+  m_toggleFolding->setChecked(settings.value("CodeFolding", false).toBool());
+  m_toggleWhitespace->setChecked(settings.value("ShowWhitespace", false).toBool());
   
   m_manager->m_replaceTabs = settings.value("ReplaceTabs", true ).toBool();
   m_manager->m_tabWhitespaceCount = settings.value("TabWhitespaceCount", 4).toInt();
   m_manager->m_fontFamily = settings.value("ScriptFontFamily","").toString();
-
+  
   settings.endGroup();
 
 }
@@ -533,11 +535,9 @@ void ScriptingWindow::initEditMenuActions()
   
   m_tabsToSpaces = new QAction(tr("Tabs to Spaces"), this);
   connect(m_tabsToSpaces, SIGNAL(triggered()), m_manager, SLOT(tabsToSpaces()));
-  // m_tabsToSpaces->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
 
   m_spacesToTabs = new QAction(tr("Spaces to Tabs"), this);
   connect(m_spacesToTabs, SIGNAL(triggered()), m_manager, SLOT(spacesToTabs()));
-  //m_spacesToTabs->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_M));
 
   m_find = new QAction(tr("&Find/Replace"), this);
   connect(m_find, SIGNAL(triggered()), m_manager, 
@@ -626,7 +626,7 @@ void ScriptingWindow::initWindowMenuActions()
 
   // Toggle the whitespace arrow
   m_toggleWhitespace = new QAction(tr("&Show Whitespace"), this);
-  m_toggleWhitespace->setCheckable(true);
+  m_toggleWhitespace->setCheckable(true);  
   connect(m_toggleWhitespace, SIGNAL(toggled(bool)), m_manager, SLOT(toggleWhitespace(bool)));
 
   // Open Config Tabs dialog

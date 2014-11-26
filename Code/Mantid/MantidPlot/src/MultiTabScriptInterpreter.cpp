@@ -91,6 +91,7 @@ void MultiTabScriptInterpreter::newTab(int index, const QString & filename)
   ScriptFileInterpreter *scriptRunner = new ScriptFileInterpreter(this,"ScriptWindow");
   scriptRunner->setup(*scriptingEnv(), filename);
   scriptRunner->toggleProgressReporting(m_reportProgress);
+  scriptRunner->toggleCodeFolding(m_codeFolding);
   scriptRunner->toggleWhitespace(m_showWhitespace);
   scriptRunner->setTabWhitespaceCount(m_tabWhitespaceCount);
   scriptRunner->toggleReplaceTabs(m_replaceTabs);
@@ -403,6 +404,7 @@ void MultiTabScriptInterpreter::toggleProgressReporting(bool state)
  */
 void MultiTabScriptInterpreter::toggleCodeFolding(bool state)
 {
+  m_codeFolding = state;
   int index_end = count() - 1;
   for( int index = index_end; index >= 0; --index )
   {
