@@ -5,7 +5,8 @@
 #include "MantidAPI/Algorithm.h"
 
 #include "MantidGeometry/Crystal/PointGroup.h"
-#include "MantidGeometry/Crystal/ReflectionCondition.h"
+#include "MantidGeometry/Crystal/SpaceGroup.h"
+#include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 
 namespace Mantid
@@ -56,8 +57,12 @@ public:
     virtual std::map<std::string, std::string> validateInputs();
 
 protected:
-    Geometry::PointGroup_sptr getPointGroup(const std::string &pointGroupString) const;
-    Geometry::ReflectionCondition_sptr getLatticeCentering(const std::string &latticeCenteringString) const;
+    Geometry::SpaceGroup_const_sptr getSpaceGroup(const std::string &spaceGroupString) const;
+
+    Geometry::CompositeBraggScatterer_sptr getScatterers(const std::string &scattererString) const;
+    Geometry::BraggScatterer_sptr getScatterer(const std::string &singleScatterer) const;
+    std::vector<std::string> getCleanScattererTokens(const std::vector<std::string> &tokens) const;
+
     double getDMaxValue(const Geometry::UnitCell &unitCell) const;
 
     double getLargestDValue(const Geometry::UnitCell &unitCell) const;
@@ -68,11 +73,6 @@ protected:
 private:
     void init();
     void exec();
-
-    std::vector<Geometry::PointGroup_sptr> m_pointGroups;
-    std::vector<Geometry::ReflectionCondition_sptr> m_latticeCenterings;
-
-
 };
 
 

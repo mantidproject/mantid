@@ -5,17 +5,23 @@
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidGeometry/Crystal/BraggScattererFactory.h"
+
+#include <boost/tokenizer.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/assign.hpp>
 
 namespace Mantid
 {
 namespace Poldi
 {
 
-using Mantid::Kernel::Direction;
-using Mantid::API::WorkspaceProperty;
-using Mantid::API::ITableWorkspace;
-using namespace Mantid::Geometry;
-using namespace Mantid::Kernel;
+using Kernel::Direction;
+using API::WorkspaceProperty;
+using API::ITableWorkspace;
+using namespace Geometry;
+using namespace Kernel;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PoldiCreatePeaksFromCell)
@@ -25,9 +31,7 @@ DECLARE_ALGORITHM(PoldiCreatePeaksFromCell)
 //----------------------------------------------------------------------------------------------
 /** Constructor
    */
-PoldiCreatePeaksFromCell::PoldiCreatePeaksFromCell() :
-    m_pointGroups(Geometry::getAllPointGroups()),
-    m_latticeCenterings(Geometry::getAllReflectionConditions())
+PoldiCreatePeaksFromCell::PoldiCreatePeaksFromCell()
 {
 }
 
@@ -71,28 +75,61 @@ std::map<std::string, std::string> PoldiCreatePeaksFromCell::validateInputs()
     return errorMap;
 }
 
-/// Returns a PointGroup_sptr for a given string or throws std::invalid_argument.
-PointGroup_sptr PoldiCreatePeaksFromCell::getPointGroup(const std::string &pointGroupString) const
+/// Tries to construct a space group object using the space group factory.
+SpaceGroup_const_sptr PoldiCreatePeaksFromCell::getSpaceGroup(const std::string &spaceGroupString) const
 {
-    for(auto it = m_pointGroups.begin(); it != m_pointGroups.end(); ++it) {
-        if((*it)->getName() == pointGroupString) {
-            return *it;
-        }
-    }
-
-    throw std::invalid_argument("PointGroup '" + pointGroupString + "' does not exist.");
+    return SpaceGroupFactory::Instance().createSpaceGroup(spaceGroupString);
 }
 
-/// Returns a ReflectionCondition_sptr for a given lattice centering name or throws std::invalid_argument.
-ReflectionCondition_sptr PoldiCreatePeaksFromCell::getLatticeCentering(const std::string &latticeCenteringString) const
+CompositeBraggScatterer_sptr PoldiCreatePeaksFromCell::getScatterers(const std::string &scattererString) const
 {
-    for(auto it = m_latticeCenterings.begin(); it != m_latticeCenterings.end(); ++it) {
-        if((*it)->getName() == latticeCenteringString) {
-            return *it;
-        }
+    boost::char_separator<char> atomSep(";");
+    boost::tokenizer<boost::char_separator<char> > tokens(scattererString, atomSep);
+
+    std::vector<BraggScatterer_sptr> scatterers;
+
+    for(auto it = tokens.begin(); it != tokens.end(); ++it) {
+        scatterers.push_back(getScatterer(*it));
     }
 
-    throw std::invalid_argument("LatticeCentering '" + latticeCenteringString + "' does not exist.");
+    return CompositeBraggScatterer::create(scatterers);
+}
+
+BraggScatterer_sptr PoldiCreatePeaksFromCell::getScatterer(const std::string &singleScatterer) const
+{
+    std::vector<std::string> tokens;
+    boost::split(tokens, singleScatterer, boost::is_any_of(" "));
+
+    if(tokens.size() < 4 || tokens.size() > 6) {
+        throw std::invalid_argument("Could not parse scatterer string: " + singleScatterer);
+    }
+
+    std::vector<std::string> cleanScattererTokens = getCleanScattererTokens(tokens);
+    std::vector<std::string> properties = boost::assign::list_of("Element")("Position")("Occupancy")("U").convert_to_container<std::vector<std::string> >();
+
+    std::string initString;
+    for(size_t i = 0; i < cleanScattererTokens.size(); ++i) {
+        initString += properties[i] + "=" + cleanScattererTokens[i] + ";";
+    }
+
+    return BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", initString);
+}
+
+std::vector<std::string> PoldiCreatePeaksFromCell::getCleanScattererTokens(const std::vector<std::string> &tokens) const
+{
+    std::vector<std::string> cleanTokens;
+
+    // Element
+    cleanTokens.push_back(tokens[0]);
+
+    // X, Y, Z
+    cleanTokens.push_back("[" + tokens[1] + "," + tokens[2] + "," + tokens[3] + "]");
+
+    for(size_t i = 4; i < tokens.size(); ++i) {
+        cleanTokens.push_back(tokens[i]);
+    }
+
+    return cleanTokens;
 }
 
 /** Returns the largest lattice spacing based on the algorithm properties
@@ -176,20 +213,12 @@ UnitCell PoldiCreatePeaksFromCell::getConstrainedUnitCell(const UnitCell &unitCe
    */
 void PoldiCreatePeaksFromCell::init()
 {
-    std::vector<std::string> centeringOptions;
-    for (size_t i = 0; i < m_latticeCenterings.size(); ++i) {
-        centeringOptions.push_back(m_latticeCenterings[i]->getName());
-    }
-    declareProperty("LatticeCentering", centeringOptions[0], boost::make_shared<StringListValidator>(centeringOptions),
-            "Centering of the crystal lattice.");
+    std::vector<std::string> spaceGroups = SpaceGroupFactory::Instance().subscribedSpaceGroupSymbols();
+    declareProperty("SpaceGroup", spaceGroups.front(), boost::make_shared<StringListValidator>(spaceGroups),
+            "SpaceGroup of the crystal structure.");
 
-    std::vector<std::string> pointGroupOptions;
-    for (size_t i = 0; i < m_pointGroups.size(); ++i) {
-        pointGroupOptions.push_back(m_pointGroups[i]->getName());
-    }
-    declareProperty("PointGroup", pointGroupOptions[0], boost::make_shared<StringListValidator>(pointGroupOptions),
-            "Point group of the crystal.");
-
+    declareProperty("Atoms", "", "Atoms in the asymmetric unit. Format: \n"
+                                 "Element_0 [x,y,z] Occupancy U; ... ");
 
     boost::shared_ptr<BoundedValidator<double> > latticeParameterEdgeValidator = boost::make_shared<BoundedValidator<double> >(0.0, 0.0);
     latticeParameterEdgeValidator->clearUpper();
@@ -217,12 +246,13 @@ void PoldiCreatePeaksFromCell::init()
 void PoldiCreatePeaksFromCell::exec()
 {
     // Get all user input regarding the unit cell
-    PointGroup_sptr pointGroup = getPointGroup(getProperty("PointGroup"));
+    SpaceGroup_const_sptr spaceGroup = getSpaceGroup(getProperty("SpaceGroup"));
+    PointGroup_sptr pointGroup = PointGroupFactory::Instance().createPointGroupFromSpaceGroupSymbol(spaceGroup->hmSymbol());
     UnitCell unitCell = getConstrainedUnitCell(getUnitCellFromProperties(), pointGroup->crystalSystem());
-    ReflectionCondition_sptr latticeCentering = getLatticeCentering(getProperty("LatticeCentering"));
+    CompositeBraggScatterer_sptr scatterers = getScatterers(getProperty("Atoms"));
 
     // Create a CrystalStructure-object for use with PoldiPeakCollection
-    CrystalStructure_sptr crystalStructure = boost::make_shared<CrystalStructure>(unitCell, pointGroup, latticeCentering);
+    CrystalStructure_sptr crystalStructure = boost::make_shared<CrystalStructure>(unitCell, spaceGroup, scatterers);
 
     double dMin = getProperty("LatticeSpacingMin");
     double dMax = getDMaxValue(unitCell);

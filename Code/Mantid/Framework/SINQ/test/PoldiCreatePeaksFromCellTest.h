@@ -36,8 +36,7 @@ public:
         PoldiCreatePeaksFromCell alg;
         TS_ASSERT_THROWS_NOTHING( alg.initialize() )
                 TS_ASSERT( alg.isInitialized() )
-                TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PointGroup", "m-3m (Cubic)") );
-        TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("LatticeCentering", "Primitive"));
+                TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("SpaceGroup", "P m -3 m") );
         TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("a", "4.126"));
         TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("LatticeSpacingMin", "0.55"));
         TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("LatticeSpacingMax", "4.0"));
@@ -83,36 +82,6 @@ public:
         alg.setPropertyValue("LatticeSpacingMax", "-0.5");
         errorMap = alg.validateInputs();
         TS_ASSERT_EQUALS(errorMap.size(), 1)
-    }
-
-    void testGetPointGroup()
-    {
-        TestablePoldiCreatePeaksFromCell alg;
-
-        // Test all cases that should work
-        std::vector<PointGroup_sptr> pgs = getAllPointGroups();
-        for(auto it = pgs.begin(); it != pgs.end(); ++it) {
-            PointGroup_sptr pg;
-            TS_ASSERT_THROWS_NOTHING(pg = alg.getPointGroup((*it)->getName()));
-            TS_ASSERT_EQUALS(pg->getName(), (*it)->getName());
-        }
-
-        TS_ASSERT_THROWS(alg.getPointGroup("DoesNotExist"), std::invalid_argument);
-    }
-
-    void testGetLatticeCentering()
-    {
-        TestablePoldiCreatePeaksFromCell alg;
-
-        // Test all cases that should work
-        std::vector<ReflectionCondition_sptr> centerings = getAllReflectionConditions();
-        for(auto it = centerings.begin(); it != centerings.end(); ++it) {
-            ReflectionCondition_sptr centering;
-            TS_ASSERT_THROWS_NOTHING(centering = alg.getLatticeCentering((*it)->getName()));
-            TS_ASSERT_EQUALS(centering->getName(), (*it)->getName());
-        }
-
-        TS_ASSERT_THROWS(alg.getLatticeCentering("DoesNotExist"), std::invalid_argument);
     }
 
     void testGetLargestDValue()
