@@ -107,6 +107,7 @@ void FrameworkManagerImpl::UpdateInstrumentDefinitions()
   try
   {
     IAlgorithm* algDownloadInstrument = this->createAlgorithm("DownloadInstrument");
+    algDownloadInstrument->setAlgStartupLogging(false);
     Poco::ActiveResult<bool> result = algDownloadInstrument->executeAsync();
   }
   catch (Kernel::Exception::NotFoundError &)
