@@ -88,7 +88,7 @@ namespace
       }
 
       std::ofstream file;
-      file.open (localFilePath);
+      file.open (localFilePath.c_str());
       file << outputString;
       file.close();
 
