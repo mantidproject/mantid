@@ -23,7 +23,8 @@ struct MANTID_SINQ_DLL IndexCandidatePair
     IndexCandidatePair() :
         observed(),
         candidate(),
-        score(0.0),
+        positionMatch(0.0),
+        intensityMatch(0.0),
         candidateCollectionIndex(0) { }
 
     IndexCandidatePair(const PoldiPeak_sptr &measuredPeak, const PoldiPeak_sptr &candidatePeak, size_t index);
@@ -31,12 +32,17 @@ struct MANTID_SINQ_DLL IndexCandidatePair
     /// Comparison operator, scores are compared.
     bool operator <(const IndexCandidatePair &other) const
     {
-        return score < other.score;
+        if(fabs(positionMatch - other.positionMatch) > 0.01) {
+            return positionMatch < other.positionMatch;
+        }
+
+        return intensityMatch < other.intensityMatch;
     }
 
     PoldiPeak_sptr observed;
     PoldiPeak_sptr candidate;
-    double score;
+    double positionMatch;
+    double intensityMatch;
     size_t candidateCollectionIndex;
 };
 
@@ -107,9 +113,17 @@ protected:
     void scaleIntensityEstimates(const std::vector<PoldiPeakCollection_sptr> &peakCollections, const std::vector<double> &normalizedContributions) const;
     void scaleIntensityEstimates(const PoldiPeakCollection_sptr &peakCollection, double contribution) const;
 
+    void scaleToExperimentalValues(const std::vector<PoldiPeakCollection_sptr> &peakCollections, const PoldiPeakCollection_sptr &measuredPeaks) const;
+
+    double getMaximumIntensity(const PoldiPeakCollection_sptr &peakCollection) const;
+    size_t getMaximumIntensityPeakIndex(const PoldiPeakCollection_sptr &peakCollection) const;
+
     std::vector<double> getTolerances(size_t size) const;
     void assignFwhmEstimates(const std::vector<PoldiPeakCollection_sptr> &peakCollections, const std::vector<double> &tolerances) const;
     void assignFwhmEstimates(const PoldiPeakCollection_sptr &peakCollection, double tolerance) const;
+
+    // Integration
+    PoldiPeakCollection_sptr getIntegratedPeaks(const PoldiPeakCollection_sptr &rawPeaks);
 
     // Indexing algorithm
     void indexPeaks(const PoldiPeakCollection_sptr &measured, const std::vector<PoldiPeakCollection_sptr> &knownCompoundPeaks);

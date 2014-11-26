@@ -1,4 +1,5 @@
 #include "MantidSINQ/PoldiIndexKnownCompounds.h"
+#include "MantidSINQ/PoldiUtilities/PeakFunctionIntegrator.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -6,9 +7,12 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidSINQ/PoldiUtilities/MillerIndicesIO.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/FunctionFactory.h"
 
 #include <boost/bind.hpp>
 #include <numeric>
+
+#include <boost/math/distributions/normal.hpp>
 
 namespace Mantid
 {
@@ -41,10 +45,24 @@ IndexCandidatePair::IndexCandidatePair(const PoldiPeak_sptr &measuredPeak, const
     }
 
     double peakD = observed->d();
-    double sigma = PoldiIndexKnownCompounds::fwhmToSigma(fwhm);
-    double difference = (peakD - candidate->d()) / sigma;
+    double sigmaD = PoldiIndexKnownCompounds::fwhmToSigma(fwhm);
+    double differenceD = fabs(peakD - candidate->d());
 
-    score = candidate->intensity() * exp(-0.5 * difference * difference);
+    boost::math::normal positionDistribution(0.0, sigmaD);
+
+    positionMatch = (1.0 - boost::math::cdf(positionDistribution, differenceD)) * 2.0;
+
+    double peakI = observed->intensity();
+    double sigmaI = 0.25 * fabs(peakI);
+    double differenceI = fabs(peakI - candidate->intensity());
+
+    boost::math::normal intensityDistribution(0.0, sigmaI);
+
+    intensityMatch = (1.0 - boost::math::cdf(intensityDistribution, differenceI)) * 2.0;
+
+    std::cout << MillerIndicesIO::toString(candidate->hkl()) << std::endl;
+    std::cout << candidate->intensity() << " " << peakI << " " << positionMatch << std::endl;
+    std::cout << candidate->d() << " " << peakD << " " << intensityMatch << std::endl << std::endl;
 }
 
 /// Default constructor
@@ -327,6 +345,44 @@ void PoldiIndexKnownCompounds::scaleIntensityEstimates(const PoldiPeakCollection
     }
 }
 
+void PoldiIndexKnownCompounds::scaleToExperimentalValues(const std::vector<PoldiPeakCollection_sptr> &peakCollections, const PoldiPeakCollection_sptr &measuredPeaks) const
+{
+    double maximumExperimentalIntensity = getMaximumIntensity(measuredPeaks);
+
+    double maximumCalculatedIntensity = 0.0;
+    for(auto it = peakCollections.begin(); it != peakCollections.end(); ++it) {
+        maximumCalculatedIntensity = std::max(getMaximumIntensity(*it), maximumCalculatedIntensity);
+    }
+
+    std::cout << "MAX: " << maximumExperimentalIntensity << " " << maximumCalculatedIntensity << std::endl;
+
+    scaleIntensityEstimates(peakCollections, std::vector<double>(peakCollections.size(), maximumExperimentalIntensity / maximumCalculatedIntensity));
+}
+
+double PoldiIndexKnownCompounds::getMaximumIntensity(const PoldiPeakCollection_sptr &peakCollection) const
+{
+    size_t i = getMaximumIntensityPeakIndex(peakCollection);
+
+    return peakCollection->peak(i)->intensity();
+}
+
+size_t PoldiIndexKnownCompounds::getMaximumIntensityPeakIndex(const PoldiPeakCollection_sptr &peakCollection) const
+{
+    double maxInt = 0.0;
+    size_t maxIndex = 0;
+
+    for(size_t i = 0; i < peakCollection->peakCount(); ++i) {
+        PoldiPeak_sptr currentPeak = peakCollection->peak(i);
+        double currentInt = currentPeak->intensity();
+        if(currentInt > maxInt) {
+            maxInt = currentInt;
+            maxIndex = i;
+        }
+    }
+
+    return maxIndex;
+}
+
 /// Returns tolerances to be used for indexing. The actual size of the vector is determined by PoldiIndexKnownCompounds::reshapeVector.
 std::vector<double> PoldiIndexKnownCompounds::getTolerances(size_t size) const
 {
@@ -359,6 +415,33 @@ void PoldiIndexKnownCompounds::assignFwhmEstimates(const PoldiPeakCollection_spt
         PoldiPeak_sptr peak = peakCollection->peak(i);
         peak->setFwhm(UncertainValue(fwhm), PoldiPeak::Relative);
     }
+}
+
+PoldiPeakCollection_sptr PoldiIndexKnownCompounds::getIntegratedPeaks(const PoldiPeakCollection_sptr &rawPeaks)
+{
+    if(rawPeaks->intensityType() == PoldiPeakCollection::Integral) {
+        return rawPeaks;
+    }
+
+    PeakFunctionIntegrator integrator;
+
+    PoldiPeakCollection_sptr peaks = boost::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
+    for(size_t i = 0; i < rawPeaks->peakCount(); ++i) {
+        PoldiPeak_sptr peak = rawPeaks->peak(i)->clone();
+
+        IPeakFunction_sptr peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction(rawPeaks->getProfileFunctionName()));
+        peakFunction->setCentre(0.0);
+        peakFunction->setHeight(peak->intensity());
+        peakFunction->setFwhm(peak->fwhm(PoldiPeak::AbsoluteD));
+
+        IntegrationResult result = integrator.integrateInfinity(peakFunction);
+
+        peak->setIntensity(UncertainValue(result.result));
+
+        peaks->addPeak(peak);
+    }
+
+    return peaks;
 }
 
 /** Tries to index the supplied measured peaks
@@ -506,7 +589,7 @@ void PoldiIndexKnownCompounds::assignCandidates(const std::vector<IndexCandidate
 
         g_log.information() << "    Candidate d=" << static_cast<double>(measuredPeak->d()) << " -> "
                             << "Phase: " << currentCandidate.candidateCollectionIndex << " [" << MillerIndicesIO::toString(expectedPeak->hkl()) << "] (d=" << static_cast<double>(expectedPeak->d()) << "), "
-                            << "Score=" << currentCandidate.score << ": ";
+                            << "Score=(" << currentCandidate.positionMatch << ", " << currentCandidate.intensityMatch << "): ";
 
         /* If the peak has not been indexed yet, it is not stored in the set
          * that holds measured peaks that are already indexed, so the candidate
@@ -593,8 +676,11 @@ void PoldiIndexKnownCompounds::exec()
 
     DataObjects::TableWorkspace_sptr peakTableWorkspace = getProperty("InputWorkspace");
 
-    PoldiPeakCollection_sptr unindexedPeaks = boost::make_shared<PoldiPeakCollection>(peakTableWorkspace);
-    g_log.information() << "  Number of peaks: " << unindexedPeaks->peakCount() << std::endl;
+    PoldiPeakCollection_sptr unindexedRawPeaks = boost::make_shared<PoldiPeakCollection>(peakTableWorkspace);
+    g_log.information() << "  Number of peaks: " << unindexedRawPeaks->peakCount() << std::endl;
+
+    g_log.information() << "  Integrating peaks..." << std::endl;
+    PoldiPeakCollection_sptr unindexedPeaks = getIntegratedPeaks(unindexedRawPeaks);
 
     std::vector<Workspace_sptr> workspaces = getWorkspaces(getProperty("CompoundWorkspaces"));
     std::vector<PoldiPeakCollection_sptr> peakCollections = getPeakCollections(workspaces);
@@ -618,6 +704,7 @@ void PoldiIndexKnownCompounds::exec()
     std::vector<double> normalizedContributions = getNormalizedContributions(contributions);
 
     scaleIntensityEstimates(peakCollections, normalizedContributions);
+    scaleToExperimentalValues(peakCollections, unindexedPeaks);
 
     // Tolerances on the other hand are handled as "FWHM".
     std::vector<double> tolerances = getTolerances(m_expectedPhases.size());
