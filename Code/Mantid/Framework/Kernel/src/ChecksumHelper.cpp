@@ -27,7 +27,7 @@ namespace ChecksumHelper
      */
     std::string loadFile(const std::string & filepath, const bool unixEOL = false)
     {
-      std::ifstream filein(filepath, std::ios::in | std::ios::binary);
+      std::ifstream filein(filepath.c_str(), std::ios::in | std::ios::binary);
       if(!filein) return "";
 
       std::string contents;
