@@ -55,6 +55,8 @@ include_directories ( SYSTEM ${NEXUS_INCLUDE_DIR} )
 
 find_package ( MuParser REQUIRED )
 
+find_package ( JsonCPP REQUIRED )
+
 find_package ( Doxygen ) # optional
 
 # Need to change search path to find zlib include on Windows.

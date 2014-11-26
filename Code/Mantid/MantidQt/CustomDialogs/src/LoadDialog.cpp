@@ -81,20 +81,32 @@ namespace MantidQt
     }
 
     /**
-    * Suggest a workspace name from the file
+    * Use property 'OutputWorkspace' as suggestion if present, otherwise derive a workspace name from 
+    * the file (base) name
     */
     void LoadDialog::suggestWSName()
     {
-      if( !m_form.workspaceEdit->isEnabled() ) return;
-      QString suggestion;
-      if( m_form.fileWidget->isValid() )
+      if( !m_form.workspaceEdit->isEnabled() )
+        return;
+
+      const std::string& outWsName = getAlgorithm()->getPropertyValue("OutputWorkspace");
+      if (!outWsName.empty())
       {
-        if( m_form.fileWidget->getFilenames().size() == 1 )
-          suggestion = QFileInfo(m_form.fileWidget->getFirstFilename()).completeBaseName();
-        else
-          suggestion = "MultiFiles";
+          m_form.workspaceEdit->setText(QString::fromStdString(outWsName));
       }
-      m_form.workspaceEdit->setText(suggestion);
+      else
+      {
+        // Only if no value given for the property 'OutputWorkspace', suggest ws name based on file name
+        QString fileSuggestion;
+        if( m_form.fileWidget->isValid() )
+        {
+          if( m_form.fileWidget->getFilenames().size() == 1 )
+            fileSuggestion = QFileInfo(m_form.fileWidget->getFirstFilename()).completeBaseName();
+          else
+            fileSuggestion = "MultiFiles";
+        }
+        m_form.workspaceEdit->setText(fileSuggestion);
+      }
     }
 
     /**

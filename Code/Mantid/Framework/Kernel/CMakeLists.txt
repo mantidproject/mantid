@@ -32,6 +32,7 @@ set ( SRC_FILES
 	src/IPropertyManager.cpp
 	src/ISaveable.cpp
 	src/InstrumentInfo.cpp
+	src/InternetHelper.cpp
 	src/Interpolation.cpp
 	src/LibraryManager.cpp
 	src/LibraryWrapper.cpp
@@ -160,6 +161,7 @@ set ( INC_FILES
 	inc/MantidKernel/IValidator.h
 	inc/MantidKernel/Instantiator.h
 	inc/MantidKernel/InstrumentInfo.h
+	inc/MantidKernel/InternetHelper.h
 	inc/MantidKernel/Interpolation.h
 	inc/MantidKernel/LibraryManager.h
 	inc/MantidKernel/LibraryWrapper.h
@@ -284,6 +286,7 @@ set ( TEST_FILES
 	ISaveableTest.h
 	IValidatorTest.h
 	InstrumentInfoTest.h
+	InternetHelperTest.h
 	InterpolationTest.h
 	ListValidatorTest.h
 	LogFilterTest.h
@@ -381,7 +384,8 @@ set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
  target_link_libraries ( Kernel stdc++ )
 endif()
-target_link_libraries ( Kernel ${NEXUS_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} ${NETWORK_LIBRARIES} )
+target_link_libraries ( Kernel ${NEXUS_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} 
+                        ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} )
 if ( WIN32 )
   target_link_libraries ( Kernel Psapi.lib ) # For memory usage queries
 endif()
