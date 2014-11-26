@@ -32,7 +32,7 @@ QwtWorkspaceSpectrumData *QwtWorkspaceSpectrumData::copy() const
 */
  QwtWorkspaceSpectrumData* QwtWorkspaceSpectrumData::copyWithNewSource(const Mantid::API::MatrixWorkspace & workspace) const
 {
-  return new QwtWorkspaceSpectrumData(workspace, m_spec, m_logScale);
+  return new QwtWorkspaceSpectrumData(workspace, m_spec, m_logScale, m_isDistribution);
 }
 
 
