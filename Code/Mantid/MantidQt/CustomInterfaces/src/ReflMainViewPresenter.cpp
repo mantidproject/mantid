@@ -1046,6 +1046,8 @@ namespace MantidQt
       case IReflPresenter::TransferFlag:        transfer();          break;
       case IReflPresenter::ImportTableFlag:     importTable();       break;
       case IReflPresenter::ExportTableFlag:     exportTable();       break;
+      case IReflPresenter::PlotRowFlag:         plotRow();           break;
+      case IReflPresenter::PlotGroupFlag:       plotGroup();         break;
       }
       //Not having a 'default' case is deliberate. gcc issues a warning if there's a flag we aren't handling.
     }
@@ -1391,6 +1393,81 @@ namespace MantidQt
         m_model->setData(m_model->index(rowIndex, COL_SCALE), 1.0);
         m_model->setData(m_model->index(rowIndex, COL_GROUP), groups[row["group"]]);
       }
+    }
+
+    /** Plots any currently selected rows */
+    void ReflMainViewPresenter::plotRow()
+    {
+      auto selectedRows = m_view->getSelectedRows();
+
+      if(selectedRows.empty())
+        return;
+
+      std::set<std::string> workspaces, notFound;
+      for(auto row = selectedRows.begin(); row != selectedRows.end(); ++row)
+      {
+        const std::string wsName = "IvsQ_" + getRunNumber(prepareRunWorkspace(m_model->data(m_model->index(*row, COL_RUNS)).toString().toStdString()));
+        if(AnalysisDataService::Instance().doesExist(wsName))
+          workspaces.insert(wsName);
+        else
+          notFound.insert(wsName);
+      }
+
+      if(!notFound.empty())
+        m_view->giveUserWarning(
+            "The following workspaces were not plotted because they were not found:\n"
+            + boost::algorithm::join(notFound, "\n") +
+            "\n\nPlease check that the rows you are trying to plot have been fully processed.",
+            "Error plotting rows.");
+
+      m_view->plotWorkspaces(workspaces);
+    }
+
+    /** Plots any currently selected groups */
+    void ReflMainViewPresenter::plotGroup()
+    {
+      auto selectedRows = m_view->getSelectedRows();
+
+      if(selectedRows.empty())
+        return;
+
+      std::set<int> selectedGroups;
+      for(auto row = selectedRows.begin(); row != selectedRows.end(); ++row)
+        selectedGroups.insert(m_model->data(m_model->index(*row, COL_GROUP)).toInt());
+
+      //Now, get the names of the stitched workspace, one per group
+      std::map<int,std::vector<std::string>> runsByGroup;
+      const int numRows = m_model->rowCount();
+      for(int row = 0; row < numRows; ++row)
+      {
+        int group = m_model->data(m_model->index(row, COL_GROUP)).toInt();
+
+        //Skip groups we don't care about
+        if(selectedGroups.find(group) == selectedGroups.end())
+          continue;
+
+        //Add this to the list of runs
+        runsByGroup[group].push_back(getRunNumber(prepareRunWorkspace(m_model->data(m_model->index(row, COL_RUNS)).toString().toStdString())));
+      }
+
+      std::set<std::string> workspaces, notFound;
+      for(auto runsMap = runsByGroup.begin(); runsMap != runsByGroup.end(); ++runsMap)
+      {
+        const std::string wsName = "IvsQ_" + boost::algorithm::join(runsMap->second, "_");
+        if(AnalysisDataService::Instance().doesExist(wsName))
+          workspaces.insert(wsName);
+        else
+          notFound.insert(wsName);
+      }
+
+      if(!notFound.empty())
+        m_view->giveUserWarning(
+            "The following workspaces were not plotted because they were not found:\n"
+            + boost::algorithm::join(notFound, "\n") +
+            "\n\nPlease check that the groups you are trying to plot have been fully processed.",
+            "Error plotting groups.");
+
+      m_view->plotWorkspaces(workspaces);
     }
 
     /** Shows the Refl Options dialog */
