@@ -155,7 +155,7 @@ file ( WRITE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh "#!/bin/bash
 execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh"
                   OUTPUT_QUIET ERROR_QUIET )
 # Package version
-install ( FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}launch_mantidplot.sh
+install ( FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh
           DESTINATION ${BIN_DIR}
           PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
           GROUP_EXECUTE GROUP_READ
