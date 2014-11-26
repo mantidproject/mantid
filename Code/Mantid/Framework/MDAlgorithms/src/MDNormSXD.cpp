@@ -364,7 +364,7 @@ namespace Mantid
       integrFlux->getXMinMax(m_kiMin, m_kiMax);
       API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
       
-      const auto & exptInfoZero = *(m_normWS->getExperimentInfo(0));
+      const auto & exptInfoZero = *(m_inputWS->getExperimentInfo(0));
       typedef Kernel::PropertyWithValue<std::vector<double> > VectorDoubleProperty;
       auto *rubwLog = dynamic_cast<VectorDoubleProperty*>(exptInfoZero.getLog("RUBW_MATRIX"));
       if(!rubwLog)
@@ -398,8 +398,18 @@ namespace Mantid
 
         const auto detID = detIDs[i];
         double theta(0.0), phi(0.0);
-        auto spectrum = getThetaPhi(detID, exptInfoZero, theta, phi);
-        if(spectrum->isMonitor() || spectrum->isMasked()) continue;
+        bool skip(false);
+        try
+        {
+          auto spectrum = getThetaPhi(detID, exptInfoZero, theta, phi);
+          if(spectrum->isMonitor() || spectrum->isMasked()) continue;
+        }
+        catch(std::exception&) // detector might not exist or has no been included in grouping
+        {
+          skip = true;// Intel compiler has a problem with continue inside a catch inside openmp...
+        }
+        if(skip) continue;
+
         // Intersections
         auto intersections = calculateIntersections(theta, phi);
         if(intersections.empty()) continue;
@@ -565,20 +575,27 @@ namespace Mantid
       const size_t ntotal = detIDs.size();
       std::vector<detid_t> singleIDs;
       singleIDs.reserve(ntotal/2); // reserve half. In the case of 1:1 it will double to the correct size once
+      std::set<detid_t> groupedIDs;
       
       for(auto iter = detIDs.begin(); iter != detIDs.end(); ++iter)
       {
-        detid_t frontID = *iter;
+        detid_t curID = *iter;
+        if(groupedIDs.count(curID) == 1) continue; // Already been processed
+
         try
         {
-          const auto & members = exptInfo.getGroupMembers(*iter);
-          frontID = members.front();
+          const auto & members = exptInfo.getGroupMembers(curID);
+          singleIDs.push_back(members.front());
+          std::copy(members.begin() + 1, members.end(),
+                    std::inserter(groupedIDs, groupedIDs.begin()));
         }
         catch (std::runtime_error &)
-        {}
-        singleIDs.push_back(frontID);
+        {
+          singleIDs.push_back(curID);
+        }
       }
       
+      g_log.debug() << "Found " << singleIDs.size() << " spectra from  " << detIDs.size() << " IDs\n";
       return singleIDs;
     }
 
