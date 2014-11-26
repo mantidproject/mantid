@@ -148,6 +148,8 @@ class BASISReduction(PythonAlgorithm):
                        OutputWorkspace=self._samSqwWs,
                        QAxisBinning=self._qBins, EMode='Indirect',
                        EFixed='2.0826')
+            # Clear mask from reduced file. Needed for binary operations involving this S(Q,w)
+            api.ClearMaskFlag(Workspace=self._samSqwWs)
 
             dave_grp_filename = self._makeRunName(self._samWsRun,
                                                   False) + ".dat"

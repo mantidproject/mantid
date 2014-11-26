@@ -29,6 +29,8 @@ namespace Geometry
     virtual ~ReflectionCondition() {}
     /// Name of the reflection condition
     virtual std::string getName() = 0;
+    /// Symbol of the associated lattice centering.
+    virtual std::string getSymbol() = 0;
     /// Return true if the hkl is allowed.
     virtual bool isAllowed(int h, int k, int l) = 0;
   };
@@ -40,6 +42,8 @@ namespace Geometry
   public:
     /// Name of the reflection condition
     virtual std::string getName() { return "Primitive"; }
+    /// Symbol of the associated lattice centering.
+    virtual std::string getSymbol() { return "P"; }
     /// Return true if the hkl is allowed.
     virtual bool isAllowed(int /*h*/, int /*k*/, int /*l*/) { return true; }
   };
@@ -51,6 +55,8 @@ namespace Geometry
   public:
     /// Name of the reflection condition
     virtual std::string getName() { return "C-face centred"; }
+    /// Symbol of the associated lattice centering.
+    virtual std::string getSymbol() { return "C"; }
     /// Return true if the hkl is allowed.
     virtual bool isAllowed(int h, int k, int /*l*/) { return (((h+k)%2)==0); }
   };
@@ -62,6 +68,8 @@ namespace Geometry
   public:
     /// Name of the reflection condition
     virtual std::string getName() { return "A-face centred"; }
+    /// Symbol of the associated lattice centering.
+    virtual std::string getSymbol() { return "A"; }
     /// Return true if the hkl is allowed.
     virtual bool isAllowed(int /*h*/, int k, int l) { return (((k+l)%2)==0); }
   };
@@ -73,6 +81,8 @@ namespace Geometry
   public:
     /// Name of the reflection condition
     virtual std::string getName() { return "B-face centred"; }
+    /// Symbol of the associated lattice centering.
+    virtual std::string getSymbol() { return "B"; }
     /// Return true if the hkl is allowed.
     virtual bool isAllowed(int h, int /*k*/, int l) { return (((h+l)%2)==0); }
   };
@@ -84,6 +94,8 @@ namespace Geometry
   public:
     /// Name of the reflection condition
     virtual std::string getName() { return "Body centred"; }
+    /// Symbol of the associated lattice centering.
+    virtual std::string getSymbol() { return "I"; }
     /// Return true if the hkl is allowed.
     virtual bool isAllowed(int h, int k, int l) { return ((h+k+l)%2)==0; }
   };
@@ -95,6 +107,8 @@ namespace Geometry
   public:
     /// Name of the reflection condition
     virtual std::string getName() { return "All-face centred"; }
+    /// Symbol of the associated lattice centering.
+    virtual std::string getSymbol() { return "F"; }
     /// Return true if the hkl is allowed.
     virtual bool isAllowed(int h, int k, int l)
     { return (((((h+k)%2)==0) && (((h+l)%2)==0) && (((k+l)%2)==0)) | ((h%2==0) && (k%2==0) && (l%2==0)) || ((h%2==1) && (k%2==1) && (l%2==1))); }
@@ -107,6 +121,8 @@ namespace Geometry
   public:
     /// Name of the reflection condition
     virtual std::string getName() { return "Rhombohedrally centred, obverse"; }
+    /// Symbol of the associated lattice centering.
+    virtual std::string getSymbol() { return "Robv"; }
     /// Return true if the hkl is allowed.
     virtual bool isAllowed(int h, int k, int l) { return (((-h+k+l)%3)==0); }
   };
@@ -118,6 +134,8 @@ namespace Geometry
   public:
     /// Name of the reflection condition
     virtual std::string getName() { return "Rhombohedrally centred, reverse"; }
+    /// Symbol of the associated lattice centering.
+    virtual std::string getSymbol() { return "Rrev"; }
     /// Return true if the hkl is allowed.
     virtual bool isAllowed(int h, int k, int l) { return (((h-k+l)%3)==0); }
   };
@@ -129,6 +147,8 @@ namespace Geometry
   public:
     /// Name of the reflection condition
     virtual std::string getName() { return "Hexagonally centred, reverse"; }
+    /// Symbol of the associated lattice centering.
+    virtual std::string getSymbol() { return "H"; }
     /// Return true if the hkl is allowed.
     virtual bool isAllowed(int h, int k, int /*l*/) { return (((h-k)%3)==0); }
   };

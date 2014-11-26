@@ -3,7 +3,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/IReflSearcher.h"
@@ -83,13 +82,13 @@ namespace MantidQt
       //get an unused group id
       int getUnusedGroup(std::set<int> ignoredRows = std::set<int>()) const;
       //make a transmission workspace
-      Mantid::API::MatrixWorkspace_sptr makeTransWS(const std::string& transString);
+      Mantid::API::Workspace_sptr makeTransWS(const std::string& transString);
       //Validate a row
       void validateRow(int rowNo) const;
       //Autofill a row with sensible values
       void autofillRow(int rowNo);
       //calculates qmin and qmax
-      std::vector<double> calcQRange(Mantid::API::MatrixWorkspace_sptr ws, double theta);
+      std::vector<double> calcQRange(Mantid::API::Workspace_sptr ws, double theta);
       //get the number of rows in a group
       size_t numRowsInGroup(int groupId) const;
       //Stitch some rows

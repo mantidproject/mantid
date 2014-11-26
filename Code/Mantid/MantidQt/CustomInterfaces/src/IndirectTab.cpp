@@ -83,10 +83,10 @@ namespace CustomInterfaces
     load->setProperty("OutputWorkspace", outputName.toStdString());
 
     if(specMin != -1)
-      load->setProperty("SpectrumMin", specMin);
+      load->setPropertyValue("SpectrumMin", boost::lexical_cast<std::string>(specMin));
 
     if(specMax != -1)
-      load->setProperty("SpectrumMax", specMax);
+      load->setPropertyValue("SpectrumMax", boost::lexical_cast<std::string>(specMax));
 
     load->execute();
 
