@@ -1214,13 +1214,13 @@ namespace Mantid
       if (m_isAlgStartupLoggingEnabled)
       {
         logger.notice() << name() << " started";
+        if (this->isChild())
+          logger.notice() << " (child)";
+        logger.notice() << std::endl;
+        // Make use of the AlgorithmHistory class, which holds all the info we want here
+        AlgorithmHistory AH(this);
+        logger.information() << AH;
       }
-      if (this->isChild())
-        logger.notice() << " (child)";
-      logger.notice() << std::endl;
-      // Make use of the AlgorithmHistory class, which holds all the info we want here
-      AlgorithmHistory AH(this);
-      logger.information() << AH;
     }
 
 
