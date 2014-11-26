@@ -7,12 +7,12 @@ import os
 
 
 class DirectReductionProperties(object):
-    """ Class describes basic properties, used in reduction
+    """ Class contains main properties, used in reduction, and not described in 
+        IDF
 
         These properties are main set of properties, user have to set up 
         for reduction to work with defaults. 
 
-        It also contains various auxiliary non-IDF properties. 
     """
 
     # logging levels available for user
@@ -24,8 +24,8 @@ class DirectReductionProperties(object):
           "debug" :       lambda (msg):   logger.debug(msg)}
 
 
-    def __init__(self,InsturmentName,run_number=None,wb_run_number=None): 
-        object.__setattr__(self,'_run_number',run_number);
+    def __init__(self,InsturmentName,run_workspace=None,wb_run_number=None): 
+        object.__setattr__(self,'_run_number',run_workspace);
         object.__setattr__(self,'_wb_run_number',wb_run_number);
 
         object.__setattr__(self,'_monovan_run_number',None);
@@ -36,14 +36,14 @@ class DirectReductionProperties(object):
         object.__setattr__(self,'_energy_bins',None);
 
         #
-        object.__setattr__(self,'_pInstrument',self._set_instrument(InsturmentName,run_number,wb_run_number));
+        object.__setattr__(self,'_pInstrument',self._set_instrument(InsturmentName,run_workspace,wb_run_number));
         # Helper properties, defining logging options 
         object.__setattr__(self,'_log_level','notice');
         object.__setattr__(self,'_log_to_mantid',True);
 
         object.__setattr__(self,'_psi',float('NaN'));
         object.__setattr__(self,'_second_white',None);
-
+  
     #end
 
     def getDefaultParameterValue(self,par_name):
@@ -208,16 +208,23 @@ class DirectReductionProperties(object):
             val = bool(value)
         object.__setattr__(self,'_apply_kikf_correction',val);
 
-    # 
-    def _set_instrument(self,InstrumentName,run_number,wb_run_number):
+    # -----------------------------------------------------------------------------
+    # Service properties (used by class itself)
+    #
+
+    def _set_instrument(self,InstrumentName,run_workspace=None,wb_run_number=None):
         """ simple method used to obtain default instrument for testing """
         # TODO: implement advanced instrument setter, used in DirectEnergy conversion
-        idf_dir = config.getString('instrumentDefinition.directory')
-        idf_file=api.ExperimentInfo.getInstrumentFilename(InstrumentName)
-        tmp_ws_name = '__empty_' + InstrumentName
-        if not mtd.doesExist(tmp_ws_name):
+
+        if run_workspace:
+            return run_workspace.getInstrumetnt();
+        else:
+            idf_dir = config.getString('instrumentDefinition.directory')
+            idf_file=api.ExperimentInfo.getInstrumentFilename(InstrumentName)
+            tmp_ws_name = '__empty_' + InstrumentName
+            if not mtd.doesExist(tmp_ws_name):
                LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
-        return mtd[tmp_ws_name].getInstrument();
+            return mtd[tmp_ws_name].getInstrument();
 
 
     def log(self, msg,level="notice"):
@@ -433,33 +440,85 @@ class SaveFormat(object):
 #end SaveFormat
 
 class DiagSpectra(object):
-    """ class describes spectra list which can be used in diagnostics """
+    """ class describes spectra list which should be used in diagnostics 
+
+        consist of tuples list where each tuple are the numbers 
+        indicating first-last spectra in the group.
+        if None, all spectra are used in diagnostics
+
+        TODO: not fully completed, a setter does not verify string and non-string values
+    """
     def __get__(self,instance,type=None):
-       try:
-           return  prop_helpers.gen_getter(instance.__dict__,'spectra_to_monitors_list');
-       except KeyError:
-           return None
+       sp_string = prop_helpers.gen_getter(instance.__dict__,'diag_spectra');
+       if sp_string:
+            return self.__process_spectra_list(sp_string);
+       else:
+            return None
+
     def __set__(self,instance,spectra_list):
-            self.diag_spectra.split(";")
+            prop_helpers.gen_setter(instance.__dict__,'diag_spectra',spectra_list);
+
+    def __process_spectra_list(self,specta_sring):
+        """ process IDF description of the spectra string """
+        if specta_sring.lower() in ['none','no']:
+            return None
+        else:
+            banks = specta_sring.split(";")
             bank_spectra = []
             for b in banks:
                 token = b.split(",")  # b = "(,)"
                 if len(token) != 2:
-                    raise ValueError("Invalid bank spectra specification in diag %s" % self.diag_spectra)
+                    raise ValueError("Invalid bank spectra specification in diagnostics properties %s" % specta_sring)
                 start = int(token[0].lstrip('('))
                 end = int(token[1].rstrip(')'))
                 bank_spectra.append((start,end))
+        return bank_spectra;
+
+class BackbgroundTestRange(object):
+    """ The TOF range used in diagnostics to reject high background spectra. 
+
+        Usually it is the same range as the TOF range used to remove 
+        background (in powders) though it may be set up separately.        
+    """
+    def __get__(self,instance,type=None):
+       range = prop_helpers.gen_getter(instance.__dict__,'_background_test_range');
+       if range  :
+            return range 
+       else:
+            return instance.bkgd_range;
+
+    def __set__(self,instance,value):
+        if value is None:
+           range = prop_helpers.gen_setter(instance.__dict__,'_background_test_range',None);
+           return
+        if isinstance(value,str):
+            value = str.split(value,',')
+        if len(value) != 2:
+            raise ValueError("background test range can be set to a 2 element list of floats")
+
+        range = prop_helpers.gen_setter(instance.__dict__,'_background_test_range',[float(value[0]),float(value[1])]);
+
+
 #end DiagSpectra
-
-
-
 #-----------------------------------------------------------------------------------------
 # END Descriptors, Direct property manager itself
 #-----------------------------------------------------------------------------------------
+
 class DirectPropertyManager(DirectReductionProperties):
     """Class provides interface to all reduction properties, present in IDF
 
-       These properties are responsible for accurate turning up of the reduction
+       These properties are responsible for fine turning up of the reduction
+
+       Supported properties in IDF can be simple (prop[name]=value e.g. 
+       prop['vanadium_mass']=30.5 
+       
+       or complex 
+       where prop[name_complex_prop] value is equal [prop[name_1],prop[name_2]]
+       e.g. time interval used in normalization on monitor 1:
+       prop[norm_mon_integration_range] = [prop['norm-mon1-min'],prop['norm-mon1-max']]
+       prop['norm-mon1-min']=1000,prop['norm-mon1-max']=2000
+
+       properties which values described by more complex function have to have Descriptors. 
     """
 
     _class_wrapper ='_DirectPropertyManager__';
@@ -467,19 +526,20 @@ class DirectPropertyManager(DirectReductionProperties):
         #
         DirectReductionProperties.__init__(self,InstrumentName,run_number,wb_run_number);
         #
-
+        # define private properties served the class
         private_properties = {'descriptors':[],'subst_dict':{},'prop_allowed_values':{},'changed_properties':set(),
         'file_properties':[],'abs_norm_file_properties':[],
         'abs_units_par_to_change':[],'':[]};
-        #
+        # place these properties to __dict__  with proper decoration
         self._set_private_properties(private_properties);
         # ---------------------------------------------------------------------------------------------
-        # overloaded descriptors: Their generation should be automated
+        # overloaded descriptors. These properties have their personal descriptors, different from default
         all_methods = dir(self);
         self.__descriptors = prop_helpers.extract_non_system_names(all_methods);
 
-
+        # retrieve the dictionary of property-values described in IDF
         param_list = prop_helpers.get_default_idf_param_list(self.instrument);
+
 
         # build and use substitution dictionary
         if 'synonims' in param_list:
@@ -489,12 +549,19 @@ class DirectPropertyManager(DirectReductionProperties):
             del param_list['synonims']
         #end
 
-        # set up properties which have default parameters
+
+        # build and initiate  properties with default descriptors (TODO: consider complex automatic descriptors)
         param_list =  prop_helpers.build_properties_dict(param_list,self.__subst_dict)
+
+        # modify some non-standard properties, namely the IDF properties, which need overloaded getter (and this getter is provided)
+        if 'background_test_range' in param_list:
+            val = param_list['background_test_range']
+            param_list['_background_test_range'] = val;
+
         self.__dict__.update(param_list)
 
 
-        # file properties
+        # file properties -- the properties described files which should exist for reduction to work.
         self.__file_properties = ['det_cal_file','map_file','hard_mask_file']
         self.__abs_norm_file_properties = ['monovan_mapfile']
 
@@ -510,10 +577,7 @@ class DirectPropertyManager(DirectReductionProperties):
         # list of the parameters which should usually be changed by user and if not, user should be warn about it.
         self.__abs_units_par_to_change=['sample_mass','sample_rmm']
         # list of the parameters which should always be taken from IDF unless explicitly set from elsewhere. These parameters MUST have setters and getters
-        #self.__idf_param_located =['ei_mon_spectra']
-        # dictionary of the special setters & getters:
-
-        # list of the properties which have been changed:
+  
 
     def _set_private_properties(self,prop_dict):
 
@@ -549,7 +613,7 @@ class DirectPropertyManager(DirectReductionProperties):
             name =name0;
         #end
 
-        # redefine generic substitutions for None
+        # replace common substitutions for None
         if type(val) is str :
            val = val.lower()
            if (val == 'none' or len(val) == 0):
@@ -573,7 +637,8 @@ class DirectPropertyManager(DirectReductionProperties):
             super(DirectPropertyManager,self).__setattr__(name,val)
         else:
             prop_helpers.gen_setter(self.__dict__,name,val);
-        # record changes in parameter
+
+        # record changes in the property
         self.__changed_properties.add(name);
 
    # ----------------------------
@@ -595,7 +660,6 @@ class DirectPropertyManager(DirectReductionProperties):
     def getChangedProperties(self):
         """ method returns set of the properties changed from defaults """
         return self.__dict__[self._class_wrapper+'changed_properties'];
-    changed_properties = property(getChangedProperties);
 
 #----------------------------------------------------------------------------------
 #              Overloaded setters/getters
@@ -620,7 +684,8 @@ class DirectPropertyManager(DirectReductionProperties):
     use_hard_mask_only = HardMaskOnly();
     #
     diag_spectra = DiagSpectra();
-
+    #
+    background_test_range = BackbgroundTestRange();
 
 
     @property
@@ -629,44 +694,36 @@ class DirectPropertyManager(DirectReductionProperties):
             return True
         else:
             return False
+
+
     
-        
-
-    @property
-    def background_test_range(self):
-        if not hasattr(self,'_background_test_range') or self._background_test_range is None:
-            return self.bkgd_range;
-        else:
-            return self._background_test_range
-    @background_test_range.setter
-    def background_test_range(self,value):
-        if value is None:
-            self._background_test_range=None
-            return
-        if isinstance(value,str):
-            value = str.split(value,',')
-        if len(value) != 2:
-            raise ValueError("background test range can be set to a 2 element list of floats")
-
-        self._background_test_range=[float(value[0]),float(value[1])]
-
-
+       
 
     def set_input_parameters(self,**kwargs):
         """ Set input properties from a dictionary of parameters
 
-            Auxiliary methods used in old interface.
+            Auxiliary method used in old interface.
             Returns the list of changed properties.
         """
 
         for par_name,value in kwargs.items() :
-
             setattr(self,par_name,value);
 
         return self.getChangedProperties();
 
+    def get_diagnostics_parameters(self):
+        """ Return the dictionary of the properties used in diagnostics with their current values """ 
 
+        diag_param_list = ['tiny', 'huge', 'samp_zero', 'samp_lo', 'samp_hi','samp_sig',\
+                           'van_out_lo', 'van_out_hi', 'van_lo', 'van_hi', 'van_sig', 'variation',\
+                           'bleed_test','bleed_pixels','bleed_maxrate',\
+                           'hard_mask_file','use_hard_mask_only','background_test_range']
+        result = {};
+
+        for key in diag_param_list:
+            result[key] = getattr(self,key);
   
+        return result;
 
     def init_idf_params(self, reinitialize_parameters=False):
         """
@@ -745,12 +802,12 @@ class DirectPropertyManager(DirectReductionProperties):
 
 
 
-    def help(self,keyword=None) :
-        """function returns help on reduction parameters.
+    #def help(self,keyword=None) :
+    #    """function returns help on reduction parameters.
 
-           if provided without arguments it returns the list of the parameters available
-        """
-        raise KeyError(' Help for this class is not yet implemented: see {0}_Parameter.xml in the file for the parameters description'.format());
+    #       if provided without arguments it returns the list of the parameters available
+    #    """
+    #    raise KeyError(' Help for this class is not yet implemented: see {0}_Parameter.xml in the file for the parameters description'.format());
 
 if __name__=="__main__":
     pass

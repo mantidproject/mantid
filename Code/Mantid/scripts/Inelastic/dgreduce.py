@@ -293,8 +293,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
      # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
     if not   masks_done:
         print '########### Run diagnose for sample run ##############################'
-        masking = Reducer.diagnose(wb_run,sample = mask_run,
-                                    second_white=None,print_results=True)
+        masking = Reducer.diagnose(wb_run,mask_run, print_results=True)
         header = "Diag Processed workspace with {0:d} spectra and masked {1:d} bad spectra"
 
 
@@ -306,8 +305,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
                 else:
                     if not Reducer.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better soulution for that.
                         print '########### Run diagnose for monochromatic vanadium run ##############'
-                        masking2 = Reducer.diagnose(wb_for_monovanadium,sample=monovan_run,
-                                         second_white = None,rint_results=True)
+                        masking2 = Reducer.diagnose(wb_for_monovanadium,monovan_run,print_results=True)
                         masking +=  masking2
                         DeleteWorkspace(masking2)
 

@@ -58,7 +58,7 @@ class DirectEnergyConversion(object):
     Performs a convert to energy assuming the provided instrument is an elastic instrument
     """
 
-    def diagnose(self, white, **kwargs):
+    def diagnose(self, white,diag_sample=None,**kwargs):
         """
             Run diagnostics on the provided workspaces.
 
@@ -75,10 +75,13 @@ class DirectEnergyConversion(object):
                        have simple been loaded and nothing else.
 
             Optional inputs:
-              sample - A workspace, run number or filepath of a sample run. A workspace is assumed to
-                       have simple been loaded and nothing else. (default = None)
+              diag_sample - A workspace, run number or filepath of additional (sample) run used for diagnostics.
+                            A workspace is assumed to have simple been loaded and nothing else. (default = None)
+
               second_white - If provided an additional set of tests is performed on this. (default = None)
-              hard_mask  - A file specifying those spectra that should be masked without testing (default=None)
+              hard_mask    - A file specifying those spectra that should be masked without testing (default=None)
+
+              # IDF-based diagnostics parameters:
               tiny        - Minimum threshold for acceptance (default = 1e-10)
               huge        - Maximum threshold for acceptance (default = 1e10)
               background_test_range - A list of two numbers indicating the background range (default=instrument defaults)
@@ -88,7 +91,7 @@ class DirectEnergyConversion(object):
               van_hi      - Fraction of median to consider counting high for the white beam diag (default = 1.5)
               van_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
                           "difference with respect to the median value must also exceed this number of error bars (default=0.0)
-              samp_zero    - If true then zeroes in the vanadium data will count as failed (default = True)
+              samp_zero    - If true then zeros in the vanadium data will count as failed (default = True)
               samp_lo      - Fraction of median to consider counting low for the white beam diag (default = 0)
               samp_hi      - Fraction of median to consider counting high for the white beam diag (default = 2.0)
               samp_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
@@ -107,15 +110,11 @@ class DirectEnergyConversion(object):
         else:
             var_name = "diag_mask"
 
-        prop_man = selt.prop_man;
-        diag_params = prop_man.getDiagnosticsParameters();
-        for key,val in kwargs.iteritems():
-            diag_params[key]=val;
-        ## Check for any keywords that have not been supplied and put in the values set on reducer
-        #for par in self.__diag_params:
-        #    arg = par.lstrip('diag_')
-        #    if arg not in kwargs:
-        #        kwargs[arg] = getattr(self, arg)
+        prop_man = self.prop_man;
+        # modify properties using input arguments
+        prop_man.set_input_parameters(**kwargs);
+        # return all diagnostics parameters
+        diag_params = prop_man.get_diagnostics_parameters();
 
         # if input parameter is workspace rather then run, we want to keep it
         self._keep_wb_workspace = False
@@ -154,63 +153,51 @@ class DirectEnergyConversion(object):
             prop_man.second_white = other_whiteintegrals;
 
 
-        # Get the background/total counts from the sample if present
-        if 'sample' in kwargs:
-            sample = kwargs['sample']
-            del kwargs['sample']
+        # Get the background/total counts from the sample run if present
+        if diag_sample: 
             # If the bleed test is requested then we need to pass in the sample_run as well
             if prop_man.bleed_test:
-                kwargs['sample_run'] = sample
+                diag_params['sample_run'] = sample
 
             # Set up the background integrals
             result_ws = self.load_data(sample)
             result_ws = self.normalise(result_ws, result_ws.name(), self.normalise_method)
-            if 'background_test_range' in kwargs:
-                bkgd_range = kwargs['background_test_range']
-                del kwargs['background_test_range']
-            else:
-                bkgd_range = self.background_test_range
+
+            bkgd_range = prop_man.background_test_range
             background_int = Integration(result_ws,
                                          RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1],
                                          IncludePartialBins=True)
             total_counts = Integration(result_ws, IncludePartialBins=True)
             background_int = ConvertUnits(background_int, "Energy", AlignBins=0)
-            self.log("Diagnose: finished convertUnits ")
+            self.log("Diagnose: finished convertUnits ",'information')
+
             background_int *= prop_man.scale_factor;
             diagnostics.normalise_background(background_int, whiteintegrals, kwargs.get('second_white',None))
-            kwargs['background_int'] = background_int
-            kwargs['sample_counts'] = total_counts
+            diag_params['background_int'] = background_int
+            diag_params['sample_counts'] = total_counts
 
         # Check how we should run diag
-        if self.diag_spectra is None:
+        bank_spectra = prop_man.diag_spectra;
+        if diag_spectra is None:
             # Do the whole lot at once
-            diagnostics.diagnose(whiteintegrals, **kwargs)
+            diagnostics.diagnose(whiteintegrals, **diag_params)
         else:
-            banks = self.diag_spectra.split(";")
-            bank_spectra = []
-            for b in banks:
-                token = b.split(",")  # b = "(,)"
-                if len(token) != 2:
-                    raise ValueError("Invalid bank spectra specification in diag %s" % self.diag_spectra)
-                start = int(token[0].lstrip('('))
-                end = int(token[1].rstrip(')'))
-                bank_spectra.append((start,end))
-
             for index, bank in enumerate(bank_spectra):
-                kwargs['start_index'] = bank[0] - 1
-                kwargs['end_index'] = bank[1] - 1
+                diag_params['start_index'] = bank[0] - 1
+                diag_params['end_index']   = bank[1] - 1
                 diagnostics.diagnose(whiteintegrals, **kwargs)
 
-        if 'sample_counts' in kwargs:
+        if 'sample_counts' in diag_params:
             DeleteWorkspace(Workspace='background_int')
             DeleteWorkspace(Workspace='total_counts')
-        if 'second_white' in kwargs:
+        if 'second_white' in diag_params:
             DeleteWorkspace(Workspace=kwargs['second_white'])
-        # Return a mask workspace
+        # Extract a mask workspace
         diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=var_name)
 
         DeleteWorkspace(Workspace=whiteintegrals)
-        self.spectra_masks = diag_mask
+        #TODO do we need this?
+        #self.spectra_masks = diag_mask
         return diag_mask
 
 
@@ -222,9 +209,10 @@ class DirectEnergyConversion(object):
         (rather the detector electronic's efficiency as the geuger counters are very different in efficiency)
         and is used to remove the influence of this efficiency to the different detectors.
         """
+        propman = self.prop_man;
+        instr_name = propman.instr_name;
 
-
-        whitews_name = common.create_resultname(white_run, suffix='-white')
+        whitews_name = common.create_resultname(white_run, prefix = instr_name,suffix='-white')
         if whitews_name in mtd:
             DeleteWorkspace(Workspace=whitews_name)
         # Load
@@ -232,15 +220,14 @@ class DirectEnergyConversion(object):
 
         # Normalize
         self.__in_white_normalization = True;
-        white_ws = self.normalise(white_data, whitews_name, self.normalise_method,0.0,mon_number)
+        white_ws = self.normalise(white_data, whitews_name, propman.normalise_method,0.0,mon_number)
         self.__in_white_normalization = False;
 
         # Units conversion
         white_ws = ConvertUnits(InputWorkspace=white_ws,OutputWorkspace=whitews_name, Target= "Energy", AlignBins=0)
         self.log("do_white: finished convertUnits ")
         # This both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
-        low = self.wb_integr_range[0]
-        upp = self.wb_integr_range[1]
+        low,upp=prop_man.wb_integr_range;
         if low > upp:
             raise ValueError("White beam integration range is inconsistent. low=%d, upp=%d" % (low,upp))
         delta = 2.0*(upp - low)
@@ -666,14 +653,14 @@ class DirectEnergyConversion(object):
 
            Explores different ways of finding monitor workspace in Mantid and returns the python pointer to the
            workspace which contains monitors.
-
-
         """
+
+
         if mon_number is None:
             if method == 'monitor-2':
-               mon_spectr_num=int(self.mon2_norm_spec)
+               mon_spectr_num=int(self.prop_man.mon2_norm_spec)
             else:
-               mon_spectr_num=int(self.mon1_norm_spec)
+               mon_spectr_num=int(self.prop_man.mon1_norm_spec)
         else:
                mon_spectr_num=mon_number
 
@@ -898,9 +885,11 @@ class DirectEnergyConversion(object):
         """
 
         # this can be a workspace too
-        calibration = self.det_cal_file;
-        monitors_inWS=self.load_monitors_with_workspace
-        result_ws = common.load_runs(self.instr_name, runs, calibration=calibration, sum=True,load_with_workspace=monitors_inWS)
+        propman = self.prop_man;
+        calibration = propman.det_cal_file;
+        monitors_inWS=propman.load_monitors_with_workspace
+
+        result_ws = common.load_runs(propman.instr_name, runs, calibration=calibration, sum=True,load_with_workspace=monitors_inWS)
 
         mon_WsName = result_ws.getName()+'_monitors'
         if mon_WsName in mtd:
@@ -920,9 +909,9 @@ class DirectEnergyConversion(object):
                 if monitor_ws:
                     monitor_ws=RenameWorkspace(InputWorkspace=monitor_ws,OutputWorkspace=mon_WsName)
 
-        self.setup_mtd_instrument(result_ws)
-        if monitor_ws and self.spectra_to_monitors_list:
-            for specID in self.spectra_to_monitors_list:
+        self.setup_instrument_properties(result_ws)
+        if monitor_ws and propman.spectra_to_monitors_list:
+            for specID in propman.spectra_to_monitors_list:
                 self.copy_spectrum2monitors(result_ws,monitor_ws,specID);
 
         return result_ws
@@ -964,16 +953,6 @@ class DirectEnergyConversion(object):
        if 'tmp_mon' in mtd:
            DeleteWorkspace(WorkspaceName='tmp_mon');
 
-    #---------------------------------------------------------------------------
-    # Behind the scenes stuff
-    #---------------------------------------------------------------------------
-
-    def __init__(self, instr_name=None):
-        """
-        Constructor
-        """
-        self.initialise(instr_name);
-
     @property 
     def prop_man(self):
         """ Return property manager containing DirectEnergyConversion parameters """
@@ -985,32 +964,42 @@ class DirectEnergyConversion(object):
             self._propMan = value;
         else:
             raise KeyError("Property manager can be initialized by an instance of DirectProperyManager only")
+    #---------------------------------------------------------------------------
+    # Behind the scenes stuff
+    #---------------------------------------------------------------------------
 
-    def initialise(self, instr_name,reload_instrument=False):
+    def __init__(self, instr_name=None):
+        """
+        Constructor
+        """
+        self.initialise(instr_name);
+
+ 
+    def initialise(self, instr,reload_instrument=False):
         """
         Initialize the private attributes of the class and the nullify the attributes which expected to be always set-up from a calling script
         """
 
         # Instrument and default parameter setup
         # formats available for saving. As the reducer has to have a method to process one of this, it is private property
-        ## Detector diagnosis
-        # Diag parameters -- keys used by diag method to pick from default parameters. Diag cuts these keys removing diag_ word
-        # and tries to get rest from the correspondent Direct Energy conversion attributes.
-        self.__diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
-                              'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation',\
-                              'diag_bleed_test','diag_bleed_pixels','diag_bleed_maxrate','diag_hard_mask_file','diag_use_hard_mask_only','diag_background_test_range']
         if hasattr(self,'_propMan'):
+            if isinstance(instr,str):
+                instr_name = 
             if self._propMan is None or instr_name != self._propMan.instrument.getName() or reload_instrument:
                 self._propMan = DirectPropertyManager(instr_name);
         else:
-            self._propMan = DirectPropertyManager(instr_name);
+            self._propMan = DirectPropertyManager(instr);
+        #
+        # Internal properties and keys
+        self._keep_wb_workspace = False;
+        
 
-    def setup_mtd_instrument(self, workspace = None,reload_instrument=False):
+    def setup_instrument_properties(self, workspace = None,reload_instrument=False):
         if workspace != None:
-            # TODO: Check it!
-            self.instrument = workspace.getInstrument()
-            self.instr_name = self.instrument.getName()
-
+            instrument = workspace.getInstrument();
+            name      = instrument.getName();
+            if name != self.prop_man.instr_name:
+               self.prop_man = DirectPropertyManager(name,workspace);
 
 
     def check_abs_norm_defaults_changed(self,changed_param_list) :

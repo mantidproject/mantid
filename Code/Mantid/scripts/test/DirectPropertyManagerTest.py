@@ -2,6 +2,7 @@ from mantid.simpleapi import *
 from mantid import api
 import unittest
 import inspect
+import numpy as np
 from DirectPropertyManager import DirectPropertyManager
 
 
@@ -55,14 +56,14 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_set_non_default_simple_value(self):
         propman = self.prop_man
 
-        self.assertEqual(len(propman.changed_properties),0);
+        self.assertEqual(len(propman.getChangedProperties()),0);
         propman.van_mass = 100;
 
         self.assertAlmostEqual(propman.van_sig,0.,7)
 
         propman.diag_van_sig = 1;
 
-        prop_changed = propman.changed_properties;
+        prop_changed = propman.getChangedProperties();
 
         self.assertEqual(len(prop_changed),2)
         self.assertTrue('van_mass' in prop_changed)
@@ -71,7 +72,8 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_overloaded_setters_getters(self):
         propman = self.prop_man
 
-        self.assertEqual(len(propman.changed_properties),0);
+        changed_properties = propman.getChangedProperties()
+        self.assertEqual(len(changed_properties),0);
 
         self.assertAlmostEqual(propman.van_rmm,50.9415,9);
         self.assertRaises(AttributeError,setattr,propman,'van_rmm',100);
@@ -95,7 +97,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(propman.monovan_mapfile,'the_monovan_map_file.rst');
 
 
-        prop_changed = propman.changed_properties;
+        prop_changed =propman.getChangedProperties()
         self.assertEqual(len(prop_changed),4)
         self.assertTrue('det_cal_file' in prop_changed)
         self.assertTrue('hard_mask_file' in prop_changed)
@@ -130,7 +132,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEquals(467,propman.spectra_to_monitors_list[0]);
         self.assertEquals(444,propman.spectra_to_monitors_list[1]);
 
-        prop_changed = propman.changed_properties;
+        prop_changed = propman.getChangedProperties();
         self.assertEqual(len(prop_changed),1)
         self.assertTrue('spectra_to_monitors_list' in prop_changed)
 
@@ -156,7 +158,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         mon_spectra = propman.ei_mon_spectra;
         self.assertEqual(mon_spectra,[10,3])
 
-        prop_changed = propman.changed_properties;
+        prop_changed = propman.getChangedProperties();
         self.assertEqual(len(prop_changed),2)
         self.assertTrue('norm_mon_integration_range' in prop_changed)
 
@@ -168,7 +170,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.test_ei2_mon_spectra = 10000;
         self.assertEqual(propman.ei_mon_spectra,[41474,10000])
 
-        prop_changed = propman.changed_properties;
+        prop_changed = propman.getChangedProperties();
         self.assertEqual(len(prop_changed),1)
 
         self.assertTrue("ei_mon2_spec" in prop_changed,"changing test_ei2_mon_spectra should change ei_mon2_spectra")
@@ -177,7 +179,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.test_mon_spectra_composite = [10000,2000]        
         self.assertEqual(propman.ei_mon_spectra,[10000,2000])
 
-        prop_changed = propman.changed_properties;
+        prop_changed = propman.getChangedProperties();
         self.assertEqual(len(prop_changed),2)
 
         self.assertTrue("ei_mon_spectra" in prop_changed,"changing test_mon_spectra_composite should change ei_mon_spectra")
@@ -237,24 +239,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue(propman.load_monitors_with_workspace)
 
 
- #def test_default_warnings(self):
-    #    tReducer = self.reducer
-
-    #    keys_changed=['somethins_else1','sample_mass','sample_rmm','somethins_else2']
-
-    #    self.assertEqual(0,tReducer.check_abs_norm_defaults_changed(keys_changed))
-
-    #    keys_changed=['somethins_else1','sample_rmm','somethins_else2']
-    #    self.assertEqual(1,tReducer.check_abs_norm_defaults_changed(keys_changed))
-
-    #    keys_changed=['somethins_else1','somethins_else2']
-    #    self.assertEqual(2,tReducer.check_abs_norm_defaults_changed(keys_changed))
-    #def test_do_white(self) :
-    #    tReducer = self.reducer
-    #    monovan = 1000
-    #    data = None
-    #    name = tReducer.make_ckpt_name('do_white',monovan,data,'t1')
-    #    self.assertEqual('do_white1000t1',name)
 
     def test_get_default_parameter_val(self):
         propman = self.prop_man
@@ -310,75 +294,70 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         self.assertRaises(KeyError,setattr,propman,'normalise_method','unsupported');
 
+    def test_ki_kf(self):
+        propman = self.prop_man
+
+        self.assertTrue(propman.apply_kikf_correction)
+
+        propman.apply_kikf_correction = True;
+        self.assertTrue(propman.apply_kikf_correction)
+        propman.apply_kikf_correction = False;
+        self.assertFalse(propman.apply_kikf_correction)
+
+    def test_instr_name_and_psi(self):
+        propman = self.prop_man
+
+        psi = propman.psi;
+        self.assertTrue(np.isnan(psi))
 
 
-    #def test_save_formats(self):
-    #    tReducer = self.reducer;
+        instr_name = propman.instr_name;
+        self.assertEqual(instr_name,'MAR')
 
-    #    ws_name = '__empty_'+tReducer._instr_name
+        propman.psi = 10
+        self.assertEqual(propman.psi,10)
+    def test_diag_spectra(self):
+        propman = self.prop_man
 
-    #    pws = mtd[ws_name]
-    #    self.assertEqual(pws.name(),ws_name);
-    #    self.assertTrue(tReducer.save_format is None)
-    #    # do nothing
-    #    tReducer.save_results(pws,'test_path')
-    #    tReducer.test_name='';
-    #    def f_spe(workspace, filename):
-    #            tReducer.test_name += (workspace.name()+'_file_spe_' + filename)
-    #    def f_nxspe(workspace, filename):
-    #            tReducer.test_name += (workspace.name()+'_file_nxspe_' + filename)
-    #    def f_nxs(workspace, filename):
-    #            tReducer.test_name += (workspace.name()+'_file_nxs_' + filename)
+        self.assertTrue(propman.diag_spectra is None)
 
+        propman.diag_spectra ='(19,299);(399,500)'
+        spectra = propman.diag_spectra
+        self.assertEqual(spectra[0],(19,299));
+        self.assertEqual(spectra[1],(399,500));
 
-    #    # redefine test save methors to produce test ouptut
-    #    tReducer._DirectEnergyConversion__save_formats['.spe']=lambda workspace,filename: f_spe(workspace,filename);
-    #    tReducer._DirectEnergyConversion__save_formats['.nxspe']=lambda workspace,filename : f_nxspe(workspace,filename);
-    #    tReducer._DirectEnergyConversion__save_formats['.nxs']=lambda workspace,filename : f_nxs(workspace,filename);
+        propman  = DirectPropertyManager("MAP");
+        spectra = propman.diag_spectra
+        # (1,17280);(17281,18432);(18433,32256);(32257,41472)
+        self.assertEqual(len(spectra),4)
+        self.assertEqual(spectra[0],(1,17280));
+        self.assertEqual(spectra[3],(32257,41472));
 
 
 
-    #    # set non-exisiting format
-    #    tReducer.save_format = 'non-existing-format'
-    #    self.assertTrue(tReducer.save_format is None)
+ #def test_default_warnings(self):
+    #    tReducer = self.reducer
 
-    #    tReducer.save_format = 'spe'
-    #    self.assertTrue(tReducer.save_format is None)
+    #    keys_changed=['somethins_else1','sample_mass','sample_rmm','somethins_else2']
 
-    #    tReducer.save_format = '.spe'
-    #    self.assertEqual(tReducer.save_format,['.spe'])
+    #    self.assertEqual(0,tReducer.check_abs_norm_defaults_changed(keys_changed))
 
-    #    tReducer.test_name='';
-    #    tReducer.save_results(pws)
-    #    self.assertEquals(ws_name+'_file_spe_'+ws_name+'.spe',tReducer.test_name)
-    #    file_long_name = ws_name+'_file_spe_other_file_name.spe'
+    #    keys_changed=['somethins_else1','sample_rmm','somethins_else2']
+    #    self.assertEqual(1,tReducer.check_abs_norm_defaults_changed(keys_changed))
 
-    #    tReducer.test_name='';
-    #    tReducer.save_results(pws,'other_file_name')
-    #    self.assertEquals(file_long_name,tReducer.test_name)
-
-    #    file_long_name=ws_name+'_file_nxspe_ofn.nxspe'+ws_name+'_file_nxs_ofn.nxs'
-    #    tReducer.test_name='';
-    #    tReducer.save_results(pws,'ofn',['.nxspe','.nxs'])
-    #    self.assertEquals(file_long_name,tReducer.test_name)
-
-    #    #clear all previous default formats
-    #    tReducer.save_format=[];
-    #    self.assertTrue(tReducer.save_format is None)
-
-    #    format_list = ['.nxspe','.nxs','.spe']
-    #    file_long_name = '';
-    #    tReducer.save_format = format_list;
-    #    for i in xrange(len(format_list)):
-    #        self.assertEqual(tReducer.save_format[i],format_list[i]);
-    #        end = len(format_list[i]);
-    #        file_long_name+=ws_name+'_file_'+format_list[i][1:end]+'_ofn'+format_list[i]
-
-    #    tReducer.test_name='';
-    #    tReducer.save_results(pws,'ofn')
-    #    self.assertEquals(file_long_name,tReducer.test_name)
+    #    keys_changed=['somethins_else1','somethins_else2']
+    #    self.assertEqual(2,tReducer.check_abs_norm_defaults_changed(keys_changed))
+    #def test_do_white(self) :
+    #    tReducer = self.reducer
+    #    monovan = 1000
+    #    data = None
+    #    name = tReducer.make_ckpt_name('do_white',monovan,data,'t1')
+    #    self.assertEqual('do_white1000t1',name)
 
 
+
+
+    
 
 if __name__=="__main__":
         unittest.main()
