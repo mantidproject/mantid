@@ -67,6 +67,10 @@
       <value val="40000" />
     </parameter>
 
+    <parameter name="Workflow.GroupingMethod" type="string">
+      <value val="All" />
+    </parameter>
+
     <parameter name="Workflow.Masking" type="string">
       <value val="IdentifyNoisyDetectors" />
     </parameter>
