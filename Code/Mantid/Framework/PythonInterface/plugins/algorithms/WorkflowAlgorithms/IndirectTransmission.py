@@ -50,10 +50,10 @@ class IndirectTransmission(PythonAlgorithm):
                              doc='Sample chemical formula')
 
         self.declareProperty(name='NumberDensity', defaultValue=0.1,
-                             doc='Number denisty. Default=0.1')
+                             doc='Number denisty (atoms/Angstrom^3). Default=0.1')
 
         self.declareProperty(name='Thickness', defaultValue=0.1,
-                             doc='Sample thickness. Default=0.1')
+                             doc='Sample thickness (cm). Default=0.1')
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', "", Direction.Output),
                              doc="The name of the output workspace.")
