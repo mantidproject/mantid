@@ -193,7 +193,7 @@ int InternetHelper::sendHTTPSRequest(const std::string& url,
     HTTPSClientSession session(uri.getHost(), static_cast<Poco::UInt16>(uri.getPort()));
     session.setTimeout(Poco::Timespan(m_timeout, 0)); // m_timeout seconds
 
-    if (!getProxy(url).emptyProxy())
+    if (!getProxy(uri.getHost()).emptyProxy())
     {
       session.setProxyHost(getProxy(url).host());
       session.setProxyPort(static_cast<Poco::UInt16>(getProxy(url).port()));
