@@ -365,7 +365,6 @@ namespace API
   {
     if(m_detgroups.empty())
     {
-      g_log.debug("No detector mapping cached, getting detector from instrument");
       return getInstrument()->getDetector(detID);
     }
     else
