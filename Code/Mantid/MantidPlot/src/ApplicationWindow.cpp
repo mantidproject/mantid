@@ -1014,7 +1014,6 @@ void ApplicationWindow::initToolBars()
   plotTools->addAction(btnZoomOut);
   plotTools->addAction(actionUnzoom);
 
-
   btnCursor = new QAction(tr("&Data Reader"), this);
   btnCursor->setShortcut( tr("CTRL+D") );
   btnCursor->setActionGroup(dataTools);
@@ -1064,21 +1063,21 @@ void ApplicationWindow::initToolBars()
   plotTools->addSeparator ();
 
   btnLabel = new QAction(tr("Label &Tool"), this);
-  btnLabel->setShortcut(tr("ALT+T"));
+  btnLabel->setShortcut(tr("Ctrl+Alt+T"));
   btnLabel->setActionGroup(dataTools);
   btnLabel->setIcon(QIcon(getQPixmap("text_xpm")));
   btnLabel->setCheckable(true);
-  plotTools->addAction(btnLabel); //disabled until fixed (#2783)
+  plotTools->addAction(btnLabel);
 
   btnArrow = new QAction(tr("Draw &Arrow"), this);
-  btnArrow->setShortcut( tr("CTRL+ALT+A") );
+  btnArrow->setShortcut( tr("Ctrl+Alt+A") );
   btnArrow->setActionGroup(dataTools);
   btnArrow->setCheckable( true );
   btnArrow->setIcon(QIcon(getQPixmap("arrow_xpm")) );
   plotTools->addAction(btnArrow);
 
-  btnLine = new QAction(tr("Draw &Line"), this);
-  btnLine->setShortcut( tr("CTRL+ALT+L") );
+  btnLine = new QAction(tr("Draw Li&ne"), this);
+  btnLine->setShortcut( tr("Ctrl+Alt+N") );
   btnLine->setActionGroup(dataTools);
   btnLine->setCheckable( true );
   btnLine->setIcon(QIcon(getQPixmap("lPlot_xpm")) );
@@ -12929,11 +12928,11 @@ void ApplicationWindow::createActions()
   connect(actionShowCurvesDialog, SIGNAL(activated()), this, SLOT(showCurvesDialog()));
 
   actionAddErrorBars = new QAction(QIcon(getQPixmap("errors_xpm")), tr("Add &Error Bars..."), this);
-  actionAddErrorBars->setShortcut( tr("Ctrl+B") );
+  actionAddErrorBars->setShortcut( tr("Ctrl+Alt+E") );
   connect(actionAddErrorBars, SIGNAL(activated()), this, SLOT(addErrorBars()));
 
-  actionRemoveErrorBars = new QAction(QIcon(getQPixmap("errors_remove_xpm")), tr("Remove Error Bars..."), this);
-  //actionRemoveErrorBars->setShortcut( tr("Ctrl+B") );
+  actionRemoveErrorBars = new QAction(QIcon(getQPixmap("errors_remove_xpm")), tr("&Remove Error Bars..."), this);
+  actionRemoveErrorBars->setShortcut( tr("Ctrl+Alt+R") );
   connect(actionRemoveErrorBars, SIGNAL(activated()), this, SLOT(removeErrorBars()));
 
   actionAddFunctionCurve = new QAction(QIcon(getQPixmap("fx_xpm")), tr("Add &Function..."), this);
@@ -12945,15 +12944,15 @@ void ApplicationWindow::createActions()
   connect(actionUnzoom, SIGNAL(activated()), this, SLOT(setAutoScale()));
 
   actionNewLegend = new QAction(QIcon(getQPixmap("legend_xpm")), tr("New &Legend"), this);
-  actionNewLegend->setShortcut( tr("Ctrl+L") );
+  actionNewLegend->setShortcut( tr("Ctrl+Alt+L") );
   connect(actionNewLegend, SIGNAL(activated()), this, SLOT(newLegend()));
 
-  actionTimeStamp = new QAction(QIcon(getQPixmap("clock_xpm")), tr("Add Time Stamp"), this);
-  actionTimeStamp->setShortcut( tr("Ctrl+ALT+T") );
+  actionTimeStamp = new QAction(QIcon(getQPixmap("clock_xpm")), tr("Add Time &Stamp"), this);
+  actionTimeStamp->setShortcut( tr("Ctrl+ALT+S") );
   connect(actionTimeStamp, SIGNAL(activated()), this, SLOT(addTimeStamp()));
 
   actionAddImage = new QAction(QIcon(getQPixmap("monalisa_xpm")), tr("Add &Image"), this);
-  actionAddImage->setShortcut( tr("ALT+I") );
+  actionAddImage->setShortcut( tr("Ctrl+Alt+I") );
   connect(actionAddImage, SIGNAL(activated()), this, SLOT(addImage()));
 
   actionPlotL = new QAction(QIcon(getQPixmap("lPlot_xpm")), tr("&Line"), this);
@@ -13763,7 +13762,11 @@ void ApplicationWindow::translateActionsStrings()
 
   actionAddErrorBars->setMenuText(tr("Add &Error Bars..."));
   actionAddErrorBars->setToolTip(tr("Add Error Bars..."));
-  actionAddErrorBars->setShortcut(tr("Ctrl+B"));
+  actionAddErrorBars->setShortcut(tr("Ctrl+Alt+E"));
+
+  actionRemoveErrorBars->setMenuText(tr("&Remove Error Bars..."));
+  actionRemoveErrorBars->setToolTip(tr("Remove Error Bars..."));
+  actionRemoveErrorBars->setShortcut(tr("Ctrl+Alt+R"));
 
   actionAddFunctionCurve->setMenuText(tr("Add &Function..."));
   actionAddFunctionCurve->setToolTip(tr("Add Function..."));
@@ -13774,16 +13777,16 @@ void ApplicationWindow::translateActionsStrings()
   actionUnzoom->setToolTip(tr("Rescale to Show All"));
 
   actionNewLegend->setMenuText( tr("Add New &Legend"));
-  actionNewLegend->setShortcut(tr("Ctrl+L"));
+  actionNewLegend->setShortcut(tr("Ctrl+Alt+L"));
   actionNewLegend->setToolTip(tr("Add New Legend"));
 
-  actionTimeStamp->setMenuText(tr("Add Time Stamp"));
-  actionTimeStamp->setShortcut(tr("Ctrl+ALT+T"));
+  actionTimeStamp->setMenuText(tr("Add Time &Stamp"));
+  actionTimeStamp->setShortcut(tr("Ctrl+Alt+S"));
   actionTimeStamp->setToolTip(tr("Date & time "));
 
   actionAddImage->setMenuText(tr("Add &Image"));
   actionAddImage->setToolTip(tr("Add Image"));
-  actionAddImage->setShortcut(tr("ALT+I"));
+  actionAddImage->setShortcut(tr("Ctrl+Alt+I"));
 
   actionPlotL->setMenuText(tr("&Line"));
   actionPlotL->setToolTip(tr("Plot as line"));
@@ -14076,11 +14079,11 @@ void ApplicationWindow::translateActionsStrings()
   btnRemovePoints->setToolTip(tr("Remove data points"));
 
   btnArrow->setMenuText(tr("Draw &Arrow"));
-  btnArrow->setShortcut(tr("CTRL+ALT+A"));
+  btnArrow->setShortcut(tr("Ctrl+Alt+A"));
   btnArrow->setToolTip(tr("Draw Arrow"));
 
-  btnLine->setMenuText(tr("Draw &Line"));
-  btnLine->setShortcut(tr("CTRL+ALT+L"));
+  btnLine->setMenuText(tr("Draw Li&ne"));
+  btnLine->setShortcut(tr("CtrL+Alt+N"));
   btnLine->setToolTip(tr("Draw Line"));
 
   // FIXME: is setText necessary for action groups?
