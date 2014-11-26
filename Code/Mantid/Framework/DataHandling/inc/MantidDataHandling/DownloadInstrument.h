@@ -52,7 +52,7 @@ namespace DataHandling
     void exec();
     virtual int doDownloadFile(const std::string& urlFile, const std::string& localFilePath = "",
                                const StringToStringMap& headers = StringToStringMap());
-    StringToStringMap getFileShas(const std::string& directoryPath, const std::string& filePath);
+    StringToStringMap getFileShas(const std::string& directoryPath);
     const std::string getDownloadableRepoUrl(const std::string& filename) const;
     StringToStringMap processRepository();
     std::string getValueOrDefault(const StringToStringMap & mapping,

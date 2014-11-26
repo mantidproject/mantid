@@ -172,9 +172,9 @@ namespace Mantid
 
       //update local repo files
       Poco::Path installRepoFile(localPath, "install.json");
-      StringToStringMap installShas = getFileShas(installPath.toString(), installRepoFile.toString());
+      StringToStringMap installShas = getFileShas(installPath.toString());
       Poco::Path localRepoFile(localPath, "local.json");
-      StringToStringMap localShas = getFileShas(localPath.toString(), localRepoFile.toString());
+      StringToStringMap localShas = getFileShas(localPath.toString());
 
       // Parse the server JSON response
       Json::Reader reader;
@@ -228,12 +228,11 @@ namespace Mantid
     }
 
     /** Creates or updates the json file of a directories contents
-    * @param directoryPath The path to catalog
-    * @param filePath The path of the file containing the datalog
+    * @param directoryPath The path to the directory to catalog
     * @return A map of file names to sha1 values
     **/
     DownloadInstrument::StringToStringMap
-    DownloadInstrument::getFileShas(const std::string& directoryPath, const std::string& filePath)
+    DownloadInstrument::getFileShas(const std::string& directoryPath)
     {
       StringToStringMap filesToSha;
       try
@@ -277,11 +276,10 @@ namespace Mantid
     /** Download a url and fetch it inside the local path given.
     This calls Kernel/InternetHelper, but is wrapped in this method to allow mocking in the unit tests.
 
+    @param urlFile : The url to download the contents of
     @param localFilePath [optional] : Provide the destination of the file downloaded at the url_file.
     the connection and the download was done correctly.
-
     @param headers [optional] : A key value pair map of any additional headers to include in the request.
-
     @exception Mantid::Kernel::Exception::InternetError : For any unexpected behaviour.
     */
     int DownloadInstrument::doDownloadFile(const std::string & urlFile,
