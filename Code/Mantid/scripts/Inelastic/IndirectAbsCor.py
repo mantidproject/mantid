@@ -92,16 +92,14 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
 
     diffraction_run = checkUnitIs(inputWS, 'dSpacing')
 
-    det, _ = GetThetaQ(inputWS)
-
-    det = GetWSangles(inputWS)
-    ndet = len(det)
-
     if diffraction_run:
+        det = GetWSangles(inputWS)
         efixed = 0.0
     else:
+        det, _ = GetThetaQ(inputWS)
         efixed = getEfixed(inputWS)
 
+    ndet = len(det)
     waves = WaveRange(inputWS, efixed) # get wavelengths
     nw = len(waves)
 
