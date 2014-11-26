@@ -82,11 +82,10 @@ set ( POST_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postrm )
 
 if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedora" ) # RHEL/Fedora
   if ( "${UNIX_CODENAME}" MATCHES "Santiago" ) # el6
-    set ( MANTIDPLOT_LAUNCHER_PREFIX
-          "LD_PRELOAD=\${EXTRA_LDPRELOAD_LIBS} scl enable mantidlibs" )
+    set ( WRAPPER_COMMAND "scl enable mantidlibs" )
+    set ( EXTRA_LDPATH "/usr/lib64/paraview" )
   else()
-    set ( MANTIDPLOT_LAUNCHER_PREFIX
-          "LD_PRELOAD=\${EXTRA_LDPRELOAD_LIBS} LD_LIBRARY_PATH=/usr/lib64/paraview:${LD_LIBRARY_PATH} eval" ) # LD_PATH hack for non-official ParaView
+    set ( WRAPPER_COMMAND "eval" )
   endif()
 
   if ( NOT MPI_BUILD )
@@ -105,7 +104,7 @@ if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedor
     set ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${POST_UNINSTALL_FILE} )
   endif()
 elseif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
-  set ( MANTIDPLOT_LAUNCHER_PREFIX "LD_PRELOAD=${EXTRA_LDPRELOAD_LIBS} eval" )
+  set ( WRAPPER_COMMAND "eval" )
 
   if ( NOT MPI_BUILD )
     configure_file ( ${CMAKE_MODULE_PATH}/Packaging/deb/scripts/deb_pre_inst.in
@@ -120,8 +119,6 @@ elseif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
     set ( CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
           "${PRE_INSTALL_FILE};${POST_INSTALL_FILE};${PRE_UNINSTALL_FILE}" )
   endif()
-  # Launcher prefix
-  set ( MANTIDPLOT_LAUNCHER_PREFIX "LD_PRELOAD=\${EXTRA_LDPRELOAD_LIBS} eval" )
 endif()
 
 ############################################################################
@@ -132,22 +129,24 @@ file ( WRITE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh "#!/bin/bash
   "#\n"
   "# Launch Mantidplot using any necessary LD_PRELOAD or software collection behaviour\n"
   "#\n"
-  "SCRIPTDIR=$(dirname $(readlink -f \"$0\"))\n"
-  "${MANTIDPLOT_LAUNCHER_PREFIX} \"\$SCRIPTDIR/MantidPlot $*\" \n"
+  "INSTALLDIR=$(dirname $(readlink -f \"$0\"))\n"
+  "LOCAL_PRELOAD=${EXTRA_LDPRELOAD_LIBS}:\${LD_PRELOAD}\n"
+  "LOCAL_LDPATH=${EXTRA_LDPATH}:\${LD_LIBRARY_PATH}\n"
+  "if [ -z \"\${TCMALLOC_RELEASE_RATE}\" ]; then\n"
+  "    TCM_RELEASE=10000\n"
+  "else\n"
+  "    TCM_RELEASE=\${TCMALLOC_RELEASE_RATE}\n"
+  "fi\n"
+  "\n"
+  "LD_PRELOAD=\${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=\${TCM_RELEASE} LD_LIBRARY_PATH=\${LOCAL_LDPATH} ${WRAPPER_COMMAND} \"\$INSTALLDIR/MantidPlot $*\" \n"
+  "\n"
 )
 # Needs to be executable
 execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh"
                   OUTPUT_QUIET ERROR_QUIET )
 # Package version
-file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install "#!/bin/sh\n"
-  "#\n"
-  "# Launch Mantidplot using any necessary LD_PRELOAD or software collection behaviour\n"
-  "#\n"
-  "${MANTIDPLOT_LAUNCHER_PREFIX} \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}/MantidPlot_exe $*\" \n"
-)
-
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install
-          DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh
+install ( FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}launch_mantidplot.sh
+          DESTINATION ${BIN_DIR}
           PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
           GROUP_EXECUTE GROUP_READ
           WORLD_EXECUTE WORLD_READ
