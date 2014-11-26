@@ -1298,14 +1298,22 @@ namespace MantidQt
       if(selectedRows.empty())
         return;
 
-      std::set<std::string> workspaces;
-
+      std::set<std::string> workspaces, notFound;
       for(auto row = selectedRows.begin(); row != selectedRows.end(); ++row)
       {
         const std::string wsName = "IvsQ_" + getRunNumber(prepareRunWorkspace(m_model->data(m_model->index(*row, COL_RUNS)).toString().toStdString()));
         if(AnalysisDataService::Instance().doesExist(wsName))
           workspaces.insert(wsName);
+        else
+          notFound.insert(wsName);
       }
+
+      if(!notFound.empty())
+        m_view->giveUserWarning(
+            "The following workspaces were not plotted because they were not found:\n"
+            + boost::algorithm::join(notFound, "\n") +
+            "\n\nPlease check that the rows you are trying to plot have been fully processed.",
+            "Error plotting rows.");
 
       m_view->plotWorkspaces(workspaces);
     }
@@ -1337,13 +1345,23 @@ namespace MantidQt
         runsByGroup[group].push_back(getRunNumber(prepareRunWorkspace(m_model->data(m_model->index(row, COL_RUNS)).toString().toStdString())));
       }
 
-      std::set<std::string> workspaces;
+      std::set<std::string> workspaces, notFound;
       for(auto runsMap = runsByGroup.begin(); runsMap != runsByGroup.end(); ++runsMap)
       {
         const std::string wsName = "IvsQ_" + boost::algorithm::join(runsMap->second, "_");
         if(AnalysisDataService::Instance().doesExist(wsName))
           workspaces.insert(wsName);
+        else
+          notFound.insert(wsName);
       }
+
+      if(!notFound.empty())
+        m_view->giveUserWarning(
+            "The following workspaces were not plotted because they were not found:\n"
+            + boost::algorithm::join(notFound, "\n") +
+            "\n\nPlease check that the groups you are trying to plot have been fully processed.",
+            "Error plotting groups.");
+
       m_view->plotWorkspaces(workspaces);
     }
 
