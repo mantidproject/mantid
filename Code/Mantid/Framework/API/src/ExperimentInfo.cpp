@@ -117,6 +117,14 @@ namespace API
     out << "Instrument from: " << inst->getFilename();
     out << "\n";
 
+    //parameter files loaded
+    auto paramFileVector = this->instrumentParameters().getParameterFilenames();
+    for (auto itFilename = paramFileVector.begin(); itFilename != paramFileVector.end(); ++itFilename)
+    {
+      out << "Parameters from: " << *itFilename;
+      out << "\n";
+    }
+
     std::string runStart = getAvailableWorkspaceStartDate();
     std::string runEnd = getAvailableWorkspaceEndDate();
     std::string msgNA = "not available";
