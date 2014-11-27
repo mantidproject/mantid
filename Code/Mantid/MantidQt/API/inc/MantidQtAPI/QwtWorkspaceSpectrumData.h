@@ -8,6 +8,19 @@
 #include <boost/shared_ptr.hpp>
 #include <QString>
 
+namespace MantidQt
+{
+
+  // Enumerate how to handle distributions
+  enum DistributionFlag
+  {
+    DistributionDefault = 0, // Use preferences value
+    DistributionTrue, // Force distribution plotting
+    DistributionFalse // Disable distribution plotting
+  };
+
+}
+
 //=================================================================================================
 //=================================================================================================
 /**  This class implements QwtData with direct access to a spectrum in a MatrixWorkspace.
@@ -15,7 +28,9 @@
 class EXPORT_OPT_MANTIDQT_API QwtWorkspaceSpectrumData : public MantidQwtMatrixWorkspaceData
 {
 public:
-  QwtWorkspaceSpectrumData(const Mantid::API::MatrixWorkspace & workspace, int specIndex, const bool logScale, bool distr = false);
+
+  QwtWorkspaceSpectrumData(const Mantid::API::MatrixWorkspace & workspace, int specIndex,
+                           const bool logScale, const bool distr);
 
   //! @return Pointer to a copy (virtual copy constructor)
   virtual QwtWorkspaceSpectrumData *copy() const;

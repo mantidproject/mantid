@@ -3,8 +3,15 @@
 
 #include <QStringBuilder>
 
-/// Constructor
-QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(const Mantid::API::MatrixWorkspace & workspace,int specIndex, const bool logScale, bool distr)
+/**
+ * Construct a QwtWorkspaceSpectrumData object with a source workspace
+ * @param workspace The workspace containing the data
+ * @param specIndex Index of the spectrum to plot
+ * @param logScale If true, plot a log scale
+ * @param distr If true, plot the Y values/X bin-width
+ */
+QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(const Mantid::API::MatrixWorkspace & workspace,
+                                                   int specIndex, const bool logScale, const bool distr)
  : m_spec(specIndex),
    m_X(workspace.readX(specIndex)),
    m_Y(workspace.readY(specIndex)),
