@@ -840,6 +840,7 @@ void ApplicationWindow::initGlobalConstants()
   d_show_axes_labels = QVector<bool> (QwtPlot::axisCnt, true);
   d_show_axes_labels[1] = false;
   d_show_axes_labels[3] = false;
+  autoDistribution1D = true;
   canvasFrameWidth = 0;
   defaultPlotMargin = 0;
   drawBackbones = true;
@@ -5294,6 +5295,7 @@ void ApplicationWindow::readSettings()
 
   settings.beginGroup("/General");
   titleOn = settings.value("/Title", true).toBool();
+  autoDistribution1D = settings.value("/AutoDistribution1D", true).toBool();
   canvasFrameWidth = settings.value("/CanvasFrameWidth", 0).toInt();
   defaultPlotMargin = settings.value("/Margin", 0).toInt();
   drawBackbones = settings.value("/AxesBackbones", true).toBool();
@@ -5672,6 +5674,7 @@ void ApplicationWindow::saveSettings()
   settings.beginGroup("/2DPlots");
   settings.beginGroup("/General");
   settings.setValue("/Title", titleOn);
+  settings.setValue("/AutoDistribution1D", autoDistribution1D);
   settings.setValue("/CanvasFrameWidth", canvasFrameWidth);
   settings.setValue("/Margin", defaultPlotMargin);
   settings.setValue("/AxesBackbones", drawBackbones);
