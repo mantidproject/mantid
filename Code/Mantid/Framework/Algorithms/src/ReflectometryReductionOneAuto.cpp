@@ -444,13 +444,17 @@ namespace Mantid
           this->setPropertyValue("ThetaOut", alg->getPropertyValue("ThetaOut"));
       }
 
-      //Group the IvsLam workspaces together
+      //Group the IvsQ and IvsLam workspaces
       Algorithm_sptr groupAlg = this->createChildAlgorithm("GroupWorkspaces");
       groupAlg->setChild(false);
       groupAlg->setRethrows(true);
 
       groupAlg->setProperty("InputWorkspaces", IvsLamGroup);
       groupAlg->setProperty("OutputWorkspace", outputIvsLam);
+      groupAlg->execute();
+
+      groupAlg->setProperty("InputWorkspaces", IvsQGroup);
+      groupAlg->setProperty("OutputWorkspace", outputIvsQ);
       groupAlg->execute();
 
       //If this is a multiperiod workspace and we have polarization corrections enabled
@@ -491,15 +495,9 @@ namespace Mantid
         }
       }
 
-      //Now we have our final IvsQ workspaces, so let's group them too
-      groupAlg->setProperty("InputWorkspaces", IvsQGroup);
-      groupAlg->setProperty("OutputWorkspace", outputIvsQ);
-      groupAlg->execute();
-
+      //We finished successfully
       this->setPropertyValue("OutputWorkspace", outputIvsQ);
       this->setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
-
-      //We finished successfully
       setExecuted(true);
       notificationCenter().postNotification(new FinishedNotification(this,isExecuted()));
       return true;
