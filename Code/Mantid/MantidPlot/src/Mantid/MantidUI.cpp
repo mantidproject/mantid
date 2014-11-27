@@ -3127,7 +3127,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
   bool plotAsDistribution(false);
   if(distr == MantidQt::DistributionDefault)
   {
-   plotAsDistribution = false;
+   plotAsDistribution = appWindow()->autoDistribution1D;
   }
   else
   {
