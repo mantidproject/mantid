@@ -159,11 +159,11 @@ class DirectEnergyConversion(object):
         if diag_sample: 
             # If the bleed test is requested then we need to pass in the sample_run as well
             if prop_man.bleed_test:
-                diag_params['sample_run'] = sample
+                diag_params['sample_run'] = diag_sample
 
             # Set up the background integrals
-            result_ws = self.load_data(sample)
-            result_ws = self.normalise(result_ws, result_ws.name(), self.normalise_method)
+            result_ws = self.load_data(diag_sample)
+            result_ws = self.normalise(result_ws, result_ws.name(), prop_man.normalise_method)
 
             bkgd_range = prop_man.background_test_range
             background_int = Integration(result_ws,
@@ -171,10 +171,10 @@ class DirectEnergyConversion(object):
                                          IncludePartialBins=True)
             total_counts = Integration(result_ws, IncludePartialBins=True)
             background_int = ConvertUnits(background_int, "Energy", AlignBins=0)
-            self.log("Diagnose: finished convertUnits ",'information')
+            prop_man.log("Diagnose: finished convertUnits ",'information')
 
             background_int *= prop_man.scale_factor;
-            diagnostics.normalise_background(background_int, whiteintegrals, kwargs.get('second_white',None))
+            diagnostics.normalise_background(background_int, whiteintegrals, diag_params.get('second_white',None))
             diag_params['background_int'] = background_int
             diag_params['sample_counts'] = total_counts
 
@@ -193,7 +193,7 @@ class DirectEnergyConversion(object):
             DeleteWorkspace(Workspace='background_int')
             DeleteWorkspace(Workspace='total_counts')
         if 'second_white' in diag_params:
-            DeleteWorkspace(Workspace=kwargs['second_white'])
+            DeleteWorkspace(Workspace=diag_params['second_white'])
         # Extract a mask workspace
         diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=var_name)
 
