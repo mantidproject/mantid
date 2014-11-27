@@ -114,6 +114,19 @@ namespace API
         << inst->getValidFromDate().toFormattedString("%Y-%b-%d")
         << " to " << inst->getValidToDate().toFormattedString("%Y-%b-%d") << ")";
     out << "\n";
+    if (!inst->getFilename().empty())
+    {
+      out << "Instrument from: " << inst->getFilename();
+      out << "\n";
+    }
+
+    //parameter files loaded
+    auto paramFileVector = this->instrumentParameters().getParameterFilenames();
+    for (auto itFilename = paramFileVector.begin(); itFilename != paramFileVector.end(); ++itFilename)
+    {
+      out << "Parameters from: " << *itFilename;
+      out << "\n";
+    }
 
     std::string runStart = getAvailableWorkspaceStartDate();
     std::string runEnd = getAvailableWorkspaceEndDate();
