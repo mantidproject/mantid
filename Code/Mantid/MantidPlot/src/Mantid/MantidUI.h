@@ -16,7 +16,10 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
+
 #include "MantidQtAPI/AlgorithmDialog.h"
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+
 #include <Poco/NObserver.h>
 
 #include <QDockWidget>
@@ -188,7 +191,9 @@ public:
   MultiLayer* createGraphFromTable(Table* t, int type = 0);
 
   // Shows 1D graphs of the spectra (rows) selected in a MantidMatrix
-  MultiLayer* plotSelectedRows(const MantidMatrix * const m, bool errs = true, bool distr = false);
+  MultiLayer* plotSelectedRows(const MantidMatrix * const m,
+                               MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+                               bool errs = true);
   // Shows 1D graphs of the columns (bins) selected in a MantidMatrix
   MultiLayer* plotSelectedColumns(const MantidMatrix * const m, bool errs = true);
 
@@ -206,22 +211,25 @@ public:
   public slots:
     // Create a 1d graph form specified MatrixWorkspace and index
   MultiLayer* plot1D(const QStringList& wsnames, const QList<int>& indexList, bool spectrumPlot,
-                              bool errs=true, Graph::CurveType style = Graph::Unspecified,
-                              MultiLayer* plotWindow = NULL, bool clearWindow = false);
+                     bool errs=true, Graph::CurveType style = Graph::Unspecified,
+                     MultiLayer* plotWindow = NULL, bool clearWindow = false);
 
   MultiLayer* plot1D(const QString& wsName, const std::set<int>& indexList, bool spectrumPlot,
-                              bool errs=false, bool distr=false,
-                              MultiLayer* plotWindow = NULL, bool clearWindow = false);
+                     MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+                     bool errs=false,
+                     MultiLayer* plotWindow = NULL, bool clearWindow = false);
 
   MultiLayer* plot1D(const QMultiMap<QString,int>& toPlot, bool spectrumPlot,
-                              bool errs=false, bool distr=false,
-                              Graph::CurveType style = Graph::Unspecified,
-                              MultiLayer* plotWindow = NULL, bool clearWindow = false);
+                     MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+                     bool errs=false,
+                     Graph::CurveType style = Graph::Unspecified,
+                     MultiLayer* plotWindow = NULL, bool clearWindow = false);
 
   MultiLayer* plot1D(const QMultiMap<QString,std::set<int> >& toPlot, bool spectrumPlot,
-                              bool errs=false, bool distr=false,
-                              MultiLayer* plotWindow = NULL, bool clearWindow = false);
-
+                     MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+                     bool errs=false,
+                     MultiLayer* plotWindow = NULL, bool clearWindow = false);
+  
     /// Draw a color fill plot for each of the listed workspaces
     void drawColorFillPlots(const QStringList & wsNames, Graph::CurveType curveType = Graph::ColorMap);
     /// Draw a color fill plot for the named workspace
@@ -229,7 +237,9 @@ public:
                                         MultiLayer* window = NULL);
 
     // Create a 1d graph form specified spectra in a MatrixWorkspace
-    MultiLayer* plotSpectraRange(const QString& wsName, int i0, int i1, bool errs=true, bool distr=false);
+    MultiLayer* plotSpectraRange(const QString& wsName, int i0, int i1, 
+                                 MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+                                 bool errs=true);
 
     // Set properties of a 1d graph which plots data from a workspace
     static void setUpBinGraph(MultiLayer* ml, const QString& wsName, Mantid::API::MatrixWorkspace_const_sptr workspace);
