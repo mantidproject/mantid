@@ -114,8 +114,11 @@ namespace API
         << inst->getValidFromDate().toFormattedString("%Y-%b-%d")
         << " to " << inst->getValidToDate().toFormattedString("%Y-%b-%d") << ")";
     out << "\n";
-    out << "Instrument from: " << inst->getFilename();
-    out << "\n";
+    if (!inst->getFilename().empty())
+    {
+      out << "Instrument from: " << inst->getFilename();
+      out << "\n";
+    }
 
     //parameter files loaded
     auto paramFileVector = this->instrumentParameters().getParameterFilenames();
