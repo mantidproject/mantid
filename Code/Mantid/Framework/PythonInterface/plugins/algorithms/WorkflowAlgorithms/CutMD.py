@@ -111,7 +111,7 @@ class CutMD(DataProcessorAlgorithm):
            for k in Krange:
                for l in Lrange:
                    original_corner=np.array([h,k,l])
-                   new_coords[counter]=original_corner.dot(Minv)
+                   new_coords[counter]=np.dot(original_corner, Minv)
                    counter += 1
         
         # Get the min max extents
