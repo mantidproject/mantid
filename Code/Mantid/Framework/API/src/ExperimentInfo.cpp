@@ -114,6 +114,8 @@ namespace API
         << inst->getValidFromDate().toFormattedString("%Y-%b-%d")
         << " to " << inst->getValidToDate().toFormattedString("%Y-%b-%d") << ")";
     out << "\n";
+    out << "Instrument from: " << inst->getFilename();
+    out << "\n";
 
     std::string runStart = getAvailableWorkspaceStartDate();
     std::string runEnd = getAvailableWorkspaceEndDate();
