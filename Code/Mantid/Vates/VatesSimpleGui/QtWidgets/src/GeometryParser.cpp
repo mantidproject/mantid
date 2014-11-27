@@ -47,7 +47,7 @@ AxisInformation *GeometryParser::getAxisInfo(const std::string dimension)
     }
   }
 
-  Poco::XML::NodeList *cNodes = pNode->childNodes();
+  Poco::AutoPtr<Poco::XML::NodeList> cNodes = pNode->childNodes();
   double min = -99.0;
   double max = 99.0;
   std::string title;
