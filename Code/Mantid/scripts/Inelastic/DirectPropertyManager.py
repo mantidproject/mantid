@@ -1,5 +1,8 @@
+""" File contains number of various classes defining interface for Direct inelastic reduction  """
+
 from mantid.simpleapi import *
 from mantid import api
+from mantid import geometry
 import DirectReductionHelpers as prop_helpers
 import CommonFunctions as common
 import os
@@ -24,19 +27,24 @@ class DirectReductionProperties(object):
           "debug" :       lambda (msg):   logger.debug(msg)}
 
 
-    def __init__(self,InsturmentName,run_workspace=None,wb_run_number=None): 
-        object.__setattr__(self,'_run_number',run_workspace);
-        object.__setattr__(self,'_wb_run_number',wb_run_number);
+    def __init__(self,Instrument,run_workspace=None): 
+        """ initialize main properties, defined by the class
+            @parameter Instrument  -- name or pointer to the instrument, 
+                       deployed in reduction
+        """
+        #
+        object.__setattr__(self,'_pInstrument',self._set_instrument(Instrument,run_workspace));
+        #
+        object.__setattr__(self,'_sample_run',run_workspace);
+        object.__setattr__(self,'_wb_run',None);
 
-        object.__setattr__(self,'_monovan_run_number',None);
+        object.__setattr__(self,'_monovan_run',None);
         object.__setattr__(self,'_wb_for_monovan_run',None);
 
         object.__setattr__(self,'_incident_energy',None)
 
         object.__setattr__(self,'_energy_bins',None);
 
-        #
-        object.__setattr__(self,'_pInstrument',self._set_instrument(InsturmentName,run_workspace,wb_run_number));
         # Helper properties, defining logging options 
         object.__setattr__(self,'_log_level','notice');
         object.__setattr__(self,'_log_to_mantid',True);
@@ -60,7 +68,7 @@ class DirectReductionProperties(object):
             raise KeyError("Attempt to use uninitialized property manager");
         else:
             name = self._pInstrument.getName();
-            return name[0:3];
+            return name;
     @property 
     def psi(self):
         """ rotation angle (not available from IDF)"""
@@ -138,39 +146,38 @@ class DirectReductionProperties(object):
        self._energy_bins= value
 
     @property
-    def run_number(self):
+    def sample_run(self):
         """ run number to process or list of the run numbers """
-        if self._run_number is None:
-            raise KeyError("Run number has not been set")
-        return _run_number;
+        if self._sample_run is None:
+            raise KeyError("Sample run has not been defined")
+        return _sample_run;
 
-    @run_number.setter
-    def run_number(self,value):
+    @sample_run.setter
+    def sample_run(self,value):
         """ sets a run number to process or list of run numbers """
-        self._run_number = value
+        self._sample_run = value
 
     @property
-    def wb_run_number(self):
-        if self._wb_run_number is None:
-            raise KeyError("White beam run number has not been set")
-        return _wb_run_number;
-
-    @wb_run_number.setter
-    def wb_run_number(self,value):
-        self._wb_run_number = value
+    def wb_run(self):
+        if self._wb_run is None:
+            raise KeyError("White beam run has not been defined")
+        return _wb_run;
+    @wb_run.setter
+    def wb_run(self,value):
+        self._wb_run = value
 
 
     @property 
     def monovanadium_run(self): 
-        """ run number for monochromatic vanadium used in normalization """
+        """ run ID (number or workspace) for monochromatic vanadium used in normalization """
         if self._wb_run_number is None:
-            raise KeyError("White beam run number has not been set")
+            raise KeyError("White beam run  has not been set")
 
         return _monovan_run;
 
     @monovanadium_run.setter
     def monovanadium_run(self,value): 
-        """ run number for monochromatic vanadium used in normalization """
+        """ run ID (number or workspace) for monochromatic vanadium used in normalization """
         self._monovan_run = value
 
     @property 
@@ -212,19 +219,24 @@ class DirectReductionProperties(object):
     # Service properties (used by class itself)
     #
 
-    def _set_instrument(self,InstrumentName,run_workspace=None,wb_run_number=None):
+    def _set_instrument(self,Instrument,run_workspace=None):
         """ simple method used to obtain default instrument for testing """
         # TODO: implement advanced instrument setter, used in DirectEnergy conversion
 
         if run_workspace:
-            return run_workspace.getInstrumetnt();
+            return run_workspace.getInstrument();
         else:
-            idf_dir = config.getString('instrumentDefinition.directory')
-            idf_file=api.ExperimentInfo.getInstrumentFilename(InstrumentName)
-            tmp_ws_name = '__empty_' + InstrumentName
-            if not mtd.doesExist(tmp_ws_name):
-               LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
-            return mtd[tmp_ws_name].getInstrument();
+            if isinstance(Instrument,geometry._geometry.Instrument):
+                return Instrument;
+            elif isinstance(Instrument,str): # instrument name defined
+                idf_dir = config.getString('instrumentDefinition.directory')
+                idf_file=api.ExperimentInfo.getInstrumentFilename(Instrument)
+                tmp_ws_name = '__empty_' + Instrument
+                if not mtd.doesExist(tmp_ws_name):
+                   LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
+                return mtd[tmp_ws_name].getInstrument();
+            else:
+                raise TypeError(' neither instrument name nor instrument pointer provided as instrument parameter')
 
 
     def log(self, msg,level="notice"):
@@ -522,9 +534,9 @@ class DirectPropertyManager(DirectReductionProperties):
     """
 
     _class_wrapper ='_DirectPropertyManager__';
-    def __init__(self,InstrumentName,run_number=None,wb_run_number=None):
+    def __init__(self,Instrument,instr_run=None):
         #
-        DirectReductionProperties.__init__(self,InstrumentName,run_number,wb_run_number);
+        DirectReductionProperties.__init__(self,Instrument,instr_run);
         #
         # define private properties served the class
         private_properties = {'descriptors':[],'subst_dict':{},'prop_allowed_values':{},'changed_properties':set(),
@@ -535,7 +547,7 @@ class DirectPropertyManager(DirectReductionProperties):
         # ---------------------------------------------------------------------------------------------
         # overloaded descriptors. These properties have their personal descriptors, different from default
         all_methods = dir(self);
-        self.__descriptors = prop_helpers.extract_non_system_names(all_methods);
+        self.__descriptors = prop_helpers.extract_non_system_names(all_methods,DirectPropertyManager._class_wrapper);
 
         # retrieve the dictionary of property-values described in IDF
         param_list = prop_helpers.get_default_idf_param_list(self.instrument);
@@ -553,10 +565,13 @@ class DirectPropertyManager(DirectReductionProperties):
         # build and initiate  properties with default descriptors (TODO: consider complex automatic descriptors)
         param_list =  prop_helpers.build_properties_dict(param_list,self.__subst_dict)
 
-        # modify some non-standard properties, namely the IDF properties, which need overloaded getter (and this getter is provided)
+        # modify some IDF properties, which need overloaded getter (and this getter is provided)
         if 'background_test_range' in param_list:
             val = param_list['background_test_range']
             param_list['_background_test_range'] = val;
+            del param_list['background_test_range']
+        else:
+            param_list['_background_test_range'] = None;
 
         self.__dict__.update(param_list)
 
@@ -714,14 +729,17 @@ class DirectPropertyManager(DirectReductionProperties):
     def get_diagnostics_parameters(self):
         """ Return the dictionary of the properties used in diagnostics with their current values """ 
 
-        diag_param_list = ['tiny', 'huge', 'samp_zero', 'samp_lo', 'samp_hi','samp_sig',\
-                           'van_out_lo', 'van_out_hi', 'van_lo', 'van_hi', 'van_sig', 'variation',\
-                           'bleed_test','bleed_pixels','bleed_maxrate',\
-                           'hard_mask_file','use_hard_mask_only','background_test_range']
+        diag_param_list ={'tiny':1e-10, 'huge':1e10, 'samp_zero':False, 'samp_lo':0.0, 'samp_hi':2,'samp_sig':3,\
+                           'van_out_lo':0.01, 'van_out_hi':100., 'van_lo':0.1, 'van_hi':1.5, 'van_sig':0.0, 'variation':1.1,\
+                           'bleed_test':False,'bleed_pixels':0,'bleed_maxrate':0,\
+                           'hard_mask_file':None,'use_hard_mask_only':False,'background_test_range':None}
         result = {};
 
-        for key in diag_param_list:
-            result[key] = getattr(self,key);
+        for key,val in diag_param_list.iteritems():
+            try:
+                result[key] = getattr(self,key);
+            except KeyError: 
+                self.log('--- Diagnostics property {0} is not found in instrument properties. Default value {1} is used instead \n'.format(key,value),'warning')
   
         return result;
 

@@ -36,6 +36,8 @@ import diagnostics
 from mantid.simpleapi import *
 from mantid.kernel import funcreturns
 from mantid import api
+from mantid import geometry
+
 import glob
 import sys
 import os.path
@@ -177,15 +179,15 @@ class DirectEnergyConversion(object):
             diag_params['sample_counts'] = total_counts
 
         # Check how we should run diag
-        bank_spectra = prop_man.diag_spectra;
-        if diag_spectra is None:
+        diag_spectra_blocks = prop_man.diag_spectra;
+        if diag_spectra_blocks  is None:
             # Do the whole lot at once
             diagnostics.diagnose(whiteintegrals, **diag_params)
         else:
-            for index, bank in enumerate(bank_spectra):
+            for index, bank in enumerate(diag_spectra_blocks):
                 diag_params['start_index'] = bank[0] - 1
                 diag_params['end_index']   = bank[1] - 1
-                diagnostics.diagnose(whiteintegrals, **kwargs)
+                diagnostics.diagnose(whiteintegrals, **diag_params)
 
         if 'sample_counts' in diag_params:
             DeleteWorkspace(Workspace='background_int')
@@ -225,9 +227,9 @@ class DirectEnergyConversion(object):
 
         # Units conversion
         white_ws = ConvertUnits(InputWorkspace=white_ws,OutputWorkspace=whitews_name, Target= "Energy", AlignBins=0)
-        self.log("do_white: finished convertUnits ")
+        propman.log("do_white: finished converting Units",'notice')
         # This both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
-        low,upp=prop_man.wb_integr_range;
+        low,upp=propman.wb_integr_range;
         if low > upp:
             raise ValueError("White beam integration range is inconsistent. low=%d, upp=%d" % (low,upp))
         delta = 2.0*(upp - low)
@@ -239,7 +241,7 @@ class DirectEnergyConversion(object):
         white_ws = self.remap(white_ws, spectra_masks, map_file)
 
         # White beam scale factor
-        white_ws *= self.wb_scale_factor
+        white_ws *= propman.wb_scale_factor
         return white_ws
 
     def mono_van(self, mono_van, ei_guess, white_run=None, map_file=None,
@@ -581,17 +583,11 @@ class DirectEnergyConversion(object):
         The position of the "source" component is also moved to match the position of
         the first monitor
         """
-        fix_ei = str(self.fix_ei).lower()
-        if fix_ei == 'true':
-            fix_ei = True
-        elif fix_ei == 'false':
-            fix_ei = False
-        elif fix_ei == 'fixei':
-            fix_ei = True
-        else:
-            raise TypeError('Unknown option passed to get_ei "%s"' % fix_ei)
+        propman = self.prop_man;
+        fix_ei = prop_man.fix_ei;
+        ei_mon_spectra = propman.ei_mon_spectra;
+        self.prop_man.incident_energy  = ei_guess;
 
-        self.incident_energy= ei_guess
         #-------------------------------------------------------------
         # check if monitors are in the main workspace or provided separately
         monitor_ws = input_ws;
@@ -600,23 +596,23 @@ class DirectEnergyConversion(object):
             monitor_ws = mtd[monitor_ws]
         try:
             # check if the spectra with correspondent number is present in the workspace
-            nsp = monitor_ws.getIndexFromSpectrumNumber(int(self.ei_mon_spectra[0]));
+            nsp = monitor_ws.getIndexFromSpectrumNumber(int(ei_mon_spectra[0]));
         except RuntimeError as err:
             monitors_from_separate_ws = True
             mon_ws = monitor_ws.getName()+'_monitors'
             try:
                 monitor_ws = mtd[mon_ws];
             except:
-                print "**** ERROR while attempting to get spectra {0} from workspace: {1}, error: {2} ".format(self.ei_mon_spectra[0],monitor_ws.getName(), err)
+                print "**** ERROR while attempting to get spectra {0} from workspace: {1}, error: {2} ".format(ei_mon_spectra[0],monitor_ws.getName(), err)
                 raise
         #------------------------------------------------
 
         # Calculate the incident energy
         ei,mon1_peak,mon1_index,tzero = \
-            GetEi(InputWorkspace=monitor_ws, Monitor1Spec=int(self.ei_mon_spectra[0]), Monitor2Spec=int(self.ei_mon_spectra[1]),
+            GetEi(InputWorkspace=monitor_ws, Monitor1Spec=int(ei_mon_spectra[0]), Monitor2Spec=int(ei_mon_spectra[1]),
                   EnergyEstimate=ei_guess,FixEi=self.fix_ei)
 
-        self.incident_energy = ei
+        self.prop_man.incident_energy = ei
         # copy incident energy obtained on monitor workspace to detectors workspace
         if monitors_from_separate_ws:
             AddSampleLog(Workspace=input_ws,LogName='Ei',LogText=str(ei),LogType='Number')
@@ -648,8 +644,8 @@ class DirectEnergyConversion(object):
 
         return result_ws
 
-    def getMonitorWS(self,data_ws,method,mon_number=None):
-        """get pointer to monitor workspace.
+    def get_monitors_ws(self,data_ws,method,mon_number=None):
+        """ get pointer to a workspace containing monitors. 
 
            Explores different ways of finding monitor workspace in Mantid and returns the python pointer to the
            workspace which contains monitors.
@@ -685,25 +681,23 @@ class DirectEnergyConversion(object):
         """
         Apply normalization using specified source
         """
-        if method is None :
-            method = "undefined"
-        if not method in self.__normalization_methods:
-            raise KeyError("Normalization method: "+method+" is not among known normalization methods")
 
-        # Make sure we don't call this twice
-        method = method.lower()
         done_log = "DirectInelasticReductionNormalisedBy"
 
-        if done_log in data_ws.getRun() or method == 'none':
+        if done_log in data_ws.getRun() or method is None:
             if data_ws.name() != result_name:
                 CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_name)
             output = mtd[result_name]
             return output;
 
-        if method == 'monitor-1' or method == 'monitor-2' :
+        # Make sure we don't call this twice
+        method = method.lower()
+
+
+        if method[:7] == 'monitor': # 'monitor-1' or 'monitor-2' :
             # get monitor's workspace
             try:
-                mon_ws,mon_index = self.getMonitorWS(data_ws,method,mon_number)
+                mon_ws,mon_index = self.get_monitors_ws(data_ws,method,mon_number)
             except :
                 if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not have monitors
                     method = 'current'
@@ -712,8 +706,9 @@ class DirectEnergyConversion(object):
 
 
         if method == 'monitor-1':
-            range_min = self.norm_mon_integration_range[0] + range_offset
-            range_max = self.norm_mon_integration_range[1] + range_offset
+            range = self.prop_man.norm_mon_integration_range;
+            range_min = range[0] + range_offset
+            range_max = range[1] + range_offset
 
 
             output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
@@ -722,7 +717,7 @@ class DirectEnergyConversion(object):
         elif method == 'monitor-2':
 
             # Found TOF range, correspondent to incident energy monitor peak;
-            ei = self.incident_energy;
+            ei = self.prop_man.incident_energy;
             x=[0.8*ei,ei,1.2*ei]
             y=[1]*2;
             range_ws=CreateWorkspace(DataX=x,DataY=y,UnitX='Energy',ParentWorkspace=mon_ws);
@@ -743,92 +738,92 @@ class DirectEnergyConversion(object):
         AddSampleLog(Workspace=output, LogName=done_log,LogText=method)
         return output
 
-    def calc_average(self, data_ws,energy_incident):
-        """
-        Compute the average Y value of a workspace.
+    #def calc_average(self, data_ws,energy_incident):
+    #    """
+    #    Compute the average Y value of a workspace.
 
-        The average is computed by collapsing the workspace to a single bin per spectra then masking
-        masking out detectors given by the FindDetectorsOutsideLimits and MedianDetectorTest algorithms.
-        The average is then the computed as the using the remainder and factoring in their errors as weights, i.e.
+    #    The average is computed by collapsing the workspace to a single bin per spectra then masking
+    #    masking out detectors given by the FindDetectorsOutsideLimits and MedianDetectorTest algorithms.
+    #    The average is then the computed as the using the remainder and factoring in their errors as weights, i.e.
 
-            average = sum(Yvalue[i]*weight[i]) / sum(weights)
+    #        average = sum(Yvalue[i]*weight[i]) / sum(weights)
 
-        where only those detectors that are unmasked are used and the weight[i] = 1/errorValue[i].
-        """
+    #    where only those detectors that are unmasked are used and the weight[i] = 1/errorValue[i].
+    #    """
 
-        if self.monovan_integr_range is None :
-            self.monovan_integr_range = [self.monovan_lo_frac*energy_incident,self.monovan_hi_frac*energy_incident];
-
-
-        e_low = self.monovan_integr_range[0]
-        e_upp = self.monovan_integr_range[1]
-        if e_low > e_upp:
-            raise ValueError("Inconsistent mono-vanadium integration range defined!")
-        data_ws=Rebin(InputWorkspace=data_ws,OutputWorkspace=data_ws,Params= [e_low, 2.*(e_upp-e_low), e_upp])
-        data_ws=ConvertToMatrixWorkspace(InputWorkspace=data_ws,OutputWorkspace= data_ws)
-
-        args = {}
-        args['tiny'] = self.tiny
-        args['huge'] = self.huge
-        args['van_out_lo'] = self.monovan_lo_bound
-        args['van_out_hi'] = self.monovan_hi_bound
-        args['van_lo'] = self.monovan_lo_frac
-        args['van_hi'] = self.monovan_hi_frac
-        args['van_sig'] = self.samp_sig
-        args['use_hard_mask_only']=self.use_hard_mask_only;
-        args['print_results'] = False
-
-        diagnostics.diagnose(data_ws, **args)
-        monovan_masks,det_ids = ExtractMask(InputWorkspace=data_ws,OutputWorkspace='monovan_masks')
-        MaskDetectors(Workspace=data_ws, MaskedWorkspace=monovan_masks)
-        DeleteWorkspace(Workspace=monovan_masks)
-
-        ConvertFromDistribution(Workspace=data_ws)
-        nhist = data_ws.getNumberHistograms()
-        average_value = 0.0
-        weight_sum = 0.0
-        ic =0
-        for i in range(nhist):
-            try:
-                det = data_ws.getDetector(i)
-            except Exception:
-                continue
-            if det.isMasked():
-                continue
-            y_value = data_ws.readY(i)[0]
-            if y_value != y_value:
-                continue
-            ic = ic+1;
-            weight = 1.0/data_ws.readE(i)[0]
-            average_value += y_value * weight
-            weight_sum += weight
-
-        if weight_sum == 0:
-            raise RuntimeError(str.format(" Vanadium weight calculated from {0} spectra out of {1} histograms is equal to 0 and sum: {2} Check vanadium integration ranges or diagnostic settings ",str(ic),str(nhist),str(average_value)))
-        return average_value / weight_sum
-
-    def monovan_abs(self, ei_workspace):
-        """Calculates the scaling factor required for normalization to absolute units.
-        The given workspace must contain an Ei value. This will have happened if GetEi
-        has been run
-        """
-        #  Scale by vanadium cross-section which is energy dependent up to a point
-        run = ei_workspace.getRun()
-        try:
-            ei_prop = run['Ei']
-        except KeyError:
-            raise RuntimeError('The given workspace "%s" does not contain an Ei value. Run GetEi first.' % str(ei_workspace))
-
-        ei_value = ei_prop.value
-        absnorm_factor = self.calc_average(ei_workspace,ei_value)
+    #    if self.monovan_integr_range is None :
+    #        self.monovan_integr_range = [self.monovan_lo_frac*energy_incident,self.monovan_hi_frac*energy_incident];
 
 
-        if ei_value >= 200.0:
-            xsection = 421.0
-        else:
-            xsection = 400.0 + (ei_value/10.0)
-        absnorm_factor /= xsection
-        return absnorm_factor * (float(self.sample_mass)/float(self.sample_rmm))
+    #    e_low = self.monovan_integr_range[0]
+    #    e_upp = self.monovan_integr_range[1]
+    #    if e_low > e_upp:
+    #        raise ValueError("Inconsistent mono-vanadium integration range defined!")
+    #    data_ws=Rebin(InputWorkspace=data_ws,OutputWorkspace=data_ws,Params= [e_low, 2.*(e_upp-e_low), e_upp])
+    #    data_ws=ConvertToMatrixWorkspace(InputWorkspace=data_ws,OutputWorkspace= data_ws)
+
+    #    args = {}
+    #    args['tiny'] = self.tiny
+    #    args['huge'] = self.huge
+    #    args['van_out_lo'] = self.monovan_lo_bound
+    #    args['van_out_hi'] = self.monovan_hi_bound
+    #    args['van_lo'] = self.monovan_lo_frac
+    #    args['van_hi'] = self.monovan_hi_frac
+    #    args['van_sig'] = self.samp_sig
+    #    args['use_hard_mask_only']=self.use_hard_mask_only;
+    #    args['print_results'] = False
+
+    #    diagnostics.diagnose(data_ws, **args)
+    #    monovan_masks,det_ids = ExtractMask(InputWorkspace=data_ws,OutputWorkspace='monovan_masks')
+    #    MaskDetectors(Workspace=data_ws, MaskedWorkspace=monovan_masks)
+    #    DeleteWorkspace(Workspace=monovan_masks)
+
+    #    ConvertFromDistribution(Workspace=data_ws)
+    #    nhist = data_ws.getNumberHistograms()
+    #    average_value = 0.0
+    #    weight_sum = 0.0
+    #    ic =0
+    #    for i in range(nhist):
+    #        try:
+    #            det = data_ws.getDetector(i)
+    #        except Exception:
+    #            continue
+    #        if det.isMasked():
+    #            continue
+    #        y_value = data_ws.readY(i)[0]
+    #        if y_value != y_value:
+    #            continue
+    #        ic = ic+1;
+    #        weight = 1.0/data_ws.readE(i)[0]
+    #        average_value += y_value * weight
+    #        weight_sum += weight
+
+    #    if weight_sum == 0:
+    #        raise RuntimeError(str.format(" Vanadium weight calculated from {0} spectra out of {1} histograms is equal to 0 and sum: {2} Check vanadium integration ranges or diagnostic settings ",str(ic),str(nhist),str(average_value)))
+    #    return average_value / weight_sum
+
+    #def monovan_abs(self, ei_workspace):
+    #    """Calculates the scaling factor required for normalization to absolute units.
+    #    The given workspace must contain an Ei value. This will have happened if GetEi
+    #    has been run
+    #    """
+    #    #  Scale by vanadium cross-section which is energy dependent up to a point
+    #    run = ei_workspace.getRun()
+    #    try:
+    #        ei_prop = run['Ei']
+    #    except KeyError:
+    #        raise RuntimeError('The given workspace "%s" does not contain an Ei value. Run GetEi first.' % str(ei_workspace))
+
+    #    ei_value = ei_prop.value
+    #    absnorm_factor = self.calc_average(ei_workspace,ei_value)
+
+
+    #    if ei_value >= 200.0:
+    #        xsection = 421.0
+    #    else:
+    #        xsection = 400.0 + (ei_value/10.0)
+    #    absnorm_factor /= xsection
+    #    return absnorm_factor * (float(self.sample_mass)/float(self.sample_rmm))
 
     def save_results(self, workspace, save_file=None, formats = None):
         """
@@ -892,7 +887,7 @@ class DirectEnergyConversion(object):
         result_ws = common.load_runs(propman.instr_name, runs, calibration=calibration, sum=True,load_with_workspace=monitors_inWS)
 
         mon_WsName = result_ws.getName()+'_monitors'
-        if mon_WsName in mtd:
+        if mon_WsName in mtd  and not monitors_inWS:
             monitor_ws = mtd[mon_WsName];
         else:
             monitor_ws = None;
@@ -979,20 +974,27 @@ class DirectEnergyConversion(object):
         """
         Initialize the private attributes of the class and the nullify the attributes which expected to be always set-up from a calling script
         """
+        # Internal properties and keys
+        self._keep_wb_workspace = False;
+        self._do_ISIS_normalization = True;
+        
+
 
         # Instrument and default parameter setup
         # formats available for saving. As the reducer has to have a method to process one of this, it is private property
-        if hasattr(self,'_propMan'):
-            if isinstance(instr,str):
-                instr_name = 
-            if self._propMan is None or instr_name != self._propMan.instrument.getName() or reload_instrument:
-                self._propMan = DirectPropertyManager(instr_name);
-        else:
+        if not hasattr(self,'_propMan') or self._propMan is None:
             self._propMan = DirectPropertyManager(instr);
+        else:
+            old_name = self._propMan.instrument.getName();
+            if isinstance(instr,geometry._geometry.Instrument):
+                new_name = self._propMan.instrument.getName();
+            else:
+                new_name = instr
+            #end if
+            if old_name != new_name or reload_instrument:
+                self._propMan = DirectPropertyManager(new_name);
+            #end if
         #
-        # Internal properties and keys
-        self._keep_wb_workspace = False;
-        
 
     def setup_instrument_properties(self, workspace = None,reload_instrument=False):
         if workspace != None:
@@ -1020,12 +1022,7 @@ class DirectEnergyConversion(object):
 
 
  
-    @staticmethod
-    def make_ckpt_name(*argi) :
-        """ Make the name of the checkpoint from the function arguments
-        """
-        return ''.join(str(arg) for arg in argi if arg is not None)
-
+  
 
 class switch(object):
     """ Helper class providing nice switch statement""" 

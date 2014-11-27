@@ -29,7 +29,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertFalse(tReducer.prop_man is None)
 
         prop_man = tReducer.prop_man;
-        self.assertEqual(prop_man.instr_name,"MAR")
+        self.assertEqual(prop_man.instr_name,"MARI")
 
 
     def test_save_formats(self):
@@ -101,48 +101,43 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # this is strange feature.
         self.assertTrue(len(tReducer.prop_man.save_format) ==2)
 
-    def test_diagnostics(self):
+    def test_diagnostics_wb(self):
         wb_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000)
+        LoadInstrument(wb_ws,InstrumentName='MARI')
 
-        tReducer = self.reducer;
-
-        tReducer.diagnose(wb_ws);
+        tReducer = DirectEnergyConversion(wb_ws.getInstrument())
 
 
-    def test_do_white(self) :
-        tReducer = self.reducer
+        mask_workspace=tReducer.diagnose(wb_ws);
+        self.assertTrue(mask_workspace)
+
+    def test_do_white_wb(self) :
         wb_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000)
-        tReducer.initialise(wb_ws.getInstrument())
-        tReducer.do_white(wb_ws, None, None,None)
+        # THIS DOES NOT WORK AND THE QUESTION IS WHY?
+        used_parameters = """<?xml version="1.0" encoding="UTF-8" ?>
+            <parameter-file instrument="BASIC_RECT" valid-from="2014-01-01 00:00:01">
+            <component-link name = "BASIC_RECT">
 
-        #self.assertEqual('do_white1000t1',name)
+            <parameter name="det_cal_file" type="string">
+               <value val="None"/>
+            </parameter>
 
-    #def test_get_parameter(self):
-    #    tReducer = self.reducer
-    #    param = tReducer.get_default_parameter('map_file')
-    #    self.assertTrue(isinstance(param,str))
+            <parameter name="load_monitors_with_workspace"  type="bool">
+                <value val="True"/>
+            </parameter>
 
-    #    param = tReducer.get_default_parameter('ei-mon1-spec')
-    #    self.assertTrue(isinstance(param,int))
+            </component-link>
+            </parameter-file>"""
+        #LoadParameterFile(Workspace=wb_ws,ParameterXML = used_parameters);
+        LoadInstrument(wb_ws,InstrumentName='MARI')
 
-    #    param = tReducer.get_default_parameter('check_background')
-    #    self.assertTrue(isinstance(param,bool))
+        tReducer = DirectEnergyConversion(wb_ws.getInstrument())
 
-    #    print "Instr_type :",type(tReducer.instrument)
+        white_ws = tReducer.do_white(wb_ws, None, None,None)
+        self.assertTrue(white_ws)
 
 
 
-    #def test_load_monitors_with_workspacer(self):
-    #    tReducer =self.reducer;
-
-    #    self.assertFalse(tReducer.load_monitors_with_workspace)
-
-    #    tReducer.load_monitors_with_workspace=True;
-    #    self.assertTrue(tReducer.load_monitors_with_workspace)
-    #    tReducer.load_monitors_with_workspace=0;
-    #    self.assertFalse(tReducer.load_monitors_with_workspace)
-    #    tReducer.load_monitors_with_workspace=10;
-    #    self.assertTrue(tReducer.load_monitors_with_workspace)
 
     ##def test_diag_call(self):
     ##    tReducer = self.reducer

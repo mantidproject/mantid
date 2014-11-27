@@ -120,13 +120,15 @@ def build_properties_dict(param_map,synonims,preffix='') :
     return properties_dict
 
 
-def extract_non_system_names(names_list):
+def extract_non_system_names(names_list,prefix='__'):
     """ The function processes the input list and returns 
         the list with names which do not have the system framing (leading __)                  
     """
     result = list();
+    ns = len(prefix);
     for name in names_list:
-        if name[:2] != '__':
+        pend = min(ns,len(name))
+        if name[:pend] != prefix:
             result.append(name)
     return result
 
