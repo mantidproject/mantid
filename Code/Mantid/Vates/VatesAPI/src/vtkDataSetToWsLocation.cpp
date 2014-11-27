@@ -45,7 +45,7 @@ namespace Mantid
       std::string xmlString = convert(m_dataset->GetFieldData(), XMLDefinitions::metaDataId());
 
       Poco::XML::DOMParser pParser;
-      Poco::XML::Document* pDoc = pParser.parseString(xmlString);
+      Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlString);
       Poco::XML::Element* pRootElem = pDoc->documentElement();
       Poco::XML::Element* wsLocationElem = pRootElem->getChildElement(MDGeometryXMLDefinitions::workspaceLocationElementName());
       if(wsLocationElem == NULL)
