@@ -3,7 +3,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
@@ -215,16 +214,13 @@ namespace Mantid
               "PNR: Polarized Neutron Reflectivity mode\n"
               "PA: Full Polarization Analysis PNR-PA");
 
-      VecDouble emptyVec;
-      auto mandatoryArray = boost::make_shared<MandatoryValidator<VecDouble> >();
-
-      declareProperty(new ArrayProperty<double>(cppLabel(), mandatoryArray, Direction::Input),
+      declareProperty(new ArrayProperty<double>(cppLabel(), Direction::Input),
           "Effective polarizing power of the polarizing system. Expressed as a ratio 0 < Pp < 1");
 
       declareProperty(new ArrayProperty<double>(cApLabel(), Direction::Input),
           "Effective polarizing power of the analyzing system. Expressed as a ratio 0 < Ap < 1");
 
-      declareProperty(new ArrayProperty<double>(crhoLabel(), mandatoryArray, Direction::Input),
+      declareProperty(new ArrayProperty<double>(crhoLabel(), Direction::Input),
           "Ratio of efficiencies of polarizer spin-down to polarizer spin-up. This is characteristic of the polarizer flipper. Values are constants for each term in a polynomial expression.");
 
       declareProperty(new ArrayProperty<double>(cAlphaLabel(), Direction::Input),
@@ -365,6 +361,29 @@ namespace Mantid
       validateInputWorkspace(inWS);
 
       Instrument_const_sptr instrument = fetchInstrument(inWS.get());
+
+      //Check if we need to fetch polarization parameters from the instrument's parameters
+      std::map<std::string,std::string> loadableProperties;
+      loadableProperties[  crhoLabel()] = "crho";
+      loadableProperties[cAlphaLabel()] = "calpha";
+      loadableProperties[   cApLabel()] = "cAp";
+      loadableProperties[   cppLabel()] = "cPp";
+
+      for(auto propName = loadableProperties.begin(); propName != loadableProperties.end(); ++propName)
+      {
+        Property* prop = getProperty(propName->first);
+
+        if(!prop)
+          continue;
+
+        if(prop->isDefault())
+        {
+          auto vals = instrument->getStringParameter(propName->second);
+          if(vals.empty())
+            throw std::runtime_error("Cannot find value for " + propName->first + " in parameter file. Please specify this property manually.");
+          prop->setValue(vals[0]);
+        }
+      }
 
       WorkspaceGroup_sptr outWS;
       if (analysisMode == pALabel())
