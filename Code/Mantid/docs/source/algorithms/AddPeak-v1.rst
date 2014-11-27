@@ -9,7 +9,7 @@
 Description
 -----------
 
-Adds a `IPeak <http://www.mantidproject./IPeak>`__ to a `PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`__.
+Adds a peak to a :ref:`PeaksWorkspace <PeaksWorkspace>`.
 
 Usage
 -----
