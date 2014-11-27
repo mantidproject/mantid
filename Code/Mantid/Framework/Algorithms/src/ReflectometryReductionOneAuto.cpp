@@ -371,7 +371,7 @@ namespace Mantid
       const std::string outputIvsQ = this->getPropertyValue("OutputWorkspace");
       const std::string outputIvsLam = this->getPropertyValue("OutputWorkspaceWavelength");
 
-      //create algorithm
+      //Create a copy of ourselves
       Algorithm_sptr alg = this->createChildAlgorithm(this->name(),-1,-1,this->isLogging(),this->version());
       alg->setChild(false);
       alg->setRethrows(true);
@@ -417,7 +417,7 @@ namespace Mantid
 
       std::vector<std::string> IvsQGroup, IvsLamGroup;
 
-      //Execute algorithm over each period
+      //Execute algorithm over each group member (or period, if this is multiperiod)
       size_t numMembers = group->size();
       for(size_t i = 0; i < numMembers; ++i)
       {
@@ -439,11 +439,12 @@ namespace Mantid
         IvsQGroup.push_back(IvsQName);
         IvsLamGroup.push_back(IvsLamName);
 
-        //We use the first period for our thetaout
+        //We use the first group member for our thetaout value
         if(i == 0)
           this->setPropertyValue("ThetaOut", alg->getPropertyValue("ThetaOut"));
       }
 
+      //Group the IvsLam workspaces together
       Algorithm_sptr groupAlg = this->createChildAlgorithm("GroupWorkspaces");
       groupAlg->setChild(false);
       groupAlg->setRethrows(true);
@@ -452,12 +453,45 @@ namespace Mantid
       groupAlg->setProperty("OutputWorkspace", outputIvsLam);
       groupAlg->execute();
 
-      if(group->isMultiperiod())
+      //If this is a multiperiod workspace and we have polarization corrections enabled
+      if(this->getPropertyValue("PolarizationAnalysis") != noPolarizationCorrectionMode())
       {
-        //perform polarizationcorrection on IvsLam workspaces
-        //recalculate IvsQ using new IvsLam as input
+        if(group->isMultiperiod())
+        {
+          //Perform polarization correction over the IvsLam group
+          Algorithm_sptr polAlg = this->createChildAlgorithm("PolarizationCorrection");
+          polAlg->setChild(false);
+          polAlg->setRethrows(true);
+
+          polAlg->setProperty("InputWorkspace", outputIvsLam);
+          polAlg->setProperty("OutputWorkspace", outputIvsLam);
+          polAlg->setProperty("PolarizationAnalysis", this->getPropertyValue("PolarizationAnalysis"));
+          polAlg->setProperty(   "CPp", this->getPropertyValue(   cppLabel()));
+          polAlg->setProperty(  "CRho", this->getPropertyValue(  crhoLabel()));
+          polAlg->setProperty(   "CAp", this->getPropertyValue(   cApLabel()));
+          polAlg->setProperty("CAlpha", this->getPropertyValue(cAlphaLabel()));
+          polAlg->execute();
+
+          //Now we've overwritten the IvsLam workspaces, we'll need to recalculate the IvsQ ones
+          alg->setProperty("FirstTransmissionRun", "");
+          alg->setProperty("SecondTransmissionRun", "");
+          for(size_t i = 0; i < numMembers; ++i)
+          {
+            const std::string IvsQName = outputIvsQ + "_" + boost::lexical_cast<std::string>(i+1);
+            const std::string IvsLamName = outputIvsLam + "_" + boost::lexical_cast<std::string>(i+1);
+            alg->setProperty("InputWorkspace", IvsLamName);
+            alg->setProperty("OutputWorkspace", IvsQName);
+            alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
+            alg->execute();
+          }
+        }
+        else
+        {
+          g_log.warning("Polarization corrections can only be performed on multiperiod workspaces.");
+        }
       }
 
+      //Now we have our final IvsQ workspaces, so let's group them too
       groupAlg->setProperty("InputWorkspaces", IvsQGroup);
       groupAlg->setProperty("OutputWorkspace", outputIvsQ);
       groupAlg->execute();
@@ -465,12 +499,10 @@ namespace Mantid
       this->setPropertyValue("OutputWorkspace", outputIvsQ);
       this->setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
 
-      // We finished successfully.
+      //We finished successfully
       setExecuted(true);
       notificationCenter().postNotification(new FinishedNotification(this,isExecuted()));
-
       return true;
     }
-
   } // namespace Algorithms
 } // namespace Mantid
