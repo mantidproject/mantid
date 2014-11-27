@@ -364,10 +364,15 @@ namespace Mantid
 
       //Check if we need to fetch polarization parameters from the instrument's parameters
       std::map<std::string,std::string> loadableProperties;
-      loadableProperties[  crhoLabel()] = "crho";
-      loadableProperties[cAlphaLabel()] = "calpha";
-      loadableProperties[   cApLabel()] = "cAp";
-      loadableProperties[   cppLabel()] = "cPp";
+      loadableProperties[crhoLabel()] = "crho";
+      loadableProperties[ cppLabel()] = "cPp";
+
+      //In PA mode, we also require cap and calpha
+      if(analysisMode == pALabel())
+      {
+        loadableProperties[   cApLabel()] = "cAp";
+        loadableProperties[cAlphaLabel()] = "calpha";
+      }
 
       for(auto propName = loadableProperties.begin(); propName != loadableProperties.end(); ++propName)
       {
