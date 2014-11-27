@@ -97,6 +97,13 @@ namespace Mantid
 
       API::Workspace_sptr loadTableEntry(Mantid::NeXus::NXEntry& entry);
 
+      /// Load a numeric column to the TableWorkspace.
+      template<typename Type>
+      void loadNumericColumn(const Mantid::NeXus::NXData& tableData,
+                            const std::string& dataSetName,
+                            const API::ITableWorkspace_sptr& tableWs,
+                            const std::string& columnType);
+
       /// Loads a vector column to the TableWorkspace.
       template<typename Type>
       void loadVectorColumn(const Mantid::NeXus::NXData& tableData,
@@ -104,7 +111,7 @@ namespace Mantid
                             const API::ITableWorkspace_sptr& tableWs,
                             const std::string& columnType);
 
-	  API::Workspace_sptr loadPeaksEntry(Mantid::NeXus::NXEntry & entry);
+	    API::Workspace_sptr loadPeaksEntry(Mantid::NeXus::NXEntry & entry);
 
       API::MatrixWorkspace_sptr loadEventEntry(Mantid::NeXus::NXData & wksp_cls,Mantid::NeXus::NXDouble & xbins,
           const double& progressStart, const double& progressRange);

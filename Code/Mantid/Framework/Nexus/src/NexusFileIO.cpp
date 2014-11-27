@@ -578,27 +578,31 @@ namespace Mantid
 
         if (col->isType<double>())
         {
-          writeTableColumn<double>(NX_FLOAT64,"A double",*col,str);
+          writeTableColumn<double>(NX_FLOAT64,"",*col,str);
         }
         else if (col->isType<float>())
         {
-          writeTableColumn<float>(NX_FLOAT32,"A float",*col,str);
+          writeTableColumn<float>(NX_FLOAT32,"",*col,str);
         }
         else if (col->isType<int>())
         {
-          writeTableColumn<int>(NX_INT32,"An integer",*col,str);
+          writeTableColumn<int>(NX_INT32,"",*col,str);
         }
         else if (col->isType<int32_t>())
         {
-          writeTableColumn<int32_t>(NX_INT32,"An integer",*col,str);
+          writeTableColumn<int32_t>(NX_INT32,"int32_t",*col,str);
         }
         else if (col->isType<int64_t>())
         {
-          writeTableColumn<int64_t>(NX_INT64,"An integer",*col,str);
+          writeTableColumn<int64_t>(NX_INT64,"",*col,str);
         }
         else if (col->isType<size_t>())
         {
-          writeTableColumn<size_t>(NX_UINT64,"An integer",*col,str);
+          writeTableColumn<size_t>(NX_UINT64,"",*col,str);
+        }
+        else if (col->isType<Boolean>())
+        {
+          writeTableColumn<bool>(NX_UINT8,"",*col,str);
         }
         else if (col->isType<std::string>())
         {

@@ -755,6 +755,46 @@ int64_t          index_start = indices[wi];
     }
 
 //-------------------------------------------------------------------------------------------------
+      /**
+       * Load a numeric column to the TableWorkspace.
+       * @param tableData   :: Table data to load from
+       * @param dataSetName :: Name of the data set to use to get column data
+       * @param tableWs     :: Workspace to add column to
+       * @param columnType  :: Name of the column type to create
+       */
+      template<typename Type>
+      void LoadNexusProcessed::loadNumericColumn(const Mantid::NeXus::NXData& tableData,
+                            const std::string& dataSetName,
+                            const API::ITableWorkspace_sptr& tableWs,
+                            const std::string& columnType)
+      {
+        NXDataSetTyped<Type> data = tableData.openNXDataSet<Type>(dataSetName);
+        std::string columnTitle = data.attributes("name");
+        if (!columnTitle.empty())
+        {
+          data.load();
+          auto length = static_cast<size_t>(data.dim0());
+          auto rowCount = tableWs->rowCount();
+          // check that the row count is OK
+          if ( rowCount == 0 )
+          {
+            tableWs->setRowCount(length);
+          }
+          else if ( rowCount != length )
+          {
+            throw std::runtime_error("Columns have different sizes.");
+          }
+          // copy the data
+          auto column = tableWs->addColumn(columnType, columnTitle);
+          for (int i = 0; i < length; i++)
+          {
+            column->cell<Type>(i) = *(data() + i);
+          }
+        }
+      }
+
+
+//-------------------------------------------------------------------------------------------------
     /**
      * Load a table
      */
@@ -771,9 +811,9 @@ int64_t          index_start = indices[wi];
       int columnNumber = 1;
       do
       {
-        std::string str = "column_" + boost::lexical_cast<std::string>(columnNumber);
+        std::string dataSetName = "column_" + boost::lexical_cast<std::string>(columnNumber);
 
-        NXInfo info = nx_tw.getDataSetInfo(str.c_str());
+        NXInfo info = nx_tw.getDataSetInfo(dataSetName.c_str());
         if (info.stat == NX_ERROR)
         {
           // Assume we done last column of table
@@ -784,46 +824,38 @@ int64_t          index_start = indices[wi];
         {
           if (info.type == NX_FLOAT64)
           {
-            NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
-            std::string columnTitle = nxDouble.attributes("name");
-            if (!columnTitle.empty())
-            {
-              workspace->addColumn("double", columnTitle);
-              nxDouble.load();
-              int length = nxDouble.dim0();
-              if (!hasNumberOfRowBeenSet)
-              {
-                workspace->setRowCount(length);
-                hasNumberOfRowBeenSet = true;
-              }
-              for (int i = 0; i < length; i++)
-                workspace->cell<double>(i, columnNumber - 1) = *(nxDouble() + i);
-            }
+            loadNumericColumn<double>( nx_tw, dataSetName, workspace, "double" );
           }
           else if (info.type == NX_INT32)
           {
-            NXInt nxInt = nx_tw.openNXInt(str.c_str());
-            std::string columnTitle = nxInt.attributes("name");
-            if (!columnTitle.empty())
-            {
-              workspace->addColumn("int", columnTitle);
-              nxInt.load();
-              int length = nxInt.dim0();
-              if (!hasNumberOfRowBeenSet)
-              {
-                workspace->setRowCount(length);
-                hasNumberOfRowBeenSet = true;
-              }
-              for (int i = 0; i < length; i++)
-                workspace->cell<int>(i, columnNumber - 1) = *(nxInt() + i);
-            }
+            loadNumericColumn<int>( nx_tw, dataSetName, workspace, "int" );
+          }
+          else if (info.type == NX_INT64)
+          {
+            loadNumericColumn<int64_t>( nx_tw, dataSetName, workspace, "long64" );
+          }
+          else if (info.type == NX_UINT64)
+          {
+            loadNumericColumn<size_t>( nx_tw, dataSetName, workspace, "size_t" );
+          }
+          else if (info.type == NX_FLOAT32)
+          {
+            loadNumericColumn<float>( nx_tw, dataSetName, workspace, "float" );
+          }
+          else if (info.type == NX_UINT8)
+          {
+            loadNumericColumn<Boolean>( nx_tw, dataSetName, workspace, "bool" );
+          }
+          else
+          {
+            throw std::logic_error("Column with Nexus data type " + boost::lexical_cast<std::string>(info.type) + " cannot be loaded.");
           }
         }
         else if (info.rank == 2)
         {
           if (info.type == NX_CHAR)
           {
-            NXChar data = nx_tw.openNXChar(str.c_str());
+            NXChar data = nx_tw.openNXChar(dataSetName.c_str());
             std::string columnTitle = data.attributes("name");
             if (!columnTitle.empty())
             {
@@ -849,7 +881,7 @@ int64_t          index_start = indices[wi];
 #define IF_VECTOR_COLUMN(Type, ColumnTypeName, NexusType) \
       else if ( info.type == NexusType ) \
       { \
-        loadVectorColumn<Type>(nx_tw, str, workspace, #ColumnTypeName); \
+        loadVectorColumn<Type>(nx_tw, dataSetName, workspace, #ColumnTypeName); \
       }
           IF_VECTOR_COLUMN(int, vector_int, NX_INT32)
           IF_VECTOR_COLUMN(double, vector_double, NX_FLOAT64)
