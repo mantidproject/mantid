@@ -354,20 +354,17 @@ namespace Mantid
 
     bool ReflectometryReductionOneAuto::checkGroups()
     {
-      std::string wsName = getPropertyValue("InputWorkspace");
-
-      try
-      {
-        auto ws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
-        if(ws)
-          return true;
-      } catch(...) {}
-      return false;
+      //If the inputworkspace is a workspace group, return true
+      auto wsProp = dynamic_cast<IWorkspaceProperty*>(getPointerToProperty("InputWorkspace"));
+      WorkspaceGroup_sptr ws = boost::dynamic_pointer_cast<WorkspaceGroup>(wsProp->getWorkspace());
+      return (ws) ? true : false;
     }
 
     bool ReflectometryReductionOneAuto::processGroups()
     {
-      auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getPropertyValue("InputWorkspace"));
+      auto wsProp = dynamic_cast<IWorkspaceProperty*>(getPointerToProperty("InputWorkspace"));
+      auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(wsProp->getWorkspace());
+
       const std::string outputIvsQ = this->getPropertyValue("OutputWorkspace");
       const std::string outputIvsLam = this->getPropertyValue("OutputWorkspaceWavelength");
 
@@ -393,8 +390,8 @@ namespace Mantid
       WorkspaceGroup_sptr firstTransG;
       if(!firstTrans.empty())
       {
-        auto firstTransWS = AnalysisDataService::Instance().retrieveWS<Workspace>(firstTrans);
-        firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
+        auto firstTransProp = dynamic_cast<IWorkspaceProperty*>(getPointerToProperty("FirstTransmissionRun"));
+        firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransProp->getWorkspace());
 
         if(!firstTransG)
           alg->setProperty("FirstTransmissionRun", firstTrans);
@@ -406,8 +403,8 @@ namespace Mantid
       WorkspaceGroup_sptr secondTransG;
       if(!secondTrans.empty())
       {
-        auto secondTransWS = AnalysisDataService::Instance().retrieveWS<Workspace>(secondTrans);
-        secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
+        auto secondTransProp = dynamic_cast<IWorkspaceProperty*>(getPointerToProperty("SecondTransmissionRun"));
+        secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransProp->getWorkspace());
 
         if(!secondTransG)
           alg->setProperty("SecondTransmissionRun", secondTrans);
