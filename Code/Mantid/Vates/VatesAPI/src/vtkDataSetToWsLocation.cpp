@@ -6,6 +6,7 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Document.h>
+#include <Poco/AutoPtr.h>
 
 namespace Mantid
 {
