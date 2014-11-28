@@ -141,6 +141,10 @@ namespace IDA
     func->applyTies();
 
     std::string function = std::string(func->asString());
+    QString fitType = fitTypeString();
+    QString specMin = uiForm().furyfit_spSpectraMin->text();
+    QString specMax = uiForm().furyfit_spSpectraMax->text();
+
     QString pyInput = "from IndirectDataAnalysis import furyfitSeq, furyfitMult\n"
       "input = '" + m_ffInputWSName + "'\n"
       "func = r'" + QString::fromStdString(function) + "'\n"
@@ -148,8 +152,8 @@ namespace IDA
       "startx = " + m_properties["StartX"]->valueText() + "\n"
       "endx = " + m_properties["EndX"]->valueText() + "\n"
       "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n"
-      "spec_min = " + uiForm().furyfit_spSpectraMin->text() + "\n"
-      "spec_max = " + uiForm().furyfit_spSpectraMax->text() + "\n"
+      "spec_min = " + specMin + "\n"
+      "spec_max = " + specMax + "\n"
       "spec_max = None\n";
 
     if (constrainIntens) pyInput += "constrain_intens = True \n";
@@ -171,6 +175,11 @@ namespace IDA
     }
 
     QString pyOutput = runPythonCode(pyInput);
+
+    // Set the result workspace for Python script export
+    QString inputWsName = QString::fromStdString(m_ffInputWS->getName());
+    QString resultWsName = inputWsName.left(inputWsName.lastIndexOf("_")) + "_fury_" + fitType + specMin + "_to_" + specMax + "_Workspaces";
+    m_pythonExportWsName = resultWsName.toStdString();
   }
 
   bool FuryFit::validate()

@@ -3,6 +3,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/BatchAlgorithmRunner.h"
@@ -77,6 +78,7 @@ namespace CustomInterfaces
     void runTab();
     void setupTab();
     bool validateTab();
+    void exportPythonScript();
 
   protected slots:
     /// Slot to handle when an algorithm finishes running
@@ -163,6 +165,10 @@ namespace CustomInterfaces
     virtual void run() = 0;
     /// Overidden by child class.
     virtual bool validate() = 0;
+
+    Mantid::Kernel::DateAndTime m_tabStartTime;
+    Mantid::Kernel::DateAndTime m_tabEndTime;
+    std::string m_pythonExportWsName;
 
   };
 } // namespace CustomInterfaces

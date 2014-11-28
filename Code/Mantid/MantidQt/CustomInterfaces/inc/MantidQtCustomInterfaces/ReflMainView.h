@@ -54,6 +54,9 @@ namespace MantidQt
       virtual void giveUserCritical(std::string prompt, std::string title) = 0;
       virtual void showAlgorithmDialog(const std::string& algorithm) = 0;
 
+      //Plotting
+      virtual void plotWorkspaces(const std::set<std::string>& workspaces) = 0;
+
       //Set the status of the progress bar
       virtual void setProgressRange(int min, int max) = 0;
       virtual void setProgress(int progress) = 0;

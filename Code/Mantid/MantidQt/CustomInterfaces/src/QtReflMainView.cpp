@@ -279,6 +279,22 @@ namespace MantidQt
     }
 
     /**
+    This slot notifies the presenter that the "plot selected rows" button has been pressed
+    */
+    void QtReflMainView::on_actionPlotRow_triggered()
+    {
+      m_presenter->notify(IReflPresenter::PlotRowFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "plot selected groups" button has been pressed
+    */
+    void QtReflMainView::on_actionPlotGroup_triggered()
+    {
+      m_presenter->notify(IReflPresenter::PlotGroupFlag);
+    }
+
+    /**
     This slot notifies the presenter that the table has been updated/changed by the user
     */
     void QtReflMainView::tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight)
@@ -302,6 +318,9 @@ namespace MantidQt
       QMenu* menu = new QMenu(this);
       menu->addAction(ui.actionProcess);
       menu->addAction(ui.actionExpandSelection);
+      menu->addSeparator();
+      menu->addAction(ui.actionPlotRow);
+      menu->addAction(ui.actionPlotGroup);
       menu->addSeparator();
       menu->addAction(ui.actionPrependRow);
       menu->addAction(ui.actionAppendRow);
@@ -404,6 +423,24 @@ namespace MantidQt
       pythonSrc << "  " << algorithm << "Dialog()\n";
       pythonSrc << "except:\n";
       pythonSrc << "  pass\n";
+      runPythonCode(QString::fromStdString(pythonSrc.str()));
+    }
+
+    /**
+    Plot a workspace
+    */
+    void QtReflMainView::plotWorkspaces(const std::set<std::string>& workspaces)
+    {
+      if(workspaces.empty())
+        return;
+
+      std::stringstream pythonSrc;
+      pythonSrc << "base_graph = None\n";
+      for(auto ws = workspaces.begin(); ws != workspaces.end(); ++ws)
+        pythonSrc << "base_graph = plotSpectrum(\"" << *ws << "\", 0, True, window = base_graph)\n";
+
+      pythonSrc << "base_graph.activeLayer().logLogAxes()\n";
+
       runPythonCode(QString::fromStdString(pythonSrc.str()));
     }
 

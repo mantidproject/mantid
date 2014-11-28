@@ -89,6 +89,10 @@ namespace IDA
 
     QString pyOutput = runPythonCode(pyInput);
     UNUSED_ARG(pyOutput);
+
+    // Set the result workspace for Python script export
+    QString dataName = uiForm().msd_dsSampleInput->getCurrentDataName();
+    m_pythonExportWsName = dataName.left(dataName.lastIndexOf("_")).toStdString() + "_msd";
   }
 
   void MSDFit::singleFit()

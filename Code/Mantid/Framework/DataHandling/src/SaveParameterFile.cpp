@@ -95,17 +95,41 @@ namespace DataHandling
       const std::string  pType = (*paramsIt).second->type();
       const std::string pValue = (*paramsIt).second->asString();
 
-			if(pName == "x"          || pName == "y"          || pName == "z"          ||
-				pName == "r-position" || pName == "t-position" || pName == "p-position" ||
-				pName == "rotx"       || pName == "roty"       || pName == "rotz"        )
-			{
+      if(pName == "x"          || pName == "y"          || pName == "z"          ||
+         pName == "r-position" || pName == "t-position" || pName == "p-position" ||
+         pName == "rotx"       || pName == "roty"       || pName == "rotz"        )
+      {
         g_log.warning() << "The parameter name '" << pName << "' is reserved and has not been saved. "
                         << "Please contact the Mantid team for more information.";
         continue;
       }
 
+      if(pName == "pos")
+      {
+        if(saveLocationParams)
+        {
+          V3D pos;
+          std::istringstream pValueSS(pValue);
+          pos.readPrinted(pValueSS);
+          toSave[cID].push_back(boost::make_tuple("x", "double", boost::lexical_cast<std::string>(pos.X())));
+          toSave[cID].push_back(boost::make_tuple("y", "double", boost::lexical_cast<std::string>(pos.Y())));
+          toSave[cID].push_back(boost::make_tuple("z", "double", boost::lexical_cast<std::string>(pos.Z())));
+        }
+      }
+      else if(pName == "rot")
+      {
+        if(saveLocationParams)
+        {
+          V3D rot;
+          std::istringstream pValueSS(pValue);
+          rot.readPrinted(pValueSS);
+          toSave[cID].push_back(boost::make_tuple("rotx", "double", boost::lexical_cast<std::string>(rot.X())));
+          toSave[cID].push_back(boost::make_tuple("roty", "double", boost::lexical_cast<std::string>(rot.Y())));
+          toSave[cID].push_back(boost::make_tuple("rotz", "double", boost::lexical_cast<std::string>(rot.Z())));
+        }
+      }
       //If it isn't a position or rotation parameter, we can just add it to the list to save directly and move on.
-      if(pName != "pos" && pName != "rot")
+      else
       {
         if(pType == "fitting")
         {
@@ -123,54 +147,6 @@ namespace DataHandling
         }
         else
           toSave[cID].push_back(boost::make_tuple(pName, pType, pValue));
-      }
-    }
-
-    std::vector<IComponent_const_sptr> components;
-    //If we're saving location parameters we'll check every component to see if its location has been changed
-    if(saveLocationParams)
-    {
-      //Get all the components in the instrument
-      instrument->getChildren(components, true);
-      prog.resetNumSteps((int64_t)components.size(), 0.3, 0.6);
-
-      for(auto cIt = components.begin(); cIt != components.end(); ++cIt)
-      {
-        if(prog.hasCancellationBeenRequested())
-          break;
-        prog.report("Generating location parameters");
-        const IComponent* comp = cIt->get();
-        const IComponent* baseComp = comp->getBaseComponent();
-        const ComponentID cID = const_cast<ComponentID>(comp);
-
-        //Check if the position has been changed by a parameter
-        //If so, check each axis and add the relevant adjustment parameters to the to-save list.
-        const V3D basePos = baseComp->getPos();
-        const V3D  absPos =     comp->getPos();
-        const V3D posDiff = absPos - basePos;
-
-        const double threshold = 0.0001;
-
-        if(std::abs(posDiff.X()) > threshold)
-          toSave[cID].push_back(boost::make_tuple("x", "double", Strings::toString<double>(absPos.X())));
-        if(std::abs(posDiff.Y()) > threshold)
-          toSave[cID].push_back(boost::make_tuple("y", "double", Strings::toString<double>(absPos.Y())));
-        if(std::abs(posDiff.Z()) > threshold)
-          toSave[cID].push_back(boost::make_tuple("z", "double", Strings::toString<double>(absPos.Z())));
-
-        //Check if the rotation has been changed by a parameter
-        //If so, convert to Euler (XYZ order) and output each component that differs
-        const Quat baseRot = baseComp->getRotation();
-        const Quat absRot = comp->getRotation();
-
-        if(baseRot != absRot)
-        {
-          //Euler rotation components are not independent so write them all out to be safe.
-          std::vector<double> absEuler = absRot.getEulerAngles("XYZ");
-          toSave[cID].push_back(boost::make_tuple("rotx", "double", Strings::toString<double>(absEuler[0])));
-          toSave[cID].push_back(boost::make_tuple("roty", "double", Strings::toString<double>(absEuler[1])));
-          toSave[cID].push_back(boost::make_tuple("rotz", "double", Strings::toString<double>(absEuler[2])));
-        }
       }
     }
 
