@@ -172,12 +172,6 @@ namespace CustomInterfaces
       sliceAlg->setProperty("BackgroundRange", backgroundRange);
     }
 
-    // Set workspace name for Python export
-    QString firstFilename = m_uiForm.slice_inputFile->getFirstFilename();
-    QFileInfo firstFileInfo(firstFilename);
-    QString resultWorkspace = firstFileInfo.baseName() + suffix;
-    m_pythonExportWsName = resultWorkspace.toStdString();
-
     runAlgorithm(sliceAlg);
   }
 
@@ -421,12 +415,19 @@ namespace CustomInterfaces
       return;
     }
 
+    // Set workspace for Python export as the first result workspace
+    m_pythonExportWsName = sliceWs->getName();
+
     // Plot result spectrum
     plotMiniPlot(sliceWs, 0, "SlicePreviewPlot", "SlicePreviewCurve");
 
     // Set X range to data range
     setXAxisToCurve("SlicePreviewPlot", "SlicePreviewCurve");
     m_plots["SlicePreviewPlot"]->replot();
+
+    // Ungroup the output workspace
+    sliceOutputGroup->removeAll();
+    AnalysisDataService::Instance().remove("IndirectDiagnostics_Workspaces");
   }
 
   /**
