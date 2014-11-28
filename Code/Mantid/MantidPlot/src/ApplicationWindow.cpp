@@ -10098,24 +10098,27 @@ void ApplicationWindow::showGraphContextMenu()
   colour.insertItem(tr("&Linear"), ag, SLOT(linColor()));
   cm.insertItem(tr("&Color Bar"), &colour);
 
-  QAction *noNorm = new QAction(tr("N&one"), &normalization);
-  noNorm->setCheckable(true);
-  connect(noNorm, SIGNAL(activated()), ag, SLOT(noNormalization()));
-  normalization.addAction(noNorm);
+  if(ag->normalizable())
+  {
+    QAction *noNorm = new QAction(tr("N&one"), &normalization);
+    noNorm->setCheckable(true);
+    connect(noNorm, SIGNAL(activated()), ag, SLOT(noNormalization()));
+    normalization.addAction(noNorm);
 
-  QAction *binNorm = new QAction(tr("&Bin Width"), &normalization);
-  binNorm->setCheckable(true);
-  connect(binNorm, SIGNAL(activated()), ag, SLOT(binWidthNormalization()));
-  normalization.addAction(binNorm);
+    QAction *binNorm = new QAction(tr("&Bin Width"), &normalization);
+    binNorm->setCheckable(true);
+    connect(binNorm, SIGNAL(activated()), ag, SLOT(binWidthNormalization()));
+    normalization.addAction(binNorm);
 
-  QActionGroup *normalizationActions = new QActionGroup(this);
-  normalizationActions->setExclusive(true);
-  normalizationActions->addAction(noNorm);
-  normalizationActions->addAction(binNorm);
+    QActionGroup *normalizationActions = new QActionGroup(this);
+    normalizationActions->setExclusive(true);
+    normalizationActions->addAction(noNorm);
+    normalizationActions->addAction(binNorm);
 
-  noNorm->setChecked(!ag->isDistribution());
-  binNorm->setChecked(ag->isDistribution());
-  cm.insertItem(tr("&Normalization"), &normalization);
+    noNorm->setChecked(!ag->isDistribution());
+    binNorm->setChecked(ag->isDistribution());
+    cm.insertItem(tr("&Normalization"), &normalization);
+  }
 
   cm.insertSeparator();
   copy.insertItem(tr("&Layer"), this, SLOT(copyActiveLayer()));
