@@ -67,7 +67,7 @@ def diagnose(white_int, **kwargs):
     # Hard mask
     hardmask_file = kwargs.get('hard_mask_file', None)
     if hardmask_file is not None:
-        LoadMask(Instrument=kwargs.get('instrument_name',''),InputFile=parser.hard_mask_file,
+        LoadMask(Instrument=kwargs.get('instr_name',''),InputFile=parser.hard_mask_file,
                  OutputWorkspace='hard_mask_ws')
         MaskDetectors(Workspace=white_int, MaskedWorkspace='hard_mask_ws')
         # Find out how many detectors we hard masked

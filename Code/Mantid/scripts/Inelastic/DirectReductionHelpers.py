@@ -1,3 +1,5 @@
+from mantid import config
+
 """
 Set of functions to assist with processing instrument parameters relevant to reduction. 
 """

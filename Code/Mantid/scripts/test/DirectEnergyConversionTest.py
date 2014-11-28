@@ -136,6 +136,30 @@ class DirectEnergyConversionTest(unittest.TestCase):
         white_ws = tReducer.do_white(wb_ws, None, None,None)
         self.assertTrue(white_ws)
 
+    def test_get_abs_normalization_factor(self) :
+        mono_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000,XUnit='DeltaE',XMin=-5,XMax=15,BinWidth=0.1)
+        LoadInstrument(mono_ws,InstrumentName='MARI')
+
+        tReducer = DirectEnergyConversion(mono_ws.getInstrument())
+        tReducer.prop_man.incident_energy = 5.
+
+        (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(mono_ws.getName(),5.)        
+        self.assertAlmostEqual(nf1,0.139349147,7)
+        self.assertAlmostEqual(nf1,nf2)
+        self.assertAlmostEqual(nf2,nf3)
+        self.assertAlmostEqual(nf3,nf4)
+
+        # check warning. WB spectra with 0 signal indicate troubles. 
+        mono_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000,XUnit='DeltaE',XMin=-5,XMax=15,BinWidth=0.1)
+        LoadInstrument(mono_ws,InstrumentName='MARI')
+        sig = mono_ws.dataY(0);
+        sig[:]=0;          
+
+        (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(mono_ws.getName(),5.)
+        self.assertAlmostEqual(nf1,0.139349147,7)
+        self.assertAlmostEqual(nf1,nf2)
+        self.assertAlmostEqual(nf2,nf3)
+        self.assertAlmostEqual(nf3,nf4)
 
 
 
