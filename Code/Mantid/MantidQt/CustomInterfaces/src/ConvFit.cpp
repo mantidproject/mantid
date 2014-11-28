@@ -690,25 +690,6 @@ namespace IDA
     uiForm().confit_ckPlotGuess->setChecked(false);
 
     int specNo = uiForm().confit_spPlotSpectrum->text().toInt();
-    // Set spectra max value
-    int specMin = 0;
-    int specMax = static_cast<int>(m_cfInputWS->getNumberHistograms()) - 1;
-
-    m_valInt->setRange(specMin, specMax);
-    /* uiForm().confit_spSpectraMin->setText(QString::number(specMin)); */
-    /* uiForm().confit_spSpectraMax->setText(QString::number(specMax)); */
-
-    if ( specNo < 0 || specNo > specMax )
-    {
-      /* uiForm().confit_spPlotSpectrum->setText("0"); */
-      specNo = 0;
-    }
-
-    int smCurrent = uiForm().confit_spSpectraMax->text().toInt();
-    if ( smCurrent < 0 || smCurrent > specMax )
-    {
-      /* uiForm().confit_spSpectraMax->setText(QString::number(specMax)); */
-    }
 
     plotMiniPlot(m_cfInputWS, specNo, "ConvFitPlot", "CFDataCurve");
     try
@@ -818,7 +799,7 @@ namespace IDA
     }
 
     QString outputNm = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + m_cfInputWSName + QString("')\n")).trimmed();
-    outputNm += QString("conv_") + fitType + bgType + uiForm().confit_spPlotSpectrum->text();  
+    outputNm += QString("conv_") + fitType + bgType + uiForm().confit_spPlotSpectrum->text();
     std::string output = outputNm.toStdString();
 
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");

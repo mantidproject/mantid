@@ -777,6 +777,7 @@ namespace IDA
     delete proplbl;
     delete prop;
   }
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
