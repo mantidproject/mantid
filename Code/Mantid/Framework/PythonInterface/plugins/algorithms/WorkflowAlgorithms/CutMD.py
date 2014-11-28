@@ -266,12 +266,13 @@ class CutMD(DataProcessorAlgorithm):
         
         projection_labels = self.__make_labels(projection)
         
+        
+        prog = Progress(self, 0, 1, to_cut.getBoxController().getTotalNumMDBoxes())
+        cut_alg_name = "BinMD" if nopix else "SliceMD"
         '''
         Actually perform the binning operation
         '''
-        cut_alg_name = "BinMD" if nopix else "SliceMD"
-        cut_alg = AlgorithmManager.Instance().create(cut_alg_name)
-        cut_alg.setChild(True)
+        cut_alg = self.createChildAlgorithm(name=cut_alg_name, startProgress=0, endProgress=1.0)
         cut_alg.initialize()
         cut_alg.setProperty("InputWorkspace", to_cut)
         cut_alg.setPropertyValue("OutputWorkspace", "sliced")
@@ -294,6 +295,7 @@ class CutMD(DataProcessorAlgorithm):
         
         slice = cut_alg.getProperty("OutputWorkspace").value
         
+        
          # Attach the w-matrix (projection matrix)
         if slice.getNumExperimentInfo() > 0:
             u, v, w = projection
@@ -302,5 +304,6 @@ class CutMD(DataProcessorAlgorithm):
             info.run().addProperty("W_MATRIX", w_matrix, True)
             
         self.setProperty("OutputWorkspace", slice)
+        
         
 AlgorithmFactory.subscribe(CutMD)
