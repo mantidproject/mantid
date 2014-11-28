@@ -177,6 +177,9 @@ namespace IDA
     }
 
     m_batchAlgoRunner->executeBatchAsync();
+
+    // Set the result workspace for Python script export
+    m_pythonExportWsName = qSquaredWorkspace.toStdString();
   }
 
   /**

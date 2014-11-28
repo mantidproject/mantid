@@ -136,7 +136,7 @@ namespace CustomInterfaces
   void IndirectDiagnostics::run()
   {
     QString suffix = "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_slice";
-    QString filenames = m_uiForm.slice_inputFile->getFilenames().join("', r'");
+    QString filenames = m_uiForm.slice_inputFile->getFilenames().join(",");
 
     std::vector<long> spectraRange;
     spectraRange.push_back(static_cast<long>(m_dblManager->value(m_properties["SpecMin"])));
@@ -171,6 +171,12 @@ namespace CustomInterfaces
       backgroundRange.push_back(m_dblManager->value(m_properties["BackgroundEnd"]));
       sliceAlg->setProperty("BackgroundRange", backgroundRange);
     }
+
+    // Set workspace name for Python export
+    QString firstFilename = m_uiForm.slice_inputFile->getFirstFilename();
+    QFileInfo firstFileInfo(firstFilename);
+    QString resultWorkspace = firstFileInfo.baseName() + suffix;
+    m_pythonExportWsName = resultWorkspace.toStdString();
 
     runAlgorithm(sliceAlg);
   }
@@ -346,7 +352,7 @@ namespace CustomInterfaces
   void IndirectDiagnostics::updatePreviewPlot()
   {
     QString suffix = "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_slice";
-    QString filenames = m_uiForm.slice_inputFile->getFilenames().join("', r'");
+    QString filenames = m_uiForm.slice_inputFile->getFilenames().join(",");
 
     std::vector<long> spectraRange;
     spectraRange.push_back(static_cast<long>(m_dblManager->value(m_properties["SpecMin"])));

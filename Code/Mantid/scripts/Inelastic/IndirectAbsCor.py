@@ -213,9 +213,9 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
             logger.notice('Output file created : '+opath)
 
     if ncan > 1:
-        return [assWS, asscWS, acscWS, accWS]
+        return [fname, assWS, asscWS, acscWS, accWS]
     else:
-        return [assWS]
+        return [fname, assWS]
 
 def plotAbs(workspaces, plotOpt):
     if ( plotOpt == 'None' ): return
@@ -248,6 +248,7 @@ def AbsRunFeeder(input_ws, can_ws, geom, ncan, size, avar, density, beam_width=N
         @param plot_opt - whether to plot output
         @param verbose - whether to show extra verbose output
         @param save - whether to save the output to file
+        @return The result workspace group
     """
 
     StartTime('CalculateCorrections')
@@ -306,7 +307,9 @@ def AbsRunFeeder(input_ws, can_ws, geom, ncan, size, avar, density, beam_width=N
                         sigs, siga, avar, verbose, save)
 
     EndTime('CalculateCorrections')
-    plotAbs(workspaces, plot_opt)
+    plotAbs(workspaces[1:], plot_opt)
+
+    return workspaces[0]
 
 
 def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
