@@ -255,12 +255,36 @@ class CutMD(DataProcessorAlgorithm):
    
         extents = self.__calculate_extents(v, u, w, ( x_extents, y_extents, z_extents ) )
         extents, bins = self.__calculate_steps( extents, ( p1_bins, p2_bins, p3_bins ) )
-        if p4_bins:
+        if p4_bins != None:
             if (ndims == 4):
-                ebins = self.__to_mantid_slicing_binning(p1_bins, to_cut, 3); 
+                n_args = len(p4_bins)
+                min, max = self.__extents_in_current_projection(to_cut, 3); 
+                d_range = max - min
+                if n_args == 1:
+                    step_size = p4_bins[0]
+                    nbins = d_range / step_size
+                elif n_args == 2:
+                    min = p4_bins[0]
+                    max = p4_bins[1]
+                    nbins = 1
+                elif n_args == 3:
+                    min = p4_bins[i][0]
+                    max = p4_bins[i][2]
+                    step_size = p4_bins[1]
+                    dim_range = max - min
+                    if step_size > dim_range:
+                        step_size = dim_range
+                    n_bins = int( dim_range / step_size)
+                
+                extents.append(min)
+                extents.append(max)
+                bins.append(nbins)
+                    
                 e_units = to_cut.getDimension(3).getUnits()
-                bins.append(int(ebins[2]))
-                target_units.append(e_units)
+                
+                temp = list(target_units)
+                temp.append(target_units)
+                target_units = tuple(temp)
             else:
                 raise ValueError("Cannot specify P4Bins unless the workspace is of sufficient dimensions")
         
