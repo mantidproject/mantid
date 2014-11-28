@@ -55,6 +55,19 @@
     </cuboid>
   </type>
 
+  <component type="monitor2" idlist="monitor2">
+    <location z="0" />
+  </component>
+
+  <type name="monitor2" is="monitor">
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
+      <left-front-top-point  x="0.0025" y="-0.1" z="0.02"  />
+      <left-back-bottom-point  x="-0.0025" y="-0.1" z="0.0"  />
+      <right-front-bottom-point  x="0.0025" y="0.1" z="0.0"  />
+    </cuboid>
+  </type>
+
   <!-- DETECTORS -->
   <component type="front" idlist="front">
     <location />
@@ -225,6 +238,10 @@
 
   <idlist idname="monitor1">
     <id val="33" />
+  </idlist>
+
+  <idlist idname="monitor2">
+    <id val="35" />
   </idlist>
 
 </instrument>
