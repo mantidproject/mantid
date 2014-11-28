@@ -8,25 +8,29 @@
  * @param workspace The workspace containing the data
  * @param specIndex Index of the spectrum to plot
  * @param logScale If true, plot a log scale
- * @param distr If true and the data is histogram then plot the Y values/X bin-width
+ * @param plotAsDistribution If true and the data is histogram and not already a distribution then plot the Y values/X bin-width
  */
 QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(const Mantid::API::MatrixWorkspace & workspace,
-                                                   int specIndex, const bool logScale, const bool distr)
+                                                   int specIndex, const bool logScale,
+                                                   const bool plotAsDistribution)
  : m_spec(specIndex),
    m_X(workspace.readX(specIndex)),
    m_Y(workspace.readY(specIndex)),
    m_E(workspace.readE(specIndex)),
    m_xTitle(), m_yTitle(),
    m_isHistogram(workspace.isHistogramData()),
+   m_dataIsNormalized(workspace.isDistribution()),
    m_binCentres(false),
    m_logScale(logScale),
    m_minPositive(0),
    m_isDistribution(false)
 {
-  setAsDistribution(distr); // takes into account if this is a histogram and sets m_isDistribution
-  
+  // Actual plotting based on what type of data we have
+  setAsDistribution(plotAsDistribution && !m_dataIsNormalized); // takes into account if this is a histogram and sets m_isDistribution
+
   m_xTitle = MantidQt::API::PlotAxis(workspace, 0).title();
-  m_yTitle = MantidQt::API::PlotAxis(m_isDistribution, workspace).title();
+  m_yTitle = MantidQt::API::PlotAxis((m_dataIsNormalized||m_isDistribution), workspace).title();
+
 }
 
 /// Virtual copy constructor

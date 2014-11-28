@@ -3123,7 +3123,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
   ml->setName(appWindow()->generateUniqueName(plotTitle + "-"));
   m_lastShown1DPlotWin = ml;
 
-  // Do we plot try to plot as distribution
+  // Do we plot try to plot as distribution. If request and it is not already one!
   bool plotAsDistribution(false);
   if(distr == MantidQt::DistributionDefault)
   {
@@ -3147,7 +3147,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
       if(!firstCurve)
       {
         firstCurve = wsCurve;
-        g->setNormalizable(firstCurve->isHistogramData());
+        g->setNormalizable(firstCurve->isNormalizable());
         g->setDistribution(firstCurve->isDistribution());
       }
     } 
