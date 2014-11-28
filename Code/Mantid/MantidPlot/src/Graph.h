@@ -203,7 +203,8 @@ public slots:
   void binWidthNormalization();
   
   // Are MantidCurves plotted as distributions in this Graph
-  bool isDistribution()const{return m_isDistribution;}
+  bool isDistribution() const { return m_isDistribution; }
+  void setDistribution(const bool on) { m_isDistribution = on; }
 
 
   //! Accessor method for #d_plot.
