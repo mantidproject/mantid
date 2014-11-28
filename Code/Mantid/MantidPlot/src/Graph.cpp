@@ -5978,7 +5978,33 @@ void Graph::enableFixedAspectRatio(bool on)
   }
 #else
   UNUSED_ARG(on)
-#endif
+    #endif
+}
+
+/**
+ * Turn off any normalization
+ */
+void Graph::noNormalization()
+{
+  if(!m_isDistribution) return; // Nothing to do
+
+  m_isDistribution = false;
+  updateDataCurves();
+  d_plot->updateAxes();
+  notifyChanges();
+}
+
+/**
+ * Turn on normalization by bin width if it is appropriate
+ */
+void Graph::binWidthNormalization()
+{
+  if(m_isDistribution) return; // Nothing to do
+
+  m_isDistribution = true;
+  updateDataCurves();
+  d_plot->updateAxes();
+  notifyChanges();
 }
 
 void Graph::setWaterfallXOffset(int offset)
@@ -6089,7 +6115,11 @@ void Graph::updateDataCurves()
     if (DataCurve *c = dynamic_cast<DataCurve*>(pc))
       c->loadData();
     else if (MantidMatrixCurve *mc = dynamic_cast<MantidMatrixCurve*>(pc))
+    {
+      mc->setDrawAsDistribution(m_isDistribution);
+      mc->invalidateBoundingRect();
       mc->loadData();
+    }
   }
   QApplication::restoreOverrideCursor();
 }

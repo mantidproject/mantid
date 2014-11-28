@@ -10054,6 +10054,7 @@ void ApplicationWindow::showGraphContextMenu()
 
   QMenu axes(this);
   QMenu colour(this);
+  QMenu normalization(this);
   QMenu exports(this);
   QMenu copy(this);
   QMenu prints(this);
@@ -10096,6 +10097,10 @@ void ApplicationWindow::showGraphContextMenu()
   colour.insertItem(tr("Lo&g Scale"), ag, SLOT(logColor()));
   colour.insertItem(tr("&Linear"), ag, SLOT(linColor()));
   cm.insertItem(tr("&Color Bar"), &colour);
+
+  normalization.insertItem(tr("N&one"), ag,SLOT(noNormalization()));
+  normalization.insertItem(tr("&Bin Width"), ag, SLOT(binWidthNormalization()));
+  cm.insertItem(tr("&Normalization"), &normalization);
 
   cm.insertSeparator();
   copy.insertItem(tr("&Layer"), this, SLOT(copyActiveLayer()));

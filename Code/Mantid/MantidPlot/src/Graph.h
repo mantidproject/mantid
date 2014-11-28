@@ -198,9 +198,13 @@ public slots:
   void enablePanningMagnifier(bool on = true);
   bool isFixedAspectRatioEnabled();
   void enableFixedAspectRatio(bool on);
+
+  void noNormalization();
+  void binWidthNormalization();
+  
   // Are MantidCurves plotted as distributions in this Graph
   bool isDistribution()const{return m_isDistribution;}
-	
+
 
   //! Accessor method for #d_plot.
   Plot* plotWidget(){return d_plot;};
