@@ -786,7 +786,7 @@ int64_t          index_start = indices[wi];
           }
           // copy the data
           auto column = tableWs->addColumn(columnType, columnTitle);
-          for (int i = 0; i < length; i++)
+          for (size_t i = 0; i < length; i++)
           {
             column->cell<Type>(i) = *(data() + i);
           }
@@ -958,14 +958,14 @@ int64_t          index_start = indices[wi];
       {
         ColumnVector<V3D> col =  tableWs->addColumn("V3D", columnTitle);
 
-        const size_t rowCount = data.dim0();
+        const int rowCount = data.dim0();
 
         // This might've been done already, but doing it twice should't do any harm
         tableWs->setRowCount(rowCount);
 
         data.load();
 
-        for (size_t i = 0; i < rowCount; ++i)
+        for (int i = 0; i < rowCount; ++i)
         {
           auto& cell = col[i];
           cell( data(i,0), data(i,1), data(i,2) );

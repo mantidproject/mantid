@@ -555,7 +555,7 @@ namespace Mantid
       }
 
       // Special case of V3D
-      size_t getSizeOf( const Kernel::V3D& vec )
+      size_t getSizeOf( const Kernel::V3D& )
       {
         return 3;
       }
