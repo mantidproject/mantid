@@ -266,8 +266,6 @@ class CutMD(DataProcessorAlgorithm):
         
         projection_labels = self.__make_labels(projection)
         
-        
-        prog = Progress(self, 0, 1, to_cut.getBoxController().getTotalNumMDBoxes())
         cut_alg_name = "BinMD" if nopix else "SliceMD"
         '''
         Actually perform the binning operation
