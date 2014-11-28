@@ -193,10 +193,10 @@ namespace Mantid
       std::string logValueType()const{return "unknown";}
 
       /// Writes given vector column to the currently open Nexus file
-      template<typename Type>
-      void writeNexusVectorColumn(const boost::shared_ptr< const DataObjects::VectorColumn<Type> >& column,
+      template<typename VecType, typename ElemType>
+      void writeNexusVectorColumn(API::Column_const_sptr column,
                                   const std::string& columnName, int nexusType,
-                                  const std::string& typeName) const;
+                                  const std::string& interpret_as) const;
 
       /// Save a numeric columns of a TableWorkspace to currently open nexus file.
       template<typename T>
@@ -374,77 +374,6 @@ namespace Mantid
 
       writeNxFloatArray("time", times,  attributes, avalues);
       status=NXclosegroup(fileID);
-    }
-
-    /**
-     * Writes given vector column to the currently open Nexus file.
-     * @param columnName :: Name of NXdata to write to
-     * @param nexusType  :: Nexus type to use to store data
-     * @param typeName   :: Name of the type to use for "interpret_as" attribute
-     * @param column     :: Column to write
-     */
-    template<typename Type>
-    void NexusFileIO::writeNexusVectorColumn(const boost::shared_ptr<const DataObjects::VectorColumn<Type> >& column,
-                                             const std::string& columnName, int nexusType,
-                                             const std::string& typeName) const
-    {
-      size_t rowCount = column->size();
-
-      // Search for the longest array amongst the cells
-      size_t maxSize(0);
-      for ( size_t i = 0; i < rowCount; ++i )
-      {
-        size_t size = column->template cell< std::vector<Type> >(i).size();
-
-        if ( size > maxSize )
-          maxSize = size;
-      }
-
-      // Set-up dimensions
-      int dims[2];
-      dims[0] = static_cast<int>(rowCount);
-      dims[1] = static_cast<int>(maxSize);
-
-      // Create data array
-      boost::scoped_array<Type> data(new Type[rowCount * maxSize]);
-
-      for ( size_t i = 0; i < rowCount; ++i )
-      {
-        auto values = column->template cell< std::vector<Type> >(i);
-
-        // So that all the arrays are of the size maxSize
-        values.resize(maxSize);
-
-        // Copy values to the data array
-        for ( size_t j = 0; j < maxSize; ++j )
-          data[i*maxSize + j] = values[j];
-      }
-
-      // Write data
-      NXwritedata(columnName.c_str(), nexusType, 2, dims, reinterpret_cast<void*>(data.get()), false);
-
-      NXopendata(fileID, columnName.c_str());
-
-      // Add sizes of rows as attributes. We can't use padding zeroes to determine that because the
-      // vector stored might end with zeroes as well.
-      for ( size_t i = 0; i < rowCount; ++i )
-      {
-        auto size = static_cast<int>( column->template cell< std::vector<Type> >(i).size() );
-
-        std::ostringstream rowSizeAttrName;
-        rowSizeAttrName << "row_size_" << i;
-
-        NXputattr(fileID, rowSizeAttrName.str().c_str(), &size, 1, NX_INT32);
-      }
-
-      std::string units = "Not known";
-      std::string interpret_as = "A vector of " + typeName;
-
-      // Write general attributes
-      NXputattr(fileID, "units",  units.c_str(), static_cast<int>(units.size()), NX_CHAR);
-      NXputattr(fileID, "interpret_as",  interpret_as.c_str(), static_cast<int>(interpret_as.size()), NX_CHAR);
-
-      NXclosedata(fileID);
     }
 
 

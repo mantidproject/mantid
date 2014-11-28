@@ -547,7 +547,7 @@ public:
     TS_ASSERT( alg.execute());
 
     TableWorkspace_const_sptr ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(wsName);
-    TS_ASSERT_EQUALS( ws->columnCount(), 8);
+    TS_ASSERT_EQUALS( ws->columnCount(), 9);
     TS_ASSERT_EQUALS( ws->rowCount(), 4);
 
     try
@@ -608,6 +608,13 @@ public:
         TS_ASSERT( column[1] );
         TS_ASSERT( !column[2] );
         TS_ASSERT( column[3] );
+      }
+      {
+        ConstColumnVector<Mantid::Kernel::V3D> column = ws->getVector("3DVector");
+        TS_ASSERT_EQUALS( column[0], Mantid::Kernel::V3D(1,2,3));
+        TS_ASSERT_EQUALS( column[1], Mantid::Kernel::V3D(4,5,6));
+        TS_ASSERT_EQUALS( column[2], Mantid::Kernel::V3D(7,8,9));
+        TS_ASSERT_EQUALS( column[3], Mantid::Kernel::V3D(11,12,13));
       }
     }
     catch(std::exception& e)

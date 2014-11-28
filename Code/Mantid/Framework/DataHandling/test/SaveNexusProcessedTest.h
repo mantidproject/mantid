@@ -23,6 +23,7 @@
 #include <Poco/Path.h>
 
 #include <nexus/NeXusFile.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <fstream>
 #include <cxxtest/TestSuite.h>
@@ -60,7 +61,7 @@ public:
   }
 
 
-  void xtestInit()
+  void testInit()
   {
     SaveNexusProcessed algToBeTested;
     TS_ASSERT_THROWS_NOTHING(algToBeTested.initialize());
@@ -68,7 +69,7 @@ public:
   }
 
 
-  void xtestExec()
+  void testExec()
   {
 
     SaveNexusProcessed algToBeTested;
@@ -124,7 +125,7 @@ public:
 
 
 
-  void xtestExecOnLoadraw()
+  void testExecOnLoadraw()
   {
     SaveNexusProcessed algToBeTested;
     std::string inputFile = "LOQ48127.raw";
@@ -175,7 +176,7 @@ public:
   }
 
 
-  void xtestExecOnMuon()
+  void testExecOnMuon()
   {
     SaveNexusProcessed algToBeTested;
 
@@ -309,42 +310,42 @@ public:
   }
 
 
-  void xtestExec_EventWorkspace_TofEvent()
+  void testExec_EventWorkspace_TofEvent()
   {
     std::string outputFile;
     do_testExec_EventWorkspaces("SaveNexusProcessed_", TOF, outputFile, false, clearfiles);
   }
 
-  void xtestExec_EventWorkspace_WeightedEvent()
+  void testExec_EventWorkspace_WeightedEvent()
   {
     std::string outputFile;
     do_testExec_EventWorkspaces("SaveNexusProcessed_", WEIGHTED, outputFile, false, clearfiles);
   }
 
-  void xtestExec_EventWorkspace_WeightedEventNoTime()
+  void testExec_EventWorkspace_WeightedEventNoTime()
   {
     std::string outputFile;
     do_testExec_EventWorkspaces("SaveNexusProcessed_", WEIGHTED_NOTIME, outputFile, false, clearfiles);
   }
 
-  void xtestExec_EventWorkspace_DifferentTypes()
+  void testExec_EventWorkspace_DifferentTypes()
   {
     std::string outputFile;
     do_testExec_EventWorkspaces("SaveNexusProcessed_DifferentTypes_", WEIGHTED_NOTIME, outputFile, true, clearfiles);
   }
 
-  void xtestExec_EventWorkspace_DontPreserveEvents()
+  void testExec_EventWorkspace_DontPreserveEvents()
   {
     std::string outputFile;
     do_testExec_EventWorkspaces("SaveNexusProcessed_EventTo2D", TOF, outputFile, false, clearfiles, false /* DONT preserve events */);
   }
-  void xtestExec_EventWorkspace_CompressNexus()
+  void testExec_EventWorkspace_CompressNexus()
   {
     std::string outputFile;
     do_testExec_EventWorkspaces("SaveNexusProcessed_EventTo2D", TOF, outputFile, false, clearfiles, true /* DONT preserve events */, true /* Compress */);
   }
 
-  void xtestExecSaveLabel()
+  void testExecSaveLabel()
   {
     SaveNexusProcessed alg;
     if ( !alg.isInitialized() ) alg.initialize();
@@ -394,7 +395,7 @@ public:
     AnalysisDataService::Instance().remove("testSpace");
   }
 
-  void xtestSaveGroupWorkspace()
+  void testSaveGroupWorkspace()
   {
     const std::string output_filename = "SaveNexusProcessedTest_GroupWorkspaceFile.nxs";
 
@@ -430,7 +431,7 @@ public:
 
   }
 
-  void xtestSaveTableVectorColumn()
+  void testSaveTableVectorColumn()
   {
     std::string outputFileName = "SaveNexusProcessedTest_testSaveTableVectorColumn.nxs";
 
@@ -504,7 +505,7 @@ public:
         TS_ASSERT_EQUALS( savedNexus.getAttr<int>(attrInfos1[2]), 4 );
 
         TS_ASSERT_EQUALS( attrInfos1[4].name, "interpret_as");
-        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos1[4]), "A vector of int" );
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos1[4]), "" );
 
         TS_ASSERT_EQUALS( attrInfos1[5].name, "name");
         TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos1[5]), "IntVectorColumn" );
@@ -540,7 +541,7 @@ public:
         TS_ASSERT_EQUALS( savedNexus.getAttr<int>(attrInfos2[1]), 2 );
 
         TS_ASSERT_EQUALS( attrInfos2[4].name, "interpret_as");
-        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos2[4]), "A vector of double" );
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos2[4]), "" );
 
         TS_ASSERT_EQUALS( attrInfos2[5].name, "name");
         TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos2[5]), "DoubleVectorColumn" );
@@ -610,6 +611,13 @@ public:
       data[1] = false;
       data[2] = true;
     }
+    table->addColumn("V3D", "V3DColumn");
+    {
+      auto& data = table->getColVector<V3D>("V3DColumn");
+      data[0] = V3D(1,2,3);
+      data[1] = V3D(4,5,6);
+      data[2] = V3D(7,8,9);
+    }
 
     SaveNexusProcessed alg;
     alg.initialize();
@@ -634,21 +642,21 @@ public:
       savedNexus.openData("column_1");
       doTestColumnInfo( savedNexus, NX_INT32, "", "IntColumn" );
       int expectedData[] = { 5, 2, 3 };
-      doTestColumnData( savedNexus, expectedData );
+      doTestColumnData( "IntColumn", savedNexus, expectedData );
     }
 
     {
       savedNexus.openData("column_2");
       doTestColumnInfo( savedNexus, NX_FLOAT64, "", "DoubleColumn" );
       double expectedData[] = { 0.5, 0.2, 0.3 };
-      doTestColumnData( savedNexus, expectedData );
+      doTestColumnData( "DoubleColumn", savedNexus, expectedData );
     }
 
     {
       savedNexus.openData("column_3");
       doTestColumnInfo( savedNexus, NX_FLOAT32, "", "FloatColumn" );
       float expectedData[] = { 10.5f, 10.2f, 10.3f };
-      doTestColumnData( savedNexus, expectedData );
+      doTestColumnData( "FloatColumn", savedNexus, expectedData );
     }
 
     {
@@ -656,28 +664,35 @@ public:
       // it is the same as int
       doTestColumnInfo( savedNexus, NX_INT32, "", "Int32Column" );
       int32_t expectedData[] = { 15, 12, 13 };
-      doTestColumnData( savedNexus, expectedData );
+      doTestColumnData( "Int32Column", savedNexus, expectedData );
     }
 
     {
       savedNexus.openData("column_5");
       doTestColumnInfo( savedNexus, NX_INT64, "", "Int64Column" );
       int64_t expectedData[] = { 25, 22, 23 };
-      doTestColumnData( savedNexus, expectedData );
+      doTestColumnData( "Int64Column", savedNexus, expectedData );
     }
 
     {
       savedNexus.openData("column_6");
       doTestColumnInfo( savedNexus, NX_UINT64, "", "SizeColumn" );
       size_t expectedData[] = { 35, 32, 33 };
-      doTestColumnData( savedNexus, expectedData );
+      doTestColumnData( "SizeColumn", savedNexus, expectedData );
     }
 
     {
       savedNexus.openData("column_7");
       doTestColumnInfo( savedNexus, NX_UINT8, "", "BoolColumn" );
       unsigned char expectedData[] = { 1, 0, 1 };
-      doTestColumnData( savedNexus, expectedData );
+      doTestColumnData( "BoolColumn", savedNexus, expectedData );
+    }
+
+    {
+      savedNexus.openData("column_8");
+      doTestColumnInfo2( savedNexus, NX_FLOAT64, "V3D", "V3DColumn", 3 );
+      double expectedData[] = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0 };
+      doTestColumnData( "V3DColumn",savedNexus, expectedData, 9 );
     }
 
     savedNexus.close();
@@ -710,16 +725,42 @@ private:
       }
   }
 
+  void doTestColumnInfo2(NeXus::File& file, int type, const std::string& interpret_as, const std::string& name, int dim1 )
+  {
+      NeXus::Info columnInfo = file.getInfo();
+      TSM_ASSERT_EQUALS( name, columnInfo.dims.size(), 2 );
+      TSM_ASSERT_EQUALS( name, columnInfo.dims[0], 3 );
+      TSM_ASSERT_EQUALS( name, columnInfo.dims[1], dim1 );
+      TSM_ASSERT_EQUALS( name, columnInfo.type, type );
+
+      std::vector<NeXus::AttrInfo> attrInfos = file.getAttrInfos();
+      TSM_ASSERT_EQUALS( name, attrInfos.size(), 6 );
+
+      if ( attrInfos.size() == 6 )
+      {
+        TSM_ASSERT_EQUALS( name, attrInfos[4].name, "interpret_as");
+        TSM_ASSERT_EQUALS( name, file.getStrAttr(attrInfos[4]), interpret_as );
+
+        TSM_ASSERT_EQUALS( name, attrInfos[5].name, "name");
+        TSM_ASSERT_EQUALS( name, file.getStrAttr(attrInfos[5]), name );
+
+        TSM_ASSERT_EQUALS( name, attrInfos[3].name, "units");
+        TSM_ASSERT_EQUALS( name, file.getStrAttr(attrInfos[3]), "Not known" );
+      }
+  }
+
   template<typename T>
-  void doTestColumnData( NeXus::File& file, const T expectedData[] )
+  void doTestColumnData( const std::string& name, NeXus::File& file, const T expectedData[], size_t len = 3 )
   {
     std::vector<T> data;
     file.getData(data);
 
-    TS_ASSERT_EQUALS( data.size(), 3 );
-    TS_ASSERT_EQUALS( data[0], expectedData[0] );
-    TS_ASSERT_EQUALS( data[1], expectedData[1] );
-    TS_ASSERT_EQUALS( data[2], expectedData[2] );
+    TSM_ASSERT_EQUALS( name, data.size(), len );
+    for(size_t i = 0; i < len; ++i)
+    {
+      std::string mess = name + ", item #" + boost::lexical_cast<std::string>(i);
+      TSM_ASSERT_EQUALS( mess, data[i], expectedData[i] );
+    };
   }
 
   std::string outputFile;

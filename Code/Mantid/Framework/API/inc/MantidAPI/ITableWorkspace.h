@@ -332,7 +332,19 @@ public:
   {
     if (!m_column->isType<T>())
     {
-      throw std::runtime_error("Type mismatch when creating a ColumnVector.");
+      std::stringstream mess; 
+      mess << "Type mismatch when creating a ColumnVector<" << typeid(T).name() << ">.";
+      throw std::runtime_error( mess.str() );
+    }
+  }
+  /// Construct directly from column
+  ColumnVector(Column_sptr column):m_column(column)
+  {
+    if (!m_column->isType<T>())
+    {
+      std::stringstream mess; 
+      mess << "Type mismatch when creating a ColumnVector<" << typeid(T).name() << ">.";
+      throw std::runtime_error( mess.str() );
     }
   }
   /** Get the element
@@ -359,7 +371,19 @@ public:
   {
     if (!m_column->isType<T>())
     {
-      throw std::runtime_error("Type mismatch when creating a ColumnVector.");
+      std::stringstream mess; 
+      mess << "Type mismatch when creating a ColumnVector<" << typeid(T).name() << ">.";
+      throw std::runtime_error( mess.str() );
+    }
+  }
+  /// Construct directly from column
+  ConstColumnVector(Column_const_sptr column):m_column(column)
+  {
+    if (!m_column->isType<T>())
+    {
+      std::stringstream mess; 
+      mess << "Type mismatch when creating a ColumnVector<" << typeid(T).name() << ">.";
+      throw std::runtime_error( mess.str() );
     }
   }
   /** Get the const reference to element

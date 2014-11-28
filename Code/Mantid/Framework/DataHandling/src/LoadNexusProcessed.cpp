@@ -805,9 +805,6 @@ int64_t          index_start = indices[wi];
 
       NXData nx_tw = entry.openNXData("table_workspace");
 
-      bool hasNumberOfRowBeenSet = false;
-      //int numberOfRows = 0;
-
       int columnNumber = 1;
       do
       {
@@ -861,11 +858,7 @@ int64_t          index_start = indices[wi];
             {
               workspace->addColumn("str", columnTitle);
               int nRows = info.dims[0];
-              if (!hasNumberOfRowBeenSet)
-              {
-                workspace->setRowCount(nRows);
-                hasNumberOfRowBeenSet = true;
-              }
+              workspace->setRowCount(nRows);
 
               const int maxStr = info.dims[1];
               data.load();
@@ -878,13 +871,22 @@ int64_t          index_start = indices[wi];
               }
             }
           }
-#define IF_VECTOR_COLUMN(Type, ColumnTypeName, NexusType) \
-      else if ( info.type == NexusType ) \
-      { \
-        loadVectorColumn<Type>(nx_tw, dataSetName, workspace, #ColumnTypeName); \
-      }
-          IF_VECTOR_COLUMN(int, vector_int, NX_INT32)
-          IF_VECTOR_COLUMN(double, vector_double, NX_FLOAT64)
+          else if ( info.type == NX_INT32 )
+          {
+            loadVectorColumn<int>(nx_tw, dataSetName, workspace, "vector_int");
+          }
+          else if ( info.type == NX_FLOAT64 )
+          {
+            auto data = nx_tw.openNXDouble(dataSetName.c_str());
+            if ( data.attributes("interpret_as") == "V3D" )
+            {
+              loadV3DColumn( data, workspace );
+            }
+            else
+            {
+              loadVectorColumn<double>(nx_tw, dataSetName, workspace, "vector_double");
+            }
+          }
 
         }
 
@@ -939,6 +941,34 @@ int64_t          index_start = indices[wi];
           rowSizeStr >> rowSize;
 
           cell.resize(rowSize);
+        }
+      }
+    }
+
+    /**
+     * Loads a V3D column to the TableWorkspace.
+     * @param data   :: Table data to load from
+     * @param tableWs     :: Workspace to add column to
+     */
+    void LoadNexusProcessed::loadV3DColumn(Mantid::NeXus::NXDouble& data,
+                            const API::ITableWorkspace_sptr& tableWs)
+    {
+      std::string columnTitle = data.attributes("name");
+      if (!columnTitle.empty())
+      {
+        ColumnVector<V3D> col =  tableWs->addColumn("V3D", columnTitle);
+
+        const size_t rowCount = data.dim0();
+
+        // This might've been done already, but doing it twice should't do any harm
+        tableWs->setRowCount(rowCount);
+
+        data.load();
+
+        for (size_t i = 0; i < rowCount; ++i)
+        {
+          auto& cell = col[i];
+          cell( data(i,0), data(i,1), data(i,2) );
         }
       }
     }

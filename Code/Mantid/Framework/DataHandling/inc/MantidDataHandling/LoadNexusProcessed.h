@@ -111,6 +111,9 @@ namespace Mantid
                             const API::ITableWorkspace_sptr& tableWs,
                             const std::string& columnType);
 
+      /// Loads a V3D column to the TableWorkspace.
+      void loadV3DColumn(Mantid::NeXus::NXDouble& data, const API::ITableWorkspace_sptr& tableWs);
+
 	    API::Workspace_sptr loadPeaksEntry(Mantid::NeXus::NXEntry & entry);
 
       API::MatrixWorkspace_sptr loadEventEntry(Mantid::NeXus::NXData & wksp_cls,Mantid::NeXus::NXDouble & xbins,
