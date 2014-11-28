@@ -642,7 +642,7 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
     using MantidQt::API::PlotAxis;
     plot->setXAxisLabel(PlotAxis(*m_workspace, 0).title());
     plot->setYAxisLabel(PlotAxis(*m_workspace, 1).title());
-    plot->setZAxisLabel(PlotAxis(*m_workspace).title());
+    plot->setZAxisLabel(PlotAxis(false, *m_workspace).title());
 
     a->initPlot3D(plot);
     //plot->confirmClose(false);

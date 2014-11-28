@@ -23,10 +23,10 @@ QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(const Mantid::API::MatrixWork
    m_minPositive(0),
    m_isDistribution(false)
 {
-  setAsDistribution(distr); // takes into account if this is a histogram or not
+  setAsDistribution(distr); // takes into account if this is a histogram and sets m_isDistribution
   
   m_xTitle = MantidQt::API::PlotAxis(workspace, 0).title();
-  m_yTitle = MantidQt::API::PlotAxis(workspace).title();
+  m_yTitle = MantidQt::API::PlotAxis(m_isDistribution, workspace).title();
 }
 
 /// Virtual copy constructor

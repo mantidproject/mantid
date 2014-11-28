@@ -2955,7 +2955,7 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
     xtitle = MantidQt::API::PlotAxis(*workspace, 1).title();
   }
   g->setXAxisTitle(xtitle);
-  g->setYAxisTitle(MantidQt::API::PlotAxis(*workspace).title());
+  g->setYAxisTitle(MantidQt::API::PlotAxis(false, *workspace).title());
 }
 
 /**
