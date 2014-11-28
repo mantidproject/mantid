@@ -240,6 +240,9 @@ namespace IDA
 
     outputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(pyOutput.toStdString());
     plotPreview(uiForm().abscor_spPreviewSpec->value());
+
+    // Set the result workspace for Python script export
+    m_pythonExportWsName = pyOutput.toStdString();
   }
 
   /**

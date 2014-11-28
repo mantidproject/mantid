@@ -85,6 +85,8 @@ namespace MantidQt
     private slots:
       /// Opens the help page for the current tab
       void helpClicked();
+      /// Exports the current tab algorithms as a Python script
+      void exportTabPython();
       /// Runs the current tab
       void runClicked();
       /// Opens the manage directory dialog

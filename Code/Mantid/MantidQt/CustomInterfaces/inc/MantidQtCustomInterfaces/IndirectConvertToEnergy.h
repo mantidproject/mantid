@@ -48,6 +48,7 @@ namespace CustomInterfaces
     virtual bool validate();
 
   private slots:
+    void algorithmComplete(bool error);
     void setInstrumentDefault(); ///< Sets default parameters for current instrument
     void mappingOptionSelected(const QString& groupType); ///< change ui to display appropriate options
     void backgroundClicked(); ///< handles showing and hiding m_backgroundDialog

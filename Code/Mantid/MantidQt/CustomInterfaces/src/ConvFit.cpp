@@ -148,10 +148,10 @@ namespace IDA
       return;
     }
 
-    QString ftype = fitTypeString();
-    QString bg = backgroundString();
+    QString fitType = fitTypeString();
+    QString bgType = backgroundString();
 
-    if(ftype == "")
+    if(fitType == "")
     {
       g_log.error("No fit type defined");
     }
@@ -163,6 +163,8 @@ namespace IDA
     std::string function = std::string(func->asString());
     QString stX = m_properties["StartX"]->valueText();
     QString enX = m_properties["EndX"]->valueText();
+    QString specMin = uiForm().confit_leSpectraMin->text();
+    QString specMax = uiForm().confit_leSpectraMax->text();
 
     QString pyInput =
       "from IndirectDataAnalysis import confitSeq\n"
@@ -174,11 +176,11 @@ namespace IDA
       "ties = " + ties + "\n"
       "save = ";
   
-    if(uiForm().confit_leSpectraMin->text() != "")
-      pyInput += "specMin = " + uiForm().confit_leSpectraMin->text() + "\n";
+    if(specMin != "")
+      pyInput += "specMin = " + specMin + "\n";
 
-    if(uiForm().confit_leSpectraMax->text() != "")
-      pyInput += "specMax = " + uiForm().confit_leSpectraMax->text() + "\n";
+    if(specMax != "")
+      pyInput += "specMax = " + specMax + "\n";
 
     pyInput += uiForm().confit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
 
@@ -200,11 +202,16 @@ namespace IDA
     }
   
     pyInput +=    
-      "bg = '" + bg + "'\n"
-      "ftype = '" + ftype + "'\n"
+      "bg = '" + bgType + "'\n"
+      "ftype = '" + fitType + "'\n"
       "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, convolve, Verbose=verbose, Plot=plot, Save=save)\n";
 
     QString pyOutput = runPythonCode(pyInput);
+
+    // Set the result workspace for Python script export
+    QString inputWsName = QString::fromStdString(m_cfInputWS->getName());
+    QString resultWsName = inputWsName.left(inputWsName.lastIndexOf("_")) + "_conv_" + fitType + bgType + specMin + "_to_" + specMax + "_Workspaces";
+    m_pythonExportWsName = resultWsName.toStdString();
   }
 
   /**
@@ -491,8 +498,14 @@ namespace IDA
         IAlgorithm_sptr loadParamFile = AlgorithmManager::Instance().create("LoadParameterFile");
         loadParamFile->initialize();
         loadParamFile->setProperty("Workspace", workspaceName);
-        loadParamFile->setProperty("Filename", inst->getName()+"_"+analyser+"_"+reflection+"_Parameters.xml");
+        loadParamFile->setProperty("Filename", inst->getName() + "_" + analyser + "_" + reflection + "_Parameters.xml");
         loadParamFile->execute();
+
+        if(!loadParamFile->isExecuted())
+        {
+          g_log.error("Could not load parameter file, ensure instrument directory is in data search paths.");
+          return 0.0;
+        }
 
         inst = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName)->getInstrument();
       }
@@ -503,7 +516,8 @@ namespace IDA
     {
       UNUSED_ARG(e);
 
-      resolution = 0;
+      g_log.error("Could not load instrument resolution from parameter file");
+      resolution = 0.0;
     }
       
     return resolution;
@@ -771,16 +785,16 @@ namespace IDA
     Mantid::API::CompositeFunction_sptr function = createFunction(uiForm().confit_ckTieCentres->isChecked());
 
     // get output name
-    QString ftype = fitTypeString();
-    QString bg = backgroundString();
+    QString fitType = fitTypeString();
+    QString bgType = backgroundString();
 
-    if(ftype == "")
+    if(fitType == "")
     {
       g_log.error("No fit type defined!");
     }
 
     QString outputNm = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + m_cfInputWSName + QString("')\n")).trimmed();
-    outputNm += QString("conv_") + ftype + bg + uiForm().confit_lePlotSpectrum->text();  
+    outputNm += QString("conv_") + fitType + bgType + uiForm().confit_lePlotSpectrum->text();  
     std::string output = outputNm.toStdString();
 
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");

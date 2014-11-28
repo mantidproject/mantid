@@ -89,24 +89,16 @@ namespace MantidQt
       if( !m_form.workspaceEdit->isEnabled() )
         return;
 
-      const std::string& outWsName = getAlgorithm()->getPropertyValue("OutputWorkspace");
-      if (!outWsName.empty())
+      // suggest ws name based on file name
+      QString fileSuggestion;
+      if( m_form.fileWidget->isValid() )
       {
-          m_form.workspaceEdit->setText(QString::fromStdString(outWsName));
+        if( m_form.fileWidget->getFilenames().size() == 1 )
+          fileSuggestion = QFileInfo(m_form.fileWidget->getFirstFilename()).completeBaseName();
+        else
+          fileSuggestion = "MultiFiles";
       }
-      else
-      {
-        // Only if no value given for the property 'OutputWorkspace', suggest ws name based on file name
-        QString fileSuggestion;
-        if( m_form.fileWidget->isValid() )
-        {
-          if( m_form.fileWidget->getFilenames().size() == 1 )
-            fileSuggestion = QFileInfo(m_form.fileWidget->getFirstFilename()).completeBaseName();
-          else
-            fileSuggestion = "MultiFiles";
-        }
-        m_form.workspaceEdit->setText(fileSuggestion);
-      }
+      m_form.workspaceEdit->setText(fileSuggestion);
     }
 
     /**
@@ -168,9 +160,19 @@ namespace MantidQt
       m_form.fileWidget->readSettings("Mantid/Algorithms/Load");
       m_initialHeight = this->height();
 
-      // Guess at an output workspace name but only if the user hasn't changed anything
-      enableNameSuggestion(true);
-      connect(m_form.workspaceEdit, SIGNAL(textEdited(const QString&)), this, SLOT(enableNameSuggestion()));
+      const std::string& outWsName = getAlgorithm()->getPropertyValue("OutputWorkspace");
+      if (!outWsName.empty())
+      {
+        // OutputWorkspace name suggestion received as parameter, just take it and don't change it
+        m_form.workspaceEdit->setText(QString::fromStdString(outWsName));
+      }
+      else
+      {
+        // Guess at an output workspace name but only if the user hasn't changed anything
+        enableNameSuggestion(true);
+        connect(m_form.workspaceEdit, SIGNAL(textEdited(const QString&)), this, SLOT(enableNameSuggestion()));
+      }
+
       // Connect the file finder's file found signal to the dynamic property create method.
       // When the file text is set the Load algorithm finds the concrete loader and then we
       // know what extra properties to create
