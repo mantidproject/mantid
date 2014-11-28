@@ -657,9 +657,6 @@ namespace Mantid
 
       int nRows = static_cast<int>(itableworkspace->rowCount());
 
-      int dims_array[1] =
-      { nRows };
-
       for (size_t i = 0; i < itableworkspace->columnCount(); i++)
       {
         Column_const_sptr col = itableworkspace->getColumn(i);
