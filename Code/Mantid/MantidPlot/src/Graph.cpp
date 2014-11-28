@@ -203,6 +203,8 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 
   connect (d_zoomer[0],SIGNAL(zoomed (const QwtDoubleRect &)),this,SLOT(zoomed (const QwtDoubleRect &)));
 
+  m_isDistribution = false;
+  m_normalizable = false;
 }
 
 void Graph::notifyChanges()

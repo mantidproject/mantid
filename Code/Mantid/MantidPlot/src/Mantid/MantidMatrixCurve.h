@@ -89,6 +89,9 @@ public:
   /// Returns whether the curve is plotted as a distribution
   bool isDistribution() const;
 
+  /// Returns true if the curve data comes for a histgoram workspace
+  bool isHistogramData() const;
+
   virtual void draw(QPainter *p, 
     const QwtScaleMap &xMap, const QwtScaleMap &yMap,
     const QRect &) const;

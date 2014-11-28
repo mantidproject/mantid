@@ -8,7 +8,7 @@
  * @param workspace The workspace containing the data
  * @param specIndex Index of the spectrum to plot
  * @param logScale If true, plot a log scale
- * @param distr If true, plot the Y values/X bin-width
+ * @param distr If true and the data is histogram then plot the Y values/X bin-width
  */
 QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(const Mantid::API::MatrixWorkspace & workspace,
                                                    int specIndex, const bool logScale, const bool distr)
@@ -21,8 +21,10 @@ QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(const Mantid::API::MatrixWork
    m_binCentres(false),
    m_logScale(logScale),
    m_minPositive(0),
-   m_isDistribution(distr)
+   m_isDistribution(false)
 {
+  setAsDistribution(distr); // takes into account if this is a histogram or not
+  
   m_xTitle = MantidQt::API::PlotAxis(workspace, 0).title();
   m_yTitle = MantidQt::API::PlotAxis(workspace).title();
 }

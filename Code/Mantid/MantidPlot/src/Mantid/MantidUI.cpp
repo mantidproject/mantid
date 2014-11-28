@@ -3123,7 +3123,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
   ml->setName(appWindow()->generateUniqueName(plotTitle + "-"));
   m_lastShown1DPlotWin = ml;
 
-  // Do we plot a distribution or not
+  // Do we plot try to plot as distribution
   bool plotAsDistribution(false);
   if(distr == MantidQt::DistributionDefault)
   {
@@ -3136,15 +3136,20 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
   
   // Try to add curves to the plot
   Graph *g = ml->activeGraph();
-  g->setDistribution(plotAsDistribution);
   MantidMatrixCurve::IndexDir indexType = (spectrumPlot) ? MantidMatrixCurve::Spectrum : MantidMatrixCurve::Bin;
   MantidMatrixCurve* firstCurve(NULL);
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();++it)
   {
     try
     {
-      auto * wsCurve = new MantidMatrixCurve(it.key(),g,it.value(),indexType,errs,plotAsDistribution,style);
-      if(!firstCurve) firstCurve = wsCurve;
+      auto * wsCurve = new MantidMatrixCurve(it.key(), g, it.value(), indexType,
+                                             errs, plotAsDistribution, style);
+      if(!firstCurve)
+      {
+        firstCurve = wsCurve;
+        g->setNormalizable(firstCurve->isHistogramData());
+        g->setDistribution(firstCurve->isDistribution());
+      }
     } 
     catch (Mantid::Kernel::Exception::NotFoundError&) 
     {
