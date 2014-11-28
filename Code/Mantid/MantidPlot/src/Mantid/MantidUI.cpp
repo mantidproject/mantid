@@ -1412,7 +1412,10 @@ void MantidUI::executeSaveNexus()
 {
   QString wsName = getSelectedWorkspaceName();
   QHash<QString,QString> presets;
-  presets["InputWorkspace"] = wsName;
+  if (!wsName.isEmpty())
+  {
+    presets["InputWorkspace"] = wsName;
+  }
   showAlgorithmDialog("SaveNexus", presets);
 }
 
@@ -2118,10 +2121,17 @@ void MantidUI::saveProject(bool saved)
   }
   Mantid::API::FrameworkManager::Instance().clear();
 }
+
 void MantidUI::enableSaveNexus(const QString& wsName)
 {
-  appWindow()->enablesaveNexus(wsName);
+  appWindow()->enableSaveNexus(wsName);
 }
+
+void MantidUI::disableSaveNexus()
+{
+  appWindow()->disableSaveNexus();
+}
+
 
 /** This method is sueful for saving the currently loaded workspaces to project file on save.
 *  saves the names of all the workspaces loaded into mantid workspace tree
@@ -3066,8 +3076,37 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-  const QString& firstWsName = toPlot.constBegin().key();
+  const QString& firstWsName = toPlot.constBegin().key();;
+  QString plotTitle;
+  // If the first workspace selected in the tree is a WorkspaceGroup,
+  // use its name directly, rather than the first in the list 'toPlot'
+  // (which will be the first workspace included in the group - not
+  // the best title).
+  const QString& sel = m_exploreMantid->getSelectedWorkspaceName();
+  WorkspaceGroup_const_sptr gWs;
+  if (!sel.isEmpty() && AnalysisDataService::Instance().doesExist(sel.toStdString()))
+  {
+    try
+    {
+      gWs = boost::dynamic_pointer_cast<const WorkspaceGroup>
+        (Mantid::API::AnalysisDataService::Instance().retrieve(sel.toStdString()));
+    }
+    catch(std::exception&)
+    {
+      // can happen, nothing to worry about
+      gWs = WorkspaceGroup_const_sptr();  // make sure, anyway
+    }
+  }
+  if (gWs)
+  {
+    plotTitle = sel;
+  }
+  else
+  {
+    plotTitle = firstWsName;
+  }
 
+  // Limit to 1 window for this type of plot -> reuse plot/graph window
   if(workspacesDockPlot1To1())
   {
     if (m_lastShown1DPlotWin)
@@ -3077,8 +3116,8 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
     }
   }
   bool isGraphNew = false;
-  MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, firstWsName, clearWindow);
-  ml->setName(appWindow()->generateUniqueName(firstWsName + "-"));
+  MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, plotTitle, clearWindow);
+  ml->setName(appWindow()->generateUniqueName(plotTitle + "-"));
   m_lastShown1DPlotWin = ml;
 
   Graph *g = ml->activeGraph();
@@ -3103,7 +3142,12 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
     }
   }
 
-  if(isGraphNew)
+  if(!isGraphNew)
+  {
+    // Replot graph is we've added curves to existing one
+    g->replot();
+  }
+  else
   {
     if(!firstCurve)
     {
@@ -3127,10 +3171,6 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
     g->checkValuesInAxisRange(firstCurve);
   }
 
-  if(!isGraphNew)
-    // Replot graph is we've added curves to existing one
-    g->replot();
-  
   // Check if window does not contain any curves and should be closed
   ml->maybeNeedToClose();
 

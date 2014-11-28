@@ -10,6 +10,7 @@ set ( SRC_FILES
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
+	src/DownloadFile.cpp
 	src/ExtractMonitorWorkspace.cpp
 	src/FilterEventsByLogValuePreNexus.cpp
 	src/FindDetectorsInShape.cpp
@@ -126,16 +127,16 @@ set ( SRC_FILES
 	src/SaveMask.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
+	src/SaveNXTomo.cpp
 	src/SaveNexus.cpp
 	src/SaveNexusProcessed.cpp
-	src/SaveNXTomo.cpp
-	src/SaveParameterFile.cpp
 	src/SavePAR.cpp
 	src/SavePDFGui.cpp
 	src/SavePHX.cpp
 	src/SaveParameterFile.cpp
 	src/SaveRKH.cpp
 	src/SaveReflTBL.cpp
+	src/SaveReflThreeColumnAscii.cpp
 	src/SaveSPE.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
@@ -156,6 +157,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
+	inc/MantidDataHandling/DownloadFile.h
 	inc/MantidDataHandling/ExtractMonitorWorkspace.h
 	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
@@ -267,16 +269,16 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveMask.h
 	inc/MantidDataHandling/SaveNISTDAT.h
 	inc/MantidDataHandling/SaveNXSPE.h
+	inc/MantidDataHandling/SaveNXTomo.h
 	inc/MantidDataHandling/SaveNexus.h
 	inc/MantidDataHandling/SaveNexusProcessed.h
-	inc/MantidDataHandling/SaveNXTomo.h
-	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SavePAR.h
 	inc/MantidDataHandling/SavePDFGui.h
 	inc/MantidDataHandling/SavePHX.h
 	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SaveRKH.h
 	inc/MantidDataHandling/SaveReflTBL.h
+	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
@@ -301,6 +303,7 @@ set ( TEST_FILES
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
+	DownloadFileTest.h
 	ExtractMonitorWorkspaceTest.h
 	FilterEventsByLogValuePreNexusTest.h
 	FindDetectorsInShapeTest.h
@@ -411,6 +414,7 @@ set ( TEST_FILES
 	SaveParameterFileTest.h
 	SaveRKHTest.h
 	SaveReflTBLTest.h
+	SaveReflThreeColumnAsciiTest.h
 	SaveSPETest.h
 	SaveToSNSHistogramNexusTest.h
 	SetSampleMaterialTest.h

@@ -313,6 +313,7 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
     double lastY = m_spectrumDisplay->getPointedAtY();
 
     QKeyEvent *keyEvent = dynamic_cast<QKeyEvent *>(event);
+    if(!keyEvent) return false;
     int key = keyEvent->key();
     switch (key)
     {

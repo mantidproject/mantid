@@ -7,6 +7,9 @@
 
 #include <qwt_plot.h>
 
+using namespace Mantid::API;
+using namespace MantidQt::API;
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -39,6 +42,7 @@ namespace IDA
     m_dblManager->setDecimals(m_properties["R2E"], NUM_DECIMALS);
 
     m_properties["UseTwoRanges"] = m_blnManager->addProperty("Use Two Ranges");
+    m_properties["Normalise"] = m_blnManager->addProperty("Normalise to Lowest Temp");
 
     m_properties["Range1"] = m_grpManager->addProperty("Range One");
     m_properties["Range1"]->addSubProperty(m_properties["R1S"]);
@@ -50,6 +54,7 @@ namespace IDA
     m_elwTree->addProperty(m_properties["Range1"]);
     m_elwTree->addProperty(m_properties["UseTwoRanges"]);
     m_elwTree->addProperty(m_properties["Range2"]);
+    m_elwTree->addProperty(m_properties["Normalise"]);
 
     // Create Slice Plot Widget for Range Selection
     m_plots["ElwinPlot"] = new QwtPlot(m_parentWidget);
@@ -74,7 +79,7 @@ namespace IDA
   
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(twoRanges(QtProperty*, bool)));
-    twoRanges(0, false);
+    twoRanges(m_properties["UseTwoRanges"], false);
 
     connect(uiForm().elwin_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
     connect(uiForm().elwin_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
@@ -89,38 +94,113 @@ namespace IDA
 
   void Elwin::run()
   {
-    QString pyInput =
-      "from IndirectDataAnalysis import elwin\n"
-      "input = [r'" + uiForm().elwin_inputFile->getFilenames().join("', r'") + "']\n"
-      "eRange = [ " + QString::number(m_dblManager->value(m_properties["R1S"])) +","+ QString::number(m_dblManager->value(m_properties["R1E"]));
+    QStringList inputFilenames = uiForm().elwin_inputFile->getFilenames();
+    inputFilenames.sort();
 
-    if ( m_blnManager->value(m_properties["UseTwoRanges"]) )
+    // Get workspace names
+    std::string inputGroupWsName = "IDA_Elwin_Input";
+
+    QFileInfo firstFileInfo(inputFilenames[0]);
+    QString filename = firstFileInfo.baseName();
+    QString workspaceBaseName = filename.left(filename.lastIndexOf("_")) + "_elwin_";
+
+    QString qWorkspace = workspaceBaseName + "eq";
+    QString qSquaredWorkspace = workspaceBaseName + "eq2";
+    QString elfWorkspace = workspaceBaseName + "elf";
+    QString eltWorkspace = workspaceBaseName + "elt";
+
+    // Load input files
+    std::vector<std::string> inputWorkspaceNames;
+
+    for(auto it = inputFilenames.begin(); it != inputFilenames.end(); ++it)
     {
-      pyInput += ", " + QString::number(m_dblManager->value(m_properties["R2S"])) + ", " + QString::number(m_dblManager->value(m_properties["R2E"]));
+      QFileInfo inputFileInfo(*it);
+      std::string workspaceName = inputFileInfo.baseName().toStdString();
+
+      IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadNexus");
+      loadAlg->initialize();
+      loadAlg->setProperty("Filename", (*it).toStdString());
+      loadAlg->setProperty("OutputWorkspace", workspaceName);
+
+      m_batchAlgoRunner->addAlgorithm(loadAlg);
+      inputWorkspaceNames.push_back(workspaceName);
     }
 
-    pyInput+= "]\n";
+    // Group input workspaces
+    IAlgorithm_sptr groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
+    groupWsAlg->initialize();
+    groupWsAlg->setProperty("InputWorkspaces", inputWorkspaceNames);
+    groupWsAlg->setProperty("OutputWorkspace", inputGroupWsName);
 
-    pyInput+= "logType = '"+ uiForm().leLogName->text() +"'\n";
+    m_batchAlgoRunner->addAlgorithm(groupWsAlg);
+
+    // Configure ElasticWindowMultiple algorithm
+    IAlgorithm_sptr elwinMultAlg = AlgorithmManager::Instance().create("ElasticWindowMultiple");
+    elwinMultAlg->initialize();
+
+    elwinMultAlg->setProperty("Plot", uiForm().elwin_ckPlot->isChecked());
+
+    elwinMultAlg->setProperty("OutputInQ", qWorkspace.toStdString());
+    elwinMultAlg->setProperty("OutputInQSquared", qSquaredWorkspace.toStdString());
+    elwinMultAlg->setProperty("OutputELF", elfWorkspace.toStdString());
+
+    elwinMultAlg->setProperty("SampleEnvironmentLogName", uiForm().leLogName->text().toStdString());
+
+    elwinMultAlg->setProperty("Range1Start", m_dblManager->value(m_properties["R1S"]));
+    elwinMultAlg->setProperty("Range1End", m_dblManager->value(m_properties["R1E"]));
+
+    if(m_blnManager->value(m_properties["UseTwoRanges"]))
+    {
+      elwinMultAlg->setProperty("Range2Start", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["R1S"])));
+      elwinMultAlg->setProperty("Range2End", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["R1E"])));
+    }
     
-    if ( uiForm().elwin_ckNormalise->isChecked() ) pyInput += "normalise = True\n";
-    else pyInput += "normalise = False\n";
+    if(m_blnManager->value(m_properties["Normalise"]))
+    {
+      elwinMultAlg->setProperty("OutputELT", eltWorkspace.toStdString());
+    }
 
-    if ( uiForm().elwin_ckSave->isChecked() ) pyInput += "save = True\n";
-    else pyInput += "save = False\n";
+    BatchAlgorithmRunner::AlgorithmRuntimeProps elwinInputProps;
+    elwinInputProps["InputWorkspaces"] = inputGroupWsName;
 
-    if ( uiForm().elwin_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
+    m_batchAlgoRunner->addAlgorithm(elwinMultAlg, elwinInputProps);
 
-    if ( uiForm().elwin_ckPlot->isChecked() ) pyInput += "plot = True\n";
-    else pyInput += "plot = False\n";
+    // Configure Save algorithms
+    if(uiForm().elwin_ckSave->isChecked())
+    {
+      addSaveAlgorithm(qWorkspace);
+      addSaveAlgorithm(qSquaredWorkspace);
+      addSaveAlgorithm(elfWorkspace);
 
+      if(m_blnManager->value(m_properties["Normalise"]))
+        addSaveAlgorithm(eltWorkspace);
+    }
 
-    pyInput +=
-      "eq1_ws, eq2_ws = elwin(input, eRange, log_type=logType, Normalise=normalise, Save=save, Verbose=verbose, Plot=plot)\n";
+    m_batchAlgoRunner->executeBatchAsync();
+  }
 
-    QString pyOutput = runPythonCode(pyInput);
-    UNUSED_ARG(pyOutput);
+  /**
+   * Configures and adds a SaveNexus algorithm to the batch runner.
+   *
+   * @param workspaceName Name of the workspace to save
+   * @param filename Name of the file to save it as
+   */
+  void Elwin::addSaveAlgorithm(QString workspaceName, QString filename)
+  {
+    // Set a default filename if none provided
+    if(filename.isEmpty())
+      filename = workspaceName + ".nxs";
+
+    // Configure the algorithm
+    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("SaveNexus");
+    loadAlg->initialize();
+    loadAlg->setProperty("Filename", filename.toStdString());
+
+    BatchAlgorithmRunner::AlgorithmRuntimeProps saveAlgProps;
+    saveAlgProps["InputWorkspace"] = workspaceName.toStdString();
+
+    // Add it to the batch runner
+    m_batchAlgoRunner->addAlgorithm(loadAlg, saveAlgProps);
   }
 
   bool Elwin::validate()
@@ -231,9 +311,10 @@ namespace IDA
     }
   }
 
-  void Elwin::twoRanges(QtProperty*, bool val)
+  void Elwin::twoRanges(QtProperty* prop, bool val)
   {
-    m_rangeSelectors["ElwinRange2"]->setVisible(val);
+    if(prop == m_properties["UseTwoRanges"])
+      m_rangeSelectors["ElwinRange2"]->setVisible(val);
   }
 
   void Elwin::minChanged(double val)

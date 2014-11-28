@@ -74,9 +74,10 @@ namespace Mantid
     /// Load the logs
     void runLoadLogs(const std::string filename,
         API::MatrixWorkspace_sptr localWorkspace);
-
     bool allMonitorsHaveHistoData(::NeXus::File& file,
                                   const std::vector<std::string>& monitorNames);
+    /// is it possible to open the file?
+    bool canOpenAsNeXus(const std::string& fname);
 
     /// The name and path of the input file
     std::string filename;

@@ -22,8 +22,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty('CanWorkspace', '', direction=Direction.Input),
                              doc='Background/can workspace')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output,
-                             optional=PropertyMode.Optional),
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace group')
 
         self.declareProperty(name='Verbose', defaultValue=False, doc='Output more verbose message to log')
@@ -51,10 +50,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         trans = numpy.average(mtd[trans_ws].readY(0))
 
         AddSampleLog(Workspace=trans_ws, LogName='can_workspace', LogType='String', LogText=self._can_ws_in)
-
-        # Generate an output workspace name if none provided
-        if self._out_ws == '':
-            self._out_ws = ws_basename + '_Transmission'
 
         # Group workspaces
         group = sam_ws + ',' + can_ws + ',' + trans_ws

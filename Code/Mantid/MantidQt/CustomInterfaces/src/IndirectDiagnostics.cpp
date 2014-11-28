@@ -156,6 +156,7 @@ namespace CustomInterfaces
     sliceAlg->setProperty("Plot", m_uiForm.slice_ckPlot->isChecked());
     sliceAlg->setProperty("Save", m_uiForm.slice_ckSave->isChecked());
     sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
+    sliceAlg->setProperty("OutputWorkspace", "IndirectDiagnostics_Workspaces");
 
     if(m_uiForm.slice_ckUseCalib->isChecked())
     {
@@ -365,6 +366,7 @@ namespace CustomInterfaces
     sliceAlg->setProperty("Plot", false);
     sliceAlg->setProperty("Save", false);
     sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
+    sliceAlg->setProperty("OutputWorkspace", "IndirectDiagnostics_Workspaces");
 
     if(m_uiForm.slice_ckUseCalib->isChecked())
     {
@@ -399,12 +401,22 @@ namespace CustomInterfaces
     if(filenames.size() < 1)
       return;
 
-    QString filename = filenames[0].toLower();
-    QFileInfo rawFileInfo(filename);
-    QString wsName = rawFileInfo.baseName() + "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_slice";
+    WorkspaceGroup_sptr sliceOutputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IndirectDiagnostics_Workspaces");
+    if(sliceOutputGroup->size() == 0)
+    {
+      g_log.warning("No result workspaces, cannot plot preview.");
+      return;
+    }
+
+    MatrixWorkspace_sptr sliceWs = boost::dynamic_pointer_cast<MatrixWorkspace>(sliceOutputGroup->getItem(0));
+    if(!sliceWs)
+    {
+      g_log.warning("No result workspaces, cannot plot preview.");
+      return;
+    }
 
     // Plot result spectrum
-    plotMiniPlot(wsName, 0, "SlicePreviewPlot", "SlicePreviewCurve");
+    plotMiniPlot(sliceWs, 0, "SlicePreviewPlot", "SlicePreviewCurve");
 
     // Set X range to data range
     setXAxisToCurve("SlicePreviewPlot", "SlicePreviewCurve");

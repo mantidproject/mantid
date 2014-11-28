@@ -238,7 +238,11 @@ namespace CustomInterfaces
       createRESfile(filenames);
     }
 
-    /* m_uiForm.ind_calibFile->setFileTextWithSearch(pyOutput + ".nxs"); */
+    QString firstFile = m_uiForm.cal_leRunNo->getFirstFilename();
+    QFileInfo firstFileInfo(firstFile);
+    QString calFileName = firstFileInfo.baseName() + "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_calib.nxs";
+
+    m_uiForm.ind_calibFile->setFileTextWithSearch(calFileName);
     m_uiForm.ckUseCalib->setChecked(true);
 
     disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmsComplete(bool)));
@@ -376,8 +380,6 @@ namespace CustomInterfaces
     QString files = m_uiForm.cal_leRunNo->getFilenames().join(",");
 
     QFileInfo fi(m_uiForm.cal_leRunNo->getFirstFilename());
-    QString outWS = fi.baseName() + "_" + m_uiForm.cbAnalyser->currentText() +
-        m_uiForm.cbReflection->currentText() + "_red";
 
     QString detRange = QString::number(m_dblManager->value(m_properties["ResSpecMin"])) + ","
         + QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
@@ -388,21 +390,39 @@ namespace CustomInterfaces
     reductionAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
     reductionAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
     reductionAlg->setProperty("InputFiles", files.toStdString());
+    reductionAlg->setProperty("OutputWorkspace", "__IndirectCalibration_reduction");
     reductionAlg->setProperty("DetectorRange", detRange.toStdString());
     reductionAlg->execute();
 
-    Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(outWS.toStdString()));
+    if(!reductionAlg->isExecuted())
+    {
+      g_log.warning("Could not generate energy preview plot.");
+      return;
+    }
 
-    const Mantid::MantidVec & dataX = input->readX(0);
+    WorkspaceGroup_sptr reductionOutputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("__IndirectCalibration_reduction");
+    if(reductionOutputGroup->size() == 0)
+    {
+      g_log.warning("No result workspaces, cannot plot energy preview.");
+      return;
+    }
+
+    MatrixWorkspace_sptr energyWs = boost::dynamic_pointer_cast<MatrixWorkspace>(reductionOutputGroup->getItem(0));
+    if(!energyWs)
+    {
+      g_log.warning("No result workspaces, cannot plot energy preview.");
+      return;
+    }
+
+    const Mantid::MantidVec & dataX = energyWs->readX(0);
     std::pair<double, double> range(dataX.front(), dataX.back());
 
     setPlotRange("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], range);
 
-    plotMiniPlot(input, 0, "ResPlot", "ResCurve");
+    plotMiniPlot(energyWs, 0, "ResPlot", "ResCurve");
     setXAxisToCurve("ResPlot", "ResCurve");
 
-    calSetDefaultResolution(input);
+    calSetDefaultResolution(energyWs);
 
     replot("ResPlot");
   }
