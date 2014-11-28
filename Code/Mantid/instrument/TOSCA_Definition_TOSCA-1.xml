@@ -60,10 +60,6 @@
     <location />
   </component>
 
-  <component type="front" idlist="front">
-    <location />
-  </component>
-
   <component type="diffraction" idlist="diffraction">
     <location />
   </component>
@@ -349,9 +345,6 @@
       <location r="0.8383" t="0.0" p="0.0" rot="90.0" name="Detector #70" />
       <parameter name="Efixed"> <value val="4.3356" /> </parameter>
     </component>
-  </type>
-
-  <type name="front">
     <component type="tube" >
       <location r="0.6718" t="0.0" p="0.0" rot="90.0" name="Detector #71" />
       <parameter name="Efixed"> <value val="2.8781" /> </parameter>
@@ -666,9 +659,6 @@
     <id start="33" end="46" />
     <id start="49" end="62" />
     <id start="65" end="78" />
-  </idlist>
-
-  <idlist idname="front">
     <id start="81" end="94" />
     <id start="97" end="110" />
     <id start="113" end="126" />
@@ -677,11 +667,11 @@
   </idlist>
 
   <idlist idname="monitor1">
-    <id val="169" />
+    <id val="161" />
   </idlist>
 
   <idlist idname="diffraction">
-    <id start="170" end="173" />
+    <id start="169" end="172" />
   </idlist>
 
 </instrument>
