@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <parameter-file instrument="TOSCA"
-  valid-from="2000-03-31 15:20:00"
-  valid-to="2100-01-31 23:59:59" >
+  valid-from="1998-05-26 00:00:00"
+  valid-to="2000-03-31 15:20:00" >
 
   <component-link name = "TOSCA">
 
@@ -56,6 +56,23 @@
       <value val="1e9" />
     </parameter>
     <parameter name="Workflow.Monitor1-Attenuation" >
+      <value val="8.3" />
+    </parameter>
+
+    <!-- This is actually spectrum index, NOT spectrum number -->
+    <parameter name="Workflow.Monitor2-SpectrumNumber" >
+      <value val="140" />
+    </parameter>
+    <parameter name="Workflow.Monitor2-Area" >
+      <value val="5.391011e-5" />
+    </parameter>
+    <parameter name="Workflow.Monitor2-Thickness" >
+      <value val="0.013" />
+    </parameter>
+    <parameter name="Workflow.Monitor2-ScalingFactor">
+      <value val="1e9" />
+    </parameter>
+    <parameter name="Workflow.Monitor2-Attenuation" >
       <value val="8.3" />
     </parameter>
 
