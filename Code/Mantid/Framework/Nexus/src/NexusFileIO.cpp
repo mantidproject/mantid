@@ -671,21 +671,21 @@ namespace Mantid
         {
           writeTableColumn<float>(NX_FLOAT32,"",*col,str);
         }
-        else if (col->isType<int>())
-        {
-          writeTableColumn<int>(NX_INT32,"",*col,str);
-        }
         else if (col->isType<int32_t>())
         {
-          writeTableColumn<int32_t>(NX_INT32,"int32_t",*col,str);
+          writeTableColumn<int32_t>(NX_INT32,"",*col,str);
+        }
+        else if (col->isType<uint32_t>())
+        {
+          writeTableColumn<uint32_t>(NX_UINT32,"",*col,str);
         }
         else if (col->isType<int64_t>())
         {
           writeTableColumn<int64_t>(NX_INT64,"",*col,str);
         }
-        else if (col->isType<size_t>())
+        else if (col->isType<uint64_t>())
         {
-          writeTableColumn<size_t>(NX_UINT64,"",*col,str);
+          writeTableColumn<uint64_t>(NX_UINT64,"",*col,str);
         }
         else if (col->isType<Boolean>())
         {

@@ -583,9 +583,9 @@ public:
       data[1] = 10.2f;
       data[2] = 10.3f;
     }
-    table->addColumn("int32_t", "Int32Column");
+    table->addColumn("uint", "UInt32Column");
     {
-      auto& data = table->getColVector<int32_t>("Int32Column");
+      auto& data = table->getColVector<uint32_t>("UInt32Column");
       data[0] = 15;
       data[1] = 12;
       data[2] = 13;
@@ -597,9 +597,9 @@ public:
       data[1] = 22;
       data[2] = 23;
     }
-    table->addColumn("size_t", "SizeColumn");
+    table->addColumn("ulong64", "SizeColumn");
     {
-      auto& data = table->getColVector<size_t>("SizeColumn");
+      auto& data = table->getColVector<uint64_t>("SizeColumn");
       data[0] = 35;
       data[1] = 32;
       data[2] = 33;
@@ -641,7 +641,7 @@ public:
     {
       savedNexus.openData("column_1");
       doTestColumnInfo( savedNexus, NX_INT32, "", "IntColumn" );
-      int expectedData[] = { 5, 2, 3 };
+      int32_t expectedData[] = { 5, 2, 3 };
       doTestColumnData( "IntColumn", savedNexus, expectedData );
     }
 
@@ -662,9 +662,9 @@ public:
     {
       savedNexus.openData("column_4");
       // it is the same as int
-      doTestColumnInfo( savedNexus, NX_INT32, "", "Int32Column" );
-      int32_t expectedData[] = { 15, 12, 13 };
-      doTestColumnData( "Int32Column", savedNexus, expectedData );
+      doTestColumnInfo( savedNexus, NX_UINT32, "", "UInt32Column" );
+      uint32_t expectedData[] = { 15, 12, 13 };
+      doTestColumnData( "UInt32Column", savedNexus, expectedData );
     }
 
     {
@@ -677,7 +677,7 @@ public:
     {
       savedNexus.openData("column_6");
       doTestColumnInfo( savedNexus, NX_UINT64, "", "SizeColumn" );
-      size_t expectedData[] = { 35, 32, 33 };
+      uint64_t expectedData[] = { 35, 32, 33 };
       doTestColumnData( "SizeColumn", savedNexus, expectedData );
     }
 

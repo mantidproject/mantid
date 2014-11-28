@@ -833,7 +833,7 @@ int64_t          index_start = indices[wi];
           }
           else if (info.type == NX_UINT64)
           {
-            loadNumericColumn<size_t>( nx_tw, dataSetName, workspace, "size_t" );
+            loadNumericColumn<size_t>( nx_tw, dataSetName, workspace, "ulong64" );
           }
           else if (info.type == NX_FLOAT32)
           {
