@@ -184,6 +184,9 @@ namespace CustomInterfaces
 
     m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
     m_batchAlgoRunner->executeBatchAsync();
+
+    // Set output workspace name for Python export
+    m_pythonExportWsName = "IndirectInergyTransfer_Workspaces";
   }
 
   /**
