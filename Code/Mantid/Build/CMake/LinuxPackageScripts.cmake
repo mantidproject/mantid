@@ -127,28 +127,18 @@ endif()
 # MantidPlot launcher script
 ############################################################################
 # Local dev version
-file ( WRITE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh "#!/bin/bash\n"
-  "#\n"
-  "# Launch Mantidplot using any necessary LD_PRELOAD or software collection behaviour\n"
-  "#\n"
-  "INSTALLDIR=$(dirname $(readlink -f \"$0\"))\n"
-  "LOCAL_PRELOAD=${EXTRA_LDPRELOAD_LIBS}:\${LD_PRELOAD}\n"
-  "LOCAL_LDPATH=${EXTRA_LDPATH}:\${LD_LIBRARY_PATH}\n"
-  "if [ -z \"\${TCMALLOC_RELEASE_RATE}\" ]; then\n"
-  "    TCM_RELEASE=10000\n"
-  "else\n"
-  "    TCM_RELEASE=\${TCMALLOC_RELEASE_RATE}\n"
-  "fi\n"
-  "\n"
-  "LD_PRELOAD=\${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=\${TCM_RELEASE} LD_LIBRARY_PATH=\${LOCAL_LDPATH} ${WRAPPER_COMMAND} \"\$INSTALLDIR/MantidPlot_exe $*\" \n"
-  "\n"
-)
+set ( MANTIDPLOT_EXEC MantidPlot )
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in 
+                 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh @ONLY )
 # Needs to be executable
 execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh"
                   OUTPUT_QUIET ERROR_QUIET )
 # Package version
-install ( FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh
-          DESTINATION ${BIN_DIR}
+set ( MANTIDPLOT_EXEC MantidPlot_exe )
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in 
+                 ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install @ONLY )
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh
+          DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh
           PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
           GROUP_EXECUTE GROUP_READ
           WORLD_EXECUTE WORLD_READ
