@@ -113,6 +113,8 @@ namespace Mantid
       void setGlobalLocaleToAscii();
       /// Silence NeXus output
       void disableNexusOutput();
+      /// Update instrument definitions from github
+      void UpdateInstrumentDefinitions();
 
       #ifdef MPI_BUILD
       /** Member variable that initialises the MPI environment on construction (in the
