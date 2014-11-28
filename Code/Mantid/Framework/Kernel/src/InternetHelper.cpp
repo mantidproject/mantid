@@ -194,7 +194,7 @@ int InternetHelper::sendHTTPSRequest(const std::string& url,
     session.setTimeout(Poco::Timespan(m_timeout, 0)); // m_timeout seconds
 
     // HACK:: Currently the automatic proxy detection only supports http proxy detection
-    // most locations use the same proxy for http and https, so for it to use the http proxy
+    // most locations use the same proxy for http and https, so force it to use the http proxy
     std::string urlforProxy = ConfigService::Instance().getString("proxy.httpsTargetUrl");
     if (urlforProxy.empty())
     {
