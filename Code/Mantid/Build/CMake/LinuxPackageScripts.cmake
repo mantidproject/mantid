@@ -137,7 +137,7 @@ execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch
 set ( MANTIDPLOT_EXEC MantidPlot_exe )
 configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in 
                  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install @ONLY )
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install
           DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh
           PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
           GROUP_EXECUTE GROUP_READ
