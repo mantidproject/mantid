@@ -78,17 +78,6 @@
   </component>
 
   <type name="back">
-
-  <!-- DETECTORS -->
-  <component type="back" idlist="back">
-    <location />
-  </component>
-
-  <component type="diffraction" idlist="diffraction">
-    <location />
-  </component>
-
-  <type name="back">
     <component type="tube" >
       <location r="0.6618" t="0.0" p="0.0" rot="90.0" name="Detector #1" />
       <parameter name="Efixed"> <value val="2.8584" /> </parameter>
