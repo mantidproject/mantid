@@ -810,6 +810,11 @@ namespace MantidQt
 
       std::string outputWSName = "IvsQ_" + boost::algorithm::join(runs, "_");
 
+      //If the previous stitch result is in the ADS already, we'll need to remove it.
+      //If it's a group, we'll get an error for trying to group into a used group name
+      if(AnalysisDataService::Instance().doesExist(outputWSName))
+        AnalysisDataService::Instance().remove(outputWSName);
+
       IAlgorithm_sptr algStitch = AlgorithmManager::Instance().create("Stitch1DMany");
       algStitch->initialize();
       algStitch->setProperty("InputWorkspaces", workspaceNames);
