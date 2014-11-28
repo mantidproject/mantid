@@ -58,7 +58,9 @@
 #include "ApplicationWindow.h"
 #include "plot2D/ScaleEngine.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "Mantid/MantidMatrixCurve.h"
+#include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "Mantid/ErrorBarSettings.h"
 
@@ -3813,6 +3815,22 @@ void Graph::addLegendItem()
   }
 }
 
+QString Graph::yAxisTitleFromFirstCurve()
+{
+  // I really don't like this...
+  if(auto *firstCurve = dynamic_cast<MantidMatrixCurve*>(curve(0)))
+  {
+    using namespace Mantid::API;
+    QString wsName = firstCurve->workspaceName();
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
+    return MantidQt::API::PlotAxis(m_isDistribution, *ws).title();
+  }
+  else
+  {
+    return axisTitle(0);
+  }
+}
+
 void Graph::contextMenuEvent(QContextMenuEvent *e)
 {
   if (selectedMarker>=0) {
@@ -5993,6 +6011,7 @@ void Graph::noNormalization()
   m_isDistribution = false;
   updateDataCurves();
   d_plot->updateAxes();
+  setYAxisTitle(yAxisTitleFromFirstCurve());
   notifyChanges();
 }
 
@@ -6006,6 +6025,8 @@ void Graph::binWidthNormalization()
   m_isDistribution = true;
   updateDataCurves();
   d_plot->updateAxes();
+  setYAxisTitle(yAxisTitleFromFirstCurve());
+
   notifyChanges();
 }
 

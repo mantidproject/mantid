@@ -826,7 +826,9 @@ private:
   void niceLogScales(QwtPlot::Axis axis);
   void deselectCurves();
   void addLegendItem();
-	
+
+  QString yAxisTitleFromFirstCurve();
+  
   Plot *d_plot;
   QwtPlotZoomer *d_zoomer[2];
   TitlePicker *titlePicker;
