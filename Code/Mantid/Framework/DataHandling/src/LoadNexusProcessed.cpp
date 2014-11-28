@@ -831,10 +831,10 @@ int64_t          index_start = indices[wi];
           {
             loadNumericColumn<int64_t>( nx_tw, dataSetName, workspace, "long64" );
           }
-          else if (info.type == NX_UINT64)
-          {
-            loadNumericColumn<size_t>( nx_tw, dataSetName, workspace, "ulong64" );
-          }
+          //else if (info.type == NX_UINT64)
+          //{
+          //  loadNumericColumn<size_t>( nx_tw, dataSetName, workspace, "ulong64" );
+          //}
           else if (info.type == NX_FLOAT32)
           {
             loadNumericColumn<float>( nx_tw, dataSetName, workspace, "float" );
@@ -843,10 +843,10 @@ int64_t          index_start = indices[wi];
           {
             loadNumericColumn<Boolean>( nx_tw, dataSetName, workspace, "bool" );
           }
-          else
-          {
-            throw std::logic_error("Column with Nexus data type " + boost::lexical_cast<std::string>(info.type) + " cannot be loaded.");
-          }
+          //else
+          //{
+          //  throw std::logic_error("Column with Nexus data type " + boost::lexical_cast<std::string>(info.type) + " cannot be loaded.");
+          //}
         }
         else if (info.rank == 2)
         {
