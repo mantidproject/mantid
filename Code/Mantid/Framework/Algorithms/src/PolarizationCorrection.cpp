@@ -165,7 +165,7 @@ namespace Mantid
     /// Algorithm's category for identification. @see Algorithm::category
     const std::string PolarizationCorrection::category() const
     {
-      return "ISIS\\Reflectometry";
+      return "Reflectometry\\ISIS";
     }
 
     bool PolarizationCorrection::isPropertyDefault(const std::string& propertyName) const
