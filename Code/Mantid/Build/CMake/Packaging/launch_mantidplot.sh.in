@@ -5,13 +5,13 @@
 # Script is configured by CMake
 
 # Find out where we are
-SCRIPTFILE=$(readlink -f \"$0\")
+SCRIPTFILE=$(readlink -f "$0")
 INSTALLDIR=$(echo $SCRIPTFILE | sed -r -e 's|^(.*)/(.*)$|\1|g') #.* is greedy and eats up until the final slash
 
 # Define extra libraries and load paths
 LOCAL_PRELOAD=@EXTRA_LDPRELOAD_LIBS@:${LD_PRELOAD}
 LOCAL_LDPATH=@EXTRA_LDPATH@:${LD_LIBRARY_PATH}
-if [ -z \"${TCMALLOC_RELEASE_RATE}\" ]; then
+if [ -z "${TCMALLOC_RELEASE_RATE}" ]; then
     TCM_RELEASE=10000
 else
     TCM_RELEASE=${TCMALLOC_RELEASE_RATE}
