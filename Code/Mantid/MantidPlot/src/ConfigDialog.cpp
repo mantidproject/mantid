@@ -1767,7 +1767,7 @@ void ConfigDialog::languageChange()
   labelFrameWidth->setText(tr("Frame width" ));
 
   boxFrame->setText(tr("Canvas Fra&me"));
-  boxDistribution->setText(tr("Normalize 1D to bin width"));
+  boxDistribution->setText(tr("Normalize histogram to bin width"));
   boxDistribution->setToolTip(tr("If checked, plot all spectra graphs normalised to the bin widths"));
   boxTitle->setText(tr("Show &Title"));
   boxScaleFonts->setText(tr("Scale &Fonts"));
