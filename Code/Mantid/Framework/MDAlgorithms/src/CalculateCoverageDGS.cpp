@@ -4,7 +4,10 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 namespace Mantid
 {
@@ -68,8 +71,21 @@ namespace MDAlgorithms
     declareProperty(new ArrayProperty<double>("Q3Basis",Q3,mustBe3D),"Q3 projection direction in the x,y,z format. Q1, Q2, Q3 must not be coplanar");
     declareProperty(new PropertyWithValue<double>("IncidentEnergy",EMPTY_DBL(),mustBePositive,Mantid::Kernel::Direction::Input),"Incident energy. If set, will override Ei in the input workspace");
 
+    std::vector<std::string> options;
+    options.push_back("Q1");
+    options.push_back("Q2");
+    options.push_back("Q3");
+    options.push_back("DeltaE");
 
-
+    for(int i=1;i<=4;i++)
+    {
+        std::string dim("Dimension");
+        dim+=Kernel::toString(i);
+        declareProperty(dim,options[i-1],boost::make_shared<StringListValidator>(options),"Dimension to bin or integrate");
+        declareProperty(dim+"Min",EMPTY_DBL(),dim+" minimum value. If empty will take minimum possible value.");
+        declareProperty(dim+"Max",EMPTY_DBL(),dim+" maximum value. If empty will take maximum possible value.");
+        declareProperty(dim+"Step",EMPTY_DBL(),dim+" step size. If empty the dimension will be integrated between minimum and maximum values");
+    }
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Mantid::Kernel::Direction::Output), "A name for the output data MDHistoWorkspace.");
   }
 
@@ -95,8 +111,19 @@ namespace MDAlgorithms
       double Ei=getProperty("IncidentEnergy");
       if (Ei==EMPTY_DBL())
       {
-          //TODO: get Ei from workspace
-          throw std::invalid_argument("Could not find Ei");
+          if (inputWS->run().hasProperty("Ei"))
+          {
+              Kernel::Property* eiprop = inputWS->run().getProperty("Ei");
+              Ei = boost::lexical_cast<double>(eiprop->value());
+              if(Ei<=0)
+              {
+                 throw std::invalid_argument("Ei stored in the workspace is not positive");
+              }
+          }
+          else
+          {
+           throw std::invalid_argument("Could not find Ei in the workspace. Please enter a positive value");
+          }
       }
 
       //TODO: get dEmin,dEmax from properties
@@ -115,9 +142,32 @@ namespace MDAlgorithms
       if(QmaxTemp>Qmax)
           Qmax=QmaxTemp;
 
+      //get goniometer
+      DblMatrix gon=DblMatrix(3,3,true);
+      if (inputWS->run().getGoniometer().isDefined())
+      {
+          gon=inputWS->run().getGoniometerMatrix();
+      }
 
-      g_log.warning()<<ttmax<<" "<<Qmax;
+      //get the UB
+      DblMatrix UB=DblMatrix(3,3,true)*(0.5/M_PI);
+      if (inputWS->sample().hasOrientedLattice())
+      {
+          UB=inputWS->sample().getOrientedLattice().getUB();
+      }
 
+      //get the W matrix
+      DblMatrix W=DblMatrix(3,3);
+      std::vector<double> Q1Basis = getProperty("Q1Basis");
+      std::vector<double> Q2Basis = getProperty("Q2Basis");
+      std::vector<double> Q3Basis = getProperty("Q3Basis");
+      W.setRow(0,Q1Basis);
+      W.setRow(1,Q2Basis);
+      W.setRow(2,Q3Basis);
+
+      rubw=gon*UB*W*(2.0*M_PI);
+
+      //calculate limits
       size_t q1NumBins=5,q2NumBins=5,q3NumBins=5,eNumBins=5;
       double q1min=0,q1max=1;
       double q2min=0,q2max=2;

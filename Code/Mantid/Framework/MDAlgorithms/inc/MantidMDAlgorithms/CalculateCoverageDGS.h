@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid
 {
@@ -45,8 +46,9 @@ namespace MDAlgorithms
   private:
     void init();
     void exec();
-
-
+    Kernel::DblMatrix rubw;
+    std::vector<Kernel::VMD> calculateIntersections(const double theta, const double phi);
+    //void cacheDimensionXValues();
   };
 
 
