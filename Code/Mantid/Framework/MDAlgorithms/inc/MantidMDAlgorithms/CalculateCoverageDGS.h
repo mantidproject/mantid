@@ -46,8 +46,15 @@ namespace MDAlgorithms
   private:
     void init();
     void exec();
-    Kernel::DblMatrix rubw;
+
     std::vector<Kernel::VMD> calculateIntersections(const double theta, const double phi);
+
+    /// limits for h,k,l,dE dimensions
+    coord_t m_hmin, m_hmax, m_kmin, m_kmax, m_lmin, m_lmax, m_dEmin, m_dEmax;
+    /// flag for integrated h,k,l,dE dimensions
+    bool m_hIntegrated, m_kIntegrated, m_lIntegrated, m_dEIntegrated;
+    /// (2*PiRUBW)^-1
+    Mantid::Kernel::DblMatrix m_rubw;
     //void cacheDimensionXValues();
   };
 
