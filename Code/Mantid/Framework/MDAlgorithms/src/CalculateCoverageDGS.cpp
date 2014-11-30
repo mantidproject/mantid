@@ -8,6 +8,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid
 {
@@ -360,17 +361,62 @@ namespace MDAlgorithms
       Mantid::MDEvents::MDHistoWorkspace_sptr coverage=MDHistoWorkspace_sptr(new MDHistoWorkspace(binDimensions));
       setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(coverage));
 
-      //put 1 for the coverage
-      std::vector<coord_t> pos;
-      pos.push_back(0.5);
-      pos.push_back(0.5);
-      pos.push_back(0.5);
-      pos.push_back(0.5);
-      size_t linIndex=coverage->getLinearIndexAtCoord(pos.data());
-      coverage->setSignalAt(linIndex,1.);
+      const int64_t ndets = static_cast<int64_t>(tt.size());
+
+      PARALLEL_FOR1(inputWS)
+      for(int64_t i = 0; i < ndets; i++)
+      {
+        PARALLEL_START_INTERUPT_REGION
+        auto intersections = calculateIntersections(tt[i], phi[i]);
+        if(intersections.empty()) continue;
+        auto intersectionsBegin = intersections.begin();
+        for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it)
+        {
+            const auto & curIntSec = *it;
+            const auto & prevIntSec = *(it-1);
+            // the full vector isn't used so compute only what is necessary
+            double delta = curIntSec[3] - prevIntSec[3];
+            if(delta < 1e-07) continue; // Assume zero contribution if difference is small
+            // Average between two intersections for final position
+            std::vector<coord_t> pos(4);
+            std::transform(curIntSec.getBareArray(), curIntSec.getBareArray() + 4,
+                prevIntSec.getBareArray(), pos.begin(),
+                VectorHelper::SimpleAverage<double>());
+            std::vector<coord_t> posNew = affineMat*pos;
+            size_t linIndex = coverage->getLinearIndexAtCoord(posNew.data());
+            if(linIndex == size_t(-1)) continue;
+           PARALLEL_CRITICAL(updateMD)
+           {
+            coverage->setSignalAt(linIndex, 1.);
+           }
+        }
+        PARALLEL_END_INTERUPT_REGION
+       }
+       PARALLEL_CHECK_INTERUPT_REGION
   }
 
+  /**
+ * Calculate the points of intersection for the given detector with cuboid surrounding the
+ * detector position in HKL
+ * @param theta Polar angle withd detector
+ * @param phi Azimuthal angle with detector
+ * @return A list of intersections in HKL space
+ */
+ std::vector<Kernel::VMD> CalculateCoverageDGS::calculateIntersections(const double theta, const double phi)
+ {
+    V3D q(-sin(theta)*cos(phi), -sin(theta)*sin(phi), 1.-cos(theta));
+    q = m_rubw*q;
+    /*double hStart = q.X()*m_kiMin, hEnd = q.X()*m_kiMax;
+    double kStart = q.Y()*m_kiMin, kEnd = q.Y()*m_kiMax;
+    double lStart = q.Z()*m_kiMin, lEnd = q.Z()*m_kiMax;
+    double eps = 1e-7;
+    auto hNBins = m_hX.size();
+    auto kNBins = m_kX.size();
+    auto lNBins = m_lX.size();*/
+    std::vector<Kernel::VMD> intersections;
 
+    return intersections;
+ }
 
 } // namespace MDAlgorithms
 } // namespace Mantid
