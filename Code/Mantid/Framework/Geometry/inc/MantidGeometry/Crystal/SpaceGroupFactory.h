@@ -13,6 +13,29 @@ namespace Mantid
 namespace Geometry
 {
 
+struct MANTID_GEOMETRY_DLL SpaceGroupSubscriptionHelper
+{
+    enum GenerationMethod {
+        Tabulated,
+        Generated
+    };
+
+    SpaceGroupSubscriptionHelper(size_t number,
+                                 const std::string &hmSymbol,
+                                 const std::string &generationInformation,
+                                 GenerationMethod generationMethod) :
+        number(number),
+        hmSymbol(hmSymbol),
+        generationInformation(generationInformation),
+        generationMethod(generationMethod)
+    { }
+
+    size_t number;
+    std::string hmSymbol;
+    std::string generationInformation;
+    GenerationMethod generationMethod;
+};
+
 /** SpaceGroupFactory
 
   Factory for SpaceGroups. When a space group is subscribed, it
@@ -52,7 +75,7 @@ class MANTID_GEOMETRY_DLL SpaceGroupFactoryImpl
 public:
     virtual ~SpaceGroupFactoryImpl() { }
 
-    SpaceGroup_const_sptr createSpaceGroup(const std::string &hmSymbol) const;
+    SpaceGroup_const_sptr createSpaceGroup(const std::string &hmSymbol);
 
     bool isSubscribed(const std::string &hmSymbol) const;
     bool isSubscribed(size_t number) const;
@@ -69,17 +92,26 @@ public:
 protected:
     void throwIfSubscribed(const std::string &hmSymbol);
 
+    SpaceGroup_const_sptr generateValidPrototype(const std::string &hmSymbol) const;
+    Group_const_sptr generateValidGeneratedGroup(const std::string &hmSymbol, const std::string &generators) const;
+    Group_const_sptr generateValidTabulatedGroup(const std::string &generators) const;
+
+    void registerValidPrototype(const SpaceGroup_const_sptr &prototype);
+
     std::string getCenteringString(const std::string &hmSymbol) const;
     Group_const_sptr getGeneratedGroup(const std::string &generators, const std::string &centeringSymbol) const;
     Group_const_sptr getTabulatedGroup(const std::string &symmetryOperations) const;
 
     SpaceGroup_const_sptr getPrototype(Group_const_sptr generatingGroup, size_t number, const std::string &hmSymbol) const;
 
+    void subscribeGeneratorInformation(size_t number, const std::string &hmSymbol, const std::string &generators, SpaceGroupSubscriptionHelper::GenerationMethod method);
+    bool isValidGeneratorString(const std::string &generatorString) const;
     void subscribe(const SpaceGroup_const_sptr &prototype);
 
     SpaceGroup_const_sptr constructFromPrototype(const SpaceGroup_const_sptr prototype) const;
 
     std::multimap<size_t, std::string> m_numberMap;
+    std::map<std::string, SpaceGroupSubscriptionHelper> m_generatorMap;
     std::map<std::string, SpaceGroup_const_sptr> m_prototypes;
 
     SpaceGroupFactoryImpl();

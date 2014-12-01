@@ -1,5 +1,6 @@
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
-#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
+#include "MantidGeometry/Crystal/SymmetryOperationSymbolParser.h"
+#include "MantidKernel/Exception.h"
 
 #include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 #include "MantidGeometry/Crystal/CenteringGroup.h"
@@ -7,6 +8,7 @@
 #include "MantidKernel/LibraryManager.h"
 
 #include <boost/make_shared.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace Mantid
 {
@@ -14,13 +16,21 @@ namespace Geometry
 {
 
 /// Creates a space group given the Hermann-Mauguin symbol, throws std::invalid_argument if symbol is not registered.
-SpaceGroup_const_sptr SpaceGroupFactoryImpl::createSpaceGroup(const std::string &hmSymbol) const
+SpaceGroup_const_sptr SpaceGroupFactoryImpl::createSpaceGroup(const std::string &hmSymbol)
 {
     if(!isSubscribed(hmSymbol)) {
         throw std::invalid_argument("Space group with symbol '" + hmSymbol + "' is not registered.");
     }
 
-    return constructFromPrototype(m_prototypes.find(hmSymbol)->second);
+    SpaceGroup_const_sptr prototype = m_prototypes.find(hmSymbol)->second;
+
+    if(!prototype) {
+        prototype = generateValidPrototype(hmSymbol);
+
+        registerValidPrototype(prototype);
+    }
+
+    return constructFromPrototype(prototype);
 }
 
 /// Returns true if space group with given symbol is subscribed.
@@ -83,11 +93,15 @@ void SpaceGroupFactoryImpl::unsubscribeSpaceGroup(const std::string &hmSymbol)
     }
 
     auto eraseSymbol = m_prototypes.find(hmSymbol);
-    SpaceGroup_const_sptr spaceGroup = eraseSymbol->second;
-
-    auto eraseNumber = m_numberMap.find(spaceGroup->number());
-    m_numberMap.erase(eraseNumber);
     m_prototypes.erase(eraseSymbol);
+
+    auto eraseGenerator = m_generatorMap.find(hmSymbol);
+    m_generatorMap.erase(eraseGenerator);
+
+    SpaceGroupSubscriptionHelper eraseHelper = eraseGenerator->second;
+    auto eraseNumber = m_numberMap.find(eraseHelper.number);
+
+    m_numberMap.erase(eraseNumber);
 }
 
 /**
@@ -111,12 +125,7 @@ void SpaceGroupFactoryImpl::subscribeGeneratedSpaceGroup(size_t number, const st
 {
     throwIfSubscribed(hmSymbol);
 
-    // Generate factor group and centering group
-    std::string centeringSymbol = getCenteringString(hmSymbol);
-    Group_const_sptr generatingGroup = getGeneratedGroup(generators, centeringSymbol);
-
-    SpaceGroup_const_sptr prototype = getPrototype(generatingGroup, number, hmSymbol);
-    subscribe(prototype);
+    subscribeGeneratorInformation(number, hmSymbol, generators, SpaceGroupSubscriptionHelper::GenerationMethod::Generated);
 }
 
 /// Subscribes a "tabulated space group" into the factory where all symmetry operations need to be supplied, including centering.
@@ -124,11 +133,7 @@ void SpaceGroupFactoryImpl::subscribeTabulatedSpaceGroup(size_t number, const st
 {
     throwIfSubscribed(hmSymbol);
 
-    // Generate a group using the supplied symmetry operations
-    Group_const_sptr generatingGroup = getTabulatedGroup(symmetryOperations);
-
-    SpaceGroup_const_sptr prototype = getPrototype(generatingGroup, number, hmSymbol);
-    subscribe(prototype);
+    subscribeGeneratorInformation(number, hmSymbol, symmetryOperations, SpaceGroupSubscriptionHelper::GenerationMethod::Tabulated);
 }
 
 /// Creatings a prototype instance of SpaceGroup using the supplied parameters.
@@ -139,6 +144,37 @@ SpaceGroup_const_sptr SpaceGroupFactoryImpl::getPrototype(Group_const_sptr gener
     }
 
     return boost::make_shared<const SpaceGroup>(number, hmSymbol, *generatingGroup);
+}
+
+/// Stores a SpaceGroupSubscriptionHelper object which contains all information required for generating a concrete space group.
+void SpaceGroupFactoryImpl::subscribeGeneratorInformation(size_t number, const std::string &hmSymbol, const std::string &generators, SpaceGroupSubscriptionHelper::GenerationMethod method)
+{
+    if(!isValidGeneratorString(generators)) {
+        throw std::invalid_argument("Generator contains elements that can not be parsed as symmetry operations: " + generators);
+    }
+
+    m_numberMap.insert(std::make_pair(number, hmSymbol));
+
+    SpaceGroup_const_sptr null;
+    m_prototypes.insert(std::make_pair(hmSymbol, null));
+
+    m_generatorMap.insert(std::make_pair(hmSymbol, SpaceGroupSubscriptionHelper(number, hmSymbol, generators, method)));
+}
+
+bool SpaceGroupFactoryImpl::isValidGeneratorString(const std::string &generatorString) const
+{
+    std::vector<std::string> generatorStrings;
+    boost::split(generatorStrings, generatorString, boost::is_any_of(";"));
+
+    for(auto it = generatorStrings.begin(); it != generatorStrings.end(); ++it) {
+        try {
+            SymmetryOperationSymbolParser::parseIdentifier(*it);
+        } catch(Kernel::Exception::ParseError) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 /// Returns a copy-constructed instance of the supplied space group prototype object.
@@ -155,10 +191,59 @@ void SpaceGroupFactoryImpl::throwIfSubscribed(const std::string &hmSymbol)
     }
 }
 
-/// Stores the given prototype in the space group factory.
-void SpaceGroupFactoryImpl::subscribe(const SpaceGroup_const_sptr &prototype)
+/**
+ * Generates an actual prototype instance
+ *
+ * This method tries to create a space group prototype object from the information
+ * stored for generating the group. This method is used when a concrete space group
+ * is constructed for the first time and no prototype is available yet.
+ *
+ * @param hmSymbol :: Hermann-Mauguin symbol, has to be registered.
+ * @return Space group prototype object.
+ */
+SpaceGroup_const_sptr SpaceGroupFactoryImpl::generateValidPrototype(const std::string &hmSymbol) const
 {
-    m_numberMap.insert(std::make_pair(prototype->number(), prototype->hmSymbol()));
+    auto generationInformation = m_generatorMap.find(hmSymbol);
+
+    SpaceGroupSubscriptionHelper helper = generationInformation->second;
+    Group_const_sptr generatingGroup;
+
+    switch(helper.generationMethod) {
+    case SpaceGroupSubscriptionHelper::GenerationMethod::Generated:
+        generatingGroup = generateValidGeneratedGroup(hmSymbol, helper.generationInformation);
+        break;
+    case SpaceGroupSubscriptionHelper::GenerationMethod::Tabulated:
+        generatingGroup = generateValidTabulatedGroup(helper.generationInformation);
+        break;
+    }
+
+    if(!generatingGroup) {
+        throw std::runtime_error("Could not generate valid prototype. Aborting.");
+    }
+
+    return getPrototype(generatingGroup, helper.number, hmSymbol);
+}
+
+/// Generate a valid generated group from the generator and the HM-symbol using SpaceGroupFactory::getGeneratedGroup.
+Group_const_sptr SpaceGroupFactoryImpl::generateValidGeneratedGroup(const std::string &hmSymbol, const std::string &generators) const
+{
+    std::string centeringSymbol = getCenteringString(hmSymbol);
+    return getGeneratedGroup(generators, centeringSymbol);
+}
+
+/// Generate a valid tabulated group from the generator string which should be usable by SpaceGroupFactory::getTabulatedGroup.
+Group_const_sptr SpaceGroupFactoryImpl::generateValidTabulatedGroup(const std::string &generators) const
+{
+    return getTabulatedGroup(generators);
+}
+
+/// Store prototype in the internal prototype-storage, replace any previously stored prototype with the same HM-symbol.
+void SpaceGroupFactoryImpl::registerValidPrototype(const SpaceGroup_const_sptr &prototype)
+{
+    if(!prototype) {
+        throw std::invalid_argument("Cannot register null-prototype.");
+    }
+
     m_prototypes.insert(std::make_pair(prototype->hmSymbol(), prototype));
 }
 
@@ -196,6 +281,7 @@ Group_const_sptr SpaceGroupFactoryImpl::getGeneratedGroup(const std::string &gen
 /// Constructor cannot be called, since SingletonHolder is used.
 SpaceGroupFactoryImpl::SpaceGroupFactoryImpl() :
     m_numberMap(),
+    m_generatorMap(),
     m_prototypes()
 {
     Kernel::LibraryManager::Instance();
