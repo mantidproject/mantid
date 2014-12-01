@@ -59,7 +59,7 @@ private:
   void init();
   void exec();
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
-  double fitSpectra(const int64_t s);
+  double fitSpectra(const int64_t s, bool isAbsolbute);
   /// Create a function string from the given parameters and the algorithm inputs
   API::IFunction_sptr createFunction(const double peakHeight, const double peakLoc);
   /// Read in all the input parameters
