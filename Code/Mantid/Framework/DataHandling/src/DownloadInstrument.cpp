@@ -278,7 +278,7 @@ namespace Mantid
     * @param filenamesToKeep a set of filenames to keep
     * @returns the number of files removed
     **/
-    const size_t DownloadInstrument::removeOrphanedFiles(const std::string& directoryPath, 
+    size_t DownloadInstrument::removeOrphanedFiles(const std::string& directoryPath, 
       const std::set<std::string>& filenamesToKeep) const
     {
       //hold files to delete in a set so we don't remove files while iterating over the directory.
