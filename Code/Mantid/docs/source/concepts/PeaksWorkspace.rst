@@ -8,7 +8,7 @@ The PeaksWorkspace is a special Workspace that holds a list of single crystal Pe
 Creating a PeaksWorkspace
 -------------------------
         
-* :ref:`FindPeaksMD <algm-FindPeaksMD>` will find peaks in reciprocal space in a [[MDWorkspace]]
+* :ref:`FindPeaksMD <algm-FindPeaksMD>` will find peaks in reciprocal space in a :ref:`MDWorkspace <MDWorkspace>`.
 * :ref:`FindSXPeaks <algm-FindSXPeaks>` will find peaks in detector space.
 * :ref:`PredictPeaks <algm-PredictPeaks>` will predict peak positions in a workspace given a UB matrix.
 * The :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` algorithm will load a PeaksWorkspace from file.
@@ -27,6 +27,7 @@ The Peak Object
 ---------------
 
 Each peak object contains several pieces of information. Not all of them are necessary:
+
 * Detector position and wavelength
 * Q position (calculated from the detector position/wavelength)
 * H K L indices (optional)
@@ -68,7 +69,7 @@ Or you can create a new peak in this way:
     # The peak can later be added to the workspace
     pws.addPeak(p)
 
-Once you have a handle on a peak ''p'' you have several methods to query/modify its values:
+Once you have a handle on a peak "p" you have several methods to query/modify its values:
 
 .. code-block:: python
 
