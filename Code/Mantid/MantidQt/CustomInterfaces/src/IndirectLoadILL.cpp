@@ -13,7 +13,7 @@ namespace MantidQt
   namespace CustomInterfaces
   {
     IndirectLoadILL::IndirectLoadILL(QWidget * parent) : 
-      IndirectLoadAsciiTab(parent)
+      IndirectToolsTab(parent)
     {
       m_uiForm.setupUi(parent);
 

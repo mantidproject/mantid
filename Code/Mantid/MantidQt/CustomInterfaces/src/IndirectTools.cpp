@@ -1,6 +1,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
-#include "MantidQtCustomInterfaces/IndirectLoadAscii.h"
+#include "MantidQtCustomInterfaces/IndirectTools.h"
 #include "MantidQtCustomInterfaces/IndirectLoadILL.h"
 
 #include <QDesktopServices>
@@ -11,30 +11,30 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    DECLARE_SUBWINDOW(IndirectLoadAscii);
+    DECLARE_SUBWINDOW(IndirectTools);
   }
 }
 
 using namespace MantidQt::CustomInterfaces;
 
-IndirectLoadAscii::IndirectLoadAscii(QWidget *parent) : UserSubWindow(parent),
-	m_changeObserver(*this, &IndirectLoadAscii::handleDirectoryChange)
+IndirectTools::IndirectTools(QWidget *parent) : UserSubWindow(parent),
+	m_changeObserver(*this, &IndirectTools::handleDirectoryChange)
 {
 
 }
 
-void IndirectLoadAscii::initLayout()
+void IndirectTools::initLayout()
 {
 	m_uiForm.setupUi(this);
-	
+
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
 	//insert each tab into the interface on creation
-	m_loadAsciiTabs.insert(std::make_pair(LOAD_ILL, new IndirectLoadILL(m_uiForm.IndirectLoadAsciiTabs->widget(LOAD_ILL))));
+	m_loadAsciiTabs.insert(std::make_pair(LOAD_ILL, new IndirectLoadILL(m_uiForm.IndirectToolsTabs->widget(LOAD_ILL))));
 
 	//Connect each tab to the actions available in this GUI
-	std::map<unsigned int, IndirectLoadAsciiTab*>::iterator iter;
+	std::map<unsigned int, IndirectToolsTab*>::iterator iter;
 	for (iter = m_loadAsciiTabs.begin(); iter != m_loadAsciiTabs.end(); ++iter)
 	{
 		connect(iter->second, SIGNAL(executePythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
@@ -54,7 +54,7 @@ void IndirectLoadAscii::initLayout()
    *
    * @param :: the detected close event
    */
-  void IndirectLoadAscii::closeEvent(QCloseEvent*)
+  void IndirectTools::closeEvent(QCloseEvent*)
   {
     Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
   }
@@ -64,7 +64,7 @@ void IndirectLoadAscii::initLayout()
    *
    * @param pNf :: notification
    */
-  void IndirectLoadAscii::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
+  void IndirectTools::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
   {
     std::string key = pNf->key();
     if ( key == "defaultsave.directory" )
@@ -78,7 +78,7 @@ void IndirectLoadAscii::initLayout()
  *
  * This includes setting the default browsing directory to be the default save directory.
  */
-void IndirectLoadAscii::loadSettings()
+void IndirectTools::loadSettings()
 {
   QSettings settings;
   QString settingsGroup = "CustomInterfaces/IndirectAnalysis/";
@@ -87,7 +87,7 @@ void IndirectLoadAscii::loadSettings()
   settings.beginGroup(settingsGroup + "ProcessedFiles");
   settings.setValue("last_directory", saveDir);
 
-	std::map<unsigned int, IndirectLoadAsciiTab*>::iterator iter;
+	std::map<unsigned int, IndirectToolsTab*>::iterator iter;
 	for (iter = m_loadAsciiTabs.begin(); iter != m_loadAsciiTabs.end(); ++iter)
 	{
   	iter->second->loadSettings(settings);
@@ -100,13 +100,13 @@ void IndirectLoadAscii::loadSettings()
 /**
  * Slot to run the underlying algorithm code based on the currently selected
  * tab.
- * 
+ *
  * This method checks the tabs validate method is passing before calling
  * the run method.
  */
-void IndirectLoadAscii::runClicked()
+void IndirectTools::runClicked()
 {
-	int tabIndex = m_uiForm.IndirectLoadAsciiTabs->currentIndex();
+	int tabIndex = m_uiForm.IndirectToolsTabs->currentIndex();
 
 	if(m_loadAsciiTabs[tabIndex]->validate())
 	{
@@ -118,9 +118,9 @@ void IndirectLoadAscii::runClicked()
  * Slot to open a new browser window and navigate to the help page
  * on the wiki for the currently selected tab.
  */
-void IndirectLoadAscii::helpClicked()
+void IndirectTools::helpClicked()
 {
-	int tabIndex = m_uiForm.IndirectLoadAsciiTabs->currentIndex();
+	int tabIndex = m_uiForm.IndirectToolsTabs->currentIndex();
 	QString url = m_loadAsciiTabs[tabIndex]->tabHelpURL();
 	QDesktopServices::openUrl(QUrl(url));
 }
@@ -129,7 +129,7 @@ void IndirectLoadAscii::helpClicked()
  * Slot to show the manage user dicrectories dialog when the user clicks
  * the button on the interface.
  */
-void IndirectLoadAscii::manageUserDirectories()
+void IndirectTools::manageUserDirectories()
 {
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
   ad->show();
@@ -139,14 +139,14 @@ void IndirectLoadAscii::manageUserDirectories()
 /**
  * Slot to wrap the protected showInformationBox method defined
  * in UserSubWindow and provide access to composed tabs.
- * 
+ *
  * @param message :: The message to display in the message box
  */
-void IndirectLoadAscii::showMessageBox(const QString& message)
+void IndirectTools::showMessageBox(const QString& message)
 {
   showInformationBox(message);
 }
 
-IndirectLoadAscii::~IndirectLoadAscii()
+IndirectTools::~IndirectTools()
 {
 }

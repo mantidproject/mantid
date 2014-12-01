@@ -1,5 +1,5 @@
 #include "MantidQtAPI/UserSubWindow.h"
-#include "MantidQtCustomInterfaces/IndirectLoadAsciiTab.h"
+#include "MantidQtCustomInterfaces/IndirectToolsTab.h"
 
 namespace MantidQt
 {
@@ -9,7 +9,7 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
      */
-    IndirectLoadAsciiTab::IndirectLoadAsciiTab(QWidget * parent) : QWidget(parent)
+    IndirectToolsTab::IndirectToolsTab(QWidget * parent) : QWidget(parent)
     {
 
     }
@@ -17,27 +17,27 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Destructor
      */
-    IndirectLoadAsciiTab::~IndirectLoadAsciiTab()
+    IndirectToolsTab::~IndirectToolsTab()
     {
     }
 
     /**
      * Method to build a URL to the appropriate page on the wiki for this tab.
-     * 
+     *
      * @return The URL to the wiki page
      */
-    QString IndirectLoadAsciiTab::tabHelpURL()
-    { 
-      return "http://www.mantidproject.org/IndirectLoadASCII:" + help();
+    QString IndirectToolsTab::tabHelpURL()
+    {
+      return "http://www.mantidproject.org/IndirectTools:" + help();
     }
 
     /**
      * Emits a signal to run a python script using the method in the parent
      * UserSubWindow
-     * 
+     *
      * @param pyInput :: A string of python code to execute
      */
-    void IndirectLoadAsciiTab::runPythonScript(const QString& pyInput)
+    void IndirectToolsTab::runPythonScript(const QString& pyInput)
     {
       emit executePythonScript(pyInput, false);
     }

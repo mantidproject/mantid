@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTLOADILL_H_
 
 #include "ui_IndirectLoadILL.h"
-#include "MantidQtCustomInterfaces/IndirectLoadAsciiTab.h"
+#include "MantidQtCustomInterfaces/IndirectToolsTab.h"
 #include "MantidAPI/ExperimentInfo.h"
 
 #include <QComboBox>
@@ -13,14 +13,14 @@ namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
-		class DLLExport IndirectLoadILL : public IndirectLoadAsciiTab
+		class DLLExport IndirectLoadILL : public IndirectToolsTab
 		{
 			Q_OBJECT
 
 		public:
 			IndirectLoadILL(QWidget * parent = 0);
 
-			// Inherited methods from IndirectLoadAsciiTab
+			// Inherited methods from IndirectToolsTab
 			QString help() { return "LoadILL"; };
 
 			bool validate();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectLoadAscii</class>
- <widget class="QMainWindow" name="IndirectLoadAscii">
+ <class>IndirectTools</class>
+ <widget class="QMainWindow" name="IndirectTools">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,12 +11,12 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Indirect Load ASCII</string>
+   <string>Indirect Tools</string>
   </property>
   <widget class="QWidget" name="centralwidget">
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTabWidget" name="IndirectLoadAsciiTabs">
+    <widget class="QTabWidget" name="IndirectToolsTabs">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>

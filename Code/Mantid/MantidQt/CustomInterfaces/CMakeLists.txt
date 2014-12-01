@@ -20,8 +20,6 @@ set ( SRC_FILES
 	src/IndirectDataReductionTab.cpp
 	src/IndirectDiagnostics.cpp
 	src/IndirectDiffractionReduction.cpp
-	src/IndirectLoadAscii.cpp
-	src/IndirectLoadAsciiTab.cpp
   src/IndirectLoadILL.cpp
 	src/IndirectMolDyn.cpp
 	src/IndirectMoments.cpp
@@ -31,6 +29,8 @@ set ( SRC_FILES
   src/IndirectSqw.cpp
 	src/IndirectSymmetrise.cpp
 	src/IndirectTab.cpp
+	src/IndirectTools.cpp
+	src/IndirectToolsTab.cpp
   src/IndirectTransmission.cpp
 	src/JumpFit.cpp
 	src/MSDFit.cpp
@@ -103,8 +103,6 @@ set ( INC_FILES
  	inc/MantidQtCustomInterfaces/IndirectDataReductionTab.h
 	inc/MantidQtCustomInterfaces/IndirectDiagnostics.h
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
-	inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
-	inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
   inc/MantidQtCustomInterfaces/IndirectLoadILL.h
 	inc/MantidQtCustomInterfaces/IndirectMolDyn.h
 	inc/MantidQtCustomInterfaces/IndirectMoments.h
@@ -114,6 +112,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IndirectSqw.h
 	inc/MantidQtCustomInterfaces/IndirectSymmetrise.h
   inc/MantidQtCustomInterfaces/IndirectTransmission.h
+	inc/MantidQtCustomInterfaces/IndirectTools.h
+	inc/MantidQtCustomInterfaces/IndirectToolsTab.h
   inc/MantidQtCustomInterfaces/IndirectTab.h
 	inc/MantidQtCustomInterfaces/IReflPresenter.h
 	inc/MantidQtCustomInterfaces/IReflSearcher.h
@@ -193,8 +193,6 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectDataReductionTab.h
                 inc/MantidQtCustomInterfaces/IndirectDiagnostics.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
-                inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
-                inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
                 inc/MantidQtCustomInterfaces/IndirectLoadILL.h
                 inc/MantidQtCustomInterfaces/IndirectMolDyn.h
                 inc/MantidQtCustomInterfaces/IndirectMoments.h
@@ -204,6 +202,8 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectSqw.h
                 inc/MantidQtCustomInterfaces/IndirectSymmetrise.h
                 inc/MantidQtCustomInterfaces/IndirectTransmission.h
+                inc/MantidQtCustomInterfaces/IndirectTools.h
+                inc/MantidQtCustomInterfaces/IndirectToolsTab.h
                 inc/MantidQtCustomInterfaces/IndirectTab.h
                 inc/MantidQtCustomInterfaces/JumpFit.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
@@ -247,11 +247,11 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.ui
                inc/MantidQtCustomInterfaces/IndirectDataReduction.ui
                inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.ui
-               inc/MantidQtCustomInterfaces/IndirectLoadAscii.ui
                inc/MantidQtCustomInterfaces/IndirectLoadILL.ui
                inc/MantidQtCustomInterfaces/IndirectMolDyn.ui
                inc/MantidQtCustomInterfaces/IndirectSassena.ui
                inc/MantidQtCustomInterfaces/IndirectSimulation.ui
+               inc/MantidQtCustomInterfaces/IndirectTools.ui
                inc/MantidQtCustomInterfaces/JumpFit.ui
                inc/MantidQtCustomInterfaces/MultiDatasetFit.ui
                inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.ui
