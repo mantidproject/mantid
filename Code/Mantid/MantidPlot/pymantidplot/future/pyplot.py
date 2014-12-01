@@ -1,5 +1,5 @@
 """============================================================================
-New Python command line interface for plotting in Mantid (ala matplotlib)
+New Python command line interface for plotting in Mantid (a la matplotlib)
 ============================================================================
 
 The idea behind this new module is to provide a simpler, more
@@ -10,7 +10,8 @@ options.
 
 The module is at a very early stage of development and provides
 limited functionality. This is very much work in progress at the
-moment. Feedback is very much welcome!
+moment. The module is subject to changes and for now included in
+Mantid as a 'future' import. Feedback is very much welcome!
 
 To use this new functionality you first need to import the new pyplot module:
 
@@ -33,7 +34,7 @@ Plot a Mantid workspace
 -----------------------
 
     # first, load a workspace. You can do this with a Load command or just from the GUI menus
-    ws=Load("/path/to/MAR11060.raw", OutputWorkspace="foo")
+    ws = Load("/path/to/MAR11060.raw", OutputWorkspace="foo")
     plot(ws, [100])
 
 The list or array of values will be inserted in a workspace named
@@ -67,7 +68,7 @@ Plot spectra using workspace objects and workspace names
 --------------------------------------------------------
 
     # please make sure that you use the right path and file name
-    mar=Load('/path/to/MAR11060.raw', OutputWorkspace="MAR11060")
+    mar = Load('/path/to/MAR11060.raw', OutputWorkspace="MAR11060")
     plot('MAR11060', [10,100,500])
     plot(mar,[3, 500, 800])
 
@@ -99,7 +100,7 @@ Plotting bins
 
 To plot workspace bins you can use the keyword 'tool' with the value 'plot_bin', like this:
 
-    ws=Load('/path/to/HRP39182.RAW', OutputWorkspace="HRP39182")
+    ws = Load('/path/to/HRP39182.RAW', OutputWorkspace="HRP39182")
     plot(ws, [1, 5, 7, 100], tool='plot_bin')
 
 or, alternatively, you can use the plot_bin command:
@@ -129,12 +130,12 @@ Changing style properties
 You can modify the style of your plots. For example like this (for a
 full list of options currently supported, see below).
 
-    lines=plot(loq, [100, 104], tool='plot_spectrum', linestyle='-.', marker='*', color='red')
+    lines = plot(loq, [100, 104], tool='plot_spectrum', linestyle='-.', marker='*', color='red')
 
 Notice that the plot function returns a list of lines, which
 correspond to the spectra lines. At present the lines have limited
-functionality. Essentially, the data underlying these lines data can
-be retrieved as follows:
+functionality. Essentially, the data underlying these lines can be
+retrieved as follows:
 
     lines[0].get_xdata()
     lines[0].get_ydata()
@@ -163,6 +164,10 @@ where the file format is guessed from the file extension. The same
 extensions as in the MantidPlot figure export dialog are supported,
 including jpg, png, tif, ps, and svg.
 
+The usage of these functions very similar to the matlab and/or
+pyplot functions with the same names. The list of functions
+currently supported is provided further below.
+
 Additional options supported as keyword arguments (kwargs):
 -----------------------------------------------------------
 
@@ -181,6 +186,22 @@ plots. hold has the same behavior as in matplotlib and pyplot. If the
 value of hold is 'on' in a plot command, the new plot will be drawn on
 top of the current plot window, without clearing it. This makes it
 possible to make plots incrementally.
+
+For example, one can add two spectra from a workspace using the
+following command:
+
+    lines = plot(loq, [100, 102], linestyle='-.', color='red')
+
+But similar results can be obtained by plotting one of the spectra by
+a first command, and then plotting the second spectra in a subsequent
+command with the hold parameter enabled:
+
+    lines = plot(loq, 100, linestyle='-.', color='red')
+    lines = plot(loq, 102, linestyle='-.', color='blue', hold='on')
+
+After the two commands above, any subsequent plot command that passes
+hold='on' as a parameter would add new spectra into the same plot. An
+alternative way of doing this is explained next.
 
 Multi-plot commands
 -------------------
@@ -217,7 +238,7 @@ color         color character or string ('b', 'blue', 'g', 'green', 'k', 'black'
 Functions that modify plot properties
 -------------------------------------
 
-Here is a list of the functions supported at the moment. The offer the
+Here is a list of the functions supported at the moment. They offer the
 same functionality as their counterparts in matplotlib's pyplot.
 
 - title
@@ -228,6 +249,12 @@ same functionality as their counterparts in matplotlib's pyplot.
 - axis
 - grid
 - savefig
+
+This is a limited list of functions that should be sufficient for
+basic plots. These functions are presently provided as an example of
+this style of interace, and some of them provide functionality similar
+or equivalent to several of the keyword arguments for plot commands
+detailed in this documentation.
 
 """
 # Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -265,8 +292,9 @@ import mantidplot
 print ("You are loading '" + __name__ + "', which is an experimental module." +
 """
 Please note: this module is at a very early stage of development and
-provides limited functionality. This is work in progress and feedback
-is very much welcome! Please let us know any wishes and suggestions.""")
+provides limited functionality. It is work in progress and is subject
+to change. Feedback is very much welcome! Please let us know any wishes
+and suggestions.""")
 
 class Line2D():
     """
