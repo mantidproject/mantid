@@ -177,8 +177,13 @@ def GetThetaQ(ws):
 
     # If axis is in Q need to calculate back to angles and just return axis values
     elif axis.isNumeric() and axis.getUnit().unitID() == 'MomentumTransfer':
-        q = axis.extractValues()
-        theta = 2.0 * np.degrees(np.arcsin(q / k0))
+        q_bin_edge = axis.extractValues()
+        q = list()
+        for i in range(1, len(q_bin_edge)):
+            q_centre = (q_bin_edge[i] - q_bin_edge[i - 1]) / 2
+            q.append(q_centre)
+        np_q = np.array(q)
+        theta = 2.0 * np.degrees(np.arcsin(np_q / k0))
 
     # Out of options here
     else:

@@ -99,6 +99,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
         det, _ = GetThetaQ(inputWS)
         efixed = getEfixed(inputWS)
 
+
     ndet = len(det)
     waves = WaveRange(inputWS, efixed) # get wavelengths
     nw = len(waves)
