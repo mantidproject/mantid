@@ -32,6 +32,7 @@ set ( SRC_FILES
 	src/IndirectTools.cpp
 	src/IndirectToolsTab.cpp
   src/IndirectTransmission.cpp
+  src/IndirectTransmissionCalc.cpp
 	src/JumpFit.cpp
 	src/MSDFit.cpp
 	src/MantidEV.cpp
@@ -112,6 +113,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IndirectSqw.h
 	inc/MantidQtCustomInterfaces/IndirectSymmetrise.h
   inc/MantidQtCustomInterfaces/IndirectTransmission.h
+  inc/MantidQtCustomInterfaces/IndirectTransmissionCalc.h
 	inc/MantidQtCustomInterfaces/IndirectTools.h
 	inc/MantidQtCustomInterfaces/IndirectToolsTab.h
   inc/MantidQtCustomInterfaces/IndirectTab.h
@@ -202,6 +204,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectSqw.h
                 inc/MantidQtCustomInterfaces/IndirectSymmetrise.h
                 inc/MantidQtCustomInterfaces/IndirectTransmission.h
+                inc/MantidQtCustomInterfaces/IndirectTransmissionCalc.h
                 inc/MantidQtCustomInterfaces/IndirectTools.h
                 inc/MantidQtCustomInterfaces/IndirectToolsTab.h
                 inc/MantidQtCustomInterfaces/IndirectTab.h
@@ -252,6 +255,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/IndirectSassena.ui
                inc/MantidQtCustomInterfaces/IndirectSimulation.ui
                inc/MantidQtCustomInterfaces/IndirectTools.ui
+               inc/MantidQtCustomInterfaces/IndirectTransmissionCalc.ui
                inc/MantidQtCustomInterfaces/JumpFit.ui
                inc/MantidQtCustomInterfaces/MultiDatasetFit.ui
                inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.ui

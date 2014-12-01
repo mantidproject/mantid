@@ -15,8 +15,8 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    /** 
-    This class defines the Indirect Foreign interface. It handles the creation of the interface window and 
+    /**
+    This class defines the Indirect Foreign interface. It handles the creation of the interface window and
 		handles the interaction between the child tabs on the window.
 
     @author Samuel Jackson, STFC
@@ -39,7 +39,7 @@ namespace MantidQt
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
     class DLLExport IndirectTools : public MantidQt::API::UserSubWindow
@@ -52,6 +52,7 @@ namespace MantidQt
 			enum TabChoice
 			{
 				LOAD_ILL,
+        TRANSMISSION
 			};
 
     public: // public constructor, destructor and functions

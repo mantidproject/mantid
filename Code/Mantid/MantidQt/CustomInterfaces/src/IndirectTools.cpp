@@ -1,6 +1,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/IndirectTools.h"
+#include "MantidQtCustomInterfaces/IndirectTransmissionCalc.h"
 #include "MantidQtCustomInterfaces/IndirectLoadILL.h"
 
 #include <QDesktopServices>
@@ -32,6 +33,7 @@ void IndirectTools::initLayout()
 
 	//insert each tab into the interface on creation
 	m_loadAsciiTabs.insert(std::make_pair(LOAD_ILL, new IndirectLoadILL(m_uiForm.IndirectToolsTabs->widget(LOAD_ILL))));
+	m_loadAsciiTabs.insert(std::make_pair(TRANSMISSION, new IndirectTransmissionCalc(m_uiForm.IndirectToolsTabs->widget(TRANSMISSION))));
 
 	//Connect each tab to the actions available in this GUI
 	std::map<unsigned int, IndirectToolsTab*>::iterator iter;

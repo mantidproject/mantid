@@ -26,9 +26,14 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="neutron">
+     <widget class="QWidget" name="tabLoadILL">
       <attribute name="title">
        <string>Load ILL</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tabTransmissionCalc">
+      <attribute name="title">
+       <string>Transmission</string>
       </attribute>
      </widget>
     </widget>
