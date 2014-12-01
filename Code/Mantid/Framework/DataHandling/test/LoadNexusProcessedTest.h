@@ -547,7 +547,7 @@ public:
     TS_ASSERT( alg.execute());
 
     TableWorkspace_const_sptr ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(wsName);
-    TS_ASSERT_EQUALS( ws->columnCount(), 8);
+    TS_ASSERT_EQUALS( ws->columnCount(), 10);
     TS_ASSERT_EQUALS( ws->rowCount(), 4);
 
     try
@@ -582,6 +582,13 @@ public:
         TS_ASSERT_EQUALS( column[3], 4);
       }
       {
+        ConstColumnVector<uint32_t> column = ws->getVector("UInteger");
+        TS_ASSERT_EQUALS( column[0], 35);
+        TS_ASSERT_EQUALS( column[1], 33);
+        TS_ASSERT_EQUALS( column[2], 32);
+        TS_ASSERT_EQUALS( column[3], 34);
+      }
+      {
         ConstColumnVector<int64_t> column = ws->getVector("Integer64");
         TS_ASSERT_EQUALS( column[0], 15);
         TS_ASSERT_EQUALS( column[1], 13);
@@ -595,13 +602,13 @@ public:
         TS_ASSERT_DELTA( column[2], 0.2, 0.000001 );
         TS_ASSERT_DELTA( column[3], 0.4, 0.000001 );
       }
-      //{
-      //  ConstColumnVector<size_t> column = ws->getVector("Size");
-      //  TS_ASSERT_EQUALS( column[0], 25);
-      //  TS_ASSERT_EQUALS( column[1], 23);
-      //  TS_ASSERT_EQUALS( column[2], 22);
-      //  TS_ASSERT_EQUALS( column[3], 24);
-      //}
+      {
+        ConstColumnVector<uint64_t> column = ws->getVector("Size");
+        TS_ASSERT_EQUALS( column[0], 25);
+        TS_ASSERT_EQUALS( column[1], 23);
+        TS_ASSERT_EQUALS( column[2], 22);
+        TS_ASSERT_EQUALS( column[3], 24);
+      }
       {
         ConstColumnVector<Boolean> column = ws->getVector("Bool");
         TS_ASSERT( column[0] );

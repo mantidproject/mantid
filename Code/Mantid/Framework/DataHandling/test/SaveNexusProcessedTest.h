@@ -405,7 +405,6 @@ public:
     {
       Poco::File(output_filename).remove();
     }
-
     const int nEntries = 3;
     const int nHist = 1;
     const int nBins = 1;
@@ -583,14 +582,13 @@ public:
       data[1] = 10.2f;
       data[2] = 10.3f;
     }
-    table->addColumn("int", "UInt32Column");
-    //table->addColumn("uint", "UInt32Column");
-    //{
-    //  auto& data = table->getColVector<uint32_t>("UInt32Column");
-    //  data[0] = 15;
-    //  data[1] = 12;
-    //  data[2] = 13;
-    //}
+    table->addColumn("uint", "UInt32Column");
+    {
+      auto& data = table->getColVector<uint32_t>("UInt32Column");
+      data[0] = 15;
+      data[1] = 12;
+      data[2] = 13;
+    }
     table->addColumn("long64", "Int64Column");
     {
       auto& data = table->getColVector<int64_t>("Int64Column");
@@ -598,14 +596,13 @@ public:
       data[1] = 22;
       data[2] = 23;
     }
-    table->addColumn("int", "SizeColumn");
-    //table->addColumn("ulong64", "SizeColumn");
-    //{
-    //  auto& data = table->getColVector<uint64_t>("SizeColumn");
-    //  data[0] = 35;
-    //  data[1] = 32;
-    //  data[2] = 33;
-    //}
+    table->addColumn("ulong64", "SizeColumn");
+    {
+      auto& data = table->getColVector<uint64_t>("SizeColumn");
+      data[0] = 35;
+      data[1] = 32;
+      data[2] = 33;
+    }
     table->addColumn("bool", "BoolColumn");
     {
       auto& data = table->getColVector<Boolean>("BoolColumn");
@@ -661,12 +658,12 @@ public:
       doTestColumnData( "FloatColumn", savedNexus, expectedData );
     }
 
-    //{
-    //  savedNexus.openData("column_4");
-    //  doTestColumnInfo( savedNexus, NX_UINT32, "", "UInt32Column" );
-    //  uint32_t expectedData[] = { 15, 12, 13 };
-    //  doTestColumnData( "UInt32Column", savedNexus, expectedData );
-    //}
+    {
+      savedNexus.openData("column_4");
+      doTestColumnInfo( savedNexus, NX_UINT32, "", "UInt32Column" );
+      uint32_t expectedData[] = { 15, 12, 13 };
+      doTestColumnData( "UInt32Column", savedNexus, expectedData );
+    }
 
     {
       savedNexus.openData("column_5");
@@ -675,12 +672,12 @@ public:
       doTestColumnData( "Int64Column", savedNexus, expectedData );
     }
 
-    //{
-    //  savedNexus.openData("column_6");
-    //  doTestColumnInfo( savedNexus, NX_UINT64, "", "SizeColumn" );
-    //  uint64_t expectedData[] = { 35, 32, 33 };
-    //  doTestColumnData( "SizeColumn", savedNexus, expectedData );
-    //}
+    {
+      savedNexus.openData("column_6");
+      doTestColumnInfo( savedNexus, NX_UINT64, "", "SizeColumn" );
+      uint64_t expectedData[] = { 35, 32, 33 };
+      doTestColumnData( "SizeColumn", savedNexus, expectedData );
+    }
 
     {
       savedNexus.openData("column_7");

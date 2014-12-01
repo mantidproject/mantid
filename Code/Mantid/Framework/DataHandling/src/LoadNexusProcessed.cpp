@@ -827,14 +827,18 @@ int64_t          index_start = indices[wi];
           {
             loadNumericColumn<int>( nx_tw, dataSetName, workspace, "int" );
           }
+          else if (info.type == NX_UINT32)
+          {
+            loadNumericColumn<uint32_t>( nx_tw, dataSetName, workspace, "uint" );
+          }
           else if (info.type == NX_INT64)
           {
             loadNumericColumn<int64_t>( nx_tw, dataSetName, workspace, "long64" );
           }
-          //else if (info.type == NX_UINT64)
-          //{
-          //  loadNumericColumn<size_t>( nx_tw, dataSetName, workspace, "ulong64" );
-          //}
+          else if (info.type == NX_UINT64)
+          {
+            loadNumericColumn<int64_t>( nx_tw, dataSetName, workspace, "ulong64" );
+          }
           else if (info.type == NX_FLOAT32)
           {
             loadNumericColumn<float>( nx_tw, dataSetName, workspace, "float" );

@@ -109,11 +109,11 @@ namespace Mantid
       if(!targWS->addColumn("double","TwoTheta"))throw(std::runtime_error("Can not add column TwoTheta"));
       if(!targWS->addColumn("double","Azimuthal"))throw(std::runtime_error("Can not add column Azimuthal"));
       // the detector ID;
-      if(!targWS->addColumn("int32_t","DetectorID"))throw(std::runtime_error("Can not add column DetectorID"));
+      if(!targWS->addColumn("int","DetectorID"))throw(std::runtime_error("Can not add column DetectorID"));
       // stores spectra index which corresponds to a valid detector index;
-      if(!targWS->addColumn("size_t","detIDMap"))throw(std::runtime_error("Can not add column detIDMap"));
+      if(!targWS->addColumn("ulong64","detIDMap"))throw(std::runtime_error("Can not add column detIDMap"));
       // stores detector index which corresponds to the workspace index;
-      if(!targWS->addColumn("size_t","spec2detMap"))throw(std::runtime_error("Can not add column spec2detMap"));
+      if(!targWS->addColumn("ulong64","spec2detMap"))throw(std::runtime_error("Can not add column spec2detMap"));
 
       m_getIsMasked = this->getProperty("GetMaskState");
       if(m_getIsMasked)  // as bool is presented in vectors as a class, we are using int instead of bool
