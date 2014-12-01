@@ -29,15 +29,15 @@ def create_resultname(run_number, prefix='', suffix=''):
     if type(run_number) == list:
         name = create_resultname(run_number[0], prefix, suffix)
     elif type(run_number) == int:
-        name = prefix + '{0:0>#8d}.spe{1}'.format(run_number,suffix)
+        name = prefix + '{0:0>#6d}_spe{1}'.format(run_number,suffix)
     else:
         name = os.path.basename(str(run_number))
         # Hack any instrument name off the front so the output is the same as if you give it a run number
         name = name.lstrip(string.ascii_letters)
         if (suffix is None):
-            name = prefix + os.path.splitext(name)[0] + '.spe'
+            name = prefix + os.path.splitext(name)[0] + '_spe'
         else:
-            name = prefix + os.path.splitext(name)[0] + '.spe' + suffix
+            name = prefix + os.path.splitext(name)[0] + '_spe' + suffix
 
     return name
 
