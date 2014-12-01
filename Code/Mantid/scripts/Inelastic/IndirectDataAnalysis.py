@@ -1118,7 +1118,9 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
                 logger.notice('Output file created : '+res_path)
 
         DeleteWorkspace(cws)
+
     EndTime('ApplyCorrections')
+    return res_plot
 
 
 def plotCorrResult(inWS, PlotResult):

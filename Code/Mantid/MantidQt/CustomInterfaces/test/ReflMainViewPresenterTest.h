@@ -1188,6 +1188,74 @@ public:
     TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 2);
     TS_ASSERT_EQUALS(ws->String(5, OptionsCol), "def");
   }
+
+  void testImportTable()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(&mockView);
+    EXPECT_CALL(mockView, showAlgorithmDialog("LoadReflTBL"));
+    presenter.notify(IReflPresenter::ImportTableFlag);
+  }
+
+  void testExportTable()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(&mockView);
+    EXPECT_CALL(mockView, showAlgorithmDialog("SaveReflTBL"));
+    presenter.notify(IReflPresenter::ExportTableFlag);
+  }
+
+  void testPlotRowWarn()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    createTOFWorkspace("TOF_12345", "12345");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(IReflPresenter::OpenTableFlag);
+
+    std::set<int> rowlist;
+    rowlist.insert(0);
+
+    //We should be warned
+    EXPECT_CALL(mockView, giveUserWarning(_,_));
+
+    //The user hits "plot rows" with the first row selected
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(rowlist));
+    presenter.notify(IReflPresenter::PlotRowFlag);
+
+    //Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("TOF_12345");
+  }
+
+  void testPlotGroupWarn()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(&mockView);
+
+    createPrefilledWorkspace("TestWorkspace");
+    createTOFWorkspace("TOF_12345", "12345");
+    createTOFWorkspace("TOF_12346", "12346");
+    EXPECT_CALL(mockView, getWorkspaceToOpen()).Times(1).WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(IReflPresenter::OpenTableFlag);
+
+    std::set<int> rowlist;
+    rowlist.insert(0);
+
+    //We should be warned
+    EXPECT_CALL(mockView, giveUserWarning(_,_));
+
+    //The user hits "plot groups" with the first row selected
+    EXPECT_CALL(mockView, getSelectedRows()).Times(1).WillRepeatedly(Return(rowlist));
+    presenter.notify(IReflPresenter::PlotGroupFlag);
+
+    //Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("TOF_12345");
+    AnalysisDataService::Instance().remove("TOF_12346");
+  }
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTERTEST_H */

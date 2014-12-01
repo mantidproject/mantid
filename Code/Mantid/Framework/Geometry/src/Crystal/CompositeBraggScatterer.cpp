@@ -94,6 +94,14 @@ void CompositeBraggScatterer::removeScatterer(size_t i)
     redeclareProperties();
 }
 
+/// Removes all scatterers.
+void CompositeBraggScatterer::removeAllScatterers()
+{
+    while(nScatterers() > 0) {
+        removeScatterer(0);
+    }
+}
+
 /// Calculates the structure factor for the given HKL by summing all contributions from contained scatterers.
 StructureFactor CompositeBraggScatterer::calculateStructureFactor(const Kernel::V3D &hkl) const
 {

@@ -5,6 +5,7 @@
 #include "ImportWorkspaceDlg.h"
 #include "AlgorithmMonitor.h"
 #include "MantidSampleLogDialog.h"
+#include "MantidSampleMaterialDialog.h"
 #include "AlgorithmHistoryWindow.h"
 #include "MantidMatrixCurve.h"
 #include "MantidMDCurve.h"
@@ -1411,7 +1412,10 @@ void MantidUI::executeSaveNexus()
 {
   QString wsName = getSelectedWorkspaceName();
   QHash<QString,QString> presets;
-  presets["InputWorkspace"] = wsName;
+  if (!wsName.isEmpty())
+  {
+    presets["InputWorkspace"] = wsName;
+  }
   showAlgorithmDialog("SaveNexus", presets);
 }
 
@@ -1447,15 +1451,12 @@ void MantidUI::showAlgorithmDialog(const QString & algName, int version)
 * @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
 * @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
 */
-void MantidUI::showAlgorithmDialog(QString algName, QHash<QString,QString> paramList,Mantid::API::AlgorithmObserver* obs)
+void MantidUI::showAlgorithmDialog(QString algName, QHash<QString,QString> paramList, Mantid::API::AlgorithmObserver *obs)
 {
   //Get latest version of the algorithm
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
   if( !alg ) return;
-  if (obs)
-  {
-    obs->observeFinish(alg);
-  }
+
   for(QHash<QString,QString>::Iterator it = paramList.begin(); it != paramList.end(); ++it)
   {
     alg->setPropertyValue(it.key().toStdString(),it.value().toStdString());
@@ -1467,6 +1468,11 @@ void MantidUI::showAlgorithmDialog(QString algName, QHash<QString,QString> param
     // when loading files, we'll need to update the list of recent files
     // hook up MantidUI::fileDialogAccept() to the LoadDialog dialog accepted() signal
     connect(dlg, SIGNAL(accepted()), this, SLOT(loadFileDialogAccept()));
+  }
+
+  if (obs)
+  {
+    dlg->addAlgorithmObserver(obs);
   }
 
   dlg->show();
@@ -1489,7 +1495,7 @@ void MantidUI::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg)
 * @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
 * @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
 */
-void MantidUI::executeAlgorithm(const QString & algName, const QString & paramList,Mantid::API::AlgorithmObserver* obs)
+void MantidUI::executeAlgorithm(const QString & algName, const QString & paramList, Mantid::API::AlgorithmObserver* obs)
 {
   //Get latest version of the algorithm
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
@@ -2115,10 +2121,17 @@ void MantidUI::saveProject(bool saved)
   }
   Mantid::API::FrameworkManager::Instance().clear();
 }
+
 void MantidUI::enableSaveNexus(const QString& wsName)
 {
-  appWindow()->enablesaveNexus(wsName);
+  appWindow()->enableSaveNexus(wsName);
 }
+
+void MantidUI::disableSaveNexus()
+{
+  appWindow()->disableSaveNexus();
+}
+
 
 /** This method is sueful for saving the currently loaded workspaces to project file on save.
 *  saves the names of all the workspaces loaded into mantid workspace tree
@@ -2205,6 +2218,10 @@ void MantidUI::menuMantidMatrixAboutToShow()
 
   action = new QAction("Sample Logs...", this);
   connect(action,SIGNAL(triggered()),this,SLOT(showLogFileWindow()));
+  menuMantidMatrix->addAction(action);
+
+  action = new QAction("Sample Material...", this);
+  connect(action,SIGNAL(triggered()),this,SLOT(showSampleMaterialWindow()));
   menuMantidMatrix->addAction(action);
 
   action = new QAction("Show History", this);
@@ -2767,6 +2784,16 @@ void MantidUI::showLogFileWindow()
   dlg->setFocus();
 }
 
+void MantidUI::showSampleMaterialWindow()
+{
+  MantidSampleMaterialDialog *dlg = new MantidSampleMaterialDialog(getSelectedWorkspaceName(), this);
+  dlg->setModal(false);
+  dlg->setAttribute(Qt::WA_DeleteOnClose);
+  dlg->show();
+  dlg->setFocus();
+  dlg->updateMaterial();
+}
+
 //  *****      Plotting Methods     *****  //
 
 /** Create a Table form specified spectra in a MatrixWorkspace
@@ -3049,8 +3076,37 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-  const QString& firstWsName = toPlot.constBegin().key();
+  const QString& firstWsName = toPlot.constBegin().key();;
+  QString plotTitle;
+  // If the first workspace selected in the tree is a WorkspaceGroup,
+  // use its name directly, rather than the first in the list 'toPlot'
+  // (which will be the first workspace included in the group - not
+  // the best title).
+  const QString& sel = m_exploreMantid->getSelectedWorkspaceName();
+  WorkspaceGroup_const_sptr gWs;
+  if (!sel.isEmpty() && AnalysisDataService::Instance().doesExist(sel.toStdString()))
+  {
+    try
+    {
+      gWs = boost::dynamic_pointer_cast<const WorkspaceGroup>
+        (Mantid::API::AnalysisDataService::Instance().retrieve(sel.toStdString()));
+    }
+    catch(std::exception&)
+    {
+      // can happen, nothing to worry about
+      gWs = WorkspaceGroup_const_sptr();  // make sure, anyway
+    }
+  }
+  if (gWs)
+  {
+    plotTitle = sel;
+  }
+  else
+  {
+    plotTitle = firstWsName;
+  }
 
+  // Limit to 1 window for this type of plot -> reuse plot/graph window
   if(workspacesDockPlot1To1())
   {
     if (m_lastShown1DPlotWin)
@@ -3060,8 +3116,8 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
     }
   }
   bool isGraphNew = false;
-  MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, firstWsName, clearWindow);
-  ml->setName(appWindow()->generateUniqueName(firstWsName + "-"));
+  MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, plotTitle, clearWindow);
+  ml->setName(appWindow()->generateUniqueName(plotTitle + "-"));
   m_lastShown1DPlotWin = ml;
 
   Graph *g = ml->activeGraph();
@@ -3086,7 +3142,12 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
     }
   }
 
-  if(isGraphNew)
+  if(!isGraphNew)
+  {
+    // Replot graph is we've added curves to existing one
+    g->replot();
+  }
+  else
   {
     if(!firstCurve)
     {
@@ -3110,10 +3171,6 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
     g->checkValuesInAxisRange(firstCurve);
   }
 
-  if(!isGraphNew)
-    // Replot graph is we've added curves to existing one
-    g->replot();
-  
   // Check if window does not contain any curves and should be closed
   ml->maybeNeedToClose();
 

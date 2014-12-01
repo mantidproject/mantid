@@ -1,5 +1,8 @@
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/LibHelper.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
+#include <Poco/Path.h>
 
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -23,6 +26,7 @@
 #include <QMessageBox>
 
 #include <iostream>
+#include <string>
 
 namespace Mantid
 {
@@ -30,16 +34,30 @@ namespace Vates
 {
 namespace SimpleGui
 {
-
+namespace
+{
+  /// Static logger
+  Kernel::Logger g_log("ThreeSliceView");
+}
 ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
 {
   this->ui.setupUi(this);
+
+  // We need to load the QuadView.dll plugin. The Windows system requires the full
+  // path information. The DLL is located in the apropriate executeable path of paraview.
+  const Poco::Path paraviewPath(Mantid::Kernel::ConfigService::Instance().getParaViewPath());
+
+  Poco::Path quadViewFullPath(paraviewPath, QUADVIEW_LIBRARY.toStdString());
+
+  QString quadViewLibrary(quadViewFullPath.toString().c_str());
 
   // Need to load plugin
   pqPluginManager* pm = pqApplicationCore::instance()->getPluginManager();
   QString error;
   pm->loadExtension(pqActiveObjects::instance().activeServer(),
-                    QUADVIEW_LIBRARY, &error, false);
+                    quadViewLibrary, &error, false);
+
+  g_log.debug() << "Loading QuadView.dll from " << quadViewLibrary.toStdString() << "\n";
 
   this->mainView = this->createRenderView(this->ui.mainRenderFrame,
                                           QString("pqQuadView"));

@@ -59,6 +59,12 @@ namespace MantidQt
         CopySelectedFlag,
         CutSelectedFlag,
         PasteSelectedFlag,
+        SearchFlag,
+        TransferFlag,
+        ImportTableFlag,
+        ExportTableFlag,
+        PlotRowFlag,
+        PlotGroupFlag,
       };
 
       //Tell the presenter something happened

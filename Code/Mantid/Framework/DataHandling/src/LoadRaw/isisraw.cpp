@@ -8,7 +8,7 @@
 #define FAILURE 1
 
 /// stuff
-ISISRAW::ISISRAW() : m_crpt(0), m_ntc1(0), m_nsp1(0), m_nper(0),dat1(0)
+ISISRAW::ISISRAW() : m_crpt(0),dat1(0)
 {
 	int i, j;
 	// section 1
@@ -139,7 +139,7 @@ int ISISRAW::addItems()
 
 // create one bound to a CRPT
 /// stuff
-ISISRAW::ISISRAW(ISISCRPT_STRUCT* crpt) : m_crpt(crpt),m_ntc1(0),m_nsp1(0), m_nper(0),
+ISISRAW::ISISRAW(ISISCRPT_STRUCT* crpt) : m_crpt(crpt),
     frmt_ver_no(0),data_format(0),ver2(0),r_number(0),ver3(0),
     i_det(0),i_mon(0),i_use(0),mdet(0),monp(0),spec(0),delt(0),len2(0),code(0),tthe(0),ut(0),
     ver4(0),ver5(0),crat(0),modn(0),mpos(0),timr(0),udet(0),ver6(0),t_ntrg(0),t_nfpp(0),t_nper(0),
@@ -164,7 +164,7 @@ ISISRAW::ISISRAW(ISISCRPT_STRUCT* crpt) : m_crpt(crpt),m_ntc1(0),m_nsp1(0), m_np
 
 // create one bound to a CRPT
 /// stuff
-ISISRAW::ISISRAW(ISISCRPT_STRUCT* crpt, bool doUpdateFromCRPT) : m_crpt(crpt),m_ntc1(0),m_nsp1(0), m_nper(0),
+ISISRAW::ISISRAW(ISISCRPT_STRUCT* crpt, bool doUpdateFromCRPT) : m_crpt(crpt),
     frmt_ver_no(0),data_format(0),ver2(0),r_number(0),ver3(0),
     i_det(0),i_mon(0),i_use(0),mdet(0),monp(0),spec(0),delt(0),len2(0),code(0),tthe(0),ut(0),
     ver4(0),ver5(0),crat(0),modn(0),mpos(0),timr(0),udet(0),ver6(0),t_ntrg(0),t_nfpp(0),t_nper(0),

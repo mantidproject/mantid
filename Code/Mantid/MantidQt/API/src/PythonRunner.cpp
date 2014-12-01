@@ -59,7 +59,7 @@ QString PythonRunner::runPythonCode(const QString & code, bool no_output)
     tmpstring.append(stream.readLine().trimmed() + "\n");
   }
   //FIXME: Ticket-9217 - Commented out for the moment to try and get working with clang
-  //if(g_log.is(Logger::Priority::PRIO_DEBUG)) g_log.debug() << "Raw output from execution:\n" << tmpstring.toAscii().data() << "\n";
+  if(g_log.is(Logger::Priority::PRIO_DEBUG)) g_log.debug() << "Raw output from execution:\n" << tmpstring.toAscii().data() << "\n";
   return tmpstring;
 }
 /** This Python helper function converts a list of strings into one

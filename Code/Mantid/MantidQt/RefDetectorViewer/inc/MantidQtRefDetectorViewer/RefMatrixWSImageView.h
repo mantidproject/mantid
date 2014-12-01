@@ -7,16 +7,16 @@
 #include "MantidQtRefDetectorViewer/RefImageView.h"
 
 /**
-    @class RefMatrixWSImageView 
-  
-       This is the top level class for showing a matrix workspace
+    @class RefMatrixWSImageView
+
+    This is the top level class for showing a matrix workspace
     using an ImageViewer.
- 
-    @author Dennis Mikkelson 
-    @date   2012-05-08 
-     
+
+    @author Dennis Mikkelson
+    @date   2012-05-08
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -31,8 +31,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
@@ -40,27 +40,30 @@ namespace MantidQt
 {
 namespace RefDetectorViewer
 {
+class RefIVConnections;
 
-  class RefIVConnections;
-   class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefMatrixWSImageView
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefMatrixWSImageView
 {
-  public:
 
-    /// Construct an image viewer for the specifed MatrixWorkspace
-    RefMatrixWSImageView ( Mantid::API::MatrixWorkspace_sptr /*mat_ws*/ );
+public:
+  /// Construct an image viewer for the specifed MatrixWorkspace
+  RefMatrixWSImageView ( Mantid::API::MatrixWorkspace_sptr /*mat_ws*/ );
 
-    RefMatrixWSImageView( QString wps_name, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max);
-    RefIVConnections* getConnections();
+  RefMatrixWSImageView( QString wpsName,
+                        int peakMin, int peakMax,
+                        int backMin, int backMax,
+                        int tofMin,  int tofMax);
 
-    ~RefMatrixWSImageView();
+  RefIVConnections* getConnections();
+
+  ~RefMatrixWSImageView();
 
 private:
-    
-    RefImageView *image_view;
-    
+  RefImageView *m_imageView;
+
 };
 
 } // namespace RefDetectorViewer
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif // REF_MATRIX_WS_IMAGE_VIEW_H

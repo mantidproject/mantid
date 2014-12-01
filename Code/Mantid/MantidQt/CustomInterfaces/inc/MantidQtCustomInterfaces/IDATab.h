@@ -4,6 +4,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/IndirectDataAnalysis.h"
+#include "MantidQtCustomInterfaces/IndirectTab.h"
 
 class QwtPlotCurve;
 class QwtPlot;
@@ -44,7 +45,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class IDATab : public QWidget
+  class DLLExport IDATab : public IndirectTab
   {
     Q_OBJECT
 
@@ -52,43 +53,27 @@ namespace IDA
     /// Constructor
     IDATab(QWidget * parent = 0);
 
-    /// Sets up the tab.
-    void setupTab();
-    /// Runs the tab.
-    void runTab();
     /// Loads the tab's settings.
     void loadTabSettings(const QSettings & settings);
     /// Returns the URL of the Mantid Wiki webpage for the tab.
     QString tabHelpURL();
 
+  signals:
+		/// Send signal to parent window to show a message box to user
+		void showMessageBox(const QString& message);
+
   protected:
-    /// Displays the given message in a dialog box.
-    void showInformationBox(const QString & message);
-    /// Run a piece of python code and return any output that was written to stdout
-    QString runPythonCode(const QString & code, bool no_output = false);
-    /// Run load nexus and return the workspace.
-    Mantid::API::MatrixWorkspace_const_sptr runLoadNexus(const QString & filename, const QString & wsname);
-
-    /// Creates and returns a "mini plot" looking up the workspace from the ADS
-    QwtPlotCurve* plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, const QString & workspace, size_t index);
-    /// Creates and returns a "mini plot".
-    QwtPlotCurve* plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, const  Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t index);
-
-    /// Returns the range of the given curve data.
-    std::pair<double,double> getCurveRange(QwtPlotCurve* curve);
+    /// Function to run a string as python code
+    void runPythonScript(const QString& pyInput);
     /// Check the binning between two workspaces match
     bool checkWorkspaceBinningMatches(Mantid::API::MatrixWorkspace_const_sptr left, 
                                       Mantid::API::MatrixWorkspace_const_sptr right);
 
-    /// Function to run an algorithm on a seperate thread
-    void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
-
-    /// Algorithm runner object to execute algorithms on a seperate thread from the gui
-    MantidQt::API::AlgorithmRunner* m_algRunner;
     /// Returns a handle to the UI form object stored in the IndirectDataAnalysis class.
     Ui::IndirectDataAnalysis & uiForm();
     /// Returns a const handle to the UI form object stored in the IndirectDataAnalysis class.
     const Ui::IndirectDataAnalysis & uiForm() const;
+
     /// Returns a handle to the DoubleEditorFactory object stored in the IndirectDataAnalysis class.
     DoubleEditorFactory * doubleEditorFactory();
     /// Returns a handle to the QtCheckBoxFactory object stored in the IndirectDataAnalysis class.
@@ -104,7 +89,8 @@ namespace IDA
     /// Overidden by child class.
     virtual void run() = 0;
     /// Overidden by child class.
-    virtual QString validate() = 0;
+    virtual bool validate() = 0;
+
     /// Overidden by child class.
     virtual void loadSettings(const QSettings & settings) = 0;
     /// Overidden by child class.
@@ -112,6 +98,7 @@ namespace IDA
 
     /// A pointer to the parent (friend) IndirectDataAnalysis object.
     IndirectDataAnalysis * m_parent;
+
   };
 } // namespace IDA
 } // namespace CustomInterfaces

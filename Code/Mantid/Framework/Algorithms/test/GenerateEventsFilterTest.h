@@ -109,8 +109,12 @@ public:
    */
   void test_genTimeMultipleInterval()
   {
-    // 1. Create input Workspace
+    // Create input Workspace
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
+    for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i)
+      std::cout << "Spectrum " << i << ": max pulse time = " << eventWS->getEventList(i).getPulseTimeMax()
+                << " = " << eventWS->getEventList(i).getPulseTimeMin().totalNanoseconds() << "\n";
+
     int64_t timeinterval_ns = 15000;
 
     // 2. Init and set property
@@ -133,7 +137,7 @@ public:
 
     TS_ASSERT(splittersws);
 
-    size_t numintervals = 67;
+    size_t numintervals = 74;
     TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), numintervals);
 
     std::string runstarttimestr = eventWS->run().getProperty("run_start")->value();
@@ -142,7 +146,7 @@ public:
 
     Kernel::TimeSeriesProperty<double> *protonchargelog =
         dynamic_cast<Kernel::TimeSeriesProperty<double>* >(eventWS->run().getProperty("proton_charge"));
-    Kernel::DateAndTime runstoptime = protonchargelog->lastTime();
+    Kernel::DateAndTime runstoptime = Kernel::DateAndTime(protonchargelog->lastTime().totalNanoseconds() + 100000);
 
     // b) First interval
     Kernel::SplittingInterval splitter0 = splittersws->getSplitter(0);
@@ -411,12 +415,11 @@ public:
     using namespace WorkspaceCreationHelper;
     double PI = 3.14159265;
 
-    // 1. Empty workspace
+    // Empty workspace
     DataObjects::EventWorkspace_sptr eventws =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 2, true);
-    //eventws->setName("TestWorkspace");
 
-    // 2. Run star time
+    // Run star time
     int64_t runstarttime_ns = 3000000000;
     int64_t runstoptime_ns  = 3001000000;
     int64_t pulsetime_ns    =     100000;
@@ -424,7 +427,7 @@ public:
     Kernel::DateAndTime runstarttime(runstarttime_ns);
     eventws->mutableRun().addProperty("run_start", runstarttime.toISO8601String());
 
-    // 3. Proton charge log
+    // Proton charge log
     Kernel::TimeSeriesProperty<double> *protonchargelog =
         new Kernel::TimeSeriesProperty<double>("proton_charge");
     int64_t curtime_ns = runstarttime_ns;
@@ -435,6 +438,7 @@ public:
       curtime_ns += pulsetime_ns;
     }
     eventws->mutableRun().addProperty(protonchargelog, true);
+    std::cout << "Proton charge log from " << runstarttime_ns << " to " << runstoptime_ns << "\n";
 
     // 4. Sine value log (value record 1/4 of pulse time.  it is FAST)
     Kernel::TimeSeriesProperty<double> *sinlog = new Kernel::TimeSeriesProperty<double>("FastSineLog");
@@ -461,6 +465,8 @@ public:
       curtime_ns += pulsetime_ns*2;
     }
     eventws->mutableRun().addProperty(coslog, true);
+
+    std::cout << "<----------- Number of events = " << eventws->getNumberEvents() << "\n";
 
     return eventws;
   }
@@ -607,7 +613,7 @@ public:
     TS_ASSERT(splittersws);
 
     // Check values of output workspace
-    size_t numintervals = 67;
+    size_t numintervals = 74;
     TS_ASSERT_EQUALS(splittersws->readY(0).size(), numintervals);
 
     std::string runstarttimestr = eventWS->run().getProperty("run_start")->value();
@@ -616,7 +622,7 @@ public:
 
     Kernel::TimeSeriesProperty<double> *protonchargelog =
         dynamic_cast<Kernel::TimeSeriesProperty<double>* >(eventWS->run().getProperty("proton_charge"));
-    Kernel::DateAndTime runstoptime = protonchargelog->lastTime();
+    Kernel::DateAndTime runstoptime = Kernel::DateAndTime(protonchargelog->lastTime().totalNanoseconds() + 100000);
 
     // First interval
     TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->readX(0)[0]), runstarttime_ns);
@@ -890,8 +896,6 @@ public:
    */
   void test_genMultipleIntLogValuesFilterMatrixSplitter()
   {
-    std::cout << "\n==== Test Multiple Integer Log Value Filter (Matrix Splitter) ====\n" << std::endl;
-
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspaceIntLog();
     AnalysisDataService::Instance().addOrReplace("TestEventWS09", eventWS);

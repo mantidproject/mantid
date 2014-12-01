@@ -2346,7 +2346,7 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 
           fseek(f,LAYER+0x19,SEEK_SET);
           fread(&h,1,1,f);
-          if(h >= 0x64 && h < 0x1F4)
+          if(h >= 0x64)
           {
             col=findDataByIndex(nColY - 1 + h - 0x64);
             if(col.size()>0)

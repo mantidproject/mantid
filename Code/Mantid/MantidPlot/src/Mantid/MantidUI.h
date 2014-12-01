@@ -299,6 +299,7 @@ public:
 
   void saveProject(bool save);
   void enableSaveNexus(const QString & wsName);
+  void disableSaveNexus();
 
 signals:
   //A signal to indicate that we want a script to produce a dialog
@@ -385,12 +386,12 @@ signals:
 
     // Execute algorithm given name and version
     void showAlgorithmDialog(const QString & algName, int version = -1);
-    //Execute an algorithm with the given parameter list
-    void showAlgorithmDialog(QString algName, QHash<QString, QString> paramList, Mantid::API::AlgorithmObserver* obs = NULL);
+    // Execute an algorithm with the given parameter list
+    void showAlgorithmDialog(QString algName, QHash<QString, QString> paramList, Mantid::API::AlgorithmObserver *obs = NULL);
     // Execute an algorithm
     void executeAlgorithm(Mantid::API::IAlgorithm_sptr alg);
     // Execute a named algorithm using the given parameters
-    void executeAlgorithm(const QString & algName, const QString & paramList,Mantid::API::AlgorithmObserver* obs);
+    void executeAlgorithm(const QString & algName, const QString & paramList, Mantid::API::AlgorithmObserver* obs);
 
     // Find the name of the first input workspace for an algorithm
     QString findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algorithm) const;
@@ -416,6 +417,9 @@ signals:
 
     // Show log files for selected workspace
     void showLogFileWindow();
+
+    // Show sample material window for selected workspace
+    void showSampleMaterialWindow();
 
     void insertMenu();
 

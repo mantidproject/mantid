@@ -1,4 +1,4 @@
-﻿#ifndef MANTID_GEOMETRY_COMPOSITEBRAGGSCATTERER_H_
+#ifndef MANTID_GEOMETRY_COMPOSITEBRAGGSCATTERER_H_
 #define MANTID_GEOMETRY_COMPOSITEBRAGGSCATTERER_H_
 
 #include "MantidGeometry/DllConfig.h"
@@ -77,9 +77,10 @@ public:
     size_t nScatterers() const;
     BraggScatterer_sptr getScatterer(size_t i) const;
     void removeScatterer(size_t i);
+    void removeAllScatterers();
 
     StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const;
-    
+
 protected:
     void afterPropertySet(const std::string &propertyName);
     void propagateProperty(const std::string &propertyName);
@@ -91,9 +92,7 @@ protected:
     std::vector<BraggScatterer_sptr> m_scatterers;
 };
 
+}
+}
 
-
-} // namespace Geometry
-} // namespace Mantid
-
-#endif  /* MANTID_GEOMETRY_COMPOSITEBRAGGSCATTERER_H_ */
+#endif

@@ -43,29 +43,6 @@ namespace
   }
 
   /**
-   * Helper function that takes a vector of runs, and generates a suggested workspace name.
-   * This will likely need to be improved and may have to include instrument name, etc.
-   *
-   * @param runs :: a vector of run numbers.
-   *
-   * @returns a string containing a suggested ws name based on the given run numbers.
-   */
-  std::string generateWsNameFromRuns(std::vector<unsigned int> runs)
-  {
-    std::string wsName("");
-
-    for(size_t i = 0; i < runs.size(); ++i)
-    {
-      if(!wsName.empty())
-        wsName += "_";
-
-      wsName += boost::lexical_cast<std::string>(runs[i]);
-    }
-
-    return wsName;
-  }
-
-  /**
    * Helper function that takes a vector of filenames, and generates a suggested workspace name.
    *
    * @param filenames :: a vector of filenames.

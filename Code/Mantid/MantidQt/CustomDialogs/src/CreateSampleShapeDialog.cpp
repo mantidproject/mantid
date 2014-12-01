@@ -38,7 +38,7 @@ using namespace MantidQt::CustomDialogs;
  * Constructor
  */
 CreateSampleShapeDialog::CreateSampleShapeDialog(QWidget *parent) :
-  AlgorithmDialog(parent), m_setup_map(), m_details_map(), m_ops_map()
+  AlgorithmDialog(parent), m_shapeTree(NULL), m_setup_map(), m_details_map(), m_ops_map()
 {
   m_object_viewer = new MantidGLWidget;
 }
@@ -334,6 +334,7 @@ void CreateSampleShapeDialog::addShape(QAction *shape)
 {
   // Get the selected item
   BinaryTreeWidgetItem *parent = getSelectedItem();
+  if(!parent) return;
   if( parent && parent->childCount() == 2 ) return;
 
   BinaryTreeWidgetItem *child = new BinaryTreeWidgetItem(QStringList(shape->text()));
@@ -360,6 +361,7 @@ void CreateSampleShapeDialog::addOperation(QAction *opt)
 {
   //Get the selected item
   BinaryTreeWidgetItem *selected = getSelectedItem();
+  if(!selected) return;
   if( selected && selected->childCount() == 2 ) return;
 
   BinaryTreeWidgetItem *operation = new BinaryTreeWidgetItem;
@@ -468,6 +470,7 @@ void CreateSampleShapeDialog::setupDetailsBox()
   if( m_uiForm.details_scroll->widget() ) m_uiForm.details_scroll->takeWidget();
 
   BinaryTreeWidgetItem *item = dynamic_cast<BinaryTreeWidgetItem*>(selection[0]);
+  if(!item) return;
   QString shapename = item->text(0);
   if( m_setup_map.contains(shapename) )
   {
@@ -484,7 +487,6 @@ void CreateSampleShapeDialog::setupDetailsBox()
     //Set it as the currently displayed widget
     m_uiForm.details_scroll->setWidget(obj);    
   }
-  
 }
 
 /**

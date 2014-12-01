@@ -618,7 +618,7 @@ public:
 
   void test_BASIS()
   {
-    doTest("BASIS_Definition.xml", 5);
+    doTest("BASIS_Definition_0-20130119.xml", 5);
   }
 
   void test_CNCS()

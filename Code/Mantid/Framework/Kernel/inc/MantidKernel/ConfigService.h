@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/ProxyInfo.h"
 #include <vector>
 #include <map>
 #include <set>
@@ -152,6 +153,10 @@ namespace Mantid
       std::string getOSArchitecture();
       /// Returns the OS version
       std::string getOSVersion();
+      /// Returns a human readable version of the OS version
+      std::string getOSVersionReadable();
+      /// Returns the username
+      std::string getUsername();
       /// Returns the current directory
       std::string getCurrentDir();
       /// Returns the current directory
@@ -225,6 +230,11 @@ namespace Mantid
       /// Quick check to determine if vates has been installed.
       bool quickVatesCheck() const;
 
+      /// Gets the proxy for the system
+      Kernel::ProxyInfo& getProxy(const std::string& url);
+
+      /// Get the ParaViewPath
+      const std::string getParaViewPath() const;
     private:
       friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
       /// Handles distribution of Poco signals.
@@ -305,6 +315,12 @@ namespace Mantid
       std::vector<FacilityInfo*> m_facilities;
       /// Define a flag value for a removed property
       const std::string m_removedFlag;
+
+      ///local cache of proxy details
+      Kernel::ProxyInfo m_proxyInfo;
+      ///wether the proxy has been populated yet
+      bool m_isProxySet;
+
     };
 
     /// Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.

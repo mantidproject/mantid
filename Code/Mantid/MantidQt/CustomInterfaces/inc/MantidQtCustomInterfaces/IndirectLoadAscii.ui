@@ -28,7 +28,7 @@
      </property>
      <widget class="QWidget" name="neutron">
       <attribute name="title">
-       <string>Neutron</string>
+       <string>Load ILL</string>
       </attribute>
      </widget>
     </widget>

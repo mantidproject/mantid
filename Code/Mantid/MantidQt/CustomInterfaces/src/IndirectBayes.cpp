@@ -37,9 +37,8 @@ IndirectBayes::IndirectBayes(QWidget *parent) : UserSubWindow(parent),
 	std::map<unsigned int, IndirectBayesTab*>::iterator iter;
 	for (iter = m_bayesTabs.begin(); iter != m_bayesTabs.end(); ++iter)
 	{
-		connect(iter->second, SIGNAL(executePythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
+		connect(iter->second, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
 		connect(iter->second, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
-		
 	}
 
 	loadSettings();
@@ -110,9 +109,9 @@ void IndirectBayes::runClicked()
 {
 	int tabIndex = m_uiForm.indirectBayesTabs->currentIndex();
 
-	if(m_bayesTabs[tabIndex]->validate())
+	if(m_bayesTabs[tabIndex]->validateTab())
 	{
-		m_bayesTabs[tabIndex]->run();
+		m_bayesTabs[tabIndex]->runTab();
 	}
 }
 

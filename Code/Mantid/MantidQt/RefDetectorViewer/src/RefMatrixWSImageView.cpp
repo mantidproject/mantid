@@ -18,74 +18,63 @@ using namespace Mantid::API;
 /**
  * Construct an ImageView for the specified matrix workspace
  */
-RefMatrixWSImageView::RefMatrixWSImageView( MatrixWorkspace_sptr /*mat_ws*/ )
+RefMatrixWSImageView::RefMatrixWSImageView( MatrixWorkspace_sptr /*mat_ws*/ ) :
+  m_imageView(NULL)
 {
-    return;
-    //  RefMatrixWSDataSource* source = new RefMatrixWSDataSource( mat_ws );
+  return;
+  //  RefMatrixWSDataSource* source = new RefMatrixWSDataSource( mat_ws );
 //  image_view = new RefImageView( source );  // this is the QMainWindow
 //                                         // for the viewer.  It is
 //                                         // deleted when the window
 //                                         // is closed
 }
 
-RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max)
+RefMatrixWSImageView::RefMatrixWSImageView( QString wpsName,
+                                            int peakMin, int peakMax,
+                                            int backMin, int backMax,
+                                            int tofMin,  int tofMax)
 {
+  IEventWorkspace_sptr ws;
+  ws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(wpsName.toStdString());
 
-    IEventWorkspace_sptr ws;
-    ws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(wps_name.toStdString());
+  const double totalYMin = 0.0;
+  const double totalYMax = 255.0; //303
+  const size_t totalRows = 256;   //304
 
-    const double total_ymin = 0.0;
-    const double total_ymax = 255.0;
-    const size_t total_rows = 256;
-//    const double total_ymax = 303;
-//    const size_t total_rows = 304;
-    
-    
-    std::vector<double> xaxis = ws->readX(0);
-    const size_t sz = xaxis.size()-1;
-    const size_t total_cols = sz;
-    
-    double total_xmin = xaxis[0];
-    double total_xmax = xaxis[sz];
-    
-    float *data = new float[static_cast<size_t>(total_ymax) * sz];
-    
-//    std::cout << "Starting the for loop " << std::endl;
-//    std::cout << "total_xmax: " << total_xmax << std::endl;
-//    std::cout << "sz is : " << sz << std::endl;
-    
-    std::vector<double> yaxis;
-    for (size_t px=0; px<total_ymax; px++)
-    {
-        //retrieve data now
-        yaxis = ws->readY(px);
-        for (size_t tof=0; tof<sz; tof++)
-        {
-            data[px*sz + tof] = static_cast<float>(yaxis[tof]);
-        }
-    }
-    
-    SpectrumView::ArrayDataSource* source = new SpectrumView::ArrayDataSource(total_xmin, total_xmax,
-                                                        total_ymin, total_ymax,
-                                                        total_rows, total_cols,
-                                                        data);
-    
-//    std::cout << "ws->readX(0).size(): " << ws->readX(0).size() << std::endl;
+  std::vector<double> xAxis = ws->readX(0);
+  const size_t sz = xAxis.size() - 1;
+  const size_t totalCols = sz;
 
-    
-    
-    image_view = new RefImageView( source,
-                                  peak_min, peak_max,
-                                  back_min, back_max,
-                                  tof_min, tof_max);
+  double totalXMin = xAxis[0];
+  double totalXMax = xAxis[sz];
 
+  std::vector<float> data(static_cast<size_t>(totalYMax) * sz);
+
+  std::vector<double> yAxis;
+  for (size_t px = 0; px < totalYMax; px++)
+  {
+    // Retrieve data now
+    yAxis = ws->readY(px);
+    for (size_t tof = 0; tof < sz; tof++)
+      data[px * sz + tof] = static_cast<float>(yAxis[tof]);
+  }
+
+  SpectrumView::ArrayDataSource_sptr source =
+    SpectrumView::ArrayDataSource_sptr( new SpectrumView::ArrayDataSource(totalXMin, totalXMax,
+                                                                          totalYMin, totalYMax,
+                                                                          totalRows, totalCols,
+                                                                          data) );
+
+  m_imageView = new RefImageView( source,
+                                  peakMin, peakMax,
+                                  backMin, backMax,
+                                  tofMin,  tofMax);
 }
 
 
 RefIVConnections* RefMatrixWSImageView::getConnections()
 {
-  return image_view->getIVConnections();
-
+  return m_imageView->getIVConnections();
 }
 
 
@@ -93,4 +82,3 @@ RefMatrixWSImageView::~RefMatrixWSImageView()
 {
   // nothing to do here, since image_view is deleted when the window closes
 }
-

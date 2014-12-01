@@ -174,20 +174,10 @@ namespace CustomInterfaces
       m_batchAlgoRunner->addAlgorithm(energyRebinAlg);
     }
 
-    // Get correct S(Q, w) algorithm
     QString eFixed = getInstrumentDetails()["efixed-val"];
 
-    IAlgorithm_sptr sqwAlg;
-    QString rebinType = m_uiForm.sqw_cbRebinType->currentText();
-
-    if(rebinType == "Centre (SofQW)")
-      sqwAlg = AlgorithmManager::Instance().create("SofQW");
-    else if(rebinType == "Parallelepiped (SofQW2)")
-      sqwAlg = AlgorithmManager::Instance().create("SofQW2");
-    else if(rebinType == "Parallelepiped/Fractional Area (SofQW3)")
-      sqwAlg = AlgorithmManager::Instance().create("SofQW3");
-
     // S(Q, w) algorithm
+    IAlgorithm_sptr sqwAlg = AlgorithmManager::Instance().create("SofQW2");
     sqwAlg->initialize();
 
     BatchAlgorithmRunner::AlgorithmRuntimeProps sqwInputProps;
@@ -202,19 +192,6 @@ namespace CustomInterfaces
     sqwAlg->setProperty("EFixed", eFixed.toStdString());
 
     m_batchAlgoRunner->addAlgorithm(sqwAlg, sqwInputProps);
-
-    // Add sample log for S(Q, w) algorithm used
-    IAlgorithm_sptr sampleLogAlg = AlgorithmManager::Instance().create("AddSampleLog");
-    sampleLogAlg->initialize();
-
-    sampleLogAlg->setProperty("LogName", "rebin_type");
-    sampleLogAlg->setProperty("LogType", "String");
-    sampleLogAlg->setProperty("LogText", rebinType.toStdString());
-
-    BatchAlgorithmRunner::AlgorithmRuntimeProps inputToAddSampleLogProps;
-    inputToAddSampleLogProps["Workspace"] = sqwWsName.toStdString();
-
-    m_batchAlgoRunner->addAlgorithm(sampleLogAlg, inputToAddSampleLogProps);
 
     // Save S(Q, w) workspace
     if(m_uiForm.sqw_ckSave->isChecked())
@@ -231,6 +208,9 @@ namespace CustomInterfaces
 
       m_batchAlgoRunner->addAlgorithm(saveNexusAlg, inputToSaveNexusProps);
     }
+
+    // Set the name of the result workspace for Python export
+    m_pythonExportWsName = sqwWsName.toStdString();
 
     m_batchAlgoRunner->executeBatch();
   }
@@ -264,7 +244,7 @@ namespace CustomInterfaces
         "plotSpectrum(sqw_ws, range(0, n_spec))\n";
     }
 
-    m_pythonRunner.runPythonCode(pyInput).trimmed();
+    m_pythonRunner.runPythonCode(pyInput);
   }
 
   /**
@@ -318,7 +298,7 @@ namespace CustomInterfaces
       convertSpecAlg->execute();
 
       QString pyInput = "plot2D('" + convertedWsName + "')\n";
-      m_pythonRunner.runPythonCode(pyInput).trimmed();
+      m_pythonRunner.runPythonCode(pyInput);
     }
     else
     {

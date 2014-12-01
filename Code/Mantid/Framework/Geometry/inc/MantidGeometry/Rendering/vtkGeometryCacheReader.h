@@ -50,7 +50,6 @@ namespace Mantid
     private:
 
       Poco::XML::Document* mDoc;         ///< The XML document
-      Poco::XML::Element*  mRoot;        ///< The root XML element
       Poco::XML::DOMParser*  pParser;    ///< The XML parser
       std::string          mFileName;    ///< The file name
       //Private Methods

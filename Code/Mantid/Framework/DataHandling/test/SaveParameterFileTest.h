@@ -39,6 +39,7 @@ public:
     setParam("nickel-holder", "testString1", "hello world");
     setParam("nickel-holder", "testString2", "unchanged");
     setParamByDetID(1301, "testDouble", 2.17);
+		setFitParam("nickel-holder", "A", ", BackToBackExponential , S ,  ,  ,  ,  , sqrt(188.149*centre^4+6520.945*centre^2) , dSpacing , TOF , linear ; TOF ; TOF");
 
     //Create a temporary blank file for us to test with
     ScopedFileHelper::ScopedFile paramFile("", "__params.xml");
@@ -47,9 +48,10 @@ public:
     saveParams(paramFile.getFileName());
 
     //Change some parameters - these changes should not have an effect
-    setParam("nickel-holder", "testDouble1", 3.14);
-    setParam("nickel-holder", "testString1", "broken");
-    setParamByDetID(1301, "testDouble", 7.89);
+		setParam("nickel-holder", "testDouble1", 3.14);
+		setParam("nickel-holder", "testString1", "broken");
+		setParamByDetID(1301, "testDouble", 7.89);
+		setFitParam("nickel-holder", "B", "someString");
 
     //Load the saved parameters back in
     loadParams(paramFile.getFileName());
@@ -60,6 +62,7 @@ public:
     checkParam("nickel-holder", "testString1", "hello world");
     checkParam("nickel-holder", "testString2", "unchanged");
     checkParamByDetID(1301, "testDouble", 2.17);
+		checkFitParam("nickel-holder", "A", ", BackToBackExponential , S ,  ,  ,  ,  , sqrt(188.149*centre^4+6520.945*centre^2) , dSpacing , TOF , linear ; TOF ; TOF");
   }
 
   void setParam(std::string cName, std::string pName, std::string value)
@@ -86,6 +89,16 @@ public:
     IComponent_const_sptr comp = boost::dynamic_pointer_cast<const IComponent>(det);
     paramMap.addDouble(comp->getComponentID(), pName, value);
   }
+
+	void setFitParam(std::string cName, std::string pName, std::string value)
+	{
+    Instrument_const_sptr inst = m_ws->getInstrument();
+    ParameterMap& paramMap = m_ws->instrumentParameters();
+    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+		auto param = ParameterFactory::create("fitting",pName);
+		param->fromString(value);
+		paramMap.add(comp.get(),param);
+	}
 
   void checkParam(std::string cName, std::string pName, std::string value)
   {
@@ -116,6 +129,22 @@ public:
     TS_ASSERT_DELTA(value, pValue, 0.0001);
   }
 
+  void checkFitParam(std::string cName, std::string pName, std::string value)
+  {
+    Instrument_const_sptr inst = m_ws->getInstrument();
+    ParameterMap& paramMap = m_ws->instrumentParameters();
+    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+		auto param = paramMap.get(comp.get(),pName,"fitting");
+		const Mantid::Geometry::FitParameter& fitParam = param->value<FitParameter>();
+
+		// Info about fitting parameter is in string value, see FitParameter class
+		typedef Poco::StringTokenizer tokenizer;
+		tokenizer values(value, ",", tokenizer::TOK_TRIM);
+		TS_ASSERT_EQUALS(fitParam.getFormula(), values[7]);
+		TS_ASSERT_EQUALS(fitParam.getFunction(), values[1]);
+		TS_ASSERT_EQUALS(fitParam.getResultUnit(), values[9]);
+		TS_ASSERT_EQUALS(fitParam.getFormulaUnit(), values[8]);
+  }
 
   void loadParams(std::string filename)
   {
