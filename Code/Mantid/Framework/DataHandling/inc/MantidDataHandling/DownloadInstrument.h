@@ -5,6 +5,7 @@
 #include "MantidKernel/ProxyInfo.h"
 
 #include <map>
+#include <set>
 
 namespace Mantid
 {
@@ -58,6 +59,9 @@ namespace DataHandling
     std::string getValueOrDefault(const StringToStringMap & mapping,
                                   const std::string & key,
                                   const std::string & defaultValue) const;
+
+    const size_t removeOrphanedFiles(const std::string& directoryPath, 
+                                  const std::set<std::string>& filenamesToKeep) const;
 
     Kernel::ProxyInfo m_proxyInfo;
     bool m_isProxySet;

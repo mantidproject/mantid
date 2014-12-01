@@ -7,6 +7,8 @@
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DirectoryIterator.h>
+#include <Poco/Path.h>
+#include <Poco/File.h>
 #include <Poco/Net/HTTPResponse.h>
 // Visual Studio complains with the inclusion of Poco/FileStream
 // disabling this warning.
@@ -186,10 +188,13 @@ namespace Mantid
       }
       fileStream.close();
 
+      std::set<std::string> repoFilenames;
+
       for(Json::ArrayIndex i = 0; i < serverContents.size(); ++i)
       {
         const auto & serverElement = serverContents[i];
         std::string name = serverElement.get("name", "").asString();
+        repoFilenames.insert(name);
         Poco::Path filePath(localPath, name);
         if(filePath.getExtension() != "xml") continue;
         std::string sha = serverElement.get("sha","").asString();
@@ -209,6 +214,10 @@ namespace Mantid
           fileMap.insert(std::make_pair(htmlUrl, filePath.toString())); // ACTION - DOWNLOAD to localPath and overwrite
         }
       }
+
+      //remove any .xml files from the local appdata directory that are not present in the remote instrument repo
+      removeOrphanedFiles(localPath.toString(),repoFilenames);
+
       return fileMap;
     }
 
@@ -262,6 +271,73 @@ namespace Mantid
       }
 
       return filesToSha;
+    }
+
+    /** removes any .xml files in a directory that are not in filenamesToKeep
+    * @param directoryPath the directory to work in
+    * @param filenamesToKeep a set of filenames to keep
+    * @returns the number of files removed
+    **/
+    const size_t DownloadInstrument::removeOrphanedFiles(const std::string& directoryPath, 
+      const std::set<std::string>& filenamesToKeep) const
+    {
+      //hold files to delete in a set so we don't remove files while iterating over the directory.
+      std::set<std::string> filesToDelete;
+
+      try
+      {
+        using Poco::DirectoryIterator;
+        DirectoryIterator end;
+        for (DirectoryIterator it(directoryPath); it != end; ++it)
+        {
+          const auto & entryPath = Poco::Path(it->path());
+          if (entryPath.getExtension() != "xml") continue;
+          if (filenamesToKeep.find(entryPath.getFileName()) == filenamesToKeep.end())
+          {
+            g_log.debug() << 
+              "File not found in remote instrument repository, will be deleted: " 
+              << entryPath.getFileName() << std::endl;
+            filesToDelete.insert(it->path());
+          }
+        }
+      }
+      catch (Poco::Exception & ex)
+      {
+        g_log.error() << "DownloadInstrument: failed to list the directory: " << directoryPath << " : "
+          << ex.className() << " : " << ex.displayText() << std::endl;
+        // silently ignore this exception.
+      } catch (std::exception & ex)
+      {
+        std::stringstream ss;
+        ss << "unknown exception while checking local file system. " << ex.what() << ". Input = "
+           << directoryPath;
+        throw std::runtime_error(ss.str());
+      }
+
+      //delete any identified files
+      try
+      {
+        for (auto it = filesToDelete.begin(); it != filesToDelete.end(); ++it)
+        {
+          Poco::File file(*it);
+          file.remove();
+        }
+      }
+      catch (Poco::Exception & ex)
+      {
+        g_log.error() << "DownloadInstrument: failed to delete file: " << " : "
+          << ex.className() << " : " << ex.displayText() << std::endl;
+        // silently ignore this exception.
+      } catch (std::exception & ex)
+      {
+        std::stringstream ss;
+        ss << "unknown exception while deleting  file. " << ex.what();
+        throw std::runtime_error(ss.str());
+      }
+      
+      g_log.debug() << filesToDelete.size() << " Files deleted." << std::endl;
+
+      return filesToDelete.size();
     }
 
     /** Converts a github file page to a downloadable url for the file.
