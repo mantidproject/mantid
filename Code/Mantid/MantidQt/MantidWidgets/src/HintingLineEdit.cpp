@@ -9,6 +9,18 @@ namespace MantidQt
   {
     HintingLineEdit::HintingLineEdit(QWidget *parent, const std::map<std::string,std::string> &hints) : QLineEdit(parent), m_hints(hints), m_dontComplete(false)
     {
+      m_hintLabel = new QLabel(this, Qt::ToolTip);
+      m_hintLabel->setMargin(1 + style()->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth, 0, m_hintLabel));
+      m_hintLabel->setFrameStyle(QFrame::StyledPanel);
+      m_hintLabel->setAlignment(Qt::AlignLeft);
+      m_hintLabel->setWordWrap(true);
+      m_hintLabel->setIndent(1);
+      m_hintLabel->setAutoFillBackground(true);
+      m_hintLabel->setPalette(QToolTip::palette());
+      m_hintLabel->setForegroundRole(QPalette::ToolTipText);
+      m_hintLabel->setBackgroundRole(QPalette::ToolTipBase);
+      m_hintLabel->ensurePolished();
+
       connect(this, SIGNAL(textEdited(const QString&)), this, SLOT(updateHints(const QString&)));
     }
 
@@ -97,9 +109,23 @@ namespace MantidQt
     {
       QString hintList;
       for(auto mIt = m_matches.begin(); mIt != m_matches.end(); ++mIt)
-        hintList += QString::fromStdString(mIt->first) + " : " + QString::fromStdString(mIt->second) + "\n";
+      {
+        hintList += "<b>" + QString::fromStdString(mIt->first) + "</b><br />\n";
+        if(!mIt->second.empty())
+          hintList += QString::fromStdString(mIt->second) + "<br />\n";
+      }
 
-      QToolTip::showText(mapToGlobal(QPoint(0, 5)), hintList.trimmed());
+      if(!hintList.trimmed().isEmpty())
+      {
+        m_hintLabel->show();
+        m_hintLabel->setText(hintList.trimmed());
+        m_hintLabel->adjustSize();
+        m_hintLabel->move(mapToGlobal(QPoint(0, height())));
+      }
+      else
+      {
+        m_hintLabel->hide();
+      }
     }
 
     /** Insert an auto completion suggestion beneath the user's cursor and select it */

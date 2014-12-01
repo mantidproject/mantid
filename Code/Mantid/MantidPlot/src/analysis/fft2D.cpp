@@ -147,8 +147,10 @@ void fft2d_inv(double **xtre, double **xtim, double **xrec_re, double **xrec_im,
     QVarLengthArray<double> x_int_l(width), x_int2_l(width), x_int_c(height), x_int2_c(height);//double x_int_l[width], x_int2_l[width], x_int_c[height], x_int2_c[height];
     for(int k=0; k<height; k++){
         for(int j=0; j<width; j++){
-            x_int_l[j] = xtre[(k-(height>>1))%height][(j+(width>>1))%width];
-            x_int2_l[j] = xtim[(k-(height>>1))%height][(j+(width>>1))%width] ;
+            int idx_h = (k+(height>>1))%height;
+            int idx_w = (j+(width>>1))%width;
+            x_int_l[j] = xtre[idx_h][idx_w];
+            x_int2_l[j] = xtim[idx_h][idx_w];
         }
         fft_inv(x_int_l.data(), x_int2_l.data(), width) ;//fft_inv(x_int_l, x_int2_l, width) ;
         for(int j=0; j<width; j++){

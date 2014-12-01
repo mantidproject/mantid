@@ -51,8 +51,7 @@ namespace MantidQt
       /// Enumeration for the index of each tab
 			enum TabChoice
 			{
-				NEUTRON,
-				MOLDYN,
+				LOAD_ILL,
 			};
 
     public: // public constructor, destructor and functions

@@ -7,7 +7,7 @@
 # TCMALLOC_FOUND If false, do not try to use TCMALLOC
 
 find_path ( TCMALLOC_INCLUDE_DIR tcmalloc.h 
-            PATHS /usr/include/google
+            PATHS /usr/include/gperftools
 )
 
 find_library ( TCMALLOC_LIB NAMES tcmalloc tcmalloc_minimal )

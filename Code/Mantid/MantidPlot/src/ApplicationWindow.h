@@ -188,7 +188,10 @@ public:
   QString endOfLine();
   bool autoUpdateTableValues(){return d_auto_update_table_values;};
   void setAutoUpdateTableValues(bool on = true);
-  void enablesaveNexus(const QString& wsName);
+  // enables File->Save->Nexus action in the main menu and sets the parameter wsName as input workspace for save alg.
+  void enableSaveNexus(const QString& wsName);
+  // disables File->Save-Nexus action in the main menu. Useful when de-selecting workspaces
+  void disableSaveNexus();
 
 public slots:
   //! \name Projects and Project Files

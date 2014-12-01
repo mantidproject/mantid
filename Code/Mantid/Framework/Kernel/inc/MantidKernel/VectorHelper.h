@@ -234,7 +234,7 @@ namespace VectorHelper
     /// Return the average of the two arguments
     T operator()(const T & x, const T & y) const
     {
-      return 0.5 * (x + y);
+      return static_cast<T>(0.5) * (x + y);
     }
   };
 

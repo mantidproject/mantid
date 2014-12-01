@@ -115,7 +115,6 @@ namespace Mantid
       * @param alg :: LoadEventNexus
       * @param entry_name :: name of the bank
       * @param prog :: Progress reporter
-      * @param scheduler :: ThreadScheduler running this task
       * @param event_id :: array with event IDs
       * @param event_time_of_flight :: array with event TOFS
       * @param numEvents :: how many events in the arrays
@@ -129,7 +128,7 @@ namespace Mantid
       * @return
       */
       ProcessBankData(LoadEventNexus * alg, std::string entry_name,
-        Progress * prog, ThreadScheduler * scheduler,
+        Progress * prog,
         boost::shared_array<uint32_t> event_id,
         boost::shared_array<float> event_time_of_flight,
         size_t numEvents, size_t startAt,
@@ -139,7 +138,7 @@ namespace Mantid
         detid_t min_event_id, detid_t max_event_id)
         : Task(), alg(alg), entry_name(entry_name), pixelID_to_wi_vector(alg->pixelID_to_wi_vector),
         pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
-        prog(prog), scheduler(scheduler),
+        prog(prog),
         event_id(event_id), event_time_of_flight(event_time_of_flight), numEvents(numEvents), startAt(startAt),
         event_index(event_index),
         thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
@@ -200,7 +199,7 @@ namespace Mantid
           }
         }
 
-        // Check for cancelled algorithm
+        // Check for canceled algorithm
         if (alg->getCancel())
         {
           return;
@@ -360,16 +359,15 @@ namespace Mantid
           "monotonically increasing pulse times" << std::endl;
 
         //Join back up the tof limits to the global ones
-        PARALLEL_CRITICAL(tof_limits)
+        //This is not thread safe, so only one thread at a time runs this.
         {
-          //This is not thread safe, so only one thread at a time runs this.
+          Poco::FastMutex::ScopedLock _lock(alg->m_tofMutex);
           if (my_shortest_tof < alg->shortest_tof) { alg->shortest_tof = my_shortest_tof;}
           if (my_longest_tof > alg->longest_tof ) { alg->longest_tof  = my_longest_tof;}
           alg->bad_tofs += badTofs;
           alg->discarded_events += my_discarded_events;
         }
-
-
+      
         // For Linux with tcmalloc, make sure memory goes back;
         // but don't call if more than 15% of memory is still available, since that slows down the loading.
         MemoryManager::Instance().releaseFreeMemoryIfAbove(0.85);
@@ -391,8 +389,6 @@ namespace Mantid
       detid_t pixelID_to_wi_offset;
       /// Progress reporting
       Progress * prog;
-      /// ThreadScheduler running this task
-      ThreadScheduler * scheduler;
       /// event pixel ID array
       boost::shared_array<uint32_t> event_id;
       /// event TOF array
@@ -444,7 +440,6 @@ namespace Mantid
         Progress * prog, boost::shared_ptr<Mutex> ioMutex, ThreadScheduler * scheduler)
         : Task(),
         alg(alg), entry_name(entry_name), entry_type(entry_type),
-        pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
         // prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL), m_loadError(false),
         prog(prog), scheduler(scheduler), m_loadError(false),
         m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(), m_event_id(NULL),
@@ -881,14 +876,14 @@ namespace Mantid
         if (alg->splitProcessing)
           mid_id = (m_max_id + m_min_id) / 2;
 
-        ProcessBankData * newTask1 = new ProcessBankData(alg, entry_name, prog,scheduler,
+        ProcessBankData * newTask1 = new ProcessBankData(alg, entry_name, prog,
           event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
           thisBankPulseTimes, m_have_weight, event_weight_shrd,
           m_min_id, mid_id);
         scheduler->push(newTask1);
         if (alg->splitProcessing)
         {
-          ProcessBankData * newTask2 = new ProcessBankData(alg, entry_name, prog,scheduler,
+          ProcessBankData * newTask2 = new ProcessBankData(alg, entry_name, prog,
             event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
             thisBankPulseTimes, m_have_weight, event_weight_shrd,
             (mid_id+1), m_max_id);
@@ -919,10 +914,6 @@ namespace Mantid
       std::string entry_name;
       /// NXS type
       std::string entry_type;
-      /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace index)
-      const std::vector<size_t> & pixelID_to_wi_vector;
-      /// Offset in the pixelID_to_wi_vector to use.
-      detid_t pixelID_to_wi_offset;
       /// Progress reporting
       Progress * prog;
       /// ThreadScheduler running this task
@@ -1213,28 +1204,19 @@ namespace Mantid
       if (load_monitors)
       {
         prog.report("Loading monitors");
-        const bool eventMonitors = getProperty("MonitorsAsEvents");
-        if( eventMonitors && this->hasEventMonitors() )
+        const bool monitorsAsEvents = getProperty("MonitorsAsEvents");
+
+        if (monitorsAsEvents && !this->hasEventMonitors()) {
+          g_log.warning() << "The property MonitorsAsEvents has been enabled but this file does not seem to have monitors with events." << endl;
+        }
+        if(monitorsAsEvents)
         {
-          // Note the reuse of the WS member variable below. Means I need to grab a copy of its current value.
-          auto dataWS = WS;
-          WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
-          //add filename
-          WS->mutableRun().addProperty("Filename",m_filename);
-          // Perform the load
-          loadEvents(&prog, true);
-          std::string mon_wsname = this->getProperty("OutputWorkspace");
-          mon_wsname.append("_monitors");
-          this->declareProperty(new WorkspaceProperty<IEventWorkspace>
-            ("MonitorWorkspace", mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
-          this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", WS);
-          // Set the internal monitor workspace pointer as well
-          dataWS->setMonitorWorkspace(WS);
-          // If the run was paused at any point, filter out those events (SNS only, I think)
-          filterDuringPause(WS);
+          // no matter whether the file has events or not, the user has requested to load events from monitors
+          this->runLoadMonitorsAsEvents(&prog);
         }
         else
         {
+          // this resorts to child algorithm 'LoadNexusMonitors', passing the property 'MonitorsAsEvents'
           this->runLoadMonitors();
         }
       }
@@ -1798,6 +1780,40 @@ namespace Mantid
       }
       file.closeData();
 
+      // get the experiment identifier
+      try {
+        file.openData("experiment_identifier");
+        string expId("");
+        if (file.getInfo().type == ::NeXus::CHAR)
+        {
+          expId = file.getStrData();
+        }
+        if (!expId.empty()) {
+          WS->mutableRun().addProperty("experiment_identifier", expId);
+        }
+        file.closeData();
+      } catch (::NeXus::Exception &) {
+        // let it drop on floor
+      }
+
+      // get the sample name
+      try {
+        file.openGroup("sample", "NXsample");
+        file.openData("name");
+        string name("");
+        if (file.getInfo().type == ::NeXus::CHAR)
+        {
+          name = file.getStrData();
+        }
+        if (!name.empty()) {
+          WS->mutableSample().setName(name);
+        }
+        file.closeData();
+        file.closeGroup();
+      } catch (::NeXus::Exception &) {
+        // let it drop on floor
+      }
+
       // get the duration
       file.openData("duration");
       std::vector<double> duration;
@@ -2235,10 +2251,53 @@ namespace Mantid
       return result;
     }
 
+    /**
+    * Load the Monitors from the NeXus file into an event workspace. A
+    * new event workspace is created and associated to the data
+    * workspace. The name of the new event workspace is contructed by
+    * appending '_monitors' to the base workspace name.
+    *
+    * This is used when the property "MnitorsAsEvents" is enabled, and
+    * there are monitors with events.
+    *
+    * @param prog :: progress reporter
+    */
+    void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress * const prog)
+    {
+      try
+      {
+        // Note the reuse of the WS member variable below. Means I need to grab a copy of its current value.
+        auto dataWS = WS;
+        WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
+        // add filename
+        WS->mutableRun().addProperty("Filename", m_filename);
+        // Perform the load (only events from monitor)
+        loadEvents(prog, true);
+        std::string mon_wsname = this->getProperty("OutputWorkspace");
+        mon_wsname.append("_monitors");
+        this->declareProperty(new WorkspaceProperty<IEventWorkspace>
+                              ("MonitorWorkspace", mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
+        this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", WS);
+        // Set the internal monitor workspace pointer as well
+        dataWS->setMonitorWorkspace(WS);
+        // If the run was paused at any point, filter out those events (SNS only, I think)
+        filterDuringPause(WS);
+      }
+      catch (const std::exception& e)
+      {
+        g_log.error() << "Error while loading monitors as events from file: ";
+        g_log.error() << e.what() << std::endl;
+      }
+    }
+
     //-----------------------------------------------------------------------------
     /**
     * Load the Monitors from the NeXus file into a workspace. The original
     * workspace name is used and appended with _monitors.
+    *
+    * This is used when the property "MonitorsAsEvents" is not
+    * enabled, and uses LoadNexusMonitors to load monitor data into a
+    * Workspace2D.
     */
     void LoadEventNexus::runLoadMonitors()
     {
@@ -2252,6 +2311,7 @@ namespace Mantid
         loadMonitors->setPropertyValue("Filename", m_filename);
         g_log.information() << "New workspace name for monitors: " << mon_wsname << std::endl;
         loadMonitors->setPropertyValue("OutputWorkspace", mon_wsname);
+        loadMonitors->setPropertyValue("MonitorsAsEvents", this->getProperty("MonitorsAsEvents"));
         loadMonitors->execute();
         MatrixWorkspace_sptr mons = loadMonitors->getProperty("OutputWorkspace");
         this->declareProperty(new WorkspaceProperty<>("MonitorWorkspace",

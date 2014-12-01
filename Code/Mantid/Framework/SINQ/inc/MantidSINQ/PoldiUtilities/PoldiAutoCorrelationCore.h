@@ -17,6 +17,23 @@ namespace Mantid
 namespace Poldi
 {
 
+/// Helper struct for inner correlation method.
+struct CountLocator
+{
+    int detectorElement;
+    double arrivalWindowCenter;
+    double arrivalWindowWidth;
+
+    double cmin;
+    double cmax;
+
+    int icmin;
+    int icmax;
+
+    int iicmin;
+    int iicmax;
+};
+
 /** PoldiAutoCorrelationCore :
 
     Implementation of the autocorrelation algorithm used for analysis of data
@@ -49,12 +66,12 @@ class MANTID_SINQ_DLL PoldiAutoCorrelationCore
 {
 public:
     PoldiAutoCorrelationCore(Kernel::Logger& g_log);
-    ~PoldiAutoCorrelationCore() { }
+    virtual ~PoldiAutoCorrelationCore() { }
 
-    void setInstrument(boost::shared_ptr<PoldiAbstractDetector> detector, boost::shared_ptr<PoldiAbstractChopper> chopper);
+    void setInstrument(const PoldiAbstractDetector_sptr &detector, const PoldiAbstractChopper_sptr &chopper);
     void setWavelengthRange(double lambdaMin, double lambdaMax);
 
-    DataObjects::Workspace2D_sptr calculate(DataObjects::Workspace2D_sptr countData);
+    DataObjects::Workspace2D_sptr calculate(DataObjects::Workspace2D_sptr &countData, const DataObjects::Workspace2D_sptr &normCountData = DataObjects::Workspace2D_sptr());
 
 protected:
     double getNormalizedTOFSum(const std::vector<double> &normalizedTofs) const;
@@ -62,13 +79,14 @@ protected:
 
     double getRawCorrelatedIntensity(double dValue, double weight) const;
     UncertainValue getCMessAndCSigma(double dValue, double slitTimeOffset, int index) const;
-    double reduceChopperSlitList(const std::vector<UncertainValue> &valuesWithSigma, double weight) const;
+    CountLocator getCountLocator(double dValue, double slitTimeOffset, int index) const;
+    virtual double reduceChopperSlitList(const std::vector<UncertainValue> &valuesWithSigma, double weight) const;
 
     std::vector<double> getDistances(const std::vector<int> &elements) const;
     std::vector<double> getTofsFor1Angstrom(const std::vector<int> &elements) const;
 
     double getCounts(int x, int y) const;
-    double getNormCounts(int x, int y) const;
+    virtual double getNormCounts(int x, int y) const;
 
     int getElementFromIndex(int index) const;
     double getTofFromIndex(int index) const;
@@ -76,10 +94,12 @@ protected:
 
     int cleanIndex(int index, int maximum) const;
 
-    void setCountData(DataObjects::Workspace2D_sptr countData);
+    void setCountData(const DataObjects::Workspace2D_sptr &countData);
+    void setNormCountData(const DataObjects::Workspace2D_sptr &normCountData);
 
     double correctedIntensity(double intensity, double weight) const;
-
+    virtual double calculateCorrelationBackground(double sumOfCorrelationCounts, double sumOfCounts) const;
+    virtual DataObjects::Workspace2D_sptr finalizeCalculation(const std::vector<double> &correctedCorrelatedIntensities, const std::vector<double> &dValues) const;
 
     boost::shared_ptr<PoldiAbstractDetector> m_detector;
     boost::shared_ptr<PoldiAbstractChopper> m_chopper;
@@ -97,7 +117,7 @@ protected:
     std::vector<int> m_indices;
 
     DataObjects::Workspace2D_sptr m_countData;
-    int m_elementsMaxIndex;
+    DataObjects::Workspace2D_sptr m_normCountData;
 
     double m_sumOfWeights;
     double m_correlationBackground;

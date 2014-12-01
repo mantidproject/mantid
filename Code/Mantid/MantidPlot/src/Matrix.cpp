@@ -901,7 +901,8 @@ void Matrix::print(const QString& fileName)
   // print header
   p.setFont(QFont());
   QString header_label = d_matrix_model->headerData(0, Qt::Horizontal).toString();
-  QRect br = p.boundingRect(br, Qt::AlignCenter, header_label);
+  QRect br;
+  br = p.boundingRect(br, Qt::AlignCenter, header_label);
   p.drawLine(right, height, right, height+br.height());
   QRect tr(br);
 

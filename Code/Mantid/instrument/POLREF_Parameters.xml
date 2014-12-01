@@ -39,10 +39,14 @@
     <value val="2"/>
   </parameter>
 
+  <!-- In the old Reflectometry UI, LambdaMin's value has 1 added to it.
+       In the new Reflectometry UI, this adjustment is NOT made. -->
   <parameter name="LambdaMin">
     <value val="1.0"/>
   </parameter>
 
+  <!-- In the old Reflectometry UI, LambdaMax's value has 2 subtracted from it.
+       In the new Reflectometry UI, this adjustment is NOT made. -->
   <parameter name="LambdaMax">
     <value val="15.0"/>
   </parameter>

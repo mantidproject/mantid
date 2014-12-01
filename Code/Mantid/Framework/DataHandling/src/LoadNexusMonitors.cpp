@@ -54,6 +54,10 @@ void LoadNexusMonitors::init()
     new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "",
         Kernel::Direction::Output),
     "The name of the output workspace in which to load the NeXus monitors." );
+
+  declareProperty(
+    new Kernel::PropertyWithValue<bool>("MonitorsAsEvents", true, Kernel::Direction::Input),
+        "If enabled (by default), load the monitors as events (into an EventWorkspace), as long as there is event data. If disabled, load monitors as spectra (into a Workspace2D, regardless of whether event data is found.");
 }
 
 /**
@@ -66,6 +70,11 @@ void LoadNexusMonitors::exec()
   this->filename = this->getPropertyValue("Filename");
 
   API::Progress prog1(this, 0.0, 0.2, 2);
+
+  if (!canOpenAsNeXus(this->filename))
+  {
+    throw std::runtime_error("Failed to recognize this file as a NeXus file, cannot continue.");
+  }
 
   // top level file information
   ::NeXus::File file(this->filename);
@@ -85,7 +94,7 @@ void LoadNexusMonitors::exec()
   }
   prog1.report();
 
-  //Now we want to go through and find the monitors
+  // Now we want to go through and find the monitors
   entries = file.getEntries();
   std::vector<std::string> monitorNames;
   size_t numHistMon = 0;
@@ -152,14 +161,33 @@ void LoadNexusMonitors::exec()
   }
   this->nMonitors = monitorNames.size();
 
-  // only use if using event monitors
-  EventWorkspace_sptr eventWS;
+  // Nothing to do
+  if (0 == nMonitors)
+    return;
 
+  // With this property you can make the exception that even if there's event data, monitors will be loaded
+  // as histograms (if set to false)
+  bool monitorsAsEvents = getProperty("MonitorsAsEvents");
+  // Beware, even if monitorsAsEvents==False (user requests to load monitors as histograms)
+  // check if there's histogram data. If not, ignore setting, step back and load monitors as
+  // events which is the only possibility left.
+  if (!monitorsAsEvents)
+    if (!allMonitorsHaveHistoData(file, monitorNames))
+    {
+      g_log.information() << "Cannot load monitors as histogram data. Loading as events even if the opposite was requested by disabling the property MonitorsAsEvents" << std::endl;
+      monitorsAsEvents = true;
+    }
+
+  // only used if using event monitors
+  EventWorkspace_sptr eventWS;
   // Create the output workspace
   bool useEventMon;
-  if (numHistMon == this->nMonitors)
+  if (numHistMon == this->nMonitors || !monitorsAsEvents)
   {
     useEventMon = false;
+    if (this->nMonitors == 0)
+          throw std::runtime_error("Not loading event data. Trying to load histogram data but failed to find monitors with histogram data or could not interpret the data. This file may be corrupted or it may not be supported");
+
     this->WS = API::WorkspaceFactory::Instance().create("Workspace2D",
                                                         this->nMonitors, 1, 1);
     // if there is a distinct monitor number for each monitor sort them by that number
@@ -419,6 +447,36 @@ void LoadNexusMonitors::exec()
 }
 
 /**
+ * Can we get a histogram (non event data) for every monitor?
+ *
+ * @param file :: NeXus file object (open)
+ * @param monitorNames :: names of monitors of interest
+ *
+ * @return If there seems to be histograms for all monitors (they have "data"
+ **/
+bool LoadNexusMonitors::allMonitorsHaveHistoData(::NeXus::File& file,
+                                                 const std::vector<std::string>& monitorNames)
+{
+  bool res = true;
+
+  try
+  {
+    for (std::size_t i = 0; i < this->nMonitors; ++i) {
+      file.openGroup(monitorNames[i], "NXmonitor");
+      file.openData("data");
+      file.closeData();
+      file.closeGroup();
+    }
+  }
+  catch (::NeXus::Exception&)
+  {
+    file.closeGroup();
+    res = false;
+  }
+  return res;
+}
+
+/**
  * Fix the detector numbers if the defaults are not correct. Currently checks the isis_vms_compat
  * block and reads them from there if possible
  * @param det_ids :: An array of prefilled detector IDs
@@ -484,6 +542,33 @@ void LoadNexusMonitors::runLoadLogs(const std::string filename, API::MatrixWorks
     {
       g_log.error() << "Error while loading Logs from Nexus. Some sample logs may be missing." << std::endl;
     }
+}
+
+/**
+ * Helper method to make sure that a file is / can be openend as a NeXus file
+ *
+ * @param fname :: name of the file
+ * @return True if opening the file as NeXus and retrieving entries succeeds
+ **/
+bool LoadNexusMonitors::canOpenAsNeXus(const std::string& fname)
+{
+  bool res = true;
+  ::NeXus::File* f = NULL;
+  try
+  {
+    f = new ::NeXus::File(fname);
+    if (f)
+      f->getEntries();
+  }
+  catch(::NeXus::Exception& e)
+  {
+    g_log.error() << "Failed to open as a NeXus file: '" << fname <<
+      "', error description: " << e.what() << std::endl;
+    res = false;
+  }
+  if (f)
+    delete f;
+  return res;
 }
 
 } // end DataHandling

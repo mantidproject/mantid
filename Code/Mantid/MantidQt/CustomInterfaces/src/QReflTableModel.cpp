@@ -10,10 +10,10 @@ namespace MantidQt
 
     const QString QReflTableModel::RUNS = "Run(s)";
     const QString QReflTableModel::ANGLE = "Angle";
-    const QString QReflTableModel::TRANSMISSION = "Transmission";
-    const QString QReflTableModel::QMIN = "q_min";
-    const QString QReflTableModel::QMAX = "q_max";
-    const QString QReflTableModel::DQQ = "dq/q";
+    const QString QReflTableModel::TRANSMISSION = "Transmission Run(s)";
+    const QString QReflTableModel::QMIN = "Q min";
+    const QString QReflTableModel::QMAX = "Q max";
+    const QString QReflTableModel::DQQ = "dQ/Q";
     const QString QReflTableModel::SCALE = "Scale";
     const QString QReflTableModel::GROUP = "Group";
     const QString QReflTableModel::OPTIONS = "Options";
@@ -59,7 +59,7 @@ namespace MantidQt
     void QReflTableModel::invalidateDataCache(const int row) const
     {
       //If the row is in the cache, invalidate the cache.
-      if(row == m_dataCachePeakIndex)
+      if(row == m_dataCachePeakIndex || row == -1)
         m_dataCachePeakIndex = -1;
     }
 
@@ -135,14 +135,14 @@ namespace MantidQt
     */
     QVariant QReflTableModel::data(const QModelIndex &index, int role) const
     {
-      if (role == Qt::TextAlignmentRole)
+      if(role == Qt::TextAlignmentRole)
       {
         if(index.column() == COL_OPTIONS)
           return Qt::AlignLeft;
         else
           return Qt::AlignRight;
       }
-      else if( role != Qt::DisplayRole && role != Qt::EditRole)
+      else if(role != Qt::DisplayRole && role != Qt::EditRole)
       {
         return QVariant();
       }
@@ -197,17 +197,97 @@ namespace MantidQt
     */
     QVariant QReflTableModel::headerData(int section, Qt::Orientation orientation, int role) const
     {
-      if (role != Qt::DisplayRole)
-        return QVariant();
+      if(role == Qt::WhatsThisRole && orientation == Qt::Horizontal)
+      {
+        switch(section)
+        {
+          case COL_RUNS:
+            return QString(
+                "<b>Sample runs to be processed.</b><br />"
+                "<i>required</i><br />"
+                "Runs may be given as run numbers or workspace names. "
+                "Multiple runs may be added together by separating them with a '+'. "
+                "<br /><br /><b>Example:</b> <samp>1234+1235+1236</samp>"
+                );
+          case COL_ANGLE:
+            return QString(
+                "<b>Angle used during the run.</b><br />"
+                "<i>optional</i><br />"
+                "Unit: degrees<br />"
+                "If left blank, this is set to the last value for 'THETA' in the run's sample log. "
+                "If multiple runs were given in the Run(s) column, the first listed run's sample log will be used. "
+                "<br /><br /><b>Example:</b> <samp>0.7</samp>"
+                );
+          case COL_TRANSMISSION:
+            return QString(
+                "<b>Transmission run(s) to use to normalise the sample runs.</b><br />"
+                "<i>optional</i><br />"
+                "To specify two transmission runs, separate them with a comma. "
+                "If left blank, the sample runs will be normalised by monitor only."
+                "<br /><br /><b>Example:</b> <samp>1234,12345</samp>"
+                );
+          case COL_QMIN:
+            return QString(
+                "<b>Minimum value of Q to be used</b><br />"
+                "<i>optional</i><br />"
+                "Unit: &#197;<sup>-1</sup><br />"
+                "Data with a value of Q lower than this will be discarded. "
+                "If left blank, this is set to the lowest Q value found. "
+                "This is useful for discarding noisy data. "
+                "<br /><br /><b>Example:</b> <samp>0.1</samp>"
+                );
+          case COL_QMAX:
+            return QString(
+                "<b>Maximum value of Q to be used</b><br />"
+                "<i>optional</i><br />"
+                "Unit: &#197;<sup>-1</sup><br />"
+                "Data with a value of Q higher than this will be discarded. "
+                "If left blank, this is set to the highest Q value found. "
+                "This is useful for discarding noisy data. "
+                "<br /><br /><b>Example:</b> <samp>0.9</samp>"
+                );
+          case COL_DQQ:
+            return QString(
+                "<b>Resolution used when rebinning</b><br />"
+                "<i>optional</i><br />"
+                "If left blank, this is calculated for you using the CalculateResolution algorithm. "
+                "<br /><br /><b>Example:</b> <samp>0.9</samp>"
+                );
+          case COL_SCALE:
+            return QString(
+                "<b>Scaling factor</b><br />"
+                "<i>required</i><br />"
+                "The created IvsQ workspaces will be Scaled by <samp>1/i</samp> where <samp>i</samp> is the value of this column."
+                "<br /><br /><b>Example:</b> <samp>1</samp>"
+                );
+          case COL_GROUP:
+            return QString(
+                "<b>Grouping for stitching</b><br />"
+                "<i>required</i><br />"
+                "The value of this column determines which other rows this row's output will be stitched with. "
+                "All rows with the same group number are stitched together. "
+                );
+          case COL_OPTIONS:
+            return QString(
+                "<b>Override <samp>ReflectometryReductionOneAuto</samp> properties</b><br />"
+                "<i>optional</i><br />"
+                "This column allows you to override the properties used when executing <samp>ReflectometryReductionOneAuto</samp>. "
+                "Options are given as key=value pairs, separated by commas. "
+                "Values containing commas must be quoted."
+                "<br /><br /><b>Example:</b> <samp>StrictSpectrumChecking=0, RegionOfDirectBeam=\"0,2\", Params=\"1,2,3\"</samp>"
+                );
+          default:
+            return QVariant();
+        }
+      }
+      else if(role == Qt::DisplayRole)
+      {
+        if(orientation == Qt::Horizontal)
+          return findColumnName(section);
+        if(orientation == Qt::Vertical)
+          return QString::number(section + 1);
+      }
 
-      if (orientation == Qt::Horizontal)
-      {
-        return findColumnName(section);
-      }
-      else if (orientation == Qt::Vertical)
-      {
-        return QString::number(section + 1);
-      }
       return QVariant();
     }
 
@@ -219,6 +299,52 @@ namespace MantidQt
     {
       if (!index.isValid()) return 0;
       return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
+    }
+
+    /**
+    Insert the given number of rows at the specified position
+    @param row : The row to insert before
+    @param count : The number of rows to insert
+    @param parent : The parent index
+    */
+    bool QReflTableModel::insertRows(int row, int count, const QModelIndex& parent)
+    {
+      if(count < 1)
+        return true;
+
+      if(row < 0)
+        return false;
+
+      beginInsertRows(parent, row, row + count - 1);
+      for(int i = 0; i < count; ++i)
+        m_tWS->insertRow(row + i);
+      endInsertRows();
+
+      invalidateDataCache(-1);
+      return true;
+    }
+
+    /**
+    Remove the given number of rows from the specified position
+    @param row : The row index to remove from
+    @param count : The number of rows to remove
+    @param parent : The parent index
+    */
+    bool QReflTableModel::removeRows(int row, int count, const QModelIndex& parent)
+    {
+      if(count < 1)
+        return true;
+
+      if(row < 0)
+        return false;
+
+      beginRemoveRows(parent, row, row + count - 1);
+      for(int i = 0; i < count; ++i)
+        m_tWS->removeRow(row);
+      endRemoveRows();
+
+      invalidateDataCache(-1);
+      return true;
     }
 
   } // namespace CustomInterfaces

@@ -23,6 +23,7 @@
 // Could have forward declared this but it makes it easier to use from
 // inheriting classes if it is included here
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/AlgorithmObserver.h"
 
 #include <QDialog>
 #include <QString>
@@ -246,6 +247,8 @@ public:
   void setOptionalMessage(const QString & message);
   /// Set comma-separated-list of enabled parameter names
   void addEnabledAndDisableLists(const QStringList & enabled, const QStringList & disabled);
+  /// Add an AlgorithmObserver to the algorithm
+  void addAlgorithmObserver(Mantid::API::AlgorithmObserver *observer);
 
 protected:
 
@@ -300,6 +303,9 @@ protected:
 
   /// A map to keep track of replace workspace button presses
   QHash<QPushButton*, int> m_wsbtn_tracker;
+
+  /// A list of AlgorithmObservers to add to the algorithm prior to execution
+  std::vector<Mantid::API::AlgorithmObserver *> m_observers;
   //@}
 };
 

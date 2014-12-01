@@ -62,12 +62,6 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-
-  /// Pixels in the detector
-  int XPixels;
-  /// Pixels in the detector
-  int YPixels;
-
   /// Number to sum
   int SumX;
   /// Number to sum

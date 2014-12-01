@@ -8,7 +8,7 @@ using namespace Mantid::API;
 
 namespace MantidQt
 {
-  namespace CustomInterfaces
+  namespace MantidWidgets
   {
     /** AlgorithmHintStrategy : Produces hints using a given algorithm's properties.
 

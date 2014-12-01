@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/FindPeaksMD.cpp
 	src/GreaterThanMD.cpp
 	src/IDynamicRebinning.cpp
+	src/IntegrateFlux.cpp
 	src/IntegratePeaksMD.cpp
 	src/IntegratePeaksMD2.cpp
 	src/InvalidParameter.cpp
@@ -63,13 +64,12 @@ set ( SRC_FILES
 	src/Quantification/Resolution/TobyFitYVector.cpp
 	src/Quantification/ResolutionConvolvedCrossSection.cpp
 	src/Quantification/SimulateResolutionConvolvedModel.cpp
-	src/SXDMDNorm.cpp
+	src/MDNormSXD.cpp
 	src/SaveMD.cpp
 	src/SaveZODS.cpp
 	src/SetMDUsingMask.cpp
 	src/SliceMD.cpp
 	src/SlicingAlgorithm.cpp
-	src/Stitch1DMD.cpp
 	src/ThresholdMD.cpp
 	src/TransformMD.cpp
 	src/UnaryOperationMD.cpp
@@ -103,13 +103,14 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/DllConfig.h
 	inc/MantidMDAlgorithms/EqualToMD.h
-	inc/MantidMDAlgorithms/ExponentialMD.h
 	inc/MantidMDAlgorithms/EvaluateMDFunction.h
+	inc/MantidMDAlgorithms/ExponentialMD.h
 	inc/MantidMDAlgorithms/FakeMDEventData.h
 	inc/MantidMDAlgorithms/FindPeaksMD.h
 	inc/MantidMDAlgorithms/GSLFunctions.h
 	inc/MantidMDAlgorithms/GreaterThanMD.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
+	inc/MantidMDAlgorithms/IntegrateFlux.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD2.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
@@ -145,13 +146,12 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h
 	inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
 	inc/MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h
-	inc/MantidMDAlgorithms/SXDMDNorm.h
+	inc/MantidMDAlgorithms/MDNormSXD.h
 	inc/MantidMDAlgorithms/SaveMD.h
 	inc/MantidMDAlgorithms/SaveZODS.h
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
 	inc/MantidMDAlgorithms/SliceMD.h
 	inc/MantidMDAlgorithms/SlicingAlgorithm.h
-	inc/MantidMDAlgorithms/Stitch1DMD.h
 	inc/MantidMDAlgorithms/ThresholdMD.h
 	inc/MantidMDAlgorithms/TransformMD.h
 	inc/MantidMDAlgorithms/UnaryOperationMD.h
@@ -186,13 +186,14 @@ set ( TEST_FILES
 	CreateMDWorkspaceTest.h
 	DivideMDTest.h
 	EqualToMDTest.h
-	ExponentialMDTest.h
 	EvaluateMDFunctionTest.h
+	ExponentialMDTest.h
 	FakeMDEventDataTest.h
 	FindPeaksMDTest.h
 	FitResolutionConvolvedModelTest.h
 	ForegroundModelTest.h
 	GreaterThanMDTest.h
+	IntegrateFluxTest.h
 	IntegratePeaksMD2Test.h
 	IntegratePeaksMDTest.h
 	InvalidParameterParserTest.h
@@ -215,14 +216,13 @@ set ( TEST_FILES
 	PowerMDTest.h
 	PreprocessDetectorsToMDTest.h
 	ResolutionConvolvedCrossSectionTest.h
-	SXDMDNormTest.h
+	MDNormSXDTest.h
 	SaveMDTest.h
 	SaveZODSTest.h
 	SetMDUsingMaskTest.h
 	SimulateResolutionConvolvedModelTest.h
 	SliceMDTest.h
 	SlicingAlgorithmTest.h
-	Stitch1DMDTest.h
 	Strontium122Test.h
 	ThresholdMDTest.h
 	TobyFitBMatrixTest.h

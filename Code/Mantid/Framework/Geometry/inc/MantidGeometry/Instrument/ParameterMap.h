@@ -10,7 +10,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Cache.h"
 
-#include <boost/unordered_map.hpp>
+#include <map>
 #include <vector>
 #include <typeinfo>
 
@@ -54,19 +54,19 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-   /// Parameter map iterator typedef
-   typedef boost::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator component_map_it;
-   typedef boost::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator component_map_cit;
+  /// Parameter map iterator typedef
+  typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator component_map_it;
+  typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator component_map_cit;
 
   class MANTID_GEOMETRY_DLL ParameterMap
   {
   public:
     /// Parameter map typedef
-    typedef boost::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
+    typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
     /// Parameter map iterator typedef
-    typedef boost::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator pmap_it;
+    typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator pmap_it;
     /// Parameter map iterator typedef
-    typedef boost::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_cit;
+    typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_cit;
     /// Default constructor
     ParameterMap();
     /// Returns true if the map is empty, false otherwise
@@ -265,6 +265,12 @@ namespace Geometry
     void saveNexus(::NeXus::File * file, const std::string & group) const;
     /// Copy pairs (oldComp->id,Parameter) to the m_map assigning the new newComp->id
     void copyFromParameterMap(const IComponent* oldComp,const IComponent* newComp, const ParameterMap *oldPMap);
+
+    /// Returns a list of all the parameter files loaded
+    const std::vector<std::string>& getParameterFilenames() const;
+    /// adds a parameter filename that has been loaded
+    void addParameterFilename(const std::string& filename);
+
     /// access iterators. begin;
     pmap_it begin(){return m_map.begin();}
     pmap_cit begin()const{return m_map.begin();}
@@ -280,6 +286,8 @@ namespace Geometry
     ///const version of the internal function to get position of the parameter in the parameter map
     component_map_cit positionOf(const IComponent* comp,const char *name, const char * type) const;
 
+    /// internal list of parameter files loaded
+    std::vector<std::string> m_parameterFileNames;
 
     /// internal parameter map instance
     pmap m_map;
