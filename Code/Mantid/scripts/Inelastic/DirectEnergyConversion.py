@@ -719,54 +719,21 @@ class DirectEnergyConversion(object):
           wksp_out = prop_man.get_sample_ws_name();
 
 
-      # we may want to run absolute units normalization and this function has been called with monovan run or helper procedure
-      if prop_man.monovan_run != None :
-         # check if mono-vanadium is provided as multiple files list or just put in brackets occasionally
-          prop_man.log("****************************************************************",'notice');
-          prop_man.log('*** Output will be in absolute units of mb/str/mev/fu','notice')
-          non_changed = prop_man.check_monovan_par_changed();
-          if len(non_changed) > 0:
-              for prop in non_changed:
-                 value = getattr(prop_man,prop)
-                 message = '\n***WARNING!: Absolute units reduction parameter : {0} has its default value: {1}'+\
-                           '\n             This may need to change for correct absolute units reduction\n'
-
-                 prop_man.log(message.format(prop,value),'warning')
-
       # Process old legacy parameters which are easy to re-define in dgreduce rather then transfer through Mantid
       #TODO (verify)
       #program_args = process_legacy_parameters(**kwargs)
+
+
+      # inform user on what parameters have changed 
+      prop_man.log_changed_values('notice');
+      #process complex parameters
+
       start_time=time.time()
+      # defaults can be None too, but can be a file
 
-
-      # inform user about changed parameters
-      prop_man.log("*** Provisional Incident energy: {0:>12.3f} mEv".format(ei_guess),'notice')
-      prop_man.log("****************************************************************",'notice');
-      changed_Keys= prop_man.getChangedProperties();
-      for key in changed_Keys:
-          val = getattr(prop_man,key);
-          prop_man.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val),'notice')
-
-
-      save_dir = config.getString('defaultsave.directory')
-      prop_man.log("****************************************************************",'notice');
-      if prop_man.monovan_run != None and not('van_mass' in changed_Keys):
-         prop_man.log("*** Monochromatic vanadium mass used : {0} ".format(prop_man.van_mass),'notice')
-      prop_man.log("*** By default results are saved into: {0}".format(save_dir),'notice');
-      prop_man.log("****************************************************************",'notice');
-
-       #process complex parameters
-
-
-       # defaults can be None too, but can be a file
-      if  prop_man.map_file == None:
-            prop_man.log('*** one2one map selected','notice')
-
-    # check if reducer can find all non-run files necessary for the reduction before starting long run.
+     # check if reducer can find all non-run files necessary for the reduction before starting long run.
       #TODO:
       # Reducer.check_necessary_files(monovan_run);
-
-      prop_man.log("*** Output will be normalized to {0}".format(prop_man.normalise_method),'notice');
 
       # TODO: --check out if internal summation works
       # Here was summation in dgreduce. 
@@ -796,7 +763,7 @@ class DirectEnergyConversion(object):
       if not masks_done:
         prop_man.log("########### Run diagnose for sample run ##############################",'notice');
         prop_man.log("########### Run diagnose for monochromatic vanadium run ##############",'notice');
-        masking = self.diagnose(wb_run,prop_man.mask_run,
+        masking = self.diagnose(prop_man.wb_run,prop_man.mask_run,
                                     second_white=None,print_results=True)
         header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
 
@@ -807,7 +774,7 @@ class DirectEnergyConversion(object):
                 if prop_man.use_sam_msk_on_monovan == True:
                     prop_man.log('  Applying sample run mask to mono van')
                 else:
-                    if not prop_man.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better soulution for that.
+                    if not prop_man.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better solution for that.
                         prop_man.log("########### Run diagnose for monochromatic vanadium run ##############",'notice');
 
                         masking2 = self.diagnose(prop_man.wb_for_monovan_run,prop_man.monovan_run,
@@ -1274,7 +1241,15 @@ class DirectEnergyConversion(object):
         """
         Constructor
         """
-        self.initialise(instr_name);
+        # Internal properties and keys
+        self._keep_wb_workspace = False;
+        self._do_ISIS_normalization = True;
+        self.spectra_masks = None;
+
+        if instr_name:
+            self.initialise(instr_name);
+        else:
+            self._propMan = None;
 
  
     def initialise(self, instr,reload_instrument=False):
@@ -1290,11 +1265,16 @@ class DirectEnergyConversion(object):
         # Instrument and default parameter setup
         # formats available for saving. As the reducer has to have a method to process one of this, it is private property
         if not hasattr(self,'_propMan') or self._propMan is None:
-            self._propMan = DirectPropertyManager(instr);
+            if isinstance(instr,DirectPropertyManager):
+                self._propMan  = instr;
+            else:
+                self._propMan = DirectPropertyManager(instr);
         else:
             old_name = self._propMan.instrument.getName();
             if isinstance(instr,geometry._geometry.Instrument):
                 new_name = self._propMan.instrument.getName();
+            elif isinstance(instr,DirectPropertyManager):
+                new_name = instr.instr_name;
             else:
                 new_name = instr
             #end if

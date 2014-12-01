@@ -1,4 +1,6 @@
-""" File contains number of various classes defining interface for Direct inelastic reduction  """
+""" File contains classes defining the interface for Direct inelastic reduction with properties 
+    present in Instrument_Properties.xml file
+"""
 
 from mantid.simpleapi import *
 from mantid import api
@@ -209,7 +211,7 @@ class SaveFormat(object):
             if not(value in SaveFormat.save_formats):
                 instance.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur for this format")
                 return 
-        elif isinstance(value,list):
+        elif isinstance(value,list) or isinstance(value,set):
             # set single default save format recursively
              for val in value:
                     self.__set__(instance,val);
@@ -313,6 +315,7 @@ class DirectPropertyManager(DirectReductionProperties):
         #
         # define private properties served the class
         private_properties = {'descriptors':[],'subst_dict':{},'prop_allowed_values':{},'changed_properties':set(),
+        'advanced_properties':set(),
         'file_properties':[],'abs_norm_file_properties':[]};
         # place these properties to __dict__  with proper decoration
         self._set_private_properties(private_properties);
@@ -424,6 +427,8 @@ class DirectPropertyManager(DirectReductionProperties):
 
         # record changes in the property
         self.__changed_properties.add(name);
+        if self.record_advanced_properties:
+           self.__advanced_properties.add(name);
 
    # ----------------------------
     def __getattr__(self,name):
@@ -470,6 +475,13 @@ class DirectPropertyManager(DirectReductionProperties):
     def getChangedProperties(self):
         """ method returns set of the properties changed from defaults """
         return self.__dict__[self._class_wrapper+'changed_properties'];
+    def getChangedAdvancedProperties(self):
+        """ method returns advanced properties, changed from defaults 
+          and recorded when record_advanced_properties was set to True
+
+          TODO: deal with this recording better. 
+          """ 
+        return self.__dict__[self._class_wrapper+'advanced_properties'];
 
     @property
     def relocate_dets(self) :
@@ -490,8 +502,6 @@ class DirectPropertyManager(DirectReductionProperties):
     def set_input_parameters(self,**kwargs):
         """ Set input properties from a dictionary of parameters
 
-            Auxiliary method used in old interface.
-            Returns the list of changed properties.
         """
 
         for par_name,value in kwargs.items() :
@@ -520,17 +530,6 @@ class DirectPropertyManager(DirectReductionProperties):
   
         return result;
 
-    def check_monovan_par_changed(self):
-        """ method verifies, if properties necessary for monovanadium reduction have indeed been changed  from defaults """
-
-        # list of the parameters which should usually be changed by user and if not, user should be warn about it.
-        momovan_properties=['sample_mass','sample_rmm','monovan_run']
-        changed_prop = self.getChangedProperties();
-        non_changed = [];
-        for property in momovan_properties:
-            if not property in changed_prop:
-                non_changed.append(property)
-        return non_changed;
 
     # TODO: finish refactoring this. 
     def init_idf_params(self, reinitialize_parameters=False):
@@ -591,6 +590,95 @@ class DirectPropertyManager(DirectReductionProperties):
 
         if  base_file_missing or abs_file_missing:
              raise RuntimeError(" Files needed for the run are missing ")
+    #
+    def _check_monovan_par_changed(self):
+        """ method verifies, if properties necessary for monovanadium reduction have indeed been changed  from defaults """
+
+        # list of the parameters which should usually be changed by user and if not, user should be warn about it.
+        momovan_properties=['sample_mass','sample_rmm','monovan_run']
+        changed_prop = self.getChangedProperties();
+        non_changed = [];
+        for property in momovan_properties:
+            if not property in changed_prop:
+                non_changed.append(property)
+        return non_changed;
+
+    #
+    def log_changed_values(self,log_level='notice'):
+      """ inform user about changed parameters and about the parameters that should be changed but have not
+      
+        This method is abstract method of DirectReductionProperties but is fully defined in 
+        DirectPropertyManager
+      """
+
+      # we may want to run absolute units normalization and this function has been called with monovan run or helper procedure
+      if self.monovan_run != None :
+         # check if mono-vanadium is provided as multiple files list or just put in brackets occasionally
+          self.log("****************************************************************",'notice');
+          self.log('*** Output will be in absolute units of mb/str/mev/fu','notice')
+          non_changed = self._check_monovan_par_changed();
+          if len(non_changed) > 0:
+              for prop in non_changed:
+                 value = getattr(self,prop)
+                 message = '\n***WARNING!: Absolute units reduction parameter : {0} has its default value: {1}'+\
+                           '\n             This may need to change for correct absolute units reduction\n'
+
+                 self.log(message.format(prop,value),'warning')
+
+
+      # now let's report on normal run.
+      self.log("*** Provisional Incident energy: {0:>12.3f} mEv".format(self.incident_energy),log_level)
+      self.log("****************************************************************",log_level);
+      changed_Keys= self.getChangedProperties();
+      for key in changed_Keys:
+          val = getattr(self,key);
+          self.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val),log_level)
+
+
+      save_dir = config.getString('defaultsave.directory')
+      self.log("****************************************************************",log_level);
+      if self.monovan_run != None and not('van_mass' in changed_Keys):                           # This output is 
+         self.log("*** Monochromatic vanadium mass used : {0} ".format(self.van_mass),log_level) # Adroja request from may 2014
+      #
+      self.log("*** By default results are saved into: {0}".format(save_dir),log_level);
+      self.log("*** Output will be normalized to {0}".format(self.normalise_method),log_level);
+      if  self.map_file == None:
+            self.log('*** one2one map selected',log_level)
+      self.log("****************************************************************",log_level);
+
+    def export_changed_values(self,FileName='reduce_vars.py'):
+        """ Method to write changed simple and advanced properties into dictionary, to process by 
+            web reduction interface
+        """
+        changed_Keys= self.getChangedProperties();
+        advancedKeys= self.getChangedAdvancedProperties();
+       
+        f=open(FileName,'w')
+        f.write("standard_vars = {\n")
+        str_wrapper = '         '
+        for key in changed_Keys:
+            if not key in advancedKeys:
+                  val = getattr(self,key);
+                  if isinstance(val,str):
+                      row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
+                  else:
+                      row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
+                  f.write(row);
+                  str_wrapper=',\n         '
+        f.write("}\nadvanced_vars={\n")
+
+        str_wrapper='         '
+        for key in advancedKeys:
+                  val = getattr(self,key);
+                  if isinstance(val,str):
+                      row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
+                  else:
+                      row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
+                  f.write(row);
+                  str_wrapper=',\n        '
+        f.write("}\n")
+        f.close();
+
 
 
 
