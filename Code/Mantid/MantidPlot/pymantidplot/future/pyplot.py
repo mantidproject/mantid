@@ -313,7 +313,7 @@ class Line2D():
         self._index = index   # will (may) be needed to change properties of this line
         self._xdata = x_data
         self._ydata = y_data
-        self._fig = None
+        self._fig = fig
 
     def get_xdata(self):
         return self._xdata
@@ -323,6 +323,130 @@ class Line2D():
 
     def figure(self):
         return self._fig
+
+class Axes():
+    """
+    A very minimal replica of matplotlib.axes.Axes. The true Axes is a
+    sublcass of matplotlib.artist and provides tons of functionality.
+    At the moment this just provides a few set methods for properties
+    such as labels and axis limits.
+    """
+
+    """Many plot manipulation functions that are provided in
+    matplolib through Axes objects, for example to manipulate the x/y
+    ticks, are not currently supported. Objects of this class hold
+    their Figure object.  Presently every figure has a single Axes
+    object, and there is no support for multiple axes (as in
+    fig.add_axes() or fix.axes()).
+    """
+
+    def __init__(self, fig, xscale='linear', yscale='linear'):
+        self._fig = fig
+        # state of x and y scale kept here. C++ Graph.isLog() not yet exposed
+        self._xscale = xscale
+        self._yscale = yscale
+
+    def axis(self, lims):
+        """
+        Set the boundaries or limits of the x and y axes
+
+        @param lims :: list or vector specifying min x, max x, min y, max y
+        """
+        l = __last_fig()._graph.activeLayer()
+        if 4 != len(lims):
+            raise ValueError("Error: 4 real values are required for the x and y axes limits")
+        l.setScale(*lims)
+
+    def set_xlabel(self, lbl):
+        """
+        Set the label or title of the x axis
+
+        @param lbl :: x axis lbl
+        """
+        l = self.get_figure()._graph.activeLayer()
+        l.setXTitle(lbl)
+
+    def set_ylabel(self, lbl):
+        """
+        Set the label or title of the y axis
+
+        @param lbl :: y axis lbl
+        """
+        l = self.get_figure()._graph.activeLayer()
+        l.setYTitle(lbl)
+
+    def set_xlim(self, xmin, xmax):
+        """
+        Set the boundaries of the x axis
+
+        @param xmin :: minimum value
+        @param xmax :: maximum value
+        """
+        l = self.get_figure()._graph.activeLayer()
+        l.setAxisScale(2, xmin, xmax)
+
+    def set_ylim(self, ymin, ymax):
+        """
+        Set the boundaries of the y axis
+
+        @param ymin :: minimum value
+        @param ymax :: maximum value
+        """
+        l = self.get_figure()._graph.activeLayer()
+        l.setAxisScale(0, ymin, ymax)
+
+    def set_xscale(self, scale_str):
+        """
+        Set the type of scale of the x axis
+
+        @param scale_str :: either 'linear' for linear scale or 'log' for logarithmic scale
+        """
+        if 'log' != scale_str and 'linear' != scale_str:
+            raise ValueError("You need to specify either 'log' or 'linear' type of scale for the x axis." )
+
+        l = self.get_figure()._graph.activeLayer()
+        if scale_str == 'log':
+            if 'log' == self._yscale:
+                l.logLogAxes()
+            else:
+                l.logXLinY()
+        elif scale_str == 'linear':
+            if 'log' == self._yscale:
+                l.logYlinX()
+            else:
+                l.linearAxes()
+        self._xscale = scale_str
+
+    def set_yscale(self, scale_str):
+        """
+        Set the type of scale of the y axis
+
+        @param scale_str :: either 'linear' for linear scale or 'log' for logarithmic scale
+        """
+        if 'log' != scale_str and 'linear' != scale_str:
+            raise ValueError("You need to specify either 'log' or 'linear' type of scale for the y axis." )
+
+        l = self.get_figure()._graph.activeLayer()
+        if scale_str == 'log':
+            if 'log' == self._xscale:
+                l.logLogAxes()
+            else:
+                l.logYlinX()
+        elif scale_str == 'linear':
+            if 'log' == self._xscale:
+                l.logXlinY()
+            else:
+                l.linearAxes()
+        self._xscale = scale_str
+
+    def get_figure(self, ):
+        """
+        Get the figure where this Axes object is included
+
+        Returns :: figure object for the figure that contains this Axes
+        """
+        return self._fig
+
 
 class Figure():
     """
@@ -350,12 +474,15 @@ class Figure():
                 __figures[num] = self
                 if num > __figures_seq:
                     __figures_seq = num
+                self._axes = Axes(self)
             else:
                 if None == fig._graph._getHeldObject():
                     # has been destroyed!
                     self._graph = Figure.__empty_graph()
+                    self._axes = Axes(self)
                 else:
                     self._graph = fig._graph
+                    self._axes = fig._axes
         elif isinstance(num, mantidplot.proxies.Graph):
             if None == num._getHeldObject():
                 # deleted Graph!
@@ -364,6 +491,7 @@ class Figure():
                 self._graph = num
             num = Figure.__make_new_fig_number()
             Figure.__figures[num] = self
+            self._axes = Axes(self)
         else:
             raise ValueError("To create a Figure you need to specify a figure number or a Graph object." )
 
@@ -503,7 +631,7 @@ def __is_data_pair(a, b):
 
         Returns :: True if the arguments can be used to plot something is an integer, or a python or numpy list
     """
-    res = (__is_array(a) and __is_array(a)) or (__is_valid_workspaces_arg(a) and __is_array_or_int(b))
+    res = (__is_array(a) and __is_array(b)) or (__is_valid_workspaces_arg(a) and __is_array_or_int(b))
     return res
 
 def __is_workspace(arg):
@@ -1163,7 +1291,7 @@ def ylabel(lbl):
 
 def title(title):
     """
-    Set title of active plot
+    Set title of the active plot
 
     @param title :: title string
     """
@@ -1172,7 +1300,7 @@ def title(title):
 
 def axis(lims):
     """
-    Set the boundaries of the x and y axes
+    Set the boundaries or limits of the x and y axes
 
     @param lims :: list or vector specifying min x, max x, min y, max y
     """
@@ -1181,11 +1309,29 @@ def axis(lims):
         raise ValueError("Error: 4 real values are required for the x and y axes limits")
     l.setScale(*lims)
 
+def yscale(scale_str):
+    """
+    Set the type of scale of the y axis
+
+    @param scale_str :: either 'linear' for linear scale or 'log' for logarithmic scale
+    """
+    ax = __last_fig()._axes
+    ax.set_yscale(scale_str)
+
+def xscale(scale_str):
+    """
+    Set the type of scale of the x axis
+
+    @param scale_str :: either 'linear' for linear scale or 'log' for logarithmic scale
+    """
+    ax = __last_fig()._axes
+    ax.set_xscale(scale_str)
+
 def grid(opt='on'):
     """
-    Set title of active plot
+    Enable a grid on the active plot (horizontal and vertical)
 
-    @param title :: title string
+    @param title :: 'on' to enable
     """
     l = __last_fig()._graph.activeLayer()
     if None == opt or 'on' == opt:
