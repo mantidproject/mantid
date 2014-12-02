@@ -953,8 +953,14 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
                      EMode='Indirect', EFixed=efixed)
         ConvertUnits(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS, Target='DeltaE',
                      EMode='Indirect', EFixed=efixed)
-        ConvertSpectrumAxis(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw',
-                            Target='ElasticQ', EMode='Indirect', EFixed=efixed)
+        # Convert the spectrum axis to Q if not already in it
+        sample_v_unit = mtd[CorrectedWS].getAxis(1).getUnit().unitID()
+        logger.debug('COrrected workspace vertical axis is in %s' % sample_v_unit)
+        if sample_v_unit != 'MomentumTransfer':
+            ConvertSpectrumAxis(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw',
+                                Target='ElasticQ', EMode='Indirect', EFixed=efixed)
+        else:
+            CloneWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS + '_rqw')
 
     RenameWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_red')
 
