@@ -13,6 +13,7 @@ namespace Mantid
 namespace Geometry
 {
 
+/// Helper class for subscribing space groups.
 struct MANTID_GEOMETRY_DLL SpaceGroupSubscriptionHelper
 {
     enum GenerationMethod {
@@ -96,6 +97,7 @@ protected:
     Group_const_sptr generateValidGeneratedGroup(const std::string &hmSymbol, const std::string &generators) const;
     Group_const_sptr generateValidTabulatedGroup(const std::string &generators) const;
 
+    SpaceGroup_const_sptr getPrototype(const std::string &hmSymbol);
     void registerValidPrototype(const SpaceGroup_const_sptr &prototype);
 
     std::string getCenteringString(const std::string &hmSymbol) const;

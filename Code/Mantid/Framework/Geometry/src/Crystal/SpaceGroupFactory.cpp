@@ -22,15 +22,7 @@ SpaceGroup_const_sptr SpaceGroupFactoryImpl::createSpaceGroup(const std::string 
         throw std::invalid_argument("Space group with symbol '" + hmSymbol + "' is not registered.");
     }
 
-    SpaceGroup_const_sptr prototype = m_prototypes.find(hmSymbol)->second;
-
-    if(!prototype) {
-        prototype = generateValidPrototype(hmSymbol);
-
-        registerValidPrototype(prototype);
-    }
-
-    return constructFromPrototype(prototype);
+    return constructFromPrototype(getPrototype(hmSymbol));
 }
 
 /// Returns true if space group with given symbol is subscribed.
@@ -235,6 +227,20 @@ Group_const_sptr SpaceGroupFactoryImpl::generateValidGeneratedGroup(const std::s
 Group_const_sptr SpaceGroupFactoryImpl::generateValidTabulatedGroup(const std::string &generators) const
 {
     return getTabulatedGroup(generators);
+}
+
+/// Returns a prototype object for the requested space group and registers it into the factory if it has not been registered before.
+SpaceGroup_const_sptr SpaceGroupFactoryImpl::getPrototype(const std::string &hmSymbol)
+{
+    SpaceGroup_const_sptr prototype = m_prototypes.find(hmSymbol)->second;
+
+    if(!prototype) {
+        prototype = generateValidPrototype(hmSymbol);
+
+        registerValidPrototype(prototype);
+    }
+
+    return prototype;
 }
 
 /// Store prototype in the internal prototype-storage, replace any previously stored prototype with the same HM-symbol.
