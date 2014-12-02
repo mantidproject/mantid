@@ -126,11 +126,11 @@ class DirectReductionProperties(object):
 
     # logging levels available for user
     log_options = \
-        { "error" :       lambda (msg):   logger.error(msg),
-          "warning" :     lambda (msg):   logger.warning(msg),
-          "notice" :      lambda (msg):   logger.notice(msg),
-          "information" : lambda (msg):   logger.information(msg),
-          "debug" :       lambda (msg):   logger.debug(msg)}
+        { "error" :       (1,lambda (msg):   logger.error(msg)),
+          "warning" :     (2,lambda (msg):   logger.warning(msg)),
+          "notice" :      (3,lambda (msg):   logger.notice(msg)),
+          "information" : (4,lambda (msg):   logger.information(msg)),
+          "debug" :       (5,lambda (msg):   logger.debug(msg))}
 
 
     def __init__(self,Instrument,run_workspace=None): 
@@ -152,7 +152,8 @@ class DirectReductionProperties(object):
 
         # Helper properties, defining logging options 
         object.__setattr__(self,'_log_level','notice');
-        object.__setattr__(self,'_log_to_mantid',True);
+        object.__setattr__(self,'_log_to_mantid',False);
+        object.__setattr__(self,'_current_log_level',3);
 
         object.__setattr__(self,'_psi',float('NaN'));
         object.__setattr__(self,'_second_white',None);
@@ -362,10 +363,13 @@ class DirectReductionProperties(object):
     def log(self, msg,level="notice"):
         """Send a log message to the location defined
         """
+        lev,logger = DirectReductionProperties.log_options[level]
         if self._log_to_mantid:
-            DirectReductionProperties.log_options[level](msg)
+            logger(msg)
         else:
-            print msg
+        # TODO: reconcile this with Mantid. 
+           if lev<=self._current_log_level:
+              print msg
 
 
 

@@ -291,7 +291,7 @@ class DirectEnergyConversion(object):
 
         # Units conversion
         white_ws = ConvertUnits(InputWorkspace=white_ws,OutputWorkspace=whitews_name, Target= "Energy", AlignBins=0)
-        propman.log("do_white: finished converting Units",'notice')
+        propman.log("do_white: finished converting Units",'information')
         # This both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
         low,upp=propman.wb_integr_range;
         if low > upp:
@@ -845,20 +845,21 @@ class DirectEnergyConversion(object):
         prop_man = self.prop_man;
         if prop_man.mono_correction_factor:
             absnorm_factor=float(prop_man.mono_correction_factor)
-            prop_man.log('##### Using supplied workspace correction factor                          ######','information')
-            prop_man.log('      Value : {0}'.format(absnorm_factor),'information')
-
+            prop_man.log('##### Using supplied workspace correction factor                          ######','notice')
+            abs_norm_factor_is='provided'
         else:
-            prop_man.log('##### Evaluate the integral from the monovan run and calculate the correction factor ######','information')
-            prop_man.log('      Using absolute units vanadium integration range : '+str(prop_man.monovan_integr_range),'information')
+            mvir=prop_man.monovan_integr_range;
+            prop_man.log('##### Evaluate the integral from the monovan run and calculate the correction factor ######','notice')
+            prop_man.log('      Using absolute units vanadium integration range : [{0:8f}:{1:8f}]       ######'.format(mvir[0],mvir[1]),'notice')
+            abs_norm_factor_is = 'calculated'
         #
             result_ws_name = common.create_resultname(monovan_run,prop_man.instr_name)
-            # check the case when the sample is monovan itself (for testing purposes)
+            # check the case when the sample is monovanadium itself (for testing purposes)
             if result_ws_name == deltaE_wkspace_sample.name() :
                 deltaE_wkspace_monovan = CloneWorkspace(InputWorkspace=deltaE_wkspace_sample,OutputWorkspace=result_ws_name+'-monovan');
                 deltaE_wkspace_monovan=self.remap(deltaE_wkspace_monovan,None,prop_man.monovan_mapfile)
             else:
-                # convert to monovan to energy
+                # convert to monovanadium to energy
                 map_file              = prop_man.map_file;
                 self.prop_man.map_file = prop_man.monovan_mapfile;
                 deltaE_wkspace_monovan = self.convert_to_energy(monovan_run, ei_guess, wb_mono)
@@ -870,10 +871,11 @@ class DirectEnergyConversion(object):
 
             (anf_LibISIS,anf_SS2,anf_Puas,anf_TGP) = self.get_abs_normalization_factor(deltaE_wkspace_monovan.getName(),ei_monovan)
 
-            prop_man.log('Absolute correction factor S^2: {0:10.4f} LibISIS: {1:10.4f} Poisson: {2:10.4f}  TGP: {3:10.4f} '.format(anf_LibISIS,anf_SS2,anf_Puas,anf_TGP))
+            prop_man.log('*** Absolute correction factor(s): S^2: {0:10.4f}\n*** LibISIS: {1:10.4f} Poisson: {2:10.4f}  TGP: {3:10.4f} '\
+                .format(anf_LibISIS,anf_SS2,anf_Puas,anf_TGP),'notice')
             absnorm_factor = anf_TGP;
         #end
-
+        prop_man.log('*** Using {0} value : {1} of absolute units correction factor'.format(abs_norm_factor_is,absnorm_factor),'notice')
         deltaE_wkspace_sample = deltaE_wkspace_sample/absnorm_factor;
 
 
