@@ -318,6 +318,12 @@ namespace Mantid
       const auto nIpa = (AOperations + IpaPlusIapMinusIppMinusIaa) / D;
       const auto nIap = (negateAOperations + IpaPlusIapMinusIppMinusIaa) / D;
 
+      //Preserve the history of the inside workspaces
+      nIpp->history().addHistory(Ipp->getHistory());
+      nIaa->history().addHistory(Iaa->getHistory());
+      nIpa->history().addHistory(Ipa->getHistory());
+      nIap->history().addHistory(Iap->getHistory());
+
       WorkspaceGroup_sptr dataOut = boost::make_shared<WorkspaceGroup>();
       dataOut->addWorkspace(nIpp);
       dataOut->addWorkspace(nIaa);
@@ -345,6 +351,10 @@ namespace Mantid
 
       const auto nIp = (Ip * (rho * pp + 1.0) + Ia * (pp - 1.0)) / D;
       const auto nIa = (Ip * (rho * pp - 1.0) + Ia * (pp + 1.0)) / D;
+
+      //Preserve the history of the inside workspaces
+      nIp->history().addHistory(Ip->getHistory());
+      nIa->history().addHistory(Ia->getHistory());
 
       WorkspaceGroup_sptr dataOut = boost::make_shared<WorkspaceGroup>();
       dataOut->addWorkspace(nIp);
