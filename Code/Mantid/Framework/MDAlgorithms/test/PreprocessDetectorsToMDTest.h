@@ -61,7 +61,7 @@ void testPreprocessDetectors()
 
   size_t nVal = tws->rowCount();
 
-  const std::vector<size_t> & spec2detMap = tws->getColVector<size_t>("spec2detMap");
+  const std::vector<size_t> & spec2detMap = tws->getColVector<uint64_t>("spec2detMap");
   for(size_t i=0;i<nVal;i++)
   {
     TS_ASSERT_EQUALS(i,spec2detMap[i]);
@@ -90,9 +90,9 @@ void testFakeDetectors()
 
   size_t nVal = tws->rowCount();
 
-  auto & spec2detMap = tws->getColVector<size_t>("spec2detMap");
+  auto & spec2detMap = tws->getColVector<uint64_t>("spec2detMap");
   auto & detId       = tws->getColVector<int32_t>("DetectorID");
-  auto &detIDMap     = tws->getColVector<size_t>("detIDMap");
+  auto &detIDMap     = tws->getColVector<uint64_t>("detIDMap");
   auto &L2         = tws->getColVector<double>("L2");
   auto &TwoTheta   = tws->getColVector<double>("TwoTheta");
   auto &Azimuthal  = tws->getColVector<double>("Azimuthal");

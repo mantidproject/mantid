@@ -1282,9 +1282,9 @@ namespace WorkspaceCreationHelper
     targWS->logs()->addProperty<double>("Ei", Ei, true); //"Incident energy for Direct or Analysis energy for indirect instrument");
 
     // get access to the workspace memory
-    auto &sp2detMap = targWS->getColVector<size_t>("spec2detMap");
+    auto &sp2detMap = targWS->getColVector<uint64_t>("spec2detMap");
     auto &detId = targWS->getColVector<int32_t>("DetectorID");
-    auto &detIDMap = targWS->getColVector<size_t>("detIDMap");
+    auto &detIDMap = targWS->getColVector<uint64_t>("detIDMap");
     auto &L2 = targWS->getColVector<double>("L2");
     auto &TwoTheta = targWS->getColVector<double>("TwoTheta");
     auto &Azimuthal = targWS->getColVector<double>("Azimuthal");
@@ -1296,9 +1296,9 @@ namespace WorkspaceCreationHelper
     uint32_t liveDetectorsCount(0);
     for (size_t i = 0; i < nHist; i++)
     {
-      sp2detMap[i] = std::numeric_limits<size_t>::quiet_NaN();
+      sp2detMap[i] = std::numeric_limits<uint64_t>::quiet_NaN();
       detId[i] = std::numeric_limits<int32_t>::quiet_NaN();
-      detIDMap[i] = std::numeric_limits<size_t>::quiet_NaN();
+      detIDMap[i] = std::numeric_limits<uint64_t>::quiet_NaN();
       L2[i] = std::numeric_limits<double>::quiet_NaN();
       TwoTheta[i] = std::numeric_limits<double>::quiet_NaN();
       Azimuthal[i] = std::numeric_limits<double>::quiet_NaN();

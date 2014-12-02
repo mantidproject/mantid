@@ -153,7 +153,7 @@ namespace Mantid
 
       // 
       long nHist =static_cast<long>(inWS->getNumberHistograms());
-      auto detIDMap = WSDescription.m_PreprDetTable->getColVector<size_t>("detIDMap");
+      auto detIDMap = WSDescription.m_PreprDetTable->getColVector<uint64_t>("detIDMap");
 
       // vector to place transformed coordinates;
       std::vector<coord_t> locCoord(nDims);

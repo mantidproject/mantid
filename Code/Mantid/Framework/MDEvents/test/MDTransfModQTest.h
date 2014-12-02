@@ -84,7 +84,7 @@ public:
     double signal(1),errorSq(1);
     unsigned int nDims = WSDescr.nDimensions();
 
-    auto detIDMap = WSDescr.m_PreprDetTable->getColVector<size_t>("detIDMap");
+    auto detIDMap = WSDescr.m_PreprDetTable->getColVector<uint64_t>("detIDMap");
  
     std::vector<coord_t> locCoord(nDims);
     std::vector<coord_t> minCoord(nDims,FLT_MAX);
