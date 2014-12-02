@@ -9,6 +9,12 @@
 #include <QStringList>
 
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("IndirectTransmissionCalc");
+}
 
 namespace MantidQt
 {
@@ -19,10 +25,10 @@ namespace MantidQt
     {
       m_uiForm.setupUi(parent);
 
-      connect(m_batchAlgoRunner, SIGNAL(batchCOmplete(bool)), this, SLOT(algorithmComplete(bool)));
+      connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
       connect(m_uiForm.cbInstrument, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(instrumentSelected(const QString&)));
-      connect(m_uiForm.cbAnalyser, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(analyserSelected(const QString&)));
+      connect(m_uiForm.cbAnalyser, SIGNAL(currentIndexChanged(int)), this, SLOT(analyserSelected(int)));
     }
 
     /*
@@ -30,6 +36,7 @@ namespace MantidQt
      */
     void IndirectTransmissionCalc::setup()
     {
+      instrumentSelected(m_uiForm.cbInstrument->currentText());
     }
 
     /**
@@ -58,6 +65,8 @@ namespace MantidQt
      */
     void IndirectTransmissionCalc::algorithmComplete(bool error)
     {
+      enableInstrumentControls(true);
+
       if(error)
         return;
 
@@ -84,7 +93,97 @@ namespace MantidQt
      */
     void IndirectTransmissionCalc::instrumentSelected(const QString& instrumentName)
     {
-      // TODO: Update analyser and reflection list
+      // Do not try to load the same instrument again
+      if(instrumentName == m_instrument)
+        return;
+
+      // Disable the instrument controls while the instrument is being loaded
+      enableInstrumentControls(false);
+
+      // Remove the old empty instrument workspace if it is there
+      std::string wsName = "__empty_" + m_instrument.toStdString();
+      Mantid::API::AnalysisDataServiceImpl& dataStore = Mantid::API::AnalysisDataService::Instance();
+      if(dataStore.doesExist(wsName))
+        dataStore.remove(wsName);
+
+      // Record the current instrument
+      m_instrument = instrumentName;
+      wsName = "__empty_" + m_instrument.toStdString();
+
+      // Get the IDF file path form experiment info
+      ExperimentInfo expInfo;
+      std::string instFilename = expInfo.getInstrumentFilename(instrumentName.toStdString());
+
+      // Load the instrument
+      IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+      loadAlg->initialize();
+      loadAlg->setProperty("Filename", instFilename);
+      loadAlg->setProperty("OutputWorkspace", wsName);
+
+      // Connect the completion signal to the instrument loading complete function
+      disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+      connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));
+
+      // Run the algorithm async
+      runAlgorithm(loadAlg);
+    }
+
+    void IndirectTransmissionCalc::instrumentLoadingDone(bool error)
+    {
+      // Switch the completion signal back to the original slot
+      connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+      disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));
+
+      if(error)
+      {
+        g_log.error("Algorithm error when loading instrument");
+        enableInstrumentControls(true);
+        return;
+      }
+
+      std::string wsName = "__empty_" + m_instrument.toStdString();
+      AnalysisDataServiceImpl& dataStore = AnalysisDataService::Instance();
+      if(!dataStore.doesExist(wsName))
+      {
+        g_log.error("Instrument workspace was not found in ADS");
+        enableInstrumentControls(true);
+        return;
+      }
+
+      MatrixWorkspace_const_sptr instWorkspace = dataStore.retrieveWS<MatrixWorkspace>(wsName);
+      Instrument_const_sptr instrument = instWorkspace->getInstrument();
+
+      m_uiForm.cbAnalyser->clear();
+
+      std::vector<std::string> analysers;
+      boost::split(analysers, instrument->getStringParameter("analysers")[0], boost::is_any_of(","));
+
+      for(auto it = analysers.begin(); it != analysers.end(); ++it)
+      {
+        std::string analyser = *it;
+        std::string ipfReflections = instrument->getStringParameter("refl-" + analyser)[0];
+
+        std::vector<std::string> reflections;
+        boost::split(reflections, ipfReflections, boost::is_any_of(","), boost::token_compress_on);
+
+        if(analyser != "diffraction") // Do not put diffraction into the analyser list
+        {
+          if(reflections.size() > 0)
+          {
+            QStringList reflectionsList;
+            for(auto reflIt = reflections.begin(); reflIt != reflections.end(); ++reflIt)
+              reflectionsList.push_back(QString::fromStdString(*reflIt));
+            QVariant data = QVariant(reflectionsList);
+            m_uiForm.cbAnalyser->addItem(QString::fromStdString(analyser), data);
+          }
+          else
+          {
+            m_uiForm.cbAnalyser->addItem(QString::fromStdString(analyser));
+          }
+        }
+      }
+
+      analyserSelected(m_uiForm.cbAnalyser->currentIndex());
     }
 
     /**
@@ -92,11 +191,33 @@ namespace MantidQt
      *
      * Populates the reflection list.
      *
-     * @param analyserName Name of selected analyser
+     * @param index Index of the selected analyser
      */
-    void IndirectTransmissionCalc::analyserSelected(const QString& analyserName)
+    void IndirectTransmissionCalc::analyserSelected(int index)
     {
-      // TODO: Update reflection list
+      // Populate Reflection combobox with correct values for Analyser selected.
+      m_uiForm.cbReflection->clear();
+
+      QVariant currentData = m_uiForm.cbAnalyser->itemData(index);
+      QStringList reflections = currentData.toStringList();
+      for ( int i = 0; i < reflections.count(); i++ )
+      {
+        m_uiForm.cbReflection->addItem(reflections[i]);
+      }
+
+      enableInstrumentControls(true);
+    }
+
+    /**
+     * Enable or disable the instrument setup controls.
+     *
+     * @param If the controls should be enabled
+     */
+    void IndirectTransmissionCalc::enableInstrumentControls(bool enabled)
+    {
+      m_uiForm.cbInstrument->setEnabled(enabled);
+      m_uiForm.cbAnalyser->setEnabled(enabled);
+      m_uiForm.cbReflection->setEnabled(enabled);
     }
 
   } // namespace CustomInterfaces

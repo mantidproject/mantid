@@ -41,6 +41,7 @@ void IndirectTools::initLayout()
 	{
 		connect(iter->second, SIGNAL(executePythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
 		connect(iter->second, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
+    iter->second->setupTab();
 	}
 
 	loadSettings();
