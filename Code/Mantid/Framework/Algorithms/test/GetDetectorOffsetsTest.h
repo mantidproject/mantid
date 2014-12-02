@@ -157,8 +157,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference","1.00"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMin","-20"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMax","20"));
-    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaxOffset","100"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaxOffset","10"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("OffsetMode","Absolute"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DIdeal","3.5"));
     TS_ASSERT_THROWS_NOTHING( offsets.execute() );
     TS_ASSERT( offsets.isExecuted() );
 
@@ -166,7 +167,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
     if (!output) return;
 
-    TS_ASSERT_DELTA( output->dataY(0)[0], -52.0196, 0.0001);
+    TS_ASSERT_DELTA( output->dataY(0)[0], 2.4803, 0.0001);
 
     AnalysisDataService::Instance().remove(outputWS);
 

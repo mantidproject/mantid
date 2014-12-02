@@ -72,8 +72,9 @@ private:
   double Xmax;        ///< The end of the X range for fitting
   double maxOffset;   ///< The maximum absolute value of offsets
   double dreference;  ///< The expected peak position in d-spacing (?)
+  double dideal;      ///< The known peak centre value from the NIST standard information
   double step;        ///< The step size
-  int64_t nspec;          ///< The number of spectra in the input workspace
+  int64_t nspec;      ///< The number of spectra in the input workspace
 };
 
 } // namespace Algorithm

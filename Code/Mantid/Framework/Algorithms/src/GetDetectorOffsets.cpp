@@ -74,6 +74,8 @@ namespace Mantid
 
       declareProperty("OffsetMode", "Relative", boost::make_shared<StringListValidator>(modes),
         "Whether to calculate a relative or absolute offset");
+      declareProperty("DIdeal",2.0, mustBePositive,
+        "The known peak centre value from the NIST standard information, this is only used in Absolute OffsetMode.");
 
     }
 
@@ -99,6 +101,8 @@ namespace Mantid
       {
         isAbsolute = true;
       }
+      
+      dideal =getProperty("DIdeal");
 
       int nspec=static_cast<int>(inputW->getNumberHistograms());
       // Create the output OffsetsWorkspace
@@ -229,7 +233,7 @@ namespace Mantid
       {
         // translated from(DIdeal - FittedPeakCentre)/(FittedPeakCentre)
         // given by Matt Tucker in ticket #10642
-        offset += (dreference - offset)/offset;
+        offset += (dideal - dreference)/dreference;
       }
       return offset;
     }
