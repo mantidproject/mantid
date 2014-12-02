@@ -10,7 +10,7 @@ options.
 
 The module is at a very early stage of development and provides
 limited functionality. This is very much work in progress at the
-moment. The module is subject to changes and for now included in
+moment. The module is subject to changes and it is for now included in
 Mantid as a 'future' import. Feedback is very much welcome!
 
 To use this new functionality you first need to import the new pyplot module:
@@ -146,6 +146,13 @@ workspace. Conversely, if you use plot_bin, the number of elements in
 the output lines should be equal to the number of spectra in the
 workspace.
 
+   To modify the figure, you first need to obtain the figure object
+that represents the figure where the lines are displayed. Once you do
+so you can for example set the title of the figure like this:
+
+    fig = lines[0].figure()
+    fig.suptitle('Example figure title')
+
 Other properties can be modified using different functions, as in
 matplotlib's pyplot. For example:
 
@@ -156,7 +163,9 @@ matplotlib's pyplot. For example:
     xlim(1e3, 4e4)
     grid('on')
 
-You can also save the current figure into a file like this:
+By default, these functions manipulate the current figure (the last or
+most recently shown figure). You can also save the current figure into
+a file like this:
 
     savefig('example_saved_figure.png')
 
@@ -235,11 +244,34 @@ marker        'o', 'v', '^', '<', '>', 's', '*', 'h', '|', '_'
 color         color character or string ('b', 'blue', 'g', 'green', 'k', 'black', 'y', 'yellow', 'c', 'cyan', 'r', 'red'. 'm', 'magenta', etc.). RGB colors are not supported at the moment.
 ============  ================
 
+Modifying the plot axes
+-----------------------
+
+You can modify different properties of the plot axes via functions, as
+seen before. For example:
+
+    ylabel('Counts')
+    ylim(0, 8)
+
+An alternative is to use equivalent methods provided by the figure and
+axes objects. For this you first need to retrieve the figure and axes
+where a plot (or lines) has been shown.
+
+    lines = plot(mar,[3, 500, 800])
+    fig = lines[0].figure()
+    all_ax = fig.axes()    # fig.axes() returns in principle a list
+    ax = all_ax[0]         #  but we only use one axes
+    ax.set_ylabel('Counts')
+    ax.set_xlabel('ToF')
+    ax.set_ylim(0, 8)
+    ax.set_xlim(1e3, 4e4)
+
 Functions that modify plot properties
 -------------------------------------
 
-Here is a list of the functions supported at the moment. They offer the
-same functionality as their counterparts in matplotlib's pyplot.
+Here is a list of the functions supported at the moment. They offer
+the same functionality as their counterparts in matplotlib's
+pyplot.
 
 - title
 - xlabel
@@ -252,9 +284,12 @@ same functionality as their counterparts in matplotlib's pyplot.
 
 This is a limited list of functions that should be sufficient for
 basic plots. These functions are presently provided as an example of
-this style of interace, and some of them provide functionality similar
-or equivalent to several of the keyword arguments for plot commands
-detailed in this documentation.
+this style of interface, and some of them provide functionality
+similar or equivalent to several of the keyword arguments for plot
+commands detailed in this documentation. Some others produce results
+equivalent to the more object oriented methods described above. For
+example, the function xlabel is equivalent to the method set_xlabel
+applied on Axes object for the current figure.
 
 """
 # Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -494,6 +529,24 @@ class Figure():
             self._axes = Axes(self)
         else:
             raise ValueError("To create a Figure you need to specify a figure number or a Graph object." )
+
+    def suptitle(title):
+        """
+        Set a title for the figure
+
+        @param title :: title string
+        """
+        l = _graph.activeLayer()
+        l.setTitle(title)
+
+    def axes(self):
+        """
+        Obtain the list of axes in this figure.
+
+        Returns :: list of axes. Presently only one Axes object is supported
+                   and this method returns a single object list
+        """
+        return _axes
 
     @classmethod
     def fig_seq(cls):
