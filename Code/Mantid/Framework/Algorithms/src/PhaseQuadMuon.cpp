@@ -166,7 +166,7 @@ void PhaseQuadMuon::convertToMicroSecs (API::MatrixWorkspace_sptr inputWs)
     auto spec = inputWs->getSpectrum(h);
     for (int t=0; t<m_nData+1; t++)
     {
-     spec->dataX()[t] = ( spec->dataX()[t] + m_tMin ) / 1000;
+     spec->dataX()[t] = spec->dataX()[t]/1000+m_tMin;
     }
   }
 }
