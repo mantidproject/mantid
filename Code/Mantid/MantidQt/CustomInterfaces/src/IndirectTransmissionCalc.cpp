@@ -4,6 +4,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtCustomInterfaces/IndirectTransmissionCalc.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include <QFileInfo>
 #include <QStringList>
@@ -46,8 +47,14 @@ namespace MantidQt
      */
     bool IndirectTransmissionCalc::validate()
     {
-      // TODO: Validation
-      return true;
+      UserInputValidator uiv;
+
+      uiv.checkFieldIsNotEmpty("Chemical Formula", m_uiForm.leChemicalFormula, m_uiForm.valChemicalFormula);
+
+      QString error = uiv.generateErrorMessage();
+      showMessageBox(error);
+
+      return error.isEmpty();
     }
 
     /**
@@ -55,7 +62,22 @@ namespace MantidQt
      */
     void IndirectTransmissionCalc::run()
     {
-      // TODO: Run algorithm
+      IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmission");
+      transAlg->initialize();
+      transAlg->setProperty("Instrument", m_uiForm.cbInstrument->currentText().toStdString());
+      transAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
+      transAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
+      transAlg->setProperty("ChemicalFormula", m_uiForm.leChemicalFormula->text().toStdString());
+      transAlg->setProperty("NumberDensity", m_uiForm.spNumberDensity->value());
+      transAlg->setProperty("Thickness", m_uiForm.spThickness->value());
+      transAlg->setProperty("OutputWorkspace", "trans");
+
+      // Ensure completion signal is connected to correct slot
+      connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+      disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));
+
+      // Run the algorithm async
+      runAlgorithm(transAlg);
     }
 
     /**
