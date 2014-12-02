@@ -324,5 +324,84 @@ DECLARE_GENERATED_SPACE_GROUP(225, "F m -3 m", "-x,-y,z; -x,y,-z; z,x,y; y,x,-z;
 DECLARE_GENERATED_SPACE_GROUP(227, "F d -3 m", "-x,-y+1/2,z+1/2; -x+1/2,y+1/2,-z; z,x,y; y+3/4,x+1/4,-z+3/4; -x+1/4,-y+1/4,-z+1/4")
 DECLARE_GENERATED_SPACE_GROUP(229, "I m -3 m", "-x,-y,z; -x,y,-z; z,x,y; y,x,-z; -x,-y,-z")
 
+bool isValidGeneratorString(const std::string &generatorString)
+{
+    std::vector<std::string> generatorStrings;
+    boost::split(generatorStrings, generatorString, boost::is_any_of(";"));
+
+    for(auto it = generatorStrings.begin(); it != generatorStrings.end(); ++it) {
+        try {
+            SymmetryOperationSymbolParser::parseIdentifier(*it);
+        } catch(Kernel::Exception::ParseError) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+AbstractSpaceGroupGenerator::AbstractSpaceGroupGenerator(size_t number, const std::string &hmSymbol, const std::string &generatorInformation) :
+    m_number(number),
+    m_hmSymbol(hmSymbol),
+    m_generatorString(generatorInformation),
+    m_prototype()
+{
+
+}
+
+SpaceGroup_const_sptr AbstractSpaceGroupGenerator::getPrototype()
+{
+    if(!hasValidPrototype()) {
+        m_prototype = generatePrototype();
+    }
+
+    return m_prototype;
+}
+
+SpaceGroup_const_sptr AbstractSpaceGroupGenerator::generatePrototype()
+{
+    Group_const_sptr generatingGroup = generateGroup();
+
+    if(!generatingGroup) {
+        throw std::runtime_error("Could not create group from supplied symmetry operations.");
+    }
+
+    return boost::make_shared<const SpaceGroup>(m_number, m_hmSymbol, *generatingGroup);
+}
+
+AlgorithmicSpaceGroupGenerator::AlgorithmicSpaceGroupGenerator(size_t number, const std::string &hmSymbol, const std::string &generatorInformation) :
+    AbstractSpaceGroupGenerator(number, hmSymbol, generatorInformation)
+{
+    if(!isValidGeneratorString(generatorInformation)) {
+        throw std::runtime_error("Generator string could not be parsed: " + generatorInformation);
+    }
+}
+
+Group_const_sptr AlgorithmicSpaceGroupGenerator::generateGroup() const
+{
+    Group_const_sptr baseGroup = GroupFactory::create<ProductOfCyclicGroups>(getGeneratorString());
+    Group_const_sptr centeringGroup = GroupFactory::create<CenteringGroup>(getCenteringSymbol());
+
+    return baseGroup * centeringGroup;
+}
+
+std::string AlgorithmicSpaceGroupGenerator::getCenteringSymbol() const
+{
+    return getHMSymbol().substr(0, 1);
+}
+
+TabulatedSpaceGroupGenerator::TabulatedSpaceGroupGenerator(size_t number, const std::string &hmSymbol, const std::string &generatorInformation) :
+    AbstractSpaceGroupGenerator(number, hmSymbol, generatorInformation)
+{
+    if(!isValidGeneratorString(generatorInformation)) {
+        throw std::runtime_error("Generator string could not be parsed: " + generatorInformation);
+    }
+}
+
+Group_const_sptr TabulatedSpaceGroupGenerator::generateGroup() const
+{
+    return GroupFactory::create<Group>(getGeneratorString());
+}
+
 } // namespace Geometry
 } // namespace Mantid

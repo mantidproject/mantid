@@ -37,6 +37,56 @@ struct MANTID_GEOMETRY_DLL SpaceGroupSubscriptionHelper
     GenerationMethod generationMethod;
 };
 
+bool MANTID_GEOMETRY_DLL isValidGeneratorString(const std::string &generatorString);
+
+class MANTID_GEOMETRY_DLL AbstractSpaceGroupGenerator
+{
+public:
+    AbstractSpaceGroupGenerator(size_t number, const std::string &hmSymbol, const std::string &generatorInformation);
+    virtual ~AbstractSpaceGroupGenerator() { }
+
+    inline size_t getNumber() const { return m_number; }
+    inline std::string getHMSymbol() const { return m_hmSymbol; }
+    inline std::string getGeneratorString() const { return m_generatorString; }
+
+    SpaceGroup_const_sptr getPrototype();
+
+protected:
+    virtual Group_const_sptr generateGroup() const = 0;
+
+private:
+    inline bool hasValidPrototype() const { return static_cast<bool>(m_prototype); }
+    SpaceGroup_const_sptr generatePrototype();
+
+    size_t m_number;
+    std::string m_hmSymbol;
+    std::string m_generatorString;
+
+    SpaceGroup_const_sptr m_prototype;
+};
+
+class MANTID_GEOMETRY_DLL AlgorithmicSpaceGroupGenerator : public AbstractSpaceGroupGenerator
+{
+public:
+    AlgorithmicSpaceGroupGenerator(size_t number, const std::string &hmSymbol, const std::string &generatorInformation);
+    virtual ~AlgorithmicSpaceGroupGenerator() { }
+
+protected:
+    Group_const_sptr generateGroup() const;
+    std::string getCenteringSymbol() const;
+
+};
+
+class MANTID_GEOMETRY_DLL TabulatedSpaceGroupGenerator : public AbstractSpaceGroupGenerator
+{
+public:
+    TabulatedSpaceGroupGenerator(size_t number, const std::string &hmSymbol, const std::string &generatorInformation);
+    virtual ~TabulatedSpaceGroupGenerator() { }
+
+protected:
+    Group_const_sptr generateGroup() const;
+};
+
 /** SpaceGroupFactory
 
   Factory for SpaceGroups. When a space group is subscribed, it
