@@ -1,13 +1,11 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtCustomInterfaces/IndirectTransmissionCalc.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
-#include <QFileInfo>
-#include <QStringList>
+#include <QTreeWidgetItem>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -62,15 +60,18 @@ namespace MantidQt
      */
     void IndirectTransmissionCalc::run()
     {
+      std::string instrumentName = m_uiForm.cbInstrument->currentText().toStdString();
+      std::string outWsName = instrumentName + "_transmission";
+
       IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmission");
       transAlg->initialize();
-      transAlg->setProperty("Instrument", m_uiForm.cbInstrument->currentText().toStdString());
+      transAlg->setProperty("Instrument", instrumentName);
       transAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
       transAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
       transAlg->setProperty("ChemicalFormula", m_uiForm.leChemicalFormula->text().toStdString());
       transAlg->setProperty("NumberDensity", m_uiForm.spNumberDensity->value());
       transAlg->setProperty("Thickness", m_uiForm.spThickness->value());
-      transAlg->setProperty("OutputWorkspace", "trans");
+      transAlg->setProperty("OutputWorkspace", outWsName);
 
       // Ensure completion signal is connected to correct slot
       connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
@@ -92,7 +93,25 @@ namespace MantidQt
       if(error)
         return;
 
-      // TODO: Update table in UI
+      std::string instrumentName = m_uiForm.cbInstrument->currentText().toStdString();
+      std::string outWsName = instrumentName + "_transmission";
+
+      ITableWorkspace_const_sptr resultTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outWsName);
+      Column_const_sptr propertyNames = resultTable->getColumn("Name");
+      Column_const_sptr propertyValues = resultTable->getColumn("Value");
+
+      // Update the table in the GUI
+      m_uiForm.tvResultsTable->clear();
+
+      QTreeWidgetItem *item;
+
+      for(size_t i = 0; i < resultTable->rowCount(); i++)
+      {
+        item = new QTreeWidgetItem();
+        item->setText(0, QString::fromStdString(propertyNames->cell<std::string>(i)));
+        item->setText(1, QString::number(propertyValues->cell<double>(i)));
+        m_uiForm.tvResultsTable->addTopLevelItem(item);
+      }
     }
 
     /**

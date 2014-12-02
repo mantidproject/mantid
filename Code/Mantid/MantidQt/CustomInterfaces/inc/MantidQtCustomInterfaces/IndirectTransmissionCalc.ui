@@ -117,6 +117,9 @@
           <property name="maximum">
            <double>1000.000000000000000</double>
           </property>
+          <property name="value">
+           <double>0.100000000000000</double>
+          </property>
          </widget>
         </item>
         <item row="1" column="1">
@@ -126,6 +129,9 @@
           </property>
           <property name="maximum">
            <double>10000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.100000000000000</double>
           </property>
          </widget>
         </item>
@@ -165,7 +171,27 @@
     </layout>
    </item>
    <item>
-    <widget class="QTableWidget" name="tableWidget"/>
+    <widget class="QTreeWidget" name="tvResultsTable">
+     <property name="columnCount">
+      <number>2</number>
+     </property>
+     <attribute name="headerDefaultSectionSize">
+      <number>200</number>
+     </attribute>
+     <attribute name="headerMinimumSectionSize">
+      <number>50</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Property</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Value</string>
+      </property>
+     </column>
+    </widget>
    </item>
   </layout>
  </widget>
