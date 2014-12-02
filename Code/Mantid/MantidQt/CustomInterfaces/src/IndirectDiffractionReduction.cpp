@@ -167,7 +167,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
   msgDiffReduction->setProperty("RebinParam", rebin.toStdString());
   msgDiffReduction->setProperty("IndividualGrouping", individualGrouping);
   msgDiffReduction->setProperty("SaveFormats", saveFormats);
-  msgDiffReduction->setProperty("OutputWorkspaceGroup", "IndirectDiffraction_Workspaces");
+  msgDiffReduction->setProperty("OutputWorkspace", "IndirectDiffraction_Workspaces");
 
   m_batchAlgoRunner->addAlgorithm(msgDiffReduction);
 

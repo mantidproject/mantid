@@ -299,6 +299,7 @@ public:
 
   void saveProject(bool save);
   void enableSaveNexus(const QString & wsName);
+  void disableSaveNexus();
 
 signals:
   //A signal to indicate that we want a script to produce a dialog

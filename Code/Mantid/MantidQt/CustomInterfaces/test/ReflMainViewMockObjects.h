@@ -35,6 +35,7 @@ public:
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
 
   MOCK_METHOD1(showAlgorithmDialog, void(const std::string&));
+  MOCK_METHOD1(plotWorkspaces, void(const std::set<std::string>&));
 
   //IO
   MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());

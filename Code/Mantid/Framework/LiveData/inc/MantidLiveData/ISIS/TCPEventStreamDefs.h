@@ -43,7 +43,14 @@ struct TCPStreamEventHeader
 	static const uint32_t marker = 0xffffffff;  ///< magic value for marker1, marker2
 	TCPStreamEventHeader() : marker1(marker), marker2(marker), version(current_version), length(sizeof(TCPStreamEventHeader)), type(InvalidStream) { }
 	TCPStreamEventHeader(uint32_t type_) : marker1(marker), marker2(marker), version(current_version), length(sizeof(TCPStreamEventHeader)), type(type_) { }
+#if __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wtautological-compare"
+#endif
 	bool isValid() const { return marker1 == marker && marker2 == marker && length >= sizeof(TCPStreamEventHeader) && majorVersion() == TCPStreamEventHeader::major_version && minorVersion() >= TCPStreamEventHeader::minor_version && type != InvalidStream; }
+#if __clang__
+#pragma clang diagnostic pop
+#endif    
 	static const uint32_t major_version = 1; ///< starts at 1, then incremented whenever layout of this or further packets changes in a non backward compatible way
 	static const uint32_t minor_version = 0; ///< reset to 0 in major version change, then incremented whenever layout of this or further packets changes in a backward compatible way
 	static const uint32_t current_version = (major_version << 16) | minor_version; ///< starts at 1, then incremented whenever layout of this or further packets changes

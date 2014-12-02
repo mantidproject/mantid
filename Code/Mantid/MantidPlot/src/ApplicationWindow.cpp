@@ -9720,7 +9720,7 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 {
   if(scriptingWindow && scriptingWindow->isExecuting())
   {
-    if( ! QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", tr("Yes"), tr("No")) == 0 )
+    if( ! (QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", tr("Yes"), tr("No")) == 0) )
     {
       ce->ignore();
       return;
@@ -17592,11 +17592,19 @@ void ApplicationWindow::savedatainNexusFormat(const std::string& wsName,const st
   {
   }
 }
-void ApplicationWindow::enablesaveNexus(const QString &wsName)
+
+void ApplicationWindow::enableSaveNexus(const QString &wsName)
 {
-  if(actionSaveFile) actionSaveFile->setEnabled(true);
+  if (actionSaveFile) actionSaveFile->setEnabled(true);
   m_nexusInputWSName=wsName;
 }
+
+void ApplicationWindow::disableSaveNexus()
+{
+  if (actionSaveFile)
+    actionSaveFile->setEnabled(false);
+}
+
 /* For zooming the selected graph using the drag canvas tool and mouse drag.
  */
 void ApplicationWindow::panOnPlot()

@@ -114,6 +114,30 @@ namespace API
         << inst->getValidFromDate().toFormattedString("%Y-%b-%d")
         << " to " << inst->getValidToDate().toFormattedString("%Y-%b-%d") << ")";
     out << "\n";
+    if (!inst->getFilename().empty())
+    {
+      out << "Instrument from: " << inst->getFilename();
+      out << "\n";
+    }
+
+    //parameter files loaded
+    auto paramFileVector = this->instrumentParameters().getParameterFilenames();
+    for (auto itFilename = paramFileVector.begin(); itFilename != paramFileVector.end(); ++itFilename)
+    {
+      out << "Parameters from: " << *itFilename;
+      out << "\n";
+    }
+
+    std::string runStart = getAvailableWorkspaceStartDate();
+    std::string runEnd = getAvailableWorkspaceEndDate();
+    std::string msgNA = "not available";
+    if (runStart.empty())
+      runStart = msgNA;
+    if (runEnd.empty())
+      runEnd = msgNA;
+    out << "Run start: " << runStart << "\n";
+    out << "Run end:  " << runEnd << "\n";   // note extra space for pseudo/approx-alignment
+
     if (this->sample().hasOrientedLattice())
     {
       const Geometry::OrientedLattice & latt = this->sample().getOrientedLattice();
@@ -365,7 +389,6 @@ namespace API
   {
     if(m_detgroups.empty())
     {
-      g_log.debug("No detector mapping cached, getting detector from instrument");
       return getInstrument()->getDetector(detID);
     }
     else
@@ -766,11 +789,11 @@ namespace API
 
   //---------------------------------------------------------------------------------------
   /** Return workspace start date as an ISO 8601 string. If this info not stored in workspace the
-  *   method returns current date.
+  *   method returns current date. This date is used for example to retrieve the instrument file.
   *
-  *  @return workspace start date as a string
+  *  @return workspace start date as a string (current time if start date not available)
   */
-  std::string ExperimentInfo::getWorkspaceStartDate()
+  std::string ExperimentInfo::getWorkspaceStartDate() const
   {
     std::string date;
     try
@@ -781,6 +804,48 @@ namespace API
     {
       g_log.information("run_start/start_time not stored in workspace. Default to current date.");
       date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
+    }
+    return date;
+  }
+
+  //---------------------------------------------------------------------------------------
+  /** Return workspace start date as a formatted string (strftime, as
+   *  returned by Kernel::DateAndTime) string, if available. If
+   *  unavailable, an empty string is returned
+   *
+   *  @return workspace start date as a string (empty if no date available)
+   */
+  std::string ExperimentInfo::getAvailableWorkspaceStartDate() const
+  {
+    std::string date;
+    try
+    {
+      date = run().startTime().toFormattedString();
+    }
+    catch (std::runtime_error &)
+    {
+      g_log.information("Note: run_start/start_time not stored in workspace.");
+    }
+    return date;
+  }
+
+  //---------------------------------------------------------------------------------------
+  /** Return workspace end date as a formatted string (strftime style,
+   *  as returned by Kernel::DateAdnTime) string, if available. If
+   *  unavailable, an empty string is returned
+   *
+   *  @return workspace end date as a string (empty if no date available)
+   */
+  std::string ExperimentInfo::getAvailableWorkspaceEndDate() const
+  {
+    std::string date;
+    try
+    {
+      date = run().endTime().toFormattedString();
+    }
+    catch (std::runtime_error &)
+    {
+      g_log.information("Note: run_start/start_time not stored in workspace.");
     }
     return date;
   }

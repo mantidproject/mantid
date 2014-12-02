@@ -192,6 +192,8 @@ private:
   bool isAutoRebinSet() const;
   void autoRebinIfRequired();
 
+  // helper for saveImage
+  QString ensurePngExtension(const QString& fname) const;
 
 private:
 

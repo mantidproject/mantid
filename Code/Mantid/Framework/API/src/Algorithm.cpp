@@ -84,7 +84,8 @@ namespace Mantid
       m_progressObserver(NULL),
       m_isInitialized(false), m_isExecuted(false),m_isChildAlgorithm(false), m_recordHistoryForChild(false),
       m_alwaysStoreInADS(false),m_runningAsync(false),
-      m_running(false), m_rethrow(false), m_algorithmID(this), m_singleGroup(-1), m_groupsHaveSimilarNames(false)
+      m_running(false), m_rethrow(false), m_isAlgStartupLoggingEnabled(true),
+      m_algorithmID(this), m_singleGroup(-1), m_groupsHaveSimilarNames(false)
     {
     }
 
@@ -1034,6 +1035,7 @@ namespace Mantid
       m_algorithmID = proxy.getAlgorithmID();
       setLogging(proxy.isLogging());
       setLoggingOffset(proxy.getLoggingOffset());
+      setAlgStartupLogging(proxy.getAlgStartupLogging());
       setChild(proxy.isChild());
     }
 
@@ -1055,15 +1057,35 @@ namespace Mantid
         // Loop over the output workspaces
         for (outWS = outputWorkspaces.begin(); outWS != outputWorkspaces.end(); ++outWS)
         {
+          WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(*outWS);
+
           // Loop over the input workspaces, making the call that copies their history to the output ones
           // (Protection against copy to self is in WorkspaceHistory::copyAlgorithmHistory)
           for (inWS = inputWorkspaces.begin(); inWS != inputWorkspaces.end(); ++inWS)
           {
             (*outWS)->history().addHistory( (*inWS)->getHistory() );
+
+            // Add history to each child of output workspace group
+            if(wsGroup)
+            {
+              for(size_t i = 0; i < wsGroup->size(); i++)
+              {
+                wsGroup->getItem(i)->history().addHistory( (*inWS)->getHistory() );
+              }
+            }
           }
 
           // Add the history for the current algorithm to all the output workspaces
           (*outWS)->history().addHistory(m_history);
+
+          // Add history to each child of output workspace group
+          if(wsGroup)
+          {
+            for(size_t i = 0; i < wsGroup->size(); i++)
+            {
+              wsGroup->getItem(i)->history().addHistory(m_history);
+            }
+          }
         }
       }
       //this is a child algorithm, but we still want to keep the history.
@@ -1189,13 +1211,16 @@ namespace Mantid
     {
       auto & logger = getLogger();
 
-      logger.notice() << name() << " started";
-      if (this->isChild())
-        logger.notice() << " (child)";
-      logger.notice() << std::endl;
-      // Make use of the AlgorithmHistory class, which holds all the info we want here
-      AlgorithmHistory AH(this);
-      logger.information() << AH;
+      if (m_isAlgStartupLoggingEnabled)
+      {
+        logger.notice() << name() << " started";
+        if (this->isChild())
+          logger.notice() << " (child)";
+        logger.notice() << std::endl;
+        // Make use of the AlgorithmHistory class, which holds all the info we want here
+        AlgorithmHistory AH(this);
+        logger.information() << AH;
+      }
     }
 
 
@@ -1642,8 +1667,11 @@ namespace Mantid
 
       if (!m_isChildAlgorithm || m_alwaysStoreInADS)
       {
-        getLogger().notice() << name() << " successful, Duration "
-              << std::fixed << std::setprecision(2) << duration << " seconds" << optionalMessage << std::endl;
+        if (m_isAlgStartupLoggingEnabled)
+        {
+          getLogger().notice() << name() << " successful, Duration "
+                << std::fixed << std::setprecision(2) << duration << " seconds" << optionalMessage << std::endl;
+        }
       }
       
       else
@@ -1653,8 +1681,21 @@ namespace Mantid
       m_running = false;
     }
 
+    /** Enable or disable Logging of start and end messages
+    @param enabled : true to enable logging, false to disable
+    */ 
+    void Algorithm::setAlgStartupLogging(const bool enabled) 
+    {
+      m_isAlgStartupLoggingEnabled = enabled;
+    }
 
-
+    /** return the state of logging of start and end messages
+    @returns : true to logging is enabled
+    */ 
+    bool Algorithm::getAlgStartupLogging() const
+    {
+      return m_isAlgStartupLoggingEnabled;
+    }
   } // namespace API
 
   //---------------------------------------------------------------------------

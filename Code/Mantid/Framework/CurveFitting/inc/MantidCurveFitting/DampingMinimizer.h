@@ -44,7 +44,7 @@ class DLLExport DampingMinimizer : public API::IFuncMinimizer
 {
 public:
   /// Constructor
-  DampingMinimizer();
+  DampingMinimizer(double relTol = 0.0001);
   /// Name of the minimizer.
   std::string name() const {return "DampingMinimizer";}
 

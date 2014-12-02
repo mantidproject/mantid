@@ -9,9 +9,9 @@ PV_LOC=paraview
 
 PV_PKG=ParaView
 
-PV_VER=3.10.1
+PV_VER=3.98.1
 
-PV_NAME=${PV_PKG}-${PV_VER}-patched
+PV_NAME=${PV_PKG}-${PV_VER}-source
 
 PV_SRC=${PV_NAME}.tar.gz
 

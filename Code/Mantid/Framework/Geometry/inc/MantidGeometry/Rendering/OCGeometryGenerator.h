@@ -57,7 +57,6 @@ namespace Mantid
     private:                    
       const Object *Obj; ///< Input Object
       TopoDS_Shape* ObjSurface; ///< Storage for the output surface
-      int   iGridSize; ///< Grid size for sampling the object
       ///Analyze the object
       void AnalyzeObject();
       ///Analyze a geometry rule for n object rule

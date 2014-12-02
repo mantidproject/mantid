@@ -45,7 +45,7 @@ namespace Mantid
      * Default constructor
      */
     ParameterMap::ParameterMap()
-      : m_map()
+      : m_parameterFileNames(), m_map()
     {}
 
     /**
@@ -1024,6 +1024,22 @@ namespace Mantid
       std::string s = this->asString();
       file->writeData("data", s);
       file->closeGroup();
+    }
+
+    /** Returns a list of all the parameter files loaded
+    * @returns a vector of the filenames
+    */
+    const std::vector<std::string>& ParameterMap::getParameterFilenames() const
+    {
+      return m_parameterFileNames;
+    }
+    /// 
+    /** adds a parameter filename that has been loaded
+    * @param filename the filename to add
+    */
+    void ParameterMap::addParameterFilename(const std::string& filename)
+    {
+      m_parameterFileNames.push_back(filename);
     }
 
   } // Namespace Geometry

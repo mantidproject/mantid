@@ -97,12 +97,51 @@
 #include <QtGui/QFocusEvent>
 #include <QtGui/QStyle>
 #include <QtGui/QPalette>
+#include <QtGui/qcheckbox.h>
+#include <QtGui/qlineedit.h>
 
 #include <iostream>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
 #endif
+
+class PropertyOptionCheckBox: public QWidget
+{
+  Q_OBJECT
+public:
+  PropertyOptionCheckBox(QWidget *parent,QtProperty *property, const QString &optionName):
+    QWidget(parent),
+    m_property(property),
+    m_optionName(optionName),
+    m_checked(property->checkOption(optionName))
+  {
+    setFocusPolicy(Qt::StrongFocus);
+  }
+  void paintEvent (QPaintEvent*)
+  {
+      QStyleOptionButton opt;
+      auto state = isChecked() ? QStyle::State_On : QStyle::State_Off;
+      opt.state |= state;
+      opt.rect = rect();
+      opt.rect.setWidth(opt.rect.height());
+      QPainter painter(this);
+      QApplication::style()->drawPrimitive(QStyle::PE_IndicatorCheckBox,&opt,&painter);
+  }
+  void mousePressEvent (QMouseEvent* event)
+  {
+    event->accept();
+    setChecked( ! isChecked() );
+    m_property->setOption( m_optionName, isChecked() );
+    update();
+  }
+  void setChecked(bool on){m_checked = on;}
+  bool isChecked() const {return m_checked;}
+private:
+  QtProperty *m_property;
+  QString m_optionName;
+  bool m_checked;
+};
 
 class QtPropertyEditorView;
 
@@ -113,7 +152,7 @@ class QtTreePropertyBrowserPrivate
 
 public:
     QtTreePropertyBrowserPrivate();
-    void init(QWidget *parent);
+    void init(QWidget *parent, const QStringList &options);
 
     void propertyInserted(QtBrowserItem *index, QtBrowserItem *afterIndex);
     void propertyRemoved(QtBrowserItem *index);
@@ -145,6 +184,8 @@ public:
 
     QTreeWidgetItem *editedItem() const;
 
+    const QStringList& options() const {return m_options;}
+
 private:
     void updateItem(QTreeWidgetItem *item);
 
@@ -161,6 +202,7 @@ private:
     bool m_markPropertiesWithoutValue;
     bool m_browserChangedBlocked;
     QIcon m_expandIcon;
+    QStringList m_options; // options that can be associated with QtProperties
 };
 
 // ------------ QtPropertyEditorView
@@ -255,6 +297,7 @@ void QtPropertyEditorView::mousePressEvent(QMouseEvent *event)
 {
     QTreeWidget::mousePressEvent(event);
     QTreeWidgetItem *item = itemAt(event->pos());
+    auto index = currentIndex();
 
     if (item) {
         if ((item != m_editorPrivate->editedItem()) && (event->button() == Qt::LeftButton)
@@ -264,6 +307,10 @@ void QtPropertyEditorView::mousePressEvent(QMouseEvent *event)
         } else if (!m_editorPrivate->hasValue(item) && m_editorPrivate->markPropertiesWithoutValue() && !rootIsDecorated()) {
             if (event->pos().x() + header()->offset() < 20)
                 item->setExpanded(!item->isExpanded());
+        }
+        else if (index.column() == 2)
+        {
+          editItem(item,2);
         }
     }
 }
@@ -374,6 +421,20 @@ QWidget *QtPropertyEditorDelegate::createEditor(QWidget *parent,
             return editor;
         }
     }
+    if (index.column() > 1 && m_editorPrivate) {
+      QtProperty *property = m_editorPrivate->indexToProperty(index);
+      int optionIndex = index.column() - 2;
+      if ( optionIndex >= m_editorPrivate->options().size() )
+      {
+        return NULL;
+      }
+      QString optionName = m_editorPrivate->options()[optionIndex];
+      if ( property->hasOption(optionName) )
+      {
+        QWidget *editor = new PropertyOptionCheckBox(parent,property,optionName);
+        return editor;
+      }
+    }
     return 0;
 }
 
@@ -424,6 +485,25 @@ void QtPropertyEditorDelegate::paint(QPainter *painter, const QStyleOptionViewIt
         painter->drawLine(right, option.rect.y(), right, option.rect.bottom());
     }
     painter->restore();
+    if ( index.column() > 1 )
+    {
+      QtProperty *property = m_editorPrivate->indexToProperty(index);
+      int optionIndex = index.column() - 2;
+      if ( optionIndex >= m_editorPrivate->options().size() )
+      {
+        return;
+      }
+      QString optionName = m_editorPrivate->options()[optionIndex];
+      if ( property->hasOption(optionName) )
+      {
+        QStyleOptionButton opt;
+        auto state = property->checkOption(optionName) ? QStyle::State_On : QStyle::State_Off;
+        opt.state |= state;
+        opt.rect = option.rect;
+        opt.rect.setWidth(opt.rect.height());
+        QApplication::style()->drawPrimitive(QStyle::PE_IndicatorCheckBox,&opt,painter);
+      }
+    }
 }
 
 QSize QtPropertyEditorDelegate::sizeHint(const QStyleOptionViewItem &option,
@@ -483,7 +563,7 @@ static QIcon drawIndicatorIcon(const QPalette &palette, QStyle *style)
     return rc;
 }
 
-void QtTreePropertyBrowserPrivate::init(QWidget *parent)
+void QtTreePropertyBrowserPrivate::init(QWidget *parent, const QStringList &options)
 {
     QHBoxLayout *layout = new QHBoxLayout(parent);
     layout->setMargin(0);
@@ -492,10 +572,17 @@ void QtTreePropertyBrowserPrivate::init(QWidget *parent)
     m_treeWidget->setIconSize(QSize(18, 18));
     layout->addWidget(m_treeWidget);
 
-    m_treeWidget->setColumnCount(2);
+    m_options = options;
+    const int columnCount = 2 + m_options.size();
+    m_treeWidget->setColumnCount( columnCount );
     QStringList labels;
     labels.append(QApplication::translate("QtTreePropertyBrowser", "Property", 0, QApplication::UnicodeUTF8));
     labels.append(QApplication::translate("QtTreePropertyBrowser", "Value", 0, QApplication::UnicodeUTF8));
+    // add optional columns
+    for(auto opt = m_options.begin(); opt != m_options.end(); ++opt)
+    {
+      labels.append(QApplication::translate("QtTreePropertyBrowser", *opt, 0, QApplication::UnicodeUTF8));
+    }
     m_treeWidget->setHeaderLabels(labels);
     m_treeWidget->setAlternatingRowColors(true);
     m_treeWidget->setEditTriggers(QAbstractItemView::EditKeyPressed);
@@ -790,13 +877,13 @@ void QtTreePropertyBrowserPrivate::editItem(QtBrowserItem *browserItem)
 /**
     Creates a property browser with the given \a parent.
 */
-QtTreePropertyBrowser::QtTreePropertyBrowser(QWidget *parent)
+QtTreePropertyBrowser::QtTreePropertyBrowser(QWidget *parent, const QStringList &options)
     : QtAbstractPropertyBrowser(parent)
 {
     d_ptr = new QtTreePropertyBrowserPrivate;
     d_ptr->q_ptr = this;
 
-    d_ptr->init(this);
+    d_ptr->init(this,options);
     connect(this, SIGNAL(currentItemChanged(QtBrowserItem*)), this, SLOT(slotCurrentBrowserItemChanged(QtBrowserItem*)));
 }
 
