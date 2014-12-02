@@ -821,27 +821,27 @@ __linestyle_to_qt_penstyle = {
     '-.': QtCore.Qt.DashDotLine, ':': QtCore.Qt.DotLine
 } # other available: Qt.DashDotDotLine, Qt.CustomDashLine
 
-def __is_linestyle(s, i):
+def __is_linestyle(stl, i):
     """
         Check if we have a linestyle string in string s at position i
-        @param s :: input (style) string
+        @param stl :: input (style) string, for example: '-.g', 'r', ':b'
         @param i :: index where to start checking in string s
 
         Returns :: 0 if no linestyle string is identified, length of the string (1 or 2) otherwise
     """
     global __linestyle_to_qt_penstyle
 
-    if len(s) <= i:
+    if len(stl) <= i:
         return 0
 
-    if len(s) > len(s) + 1:
+    if len(stl) > i+1:
         # can check 2 chars
         wrong = 'inexistent'
-        penstyle = __linestyle_to_qt_penstyle.get(linestyle, wrong)
+        penstyle = __linestyle_to_qt_penstyle.get(stl[i:i+2], wrong)
         if wrong != penstyle:
             return 2
 
-    if '-'==s[i] or ':'==s[i]:
+    if '-'==stl[i] or ':'==stl[i]:
         return 1
     else:
         return 0
