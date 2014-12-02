@@ -9,9 +9,8 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
      */
-    IndirectToolsTab::IndirectToolsTab(QWidget * parent) : QWidget(parent)
+    IndirectToolsTab::IndirectToolsTab(QWidget * parent) : IndirectTab(parent)
     {
-
     }
 
     //----------------------------------------------------------------------------------------------

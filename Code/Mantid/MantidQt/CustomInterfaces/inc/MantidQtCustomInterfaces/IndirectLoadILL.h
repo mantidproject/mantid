@@ -23,11 +23,13 @@ namespace MantidQt
 			// Inherited methods from IndirectToolsTab
 			QString help() { return "LoadILL"; };
 
-			bool validate();
-			void run();
-
 			/// Load default settings into the interface
 			void loadSettings(const QSettings& settings);
+
+    protected:
+      void setup();
+			bool validate();
+			void run();
 
 		private slots:
 			/// Populate the analyser and reflection options on the interface

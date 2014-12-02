@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_INDIRECTTOOLSTAB_H_
 
 #include "MantidKernel/System.h"
+#include "IndirectTab.h"
 #include <QSettings>
 #include <QWidget>
 
@@ -37,7 +38,7 @@ namespace MantidQt
 			Code Documentation is available at: <http://doxygen.mantidproject.org>
 		*/
 
-		class DLLExport IndirectToolsTab : public QWidget
+		class DLLExport IndirectToolsTab : public IndirectTab
 		{
 			Q_OBJECT
 
@@ -50,8 +51,6 @@ namespace MantidQt
 
 			/// Base methods implemented in derived classes
 			virtual QString help() = 0;
-			virtual bool validate() = 0;
-			virtual void run() = 0;
 			virtual void loadSettings(const QSettings& settings) = 0;
 
 		signals:
@@ -61,6 +60,10 @@ namespace MantidQt
 			void showMessageBox(const QString& message);
 
 		protected:
+      virtual void setup() = 0;
+      virtual void run() = 0;
+      virtual bool validate() = 0;
+
 			void runPythonScript(const QString& pyInput);
 
 		};

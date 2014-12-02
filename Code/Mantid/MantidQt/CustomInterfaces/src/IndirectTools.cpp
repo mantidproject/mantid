@@ -109,11 +109,7 @@ void IndirectTools::loadSettings()
 void IndirectTools::runClicked()
 {
 	int tabIndex = m_uiForm.IndirectToolsTabs->currentIndex();
-
-	if(m_loadAsciiTabs[tabIndex]->validate())
-	{
-		m_loadAsciiTabs[tabIndex]->run();
-	}
+  m_loadAsciiTabs[tabIndex]->runTab();
 }
 
 /**

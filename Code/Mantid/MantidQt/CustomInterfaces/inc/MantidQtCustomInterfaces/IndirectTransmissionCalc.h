@@ -23,11 +23,21 @@ namespace MantidQt
 			// Inherited methods from IndirectToolsTab
 			QString help() { return "Transmission"; };
 
+			/// Load default settings into the interface
+			void loadSettings(const QSettings& settings);
+
+    protected:
+      void setup();
 			bool validate();
 			void run();
 
-			/// Load default settings into the interface
-			void loadSettings(const QSettings& settings);
+    private slots:
+      /// Handles completion of the algorithm
+      void algorithmComplete(bool error);
+      /// Handles an instrument being selected
+      void instrumentSelected(const QString& instrumentName);
+      /// Handles an analyser being selected
+      void analyserSelected(const QString& analyserName);
 
 		private:
 			/// The ui form
