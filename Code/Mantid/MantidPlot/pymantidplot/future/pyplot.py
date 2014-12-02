@@ -26,53 +26,62 @@ commands. See the following examples.
 Plot an array (python list)
 ---------------------------
 
+    # plot array
     plot([0.1, 0.3, 0.2, 4])
-    # The array values will be inserted in a workspace named 'array_dummy_workspace_...'
-
-
-Plot a Mantid workspace
------------------------
-
-    # first, load a workspace. You can do this with a Load command or just from the GUI menus
-    ws = Load("/path/to/MAR11060.raw", OutputWorkspace="foo")
-    plot(ws, [100])
-
-The list or array of values will be inserted in a workspace named
-'array_dummy_workspace_...', for example: array_dummy_workspace_1,
-array_dummy_workspace_2, as you create new plots.
-
-
-The plot commands accept a list of options (kwargs) as parameters
-passed by name. With these options you can modify plot properties,
-such as line styles, colors, axis scale, etc. The following example
-illustrates the use of a few options. You can refer to the list of
-options provided further down in this document. In principle, any
-combination of options is supported, as long as it makes sense!
+    # plot x-y
+    plot([0.1, 0.2, 0.3, 0.4], [1.2, 1.3, 0.2, 0.8])
 
 Plot an array with a different style
 ------------------------------------
+
+The plot commands that are described here accept a list of options
+(kwargs) as parameters passed by name. With these options you can
+modify plot properties, such as line styles, colors, axis scale,
+etc. The following example illustrates the use of a few options. You
+can refer to the list of options provided further down in this
+document. In principle, any combination of options is supported, as
+long as it makes sense!
 
     a = [0.1, 0.3, 0.2, 4]
     plot(a)
     import numpy as np
     y = np.sin(np.linspace(-2.28, 2.28, 1000))
-    plot(y)
-
+    plot(y, linestyle='-.', marker='o', color='red')
 
 If you have used the traditional Mantid command line interface in
 Python you will probably remember the plotSpectrum, plotBin and plotMD
 functions. These are supported in this new interface as shown in the
 following examples.
 
+Plot a Mantid workspace
+-----------------------
+
+You can pass one or more workspaces to the plot function. By default
+it will plot the spectra of the workspace(s), selecting them by the
+indices specified in the second argument. This behavior is similar to
+he plotSpectrum function of the traditional mantidplot module. This is
+a simple example that produces plots of spectra:
+
+    # first, load a workspace. You can do this with a Load command or just from the GUI menus
+    ws = Load("/path/to/MAR11060.raw", OutputWorkspace="foo")
+    # 1 spectrum plot
+    plot(ws, 100)
+    # 3 spectra plot
+    plot(ws, [100, 101, 102])
+
 Plot spectra using workspace objects and workspace names
 --------------------------------------------------------
+
+It is also possible to pass workspace names to plot, as in the
+following example:
 
     # please make sure that you use the right path and file name
     mar = Load('/path/to/MAR11060.raw', OutputWorkspace="MAR11060")
     plot('MAR11060', [10,100,500])
     plot(mar,[3, 500, 800])
 
-Let's load one more workspace so we can see some examples with list of workspaces
+Let's load one more workspace so we can see some examples with list of
+workspaces
 
     loq=Load('/path/to/LOQ48097.raw', OutputWorkspace="LOQ48097")
 
@@ -98,7 +107,8 @@ tool='plot_spectrum':
 Plotting bins
 -------------
 
-To plot workspace bins you can use the keyword 'tool' with the value 'plot_bin', like this:
+To plot workspace bins you can use the keyword 'tool' with the value
+'plot_bin', like this:
 
     ws = Load('/path/to/HRP39182.RAW', OutputWorkspace="HRP39182")
     plot(ws, [1, 5, 7, 100], tool='plot_bin')
@@ -110,7 +120,8 @@ or, alternatively, you can use the plot_bin command:
 Plotting MD workspaces
 ---------------------
 
-Similarly, to plot MD workspaces you can use the keyword 'tool' with the value 'plot_md', like this:
+Similarly, to plot MD workspaces you can use the keyword 'tool' with
+the value 'plot_md', like this:
 
     simple_md_ws = CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace=MDWWorkspaceName)
     plot(simple_md_ws, tool='plot_md')
@@ -210,7 +221,10 @@ command with the hold parameter enabled:
 
 After the two commands above, any subsequent plot command that passes
 hold='on' as a parameter would add new spectra into the same plot. An
-alternative way of doing this is explained next.
+alternative way of doing this is explained next. Note however that
+using the hold property to combine different types of plots
+(plot_spectrum, plot_bin, etc.) will most likely produce useless
+results.
 
 Multi-plot commands
 -------------------
@@ -261,6 +275,7 @@ where a plot (or lines) has been shown.
     fig = lines[0].figure()
     all_ax = fig.axes()    # fig.axes() returns in principle a list
     ax = all_ax[0]         #  but we only use one axes
+
     ax.set_ylabel('Counts')
     ax.set_xlabel('ToF')
     ax.set_ylim(0, 8)
@@ -503,12 +518,12 @@ class Figure():
         if isinstance(num, int):
             # normal matplotlib use, like figure(2)
             missing = -1
-            fig = __figures.get(num, missing)
+            fig = Figure.__figures.get(num, missing)
             if missing == fig:
                 self._graph = Figure.__empty_graph()
-                __figures[num] = self
-                if num > __figures_seq:
-                    __figures_seq = num
+                Figure.__figures[num] = self
+                if num > Figure.__figures_seq:
+                    Figure.__figures_seq = num
                 self._axes = Axes(self)
             else:
                 if None == fig._graph._getHeldObject():
@@ -530,13 +545,13 @@ class Figure():
         else:
             raise ValueError("To create a Figure you need to specify a figure number or a Graph object." )
 
-    def suptitle(title):
+    def suptitle(self, title):
         """
         Set a title for the figure
 
         @param title :: title string
         """
-        l = _graph.activeLayer()
+        l = self._graph.activeLayer()
         l.setTitle(title)
 
     def axes(self):
@@ -546,7 +561,7 @@ class Figure():
         Returns :: list of axes. Presently only one Axes object is supported
                    and this method returns a single object list
         """
-        return _axes
+        return [self._axes]
 
     @classmethod
     def fig_seq(cls):
@@ -706,9 +721,9 @@ def __is_array_of_workspaces(arg):
     return __is_array(arg) and len(arg) > 0 and __is_workspace(arg[0])
 
 
-def __create_workspace(x, y, name="array_dummy_workspace"):
+def __create_workspace(x, y, name="__array_dummy_workspace"):
     """
-        Create a workspace. Also puts it in the ADS
+        Create a workspace. Also puts it in the ADS with __ name
         @param x :: x array
         @param y :: y array
         @param name :: workspace name
@@ -888,11 +903,12 @@ def __is_linestyle(stl, i):
         return 0
 
     if len(stl) > i+1:
-        # can check 2 chars
-        wrong = 'inexistent'
-        penstyle = __linestyle_to_qt_penstyle.get(stl[i:i+2], wrong)
-        if wrong != penstyle:
-            return 2
+        if '-' == stl[i+1] or '.' == stl[i+1]:
+            # can check 2 chars
+            wrong = 'inexistent'
+            penstyle = __linestyle_to_qt_penstyle.get(stl[i:i+2], wrong)
+            if wrong != penstyle:
+                return 2
 
     if '-'==stl[i] or ':'==stl[i]:
         return 1
@@ -920,7 +936,7 @@ def __apply_plot_args(graph, first_line, *args):
                 linestyle_len = __is_linestyle(a,i)
                 if linestyle_len > 0:
                     __apply_linestyle(graph, a[i:i+linestyle_len], first_line)
-                    i += 2
+                    i += linestyle_len
                 elif __is_marker(a[i]):
                     __apply_marker(graph, a[i:], first_line)
                     i += 1
@@ -1403,15 +1419,10 @@ def figure(num=None):
     if not num:
         return __empty_fig()
     else:
-        if num < 0:
-            raise ValueError("The figure number cannot be negative")
+        if num < 1:
+            raise ValueError("The figure number must be >= 1")
 
-    missing = None
-    fig = Figure.__figures.get(num, None)
-    if None == fig:
-        return __empty_fig()
-    else:
-        return fig
+    return Figure(num)
 
 def savefig(name):
     """
