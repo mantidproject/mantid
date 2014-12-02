@@ -10,7 +10,7 @@ class ReflTestHarness:
         pass
 
     def setup_application(self):
-        startApplication("MantidPlot")
+        startApplication("MantidPlot_exe")
         
     def tear_down_application(self):
         sendEvent("QCloseEvent", waitForObject(":MantidPlot - untitled_ApplicationWindow_2"))
