@@ -129,8 +129,28 @@ public:
     std::string localInstDir = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories()[0];
     cleanupDiretory(localInstDir);
 
-    TSM_ASSERT_EQUALS("The expected number of files downloaded the first time was wrong.", runDownloadInstrument(), 2);
-    TSM_ASSERT_EQUALS("The expected number of files downloaded the second time was wrong.", runDownloadInstrument(), 1);
+
+    cleanupDiretory(localInstDir);
+  }
+
+  void test_execOrphanedFile()
+  {
+    std::string localInstDir = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories()[0];
+    cleanupDiretory(localInstDir);
+
+    //add an orphaned file
+    Poco::Path orphanedFilePath (localInstDir);
+    orphanedFilePath.makeDirectory();
+    orphanedFilePath.setFileName("Orphaned_Should_not_be_here.xml");
+
+    std::ofstream file;
+    file.open (orphanedFilePath.toString().c_str());
+    file.close();
+
+    TSM_ASSERT_EQUALS("The expected number of files downloaded was wrong.", runDownloadInstrument(), 2);
+
+    Poco::File orphanedFile(orphanedFilePath);
+    TSM_ASSERT("The orphaned file was not deleted",orphanedFile.exists()==false);
 
     cleanupDiretory(localInstDir);
   }
