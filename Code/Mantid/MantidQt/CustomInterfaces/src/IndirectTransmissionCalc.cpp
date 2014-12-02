@@ -103,11 +103,9 @@ namespace MantidQt
       // Update the table in the GUI
       m_uiForm.tvResultsTable->clear();
 
-      QTreeWidgetItem *item;
-
       for(size_t i = 0; i < resultTable->rowCount(); i++)
       {
-        item = new QTreeWidgetItem();
+        QTreeWidgetItem *item = new QTreeWidgetItem();
         item->setText(0, QString::fromStdString(propertyNames->cell<std::string>(i)));
         item->setText(1, QString::number(propertyValues->cell<double>(i)));
         m_uiForm.tvResultsTable->addTopLevelItem(item);
@@ -154,6 +152,12 @@ namespace MantidQt
       // Get the IDF file path form experiment info
       ExperimentInfo expInfo;
       std::string instFilename = expInfo.getInstrumentFilename(instrumentName.toStdString());
+
+      if(instFilename.empty())
+      {
+        g_log.error("Could not find IDF for selected instrument");
+        return;
+      }
 
       // Load the instrument
       IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
@@ -252,7 +256,7 @@ namespace MantidQt
     /**
      * Enable or disable the instrument setup controls.
      *
-     * @param If the controls should be enabled
+     * @param enabled If the controls should be enabled
      */
     void IndirectTransmissionCalc::enableInstrumentControls(bool enabled)
     {
