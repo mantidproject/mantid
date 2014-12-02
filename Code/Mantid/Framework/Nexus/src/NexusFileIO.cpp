@@ -521,15 +521,15 @@ namespace Mantid
       * @param col :: Reference to the column being svaed.
       * @param columnName :: Name of the nexus data set in which the column values are saved.
       */
-    template<typename T>
+    template<typename ColumnT, typename NexusT>
     void NexusFileIO::writeTableColumn(int type, const std::string& interpret_as, const API::Column& col, const std::string& columnName) const
     {
       const int nRows = static_cast<int>(col.size());
       int dims_array[1] = { nRows };
 
-      T* toNexus = new T[nRows];
+      NexusT* toNexus = new NexusT[nRows];
       for (int ii = 0; ii < nRows; ii++)
-        toNexus[ii] = col.cell<T>(ii);
+        toNexus[ii] = static_cast<NexusT>(col.cell<ColumnT>(ii));
       NXwritedata(columnName.c_str(), type, 1, dims_array, (void *) (toNexus), false);
       delete[] toNexus;
 
@@ -665,31 +665,31 @@ namespace Mantid
 
         if (col->isType<double>())
         {
-          writeTableColumn<double>(NX_FLOAT64,"",*col,str);
+          writeTableColumn<double,double>(NX_FLOAT64,"",*col,str);
         }
         else if (col->isType<float>())
         {
-          writeTableColumn<float>(NX_FLOAT32,"",*col,str);
+          writeTableColumn<float,float>(NX_FLOAT32,"",*col,str);
         }
-        else if (col->isType<int32_t>())
+        else if (col->isType<int>())
         {
-          writeTableColumn<int32_t>(NX_INT32,"",*col,str);
+          writeTableColumn<int,int32_t>(NX_INT32,"",*col,str);
         }
         else if (col->isType<uint32_t>())
         {
-          writeTableColumn<uint32_t>(NX_UINT32,"",*col,str);
+          writeTableColumn<uint32_t,uint32_t>(NX_UINT32,"",*col,str);
         }
         else if (col->isType<int64_t>())
         {
-          writeTableColumn<int64_t>(NX_INT64,"",*col,str);
+          writeTableColumn<int64_t,int64_t>(NX_INT64,"",*col,str);
         }
-        else if (col->isType<uint64_t>())
+        else if (col->isType<size_t>())
         {
-          writeTableColumn<uint64_t>(NX_UINT64,"",*col,str);
+          writeTableColumn<size_t,uint64_t>(NX_UINT64,"",*col,str);
         }
         else if (col->isType<Boolean>())
         {
-          writeTableColumn<bool>(NX_UINT8,"",*col,str);
+          writeTableColumn<bool,bool>(NX_UINT8,"",*col,str);
         }
         else if (col->isType<std::string>())
         {

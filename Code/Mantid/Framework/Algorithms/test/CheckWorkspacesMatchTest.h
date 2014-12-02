@@ -902,7 +902,7 @@ private:
     table->addColumn("int","int");
     table->addColumn("uint","uint");
     table->addColumn("long64","int64");
-    table->addColumn("ulong64","uint64");
+    table->addColumn("size_t","size_t");
     table->addColumn("float","float");
     table->addColumn("double","double");
     table->addColumn("bool","bool");

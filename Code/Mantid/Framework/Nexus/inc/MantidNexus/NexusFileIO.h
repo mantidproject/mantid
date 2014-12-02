@@ -199,7 +199,7 @@ namespace Mantid
                                   const std::string& interpret_as) const;
 
       /// Save a numeric columns of a TableWorkspace to currently open nexus file.
-      template<typename T>
+      template<typename ColumnT, typename NexusT>
       void writeTableColumn(int type, const std::string& interpret_as, const API::Column& col, const std::string& columnName) const;
     };
     

@@ -111,9 +111,9 @@ namespace Mantid
       // the detector ID;
       if(!targWS->addColumn("int","DetectorID"))throw(std::runtime_error("Can not add column DetectorID"));
       // stores spectra index which corresponds to a valid detector index;
-      if(!targWS->addColumn("ulong64","detIDMap"))throw(std::runtime_error("Can not add column detIDMap"));
+      if(!targWS->addColumn("size_t","detIDMap"))throw(std::runtime_error("Can not add column detIDMap"));
       // stores detector index which corresponds to the workspace index;
-      if(!targWS->addColumn("ulong64","spec2detMap"))throw(std::runtime_error("Can not add column spec2detMap"));
+      if(!targWS->addColumn("size_t","spec2detMap"))throw(std::runtime_error("Can not add column spec2detMap"));
 
       m_getIsMasked = this->getProperty("GetMaskState");
       if(m_getIsMasked)  // as bool is presented in vectors as a class, we are using int instead of bool
@@ -170,9 +170,9 @@ namespace Mantid
       targWS->logs()->addProperty<bool>("FakeDetectors",false,true);
 
       // get access to the workspace memory
-      auto &sp2detMap  = targWS->getColVector<uint64_t>("spec2detMap");
+      auto &sp2detMap  = targWS->getColVector<size_t>("spec2detMap");
       auto &detId      = targWS->getColVector<int32_t>("DetectorID");
-      auto &detIDMap   = targWS->getColVector<uint64_t>("detIDMap");
+      auto &detIDMap   = targWS->getColVector<size_t>("detIDMap");
       auto &L2         = targWS->getColVector<double>("L2");
       auto &TwoTheta   = targWS->getColVector<double>("TwoTheta");
       auto &Azimuthal  = targWS->getColVector<double>("Azimuthal");
@@ -332,9 +332,9 @@ namespace Mantid
 
 
       // get access to the workspace memory
-      auto &sp2detMap  = targWS->getColVector<uint64_t>("spec2detMap");
+      auto &sp2detMap  = targWS->getColVector<size_t>("spec2detMap");
       auto &detId      = targWS->getColVector<int32_t>("DetectorID");
-      auto &detIDMap   = targWS->getColVector<uint64_t>("detIDMap");
+      auto &detIDMap   = targWS->getColVector<size_t>("detIDMap");
       auto &L2         = targWS->getColVector<double>("L2");
       auto &TwoTheta   = targWS->getColVector<double>("TwoTheta");
       auto &Azimuthal  = targWS->getColVector<double>("Azimuthal");

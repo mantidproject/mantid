@@ -353,12 +353,12 @@ public:
   {
 
     TableWorkspace tw(3);
-    tw.addColumn("ulong64","SizeT");
+    tw.addColumn("size_t","SizeT");
     tw.addColumn("double","Double");
     tw.addColumn("str","String");
 
 
-    auto &SizeTData = tw.getColVector<uint64_t>("SizeT");
+    auto &SizeTData = tw.getColVector<size_t>("SizeT");
     TS_ASSERT_THROWS(tw.getColVector<int>("Double"),std::runtime_error);
     std::vector<double> &DoublData = tw.getColVector<double>("Double");
     std::vector<std::string> &StrData = tw.getColVector<std::string>("String");
@@ -374,7 +374,7 @@ public:
     StrData[1] = "2";
     StrData[2] = "3";
 
-    auto SizeTDataI = tw.getColVector<uint64_t>(0);
+    auto SizeTDataI = tw.getColVector<size_t>(0);
     TS_ASSERT_THROWS(tw.getColVector<int>(1),std::runtime_error);
     auto DoublDataI = tw.getColVector<double>(1);
     auto StrDataI = tw.getColVector<std::string>(2);

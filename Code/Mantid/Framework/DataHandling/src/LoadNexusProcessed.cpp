@@ -762,13 +762,13 @@ int64_t          index_start = indices[wi];
        * @param tableWs     :: Workspace to add column to
        * @param columnType  :: Name of the column type to create
        */
-      template<typename Type>
+      template<typename ColumnType, typename NexusType>
       void LoadNexusProcessed::loadNumericColumn(const Mantid::NeXus::NXData& tableData,
                             const std::string& dataSetName,
                             const API::ITableWorkspace_sptr& tableWs,
                             const std::string& columnType)
       {
-        NXDataSetTyped<Type> data = tableData.openNXDataSet<Type>(dataSetName);
+        NXDataSetTyped<NexusType> data = tableData.openNXDataSet<NexusType>(dataSetName);
         std::string columnTitle = data.attributes("name");
         if (!columnTitle.empty())
         {
@@ -788,7 +788,7 @@ int64_t          index_start = indices[wi];
           auto column = tableWs->addColumn(columnType, columnTitle);
           for (size_t i = 0; i < length; i++)
           {
-            column->cell<Type>(i) = *(data() + i);
+            column->cell<ColumnType>(i) = static_cast<ColumnType>(*(data() + i));
           }
         }
       }
@@ -821,36 +821,36 @@ int64_t          index_start = indices[wi];
         {
           if (info.type == NX_FLOAT64)
           {
-            loadNumericColumn<double>( nx_tw, dataSetName, workspace, "double" );
+            loadNumericColumn<double,double>( nx_tw, dataSetName, workspace, "double" );
           }
           else if (info.type == NX_INT32)
           {
-            loadNumericColumn<int>( nx_tw, dataSetName, workspace, "int" );
+            loadNumericColumn<int,int32_t>( nx_tw, dataSetName, workspace, "int" );
           }
           else if (info.type == NX_UINT32)
           {
-            loadNumericColumn<uint32_t>( nx_tw, dataSetName, workspace, "uint" );
+            loadNumericColumn<uint32_t,uint32_t>( nx_tw, dataSetName, workspace, "uint" );
           }
           else if (info.type == NX_INT64)
           {
-            loadNumericColumn<int64_t>( nx_tw, dataSetName, workspace, "long64" );
+            loadNumericColumn<int64_t,int64_t>( nx_tw, dataSetName, workspace, "long64" );
           }
           else if (info.type == NX_UINT64)
           {
-            loadNumericColumn<int64_t>( nx_tw, dataSetName, workspace, "ulong64" );
+            loadNumericColumn<size_t,uint64_t>( nx_tw, dataSetName, workspace, "size_t" );
           }
           else if (info.type == NX_FLOAT32)
           {
-            loadNumericColumn<float>( nx_tw, dataSetName, workspace, "float" );
+            loadNumericColumn<float,float>( nx_tw, dataSetName, workspace, "float" );
           }
           else if (info.type == NX_UINT8)
           {
-            loadNumericColumn<Boolean>( nx_tw, dataSetName, workspace, "bool" );
+            loadNumericColumn<bool,bool>( nx_tw, dataSetName, workspace, "bool" );
           }
-          //else
-          //{
-          //  throw std::logic_error("Column with Nexus data type " + boost::lexical_cast<std::string>(info.type) + " cannot be loaded.");
-          //}
+          else
+          {
+            throw std::logic_error("Column with Nexus data type " + boost::lexical_cast<std::string>(info.type) + " cannot be loaded.");
+          }
         }
         else if (info.rank == 2)
         {

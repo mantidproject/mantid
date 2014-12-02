@@ -603,7 +603,7 @@ public:
         TS_ASSERT_DELTA( column[3], 0.4, 0.000001 );
       }
       {
-        ConstColumnVector<uint64_t> column = ws->getVector("Size");
+        ConstColumnVector<size_t> column = ws->getVector("Size");
         TS_ASSERT_EQUALS( column[0], 25);
         TS_ASSERT_EQUALS( column[1], 23);
         TS_ASSERT_EQUALS( column[2], 22);

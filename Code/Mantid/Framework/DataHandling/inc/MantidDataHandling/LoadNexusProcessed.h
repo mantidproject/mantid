@@ -98,7 +98,7 @@ namespace Mantid
       API::Workspace_sptr loadTableEntry(Mantid::NeXus::NXEntry& entry);
 
       /// Load a numeric column to the TableWorkspace.
-      template<typename Type>
+      template<typename ColumnType, typename NexusType>
       void loadNumericColumn(const Mantid::NeXus::NXData& tableData,
                             const std::string& dataSetName,
                             const API::ITableWorkspace_sptr& tableWs,

@@ -596,9 +596,9 @@ public:
       data[1] = 22;
       data[2] = 23;
     }
-    table->addColumn("ulong64", "SizeColumn");
+    table->addColumn("size_t", "SizeColumn");
     {
-      auto& data = table->getColVector<uint64_t>("SizeColumn");
+      auto& data = table->getColVector<size_t>("SizeColumn");
       data[0] = 35;
       data[1] = 32;
       data[2] = 33;
