@@ -203,7 +203,7 @@ class DirectEnergyConversion(object):
                 # Load
                 white_data = self.load_data(white,whitews_name,self._keep_wb_workspace)
 
-                diag_mask= LoadMask(Instrument=self.instr_name,InputFile=prop_man.hard_mask_file,
+                diag_mask= LoadMask(Instrument=prop_man.instr_name,InputFile=prop_man.hard_mask_file,
                                OutputWorkspace='hard_mask_ws')
                 MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
                 diag_mask,masked_list = ExtractMask(InputWorkspace=white_data)
@@ -764,7 +764,7 @@ class DirectEnergyConversion(object):
         prop_man.log("########### Run diagnose for sample run ##############################",'notice');
         prop_man.log("########### Run diagnose for monochromatic vanadium run ##############",'notice');
         masking = self.diagnose(prop_man.wb_run,prop_man.mask_run,
-                                    second_white=None,print_results=True)
+                                second_white=None,print_results=True)
         header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
 
 
@@ -843,10 +843,10 @@ class DirectEnergyConversion(object):
         """
         # Old interface support
         prop_man = self.prop_man;
-        if not (prop_man.mono_correction_factor is None) :
+        if prop_man.mono_correction_factor:
             absnorm_factor=float(prop_man.mono_correction_factor)
-            prop_man.log('##### Using supplied workspace correction factor                          ######')
-            prop_man.log('      Value : '+str(absnorm_factor))
+            prop_man.log('##### Using supplied workspace correction factor                          ######','information')
+            prop_man.log('      Value : {0}'.format(absnorm_factor),'information')
 
         else:
             prop_man.log('##### Evaluate the integral from the monovan run and calculate the correction factor ######','information')
@@ -868,11 +868,11 @@ class DirectEnergyConversion(object):
             prop_man.log('      Incident energy found for monovanadium run: '+str(ei_monovan)+' meV','notice')
 
 
-        (anf_LibISIS,anf_SS2,anf_Puas,anf_TGP) = self.get_abs_normalization_factor(deltaE_wkspace_monovan.getName(),ei_monovan)
+            (anf_LibISIS,anf_SS2,anf_Puas,anf_TGP) = self.get_abs_normalization_factor(deltaE_wkspace_monovan.getName(),ei_monovan)
 
-        prop_man.log('Absolute correction factor S^2: {0:10.4f} LibISIS: {1:10.4f} Poisson: {2:10.4f}  TGP: {3:10.4f} '.format(anf_LibISIS,anf_SS2,anf_Puas,anf_TGP))
-        absnorm_factor = anf_TGP;
-
+            prop_man.log('Absolute correction factor S^2: {0:10.4f} LibISIS: {1:10.4f} Poisson: {2:10.4f}  TGP: {3:10.4f} '.format(anf_LibISIS,anf_SS2,anf_Puas,anf_TGP))
+            absnorm_factor = anf_TGP;
+        #end
 
         deltaE_wkspace_sample = deltaE_wkspace_sample/absnorm_factor;
 
