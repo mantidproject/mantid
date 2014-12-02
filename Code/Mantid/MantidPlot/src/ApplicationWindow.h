@@ -1208,6 +1208,8 @@ private:
   ///
   void showalgorithmDescriptions();
 
+  /// Contains the rules of when to show the FirstTimeSetup UI.
+  bool shouldWeShowFirstTimeSetup();
   /// Open up the FirstRunSetup dialog
   void showFirstTimeSetup();
 

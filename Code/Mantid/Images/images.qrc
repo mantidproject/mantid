@@ -37,6 +37,17 @@
     </qresource>
     <qresource prefix="/Icons">
         <file>LoadFile.png</file>
+        <file>Notepad-Bloc-notes-icon-48x48.png</file>
+        <file>Notepad-Bloc-notes-icon-32x32.png</file>
+        <file>download-icon-48x48.png</file>
+        <file>download-icon-32x32.png</file>
+        <file>Python-icon-48x48.png</file>
+        <file>Python-icon-32x32.png</file>
+        <file>Python-icon-16x16.png</file>
+        <file>Plugin-icon-32x32.png</file>
+        <file>Plugin-Python-icon-32x32.png</file>
+        <file>Misc-Tutorial-icon-48x48.png</file>
+        <file>Misc-Tutorial-icon-32x32.png</file>
     </qresource>
     <qresource prefix="/PickTools">
         <file>zoom.png</file>

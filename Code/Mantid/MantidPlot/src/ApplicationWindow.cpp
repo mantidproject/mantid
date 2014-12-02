@@ -585,12 +585,35 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
     g_log.warning("The scripting language is set to muParser. This is probably not what you want! Change the default in View->Preferences.");
   }
 
-  // Need to show first time setup dialog?
+  // Need to show first time setup dialog?#
+  if (shouldWeShowFirstTimeSetup())
+  {
+    showFirstTimeSetup();
+  }
+ 
+  using namespace Mantid::API;
+  // Do this as late as possible to avoid unnecessary updates
+  AlgorithmFactory::Instance().enableNotifications();
+  AlgorithmFactory::Instance().notificationCenter.postNotification(new AlgorithmFactoryUpdateNotification);
+
+  /*
+  The scripting enironment call setScriptingLanguage is trampling over the PATH, so we have to set it again.
+  Here we do not off the setup dialog.
+  */
+  const bool skipDialog = true;
+  trySetParaviewPath(args, skipDialog);
+}
+
+bool ApplicationWindow::shouldWeShowFirstTimeSetup()
+{
+  //first check the facility and instrument
+  using Mantid::Kernel::ConfigService;
+  auto & config = ConfigService::Instance(); 
   std::string facility = config.getString("default.facility");
   std::string instrument = config.getString("default.instrument");
   if ( facility.empty() || instrument.empty() )
   {
-    showFirstTimeSetup();
+    return true;
   }
   else
   {
@@ -607,20 +630,29 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
       //failed to find the facility or instrument
       g_log.error()<<"Could not find your default facility '" << facility 
         <<"' or instrument '" << instrument << "' in facilities.xml, showing please select again." << std::endl;
-      showFirstTimeSetup();
+      return true;
     }
   }
-  using namespace Mantid::API;
-  // Do this as late as possible to avoid unnecessary updates
-  AlgorithmFactory::Instance().enableNotifications();
-  AlgorithmFactory::Instance().notificationCenter.postNotification(new AlgorithmFactoryUpdateNotification);
 
-  /*
-  The scripting enironment call setScriptingLanguage is trampling over the PATH, so we have to set it again.
-  Here we do not off the setup dialog.
-  */
-  const bool skipDialog = true;
-  trySetParaviewPath(args, skipDialog);
+  QSettings settings;
+  settings.beginGroup("Mantid/FirstUse");
+  const bool doNotShowUntilNextRelease = settings.value("DoNotShowUntilNextRelease", 0).toInt();
+  const QString lastVersion = settings.value("LastVersion", "").toString();
+  settings.endGroup();
+
+  if (!doNotShowUntilNextRelease)
+  {
+    return true;
+  }
+
+  //Now check if the version has changed since last time
+  const QString version = QString::fromStdString(Mantid::Kernel::MantidVersion::releaseNotes());
+  if (version != lastVersion)
+  {
+    return true;
+  }
+
+  return false;
 }
 
 /*

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1002</width>
+    <width>998</width>
     <height>567</height>
    </rect>
   </property>
@@ -20,42 +20,68 @@
    <string>Welcome to Mantid</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QDialog{background-image: url(:/First_use_Background.png);}
+   <string notr="true">QDialog#FirstTimeSetup{background-image: url(:/First_use_Background.png);}
 color: rgb(255, 255, 255);</string>
   </property>
-  <widget class="QLabel" name="lbUpdate">
+  <widget class="QWidget" name="layoutWidget4">
    <property name="geometry">
     <rect>
-     <x>430</x>
-     <y>530</y>
-     <width>361</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">color: rgb(255, 255, 255);</string>
-   </property>
-   <property name="text">
-    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;You can revisit this dialog by selecting &amp;quot;First Time Setup&amp;quot; on the Help menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-   <property name="wordWrap">
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QWidget" name="layoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>797</x>
-     <y>530</y>
-     <width>191</width>
+     <x>10</x>
+     <y>540</y>
+     <width>981</width>
      <height>25</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QCheckBox" name="chkDoNotShowUntilNextRelease">
+      <property name="styleSheet">
+       <string notr="true">color: rgb(255, 255, 255);</string>
+      </property>
+      <property name="text">
+       <string>Do not show again until next release</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QLabel" name="lbUpdate">
+      <property name="minimumSize">
+       <size>
+        <width>370</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(255, 255, 255);</string>
+      </property>
+      <property name="text">
+       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;You can revisit this dialog by selecting &amp;quot;First Time Setup&amp;quot; on the Help menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
     <item>
      <widget class="QPushButton" name="pbCancel">
       <property name="text">
@@ -81,10 +107,10 @@ p, li { white-space: pre-wrap; }
   <widget class="QGroupBox" name="grpPersonalSetup">
    <property name="geometry">
     <rect>
-     <x>800</x>
-     <y>400</y>
-     <width>191</width>
-     <height>121</height>
+     <x>740</x>
+     <y>410</y>
+     <width>251</width>
+     <height>111</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -93,128 +119,93 @@ p, li { white-space: pre-wrap; }
    <property name="title">
     <string>Personal Setup</string>
    </property>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>100</x>
-      <y>20</y>
-      <width>71</width>
-      <height>48</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout"/>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>11</x>
-      <y>21</y>
-      <width>91</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">color: rgb(255, 255, 255);</string>
-    </property>
-    <property name="text">
-     <string>Default Facility</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="cbFacility">
-    <property name="geometry">
-     <rect>
-      <x>108</x>
-      <y>21</y>
-      <width>69</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">color: rgb(0, 0, 0);</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>11</x>
-      <y>47</y>
-      <width>91</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">color: rgb(255, 255, 255);</string>
-    </property>
-    <property name="text">
-     <string>Default Instrument</string>
-    </property>
-   </widget>
-   <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInstrument">
-    <property name="geometry">
-     <rect>
-      <x>108</x>
-      <y>47</y>
-      <width>69</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">color: rgb(0, 0, 0);</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="lbMUD">
+   <widget class="QWidget" name="layoutWidget1">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>70</y>
-      <width>131</width>
-      <height>26</height>
+      <y>20</y>
+      <width>231</width>
+      <height>80</height>
      </rect>
     </property>
-    <property name="styleSheet">
-     <string notr="true">color: rgb(255, 255, 255);</string>
-    </property>
-    <property name="text">
-     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
+       </property>
+       <property name="text">
+        <string>Default Facility</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="cbFacility">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
+       </property>
+       <property name="text">
+        <string>Default Instrument</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInstrument">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="lbMUD">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
+       </property>
+       <property name="text">
+        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Set local data directories:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-    </property>
-    <property name="wordWrap">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pbMUD">
-    <property name="geometry">
-     <rect>
-      <x>50</x>
-      <y>90</y>
-      <width>125</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">color: rgb(0, 0, 0);</string>
-    </property>
-    <property name="text">
-     <string>Manage User Directories</string>
-    </property>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Set local data directories&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QPushButton" name="pbMUD">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);</string>
+       </property>
+       <property name="text">
+        <string>Manage User Directories</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget2">
    <property name="geometry">
     <rect>
      <x>80</x>
      <y>200</y>
-     <width>307</width>
+     <width>313</width>
      <height>138</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout1">
     <item>
      <widget class="QCommandLinkButton" name="clbReleaseNotes">
       <property name="font">
@@ -236,12 +227,12 @@ p, li { white-space: pre-wrap; }
       </property>
       <property name="icon">
        <iconset resource="../../../Images/images.qrc">
-        <normaloff>:/win/running_process.png</normaloff>:/win/running_process.png</iconset>
+        <normaloff>:/Icons/Notepad-Bloc-notes-icon-48x48.png</normaloff>:/Icons/Notepad-Bloc-notes-icon-48x48.png</iconset>
       </property>
       <property name="iconSize">
        <size>
-        <width>40</width>
-        <height>40</height>
+        <width>48</width>
+        <height>48</height>
        </size>
       </property>
       <property name="checkable">
@@ -270,12 +261,12 @@ p, li { white-space: pre-wrap; }
       </property>
       <property name="icon">
        <iconset resource="../../../Images/images.qrc">
-        <normaloff>:/win/running_process.png</normaloff>:/win/running_process.png</iconset>
+        <normaloff>:/Icons/download-icon-48x48.png</normaloff>:/Icons/download-icon-48x48.png</iconset>
       </property>
       <property name="iconSize">
        <size>
-        <width>40</width>
-        <height>40</height>
+        <width>48</width>
+        <height>48</height>
        </size>
       </property>
       <property name="checkable">
@@ -285,7 +276,7 @@ p, li { white-space: pre-wrap; }
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget3">
    <property name="geometry">
     <rect>
      <x>540</x>
@@ -294,7 +285,7 @@ p, li { white-space: pre-wrap; }
      <height>311</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QVBoxLayout" name="verticalLayout2">
     <item>
      <widget class="QLabel" name="lblTutorials">
       <property name="font">
@@ -334,12 +325,12 @@ p, li { white-space: pre-wrap; }
       </property>
       <property name="icon">
        <iconset resource="../../../Images/images.qrc">
-        <normaloff>:/win/running_process.png</normaloff>:/win/running_process.png</iconset>
+        <normaloff>:/Icons/Misc-Tutorial-icon-32x32.png</normaloff>:/Icons/Misc-Tutorial-icon-32x32.png</iconset>
       </property>
       <property name="iconSize">
        <size>
-        <width>40</width>
-        <height>40</height>
+        <width>32</width>
+        <height>32</height>
        </size>
       </property>
       <property name="checkable">
@@ -368,12 +359,12 @@ p, li { white-space: pre-wrap; }
       </property>
       <property name="icon">
        <iconset resource="../../../Images/images.qrc">
-        <normaloff>:/win/running_process.png</normaloff>:/win/running_process.png</iconset>
+        <normaloff>:/Icons/Python-icon-32x32.png</normaloff>:/Icons/Python-icon-32x32.png</iconset>
       </property>
       <property name="iconSize">
        <size>
-        <width>40</width>
-        <height>40</height>
+        <width>32</width>
+        <height>32</height>
        </size>
       </property>
       <property name="checkable">
@@ -406,8 +397,8 @@ p, li { white-space: pre-wrap; }
       </property>
       <property name="iconSize">
        <size>
-        <width>40</width>
-        <height>40</height>
+        <width>32</width>
+        <height>32</height>
        </size>
       </property>
       <property name="checkable">
@@ -436,12 +427,12 @@ p, li { white-space: pre-wrap; }
       </property>
       <property name="icon">
        <iconset resource="../../../Images/images.qrc">
-        <normaloff>:/win/running_process.png</normaloff>:/win/running_process.png</iconset>
+        <normaloff>:/Icons/Plugin-Python-icon-32x32.png</normaloff>:/Icons/Plugin-Python-icon-32x32.png</iconset>
       </property>
       <property name="iconSize">
        <size>
-        <width>40</width>
-        <height>40</height>
+        <width>32</width>
+        <height>32</height>
        </size>
       </property>
       <property name="checkable">

@@ -38,6 +38,7 @@ class MANTID_KERNEL_DLL MantidVersion
 {
 public:
   static const char* version();     ///< The full version number
+  static std::string releaseNotes(); ///< The url to the most applicable release notes
   static const char* revision();    ///< The abbreviated SHA-1 of the last commit
   static const char* revisionFull();    ///< The full SHA-1 of the last commit
   static const char* releaseDate(); ///< The date of the last commit
