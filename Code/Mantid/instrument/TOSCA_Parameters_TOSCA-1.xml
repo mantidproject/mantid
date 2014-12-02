@@ -83,10 +83,7 @@
       <value val="40000" />
     </parameter>
     <parameter name="Workflow.GroupingMethod" type="string">
-      <value val="File" />
-    </parameter>
-    <parameter name="Workflow.GroupingFile" type="string">
-      <value val="TOSCA_Grouping.xml" />
+      <value val="All" />
     </parameter>
     <parameter name="Workflow.Masking" type="string">
       <value val="IdentifyNoisyDetectors" />
