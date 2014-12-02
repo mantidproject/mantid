@@ -617,6 +617,13 @@ public:
       data[1] = V3D(4,5,6);
       data[2] = V3D(7,8,9);
     }
+    table->addColumn("str", "StringColumn");
+    {
+      auto& data = table->getColVector<std::string>("StringColumn");
+      data[0] = "First row";
+      data[1] = "2";
+      data[2] = "";
+    }
 
     SaveNexusProcessed alg;
     alg.initialize();
@@ -691,6 +698,45 @@ public:
       doTestColumnInfo2( savedNexus, NX_FLOAT64, "V3D", "V3DColumn", 3 );
       double expectedData[] = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0 };
       doTestColumnData( "V3DColumn",savedNexus, expectedData, 9 );
+    }
+
+    {
+      savedNexus.openData("column_9");
+
+      NeXus::Info columnInfo = savedNexus.getInfo();
+      TS_ASSERT_EQUALS( columnInfo.dims.size(), 2 );
+      TS_ASSERT_EQUALS( columnInfo.dims[0], 3 );
+      TS_ASSERT_EQUALS( columnInfo.dims[1], 9 );
+      TS_ASSERT_EQUALS( columnInfo.type, NX_CHAR );
+
+      std::vector<NeXus::AttrInfo> attrInfos = savedNexus.getAttrInfos();
+      TS_ASSERT_EQUALS( attrInfos.size(), 3 );
+
+      if ( attrInfos.size() == 3 )
+      {
+        TS_ASSERT_EQUALS( attrInfos[1].name, "interpret_as");
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos[1]), "A string" );
+
+        TS_ASSERT_EQUALS( attrInfos[2].name, "name");
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos[2]), "StringColumn" );
+
+        TS_ASSERT_EQUALS( attrInfos[0].name, "units");
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos[0]), "N/A" );
+      }
+
+      std::vector<char> data;
+      savedNexus.getData(data);
+      TS_ASSERT_EQUALS( data.size(), 9 * 3 );
+
+      std::string first( data.begin(), data.begin() + 9 );
+      TS_ASSERT_EQUALS( first, "First row" );
+
+      std::string second( data.begin() + 9, data.begin() + 18 );
+      TS_ASSERT_EQUALS( second, "2        " );
+
+      std::string third( data.begin() + 18, data.end() );
+      TS_ASSERT_EQUALS( third, "         " );
+
     }
 
     savedNexus.close();
