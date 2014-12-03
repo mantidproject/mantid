@@ -88,12 +88,15 @@ class Symmetrise(PythonAlgorithm):
             logger.notice('Output array LR split index = %d' % output_cut_index)
 
         x_unit = mtd[self._sample].getAxis(0).getUnit().unitID()
+        v_unit = mtd[self._sample].getAxis(1).getUnit().unitID()
+        v_axis_data = mtd[self._sample].getAxis(1).extractValues()
 
         # Create an empty workspace with enough storage for the new data
         zeros = np.zeros(new_array_len * num_symm_spectra)
         CreateWorkspace(OutputWorkspace=temp_ws_name,
                         DataX=zeros, DataY=zeros, DataE=zeros,
                         NSpec=int(num_symm_spectra),
+                        VerticalAxisUnit=v_unit, VerticalAxisValues=v_axis_data,
                         UnitX=x_unit)
 
         # Copy logs and properties from sample workspace

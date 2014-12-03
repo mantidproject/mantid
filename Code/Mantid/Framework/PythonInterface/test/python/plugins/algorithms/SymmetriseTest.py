@@ -12,8 +12,11 @@ def _generate_sample_ws(ws_name):
     data_x = np.arange(0, 10, 0.01)
     data_y = _rayleigh(data_x, 1)
 
-    CreateWorkspace(DataX=data_x, DataY=data_y, OutputWorkspace=ws_name)
-    ScaleX(InputWorkspace=ws_name, Factor=-1, Operation="Add", OutputWorkspace=ws_name)  # centre the peak over 0
+    # Create the workspace and give it some units
+    CreateWorkspace(OutputWorkspace=ws_name, DataX=data_x, DataY=data_y,
+                    UnitX='MomentumTransfer', VerticalAxisUnit='QSquared', VerticalAxisValues='0.2')
+    # Centre the peak over 0
+    ScaleX(InputWorkspace=ws_name, Factor=-1, Operation="Add", OutputWorkspace=ws_name)
 
     return mtd[ws_name]
 
@@ -22,24 +25,34 @@ class SymmetriseTest(unittest.TestCase):
 
     def _validate_workspace(self, workspace):
         """
-        Performs a few simple chackes to make sure the output workspace is valid.
+        Verifies that the output workspace is actually symmetrical and
+        keeps properties of the original.
 
         @param workspace Workspace to check
         """
+        tolerance = 1e-15
 
-        tolerance = 1e-10
-
-        # Min and max should be equal (or at least close enough to be equal)
+        # Test that each pair of points moving inwards are equal
         data_x = workspace.dataX(0)
-        delta = abs(data_x.min()) - abs(data_x.max())
-        self.assertTrue(abs(delta) < tolerance)
+        for idx in xrange(0, int(len(data_x) / 2)):
+            delta = abs(data_x[idx]) - abs(data_x[-(idx + 1)])
+            self.assertTrue(abs(delta) < tolerance)
+
+        # Test that the axis and values were preserved
+        sample_x_axis = self._sample_ws.getAxis(0)
+        sample_v_axis = self._sample_ws.getAxis(1)
+        test_x_axis = workspace.getAxis(0)
+        test_v_axis = workspace.getAxis(1)
+
+        self.assertEquals(sample_x_axis.getUnit().unitID(), test_x_axis.getUnit().unitID())
+        self.assertEquals(sample_v_axis.getUnit().unitID(), test_v_axis.getUnit().unitID())
+        self.assertEquals(sample_v_axis.extractValues(), test_v_axis.extractValues())
 
 
     def setUp(self):
         """
         Creates a sample workspace to symmetrise.
         """
-
         self._sample_ws = _generate_sample_ws('symm_test_sample_ws')
 
 
@@ -49,6 +62,16 @@ class SymmetriseTest(unittest.TestCase):
         """
         symm_test_out_ws = Symmetrise(Sample=self._sample_ws,
                                       XMin=0.05, XMax=0.2)
+
+        self._validate_workspace(symm_test_out_ws)
+
+
+    def test_symm_about_zero(self):
+        """
+        Tests symmetrising about x=0.
+        """
+        symm_test_out_ws = Symmetrise(Sample=self._sample_ws,
+                                      XMin=0.0, XMax=0.2)
 
         self._validate_workspace(symm_test_out_ws)
 

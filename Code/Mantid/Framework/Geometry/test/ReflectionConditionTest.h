@@ -7,6 +7,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include <set>
 
 using namespace Mantid::Geometry;
 
@@ -50,6 +51,29 @@ public:
     TS_ASSERT(refs[0]);
     TS_ASSERT_EQUALS(refs[0]->getName(), "Primitive");
     TS_ASSERT(refs[8]);
+  }
+
+  void test_ReflectionConditionSymbols()
+  {
+      std::set<std::string> centeringSymbols;
+      centeringSymbols.insert("P");
+      centeringSymbols.insert("A");
+      centeringSymbols.insert("B");
+      centeringSymbols.insert("C");
+      centeringSymbols.insert("F");
+      centeringSymbols.insert("I");
+      centeringSymbols.insert("Robv");
+      centeringSymbols.insert("Rrev");
+      centeringSymbols.insert("H");
+
+      std::vector<ReflectionCondition_sptr> refs = getAllReflectionConditions();
+      for(auto it = refs.begin(); it != refs.end(); ++it) {
+          TSM_ASSERT_DIFFERS((*it)->getSymbol(), centeringSymbols.find((*it)->getSymbol()), centeringSymbols.end());
+          centeringSymbols.erase((*it)->getSymbol());
+      }
+
+      // All centering symbols are present if the set is empty.
+      TS_ASSERT_EQUALS(centeringSymbols.size(), 0);
   }
 
 

@@ -21,7 +21,7 @@ Usage
 .. testcode:: ExIRISReduction
 
    InelasticIndirectReduction(InputFiles='IRS21360.raw',
-      OutputWorkspaceGroup='IndirectReductions',
+      OutputWorkspace='IndirectReductions',
       Instrument='IRIS',
       Analyser='graphite',
       Reflection='002',

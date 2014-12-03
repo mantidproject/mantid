@@ -21,18 +21,21 @@ namespace IDA
     virtual void run();
     virtual bool validate();
     virtual void loadSettings(const QSettings & settings);
-    virtual QString helpURL() {return "MSDFit";}
+    virtual QString helpURL() { return "MSDFit"; }
 
   private slots:
     void singleFit();
     void plotFit(QString wsName);
+    void newDataLoaded(const QString wsName);
     void plotInput();
+    void specMinChanged(int value);
+    void specMaxChanged(int value);
     void minChanged(double val);
     void maxChanged(double val);
     void updateRS(QtProperty* prop, double val);
-    
+
   private:
-    QString currentWsName;
+    QString m_currentWsName;
     QtTreePropertyBrowser* m_msdTree;
 
   };

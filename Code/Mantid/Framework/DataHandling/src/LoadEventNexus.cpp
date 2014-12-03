@@ -1204,28 +1204,19 @@ namespace Mantid
       if (load_monitors)
       {
         prog.report("Loading monitors");
-        const bool eventMonitors = getProperty("MonitorsAsEvents");
-        if( eventMonitors && this->hasEventMonitors() )
+        const bool monitorsAsEvents = getProperty("MonitorsAsEvents");
+
+        if (monitorsAsEvents && !this->hasEventMonitors()) {
+          g_log.warning() << "The property MonitorsAsEvents has been enabled but this file does not seem to have monitors with events." << endl;
+        }
+        if(monitorsAsEvents)
         {
-          // Note the reuse of the WS member variable below. Means I need to grab a copy of its current value.
-          auto dataWS = WS;
-          WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
-          //add filename
-          WS->mutableRun().addProperty("Filename",m_filename);
-          // Perform the load
-          loadEvents(&prog, true);
-          std::string mon_wsname = this->getProperty("OutputWorkspace");
-          mon_wsname.append("_monitors");
-          this->declareProperty(new WorkspaceProperty<IEventWorkspace>
-            ("MonitorWorkspace", mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
-          this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", WS);
-          // Set the internal monitor workspace pointer as well
-          dataWS->setMonitorWorkspace(WS);
-          // If the run was paused at any point, filter out those events (SNS only, I think)
-          filterDuringPause(WS);
+          // no matter whether the file has events or not, the user has requested to load events from monitors
+          this->runLoadMonitorsAsEvents(&prog);
         }
         else
         {
+          // this resorts to child algorithm 'LoadNexusMonitors', passing the property 'MonitorsAsEvents'
           this->runLoadMonitors();
         }
       }
@@ -2260,10 +2251,53 @@ namespace Mantid
       return result;
     }
 
+    /**
+    * Load the Monitors from the NeXus file into an event workspace. A
+    * new event workspace is created and associated to the data
+    * workspace. The name of the new event workspace is contructed by
+    * appending '_monitors' to the base workspace name.
+    *
+    * This is used when the property "MnitorsAsEvents" is enabled, and
+    * there are monitors with events.
+    *
+    * @param prog :: progress reporter
+    */
+    void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress * const prog)
+    {
+      try
+      {
+        // Note the reuse of the WS member variable below. Means I need to grab a copy of its current value.
+        auto dataWS = WS;
+        WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
+        // add filename
+        WS->mutableRun().addProperty("Filename", m_filename);
+        // Perform the load (only events from monitor)
+        loadEvents(prog, true);
+        std::string mon_wsname = this->getProperty("OutputWorkspace");
+        mon_wsname.append("_monitors");
+        this->declareProperty(new WorkspaceProperty<IEventWorkspace>
+                              ("MonitorWorkspace", mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
+        this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", WS);
+        // Set the internal monitor workspace pointer as well
+        dataWS->setMonitorWorkspace(WS);
+        // If the run was paused at any point, filter out those events (SNS only, I think)
+        filterDuringPause(WS);
+      }
+      catch (const std::exception& e)
+      {
+        g_log.error() << "Error while loading monitors as events from file: ";
+        g_log.error() << e.what() << std::endl;
+      }
+    }
+
     //-----------------------------------------------------------------------------
     /**
     * Load the Monitors from the NeXus file into a workspace. The original
     * workspace name is used and appended with _monitors.
+    *
+    * This is used when the property "MonitorsAsEvents" is not
+    * enabled, and uses LoadNexusMonitors to load monitor data into a
+    * Workspace2D.
     */
     void LoadEventNexus::runLoadMonitors()
     {
@@ -2277,6 +2311,7 @@ namespace Mantid
         loadMonitors->setPropertyValue("Filename", m_filename);
         g_log.information() << "New workspace name for monitors: " << mon_wsname << std::endl;
         loadMonitors->setPropertyValue("OutputWorkspace", mon_wsname);
+        loadMonitors->setPropertyValue("MonitorsAsEvents", this->getProperty("MonitorsAsEvents"));
         loadMonitors->execute();
         MatrixWorkspace_sptr mons = loadMonitors->getProperty("OutputWorkspace");
         this->declareProperty(new WorkspaceProperty<>("MonitorWorkspace",

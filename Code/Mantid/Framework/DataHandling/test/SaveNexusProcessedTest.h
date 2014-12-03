@@ -10,6 +10,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
@@ -22,6 +23,7 @@
 #include <Poco/Path.h>
 
 #include <nexus/NeXusFile.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <fstream>
 #include <cxxtest/TestSuite.h>
@@ -403,7 +405,6 @@ public:
     {
       Poco::File(output_filename).remove();
     }
-
     const int nEntries = 3;
     const int nHist = 1;
     const int nBins = 1;
@@ -503,7 +504,7 @@ public:
         TS_ASSERT_EQUALS( savedNexus.getAttr<int>(attrInfos1[2]), 4 );
 
         TS_ASSERT_EQUALS( attrInfos1[4].name, "interpret_as");
-        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos1[4]), "A vector of int" );
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos1[4]), "" );
 
         TS_ASSERT_EQUALS( attrInfos1[5].name, "name");
         TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos1[5]), "IntVectorColumn" );
@@ -539,7 +540,7 @@ public:
         TS_ASSERT_EQUALS( savedNexus.getAttr<int>(attrInfos2[1]), 2 );
 
         TS_ASSERT_EQUALS( attrInfos2[4].name, "interpret_as");
-        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos2[4]), "A vector of double" );
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos2[4]), "" );
 
         TS_ASSERT_EQUALS( attrInfos2[5].name, "name");
         TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos2[5]), "DoubleVectorColumn" );
@@ -553,7 +554,259 @@ public:
     Poco::File(outputFileName).remove();
   }
 
+  void testSaveTableColumn()
+  {
+    std::string outputFileName = "SaveNexusProcessedTest_testSaveTable.nxs";
+
+    // Create a table which we will save
+    auto table = boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(WorkspaceFactory::Instance().createTable());
+    table->setRowCount(3);
+    table->addColumn("int", "IntColumn");
+    {
+      auto& data = table->getColVector<int>("IntColumn");
+      data[0] = 5;
+      data[1] = 2;
+      data[2] = 3;
+    }
+    table->addColumn("double", "DoubleColumn");
+    {
+      auto& data = table->getColVector<double>("DoubleColumn");
+      data[0] = 0.5;
+      data[1] = 0.2;
+      data[2] = 0.3;
+    }
+    table->addColumn("float", "FloatColumn");
+    {
+      auto& data = table->getColVector<float>("FloatColumn");
+      data[0] = 10.5f;
+      data[1] = 10.2f;
+      data[2] = 10.3f;
+    }
+    table->addColumn("uint", "UInt32Column");
+    {
+      auto& data = table->getColVector<uint32_t>("UInt32Column");
+      data[0] = 15;
+      data[1] = 12;
+      data[2] = 13;
+    }
+    table->addColumn("long64", "Int64Column");
+    {
+      auto& data = table->getColVector<int64_t>("Int64Column");
+      data[0] = 25;
+      data[1] = 22;
+      data[2] = 23;
+    }
+    table->addColumn("size_t", "SizeColumn");
+    {
+      auto& data = table->getColVector<size_t>("SizeColumn");
+      data[0] = 35;
+      data[1] = 32;
+      data[2] = 33;
+    }
+    table->addColumn("bool", "BoolColumn");
+    {
+      auto& data = table->getColVector<Boolean>("BoolColumn");
+      data[0] = true;
+      data[1] = false;
+      data[2] = true;
+    }
+    table->addColumn("V3D", "V3DColumn");
+    {
+      auto& data = table->getColVector<V3D>("V3DColumn");
+      data[0] = V3D(1,2,3);
+      data[1] = V3D(4,5,6);
+      data[2] = V3D(7,8,9);
+    }
+    table->addColumn("str", "StringColumn");
+    {
+      auto& data = table->getColVector<std::string>("StringColumn");
+      data[0] = "First row";
+      data[1] = "2";
+      data[2] = "";
+    }
+
+    SaveNexusProcessed alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", table);
+    alg.setPropertyValue("Filename", outputFileName);
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    if ( ! alg.isExecuted() )
+      return; // Nothing to check
+
+    // Get full output file path
+    outputFileName = alg.getPropertyValue("Filename");
+
+    NeXus::File savedNexus(outputFileName);
+
+    savedNexus.openGroup("mantid_workspace_1", "NXentry");
+    savedNexus.openGroup("table_workspace", "NXdata");
+
+    {
+      savedNexus.openData("column_1");
+      doTestColumnInfo( savedNexus, NX_INT32, "", "IntColumn" );
+      int32_t expectedData[] = { 5, 2, 3 };
+      doTestColumnData( "IntColumn", savedNexus, expectedData );
+    }
+
+    {
+      savedNexus.openData("column_2");
+      doTestColumnInfo( savedNexus, NX_FLOAT64, "", "DoubleColumn" );
+      double expectedData[] = { 0.5, 0.2, 0.3 };
+      doTestColumnData( "DoubleColumn", savedNexus, expectedData );
+    }
+
+    {
+      savedNexus.openData("column_3");
+      doTestColumnInfo( savedNexus, NX_FLOAT32, "", "FloatColumn" );
+      float expectedData[] = { 10.5f, 10.2f, 10.3f };
+      doTestColumnData( "FloatColumn", savedNexus, expectedData );
+    }
+
+    {
+      savedNexus.openData("column_4");
+      doTestColumnInfo( savedNexus, NX_UINT32, "", "UInt32Column" );
+      uint32_t expectedData[] = { 15, 12, 13 };
+      doTestColumnData( "UInt32Column", savedNexus, expectedData );
+    }
+
+    {
+      savedNexus.openData("column_5");
+      doTestColumnInfo( savedNexus, NX_INT64, "", "Int64Column" );
+      int64_t expectedData[] = { 25, 22, 23 };
+      doTestColumnData( "Int64Column", savedNexus, expectedData );
+    }
+
+    {
+      savedNexus.openData("column_6");
+      doTestColumnInfo( savedNexus, NX_UINT64, "", "SizeColumn" );
+      uint64_t expectedData[] = { 35, 32, 33 };
+      doTestColumnData( "SizeColumn", savedNexus, expectedData );
+    }
+
+    {
+      savedNexus.openData("column_7");
+      doTestColumnInfo( savedNexus, NX_UINT8, "", "BoolColumn" );
+      unsigned char expectedData[] = { 1, 0, 1 };
+      doTestColumnData( "BoolColumn", savedNexus, expectedData );
+    }
+
+    {
+      savedNexus.openData("column_8");
+      doTestColumnInfo2( savedNexus, NX_FLOAT64, "V3D", "V3DColumn", 3 );
+      double expectedData[] = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0 };
+      doTestColumnData( "V3DColumn",savedNexus, expectedData, 9 );
+    }
+
+    {
+      savedNexus.openData("column_9");
+
+      NeXus::Info columnInfo = savedNexus.getInfo();
+      TS_ASSERT_EQUALS( columnInfo.dims.size(), 2 );
+      TS_ASSERT_EQUALS( columnInfo.dims[0], 3 );
+      TS_ASSERT_EQUALS( columnInfo.dims[1], 9 );
+      TS_ASSERT_EQUALS( columnInfo.type, NX_CHAR );
+
+      std::vector<NeXus::AttrInfo> attrInfos = savedNexus.getAttrInfos();
+      TS_ASSERT_EQUALS( attrInfos.size(), 3 );
+
+      if ( attrInfos.size() == 3 )
+      {
+        TS_ASSERT_EQUALS( attrInfos[1].name, "interpret_as");
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos[1]), "A string" );
+
+        TS_ASSERT_EQUALS( attrInfos[2].name, "name");
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos[2]), "StringColumn" );
+
+        TS_ASSERT_EQUALS( attrInfos[0].name, "units");
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos[0]), "N/A" );
+      }
+
+      std::vector<char> data;
+      savedNexus.getData(data);
+      TS_ASSERT_EQUALS( data.size(), 9 * 3 );
+
+      std::string first( data.begin(), data.begin() + 9 );
+      TS_ASSERT_EQUALS( first, "First row" );
+
+      std::string second( data.begin() + 9, data.begin() + 18 );
+      TS_ASSERT_EQUALS( second, "2        " );
+
+      std::string third( data.begin() + 18, data.end() );
+      TS_ASSERT_EQUALS( third, "         " );
+
+    }
+
+    savedNexus.close();
+    Poco::File(outputFileName).remove();
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
+
+  void doTestColumnInfo(NeXus::File& file, int type, const std::string& interpret_as, const std::string& name )
+  {
+      NeXus::Info columnInfo = file.getInfo();
+      TSM_ASSERT_EQUALS( name, columnInfo.dims.size(), 1 );
+      TSM_ASSERT_EQUALS( name, columnInfo.dims[0], 3 );
+      TSM_ASSERT_EQUALS( name, columnInfo.type, type );
+
+      std::vector<NeXus::AttrInfo> attrInfos = file.getAttrInfos();
+      TSM_ASSERT_EQUALS( name, attrInfos.size(), 3 );
+
+      if ( attrInfos.size() == 3 )
+      {
+        TSM_ASSERT_EQUALS( name, attrInfos[1].name, "interpret_as");
+        TSM_ASSERT_EQUALS( name, file.getStrAttr(attrInfos[1]), interpret_as );
+
+        TSM_ASSERT_EQUALS( name, attrInfos[2].name, "name");
+        TSM_ASSERT_EQUALS( name, file.getStrAttr(attrInfos[2]), name );
+
+        TSM_ASSERT_EQUALS( name, attrInfos[0].name, "units");
+        TSM_ASSERT_EQUALS( name, file.getStrAttr(attrInfos[0]), "Not known" );
+      }
+  }
+
+  void doTestColumnInfo2(NeXus::File& file, int type, const std::string& interpret_as, const std::string& name, int dim1 )
+  {
+      NeXus::Info columnInfo = file.getInfo();
+      TSM_ASSERT_EQUALS( name, columnInfo.dims.size(), 2 );
+      TSM_ASSERT_EQUALS( name, columnInfo.dims[0], 3 );
+      TSM_ASSERT_EQUALS( name, columnInfo.dims[1], dim1 );
+      TSM_ASSERT_EQUALS( name, columnInfo.type, type );
+
+      std::vector<NeXus::AttrInfo> attrInfos = file.getAttrInfos();
+      TSM_ASSERT_EQUALS( name, attrInfos.size(), 6 );
+
+      if ( attrInfos.size() == 6 )
+      {
+        TSM_ASSERT_EQUALS( name, attrInfos[4].name, "interpret_as");
+        TSM_ASSERT_EQUALS( name, file.getStrAttr(attrInfos[4]), interpret_as );
+
+        TSM_ASSERT_EQUALS( name, attrInfos[5].name, "name");
+        TSM_ASSERT_EQUALS( name, file.getStrAttr(attrInfos[5]), name );
+
+        TSM_ASSERT_EQUALS( name, attrInfos[3].name, "units");
+        TSM_ASSERT_EQUALS( name, file.getStrAttr(attrInfos[3]), "Not known" );
+      }
+  }
+
+  template<typename T>
+  void doTestColumnData( const std::string& name, NeXus::File& file, const T expectedData[], size_t len = 3 )
+  {
+    std::vector<T> data;
+    file.getData(data);
+
+    TSM_ASSERT_EQUALS( name, data.size(), len );
+    for(size_t i = 0; i < len; ++i)
+    {
+      std::string mess = name + ", item #" + boost::lexical_cast<std::string>(i);
+      TSM_ASSERT_EQUALS( mess, data[i], expectedData[i] );
+    };
+  }
+
   std::string outputFile;
   std::string entryName;
   std::string dataName;

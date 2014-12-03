@@ -14,9 +14,16 @@ Description
    This algorithm is being developed for a specific instrument. It might get changed or even 
    removed without a notification, should instrument scientists decide to do so.
 
-Fits the data of every detector pixel using expected Bragg peak positions.
 
-Allows to correct for tiny variations in pixel parameters.
+Allows to correct for tiny variations in pixel parameters. It does this by fitting the peak for each of the the selected bank's indices, (using :ref:`algm-EnginXFitPeaks` ) and using the resulting difc value to calibrate the detector position. The calibrated detector position is produced as shown below: 
+
+
+
+.. math:: L2 = \left(\frac{Difc} { 252.816 * 2 * sin \left(\frac{2\theta} {2.0}\right)}\right) - 50
+
+
+
+The cartesian2d vector is then returned for the given spherical co ordinates (L2, 2theta and phi).
 
 The result of the calibration is accepted by both :ref:`algm-EnginXCalibrate` and 
 :ref:`algm-EnginXFocus` to correct the detector positions before focussing.

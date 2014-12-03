@@ -149,7 +149,7 @@ namespace Mantid
  * [ Framework needs to support plug-ins; assigned to ion ]
  */
 
-class Graph: public QWidget 
+class Graph : public QWidget
 {
   Q_OBJECT
 
@@ -311,9 +311,6 @@ public slots:
   //! Provided for convenience in scripts
   void exportToFile(const QString& fileName);
   void exportSVG(const QString& fname);
-#ifdef EMF_OUTPUT
-  void exportEMF(const QString& fname);
-#endif
   void exportVector(const QString& fileName, int res = 0, bool color = true,
                     bool keepAspect = true, QPrinter::PageSize pageSize = QPrinter::Custom);
   void exportImage(const QString& fileName, int quality = 100, bool transparent = false);
@@ -356,7 +353,6 @@ public slots:
   //@}
 
   //! Set axis scale
-  void invertScale(int axis);
   void setScale(int axis, double start, double end, double step = 0.0,
                 int majorTicks = 5, int minorTicks = 5, int type = 0, bool inverted = false,
                 double left_break = -DBL_MAX, double right_break = DBL_MAX, int pos = 50,
@@ -401,28 +397,19 @@ public slots:
   void setAutoScale();
   void updateScale();
 
-  //! \name Saving to File
+  //! \name Project Loading/Saving
   //@{
-  QString saveToString(bool saveAsTemplate = false);
-  QString saveScale();
-  QString saveScaleTitles();
-  QString saveFonts();
-  QString saveMarkers();
+  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
+  std::string saveToProject();
+
+  std::string saveCurve(int i);
+  std::string saveScale();
+  std::string saveMarkers();
+
+  //Still used by saveCurve. Needs a clean-up.
   QString saveCurveLayout(int index);
-  QString saveAxesTitleColors();
-  QString saveAxesColors();
-  QString saveEnabledAxes();
-  QString saveCanvas();
-  QString saveTitle();
-  QString saveAxesTitleAlignement();
-  QString saveEnabledTickLabels();
-  QString saveTicksType();
-  QString saveCurves();
-  QString saveLabelsFormat();
-  QString saveLabelsRotation();
-  QString saveAxesLabelsType();
-  QString saveAxesBaseline();
-  QString saveAxesFormulas();
+  //A method to populate the CurveLayout struct on loading a project
+  CurveLayout fillCurveSettings(const QStringList & curve, int fileVersion, unsigned int offset = 0);
   //@}
 
   //! \name Text Markers
@@ -432,12 +419,11 @@ public slots:
   LegendWidget* insertText(LegendWidget*);
 
   //! Used when opening a project file
-  LegendWidget* insertText(const QStringList& list, int fileVersion);
+  LegendWidget* insertText(const std::string& type, const std::string& line);
 
   void addTimeStamp();
   void removeLegend();
   void removeLegendItem(int index);
-  void insertLegend(const QStringList& lst, int fileVersion);
 
   LegendWidget *legend(){return d_legend;};
   LegendWidget* newLegend(const QString& text = QString());
@@ -739,8 +725,6 @@ public slots:
   Spectrogram* plotSpectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type);//Mantid
   // Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type);//Mantid
   Spectrogram* plotSpectrogram(Spectrogram *d_spectrogram, CurveType type);//Mantid
-  //! Restores a spectrogram. Used when opening a project file.
-  void restoreSpectrogram(ApplicationWindow *app, const QStringList& lst);
   //! Add a matrix histogram  to the graph
   QwtHistogram* addHistogram(Matrix *m);
   //! Restores a histogram from a project file.
@@ -814,8 +798,6 @@ private slots:
   void slotDragMouseMove(QPoint);
 
 private:
-  //! Finds bounding interval of the plot data.
-  QwtDoubleInterval axisBoundingInterval(int axis);
   void niceLogScales(QwtPlot::Axis axis);
   void deselectCurves();
   void addLegendItem();

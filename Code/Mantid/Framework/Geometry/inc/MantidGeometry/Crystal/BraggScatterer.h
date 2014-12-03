@@ -81,6 +81,7 @@ public:
     virtual BraggScatterer_sptr clone() const = 0;
 
     virtual StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const = 0;
+    double calculateFSquared(const Kernel::V3D &hkl) const;
 
     bool isPropertyExposedToComposite(const std::string &propertyName) const;
     bool isPropertyExposedToComposite(Kernel::Property *property) const;

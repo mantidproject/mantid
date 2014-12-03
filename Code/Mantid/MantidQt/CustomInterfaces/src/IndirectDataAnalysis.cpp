@@ -34,7 +34,9 @@ namespace IDA
    * @param parent :: the parent QWidget.
    */
   IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent) :
-    UserSubWindow(parent), m_dblEdFac(NULL), m_blnEdFac(NULL),
+    UserSubWindow(parent),
+    m_valInt(NULL), m_valDbl(NULL),
+    m_dblEdFac(NULL), m_blnEdFac(NULL),
     m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange)
   {
     // Allows us to get a handle on a tab using an enum, for example "m_tabs[ELWIN]".
@@ -92,6 +94,7 @@ namespace IDA
       connect(tab->second, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
     }
 
+    connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this, SLOT(exportTabPython()));
     connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
     connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
     connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
@@ -154,6 +157,15 @@ namespace IDA
     unsigned int currentTab = m_uiForm.tabWidget->currentIndex();
     QString url = m_tabs[currentTab]->tabHelpURL();
     QDesktopServices::openUrl(QUrl(url));
+  }
+
+  /**
+   * Handles exporting a Python script for the current tab.
+   */
+  void IndirectDataAnalysis::exportTabPython()
+  {
+    unsigned int currentTab = m_uiForm.tabWidget->currentIndex();
+    m_tabs[currentTab]->exportPythonScript();
   }
 
   /**

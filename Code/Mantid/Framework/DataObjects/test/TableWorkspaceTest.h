@@ -358,7 +358,7 @@ public:
     tw.addColumn("str","String");
 
 
-    std::vector<size_t> &SizeTData = tw.getColVector<size_t>("SizeT");
+    auto &SizeTData = tw.getColVector<size_t>("SizeT");
     TS_ASSERT_THROWS(tw.getColVector<int>("Double"),std::runtime_error);
     std::vector<double> &DoublData = tw.getColVector<double>("Double");
     std::vector<std::string> &StrData = tw.getColVector<std::string>("String");

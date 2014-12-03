@@ -11,6 +11,7 @@
 #include "MantidKernel/StdoutChannel.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/NetworkProxy.h"
 
 #include <Poco/Util/LoggingConfigurator.h>
 #include <Poco/Util/SystemConfiguration.h>
@@ -25,8 +26,10 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/Notification.h>
 #include <Poco/Environment.h>
+#include <Poco/File.h>
 #include <Poco/Process.h>
 #include <Poco/String.h>
+#include <Poco/URI.h>
 #ifdef _WIN32
   #pragma warning( disable: 4250 )
 #endif
@@ -182,7 +185,8 @@ ConfigServiceImpl::ConfigServiceImpl() :
 #else
   m_user_properties_file_name("Mantid.user.properties"),
 #endif
-  m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(), m_instr_prefixes(), m_removedFlag("@@REMOVED@@")
+  m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(), m_instr_prefixes(), m_removedFlag("@@REMOVED@@"),
+  m_proxyInfo(),m_isProxySet(false)
 {
   //getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration> ;
@@ -1241,6 +1245,141 @@ std::string ConfigServiceImpl::getOSVersion()
   return m_pSysConfig->getString("system.osVersion");
 }
 
+/// @returns true if the file exists and can be read
+bool canRead(const std::string &filename) {
+  // check for existence of the file
+  Poco::File pocoFile(filename);
+  if (!pocoFile.exists()) {
+    return false;
+  }
+
+  // just return if it is readable
+  return pocoFile.canRead();
+}
+
+/// @returns the value associated with the key.
+std::string getValueFromStdOut(const std::string &orig, const std::string &key) {
+  size_t start = orig.find(key);
+  if (start == std::string::npos) {
+    return std::string();
+  }
+  start += key.size();
+
+  size_t stop = orig.find("\n", start);
+  if (stop == std::string::npos) {
+    return std::string();
+  }
+
+  return Mantid::Kernel::Strings::strip(orig.substr(start, stop-start-1));
+}
+
+/**
+ * Gets the name of the operating system version in a human readable form.
+ *
+ * @returns The operating system desciption
+ */
+std::string ConfigServiceImpl::getOSVersionReadable() {
+  std::string description;
+
+  // read os-release
+  static const std::string OS_RELEASE("/etc/os-release");
+  if (canRead(OS_RELEASE)) {
+    static const std::string PRETTY_NAME("PRETTY_NAME=");
+
+    // open it to see if it has the magic line
+    std::ifstream handle(OS_RELEASE.c_str(), std::ios::in);
+
+    // go through the file
+    std::string line;
+    while (std::getline(handle, line)) {
+      if (line.find(PRETTY_NAME) != std::string::npos) {
+        if (line.length() > PRETTY_NAME.length() + 1) {
+          size_t length = line.length() - PRETTY_NAME.length() - 2;
+          description = line.substr(PRETTY_NAME.length() + 1, length);
+        }
+        break;
+      }
+    }
+
+    // cleanup
+    handle.close();
+    if (!description.empty()) {
+      return description;
+    }
+  }
+
+  // read redhat-release
+  static const std::string REDHAT_RELEASE("/etc/redhat-release");
+  if (canRead(REDHAT_RELEASE)) {
+    // open it to see if it has the magic line
+    std::ifstream handle(REDHAT_RELEASE.c_str(), std::ios::in);
+
+    // go through the file
+    std::string line;
+    while (std::getline(handle, line)) {
+      if (!line.empty()) {
+        description = line;
+        break;
+      }
+    }
+
+    // cleanup
+    handle.close();
+    if (!description.empty()) {
+      return description;
+    }
+  }
+
+  // try system calls
+  std::string cmd;
+  std::vector<std::string> args;
+#ifdef __APPLE__
+  cmd = "sw_vers"; // mac
+#elif _WIN32
+  cmd = "wmic";              // windows
+  args.push_back("os");      // windows
+  args.push_back("get");     // windows
+  args.push_back("Caption"); // windows
+  args.push_back("/value");  // windows
+#endif
+
+  if (!cmd.empty()) {
+    try {
+      Poco::Pipe outPipe, errorPipe;
+      Poco::ProcessHandle ph =
+          Poco::Process::launch(cmd, args, 0, &outPipe, &errorPipe);
+      const int rc = ph.wait();
+      // Only if the command returned successfully.
+      if (rc == 0) {
+        Poco::PipeInputStream pipeStream(outPipe);
+        std::stringstream stringStream;
+        Poco::StreamCopier::copyStream(pipeStream, stringStream);
+        const std::string result = stringStream.str();
+#ifdef __APPLE__
+        const std::string product_name = getValueFromStdOut(result, "ProductName:");
+        const std::string product_vers = getValueFromStdOut(result, "ProductVersion:");
+          
+        description = product_name + " " + product_vers;
+#elif _WIN32
+        description = getValueFromStdOut(result, "Caption=");
+#else
+        UNUSED_ARG(result); // only used on mac and windows
+#endif
+      } else {
+        std::stringstream messageStream;
+        messageStream << "command \"" << cmd << "\" failed with code: " << rc;
+        g_log.debug(messageStream.str());
+      }
+    }
+    catch (Poco::SystemException &e) {
+      g_log.debug("command \"" + cmd + "\" failed");
+      g_log.debug(e.what());
+    }
+  }
+
+  return description;
+}
+
 /// @returns The name of the current user as reported by the environment.
 std::string ConfigServiceImpl::getUsername() {
   std::string username;
@@ -2019,6 +2158,45 @@ bool ConfigServiceImpl::quickVatesCheck() const
     ++it;
   }
   return found;
+}
+
+/*
+Gets the system proxy information
+@url A url to match the proxy to
+@return the proxy information.
+*/
+Kernel::ProxyInfo& ConfigServiceImpl::getProxy(const std::string& url)
+{
+  if (!m_isProxySet)
+  {  
+    //set the proxy
+    //first check if the proxy is defined in the properties file
+    std::string proxyHost;
+    int proxyPort;
+    if ((getValue("proxy.host",proxyHost) == 1) && (getValue("proxy.port",proxyPort) == 1))
+    {
+      //set it from the config values
+      m_proxyInfo = ProxyInfo(proxyHost,proxyPort,true);
+    }
+    else
+    {
+      //get the system proxy
+      Poco::URI uri(url);
+      Mantid::Kernel::NetworkProxy proxyHelper;
+      m_proxyInfo = proxyHelper.getHttpProxy(uri.toString());
+    }      
+    m_isProxySet = true;
+  }
+  return m_proxyInfo;
+}
+
+/**
+ * Gets the path to ParaView.
+ * @returns The ParaView path.
+ */
+const std::string ConfigServiceImpl::getParaViewPath() const
+{
+  return getString("paraview.path");
 }
 
 /// \cond TEMPLATE

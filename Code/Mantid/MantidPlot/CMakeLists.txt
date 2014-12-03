@@ -129,6 +129,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/TiledWindow.cpp
                    src/TitlePicker.cpp
                    src/TranslateCurveTool.cpp
+                   src/TSVSerialiser.cpp
                    src/UserFunction.cpp
                    src/VectorCurve.cpp
                    src/origin/OPJFile.cpp
@@ -373,6 +374,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/TiledWindow.h
                    src/TitlePicker.h
                    src/TranslateCurveTool.h
+                   src/TSVSerialiser.h
                    src/UserFunction.h
                    src/VectorCurve.h
                    src/analysis/fft2D.h
@@ -473,6 +475,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/Viewport.h
                    src/Mantid/InstrumentWidget/DetXMLFile.h
                    src/Mantid/InstrumentWidget/UCorrectionDialog.h
+                   src/Mantid/IProjectSerialisable.h
 )
 
 ###########################################################################
@@ -763,6 +766,7 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Images/images.qrc )
 qt4_add_resources ( RES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/icons.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/SliceViewer/icons/SliceViewerIcons.qrc )
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/CustomInterfaces/icons/CustomInterfacesIcons.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Vates/VatesSimpleGui/ViewWidgets/icons/ViewWidgetsIcons.qrc )
 
 ###########################################################################

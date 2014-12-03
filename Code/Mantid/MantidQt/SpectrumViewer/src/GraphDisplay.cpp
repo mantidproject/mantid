@@ -30,10 +30,13 @@ GraphDisplay::GraphDisplay( QwtPlot*      graphPlot,
   m_graphPlot(graphPlot),
   m_curve(new QwtPlotCurve("Curve 1")),
   m_graphTable(graphTable),
+
   m_isVertical(isVertical),
   m_isLogX(false),
   m_imageX(0.0), m_imageY(0.0),
-  m_rangeScale(1.0)
+  m_rangeScale(1.0),
+  m_minX(0.0), m_maxX(0.0),
+  m_minY(0.0), m_maxY(0.0)
 {
   if(isVertical)
     graphPlot->setAxisMaxMajor( QwtPlot::xBottom, 3 );

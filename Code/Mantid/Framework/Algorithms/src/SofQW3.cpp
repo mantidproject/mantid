@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/SofQW3.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -96,6 +97,10 @@ namespace Algorithms
     const size_t nEnergyBins = inputWS->blocksize();
     const size_t nHistos = inputWS->getNumberHistograms();
 
+    // Holds the spectrum-detector mapping
+    std::vector<specid_t> specNumberMapping;
+    std::vector<detid_t> detIDMapping;
+
     // Progress reports & cancellation
     const size_t nreports(nHistos * nEnergyBins);
     m_progress = boost::shared_ptr<API::Progress>(new API::Progress(this, 0.0,
@@ -121,10 +126,10 @@ namespace Algorithms
     const MantidVec & X = inputWS->readX(0);
 
     int emode = m_EmodeProperties.m_emode;
-    PARALLEL_FOR2(inputWS, outputWS)
+    /* PARALLEL_FOR2(inputWS, outputWS) */
     for (int64_t i = 0; i < static_cast<int64_t>(nHistos); ++i) // signed for openmp
     {
-      PARALLEL_START_INTERUPT_REGION
+      /* PARALLEL_START_INTERUPT_REGION */
 
       DetConstPtr detector = inputWS->getDetector(i);
       if (detector->isMasked() || detector->isMonitor())
@@ -158,8 +163,10 @@ namespace Algorithms
         const double dE_j = X[j];
         const double dE_jp1 = X[j+1];
 
+        const double lrQ = this->calculateQ(efixed,emode, dE_jp1, thetaLower, phiLower);
+
         const V2D ll(dE_j, this->calculateQ(efixed, emode,dE_j, thetaLower, phiLower));
-        const V2D lr(dE_jp1, this->calculateQ(efixed,emode, dE_jp1, thetaLower, phiLower));
+        const V2D lr(dE_jp1, lrQ);
         const V2D ur(dE_jp1, this->calculateQ(efixed,emode, dE_jp1, thetaUpper, phiUpper));
         const V2D ul(dE_j, this->calculateQ(efixed,emode, dE_j, thetaUpper, phiUpper));
         if(g_log.is(Logger::Priority::PRIO_DEBUG))
@@ -172,18 +179,31 @@ namespace Algorithms
         Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
 
         this->rebinToFractionalOutput(inputQ, inputWS, i, j, outputWS, m_Qout);
+
+        // Find which q bin this point lies in
+        const MantidVec::difference_type qIndex = std::upper_bound(m_Qout.begin(), m_Qout.end(), lrQ) - m_Qout.begin();
+        if(qIndex != 0 && qIndex < static_cast<int>(m_Qout.size()))
+        {
+          // Add this spectra-detector pair to the mapping
+          specNumberMapping.push_back(outputWS->getSpectrum(qIndex - 1)->getSpectrumNo());
+          detIDMapping.push_back(detector->getID());
+        }
       }
       if(g_log.is(Logger::Priority::PRIO_DEBUG))
       {
         g_log.debug(logStream.str());
       }
 
-      PARALLEL_END_INTERUPT_REGION
+      /* PARALLEL_END_INTERUPT_REGION */
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    /* PARALLEL_CHECK_INTERUPT_REGION */
 
     outputWS->finalize();
     this->normaliseOutput(outputWS, inputWS);
+
+    // Set the output spectrum-detector mapping
+    SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
+    outputWS->updateSpectraUsing(outputDetectorMap);
   }
 
 

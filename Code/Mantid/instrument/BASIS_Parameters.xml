@@ -64,6 +64,9 @@
 <parameter name="Workflow.NamingConvention" type="string">
     <value val="AnalyserReflection" />
 </parameter>
+<parameter name="Workflow.SE-log" type="string">
+    <value val="SetpointLP1" />
+</parameter>
 
 </component-link>
 
