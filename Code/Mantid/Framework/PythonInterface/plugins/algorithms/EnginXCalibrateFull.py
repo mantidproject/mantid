@@ -13,7 +13,7 @@ class EnginXCalibrateFull(PythonAlgorithm):
     	return "Calibrates every pixel position by performing single peak fitting."
 
     def PyInit(self):
-    	self.declareProperty(FileProperty("InputWorkspace", "", FileAction.Load),
+    	self.declareProperty(FileProperty("Filename", "", FileAction.Load),
     		"Calibration run to use")
 
     	self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Output),
