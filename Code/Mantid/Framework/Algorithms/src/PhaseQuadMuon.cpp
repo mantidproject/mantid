@@ -392,10 +392,11 @@ void PhaseQuadMuon::loseExponentialDecay (API::MatrixWorkspace_sptr tempWs)
       outE[i] = oops ? m_bigNumber : specIn->readE()[i]/usey;
     }
 
-    double s, sx, sy, sig;
+    double s, sx, sy;
     s = sx = sy =0;
     for (int i=0; i<m_nData; i++)
     {
+      double sig;
       sig = outE[i]*outE[i];
       s += 1./sig;
       sx+= outX[i]/sig;
