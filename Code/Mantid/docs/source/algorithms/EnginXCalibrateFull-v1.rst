@@ -23,6 +23,17 @@ The result of the calibration is accepted by both :ref:`algm-EnginXCalibrate` an
 
 Expects the *long* calibration run, which provides a decent pattern for every pixel.
 
+After receiving the bank's indicies, it goes through each one fitting the peak (using :ref:`algm-EnginXFitPeak`) and using the resulting difc value to calibrate the detector position. The calibrated detector position is produced as shown below: 
+
+#test12
+
+
+
+.. math:: L2 = \left(\frac{Difc} { 252.816 * 2 * sin \left(\frac{det2\theta} {2.0}\right)}\right) - 50
+
+
+
+the cartesian2d vector is then returned for the given spherical co ordinates
 
 .. categories::
 
