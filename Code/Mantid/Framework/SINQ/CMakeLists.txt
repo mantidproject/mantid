@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/PoldiAutoCorrelation5.cpp
         src/PoldiCalculateSpectrum2D.cpp
 	src/PoldiFitPeaks1D.cpp
+        src/PoldiFitPeaks1D2.cpp
 	src/PoldiLoadChopperSlits.cpp
 	src/PoldiLoadIPP.cpp
 	src/PoldiLoadLog.cpp
@@ -47,6 +48,7 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiAutoCorrelation5.h
         inc/MantidSINQ/PoldiCalculateSpectrum2D.h
 	inc/MantidSINQ/PoldiFitPeaks1D.h
+        inc/MantidSINQ/PoldiFitPeaks1D2.h
 	inc/MantidSINQ/PoldiLoadChopperSlits.h
 	inc/MantidSINQ/PoldiLoadIPP.h
 	inc/MantidSINQ/PoldiLoadLog.h
@@ -104,6 +106,7 @@ set ( TEST_FILES
 	PoldiDetectorFactoryTest.h
 	PoldiDetectorTest.h
 	PoldiFitPeaks1DTest.h
+        PoldiFitPeaks1D2Test.h
         PoldiInstrumentAdapterTest.h
         PoldiPeakCollectionTest.h
 	PoldiPeakSearchTest.h
