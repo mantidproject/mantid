@@ -49,6 +49,11 @@ namespace MantidQt
 
       uiv.checkFieldIsNotEmpty("Chemical Formula", m_uiForm.leChemicalFormula, m_uiForm.valChemicalFormula);
 
+      // Ignore TOSCA and it's variants, they store efixed per detector
+      std::string instrumentName = m_uiForm.cbInstrument->currentText().toStdString();
+      if(instrumentName == "TOSCA" || instrumentName == "TFXA")
+        uiv.addErrorMessage(QString::fromStdString(instrumentName) + " is currently not supported.");
+
       QString error = uiv.generateErrorMessage();
       showMessageBox(error);
 
