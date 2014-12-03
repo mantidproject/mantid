@@ -100,7 +100,7 @@ public:
         Mantid::Poldi::PoldiFitPeaks1D fitPeaks1D;
         fitPeaks1D.initialize();
 
-        TS_ASSERT_EQUALS(fitPeaks1D.propertyCount(), 8);
+        TS_ASSERT_EQUALS(fitPeaks1D.propertyCount(), 6);
 
         std::vector<Property *> properties = fitPeaks1D.getProperties();
         std::set<std::string> names;
@@ -114,8 +114,6 @@ public:
         TS_ASSERT_EQUALS(names.count("PeakFunction"), 1);
         TS_ASSERT_EQUALS(names.count("PoldiPeakTable"), 1);
         TS_ASSERT_EQUALS(names.count("OutputWorkspace"), 1);
-        TS_ASSERT_EQUALS(names.count("ResultTableWorkspace"), 1);
-        TS_ASSERT_EQUALS(names.count("FitCharacteristicsWorkspace"), 1);
         TS_ASSERT_EQUALS(names.count("FitPlotsWorkspace"), 1);
     }
 

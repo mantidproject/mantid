@@ -65,20 +65,10 @@ namespace Poldi
 
     API::IAlgorithm_sptr getFitAlgorithm(const DataObjects::Workspace2D_sptr &dataWorkspace, const PoldiPeak_sptr &peak, const API::IFunction_sptr &profile);
 
-    void addPeakFitCharacteristics(const API::ITableWorkspace_sptr &fitResult);
-    void initializeFitResultWorkspace(const API::ITableWorkspace_sptr &fitResult);
-
-    void initializePeakResultWorkspace(const DataObjects::TableWorkspace_sptr &peakResultWorkspace) const;
-    void storePeakResult(API::TableRow tableRow, const PoldiPeak_sptr &peak) const;
-    DataObjects::TableWorkspace_sptr generateResultTable(const PoldiPeakCollection_sptr &peaks) const;
-
     PoldiPeakCollection_sptr m_peaks;
     std::string m_profileTemplate;
     API::IFunction_sptr m_backgroundTemplate;
     std::string m_profileTies;
-
-    DataObjects::TableWorkspace_sptr m_fitCharacteristics;
-    DataObjects::TableWorkspace_sptr m_peakResultOutput;
 
     double m_fwhmMultiples;
 

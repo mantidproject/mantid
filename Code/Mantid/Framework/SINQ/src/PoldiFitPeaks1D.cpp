@@ -35,8 +35,6 @@ PoldiFitPeaks1D::PoldiFitPeaks1D() :
     m_profileTemplate(),
     m_backgroundTemplate(),
     m_profileTies(),
-    m_fitCharacteristics(),
-    m_peakResultOutput(),
     m_fwhmMultiples(1.0)
 {
 
@@ -70,8 +68,6 @@ void PoldiFitPeaks1D::init()
     declareProperty(new WorkspaceProperty<TableWorkspace>("PoldiPeakTable","",Direction::Input), "A table workspace containing POLDI peak data.");
 
     declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace","RefinedPeakTable",Direction::Output), "Output workspace with refined peak data.");
-    declareProperty(new WorkspaceProperty<TableWorkspace>("ResultTableWorkspace","ResultTable",Direction::Output), "Fit results.");
-    declareProperty(new WorkspaceProperty<TableWorkspace>("FitCharacteristicsWorkspace","FitCharacteristics",Direction::Output), "Fit characteristics for each peak.");
     declareProperty(new WorkspaceProperty<Workspace>("FitPlotsWorkspace","FitPlots",Direction::Output), "Plots of all peak fits.");
 
     m_backgroundTemplate = FunctionFactory::Instance().createInitialized("name=UserFunction, Formula=A0 + A1*(x - x0)^2");
@@ -147,10 +143,7 @@ void PoldiFitPeaks1D::exec()
 
     Workspace2D_sptr dataWorkspace = getProperty("InputWorkspace");
 
-    m_fitCharacteristics = boost::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
     WorkspaceGroup_sptr fitPlotGroup(new WorkspaceGroup);
-
-
 
     for(size_t i = 0; i < m_peaks->peakCount(); ++i) {
         PoldiPeak_sptr currentPeak = m_peaks->peak(i);
@@ -162,18 +155,14 @@ void PoldiFitPeaks1D::exec()
 
         if(fitSuccess) {
             setValuesFromProfileFunction(currentPeak, fit->getProperty("Function"));
-            addPeakFitCharacteristics(fit->getProperty("OutputParameters"));
 
             MatrixWorkspace_sptr fpg = fit->getProperty("OutputWorkspace");
             fitPlotGroup->addWorkspace(fpg);
         }
     }
 
-    m_peakResultOutput = generateResultTable(m_peaks);
 
     setProperty("OutputWorkspace", m_peaks->asTableWorkspace());
-    setProperty("FitCharacteristicsWorkspace", m_fitCharacteristics);
-    setProperty("ResultTableWorkspace", m_peakResultOutput);
     setProperty("FitPlotsWorkspace", fitPlotGroup);
 }
 
@@ -196,63 +185,6 @@ IAlgorithm_sptr PoldiFitPeaks1D::getFitAlgorithm(const Workspace2D_sptr &dataWor
 
     return fitAlgorithm;
 }
-
-void PoldiFitPeaks1D::addPeakFitCharacteristics(const ITableWorkspace_sptr &fitResult)
-{
-    if(m_fitCharacteristics->columnCount() == 0) {
-        initializeFitResultWorkspace(fitResult);
-    }
-
-    TableRow newRow = m_fitCharacteristics->appendRow();
-
-    for(size_t i = 0; i < fitResult->rowCount(); ++i) {
-        TableRow currentRow = fitResult->getRow(i);
-
-        newRow << UncertainValueIO::toString(UncertainValue(currentRow.Double(1), currentRow.Double(2)));
-    }
-}
-
-void PoldiFitPeaks1D::initializeFitResultWorkspace(const API::ITableWorkspace_sptr &fitResult)
-{
-    for(size_t i = 0; i < fitResult->rowCount(); ++i) {
-        TableRow currentRow = fitResult->getRow(i);
-        m_fitCharacteristics->addColumn("str", currentRow.cell<std::string>(0));
-    }
-}
-
-void PoldiFitPeaks1D::initializePeakResultWorkspace(const DataObjects::TableWorkspace_sptr &peakResultWorkspace) const
-{
-    peakResultWorkspace->addColumn("str", "Q");
-    peakResultWorkspace->addColumn("str", "d");
-    peakResultWorkspace->addColumn("double", "deltaD/d *10^3");
-    peakResultWorkspace->addColumn("str", "FWHM rel. *10^3");
-    peakResultWorkspace->addColumn("str", "Intensity");
-}
-
-void PoldiFitPeaks1D::storePeakResult(TableRow tableRow, const PoldiPeak_sptr &peak) const
-{
-    UncertainValue q = peak->q();
-    UncertainValue d = peak->d();
-
-    tableRow << UncertainValueIO::toString(q)
-             << UncertainValueIO::toString(d)
-             << d.error() / d.value() * 1e3
-             << UncertainValueIO::toString(peak->fwhm(PoldiPeak::Relative) * 1e3)
-             << UncertainValueIO::toString(peak->intensity());
-}
-
-TableWorkspace_sptr PoldiFitPeaks1D::generateResultTable(const PoldiPeakCollection_sptr &peaks) const
-{
-    TableWorkspace_sptr outputTable = boost::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
-    initializePeakResultWorkspace(outputTable);
-
-    for(size_t i = 0; i < peaks->peakCount(); ++i) {
-        storePeakResult(outputTable->appendRow(), peaks->peak(i));
-    }
-
-    return outputTable;
-}
-
 
 } // namespace Poldi
 } // namespace Mantid
