@@ -59,13 +59,18 @@ public:
     void testGetPeakProfile()
     {
         TestablePoldiFitPeaks1D poldiFitPeaks;
+        poldiFitPeaks.m_backgroundTemplate = m_backgroundTestFunction;
         poldiFitPeaks.initialize();
         poldiFitPeaks.setPeakFunction(m_profileTestFunction);
 
-        IFunction_sptr peakFunction = poldiFitPeaks.getPeakProfile(m_testPeak);
+        IFunction_sptr totalProfile = poldiFitPeaks.getPeakProfile(m_testPeak);
 
-        // make sure that the profile is correct
-        IPeakFunction_sptr profile = boost::dynamic_pointer_cast<IPeakFunction>(peakFunction);
+        // make sure that we get back a composite of peak and background
+        CompositeFunction_sptr composite = boost::dynamic_pointer_cast<CompositeFunction>(totalProfile);
+        TS_ASSERT(composite);
+
+        // make sure that the profile is the first function in the composite
+        IPeakFunction_sptr profile = boost::dynamic_pointer_cast<IPeakFunction>(composite->getFunction(0));
         TS_ASSERT(profile);
 
         TS_ASSERT_EQUALS(profile->centre(), m_testPeak->q());
@@ -95,7 +100,7 @@ public:
         Mantid::Poldi::PoldiFitPeaks1D fitPeaks1D;
         fitPeaks1D.initialize();
 
-        TS_ASSERT_EQUALS(fitPeaks1D.propertyCount(), 7);
+        TS_ASSERT_EQUALS(fitPeaks1D.propertyCount(), 8);
 
         std::vector<Property *> properties = fitPeaks1D.getProperties();
         std::set<std::string> names;
@@ -110,6 +115,7 @@ public:
         TS_ASSERT_EQUALS(names.count("PoldiPeakTable"), 1);
         TS_ASSERT_EQUALS(names.count("OutputWorkspace"), 1);
         TS_ASSERT_EQUALS(names.count("ResultTableWorkspace"), 1);
+        TS_ASSERT_EQUALS(names.count("FitCharacteristicsWorkspace"), 1);
         TS_ASSERT_EQUALS(names.count("FitPlotsWorkspace"), 1);
     }
 

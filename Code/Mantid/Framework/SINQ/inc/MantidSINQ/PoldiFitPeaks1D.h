@@ -15,34 +15,6 @@ namespace Mantid
 {
 namespace Poldi
 {
-  /// Helper class for refining peaks with overlapping ranges
-  class RefinedRange
-  {
-  public:
-    RefinedRange(const PoldiPeak_sptr &peak, double fwhmMultiples);
-    RefinedRange(double xStart, double xEnd, const std::vector<PoldiPeak_sptr> &peaks);
-    RefinedRange(const RefinedRange &other);
-
-    bool operator <(const RefinedRange &other) const;
-
-    bool overlaps(const RefinedRange &other) const;
-    void merge(const RefinedRange &other);
-
-    const std::vector<PoldiPeak_sptr> getPeaks() const { return m_peaks; }
-
-    double getXStart() const { return m_xStart; }
-    double getXEnd() const { return m_xEnd; }
-
-  private:
-    std::vector<PoldiPeak_sptr> m_peaks;
-    double m_xStart;
-    double m_xEnd;
-  };
-
-  typedef boost::shared_ptr<RefinedRange> RefinedRange_sptr;
-
-  bool operator <(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs);
-
   /** PoldiFitPeaks1D :
     
     PoldiFitPeaks1D fits multiple peaks to POLDI auto-correlation data.
@@ -84,25 +56,17 @@ namespace Poldi
     virtual const std::string category() const;
 
   protected:
-    PoldiPeakCollection_sptr fitPeaks(const PoldiPeakCollection_sptr &peaks);
-
-    int getBestChebyshevPolynomialDegree(const DataObjects::Workspace2D_sptr &dataWorkspace, const RefinedRange_sptr &range);
-
-    PoldiPeakCollection_sptr getReducedPeakCollection(const PoldiPeakCollection_sptr &peaks) const;
-    bool peakIsAcceptable(const PoldiPeak_sptr &peak) const;
-
     void setPeakFunction(const std::string &peakFunction);
     PoldiPeakCollection_sptr getInitializedPeakCollection(const DataObjects::TableWorkspace_sptr &peakTable) const;
 
-    std::vector<RefinedRange_sptr> getRefinedRanges(const PoldiPeakCollection_sptr &peaks) const;
-    std::vector<RefinedRange_sptr> getReducedRanges(const std::vector<RefinedRange_sptr> &ranges) const;
-
-    API::IFunction_sptr getRangeProfile(const RefinedRange_sptr &range, int n) const;
     API::IFunction_sptr getPeakProfile(const PoldiPeak_sptr &poldiPeak) const;
     void setValuesFromProfileFunction(PoldiPeak_sptr poldiPeak, const API::IFunction_sptr &fittedFunction) const;
     double getFwhmWidthRelation(API::IPeakFunction_sptr peakFunction) const;
 
-    API::IAlgorithm_sptr getFitAlgorithm(const DataObjects::Workspace2D_sptr &dataWorkspace, const RefinedRange_sptr &range, int n);
+    API::IAlgorithm_sptr getFitAlgorithm(const DataObjects::Workspace2D_sptr &dataWorkspace, const PoldiPeak_sptr &peak, const API::IFunction_sptr &profile);
+
+    void addPeakFitCharacteristics(const API::ITableWorkspace_sptr &fitResult);
+    void initializeFitResultWorkspace(const API::ITableWorkspace_sptr &fitResult);
 
     void initializePeakResultWorkspace(const DataObjects::TableWorkspace_sptr &peakResultWorkspace) const;
     void storePeakResult(API::TableRow tableRow, const PoldiPeak_sptr &peak) const;
@@ -110,10 +74,11 @@ namespace Poldi
 
     PoldiPeakCollection_sptr m_peaks;
     std::string m_profileTemplate;
+    API::IFunction_sptr m_backgroundTemplate;
+    std::string m_profileTies;
 
+    DataObjects::TableWorkspace_sptr m_fitCharacteristics;
     DataObjects::TableWorkspace_sptr m_peakResultOutput;
-    API::WorkspaceGroup_sptr m_fitplots;
-
 
     double m_fwhmMultiples;
 
