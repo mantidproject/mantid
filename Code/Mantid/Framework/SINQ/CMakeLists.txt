@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/PoldiLoadSpectra.cpp
 	src/PoldiPeakDetection2.cpp
 	src/PoldiPeakSearch.cpp
+	src/PoldiPeakSummary.cpp
 	src/PoldiRemoveDeadWires.cpp
 	src/PoldiTruncateData.cpp
 	src/PoldiUtilities/MillerIndices.cpp
@@ -55,6 +56,7 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiLoadSpectra.h
 	inc/MantidSINQ/PoldiPeakDetection2.h
 	inc/MantidSINQ/PoldiPeakSearch.h
+	inc/MantidSINQ/PoldiPeakSummary.h
 	inc/MantidSINQ/PoldiRemoveDeadWires.h
 	inc/MantidSINQ/PoldiTruncateData.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndices.h
@@ -110,6 +112,7 @@ set ( TEST_FILES
         PoldiInstrumentAdapterTest.h
         PoldiPeakCollectionTest.h
 	PoldiPeakSearchTest.h
+	PoldiPeakSummaryTest.h
 	PoldiPeakTest.h
         PoldiSourceSpectrumTest.h
         PoldiSpectrumDomainFunctionTest.h
