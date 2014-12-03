@@ -25,9 +25,6 @@ namespace MantidQt
       m_uiForm.setupUi(parent);
 
       connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
-
-      connect(m_uiForm.cbInstrument, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(instrumentSelected(const QString&)));
-      connect(m_uiForm.cbAnalyser, SIGNAL(currentIndexChanged(int)), this, SLOT(analyserSelected(int)));
     }
 
     /*
@@ -36,6 +33,9 @@ namespace MantidQt
     void IndirectTransmissionCalc::setup()
     {
       instrumentSelected(m_uiForm.cbInstrument->currentText());
+
+      connect(m_uiForm.cbInstrument, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(instrumentSelected(const QString&)));
+      connect(m_uiForm.cbAnalyser, SIGNAL(currentIndexChanged(int)), this, SLOT(analyserSelected(int)));
     }
 
     /**
