@@ -89,7 +89,6 @@ DECLARE_ALGORITHM(PoldiFitPeaks1D2)
 PoldiFitPeaks1D2::PoldiFitPeaks1D2() :
     m_peaks(),
     m_profileTemplate(),
-    m_peakResultOutput(),
     m_fitplots(new WorkspaceGroup),
     m_fwhmMultiples(1.0)
 {
@@ -124,7 +123,6 @@ void PoldiFitPeaks1D2::init()
     declareProperty(new WorkspaceProperty<TableWorkspace>("PoldiPeakTable","",Direction::Input), "A table workspace containing POLDI peak data.");
 
     declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace","RefinedPeakTable",Direction::Output), "Output workspace with refined peak data.");
-    declareProperty(new WorkspaceProperty<TableWorkspace>("ResultTableWorkspace","ResultTable",Direction::Output), "Fit results.");
     declareProperty(new WorkspaceProperty<Workspace>("FitPlotsWorkspace","FitPlots",Direction::Output), "Plots of all peak fits.");
 }
 
@@ -324,10 +322,8 @@ void PoldiFitPeaks1D2::exec()
         fittedPeaksNew = fitPeaks(fittedPeaksOld);
     }
 
-    m_peakResultOutput = generateResultTable(fittedPeaksNew);
 
     setProperty("OutputWorkspace", m_peaks->asTableWorkspace());
-    setProperty("ResultTableWorkspace", m_peakResultOutput);
     setProperty("FitPlotsWorkspace", m_fitplots);
 }
 
@@ -347,39 +343,6 @@ IAlgorithm_sptr PoldiFitPeaks1D2::getFitAlgorithm(const Workspace2D_sptr &dataWo
     fitAlgorithm->setProperty("EndX", range->getXEnd());
 
     return fitAlgorithm;
-}
-
-void PoldiFitPeaks1D2::initializePeakResultWorkspace(const DataObjects::TableWorkspace_sptr &peakResultWorkspace) const
-{
-    peakResultWorkspace->addColumn("str", "Q");
-    peakResultWorkspace->addColumn("str", "d");
-    peakResultWorkspace->addColumn("double", "deltaD/d *10^3");
-    peakResultWorkspace->addColumn("str", "FWHM rel. *10^3");
-    peakResultWorkspace->addColumn("str", "Intensity");
-}
-
-void PoldiFitPeaks1D2::storePeakResult(TableRow tableRow, const PoldiPeak_sptr &peak) const
-{
-    UncertainValue q = peak->q();
-    UncertainValue d = peak->d();
-
-    tableRow << UncertainValueIO::toString(q)
-             << UncertainValueIO::toString(d)
-             << d.error() / d.value() * 1e3
-             << UncertainValueIO::toString(peak->fwhm(PoldiPeak::Relative) * 1e3)
-             << UncertainValueIO::toString(peak->intensity());
-}
-
-TableWorkspace_sptr PoldiFitPeaks1D2::generateResultTable(const PoldiPeakCollection_sptr &peaks) const
-{
-    TableWorkspace_sptr outputTable = boost::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
-    initializePeakResultWorkspace(outputTable);
-
-    for(size_t i = 0; i < peaks->peakCount(); ++i) {
-        storePeakResult(outputTable->appendRow(), peaks->peak(i));
-    }
-
-    return outputTable;
 }
 
 } // namespace Poldi

@@ -104,14 +104,9 @@ namespace Poldi
 
     API::IAlgorithm_sptr getFitAlgorithm(const DataObjects::Workspace2D_sptr &dataWorkspace, const RefinedRange_sptr &range, int n);
 
-    void initializePeakResultWorkspace(const DataObjects::TableWorkspace_sptr &peakResultWorkspace) const;
-    void storePeakResult(API::TableRow tableRow, const PoldiPeak_sptr &peak) const;
-    DataObjects::TableWorkspace_sptr generateResultTable(const PoldiPeakCollection_sptr &peaks) const;
-
     PoldiPeakCollection_sptr m_peaks;
     std::string m_profileTemplate;
 
-    DataObjects::TableWorkspace_sptr m_peakResultOutput;
     API::WorkspaceGroup_sptr m_fitplots;
 
 
