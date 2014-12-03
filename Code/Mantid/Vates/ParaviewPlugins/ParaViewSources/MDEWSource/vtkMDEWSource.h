@@ -67,11 +67,11 @@ public:
   const char* GetWorkspaceName();
   /// Getter for the workspace type
   char* GetWorkspaceTypeName();
-  /// Getter for the minimum value of the workspace data
+  /// Getter for the minimum value of the workspace data.
   double GetMinValue();
-  /// Getter for the maximum value of the workspace data
+  /// Getter for the maximum value of the workspace data.
   double GetMaxValue();
-  /// Getter for the maximum value of the workspace data
+  /// Getter for the instrument associated with the workspace data.
   const char* GetInstrument();
 
 protected:

@@ -2,9 +2,14 @@
 #define MANTID_VATES_MDEW_LOADING_PRESENTER
 
 #include "MantidVatesAPI/MDLoadingPresenter.h"
+#include "MantidVatesAPI/MetadataJsonManager.h"
+#include "MantidVatesAPI/MetaDataExtractorUtils.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+
+#include <boost/scoped_ptr.hpp>
 
 namespace Mantid
 {
@@ -49,14 +54,22 @@ namespace Mantid
       virtual void setAxisLabels(vtkDataSet* visualDataSet);
       virtual ~MDEWLoadingPresenter();
       virtual const std::string& getInstrument();
+      virtual double getMinValue();
+      virtual double getMaxValue();
+
     protected:
       /*---------------------------------------------------------------------------
       Common/shared operations and members for all MDEW file-type loading.
       ---------------------------------------------------------------------------*/
       MDLoadingView* m_view;
-      
       Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::NoDimensionPolicy> xmlBuilder;
+
+      boost::scoped_ptr<MetadataJsonManager> m_metadataJsonManager;
+      boost::scoped_ptr<MetaDataExtractorUtils> m_metaDataExtractor;
+      boost::scoped_ptr<VatesConfigurations> m_vatesConfigurations;
+
       Mantid::Geometry::IMDDimension_sptr tDimension;
+
       std::vector<std::string> axisLabels;
       virtual void appendMetadata(vtkDataSet* visualDataSet, const std::string& wsName) ;
       virtual void extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs);
@@ -67,7 +80,6 @@ namespace Mantid
       size_t m_recursionDepth;
       bool m_loadInMemory;
       bool m_firstLoad;
-      std::string m_instrument;
     };
   }
 }

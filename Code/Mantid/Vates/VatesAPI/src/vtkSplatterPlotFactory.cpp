@@ -211,7 +211,10 @@ namespace VATES
     saved_signals.reserve(numPoints);
     saved_centers.reserve(numPoints);
     saved_n_points_in_cell.reserve(numPoints);
-  
+
+    double maxSignalScalar = 0;
+    double minSignalScalar = VTK_DOUBLE_MAX;
+
     size_t pointIndex = 0;
     size_t box_index  = 0;
     bool   done       = false;
@@ -224,6 +227,8 @@ namespace VATES
         continue;
       }
       float signal_normalized = static_cast<float>(box->getSignalNormalized());
+      maxSignalScalar = maxSignalScalar > signal_normalized ? maxSignalScalar:signal_normalized;
+      minSignalScalar = minSignalScalar > signal_normalized ? signal_normalized : minSignalScalar;
       size_t newPoints = box->getNPoints();
       size_t num_from_this_box = points_per_box;
       if (num_from_this_box > newPoints)
@@ -305,7 +310,7 @@ namespace VATES
     //points->Squeeze();
     signal->Squeeze();
     visualDataSet->Squeeze();
-
+    
     // Add points and scalars
     visualDataSet->SetPoints(points);
     visualDataSet->GetCellData()->SetScalars(signal);
@@ -530,13 +535,19 @@ namespace VATES
       this->slice = false;
     }
 
-    // Set the bounds 
-    QwtDoubleInterval minMaxValue = m_metaDataExtractor->getMinAndMax(m_workspace);
-    m_minValue = minMaxValue.minValue();
-    m_maxValue = minMaxValue.maxValue();
+    // Macro to call the right instance of the
+    CALL_MDEVENT_FUNCTION(this->doCreate, m_workspace);
+
 
     // Set the instrument
     m_instrument = m_metaDataExtractor->extractInstrument(m_workspace);
+    double* range = dataSet->GetScalarRange();
+    if (range)
+    {
+      m_minValue = range[0];
+      m_maxValue = range[1];
+    }
+
 
     // Check for the workspace type, i.e. if it is MDHisto or MDEvent
     IMDEventWorkspace_sptr eventWorkspace = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);

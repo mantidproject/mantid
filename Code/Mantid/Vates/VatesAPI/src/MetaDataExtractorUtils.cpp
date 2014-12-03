@@ -18,7 +18,7 @@ namespace Mantid
         Kernel::Logger g_log("MetaDataExtractorUtils");
     }
 
-    MetaDataExtractorUtils::MetaDataExtractorUtils()
+    MetaDataExtractorUtils::MetaDataExtractorUtils():defaultMin(0.0), defaultMax(1.0)
     {
     }
 
@@ -38,7 +38,7 @@ namespace Mantid
       Mantid::API::IMDEventWorkspace_sptr eventWorkspace = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspace);
       Mantid::API::IMDHistoWorkspace_sptr histoWorkspace = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace);
     
-      std::string instrument;
+      std::string instrument = "";
 
       // Check which workspace is currently used and that it contains at least one instrument.
       if (eventWorkspace)
@@ -79,6 +79,13 @@ namespace Mantid
      */
     QwtDoubleInterval MetaDataExtractorUtils::getMinAndMax(Mantid::API::IMDWorkspace_sptr workspace)
     {
+      if (!workspace)
+      {
+        throw std::invalid_argument("The workspace is empty.");
+        
+        return QwtDoubleInterval(defaultMin,defaultMax);
+      }
+
       auto iterators = workspace->createIterators(PARALLEL_GET_MAX_THREADS, 0);
 
       std::vector<QwtDoubleInterval> intervals(iterators.size());
@@ -87,6 +94,7 @@ namespace Mantid
       for (int i=0; i < int(iterators.size()); i++)
       {
         Mantid::API::IMDIterator * it = iterators[i];
+
         QwtDoubleInterval range = this->getRange(it);
         intervals[i] = range;
         // don't delete iterator in parallel. MSVC doesn't like it
@@ -96,11 +104,12 @@ namespace Mantid
       // Combine the overall min/max
       double minSignal = DBL_MAX;
       double maxSignal = -DBL_MAX;
+
       auto inf = std::numeric_limits<double>::infinity();
       for (size_t i=0; i < iterators.size(); i++)
       {
         delete iterators[i];
-
+        
         double signal;
         signal = intervals[i].minValue();
         if (signal != inf && signal < minSignal) minSignal = signal;
@@ -109,11 +118,12 @@ namespace Mantid
         if (signal != inf && signal > maxSignal) maxSignal = signal;
       }
 
+      // Set the lowest element to the smallest non-zero element.
       if (minSignal == DBL_MAX)
       {
-        minSignal = 0.0;
-        maxSignal = 1.0;
-      }
+        minSignal = defaultMin;
+        maxSignal = defaultMax;
+      } 
 
       QwtDoubleInterval minMaxContainer;
 
@@ -126,7 +136,7 @@ namespace Mantid
           minMaxContainer = QwtDoubleInterval(minSignal*0.5, minSignal*1.5);
         else
           // Other default value
-          minMaxContainer = QwtDoubleInterval(0., 1.0);
+          minMaxContainer = QwtDoubleInterval(defaultMin, defaultMax);
       }
 
       return minMaxContainer;
@@ -140,32 +150,43 @@ namespace Mantid
     QwtDoubleInterval MetaDataExtractorUtils::getRange(Mantid::API::IMDIterator * it)
     {
       if (!it)
-        return QwtDoubleInterval(0., 1.0);
+        return QwtDoubleInterval(defaultMin, defaultMax);
       if (!it->valid())
-        return QwtDoubleInterval(0., 1.0);
+        return QwtDoubleInterval(defaultMin, defaultMax);
 
       // Use no normalization
       it->setNormalization(Mantid::API::VolumeNormalization);
-
+     
       double minSignal = DBL_MAX;
+      double minSignalZeroCheck = DBL_MAX;
       double maxSignal = -DBL_MAX;
       auto inf = std::numeric_limits<double>::infinity();
+
       do
       {
         double signal = it->getNormalizedSignal();
+      
         // Skip any 'infs' as it screws up the color scale
         if (signal != inf)
         {
-          if (signal < minSignal) minSignal = signal;
+          if (signal == 0.0) minSignalZeroCheck = signal;
+          if (signal < minSignal && signal >0.0) minSignal = signal;
           if (signal > maxSignal) maxSignal = signal;
         }
       } while (it->next());
 
-
       if (minSignal == DBL_MAX)
       {
-        minSignal = inf;
-        maxSignal = inf;
+        if (minSignalZeroCheck != DBL_MAX)
+        {
+          minSignal = defaultMin;
+          maxSignal = defaultMax;
+        }
+        else
+        {
+          minSignal = inf;
+          maxSignal = inf;
+        }
       }
       return QwtDoubleInterval(minSignal, maxSignal);
     }

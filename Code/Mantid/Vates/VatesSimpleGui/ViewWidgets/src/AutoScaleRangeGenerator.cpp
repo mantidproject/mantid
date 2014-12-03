@@ -11,7 +11,10 @@
 #include <pqOutputPort.h>
 #include <pqPipelineFilter.h>
 #include <pqPipelineSource.h>
+#include <pqScalarsToColors.h>
 #include <vtkSMPropertyHelper.h>
+#include <vtkSMProxy.h>
+#include <vtkSMDoubleVectorProperty.h>
 
 namespace Mantid
 {
@@ -140,32 +143,61 @@ namespace SimpleGui
 
     while(isFilter)
     {
-      // If we are dealing with a filter, we can cast it.
+      // Make sure that the pipeline properties are up to date
+      vtkSMProxy* proxy = pqSource->getProxy();
+      proxy->UpdateVTKObjects();
+      proxy->UpdatePropertyInformation();
+      pqSource->updatePipeline();
+
+      // If we are dealing with a filter, we can cast it. If it is a source,
+      // then the cast should result in a NULL, an exception is the splatterplot filter which 
+      // also contains size information
       pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(pqSource);
 
-      if (!filter)
+      if (QString(proxy->GetXMLName()).contains("SplatterPlot"))
       {
+          minValue = vtkSMPropertyHelper(proxy,"MinValue").GetAsDouble();
+
+          maxValue = vtkSMPropertyHelper(proxy,"MaxValue").GetAsDouble();
+
+          isFilter = false;
+      }
+      else if (!filter)
+      {
+        // Only MDEvent and MDHisto workspaces will provide us with min and max
+        const char* workspaceTypeName = vtkSMPropertyHelper(proxy,"WorkspaceTypeName").GetAsString();
+        std::string workspaceType(workspaceTypeName);
+        size_t mdEvent = workspaceType.find("MDEventWorkspace");
+        size_t mdHisto = workspaceType.find("MDHistoWorkspace");
+
+        if (mdEvent != std::string::npos || mdHisto != std::string::npos)
+        {
+          minValue = vtkSMPropertyHelper(proxy,"MinValue").GetAsDouble();
+
+          maxValue = vtkSMPropertyHelper(proxy,"MaxValue").GetAsDouble();
+        }
+        else
+        {
+          // Peak Source should not produce a color scale range
+          minValue = DBL_MAX;
+          maxValue = -DBL_MAX;
+        }
+
         isFilter = false;
-
-        minValue = vtkSMPropertyHelper(pqSource->getProxy(),
-                                       "MinValue").GetAsDouble();
-
-        maxValue = vtkSMPropertyHelper(pqSource->getProxy(),
-                                       "MaxValue").GetAsDouble();
       } 
       else
       {
-        // We expect one input, if not provide defailt values
+        // We expect one input, if not provide default values
         if (filter->getInputCount() != 1)
         {
           minValue = this->defaultValue;
           maxValue = this->defaultValue;
+
           isFilter = false;
         } 
         else
         {
           QList<pqOutputPort*> outputPorts = filter->getAllInputs();
-
           pqSource = outputPorts[0]->getSource();
         }
       }

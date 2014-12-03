@@ -5,7 +5,6 @@
 #include "MantidAPI/IMDIterator.h"
 #include "qwt/qwt_double_interval.h"
 #include <string>
-#include <vector>
 
 
 /**
@@ -67,6 +66,9 @@ namespace Mantid
           * @retunrs A maximum and minimum pair.
           */
         QwtDoubleInterval getRange(Mantid::API::IMDIterator* it);
+
+        double defaultMin;
+        double defaultMax;
     };
   }
 }

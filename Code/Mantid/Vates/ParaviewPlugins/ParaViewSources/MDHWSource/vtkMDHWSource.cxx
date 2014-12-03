@@ -177,7 +177,7 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     factory->SetSuccessor(successor);
 
     vtkDataSet* product = m_presenter->execute(factory, loadingProgressUpdate, drawingProgressUpdate);
-
+    
     //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
     vtkBox* box = vtkBox::New();
     box->SetBounds(product->GetBounds());
@@ -192,6 +192,7 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
       outInfo->Get(vtkDataObject::DATA_OBJECT()));
     output->ShallowCopy(clipperOutput);
+
     try
     {
       m_presenter->makeNonOrthogonal(output);
@@ -213,7 +214,9 @@ int vtkMDHWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
 {
   if(m_presenter == NULL && !m_wsName.empty())
   {
-    m_presenter = new MDHWInMemoryLoadingPresenter(new MDLoadingViewAdapter<vtkMDHWSource>(this), new ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace>, m_wsName);
+    m_presenter = new MDHWInMemoryLoadingPresenter(new MDLoadingViewAdapter<vtkMDHWSource>(this),
+                                                   new ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace>,
+                                                   m_wsName);
     if(!m_presenter->canReadFile())
     {
       vtkErrorMacro(<<"Cannot fetch the specified workspace from Mantid ADS.");

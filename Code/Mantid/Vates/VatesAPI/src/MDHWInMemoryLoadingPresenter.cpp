@@ -23,7 +23,7 @@ namespace Mantid
     @throw invalid_arument if view is null
     */
   MDHWInMemoryLoadingPresenter::MDHWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName) : MDHWLoadingPresenter(view),
-     m_repository(repository), m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1), m_metaDataExtractor(new MetaDataExtractorUtils())
+     m_repository(repository), m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1)
   {
     if(m_wsName.empty())
     {
@@ -84,6 +84,16 @@ namespace Mantid
       /*extractMetaData needs to be re-run here because the first execution of this from ::executeLoadMetadata will not have ensured that all dimensions
         have proper range extents set.
       */
+
+      // Update the meta data min and max values with the values of the visual data set. This is necessary since we want the full data range of the visual 
+      // data set and not of the actual underlying data set.
+      double* range  = visualDataSet->GetScalarRange();
+      if (range)
+      {
+        this->m_metadataJsonManager->setMinValue(range[0]);
+        this->m_metadataJsonManager->setMaxValue(range[1]);
+      }
+
       this->extractMetadata(histoWs);
 
       this->appendMetadata(visualDataSet, histoWs->getName());
@@ -104,11 +114,11 @@ namespace Mantid
       
       // Set the minimum and maximum of the workspace data.
       QwtDoubleInterval minMaxContainer =  m_metaDataExtractor->getMinAndMax(histoWs);
-      m_minValue = minMaxContainer.minValue();
-      m_maxValue = minMaxContainer.maxValue();
+      m_metadataJsonManager->setMinValue(minMaxContainer.minValue());
+      m_metadataJsonManager->setMaxValue(minMaxContainer.maxValue());
 
       // Set the instrument which is associated with the workspace.
-      m_instrument =m_metaDataExtractor->extractInstrument(histoWs);
+      m_metadataJsonManager->setInstrument(m_metaDataExtractor->extractInstrument(histoWs));
 
       //Call base-class extraction method.
       this->extractMetadata(histoWs);
@@ -120,10 +130,10 @@ namespace Mantid
       delete m_view;
     }
 
-     /*
-      Getter for the workspace type name.
-      @return Workspace Type Name
-    */
+    /*
+     * Getter for the workspace type name.
+     * @return Workspace Type Name
+     */
     std::string MDHWInMemoryLoadingPresenter::getWorkspaceTypeName()
     {
       return m_wsTypeName;
@@ -136,24 +146,6 @@ namespace Mantid
     int MDHWInMemoryLoadingPresenter::getSpecialCoordinates()
     {
       return m_specialCoords;
-    }
-
-   /**
-     * Getter for the minimum value;
-     * @return The minimum value of the data set.
-     */
-    double MDHWInMemoryLoadingPresenter::getMinValue()
-    {
-      return m_minValue;
-    }
-
-   /**
-    * Getter for the maximum value;
-    * @return The maximum value of the data set.
-    */
-    double MDHWInMemoryLoadingPresenter::getMaxValue()
-    {
-      return m_maxValue;
     }
   }
 }

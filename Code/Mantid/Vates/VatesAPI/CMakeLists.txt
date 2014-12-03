@@ -24,6 +24,7 @@ src/MDHWNexusLoadingPresenter.cpp
 src/MedianAndBelowThresholdRange.cpp
 src/MetadataToFieldData.cpp
 src/MetaDataExtractorUtils.cpp
+src/MetadataJsonManager.cpp
 src/NoThresholdRange.cpp
 src/NullRebinningPresenter.cpp
 src/ProgressAction.cpp
@@ -33,6 +34,7 @@ src/SynchronisingGeometryPresenter.cpp
 src/TimeStepToTimeStep.cpp
 src/TimeToTimeStep.cpp
 src/UserDefinedThresholdRange.cpp
+src/VatesConfigurations.cpp
 src/vtkDataSetFactory.cpp
 src/vtkDataSetToGeometry.cpp
 src/vtkDataSetToImplicitFunction.cpp
@@ -81,6 +83,7 @@ inc/MantidVatesAPI/MDRebinningView.h
 inc/MantidVatesAPI/MDRebinningViewAdapter.h
 inc/MantidVatesAPI/MedianAndBelowThresholdRange.h
 inc/MantidVatesAPI/MetaDataExtractorUtils.h
+inc/MantidVatesAPI/MetadataJsonManager.h
 inc/MantidVatesAPI/IgnoreZerosThresholdRange.h
 inc/MantidVatesAPI/IMDDimensionComparitor.h
 inc/MantidVatesAPI/MetadataToFieldData.h
@@ -96,6 +99,7 @@ inc/MantidVatesAPI/ThresholdRange.h
 inc/MantidVatesAPI/TimeStepToTimeStep.h
 inc/MantidVatesAPI/TimeToTimeStep.h
 inc/MantidVatesAPI/UserDefinedThresholdRange.h
+inc/MantidVatesAPI/VatesConfigurations.h
 inc/MantidVatesAPI/vtkDataSetFactory.h
 inc/MantidVatesAPI/vtkDataSetToGeometry.h
 inc/MantidVatesAPI/vtkDataSetToImplicitFunction.h
@@ -146,6 +150,8 @@ test/MDEWRebinningPresenterTest.h
 test/MDHWInMemoryLoadingPresenterTest.h
 test/MDHWLoadingPresenterTest.h
 test/MDHWNexusLoadingPresenterTest.h
+test/MetaDataExtractorUtilsTest.h
+test/MetadataJsonManagerTest.h
 test/NullRebinningPresenterTest.h
 test/MetadataToFieldDataTest.h
 test/RebinningKnowledgeSerializerTest.h

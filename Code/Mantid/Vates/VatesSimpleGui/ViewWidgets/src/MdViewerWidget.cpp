@@ -455,11 +455,6 @@ void MdViewerWidget::setParaViewComponentsForView()
                    SLOT(onParallelProjection(bool)));
 }
 
-
-
-
-
-
 /**
  * This function loads and renders data from the given source for the
  * standalone mode.
@@ -727,6 +722,7 @@ void MdViewerWidget::renderAndFinalSetup()
   this->currentView->checkView(this->initialView);
   this->currentView->updateAnimationControls();
   this->setVisibilityListener();
+  this->currentView->onAutoScale(this->ui.colorSelectionWidget);
 }
 
 /**
