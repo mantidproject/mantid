@@ -99,10 +99,8 @@ from mantid import api
 from mantid import geometry
 
 import time as time
-import glob
-import sys
-import os.path
-import math
+import glob,sys,os.path,math
+import numpy as np
 
 import CommonFunctions as common
 import diagnostics
@@ -570,21 +568,9 @@ class DirectEnergyConversion(object):
 
       """ 
       # Support for old reduction interface:
-      if not(wb_run is None):
-        self.prop_man.wb_run = wb_run
-        if not(sample_run is None):
-            self.prop_man.sample_run = sample_run
-            if not(ei_guess is None):
-               self.prop_man.incident_energy = ei_guess 
-               if not(rebin is None):
-                  self.prop_man.energy_bins = rebin
-                  if not(map_file is None):
-                     self.prop_man.map_file = map_file
-                     if not(monovan_run is None):
-                        self.prop_man.monovan_run = monovan_run
-                        if not(wb_for_monovan_run is None):
-                            self.prop_man.wb_for_monovan_run = wb_for_monovan_run
-
+      self.prop_man.set_input_parameters_ignore_nan(wb_run=wb_run,sample_run=sample_run,incident_energy=ei_guess,
+                                           energy_bins=rebin,map_file=map_file,monovan_run=monovan_run,wb_for_monovan_run=wb_for_monovan_run)
+      # 
       self.prop_man.set_input_parameters(**kwargs);
 
       prop_man = self.prop_man;
@@ -612,8 +598,18 @@ class DirectEnergyConversion(object):
       #TODO:
       # Reducer.check_necessary_files(monovan_run);
 
-      # TODO: --check out if internal summation works
+      # TODO: --check out if internal summation works -- it does not. Should be fixed. Old summation meanwhile
       # Here was summation in dgreduce. 
+      if (np.size(self.prop_man.sample_run)) > 1 and self.prop_man.sum_runs:
+        #this sums the runs together before passing the summed file to the rest of the reduction
+        #this circumvents the inbuilt method of summing which fails to sum the files for diag
+
+        #the D.E.C. tries to be too clever so we have to fool it into thinking the raw file is already exists as a workspace
+        sum_name=self.prop_man.instr_name+str(self.prop_man.sample_run[0])+'-sum'
+        sample_run =self.sum_files(sum_name, sample_run)
+        common.apply_calibration(self.prop_man.instr_name,sample_run,self.prop_man.det_cal_file)
+        self.prop_man.sample_run = sample_run
+
 
 
       masking = None;
@@ -706,6 +702,46 @@ class DirectEnergyConversion(object):
 #----------------------------------------------------------------------------------
 #                        Reduction steps
 #----------------------------------------------------------------------------------
+    def sum_files(self, accumulator, files):
+        """ Custom sum for multiple runs
+
+            Left for compatibility as internal summation had some unspecified problems.
+
+            TODO: Should Go replaced by internal procedure
+            TODO: Monitors are not summed together here. 
+        """
+        instr_name = self.prop_man.instr_name;
+        accum_name = accumulator
+        if isinstance(accum_name,api.Workspace): # it is actually workspace and is in Mantid
+            accum_name  = accumulator.name()
+        if accum_name  in mtd:
+            DeleteWorkspace(Workspace=accum_name)     
+
+
+        load_mon_with_ws = self.prop_man.load_monitors_with_workspace;
+        if type(files) == list:
+             #tmp_suffix = '_plus_tmp'
+
+            for filename in files:
+               print 'Summing run ',filename,' to workspace ',accumulator
+               temp = common.load_run(instr_name,filename, force=False,load_with_workspace = load_mon_with_ws)
+
+               if accum_name in mtd: # add current workspace to the existing one
+                  accumulator = mtd[accum_name]
+                  accumulator+=  temp
+                  DeleteWorkspace(Workspace=temp)
+               else:
+                   print 'Creating output workspace: '
+                   accumulator=RenameWorkspace(InputWorkspace=temp,OutputWorkspace=accum_name)
+
+            return accumulator
+        else:
+            temp = common.load_run(instr_name,files, force=False,load_with_workspace = load_mon_with_ws)
+            accumulator=RenameWorkspace(InputWorkspace=temp,OutputWorkspace=accum_name)
+            return accumulator;
+
+
+
     def apply_absolute_normalization(self,deltaE_wkspace_sample,monovan_run=None,ei_guess=None,wb_mono=None):
         """  Function applies absolute normalization factor to the target workspace
              and calculates this factor if necessary
@@ -755,9 +791,7 @@ class DirectEnergyConversion(object):
         #end
         prop_man.log('*** Using {0} value : {1} of absolute units correction factor (TGP)'.format(abs_norm_factor_is,absnorm_factor),'notice')
         prop_man.log('*******************************************************************************************','notice')
-        #absnorm_factor  =  0.0245159026452 
-        # fix old system tests with would fail otherwise in 10^-6 limits
-        absnorm_factor  =  absnorm_factor*0.024519711695583177/0.0245159026452
+
         deltaE_wkspace_sample = deltaE_wkspace_sample/absnorm_factor;
 
 
@@ -894,9 +928,11 @@ class DirectEnergyConversion(object):
         One-shot function to convert the given runs to energy
         """
 
-        self.prop_man.incident_energy = ei;
+        self.prop_man.incident_energy = ei;      
         prop_man = self.prop_man;
-
+        prop_man.set_input_parameters_ignore_nan(sample_run=mono_run,incident_energy=ei,
+                                                 wb_run = white_run,monovan_run=mono_van,
+                                                 wb_for_monovan_run =abs_white_run);   # note not-supported second ei for monovan
 
         # Figure out what to call the workspace
         result_name = mono_run

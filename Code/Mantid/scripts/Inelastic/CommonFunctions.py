@@ -87,7 +87,7 @@ def load_runs(inst_name, runs, sum=True, calibration=None,load_with_workspace=Fa
             sum = False
         if sum == True:
             if len(runs) == 0: raise RuntimeError("load_runs was supplied an empty list.")
-            result_ws = load_run(runs[0])
+            result_ws = load_run(inst_name,runs[0])
             summed = 'summed-run-files'
             CloneWorkspace(InputWorkspace=result_ws,OutputWorkspace=summed)
             sum_files(summed, runs[1:])

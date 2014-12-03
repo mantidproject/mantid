@@ -46,17 +46,17 @@ class ReductionWrapper(object):
        red = DirectEnergyConversion();
  
        if using_web_data:
-	       config.appendDataSearchDir(output_directory)
-           web_vars = dict(rv.standard_vars.items()+rv.advanced_vars.items());
-           self.red_prop.set_input_parameters(**web_vars);
-		   self.red_prop.sample_run = input_file;
+          config.appendDataSearchDir(output_directory)
+          web_vars = dict(rv.standard_vars.items()+rv.advanced_vars.items());
+          self.red_prop.set_input_parameters(**web_vars);
+          self.red_prop.sample_run = input_file;
        #end
 
        red.initialise(self.red_prop);
        ws = red.convert_to_energy_transfer();
        #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
-       #when run from web service, return additional path for web server to copy data to";
        if using_web_data:
+           #when run from web service, return additional path for web server to copy data to";
             return ""
        else:
             return ws

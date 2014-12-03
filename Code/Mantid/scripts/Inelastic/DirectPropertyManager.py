@@ -497,7 +497,20 @@ class DirectPropertyManager(DirectReductionProperties):
         else:
             return common.create_resultname(self.sample_run,self.instr_name,'-sum');
    
-       
+    def set_input_parameters_ignore_nan(self,**kwargs):
+        """ Like similar method set_input_parameters this one is used to 
+            set changed parameters from dictionary of parameters. 
+
+            Unlike set_input_parameters, this method does not set parameter, 
+            with value  equal to None. As such, this method is used as interface to 
+            set data from a function with a list of given parameters (*args vrt **kwargs),
+            with some parameters missing.
+        """   
+        for par_name,value in kwargs.items() :
+            if not(value is None):
+                setattr(self,par_name,value);
+
+
 
     def set_input_parameters(self,**kwargs):
         """ Set input properties from a dictionary of parameters
