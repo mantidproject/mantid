@@ -206,6 +206,7 @@ void MultiTabScriptInterpreter::closeAllTabs()
 */
 QString MultiTabScriptInterpreter::saveToString()
 {
+  int nscripts = 0;
   QString fileNames;
   fileNames="<scriptwindow>\n";
   fileNames+="ScriptNames\t";
@@ -220,10 +221,11 @@ QString MultiTabScriptInterpreter::saveToString()
     {
       fileNames+=s;
       fileNames+="\t";
+      nscripts++;
     }
   }
   fileNames+="\n</scriptwindow>\n";
-  return fileNames;
+  return (nscripts > 0) ? fileNames : "";
 }
 
 

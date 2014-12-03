@@ -110,7 +110,7 @@ namespace Mantid
     /// Algorithm's category for identification. @see Algorithm::category
     const std::string ReflectometryReductionOne::category() const
     {
-      return "Reflectometry\\ISIS";
+      return "Reflectometry";
     }
 
     //----------------------------------------------------------------------------------------------

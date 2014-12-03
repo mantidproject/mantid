@@ -57,6 +57,9 @@ namespace DataHandling
     /// Returns a confidence value that this algorithm can load a file
     virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
+    /// Confidence in identifier.
+    static int identiferConfidence(const std::string& value);
+
   private:
     
     /// Initialise the properties

@@ -133,20 +133,28 @@ namespace MDAlgorithms
         V3D vecCentroid(centroid[0], centroid[1], centroid[2]);
 
         // Save it back in the peak object, in the dimension specified.
-        if (CoordinatesToUse == 1) //"Q (lab frame)"
-        {
-          p.setQLabFrame( vecCentroid, detectorDistance);
-          p.findDetector();
-        }
-        else if (CoordinatesToUse == 2) //"Q (sample frame)"
-        {
-          p.setQSampleFrame( vecCentroid, detectorDistance);
-          p.findDetector();
-        }
-        else if (CoordinatesToUse == 3) //"HKL"
-        {
-          p.setHKL( vecCentroid );
-        }
+        try
+         {
+			if (CoordinatesToUse == 1) //"Q (lab frame)"
+			{
+			  p.setQLabFrame( vecCentroid, detectorDistance);
+			  p.findDetector();
+			}
+			else if (CoordinatesToUse == 2) //"Q (sample frame)"
+			{
+			  p.setQSampleFrame( vecCentroid, detectorDistance);
+			  p.findDetector();
+			}
+			else if (CoordinatesToUse == 3) //"HKL"
+			{
+			  p.setHKL( vecCentroid );
+			}
+         }
+		catch (std::exception & e)
+		{
+		  g_log.warning() << "Error setting Q or HKL" << std::endl;
+		  g_log.warning() << e.what() << std::endl;
+		}
 
 
         g_log.information() << "Peak " << i << " at " << pos << ": signal "

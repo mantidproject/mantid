@@ -45,6 +45,8 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   setMinimumWidth(200);
   parent->addDockWidget( Qt::RightDockWidgetArea, this );
 
+  m_appParent = parent;
+
   QFrame *f = new QFrame(this);
   setWidget(f);
 
@@ -212,6 +214,9 @@ void MantidDockWidget::createWorkspaceMenuActions()
 
   m_showLogs = new QAction(tr("Sample Logs..."), this);
   connect(m_showLogs,SIGNAL(triggered()),m_mantidUI,SLOT(showLogFileWindow()));
+
+  m_showSampleMaterial = new QAction(tr("Sample Material..."), this);
+  connect(m_showSampleMaterial,SIGNAL(triggered()),m_mantidUI,SLOT(showSampleMaterialWindow()));
 
   m_showHist = new QAction(tr("Show History"), this);
   connect(m_showHist,SIGNAL(triggered()),m_mantidUI,SLOT(showAlgorithmHistory()));
@@ -552,6 +557,7 @@ void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, const Mantid::AP
   menu->addSeparator();
   menu->addAction(m_showDetectors);
   menu->addAction(m_showLogs);
+  menu->addAction(m_showSampleMaterial);
   menu->addAction(m_showHist);
   menu->addAction(m_saveNexus);
 }
@@ -580,6 +586,7 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, const Mantid::A
   menu->addAction(m_showHist);  // Algorithm history
   menu->addAction(m_showListData); // Show data in table
   menu->addAction(m_showLogs);
+  menu->addAction(m_showSampleMaterial); //TODO
 }
 
 void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr &WS) const
@@ -601,6 +608,7 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::A
   menu->addAction(m_showListData); // Show data in table
   menu->addAction(m_convertMDHistoToMatrixWorkspace);
   menu->addAction(m_showLogs);
+  menu->addAction(m_showSampleMaterial); //TODO
 }
 
 
@@ -878,26 +886,53 @@ deleteWorkspaces
 void MantidDockWidget::deleteWorkspaces()
 {
   QList<QTreeWidgetItem*> items = m_tree->selectedItems();
-  if(items.empty())
-  {
-    MantidMatrix* m = dynamic_cast<MantidMatrix*>(m_mantidUI->appWindow()->activeWindow());
-    if (!m || !m->isA("MantidMatrix")) return;
-    if(m->workspaceName().isEmpty()) return;
+  MantidMatrix* m = dynamic_cast<MantidMatrix*>(m_mantidUI->appWindow()->activeWindow());
+   
+  bool deleteExplorer = false;
+  bool deleteActive = false;
 
-    if(m_ads.doesExist(m->workspaceName().toStdString()))
-    {	
-      m_mantidUI->deleteWorkspace(m->workspaceName());
-    }
-    return;
-  }
-  //loop through multiple items selected from the mantid tree
-  QList<QTreeWidgetItem*>::iterator itr=items.begin();
-  for (itr = items.begin(); itr != items.end(); ++itr)
+  if((m_deleteButton->hasFocus() || m_tree->hasFocus()) && !items.empty())
   {
-    //Sometimes we try to delete a workspace that's already been deleted.
-    if(m_ads.doesExist((*itr)->text(0).toStdString()))
-      m_mantidUI->deleteWorkspace((*itr)->text(0));
-  }//end of for loop for selected items
+    deleteExplorer = true;
+  }
+  if((m && m->isA("MantidMatrix")) && (!m->workspaceName().isEmpty() && m_ads.doesExist(m->workspaceName().toStdString())))
+  {
+    deleteActive = true;
+  }
+
+  if(deleteActive || deleteExplorer)
+  {    
+    QMessageBox::StandardButton reply;
+    
+    if(m_appParent->isDeleteWorkspacePromptEnabled())
+    {
+      reply = QMessageBox::question(this, "Delete Workspaces", "Are you sure you want to delete the selected Workspaces?\n\nThis prompt can be disabled from:\nPreferences->General->Confirmations",
+                                    QMessageBox::Yes|QMessageBox::No);
+    }
+    else
+    {
+      reply = QMessageBox::Yes;
+    }
+
+    if (reply == QMessageBox::Yes)
+    {
+      if(deleteExplorer)
+      { 
+        //loop through multiple items selected from the mantid tree
+        QList<QTreeWidgetItem*>::iterator itr=items.begin();
+        for (itr = items.begin(); itr != items.end(); ++itr)
+        {
+          //Sometimes we try to delete a workspace that's already been deleted.
+          if(m_ads.doesExist((*itr)->text(0).toStdString()))
+            m_mantidUI->deleteWorkspace((*itr)->text(0));
+        }//end of for loop for selected items
+      }
+      else if(deleteActive)
+      {
+        m_mantidUI->deleteWorkspace(m->workspaceName());
+      }
+    }
+  }
 }
 
 void MantidDockWidget::sortAscending()
@@ -1336,6 +1371,16 @@ void MantidDockWidget::treeSelectionChanged()
 
   if(m_saveButton)
     m_saveButton->setEnabled(Items.size() > 0);
+
+  if (Items.size() > 0)
+  {
+    auto item = *(Items.begin());
+    m_mantidUI->enableSaveNexus(item->text(0));
+  }
+  else
+  {
+    m_mantidUI->disableSaveNexus();
+  }
 }
 
 /**

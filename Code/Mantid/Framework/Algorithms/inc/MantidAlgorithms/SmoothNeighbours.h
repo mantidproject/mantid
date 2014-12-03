@@ -128,12 +128,6 @@ private:
   static const std::string RECTANGULAR_GROUP;
   /// Input workspace name
   static const std::string INPUT_WORKSPACE;
-
-  /// Pixels in the detector
-  int XPixels;
-  /// Pixels in the detector
-  int YPixels;
-
   /// Number to sum
   int AdjX;
   /// Number to sum

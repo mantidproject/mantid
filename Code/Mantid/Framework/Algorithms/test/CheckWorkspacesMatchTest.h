@@ -688,7 +688,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws3) );
     
     TS_ASSERT( checker.execute() );
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Log name mismatch" );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Log mismatch" );
     
     Mantid::API::MatrixWorkspace_sptr ws4 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
     ws4->mutableRun().addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop1",100));
@@ -697,7 +697,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws4) );
     
     TS_ASSERT( checker.execute() );
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Log value mismatch" );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Log mismatch" );
   }
 
   void test_Input_With_Two_Groups_That_Are_The_Same_Matches()
@@ -900,9 +900,9 @@ private:
     auto table = WorkspaceFactory::Instance().createTable();
     // One column of each type
     table->addColumn("int","int");
-    table->addColumn("int32_t","int32");
+    table->addColumn("uint","uint");
     table->addColumn("long64","int64");
-    table->addColumn("size_t","uint");
+    table->addColumn("size_t","size_t");
     table->addColumn("float","float");
     table->addColumn("double","double");
     table->addColumn("bool","bool");
@@ -911,13 +911,13 @@ private:
 
     // A few rows
     TableRow row1 = table->appendRow();
-    row1 << -1 << static_cast<int32_t>(0) << static_cast<int64_t>(1) << static_cast<size_t>(10)
+    row1 << -1 << static_cast<uint32_t>(0) << static_cast<int64_t>(1) << static_cast<size_t>(10)
          << 5.5f << -9.9 << true << "Hello" << Mantid::Kernel::V3D();
     TableRow row2 = table->appendRow();
-    row2 << 1 << static_cast<int32_t>(-2) << static_cast<int64_t>(-2) << static_cast<size_t>(100)
+    row2 << 1 << static_cast<uint32_t>(2) << static_cast<int64_t>(-2) << static_cast<size_t>(100)
          << 0.0f << 101.0 << false << "World" << Mantid::Kernel::V3D(-1,3,4);
     TableRow row3 = table->appendRow();
-    row3 << 6 << static_cast<int32_t>(3) << static_cast<int64_t>(0) << static_cast<size_t>(0)
+    row3 << 6 << static_cast<uint32_t>(3) << static_cast<int64_t>(0) << static_cast<size_t>(0)
          << -99.0f << 0.0 << false << "!" << Mantid::Kernel::V3D(1,6,10);
 
     return table;

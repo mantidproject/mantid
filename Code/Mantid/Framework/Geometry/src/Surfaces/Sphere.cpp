@@ -19,17 +19,17 @@ namespace Mantid
     Sphere::Sphere() : Quadratic(),
       Centre(0,0,0),Radius(0.0)
       /**
-      Default constructor 
-      make sphere at the origin radius zero 
+      Default constructor
+      make sphere at the origin radius zero
       */
     {
       setBaseEqn();
     }
 
-    Sphere::Sphere(const Sphere &A) : 
+    Sphere::Sphere(const Sphere &A) :
     Quadratic(A),Centre(A.Centre),Radius(A.Radius)
       /**
-      Default Copy constructor 
+      Default Copy constructor
       @param A :: Sphere to copy
       */
     { }
@@ -37,7 +37,7 @@ namespace Mantid
     Sphere*
       Sphere::clone() const
       /**
-      Makes a clone (implicit virtual copy constructor) 
+      Makes a clone (implicit virtual copy constructor)
       @return new (*this)
       */
     {
@@ -45,7 +45,7 @@ namespace Mantid
     }
 
     Sphere&
-      Sphere::operator=(const Sphere &A) 
+      Sphere::operator=(const Sphere &A)
       /**
       Default Assignment operator
       @param A :: Sphere to copy
@@ -69,19 +69,19 @@ namespace Mantid
 
     int
       Sphere::setSurface(const std::string& Pstr)
-      /** 
-      Processes a standard MCNPX cone string    
+      /**
+      Processes a standard MCNPX cone string
       Recall that cones can only be specified on an axis
-      Valid input is: 
-      - so radius 
+      Valid input is:
+      - so radius
       - s cen_x cen_y cen_z radius
       - sx - cen_x radius
-      @return : 0 on success, neg of failure 
+      @return : 0 on success, neg of failure
       */
     {
       std::string Line=Pstr;
       std::string item;
-      if (!Mantid::Kernel::Strings::section(Line,item) || 
+      if (!Mantid::Kernel::Strings::section(Line,item) ||
         tolower(item[0])!='s' || item.length()>2)
         return -1;
 
@@ -101,10 +101,10 @@ namespace Mantid
       else if (item.length()==1)
       {
         int index;
-        for(index=0;index<3 && Mantid::Kernel::Strings::section(Line,cent[index]);
-          index++);
-          if (index!=3)
-            return -5;
+        for(index=0;index<3 && Mantid::Kernel::Strings::section(Line,cent[index]);index++)
+          ;
+        if (index!=3)
+          return -5;
       }
       else
         return -6;
@@ -115,24 +115,25 @@ namespace Mantid
       Radius=R;
       setBaseEqn();
       return 0;
-    } 
+    }
 
 
     int
       Sphere::side(const Kernel::V3D& Pt) const
       /**
-      Calculate where the point Pt is relative to the 
+      Calculate where the point Pt is relative to the
       sphere.
       @param Pt :: Point to test
       @retval -1 :: Pt within sphere
       @retval 0 :: point on the surface (within CTolerance)
-      @retval 1 :: Pt outside the sphere 
+      @retval 1 :: Pt outside the sphere
       */
     {
-      const double displace = centreToPoint(Pt) - Radius;
       //MG:  Surface test  - This does not use onSurface since it would double the amount of
       // computation if the object is not on the surface which is most likely
-      if( std::abs(displace) < Tolerance )
+      const double xdiff(Pt.X()-Centre.X()), ydiff(Pt.Y()-Centre.Y()), zdiff(Pt.Z()-Centre.Z());
+      const double displace = sqrt(xdiff*xdiff + ydiff*ydiff + zdiff*zdiff) - Radius;
+      if( fabs(displace) < Tolerance )
       {
         return 0;
       }
@@ -157,9 +158,9 @@ namespace Mantid
 
     double
       Sphere::distance(const Kernel::V3D& Pt) const
-      /** 
-      Determine the shortest distance from the Surface 
-      to the Point. 
+      /**
+      Determine the shortest distance from the Surface
+      to the Point.
       @param Pt :: Point to calculate distance from
       @return distance (Positive only)
       */
@@ -170,7 +171,7 @@ namespace Mantid
 
 
     void
-      Sphere::displace(const Kernel::V3D& Pt) 
+      Sphere::displace(const Kernel::V3D& Pt)
       /**
       Apply a shift of the centre
       @param Pt :: distance to add to the centre
@@ -182,7 +183,7 @@ namespace Mantid
     }
 
     void
-      Sphere::rotate(const Kernel::Matrix<double>& MA) 
+      Sphere::rotate(const Kernel::Matrix<double>& MA)
       /**
       Apply a Rotation matrix
       @param MA :: matrix to rotate by
@@ -197,13 +198,13 @@ namespace Mantid
     {
       /**
       Compute the distance between the given point and the centre of the sphere
-      @param pt :: The chosen point 
+      @param pt :: The chosen point
       */
       const Kernel::V3D displace_vec = pt - Centre;
       return displace_vec.norm();
     }
 
-    void 
+    void
       Sphere::setCentre(const Kernel::V3D& A)
       /**
       Set the centre point
@@ -215,7 +216,7 @@ namespace Mantid
       return;
     }
 
-    void 
+    void
       Sphere::setBaseEqn()
       /**
       Sets an equation of type (general sphere)
@@ -224,7 +225,7 @@ namespace Mantid
     {
       BaseEqn[0]=1.0;     // A x^2
       BaseEqn[1]=1.0;     // B y^2
-      BaseEqn[2]=1.0;     // C z^2 
+      BaseEqn[2]=1.0;     // C z^2
       BaseEqn[3]=0.0;     // D xy
       BaseEqn[4]=0.0;     // E xz
       BaseEqn[5]=0.0;     // F yz
@@ -236,12 +237,12 @@ namespace Mantid
     }
 
 
-    void 
+    void
       Sphere::write(std::ostream& OX) const
-      /** 
-      Object of write is to output a MCNPX plane info 
-      @param OX :: Output stream (required for multiple std::endl)  
-      \todo (Needs precision) 
+      /**
+      Object of write is to output a MCNPX plane info
+      @param OX :: Output stream (required for multiple std::endl)
+      \todo (Needs precision)
       */
     {
       std::ostringstream cx;

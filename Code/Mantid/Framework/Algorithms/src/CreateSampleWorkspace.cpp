@@ -19,6 +19,7 @@
 #include <cmath>
 #include <ctime>
 #include <numeric>
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -91,7 +92,7 @@ namespace Algorithms
     declareProperty("UserDefinedFunction","","Parameters defining the fitting function and its initial values");
 
     declareProperty("NumBanks", 2,boost::make_shared<BoundedValidator<int> >(0,100), "The Number of banks in the instrument (default:2)");
-    declareProperty("BankPixelWidth", 10,boost::make_shared<BoundedValidator<int> >(0,1000), "The width & height of each bank in pixels (default:10).");
+    declareProperty("BankPixelWidth", 10,boost::make_shared<BoundedValidator<int> >(0,10000), "The width & height of each bank in pixels (default:10).");
     declareProperty("NumEvents", 1000,boost::make_shared<BoundedValidator<int> >(0,100000), "The number of events per detector, this is only used for EventWorkspaces (default:1000).");
     declareProperty("Random", false, "Whether to randomise the placement of events and data (default:false).");
 
@@ -117,7 +118,19 @@ namespace Algorithms
     const std::string xUnit = getProperty("XUnit");
     const double xMin = getProperty("XMin");
     const double xMax = getProperty("XMax");
-    const double binWidth = getProperty("BinWidth");
+    double binWidth = getProperty("BinWidth");
+
+    if (xMax <= xMin)
+    {
+      throw std::invalid_argument("XMax must be larger than XMin");
+    }
+
+    if (binWidth > (xMax-xMin))
+    {
+      //the bin width is so large that there is less than one bin - so adjust it down
+      binWidth = xMax-xMin;
+      g_log.warning()<<"The bin width is so large that there is less than one bin - it has been changed to " << binWidth << std::endl;
+    }
 
     std::string functionString = "";
     if (m_preDefinedFunctionmap.find(preDefinedFunction) != m_preDefinedFunctionmap.end())

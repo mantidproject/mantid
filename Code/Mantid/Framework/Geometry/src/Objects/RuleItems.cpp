@@ -292,9 +292,11 @@ Intersection::isValid(const Kernel::V3D& Vec) const
     @retval 0 :: Vec is outside object.
   */
 {
-  if (!A || !B)
-    return false;
-  return (A->isValid(Vec) && B->isValid(Vec)) ? true : false;
+  if(A && B)
+  {
+    return (A->isValid(Vec) && B->isValid(Vec));
+  }
+  return false;
 }
 
 bool
@@ -849,9 +851,10 @@ SurfPoint::isValid(const Kernel::V3D& Pt) const
   */
 {
   if (key)
-    return (key->side(Pt)*sign)>=0 ? true : false;
-  else
-    return false;
+  {
+    return (key->side(Pt)*sign)>=0;
+  }
+  return false;
 }
 
 bool 

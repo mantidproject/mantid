@@ -45,7 +45,7 @@ namespace Mantid
      * Default constructor
      */
     ParameterMap::ParameterMap()
-      : m_map()
+      : m_parameterFileNames(), m_map()
     {}
 
     /**
@@ -131,10 +131,10 @@ namespace Mantid
      * @return true if the objects are considered not equal, false otherwise
      */
     bool ParameterMap::operator!=(const ParameterMap & rhs) const
-    { 
-      return !(this->operator==(rhs)); 
+    {
+      return !(this->operator==(rhs));
     }
-    
+
     /**
      * Compares the values in this object with that given for equality
      * The order of the values in the map is not important.
@@ -144,10 +144,10 @@ namespace Mantid
     bool ParameterMap::operator==(const ParameterMap & rhs) const
     {
       if(this == &rhs) return true; // True for the same object
-      
+
       // Quick size check
       if(this->size() != rhs.size()) return false;
-      
+
       // The map is unordered and the key is only valid at runtime. The
       // asString method turns the ComponentIDs to full-qualified name identifiers
       // so we will use the same approach to compare them
@@ -175,7 +175,7 @@ namespace Mantid
       return true;
     }
 
-     
+
     /**
      * Output information that helps understanding the mismatch between two parameter maps.
      * To loop through the difference between two very large parameter map can take time, in which
@@ -187,15 +187,15 @@ namespace Mantid
     const std::string ParameterMap::diff(const ParameterMap & rhs, const bool & firstDiffOnly) const
     {
       if(this == &rhs) return std::string(""); // True for the same object
-      
+
       // Quick size check
-      if(this->size() != rhs.size()) 
+      if(this->size() != rhs.size())
       {
-          return std::string("Number of parameters does not match: ") + 
+          return std::string("Number of parameters does not match: ") +
             boost::lexical_cast<std::string>(this->size()) + " not equal to " +
             boost::lexical_cast<std::string>(rhs.size());
       }
-      
+
       // Run this same loops as in operator==
       // The map is unordered and the key is only valid at runtime. The
       // asString method turns the ComponentIDs to full-qualified name identifiers
@@ -221,7 +221,7 @@ namespace Mantid
           }
         }
 
-        if(!match) 
+        if(!match)
         {
           // output some information that helps with understanding the mismatch
           strOutput << "Parameter mismatch LHS=RHS for LHS parameter in component with name: " << fullName
@@ -306,7 +306,7 @@ namespace Mantid
         if( name == pos() || name == rot() ) clearPositionSensitiveCaches();
       }
     }
-    
+
     /**
      * Add a value into the map
      * @param type :: A string denoting the type, e.g. double, string, fitting
@@ -314,7 +314,7 @@ namespace Mantid
      * @param name :: The name of the parameter
      * @param value :: The parameter's value
      */
-    void ParameterMap::add(const std::string& type,const IComponent* comp,const std::string& name, 
+    void ParameterMap::add(const std::string& type,const IComponent* comp,const std::string& name,
                            const std::string& value)
     {
       auto param = ParameterFactory::create(type,name);
@@ -331,7 +331,7 @@ namespace Mantid
       // can not add null pointer
       if(!par)return;
 
-      PARALLEL_CRITICAL(parameter_add)
+      PARALLEL_CRITICAL(m_mapAccess)
       {
         auto existing_par = positionOf(comp,par->name().c_str(),"");
         // As this is only an add method it should really throw if it already exists.
@@ -350,13 +350,13 @@ namespace Mantid
     }
 
     /** Create or adjust "pos" parameter for a component
-     * Assumed that name either equals "x", "y" or "z" otherwise this 
+     * Assumed that name either equals "x", "y" or "z" otherwise this
      * method will not add or modify "pos" parameter
      * @param comp :: Component
      * @param name :: name of the parameter
      * @param value :: value
      */
-    void ParameterMap::addPositionCoordinate(const IComponent* comp, const std::string& name, 
+    void ParameterMap::addPositionCoordinate(const IComponent* comp, const std::string& name,
                                              const double value)
     {
       Parameter_sptr param = get(comp,pos());
@@ -393,7 +393,7 @@ namespace Mantid
     }
 
     /** Create or adjust "rot" parameter for a component
-     * Assumed that name either equals "rotx", "roty" or "rotz" otherwise this 
+     * Assumed that name either equals "rotx", "roty" or "rotz" otherwise this
      * method will not add/modify "rot" parameter
      * @param comp :: Component
      * @param name :: Parameter name
@@ -420,7 +420,7 @@ namespace Mantid
         rotZ = paramRotZ->value<double>();
       else
         rotZ = 0.0;
-        
+
 
       // adjust rotation
       Quat quat;
@@ -452,7 +452,7 @@ namespace Mantid
       addQuat(comp, rot(), quat);
     }
 
-    /**  
+    /**
      * Adds a double value to the parameter map.
      * @param comp :: Component to which the new parameter is related
      * @param name :: Name for the new parameter
@@ -474,7 +474,7 @@ namespace Mantid
       add(pDouble(),comp,name,value);
     }
 
-    /**  
+    /**
      * Adds an int value to the parameter map.
      * @param comp :: Component to which the new parameter is related
      * @param name :: Name for the new parameter
@@ -496,7 +496,7 @@ namespace Mantid
       add(pInt(),comp,name,value);
     }
 
-    /**  
+    /**
      * Adds a bool value to the parameter map.
      * @param comp :: Component to which the new parameter is related
      * @param name :: Name for the new parameter
@@ -517,7 +517,7 @@ namespace Mantid
       add(pBool(),comp,name,value);
     }
 
-    /**  
+    /**
      * Adds a std::string value to the parameter map.
      * @param comp :: Component to which the new parameter is related
      * @param name :: Name for the new parameter
@@ -528,7 +528,7 @@ namespace Mantid
       add<std::string>(pString(),comp,name,value);
     }
 
-    /**  
+    /**
      * Adds a V3D value to the parameter map.
      * @param comp :: Component to which the new parameter is related
      * @param name :: Name for the new parameter
@@ -552,7 +552,7 @@ namespace Mantid
       clearPositionSensitiveCaches();
     }
 
-    /**  
+    /**
      * Adds a Quat value to the parameter map.
      * @param comp :: Component to which the new parameter is related
      * @param name :: Name for the new parameter
@@ -625,7 +625,7 @@ namespace Mantid
         }
         return false;
       }
-      else 
+      else
         return false;
     }
 
@@ -654,7 +654,7 @@ namespace Mantid
       Parameter_sptr result;
       if(!comp) return result;
 
-      PARALLEL_CRITICAL(ParameterMap_get)
+      PARALLEL_CRITICAL(m_mapAccess)
       {
         auto itr = positionOf(comp,name, type);
         if (itr != m_map.end())
@@ -662,8 +662,8 @@ namespace Mantid
       }
       return result;
     }
-    
-    /**Return an iterator pointing to a named parameter of a given type. 
+
+    /**Return an iterator pointing to a named parameter of a given type.
      * @param comp :: Component to which parameter is related
      * @param name :: Parameter name
      * @param type :: An optional type string. If empty, any type is returned
@@ -692,11 +692,11 @@ namespace Mantid
               }
             }
           }
-      }     
+      }
       return result;
     }
 
-    /**Return a const iterator pointing to a named parameter of a given type. 
+    /**Return a const iterator pointing to a named parameter of a given type.
      * @param comp :: Component to which parameter is related
      * @param name :: Parameter name
      * @param type :: An optional type string. If empty, any type is returned
@@ -725,7 +725,7 @@ namespace Mantid
               }
             }
           }
-      }     
+      }
       return result;
     }
 
@@ -739,7 +739,7 @@ namespace Mantid
     Parameter_sptr ParameterMap::getByType(const IComponent* comp, const std::string& type) const
     {
       Parameter_sptr result = Parameter_sptr();
-      PARALLEL_CRITICAL(ParameterMap_get)
+      PARALLEL_CRITICAL(m_mapAccess)
       {
         if( !m_map.empty() )
         {
@@ -763,7 +763,7 @@ namespace Mantid
              } // found->firdst
           } // it_found != m_map.end()
         } //!m_map.empty()
-      } // PARALLEL_CRITICAL(ParameterMap_get)
+      } // PARALLEL_CRITICAL(m_map_access)
       return result;
     }
 
@@ -789,7 +789,7 @@ namespace Mantid
     }
 
 
-    /** 
+    /**
      * Find a parameter by name, recursively going up the component tree
      * to higher parents.
      * @param comp :: The component to start the search with
@@ -797,13 +797,13 @@ namespace Mantid
      * @param type :: An optional type string
      * @returns the first matching parameter.
      */
-    Parameter_sptr ParameterMap::getRecursive(const IComponent* comp,const std::string& name, 
+    Parameter_sptr ParameterMap::getRecursive(const IComponent* comp,const std::string& name,
                                               const std::string & type) const
     {
       return getRecursive(comp, name.c_str(), type.c_str());
     }
 
-    /** 
+    /**
      * Find a parameter by name, recursively going up the component tree
      * to higher parents.
      * @param comp :: The component to start the search with
@@ -811,7 +811,7 @@ namespace Mantid
      * @param type :: An optional type string
      * @returns the first matching parameter.
      */
-    Parameter_sptr ParameterMap::getRecursive(const IComponent* comp, const char* name, 
+    Parameter_sptr ParameterMap::getRecursive(const IComponent* comp, const char* name,
                                               const char * type) const
     {
       Parameter_sptr result = this->get(comp->getComponentID(), name, type);
@@ -827,7 +827,7 @@ namespace Mantid
       return result;
     }
 
-    /**  
+    /**
      * Return the value of a parameter as a string
      * @param comp :: Component to which parameter is related
      * @param name :: Parameter name
@@ -849,7 +849,7 @@ namespace Mantid
       return param->asString();
     }
 
-    /** 
+    /**
      * Returns a set with all the parameter names for the given component
      * @param comp :: A pointer to the component of interest
      * @returns A set of names of parameters for the given component
@@ -864,17 +864,16 @@ namespace Mantid
         return paramNames;
       }
 
-      pmap_cit it_begin = m_map.lower_bound(id);
-      pmap_cit it_end = m_map.upper_bound(id);
-
-      for(pmap_cit it = it_begin; it != it_end; ++it)
+      pmap_cit itr = m_map.lower_bound(id);
+      pmap_cit itr_end = m_map.upper_bound(id);
+      for(pmap_cit it = itr; it != itr_end; ++it)
       {
         paramNames.insert(it->second->name());
       }
 
       return paramNames;
-    } 
-    
+    }
+
     /**
      * Return a string representation of the parameter map. The format is either:
      * |detID:id-value;param-type;param-name;param-value| for a detector or
@@ -914,10 +913,10 @@ namespace Mantid
       m_cacheRotMap.clear();
       m_boundingBoxMap.clear();
     }
- 
+
     ///Sets a cached location on the location cache
     /// @param comp :: The Component to set the location of
-    /// @param location :: The location 
+    /// @param location :: The location
     void ParameterMap::setCachedLocation(const IComponent* comp, const V3D& location) const
     {
       // Call to setCachedLocation is a write so not thread-safe
@@ -943,7 +942,7 @@ namespace Mantid
 
     ///Sets a cached rotation on the rotation cache
     /// @param comp :: The Component to set the rotation of
-    /// @param rotation :: The rotation as a quaternion 
+    /// @param rotation :: The rotation as a quaternion
     void ParameterMap::setCachedRotation(const IComponent* comp, const Quat& rotation) const
     {
       // Call to setCachedRotation is a write so not thread-safe
@@ -996,7 +995,7 @@ namespace Mantid
      * @param oldPMap :: Old map corresponding to the Old component
      */
     void ParameterMap::copyFromParameterMap(const IComponent* oldComp,
-                                            const IComponent* newComp, const ParameterMap *oldPMap) 
+                                            const IComponent* newComp, const ParameterMap *oldPMap)
     {
 
       std::set<std::string> oldParameterNames = oldPMap->names(oldComp);
@@ -1008,7 +1007,7 @@ namespace Mantid
         m_map.insert(std::make_pair(newComp->getComponentID(),thisParameter));
       }
     }
-    
+
     //--------------------------------------------------------------------------------------------
     /** Save the object to an open NeXus file.
      * @param file :: open NeXus file
@@ -1027,6 +1026,21 @@ namespace Mantid
       file->closeGroup();
     }
 
+    /** Returns a list of all the parameter files loaded
+    * @returns a vector of the filenames
+    */
+    const std::vector<std::string>& ParameterMap::getParameterFilenames() const
+    {
+      return m_parameterFileNames;
+    }
+    /// 
+    /** adds a parameter filename that has been loaded
+    * @param filename the filename to add
+    */
+    void ParameterMap::addParameterFilename(const std::string& filename)
+    {
+      m_parameterFileNames.push_back(filename);
+    }
+
   } // Namespace Geometry
 } // Namespace Mantid
-

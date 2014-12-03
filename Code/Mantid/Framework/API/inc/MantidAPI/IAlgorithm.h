@@ -156,6 +156,10 @@ public:
   virtual void setLoggingOffset(const int value) = 0;
   ///returns the logging priority offset
   virtual int getLoggingOffset() const = 0;
+  /// disable Logging of start and end messages
+  virtual void setAlgStartupLogging(const bool enabled) = 0;
+  /// get the state of Logging of start and end messages
+  virtual bool getAlgStartupLogging() const = 0;
   ///setting the child start progress
   virtual void setChildStartProgress(const double startProgress)const = 0;
   /// setting the child end progress
