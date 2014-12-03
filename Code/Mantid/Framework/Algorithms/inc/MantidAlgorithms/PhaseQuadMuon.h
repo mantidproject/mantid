@@ -84,6 +84,18 @@ namespace Mantid
       void squash(const API::MatrixWorkspace_sptr tempWs, API::MatrixWorkspace_sptr outputWs);
       /// Put back in exponential decay
       void regainExponential(API::MatrixWorkspace_sptr outputWs);
+      /// Muon lifetime
+      double m_muLife;
+      /// Maximum counts expected
+      double m_bigNumber;
+      /// Pulse definitely finished by here (bin no)
+      int m_tPulseOver;
+      /// Number of bins to exclude after lag-time (ie pulse arrival time)
+      double m_pulseTail;
+      /// Poisson limit
+      double m_poissonLim;
+      /// Time (microsec) by which a well-def'd point in the first proton/pion pulse leads its counterpart in the second
+      double m_pulseTwo;
       /// Number of input histograms
       int m_nHist;
       /// Number of datapoints per histogram
@@ -94,22 +106,10 @@ namespace Mantid
       double m_meanLag;
       /// Good muons from here on (bin no). Unused now but can be needed in the future
       int m_tValid;
-      /// Pulse definitely finished by here (bin no)
-      int m_tPulseOver;
       /// Double-pulse flag
       bool m_isDouble;
-      /// Time (microsec) by which a well-def'd point in the first proton/pion pulse leads its counterpart in the second
-      double m_pulseTwo;
       /// Minimum value of t
       double m_tMin;
-      /// Muon lifetime
-      double m_muLife;
-      /// Poisson limit
-      double m_poissonLim;
-      /// Maximum counts expected
-      double m_bigNumber;
-      /// Number of bins to exclude after lag-time (ie pulse arrival time)
-      double m_pulseTail;
       /// Vector of detector data
       std::vector<HistData> m_histData;
     };
