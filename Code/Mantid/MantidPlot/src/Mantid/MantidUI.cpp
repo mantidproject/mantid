@@ -2162,13 +2162,7 @@ QString MantidUI::saveToString(const std::string& workingDir)
         wsNames+=QString::fromStdString(secondLevelItems[j]);
         std::string fileName(workingDir + "//" + secondLevelItems[j] + ".nxs");
         //saving to  nexus file
-        try
-        {
-          savedatainNexusFormat(fileName,secondLevelItems[j]);
-        }
-        catch(...)
-        {
-        }
+        savedatainNexusFormat(fileName,secondLevelItems[j]);
       }
     }
     else
@@ -2178,13 +2172,7 @@ QString MantidUI::saveToString(const std::string& workingDir)
 
       std::string fileName(workingDir + "//" + wsName.toStdString() + ".nxs");
       //saving to  nexus file
-      try
-      {
-        savedatainNexusFormat(fileName,wsName.toStdString());
-      }
-      catch(...)
-      {
-      }
+      savedatainNexusFormat(fileName,wsName.toStdString());
     }
   }
   wsNames+="\n</mantidworkspaces>\n";
@@ -2302,11 +2290,6 @@ MantidMatrix* MantidUI::getMantidMatrix(const QString& wsName)
     }
   }
   return m;
-}
-
-MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int end)
-{
-  return importMatrixWorkspace(wsName, false, false, start, end);
 }
 
 bool MantidUI::createScriptInputDialog(const QString & alg_name, const QString & preset_values,
@@ -3416,9 +3399,18 @@ Table* MantidUI::createTableFromSelectedColumns(MantidMatrix *m, bool errs)
 */
 void MantidUI::savedatainNexusFormat(const std::string& fileName,const std::string & wsName)
 { 
+  auto inputWorkspace = AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
+
+  //Typically, we use SaveNexusProcessed to save a workspace
+  QString algorithm = "SaveNexusProcessed";
+
+  //...but if it's an MD workspace, we use SaveMD instead
+  if(boost::dynamic_pointer_cast<const IMDEventWorkspace>(inputWorkspace) || boost::dynamic_pointer_cast<const IMDHistoWorkspace>(inputWorkspace))
+    algorithm = "SaveMD";
+
   try
   {
-    Mantid::API::IAlgorithm_sptr alg =createAlgorithm("SaveNexusProcessed");
+    Mantid::API::IAlgorithm_sptr alg = createAlgorithm(algorithm);
     alg->setPropertyValue("Filename",fileName);
     alg->setPropertyValue("InputWorkspace",wsName);
     alg->execute();
@@ -3430,57 +3422,37 @@ void MantidUI::savedatainNexusFormat(const std::string& fileName,const std::stri
 /** Loads data from nexus file
 * @param wsName :: Name of the workspace to be created
 * @param fileName :: name of the nexus file
-* @param project :: if true, load stops GUI execution
 */
-void MantidUI::loaddataFromNexusFile(const std::string& wsName,const std::string& fileName,bool project)
+void MantidUI::loadWSFromFile(const std::string& wsName, const std::string& fileName)
 {
-  if(fileName.empty()) return ;
+  if(fileName.empty())
+    return;
   try
   {
-    Mantid::API::IAlgorithm_sptr alg =createAlgorithm("LoadNexus");
+    Mantid::API::IAlgorithm_sptr alg = createAlgorithm("Load");
     alg->setPropertyValue("Filename",fileName);
     alg->setPropertyValue("OutputWorkspace",wsName);
-    if(project)alg->execute();
-    else executeAlgorithmAsync(alg);
+    alg->execute();
   }
   catch(...)
   {
   }
 }
-/** Loads data from raw file
-* @param wsName :: Name of the workspace to be created
-* @param fileName :: name of the raw file
-* @param project :: if true, load stops GUI execution
-*/
-void MantidUI::loadadataFromRawFile(const std::string& wsName,const std::string& fileName,bool project)
-{
-  if(fileName.empty()) return ;
-  try
-  {
-    Mantid::API::IAlgorithm_sptr alg =createAlgorithm("LoadRaw");
-    alg->setPropertyValue("Filename",fileName);
-    alg->setPropertyValue("OutputWorkspace",wsName);
-    if(project)alg->execute();
-    else executeAlgorithmAsync(alg);
-  }
-  catch(...)
-  {
-  }
-}
-MantidMatrix* MantidUI::openMatrixWorkspace(ApplicationWindow* parent,const QString& wsName,int lower,int upper)
-{
-  (void) parent; //Avoid compiler warning
 
+MantidMatrix* MantidUI::openMatrixWorkspace(const std::string& wsName, int lower, int upper)
+{
   MatrixWorkspace_sptr ws;
-  if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
-  {
-    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
-  }
 
-  if (!ws.get())return 0 ;
+  if(AnalysisDataService::Instance().doesExist(wsName))
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
-  MantidMatrix* w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, lower, upper);
-  if ( !w ) return 0;
+  if(!ws)
+    return 0;
+
+  MantidMatrix* w = new MantidMatrix(ws, appWindow(), "Mantid", QString::fromStdString(wsName), lower, upper);
+
+  if(!w)
+    return 0;
 
   appWindow()->addMdiSubWindow(w);
 

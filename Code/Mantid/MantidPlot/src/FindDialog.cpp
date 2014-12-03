@@ -120,7 +120,7 @@ FindDialog::FindDialog( QWidget* parent, Qt::WFlags fl )
 void FindDialog::setStartPath()
 {
 	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
-	labelStart->setText(app->current_folder->path());
+	labelStart->setText(app->currentFolder()->path());
 }
 
 void FindDialog::accept()

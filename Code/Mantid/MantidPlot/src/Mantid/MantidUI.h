@@ -274,7 +274,6 @@ public:
 
   MultiLayer* mergePlots(MultiLayer* g1, MultiLayer* g2);
   MantidMatrix* getMantidMatrix(const QString& wsName);
-  MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
 
   void setIsRunning(bool running);
   bool createScriptInputDialog(const QString & alg_name, const QString & preset_values,
@@ -289,13 +288,9 @@ public:
   */
   void savedatainNexusFormat(const std::string& fileName,const std::string & wsName);
 
-  /** load data from nexus file.This method is useful 
-  when a project is opened  from mantidplot
-  */
-  void loaddataFromNexusFile(const std::string& wsname,const std::string& fileName,bool project=false);
-  void loadadataFromRawFile(const std::string& wsname,const std::string& fileName,bool project=false);
+  void loadWSFromFile(const std::string& wsname,const std::string& fileName);
 
-  MantidMatrix* openMatrixWorkspace(ApplicationWindow* parent,const QString& wsName,int lower,int upper);
+  MantidMatrix* openMatrixWorkspace(const std::string& wsName, int lower, int upper);
 
   void saveProject(bool save);
   void enableSaveNexus(const QString & wsName);

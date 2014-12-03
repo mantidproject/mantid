@@ -52,10 +52,6 @@ public:
   CaptionPolicy captionPolicy();
   void setCaptionPolicy(CaptionPolicy);
 
-  virtual SIP_PYOBJECT saveAsTemplate(const QString& );
-%MethodCode
-  sipRes = PyString_FromString(sipCpp->saveAsTemplate(*a0));
-%End
   virtual void restore(const QStringList& );
   //Folder* folder();
   QString name();
@@ -1066,7 +1062,7 @@ public:
   enum MatrixToTableConversion{Direct, XYZ, YXZ};
   Table* table(const QString&);
 %MethodCode
-  sipRes = sipCpp->current_folder->table(*a0, false);
+  sipRes = sipCpp->currentFolder()->table(*a0, false);
   if(!sipRes)
     sipRes = sipCpp->projectFolder()->table(*a0, true);
 %End
@@ -1077,7 +1073,7 @@ public:
 %End
   Matrix* matrix(const QString&);
 %MethodCode
-  sipRes = sipCpp->current_folder->matrix(*a0, false);
+  sipRes = sipCpp->currentFolder()->matrix(*a0, false);
   if(!sipRes)
     sipRes = sipCpp->projectFolder()->matrix(*a0, true);
 %End
@@ -1088,7 +1084,7 @@ public:
   
   MultiLayer *plot(const QString&) /PyName=graph/;
 %MethodCode
-  sipRes = sipCpp->current_folder->graph(*a0, false);
+  sipRes = sipCpp->currentFolder()->graph(*a0, false);
   if(!sipRes)
     sipRes = sipCpp->projectFolder()->graph(*a0, true);
 %End
@@ -1097,7 +1093,7 @@ public:
 
   Note *note(const QString&);
 %MethodCode
-  sipRes = sipCpp->current_folder->note(*a0, false);
+  sipRes = sipCpp->currentFolder()->note(*a0, false);
   if(!sipRes)
     sipRes = sipCpp->projectFolder()->note(*a0, true);
 %End
@@ -1170,20 +1166,16 @@ public:
   // folders
   Folder *activeFolder();
 %MethodCode
-  sipRes = sipCpp->current_folder;
+  sipRes = sipCpp->currentFolder();
 %End
 
   Folder* appendProject(const QString& file_name, Folder* parentFolder = 0);
-  void saveFolder(Folder *folder, const QString& fn, bool=false);
   Folder* projectFolder() /PyName=rootFolder/;
 
   Folder* addFolder(QString name, Folder* parent = 0);
   bool deleteFolder(Folder *);
   bool changeFolder(Folder *, bool force = false);
   bool copyFolder(Folder *src, Folder *dest);
-
-  MdiSubWindow* openTemplate(const QString&);
-  void saveAsTemplate(MdiSubWindow*, const QString&);
 
   void setWindowName(MdiSubWindow *, const QString &);
   void setPreferences(Graph*);
