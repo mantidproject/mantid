@@ -56,7 +56,7 @@
   </type>
 
   <component type="monitor2" idlist="monitor2">
-    <location z="0" />
+    <location z="1.206" />
   </component>
 
   <type name="monitor2" is="monitor">
