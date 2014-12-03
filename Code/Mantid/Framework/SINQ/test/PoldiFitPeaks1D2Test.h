@@ -1,9 +1,9 @@
-#ifndef MANTID_SINQ_POLDIFITPEAKS1DTEST_H_
-#define MANTID_SINQ_POLDIFITPEAKS1DTEST_H_
+#ifndef MANTID_SINQ_POLDIFITPEAKS1D2TEST_H_
+#define MANTID_SINQ_POLDIFITPEAKS1D2TEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidSINQ/PoldiFitPeaks1D.h"
+#include "MantidSINQ/PoldiFitPeaks1D2.h"
 
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -14,33 +14,33 @@
 
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 
-using Mantid::Poldi::PoldiFitPeaks1D;
+using Mantid::Poldi::PoldiFitPeaks1D2;
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::Kernel;
 
-class PoldiFitPeaks1D;
+class PoldiFitPeaks1D2;
 
-class TestablePoldiFitPeaks1D : public Mantid::Poldi::PoldiFitPeaks1D
+class TestablePoldiFitPeaks1D2 : public Mantid::Poldi::PoldiFitPeaks1D2
 {
-    friend class PoldiFitPeaks1DTest;
+    friend class PoldiFitPeaks1D2Test;
 public:
-    TestablePoldiFitPeaks1D() :
-        PoldiFitPeaks1D()
+    TestablePoldiFitPeaks1D2() :
+        PoldiFitPeaks1D2()
     {
     }
 };
 
-class PoldiFitPeaks1DTest : public CxxTest::TestSuite
+class PoldiFitPeaks1D2Test : public CxxTest::TestSuite
 {
 public:
     // This pair of boilerplate methods prevent the suite being created statically
     // This means the constructor isn't called when running other tests
-    static PoldiFitPeaks1DTest *createSuite() { return new PoldiFitPeaks1DTest(); }
-    static void destroySuite( PoldiFitPeaks1DTest *suite ) { delete suite; }
+    static PoldiFitPeaks1D2Test *createSuite() { return new PoldiFitPeaks1D2Test(); }
+    static void destroySuite( PoldiFitPeaks1D2Test *suite ) { delete suite; }
 
-    PoldiFitPeaks1DTest()
+    PoldiFitPeaks1D2Test()
     {
         m_testPeak = PoldiPeak::create(MillerIndices(1, 1, 1), UncertainValue(1.108329), UncertainValue(2948.231), UncertainValue(0.002));
         m_profileTestFunction = std::string("Gaussian");
@@ -50,7 +50,7 @@ public:
 
     void testSetPeakFunction()
     {
-        TestablePoldiFitPeaks1D poldiFitPeaks;
+        TestablePoldiFitPeaks1D2 poldiFitPeaks;
         poldiFitPeaks.setPeakFunction(m_profileTestFunction);
 
         TS_ASSERT_EQUALS(poldiFitPeaks.m_profileTemplate, m_profileTestFunction);
@@ -58,7 +58,7 @@ public:
 
     void testGetPeakProfile()
     {
-        TestablePoldiFitPeaks1D poldiFitPeaks;
+        TestablePoldiFitPeaks1D2 poldiFitPeaks;
         poldiFitPeaks.initialize();
         poldiFitPeaks.setPeakFunction(m_profileTestFunction);
 
@@ -75,7 +75,7 @@ public:
 
     void testSetValuesFromProfileFunction()
     {
-        TestablePoldiFitPeaks1D poldiFitPeaks;
+        TestablePoldiFitPeaks1D2 poldiFitPeaks;
         poldiFitPeaks.initialize();
         poldiFitPeaks.setPeakFunction(m_profileTestFunction);
 
@@ -92,7 +92,7 @@ public:
 
     void testProperties()
     {
-        Mantid::Poldi::PoldiFitPeaks1D fitPeaks1D;
+        Mantid::Poldi::PoldiFitPeaks1D2 fitPeaks1D;
         fitPeaks1D.initialize();
 
         TS_ASSERT_EQUALS(fitPeaks1D.propertyCount(), 7);
@@ -120,4 +120,4 @@ private:
 };
 
 
-#endif /* MANTID_SINQ_POLDIFITPEAKS1DTEST_H_ */
+#endif /* MANTID_SINQ_POLDIFITPEAKS1D2TEST_H_ */
