@@ -144,7 +144,7 @@ void PhaseQuadMuon::exec()
 */
 void PhaseQuadMuon::convertToNanoSecs (API::MatrixWorkspace_sptr inputWs)
 {
-  for (int h=0; h<inputWs->getNumberHistograms(); h++)
+  for (size_t h=0; h<inputWs->getNumberHistograms(); h++)
   {
     auto spec = inputWs->getSpectrum(h);
     m_tMin = spec->dataX()[0];
