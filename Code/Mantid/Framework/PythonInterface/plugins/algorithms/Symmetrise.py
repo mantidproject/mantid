@@ -91,12 +91,17 @@ class Symmetrise(PythonAlgorithm):
         v_unit = mtd[self._sample].getAxis(1).getUnit().unitID()
         v_axis_data = mtd[self._sample].getAxis(1).extractValues()
 
+        # Take the values we need from the original vertical axis
+        min_spectrum_index = mtd[self._sample].getIndexFromSpectrumNumber(int(self._spectra_range[0]))
+        max_spectrum_index = mtd[self._sample].getIndexFromSpectrumNumber(int(self._spectra_range[1]))
+        new_v_axis_data = v_axis_data[min_spectrum_index:max_spectrum_index + 1]
+
         # Create an empty workspace with enough storage for the new data
         zeros = np.zeros(new_array_len * num_symm_spectra)
         CreateWorkspace(OutputWorkspace=temp_ws_name,
                         DataX=zeros, DataY=zeros, DataE=zeros,
                         NSpec=int(num_symm_spectra),
-                        VerticalAxisUnit=v_unit, VerticalAxisValues=v_axis_data,
+                        VerticalAxisUnit=v_unit, VerticalAxisValues=new_v_axis_data,
                         UnitX=x_unit)
 
         # Copy logs and properties from sample workspace
