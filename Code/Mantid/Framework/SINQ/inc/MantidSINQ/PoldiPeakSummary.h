@@ -1,17 +1,28 @@
-#ifndef MANTID_SINQ_POLDIPEAKSUMMARY_H_
-#define MANTID_SINQ_POLDIPEAKSUMMARY_H_
+#ifndef MANTID_POLDI_POLDIPEAKSUMMARY_H_
+#define MANTID_POLDI_POLDIPEAKSUMMARY_H_
 
-#include "MantidKernel/System.h"
+#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 
 namespace Mantid
 {
-namespace SINQ
+namespace Poldi
 {
 
-  /** PoldiPeakSummary : TODO: DESCRIPTION
+  /** PoldiPeakSummary
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    This small algorithm produces a summary table for a given
+    PoldiPeakCollection, similar to what the original data
+    analysis software produced.
+
+      @author Michael Wedel, Paul Scherrer Institut - SINQ
+      @date 03/12/2014
+
+    Copyright © 2014 PSI-MSS
 
     This file is part of Mantid.
 
@@ -31,7 +42,7 @@ namespace SINQ
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport PoldiPeakSummary  : public API::Algorithm
+  class MANTID_SINQ_DLL PoldiPeakSummary  : public API::Algorithm
   {
   public:
     PoldiPeakSummary();
@@ -46,11 +57,15 @@ namespace SINQ
     void init();
     void exec();
 
+    DataObjects::TableWorkspace_sptr getSummaryTable(const PoldiPeakCollection_sptr &peakCollection) const;
+    DataObjects::TableWorkspace_sptr getInitializedResultWorkspace() const;
+
+    void storePeakSummary(API::TableRow tableRow, const PoldiPeak_sptr &peak) const;
 
   };
 
 
-} // namespace SINQ
+} // namespace Poldi
 } // namespace Mantid
 
-#endif  /* MANTID_SINQ_POLDIPEAKSUMMARY_H_ */
+#endif  /* MANTID_POLDI_POLDIPEAKSUMMARY_H_ */
