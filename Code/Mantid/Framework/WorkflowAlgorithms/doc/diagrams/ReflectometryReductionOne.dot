@@ -19,10 +19,10 @@ digraph ReflectometryReductionOne {
 
   subgraph decisions {
     node[fillcolor = limegreen, shape = diamond]
-    checkXUnit      [label="X axis in\nWavelength (&lambda;)?"]
+    checkXUnit      [label="X axis in &lambda;?"]
     checkMultDet    [label="Multidetector?"]
     checkTransRun   [label="FirstTransmissionRun\ngiven?"]
-    checkTransUnits [label="X axis in\nWavelength (&lambda;)?"]
+    checkTransUnits [label="X axis in &lambda;?"]
     checkThetaIn    [label="ThetaIn given?"]
     checkCorDetPos  [label="Correct Detector Positions?"]
   }
@@ -31,13 +31,17 @@ digraph ReflectometryReductionOne {
     node[style = "rounded,filled", fillcolor = lightskyblue, shape = rectangle]
     calcTheta       [label="SpecularReflectionCalculateTheta"]
     convertToMT     [label="ConvertUnits\n(Momentum-transfer)"]
-    convertToWL     [label="ConvertUnits\n(Wavelength)"]
+    convertToWL     [label="ConvertUnits\n(To &lambda;)"]
     createTransWS   [label="CreateTransmissionWorkspace"]
-    directBeamNorm  [label="Direct Beam Normalisation"]
     divideDetMon    [label="Divide\n(Detectors / Monitors)"]
     divideTrans     [label="Divide\n(InputWorkspace / TransmissionWorkspace)"]
     intMon          [label="Integrate"]
     specRefPosCor   [label="SpecularReflectionPositionCorrect"]
+  }
+
+  subgraph processes {
+    node[fillcolor = lightseagreen, shape = rectangle]
+    directBeamNorm  [label="Perform Direct\nBeam Normalisation"]
   }
 
   subgraph values {
