@@ -12,7 +12,7 @@ Description
 Assuming that the *InputWorkspace* contains measured 
 counts as a function of time, the algorithm returns a workspace 
 containing two spectra (squashograms) as a function of the same time binning.
-Either *PhaseList* or *PhaseTable* must be provided. 
+Either *PhaseList* or *PhaseTable* must be provided. Note: The first column is ignored in both cases.
 
 *PhaseList* is expected to have a six-row header, including overall information, and 6 columns:
 
