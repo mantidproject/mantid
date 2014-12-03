@@ -53,14 +53,15 @@ namespace Poldi
     virtual const std::string category() const;
     virtual const std::string summary() const;
 
-  private:
-    void init();
-    void exec();
-
+  protected:
     DataObjects::TableWorkspace_sptr getSummaryTable(const PoldiPeakCollection_sptr &peakCollection) const;
     DataObjects::TableWorkspace_sptr getInitializedResultWorkspace() const;
 
     void storePeakSummary(API::TableRow tableRow, const PoldiPeak_sptr &peak) const;
+
+  private:
+    void init();
+    void exec();
 
   };
 

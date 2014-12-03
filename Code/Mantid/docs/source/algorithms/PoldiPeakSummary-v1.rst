@@ -10,35 +10,42 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+This algorithm takes the peak table resulting from one of the POLDI peak fitting routines (for example :ref:`algm-PoldiFitPeaks1D`) and summarizes the data in another table with the relevant information.
 
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
+
+.. include:: ../usagedata-note.txt
 
 **Example - PoldiPeakSummary**
 
 .. testcode:: PoldiPeakSummaryExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = PoldiPeakSummary()
-
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+    # Load data file and instrument, perform correlation analysis
+    raw_6904 = LoadSINQFile(Filename = "poldi2013n006904.hdf", Instrument = "POLDI")
+    LoadInstrument(raw_6904, InstrumentName = "POLDI")
+    correlated_6904 = PoldiAutoCorrelation(raw_6904)
+    
+    # Run peak search algorithm, store peaks in TableWorkspace
+    peaks_6904 = PoldiPeakSearch(correlated_6904)
+    
+    PoldiFitPeaks1D(InputWorkspace = correlated_6904, FwhmMultiples = 4.0,
+                    PeakFunction = "Gaussian", PoldiPeakTable = peaks_6904,
+                    OutputWorkspace = "peaks_refined_6904", ResultTableWorkspace = "result_table_6904",
+                    FitPlotsWorkspace = "fit_plots_6904")
+                    
+    summary_6904 = PoldiPeakSummary(mtd["peaks_refined_6904"])
+    
+    print "Number of refined peaks:", summary_6904.rowCount()
+    print "Number of columns that describe a peak:", summary_6904.columnCount()
 
 Output:
 
 .. testoutput:: PoldiPeakSummaryExample
 
-  The output workspace has ?? spectra
+    Number of refined peaks: 14
+    Number of columns that describe a peak: 6
 
 .. categories::
 
