@@ -102,7 +102,7 @@ PoldiFitPeaks1D2::~PoldiFitPeaks1D2()
 
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string PoldiFitPeaks1D2::name() const { return "PoldiFitPeaks1D2";}
+const std::string PoldiFitPeaks1D2::name() const { return "PoldiFitPeaks1D";}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int PoldiFitPeaks1D2::version() const { return 2;}
