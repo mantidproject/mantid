@@ -47,8 +47,9 @@ class DensityOfStates(DataProcessorAlgorithm):
         self.declareProperty(name='SumContributions', defaultValue=False,
             doc="Sum the partial density of states into a single workspace.")
 
-        self.declareProperty(name='ScaleByCrossSection', defaultValue=False,
-            doc="Sum the partial density of states by the incoh scattering cross section.")
+        self.declareProperty(name='ScaleByCrossSection', defaultValue='None',
+            validator=StringListValidator(['None', 'Total', 'Incoherent', 'Coherent']),
+            doc="Sum the partial density of states by the scattering cross section.")
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
             doc="Name to give the output workspace.")
@@ -68,7 +69,7 @@ class DensityOfStates(DataProcessorAlgorithm):
 
         spec_type = self.getPropertyValue('SpectrumType')
         sum_contributions = self.getProperty('SumContributions').value
-        scale_by_cross_section = self.getProperty('ScaleByCrossSection').value
+        scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection') != 'None'
         ions = self.getProperty('Ions').value
         calc_partial = (len(ions) > 0)
 
@@ -125,7 +126,7 @@ class DensityOfStates(DataProcessorAlgorithm):
                 GroupWorkspaces(group, OutputWorkspace=self._ws_name)
 
         # We want to calculate a total DoS with scaled intensities
-        elif self._spec_type == 'DOS' and self._scale_by_cross_section:
+        elif self._spec_type == 'DOS' and self._scale_by_cross_section != 'None':
             logger.notice('Calculating summed density of states with scaled intensities')
             prog_reporter.report('Calculating density of states')
 
@@ -191,7 +192,7 @@ class DensityOfStates(DataProcessorAlgorithm):
         self._zero_threshold = self.getProperty('ZeroThreshold').value
         self._ions = self.getProperty('Ions').value
         self._sum_contributions = self.getProperty('SumContributions').value
-        self._scale_by_cross_section = self.getProperty('ScaleByCrossSection').value
+        self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
         self._calc_partial = (len(self._ions) > 0)
 
 #----------------------------------------------------------------------------------------
@@ -264,8 +265,14 @@ class DensityOfStates(DataProcessorAlgorithm):
             SetSampleMaterial(InputWorkspace=self._ws_name, ChemicalFormula=ion_name)
 
             # Multiply intensity by scatttering cross section
-            if self._scale_by_cross_section:
+            if self._scale_by_cross_section == 'Incoherent':
                 scattering_x_section = mtd[self._ws_name].mutableSample().getMaterial().incohScatterXSection()
+            elif self._scale_by_cross_section == 'Coherent':
+                scattering_x_section = mtd[self._ws_name].mutableSample().getMaterial().cohScatterXSection()
+            elif self._scale_by_cross_section == 'Total':
+                scattering_x_section = mtd[self._ws_name].mutableSample().getMaterial().totalScatterXSection()
+
+            if self._scale_by_cross_section != 'None':
                 Scale(InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name, Operation='Multiply', Factor=scattering_x_section)
 
             partial_workspaces.append(partial_ws_name)
@@ -604,7 +611,7 @@ class DensityOfStates(DataProcessorAlgorithm):
 
                 vector_match = eigenvectors_regex.match(line)
                 if vector_match:
-                    if self._calc_partial or (self._spec_type == 'DOS' and self._scale_by_cross_section):
+                    if self._calc_partial or (self._spec_type == 'DOS' and self._scale_by_cross_section != 'None'):
                         # Parse eigenvectors for partial dos
                         vectors = self._parse_phonon_eigenvectors(f_handle)
                         eigenvectors.append(vectors)
