@@ -4,11 +4,17 @@
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
-
 #include <QFileInfo>
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
+
+using namespace Mantid::API;
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("MSDFit");
+}
 
 namespace MantidQt
 {
@@ -51,14 +57,12 @@ namespace IDA
     connect(m_rangeSelectors["MSDRange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
 
-    connect(uiForm().msd_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput()));
+    connect(uiForm().msd_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded(const QString&)));
     connect(uiForm().msd_pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
-    connect(uiForm().msd_lePlotSpectrum, SIGNAL(editingFinished()), this, SLOT(plotInput()));
-    connect(uiForm().msd_leSpectraMin, SIGNAL(editingFinished()), this, SLOT(plotInput()));
-    connect(uiForm().msd_leSpectraMax, SIGNAL(editingFinished()), this, SLOT(plotInput()));
-    
-    uiForm().msd_leSpectraMin->setValidator(m_valInt);
-    uiForm().msd_leSpectraMax->setValidator(m_valInt);
+    connect(uiForm().msd_spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
+
+    connect(uiForm().msd_spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));
+    connect(uiForm().msd_spSpectraMax, SIGNAL(valueChanged(int)), this, SLOT(specMaxChanged(int)));
   }
 
   void MSDFit::run()
@@ -67,8 +71,8 @@ namespace IDA
     "from IndirectDataAnalysis import msdfit\n"
     "startX = " + QString::number(m_dblManager->value(m_properties["Start"])) +"\n"
     "endX = " + QString::number(m_dblManager->value(m_properties["End"])) +"\n"
-    "specMin = " + uiForm().msd_leSpectraMin->text() + "\n"
-    "specMax = " + uiForm().msd_leSpectraMax->text() + "\n"
+    "specMin = " + uiForm().msd_spSpectraMin->text() + "\n"
+    "specMax = " + uiForm().msd_spSpectraMax->text() + "\n"
     "input = '" + uiForm().msd_dsSampleInput->getCurrentDataName() + "'\n";
 
     if ( uiForm().msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
@@ -93,12 +97,15 @@ namespace IDA
 
   void MSDFit::singleFit()
   {
+    if(!validate())
+      return;
+
     QString pyInput =
       "from IndirectDataAnalysis import msdfit\n"
       "startX = " + QString::number(m_dblManager->value(m_properties["Start"])) +"\n"
       "endX = " + QString::number(m_dblManager->value(m_properties["End"])) +"\n"
-      "specMin = " + uiForm().msd_lePlotSpectrum->text() + "\n"
-      "specMax = " + uiForm().msd_lePlotSpectrum->text() + "\n"
+      "specMin = " + uiForm().msd_spPlotSpectrum->text() + "\n"
+      "specMax = " + uiForm().msd_spPlotSpectrum->text() + "\n"
       "input = '" + uiForm().msd_dsSampleInput->getCurrentDataName() + "'\n";
 
     if ( uiForm().msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
@@ -115,15 +122,15 @@ namespace IDA
   bool MSDFit::validate()
   {
     UserInputValidator uiv;
-    
+
     uiv.checkDataSelectorIsValid("Sample input", uiForm().msd_dsSampleInput);
 
     auto range = std::make_pair(m_dblManager->value(m_properties["Start"]), m_dblManager->value(m_properties["End"]));
     uiv.checkValidRange("a range", range);
 
-    QString specMin = uiForm().msd_leSpectraMin->text();
-    QString specMax = uiForm().msd_leSpectraMax->text();
-    auto specRange = std::make_pair(specMin.toInt(), specMax.toInt()+1);
+    int specMin = uiForm().msd_spSpectraMin->value();
+    int specMax = uiForm().msd_spSpectraMax->value();
+    auto specRange = std::make_pair(specMin, specMax+1);
     uiv.checkValidRange("spectrum range", specRange);
 
     QString errors = uiv.generateErrorMessage();
@@ -151,60 +158,51 @@ namespace IDA
     }
   }
 
+  /**
+   * Called when new data has been loaded by the data selector.
+   *
+   * Configures ranges for spin boxes before raw plot is done.
+   *
+   * @param wsName Name of new workspace loaded
+   */
+  void MSDFit::newDataLoaded(const QString wsName)
+  {
+    auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsName.toStdString());
+    int maxSpecIndex = static_cast<int>(ws->getNumberHistograms()) - 1;
+
+    uiForm().msd_spPlotSpectrum->setMaximum(maxSpecIndex);
+    uiForm().msd_spPlotSpectrum->setMinimum(0);
+    uiForm().msd_spPlotSpectrum->setValue(0);
+
+    uiForm().msd_spSpectraMin->setMaximum(maxSpecIndex);
+    uiForm().msd_spSpectraMin->setMinimum(0);
+
+    uiForm().msd_spSpectraMax->setMaximum(maxSpecIndex);
+    uiForm().msd_spSpectraMax->setMinimum(0);
+    uiForm().msd_spSpectraMax->setValue(maxSpecIndex);
+
+    plotInput();
+  }
+
   void MSDFit::plotInput()
   {
-    using namespace Mantid::API;
-
     QString wsname = uiForm().msd_dsSampleInput->getCurrentDataName();
-    auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsname.toStdString());
-    int nHist = static_cast<int>(ws->getNumberHistograms());
 
-    QString plotSpec = uiForm().msd_lePlotSpectrum->text();
-    QString specMin = uiForm().msd_leSpectraMin->text();
-    QString specMax = uiForm().msd_leSpectraMax->text();
-
-    int wsIndex = 0;
-    int minIndex = 0;
-    int maxIndex = nHist - 1;
-
-    if (m_currentWsName == wsname)
+    if(!AnalysisDataService::Instance().doesExist(wsname.toStdString()))
     {
-      if (!plotSpec.isEmpty() && plotSpec.toInt() < nHist)
-      {
-        wsIndex = plotSpec.toInt();
-      }
-
-      if (!specMin.isEmpty())
-      {
-        minIndex = specMin.toInt();
-      }
-
-      if (!specMax.isEmpty() && specMax.toInt() < nHist)
-      {
-        maxIndex = specMax.toInt();
-      }
-
-      if (wsIndex < minIndex)
-      {
-        wsIndex = minIndex;
-      }
-      else if( wsIndex > maxIndex)
-      {
-        wsIndex = maxIndex;
-      }
+      g_log.error("No workspace loaded, cannot create preview plot.");
+      return;
     }
 
+    auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsname.toStdString());
+
+    int wsIndex = uiForm().msd_spPlotSpectrum->value();
     plotMiniPlot(ws, wsIndex, "MSDPlot", "MSDDataCurve");
+
     try
     {
       const std::pair<double, double> range = getCurveRange("MSDDataCurve");
       m_rangeSelectors["MSDRange"]->setRange(range.first, range.second);
-      
-      uiForm().msd_leSpectraMin->setText(QString::number(minIndex));
-      uiForm().msd_leSpectraMax->setText(QString::number(maxIndex));
-      uiForm().msd_lePlotSpectrum->setText(QString::number(wsIndex));
-
-      m_valInt->setRange(0, maxIndex);
 
       // Replot
       replot("MSDPlot");
@@ -215,6 +213,34 @@ namespace IDA
     }
 
     m_currentWsName = wsname;
+
+    // Remove the old fit curve
+    removeCurve("MSDFitCurve");
+    replot("MSDPlot");
+  }
+
+  /**
+   * Handles the user entering a new minimum spectrum index.
+   *
+   * Prevents the user entering an overlapping spectra range.
+   *
+   * @param value Minimum spectrum index
+   */
+  void MSDFit::specMinChanged(int value)
+  {
+    uiForm().msd_spSpectraMax->setMinimum(value);
+  }
+
+  /**
+   * Handles the user entering a new maximum spectrum index.
+   *
+   * Prevents the user entering an overlapping spectra range.
+   *
+   * @param value Maximum spectrum index
+   */
+  void MSDFit::specMaxChanged(int value)
+  {
+    uiForm().msd_spSpectraMin->setMaximum(value);
   }
 
   void MSDFit::minChanged(double val)
