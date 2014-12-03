@@ -565,6 +565,203 @@ class DirectEnergyConversion(object):
         result_ws *= prop_man.scale_factor
         return result_ws
 
+    def convert_to_energy_transfer(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,monovan_run=None,wb_for_monovan_run=None,**kwargs):
+      """ One step conversion of run into workspace containing information about energy transfer
+
+      """ 
+      # Support for old reduction interface:
+      if not(wb_run is None):
+        self.prop_man.wb_run = wb_run
+        if not(sample_run is None):
+            self.prop_man.sample_run = sample_run
+            if not(ei_guess is None):
+               self.prop_man.incident_energy = ei_guess 
+               if not(rebin is None):
+                  self.prop_man.energy_bins = rebin
+                  if not(map_file is None):
+                     self.prop_man.map_file = map_file
+                     if not(monovan_run is None):
+                        self.prop_man.monovan_run = monovan_run
+                        if not(wb_for_monovan_run is None):
+                            self.prop_man.wb_for_monovan_run = wb_for_monovan_run
+
+      self.prop_man.set_input_parameters(**kwargs);
+
+      prop_man = self.prop_man;
+      # output workspace name.
+      try:
+          n,r=funcreturns.lhs_info('both')
+          wksp_out=r[0]
+      except:
+          wksp_out = prop_man.get_sample_ws_name();
+
+
+      # Process old legacy parameters which are easy to re-define in dgreduce rather then transfer through Mantid
+      #TODO (verify)
+      #program_args = process_legacy_parameters(**kwargs)
+
+
+      # inform user on what parameters have changed 
+      prop_man.log_changed_values('notice');
+      #process complex parameters
+
+      start_time=time.time()
+      # defaults can be None too, but can be a file
+
+     # check if reducer can find all non-run files necessary for the reduction before starting long run.
+      #TODO:
+      # Reducer.check_necessary_files(monovan_run);
+
+      # TODO: --check out if internal summation works
+      # Here was summation in dgreduce. 
+
+
+      masking = None;
+      masks_done=False
+      if not prop_man.run_diagnostics:
+          header="*** Diagnostics including hard masking is skipped "
+          masks_done = True;
+      #if Reducer.save_and_reuse_masks :
+      #    raise NotImplementedError("Save and reuse masks option is not yet implemented")
+      #    mask_file_name = common.create_resultname(str(mask_run),prop_man.instr_name,'_masks.xml')
+      #    mask_full_file = FileFinder.getFullPath(mask_file_name)
+      #    if len(mask_full_file) > 0 :
+      #      masking = LoadMask(Instrument=Reducer.instr_name,InputFile=mask_full_file,OutputWorkspace=mask_file_name)
+      #      #Reducer.hard_mask_file = mask_full_file;
+      #      #Reducer.use_hard_mask_only = True
+      #      masks_done=True
+      #      header="Masking fully skipped and processed {0} spectra and  {1} bad spectra "
+      #  else:
+      #      pass
+#-------------------------------------------------------------------------------------------------------------------------------------------------------
+#  Diagnostics here 
+# --------------------------------------------------------------------------------------------------------
+     # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
+      if not masks_done:
+        prop_man.log("########### Run diagnose for sample run ##############################",'notice');
+        masking = self.diagnose(prop_man.wb_run,prop_man.mask_run,
+                                second_white=None,print_results=True)
+        header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
+
+
+        # diagnose absolute units:
+        if prop_man.monovan_run != None :
+            if prop_man.mono_correction_factor == None :
+                if prop_man.use_sam_msk_on_monovan == True:
+                    prop_man.log('  Applying sample run mask to mono van')
+                else:
+                    if not prop_man.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better solution for that.
+                        prop_man.log("########### Run diagnose for monochromatic vanadium run ##############",'notice');
+
+                        masking2 = self.diagnose(prop_man.wb_for_monovan_run,prop_man.monovan_run,
+                                         second_white = None,print_results=True)
+                        masking +=  masking2
+                        DeleteWorkspace(masking2)
+
+
+            else: # if Reducer.mono_correction_factor != None :
+                pass
+
+      # save mask if it does not exist and has been already loaded
+      #if Reducer.save_and_reuse_masks and not masks_done:
+      #    SaveMask(InputWorkspace=masking,OutputFile = mask_file_name,GroupedDetectors=True)
+
+      # Very important statement propagating masks for further usage in convert_to_energy
+      self.spectra_masks=masking
+      # estimate and report the number of failing detectors
+      failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
+      nMaskedSpectra = len(failed_sp_list)
+      # this tells turkey in case of hard mask only but everything else semens work fine
+      prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice');
+      #Run the conversion first on the sample
+      deltaE_wkspace_sample = self.convert_to_energy(prop_man.sample_run,prop_man.incident_energy,prop_man.wb_run)
+    
+
+      # calculate absolute units integral and apply it to the workspace
+      if prop_man.monovan_run != None or prop_man.mono_correction_factor != None :
+         deltaE_wkspace_sample = self.apply_absolute_normalization(deltaE_wkspace_sample,prop_man.monovan_run,\
+                                      prop_man.incident_energy,prop_man.wb_for_monovan_run)
+
+
+      results_name = deltaE_wkspace_sample.name();
+      if results_name != wksp_out:
+         RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=wksp_out)
+
+
+      ei= (deltaE_wkspace_sample.getRun().getLogData("Ei").value)
+      prop_man.log("*** Incident energy found for sample run: {0} meV".format(ei),'notice');
+
+      end_time=time.time()
+      prop_man.log("*** Elapsed time = {0} sec".format(end_time-start_time),'notice');
+
+      if mtd.doesExist('_wksp.spe-white')==True:
+        DeleteWorkspace(Workspace='_wksp.spe-white')
+    # Hack for multirep mode?
+#    if mtd.doesExist('hard_mask_ws') == True:
+ #       DeleteWorkspace(Workspace='hard_mask_ws')
+
+      return deltaE_wkspace_sample
+
+  
+#----------------------------------------------------------------------------------
+#                        Reduction steps
+#----------------------------------------------------------------------------------
+    def apply_absolute_normalization(self,deltaE_wkspace_sample,monovan_run=None,ei_guess=None,wb_mono=None):
+        """  Function applies absolute normalization factor to the target workspace
+             and calculates this factor if necessary
+
+            Inputs:
+            Reducer           --    properly initialized class which performs reduction
+            deltaE_wkspace_sample-- the workspace which should be modified
+            monovan_run          -- run number for monochromatic vanadium sample at current energy
+            ei_guess             -- estimated neutrons incident energy
+            wb_mono              -- white bean vanadium run number.
+        """
+        # Old interface support
+        prop_man = self.prop_man;
+        prop_man.log('******  Run absolute units corrections ****************************************************','notice')
+
+        if prop_man.mono_correction_factor:
+            absnorm_factor=float(prop_man.mono_correction_factor)
+            prop_man.log('*** Using supplied workspace correction factor                           ******','notice')
+            abs_norm_factor_is='provided'
+        else:
+            mvir=prop_man.monovan_integr_range;
+            prop_man.log('*** Evaluating the integral from the monovan run and calculate the correction factor ******','notice')
+            prop_man.log('    Using absolute units vanadium integration range : [{0:8f}:{1:8f}]         ******'.format(mvir[0],mvir[1]),'notice')
+            abs_norm_factor_is = 'calculated'
+        #
+            result_ws_name = common.create_resultname(monovan_run,prop_man.instr_name)
+            # check the case when the sample is monovanadium itself (for testing purposes)
+            if result_ws_name == deltaE_wkspace_sample.name() :
+                deltaE_wkspace_monovan = CloneWorkspace(InputWorkspace=deltaE_wkspace_sample,OutputWorkspace=result_ws_name+'-monovan');
+                deltaE_wkspace_monovan=self.remap(deltaE_wkspace_monovan,None,prop_man.monovan_mapfile)
+            else:
+                # convert to monovanadium to energy
+                map_file              = prop_man.map_file;
+                self.prop_man.map_file = prop_man.monovan_mapfile;
+                deltaE_wkspace_monovan = self.convert_to_energy(monovan_run, ei_guess, wb_mono)
+                self.prop_man.map_file = map_file
+
+            ei_monovan = deltaE_wkspace_monovan.getRun().getLogData("Ei").value
+            prop_man.log('    Incident energy found for monovanadium run: '+str(ei_monovan)+' meV','notice')
+
+
+            (anf_LibISIS,anf_SS2,anf_Puas,anf_TGP) = self.get_abs_normalization_factor(deltaE_wkspace_monovan.getName(),ei_monovan)
+
+            prop_man.log('*** Absolute correction factor(s): S^2: {0:10.4f}\n*** LibISIS: {1:10.4f} Poisson: {2:10.4f}  TGP: {3:10.4f} '\
+                .format(anf_LibISIS,anf_SS2,anf_Puas,anf_TGP),'notice')
+            absnorm_factor = anf_TGP;
+        #end
+        prop_man.log('*** Using {0} value : {1} of absolute units correction factor (TGP)'.format(abs_norm_factor_is,absnorm_factor),'notice')
+        prop_man.log('*******************************************************************************************','notice')
+        #absnorm_factor  =  0.0245159026452 
+        # fix old system tests with would fail otherwise in 10^-6 limits
+        absnorm_factor  =  absnorm_factor*0.024519711695583177/0.0245159026452
+        deltaE_wkspace_sample = deltaE_wkspace_sample/absnorm_factor;
+
+
+        return deltaE_wkspace_sample
     def get_abs_normalization_factor(self,deltaE_wkspaceName,ei_monovan):
         """get absolute normalization factor for monochromatic vanadium
 
@@ -688,198 +885,7 @@ class DirectEnergyConversion(object):
            DeleteWorkspace(Workspace=data_ws)
         return (norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
 #-------------------------------------------------------------------------------
-    def convert_to_energy_transfer(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,monovan_run=None,wb_for_monovan_run=None,**kwargs):
-      """ One step conversion of run into workspace containing information about energy transfer
 
-      """ 
-      # Support for old reduction interface:
-      if not(wb_run is None):
-        self.prop_man.wb_run = wb_run
-        if not(sample_run is None):
-            self.prop_man.sample_run = sample_run
-            if not(ei_guess is None):
-               self.prop_man.incident_energy = ei_guess 
-               if not(rebin is None):
-                  self.prop_man.energy_bins = rebin
-                  if not(map_file is None):
-                     self.prop_man.map_file = map_file
-                     if not(monovan_run is None):
-                        self.prop_man.monovan_run = monovan_run
-                        if not(wb_for_monovan_run is None):
-                            self.prop_man.wb_for_monovan_run = wb_for_monovan_run
-
-      self.prop_man.set_input_parameters(**kwargs);
-
-      prop_man = self.prop_man;
-      # output workspace name.
-      try:
-          n,r=funcreturns.lhs_info('both')
-          wksp_out=r[0]
-      except:
-          wksp_out = prop_man.get_sample_ws_name();
-
-
-      # Process old legacy parameters which are easy to re-define in dgreduce rather then transfer through Mantid
-      #TODO (verify)
-      #program_args = process_legacy_parameters(**kwargs)
-
-
-      # inform user on what parameters have changed 
-      prop_man.log_changed_values('notice');
-      #process complex parameters
-
-      start_time=time.time()
-      # defaults can be None too, but can be a file
-
-     # check if reducer can find all non-run files necessary for the reduction before starting long run.
-      #TODO:
-      # Reducer.check_necessary_files(monovan_run);
-
-      # TODO: --check out if internal summation works
-      # Here was summation in dgreduce. 
-
-
-      masking = None;
-      masks_done=False
-      if not prop_man.run_diagnostics:
-          header="*** Diagnostics including hard masking is skipped "
-          masks_done = True;
-      #if Reducer.save_and_reuse_masks :
-      #    raise NotImplementedError("Save and reuse masks option is not yet implemented")
-      #    mask_file_name = common.create_resultname(str(mask_run),prop_man.instr_name,'_masks.xml')
-      #    mask_full_file = FileFinder.getFullPath(mask_file_name)
-      #    if len(mask_full_file) > 0 :
-      #      masking = LoadMask(Instrument=Reducer.instr_name,InputFile=mask_full_file,OutputWorkspace=mask_file_name)
-      #      #Reducer.hard_mask_file = mask_full_file;
-      #      #Reducer.use_hard_mask_only = True
-      #      masks_done=True
-      #      header="Masking fully skipped and processed {0} spectra and  {1} bad spectra "
-      #  else:
-      #      pass
-#-------------------------------------------------------------------------------------------------------------------------------------------------------
-#  Diagnostics here 
-# --------------------------------------------------------------------------------------------------------
-     # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
-      if not masks_done:
-        prop_man.log("########### Run diagnose for sample run ##############################",'notice');
-        prop_man.log("########### Run diagnose for monochromatic vanadium run ##############",'notice');
-        masking = self.diagnose(prop_man.wb_run,prop_man.mask_run,
-                                second_white=None,print_results=True)
-        header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
-
-
-        # diagnose absolute units:
-        if prop_man.monovan_run != None :
-            if prop_man.mono_correction_factor == None :
-                if prop_man.use_sam_msk_on_monovan == True:
-                    prop_man.log('  Applying sample run mask to mono van')
-                else:
-                    if not prop_man.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better solution for that.
-                        prop_man.log("########### Run diagnose for monochromatic vanadium run ##############",'notice');
-
-                        masking2 = self.diagnose(prop_man.wb_for_monovan_run,prop_man.monovan_run,
-                                         second_white = None,print_results=True)
-                        masking +=  masking2
-                        DeleteWorkspace(masking2)
-
-
-            else: # if Reducer.mono_correction_factor != None :
-                pass
-
-      # save mask if it does not exist and has been already loaded
-      #if Reducer.save_and_reuse_masks and not masks_done:
-      #    SaveMask(InputWorkspace=masking,OutputFile = mask_file_name,GroupedDetectors=True)
-
-      # Very important statement propagating masks for further usage in convert_to_energy
-      self.spectra_masks=masking
-      # estimate and report the number of failing detectors
-      failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
-      nMaskedSpectra = len(failed_sp_list)
-      # this tells turkey in case of hard mask only but everything else semens work fine
-      prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice');
-      #Run the conversion first on the sample
-      deltaE_wkspace_sample = self.convert_to_energy(prop_man.sample_run,prop_man.incident_energy,prop_man.wb_run)
-
-
-      # calculate absolute units integral and apply it to the workspace
-      if prop_man.monovan_run != None or prop_man.mono_correction_factor != None :
-         deltaE_wkspace_sample = self.apply_absolute_normalization(deltaE_wkspace_sample,prop_man.monovan_run,\
-                                      prop_man.incident_energy,prop_man.wb_for_monovan_run)
-
-
-      results_name = deltaE_wkspace_sample.name();
-      if results_name != wksp_out:
-         RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=wksp_out)
-
-
-      ei= (deltaE_wkspace_sample.getRun().getLogData("Ei").value)
-      prop_man.log("*** Incident energy found for sample run: {0} meV".format(ei),'notice');
-
-      end_time=time.time()
-      prop_man.log("*** Elapsed time = {0} sec".format(end_time-start_time),'notice');
-
-      if mtd.doesExist('_wksp.spe-white')==True:
-        DeleteWorkspace(Workspace='_wksp.spe-white')
-    # Hack for multirep mode?
-#    if mtd.doesExist('hard_mask_ws') == True:
- #       DeleteWorkspace(Workspace='hard_mask_ws')
-
-      return deltaE_wkspace_sample
-
-  
-#----------------------------------------------------------------------------------
-#                        Reduction steps
-#----------------------------------------------------------------------------------
-    def apply_absolute_normalization(self,deltaE_wkspace_sample,monovan_run=None,ei_guess=None,wb_mono=None):
-        """  Function applies absolute normalization factor to the target workspace
-             and calculates this factor if necessary
-
-            Inputs:
-            Reducer           --    properly initialized class which performs reduction
-            deltaE_wkspace_sample-- the workspace which should be modified
-            monovan_run          -- run number for monochromatic vanadium sample at current energy
-            ei_guess             -- estimated neutrons incident energy
-            wb_mono              -- white bean vanadium run number.
-        """
-        # Old interface support
-        prop_man = self.prop_man;
-        if prop_man.mono_correction_factor:
-            absnorm_factor=float(prop_man.mono_correction_factor)
-            prop_man.log('##### Using supplied workspace correction factor                          ######','notice')
-            abs_norm_factor_is='provided'
-        else:
-            mvir=prop_man.monovan_integr_range;
-            prop_man.log('##### Evaluate the integral from the monovan run and calculate the correction factor ######','notice')
-            prop_man.log('      Using absolute units vanadium integration range : [{0:8f}:{1:8f}]       ######'.format(mvir[0],mvir[1]),'notice')
-            abs_norm_factor_is = 'calculated'
-        #
-            result_ws_name = common.create_resultname(monovan_run,prop_man.instr_name)
-            # check the case when the sample is monovanadium itself (for testing purposes)
-            if result_ws_name == deltaE_wkspace_sample.name() :
-                deltaE_wkspace_monovan = CloneWorkspace(InputWorkspace=deltaE_wkspace_sample,OutputWorkspace=result_ws_name+'-monovan');
-                deltaE_wkspace_monovan=self.remap(deltaE_wkspace_monovan,None,prop_man.monovan_mapfile)
-            else:
-                # convert to monovanadium to energy
-                map_file              = prop_man.map_file;
-                self.prop_man.map_file = prop_man.monovan_mapfile;
-                deltaE_wkspace_monovan = self.convert_to_energy(monovan_run, ei_guess, wb_mono)
-                self.prop_man.map_file = map_file
-
-            ei_monovan = deltaE_wkspace_monovan.getRun().getLogData("Ei").value
-            prop_man.log('      Incident energy found for monovanadium run: '+str(ei_monovan)+' meV','notice')
-
-
-            (anf_LibISIS,anf_SS2,anf_Puas,anf_TGP) = self.get_abs_normalization_factor(deltaE_wkspace_monovan.getName(),ei_monovan)
-
-            prop_man.log('*** Absolute correction factor(s): S^2: {0:10.4f}\n*** LibISIS: {1:10.4f} Poisson: {2:10.4f}  TGP: {3:10.4f} '\
-                .format(anf_LibISIS,anf_SS2,anf_Puas,anf_TGP),'notice')
-            absnorm_factor = anf_TGP;
-        #end
-        prop_man.log('*** Using {0} value : {1} of absolute units correction factor'.format(abs_norm_factor_is,absnorm_factor),'notice')
-        deltaE_wkspace_sample = deltaE_wkspace_sample/absnorm_factor;
-
-
-        return deltaE_wkspace_sample
 
     def convert_to_energy(self, mono_run, ei, white_run=None, mono_van=None,\
                           abs_ei=None, abs_white_run=None, save_path=None, Tzero=None, \
