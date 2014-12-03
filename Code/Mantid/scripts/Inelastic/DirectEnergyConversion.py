@@ -106,13 +106,13 @@ import CommonFunctions as common
 import diagnostics
 from DirectPropertyManager import DirectPropertyManager;
 
-def setup_reducer(inst_name):
+def setup_reducer(inst_name,reload_instrument=False):
     """
     Given an instrument name or prefix this sets up a converter
     object for the reduction
     """
     try:
-        return DirectEnergyConversion(inst_name)
+        return DirectEnergyConversion(inst_name,reload_instrument)
     except RuntimeError, exc:
         raise RuntimeError('Unknown instrument "%s" or wrong IDF file for this instrument, cannot continue' % inst_name)
 
@@ -707,10 +707,12 @@ class DirectEnergyConversion(object):
 
             Left for compatibility as internal summation had some unspecified problems.
 
-            TODO: Should Go replaced by internal procedure
+            TODO: Should be replaced by internal procedure
             TODO: Monitors are not summed together here. 
+            TODO: Should we allow to add to existing accumulator?
         """
-        instr_name = self.prop_man.instr_name;
+        prop_man = self.prop_man
+        instr_name = prop_man.instr_name;
         accum_name = accumulator
         if isinstance(accum_name,api.Workspace): # it is actually workspace and is in Mantid
             accum_name  = accumulator.name()
@@ -718,28 +720,31 @@ class DirectEnergyConversion(object):
             DeleteWorkspace(Workspace=accum_name)     
 
 
-        load_mon_with_ws = self.prop_man.load_monitors_with_workspace;
+        load_mon_with_ws = prop_man.load_monitors_with_workspace;
+        prop_man.log("****************************************************************",'notice');
+        prop_man.log("*** Summing multiple runs",'notice')
         if type(files) == list:
              #tmp_suffix = '_plus_tmp'
 
             for filename in files:
-               print 'Summing run ',filename,' to workspace ',accumulator
                temp = common.load_run(instr_name,filename, force=False,load_with_workspace = load_mon_with_ws)
 
                if accum_name in mtd: # add current workspace to the existing one
                   accumulator = mtd[accum_name]
                   accumulator+=  temp
                   DeleteWorkspace(Workspace=temp)
+                  prop_man.log("*** Added run: {0} to workspace: {1}".format(filename,accum_name),'notice')
                else:
-                   print 'Creating output workspace: '
                    accumulator=RenameWorkspace(InputWorkspace=temp,OutputWorkspace=accum_name)
+                   prop_man.log("*** Summing multiple runs: created output workspace: {0} from run {1}".format(accum_name,filename),'notice')
 
             return accumulator
         else:
             temp = common.load_run(instr_name,files, force=False,load_with_workspace = load_mon_with_ws)
             accumulator=RenameWorkspace(InputWorkspace=temp,OutputWorkspace=accum_name)
-            return accumulator;
+        prop_man.log("****************************************************************",'notice');
 
+        return accumulator;
 
 
     def apply_absolute_normalization(self,deltaE_wkspace_sample,monovan_run=None,ei_guess=None,wb_mono=None):
@@ -1281,7 +1286,7 @@ class DirectEnergyConversion(object):
     # Behind the scenes stuff
     #---------------------------------------------------------------------------
 
-    def __init__(self, instr_name=None):
+    def __init__(self, instr_name=None,reload_instrument=False):
         """
         Constructor
         """
@@ -1291,7 +1296,7 @@ class DirectEnergyConversion(object):
         self.spectra_masks = None;
 
         if instr_name:
-            self.initialise(instr_name);
+            self.initialise(instr_name,reload_instrument);
         else:
             self._propMan = None;
 

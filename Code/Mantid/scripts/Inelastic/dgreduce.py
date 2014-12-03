@@ -39,7 +39,7 @@ def setup(instname=None,reload=False):
             if not reload :
                return  # has been already defined
 
-    Reducer = DRC.setup_reducer(instname)
+    Reducer = DRC.setup_reducer(instname,reload)
 
 def help(keyword=None) :
     """function returns help on reduction parameters.
