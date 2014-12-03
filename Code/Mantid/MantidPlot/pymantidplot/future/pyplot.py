@@ -5,8 +5,8 @@ New Python command line interface for plotting in Mantid (a la matplotlib)
 The idea behind this new module is to provide a simpler, more
 homogeneous command line interface (CLI) to the Mantid plotting
 functionality. This new interface is meant to resemble MatPlotLib as
-far as possible, and provide a more manageable, limited number of plot
-options.
+far as possible, and to provide a more manageable, limited number of
+plot options.
 
 The module is at a very early stage of development and provides
 limited functionality. This is very much work in progress at the
@@ -172,6 +172,7 @@ matplotlib's pyplot. For example:
     ylabel('Counts')
     ylim(0, 8)
     xlim(1e3, 4e4)
+    xscale('log')
     grid('on')
 
 By default, these functions manipulate the current figure (the last or
@@ -262,14 +263,16 @@ Modifying the plot axes
 -----------------------
 
 You can modify different properties of the plot axes via functions, as
-seen before. For example:
+seen before. This includes the x and y axis titles, limits and scale
+(linear or logarithmic). For example:
 
     ylabel('Counts')
     ylim(0, 8)
+    yscale('log')
 
-An alternative is to use equivalent methods provided by the figure and
-axes objects. For this you first need to retrieve the figure and axes
-where a plot (or lines) has been shown.
+An alternative is to use equivalent methods provided by the Figure and
+Axes objects. For this you first need to retrieve the figure and axes
+where a plot (or line) has been shown.
 
     lines = plot(mar,[3, 500, 800])
     fig = lines[0].figure()
@@ -279,7 +282,8 @@ where a plot (or lines) has been shown.
     ax.set_ylabel('Counts')
     ax.set_xlabel('ToF')
     ax.set_ylim(0, 8)
-    ax.set_xlim(1e3, 4e4)
+    ax.set_xlim(1e2, 4e4)
+    ax.set_xscale('log')
 
 Functions that modify plot properties
 -------------------------------------
@@ -294,18 +298,19 @@ pyplot.
 - ylim
 - xlim
 - axis
+- xscale
+- yscale
 - grid
 - savefig
 
 This is a limited list of functions that should be sufficient for
 basic plots. These functions are presently provided as an example of
-this style of interface, and some of them provide functionality
+this type of interface, and some of them provide functionality
 similar or equivalent to several of the keyword arguments for plot
 commands detailed in this documentation. Some others produce results
 equivalent to the more object oriented methods described above. For
 example, the function xlabel is equivalent to the method set_xlabel
-applied on Axes object for the current figure.
-
+applied on the Axes object for the current figure.
 """
 # Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 #
@@ -484,10 +489,10 @@ class Axes():
                 l.logYlinX()
         elif scale_str == 'linear':
             if 'log' == self._xscale:
-                l.logXlinY()
+                l.logXLinY()
             else:
                 l.linearAxes()
-        self._xscale = scale_str
+        self._yscale = scale_str
 
     def get_figure(self, ):
         """
@@ -563,6 +568,17 @@ class Figure():
         """
         return [self._axes]
 
+    def savefig(self, name):
+        """
+        Save current plot into a file. The format is guessed from the file extension (.eps, .png, .jpg, etc.)
+
+        @param name :: file name
+        """
+        if not name:
+            raise ValueError("Error: you need to specify a non-empty file name")
+        l = _graph.activeLayer()
+        l.saveImage(name);
+
     @classmethod
     def fig_seq(cls):
         """ Helper method, returns the current sequence number for figures"""
@@ -571,7 +587,7 @@ class Figure():
     @classmethod
     def __make_new_fig_number(cls):
         """ Helper method, creates and return a new figure number"""
-        num = cls.__figures_seq + 1
+        num = cls.__figures_seq
         avail = False
         while not avail:
             missing = -1
@@ -650,7 +666,7 @@ def __is_registered_workspace_name(arg):
 
         Returns :: True if arg is a correct workspace name
     """
-    return (mtd.doesExist(arg) and isinstance(mtd[arg], IMDWorkspace))
+    return (isinstance(arg, basestring) and mtd.doesExist(arg) and isinstance(mtd[arg], IMDWorkspace))
 
 def __is_valid_single_workspace_arg(arg):
     """"
@@ -665,7 +681,7 @@ def __is_valid_single_workspace_arg(arg):
     if __is_workspace(arg) or __is_registered_workspace_name(arg):
         return True
     else:
-         raise ValueError("This parameter is not a valid workspace: " + str(arg))
+        return False
 
 def __is_valid_workspaces_arg(arg):
     """"
@@ -676,12 +692,11 @@ def __is_valid_workspaces_arg(arg):
 
         Returns :: True if arg can be accepted as a workspace or a list of workspaces
     """
-    if 0 == len(arg):
-        return False
-
-    if isinstance(arg, basestring):
-        return __is_valid_single_workspace_arg(arg)
+    if __is_valid_single_workspace_arg(arg):
+        return True
     else:
+        if 0 == len(arg):
+            return False
         for name in arg:
             # name can be a workspace name or a workspace object
             try:
@@ -1419,8 +1434,8 @@ def figure(num=None):
     if not num:
         return __empty_fig()
     else:
-        if num < 1:
-            raise ValueError("The figure number must be >= 1")
+        if num < 0:
+            raise ValueError("The figure number must be >= 0")
 
     return Figure(num)
 
