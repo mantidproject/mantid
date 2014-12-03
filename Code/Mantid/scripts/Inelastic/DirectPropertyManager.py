@@ -126,12 +126,27 @@ class MonovanIntegrationRange(object):
                 range = [lo_frac*ei,hi_frac*ei]
             return range
         else:
-            return def_range;
+            min_value = prop_helpers.gen_getter(instance.__dict__,'monovan_lo_value');
+            max_value = prop_helpers.gen_getter(instance.__dict__,'monovan_hi_value');
+
+            return [min_value,max_value];
 
     def __set__(self,instance,value):
-        if value != None:
-            raise NotImplementedError('Changing monovan_integr_range is not yet implemented. Try to set up monovan_lo_frac and monovan_hi_frac, which would specify energy limits') 
-        prop_helpers.gen_setter(instance.__dict__,'monovan_integr_range',value);
+        if value is None:
+            prop_helpers.gen_setter(instance.__dict__,'monovan_integr_range',None);
+        else:
+            if isinstance(value,str):
+                values = value.split(',');
+                result = [];
+                for val in values :
+                    result.append(int(val));
+                value = result;
+            if len(value) != 2:
+                raise KeyError("monovan_integr_range has to be list of two values, defining min/max values of integration range or None to use relative to incident energy limits")
+            prop_helpers.gen_setter(instance.__dict__,'monovan_lo_value',value[0]);
+            prop_helpers.gen_setter(instance.__dict__,'monovan_hi_value',value[1]);
+
+
 #end MonovanIntegrationRange
 
 

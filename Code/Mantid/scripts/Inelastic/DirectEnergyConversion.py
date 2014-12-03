@@ -935,7 +935,7 @@ class DirectEnergyConversion(object):
 
         self.prop_man.incident_energy = ei;      
         prop_man = self.prop_man;
-        prop_man.set_input_parameters_ignore_nan(sample_run=mono_run,incident_energy=ei,
+        prop_man.set_input_parameters_ignore_nan(sample_run=mono_run,
                                                  wb_run = white_run,monovan_run=mono_van,
                                                  wb_for_monovan_run =abs_white_run);   # note not-supported second ei for monovan
 
