@@ -98,15 +98,18 @@ double QwtWorkspaceSpectrumData::ex(size_t i) const
 
 double QwtWorkspaceSpectrumData::e(size_t i) const
 {
+  double ei = (i < m_E.size()) ? m_E[i] : m_E[m_E.size()-1];
+  if(m_isDistribution)
+  {
+    ei /= (m_X[i+1] - m_X[i]);
+  }
   if (m_logScale)
   {
-    if (m_Y[i] <= 0.0)
-      return 0;
-    else
-      return m_E[i];
+    double yi = (i < m_Y.size()) ? m_Y[i] : m_Y[m_Y.size()-1];
+    if (yi <= 0.0) return 0;
+    else return ei;
   }
-  else
-    return m_E[i];
+  else return ei;
 }
 
 size_t QwtWorkspaceSpectrumData::esize() const
