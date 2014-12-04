@@ -413,7 +413,7 @@ namespace MDAlgorithms
                 prevIntSec.getBareArray(), pos.begin(),
                 VectorHelper::SimpleAverage<double>());
             //transform kf to energy transfer
-            pos[3]=(m_Ei-pos[3]*pos[3]/energyToK);
+            pos[3]=static_cast<coord_t>(m_Ei-pos[3]*pos[3]/energyToK);
 
             std::vector<coord_t> posNew = affineMat*pos;
             size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
@@ -449,7 +449,7 @@ namespace MDAlgorithms
     auto lNBins = m_lX.size();
     auto eNBins = m_eX.size();
     std::vector<Kernel::VMD> intersections;
-    intersections.reserve(hNBins + kNBins + lNBins + eNBins+10);
+    intersections.reserve(hNBins + kNBins + lNBins + eNBins+8);//8 is 3*(min,max for each Q component)+kfmin+kfmax
 
     //calculate intersections with planes perpendicular to h
     if (fabs(hStart-hEnd) > eps)
@@ -502,6 +502,109 @@ namespace MDAlgorithms
       }
     }
 
+    //calculate intersections with planes perpendicular to k
+    if (fabs(kStart-kEnd) > eps)
+    {
+      double fmom=(m_kfmax-m_kfmin)/(kEnd-kStart);
+      double fh=(hEnd-hStart)/(kEnd-kStart);
+      double fl=(lEnd-lStart)/(kEnd-kStart);
+      if(!m_kIntegrated)
+      {
+        for(size_t i = 0;i<kNBins;i++)
+        {
+          double ki = m_kX[i];
+          if((ki>=m_kmin)&&(ki<=m_kmax) && ((kStart-ki)*(kEnd-ki)<0))
+          {
+            // if ki is between kStart and kEnd, then hi and li will be between hStart, hEnd and lStart, lEnd and momi will be between m_kfmin and m_kfmax
+            double hi = fh*(ki-kStart)+hStart;
+            double li = fl*(ki-kStart)+lStart;
+            if ((hi>=m_hmin)&&(hi<=m_hmax)&&(li>=m_lmin)&&(li<=m_lmax))
+            {
+                double momi = fmom*(ki-kStart)+m_kfmin;
+                Mantid::Kernel::VMD v(hi,ki,li,momi);
+                intersections.push_back(v);
+            }
+          }
+        }
+      }
+      double momkMin = fmom*(m_kmin-kStart)+m_kfmin;
+      if ((momkMin>m_kfmin)&&(momkMin<m_kfmax))
+      {
+       //hkmin and lkmin
+       double hkmin = fh*(m_kmin-kStart)+hStart;
+       double lkmin = fl*(m_kmin-kStart)+lStart;
+       if((hkmin>=m_hmin)&&(hkmin<=m_hmax)&&(lkmin>=m_lmin)&&(lkmin<=m_lmax))
+       {
+         Mantid::Kernel::VMD v(hkmin,m_kmin,lkmin,momkMin);
+         intersections.push_back(v);
+       }
+      }
+      double momkMax = fmom*(m_kmax-kStart)+m_kfmin;
+      if ((momkMax>m_kfmin)&&(momkMax<m_kfmax))
+      {
+        //hkmax and lkmax
+        double hkmax = fh*(m_kmax-kStart)+hStart;
+        double lkmax = fl*(m_kmax-kStart)+lStart;
+        if((hkmax>=m_hmin)&&(hkmax<=m_hmax)&&(lkmax>=m_lmin)&&(lkmax<=m_lmax))
+        {
+          Mantid::Kernel::VMD v(hkmax,m_kmax,lkmax,momkMax);
+          intersections.push_back(v);
+        }
+      }
+    }
+
+
+    //calculate intersections with planes perpendicular to l
+    if (fabs(lStart-lEnd) > eps)
+    {
+      double fmom=(m_kfmax-m_kfmin)/(lEnd-lStart);
+      double fh=(hEnd-hStart)/(lEnd-lStart);
+      double fk=(kEnd-kStart)/(lEnd-lStart);
+      if(!m_lIntegrated)
+      {
+        for(size_t i = 0;i<lNBins;i++)
+        {
+          double li = m_lX[i];
+          if((li>=m_lmin)&&(li<=m_lmax) && ((lStart-li)*(lEnd-li)<0))
+          {
+            double hi = fh*(li-lStart)+hStart;
+            double ki = fk*(li-lStart)+kStart;
+            if ((hi>=m_hmin)&&(hi<=m_hmax)&&(ki>=m_kmin)&&(ki<=m_kmax))
+            {
+                double momi = fmom*(li-lStart)+m_kfmin;
+                Mantid::Kernel::VMD v(hi,ki,li,momi);
+                intersections.push_back(v);
+            }
+          }
+        }
+      }
+      double momlMin = fmom*(m_lmin-lStart)+m_kfmin;
+      if ((momlMin>m_kfmin)&&(momlMin<m_kfmax))
+      {
+       //hlmin and klmin
+       double hlmin = fh*(m_lmin-lStart)+hStart;
+       double klmin = fk*(m_lmin-lStart)+kStart;
+       if((hlmin>=m_hmin)&&(hlmin<=m_hmax)&&(klmin>=m_kmin)&&(klmin<=m_kmax))
+       {
+         Mantid::Kernel::VMD v(hlmin,klmin,m_lmin,momlMin);
+         intersections.push_back(v);
+       }
+      }
+      double momlMax = fmom*(m_lmax-lStart)+m_kfmin;
+      if ((momlMax>m_kfmin)&&(momlMax<m_kfmax))
+      {
+        //hlmax and klmax
+        double hlmax = fh*(m_lmax-lStart)+hStart;
+        double klmax = fk*(m_lmax-lStart)+kStart;
+        if((hlmax>=m_hmin)&&(hlmax<=m_hmax)&&(klmax>=m_kmin)&&(klmax<=m_kmax))
+        {
+          Mantid::Kernel::VMD v(hlmax,klmax,m_lmax,momlMax);
+          intersections.push_back(v);
+        }
+      }
+    }
+
+    //TODO: add intersections with dE and endpoints
 
     return intersections;
  }
