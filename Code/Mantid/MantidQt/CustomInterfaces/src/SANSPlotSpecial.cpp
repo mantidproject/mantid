@@ -844,7 +844,7 @@ QPair<QStringList, QMap<QString, double> > SANSPlotSpecial::getProperties(const 
 //------- Utility "Transform" Class ----------------------------------
 //--------------------------------------------------------------------
 SANSPlotSpecial::Transform::Transform(Transform::TransformType type) : m_type(type), 
-  m_xWidgets(QList<QWidget*>()), m_yWidgets(QList<QWidget*>()), m_parent(NULL), m_gDeriv(""), m_iDeriv("")
+  m_xWidgets(QList<QWidget*>()), m_yWidgets(QList<QWidget*>()), m_gDeriv(""), m_iDeriv("")
 {
   init();
 }

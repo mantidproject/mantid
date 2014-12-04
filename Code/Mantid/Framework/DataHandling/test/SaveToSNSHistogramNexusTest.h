@@ -53,7 +53,6 @@ private:
   SaveToSNSHistogramNexus algToBeTested;
   std::string outputFile;
   std::string title;
-  int entryNumber;
   
 };
 #endif /*SaveToSNSHistogramNexusTEST_H_*/

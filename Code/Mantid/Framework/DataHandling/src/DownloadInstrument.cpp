@@ -44,7 +44,7 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    DownloadInstrument::DownloadInstrument() : m_proxyInfo(), m_isProxySet(false)
+    DownloadInstrument::DownloadInstrument() : m_proxyInfo()
     {
     }
 
