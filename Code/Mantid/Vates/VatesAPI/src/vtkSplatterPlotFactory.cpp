@@ -1,15 +1,19 @@
 #include "MantidVatesAPI/vtkSplatterPlotFactory.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/Common.h"
 
 #include <vtkCellData.h>
 #include <vtkFloatArray.h>
 #include <vtkHexahedron.h>
+#include <vtkVertex.h>
 #include <vtkPoints.h>
+#include <vtkPolyVertex.h>
 #include <vtkSystemIncludes.h>
 #include <vtkUnstructuredGrid.h>
 
@@ -306,6 +310,256 @@ namespace VATES
   }
 
   /**
+   * Generate the vtkDataSet from the objects input MDHistoWorkspace (of a
+   * given type an dimensionality 3D or 4D). Note that for 4D we only look at t=0 currently.
+   * Note that this implementation is almost the same as for vtkMDHistoHexFactory.
+   * @param workspace A smart pointer to the histo workspace.
+   * @return A fully constructed vtkUnstructuredGrid containing geometric and scalar data.
+   */
+  void vtkSplatterPlotFactory::doCreateMDHisto(IMDHistoWorkspace_sptr workspace) const
+  {
+    bool VERBOSE = true;
+    CPUTimer tim;
+    // Acquire a scoped read-only lock to the workspace (prevent segfault
+    // from algos modifying wworkspace)
+    ReadLock lock(*workspace);
+
+    // Get the geometric information of the bins
+    const int nBinsX = static_cast<int>(workspace->getXDimension()->getNBins());
+    const int nBinsY = static_cast<int>(workspace->getYDimension()->getNBins());
+    const int nBinsZ = static_cast<int>(workspace->getZDimension()->getNBins());
+
+    const coord_t maxX = workspace->getXDimension()->getMaximum();
+    const coord_t minX = workspace->getXDimension()->getMinimum();
+    const coord_t maxY = workspace->getYDimension()->getMaximum();
+    const coord_t minY = workspace->getYDimension()->getMinimum();
+    const coord_t maxZ = workspace->getZDimension()->getMaximum();
+    const coord_t minZ = workspace->getZDimension()->getMinimum();
+
+    coord_t incrementX = (maxX - minX) / static_cast<coord_t>(nBinsX);
+    coord_t incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
+    coord_t incrementZ = (maxZ - minZ) / static_cast<coord_t>(nBinsZ);
+  
+    const int imageSize = (nBinsX)*(nBinsY)*(nBinsZ);
+
+    // Two points per bin, per direction. Two neighbouring bins share points.
+    const int nPointsX = nBinsX+1;
+    const int nPointsY = nBinsY+1;
+    const int nPointsZ = nBinsZ+1;
+  
+    // VTK structures
+    vtkFloatArray *signal = vtkFloatArray::New();
+    signal->Allocate(imageSize);
+    signal->SetName(m_scalarName.c_str());
+    signal->SetNumberOfComponents(1);
+
+    vtkPoints *points = vtkPoints::New();
+    points->Allocate(static_cast<int>(imageSize));
+
+    // Set up the actual vtkDataSet, here the vtkUnstructuredGrid, the cell type 
+    // we choose here is the vtk_poly_vertex
+    vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
+    this->dataSet = visualDataSet;
+    visualDataSet->Allocate(imageSize);
+    
+    // Create the Hexahedron structure.
+    vtkHexahedron *hexahedron = vtkHexahedron::New();
+    vtkVertex* vertex = vtkVertex::New();
+
+    // Check if the workspace requires 4D handling.
+    bool do4D = doMDHisto4D(workspace);
+
+    // Get the transformation that takes the points in the TRANSFORMED space back into the ORIGINAL (not-rotated) space.
+    Mantid::API::CoordTransform* transform = NULL;
+    if (m_useTransform)
+    {
+     transform = workspace->getTransformToOriginal();
+    }
+
+    Mantid::coord_t in[3]; 
+    Mantid::coord_t out[3];
+
+    // We create one point per bin and create a hexahedron which is propoertional
+    // to the signal value in the bin, yet maximally the size of the bin.
+    std::vector<vtkIdType> pointIDs(8); 
+
+    double signalScalar;
+
+    size_t index = 0;
+
+    for (int z = 0; z < nBinsZ; z++)
+    {
+      in[2] = (minZ + (static_cast<coord_t>(z)*incrementZ + static_cast<coord_t>(0.5)*incrementZ)); 
+      for (int y = 0; y < nBinsY; y++)
+      {
+        in[1] = (minY + (static_cast<coord_t>(y)*incrementY + static_cast<coord_t>(0.5)*incrementY)); 
+        for (int x = 0; x < nBinsX; x++)
+        {
+          // Get the signalScalar
+          signalScalar = this->extractScalarSignal(workspace, do4D, x, y, z);
+
+          // Make sure that the signal is not bad and is in the range and larger than 0
+          if (!Mantid::VATES::isSpecial(signalScalar) && m_thresholdRange->inRange(signalScalar) &&(signalScalar > 0.0))
+          {
+            in[0] = (minX + (static_cast<coord_t>(x) * incrementX + static_cast<coord_t>(0.5)*incrementX)); 
+
+            // Create the transformed value if required
+            if (transform)
+            {
+              transform->apply(in, out);
+            }
+            else
+            {
+              memcpy(&out, &in, sizeof in);
+            }
+
+            // Store the signal
+            signal->InsertNextValue(static_cast<float>(signalScalar));
+
+            // Currently selecting vertex as cell data type.
+            if (false)
+            {
+              // The range which is maximally the size of the 
+              coord_t range = static_cast<coord_t>(signalScalar)/ static_cast<coord_t>(m_thresholdRange->getMaximum());
+              coord_t steps[3] = {0.5*range*incrementX, 0.5*range*incrementY, 0.5*range*incrementZ};
+
+              // Set  points for the variable size hexahedron
+              setPointsAndPointIdsForHex(points, pointIDs, out, signalScalar, steps);
+
+              // Set the hexahedron
+              hexahedron->GetPointIds()->SetId(0, pointIDs[0]);
+              hexahedron->GetPointIds()->SetId(1, pointIDs[1]);
+              hexahedron->GetPointIds()->SetId(2, pointIDs[2]);
+              hexahedron->GetPointIds()->SetId(3, pointIDs[3]);
+              hexahedron->GetPointIds()->SetId(4, pointIDs[4]);
+              hexahedron->GetPointIds()->SetId(5, pointIDs[5]);
+              hexahedron->GetPointIds()->SetId(6, pointIDs[6]);
+              hexahedron->GetPointIds()->SetId(7, pointIDs[7]);
+
+              visualDataSet->InsertNextCell(VTK_HEXAHEDRON, hexahedron->GetPointIds());
+            } 
+            else
+            {
+              vtkIdType id = points->InsertNextPoint(out);
+              
+              vertex->GetPointIds()->SetId(0,id);
+              
+              visualDataSet->InsertNextCell(VTK_VERTEX, vertex->GetPointIds());
+            }
+          }
+          index++;
+        }
+      }
+    }
+    
+    hexahedron->Delete();
+    vertex->Delete();
+
+    visualDataSet->SetPoints(points);
+    visualDataSet->GetCellData()->SetScalars(signal);
+
+    std::cout << tim << " to create the visual data set." << std::endl;
+
+    points->Delete();
+    signal->Delete();
+    visualDataSet->Squeeze();
+  }
+
+  /**
+   * Set the points and pointIDs for the rectangular hexahedron structure.
+   * @param points A pointer to a VTK points structure.
+   * @param pointIDs A vector which holds point Ids.
+   * @param centre The centre of the hexahedron.
+   * @param signalScalar
+   */
+  void vtkSplatterPlotFactory::setPointsAndPointIdsForHex(vtkPoints* points,
+                                                          std::vector<vtkIdType> &pointIDs,
+                                                          Mantid::coord_t out[3],
+                                                          double signalScalar,
+                                                          Mantid::coord_t steps[3]) const
+  {
+   // 8 Points for variable size box 
+
+    //xyz
+    pointIDs[0] = points->InsertNextPoint(out[0] - steps[0],
+                                          out[1] - steps[1],
+                                          out[2] - steps[2]);
+    //dxyz
+    pointIDs[1] = points->InsertNextPoint(out[0] + steps[0],
+                                          out[1] - steps[1],
+                                          out[2] - steps[2]);
+    //dxdyz
+    pointIDs[2] = points->InsertNextPoint(out[0] + steps[0],
+                                          out[1] + steps[1],
+                                          out[2] - steps[2]);
+    //xdyz
+    pointIDs[3] = points->InsertNextPoint(out[0] - steps[0],
+                                          out[1] + steps[1],
+                                          out[2] - steps[2]);
+    //xydz
+    pointIDs[4] = points->InsertNextPoint(out[0] - steps[0],
+                                          out[1] - steps[1],
+                                          out[2] + steps[2]);
+    //dxydz
+    pointIDs[5] = points->InsertNextPoint(out[0] + steps[0],
+                                          out[1] - steps[1],
+                                          out[2] + steps[2]);
+    //dxdydz
+    pointIDs[6] = points->InsertNextPoint(out[0] + steps[0],
+                                          out[1] + steps[1],
+                                          out[2] + steps[2]);
+    //xdydz
+    pointIDs[7] = points->InsertNextPoint(out[0] - steps[0],
+                                          out[1] + steps[1],
+                                          out[2] + steps[2]);
+  }
+
+  /**
+   * Set the signals, pointIDs and points for bins which are valid to be displayed
+   * @param workspace Smart pointer to the MDHisto workspace.
+   * @param do4D If the workspace contains time.
+   * @returns The scalar signal.
+   */
+  double vtkSplatterPlotFactory::extractScalarSignal(IMDHistoWorkspace_sptr workspace,
+                                                     bool do4D, const int x, const int y, const int z) const
+  {
+    double signalScalar;
+
+    if (do4D)
+    {
+      signalScalar = workspace->getSignalNormalizedAt(x,y,z, m_time);
+    }
+    else
+    {
+      signalScalar = workspace->getSignalNormalizedAt(x,y,z);
+    }
+
+    return signalScalar;
+  }
+
+  /**
+   * Check if the MDHisto workspace is 3D or 4D in nature
+   * @param workspace The MDHisto workspace
+   * @returns Is the workspace 4D?
+   */
+  bool vtkSplatterPlotFactory::doMDHisto4D(IMDHistoWorkspace_sptr workspace) const
+  {
+    bool do4D = false;
+    
+    bool bExactMatch = true;
+ 
+    IMDHistoWorkspace_sptr workspace4D = castAndCheck<IMDHistoWorkspace, 4>(workspace, bExactMatch); 
+    
+    if (workspace4D)
+    {
+      do4D = true;
+    }
+    
+    return do4D;
+  }
+
+
+  /**
    * Generate the vtkDataSet from the objects input IMDEventWorkspace
    * @param progressUpdating : Reporting object to pass progress information up the stack.
    * @return fully constructed vtkDataSet.
@@ -357,8 +611,19 @@ namespace VATES
       this->slice = false;
     }
 
-    // Macro to call the right instance of the
-    CALL_MDEVENT_FUNCTION(this->doCreate, m_workspace);
+    // Check for the workspace type, i.e. if it is MDHisto or MDEvent
+    IMDEventWorkspace_sptr eventWorkspace = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
+    IMDHistoWorkspace_sptr histoWorkspace = boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_workspace);
+  
+    if (eventWorkspace)
+    {
+      // Macro to call the right instance of the
+      CALL_MDEVENT_FUNCTION(this->doCreate, m_workspace);
+    }
+    else 
+    {
+      this->doCreateMDHisto(histoWorkspace);
+    }
 
     // Clean up
     if (this->slice)
@@ -380,7 +645,7 @@ namespace VATES
   */
   void vtkSplatterPlotFactory::initialize(Mantid::API::Workspace_sptr ws)
   {
-    this->m_workspace = boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
+    this->m_workspace = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
     this->validate();
   }
 
@@ -393,9 +658,19 @@ namespace VATES
     {
       throw std::invalid_argument("Workspace is null or not IMDEventWorkspace");
     }
+
     if (m_workspace->getNumDims() < 3)
     {
       throw std::runtime_error("Invalid vtkSplatterPlotFactory. Workspace must have at least 3 dimensions.");
+    }
+
+    // Make sure that the workspace is either an MDEvent Workspace or an MDHistoWorkspace
+    IMDEventWorkspace_sptr eventWorkspace = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
+    IMDHistoWorkspace_sptr histoWorkspace = boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_workspace);
+    
+    if (!eventWorkspace && !histoWorkspace)
+    {
+      throw std::runtime_error("Workspace is neither an IMDHistoWorkspace nor an IMDEventWorkspace.");
     }
   }
 

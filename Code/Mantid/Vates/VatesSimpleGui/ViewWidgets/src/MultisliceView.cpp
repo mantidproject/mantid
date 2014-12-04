@@ -74,10 +74,14 @@ void MultiSliceView::setupData()
 {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
 
-  pqDataRepresentation *drep = builder->createDataRepresentation(\
-        this->origSrc->getOutputPort(0), this->mainView);
-  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Slices");
-  drep->getProxy()->UpdateVTKObjects();
+  // Make sure that origsrc exists
+  if (this->origSrc)
+  {
+    pqDataRepresentation *drep = builder->createDataRepresentation(\
+    this->origSrc->getOutputPort(0), this->mainView);
+    vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Slices");
+    drep->getProxy()->UpdateVTKObjects();
+  }
 }
 
 void MultiSliceView::render()

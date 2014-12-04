@@ -281,7 +281,6 @@ namespace VATES
     delete [] voxelShown;
     delete [] pointNeeded;
     return visualDataSet;
-
   }
 
 
