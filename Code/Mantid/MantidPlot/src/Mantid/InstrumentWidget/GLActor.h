@@ -43,7 +43,7 @@ namespace Mantid
   Base class for all objects in a 3D Scene. Methods are provided to position and rotate the objects.
   The objects can also be set as active or not. Actors maintain safe pointer to a GLObject.
 
-  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 

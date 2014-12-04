@@ -18,7 +18,7 @@ namespace CurveFitting
     @date 2013-04-26 : original LeBailFunction is not used by any other functions. And thus
                        it is rewritten.
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

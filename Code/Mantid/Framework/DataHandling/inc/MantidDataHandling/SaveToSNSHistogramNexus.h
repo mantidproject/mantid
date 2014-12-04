@@ -27,7 +27,7 @@ namespace Mantid
     @author Janik Zikovsky, with code from NXConvert, part of the NeXus library.
     @date Dec 2, 2010
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

@@ -32,7 +32,7 @@ namespace Mantid
     at the beginning and the end of each RUNNING interval and keeps track of changes
     within the interval.
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

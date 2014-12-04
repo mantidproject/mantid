@@ -79,7 +79,7 @@ namespace DataObjects
   /** This is a container for the MRU (most-recently-used) list
    * of generated histograms.
 
-    Copyright &copy; 2011-2 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011-2 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

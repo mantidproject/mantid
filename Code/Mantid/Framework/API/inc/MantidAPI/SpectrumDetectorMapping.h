@@ -26,7 +26,7 @@ namespace API
       and not the entire workspace, or you want to store some mapping that related to spectra
       that are not yet, or no longer, contained in the workspace.
 
-      Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 

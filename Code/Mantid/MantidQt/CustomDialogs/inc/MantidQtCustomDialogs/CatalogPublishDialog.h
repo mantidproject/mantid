@@ -13,7 +13,7 @@ namespace MantidQt
 
      @author Jay Rainey, ISIS Rutherford Appleton Laboratory
      @date 14/01/2014
-     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
      This file is part of Mantid.
 

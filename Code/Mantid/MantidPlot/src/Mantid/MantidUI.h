@@ -77,7 +77,7 @@ MantidUI is the extension of QtiPlot's ApplicationWindow which deals with Mantid
 @author Roman Tolchenov, Tessella Support Services plc
 @date 02/07/2008
 
-Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 

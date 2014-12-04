@@ -14,7 +14,7 @@ namespace Algorithms
 {
 /** Filters events in an EventWorkspace using values in a SampleLog.
 
-    Copyright &copy; 2010-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010-2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

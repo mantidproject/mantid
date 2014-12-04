@@ -25,7 +25,7 @@ namespace Kernel
       This class has been largely taken from one of the examples given in the
       Boost.MultiIndex documentation (<http://www.boost.org/libs/multi_index/doc/reference/index.html>)
 
-      Copyright &copy; 2008-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2008-2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 

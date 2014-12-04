@@ -14,7 +14,7 @@ namespace MantidQt
     /**
       Deals with formatting a label for a plot axis for a given type of workspace
 
-      Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 
