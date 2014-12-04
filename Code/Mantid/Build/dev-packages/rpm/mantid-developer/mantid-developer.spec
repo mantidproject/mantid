@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        1.4
+Version:        1.6
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -19,6 +19,7 @@ Requires: git-all
 Requires: gsl-devel
 Requires: hdf-devel
 Requires: hdf5-devel
+Requires: jsoncpp-devel
 Requires: muParser-devel
 Requires: mxml-devel
 Requires: nexus >= 4.2
@@ -46,8 +47,12 @@ Requires: sip-devel
 Requires: git
 Requires: openssl-devel
 Requires: texlive-latex
+%if 0%{?el6}
+# do nothing
+%else
 Requires: texlive-latex-bin
 Requires: texlive-was
+%endif
 Requires: tex-preview
 Requires: dvipng
 %if 0%{?el6}

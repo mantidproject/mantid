@@ -44,6 +44,8 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   setMinimumHeight(150);
   setMinimumWidth(200);
 
+  m_appParent = parent;
+
   QFrame *f = new QFrame(this);
   setWidget(f);
 
@@ -52,16 +54,21 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
 
   FlowLayout * buttonLayout = new FlowLayout();
   m_loadButton = new QPushButton("Load");
+  m_saveButton = new QPushButton("Save");
   m_deleteButton = new QPushButton("Delete");
   m_groupButton= new QPushButton("Group");
   m_sortButton= new QPushButton("Sort");
 
   if(m_groupButton)
     m_groupButton->setEnabled(false);
+  m_deleteButton->setEnabled(false);
+  m_saveButton->setEnabled(false);
+
   buttonLayout->addWidget(m_loadButton);
   buttonLayout->addWidget(m_deleteButton);
   buttonLayout->addWidget(m_groupButton);
   buttonLayout->addWidget(m_sortButton);
+  buttonLayout->addWidget(m_saveButton);
 
   m_workspaceFilter = new MantidQt::MantidWidgets::LineEditWithClear();
   m_workspaceFilter->setPlaceholderText("Filter Workspaces");
@@ -92,10 +99,16 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   m_loadMenu->addAction(liveDataAction);
   m_loadButton->setMenu(m_loadMenu);
 
+  // Dialog box used for user to specify folder to save multiple workspaces into
+  m_saveFolderDialog = new QFileDialog;
+  m_saveFolderDialog->setFileMode(QFileDialog::DirectoryOnly);
+  m_saveFolderDialog->setOption(QFileDialog::ShowDirsOnly);
+
   // SET UP SORT
   createSortMenuActions();
   createWorkspaceMenuActions();
 
+  connect(m_saveButton,SIGNAL(clicked()),this,SLOT(saveWorkspaces()));
   connect(m_deleteButton,SIGNAL(clicked()),this,SLOT(deleteWorkspaces()));
   connect(m_tree,SIGNAL(itemClicked(QTreeWidgetItem*, int)),this,SLOT(clickedWorkspace(QTreeWidgetItem*, int)));
   connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(workspaceSelected()));
@@ -200,6 +213,9 @@ void MantidDockWidget::createWorkspaceMenuActions()
 
   m_showLogs = new QAction(tr("Sample Logs..."), this);
   connect(m_showLogs,SIGNAL(triggered()),m_mantidUI,SLOT(showLogFileWindow()));
+
+  m_showSampleMaterial = new QAction(tr("Sample Material..."), this);
+  connect(m_showSampleMaterial,SIGNAL(triggered()),m_mantidUI,SLOT(showSampleMaterialWindow()));
 
   m_showHist = new QAction(tr("Show History"), this);
   connect(m_showHist,SIGNAL(triggered()),m_mantidUI,SLOT(showAlgorithmHistory()));
@@ -540,6 +556,7 @@ void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, const Mantid::AP
   menu->addSeparator();
   menu->addAction(m_showDetectors);
   menu->addAction(m_showLogs);
+  menu->addAction(m_showSampleMaterial);
   menu->addAction(m_showHist);
   menu->addAction(m_saveNexus);
 }
@@ -568,6 +585,7 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, const Mantid::A
   menu->addAction(m_showHist);  // Algorithm history
   menu->addAction(m_showListData); // Show data in table
   menu->addAction(m_showLogs);
+  menu->addAction(m_showSampleMaterial); //TODO
 }
 
 void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr &WS) const
@@ -589,6 +607,7 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::A
   menu->addAction(m_showListData); // Show data in table
   menu->addAction(m_convertMDHistoToMatrixWorkspace);
   menu->addAction(m_showLogs);
+  menu->addAction(m_showSampleMaterial); //TODO
 }
 
 
@@ -807,31 +826,112 @@ void MantidDockWidget::workspaceSelected()
 }
 
 /**
+ * Save all selected workspaces
+ */
+void MantidDockWidget::saveWorkspaces()
+{
+  QList<QTreeWidgetItem*> items = m_tree->selectedItems();
+  if(items.empty())
+    return;
+
+  // Call same save asction as popup menu for a single workspace
+  if(items.size() == 1)
+  {
+    m_mantidUI->saveNexusWorkspace();
+  }
+  else
+  {
+    m_saveFolderDialog->setWindowTitle("Select save folder");
+    m_saveFolderDialog->setLabelText(QFileDialog::Accept, "Select");
+    m_saveFolderDialog->open(this, SLOT(saveWorkspacesToFolder(const QString &)));
+  }
+}
+
+/**
+ * Handler for the directory browser being closed when selecting save on multiple workspaces
+ *
+ * @param folder Path to folder to save workspaces in
+ */
+void MantidDockWidget::saveWorkspacesToFolder(const QString &folder)
+{
+  QList<QTreeWidgetItem*> items = m_tree->selectedItems();
+
+  // Loop through multiple items selected from the mantid tree
+  QList<QTreeWidgetItem*>::iterator itr=items.begin();
+  for (itr = items.begin(); itr != items.end(); ++itr)
+  {
+    QString workspaceName = (*itr)->text(0);
+    QString filename = folder + "/" + workspaceName + ".nxs";
+
+    IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus");
+    saveAlg->initialize();
+    try
+    {
+      saveAlg->setProperty("InputWorkspace", workspaceName.toStdString());
+      saveAlg->setProperty("Filename", filename.toStdString());
+      saveAlg->execute();
+    }
+    catch(std::runtime_error &rte)
+    {
+      docklog.error() << "Error saving workspace " << workspaceName.toStdString()
+        << ": " << rte.what() << std::endl;
+    }
+  }
+}
+
+/**
 deleteWorkspaces
 */
 void MantidDockWidget::deleteWorkspaces()
 {
   QList<QTreeWidgetItem*> items = m_tree->selectedItems();
-  if(items.empty())
-  {
-    MantidMatrix* m = dynamic_cast<MantidMatrix*>(m_mantidUI->appWindow()->activeWindow());
-    if (!m || !m->isA("MantidMatrix")) return;
-    if(m->workspaceName().isEmpty()) return;
+  MantidMatrix* m = dynamic_cast<MantidMatrix*>(m_mantidUI->appWindow()->activeWindow());
+   
+  bool deleteExplorer = false;
+  bool deleteActive = false;
 
-    if(m_ads.doesExist(m->workspaceName().toStdString()))
-    {
-      m_mantidUI->deleteWorkspace(m->workspaceName());
-    }
-    return;
-  }
-  //loop through multiple items selected from the mantid tree
-  QList<QTreeWidgetItem*>::iterator itr=items.begin();
-  for (itr = items.begin(); itr != items.end(); ++itr)
+  if((m_deleteButton->hasFocus() || m_tree->hasFocus()) && !items.empty())
   {
-    //Sometimes we try to delete a workspace that's already been deleted.
-    if(m_ads.doesExist((*itr)->text(0).toStdString()))
-      m_mantidUI->deleteWorkspace((*itr)->text(0));
-  }//end of for loop for selected items
+    deleteExplorer = true;
+  }
+  if((m && m->isA("MantidMatrix")) && (!m->workspaceName().isEmpty() && m_ads.doesExist(m->workspaceName().toStdString())))
+  {
+    deleteActive = true;
+  }
+
+  if(deleteActive || deleteExplorer)
+  {    
+    QMessageBox::StandardButton reply;
+    
+    if(m_appParent->isDeleteWorkspacePromptEnabled())
+    {
+      reply = QMessageBox::question(this, "Delete Workspaces", "Are you sure you want to delete the selected Workspaces?\n\nThis prompt can be disabled from:\nPreferences->General->Confirmations",
+                                    QMessageBox::Yes|QMessageBox::No);
+    }
+    else
+    {
+      reply = QMessageBox::Yes;
+    }
+
+    if (reply == QMessageBox::Yes)
+    {
+      if(deleteExplorer)
+      { 
+        //loop through multiple items selected from the mantid tree
+        QList<QTreeWidgetItem*>::iterator itr=items.begin();
+        for (itr = items.begin(); itr != items.end(); ++itr)
+        {
+          //Sometimes we try to delete a workspace that's already been deleted.
+          if(m_ads.doesExist((*itr)->text(0).toStdString()))
+            m_mantidUI->deleteWorkspace((*itr)->text(0));
+        }//end of for loop for selected items
+      }
+      else if(deleteActive)
+      {
+        m_mantidUI->deleteWorkspace(m->workspaceName());
+      }
+    }
+  }
 }
 
 void MantidDockWidget::sortAscending()
@@ -1151,7 +1251,7 @@ void MantidDockWidget::groupingButtonClick()
     {
       m_mantidUI->groupWorkspaces();
     }
-    else if(qButtonName == "UnGroup")
+    else if(qButtonName == "Ungroup")
     {
       m_mantidUI->ungroupWorkspaces();
     }
@@ -1230,9 +1330,10 @@ void MantidDockWidget::drawColorFillPlot()
 void MantidDockWidget::treeSelectionChanged()
 {
   //get selected workspaces
+  QList<QTreeWidgetItem*>Items = m_tree->selectedItems();
+
   if(m_groupButton)
   {
-    QList<QTreeWidgetItem*>Items=m_tree->selectedItems();
     if(Items.size()==1)
     {
       //check it's group
@@ -1244,13 +1345,11 @@ void MantidDockWidget::treeSelectionChanged()
         WorkspaceGroup_sptr grpSptr=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
         if(grpSptr)
         {
-          m_groupButton->setText("UnGroup");
+          m_groupButton->setText("Ungroup");
           m_groupButton->setEnabled(true);
         }
         else
           m_groupButton->setEnabled(false);
-
-
       }
 
     }
@@ -1266,6 +1365,21 @@ void MantidDockWidget::treeSelectionChanged()
     }
   }
 
+  if(m_deleteButton)
+    m_deleteButton->setEnabled(Items.size() > 0);
+
+  if(m_saveButton)
+    m_saveButton->setEnabled(Items.size() > 0);
+
+  if (Items.size() > 0)
+  {
+    auto item = *(Items.begin());
+    m_mantidUI->enableSaveNexus(item->text(0));
+  }
+  else
+  {
+    m_mantidUI->disableSaveNexus();
+  }
 }
 
 /**

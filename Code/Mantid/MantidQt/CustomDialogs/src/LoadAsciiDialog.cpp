@@ -15,13 +15,17 @@ namespace MantidQt
     DECLARE_DIALOG(LoadAsciiDialog)
 
     LoadAsciiDialog::LoadAsciiDialog(QWidget *parent)
-      : MantidQt::API::AlgorithmDialog(parent)
+      : MantidQt::API::AlgorithmDialog(parent),
+      m_lineFilename(NULL),
+      m_lineOutputWorkspace(NULL),
+      m_lineCommentIndicator(NULL),
+      m_lineCustomSeparator(NULL),
+      m_separatorBox(NULL)
     {
     }
 
     LoadAsciiDialog::~LoadAsciiDialog()
     {
-
     }
 
     void LoadAsciiDialog::initLayout()

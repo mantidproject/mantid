@@ -100,11 +100,10 @@ class ExportExperimentLog(PythonAlgorithm):
 
         if len(self._sampleLogNames) != len(ops):
             raise NotImplementedError("Size of sample log names and sample operations are unequal!")
-        self._sampleLogOperations = {}
+        self._sampleLogOperations = []
         for i in xrange(len(self._sampleLogNames)):
-            key = self._sampleLogNames[i]
             value = ops[i]
-            self._sampleLogOperations[key] = value
+            self._sampleLogOperations.append(value)
         # ENDFOR
 
         if len(self._headerTitles) > 0 and len(self._headerTitles) != len(self._sampleLogNames):
@@ -239,8 +238,14 @@ class ExportExperimentLog(PythonAlgorithm):
         # Write to a buffer
         wbuf = ""
 
-        for logname in self._sampleLogNames:
-            value = logvaluedict[logname]
+        for il in xrange(len(self._sampleLogNames)):
+            logname = self._sampleLogNames[il]
+            optype = self._sampleLogOperations[il]
+            key = logname + "-" + optype
+            if key in logvaluedict.keys():
+                value = logvaluedict[key]
+            elif logname in logvaluedict.keys():
+                value = logvaluedict[logname]
             wbuf += "%s%s" % (str(value), self._valuesep)
         wbuf = wbuf[0:-1]
 
@@ -270,9 +275,12 @@ class ExportExperimentLog(PythonAlgorithm):
                 str(self._wksp)))
             return None
 
-        for logname in self._sampleLogNames:
+        #for logname in self._sampleLogNames:
+        for il in xrange(len(self._sampleLogNames)):
+            logname = self._sampleLogNames[il]
             isexist = run.hasProperty(logname)
 
+            operationtype = self._sampleLogOperations[il]
             # check whether this property does exist.
             if isexist is False:
                 # If not exist, use 0.00 as default
@@ -286,17 +294,17 @@ class ExportExperimentLog(PythonAlgorithm):
             # Get log value according to type
             if logclass == "StringPropertyWithValue":
                 propertyvalue = logproperty.value
-                operationtype = self._sampleLogOperations[logname]
+                # operationtype = self._sampleLogOperations[il]
                 if operationtype.lower() == "localtime":
                     propertyvalue = self._convertLocalTimeString(propertyvalue)
             elif logclass == "FloatPropertyWithValue":
                 propertyvalue = logproperty.value
             elif logclass == "FloatTimeSeriesProperty":
-                operationtype = self._sampleLogOperations[logname]
+                # operationtype = self._sampleLogOperations[il]
                 if operationtype.lower() == "min":
                     propertyvalue = min(logproperty.value)
                 elif operationtype.lower() == "max":
-                    propertyvalue = min(logproperty.value)
+                    propertyvalue = max(logproperty.value)
                 elif operationtype.lower() == "average":
                     propertyvalue = np.average(logproperty.value)
                 elif operationtype.lower() == "sum":
@@ -308,7 +316,8 @@ class ExportExperimentLog(PythonAlgorithm):
             else:
                 raise NotImplementedError("Class type %d is not supported." % (logclass))
 
-            valuedict[logname] = propertyvalue
+            key = logname + "-" + operationtype
+            valuedict[key] = propertyvalue
         # ENDFOR
 
         return valuedict

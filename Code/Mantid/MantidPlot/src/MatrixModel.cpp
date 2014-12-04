@@ -36,6 +36,9 @@
 #include "muParserScript.h"
 #include "ScriptingEnv.h"
 #include "analysis/fft2D.h"
+#include "TSVSerialiser.h"
+
+#include "MantidKernel/Strings.h"
 
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_linalg.h>
@@ -477,37 +480,6 @@ bool MatrixModel::removeRows(int row, int count, const QModelIndex & parent)
 
 	endRemoveRows();
 	return true;
-}
-
-QString MatrixModel::saveToString()
-{
-	QString s = "<data>\n";
-	int cols = d_cols - 1;
-	for(int i = 0; i < d_rows; i++){
-		int aux = d_cols*i;
-		bool emptyRow = true;
-		for(int j = 0; j < d_cols; j++){
-			if (gsl_finite(d_data[aux + j])){
-				emptyRow = false;
-				break;
-			}
-		}
-		if (emptyRow)
-			continue;
-
-		s += QString::number(i) + "\t";
-		for(int j = 0; j < cols; j++){
-			double val = d_data[aux + j];
-			if (gsl_finite(val))
-				s += QString::number(val, 'e', 16);
-			s += "\t";
-		}
-		double val = d_data[aux + cols];
-		if (gsl_finite(val))
-			s += QString::number(val, 'e', 16);
-		s += "\n";
-	}
-	return s + "</data>\n";
 }
 
 QImage MatrixModel::renderImage()
@@ -953,65 +925,80 @@ bool MatrixModel::calculate(int startRow, int endRow, int startCol, int endCol)
 
 void MatrixModel::fft(bool inverse)
 {
-	int width = d_cols;
-    int height = d_rows;
+  int width = d_cols;
+  int height = d_rows;
 
-    double **x_int_re = Matrix::allocateMatrixData(height, width); /* real coeff matrix */
-    if (!x_int_re)
-        return;
-    double **x_int_im = Matrix::allocateMatrixData(height, width); /* imaginary coeff  matrix*/
-	if (!x_int_im){
-        Matrix::freeMatrixData(x_int_re, height);
-        return;
-	}
+  double **x_int_re = Matrix::allocateMatrixData(height, width); /* real coeff matrix */
+  if (!x_int_re)
+    return;
 
-	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-	int cell = 0;
-    for (int i = 0; i < height; i++){
-        for (int j = 0; j < width; j++){
-            x_int_re[i][j] = d_data[cell++];
-            x_int_im[i][j] = 0.0;
-        }
-    }
-
-    if (inverse){
-        double **x_fin_re = Matrix::allocateMatrixData(height, width);
-        double **x_fin_im = Matrix::allocateMatrixData(height, width);
-		if (!x_fin_re || !x_fin_im){
-		    Matrix::freeMatrixData(x_int_re, height);
-            Matrix::freeMatrixData(x_int_im, height);
-			QApplication::restoreOverrideCursor();
-			return;
-		}
-
-        fft2d_inv(x_int_re, x_int_im, x_fin_re, x_fin_im, width, height);
-		cell = 0;
-        for (int i = 0; i < height; i++){
-            for (int j = 0; j < width; j++){
-                double re = x_fin_re[i][j];
-                double im = x_fin_im[i][j];
-                d_data[cell++] = sqrt(re*re + im*im);
-            }
-        }
-        Matrix::freeMatrixData(x_fin_re, height);
-        Matrix::freeMatrixData(x_fin_im, height);
-    } else {
-        fft2d(x_int_re, x_int_im, width, height);
-		cell = 0;
-        for (int i = 0; i < height; i++){
-            for (int j = 0; j < width; j++){
-                double re = x_int_re[i][j];
-                double im = x_int_im[i][j];
-                d_data[cell++] = sqrt(re*re + im*im);
-            }
-        }
-    }
+  double **x_int_im = Matrix::allocateMatrixData(height, width); /* imaginary coeff  matrix*/
+  if (!x_int_im){
     Matrix::freeMatrixData(x_int_re, height);
-    Matrix::freeMatrixData(x_int_im, height);
+    return;
+  }
 
-	d_matrix->resetView();
-	QApplication::restoreOverrideCursor();
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+  int cell = 0;
+  for (int i = 0; i < height; i++){
+    for (int j = 0; j < width; j++){
+      double data = d_data[cell++];
+      if(data != data) //Cell is nan
+      {
+        Matrix::freeMatrixData(x_int_re, height);
+        Matrix::freeMatrixData(x_int_im, height);
+        QApplication::restoreOverrideCursor();
+      	QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " + tr("FFT Error"),
+            tr("Matrix must not contain any NaN values when performing FFT."));
+        return;
+      }
+
+      x_int_re[i][j] = data;
+      x_int_im[i][j] = 0.0;
+    }
+  }
+
+  if (inverse){
+    double **x_fin_re = Matrix::allocateMatrixData(height, width);
+    double **x_fin_im = Matrix::allocateMatrixData(height, width);
+
+    if (!x_fin_re || !x_fin_im){
+      Matrix::freeMatrixData(x_int_re, height);
+      Matrix::freeMatrixData(x_int_im, height);
+      QApplication::restoreOverrideCursor();
+      return;
+    }
+
+    fft2d_inv(x_int_re, x_int_im, x_fin_re, x_fin_im, width, height);
+    cell = 0;
+    for (int i = 0; i < height; i++){
+      for (int j = 0; j < width; j++){
+        double re = x_fin_re[i][j];
+        double im = x_fin_im[i][j];
+        d_data[cell++] = sqrt(re*re + im*im);
+      }
+    }
+
+    Matrix::freeMatrixData(x_fin_re, height);
+    Matrix::freeMatrixData(x_fin_im, height);
+  } else {
+    fft2d(x_int_re, x_int_im, width, height);
+    cell = 0;
+    for (int i = 0; i < height; i++){
+      for (int j = 0; j < width; j++){
+        double re = x_int_re[i][j];
+        double im = x_int_im[i][j];
+        d_data[cell++] = sqrt(re*re + im*im);
+      }
+    }
+  }
+
+  Matrix::freeMatrixData(x_int_re, height);
+  Matrix::freeMatrixData(x_int_im, height);
+
+  d_matrix->resetView();
+  QApplication::restoreOverrideCursor();
 }
 
 void MatrixModel::pasteData(double *clipboardBuffer, int topRow, int leftCol, int rows, int cols)
@@ -1038,4 +1025,40 @@ void MatrixModel::pasteData(double *clipboardBuffer, int topRow, int leftCol, in
 MatrixModel::~MatrixModel()
 {
     free(d_data);
+}
+
+std::string MatrixModel::saveToProject()
+{
+  TSVSerialiser tsv;
+
+  for(int row = 0; row < d_rows; ++row)
+  {
+    //Index to the first element of each row
+    const int rowStart = d_cols * row;
+
+    //If the row is empty, we can skip it
+    bool emptyRow = true;
+    for(int col = 0; col < d_cols; ++col)
+      if(gsl_finite(d_data[rowStart + col]))
+      {
+        emptyRow = false;
+        break;
+      }
+
+    if(emptyRow)
+      continue;
+
+    //Write out the values for the row
+    tsv.writeLine(Mantid::Kernel::Strings::toString<int>(row));
+    for(int col = 0; col < d_cols; ++col)
+    {
+      double val = d_data[rowStart + col];
+      if(gsl_finite(val))
+        tsv << QString::number(val, 'e', 16);
+      else if(col + 1 < d_cols)
+        tsv << ""; //If we're not the last element, put in an empty spacer
+    }
+  }
+
+  return tsv.outputLines();
 }

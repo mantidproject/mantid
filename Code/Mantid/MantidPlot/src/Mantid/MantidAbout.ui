@@ -180,7 +180,7 @@
    <item row="3" column="0">
     <widget class="QGroupBox" name="groupBox_3">
      <property name="title">
-      <string>Contributors</string>
+      <string>Project Members</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <property name="margin">
@@ -198,8 +198,8 @@
           </property>
           <property name="maximumSize">
            <size>
-            <width>1000</width>
-            <height>1000</height>
+            <width>122</width>
+            <height>54</height>
            </size>
           </property>
           <property name="text">
@@ -218,20 +218,20 @@
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
             <horstretch>0</horstretch>
-            <verstretch>100</verstretch>
+            <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="maximumSize">
            <size>
-            <width>187</width>
-            <height>75</height>
+            <width>151</width>
+            <height>80</height>
            </size>
           </property>
           <property name="text">
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="../../../Images/images.qrc">:/Tessella_Logo_Transparent.gif</pixmap>
+           <pixmap resource="../../../Images/images.qrc">:/ess_logo_transparent_small.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -278,7 +278,7 @@
            <pixmap resource="../../../Images/images.qrc">:/ISIS_Logo_Transparent.gif</pixmap>
           </property>
           <property name="scaledContents">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="alignment">
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -288,7 +288,7 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
+        <item row="3" column="1">
          <widget class="QLabel" name="snsLogo">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -313,7 +313,7 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="2">
+        <item row="3" column="2">
          <spacer name="horizontalSpacer_3">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -352,7 +352,7 @@
           </property>
          </spacer>
         </item>
-        <item row="2" column="0">
+        <item row="3" column="0">
          <spacer name="horizontalSpacer_7">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -365,7 +365,7 @@
           </property>
          </spacer>
         </item>
-        <item row="2" column="4">
+        <item row="3" column="4">
          <spacer name="horizontalSpacer_8">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -378,19 +378,19 @@
           </property>
          </spacer>
         </item>
-        <item row="2" column="3">
+        <item row="3" column="3">
          <widget class="QLabel" name="hfirLogo">
           <property name="maximumSize">
            <size>
-            <width>169</width>
-            <height>75</height>
+            <width>198</width>
+            <height>79</height>
            </size>
           </property>
           <property name="text">
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="../../../Images/images.qrc">:/HFIR_logo_small.png</pixmap>
+           <pixmap resource="../../../Images/images.qrc">:/Tessella_Logo_Transparent.gif</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -399,6 +399,19 @@
            <set>Qt::AlignCenter</set>
           </property>
          </widget>
+        </item>
+        <item row="2" column="3">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </item>

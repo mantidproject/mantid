@@ -65,6 +65,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.__column_settings = "Mantid/ISISReflGui/Columns"
         self.__icat_download_key = "icat_download"
         self.__ads_use_key = "AlgUse"
+        self.__alg_migration_key="AlgUseReset"
         self.__live_data_frequency_key = "frequency"
         self.__live_data_method_key = "method"
         self.__group_tof_workspaces_key = "group_tof_workspaces"
@@ -92,13 +93,20 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
         settings.beginGroup(self.__generic_settings)
         
-        self.alg_use = settings.value(self.__ads_use_key, False, type=bool)
+        self.__alg_migrate = settings.value(self.__alg_migration_key, True, type=bool)
+        if self.__alg_migrate:
+            self.__alg_use = True # We will use the algorithms by default rather than the quick scripts
+            self.__alg_migrate = False # Never do this again. We only want to reset once.
+        else:
+            self.__alg_use = settings.value(self.__ads_use_key, True, type=bool)
+    
         self.__icat_download = settings.value(self.__icat_download_key, False, type=bool)
         self.__group_tof_workspaces = settings.value(self.__group_tof_workspaces_key, True, type=bool)
         
-        settings.setValue(self.__ads_use_key, self.alg_use)
+        settings.setValue(self.__ads_use_key, self.__alg_use)
         settings.setValue(self.__icat_download_key, self.__icat_download)
         settings.setValue(self.__group_tof_workspaces_key, self.__group_tof_workspaces)
+        settings.setValue(self.__alg_migration_key, self.__alg_migrate)
 
 
         settings.endGroup()
@@ -699,7 +707,12 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 if len(two_theta_str) > 0:
                                     two_theta = float(two_theta_str)
 
-                                dqq, two_theta = CalculateResolution(Workspace = loadedRun, TwoTheta = two_theta)
+                                #Make sure we only ever run calculate resolution on a non-group workspace.
+                                #If we're given a group workspace, we can just run it on the first member of the group instead
+                                thetaRun = loadedRun
+                                if isinstance(thetaRun, WorkspaceGroup):
+                                  thetaRun = thetaRun[0]
+                                dqq, two_theta = CalculateResolution(Workspace = thetaRun, TwoTheta = two_theta)
 
                                 #Put the calculated resolution into the table
                                 resItem = QtGui.QTableWidgetItem()
@@ -920,13 +933,19 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         transrun_named = self.__name_trans(transrun)
         # Look for existing transmission workspaces that match the name
         transmission_ws = None
-        if mtd.doesExist(transrun_named) and mtd[transrun_named].getAxis(0).getUnit().unitID() == "Wavelength":
-            logger.notice('Reusing transmission workspace ' + transrun_named)
-            transmission_ws = mtd[transrun_named]
+        if mtd.doesExist(transrun_named):
+            if isinstance(mtd[transrun_named], WorkspaceGroup):
+                unit = mtd[transrun_named][0].getAxis(0).getUnit().unitID()
+            else:
+                unit = mtd[transrun_named].getAxis(0).getUnit().unitID()
+
+            if unit == "Wavelength":
+                logger.notice('Reusing transmission workspace ' + transrun_named)
+                transmission_ws = mtd[transrun_named]
 
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
 
-        if len(angle) > 1:
+        if len(angle) > 0:
             angle = float(angle)
         else:
             angle = None
@@ -953,18 +972,38 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             else:
                 raise RuntimeError("Up to 2 transmission runs can be specified. No more than that.")
 
-        if self.alg_use:
-            #Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
+        #Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
+        ws = ConvertToWavelength.to_workspace(loadedRun, ws_prefix="")
 
-            ws = ConvertToWavelength.to_workspace(loadedRun, ws_prefix="")
+        if self.__alg_use:
+            #If we're dealing with a workspace group, we'll manually map execution over each group member
+            #We do this so we can get ThetaOut correctly (see ticket #10597 for why we can't at the moment)
+            if isinstance(ws, WorkspaceGroup):
+                wqGroup = []
+                wlamGroup = []
+                thetaGroup = []
 
-            wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ', OutputWorkspaceWavelength=runno+'_IvsLam',)
+                group_trans_ws = transmission_ws
+                for i in range(0, ws.size()):
+                    #If the transmission workspace is a group, we'll use it pair-wise with the tof workspace group
+                    if isinstance(transmission_ws, WorkspaceGroup):
+                        group_trans_ws = transmission_ws[i]
+                    wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ_'+str(i+1), OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),)
+                    wqGroup.append(wq)
+                    wlamGroup.append(wlam)
+                    thetaGroup.append(th)
+
+                wq = GroupWorkspaces(InputWorkspaces=wqGroup, OutputWorkspace=runno+'_IvsQ')
+                wlam = GroupWorkspaces(InputWorkspaces=wlamGroup, OutputWorkspace=runno+'_IvsLam')
+                th = thetaGroup[0]
+            else:
+                wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ', OutputWorkspaceWavelength=runno+'_IvsLam',)
 
             cleanup()
         else:
             wlam, wq, th = quick(loadedRun, trans=transmission_ws, theta=angle, tof_prefix="")
 
-        if self.__group_tof_workspaces:
+        if self.__group_tof_workspaces and not isinstance(ws, WorkspaceGroup):
             if "TOF" in mtd:
                 tof_group = mtd["TOF"]
                 if not tof_group.contains(loadedRun):
@@ -976,7 +1015,12 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             runno = runno.split(':')[0]
         if ',' in runno:
             runno = runno.split(',')[0]
-        inst = wq.getInstrument()
+        if isinstance(wq, WorkspaceGroup):
+            inst = wq[0].getInstrument()
+        else:
+            inst = wq.getInstrument()
+        #NOTE: In the new Refl UI, these adjustments to lmin/lmax are NOT made. This has been
+        #noted in the parameter files for INTER/CRIST/POLREF/SURF.
         lmin = inst.getNumberParameter('LambdaMin')[0] + 1
         lmax = inst.getNumberParameter('LambdaMax')[0] - 2
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
@@ -1150,14 +1194,14 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         try:
             
             dialog_controller = refl_options.ReflOptions(def_method = self.live_method, def_freq = self.live_freq, 
-                                                         def_alg_use = self.alg_use, def_icat_download=self.__icat_download,
+                                                         def_alg_use = self.__alg_use, def_icat_download=self.__icat_download,
                                                          def_group_tof_workspaces = self.__group_tof_workspaces)
             if dialog_controller.exec_():
 
                 # Fetch the settings back off the controller
                 self.live_freq = dialog_controller.frequency()
                 self.live_method = dialog_controller.method()
-                self.alg_use = dialog_controller.useAlg()
+                self.__alg_use = dialog_controller.useAlg()
                 self.__icat_download = dialog_controller.icatDownload()
                 self.__group_tof_workspaces = dialog_controller.groupTOFWorkspaces()
 
@@ -1168,7 +1212,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 settings.setValue(self.__live_data_method_key, self.live_method)
                 settings.endGroup()
                 settings.beginGroup(self.__generic_settings)
-                settings.setValue(self.__ads_use_key, self.alg_use)
+                settings.setValue(self.__ads_use_key, self.__alg_use)
                 settings.setValue(self.__icat_download_key, self.__icat_download)
                 settings.setValue(self.__group_tof_workspaces_key, self.__group_tof_workspaces)
                 settings.endGroup()

@@ -249,7 +249,7 @@ void ScriptFileInterpreter::executeAll(const Script::ExecutionMode mode)
  */
 void ScriptFileInterpreter::executeSelection(const Script::ExecutionMode mode)
 {
-  if(m_editor->hasSelectedText())
+  if((m_editor->hasSelectedText() && (!m_editor->selectedText().isEmpty())))
   {
     int firstLineOffset(0), unused(0);
     m_editor->getSelection(&firstLineOffset, &unused, &unused, &unused);

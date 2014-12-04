@@ -50,7 +50,7 @@ namespace Mantid
     class MANTID_API_DLL LiveListenerFactoryImpl : public Kernel::DynamicFactory<ILiveListener>
     {
     public:
-      boost::shared_ptr<ILiveListener> create(const std::string& instrumentName, bool connect) const;
+      boost::shared_ptr<ILiveListener> create(const std::string& instrumentName, bool connect, const Kernel::IPropertyManager* props = NULL) const;
       bool checkConnection(const std::string& instrumentName) const;
 
     private:

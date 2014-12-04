@@ -5,7 +5,6 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
-#include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidAPI/Progress.h"
@@ -72,11 +71,11 @@ void LoadParameterFile::init()
 void LoadParameterFile::exec()
 {
   // Retrieve the filename from the properties
-  std::string filename = getPropertyValue("Filename");
+  const std::string filename = getPropertyValue("Filename");
 
   // Retrieve the parameter XML string from the properties
   const Property * const parameterXMLProperty = getProperty("ParameterXML"); // to check whether it is default
-  std::string parameterXML = getPropertyValue("ParameterXML");
+  const std::string parameterXML = getPropertyValue("ParameterXML");
 
   // Check the two properties (at least one must be set)
   if( filename.empty() && parameterXMLProperty->isDefault()){
@@ -86,11 +85,6 @@ void LoadParameterFile::exec()
   // Get the input workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
-  execManually(!parameterXMLProperty->isDefault(), filename, parameterXML, localWorkspace);
-}
-
-void LoadParameterFile::execManually(bool useString, std::string filename, std::string parameterXML,  Mantid::API::ExperimentInfo_sptr localWorkspace)
-{
   // TODO: Refactor to remove the need for the const cast (ticket #8521)
   Instrument_sptr instrument = boost::const_pointer_cast<Instrument>(localWorkspace->getInstrument()->baseInstrument());
 
@@ -98,7 +92,13 @@ void LoadParameterFile::execManually(bool useString, std::string filename, std::
   DOMParser pParser;
   AutoPtr<Document> pDoc;
 
-  if(useString){
+  //Progress reporting object
+  Progress prog(this, 0.0, 1.0, 100);
+
+  prog.report("Parsing XML");
+  //If we've been given an XML string parse that instead
+  if(!parameterXMLProperty->isDefault())
+  {
     try
     {
       pDoc = pParser.parseString(parameterXML);
@@ -137,11 +137,17 @@ void LoadParameterFile::execManually(bool useString, std::string filename, std::
 
   // Set all parameters that specified in all component-link elements of pRootElem
   InstrumentDefinitionParser loadInstr;
-  loadInstr.setComponentLinks(instrument, pRootElem);
+  loadInstr.setComponentLinks(instrument, pRootElem, &prog);
 
   // populate parameter map of workspace 
   localWorkspace->populateInstrumentParameters();
+  if (!filename.empty())
+  {
+    localWorkspace->instrumentParameters().addParameterFilename(filename);
+  }
 
+  prog.resetNumSteps(1, 0.0, 1.0);
+  prog.report("Done");
 }
 
 } // namespace DataHandling

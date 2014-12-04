@@ -186,6 +186,11 @@ namespace Algorithms
     declareProperty("MaxChiSq", 100., "Maximum chisq value for individual peak fit allowed. (Default: 100)");
 
     declareProperty("MinimumPeakHeight", 2.0, "Minimum value allowed for peak height.");
+
+    declareProperty("MinimumPeakHeightObs", 0.0, "Least value of the maximum observed Y value of a peak within "
+                    "specified region.  If any peak's maximum observed Y value is smaller, then "
+                    "this peak will not be fit.  It is designed for EventWorkspace with integer counts.");
+
     //Disable default gsl error handler (which is to call abort!)
     gsl_set_error_handler_off();
 
@@ -314,6 +319,7 @@ namespace Algorithms
     m_maxChiSq = this->getProperty("MaxChiSq");
     m_minPeakHeight = this->getProperty("MinimumPeakHeight");
     m_maxOffset=getProperty("MaxOffset");
+    m_leastMaxObsY = getProperty("MinimumPeakHeightObs");
 
     // Create output workspaces
     outputW = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
@@ -354,30 +360,42 @@ namespace Algorithms
     // Check number of columns matches number of peaks
     size_t numcols = windowtablews->columnCount();
     size_t numpeaks = m_peakPositions.size();
+
     if (numcols != 2*numpeaks+1)
       throw std::runtime_error("Number of columns is not 2 times of number of referenced peaks. ");
 
     // Check number of spectra should be same to input workspace
     size_t numrows = windowtablews->rowCount();
-    if (numrows != m_inputWS->getNumberHistograms())
-      throw std::runtime_error("Number of spectra in fit window workspace does not match input workspace. ");
+    bool needuniversal = false;
+    if (numrows < m_inputWS->getNumberHistograms())
+      needuniversal = true;
+    else if (numrows > m_inputWS->getNumberHistograms())
+      throw std::runtime_error("Number of rows in table workspace is larger than number of spectra.");
 
-    // Create workspace
+    // Clear and re-size of the vector for fit windows
     m_vecFitWindow.clear();
-    m_vecFitWindow.resize(numrows);
+    m_vecFitWindow.resize(m_inputWS->getNumberHistograms());
 
+    std::vector<double> vec_univFitWindow;
+    bool founduniversal = false;
+
+    // Parse the table workspace
     for (size_t i = 0; i < numrows; ++i)
     {
       // spectrum number
       int spec = windowtablews->cell<int>(i, 0);
-      if (spec < 0 || spec >= static_cast<int>(numrows))
+      if (spec >= static_cast<int>(numrows))
       {
         std::stringstream ess;
         ess << "Peak fit windows at row " << i << " has spectrum " << spec
             << ", which is out of allowed range! ";
         throw std::runtime_error(ess.str());
       }
-      else if (m_vecFitWindow[spec].size() != 0)
+      if (spec < 0 && founduniversal)
+      {
+        throw std::runtime_error("There are more than 1 universal spectrum (spec < 0) in TableWorkspace.");
+      }
+      else if (spec >= 0 && m_vecFitWindow[spec].size() != 0)
       {
         std::stringstream ess;
         ess << "Peak fit windows at row " << i << " has spectrum " << spec
@@ -394,7 +412,28 @@ namespace Algorithms
       }
 
       // add to vector of fit windows
-      m_vecFitWindow[spec] = fitwindows;
+      if (spec >= 0)
+        m_vecFitWindow[spec] = fitwindows;
+      else
+      {
+        vec_univFitWindow = fitwindows;
+        founduniversal = true;
+      }
+    }
+
+    // Check and fill if using universal
+    if (needuniversal && !founduniversal)
+    {
+      // Invalid case
+      throw std::runtime_error("Number of rows in TableWorkspace is smaller than number of spectra.  But "
+                               "there is no universal fit window given!");
+    }
+    else if (founduniversal)
+    {
+      // Fill the universal
+      for (size_t i = 0; i < m_inputWS->getNumberHistograms(); ++i)
+        if (m_vecFitWindow[i].size() == 0)
+          m_vecFitWindow[i] = vec_univFitWindow;
     }
 
     return;

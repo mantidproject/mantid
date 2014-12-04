@@ -17,7 +17,7 @@ class EnginXCalibrateFull(PythonAlgorithm):
     		"Calibration run to use")
 
     	self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Output),
-    		"A table with calibrated detector positions as accepted by ApplyCalibration algorithm.")
+    		"A table with the detector IDs and calibrated detector positions in V3P format.")
 
     	self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),
     		"A list of dSpacing values where peaks are expected.")

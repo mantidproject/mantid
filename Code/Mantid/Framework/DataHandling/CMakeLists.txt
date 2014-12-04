@@ -10,6 +10,8 @@ set ( SRC_FILES
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
+	src/DownloadInstrument.cpp
+	src/DownloadFile.cpp
 	src/ExtractMonitorWorkspace.cpp
 	src/FilterEventsByLogValuePreNexus.cpp
 	src/FindDetectorsInShape.cpp
@@ -20,11 +22,11 @@ set ( SRC_FILES
 	src/ISISDataArchive.cpp
 	src/ISISRunLogs.cpp
 	src/Load.cpp
+	src/LoadANSTOHelper.cpp
 	src/LoadAscii.cpp
 	src/LoadAscii2.cpp
-        src/LoadBBY.cpp
+	src/LoadBBY.cpp
 	src/LoadCalFile.cpp
-	src/LoadVulcanCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
 	src/LoadDaveGrp.cpp
@@ -35,6 +37,7 @@ set ( SRC_FILES
 	src/LoadEventNexus.cpp
 	src/LoadEventPreNexus.cpp
 	src/LoadEventPreNexus2.cpp
+	src/LoadFITS.cpp
 	src/LoadFullprofResolution.cpp
 	src/LoadGSASInstrumentFile.cpp
 	src/LoadGSS.cpp
@@ -92,6 +95,7 @@ set ( SRC_FILES
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
 	src/LoadTOFRawNexus.cpp
+	src/LoadVulcanCalFile.cpp
 	src/MaskDetectors.cpp
 	src/MaskDetectorsInShape.cpp
 	src/MergeLogs.cpp
@@ -124,13 +128,16 @@ set ( SRC_FILES
 	src/SaveMask.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
+	src/SaveNXTomo.cpp
 	src/SaveNexus.cpp
 	src/SaveNexusProcessed.cpp
-	src/SaveParameterFile.cpp
 	src/SavePAR.cpp
+	src/SavePDFGui.cpp
 	src/SavePHX.cpp
+	src/SaveParameterFile.cpp
 	src/SaveRKH.cpp
 	src/SaveReflTBL.cpp
+	src/SaveReflThreeColumnAscii.cpp
 	src/SaveSPE.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
@@ -151,6 +158,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
+	inc/MantidDataHandling/DownloadInstrument.h
+	inc/MantidDataHandling/DownloadFile.h
 	inc/MantidDataHandling/ExtractMonitorWorkspace.h
 	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
@@ -161,11 +170,11 @@ set ( INC_FILES
 	inc/MantidDataHandling/ISISDataArchive.h
 	inc/MantidDataHandling/ISISRunLogs.h
 	inc/MantidDataHandling/Load.h
+	inc/MantidDataHandling/LoadANSTOHelper.h
 	inc/MantidDataHandling/LoadAscii.h
 	inc/MantidDataHandling/LoadAscii2.h
-        inc/MantidDataHandling/LoadBBY.h
+	inc/MantidDataHandling/LoadBBY.h
 	inc/MantidDataHandling/LoadCalFile.h
-	inc/MantidDataHandling/LoadVulcanCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
 	inc/MantidDataHandling/LoadDaveGrp.h
@@ -176,6 +185,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
+	inc/MantidDataHandling/LoadFITS.h
 	inc/MantidDataHandling/LoadFullprofResolution.h
 	inc/MantidDataHandling/LoadGSASInstrumentFile.h
 	inc/MantidDataHandling/LoadGSS.h
@@ -228,6 +238,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
+	inc/MantidDataHandling/LoadVulcanCalFile.h
 	inc/MantidDataHandling/MaskDetectors.h
 	inc/MantidDataHandling/MaskDetectorsInShape.h
 	inc/MantidDataHandling/MergeLogs.h
@@ -260,13 +271,16 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveMask.h
 	inc/MantidDataHandling/SaveNISTDAT.h
 	inc/MantidDataHandling/SaveNXSPE.h
+	inc/MantidDataHandling/SaveNXTomo.h
 	inc/MantidDataHandling/SaveNexus.h
 	inc/MantidDataHandling/SaveNexusProcessed.h
-	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SavePAR.h
+	inc/MantidDataHandling/SavePDFGui.h
 	inc/MantidDataHandling/SavePHX.h
+	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SaveRKH.h
 	inc/MantidDataHandling/SaveReflTBL.h
+	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
@@ -291,6 +305,8 @@ set ( TEST_FILES
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
+	DownloadInstrumentTest.h
+	DownloadFileTest.h
 	ExtractMonitorWorkspaceTest.h
 	FilterEventsByLogValuePreNexusTest.h
 	FindDetectorsInShapeTest.h
@@ -304,7 +320,6 @@ set ( TEST_FILES
 	LoadAsciiTest.h
 	LoadBBYTest.h
 	LoadCalFileTest.h
-	LoadVulcanCalFileTest.h
 	LoadCanSAS1dTest.h
 	LoadDaveGrpTest.h
 	LoadDetectorInfoTest.h
@@ -314,6 +329,7 @@ set ( TEST_FILES
 	LoadEventNexusTest.h
 	LoadEventPreNexus2Test.h
 	LoadEventPreNexusTest.h
+	LoadFITSTest.h
 	LoadFullprofResolutionTest.h
 	LoadGSASInstrumentFileTest.h
 	LoadGSSTest.h
@@ -361,6 +377,7 @@ set ( TEST_FILES
 	LoadSpice2dTest.h
 	LoadTOFRawNexusTest.h
 	LoadTest.h
+	LoadVulcanCalFileTest.h
 	MaskDetectorsInShapeTest.h
 	MaskDetectorsTest.h
 	MergeLogsTest.h
@@ -394,17 +411,19 @@ set ( TEST_FILES
 	SaveNXSPETest.h
 	SaveNexusProcessedTest.h
 	SaveNexusTest.h
-	SaveParameterFileTest.h
 	SavePARTest.h
+	SavePDFGuiTest.h
 	SavePHXTest.h
+	SaveParameterFileTest.h
 	SaveRKHTest.h
 	SaveReflTBLTest.h
+	SaveReflThreeColumnAsciiTest.h
 	SaveSPETest.h
 	SaveToSNSHistogramNexusTest.h
 	SetSampleMaterialTest.h
 	SetScalingPSDTest.h
 	UpdateInstrumentFromFileTest.h
-	XMLlogfileTest.h
+	XMLInstrumentParameterTest.h
 )
 
 

@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/AddTimeSeriesLog.cpp
 	src/AlignDetectors.cpp
 	src/AlphaCalc.cpp
+	src/AnnularRingAbsorption.cpp
 	src/AnyShapeAbsorption.cpp
 	src/AppendSpectra.cpp
 	src/ApplyCalibration.cpp
@@ -53,6 +54,7 @@ set ( SRC_FILES
 	src/CopyInstrumentParameters.cpp
 	src/CopyLogs.cpp
 	src/CopySample.cpp
+	src/CorelliCrossCorrelate.cpp
 	src/CorrectFlightPaths.cpp
 	src/CorrectKiKf.cpp
 	src/CorrectToFile.cpp
@@ -159,6 +161,7 @@ set ( SRC_FILES
 	src/PDFFourierTransform.cpp
 	src/Pause.cpp
 	src/PerformIndexOperations.cpp
+	src/PhaseQuadMuon.cpp
 	src/PlotAsymmetryByLogValue.cpp
 	src/Plus.cpp
 	src/PointByPointVCorrection.cpp
@@ -222,6 +225,7 @@ set ( SRC_FILES
 	src/SpecularReflectionPositionCorrect.cpp
 	src/SphericalAbsorption.cpp
 	src/Stitch1D.cpp
+	src/Stitch1DMany.cpp
 	src/StripPeaks.cpp
 	src/StripVanadiumPeaks.cpp
 	src/StripVanadiumPeaks2.cpp
@@ -255,6 +259,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AddTimeSeriesLog.h
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AlphaCalc.h
+	inc/MantidAlgorithms/AnnularRingAbsorption.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
 	inc/MantidAlgorithms/AppendSpectra.h
 	inc/MantidAlgorithms/ApplyCalibration.h
@@ -299,6 +304,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CopyInstrumentParameters.h
 	inc/MantidAlgorithms/CopyLogs.h
 	inc/MantidAlgorithms/CopySample.h
+	inc/MantidAlgorithms/CorelliCrossCorrelate.h
 	inc/MantidAlgorithms/CorrectFlightPaths.h
 	inc/MantidAlgorithms/CorrectKiKf.h
 	inc/MantidAlgorithms/CorrectToFile.h
@@ -406,6 +412,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PDFFourierTransform.h
 	inc/MantidAlgorithms/Pause.h
 	inc/MantidAlgorithms/PerformIndexOperations.h
+	inc/MantidAlgorithms/PhaseQuadMuon.h
 	inc/MantidAlgorithms/PlotAsymmetryByLogValue.h
 	inc/MantidAlgorithms/Plus.h
 	inc/MantidAlgorithms/PointByPointVCorrection.h
@@ -469,6 +476,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SpecularReflectionPositionCorrect.h
 	inc/MantidAlgorithms/SphericalAbsorption.h
 	inc/MantidAlgorithms/Stitch1D.h
+	inc/MantidAlgorithms/Stitch1DMany.h
 	inc/MantidAlgorithms/StripPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks2.h
@@ -513,6 +521,7 @@ set ( TEST_FILES
 	AddTimeSeriesLogTest.h
 	AlignDetectorsTest.h
 	AlphaCalcTest.h
+	AnnularRingAbsorptionTest.h
 	AnyShapeAbsorptionTest.h
 	AppendSpectraTest.h
 	ApplyCalibrationTest.h
@@ -557,6 +566,7 @@ set ( TEST_FILES
 	CopyInstrumentParametersTest.h
 	CopyLogsTest.h
 	CopySampleTest.h
+	CorelliCrossCorrelateTest.h
 	CorrectFlightPathsTest.h
 	CorrectKiKfTest.h
 	CorrectToFileTest.h
@@ -586,6 +596,7 @@ set ( TEST_FILES
 	DiffractionFocussingTest.h
 	DivideTest.h
 	EditInstrumentGeometryTest.h
+  ElasticWindowTest.h
 	EstimatePDDetectorResolutionTest.h
 	ExponentialCorrectionTest.h
 	ExponentialTest.h
@@ -650,6 +661,7 @@ set ( TEST_FILES
 	PDFFourierTransformTest.h
 	PauseTest.h
 	PerformIndexOperationsTest.h
+  PhaseQuadMuonTest.h
 	PlotAsymmetryByLogValueTest.h
 	PlusTest.h
 	PointByPointVCorrectionTest.h
@@ -719,9 +731,9 @@ set ( TEST_FILES
 	WeightedMeanOfWorkspaceTest.h
 	WeightedMeanTest.h
 	WeightingStrategyTest.h
+	WienerSmoothTest.h
 	WorkspaceCreationHelperTest.h
 	WorkspaceGroupTest.h
-	WienerSmoothTest.h
 )
 
 set ( TEST_PY_FILES NormaliseToUnityTest.py )

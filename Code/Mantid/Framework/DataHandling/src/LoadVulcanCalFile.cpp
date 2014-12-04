@@ -15,6 +15,7 @@
 #include <sstream>
 #include <fstream>
 
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
 
 
@@ -279,6 +280,7 @@ namespace DataHandling
     */
   void LoadVulcanCalFile::setupMaskWorkspace()
   {
+
     // Skip if bad pixel file is not given
     if (m_badPixFilename.size() == 0) return;
 
@@ -293,21 +295,24 @@ namespace DataHandling
     string line;
     while (std::getline(maskss, line))
     {
-      // Get the bad pixel's detector ID.  One per line
-      stringstream liness(line);
-
-      try
+      boost::algorithm::trim(line);
+      if (!line.empty())
       {
-        int pixelid;
-        liness >> pixelid;
+        // Get the bad pixel's detector ID.  One per line
+        stringstream liness(line);
+        try
+        {
+          int pixelid;
+          liness >> pixelid;
 
-        // Set mask
-        m_maskWS->setValue(pixelid, 1.0);
-      }
-      catch (const std::invalid_argument& e)
-      {
-        g_log.debug() << "Unable to parse line " << line << ".  Error message: " << e.what() << "\n";
-        continue;
+          // Set mask
+          m_maskWS->setValue(pixelid, 1.0);
+        }
+        catch (const std::invalid_argument& e)
+        {
+          g_log.debug() << "Unable to parse line " << line << ".  Error message: " << e.what() << "\n";
+          continue;
+        }
       }
     }
     maskss.close();
@@ -322,6 +327,7 @@ namespace DataHandling
         m_maskWS->dataY(i)[0] = 1.0;
         msg << "Spectrum " << i << " is masked. DataY = " << m_maskWS->readY(i)[0] << "\n";
       }
+
     }
     g_log.information(msg.str());
 

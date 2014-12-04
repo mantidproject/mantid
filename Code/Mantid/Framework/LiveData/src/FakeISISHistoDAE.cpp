@@ -58,6 +58,8 @@ class TestServerConnection: public Poco::Net::TCPServerConnection
   int m_nPeriods;
   int m_nSpectra;
   int m_nBins;
+  int m_nMonitors;
+  int m_nMonitorBins;
 public:
   /**
    * Constructor. Defines the simulated dataset dimensions.
@@ -70,7 +72,9 @@ public:
   Poco::Net::TCPServerConnection(soc),
   m_nPeriods(nper),
   m_nSpectra(nspec),
-  m_nBins(nbins)
+  m_nBins(nbins),
+  m_nMonitors(3),
+  m_nMonitorBins(nbins * 2)
   {
     char buffer[1024];
     socket().receiveBytes(&buffer,1024);
@@ -132,17 +136,17 @@ public:
   {
     int period = 0;
     int istart = spec;
-    const int ns1 = m_nSpectra + 1;
-    const int nb1 = m_nBins + 1;
+    const int ns1 = m_nSpectra + m_nMonitors + 1;
     if ( m_nPeriods > 1 )
     {
       period = spec / ns1;
       istart = spec - period * ns1;
-      if ( period >= m_nPeriods || istart + nos > ns1 )
-      {
-        sendOK();
-      }
     }
+    if ( period >= m_nPeriods || istart + nos > ns1 )
+    {
+      sendOK();
+    }
+    const int nb1 = (istart <= m_nSpectra? m_nBins : m_nMonitorBins) + 1;
     const int ndata = nos * nb1;
     std::vector<int> data( ndata );
     for(int i = 0; i < nos; ++i)
@@ -228,18 +232,41 @@ public:
         {
           sendInt( m_nSpectra );
         }
+        else if ( command == "NSP2" )
+        {
+          sendInt( m_nMonitors );
+        }
         else if ( command == "NTC1" )
         {
           sendInt( m_nBins );
         }
+        else if ( command == "NTC2" )
+        {
+          sendInt( m_nMonitorBins );
+        }
         else if ( command == "NDET" )
         {
-          sendInt( m_nSpectra );
+          sendInt( m_nSpectra + m_nMonitors );
+        }
+        else if ( command == "NMON" )
+        {
+          sendInt( m_nMonitors );
         }
         else if ( command == "RTCB1" )
         {
           std::vector<float> bins( m_nBins + 1 );
           const float dx = 100.0f;
+          float x = 10000.0f;
+          for(auto b = bins.begin(); b != bins.end(); ++b, x += dx)
+          {
+            *b = x;
+          };
+          sendFloatArray( bins );
+        }
+        else if ( command == "RTCB2" || (command.size() > 5 && command.substr(0,5) == "RTCB_") )
+        {
+          std::vector<float> bins( m_nMonitorBins + 1 );
+          const float dx = 10.0f;
           float x = 10000.0f;
           for(auto b = bins.begin(); b != bins.end(); ++b, x += dx)
           {
@@ -255,8 +282,8 @@ public:
         }
         else if ( command == "UDET" )
         {
-          std::vector<int> udet( m_nSpectra );
-          for(int i = 0; i < m_nSpectra; ++i)
+          std::vector<int> udet( m_nSpectra  + m_nMonitors );
+          for(int i = 0; i < static_cast<int>(udet.size()); ++i)
           {
             udet[i] = (int)( 1000 + i + 1 );
           }
@@ -264,12 +291,21 @@ public:
         }
         else if ( command == "SPEC" )
         {
-          std::vector<int> spec( m_nSpectra );
-          for(int i = 0; i < m_nSpectra; ++i)
+          std::vector<int> spec( m_nSpectra  + m_nMonitors );
+          for(int i = 0; i < static_cast<int>(spec.size()); ++i)
           {
             spec[i] = (int)( i + 1 );
           }
           sendIntArray( spec );
+        }
+        else if ( command == "MDET" )
+        {
+          std::vector<int> mdet( m_nMonitors );
+          for(int i = 0; i < m_nMonitors; ++i)
+          {
+            mdet[i] = (int)( m_nSpectra + i + 1 );
+          }
+          sendIntArray( mdet );
         }
         else
         {

@@ -38,6 +38,9 @@ class ReductionOptions(BaseScriptElement):
     n_q_bins = 100
     n_sub_pix = 1
     log_binning = False
+    
+    # Mask side
+    masked_side = None
 
     # Masking
     class RectangleMask(object):
@@ -116,6 +119,9 @@ class ReductionOptions(BaseScriptElement):
         script += "IQxQy(nbins=%g)\n" % self.n_q_bins
 
         # Mask
+        #   Detector plane
+        if self.masked_side is not None:
+            script += "MaskDetectorSide('%s')\n" % str(self.masked_side)
         #   Edges
         if (self.top != 0 or self.bottom != 0 or self.left != 0 or self.right != 0):
             script += "Mask(nx_low=%d, nx_high=%d, ny_low=%d, ny_high=%d)\n" % (self.left, self.right, self.bottom, self.top)
@@ -182,6 +188,8 @@ class ReductionOptions(BaseScriptElement):
         xml += "  <mask_bottom>%g</mask_bottom>\n" % self.bottom
         xml += "  <mask_left>%g</mask_left>\n" % self.left
         xml += "  <mask_right>%g</mask_right>\n" % self.right
+        
+        xml += "  <mask_side>%s</mask_side>\n" % str(self.masked_side)
 
         xml += "  <Shapes>\n"
         for item in self.shapes:
@@ -264,6 +272,8 @@ class ReductionOptions(BaseScriptElement):
             self.bottom = BaseScriptElement.getIntElement(mask_dom, "mask_bottom", default=ReductionOptions.bottom)
             self.right = BaseScriptElement.getIntElement(mask_dom, "mask_right", default=ReductionOptions.right)
             self.left = BaseScriptElement.getIntElement(mask_dom, "mask_left", default=ReductionOptions.left)
+
+            self.masked_side = BaseScriptElement.getStringElement(mask_dom, "mask_side", default=ReductionOptions.masked_side)
 
             self.shapes = []
             shapes_dom_list = mask_dom.getElementsByTagName("Shapes")
@@ -409,6 +419,7 @@ class ReductionOptions(BaseScriptElement):
         self.detector_ids = []
         self.mask_file = ''
         self.use_mask_file = ReductionOptions.use_mask_file
+        self.masked_side = None
 
         self.use_data_directory = ReductionOptions.use_data_directory
         self.output_directory = ReductionOptions.output_directory

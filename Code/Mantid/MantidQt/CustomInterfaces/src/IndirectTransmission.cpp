@@ -2,6 +2,8 @@
 
 #include <QFileInfo>
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -13,86 +15,124 @@ namespace CustomInterfaces
   IndirectTransmission::IndirectTransmission(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent)
   {
+    // Preview plot
+    m_plots["PreviewPlot"] = new QwtPlot(m_parentWidget);
+    m_plots["PreviewPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
+    m_plots["PreviewPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
+    m_plots["PreviewPlot"]->setCanvasBackground(Qt::white);
+    m_uiForm.trans_plotPreview->addWidget(m_plots["PreviewPlot"]);
+
+    // Update the preview plot when the algorithm is complete
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(transAlgDone(bool)));
+    connect(m_uiForm.trans_dsSampleInput, SIGNAL(dataReady(QString)), this, SLOT(dataLoaded()));
+    connect(m_uiForm.trans_dsCanInput, SIGNAL(dataReady(QString)), this, SLOT(dataLoaded()));
   }
-    
+
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   IndirectTransmission::~IndirectTransmission()
   {
-
   }
-  
+
   void IndirectTransmission::setup()
   {
   }
 
   void IndirectTransmission::run()
   {
-    QString sampleNo = m_uiForm.transInputFile->getFirstFilename();
-    QString canNo = m_uiForm.transCanFile->getFirstFilename();
+    QString sampleWsName = m_uiForm.trans_dsSampleInput->getCurrentDataName();
+    QString canWsName = m_uiForm.trans_dsCanInput->getCurrentDataName();
+    QString outWsName = sampleWsName + "_trans";
 
-    QFileInfo finfo(sampleNo);
-    QString inst = finfo.baseName();
+    IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
+    transAlg->initialize();
 
-    //flags for various algorithm options
-    QString verbose("False");
-    QString save("False");
-    QString plot("False");
+    transAlg->setProperty("SampleWorkspace", sampleWsName.toStdString());
+    transAlg->setProperty("CanWorkspace", canWsName.toStdString());
+    transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
 
-    if(m_uiForm.trans_ckVerbose->isChecked())
-    {
-      verbose  = "True";
-    }
+    transAlg->setProperty("Verbose", m_uiForm.trans_ckVerbose->isChecked());
+    transAlg->setProperty("Plot", m_uiForm.trans_ckPlot->isChecked());
+    transAlg->setProperty("Save", m_uiForm.trans_ckSave->isChecked());
 
-    if(m_uiForm.trans_ckSave->isChecked())
-    {
-      save = "True";
-    }
-
-    if(m_uiForm.trans_ckPlot->isChecked())
-    {
-      plot = "True";
-    }
-
-    QString pyInput =
-        "from IndirectEnergyConversion import IndirectTrans \n"
-        "IndirectTrans('"+inst+"','"+sampleNo+"','"+canNo+"',"
-        "Verbose="+verbose+","
-        "Plot="+plot+","
-        "Save="+save+""
-        ")\n";
-
-    emit runAsPythonScript(pyInput, true);
+    runAlgorithm(transAlg);
   }
 
   bool IndirectTransmission::validate()
   {
+    // Check if we have an appropriate instrument
     QString currentInst = m_uiForm.cbInst->currentText();
-
-    //Check if we have an appropriate instrument
     if(currentInst != "IRIS" && currentInst != "OSIRIS")
-    {
       return false;
-    }
 
-    //Check that the user has entered some file names
-    if(m_uiForm.transInputFile->isEmpty()
-        || m_uiForm.transCanFile->isEmpty())
-    {
+    // Check for an invalid sample input
+    if(!m_uiForm.trans_dsSampleInput->isValid())
       return false;
-    }
 
-    //Check if we have a file problem
-    QString errorInputFile = m_uiForm.transInputFile->getFileProblem();
-    QString errorCanFile = m_uiForm.transCanFile->getFileProblem();
-
-    if(!errorInputFile.isEmpty() || !errorCanFile.isEmpty())
-    {
+    // Check for an invalid can input
+    if(!m_uiForm.trans_dsCanInput->isValid())
       return false;
-    }
 
     return true;
+  }
+
+  void IndirectTransmission::dataLoaded()
+  {
+    if(validate())
+      previewPlot();
+  }
+
+  void IndirectTransmission::previewPlot()
+  {
+    QString sampleWsName = m_uiForm.trans_dsSampleInput->getCurrentDataName();
+    QString canWsName = m_uiForm.trans_dsCanInput->getCurrentDataName();
+    QString outWsName = sampleWsName + "_trans";
+
+    IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
+    transAlg->initialize();
+
+    transAlg->setProperty("SampleWorkspace", sampleWsName.toStdString());
+    transAlg->setProperty("CanWorkspace", canWsName.toStdString());
+    transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
+
+    transAlg->setProperty("Verbose", m_uiForm.trans_ckVerbose->isChecked());
+    transAlg->setProperty("Plot", false);
+    transAlg->setProperty("Save", false);
+
+    // Set the workspace name for Python script export
+    m_pythonExportWsName = sampleWsName.toStdString() + "_Trans";
+
+    runAlgorithm(transAlg);
+  }
+
+  void IndirectTransmission::transAlgDone(bool error)
+  {
+    if(error)
+      return;
+
+    QString sampleWsName = m_uiForm.trans_dsSampleInput->getCurrentDataName();
+    QString outWsName = sampleWsName + "_trans";
+
+    WorkspaceGroup_sptr resultWsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWsName.toStdString());
+    std::vector<std::string> resultWsNames = resultWsGroup->getNames();
+
+    if(resultWsNames.size() < 3)
+      return;
+
+    // Plot each spectrum
+    plotMiniPlot(QString::fromStdString(resultWsNames[0]), 0, "PreviewPlot", "SamCurve");
+    plotMiniPlot(QString::fromStdString(resultWsNames[1]), 0, "PreviewPlot", "CanCurve");
+    plotMiniPlot(QString::fromStdString(resultWsNames[2]), 0, "PreviewPlot", "TransCurve");
+
+    // Colour plots as per plot option
+    m_curves["SamCurve"]->setPen(QColor(Qt::red));
+    m_curves["CanCurve"]->setPen(QColor(Qt::black));
+    m_curves["TransCurve"]->setPen(QColor(Qt::green));
+
+    // Set X range to data range
+    setXAxisToCurve("PreviewPlot", "TransCurve");
+    m_plots["PreviewPlot"]->replot();
   }
 
 } // namespace CustomInterfaces
