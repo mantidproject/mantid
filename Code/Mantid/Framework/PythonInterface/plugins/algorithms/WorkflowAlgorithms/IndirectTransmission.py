@@ -35,7 +35,7 @@ class IndirectTransmission(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(name='Instrument', defaultValue='IRIS',
-                             validator=StringListValidator(['IRIS', 'OSIRIS', 'BASIS']),
+                             validator=StringListValidator(['IRIS', 'OSIRIS', 'BASIS', 'VISION']),
                              doc='Instrument')
 
         self.declareProperty(name='Analyser', defaultValue='graphite',
