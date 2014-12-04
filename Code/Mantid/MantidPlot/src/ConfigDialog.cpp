@@ -1346,10 +1346,14 @@ void ConfigDialog::initOptionsPage()
   boxFrame->setChecked(app->canvasFrameWidth > 0);
   optionsLayout->addWidget( boxFrame, 2, 0 );
 
+  boxDistribution = new QCheckBox();
+  boxDistribution->setChecked(app->autoDistribution1D);
+  optionsLayout->addWidget( boxDistribution, 3, 0);
+  
   labelFrameWidth = new QLabel();
-  optionsLayout->addWidget( labelFrameWidth, 3, 0 );
+  optionsLayout->addWidget( labelFrameWidth, 4, 0 );
   boxFrameWidth= new QSpinBox();
-  optionsLayout->addWidget( boxFrameWidth, 3, 1 );
+  optionsLayout->addWidget( boxFrameWidth, 4, 1 );
   boxFrameWidth->setRange(1, 100);
   boxFrameWidth->setValue(app->canvasFrameWidth);
   if (!app->canvasFrameWidth)
@@ -1359,12 +1363,12 @@ void ConfigDialog::initOptionsPage()
   }
 
   lblMargin = new QLabel();
-  optionsLayout->addWidget( lblMargin, 4, 0 );
+  optionsLayout->addWidget( lblMargin, 5, 0 );
   boxMargin= new QSpinBox();
   boxMargin->setRange(0, 1000);
   boxMargin->setSingleStep(5);
   boxMargin->setValue(app->defaultPlotMargin);
-  optionsLayout->addWidget( boxMargin, 4, 1 );
+  optionsLayout->addWidget( boxMargin, 5, 1 );
 
   optionsLayout->setRowStretch( 7, 1 );
 
@@ -1763,6 +1767,8 @@ void ConfigDialog::languageChange()
   labelFrameWidth->setText(tr("Frame width" ));
 
   boxFrame->setText(tr("Canvas Fra&me"));
+  boxDistribution->setText(tr("Normalize histogram to bin width"));
+  boxDistribution->setToolTip(tr("If checked, plot all spectra graphs normalised to the bin widths"));
   boxTitle->setText(tr("Show &Title"));
   boxScaleFonts->setText(tr("Scale &Fonts"));
   boxAutoscaling->setText(tr("Auto&scaling"));
@@ -2015,7 +2021,7 @@ void ConfigDialog::apply()
   // 2D plots page: options tab
   app->d_in_place_editing = !boxLabelsEditing->isChecked();
   app->titleOn=boxTitle->isChecked();
-
+  app->autoDistribution1D = boxDistribution->isChecked();
   if (boxFrame->isChecked())
     app->canvasFrameWidth = boxFrameWidth->value();
   else

@@ -842,6 +842,7 @@ void ApplicationWindow::initGlobalConstants()
   d_show_axes_labels = QVector<bool> (QwtPlot::axisCnt, true);
   d_show_axes_labels[1] = false;
   d_show_axes_labels[3] = false;
+  autoDistribution1D = true;
   canvasFrameWidth = 0;
   defaultPlotMargin = 0;
   drawBackbones = true;
@@ -5085,6 +5086,7 @@ void ApplicationWindow::readSettings()
 
   settings.beginGroup("/General");
   titleOn = settings.value("/Title", true).toBool();
+  autoDistribution1D = settings.value("/AutoDistribution1D", true).toBool();
   canvasFrameWidth = settings.value("/CanvasFrameWidth", 0).toInt();
   defaultPlotMargin = settings.value("/Margin", 0).toInt();
   drawBackbones = settings.value("/AxesBackbones", true).toBool();
@@ -5463,6 +5465,7 @@ void ApplicationWindow::saveSettings()
   settings.beginGroup("/2DPlots");
   settings.beginGroup("/General");
   settings.setValue("/Title", titleOn);
+  settings.setValue("/AutoDistribution1D", autoDistribution1D);
   settings.setValue("/CanvasFrameWidth", canvasFrameWidth);
   settings.setValue("/Margin", defaultPlotMargin);
   settings.setValue("/AxesBackbones", drawBackbones);
@@ -9800,6 +9803,7 @@ void ApplicationWindow::showGraphContextMenu()
 
   QMenu axes(this);
   QMenu colour(this);
+  QMenu normalization(this);
   QMenu exports(this);
   QMenu copy(this);
   QMenu prints(this);
@@ -9842,6 +9846,28 @@ void ApplicationWindow::showGraphContextMenu()
   colour.insertItem(tr("Lo&g Scale"), ag, SLOT(logColor()));
   colour.insertItem(tr("&Linear"), ag, SLOT(linColor()));
   cm.insertItem(tr("&Color Bar"), &colour);
+
+  if(ag->normalizable())
+  {
+    QAction *noNorm = new QAction(tr("N&one"), &normalization);
+    noNorm->setCheckable(true);
+    connect(noNorm, SIGNAL(activated()), ag, SLOT(noNormalization()));
+    normalization.addAction(noNorm);
+
+    QAction *binNorm = new QAction(tr("&Bin Width"), &normalization);
+    binNorm->setCheckable(true);
+    connect(binNorm, SIGNAL(activated()), ag, SLOT(binWidthNormalization()));
+    normalization.addAction(binNorm);
+
+    QActionGroup *normalizationActions = new QActionGroup(this);
+    normalizationActions->setExclusive(true);
+    normalizationActions->addAction(noNorm);
+    normalizationActions->addAction(binNorm);
+
+    noNorm->setChecked(!ag->isDistribution());
+    binNorm->setChecked(ag->isDistribution());
+    cm.insertItem(tr("&Normalization"), &normalization);
+  }
 
   cm.insertSeparator();
   copy.insertItem(tr("&Layer"), this, SLOT(copyActiveLayer()));

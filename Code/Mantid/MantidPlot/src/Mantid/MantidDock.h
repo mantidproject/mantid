@@ -76,9 +76,7 @@ private slots:
   void treeSelectionChanged();
   void groupingButtonClick();
   void plotSpectra();
-  void plotSpectraDistribution();
   void plotSpectraErr();
-  void plotSpectraDistributionErr();
   void drawColorFillPlot();
   void showDetectorTable();
   void convertToMatrixWorkspace();
@@ -130,7 +128,7 @@ private:
   QFileDialog *m_saveFolderDialog;
 
   //Context-menu actions
-  QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr, *m_plotSpecDistr,
+  QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr,
   *m_showDetectors, *m_showBoxData, *m_showVatesGui,
   *m_showSpectrumViewer,
   *m_showSliceViewer,

@@ -34,11 +34,12 @@ namespace MantidQt
     /**
      * The title will be filled with the caption & label for the Y data values
      * within the workspace, ~ the Z axis
-     * @param workspace  The workspace containing the Y title information
+     * @param plottingDistribution If true, the Y axis has been divided by the bin width
+     * @param workspace The workspace containing the Y title information
      */
-    PlotAxis::PlotAxis(const Mantid::API::MatrixWorkspace &workspace)
+    PlotAxis::PlotAxis(const bool plottingDistribution, const Mantid::API::MatrixWorkspace &workspace)
     {
-      titleFromYData(workspace);
+      titleFromYData(workspace, plottingDistribution);
     }
 
     /**
@@ -87,24 +88,33 @@ namespace MantidQt
     /**
      * Constructs a title using the unicode methods of the UnitLabel
      * @param workspace The workspace containing the Y title information
+     * @param plottingDistribution If true, the Y axis has been divided by the bin width
      */
-    void PlotAxis::titleFromYData(const Mantid::API::MatrixWorkspace &workspace)
+    void PlotAxis::titleFromYData(const Mantid::API::MatrixWorkspace &workspace,
+                                  const bool plottingDistribution)
     {
-      if( !workspace.YUnitLabel().empty() )
+      // The workspace can have a custom label so we should use that as a preference.
+      // The workspace.YUnitLabel does some mangling of the string if the user set no
+      // custom label. See MatrixWorkspace::YUnitLabel
+      
+      const std::string customLabel = workspace.YUnitLabel();
+      const std::string yunit = workspace.YUnit();
+      if((yunit == customLabel) || (customLabel.find("per") != std::string::npos))
       {
-        m_title = QString::fromStdString(workspace.YUnitLabel());
-        return;
-      }
-
-      m_title = QString::fromStdString(workspace.YUnit());
-      if(workspace.isDistribution() && workspace.axes() > 0 && workspace.getAxis(0)->unit())
-      {
-        const auto xunit = workspace.getAxis(0)->unit();
-        const auto lbl = xunit->label();
-        if(!lbl.utf8().empty())
+        m_title = QString::fromStdString(yunit);
+        if(plottingDistribution && workspace.axes() > 0 && workspace.getAxis(0)->unit())
         {
-          m_title += " (" + QString::fromStdWString(lbl.utf8()) + QString::fromWCharArray(L"\u207b\u00b9)");
+          const auto xunit = workspace.getAxis(0)->unit();
+          const auto lbl = xunit->label();
+          if(!lbl.utf8().empty())
+          {
+            m_title += " (" + QString::fromStdWString(lbl.utf8()) + QString::fromWCharArray(L"\u207b\u00b9)");
+          }
         }
+      }
+      else
+      {
+        m_title = QString::fromStdString(customLabel);
       }
     }
 

@@ -89,6 +89,12 @@ public:
   /// Returns whether the curve is plotted as a distribution
   bool isDistribution() const;
 
+  /// Returns true if the curve data comes for a histgoram workspace
+  bool isHistogramData() const;
+
+  /// Returns whether the can be normalized, i.e whether the workspace data is already divided by the width
+  bool isNormalizable() const;
+  
   virtual void draw(QPainter *p, 
     const QwtScaleMap &xMap, const QwtScaleMap &yMap,
     const QRect &) const;
