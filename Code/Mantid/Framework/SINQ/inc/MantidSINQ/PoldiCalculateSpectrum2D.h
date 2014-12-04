@@ -4,12 +4,11 @@
 #include "MantidKernel/System.h"
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h"
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
-
 
 namespace Mantid
 {
@@ -64,10 +63,13 @@ protected:
     PoldiPeakCollection_sptr getNormalizedPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const;
     PoldiPeakCollection_sptr getCountPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const;
 
+    PoldiPeakCollection_sptr getPeakCollectionFromFunction(const API::IFunction_sptr &fitFunction) const;
     boost::shared_ptr<Poldi2DFunction> getFunctionFromPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const;
     void addBackgroundTerms(boost::shared_ptr<Poldi2DFunction> poldi2DFunction) const;
 
-    API::MatrixWorkspace_sptr calculateSpectrum(const PoldiPeakCollection_sptr &peakCollection, const API::MatrixWorkspace_sptr &matrixWorkspace);
+    API::IAlgorithm_sptr calculateSpectrum(const PoldiPeakCollection_sptr &peakCollection, const API::MatrixWorkspace_sptr &matrixWorkspace);
+    API::MatrixWorkspace_sptr getWorkspace(const API::IAlgorithm_sptr &fitAlgorithm) const;
+    API::IFunction_sptr getFunction(const API::IAlgorithm_sptr &fitAlgorithm) const;
 
     void setTimeTransformerFromInstrument(const PoldiInstrumentAdapter_sptr &poldiInstrument);
     void setTimeTransformer(const PoldiTimeTransformer_sptr &poldiTimeTransformer);

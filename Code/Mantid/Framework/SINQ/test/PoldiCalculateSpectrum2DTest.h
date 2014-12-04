@@ -202,6 +202,26 @@ public:
         }
     }
 
+    void testGetPeakCollectionFromFunction()
+    {
+        TestablePoldiCalculateSpectrum2D spectrumCalculator;
+        PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
+
+        IFunction_sptr poldi2DFunction = spectrumCalculator.getFunctionFromPeakCollection(peaks);
+
+        PoldiPeakCollection_sptr peaksFromFunction = spectrumCalculator.getPeakCollectionFromFunction(poldi2DFunction);
+
+        TS_ASSERT_EQUALS(peaksFromFunction->peakCount(), peaks->peakCount());
+        for(size_t i = 0; i < peaksFromFunction->peakCount(); ++i) {
+            PoldiPeak_sptr functionPeak = peaksFromFunction->peak(i);
+            PoldiPeak_sptr referencePeak = peaks->peak(i);
+
+            TS_ASSERT_EQUALS(functionPeak->d(), referencePeak->d());
+            TS_ASSERT_EQUALS(functionPeak->fwhm(), referencePeak->fwhm());
+            TS_ASSERT_EQUALS(functionPeak->intensity(), referencePeak->intensity());
+        }
+    }
+
     void testAddBackgroundFunctions()
     {
         TestablePoldiCalculateSpectrum2D spectrumCalculator;

@@ -74,7 +74,53 @@ namespace Poldi
     declareProperty("FitLinearBackground", true, "Add a background term linear in 2theta to the fit.");
     declareProperty("LinearBackgroundParameter", 0.0, "Initial value of linear background.");
 
+    declareProperty("MaximumIterations", 0, "Maximum number of iterations for the fit. Use 0 to calculate 2D-spectrum without fitting.");
+
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), "Calculated POLDI 2D-spectrum");
+    declareProperty(new WorkspaceProperty<TableWorkspace>("RefinedPoldiPeakWorkspace", "", Direction::Output), "Table workspace with fitted peaks.");
+  }
+
+  /**
+   * Construct a PoldiPeakCollection from a Poldi2DFunction
+   *
+   * This method performs the opposite operation of getFunctionFromPeakCollection.
+   * It takes a function, checks if it's of the proper type and turns the information
+   * into a PoldiPeakCollection.
+   *
+   * @param  Poldi2DFunction with one PoldiSpectrumDomainFunction per peak
+   * @return PoldiPeakCollection containing peaks with normalized intensities
+   */
+  PoldiPeakCollection_sptr PoldiCalculateSpectrum2D::getPeakCollectionFromFunction(const IFunction_sptr &fitFunction) const
+  {
+      boost::shared_ptr<Poldi2DFunction> poldi2DFunction = boost::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
+
+      if(!poldi2DFunction) {
+          throw std::invalid_argument("Cannot process function that is not a Poldi2DFunction.");
+      }
+
+      PoldiPeakCollection_sptr normalizedPeaks = boost::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
+
+      for(size_t i = 0; i < poldi2DFunction->nFunctions(); ++i) {
+          boost::shared_ptr<PoldiSpectrumDomainFunction> peakFunction = boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(poldi2DFunction->getFunction(i));
+
+          if(peakFunction) {
+              size_t dIndex = peakFunction->parameterIndex("Centre");
+              UncertainValue d(peakFunction->getParameter(dIndex), peakFunction->getError(dIndex));
+
+              size_t iIndex = peakFunction->parameterIndex("Area");
+              UncertainValue intensity(peakFunction->getParameter(iIndex), peakFunction->getError(iIndex));
+
+              size_t fIndex = peakFunction->parameterIndex("Fwhm");
+              UncertainValue fwhm(peakFunction->getParameter(fIndex), peakFunction->getError(fIndex));
+
+              PoldiPeak_sptr peak = PoldiPeak::create(MillerIndices(), d, intensity, UncertainValue(1.0));
+              peak->setFwhm(fwhm, PoldiPeak::FwhmRelation::AbsoluteD);
+
+              normalizedPeaks->addPeak(peak);
+          }
+      }
+
+      return normalizedPeaks;
   }
 
   /**
@@ -124,7 +170,14 @@ namespace Poldi
           peakCollection->setProfileFunctionName(profileFunctionProperty->value());
       }
 
-      setProperty("OutputWorkspace", calculateSpectrum(peakCollection, ws));
+      IAlgorithm_sptr fitAlgorithm = calculateSpectrum(peakCollection, ws);
+
+      IFunction_sptr fitFunction = getFunction(fitAlgorithm);
+      PoldiPeakCollection_sptr normalizedPeaks = getPeakCollectionFromFunction(fitFunction);
+      PoldiPeakCollection_sptr integralPeaks = getCountPeakCollection(normalizedPeaks);
+
+      setProperty("OutputWorkspace", getWorkspace(fitAlgorithm));
+      setProperty("RefinedPoldiPeakWorkspace", integralPeaks->asTableWorkspace());
   }
 
   /**
@@ -154,15 +207,17 @@ namespace Poldi
   }
 
   /**
-   * Calculates the 2D spectrum in a MatrixWorkspace
+   * Performs the fit and returns the fit algorithm
    *
-   * In this method the actual function calculation is performed using Fit.
+   * In this method the actual function fit/calculation is performed
+   * using the Fit algorithm. After execution the algorithm is returned for
+   * further processing.
    *
    * @param peakCollection :: PoldiPeakCollection
    * @param matrixWorkspace :: MatrixWorkspace with POLDI instrument and correct dimensions
-   * @return MatrixWorkspace with the calculated data
+   * @return Instance of Fit-algorithm, after execution
    */
-  MatrixWorkspace_sptr PoldiCalculateSpectrum2D::calculateSpectrum(const PoldiPeakCollection_sptr &peakCollection, const MatrixWorkspace_sptr &matrixWorkspace)
+  IAlgorithm_sptr PoldiCalculateSpectrum2D::calculateSpectrum(const PoldiPeakCollection_sptr &peakCollection, const MatrixWorkspace_sptr &matrixWorkspace)
   {
       PoldiPeakCollection_sptr integratedPeaks = getIntegratedPeakCollection(peakCollection);
       PoldiPeakCollection_sptr normalizedPeakCollection = getNormalizedPeakCollection(integratedPeaks);
@@ -180,14 +235,36 @@ namespace Poldi
       fit->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(mdFunction));
       fit->setProperty("InputWorkspace", matrixWorkspace);
       fit->setProperty("CreateOutput", true);
-      fit->setProperty("MaxIterations", 0);
+
+      int maxIterations = getProperty("MaximumIterations");
+      fit->setProperty("MaxIterations", maxIterations);
+
       fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
 
       fit->execute();
 
-      MatrixWorkspace_sptr outputWs = fit->getProperty("OutputWorkspace");
+      return fit;
+  }
 
-      return outputWs;
+  /// Returns the output workspace stored in the Fit algorithm.
+  MatrixWorkspace_sptr PoldiCalculateSpectrum2D::getWorkspace(const IAlgorithm_sptr &fitAlgorithm) const
+  {
+      if(!fitAlgorithm) {
+          throw std::invalid_argument("Cannot extract workspace from null-algorithm.");
+      }
+
+      MatrixWorkspace_sptr outputWorkspace = fitAlgorithm->getProperty("OutputWorkspace");
+      return outputWorkspace;
+  }
+
+  IFunction_sptr PoldiCalculateSpectrum2D::getFunction(const IAlgorithm_sptr &fitAlgorithm) const
+  {
+      if(!fitAlgorithm) {
+          throw std::invalid_argument("Cannot extract function from null-algorithm.");
+      }
+
+      IFunction_sptr fitFunction = fitAlgorithm->getProperty("Function");
+      return fitFunction;
   }
 
   /**
