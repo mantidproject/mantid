@@ -21,6 +21,9 @@ void FirstTimeSetup::initLayout()
 {
   this->setWindowTitle(this->windowTitle() + " " + Mantid::Kernel::MantidVersion::version());
 
+  setFixedSize(size());
+  m_uiForm.lblVersion->setText(m_uiForm.lblVersion->text() + Mantid::Kernel::MantidVersion::version());
+
   connect(m_uiForm.pbConfirm, SIGNAL(clicked()), this, SLOT(confirm()));
   connect(m_uiForm.pbCancel, SIGNAL(clicked()), this, SLOT(cancel()));
   connect(m_uiForm.cbFacility, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(facilitySelected(const QString &)));

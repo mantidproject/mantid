@@ -35,8 +35,14 @@ color: rgb(255, 255, 255);</string>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
      <widget class="QCheckBox" name="chkDoNotShowUntilNextRelease">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
       <property name="styleSheet">
-       <string notr="true">color: rgb(255, 255, 255);</string>
+       <string notr="true">color: rgb(0, 0, 0);</string>
       </property>
       <property name="text">
        <string>Do not show again until next release</string>
@@ -63,18 +69,24 @@ color: rgb(255, 255, 255);</string>
      <widget class="QLabel" name="lbUpdate">
       <property name="minimumSize">
        <size>
-        <width>370</width>
+        <width>430</width>
         <height>0</height>
        </size>
       </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
       <property name="styleSheet">
-       <string notr="true">color: rgb(255, 255, 255);</string>
+       <string notr="true">color: rgb(0, 0, 0);</string>
       </property>
       <property name="text">
        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;You can revisit this dialog by selecting &amp;quot;First Time Setup&amp;quot; on the Help menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="wordWrap">
@@ -107,14 +119,24 @@ p, li { white-space: pre-wrap; }
   <widget class="QGroupBox" name="grpPersonalSetup">
    <property name="geometry">
     <rect>
-     <x>740</x>
+     <x>732</x>
      <y>410</y>
-     <width>251</width>
+     <width>261</width>
      <height>111</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
    <property name="styleSheet">
-    <string notr="true">color: rgb(255, 255, 255);</string>
+    <string notr="true">QGroupBox {
+     border: 2px solid green;
+     border-radius: 5px;
+ }
+</string>
    </property>
    <property name="title">
     <string>Personal Setup</string>
@@ -122,20 +144,26 @@ p, li { white-space: pre-wrap; }
    <widget class="QWidget" name="layoutWidget1">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>12</x>
       <y>20</y>
-      <width>231</width>
+      <width>242</width>
       <height>80</height>
      </rect>
     </property>
     <layout class="QFormLayout" name="formLayout">
      <item row="0" column="0">
       <widget class="QLabel" name="label">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="autoFillBackground">
         <bool>false</bool>
        </property>
        <property name="styleSheet">
-        <string notr="true">color: rgb(255, 255, 255);</string>
+        <string notr="true">color: rgb(0, 0, 0);</string>
        </property>
        <property name="text">
         <string>Default Facility</string>
@@ -151,8 +179,14 @@ p, li { white-space: pre-wrap; }
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="styleSheet">
-        <string notr="true">color: rgb(255, 255, 255);</string>
+        <string notr="true">color: rgb(0, 0, 0);</string>
        </property>
        <property name="text">
         <string>Default Instrument</string>
@@ -168,14 +202,20 @@ p, li { white-space: pre-wrap; }
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="lbMUD">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="styleSheet">
-        <string notr="true">color: rgb(255, 255, 255);</string>
+        <string notr="true">color: rgb(0, 0, 0);</string>
        </property>
        <property name="text">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Set local data directories&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="wordWrap">
@@ -196,97 +236,17 @@ p, li { white-space: pre-wrap; }
     </layout>
    </widget>
   </widget>
-  <widget class="QWidget" name="layoutWidget2">
+  <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>200</y>
-     <width>313</width>
-     <height>138</height>
+     <x>60</x>
+     <y>130</y>
+     <width>911</width>
+     <height>279</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout1">
-    <item>
-     <widget class="QCommandLinkButton" name="clbReleaseNotes">
-      <property name="font">
-       <font>
-        <family>Segoe UI</family>
-        <pointsize>24</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::LeftToRight</enum>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">color: rgb(0, 128, 0);</string>
-      </property>
-      <property name="text">
-       <string>Release Notes</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../../../Images/images.qrc">
-        <normaloff>:/Icons/Notepad-Bloc-notes-icon-48x48.png</normaloff>:/Icons/Notepad-Bloc-notes-icon-48x48.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>48</width>
-        <height>48</height>
-       </size>
-      </property>
-      <property name="checkable">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCommandLinkButton" name="clbSampleDatasets">
-      <property name="font">
-       <font>
-        <family>Segoe UI</family>
-        <pointsize>24</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::LeftToRight</enum>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">color: rgb(0, 128, 0);</string>
-      </property>
-      <property name="text">
-       <string>Sample Datasets</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../../../Images/images.qrc">
-        <normaloff>:/Icons/download-icon-48x48.png</normaloff>:/Icons/download-icon-48x48.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>48</width>
-        <height>48</height>
-       </size>
-      </property>
-      <property name="checkable">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="layoutWidget3">
-   <property name="geometry">
-    <rect>
-     <x>540</x>
-     <y>90</y>
-     <width>410</width>
-     <height>311</height>
-    </rect>
-   </property>
-   <layout class="QVBoxLayout" name="verticalLayout2">
-    <item>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
      <widget class="QLabel" name="lblTutorials">
       <property name="font">
        <font>
@@ -297,14 +257,32 @@ p, li { white-space: pre-wrap; }
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true">color: rgb(255, 255, 255);</string>
+       <string notr="true">color: rgb(0, 105, 0);</string>
       </property>
       <property name="text">
        <string>Tutorials</string>
       </property>
      </widget>
     </item>
-    <item>
+    <item row="0" column="1">
+     <widget class="QLabel" name="lblVersion">
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+        <pointsize>24</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 105, 0);</string>
+      </property>
+      <property name="text">
+       <string>Version </string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
      <widget class="QCommandLinkButton" name="clbMantidIntroduction">
       <property name="font">
        <font>
@@ -318,7 +296,7 @@ p, li { white-space: pre-wrap; }
        <enum>Qt::LeftToRight</enum>
       </property>
       <property name="styleSheet">
-       <string notr="true">color: rgb(0, 128, 0);</string>
+       <string notr="true">color: rgb(0, 0, 0);</string>
       </property>
       <property name="text">
        <string>Mantid Introduction</string>
@@ -338,7 +316,42 @@ p, li { white-space: pre-wrap; }
       </property>
      </widget>
     </item>
-    <item>
+    <item row="1" column="1">
+     <widget class="QCommandLinkButton" name="clbReleaseNotes">
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+        <pointsize>18</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 128, 0);
+color: rgb(0, 0, 0);</string>
+      </property>
+      <property name="text">
+       <string>Release Notes</string>
+      </property>
+      <property name="icon">
+       <iconset resource="../../../Images/images.qrc">
+        <normaloff>:/Icons/Notepad-Bloc-notes-icon-32x32.png</normaloff>:/Icons/Notepad-Bloc-notes-icon-32x32.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
      <widget class="QCommandLinkButton" name="clbPythonIntroduction">
       <property name="font">
        <font>
@@ -352,7 +365,7 @@ p, li { white-space: pre-wrap; }
        <enum>Qt::LeftToRight</enum>
       </property>
       <property name="styleSheet">
-       <string notr="true">color: rgb(0, 128, 0);</string>
+       <string notr="true">color: rgb(0, 0, 0);</string>
       </property>
       <property name="text">
        <string>Introduction to Python</string>
@@ -372,7 +385,41 @@ p, li { white-space: pre-wrap; }
       </property>
      </widget>
     </item>
-    <item>
+    <item row="2" column="1">
+     <widget class="QCommandLinkButton" name="clbSampleDatasets">
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+        <pointsize>18</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 0, 0);</string>
+      </property>
+      <property name="text">
+       <string>Sample Datasets</string>
+      </property>
+      <property name="icon">
+       <iconset resource="../../../Images/images.qrc">
+        <normaloff>:/Icons/download-icon-32x32.png</normaloff>:/Icons/download-icon-32x32.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
      <widget class="QCommandLinkButton" name="clbPythonInMantid">
       <property name="font">
        <font>
@@ -386,7 +433,7 @@ p, li { white-space: pre-wrap; }
        <enum>Qt::LeftToRight</enum>
       </property>
       <property name="styleSheet">
-       <string notr="true">color: rgb(0, 128, 0);</string>
+       <string notr="true">color: rgb(0, 0, 0);</string>
       </property>
       <property name="text">
        <string>Python in Mantid</string>
@@ -406,7 +453,7 @@ p, li { white-space: pre-wrap; }
       </property>
      </widget>
     </item>
-    <item>
+    <item row="4" column="0">
      <widget class="QCommandLinkButton" name="clbExtendingMantid">
       <property name="font">
        <font>
@@ -420,7 +467,7 @@ p, li { white-space: pre-wrap; }
        <enum>Qt::LeftToRight</enum>
       </property>
       <property name="styleSheet">
-       <string notr="true">color: rgb(0, 128, 0);</string>
+       <string notr="true">color: rgb(0, 0, 0);</string>
       </property>
       <property name="text">
        <string>Extending Mantid with Python</string>

@@ -48,6 +48,7 @@
         <file>Plugin-Python-icon-32x32.png</file>
         <file>Misc-Tutorial-icon-48x48.png</file>
         <file>Misc-Tutorial-icon-32x32.png</file>
+        <file>MantidPlot_Python_Icon_32x32.png</file>
     </qresource>
     <qresource prefix="/PickTools">
         <file>zoom.png</file>
