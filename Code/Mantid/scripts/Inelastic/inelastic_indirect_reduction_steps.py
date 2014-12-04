@@ -890,8 +890,15 @@ class SaveItem(ReductionStep):
             elif format == 'nxspe':
                 SaveNXSPE(InputWorkspace=file_ws, Filename=filename + '.nxspe')
             elif format == 'ascii':
-                #version 1 of SaveASCII produces output that works better with excel/origin
-                SaveAscii(InputWorkspace=file_ws, Filename=filename + '.dat', Version=1)
+                # Version 1 of SaveASCII produces output that works better with excel/origin
+                # For some reason this has to be done with an algorithm object, using the function
+                # wrapper with Version did not change the version that was run
+                saveAsciiAlg = mantid.api.AlgorithmManager.createUnmanaged('SaveAscii', 1)
+                saveAsciiAlg.initialize()
+                saveAsciiAlg.setProperty('InputWorkspace', file_ws)
+                saveAsciiAlg.setProperty('Filename', filename + '.dat')
+                saveAsciiAlg.execute()
+
             elif format == 'gss':
                 ConvertUnits(InputWorkspace=file_ws, OutputWorkspace="__save_item_temp", Target="TOF")
                 SaveGSS(InputWorkspace="__save_item_temp", Filename=filename + ".gss")
