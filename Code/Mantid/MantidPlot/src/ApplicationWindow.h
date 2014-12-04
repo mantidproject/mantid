@@ -1090,8 +1090,7 @@ private:
   void openSurfacePlot      (const std::string& lines, const int fileVersion);
   void openTable            (const std::string& lines, const int fileVersion);
   void openTableStatistics  (const std::string& lines, const int fileVersion);
-
-  void openScriptWindow     (const QStringList &list);
+  void openScriptWindow     (const QStringList& lines);
   //@}
 
   ApplicationWindow* loadScript(const QString& fn, bool existingProject = false);
