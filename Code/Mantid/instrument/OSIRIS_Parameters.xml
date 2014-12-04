@@ -29,6 +29,7 @@
 </parameter>
 
 <!-- Reduction workflow parameters under this line -->
+<!-- This is actually spectrum index, NOT spectrum number -->
 <parameter name="Workflow.Monitor1-SpectrumNumber" >
   <value val="0" />
 </parameter>
@@ -44,6 +45,7 @@
 <parameter name="Workflow.Monitor1-ScalingFactor">
   <value val="1e6" />
 </parameter>
+<!-- This is actually spectrum index, NOT spectrum number -->
 <parameter name="Workflow.Monitor2-SpectrumNumber" >
   <value val="1" />
 </parameter>

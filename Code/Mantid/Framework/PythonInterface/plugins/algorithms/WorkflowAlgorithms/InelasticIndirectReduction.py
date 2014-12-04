@@ -25,7 +25,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         self.declareProperty(name='LoadLogs', defaultValue=False, doc='Load sample logs from input files')
 
         self.declareProperty(name='Instrument', defaultValue='', doc='Instrument used during run',
-                             validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'BASIS', 'VISION']))
+                             validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'TFXA', 'BASIS', 'VISION']))
         self.declareProperty(name='Analyser', defaultValue='', doc='Analyser used during run',
                              validator=StringListValidator(['graphite', 'mica', 'fmica', 'silicon']))
         self.declareProperty(name='Reflection', defaultValue='', doc='Reflection used during run',
