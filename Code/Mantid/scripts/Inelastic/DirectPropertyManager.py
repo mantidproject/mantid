@@ -92,10 +92,29 @@ class MapMaskFile(object):
 #end MapMaskFile
 
 class HardMaskOnly(object):
+    """ Sets diagnostics algorithm to use hard mask file provided and to disable all other diagnostics routines
+
+        It controls two options, where the first one is use_hard_mask_only=True/False, controls diagnostics algorithm
+        and another one: hard_mask_file provides file for masking.         
+    """
     def __get__(self,instance,type=None):
           return prop_helpers.gen_getter(instance.__dict__,'use_hard_mask_only');
     def __set__(self,instance,value):
-        prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',value);
+        if value is None:
+            prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',False);
+        elif isinstance(value,bool):
+            prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',value);
+        elif isinstance(value,str):
+            if value.lower() in ['true','yes']:
+                prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',True);
+            elif value.lower() in ['false','no']:
+                prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',False);
+            else: # it is probably a hard mask file provided:
+                prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',True);
+                instance.hard_mask_file = value;
+            #end
+        #end
+
         if not(value) and instance.hard_mask_file is None:
             instance.run_diagnostics = False;
 #end HardMaskOnly
@@ -145,8 +164,6 @@ class MonovanIntegrationRange(object):
                 raise KeyError("monovan_integr_range has to be list of two values, defining min/max values of integration range or None to use relative to incident energy limits")
             prop_helpers.gen_setter(instance.__dict__,'monovan_lo_value',value[0]);
             prop_helpers.gen_setter(instance.__dict__,'monovan_hi_value',value[1]);
-
-
 #end MonovanIntegrationRange
 
 
@@ -169,12 +186,15 @@ class SpectraToMonitorsList(object):
            return None
    def __set__(self,instance,spectra_list):
         """ Sets copy spectra to monitors variable as a list of monitors using different forms of input """
-        if spectra_list is None:
-            prop_helpers.gen_setter(instance.__dict__,'spectra_to_monitors_list',None);
-            return;
+        result = self.convert_to_list(spectra_list);
+        prop_helpers.gen_setter(instance.__dict__,'spectra_to_monitors_list',result);
+        return;
+   def convert_to_list(self,spectra_list):
+       """ convert any spectra_list representation into a list """ 
+       if spectra_list is None:
+            return None
 
-        result = None;
-        if isinstance(spectra_list,str):
+       if isinstance(spectra_list,str):
             if spectra_list.lower() is 'none':
                 result = None;
             else:
@@ -183,7 +203,7 @@ class SpectraToMonitorsList(object):
                 for spectum in spectra :
                     result.append(int(spectum));
 
-        else:
+       else:
             if isinstance(spectra_list,list):
                 if len(spectra_list) == 0:
                     result=None;
@@ -193,9 +213,8 @@ class SpectraToMonitorsList(object):
                         result.append(int(spectra_list[i]));
             else:
                 result =[int(spectra_list)];
+       return result
 
-        prop_helpers.gen_setter(instance.__dict__,'spectra_to_monitors_list',result);
-        return;
 #end SpectraToMonitorsList
     # format to save data
 class SaveFormat(object):
@@ -275,6 +294,7 @@ class DiagSpectra(object):
                 end = int(token[1].rstrip(')'))
                 bank_spectra.append((start,end))
         return bank_spectra;
+#end class DiagSpectra
 
 class BackbgroundTestRange(object):
     """ The TOF range used in diagnostics to reject high background spectra. 
@@ -299,9 +319,8 @@ class BackbgroundTestRange(object):
             raise ValueError("background test range can be set to a 2 element list of floats")
 
         range = prop_helpers.gen_setter(instance.__dict__,'_background_test_range',[float(value[0]),float(value[1])]);
+#end BackbgroundTestRange
 
-
-#end DiagSpectra
 #-----------------------------------------------------------------------------------------
 # END Descriptors, Direct property manager itself
 #-----------------------------------------------------------------------------------------
@@ -355,6 +374,7 @@ class DirectPropertyManager(DirectReductionProperties):
         # build and initiate  properties with default descriptors (TODO: consider complex automatic descriptors)
         param_list =  prop_helpers.build_properties_dict(param_list,self.__subst_dict)
 
+        #--------------------------------------------------------------------------------------
         # modify some IDF properties, which need overloaded getter (and this getter is provided somewhere in this class)
         if 'background_test_range' in param_list:
             val = param_list['background_test_range']
@@ -362,7 +382,14 @@ class DirectPropertyManager(DirectReductionProperties):
             del param_list['background_test_range']
         else:
             param_list['_background_test_range'] = None;
-
+        #end
+        # make spectra_to_monitors_list to be the list indeed. 
+        if 'spectra_to_monitors_list' in param_list:
+            sml = SpectraToMonitorsList();
+            param_list['spectra_to_monitors_list']=sml.convert_to_list(param_list['spectra_to_monitors_list'])
+        #end
+        # End modify. 
+        #----------------------------------------------------------------------------------------
         self.__dict__.update(param_list)
 
 

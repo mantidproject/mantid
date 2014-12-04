@@ -199,7 +199,7 @@ class DirectEnergyConversion(object):
                 if whitews_name in mtd:
                     DeleteWorkspace(Workspace=whitews_name)
                 # Load
-                white_data = self.load_data(white,whitews_name,self._keep_wb_workspace)
+                white_data,mon_ws = self.load_data(white,whitews_name,self._keep_wb_workspace)
 
                 diag_mask= LoadMask(Instrument=prop_man.instr_name,InputFile=prop_man.hard_mask_file,
                                OutputWorkspace='hard_mask_ws')
@@ -224,8 +224,8 @@ class DirectEnergyConversion(object):
                 diag_params['sample_run'] = diag_sample
 
             # Set up the background integrals
-            result_ws = self.load_data(diag_sample)
-            result_ws = self.normalise(result_ws, result_ws.name(), prop_man.normalise_method)
+            result_ws,mon_ws = self.load_data(diag_sample)
+            result_ws        = self.normalise(result_ws, result_ws.name(), prop_man.normalise_method)
 
             bkgd_range = prop_man.background_test_range
             background_int = Integration(result_ws,
@@ -280,7 +280,7 @@ class DirectEnergyConversion(object):
         if whitews_name in mtd:
             DeleteWorkspace(Workspace=whitews_name)
         # Load
-        white_data = self.load_data(white_run,whitews_name,self._keep_wb_workspace)
+        white_data,mon_ws = self.load_data(white_run,whitews_name,self._keep_wb_workspace)
 
         # Normalize
         self.__in_white_normalization = True;
@@ -312,7 +312,7 @@ class DirectEnergyConversion(object):
         If multiple run files are passed to this function, they are summed into a run and then processed
         """
         # Load data
-        sample_data = self.load_data(mono_van)
+        sample_data,mon_ws = self.load_data(mono_van)
         # Create the result name if necessary
         if result_name is None:
             result_name = common.create_resultname(mono_van)
@@ -328,13 +328,13 @@ class DirectEnergyConversion(object):
         """Convert a mono-chromatic sample run to DeltaE.
         If multiple run files are passed to this function, they are summed into a run and then processed
         """
-        # Load data
-        sample_data = self.load_data(mono_run)
-        # Create the result name if necessary
         if result_name is None:
             result_name = common.create_resultname(mono_run, self.instr_name)
 
-        mono_s=self._do_mono(sample_data, sample_data, result_name, ei_guess,
+        # Load data
+        sample_data,mon_ws = self.load_data(mono_run,result_name)
+        # Create the result name if necessary
+        mono_s=self._do_mono(sample_data, mon_ws, result_name, ei_guess,
                                   white_run, map_file, spectra_masks, Tzero)
         return mono_s
 
@@ -486,7 +486,7 @@ class DirectEnergyConversion(object):
         # Do ISIS stuff for Ei
         # Both are these should be run properties really
 
-        ei_value, mon1_peak = self.get_ei(monitor_ws, result_name, ei_guess)
+        ei_value, mon1_peak = self.get_ei(data_ws, result_name, ei_guess)
         self.prop_man.incident_energy = ei_value
         prop_man = self.prop_man;
 
@@ -583,7 +583,7 @@ class DirectEnergyConversion(object):
 
 
       # Process old legacy parameters which are easy to re-define in dgreduce rather then transfer through Mantid
-      #TODO (verify)
+      #TODO: (verify)
       #program_args = process_legacy_parameters(**kwargs)
 
 
@@ -1213,26 +1213,35 @@ class DirectEnergyConversion(object):
         if mon_WsName in mtd  and not monitors_inWS:
             monitor_ws = mtd[mon_WsName];
         else:
-            monitor_ws = None;
+            if monitors_inWS:
+                monitor_ws = result_ws;
+            else:
+                monitor_ws = None;
 
-
+        old_result = result_ws;
         if new_ws_name != None :
             mon_WsName = new_ws_name+'_monitors'
             if keep_previous_ws:
                 result_ws = CloneWorkspace(InputWorkspace = result_ws,OutputWorkspace = new_ws_name)
-                if monitor_ws:
+                if monitor_ws and monitor_ws != old_result:
                     monitor_ws = CloneWorkspace(InputWorkspace = monitor_ws,OutputWorkspace = mon_WsName)
             else:
                 result_ws = RenameWorkspace(InputWorkspace=result_ws,OutputWorkspace=new_ws_name)
                 if monitor_ws:
-                    monitor_ws=RenameWorkspace(InputWorkspace=monitor_ws,OutputWorkspace=mon_WsName)
-
+                    if monitor_ws== old_result:
+                        monitor_ws= result_ws;
+                    else:
+                        monitor_ws=RenameWorkspace(InputWorkspace=monitor_ws,OutputWorkspace=mon_WsName)
+                    #
+        
         self.setup_instrument_properties(result_ws)
-        if monitor_ws and propman.spectra_to_monitors_list:
-            for specID in propman.spectra_to_monitors_list:
-                self.copy_spectrum2monitors(result_ws,monitor_ws,specID);
+        # TODO: is it possible to have spectra_to_monitors_list defined and monitors loaded with workspace? then all below will fail miserably. 
+        spec_to_mon =  propman.spectra_to_monitors_list;
+        if monitor_ws and spec_to_mon :
+            for specID in spec_to_mon:
+                result_ws,monitor_ws=self.copy_spectrum2monitors(result_ws,monitor_ws,specID);
 
-        return result_ws
+        return (result_ws,monitor_ws)
 
     @staticmethod
     def copy_spectrum2monitors(wsName,monWSName,spectraID):
@@ -1244,7 +1253,7 @@ class DirectEnergyConversion(object):
         @param spectraID -- the ID of the spectra to copy.
 
          TODO: As extract single spectrum works only with WorkspaceIndex, we have to assume that WorkspaceIndex=spectraID-1;
-         this does not always correct, so it is better to change ExtractSingleSpectrum to accept workspaceID
+         this is not always correct, so it is better to change ExtractSingleSpectrum to accept workspaceID
        """
        if isinstance(wsName,str):
             ws = mtd[wsName];
@@ -1266,10 +1275,11 @@ class DirectEnergyConversion(object):
        Rebin(InputWorkspace='tmp_mon',OutputWorkspace='tmp_mon',Params=bins,PreserveEvents='0')
        # should be vice versa but Conjoin invalidate ws pointers and hopefully nothing could happen with workspace during conjoining
        AddSampleLog(Workspace=monWS,LogName=done_log_name,LogText=str(ws_index),LogType='Number');
-       ConjoinWorkspaces(InputWorkspace1=monWS,InputWorkspace2='tmp_mon')
+       monWS=ConjoinWorkspaces(InputWorkspace1=monWS,InputWorkspace2='tmp_mon')
 
        if 'tmp_mon' in mtd:
            DeleteWorkspace(WorkspaceName='tmp_mon');
+       return (ws,monWS);
 
     @property 
     def prop_man(self):
