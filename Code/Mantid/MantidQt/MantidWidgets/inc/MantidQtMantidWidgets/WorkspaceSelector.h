@@ -87,6 +87,9 @@ namespace MantidWidgets
     bool isValid() const;
     void refresh();
 
+signals:
+    void emptied();
+
   private:
     void handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf);
     void handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
