@@ -4,7 +4,10 @@
 #include "MantidDataHandling/SaveNXTomo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidNexus/NexusClasses.h"
+
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
+
 
 namespace Mantid
 {
