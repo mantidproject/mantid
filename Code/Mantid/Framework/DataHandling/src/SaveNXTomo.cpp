@@ -134,7 +134,6 @@ namespace Mantid
 
    /**
     * Creates the format for the output file if it doesn't exist
-    * @param resizeData should the data structures be resized rather than expanded
     * @returns the structured nexus file to write the data to
     *
     * @throw runtime_error Thrown if nexus file cannot be opened or created
@@ -396,7 +395,7 @@ namespace Mantid
           {
             nxFile.openData(prop->name());            
           }
-          catch(::NeXus::Exception)
+          catch(::NeXus::Exception &)
           {
             // Create the data entry if it doesn't exist yet, and open.
             std::vector<int64_t> infDim;
