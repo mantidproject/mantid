@@ -835,17 +835,10 @@ void MantidDockWidget::workspaceSelected()
     // Remove all existing save algorithms from list
     m_saveMenu->clear();
 
-    //TODO: this should be populated based on the workspace type
-    QAction *saveNexusAction = new QAction("Nexus", this);
-    saveNexusAction->setData(QVariant("SaveNexus"));
-    connect(saveNexusAction, SIGNAL(triggered()), this, SLOT(handleShowSaveAlgorithm()));
-
-    QAction *saveAsciiV1Action = new QAction("ASCII v1", this);
-    saveAsciiV1Action->setData(QVariant("SaveAscii.1"));
-    connect(saveAsciiV1Action, SIGNAL(triggered()), this, SLOT(handleShowSaveAlgorithm()));
-
-    m_saveMenu->addAction(saveNexusAction);
-    m_saveMenu->addAction(saveAsciiV1Action);
+    // Add some save algorithms
+    addSaveMenuOption("SaveNexus", "Nexus");
+    addSaveMenuOption("SaveAscii", "ASCII");
+    addSaveMenuOption("SaveAscii.1", "ASCII v1");
 
     // Set the button to show the menu
     m_saveButton->setMenu(m_saveMenu);
@@ -856,6 +849,29 @@ void MantidDockWidget::workspaceSelected()
   {
     m_mantidUI->enableSaveNexus(wsName);
   }
+}
+
+/**
+ * Adds an algorithm to the save menu.
+ *
+ * @param algorithmString Algorithm string in format ALGO_NAME.VERSION or ALGO_NAME
+ * @param menuEntryName Text to be shown in menu
+ */
+void MantidDockWidget::addSaveMenuOption(QString algorithmString, QString menuEntryName)
+{
+  // Default to algo string if no entry name given
+  if(menuEntryName.isEmpty())
+    menuEntryName = algorithmString;
+
+  // Create the action and add data
+  QAction *saveAction = new QAction(menuEntryName, this);
+  saveAction->setData(QVariant(algorithmString));
+
+  // Connect the tigger slot to show algorithm dialog
+  connect(saveAction, SIGNAL(triggered()), this, SLOT(handleShowSaveAlgorithm()));
+
+  // Add it to the menu
+  m_saveMenu->addAction(saveAction);
 }
 
 /**
