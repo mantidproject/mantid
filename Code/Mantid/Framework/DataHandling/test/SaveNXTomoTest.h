@@ -200,7 +200,7 @@ private:
     std::string groupName = input + boost::lexical_cast<std::string>(wsIndOffset);
     wsGroup->setTitle(groupName);
    
-    for(int i=0;i<wspaces.size();++i)
+    for(uint32_t i=0;i<static_cast<uint32_t>(wspaces.size());++i)
     {
       wspaces[i] = WorkspaceCreationHelper::Create2DWorkspaceBinned(axisSize*axisSize,1,1.0);  
       wspaces[i]->setTitle(groupName + boost::lexical_cast<std::string>(wsIndOffset+(i+1)));
