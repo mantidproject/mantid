@@ -941,8 +941,7 @@ void MantidDockWidget::handleShowSaveAlgorithm()
       if(!wsName.isEmpty())
         presets["InputWorkspace"] = wsName;
 
-      //TODO: need to set version
-      m_mantidUI->showAlgorithmDialog(algorithmName, presets);
+      m_mantidUI->showAlgorithmDialog(algorithmName, presets, NULL, version);
       return;
     }
   }
