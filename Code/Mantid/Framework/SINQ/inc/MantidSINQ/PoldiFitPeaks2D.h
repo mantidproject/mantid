@@ -15,11 +15,14 @@ namespace Mantid
 namespace Poldi
 {
 
-/** PoldiCalculateSpectrum2D
+/** PoldiFitPeaks2D
 
-    An Algorithm to calculate a POLDI 2D-spectrum from a given table containing POLDI
+    An Algorithm to fit a POLDI 2D-spectrum from a given table containing POLDI
     peak data. A MatrixWorkspace containing a proper POLDI instrument definition is required
     to determine output workspace dimensions etc.
+
+    In order to use the algorithm for calculating a theoretical spectrum,
+    the MaximumIterations property can be set to 0.
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 16/05/2014
@@ -45,11 +48,11 @@ namespace Poldi
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-class MANTID_SINQ_DLL PoldiCalculateSpectrum2D  : public API::Algorithm
+class MANTID_SINQ_DLL PoldiFitPeaks2D  : public API::Algorithm
 {
 public:
-    PoldiCalculateSpectrum2D();
-    virtual ~PoldiCalculateSpectrum2D();
+    PoldiFitPeaks2D();
+    virtual ~PoldiFitPeaks2D();
     
     virtual const std::string name() const;
     virtual int version() const;

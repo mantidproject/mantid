@@ -9,18 +9,20 @@
 Description
 -----------
 
-PoldiCalculateSpectrum2D is a preliminary algorithm that can be used to calculate 2D POLDI-data from a set of peaks. These must come in a table of special format, which may be generated for example by :ref:`algm-PoldiFitPeaks1D`. Furthermore, the algorithm needs a MatrixWorkspace containing raw POLDI data with correct dimensions and a proper instrument definition.
+PoldiFitPeaks2D is an algorithm that can be used to fit a set of individual peaks to 2D POLDI-data. These must come in a table of special format, which may be generated for example by :ref:`algm-PoldiFitPeaks1D`. Furthermore, the algorithm needs a MatrixWorkspace containing raw POLDI data with correct dimensions and a proper instrument definition.
 
 The 1D-peak intensities need to be integral intensities, so the peaks are integrated if necessary. If there is no profile information supplied in the peak table (:ref:`algm-PoldiFitPeaks1D` adds this automatically), it's possible to supply a profile function as parameter to this algorithm. If a profile function name is present in the peak table, the one supplied in the parameters has priority.
 
-At the moment all profiles are calculated independently, using Gaussian functions. In future versions of the algorithm this will be much more flexible, including background functions.
+At the moment all profiles are calculated independently, using Gaussian functions. In future versions of the algorithm this will be much more flexible.
+
+PoldiFitPeaks2D can also be used to calculate a theoretical 2D pattern from a set of peaks by limiting the iterations to 0.
 
 Usage
 -----
 
 .. include:: ../usagedata-note.txt
 
-PoldiAutoCorrelation operates on a MatrixWorkspace with a valid POLDI instrument definition. The following short example demonstrates how to use the algorithm, processing data obtained from recording the spectrum of a Silicon standard material (powder).
+PoldiFitPeaks2D operates on a MatrixWorkspace with a valid POLDI instrument definition. The following short example demonstrates how to use the algorithm, processing data obtained from recording the spectrum of a Silicon standard material (powder) and calculating a theoretical 2D-spectrum.
 
 .. testcode:: ExSilicon2D
 
@@ -42,7 +44,7 @@ PoldiAutoCorrelation operates on a MatrixWorkspace with a valid POLDI instrument
                     FitPlotsWorkspace = "fit_plots_6904")
                     
     # Calculate a 2D spectrum using the refined peaks
-    PoldiCalculateSpectrum2D(InputWorkspace=truncated_6904,
+    PoldiFitPeaks2D(InputWorkspace=truncated_6904,
                              PoldiPeakWorkspace="peaks_refined_6904",
                              OutputWorkspace="simulated_6904")
     
@@ -77,7 +79,7 @@ In general, there is a background in POLDI data that depends on :math:`2\theta`.
                     FitPlotsWorkspace = "fit_plots_6904")
 
     # Calculate a 2D spectrum using the refined peaks - with background linear in 2theta
-    PoldiCalculateSpectrum2D(InputWorkspace=truncated_6904,
+    PoldiFitPeaks2D(InputWorkspace=truncated_6904,
                              PoldiPeakWorkspace="peaks_refined_6904",
                              OutputWorkspace="simulated_6904",
                              LinearBackgroundParameter=0.01)

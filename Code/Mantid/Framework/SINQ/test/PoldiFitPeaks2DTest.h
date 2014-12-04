@@ -6,7 +6,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 
-#include "MantidSINQ/PoldiCalculateSpectrum2D.h"
+#include "MantidSINQ/PoldiFitPeaks2D.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -14,15 +14,15 @@ using namespace Mantid::Poldi;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-class PoldiCalculateSpectrum2DTest : public CxxTest::TestSuite
+class PoldiFitPeaks2DTest : public CxxTest::TestSuite
 {
 public:
     // This pair of boilerplate methods prevent the suite being created statically
     // This means the constructor isn't called when running other tests
-    static PoldiCalculateSpectrum2DTest *createSuite() { return new PoldiCalculateSpectrum2DTest(); }
-    static void destroySuite( PoldiCalculateSpectrum2DTest *suite ) { delete suite; }
+    static PoldiFitPeaks2DTest *createSuite() { return new PoldiFitPeaks2DTest(); }
+    static void destroySuite( PoldiFitPeaks2DTest *suite ) { delete suite; }
 
-    PoldiCalculateSpectrum2DTest()
+    PoldiFitPeaks2DTest()
     {
         FrameworkManager::Instance();
 
@@ -32,7 +32,7 @@ public:
 
     void testSetTimeTransformer()
     {
-        TestablePoldiCalculateSpectrum2D spectrumCalculator;
+        TestablePoldiFitPeaks2D spectrumCalculator;
         spectrumCalculator.setTimeTransformer(m_timeTransformer);
 
         TS_ASSERT_EQUALS(spectrumCalculator.m_timeTransformer, m_timeTransformer);
@@ -40,7 +40,7 @@ public:
 
     void testSetTimeTransformerFromInstrument()
     {
-        TestablePoldiCalculateSpectrum2D spectrumCalculator;
+        TestablePoldiFitPeaks2D spectrumCalculator;
         spectrumCalculator.setTimeTransformerFromInstrument(m_instrument);
 
         TS_ASSERT(spectrumCalculator.m_timeTransformer);
@@ -48,7 +48,7 @@ public:
 
     void testSetDeltaT()
     {
-        TestablePoldiCalculateSpectrum2D spectrumCalculator;
+        TestablePoldiFitPeaks2D spectrumCalculator;
         TS_ASSERT_THROWS_NOTHING(spectrumCalculator.setDeltaT(2.0));
         TS_ASSERT_EQUALS(spectrumCalculator.m_deltaT, 2.0);
 
@@ -63,7 +63,7 @@ public:
             ws->dataX(0)[i] = static_cast<double>(i);
         }
 
-        TestablePoldiCalculateSpectrum2D spectrumCalculator;
+        TestablePoldiFitPeaks2D spectrumCalculator;
         spectrumCalculator.setDeltaTFromWorkspace(ws);
         TS_ASSERT_EQUALS(spectrumCalculator.m_deltaT, 1.0);
 
@@ -73,7 +73,7 @@ public:
 
     void testIsValidDeltaT()
     {
-        TestablePoldiCalculateSpectrum2D spectrumCalculator;
+        TestablePoldiFitPeaks2D spectrumCalculator;
         TS_ASSERT_EQUALS(spectrumCalculator.isValidDeltaT(1.0), true);
         TS_ASSERT_EQUALS(spectrumCalculator.isValidDeltaT(0.0), false);
         TS_ASSERT_EQUALS(spectrumCalculator.isValidDeltaT(-1.0), false);
@@ -81,7 +81,7 @@ public:
 
     void testGetPeakCollection()
     {
-        TestablePoldiCalculateSpectrum2D spectrumCalculator;
+        TestablePoldiFitPeaks2D spectrumCalculator;
 
         TableWorkspace_sptr peakTable = PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace();
         TS_ASSERT_THROWS_NOTHING(spectrumCalculator.getPeakCollection(peakTable));
@@ -94,7 +94,7 @@ public:
     {
         PoldiPeakCollection_sptr testPeaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
 
-        TestablePoldiCalculateSpectrum2D spectrumCalculator;
+        TestablePoldiFitPeaks2D spectrumCalculator;
         // deltaT is not set, so this must fail
         TS_ASSERT_THROWS(spectrumCalculator.getIntegratedPeakCollection(testPeaks), std::invalid_argument);
         spectrumCalculator.setDeltaT(3.0);
@@ -138,7 +138,7 @@ public:
 
     void testGetNormalizedPeakCollection()
     {
-        TestablePoldiCalculateSpectrum2D spectrumCalculator;
+        TestablePoldiFitPeaks2D spectrumCalculator;
 
         // first, test the failing cases
         PoldiPeakCollection_sptr invalidPeakCollection;
@@ -162,7 +162,7 @@ public:
 
     void testGetCountPeakCollection()
     {
-        TestablePoldiCalculateSpectrum2D spectrumCalculator;
+        TestablePoldiFitPeaks2D spectrumCalculator;
 
         // first, test the failing cases
         PoldiPeakCollection_sptr invalidPeakCollection;
@@ -187,7 +187,7 @@ public:
 
     void testGetFunctionFromPeakCollection()
     {
-        TestablePoldiCalculateSpectrum2D spectrumCalculator;
+        TestablePoldiFitPeaks2D spectrumCalculator;
         PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
 
         boost::shared_ptr<Poldi2DFunction> poldi2DFunction = spectrumCalculator.getFunctionFromPeakCollection(peaks);
@@ -204,7 +204,7 @@ public:
 
     void testGetPeakCollectionFromFunction()
     {
-        TestablePoldiCalculateSpectrum2D spectrumCalculator;
+        TestablePoldiFitPeaks2D spectrumCalculator;
         PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
 
         IFunction_sptr poldi2DFunction = spectrumCalculator.getFunctionFromPeakCollection(peaks);
@@ -224,7 +224,7 @@ public:
 
     void testAddBackgroundFunctions()
     {
-        TestablePoldiCalculateSpectrum2D spectrumCalculator;
+        TestablePoldiFitPeaks2D spectrumCalculator;
         spectrumCalculator.initialize();
 
         boost::shared_ptr<Poldi2DFunction> funDefault(new Poldi2DFunction);
@@ -274,12 +274,12 @@ private:
         }
     }
 
-    class TestablePoldiCalculateSpectrum2D : public PoldiCalculateSpectrum2D
+    class TestablePoldiFitPeaks2D : public PoldiFitPeaks2D
     {
-        friend class PoldiCalculateSpectrum2DTest;
+        friend class PoldiFitPeaks2DTest;
     public:
-        TestablePoldiCalculateSpectrum2D() : PoldiCalculateSpectrum2D() { }
-        ~TestablePoldiCalculateSpectrum2D() { }
+        TestablePoldiFitPeaks2D() : PoldiFitPeaks2D() { }
+        ~TestablePoldiFitPeaks2D() { }
     };
 
 };
