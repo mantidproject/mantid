@@ -57,7 +57,8 @@ public:
 
 public slots:
   void clickedWorkspace(QTreeWidgetItem*, int);
-  void saveWorkspaces();
+  void saveWorkspaceGroup();
+  void handleShowSaveAlgorithm();
   void deleteWorkspaces();
   void renameWorkspace();
   void populateChildData(QTreeWidgetItem* item);
@@ -120,7 +121,7 @@ private:
 
   QPushButton *m_loadButton;
   QPushButton *m_saveButton;
-  QMenu *m_loadMenu, *m_saveToProgram, *m_sortMenu;
+  QMenu *m_loadMenu, *m_saveToProgram, *m_sortMenu, *m_saveMenu;
   QPushButton *m_deleteButton;
   QPushButton *m_groupButton;
   QPushButton *m_sortButton;

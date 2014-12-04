@@ -85,10 +85,10 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   layout->addWidget(m_workspaceFilter);
   layout->addWidget(m_tree);
 
-
   m_loadMenu = new QMenu(this);
+  m_saveMenu = new QMenu(this);
 
-  QAction* loadFileAction = new QAction("File",this);
+  QAction *loadFileAction = new QAction("File",this);
   QAction *liveDataAction = new QAction("Live Data",this);
   m_loadMapper = new QSignalMapper(this);
   m_loadMapper->setMapping(liveDataAction,"StartLiveData");
@@ -109,7 +109,6 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   createSortMenuActions();
   createWorkspaceMenuActions();
 
-  connect(m_saveButton,SIGNAL(clicked()),this,SLOT(saveWorkspaces()));
   connect(m_deleteButton,SIGNAL(clicked()),this,SLOT(deleteWorkspaces()));
   connect(m_tree,SIGNAL(itemClicked(QTreeWidgetItem*, int)),this,SLOT(clickedWorkspace(QTreeWidgetItem*, int)));
   connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(workspaceSelected()));
@@ -819,6 +818,39 @@ void MantidDockWidget::workspaceSelected()
 { 
   QList<QTreeWidgetItem*> selectedItems=m_tree->selectedItems();
   if(selectedItems.isEmpty()) return;
+
+  // If there are multiple workspaces selected group and save as Nexus
+  if(selectedItems.length() > 1)
+  {
+    connect(m_saveButton, SIGNAL(clicked()), this, SLOT(saveWorkspaceGroup()));
+
+    // Don't display as a group
+    m_saveButton->setMenu(NULL);
+  }
+  else
+  {
+    // Don't run the save group function when clicked
+    disconnect(m_saveButton, SIGNAL(clicked()), this, SLOT(saveWorkspaceGroup()));
+
+    // Remove all existing save algorithms from list
+    m_saveMenu->clear();
+
+    //TODO: this should be populated based on the workspace type
+    QAction *saveNexusAction = new QAction("Nexus", this);
+    saveNexusAction->setData(QVariant("SaveNexus"));
+    connect(saveNexusAction, SIGNAL(triggered()), this, SLOT(handleShowSaveAlgorithm()));
+
+    QAction *saveAsciiV1Action = new QAction("ASCII v1", this);
+    saveAsciiV1Action->setData(QVariant("SaveAscii.1"));
+    connect(saveAsciiV1Action, SIGNAL(triggered()), this, SLOT(handleShowSaveAlgorithm()));
+
+    m_saveMenu->addAction(saveNexusAction);
+    m_saveMenu->addAction(saveAsciiV1Action);
+
+    // Set the button to show the menu
+    m_saveButton->setMenu(m_saveMenu);
+  }
+
   QString wsName=selectedItems[0]->text(0);
   if(m_ads.doesExist(wsName.toStdString()))
   {
@@ -829,23 +861,15 @@ void MantidDockWidget::workspaceSelected()
 /**
  * Save all selected workspaces
  */
-void MantidDockWidget::saveWorkspaces()
+void MantidDockWidget::saveWorkspaceGroup()
 {
   QList<QTreeWidgetItem*> items = m_tree->selectedItems();
-  if(items.empty())
+  if(items.size() < 2)
     return;
 
-  // Call same save asction as popup menu for a single workspace
-  if(items.size() == 1)
-  {
-    m_mantidUI->saveNexusWorkspace();
-  }
-  else
-  {
-    m_saveFolderDialog->setWindowTitle("Select save folder");
-    m_saveFolderDialog->setLabelText(QFileDialog::Accept, "Select");
-    m_saveFolderDialog->open(this, SLOT(saveWorkspacesToFolder(const QString &)));
-  }
+  m_saveFolderDialog->setWindowTitle("Select save folder");
+  m_saveFolderDialog->setLabelText(QFileDialog::Accept, "Select");
+  m_saveFolderDialog->open(this, SLOT(saveWorkspacesToFolder(const QString &)));
 }
 
 /**
@@ -878,6 +902,53 @@ void MantidDockWidget::saveWorkspacesToFolder(const QString &folder)
         << ": " << rte.what() << std::endl;
     }
   }
+}
+
+/**
+ * Handles a save algorithm being triggered by the Save menu.
+ *
+ * To select a specific algorithm add a QString to the data of the QAction
+ * in the form ALGORITHM_NAME.VERSION or just ALGORITHM_NAME to use the
+ * most recent version.
+ */
+void MantidDockWidget::handleShowSaveAlgorithm()
+{
+  QAction *sendingAction = dynamic_cast<QAction *>(sender());
+
+  if(sendingAction)
+  {
+    QString wsName = getSelectedWorkspaceName();
+    QVariant data = sendingAction->data();
+    QString algorithmName;
+    int version = -1;
+
+    if(data.canConvert<QString>())
+    {
+      QStringList splitData = data.toString().split(".");
+      switch(splitData.length())
+      {
+        case 2:
+          version = splitData[1].toInt();
+        case 1:
+          algorithmName = splitData[0];
+          break;
+        default:
+          m_mantidUI->saveNexusWorkspace();
+          return;
+      }
+
+      QHash<QString,QString> presets;
+      if(!wsName.isEmpty())
+        presets["InputWorkspace"] = wsName;
+
+      //TODO: need to set version
+      m_mantidUI->showAlgorithmDialog(algorithmName, presets);
+      return;
+    }
+  }
+
+  // If we can't get the type of algorithm this should be we can always fall back on Nexus
+  m_mantidUI->saveNexusWorkspace();
 }
 
 /**
