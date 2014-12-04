@@ -125,7 +125,8 @@ class LoadVesuvio(PythonAlgorithm):
         except ValueError:
             run_str = runs[0]
 
-        LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=self._spectra,
+        all_spectra = [item for sublist in self._spectra for item in sublist]
+        LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spectra,
                 EnableLogging=_LOGGING_)
         raw_group = mtd[SUMMED_WS]
         self._nperiods = raw_group.size()
@@ -135,7 +136,7 @@ class LoadVesuvio(PythonAlgorithm):
         self.foil_out = foil_out
 
         foil_map = SpectraToFoilPeriodMap(self._nperiods)
-        for ws_index, spectrum_no in enumerate(self._spectra):
+        for ws_index, spectrum_no in enumerate(all_spectra):
             self._set_spectra_type(spectrum_no)
             foil_out_periods, foil_thin_periods, foil_thick_periods = self._get_foil_periods()
 
