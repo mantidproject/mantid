@@ -347,12 +347,13 @@ class DirectEnergyConversion(object):
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
 
         # Special load monitor stuff.
-        if (self.instr_name == "CNCS" or self.instr_name == "HYSPEC"):
-            self.fix_ei = True
+        propman = self.prop_man;
+        if (propman.instr_name == "CNCS" or propman.instr_name == "HYSPEC"):
+            propman.fix_ei = True
             ei_value = ei_guess
-            if (self.instr_name == "HYSPEC"):
+            if (propman.instr_name == "HYSPEC"):
                 Tzero=4.0 + 107.0 / (1+math.pow((ei_value/31.0),3.0))
-                self.log("Determined T0 of %s for HYSPEC" % str(Tzero))
+                propman.log("Determined T0 of %s for HYSPEC" % str(Tzero))
             if (Tzero is None):
                 tzero = (0.1982*(1+ei_value)**(-0.84098))*1000.0
             else:
@@ -360,11 +361,11 @@ class DirectEnergyConversion(object):
             # apply T0 shift
             ScaleX(InputWorkspace=data_ws,OutputWorkspace=result_name,Operation="Add",Factor=-tzero)
             mon1_peak = 0.0
-        elif (self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
+        elif (propman.instr_name == "ARCS" or propman.instr_name == "SEQUOIA"):
             if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename'].value
             else: raise RuntimeError('Cannot load monitors for event reduction. Unable to determine Filename from mono workspace, it should have been added as a run log.')
 
-            self.log("mono_run = %s (%s)" % (mono_run,type(mono_run)),'debug')
+            propman.log("mono_run = %s (%s)" % (mono_run,type(mono_run)),'debug')
 
             if mono_run.endswith("_event.nxs"):
                 monitor_ws=LoadNexusMonitors(Filename=mono_run)
@@ -373,10 +374,10 @@ class DirectEnergyConversion(object):
                 monitor_ws=LoadPreNexusMonitors(RunInfoFilename=InfoFilename)
 
             argi = {};
-            argi['Monitor1Spec']=int(self.ei_mon_spectra[0]);
-            argi['Monitor2Spec']=int(self.ei_mon_spectra[1]);
+            argi['Monitor1Spec']=int(propman.ei_mon_spectra[0]);
+            argi['Monitor2Spec']=int(propman.ei_mon_spectra[1]);
             argi['EnergyEstimate']=ei_guess;
-            argi['FixEi'] =self.fix_ei
+            argi['FixEi'] =propman.fix_ei
             if hasattr(self, 'ei_mon_peak_search_range'):
                 argi['PeakSearchRange']=self.ei_mon_peak_search_range;
 
@@ -384,7 +385,7 @@ class DirectEnergyConversion(object):
                 ei_calc,firstmon_peak,firstmon_index,TzeroCalculated = \
                     GetEi(InputWorkspace=monitor_ws,**argi)
             except:
-                self.log("Error in GetEi. Using entered values.")
+                propman.log("Error in GetEi. Using entered values.")
                 #monitor_ws.getRun()['Ei'] = ei_value
                 ei_value = ei_guess
                 AddSampleLog(Workspace=monitor_ws,LogName= 'Ei',LogText= ei_value,LogType= "Number")
@@ -398,7 +399,7 @@ class DirectEnergyConversion(object):
                 tzero = TzeroCalculated
 
             # If we are fixing, then use the guess if given
-            if (self.fix_ei):
+            if (propman.fix_ei):
                 ei_value = ei_guess
                 # If a Tzero has been entered, use it, if we are fixing.
                 if (Tzero is not None):
@@ -412,37 +413,36 @@ class DirectEnergyConversion(object):
             mon1_peak = 0.0
             # apply T0 shift
             ScaleX(InputWorkspace=data_ws,OutputWorkspace= result_name,Operation="Add",Factor=-tzero)
-            self.incident_energy = ei_value
         else:
             # Do ISIS stuff for Ei
             # Both are these should be run properties really
             ei_value, mon1_peak = self.get_ei(monitor_ws, result_name, ei_guess)
-            self.incident_energy = ei_value
+        self.prop_man.incident_energy = ei_value
 
         # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in CalculateFlatBackground and normalisation
         bin_offset = -mon1_peak
 
         # For event mode, we are going to histogram in energy first, then go back to TOF
-        if self.check_background== True:
+        if propman.check_background== True:
            # Extract the time range for the background determination before we throw it away
-           background_bins = "%s,%s,%s" % (self.bkgd_range[0] + bin_offset, (self.bkgd_range[1]-self.bkgd_range[0]), self.bkgd_range[1] + bin_offset)
+           background_bins = "%s,%s,%s" % (propman.bkgd_range[0] + bin_offset, (propman.bkgd_range[1]-propman.bkgd_range[0]), propman.bkgd_range[1] + bin_offset)
            Rebin(InputWorkspace=result_name,OutputWorkspace= "background_origin_ws",Params=background_bins)
 
         # Convert to Et
         ConvertUnits(InputWorkspace=result_name,OutputWorkspace= "_tmp_energy_ws", Target="DeltaE",EMode="Direct", EFixed=ei_value)
         RenameWorkspace(InputWorkspace="_tmp_energy_ws",OutputWorkspace= result_name)
         # Histogram
-        Rebin(InputWorkspace=result_name,OutputWorkspace= "_tmp_rebin_ws",Params= self.energy_bins, PreserveEvents=False)
+        Rebin(InputWorkspace=result_name,OutputWorkspace= "_tmp_rebin_ws",Params= propman.energy_bins, PreserveEvents=False)
         RenameWorkspace(InputWorkspace="_tmp_rebin_ws",OutputWorkspace= result_name)
         # Convert back to TOF
         ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="TOF",EMode="Direct", EFixed=ei_value)
 
-        if self.check_background == True:
+        if propman.check_background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
             ConvertToDistribution(Workspace=result_name)
 
             CalculateFlatBackground(InputWorkspace="background_origin_ws",OutputWorkspace= "background_ws",
-                               StartX= self.bkgd_range[0] + bin_offset,EndX= self.bkgd_range[1] + bin_offset,
+                               StartX= propman.bkgd_range[0] + bin_offset,EndX= propman.bkgd_range[1] + bin_offset,
                                WorkspaceIndexList= '',Mode= 'Mean',OutputMode= 'Return Background')
             # Delete the raw data background region workspace
             DeleteWorkspace("background_origin_ws")
@@ -457,7 +457,7 @@ class DirectEnergyConversion(object):
 
         # Normalize using the chosen method
         # This should be done as soon as possible after loading and usually happens at diag. Here just in case if diag was bypassed
-        self.normalise(mtd[result_name], result_name, self.normalise_method, range_offset=bin_offset)
+        self.normalise(mtd[result_name], result_name, propman.normalise_method, range_offset=bin_offset)
 
 
 
@@ -465,14 +465,14 @@ class DirectEnergyConversion(object):
         #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
         # But this one passes...
         ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
-        self.log("_do_mono: finished ConvertUnits for : "+result_name)
+        propman.log("_do_mono: finished ConvertUnits for : "+result_name)
 
 
 
-        if not self.energy_bins is None:
-            Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= self.energy_bins,PreserveEvents=False)
+        if propman.energy_bins :
+            Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= propman.energy_bins,PreserveEvents=False)
 
-        if self.apply_detector_eff:
+        if propman.apply_detector_eff:
            # Need to be in lambda for detector efficiency correction
             ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="Wavelength", EMode="Direct", EFixed=ei_value)
             He3TubeEfficiency(InputWorkspace=result_name,OutputWorkspace=result_name)
