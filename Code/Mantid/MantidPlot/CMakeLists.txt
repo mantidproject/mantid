@@ -960,16 +960,10 @@ set ( MANTIDPLOT_TEST_PY_FILES
         MantidPlot2DPlotTest.py
         MantidPlotProxiesTest.py
 	MantidPlotPythonImportTest.py
-<<<<<<< HEAD
-	MantidPlotFoldersTest.py
-	MantidPlotMdiSubWindowTest.py
-	MantidPlotTiledWindowTest.py
-=======
 	MantidPlotFoldersTest.py
 	MantidPlotMdiSubWindowTest.py
 	MantidPlotTiledWindowTest.py
         MantidPlotInputArgsCheck.py
->>>>>>> master
 )
 
 if ( 0 )
