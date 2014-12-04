@@ -252,7 +252,7 @@ public:
           for(size_t j = 0; j < x.size(); ++j) {
               x[j] = static_cast<double>(j);
               y[j] = static_cast<double>(i) + slope * x[j];
-              e[j] = 0.1 * y[j];
+              e[j] = 0.0001 * y[j];
           }
       }
 
@@ -294,7 +294,7 @@ public:
           for(size_t j = 0; j < x.size(); ++j) {
               x[j] = static_cast<double>(j);
               y[j] = static_cast<double>(i) + slopes[i % slopes.size()] * x[j];
-              e[j] = std::max(1.0, sqrt(y[j]));
+              e[j] = 0.001 * std::max(1.0, sqrt(y[j]));
           }
       }
 
