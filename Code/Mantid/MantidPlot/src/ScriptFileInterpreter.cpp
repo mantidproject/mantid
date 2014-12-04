@@ -252,7 +252,8 @@ void ScriptFileInterpreter::toggleComment(bool addComment)
 // using an older version(2.4.6) of the library missing the method, and too close to code freeze to update.
 inline void ScriptFileInterpreter::replaceSelectedText(const ScriptEditor *editor, const QString &text)
 {
-  const char *b = (( editor->SCI_GETCODEPAGE == CP_UTF8) ? text.utf8().constData() : text.latin1());    
+  int UTF8_CodePage = 65001; 
+  const char *b = (( editor->SCI_GETCODEPAGE == UTF8_CodePage) ? text.utf8().constData() : text.latin1());    
   editor->SendScintilla( editor->SCI_REPLACESEL, b );
 }
 
