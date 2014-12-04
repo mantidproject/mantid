@@ -24,7 +24,8 @@ public:
   {
     inputWS = "saveNXTomo_test";
     outputFile = "SaveNXTomoTestFile.nxs"; 
-    saver = FrameworkManager::Instance().createAlgorithm("SaveNXTomo");
+    axisSize = 50;
+    saver = FrameworkManager::Instance().createAlgorithm("SaveNXTomo");  
   }    
 
   void testName()
@@ -179,12 +180,12 @@ private:
   Workspace_sptr makeWorkspaceSingle(const std::string &input)
   {
     // Create a single workspace    
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(AXIS_SIZE*AXIS_SIZE,1,1.0);     
+    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(axisSize*axisSize,1,1.0);     
     ws->setTitle(input);
     
     // Add axis sizes
-    ws->mutableRun().addLogData(new PropertyWithValue<int>("Axis1", AXIS_SIZE));  
-    ws->mutableRun().addLogData(new PropertyWithValue<int>("Axis2", AXIS_SIZE));  
+    ws->mutableRun().addLogData(new PropertyWithValue<int>("Axis1", axisSize));  
+    ws->mutableRun().addLogData(new PropertyWithValue<int>("Axis2", axisSize));  
     
     // Add log values
     ws->mutableRun().addLogData(new PropertyWithValue<double>("Rotation", 1 * 5));    
@@ -201,10 +202,10 @@ private:
    
     for(int i=0;i<wspaces.size();++i)
     {
-      wspaces[i] = WorkspaceCreationHelper::Create2DWorkspaceBinned(AXIS_SIZE*AXIS_SIZE,1,1.0);  
+      wspaces[i] = WorkspaceCreationHelper::Create2DWorkspaceBinned(axisSize*axisSize,1,1.0);  
       wspaces[i]->setTitle(groupName + boost::lexical_cast<std::string>(wsIndOffset+(i+1)));
-      wspaces[i]->mutableRun().addLogData(new PropertyWithValue<int>("Axis1", AXIS_SIZE));  
-      wspaces[i]->mutableRun().addLogData(new PropertyWithValue<int>("Axis2", AXIS_SIZE));  
+      wspaces[i]->mutableRun().addLogData(new PropertyWithValue<int>("Axis1", axisSize));  
+      wspaces[i]->mutableRun().addLogData(new PropertyWithValue<int>("Axis2", axisSize));  
       wspaces[i]->mutableRun().addLogData(new PropertyWithValue<double>("Rotation", ((i+1) + wsIndOffset) * 5));
       wsGroup->addWorkspace(wspaces[i]);
     }    
@@ -269,8 +270,8 @@ private:
       nxFile.openPath("/entry1/tomo_entry/data");
       nxFile.openData("data");
         TS_ASSERT_EQUALS( nxFile.getInfo().dims[0], wsCount );
-        TS_ASSERT_EQUALS( nxFile.getInfo().dims[1], AXIS_SIZE );
-        TS_ASSERT_EQUALS( nxFile.getInfo().dims[2], AXIS_SIZE );
+        TS_ASSERT_EQUALS( nxFile.getInfo().dims[1], axisSize );
+        TS_ASSERT_EQUALS( nxFile.getInfo().dims[2], axisSize );
       nxFile.closeData();
       nxFile.openData("rotation_angle");
         TS_ASSERT_EQUALS( nxFile.getInfo().dims[0], wsCount );
@@ -338,7 +339,7 @@ private:
   IAlgorithm* saver;
   std::string outputFile;
   std::string inputWS;
-  static const int AXIS_SIZE = 50;
+  int axisSize;
 };
 
 #endif /*SAVENXTOMOTEST_H_*/
