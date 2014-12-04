@@ -731,42 +731,6 @@ class DirectPropertyManager(DirectReductionProperties):
             self.log('*** one2one map selected',log_level)
       self.log("****************************************************************",log_level);
 
-    def export_changed_values(self,FileName='reduce_vars.py'):
-        """ Method to write changed simple and advanced properties into dictionary, to process by 
-            web reduction interface
-        """
-        changed_Keys= self.getChangedProperties();
-        advancedKeys= self.getChangedAdvancedProperties();
-       
-        f=open(FileName,'w')
-        f.write("standard_vars = {\n")
-        str_wrapper = '         '
-        for key in changed_Keys:
-            if not key in advancedKeys:
-                  val = getattr(self,key);
-                  if isinstance(val,str):
-                      row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
-                  else:
-                      row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
-                  f.write(row);
-                  str_wrapper=',\n         '
-        f.write("}\nadvanced_vars={\n")
-
-        str_wrapper='         '
-        for key in advancedKeys:
-                  val = getattr(self,key);
-                  if isinstance(val,str):
-                      row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
-                  else:
-                      row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
-                  f.write(row);
-                  str_wrapper=',\n        '
-        f.write("}\n")
-        f.close();
-
-
-
-
 
     #def help(self,keyword=None) :
     #    """function returns help on reduction parameters.
