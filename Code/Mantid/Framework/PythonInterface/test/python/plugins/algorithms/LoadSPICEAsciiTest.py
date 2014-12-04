@@ -18,7 +18,7 @@ class LoadSPICEAsciiTest(unittest.TestCase):
             Filename = "HB2A_exp0231_scan0001.dat", 
 	    OutputWorkspace = "HB2A_0231_0001_Data", 
 	    RunInfoWorkspace = "HB2A_0231_Info",
-            IgnoreUnlistedLogNames = False)
+            IgnoreUnlistedLogs = False)
 
         # Validate
         self.assertTrue(alg_test.isExecuted())
@@ -63,12 +63,12 @@ class LoadSPICEAsciiTest(unittest.TestCase):
         # Test algorithm
         alg_test = run_algorithm("LoadSPICEAscii",
             Filename = "HB2A_exp0231_scan0001.dat", 
-            StringSampleLogNames = "a, b",
+            StringSampleLogNames = "a,b",
             IntSampleLogNames = "",
             FloatSampleLogNames = "", 
 	    OutputWorkspace = "HB2A_0231_0001_Data", 
 	    RunInfoWorkspace = "HB2A_0231_Info",
-            IgnoreUnlistedLogNames = True)
+            IgnoreUnlistedLogs = True)
 
         # Validate
         self.assertTrue(alg_test.isExecuted())

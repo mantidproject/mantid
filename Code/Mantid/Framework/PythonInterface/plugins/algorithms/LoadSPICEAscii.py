@@ -29,10 +29,10 @@ class LoadSPICEAscii(PythonAlgorithm):
         strspckeyprop = StringArrayProperty("StringSampleLogNames", values=[], direction=Direction.Input)
         self.declareProperty(strspckeyprop, "List of log names that will be imported as string property.")
 
-        intspckeyprop = IntArrayProperty("IntSampleLogNames", values=[], direction=Direction.Input)
+        intspckeyprop = StringArrayProperty("IntSampleLogNames", values=[], direction=Direction.Input)
         self.declareProperty(intspckeyprop, "List of log names that will be imported as integer property.")
 
-        floatspckeyprop = FloatArrayProperty("FloatSampleLogNames", values=[], direction=Direction.Input)
+        floatspckeyprop = StringArrayProperty("FloatSampleLogNames", values=[], direction=Direction.Input)
         self.declareProperty(floatspckeyprop, "List of log names that will be imported as float property.")
 
         self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),
@@ -53,9 +53,11 @@ class LoadSPICEAscii(PythonAlgorithm):
         # Input
         filename = self.getPropertyValue("Filename")
 
-        strlognames = self.getPropertyValue("StringSampleLogNames")
-        intlognames = self.getPropertyValue("IntSampleLogNames")
-        floatlognames = self.getPropertyValue("FloatSampleLogNames")
+        strlognames = self.getProperty("StringSampleLogNames").value
+        intlognames = self.getProperty("IntSampleLogNames").value
+        floatlognames = self.getProperty("FloatSampleLogNames").value
+	
+	print "floatlognames : ", floatlognames
 
         valid = self.validateLogNamesType(floatlognames, intlognames, strlognames)
         if valid is False:
@@ -68,7 +70,8 @@ class LoadSPICEAscii(PythonAlgorithm):
 	outws = self.createDataWS(datalist, titles)
 
 	# Build run information workspace
-	runinfows = self.createRunInfoWS(runinfodict, floatlognames, intloagnames, strlognames)
+        ignoreunlisted = self.getProperty("IgnoreUnlistedLogs").value
+	runinfows = self.createRunInfoWS(runinfodict, floatlognames, intlognames, strlognames, ignoreunlisted)
 
 	# Set properties
         self.setProperty("OutputWorkspace", outws)
@@ -164,23 +167,52 @@ class LoadSPICEAscii(PythonAlgorithm):
 	""" Create run information workspace
 	"""
         # Create an empty workspace
-        matrixws = api.CreateWorkspace(DataX=[1,2], DataY=[1], DataE=[1], NSpce=1, VerticalAxisUnit="SpectraNumber")
+        matrixws = api.CreateWorkspace(DataX=[1,2], DataY=[1], DataE=[1], NSpec=1, VerticalAxisUnit="SpectraNumber")
 
         run = matrixws.getRun()
-        
+	
+	wbuf = "Float log names: "
+	for logname in floatlognamelist:
+		wbuf += "'%s', " % (logname)
+	self.log().notice(wbuf)
+	        
         for title in runinfodict.keys():
             tmpvalue = runinfodict[title]
+	    self.log().notice("Title = '%s'" % (title))
+	    
             if title in floatlognamelist:
-                tmpproperty = FloatTimeSeriesProperty(title)
-                tmpproperty.addValue(runnend, float(tmpvalue))
-            elif title in intlognamelist: 
-                tmpproperty = IntTimeSeriesProperty(title)
-                tmpproperty.addValue(runnend, int(tmpvalue))
-            elif title in strlognamelist or ignoreunlisted is False:
-                tmpproperty = StringProperty(title)
-                tmpproperty.addValue(runnend, tmpvalue)
+                # Float log: consider error bar
+                adderrorvalue = False
+                if tmpvalue.count("+/-") == 1:
+                    terms = tmpvalue.split("+/-")
+                    tmpvalue = terms[0]
+                    errvalue = terms[1]
+                    adderrorvalue = True
 
-            run.addProperty(title, tmpproperty, False)
+                api.AddSampleLog(Workspace=matrixws, 
+                        LogName=title,
+                        LogText=tmpvalue,
+                        LogType='Number')
+			
+		if adderrorvalue is True:
+                    api.AddSampleLog(Workspace=matrixws, 
+                          LogName=title+".error",
+                          LogText=errvalue,
+                          LogType='Number')
+
+            elif title in intlognamelist: 
+                # Integer log
+                api.AddSampleLog(Workspace=matrixws, 
+                        LogName=title,
+                        LogText=tmpvalue, 
+                        LogType='Number')
+
+            elif (title in strlognamelist) or (ignoreunlisted is False):
+                api.AddSampleLog(Workspace=matrixws, 
+                        LogName=title,
+                        LogText=tmpvalue, 
+                        LogType='String')
+
         # ENDIF
 
 	return matrixws
@@ -195,7 +227,8 @@ class LoadSPICEAscii(PythonAlgorithm):
         logsets.append(set(strlognames))
 
         for (i, j) in [(0, 1), (0, 2), (1, 2)]:
-            if len(logsets[i] - logsets[j]) > 0 or len(logsets[j] - logsets[i]) > 0:
+            if len( logsets[i].intersection(logsets[j]) ) > 0:
+                self.log().error("logsets[%d] = %s, logsets[%d] = %s" % (i, str(logsets[i]), j, str(logsets[j])))
                 return False
 
         return True
