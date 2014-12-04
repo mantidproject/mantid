@@ -935,11 +935,12 @@ void MantidDockWidget::handleShowSaveAlgorithm()
   {
     QString wsName = getSelectedWorkspaceName();
     QVariant data = sendingAction->data();
-    QString algorithmName;
-    int version = -1;
 
     if(data.canConvert<QString>())
     {
+      QString algorithmName;
+      int version = -1;
+
       QStringList splitData = data.toString().split(".");
       switch(splitData.length())
       {
