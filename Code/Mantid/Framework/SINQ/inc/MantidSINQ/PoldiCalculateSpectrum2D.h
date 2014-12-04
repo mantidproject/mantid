@@ -62,6 +62,7 @@ protected:
     PoldiPeakCollection_sptr getPeakCollection(const DataObjects::TableWorkspace_sptr &peakTable) const;
     PoldiPeakCollection_sptr getIntegratedPeakCollection(const PoldiPeakCollection_sptr &rawPeakCollection) const;
     PoldiPeakCollection_sptr getNormalizedPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const;
+    PoldiPeakCollection_sptr getCountPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const;
 
     boost::shared_ptr<Poldi2DFunction> getFunctionFromPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const;
     void addBackgroundTerms(boost::shared_ptr<Poldi2DFunction> poldi2DFunction) const;

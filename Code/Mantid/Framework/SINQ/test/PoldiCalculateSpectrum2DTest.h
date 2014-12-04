@@ -160,6 +160,31 @@ public:
         compareIntensities(normalizedPeaks, normalizedReferencePeaks, 1.5e-6);
     }
 
+    void testGetCountPeakCollection()
+    {
+        TestablePoldiCalculateSpectrum2D spectrumCalculator;
+
+        // first, test the failing cases
+        PoldiPeakCollection_sptr invalidPeakCollection;
+        TS_ASSERT_THROWS(spectrumCalculator.getCountPeakCollection(invalidPeakCollection), std::invalid_argument);
+
+        // m_timeTransformer has not been assigned, so even a "good" PeakCollection will throw
+        PoldiPeakCollection_sptr testPeaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
+        TS_ASSERT_THROWS(spectrumCalculator.getCountPeakCollection(testPeaks), std::invalid_argument);
+
+        spectrumCalculator.setTimeTransformer(m_timeTransformer);
+
+        // to verify the results, use actual results from after integration step
+        PoldiPeakCollection_sptr normalizedPeaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
+        TS_ASSERT_THROWS_NOTHING(spectrumCalculator.getCountPeakCollection(normalizedPeaks));
+
+        PoldiPeakCollection_sptr integratedPeaks = spectrumCalculator.getCountPeakCollection(normalizedPeaks);
+        PoldiPeakCollection_sptr integratedReferencePeaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionIntegral();
+
+        compareIntensities(integratedPeaks, integratedReferencePeaks, 1.5e-6);
+
+    }
+
     void testGetFunctionFromPeakCollection()
     {
         TestablePoldiCalculateSpectrum2D spectrumCalculator;

@@ -394,6 +394,41 @@ namespace Poldi
       return normalizedPeakCollection;
   }
 
+  /**
+   * Converts normalized peak intensities to count based integral intensities
+   *
+   * This operation is the opposite of getNormalizedPeakCollection and is used to convert
+   * the intensities back to integral intensities.
+   *
+   * @param peakCollection :: PoldiPeakCollection with normalized intensities
+   * @return PoldiPeakCollection with integral intensities
+   */
+  PoldiPeakCollection_sptr PoldiCalculateSpectrum2D::getCountPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const
+  {
+      if(!peakCollection) {
+          throw std::invalid_argument("Cannot proceed with invalid PoldiPeakCollection.");
+      }
+
+      if(!m_timeTransformer) {
+          throw std::invalid_argument("Cannot proceed without PoldiTimeTransformer.");
+      }
+
+      PoldiPeakCollection_sptr countPeakCollection = boost::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
+      countPeakCollection->setProfileFunctionName(peakCollection->getProfileFunctionName());
+
+      for(size_t i = 0; i < peakCollection->peakCount(); ++i) {
+          PoldiPeak_sptr peak = peakCollection->peak(i);
+          double calculatedIntensity = m_timeTransformer->calculatedTotalIntensity(peak->d());
+
+          PoldiPeak_sptr countPeak = peak->clone();
+          countPeak->setIntensity(peak->intensity() * calculatedIntensity);
+
+          countPeakCollection->addPeak(countPeak);
+      }
+
+      return countPeakCollection;
+  }
+
 
 } // namespace Poldi
 } // namespace Mantid
