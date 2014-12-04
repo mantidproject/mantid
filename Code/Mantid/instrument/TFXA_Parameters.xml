@@ -35,7 +35,7 @@
     </parameter>
 
     <parameter name="rebin-default" type="string">
-      <value val="3,0.005,500" />
+      <value val="3,-0.005,500" />
     </parameter>
 
     <!-- This is actually spectrum index, NOT spectrum number -->
