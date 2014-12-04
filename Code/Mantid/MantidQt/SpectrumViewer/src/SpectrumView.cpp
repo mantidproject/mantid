@@ -82,13 +82,19 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
   observePreDelete();
   observeADSClear();
 
-  // connect WorkspaceObserver signals
+  // Connect WorkspaceObserver signals
   connect(this, SIGNAL(needToClose()), this, SLOT(closeWindow()));
   connect(this, SIGNAL(needToUpdate()), this, SLOT(updateWorkspace()));
 
-  // set the window title
+  // Set the window title
   std::string windowTitle = "SpectrumView (" + wksp->getTitle() + ")";
   this->setWindowTitle(QString::fromStdString(windowTitle).simplified());
+
+  // Remove the old graph plots
+  if(m_hGraph) delete m_hGraph;
+  if(m_vGraph) delete m_vGraph;
+  if(m_spectrumDisplay) delete m_spectrumDisplay;
+  if(m_svConnections) delete m_svConnections;
 
   m_hGraph = new GraphDisplay( m_ui->h_graphPlot, m_ui->h_graph_table, false );
   m_vGraph = new GraphDisplay( m_ui->v_graphPlot, m_ui->v_graph_table, true );
@@ -136,7 +142,7 @@ void SpectrumView::updateHandlers(SpectrumDataSource_sptr dataSource)
 
 
 /**
- * Slot to close the window
+ * Slot to close the window.
  */
 void SpectrumView::closeWindow()
 {
@@ -145,9 +151,12 @@ void SpectrumView::closeWindow()
 
 
 /**
- * Signal to close this window if the workspace has just been deleted
+ * Signal to close this window if the workspace has just been deleted.
+ *
+ * @param wsName Name of workspace
+ * @param ws Pointer to workspace
  */
-void SpectrumView::preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+void SpectrumView::preDeleteHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
   if (m_spectrumDisplay->hasData(wsName, ws))
   {
@@ -157,7 +166,10 @@ void SpectrumView::preDeleteHandle(const std::string& wsName,const boost::shared
 
 
 /**
- * Signal that the workspace being looked at was just replaced with a different one
+ * Signal that the workspace being looked at was just replaced with a different one.
+ *
+ * @param wsName Name of workspace
+ * @param ws Pointer to workspace
  */
 void SpectrumView::afterReplaceHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
