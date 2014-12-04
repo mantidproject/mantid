@@ -1,5 +1,35 @@
-""" File contains classes defining the interface for Direct inelastic reduction with properties 
+""" Class defines the interface for Direct inelastic reduction with properties 
     present in Instrument_Properties.xml file
+
+    The class is written to provide the following functionality. 
+
+    1) Properties are initiated from Instrument_Properties.xml file as defaults. 
+    2) Attempt to access property, not present in this file throws. 
+    3) Attempt to create property not present in this file throws. 
+    4) A standard behavior is defined for the most of the properties (get/set appropriate value) when there is number of 
+       overloaded properties, which support more complex behavior using specially written attribute-classes. 
+    5) Changes to the properties are recorded and list of changed properties is available on request
+
+
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://github.com/mantidproject/mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 """
 
 from mantid.simpleapi import *
