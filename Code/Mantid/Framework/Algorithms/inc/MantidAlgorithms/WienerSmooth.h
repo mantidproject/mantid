@@ -12,7 +12,7 @@ namespace Algorithms
   /** WienerSmooth algorithm performes smoothing data in a spectrum of a matrix workspace
     using the Wiener filter smoothing.
     
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

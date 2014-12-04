@@ -51,7 +51,7 @@ MatrixWorkspace_sptr MANTID_API_DLL operator/=(const MatrixWorkspace_sptr lhs, c
     @author Russell Taylor, Tessella Support Services plc
     @date 19/09/2008
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

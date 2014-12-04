@@ -15,7 +15,7 @@ namespace DataObjects
      
   /** MDNormSXD : Generate MD normalization for single crystal diffraction
 
-     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
     
      This file is part of Mantid.
      

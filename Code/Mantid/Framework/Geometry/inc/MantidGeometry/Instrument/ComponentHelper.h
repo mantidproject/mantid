@@ -22,7 +22,7 @@ namespace Mantid
       A set of helper functions for dealing with components, i.e. movement, rotation that require
       interaction with the ParamterMap.
 
-      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 

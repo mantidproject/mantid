@@ -21,7 +21,7 @@ namespace CustomInterfaces
   /** ALCBaselineModellingView : Widget-based implementation of the ALC Baseline Modelling step
                                  interface.
     
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

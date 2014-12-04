@@ -18,7 +18,7 @@ namespace MDAlgorithms
     to perform generic part of the transformation from a matrix workspace of a real instrument to 
     physical MD workspace of an experimental results (e.g Q-space). 
 
-    Copyright &copy; 13/09/2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 13/09/2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
