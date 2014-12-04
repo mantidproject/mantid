@@ -4,13 +4,13 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Matrix.h"
-
+#include "MantidMDEvents/MDHistoWorkspace.h"
 namespace Mantid
 {
 namespace MDAlgorithms
 {
 
-  /** CalculateCoverageDGS : TODO: DESCRIPTION
+  /** CalculateCoverageDGS : Calculate coverage for single crystal direct geometry scattering
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -47,15 +47,29 @@ namespace MDAlgorithms
     void init();
     void exec();
 
-    std::vector<Kernel::VMD> calculateIntersections(const double theta, const double phi);
-
     /// limits for h,k,l,dE dimensions
     coord_t m_hmin, m_hmax, m_kmin, m_kmax, m_lmin, m_lmax, m_dEmin, m_dEmax;
+    /// cached values for incident energy and momentum
+    double m_Ei,m_ki, m_kfmin,m_kfmax;
     /// flag for integrated h,k,l,dE dimensions
     bool m_hIntegrated, m_kIntegrated, m_lIntegrated, m_dEIntegrated;
+    /// cached X values along dimensions h,k,l, dE
+    std::vector<double> m_hX, m_kX, m_lX, m_eX;
+    ///index of h,k,l,dE dimensions in the output workspaces
+    size_t m_hIdx, m_kIdx, m_lIdx, m_eIdx;
     /// (2*PiRUBW)^-1
     Mantid::Kernel::DblMatrix m_rubw;
-    //void cacheDimensionXValues();
+
+    /// Normalization workspace (this is the coverage workspace)
+    Mantid::MDEvents::MDHistoWorkspace_sptr m_normWS;
+
+    /// Conversion constant for E->k. k(A^-1) = sqrt(energyToK*E(meV))
+    const double energyToK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 /
+      (PhysicalConstants::h*PhysicalConstants::h);
+
+
+    std::vector<Kernel::VMD> calculateIntersections(const double theta, const double phi);
+    void cacheDimensionXValues();
   };
 
 

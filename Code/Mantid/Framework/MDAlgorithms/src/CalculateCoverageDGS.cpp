@@ -54,6 +54,32 @@ namespace MDAlgorithms
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
   const std::string CalculateCoverageDGS::summary() const { return "Calculate the reciprocal space coverage for direct geometry spectrometers";};
 
+
+  /**
+ * Stores the X values from each H,K,L dimension as member variables
+ */
+  void CalculateCoverageDGS::cacheDimensionXValues()
+  {
+    auto &hDim = *m_normWS->getDimension(m_hIdx);
+    m_hX.resize(hDim.getNBins());
+    for(size_t i = 0; i < m_hX.size(); ++i)
+    {
+      m_hX[i] = hDim.getX(i);
+    }
+    auto &kDim = *m_normWS->getDimension(m_kIdx);
+    m_kX.resize( kDim.getNBins() );
+    for(size_t i = 0; i < m_kX.size(); ++i)
+    {
+      m_kX[i] = kDim.getX(i);
+    }
+    auto &lDim = *m_normWS->getDimension(m_lIdx);
+    m_lX.resize( lDim.getNBins() );
+    for(size_t i = 0; i < m_lX.size(); ++i)
+    {
+      m_lX[i] = lDim.getX(i);
+    }
+   }
+
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
@@ -109,14 +135,14 @@ namespace MDAlgorithms
       }
 
       double ttmax=*(std::max_element(tt.begin(),tt.end()));
-      double Ei=getProperty("IncidentEnergy");
-      if (Ei==EMPTY_DBL())
+      m_Ei=getProperty("IncidentEnergy");
+      if (m_Ei==EMPTY_DBL())
       {
           if (inputWS->run().hasProperty("Ei"))
           {
               Kernel::Property* eiprop = inputWS->run().getProperty("Ei");
-              Ei = boost::lexical_cast<double>(eiprop->value());
-              if(Ei<=0)
+              m_Ei = boost::lexical_cast<double>(eiprop->value());
+              if(m_Ei<=0)
               {
                  throw std::invalid_argument("Ei stored in the workspace is not positive");
               }
@@ -143,6 +169,7 @@ namespace MDAlgorithms
               q1min=getProperty(dim+"Min");
               q1max=getProperty(dim+"Max");
               q1step=getProperty(dim+"Step");
+              m_hIdx=i-1;
           }
           if (dimensioni=="Q2")
           {
@@ -150,6 +177,7 @@ namespace MDAlgorithms
               q2min=getProperty(dim+"Min");
               q2max=getProperty(dim+"Max");
               q2step=getProperty(dim+"Step");
+              m_kIdx=i-1;
           }
           if (dimensioni=="Q3")
           {
@@ -157,14 +185,16 @@ namespace MDAlgorithms
               q3min=getProperty(dim+"Min");
               q3max=getProperty(dim+"Max");
               q3step=getProperty(dim+"Step");
+              m_lIdx=i-1;
           }
           if (dimensioni=="DeltaE")
           {
               affineMat[i-1][3]=1.;
+              m_eIdx=i-1;
               double dmin=getProperty(dim+"Min");
               if(dmin==EMPTY_DBL())
               {
-                m_dEmin=-static_cast<coord_t>(Ei);
+                m_dEmin=-static_cast<coord_t>(m_Ei);
               }
               else
               {
@@ -173,7 +203,7 @@ namespace MDAlgorithms
               double dmax=getProperty(dim+"Max");
               if(dmax==EMPTY_DBL())
               {
-                m_dEmax=static_cast<coord_t>(Ei);
+                m_dEmax=static_cast<coord_t>(m_Ei);
               }
               else
               {
@@ -202,16 +232,14 @@ namespace MDAlgorithms
           g_log.debug()<<affineMat;
           throw std::invalid_argument("Please make sure each dimension is selected only once.");
       }
-      // Conversion constant for E->k. k(A^-1) = sqrt(energyToK*E(meV))
-      const double energyToK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 /
-        (PhysicalConstants::h*PhysicalConstants::h);
+
       //Qmax is at  kf=kfmin or kf=kfmax
-      double ki=std::sqrt(energyToK*Ei);
-      double kfmin=std::sqrt(energyToK*(Ei-m_dEmin));
-      double kfmax=std::sqrt(energyToK*(Ei-m_dEmax));
-      double QmaxTemp=sqrt(ki*ki+kfmin*kfmin-2*ki*kfmin*cos(ttmax));
+      m_ki=std::sqrt(energyToK*m_Ei);
+      m_kfmin=std::sqrt(energyToK*(m_Ei-m_dEmin));
+      m_kfmax=std::sqrt(energyToK*(m_Ei-m_dEmax));
+      double QmaxTemp=sqrt(m_ki*m_ki+m_kfmin*m_kfmin-2*m_ki*m_kfmin*cos(ttmax));
       double Qmax=QmaxTemp;
-      QmaxTemp=sqrt(ki*ki+kfmax*kfmax-2*ki*kfmax*cos(ttmax));
+      QmaxTemp=sqrt(m_ki*m_ki+m_kfmax*m_kfmax-2*m_ki*m_kfmax*cos(ttmax));
       if(QmaxTemp>Qmax)
           Qmax=QmaxTemp;
 
@@ -358,8 +386,10 @@ namespace MDAlgorithms
           }
       }
 
-      Mantid::MDEvents::MDHistoWorkspace_sptr coverage=MDHistoWorkspace_sptr(new MDHistoWorkspace(binDimensions));
-      setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(coverage));
+      m_normWS=MDHistoWorkspace_sptr(new MDHistoWorkspace(binDimensions));
+      setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(m_normWS));
+
+      cacheDimensionXValues();
 
       const int64_t ndets = static_cast<int64_t>(tt.size());
 
@@ -382,12 +412,15 @@ namespace MDAlgorithms
             std::transform(curIntSec.getBareArray(), curIntSec.getBareArray() + 4,
                 prevIntSec.getBareArray(), pos.begin(),
                 VectorHelper::SimpleAverage<double>());
+            //transform kf to energy transfer
+            pos[3]=(m_Ei-pos[3]*pos[3]/energyToK);
+
             std::vector<coord_t> posNew = affineMat*pos;
-            size_t linIndex = coverage->getLinearIndexAtCoord(posNew.data());
+            size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
             if(linIndex == size_t(-1)) continue;
            PARALLEL_CRITICAL(updateMD)
            {
-            coverage->setSignalAt(linIndex, 1.);
+            m_normWS->setSignalAt(linIndex, 1.);
            }
         }
         PARALLEL_END_INTERUPT_REGION
@@ -400,20 +433,75 @@ namespace MDAlgorithms
  * detector position in HKL
  * @param theta Polar angle withd detector
  * @param phi Azimuthal angle with detector
- * @return A list of intersections in HKL space
+ * @return A list of intersections in HKL+kf space
  */
  std::vector<Kernel::VMD> CalculateCoverageDGS::calculateIntersections(const double theta, const double phi)
  {
-    V3D q(-sin(theta)*cos(phi), -sin(theta)*sin(phi), 1.-cos(theta));
-    q = m_rubw*q;
-    /*double hStart = q.X()*m_kiMin, hEnd = q.X()*m_kiMax;
-    double kStart = q.Y()*m_kiMin, kEnd = q.Y()*m_kiMax;
-    double lStart = q.Z()*m_kiMin, lEnd = q.Z()*m_kiMax;
+    V3D qout(sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)),qin(0,0,m_ki);
+    qout = m_rubw*qout;
+    qin = m_rubw*qin;
+    double hStart = qin.X()-qout.X()*m_kfmin, hEnd = qin.X()-qout.X()*m_kfmax;
+    double kStart = qin.Y()-qout.Y()*m_kfmin, kEnd = qin.Y()-qout.Y()*m_kfmax;
+    double lStart = qin.Z()-qout.Z()*m_kfmin, lEnd = qin.Z()-qout.Z()*m_kfmax;
     double eps = 1e-7;
     auto hNBins = m_hX.size();
     auto kNBins = m_kX.size();
-    auto lNBins = m_lX.size();*/
+    auto lNBins = m_lX.size();
+    auto eNBins = m_eX.size();
     std::vector<Kernel::VMD> intersections;
+    intersections.reserve(hNBins + kNBins + lNBins + eNBins+10);
+
+    //calculate intersections with planes perpendicular to h
+    if (fabs(hStart-hEnd) > eps)
+    {
+      double fmom=(m_kfmax-m_kfmin)/(hEnd-hStart);
+      double fk=(kEnd-kStart)/(hEnd-hStart);
+      double fl=(lEnd-lStart)/(hEnd-hStart);
+      if(!m_hIntegrated)
+      {
+        for(size_t i = 0;i<hNBins;i++)
+        {
+          double hi = m_hX[i];
+          if((hi>=m_hmin)&&(hi<=m_hmax) && ((hStart-hi)*(hEnd-hi)<0))
+          {
+            // if hi is between hStart and hEnd, then ki and li will be between kStart, kEnd and lStart, lEnd and momi will be between m_kfmin and m_kfmax
+            double ki = fk*(hi-hStart)+kStart;
+            double li = fl*(hi-hStart)+lStart;
+            if ((ki>=m_kmin)&&(ki<=m_kmax)&&(li>=m_lmin)&&(li<=m_lmax))
+            {
+                double momi = fmom*(hi-hStart)+m_kfmin;
+                Mantid::Kernel::VMD v(hi,ki,li,momi);
+                intersections.push_back(v);
+            }
+          }
+        }
+      }
+      double momhMin = fmom*(m_hmin-hStart)+m_kfmin;
+      if ((momhMin>m_kfmin)&&(momhMin<m_kfmax))
+      {
+       //khmin and lhmin
+       double khmin = fk*(m_hmin-hStart)+kStart;
+       double lhmin = fl*(m_hmin-hStart)+lStart;
+       if((khmin>=m_kmin)&&(khmin<=m_kmax)&&(lhmin>=m_lmin)&&(lhmin<=m_lmax))
+       {
+         Mantid::Kernel::VMD v(m_hmin,khmin,lhmin,momhMin);
+         intersections.push_back(v);
+       }
+      }
+      double momhMax = fmom*(m_hmax-hStart)+m_kfmin;
+      if ((momhMax>m_kfmin)&&(momhMax<m_kfmax))
+      {
+        //khmax and lhmax
+        double khmax = fk*(m_hmax-hStart)+kStart;
+        double lhmax = fl*(m_hmax-hStart)+lStart;
+        if((khmax>=m_kmin)&&(khmax<=m_kmax)&&(lhmax>=m_lmin)&&(lhmax<=m_lmax))
+        {
+          Mantid::Kernel::VMD v(m_hmax,khmax,lhmax,momhMax);
+          intersections.push_back(v);
+        }
+      }
+    }
+
 
     return intersections;
  }
