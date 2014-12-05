@@ -16,6 +16,23 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>998</width>
+    <height>567</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>998</width>
+    <height>567</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Segoe UI</family>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Welcome to Mantid</string>
   </property>
@@ -37,6 +54,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QCheckBox" name="chkDoNotShowUntilNextRelease">
       <property name="font">
        <font>
+        <family>Segoe UI</family>
         <weight>75</weight>
         <bold>true</bold>
        </font>
@@ -69,12 +87,13 @@ color: rgb(255, 255, 255);</string>
      <widget class="QLabel" name="lbUpdate">
       <property name="minimumSize">
        <size>
-        <width>500</width>
+        <width>540</width>
         <height>0</height>
        </size>
       </property>
       <property name="font">
        <font>
+        <family>Segoe UI</family>
         <weight>75</weight>
         <bold>true</bold>
        </font>
@@ -99,6 +118,11 @@ p, li { white-space: pre-wrap; }
     </item>
     <item>
      <widget class="QPushButton" name="pbCancel">
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+       </font>
+      </property>
       <property name="text">
        <string>ASK ME NEXT TIME</string>
       </property>
@@ -112,6 +136,11 @@ p, li { white-space: pre-wrap; }
     </item>
     <item>
      <widget class="QPushButton" name="pbConfirm">
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+       </font>
+      </property>
       <property name="text">
        <string>SET</string>
       </property>
@@ -130,6 +159,7 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="font">
     <font>
+     <family>Segoe UI</family>
      <weight>75</weight>
      <bold>true</bold>
     </font>
@@ -158,6 +188,7 @@ p, li { white-space: pre-wrap; }
       <widget class="QLabel" name="label">
        <property name="font">
         <font>
+         <family>Segoe UI</family>
          <weight>75</weight>
          <bold>true</bold>
         </font>
@@ -184,6 +215,7 @@ p, li { white-space: pre-wrap; }
       <widget class="QLabel" name="label_2">
        <property name="font">
         <font>
+         <family>Segoe UI</family>
          <weight>75</weight>
          <bold>true</bold>
         </font>
@@ -213,6 +245,7 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="font">
         <font>
+         <family>Segoe UI</family>
          <weight>75</weight>
          <bold>true</bold>
         </font>
@@ -234,6 +267,11 @@ p, li { white-space: pre-wrap; }
      </item>
      <item row="2" column="1">
       <widget class="QPushButton" name="pbMUD">
+       <property name="font">
+        <font>
+         <family>Segoe UI</family>
+        </font>
+       </property>
        <property name="styleSheet">
         <string notr="true">color: rgb(0, 0, 0);</string>
        </property>
