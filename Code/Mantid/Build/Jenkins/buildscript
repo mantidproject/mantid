@@ -104,7 +104,11 @@ if [[ ${JOB_NAME} == *coverity_build_and_submit* ]]; then
   status=$(curl --form token=$COVERITY_TOKEN --form email=mantidproject@gmail.com \
        --form file=@mantid.tgz --form version=$GIT_COMMIT \
        https://scan.coverity.com/builds?project=mantidproject%2Fmantid)
-  return $status
+  if [[ ${status} ]]; then
+    return ${status}
+  else
+    return 0
+  fi
 fi
 
 ###############################################################################
