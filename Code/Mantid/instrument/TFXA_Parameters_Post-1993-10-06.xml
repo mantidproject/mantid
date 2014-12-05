@@ -20,13 +20,13 @@
       <value val="diffspec" />
     </parameter>
 
-    <!-- Available options are "Show" or "Hide". -->
+    <!-- Available options are "true" or "false". -->
     <parameter name="cm-1-convert-choice" type="string">
-      <value val="Show" />
+      <value val="true" />
     </parameter>
 
-    <parameter name="save-aclimax-choice" type="string">
-      <value val="Show" />
+    <parameter name="save-ascii-choice" type="string">
+      <value val="true" />
     </parameter>
 
     <!-- Reduction workflow parameters under this line -->
