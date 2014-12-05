@@ -61,7 +61,6 @@ if [[ ${JOB_NAME} == *clean* ]]; then
     # Mac packaging
     PACKAGINGVARS="-DPACKAGE_DOCS=ON"
   fi
-
 fi
 
 ###############################################################################
@@ -82,14 +81,13 @@ cd $WORKSPACE/build
 
 ###############################################################################
 ## Check the required build configuration
-## Use RelWithDbgInfo unless requested by the job name
 ###############################################################################
 if [[ ${JOB_NAME} == *debug* ]]; then
   BUILD_CONFIG="Debug"
-elif [[ ${JOB_NAME} == *release* ]]; then
-  BUILD_CONFIG="Release"
+elif [[ ${JOB_NAME} == *relwithdbg* ]]; then
+  BUILD_CONFIG="RelWithDbg"
 else
-  BUILD_CONFIG="RelWithDebInfo"
+  BUILD_CONFIG="Release"
 fi
 
 ###############################################################################
