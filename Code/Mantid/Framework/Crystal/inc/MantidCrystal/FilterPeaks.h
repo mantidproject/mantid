@@ -11,7 +11,7 @@ namespace Crystal
 
   /** FilterPeaks : Filter a peaks workspace based on a set number of queries to provide a new, filtered peaks workspace.
     
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

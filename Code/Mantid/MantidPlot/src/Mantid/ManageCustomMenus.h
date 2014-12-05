@@ -12,7 +12,7 @@ add custom scripts or custom Qt interfaces to a menu in MantidPlot.
 
 @author Michael Whitty, ISIS
 
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 

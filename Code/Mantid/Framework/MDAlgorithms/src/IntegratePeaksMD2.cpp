@@ -255,22 +255,20 @@ namespace MDAlgorithms
         pos = p.getHKL();
 
       // Do not integrate if sphere is off edge of detector
-      if (BackgroundOuterRadius > PeakRadius)
-      {
-        if (!detectorQ(p.getQLabFrame(), BackgroundOuterRadius))
-          {
-             g_log.warning() << "Warning: sphere/cylinder for integration is off edge of detector for peak " << i << std::endl;
-             if (!integrateEdge)continue;
-          }
-      }
-      else
-      {
-        if (!detectorQ(p.getQLabFrame(), PeakRadius))
-          {
-             g_log.warning() << "Warning: sphere/cylinder for integration is off edge of detector for peak " << i << std::endl;
-             if (!integrateEdge)continue;
-          }
-      }
+
+      if (!detectorQ(p.getQLabFrame(), std::max(BackgroundOuterRadius, PeakRadius)))
+        {
+           g_log.warning() << "Warning: sphere/cylinder for integration is off edge of detector for peak " << i << std::endl;
+           if (!integrateEdge)
+           {
+             if (replaceIntensity)
+             {
+                p.setIntensity(0.0);
+                p.setSigmaIntensity( 0.0 );
+             }
+             continue;
+           }
+        }
 
       // Build the sphere transformation
       bool dimensionsUsed[nd];
@@ -432,7 +430,19 @@ namespace MDAlgorithms
         }
       }
 
-      if (profileFunction.compare("NoFit") != 0)
+      if (profileFunction.compare("NoFit") == 0)
+      {
+        signal = 0.;
+        for (size_t j = 0; j < numSteps; j++)
+        {
+            if (j < peakMin || j > peakMax)
+              background_total = background_total + wsProfile2D->dataY(i)[j];
+            else
+              signal = signal + wsProfile2D->dataY(i)[j];
+         }
+        errorSquared = std::fabs(signal);
+      }
+      else
       {
           API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
           findpeaks->setProperty("InputWorkspace", wsProfile2D);
@@ -514,7 +524,7 @@ namespace MDAlgorithms
         signal = 0.0;
         if (integrationOption.compare("Sum") == 0)
         {
-          for (size_t j = 0; j < numSteps; j++) if ( !boost::math::isnan(yy[j]) && !boost::math::isinf(yy[j]))signal+= yy[j];
+          for (size_t j = peakMin; j <= peakMax; j++) if ( !boost::math::isnan(yy[j]) && !boost::math::isinf(yy[j]))signal+= yy[j];
         }
         else
         {
@@ -527,7 +537,7 @@ namespace MDAlgorithms
           F.function = &Mantid::MDAlgorithms::f_eval2;
           F.params = &fun;
 
-          gsl_integration_qags (&F, x[0], x[numSteps-1], 0, 1e-7, 1000,
+          gsl_integration_qags (&F, x[peakMin], x[peakMax], 0, 1e-7, 1000,
                      w, &signal, &error);
 
           gsl_integration_workspace_free (w);
@@ -554,7 +564,8 @@ namespace MDAlgorithms
 
       g_log.information() << "Peak " << i << " at " << pos << ": signal "
         << signal << " (sig^2 " << errorSquared << "), with background "
-        << bgSignal << " (sig^2 " << bgErrorSquared << ") subtracted."
+        << bgSignal + ratio * background_total << " (sig^2 " 
+        << bgErrorSquared+ ratio * ratio * std::fabs(background_total) << ") subtracted."
         << std::endl;
 
     }

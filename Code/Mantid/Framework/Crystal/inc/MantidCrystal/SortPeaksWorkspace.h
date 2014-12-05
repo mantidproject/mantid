@@ -12,7 +12,7 @@ namespace Crystal
 
   /** SortPeaksWorkspace : Sort a PeaksWorkspace by a range of properties. Only allow sorting of one property at a time.
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

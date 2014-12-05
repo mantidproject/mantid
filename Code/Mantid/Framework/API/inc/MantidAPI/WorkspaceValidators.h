@@ -22,7 +22,7 @@ namespace API
     @author Russell Taylor, Tessella Support Services plc
     @date 16/09/2008
 
-    Copyright &copy; 2008-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -367,44 +367,6 @@ private:
       return "";
       
   }
-};
-
-//===============================================================================================
-/**
- * A validator which checks whether data in each spectrum of the input workspace are monotonically increasing.
- */
-class DLLExport IncreasingDataValidator : public MatrixWorkspaceValidator
-{
-public:
-  ///Gets the type of the validator
-  std::string getType() const { return "increasingdata"; }
-  /// Clone the current state
-  Kernel::IValidator_sptr clone() const { return boost::make_shared<IncreasingDataValidator>(*this); }
-
-private:
-  /** Validate a workspace.
-  *  @param value :: The workspace to test
-  *  @return A message for users with negative results, otherwise ""
-  */
-  std::string checkValidity( const MatrixWorkspace_sptr& value ) const
-  {
-    if ( value->blocksize() < 2 ) 
-    {
-      return "Spectra must have two or more data points (bins).";
-    }
-    for(size_t spec = 0; spec < value->getNumberHistograms(); ++spec)
-    {
-      auto &Y = value->readY( spec );
-      double y = Y.front();
-      for(auto it = Y.begin() + 1; it != Y.end(); ++it)
-      {
-        if ( y > *it ) return "Data in the workspace must monotonically increase.";
-        y = *it;
-      }
-    }
-    return "";
-  }
-
 };
 
 } // namespace API

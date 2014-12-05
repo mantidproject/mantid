@@ -43,7 +43,7 @@ namespace Mantid
     @author Roman Tolchenov, Tessella plc
     @date 03/03/2009
 
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -131,6 +131,10 @@ namespace Mantid
       void setLoggingOffset(const int value)  { m_loggingOffset=value; }
       ///returns the logging priority offset
       int getLoggingOffset() const { return m_loggingOffset; }
+      /// disable Logging of start and end messages
+      void setAlgStartupLogging(const bool enabled);
+      /// get the state of Logging of start and end messages
+      bool getAlgStartupLogging() const;
 
       ///setting the child start progress
       void setChildStartProgress(const double startProgress)const;
@@ -171,6 +175,7 @@ namespace Mantid
       bool m_isExecuted;     ///< Executed flag
       bool m_isLoggingEnabled;///< is the logging of the underlying algorithm enabled
       int m_loggingOffset; ///< the logging priority offset
+      bool m_isAlgStartupLoggingEnabled; /// Whether to log alg startup and closedown messages from the base class (default = true)
       bool m_rethrow; ///< Whether or not to rethrow exceptions.
       bool m_isChild; ///< Is this a child algo
 

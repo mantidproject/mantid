@@ -10,6 +10,9 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+using ::testing::Return;
+using ::testing::A;
+
 class BraggScattererInCrystalStructureTest : public CxxTest::TestSuite
 {
 public:
@@ -125,7 +128,11 @@ public:
 private:
   BraggScattererInCrystalStructure_sptr getDefaultScatterer()
   {
-      return boost::make_shared<MockBraggScatterer>();
+      boost::shared_ptr<MockBraggScatterer> mockScatterer = boost::make_shared<MockBraggScatterer>();
+      EXPECT_CALL(*mockScatterer, afterScattererPropertySet(A<const std::string &>()))
+              .WillRepeatedly(Return());
+
+      return mockScatterer;
   }
 
   BraggScattererInCrystalStructure_sptr getInitializedScatterer()

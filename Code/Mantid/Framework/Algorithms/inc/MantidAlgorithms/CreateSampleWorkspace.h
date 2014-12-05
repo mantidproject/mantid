@@ -15,7 +15,7 @@ namespace Algorithms
 
   /** CreateSampleWorkspace : This algorithm is intended for the creation of sample workspaces for usage examples and other situations
     
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

@@ -5,6 +5,8 @@
 #include <QFileInfo>
 #include <QInputDialog>
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -62,6 +64,8 @@ namespace CustomInterfaces
     connect(m_uiForm.entryRebinWidth, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
     connect(m_uiForm.entryRebinHigh, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
 
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+
     // Update UI widgets to show default values
     mappingOptionSelected(m_uiForm.cbMappingOptions->currentText());
     rebinEntryToggle(m_uiForm.rebin_ckDNR->isChecked());
@@ -89,7 +93,6 @@ namespace CustomInterfaces
 
   void IndirectConvertToEnergy::run()
   {
-    using namespace Mantid::API;
     using MantidQt::API::BatchAlgorithmRunner;
 
     IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("InelasticIndirectReduction", -1);
@@ -164,6 +167,8 @@ namespace CustomInterfaces
     reductionAlg->setProperty("SaveCM1", m_uiForm.ckCm1Units->isChecked());
     reductionAlg->setProperty("SaveFormats", getSaveFormats());
 
+    reductionAlg->setProperty("OutputWorkspace", "IndirectEnergyTransfer_Workspaces");
+
     // Plot Output options
     switch(m_uiForm.ind_cbPlotOutput->currentIndex())
     {
@@ -179,6 +184,33 @@ namespace CustomInterfaces
 
     m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
     m_batchAlgoRunner->executeBatchAsync();
+
+    // Set output workspace name for Python export
+    m_pythonExportWsName = "IndirectInergyTransfer_Workspaces";
+  }
+
+  /**
+   * Handles completion of the algorithm.
+   *
+   * Sets result workspace for Python export and ungroups result WorkspaceGroup.
+   *
+   * @param error True if the algorithm was stopped due to error, false otherwise
+   */
+  void IndirectConvertToEnergy::algorithmComplete(bool error)
+  {
+    if(error)
+      return;
+
+    WorkspaceGroup_sptr energyTransferOutputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IndirectEnergyTransfer_Workspaces");
+    if(energyTransferOutputGroup->size() == 0)
+      return;
+
+    // Set workspace for Python export as the first result workspace
+    m_pythonExportWsName = energyTransferOutputGroup->getNames()[0];
+
+    // Ungroup the output workspace
+    energyTransferOutputGroup->removeAll();
+    AnalysisDataService::Instance().remove("IndirectEnergyTransfer_Workspaces");
   }
 
   bool IndirectConvertToEnergy::validate()
@@ -373,6 +405,18 @@ namespace CustomInterfaces
       m_uiForm.entryRebinHigh->setText("");
       m_uiForm.entryRebinString->setText("");
     }
+
+    if(!instDetails["cm-1-convert-choice"].isEmpty())
+    {
+      bool defaultOptions = instDetails["cm-1-convert-choice"] == "true";
+      m_uiForm.ckCm1Units->setChecked(defaultOptions);
+    }
+
+    if(!instDetails["save-ascii-choice"].isEmpty())
+    {
+      bool defaultOptions = instDetails["save-ascii-choice"] == "true";
+      m_uiForm.save_ckAscii->setChecked(defaultOptions);
+    }
   }
 
   /**
@@ -494,8 +538,6 @@ namespace CustomInterfaces
    */
   QString IndirectConvertToEnergy::createMapFile(const QString& groupType)
   {
-    using namespace Mantid::API;
-
     QString specRange = m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text();
 
     if(groupType == "File")
@@ -561,7 +603,6 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::plotRaw()
   {
-    using namespace Mantid::API;
     using MantidQt::API::BatchAlgorithmRunner;
 
     if(!m_uiForm.ind_runFiles->isValid())

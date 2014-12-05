@@ -15,7 +15,7 @@ namespace Mantid
 
     /** RebinByTimeBase : Algorithm base class for algorithms performing rebinning by an absolute time axis.
 
-     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
      This file is part of Mantid.
 

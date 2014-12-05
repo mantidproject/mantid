@@ -33,7 +33,7 @@ namespace ComponentCreationHelper
   /**
   A set of helper functions for creating various component structures for the unit tests.
 
-  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 

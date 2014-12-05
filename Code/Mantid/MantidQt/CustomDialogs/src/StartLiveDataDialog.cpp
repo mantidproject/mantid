@@ -72,7 +72,7 @@ namespace CustomDialogs
 ///Constructor
 StartLiveDataDialog::StartLiveDataDialog(QWidget *parent) :
   AlgorithmDialog(parent),
-  m_useProcessAlgo(false), m_useProcessScript(NULL),
+  m_useProcessAlgo(false), m_useProcessScript(false),
   m_usePostProcessAlgo(false), m_usePostProcessScript(false)
 {
   // Create the input history. This loads it too.

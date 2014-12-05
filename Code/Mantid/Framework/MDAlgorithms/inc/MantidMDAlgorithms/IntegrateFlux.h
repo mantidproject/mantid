@@ -7,6 +7,11 @@
 namespace Mantid
 {
 
+namespace API
+{
+  class MatrixWorkspace;
+}
+
 namespace DataObjects
 {
   class EventWorkspace;
@@ -18,9 +23,8 @@ namespace MDAlgorithms
   /** Algorithm IntegrateFlux.
 
     Calculates indefinite integral of the spectra in the input workspace sampled at a regular grid.
-    The input workspace is expected to be an event workspace with weighted-no-time events.
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -53,8 +57,15 @@ namespace MDAlgorithms
     void init();
     void exec();
 
-    boost::shared_ptr<API::MatrixWorkspace> createOutputWorkspace( const DataObjects::EventWorkspace& eventWS, size_t nX ) const;
-    void integrateSpectra( const DataObjects::EventWorkspace& eventWS, API::MatrixWorkspace &integrWS );
+    boost::shared_ptr<API::MatrixWorkspace> createOutputWorkspace( const API::MatrixWorkspace& inputWS, size_t nX ) const;
+    void integrateSpectra( const API::MatrixWorkspace& inputWS, API::MatrixWorkspace &integrWS ) const;
+    template<class EventType>
+    void integrateSpectraEvents( const DataObjects::EventWorkspace& inputWS, API::MatrixWorkspace &integrWS ) const;
+    void integrateSpectraMatrix( const API::MatrixWorkspace& inputWS, API::MatrixWorkspace &integrWS ) const;
+    void integrateSpectraHistograms( const API::MatrixWorkspace& inputWS, API::MatrixWorkspace &integrWS ) const;
+    void integrateSpectraPointData( const API::MatrixWorkspace& inputWS, API::MatrixWorkspace &integrWS ) const;
+
+    size_t getMaxNumberOfPoints( const API::MatrixWorkspace& inputWS ) const;
 
   };
 

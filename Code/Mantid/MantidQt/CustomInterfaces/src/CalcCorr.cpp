@@ -54,7 +54,8 @@ public:
     // For each range in the list, use the slave QDoubleValidator to find out the state.
     for( auto range = m_ranges.begin(); range != m_ranges.end(); ++ range )
     {
-      assert(range->first < range->second); // Play nice.
+      if(range->first >= range->second)
+        throw std::runtime_error("Invalid range");
 
       m_slaveVal->setBottom(range->first);
       m_slaveVal->setTop(range->second);
@@ -278,10 +279,12 @@ namespace IDA
       "plotOpt = '" + uiForm().absp_cbPlotOutput->currentText() + "'\n"
       "sampleFormula = " + sampleFormula + "\n"
       "canFormula = " + canFormula + "\n"
-      "IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plot_opt=plotOpt, save=save, verbose=verbose)\n";
+      "print IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plot_opt=plotOpt, save=save, verbose=verbose)\n";
 
     QString pyOutput = runPythonCode(pyInput);
-    UNUSED_ARG(pyOutput);
+
+    // Set the result workspace for Python script export
+    m_pythonExportWsName = pyOutput.trimmed().toStdString();
   }
 
   bool CalcCorr::validate()

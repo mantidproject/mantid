@@ -29,9 +29,15 @@
  ***************************************************************************/
 #include "TableStatistics.h"
 
+#include "ApplicationWindow.h"
+#include "TSVSerialiser.h"
+#include "MantidKernel/Strings.h"
+
 #include <QList>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_statistics.h>
+
+#include <boost/algorithm/string.hpp>
 
 TableStatistics::TableStatistics(ScriptingEnv *env, ApplicationWindow *parent, Table *base, Type t, QList<int> targets)
 	: Table(env, 1, 1, "", parent, ""),
@@ -276,28 +282,109 @@ void TableStatistics::removeCol(const QString &col)
 		}
 }
 
-QString TableStatistics::saveToString(const QString &geometry, bool)
+void TableStatistics::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
 {
-	if (!d_base)
-		return Table::saveToString(geometry, false);
-		
-	QString s = "<TableStatistics>\n";
-	s += QString(objectName())+"\t";
-	s += QString(d_base->objectName()) + "\t";
-	s += QString(d_type == row ? "row" : "col") + "\t";
-	s += birthDate()+"\n";
-	s += "Targets";
-	for (QList<int>::iterator i=d_targets.begin(); i!=d_targets.end(); ++i)
-		s += "\t" + QString::number(*i);
-	s += "\n";
-	s += geometry;
-	s += saveHeader();
-	s += saveColumnWidths();
-	s += saveCommands();
-	s += saveColumnTypes();
-	s += saveReadOnlyInfo();
-	s += saveHiddenColumnsInfo();
-	s += saveComments();
-	s += "WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
-	return s + "</TableStatistics>\n";
+  Q_UNUSED(fileVersion);
+
+  TSVSerialiser tsv(lines);
+
+  if(tsv.selectLine("geometry"))
+    app->restoreWindowGeometry(app, this, QString::fromStdString(tsv.lineAsString("geometry")));
+
+  if(tsv.selectLine("header"))
+  {
+    QStringList header = QString::fromUtf8(tsv.lineAsString("header").c_str()).split("\t");
+    header.pop_front();
+    loadHeader(header);
+  }
+
+  if(tsv.selectLine("ColWidth"))
+  {
+    QStringList colWidths = QString::fromUtf8(tsv.lineAsString("ColWidth").c_str()).split("\t");
+    colWidths.pop_front();
+    setColWidths(colWidths);
+  }
+
+  if(tsv.selectLine("ColType"))
+  {
+    QStringList colTypes = QString::fromUtf8(tsv.lineAsString("ColType").c_str()).split("\t");
+    colTypes.pop_front();
+    setColumnTypes(colTypes);
+  }
+
+  if(tsv.selectLine("Comments"))
+  {
+    QStringList comments = QString::fromUtf8(tsv.lineAsString("Comments").c_str()).split("\t");
+    comments.pop_front();
+    setColComments(comments);
+  }
+
+  if(tsv.selectLine("WindowLabel"))
+  {
+    QString caption;
+    int policy;
+    tsv >> caption >> policy;
+    setWindowLabel(caption);
+    setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
+  }
+
+  if(tsv.hasSection("com"))
+  {
+    std::vector<std::string> sections = tsv.sections("com");
+    for(auto it = sections.begin(); it != sections.end(); ++it)
+    {
+      /* This is another special case because of legacy.
+       * Format: `<col nr="X">\nYYY\n</col>`
+       * where X is the row index (0..n), and YYY is the formula.
+       * YYY may span multiple lines.
+       * There may be multiple <col>s in each com section.
+       */
+      const std::string lines = *it;
+      std::vector<std::string> valVec;
+      boost::split(valVec, lines, boost::is_any_of("\n"));
+
+      for(size_t i = 0; i < valVec.size(); ++i)
+      {
+        const std::string line = valVec[i];
+        if(line.length() < 11)
+          continue;
+        const std::string colStr = line.substr(9, line.length() - 11);
+        int col;
+        Mantid::Kernel::Strings::convert<int>(colStr, col);
+        std::string formula;
+        for(++i; i < valVec.size() && valVec[i] != "</col>"; ++i)
+        {
+          //If we've already got a line, put a newline in first.
+          if(formula.length() > 0)
+            formula += "\n";
+
+          formula += valVec[i];
+        }
+        setCommand(col, QString::fromUtf8(formula.c_str()));
+      }
+    }
+  }
+}
+
+std::string TableStatistics::saveToProject(ApplicationWindow* app)
+{
+  TSVSerialiser tsv;
+  tsv.writeRaw("<TableStatistics>");
+
+  tsv.writeLine(objectName().toStdString());
+  tsv << d_base->objectName();
+  tsv << (d_type == row ? "row" : "col");
+  tsv << birthDate();
+
+  tsv.writeLine("Targets");
+	for(auto it = d_targets.begin(); it != d_targets.end(); ++it)
+		tsv << *it;
+
+  tsv.writeRaw(app->windowGeometryInfo(this));
+
+  tsv.writeRaw(saveTableMetadata());
+
+  tsv.writeLine("WindowLabel") << windowLabel() << captionPolicy();
+  tsv.writeRaw("</TableStatistics>");
+  return tsv.outputLines();
 }

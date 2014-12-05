@@ -18,7 +18,7 @@ namespace Mantid
     AsciiPointBase class which provides the main implementation for the init() & exec() methods.
     Output is tab delimited Ascii point data without dq/q and with extra header information.
 
-    Copyright &copy; 2007-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -52,7 +52,7 @@ namespace Mantid
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       ///Algorithm's version for data output overriding a virtual method
-      void data(std::ofstream & file, const std::vector<double> & XData,  bool exportDeltaQ);
+      void data(std::ofstream & file, const std::vector<double> & XData, bool exportDeltaQ = false);
 
     private:
       

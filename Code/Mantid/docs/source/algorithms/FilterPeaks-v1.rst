@@ -9,7 +9,7 @@
 Description
 -----------
 
-Filters a `PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`__ using a set number of
-queries. Outputs a filtered `PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`__.
+Filters a :ref:`PeaksWorkspace <PeaksWorkspace>` using a set number of
+queries. Outputs a filtered :ref:`PeaksWorkspace <PeaksWorkspace>`.
 
 .. categories::

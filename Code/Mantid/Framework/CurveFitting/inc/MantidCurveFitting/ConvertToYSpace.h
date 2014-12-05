@@ -24,7 +24,7 @@ namespace CurveFitting
     Takes a workspace with X axis in TOF and converts it to Y-space where the transformation is defined
     by equation (7) in http://link.aip.org/link/doi/10.1063/1.3561493?ver=pdfcov
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

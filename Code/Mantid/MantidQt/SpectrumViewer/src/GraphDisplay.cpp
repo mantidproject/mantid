@@ -45,6 +45,7 @@ GraphDisplay::GraphDisplay( QwtPlot*      graphPlot,
 
 GraphDisplay::~GraphDisplay()
 {
+  m_curve->attach(0);
   delete m_curve;
 }
 

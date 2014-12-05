@@ -21,7 +21,7 @@ namespace Geometry
   which has been defined as a gq surface in MCNPX.
   It is a realisation of the Surface object.
 
-  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
         

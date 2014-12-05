@@ -1,5 +1,5 @@
 from mantid import logger, mtd
-from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, PropertyMode
+from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, IntArrayProperty
 from mantid.simpleapi import CreateWorkspace, CopyLogs, CopySample, CopyInstrumentParameters, SaveNexusProcessed, CreateEmptyTableWorkspace, RenameWorkspace
 
@@ -11,15 +11,15 @@ import numpy as np
 class Symmetrise(PythonAlgorithm):
 
     def category(self):
-        return 'Workflow\\MIDAS;PythonAlgorithms'
+        return 'PythonAlgorithms'
 
 
     def summary(self):
-        return 'Takes an asymmetric S(Q,w) and makes it symmetric'
+        return 'Make asymmetric workspace data symmetric.'
 
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty('Sample', '', Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('Sample', '', Direction.Input),
                              doc='Sample to run with')
 
         self.declareProperty(IntArrayProperty(name='SpectraRange'),
@@ -35,10 +35,10 @@ class Symmetrise(PythonAlgorithm):
         self.declareProperty('Save', defaultValue=False,
                              doc='Switch saving result to nxs file Off/On')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                              Direction.Output), doc='Name to call the output workspace.')
 
-        self.declareProperty(WorkspaceProperty('OutputPropertiesTable', '',
+        self.declareProperty(ITableWorkspaceProperty('OutputPropertiesTable', '',
                              Direction.Output, PropertyMode.Optional), doc='Name to call the properties output table workspace.')
 
 
@@ -88,12 +88,20 @@ class Symmetrise(PythonAlgorithm):
             logger.notice('Output array LR split index = %d' % output_cut_index)
 
         x_unit = mtd[self._sample].getAxis(0).getUnit().unitID()
+        v_unit = mtd[self._sample].getAxis(1).getUnit().unitID()
+        v_axis_data = mtd[self._sample].getAxis(1).extractValues()
+
+        # Take the values we need from the original vertical axis
+        min_spectrum_index = mtd[self._sample].getIndexFromSpectrumNumber(int(self._spectra_range[0]))
+        max_spectrum_index = mtd[self._sample].getIndexFromSpectrumNumber(int(self._spectra_range[1]))
+        new_v_axis_data = v_axis_data[min_spectrum_index:max_spectrum_index + 1]
 
         # Create an empty workspace with enough storage for the new data
         zeros = np.zeros(new_array_len * num_symm_spectra)
         CreateWorkspace(OutputWorkspace=temp_ws_name,
                         DataX=zeros, DataY=zeros, DataE=zeros,
                         NSpec=int(num_symm_spectra),
+                        VerticalAxisUnit=v_unit, VerticalAxisValues=new_v_axis_data,
                         UnitX=x_unit)
 
         # Copy logs and properties from sample workspace

@@ -509,8 +509,8 @@ static PoldiPeakCollection_sptr createPoldiPeakCollectionNormalized()
 {
     PoldiPeakCollection_sptr peaks(new PoldiPeakCollection(PoldiPeakCollection::Integral));
     peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.108644), UncertainValue(1.926395655), UncertainValue(0.002475747)));
-    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.920200), UncertainValue(4.773980141), UncertainValue(0.002444439)));
-    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.637539), UncertainValue(9.370919228), UncertainValue(0.002516417)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.637539), UncertainValue(4.773980141), UncertainValue(0.002516417)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.920200), UncertainValue(9.370919228), UncertainValue(0.002444439)));
     peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.245958), UncertainValue(1.758037806), UncertainValue(0.002696334)));
 
     peaks->setProfileFunctionName("Gaussian");

@@ -4,6 +4,8 @@
 """
 import time
 from reduction_gui.reduction.scripter import BaseReductionScripter
+import sys
+
 # Check whether Mantid is available
 try:
     import mantidplot

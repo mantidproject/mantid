@@ -40,6 +40,7 @@
 #include "MantidQtAPI/QwtRasterDataMD.h"
 #include "MantidQtAPI/SignalRange.h"
 #include "MantidAPI/IMDIterator.h"
+#include "TSVSerialiser.h"
 
 #include <iostream>
 #include <numeric>
@@ -639,62 +640,6 @@ bool Spectrogram::selectedLabels(const QPoint& pos)
   return false;
 }
 
-QString Spectrogram::saveToString()
-{
-  QString s = "<spectrogram>\n";
-  //s += "\t<matrix>" + QString(d_matrix->objectName()) + "</matrix>\n";
-
-  if (color_map_policy != Custom)
-    s += "\t<ColorPolicy>" + QString::number(color_map_policy) + "</ColorPolicy>\n";
-  else
-  {
-    s += "\t<ColorMap>\n";
-    if(!mCurrentColorMap.isEmpty())s+="\t\tFileName\t"+mCurrentColorMap+"\n";
-    s += "\t\t<Mode>" + QString::number(color_map.mode()) + "</Mode>\n";
-    s += "\t\t<MinColor>" + color_map.color1().name() + "</MinColor>\n";
-    s += "\t\t<MaxColor>" + color_map.color2().name() + "</MaxColor>\n";
-    QwtArray <double> colors = color_map.colorStops();
-    int stops = (int)colors.size();
-    s += "\t\t<ColorStops>" + QString::number(stops - 2) + "</ColorStops>\n";
-    for (int i = 1; i < stops - 1; i++)
-    {
-      s += "\t\t<Stop>" + QString::number(colors[i]) + "\t";
-      s += QColor(color_map.rgb(QwtDoubleInterval(0,1), colors[i])).name();
-      s += "</Stop>\n";
-    }
-    s += "\t</ColorMap>\n";
-  }
-  s += "\t<Image>"+QString::number(testDisplayMode(QwtPlotSpectrogram::ImageMode))+"</Image>\n";
-
-  bool contourLines = testDisplayMode(QwtPlotSpectrogram::ContourMode);
-  s += "\t<ContourLines>"+QString::number(contourLines)+"</ContourLines>\n";
-  if (contourLines)
-  {
-    s += "\t\t<Levels>"+QString::number(levels())+"</Levels>\n";
-    bool defaultPen = defaultContourPen().style() != Qt::NoPen;
-    if (defaultPen)
-    {s += "\t\t<DefaultPen>"+QString::number(defaultPen)+"</DefaultPen>\n";
-    s += "\t\t\t<PenColor>"+defaultContourPen().color().name()+"</PenColor>\n";
-    s += "\t\t\t<PenWidth>"+QString::number(defaultContourPen().widthF())+"</PenWidth>\n";
-    s += "\t\t\t<PenStyle>"+QString::number(defaultContourPen().style() - 1)+"</PenStyle>\n";
-    }
-    else if(!d_color_map_pen)
-    {s += "\t\t<CustomPen>"+QString::number(!defaultPen)+"</CustomPen>\n";
-    }
-    else
-      s += "\t\t<ColormapPen>"+QString::number(!defaultPen)+"</ColormapPen>\n";
-  }
-  QwtScaleWidget *colorAxis = plot()->axisWidget(color_axis);
-  if (colorAxis && colorAxis->isColorBarEnabled())
-  {
-    s += "\t<ColorBar>\n\t\t<axis>" + QString::number(color_axis) + "</axis>\n";
-    s += "\t\t<width>" + QString::number(colorAxis->colorBarWidth()) + "</width>\n";
-    s += "\t</ColorBar>\n";
-  }
-  s += "\t<Visible>"+ QString::number(isVisible()) + "</Visible>\n";
-  s+="\t<IntensityChanged>"+QString::number(isIntensityChanged())+"</IntensityChanged>\n";
-  return s+"</spectrogram>\n";
-}
 /**
  * Returns a reference to the constant colormap
  */
@@ -1137,3 +1082,158 @@ QImage Spectrogram::renderImage(
   return image;
 }
 
+void Spectrogram::loadFromProject(const std::string& lines)
+{
+  using namespace Mantid::Kernel;
+
+  TSVSerialiser tsv(lines);
+
+  if(tsv.hasSection("ColorPolicy"))
+  {
+    std::string policyStr = tsv.sections("ColorPolicy").front();
+    int policy = 0;
+    Strings::convert<int>(policyStr, policy);
+    if(policy == GrayScale)
+      setGrayScale();
+    else if(policy == Default)
+      setDefaultColorMap();
+  }
+  else if(tsv.hasSection("ColorMap"))
+  {
+    const std::string cmStr = tsv.sections("ColorMap").front();
+    TSVSerialiser cm(cmStr);
+
+    std::string filename;
+    if(cm.selectLine("FileName"))
+        cm >> filename;
+
+    const std::string modeStr = cm.sections("Mode")[0];
+    const std::string minColStr = cm.sections("MinColor")[0];
+    const std::string maxColStr = cm.sections("MaxColor")[0];
+    std::vector<std::string> stopVec = cm.sections("Stop");
+
+    int mode;
+    Mantid::Kernel::Strings::convert<int>(modeStr, mode);
+    QColor c1(QString::fromStdString(minColStr));
+    QColor c2(QString::fromStdString(maxColStr));
+
+    QwtLinearColorMap colorMap(c1, c2);
+    colorMap.setMode((QwtLinearColorMap::Mode)mode);
+
+    for(auto it = stopVec.begin(); it != stopVec.end(); ++it)
+    {
+      std::vector<std::string> stopParts;
+      double pos;
+      boost::split(stopParts, *it, boost::is_any_of("\t"));
+      Mantid::Kernel::Strings::convert<double>(stopParts[0], pos);
+      colorMap.addColorStop(pos, QColor(QString::fromStdString(stopParts[1])));
+    }
+
+    setCustomColorMap(colorMap);
+  }
+
+  if(tsv.hasSection("Image"))
+  {
+    std::string imgStr = tsv.sections("Image").front();
+    int imageMode = 0;
+    Strings::convert<int>(imgStr, imageMode);
+    setDisplayMode(QwtPlotSpectrogram::ImageMode, (bool)imageMode);
+  }
+
+  if(tsv.hasSection("ContourLines"))
+  {
+    std::string clStr = tsv.sections("ContourLines").front();
+    int contours = 0;
+    Strings::convert<int>(clStr, contours);
+    setDisplayMode(QwtPlotSpectrogram::ContourMode, (bool)contours);
+  }
+
+  if(tsv.hasSection("ColorBar"))
+  {
+    const std::string cbStr = tsv.sections("ColorBar").front();
+    TSVSerialiser cb(cbStr);
+
+    std::string axisStr = cb.sections("axis")[0];
+    std::string widthStr = cb.sections("width")[0];
+    int axis, width;
+    Mantid::Kernel::Strings::convert<int>(axisStr, axis);
+    Mantid::Kernel::Strings::convert<int>(widthStr, width);
+
+    QwtScaleWidget* colorAxis = plot()->axisWidget(axis);
+    if(colorAxis)
+    {
+      colorAxis->setColorBarWidth(width);
+      colorAxis->setColorBarEnabled(true);
+    }
+  }
+
+  if(tsv.hasSection("Visible"))
+  {
+    std::string visibleStr = tsv.sections("Visible").front();
+    int visible = 1;
+    Strings::convert<int>(visibleStr, visible);
+    setVisible(visible);
+  }
+
+  if(tsv.hasSection("IntensityChanged"))
+  {
+    std::string intensityChangedStr = tsv.sections("IntensityChanged").front();
+    int iC = 0;
+    Strings::convert<int>(intensityChangedStr, iC);
+    setIntensityChange(iC);
+  }
+}
+
+std::string Spectrogram::saveToProject()
+{
+  using namespace Mantid::Kernel;
+  TSVSerialiser tsv;
+  tsv.writeRaw("<spectrogram>");
+  if(!d_wsName.empty())
+    tsv.writeLine("workspace") << d_wsName;
+  if(d_matrix)
+    tsv.writeLine("matrix") << d_matrix->name().toStdString();
+
+  if (color_map_policy != Custom)
+    tsv.writeInlineSection("ColorPolicy", Strings::toString<int>(color_map_policy));
+  else
+  {
+    TSVSerialiser cm;
+    if(!mCurrentColorMap.isEmpty())
+      cm.writeLine("FileName") << mCurrentColorMap.toStdString();
+    cm.writeInlineSection("Mode", Strings::toString<int>(color_map.mode()));
+    cm.writeInlineSection("MinColor", color_map.color1().name().toStdString());
+    cm.writeInlineSection("MaxColor", color_map.color2().name().toStdString());
+
+    QwtArray <double> colors = color_map.colorStops();
+    int stops = (int)colors.size();
+    cm.writeInlineSection("ColorStops", Strings::toString<int>(stops - 2));
+    for(int i = 1; i < stops - 1; i++)
+    {
+      QString stopStr = QString::number(colors[i]) + "\t";
+      stopStr += QColor(color_map.rgb(QwtDoubleInterval(0,1), colors[i])).name();
+      cm.writeInlineSection("Stop", stopStr.toStdString());
+    }
+    tsv.writeSection("ColorMap", cm.outputLines());
+  }
+
+  tsv.writeInlineSection("Image", Strings::toString<int>(testDisplayMode(QwtPlotSpectrogram::ImageMode)));
+
+  const bool contourLines = testDisplayMode(QwtPlotSpectrogram::ContourMode);
+  tsv.writeInlineSection("ContourLines", contourLines ? "1" : "0");
+
+  QwtScaleWidget *colorAxis = plot()->axisWidget(color_axis);
+  if(colorAxis && colorAxis->isColorBarEnabled())
+  {
+    TSVSerialiser cb;
+    cb.writeInlineSection("axis", Strings::toString<int>(color_axis));
+    cb.writeInlineSection("width", Strings::toString<int>(colorAxis->colorBarWidth()));
+    tsv.writeSection("ColorBar", cb.outputLines());
+  }
+
+  tsv.writeInlineSection("Visible", isVisible() ? "1" : "0");
+  tsv.writeInlineSection("IntensityChanged", isIntensityChanged() ? "1" : "0");
+
+  tsv.writeRaw("</spectrogram>");
+  return tsv.outputLines();
+}
