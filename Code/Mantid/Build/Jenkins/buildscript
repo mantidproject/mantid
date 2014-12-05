@@ -96,6 +96,18 @@ fi
 $SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DDOCS_HTML=ON ${PACKAGINGVARS} ../Code/Mantid"
 
 ###############################################################################
+# Coverity build should exit early
+###############################################################################
+if [[ ${JOB_NAME} == *coverity_build_and_submit* ]]; then
+  ${COVERITY_DIR}/cov-build --dir cov-int scl enable mantidlibs "make -j${BUILD_THREADS}"
+  tar czvf mantid.tgz cov-int
+  status=$(curl --form token=$COVERITY_TOKEN --form email=mantidproject@gmail.com \
+       --form file=@mantid.tgz --form version=$GIT_COMMIT \
+       https://scan.coverity.com/builds?project=mantidproject%2Fmantid)
+  return $status
+fi
+
+###############################################################################
 # Build step
 ###############################################################################
 $SCL_ON_RHEL6 "make -j$BUILD_THREADS"
