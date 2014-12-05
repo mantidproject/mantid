@@ -85,7 +85,7 @@ void SortTableWorkspaceDialog::parseInput()
 * Tie static widgets to their properties
 * @param readHistory :: If true then the history will be re read.
 */
-void SortTableWorkspaceDialog::tieStaticWidgets(const bool readHistory)
+void SortTableWorkspaceDialog::tieStaticWidgets(const bool)
 {
   QStringList allowedTypes;
   allowedTypes << "TableWorkspace";
