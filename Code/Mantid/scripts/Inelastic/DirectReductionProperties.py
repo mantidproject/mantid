@@ -54,7 +54,8 @@ class IncidentEnergy(object):
        
        # 
        if isinstance(instance._incident_energy,list):
-           for en in self._incident_energy:
+           inc_energy = instance._incident_energy
+           for en in inc_energy:
                if en<= 0:
                  raise KeyError("Incident energy have to be positive number of list of positive numbers."+
                            " For input argument {0} got negative value {1}".format(value,en))     
