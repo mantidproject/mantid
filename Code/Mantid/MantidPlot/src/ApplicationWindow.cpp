@@ -4671,33 +4671,6 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     }
   }
 
-  if(tsv.hasSection("multiLayer"))
-  {
-    std::vector<std::string> multiLayer = tsv.sections("multiLayer");
-    for(auto it = multiLayer.begin(); it != multiLayer.end(); ++it)
-    {
-      openMultiLayer(*it, fileVersion);
-    }
-  }
-
-  if(tsv.hasSection("SurfacePlot"))
-  {
-    std::vector<std::string> plotSections = tsv.sections("SurfacePlot");
-    for(auto it = plotSections.begin(); it != plotSections.end(); ++it)
-    {
-      openSurfacePlot(*it, fileVersion);
-    }
-  }
-
-  if(tsv.hasSection("log"))
-  {
-    std::vector<std::string> logSections = tsv.sections("log");
-    for(auto it = logSections.begin(); it != logSections.end(); ++it)
-    {
-      currentFolder()->appendLogInfo(QString::fromStdString(*it));
-    }
-  }
-
   if(tsv.hasSection("table"))
   {
     std::vector<std::string> tableSections = tsv.sections("table");
@@ -4722,6 +4695,33 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     for(auto it = matrixSections.begin(); it != matrixSections.end(); ++it)
     {
       openMatrix(*it, fileVersion);
+    }
+  }
+
+  if(tsv.hasSection("multiLayer"))
+  {
+    std::vector<std::string> multiLayer = tsv.sections("multiLayer");
+    for(auto it = multiLayer.begin(); it != multiLayer.end(); ++it)
+    {
+      openMultiLayer(*it, fileVersion);
+    }
+  }
+
+  if(tsv.hasSection("SurfacePlot"))
+  {
+    std::vector<std::string> plotSections = tsv.sections("SurfacePlot");
+    for(auto it = plotSections.begin(); it != plotSections.end(); ++it)
+    {
+      openSurfacePlot(*it, fileVersion);
+    }
+  }
+
+  if(tsv.hasSection("log"))
+  {
+    std::vector<std::string> logSections = tsv.sections("log");
+    for(auto it = logSections.begin(); it != logSections.end(); ++it)
+    {
+      currentFolder()->appendLogInfo(QString::fromStdString(*it));
     }
   }
 
