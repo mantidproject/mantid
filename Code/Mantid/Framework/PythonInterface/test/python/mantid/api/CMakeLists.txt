@@ -10,7 +10,6 @@ set ( TEST_PY_FILES
   AnalysisDataServiceTest.py
   AxisTest.py
   CatalogManagerTest.py
-  CutMDTest.py
   DataProcessorAlgorithmTest.py
   DeprecatedAlgorithmCheckerTest.py
   ExperimentInfoTest.py
