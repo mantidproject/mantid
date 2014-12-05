@@ -1,4 +1,5 @@
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
+#include <math.h>
 
 namespace Mantid
 {
