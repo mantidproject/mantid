@@ -345,10 +345,6 @@ namespace MDAlgorithms
             double scaleFactor = peakVolume / bgVolume;
             bgSignal *= scaleFactor;
             bgErrorSquared *= scaleFactor * scaleFactor;
-            // Adjust the integrated values.
-            signal -= bgSignal;
-            // But we add the errors together
-            errorSquared += bgErrorSquared;
       }
     }
       else
@@ -415,10 +411,6 @@ namespace MDAlgorithms
             double scaleFactor = peakVolume / bgVolume;
             bgSignal *= scaleFactor;
             bgErrorSquared *= scaleFactor * scaleFactor;
-            // Adjust the integrated values.
-            signal -= bgSignal;
-            // But we add the errors together
-            errorSquared += bgErrorSquared;
       }
       else
       {
@@ -556,8 +548,8 @@ namespace MDAlgorithms
       // Save it back in the peak object.
       if (signal != 0. || replaceIntensity)
       {
-        p.setIntensity(signal - ratio * background_total);
-        p.setSigmaIntensity( sqrt(errorSquared + ratio * ratio * std::fabs(background_total)) );
+        p.setIntensity(signal - ratio * background_total - bgSignal);
+        p.setSigmaIntensity( sqrt(errorSquared + ratio * ratio * std::fabs(background_total) + bgErrorSquared) );
       }
 
       g_log.information() << "Peak " << i << " at " << pos << ": signal "
