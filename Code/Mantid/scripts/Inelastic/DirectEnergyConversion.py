@@ -760,7 +760,7 @@ class DirectEnergyConversion(object):
         """
         # Old interface support
         prop_man = self.prop_man;
-        prop_man.log('******  Run absolute units corrections ****************************************************','notice')
+        prop_man.log('*** Running absolute units corrections ****************************************************','notice')
 
         if prop_man.mono_correction_factor:
             absnorm_factor=float(prop_man.mono_correction_factor)
