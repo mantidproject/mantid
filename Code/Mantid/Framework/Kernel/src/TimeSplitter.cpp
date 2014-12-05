@@ -52,8 +52,7 @@ int SplittingInterval::index() const
 }
 
 /// Return true if the b SplittingInterval overlaps with this one.
-double SplittingInterval::overlaps(const SplittingInterval& b) const
-{
+bool SplittingInterval::overlaps(const SplittingInterval &b) const {
   return ((b.m_start < this->m_stop) && (b.m_start >= this->m_start))
       || ((b.m_stop < this->m_stop) && (b.m_stop >= this->m_start))
       || ((this->m_start < b.m_stop) && (this->m_start >= b.m_start))
