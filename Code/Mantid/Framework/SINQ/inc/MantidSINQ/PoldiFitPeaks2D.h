@@ -4,23 +4,25 @@
 #include "MantidKernel/System.h"
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h"
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
-
 
 namespace Mantid
 {
 namespace Poldi
 {
 
-/** PoldiCalculateSpectrum2D
+/** PoldiFitPeaks2D
 
-    An Algorithm to calculate a POLDI 2D-spectrum from a given table containing POLDI
+    An Algorithm to fit a POLDI 2D-spectrum from a given table containing POLDI
     peak data. A MatrixWorkspace containing a proper POLDI instrument definition is required
     to determine output workspace dimensions etc.
+
+    In order to use the algorithm for calculating a theoretical spectrum,
+    the MaximumIterations property can be set to 0.
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 16/05/2014
@@ -46,11 +48,11 @@ namespace Poldi
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-class MANTID_SINQ_DLL PoldiCalculateSpectrum2D  : public API::Algorithm
+class MANTID_SINQ_DLL PoldiFitPeaks2D  : public API::Algorithm
 {
 public:
-    PoldiCalculateSpectrum2D();
-    virtual ~PoldiCalculateSpectrum2D();
+    PoldiFitPeaks2D();
+    virtual ~PoldiFitPeaks2D();
     
     virtual const std::string name() const;
     virtual int version() const;
@@ -62,11 +64,17 @@ protected:
     PoldiPeakCollection_sptr getPeakCollection(const DataObjects::TableWorkspace_sptr &peakTable) const;
     PoldiPeakCollection_sptr getIntegratedPeakCollection(const PoldiPeakCollection_sptr &rawPeakCollection) const;
     PoldiPeakCollection_sptr getNormalizedPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const;
+    PoldiPeakCollection_sptr getCountPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const;
 
+    void assignMillerIndices(const PoldiPeakCollection_sptr &from, PoldiPeakCollection_sptr &to) const;
+
+    PoldiPeakCollection_sptr getPeakCollectionFromFunction(const API::IFunction_sptr &fitFunction) const;
     boost::shared_ptr<Poldi2DFunction> getFunctionFromPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const;
     void addBackgroundTerms(boost::shared_ptr<Poldi2DFunction> poldi2DFunction) const;
 
-    API::MatrixWorkspace_sptr calculateSpectrum(const PoldiPeakCollection_sptr &peakCollection, const API::MatrixWorkspace_sptr &matrixWorkspace);
+    API::IAlgorithm_sptr calculateSpectrum(const PoldiPeakCollection_sptr &peakCollection, const API::MatrixWorkspace_sptr &matrixWorkspace);
+    API::MatrixWorkspace_sptr getWorkspace(const API::IAlgorithm_sptr &fitAlgorithm) const;
+    API::IFunction_sptr getFunction(const API::IAlgorithm_sptr &fitAlgorithm) const;
 
     void setTimeTransformerFromInstrument(const PoldiInstrumentAdapter_sptr &poldiInstrument);
     void setTimeTransformer(const PoldiTimeTransformer_sptr &poldiTimeTransformer);

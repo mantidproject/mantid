@@ -33,8 +33,18 @@ void PhaseQuadMuon::init()
   declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>("PhaseTable", "", Direction::Input, API::PropertyMode::Optional), 
     "Name of the Phase Table");
 
+  declareProperty(new PropertyWithValue<int>("PulseOver", 60, Direction::Input), 
+    "Bin number when the pulse is over. Mandatory if PhaseTable is provided");
+
+  declareProperty(new PropertyWithValue<double>("MeanLag", 127.702, Direction::Input), 
+    "Average Lag value over detectors");
+
+  declareProperty(new PropertyWithValue<bool>("DoublePulse", false, Direction::Input), 
+    "If signal is double-pulse");
+
   declareProperty(new API::FileProperty("PhaseList", "", API::FileProperty::OptionalLoad, ".INF", Direction::Input),
     "A space-delimited text file with a six-row header");
+
 }
 
 /** Executes the algorithm
@@ -48,34 +58,60 @@ void PhaseQuadMuon::exec()
   // Get input phase table
   API::ITableWorkspace_sptr phaseTable = getProperty("PhaseTable");
 
-  // Get input phase table
+  // Get input phase list
   std::string filename = getPropertyValue("PhaseList");
 
+  // Set number of histograms
+  m_nHist = static_cast<int>(inputWs->getNumberHistograms());
+  // Set number of data points per histogram
+  m_nData = static_cast<int>(inputWs->getSpectrum(0)->readY().size());
+
+  // Not necessary as we will be converting back to micro secs
+  // Just to make sure that the code is doing exactly the same as the VAX c code
+  // BUT the method also shifts the spectra, and we definitely need this shift
+  convertToNanoSecs(inputWs);
+
+  // Set time resolution
+  m_res = inputWs->getSpectrum(0)->readX()[1] - inputWs->getSpectrum(0)->readX()[0];
+
+  // Create a deadTimeTable to apply deadtime corrections. It will be filled by loadPhaseTable or loadPhaseList
+  API::ITableWorkspace_sptr deadTimeTable = API::WorkspaceFactory::Instance().createTable();
+  deadTimeTable->addColumn("int","Spectrum no");
+  deadTimeTable->addColumn("double","Deadtime");
+
+  // Check that either phaseTable or PhaseList has been provided
   if ( phaseTable )
   {
-    loadPhaseTable(phaseTable);
+    loadPhaseTable(phaseTable, deadTimeTable);
+    // If phaseTable was supplied, get m_tPulseOver, m_meanLag
+    m_tPulseOver = getProperty("PulseOver");
+    m_meanLag = getProperty("MeanLag");
   }
   else if ( filename != "" )
   {
-    loadPhaseList ( filename );
+    loadPhaseList ( filename, deadTimeTable );
   }
   else
   {
     throw std::runtime_error("PhaseQuad: You must provide either PhaseTable or PhaseList");
   }
 
-  // Set number of data points per histogram
-  m_nData = static_cast<int>(inputWs->getSpectrum(0)->readY().size());
-
-  // Check number of histograms in inputWs match number of detectors in phase table
-  if (m_nHist != static_cast<int>(inputWs->getNumberHistograms()))
+  // Check if signal is double-pulse and set m_tPulseOver accordingly
+  m_isDouble = getProperty("DoublePulse");
+  double a= m_meanLag + m_pulseTail;
+  if (m_isDouble)
   {
-    throw std::runtime_error("PhaseQuad: Number of histograms in phase table does not match number of spectra in workspace");
+    a += m_pulseTwo*1000;
   }
+  a/=m_res;
+  m_tPulseOver = static_cast<int>(a);
 
   // Create temporary workspace to perform operations on it
   API::MatrixWorkspace_sptr tempWs = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
     API::WorkspaceFactory::Instance().create("Workspace2D", m_nHist, m_nData+1, m_nData));
+
+  // Apply deadtime corrections and store results in tempWs
+  deadTimeCorrection(inputWs,deadTimeTable,tempWs);
 
   // Create output workspace with two spectra (squashograms)
   API::MatrixWorkspace_sptr outputWs = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
@@ -84,51 +120,134 @@ void PhaseQuadMuon::exec()
 
   // Rescale detector efficiency to maximum value
   normaliseAlphas(m_histData);
+
   // Remove exponential decay and save results into tempWs
-  loseExponentialDecay(inputWs,tempWs);
+  loseExponentialDecay(tempWs);
+
   // Compute squashograms
   squash (tempWs, outputWs);
+
   // Regain exponential decay
   regainExponential(outputWs);
   
+  // Convert and shift output and input workspaces
+  convertToMicroSecs(inputWs);
+  convertToMicroSecs(outputWs);
+
   setProperty("OutputWorkspace", outputWs);
 
-  // Remove temporary workspace tempWs
-  Mantid::API::FrameworkManager::Instance().deleteWorkspace("");
+}
+
+//----------------------------------------------------------------------------------------------
+/** Convert X units from micro-secs to nano-secs and shift to start at t=0
+* @param inputWs :: [input/output] workspace to convert
+*/
+void PhaseQuadMuon::convertToNanoSecs (API::MatrixWorkspace_sptr inputWs)
+{
+  for (size_t h=0; h<inputWs->getNumberHistograms(); h++)
+  {
+    auto spec = inputWs->getSpectrum(h);
+    m_tMin = spec->dataX()[0];
+    for (int t=0; t<m_nData+1; t++)
+    {
+     spec->dataX()[t] = ( spec->dataX()[t] - m_tMin ) * 1000;
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------------
+/** Convert X units from nano-secs to micro-secs and shift to start at m_tMin
+* @param inputWs :: [input/output] workspace to convert
+*/
+void PhaseQuadMuon::convertToMicroSecs (API::MatrixWorkspace_sptr inputWs)
+{
+  for (size_t h=0; h<inputWs->getNumberHistograms(); h++)
+  {
+    auto spec = inputWs->getSpectrum(h);
+    for (int t=0; t<m_nData+1; t++)
+    {
+     spec->dataX()[t] = spec->dataX()[t]/1000+m_tMin;
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------------
+/** Apply dead time correction to spectra in inputWs and create temporary workspace with corrected spectra
+* @param inputWs :: [input] input workspace containing spectra to correct
+* @param deadTimeTable :: [input] table containing dead times
+* @param tempWs :: [output] workspace containing corrected spectra
+*/
+void PhaseQuadMuon::deadTimeCorrection(API::MatrixWorkspace_sptr inputWs, API::ITableWorkspace_sptr deadTimeTable, API::MatrixWorkspace_sptr& tempWs)
+{
+
+  // Apply correction only from t = m_tPulseOver
+  // To do so, we first apply corrections to the whole spectrum (ApplyDeadTimeCorr
+  // does not allow to select a range in the spectrum)
+  // Then we recover counts from 0 to m_tPulseOver
+
+  auto alg = this->createChildAlgorithm("ApplyDeadTimeCorr",-1,-1);
+  alg->initialize();
+  alg->setProperty("DeadTimeTable", deadTimeTable);
+  alg->setPropertyValue("InputWorkspace", inputWs->getName());
+  alg->setPropertyValue("OutputWorkspace", inputWs->getName()+"_deadtime");
+  bool sucDeadTime = alg->execute();
+  if (!sucDeadTime)
+  {
+    g_log.error() << "PhaseQuad: Unable to apply dead time corrections" << std::endl;
+    throw std::runtime_error("PhaseQuad: Unable to apply dead time corrections");
+  }
+  tempWs = alg->getProperty("OutputWorkspace");
+
+  // Now recover counts from t=0 to m_tPulseOver
+  // Errors are set to m_bigNumber
+  for (int h=0; h<m_nHist; h++)
+  {
+    auto specOld = inputWs->getSpectrum(h);
+    auto specNew = tempWs->getSpectrum(h);
+
+    for (int t=0; t<m_tPulseOver; t++)
+    {
+      specNew->dataY()[t] = specOld->dataY()[t];
+      specNew->dataE()[t] = m_bigNumber;
+    }
+  }
+
 }
 
 //----------------------------------------------------------------------------------------------
 /** Load PhaseTable file to a vector of HistData.
 * @param phaseTable :: [input] phase table containing detector info
+* @param deadTimeTable :: [output] phase table containing dead times
 */
-void PhaseQuadMuon::loadPhaseTable(API::ITableWorkspace_sptr phaseTable)
+void PhaseQuadMuon::loadPhaseTable(API::ITableWorkspace_sptr phaseTable, API::ITableWorkspace_sptr deadTimeTable)
 {
   if ( phaseTable->rowCount() )
   {
-    if ( phaseTable->columnCount()<3 )
+    if ( phaseTable->columnCount()<4 )
     {
-      throw std::invalid_argument("PhaseQuad: PhaseTable must contain at least three columns");
+      throw std::invalid_argument("PhaseQuad: PhaseTable must contain at least four columns");
     }
 
-    m_nHist = static_cast<int>(phaseTable->rowCount());
+    // Check number of histograms in inputWs match number of detectors in phase table
+    if (m_nHist != static_cast<int>(phaseTable->rowCount()))
+    {
+      throw std::runtime_error("PhaseQuad: Number of histograms in phase table does not match number of spectra in workspace");
+    }
 
     for (size_t i=0; i<phaseTable->rowCount(); ++i)
     {
       API::TableRow phaseRow = phaseTable->getRow(i);
 
+      // The first three columns go to m_histData
       HistData tempHist;
+      tempHist.detOK = phaseRow.Bool(0);
       tempHist.alpha = phaseRow.Double(1);
       tempHist.phi   = phaseRow.Double(2);
-
-      // Read first column as double
-      // If it is exactly 0, set detOK to false
-      // Set detOK to true otherwise
-      if ( phaseRow.Double(0)==0 )
-        tempHist.detOK = false;
-      else
-        tempHist.detOK = true;
-
       m_histData.push_back(tempHist);
+
+      // The last column goes to deadTimeTable
+      API::TableRow deadRow = deadTimeTable->appendRow();
+      deadRow << static_cast<int>(i)+1 << phaseRow.Double(3);
     }
 
   }
@@ -140,10 +259,11 @@ void PhaseQuadMuon::loadPhaseTable(API::ITableWorkspace_sptr phaseTable)
 }
 
 //----------------------------------------------------------------------------------------------
-/** Load PhaseTable file to a vector of HistData.
+/** Load PhaseList file to a vector of HistData and a deadTimeTable.
 * @param filename :: [input] phase list .inf filename
+* @param deadTimeTable :: [output] table containing dead times
 */
-void PhaseQuadMuon::loadPhaseList(const std::string& filename )
+void PhaseQuadMuon::loadPhaseList(const std::string& filename, API::ITableWorkspace_sptr deadTimeTable )
 {
 
   std::ifstream input(filename.c_str(), std::ios_base::in);
@@ -174,26 +294,37 @@ void PhaseQuadMuon::loadPhaseList(const std::string& filename )
       std::getline( input, line );
 
       // Read first useful line
-      input >> m_nHist >> m_tValid >> m_tNoPulse >> m_meanLag;
+      int nHist;
+      input >> nHist >> m_tValid >> m_tPulseOver >> m_meanLag;
+      if (m_nHist!=nHist)
+      {
+        throw std::runtime_error("PhaseQuad: Number of histograms in phase list does not match number of spectra in workspace");
+      }
 
       // Read histogram data
       int cont=0;
       HistData tempData;
-      while( input >> tempData.detOK >> tempData.alpha >> tempData.phi >> tempData.lag >> tempData.dead >> tempData.deadm )
+      double lag, dead, deadm;
+      while( input >> tempData.detOK >> tempData.alpha >> tempData.phi >> lag >> dead >> deadm )
       {
         m_histData.push_back (tempData);
         cont++;
+
+        // Add dead time to deadTimeTable
+        API::TableRow row = deadTimeTable->appendRow();
+        row << cont << dead;
+
       }
 
       if ( cont != m_nHist )
       {
         if ( cont < m_nHist )
         {
-          throw Exception::FileError("PhaseQuad: Lines missing in phase table ", filename);
+          throw Exception::FileError("PhaseQuad: Lines missing in phase list", filename);
         }
         else
         {
-          throw Exception::FileError("PhaseQuad: Extra lines in phase table ", filename);
+          throw Exception::FileError("PhaseQuad: Extra lines in phase list", filename);
         }
       }
 
@@ -202,7 +333,7 @@ void PhaseQuadMuon::loadPhaseList(const std::string& filename )
   else
   {
     // Throw exception if file cannot be opened
-    throw std::runtime_error("PhaseQuad: Unable to open PhaseTable");
+    throw std::runtime_error("PhaseQuad: Unable to open PhaseList");
   }
 
 }
@@ -235,51 +366,58 @@ void PhaseQuadMuon::normaliseAlphas (std::vector<HistData>& histData)
 
 //----------------------------------------------------------------------------------------------
 /** Remove exponential decay from input histograms, i.e., calculate asymmetry
-* @param inputWs :: input workspace containing the spectra
-* @param outputWs :: output workspace to hold temporary results
+* @param tempWs :: workspace containing the spectra to remove exponential from
 */
-void PhaseQuadMuon::loseExponentialDecay (API::MatrixWorkspace_sptr inputWs, API::MatrixWorkspace_sptr outputWs)
+void PhaseQuadMuon::loseExponentialDecay (API::MatrixWorkspace_sptr tempWs)
 {
-  for (size_t h=0; h<inputWs->getNumberHistograms(); h++)
+  for (size_t h=0; h<tempWs->getNumberHistograms(); h++)
   {
-    auto specIn = inputWs->getSpectrum(h);
-    auto specOut = outputWs->getSpectrum(h);
+    auto specIn = tempWs->getSpectrum(h);
+    MantidVec outX, outY, outE;
+    MantidVec inX, inY, inE;
 
-    specOut->dataX()=specIn->readX();
+    inX = specIn->readX();
+    inY = specIn->readY();
+    inE = specIn->readE();
+    outX= specIn->readX();
+    outY= specIn->readY();
+    outE= specIn->readE();
+
 
     for(int i=0; i<m_nData; i++)
     {
-      if ( specIn->readX()[i]>=0 )
-      {
-        double usey = specIn->readY()[i];
-        double oops = ( (usey<=0) || (specIn->readE()[i]>=m_bigNumber));
-        specOut->dataY()[i] = oops ? 0 : log(usey);
-        specOut->dataE()[i] = oops ? m_bigNumber : specIn->readE()[i]/usey;
-      }
+      double usey = specIn->readY()[i];
+      double oops = ( (usey<=0) || (specIn->readE()[i]>=m_bigNumber));
+      outY[i] = oops ? 0 : log(usey);
+      outE[i] = oops ? m_bigNumber : specIn->readE()[i]/usey;
     }
 
-    double s, sx, sy, sig;
+    double s, sx, sy;
     s = sx = sy =0;
     for (int i=0; i<m_nData; i++)
     {
-      if ( specIn->readX()[i]>=0 )
-      {
-        sig = specOut->readE()[i]*specOut->readE()[i];
-        s += 1./sig;
-        sx+= specOut->readX()[i]/sig;
-        sy+= specOut->readY()[i]/sig;
-      }
+      double sig;
+      sig = outE[i]*outE[i];
+      s += 1./sig;
+      sx+= outX[i]/sig;
+      sy+= outY[i]/sig;
     }
-    double N0 = (sy+sx/m_muLife)/s;
+    double N0 = (sy+sx/m_muLife/1000)/s;
     N0=exp(N0);
+    m_histData[h].n0=N0;
 
     for (int i=0; i<m_nData; i++)
     {
-      if ( specIn->readX()[i]>=0 )
+      specIn->dataY()[i] = inY[i] - N0 *exp(-outX[i]/m_muLife/1000);
+      if (i<m_tPulseOver )
       {
-        specOut->dataY()[i] = specIn->dataY()[i] - N0 *exp(-specIn->readX()[i]/m_muLife);
-        specOut->dataE()[i] = ( specIn->readY()[i] > m_poissonLim) ? specIn->readE()[i] : sqrt(N0*exp(-specIn->readX()[i]/m_muLife));
+        specIn->dataE()[i] = m_bigNumber;
       }
+      else
+      {
+        specIn->dataE()[i] = ( inY[i] > m_poissonLim) ? inE[i] : sqrt(N0*exp(-outX[i]/m_muLife/1000));
+      }
+
     }
   } // Histogram loop
 
@@ -291,7 +429,7 @@ void PhaseQuadMuon::loseExponentialDecay (API::MatrixWorkspace_sptr inputWs, API
 * @param tempWs :: input workspace containing the asymmetry in the lab frame
 * @param outputWs :: output workspace to hold squashograms
 */
-void PhaseQuadMuon::squash(API::MatrixWorkspace_sptr tempWs, API::MatrixWorkspace_sptr outputWs)
+void PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr tempWs, API::MatrixWorkspace_sptr outputWs)
 {
 
   double sxx=0;
@@ -301,8 +439,8 @@ void PhaseQuadMuon::squash(API::MatrixWorkspace_sptr tempWs, API::MatrixWorkspac
   for (int h=0; h<m_nHist; h++)
   {
     auto data = m_histData[h];
-    double X = data.detOK * data.alpha * cos(data.phi);
-    double Y = data.detOK * data.alpha * sin(data.phi);
+    double X = data.n0 * data.alpha * cos(data.phi);
+    double Y = data.n0 * data.alpha * sin(data.phi);
     sxx += X*X;
     syy += Y*Y;
     sxy += X*Y;
@@ -313,12 +451,11 @@ void PhaseQuadMuon::squash(API::MatrixWorkspace_sptr tempWs, API::MatrixWorkspac
   double lam2 = 2 * sxy / (sxy*sxy - sxx*syy);
   double mu2  = 2 * sxx / (sxx*syy - sxy*sxy);
   std::vector<double> aj, bj;
-
   for (int h=0; h<m_nHist; h++)
   {
     auto data = m_histData[h];
-    double X = data.detOK * data.alpha * cos(data.phi);
-    double Y = data.detOK * data.alpha * sin(data.phi);
+    double X = data.n0 * data.alpha * cos(data.phi);
+    double Y = data.n0 * data.alpha * sin(data.phi);
     aj.push_back( (lam1 * X + mu1 * Y)*0.5 );
     bj.push_back( (lam2 * X + mu2 * Y)*0.5 );
   }
@@ -361,14 +498,14 @@ void PhaseQuadMuon::regainExponential(API::MatrixWorkspace_sptr outputWs)
   for (int i=0; i<m_nData; i++)
   {
     double x = outputWs->getSpectrum(0)->readX()[i];
-    double xp= outputWs->getSpectrum(0)->readX()[i+1];
-    double e = exp(-( (xp-x)*0.5+x )/m_muLife);
+    double e = exp(-x/m_muLife/1000);
     specRe->dataY()[i] /= e;
     specIm->dataY()[i] /= e;
     specRe->dataE()[i] /= e;
     specIm->dataE()[i] /= e;
   }
 }
+
 
 }
 }

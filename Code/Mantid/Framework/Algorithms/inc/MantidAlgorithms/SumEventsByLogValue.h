@@ -17,7 +17,7 @@ namespace Algorithms
     Produces a table or single spectrum workspace containing the total summed events in the workspace
     as a function of a specified log.
     
-    Copyright &copy; 2012-3 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012-3 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

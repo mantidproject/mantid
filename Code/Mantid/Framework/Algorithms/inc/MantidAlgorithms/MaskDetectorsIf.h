@@ -25,7 +25,7 @@ This algorithm is used to select/deselect detectors in a *.cal file.
  @author Laurent Chapon, Pascal Manuel ISIS Facility, Rutherford Appleton Laboratory
  @date 06/07/2009
 
- Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 

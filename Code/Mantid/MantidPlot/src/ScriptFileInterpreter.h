@@ -71,6 +71,14 @@ public slots:
   virtual void paste();
   /// Find/replace in editor
   virtual void showFindReplaceDialog();
+  /// Comment block of code
+  virtual void comment();
+  /// Uncomment block of code
+  virtual void uncomment();
+  /// Convert tabs in selection to spaces
+  virtual void tabsToSpaces();
+  /// Convert spaces in selection to tabs
+  virtual void spacesToTabs();
 
   /// Execute the whole script.
   virtual void executeAll(const Script::ExecutionMode mode = Script::Asynchronous);
@@ -82,7 +90,15 @@ public slots:
   /// Toggles the progress reports on/off
   virtual void toggleProgressReporting(bool state);
   /// Toggles the code folding on/off
-  virtual void toggleCodeFolding(bool state);
+  virtual void toggleCodeFolding(bool state);  
+  /// Toggles the whitespace visibility
+  virtual void toggleWhitespace(bool state);
+  /// Toggle replacing tabs with whitespace
+  virtual void toggleReplaceTabs(bool state);
+  /// Number of spaces to insert for a tab
+  virtual void setTabWhitespaceCount(int count);
+  /// Set a font
+  virtual void setFont(const QString &fontFamily);
 
 signals:
   /// Emits a signal when any text in the editor changes
@@ -115,6 +131,10 @@ private:
   
   bool readFileIntoEditor(const QString & filename);
   void executeCode(const ScriptCode & code, const Script::ExecutionMode mode);
+
+  void toggleComment(bool addComment);
+  // Replaces the currently selected text in the editor
+  inline void replaceSelectedText(const ScriptEditor *editor, const QString &text);
 
   QSplitter *m_splitter;
   ScriptEditor *m_editor;

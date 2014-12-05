@@ -38,6 +38,12 @@ class ReductionOptions(BaseScriptElement):
     n_q_bins = 100
     n_sub_pix = 1
     log_binning = False
+    align_log_with_decades = True
+    
+    # Wedges
+    n_wedges = 2
+    wedge_angle = 30.0
+    wedge_offset = 0.0
     
     # Mask side
     masked_side = None
@@ -115,8 +121,18 @@ class ReductionOptions(BaseScriptElement):
             script += "SetAbsoluteScale(%g)\n" % self.scaling_factor
 
         # Q binning
-        script += "AzimuthalAverage(n_bins=%g, n_subpix=%g, log_binning=%s)\n" % (self.n_q_bins, self.n_sub_pix, str(self.log_binning))
-        script += "IQxQy(nbins=%g)\n" % self.n_q_bins
+        script += "AzimuthalAverage(n_bins=%g, n_subpix=%g, log_binning=%s" % (self.n_q_bins, self.n_sub_pix, str(self.log_binning))
+        if self.align_log_with_decades: script += ", align_log_with_decades=%s" % str(self.align_log_with_decades)
+        script += ")\n"
+        
+        # If we align we decades, use more points for I(qx,qy)
+        n_xy_bins = self.n_q_bins
+        if self.log_binning and self.align_log_with_decades:
+            n_xy_bins = int(3*self.n_q_bins)
+        script += "IQxQy(nbins=%g)\n" % n_xy_bins
+        
+        if self.n_wedges>0:
+            script += "SetWedges(number_of_wedges=%g, wedge_angle=%g, wedge_offset=%g)\n" % (self.n_wedges, self.wedge_angle, self.wedge_offset)
 
         # Mask
         #   Detector plane
@@ -174,7 +190,12 @@ class ReductionOptions(BaseScriptElement):
         xml += "  <n_q_bins>%g</n_q_bins>\n" % self.n_q_bins
         xml += "  <n_sub_pix>%g</n_sub_pix>\n" % self.n_sub_pix
         xml += "  <log_binning>%s</log_binning>\n" % str(self.log_binning)
+        xml += "  <align_log_with_decades>%s</align_log_with_decades>\n" % str(self.align_log_with_decades)
 
+        xml += "  <n_wedges>%g</n_wedges>\n" % self.n_wedges
+        xml += "  <wedge_angle>%g</wedge_angle>\n" % self.wedge_angle
+        xml += "  <wedge_offset>%g</wedge_offset>\n" % self.wedge_offset
+        
         xml += "  <normalization>%d</normalization>\n" % self.normalization
 
         # Output directory
@@ -260,6 +281,15 @@ class ReductionOptions(BaseScriptElement):
                                                        default=ReductionOptions.n_sub_pix)
         self.log_binning = BaseScriptElement.getBoolElement(instrument_dom, "log_binning",
                                                                  default = ReductionOptions.log_binning)
+        self.align_log_with_decades = BaseScriptElement.getBoolElement(instrument_dom, "align_log_with_decades",
+                                                                       default = ReductionOptions.align_log_with_decades)
+
+        self.n_wedges = BaseScriptElement.getIntElement(instrument_dom, "n_wedges",
+                                                        default=ReductionOptions.n_wedges)
+        self.wedge_angle = BaseScriptElement.getFloatElement(instrument_dom, "wedge_angle",
+                                                             default=ReductionOptions.wedge_angle)
+        self.wedge_offset = BaseScriptElement.getFloatElement(instrument_dom, "wedge_offset",
+                                                              default=ReductionOptions.wedge_offset)
 
         self.normalization = BaseScriptElement.getIntElement(instrument_dom, "normalization",
                                                              default=ReductionOptions.normalization)
@@ -338,6 +368,11 @@ class ReductionOptions(BaseScriptElement):
         self.n_q_bins = BaseScriptElement.getPropertyValue(alg, "IQNumberOfBins", default=ReductionOptions.n_q_bins)
         self.n_sub_pix = BaseScriptElement.getPropertyValue(alg, "NumberOfSubpixels", default=ReductionOptions.n_sub_pix)
         self.log_binning = BaseScriptElement.getPropertyValue(alg, "IQLogBinning", default = ReductionOptions.log_binning)
+        self.align_log_with_decades = BaseScriptElement.getPropertyValue(alg, "IQAlignLogWithDecades", default = ReductionOptions.align_log_with_decades)
+
+        self.n_wedges = BaseScriptElement.getPropertyValue(alg, "NumberOfWedges", default=ReductionOptions.n_wedges)
+        self.wedge_angle = BaseScriptElement.getPropertyValue(alg, "WedgeAngle", default=ReductionOptions.wedge_angle)
+        self.wedge_offset = BaseScriptElement.getPropertyValue(alg, "WedgeOffset", default=ReductionOptions.wedge_offset)
 
         # Normalization
         norm_option = BaseScriptElement.getPropertyValue(alg, "Normalisation", default = 'Monitor')
@@ -397,6 +432,8 @@ class ReductionOptions(BaseScriptElement):
 
         self.sample_detector_distance = ReductionOptions.sample_detector_distance
         self.detector_offset = ReductionOptions.detector_offset
+        if self.instrument_name.upper() == "GPSANS":
+            self.detector_offset = 711.0
         self.wavelength = ReductionOptions.wavelength
         self.wavelength_spread = ReductionOptions.wavelength_spread
 
@@ -407,6 +444,11 @@ class ReductionOptions(BaseScriptElement):
         self.n_q_bins = ReductionOptions.n_q_bins
         self.n_sub_pix = ReductionOptions.n_sub_pix
         self.log_binning = ReductionOptions.log_binning
+        self.align_log_with_decades = ReductionOptions.align_log_with_decades
+        
+        self.n_wedges = ReductionOptions.n_wedges
+        self.wedge_angle = ReductionOptions.wedge_angle
+        self.wedge_offset = ReductionOptions.wedge_offset
 
         self.normalization = ReductionOptions.normalization
 

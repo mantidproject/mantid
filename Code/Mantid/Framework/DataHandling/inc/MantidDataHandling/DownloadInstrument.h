@@ -14,7 +14,7 @@ namespace DataHandling
 {
   /** DownloadInstrument : Downloads one or more instrument files to the local instrument cache from the instrument repository
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -64,7 +64,6 @@ namespace DataHandling
                                   const std::set<std::string>& filenamesToKeep) const;
 
     Kernel::ProxyInfo m_proxyInfo;
-    bool m_isProxySet;
   };
 
 

@@ -996,7 +996,7 @@ void MantidUI::copyRowToGraph()
 {
   MantidMatrix* m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
-  plotSelectedRows(m,false);
+  plotSelectedRows(m,MantidQt::DistributionDefault,false);
 
 }
 
@@ -1018,7 +1018,7 @@ void MantidUI::copyRowToGraphErr()
 {
   MantidMatrix* m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
-  plotSelectedRows(m,true);
+  plotSelectedRows(m,MantidQt::DistributionDefault,true);
 
 }
 
@@ -1026,7 +1026,7 @@ void MantidUI::copyRowsToWaterfall()
 {
   const MantidMatrix* const m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
-  MultiLayer* ml = plotSelectedRows(m,false);
+  MultiLayer* ml = plotSelectedRows(m, MantidQt::DistributionDefault, false);
   if (ml) convertToWaterfall(ml);
 }
 
@@ -1034,7 +1034,8 @@ void MantidUI::plotWholeAsWaterfall()
 {
   const MantidMatrix* const m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
-  MultiLayer* ml = plotSpectraRange(m->workspaceName(),0,m->numRows()-1,false);
+  MultiLayer* ml = plotSpectraRange(m->workspaceName(),0,m->numRows()-1,
+                                    MantidQt::DistributionDefault, false);
   if (ml) convertToWaterfall(ml);
 }
 
@@ -1450,11 +1451,12 @@ void MantidUI::showAlgorithmDialog(const QString & algName, int version)
 * @param algName :: The algorithm name
 * @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
 * @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
+* @param version :: version number, -1 for latest
 */
-void MantidUI::showAlgorithmDialog(QString algName, QHash<QString,QString> paramList, Mantid::API::AlgorithmObserver *obs)
+void MantidUI::showAlgorithmDialog(QString algName, QHash<QString,QString> paramList, Mantid::API::AlgorithmObserver *obs, int version)
 {
   //Get latest version of the algorithm
-  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
+  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
   if( !alg ) return;
 
   for(QHash<QString,QString>::Iterator it = paramList.begin(); it != paramList.end(); ++it)
@@ -2238,13 +2240,13 @@ void MantidUI::menuMantidMatrixAboutToShow()
 MultiLayer* MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
 {
   QMessageBox::information(appWindow(),"OK",wsName+" "+QString::number(spec));
-  return plotSpectraRange(wsName, spec, spec, false);
+  return plotSpectraRange(wsName, spec, spec, MantidQt::DistributionDefault, false);
 }
 
 /// Catches the signal from InstrumentWindow to plot a spectrum.
 MultiLayer* MantidUI::plotInstrumentSpectrumList(const QString& wsName, std::set<int> spec)
 {
-  return plot1D(wsName, spec, false);
+  return plot1D(wsName, spec, true, MantidQt::DistributionDefault, false);
 }
 
 /**
@@ -2937,7 +2939,7 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
     xtitle = MantidQt::API::PlotAxis(*workspace, 1).title();
   }
   g->setXAxisTitle(xtitle);
-  g->setYAxisTitle(MantidQt::API::PlotAxis(*workspace).title());
+  g->setYAxisTitle(MantidQt::API::PlotAxis(false, *workspace).title());
 }
 
 /**
@@ -2951,7 +2953,7 @@ Plots the spectra from the given workspaces
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
 */
 MultiLayer* MantidUI::plot1D(const QStringList& ws_names, const QList<int>& indexList, bool spectrumPlot, bool errs,
-                                      Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)
+                             Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;
@@ -2973,19 +2975,20 @@ MultiLayer* MantidUI::plot1D(const QStringList& ws_names, const QList<int>& inde
   }
 
   // Pass over to the overloaded method
-  return plot1D(pairs,spectrumPlot,errs,false,style,plotWindow, clearWindow);
+  return plot1D(pairs,spectrumPlot,MantidQt::DistributionDefault, errs,style,plotWindow, clearWindow);
 }
 /** Create a 1D graph from the specified list of workspaces/spectra.
 @param toPlot :: Map of form ws -> [spectra_list]
 @param spectrumPlot :: True if indices should be interpreted as row indices
+@param distr :: if true, workspace plot as y data/bin width
 @param errs :: If true include the errors on the graph
-@param distr :: if true, workspace is a distribution
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
 */
-MultiLayer* MantidUI::plot1D(const QMultiMap<QString, set<int> >& toPlot, bool spectrumPlot, bool errs, bool distr,
-  MultiLayer* plotWindow, bool clearWindow)
+MultiLayer* MantidUI::plot1D(const QMultiMap<QString, set<int> >& toPlot, bool spectrumPlot,
+                             MantidQt::DistributionFlag distr, bool errs,
+                             MultiLayer* plotWindow, bool clearWindow)
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;
@@ -3001,21 +3004,21 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString, set<int> >& toPlot, bool s
   }
 
   // Pass over to the overloaded method
-  return plot1D(pairs,spectrumPlot,errs,distr,Graph::Unspecified,plotWindow, clearWindow);
+  return plot1D(pairs,spectrumPlot,distr,errs,Graph::Unspecified,plotWindow, clearWindow);
 }
 
 /** Create a 1d graph from the specified spectra in a MatrixWorkspace
 @param wsName :: Workspace name
 @param indexList :: List of indices to plot for each workspace
 @param spectrumPlot :: True if indices should be interpreted as row indices
+@param distr :: if true, workspace plot as y data/bin width
 @param errs :: If true include the errors on the graph
-@param distr :: if true, workspace is a distribution
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
 */
-MultiLayer* MantidUI::plot1D(const QString& wsName, const std::set<int>& indexList, bool spectrumPlot, bool errs,
-  bool distr, MultiLayer* plotWindow, bool clearWindow)
+MultiLayer* MantidUI::plot1D(const QString& wsName, const std::set<int>& indexList, bool spectrumPlot,
+  MantidQt::DistributionFlag distr, bool errs, MultiLayer* plotWindow, bool clearWindow)
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;
@@ -3027,21 +3030,22 @@ MultiLayer* MantidUI::plot1D(const QString& wsName, const std::set<int>& indexLi
   }
 
   // Pass over to the overloaded method
-  return plot1D(pairs,spectrumPlot,errs,distr,Graph::Unspecified,plotWindow, clearWindow);
+  return plot1D(pairs,spectrumPlot,distr,errs,Graph::Unspecified,plotWindow, clearWindow);
 }
 
 /** Create a 1d graph form a set of workspace-spectrum pairs
 @param toPlot :: A list of workspace/spectra to be shown in the graph
 @param spectrumPlot :: True if indices should be interpreted as row indices
+@param distr :: if true, workspace plot as y data/bin width
 @param errs :: If true include the errors to the graph
-@param distr :: if true, workspace is a distribution
 @param style :: curve style for plot
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
 */
-MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrumPlot, bool errs, bool distr,
-  Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)
+MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrumPlot,
+                             MantidQt::DistributionFlag distr, bool errs,
+                             Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)
 {
   if(toPlot.size() == 0) return NULL;
 
@@ -3103,17 +3107,33 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
   ml->setName(appWindow()->generateUniqueName(plotTitle + "-"));
   m_lastShown1DPlotWin = ml;
 
-  Graph *g = ml->activeGraph();
-
+  // Do we plot try to plot as distribution. If request and it is not already one!
+  bool plotAsDistribution(false);
+  if(distr == MantidQt::DistributionDefault)
+  {
+   plotAsDistribution = appWindow()->autoDistribution1D;
+  }
+  else
+  {
+    plotAsDistribution = (distr == MantidQt::DistributionTrue);
+  }
+  
   // Try to add curves to the plot
+  Graph *g = ml->activeGraph();
   MantidMatrixCurve::IndexDir indexType = (spectrumPlot) ? MantidMatrixCurve::Spectrum : MantidMatrixCurve::Bin;
   MantidMatrixCurve* firstCurve(NULL);
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();++it)
   {
     try
     {
-      auto * wsCurve = new MantidMatrixCurve(it.key(),g,it.value(),indexType,errs,distr,style);
-      if(!firstCurve) firstCurve = wsCurve;
+      auto * wsCurve = new MantidMatrixCurve(it.key(), g, it.value(), indexType,
+                                             errs, plotAsDistribution, style);
+      if(!firstCurve)
+      {
+        firstCurve = wsCurve;
+        g->setNormalizable(firstCurve->isNormalizable());
+        g->setDistribution(firstCurve->isDistribution());
+      }
     } 
     catch (Mantid::Kernel::Exception::NotFoundError&) 
     {
@@ -3296,7 +3316,8 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
 @param errs :: If true include the errors to the graph
 @param distr :: if true, workspace is a distribution
 */
-MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bool errs, bool distr)
+MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1,
+                                       MantidQt::DistributionFlag distr, bool errs)
 {
   if (i0 < 0 || i1 < 0) return 0;
   /** For instrument with one to many spectra-detector mapping,
@@ -3307,20 +3328,22 @@ MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bo
   for(int i=i0;i<=i1;i++)
     indexList.insert(i);
 
-  return plot1D(wsName,indexList,true, errs,distr);
+  return plot1D(wsName,indexList,true, distr, errs);
 }
 
 /**  Create a graph and plot the selected rows of a MantidMatrix
 @param m :: Mantid matrix
-@param errs :: True if the errors to be plotted
 @param distr :: if true, workspace is a distribution
+@param errs :: True if the errors to be plotted
 */
-MultiLayer* MantidUI::plotSelectedRows(const MantidMatrix * const m, bool errs, bool distr)
+MultiLayer* MantidUI::plotSelectedRows(const MantidMatrix * const m,
+                                       MantidQt::DistributionFlag distr,
+                                       bool errs)
 {
   const QList<int>& rows = m->getSelectedRows();
   std::set<int> rowSet(rows.constBegin(),rows.constEnd());
 
-  return plot1D(m->workspaceName(),rowSet,true,errs,distr);
+  return plot1D(m->workspaceName(),rowSet,true,distr, errs);
 }
 
 /**
@@ -3334,10 +3357,11 @@ MultiLayer *MantidUI::plotSelectedColumns(const MantidMatrix * const m, bool err
   const QList<int>& cols = m->getSelectedColumns();
   std::set<int> colSet(cols.constBegin(),cols.constEnd());
 
-  return plot1D(m->workspaceName(),colSet,false,errs,false);
+  return plot1D(m->workspaceName(),colSet,false,MantidQt::DistributionFalse, errs);
 }
 
-Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixWorkspace_const_sptr workspace, const QList<int>& bins, bool errs, int fromRow, int toRow)
+Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixWorkspace_const_sptr workspace,
+                                     const QList<int>& bins, bool errs, int fromRow, int toRow)
 {
   if (bins.empty()) return NULL;
 

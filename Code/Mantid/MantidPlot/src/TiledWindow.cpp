@@ -22,7 +22,6 @@ const int minimumTileHeight = 100;
 const QColor normalColor("black");
 const QColor selectedColor("green");
 const QColor acceptDropColor("red");
-const int normalWidth(0);
 const int selectedWidth(5);
 const int acceptDropWidth(5);
 

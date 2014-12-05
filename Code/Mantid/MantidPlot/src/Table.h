@@ -189,7 +189,7 @@ public slots:
 	 *
 	 * The sorting itself is done using sort(int,int,const QString&).
 	 */
-	void sortTableDialog();
+	virtual void sortTableDialog();
 	//! Sort all columns as in sortColumns(const QStringList&,int,int,const QString&).
 	void sort(int type = 0, int order  = 0, const QString& leadCol = QString());
   //! Sort selected columns as in sortColumns(const QStringList&,int,int,const QString&).

@@ -18,7 +18,7 @@ namespace Algorithms
     It is assumed that the log time will be the same time as neutron arrives sample,
     and the input event workspace contains the neutron with time recorded at the detector.
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

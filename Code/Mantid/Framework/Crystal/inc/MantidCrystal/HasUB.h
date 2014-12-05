@@ -13,7 +13,7 @@ namespace Crystal
   /** HasUB : Determine if a workspace has a UB matrix on any of it's samples. Returns True if one is found. Returns false if none can be found, or if the
    * workspace type is incompatible.
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
