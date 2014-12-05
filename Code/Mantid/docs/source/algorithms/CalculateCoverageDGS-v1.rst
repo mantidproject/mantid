@@ -35,7 +35,7 @@ Usage
 **Example - CalculateCoverageDGS**
 
 .. testcode:: CalculateCoverageDGSExample
-
+    
     w=Load(Filename="CNCS_7860")
     w=ConvertUnits(InputWorkspace=w,Target='DeltaE', EMode='Direct', EFixed='3')
     SetGoniometer(Workspace=w, Axis0='30,0,1,0,1')
@@ -47,14 +47,14 @@ Usage
         Dimension3Min=-1, Dimension3Max=1, Dimension3Step=2, 
         Dimension4Min=0, Dimension4Max=3, Dimension4Step=0.1)
 
-   # Print the result
-   print "You cover %i MD bins out of j" %(coverage.getSignalArray().sum,coverage.getSignalArray().size)
+    # Print the result
+    print "You cover %i MD bins out of %i" %(coverage.getSignalArray().sum(),coverage.getSignalArray().size)
 
 Output:
 
 .. testoutput:: CalculateCoverageDGSExample
 
-  You cover 506 MD bins out of 3000
+    You cover 506 MD bins out of 3000
   
 .. categories::
 
