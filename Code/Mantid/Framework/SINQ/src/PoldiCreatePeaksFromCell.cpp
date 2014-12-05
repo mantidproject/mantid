@@ -89,7 +89,7 @@ CompositeBraggScatterer_sptr PoldiCreatePeaksFromCell::getScatterers(const std::
     std::vector<BraggScatterer_sptr> scatterers;
 
     for(auto it = tokens.begin(); it != tokens.end(); ++it) {
-        scatterers.push_back(getScatterer(*it));
+        scatterers.push_back(getScatterer(boost::trim_copy(*it)));
     }
 
     return CompositeBraggScatterer::create(scatterers);
@@ -218,7 +218,7 @@ void PoldiCreatePeaksFromCell::init()
             "SpaceGroup of the crystal structure.");
 
     declareProperty("Atoms", "", "Atoms in the asymmetric unit. Format: \n"
-                                 "Element_0 [x,y,z] Occupancy U; ... ");
+                                 "Element x y z Occupancy U; ... ");
 
     boost::shared_ptr<BoundedValidator<double> > latticeParameterEdgeValidator = boost::make_shared<BoundedValidator<double> >(0.0, 0.0);
     latticeParameterEdgeValidator->clearUpper();

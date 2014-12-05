@@ -35,8 +35,9 @@ public:
 
         PoldiCreatePeaksFromCell alg;
         TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-                TS_ASSERT( alg.isInitialized() )
-                TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("SpaceGroup", "P m -3 m") );
+        TS_ASSERT( alg.isInitialized() )
+        TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("SpaceGroup", "P m -3 m") );
+        TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Atoms", "Cl 0 0 0 1.0 0.005; Cs 0.5 0.5 0.5 1.0 0.005");)
         TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("a", "4.126"));
         TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("LatticeSpacingMin", "0.55"));
         TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("LatticeSpacingMax", "4.0"));
