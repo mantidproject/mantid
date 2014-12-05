@@ -105,9 +105,9 @@ if [[ ${JOB_NAME} == *coverity_build_and_submit* ]]; then
        --form file=@mantid.tgz --form version=$GIT_COMMIT \
        https://scan.coverity.com/builds?project=mantidproject%2Fmantid)
   if [[ ${status} ]]; then
-    return ${status}
+    exit 1
   else
-    return 0
+    exit 0
   fi
 fi
 
