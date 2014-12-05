@@ -392,7 +392,7 @@ signals:
     // Execute algorithm given name and version
     void showAlgorithmDialog(const QString & algName, int version = -1);
     // Execute an algorithm with the given parameter list
-    void showAlgorithmDialog(QString algName, QHash<QString, QString> paramList, Mantid::API::AlgorithmObserver *obs = NULL);
+    void showAlgorithmDialog(QString algName, QHash<QString, QString> paramList, Mantid::API::AlgorithmObserver *obs = NULL, int version = -1);
     // Execute an algorithm
     void executeAlgorithm(Mantid::API::IAlgorithm_sptr alg);
     // Execute a named algorithm using the given parameters

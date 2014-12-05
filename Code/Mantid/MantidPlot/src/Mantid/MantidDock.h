@@ -57,7 +57,7 @@ public:
 
 public slots:
   void clickedWorkspace(QTreeWidgetItem*, int);
-  void saveWorkspaces();
+  void saveWorkspaceGroup();
   void deleteWorkspaces();
   void renameWorkspace();
   void populateChildData(QTreeWidgetItem* item);
@@ -73,6 +73,7 @@ protected slots:
   void workspaceSelected();
 
 private slots:
+  void handleShowSaveAlgorithm();
   void treeSelectionChanged();
   void groupingButtonClick();
   void plotSpectra();
@@ -88,6 +89,7 @@ private slots:
   void filterWorkspaceTree(const QString &text);
 
 private:
+  void addSaveMenuOption(QString algorithmString, QString menuEntryName = "");
   void setTreeUpdating(const bool state);
   inline bool isTreeUpdating() const { return m_treeUpdating; }
   void populateTopLevel(const std::map<std::string,Mantid::API::Workspace_sptr> & topLevelItems, const QStringList & expanded);
@@ -118,7 +120,7 @@ private:
 
   QPushButton *m_loadButton;
   QPushButton *m_saveButton;
-  QMenu *m_loadMenu, *m_saveToProgram, *m_sortMenu;
+  QMenu *m_loadMenu, *m_saveToProgram, *m_sortMenu, *m_saveMenu;
   QPushButton *m_deleteButton;
   QPushButton *m_groupButton;
   QPushButton *m_sortButton;
