@@ -48,11 +48,21 @@ IndexCandidatePair::IndexCandidatePair(const PoldiPeak_sptr &measuredPeak, const
     double sigmaD = PoldiIndexKnownCompounds::fwhmToSigma(fwhm);
     double differenceD = fabs(peakD - candidate->d());
 
+    /* Assume a normal distribution of distances around 0.0, with the given
+     * sigma (corresponds to tolerance). Then, calculate the probability
+     * of finding a peak that is even closer. The complement of that is the
+     * "match". The closer the measured position is to the calculated, the
+     * lower the probability of finding a peak that is even closer, thus
+     * increasing the peak's "match".
+     */
     boost::math::normal positionDistribution(0.0, sigmaD);
 
-    double candidateIntensity = candidatePeak->intensity();
+    // Multiplication by 2.0, because difference is absolute.
+    double complementOfCloserPeak = boost::math::cdf(complement(positionDistribution, differenceD)) * 2.0;
 
-    positionMatch = (1.0 - boost::math::cdf(positionDistribution, differenceD)) * 2.0 * candidateIntensity;
+    // Scale by calculated intensity to take into account minority phases etc.
+    double candidateIntensity = candidatePeak->intensity();
+    positionMatch = complementOfCloserPeak * candidateIntensity;
 }
 
 /// Default constructor
@@ -668,9 +678,8 @@ void PoldiIndexKnownCompounds::exec()
     initializeUnindexedPeaks();
     initializeIndexedPeaks(m_expectedPhases);
 
-    /* For calculating scores in the indexing procedure, scattering contributions as well as
-     * reflection multiplicities can be used (if available). These are assigned as "intensities"
-     * on the reflections of the respective peak collections.
+    /* For calculating scores in the indexing procedure, scattering contributions are used.
+     * The structure factors are scaled accordingly.
      */
     std::vector<double> contributions = getContributions(m_expectedPhases.size());
     std::vector<double> normalizedContributions = getNormalizedContributions(contributions);
