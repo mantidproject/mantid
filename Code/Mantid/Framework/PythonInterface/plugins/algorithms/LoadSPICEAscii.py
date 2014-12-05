@@ -57,8 +57,6 @@ class LoadSPICEAscii(PythonAlgorithm):
         intlognames = self.getProperty("IntSampleLogNames").value
         floatlognames = self.getProperty("FloatSampleLogNames").value
 	
-	print "floatlognames : ", floatlognames
-
         valid = self.validateLogNamesType(floatlognames, intlognames, strlognames)
         if valid is False:
             raise RuntimeError("At one log name appears in multiple log type lists")
@@ -76,7 +74,7 @@ class LoadSPICEAscii(PythonAlgorithm):
 	# Set properties
         self.setProperty("OutputWorkspace", outws)
 	self.setProperty('RunInfoWorkspace', runinfows)
-
+	
         return
 
 
@@ -167,18 +165,19 @@ class LoadSPICEAscii(PythonAlgorithm):
 	""" Create run information workspace
 	"""
         # Create an empty workspace
-        matrixws = api.CreateWorkspace(DataX=[1,2], DataY=[1], DataE=[1], NSpec=1, VerticalAxisUnit="SpectraNumber")
+        matrixws = api.CreateWorkspace(DataX=[1,2], DataY=[1], DataE=[1], NSpec=1, VerticalAxisUnit="SpectraNumber", 
+                OutputWorkspace=self.getPropertyValue("RunInfoWorkspace"))
 
         run = matrixws.getRun()
 	
-	wbuf = "Float log names: "
-	for logname in floatlognamelist:
-		wbuf += "'%s', " % (logname)
-	self.log().notice(wbuf)
+	#wbuf = "Float log names: "
+	#for logname in floatlognamelist:
+	#	wbuf += "'%s', " % (logname)
+	#self.log().notice(wbuf)
 	        
         for title in runinfodict.keys():
             tmpvalue = runinfodict[title]
-	    self.log().notice("Title = '%s'" % (title))
+	    #self.log().notice("Title = '%s'" % (title))
 	    
             if title in floatlognamelist:
                 # Float log: consider error bar

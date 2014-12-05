@@ -39,15 +39,14 @@ class LoadSPICEAsciiTest(unittest.TestCase):
 	runinfows = AnalysisDataService.retrieve("HB2A_0231_Info")
 	self.assertTrue(runinfows is not None)
 
-	infodict = {}
-	numrows = runinfows.rowCount()
-	for irow in xrange(numrows):
-	    title = runinfows.cell(irow, 0)
-	    value = runinfows.cell(irow, 1)
-	    infodict[title] = value
+        samplesloglist = runinfows.getRun().getProperties()
+        self.assertEquals(len(samplesloglist), 33) # 32 come with file and 1 native to workspace (run_title)
 
-	self.assertEquals(infodict['proposal'], 'IPTS-6174')
-	self.assertEquals(infodict['runend'], '12:33:21 PM  8/13/2012')
+        ipts = runinfows.getRun().getProperty('proposal').value
+	self.assertEquals(ipts, 'IPTS-6174')
+
+        runend = runinfows.getRun().getProperty('runend').value
+	self.assertEquals(runend, '12:33:21 PM  8/13/2012')
 
 
 	# Clean
@@ -63,11 +62,11 @@ class LoadSPICEAsciiTest(unittest.TestCase):
         # Test algorithm
         alg_test = run_algorithm("LoadSPICEAscii",
             Filename = "HB2A_exp0231_scan0001.dat", 
-            StringSampleLogNames = "a,b",
-            IntSampleLogNames = "",
-            FloatSampleLogNames = "", 
+            StringSampleLogNames = "a,experiment, scan_title, b, proposal",
+            IntSampleLogNames = "Sum of Counts, scan, mode, experiment_number",
+            FloatSampleLogNames = "samplemosaic, preset_value, Full Width Half-Maximum, Center of Mass", 
 	    OutputWorkspace = "HB2A_0231_0001_Data", 
-	    RunInfoWorkspace = "HB2A_0231_Info",
+	    RunInfoWorkspace = "HB2A_0231_Info2",
             IgnoreUnlistedLogs = True)
 
         # Validate
@@ -86,23 +85,28 @@ class LoadSPICEAsciiTest(unittest.TestCase):
 	numrows = datatbws.rowCount()
 	self.assertEquals(numrows, 61)
 
-	runinfows = AnalysisDataService.retrieve("HB2A_0231_Info")
+	runinfows = AnalysisDataService.retrieve("HB2A_0231_Info2")
 	self.assertTrue(runinfows is not None)
 
-	infodict = {}
-	numrows = runinfows.rowCount()
-	for irow in xrange(numrows):
-	    title = runinfows.cell(irow, 0)
-	    value = runinfows.cell(irow, 1)
-	    infodict[title] = value
+        samplesloglist = runinfows.getRun().getProperties()
+        self.assertEquals(len(samplesloglist), 14) # 32 come with file and 1 native to workspace (run_title)
 
-	self.assertEquals(infodict['proposal'], 'IPTS-6174')
-	self.assertEquals(infodict['runend'], '12:33:21 PM  8/13/2012')
+        ipts = runinfows.getRun().getProperty('proposal').value
+	self.assertEquals(ipts, 'IPTS-6174')
 
+        mode = runinfows.getRun().getProperty('mode').value
+	self.assertEquals(mode, 3)
+
+        comerr = runinfows.getRun().getProperty('Center of Mass.error').value
+	self.assertEquals(comerr, 0.009214)
 
 	# Clean
         AnalysisDataService.remove("HB2A_0231_0001_Data")
 	AnalysisDataService.remove("HB2A_0231_Info")
+
+	# Clean
+        AnalysisDataService.remove("HB2A_0231_0001_Data")
+	AnalysisDataService.remove("HB2A_0231_Info2")
 
         return
 

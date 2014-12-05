@@ -45,33 +45,34 @@ Usage
 
 .. testcode:: ExLoadHB2AData
 
-  LoadSPICEAscii(Filename=r'HB2A_exp0231_scan0001.dat',
-	OutputWorkspace = 'HB2A_0231_0001_Data',
-	RunInfoWorkspace = 'HB2A_0231_Info')
-
+  LoadSPICEAscii(Filename="HB2A_exp0231_scan0001.dat", 
+        IntSampleLogNames="Sum of Counts, scan, mode, experiment_number",
+        FloatSampleLogNames="samplemosaic, preset_value, Full Width Half-Maximum, Center of Mass", 
+        OutputWorkspace="HB2A_0231_0001_Data", 
+        RunInfoWorkspace="HB2A_0231_Info")
   datatbws = mtd['HB2A_0231_0001_Data'] 
-  infotablews = mtd['HB2A_0231_Info']
+  infows = mtd['HB2A_0231_Info']
 
   print "Number of measuring points = %d" % (datatbws.rowCount())
   print "Number of columns in data workspace = %d" % (datatbws.columnCount())
-  print "Number of run information = %d" % (infotablews.rowCount())
-  print "%s = %s" % (infotablews.cell(0, 0), infotablews.cell(0, 1))
-  print "%s = %s" % (infotablews.cell(31, 0), infotablews.cell(31, 1))
+  print "Number of run information = %d" % (len(infows.getRun().getProperties()))
+  print "Sum of Counts = %d" % (infows.getRun().getProperty("Sum of Counts").value)
+  print "Center of Mass = %.5f +/- %.5f" % (infows.getRun().getProperty("Center of Mass").value, 
+      infows.getRun().getProperty("Center of Mass.error").value)
 
 .. testcleanup:: ExLoadHB2AData
 
-  DeleteWorkspace(infotablews)
+  DeleteWorkspace(infows)
   DeleteWorkspace(datatbws)
 
 Output:
 
 .. testoutput:: ExLoadHB2AData
 
-   Number of measuring points = 61
-   Number of columns in data workspace = 70
-   Number of run information = 32
-   scan = 1
-   builtin_command = scan 2theta 6 12 .1 preset time 30
-
+  Number of measuring points = 61
+  Number of columns in data workspace = 70
+  Number of run information = 35
+  Sum of Counts = 1944923
+  Center of Mass = 9.00076 +/- 0.00921
 
 .. categories::
