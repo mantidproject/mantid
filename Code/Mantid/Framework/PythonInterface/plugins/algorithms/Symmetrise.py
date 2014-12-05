@@ -1,5 +1,5 @@
 from mantid import logger, mtd
-from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, PropertyMode
+from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, IntArrayProperty
 from mantid.simpleapi import CreateWorkspace, CopyLogs, CopySample, CopyInstrumentParameters, SaveNexusProcessed, CreateEmptyTableWorkspace, RenameWorkspace
 
@@ -11,15 +11,15 @@ import numpy as np
 class Symmetrise(PythonAlgorithm):
 
     def category(self):
-        return 'Workflow\\MIDAS;PythonAlgorithms'
+        return 'PythonAlgorithms'
 
 
     def summary(self):
-        return 'Takes an asymmetric S(Q,w) and makes it symmetric'
+        return 'Make asymmetric workspace data symmetric.'
 
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty('Sample', '', Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('Sample', '', Direction.Input),
                              doc='Sample to run with')
 
         self.declareProperty(IntArrayProperty(name='SpectraRange'),
@@ -35,10 +35,10 @@ class Symmetrise(PythonAlgorithm):
         self.declareProperty('Save', defaultValue=False,
                              doc='Switch saving result to nxs file Off/On')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                              Direction.Output), doc='Name to call the output workspace.')
 
-        self.declareProperty(WorkspaceProperty('OutputPropertiesTable', '',
+        self.declareProperty(ITableWorkspaceProperty('OutputPropertiesTable', '',
                              Direction.Output, PropertyMode.Optional), doc='Name to call the properties output table workspace.')
 
 
