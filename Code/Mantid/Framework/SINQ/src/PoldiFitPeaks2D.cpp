@@ -176,6 +176,8 @@ namespace Poldi
       PoldiPeakCollection_sptr normalizedPeaks = getPeakCollectionFromFunction(fitFunction);
       PoldiPeakCollection_sptr integralPeaks = getCountPeakCollection(normalizedPeaks);
 
+      assignMillerIndices(peakCollection, integralPeaks);
+
       setProperty("OutputWorkspace", getWorkspace(fitAlgorithm));
       setProperty("RefinedPoldiPeakWorkspace", integralPeaks->asTableWorkspace());
   }
@@ -504,6 +506,25 @@ namespace Poldi
       }
 
       return countPeakCollection;
+  }
+
+  /// Assign Miller indices from one peak collection to another.
+  void PoldiFitPeaks2D::assignMillerIndices(const PoldiPeakCollection_sptr &from, PoldiPeakCollection_sptr &to) const
+  {
+      if(!from || !to) {
+          throw std::invalid_argument("Cannot process invalid peak collections.");
+      }
+
+      if(from->peakCount() != to->peakCount()) {
+          throw std::runtime_error("Cannot assign indices if number of peaks does not match.");
+      }
+
+      for(size_t i = 0; i < from->peakCount(); ++i) {
+          PoldiPeak_sptr fromPeak = from->peak(i);
+          PoldiPeak_sptr toPeak = to->peak(i);
+
+          toPeak->setHKL(fromPeak->hkl());
+      }
   }
 
 

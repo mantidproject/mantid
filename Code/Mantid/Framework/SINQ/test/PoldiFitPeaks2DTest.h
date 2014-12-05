@@ -222,6 +222,34 @@ public:
         }
     }
 
+    void testAssignMillerIndices()
+    {
+        PoldiPeak_sptr peak1 = PoldiPeak::create(MillerIndices(1, 1, 1), 2.0);
+        PoldiPeakCollection_sptr from = boost::make_shared<PoldiPeakCollection>();
+        from->addPeak(peak1);
+
+        PoldiPeak_sptr peak2 = PoldiPeak::create(Conversions::dToQ(2.0));
+        PoldiPeakCollection_sptr to = boost::make_shared<PoldiPeakCollection>();
+        to->addPeak(peak2);
+
+        PoldiPeakCollection_sptr invalid;
+
+        TestablePoldiFitPeaks2D spectrumCalculator;
+
+        TS_ASSERT_THROWS(spectrumCalculator.assignMillerIndices(from, invalid), std::invalid_argument);
+        TS_ASSERT_THROWS(spectrumCalculator.assignMillerIndices(invalid, from), std::invalid_argument);
+        TS_ASSERT_THROWS(spectrumCalculator.assignMillerIndices(invalid, invalid), std::invalid_argument);
+
+        TS_ASSERT_DIFFERS(peak1->hkl(), peak2->hkl());
+
+        TS_ASSERT_THROWS_NOTHING(spectrumCalculator.assignMillerIndices(from, to));
+        TS_ASSERT_EQUALS(peak1->hkl(), peak2->hkl());
+
+        to->addPeak(peak1);
+
+        TS_ASSERT_THROWS(spectrumCalculator.assignMillerIndices(from, to), std::runtime_error);
+    }
+
     void testAddBackgroundFunctions()
     {
         TestablePoldiFitPeaks2D spectrumCalculator;
