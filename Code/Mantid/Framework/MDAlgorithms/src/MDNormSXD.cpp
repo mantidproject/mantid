@@ -35,7 +35,7 @@ namespace Mantid
      * Constructor
      */
     MDNormSXD::MDNormSXD() :
-      m_nDims(0), m_normWS(), m_inputWS(), m_hmin(0.0f), m_hmax(0.0f),
+      m_normWS(), m_inputWS(), m_hmin(0.0f), m_hmax(0.0f),
       m_kmin(0.0f), m_kmax(0.0f), m_lmin(0.0f), m_lmax(0.0f), m_hIntegrated(true),
       m_kIntegrated(true), m_lIntegrated(true), m_rubw(3,3),
       m_kiMin(0.0), m_kiMax(EMPTY_DBL()), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1),

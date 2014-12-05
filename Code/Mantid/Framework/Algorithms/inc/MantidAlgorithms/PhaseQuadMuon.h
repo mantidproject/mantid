@@ -85,20 +85,12 @@ namespace Mantid
       int m_nHist;
       /// Number of datapoints per histogram
       int m_nData;
-      /// TODO: remove if not necessary
-      double m_res;
       /// Mean of time-shifts TODO: remove if not necessary
       double m_meanLag;
       /// Good muons from here on (bin no) TODO: remove if not necessary
       size_t m_tValid;
       /// Pulse definitely finished by here (bin no) TODO: remove if not necessary
       size_t m_tNoPulse;
-      /// Double-pulse flag TODO: remove if not necessary
-      bool m_isDouble;
-      /// Muon decay curve TODO: remove if not necessary
-      double m_tau;
-      /// Freq (of silver run) TODO: remove if not necessary
-      double m_w;
       /// Muon lifetime
       double m_muLife;
       /// Poisson limit TODO: remove if not necessary

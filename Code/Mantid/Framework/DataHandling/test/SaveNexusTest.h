@@ -111,7 +111,6 @@ private:
   SaveNexus algToBeTested;
   std::string outputFile;
   std::string title;
-  int entryNumber;
-  
+ 
 };
 #endif /*SAVENEXUSTEST_H_*/

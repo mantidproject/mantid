@@ -64,7 +64,6 @@ namespace DataHandling
                                   const std::set<std::string>& filenamesToKeep) const;
 
     Kernel::ProxyInfo m_proxyInfo;
-    bool m_isProxySet;
   };
 
 
