@@ -19,6 +19,7 @@ FirstTimeSetup::~FirstTimeSetup()
 
 void FirstTimeSetup::initLayout()
 {
+  this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
   this->setWindowTitle(this->windowTitle() + " " + Mantid::Kernel::MantidVersion::version());
 
   setFixedSize(size());
@@ -58,7 +59,7 @@ void FirstTimeSetup::confirm()
   config.setString("default.facility", m_uiForm.cbFacility->currentText().toStdString());
   config.setString("default.instrument", m_uiForm.cbInstrument->currentText().toStdString());
   config.saveConfig(filename);
-
+   
   QSettings settings;
   settings.beginGroup("Mantid/FirstUse");
   settings.setValue("DoNotShowUntilNextRelease", (m_uiForm.chkDoNotShowUntilNextRelease->isChecked()? 1 : 0));

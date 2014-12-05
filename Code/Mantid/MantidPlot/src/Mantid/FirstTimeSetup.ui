@@ -69,7 +69,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QLabel" name="lbUpdate">
       <property name="minimumSize">
        <size>
-        <width>430</width>
+        <width>500</width>
         <height>0</height>
        </size>
       </property>
@@ -88,6 +88,9 @@ color: rgb(255, 255, 255);</string>
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;You can revisit this dialog by selecting &amp;quot;First Time Setup&amp;quot; on the Help menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
       <property name="wordWrap">
        <bool>true</bool>
@@ -119,9 +122,9 @@ p, li { white-space: pre-wrap; }
   <widget class="QGroupBox" name="grpPersonalSetup">
    <property name="geometry">
     <rect>
-     <x>732</x>
+     <x>642</x>
      <y>410</y>
-     <width>261</width>
+     <width>351</width>
      <height>111</height>
     </rect>
    </property>
@@ -146,7 +149,7 @@ p, li { white-space: pre-wrap; }
      <rect>
       <x>12</x>
       <y>20</y>
-      <width>242</width>
+      <width>333</width>
       <height>80</height>
      </rect>
     </property>
@@ -202,6 +205,12 @@ p, li { white-space: pre-wrap; }
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="lbMUD">
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="font">
         <font>
          <weight>75</weight>
@@ -236,7 +245,7 @@ p, li { white-space: pre-wrap; }
     </layout>
    </widget>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>60</x>
