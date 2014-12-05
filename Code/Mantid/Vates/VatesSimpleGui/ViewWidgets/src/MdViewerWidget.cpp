@@ -501,7 +501,11 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
   // correct initial after calling renderAndFinalSetup. We first 
   // need to load in the current view and then switch to be inline
   // with the current architecture.
-  resetCurrentView(workspaceType, instrumentName);
+  
+  if (VatesViewerInterface::PEAKS != workspaceType)
+  {
+     resetCurrentView(workspaceType, instrumentName);
+  }
 }
 
 /**
@@ -653,17 +657,7 @@ ModeControlWidget::Views MdViewerWidget::checkViewAgainstWorkspace(ModeControlWi
 {
   ModeControlWidget::Views selectedView;
 
-  if (VatesViewerInterface::PEAKS == workspaceType)
-  {
-    // For now we set the standard view as default for the peak workspace
-    if (view != ModeControlWidget::STANDARD)
-    {
-      g_log.warning() << "Selected a plot which was not a standard plot for a peaks workspace. \n";
-    }
-
-    selectedView =  ModeControlWidget::STANDARD;
-  }
-  else if (VatesViewerInterface::MDHW == workspaceType)
+  if (VatesViewerInterface::MDHW == workspaceType)
   {
     // Histo workspaces cannot have a splatter plot, 
     if (view == ModeControlWidget::SPLATTERPLOT)
