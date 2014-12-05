@@ -46,7 +46,7 @@ The following example extracts peaks from the correlation spectrum of a Silicon 
                     FitPlotsWorkspace = "fit_plots_6904")
 
     # Create theoretical reflections for Silicon
-    Si = PoldiCreatePeaksFromCell(SpaceGroup="F d -3 m"
+    Si = PoldiCreatePeaksFromCell(SpaceGroup="F d -3 m",
                                     Atoms="Si 0.0 0.0 0.0 1.0 0.005",
                                     a=5.43071,
                                     LatticeSpacingMin=0.7, LatticeSpacingMax=10.0)
