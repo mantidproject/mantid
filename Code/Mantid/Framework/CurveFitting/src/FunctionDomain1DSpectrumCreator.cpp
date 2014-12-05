@@ -70,7 +70,7 @@ void FunctionDomain1DSpectrumCreator::createDomain(boost::shared_ptr<FunctionDom
 
     for(size_t i = 0; i < yData.size(); ++i) {
         values->setFitData(i, yData[i]);
-        values->setFitWeight(i, eData[i] != 0 ? eData[i] : 1.0);
+        values->setFitWeight(i, 1.0/(eData[i] != 0 ? eData[i] : 1.0));
     }
 }
 

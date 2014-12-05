@@ -56,6 +56,39 @@ public:
         TS_ASSERT_EQUALS(values[9], 2.0);
     }
 
+    void testIterationBehavior()
+    {
+        boost::shared_ptr<Poldi2DFunction> function2D(new Poldi2DFunction);
+
+        IFunction_sptr first(new SummingFunction);
+        IFunction_sptr second(new SummingFunction);
+
+        function2D->addFunction(first);
+        function2D->addFunction(second);
+
+        // x doesn't matter for that function
+        std::vector<double> x(10, 1.0);
+
+        FunctionDomain1DSpectrum domain(0, x);
+        FunctionValues values(domain);
+
+
+        function2D->function(domain, values);
+
+        for(size_t i = 0; i < values.size(); ++i) {
+            TS_ASSERT_THROWS(values.getFitWeight(i), std::runtime_error);
+        }
+
+        function2D->iterationFinished();
+
+        function2D->function(domain, values);
+
+        for(size_t i = 0; i < values.size(); ++i) {
+            TS_ASSERT_THROWS_NOTHING(values.getFitWeight(i));
+            TS_ASSERT_EQUALS(values.getFitWeight(i), 1.0/sqrt(fabs(values.getCalculated(i) + 0.1)));
+        }
+    }
+
 private:
     /* small test function that behaves like PoldiSpectrumDomainFunction
      * in that it uses FunctionValues::addToCalculated.
