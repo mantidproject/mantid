@@ -474,10 +474,10 @@ class DirectPropertyManager(DirectReductionProperties):
 
         # replace common substitutions for None
         if type(val) is str :
-           val = val.lower()
-           if (val == 'none' or len(val) == 0):
+           val1 = val.lower()
+           if (val1 == 'none' or len(val1) == 0):
               val = None;
-           if val == 'default':
+           if val1 == 'default':
               val = self.getDefaultParameterValue(name0);
 
         if type(val) is list and len(val) == 0:

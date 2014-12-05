@@ -75,7 +75,7 @@ Whitebeam run number or file name or workspace
                        bleed test diagnostic
       print_results - If True then the results are printed to the screen
 
-      diag_remove_zero =True, False (default):Diag zero counts in background range
+      diag_remove_ero =True, False (default):Diag zero counts in background range
       bleed=True , turn bleed correction on and off on by default for Merlin and LET
 
       sum =True,False(default) , sum multiple files

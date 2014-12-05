@@ -29,7 +29,7 @@ class IncidentEnergy(object):
           if isinstance(value,str):
              en_list = str.split(value,',');
              if len(en_list)>1:                 
-                rez = list;
+                rez = [];
                 for en_str in en_list:
                     val = float(en_str);
                     rez.append(val)
