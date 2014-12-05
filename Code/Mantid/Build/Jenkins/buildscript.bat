@@ -24,15 +24,16 @@ echo %sha1%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check the required build configuration
+:: Use RelWithDbgInfo unless specified by job name
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set BUILD_CONFIG=
 if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
     set BUILD_CONFIG=Debug
 ) else (
-if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
-    set BUILD_CONFIG=RelWithDbg
-) else (
+if not "%JOB_NAME%"=="%JOB_NAME:release=%" (
     set BUILD_CONFIG=Release
+) else (
+    set BUILD_CONFIG=RelWithDebInfo
     ))
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

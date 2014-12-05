@@ -15,7 +15,7 @@ namespace DataObjects
      
   /** MDNormSXD : Generate MD normalization for single crystal diffraction
 
-     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
     
      This file is part of Mantid.
      
@@ -69,8 +69,6 @@ namespace DataObjects
                        double &theta, double &phi);
       std::vector<Kernel::VMD> calculateIntersections(const double theta, const double phi);
 
-      /// number of MD dimensions
-      size_t m_nDims;
       /// Normalization workspace
       MDEvents::MDHistoWorkspace_sptr m_normWS;
       /// Input workspace

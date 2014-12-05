@@ -1090,8 +1090,7 @@ private:
   void openSurfacePlot      (const std::string& lines, const int fileVersion);
   void openTable            (const std::string& lines, const int fileVersion);
   void openTableStatistics  (const std::string& lines, const int fileVersion);
-
-  void openScriptWindow     (const QStringList &list);
+  void openScriptWindow     (const QStringList& lines);
   //@}
 
   ApplicationWindow* loadScript(const QString& fn, bool existingProject = false);
@@ -1184,6 +1183,8 @@ private slots:
   ///
   void showalgorithmDescriptions();
 
+  /// Contains the rules of when to show the FirstTimeSetup UI.
+  bool shouldWeShowFirstTimeSetup();
   /// Open up the FirstRunSetup dialog
   void showFirstTimeSetup();
 
@@ -1306,6 +1307,7 @@ public:
   bool d_synchronize_graph_scales;
 
   int majTicksStyle, minTicksStyle, legendFrameStyle, autoSaveTime, canvasFrameWidth;
+  bool autoDistribution1D;
   QColor legendBackground, legendTextColor, defaultArrowColor;
   int defaultArrowHeadLength, defaultArrowHeadAngle;
   double defaultArrowLineWidth, defaultCurveLineWidth;

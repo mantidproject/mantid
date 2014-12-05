@@ -26,7 +26,7 @@ namespace Kernel
 
   /** InternetHelper : A helper class for supporting access to resources through HTTP and HTTPS
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

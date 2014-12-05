@@ -2,7 +2,7 @@
 TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
 *WIKI*/
 
-#include "MantidSINQ/PoldiCalculateSpectrum2D.h"
+#include "MantidSINQ/PoldiFitPeaks2D.h"
 
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -25,7 +25,7 @@ namespace Mantid
 namespace Poldi
 {
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(PoldiCalculateSpectrum2D)
+  DECLARE_ALGORITHM(PoldiFitPeaks2D)
 
   using namespace API;
   using namespace Kernel;
@@ -33,7 +33,7 @@ namespace Poldi
 
   /** Constructor
    */
-  PoldiCalculateSpectrum2D::PoldiCalculateSpectrum2D():
+  PoldiFitPeaks2D::PoldiFitPeaks2D():
       Algorithm(),
       m_timeTransformer(),
       m_deltaT(0.0)
@@ -42,27 +42,27 @@ namespace Poldi
 
   /** Destructor
    */
-  PoldiCalculateSpectrum2D::~PoldiCalculateSpectrum2D()
+  PoldiFitPeaks2D::~PoldiFitPeaks2D()
   {
   }
 
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string PoldiCalculateSpectrum2D::name() const { return "PoldiCalculateSpectrum2D";}
+  const std::string PoldiFitPeaks2D::name() const { return "PoldiFitPeaks2D";}
 
   /// Algorithm's version for identification. @see Algorithm::version
-  int PoldiCalculateSpectrum2D::version() const { return 1;}
+  int PoldiFitPeaks2D::version() const { return 1;}
 
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string PoldiCalculateSpectrum2D::category() const { return "SINQ\\Poldi\\PoldiSet";}
+  const std::string PoldiFitPeaks2D::category() const { return "SINQ\\Poldi\\PoldiSet";}
 
   /// Very short algorithm summary. @see Algorith::summary
-  const std::string PoldiCalculateSpectrum2D::summary() const
+  const std::string PoldiFitPeaks2D::summary() const
   {
       return "Calculates a POLDI 2D-spectrum.";
   }
 
   /// Initialization of algorithm properties.
-  void PoldiCalculateSpectrum2D::init()
+  void PoldiFitPeaks2D::init()
   {
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input), "Measured POLDI 2D-spectrum.");
     declareProperty(new WorkspaceProperty<TableWorkspace>("PoldiPeakWorkspace", "", Direction::Input), "Table workspace with peak information.");
@@ -74,7 +74,53 @@ namespace Poldi
     declareProperty("FitLinearBackground", true, "Add a background term linear in 2theta to the fit.");
     declareProperty("LinearBackgroundParameter", 0.0, "Initial value of linear background.");
 
+    declareProperty("MaximumIterations", 0, "Maximum number of iterations for the fit. Use 0 to calculate 2D-spectrum without fitting.");
+
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), "Calculated POLDI 2D-spectrum");
+    declareProperty(new WorkspaceProperty<TableWorkspace>("RefinedPoldiPeakWorkspace", "", Direction::Output), "Table workspace with fitted peaks.");
+  }
+
+  /**
+   * Construct a PoldiPeakCollection from a Poldi2DFunction
+   *
+   * This method performs the opposite operation of getFunctionFromPeakCollection.
+   * It takes a function, checks if it's of the proper type and turns the information
+   * into a PoldiPeakCollection.
+   *
+   * @param  Poldi2DFunction with one PoldiSpectrumDomainFunction per peak
+   * @return PoldiPeakCollection containing peaks with normalized intensities
+   */
+  PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(const IFunction_sptr &fitFunction) const
+  {
+      boost::shared_ptr<Poldi2DFunction> poldi2DFunction = boost::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
+
+      if(!poldi2DFunction) {
+          throw std::invalid_argument("Cannot process function that is not a Poldi2DFunction.");
+      }
+
+      PoldiPeakCollection_sptr normalizedPeaks = boost::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
+
+      for(size_t i = 0; i < poldi2DFunction->nFunctions(); ++i) {
+          boost::shared_ptr<PoldiSpectrumDomainFunction> peakFunction = boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(poldi2DFunction->getFunction(i));
+
+          if(peakFunction) {
+              size_t dIndex = peakFunction->parameterIndex("Centre");
+              UncertainValue d(peakFunction->getParameter(dIndex), peakFunction->getError(dIndex));
+
+              size_t iIndex = peakFunction->parameterIndex("Area");
+              UncertainValue intensity(peakFunction->getParameter(iIndex), peakFunction->getError(iIndex));
+
+              size_t fIndex = peakFunction->parameterIndex("Fwhm");
+              UncertainValue fwhm(peakFunction->getParameter(fIndex), peakFunction->getError(fIndex));
+
+              PoldiPeak_sptr peak = PoldiPeak::create(MillerIndices(), d, intensity, UncertainValue(1.0));
+              peak->setFwhm(fwhm, PoldiPeak::FwhmRelation::AbsoluteD);
+
+              normalizedPeaks->addPeak(peak);
+          }
+      }
+
+      return normalizedPeaks;
   }
 
   /**
@@ -86,7 +132,7 @@ namespace Poldi
    * @param peakCollection :: PoldiPeakCollection containing peaks with integral intensities
    * @return Poldi2DFunction with one PoldiSpectrumDomainFunction per peak
    */
-  boost::shared_ptr<Poldi2DFunction> PoldiCalculateSpectrum2D::getFunctionFromPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const
+  boost::shared_ptr<Poldi2DFunction> PoldiFitPeaks2D::getFunctionFromPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const
   {
       boost::shared_ptr<Poldi2DFunction> mdFunction(new Poldi2DFunction);
 
@@ -105,7 +151,7 @@ namespace Poldi
   }
 
   /// Executes the algorithm
-  void PoldiCalculateSpectrum2D::exec()
+  void PoldiFitPeaks2D::exec()
   {
       TableWorkspace_sptr peakTable = getProperty("PoldiPeakWorkspace");
       if(!peakTable) {
@@ -124,7 +170,16 @@ namespace Poldi
           peakCollection->setProfileFunctionName(profileFunctionProperty->value());
       }
 
-      setProperty("OutputWorkspace", calculateSpectrum(peakCollection, ws));
+      IAlgorithm_sptr fitAlgorithm = calculateSpectrum(peakCollection, ws);
+
+      IFunction_sptr fitFunction = getFunction(fitAlgorithm);
+      PoldiPeakCollection_sptr normalizedPeaks = getPeakCollectionFromFunction(fitFunction);
+      PoldiPeakCollection_sptr integralPeaks = getCountPeakCollection(normalizedPeaks);
+
+      assignMillerIndices(peakCollection, integralPeaks);
+
+      setProperty("OutputWorkspace", getWorkspace(fitAlgorithm));
+      setProperty("RefinedPoldiPeakWorkspace", integralPeaks->asTableWorkspace());
   }
 
   /**
@@ -136,7 +191,7 @@ namespace Poldi
    *
    * @param poldi2DFunction :: Poldi2DFunction to which the background is added.
    */
-  void PoldiCalculateSpectrum2D::addBackgroundTerms(boost::shared_ptr<Poldi2DFunction> poldi2DFunction) const
+  void PoldiFitPeaks2D::addBackgroundTerms(boost::shared_ptr<Poldi2DFunction> poldi2DFunction) const
   {
       bool addConstantBackground = getProperty("FitConstantBackground");
       if(addConstantBackground) {
@@ -154,15 +209,17 @@ namespace Poldi
   }
 
   /**
-   * Calculates the 2D spectrum in a MatrixWorkspace
+   * Performs the fit and returns the fit algorithm
    *
-   * In this method the actual function calculation is performed using Fit.
+   * In this method the actual function fit/calculation is performed
+   * using the Fit algorithm. After execution the algorithm is returned for
+   * further processing.
    *
    * @param peakCollection :: PoldiPeakCollection
    * @param matrixWorkspace :: MatrixWorkspace with POLDI instrument and correct dimensions
-   * @return MatrixWorkspace with the calculated data
+   * @return Instance of Fit-algorithm, after execution
    */
-  MatrixWorkspace_sptr PoldiCalculateSpectrum2D::calculateSpectrum(const PoldiPeakCollection_sptr &peakCollection, const MatrixWorkspace_sptr &matrixWorkspace)
+  IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(const PoldiPeakCollection_sptr &peakCollection, const MatrixWorkspace_sptr &matrixWorkspace)
   {
       PoldiPeakCollection_sptr integratedPeaks = getIntegratedPeakCollection(peakCollection);
       PoldiPeakCollection_sptr normalizedPeakCollection = getNormalizedPeakCollection(integratedPeaks);
@@ -180,14 +237,36 @@ namespace Poldi
       fit->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(mdFunction));
       fit->setProperty("InputWorkspace", matrixWorkspace);
       fit->setProperty("CreateOutput", true);
-      fit->setProperty("MaxIterations", 0);
+
+      int maxIterations = getProperty("MaximumIterations");
+      fit->setProperty("MaxIterations", maxIterations);
+
       fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
 
       fit->execute();
 
-      MatrixWorkspace_sptr outputWs = fit->getProperty("OutputWorkspace");
+      return fit;
+  }
 
-      return outputWs;
+  /// Returns the output workspace stored in the Fit algorithm.
+  MatrixWorkspace_sptr PoldiFitPeaks2D::getWorkspace(const IAlgorithm_sptr &fitAlgorithm) const
+  {
+      if(!fitAlgorithm) {
+          throw std::invalid_argument("Cannot extract workspace from null-algorithm.");
+      }
+
+      MatrixWorkspace_sptr outputWorkspace = fitAlgorithm->getProperty("OutputWorkspace");
+      return outputWorkspace;
+  }
+
+  IFunction_sptr PoldiFitPeaks2D::getFunction(const IAlgorithm_sptr &fitAlgorithm) const
+  {
+      if(!fitAlgorithm) {
+          throw std::invalid_argument("Cannot extract function from null-algorithm.");
+      }
+
+      IFunction_sptr fitFunction = fitAlgorithm->getProperty("Function");
+      return fitFunction;
   }
 
   /**
@@ -195,7 +274,7 @@ namespace Poldi
    *
    * @param poldiInstrument :: PoldiInstrumentAdapter with valid components
    */
-  void PoldiCalculateSpectrum2D::setTimeTransformerFromInstrument(const PoldiInstrumentAdapter_sptr &poldiInstrument)
+  void PoldiFitPeaks2D::setTimeTransformerFromInstrument(const PoldiInstrumentAdapter_sptr &poldiInstrument)
   {
       setTimeTransformer(boost::make_shared<PoldiTimeTransformer>(poldiInstrument));
   }
@@ -205,7 +284,7 @@ namespace Poldi
    *
    * @param poldiTimeTransformer
    */
-  void PoldiCalculateSpectrum2D::setTimeTransformer(const PoldiTimeTransformer_sptr &poldiTimeTransformer)
+  void PoldiFitPeaks2D::setTimeTransformer(const PoldiTimeTransformer_sptr &poldiTimeTransformer)
   {
       m_timeTransformer = poldiTimeTransformer;
   }
@@ -219,7 +298,7 @@ namespace Poldi
    *
    * @param matrixWorkspace :: MatrixWorkspace with at least one spectrum with at least two x-values.
    */
-  void PoldiCalculateSpectrum2D::setDeltaTFromWorkspace(const MatrixWorkspace_sptr &matrixWorkspace)
+  void PoldiFitPeaks2D::setDeltaTFromWorkspace(const MatrixWorkspace_sptr &matrixWorkspace)
   {
       if(matrixWorkspace->getNumberHistograms() < 1) {
           throw std::invalid_argument("MatrixWorkspace does not contain any data.");
@@ -240,7 +319,7 @@ namespace Poldi
    *
    * @param newDeltaT :: Value to be used as delta t for calculations.
    */
-  void PoldiCalculateSpectrum2D::setDeltaT(double newDeltaT)
+  void PoldiFitPeaks2D::setDeltaT(double newDeltaT)
   {
       if(!isValidDeltaT(newDeltaT)) {
           throw std::invalid_argument("Time bin size must be larger than 0.");
@@ -255,7 +334,7 @@ namespace Poldi
    * @param deltaT :: Value to be checked for validity as a time difference.
    * @return True if delta t is larger than 0, otherwise false.
    */
-  bool PoldiCalculateSpectrum2D::isValidDeltaT(double deltaT) const
+  bool PoldiFitPeaks2D::isValidDeltaT(double deltaT) const
   {
       return deltaT > 0.0;
   }
@@ -266,7 +345,7 @@ namespace Poldi
    * @param peakTable :: TableWorkspace with POLDI peak data.
    * @return PoldiPeakCollection with the data from the table workspace.
    */
-  PoldiPeakCollection_sptr PoldiCalculateSpectrum2D::getPeakCollection(const TableWorkspace_sptr &peakTable) const
+  PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollection(const TableWorkspace_sptr &peakTable) const
   {
       try {
           return boost::make_shared<PoldiPeakCollection>(peakTable);
@@ -289,7 +368,7 @@ namespace Poldi
    * @param rawPeakCollection :: PoldiPeakCollection
    * @return PoldiPeakCollection with integrated intensities
    */
-  PoldiPeakCollection_sptr PoldiCalculateSpectrum2D::getIntegratedPeakCollection(const PoldiPeakCollection_sptr &rawPeakCollection) const
+  PoldiPeakCollection_sptr PoldiFitPeaks2D::getIntegratedPeakCollection(const PoldiPeakCollection_sptr &rawPeakCollection) const
   {
       if(!rawPeakCollection) {
           throw std::invalid_argument("Cannot proceed with invalid PoldiPeakCollection.");
@@ -368,7 +447,7 @@ namespace Poldi
    * @param peakCollection :: PoldiPeakCollection with integrated intensities
    * @return PoldiPeakCollection with normalized intensities
    */
-  PoldiPeakCollection_sptr PoldiCalculateSpectrum2D::getNormalizedPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const
+  PoldiPeakCollection_sptr PoldiFitPeaks2D::getNormalizedPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const
   {
       if(!peakCollection) {
           throw std::invalid_argument("Cannot proceed with invalid PoldiPeakCollection.");
@@ -392,6 +471,60 @@ namespace Poldi
       }
 
       return normalizedPeakCollection;
+  }
+
+  /**
+   * Converts normalized peak intensities to count based integral intensities
+   *
+   * This operation is the opposite of getNormalizedPeakCollection and is used to convert
+   * the intensities back to integral intensities.
+   *
+   * @param peakCollection :: PoldiPeakCollection with normalized intensities
+   * @return PoldiPeakCollection with integral intensities
+   */
+  PoldiPeakCollection_sptr PoldiFitPeaks2D::getCountPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const
+  {
+      if(!peakCollection) {
+          throw std::invalid_argument("Cannot proceed with invalid PoldiPeakCollection.");
+      }
+
+      if(!m_timeTransformer) {
+          throw std::invalid_argument("Cannot proceed without PoldiTimeTransformer.");
+      }
+
+      PoldiPeakCollection_sptr countPeakCollection = boost::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
+      countPeakCollection->setProfileFunctionName(peakCollection->getProfileFunctionName());
+
+      for(size_t i = 0; i < peakCollection->peakCount(); ++i) {
+          PoldiPeak_sptr peak = peakCollection->peak(i);
+          double calculatedIntensity = m_timeTransformer->calculatedTotalIntensity(peak->d());
+
+          PoldiPeak_sptr countPeak = peak->clone();
+          countPeak->setIntensity(peak->intensity() * calculatedIntensity);
+
+          countPeakCollection->addPeak(countPeak);
+      }
+
+      return countPeakCollection;
+  }
+
+  /// Assign Miller indices from one peak collection to another.
+  void PoldiFitPeaks2D::assignMillerIndices(const PoldiPeakCollection_sptr &from, PoldiPeakCollection_sptr &to) const
+  {
+      if(!from || !to) {
+          throw std::invalid_argument("Cannot process invalid peak collections.");
+      }
+
+      if(from->peakCount() != to->peakCount()) {
+          throw std::runtime_error("Cannot assign indices if number of peaks does not match.");
+      }
+
+      for(size_t i = 0; i < from->peakCount(); ++i) {
+          PoldiPeak_sptr fromPeak = from->peak(i);
+          PoldiPeak_sptr toPeak = to->peak(i);
+
+          toPeak->setHKL(fromPeak->hkl());
+      }
   }
 
 

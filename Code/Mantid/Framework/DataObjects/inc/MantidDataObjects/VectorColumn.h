@@ -18,7 +18,7 @@ namespace DataObjects
     Plese add more specializations to VectorColumn.cpp as you need them. I don't guarantee
     it will work correctly with complex or user types, but it might.
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

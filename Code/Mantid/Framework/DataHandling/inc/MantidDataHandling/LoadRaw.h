@@ -15,7 +15,7 @@ namespace Mantid
         Superseded by LoadRaw3.
         What's left in this class is just a stub.
 
-        Copyright &copy; 2007-2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+        Copyright &copy; 2007-2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
         This file is part of Mantid.
 

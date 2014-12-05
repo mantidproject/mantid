@@ -31,7 +31,7 @@ namespace Mantid
     other Nexus formats. It might be replaced in future by methods using
     the new Nexus C++ API.
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

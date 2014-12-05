@@ -60,6 +60,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "Mantid/MantidMatrixCurve.h"
+#include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "Mantid/ErrorBarSettings.h"
 
@@ -206,6 +207,8 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 
   connect (d_zoomer[0],SIGNAL(zoomed (const QwtDoubleRect &)),this,SLOT(zoomed (const QwtDoubleRect &)));
 
+  m_isDistribution = false;
+  m_normalizable = false;
 }
 
 void Graph::notifyChanges()
@@ -3221,6 +3224,22 @@ void Graph::addLegendItem()
   }
 }
 
+QString Graph::yAxisTitleFromFirstCurve()
+{
+  // I really don't like this...
+  if(auto *firstCurve = dynamic_cast<MantidMatrixCurve*>(curve(0)))
+  {
+    using namespace Mantid::API;
+    QString wsName = firstCurve->workspaceName();
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
+    return MantidQt::API::PlotAxis(m_isDistribution, *ws).title();
+  }
+  else
+  {
+    return axisTitle(0);
+  }
+}
+
 void Graph::contextMenuEvent(QContextMenuEvent *e)
 {
   if (selectedMarker>=0) {
@@ -5226,7 +5245,36 @@ void Graph::enableFixedAspectRatio(bool on)
   }
 #else
   UNUSED_ARG(on)
-#endif
+    #endif
+}
+
+/**
+ * Turn off any normalization
+ */
+void Graph::noNormalization()
+{
+  if(!m_isDistribution) return; // Nothing to do
+
+  m_isDistribution = false;
+  updateDataCurves();
+  d_plot->updateAxes();
+  setYAxisTitle(yAxisTitleFromFirstCurve());
+  notifyChanges();
+}
+
+/**
+ * Turn on normalization by bin width if it is appropriate
+ */
+void Graph::binWidthNormalization()
+{
+  if(m_isDistribution) return; // Nothing to do
+
+  m_isDistribution = true;
+  updateDataCurves();
+  d_plot->updateAxes();
+  setYAxisTitle(yAxisTitleFromFirstCurve());
+
+  notifyChanges();
 }
 
 void Graph::setWaterfallXOffset(int offset)
@@ -5337,7 +5385,11 @@ void Graph::updateDataCurves()
     if (DataCurve *c = dynamic_cast<DataCurve*>(pc))
       c->loadData();
     else if (MantidMatrixCurve *mc = dynamic_cast<MantidMatrixCurve*>(pc))
+    {
+      mc->setDrawAsDistribution(m_isDistribution);
+      mc->invalidateBoundingRect();
       mc->loadData();
+    }
   }
   QApplication::restoreOverrideCursor();
 }
@@ -5994,28 +6046,43 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     {
       TSVSerialiser specTSV(*it);
 
-      auto matrixSections = specTSV.sections("matrix");
-      if(matrixSections.empty())
-        continue;
+      if(specTSV.selectLine("workspace"))
+      {
+        std::string wsName;
+        specTSV >> wsName;
 
-      const std::string wsName = *matrixSections.begin();
-      Mantid::API::IMDWorkspace_const_sptr wsPtr = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::IMDWorkspace>(wsName);
+        Mantid::API::IMDWorkspace_const_sptr wsPtr = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::IMDWorkspace>(wsName);
 
-      //Check the pointer
-      if(!wsPtr.get())
-        continue;
+        //Check the pointer
+        if(!wsPtr.get())
+          continue;
 
-      /* You may notice we plot the spectrogram before loading it.
-      * Why? Because plotSpectrogram overrides the spectrograms' settings
-      * based off the second parameter (which has been chosen arbitrarily
-      * in this case). We're just use plotSpectrogram to add the spectrogram
-      * to the graph for us, and then loading the settings into the spectrogram.
-      */
-      Spectrogram* s = new Spectrogram(QString::fromUtf8(wsName.c_str()), wsPtr);
-      plotSpectrogram(s, Graph::ColorMap);
-      s->loadFromProject(*it);
+        /* You may notice we plot the spectrogram before loading it.
+        * Why? Because plotSpectrogram overrides the spectrograms' settings
+        * based off the second parameter (which has been chosen arbitrarily
+        * in this case). We're just use plotSpectrogram to add the spectrogram
+        * to the graph for us, and then loading the settings into the spectrogram.
+        */
+        Spectrogram* s = new Spectrogram(QString::fromUtf8(wsName.c_str()), wsPtr);
+        plotSpectrogram(s, Graph::ColorMap);
+        s->loadFromProject(*it);
+        curveID++;
+      }
+      else if(specTSV.selectLine("matrix"))
+      {
+        std::string matrixName;
+        specTSV >> matrixName;
 
-      curveID++;
+        Matrix* m = app->matrix(QString::fromStdString(matrixName));
+
+        if(!m)
+          continue;
+
+        Spectrogram* s = new Spectrogram(m);
+        plotSpectrogram(s, Graph::ColorMap);
+        s->loadFromProject(*it);
+        curveID++;
+      }
     }
 
     //<SkipPoints>, <CurveLabels>, and <MantidYErrors> all apply to the

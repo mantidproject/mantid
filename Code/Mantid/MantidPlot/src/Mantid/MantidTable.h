@@ -27,6 +27,8 @@ public:
   //! are the columns fixed - not editable by the GUI
   virtual bool isFixedColumns() {return true;}
 
+  virtual void sortTableDialog();
+
 signals:
   void needToClose();
   void needToUpdate();

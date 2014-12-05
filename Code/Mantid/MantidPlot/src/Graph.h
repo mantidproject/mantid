@@ -198,9 +198,16 @@ public slots:
   void enablePanningMagnifier(bool on = true);
   bool isFixedAspectRatioEnabled();
   void enableFixedAspectRatio(bool on);
+
+  void noNormalization();
+  void binWidthNormalization();
+
+  bool normalizable() const { return m_normalizable; }
+  void setNormalizable(const bool on) { m_normalizable = on; }
   // Are MantidCurves plotted as distributions in this Graph
-  bool isDistribution()const{return m_isDistribution;}
-	
+  bool isDistribution() const { return m_isDistribution; }
+  void setDistribution(const bool on) { m_isDistribution = on; }
+
 
   //! Accessor method for #d_plot.
   Plot* plotWidget(){return d_plot;};
@@ -801,7 +808,9 @@ private:
   void niceLogScales(QwtPlot::Axis axis);
   void deselectCurves();
   void addLegendItem();
-	
+
+  QString yAxisTitleFromFirstCurve();
+  
   Plot *d_plot;
   QwtPlotZoomer *d_zoomer[2];
   TitlePicker *titlePicker;
@@ -862,8 +871,10 @@ private:
   bool d_synchronize_scales;
   int d_waterfall_offset_x, d_waterfall_offset_y;
 
-  // True if MantidCurves are plotted as distributions
+  // True if MantidCurves are plotted as distribution
   bool m_isDistribution;
+  // True, if the graph can be plotted as distribution
+  bool m_normalizable;
   // x and y units of MantidCurves
   boost::shared_ptr<Mantid::Kernel::Unit> m_xUnits;
   boost::shared_ptr<Mantid::Kernel::Unit> m_yUnits;

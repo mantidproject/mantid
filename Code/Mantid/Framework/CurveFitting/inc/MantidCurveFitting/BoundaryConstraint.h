@@ -21,7 +21,7 @@ namespace Mantid
     @author Anders Markvardsen, ISIS, RAL
     @date 13/11/2009
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

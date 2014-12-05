@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "TXFA" valid-from="1993-10-06 18:50:00" valid-to="1998-05-26 12:04:46">
+
+  <component-link name = "TFXA">
+
+    <parameter name="deltaE-mode" type="string">
+      <value val="indirect"/>
+    </parameter>
+
+    <!-- These properties are neceessary for use in the Indirect CTE interface. -->
+    <parameter name="analysers" type="string">
+      <value val="graphite,diffraction" />
+    </parameter>
+
+    <parameter name="refl-graphite" type="string">
+      <value val="002" />
+    </parameter>
+
+    <parameter name="refl-diffraction" type="string">
+      <value val="diffspec" />
+    </parameter>
+
+    <!-- Available options are "true" or "false". -->
+    <parameter name="cm-1-convert-choice" type="string">
+      <value val="true" />
+    </parameter>
+
+    <parameter name="save-ascii-choice" type="string">
+      <value val="true" />
+    </parameter>
+
+    <!-- Reduction workflow parameters under this line -->
+    <parameter name="Workflow.InfoTable" type="string">
+      <value val="inst_abrv, run_number, user_name, run_title, hd_dur" />
+    </parameter>
+
+    <parameter name="rebin-default" type="string">
+      <value val="3,-0.005,500" />
+    </parameter>
+
+    <!-- This is actually spectrum index, NOT spectrum number -->
+    <parameter name="Workflow.Monitor1-SpectrumNumber" >
+      <value val="28" />
+    </parameter>
+
+    <parameter name="Workflow.Monitor1-Area" >
+      <value val="5.391011e-5" />
+    </parameter>
+
+    <parameter name="Workflow.Monitor1-Thickness" >
+      <value val="0.013" />
+    </parameter>
+
+    <parameter name="Workflow.Monitor1-ScalingFactor">
+      <value val="1e9" />
+    </parameter>
+
+    <parameter name="Workflow.Monitor1-Attenuation" >
+      <value val="8.3" />
+    </parameter>
+
+    <!-- This is actually spectrum index, NOT spectrum number -->
+    <parameter name="Workflow.Monitor2-SpectrumNumber" >
+      <value val="35" />
+    </parameter>
+
+    <parameter name="Workflow.Monitor2-Area" >
+      <value val="5.391011e-5" />
+    </parameter>
+
+    <parameter name="Workflow.Monitor2-Thickness" >
+      <value val="0.013" />
+    </parameter>
+
+    <parameter name="Workflow.Monitor2-ScalingFactor">
+      <value val="1e9" />
+    </parameter>
+
+    <parameter name="Workflow.Monitor2-Attenuation" >
+      <value val="8.3" />
+    </parameter>
+
+    <parameter name="Workflow.UnwrapMonitor" type="string">
+      <value val="Never" />
+    </parameter>
+
+    <parameter name="Workflow.ChopDataIfGreaterThan">
+      <value val="40000" />
+    </parameter>
+
+    <parameter name="Workflow.GroupingMethod" type="string">
+      <value val="All" />
+    </parameter>
+
+    <parameter name="Workflow.Masking" type="string">
+      <value val="IdentifyNoisyDetectors" />
+    </parameter>
+
+  </component-link>
+
+</parameter-file>

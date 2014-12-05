@@ -1189,7 +1189,10 @@ std::string Spectrogram::saveToProject()
   using namespace Mantid::Kernel;
   TSVSerialiser tsv;
   tsv.writeRaw("<spectrogram>");
-  tsv.writeInlineSection("matrix", d_wsName);
+  if(!d_wsName.empty())
+    tsv.writeLine("workspace") << d_wsName;
+  if(d_matrix)
+    tsv.writeLine("matrix") << d_matrix->name().toStdString();
 
   if (color_map_policy != Custom)
     tsv.writeInlineSection("ColorPolicy", Strings::toString<int>(color_map_policy));

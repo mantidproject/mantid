@@ -25,9 +25,6 @@ namespace MantidQt
       m_uiForm.setupUi(parent);
 
       connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
-
-      connect(m_uiForm.cbInstrument, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(instrumentSelected(const QString&)));
-      connect(m_uiForm.cbAnalyser, SIGNAL(currentIndexChanged(int)), this, SLOT(analyserSelected(int)));
     }
 
     /*
@@ -36,6 +33,9 @@ namespace MantidQt
     void IndirectTransmissionCalc::setup()
     {
       instrumentSelected(m_uiForm.cbInstrument->currentText());
+
+      connect(m_uiForm.cbInstrument, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(instrumentSelected(const QString&)));
+      connect(m_uiForm.cbAnalyser, SIGNAL(currentIndexChanged(int)), this, SLOT(analyserSelected(int)));
     }
 
     /**
@@ -48,6 +48,11 @@ namespace MantidQt
       UserInputValidator uiv;
 
       uiv.checkFieldIsNotEmpty("Chemical Formula", m_uiForm.leChemicalFormula, m_uiForm.valChemicalFormula);
+
+      // Ignore TOSCA and it's variants, they store efixed per detector
+      std::string instrumentName = m_uiForm.cbInstrument->currentText().toStdString();
+      if(instrumentName == "TOSCA" || instrumentName == "TFXA")
+        uiv.addErrorMessage(QString::fromStdString(instrumentName) + " is currently not supported.");
 
       QString error = uiv.generateErrorMessage();
       showMessageBox(error);

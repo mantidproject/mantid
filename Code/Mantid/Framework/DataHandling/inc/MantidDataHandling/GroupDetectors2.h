@@ -79,7 +79,7 @@ namespace DataHandling
     @author Steve Williams and Russell Taylor (Tessella Support Services plc)
     @date 27/07/2009
 
-    Copyright &copy; 2008-11 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-11 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

@@ -21,7 +21,7 @@ namespace MantidQt
 
     @author Samuel Jackson, STFC
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -51,8 +51,8 @@ namespace MantidQt
       /// Enumeration for the index of each tab
 			enum TabChoice
 			{
-				LOAD_ILL,
-        TRANSMISSION
+        TRANSMISSION,
+				LOAD_ILL
 			};
 
     public: // public constructor, destructor and functions
@@ -86,7 +86,7 @@ namespace MantidQt
       void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
       /// Map of tabs indexed by position on the window
-			std::map<unsigned int, IndirectToolsTab*> m_loadAsciiTabs;
+			std::map<unsigned int, IndirectToolsTab*> m_tabs;
       /// Change Observer for ConfigService (monitors user directories)
       Poco::NObserver<IndirectTools, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
       /// Main interface window

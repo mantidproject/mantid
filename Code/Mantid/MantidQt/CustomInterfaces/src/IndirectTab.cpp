@@ -249,7 +249,8 @@ namespace CustomInterfaces
     if( wsIndex >= workspace->getNumberHistograms() || workspace->readX(0).size() < 2 )
       return;
 
-    QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), false);
+    const bool logScale(false), distribution(false);
+    QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), logScale, distribution);
 
     removeCurve(cID);
 
