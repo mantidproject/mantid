@@ -59,21 +59,7 @@ class ReductionWrapperTest(unittest.TestCase):
         self.assertEqual(rv.standard_vars,main_prop);
         self.assertEqual(rv.advanced_vars,adv_prop);
 
-        # apply them to new properties.
-        #other_prop = self.prop_man;
-        #other_prop.set_input_parameters(**(rv.standard_vars));
-        #simple_prop = other_prop.getChangedProperties();
 
-
-        #other_prop.set_input_parameters(**(rv.advanced_vars));
-
-
-
-        # look what have changed and compare with initial data. 
-        #all_prop = other_prop.getChangedProperties();
-
-        #self.assertEqual(all_initial_prop,all_prop)
-        #self.assertEqual(adv_initial_prop,adv_prop)
 
         os.remove(file);
         fbase,fext = os.path.splitext(file)

@@ -54,7 +54,7 @@ class VanadiumRMM(object):
         """ return rmm for vanadium """
         return 50.9415;
     def __set__(self,instance,value):
-        raise AttributeError(("Can not change vanadium rmm"));
+        raise AttributeError("Can not change vanadium rmm");
 #end VanadiumRMM
 #
 class DetCalFile(object):
@@ -246,7 +246,8 @@ class SpectraToMonitorsList(object):
        return result
 
 #end SpectraToMonitorsList
-    # format to save data
+
+# format(s) to save data
 class SaveFormat(object):
    # formats available for saving
    save_formats = ['spe','nxspe','nxs'];

@@ -93,9 +93,18 @@ def using_web_data(self):
 def iliad(F):
     def iliad_wrapper(*args):
         #seq = inspect.stack();
+
         host = args[0];
-        input_file = args[1];
-        output_directory = args[2];
+        if len(args)>1:
+            input_file = args[1];
+            if len(args)>2:
+                output_directory = args[2];
+            else:
+                output_directory =None
+        else:
+            input_file=None
+            output_directory=None
+
         use_web_variables= False;
         if host._web_var and output_directory:
             use_web_variables = True;

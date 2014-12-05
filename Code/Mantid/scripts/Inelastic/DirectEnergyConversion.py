@@ -606,7 +606,7 @@ class DirectEnergyConversion(object):
 
         #the D.E.C. tries to be too clever so we have to fool it into thinking the raw file is already exists as a workspace
         sum_name=self.prop_man.instr_name+str(self.prop_man.sample_run[0])+'-sum'
-        sample_run =self.sum_files(sum_name, sample_run)
+        sample_run =self.sum_files(sum_name, self.prop_man.sample_run)
         common.apply_calibration(self.prop_man.instr_name,sample_run,self.prop_man.det_cal_file)
         self.prop_man.sample_run = sample_run
 
