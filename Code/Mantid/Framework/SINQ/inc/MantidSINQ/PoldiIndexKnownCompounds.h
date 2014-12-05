@@ -24,25 +24,19 @@ struct MANTID_SINQ_DLL IndexCandidatePair
         observed(),
         candidate(),
         positionMatch(0.0),
-        intensityMatch(0.0),
         candidateCollectionIndex(0) { }
 
     IndexCandidatePair(const PoldiPeak_sptr &measuredPeak, const PoldiPeak_sptr &candidatePeak, size_t index);
 
-    /// Comparison operator, scores are compared.
+    /// Comparison operator, position matches are compared.
     bool operator <(const IndexCandidatePair &other) const
     {
-        if(fabs(positionMatch - other.positionMatch) > 0.01) {
-            return positionMatch < other.positionMatch;
-        }
-
-        return intensityMatch < other.intensityMatch;
+        return positionMatch < other.positionMatch;
     }
 
     PoldiPeak_sptr observed;
     PoldiPeak_sptr candidate;
     double positionMatch;
-    double intensityMatch;
     size_t candidateCollectionIndex;
 };
 
@@ -122,9 +116,6 @@ protected:
     void assignFwhmEstimates(const std::vector<PoldiPeakCollection_sptr> &peakCollections, const std::vector<double> &tolerances) const;
     void assignFwhmEstimates(const PoldiPeakCollection_sptr &peakCollection, double tolerance) const;
 
-    // Integration
-    PoldiPeakCollection_sptr getIntegratedPeaks(const PoldiPeakCollection_sptr &rawPeaks);
-
     // Indexing algorithm
     void indexPeaks(const PoldiPeakCollection_sptr &measured, const std::vector<PoldiPeakCollection_sptr> &knownCompoundPeaks);
 
@@ -137,6 +128,8 @@ protected:
     bool inPeakSet(const std::set<PoldiPeak_sptr> &peakSet, const PoldiPeak_sptr &peak) const;
     void assignPeakIndex(const IndexCandidatePair &candidate);
 
+    // Finalization
+    PoldiPeakCollection_sptr getIntensitySortedPeakCollection(const PoldiPeakCollection_sptr &peaks) const;
 
     PoldiPeakCollection_sptr m_measuredPeaks;
     std::vector<PoldiPeakCollection_sptr> m_expectedPhases;

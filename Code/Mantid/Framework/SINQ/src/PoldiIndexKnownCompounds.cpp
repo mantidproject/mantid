@@ -50,19 +50,9 @@ IndexCandidatePair::IndexCandidatePair(const PoldiPeak_sptr &measuredPeak, const
 
     boost::math::normal positionDistribution(0.0, sigmaD);
 
-    positionMatch = (1.0 - boost::math::cdf(positionDistribution, differenceD)) * 2.0;
+    double candidateIntensity = candidatePeak->intensity();
 
-    double peakI = observed->intensity();
-    double sigmaI = 0.25 * fabs(peakI);
-    double differenceI = fabs(peakI - candidate->intensity());
-
-    boost::math::normal intensityDistribution(0.0, sigmaI);
-
-    intensityMatch = (1.0 - boost::math::cdf(intensityDistribution, differenceI)) * 2.0;
-
-    std::cout << MillerIndicesIO::toString(candidate->hkl()) << std::endl;
-    std::cout << candidate->intensity() << " " << peakI << " " << positionMatch << std::endl;
-    std::cout << candidate->d() << " " << peakD << " " << intensityMatch << std::endl << std::endl;
+    positionMatch = (1.0 - boost::math::cdf(positionDistribution, differenceD)) * 2.0 * candidateIntensity;
 }
 
 /// Default constructor
@@ -354,8 +344,6 @@ void PoldiIndexKnownCompounds::scaleToExperimentalValues(const std::vector<Poldi
         maximumCalculatedIntensity = std::max(getMaximumIntensity(*it), maximumCalculatedIntensity);
     }
 
-    std::cout << "MAX: " << maximumExperimentalIntensity << " " << maximumCalculatedIntensity << std::endl;
-
     scaleIntensityEstimates(peakCollections, std::vector<double>(peakCollections.size(), maximumExperimentalIntensity / maximumCalculatedIntensity));
 }
 
@@ -415,33 +403,6 @@ void PoldiIndexKnownCompounds::assignFwhmEstimates(const PoldiPeakCollection_spt
         PoldiPeak_sptr peak = peakCollection->peak(i);
         peak->setFwhm(UncertainValue(fwhm), PoldiPeak::Relative);
     }
-}
-
-PoldiPeakCollection_sptr PoldiIndexKnownCompounds::getIntegratedPeaks(const PoldiPeakCollection_sptr &rawPeaks)
-{
-    if(rawPeaks->intensityType() == PoldiPeakCollection::Integral) {
-        return rawPeaks;
-    }
-
-    PeakFunctionIntegrator integrator;
-
-    PoldiPeakCollection_sptr peaks = boost::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
-    for(size_t i = 0; i < rawPeaks->peakCount(); ++i) {
-        PoldiPeak_sptr peak = rawPeaks->peak(i)->clone();
-
-        IPeakFunction_sptr peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction(rawPeaks->getProfileFunctionName()));
-        peakFunction->setCentre(0.0);
-        peakFunction->setHeight(peak->intensity());
-        peakFunction->setFwhm(peak->fwhm(PoldiPeak::AbsoluteD));
-
-        IntegrationResult result = integrator.integrateInfinity(peakFunction);
-
-        peak->setIntensity(UncertainValue(result.result));
-
-        peaks->addPeak(peak);
-    }
-
-    return peaks;
 }
 
 /** Tries to index the supplied measured peaks
@@ -589,7 +550,7 @@ void PoldiIndexKnownCompounds::assignCandidates(const std::vector<IndexCandidate
 
         g_log.information() << "    Candidate d=" << static_cast<double>(measuredPeak->d()) << " -> "
                             << "Phase: " << currentCandidate.candidateCollectionIndex << " [" << MillerIndicesIO::toString(expectedPeak->hkl()) << "] (d=" << static_cast<double>(expectedPeak->d()) << "), "
-                            << "Score=(" << currentCandidate.positionMatch << ", " << currentCandidate.intensityMatch << "): ";
+                            << "Score=(" << currentCandidate.positionMatch << "): ";
 
         /* If the peak has not been indexed yet, it is not stored in the set
          * that holds measured peaks that are already indexed, so the candidate
@@ -646,6 +607,20 @@ void PoldiIndexKnownCompounds::assignPeakIndex(const IndexCandidatePair &candida
     m_indexedPeaks[candidate.candidateCollectionIndex]->addPeak(candidate.observed);
 }
 
+PoldiPeakCollection_sptr PoldiIndexKnownCompounds::getIntensitySortedPeakCollection(const PoldiPeakCollection_sptr &peaks) const
+{
+    std::vector<PoldiPeak_sptr> peakVector(peaks->peaks());
+
+    std::sort(peakVector.begin(), peakVector.end(), boost::bind<bool>(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::intensity));
+
+    PoldiPeakCollection_sptr sortedPeaks = boost::make_shared<PoldiPeakCollection>(peaks->intensityType());
+    for(size_t i = 0; i < peakVector.size(); ++i) {
+        sortedPeaks->addPeak(peakVector[i]->clone());
+    }
+
+    return sortedPeaks;
+}
+
 /** Initialize the algorithm's properties.
    */
 void PoldiIndexKnownCompounds::init()
@@ -676,11 +651,8 @@ void PoldiIndexKnownCompounds::exec()
 
     DataObjects::TableWorkspace_sptr peakTableWorkspace = getProperty("InputWorkspace");
 
-    PoldiPeakCollection_sptr unindexedRawPeaks = boost::make_shared<PoldiPeakCollection>(peakTableWorkspace);
-    g_log.information() << "  Number of peaks: " << unindexedRawPeaks->peakCount() << std::endl;
-
-    g_log.information() << "  Integrating peaks..." << std::endl;
-    PoldiPeakCollection_sptr unindexedPeaks = getIntegratedPeaks(unindexedRawPeaks);
+    PoldiPeakCollection_sptr unindexedPeaks = boost::make_shared<PoldiPeakCollection>(peakTableWorkspace);
+    g_log.information() << "  Number of peaks: " << unindexedPeaks->peakCount() << std::endl;
 
     std::vector<Workspace_sptr> workspaces = getWorkspaces(getProperty("CompoundWorkspaces"));
     std::vector<PoldiPeakCollection_sptr> peakCollections = getPeakCollections(workspaces);
@@ -721,12 +693,12 @@ void PoldiIndexKnownCompounds::exec()
     WorkspaceGroup_sptr outputWorkspaces = boost::make_shared<WorkspaceGroup>();
 
     for(size_t i = 0; i < m_indexedPeaks.size(); ++i) {
-        ITableWorkspace_sptr tableWs = m_indexedPeaks[i]->asTableWorkspace();
+        PoldiPeakCollection_sptr intensitySorted = getIntensitySortedPeakCollection(m_indexedPeaks[i]);
+        ITableWorkspace_sptr tableWs = intensitySorted->asTableWorkspace();
         AnalysisDataService::Instance().addOrReplace("Indexed_" + m_phaseNames[i], tableWs);
 
         outputWorkspaces->addWorkspace(tableWs);
     }
-
 
     ITableWorkspace_sptr unindexedTableWs = m_unindexedPeaks->asTableWorkspace();
 

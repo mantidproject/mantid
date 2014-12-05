@@ -334,8 +334,10 @@ public:
         PoldiPeakCollection_sptr indexedSilicon = PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon();
         TS_ASSERT_THROWS_NOTHING(alg.scaleIntensityEstimates(indexedSilicon, 2.0));
 
+        PoldiPeakCollection_sptr reference = PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon();
+
         for(size_t i = 0; i < indexedSilicon->peakCount(); ++i) {
-            TS_ASSERT_EQUALS(indexedSilicon->peak(i)->intensity(), 2.0);
+            TS_ASSERT_EQUALS(indexedSilicon->peak(i)->intensity(), 2.0 * reference->peak(i)->intensity());
         }
 
         // test override with vectors
@@ -498,7 +500,7 @@ public:
         IndexCandidatePair defaultConstructed;
         TS_ASSERT(!defaultConstructed.observed);
         TS_ASSERT(!defaultConstructed.observed);
-        TS_ASSERT_EQUALS(defaultConstructed.score, 0.0);
+        TS_ASSERT_EQUALS(defaultConstructed.positionMatch, 0.0);
         TS_ASSERT_EQUALS(defaultConstructed.candidateCollectionIndex, 0);
     }
 
@@ -511,9 +513,7 @@ public:
         PoldiPeak_sptr peak = PoldiPeak::create(Conversions::dToQ(2.0));
 
         /* Two candidates for indexing with different
-         * distances from the peak position.
-         * They both have a contribution of 1.0 and equal , so score is only
-         * determined by |d(peak)-d(candidate)|.
+         * distances from the peak position, but equal tolerances.
          */
         PoldiPeak_sptr candidate1 = PoldiPeak::create(Conversions::dToQ(2.04), 1.0);
         candidate1->setFwhm(UncertainValue(alg.sigmaToFwhm(0.1)), PoldiPeak::Relative);
@@ -533,16 +533,10 @@ public:
         TS_ASSERT_EQUALS(peakCandidate1.candidate, candidate1);
         TS_ASSERT_EQUALS(peakCandidate1.candidateCollectionIndex, 1);
 
-        /* Score is a gaussian with A = I(candidate), sigma from FWHM(candidate)
-         * and x0 = d(candidate). x is d(peak).
-         */
-        TS_ASSERT_DELTA(peakCandidate1.score, 0.98096021516673242965, 1e-12);
-
         IndexCandidatePair peakCandidate2(peak, candidate2, 1);
         TS_ASSERT_EQUALS(peakCandidate2.observed, peak);
         TS_ASSERT_EQUALS(peakCandidate2.candidate, candidate2);
         TS_ASSERT_EQUALS(peakCandidate2.candidateCollectionIndex, 1);
-        TS_ASSERT_DELTA(peakCandidate2.score, 0.91685535573202892876, 1e-12);
 
         // Test comparison operator
         TS_ASSERT(peakCandidate2 < peakCandidate1);
@@ -574,15 +568,16 @@ public:
         TS_ASSERT_THROWS_NOTHING(alg.indexPeaks(measured, expected));
         TS_ASSERT_EQUALS(alg.m_unindexedPeaks->peakCount(), 2);
 
-        PoldiPeakCollection_sptr indexedSi = alg.m_indexedPeaks[0];
+        PoldiPeakCollection_sptr indexedSi = alg.getIntensitySortedPeakCollection(alg.m_indexedPeaks[0]);
         TS_ASSERT_EQUALS(indexedSi->peakCount(), 4);
 
-        TS_ASSERT_EQUALS(indexedSi->peak(0)->hkl(), MillerIndices(3, 3, 1));
+        // Peaks are ordered by intensity
+        TS_ASSERT_EQUALS(indexedSi->peak(3)->hkl(), MillerIndices(3, 3, 1));
         // Make sure this is the correct peak (not the one introduced above)
-        TS_ASSERT_EQUALS(indexedSi->peak(1)->hkl(), MillerIndices(3, 1, 1));
-        TS_ASSERT_EQUALS(indexedSi->peak(2)->hkl(), MillerIndices(2, 2, 0));
-        TS_ASSERT_EQUALS(indexedSi->peak(3)->hkl(), MillerIndices(4, 2, 2));
-        TS_ASSERT_EQUALS(indexedSi->peak(3)->d(), 1.108644);
+        TS_ASSERT_EQUALS(indexedSi->peak(2)->hkl(), MillerIndices(3, 1, 1));
+        TS_ASSERT_EQUALS(indexedSi->peak(1)->hkl(), MillerIndices(2, 2, 0));
+        TS_ASSERT_EQUALS(indexedSi->peak(0)->hkl(), MillerIndices(4, 2, 2));
+        TS_ASSERT_EQUALS(indexedSi->peak(0)->d(), 1.108644);
     }
 
 private:
