@@ -75,7 +75,7 @@ SplittingInterval SplittingInterval::operator &(const SplittingInterval& b) cons
 SplittingInterval SplittingInterval::operator |(const SplittingInterval& b) const
 {
   SplittingInterval out(*this);
-  if (this->overlaps(b) == 0.)
+  if (!this->overlaps(b))
     throw std::invalid_argument("SplittingInterval: cannot apply the OR (|) operator to non-overlapping SplittingInterval's.");
 
   if (b.m_start < this->m_start)
@@ -182,7 +182,7 @@ TimeSplitterType operator &(const TimeSplitterType& a, const TimeSplitterType& b
   {
     for (bit=b.begin(); bit != b.end(); ++bit)
     {
-      if (ait->overlaps(*bit) != 0.) {
+      if (ait->overlaps(*bit)) {
         // The & operator for SplittingInterval keeps the index of the left-hand-side (ait in this case)
         //  meaning that a has to be the splitter because the b index is ignored.
         out.push_back( *ait & *bit );
