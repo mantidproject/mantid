@@ -181,9 +181,6 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_plotSpecErr = new QAction(tr("Plot Spectrum with Errors..."),this);
   connect(m_plotSpecErr,SIGNAL(triggered()),this,SLOT(plotSpectraErr()));
 
-  m_plotSpecDistr = new QAction(tr("Plot spectrum as distribution..."),this);
-  connect(m_plotSpecDistr,SIGNAL(triggered()),this,SLOT(plotSpectraDistribution()));
-
   m_colorFill = new QAction(tr("Color Fill Plot"), this);
   connect(m_colorFill, SIGNAL(triggered()), this, SLOT(drawColorFillPlot()));
 
@@ -1266,17 +1263,7 @@ void MantidDockWidget::plotSpectra()
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
 
-  m_mantidUI->plot1D(toPlot, true, false);
-}
-
-/// Plots a single spectrum from each selected workspace
-void MantidDockWidget::plotSpectraDistribution()
-{
-  const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
-  // An empty map will be returned if the user clicks cancel in the spectrum selection
-  if (toPlot.empty()) return;
-
-  m_mantidUI->plot1D(toPlot, true, false, true );
+  m_mantidUI->plot1D(toPlot, true, MantidQt::DistributionDefault, false);
 }
 
 /// Plots a single spectrum from each selected workspace with errors
@@ -1286,17 +1273,7 @@ void MantidDockWidget::plotSpectraErr()
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
 
-  m_mantidUI->plot1D(toPlot, true, true);
-}
-
-/// Plots a single spectrum from each selected workspace with erros
-void MantidDockWidget::plotSpectraDistributionErr()
-{
-  const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
-  // An empty map will be returned if the user clicks cancel in the spectrum selection
-  if (toPlot.empty()) return;
-
-  m_mantidUI->plot1D(toPlot, true, true, true );
+  m_mantidUI->plot1D(toPlot, true, MantidQt::DistributionDefault, true);
 }
 
 /**

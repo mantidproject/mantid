@@ -17,7 +17,7 @@ namespace API
     after creation. Only a derived class can add functions in its contructor (or methods). 
     The function factory treat an ImmutableCompositeFunction as a simple function.
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

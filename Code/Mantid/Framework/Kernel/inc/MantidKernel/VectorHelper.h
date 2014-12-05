@@ -20,7 +20,7 @@ namespace Kernel
     @author Laurent C Chapon, Rutherford Appleton Laboratory
     @date 16/12/2008
 
-    Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -234,7 +234,7 @@ namespace VectorHelper
     /// Return the average of the two arguments
     T operator()(const T & x, const T & y) const
     {
-      return 0.5 * (x + y);
+      return static_cast<T>(0.5) * (x + y);
     }
   };
 

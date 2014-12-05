@@ -17,7 +17,7 @@ namespace Mantid
       /**
       This namespace contains helper functions for classes that are overridden in Python
 
-      Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 

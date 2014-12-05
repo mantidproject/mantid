@@ -514,6 +514,126 @@ namespace Mantid
     }
 
     //-------------------------------------------------------------------------------------
+    /** 
+      * Save a numeric columns of a TableWorkspace to currently open nexus file.
+      * @param type :: Nexus code for the element data type.
+      * @param interpret_as :: Value of the interpret_as attribute.
+      * @param col :: Reference to the column being svaed.
+      * @param columnName :: Name of the nexus data set in which the column values are saved.
+      */
+    template<typename ColumnT, typename NexusT>
+    void NexusFileIO::writeTableColumn(int type, const std::string& interpret_as, const API::Column& col, const std::string& columnName) const
+    {
+      const int nRows = static_cast<int>(col.size());
+      int dims_array[1] = { nRows };
+
+      NexusT* toNexus = new NexusT[nRows];
+      for (int ii = 0; ii < nRows; ii++)
+        toNexus[ii] = static_cast<NexusT>(col.cell<ColumnT>(ii));
+      NXwritedata(columnName.c_str(), type, 1, dims_array, (void *) (toNexus), false);
+      delete[] toNexus;
+
+      // attributes
+      NXopendata(fileID, columnName.c_str());
+      std::string units = "Not known";
+      NXputattr(fileID, "units", reinterpret_cast<void*>(const_cast<char*>(units.c_str())),
+          static_cast<int>(units.size()), NX_CHAR);
+      NXputattr(fileID, "interpret_as",
+          reinterpret_cast<void*>(const_cast<char*>(interpret_as.c_str())),
+          static_cast<int>(interpret_as.size()), NX_CHAR);
+      NXclosedata(fileID);
+    }
+
+    // Helper templated definitions
+    namespace{
+
+      // Get a size of a vector to be used in writeNexusVectorColumn(...)
+      template<typename VecType>
+      size_t getSizeOf( const VecType& vec )
+      {
+        return vec.size();
+      }
+
+      // Special case of V3D
+      size_t getSizeOf( const Kernel::V3D& )
+      {
+        return 3;
+      }
+    }
+
+
+    /**
+     * Writes given vector column to the currently open Nexus file.
+     * @param column     :: Column to write
+     * @param columnName :: Name of NXdata to write to
+     * @param nexusType  :: Nexus type to use to store data
+     * @param interpret_as   :: Name of the type to use for "interpret_as" attribute
+     */
+    template<typename VecType, typename ElemType>
+    void NexusFileIO::writeNexusVectorColumn(Column_const_sptr col,
+                                             const std::string& columnName, int nexusType,
+                                             const std::string& interpret_as) const
+    {
+      ConstColumnVector<VecType> column(col);
+      size_t rowCount = column.size();
+
+      // Search for the longest array amongst the cells
+      size_t maxSize(0);
+      for ( size_t i = 0; i < rowCount; ++i )
+      {
+        size_t size = getSizeOf( column[i] );
+
+        if ( size > maxSize )
+          maxSize = size;
+      }
+
+      // Set-up dimensions
+      int dims[2];
+      dims[0] = static_cast<int>(rowCount);
+      dims[1] = static_cast<int>(maxSize);
+
+      // Create data array
+      boost::scoped_array<ElemType> data(new ElemType[rowCount * maxSize]);
+
+      for ( size_t i = 0; i < rowCount; ++i )
+      {
+        // copy data in a cell to a vector with the same element type
+        std::vector<ElemType> values = column[i];
+
+        // So that all the arrays are of the size maxSize
+        values.resize(maxSize);
+
+        // Copy values to the data array
+        for ( size_t j = 0; j < maxSize; ++j )
+          data[i*maxSize + j] = values[j];
+      }
+
+      // Write data
+      NXwritedata(columnName.c_str(), nexusType, 2, dims, reinterpret_cast<void*>(data.get()), false);
+
+      NXopendata(fileID, columnName.c_str());
+
+      // Add sizes of rows as attributes. We can't use padding zeroes to determine that because the
+      // vector stored might end with zeroes as well.
+      for ( size_t i = 0; i < rowCount; ++i )
+      {
+        auto size = static_cast<int>( getSizeOf(column[i]) );
+
+        std::ostringstream rowSizeAttrName;
+        rowSizeAttrName << "row_size_" << i;
+
+        NXputattr(fileID, rowSizeAttrName.str().c_str(), &size, 1, NX_INT32);
+      }
+
+      std::string units = "Not known";
+
+      // Write general attributes
+      NXputattr(fileID, "units",  units.c_str(), static_cast<int>(units.size()), NX_CHAR);
+      NXputattr(fileID, "interpret_as",  interpret_as.c_str(), static_cast<int>(interpret_as.size()), NX_CHAR);
+
+      NXclosedata(fileID);
+    }
+    //-------------------------------------------------------------------------------------
     /** Write out a table Workspace's
      */
     int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr& itableworkspace,
@@ -537,9 +657,6 @@ namespace Mantid
 
       int nRows = static_cast<int>(itableworkspace->rowCount());
 
-      int dims_array[1] =
-      { nRows };
-
       for (size_t i = 0; i < itableworkspace->columnCount(); i++)
       {
         Column_const_sptr col = itableworkspace->getColumn(i);
@@ -548,41 +665,31 @@ namespace Mantid
 
         if (col->isType<double>())
         {
-          double * toNexus = new double[nRows];
-          for (int ii = 0; ii < nRows; ii++)
-            toNexus[ii] = col->cell<double>(ii);
-          NXwritedata(str.c_str(), NX_FLOAT64, 1, dims_array, (void *) (toNexus), false);
-          delete[] toNexus;
-
-          // attributes
-          NXopendata(fileID, str.c_str());
-          std::string units = "Not known";
-          std::string interpret_as = "A double";
-          NXputattr(fileID, "units", reinterpret_cast<void*>(const_cast<char*>(units.c_str())),
-              static_cast<int>(units.size()), NX_CHAR);
-          NXputattr(fileID, "interpret_as",
-              reinterpret_cast<void*>(const_cast<char*>(interpret_as.c_str())),
-              static_cast<int>(interpret_as.size()), NX_CHAR);
-          NXclosedata(fileID);
+          writeTableColumn<double,double>(NX_FLOAT64,"",*col,str);
+        }
+        else if (col->isType<float>())
+        {
+          writeTableColumn<float,float>(NX_FLOAT32,"",*col,str);
         }
         else if (col->isType<int>())
         {
-          int * toNexus = new int[nRows];
-          for (int ii = 0; ii < nRows; ii++)
-            toNexus[ii] = col->cell<int>(ii);
-          NXwritedata(str.c_str(), NX_INT32, 1, dims_array, (void *) (toNexus), false);
-          delete[] toNexus;
-
-          // attributes
-          NXopendata(fileID, str.c_str());
-          std::string units = "Not known";
-          std::string interpret_as = "An integer";
-          NXputattr(fileID, "units", reinterpret_cast<void*>(const_cast<char*>(units.c_str())),
-              static_cast<int>(units.size()), NX_CHAR);
-          NXputattr(fileID, "interpret_as",
-              reinterpret_cast<void*>(const_cast<char*>(interpret_as.c_str())),
-              static_cast<int>(interpret_as.size()), NX_CHAR);
-          NXclosedata(fileID);
+          writeTableColumn<int,int32_t>(NX_INT32,"",*col,str);
+        }
+        else if (col->isType<uint32_t>())
+        {
+          writeTableColumn<uint32_t,uint32_t>(NX_UINT32,"",*col,str);
+        }
+        else if (col->isType<int64_t>())
+        {
+          writeTableColumn<int64_t,int64_t>(NX_INT64,"",*col,str);
+        }
+        else if (col->isType<size_t>())
+        {
+          writeTableColumn<size_t,uint64_t>(NX_UINT64,"",*col,str);
+        }
+        else if (col->isType<Boolean>())
+        {
+          writeTableColumn<bool,bool>(NX_UINT8,"",*col,str);
         }
         else if (col->isType<std::string>())
         {
@@ -624,13 +731,18 @@ namespace Mantid
 
           NXclosedata(fileID);
         }
-#define IF_VECTOR_COLUMN(Type, NexusType) \
-      else if ( col->isType< std::vector<Type> >() ) \
-      { \
-        auto vecCol = boost::dynamic_pointer_cast< const VectorColumn<Type> >(col); \
-        writeNexusVectorColumn<Type>(vecCol, str, NexusType, #Type); \
-      }
-        IF_VECTOR_COLUMN(int,NX_INT32) IF_VECTOR_COLUMN(double, NX_FLOAT64)
+        else if ( col->isType< std::vector<int> >() )
+        {
+          writeNexusVectorColumn<std::vector<int>,int>(col, str, NX_INT32, "");
+        }
+        else if ( col->isType< std::vector<double> >() )
+        {
+          writeNexusVectorColumn<std::vector<double>,double>(col, str, NX_FLOAT64, "");
+        }
+        else if ( col->isType< Kernel::V3D >() )
+        {
+          writeNexusVectorColumn<Kernel::V3D,double>(col, str, NX_FLOAT64, "V3D");
+        }
 
         // write out title
         NXopendata(fileID, str.c_str());

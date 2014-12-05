@@ -20,7 +20,7 @@ namespace Geometry
   This is essentially an adapter for a Poco::File, with some extra convenience methods allowing easy access to the parent directory path.
   This type has the last modified date and the exists method as a virtual methods to facilite testing.
     
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

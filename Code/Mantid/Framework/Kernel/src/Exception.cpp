@@ -427,8 +427,6 @@ const int& InternetError::errorCode() const
   return m_errorCode;
 }
 
-
-
 } // namespace Exception
 } // namespace Kernel
 } // namespace Mantid

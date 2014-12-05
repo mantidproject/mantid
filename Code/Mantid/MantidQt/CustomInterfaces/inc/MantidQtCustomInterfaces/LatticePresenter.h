@@ -16,7 +16,7 @@ namespace MantidQt
       @author Owen Arnold, RAL ISIS
       @date 06/Oct/2011
 
-      Copyright &copy; 2010-11 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2010-11 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 

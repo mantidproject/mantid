@@ -35,7 +35,7 @@
     </parameter>
 
     <parameter name="rebin-default" type="string">
-      <value val="-3,0.005,500" />
+      <value val="3,-0.005,500" />
     </parameter>
 
     <!-- This is actually spectrum index, NOT spectrum number -->
@@ -56,6 +56,27 @@
     </parameter>
 
     <parameter name="Workflow.Monitor1-Attenuation" >
+      <value val="8.3" />
+    </parameter>
+
+    <!-- This is actually spectrum index, NOT spectrum number -->
+    <parameter name="Workflow.Monitor2-SpectrumNumber" >
+      <value val="35" />
+    </parameter>
+
+    <parameter name="Workflow.Monitor2-Area" >
+      <value val="5.391011e-5" />
+    </parameter>
+
+    <parameter name="Workflow.Monitor2-Thickness" >
+      <value val="0.013" />
+    </parameter>
+
+    <parameter name="Workflow.Monitor2-ScalingFactor">
+      <value val="1e9" />
+    </parameter>
+
+    <parameter name="Workflow.Monitor2-Attenuation" >
       <value val="8.3" />
     </parameter>
 

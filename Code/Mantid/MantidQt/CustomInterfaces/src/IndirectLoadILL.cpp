@@ -12,8 +12,8 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    IndirectLoadILL::IndirectLoadILL(QWidget * parent) : 
-      IndirectLoadAsciiTab(parent)
+    IndirectLoadILL::IndirectLoadILL(QWidget * parent) :
+      IndirectToolsTab(parent)
     {
       m_uiForm.setupUi(parent);
 
@@ -27,8 +27,15 @@ namespace MantidQt
     }
 
     /**
+     * Run any tab setup code.
+     */
+    void IndirectLoadILL::setup()
+    {
+    }
+
+    /**
      * Validate the form to check the program can be run
-     * 
+     *
      * @return :: Whether the form was valid
      */
     bool IndirectLoadILL::validate()
@@ -41,7 +48,7 @@ namespace MantidQt
       {
         emit showMessageBox("File is not of expected type:\n File type must be .asc, .inx or .nxs");
         return false;
-      } 
+      }
 
       return true;
     }
@@ -50,7 +57,7 @@ namespace MantidQt
      * Collect the settings on the GUI and build a python
      * script that runs IndirectLoadILL
      */
-    void IndirectLoadILL::run() 
+    void IndirectLoadILL::run()
     {
       QString verbose("False");
       QString plot("False");
@@ -98,7 +105,7 @@ namespace MantidQt
         else if(ext == "asc") //using ascii files
         {
           pyFunc += "IbackStart";
-        } 
+        }
         else if(ext == "inx") //using inx files
         {
           pyFunc += "InxStart";
@@ -120,7 +127,7 @@ namespace MantidQt
     /**
      * Set the file browser to use the default save directory
      * when browsing for input files.
-     *  
+     *
      * @param settings :: The settings to loading into the interface
      */
     void IndirectLoadILL::loadSettings(const QSettings& settings)
@@ -130,7 +137,7 @@ namespace MantidQt
 
     /**
      * Set the analyser option when the instrument changes.
-     *  
+     *
      * @param instrument :: The name of the instrument
      */
     void IndirectLoadILL::instrumentChanged(const QString& instrument)
@@ -157,10 +164,10 @@ namespace MantidQt
               QStringList analysersList = QString(analysers[0].c_str()).split(',');
               m_uiForm.cbAnalyser->addItems(analysersList);
 
-              // for each analyser for this instrument, get there reflections 
+              // for each analyser for this instrument, get there reflections
               QStringList::const_iterator it;
               for( it = analysersList.begin(); it != analysersList.end(); ++it) {
-                
+
                 auto reflections = inst->getStringParameter("refl-"+it->toStdString());
 
                 if( reflections.size() > 0 )
@@ -191,7 +198,7 @@ namespace MantidQt
      * This will use LoadEmptyInstrument and get the instrument details off of
      * the workspace. It also uses ExperimentInfo to get the most relevant instrument
      * defintion.
-     *  
+     *
      * @param instrument :: The name of the instrument
      * @return Pointer to the instrument
      */
@@ -233,7 +240,7 @@ namespace MantidQt
 
     /**
      * Set the reflection option when the analyser changes.
-     *  
+     *
      * @param analyser :: The name of the analyser
      */
     void IndirectLoadILL::analyserChanged(const QString& analyser)
@@ -259,7 +266,7 @@ namespace MantidQt
       QString filename = m_uiForm.mwRun->getFirstFilename();
       QFileInfo finfo(filename);
       QStringList fnameParts = finfo.baseName().split('_');
-      
+
       if( fnameParts.size() > 0 )
       {
         //Check if the first part of the name is in the instruments list

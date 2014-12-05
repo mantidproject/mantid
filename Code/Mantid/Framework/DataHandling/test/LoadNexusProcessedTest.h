@@ -547,24 +547,87 @@ public:
     TS_ASSERT( alg.execute());
 
     TableWorkspace_const_sptr ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(wsName);
-    TS_ASSERT_EQUALS( ws->columnCount(), 3);
+    TS_ASSERT_EQUALS( ws->columnCount(), 10);
     TS_ASSERT_EQUALS( ws->rowCount(), 4);
-    Column_const_sptr column;
-    TS_ASSERT_THROWS_NOTHING( column = ws->getColumn("Name"));
-    TS_ASSERT_EQUALS( column->cell<std::string>(0), "Height");
-    TS_ASSERT_EQUALS( column->cell<std::string>(1), "PeakCentre");
-    TS_ASSERT_EQUALS( column->cell<std::string>(2), "Sigma");
-    TS_ASSERT_EQUALS( column->cell<std::string>(3), "Cost function value");
-    TS_ASSERT_THROWS_NOTHING( column = ws->getColumn("Value"));
-    TS_ASSERT_DELTA( column->cell<double>(0), 79.2315, 0.0001);
-    TS_ASSERT_DELTA( column->cell<double>(1), 2.3979, 0.0001);
-    TS_ASSERT_DELTA( column->cell<double>(2), 0.3495, 0.0001);
-    TS_ASSERT_DELTA( column->cell<double>(3), 35.6841, 0.0001);
-    TS_ASSERT_THROWS_NOTHING( column = ws->getColumn("Error"));
-    TS_ASSERT_DELTA( column->cell<double>(0), 0.814478, 0.0001);
-    TS_ASSERT_DELTA( column->cell<double>(1), 0.00348291, 0.000001);
-    TS_ASSERT_DELTA( column->cell<double>(2), 0.00342847, 0.000001);
-    TS_ASSERT_EQUALS( column->cell<double>(3), 0);
+
+    try
+    {
+      {
+        ConstColumnVector<std::string> column = ws->getVector("Name");
+        TS_ASSERT_EQUALS( column[0], "Height");
+        TS_ASSERT_EQUALS( column[1], "PeakCentre");
+        TS_ASSERT_EQUALS( column[2], "Sigma");
+        TS_ASSERT_EQUALS( column[3], "Cost function value");
+      }
+      {
+        ConstColumnVector<double> column = ws->getVector("Value");
+        TS_ASSERT_DELTA( column[0], 79.2315, 0.0001);
+        TS_ASSERT_DELTA( column[1], 2.3979, 0.0001);
+        TS_ASSERT_DELTA( column[2], 0.3495, 0.0001);
+        TS_ASSERT_DELTA( column[3], 35.6841, 0.0001);
+      }
+      {
+        ConstColumnVector<double> column = ws->getVector("Error");
+        TS_ASSERT_DELTA( column[0], 0.814478, 0.0001);
+        TS_ASSERT_DELTA( column[1], 0.00348291, 0.000001);
+        TS_ASSERT_DELTA( column[2], 0.00342847, 0.000001);
+        TS_ASSERT_EQUALS( column[3], 0);
+      }
+      {
+        TS_ASSERT_THROWS( ConstColumnVector<int64_t> column = ws->getVector("Integer"), std::runtime_error );
+        ConstColumnVector<int> column = ws->getVector("Integer");
+        TS_ASSERT_EQUALS( column[0], 5);
+        TS_ASSERT_EQUALS( column[1], 3);
+        TS_ASSERT_EQUALS( column[2], 2);
+        TS_ASSERT_EQUALS( column[3], 4);
+      }
+      {
+        ConstColumnVector<uint32_t> column = ws->getVector("UInteger");
+        TS_ASSERT_EQUALS( column[0], 35);
+        TS_ASSERT_EQUALS( column[1], 33);
+        TS_ASSERT_EQUALS( column[2], 32);
+        TS_ASSERT_EQUALS( column[3], 34);
+      }
+      {
+        ConstColumnVector<int64_t> column = ws->getVector("Integer64");
+        TS_ASSERT_EQUALS( column[0], 15);
+        TS_ASSERT_EQUALS( column[1], 13);
+        TS_ASSERT_EQUALS( column[2], 12);
+        TS_ASSERT_EQUALS( column[3], 14);
+      }
+      {
+        ConstColumnVector<float> column = ws->getVector("Float");
+        TS_ASSERT_DELTA( column[0], 0.5, 0.000001 );
+        TS_ASSERT_DELTA( column[1], 0.3, 0.000001 );
+        TS_ASSERT_DELTA( column[2], 0.2, 0.000001 );
+        TS_ASSERT_DELTA( column[3], 0.4, 0.000001 );
+      }
+      {
+        ConstColumnVector<size_t> column = ws->getVector("Size");
+        TS_ASSERT_EQUALS( column[0], 25);
+        TS_ASSERT_EQUALS( column[1], 23);
+        TS_ASSERT_EQUALS( column[2], 22);
+        TS_ASSERT_EQUALS( column[3], 24);
+      }
+      {
+        ConstColumnVector<Boolean> column = ws->getVector("Bool");
+        TS_ASSERT( column[0] );
+        TS_ASSERT( column[1] );
+        TS_ASSERT( !column[2] );
+        TS_ASSERT( column[3] );
+      }
+      {
+        ConstColumnVector<Mantid::Kernel::V3D> column = ws->getVector("3DVector");
+        TS_ASSERT_EQUALS( column[0], Mantid::Kernel::V3D(1,2,3));
+        TS_ASSERT_EQUALS( column[1], Mantid::Kernel::V3D(4,5,6));
+        TS_ASSERT_EQUALS( column[2], Mantid::Kernel::V3D(7,8,9));
+        TS_ASSERT_EQUALS( column[3], Mantid::Kernel::V3D(11,12,13));
+      }
+    }
+    catch(std::exception& e)
+    {
+      TS_FAIL( e.what() );
+    }
 
     AnalysisDataService::Instance().remove(wsName);
   }

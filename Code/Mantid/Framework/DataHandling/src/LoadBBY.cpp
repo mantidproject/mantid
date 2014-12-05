@@ -30,13 +30,13 @@ namespace Mantid
     class BbyDetectorBankFactory {
     private:
       // fields
-      const Geometry::Instrument_sptr _instrument;
-      const Geometry::Object_sptr     _pixelShape;
-      const size_t _xPixelCount;
-      const size_t _yPixelCount;
-      const double _pixelWidth;
-      const double _pixelHeight;
-      const Kernel::V3D _center;
+      const Geometry::Instrument_sptr m_instrument;
+      const Geometry::Object_sptr     m_pixelShape;
+      const size_t m_xPixelCount;
+      const size_t m_yPixelCount;
+      const double m_pixelWidth;
+      const double m_pixelHeight;
+      const Kernel::V3D m_center;
 
     public:
       // construction
@@ -437,13 +437,13 @@ namespace Mantid
     template<class T>
     bool LoadBBY::loadNXDataSet(T &value, NeXus::NXEntry &entry, const std::string &path) {
       try {
-        if (entry.isValid(path)) {
+        //if (entry.isValid(path)) {
           NeXus::NXDataSetTyped<T> dataSet = entry.openNXDataSet<float>(path);
           dataSet.load();
 
           value = *dataSet();
           return true;
-        }
+        //}
       }
       catch (std::runtime_error&) {
       }
@@ -491,7 +491,7 @@ namespace Mantid
         bool event_ended = false;
         switch (state) {
           case 0:
-            x  = (c & 0xFF) << 0;   // set bit 1-8
+            x  = (c & 0xFF) >> 0;   // set bit 1-8
             break;
 
           case 1:
@@ -531,11 +531,11 @@ namespace Mantid
           else if ((x >= HISTO_BINS_X) || (y >= HISTO_BINS_Y)) {
           }
           else {
-            // conversion from 100 nanoseconds to 1 microseconds
-            double tof = dt * 0.1;
+              // conversion from 100 nanoseconds to 1 microsecond
+              double tof = dt * 0.1;
 
-            if ((tofMinBoundary <= tof) && (tof <= tofMaxBoundary))
-              counter.addEvent(HISTO_BINS_Y * x + y, tof);
+              if ((tofMinBoundary <= tof) && (tof <= tofMaxBoundary))
+                counter.addEvent(HISTO_BINS_Y * x + y, tof);
           }
           
           progTracker.update(file.selected_position());
@@ -569,7 +569,7 @@ namespace Mantid
 
               size_t p0, p1;
               if (k != std::string::npos) {
-                p0 = boost::lexical_cast<size_t>(item.substr(k));
+                p0 = boost::lexical_cast<size_t>(item.substr(0, k));
                 p1 = boost::lexical_cast<size_t>(item.substr(k + 1, item.size() - k - 1));
 
                 if (p0 > p1)
@@ -609,38 +609,38 @@ namespace Mantid
       double pixelWidth,
       double pixelHeight,
       const Kernel::V3D &center) :
-      _instrument(instrument),
-      _pixelShape(pixelShape),
-      _xPixelCount(xPixelCount),
-      _yPixelCount(yPixelCount),
-      _pixelWidth(pixelWidth),
-      _pixelHeight(pixelHeight),
-      _center(center) {
+      m_instrument(instrument),
+      m_pixelShape(pixelShape),
+      m_xPixelCount(xPixelCount),
+      m_yPixelCount(yPixelCount),
+      m_pixelWidth(pixelWidth),
+      m_pixelHeight(pixelHeight),
+      m_center(center) {
     }
     void BbyDetectorBankFactory::createAndAssign(size_t startIndex, const Kernel::V3D &pos, const Kernel::Quat &rot) const {
       // create a RectangularDetector which represents a rectangular array of pixels
-      Geometry::RectangularDetector* bank = new Geometry::RectangularDetector("bank", _instrument.get()); // ??? possible memory leak!? "new" without "delete"
+      Geometry::RectangularDetector* bank = new Geometry::RectangularDetector("bank", m_instrument.get()); // ??? possible memory leak!? "new" without "delete"
 
       bank->initialize(
-        _pixelShape,
+        m_pixelShape,
         // x
-        (int)_xPixelCount,
+        (int)m_xPixelCount,
         0,
-        _pixelWidth,
+        m_pixelWidth,
         // y
-        (int)_yPixelCount,
+        (int)m_yPixelCount,
         0,
-        _pixelHeight,
+        m_pixelHeight,
         // indices
         (int)startIndex,
         true,
-        (int)_yPixelCount);
+        (int)m_yPixelCount);
       
-      for (size_t x = 0; x < _xPixelCount; ++x)
-        for (size_t y = 0; y < _yPixelCount; ++y)
-          _instrument->markAsDetector(bank->getAtXY((int)x, (int)y).get());
+      for (size_t x = 0; x < m_xPixelCount; ++x)
+        for (size_t y = 0; y < m_yPixelCount; ++y)
+          m_instrument->markAsDetector(bank->getAtXY((int)x, (int)y).get());
       
-      Kernel::V3D center(_center);
+      Kernel::V3D center(m_center);
       rot.rotate(center);
 
       bank->rotate(rot);

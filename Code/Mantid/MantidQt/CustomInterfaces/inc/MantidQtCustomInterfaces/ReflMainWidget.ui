@@ -223,6 +223,9 @@
             <addaction name="actionProcess"/>
             <addaction name="actionExpandSelection"/>
             <addaction name="separator"/>
+            <addaction name="actionPlotRow"/>
+            <addaction name="actionPlotGroup"/>
+            <addaction name="separator"/>
             <addaction name="actionAppendRow"/>
             <addaction name="actionDeleteRow"/>
             <addaction name="separator"/>
@@ -373,6 +376,9 @@
     </property>
     <addaction name="actionProcess"/>
     <addaction name="actionExpandSelection"/>
+    <addaction name="separator"/>
+    <addaction name="actionPlotRow"/>
+    <addaction name="actionPlotGroup"/>
     <addaction name="separator"/>
     <addaction name="actionPrependRow"/>
     <addaction name="actionAppendRow"/>
@@ -647,6 +653,36 @@
    </property>
    <property name="shortcut">
     <string>F1</string>
+   </property>
+  </action>
+  <action name="actionPlotRow">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/graph.png</normaloff>:/graph.png</iconset>
+   </property>
+   <property name="text">
+    <string>Plot Selected Rows</string>
+   </property>
+   <property name="toolTip">
+    <string>Plot the selected rows</string>
+   </property>
+   <property name="whatsThis">
+    <string>Creates a plot of the IvsQ workspaces produced by the selected rows.</string>
+   </property>
+  </action>
+  <action name="actionPlotGroup">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/trajectory.png</normaloff>:/trajectory.png</iconset>
+   </property>
+   <property name="text">
+    <string>Plot Selected Groups</string>
+   </property>
+   <property name="toolTip">
+    <string>Plot the selected groups</string>
+   </property>
+   <property name="whatsThis">
+    <string>Creates a plot of the stitched IvsQ workspaces produced by any groups any selected rows are in.</string>
    </property>
   </action>
  </widget>

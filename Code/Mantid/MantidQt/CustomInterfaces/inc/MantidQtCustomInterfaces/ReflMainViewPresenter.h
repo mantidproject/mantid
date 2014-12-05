@@ -21,7 +21,7 @@ namespace MantidQt
 
     ReflMainViewPresenter is a presenter class for teh Reflectometry Interface. It handles any interface functionality and model manipulation.
 
-    Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -70,7 +70,7 @@ namespace MantidQt
       boost::shared_ptr<ReflTransferStrategy> m_transferStrategy;
 
       //process selected rows
-      virtual void process();
+      void process();
       //Reduce a row
       void reduceRow(int rowNo);
       //prepare a run or list of runs for processing
@@ -94,34 +94,37 @@ namespace MantidQt
       //Stitch some rows
       void stitchRows(std::set<int> rows);
       //insert a row in the model before the given index
-      virtual void insertRow(int index);
+      void insertRow(int index);
       //add row(s) to the model
-      virtual void appendRow();
-      virtual void prependRow();
+      void appendRow();
+      void prependRow();
       //delete row(s) from the model
-      virtual void deleteRow();
+      void deleteRow();
       //clear selected row(s) in the model
-      virtual void clearSelected();
+      void clearSelected();
       //copy selected rows to clipboard
-      virtual void copySelected();
+      void copySelected();
       //copy selected rows to clipboard and then delete them
-      virtual void cutSelected();
+      void cutSelected();
       //paste clipboard into selected rows
-      virtual void pasteSelected();
+      void pasteSelected();
       //group selected rows together
-      virtual void groupRows();
+      void groupRows();
       //expand selection to group
-      virtual void expandSelection();
+      void expandSelection();
       //table io methods
-      virtual void newTable();
-      virtual void openTable();
-      virtual void saveTable();
-      virtual void saveTableAs();
-      virtual void importTable();
-      virtual void exportTable();
+      void newTable();
+      void openTable();
+      void saveTable();
+      void saveTableAs();
+      void importTable();
+      void exportTable();
       //searching
-      virtual void search();
-      virtual void transfer();
+      void search();
+      void transfer();
+      //plotting
+      void plotRow();
+      void plotGroup();
       //options
       void showOptionsDialog();
       void initOptions();

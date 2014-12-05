@@ -203,7 +203,7 @@ namespace Algorithms
   void ReadGroupsFromFile::readXMLGroupingFile(const std::string& filename)
   {
     Poco::XML::DOMParser xmlParser;
-    Poco::XML::Document* file;
+    Poco::AutoPtr<Poco::XML::Document> file;
     try
     {
       file = xmlParser.parse(filename);
@@ -220,7 +220,7 @@ namespace Algorithms
       throw Kernel::Exception::FileError("No root element in XML grouping file: ", filename);
     }
 
-    Poco::XML::NodeList* groups = root->getElementsByTagName("group");
+    Poco::AutoPtr<Poco::XML::NodeList> groups = root->getElementsByTagName("group");
 
     if ( groups->length() == 0 )
     {

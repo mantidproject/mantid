@@ -52,6 +52,7 @@ namespace Kernel
         <li><b>MisMatch</b> - Error when two numbers should be identical (or close).</li>
         <li><b>IndexError</b> - Error when an incorrect index value is given.</li>
         <li><b>NullPointerException</b> - Thrown when a zero pointer is dereferenced.</li>
+        <li><b>InternetError</b> - Thrown when an error occurs accessing an internet resource.</li>
       </ul>
       </li>
     </ul>
@@ -61,7 +62,7 @@ namespace Kernel
     @author Nick Draper, Tessella Support Services plc
     @date 8/11/2007
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

@@ -11,7 +11,7 @@ namespace Mantid
   {
     /** BackgroundStrategy : Abstract class used for identifying elements of a IMDWorkspace that are not considered background.
 
-     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
      This file is part of Mantid.
 

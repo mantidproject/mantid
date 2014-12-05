@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "TOSCA" valid-from = "2011-01-19T00:00:00">
+<parameter-file instrument="TOSCA"
+  valid-from="2000-03-31 15:20:00"
+  valid-to="2100-01-31 23:59:59" >
 
   <component-link name = "TOSCA">
 
@@ -39,6 +41,7 @@
     <parameter name="Workflow.InfoTable" type="string">
       <value val="inst_abrv, run_number, user_name, run_title, hd_dur" />
     </parameter>
+
     <!-- This is actually spectrum index, NOT spectrum number -->
     <parameter name="Workflow.Monitor1-SpectrumNumber" >
       <value val="140" />
@@ -55,6 +58,7 @@
     <parameter name="Workflow.Monitor1-Attenuation" >
       <value val="8.3" />
     </parameter>
+
     <parameter name="Workflow.UnwrapMonitor" type="string">
       <value val="Never" />
     </parameter>

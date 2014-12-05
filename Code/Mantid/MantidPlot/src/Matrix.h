@@ -44,6 +44,8 @@
 #include "ScriptingEnv.h"
 #include "Scripted.h"
 
+#include "Mantid/IProjectSerialisable.h"
+
 #include <qwt_double_rect.h>
 #include <qwt_color_map.h>
 
@@ -59,7 +61,7 @@ class QShortcut;
 class QUndoStack;
 
 //! Matrix worksheet class
-class Matrix: public MdiSubWindow, public Scripted
+class Matrix: public MdiSubWindow, public Scripted, public Mantid::IProjectSerialisable
 {
   Q_OBJECT
 
@@ -230,11 +232,10 @@ public slots:
 
   //! Load the matrix from a string list (i.e. lines from a project file)
   void restore(const QStringList &l);
-  //! Format the matrix format in a string to save it in a template file
-  QString saveAsTemplate(const QString &info);
 
-  //! Return a string to save the matrix in a project file (\<matrix\> section)
-  QString saveToString(const QString &info, bool saveAsTemplate = false);
+  // loading and saving project files
+  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
+  std::string saveToProject(ApplicationWindow* app);
 
   // selection operations
   //! Standard cut operation

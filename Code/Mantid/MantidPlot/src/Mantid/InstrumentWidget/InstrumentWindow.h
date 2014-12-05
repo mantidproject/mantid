@@ -11,6 +11,7 @@
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmObserver.h"
+#include "Mantid/IProjectSerialisable.h"
 
 #include <string>
 #include <vector>
@@ -57,7 +58,7 @@ class QSettings;
   and needs to be updated whenever the instrument view functionality changes.
 
  */
-class InstrumentWindow : public MdiSubWindow, public MantidQt::API::WorkspaceObserver, public Mantid::API::AlgorithmObserver
+class InstrumentWindow : public MdiSubWindow, public MantidQt::API::WorkspaceObserver, public Mantid::API::AlgorithmObserver, public Mantid::IProjectSerialisable
 {
   Q_OBJECT
 
@@ -89,8 +90,6 @@ public:
   void selectComponent(const QString & name);
   void setScaleType(GraphOptions::ScaleType type);
   void setViewType(const QString& type);
-  /// for saving the instrument window  to mantid project
-  QString saveToString(const QString& geometry, bool saveAsTemplate= false);
   InstrumentActor* getInstrumentActor() const {return m_instrumentActor;}
   bool blocked()const{return m_blocked;}
   void selectTab(int tab);
@@ -103,6 +102,9 @@ public:
   QString getSettingsGroupName() const;
   /// Get a name for a instrument-specific settings group
   QString getInstrumentSettingsGroupName() const;
+
+  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
+  std::string saveToProject(ApplicationWindow* app);
 
 signals:
   void enableLighting(bool);

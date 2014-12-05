@@ -13,7 +13,7 @@ namespace DataHandling
 
   /** LoadLLB : Loads an LLB MIBEMOL TOF NeXus file into a Workspace2D with the given name.
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

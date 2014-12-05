@@ -114,6 +114,19 @@ namespace API
         << inst->getValidFromDate().toFormattedString("%Y-%b-%d")
         << " to " << inst->getValidToDate().toFormattedString("%Y-%b-%d") << ")";
     out << "\n";
+    if (!inst->getFilename().empty())
+    {
+      out << "Instrument from: " << inst->getFilename();
+      out << "\n";
+    }
+
+    //parameter files loaded
+    auto paramFileVector = this->instrumentParameters().getParameterFilenames();
+    for (auto itFilename = paramFileVector.begin(); itFilename != paramFileVector.end(); ++itFilename)
+    {
+      out << "Parameters from: " << *itFilename;
+      out << "\n";
+    }
 
     std::string runStart = getAvailableWorkspaceStartDate();
     std::string runEnd = getAvailableWorkspaceEndDate();
@@ -376,7 +389,6 @@ namespace API
   {
     if(m_detgroups.empty())
     {
-      g_log.debug("No detector mapping cached, getting detector from instrument");
       return getInstrument()->getDetector(detID);
     }
     else

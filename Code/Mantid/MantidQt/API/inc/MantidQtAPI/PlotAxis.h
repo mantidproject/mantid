@@ -14,7 +14,7 @@ namespace MantidQt
     /**
       Deals with formatting a label for a plot axis for a given type of workspace
 
-      Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 
@@ -42,8 +42,9 @@ namespace MantidQt
                const size_t index);
       /// Constructor with an IMDDimension
       PlotAxis(const Mantid::Geometry::IMDDimension & dim);
-      /// Constructor with just a workspace
-      PlotAxis(const Mantid::API::MatrixWorkspace & workspace);
+      /// Constructor with just a workspace (reverse order to above so compiler doesn't convert a
+      /// a bool to an size_t and call the wrong thing
+      PlotAxis(const bool plottingDistribution, const Mantid::API::MatrixWorkspace & workspace);
 
       /// Create a new axis title
       QString title() const;
@@ -57,7 +58,8 @@ namespace MantidQt
       /// Creates a title suitable for an axis attached to the given dimension
       void titleFromDimension(const Mantid::Geometry::IMDDimension & dim);
       /// Creates a title suitable for the Y data values
-      void titleFromYData(const Mantid::API::MatrixWorkspace & workspace);
+      void titleFromYData(const Mantid::API::MatrixWorkspace & workspace,
+                          const bool plottingDistribution);
 
       /// Title
       QString m_title;

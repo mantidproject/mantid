@@ -1,13 +1,13 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTLOADASCII_H_
-#define MANTIDQTCUSTOMINTERFACES_INDIRECTLOADASCII_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTTOOLS_H_
+#define MANTIDQTCUSTOMINTERFACES_INDIRECTTOOLS_H_
 
 //----------------------
 // Includes
 //----------------------
-#include "ui_IndirectLoadAscii.h"
+#include "ui_IndirectTools.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/UserSubWindow.h"
-#include "MantidQtCustomInterfaces/IndirectLoadAsciiTab.h"
+#include "MantidQtCustomInterfaces/IndirectToolsTab.h"
 
 #include <Poco/NObserver.h>
 
@@ -15,13 +15,13 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    /** 
-    This class defines the Indirect Foreign interface. It handles the creation of the interface window and 
+    /**
+    This class defines the Indirect Foreign interface. It handles the creation of the interface window and
 		handles the interaction between the child tabs on the window.
 
     @author Samuel Jackson, STFC
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -39,10 +39,10 @@ namespace MantidQt
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-    class DLLExport IndirectLoadAscii : public MantidQt::API::UserSubWindow
+    class DLLExport IndirectTools : public MantidQt::API::UserSubWindow
     {
       Q_OBJECT
 
@@ -51,23 +51,23 @@ namespace MantidQt
       /// Enumeration for the index of each tab
 			enum TabChoice
 			{
-				LOAD_ILL,
+        TRANSMISSION,
+				LOAD_ILL
 			};
 
     public: // public constructor, destructor and functions
       /// Default Constructor
-      IndirectLoadAscii(QWidget *parent = 0);
+      IndirectTools(QWidget *parent = 0);
       ///Destructor
-      ~IndirectLoadAscii();
+      ~IndirectTools();
       /// Interface name
-      static std::string name() { return "Load Ascii"; }
+      static std::string name() { return "Tools"; }
       // This interface's categories.
       static QString categoryInfo() { return "Indirect"; }
+
       virtual void initLayout();
 
     private slots:
-      // Run the appropriate action depending based on the selected tab
-
       /// Slot for clicking on the run button
       void runClicked();
       /// Slot for clicking on the hlep button
@@ -82,15 +82,15 @@ namespace MantidQt
       void loadSettings();
       /// Called upon a close event.
       virtual void closeEvent(QCloseEvent*);
-      /// handle POCO event
+      /// Handle POCO event
       void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
       /// Map of tabs indexed by position on the window
-			std::map<unsigned int, IndirectLoadAsciiTab*> m_loadAsciiTabs;
+			std::map<unsigned int, IndirectToolsTab*> m_tabs;
       /// Change Observer for ConfigService (monitors user directories)
-      Poco::NObserver<IndirectLoadAscii, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
-      ///Main interface window
-      Ui::IndirectLoadAscii m_uiForm;
+      Poco::NObserver<IndirectTools, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+      /// Main interface window
+      Ui::IndirectTools m_uiForm;
     };
   }
 }

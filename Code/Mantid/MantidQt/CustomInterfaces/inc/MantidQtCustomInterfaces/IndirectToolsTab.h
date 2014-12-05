@@ -1,7 +1,8 @@
-#ifndef MANTID_CUSTOMINTERFACES_INDIRECTLOADASCIITAB_H_
-#define MANTID_CUSTOMINTERFACES_INDIRECTLOADASCIITAB_H_
+#ifndef MANTID_CUSTOMINTERFACES_INDIRECTTOOLSTAB_H_
+#define MANTID_CUSTOMINTERFACES_INDIRECTTOOLSTAB_H_
 
 #include "MantidKernel/System.h"
+#include "IndirectTab.h"
 #include <QSettings>
 #include <QWidget>
 
@@ -13,10 +14,10 @@ namespace MantidQt
 			This class defines a abstract base class for the different tabs of the Indirect Foreign interface.
 			Any joint functionality shared between each of the tabs should be implemented here as well as defining
 			shared member functions.
-    
+
 			@author Samuel Jackson, STFC
 
-			Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+			Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
 			This file is part of Mantid.
 
@@ -37,21 +38,19 @@ namespace MantidQt
 			Code Documentation is available at: <http://doxygen.mantidproject.org>
 		*/
 
-		class DLLExport IndirectLoadAsciiTab : public QWidget
+		class DLLExport IndirectToolsTab : public IndirectTab
 		{
 			Q_OBJECT
 
 		public:
-			IndirectLoadAsciiTab(QWidget * parent = 0);
-			~IndirectLoadAsciiTab();
+			IndirectToolsTab(QWidget * parent = 0);
+			~IndirectToolsTab();
 
 			/// Returns a URL for the wiki help page for this interface
 			QString tabHelpURL();
 
-			/// Base methods implemented in derived classes 
+			/// Base methods implemented in derived classes
 			virtual QString help() = 0;
-			virtual bool validate() = 0;
-			virtual void run() = 0;
 			virtual void loadSettings(const QSettings& settings) = 0;
 
 		signals:
@@ -61,6 +60,10 @@ namespace MantidQt
 			void showMessageBox(const QString& message);
 
 		protected:
+      virtual void setup() = 0;
+      virtual void run() = 0;
+      virtual bool validate() = 0;
+
 			void runPythonScript(const QString& pyInput);
 
 		};
