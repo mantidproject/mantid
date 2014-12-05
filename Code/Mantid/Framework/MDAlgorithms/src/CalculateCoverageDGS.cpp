@@ -20,6 +20,14 @@ namespace MDAlgorithms
   using namespace Mantid::MDEvents;
   using namespace Mantid::Geometry;
 
+  namespace
+  {
+    //function to compare two intersections (h,k,l,Momentum) by scattered momentum
+    bool compareMomentum(const Mantid::Kernel::VMD &v1, const Mantid::Kernel::VMD &v2)
+    {
+      return (v1[3] < v2[3]);
+    }
+  }
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(CalculateCoverageDGS)
 
@@ -28,7 +36,12 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  CalculateCoverageDGS::CalculateCoverageDGS()
+  CalculateCoverageDGS::CalculateCoverageDGS():
+      m_hmin(0.f), m_hmax(0.f), m_kmin(0.f), m_kmax(0.f), m_lmin(0.f), m_lmax(0.f),
+      m_dEmin(0.f), m_dEmax(0.f), m_Ei(0.),m_ki(0.), m_kfmin(0.), m_kfmax(0.),
+      m_hIntegrated(false), m_kIntegrated(false), m_lIntegrated(false), m_dEIntegrated(false),
+      m_hX(), m_kX(), m_lX(),m_eX(),m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1),
+      m_rubw(3,3),m_normWS()
   {
   }
 
@@ -77,6 +90,13 @@ namespace MDAlgorithms
     for(size_t i = 0; i < m_lX.size(); ++i)
     {
       m_lX[i] = lDim.getX(i);
+    }
+    //NOTE: store k final instead
+    auto &eDim = *m_normWS->getDimension(m_eIdx);
+    m_eX.resize( eDim.getNBins() );
+    for(size_t i = 0; i < m_eX.size(); ++i)
+    {
+      m_eX[i] = std::sqrt(energyToK*(m_Ei-eDim.getX(i)));
     }
    }
 
@@ -267,7 +287,7 @@ namespace MDAlgorithms
       W.setRow(2,Q3Basis);
 
       m_rubw=gon*UB*W*(2.0*M_PI);
-
+      m_rubw.Invert();
 
       //calculate maximum original limits
       Geometry::OrientedLattice ol;
@@ -387,6 +407,7 @@ namespace MDAlgorithms
       }
 
       m_normWS=MDHistoWorkspace_sptr(new MDHistoWorkspace(binDimensions));
+      m_normWS->setTo(0.,0.,0.);
       setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(m_normWS));
 
       cacheDimensionXValues();
@@ -406,7 +427,7 @@ namespace MDAlgorithms
             const auto & prevIntSec = *(it-1);
             // the full vector isn't used so compute only what is necessary
             double delta = curIntSec[3] - prevIntSec[3];
-            if(delta < 1e-07) continue; // Assume zero contribution if difference is small
+            if(delta < 1e-10) continue; // Assume zero contribution if difference is small
             // Average between two intersections for final position
             std::vector<coord_t> pos(4);
             std::transform(curIntSec.getBareArray(), curIntSec.getBareArray() + 4,
@@ -437,13 +458,13 @@ namespace MDAlgorithms
  */
  std::vector<Kernel::VMD> CalculateCoverageDGS::calculateIntersections(const double theta, const double phi)
  {
-    V3D qout(sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)),qin(0,0,m_ki);
+    V3D qout(sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)),qin(0.,0.,m_ki);
     qout = m_rubw*qout;
     qin = m_rubw*qin;
     double hStart = qin.X()-qout.X()*m_kfmin, hEnd = qin.X()-qout.X()*m_kfmax;
     double kStart = qin.Y()-qout.Y()*m_kfmin, kEnd = qin.Y()-qout.Y()*m_kfmax;
     double lStart = qin.Z()-qout.Z()*m_kfmin, lEnd = qin.Z()-qout.Z()*m_kfmax;
-    double eps = 1e-7;
+    double eps = 1e-10;
     auto hNBins = m_hX.size();
     auto kNBins = m_kX.size();
     auto lNBins = m_lX.size();
@@ -477,7 +498,7 @@ namespace MDAlgorithms
         }
       }
       double momhMin = fmom*(m_hmin-hStart)+m_kfmin;
-      if ((momhMin>m_kfmin)&&(momhMin<m_kfmax))
+      if ((momhMin-m_kfmin)*(momhMin-m_kfmax)<0)//m_kfmin>m_kfmax
       {
        //khmin and lhmin
        double khmin = fk*(m_hmin-hStart)+kStart;
@@ -489,7 +510,7 @@ namespace MDAlgorithms
        }
       }
       double momhMax = fmom*(m_hmax-hStart)+m_kfmin;
-      if ((momhMax>m_kfmin)&&(momhMax<m_kfmax))
+      if ((momhMax-m_kfmin)*(momhMax-m_kfmax)<=0)
       {
         //khmax and lhmax
         double khmax = fk*(m_hmax-hStart)+kStart;
@@ -528,7 +549,7 @@ namespace MDAlgorithms
         }
       }
       double momkMin = fmom*(m_kmin-kStart)+m_kfmin;
-      if ((momkMin>m_kfmin)&&(momkMin<m_kfmax))
+      if ((momkMin-m_kfmin)*(momkMin-m_kfmax)<0)
       {
        //hkmin and lkmin
        double hkmin = fh*(m_kmin-kStart)+hStart;
@@ -540,7 +561,7 @@ namespace MDAlgorithms
        }
       }
       double momkMax = fmom*(m_kmax-kStart)+m_kfmin;
-      if ((momkMax>m_kfmin)&&(momkMax<m_kfmax))
+      if ((momkMax-m_kfmin)*(momkMax-m_kfmax)<=0)
       {
         //hkmax and lkmax
         double hkmax = fh*(m_kmax-kStart)+hStart;
@@ -579,7 +600,7 @@ namespace MDAlgorithms
         }
       }
       double momlMin = fmom*(m_lmin-lStart)+m_kfmin;
-      if ((momlMin>m_kfmin)&&(momlMin<m_kfmax))
+      if ((momlMin-m_kfmin)*(momlMin-m_kfmax)<=0)
       {
        //hlmin and klmin
        double hlmin = fh*(m_lmin-lStart)+hStart;
@@ -591,7 +612,7 @@ namespace MDAlgorithms
        }
       }
       double momlMax = fmom*(m_lmax-lStart)+m_kfmin;
-      if ((momlMax>m_kfmin)&&(momlMax<m_kfmax))
+      if ((momlMax-m_kfmin)*(momlMax-m_kfmax)<0)
       {
         //hlmax and klmax
         double hlmax = fh*(m_lmax-lStart)+hStart;
@@ -604,7 +625,42 @@ namespace MDAlgorithms
       }
     }
 
-    //TODO: add intersections with dE and endpoints
+    //intersections with dE
+    if(!m_dEIntegrated)
+    {
+        for(size_t i = 0;i<eNBins;i++)
+        {
+            double kfi=m_eX[i];
+            if((kfi-m_kfmin)*(kfi-m_kfmax)<=0)
+            {
+                double h = qin.X()-qout.X()*kfi;
+                double k = qin.Y()-qout.Y()*kfi;
+                double l = qin.Z()-qout.Z()*kfi;
+                if((h>=m_hmin)&&(h<=m_hmax)&&(k>=m_kmin)&&(k<=m_kmax)&&(l>=m_lmin)&&(l<=m_lmax))
+                {
+                    Mantid::Kernel::VMD v(h,k,l,kfi);
+                    intersections.push_back(v);
+                }
+            }
+        }
+    }
+
+    //endpoints
+    if ((hStart>=m_hmin)&&(hStart<=m_hmax)&&(kStart>=m_kmin)&&(kStart<=m_kmax)&&(lStart>=m_lmin)&&(lStart<=m_lmax))
+    {
+      Mantid::Kernel::VMD v(hStart,kStart,lStart,m_kfmin);
+      intersections.push_back(v);
+    }
+    if ((hEnd>=m_hmin)&&(hEnd<=m_hmax)&&(kEnd>=m_kmin)&&(kEnd<=m_kmax)&&(lEnd>=m_lmin)&&(lEnd<=m_lmax))
+    {
+      Mantid::Kernel::VMD v(hEnd,kEnd,lEnd,m_kfmax);
+      intersections.push_back(v);
+    }
+
+    //sort intersections by final momentum
+    typedef std::vector<Mantid::Kernel::VMD>::iterator IterType;
+    std::stable_sort<IterType,bool (*)(const Mantid::Kernel::VMD&,const Mantid::Kernel::VMD&)>(intersections.begin(),intersections.end(),compareMomentum);
+
 
     return intersections;
  }
