@@ -1553,7 +1553,9 @@ void Matrix::loadFromProject(const std::string& lines, ApplicationWindow* app, c
     std::string dataLines;
     tsv >> dataLines;
     std::vector<std::string> dataVec, valVec;
-    boost::split(dataVec, dataLines, boost::is_any_of("\n"));
+
+    if(!dataLines.empty())
+      boost::split(dataVec, dataLines, boost::is_any_of("\n"));
 
     for(auto lineIt = dataVec.begin(); lineIt != dataVec.end(); ++lineIt)
     {
