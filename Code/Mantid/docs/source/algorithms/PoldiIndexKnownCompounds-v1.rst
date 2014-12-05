@@ -28,7 +28,7 @@ Usage
 -----
 .. include:: ../usagedata-note.txt
 
-The following example extracts peaks from the correlation spectrum of a Silicon standard measurement and indexes the observed peaks with Silicon reflections.
+The following example extracts peaks from the correlation spectrum of a Silicon standard measurement and indexes the observed peaks with Silicon reflections. One peak can not be indexed, but closer inspection of the correlation spectrum reveals that there is indeed no peak at this position (:math:`Q \approx 1.54`).
 
 .. testcode:: PoldiIndexKnownCompoundsExample
 
@@ -46,14 +46,17 @@ The following example extracts peaks from the correlation spectrum of a Silicon 
                     FitPlotsWorkspace = "fit_plots_6904")
 
     # Create theoretical reflections for Silicon
-    Si = PoldiCreatePeaksFromCell(LatticeCentering="All-face centred", PointGroup="m-3m (Cubic)", a=5.43071, LatticeSpacingMin=0.7, LatticeSpacingMax=10.0)
+    Si = PoldiCreatePeaksFromCell(SpaceGroup="F d -3 m"
+                                    Atoms="Si 0.0 0.0 0.0 1.0 0.005",
+                                    a=5.43071,
+                                    LatticeSpacingMin=0.7, LatticeSpacingMax=10.0)
 
     # Index reflections
     PoldiIndexKnownCompounds(InputWorkspace="peaks_refined_6904",
-                                 CompoundWorkspaces="Si",
-                                 Tolerances="0.005",
-                                 ScatteringContributions="1.0",
-                                 OutputWorkspace="Indexed")
+                                    CompoundWorkspaces="Si",
+                                    Tolerances="0.005",
+                                    ScatteringContributions="1.0",
+                                    OutputWorkspace="Indexed")
 
     print "Indexed_Si contains", mtd['Indexed_Si'].rowCount(), "indexed peaks."
     print "Number of unindexed peaks:", mtd['Unindexed_peaks_refined_6904'].rowCount()
