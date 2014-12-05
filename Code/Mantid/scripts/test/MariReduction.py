@@ -47,6 +47,7 @@ class ReduceMARI(ReductionWrapper):
        red.initialise(self.red_prop);
        ws = red.convert_to_energy_transfer();
        #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
+
        #when run from web service, return additional path for web server to copy data to";
        return ws
    def __init__(self):

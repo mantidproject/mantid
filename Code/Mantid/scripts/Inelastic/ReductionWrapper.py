@@ -4,11 +4,13 @@ from DirectEnergyConversion import  DirectEnergyConversion
 from DirectPropertyManager import DirectPropertyManager;
 #import inspect
 import os
+from abc import abstractmethod
+
 
 class ReductionWrapper(object):
     def __init__(self,instrumentName,web_var=None):
       """ sets properties defaults for the instrument with Name"""
-      self.red_prop = DirectPropertyManager(instrumentName)
+      self.iliad_prop = DirectPropertyManager(instrumentName)
       # the variables which are set up from the main properties
       self._main_properties=[];
       # the variables which are set up from the advanced properties.
@@ -45,6 +47,17 @@ class ReductionWrapper(object):
         f.close();
 
 
+    @abstractmethod
+    def def_main_properties(self):
+        raise NotImplementedError('def_main_properties  has to be implemented')
+    @abstractmethod
+    def def_advanced_properties(self):
+        raise NotImplementedError('def_advanced_properties  has to be implemented')
+    @abstractmethod
+    def main(self,input_file=None,output_directory=None):
+        raise NotImplementedError('main routine has to be implemented')
+
+
 def MainProperties(F):
     """ Decorator stores properties dedicated as main and sets these properties as input to reduction parameters.""" 
     def main_prop_wrapper(*args):
@@ -52,7 +65,7 @@ def MainProperties(F):
         #print "in decorator: ",properties
         host = args[0];
         host._main_properties=properties;
-        host.red_prop.set_input_parameters(**properties);
+        host.iliad_prop.set_input_parameters(**properties);
         return properties
 
     return main_prop_wrapper
@@ -64,7 +77,7 @@ def AdvancedProperties(F):
         #print "in decorator: ",properties
         host = args[0];
         host._advanced_properties=properties;
-        host.red_prop.set_input_parameters(**properties);
+        host.iliad_prop.set_input_parameters(**properties);
         return properties
 
     return advanced_prop_wrapper
@@ -88,8 +101,8 @@ def iliad(F):
             use_web_variables = True;
             config.appendDataSearchDir(output_directory)
             web_vars = dict(host._web_var.standard_vars.items()+host._web_var.advanced_vars.items());
-            host.red_prop.set_input_parameters(**web_vars);
-            host.red_prop.sample_run = input_file;
+            host.iliad_prop.set_input_parameters(**web_vars);
+            host.iliad_prop.sample_run = input_file;
 
         rez = F(*args)
         # prohibit returning workspace to web services. 
