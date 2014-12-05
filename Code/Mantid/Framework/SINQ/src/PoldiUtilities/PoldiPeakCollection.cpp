@@ -208,6 +208,10 @@ void PoldiPeakCollection::setPeaks(const std::vector<V3D> &hkls, const std::vect
         throw std::invalid_argument("hkl-vector and d-vector do not have the same length.");
     }
 
+    if(!m_pointGroup) {
+        throw std::runtime_error("Cannot set peaks without point group.");
+    }
+
     m_peaks.clear();
 
     for(size_t i = 0; i < hkls.size(); ++i) {
