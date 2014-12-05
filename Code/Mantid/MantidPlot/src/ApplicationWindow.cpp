@@ -4740,9 +4740,14 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     std::vector<std::string> scriptSections = tsv.sections("scriptwindow");
     for(auto it = scriptSections.begin(); it != scriptSections.end(); ++it)
     {
-      std::string scriptLines = *it;
-      QStringList sl = QString::fromStdString(scriptLines).split("\n");
-      openScriptWindow(sl);
+      TSVSerialiser sTSV(*it);
+      QStringList files;
+
+      auto scriptNames = sTSV.values("ScriptNames");
+      //Iterate, ignoring scriptNames[0] which is just "ScriptNames"
+      for(size_t i = 1; i < scriptNames.size(); ++i)
+        files.append(QString::fromStdString(scriptNames[i]));
+      openScriptWindow(files);
     }
   }
 
@@ -11076,25 +11081,23 @@ void ApplicationWindow::openMultiLayer(const std::string& lines, const int fileV
 
 /** This method opens script window with a list of scripts loaded
  */
-void ApplicationWindow::openScriptWindow(const QStringList &list)
+void ApplicationWindow::openScriptWindow(const QStringList& files)
 {
   showScriptWindow();
   if(!scriptingWindow)
     return;
 
   scriptingWindow->setWindowTitle("MantidPlot: " + scriptingEnv()->languageName() + " Window");
-  QStringList scriptnames;
 
-  foreach (QString fileNameEntry, list)
-  {
-    scriptnames.append(fileNameEntry.split("\t"));
-  }
-
+  //The first time we don't use a new tab, to re-use the blank script tab
+  //on further iterations we open a new tab
   bool newTab = false;
-  foreach (QString scriptname, scriptnames)
+  for(auto file = files.begin(); file != files.end(); ++file)
   {
-    scriptingWindow->open(scriptname,newTab);
-    newTab=false;
+    if(file->isEmpty())
+      continue;
+    scriptingWindow->open(*file, newTab);
+    newTab = true;
   }
 }
 
