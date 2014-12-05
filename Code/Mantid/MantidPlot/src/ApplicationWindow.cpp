@@ -1434,6 +1434,7 @@ void ApplicationWindow::tableMenuAboutToShow()
     tableMenu->addAction(actionConvertTableToWorkspace);
   }
   tableMenu->addAction(actionConvertTableToMatrixWorkspace);
+  tableMenu->addAction(actionSortTable);
 
   tableMenu->insertSeparator();
   tableMenu->addAction(actionShowPlotWizard);
@@ -6594,10 +6595,7 @@ void ApplicationWindow::sortActiveTable()
   if (!t)
     return;
 
-  if ((int)t->selectedColumns().count()>0)
-    t->sortTableDialog();
-  else
-    QMessageBox::warning(this, "MantidPlot - Column selection error","Please select a column first!");//Mantid
+  t->sortTableDialog();
 }
 
 void ApplicationWindow::sortSelection()
@@ -9012,7 +9010,10 @@ void ApplicationWindow::analysisMenuAboutToShow()
     analysisMenu->addAction(actionShowColStatistics);
     analysisMenu->addAction(actionShowRowStatistics);
     analysisMenu->insertSeparator();
-    analysisMenu->addAction(actionSortSelection);
+    if (w->isA("Table"))
+    {
+      analysisMenu->addAction(actionSortSelection);
+    }
     analysisMenu->addAction(actionSortTable);
 
     normMenu->clear();
