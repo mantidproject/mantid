@@ -63,11 +63,6 @@ namespace MDAlgorithms
     /// Normalization workspace (this is the coverage workspace)
     Mantid::MDEvents::MDHistoWorkspace_sptr m_normWS;
 
-    /// Conversion constant for E->k. k(A^-1) = sqrt(energyToK*E(meV))
-    const double energyToK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 /
-      (PhysicalConstants::h*PhysicalConstants::h);
-
-
     std::vector<Kernel::VMD> calculateIntersections(const double theta, const double phi);
     void cacheDimensionXValues();
   };

@@ -73,6 +73,9 @@ namespace MDAlgorithms
  */
   void CalculateCoverageDGS::cacheDimensionXValues()
   {
+    const double energyToK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 /
+        (PhysicalConstants::h*PhysicalConstants::h);
+
     auto &hDim = *m_normWS->getDimension(m_hIdx);
     m_hX.resize(hDim.getNBins());
     for(size_t i = 0; i < m_hX.size(); ++i)
@@ -141,6 +144,8 @@ namespace MDAlgorithms
    */
   void CalculateCoverageDGS::exec()
   {
+      const double energyToK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 /
+          (PhysicalConstants::h*PhysicalConstants::h);
       //get the limits
       Mantid::API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
       //cache two theta and phi
