@@ -223,7 +223,6 @@ void SplatterPlotView::checkPeaksCoordinates()
   if (!this->peaksSource.isEmpty() &&
       !this->ui.overridePeakCoordsButton->isChecked())
   {
-
     int peakViewCoords = vtkSMPropertyHelper(this->origSrc->getProxy(),
                                              "SpecialCoordinates").GetAsInt();
     // Make commensurate with vtkPeakMarkerFactory
@@ -246,11 +245,11 @@ void SplatterPlotView::onThresholdButtonClicked()
   emit this->lockColorControls();
 }
 
-void SplatterPlotView::checkView(ModeControlWidget::Views initialView)
+void SplatterPlotView::checkView()
 {
   if (!this->noOverlay && this->peaksSource.isEmpty())
   {
-    ViewBase::checkView(initialView);
+    ViewBase::checkView();
   }
   this->noOverlay = false;
 }

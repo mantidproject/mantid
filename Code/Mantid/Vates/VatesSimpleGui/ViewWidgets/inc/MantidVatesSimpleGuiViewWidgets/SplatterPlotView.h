@@ -62,7 +62,7 @@ public:
   virtual ~SplatterPlotView();
 
   /// @see ViewBase::checkView
-  void checkView(ModeControlWidget::Views initialView);
+  void checkView();
   /**
    * ViewBase::destroyView
    */

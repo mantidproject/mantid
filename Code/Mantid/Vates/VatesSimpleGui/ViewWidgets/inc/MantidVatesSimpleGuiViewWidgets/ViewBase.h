@@ -63,7 +63,7 @@ public:
   virtual ~ViewBase() {}
 
   /// Poll the view to set status for mode control buttons.
-  virtual void checkView(ModeControlWidget::Views initialView);
+  virtual void checkView();
   /// Poll the view to set status for mode control buttons on view switch.
   virtual void checkViewOnSwitch();
   /// Close view generated sub-windows.
@@ -181,10 +181,9 @@ signals:
   void setViewStatus(ModeControlWidget::Views mode, bool state);
   /**
    * Signal to set the status of the view mode buttons.
-	 * @param The initial view.
-   * @param state Whether or not to enable to view mode buttons.
+   * @param state whether or not to enable to view mode buttons
    */
-  void setViewsStatus(ModeControlWidget::Views view, bool state);
+  void setViewsStatus(bool state);
 
 private:
   Q_DISABLE_COPY(ViewBase)

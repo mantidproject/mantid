@@ -5,8 +5,6 @@
 
 #include <QWidget>
 
-#include <string>
-
 class QString;
 
 namespace MantidQt
@@ -60,11 +58,8 @@ public:
    * @param wsname the name of the workspace to visualize
    * @param wstype the type of workspace being visualized
    */
-  virtual void renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName);
-
-  /**
-   * Special function of correct widget invocation for plugin mode.
-   */
+  virtual void renderWorkspace(QString wsname, int wstype);
+  /// Special function of correct widget invocation for plugin mode.
   virtual void setupPluginMode();
 
   /// Enum to track the workspace type
