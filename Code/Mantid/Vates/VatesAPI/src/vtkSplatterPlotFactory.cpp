@@ -362,8 +362,7 @@ namespace VATES
     this->dataSet = visualDataSet;
     visualDataSet->Allocate(imageSize);
     
-    // Create the Hexahedron structure.
-    vtkHexahedron *hexahedron = vtkHexahedron::New();
+    // Create the vertex structure.
     vtkVertex* vertex = vtkVertex::New();
 
     // Check if the workspace requires 4D handling.
@@ -416,43 +415,18 @@ namespace VATES
             // Store the signal
             signal->InsertNextValue(static_cast<float>(signalScalar));
 
-            // Currently selecting vertex as cell data type.
-            if (false)
-            {
-              // The range which is maximally the size of the 
-              coord_t range = static_cast<coord_t>(signalScalar)/ static_cast<coord_t>(m_thresholdRange->getMaximum());
-              coord_t steps[3] = {0.5*range*incrementX, 0.5*range*incrementY, 0.5*range*incrementZ};
-
-              // Set  points for the variable size hexahedron
-              setPointsAndPointIdsForHex(points, pointIDs, out, signalScalar, steps);
-
-              // Set the hexahedron
-              hexahedron->GetPointIds()->SetId(0, pointIDs[0]);
-              hexahedron->GetPointIds()->SetId(1, pointIDs[1]);
-              hexahedron->GetPointIds()->SetId(2, pointIDs[2]);
-              hexahedron->GetPointIds()->SetId(3, pointIDs[3]);
-              hexahedron->GetPointIds()->SetId(4, pointIDs[4]);
-              hexahedron->GetPointIds()->SetId(5, pointIDs[5]);
-              hexahedron->GetPointIds()->SetId(6, pointIDs[6]);
-              hexahedron->GetPointIds()->SetId(7, pointIDs[7]);
-
-              visualDataSet->InsertNextCell(VTK_HEXAHEDRON, hexahedron->GetPointIds());
-            } 
-            else
-            {
-              vtkIdType id = points->InsertNextPoint(out);
+            vtkIdType id = points->InsertNextPoint(out);
               
-              vertex->GetPointIds()->SetId(0,id);
+            vertex->GetPointIds()->SetId(0,id);
               
-              visualDataSet->InsertNextCell(VTK_VERTEX, vertex->GetPointIds());
-            }
+            visualDataSet->InsertNextCell(VTK_VERTEX, vertex->GetPointIds());
+            
           }
           index++;
         }
       }
     }
     
-    hexahedron->Delete();
     vertex->Delete();
 
     visualDataSet->SetPoints(points);
