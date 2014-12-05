@@ -29,14 +29,14 @@ PoldiFitPeaks2D operates on a MatrixWorkspace with a valid POLDI instrument defi
     # Load data file with Si spectrum and instrument definition
     raw_6904 = LoadSINQFile(Filename = "poldi2013n006904.hdf", Instrument = "POLDI")
     LoadInstrument(raw_6904, InstrumentName = "POLDI")
-    
+
     # Data needs to be truncated to correct dimensions.
     truncated_6904 = PoldiTruncateData(raw_6904)
-    
+
     # Perform correlation, peak search and fit
     correlated_6904 = PoldiAutoCorrelation(truncated_6904)
     peaks_6904 = PoldiPeakSearch(correlated_6904)
-    
+
     PoldiFitPeaks1D(InputWorkspace = correlated_6904, FwhmMultiples = 4.0,
                     PeakFunction = "Gaussian", PoldiPeakTable = peaks_6904,
                     OutputWorkspace = "peaks_refined_6904", ResultTableWorkspace = "result_table_6904",
@@ -45,8 +45,9 @@ PoldiFitPeaks2D operates on a MatrixWorkspace with a valid POLDI instrument defi
                     
     # Calculate a 2D spectrum using the refined peaks
     PoldiFitPeaks2D(InputWorkspace=truncated_6904,
-                             PoldiPeakWorkspace="peaks_refined_6904",
-                             OutputWorkspace="simulated_6904")
+                                PoldiPeakWorkspace="peaks_refined_6904",
+                                RefinedPoldiPeakWorkspace="peaks_fit_2d_6904",
+                                OutputWorkspace="simulated_6904")
     
 After this step, there is a new workspace containing the simulated spectrum. It should look similar to the one in the following figure:
 
@@ -82,6 +83,7 @@ In general, there is a background in POLDI data that depends on :math:`2\theta`.
     PoldiFitPeaks2D(InputWorkspace=truncated_6904,
                              PoldiPeakWorkspace="peaks_refined_6904",
                              OutputWorkspace="simulated_6904",
+                             RefinedPoldiPeakWorkspace="peaks_fit_2d_6904",
                              LinearBackgroundParameter=0.01)
 
 Now the spectrum looks different, like in the example below.
