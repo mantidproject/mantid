@@ -157,8 +157,8 @@ int StrFullCut(std::string& Text,const boost::regex& Re,std::vector<T>& Aout)
   std::cerr<<"SFC :: "<<std::endl;
   Aout.clear();
   unsigned int zero = 0; // Needed for boost 1.40
-  const int M0=m1->position(zero);
-  int ML=M0;
+  const size_t M0 = m1->position(zero);
+  size_t ML = M0;
   for(;m1!=empty;m1++)
     {
       for(unsigned int index=1;index<m1->size();index++)
