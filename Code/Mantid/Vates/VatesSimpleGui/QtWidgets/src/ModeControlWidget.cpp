@@ -30,12 +30,10 @@ ModeControlWidget::ModeControlWidget(QWidget *parent) : QWidget(parent)
                    this, SLOT(onSplatterPlotViewButtonClicked()));
 
   // Add the mapping from string to the view enum
-  mapFromStringToView.reserve(4);
   mapFromStringToView.insert(std::pair<std::string ,ModeControlWidget::Views>("STANDARD", ModeControlWidget::STANDARD));
   mapFromStringToView.insert(std::pair<std::string ,ModeControlWidget::Views>("THREESLICE", ModeControlWidget::THREESLICE));
   mapFromStringToView.insert(std::pair<std::string ,ModeControlWidget::Views>("MULTISLICE", ModeControlWidget::MULTISLICE));
   mapFromStringToView.insert(std::pair<std::string ,ModeControlWidget::Views>("SPLATTERPLOT", ModeControlWidget::SPLATTERPLOT));
-
 }
 
 ModeControlWidget::~ModeControlWidget()
