@@ -41,11 +41,17 @@
 color: rgb(255, 255, 255);</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>2</number>
+   </property>
    <property name="topMargin">
     <number>125</number>
    </property>
    <item>
     <layout class="QGridLayout" name="gridLayout">
+     <property name="leftMargin">
+      <number>17</number>
+     </property>
      <property name="spacing">
       <number>0</number>
      </property>
@@ -293,6 +299,19 @@ color: rgb(0, 0, 0);</string>
     </layout>
    </item>
    <item>
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QLabel" name="lbUpdate">
@@ -355,12 +374,18 @@ color: rgb(0, 0, 0);</string>
        <property name="title">
         <string>Personal Setup</string>
        </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
        <layout class="QFormLayout" name="formLayout">
         <property name="fieldGrowthPolicy">
          <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
         </property>
         <property name="topMargin">
          <number>18</number>
+        </property>
+        <property name="bottomMargin">
+         <number>6</number>
         </property>
         <item row="0" column="0">
          <widget class="QLabel" name="label">
@@ -474,7 +499,7 @@ color: rgb(0, 0, 0);</string>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
+         <width>13</width>
          <height>20</height>
         </size>
        </property>
@@ -497,6 +522,9 @@ color: rgb(0, 0, 0);</string>
       <widget class="QPushButton" name="pbConfirm">
        <property name="text">
         <string>SET</string>
+       </property>
+       <property name="default">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
