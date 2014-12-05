@@ -126,7 +126,7 @@ private:
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
   pqViewSettingsReaction *viewSettings; ///< Holder for the view settings reaction
   bool viewSwitched;
-	ModeControlWidget::Views initialView; ///< Holds the initial view
+  ModeControlWidget::Views initialView; ///< Holds the initial view
 
 
   /// Check the environmental variables.
@@ -163,18 +163,18 @@ private:
   void swapViews();
   /// Update the state of application widgets.
   void updateAppState();
-	/// Get the initial view for the current workspace and user setting
-	ModeControlWidget::Views getInitialView(int workspaceType, std::string instrumentName);
+  /// Get the initial view for the current workspace and user setting
+  ModeControlWidget::Views getInitialView(int workspaceType, std::string instrumentName);
   /// Check that the view is valid for teh workspace type
-	ModeControlWidget::Views checkViewAgainstWorkspace(ModeControlWidget::Views view, int workspaceType);
-	/// Get the technique associated with an instrument.
-	const std::string getTechniqueForInstrument(const std::string& instrumentName) const;
-	/// Get the view for a specified instrument
-	std::string getViewForInstrument(const std::string& instrument) const;
-	/// Check if a technique contains a keyword
-	bool checkIfTechniqueContainsKeyword(const std::set<std::string>& techniques, const std::string& keyword) const;
-	/// Reset the current view to the appropriate initial view.
-	void resetCurrentView(int workspaceType, const std::string& instrumentName);
+  ModeControlWidget::Views checkViewAgainstWorkspace(ModeControlWidget::Views view, int workspaceType);
+  /// Get the technique associated with an instrument.
+  const std::string getTechniqueForInstrument(const std::string& instrumentName) const;
+  /// Get the view for a specified instrument
+  std::string getViewForInstrument(const std::string& instrument) const;
+  /// Check if a technique contains a keyword
+  bool checkIfTechniqueContainsKeyword(const std::set<std::string>& techniques, const std::string& keyword) const;
+  /// Reset the current view to the appropriate initial view.
+  void resetCurrentView(int workspaceType, const std::string& instrumentName);
 };
 
 } // SimpleGui

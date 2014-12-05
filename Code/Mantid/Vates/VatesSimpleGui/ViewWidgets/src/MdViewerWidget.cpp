@@ -219,6 +219,7 @@ void MdViewerWidget::setupMainView()
 
   // Set the view at startup to STANDARD, the view will be changed, depending on the workspace
   this->currentView = this->setMainViewWidget(this->ui.viewWidget, ModeControlWidget::STANDARD);
+  this->initialView = ModeControlWidget::STANDARD;
   this->currentView->installEventFilter(this);
 
   // Create a layout to manage the view properly
@@ -696,6 +697,7 @@ void MdViewerWidget::setupPluginMode()
   this->setupMainView();
 }
 
+
 /**
  * This function tells the current view to render the data, perform any
  * necessary checks on the view given the workspace type and update the
@@ -774,6 +776,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->currentView->setColorsForView();
   this->currentView->checkViewOnSwitch();
   this->updateAppState();
+  this->initialView = v; 
 }
 
 /**
