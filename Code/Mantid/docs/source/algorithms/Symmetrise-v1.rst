@@ -10,8 +10,8 @@ Description
 -----------
 
 Symmetrise takes a matrix workspace containing asymmetric data and makes
-it symmetris by reflecting a given section of the right hand side
-(positive) on the the left hand side (negative).
+it symmetrical by reflecting a given section of the right hand side
+(positive) on the left hand side (negative).
 
 Two values, XMin and XMax, are chosen to specify the section of the positive
 side of the curve to be reflected onto the negative side, the sample curve
