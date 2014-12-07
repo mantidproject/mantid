@@ -39,6 +39,7 @@ set ( SRC_FILES
 	src/LoadMD.cpp
 	src/LoadSQW.cpp
 	src/LogarithmMD.cpp
+	src/MDNormSCD.cpp
 	src/MaskMD.cpp
 	src/MergeMD.cpp
 	src/MergeMDFiles.cpp
@@ -64,7 +65,6 @@ set ( SRC_FILES
 	src/Quantification/Resolution/TobyFitYVector.cpp
 	src/Quantification/ResolutionConvolvedCrossSection.cpp
 	src/Quantification/SimulateResolutionConvolvedModel.cpp
-	src/MDNormSCD.cpp
 	src/SaveMD.cpp
 	src/SaveZODS.cpp
 	src/SetMDUsingMask.cpp
@@ -121,6 +121,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/LoadMD.h
 	inc/MantidMDAlgorithms/LoadSQW.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
+	inc/MantidMDAlgorithms/MDNormSCD.h
 	inc/MantidMDAlgorithms/MaskMD.h
 	inc/MantidMDAlgorithms/MergeMD.h
 	inc/MantidMDAlgorithms/MergeMDFiles.h
@@ -146,7 +147,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h
 	inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
 	inc/MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h
-	inc/MantidMDAlgorithms/MDNormSCD.h
 	inc/MantidMDAlgorithms/SaveMD.h
 	inc/MantidMDAlgorithms/SaveZODS.h
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
@@ -202,6 +202,7 @@ set ( TEST_FILES
 	LoadMDTest.h
 	LoadSQWTest.h
 	LogarithmMDTest.h
+	MDNormSCDTest.h
 	MDResolutionConvolutionFactoryTest.h
 	MaskMDTest.h
 	MergeMDFilesTest.h
@@ -216,7 +217,6 @@ set ( TEST_FILES
 	PowerMDTest.h
 	PreprocessDetectorsToMDTest.h
 	ResolutionConvolvedCrossSectionTest.h
-	MDNormSCDTest.h
 	SaveMDTest.h
 	SaveZODSTest.h
 	SetMDUsingMaskTest.h
