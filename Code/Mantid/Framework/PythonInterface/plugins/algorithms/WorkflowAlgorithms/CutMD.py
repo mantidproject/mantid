@@ -4,6 +4,7 @@ from mantid.simpleapi import *
 import numpy as np
 import os.path
 import re
+import __builtin__
 
 class Projection(object):
     u = "u"
@@ -185,7 +186,8 @@ class CutMD(DataProcessorAlgorithm):
         axes_check = self.getProperty("CheckAxes").value
         if axes_check:
             predicates = ["^(H.*)|(\\[H,0,0\\].*)$","^(K.*)|(\\[0,K,0\\].*)$","^(L.*)|(\\[0,0,L\\].*)$"]  
-            for i in range(ndims):
+            n_crystallographic_dims = __builtin__.min(3, ndims)
+            for i in range(n_crystallographic_dims):
                 dimension = to_cut.getDimension(i)
                 p = re.compile(predicates[i])
                 if not p.match( dimension.getName() ):
@@ -229,6 +231,9 @@ class CutMD(DataProcessorAlgorithm):
             
         
     def PyExec(self):
+        
+        logger.warning('You are running algorithm %s that is the beta stage of development' % (self.name()))
+        
         to_cut = self.getProperty("InputWorkspace").value
         self.__verify_input_workspace(to_cut)
         ndims = to_cut.getNumDims()
@@ -241,7 +246,8 @@ class CutMD(DataProcessorAlgorithm):
         p1_bins = self.getProperty("P1Bin").value
         p2_bins = self.getProperty("P2Bin").value
         p3_bins = self.getProperty("P3Bin").value
-        p4_bins = self.getProperty("P4Bin").value 
+        p4_bins_property = self.getProperty("P4Bin")
+        p4_bins = p4_bins_property.value 
         
         x_extents = self.__extents_in_current_projection(to_cut, 0);
         y_extents = self.__extents_in_current_projection(to_cut, 1);
@@ -255,7 +261,8 @@ class CutMD(DataProcessorAlgorithm):
    
         extents = self.__calculate_extents(v, u, w, ( x_extents, y_extents, z_extents ) )
         extents, bins = self.__calculate_steps( extents, ( p1_bins, p2_bins, p3_bins ) )
-        if p4_bins != None:
+        
+        if not p4_bins_property.isDefault:
             if (ndims == 4):
                 n_args = len(p4_bins)
                 min, max = self.__extents_in_current_projection(to_cut, 3); 
@@ -278,7 +285,7 @@ class CutMD(DataProcessorAlgorithm):
                 
                 extents.append(min)
                 extents.append(max)
-                bins.append(nbins)
+                bins.append(int(nbins))
                     
                 e_units = to_cut.getDimension(3).getUnits()
                 
@@ -301,15 +308,30 @@ class CutMD(DataProcessorAlgorithm):
         cut_alg.setProperty("NormalizeBasisVectors", False)
         cut_alg.setProperty("AxisAligned", False)
         # Now for the basis vectors.
-        for i in range(0, to_cut.getNumDims()):
+        
+        n_padding = __builtin__.max(0, ndims-3)
+        
+        for i in range(0, ndims):
+            
+            
             if i <= 2:
+                
                 label = projection_labels[i]
                 unit = target_units[i]
-                vec = projection[i]
-                value = "%s, %s, %s" % ( label, unit, ",".join(map(str, vec))) 
-                cut_alg.setPropertyValue("BasisVector{0}".format(i) , value)
-            if i > 2:
-                raise RuntimeError("Not implemented yet for non-crystallographic basis vector generation.")
+                vec = list(projection[i]) + ( [0] * n_padding )
+                    
+            # These are always orthogonal to the rest.
+            else:
+                orthogonal_dimension = to_cut.getDimension(i)
+                label = orthogonal_dimension.getName() 
+                unit = orthogonal_dimension.getUnits()
+                vec = [0] * ndims
+                vec[i] = i
+            
+            value = "%s, %s, %s" % ( label, unit, ",".join(map(str, vec))) 
+            cut_alg.setPropertyValue("BasisVector{0}".format(i) , value)    
+                
+            
         cut_alg.setProperty("OutputExtents", extents)
         cut_alg.setProperty("OutputBins", bins)
          
