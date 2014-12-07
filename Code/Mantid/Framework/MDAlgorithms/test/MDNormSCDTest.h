@@ -1,29 +1,29 @@
-#ifndef MANTID_MDALGORITHMS_MDNORMSXDTEST_H_
-#define MANTID_MDALGORITHMS_MDNORMSXDTEST_H_
+#ifndef MANTID_MDALGORITHMS_MDNORMSCDTEST_H_
+#define MANTID_MDALGORITHMS_MDNORMSCDTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/MDNormSXD.h"
+#include "MantidMDAlgorithms/MDNormSCD.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::MDAlgorithms::MDNormSXD;
+using Mantid::MDAlgorithms::MDNormSCD;
 using namespace Mantid::API;
 
-class MDNormSXDTest : public CxxTest::TestSuite
+class MDNormSCDTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDNormSXDTest *createSuite() { return new MDNormSXDTest(); }
-  static void destroySuite( MDNormSXDTest *suite ) { delete suite; }
+  static MDNormSCDTest *createSuite() { return new MDNormSCDTest(); }
+  static void destroySuite( MDNormSCDTest *suite ) { delete suite; }
 
 
   void test_Init()
   {
-    MDNormSXD alg;
+    MDNormSCD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -39,7 +39,7 @@ public:
     std::string saWsName = "__temp_InputSAWorkspaceName";
     createBadFluxWorkspace(saWsName);
 
-    MDNormSXD alg;
+    MDNormSCD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", mdWsName) );
@@ -116,4 +116,4 @@ private:
 };
 
 
-#endif /* MANTID_MDALGORITHMS_MDNORMSXDTEST_H_ */
+#endif /* MANTID_MDALGORITHMS_MDNORMSCDTEST_H_ */
