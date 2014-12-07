@@ -53,16 +53,16 @@ class IncidentEnergy(object):
          raise KeyError("Incident energy have to be positive number of list of positive numbers. Got None")
        
        # 
-       if isinstance(instance._incident_energy,list):
-           inc_energy = instance._incident_energy
-           for en in inc_energy:
+       inc_en=instance._incident_energy
+       if isinstance(inc_en,list):
+           for en in inc_en:
                if en<= 0:
                  raise KeyError("Incident energy have to be positive number of list of positive numbers."+
                            " For input argument {0} got negative value {1}".format(value,en))     
        else:
-         if instance._incident_energy<= 0:
+         if inc_en<= 0:
             raise KeyError("Incident energy have to be positive number of list of positive numbers."+
-                           " For value {0} got negative {1}".format(value,instance._incident_energy))
+                           " For value {0} got negative {1}".format(value,inc_en))
 # end IncidentEnergy
 class EnergyBins(object):
     """ Property provides various energy bin possibilities """
@@ -73,10 +73,10 @@ class EnergyBins(object):
     def __set__(self,instance,values):
        if values != None:
           if isinstance(values,str):
-             list = str.split(values,',');
-             nBlocks = len(list);
+             lst = str.split(values,',');
+             nBlocks = len(lst);
              for i in xrange(0,nBlocks,3):
-                value = [float(list[i]),float(list[i+1]),float(list[i+2])]
+                value = [float(lst[i]),float(lst[i+1]),float(lst[i+2])]
           else:
               value = values;
               nBlocks = len(value);
