@@ -399,7 +399,8 @@
        bleed_test = bleed = diag_bleed_test;
        bleed_maxrate = diag_bleed_maxrate;
        bleed_pixels  = diag_bleed_pixels;
-       ei-mon2-spec = test_ei2_mon_spectra;
+       ei-mon1-spec=ei_mon1_spec;       
+       ei-mon2-spec = test_ei2_mon_spectra=ei_mon2_spec;
        ei_mon_spectra=test_mon_spectra_composite"
     />
 </parameter>
