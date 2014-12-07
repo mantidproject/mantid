@@ -40,7 +40,7 @@
 </parameter>
 
 <!-- Energy conversion mode direct/indirect/elastic (the one the reducer understands) -->
-<parameter name="deltaE_mode" type="string">
+<parameter name="deltaE-mode" type="string">
   <value val="direct"/>
 </parameter>
 
@@ -401,9 +401,11 @@
        bleed_test = bleed = diag_bleed_test;
        bleed_maxrate = diag_bleed_maxrate;
        bleed_pixels  = diag_bleed_pixels;
-       ei-mon1-spec=ei_mon1_spec;       
+       deltaE_mode =  deltaE-mode;
+       ei-mon1-spec=ei_mon1_spec;
        ei-mon2-spec = test_ei2_mon_spectra=ei_mon2_spec;
        ei_mon_spectra=test_mon_spectra_composite"
+
     />
 </parameter>
  
