@@ -61,9 +61,7 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: Build step
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" --build . -- /nologo /m:%BUILD_THREADS% /nr:false
-if ERRORLEVEL 1 exit /B %ERRORLEVEL%
-"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" --build . --target AllTests -- /nologo /m:%BUILD_THREADS% /nr:false
+"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" --build . -- /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=%BUILD_CONFIG% Mantid.sln
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -77,7 +75,7 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if "%CLEANBUILD%" EQU "yes" (
     :: Build offline documentation
-    "C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" --build . --target docs-qthelp -- /nologo /m:%BUILD_THREADS% /nr:false
+    "C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" --build . -- /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxproj
 
     :: ignore errors as the exit code of the build isn't correct
     ::if ERRORLEVEL 1 exit /B %ERRORLEVEL%
