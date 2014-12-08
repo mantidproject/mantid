@@ -45,13 +45,6 @@ public:
     TSM_ASSERT_THROWS("This is a NULL workspace. Should throw.", factory.initialize( Workspace_sptr(ws) ), std::invalid_argument);
   }
 
-  void testInitializeWithWrongWorkspaceTypeThrows()
-  {
-    IMDWorkspace* ws = new MockIMDWorkspace;
-    vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
-    TSM_ASSERT_THROWS("This is an invalid workspace. Should throw.", factory.initialize( Workspace_sptr(ws) ), std::invalid_argument);
-  }
-
   /*Demonstrative tests*/
 
   void test_3DWorkspace()

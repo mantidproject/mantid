@@ -18,10 +18,11 @@ void VatesViewerInterface::setupPluginMode()
 {
 }
 
-void VatesViewerInterface::renderWorkspace(QString wsname, int wstype)
+void VatesViewerInterface::renderWorkspace(QString workSpaceName, int workspaceType, std::string instrumentName)
 {
-  UNUSED_ARG(wsname);
-  UNUSED_ARG(wstype);
+  UNUSED_ARG(workSpaceName);
+  UNUSED_ARG(workspaceType);
+  UNUSED_ARG(instrumentName);
 }
 
 void VatesViewerInterface::shutdown()

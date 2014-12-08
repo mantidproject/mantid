@@ -235,6 +235,10 @@ namespace Mantid
 
       /// Get the ParaViewPath
       const std::string getParaViewPath() const;
+
+      /// Get the initial view for vates
+      const std::string getVsiInitialView() const;
+
     private:
       friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
       /// Handles distribution of Poco signals.

@@ -39,6 +39,8 @@ namespace
   /// Static logger
   Kernel::Logger g_log("ThreeSliceView");
 }
+
+
 ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
 {
   this->ui.setupUi(this);
