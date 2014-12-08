@@ -34,6 +34,9 @@ namespace Kernel
 */
 namespace ChecksumHelper 
 {
+/// create a md5 checksum from a string
+MANTID_KERNEL_DLL std::string md5FromString(const std::string &input);
+
   ///create a SHA-1 checksum from a string
   MANTID_KERNEL_DLL std::string sha1FromString(const std::string& input);
   ///create a SHA-1 checksum from a file

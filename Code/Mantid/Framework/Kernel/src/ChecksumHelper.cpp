@@ -4,6 +4,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_array.hpp>
 
+#include <Poco/MD5Engine.h>
 #include <Poco/SHA1Engine.h>
 #include <Poco/DigestStream.h>
 
@@ -62,6 +63,32 @@ namespace ChecksumHelper
       outstr.flush(); //to pass everything to the digest engine
       return DigestEngine::digestToHex(sha1.digest());
     }
+
+    /**
+     * Create sha1 out of data and an optional header
+     * @param data Contents as a string
+     * @param header An optional string to prepend to the data
+     */
+    std::string createMD5(const std::string &data,
+                          const std::string &header = "") {
+      using Poco::DigestEngine;
+      using Poco::MD5Engine;
+      using Poco::DigestOutputStream;
+
+      MD5Engine sha1;
+      DigestOutputStream outstr(sha1);
+      outstr << header << data;
+      outstr.flush(); // to pass everything to the digest engine
+      return DigestEngine::digestToHex(sha1.digest());
+    }
+    }
+
+    /** Creates a md5 checksum from a string
+    * @param input The string to checksum
+    * @returns a checksum string
+    **/
+    std::string md5FromString(const std::string &input) {
+      return ChecksumHelper::createMD5(input);
   }
 
 
