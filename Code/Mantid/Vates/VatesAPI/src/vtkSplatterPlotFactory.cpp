@@ -318,7 +318,6 @@ namespace VATES
    */
   void vtkSplatterPlotFactory::doCreateMDHisto(IMDHistoWorkspace_sptr workspace) const
   {
-    bool VERBOSE = true;
     CPUTimer tim;
     // Acquire a scoped read-only lock to the workspace (prevent segfault
     // from algos modifying wworkspace)

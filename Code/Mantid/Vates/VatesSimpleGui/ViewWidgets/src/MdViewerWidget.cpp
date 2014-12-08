@@ -377,8 +377,6 @@ void MdViewerWidget::setParaViewComponentsForView()
   this->ui.propertiesPanel->setView(this->currentView->getView());
   this->ui.pipelineBrowser->setActiveView(this->currentView->getView());
 
-  pqPipelineSource *src = pqActiveObjects::instance().activeSource();
-
   pqActiveObjects *activeObjects = &pqActiveObjects::instance();
   QObject::connect(activeObjects, SIGNAL(portChanged(pqOutputPort*)),
                    this->ui.propertiesPanel, SLOT(setOutputPort(pqOutputPort*)));
