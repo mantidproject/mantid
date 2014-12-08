@@ -89,7 +89,7 @@ namespace Mantid
       /// @param maxSize :: Maximum size of each simple domain
       void setMaxSize(size_t maxSize){m_maxSize = maxSize;}
       /// Set the normalisation flag
-      /// @param maxSize :: If true and the spectrum is a histogram the fitting data will be normalised 
+      /// @param on :: If true and the spectrum is a histogram the fitting data will be normalised 
       /// by the bin width.
       void setNormalise(bool on){m_normalise = on;}
     protected:
