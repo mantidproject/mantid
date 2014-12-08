@@ -15,7 +15,7 @@
 :: You should have received a copy of the GNU General Public License
 :: along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-:: File change history is stored at: <https://github.com/mantidproject/mantid>. 
+:: File change history is stored at: <https://github.com/mantidproject/mantid>.
 :: Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 @echo off
@@ -24,4 +24,4 @@ set pref_file=Mantid.user.properties
 
 if exist %pref_file%. del %pref_file%. else echo %pref_file% not found
 
-python.exe mantid_qt_settings_editor.py -fc
+python.exe %~dp0\mantid_qt_settings_editor.py -fc
