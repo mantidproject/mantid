@@ -556,6 +556,10 @@ void MdiSubWindow::resize(int w, int h)
     setGeometry(x(), y(), w, h);
     pw->adjustSize();
   }
+  else
+  {
+    QFrame::resize(w,h);
+  }
 }
 
 /**
@@ -568,6 +572,10 @@ void MdiSubWindow::resize(const QSize& size)
   {
     setGeometry(pw->x(), pw->y(), size.width(), size.height());
     pw->adjustSize();
+  }
+  else
+  {
+    QFrame::resize(size);
   }
 }
 
