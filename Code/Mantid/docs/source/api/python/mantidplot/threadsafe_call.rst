@@ -2,7 +2,7 @@
  threadsafe_call
 =================
 
-.. module:`mantidplotpy.proxies`
+.. module:`pymantidplot.proxies`
 
-.. autofunction:: mantidplotpy.proxies.threadsafe_call
+.. autofunction:: pymantidplot.proxies.threadsafe_call
 
