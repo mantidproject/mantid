@@ -181,7 +181,7 @@ signals:
   void setViewStatus(ModeControlWidget::Views mode, bool state);
   /**
    * Signal to set the status of the view mode buttons.
-	 * @param The initial view.
+	 * @param view The initial view.
    * @param state Whether or not to enable to view mode buttons.
    */
   void setViewsStatus(ModeControlWidget::Views view, bool state);

@@ -57,8 +57,9 @@ public:
   virtual ~VatesViewerInterface();
   /**
    * Function to create the source from the given workspace.
-   * @param wsname the name of the workspace to visualize
-   * @param wstype the type of workspace being visualized
+   * @param workspaceName the name of the workspace to visualize
+   * @param workspaceType the type of workspace being visualized
+   * @param instrumentName The Name of the instrument.
    */
   virtual void renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName);
 

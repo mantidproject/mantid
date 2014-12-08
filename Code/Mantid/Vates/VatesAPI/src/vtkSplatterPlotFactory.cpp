@@ -433,6 +433,9 @@ namespace VATES
    * Set the signals, pointIDs and points for bins which are valid to be displayed
    * @param workspace Smart pointer to the MDHisto workspace.
    * @param do4D If the workspace contains time.
+   * @param x The x coordinate.
+   * @param y The y coordinate.
+   * @param z The z coordinate.
    * @returns The scalar signal.
    */
   signal_t vtkSplatterPlotFactory::extractScalarSignal(IMDHistoWorkspace_sptr workspace,

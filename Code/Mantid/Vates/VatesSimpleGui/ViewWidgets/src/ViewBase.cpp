@@ -292,20 +292,20 @@ pqPipelineSource *ViewBase::getPvActiveSrc()
  * this function to provide alternate checks.
  * @param initialView The initial view.
  */
-void ViewBase::checkView(ModeControlWidget::Views intialView)
+void ViewBase::checkView(ModeControlWidget::Views initialView)
 {
   if (this->isMDHistoWorkspace(this->origSrc))
   {
-    emit this->setViewsStatus(intialView, true);
+    emit this->setViewsStatus(initialView, true);
     emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, false);
   }
   else if (this->isPeaksWorkspace(this->origSrc))
   {
-    emit this->setViewsStatus(intialView, false);
+    emit this->setViewsStatus(initialView, false);
   }
   else
   {
-    emit this->setViewsStatus(intialView, true);
+    emit this->setViewsStatus(initialView, true);
   }
 }
 

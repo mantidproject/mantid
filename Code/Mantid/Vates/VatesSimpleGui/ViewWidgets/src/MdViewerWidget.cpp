@@ -471,7 +471,7 @@ void MdViewerWidget::renderingDone()
  * name so that the data can be retrieved and rendered.
  * @param workspaceName The workspace name for the data.
  * @param workspaceType A numeric indicator of the workspace type.
- * @param intrumentName The name of the instrument which measured the workspace data.
+ * @param instrumentName The name of the instrument which measured the workspace data.
  */
 void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName)
 {
@@ -628,7 +628,7 @@ std::string MdViewerWidget::getViewForInstrument(const std::string& instrumentNa
  * Check if a set of techniques contains a technique which matches specified keyword
  * @param techniques A set of techniques
  * @param keyword A keyword 
- * @param True if the keyword is contained in at least one technique else false.
+ * @returns True if the keyword is contained in at least one technique else false.
  */
 bool MdViewerWidget::checkIfTechniqueContainsKeyword(const std::set<std::string>& techniques, const std::string& keyword) const
 {
