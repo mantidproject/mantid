@@ -39,7 +39,7 @@ def diagnose(white_int, **kwargs):
           van_hi      - Fraction of median to consider counting high for the white beam diag
           van_sig     - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the
                         difference with respect to the median value must also exceed this number of error bars
-          samp_zero    - If true then zeroes in background are masked also
+          samp_zero    - If true then zeros in background are masked also
           samp_lo      - Fraction of median to consider counting low for the background  diag
           samp_hi      - Fraction of median to consider counting high for the background diag
           samp_sig     - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
@@ -67,7 +67,7 @@ def diagnose(white_int, **kwargs):
     # Hard mask
     hardmask_file = kwargs.get('hard_mask_file', None)
     if hardmask_file is not None:
-        LoadMask(Instrument=kwargs.get('instrument_name',''),InputFile=parser.hard_mask_file,
+        LoadMask(Instrument=kwargs.get('instr_name',''),InputFile=parser.hard_mask_file,
                  OutputWorkspace='hard_mask_ws')
         MaskDetectors(Workspace=white_int, MaskedWorkspace='hard_mask_ws')
         # Find out how many detectors we hard masked
