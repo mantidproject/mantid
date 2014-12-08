@@ -397,10 +397,15 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(propman.incident_energy,10)
         ei = [20,30]
         propman.incident_energy=ei
-        self.assertAlmostEqual(propman.incident_energy,ei)
+        got_ei = propman.incident_energy
+        for ind,en in enumerate(got_ei):
+            self.assertAlmostEqual(en,ei[ind])
 
         propman.incident_energy='20,30'
-        self.assertAlmostEqual(propman.incident_energy,ei)
+        got_ei = propman.incident_energy
+        for ind,en in enumerate(got_ei):
+            self.assertAlmostEqual(en,ei[ind])
+
 
         #TODO: this one is not completed
 
