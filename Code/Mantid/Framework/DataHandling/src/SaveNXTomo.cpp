@@ -4,7 +4,9 @@
 #include "MantidDataHandling/SaveNXTomo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidNexus/NexusClasses.h"
+
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 
 
 namespace Mantid
@@ -98,13 +100,16 @@ namespace Mantid
       // Retrieve the filename from the properties
       this->m_filename = getPropertyValue("Filename");
             
-      // Populate the array
-      m_dimensions = getDimensionsFromDetector(getRectangularDetectors(m_workspaces[0]->getInstrument()));
-
-      // Insert number of bins at front
-      m_dimensions.insert(m_dimensions.begin(), m_workspaces.size()); // Number of bins      
-       
+      // Populate the dimension array - assume all are the same
+      m_dimensions.push_back(m_workspaces.size());
+      m_dimensions.push_back(boost::lexical_cast<int64_t>(m_workspaces[0]->mutableRun().getLogData("Axis1")->value()));
+      m_dimensions.push_back(boost::lexical_cast<int64_t>(m_workspaces[0]->mutableRun().getLogData("Axis2")->value()));
+    
       m_spectraCount = m_dimensions[1]*m_dimensions[2];
+
+      // Define
+      m_infDimensions = m_dimensions;
+      m_infDimensions[0] = NX_UNLIMITED;
 
       // What size slabs are we going to write      
       m_slabSize.push_back(1);
@@ -123,7 +128,7 @@ namespace Mantid
 
       for(auto it=m_workspaces.begin(); it!=m_workspaces.end();++it)
       {
-        writeSingle(*it,nxFile);               
+        writeSingleWorkspace(*it,nxFile);               
         progress.report();              
       }
       
@@ -132,48 +137,37 @@ namespace Mantid
 
    /**
     * Creates the format for the output file if it doesn't exist
-    * @param resizeData should the data structures be resized rather than expanded
     * @returns the structured nexus file to write the data to
     *
     * @throw runtime_error Thrown if nexus file cannot be opened or created
     */
-    ::NeXus::File SaveNXTomo::setupFile(bool resizeData)
-    {      
+    ::NeXus::File SaveNXTomo::setupFile()
+    {        
       // Try and open the file, if it doesn't exist, create it.     
       NXhandle fileHandle;
       NXstatus status = NXopen(this->m_filename.c_str(), NXACC_RDWR, &fileHandle);
       
-      std::vector<double> prevData, prevError, rotationAngles;
-      //std::map<std::string, std::string> prevLogVals; 
-
-      // rotations
-      int numFiles = 0;
-
-      if(status!= NX_ERROR && (!m_overwriteFile || resizeData))
+      if(status!= NX_ERROR && !m_overwriteFile)
       {
-        // Retrieve all data currently in file so that it can be recreated with it.
+        // Appending to an existing file, return reference to the file
         ::NeXus::File nxFile(fileHandle);
-                
-        nxFile.openPath("/entry1/tomo_entry/data");
-      
-        nxFile.getAttr<int>("NumFiles",numFiles);
-        nxFile.readData<double>("data", prevData);
-        
-        if(m_includeError)
-          nxFile.readData<double>("error", prevError);
-             
-        nxFile.readData<double>("rotation_angle",rotationAngles);
+        return nxFile;
       }
-          
-      // Whatever the situation, we're recreating the file now
+    
+      // Either overwriting the file or creating a new one now
       if(status!=NX_ERROR) 
       {
         ::NeXus::File f(fileHandle);
         f.close();
       }
 
+      // If not overwriting, ensure it has a .nxs extension
+      if((!m_overwriteFile || status == NX_ERROR) && !boost::ends_with(this->m_filename, ".nxs"))
+        m_filename = m_filename + ".nxs";     
+      
+
       status = NXopen(this->m_filename.c_str(), NXACC_CREATE5, &fileHandle);  
- 
+    
       if(status==NX_ERROR)
         throw std::runtime_error("Unable to open or create nexus file.");    
     
@@ -185,29 +179,14 @@ namespace Mantid
       // Make the top level entry (and open it)
       nxFile.makeGroup("entry1", "NXentry", true);
 
-      // Make an entry to store log values from the original files. Take only from latest one.
-      nxFile.makeGroup("log_info","NXsubentry", true);
-      
-      // Populate from latest
-      std::vector<Property*> log = (m_workspaces.back())->run().getLogData();
-      for(auto it=log.begin();it!=log.end();++it)
-      {
-        nxFile.writeData((*it)->name(), (*it)->value());
-      }       
+      // Make an entry to store log values from the original files.
+      nxFile.makeGroup("log_info","NXsubentry", false);     
 
-      nxFile.closeGroup();
-
-      // Make a sub-group for the entry to work with DAWN software (and open it)
+       // Make a sub-group for the entry to work with DAWN software (and open it)
       nxFile.makeGroup("tomo_entry", "NXsubentry", true);
 
       // Title
       nxFile.writeData("title", this->m_filename);
-      
-      // Start Time; Format ISO8601 | unused but part of NXtomo schema
-      //nxFile.writeData("start_time", );
-
-      // End Time; Format ISO8601 | unused but part of NXtomo schema
-      //nxFile.writeData("end_time", );
 
       // Definition name and version
       nxFile.writeData("definition", "NXtomo");
@@ -227,16 +206,14 @@ namespace Mantid
       // Write the instrument name | could add short_name attribute to name
       nxFile.writeData("name", m_workspaces[0]->getInstrument()->getName());
              
-      // detector group - diamond example file contains {data,distance,image_key,x_pixel_size,y_pixel_size} Only adding image_key for now, 0 filled.
-      // TODO: change this when open and dark field files are dealt with
+      // detector group - diamond example file contains {data,distance,image_key,x_pixel_size,y_pixel_size} 
       nxFile.makeGroup("detector", "NXdetector", true);
-      std::vector<double> imageKeys((resizeData) ? numFiles : numFiles+m_workspaces.size(),0);
-      nxFile.writeData("image_key", imageKeys);
-      // Create link to image_key
-      nxFile.openData("image_key");
-      //NXlink imageKeyLink = nxFile.getDataID();      
-      nxFile.closeData();
-      nxFile.closeGroup();
+      
+      std::vector<int64_t> infDim;
+      infDim.push_back(NX_UNLIMITED);
+
+      nxFile.makeData("image_key", ::NeXus::FLOAT64, infDim, false);
+      nxFile.closeGroup(); // detector
 
       // source group // from diamond file contains {current,energy,name,probe,type} - probe = [neutron | x-ray | electron]      
       
@@ -245,73 +222,33 @@ namespace Mantid
       // ******************************************
       // NXsample
       nxFile.makeGroup("sample", "NXsample", true);
-      // TODO: Write sample info
-      // name
 
-      std::vector<int64_t> rotDims;
-      rotDims.push_back((resizeData) ? numFiles : numFiles+m_workspaces.size());
-      nxFile.makeData("rotation_angle", ::NeXus::FLOAT64, rotDims, false);
-      if(rotationAngles.size() > 0)
-      {
-        nxFile.openData("rotation_angle");
-          nxFile.putSlab(rotationAngles, 0, static_cast<int>(rotationAngles.size()));
-        nxFile.closeData();
-      }
-
+      nxFile.makeData("rotation_angle", ::NeXus::FLOAT64, infDim, true);
       // Create a link object for rotation_angle to use later
-      nxFile.openData("rotation_angle");
-        NXlink rotationLink = nxFile.getDataID();
+      NXlink rotationLink = nxFile.getDataID();
       nxFile.closeData();
-      // x_translation
-      // y_translation
-      // z_translation
       nxFile.closeGroup(); // NXsample
       
       // ******************************************
       // Make the NXmonitor group - Holds base beam intensity for each image
-      // If information is not present, set as 1
-      // TODO: when FITS changes to include intensity, add intensity info
 
-      std::vector<double> intensity((resizeData) ? numFiles : numFiles+m_workspaces.size(),1);   
       nxFile.makeGroup("control", "NXmonitor", true);         
-        nxFile.writeData("data", intensity);
+      nxFile.makeData("data", ::NeXus::FLOAT64, infDim, false);
       nxFile.closeGroup(); // NXmonitor          
        
       nxFile.makeGroup("data", "NXdata", true);
-        nxFile.putAttr<int>("NumFiles", numFiles);
+        nxFile.putAttr<int>("NumFiles", 0);
                 
       nxFile.makeLink(rotationLink);
+  
+      nxFile.makeData("data", ::NeXus::FLOAT64, m_infDimensions, true);
+      // Create a link object for the data      
+      NXlink dataLink = nxFile.getDataID();
+      nxFile.closeData(); 
 
-      std::vector<int64_t> dims = m_dimensions;
-
-      dims[0] = (resizeData) ? numFiles : numFiles+m_workspaces.size();
-        
-      nxFile.makeData("data", ::NeXus::FLOAT64, dims, false);
       if(m_includeError) 
-        nxFile.makeData("error", ::NeXus::FLOAT64, dims, false);
-              
-      if(prevData.size() > 0)
-      {
-        m_slabStart[0] = 0;
-        m_slabSize[0] = numFiles;
-
-        nxFile.openData("data");
-          nxFile.putSlab(prevData,m_slabStart, m_slabSize);
-        nxFile.closeData();
-
-        if(prevError.size() > 0)
-        {
-          nxFile.openData("error");
-            nxFile.putSlab(prevError,m_slabStart, m_slabSize);
-          nxFile.closeData();
-        }
-      }
-
-      // Create a link object for the data
-      nxFile.openData("data");
-        NXlink dataLink = nxFile.getDataID();
-      nxFile.closeData();       
-
+        nxFile.makeData("error", ::NeXus::FLOAT64, m_infDimensions, false);
+         
       nxFile.closeGroup(); // Close Data group
 
       // Put a link to the data in instrument/detector
@@ -319,8 +256,7 @@ namespace Mantid
         nxFile.openGroup("detector","NXdetector");
           nxFile.makeLink(dataLink);
         nxFile.closeGroup();
-      nxFile.closeGroup();    
-      
+      nxFile.closeGroup();          
 
       nxFile.closeGroup(); // tomo_entry sub-group
       nxFile.closeGroup(); // Top level NXentry      
@@ -334,11 +270,11 @@ namespace Mantid
     * @param workspace the workspace to get data from
     * @param nxFile the nexus file to save data into
     */
-    void SaveNXTomo::writeSingle(const Workspace2D_sptr workspace, ::NeXus::File &nxFile)
+    void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr workspace, ::NeXus::File &nxFile)
     {
       try
       {     
-          nxFile.openPath("/entry1/tomo_entry/data");
+        nxFile.openPath("/entry1/tomo_entry/data");
       }
       catch(...)
       {        
@@ -355,7 +291,7 @@ namespace Mantid
       // Set the rotation value for this WS
       std::vector<double> rotValue;
       rotValue.push_back(0);
-
+      
       if(workspace->run().hasProperty("Rotation"))
       {
         std::string tmpVal = workspace->run().getLogData("Rotation")->value();
@@ -365,8 +301,8 @@ namespace Mantid
         }
         catch(...){}
         // Invalid Cast is handled below        
-      }      
-        
+      }            
+
       nxFile.openData("rotation_angle");
         nxFile.putSlab(rotValue, numFiles, 1);
       nxFile.closeData();   
@@ -388,70 +324,146 @@ namespace Mantid
 
       nxFile.closeData();
       
-      nxFile.putAttr("NumFiles", ++numFiles);
+      nxFile.putAttr("NumFiles", numFiles+1);
 
       nxFile.closeGroup();
+
+      // Write additional log information, intensity and image key
+      writeLogValues(workspace, nxFile, numFiles);
+      writeIntensityValue(workspace, nxFile, numFiles);
+      writeImageKeyValue(workspace, nxFile, numFiles);
+
+      ++numFiles;
 
       delete[] dataArr;
     }
 
-
-    /**
-    * Find all RectangularDetector objects in an instrument
-    * @param instrument instrument to search for detectors in
-    * @returns vector of all Rectangular Detectors
-    */
-    std::vector<boost::shared_ptr<const RectangularDetector>> SaveNXTomo::getRectangularDetectors(const Geometry::Instrument_const_sptr &instrument)
+    void SaveNXTomo::writeImageKeyValue(const DataObjects::Workspace2D_sptr workspace, ::NeXus::File &nxFile, int thisFileInd)
     {
-      std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> components;
-      instrument->getChildren(components,true);
+      // Add ImageKey to instrument/image_key if present, use 0 if not   
+      try
+      {     
+        nxFile.openPath("/entry1/tomo_entry/instrument/detector");
+      }
+      catch(...)
+      {        
+        throw std::runtime_error("Unable to create a valid NXTomo file");    
+      }
 
-      std::vector<boost::shared_ptr<const RectangularDetector>> rectDetectors;
-    
-      for(auto it = components.begin(); it != components.end(); ++it)
+      // Set the default key value for this WS
+      std::vector<double> keyValue;
+      keyValue.push_back(0);
+
+      if(workspace->run().hasProperty("ImageKey"))
       {
-        // for all components, compare to RectangularDetector - if it is one, add it to detectors list. 
-        auto ptr = boost::dynamic_pointer_cast<const RectangularDetector>(*it);
-        if(ptr != NULL)
+        std::string tmpVal = workspace->run().getLogData("ImageKey")->value();
+        try
         {
-          rectDetectors.push_back(ptr);
+          keyValue[0] = boost::lexical_cast<double>(tmpVal);
+        }
+        catch(...){}
+        // Invalid Cast is handled below        
+      }      
+
+      nxFile.openData("image_key");
+        nxFile.putSlab(keyValue, thisFileInd, 1);
+      nxFile.closeData();   
+
+      nxFile.closeGroup();
+    }
+
+    void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr workspace, ::NeXus::File &nxFile, int thisFileInd)
+    {
+      // Add Log information (minus special values - Rotation, ImageKey, Intensity)
+      // Unable to add multidimensional string data, storing strings as multidimensional data set of uint8 values
+      try
+      {     
+        nxFile.openPath("/entry1/log_info");
+      }
+      catch(...)
+      {        
+        throw std::runtime_error("Unable to create a valid NXTomo file");    
+      }
+
+      // Loop through all log values, create it if it doesn't exist. Then append value
+      std::vector<Property*> logVals =  workspace->run().getLogData();
+
+      for(auto it=logVals.begin();it!=logVals.end();++it)
+      {
+        auto prop = *it;
+        if(prop->name() != "ImageKey" && prop->name() != "Rotation" && 
+          prop->name() != "Intensity" && prop->name() != "Axis1" && prop->name() != "Axis2")
+        {
+          try
+          {
+            nxFile.openData(prop->name());            
+          }
+          catch(::NeXus::Exception &)
+          {
+            // Create the data entry if it doesn't exist yet, and open.
+            std::vector<int64_t> infDim;
+            infDim.push_back(NX_UNLIMITED);
+            infDim.push_back(NX_UNLIMITED);
+            nxFile.makeData(prop->name(), ::NeXus::UINT8, infDim, true);
+          }
+
+          size_t strSize = prop->value().length();
+
+          char *val = new char[80]();
+      
+          // If log value is from FITS file as it should be, 
+          // it won't be greater than this. Otherwise Shorten it
+          if(strSize > 80) 
+            strSize = 80;
+
+          strncpy(val,prop->value().c_str(),strSize);
+
+          std::vector<int64_t> start, size;
+          start.push_back(thisFileInd);
+          start.push_back(0);
+          size.push_back(1);
+          size.push_back(strSize);
+
+          //single item
+          nxFile.putSlab(val, start, size);
+
+          nxFile.closeData();           
         }
       }
+    }
+
+    void SaveNXTomo::writeIntensityValue(const DataObjects::Workspace2D_sptr workspace, ::NeXus::File &nxFile, int thisFileInd)
+    {      
+      // Add Intensity to control if present, use 1 if not
+      try
+      {     
+        nxFile.openPath("/entry1/tomo_entry/control");
+      }
+      catch(...)
+      {        
+        throw std::runtime_error("Unable to create a valid NXTomo file");    
+      } 
       
-      return rectDetectors;
-    }
+      std::vector<double> intensityValue;
+      intensityValue.push_back(1);
 
+      if(workspace->run().hasProperty("Intensity"))
+      {
+        std::string tmpVal = workspace->run().getLogData("Intensity")->value();
+        try
+        {
+          intensityValue[0] = boost::lexical_cast<double>(tmpVal);
+        }
+        catch(...){}
+        // Invalid Cast is handled below     
+      }     
+
+      nxFile.openData("data");
+      nxFile.putSlab(intensityValue, thisFileInd, 1);
+      nxFile.closeData();  
+    }
+   
     /**
-    * Populates the dimensions vector with number of files, x and y sizes from a specified rectangular detector
-    * @param rectDetectors List of rectangular detectors to get axis sizes from
-    * @param useDetectorIndex index of the detector to select from the list, default = 0
-    * @returns vector of both axis dimensions for specified detector
-    *
-    *  @throw runtime_error Thrown if there are no rectangular detectors
-    */
-    std::vector<int64_t> SaveNXTomo::getDimensionsFromDetector(const std::vector<boost::shared_ptr<const RectangularDetector>> &rectDetectors, size_t useDetectorIndex) 
-    {
-      // Add number of pixels in X and Y from instrument definition
-
-      std::vector<int64_t> dims;
-
-      if(rectDetectors.size() != 0)
-      {
-        // Assume the first rect detector is the desired one.
-        dims.push_back(rectDetectors[useDetectorIndex]->xpixels());
-        dims.push_back(rectDetectors[useDetectorIndex]->ypixels());
-      }
-      else
-      {
-        // Incorrect workspace : requires the x/y pixel count from the instrument definition
-        g_log.error("Unable to retrieve x and y pixel count from an instrument definition associated with this workspace.");
-        throw std::runtime_error("Unable to retrieve x and y pixel count from an instrument definition associated with this workspace.");      
-      }
-
-      return dims;
-    }
-
-   /**
     * Run instead of exec when operating on groups
     */
     bool SaveNXTomo::processGroups()
