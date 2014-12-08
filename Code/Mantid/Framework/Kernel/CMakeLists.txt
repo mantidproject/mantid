@@ -9,9 +9,10 @@ set ( SRC_FILES
 	src/CatalogInfo.cpp
 	src/CompositeValidator.cpp
 	src/ConfigService.cpp
+	src/ChecksumHelper.cpp
 	src/DataItem.cpp
 	src/DateAndTime.cpp
-	src/DateTimeValidator.cpp
+	src/DateTimeValidator.cpp 
 	src/DateValidator.cpp
 	src/DeltaEMode.cpp
 	src/DirectoryValidator.cpp
@@ -128,6 +129,7 @@ set ( INC_FILES
 	inc/MantidKernel/CatalogInfo.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ConfigService.h
+	inc/MantidKernel/ChecksumHelper.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTime.h
@@ -261,6 +263,7 @@ set ( TEST_FILES
 	CatalogInfoTest.h
 	CompositeValidatorTest.h
 	ConfigServiceTest.h
+	ChecksumHelperTest.h
 	DataServiceTest.h
 	DateAndTimeTest.h
 	DateTimeValidatorTest.h
@@ -425,6 +428,7 @@ set ( PLUGINS "." )
 set ( PV_PLUGINS "./pvplugins" )
 set ( IGNORE_PARAVIEW "0" )
 set ( QTPLUGINS "." )
+set ( UPDATE_INSTRUMENT_DEFINTITIONS "0" )
 set ( PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonInterface/plugins" )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/../../Test/AutoTestData/UsageData;${MANTID_ROOT}/instrument )
 set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
@@ -501,6 +505,7 @@ endif ()
 
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
+set ( UPDATE_INSTRUMENT_DEFINTITIONS "1" )
 set ( DATADIRS "" )
 set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish" )
 set ( HTML_ROOT ../share/doc/html )

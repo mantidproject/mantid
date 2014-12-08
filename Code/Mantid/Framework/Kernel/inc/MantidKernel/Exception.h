@@ -52,6 +52,7 @@ namespace Kernel
         <li><b>MisMatch</b> - Error when two numbers should be identical (or close).</li>
         <li><b>IndexError</b> - Error when an incorrect index value is given.</li>
         <li><b>NullPointerException</b> - Thrown when a zero pointer is dereferenced.</li>
+        <li><b>InternetError</b> - Thrown when an error occurs accessing an internet resource.</li>
       </ul>
       </li>
     </ul>

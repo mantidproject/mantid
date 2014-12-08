@@ -193,10 +193,19 @@ int InternetHelper::sendHTTPSRequest(const std::string& url,
     HTTPSClientSession session(uri.getHost(), static_cast<Poco::UInt16>(uri.getPort()));
     session.setTimeout(Poco::Timespan(m_timeout, 0)); // m_timeout seconds
 
-    if (!getProxy(url).emptyProxy())
+    // HACK:: Currently the automatic proxy detection only supports http proxy detection
+    // most locations use the same proxy for http and https, so force it to use the http proxy
+    std::string urlforProxy = ConfigService::Instance().getString("proxy.httpsTargetUrl");
+    if (urlforProxy.empty())
     {
-      session.setProxyHost(getProxy(url).host());
-      session.setProxyPort(static_cast<Poco::UInt16>(getProxy(url).port()));
+      urlforProxy = "http://" + uri.getHost();
+    }
+
+    auto proxy = getProxy(urlforProxy);
+    if (!proxy.emptyProxy())
+    {
+      session.setProxyHost(proxy.host());
+      session.setProxyPort(static_cast<Poco::UInt16>(proxy.port()));
     }
 
     // create a request
