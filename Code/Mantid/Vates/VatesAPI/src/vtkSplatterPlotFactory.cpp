@@ -445,11 +445,11 @@ namespace VATES
 
     if (do4D)
     {
-      signalScalar = workspace->getSignalNormalizedAt(x,y,z, m_time);
+      signalScalar = workspace->getSignalNormalizedAt(static_cast<size_t>(x),static_cast<size_t>(y),static_cast<size_t>(z), static_cast<size_t>(m_time));
     }
     else
     {
-      signalScalar = workspace->getSignalNormalizedAt(x,y,z);
+      signalScalar = workspace->getSignalNormalizedAt(static_cast<size_t>(x),static_cast<size_t>(y),static_cast<size_t>(z));
     }
 
     return signalScalar;
