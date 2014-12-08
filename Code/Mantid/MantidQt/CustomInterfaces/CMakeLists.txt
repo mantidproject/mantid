@@ -2,11 +2,8 @@ set ( SRC_FILES
 	src/ApplyCorr.cpp
 	src/CalcCorr.cpp
 	src/ConvFit.cpp
-	src/CreateMDWorkspace.cpp
-	src/CreateMDWorkspaceAlgDialog.cpp
 	src/DirectConvertToEnergy.cpp
 	src/Elwin.cpp
-	src/EventNexusFileMemento.cpp
 	src/Fury.cpp
 	src/FuryFit.cpp
 	src/Homer.cpp
@@ -57,9 +54,7 @@ set ( SRC_FILES
 	src/QReflTableModel.cpp
 	src/QtReflMainView.cpp
 	src/QtReflOptionsDialog.cpp
-	src/QtWorkspaceMementoModel.cpp
 	src/Quasi.cpp
-	src/RawFileMemento.cpp
 	src/ReflCatalogSearcher.cpp
 	src/ReflLegacyTransferStrategy.cpp
 	src/ReflMainViewPresenter.cpp
@@ -73,8 +68,6 @@ set ( SRC_FILES
 	src/StepScan.cpp
 	src/Stretch.cpp
 	src/UserInputValidator.cpp
-	src/WorkspaceInADS.cpp
-	src/WorkspaceMemento.cpp
 	src/background.cpp
 	src/deltaECalc.cpp
 )
@@ -85,12 +78,9 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Background.h
 	inc/MantidQtCustomInterfaces/CalcCorr.h
 	inc/MantidQtCustomInterfaces/ConvFit.h
-	inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
-	inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
 	inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/DllConfig.h
 	inc/MantidQtCustomInterfaces/Elwin.h
-	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h
 	inc/MantidQtCustomInterfaces/Fury.h
 	inc/MantidQtCustomInterfaces/FuryFit.h
 	inc/MantidQtCustomInterfaces/Homer.h
@@ -154,9 +144,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/QReflTableModel.h
 	inc/MantidQtCustomInterfaces/QtReflMainView.h
 	inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
-	inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
 	inc/MantidQtCustomInterfaces/Quasi.h
-	inc/MantidQtCustomInterfaces/RawFileMemento.h
 	inc/MantidQtCustomInterfaces/ResNorm.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
@@ -167,8 +155,6 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Stretch.h
 	inc/MantidQtCustomInterfaces/Updateable.h
 	inc/MantidQtCustomInterfaces/UserInputValidator.h
-	inc/MantidQtCustomInterfaces/WorkspaceInADS.h
-	inc/MantidQtCustomInterfaces/WorkspaceMemento.h
 	inc/MantidQtCustomInterfaces/deltaECalc.h
 )
 
@@ -178,8 +164,6 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ApplyCorr.h
                 inc/MantidQtCustomInterfaces/CalcCorr.h
                 inc/MantidQtCustomInterfaces/ConvFit.h
-                inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
-                inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
                 inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/Elwin.h
                 inc/MantidQtCustomInterfaces/Fury.h
@@ -243,8 +227,6 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
-               inc/MantidQtCustomInterfaces/CreateMDWorkspace.ui
-               inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/IndirectBayes.ui
                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.ui
@@ -282,15 +264,10 @@ set ( TEST_FILES
 	ALCBaselineModellingPresenterTest.h
 	ALCDataLoadingPresenterTest.h
 	ALCPeakFittingPresenterTest.h
-	CreateMDWorkspaceAlgDialogTest.h
-	EventNexusFileMementoTest.h
 	IO_MuonGroupingTest.h
 	MuonAnalysisHelperTest.h
-	RawFileMementoTest.h
 	ReflLegacyTransferStrategyTest.h
 	ReflMainViewPresenterTest.h
-	WorkspaceInADSTest.h
-	WorkspaceMementoTest.h
 )
 
 include_directories ( inc )
