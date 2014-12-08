@@ -269,11 +269,9 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
                       "Mantid Workspace Name").Set(wsName.toStdString().c_str());
 
   // Update the source so that it retrieves the data from the Mantid workspace
-  vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
-  srcProxy->UpdateVTKObjects();
-  srcProxy->Modified();
-  srcProxy->UpdatePipelineInformation();
-  src->updatePipeline();
+  src->getProxy()->UpdateVTKObjects(); // Updates all the proxies
+  src->updatePipeline(); // Updates the pipeline
+  src->setModifiedState(pqProxy::UNMODIFIED); // Just to that the UI state looks consistent with the apply
   return src;
 }
 

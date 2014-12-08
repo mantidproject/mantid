@@ -27,6 +27,8 @@
 #include <pqAnimationScene.h>
 #include <pqApplicationCore.h>
 #include <pqApplicationSettingsReaction.h>
+#include <pqApplyBehavior.h>
+#include <pqDeleteReaction.h>
 #include <pqLoadDataReaction.h>
 #include <pqObjectBuilder.h>
 #include <pqParaViewBehaviors.h>
@@ -199,7 +201,13 @@ void MdViewerWidget::setupUiAndConnections()
     "COLOR_EDITOR_PANEL", this->ui.colorMapEditorDock);
   this->ui.colorMapEditorDock->hide();
   this->connect(this->ui.proxiesPanel,SIGNAL(changeFinished(vtkSMProxy*)),SLOT(panelChanged()));
-    
+  QAction* temp = new QAction(this);
+  pqDeleteReaction* deleteHandler = new pqDeleteReaction(temp);
+  deleteHandler->connect(this->ui.propertiesPanel,SIGNAL(deleteRequested(pqPipelineSource*)),SLOT(deleteSource(pqPipelineSource*)));
+  
+  pqApplyBehavior* applyBehavior = new pqApplyBehavior(this);
+  applyBehavior->registerPanel(this->ui.propertiesPanel);
+  
 }
 
 void MdViewerWidget::panelChanged()
@@ -851,21 +859,15 @@ void MdViewerWidget::afterReplaceHandle(const std::string &wsName,
     // Have to mark the filter as modified to get it to update. Do this by
     // changing the requested workspace name to a dummy name and then change
     // back. However, push the change all the way down for it to work.
-    vtkSMPropertyHelper(src->getProxy(),
+    vtkSMProxy* proxy = src->getProxy();
+    vtkSMPropertyHelper(proxy,
                         "Mantid Workspace Name").Set("ChangeMe!");
-    vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
-    srcProxy->UpdateVTKObjects();
-    srcProxy->Modified();
-    srcProxy->UpdatePipelineInformation();
-    src->updatePipeline();
+    proxy->UpdateVTKObjects();
 
-    vtkSMPropertyHelper(src->getProxy(),
+    vtkSMPropertyHelper(proxy,
                         "Mantid Workspace Name").Set(wsName.c_str());
     // Update the source so that it retrieves the data from the Mantid workspace
-    srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
-    srcProxy->UpdateVTKObjects();
-    srcProxy->Modified();
-    srcProxy->UpdatePipelineInformation();
+    proxy->UpdateVTKObjects();
     src->updatePipeline();
 
     this->currentView->setColorsForView();
