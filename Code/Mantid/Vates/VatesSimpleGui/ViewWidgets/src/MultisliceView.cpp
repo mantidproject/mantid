@@ -135,6 +135,13 @@ void MultiSliceView::checkSliceViewCompat()
     QObject::disconnect(this->mainView, 0, this, 0);
   }
 }
+  
+void MultiSliceView::changedSlicePoint(Mantid::Kernel::VMD selectedPoint)
+{
+  vtkSMPropertyHelper(this->mainView->getProxy(),"XSlicesValues").Set(selectedPoint[0]);
+  this->mainView->getProxy()->UpdateVTKObjects();
+  this->mainView->render();
+}
 
 /**
  * This function is responsible for opening the given cut in SliceViewer.
@@ -240,6 +247,7 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
     // Set the slice points, etc, using the XML definition of the plane function
     w->getSlicer()->openFromXML( QString::fromStdString(rks.createXMLString()) );
     w->show();
+    this->connect(w->getSlicer(), SIGNAL(changedSlicePoint(Mantid::Kernel::VMD)), SLOT(changedSlicePoint(Mantid::Kernel::VMD)));
   }
   catch (std::runtime_error & e)
   {

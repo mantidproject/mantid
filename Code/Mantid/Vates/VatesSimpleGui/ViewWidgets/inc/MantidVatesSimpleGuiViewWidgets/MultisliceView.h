@@ -1,6 +1,7 @@
 #ifndef MULTISLICEVIEW_H_
 #define MULTISLICEVIEW_H_
 
+#include "MantidKernel/VMD.h"
 #include "ui_MultisliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
@@ -87,6 +88,9 @@ protected slots:
                          int button, int modifier);
   /// Launch SliceViewer with the specified cut.
   void showCutInSliceViewer(int axisIndex, double sliceOffsetOnAxis);
+  
+  //// changes the slice point in VATES.
+  void changedSlicePoint(Mantid::Kernel::VMD selectedPoint);
 
 private:
   Q_DISABLE_COPY(MultiSliceView)

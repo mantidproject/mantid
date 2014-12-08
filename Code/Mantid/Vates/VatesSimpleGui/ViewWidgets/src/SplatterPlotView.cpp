@@ -120,6 +120,7 @@ void SplatterPlotView::destroyView()
     builder->destroy(this->splatSource);
   }
   builder->destroy(this->view);
+  pqActiveObjects::instance().setActiveSource(this->origSrc);
 }
 
 pqRenderView* SplatterPlotView::getView()
