@@ -82,7 +82,7 @@ Usage
 .. testoutput:: ExPreprocessDetectoresToMD
 
    The resulting table has the following columns:
-   ['DetDirections','L2','TwoTheta','Azimuthal','DetectorID','detIDMap','spec2detMap','detMask','eFixed']
+   ['DetDirections', 'L2', 'TwoTheta', 'Azimuthal', 'DetectorID', 'detIDMap', 'spec2detMap', 'detMask', 'eFixed']
    The number of rows in the workspace is :  918
    The polar angle for detector N 10 is 0.314159 rad
    The table workspace logs (properties) are currently not availible from python

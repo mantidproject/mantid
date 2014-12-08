@@ -213,6 +213,10 @@ class MDIWindow(QtProxyObject):
 class Graph(MDIWindow):
     """Proxy for the _qti.Graph object.
     """
+    # When checking the SIP interface, remember the following name mappings (PyName):
+    # C++ 'Multilayer' class => Python 'Graph' class
+    # C++ 'Graph' class => Python 'Layer' class
+
     def __init__(self, toproxy):
         MDIWindow.__init__(self,toproxy)
 
@@ -264,10 +268,19 @@ class Graph(MDIWindow):
         """
         threadsafe_call(self._getHeldObject().insertCurve, graph._getHeldObject(), index)
 
+
 #-----------------------------------------------------------------------------
 class Layer(QtProxyObject):
     """Proxy for the _qti.Layer object.
     """
+    # These methods are used for the new matplotlib-like CLI
+    # These ones are provided by the C++ class Graph, which in the SIP declarations is renamed as Layer
+    # The only purpose of listing them here is that these will be returned by this class' __dir()__, and
+    #    shown interactively, while the ones not listed and/or overloaded here may not be shown in ipython, etc.
+    additional_methods = ['logLogAxes', 'logXLinY', 'logXLinY',
+                          'removeLegend', 'saveImage', 'setAxisScale', 'setCurveLineColor', 'setCurveLineStyle',
+                          'setCurveLineWidth', 'setCurveSymbol', 'setScale', 'setTitle', 'setXTitle', 'setYTitle']
+
     def __init__(self, toproxy):
         QtProxyObject.__init__(self,toproxy)
 
@@ -377,6 +390,16 @@ class Layer(QtProxyObject):
     def spectrogram(self):
         """If the layer contains a spectrogram, get a handle to the spectrogram object."""
         return new_proxy(QtProxyObject, self._getHeldObject().spectrogram)
+
+
+    def __dir__(self):
+        """Returns the list of attributes of this object."""
+        # The first part (explicitly defined ones) are here for the traditional Mantid CLI,
+        # the additional ones have been added for the matplotlib-like CLI (without explicit
+        # declaration/documentation here in the proxies layer.
+        return ['insertCurve', 'addCurves', 'addCurve', 'addErrorBars', 'errorBarSettings', 'addHistogram',
+                'newLegend', 'legend', 'grid', 'spectrogram' ] + self.additional_methods
+
 
 #-----------------------------------------------------------------------------
 class Graph3D(QtProxyObject):

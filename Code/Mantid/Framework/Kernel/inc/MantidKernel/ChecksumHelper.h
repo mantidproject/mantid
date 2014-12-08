@@ -4,15 +4,13 @@
 #include "MantidKernel/DllConfig.h"
 #include <string>
 
-
-namespace Mantid
-{
-namespace Kernel
-{
+namespace Mantid {
+namespace Kernel {
 
 /** ChecksumHelper : A selection of helper methods for calculating checksums
 
-  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -32,18 +30,19 @@ namespace Kernel
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-namespace ChecksumHelper 
-{
-  ///create a SHA-1 checksum from a string
-  MANTID_KERNEL_DLL std::string sha1FromString(const std::string& input);
-  ///create a SHA-1 checksum from a file
-  MANTID_KERNEL_DLL std::string sha1FromFile(const std::string& filepath);
-  ///create a git checksum from a file (these match the git hash-object command)
-  MANTID_KERNEL_DLL std::string gitSha1FromFile(const std::string& filepath);
-};
+namespace ChecksumHelper {
+/// create a md5 checksum from a string
+MANTID_KERNEL_DLL std::string md5FromString(const std::string &input);
 
+/// create a SHA-1 checksum from a string
+MANTID_KERNEL_DLL std::string sha1FromString(const std::string &input);
+/// create a SHA-1 checksum from a file
+MANTID_KERNEL_DLL std::string sha1FromFile(const std::string &filepath);
+/// create a git checksum from a file (these match the git hash-object command)
+MANTID_KERNEL_DLL std::string gitSha1FromFile(const std::string &filepath);
+};
 
 } // namespace Kernel
 } // namespace Mantid
 
-#endif  /* MANTID_KERNEL_CHECKSUMHELPER_H_ */
+#endif /* MANTID_KERNEL_CHECKSUMHELPER_H_ */

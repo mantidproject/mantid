@@ -29,15 +29,15 @@ def create_resultname(run_number, prefix='', suffix=''):
     if type(run_number) == list:
         name = create_resultname(run_number[0], prefix, suffix)
     elif type(run_number) == int:
-        name = prefix + str(run_number) + '.spe' + suffix
+        name = prefix + '{0:0>#6d}_spe{1}'.format(run_number,suffix)
     else:
         name = os.path.basename(str(run_number))
         # Hack any instrument name off the front so the output is the same as if you give it a run number
         name = name.lstrip(string.ascii_letters)
         if (suffix is None):
-            name = os.path.splitext(name)[0] + '.spe'
+            name = prefix + os.path.splitext(name)[0] + '_spe'
         else:
-            name = os.path.splitext(name)[0] + '.spe' + suffix
+            name = prefix + os.path.splitext(name)[0] + '_spe' + suffix
 
     return name
 
@@ -87,7 +87,7 @@ def load_runs(inst_name, runs, sum=True, calibration=None,load_with_workspace=Fa
             sum = False
         if sum == True:
             if len(runs) == 0: raise RuntimeError("load_runs was supplied an empty list.")
-            result_ws = load_run(runs[0])
+            result_ws = load_run(inst_name,runs[0])
             summed = 'summed-run-files'
             CloneWorkspace(InputWorkspace=result_ws,OutputWorkspace=summed)
             sum_files(summed, runs[1:])

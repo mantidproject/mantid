@@ -405,7 +405,8 @@ void V3D::getSpherical(double& R, double& theta, double& phi) const
   const double rad2deg = 180.0/M_PI;
   R = norm();
   theta = 0.0;
-  if ( R ) theta = acos(z/R) * rad2deg;
+  if (R != 0.0)
+    theta = acos(z / R) * rad2deg;
   phi = atan2(y,x) * rad2deg;
   return;
 }
@@ -494,8 +495,7 @@ double V3D::zenith(const V3D& v) const
 {
   double R = distance(v);
   double zOffset = z - v.z;
-  if ( R )
-  {
+  if (R != 0.0) {
     return acos( zOffset / R );
   }
   else

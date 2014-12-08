@@ -35,8 +35,8 @@ QwtPlotPicker(graph->plotWidget()->canvas()),
 PlotToolInterface(graph),
 m_fitPropertyBrowser(fitPropertyBrowser),
 m_mantidUI(mantidUI),
-m_wsName(),m_spec(),m_init(false), //m_current(0),
-m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
+m_wsName(),m_spec(),m_init(false),
+m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false),m_shouldBeNormalised(false)
 {
   d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
 
@@ -58,6 +58,7 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
       {
         m_wsName = mcurve->workspaceName();
         m_spec = mcurve->workspaceIndex();
+        m_shouldBeNormalised = mcurve->isDistribution() && mcurve->isNormalizable();
       }
       else
       {
@@ -69,6 +70,7 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
   {
     return;
   }
+  m_fitPropertyBrowser->normaliseData(m_shouldBeNormalised);
   m_fitPropertyBrowser->getHandler()->removeAllPlots();
   m_fitPropertyBrowser->setWorkspaceName(m_wsName);
   m_fitPropertyBrowser->setWorkspaceIndex(m_spec);
@@ -568,11 +570,11 @@ void PeakPickerTool::algorithmFinished(const QString& out)
   removeFitCurves();
 
   // If style needs to be changed from default, signal pair second will be true and change to line.
-  auto * curve = new MantidMatrixCurve("",out,graph(),1,MantidMatrixCurve::Spectrum, false, false, Graph::Line);
+  auto * curve = new MantidMatrixCurve("",out,graph(),1,MantidMatrixCurve::Spectrum, false, m_shouldBeNormalised, Graph::Line);
   m_curveNames.append(curve->title().text());
   if (m_fitPropertyBrowser->plotDiff())
   {
-    curve = new MantidMatrixCurve("",out,graph(),2,MantidMatrixCurve::Spectrum,false);
+    curve = new MantidMatrixCurve("",out,graph(),2,MantidMatrixCurve::Spectrum,false,m_shouldBeNormalised);
     m_curveNames.append(curve->title().text());
   }
   if(m_fitPropertyBrowser->plotCompositeMembers())
@@ -584,7 +586,7 @@ void PeakPickerTool::algorithmFinished(const QString& out)
       const size_t nhist = wkspace->getNumberHistograms();
       for(size_t i = 3; i < nhist; ++i) // first 3 are data,sum,diff
       {
-        curve = new MantidMatrixCurve("",out,graph(),static_cast<int>(i),MantidMatrixCurve::Spectrum,false);
+        curve = new MantidMatrixCurve("",out,graph(),static_cast<int>(i),MantidMatrixCurve::Spectrum,false,m_shouldBeNormalised);
         m_curveNames.append(curve->title().text());
       }
     }

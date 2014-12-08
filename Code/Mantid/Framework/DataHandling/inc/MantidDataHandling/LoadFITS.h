@@ -24,6 +24,7 @@ struct FITSInfo {
   double tof;
   double timeBin;
   double scale;
+  int imageKey;
   long int countsInImage;
   long int numberOfTriggers;
   string extension;
@@ -127,6 +128,7 @@ namespace DataHandling
     string m_headerOffsetKey;
     string m_headerBitDepthKey;
     string m_headerRotationKey;
+    string m_headerImageKeyKey;
     string m_mapFile;
     std::vector<std::string> m_headerAxisNameKeys;
 

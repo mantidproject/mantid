@@ -37,11 +37,13 @@
        <property name="workspaceSuffixes" stdset="0">
         <stringlist>
          <string>_red</string>
+         <string>_sqw</string>
         </stringlist>
        </property>
        <property name="fileBrowserSuffixes" stdset="0">
         <stringlist>
          <string>_red.nxs</string>
+         <string>_sqw.nxs</string>
         </stringlist>
        </property>
       </widget>
@@ -68,12 +70,14 @@
         <stringlist>
          <string>_res</string>
          <string>_red</string>
+         <string>_sqw</string>
         </stringlist>
        </property>
        <property name="fileBrowserSuffixes" stdset="0">
         <stringlist>
          <string>_res.nxs</string>
          <string>_red.nxs</string>
+         <string>_sqw.nxs</string>
         </stringlist>
        </property>
        <property name="showLoad">
