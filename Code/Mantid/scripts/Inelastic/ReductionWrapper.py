@@ -91,6 +91,11 @@ def using_web_data(self):
 
 
 def iliad(F):
+    """ This decorator wraps around main procedure, tries to identify if the procedure is run from web services or 
+        from Mantid directly and sets up web-modified variables as input for reduction if it runs from web services. 
+
+
+    """
     def iliad_wrapper(*args):
         #seq = inspect.stack();
 
