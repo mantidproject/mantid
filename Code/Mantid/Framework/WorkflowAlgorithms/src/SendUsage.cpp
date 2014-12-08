@@ -1,4 +1,5 @@
 #include "MantidWorkflowAlgorithms/SendUsage.h"
+#include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/MantidVersion.h"
@@ -35,9 +36,7 @@ SendUsage::~SendUsage() {}
 const std::string SendUsage::name() const { return "SendUsage"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int SendUsage::version() const {
-  return 1;
-}
+int SendUsage::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string SendUsage::category() const { return "Workflow"; }
@@ -79,11 +78,14 @@ void SendUsage::generateHeader() {
   std::stringstream buffer;
   buffer << "{";
 
-  // username - TODO should be hashed
-  buffer << "\"uid\":\"" << ConfigService::Instance().getUsername() << "\",";
+  // username
+  buffer << "\"uid\":\"" << Kernel::ChecksumHelper::md5FromString(
+                                ConfigService::Instance().getUsername())
+         << "\",";
 
-  // hostname - TODO should be hashed
-  buffer << "\"host\":\"" << ConfigService::Instance().getComputerName()
+  // hostname
+  buffer << "\"host\":\"" << Kernel::ChecksumHelper::md5FromString(
+                                 ConfigService::Instance().getComputerName())
          << "\",";
 
   // current date and time
