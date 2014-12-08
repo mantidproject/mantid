@@ -258,7 +258,7 @@ pqPipelineRepresentation *ViewBase::getPvActiveRep()
  * @param pluginName name of the ParaView plugin
  * @param wsName name of the Mantid workspace to pass to the plugin
  */
-void ViewBase::setPluginSource(QString pluginName, QString wsName)
+pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
 {
   // Create the source from the plugin
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
@@ -274,6 +274,7 @@ void ViewBase::setPluginSource(QString pluginName, QString wsName)
   srcProxy->Modified();
   srcProxy->UpdatePipelineInformation();
   src->updatePipeline();
+  return src;
 }
 
 /**

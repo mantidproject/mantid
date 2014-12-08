@@ -201,6 +201,16 @@
           </item>
          </layout>
         </widget>
+        <widget class="QWidget" name="properties2">
+         <attribute name="title">
+          <string>Properties</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="pqProxiesWidget" name="proxiesPanel" native="true"/>
+          </item>
+         </layout>
+        </widget>
         <widget class="QWidget" name="information">
          <attribute name="title">
           <string>Information</string>

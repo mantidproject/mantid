@@ -111,7 +111,7 @@ public:
   /// Set the current color scale state
   virtual void setColorScaleState(ColorSelectionWidget *cs);
   /// Create source for plugin mode.
-  virtual void setPluginSource(QString pluginName, QString wsName);
+  virtual pqPipelineSource* setPluginSource(QString pluginName, QString wsName);
   /// Determines if source has timesteps (4D).
   virtual bool srcHasTimeSteps(pqPipelineSource *src);
 

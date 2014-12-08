@@ -198,8 +198,15 @@ void MdViewerWidget::setupUiAndConnections()
   pqApplicationCore::instance()->registerManager(
     "COLOR_EDITOR_PANEL", this->ui.colorMapEditorDock);
   this->ui.colorMapEditorDock->hide();
+  this->connect(this->ui.proxiesPanel,SIGNAL(changeFinished(vtkSMProxy*)),SLOT(panelChanged()));
+    
 }
 
+void MdViewerWidget::panelChanged()
+{
+    this->currentView->renderAll();
+}
+    
 /**
  * This function places the standard view to the main window, installs an
  * event filter, tweaks the UI layout for the view and calls the routine that
@@ -497,7 +504,10 @@ void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
     sourcePlugin = "MDEW Source";
   }
 
-  this->currentView->setPluginSource(sourcePlugin, wsname);
+  pqPipelineSource* source = this->currentView->setPluginSource(sourcePlugin, wsname);
+  //this->ui.proxiesPanel->clear();
+  //this->ui.proxiesPanel->addProxy(source->getProxy(),"datasource",QStringList(),true);
+  //this->ui.proxiesPanel->updateLayout();
   this->renderAndFinalSetup();
 }
 
@@ -512,6 +522,12 @@ void MdViewerWidget::renderAndFinalSetup()
   this->currentView->setColorsForView();
   this->currentView->checkView();
   this->currentView->updateAnimationControls();
+  pqPipelineSource *source = this->currentView->origSrc;
+  pqPipelineRepresentation *repr = this->currentView->origRep;
+  this->ui.proxiesPanel->clear();
+  this->ui.proxiesPanel->addProxy(source->getProxy(),"datasource",QStringList(),true);
+  this->ui.proxiesPanel->addProxy(repr->getProxy(),"display",QStringList("CubeAxesVisibility"),true);
+  this->ui.proxiesPanel->updateLayout();
 }
 
 /**

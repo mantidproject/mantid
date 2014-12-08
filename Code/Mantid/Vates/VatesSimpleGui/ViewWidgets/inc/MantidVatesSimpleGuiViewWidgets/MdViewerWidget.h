@@ -101,6 +101,8 @@ protected slots:
   void renderingDone();
   /// Execute view switch.
   void switchViews(ModeControlWidget::Views v);
+  /// Triggered when panel is changed.
+  void panelChanged();
 
 protected:
   /// Handle workspace preDeletion tasks.
