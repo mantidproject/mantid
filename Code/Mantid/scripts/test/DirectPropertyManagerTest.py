@@ -409,6 +409,38 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         #TODO: this one is not completed
 
+    def test_set_defailts_from_instrument(self) :
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=100)
+
+        SetInstrumentParameter(ws,ParameterName="TestParam1",Value="3.5",ParameterType="Number")
+        SetInstrumentParameter(ws,ParameterName="TestParam2",Value="initial1",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="TestParam3",Value="initial2",ParameterType="String")
+
+        instr = ws.getInstrument()
+        propman = DirectPropertyManager(instr);
+
+        self.assertAlmostEqual(propman.TestParam1,3.5);
+        self.assertEquals(propman.TestParam2,"initial1");
+        self.assertEquals(propman.TestParam3,"initial2");
+        
+        propman.TestParam2="gui_changed1"
+        self.assertEquals(propman.TestParam2,"gui_changed1");
+
+        SetInstrumentParameter(ws,ParameterName="TestParam2",Value="instr_changed1",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="TestParam3",Value="instr_changed2",ParameterType="String")
+
+        self.assertAlmostEqual(propman.TestParam1,3.5);
+        self.assertEquals(propman.TestParam2,"gui_changed1");
+        self.assertEquals(propman.TestParam3,"initial2");
+  
+
+        propman.update_defaults_from_instrument(ws.getInstrument());
+
+        self.assertAlmostEqual(propman.TestParam1,3.5);
+        self.assertEquals(propman.TestParam2,"gui_changed1");
+        self.assertEquals(propman.TestParam3,"instr_changed2");
+
+
 
 
  #def test_default_warnings(self):

@@ -242,7 +242,7 @@ def check_instrument_name(old_name,new_name):
         instrument = config.getFacility().instrument(new_name)
         short_name = instrument.shortName()
         full_name = instrument.name()
-    except:
+    except RuntimeError:
         # it is possible to have wrong facility:
         facilities = config.getFacilities()
         old_facility = str(config.getFacility())

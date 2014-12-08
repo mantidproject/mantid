@@ -607,15 +607,25 @@ class DirectPropertyManager(DirectReductionProperties):
   
         return result;
 
-    def update_defaults_from_instrument(pInstrument):
+    def update_defaults_from_instrument(self,pInstrument):
         """ Method used to update default parameters from the same instrument.
 
             Used if initial parameters correspond to instrument with one validity dates and 
             current instrument has different validity dates and different default values for 
             these dates.
 
+            List of synonims is not modified
         """ 
+        if self.instr_name != pInstrument.getName():
+            raise AttributeError("Can not change instrument parameters ")
+        else:
+            changed_properties = self.getChangedProperties()
+            param_list = prop_helpers.get_default_idf_param_list(pInstrument);
+            for key,val in param_list.iteritems():
+                if not (key in changed_properties):
+                    setattr(self,key,val)
         pass
+    #end
 
     # TODO: finish refactoring this. 
     def init_idf_params(self, reinitialize_parameters=False):

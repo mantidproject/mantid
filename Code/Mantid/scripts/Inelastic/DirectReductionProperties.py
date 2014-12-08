@@ -331,7 +331,15 @@ class DirectReductionProperties(object):
             if isinstance(Instrument,geometry._geometry.Instrument):
                 instrument = Instrument;
                 instr_name = instrument.getFullName()
-                new_name,full_name,facility_ = prop_helpers.check_instrument_name(None,instr_name);
+                try: 
+                    new_name,full_name,facility_ = prop_helpers.check_instrument_name(None,instr_name);
+                except KeyError: # the instrument pointer is not found in any facility but we have it after all
+                    new_name=instr_name
+                    full_name=instr_name
+                    facility_= 'TEST'
+                #end
+
+
             elif isinstance(Instrument,str): # instrument name defined
                 new_name,full_name,facility_ = prop_helpers.check_instrument_name(None,Instrument);
                 idf_dir = config.getString('instrumentDefinition.directory')
