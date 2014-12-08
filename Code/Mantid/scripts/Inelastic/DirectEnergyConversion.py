@@ -75,7 +75,7 @@ Whitebeam run number or file name or workspace
                        bleed test diagnostic
       print_results - If True then the results are printed to the screen
 
-      diag_remove_zero =True, False (default):Diag zero counts in background range
+      diag_remove_ero =True, False (default):Diag zero counts in background range
       bleed=True , turn bleed correction on and off on by default for Merlin and LET
 
       sum =True,False(default) , sum multiple files
@@ -606,7 +606,7 @@ class DirectEnergyConversion(object):
 
         #the D.E.C. tries to be too clever so we have to fool it into thinking the raw file is already exists as a workspace
         sum_name=self.prop_man.instr_name+str(self.prop_man.sample_run[0])+'-sum'
-        sample_run =self.sum_files(sum_name, sample_run)
+        sample_run =self.sum_files(sum_name, self.prop_man.sample_run)
         common.apply_calibration(self.prop_man.instr_name,sample_run,self.prop_man.det_cal_file)
         self.prop_man.sample_run = sample_run
 
@@ -760,7 +760,7 @@ class DirectEnergyConversion(object):
         """
         # Old interface support
         prop_man = self.prop_man;
-        prop_man.log('******  Run absolute units corrections ****************************************************','notice')
+        prop_man.log('*** Running absolute units corrections ****************************************************','notice')
 
         if prop_man.mono_correction_factor:
             absnorm_factor=float(prop_man.mono_correction_factor)

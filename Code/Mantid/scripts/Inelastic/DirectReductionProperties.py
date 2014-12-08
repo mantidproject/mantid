@@ -160,9 +160,7 @@ class DirectReductionProperties(object):
         object.__setattr__(self,'_second_white',None);
         object.__setattr__(self,'_mono_correction_factor',None);
 
-        # 
-        object.__setattr__(self,'_record_advanced_properties',False);
-
+ 
         self._set_instrument_and_facility(Instrument,run_workspace);
   
     #end
@@ -202,15 +200,6 @@ class DirectReductionProperties(object):
     @property 
     def apply_detector_eff(self):
         return True;
-    #-----------------------------------------------------------------------------------
-    #TODO: Implement auto-clearing decorator around it
-    @property
-    def record_advanced_properties(self):
-        return self._record_advanced_properties;
-    #
-    @record_advanced_properties.setter
-    def record_advanced_properties(self,value):
-         object.__setattr__(self,'_record_advanced_properties',bool(value));
     #-----------------------------------------------------------------------------------
     @property 
     def psi(self):

@@ -54,7 +54,7 @@ class VanadiumRMM(object):
         """ return rmm for vanadium """
         return 50.9415;
     def __set__(self,instance,value):
-        raise AttributeError(("Can not change vanadium rmm"));
+        raise AttributeError("Can not change vanadium rmm");
 #end VanadiumRMM
 #
 class DetCalFile(object):
@@ -246,7 +246,8 @@ class SpectraToMonitorsList(object):
        return result
 
 #end SpectraToMonitorsList
-    # format to save data
+
+# format(s) to save data
 class SaveFormat(object):
    # formats available for saving
    save_formats = ['spe','nxspe','nxs'];
@@ -379,7 +380,6 @@ class DirectPropertyManager(DirectReductionProperties):
         #
         # define private properties served the class
         private_properties = {'descriptors':[],'subst_dict':{},'prop_allowed_values':{},'changed_properties':set(),
-        'advanced_properties':set(),
         'file_properties':[],'abs_norm_file_properties':[]};
         # place these properties to __dict__  with proper decoration
         self._set_private_properties(private_properties);
@@ -474,10 +474,10 @@ class DirectPropertyManager(DirectReductionProperties):
 
         # replace common substitutions for None
         if type(val) is str :
-           val = val.lower()
-           if (val == 'none' or len(val) == 0):
+           val1 = val.lower()
+           if (val1 == 'none' or len(val1) == 0):
               val = None;
-           if val == 'default':
+           if val1 == 'default':
               val = self.getDefaultParameterValue(name0);
 
         if type(val) is list and len(val) == 0:
@@ -499,12 +499,11 @@ class DirectPropertyManager(DirectReductionProperties):
 
         # record changes in the property
         self.__changed_properties.add(name);
-        if self.record_advanced_properties:
-           self.__advanced_properties.add(name);
 
    # ----------------------------
     def __getattr__(self,name):
-       """ Overloaded get method, disallowing non-existing properties being get """ 
+       """ Overloaded get method, disallowing non-existing properties being get but allowing 
+          a property been called with  different names specified in substitution dictionary. """ 
 
        tDict = object.__getattribute__(self,'__dict__');
        if name is '__dict__':
@@ -547,14 +546,7 @@ class DirectPropertyManager(DirectReductionProperties):
     def getChangedProperties(self):
         """ method returns set of the properties changed from defaults """
         return self.__dict__[self._class_wrapper+'changed_properties'];
-    def getChangedAdvancedProperties(self):
-        """ method returns advanced properties, changed from defaults 
-          and recorded when record_advanced_properties was set to True
-
-          TODO: deal with this recording better. 
-          """ 
-        return self.__dict__[self._class_wrapper+'advanced_properties'];
-
+ 
     @property
     def relocate_dets(self) :
         if self.det_cal_file != None:
@@ -615,6 +607,15 @@ class DirectPropertyManager(DirectReductionProperties):
   
         return result;
 
+    def update_defaults_from_instrument(pInstrument):
+        """ Method used to update default parameters from the same instrument.
+
+            Used if initial parameters correspond to instrument with one validity dates and 
+            current instrument has different validity dates and different default values for 
+            these dates.
+
+        """ 
+        pass
 
     # TODO: finish refactoring this. 
     def init_idf_params(self, reinitialize_parameters=False):
@@ -730,42 +731,6 @@ class DirectPropertyManager(DirectReductionProperties):
       if  self.map_file == None:
             self.log('*** one2one map selected',log_level)
       self.log("****************************************************************",log_level);
-
-    def export_changed_values(self,FileName='reduce_vars.py'):
-        """ Method to write changed simple and advanced properties into dictionary, to process by 
-            web reduction interface
-        """
-        changed_Keys= self.getChangedProperties();
-        advancedKeys= self.getChangedAdvancedProperties();
-       
-        f=open(FileName,'w')
-        f.write("standard_vars = {\n")
-        str_wrapper = '         '
-        for key in changed_Keys:
-            if not key in advancedKeys:
-                  val = getattr(self,key);
-                  if isinstance(val,str):
-                      row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
-                  else:
-                      row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
-                  f.write(row);
-                  str_wrapper=',\n         '
-        f.write("}\nadvanced_vars={\n")
-
-        str_wrapper='         '
-        for key in advancedKeys:
-                  val = getattr(self,key);
-                  if isinstance(val,str):
-                      row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
-                  else:
-                      row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
-                  f.write(row);
-                  str_wrapper=',\n        '
-        f.write("}\n")
-        f.close();
-
-
-
 
 
     #def help(self,keyword=None) :

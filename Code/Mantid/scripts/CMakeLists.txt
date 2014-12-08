@@ -2,8 +2,11 @@
 set ( TEST_PY_FILES 
       test/ConvertToWavelengthTest.py
       test/SettingsTest.py
+      test/DirectReductionHelpersTest.py 
+      test/DirectPropertyManagerTest.py     
       test/DgreduceTest.py
       test/DirectEnergyConversionTest.py
+      test/ReductionWrapperTest.py
       test/IndirectApplyCorrectionsTest.py
       test/IndirectCommonTests.py
       test/ReflectometryQuickAuxiliaryTest.py 
