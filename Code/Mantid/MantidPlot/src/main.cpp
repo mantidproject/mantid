@@ -172,14 +172,12 @@ int main( int argc, char ** argv )
       s += "-h or --help: show command line options\n";
       s += "-v or --version: print MantidPlot version and release date\n";
       s += "-r or --revision: print MantidPlot version and release date\n";
+      s += "-s or --silent: start mantidplot without any setup dialogs\n";
       s += "-x or --execute: execute the script file given as argument\n";
       s += "-xq or --executeandquit: execute the script file given as argument and then exit MantidPlot\n\n";
       s += "'filename' can be any of .qti, qti.gz, .opj, .ogm, .ogw, .ogg, .py or ASCII file\n\n";
-#ifdef Q_OS_WIN
-      QMessageBox::information(NULL, "MantidPlot - Help", s);
-#else
       std::wcout << s.toStdWString();
-#endif
+
       exit(0);
     }
     //else if ( str == "-m" || str == "--manual" ) // Not for the time being at least
