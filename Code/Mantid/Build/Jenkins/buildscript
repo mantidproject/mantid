@@ -104,10 +104,12 @@ if [[ ${JOB_NAME} == *coverity_build_and_submit* ]]; then
   status=$(curl --form token=$COVERITY_TOKEN --form email=mantidproject@gmail.com \
        --form file=@mantid.tgz --form version=$GIT_COMMIT \
        https://scan.coverity.com/builds?project=mantidproject%2Fmantid)
-  if [[ ${status} ]]; then
-    exit 1
-  else
+  status=$(echo ${status} | sed -e 's/^ *//' -e 's/ *$//')
+  if [[ -z $status ]]; then
     exit 0
+  else
+    echo "$status"
+    exit 1
   fi
 fi
 
