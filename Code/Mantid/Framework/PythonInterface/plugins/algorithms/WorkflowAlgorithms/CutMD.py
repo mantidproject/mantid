@@ -196,7 +196,6 @@ class CutMD(DataProcessorAlgorithm):
     def __verify_projection_input(self, projection_table):
         if isinstance(projection_table, ITableWorkspace):
             column_names = set(projection_table.getColumnNames())
-            logger.warning(str(column_names)) 
             if not column_names == set([Projection.u, Projection.v, 'type']):
                     if not column_names == set([Projection.u, Projection.v, 'offsets', 'type']):
                         if not column_names == set([Projection.u, Projection.v, Projection.w, 'offsets', 'type']):
