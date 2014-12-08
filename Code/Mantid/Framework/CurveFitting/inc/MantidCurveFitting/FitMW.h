@@ -88,6 +88,10 @@ namespace Mantid
       /// Set max size for Sequantial and Parallel domains
       /// @param maxSize :: Maximum size of each simple domain
       void setMaxSize(size_t maxSize){m_maxSize = maxSize;}
+      /// Set the normalisation flag
+      /// @param maxSize :: If true and the spectrum is a histogram the fitting data will be normalised 
+      /// by the bin width.
+      void setNormalise(bool on){m_normalise = on;}
     protected:
       /// Calculate size and starting iterator in the X array
       void getStartIterator(const Mantid::MantidVec& X, Mantid::MantidVec::const_iterator& from, size_t& n, bool isHisto) const;

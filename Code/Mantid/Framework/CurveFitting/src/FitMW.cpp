@@ -94,7 +94,8 @@ namespace
     API::IDomainCreator(NULL,std::vector<std::string>(),domainType),
   m_startX(EMPTY_DBL()),
   m_endX(EMPTY_DBL()),
-  m_maxSize(10)
+  m_maxSize(10),
+  m_normalise(false)
   {
   }
 
