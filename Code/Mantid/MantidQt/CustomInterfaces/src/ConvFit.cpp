@@ -511,8 +511,9 @@ namespace IDA
     try
     {
       Mantid::Geometry::Instrument_const_sptr inst =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName)->getInstrument();
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName)->getInstrument();
       std::string analyser = inst->getStringParameter("analyser")[0];
+      std::string idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
 
       // If the analyser component is not already in the data file the laod it from the parameter file
       if(inst->getComponentByName(analyser)->getNumberParameter("resolution").size() == 0)
@@ -522,7 +523,7 @@ namespace IDA
         IAlgorithm_sptr loadParamFile = AlgorithmManager::Instance().create("LoadParameterFile");
         loadParamFile->initialize();
         loadParamFile->setProperty("Workspace", workspaceName);
-        loadParamFile->setProperty("Filename", inst->getName() + "_" + analyser + "_" + reflection + "_Parameters.xml");
+        loadParamFile->setProperty("Filename", idfDirectory + inst->getName() + "_"+analyser + "_" + reflection + "_Parameters.xml");
         loadParamFile->execute();
 
         if(!loadParamFile->isExecuted())

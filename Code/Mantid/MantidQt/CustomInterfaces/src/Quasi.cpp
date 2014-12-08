@@ -106,6 +106,17 @@ namespace MantidQt
 				return false;
 			}
 
+			QString program = m_uiForm.cbProgram->currentText();
+      if(program == "Stretched Exponential")
+      {
+			  QString resName = m_uiForm.dsResolution->getCurrentDataName();
+        if(!resName.endsWith("_res"))
+        {
+          emit showMessageBox("Stretched Exponential program can only be used with a resolution file.");
+          return false;
+        }
+      }
+
 			return true;
 		}
 

@@ -16,7 +16,7 @@ import datetime
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import pyqtSlot
 
-from mantidplotpy.proxies import threadsafe_call
+from pymantidplot.proxies import threadsafe_call
 
 # Try to import QTest. Not available on Windows?
 try:

@@ -1,4 +1,4 @@
-#include "MantidMDAlgorithms/MDNormSXD.h"
+#include "MantidMDAlgorithms/MDNormSCD.h"
 
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -28,13 +28,13 @@ namespace Mantid
     }
     
     // Register the algorithm into the AlgorithmFactory
-    DECLARE_ALGORITHM(MDNormSXD)
+    DECLARE_ALGORITHM(MDNormSCD)
     
     //----------------------------------------------------------------------------------------------
     /**
      * Constructor
      */
-    MDNormSXD::MDNormSXD() :
+    MDNormSCD::MDNormSCD() :
       m_normWS(), m_inputWS(), m_hmin(0.0f), m_hmax(0.0f),
       m_kmin(0.0f), m_kmax(0.0f), m_lmin(0.0f), m_lmax(0.0f), m_hIntegrated(true),
       m_kIntegrated(true), m_lIntegrated(true), m_rubw(3,3),
@@ -44,25 +44,25 @@ namespace Mantid
     }
     
     /// Algorithm's version for identification. @see Algorithm::version
-    int MDNormSXD::version() const { return 1; }
+    int MDNormSCD::version() const { return 1; }
     
     /// Algorithm's category for identification. @see Algorithm::category
-    const std::string MDNormSXD::category() const { return "MDAlgorithms"; }
+    const std::string MDNormSCD::category() const { return "MDAlgorithms"; }
     
     /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-    const std::string MDNormSXD::summary() const
+    const std::string MDNormSCD::summary() const
     { 
       return "Calculate normalization for an MDEvent workspace for single crystal diffraction.";
     }
     
     /// Algorithm's name for use in the GUI and help. @see Algorithm::name
-    const std::string MDNormSXD::name() const { return "MDNormSXD"; }
+    const std::string MDNormSCD::name() const { return "MDNormSCD"; }
     
     //----------------------------------------------------------------------------------------------
     /**
       * Initialize the algorithm's properties.
       */
-    void MDNormSXD::init()
+    void MDNormSCD::init()
     {
       declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input),
                       "An input MDWorkspace.");
@@ -99,7 +99,7 @@ namespace Mantid
     /**
      * Execute the algorithm.
      */
-    void MDNormSXD::exec()
+    void MDNormSCD::exec()
     {
       cacheInputs();
       auto outputWS = binInputWS();
@@ -126,7 +126,7 @@ namespace Mantid
     /**
      * Set up starting values for cached variables
      */
-    void MDNormSXD::cacheInputs()
+    void MDNormSCD::cacheInputs()
     {
       m_inputWS = getProperty("InputWorkspace");
       if( inputEnergyMode() != "Elastic" )
@@ -159,7 +159,7 @@ namespace Mantid
      * Currently looks for the ConvertToMD algorithm in the history
      * @return A string donating the energy transfer mode of the input workspace
      */
-    std::string MDNormSXD::inputEnergyMode() const
+    std::string MDNormSCD::inputEnergyMode() const
     {
       const auto & hist = m_inputWS->getHistory();
       const size_t nalgs = hist.size();
@@ -196,7 +196,7 @@ namespace Mantid
      * All slicing algorithm properties are passed along
      * @return MDHistoWorkspace as a result of the binning
      */
-    MDHistoWorkspace_sptr MDNormSXD::binInputWS()
+    MDHistoWorkspace_sptr MDNormSCD::binInputWS()
     {
       const auto & props = getProperties();
       IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
@@ -219,7 +219,7 @@ namespace Mantid
      * Create & cached the normalization workspace
      * @param dataWS The binned workspace that will be used for the data
      */
-    void MDNormSXD::createNormalizationWS(const MDHistoWorkspace &dataWS)
+    void MDNormSCD::createNormalizationWS(const MDHistoWorkspace &dataWS)
     {
       // Copy the MDHisto workspace, and change signals and errors to 0.
       m_normWS = boost::make_shared<MDHistoWorkspace>(dataWS);
@@ -231,7 +231,7 @@ namespace Mantid
      * @param skipNormalization [InOut] Updated to false if any values are outside range measured by input workspace
      * @return A vector of values from other dimensions to be include in normalized MD position calculation
      */
-    std::vector<coord_t> MDNormSXD::getValuesFromOtherDimensions(bool &skipNormalization) const
+    std::vector<coord_t> MDNormSCD::getValuesFromOtherDimensions(bool &skipNormalization) const
     {
       const auto & runZero = m_inputWS->getExperimentInfo(0)->run();
 
@@ -264,7 +264,7 @@ namespace Mantid
      * @param skipNormalization [InOut] Sets the flag true if normalization values are outside of original inputs
      * @return Affine trasform matrix
      */
-    Kernel::Matrix<coord_t> MDNormSXD::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues, 
+    Kernel::Matrix<coord_t> MDNormSCD::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues, 
                                                                     bool &skipNormalization)
     {
       // Get indices of the original dimensions in the output workspace,
@@ -330,7 +330,7 @@ namespace Mantid
     /**
      * Stores the X values from each H,K,L dimension as member variables
      */
-    void MDNormSXD::cacheDimensionXValues()
+    void MDNormSCD::cacheDimensionXValues()
     {
       auto &hDim = *m_normWS->getDimension(m_hIdx);
       m_hX.resize(hDim.getNBins());
@@ -357,7 +357,7 @@ namespace Mantid
      * @param otherValues
      * @param affineTrans
      */
-    void MDNormSXD::calculateNormalization(const std::vector<coord_t> &otherValues,
+    void MDNormSCD::calculateNormalization(const std::vector<coord_t> &otherValues,
                                            const Kernel::Matrix<coord_t> &affineTrans)
     {
       API::MatrixWorkspace_const_sptr integrFlux = getProperty("FluxWorkspace");
@@ -484,7 +484,7 @@ namespace Mantid
      * @param sp :: A workspace index for a spectrum in integrFlux to interpolate.
      * @param yValues :: A vector to save the results.
      */
-    void MDNormSXD::calcIntegralsForIntersections( const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux, size_t sp, std::vector<double> &yValues ) const
+    void MDNormSCD::calcIntegralsForIntersections( const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux, size_t sp, std::vector<double> &yValues ) const
     {
       assert( xValues.size() == yValues.size() );
 
@@ -570,7 +570,7 @@ namespace Mantid
      * @param detIDs A list of existing IDs
      * @return A new list of IDs
      */
-    std::vector<detid_t> MDNormSXD::removeGroupedIDs(const ExperimentInfo &exptInfo, const std::vector<detid_t> &detIDs)
+    std::vector<detid_t> MDNormSCD::removeGroupedIDs(const ExperimentInfo &exptInfo, const std::vector<detid_t> &detIDs)
     {
       const size_t ntotal = detIDs.size();
       std::vector<detid_t> singleIDs;
@@ -610,7 +610,7 @@ namespace Mantid
      *         (may be a single pixel or group)
      */
     Geometry::IDetector_const_sptr
-    MDNormSXD::getThetaPhi(const detid_t detID,
+    MDNormSCD::getThetaPhi(const detid_t detID,
                            const ExperimentInfo &exptInfo,
                            double &theta, double &phi)
     {
@@ -627,7 +627,7 @@ namespace Mantid
      * @param phi Azimuthal angle with detector
      * @return A list of intersections in HKL space
      */
-    std::vector<Kernel::VMD> MDNormSXD::calculateIntersections(const double theta, const double phi)
+    std::vector<Kernel::VMD> MDNormSCD::calculateIntersections(const double theta, const double phi)
     {
       V3D q(-sin(theta)*cos(phi), -sin(theta)*sin(phi), 1.-cos(theta));
       q = m_rubw*q;

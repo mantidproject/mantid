@@ -24,16 +24,15 @@ echo %sha1%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check the required build configuration
-:: Use RelWithDbgInfo unless specified by job name
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set BUILD_CONFIG=
 if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
     set BUILD_CONFIG=Debug
 ) else (
-if not "%JOB_NAME%"=="%JOB_NAME:release=%" (
-    set BUILD_CONFIG=Release
+if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
+    set BUILD_CONFIG=RelWithDbg
 ) else (
-    set BUILD_CONFIG=RelWithDebInfo
+    set BUILD_CONFIG=Release
     ))
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -72,18 +71,22 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
 msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=%BUILD_CONFIG% Mantid.sln
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the tests
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+<<<<<<< HEAD
 "C:\Program Files (x86)\CMake 2.8\bin\ctest.exe" -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure -E MantidPlot
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: Run GUI tests serially
 :: ctest -C %BUILD_CONFIG% --output-on-failure -R MantidPlot
 :: if ERRORLEVEL 1 exit /B %ERRORLEVEL%
+=======
+"C:\Program Files (x86)\CMake 2.8\bin\ctest.exe" -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
+if ERRORLEVEL 1 exit /B %ERRORLEVEL%
+>>>>>>> origin/master
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the install kit if this is a clean build
