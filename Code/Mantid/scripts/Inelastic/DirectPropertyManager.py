@@ -502,7 +502,8 @@ class DirectPropertyManager(DirectReductionProperties):
 
    # ----------------------------
     def __getattr__(self,name):
-       """ Overloaded get method, disallowing non-existing properties being get """ 
+       """ Overloaded get method, disallowing non-existing properties being get but allowing 
+          a property been called with  different names specified in substitution dictionary. """ 
 
        tDict = object.__getattribute__(self,'__dict__');
        if name is '__dict__':
@@ -606,6 +607,15 @@ class DirectPropertyManager(DirectReductionProperties):
   
         return result;
 
+    def update_defaults_from_instrument(pInstrument):
+        """ Method used to update default parameters from the same instrument.
+
+            Used if initial parameters correspond to instrument with one validity dates and 
+            current instrument has different validity dates and different default values for 
+            these dates.
+
+        """ 
+        pass
 
     # TODO: finish refactoring this. 
     def init_idf_params(self, reinitialize_parameters=False):
