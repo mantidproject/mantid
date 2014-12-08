@@ -546,7 +546,13 @@ class DirectPropertyManager(DirectReductionProperties):
     def getChangedProperties(self):
         """ method returns set of the properties changed from defaults """
         return self.__dict__[self._class_wrapper+'changed_properties'];
- 
+    def setChangedProperties(self,value=set()):
+        """ Method to clear changed properties list""" 
+        if isinstance(value,set):
+            self.__dict__[self._class_wrapper+'changed_properties'] =value;
+        else:
+            raise KeyError("Changed properties can be initialized by apporpriate properties set only")
+
     @property
     def relocate_dets(self) :
         if self.det_cal_file != None:
@@ -614,16 +620,32 @@ class DirectPropertyManager(DirectReductionProperties):
             current instrument has different validity dates and different default values for 
             these dates.
 
-            List of synonims is not modified
+            List of synonims is not modified and new properties are not added assuming that 
+            recent dictionary and properties are most comprehensive one
         """ 
         if self.instr_name != pInstrument.getName():
             raise AttributeError("Can not change instrument parameters ")
         else:
             changed_properties = self.getChangedProperties()
-            param_list = prop_helpers.get_default_idf_param_list(pInstrument);
+            param_list = prop_helpers.get_default_idf_param_list(pInstrument)
             for key,val in param_list.iteritems():
+                if key == 'synonims':
+                    continue
+
                 if not (key in changed_properties):
-                    setattr(self,key,val)
+                    if key in self.__subst_dict:
+                        name =self.__subst_dict[key]; 
+                    else:
+                        name =key; 
+                    if not(name in self.__dict__):
+                        name = '_'+name
+
+                    cur_val = self.__dict__[name]
+                    # complex properties set up through their members so no need to set up one
+                    if not isinstance(cur_val,prop_helpers.ComplexProperty): 
+                           setattr(self,name,val)
+        # Clear changed properties list (is this wise?, may be we want to know that some defaults changed?)
+        self.setChangedProperties();
         pass
     #end
 

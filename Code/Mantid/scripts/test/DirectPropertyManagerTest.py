@@ -440,9 +440,41 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEquals(propman.TestParam2,"gui_changed1");
         self.assertEquals(propman.TestParam3,"instr_changed2");
 
+    def test_set_complex_defailts_from_instrument(self) :
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
 
+        SetInstrumentParameter(ws,ParameterName="Param1",Value="BaseParam1:BaseParam2",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="BaseParam1",Value="Val1",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="BaseParam2",Value="Val2",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="synonims",Value="ParaPara=BaseParam2",ParameterType="String")
 
+        instr = ws.getInstrument()
+        propman = DirectPropertyManager(instr);
 
+        SampleResult = ['Val1','Val2']
+        cVal = propman.Param1;
+        for test,sample in zip(cVal,SampleResult):
+            self.assertEqual(test,sample)
+
+        self.assertEqual(propman.ParaPara,'Val2')
+        self.assertEqual(propman.BaseParam2,'Val2')
+
+        SetInstrumentParameter(ws,ParameterName="Param1",Value="Ignore1:Ignore2",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="BaseParam1",Value="OtherVal1",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="BaseParam2",Value="OtherVal2",ParameterType="String")
+
+        propman.update_defaults_from_instrument(ws.getInstrument());
+
+        SampleResult = ['OtherVal1','OtherVal2']
+        cVal = propman.Param1;
+        for test,sample in zip(cVal,SampleResult):
+            self.assertEqual(test,sample)
+
+        self.assertEqual(propman.ParaPara,'OtherVal2')
+        self.assertEqual(propman.BaseParam2,'OtherVal2')
+        
+        self.assertEquals(propman.BaseParam1,"OtherVal1");
+  
  #def test_default_warnings(self):
     #    tReducer = self.reducer
 

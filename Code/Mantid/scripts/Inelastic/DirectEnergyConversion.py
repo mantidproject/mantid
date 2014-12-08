@@ -315,7 +315,7 @@ class DirectEnergyConversion(object):
         sample_data,mon_ws = self.load_data(mono_van)
         # Create the result name if necessary
         if result_name is None:
-            result_name = common.create_resultname(mono_van)
+           result_name = common.create_resultname(mono_van)
 
         monovan = self._do_mono(sample_data, sample_data, result_name, ei_guess,
                                 white_run, map_file, spectra_masks, Tzero)
@@ -573,13 +573,12 @@ class DirectEnergyConversion(object):
       # 
       self.prop_man.set_input_parameters(**kwargs);
 
-      prop_man = self.prop_man;
       # output workspace name.
       try:
           n,r=funcreturns.lhs_info('both')
           wksp_out=r[0]
       except:
-          wksp_out = prop_man.get_sample_ws_name();
+          wksp_out = self.prop_man.get_sample_ws_name();
 
 
       # Process old legacy parameters which are easy to re-define in dgreduce rather then transfer through Mantid
@@ -588,7 +587,7 @@ class DirectEnergyConversion(object):
 
 
       # inform user on what parameters have changed 
-      prop_man.log_changed_values('notice');
+      self.prop_man.log_changed_values('notice');
       #process complex parameters
 
       start_time=time.time()
@@ -598,19 +597,27 @@ class DirectEnergyConversion(object):
       #TODO:
       # Reducer.check_necessary_files(monovan_run);
 
-      # TODO: --check out if internal summation works -- it does not. Should be fixed. Old summation meanwhile
+
       # Here was summation in dgreduce. 
       if (np.size(self.prop_man.sample_run)) > 1 and self.prop_man.sum_runs:
         #this sums the runs together before passing the summed file to the rest of the reduction
         #this circumvents the inbuilt method of summing which fails to sum the files for diag
+        # TODO: --check out if internal summation works -- it does not. Should be fixed. Old summation meanwhile
 
-        #the D.E.C. tries to be too clever so we have to fool it into thinking the raw file is already exists as a workspace
         sum_name=self.prop_man.instr_name+str(self.prop_man.sample_run[0])+'-sum'
         sample_run =self.sum_files(sum_name, self.prop_man.sample_run)
         common.apply_calibration(self.prop_man.instr_name,sample_run,self.prop_man.det_cal_file)
         self.prop_man.sample_run = sample_run
+      else:
+        sample_run,sample_monitors = self.load_data(self.prop_man.sample_run);
+        self.prop_man.sample_run = sample_run     
+
+      # Update reduction properties which may change in the workspace but have not been modified from input parameters. 
+      # E.g. detector number have changed 
+      self.prop_man.update_defaults_from_instrument(sample_run.getInstrument());
 
 
+      prop_man = self.prop_man
 
       masking = None;
       masks_done=False
@@ -618,17 +625,7 @@ class DirectEnergyConversion(object):
           header="*** Diagnostics including hard masking is skipped "
           masks_done = True;
       #if Reducer.save_and_reuse_masks :
-      #    raise NotImplementedError("Save and reuse masks option is not yet implemented")
-      #    mask_file_name = common.create_resultname(str(mask_run),prop_man.instr_name,'_masks.xml')
-      #    mask_full_file = FileFinder.getFullPath(mask_file_name)
-      #    if len(mask_full_file) > 0 :
-      #      masking = LoadMask(Instrument=Reducer.instr_name,InputFile=mask_full_file,OutputWorkspace=mask_file_name)
-      #      #Reducer.hard_mask_file = mask_full_file;
-      #      #Reducer.use_hard_mask_only = True
-      #      masks_done=True
-      #      header="Masking fully skipped and processed {0} spectra and  {1} bad spectra "
-      #  else:
-      #      pass
+      # SAVE AND REUSE MASKS
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
 #  Diagnostics here 
 # --------------------------------------------------------------------------------------------------------
@@ -669,10 +666,14 @@ class DirectEnergyConversion(object):
       nMaskedSpectra = len(failed_sp_list)
       # this tells turkey in case of hard mask only but everything else semens work fine
       prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice');
-      #Run the conversion first on the sample
-      deltaE_wkspace_sample = self.convert_to_energy(prop_man.sample_run,prop_man.incident_energy,prop_man.wb_run)
-    
 
+      #Run the conversion first on the sample
+      #result_name = 
+      #deltaE_wkspace_sample = self.convert_to_energy(prop_man.sample_run,prop_man.incident_energy,prop_man.wb_run)
+      deltaE_wkspace_sample = self.mono_sample(prop_man.sample_run,prop_man.incident_energy,prop_man.wb_run,
+                                               prop_man.map_file,masking)
+
+ 
       # calculate absolute units integral and apply it to the workspace
       if prop_man.monovan_run != None or prop_man.mono_correction_factor != None :
          deltaE_wkspace_sample = self.apply_absolute_normalization(deltaE_wkspace_sample,prop_man.monovan_run,\
