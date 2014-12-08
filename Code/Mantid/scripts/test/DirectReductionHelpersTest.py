@@ -53,7 +53,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
         param_list = helpers.get_default_idf_param_list(pInstr);
         self.assertTrue(isinstance(param_list,dict))
         # check couple of parameters which are certainly in IDF
-        self.assertTrue('deltaE_mode' in param_list)
+        self.assertTrue('deltaE-mode' in param_list)
         self.assertTrue('normalise_method' in param_list)
         self.assertTrue('diag_samp_lo' in param_list)
 

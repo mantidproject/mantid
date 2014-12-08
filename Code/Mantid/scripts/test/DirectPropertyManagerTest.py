@@ -3,6 +3,8 @@ from mantid import api
 import unittest
 import inspect
 import numpy as np
+import os
+import sys
 from DirectPropertyManager import DirectPropertyManager
 
 
@@ -157,13 +159,15 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.ei_mon1_spec = 10
         mon_spectra = propman.ei_mon_spectra;
         self.assertEqual(mon_spectra,[10,3])
+        self.assertEqual(propman.ei_mon1_spec,10)
+
 
         prop_changed = propman.getChangedProperties();
         self.assertEqual(len(prop_changed),2)
         self.assertTrue('norm_mon_integration_range' in prop_changed)
 
         self.assertTrue("norm_mon_integration_range" in prop_changed,"mon_norm_range should change")
-        self.assertTrue("ei_mon1_spec" in prop_changed,"changing ei-mon1-spec should change ei_mon_spectra")
+        self.assertTrue("ei-mon1-spec" in prop_changed,"changing ei_mon_spectra should change ei-mon1-spec")
 
     def test_set_non_default_complex_value_synonims(self):
         propman = DirectPropertyManager("MAP");
@@ -173,7 +177,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         prop_changed = propman.getChangedProperties();
         self.assertEqual(len(prop_changed),1)
 
-        self.assertTrue("ei_mon2_spec" in prop_changed,"changing test_ei2_mon_spectra should change ei_mon2_spectra")
+        self.assertTrue("ei-mon2-spec" in prop_changed,"changing test_ei2_mon_spectra should change ei-mon2-spectra")
 
 
         propman.test_mon_spectra_composite = [10000,2000]        
@@ -209,23 +213,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(propman.monovan_integr_range,[lo_frac*energy_incident,hi_frac*energy_incident])
 
 
-    def test_set_energy_bins(self):
-        #TODO  modify and verify the energy bins for range of energies
-        propman = self.prop_man
-
-        propman.energy_bins='-30,3,10'
-        bins = propman.energy_bins
-        self.assertAlmostEqual(bins[0],-30)
-        self.assertAlmostEqual(bins[1],3)
-        self.assertAlmostEqual(bins[2],10)
-
-
-        propman.energy_bins=[-20,4,100]
-        bins = propman.energy_bins
-        self.assertAlmostEqual(bins[0],-20)
-        self.assertAlmostEqual(bins[1],4)
-        self.assertAlmostEqual(bins[2],100)
-
     def test_load_monitors_with_workspace(self):
         propman = self.prop_man
 
@@ -245,7 +232,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         param = propman.getDefaultParameterValue('map_file')
         self.assertTrue(isinstance(param,str))
 
-        param = propman.getDefaultParameterValue('ei_mon1_spec')
+        param = propman.getDefaultParameterValue('ei-mon1-spec')
         self.assertTrue(isinstance(param,int))
 
         param = propman.getDefaultParameterValue('check_background')
@@ -312,7 +299,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
 
         instr_name = propman.instr_name;
-        self.assertEqual(instr_name,'MAR')
+        self.assertEqual(instr_name,'MARI')
 
         propman.psi = 10
         self.assertEqual(propman.psi,10)
@@ -332,6 +319,90 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(len(spectra),4)
         self.assertEqual(spectra[0],(1,17280));
         self.assertEqual(spectra[3],(32257,41472));
+    def test_get_diagnostics_parameters(self):
+        propman = self.prop_man
+
+        params = propman.get_diagnostics_parameters();
+        self.assertEqual(len(params),19);
+        
+        bkg_test_range0 = propman.background_test_range;
+        bkg_test_range  = params['background_test_range'];
+        bkg_range = propman.background_range;
+        self.assertEqual(bkg_range,bkg_test_range)
+        self.assertEqual(bkg_range,bkg_test_range0)
+
+        propman.background_test_range = [1000,2000];
+        bkg_test_range = propman.background_test_range;
+        self.assertEqual(bkg_test_range,[1000,2000])
+
+    def test_get_sample_ws_name(self):
+        propman = self.prop_man
+
+        # no workspace name if sample is not defined. 
+        self.assertRaises(KeyError,propman.get_sample_ws_name)
+
+        propman.sample_run = 0;
+        ws_name = propman.get_sample_ws_name();
+        self.assertEqual(ws_name,'MARI000000_spe')
+
+        propman.sum_runs = 3
+        ws_name = propman.get_sample_ws_name();
+        self.assertEqual(ws_name,'MARI000000_spe-sum')
+
+
+    def test_check_monovan_changed(self):
+         propman = self.prop_man 
+         
+         non_changed = propman._check_monovan_par_changed()
+         # nothing have changed initially 
+         self.assertEqual(len(non_changed),3);
+
+         propman.incident_energy = 10;
+         propman.monovan_run = 139000
+
+         non_changed = propman._check_monovan_par_changed()
+         self.assertEqual(len(non_changed),2);
+         propman.sample_mass = 1;
+         propman.log_changed_values()
+
+         non_changed = propman._check_monovan_par_changed()
+         self.assertEqual(len(non_changed),1);
+         propman.sample_rmm = 200;
+         non_changed = propman._check_monovan_par_changed()
+         self.assertEqual(len(non_changed),0);
+
+
+         propman.log_changed_values()
+
+
+    def test_set_energy_bins_and_ei(self):
+        #TODO  modify and verify the energy bins for range of energies
+        propman = self.prop_man
+
+        propman.energy_bins='-30,3,10'
+        bins = propman.energy_bins
+        self.assertAlmostEqual(bins[0],-30)
+        self.assertAlmostEqual(bins[1],3)
+        self.assertAlmostEqual(bins[2],10)
+
+
+        propman.energy_bins=[-20,4,100]
+        bins = propman.energy_bins
+        self.assertAlmostEqual(bins[0],-20)
+        self.assertAlmostEqual(bins[1],4)
+        self.assertAlmostEqual(bins[2],100)
+
+
+        propman.incident_energy=10
+        self.assertAlmostEqual(propman.incident_energy,10)
+        ei = [20,30]
+        propman.incident_energy=ei
+        self.assertAlmostEqual(propman.incident_energy,ei)
+
+        propman.incident_energy='20,30'
+        self.assertAlmostEqual(propman.incident_energy,ei)
+
+        #TODO: this one is not completed
 
 
 
