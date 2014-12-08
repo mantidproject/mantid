@@ -658,8 +658,14 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
                      EMode='Indirect', EFixed=efixed)
         ConvertUnits(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS, Target='DeltaE',
                      EMode='Indirect', EFixed=efixed)
-        ConvertSpectrumAxis(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw',
-                            Target='ElasticQ', EMode='Indirect', EFixed=efixed)
+        # Convert the spectrum axis to Q if not already in it
+        sample_v_unit = mtd[CorrectedWS].getAxis(1).getUnit().unitID()
+        logger.debug('COrrected workspace vertical axis is in %s' % sample_v_unit)
+        if sample_v_unit != 'MomentumTransfer':
+            ConvertSpectrumAxis(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw',
+                                Target='ElasticQ', EMode='Indirect', EFixed=efixed)
+        else:
+            CloneWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS + '_rqw')
 
     RenameWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_red')
 
@@ -742,7 +748,12 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
             if Verbose:
                 logger.notice('Output file created : '+cred_path)
         calc_plot = [cor_result + ext, sample]
-        res_plot = cor_result+'_rqw'
+
+        if not diffraction_run:
+            res_plot = cor_result + '_rqw'
+        else:
+            res_plot = cor_result + '_red'
+
     else:
         if scaled_container == '':
             raise RuntimeError('Invalid options - nothing to do!')
