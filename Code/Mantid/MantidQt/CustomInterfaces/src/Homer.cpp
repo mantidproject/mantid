@@ -167,7 +167,7 @@ void Homer::page1Validators()
 /// Adds the diag custom widgets and a check box to allow users to enable or disable the widget
 void Homer::setUpPage2()
 {
-  /* The diag -detector diagnositics part of the form is a separate widget, all the work is 
+  /* The diag -detector diagnostics part of the form is a separate widget, all the work is 
      coded in over there
      this second page is largely filled with the diag widget, previous settings, 
      second argument, depends on the instrument and the detector diagnostic settings are 
@@ -583,7 +583,7 @@ bool Homer::runScripts()
       m_backgroundDialog->getRange().first, m_backgroundDialog->getRange().second);
   connect(&unitsConv, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   
-  // The diag -detector diagnositics part of the form is a separate widget, all the work is coded in over there
+  // The diag -detector diagnostics part of the form is a separate widget, all the work is coded in over there
   if (m_uiForm.ckRunDiag->isChecked())
   {
     // mostly important to stop the run button being clicked twice, prevents any change to the form until the run has completed
@@ -656,7 +656,7 @@ void Homer::helpClicked()
   QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Homer"));
 }
 
-/** This slot updates the MWDiag and SPE filename suggestor with the
+/** This slot updates the MWDiag and SPE filename suggester with the
 * names of the files the user has just chosen
 */
 void Homer::runFilesChanged()
@@ -714,7 +714,7 @@ void Homer::updateWBV()
 QString Homer::defaultName()
 {
   try
-  {//this will trhow if there is an invalid filename
+  {//this will throw if there is an invalid filename
     QStringList fileList = m_uiForm.runFiles->getFilenames();
     if ( fileList.size() == 0 )
     {
