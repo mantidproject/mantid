@@ -88,6 +88,10 @@ namespace Mantid
       /// Set max size for Sequantial and Parallel domains
       /// @param maxSize :: Maximum size of each simple domain
       void setMaxSize(size_t maxSize){m_maxSize = maxSize;}
+      /// Set the normalisation flag
+      /// @param on :: If true and the spectrum is a histogram the fitting data will be normalised 
+      /// by the bin width.
+      void setNormalise(bool on){m_normalise = on;}
     protected:
       /// Calculate size and starting iterator in the X array
       void getStartIterator(const Mantid::MantidVec& X, Mantid::MantidVec::const_iterator& from, size_t& n, bool isHisto) const;
@@ -115,6 +119,8 @@ namespace Mantid
       std::string m_endXPropertyName;
       /// Store maxSize property name
       std::string m_maxSizePropertyName;
+      /// Store Normalise property name
+      std::string m_normalisePropertyName;
 
       /// The input MareixWorkspace
       mutable boost::shared_ptr<API::MatrixWorkspace> m_matrixWorkspace;
@@ -126,6 +132,8 @@ namespace Mantid
       mutable double m_endX;
       /// Max size for seq domain
       mutable size_t m_maxSize;
+      /// Option to normalise the data
+      mutable bool m_normalise;
       size_t m_startIndex;
     };
 
