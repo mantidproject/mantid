@@ -38,7 +38,7 @@ namespace MantidWidgets
   @author Michael Whitty
   @date 23/02/2011
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -86,6 +86,9 @@ namespace MantidWidgets
     void setValidatingAlgorithm(const QString & algName);
     bool isValid() const;
     void refresh();
+
+signals:
+    void emptied();
 
   private:
     void handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf);

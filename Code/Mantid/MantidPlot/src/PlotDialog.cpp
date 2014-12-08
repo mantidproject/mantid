@@ -1472,7 +1472,7 @@ void PlotDialog::showStatistics()
   info += "-------------------------------------------------------------\n";
   if (!info.isEmpty())
   {
-    d_app->current_folder->appendLogInfo(info);
+    d_app->currentFolder()->appendLogInfo(info);
     d_app->showResults(true);
   }
 

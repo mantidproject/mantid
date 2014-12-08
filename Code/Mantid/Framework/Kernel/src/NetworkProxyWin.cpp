@@ -153,7 +153,7 @@ namespace Mantid
       if(get_proxy_configuration_win(targetURLString, proxy_option,errmsg))
       {
         std::string proxyServer;
-        int proxyPort;
+        int proxyPort = 0;
         if (!proxy_option.empty())
         {
           size_t pos = proxy_option.rfind(':');

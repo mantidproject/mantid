@@ -13,7 +13,7 @@ namespace Mantid
      * a single workspace from all the detector (non-monitor, not masked) spectra
      * in that workspace. The results is a single value for the entire workspace.
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

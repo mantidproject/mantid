@@ -14,7 +14,7 @@ namespace Algorithms
   
   /** ConvertAxesToRealSpace : Converts the spectrum and TOF axes to real space values, integrating the data in the process
     
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

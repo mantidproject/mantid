@@ -16,7 +16,7 @@ namespace API
     Contains modifications to Qt functions where problems have been found
     on certain operating systems
 
-    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
     @date 17/09/2010
 
     This file is part of Mantid.

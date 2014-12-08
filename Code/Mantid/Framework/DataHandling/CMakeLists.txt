@@ -10,6 +10,7 @@ set ( SRC_FILES
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
+	src/DownloadInstrument.cpp
 	src/DownloadFile.cpp
 	src/ExtractMonitorWorkspace.cpp
 	src/FilterEventsByLogValuePreNexus.cpp
@@ -142,6 +143,7 @@ set ( SRC_FILES
 	src/SaveVTK.cpp
 	src/SetSampleMaterial.cpp
 	src/SetScalingPSD.cpp
+	src/SortTableWorkspace.cpp
 	src/UpdateInstrumentFromFile.cpp
 )
 
@@ -157,6 +159,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
+	inc/MantidDataHandling/DownloadInstrument.h
 	inc/MantidDataHandling/DownloadFile.h
 	inc/MantidDataHandling/ExtractMonitorWorkspace.h
 	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
@@ -284,6 +287,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetSampleMaterial.h
 	inc/MantidDataHandling/SetScalingPSD.h
+	inc/MantidDataHandling/SortTableWorkspace.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
 	src/LoadRaw/byte_rel_comp.h
 	src/LoadRaw/isisraw.h
@@ -303,6 +307,7 @@ set ( TEST_FILES
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
+	DownloadInstrumentTest.h
 	DownloadFileTest.h
 	ExtractMonitorWorkspaceTest.h
 	FilterEventsByLogValuePreNexusTest.h
@@ -406,6 +411,7 @@ set ( TEST_FILES
 	SaveMaskTest.h
 	SaveNISTDATTest.h
 	SaveNXSPETest.h
+	SaveNXTomoTest.h
 	SaveNexusProcessedTest.h
 	SaveNexusTest.h
 	SavePARTest.h
@@ -419,6 +425,7 @@ set ( TEST_FILES
 	SaveToSNSHistogramNexusTest.h
 	SetSampleMaterialTest.h
 	SetScalingPSDTest.h
+	SortTableWorkspaceTest.h
 	UpdateInstrumentFromFileTest.h
 	XMLInstrumentParameterTest.h
 )

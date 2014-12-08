@@ -73,6 +73,9 @@ public:
   Spectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
   ~Spectrogram();
 
+  void loadFromProject(const std::string& lines);
+  std::string saveToProject();
+
   /// Handles delete notification
   void postDeleteHandle(const std::string& wsName);
   /// Handles afterReplace notification
@@ -112,9 +115,6 @@ public:
   void updateData(const Mantid::API::IMDWorkspace_const_sptr & workspace);
   MantidQt::API::QwtRasterDataMD *dataFromWorkspace(const Mantid::API::IMDWorkspace_const_sptr & workspace);
   void postDataUpdate();
-
-  //! Used when saving a project file
-  QString saveToString();
 
   ColorMapPolicy colorMapPolicy()const{return color_map_policy;};
 

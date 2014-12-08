@@ -40,6 +40,15 @@ if ( boost_stdint )
 endif ()
 
 ###########################################################################
+# Globally-linked libraries variable
+###########################################################################
+
+# Might just as well link everything to Boost & Poco (found in CommonSetup)
+# Boost_LIBRARIES variable is redefined by MPISetup so capture the value here
+# and just add MPI stuff if required
+set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} )
+
+###########################################################################
 # MPI-enable build setup
 ###########################################################################
 
@@ -48,16 +57,9 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MA
   set ( MPI_BUILD OFF CACHE BOOL "Enable MPI options" )
   if ( MPI_BUILD )
   include ( MPISetup )
+        set ( MANTIDLIBS  ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES} )
   endif ( MPI_BUILD )
 endif ()
-
-###########################################################################
-# Globally-linked libraries variable
-###########################################################################
-
-# Might just as well link everything to Boost & Poco (found in CommonSetup)
-# MPI_CXX variables will be empty if not using
-set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${MPI_CXX_LIBRARIES} )
 
 ###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go

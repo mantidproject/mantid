@@ -36,6 +36,9 @@
 #include "muParserScript.h"
 #include "ScriptingEnv.h"
 #include "analysis/fft2D.h"
+#include "TSVSerialiser.h"
+
+#include "MantidKernel/Strings.h"
 
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_linalg.h>
@@ -477,37 +480,6 @@ bool MatrixModel::removeRows(int row, int count, const QModelIndex & parent)
 
 	endRemoveRows();
 	return true;
-}
-
-QString MatrixModel::saveToString()
-{
-	QString s = "<data>\n";
-	int cols = d_cols - 1;
-	for(int i = 0; i < d_rows; i++){
-		int aux = d_cols*i;
-		bool emptyRow = true;
-		for(int j = 0; j < d_cols; j++){
-			if (gsl_finite(d_data[aux + j])){
-				emptyRow = false;
-				break;
-			}
-		}
-		if (emptyRow)
-			continue;
-
-		s += QString::number(i) + "\t";
-		for(int j = 0; j < cols; j++){
-			double val = d_data[aux + j];
-			if (gsl_finite(val))
-				s += QString::number(val, 'e', 16);
-			s += "\t";
-		}
-		double val = d_data[aux + cols];
-		if (gsl_finite(val))
-			s += QString::number(val, 'e', 16);
-		s += "\n";
-	}
-	return s + "</data>\n";
 }
 
 QImage MatrixModel::renderImage()
@@ -1053,4 +1025,40 @@ void MatrixModel::pasteData(double *clipboardBuffer, int topRow, int leftCol, in
 MatrixModel::~MatrixModel()
 {
     free(d_data);
+}
+
+std::string MatrixModel::saveToProject()
+{
+  TSVSerialiser tsv;
+
+  for(int row = 0; row < d_rows; ++row)
+  {
+    //Index to the first element of each row
+    const int rowStart = d_cols * row;
+
+    //If the row is empty, we can skip it
+    bool emptyRow = true;
+    for(int col = 0; col < d_cols; ++col)
+      if(gsl_finite(d_data[rowStart + col]))
+      {
+        emptyRow = false;
+        break;
+      }
+
+    if(emptyRow)
+      continue;
+
+    //Write out the values for the row
+    tsv.writeLine(Mantid::Kernel::Strings::toString<int>(row));
+    for(int col = 0; col < d_cols; ++col)
+    {
+      double val = d_data[rowStart + col];
+      if(gsl_finite(val))
+        tsv << QString::number(val, 'e', 16);
+      else if(col + 1 < d_cols)
+        tsv << ""; //If we're not the last element, put in an empty spacer
+    }
+  }
+
+  return tsv.outputLines();
 }

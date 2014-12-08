@@ -42,6 +42,8 @@
 #include "ScriptingEnv.h"
 #include "Scripted.h"
 
+#include "Mantid/IProjectSerialisable.h"
+
 class Folder;
 
 class MyTable : public Q3Table
@@ -55,7 +57,6 @@ public:
 signals:
     void unwantedResize();
 private:
-    void activateNextCell();
     void resizeData(int n);
     bool m_blockResizing; // a workaround to prevent unwanted resizes
 };
@@ -66,7 +67,7 @@ private:
  * Port to the Model/View approach used in Qt4 and get rid of the Qt3Support dependancy.
  * [ assigned to thzs ]
  */
-class Table: public MdiSubWindow, public Scripted
+class Table: public MdiSubWindow, public Scripted, public Mantid::IProjectSerialisable
 {
     Q_OBJECT
 
@@ -129,11 +130,8 @@ public slots:
 
   virtual void cellEdited(int,int col);
 	void moveCurrentCell();
-	void clearCell(int row, int col);
-	QString saveText();
 	bool isEmptyRow(int row);
 	bool isEmptyColumn(int col);
-	int nonEmptyRows();
 
 	void print();
 	void print(const QString& fileName);
@@ -191,7 +189,7 @@ public slots:
 	 *
 	 * The sorting itself is done using sort(int,int,const QString&).
 	 */
-	void sortTableDialog();
+	virtual void sortTableDialog();
 	//! Sort all columns as in sortColumns(const QStringList&,int,int,const QString&).
 	void sort(int type = 0, int order  = 0, const QString& leadCol = QString());
   //! Sort selected columns as in sortColumns(const QStringList&,int,int,const QString&).
@@ -259,7 +257,6 @@ public slots:
 	QStringList selectedColumns();
 	QStringList selectedYColumns();
 	QStringList selectedXColumns();
-	QStringList selectedErrColumns();
 	QStringList selectedYLabels();
 	QStringList drawableColumnSelection();
 	QStringList YColumns();
@@ -300,7 +297,6 @@ public slots:
 
 	QString columnFormat(int col){return col_format[col];};
 	QStringList getColumnsFormat(){return col_format;};
-	void setColumnsFormat(const QStringList& lst);
 
 	void setTextFormat(int col);
 	void setColNumericFormat(int f, int prec, int col, bool updateCells = true);
@@ -318,31 +314,10 @@ public slots:
 
 	//! \name Saving and Restoring
 	//@{
-	virtual QString saveToString(const QString& geometry, bool = false);
-	QString saveHeader();
-	QString saveComments();
-	QString saveCommands();
-	QString saveColumnWidths();
-	QString saveColumnTypes();
-	QString saveReadOnlyInfo();
-	QString saveHiddenColumnsInfo();
+	std::string saveToProject(ApplicationWindow* app);
+	std::string saveTableMetadata();
 
-	void setSpecifications(const QString& s);
-	QString& getSpecifications();
 	void restore(QString& spec);
-	QString& getNewSpecifications();
-	void setNewSpecifications();
-
-	/**
-	 *used for restoring the table old caption stored in specifications string
-	 */
-	QString oldCaption();
-
-	/**
-	 *used for restoring the table caption stored in new specifications string
-	 */
-	QString newCaption();
-	//@}
 
 	void setBackgroundColor(const QColor& col);
 	void setTextColor(const QColor& col);
@@ -360,7 +335,7 @@ public slots:
 	void showComments(bool on = true);
 	bool commentsEnabled(){return d_show_comments;}
 
-	QString saveAsTemplate(const QString& geometryInfo);
+  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
 	void restore(const QStringList& lst);
 
 	//! This slot notifies the main application that the table has been modified. Triggers the update of 2D plots.

@@ -20,7 +20,7 @@ namespace Mantid
       This class stores details regarding the sample environment that was used during
       a specific run. It is implemented as a collection of pairs of Object elements
 
-      Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 

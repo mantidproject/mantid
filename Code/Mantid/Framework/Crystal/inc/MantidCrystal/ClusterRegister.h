@@ -17,7 +17,7 @@ namespace Crystal
 
   /** ClusterRegister : A fly-weight ICluster regeister. Handles the logic of merging clusters.
     
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

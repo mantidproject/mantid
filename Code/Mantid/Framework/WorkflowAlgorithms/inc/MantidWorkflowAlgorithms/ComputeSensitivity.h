@@ -13,7 +13,7 @@ namespace WorkflowAlgorithms
   /**
       Workflow algorithm to compute a patched sensitivity correction for EQSANS.
 
-      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 

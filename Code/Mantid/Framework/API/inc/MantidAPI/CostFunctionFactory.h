@@ -29,7 +29,7 @@ namespace API
     @author Anders Markvardsen, ISIS, RAL
     @date 20/05/2010
     
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

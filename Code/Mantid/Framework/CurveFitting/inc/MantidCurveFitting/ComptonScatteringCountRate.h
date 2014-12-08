@@ -15,7 +15,7 @@ namespace CurveFitting
     Implements a specialized function that encapsulates the combination of ComptonProfile functions
     that give the Neutron count rate.
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

@@ -1232,7 +1232,7 @@ namespace WorkspaceCreationHelper
     if (!targWS->addColumn("double", "Azimuthal"))
       throw(std::runtime_error("Can not add column Azimuthal"));
     // the detector ID;
-    if (!targWS->addColumn("int32_t", "DetectorID"))
+    if (!targWS->addColumn("int", "DetectorID"))
       throw(std::runtime_error("Can not add column DetectorID"));
     // stores spectra index which corresponds to a valid detector index;
     if (!targWS->addColumn("size_t", "detIDMap"))

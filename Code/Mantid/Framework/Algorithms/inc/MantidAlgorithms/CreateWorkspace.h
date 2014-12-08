@@ -22,7 +22,7 @@ namespace Algorithms
 *  @date 20/10/2010
 *  @author Michael Whitty
 *
-*  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+*  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 *   
 *  This file is part of Mantid.
 *

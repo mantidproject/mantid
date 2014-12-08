@@ -28,7 +28,7 @@ namespace Algorithms
     <LI> IncludeMonitors - Whether to include monitor spectra in the sum (default yes)
     </UL>
 
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

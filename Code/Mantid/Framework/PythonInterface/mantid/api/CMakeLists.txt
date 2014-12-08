@@ -34,9 +34,11 @@ set ( EXPORT_FILES
   src/Exports/ITableWorkspaceProperty.cpp
   src/Exports/MDGeometry.cpp
   src/Exports/IMDWorkspace.cpp
+  src/Exports/IMDWorkspaceProperty.cpp
   src/Exports/IMDHistoWorkspace.cpp
   src/Exports/IMDHistoWorkspaceProperty.cpp
   src/Exports/IMDEventWorkspace.cpp
+  src/Exports/IMDEventWorkspaceProperty.cpp
   src/Exports/MatrixWorkspace.cpp
   src/Exports/MatrixWorkspaceProperty.cpp
   src/Exports/IEventWorkspace.cpp

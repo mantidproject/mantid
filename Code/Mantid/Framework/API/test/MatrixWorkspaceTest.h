@@ -84,7 +84,10 @@ public:
       "X axis: Time-of-flight / microsecond\n"
       "Y axis: Counts\n"
       "Distribution: False\n"
-      "Instrument:  (1990-Jan-01 to 1990-Jan-01)\n";
+      "Instrument:  (1990-Jan-01 to 1990-Jan-01)\n"
+      "Run start: not available\n"
+      "Run end:  not available\n"
+      ;
 
     TS_ASSERT_EQUALS(expected, testWS->toString());
   }

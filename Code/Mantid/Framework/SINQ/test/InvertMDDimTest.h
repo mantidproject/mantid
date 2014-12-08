@@ -53,23 +53,23 @@ public:
     for(long i = 0; i < nBin; i++){
       sum += (long)sdata[i];
     }
-    TS_ASSERT_EQUALS(sum,2400000);
+    TS_ASSERT_EQUALS(sum,2400);
 
     // test dimensions
     boost::shared_ptr<const IMDDimension> dimi = data->getDimension(0);
-    TS_ASSERT_EQUALS(dimi->getNBins(),200);
-    TS_ASSERT_DELTA(dimi->getMinimum(),-100.,.1);
-    TS_ASSERT_DELTA(dimi->getMaximum(),100.,.1);
+    TS_ASSERT_EQUALS(dimi->getNBins(),20);
+    TS_ASSERT_DELTA(dimi->getMinimum(),-10.,.01);
+    TS_ASSERT_DELTA(dimi->getMaximum(),10.,.01);
 
     dimi = data->getDimension(1);
-    TS_ASSERT_EQUALS(dimi->getNBins(),120);
-    TS_ASSERT_DELTA(dimi->getMinimum(),-60.,.1);
-    TS_ASSERT_DELTA(dimi->getMaximum(),60.,.1);
+    TS_ASSERT_EQUALS(dimi->getNBins(),12);
+    TS_ASSERT_DELTA(dimi->getMinimum(),-6.,.01);
+    TS_ASSERT_DELTA(dimi->getMaximum(),6.,.01);
 
     dimi = data->getDimension(2);
-    TS_ASSERT_EQUALS(dimi->getNBins(),100);
-    TS_ASSERT_DELTA(dimi->getMinimum(),-50.,.1);
-    TS_ASSERT_DELTA(dimi->getMaximum(),50.,.1);
+    TS_ASSERT_EQUALS(dimi->getNBins(),10);
+    TS_ASSERT_DELTA(dimi->getMinimum(),-5.,.01);
+    TS_ASSERT_DELTA(dimi->getMaximum(),5.,.01);
 
     AnalysisDataService::Instance().clear();
 
@@ -124,15 +124,15 @@ public:
     std::vector<IMDDimension_sptr> dimensions;
     dim = MDHistoDimension_sptr( new MDHistoDimension(std::string("x"),
 						      std::string("ID0"), std::string("mm"),
-						      coord_t(-50),coord_t(50),size_t(100)));  
+                              coord_t(-5),coord_t(5),size_t(10)));
     dimensions.push_back(boost::const_pointer_cast<IMDDimension>(dim));
     dim = MDHistoDimension_sptr( new MDHistoDimension(std::string("y"),
 						      std::string("ID1"), std::string("mm"),
-						      coord_t(-60),coord_t(60),size_t(120)));  
+                              coord_t(-6),coord_t(6),size_t(12)));
     dimensions.push_back(boost::const_pointer_cast<IMDDimension>(dim));
     dim = MDHistoDimension_sptr( new MDHistoDimension(std::string("z"),
 						      std::string("ID2"), std::string("mm"),
-						      coord_t(-100),coord_t(100),size_t(200)));  
+                              coord_t(-10),coord_t(10),size_t(20)));
     dimensions.push_back(boost::const_pointer_cast<IMDDimension>(dim));
 
     MDHistoWorkspace_sptr outWS (new MDHistoWorkspace(dimensions));

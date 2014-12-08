@@ -117,8 +117,13 @@ class SANSInstrumentWidget(BaseWidget):
         # Q range
         self._summary.n_q_bins_edit.setText("100")
         self._summary.n_sub_pix_edit.setText("1")
+        self.connect(self._summary.log_binning_radio, QtCore.SIGNAL("clicked(bool)"), self._summary.align_check.setEnabled)
 
         self._summary.scale_edit.setText("1")
+        
+        self._summary.n_wedges_edit.setText("2")
+        self._summary.wedge_angle_edit.setText("30")
+        self._summary.wedge_offset_edit.setText("0")
 
         self._summary.instr_name_label.hide()
         self._dark_clicked(self._summary.dark_current_check.isChecked())
@@ -341,7 +346,13 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.n_q_bins_edit.setText(str(state.n_q_bins))
         self._summary.n_sub_pix_edit.setText(str(state.n_sub_pix))
         self._summary.log_binning_radio.setChecked(state.log_binning)
-
+        self._summary.align_check.setEnabled(state.log_binning)
+        self._summary.align_check.setChecked(state.align_log_with_decades)
+        
+        self._summary.n_wedges_edit.setText(str(state.n_wedges))
+        self._summary.wedge_angle_edit.setText(str(state.wedge_angle))
+        self._summary.wedge_offset_edit.setText(str(state.wedge_offset))
+        
         # Mask
         self._summary.mask_edit.setText(str(state.mask_file))
         self._summary.mask_check.setChecked(state.use_mask_file)
@@ -414,6 +425,11 @@ class SANSInstrumentWidget(BaseWidget):
         m.n_q_bins = util._check_and_get_int_line_edit(self._summary.n_q_bins_edit)
         m.n_sub_pix = util._check_and_get_int_line_edit(self._summary.n_sub_pix_edit)
         m.log_binning = self._summary.log_binning_radio.isChecked()
+        m.align_log_with_decades = self._summary.align_check.isChecked()
+
+        m.n_wedges = util._check_and_get_int_line_edit(self._summary.n_wedges_edit)
+        m.wedge_angle = util._check_and_get_float_line_edit(self._summary.wedge_angle_edit)
+        m.wedge_offset = util._check_and_get_float_line_edit(self._summary.wedge_offset_edit)
 
         # Detector side masking
         if self._summary.mask_side_front_radio.isChecked():
