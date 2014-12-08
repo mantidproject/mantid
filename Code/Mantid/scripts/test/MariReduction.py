@@ -35,7 +35,7 @@ class ReduceMARI(ReductionWrapper):
       prop['map_file'] = "mari_res.map"
       prop['monovan_mapfile'] = "mari_res.map"
       prop['hard_mask_file'] ="mar11015.msk"
-      prop['det_cal_file'] =11060
+      prop['det_cal_file'] ="11060"
       prop['save_format']=''
       return prop;
       #
