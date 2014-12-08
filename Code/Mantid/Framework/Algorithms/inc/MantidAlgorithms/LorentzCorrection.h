@@ -11,7 +11,7 @@ namespace Algorithms
 
   /** LorentzCorrection : Algorithm Performs a lorentz correction (sin(theta)^2)/(wavelength^4) on a MatrixWorkspace in units of wavelength
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

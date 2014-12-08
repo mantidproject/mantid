@@ -24,7 +24,7 @@ namespace Mantid
   overrides the init() & exec() methods.
     LoadRaw3 uses less memory by only loading up the datablocks as required.
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -121,8 +121,6 @@ namespace Mantid
 
       /// Read in the time bin boundaries
       int64_t m_lengthIn;
-      /// boolean for list spectra options
-      bool m_bmspeclist;
       /// time channels vector
       std::vector<boost::shared_ptr<MantidVec> > m_timeChannelsVec;
       /// total number of specs

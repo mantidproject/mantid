@@ -1710,6 +1710,50 @@ Later steps in the process (saving, renaming) will not be done.</string>
             </property>
            </layout>
           </item>
+          <item>
+           <layout class="QHBoxLayout" name="trans_loPreviewLegend">
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="trans_lbSample_2">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(255, 0, 0);</string>
+              </property>
+              <property name="text">
+               <string>Sample</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="trans_lbCan">
+              <property name="text">
+               <string>Background</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="trans_lbTransmission">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(0, 255, 0);</string>
+              </property>
+              <property name="text">
+               <string>Transmission</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
          </layout>
         </widget>
        </item>
@@ -1785,7 +1829,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
       <attribute name="title">
        <string>Symmetrise</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_15">
+      <layout class="QVBoxLayout" name="verticalLayout_151">
        <item>
         <widget class="QGroupBox" name="gbSymmInput">
          <property name="title">
@@ -1876,7 +1920,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
          <property name="title">
           <string>Output</string>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout">
+         <layout class="QHBoxLayout" name="horizontalLayout1">
           <property name="margin">
            <number>6</number>
           </property>
@@ -2122,19 +2166,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="sqw_lbRebinType">
-                <property name="minimumSize">
-                 <size>
-                  <width>43</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>Rebin Type:</string>
-                </property>
-               </widget>
-              </item>
               <item row="2" column="2">
                <widget class="QLabel" name="sqw_valQWidth">
                 <property name="styleSheet">
@@ -2261,46 +2292,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QComboBox" name="sqw_cbRebinType">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>200</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>200</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="currentIndex">
-                 <number>0</number>
-                </property>
-                <item>
-                 <property name="text">
-                  <string>Centre (SofQW)</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Parallelepiped (SofQW2)</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Parallelepiped/Fractional Area (SofQW3)</string>
-                 </property>
-                </item>
                </widget>
               </item>
              </layout>
@@ -2661,6 +2652,12 @@ Later steps in the process (saving, renaming) will not be done.</string>
     <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
       <widget class="QPushButton" name="pbHelp">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="maximumSize">
         <size>
          <width>25</width>
@@ -2676,13 +2673,35 @@ Later steps in the process (saving, renaming) will not be done.</string>
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="pbPythonExport">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>25</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Export a Python script for the algorithms run on this tab.</string>
+       </property>
+       <property name="text">
+        <string>Py</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_1">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
+         <width>30</width>
          <height>20</height>
         </size>
        </property>
@@ -2799,7 +2818,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>trans_ckVerbose</tabstop>
   <tabstop>trans_ckPlot</tabstop>
   <tabstop>trans_ckSave</tabstop>
-  <tabstop>sqw_cbRebinType</tabstop>
   <tabstop>sqw_leQLow</tabstop>
   <tabstop>sqw_leQWidth</tabstop>
   <tabstop>sqw_leQHigh</tabstop>

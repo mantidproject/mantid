@@ -496,15 +496,6 @@ def activeFolder():
     """Get a handle to the currently active folder."""
     return new_proxy(proxies.Folder, _qti.app.activeFolder)
 
-# These methods don't seem to work
-#def appendProject(filename, parentFolder=None):
-#    if parentFolder is not None:
-#        parentFolder = parentFolder._getHeldObject()
-#    return proxies.Folder(_qti.app.appendProject(filename,parentFolder))
-#
-#def saveFolder(folder, filename, compress=False):
-#    _qti.app.saveFolder(folder._getHeldObject(),filename,compress)
-
 def rootFolder():
     """Get a handle to the top-level folder."""
     return new_proxy(proxies.Folder, _qti.app.rootFolder)
@@ -546,14 +537,6 @@ def copyFolder(source, destination):
         True on success.
     """
     return threadsafe_call(_qti.app.copyFolder, source._getHeldObject(),destination._getHeldObject())
-
-def openTemplate(filename):
-    """Load a previously saved window template"""
-    return new_proxy(proxies.MDIWindow,_qti.app.openTemplate, filename)
-
-def saveAsTemplate(window, filename):
-    """Save the characteristics of the given window to file"""
-    threadsafe_call(_qti.app.saveAsTemplate, window._getHeldObject(), filename)
 
 def setWindowName(window, name):
     """Set the given window to have the given name"""

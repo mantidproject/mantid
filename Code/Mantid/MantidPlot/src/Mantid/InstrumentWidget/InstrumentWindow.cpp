@@ -13,6 +13,7 @@
 #include "DetXMLFile.h"
 #include "../MantidUI.h"
 #include "../AlgorithmMonitor.h"
+#include "TSVSerialiser.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -813,21 +814,6 @@ void InstrumentWindow::clearADSHandle()
   close();
 }
 
-/**
- * This method saves the workspace name associated with the instrument window 
- * and geometry to a string.This is useful for loading/saving the project.
- */
-QString InstrumentWindow::saveToString(const QString& geometry, bool saveAsTemplate)
-{
-  (void) saveAsTemplate;
-	QString s="<instrumentwindow>\n";
-	s+="WorkspaceName\t"+m_workspaceName+"\n";
-	s+=geometry;
-	s+="</instrumentwindow>\n";
-	return s;
-
-}
-
 /** 
  * Called just before a show event
  */
@@ -1343,4 +1329,26 @@ QString InstrumentWindow::getInstrumentSettingsGroupName() const
 {
   return QString::fromAscii( InstrumentWindowSettingsGroup ) + "/" +
       QString::fromStdString( getInstrumentActor()->getInstrument()->getName() );
+}
+
+void InstrumentWindow::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
+{
+  Q_UNUSED(fileVersion);
+
+  TSVSerialiser tsv(lines);
+  if(tsv.hasLine("geometry"))
+  {
+    const QString geometry = QString::fromStdString(tsv.lineAsString("geometry"));
+    app->restoreWindowGeometry(app, this, geometry);
+  }
+}
+
+std::string InstrumentWindow::saveToProject(ApplicationWindow* app)
+{
+  TSVSerialiser tsv;
+  tsv.writeRaw("<instrumentwindow>");
+  tsv.writeLine("WorkspaceName") << m_workspaceName.toStdString();
+  tsv.writeRaw(app->windowGeometryInfo(this));
+  tsv.writeRaw("</instrumentwindow>");
+  return tsv.outputLines();
 }

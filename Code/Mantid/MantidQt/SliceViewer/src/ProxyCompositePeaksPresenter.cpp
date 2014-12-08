@@ -13,7 +13,8 @@ namespace MantidQt
       m_compositePresenter->registerOwningPresenter(this);
     }
 
-    ProxyCompositePeaksPresenter::ProxyCompositePeaksPresenter()
+    ProxyCompositePeaksPresenter::ProxyCompositePeaksPresenter() :
+        m_updateableView(NULL)
     {
     }
 

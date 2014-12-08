@@ -43,7 +43,7 @@ namespace Mantid
     @author Roman Tolchenov, Tessella plc
     @date 17/6/2009
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -67,7 +67,7 @@ namespace Mantid
       {
       public:
           /// Constructor
-          UserFunction1D():m_x_set(false),m_parameters(new double[100]),m_buffSize(100),m_nPars(0) {};
+          UserFunction1D():m_x_set(false),m_parameters(new double[100]),m_nPars(0) {};
           /// Destructor
           virtual ~UserFunction1D() {};
           /// Algorithm's name for identification overriding a virtual method
@@ -99,8 +99,6 @@ namespace Mantid
           bool m_x_set;
           /// Pointer to muParser variables' buffer
           boost::shared_array<double> m_parameters;
-          /// Size of the variables' buffer
-          const int m_buffSize;
           /// Number of actual parameters
           int m_nPars;
           /// Temporary data storage

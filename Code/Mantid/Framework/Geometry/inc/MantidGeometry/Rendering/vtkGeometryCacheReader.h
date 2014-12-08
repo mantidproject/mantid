@@ -26,7 +26,7 @@ namespace Mantid
 
        This class reads the geometry (triangles) cached in the vtk format file and copies them to the object.
 
-       Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+       Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
        This file is part of Mantid.
 
@@ -50,7 +50,6 @@ namespace Mantid
     private:
 
       Poco::XML::Document* mDoc;         ///< The XML document
-      Poco::XML::Element*  mRoot;        ///< The root XML element
       Poco::XML::DOMParser*  pParser;    ///< The XML parser
       std::string          mFileName;    ///< The file name
       //Private Methods

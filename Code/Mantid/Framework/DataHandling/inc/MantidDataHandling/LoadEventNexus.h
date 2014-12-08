@@ -62,7 +62,7 @@ namespace DataHandling
 
     @date Sep 27, 2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -168,6 +168,9 @@ namespace DataHandling
     /// Was the instrument loaded?
     bool instrument_loaded_correctly;
 
+    /// Mutex protecting tof limits
+    Poco::FastMutex m_tofMutex;
+      
     /// Limits found to tof
     double longest_tof;
     /// Limits found to tof
@@ -234,6 +237,7 @@ namespace DataHandling
                               const std::vector<std::string> & bankNames = std::vector<std::string>());
     void deleteBanks(API::MatrixWorkspace_sptr workspace, std::vector<std::string> bankNames);
     bool hasEventMonitors();
+    void runLoadMonitorsAsEvents(API::Progress * const prog);
     void runLoadMonitors();
     /// Set the filters on TOF.
     void setTimeFilters(const bool monitors);

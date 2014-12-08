@@ -3,6 +3,7 @@
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidKernel/ConfigService.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -37,6 +38,10 @@ namespace MantidQt
       ui.setupUi(this);
 
       ui.buttonProcess->setDefaultAction(ui.actionProcess);
+      ui.buttonTransfer->setDefaultAction(ui.actionTransfer);
+
+      //Create a whats this button
+      ui.rowToolBar->addAction(QWhatsThis::createAction(this));
 
       //Expand the process runs column at the expense of the search column
       ui.splitterTables->setStretchFactor(0, 0);
@@ -48,6 +53,7 @@ namespace MantidQt
 
       //Custom context menu for table
       connect(ui.viewTable, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+      connect(ui.tableSearchResults, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showSearchContextMenu(const QPoint&)));
 
       //Finally, create a presenter to do the thinking for us
       m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(this));
@@ -74,6 +80,17 @@ namespace MantidQt
       connect(m_model.get(), SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(tableUpdated(const QModelIndex&, const QModelIndex&)));
       ui.viewTable->setModel(m_model.get());
       ui.viewTable->resizeColumnsToContents();
+    }
+
+    /**
+    Set a new model for search results
+    @param model : the model to be attached to the search results
+    */
+    void QtReflMainView::showSearch(ReflSearchModel_sptr model)
+    {
+      m_searchModel = model;
+      ui.tableSearchResults->setModel(m_searchModel.get());
+      ui.tableSearchResults->resizeColumnsToContents();
     }
 
     /**
@@ -210,6 +227,74 @@ namespace MantidQt
     }
 
     /**
+    This slot notifies the presenter that the "search" button has been pressed
+    */
+    void QtReflMainView::on_actionSearch_triggered()
+    {
+      m_presenter->notify(IReflPresenter::SearchFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "transfer" button has been pressed
+    */
+    void QtReflMainView::on_actionTransfer_triggered()
+    {
+      m_presenter->notify(IReflPresenter::TransferFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "export table" button has been pressed
+    */
+    void QtReflMainView::on_actionExportTable_triggered()
+    {
+      m_presenter->notify(IReflPresenter::ExportTableFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "import table" button has been pressed
+    */
+    void QtReflMainView::on_actionImportTable_triggered()
+    {
+      m_presenter->notify(IReflPresenter::ImportTableFlag);
+    }
+
+    /** This slot is used to syncrhonise the two instrument selection widgets */
+    void QtReflMainView::on_comboProcessInstrument_currentIndexChanged(int index)
+    {
+      ui.comboSearchInstrument->setCurrentIndex(index);
+    }
+
+    /** This slot is used to syncrhonise the two instrument selection widgets */
+    void QtReflMainView::on_comboSearchInstrument_currentIndexChanged(int index)
+    {
+      ui.comboProcessInstrument->setCurrentIndex(index);
+    }
+
+    /**
+    This slot opens the documentation when the "help" button has been pressed
+    */
+    void QtReflMainView::on_actionHelp_triggered()
+    {
+      MantidQt::API::HelpWindow::showPage(this, QString("qthelp://org.mantidproject/doc/interfaces/ISIS_Reflectometry.html"));
+    }
+
+    /**
+    This slot notifies the presenter that the "plot selected rows" button has been pressed
+    */
+    void QtReflMainView::on_actionPlotRow_triggered()
+    {
+      m_presenter->notify(IReflPresenter::PlotRowFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "plot selected groups" button has been pressed
+    */
+    void QtReflMainView::on_actionPlotGroup_triggered()
+    {
+      m_presenter->notify(IReflPresenter::PlotGroupFlag);
+    }
+
+    /**
     This slot notifies the presenter that the table has been updated/changed by the user
     */
     void QtReflMainView::tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight)
@@ -234,6 +319,9 @@ namespace MantidQt
       menu->addAction(ui.actionProcess);
       menu->addAction(ui.actionExpandSelection);
       menu->addSeparator();
+      menu->addAction(ui.actionPlotRow);
+      menu->addAction(ui.actionPlotGroup);
+      menu->addSeparator();
       menu->addAction(ui.actionPrependRow);
       menu->addAction(ui.actionAppendRow);
       menu->addSeparator();
@@ -246,6 +334,21 @@ namespace MantidQt
       menu->addAction(ui.actionDeleteRow);
 
       menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
+    }
+
+    /**
+    This slot is triggered when the user right clicks on the search results table
+    @param pos : The position of the right click within the table
+    */
+    void QtReflMainView::showSearchContextMenu(const QPoint& pos)
+    {
+      if(!ui.tableSearchResults->indexAt(pos).isValid())
+        return;
+
+      //parent widget takes ownership of QMenu
+      QMenu* menu = new QMenu(this);
+      menu->addAction(ui.actionTransfer);
+      menu->popup(ui.tableSearchResults->viewport()->mapToGlobal(pos));
     }
 
     /**
@@ -308,6 +411,37 @@ namespace MantidQt
       if(ok)
         return text.toStdString();
       return "";
+    }
+
+    /**
+    Show the user the dialog for an algorithm
+    */
+    void QtReflMainView::showAlgorithmDialog(const std::string& algorithm)
+    {
+      std::stringstream pythonSrc;
+      pythonSrc << "try:\n";
+      pythonSrc << "  " << algorithm << "Dialog()\n";
+      pythonSrc << "except:\n";
+      pythonSrc << "  pass\n";
+      runPythonCode(QString::fromStdString(pythonSrc.str()));
+    }
+
+    /**
+    Plot a workspace
+    */
+    void QtReflMainView::plotWorkspaces(const std::set<std::string>& workspaces)
+    {
+      if(workspaces.empty())
+        return;
+
+      std::stringstream pythonSrc;
+      pythonSrc << "base_graph = None\n";
+      for(auto ws = workspaces.begin(); ws != workspaces.end(); ++ws)
+        pythonSrc << "base_graph = plotSpectrum(\"" << *ws << "\", 0, True, window = base_graph)\n";
+
+      pythonSrc << "base_graph.activeLayer().logLogAxes()\n";
+
+      runPythonCode(QString::fromStdString(pythonSrc.str()));
     }
 
     /**
@@ -402,15 +536,35 @@ namespace MantidQt
 
     /**
     Get the indices of the highlighted rows
-    @returns a vector of unsigned ints contianing the highlighted row numbers
+    @returns a set of ints containing the highlighted row numbers
     */
     std::set<int> QtReflMainView::getSelectedRows() const
     {
-      auto selectedRows = ui.viewTable->selectionModel()->selectedRows();
       std::set<int> rows;
-      for(auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
-        rows.insert(it->row());
+      auto selectionModel = ui.viewTable->selectionModel();
+      if(selectionModel)
+      {
+        auto selectedRows = selectionModel->selectedRows();
+        for(auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
+          rows.insert(it->row());
+      }
+      return rows;
+    }
 
+    /**
+    Get the indices of the highlighted search result rows
+    @returns a set of ints containing the selected row numbers
+    */
+    std::set<int> QtReflMainView::getSelectedSearchRows() const
+    {
+      std::set<int> rows;
+      auto selectionModel = ui.tableSearchResults->selectionModel();
+      if(selectionModel)
+      {
+        auto selectedRows = selectionModel->selectedRows();
+        for(auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
+          rows.insert(it->row());
+      }
       return rows;
     }
 
@@ -439,6 +593,15 @@ namespace MantidQt
     std::string QtReflMainView::getClipboard() const
     {
       return QApplication::clipboard()->text().toStdString();
+    }
+
+    /**
+    Get the string the user wants to search for.
+    @returns The search string
+    */
+    std::string QtReflMainView::getSearchString() const
+    {
+      return ui.textSearch->text().toStdString();
     }
 
   } // namespace CustomInterfaces

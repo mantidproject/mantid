@@ -15,13 +15,13 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    /** 
-    This class defines the Indirect Simulation interface. It handles the creation of the interface window and 
+    /**
+    This class defines the Indirect Simulation interface. It handles the creation of the interface window and
 		handles the interaction between the child tabs on the window.
 
     @author Samuel Jackson, STFC
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -39,7 +39,7 @@ namespace MantidQt
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
     class DLLExport IndirectSimulation : public MantidQt::API::UserSubWindow
@@ -52,22 +52,22 @@ namespace MantidQt
 			enum TabChoice
 			{
 				MOLDYN,
+        SASSENA,
 			};
 
     public: // public constructor, destructor and functions
       /// Default Constructor
       IndirectSimulation(QWidget *parent = 0);
-      ///Destructor
+      /// Destructor
       ~IndirectSimulation();
       /// Interface name
       static std::string name() { return "Simulation"; }
-      // This interface's categories.
+      /// This interface's categories.
       static QString categoryInfo() { return "Indirect"; }
+      /// Setup tab UI
       virtual void initLayout();
 
     private slots:
-      // Run the appropriate action depending based on the selected tab
-
       /// Slot for clicking on the run button
       void runClicked();
       /// Slot for clicking on the hlep button
@@ -86,11 +86,12 @@ namespace MantidQt
       void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
       /// Map of tabs indexed by position on the window
-			std::map<unsigned int, IndirectSimulationTab*> m_loadAsciiTabs;
+			std::map<unsigned int, IndirectSimulationTab*> m_simulationTabs;
       /// Change Observer for ConfigService (monitors user directories)
       Poco::NObserver<IndirectSimulation, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
       ///Main interface window
       Ui::IndirectSimulation m_uiForm;
+
     };
   }
 }

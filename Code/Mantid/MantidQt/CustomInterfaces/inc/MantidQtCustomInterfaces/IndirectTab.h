@@ -3,6 +3,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/BatchAlgorithmRunner.h"
@@ -45,7 +46,7 @@ namespace CustomInterfaces
     @author Dan Nixon
     @date 08/10/2014
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -77,6 +78,7 @@ namespace CustomInterfaces
     void runTab();
     void setupTab();
     bool validateTab();
+    void exportPythonScript();
 
   protected slots:
     /// Slot to handle when an algorithm finishes running
@@ -92,6 +94,8 @@ namespace CustomInterfaces
     void plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex, const QString& plotID, const QString& curveID = "");
     /// Function to replot a miniplot
     void replot(const QString& plotID);
+    /// Function to remove a curve from a plot
+    void removeCurve(const QString& curveID);
 
     /// Function to get the range of the curve displayed on the mini plot
     std::pair<double, double> getCurveRange(const QString& plotID);
@@ -107,6 +111,8 @@ namespace CustomInterfaces
 
     /// Function to run an algorithm on a seperate thread
     void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
+
+    QString runPythonCode(QString vode, bool no_output = false);
 
     /// Parent QWidget (if applicable)
     QWidget *m_parentWidget;
@@ -150,7 +156,7 @@ namespace CustomInterfaces
     /// Send signal to parent window to show a message box to user
     void showMessageBox(const QString& message);
     /// Run a python script
-    void runAsPythonScript(const QString & code, bool no_output);
+    void runAsPythonScript(const QString & code, bool noOutput = false);
 
   protected:
     /// Overidden by child class.
@@ -159,6 +165,10 @@ namespace CustomInterfaces
     virtual void run() = 0;
     /// Overidden by child class.
     virtual bool validate() = 0;
+
+    Mantid::Kernel::DateAndTime m_tabStartTime;
+    Mantid::Kernel::DateAndTime m_tabEndTime;
+    std::string m_pythonExportWsName;
 
   };
 } // namespace CustomInterfaces

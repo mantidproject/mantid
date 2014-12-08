@@ -28,10 +28,9 @@ using Mantid::Kernel::CPUTimer;
 /** An ISaveable that fakes writing to a fixed-size file */
 class SaveableTesterWithFile : public ISaveable
 {
-    size_t ID;
 public:
-  SaveableTesterWithFile(size_t id, uint64_t pos, uint64_t size, char ch,bool wasSaved=true) : ISaveable(),
-    ID(id),m_memory(size),m_ch(ch)
+  SaveableTesterWithFile(uint64_t pos, uint64_t size, char ch,bool wasSaved=true) : ISaveable(),
+    m_memory(size),m_ch(ch)
   {
     // the object knows its place on file
     this->setFilePosition(pos,size,wasSaved);
@@ -142,7 +141,7 @@ public:
     SaveableTesterWithFile::fakeFile = "";
     data.clear();
     for (size_t i=0; i<num; i++)
-      data.push_back( new SaveableTesterWithFile(i,uint64_t(2*i),2,char(i+0x41)) );  
+      data.push_back( new SaveableTesterWithFile(uint64_t(2*i),2,char(i+0x41)) );
   }
 
   void tearDown()
@@ -300,7 +299,7 @@ public:
     std::vector<ISaveable *> bigData;
     bigData.reserve(bigNum);
     for (size_t i=0; i<bigNum; i++)
-      bigData.push_back( new SaveableTesterWithFile(i,2*i,2,char(i+0x41)) );  
+      bigData.push_back( new SaveableTesterWithFile(2*i,2,char(i+0x41)) );
 
 
     PARALLEL_FOR_NO_WSP_CHECK()
@@ -525,6 +524,48 @@ public:
     TS_ASSERT_EQUALS( dbuf.allocate(55), 1000 );
     TS_ASSERT_EQUALS( dbuf.getFileLength(), 1055 );
   }
+
+  //// Test for setting the DiskBuffer
+  void test_set_free_space_blocks()
+  {
+      DiskBuffer dbuf(0);
+      DiskBuffer::freeSpace_t &map = dbuf.getFreeSpaceMap();
+
+      uint64_t freeSpaceBlocksArray[] = {1,3,6,5};
+      std::vector<uint64_t> freeSpaceBlocksVector(freeSpaceBlocksArray, freeSpaceBlocksArray + sizeof(freeSpaceBlocksArray) / sizeof(uint64_t));
+      dbuf.setFreeSpaceVector(freeSpaceBlocksVector);
+
+      TS_ASSERT_EQUALS(map.size(), 2);
+
+      std::vector<uint64_t> assignedVector;
+      dbuf.getFreeSpaceVector(assignedVector);
+      TS_ASSERT_EQUALS(assignedVector, freeSpaceBlocksVector);
+  }
+
+  //// Test for setting the DiskBuffer with an invalid vector
+  void test_set_free_space_blocks_with_odd_sized_vector_throws_exception()
+  {
+      DiskBuffer dbuf(0);
+
+      uint64_t freeSpaceBlocksArray[] = {1,3,6};
+      std::vector<uint64_t> freeSpaceBlocksVector(freeSpaceBlocksArray, freeSpaceBlocksArray + sizeof(freeSpaceBlocksArray) / sizeof(uint64_t));
+
+      TS_ASSERT_THROWS(dbuf.setFreeSpaceVector(freeSpaceBlocksVector), std::length_error);
+  }
+
+  //// Test for setting the DiskBuffer with a zero sized vector
+  void test_set_free_space_blocks_with_zero_sized_vector()
+  {
+      DiskBuffer dbuf(0);
+      DiskBuffer::freeSpace_t &map = dbuf.getFreeSpaceMap();
+
+      std::vector<uint64_t> freeSpaceBlocksVector;
+
+      dbuf.setFreeSpaceVector(freeSpaceBlocksVector);
+
+      TS_ASSERT_EQUALS(map.size(), 0);
+  }
+
   ////--------------------------------------------------------------------------------
   ////--------------------------------------------------------------------------------
   ////--------------------------------------------------------------------------------
@@ -533,9 +574,9 @@ public:
   void test_allocate_with_file_manually()
   {
     // Start by faking a file
-    SaveableTesterWithFile * blockA = new SaveableTesterWithFile(0, 0, 2, 'A');
-    SaveableTesterWithFile * blockB = new SaveableTesterWithFile(1, 2, 3, 'B');
-    SaveableTesterWithFile * blockC = new SaveableTesterWithFile(2, 5, 5, 'C');
+    SaveableTesterWithFile * blockA = new SaveableTesterWithFile(0, 2, 'A');
+    SaveableTesterWithFile * blockB = new SaveableTesterWithFile(2, 3, 'B');
+    SaveableTesterWithFile * blockC = new SaveableTesterWithFile(5, 5, 'C');
     blockA->save();
     blockB->save();
     blockC->save();
@@ -567,7 +608,7 @@ public:
     // Now let's allocate a new block
     newPos = dbuf.allocate(2);
     TS_ASSERT_EQUALS( newPos, 2 );
-    SaveableTesterWithFile * blockD = new SaveableTesterWithFile(3, newPos, 2, 'D');
+    SaveableTesterWithFile * blockD = new SaveableTesterWithFile(newPos, 2, 'D');
     blockD->save();
     TS_ASSERT_EQUALS( SaveableTesterWithFile::fakeFile, "AADDBCCCCCBBBBBBB");
     TSM_ASSERT_EQUALS( "Still one freed block", map.size(), 1);
@@ -600,9 +641,9 @@ public:
     // filePosition has to be identified by the fileBuffer
     uint64_t filePos = std::numeric_limits<uint64_t>::max();
     // Start by faking a file
-    SaveableTesterWithFile * blockA = new SaveableTesterWithFile(0, filePos, 2, 'A',false);
-    SaveableTesterWithFile * blockB = new SaveableTesterWithFile(1, filePos, 3, 'B',false);
-    SaveableTesterWithFile * blockC = new SaveableTesterWithFile(2, filePos, 5, 'C',false);
+    SaveableTesterWithFile * blockA = new SaveableTesterWithFile(filePos, 2, 'A',false);
+    SaveableTesterWithFile * blockB = new SaveableTesterWithFile(filePos, 3, 'B',false);
+    SaveableTesterWithFile * blockC = new SaveableTesterWithFile(filePos, 5, 'C',false);
     
     DiskBuffer dbuf(3);
     dbuf.toWrite(blockB);
@@ -626,7 +667,7 @@ public:
     TS_ASSERT(!blockB->isDataChanged())
 
     //// Now let's allocate a new block
-    SaveableTesterWithFile * blockD = new SaveableTesterWithFile(3, filePos, 2, 'D',false);
+    SaveableTesterWithFile * blockD = new SaveableTesterWithFile(filePos, 2, 'D',false);
     dbuf.toWrite(blockD);
     // small block, nothing still sitting in the buffer
     TS_ASSERT_EQUALS( SaveableTesterWithFile::fakeFile, "AABBBCCCCCBBBBBBB");
@@ -674,11 +715,9 @@ public:
 /** An Saveable that will fake seeking to disk */
 class SaveableTesterWithSeek : public ISaveable
 {  
-    size_t ID;
     size_t m_memory;
 public:
-  SaveableTesterWithSeek(size_t id) : ISaveable(),
-      ID(id)
+  SaveableTesterWithSeek(size_t id) : ISaveable()
   {
     m_memory=1;
     this->setFilePosition(10+id,this->m_memory,true);
@@ -878,5 +917,5 @@ public:
 
 };
 
-
 #endif /* MANTID_KERNEL_DISKBUFFERTEST_H_ */
+

@@ -33,7 +33,7 @@ using namespace API;
 /// Constructor
 LoadRawBin0::LoadRawBin0() :
    m_filename(), m_numberOfSpectra(0),
-   m_specTimeRegimes(), m_prog(0.0), m_bmspeclist(false)
+   m_specTimeRegimes(), m_prog(0.0)
 {
 }
 

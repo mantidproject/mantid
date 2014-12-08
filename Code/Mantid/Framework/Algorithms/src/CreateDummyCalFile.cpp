@@ -14,9 +14,6 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <boost/algorithm/string/split.hpp>
@@ -25,10 +22,6 @@
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
-using Poco::XML::Node;
-using Poco::XML::NodeList;
-using Poco::XML::NodeIterator;
-using Poco::XML::NodeFilter;
 
 
 namespace Mantid
@@ -45,7 +38,7 @@ namespace Mantid
     using namespace Geometry;
     using namespace DataObjects;
 
-    CreateDummyCalFile::CreateDummyCalFile():API::Algorithm(),group_no(0)
+    CreateDummyCalFile::CreateDummyCalFile():API::Algorithm()
     {
     }
 
@@ -87,7 +80,7 @@ namespace Mantid
 
       // Set up the DOM parser and parse xml file
       DOMParser pParser;
-      Document* pDoc;
+      Poco::AutoPtr<Document> pDoc;
       try
       {
         pDoc = pParser.parse(directoryName+instshort);

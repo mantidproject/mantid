@@ -1,7 +1,5 @@
 #include "MantidQtCustomInterfaces/IndirectMolDyn.h"
 
-#include "MantidAPI/AlgorithmManager.h"
-
 #include <QFileInfo>
 #include <QString>
 
@@ -18,6 +16,10 @@ namespace MantidQt
 
       connect(m_uiForm.ckCropEnergy, SIGNAL(toggled(bool)), m_uiForm.dspMaxEnergy, SLOT(setEnabled(bool)));
       connect(m_uiForm.ckResolution, SIGNAL(toggled(bool)), m_uiForm.dsResolution, SLOT(setEnabled(bool)));
+    }
+
+    void IndirectMolDyn::setup()
+    {
     }
 
     /**
@@ -50,6 +52,12 @@ namespace MantidQt
         return false;
       }
 
+      if(m_uiForm.ckResolution->isChecked() && !m_uiForm.ckSymmetrise->isChecked())
+      {
+        emit showMessageBox("Must symmetrise when convolving with resolution.");
+        return false;
+      }
+
       return true;
     }
 
@@ -67,6 +75,7 @@ namespace MantidQt
       IAlgorithm_sptr molDynAlg = AlgorithmManager::Instance().create("MolDyn");
       molDynAlg->setProperty("Filename", filename.toStdString());
       molDynAlg->setProperty("Functions", m_uiForm.leFunctionNames->text().toStdString());
+      molDynAlg->setProperty("SymmetriseEnergy", m_uiForm.ckSymmetrise->isChecked());
       molDynAlg->setProperty("Verbose", m_uiForm.ckVerbose->isChecked());
       molDynAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
       molDynAlg->setProperty("Plot", m_uiForm.cbPlot->currentText().toStdString());

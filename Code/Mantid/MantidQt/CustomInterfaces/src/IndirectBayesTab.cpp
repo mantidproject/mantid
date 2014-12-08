@@ -48,7 +48,7 @@ namespace MantidQt
      */
     void IndirectBayesTab::runPythonScript(const QString& pyInput)
     {
-      emit executePythonScript(pyInput, true);
+      emit runAsPythonScript(pyInput, true);
     }
 
     /**

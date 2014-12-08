@@ -30,6 +30,14 @@ bool BraggScatterer::isInitialized()
     return m_isInitialized;
 }
 
+/// Returns |F(hkl)|^2
+double BraggScatterer::calculateFSquared(const V3D &hkl) const
+{
+    double modulusF = std::abs(calculateStructureFactor(hkl));
+
+    return modulusF * modulusF;
+}
+
 /// Checks whether a property with the given name is exposed to BraggScattererComposite.
 bool BraggScatterer::isPropertyExposedToComposite(const std::string &propertyName) const
 {

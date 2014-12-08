@@ -81,20 +81,24 @@ namespace MantidQt
     }
 
     /**
-    * Suggest a workspace name from the file
+    * Use property 'OutputWorkspace' as suggestion if present, otherwise derive a workspace name from 
+    * the file (base) name
     */
     void LoadDialog::suggestWSName()
     {
-      if( !m_form.workspaceEdit->isEnabled() ) return;
-      QString suggestion;
+      if( !m_form.workspaceEdit->isEnabled() )
+        return;
+
+      // suggest ws name based on file name
+      QString fileSuggestion;
       if( m_form.fileWidget->isValid() )
       {
         if( m_form.fileWidget->getFilenames().size() == 1 )
-          suggestion = QFileInfo(m_form.fileWidget->getFirstFilename()).baseName();
+          fileSuggestion = QFileInfo(m_form.fileWidget->getFirstFilename()).completeBaseName();
         else
-          suggestion = "MultiFiles";
+          fileSuggestion = "MultiFiles";
       }
-      m_form.workspaceEdit->setText(suggestion);
+      m_form.workspaceEdit->setText(fileSuggestion);
     }
 
     /**
@@ -156,9 +160,19 @@ namespace MantidQt
       m_form.fileWidget->readSettings("Mantid/Algorithms/Load");
       m_initialHeight = this->height();
 
-      // Guess at an output workspace name but only if the user hasn't changed anything
-      enableNameSuggestion(true);
-      connect(m_form.workspaceEdit, SIGNAL(textEdited(const QString&)), this, SLOT(enableNameSuggestion()));
+      const std::string& outWsName = getAlgorithm()->getPropertyValue("OutputWorkspace");
+      if (!outWsName.empty())
+      {
+        // OutputWorkspace name suggestion received as parameter, just take it and don't change it
+        m_form.workspaceEdit->setText(QString::fromStdString(outWsName));
+      }
+      else
+      {
+        // Guess at an output workspace name but only if the user hasn't changed anything
+        enableNameSuggestion(true);
+        connect(m_form.workspaceEdit, SIGNAL(textEdited(const QString&)), this, SLOT(enableNameSuggestion()));
+      }
+
       // Connect the file finder's file found signal to the dynamic property create method.
       // When the file text is set the Load algorithm finds the concrete loader and then we
       // know what extra properties to create

@@ -11,7 +11,7 @@ namespace CurveFitting
 
   /** FullprofPolynomial : Polynomial background defined in Fullprof
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -70,12 +70,6 @@ namespace CurveFitting
 
     /// Background origin position
     double m_bkpos;
-
-    /// Lower x boundary.
-    double m_StartX;
-
-    /// Upper x boundary
-    double m_EndX;
   };
 
   typedef boost::shared_ptr<FullprofPolynomial> FullprofPolynomial_sptr;

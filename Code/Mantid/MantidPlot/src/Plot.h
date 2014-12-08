@@ -101,6 +101,8 @@ public:
 	void updateLayout();
 
     void updateCurveLabels();
+  // pass through method that is public on the base class in later qwt versions
+  void updateAxes() { QwtPlot::updateAxes(); }
 
   void reverseCurveOrder(); // Created in connection with waterfall plots. Called from Graph method of same name.
 

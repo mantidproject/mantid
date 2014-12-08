@@ -19,6 +19,7 @@
 
 #include <istream>
 #include <Poco/Thread.h>
+#include <Poco/Mutex.h>
 
 namespace Mantid 
 {
@@ -34,7 +35,7 @@ namespace Kernel
    @author Martyn Gigg, Tessella Support Services plc
    @date 13/04/2010
    
-   Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+   Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
    
    This file is part of Mantid.
    
@@ -73,6 +74,8 @@ private:
 private:
   /// Store a map of thread indices to messages
   std::map<Poco::Thread::TID, std::string> m_messages;
+  /// mutex protecting logstream
+  Poco::FastMutex m_mutex;
 };
 
 

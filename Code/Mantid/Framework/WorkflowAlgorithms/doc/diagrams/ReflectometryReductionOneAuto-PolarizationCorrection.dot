@@ -1,0 +1,32 @@
+digraph ReflectometryReductionOne {
+  label = "ReflectometryReductionOneAuto polarization correction step"
+  fontname = Helvetica
+  labelloc = t
+
+  node[fontname="Helvetica", style = filled]
+  edge[fontname="Helvetica"]
+
+  subgraph params {
+    node[fillcolor = khaki, shape = oval]
+    inWL  [label="OutputWorkspaceWavelength"]
+    outWL [label="OutputWorkspaceWavelength"]
+    outMT [label="OutputWorkspace"]
+  }
+
+  subgraph algorithms {
+    node[style = "rounded,filled", fillcolor = lightskyblue, shape = rectangle]
+    polCor        [label="PolarizationCorrection"]
+    reflRedOne_0b [label="ReflectometryReductionOne"]
+    reflRedOne_1b [label="ReflectometryReductionOne"]
+    groupIvLam_b  [label="GroupWorkspaces"]
+  }
+
+  inWL   -> polCor
+  polCor -> reflRedOne_0b [label="Iv&lambda;[0]"]
+  polCor -> reflRedOne_1b [label="Iv&lambda;[1]"]
+  polCor -> outWL         [label="Iv&lambda;"]
+
+  reflRedOne_0b -> groupIvLam_b [label="IvQ[0]"]
+  reflRedOne_1b -> groupIvLam_b [label="IvQ[1]"]
+  groupIvLam_b  -> outMT        [label="IvQ"]
+}

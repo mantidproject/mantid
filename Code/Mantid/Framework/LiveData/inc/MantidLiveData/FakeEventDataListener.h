@@ -18,7 +18,7 @@ namespace Mantid
     /** An implementation of ILiveListener for testing purposes that fills its event
         workspace buffer with randomly generated events.
 
-        Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+        Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
         This file is part of Mantid.
 

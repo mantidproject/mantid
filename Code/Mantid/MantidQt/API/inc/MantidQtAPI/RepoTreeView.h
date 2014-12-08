@@ -12,7 +12,7 @@ namespace API
       the selection change. It extends the currentChanged method in order to add the 
       emition of the signal currentCell.
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

@@ -47,7 +47,7 @@ namespace MantidQt
 
 			@author Samuel Jackson, STFC
 
-			Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+			Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
 			This file is part of Mantid.
 
@@ -89,8 +89,6 @@ namespace MantidQt
 			virtual void loadSettings(const QSettings& settings) = 0;
 
 		signals:
-			/// Send signal to parent window to execute python script
-			void executePythonScript(const QString& pyInput, bool output);
 			/// Send signal to parent window to show a message box to user
 			void showMessageBox(const QString& message);
 

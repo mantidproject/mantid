@@ -34,7 +34,7 @@ namespace Geometry
     @author Roman Tolchenov, Tessella Support Services plc
     @date 2/12/2008
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
     
     This file is part of Mantid.
     
@@ -265,6 +265,12 @@ namespace Geometry
     void saveNexus(::NeXus::File * file, const std::string & group) const;
     /// Copy pairs (oldComp->id,Parameter) to the m_map assigning the new newComp->id
     void copyFromParameterMap(const IComponent* oldComp,const IComponent* newComp, const ParameterMap *oldPMap);
+
+    /// Returns a list of all the parameter files loaded
+    const std::vector<std::string>& getParameterFilenames() const;
+    /// adds a parameter filename that has been loaded
+    void addParameterFilename(const std::string& filename);
+
     /// access iterators. begin;
     pmap_it begin(){return m_map.begin();}
     pmap_cit begin()const{return m_map.begin();}
@@ -280,6 +286,8 @@ namespace Geometry
     ///const version of the internal function to get position of the parameter in the parameter map
     component_map_cit positionOf(const IComponent* comp,const char *name, const char * type) const;
 
+    /// internal list of parameter files loaded
+    std::vector<std::string> m_parameterFileNames;
 
     /// internal parameter map instance
     pmap m_map;

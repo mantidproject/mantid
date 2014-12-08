@@ -18,7 +18,7 @@ namespace Mantid
 
     /** PolarizationCorrection : Algorithm to perform polarisation corrections on multi-period group workspaces.
 
-     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
      This file is part of Mantid.
 

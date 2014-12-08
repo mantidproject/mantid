@@ -31,7 +31,7 @@ AxisInformation *GeometryParser::getAxisInfo(const std::string dimension)
 {
   AxisInformation *axis = new AxisInformation();
 
-  Poco::XML::NodeList *pNodes = this->pDoc->getElementsByTagName(dimension);
+  Poco::AutoPtr<Poco::XML::NodeList> pNodes = this->pDoc->getElementsByTagName(dimension);
   Poco::XML::Node *pNode = pNodes->item(0)->childNodes()->item(0);
   Poco::XML::XMLString label = pNode->innerText();
 
@@ -47,7 +47,7 @@ AxisInformation *GeometryParser::getAxisInfo(const std::string dimension)
     }
   }
 
-  Poco::XML::NodeList *cNodes = pNode->childNodes();
+  Poco::AutoPtr<Poco::XML::NodeList> cNodes = pNode->childNodes();
   double min = -99.0;
   double max = 99.0;
   std::string title;
@@ -90,7 +90,7 @@ double GeometryParser::convertBounds(Poco::XML::XMLString val)
 }
 
 /**
- * This function takes a timestep value and places it within the geomtry
+ * This function takes a timestep value and places it within the geometry
  * XML held by this object.
  * @param time the value of the timestep
  * @return the XML geometry with the timestep value added
@@ -98,12 +98,12 @@ double GeometryParser::convertBounds(Poco::XML::XMLString val)
 std::string GeometryParser::addTDimValue(double time)
 {
   std::string tDimLabel = Mantid::Geometry::MDGeometryXMLDefinitions::workspaceTDimensionElementName();
-  Poco::XML::NodeList *pNodes = this->pDoc->getElementsByTagName(tDimLabel);
+  Poco::AutoPtr<Poco::XML::NodeList> pNodes = this->pDoc->getElementsByTagName(tDimLabel);
   Poco::XML::Node *pNode = pNodes->item(0);
   std::ostringstream timeStr;
   timeStr << time;
-  Poco::XML::Element *valueElement = this->pDoc->createElement("Value");
-  Poco::XML::Text *valueText = this->pDoc->createTextNode(timeStr.str());
+  Poco::AutoPtr<Poco::XML::Element> valueElement = this->pDoc->createElement("Value");
+  Poco::AutoPtr<Poco::XML::Text> valueText = this->pDoc->createTextNode(timeStr.str());
   valueElement->appendChild(valueText);
   pNode->appendChild(valueElement);
 

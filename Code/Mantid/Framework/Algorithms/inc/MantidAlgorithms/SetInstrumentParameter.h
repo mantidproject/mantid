@@ -18,7 +18,7 @@ namespace Algorithms
 
   /** SetInstrumentParameter : A simple algorithm to add or set the value of an instrument parameter
     
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

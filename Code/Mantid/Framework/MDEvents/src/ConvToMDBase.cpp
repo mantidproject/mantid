@@ -29,7 +29,7 @@ namespace Mantid
       // number of valid spectra is equal to actual number of valid detectors in spectra-det map
       m_NSpectra = WSD.m_PreprDetTable->getLogs()->getPropertyValueAsType<uint32_t>("ActualDetectorsNum");
       m_detIDMap = WSD.m_PreprDetTable->getColVector<size_t>("detIDMap");
-      m_detID    = WSD.m_PreprDetTable->getColVector<int32_t>("DetectorID");
+      m_detID    = WSD.m_PreprDetTable->getColVector<int>("DetectorID");
 
     
 

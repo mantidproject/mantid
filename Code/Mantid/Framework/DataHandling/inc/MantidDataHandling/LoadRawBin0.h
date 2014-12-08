@@ -42,7 +42,7 @@ namespace Mantid
     @author Sofia Antony,ISIS,RAL
     @date 12/04/2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -108,8 +108,6 @@ namespace Mantid
 
       /// Read in the time bin boundaries
       int64_t m_lengthIn;
-      /// boolean for list spectra options
-      bool m_bmspeclist;
       /// TimeSeriesProperty<int> containing data periods.
       boost::shared_ptr<Kernel::Property> m_perioids;
 

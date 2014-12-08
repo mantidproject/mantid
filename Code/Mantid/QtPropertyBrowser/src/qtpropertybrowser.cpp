@@ -106,6 +106,7 @@ public:
 
     QSet<QtProperty *> m_parentItems;
     QList<QtProperty *> m_subItems;
+    QMap<QString,bool> m_options;
 
     QString m_toolTip;
     QString m_statusTip;
@@ -525,6 +526,22 @@ void QtProperty::removeSubProperty(QtProperty *property)
         }
         pos++;
     }
+}
+
+bool QtProperty::hasOption(const QString &opt) const
+{
+  return d_ptr->m_options.contains(opt);
+}
+
+bool QtProperty::checkOption(const QString &opt) const
+{
+  if ( !d_ptr->m_options.contains(opt) ) return false;
+  return d_ptr->m_options[opt];
+}
+
+void QtProperty::setOption(const QString &opt, bool on)
+{
+  d_ptr->m_options[opt] = on;
 }
 
 /**

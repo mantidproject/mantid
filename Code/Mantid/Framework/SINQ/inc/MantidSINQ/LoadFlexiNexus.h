@@ -15,7 +15,7 @@
  *
  * Original contributor: Mark Koennecke: mark.koennecke@psi.ch
  * 
- * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  * This file is part of Mantid.
 
@@ -95,7 +95,6 @@ private:
   int safeOpenpath(NeXus::File *fin, std::string path);
   int calculateCAddress(int *pos, int* dim, int rank);
   int calculateF77Address(int *pos, int rank);
-  size_t *indexMaker;
 };
 
 #endif /*FLEXINEXUSLOADER_H_*/

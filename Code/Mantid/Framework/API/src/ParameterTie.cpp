@@ -103,6 +103,7 @@ namespace API
       i++;
     }
 
+    m_expression = "";
     while(boost::regex_search(start,end,res,rx))
     {
       m_expression.append(start,res[0].first);

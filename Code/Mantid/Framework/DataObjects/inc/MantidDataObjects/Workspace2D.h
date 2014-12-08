@@ -22,7 +22,7 @@ namespace DataObjects
     \author Laurent C Chapon, ISIS, RAL
     \date 26/09/2007
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -76,6 +76,13 @@ public:
   */
   void setMonitorList(std::vector<specid_t>& mList){m_monitorList=mList;}
 
+  /// Copy the data (Y's) from an image to this workspace.
+  void setImageY( const API::MantidImage &image, size_t start = 0, bool parallelExecution = true );
+  /// Copy the data from an image to this workspace's errors.
+  void setImageE( const API::MantidImage &image, size_t start = 0, bool parallelExecution = true );
+  /// Copy the data from an image to this workspace's (Y's) and errors.
+  void setImageYAndE( const API::MantidImage &imageY, const API::MantidImage &imageE, size_t start = 0, bool parallelExecution = true );
+
 protected:
   /// Called by initialize()
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);
@@ -96,7 +103,6 @@ private:
   Workspace2D& operator=(const Workspace2D&);
 
   virtual std::size_t getHistogramNumberHelper() const;
-
 };
 
 ///shared pointer to the Workspace2D class

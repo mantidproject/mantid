@@ -3,6 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "boost/version.hpp"
+
 #include "MantidCurveFitting/CalculateMSVesuvio.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -36,8 +38,12 @@ public:
     auto alg = createTestAlgorithm(createFlatPlateSampleWS());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
-    
+// seed has different effect in boost version 1.56 and newer
+#if (BOOST_VERSION / 100000) == 1 && (BOOST_VERSION / 100 % 1000) >= 56
+    checkOutputValuesAsExpected(alg, 0.0111204555, 0.0019484356);
+#else
     checkOutputValuesAsExpected(alg, 0.0099824991, 0.0020558473);
+#endif
   }
 
   // ------------------------ Failure Cases -----------------------------------------
@@ -205,6 +211,7 @@ private:
     TS_ASSERT_DELTA(expectedMS, msY[checkIdx], tolerance);
     const auto & msX = multScatter->readX(0);
     TS_ASSERT_DELTA(150.0, msX[checkIdx], tolerance); // based on workspace setup
+
   }
 };
 

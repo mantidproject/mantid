@@ -17,7 +17,7 @@ namespace Mantid
 
     /** LoadFullprofResolution : Load Fullprof resolution (.irf) file to TableWorkspace(s)
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -88,9 +88,6 @@ namespace Mantid
       // Translate a parameter name from as it appears in the table workspace to its name in the XML file
       static std::string getXMLParameterName( const std::string& name );
 
-      /// Place to store the row numbers
-      static std::map<std::string, size_t> m_rowNumbers;
-
     private:
       /// Implement abstract Algorithm methods
       void init();
@@ -129,6 +126,9 @@ namespace Mantid
 
       /// Create Bank to Workspace Correspondence
       void createBankToWorkspaceMap ( const std::vector<int>& banks, const std::vector<int>& workspaces, std::map< int, size_t>& WorkpsaceOfBank );
+
+      /// Place to store the row numbers
+      static std::map<std::string, size_t> m_rowNumbers;
 
     };
 
