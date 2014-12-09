@@ -195,12 +195,7 @@ class DirectReductionProperties(object):
         """ Second white beam currently unused in the  workflow """
         pass
         #return self._second_white;
-    #TODO:
-    #-----------------------------------------------------------------------------------
-    @property 
-    def apply_detector_eff(self):
-        return True;
-    #-----------------------------------------------------------------------------------
+     #-----------------------------------------------------------------------------------
     @property 
     def psi(self):
         """ rotation angle (not available from IDF)"""
@@ -297,23 +292,23 @@ class DirectReductionProperties(object):
     @mask_run.setter
     def mask_run(self,value):
        object.__setattr__(self,'_mask_run',value)
-    #-----------------------------------------------------------------------------------
-    @property 
-    def apply_kikf_correction(self):
-        """ Parameter specifies if ki/kf correction should be applied to the reduction result"""
-        if not hasattr(self,'_apply_kikf_correction'):
-            return True;
-        else:
-            return self._apply_kikf_correction;
+    ##-----------------------------------------------------------------------------------
+    #@property 
+    #def apply_kikf_correction(self):
+    #    """ Parameter specifies if ki/kf correction should be applied to the reduction result"""
+    #    if not hasattr(self,'_apply_kikf_correction'):
+    #        return True;
+    #    else:
+    #        return self._apply_kikf_correction;
 
-    @apply_kikf_correction.setter 
-    def apply_kikf_correction(self,value):
-        """ Set up option if ki/kf correction should be applied to the reduction result (default -- true) """
-        if isinstance(value,str):
-            val = value.lower() in ['true','t','yes','y','1']
-        else:
-            val = bool(value)
-        object.__setattr__(self,'_apply_kikf_correction',val);
+    #@apply_kikf_correction.setter 
+    #def apply_kikf_correction(self,value):
+    #    """ Set up option if ki/kf correction should be applied to the reduction result (default -- true) """
+    #    if isinstance(value,str):
+    #        val = value.lower() in ['true','t','yes','y','1']
+    #    else:
+    #        val = bool(value)
+    #    object.__setattr__(self,'_apply_kikf_correction',val);
 
     # -----------------------------------------------------------------------------
     # Service properties (used by class itself)

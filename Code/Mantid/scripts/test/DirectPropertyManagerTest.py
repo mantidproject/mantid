@@ -473,8 +473,25 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(propman.ParaPara,'OtherVal2')
         self.assertEqual(propman.BaseParam2,'OtherVal2')
         
-        self.assertEquals(propman.BaseParam1,"OtherVal1");
-  
+        self.assertEquals(propman.BaseParam1,"OtherVal1")
+
+    def test_set_all_defaults_from_instrument(self) :
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
+        #idf_dir = config.getString('instrumentDefinition.directory')
+        idf_file=api.ExperimentInfo.getInstrumentFilename('LET','2014-05-03 23:59:59')
+        ws = LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=ws)
+
+        # Propman was defined for MARI but reduction parameters are all the same, so testing on LET
+        propman = self.prop_man
+        ws = mtd['ws'];
+        changed_prop=propman.update_defaults_from_instrument( ws.getInstrument(),False)
+        self.assertTrue('ei-mon1-spec' in changed_prop);
+
+        self.assertEqual(propman.ei_mon1_spec,65542)
+
+
+
+
  #def test_default_warnings(self):
     #    tReducer = self.reducer
 

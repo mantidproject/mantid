@@ -36,6 +36,7 @@ from mantid.simpleapi import *
 from mantid import api
 from mantid import geometry
 from mantid import config
+from mantid.kernel import funcreturns
 import DirectReductionHelpers as prop_helpers
 from DirectReductionProperties import DirectReductionProperties
 
@@ -472,13 +473,19 @@ class DirectPropertyManager(DirectReductionProperties):
             name =name0;
         #end
 
-        # replace common substitutions for None
+        # replace common substitutions for string value
         if type(val) is str :
            val1 = val.lower()
            if (val1 == 'none' or len(val1) == 0):
               val = None;
            if val1 == 'default':
               val = self.getDefaultParameterValue(name0);
+           # boolean property?
+           if val1 in ['true','yes']:
+               val = True
+           if val1 in ['false','no']:
+               val = False
+
 
         if type(val) is list and len(val) == 0:
             val = None;
@@ -493,7 +500,10 @@ class DirectPropertyManager(DirectReductionProperties):
 
         # set property value:
         if name in self.__descriptors:
-            super(DirectPropertyManager,self).__setattr__(name,val)
+            try:
+                super(DirectPropertyManager,self).__setattr__(name,val)
+            except AttributeError:
+                raise AttributeError(" Can not set property {0} to value {1}".format(name,val));
         else:
             prop_helpers.gen_setter(self.__dict__,name,val);
 
@@ -613,8 +623,8 @@ class DirectPropertyManager(DirectReductionProperties):
   
         return result;
 
-    def update_defaults_from_instrument(self,pInstrument):
-        """ Method used to update default parameters from the same instrument.
+    def update_defaults_from_instrument(self,pInstrument,ignore_changes=True):
+        """ Method used to update default parameters from the same instrument (with different parameters).
 
             Used if initial parameters correspond to instrument with one validity dates and 
             current instrument has different validity dates and different default values for 
@@ -622,31 +632,43 @@ class DirectPropertyManager(DirectReductionProperties):
 
             List of synonims is not modified and new properties are not added assuming that 
             recent dictionary and properties are most comprehensive one
+
+            ignore_changes==True when changes, caused by setting properties from instrument are not recorded
+            ignore_changes==False -- getChangedProperties properties after applied this method would return set 
+                            of all properties changed when applying this method
+
         """ 
         if self.instr_name != pInstrument.getName():
-            raise AttributeError("Can not change instrument parameters ")
-        else:
-            changed_properties = self.getChangedProperties()
-            param_list = prop_helpers.get_default_idf_param_list(pInstrument)
-            for key,val in param_list.iteritems():
-                if key == 'synonims':
-                    continue
+            self.log("WARNING: Setting properties of the instrument {0} from the instrument {1}.\n"
+                     "Will only work if both instruments have the same reduction properties!",'warning')
 
-                if not (key in changed_properties):
-                    if key in self.__subst_dict:
-                        name =self.__subst_dict[key]; 
-                    else:
-                        name =key; 
-                    if not(name in self.__dict__):
+        changed_properties = self.getChangedProperties()
+        param_list = prop_helpers.get_default_idf_param_list(pInstrument)
+        for key,val in param_list.iteritems():
+            if key == 'synonims':
+               continue
+
+            if not (key in changed_properties):
+               if key in self.__subst_dict:
+                        name =self.__subst_dict[key]
+               else:
+                        name =key 
+               if not(name in self.__dict__):
                         name = '_'+name
 
-                    cur_val = self.__dict__[name]
-                    # complex properties set up through their members so no need to set up one
-                    if not isinstance(cur_val,prop_helpers.ComplexProperty): 
-                           setattr(self,name,val)
+               cur_val = self.__dict__[name]
+               # complex properties set up through their members so no need to set up one
+               if not isinstance(cur_val,prop_helpers.ComplexProperty): 
+                     setattr(self,name,val)
         # Clear changed properties list (is this wise?, may be we want to know that some defaults changed?)
-        self.setChangedProperties();
-        pass
+        if ignore_changes:
+            self.setChangedProperties(changed_properties)
+
+        n=funcreturns.lhs_info('nreturns')
+        if n>0:
+            return self.getChangedProperties();
+        else:
+            return None;
     #end
 
     # TODO: finish refactoring this. 
