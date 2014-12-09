@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# File change history is stored at: <https://github.com/mantidproject/mantid>. 
+# File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 pref_file=~/.mantid/Mantid.user.properties
@@ -31,5 +31,7 @@ else
   echo $pref_file" not found"
 fi
 
+script_dir=$(dirname $0)
+
 # Remove all Qt preferences for MantidPlot
-python ./mantid_qt_settings_editor.py -fc
+python $script_dir/mantid_qt_settings_editor.py -fc
