@@ -168,10 +168,10 @@ public:
   { return initialized; }
 
   /// some units can be converted from TOF only in the range of TOF ;
-  /// This function returns minimal TOF value still reversively convertable into the unit. 
+  /// This function returns minimal TOF value still reversibly convertible into the unit. 
   virtual double conversionTOFMin()const=0;
 
-  /// This function returns maximal TOF value still reversively convertable into the unit. 
+  /// This function returns maximal TOF value still reversibly convertible into the unit. 
   virtual double conversionTOFMax()const=0;
  
   /**The range where conversion to TOF from given units is monotonic and reversible*/
@@ -284,9 +284,9 @@ public:
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
   virtual Unit * clone() const;
- ///@return -DBL_MAX as ToF convetanble to TOF for in any time range
+ ///@return -DBL_MAX as ToF convertible to TOF for in any time range
   virtual double conversionTOFMin()const;
- ///@return DBL_MAX as ToF convetanble to TOF for in any time range
+ ///@return DBL_MAX as ToF convertible  to TOF for in any time range
   virtual double conversionTOFMax()const;
 };
 
