@@ -180,7 +180,7 @@ def GetThetaQ(ws):
         q_bin_edge = axis.extractValues()
         q = list()
         for i in range(1, len(q_bin_edge)):
-            q_centre = (q_bin_edge[i] - q_bin_edge[i - 1]) / 2
+            q_centre = ((q_bin_edge[i] - q_bin_edge[i - 1]) / 2) + q_bin_edge[i - 1]
             q.append(q_centre)
         np_q = np.array(q)
         theta = 2.0 * np.degrees(np.arcsin(np_q / k0))
