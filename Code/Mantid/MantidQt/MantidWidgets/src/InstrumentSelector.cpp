@@ -31,7 +31,7 @@ namespace MantidWidgets
   */
   InstrumentSelector::InstrumentSelector(QWidget *parent, bool init) 
     : QComboBox(parent), m_changeObserver(*this, &InstrumentSelector::handleConfigChange),
-      m_techniques(), m_currentFacility(NULL), m_init(init)
+      m_techniques(), m_currentFacility(NULL), m_init(init),m_storeChanges(true)
   {
     setEditable(false);
     if( init )
@@ -171,6 +171,16 @@ namespace MantidWidgets
     this->blockSignals(false);
   }
 
+ /**
+  * Sets whether to update the default instrument on selection change 
+  * @param storeChanges :: True = store change on selection change
+  */
+  void InstrumentSelector::updateInstrumentOnSelection(const bool storeChanges)
+  {
+    m_storeChanges = storeChanges;
+  }
+
+
   //------------------------------------------------------
   // Private slot member functions
   //------------------------------------------------------
@@ -180,7 +190,7 @@ namespace MantidWidgets
   */
   void InstrumentSelector::updateDefaultInstrument(const QString & name) const
   {
-    if( !name.isEmpty() )
+    if( !name.isEmpty() && m_storeChanges)
     {
       ConfigService::Instance().setString("default.instrument", name.toStdString());
     }
