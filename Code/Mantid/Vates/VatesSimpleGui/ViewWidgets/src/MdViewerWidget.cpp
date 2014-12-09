@@ -434,7 +434,7 @@ void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
   }
 
   pqPipelineSource* source = this->currentView->setPluginSource(sourcePlugin, wsname);
-  pqSaveDataReaction::saveActiveData("/tmp/data.vtk");
+  //pqSaveDataReaction::saveActiveData("/tmp/data.vtk");
   source->getProxy()->SetAnnotation(this->m_widgetName.toLatin1().data(), "1");
   //this->ui.proxiesPanel->clear();
   //this->ui.proxiesPanel->addProxy(source->getProxy(),"datasource",QStringList(),true);
@@ -567,6 +567,15 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
       return true;
     }
   }*/
+  if(ev->type() == QEvent::WindowActivate)
+  {
+    if(this->currentView)
+    {
+      pqView* view = this->currentView->getView();
+      pqActiveObjects::instance().setActiveView(view);
+      pqActiveObjects::instance().setActiveSource(this->currentView->origSrc);
+    }
+  }
   return VatesViewerInterface::eventFilter(obj, ev);
 }
 
