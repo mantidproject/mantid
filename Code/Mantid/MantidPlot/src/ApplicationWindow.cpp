@@ -612,16 +612,16 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
 */
 bool ApplicationWindow::shouldWeShowFirstTimeSetup(const QStringList& commandArguments)
 {
-	//Early check of execute and quit command arguments used by system tests.
-	QString str;
-	foreach(str, commandArguments)
-	{
-		if((this->shouldExecuteAndQuit(str)) || 
-      (this->isSilentStartup(str)))
-		{
-		return false;
-		}
-	}
+  //Early check of execute and quit command arguments used by system tests.
+  QString str;
+  foreach(str, commandArguments)
+  {
+    if((this->shouldExecuteAndQuit(str)) ||
+       (this->isSilentStartup(str)))
+    {
+      return false;
+    }
+  }
 
   //first check the facility and instrument
   using Mantid::Kernel::ConfigService;
