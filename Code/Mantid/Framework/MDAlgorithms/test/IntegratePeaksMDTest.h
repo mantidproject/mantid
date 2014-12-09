@@ -244,7 +244,7 @@ public:
     // This one is a 2.0 radius fake peak, so the background and peak have ~ the same density! So ~0 total intensity.
     TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(), 0.0, 12.0);
     // But the error is large since it is 125 - 125 (with errors)
-    TS_ASSERT_DELTA( peakWS->getPeak(2).getSigmaIntensity(), sqrt(2*125.0), 2.);
+    TS_ASSERT_DELTA( peakWS->getPeak(2).getSigmaIntensity(), sqrt(150.0), 2.);
 
 
     // ------------- Integrating without the background gives higher counts ------------------------
@@ -324,7 +324,7 @@ public:
     doRun(1.0, 3.0, "IntegratePeaksMDTest_peaks", 2.0);
     TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1000 + 500, 80.0);
     // Error is larger, since it is error of peak + error of background
-    TSM_ASSERT_DELTA( "Error has increased", peakWS->getPeak(0).getSigmaIntensity(), sqrt(1833.0 + 333.0), 2);
+    TSM_ASSERT_DELTA( "Error has increased", peakWS->getPeak(0).getSigmaIntensity(), sqrt(1830.0), 2);
 
     // Now do the same without the background start radius
     // So we subtract both densities = a lower count

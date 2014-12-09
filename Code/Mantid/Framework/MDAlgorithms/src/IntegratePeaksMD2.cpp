@@ -157,6 +157,8 @@ namespace MDAlgorithms
     double BackgroundOuterRadius = getProperty("BackgroundOuterRadius");
     /// Start radius of the background
     double BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
+    if (BackgroundInnerRadius < PeakRadius)
+      BackgroundInnerRadius = PeakRadius;
     /// Cylinder Length to use around peaks for cylinder
     double cylinderLength = getProperty("CylinderLength");
     Workspace2D_sptr wsProfile2D,wsFit2D,wsDiff2D;
@@ -199,7 +201,6 @@ namespace MDAlgorithms
       newAxis3->setLabel(i, label.str());
         }
     }
-    double backgroundCylinder = cylinderLength;
     double percentBackground = getProperty("PercentBackground");
     size_t peakMin = 0;
     size_t peakMax = numSteps;
@@ -212,12 +213,10 @@ namespace MDAlgorithms
       size_t numBkgCh = numSteps - numPeakCh;  //number of background channels
       ratio = static_cast<double>(numPeakCh)/static_cast<double>(numBkgCh);
     }
-    //cylinderLength *= 1.0 - (percentBackground/100.);
     /// Replace intensity with 0
     bool replaceIntensity = getProperty("ReplaceIntensity");
     bool integrateEdge = getProperty("IntegrateIfOnEdge");
-    if (BackgroundInnerRadius < PeakRadius)
-      BackgroundInnerRadius = PeakRadius;
+
   std::string profileFunction = getProperty("ProfileFunction");
   std::string integrationOption = getProperty("IntegrationOption");
     std::ofstream out;
@@ -335,7 +334,7 @@ namespace MDAlgorithms
             double ratio = (PeakRadius / BackgroundOuterRadius);
             double peakVolume = ratio * ratio * ratio;
 
-            // Relative volume of the interior of the shell vs overall backgroundratio * ratio
+            // Relative volume of the interior of the shell vs overall background
             double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
             // Volume of the bg shell, relative to the volume of the BackgroundOuterRadius sphere
             double bgVolume = 1.0 - interiorRatio * interiorRatio * interiorRatio;
@@ -343,11 +342,7 @@ namespace MDAlgorithms
             // Finally, you will multiply the bg intensity by this to get the estimated background under the peak volume
             double scaleFactor = peakVolume / bgVolume;
             bgSignal *= scaleFactor;
-            bgErrorSquared *= scaleFactor;
-            // Adjust the integrated values.
-            signal -= bgSignal;
-            // But we add the errors together
-            errorSquared += bgErrorSquared;
+            bgErrorSquared *= scaleFactor * scaleFactor;
       }
     }
       else
@@ -368,14 +363,13 @@ namespace MDAlgorithms
       }
 
       // Integrate around the background radius
-      if (BackgroundOuterRadius > PeakRadius || percentBackground > 0.0)
+      if (BackgroundOuterRadius > PeakRadius)
       {
         // Get the total signal inside "BackgroundOuterRadius"
 
-        if (BackgroundOuterRadius < PeakRadius ) BackgroundOuterRadius = PeakRadius;
         signal_fit.clear();
         for (size_t j=0; j<numSteps; j++)signal_fit.push_back(0.0);
-        ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundOuterRadius), static_cast<coord_t>(backgroundCylinder), bgSignal, bgErrorSquared, signal_fit);
+        ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundOuterRadius), static_cast<coord_t>(cylinderLength), bgSignal, bgErrorSquared, signal_fit);
         for (size_t j = 0; j < numSteps; j++)
         {
            wsProfile2D->dataX(i)[j] = static_cast<double>(j);
@@ -402,23 +396,19 @@ namespace MDAlgorithms
             bgSignal -= interiorSignal;
             // We can subtract the error (instead of adding) because the two values are 100% dependent; this is the same as integrating a shell.
             bgErrorSquared -= interiorErrorSquared;
-            // Relative volume of peak vs the BackgroundOuterRadius sphere
+            // Relative volume of peak vs the BackgroundOuterRadius cylinder
             double ratio = (PeakRadius / BackgroundOuterRadius);
-            double peakVolume = ratio * ratio * (1-percentBackground/100.);
+            double peakVolume = ratio * ratio * cylinderLength;
 
-            // Relative volume of the interior of the shell vs overall backgroundratio * ratio
+            // Relative volume of the interior of the shell vs overall background
             double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
-            // Volume of the bg shell, relative to the volume of the BackgroundOuterRadius sphere
-            double bgVolume = 1.0 - interiorRatio * interiorRatio * (percentBackground/100.);
+            // Volume of the bg shell, relative to the volume of the BackgroundOuterRadius cylinder
+            double bgVolume = 1.0 - interiorRatio * interiorRatio * cylinderLength;
 
             // Finally, you will multiply the bg intensity by this to get the estimated background under the peak volume
             double scaleFactor = peakVolume / bgVolume;
             bgSignal *= scaleFactor;
-            bgErrorSquared *= scaleFactor;
-            // Adjust the integrated values.
-            signal -= bgSignal;
-            // But we add the errors together
-            errorSquared += bgErrorSquared;
+            bgErrorSquared *= scaleFactor * scaleFactor;
       }
       else
       {
@@ -558,13 +548,13 @@ namespace MDAlgorithms
       // Save it back in the peak object.
       if (signal != 0. || replaceIntensity)
       {
-      p.setIntensity(signal - ratio * background_total);
-      p.setSigmaIntensity( sqrt(errorSquared + ratio * ratio * std::fabs(background_total)) );
+        p.setIntensity(signal - ratio * background_total - bgSignal);
+        p.setSigmaIntensity( sqrt(errorSquared + ratio * ratio * std::fabs(background_total) + bgErrorSquared) );
       }
 
       g_log.information() << "Peak " << i << " at " << pos << ": signal "
         << signal << " (sig^2 " << errorSquared << "), with background "
-        << bgSignal + ratio * background_total << " (sig^2 " 
+        << bgSignal + ratio * background_total << " (sig^2 "
         << bgErrorSquared+ ratio * ratio * std::fabs(background_total) << ") subtracted."
         << std::endl;
 
