@@ -157,6 +157,8 @@ namespace MDAlgorithms
     double BackgroundOuterRadius = getProperty("BackgroundOuterRadius");
     /// Start radius of the background
     double BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
+    if (BackgroundInnerRadius < PeakRadius)
+      BackgroundInnerRadius = PeakRadius;
     /// Cylinder Length to use around peaks for cylinder
     double cylinderLength = getProperty("CylinderLength");
     Workspace2D_sptr wsProfile2D,wsFit2D,wsDiff2D;
@@ -214,8 +216,7 @@ namespace MDAlgorithms
     /// Replace intensity with 0
     bool replaceIntensity = getProperty("ReplaceIntensity");
     bool integrateEdge = getProperty("IntegrateIfOnEdge");
-    if (BackgroundInnerRadius < PeakRadius)
-      BackgroundInnerRadius = PeakRadius;
+
   std::string profileFunction = getProperty("ProfileFunction");
   std::string integrationOption = getProperty("IntegrationOption");
     std::ofstream out;
