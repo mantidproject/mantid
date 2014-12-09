@@ -27,6 +27,8 @@ class DiffractionReductionScripter(BaseReductionScripter):
         """ Initialization
         """
         super(DiffractionReductionScripter, self).__init__(name=name, facility=facility)
+        
+        print "[diffraction_reduction_script]  Facility = %s,  Instrument = %s" % (self.facility_name, self.instrument_name)
 
         return
 
@@ -34,7 +36,6 @@ class DiffractionReductionScripter(BaseReductionScripter):
         """ Generate reduction script via observers
             @param file_name: name of the file to write the script to
         """
-        print "[Main Reduction Script]  Facility = %s,  Instrument = %s" % (self.facility_name, self.instrument_name)
 
         # 1. Collect from observers
         paramdict = {}
@@ -51,7 +52,8 @@ class DiffractionReductionScripter(BaseReductionScripter):
             f.write(script)
             f.close()
 
-        print "[DBx337] Am I called?  The script is ... \n", script, "\n==== End of Script ====="
+        print "[diffraction_reduction_script]  Facility = %s,  Instrument = %s" % (self.facility_name, self.instrument_name)
+        print "The reduction script is ... \n", script, "\n==== End of Script ====="
 
         return script
 
@@ -69,7 +71,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         @param setupscript : object of SetupScript for this tab/observer
         """
-        print "ClassName: %s.  Type %s" % (tabsetuptype, type(setupscript))
+        # print "ClassName: %s.  Type %s" % (tabsetuptype, type(setupscript))
 
         if setupscript is None:
             return
@@ -119,7 +121,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 runnumber = runtuple[0]
                 datafilename = runtuple[1]
 
-                print "Working on run ", str(runnumber), " in file ", datafilename
+                # print "Working on run ", str(runnumber), " in file ", datafilename
 
                 # i.  Load meta data only
                 metadatawsname = str(datafilename.split(".")[0]+"_meta")
@@ -197,15 +199,15 @@ class DiffractionReductionScripter(BaseReductionScripter):
         dofilter = False
         if filterdict["FilterByTimeMin"] != "":
             dofilter = True
-            print "Yes! Min Generate Filter will be called!"
+            # print "Yes! Min Generate Filter will be called!"
 
         if filterdict["FilterByTimeMax"] != "":
             dofilter = True
-            print "Yes! Max Generate Filter will be called!"
+            # print "Yes! Max Generate Filter will be called!"
 
         if filterdict["FilterType"] != "NoFilter":
             dofilter = True
-            print "Yes! FilterType Generate Filter will be called!"
+            # print "Yes! FilterType Generate Filter will be called!"
 
         return dofilter
 
@@ -247,13 +249,13 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 twovalues = term.split("-")
                 try:
                     runstart = int(twovalues[0])
-                    print "run start = ", runstart
+                    #print "run start = ", runstart
                 except ValueError:
                     print "Term %s cannot be parsed to a range of integers.  Input error!" % (term)
                     break
                 try:
                     runend = int(twovalues[1])
-                    print "run end = ", runend
+                    #print "run end = ", runend
                 except ValueError:
                     print "Term %s cannot be parsed to a range of integers.  Input error!" % (term)
                     break
@@ -276,7 +278,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
             filename = str(self.instrument_name +"_" + str(run) + extension)
             datafilenames.append((run, filename))
 
-            print "Input data file %s of run number %s" % (filename, str(run))
+            #print "Input data file %s of run number %s" % (filename, str(run))
         # ENDFOR
 
         return datafilenames

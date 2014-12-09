@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui/diffraction/diffraction_adv_setup.ui'
+# Form implementation generated from reading ui file 'diffraction_adv_setup.ui'
 #
-# Created: Thu Jul  3 10:47:09 2014
-#      by: PyQt4 UI code generator 4.10.2
+# Created: Tue Dec  9 11:04:59 2014
+#      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -230,10 +230,6 @@ class Ui_Frame(object):
         self.unwrap_edit.setMaximumSize(QtCore.QSize(200, 16777215))
         self.unwrap_edit.setObjectName(_fromUtf8("unwrap_edit"))
         self.gridLayout_2.addWidget(self.unwrap_edit, 2, 1, 1, 1)
-        self.preserveevents_checkbox = QtGui.QCheckBox(self.advanced_options_group)
-        self.preserveevents_checkbox.setMaximumSize(QtCore.QSize(160, 16777215))
-        self.preserveevents_checkbox.setObjectName(_fromUtf8("preserveevents_checkbox"))
-        self.gridLayout_2.addWidget(self.preserveevents_checkbox, 5, 0, 1, 1)
         self.label_3 = QtGui.QLabel(self.advanced_options_group)
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.gridLayout_2.addWidget(self.label_3, 4, 0, 1, 1)
@@ -246,6 +242,16 @@ class Ui_Frame(object):
         self.filterbadpulses_edit = QtGui.QLineEdit(self.advanced_options_group)
         self.filterbadpulses_edit.setObjectName(_fromUtf8("filterbadpulses_edit"))
         self.gridLayout_2.addWidget(self.filterbadpulses_edit, 4, 4, 1, 1)
+        self.bkgdsmoothpar_edit = QtGui.QLineEdit(self.advanced_options_group)
+        self.bkgdsmoothpar_edit.setObjectName(_fromUtf8("bkgdsmoothpar_edit"))
+        self.gridLayout_2.addWidget(self.bkgdsmoothpar_edit, 5, 1, 1, 1)
+        self.label_bkgdsmooth = QtGui.QLabel(self.advanced_options_group)
+        self.label_bkgdsmooth.setObjectName(_fromUtf8("label_bkgdsmooth"))
+        self.gridLayout_2.addWidget(self.label_bkgdsmooth, 5, 0, 1, 1)
+        self.preserveevents_checkbox = QtGui.QCheckBox(self.advanced_options_group)
+        self.preserveevents_checkbox.setMaximumSize(QtCore.QSize(160, 16777215))
+        self.preserveevents_checkbox.setObjectName(_fromUtf8("preserveevents_checkbox"))
+        self.gridLayout_2.addWidget(self.preserveevents_checkbox, 5, 3, 1, 1)
         self.verticalLayout_6.addLayout(self.gridLayout_2)
         self.verticalLayout_4.addWidget(self.advanced_options_group)
         self.vanadium_correction_groupbox = QtGui.QGroupBox(self.scrollAreaWidgetContents)
@@ -359,13 +365,16 @@ class Ui_Frame(object):
         self.low_resolution_label.setToolTip(_translate("Frame", "<html><head/><body><p>Reference DIFC for resolution removal. Zero skips the correction.</p></body></html>", None))
         self.low_resolution_label.setText(_translate("Frame", "Low Resolution Ref", None))
         self.unwrap_edit.setToolTip(_translate("Frame", "<html><head/><body><p>Enter value for reference total flight path for frame unwrapping. Zero skips the correction. </p></body></html>", None))
-        self.preserveevents_checkbox.setToolTip(_translate("Frame", "<html><head/><body><p>Check to preserve events.  Uncheck to change from events to histograms.</p></body></html>", None))
-        self.preserveevents_checkbox.setStatusTip(_translate("Frame", "Check to calculate the absolute scale factor using the direct beam method.", None))
-        self.preserveevents_checkbox.setText(_translate("Frame", "Preserve Events", None))
         self.label_3.setText(_translate("Frame", "Scale Data", None))
         self.scaledata_edit.setToolTip(_translate("Frame", "Constant to multiply the data by before writting out", None))
         self.label_4.setText(_translate("Frame", "FilterBadPulses", None))
         self.filterbadpulses_edit.setToolTip(_translate("Frame", "<html><head/><body><p>Check to filter out events measured while proton charge is more than 5% below average </p></body></html>", None))
+        self.bkgdsmoothpar_edit.setToolTip(_translate("Frame", "<html><head/><body><p>Parameters to smooth background (can run) by FFT smooth algorithm.</p><p>Enter 2 integers.  The suggested values are &quot;20, 2&quot;. </p></body></html>", None))
+        self.label_bkgdsmooth.setToolTip(_translate("Frame", "<html><head/><body><p>Parameters to smooth background (can run) by FFT smooth algorithm.</p></body></html>", None))
+        self.label_bkgdsmooth.setText(_translate("Frame", "Background Smooth Parameters", None))
+        self.preserveevents_checkbox.setToolTip(_translate("Frame", "<html><head/><body><p>Check to preserve events.  Uncheck to change from events to histograms.</p></body></html>", None))
+        self.preserveevents_checkbox.setStatusTip(_translate("Frame", "Check to calculate the absolute scale factor using the direct beam method.", None))
+        self.preserveevents_checkbox.setText(_translate("Frame", "Preserve Events", None))
         self.vanadium_correction_groupbox.setTitle(_translate("Frame", "Strip Vanadium Peaks", None))
         self.mask_help_label.setText(_translate("Frame", "The following input parameters are used to control the algorithm to strip vanadium peaks.\n"
 "", None))
