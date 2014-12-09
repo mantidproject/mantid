@@ -11391,7 +11391,7 @@ void ApplicationWindow::openSurfacePlot(const std::string& lines, const int file
         }
       } //select line "title"
 
-      int style;
+      int style = Qwt3D::WIREFRAME;
       if(tsv.selectLine("Style"))
         tsv >> style;
 
