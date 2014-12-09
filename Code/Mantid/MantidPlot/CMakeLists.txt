@@ -1001,9 +1001,12 @@ else ()
 	# Make a ctest target for each file
 	foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
 	 	# Add the test. Name of test = name of the file
-		ADD_TEST( ${PYFILE} ${MANTIDPLOT_PATH} -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
+		add_test ( ${PYFILE} ${MANTIDPLOT_PATH} -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
 		# Set the previously-built environment
-		set_tests_properties( ${PYFILE} PROPERTIES RUN_SERIAL 1 ENVIRONMENT "${TEST_ENVIRONMENT}")
+		set_tests_properties ( ${PYFILE} PROPERTIES
+                           RUN_SERIAL 1
+                           ENVIRONMENT "${TEST_ENVIRONMENT}"
+                           TIMEOUT ${TESTING_TIMEOUT} )
 	endforeach ()
 
     add_dependencies( GUITests MantidPlot )

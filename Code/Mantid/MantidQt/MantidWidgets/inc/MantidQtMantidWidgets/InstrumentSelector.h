@@ -64,6 +64,8 @@ namespace MantidQt
       QStringList getTechniques() const;
       /// Set the list of techniques
       void setTechniques(const QStringList & techniques);
+      /// Sets whether to update the default instrument on selection change
+      void updateInstrumentOnSelection(const bool storeChanges);
 
     public slots:
       /// Update list for a new facility
@@ -92,6 +94,8 @@ namespace MantidQt
       const Mantid::Kernel::FacilityInfo *m_currentFacility;
       /// Should the object be initialized
       bool m_init;
+      /// should the default instrument be changed when the selection changes
+      bool m_storeChanges;
     };
 
   }

@@ -1078,6 +1078,7 @@ private:
   QPoint mdiAreaTopLeft() const;
   bool hasParaviewPath() const;
   bool shouldExecuteAndQuit(const QString& arg);
+  bool isSilentStartup(const QString& arg);
   void trySetParaviewPath(const QStringList& commandArguments, bool noDialog=false);
   void handleConfigDir();
 
@@ -1184,7 +1185,7 @@ private slots:
   void showalgorithmDescriptions();
 
   /// Contains the rules of when to show the FirstTimeSetup UI.
-  bool shouldWeShowFirstTimeSetup();
+  bool shouldWeShowFirstTimeSetup(const QStringList& commandArguments);
   /// Open up the FirstRunSetup dialog
   void showFirstTimeSetup();
 

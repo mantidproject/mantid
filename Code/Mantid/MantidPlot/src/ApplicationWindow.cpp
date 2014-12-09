@@ -587,8 +587,8 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
     g_log.warning("The scripting language is set to muParser. This is probably not what you want! Change the default in View->Preferences.");
   }
 
-  // Need to show first time setup dialog?#
-  if (shouldWeShowFirstTimeSetup())
+  // Need to show first time setup dialog?
+  if (shouldWeShowFirstTimeSetup(args))
   {
     showFirstTimeSetup();
   }
@@ -606,8 +606,23 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   trySetParaviewPath(args, skipDialog);
 }
 
-bool ApplicationWindow::shouldWeShowFirstTimeSetup()
+/** Determines if the first time dialog should be shown
+* @param commandArguments : all command line arguments.
+* @returns true if the dialog should be shown
+*/
+bool ApplicationWindow::shouldWeShowFirstTimeSetup(const QStringList& commandArguments)
 {
+	//Early check of execute and quit command arguments used by system tests.
+	QString str;
+	foreach(str, commandArguments)
+	{
+		if((this->shouldExecuteAndQuit(str)) || 
+      (this->isSilentStartup(str)))
+		{
+		return false;
+		}
+	}
+
   //first check the facility and instrument
   using Mantid::Kernel::ConfigService;
   auto & config = ConfigService::Instance(); 
@@ -679,7 +694,8 @@ void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments, 
     bool b_skipDialog = noDialog;
     foreach(str, commandArguments)
     {
-      if(this->shouldExecuteAndQuit(str))
+      if ((this->shouldExecuteAndQuit(str)) ||
+        (this->isSilentStartup(str)))
       {
         b_skipDialog = true;
         break;
@@ -11375,7 +11391,7 @@ void ApplicationWindow::openSurfacePlot(const std::string& lines, const int file
         }
       } //select line "title"
 
-      int style;
+      int style = Qwt3D::WIREFRAME;
       if(tsv.selectLine("Style"))
         tsv >> style;
 
@@ -13735,6 +13751,15 @@ bool ApplicationWindow::shouldExecuteAndQuit(const QString& arg)
   return arg.endsWith("--execandquit") || arg.endsWith("-xq");
 }
 
+/*
+@param arg: command argument
+@return TRUE if argument suggests a silent startup
+*/
+bool ApplicationWindow::isSilentStartup(const QString& arg)
+{
+  return arg.endsWith("--silent") || arg.endsWith("-s");
+}
+
 void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
 {
   int num_args = args.count();
@@ -13772,6 +13797,10 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
       exec = true;
       quit = true;
     }
+    else if (isSilentStartup(str))
+    {
+      g_log.debug("Starting in Silent mode");
+    }\
     // if filename not found yet then these are all program arguments so we should
     // know what they all are
     else if (file_name.isEmpty() && (str.startsWith("-") || str.startsWith("--")))
