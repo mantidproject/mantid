@@ -11,7 +11,7 @@ namespace Mantid
 
     /** Stitch1DMany : Stitches multiple Matrix Workspaces together into a single output.
 
-     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
      This file is part of Mantid.
 

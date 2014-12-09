@@ -12,7 +12,7 @@ namespace SpectrumView
 /** An interface to the RangeHandler class, which manages the min, max and step
     range controls for the SpectrumView data viewer.
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

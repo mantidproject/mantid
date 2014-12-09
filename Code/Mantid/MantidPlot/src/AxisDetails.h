@@ -4,7 +4,7 @@ This class holds the widgets that hold the details for each axis so the contents
 @author Keith Brown, Placement Student at ISIS Rutherford Appleton Laboratory from the University of Derby
 @date 15/09/2013
 
-Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 

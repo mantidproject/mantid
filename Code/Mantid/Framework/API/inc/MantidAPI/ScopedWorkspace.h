@@ -22,7 +22,7 @@ namespace API
     Primarily, it was created to overcome some limitations of WorkspaceProperties, but it can be
     useful in other places, e.g. tests.
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

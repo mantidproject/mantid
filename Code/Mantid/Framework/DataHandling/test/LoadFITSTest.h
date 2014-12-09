@@ -26,6 +26,9 @@ public:
     
     inputFile = "FITS_small_01.fits,FITS_small_02.fits";
     algToBeTested.setPropertyValue("Filename", inputFile);  
+
+    // Set the ImageKey to be 0 (as it is missing from the test file and is required);
+    algToBeTested.setProperty<int>("ImageKey", 0);
   }    
  
   void testPerformAssertions()

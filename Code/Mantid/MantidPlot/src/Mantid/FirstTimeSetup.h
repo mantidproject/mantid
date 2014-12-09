@@ -24,6 +24,13 @@ private slots:
   void confirm();
   void cancel();
 
+  void openReleaseNotes();
+  void openSampleDatasets();
+  void openMantidIntroduction();
+  void openPythonIntroduction();
+  void openPythonInMantid();
+  void openExtendingMantid();
+
   void facilitySelected(const QString& facility);
   void openManageUserDirectories();
 

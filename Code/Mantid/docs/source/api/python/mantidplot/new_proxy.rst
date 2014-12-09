@@ -2,7 +2,7 @@
  new_proxy
 ===========
 
-.. module:`mantidplotpy.proxies`
+.. module:`pymantidplot.proxies`
 
-.. autofunction:: mantidplotpy.proxies.new_proxy
+.. autofunction:: pymantidplot.proxies.new_proxy
 

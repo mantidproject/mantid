@@ -17,7 +17,7 @@ namespace Mantid
       @author Martyn Gigg, Tessella plc
       @date 2011-01-24
       
-      Copyright &copy; 20011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 20011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
       
       This file is part of Mantid.
       

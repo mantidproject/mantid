@@ -12,7 +12,7 @@ namespace MantidQt
 
     /** ReflTransferStrategy : Provides an stratgegy for transferring runs from search results to a format suitable for processing.
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

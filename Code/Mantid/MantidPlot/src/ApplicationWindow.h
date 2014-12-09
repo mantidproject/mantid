@@ -1080,6 +1080,7 @@ private:
   QPoint mdiAreaTopLeft() const;
   bool hasParaviewPath() const;
   bool shouldExecuteAndQuit(const QString& arg);
+  bool isSilentStartup(const QString& arg);
   void trySetParaviewPath(const QStringList& commandArguments, bool noDialog=false);
   void handleConfigDir();
 
@@ -1092,8 +1093,7 @@ private:
   void openSurfacePlot      (const std::string& lines, const int fileVersion);
   void openTable            (const std::string& lines, const int fileVersion);
   void openTableStatistics  (const std::string& lines, const int fileVersion);
-
-  void openScriptWindow     (const QStringList &list);
+  void openScriptWindow     (const QStringList& lines);
   //@}
 
   ApplicationWindow* loadScript(const QString& fn, bool existingProject = false);
@@ -1186,6 +1186,8 @@ private slots:
   ///
   void showalgorithmDescriptions();
 
+  /// Contains the rules of when to show the FirstTimeSetup UI.
+  bool shouldWeShowFirstTimeSetup(const QStringList& commandArguments);
   /// Open up the FirstRunSetup dialog
   void showFirstTimeSetup();
 
@@ -1308,6 +1310,7 @@ public:
   bool d_synchronize_graph_scales;
 
   int majTicksStyle, minTicksStyle, legendFrameStyle, autoSaveTime, canvasFrameWidth;
+  bool autoDistribution1D;
   QColor legendBackground, legendTextColor, defaultArrowColor;
   int defaultArrowHeadLength, defaultArrowHeadAngle;
   double defaultArrowLineWidth, defaultCurveLineWidth;

@@ -1,4 +1,5 @@
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
+#include <math.h>
 
 namespace Mantid
 {
@@ -8,7 +9,8 @@ using namespace API;
 
 Poldi2DFunction::Poldi2DFunction() :
     IFunction1DSpectrum(),
-    CompositeFunction()
+    CompositeFunction(),
+    m_iteration(0)
 {
 }
 
@@ -24,6 +26,12 @@ Poldi2DFunction::Poldi2DFunction() :
 void Poldi2DFunction::function(const FunctionDomain &domain, FunctionValues &values) const
 {
     CompositeFunction::function(domain, values);
+
+    if(m_iteration > 0) {
+        for(size_t i = 0; i < values.size(); ++i) {
+            values.setFitWeight(i, 1.0/sqrt(values.getCalculated(i) + 0.1));
+        }
+    }
 }
 
 /**
@@ -48,6 +56,11 @@ void Poldi2DFunction::function1DSpectrum(const FunctionDomain1DSpectrum &domain,
 {
     UNUSED_ARG(domain);
     UNUSED_ARG(values);
+}
+
+void Poldi2DFunction::iterationFinished()
+{
+    ++m_iteration;
 }
 
 

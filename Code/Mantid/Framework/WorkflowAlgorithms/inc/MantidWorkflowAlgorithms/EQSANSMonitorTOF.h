@@ -17,7 +17,7 @@ namespace WorkflowAlgorithms
     Determine the wavelength from the TOF in the beam monitor histogram.  The algorithm has to modify
     TOF values to correct for the fact that T_0 is not properly recorded by the DAS.
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

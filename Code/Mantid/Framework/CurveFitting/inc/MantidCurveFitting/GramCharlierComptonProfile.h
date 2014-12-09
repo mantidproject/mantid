@@ -14,7 +14,7 @@ namespace CurveFitting
     Implements a function to calculate the Compton profile of a nucleus using a Gram-Charlier approximation
     convoluted with an instrument resolution function that is approximated by a Voigt function.
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

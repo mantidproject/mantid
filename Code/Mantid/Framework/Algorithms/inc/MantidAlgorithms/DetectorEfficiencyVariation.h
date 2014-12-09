@@ -30,7 +30,7 @@ namespace Mantid
        @author Steve D Williams, ISIS Facility Rutherford Appleton Laboratory
        @date 15/06/2009
 
-       Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+       Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
        This file is part of Mantid.
 

@@ -641,11 +641,49 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   }
 
   // Need to show first time setup dialog?
+  if (shouldWeShowFirstTimeSetup(args))
+  {
+    showFirstTimeSetup();
+  }
+ 
+  using namespace Mantid::API;
+  // Do this as late as possible to avoid unnecessary updates
+  AlgorithmFactory::Instance().enableNotifications();
+  AlgorithmFactory::Instance().notificationCenter.postNotification(new AlgorithmFactoryUpdateNotification);
+
+  /*
+  The scripting enironment call setScriptingLanguage is trampling over the PATH, so we have to set it again.
+  Here we do not off the setup dialog.
+  */
+  const bool skipDialog = true;
+  trySetParaviewPath(args, skipDialog);
+}
+
+/** Determines if the first time dialog should be shown
+* @param commandArguments : all command line arguments.
+* @returns true if the dialog should be shown
+*/
+bool ApplicationWindow::shouldWeShowFirstTimeSetup(const QStringList& commandArguments)
+{
+	//Early check of execute and quit command arguments used by system tests.
+	QString str;
+	foreach(str, commandArguments)
+	{
+		if((this->shouldExecuteAndQuit(str)) || 
+      (this->isSilentStartup(str)))
+		{
+		return false;
+		}
+	}
+
+  //first check the facility and instrument
+  using Mantid::Kernel::ConfigService;
+  auto & config = ConfigService::Instance(); 
   std::string facility = config.getString("default.facility");
   std::string instrument = config.getString("default.instrument");
   if ( facility.empty() || instrument.empty() )
   {
-    showFirstTimeSetup();
+    return true;
   }
   else
   {
@@ -662,20 +700,29 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
       //failed to find the facility or instrument
       g_log.error()<<"Could not find your default facility '" << facility
         <<"' or instrument '" << instrument << "' in facilities.xml, showing please select again." << std::endl;
-      showFirstTimeSetup();
+      return true;
     }
   }
-  using namespace Mantid::API;
-  // Do this as late as possible to avoid unnecessary updates
-  AlgorithmFactory::Instance().enableNotifications();
-  AlgorithmFactory::Instance().notificationCenter.postNotification(new AlgorithmFactoryUpdateNotification);
 
-  /*
-  The scripting enironment call setScriptingLanguage is trampling over the PATH, so we have to set it again.
-  Here we do not off the setup dialog.
-  */
-  const bool skipDialog = true;
-  trySetParaviewPath(args, skipDialog);
+  QSettings settings;
+  settings.beginGroup("Mantid/FirstUse");
+  const bool doNotShowUntilNextRelease = settings.value("DoNotShowUntilNextRelease", 0).toInt();
+  const QString lastVersion = settings.value("LastVersion", "").toString();
+  settings.endGroup();
+
+  if (!doNotShowUntilNextRelease)
+  {
+    return true;
+  }
+
+  //Now check if the version has changed since last time
+  const QString version = QString::fromStdString(Mantid::Kernel::MantidVersion::releaseNotes());
+  if (version != lastVersion)
+  {
+    return true;
+  }
+
+  return false;
 }
 
 /*
@@ -700,7 +747,8 @@ void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments, 
     bool b_skipDialog = noDialog;
     foreach(str, commandArguments)
     {
-      if(this->shouldExecuteAndQuit(str))
+      if ((this->shouldExecuteAndQuit(str)) ||
+        (this->isSilentStartup(str)))
       {
         b_skipDialog = true;
         break;
@@ -895,6 +943,7 @@ void ApplicationWindow::initGlobalConstants()
   d_show_axes_labels = QVector<bool> (QwtPlot::axisCnt, true);
   d_show_axes_labels[1] = false;
   d_show_axes_labels[3] = false;
+  autoDistribution1D = true;
   canvasFrameWidth = 0;
   defaultPlotMargin = 0;
   drawBackbones = true;
@@ -1460,6 +1509,7 @@ void ApplicationWindow::tableMenuAboutToShow()
     tableMenu->addAction(actionConvertTableToWorkspace);
   }
   tableMenu->addAction(actionConvertTableToMatrixWorkspace);
+  tableMenu->addAction(actionSortTable);
 
   tableMenu->insertSeparator();
   tableMenu->addAction(actionShowPlotWizard);
@@ -4729,33 +4779,6 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     }
   }
 
-  if(tsv.hasSection("multiLayer"))
-  {
-    std::vector<std::string> multiLayer = tsv.sections("multiLayer");
-    for(auto it = multiLayer.begin(); it != multiLayer.end(); ++it)
-    {
-      openMultiLayer(*it, fileVersion);
-    }
-  }
-
-  if(tsv.hasSection("SurfacePlot"))
-  {
-    std::vector<std::string> plotSections = tsv.sections("SurfacePlot");
-    for(auto it = plotSections.begin(); it != plotSections.end(); ++it)
-    {
-      openSurfacePlot(*it, fileVersion);
-    }
-  }
-
-  if(tsv.hasSection("log"))
-  {
-    std::vector<std::string> logSections = tsv.sections("log");
-    for(auto it = logSections.begin(); it != logSections.end(); ++it)
-    {
-      currentFolder()->appendLogInfo(QString::fromStdString(*it));
-    }
-  }
-
   if(tsv.hasSection("table"))
   {
     std::vector<std::string> tableSections = tsv.sections("table");
@@ -4783,6 +4806,33 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     }
   }
 
+  if(tsv.hasSection("multiLayer"))
+  {
+    std::vector<std::string> multiLayer = tsv.sections("multiLayer");
+    for(auto it = multiLayer.begin(); it != multiLayer.end(); ++it)
+    {
+      openMultiLayer(*it, fileVersion);
+    }
+  }
+
+  if(tsv.hasSection("SurfacePlot"))
+  {
+    std::vector<std::string> plotSections = tsv.sections("SurfacePlot");
+    for(auto it = plotSections.begin(); it != plotSections.end(); ++it)
+    {
+      openSurfacePlot(*it, fileVersion);
+    }
+  }
+
+  if(tsv.hasSection("log"))
+  {
+    std::vector<std::string> logSections = tsv.sections("log");
+    for(auto it = logSections.begin(); it != logSections.end(); ++it)
+    {
+      currentFolder()->appendLogInfo(QString::fromStdString(*it));
+    }
+  }
+
   if(tsv.hasSection("note"))
   {
     std::vector<std::string> noteSections = tsv.sections("note");
@@ -4798,9 +4848,14 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     std::vector<std::string> scriptSections = tsv.sections("scriptwindow");
     for(auto it = scriptSections.begin(); it != scriptSections.end(); ++it)
     {
-      std::string scriptLines = *it;
-      QStringList sl = QString::fromStdString(scriptLines).split("\n");
-      openScriptWindow(sl);
+      TSVSerialiser sTSV(*it);
+      QStringList files;
+
+      auto scriptNames = sTSV.values("ScriptNames");
+      //Iterate, ignoring scriptNames[0] which is just "ScriptNames"
+      for(size_t i = 1; i < scriptNames.size(); ++i)
+        files.append(QString::fromStdString(scriptNames[i]));
+      openScriptWindow(files);
     }
   }
 
@@ -5144,6 +5199,7 @@ void ApplicationWindow::readSettings()
 
   settings.beginGroup("/General");
   titleOn = settings.value("/Title", true).toBool();
+  autoDistribution1D = settings.value("/AutoDistribution1D", true).toBool();
   canvasFrameWidth = settings.value("/CanvasFrameWidth", 0).toInt();
   defaultPlotMargin = settings.value("/Margin", 0).toInt();
   drawBackbones = settings.value("/AxesBackbones", true).toBool();
@@ -5522,6 +5578,7 @@ void ApplicationWindow::saveSettings()
   settings.beginGroup("/2DPlots");
   settings.beginGroup("/General");
   settings.setValue("/Title", titleOn);
+  settings.setValue("/AutoDistribution1D", autoDistribution1D);
   settings.setValue("/CanvasFrameWidth", canvasFrameWidth);
   settings.setValue("/Margin", defaultPlotMargin);
   settings.setValue("/AxesBackbones", drawBackbones);
@@ -6613,10 +6670,7 @@ void ApplicationWindow::sortActiveTable()
   if (!t)
     return;
 
-  if ((int)t->selectedColumns().count()>0)
-    t->sortTableDialog();
-  else
-    QMessageBox::warning(this, "MantidPlot - Column selection error","Please select a column first!");//Mantid
+  t->sortTableDialog();
 }
 
 void ApplicationWindow::sortSelection()
@@ -9031,7 +9085,10 @@ void ApplicationWindow::analysisMenuAboutToShow()
     analysisMenu->addAction(actionShowColStatistics);
     analysisMenu->addAction(actionShowRowStatistics);
     analysisMenu->insertSeparator();
-    analysisMenu->addAction(actionSortSelection);
+    if (w->isA("Table"))
+    {
+      analysisMenu->addAction(actionSortSelection);
+    }
     analysisMenu->addAction(actionSortTable);
 
     normMenu->clear();
@@ -9859,6 +9916,7 @@ void ApplicationWindow::showGraphContextMenu()
 
   QMenu axes(this);
   QMenu colour(this);
+  QMenu normalization(this);
   QMenu exports(this);
   QMenu copy(this);
   QMenu prints(this);
@@ -9901,6 +9959,28 @@ void ApplicationWindow::showGraphContextMenu()
   colour.insertItem(tr("Lo&g Scale"), ag, SLOT(logColor()));
   colour.insertItem(tr("&Linear"), ag, SLOT(linColor()));
   cm.insertItem(tr("&Color Bar"), &colour);
+
+  if(ag->normalizable())
+  {
+    QAction *noNorm = new QAction(tr("N&one"), &normalization);
+    noNorm->setCheckable(true);
+    connect(noNorm, SIGNAL(activated()), ag, SLOT(noNormalization()));
+    normalization.addAction(noNorm);
+
+    QAction *binNorm = new QAction(tr("&Bin Width"), &normalization);
+    binNorm->setCheckable(true);
+    connect(binNorm, SIGNAL(activated()), ag, SLOT(binWidthNormalization()));
+    normalization.addAction(binNorm);
+
+    QActionGroup *normalizationActions = new QActionGroup(this);
+    normalizationActions->setExclusive(true);
+    normalizationActions->addAction(noNorm);
+    normalizationActions->addAction(binNorm);
+
+    noNorm->setChecked(!ag->isDistribution());
+    binNorm->setChecked(ag->isDistribution());
+    cm.insertItem(tr("&Normalization"), &normalization);
+  }
 
   cm.insertSeparator();
   copy.insertItem(tr("&Layer"), this, SLOT(copyActiveLayer()));
@@ -11109,25 +11189,23 @@ void ApplicationWindow::openMultiLayer(const std::string& lines, const int fileV
 
 /** This method opens script window with a list of scripts loaded
  */
-void ApplicationWindow::openScriptWindow(const QStringList &list)
+void ApplicationWindow::openScriptWindow(const QStringList& files)
 {
   showScriptWindow();
   if(!scriptingWindow)
     return;
 
   scriptingWindow->setWindowTitle("MantidPlot: " + scriptingEnv()->languageName() + " Window");
-  QStringList scriptnames;
 
-  foreach (QString fileNameEntry, list)
-  {
-    scriptnames.append(fileNameEntry.split("\t"));
-  }
-
+  //The first time we don't use a new tab, to re-use the blank script tab
+  //on further iterations we open a new tab
   bool newTab = false;
-  foreach (QString scriptname, scriptnames)
+  for(auto file = files.begin(); file != files.end(); ++file)
   {
-    scriptingWindow->open(scriptname,newTab);
-    newTab=false;
+    if(file->isEmpty())
+      continue;
+    scriptingWindow->open(*file, newTab);
+    newTab = true;
   }
 }
 
@@ -11372,7 +11450,7 @@ void ApplicationWindow::openSurfacePlot(const std::string& lines, const int file
         }
       } //select line "title"
 
-      int style;
+      int style = Qwt3D::WIREFRAME;
       if(tsv.selectLine("Style"))
         tsv >> style;
 
@@ -13732,6 +13810,15 @@ bool ApplicationWindow::shouldExecuteAndQuit(const QString& arg)
   return arg.endsWith("--execandquit") || arg.endsWith("-xq");
 }
 
+/*
+@param arg: command argument
+@return TRUE if argument suggests a silent startup
+*/
+bool ApplicationWindow::isSilentStartup(const QString& arg)
+{
+  return arg.endsWith("--silent") || arg.endsWith("-s");
+}
+
 void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
 {
   int num_args = args.count();
@@ -13769,6 +13856,10 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
       exec = true;
       quit = true;
     }
+    else if (isSilentStartup(str))
+    {
+      g_log.debug("Starting in Silent mode");
+    }\
     // if filename not found yet then these are all program arguments so we should
     // know what they all are
     else if (file_name.isEmpty() && (str.startsWith("-") || str.startsWith("--")))

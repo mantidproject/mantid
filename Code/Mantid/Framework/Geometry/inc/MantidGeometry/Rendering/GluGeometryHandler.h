@@ -26,7 +26,7 @@ namespace Mantid
        This is an implementation class for handling geometry without triangulating and using opengl glu methods.
        This class can render cube, sphere, cone and cylinder.
 
-       Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+       Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
        This file is part of Mantid.
 

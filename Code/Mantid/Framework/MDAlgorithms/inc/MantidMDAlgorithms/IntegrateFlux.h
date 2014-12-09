@@ -24,7 +24,7 @@ namespace MDAlgorithms
 
     Calculates indefinite integral of the spectra in the input workspace sampled at a regular grid.
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

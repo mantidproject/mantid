@@ -143,6 +143,7 @@ set ( SRC_FILES
 	src/SaveVTK.cpp
 	src/SetSampleMaterial.cpp
 	src/SetScalingPSD.cpp
+	src/SortTableWorkspace.cpp
 	src/UpdateInstrumentFromFile.cpp
 )
 
@@ -286,6 +287,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetSampleMaterial.h
 	inc/MantidDataHandling/SetScalingPSD.h
+	inc/MantidDataHandling/SortTableWorkspace.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
 	src/LoadRaw/byte_rel_comp.h
 	src/LoadRaw/isisraw.h
@@ -409,6 +411,7 @@ set ( TEST_FILES
 	SaveMaskTest.h
 	SaveNISTDATTest.h
 	SaveNXSPETest.h
+	SaveNXTomoTest.h
 	SaveNexusProcessedTest.h
 	SaveNexusTest.h
 	SavePARTest.h
@@ -422,6 +425,7 @@ set ( TEST_FILES
 	SaveToSNSHistogramNexusTest.h
 	SetSampleMaterialTest.h
 	SetScalingPSDTest.h
+	SortTableWorkspaceTest.h
 	UpdateInstrumentFromFileTest.h
 	XMLInstrumentParameterTest.h
 )

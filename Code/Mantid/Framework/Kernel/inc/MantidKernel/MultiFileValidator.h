@@ -20,7 +20,7 @@ namespace Kernel
     This is essentially a wrapper around the FileValidator class; a single instance
     of which is called, once for each filename.
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

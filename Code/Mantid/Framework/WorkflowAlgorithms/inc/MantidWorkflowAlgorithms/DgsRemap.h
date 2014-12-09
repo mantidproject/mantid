@@ -13,7 +13,7 @@ namespace WorkflowAlgorithms
    * workspace if appropriate information is passed. It can be run in reverse
    * (group then mask) mode.
     
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     @date 2012-12-09
 

@@ -52,7 +52,7 @@ namespace Mantid
     @author Roman Tolchenov, Tessella plc
     @date 10/08/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -207,7 +207,7 @@ private:
   double m_xMax;    // Upper fit boundary
   bool m_changingXMin; // Flag indicating that changing of xMin is in progress
   bool m_changingXMax; // Flag indicating that changing of xMax is in progress
-  //std::string m_defaultPeakName; // The default peak function name
+  bool m_shouldBeNormalised; // Should the data be normalised before fitting?
 
   QStringList m_curveNames; // Names of all curves added to graph()
 

@@ -11,7 +11,7 @@ namespace Crystal
 
   /** PeaksInRegion : Find peaks that are either inside a box region, or that have a radius of sufficent size, that they intersect the box.
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

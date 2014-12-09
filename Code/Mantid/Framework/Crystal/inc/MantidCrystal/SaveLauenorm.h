@@ -26,7 +26,7 @@ namespace Crystal
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "SaveLauenorm";};
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Save a PeaksWorkspace to a ASCII .hkl file.";}
+    virtual const std::string summary() const {return "Save a PeaksWorkspace to a ASCII file for each detector.";}
 
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};

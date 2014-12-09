@@ -49,7 +49,7 @@ namespace Mantid
       @author Roman Tolchenov, Tessella Support Services plc
       @date 2/12/2008
       
-      Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
       
       This file is part of Mantid.
       

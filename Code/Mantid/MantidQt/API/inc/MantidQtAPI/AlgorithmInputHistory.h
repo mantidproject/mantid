@@ -17,7 +17,7 @@ namespace API
 /** This abstract class deals with the loading and saving of previous algorithm
     property values to/from MantidPlot's QSettings.
 
-    Copyright &copy; 2009-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009-2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

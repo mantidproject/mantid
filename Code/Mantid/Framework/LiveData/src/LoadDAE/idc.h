@@ -9,7 +9,7 @@
     @author Freddie Akeroyd, STFC ISIS Facility
     @date 31/07/2008
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of ISIS Instrument control program.
     you can redistribute it and/or modify it under the terms of the 

@@ -22,7 +22,7 @@ as the basis for generating visualisation cells. The recursion depth through the
  @author Owen Arnold, Tessella plc
  @date 27/July/2011
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
