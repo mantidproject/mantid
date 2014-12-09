@@ -70,7 +70,7 @@ namespace IDA
     m_furTree->addProperty(m_properties["SampleBins"]);
     m_furTree->addProperty(m_properties["ResolutionBins"]);
 
-    m_dblManager->setValue(m_properties["SampleBinning"], 10);
+    m_dblManager->setValue(m_properties["SampleBinning"], 1);
 
     m_furTree->setFactoryForManager(m_dblManager, doubleEditorFactory());
 
