@@ -488,7 +488,7 @@ color: rgb(0, 0, 0);</string>
         <string>Do not show again until next release</string>
        </property>
        <property name="checked">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
       </widget>
      </item>
