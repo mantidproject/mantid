@@ -60,27 +60,20 @@ class VanadiumRMM(object):
 #
 class DetCalFile(object):
     """ property describes various sources for the detector calibration file """
-    def __set__(self,instance,owner):
+    def __get__(self,instance,owner):
           return prop_helpers.gen_getter(instance.__dict__,'det_cal_file');
 
     def __set__(self,instance,val):
-
-       if isinstance(val,api.Workspace):
-         # workspace provided
-          prop_helpers.gen_setter(instance.__dict__,'det_cal_file',val);
-          return;
-
-        # workspace name
-       if str(val) in mtd:
-          ws = mtd[str(val)];
-          prop_helpers.gen_setter(instance.__dict__,'det_cal_file',val);
-          return;
-
-       # file name probably provided
-       if isinstance(val,str):
-          prop_helpers.gen_setter(instance.__dict__,'det_cal_file',val);
-          return;
-
+       """ set detector calibration file using various formats """ 
+       
+       if val is None or isinstance(val,api.Workspace) or isinstance(val,str):
+       # nothing provided or workspace provided or filename probably provided
+          if str(val) in mtd:
+                # workspace name provided
+                val = mtd[str(val)];
+          prop_helpers.gen_setter(instance.__dict__,'det_cal_file',val)
+          return
+  
 
        if isinstance(val,int):
           file_name= common.find_file(val);
@@ -332,7 +325,7 @@ class BackbgroundTestRange(object):
     """ The TOF range used in diagnostics to reject high background spectra. 
 
         Usually it is the same range as the TOF range used to remove 
-        background (in powders) though it may be set up separately.        
+        background (usually in powders) though it may be set up separately.        
     """
     def __get__(self,instance,type=None):
        range = prop_helpers.gen_getter(instance.__dict__,'_background_test_range');
@@ -505,7 +498,10 @@ class DirectPropertyManager(DirectReductionProperties):
             except AttributeError:
                 raise AttributeError(" Can not set property {0} to value {1}".format(name,val));
         else:
-            prop_helpers.gen_setter(self.__dict__,name,val);
+            other_prop=prop_helpers.gen_setter(self.__dict__,name,val);
+            if other_prop:
+                for prop_name in other_prop:
+                    self.__changed_properties.add(prop_name);
 
         # record changes in the property
         self.__changed_properties.add(name);
@@ -561,7 +557,7 @@ class DirectPropertyManager(DirectReductionProperties):
         if isinstance(value,set):
             self.__dict__[self._class_wrapper+'changed_properties'] =value;
         else:
-            raise KeyError("Changed properties can be initialized by apporpriate properties set only")
+            raise KeyError("Changed properties can be initialized by appropriate properties set only")
 
     @property
     def relocate_dets(self) :
@@ -639,30 +635,37 @@ class DirectPropertyManager(DirectReductionProperties):
 
         """ 
         if self.instr_name != pInstrument.getName():
-            self.log("WARNING: Setting properties of the instrument {0} from the instrument {1}.\n"
-                     "Will only work if both instruments have the same reduction properties!",'warning')
+            self.log("*** WARNING: Setting reduction properties of the instrument {0} from the instrument {1}.\n"
+                     "*** This only works if both instruments have the same reduction properties!"\
+                      .format(self.instr_name,pInstrument.getName()),'warning')
 
         changed_properties = self.getChangedProperties()
+        old_changes = set(changed_properties)
+        self.setChangedProperties(set())
+
         param_list = prop_helpers.get_default_idf_param_list(pInstrument)
         for key,val in param_list.iteritems():
             if key == 'synonims':
                continue
 
-            if not (key in changed_properties):
-               if key in self.__subst_dict:
-                        name =self.__subst_dict[key]
-               else:
-                        name =key 
+            if key in self.__subst_dict:
+                 name =self.__subst_dict[key]
+            else:
+                 name =key 
+
+            if not (name in old_changes):
                if not(name in self.__dict__):
-                        name = '_'+name
+                   name = '_'+name
 
                cur_val = self.__dict__[name]
                # complex properties set up through their members so no need to set up one
                if not isinstance(cur_val,prop_helpers.ComplexProperty): 
+                   old_val = getattr(self,name);
+                   if not(val == old_val or val == cur_val):
                      setattr(self,name,val)
         # Clear changed properties list (is this wise?, may be we want to know that some defaults changed?)
         if ignore_changes:
-            self.setChangedProperties(changed_properties)
+            self.setChangedProperties(old_changes)
 
         n=funcreturns.lhs_info('nreturns')
         if n>0:
@@ -744,36 +747,43 @@ class DirectPropertyManager(DirectReductionProperties):
         return non_changed;
 
     #
-    def log_changed_values(self,log_level='notice'):
+    def log_changed_values(self,log_level='notice',display_header=True):
       """ inform user about changed parameters and about the parameters that should be changed but have not
       
         This method is abstract method of DirectReductionProperties but is fully defined in 
         DirectPropertyManager
+
+        display_header==True prints nice additional information about run. If False, only 
+        list of changed properties displayed.
       """
+      if display_header:
+        # we may want to run absolute units normalization and this function has been called with monovan run or helper procedure
+        if self.monovan_run != None :
+            # check if mono-vanadium is provided as multiple files list or just put in brackets occasionally
+            self.log("****************************************************************",'notice');
+            self.log('*** Output will be in absolute units of mb/str/mev/fu','notice')
+            non_changed = self._check_monovan_par_changed();
+            if len(non_changed) > 0:
+                for prop in non_changed:
+                    value = getattr(self,prop)
+                    message = "\n***WARNING!: Absolute units reduction parameter : {0} has its default value: {1}"\
+                              "\n             This may need to change for correct absolute units reduction\n"
 
-      # we may want to run absolute units normalization and this function has been called with monovan run or helper procedure
-      if self.monovan_run != None :
-         # check if mono-vanadium is provided as multiple files list or just put in brackets occasionally
-          self.log("****************************************************************",'notice');
-          self.log('*** Output will be in absolute units of mb/str/mev/fu','notice')
-          non_changed = self._check_monovan_par_changed();
-          if len(non_changed) > 0:
-              for prop in non_changed:
-                 value = getattr(self,prop)
-                 message = '\n***WARNING!: Absolute units reduction parameter : {0} has its default value: {1}'+\
-                           '\n             This may need to change for correct absolute units reduction\n'
-
-                 self.log(message.format(prop,value),'warning')
+                    self.log(message.format(prop,value),'warning')
 
 
-      # now let's report on normal run.
-      self.log("*** Provisional Incident energy: {0:>12.3f} mEv".format(self.incident_energy),log_level)
+          # now let's report on normal run.
+        self.log("*** Provisional Incident energy: {0:>12.3f} mEv".format(self.incident_energy),log_level)
+      #end display_header
+
       self.log("****************************************************************",log_level);
       changed_Keys= self.getChangedProperties();
       for key in changed_Keys:
           val = getattr(self,key);
           self.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val),log_level)
 
+      if not display_header:
+          return
 
       save_dir = config.getString('defaultsave.directory')
       self.log("****************************************************************",log_level);

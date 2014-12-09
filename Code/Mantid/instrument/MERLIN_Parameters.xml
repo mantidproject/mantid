@@ -5,7 +5,7 @@
 
 <!-- files properties : -->
 
-<!-- Specify that the detector positions should be taken from the data file -->
+<!-- Specify that the detector positions should be taken from the data file (Not used ) -->
 <parameter name="det-pos-source" type="string">
   <value val="datafile"/>
 </parameter>

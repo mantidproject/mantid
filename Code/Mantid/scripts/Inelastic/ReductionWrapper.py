@@ -8,6 +8,11 @@ from abc import abstractmethod
 
 
 class ReductionWrapper(object):
+    """ Abstract class provides interface to direct inelastic reduction 
+        allowing it to be run  from Mantid, web services, or system tests 
+        using the same interface and the same run file placed in different 
+        locations
+    """ 
     def __init__(self,instrumentName,web_var=None):
       """ sets properties defaults for the instrument with Name"""
       self.iliad_prop = DirectPropertyManager(instrumentName)
@@ -49,12 +54,30 @@ class ReductionWrapper(object):
 
     @abstractmethod
     def def_main_properties(self):
+        """ Define properties which considered to be main properties changeable by user
+            
+            Should be overwritten by special reduction and decorated with  @MainProperties decorator. 
+
+            Should return dictionary with key are the properties names and values -- the default 
+            values these properties should have.
+        """ 
         raise NotImplementedError('def_main_properties  has to be implemented')
     @abstractmethod
     def def_advanced_properties(self):
+        """ Define properties which considered to be advanced but still changeable by instrument scientist or advanced user
+            
+            Should be overwritten by special reduction and decorated with  @AdvancedProperties decorator. 
+
+            Should return dictionary with key are the properties names and values -- the default 
+            values these properties should have.
+        """ 
+
         raise NotImplementedError('def_advanced_properties  has to be implemented')
     @abstractmethod
     def main(self,input_file=None,output_directory=None):
+        """ The method which performs all main reduction operations. 
+
+        """ 
         raise NotImplementedError('main routine has to be implemented')
 
 

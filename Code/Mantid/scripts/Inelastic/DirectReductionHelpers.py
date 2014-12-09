@@ -17,10 +17,12 @@ class ComplexProperty(object):
     def __set__(self,spec_dict,value):
         if len(value) != len(self._other_prop):
             raise KeyError("Complex property values can be set equal to the same length values list");
-
+        
+        changed_prop=[];
         for i,key in enumerate(self._other_prop):
                 spec_dict[key] =value[i];
-        return;
+                changed_prop.append(key);
+        return changed_prop;
 
     def len(self):
         return len(self._other_prop);
@@ -205,21 +207,22 @@ def gen_setter(keyval_dict,key,val):
     """
 
     if not(key in keyval_dict):
-        name = '_'+key;
+        name = '_'+key
         if not(name in keyval_dict):
-            raise KeyError(' Property name: {0} is not defined'.format(key));
+            raise KeyError(' Property name: {0} is not defined'.format(key))
     else:
         name = key
 
     test_val = keyval_dict[name];
     if isinstance(test_val,ComplexProperty):
        if not isinstance(val,list):
-          raise KeyError(' You can not assign non-list value to complex property {0}'.format(key));
+          raise KeyError(' You can not assign non-list value to complex property {0}'.format(key))
        pass
             # Assigning values for composite function to the function components
-       test_val.__set__(keyval_dict,val);
+       return test_val.__set__(keyval_dict,val)
     else:
        keyval_dict[key] = val;
+    return None
 
 
 def check_instrument_name(old_name,new_name):

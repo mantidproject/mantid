@@ -292,24 +292,8 @@ class DirectReductionProperties(object):
     @mask_run.setter
     def mask_run(self,value):
        object.__setattr__(self,'_mask_run',value)
-    ##-----------------------------------------------------------------------------------
-    #@property 
-    #def apply_kikf_correction(self):
-    #    """ Parameter specifies if ki/kf correction should be applied to the reduction result"""
-    #    if not hasattr(self,'_apply_kikf_correction'):
-    #        return True;
-    #    else:
-    #        return self._apply_kikf_correction;
 
-    #@apply_kikf_correction.setter 
-    #def apply_kikf_correction(self,value):
-    #    """ Set up option if ki/kf correction should be applied to the reduction result (default -- true) """
-    #    if isinstance(value,str):
-    #        val = value.lower() in ['true','t','yes','y','1']
-    #    else:
-    #        val = bool(value)
-    #    object.__setattr__(self,'_apply_kikf_correction',val);
-
+ 
     # -----------------------------------------------------------------------------
     # Service properties (used by class itself)
     #
