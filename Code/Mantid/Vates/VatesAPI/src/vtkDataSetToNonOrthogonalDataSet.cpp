@@ -73,7 +73,7 @@ vtkDataSetToNonOrthogonalDataSet::~vtkDataSetToNonOrthogonalDataSet()
 void vtkDataSetToNonOrthogonalDataSet::execute()
 {
   // Downcast to a vtkUnstructuredGrid
-  vtkUnstructuredGrid *data = vtkUnstructuredGrid::SafeDownCast(m_dataSet);
+  vtkPointSet *data = vtkPointSet::SafeDownCast(m_dataSet);
   if (NULL == data)
   {
     throw std::runtime_error("VTK dataset does not inherit from vtkPointSet");
@@ -373,7 +373,7 @@ void vtkDataSetToNonOrthogonalDataSet::copyToRaw(double *arr, MantidVec vec)
  * VTK dataset.
  * @param ugrid : The VTK dataset to add the metadata to
  */
-void vtkDataSetToNonOrthogonalDataSet::updateMetaData(vtkUnstructuredGrid *ugrid)
+void vtkDataSetToNonOrthogonalDataSet::updateMetaData(vtkDataSet *ugrid)
 {
   double baseX[3];
   double baseY[3];

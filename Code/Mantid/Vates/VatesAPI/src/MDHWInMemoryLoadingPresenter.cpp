@@ -125,5 +125,19 @@ namespace Mantid
     {
       return m_specialCoords;
     }
+    
+    std::vector<int> MDHWInMemoryLoadingPresenter::getExtents()
+    {
+      // Hack which only works in 3D. Needs to be updated for 4 dimensions!
+      using namespace Mantid::API;
+      Workspace_sptr ws = m_repository->fetchWorkspace(m_wsName);
+      IMDHistoWorkspace_sptr histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws);
+      std::vector<int> extents(6, 0);
+      extents[1] = histoWs->getDimension(0)->getNBins();
+      extents[3] = histoWs->getDimension(1)->getNBins();
+      extents[5] = histoWs->getDimension(2)->getNBins();
+      
+      return extents;
+    }
   }
 }

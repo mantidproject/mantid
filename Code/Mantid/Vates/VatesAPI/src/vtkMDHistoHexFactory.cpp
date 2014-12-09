@@ -7,6 +7,10 @@
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidKernel/ReadLock.h"
 
+#include "vtkNew.h"
+#include "vtkStructuredGrid.h"
+#include "vtkDoubleArray.h"
+
 using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDHistoWorkspace;
 using Mantid::Kernel::CPUTimer;
@@ -106,11 +110,22 @@ namespace VATES
     vtkPoints *points = vtkPoints::New();
     points->Allocate(static_cast<int>(imageSize));
 
-    vtkFloatArray * signal = vtkFloatArray::New();
-    signal->Allocate(imageSize);
+    //vtkFloatArray * signal = vtkFloatArray::New();
+    //signal->Allocate(imageSize);
+    //signal->SetName(m_scalarName.c_str());
+    //signal->SetNumberOfComponents(1);
+    
+    vtkNew<vtkDoubleArray> signal;
     signal->SetName(m_scalarName.c_str());
     signal->SetNumberOfComponents(1);
+    // (argument #3) tell VTK to not delete this array
+    signal->SetArray(m_workspace->getSignalArray(),imageSize,1);
+    assert(imageSize == signal->GetNumberOfTuples());
 
+    vtkNew<vtkStructuredGrid> visualDataset;
+    visualDataset->SetDimensions(nBinsX+1,nBinsY+1,nBinsZ+1);
+    
+    
     double signalScalar;
     const int nPointsX = nBinsX+1;
     const int nPointsY = nBinsY+1;
@@ -122,15 +137,13 @@ namespace VATES
      create the points that will be needed; so an array of pointNeeded
      is set so that all required vertices are marked, and created in a second step. */
 
-    // Array of the points that should be created, set to false
-    bool * pointNeeded = new bool[nPointsX*nPointsY*nPointsZ];
-    memset(pointNeeded, 0, nPointsX*nPointsY*nPointsZ*sizeof(bool));
     // Array with true where the voxel should be shown
-    bool * voxelShown = new bool[nBinsX*nBinsY*nBinsZ];
     double progressFactor = 0.5/double(nBinsZ);
     double progressOffset = 0.5;
 
-    size_t index = 0;
+    
+    
+    vtkIdType index = 0;
     for (int z = 0; z < nBinsZ; z++)
     {
       //Report progress updates for the first 50%
@@ -150,27 +163,10 @@ namespace VATES
           else
             signalScalar = m_workspace->getSignalNormalizedAt(x,y,z);
 
-          if (isSpecial( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
+          bool maskValue = (isSpecial( signalScalar ) || !m_thresholdRange->inRange(signalScalar));
+          if (maskValue)
           {
-            // out of range
-            voxelShown[index] = false;
-          }
-          else
-          {
-            // Valid data
-            voxelShown[index] = true;
-            signal->InsertNextValue(static_cast<float>(signalScalar));
-
-            // Make sure all 8 neighboring points are set to true
-            size_t pointIndex = x + (nPointsX * y) + (nPointsX*nPointsY*z); //(Note this index is different then the other one)
-            pointNeeded[pointIndex] = true;  pointIndex++;
-            pointNeeded[pointIndex] = true;  pointIndex += nPointsX-1;
-            pointNeeded[pointIndex] = true;  pointIndex++;
-            pointNeeded[pointIndex] = true;  pointIndex += nPointsX*nPointsY - nPointsX - 1;
-            pointNeeded[pointIndex] = true;  pointIndex++;
-            pointNeeded[pointIndex] = true;  pointIndex += nPointsX-1;
-            pointNeeded[pointIndex] = true;  pointIndex++;
-            pointNeeded[pointIndex] = true;
+            visualDataset->BlankCell(index);
           }
           index++;
         }
@@ -188,7 +184,6 @@ namespace VATES
     Mantid::coord_t out[3];
             
     // Array with the point IDs (only set where needed)
-    vtkIdType * pointIDs = new vtkIdType[nPointsX*nPointsY*nPointsZ];
     index = 0;
     progressFactor = 0.5/static_cast<double>(nPointsZ);
 
@@ -203,18 +198,15 @@ namespace VATES
         for (int x = 0; x < nPointsX; x++)
         {
           // Create the point only when needed
-          if (pointNeeded[index])
+          in[0] = (minX + (static_cast<coord_t>(x) * incrementX)); //Calculate increment in x;
+          if (transform)
           {
-            in[0] = (minX + (static_cast<coord_t>(x) * incrementX)); //Calculate increment in x;
-            if (transform)
-            {
-              transform->apply(in, out);
-              pointIDs[index] = points->InsertNextPoint(out);
-            }
-            else
-            {
-              pointIDs[index] = points->InsertNextPoint(in);
-            }
+            transform->apply(in, out);
+            points->InsertNextPoint(out);
+          }
+          else
+          {
+            points->InsertNextPoint(in);
           }
           index++;
         }
@@ -222,65 +214,15 @@ namespace VATES
     }
 
     std::cout << tim << " to create the needed points." << std::endl;
-
-    vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
-    visualDataSet->Allocate(imageSize);
-    visualDataSet->SetPoints(points);
-    visualDataSet->GetCellData()->SetScalars(signal);
-
-    // ------ Hexahedron creation ----------------
-    // It is approx. 40 x faster to create the hexadron only once, and reuse it for each voxel.
-    vtkHexahedron *theHex = vtkHexahedron::New();
-    index = 0;
-    
-    for (int z = 0; z < nBinsZ; z++)
-    {
-      for (int y = 0; y < nBinsY; y++)
-      {
-        for (int x = 0; x < nBinsX; x++)
-        {
-          if (voxelShown[index])
-          {
-            //Only create topologies for those cells which are not sparse.
-            // create a hexahedron topology
-            vtkIdType id_xyz =    pointIDs[(x)   + (y)*nPointsX + z*nPointsX*nPointsY];
-            vtkIdType id_dxyz =   pointIDs[(x+1) + (y)*nPointsX + z*nPointsX*nPointsY];
-            vtkIdType id_dxdyz =  pointIDs[(x+1) + (y+1)*nPointsX + z*nPointsX*nPointsY];
-            vtkIdType id_xdyz =   pointIDs[(x)   + (y+1)*nPointsX + z*nPointsX*nPointsY];
-
-            vtkIdType id_xydz =   pointIDs[(x)   + (y)*nPointsX + (z+1)*nPointsX*nPointsY];
-            vtkIdType id_dxydz =  pointIDs[(x+1) + (y)*nPointsX + (z+1)*nPointsX*nPointsY];
-            vtkIdType id_dxdydz = pointIDs[(x+1) + (y+1)*nPointsX + (z+1)*nPointsX*nPointsY];
-            vtkIdType id_xdydz =  pointIDs[(x)   + (y+1)*nPointsX + (z+1)*nPointsX*nPointsY];
-
-            //create the hexahedron
-            theHex->GetPointIds()->SetId(0, id_xyz);
-            theHex->GetPointIds()->SetId(1, id_dxyz);
-            theHex->GetPointIds()->SetId(2, id_dxdyz);
-            theHex->GetPointIds()->SetId(3, id_xdyz);
-            theHex->GetPointIds()->SetId(4, id_xydz);
-            theHex->GetPointIds()->SetId(5, id_dxydz);
-            theHex->GetPointIds()->SetId(6, id_dxdydz);
-            theHex->GetPointIds()->SetId(7, id_xdydz);
-
-            visualDataSet->InsertNextCell(VTK_HEXAHEDRON, theHex->GetPointIds());
-          }
-          index++;
-        }
-      }
-    }
-    theHex->Delete();
-
+    visualDataset->SetPoints(points);
+    visualDataset->GetCellData()->SetScalars(signal.GetPointer());
+    visualDataset->Register(NULL);
+        
     std::cout << tim << " to create and add the hexadrons." << std::endl;
 
-
     points->Delete();
-    signal->Delete();
-    visualDataSet->Squeeze();
-    delete [] pointIDs;
-    delete [] voxelShown;
-    delete [] pointNeeded;
-    return visualDataSet;
+    visualDataset->Squeeze();
+    return visualDataset.GetPointer();
 
   }
 

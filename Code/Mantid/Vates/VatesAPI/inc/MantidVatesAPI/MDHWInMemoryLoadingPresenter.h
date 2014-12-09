@@ -3,6 +3,7 @@
 
 #include "MantidVatesAPI/MDHWLoadingPresenter.h"
 #include <boost/scoped_ptr.hpp>
+#include <vector>
 
 class vtkDataSet;
 namespace Mantid
@@ -48,6 +49,7 @@ namespace Mantid
       virtual bool canReadFile() const;
       virtual std::string getWorkspaceTypeName();
       virtual int getSpecialCoordinates();
+      std::vector<int> getExtents();
     private:
       /// Repository for accessing workspaces. At this level, does not specify how or where from.
       boost::scoped_ptr<WorkspaceProvider> m_repository;
