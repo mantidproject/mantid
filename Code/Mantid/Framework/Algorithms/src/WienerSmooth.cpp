@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/WienerSmooth.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/ArrayProperty.h"
 
 #include <numeric>
 
@@ -60,7 +61,8 @@ namespace Algorithms
   void WienerSmooth::init()
   {
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
-    declareProperty("WorkspaceIndex",0,"A workspace index for the histogram to smooth.");
+    declareProperty(new Kernel::ArrayProperty<int>("WorkspaceIndexList"), "Workspace indices for spectra to process. "
+      "If empty smooth all spectra.");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
   }
 
@@ -71,16 +73,71 @@ namespace Algorithms
   {
     // Get the data to smooth
     API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-    size_t wsIndex = static_cast<int>( getProperty("WorkspaceIndex") );
+    std::vector<int> wsIndexList = getProperty("WorkspaceIndexList");
 
+    const size_t nSpectra = inputWS->getNumberHistograms();
+
+    // Validate the input
+    if ( wsIndexList.size() > nSpectra )
+    {
+      throw std::invalid_argument("Workspace index list has more indices than there are spectra in the input workspace.");
+    }
+
+    // if empty do whole workspace
+    if ( wsIndexList.empty() )
+    {
+      // fill wsIndexList with consecutive integers from 0 to nSpectra - 1
+      wsIndexList.resize( nSpectra );
+      wsIndexList.front() = 0;
+      for(auto index = wsIndexList.begin() + 1; index != wsIndexList.end(); ++index)
+      {
+        *index = *(index-1) + 1;
+      }
+    }
+
+    // smooth the first spectrum and create a workspace with all correct settings for the output
+    // except the number of spectra
+    size_t wsIndex = static_cast<size_t>( wsIndexList.front() );
+    auto first = smoothSingleSpectrum( inputWS, wsIndex );
+
+    // create full output workspace by copying all settings from the first spectrum. inputWS cannot be used here because
+    // blocksize() can change
+    API::MatrixWorkspace_sptr out = API::WorkspaceFactory::Instance().create( first, wsIndexList.size(), first->readX(0).size(), first->readY(0).size() );
+    out->setX( 0, first->readX(0) );
+    out->getSpectrum(0)->setData( first->readY(0), first->readE(0) );
+
+    // smooth the rest of the input
+    for(auto index = wsIndexList.begin() + 1; index != wsIndexList.end(); ++index)
+    {
+      auto next = smoothSingleSpectrum( inputWS, *index );
+      auto outIndex = std::distance( wsIndexList.begin(), index );
+
+      out->dataX(outIndex) = next->readX(0);
+      out->dataY(outIndex) = next->readY(0);
+      out->dataE(outIndex) = next->readE(0);
+    }
+
+    // set the output
+    setProperty( "OutputWorkspace", out );
+
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+   * Execute smoothing of a single spectrum.
+   * @param inputWS :: A workspace to pick a spectrum from.
+   * @param wsIndex :: An index of a spectrum to smooth.
+   * @return :: A single-spectrum workspace with the smoothed data.
+   */
+  API::MatrixWorkspace_sptr WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS, size_t wsIndex)
+  {
     size_t dataSize = inputWS->blocksize();
 
     // it won't work for very small workspaces
     if ( dataSize < 4 )
     {
       g_log.debug() << "No smoothing, spectrum copied." << std::endl;
-      setProperty( "OutputWorkspace", copyInput(inputWS,wsIndex) );
-      return;
+      return copyInput(inputWS,wsIndex);
     }
 
     // Due to the way RealFFT works the input should be even-sized
@@ -285,8 +342,7 @@ namespace Algorithms
       out->dataE(0).assign(E.begin(),E.end());
     }
 
-    // set the output
-    setProperty( "OutputWorkspace", out );
+    return out;
   }
 
   /**
