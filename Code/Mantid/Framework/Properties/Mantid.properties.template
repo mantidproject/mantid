@@ -41,6 +41,9 @@ instrumentDefinition.directory = @MANTID_ROOT@/instrument
 UpdateInstrumentDefinitions.OnStartup = @UPDATE_INSTRUMENT_DEFINTITIONS@
 UpdateInstrumentDefinitions.URL = https://api.github.com/repos/mantidproject/mantid/contents/Code/Mantid/instrument
 
+# Whether to report usage statistics back to central server
+usagereports.enabled = @ENABLE_USAGE_REPORTS@
+
 # Where to load Grouping files (that are shipped with Mantid) from
 groupingFiles.directory = @MANTID_ROOT@/instrument/Grouping
 
