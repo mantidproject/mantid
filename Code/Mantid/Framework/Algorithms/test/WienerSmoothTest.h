@@ -126,7 +126,8 @@ public:
     Y.assign( y, y + ny );
     E.assign( e, e + ny );
 
-    auto outputWs = runWienerSmooth( dataWS, 0 );
+    std::vector<int> wsIndexList(1, 0);
+    auto outputWs = runWienerSmooth( dataWS, wsIndexList );
 
     auto &outY = outputWs->readY(0);
 
@@ -139,7 +140,7 @@ public:
     AnalysisDataService::Instance().clear();
   }
   
-  MatrixWorkspace_sptr runWienerSmooth(MatrixWorkspace_sptr inputWS, size_t wsIndex)
+  MatrixWorkspace_sptr runWienerSmooth(MatrixWorkspace_sptr inputWS, const std::vector<int>& wsIndexList)
   {
     // Name of the output workspace.
     std::string outWSName("WienerSmoothTest_OutputWS");
@@ -149,7 +150,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWS) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("WorkspaceIndex", static_cast<int>(wsIndex)) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("WorkspaceIndexList", wsIndexList) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
@@ -159,13 +160,13 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName) );
     TS_ASSERT(ws);
 
-    auto &inX = inputWS->readX(wsIndex);
-    auto &inE = inputWS->readE(wsIndex);
+    auto &inX = inputWS->readX(wsIndexList[0]);
+    auto &inE = inputWS->readE(wsIndexList[0]);
 
     auto outX = ws->readX(0);
     auto outE = ws->readE(0);
 
-    TS_ASSERT_EQUALS( inputWS->readY(wsIndex).size(), ws->readY(0).size() );
+    TS_ASSERT_EQUALS( inputWS->readY(wsIndexList[0]).size(), ws->readY(0).size() );
     TS_ASSERT( std::equal( outX.begin(), outX.end(), inX.begin() ) );
     TS_ASSERT( std::equal( outE.begin(), outE.end(), inE.begin() ) );
 
