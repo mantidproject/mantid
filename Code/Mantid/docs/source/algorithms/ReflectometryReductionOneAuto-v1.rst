@@ -11,9 +11,30 @@ Description
 
 Facade over :ref:`algm-ReflectometryReductionOne`.
 
-Pulls numeric parameters out of the instrument parameters where possible. You can override any of these automatically applied defaultsby providing your own value for the input.
+Pulls numeric parameters out of the instrument parameters where possible. You can override any of these automatically applied defaults by providing your own value for the input.
+
+If ProcessingInstructions is not set its value is inferred from other properties:
+
+* If AnalysisMode = PointDetectorAnalaysis and PointDetectorStart = PointDetectorStop then the spectrum specified by PointDetectorStart is used.
+* If AnalysisMode = PointDetectorAnalaysis and PointDetectorStart ≠ PointDetectorStop then the sum of the spectra from PointDetectorStart to PointDetectorStop is used.
+* If AnalysisMode = MultiDetectorAnalaysis then all of the spectra from MultiDetectorStart onwards are used.
 
 See :ref:`algm-ReflectometryReductionOne` for more information on the wrapped algorithm.
+
+Workflow for WorkspaceGroups
+############################
+
+If a WorkspaceGroup is provided to ReflectometryReductionOneAuto, it will follow the steps shown in the diagram below to produce its output.
+
+.. image:: ../images/ReflectometryReductionOneAuto-Groups.png
+
+Workflow for Polarization Correction
+####################################
+
+If polarization correction is enabled, it is performed as an additional step once the main processing has completed.
+The following diagram shows how the :ref:`algm-PolarizationCorrection` algorithm is used.
+
+.. image:: ../images/ReflectometryReductionOneAuto-Groups.png
 
 Usage
 -----

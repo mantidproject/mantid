@@ -98,6 +98,12 @@ void ScriptingWindow::saveSettings()
   settings.setValue("/LastDirectoryVisited", m_manager->m_last_dir);
   settings.setValue("/RecentScripts",m_manager->recentScripts());
   settings.setValue("/ZoomLevel",m_manager->globalZoomLevel());
+  settings.setValue("/ShowWhitespace", m_toggleWhitespace->isChecked());
+  settings.setValue("/ReplaceTabs", m_manager->m_replaceTabs);
+  settings.setValue("/TabWhitespaceCount", m_manager->m_tabWhitespaceCount);
+  settings.setValue("/ScriptFontFamily", m_manager->m_fontFamily);
+  settings.setValue("/CodeFolding", m_toggleFolding->isChecked());
+
   settings.endGroup();
 }
 
@@ -118,7 +124,13 @@ void ScriptingWindow::readSettings()
   m_toggleProgress->setChecked(settings.value("ProgressArrow", true).toBool());
   m_manager->setRecentScripts(settings.value("/RecentScripts").toStringList());
   m_manager->m_globalZoomLevel = settings.value("ZoomLevel",0).toInt();
-
+  m_toggleFolding->setChecked(settings.value("CodeFolding", false).toBool());
+  m_toggleWhitespace->setChecked(settings.value("ShowWhitespace", false).toBool());
+  
+  m_manager->m_replaceTabs = settings.value("ReplaceTabs", true ).toBool();
+  m_manager->m_tabWhitespaceCount = settings.value("TabWhitespaceCount", 4).toInt();
+  m_manager->m_fontFamily = settings.value("ScriptFontFamily","").toString();
+  
   settings.endGroup();
 
 }
@@ -235,6 +247,14 @@ void ScriptingWindow::populateEditMenu()
   m_editMenu->addAction(m_paste);
 
   m_editMenu->insertSeparator();
+  m_editMenu->addAction(m_comment);
+  m_editMenu->addAction(m_uncomment);
+
+  m_editMenu->insertSeparator();
+  m_editMenu->addAction(m_tabsToSpaces);
+  m_editMenu->addAction(m_spacesToTabs);
+
+  m_editMenu->insertSeparator();
   m_editMenu->addAction(m_find);
 }
 /// Populate execute menu
@@ -275,6 +295,11 @@ void ScriptingWindow::populateWindowMenu()
     m_windowMenu->insertSeparator();
     m_windowMenu->addAction(m_toggleProgress);
     m_windowMenu->addAction(m_toggleFolding);
+
+    m_windowMenu->addAction(m_toggleWhitespace);
+      m_windowMenu->insertSeparator();
+    m_windowMenu->addAction(m_openConfigTabs);
+    m_windowMenu->addAction(m_selectFont);
   }
 }
 
@@ -499,6 +524,20 @@ void ScriptingWindow::initEditMenuActions()
   m_paste = new QAction(tr("&Paste"), this);
   connect(m_paste, SIGNAL(triggered()), m_manager, SLOT(paste()));
   m_paste->setShortcut(QKeySequence::Paste);
+  
+  m_comment = new QAction(tr("Co&mment"), this);
+  connect(m_comment, SIGNAL(triggered()), m_manager, SLOT(comment()));
+  m_comment->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
+
+  m_uncomment = new QAction(tr("Uncomment"), this);
+  connect(m_uncomment, SIGNAL(triggered()), m_manager, SLOT(uncomment()));
+  m_uncomment->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_M));
+  
+  m_tabsToSpaces = new QAction(tr("Tabs to Spaces"), this);
+  connect(m_tabsToSpaces, SIGNAL(triggered()), m_manager, SLOT(tabsToSpaces()));
+
+  m_spacesToTabs = new QAction(tr("Spaces to Tabs"), this);
+  connect(m_spacesToTabs, SIGNAL(triggered()), m_manager, SLOT(spacesToTabs()));
 
   m_find = new QAction(tr("&Find/Replace"), this);
   connect(m_find, SIGNAL(triggered()), m_manager, 
@@ -584,6 +623,19 @@ void ScriptingWindow::initWindowMenuActions()
   m_toggleFolding = new QAction(tr("Code &Folding"), this);
   m_toggleFolding->setCheckable(true);
   connect(m_toggleFolding, SIGNAL(toggled(bool)), m_manager, SLOT(toggleCodeFolding(bool)));
+
+  // Toggle the whitespace arrow
+  m_toggleWhitespace = new QAction(tr("&Show Whitespace"), this);
+  m_toggleWhitespace->setCheckable(true);  
+  connect(m_toggleWhitespace, SIGNAL(toggled(bool)), m_manager, SLOT(toggleWhitespace(bool)));
+
+  // Open Config Tabs dialog
+  m_openConfigTabs = new QAction(tr("Configure Tabs"), this);
+  connect(m_openConfigTabs, SIGNAL(triggered()), m_manager, SLOT(openConfigTabs()));
+
+  // Show font selection dialog
+  m_selectFont = new QAction(tr("Select Font"), this);
+  connect(m_selectFont, SIGNAL(triggered()), m_manager, SLOT(showSelectFont()));
 }
 
 /**

@@ -117,6 +117,10 @@ namespace IDA
     furyAlg->setProperty("DryRun", false);
 
     runAlgorithm(furyAlg);
+
+    // Set the result workspace for Python script export
+    QString sampleName = uiForm().fury_dsInput->getCurrentDataName();
+    m_pythonExportWsName = sampleName.left(sampleName.lastIndexOf("_")).toStdString() + "_iqt";
   }
 
   /**

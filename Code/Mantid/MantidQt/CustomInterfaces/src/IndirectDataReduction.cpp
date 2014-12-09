@@ -104,6 +104,16 @@ void IndirectDataReduction::helpClicked()
 
 
 /**
+ * Called when the user clicks the Python export button.
+ */
+void IndirectDataReduction::exportTabPython()
+{
+  QString tabName = m_uiForm.tabWidget->tabText(m_uiForm.tabWidget->currentIndex());
+  m_tabs[tabName]->exportPythonScript();
+}
+
+
+/**
  * This is the function called when the "Run" button is clicked. It will call the relevent function
  * in the subclass.
  */
@@ -145,6 +155,8 @@ void IndirectDataReduction::initLayout()
 
   // Connect "?" (Help) Button
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
+  // Connect the Python export buton
+  connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this, SLOT(exportTabPython()));
   // Connect the "Run" button
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   // Connect the "Manage User Directories" Button

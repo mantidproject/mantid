@@ -9,7 +9,7 @@ namespace RefDetectorViewer
 {
 /** Retrieves the states of the peak/background/TOF limit settings from the gui
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

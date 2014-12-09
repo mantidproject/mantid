@@ -138,7 +138,8 @@ private:
   /// Edit menu
   QMenu *m_editMenu;
   /// Edit menu actions
-  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_find;
+  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_comment, *m_uncomment, 
+    *m_tabsToSpaces, *m_spacesToTabs, *m_find;
   /// Run menu
   QMenu *m_runMenu;
   /// Execute menu actions
@@ -153,7 +154,8 @@ private:
   QMenu *m_windowMenu;
   /// Window actions
   QAction *m_alwaysOnTop, *m_hide, *m_zoomIn, *m_zoomOut, *m_resetZoom,
-    *m_toggleProgress, *m_toggleFolding;
+    *m_toggleProgress, *m_toggleFolding, *m_toggleWhitespace, 
+    *m_openConfigTabs, *m_selectFont;
   /// Change scripting language
   QAction *m_scripting_lang;
   /// Flag to define whether we should accept a close event

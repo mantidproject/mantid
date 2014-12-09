@@ -64,15 +64,42 @@ A peak will not be used if
 Generate fit window
 ###################
 
--  Required parameter: maxWidth. If it is not given, i.e., less or equal
-   to zero, then there won't be any window defined;
--  Definition of fit window for peaks indexed from 0 to N-1
+There are two approach to generate fit window.  One is via property 'FitWindowMaxWidth';
+and the other is 'FitwindowTableWorkspace'.
+
+If neither of these 2 properties are correctly specified, then then there won't be any window defined.
+
+Uniform fit window
+==================
+
+By specifying a postive float, maxWidth, for 'FitWindowMaxWidth',
+it is the definition of fit window for peaks indexed from 0 to N-1:
 
    -  Peak 0: window = :math:`\min((X0_0-dmin), maxWidth)`, :math:`\min((X0_1-X0_0)/2,maxWidth)`
    -  Peak :math:`i (0 < i < N-1)`: window = :math:`\min((X0_i-X0_{i-1})/2, maxWidth)`, :math:`\min((X0_1-X0_0)/2, maxWidth)`
    -  Peak :math:`N-1`: window = :math:`\min((X0_i-X0_{i-1})/2, maxWidth)`, :math:`\min((dmax-X0_i), maxWidth)`
 
 where :math:`X0_i` is the centre of i-th peak.
+
+Fit window for individual peak
+==============================
+
+FitwindowTableWorkspace contains the fit window for each individual peak in the workspace
+to find.
+It contains :math:`1+2\times N` columns, where N is the number of peaks positions specified in 'DReference'.
+
+- Column 0: spectrum number (workspace index) :math:`iws`.  If :math:`iws < 0`, then it is a 'universal' spectrum;
+- Column :math:`2i+1`: left boundary of peak :math:`i` defined in 'DReference' of spectrum :math:`iws`;
+- Column :math:`2i+2`: right boundary of peak :math:`i` defined in 'DReference' of spectrum :math:`iws`;
+
+Default fit windows
++++++++++++++++++++
+
+In the fit window table workspace, if there is a row, whose 'spectrum number' is a negative number,
+then the fit windows defined in this row is treated as the default fit windows.
+It means that for any spectrum that has no fit windows defined in the tableworkspace,
+the default fit windows will be applied to it.
+
 
 Quality of Fitting
 ------------------

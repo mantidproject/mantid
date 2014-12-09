@@ -36,6 +36,10 @@ if ( stdint )
   add_definitions ( -DHAVE_STDINT_H )
 endif ( stdint )
 
+# Configure a variable to hold the required test timeout value for all tests
+set ( TESTING_TIMEOUT 300 CACHE INTEGER
+      "Timeout in seconds for each test (default 300=5minutes)")
+
 ###########################################################################
 # Look for dependencies - bail out if any not found
 ###########################################################################
@@ -236,6 +240,8 @@ endif ()
 # Add compiler options if using gcc
 ###########################################################################
 if ( CMAKE_COMPILER_IS_GNUCXX )
+  include ( GNUSetup )
+elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
   include ( GNUSetup )
 endif ()
 

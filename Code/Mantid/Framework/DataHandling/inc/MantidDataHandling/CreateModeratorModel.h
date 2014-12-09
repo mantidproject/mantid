@@ -10,7 +10,7 @@ namespace Mantid
     /**
       Defines an algorithm to create a moderator model object an attach it to the given workspace
 
-      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 

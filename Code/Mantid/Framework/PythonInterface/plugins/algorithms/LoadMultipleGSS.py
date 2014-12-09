@@ -50,6 +50,6 @@ class LoadMultipleGSS(PythonAlgorithm):
         for run in runs:
             wksp = "%s_%d" % (prefix,run)
             self.__load(directory, wksp)
-        ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
+            ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
 
 AlgorithmFactory.subscribe(LoadMultipleGSS)

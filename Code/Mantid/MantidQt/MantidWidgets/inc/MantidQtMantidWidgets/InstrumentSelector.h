@@ -30,7 +30,7 @@ namespace MantidQt
     @author Martyn Gigg, Tessella Support Services plc
     @date 10/08/2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -64,6 +64,8 @@ namespace MantidQt
       QStringList getTechniques() const;
       /// Set the list of techniques
       void setTechniques(const QStringList & techniques);
+      /// Sets whether to update the default instrument on selection change
+      void updateInstrumentOnSelection(const bool storeChanges);
 
     public slots:
       /// Update list for a new facility
@@ -92,6 +94,8 @@ namespace MantidQt
       const Mantid::Kernel::FacilityInfo *m_currentFacility;
       /// Should the object be initialized
       bool m_init;
+      /// should the default instrument be changed when the selection changes
+      bool m_storeChanges;
     };
 
   }

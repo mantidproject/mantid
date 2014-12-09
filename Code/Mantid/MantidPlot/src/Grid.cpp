@@ -31,6 +31,8 @@
 #include "Grid.h"
 #include "ColorBox.h"
 
+#include "TSVSerialiser.h"
+
 #include <qwt_plot_canvas.h>
 #include <qwt_painter.h>
 
@@ -259,34 +261,32 @@ void Grid::copy(Grid *grid)
 	setRenderHint(QwtPlotItem::RenderAntialiased, grid->testRenderHint(QwtPlotItem::RenderAntialiased));
 }
 
-QString Grid::saveToString()
+std::string Grid::saveToString()
 {
-	QString s = "grid\t";
-	s += QString::number(xEnabled())+"\t";
-	s += QString::number(xMinEnabled())+"\t";
-	s += QString::number(yEnabled())+"\t";
-	s += QString::number(yMinEnabled())+"\t";
+  TSVSerialiser tsv;
+  tsv.writeLine("grid");
 
-	s += majPenX().color().name()+"\t";
-	s += QString::number(majPenX().style() - 1)+"\t";
-	s += QString::number(majPenX().widthF())+"\t";
+  tsv << xEnabled() << xMinEnabled();
+  tsv << yEnabled() << yMinEnabled();
 
-	s += minPenX().color().name()+"\t";
-	s += QString::number(minPenX().style() - 1)+"\t";
-	s += QString::number(minPenX().widthF())+"\t";
+  tsv << majPenX().color().name();
+  tsv << majPenX().style() - 1;
+  tsv << majPenX().widthF();
 
-    s += majPenY().color().name()+"\t";
-	s += QString::number(majPenY().style() - 1)+"\t";
-	s += QString::number(majPenY().widthF())+"\t";
+  tsv << minPenX().color().name();
+  tsv << minPenX().style() - 1;
+  tsv << minPenX().widthF();
 
-	s += minPenY().color().name()+"\t";
-	s += QString::number(minPenY().style() - 1)+"\t";
-	s += QString::number(minPenY().widthF())+"\t";
+  tsv << majPenY().color().name();
+  tsv << majPenY().style() - 1;
+  tsv << majPenY().widthF();
 
-	s += QString::number(xZeroLineEnabled())+"\t";
-	s += QString::number(yZeroLineEnabled())+"\t";
-	s += QString::number(xAxis())+"\t";
-	s += QString::number(yAxis())+"\t";
-	s += QString::number(testRenderHint(QwtPlotItem::RenderAntialiased))+"\n";
-	return s;
+  tsv << minPenY().color().name();
+  tsv << minPenY().style() - 1;
+  tsv << minPenY().widthF();
+
+  tsv << xZeroLineEnabled() << yZeroLineEnabled();
+  tsv << xAxis() << yAxis();
+  tsv << testRenderHint(QwtPlotItem::RenderAntialiased);
+  return tsv.outputLines();
 }

@@ -17,7 +17,7 @@ namespace DataHandling
 
   /** LoadGSASInstrumentFile : Load GSAS instrument file to TableWorkspace(s)
     
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

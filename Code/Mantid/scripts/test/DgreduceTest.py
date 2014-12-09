@@ -17,9 +17,10 @@ class DgreduceTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_run_help(self):
-        self.assertRaises(ValueError,help,'rubbish')
-        help("monovan_lo_bound")
+    #TODO: write help
+    #def test_run_help(self):
+    #    self.assertRaises(ValueError,help,'rubbish')
+    #    help("monovan_lo_bound")
     def test_process_legacy_parameters(self):
         kw=dict();
         kw["hardmaskOnly"]="someFileName"
@@ -76,23 +77,7 @@ class DgreduceTest(unittest.TestCase):
         self.assertEqual(len(params),2)
         self.assertEqual(params["hard_mask_file"],'SomeFileName');
         self.assertEqual(params['use_hard_mask_only'],False)
-    def test_setup(self):
 
-
-        setup('mari')
-        Reducer = getReducer()
-        self.assertTrue(not (Reducer is None))
-
-        self.assertEqual(Reducer.instr_name,'MAR')
-
-        Reducer.save_format = ''
-        self.assertTrue(Reducer.save_format is None)
-
-        Reducer.save_format = 'none'
-        self.assertTrue(Reducer.save_format is None)
-
-        Reducer.save_format = []
-        self.assertTrue(Reducer.save_format is None)
 
     def test_setup_empty(self):
         # clear up singleton

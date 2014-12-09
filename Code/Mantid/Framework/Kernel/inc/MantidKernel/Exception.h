@@ -52,6 +52,7 @@ namespace Kernel
         <li><b>MisMatch</b> - Error when two numbers should be identical (or close).</li>
         <li><b>IndexError</b> - Error when an incorrect index value is given.</li>
         <li><b>NullPointerException</b> - Thrown when a zero pointer is dereferenced.</li>
+        <li><b>InternetError</b> - Thrown when an error occurs accessing an internet resource.</li>
       </ul>
       </li>
     </ul>
@@ -61,7 +62,7 @@ namespace Kernel
     @author Nick Draper, Tessella Support Services plc
     @date 8/11/2007
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -343,6 +344,31 @@ class MANTID_KERNEL_DLL OpenGLError: public std::runtime_error
 
     /// Overloaded reporting method
     const char* what() const throw();
+  };
+
+  /** Exception thrown when error occurs accessing an internet resource
+   *
+   *  @author Nick Draper, Tessella
+   *  @date 13/11/2013
+   */
+  class MANTID_KERNEL_DLL
+  InternetError : public std::runtime_error
+  {
+  private:
+    /// The message returned by what()
+    std::string outMessage;
+    int m_errorCode; ///< The message reported by what()
+
+  public:
+    InternetError(const std::string& message, const int& errorCode = 0);
+    InternetError(const InternetError&);
+    ~InternetError() throw() {}
+
+    InternetError & operator=(const InternetError &);
+
+    /// Overloaded reporting method
+    const char* what() const throw();
+    const int& errorCode() const;
   };
 
 } //namespace Exception

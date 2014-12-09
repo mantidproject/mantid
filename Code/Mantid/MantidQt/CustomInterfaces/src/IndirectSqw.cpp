@@ -209,6 +209,9 @@ namespace CustomInterfaces
       m_batchAlgoRunner->addAlgorithm(saveNexusAlg, inputToSaveNexusProps);
     }
 
+    // Set the name of the result workspace for Python export
+    m_pythonExportWsName = sqwWsName.toStdString();
+
     m_batchAlgoRunner->executeBatch();
   }
 

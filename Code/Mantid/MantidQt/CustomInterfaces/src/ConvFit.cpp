@@ -14,6 +14,8 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
+using namespace Mantid::API;
+
 namespace
 {
   Mantid::Kernel::Logger g_log("ConvFit");
@@ -25,15 +27,15 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  ConvFit::ConvFit(QWidget * parent) : 
+  ConvFit::ConvFit(QWidget * parent) :
     IDATab(parent),
-    m_stringManager(NULL), m_cfTree(NULL), 
+    m_stringManager(NULL), m_cfTree(NULL),
     m_fixedProps(),
     m_cfInputWS(), m_cfInputWSName(),
     m_confitResFileType()
   {
   }
-  
+
   void ConvFit::setup()
   {
     // Create Property Managers
@@ -56,7 +58,7 @@ namespace IDA
 
     // Create Range Selectors
     m_rangeSelectors["ConvFitRange"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["ConvFitPlot"]);
-    m_rangeSelectors["ConvFitBackRange"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["ConvFitPlot"], 
+    m_rangeSelectors["ConvFitBackRange"] = new MantidQt::MantidWidgets::RangeSelector(m_plots["ConvFitPlot"],
       MantidQt::MantidWidgets::RangeSelector::YSINGLE);
     m_rangeSelectors["ConvFitBackRange"]->setColour(Qt::darkGreen);
     m_rangeSelectors["ConvFitBackRange"]->setRange(0.0, 1.0);
@@ -121,16 +123,15 @@ namespace IDA
     bgTypeSelection(uiForm().confit_cbBackground->currentIndex());
 
     // Replot input automatically when file / spec no changes
-    connect(uiForm().confit_lePlotSpectrum, SIGNAL(editingFinished()), this, SLOT(plotInput()));
-    connect(uiForm().confit_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput()));
-    
+    connect(uiForm().confit_spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
+    connect(uiForm().confit_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded(const QString&)));
+
+    connect(uiForm().confit_spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));
+    connect(uiForm().confit_spSpectraMax, SIGNAL(valueChanged(int)), this, SLOT(specMaxChanged(int)));
+
     connect(uiForm().confit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
     connect(uiForm().confit_cbBackground, SIGNAL(currentIndexChanged(int)), this, SLOT(bgTypeSelection(int)));
     connect(uiForm().confit_pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
-
-    uiForm().confit_lePlotSpectrum->setValidator(m_valInt);
-    uiForm().confit_leSpectraMin->setValidator(m_valInt);
-    uiForm().confit_leSpectraMax->setValidator(m_valInt);
 
     // Context menu
     m_cfTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -145,13 +146,14 @@ namespace IDA
   {
     if ( m_cfInputWS == NULL )
     {
+      g_log.error("No workspace loaded");
       return;
     }
 
-    QString ftype = fitTypeString();
-    QString bg = backgroundString();
+    QString fitType = fitTypeString();
+    QString bgType = backgroundString();
 
-    if(ftype == "")
+    if(fitType == "")
     {
       g_log.error("No fit type defined");
     }
@@ -163,6 +165,8 @@ namespace IDA
     std::string function = std::string(func->asString());
     QString stX = m_properties["StartX"]->valueText();
     QString enX = m_properties["EndX"]->valueText();
+    QString specMin = uiForm().confit_spSpectraMin->text();
+    QString specMax = uiForm().confit_spSpectraMax->text();
 
     QString pyInput =
       "from IndirectDataAnalysis import confitSeq\n"
@@ -172,15 +176,9 @@ namespace IDA
       "endx = " + enX + "\n"
       "plot = '" + uiForm().confit_cbPlotOutput->currentText() + "'\n"
       "ties = " + ties + "\n"
-      "save = ";
-  
-    if(uiForm().confit_leSpectraMin->text() != "")
-      pyInput += "specMin = " + uiForm().confit_leSpectraMin->text() + "\n";
-
-    if(uiForm().confit_leSpectraMax->text() != "")
-      pyInput += "specMax = " + uiForm().confit_leSpectraMax->text() + "\n";
-
-    pyInput += uiForm().confit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
+      "specMin = " + specMin + "\n"
+      "specMax = " + specMax + "\n"
+      "save = " + (uiForm().confit_ckSaveSeq->isChecked() ? "True\n" : "False\n");
 
     if ( m_blnManager->value(m_properties["Convolve"]) ) pyInput += "convolve = True\n";
     else pyInput += "convolve = False\n";
@@ -190,7 +188,7 @@ namespace IDA
 
     QString temperature = uiForm().confit_leTempCorrection->text();
     bool useTempCorrection = (!temperature.isEmpty() && uiForm().confit_ckTempCorrection->isChecked());
-    if ( useTempCorrection ) 
+    if ( useTempCorrection )
     {
       pyInput += "temp=" + temperature + "\n";
     }
@@ -198,13 +196,18 @@ namespace IDA
     {
       pyInput += "temp=None\n";
     }
-  
-    pyInput +=    
-      "bg = '" + bg + "'\n"
-      "ftype = '" + ftype + "'\n"
+
+    pyInput +=
+      "bg = '" + bgType + "'\n"
+      "ftype = '" + fitType + "'\n"
       "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, convolve, Verbose=verbose, Plot=plot, Save=save)\n";
 
     QString pyOutput = runPythonCode(pyInput);
+
+    // Set the result workspace for Python script export
+    QString inputWsName = QString::fromStdString(m_cfInputWS->getName());
+    QString resultWsName = inputWsName.left(inputWsName.lastIndexOf("_")) + "_conv_" + fitType + bgType + specMin + "_to_" + specMax + "_Workspaces";
+    m_pythonExportWsName = resultWsName.toStdString();
   }
 
   /**
@@ -213,7 +216,7 @@ namespace IDA
   bool ConvFit::validate()
   {
     using Mantid::API::AnalysisDataService;
-    
+
     UserInputValidator uiv;
 
     uiv.checkDataSelectorIsValid("Sample", uiForm().confit_dsSampleInput);
@@ -239,6 +242,34 @@ namespace IDA
     uiForm().confit_dsResInput->readSettings(settings.group());
   }
 
+  /**
+   * Called when new data has been loaded by the data selector.
+   *
+   * Configures ranges for spin boxes before raw plot is done.
+   *
+   * @param wsName Name of new workspace loaded
+   */
+  void ConvFit::newDataLoaded(const QString wsName)
+  {
+    m_cfInputWSName = wsName;
+    m_cfInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_cfInputWSName.toStdString());
+
+    int maxSpecIndex = static_cast<int>(m_cfInputWS->getNumberHistograms()) - 1;
+
+    uiForm().confit_spPlotSpectrum->setMaximum(maxSpecIndex);
+    uiForm().confit_spPlotSpectrum->setMinimum(0);
+    uiForm().confit_spPlotSpectrum->setValue(0);
+
+    uiForm().confit_spSpectraMin->setMaximum(maxSpecIndex);
+    uiForm().confit_spSpectraMin->setMinimum(0);
+
+    uiForm().confit_spSpectraMax->setMaximum(maxSpecIndex);
+    uiForm().confit_spSpectraMax->setMinimum(0);
+    uiForm().confit_spSpectraMax->setValue(maxSpecIndex);
+
+    plotInput();
+  }
+
   namespace
   {
     ////////////////////////////
@@ -262,7 +293,7 @@ namespace IDA
     }
 
     /**
-     * Takes an index, a sub index and a name, and constructs a double level 
+     * Takes an index, a sub index and a name, and constructs a double level
      * (nested) parameter name for use with function ties, etc.
      *
      * @param index    :: the index of the function in the first level.
@@ -317,10 +348,10 @@ namespace IDA
     // --- Composite / Linear Background ---
     // -------------------------------------
     func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
-    comp->addFunction(func); 
+    comp->addFunction(func);
 
     const int bgType = uiForm().confit_cbBackground->currentIndex(); // 0 = Fixed Flat, 1 = Fit Flat, 2 = Fit all
-  
+
     if ( bgType == 0 || ! m_properties["BGA0"]->subProperties().isEmpty() )
     {
       comp->tie("f0.A0", m_properties["BGA0"]->valueText().toStdString() );
@@ -348,10 +379,10 @@ namespace IDA
     // --------------------------------------------
     func = Mantid::API::FunctionFactory::Instance().createFunction("Resolution");
     conv->addFunction(func);
-    
+
     //add resolution file
     if (uiForm().confit_dsResInput->isFileSelectorVisible())
-    {    
+    {
       std::string resfilename = uiForm().confit_dsResInput->getFullFilePath().toStdString();
       Mantid::API::IFunction::Attribute attr(resfilename);
       func->setAttribute("FileName", attr);
@@ -395,7 +426,7 @@ namespace IDA
     std::string prefix1;
     std::string prefix2;
 
-    int fitTypeIndex = uiForm().confit_cbFitType->currentIndex();  
+    int fitTypeIndex = uiForm().confit_cbFitType->currentIndex();
 
     // Add 1st Lorentzian
     if(fitTypeIndex > 0)
@@ -403,7 +434,7 @@ namespace IDA
       //if temperature not included then product is lorentzian * 1
       //create product function for temp * lorentzian
       auto product = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction("ProductFunction"));
-      
+
       if(useTempCorrection)
       {
         createTemperatureCorrection(product);
@@ -423,7 +454,7 @@ namespace IDA
       //if temperature not included then product is lorentzian * 1
       //create product function for temp * lorentzian
       auto product = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction("ProductFunction"));
-    
+
       if(useTempCorrection)
       {
         createTemperatureCorrection(product);
@@ -433,7 +464,7 @@ namespace IDA
       subIndex = product->addFunction(func);
       index = model->addFunction(product);
       prefix2 = createParName(index, subIndex);
-      
+
       populateFunction(func, model, m_properties["Lorentzian2"], prefix2, false);
     }
 
@@ -457,7 +488,7 @@ namespace IDA
     //create temperature correction function to multiply with the lorentzians
     Mantid::API::IFunction_sptr tempFunc;
     QString temperature = uiForm().confit_leTempCorrection->text();
-    
+
     //create user function for the exponential correction
     // (x*temp) / 1-exp(-(x*temp))
     tempFunc = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
@@ -480,8 +511,9 @@ namespace IDA
     try
     {
       Mantid::Geometry::Instrument_const_sptr inst =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName)->getInstrument();
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName)->getInstrument();
       std::string analyser = inst->getStringParameter("analyser")[0];
+      std::string idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
 
       // If the analyser component is not already in the data file the laod it from the parameter file
       if(inst->getComponentByName(analyser)->getNumberParameter("resolution").size() == 0)
@@ -491,8 +523,14 @@ namespace IDA
         IAlgorithm_sptr loadParamFile = AlgorithmManager::Instance().create("LoadParameterFile");
         loadParamFile->initialize();
         loadParamFile->setProperty("Workspace", workspaceName);
-        loadParamFile->setProperty("Filename", inst->getName()+"_"+analyser+"_"+reflection+"_Parameters.xml");
+        loadParamFile->setProperty("Filename", idfDirectory + inst->getName() + "_"+analyser + "_" + reflection + "_Parameters.xml");
         loadParamFile->execute();
+
+        if(!loadParamFile->isExecuted())
+        {
+          g_log.error("Could not load parameter file, ensure instrument directory is in data search paths.");
+          return 0.0;
+        }
 
         inst = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName)->getInstrument();
       }
@@ -503,9 +541,10 @@ namespace IDA
     {
       UNUSED_ARG(e);
 
-      resolution = 0;
+      g_log.error("Could not load instrument resolution from parameter file");
+      resolution = 0.0;
     }
-      
+
     return resolution;
   }
 
@@ -579,7 +618,7 @@ namespace IDA
 
     return fitType;
   }
-  
+
   /**
    * Generate a string to describe the background selected by the user.
    * Used when naming the resultant workspaces.
@@ -599,7 +638,7 @@ namespace IDA
       return "FitF_s";
     case 2:
       return "FitL_s";
-    default: 
+    default:
       return "";
     }
   }
@@ -608,7 +647,7 @@ namespace IDA
   {
     m_cfTree->removeProperty(m_properties["Lorentzian1"]);
     m_cfTree->removeProperty(m_properties["Lorentzian2"]);
-  
+
     switch ( index )
     {
     case 0:
@@ -623,7 +662,7 @@ namespace IDA
       m_cfTree->addProperty(m_properties["Lorentzian2"]);
       m_rangeSelectors["ConvFitHWHM"]->setVisible(true);
       break;
-    }    
+    }
   }
 
   void ConvFit::bgTypeSelection(int index)
@@ -640,44 +679,18 @@ namespace IDA
 
   void ConvFit::plotInput()
   {
-    using Mantid::API::MatrixWorkspace;
-    using Mantid::API::AnalysisDataService;
     using Mantid::Kernel::Exception::NotFoundError;
+
+    if(!m_cfInputWS)
+    {
+      g_log.error("No workspace loaded, cannot create preview plot.");
+      return;
+    }
 
     const bool plotGuess = uiForm().confit_ckPlotGuess->isChecked();
     uiForm().confit_ckPlotGuess->setChecked(false);
 
-    if(uiForm().confit_dsSampleInput->getCurrentDataName() != m_cfInputWSName)
-    {      
-      m_cfInputWSName = uiForm().confit_dsSampleInput->getCurrentDataName();
-      m_cfInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_cfInputWSName.toStdString());
-      
-      if(!m_cfInputWS)
-      {
-        showMessageBox("Could not find the workspace in ADS. See log for details.");
-      }
-    }
-
-    int specNo = uiForm().confit_lePlotSpectrum->text().toInt();
-    // Set spectra max value
-    int specMin = 0;
-    int specMax = static_cast<int>(m_cfInputWS->getNumberHistograms()) - 1;
-
-    m_valInt->setRange(specMin, specMax);
-    uiForm().confit_leSpectraMin->setText(QString::number(specMin));
-    uiForm().confit_leSpectraMax->setText(QString::number(specMax));
-
-    if ( specNo < 0 || specNo > specMax )
-    {
-      uiForm().confit_lePlotSpectrum->setText("0");
-      specNo = 0;
-    }
-
-    int smCurrent = uiForm().confit_leSpectraMax->text().toInt();
-    if ( smCurrent < 0 || smCurrent > specMax )
-    {
-      uiForm().confit_leSpectraMax->setText(QString::number(specMax));
-    }
+    int specNo = uiForm().confit_spPlotSpectrum->text().toInt();
 
     plotMiniPlot(m_cfInputWS, specNo, "ConvFitPlot", "CFDataCurve");
     try
@@ -698,6 +711,10 @@ namespace IDA
       m_dblManager->setValue(m_properties["Lorentzian 1.FWHM"], resolution);
       m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], resolution);
     }
+
+    // Remove the old fit curve
+    removeCurve("CFCalcCurve");
+    replot("ConvFitPlot");
   }
 
   void ConvFit::plotGuess(QtProperty*)
@@ -758,6 +775,9 @@ namespace IDA
 
   void ConvFit::singleFit()
   {
+    if(!validate())
+      return;
+
     plotInput();
 
     if ( m_curves["CFDataCurve"] == NULL )
@@ -771,23 +791,23 @@ namespace IDA
     Mantid::API::CompositeFunction_sptr function = createFunction(uiForm().confit_ckTieCentres->isChecked());
 
     // get output name
-    QString ftype = fitTypeString();
-    QString bg = backgroundString();
+    QString fitType = fitTypeString();
+    QString bgType = backgroundString();
 
-    if(ftype == "")
+    if(fitType == "")
     {
       g_log.error("No fit type defined!");
     }
 
     QString outputNm = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + m_cfInputWSName + QString("')\n")).trimmed();
-    outputNm += QString("conv_") + ftype + bg + uiForm().confit_lePlotSpectrum->text();  
+    outputNm += QString("conv_") + fitType + bgType + uiForm().confit_spPlotSpectrum->text();
     std::string output = outputNm.toStdString();
 
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     alg->setPropertyValue("Function", function->asString());
     alg->setPropertyValue("InputWorkspace", m_cfInputWSName.toStdString());
-    alg->setProperty<int>("WorkspaceIndex", uiForm().confit_lePlotSpectrum->text().toInt());
+    alg->setProperty<int>("WorkspaceIndex", uiForm().confit_spPlotSpectrum->text().toInt());
     alg->setProperty<double>("StartX", m_dblManager->value(m_properties["StartX"]));
     alg->setProperty<double>("EndX", m_dblManager->value(m_properties["EndX"]));
     alg->setProperty("Output", output);
@@ -795,7 +815,7 @@ namespace IDA
     alg->setProperty("OutputCompositeMembers", true);
     alg->setProperty("ConvolveMembers", true);
     alg->execute();
-   
+
     if ( ! alg->isExecuted() )
     {
       showMessageBox("Fit algorithm failed.");
@@ -832,7 +852,7 @@ namespace IDA
 		int subIndex = 0;
 
 		//check if we're using a temperature correction
-		if (uiForm().confit_ckTempCorrection->isChecked() && 
+		if (uiForm().confit_ckTempCorrection->isChecked() &&
 				!uiForm().confit_leTempCorrection->text().isEmpty())
 		{
 				subIndex++;
@@ -849,7 +869,7 @@ namespace IDA
 			{
 				key += "f0.";
 			}
-			
+
 			key += "Height";
 
       m_dblManager->setValue(m_properties["DeltaHeight"], parameters[key]);
@@ -886,6 +906,30 @@ namespace IDA
       m_dblManager->setValue(m_properties["Lorentzian 2.PeakCentre"], parameters[pref+"PeakCentre"]);
       m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], parameters[pref+"FWHM"]);
     }
+  }
+
+  /**
+   * Handles the user entering a new minimum spectrum index.
+   *
+   * Prevents the user entering an overlapping spectra range.
+   *
+   * @param value Minimum spectrum index
+   */
+  void ConvFit::specMinChanged(int value)
+  {
+    uiForm().confit_spSpectraMax->setMinimum(value);
+  }
+
+  /**
+   * Handles the user entering a new maximum spectrum index.
+   *
+   * Prevents the user entering an overlapping spectra range.
+   *
+   * @param value Maximum spectrum index
+   */
+  void ConvFit::specMaxChanged(int value)
+  {
+    uiForm().confit_spSpectraMin->setMaximum(value);
   }
 
   void ConvFit::minChanged(double val)
@@ -938,14 +982,14 @@ namespace IDA
     // Add/remove some properties to display only relevant options
     if ( prop == m_properties["UseDeltaFunc"] )
     {
-      if ( checked ) 
-      { 
+      if ( checked )
+      {
         m_properties["DeltaFunction"]->addSubProperty(m_properties["DeltaHeight"]);
         uiForm().confit_cbPlotOutput->addItem("Height");
         uiForm().confit_cbPlotOutput->addItem("EISF");
       }
-      else 
-      { 
+      else
+      {
         m_properties["DeltaFunction"]->removeSubProperty(m_properties["DeltaHeight"]);
         uiForm().confit_cbPlotOutput->removeItem(uiForm().confit_cbPlotOutput->count()-1);
         uiForm().confit_cbPlotOutput->removeItem(uiForm().confit_cbPlotOutput->count()-1);
@@ -971,7 +1015,7 @@ namespace IDA
     // is it already fixed?
     bool fixed = prop->propertyManager() != m_dblManager;
 
-    if ( fixed && prop->propertyManager() != m_stringManager ) 
+    if ( fixed && prop->propertyManager() != m_stringManager )
       return;
 
     // Create the menu
@@ -1019,7 +1063,7 @@ namespace IDA
 
     QtProperty* prop = item->property();
     if ( prop->subProperties().empty() )
-    { 
+    {
       item = item->parent();
       prop = item->property();
     }

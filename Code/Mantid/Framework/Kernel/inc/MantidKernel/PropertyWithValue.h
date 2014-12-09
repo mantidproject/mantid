@@ -36,7 +36,7 @@ namespace Kernel
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 14/11/2007
 
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -219,7 +219,7 @@ void toValue(const std::string& strvalue, std::vector<std::vector<T> >& value, c
   PROPERTYWITHVALUE_TOVALUE(long);
   PROPERTYWITHVALUE_TOVALUE(uint32_t);
   PROPERTYWITHVALUE_TOVALUE(uint64_t);
-  #if defined(__INTEL_COMPILER) || defined(__clang__)
+  #if defined(__APPLE__)
     PROPERTYWITHVALUE_TOVALUE(unsigned long);
   #endif
 

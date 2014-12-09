@@ -71,6 +71,7 @@ set ( TEST_FILES
 	RefAxisTest.h
 	SpecialWorkspace2DTest.h
 	SplittersWorkspaceTest.h
+	TableColumnTest.h
 	TableWorkspacePropertyTest.h
 	TableWorkspaceTest.h
 	TofEventTest.h

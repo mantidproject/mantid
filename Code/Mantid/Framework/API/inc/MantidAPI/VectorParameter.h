@@ -16,7 +16,7 @@ VectorParameter is abstract type implementing curiously recurring template patte
 @author Owen Arnold, Tessella plc
 @date 21/07/2011
 
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 

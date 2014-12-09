@@ -17,7 +17,7 @@ namespace CurveFitting
 
     for the given mass where \f$J_M\f$ is approximated using a Gaussian and \f$R_M\f$ is the resolution function
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

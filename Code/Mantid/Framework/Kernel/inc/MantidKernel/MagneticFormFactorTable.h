@@ -16,7 +16,7 @@ namespace Mantid
       Implements a cached lookup table for a magnetic form factor. The table is
       created for a given MagneticIon.
 
-      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 

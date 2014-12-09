@@ -45,7 +45,7 @@ namespace Mantid
     {
 
       declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
-          boost::make_shared<WorkspaceUnitValidator>("dSpacing")),"A 2D workspace with X values of d-spacing");
+        boost::make_shared<WorkspaceUnitValidator>("dSpacing")),"A 2D workspace with X values of d-spacing");
 
       auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0);
@@ -53,20 +53,30 @@ namespace Mantid
       declareProperty("Step",0.001, mustBePositive,
         "Step size used to bin d-spacing data");
       declareProperty("DReference",2.0, mustBePositive,
-         "Center of reference peak in d-space");
+        "Center of reference peak in d-space");
       declareProperty("XMin",0.0, "Minimum of CrossCorrelation data to search for peak, usually negative");
       declareProperty("XMax",0.0, "Maximum of CrossCorrelation data to search for peak, usually positive");
 
       declareProperty(new FileProperty("GroupingFileName","", FileProperty::OptionalSave, ".cal"),
-          "Optional: The name of the output CalFile to save the generated OffsetsWorkspace." );
+        "Optional: The name of the output CalFile to save the generated OffsetsWorkspace." );
       declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputWorkspace","",Direction::Output),
-          "An output workspace containing the offsets.");
+        "An output workspace containing the offsets.");
       declareProperty(new WorkspaceProperty<>("MaskWorkspace","Mask",Direction::Output),
-          "An output workspace containing the mask.");
+        "An output workspace containing the mask.");
       // Only keep peaks
       declareProperty("PeakFunction", "Gaussian", boost::make_shared<StringListValidator>(FunctionFactory::Instance().getFunctionNames<IPeakFunction>()),
-                      "The function type for fitting the peaks.");
+        "The function type for fitting the peaks.");
       declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
+
+      std::vector<std::string> modes;
+      modes.push_back("Relative");
+      modes.push_back("Absolute");
+
+      declareProperty("OffsetMode", "Relative", boost::make_shared<StringListValidator>(modes),
+        "Whether to calculate a relative or absolute offset");
+      declareProperty("DIdeal",2.0, mustBePositive,
+        "The known peak centre value from the NIST standard information, this is only used in Absolute OffsetMode.");
+
     }
 
     //-----------------------------------------------------------------------------------------
@@ -84,6 +94,16 @@ namespace Mantid
         throw std::runtime_error("Must specify Xmin<Xmax");
       dreference=getProperty("DReference");
       step=getProperty("Step");
+
+      std::string mode =getProperty("OffsetMode");
+      bool isAbsolute = false;
+      if (mode == "Absolute")
+      {
+        isAbsolute = true;
+      }
+      
+      dideal =getProperty("DIdeal");
+
       int nspec=static_cast<int>(inputW->getNumberHistograms());
       // Create the output OffsetsWorkspace
       OffsetsWorkspace_sptr outputW(new OffsetsWorkspace(inputW->getInstrument()));
@@ -99,7 +119,7 @@ namespace Mantid
       {
         PARALLEL_START_INTERUPT_REGION
         // Fit the peak
-        double offset=fitSpectra(wi);
+        double offset=fitSpectra(wi, isAbsolute);
         double mask=0.0;
         if (std::abs(offset) > maxOffset)
         { 
@@ -162,9 +182,10 @@ namespace Mantid
    /** Calls Gaussian1D as a child algorithm to fit the offset peak in a spectrum
     *
     *  @param s :: The Workspace Index to fit
+    *  @param isAbsolbute :: Whether to calculate an absolute offset
     *  @return The calculated offset value
     */
-    double GetDetectorOffsets::fitSpectra(const int64_t s)
+    double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute)
     {
       // Find point of peak centre
       const MantidVec & yValues = inputW->readY(s);
@@ -207,6 +228,13 @@ namespace Mantid
       double offset = function->getParameter(3);//params[3]; // f1.PeakCentre
       offset = -1.*offset*step/(dreference+offset*step);
       //factor := factor * (1+offset) for d-spacemap conversion so factor cannot be negative
+
+      if (isAbsolbute)
+      {
+        // translated from(DIdeal - FittedPeakCentre)/(FittedPeakCentre)
+        // given by Matt Tucker in ticket #10642
+        offset += (dideal - dreference)/dreference;
+      }
       return offset;
     }
 

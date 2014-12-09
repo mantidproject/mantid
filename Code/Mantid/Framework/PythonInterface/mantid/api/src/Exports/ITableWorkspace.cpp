@@ -6,6 +6,7 @@
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
+#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
@@ -33,7 +34,7 @@ namespace
   /// Boost macro for "looping" over builtin types
   #define BUILTIN_TYPES \
     BOOST_PP_TUPLE_TO_LIST( \
-      6, (double, std::string, int, int64_t, float, size_t)    \
+    7, (double, std::string, int, uint32_t, int64_t, float, uint64_t)    \
     )
   #define USER_TYPES \
     BOOST_PP_TUPLE_TO_LIST( \
@@ -339,6 +340,8 @@ namespace
 
 void export_ITableWorkspace()
 {
+  using Mantid::PythonInterface::Policies::VectorToNumpy;
+
   std::string iTableWorkspace_docstring = "Most of the information from a table workspace is returned ";
   iTableWorkspace_docstring += "as native copies. All of the column accessors return lists while the ";
   iTableWorkspace_docstring += "rows return dicts. This object does support the idom 'for row in ";
@@ -364,9 +367,9 @@ void export_ITableWorkspace()
 
     .def("__len__",  &ITableWorkspace::rowCount, "Returns the number of rows within the workspace")
 
-    .def("getColumnNames",&ITableWorkspace::getColumnNames, "Return a list of the column names")
+    .def("getColumnNames",&ITableWorkspace::getColumnNames, boost::python::return_value_policy<VectorToNumpy>(),"Return a list of the column names")
 
-    .def("keys", &ITableWorkspace::getColumnNames,  "Return a list of the column names")
+    .def("keys", &ITableWorkspace::getColumnNames, boost::python::return_value_policy<VectorToNumpy>(),  "Return a list of the column names")
 
     .def("column", &column, "Return all values of a specific column as a list")
 

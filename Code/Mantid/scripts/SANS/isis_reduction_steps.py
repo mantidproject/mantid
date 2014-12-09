@@ -1037,7 +1037,7 @@ class Mask_ISIS(ReductionStep):
                 if Ys[i] != 0:
                     Ys[i] = maxval*Ys[i] + vals.readY(i)[0]
 
-            CreateWorkspace(OutputWorkspace=wksp,DataX= Xs,DataY= Ys,DataE= Es,NSpec= len(Ys), UnitX='TOF', VerticalAxisValues=Ys)
+            CreateWorkspace(OutputWorkspace=wksp,DataX= Xs,DataY= Ys,DataE= Es,NSpec= len(Ys), UnitX='TOF')
             #change the units on the workspace so it is compatible with the workspace containing counts data
             Multiply(LHSWorkspace='ones',RHSWorkspace= wksp,OutputWorkspace= 'units')
             #do the super-position and clean up

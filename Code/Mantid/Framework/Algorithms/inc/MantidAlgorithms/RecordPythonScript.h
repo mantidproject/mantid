@@ -20,7 +20,7 @@ namespace Algorithms
   <li>InputWorkspace - the workspace name who's history is to be saved.</li>
   </ul>
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 

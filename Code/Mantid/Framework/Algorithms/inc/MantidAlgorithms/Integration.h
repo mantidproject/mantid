@@ -30,7 +30,7 @@ namespace Algorithms
     <LI> IncludePartialBins - If true then partial bins from the beginning and end of the input range are also included in the integration (default false)</LI>
     </UL>
 
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

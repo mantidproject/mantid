@@ -18,7 +18,7 @@ namespace CustomInterfaces
 
   /** ALCDataLoadingView : ALC Data Loading view interface implementation using Qt widgets
     
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

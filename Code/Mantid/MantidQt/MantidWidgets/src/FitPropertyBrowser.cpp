@@ -127,7 +127,8 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject* mantidui):
   m_autoBgName(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground"))),
   m_autoBackground(NULL),
   m_decimals(-1),
-  m_mantidui(mantidui)
+  m_mantidui(mantidui),
+  m_shouldBeNormalised(false)
 {
   // Make sure plugins are loaded
   std::string libpath = Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");
@@ -1606,6 +1607,7 @@ void FitPropertyBrowser::doFit(int maxIterations)
     alg->setProperty("IgnoreInvalidData",ignoreInvalidData());
     alg->setPropertyValue("CostFunction",costFunction());
     alg->setProperty( "MaxIterations", maxIterations );
+    alg->setProperty( "Normalise", m_shouldBeNormalised );
     // Always output each composite function but not necessarily plot it
     alg->setProperty("OutputCompositeMembers", true);
     if ( alg->existsProperty("ConvolveMembers") )

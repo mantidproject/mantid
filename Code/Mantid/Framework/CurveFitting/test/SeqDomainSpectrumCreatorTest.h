@@ -71,6 +71,26 @@ public:
       TS_ASSERT_EQUALS(seqDomain->size(), 4 * 12);
   }
 
+  void testHistogramIsUsable()
+  {
+      TestableSeqDomainSpectrumCreator creator(NULL, "");
+
+      TS_ASSERT_THROWS(creator.histogramIsUsable(0), std::invalid_argument);
+
+      // Workspace with 2 histograms, one of which is masked (No. 0)
+      std::set<int64_t> masked;
+      masked.insert(0);
+      creator.setMatrixWorkspace(WorkspaceCreationHelper::Create2DWorkspace123(2, 12, false, masked));
+
+      TS_ASSERT(!creator.histogramIsUsable(0));
+      TS_ASSERT(creator.histogramIsUsable(1));
+
+      // No instrument
+      creator.setMatrixWorkspace(WorkspaceCreationHelper::Create2DWorkspace123(2, 12));
+      TS_ASSERT(creator.histogramIsUsable(0));
+      TS_ASSERT(creator.histogramIsUsable(1));
+  }
+
   void testCreateDomain()
   {
       TestableSeqDomainSpectrumCreator creator(NULL, "");
@@ -97,10 +117,45 @@ public:
       }
   }
 
+  void testCreateDomainMaskedDetectors()
+  {
+      TestableSeqDomainSpectrumCreator creator(NULL, "");
+
+      // Workspace with 4 histograms, one of which is masked (No. 2)
+      std::set<int64_t> masked;
+      masked.insert(2);
+      creator.setMatrixWorkspace(WorkspaceCreationHelper::Create2DWorkspace123(4, 12, false, masked));
+
+      FunctionDomain_sptr domain;
+      FunctionValues_sptr values;
+
+      creator.createDomain(domain, values);
+
+      boost::shared_ptr<SeqDomain> seqDomain = boost::dynamic_pointer_cast<SeqDomain>(domain);
+
+      // One less than the created workspace
+      TS_ASSERT_EQUALS(seqDomain->getNDomains(), 3);
+      for(size_t i = 0; i < seqDomain->getNDomains(); ++i) {
+          FunctionDomain_sptr localDomain;
+          FunctionValues_sptr localValues;
+
+          seqDomain->getDomainAndValues(i, localDomain, localValues);
+
+          boost::shared_ptr<FunctionDomain1DSpectrum> localSpectrumDomain = boost::dynamic_pointer_cast<FunctionDomain1DSpectrum>(localDomain);
+          TS_ASSERT(localSpectrumDomain);
+
+          TS_ASSERT_EQUALS(localSpectrumDomain->size(), 12);
+
+          // Make sure we never find 2 (masking)
+          TS_ASSERT_DIFFERS(localSpectrumDomain->getWorkspaceIndex(), 2);
+      }
+  }
+
   void testCreateOutputWorkspace()
   {
       double slope = 2.0;
       // all x values are 1.0
+
       MatrixWorkspace_sptr matrixWs = WorkspaceCreationHelper::Create2DWorkspace123(4, 12);
 
       TestableSeqDomainSpectrumCreator creator(NULL, "");
@@ -135,6 +190,55 @@ public:
       }
   }
 
+  void testCreateOutputWorkspaceMasked()
+  {
+      double slope = 2.0;
+      // all x values are 1.0
+      // Mask one histogram (No. 2)
+      std::set<int64_t> masked;
+      masked.insert(2);
+      MatrixWorkspace_sptr matrixWs = WorkspaceCreationHelper::Create2DWorkspace123(4, 12, false, masked);
+
+      TestableSeqDomainSpectrumCreator creator(NULL, "");
+      creator.setMatrixWorkspace(matrixWs);
+
+      FunctionDomain_sptr domain;
+      FunctionValues_sptr values;
+
+      creator.createDomain(domain, values);
+
+      IFunction_sptr testFunction(new SeqDomainCreatorTestFunction);
+      testFunction->initialize();
+      testFunction->setParameter("Slope", slope);
+
+      Workspace_sptr outputWs = creator.createOutputWorkspace("", testFunction, domain, values);
+
+      MatrixWorkspace_sptr outputWsMatrix = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWs);
+      TS_ASSERT(outputWsMatrix);
+
+      // Still has to be the same number of histograms.
+      TS_ASSERT_EQUALS(outputWsMatrix->getNumberHistograms(), matrixWs->getNumberHistograms());
+
+      // Spectrum 0: 0 + 2 * 1 -> All y-values should be 2
+      // Spectrum 1: 1 + 2 * 1 -> All y-values should be 3...etc.
+      for(size_t i = 0; i < outputWsMatrix->getNumberHistograms(); ++i) {
+          const std::vector<double> &x = outputWsMatrix->readX(i);
+          const std::vector<double> &y = outputWsMatrix->readY(i);
+
+          for(size_t j = 0; j < x.size(); ++j) {
+              TS_ASSERT_EQUALS(x[j], 1.0);
+
+              // If detector is not masked, there should be values, otherwise 0.
+              if(!outputWsMatrix->getDetector(i)->isMasked()) {
+                  TS_ASSERT_EQUALS(y[j], static_cast<double>(i) + slope * x[j]);
+              } else {
+                  TS_ASSERT_EQUALS(y[j], 0.0);
+              }
+          }
+      }
+
+  }
+
   void testFit()
   {
       double slope = 2.0;
@@ -148,7 +252,7 @@ public:
           for(size_t j = 0; j < x.size(); ++j) {
               x[j] = static_cast<double>(j);
               y[j] = static_cast<double>(i) + slope * x[j];
-              e[j] = 0.1 * y[j];
+              e[j] = 0.0001 * y[j];
           }
       }
 
@@ -190,7 +294,7 @@ public:
           for(size_t j = 0; j < x.size(); ++j) {
               x[j] = static_cast<double>(j);
               y[j] = static_cast<double>(i) + slopes[i % slopes.size()] * x[j];
-              e[j] = std::max(1.0, sqrt(y[j]));
+              e[j] = 0.001 * std::max(1.0, sqrt(y[j]));
           }
       }
 
