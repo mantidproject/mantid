@@ -72,6 +72,10 @@ public:
     std::string getProfileFunctionName() const;
     bool hasProfileFunctionName() const;
 
+    void setPointGroup(const Geometry::PointGroup_sptr &pointGroup);
+    Geometry::PointGroup_sptr pointGroup() const;
+
+
     DataObjects::TableWorkspace_sptr asTableWorkspace();
 
 protected:
@@ -83,19 +87,25 @@ protected:
     bool checkColumns(const DataObjects::TableWorkspace_sptr &tableWorkspace);
 
     void recoverDataFromLog(const DataObjects::TableWorkspace_sptr &TableWorkspace);
-    void setPeaks(const std::vector<Kernel::V3D> &hkls, const std::vector<double> &dValues);
+    void setPeaks(const std::vector<Kernel::V3D> &hkls, const std::vector<double> &dValues, const std::vector<double> &fSquared);
 
     std::string getIntensityTypeFromLog(const API::LogManager_sptr &tableLog);
     std::string getProfileFunctionNameFromLog(const API::LogManager_sptr &tableLog);
+    std::string getPointGroupStringFromLog(const API::LogManager_sptr &tableLog);
 
     std::string getStringValueFromLog(const API::LogManager_sptr &logManager, std::string valueName);
 
     std::string intensityTypeToString(IntensityType type) const;
     IntensityType intensityTypeFromString(std::string typeString) const;
 
+    std::string pointGroupToString(const Geometry::PointGroup_sptr &pointGroup) const;
+    Geometry::PointGroup_sptr pointGroupFromString(const std::string &pointGroupString) const;
+
     std::vector<PoldiPeak_sptr> m_peaks;
     IntensityType m_intensityType;
     std::string m_profileFunctionName;
+
+    Geometry::PointGroup_sptr m_pointGroup;
 };
 
 }
