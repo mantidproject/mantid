@@ -7,6 +7,7 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
+  inc/MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h
@@ -26,6 +27,7 @@ set( SOURCE_FILES
   src/SplatterPlotView.cpp
   src/ThreesliceView.cpp
   src/TimeControlWidget.cpp
+  src/VatesParaViewApplication.cpp
   src/ViewBase.cpp
 )
 
@@ -40,6 +42,7 @@ qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.h
   inc/MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h
+  inc/MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h
   inc/MantidVatesSimpleGuiViewWidgets/ViewBase.h
 )
 

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>974</width>
+    <width>1361</width>
     <height>710</height>
    </rect>
   </property>
@@ -191,6 +191,16 @@
         <property name="currentIndex">
          <number>0</number>
         </property>
+        <widget class="QWidget" name="properties2">
+         <attribute name="title">
+          <string>Properties</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="pqProxiesWidget" name="proxiesPanel" native="true"/>
+          </item>
+        </layout>
+        </widget>
         <widget class="QWidget" name="properties">
          <attribute name="title">
           <string>Properties</string>
@@ -201,16 +211,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="properties2">
-         <attribute name="title">
-          <string>Properties</string>
-         </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <widget class="pqProxiesWidget" name="proxiesPanel" native="true"/>
-          </item>
-         </layout>
-        </widget>
+
         <widget class="QWidget" name="information">
          <attribute name="title">
           <string>Information</string>
@@ -226,8 +227,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>126</width>
-               <height>390</height>
+               <width>105</width>
+               <height>387</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">
@@ -338,6 +339,11 @@
    <extends>QWidget</extends>
    <header>pqColorMapEditor.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>pqProxiesWidget</class>
+   <extends>QWidget</extends>
+   <header>pqproxieswidget.h</header>
   </customwidget>
  </customwidgets>
  <resources>

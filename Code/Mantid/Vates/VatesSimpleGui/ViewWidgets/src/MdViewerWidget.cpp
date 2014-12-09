@@ -71,6 +71,7 @@
 #include <pqUndoRedoBehavior.h>
 #include <pqViewStreamingBehavior.h>
 #include <pqVerifyRequiredPluginBehavior.h>
+#include <pqSaveDataReaction.h>
 
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
@@ -88,6 +89,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
+
+#include "MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h"
 
 namespace Mantid
 {
@@ -113,6 +116,9 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   dataLoader(NULL), hiddenView(NULL), lodAction(NULL), screenShot(NULL), viewLayout(NULL),
   viewSettings(NULL)
 {
+  //this will initialize the ParaView application if needed.
+  VatesParaViewApplication::instance();
+  
   // Calling workspace observer functions.
   observeAfterReplace();
   observePreDelete();
@@ -127,18 +133,13 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
  */
 MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent)
 {
-  this->checkEnvSetup();
+  
+  //this will initialize the ParaView application if needed.
+  VatesParaViewApplication::instance();
+  
   // We're in the standalone application mode
   this->internalSetup(false);
   this->setupUiAndConnections();
-  // FIXME: This doesn't allow a clean split of the classes. I will need
-  //        to investigate creating the individual behaviors to see if that
-  //        eliminates the dependence on the QMainWindow.
-  if (parent->inherits("QMainWindow"))
-  {
-    QMainWindow *mw = qobject_cast<QMainWindow *>(parent);
-    new pqParaViewBehaviors(mw, mw);
-  }
   this->setupMainView();
 }
 
@@ -153,27 +154,15 @@ MdViewerWidget::~MdViewerWidget()
  */
 void MdViewerWidget::internalSetup(bool pMode)
 {
-  this->isPluginInitialized = false;
+  static int widgetNumber = 0;
+  this->m_widgetName = QString("MdViewerWidget%1").arg(widgetNumber++);
   this->pluginMode = pMode;
   this->rotPointDialog = NULL;
   this->lodThreshold = 5.0;
   this->viewSwitched = false;
 }
 
-/**
- * This function uses VTK's system tools to check the environmental variables
- * to make sure PV_PLUGIN_PATH is available.
- */
-void MdViewerWidget::checkEnvSetup()
-{
-  QString pv_plugin_path = vtksys::SystemTools::GetEnv("PV_PLUGIN_PATH");
-  if (pv_plugin_path.isEmpty())
-  {
-    throw std::runtime_error("PV_PLUGIN_PATH not setup.\nVates plugins will not be available.\n"
-                             "Further use will cause the program to crash.\nPlease exit and "
-                             "set this variable.");
-  }
-}
+
 
 /**
  * This function sets up the UI components and connects some of the main
@@ -207,7 +196,12 @@ void MdViewerWidget::setupUiAndConnections()
   
   pqApplyBehavior* applyBehavior = new pqApplyBehavior(this);
   applyBehavior->registerPanel(this->ui.propertiesPanel);
-  
+  VatesParaViewApplication::instance()->setupParaViewBehaviors();
+  this->ui.pipelineBrowser->enableAnnotationFilter(m_widgetName);
+  this->ui.pipelineBrowser->disableAnnotationFilter();
+  this->ui.pipelineBrowser->enableAnnotationFilter(m_widgetName);
+  this->ui.pipelineBrowser->hide();
+  g_log.warning("Annotation Name: " + m_widgetName.toStdString());
 }
 
 void MdViewerWidget::panelChanged()
@@ -248,84 +242,11 @@ void MdViewerWidget::setupMainView()
 void MdViewerWidget::setupPluginMode()
 {
   GlobalInterpreterLock gil;
-  this->createAppCoreForPlugin();
-  this->checkEnvSetup();
   this->setupUiAndConnections();
-  if (!this->isPluginInitialized)
-  {
-    this->setupParaViewBehaviors();
-    this->createMenus();
-  }
+  this->createMenus();
   this->setupMainView();
 }
 
-/**
- * This function ensures that the main ParaView instance is only initialized
- * once. On the second call, it checks to make sure one doesn't exist. This is
- * only important for plugin mode operation of the VSI.
- */
-void MdViewerWidget::createAppCoreForPlugin()
-{
-  if (!pqApplicationCore::instance())
-  {
-    // Provide ParaView's application core with a path to ParaView
-    int argc = 1;
-
-    std::string paraviewPath = Mantid::Kernel::ConfigService::Instance().getParaViewPath();
-    std::vector<char> argvConversion(paraviewPath.begin(), paraviewPath.end());
-    argvConversion.push_back('\0');
-
-    char *argv[] = {&argvConversion[0]};
-
-    g_log.debug() << "Intialize pqApplicationCore with " << argv << "\n";
-
-    new pqPVApplicationCore(argc, argv);
-  }
-  else
-  {
-    this->isPluginInitialized = true;
-  }
-}
-
-/**
- * This function duplicates the nearly identical call in ParaView for their
- * main program setup. This is necessary for the plugin mode since it does
- * not have access to the QMainWindow of MantidPlot.
- */
-void MdViewerWidget::setupParaViewBehaviors()
-{
-  // Register ParaView interfaces.
-  pqInterfaceTracker* pgm = pqApplicationCore::instance()->interfaceTracker();
-
-  // * adds support for standard paraview views.
-  pgm->addInterface(new pqStandardPropertyWidgetInterface(pgm));
-
-  pgm->addInterface(new pqStandardViewFrameActionsImplementation(pgm));
-
-  // Load plugins distributed with application.
-  pqApplicationCore::instance()->loadDistributedPlugins();
-
-  // Define application behaviors.
-  new pqQtMessageHandlerBehavior(this);
-  new pqDataTimeStepBehavior(this);
-  new pqSpreadSheetVisibilityBehavior(this);
-  new pqPipelineContextMenuBehavior(this);
-  new pqObjectPickingBehavior(this);
-  new pqDefaultViewBehavior(this);
-  new pqUndoRedoBehavior(this);
-  new pqAlwaysConnectedBehavior(this);
-  new pqCrashRecoveryBehavior(this);
-  new pqAutoLoadPluginXMLBehavior(this);
-  //new pqPluginDockWidgetsBehavior(mainWindow);
-  new pqVerifyRequiredPluginBehavior(this);
-  //new pqPluginActionGroupBehavior(mainWindow);
-  new pqFixPathsInStateFilesBehavior(this);
-  new pqCommandLineOptionsBehavior(this);
-  //new pqPersistentMainWindowStateBehavior(mainWindow);
-  new pqCollaborationBehavior(this);
-  new pqViewStreamingBehavior(this);
-  new pqPluginSettingsBehavior(this);
-}
 
 /**
  * This function connects ParaView's data loader the given action.
@@ -513,6 +434,8 @@ void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
   }
 
   pqPipelineSource* source = this->currentView->setPluginSource(sourcePlugin, wsname);
+  pqSaveDataReaction::saveActiveData("/tmp/data.vtk");
+  source->getProxy()->SetAnnotation(this->m_widgetName.toLatin1().data(), "1");
   //this->ui.proxiesPanel->clear();
   //this->ui.proxiesPanel->addProxy(source->getProxy(),"datasource",QStringList(),true);
   //this->ui.proxiesPanel->updateLayout();
@@ -627,7 +550,7 @@ void MdViewerWidget::swapViews()
  */
 bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
 {
-  if (this->currentView == obj)
+  /*if (this->currentView == obj)
   {
     if (this->pluginMode && QEvent::Hide == ev->type() &&
         !ev->spontaneous())
@@ -643,7 +566,7 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
       this->ui.modeControlWidget->setToStandardView();
       return true;
     }
-  }
+  }*/
   return VatesViewerInterface::eventFilter(obj, ev);
 }
 

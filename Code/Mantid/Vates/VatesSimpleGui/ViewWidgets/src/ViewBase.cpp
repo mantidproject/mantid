@@ -265,6 +265,7 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqPipelineSource *src = builder->createSource("sources", pluginName,
                                                 server);
+  src->getProxy()->SetAnnotation("MdViewerWidget0", "1");
   vtkSMPropertyHelper(src->getProxy(),
                       "Mantid Workspace Name").Set(wsName.toStdString().c_str());
 

@@ -114,11 +114,10 @@ protected:
 
 private:
   Q_DISABLE_COPY(MdViewerWidget)
-
+  QString m_widgetName;
   ViewBase *currentView; ///< Holder for the current view
   pqLoadDataReaction *dataLoader; ///< Holder for the load data reaction
   ViewBase *hiddenView; ///< Holder for the view that is being switched from
-  bool isPluginInitialized; ///< Flag for plugin initialization
   double lodThreshold; ///< Default value for the LOD threshold (5 MB)
   QAction *lodAction; ///< Holder for the LOD threshold menu item
   bool pluginMode; ///< Flag to say widget is in plugin mode
@@ -129,16 +128,12 @@ private:
   pqApplicationSettingsReaction *viewSettings; ///< Holder for the view settings reaction
   bool viewSwitched;
 
-  /// Check the environmental variables.
-  void checkEnvSetup();
   /// Setup color selection widget connections.
   void connectColorSelectionWidget();
   /// Setup connections for all dialogs.
   void connectDialogs();
   /// Setup rotation point dialog connections.
   void connectRotationPointDialog();
-  /// Create the pqPVApplicationCore object in plugin mode.
-  void createAppCoreForPlugin();
   /// Add view specific stuff to a menu.
   void createMenus();
   /// Disconnect dialog connections.
@@ -153,8 +148,6 @@ private:
   void setParaViewComponentsForView();
   /// Run the necessary setup for the main view.
   void setupMainView();
-  /// Mimic ParaView behavior setup without QMainWindow.
-  void setupParaViewBehaviors();
   /// Creates the UI and mode switch connection.
   void setupUiAndConnections();
   /// Create the requested view.
