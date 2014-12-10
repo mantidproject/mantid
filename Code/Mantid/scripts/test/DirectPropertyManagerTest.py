@@ -549,6 +549,53 @@ class DirectPropertyManagerTest(unittest.TestCase):
         bkgd_range = propman.bkgd_range
         self.assertAlmostEqual(bkgd_range[0],mari_bkgd_range[0])
         self.assertAlmostEqual(bkgd_range[1],40)
+
+    def test_monovan_integration_range(self):
+       propman = self.prop_man
+
+       propman.incident_energy = 10
+       propman.monovan_lo_frac = -0.6
+       propman.monovan_hi_frac =  0.7
+
+       range = propman.abs_units_van_range
+       self.assertAlmostEqual(range[0],-6.)
+       self.assertAlmostEqual(range[1], 7.)
+
+       range = propman.monovan_integr_range
+       self.assertAlmostEqual(range[0],-6.)
+       self.assertAlmostEqual(range[1], 7.)
+
+       propman.monovan_lo_value = -10;
+       propman.monovan_hi_value = 10;
+
+       range = propman.abs_units_van_range
+       self.assertAlmostEqual(range[0],-6.)
+       self.assertAlmostEqual(range[1], 7.)
+
+       propman.abs_units_van_range=[-40,40]
+       self.assertAlmostEqual(propman.monovan_lo_value,-40)
+       self.assertAlmostEqual(propman.monovan_hi_value,40)
+
+       range = propman.monovan_integr_range
+       self.assertAlmostEqual(range[0],-40)
+       self.assertAlmostEqual(range[1], 40)
+
+       propman.abs_units_van_range=None
+
+       range = propman.monovan_integr_range
+       self.assertAlmostEqual(range[0],-6.)
+       self.assertAlmostEqual(range[1], 7.)
+       #
+       propman.monovan_lo_frac = -0.7
+       range = propman.monovan_integr_range
+       self.assertAlmostEqual(range[0],-7.)
+
+
+
+
+
+
+
  #def test_default_warnings(self):
     #    tReducer = self.reducer
 

@@ -143,60 +143,70 @@ class HardMaskOnly(object):
             instance.run_diagnostics = False;
 #end HardMaskOnly
 
-class MonovanIntegrationRange(object):
+class MonovanIntegrationRange(prop_helpers.ComplexProperty):
     """ integration range for monochromatic vanadium 
 
         Defined either directly or as the function of the incident energy(s)
 
         If list of incident energies is provided, map of ranges in the form 'ei'=range is returned 
     """
-    def __init__(self):
+    def __init__(self,DepType=None):
+        if DepType:
+            self._rel_range=False
+            prop_helpers.ComplexProperty.__init__(self,['monovan_lo_value','monovan_hi_value'])
+        else:
+            self._rel_range=True 
+            prop_helpers.ComplexProperty.__init__(self,['monovan_lo_frac','monovan_hi_frac'])
         pass
 
     def __get__(self,instance,type=None):
-        def_range = prop_helpers.gen_getter(instance.__dict__,'monovan_integr_range');
-        if def_range is None:
-            ei = instance.incident_energy
+        if isinstance(instance,dict):
+                ei = 1
+                tDict = instance
+        else:
+                ei = instance.incident_energy
+                tDict = instance.__dict__
+
+        if self._rel_range: # relative range
             if ei is None:
                 raise AttributeError('Attempted to obtain relative to ei monovan integration range, but incident energy has not been set');
-            lo_frac = instance.monovan_lo_frac;
-            hi_frac = instance.monovan_hi_frac;
+            rel_range = prop_helpers.ComplexProperty.__get__(self,tDict)
             if isinstance(ei,list):
                 range = dict();
                 for en in ei:
-                    range[en] = [lo_frac*en,hi_frac*en]
+                    range[en] = [rel_range[0]*en,rel_range[1]*en]
             else:
-                range = [lo_frac*ei,hi_frac*ei]
+                range = [rel_range[0]*ei,rel_range[1]*ei]
             return range
-        else:
-            min_value = prop_helpers.gen_getter(instance.__dict__,'monovan_lo_value');
-            max_value = prop_helpers.gen_getter(instance.__dict__,'monovan_hi_value');
-
-            return [min_value,max_value];
+        else: # absolute range
+            return prop_helpers.ComplexProperty.__get__(self,tDict)
 
     def __set__(self,instance,value):
-        if value is None:
-            if not ('monovan_integr_range' in instance.__dict__):
-                del instance.__dict__['_monovan_integr_range']
-                instance.__dict__.update({'monovan_integr_range':None})
-            else:
-                prop_helpers.gen_setter(instance.__dict__,'monovan_integr_range',None);
+        if isinstance(instance,dict):
+                dDict = instance
         else:
+                tDict = instance.__dict__
+        if value is None:
+            if (not self._rel_range):
+                self._rel_range = True
+                self._other_prop =['monovan_lo_frac','monovan_hi_frac']
+        else:
+            if self._rel_range:
+               self._rel_range = False
+               self._other_prop =['monovan_lo_value','monovan_hi_value']
+
             if isinstance(value,str):
-                values = value.split(',');
+                values = value.split(',')
                 result = [];
                 for val in values :
                     result.append(int(val));
                 value = result;
             if len(value) != 2:
-                raise KeyError("monovan_integr_range has to be list of two values, defining min/max values of integration range or None to use relative to incident energy limits")
-            prop_helpers.gen_setter(instance.__dict__,'monovan_lo_value',value[0]);
-            prop_helpers.gen_setter(instance.__dict__,'monovan_hi_value',value[1]);
-            if not ('_monovan_integr_range' in instance.__dict__):
-                #new_range = {'_monovan_integr_range':prop_helpers.ComplexProperty(['monovan_lo_value','monovan_hi_value'])
-                #del instance.__dict__['monovan_integr_range']
-                #instance.__dict__.update(new_range)
-                pass
+                raise KeyError("monovan_integr_range has to be list of two values, "\
+                    "defining min/max values of integration range or None to use relative to incident energy limits")
+            prop_helpers.ComplexProperty.__set__(self,tDict,value)
+
+ 
 #end MonovanIntegrationRange
 
 
@@ -446,6 +456,18 @@ class DirectPropertyManager(DirectReductionProperties):
             sml = SpectraToMonitorsList();
             param_list['spectra_to_monitors_list']=sml.convert_to_list(param_list['spectra_to_monitors_list'])
         #end
+        #
+        if 'monovan_integr_range' in param_list:
+            # get reference to class method
+            param_list['_monovan_integr_range']=self.__class__.__dict__['monovan_integr_range']
+            #
+            val = param_list['monovan_integr_range']
+            if str(val).lower() != 'none':
+                prop= param_list['_monovan_integr_range']
+                prop.__init__('AbsRange')
+            del param_list['monovan_integr_range']
+        #End monovan_integr_range
+        #-
         # End modify. 
         #----------------------------------------------------------------------------------------
         return param_list
@@ -533,12 +555,14 @@ class DirectPropertyManager(DirectReductionProperties):
        if name is '__dict__':
            return tDict;
        else:
-           subst_dict = tDict[self._class_wrapper+'subst_dict'];
-           if name in subst_dict:
-                name = subst_dict[name]
+           if name in self.__subst_dict:
+                name = self.__subst_dict[name]
            #end
-
-           return prop_helpers.gen_getter(tDict,name)
+           if name in self.__descriptors:
+              ph = tDict['_'+name]           
+              return ph.__get__(self)
+           else:
+              return prop_helpers.gen_getter(tDict,name)
        pass
 #----------------------------------------------------------------------------------
 #              Overloaded setters/getters

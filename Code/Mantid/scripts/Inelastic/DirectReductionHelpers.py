@@ -10,14 +10,19 @@ class ComplexProperty(object):
  
     def __get__(self,spec_dict,owner=None):
         """ return complex properties list """
-        rez = list();
+        #if not isinstance(spec_dict,dict):
+        #    spec_dict = spec_dict.__dict__
+        rez = list()
         for key in self._other_prop:
             rez.append(spec_dict[key]);
         return rez;
     def __set__(self,spec_dict,value):
         if len(value) != len(self._other_prop):
             raise KeyError("Complex property values can be set equal to the same length values list");
-        
+
+        #if not isinstance(spec_dict,dict):
+        #    spec_dict = spec_dict.__dict__
+         
         #changed_prop=[];
         for key,val in zip(self._other_prop,value):
                 spec_dict[key] =val;

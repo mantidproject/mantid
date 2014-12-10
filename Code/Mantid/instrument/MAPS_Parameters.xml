@@ -292,7 +292,7 @@
      if None, range is calculated from monovan_hi_frac/monovan_lo_frac 
      - providing the fractions of the incident energy      
      if one wants to specify the energy values here it has to be defined in the form:
-    <value val="monovan_lo_value,monovan_hi_value"/>      -->    
+    <value val="monovan_lo_value:monovan_hi_value"/>      -->    
 <parameter name="abs_units_van_range"  type="string">
   <value val="None"/>
 </parameter>
