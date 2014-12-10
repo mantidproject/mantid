@@ -111,6 +111,8 @@ namespace Mantid
       const auto affineTrans = findIntergratedDimensions(otherValues, skipNormalization);
       cacheDimensionXValues();
 
+      return;
+
       if(!skipNormalization)
       {
         calculateNormalization(otherValues, affineTrans);
@@ -141,8 +143,8 @@ namespace Mantid
       m_hmax = hdim->getMaximum();
       m_kmax = kdim->getMaximum();
       m_lmax = ldim->getMaximum();
-      m_dEmax = edim->getMaximum();
-      
+      m_dEmax = edim->getMaximum();    
+
       const auto & exptInfoZero = *(m_inputWS->getExperimentInfo(0));
       auto source = exptInfoZero.getInstrument()->getSource();
       auto sample = exptInfoZero.getInstrument()->getSample();
@@ -153,6 +155,39 @@ namespace Mantid
       m_samplePos = sample->getPos();
       m_beamDir = m_samplePos - source->getPos();
       m_beamDir.normalize();
+
+      double dEmin=exptInfoZero.run().getBinBoundaries().front();
+      double dEmax=exptInfoZero.run().getBinBoundaries().back();
+      if (exptInfoZero.run().hasProperty("Ei"))
+      {
+          Kernel::Property* eiprop = exptInfoZero.run().getProperty("Ei");
+          m_Ei = boost::lexical_cast<double>(eiprop->value());
+          if(m_Ei<=0)
+          {
+             throw std::invalid_argument("Ei stored in the workspace is not positive");
+          }
+      }
+      else
+      {
+       throw std::invalid_argument("Could not find Ei value in the workspace.");
+      }
+      if (dEmin>m_Ei)
+      {
+          dEmin=m_Ei;
+      }
+      if (dEmax>m_Ei)
+      {
+          dEmax=m_Ei;
+      }
+      if(dEmin==dEmax)
+      {
+          throw std::runtime_error("The limits of the original workspace used in ConvertToMD are incorrect");
+      }
+      const double energyToK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 /
+          (PhysicalConstants::h*PhysicalConstants::h);
+      m_ki=std::sqrt(energyToK*m_Ei);
+      m_kfmin=std::sqrt(energyToK*(m_Ei-m_dEmin));
+      m_kfmax=std::sqrt(energyToK*(m_Ei-m_dEmax));
     }
 
     /**
@@ -236,7 +271,7 @@ namespace Mantid
       const auto & runZero = m_inputWS->getExperimentInfo(0)->run();
 
       std::vector<coord_t> otherDimValues;
-      for(size_t i = 3; i < m_inputWS->getNumDims(); i++)
+      for(size_t i = 4; i < m_inputWS->getNumDims(); i++)
       {
         const auto dimension = m_inputWS->getDimension(i);
         float dimMin = static_cast<float>(dimension->getMinimum());
@@ -309,9 +344,21 @@ namespace Mantid
           {
             skipNormalization = true;
           }
+        }
 
-          for(size_t col = 3; col < ncm1; col++) //affine matrix, ignore last column
+        if(affineMat[row][3] == 1.)
+        {
+          m_dEIntegrated = false;
+          m_eIdx = row;
+          if(m_dEmin < dimMin) m_dEmin = dimMin;
+          if(m_dEmax > dimMax) m_dEmax = dimMax;
+          if(m_dEmin > dimMax || m_dEmax < dimMin)
           {
+            skipNormalization = true;
+          }
+        }
+        for(size_t col = 4; col < ncm1; col++) //affine matrix, ignore last column
+        {
             if(affineMat[row][col] == 1.)
             {
               double val = otherDimValues.at(col - 3);
@@ -320,7 +367,6 @@ namespace Mantid
                 skipNormalization = true;
               }
             }
-          }
         }
       }
       
@@ -332,23 +378,44 @@ namespace Mantid
      */
     void MDNormDirectSC::cacheDimensionXValues()
     {
-      auto &hDim = *m_normWS->getDimension(m_hIdx);
-      m_hX.resize(hDim.getNBins());
-      for(size_t i = 0; i < m_hX.size(); ++i)
+      const double energyToK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 /
+                (PhysicalConstants::h*PhysicalConstants::h);
+      if(!m_hIntegrated)
       {
-        m_hX[i] = hDim.getX(i);
+          auto &hDim = *m_normWS->getDimension(m_hIdx);
+          m_hX.resize(hDim.getNBins());
+          for(size_t i = 0; i < m_hX.size(); ++i)
+          {
+              m_hX[i] = hDim.getX(i);
+          }
       }
-      auto &kDim = *m_normWS->getDimension(m_kIdx);
-      m_kX.resize( kDim.getNBins() );
-      for(size_t i = 0; i < m_kX.size(); ++i)
+      if(!m_kIntegrated)
       {
-        m_kX[i] = kDim.getX(i);
+          auto &kDim = *m_normWS->getDimension(m_kIdx);
+          m_kX.resize( kDim.getNBins() );
+          for(size_t i = 0; i < m_kX.size(); ++i)
+          {
+              m_kX[i] = kDim.getX(i);
+          }
       }
-      auto &lDim = *m_normWS->getDimension(m_lIdx);
-      m_lX.resize( lDim.getNBins() );
-      for(size_t i = 0; i < m_lX.size(); ++i)
+      if(!m_lIntegrated)
       {
-        m_lX[i] = lDim.getX(i);
+          auto &lDim = *m_normWS->getDimension(m_lIdx);
+          m_lX.resize( lDim.getNBins() );
+          for(size_t i = 0; i < m_lX.size(); ++i)
+          {
+              m_lX[i] = lDim.getX(i);
+          }
+      }
+      if(!m_dEIntegrated)
+      {
+          //NOTE: store k final instead
+          auto &eDim = *m_normWS->getDimension(m_eIdx);
+          m_eX.resize( eDim.getNBins() );
+          for(size_t i = 0; i < m_eX.size(); ++i)
+          {
+              m_eX[i] = std::sqrt(energyToK*(m_Ei-eDim.getX(i)));
+          }
       }
     }
 
