@@ -2,8 +2,13 @@
 #define MANTID_GEOMETRY_SPACEGROUPFACTORYTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+using ::testing::Return;
 
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidGeometry/Crystal/CyclicGroup.h"
 
 using namespace  Mantid::Geometry;
 using Mantid::Kernel::V3D;
@@ -166,6 +171,58 @@ public:
         TS_ASSERT_THROWS_NOTHING(factory.unsubscribeSpaceGroup("P-1"));
     }
 
+    void testAbstractSpaceGroupGenerator()
+    {
+        MockSpaceGroupGenerator generator(1, "P 1", "x,y,z");
+
+        TS_ASSERT_EQUALS(generator.getNumber(), 1);
+        TS_ASSERT_EQUALS(generator.getHMSymbol(), "P 1");
+        TS_ASSERT_EQUALS(generator.getGeneratorString(), "x,y,z");
+    }
+
+    void testAbstractSpaceGroupGeneratorPrototypeBehavior()
+    {
+        /* The prototype is generated only once, after that
+         * it's stored in the generator.
+         */
+        MockSpaceGroupGenerator generator(1, "P 1", "x,y,z");
+
+        EXPECT_CALL(generator, generateGroup())
+                .Times(1)
+                .WillOnce(Return(GroupFactory::create<CyclicGroup>("-x,-y,-z")));
+
+        SpaceGroup_const_sptr prototype = generator.getPrototype();
+        TS_ASSERT(prototype);
+
+        SpaceGroup_const_sptr other = generator.getPrototype();
+
+        TS_ASSERT_EQUALS(other.get(), prototype.get());
+        TS_ASSERT_EQUALS(other, prototype);
+        TS_ASSERT_EQUALS(other->hmSymbol(), prototype->hmSymbol());
+
+        generator.getPrototype();
+        generator.getPrototype();
+    }
+
+    void testAlgorithmicSpaceGroupGenerator()
+    {
+        AlgorithmicSpaceGroupGenerator generator(1, "P -1", "-x,-y,-z");
+
+        SpaceGroup_const_sptr prototype = generator.getPrototype();
+
+        TS_ASSERT_EQUALS(prototype->order(), 2);
+        TS_ASSERT_EQUALS(prototype->hmSymbol(), "P -1");
+    }
+
+    void testTabulatedSpaceGroupGenerator()
+    {
+        TabulatedSpaceGroupGenerator generator(1, "P -1", "-x,-y,-z");
+
+        SpaceGroup_const_sptr prototype = generator.getPrototype();
+
+        TS_ASSERT_EQUALS(prototype->order(), 1);
+    }
+
 private:
     class TestableSpaceGroupFactory : public SpaceGroupFactoryImpl
     {
@@ -173,6 +230,17 @@ private:
     public:
         TestableSpaceGroupFactory() : SpaceGroupFactoryImpl() { }
         ~TestableSpaceGroupFactory() { }
+    };
+
+    class MockSpaceGroupGenerator : public AbstractSpaceGroupGenerator
+    {
+    public:
+        MockSpaceGroupGenerator(size_t number, const std::string &hmSymbol, const std::string &generatorInformation) :
+            AbstractSpaceGroupGenerator(number, hmSymbol, generatorInformation)
+        { }
+        ~MockSpaceGroupGenerator() { }
+
+        MOCK_CONST_METHOD0(generateGroup, Group_const_sptr());
     };
 
 };
