@@ -1,6 +1,13 @@
-#include "MantidAPI/AnalysisDataService.h"
+#include <iomanip>
+#include <iosfwd>
+#include <iostream>
+#include <limits>
+#include <sstream>
+#include <vector>
+#include <boost/make_shared.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
+
 #include "MantidAPI/CoordTransform.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/PeakTransformHKL.h"
@@ -9,19 +16,19 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidKernel/DataService.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/VMD.h"
-#include "MantidQtAPI/QwtRasterDataMD.h"
+#include "MantidKernel/ReadLock.h"
+#include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/SignalRange.h"
+#include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/CustomTools.h"
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
-#include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/SnapToGridDialog.h"
 #include "MantidQtSliceViewer/XYLimitsDialog.h"
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
@@ -34,50 +41,14 @@
 #include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactorySelector.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
-#include "qmainwindow.h"
-#include "qmenubar.h"
-#include <iomanip>
-#include <iosfwd>
-#include <iostream>
-#include <limits>
+
+#include <qwt_plot_panner.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/Exception.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include <qfiledialog.h>
-#include <qmenu.h>
-#include <QtGui/qaction.h>
-#include <qwt_color_map.h>
-#include <qwt_picker_machine.h>
-#include <qwt_plot_magnifier.h>
-#include <qwt_plot_panner.h>
-#include <qwt_plot_picker.h>
-#include <qwt_plot_spectrogram.h>
-#include <qwt_plot_zoomer.h>
-#include <qwt_plot.h>
-#include <qwt_scale_engine.h>
-#include <qwt_scale_map.h>
-#include <sstream>
-#include <vector>
-#include <boost/make_shared.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/ReadLock.h"
-#include "MantidQtMantidWidgets/SafeQwtPlot.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
-#include "MantidQtAPI/FileDialogHandler.h"
-#include "MantidQtAPI/PlotAxis.h"
-
+#include <Poco/AutoPtr.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -1807,7 +1778,7 @@ void SliceViewer::openFromXML(const QString & xml)
 {
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
-  Poco::XML::Document* pDoc;
+  Poco::AutoPtr<Poco::XML::Document> pDoc;
   try
   {
     pDoc = pParser.parseString(xml.toStdString());
@@ -1895,8 +1866,8 @@ void SliceViewer::openFromXML(const QString & xml)
   Poco::XML::Element* paramlist = func->getChildElement("ParameterList");
   if (!paramlist) throw std::runtime_error("SliceViewer::openFromXML(): No ParameterList element.");
 
-  NodeList * params = paramlist->getElementsByTagName("Parameter");
-  NodeList * paramvals;
+  Poco::AutoPtr<NodeList> params = paramlist->getElementsByTagName("Parameter");
+  Poco::AutoPtr<NodeList> paramvals;
   Node * param;
   if (!params || params->length() < 2)
     throw std::runtime_error("SliceViewer::openFromXML(): Too few parameters.");
