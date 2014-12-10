@@ -9,7 +9,6 @@
 
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMWriter.h>
-#include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
 #ifdef _MSC_VER
 // Disable a flood of warnings from Poco about inheriting from std::basic_istream
@@ -23,10 +22,6 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
 #include <fstream>  
@@ -59,21 +54,21 @@ void saveGroupingToXML(const Grouping& g, const std::string& filename)
   writer.setNewLine("\n");
   writer.setOptions(XMLWriter::PRETTY_PRINT);
 
-  Poco::XML::Document* mDoc = new Document();
+  Poco::AutoPtr<Poco::XML::Document> mDoc = new Document();
 
   // Create root element with a description
-  Element* rootElem = mDoc->createElement("detector-grouping");
+  Poco::AutoPtr<Element> rootElem = mDoc->createElement("detector-grouping");
   rootElem->setAttribute("description", g.description);
   mDoc->appendChild(rootElem);
 
   // Create group elements
   for (size_t gi = 0; gi < g.groups.size(); gi++)
   {
-    Element* gElem = mDoc->createElement("group");
+    Poco::AutoPtr<Element> gElem = mDoc->createElement("group");
     gElem->setAttribute("name", g.groupNames[gi]);
     rootElem->appendChild(gElem);
 
-    Element* idsElem = mDoc->createElement("ids");
+    Poco::AutoPtr<Element> idsElem = mDoc->createElement("ids");
     idsElem->setAttribute("val", g.groups[gi]);
     gElem->appendChild(idsElem);
   }
@@ -81,25 +76,25 @@ void saveGroupingToXML(const Grouping& g, const std::string& filename)
   // Create pair elements
   for (size_t pi = 0; pi < g.pairs.size(); pi++)
   {
-    Element* gElem = mDoc->createElement("pair");
+    Poco::AutoPtr<Element> gElem = mDoc->createElement("pair");
     gElem->setAttribute("name", g.pairNames[pi]);
     rootElem->appendChild(gElem);
 
-    Element* fwElem = mDoc->createElement("forward-group");
+    Poco::AutoPtr<Element> fwElem = mDoc->createElement("forward-group");
     fwElem->setAttribute("val", g.groupNames[g.pairs[pi].first]);
     gElem->appendChild(fwElem);
 
-    Element* bwElem = mDoc->createElement("backward-group");
+    Poco::AutoPtr<Element> bwElem = mDoc->createElement("backward-group");
     bwElem->setAttribute("val", g.groupNames[g.pairs[pi].second]);
     gElem->appendChild(bwElem);
 
-    Element* alphaElem = mDoc->createElement("alpha");
+    Poco::AutoPtr<Element> alphaElem = mDoc->createElement("alpha");
     alphaElem->setAttribute("val", boost::lexical_cast<std::string>(g.pairAlphas[pi]));
     gElem->appendChild(alphaElem);
   } 
 
   // Create default group/pair name element
-  Element* gElem = mDoc->createElement("default");
+  Poco::AutoPtr<Element> gElem = mDoc->createElement("default");
   gElem->setAttribute("name", g.defaultName);
   rootElem->appendChild(gElem);
 
@@ -116,7 +111,7 @@ void loadGroupingFromXML(const std::string& filename, Grouping& g)
 {
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
-  Document* pDoc;
+  Poco::AutoPtr<Document> pDoc;
   try
   {
     pDoc = pParser.parse(filename);
@@ -132,7 +127,7 @@ void loadGroupingFromXML(const std::string& filename, Grouping& g)
     throw Mantid::Kernel::Exception::FileError("No root element in XML grouping file" , filename);
 
   // Parse information for groups
-  NodeList* groups = pRootElem->getElementsByTagName("group");
+  Poco::AutoPtr<NodeList> groups = pRootElem->getElementsByTagName("group");
   if (groups->length() == 0)
     throw Mantid::Kernel::Exception::FileError("No groups specified in XML grouping file" , filename);
 
@@ -160,7 +155,7 @@ void loadGroupingFromXML(const std::string& filename, Grouping& g)
   
 
   // Parse information for pairs
-  NodeList* pairs = pRootElem->getElementsByTagName("pair");
+  Poco::AutoPtr<NodeList> pairs = pRootElem->getElementsByTagName("pair");
 
   // Resize vectors
   g.pairNames.resize(pairs->length());
