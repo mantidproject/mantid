@@ -101,13 +101,27 @@ namespace Mantid
           parseLine(templine, columns);
         }
       }
-
       newSpectra();
 
       const size_t numSpectra = m_spectra.size();
-      MatrixWorkspace_sptr localWorkspace = WorkspaceFactory::Instance().create("Workspace2D",numSpectra, m_lastBins, m_lastBins);
+      MatrixWorkspace_sptr localWorkspace;
+      try
+      {
+        localWorkspace = WorkspaceFactory::Instance().create("Workspace2D",numSpectra, m_lastBins, m_lastBins);
+      }
+      catch(std::exception&)
+      {
+        throw std::runtime_error("Failed to create a Workspace2D from the data found in this file");
+      }
 
-      writeToWorkspace(localWorkspace, numSpectra);
+      try
+      {
+        writeToWorkspace(localWorkspace, numSpectra);
+      }
+      catch(std::exception&)
+      {
+        throw std::runtime_error("Failed to write read data into the output Workspace2D");
+      }
       delete m_curSpectra;
       return localWorkspace;
     }
@@ -689,7 +703,18 @@ namespace Mantid
       // Process the header information.
       //processHeader(file);
       // Read the data
-      MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(readData(file));
+      API::Workspace_sptr rd;
+      try
+      {
+        rd = readData(file);
+      }
+      catch(std::exception& e)
+      {
+        g_log.error() << "Failed to read as ASCII this file: '" << filename <<
+          ", error description: " << e.what() << std::endl;
+        throw std::runtime_error("Failed to recognize this file as an ASCII file, cannot continue.");
+      }
+      MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(rd);
       outputWS->mutableRun().addProperty("Filename",filename);
       setProperty("OutputWorkspace", outputWS);
     }
