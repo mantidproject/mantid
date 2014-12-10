@@ -33,21 +33,21 @@ include ( ParaViewSetup )
 ###########################################################################
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
-	if ( NOT THIRD_PARTY )
-  		set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
-	endif ()
-	# Print out where we think we are looking for 3rd party stuff
-	message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
+  if ( NOT THIRD_PARTY )
+      set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
+  endif ()
+  # Print out where we think we are looking for 3rd party stuff
+  message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
 
-	# Check that the 3rd party directory exists.
-	if (NOT IS_DIRECTORY "${THIRD_PARTY}")
+  # Check that the 3rd party directory exists.
+  if (NOT IS_DIRECTORY "${THIRD_PARTY}")
         message ( WARNING "Specified THIRD_PARTY directory doesn't exist!" )
-	endif()
+  endif()
 
-	include ( WindowsSetup )
+  include ( WindowsSetup )
 
-	# Settings for generating the windows Nullsoft package via CPack
-	include ( WindowsNSIS )
+  # Settings for generating the windows Nullsoft package via CPack
+  include ( WindowsNSIS )
 
 ENDIF()
 
@@ -247,8 +247,8 @@ if ( ENABLE_CPACK )
         # parse list to string required for deb package
         string ( REPLACE ";" "" CPACK_DEBIAN_PACKAGE_DEPENDS ${DEPENDS_LIST} )
       endif()
-      # soft requirement of tcmalloc - if built with it, then require it
-      IF ( USE_TCMALLOC AND TCMALLOC_FOUND )
+      # soft requirement of tcmalloc if selected
+      IF ( USE_TCMALLOC )
         message ( STATUS " Adding gperftools to the package requirements" )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0" )
         set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},${PERFTOOLS_DEB_PACKAGE}" )

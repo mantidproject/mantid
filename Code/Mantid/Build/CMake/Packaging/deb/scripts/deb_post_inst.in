@@ -1,0 +1,60 @@
+#!/bin/sh
+# postinst script for mantid
+#
+
+set -e
+
+# summary of how this script can be called:
+#        * <postinst> `configure' <most-recently-configured-version>
+#        * <old-postinst> `abort-upgrade' <new version>
+#        * <conflictor's-postinst> `abort-remove' `in-favour' <package>
+#          <new-version>
+#        * <postinst> `abort-remove'
+#        * <deconfigured's-postinst> `abort-deconfigure' `in-favour'
+#          <failed-install-package> <version> `removing'
+#          <conflicting-package> <version>
+# for details, see http://www.debian.org/doc/debian-policy/ or
+# the debian-policy package
+
+# Configured by cmake
+ENVVARS_ON_INSTALL=@ENVVARS_ON_INSTALL_INT@
+
+case "$1" in
+
+  configure)
+    # Check consistency of prefix
+    if [ -z "@CMAKE_INSTALL_PREFIX@" ]; then
+      echo "postinst called with empty install prefix, symlinks not created."
+      exit 0
+    fi
+
+    # Create symbolic links
+    if [ -f @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot ]; then
+      mv @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot_exe
+      if [ ! -s @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot ]; then
+        ln -s @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/launch_mantidplot.sh @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot
+      fi
+      if [ ! -s @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/mantidplot ]; then
+        ln -s @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/launch_mantidplot.sh @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/mantidplot
+      fi
+    fi
+    # Environment updates if required
+    if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
+	# Link profiles to /etc/profile.d
+	ln -s @CMAKE_INSTALL_PREFIX@/@ETC_DIR@/mantid.sh /etc/profile.d/mantid.sh
+	ln -s @CMAKE_INSTALL_PREFIX@/@ETC_DIR@/mantid.csh /etc/profile.d/mantid.csh
+    fi
+  ;;
+
+  abort-upgrade|abort-remove|abort-deconfigure)
+    exit 0
+  ;;
+
+  *)
+    echo "postinst called with unknown argument \`$1'" >&2
+    exit 1
+  ;;
+
+esac
+
+exit 0

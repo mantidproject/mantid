@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# RPM post-install script for installation with ENVVARS_ON_INSTALL=True
+# Create links created inside installation directories along
+# with any other links inside /etc
+#
+ENVVARS_ON_INSTALL=@ENVVARS_ON_INSTALL_INT@
+
+if [ ! -e $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot ]; then
+  ln -s $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot
+fi
+
+if [ -f $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot ]; then
+  mv $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot_exe
+  ln -s $RPM_INSTALL_PREFIX0/@BIN_DIR@/launch_mantidplot.sh $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot
+fi
+
+if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
+  # Link profiles to /etc/profile.d
+  ln -s $RPM_INSTALL_PREFIX0/@ETC_DIR@/mantid.sh /etc/profile.d/mantid.sh
+  ln -s $RPM_INSTALL_PREFIX0/@ETC_DIR@/mantid.csh /etc/profile.d/mantid.csh
+fi
