@@ -507,10 +507,48 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(ei_spec[0],65542)
         self.assertEqual(ei_spec[1],5506)
 
+    def test_ignore_complex_defailts_changes_fom_instrument(self) :
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
 
+        SetInstrumentParameter(ws,ParameterName="bkgd_range",Value="bkgd-range-min:bkgd-range-max",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="bkgd-range-min",Value="100.",ParameterType="Number")
+        SetInstrumentParameter(ws,ParameterName="bkgd-range-max",Value="200.",ParameterType="Number")
 
+        propman = self.prop_man
 
+        propman.background_range=[20,40]
+        bkgd_range = propman.bkgd_range
+        self.assertAlmostEqual(bkgd_range[0],20)
+        self.assertAlmostEqual(bkgd_range[1],40)
 
+        changed_prop=propman.update_defaults_from_instrument( ws.getInstrument())
+
+        self.assertEqual(len(changed_prop),1)
+        bkgd_range = propman.bkgd_range
+        self.assertAlmostEqual(bkgd_range[0],20)
+        self.assertAlmostEqual(bkgd_range[1],40)
+
+    def test_ignore_complex_defailts_single_fom_instrument(self) :
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
+
+        SetInstrumentParameter(ws,ParameterName="bkgd_range",Value="bkgd-range-min:bkgd-range-max",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="bkgd-range-min",Value="100.",ParameterType="Number")
+        SetInstrumentParameter(ws,ParameterName="bkgd-range-max",Value="200.",ParameterType="Number")
+
+        propman = self.prop_man
+        mari_bkgd_range = propman.bkgd_range
+
+        setattr(propman,'bkgd-range-max',40)
+        bkgd_range = propman.bkgd_range
+        self.assertAlmostEqual(bkgd_range[0],mari_bkgd_range[0])
+        self.assertAlmostEqual(bkgd_range[1],40)
+
+        changed_prop=propman.update_defaults_from_instrument( ws.getInstrument())
+
+        self.assertEqual(len(changed_prop),1)
+        bkgd_range = propman.bkgd_range
+        self.assertAlmostEqual(bkgd_range[0],mari_bkgd_range[0])
+        self.assertAlmostEqual(bkgd_range[1],40)
  #def test_default_warnings(self):
     #    tReducer = self.reducer
 

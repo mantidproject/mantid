@@ -176,7 +176,11 @@ class MonovanIntegrationRange(object):
 
     def __set__(self,instance,value):
         if value is None:
-            prop_helpers.gen_setter(instance.__dict__,'monovan_integr_range',None);
+            if not ('monovan_integr_range' in instance.__dict__):
+                del instance.__dict__['_monovan_integr_range']
+                instance.__dict__.update({'monovan_integr_range':None})
+            else:
+                prop_helpers.gen_setter(instance.__dict__,'monovan_integr_range',None);
         else:
             if isinstance(value,str):
                 values = value.split(',');
@@ -188,6 +192,11 @@ class MonovanIntegrationRange(object):
                 raise KeyError("monovan_integr_range has to be list of two values, defining min/max values of integration range or None to use relative to incident energy limits")
             prop_helpers.gen_setter(instance.__dict__,'monovan_lo_value',value[0]);
             prop_helpers.gen_setter(instance.__dict__,'monovan_hi_value',value[1]);
+            if not ('_monovan_integr_range' in instance.__dict__):
+                #new_range = {'_monovan_integr_range':prop_helpers.ComplexProperty(['monovan_lo_value','monovan_hi_value'])
+                #del instance.__dict__['monovan_integr_range']
+                #instance.__dict__.update(new_range)
+                pass
 #end MonovanIntegrationRange
 
 
@@ -659,41 +668,60 @@ class DirectPropertyManager(DirectReductionProperties):
   
 
         for key,val in sorted_param.iteritems():
+            # set new values to old values and record this
+            if key[0] == '_':
+               public_name = key[1:]
+            else:
+               public_name = key
+            # complex properties were modified to start with _
+            if not(key in self.__dict__):
+                 name = '_'+key
+            else:
+                 name = key
 
-            if not (key in old_changes):
-               # complex properties were modified to start with _
-               if not(key in self.__dict__):
-                   name = '_'+key
-               else:
-                   name = key
-
-               try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains 
+            try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains 
                     # properties, not present in recent IDF.
-                    cur_val = self.__dict__[name]
-               except:
-                   self.log("property {0} or its derivatives have not been found in existing IDF. Ignoring this property"\
+                  cur_val = self.__dict__[name]
+            except:
+                  self.log("property {0} or its derivatives have not been found in existing IDF. Ignoring this property"\
                        .format(key),'warning')
-                   continue
+                  continue
 
-               # complex properties set up through their members so no need to set up one
-               if isinstance(cur_val,prop_helpers.ComplexProperty):
+            # complex properties may be set up through their members so no need to set up one
+            if isinstance(cur_val,prop_helpers.ComplexProperty):
+               # is complex property changed through its dependent properties?
+               dependent_prop = val.dependencies()
+               replace_old_value = True
+               if public_name in old_changes:
+                   replace_old_value = False
+
+               if replace_old_value: # may be property have changed through its dependencies
+                    for prop_name in dependent_prop:
+                        if  prop_name in old_changes:
+                            replace_old_value =False
+                            break
+               #
+               if replace_old_value:
                    old_val = cur_val.__get__(self.__dict__)
                    new_val = val.__get__(param_list)
                    if old_val != new_val:
-                       # set new values to old values and record this
-                       if name[0] == '_':
-                           public_name = name[1:]
-                       else:
-                           public_name = name
-                       setattr(self,public_name,new_val)
-                       # remove dependent values from list of changed properties not to assign them later one-by one
-                       dep_prop = val.dependencies()
-                       for prop_name in dep_prop:
-                           del sorted_param[prop_name]
-               else: 
+                      setattr(self,public_name,new_val)
+               # remove dependent values from list of changed properties not to assign them later one-by one
+               for prop_name in dependent_prop:
+                   try:
+                      del sorted_param[prop_name]
+                   except:
+                       pass
+            # simple property
+            else: 
+                if public_name in old_changes:
+                    continue
+                else: 
                    old_val = getattr(self,name);
                    if not(val == old_val or val == cur_val):
                      setattr(self,name,val)
+        #End_if
+
         # Clear changed properties list (is this wise?, may be we want to know that some defaults changed?)
         if ignore_changes:
             self.setChangedProperties(old_changes)

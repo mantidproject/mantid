@@ -19,8 +19,8 @@ class ComplexProperty(object):
             raise KeyError("Complex property values can be set equal to the same length values list");
         
         #changed_prop=[];
-        for i,key in enumerate(self._other_prop):
-                spec_dict[key] =value[i];
+        for key,val in zip(self._other_prop,value):
+                spec_dict[key] =val;
                 #changed_prop.append(key);
         #return changed_prop;
     def dependencies(self):

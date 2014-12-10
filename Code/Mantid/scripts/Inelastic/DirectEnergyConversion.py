@@ -640,7 +640,7 @@ class DirectEnergyConversion(object):
 # --------------------------------------------------------------------------------------------------------
      # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
       if not masks_done:
-        prop_man.log("########### Run diagnose for sample run ##############################",'notice');
+        prop_man.log("######## Run diagnose for sample run ###########################",'notice');
         masking = self.diagnose(prop_man.wb_run,prop_man.mask_run,
                                 second_white=None,print_results=True)
         header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
@@ -653,7 +653,7 @@ class DirectEnergyConversion(object):
                     prop_man.log('  Applying sample run mask to mono van')
                 else:
                     if not prop_man.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better solution for that.
-                        prop_man.log("########### Run diagnose for monochromatic vanadium run ##############",'notice');
+                        prop_man.log("######## Run diagnose for monochromatic vanadium run ###########",'notice');
 
                         masking2 = self.diagnose(prop_man.wb_for_monovan_run,prop_man.monovan_run,
                                          second_white = None,print_results=True)
@@ -816,8 +816,7 @@ class DirectEnergyConversion(object):
 
           Inputs:
           @param: deltaE_wkspace  -- the name (string) of monovan workspace, converted to energy
-          @param: min             -- the string representing the minimal energy to integrate the spectra
-          @param: max             -- the string representing the maximal energy to integrate the spectra
+          @param: ei_monovan      -- monovan sample incident energy
 
           @returns the value of monovan absolute normalization factor.
                    deletes monovan workspace (deltaE_wkspace) if abs norm factor was calculated successfully
@@ -833,6 +832,8 @@ class DirectEnergyConversion(object):
 
         propman = self.prop_man;
         van_mass=propman.van_mass;
+        # list of two number  representing the minimal (ei_monovan[0])
+        # and the maximal (ei_monovan[1]) energy to integrate the spectra
         minmax = propman.monovan_integr_range;
 
 
@@ -1083,13 +1084,14 @@ class DirectEnergyConversion(object):
         """
         Mask and group detectors based on input parameters
         """
+        ws_name = result_ws.getName();
         if not spec_masks is None:
-            MaskDetectors(Workspace=result_ws, MaskedWorkspace=spec_masks)
+            MaskDetectors(Workspace=ws_name, MaskedWorkspace=spec_masks)
         if not map_file is None:
-            result_ws = GroupDetectors(InputWorkspace=result_ws,OutputWorkspace=result_ws,
+            GroupDetectors(InputWorkspace=ws_name,OutputWorkspace=ws_name,
                                        MapFile= map_file, KeepUngroupedSpectra=0, Behaviour='Average')
 
-        return result_ws
+        return mtd[ws_name]
 
     def get_monitors_ws(self,data_ws,method,mon_number=None):
         """ get pointer to a workspace containing monitors. 
