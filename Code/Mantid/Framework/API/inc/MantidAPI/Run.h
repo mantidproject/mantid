@@ -77,6 +77,8 @@ namespace Mantid
       void storeHistogramBinBoundaries(const std::vector<double> & energyBins);
       /// Returns the bin boundaries for a given value
       std::pair<double, double> histogramBinBoundaries(const double energyValue) const;
+      ///Returns the vector of bin boundaries
+      std::vector<double> getBinBoundaries() const;
 
       /// Set the gonoimeter & read the values from the logs if told to do so
       void setGoniometer(const Geometry::Goniometer & goniometer, const bool useLogValues);

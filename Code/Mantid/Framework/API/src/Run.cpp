@@ -298,6 +298,21 @@ namespace
     return std::make_pair(m_histoBins[index], m_histoBins[index+1]);
   }
 
+  /**
+   * Returns the energy bin boundaries. Throws a std::runtime_error
+   * if the energy bins have not been set.
+   * @return The bin boundaries vector
+   */
+  std::vector<double> Run::getBinBoundaries() const
+  {
+    if(m_histoBins.empty())
+    {
+      throw std::runtime_error("Run::histogramBoundaries - No energy bins have been stored for this run");
+    }
+
+    return m_histoBins;
+  }
+
   //-----------------------------------------------------------------------------------------------
   /** Return the total memory used by the run object, in bytes.
    */
