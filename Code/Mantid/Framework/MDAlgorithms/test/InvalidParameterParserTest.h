@@ -10,11 +10,6 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 
 class  InvalidParameterParserTest : public CxxTest::TestSuite
 {
@@ -27,11 +22,10 @@ public:
 
         DOMParser pParser;
         std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Parameter><Type>SomeUnknownParameter</Type><Value>x</Value></Parameter>";
-        Document* pDoc = pParser.parseString(xmlToParse);
-        Element* pRootElem = pDoc->documentElement();
+        Poco::AutoPtr<Document> pDoc = pParser.parseString(xmlToParse);
 
         InvalidParameterParser parser;
-        Mantid::API::ImplicitFunctionParameter* iparam = parser.createParameter(pRootElem);
+        Mantid::API::ImplicitFunctionParameter* iparam = parser.createParameter(pDoc->documentElement());
         InvalidParameter* pInvalidParam = dynamic_cast<InvalidParameter*>(iparam);
         boost::scoped_ptr<InvalidParameter> invalparam(pInvalidParam);
 
