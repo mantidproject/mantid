@@ -191,13 +191,33 @@ namespace IDA
 
     QString wsName = uiForm().fury_dsInput->getCurrentDataName();
     QString resName = uiForm().fury_dsResInput->getCurrentDataName();
+    if(wsName.isEmpty() || resName.isEmpty())
+      return;
 
     double energyMin = m_dblManager->value(m_properties["ELow"]);
     double energyMax = m_dblManager->value(m_properties["EHigh"]);
-    long numBins = static_cast<long>(m_dblManager->value(m_properties["SampleBinning"]));
 
-    if(wsName.isEmpty() || resName.isEmpty() || numBins == 0)
+    // Estimate number of SampleBinning according to whether the workspace has angles or momentum transfer
+    MatrixWorkspace_const_sptr workspace;
+    try
+    {
+      workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsName.toStdString());
+    }
+    catch(Mantid::Kernel::Exception::NotFoundError&)
+    {
+      showMessageBox(QString("Unable to retrieve workspace: " + wsName));
       return;
+    }
+    long numBins = static_cast<long>(m_dblManager->value(m_properties["SampleBinning"])); // Default value
+    const std::string unitID( workspace->getAxis(0)->unit()->unitID() );
+    if( unitID == "MomentumTransfer")
+    {
+      numBins = 1;
+    }
+
+    if(numBins == 0)
+      return;
+
 
     bool verbose = uiForm().fury_ckVerbose->isChecked();
 
