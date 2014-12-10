@@ -7,17 +7,16 @@
 #include "MantidSINQ/SINQHMListener.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+
 #include <Poco/Net/HTTPRequest.h>
-#include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPBasicCredentials.h>
 #include <Poco/StreamCopier.h>
-#include <iostream>
-#include <sstream>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/Text.h>
+#include <Poco/AutoPtr.h>
+#include <iostream>
+#include <sstream>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -31,8 +30,8 @@ DECLARE_LISTENER(SINQHMListener)
 
 SINQHMListener::SINQHMListener() :ILiveListener(), httpcon(), response()
 {
-	connected = false;
-	dimDirty = true;
+  connected = false;
+  dimDirty = true;
 }
 
 SINQHMListener::~SINQHMListener()
@@ -144,7 +143,7 @@ void SINQHMListener::loadDimensions()
 	  Poco::StreamCopier::copyStream(istr,oss);
 
 	  DOMParser xmlParser;
-	  Document *doc;
+          Poco::AutoPtr<Document> doc;
 	  try{
 		  doc = xmlParser.parseString(oss.str());
 	  } catch (...)
@@ -152,7 +151,7 @@ void SINQHMListener::loadDimensions()
 	    throw std::runtime_error("Unable to parse sinqhm.xml");
 	  }
 	  Element *root = doc->documentElement();
-	  NodeList *bankList = root->getElementsByTagName("bank");
+	  Poco::AutoPtr<NodeList> bankList = root->getElementsByTagName("bank");
 	  /**
 	   * TODO: There may be multiple banks but I only
 	   *       look at the first
@@ -161,7 +160,7 @@ void SINQHMListener::loadDimensions()
 	  std::string rankt = bank->getAttribute("rank");
 	  rank = atoi(rankt.c_str());
 
-	  NodeList *axisList = bank->getElementsByTagName("axis");
+	  Poco::AutoPtr<NodeList> axisList = bank->getElementsByTagName("axis");
 	  for(unsigned int i = 0; i < axisList->length(); i++){
 		  Element *axis = dynamic_cast<Element*>(axisList->item(i));
 		  std::string sdim = axis->getAttribute("length");
