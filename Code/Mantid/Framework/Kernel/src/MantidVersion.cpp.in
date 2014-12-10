@@ -54,7 +54,7 @@ const char* MantidVersion::releaseDate()
 
 std::string MantidVersion::doi()
 {
-  const std::string MAIN = "http://dx.doi.org/10.5286/Software/Mantid";
+  const std::string MAIN = "http://dx.doi.org/10.1016/j.nima.2014.07.029";
   // Cast here in those cases where patch number is of the form 20131022.1356.
   const unsigned int patchVersion = static_cast<unsigned int>(@VERSION_PATCH@);
 
