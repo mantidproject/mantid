@@ -11,6 +11,14 @@ provided to the application.
 import config
 import sys
 
+__version__="unknown"
+try:
+    from _version import __version__
+except ImportError:
+    #_version.py file not found - version not known in this case so use
+    #the default previously given.
+    pass
+
 #parse args - doing it here as config structure needs to be filled prior to importing sysmon
 if ['--nompl'] == [s for s in sys.argv if '--nompl' in s]:
     #case to not use matplotlib
@@ -72,7 +80,7 @@ class SysMonMainWindow(QtGui.QMainWindow):
             
     def About(self):
         dialog=QtGui.QMessageBox(self)
-        dialog.setText("PyQt4 System Monitoring Application V0.02")
+        dialog.setText("PyQt4 System Monitoring Application "+__version__)
         info='Application Info: \n\r * Changing the Update Rate Clears plots \n\r * It may take one full new update cycle for changes to take effect \n\r * Update rate shown in History plot xaxis label \n\r * Process tab CPU percentage can be greater than 100 when more than a single core is involved'
         dialog.setDetailedText(info) #give full info in detailed text
         dialog.exec_()

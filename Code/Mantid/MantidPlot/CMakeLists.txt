@@ -882,6 +882,7 @@ copy_files_to_dir ( "${IPY_FILES}"
 # SysMon scripts
 set( SYSMON_FILES
   __init__.py
+  _version.py
   config.py
   sysmon.py
   sysmon_tools.py

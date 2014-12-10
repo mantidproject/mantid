@@ -3,7 +3,14 @@
 import sys, os, time
 import re
 import config  #application constants and variables
+#suppress deprecation warnings that can occur when importing psutil version 2
+#note - all deprecation warnings will probably be suppressed using this filterwarnings
+#as specifying the psutil module specifically in filterwarnings did not suppress 
+#these warnings
+import warnings
+warnings.filterwarnings('ignore',category=DeprecationWarning)
 import psutil
+
 #check psutil version as command syntax changes between version 1 and version 2
 ver=psutil.__version__
 verChk1=re.match('1.[0-9].[0-9]',ver) #latest psutil version 1 is 1.2.1 - using positional numeric wildcards to check sub versions
@@ -25,6 +32,15 @@ try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
     _fromUtf8 = lambda s: s
+
+#import application version information
+__version__="unknown"
+try:
+    from _version import __version__
+except ImportError:
+    #_version.py file not found - version not known in this case so use
+    #the default previously given.
+    pass
 
 class SysMon(QtGui.QWidget):
 
@@ -102,7 +118,9 @@ class SysMon(QtGui.QWidget):
             #create drawing canvas
             # a figure instance to plot on
 
-            matplotlib.rc_context({'toolbar':False})
+            if not re.match('1.[0-1]',matplotlib.__version__):
+                #if not an old version of matplotlib, then use the following command 
+                matplotlib.rc_context({'toolbar':False})
             #initialize figure 1 and its canvas for cpu and memory history plots
             self.ui.figure = plt.figure(1)
             # the Canvas Widget displays the `figure`
@@ -142,6 +160,9 @@ class SysMon(QtGui.QWidget):
         
         #upon initialization completion, set System tab (first tab on left) as the visible tab
         self.ui.tabWidget.setCurrentIndex(config.SYST_TAB)
+        
+        #initialize version label
+        self.ui.labelVersion.setText("Version: "+__version__)
 
     def constantUpdate(self):
         #redirct to global function
@@ -211,7 +232,6 @@ class SysMon(QtGui.QWidget):
             self.ui.pushButtonUpdate.setText('Hold Updates')
 
     def resizeEvent(self,resizeEvent):
-        print "resizing"
         sz=self.ui.tableWidgetProcess.size()
         w=sz.width()
         wmin=self.ui.parent.minimumSize().width() #establish minimum table size based upon parent widget minimum size

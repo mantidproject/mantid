@@ -52,7 +52,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>186</width>
+            <width>179</width>
             <height>267</height>
            </rect>
           </property>
@@ -547,7 +547,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>232</width>
+            <width>238</width>
             <height>250</height>
            </rect>
           </property>
@@ -596,6 +596,49 @@
                </widget>
               </item>
               <item>
+               <widget class="Line" name="line">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label">
+                <property name="text">
+                 <string>CPU History Smooth</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="comboBoxCPUHistSmooth">
+                <item>
+                 <property name="text">
+                  <string>1</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>2</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>5</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>10</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>15</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
                <spacer name="verticalSpacer">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>
@@ -607,6 +650,13 @@
                  </size>
                 </property>
                </spacer>
+              </item>
+              <item>
+               <widget class="QLabel" name="labelVersion">
+                <property name="text">
+                 <string>Version: </string>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>

@@ -1,10 +1,18 @@
+#suppress deprecation warnings that can occur when importing psutil version 2
+#note - all deprecation warnings will probably be suppressed using this filterwarnings
+#as specifying the psutil module specifically in filterwarnings did not suppress 
+#these warnings
+import warnings
+warnings.filterwarnings('ignore',category=DeprecationWarning)
 import psutil
+
 from PyQt4 import Qt, QtCore, QtGui
 import datetime
 import numpy as np
 import config
 import math
 import getpass
+import re
 
 #check if command line flag --nompl set to disable matplotlib 
 if not(config.nompl):
@@ -27,31 +35,14 @@ else:
     
 def constantUpdateActor(self,config):
 
-    #check duration
+    #set duration number
     Ndur=self.duration
 
-    #update global variables 
-
-    #mode to show status in percentage
-    if self.update < 3:
-        #use averaging if using faster update rates
-        Navg=1
-    else:
-        #Don't need averaging in longer acquisition cases
-        Navg=1
-    busy_avg=0
+    #get current CPU stats
     cpu_stats = psutil.cpu_times_percent(interval=0,percpu=False) #syntax seems to be same for psutil versions 1 and 2
-    
-    tmpsum=cpu_stats.system+cpu_stats.user
-    if sum(self.ui.cpu[0:Navg-2+1]) == 0:
-        #avoid initial zeros in the array pulling down the average - just use the value measured in this case.
-        busy_avg=tmpsum
-    else:
-        #case to average
-        busy_avg=(tmpsum+sum(self.ui.cpu[0:Navg-2+1]))/Navg
-    
-    percentcpubusy = busy_avg
-    self.ui.progressBarStatusCPU.setValue(round(percentcpubusy))
+    #determine total busy percentage based upon system and users
+    percentcpubusy=cpu_stats.system+cpu_stats.user
+
     percentmembusy=psutil.virtual_memory().percent
     self.ui.progressBarStatusMemory.setValue(round(percentmembusy))
     Ncpus=len(psutil.cpu_percent(percpu=True))
@@ -108,7 +99,10 @@ def constantUpdateActor(self,config):
             except:
                 uname=''
         except:
-            pass #skip process - case where process no longer exists
+            #skip process - case where process no longer exists
+            cpupct=0
+            memVal=0
+            uname=''
         cpupctTot+=cpupct
         memValTot+=memVal
         #print "uname: ",uname,"  Me: ",Me
@@ -117,16 +111,34 @@ def constantUpdateActor(self,config):
             cpupctMe+=cpupct
             memValMe+=memVal
     #print "cpupctMe: ",cpupctMe,"  memValMe: ",memValMe
-    if config.mplLoaded:
-        #update first position with most recent value overwriting oldest value which has been shifted to first position
-        self.ui.cpu=np.roll(self.ui.cpu,1)
-        self.ui.cpu[0]=percentcpubusy   #percentcpubusy seems to agree better with system System Monitor than cpupctTot/Ncpus
-        self.ui.mem=np.roll(self.ui.mem,1)
-        self.ui.mem[0]=percentmembusy
-        self.ui.cpuMe=np.roll(self.ui.cpuMe,1)
+    
+    #update first position with most recent value overwriting oldest value which has been shifted to first position
+    self.ui.cpu=np.roll(self.ui.cpu,1)
+    #check if CPU smoothing to be applied
+    sm=int(str(self.ui.comboBoxCPUHistSmooth.currentText()))
+    if sm == 1:
+        self.ui.cpu[0]=percentcpubusy
+    elif sm >1:
+        self.ui.cpu[0]=(percentcpubusy+np.sum(self.ui.cpu[1:sm]))/sm
+    else:
+        #unknown case - default to no smoothing
+        self.ui.cpu[0]=percentcpubusy
+    #update progress bar with (potentially) smoothed cpu percentage
+    self.ui.progressBarStatusCPU.setValue(round(self.ui.cpu[0]))
+    self.ui.mem=np.roll(self.ui.mem,1)
+    self.ui.mem[0]=percentmembusy
+    self.ui.cpuMe=np.roll(self.ui.cpuMe,1)
+    #check if CPU smoothing to be applied
+    if sm == 1:
         self.ui.cpuMe[0]=cpupctMe/(Ncpus)
-        self.ui.memMe=np.roll(self.ui.memMe,1)
-        self.ui.memMe[0]=memValMe    
+    elif sm>1:
+        self.ui.cpuMe[0]=(cpupctMe/(Ncpus)+np.sum(self.ui.cpuMe[1:sm]))/sm
+    else:
+        #use no filtering in case sm is unknown (should never happen...)
+        self.ui.cpuMe[0]=cpupctMe/(Ncpus)
+    self.ui.memMe=np.roll(self.ui.memMe,1)
+    self.ui.memMe[0]=memValMe    
+
 
     #update the history plot
     if self.ui.tabWidget.currentIndex() == config.HIST_TAB:
@@ -475,7 +487,11 @@ def updateUserChart(self,config):
     usersLegend.reverse()
     p.reverse()
     #place legend outside of plot to the right
-    plt.legend(p,usersLegend,bbox_to_anchor=(1.45, 1.1), loc="upper left", borderaxespad=0.1,fontsize=config.pltFont-0.5,title='Users')
+    if not re.match('1.[0-1]',matplotlib.__version__):
+        #if not an old version of matplotlib, then use the following command 
+        plt.legend(p,usersLegend,bbox_to_anchor=(1.45, 1.1), loc="upper left", borderaxespad=0.1,fontsize=config.pltFont-0.5,title='Users')
+    else:
+        plt.legend(p,usersLegend,bbox_to_anchor=(1.45, 1.1), loc="upper left", borderaxespad=0.1,title='Users')
         
     #place second y axis label on plot
     ylab2=np.arange(5)/4.0*float(ymax)

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_sysmon.ui'
 #
-# Created: Wed Sep 24 16:19:13 2014
+# Created: Fri Dec 05 09:55:29 2014
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -37,7 +37,7 @@ class Ui_Form(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 186, 267))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 179, 267))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
@@ -268,7 +268,7 @@ class Ui_Form(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollArea_2.setObjectName(_fromUtf8("scrollArea_2"))
         self.scrollAreaWidgetContents_2 = QtGui.QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 232, 250))
+        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 238, 250))
         self.scrollAreaWidgetContents_2.setObjectName(_fromUtf8("scrollAreaWidgetContents_2"))
         self.horizontalLayout_5 = QtGui.QHBoxLayout(self.scrollAreaWidgetContents_2)
         self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
@@ -290,8 +290,27 @@ class Ui_Form(object):
         self.radioButton3600Secs = QtGui.QRadioButton(self.groupBox_6)
         self.radioButton3600Secs.setObjectName(_fromUtf8("radioButton3600Secs"))
         self.verticalLayout_5.addWidget(self.radioButton3600Secs)
+        self.line = QtGui.QFrame(self.groupBox_6)
+        self.line.setFrameShape(QtGui.QFrame.HLine)
+        self.line.setFrameShadow(QtGui.QFrame.Sunken)
+        self.line.setObjectName(_fromUtf8("line"))
+        self.verticalLayout_5.addWidget(self.line)
+        self.label = QtGui.QLabel(self.groupBox_6)
+        self.label.setObjectName(_fromUtf8("label"))
+        self.verticalLayout_5.addWidget(self.label)
+        self.comboBoxCPUHistSmooth = QtGui.QComboBox(self.groupBox_6)
+        self.comboBoxCPUHistSmooth.setObjectName(_fromUtf8("comboBoxCPUHistSmooth"))
+        self.comboBoxCPUHistSmooth.addItem(_fromUtf8(""))
+        self.comboBoxCPUHistSmooth.addItem(_fromUtf8(""))
+        self.comboBoxCPUHistSmooth.addItem(_fromUtf8(""))
+        self.comboBoxCPUHistSmooth.addItem(_fromUtf8(""))
+        self.comboBoxCPUHistSmooth.addItem(_fromUtf8(""))
+        self.verticalLayout_5.addWidget(self.comboBoxCPUHistSmooth)
         spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_5.addItem(spacerItem1)
+        self.labelVersion = QtGui.QLabel(self.groupBox_6)
+        self.labelVersion.setObjectName(_fromUtf8("labelVersion"))
+        self.verticalLayout_5.addWidget(self.labelVersion)
         self.horizontalLayout_5.addWidget(self.groupBox_6)
         self.groupBox_4 = QtGui.QGroupBox(self.scrollAreaWidgetContents_2)
         self.groupBox_4.setMinimumSize(QtCore.QSize(0, 0))
@@ -355,6 +374,13 @@ class Ui_Form(object):
         self.radioButton300Secs.setText(QtGui.QApplication.translate("Form", "300 Seconds", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButton600Secs.setText(QtGui.QApplication.translate("Form", "600 Seconds", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButton3600Secs.setText(QtGui.QApplication.translate("Form", "3600 Seconds", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("Form", "CPU History Smooth", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBoxCPUHistSmooth.setItemText(0, QtGui.QApplication.translate("Form", "1", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBoxCPUHistSmooth.setItemText(1, QtGui.QApplication.translate("Form", "2", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBoxCPUHistSmooth.setItemText(2, QtGui.QApplication.translate("Form", "5", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBoxCPUHistSmooth.setItemText(3, QtGui.QApplication.translate("Form", "10", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBoxCPUHistSmooth.setItemText(4, QtGui.QApplication.translate("Form", "15", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelVersion.setText(QtGui.QApplication.translate("Form", "Version: ", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox_4.setTitle(QtGui.QApplication.translate("Form", "Update Rate", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButton1Sec.setText(QtGui.QApplication.translate("Form", "1 Second", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButton2Secs.setText(QtGui.QApplication.translate("Form", "2 Seconds", None, QtGui.QApplication.UnicodeUTF8))
