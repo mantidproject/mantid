@@ -60,8 +60,7 @@ namespace DataObjects
       void cacheDimensionXValues();
       void calculateNormalization(const std::vector<coord_t> &otherValues,
                                   const Kernel::Matrix<coord_t> &affineTrans);
-      void calcIntegralsForIntersections( const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux, 
-                                          size_t sp, std::vector<double> &yValues ) const;
+
       std::vector<detid_t> removeGroupedIDs(const API::ExperimentInfo & exptInfo,
                                             const std::vector<detid_t> &detIDs);
       Geometry::IDetector_const_sptr getThetaPhi(const detid_t detID,

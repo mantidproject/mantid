@@ -84,7 +84,7 @@ namespace Mantid
       solidAngleValidator->add<CommonBinsValidator>();
 
       
-      declareProperty(new WorkspaceProperty<>("SolidAngleWorkspace","",Direction::Input, solidAngleValidator),
+      declareProperty(new WorkspaceProperty<>("SolidAngleWorkspace","",Direction::Input, PropertyMode::Optional, solidAngleValidator),
                       "An input workspace containing integrated vanadium (a measure of the solid angle).");
       
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),
@@ -204,7 +204,7 @@ namespace Mantid
       for(auto it = props.begin(); it != props.end(); ++it)
       {
         const auto & propName = (*it)->name();
-        if(propName != "FluxWorkspace" && propName != "SolidAngleWorkspace" &&
+        if(propName != "SolidAngleWorkspace" &&
            propName != "OutputNormalizationWorkspace")
         {
           binMD->setPropertyValue(propName,(*it)->value());
@@ -475,92 +475,6 @@ namespace Mantid
       PARALLEL_CHECK_INTERUPT_REGION
 
       delete prog;*/
-    }
-
-    /**
-     * Linearly interpolate between the points in integrFlux at xValues and save the results in yValues.
-     * @param xValues :: X-values at which to interpolate
-     * @param integrFlux :: A workspace with the spectra to interpolate
-     * @param sp :: A workspace index for a spectrum in integrFlux to interpolate.
-     * @param yValues :: A vector to save the results.
-     */
-    void MDNormDirectSC::calcIntegralsForIntersections( const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux, size_t sp, std::vector<double> &yValues ) const
-    {
-      assert( xValues.size() == yValues.size() );
-
-      // the x-data from the workspace
-      const auto &xData = integrFlux.readX(sp);
-      const double xStart = xData.front();
-      const double xEnd = xData.back();
-
-      // the values in integrFlux are expected to be integrals of a non-negative function
-      // ie they must make a non-decreasing function
-      const auto &yData = integrFlux.readY(sp);
-      size_t spSize = yData.size();
-
-      const double yMin = 0.0;
-      const double yMax = yData.back();
-
-      size_t nData = xValues.size();
-      // all integrals below xStart must be 0
-      if (xValues[nData-1] < xStart)
-      {
-        std::fill( yValues.begin(), yValues.end(), yMin );
-        return;
-      }
-      
-      // all integrals above xEnd must be equal tp yMax
-      if ( xValues[0] > xEnd )
-      {
-        std::fill( yValues.begin(), yValues.end(), yMax );
-        return;
-      }
-      
-      size_t i = 0;
-      // integrals below xStart must be 0
-      while(i < nData - 1 && xValues[i] < xStart)
-      {
-        yValues[i] = yMin;
-        i++;
-      }
-      size_t j = 0;
-      for(; i < nData; i++)
-      {
-        // integrals above xEnd must be equal tp yMax
-        if (j >= spSize - 1)
-        {
-          yValues[i] = yMax;
-        }
-        else
-        {
-          double xi = xValues[i];
-          while(j < spSize - 1 && xi > xData[j]) j++;
-          // if x falls onto an interpolation point return the corresponding y
-          if (xi == xData[j])
-          {
-            yValues[i] = yData[j];
-          }
-          else if (j == spSize - 1)
-          {
-            // if we get above xEnd it's yMax
-            yValues[i] = yMax;
-          }
-          else if (j > 0)
-          {
-            // interpolate between the consecutive points
-            double x0 = xData[j-1];
-            double x1 = xData[j];
-            double y0 = yData[j-1];
-            double y1 = yData[j];
-            yValues[i] = y0 + (y1 - y0)*(xi - x0)/(x1 - x0);
-          }
-          else // j == 0
-          {
-            yValues[i] = yMin;
-          }
-        }
-      }
-      
     }
 
     /**
