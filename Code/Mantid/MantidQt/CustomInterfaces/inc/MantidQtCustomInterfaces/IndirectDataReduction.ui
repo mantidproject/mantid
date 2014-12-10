@@ -2332,12 +2332,12 @@ Later steps in the process (saving, renaming) will not be done.</string>
                 </property>
                 <item>
                  <property name="text">
-                  <string>Centre (SofQW)</string>
+                  <string>Parallelepiped (SofQW2)</string>
                  </property>
                 </item>
                 <item>
                  <property name="text">
-                  <string>Parallelepiped (SofQW2)</string>
+                  <string>Parallelepiped/Fractional Area (SofQW3)</string>
                  </property>
                 </item>
                </widget>

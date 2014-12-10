@@ -180,10 +180,10 @@ namespace CustomInterfaces
     IAlgorithm_sptr sqwAlg;
     QString rebinType = m_uiForm.sqw_cbRebinType->currentText();
 
-    if(rebinType == "Centre (SofQW)")
-      sqwAlg = AlgorithmManager::Instance().create("SofQW");
-    else if(rebinType == "Parallelepiped (SofQW2)")
+    if(rebinType == "Parallelepiped (SofQW2)")
       sqwAlg = AlgorithmManager::Instance().create("SofQW2");
+    else if(rebinType == "Parallelepiped/Fractional Area (SofQW3)")
+      sqwAlg = AlgorithmManager::Instance().create("SofQW3");
 
     // S(Q, w) algorithm
     sqwAlg->initialize();
