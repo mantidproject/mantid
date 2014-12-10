@@ -620,7 +620,7 @@ class DirectEnergyConversion(object):
       workspace_defined_prop=allChanges.difference(oldChanges)
       if len(workspace_defined_prop)>0:
           prop_man.log("****************************************************************")
-          prop_man.log('*** Sample Workspace {0} overwrites default reduction properties: '.format(sample_run.getName()))
+          prop_man.log('*** Sample run {0} properties change default reduction properties: '.format(sample_run.getName()))
           prop_man.log_changed_values('notice',False,oldChanges)
           prop_man.log("****************************************************************")
 
