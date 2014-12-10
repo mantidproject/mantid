@@ -200,6 +200,9 @@ int main( int argc, char ** argv )
     const QString versionInfo(Mantid::Kernel::MantidVersion::version());
     splash.showMessage("Release: " + releaseDateTime + " (Version " + versionInfo + ")", Qt::AlignLeft | Qt::AlignBottom);
     splash.show();
+    // If we take too long to get to the event loop then box starts out gray so ensure
+    // it is painted before doing any heavy lifting like the ApplicationWindow init
+    splash.repaint();
     app.processEvents();
 
     bool factorySettings = false;
