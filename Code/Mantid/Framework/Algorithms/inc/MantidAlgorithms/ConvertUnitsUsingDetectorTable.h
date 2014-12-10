@@ -58,15 +58,15 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConvertUnits : public API::Algorithm
+class DLLExport ConvertUnitsUsingDetectorTable : public API::Algorithm
 {
 public:
   /// Default constructor
-  ConvertUnits();
+  ConvertUnitsUsingDetectorTable();
   /// Virtual destructor
-  virtual ~ConvertUnits();
+  virtual ~ConvertUnitsUsingDetectorTable();
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "ConvertUnits"; }
+  virtual const std::string name() const { return "ConvertUnitsUsingDetectorTable"; }
     ///Summary of algorithms purpose
     virtual const std::string summary() const {return "Performs a unit change on the X values of a workspace";}
 
