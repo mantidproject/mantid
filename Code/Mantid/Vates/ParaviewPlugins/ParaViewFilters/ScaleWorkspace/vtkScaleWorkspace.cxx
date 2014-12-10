@@ -113,7 +113,7 @@ void vtkScaleWorkspace::SetZScaling(double zScaling)
 /**
  * Gets the minimum value of the data associated with the 
  * workspace.
- * @return The minimum value of the workspace data.
+ * @returns The minimum value of the workspace data.
  */
 double vtkScaleWorkspace::GetMinValue()
 {
@@ -123,7 +123,7 @@ double vtkScaleWorkspace::GetMinValue()
 /**
  * Gets the maximum value of the data associated with the 
  * workspace.
- * @return The maximum value of the workspace data.
+ * @returns The maximum value of the workspace data.
  */
 double vtkScaleWorkspace::GetMaxValue()
 {

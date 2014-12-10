@@ -11,10 +11,13 @@
 #include <pqOutputPort.h>
 #include <pqPipelineFilter.h>
 #include <pqPipelineSource.h>
+#include <pqPipelineRepresentation.h>
 #include <pqScalarsToColors.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
 #include <vtkSMDoubleVectorProperty.h>
+
+#include <QPair>
 
 namespace Mantid
 {
@@ -137,70 +140,51 @@ namespace SimpleGui
    */
   void AutoScaleRangeGenerator::setMinBufferAndMaxBuffer(pqPipelineSource* source, double& minValue, double& maxValue)
   {
-    pqPipelineSource* pqSource = source;
+    // Make sure that the pipeline properties are up to date
+    vtkSMProxy* proxy = source->getProxy();
+    proxy->UpdateVTKObjects();
+    proxy->UpdatePropertyInformation();
+    source->updatePipeline();
 
-    bool isFilter = true;
-
-    while(isFilter)
+    // Check if source is custom filter
+    if (QString(proxy->GetXMLName()).contains("MantidParaViewScaleWorkspace") ||
+        QString(proxy->GetXMLName()).contains("MDEWRebinningCutter") ||
+        QString(proxy->GetXMLName()).contains("MantidParaViewSplatterPlot"))
     {
-      // Make sure that the pipeline properties are up to date
-      vtkSMProxy* proxy = pqSource->getProxy();
-      proxy->UpdateVTKObjects();
-      proxy->UpdatePropertyInformation();
-      pqSource->updatePipeline();
+      minValue = vtkSMPropertyHelper(proxy,"MinValue").GetAsDouble();
+      maxValue = vtkSMPropertyHelper(proxy,"MaxValue").GetAsDouble();
 
-      // If we are dealing with a filter, we can cast it. If it is a source,
-      // then the cast should result in a NULL, an exception is the splatterplot filter which 
-      // also contains size information
-      pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(pqSource);
+      return;
+    }
 
-      if (QString(proxy->GetXMLName()).contains("SplatterPlot"))
-      {
-          minValue = vtkSMPropertyHelper(proxy,"MinValue").GetAsDouble();
+    // Check if source is custom source (MDHisto or MDEvent)
+    if (QString(proxy->GetXMLName()).contains("MDEW Source") ||
+        QString(proxy->GetXMLName()).contains("MDHW Source"))
+    {
+      minValue = vtkSMPropertyHelper(proxy,"MinValue").GetAsDouble();
+      maxValue = vtkSMPropertyHelper(proxy,"MaxValue").GetAsDouble();
 
-          maxValue = vtkSMPropertyHelper(proxy,"MaxValue").GetAsDouble();
+      return;
+    }
 
-          isFilter = false;
-      }
-      else if (!filter)
-      {
-        // Only MDEvent and MDHisto workspaces will provide us with min and max
-        const char* workspaceTypeName = vtkSMPropertyHelper(proxy,"WorkspaceTypeName").GetAsString();
-        std::string workspaceType(workspaceTypeName);
-        size_t mdEvent = workspaceType.find("MDEventWorkspace");
-        size_t mdHisto = workspaceType.find("MDHistoWorkspace");
+    // Check if Peak Workspace. This workspace should not contribute to colorscale
+    if (QString(proxy->GetXMLName()).contains("Peaks Source"))
+    {
+      minValue = DBL_MAX;
+      maxValue = -DBL_MAX;
 
-        if (mdEvent != std::string::npos || mdHisto != std::string::npos)
-        {
-          minValue = vtkSMPropertyHelper(proxy,"MinValue").GetAsDouble();
+      return;
+    }
 
-          maxValue = vtkSMPropertyHelper(proxy,"MaxValue").GetAsDouble();
-        }
-        else
-        {
-          // Peak Source should not produce a color scale range
-          minValue = DBL_MAX;
-          maxValue = -DBL_MAX;
-        }
+    // Otherwise get the data range of the representation for the active view
+    pqPipelineRepresentation* pipelineRepresenation = qobject_cast<pqPipelineRepresentation*>(source->getRepresentation(pqActiveObjects::instance().activeView()));
 
-        isFilter = false;
-      } 
-      else
-      {
-        // We expect one input, if not provide default values
-        if (filter->getInputCount() != 1)
-        {
-          minValue = this->defaultValue;
-          maxValue = this->defaultValue;
+    if (pipelineRepresenation)
+    {
+      QPair<double, double> range = pipelineRepresenation->getColorFieldRange();
 
-          isFilter = false;
-        } 
-        else
-        {
-          QList<pqOutputPort*> outputPorts = filter->getAllInputs();
-          pqSource = outputPorts[0]->getSource();
-        }
-      }
+      minValue = range.first;
+      maxValue = range.second;
     }
   }
 

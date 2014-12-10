@@ -15,11 +15,8 @@ public:
   void SetXScaling(double xScaling);
   void SetYScaling(double yScaling);
   void SetZScaling(double zScaling);
-  /// Getter for the minimum value of the workspace data
   double GetMinValue();
-  /// Getter for the maximum value of the workspace data
   double GetMaxValue();
-  /// Getter for the instrument associated with the instrument.
   const char* GetInstrument();
 
 protected:
