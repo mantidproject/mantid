@@ -309,9 +309,10 @@ namespace Mantid
           {
             skipNormalization = true;
           }
+        }
 
-          for(size_t col = 3; col < ncm1; col++) //affine matrix, ignore last column
-          {
+        for(size_t col = 3; col < ncm1; col++) //affine matrix, ignore last column
+        {
             if(affineMat[row][col] == 1.)
             {
               double val = otherDimValues.at(col - 3);
@@ -320,7 +321,6 @@ namespace Mantid
                 skipNormalization = true;
               }
             }
-          }
         }
       }
       
