@@ -3,10 +3,12 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
@@ -71,6 +73,9 @@ void ConvertUnits::init()
   declareProperty("AlignBins",false,
     "If true (default is false), rebins after conversion to ensure that all spectra in the output workspace\n"
     "have identical bin boundaries. This option is not recommended (see http://www.mantidproject.org/ConvertUnits).");
+
+  declareProperty(new WorkspaceProperty<ITableWorkspace>("DetectorParameters", "", Direction::Input, PropertyMode::Optional),
+    "Name of a TableWorkspace containing the detector parameters to use instead of the IDF.");
 }
 
 /** Executes the algorithm
@@ -83,7 +88,6 @@ void ConvertUnits::exec()
   // Get the workspaces
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   this->setupMemberVariables(inputWS);
-
 
   // Check that the input workspace doesn't already have the desired unit.
   if (m_inputUnit->unitID() == m_outputUnit->unitID())
@@ -350,7 +354,64 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const doub
 void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_sptr outputWS)
 {
   using namespace Geometry;
-  
+
+    // Let's see if we are using a TableWorkspace to override parameters
+    ITableWorkspace_sptr paramWS = getProperty("DetectorParameters");
+
+    // Some
+    bool usingDetPars = false;
+    bool usingDetParsL1 = false;
+    Column_const_sptr l1Column;
+    Column_const_sptr l2Column;
+    Column_const_sptr spectraColumn;
+    Column_const_sptr twoThetaColumn;
+    Column_const_sptr efixedColumn;
+    Column_const_sptr emodeColumn;
+
+    // See if we have supplied a DetectorParameters Workspace
+    if ( paramWS != NULL )
+    {
+        g_log.debug("Setting usingDetPars = true");
+        usingDetPars = true;
+
+        std::vector<std::string> columnNames = paramWS->getColumnNames();
+        
+        // First lets see if the table includes L1 ?
+        
+        if (std::find(columnNames.begin(), columnNames.end(), "l1") != columnNames.end())
+        {
+            try {
+                l1Column = paramWS->getColumn("l1");
+                usingDetParsL1 = true;
+                g_log.debug() << "Overriding L1 from IDF with parameter table." << std::endl;
+                
+            } catch (std::runtime_error) {
+                // make sure we know we are using L1 from the IDF
+                usingDetParsL1 = false;
+                g_log.debug() << "Could not find L1 in parameter table supplied - using values from IDF." << std::endl;
+            }
+        }
+        else
+        {
+            usingDetParsL1 = false;
+            g_log.debug() << "Could not find L1 in parameter table supplied - using values from IDF." << std::endl;;
+            
+        }
+
+        // Now lets read the rest of the parameters
+        try {
+            l2Column = paramWS->getColumn("l2");
+            spectraColumn = paramWS->getColumn("spectra");
+            twoThetaColumn = paramWS->getColumn("twotheta");
+            efixedColumn = paramWS->getColumn("efixed");
+            emodeColumn = paramWS->getColumn("emode");
+        } catch (...) {
+            usingDetPars = false;
+            throw Exception::InstrumentDefinitionError("DetectorParameter TableWorkspace is not defined correctly.");
+        }
+
+    }
+
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
   assert ( static_cast<bool>(eventWS) == m_inputEvents ); // Sanity check
 
@@ -368,123 +429,156 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
   // Get the distance between the source and the sample (assume in metres)
   IComponent_const_sptr source = instrument->getSource();
   IComponent_const_sptr sample = instrument->getSample();
-  if ( source == NULL || sample == NULL )
-  {
-    throw Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
-  }
-  double l1;
-  try
-  {
-    l1 = source->getDistance(*sample);
-    g_log.debug() << "Source-sample distance: " << l1 << std::endl;
-  }
-  catch (Exception::NotFoundError &)
-  {
-    g_log.error("Unable to calculate source-sample distance");
-    throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", outputWS->getTitle());
-  }
-
-  int failedDetectorCount = 0;
-
-  /// @todo No implementation for any of these in the geometry yet so using properties
-  const std::string emodeStr = getProperty("EMode");
-  // Convert back to an integer representation
-  int emode = 0;
-  if (emodeStr == "Direct") emode=1;
-  else if (emodeStr == "Indirect") emode=2;
-
-  // Not doing anything with the Y vector in to/fromTOF yet, so just pass empty vector
-  std::vector<double> emptyVec;
-  const bool needEfixed = ( outputUnit->unitID().find("DeltaE") != std::string::npos || outputUnit->unitID().find("Wave") != std::string::npos );
-  double efixedProp = getProperty("Efixed");
-  if ( emode == 1 )
-  {
-    //... direct efixed gather
-    if ( efixedProp == EMPTY_DBL() )
+    
+    if (!usingDetPars)
     {
-      // try and get the value from the run parameters
-      const API::Run & run = outputWS->run();
-      if ( run.hasProperty("Ei") )
-      {
-        Kernel::Property* prop = run.getProperty("Ei");
-        efixedProp = boost::lexical_cast<double,std::string>(prop->value());
-      }
-      else
-      {
-        if ( needEfixed )
+        if ( source == NULL || sample == NULL )
         {
-          throw std::invalid_argument("Could not retrieve incident energy from run object");
+            
+            throw Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
         }
-        else
-        {
-          efixedProp = 0.0;
-        }
-      }
     }
-    else
+    
+    double l1;
+    int emode = 0;
+    double l2, twoTheta, efixed;
+    double efixedProp;
+    
+    std::vector<double> emptyVec;
+    int failedDetectorCount = 0;
+
+    if (!usingDetPars)
     {
-      // set the Ei value in the run parameters
-      API::Run & run = outputWS->mutableRun();
-      run.addProperty<double>("Ei", efixedProp, true);
+        try
+        {
+            l1 = source->getDistance(*sample);
+            g_log.debug() << "Source-sample distance: " << l1 << std::endl;
+        }
+        catch (Exception::NotFoundError &)
+        {
+            g_log.error("Unable to calculate source-sample distance");
+            throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", outputWS->getTitle());
+        }
+        
+        /// @todo No implementation for any of these in the geometry yet so using properties
+        const std::string emodeStr = getProperty("EMode");
+        // Convert back to an integer representation
+        if (emodeStr == "Direct") emode=1;
+        else if (emodeStr == "Indirect") emode=2;
+        
+        // Not doing anything with the Y vector in to/fromTOF yet, so just pass empty vector
+        const bool needEfixed = ( outputUnit->unitID().find("DeltaE") != std::string::npos || outputUnit->unitID().find("Wave") != std::string::npos );
+        efixedProp = getProperty("Efixed");
+        if ( emode == 1 )
+        {
+            //... direct efixed gather
+            if ( efixedProp == EMPTY_DBL() )
+            {
+                // try and get the value from the run parameters
+                const API::Run & run = outputWS->run();
+                if ( run.hasProperty("Ei") )
+                {
+                    Kernel::Property* prop = run.getProperty("Ei");
+                    efixedProp = boost::lexical_cast<double,std::string>(prop->value());
+                }
+                else
+                {
+                    if ( needEfixed )
+                    {
+                        throw std::invalid_argument("Could not retrieve incident energy from run object");
+                    }
+                    else
+                    {
+                        efixedProp = 0.0;
+                    }
+                }
+            }
+            else
+            {
+                // set the Ei value in the run parameters
+                API::Run & run = outputWS->mutableRun();
+                run.addProperty<double>("Ei", efixedProp, true);
+            }
+        }
+        else if ( emode == 0 && efixedProp == EMPTY_DBL() ) // Elastic
+        {
+            efixedProp = 0.0;
+        }
     }
-  }
-  else if ( emode == 0 && efixedProp == EMPTY_DBL() ) // Elastic
-  {
-    efixedProp = 0.0;
-  }
-
-  std::vector<std::string> parameters = outputWS->getInstrument()->getStringParameter("show-signed-theta");
-  bool bUseSignedVersion = (!parameters.empty()) && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
-  function<double(IDetector_const_sptr)> thetaFunction = bUseSignedVersion ? bind(&MatrixWorkspace::detectorSignedTwoTheta, outputWS, _1) : bind(&MatrixWorkspace::detectorTwoTheta, outputWS, _1);
-
+    
+        std::vector<std::string> parameters = outputWS->getInstrument()->getStringParameter("show-signed-theta");
+        bool bUseSignedVersion = (!parameters.empty()) && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
+        function<double(IDetector_const_sptr)> thetaFunction = bUseSignedVersion ? bind(&MatrixWorkspace::detectorSignedTwoTheta, outputWS, _1) : bind(&MatrixWorkspace::detectorTwoTheta, outputWS, _1);
+    
+    
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR1(outputWS)
     for (int64_t i = 0; i < numberOfSpectra_i; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
-    double efixed = efixedProp;
+    efixed = efixedProp;
+
+    std::size_t wsid = i;
 
     try
     {
-      // Now get the detector object for this histogram
-      IDetector_const_sptr det = outputWS->getDetector(i);
-      // Get the sample-detector distance for this detector (in metres)
-      double l2, twoTheta;
-      if ( ! det->isMonitor() )
-      {
-        l2 = det->getDistance(*sample);
-        // The scattering angle for this detector (in radians).
-        twoTheta = thetaFunction(det);
-        // If an indirect instrument, try getting Efixed from the geometry
-        if (emode==2) // indirect
+        // Are we using a Detector Parameter workspace to override values
+        if (usingDetPars)
         {
-          if ( efixed == EMPTY_DBL() )
-          {
-          try
-          {
-            Parameter_sptr par = pmap.getRecursive(det.get(),"Efixed");
-            if (par) 
+            specid_t spectraNumber = static_cast<specid_t>(spectraColumn->toDouble(i));
+            wsid = outputWS->getIndexFromSpectrumNumber(spectraNumber);
+            g_log.debug() << "###### Spectra #" << spectraNumber << " ==> Workspace ID:" << wsid << std::endl;
+            l2 = l2Column->toDouble(wsid);
+            twoTheta = twoThetaColumn->toDouble(wsid);
+            efixed = efixedColumn->toDouble(wsid);
+            emode = static_cast<int>(emodeColumn->toDouble(wsid));
+            if (usingDetParsL1)
             {
-              efixed = par->value<double>();
-              g_log.debug() << "Detector: " << det->getID() << " EFixed: " << efixed << "\n";
+                l1 = l1Column->toDouble(wsid);
             }
-          }
-          catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
-          }
         }
-      }
-      else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
-      {
-        l2 = det->getDistance(*source);
-        l2 = l2-l1;
-        twoTheta = 0.0;
-        efixed = DBL_MIN;
-        // Energy transfer is meaningless for a monitor, so set l2 to 0.
-        if (outputUnit->unitID().find("DeltaE") != std::string::npos)
+        else
         {
-          l2 = 0.0;
+            // Now get the detector object for this histogram
+            IDetector_const_sptr det = outputWS->getDetector(i);
+            // Get the sample-detector distance for this detector (in metres)
+            if ( ! det->isMonitor() )
+            {
+                
+                l2 = det->getDistance(*sample);
+                // The scattering angle for this detector (in radians).
+                twoTheta = thetaFunction(det);
+                // If an indirect instrument, try getting Efixed from the geometry
+                if (emode==2) // indirect
+                {
+                    if ( efixed == EMPTY_DBL() )
+                    {
+                        try
+                        {
+                            Parameter_sptr par = pmap.getRecursive(det.get(),"Efixed");
+                            if (par)
+                            {
+                                efixed = par->value<double>();
+                                g_log.debug() << "Detector: " << det->getID() << " EFixed: " << efixed << "\n";
+                            }
+                        }
+                        catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
+                    }
+                }
+            }
+            else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
+            {
+                l2 = det->getDistance(*source);
+                l2 = l2-l1;
+                twoTheta = 0.0;
+                efixed = DBL_MIN;
+                // Energy transfer is meaningless for a monitor, so set l2 to 0.
+                if (outputUnit->unitID().find("DeltaE") != std::string::npos)
+                {
+                    l2 = 0.0;
+                }
+            }
         }
-      }
 
       // Make local copies of the units. This allows running the loop in parallel
       Unit * localFromUnit = fromUnit->clone();
@@ -493,14 +587,14 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
       /// @todo Don't yet consider hold-off (delta)
       const double delta = 0.0;
       // Convert the input unit to time-of-flight
-      localFromUnit->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+      localFromUnit->toTOF(outputWS->dataX(wsid),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       // Convert from time-of-flight to the desired unit
-      localOutputUnit->fromTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+      localOutputUnit->fromTOF(outputWS->dataX(wsid),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
 
       // EventWorkspace part, modifying the EventLists.
       if ( m_inputEvents )
       {
-        eventWS->getEventList(i).convertUnitsViaTof(localFromUnit, localOutputUnit);
+        eventWS->getEventList(wsid).convertUnitsViaTof(localFromUnit, localOutputUnit);
 
 //        std::vector<double> tofs;
 //        eventWS->getEventList(i).getTofs(tofs);
@@ -532,6 +626,11 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
   if (m_inputEvents)
     eventWS->clearMRU();
 }
+
+
+
+
+
 
 /// Calls Rebin as a Child Algorithm to align the bins
 API::MatrixWorkspace_sptr ConvertUnits::alignBins(API::MatrixWorkspace_sptr workspace)
