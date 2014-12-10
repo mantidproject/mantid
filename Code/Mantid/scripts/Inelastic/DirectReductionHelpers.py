@@ -18,13 +18,18 @@ class ComplexProperty(object):
         if len(value) != len(self._other_prop):
             raise KeyError("Complex property values can be set equal to the same length values list");
         
-        changed_prop=[];
+        #changed_prop=[];
         for i,key in enumerate(self._other_prop):
                 spec_dict[key] =value[i];
-                changed_prop.append(key);
-        return changed_prop;
+                #changed_prop.append(key);
+        #return changed_prop;
+    def dependencies(self):
+        """ returns the list of properties names, this property depends on"""
+        return self._other_prop
 
     def len(self):
+        """ returns the number of properties, this property depends on"""
+
         return len(self._other_prop);
 #end ComplexProperty
 
@@ -219,7 +224,8 @@ def gen_setter(keyval_dict,key,val):
           raise KeyError(' You can not assign non-list value to complex property {0}'.format(key))
        pass
             # Assigning values for composite function to the function components
-       return test_val.__set__(keyval_dict,val)
+       test_val.__set__(keyval_dict,val)
+       return None
     else:
        keyval_dict[key] = val;
     return None

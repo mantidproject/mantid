@@ -39,7 +39,7 @@ from mantid import config
 from mantid.kernel import funcreturns
 import DirectReductionHelpers as prop_helpers
 from DirectReductionProperties import DirectReductionProperties
-
+from collections import OrderedDict
 import CommonFunctions as common
 import os
 
@@ -385,17 +385,42 @@ class DirectPropertyManager(DirectReductionProperties):
         # retrieve the dictionary of property-values described in IDF
         param_list = prop_helpers.get_default_idf_param_list(self.instrument);
 
+        param_list = self._convert_params_to_properties(param_list);
+        #
+        self.__dict__.update(param_list)
 
-        # build and use substitution dictionary
+
+        # file properties -- the properties described files which should exist for reduction to work.
+        self.__file_properties = ['det_cal_file','map_file','hard_mask_file']
+        self.__abs_norm_file_properties = ['monovan_mapfile']
+
+        # properties with allowed values
+        self.__prop_allowed_values['normalise_method']=[None,'monitor-1','monitor-2','current']  # 'uamph', peak -- disabled/unknown at the moment
+        self.__prop_allowed_values['deltaE_mode']=['direct'] # I do not think we should try other modes here
+
+
+        # properties with special(overloaded and non-standard) setters/getters: Properties name dictionary returning tuple(getter,setter)
+        # if some is None, standard one is used. 
+        #self.__special_properties['monovan_integr_range']=(self._get_monovan_integr_range,lambda val : self._set_monovan_integr_range(val));
+        # list of the parameters which should always be taken from IDF unless explicitly set from elsewhere. These parameters MUST have setters and getters
+  
+    def _convert_params_to_properties(self,param_list,detine_subst_dict=True):
+        """ method processes parameters obtained from IDF and modifies the IDF properties
+            to the form allowing them be assigned as python class properties.            
+        """ 
+            # build and use substitution dictionary
         if 'synonims' in param_list:
             synonyms_string  = param_list['synonims'];
-            self.__subst_dict = prop_helpers.build_subst_dictionary(synonyms_string);
+            if detine_subst_dict:
+                self.__subst_dict = prop_helpers.build_subst_dictionary(synonyms_string);
+            #end
             # this dictionary will not be needed any more
             del param_list['synonims']
         #end
 
 
-        # build and initiate  properties with default descriptors (TODO: consider complex automatic descriptors)
+        # build and initiate  properties with default descriptors 
+        #(TODO: consider complex automatic descriptors -- almost done differently through complex properties in dictionary)
         param_list =  prop_helpers.build_properties_dict(param_list,self.__subst_dict)
 
         #--------------------------------------------------------------------------------------
@@ -414,23 +439,7 @@ class DirectPropertyManager(DirectReductionProperties):
         #end
         # End modify. 
         #----------------------------------------------------------------------------------------
-        self.__dict__.update(param_list)
-
-
-        # file properties -- the properties described files which should exist for reduction to work.
-        self.__file_properties = ['det_cal_file','map_file','hard_mask_file']
-        self.__abs_norm_file_properties = ['monovan_mapfile']
-
-        # properties with allowed values
-        self.__prop_allowed_values['normalise_method']=[None,'monitor-1','monitor-2','current']  # 'uamph', peak -- disabled/unknown at the moment
-        self.__prop_allowed_values['deltaE_mode']=['direct'] # I do not think we should try other modes here
-
-
-        # properties with special(overloaded and non-standard) setters/getters: Properties name dictionary returning tuple(getter,setter)
-        # if some is None, standard one is used. 
-        #self.__special_properties['monovan_integr_range']=(self._get_monovan_integr_range,lambda val : self._set_monovan_integr_range(val));
-        # list of the parameters which should always be taken from IDF unless explicitly set from elsewhere. These parameters MUST have setters and getters
-  
+        return param_list
 
     def _set_private_properties(self,prop_dict):
 
@@ -499,9 +508,9 @@ class DirectPropertyManager(DirectReductionProperties):
                 raise AttributeError(" Can not set property {0} to value {1}".format(name,val));
         else:
             other_prop=prop_helpers.gen_setter(self.__dict__,name,val);
-            if other_prop:
-                for prop_name in other_prop:
-                    self.__changed_properties.add(prop_name);
+            #if other_prop:
+            #    for prop_name in other_prop:
+            #        self.__changed_properties.add(prop_name);
 
         # record changes in the property
         self.__changed_properties.add(name);
@@ -619,7 +628,7 @@ class DirectPropertyManager(DirectReductionProperties):
   
         return result;
 
-    def update_defaults_from_instrument(self,pInstrument,ignore_changes=True):
+    def update_defaults_from_instrument(self,pInstrument,ignore_changes=False):
         """ Method used to update default parameters from the same instrument (with different parameters).
 
             Used if initial parameters correspond to instrument with one validity dates and 
@@ -639,37 +648,64 @@ class DirectPropertyManager(DirectReductionProperties):
                      "*** This only works if both instruments have the same reduction properties!"\
                       .format(self.instr_name,pInstrument.getName()),'warning')
 
-        changed_properties = self.getChangedProperties()
-        old_changes = set(changed_properties)
+        old_changes  = self.getChangedProperties()
         self.setChangedProperties(set())
 
         param_list = prop_helpers.get_default_idf_param_list(pInstrument)
-        for key,val in param_list.iteritems():
-            if key == 'synonims':
-               continue
+        param_list =  self._convert_params_to_properties(param_list,False)
 
-            if key in self.__subst_dict:
-                 name =self.__subst_dict[key]
-            else:
-                 name =key 
+        #sort parameters to have complex properties (with underscore _) first    
+        sorted_param =  OrderedDict(sorted(param_list.items(),key=lambda x : ord((x[0][0]).lower())))
+  
 
-            if not (name in old_changes):
-               if not(name in self.__dict__):
-                   name = '_'+name
+        for key,val in sorted_param.iteritems():
 
-               cur_val = self.__dict__[name]
+            if not (key in old_changes):
+               # complex properties were modified to start with _
+               if not(key in self.__dict__):
+                   name = '_'+key
+               else:
+                   name = key
+
+               try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains 
+                    # properties, not present in recent IDF.
+                    cur_val = self.__dict__[name]
+               except:
+                   self.log("property {0} or its derivatives have not been found in existing IDF. Ignoring this property"\
+                       .format(key),'warning')
+                   continue
+
                # complex properties set up through their members so no need to set up one
-               if not isinstance(cur_val,prop_helpers.ComplexProperty): 
+               if isinstance(cur_val,prop_helpers.ComplexProperty):
+                   old_val = cur_val.__get__(self.__dict__)
+                   new_val = val.__get__(param_list)
+                   if old_val != new_val:
+                       # set new values to old values and record this
+                       if name[0] == '_':
+                           public_name = name[1:]
+                       else:
+                           public_name = name
+                       setattr(self,public_name,new_val)
+                       # remove dependent values from list of changed properties not to assign them later one-by one
+                       dep_prop = val.dependencies()
+                       for prop_name in dep_prop:
+                           del sorted_param[prop_name]
+               else: 
                    old_val = getattr(self,name);
                    if not(val == old_val or val == cur_val):
                      setattr(self,name,val)
         # Clear changed properties list (is this wise?, may be we want to know that some defaults changed?)
         if ignore_changes:
             self.setChangedProperties(old_changes)
+            all_changes = old_changes
+        else:
+            new_changes = self.getChangedProperties()
+            all_changes = old_changes.union(new_changes)
+            self.setChangedProperties(all_changes)
 
         n=funcreturns.lhs_info('nreturns')
         if n>0:
-            return self.getChangedProperties();
+            return all_changes
         else:
             return None;
     #end
@@ -747,7 +783,7 @@ class DirectPropertyManager(DirectReductionProperties):
         return non_changed;
 
     #
-    def log_changed_values(self,log_level='notice',display_header=True):
+    def log_changed_values(self,log_level='notice',display_header=True,already_changed=set()):
       """ inform user about changed parameters and about the parameters that should be changed but have not
       
         This method is abstract method of DirectReductionProperties but is fully defined in 
@@ -779,6 +815,8 @@ class DirectPropertyManager(DirectReductionProperties):
       self.log("****************************************************************",log_level);
       changed_Keys= self.getChangedProperties();
       for key in changed_Keys:
+          if key in already_changed:
+              continue
           val = getattr(self,key);
           self.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val),log_level)
 

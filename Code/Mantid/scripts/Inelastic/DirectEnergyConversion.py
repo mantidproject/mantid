@@ -611,17 +611,18 @@ class DirectEnergyConversion(object):
         sample_run =self.sum_files(sum_name, self.prop_man.sample_run)
         common.apply_calibration(self.prop_man.instr_name,sample_run,self.prop_man.det_cal_file)
       else:
-        sample_run,sample_monitors = self.load_data(self.prop_man.sample_run);
+        sample_run,sample_monitors = self.load_data(self.prop_man.sample_run)
 
       # Update reduction properties which may change in the workspace but have not been modified from input parameters. 
       # E.g. detector number have changed 
-      workspace_defined_prop =self.prop_man.update_defaults_from_instrument(sample_run.getInstrument(),False);
-      #workspace_defined_prop=[]
+      oldChanges = prop_man.getChangedProperties();
+      allChanges  =self.prop_man.update_defaults_from_instrument(sample_run.getInstrument())
+      workspace_defined_prop=allChanges.difference(oldChanges)
       if len(workspace_defined_prop)>0:
-          prop_man.log("****************************************************************");
+          prop_man.log("****************************************************************")
           prop_man.log('*** Sample Workspace {0} overwrites default reduction properties: '.format(sample_run.getName()))
-          prop_man.log_changed_values('notice',False)
-          prop_man.log("****************************************************************");
+          prop_man.log_changed_values('notice',False,oldChanges)
+          prop_man.log("****************************************************************")
 
       self.prop_man.sample_run = sample_run
 

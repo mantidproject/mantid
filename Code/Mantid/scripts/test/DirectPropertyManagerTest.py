@@ -432,13 +432,20 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(propman.TestParam1,3.5);
         self.assertEquals(propman.TestParam2,"gui_changed1");
         self.assertEquals(propman.TestParam3,"initial2");
+        changes = propman.getChangedProperties();
+        self.assertTrue('TestParam2' in changes);
+        self.assertTrue(not('TestParam3' in changes));
+
   
 
-        propman.update_defaults_from_instrument(ws.getInstrument());
+        changes = propman.update_defaults_from_instrument(ws.getInstrument());
 
         self.assertAlmostEqual(propman.TestParam1,3.5);
         self.assertEquals(propman.TestParam2,"gui_changed1");
         self.assertEquals(propman.TestParam3,"instr_changed2");
+
+        self.assertTrue('TestParam2' in changes);
+        self.assertTrue('TestParam3' in changes);
 
     def test_set_complex_defailts_from_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
@@ -459,12 +466,16 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(propman.ParaPara,'Val2')
         self.assertEqual(propman.BaseParam2,'Val2')
 
-        SetInstrumentParameter(ws,ParameterName="Param1",Value="Ignore1:Ignore2",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="Param1",Value="addParam1:addParam2",ParameterType="String")
         SetInstrumentParameter(ws,ParameterName="BaseParam1",Value="OtherVal1",ParameterType="String")
         SetInstrumentParameter(ws,ParameterName="BaseParam2",Value="OtherVal2",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="addParam1",Value="Ignore1",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="addParam2",Value="Ignore2",ParameterType="String")
 
-        propman.update_defaults_from_instrument(ws.getInstrument());
 
+        changed_prop = propman.update_defaults_from_instrument(ws.getInstrument());
+
+        #property have been changed from GUI and changes from instrument are ignored
         SampleResult = ['OtherVal1','OtherVal2']
         cVal = propman.Param1;
         for test,sample in zip(cVal,SampleResult):
@@ -474,6 +485,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(propman.BaseParam2,'OtherVal2')
         
         self.assertEquals(propman.BaseParam1,"OtherVal1")
+       
 
     def test_set_all_defaults_from_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
@@ -483,11 +495,18 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         # Propman was defined for MARI but reduction parameters are all the same, so testing on LET
         propman = self.prop_man
+        self.assertEqual(propman.ei_mon1_spec,2)
+
         ws = mtd['ws'];
         changed_prop=propman.update_defaults_from_instrument( ws.getInstrument(),False)
-        self.assertTrue('ei-mon1-spec' in changed_prop);
-
+        self.assertFalse('ei-mon1-spec' in changed_prop)
         self.assertEqual(propman.ei_mon1_spec,65542)
+
+        self.assertTrue('ei_mon_spectra' in changed_prop)
+        ei_spec = propman.ei_mon_spectra
+        self.assertEqual(ei_spec[0],65542)
+        self.assertEqual(ei_spec[1],5506)
+
 
 
 
