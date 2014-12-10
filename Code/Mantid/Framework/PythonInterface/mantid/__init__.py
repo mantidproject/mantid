@@ -44,7 +44,12 @@ except ImportError:
 # Set deprecation warnings back to default (they are ignored in 2.7)
 ###############################################################################
 import warnings as _warnings
+# Default we see everything
 _warnings.filterwarnings("default",category=DeprecationWarning)
+# We can't do anything about numpy.oldnumeric being deprecated but
+# still used in other libraries, e.g scipy, so just ignore those
+_warnings.filterwarnings("ignore",category=DeprecationWarning,
+                         module="numpy.oldnumeric")
 
 ###############################################################################
 # Try to be smarter when finding Mantid framework libraries
