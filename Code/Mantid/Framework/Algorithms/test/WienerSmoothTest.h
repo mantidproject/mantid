@@ -117,9 +117,17 @@ public:
 
   void test_smooth_all_spectra()
   {
-    auto dataWS = createWorkspace();
     std::vector<int> wsIndexList;
-    auto outputWS = runWienerSmooth( dataWS, wsIndexList );
+    do_multispectra_test( wsIndexList );
+  }
+
+  void test_smooth_some_spectra()
+  {
+    std::vector<int> wsIndexList(3);
+    wsIndexList[0] = 2;
+    wsIndexList[1] = 1;
+    wsIndexList[2] = 4;
+    do_multispectra_test( wsIndexList );
   }
 
 private:
@@ -149,6 +157,42 @@ private:
     AnalysisDataService::Instance().clear();
   }
   
+  void do_multispectra_test(const std::vector<int>& wsIndexList)
+  {
+    auto inputWS = createWorkspace();
+    auto outputWS = runWienerSmooth( inputWS, wsIndexList );
+
+    size_t nSpec = outputWS->getNumberHistograms();
+    TS_ASSERT_EQUALS( outputWS->blocksize(), inputWS->blocksize() );
+    TS_ASSERT_EQUALS( outputWS->isHistogramData(), inputWS->isHistogramData() );
+    if ( wsIndexList.empty() )
+    {
+      TS_ASSERT_EQUALS( nSpec, inputWS->getNumberHistograms() );
+    }
+    else
+    {
+      TS_ASSERT_EQUALS( nSpec, wsIndexList.size() );
+    }
+
+    for(size_t outSpec = 0; outSpec < nSpec; ++outSpec)
+    {
+      size_t inSpec = wsIndexList.empty() ? outSpec : wsIndexList[outSpec];
+      auto& inY = inputWS->readY(inSpec);
+      auto& outY = outputWS->readY(outSpec);
+      TS_ASSERT( ! std::equal( outY.begin(), outY.end(), inY.begin() ) );
+
+      std::vector<double> diff(inY.size());
+      std::transform( inY.begin(), inY.end(), outY.begin(), diff.begin(), std::minus<double>() );
+
+      auto countPos = std::count_if( diff.begin(), diff.end(), std::bind2nd( std::greater<double>(), 0.0 ) );
+      auto countNeg = std::count_if( diff.begin(), diff.end(), std::bind2nd( std::less<double>(), 0.0 ) );
+
+      // the delta here is just a guess
+      TS_ASSERT_DELTA( double(countPos) / double(countNeg), 1.0, 1e-1 );
+
+    }
+  }
+
   MatrixWorkspace_sptr runWienerSmooth(MatrixWorkspace_sptr inputWS, const std::vector<int>& wsIndexList)
   {
     // Name of the output workspace.
@@ -211,7 +255,7 @@ private:
       Y.assign( y, y + ny );
       E.assign( e, e + ny );
 
-      std::transform( Y.begin(), Y.end(), Y.begin(), std::bind2nd( std::multiplies<double>(), double(i) ) );
+      std::transform( Y.begin(), Y.end(), Y.begin(), std::bind2nd( std::multiplies<double>(), double(i+1) ) );
     }
 
     return dataWS;
