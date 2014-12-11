@@ -109,7 +109,6 @@ int InternetHelper::sendRequest(const std::string &url,
                                 const std::string &method,
                                 const std::string &body) {
   Poco::URI uri(url);
-  std::cout << "URI: " << url << " method=\"" << method << "\"" << std::endl;
   if ((uri.getScheme() == "https") || (uri.getPort() == 443)) {
     return sendHTTPSRequest(url, responseStream, headers, method, body);
   } else {
