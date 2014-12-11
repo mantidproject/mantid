@@ -32,19 +32,13 @@ public:
   {
     std::string mdWsName = "__temp_InputMDWorkspaceName";
     createMDWorkspace(mdWsName);
-    std::string fluxGoodWsName = "__temp_InputGoodFluxWorkspaceName";
-    createGoodFluxWorkspace(fluxGoodWsName);
-    std::string fluxBadWsName = "__temp_InputBadFluxWorkspaceName";
-    createBadFluxWorkspace(fluxBadWsName);
     std::string saWsName = "__temp_InputSAWorkspaceName";
-    createBadFluxWorkspace(saWsName);
+    createSolidAngleWorkspace(saWsName);
 
     MDNormDirectSC alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", mdWsName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("FluxWorkspace", fluxGoodWsName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("FluxWorkspace", fluxBadWsName) ); // it isn't bad any more
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("SolidAngleWorkspace", saWsName) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "OutWSName") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputNormalizationWorkspace", "OutNormWSName") );
@@ -73,38 +67,6 @@ private:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", wsName) );
     alg.execute();
 
-  }
-
-  void createGoodFluxWorkspace(const std::string& wsName)
-  {
-    auto flux = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument( 2, 10 );
-    auto &x = flux->dataX(0);
-    auto &y1 = flux->dataY(1);
-    
-    for(size_t i = 0; i < y1.size(); ++i)
-    {
-      y1[i] = 2 * x[i];
-    }
-    flux->setX(1,x);
-    flux->getAxis(0)->setUnit("Momentum");
-
-    AnalysisDataService::Instance().addOrReplace( wsName, flux );
-  }
-
-  void createBadFluxWorkspace(const std::string& wsName)
-  {
-    auto flux = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument( 2, 10 );
-    auto &x = flux->dataX(0);
-    auto &y1 = flux->dataY(1);
-    
-    for(size_t i = 0; i < y1.size(); ++i)
-    {
-      y1[i] = -2 * x[i];
-    }
-    flux->setX(1,x);
-    flux->getAxis(0)->setUnit("Momentum");
-
-    AnalysisDataService::Instance().addOrReplace( wsName, flux );
   }
 
   void createSolidAngleWorkspace(const std::string& wsName)
