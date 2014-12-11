@@ -59,7 +59,11 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
   {
     fileExts.append("'nxspe'");
   }
-  pyCode += "mono_sample.prop_man.save_format = " + fileExts.join(",") + "\n\n";
+
+  if (fileExts.size()==0)
+     pyCode += "mono_sample.prop_man.save_format = None\n";
+  else
+     pyCode += "mono_sample.prop_man.save_format = " + fileExts.join(",") + "\n\n";
 
   // Create the python variables. The strings are wrapped with r'' for slash safety
   QString pyRunFiles = createPyListAsString(runFiles);
