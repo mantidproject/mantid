@@ -222,9 +222,6 @@ private:
       auto outX = ws->readX(i);
       auto outE = ws->readE(i);
 
-      size_t j = wsIndexList.empty() ? i : wsIndexList[i];
-
-      //TS_ASSERT_EQUALS( inputWS->readY(j).size(), ws->readY(0).size() );
       TS_ASSERT( std::equal( outX.begin(), outX.end(), inX.begin() ) );
       TS_ASSERT( std::equal( outE.begin(), outE.end(), inE.begin() ) );
 
