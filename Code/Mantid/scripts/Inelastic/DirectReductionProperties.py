@@ -293,6 +293,14 @@ class DirectReductionProperties(object):
     def mask_run(self,value):
        object.__setattr__(self,'_mask_run',value)
 
+    # -----------------------------------------------------------------------------
+    @property
+    def log_to_mantid(self):
+        """ Property specify if high level log should be printed to stdout or added to common Mantid log""" 
+        return self._log_to_mantid
+    @log_to_mantid.setter
+    def log_to_mantid(self,val):
+        object.__setarrt__(self,'_log_to_mantid',bool(val))
  
     # -----------------------------------------------------------------------------
     # Service properties (used by class itself)

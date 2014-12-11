@@ -281,14 +281,20 @@ class SaveFormat(object):
             prop_helpers.gen_setter(instance.__dict__,'save_format',set());
             return
 
-        # check string, if it is empty, clear save format, if not -- continue
+        # check string
         if isinstance(value,str):
-            if value[:1] == '.':
-                value = value[1:];
+            subformats = value.split(',')
+            if len(subformats)>1:
+                self.__set__(instance,subformats)
+                return
+            else:
+                value = subformats[0]      
+                if value[:1] == '.':
+                    value  = value[1:];
 
-            if not(value in SaveFormat.save_formats):
-                instance.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur for this format")
-                return 
+                if not(value  in SaveFormat.save_formats):
+                    instance.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur for this format")
+                    return
         elif isinstance(value,list) or isinstance(value,set):
             # set single default save format recursively
              for val in value:

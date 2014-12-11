@@ -267,6 +267,15 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue('nxs' in formats)
         self.assertTrue('nxspe' in formats)
 
+        propman.save_format = None
+        self.assertTrue(len(propman.save_format)==0)
+        propman.save_format = 'spe,.nxs'
+        formats = propman.save_format;
+        self.assertTrue(len(formats)==2)
+        self.assertTrue('nxs' in formats)
+        self.assertTrue('spe' in formats)
+
+
     def test_allowed_values(self):
 
         propman = self.prop_man
