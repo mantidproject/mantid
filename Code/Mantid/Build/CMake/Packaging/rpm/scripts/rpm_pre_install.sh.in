@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# RPM pre-install script for installation
+# Removes any stale links before they are recreated fresh
+# with any other links inside /etc if required
+#
+ENVVARS_ON_INSTALL=@ENVVARS_ON_INSTALL_INT@
+
+if [  -h $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot ]; then
+  rm $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot
+fi
+
+if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
+  # Profiles
+  if [ -h /etc/profile.d/mantid.sh ]; then
+      rm /etc/profile.d/mantid.sh
+  fi
+  if [ -h /etc/profile.d/mantid.csh ]; then
+      rm /etc/profile.d/mantid.csh
+  fi
+fi
