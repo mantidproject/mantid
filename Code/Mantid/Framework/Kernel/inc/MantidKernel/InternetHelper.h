@@ -10,7 +10,10 @@
 namespace Poco {
 // forward declaration
 class URI;
+
 namespace Net {
+// forward declaration
+class HTTPClientSession;
 // forward declaration
 class HTTPResponse;
 // forward declaration
@@ -73,26 +76,28 @@ public:
   void setTimeout(int seconds);
 
 protected:
-  virtual int
-  sendHTTPSRequest(const std::string &url, std::ostream &responseStream,
-                   const StringToStringMap &headers = StringToStringMap(),
-                   const std::string &method = std::string(),
-                   const std::string &body = std::string());
-  virtual int
-  sendHTTPRequest(const std::string &url, std::ostream &responseStream,
-                  const StringToStringMap &headers = StringToStringMap(),
-                  const std::string &method = std::string(),
-                  const std::string &body = std::string());
+  virtual int sendHTTPSRequest(const std::string &url,
+                               std::ostream &responseStream);
+  virtual int sendHTTPRequest(const std::string &url,
+                              std::ostream &responseStream);
   virtual int processErrorStates(const Poco::Net::HTTPResponse &res,
                                  std::istream &rs, const std::string &url);
 
 private:
-  void createRequest(Poco::URI &uri, const std::string method,
-                     const StringToStringMap &headers);
+  void setupProxyOnSession(Poco::Net::HTTPClientSession &session,
+                           const std::string &proxyUrl);
+  void createRequest(Poco::URI &uri);
+  int sendRequestAndProcess(Poco::Net::HTTPClientSession &session,
+                            Poco::URI &uri, std::ostream &responseStream);
+  int processRelocation(const Poco::Net::HTTPResponse &response,
+                        std::ostream &responseStream);
   Kernel::ProxyInfo m_proxyInfo;
   bool m_isProxySet;
   int m_timeout;
+  std::string m_method;
   std::string m_contentType;
+  std::string m_body;
+  StringToStringMap m_headers;
   Poco::Net::HTTPRequest *m_request;
 };
 

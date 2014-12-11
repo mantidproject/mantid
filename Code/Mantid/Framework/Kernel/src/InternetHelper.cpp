@@ -47,14 +47,24 @@ namespace {
 /// static Logger object
 Logger g_log("InternetHelper");
 
-/// Convert the method into the proper get/post string
-/// @returns Poco::Net::HTTPRequest::HTTP_GET if it is empty
-std::string getMethod(const std::string &method) {
-  if (method.empty()) {
-    return HTTPRequest::HTTP_GET;
-  } else {
-    return method;
-  }
+/// Throw an exception occurs when the computer
+/// is not connected to the internet
+void throwNotConnected(const std::string &url,
+                       const HostNotFoundException &ex) {
+  std::stringstream info;
+  info << "Failed to download " << url
+       << " because there is no connection to the host " << ex.message()
+       << ".\nHint: Check your connection following this link: <a href=\""
+       << url << "\">" << url << "</a> ";
+  throw Exception::InternetError(info.str() + ex.displayText());
+}
+
+/// @returns true if the return code is considered a relocation
+bool isRelocated(const int response) {
+  return ((response == HTTPResponse::HTTP_FOUND) ||
+          (response == HTTPResponse::HTTP_MOVED_PERMANENTLY) ||
+          (response == HTTPResponse::HTTP_TEMPORARY_REDIRECT) ||
+          (response == HTTPResponse::HTTP_SEE_OTHER));
 }
 }
 
@@ -63,14 +73,16 @@ std::string getMethod(const std::string &method) {
 */
 InternetHelper::InternetHelper()
     : m_proxyInfo(), m_isProxySet(false), m_timeout(30),
-      m_contentType("application/json"), m_request(NULL) {}
+      m_method(HTTPRequest::HTTP_GET), m_contentType("application/json"),
+      m_request(NULL) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
 */
 InternetHelper::InternetHelper(const Kernel::ProxyInfo &proxy)
     : m_proxyInfo(proxy), m_isProxySet(true), m_timeout(30),
-      m_contentType("application/json"), m_request(NULL) {}
+      m_method(HTTPRequest::HTTP_GET), m_contentType("application/json"),
+      m_request(NULL) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -81,19 +93,62 @@ InternetHelper::~InternetHelper() {
   }
 }
 
-void InternetHelper::createRequest(Poco::URI &uri, const std::string method,
-                                   const std::map<string, string> &headers) {
-  string reqMethod = getMethod(method);
+void InternetHelper::setupProxyOnSession(HTTPClientSession &session,
+                                         const std::string &proxyUrl) {
+  auto proxy = this->getProxy(proxyUrl);
+  if (!proxy.emptyProxy()) {
+    session.setProxyHost(proxy.host());
+    session.setProxyPort(static_cast<Poco::UInt16>(proxy.port()));
+  }
+}
 
-  m_request = new HTTPRequest(getMethod(method), uri.getPathAndQuery(),
-                              HTTPMessage::HTTP_1_1);
-  if (reqMethod == HTTPRequest::HTTP_POST) {
+void InternetHelper::createRequest(Poco::URI &uri) {
+  m_request =
+      new HTTPRequest(m_method, uri.getPathAndQuery(), HTTPMessage::HTTP_1_1);
+  if (!m_contentType.empty()) {
     m_request->setContentType(m_contentType);
   }
   m_request->set("User-Agent", "MANTID");
-  for (auto itHeaders = headers.begin(); itHeaders != headers.end();
+  for (auto itHeaders = m_headers.begin(); itHeaders != m_headers.end();
        ++itHeaders) {
     m_request->set(itHeaders->first, itHeaders->second);
+  }
+}
+
+int InternetHelper::sendRequestAndProcess(HTTPClientSession &session,
+                                          Poco::URI &uri,
+                                          std::ostream &responseStream) {
+  // create a request
+  this->createRequest(uri);
+  m_request->setContentLength(m_body.length());
+  session.sendRequest(*m_request) << m_body;
+
+  HTTPResponse res;
+  std::istream &rs = session.receiveResponse(res);
+  int retStatus = res.getStatus();
+  g_log.debug() << "Answer from web: " << retStatus << " " << res.getReason()
+                << std::endl;
+
+  if (retStatus == HTTPResponse::HTTP_OK ||
+      retStatus == HTTPResponse::HTTP_CREATED) {
+    Poco::StreamCopier::copyStream(rs, responseStream);
+    return retStatus;
+  } else if (isRelocated(retStatus)) {
+    return this->processRelocation(res, responseStream);
+  } else {
+    return processErrorStates(res, rs, uri.toString());
+  }
+}
+
+int InternetHelper::processRelocation(const HTTPResponse &response,
+                                      std::ostream &responseStream) {
+  std::string newLocation = response.get("location", "");
+  if (!newLocation.empty()) {
+    g_log.information() << "url relocated to " << newLocation;
+    return this->sendRequest(newLocation, responseStream);
+  } else {
+    g_log.warning("Apparent relocation did not give new location\n");
+    return response.getStatus();
   }
 }
 
@@ -108,11 +163,23 @@ int InternetHelper::sendRequest(const std::string &url,
                                 const StringToStringMap &headers,
                                 const std::string &method,
                                 const std::string &body) {
+  // set instance variables from the input as appropriate
+  if (!method.empty()) {
+    m_method = method;
+  }
+  if (!headers.empty()) {
+    m_headers = headers;
+  }
+  if (!body.empty()) {
+    m_body = body;
+  }
+
+  // send the request
   Poco::URI uri(url);
   if ((uri.getScheme() == "https") || (uri.getPort() == 443)) {
-    return sendHTTPSRequest(url, responseStream, headers, method, body);
+    return sendHTTPSRequest(url, responseStream);
   } else {
-    return sendHTTPRequest(url, responseStream, headers, method, body);
+    return sendHTTPRequest(url, responseStream);
   }
 }
 
@@ -123,10 +190,7 @@ int InternetHelper::sendRequest(const std::string &url,
 *include in the request.
 **/
 int InternetHelper::sendHTTPRequest(const std::string &url,
-                                    std::ostream &responseStream,
-                                    const StringToStringMap &headers,
-                                    const std::string &method,
-                                    const std::string &body) {
+                                    std::ostream &responseStream) {
   int retStatus = 0;
   g_log.debug() << "Sending request to: " << url << "\n";
 
@@ -137,45 +201,13 @@ int InternetHelper::sendHTTPRequest(const std::string &url,
     session.setTimeout(Poco::Timespan(m_timeout, 0)); // m_timeout seconds
 
     // configure proxy
-    if (!getProxy(url).emptyProxy()) {
-      session.setProxyHost(getProxy(url).host());
-      session.setProxyPort(static_cast<Poco::UInt16>(getProxy(url).port()));
-    }
+    setupProxyOnSession(session, url);
 
-    this->createRequest(uri, method, headers);
-    m_request->setContentLength(body.length());
-    session.sendRequest(*m_request) << body;
-
-    HTTPResponse res;
-    std::istream &rs = session.receiveResponse(res);
-    retStatus = res.getStatus();
-    g_log.debug() << "Answer from web: " << retStatus << " "
-                  << res.getReason() << std::endl;
-
-    if (retStatus == HTTPResponse::HTTP_OK || retStatus == HTTPResponse::HTTP_CREATED) {
-      Poco::StreamCopier::copyStream(rs, responseStream);
-      return retStatus;
-    } else if ((retStatus == HTTPResponse::HTTP_FOUND) ||
-               (retStatus == HTTPResponse::HTTP_MOVED_PERMANENTLY) ||
-               (retStatus == HTTPResponse::HTTP_TEMPORARY_REDIRECT) ||
-               (retStatus == HTTPResponse::HTTP_SEE_OTHER)) {
-      // extract the new location
-      std::string newLocation = res.get("location", "");
-      if (newLocation != "") {
-        return sendRequest(newLocation, responseStream, headers, method, body);
-      }
-    } else {
-      retStatus = processErrorStates(res, rs, url);
-    }
+    // low level sending the request
+    retStatus = this->sendRequestAndProcess(session, uri, responseStream);
   }
   catch (HostNotFoundException &ex) {
-    // this exception occurs when the pc is not connected to the internet
-    std::stringstream info;
-    info << "Failed to download " << url
-         << " because there is no connection to the host " << ex.message()
-         << ".\nHint: Check your connection following this link: <a href=\""
-         << url << "\">" << url << "</a> ";
-    throw Exception::InternetError(info.str() + ex.displayText());
+    throwNotConnected(url, ex);
   }
   catch (Poco::Exception &ex) {
     throw Exception::InternetError("Connection and request failed " +
@@ -191,13 +223,9 @@ int InternetHelper::sendHTTPRequest(const std::string &url,
 *include in the request.
 **/
 int InternetHelper::sendHTTPSRequest(const std::string &url,
-                                     std::ostream &responseStream,
-                                     const StringToStringMap &headers,
-                                     const std::string &method,
-                                     const std::string &body) {
+                                     std::ostream &responseStream) {
   int retStatus = 0;
-  std::string reqMethod = getMethod(method);
-  g_log.debug() << "Sending " << reqMethod << " request : " << url << "\n";
+  g_log.debug() << "Sending request to: " << url << "\n";
 
   Poco::URI uri(url);
   try {
@@ -226,48 +254,13 @@ int InternetHelper::sendHTTPSRequest(const std::string &url,
     if (urlforProxy.empty()) {
       urlforProxy = "http://" + uri.getHost();
     }
+    setupProxyOnSession(session, urlforProxy);
 
-    auto proxy = getProxy(urlforProxy);
-    if (!proxy.emptyProxy()) {
-      session.setProxyHost(proxy.host());
-      session.setProxyPort(static_cast<Poco::UInt16>(proxy.port()));
-    }
-
-    // create a request
-    this->createRequest(uri, method, headers);
-    m_request->setContentLength(body.length());
-    session.sendRequest(*m_request) << body;
-
-    HTTPResponse res;
-    std::istream &rs = session.receiveResponse(res);
-    retStatus = res.getStatus();
-    g_log.debug() << "Answer from web: " << retStatus << " "
-                  << res.getReason() << std::endl;
-
-    if (retStatus == HTTPResponse::HTTP_OK || retStatus == HTTPResponse::HTTP_CREATED) {
-      Poco::StreamCopier::copyStream(rs, responseStream);
-      return retStatus;
-    } else if ((retStatus == HTTPResponse::HTTP_FOUND) ||
-               (retStatus == HTTPResponse::HTTP_MOVED_PERMANENTLY) ||
-               (retStatus == HTTPResponse::HTTP_TEMPORARY_REDIRECT) ||
-               (retStatus == HTTPResponse::HTTP_SEE_OTHER)) {
-      // extract the new location
-      std::string newLocation = res.get("location", "");
-      if (newLocation != "") {
-        return sendRequest(newLocation, responseStream, headers, method, body);
-      }
-    } else {
-      retStatus = processErrorStates(res, rs, url);
-    }
+    // low level sending the request
+    retStatus = this->sendRequestAndProcess(session, uri, responseStream);
   }
   catch (HostNotFoundException &ex) {
-    // this exception occurs when the pc is not connected to the internet
-    std::stringstream info;
-    info << "Failed to download " << url
-         << " because there is no connection to the host " << ex.message()
-         << ".\nHint: Check your connection following this link: <a href=\""
-         << url << "\">" << url << "</a> ";
-    throw Exception::InternetError(info.str() + ex.displayText());
+    throwNotConnected(url, ex);
   }
   catch (Poco::Exception &ex) {
     throw Exception::InternetError("Connection and request failed " +

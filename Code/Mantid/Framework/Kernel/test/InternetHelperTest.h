@@ -23,26 +23,15 @@ namespace {
 class MockedInternetHelper : public InternetHelper {
 protected:
   virtual int
-  sendHTTPSRequest(const std::string &url, std::ostream &responseStream,
-                   const StringToStringMap &headers = StringToStringMap(),
-                   const std::string &method = std::string(),
-                   const std::string &body = std::string()) {
+  sendHTTPSRequest(const std::string &url, std::ostream &responseStream) {
     UNUSED_ARG(url);
-    UNUSED_ARG(headers);
-    UNUSED_ARG(method);
-    UNUSED_ARG(body);
+
     responseStream << "HTTPS request succeeded";
     return 200;
   }
   virtual int
-  sendHTTPRequest(const std::string &url, std::ostream &responseStream,
-                  const StringToStringMap &headers = StringToStringMap(),
-                  const std::string &method = std::string(),
-                  const std::string &body = std::string()) {
+  sendHTTPRequest(const std::string &url, std::ostream &responseStream) {
     UNUSED_ARG(url);
-    UNUSED_ARG(headers);
-    UNUSED_ARG(method);
-    UNUSED_ARG(body);
     responseStream << "HTTP request succeeded";
     return 200;
   }
