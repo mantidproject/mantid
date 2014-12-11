@@ -332,24 +332,33 @@ namespace Mantid
      */
     void MDNormSCD::cacheDimensionXValues()
     {
-      auto &hDim = *m_normWS->getDimension(m_hIdx);
-      m_hX.resize(hDim.getNBins());
-      for(size_t i = 0; i < m_hX.size(); ++i)
-      {
-        m_hX[i] = hDim.getX(i);
-      }
-      auto &kDim = *m_normWS->getDimension(m_kIdx);
-      m_kX.resize( kDim.getNBins() );
-      for(size_t i = 0; i < m_kX.size(); ++i)
-      {
-        m_kX[i] = kDim.getX(i);
-      }
-      auto &lDim = *m_normWS->getDimension(m_lIdx);
-      m_lX.resize( lDim.getNBins() );
-      for(size_t i = 0; i < m_lX.size(); ++i)
-      {
-        m_lX[i] = lDim.getX(i);
-      }
+        if(!m_hIntegrated)
+        {
+            auto &hDim = *m_normWS->getDimension(m_hIdx);
+            m_hX.resize(hDim.getNBins());
+            for(size_t i = 0; i < m_hX.size(); ++i)
+            {
+                m_hX[i] = hDim.getX(i);
+            }
+        }
+        if(!m_kIntegrated)
+        {
+            auto &kDim = *m_normWS->getDimension(m_kIdx);
+            m_kX.resize( kDim.getNBins() );
+            for(size_t i = 0; i < m_kX.size(); ++i)
+            {
+                m_kX[i] = kDim.getX(i);
+            }
+        }
+        if(!m_lIntegrated)
+        {
+            auto &lDim = *m_normWS->getDimension(m_lIdx);
+            m_lX.resize( lDim.getNBins() );
+            for(size_t i = 0; i < m_lX.size(); ++i)
+            {
+                m_lX[i] = lDim.getX(i);
+            }
+        }
     }
 
     /**
@@ -439,7 +448,8 @@ namespace Mantid
         const size_t vmdDims = intersections.front().size();
         // pre-allocate for efficiency and copy non-hkl dim values into place
         std::vector<coord_t> pos(vmdDims + otherValues.size());
-        std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
+        std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims-1);
+        pos.push_back(1.);
 
         for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it)
         {
@@ -450,7 +460,7 @@ namespace Mantid
           if(delta < 1e-07) continue; // Assume zero contribution if difference is small
           
           // Average between two intersections for final position
-          std::transform(curIntSec.getBareArray(), curIntSec.getBareArray() + vmdDims,
+          std::transform(curIntSec.getBareArray(), curIntSec.getBareArray() + vmdDims-1,
                          prevIntSec.getBareArray(), pos.begin(),
                          VectorHelper::SimpleAverage<coord_t>());
           std::vector<coord_t> posNew = affineTrans*pos;

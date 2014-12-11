@@ -495,8 +495,9 @@ namespace Mantid
         // Compute final position in HKL
         const size_t vmdDims = intersections.front().size();
         // pre-allocate for efficiency and copy non-hkl dim values into place
-        std::vector<coord_t> pos(vmdDims + otherValues.size());
+        std::vector<coord_t> pos(vmdDims + otherValues.size()+1);
         std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
+        pos.push_back(1.);
         auto intersectionsBegin=intersections.begin();
         for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it)
         {
@@ -510,7 +511,7 @@ namespace Mantid
           std::transform(curIntSec.getBareArray(), curIntSec.getBareArray() + vmdDims,
                          prevIntSec.getBareArray(), pos.begin(),
                          VectorHelper::SimpleAverage<coord_t>());
-          pos.push_back(1.);
+
           //transform kf to energy transfer
           pos[3]=static_cast<coord_t>(m_Ei-pos[3]*pos[3]/energyToK);
           std::vector<coord_t> posNew = affineTrans*pos;
