@@ -6,7 +6,7 @@ New plotting interface
 ----------------------
 
 This package provides a simple command line interface to the Mantid
-plotting functionality, resembling MatPlotLib and its pyplot package
+plotting functionality, resembling matplotlib and its pyplot package
 (http://matplotlib.org). The module is subject to changes and it is
 provided as a 'future' import. Feedback is very much welcome!
 
