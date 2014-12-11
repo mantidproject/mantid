@@ -41,7 +41,7 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
   QString pyCode = "import DirectEnergyConversion as direct\n";
   pyCode += QString("mono_sample = direct.DirectEnergyConversion('%1')\n").arg(m_sets.cbInst->currentText());
   //Turn off printing to stdout
-  pyCode += QString("mono_sample._to_stdout = False\n");
+  pyCode += QString("mono_sample.prop_man.log_to_mantid = True\n");
 
   addAnalysisOptions(pyCode);
   addMaskingCommands(pyCode);
@@ -49,17 +49,17 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
   QStringList fileExts;
   if( m_sets.save_ckSPE->isChecked() )
   {
-    fileExts.append("'.spe'");
+    fileExts.append("'spe'");
   }
   if( m_sets.save_ckNexus->isChecked() )
   {
-    fileExts.append("'.nxs'");
+    fileExts.append("'nxs'");
   }
   if( m_sets.save_ckNxSPE->isChecked() )
   {
-    fileExts.append("'.nxspe'");
+    fileExts.append("'nxspe'");
   }
-  pyCode += "mono_sample.save_format = [" + fileExts.join(",") + "]\n\n";
+  pyCode += "mono_sample.prop_man.mono_sample.save_format = " + fileExts.join(",") + "\n\n";
 
   // Create the python variables. The strings are wrapped with r'' for slash safety
   QString pyRunFiles = createPyListAsString(runFiles);

@@ -771,18 +771,18 @@ void Homer::setIDFValues(const QString &)
 
   // Fill in default values for tab
   QString param_defs = 
-    "import DirectEnergyConversion as direct\n"
-    "mono = direct.DirectEnergyConversion('%1')\n";
+    "from DirectPropertyManager import DirectPropertyManager\n"
+    "prop_man = DirectPropertyManager('%1')\n"
+    "prop_man.incident_energy = 1\n"
+    "int_range = prop_man.monovan_integr_range\n"
+    "bkg_rane = prop_man.bkgd_range\n";
   param_defs = param_defs.arg(prefix);
 
   param_defs += 
-    "print mono.monovan_integr_range[0]\n"
-    "print mono.monovan_integr_range[1]\n"
-    "print mono.van_mass\n"
-    "print mono.bkgd_range[0]\n"
-    "print mono.bkgd_range[1]\n"
-    "print str(mono.check_background)\n";
-  
+    "print '{0}\\n{1}\\n{2}\\n{3}\\n{4}\\n{5}\\n'"
+    ".format(int_range[0],int_range[1],prop_man.van_mass,"
+    "bkg_rane[0],bkg_rane[1],str(prop_man.check_background))\n";
+ 
   QString pyOutput = runPythonCode(param_defs).trimmed();
   QStringList values = pyOutput.split("\n", QString::SkipEmptyParts);
   if( values.count() != 6 )
