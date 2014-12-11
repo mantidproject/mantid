@@ -2578,12 +2578,12 @@
            </property>
            <property name="workspaceSuffixes" stdset="0">
             <stringlist>
-             <string>_flt_Abs</string>
+             <string>_flt_abs</string>
             </stringlist>
            </property>
            <property name="fileBrowserSuffixes" stdset="0">
             <stringlist>
-             <string>_flt_Abs.nxs</string>
+             <string>_flt_abs.nxs</string>
             </stringlist>
            </property>
            <property name="showLoad" stdset="0">
