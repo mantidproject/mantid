@@ -44,6 +44,7 @@ private:
   void init();
   void exec();
   void generateHeader();
+  void sendReport(const std::string &body = std::string());
 
   static std::string g_header;
 };

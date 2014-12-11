@@ -2,8 +2,11 @@
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/ParaViewVersion.h"
+#include <Poco/Net/HTTPRequest.h>
+#include <sstream>
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -19,6 +22,40 @@ using std::string;
 DECLARE_ALGORITHM(SendUsage)
 
 string SendUsage::g_header = string();
+
+namespace {
+/// The key in Mantid::Kernel::ConfigService to use.
+const std::string SEND_USAGE_CONFIG_KEY("usagereports.enabled");
+
+/// The URL endpoint.
+// const std::string URL("http://django-mantid.rhcloud.com/api/usage");
+const std::string URL("http://127.0.0.1:8000/api/usage"); // dev location
+
+/// The string for post method
+const std::string POST(Poco::Net::HTTPRequest::HTTP_POST);
+
+/// @returns true if Kernel::ConfigService says the option is on.
+bool doSend() {
+  // create a variable to pass in
+  int doSend = 1; // 0 = false, other = true
+
+  // get the value from config service
+  // the function returning something other than 0 means an error
+  if (!ConfigService::Instance().getValue(SEND_USAGE_CONFIG_KEY, doSend)) {
+    doSend = 1;
+  }
+
+  return (doSend != 0);
+}
+
+/// @returns Now formated for the json doc
+string currentDateAndTime() {
+  std::stringstream buffer;
+  buffer << ",\"dateTime\":\""
+         << DateAndTime::getCurrentTime().toISO8601String() << "\"";
+  return buffer.str();
+}
+}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -50,17 +87,41 @@ const std::string SendUsage::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SendUsage::init() {
-  declareProperty("UsageString", "", Direction::Output);
+  // declareProperty("UsageString", "", Direction::Input);
+  declareProperty("Json", "", Direction::Output);
+  declareProperty("HtmlCode", -1, Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SendUsage::exec() {
+  // generate the default header - this uses a cache variable
   this->generateHeader();
 
-  // close up the json
-  g_log.warning() << g_header << "}" << std::endl;
+  // send the report
+  if (doSend()) {
+    sendReport();
+  } else {
+    g_log.debug("Sending usage reports is disabled\n");
+  }
+}
+
+void SendUsage::sendReport(const std::string &body) {
+  std::string text(g_header + currentDateAndTime() + body + "}");
+  std::cout << text << std::endl;
+  g_log.debug() << text << "\n"; // TODO should be debug
+  this->setPropertyValue("Json", text);
+
+  // set up the headers
+  std::map<string, string> htmlHeaders;
+
+  std::stringstream responseStream;
+  Kernel::InternetHelper helper;
+  int status = helper.sendRequest(URL, responseStream, htmlHeaders, POST, text);
+  this->setProperty("HtmlCode", status);
+  g_log.debug() << "Call responded with " << status << "\n"
+                << responseStream.str() << "\n";
 }
 
 /**
@@ -86,10 +147,6 @@ void SendUsage::generateHeader() {
   // hostname
   buffer << "\"host\":\"" << Kernel::ChecksumHelper::md5FromString(
                                  ConfigService::Instance().getComputerName())
-         << "\",";
-
-  // current date and time
-  buffer << "\"dateTime\":\"" << DateAndTime::getCurrentTime().toISO8601String()
          << "\",";
 
   // os name, version, and architecture
