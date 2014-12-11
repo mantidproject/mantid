@@ -1115,7 +1115,7 @@ class DirectEnergyConversion(object):
         """
         if formats:
            # clear up existing save formats as one is defined in parameters
-            self.prop_man.formats=None
+            self.prop_man.save_format=None
 
         self.prop_man.set_input_parameters_ignore_nan(save_file_name=save_file,save_format=formats)
 
