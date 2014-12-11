@@ -726,6 +726,7 @@ set ( TEST_FILES
 	SumNeighboursTest.h
 	SumRowColumnTest.h
 	SumSpectraTest.h
+  TOFSANSResolutionByPixelTest.h
 	TransposeTest.h
 	UnGroupWorkspaceTest.h
 	UnaryOperationTest.h
