@@ -109,7 +109,7 @@ void TOFSANSResolutionByPixel::exec()
     MantidVec& yIn = inOutWS->dataY(i);
     const size_t xLength = xIn.size();
 
-    for ( int j = 0; j < xLength-1; j++)
+    for ( size_t j = 0; j < xLength-1; j++)
     {
       // Calculate q. Alternatively q could be calculated using ConvertUnit
       const double wl = (xIn[j+1]+xIn[j])/2.0;
