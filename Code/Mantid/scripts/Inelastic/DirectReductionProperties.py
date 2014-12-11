@@ -140,28 +140,35 @@ class DirectReductionProperties(object):
                        deployed in reduction
         """
         #
-        object.__setattr__(self,'_sample_run',run_workspace);
-        object.__setattr__(self,'_wb_run',None);
+        object.__setattr__(self,'_sample_run',run_workspace)
+        object.__setattr__(self,'_wb_run',None)
 
-        object.__setattr__(self,'_monovan_run',None);
-        object.__setattr__(self,'_wb_for_monovan_run',None);
-        object.__setattr__(self,'_mask_run',None);
+        object.__setattr__(self,'_monovan_run',None)
+        object.__setattr__(self,'_wb_for_monovan_run',None)
+        object.__setattr__(self,'_mask_run',None)
 
 
-        object.__setattr__(self,'_incident_energy',None);
-        object.__setattr__(self,'_energy_bins',None);
+        object.__setattr__(self,'_incident_energy',None)
+        object.__setattr__(self,'_energy_bins',None)
 
         # Helper properties, defining logging options 
-        object.__setattr__(self,'_log_level','notice');
-        object.__setattr__(self,'_log_to_mantid',False);
-        object.__setattr__(self,'_current_log_level',3);
+        object.__setattr__(self,'_log_level','notice')
+        object.__setattr__(self,'_log_to_mantid',False)
+        object.__setattr__(self,'_current_log_level',3)
 
-        object.__setattr__(self,'_psi',float('NaN'));
-        object.__setattr__(self,'_second_white',None);
-        object.__setattr__(self,'_mono_correction_factor',None);
+        
+        object.__setattr__(self,'_psi',float('NaN'))
+        # SNS motor stuff which is difficult to test as I've never seen it
+        object.__setattr__(self,'_motor_name',None)
+        object.__setattr__(self,'_motor_offset',0)
 
+
+        object.__setattr__(self,'_second_white',None)
+        object.__setattr__(self,'_mono_correction_factor',None)
+
+        object.__setattr__(self,'_save_file',None)
  
-        self._set_instrument_and_facility(Instrument,run_workspace);
+        self._set_instrument_and_facility(Instrument,run_workspace)
   
     #end
 
@@ -195,17 +202,6 @@ class DirectReductionProperties(object):
         """ Second white beam currently unused in the  workflow """
         pass
         #return self._second_white;
-     #-----------------------------------------------------------------------------------
-    @property 
-    def psi(self):
-        """ rotation angle (not available from IDF)"""
-        return self._psi;
-
-    @psi.setter 
-    def psi(self,value):
-        """set rotation angle (not available from IDF). This value will be saved into NXSpe file"""
-        object.__setattr__(self,'_psi',value)
-
     #-----------------------------------------------------------------------------------
     #TODO: do something about it
     @property
@@ -301,7 +297,38 @@ class DirectReductionProperties(object):
     @log_to_mantid.setter
     def log_to_mantid(self,val):
         object.__setarrt__(self,'_log_to_mantid',bool(val))
- 
+    # -----------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------
+    @property 
+    def psi(self):
+        """ rotation angle (not available from IDF)"""
+        return self._psi;
+    @psi.setter 
+    def psi(self,value):
+        """set rotation angle (not available from IDF). This value will be saved into NXSpe file"""
+        object.__setattr__(self,'_psi',value)
+    # -----------------------------------------------------------------------------
+    @property
+    def motor_name(self):
+        return self._motor_name
+    @motor_name.setter
+    def motor_name(self,val):
+        object.__setarrt__(self,'_motor_name',val)
+    #
+    @property
+    def motor_offset(self):
+        return self._motor_offset
+    @motor_offset.setter
+    def motor_offset(self,val):
+        object.__setarrt__(self,'_motor_offset',val)
+    #
+    @property
+    def save_file(self):
+        """ Defines the name of file to save results to. Default is None and default name is used for saving""" 
+        return self._save_file
+    @save_file.setter
+    def save_file(self,val):
+        object.__setarrt__(self,'_save_file',str(val))
     # -----------------------------------------------------------------------------
     # Service properties (used by class itself)
     #
