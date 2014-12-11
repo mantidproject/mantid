@@ -109,7 +109,7 @@ void SendUsage::exec() {
 
 void SendUsage::sendReport(const std::string &body) {
   std::string text(g_header + currentDateAndTime() + body + "}");
-  std::cout << text << std::endl;
+
   g_log.debug() << text << "\n"; // TODO should be debug
   this->setPropertyValue("Json", text);
 
