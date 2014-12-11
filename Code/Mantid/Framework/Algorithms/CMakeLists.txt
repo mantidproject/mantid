@@ -234,6 +234,7 @@ set ( SRC_FILES
 	src/SumRowColumn.cpp
 	src/SumSpectra.cpp
 	src/TOFSANSResolution.cpp
+  src/TOFSANSResolutionByPixel.cpp
 	src/Transpose.cpp
 	src/UnGroupWorkspace.cpp
 	src/UnaryOperation.cpp
@@ -485,6 +486,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SumRowColumn.h
 	inc/MantidAlgorithms/SumSpectra.h
 	inc/MantidAlgorithms/TOFSANSResolution.h
+  inc/MantidAlgorithms/TOFSANSResolutionByPixel.h
 	inc/MantidAlgorithms/Transpose.h
 	inc/MantidAlgorithms/UnGroupWorkspace.h
 	inc/MantidAlgorithms/UnaryOperation.h
