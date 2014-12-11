@@ -276,6 +276,10 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue('spe' in formats)
 
 
+        propman.save_format = '(.spe,nxspe)'
+
+
+
     def test_allowed_values(self):
 
         propman = self.prop_man
@@ -599,6 +603,23 @@ class DirectPropertyManagerTest(unittest.TestCase):
        range = propman.monovan_integr_range
        self.assertAlmostEqual(range[0],-7.)
 
+    def test_save_filename(self):
+       propman = self.prop_man
+
+       propman.incident_energy = 10
+
+       name = propman.save_file_name
+       self.assertEqual(name,'MAR00000Ei10.00meV')
+
+    def test_log_to_Mantid(self):
+        propman = self.prop_man
+        self.assertFalse(propman.log_to_mantid)
+
+        propman.log_to_mantid = True
+        self.assertTrue(propman.log_to_mantid)
+
+        propman.log_to_mantid = 0
+        self.assertFalse(propman.log_to_mantid)
 
 
 

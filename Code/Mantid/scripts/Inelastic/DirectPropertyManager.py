@@ -283,14 +283,13 @@ class SaveFormat(object):
 
         # check string
         if isinstance(value,str):
+            value = value.strip('[]().')
             subformats = value.split(',')
             if len(subformats)>1:
                 self.__set__(instance,subformats)
                 return
             else:
                 value = subformats[0]      
-                if value[:1] == '.':
-                    value  = value[1:];
 
                 if not(value  in SaveFormat.save_formats):
                     instance.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur for this format")

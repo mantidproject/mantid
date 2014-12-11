@@ -1117,10 +1117,10 @@ class DirectEnergyConversion(object):
            # clear up existing save formats as one is defined in parameters
             self.prop_man.formats=None
 
-        self.prop_man.set_input_parameters_ignore_nan(save_file=save_file,save_format=formats)
+        self.prop_man.set_input_parameters_ignore_nan(save_file_name=save_file,save_format=formats)
 
         #TODO: deal with this. This all should be incorporated in sample_run
-        save_file = self.prop_man.save_file
+        save_file = self.prop_man.save_file_name
         formats   = self.prop_man.save_format
         if save_file is None:
             save_file = workspace.getName()

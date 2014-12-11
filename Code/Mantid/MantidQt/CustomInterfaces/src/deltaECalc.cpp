@@ -59,7 +59,7 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
   {
     fileExts.append("'nxspe'");
   }
-  pyCode += "mono_sample.prop_man.mono_sample.save_format = " + fileExts.join(",") + "\n\n";
+  pyCode += "mono_sample.prop_man.save_format = " + fileExts.join(",") + "\n\n";
 
   // Create the python variables. The strings are wrapped with r'' for slash safety
   QString pyRunFiles = createPyListAsString(runFiles);
@@ -76,46 +76,54 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
   QString motorName = m_sets.motorNameEdit->text();
   QString pyMotorName = (motorName.isEmpty()) ? "None" : QString("r'" + motorName + "'");
 
+  QString None = "None";
+  auto rebin    = None;
+  auto map_file = None;
+  pyCode += "mono_sample.prop_man.motor_name = " + pyMotorName + "\n";
+  pyCode += "mono_sample.prop_man.motor_offset = " + pySeOffset + "\n";
+  
+
   if( m_sets.ckSumSpecs->isChecked() || runFiles.size() == 1)
   {
+    pyCode += "mono_sample.prop_man.sum_runs = True\n";
+
     QString pySaveName;
     if( saveName.isEmpty() )
     {
-      pySaveName = "None";
+       pyCode += "mono_sample.prop_man.save_file_name = None\n";
+
     }
     else
     {
-      pySaveName = "r'" + saveName + "'";
+       pyCode += "mono_sample.prop_man.save_file_name = r'"+saveName + "'\n";
     }
-    pyCode += QString("mono_sample.convert_to_energy(%1, %2, %3, %4, %5, %6, %7, motor=%8, offset=%9)");
-    pyCode = pyCode.arg(pyRunFiles, eiGuess,pyWhiteBeam,pyAbsRunFiles,absEiGuess, pyAbsWhiteBeam, pySaveName, pyMotorName, pySeOffset);
+    pyCode += QString("mono_sample.convert_to_energy(%1, %2, %3, %4, %5, %6, %7)");
+    pyCode = pyCode.arg(pyWhiteBeam,pyRunFiles, eiGuess,rebin,map_file,pyAbsRunFiles, pyAbsWhiteBeam);
   }
   else
   {
     QString pySaveName;
     if( saveName.isEmpty() )
     {
-      pySaveName = "None";
-    }
-    else
-    {
       pySaveName = "r'" + QFileInfo(saveName).absolutePath() + "'";
+      pyCode += "mono_sample.prop_man.save_file = "+pySaveName + "\n";
     }
     pyCode += "rfiles = " + pyRunFiles + "\n";
     if( absRunFiles.isEmpty() )
     {
       pyCode +=
         "for run in rfiles:\n"
-        "  mono_sample.convert_to_energy(run, %1, %2, save_path=%3, motor=%4, offset=%5)\n";
-      pyCode = pyCode.arg(eiGuess, pyWhiteBeam, pySaveName, pyMotorName, pySeOffset);
+        "  mono_sample.convert_to_energy(run, %1, %2)\n";
+      pyCode = pyCode.arg(eiGuess, pyWhiteBeam);
     }
     else
     {
       pyCode += "abs_rfiles = " + pyAbsRunFiles + "\n";
       pyCode +=
         "for run, abs in zip(rfiles, abs_rfiles):\n"
-        "  mono_sample.convert_to_energy(run, %1, %2, abs, %3, %4, save_path=%5, motor=%6, offset=%7)\n";
-      pyCode = pyCode.arg(eiGuess, pyWhiteBeam, absEiGuess, pyAbsWhiteBeam, pySaveName, pyMotorName, pySeOffset);
+        "  mono_sample.convert_to_energy(%1, run, %2, %3,abs, %6)\n";
+      pyCode = pyCode.arg(pyWhiteBeam,eiGuess,rebin,map_file,pyAbsRunFiles, pyAbsWhiteBeam);
+//                         pyWhiteBeam,pyRunFiles, eiGuess,rebin,map_file,pyAbsRunFiles, pyAbsWhiteBeam
     }
   }
   m_pyScript = pyCode;
@@ -129,13 +137,13 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
 {
     //Analysis options
   QString inputValue = m_sets.cbNormal->currentText();  ;
-  pyCode += QString("mono_sample.normalise_method = '%1'\n").arg(inputValue);
+  pyCode += QString("mono_sample.prop_man.normalise_method = '%1'\n").arg(inputValue);
 
-  pyCode += QString("mono_sample.background = %1\n");
+  pyCode += QString("mono_sample.prop_man.background = %1\n");
   if( this->m_bgRemove )
   {
     pyCode = pyCode.arg("True");
-    pyCode += QString("mono_sample.background_range = [%1, %2]\n").arg(this->m_TOFWinSt).arg(this->m_TOFWinEnd);
+    pyCode += QString("mono_sample.prop_man.background_range = [%1, %2]\n").arg(this->m_TOFWinSt).arg(this->m_TOFWinEnd);
   }
   else
   {
@@ -143,7 +151,7 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
   }
 
   //Convert to energy
-  pyCode += QString("mono_sample.fix_ei = %1\n");
+  pyCode += QString("mono_sample.prop_man.fix_ei = %1\n");
   if( m_sets.ckFixEi->isChecked() )
   {
     pyCode = pyCode.arg("True");
@@ -152,27 +160,27 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
   {
     pyCode = pyCode.arg("False");
   }
-  pyCode += QString("mono_sample.energy_bins = '%1,%2,%3'\n").arg(m_sets.leELow->text(), m_sets.leEWidth->text(), m_sets.leEHigh->text());
+  pyCode += QString("mono_sample.prop_man.energy_bins = '%1,%2,%3'\n").arg(m_sets.leELow->text(), m_sets.leEWidth->text(), m_sets.leEHigh->text());
   QString mapFile = m_sets.mapFile->getFirstFilename();
   if( !mapFile.isEmpty() )
   {
-    pyCode += QString("mono_sample.map_file = r'%1'\n").arg(mapFile);
+    pyCode += QString("mono_sample.prop_man.map_file = r'%1'\n").arg(mapFile);
   }
   if( m_sets.ckRunAbsol->isChecked() )
   {
     QString absMapFile = m_sets.absMapFile->getFirstFilename();
     if ( !absMapFile.isEmpty() )
     {
-        pyCode += QString("mono_sample.abs_map_file = r'%1'\n").arg(absMapFile);
+        pyCode += QString("mono_sample.prop_man.monovan_mapfile = r'%1'\n").arg(absMapFile);
     }
     // Set the mono vanadium integration range
-    pyCode += QString("mono_sample.monovan_integr_range=[float(%1),float(%2)]\n");
+    pyCode += QString("mono_sample.prop_man.monovan_integr_range=[float(%1),float(%2)]\n");
     pyCode = pyCode.arg(m_sets.leVanELow->text(), m_sets.leVanEHigh->text());
     // Set the sample mass and rmm
-    pyCode += QString("mono_sample.sample_mass = %1\n").arg(m_sets.leSamMass->text());
-    pyCode += QString("mono_sample.sample_rmm = %1\n").arg(m_sets.leRMMMass->text());
+    pyCode += QString("mono_sample.prop_man.sample_mass = %1\n").arg(m_sets.leSamMass->text());
+    pyCode += QString("mono_sample.prop_man.sample_rmm = %1\n").arg(m_sets.leRMMMass->text());
     // And any changed vanadium mass
-    pyCode += QString("mono_sample.van_mass = %1\n").arg(m_sets.leVanMass->text());
+    pyCode += QString("mono_sample.prop_man.van_mass = %1\n").arg(m_sets.leVanMass->text());
   }
 }
 

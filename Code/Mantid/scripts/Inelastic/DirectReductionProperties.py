@@ -84,8 +84,33 @@ class EnergyBins(object):
                raise KeyError("Energy_bin value has to be either list of n-blocks of 3 number each or string representation of this list with numbers separated by commas")
        #TODO: implement single value settings according to rebin
        object.__setattr__(instance,'_energy_bins',value);
-
 #end EnergyBins
+class SaveFileName(object):
+    """ Property defines default file name to save result to"""
+    def __init__(self,Name=None):
+       self._file_name = Name
+    def __get__(self,instance,owner=None):
+        if self._file_name:
+            return self._file_name
+        else:
+            if instance.instr_name:
+                name = instance.short_inst_name 
+            else:
+                name = '_EMPTY'
+            try:
+                sr = instance.sample_run
+            except:
+                sr = 0
+            name +='{0:0<5}Ei{1:<4.2f}meV'.format(sr,instance.incident_energy)
+            if instance.monovan_run:
+                name +='_Abs'
+        return name
+
+    def __set__(self,instance,value):
+        self._file_name = value
+#end SaveFileName
+
+
 #
 class InstrumentDependentProp(object):
     def __init__(self,prop_name):
@@ -166,7 +191,7 @@ class DirectReductionProperties(object):
         object.__setattr__(self,'_second_white',None)
         object.__setattr__(self,'_mono_correction_factor',None)
 
-        object.__setattr__(self,'_save_file',None)
+        object.__setattr__(self,'_save_file_name',None)
  
         self._set_instrument_and_facility(Instrument,run_workspace)
   
@@ -176,10 +201,12 @@ class DirectReductionProperties(object):
         """ method to get default parameter value, specified in IDF """
         return prop_helpers.get_default_parameter(self.instrument,par_name);
     #-----------------------------------------------------------------------------
-    incident_energy = IncidentEnergy();
+    incident_energy = IncidentEnergy()
     #
-    energy_bins     = EnergyBins();
-
+    energy_bins     = EnergyBins()
+    #
+    save_file_name = SaveFileName()
+    #
     instr_name      = InstrumentDependentProp('_instr_name')
     short_inst_name = InstrumentDependentProp('_short_instr_name')
     facility        = InstrumentDependentProp('_facility')
@@ -294,9 +321,10 @@ class DirectReductionProperties(object):
     def log_to_mantid(self):
         """ Property specify if high level log should be printed to stdout or added to common Mantid log""" 
         return self._log_to_mantid
+
     @log_to_mantid.setter
     def log_to_mantid(self,val):
-        object.__setarrt__(self,'_log_to_mantid',bool(val))
+        object.__setattr__(self,'_log_to_mantid',bool(val))
     # -----------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------
     @property 
@@ -313,22 +341,14 @@ class DirectReductionProperties(object):
         return self._motor_name
     @motor_name.setter
     def motor_name(self,val):
-        object.__setarrt__(self,'_motor_name',val)
+        object.__setattr__(self,'_motor_name',val)
     #
     @property
     def motor_offset(self):
         return self._motor_offset
     @motor_offset.setter
     def motor_offset(self,val):
-        object.__setarrt__(self,'_motor_offset',val)
-    #
-    @property
-    def save_file(self):
-        """ Defines the name of file to save results to. Default is None and default name is used for saving""" 
-        return self._save_file
-    @save_file.setter
-    def save_file(self,val):
-        object.__setarrt__(self,'_save_file',str(val))
+        object.__setattr__(self,'_motor_offset',val)
     # -----------------------------------------------------------------------------
     # Service properties (used by class itself)
     #
