@@ -111,8 +111,6 @@ namespace Mantid
       const auto affineTrans = findIntergratedDimensions(otherValues, skipNormalization);
       cacheDimensionXValues();
 
-      return;
-
       if(!skipNormalization)
       {
         calculateNormalization(otherValues, affineTrans);
@@ -156,8 +154,8 @@ namespace Mantid
       m_beamDir = m_samplePos - source->getPos();
       m_beamDir.normalize();
 
-      double dEmin=exptInfoZero.run().getBinBoundaries().front();
-      double dEmax=exptInfoZero.run().getBinBoundaries().back();
+      double originaldEmin=exptInfoZero.run().getBinBoundaries().front();
+      double originaldEmax=exptInfoZero.run().getBinBoundaries().back();
       if (exptInfoZero.run().hasProperty("Ei"))
       {
           Kernel::Property* eiprop = exptInfoZero.run().getProperty("Ei");
@@ -171,23 +169,24 @@ namespace Mantid
       {
        throw std::invalid_argument("Could not find Ei value in the workspace.");
       }
-      if (dEmin>m_Ei)
+      double eps=1e-7;
+      if (m_Ei-originaldEmin<eps)
       {
-          dEmin=m_Ei;
+          originaldEmin=m_Ei-eps;
       }
-      if (dEmax>m_Ei)
+      if (m_Ei-originaldEmax<eps)
       {
-          dEmax=m_Ei;
+          originaldEmax=m_Ei-1e-7;
       }
-      if(dEmin==dEmax)
+      if(originaldEmin==originaldEmax)
       {
           throw std::runtime_error("The limits of the original workspace used in ConvertToMD are incorrect");
       }
       const double energyToK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 /
           (PhysicalConstants::h*PhysicalConstants::h);
       m_ki=std::sqrt(energyToK*m_Ei);
-      m_kfmin=std::sqrt(energyToK*(m_Ei-m_dEmin));
-      m_kfmax=std::sqrt(energyToK*(m_Ei-m_dEmax));
+      m_kfmin=std::sqrt(energyToK*(m_Ei-originaldEmin));
+      m_kfmax=std::sqrt(energyToK*(m_Ei-originaldEmax));
     }
 
     /**
@@ -414,7 +413,9 @@ namespace Mantid
           m_eX.resize( eDim.getNBins() );
           for(size_t i = 0; i < m_eX.size(); ++i)
           {
-              m_eX[i] = std::sqrt(energyToK*(m_Ei-eDim.getX(i)));
+              double temp=m_Ei-eDim.getX(i);
+              if(temp<=0) temp=0.;
+              m_eX[i] = std::sqrt(energyToK*(temp));
           }
       }
     }
@@ -427,10 +428,8 @@ namespace Mantid
     void MDNormDirectSC::calculateNormalization(const std::vector<coord_t> &otherValues,
                                            const Kernel::Matrix<coord_t> &affineTrans)
     {
-      /*API::MatrixWorkspace_const_sptr integrFlux = getProperty("FluxWorkspace");
-      integrFlux->getXMinMax(m_kiMin, m_kiMax);
-      API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
-      
+      const double energyToK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 /
+                  (PhysicalConstants::h*PhysicalConstants::h);
       const auto & exptInfoZero = *(m_inputWS->getExperimentInfo(0));
       typedef Kernel::PropertyWithValue<std::vector<double> > VectorDoubleProperty;
       auto *rubwLog = dynamic_cast<VectorDoubleProperty*>(exptInfoZero.getLog("RUBW_MATRIX"));
@@ -452,16 +451,22 @@ namespace Mantid
       // Prune out those that are part of a group and simply leave the head of the group
       detIDs = removeGroupedIDs(exptInfoZero, detIDs);
 
-      // Mappings
+      // Mapping
       const int64_t ndets = static_cast<int64_t>(detIDs.size());
-      const detid2index_map fluxDetToIdx = integrFlux->getDetectorIDToWorkspaceIndexMap();
-      const detid2index_map solidAngDetToIdx = solidAngleWS->getDetectorIDToWorkspaceIndexMap();
+      bool haveSA=false;
+      API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
+      detid2index_map solidAngDetToIdx;
+      if(solidAngleWS!=NULL)
+      {
+          haveSA=true;
+          solidAngDetToIdx = solidAngleWS->getDetectorIDToWorkspaceIndexMap();
+      }
 
       auto *prog = new API::Progress(this, 0.3, 1.0, ndets);
-      PARALLEL_FOR1(integrFlux)
+      //PARALLEL_FOR_NO_WSP_CHECK()
       for(int64_t i = 0; i < ndets; i++)
       {
-        PARALLEL_START_INTERUPT_REGION
+        //PARALLEL_START_INTERUPT_REGION
 
         const auto detID = detIDs[i];
         double theta(0.0), phi(0.0);
@@ -481,55 +486,41 @@ namespace Mantid
         auto intersections = calculateIntersections(theta, phi);
         if(intersections.empty()) continue;
 
-        // get the flux spetrum number
-        size_t wsIdx = fluxDetToIdx.find(detID)->second;
         // Get solid angle for this contribution
-        double solid = solidAngleWS->readY(solidAngDetToIdx.find(detID)->second)[0]*protonCharge;
-
-        // -- calculate integrals for the intersection --
-        // momentum values at intersections
-        auto intersectionsBegin = intersections.begin();
-        std::vector<double> xValues(intersections.size()), yValues(intersections.size());
+        double solid=protonCharge;
+        if(haveSA)
         {
-          // copy momenta to xValues
-          auto x = xValues.begin();
-          for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x)
-          {
-            *x = (*it)[3];
-          }
+            solid= solidAngleWS->readY(solidAngDetToIdx.find(detID)->second)[0]*protonCharge;
         }
-        // calculate integrals at momenta from xValues by interpolating between points in spectrum sp
-        // of workspace integrFlux. The result is stored in yValues
-        calcIntegralsForIntersections( xValues, *integrFlux, wsIdx, yValues );
-
         // Compute final position in HKL
         const size_t vmdDims = intersections.front().size();
         // pre-allocate for efficiency and copy non-hkl dim values into place
         std::vector<coord_t> pos(vmdDims + otherValues.size());
         std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
-
+        auto intersectionsBegin=intersections.begin();
         for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it)
         {
           const auto & curIntSec = *it;
           const auto & prevIntSec = *(it-1);
           // the full vector isn't used so compute only what is necessary
-          double delta = curIntSec[3] - prevIntSec[3];
-          if(delta < 1e-07) continue; // Assume zero contribution if difference is small
+          double delta = (curIntSec[3]*curIntSec[3] - prevIntSec[3]*prevIntSec[3])/energyToK;
+          if(delta < 1e-10) continue; // Assume zero contribution if difference is small
           
           // Average between two intersections for final position
           std::transform(curIntSec.getBareArray(), curIntSec.getBareArray() + vmdDims,
                          prevIntSec.getBareArray(), pos.begin(),
                          VectorHelper::SimpleAverage<coord_t>());
+          pos.push_back(1.);
+          //transform kf to energy transfer
+          pos[3]=static_cast<coord_t>(m_Ei-pos[3]*pos[3]/energyToK);
           std::vector<coord_t> posNew = affineTrans*pos;
           size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
           if(linIndex == size_t(-1)) continue;
 
-          // index of the current intersection
-          size_t k = static_cast<size_t>(std::distance(intersectionsBegin, it));
-          // signal = integral between two consecutive intersections
-          double signal = (yValues[k] - yValues[k - 1])*solid;
+          // signal = integral between two consecutive intersections *solid angle *PC
+          double signal = solid*delta;
 
-          PARALLEL_CRITICAL(updateMD)
+          //PARALLEL_CRITICAL(updateMD)
           {
             signal += m_normWS->getSignalAt(linIndex);
             m_normWS->setSignalAt(linIndex, signal);
@@ -537,11 +528,11 @@ namespace Mantid
         }
         prog->report();
 
-        PARALLEL_END_INTERUPT_REGION
+        //PARALLEL_END_INTERUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
+      //PARALLEL_CHECK_INTERUPT_REGION
 
-      delete prog;*/
+      delete prog;
     }
 
     /**
