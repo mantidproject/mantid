@@ -250,18 +250,23 @@ namespace IDA
 
   bool ApplyCorr::validate()
   {
-    QString sample = uiForm().abscor_dsSample->getCurrentDataName();
-    QString sampleType = sample.right(sample.length() - sample.lastIndexOf("_"));
-    QString container = uiForm().abscor_dsContainer->getCurrentDataName();
-    QString containerType = container.right(container.length() - container.lastIndexOf("_"));
+    bool useCan = uiForm().abscor_ckUseCan->isChecked();
 
-    g_log.debug() << "Sample type is: " << sampleType.toStdString() << std::endl;
-    g_log.debug() << "Container type is: " << containerType.toStdString() << std::endl;
-
-    if(containerType != sampleType)
+    if(useCan)
     {
-      g_log.error("Must use the same type of files for sample and container inputs.");
-      return false;
+      QString sample = uiForm().abscor_dsSample->getCurrentDataName();
+      QString sampleType = sample.right(sample.length() - sample.lastIndexOf("_"));
+      QString container = uiForm().abscor_dsContainer->getCurrentDataName();
+      QString containerType = container.right(container.length() - container.lastIndexOf("_"));
+
+      g_log.debug() << "Sample type is: " << sampleType.toStdString() << std::endl;
+      g_log.debug() << "Container type is: " << containerType.toStdString() << std::endl;
+
+      if(containerType != sampleType)
+      {
+        g_log.error("Must use the same type of files for sample and container inputs.");
+        return false;
+      }
     }
 
     return true;
@@ -286,13 +291,13 @@ namespace IDA
     {
       case 0:
         // Geomtry is flat
-        ext = "_flt_Abs";
+        ext = "_flt_abs";
         uiForm().abscor_dsCorrections->setWSSuffixes(QStringList(ext));
         uiForm().abscor_dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));
         break;
       case 1:
         // Geomtry is cylinder
-        ext = "_cyl_Abs";
+        ext = "_cyl_abs";
         uiForm().abscor_dsCorrections->setWSSuffixes(QStringList(ext));
         uiForm().abscor_dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));
         break;
