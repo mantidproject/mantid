@@ -52,14 +52,19 @@ Usage
 
 .. testcleanup:: ExExaminePG3Profile
 
+  DeleteWorkspace(Workspace='Bank3Background')
+  DeleteWorkspace(Workspace='Bank3BackgroundParamsTable')
+  DeleteWorkspace(Workspace='LaB6_HKL_Table')
+  DeleteWorkspace(Workspace='PG3_15035-3')
+  DeleteWorkspace(Workspace='PG3_15035-3_BkgdPts')
   DeleteWorkspace(Workspace='PG3_15035B3_Cal')
-  DeleteWorksapce(Workspace='PG3_15035-3')
-
+  DeleteWorkspace(Workspace='PG3_Bank3_ParTable')
 
 Output:
 
 .. testoutput:: ExExaminePG3Profile
 
-  Output workspace has 6 spectra
+  GeneraateHKL? =  False
+  Output workspace has 9 spectra
 
 .. categories::
