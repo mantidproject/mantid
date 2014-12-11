@@ -44,7 +44,8 @@ private:
   void init();
   void exec();
   void generateHeader();
-  void sendReport(const std::string &body = std::string());
+  std::string generateJson();
+  void sendReport(const std::string &json);
 
   static std::string g_header;
 };

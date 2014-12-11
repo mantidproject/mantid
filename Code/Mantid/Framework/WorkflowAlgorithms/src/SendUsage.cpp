@@ -99,29 +99,35 @@ void SendUsage::exec() {
   // generate the default header - this uses a cache variable
   this->generateHeader();
 
+  std::string json = this->generateJson();
+  this->setPropertyValue("Json", json);
+
   // send the report
   if (doSend()) {
-    sendReport();
+    sendReport(json);
   } else {
     g_log.debug("Sending usage reports is disabled\n");
   }
 }
 
-void SendUsage::sendReport(const std::string &body) {
-  std::string text(g_header + currentDateAndTime() + body + "}");
-
-  g_log.debug() << text << "\n"; // TODO should be debug
-  this->setPropertyValue("Json", text);
+void SendUsage::sendReport(const std::string &json) {
+  g_log.debug() << json << "\n";
 
   // set up the headers
   std::map<string, string> htmlHeaders;
 
   std::stringstream responseStream;
   Kernel::InternetHelper helper;
-  int status = helper.sendRequest(URL, responseStream, htmlHeaders, POST, text);
+  int status = helper.sendRequest(URL, responseStream, htmlHeaders, POST, json);
   this->setProperty("HtmlCode", status);
   g_log.debug() << "Call responded with " << status << "\n"
                 << responseStream.str() << "\n";
+}
+
+std::string SendUsage::generateJson() {
+  // later in life the additional parameters can be done after
+  // the current date and time
+  return std::string(g_header + currentDateAndTime() + "}");
 }
 
 /**

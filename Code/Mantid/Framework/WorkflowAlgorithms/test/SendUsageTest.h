@@ -2,7 +2,7 @@
 #define MANTID_WORKFLOWALGORITHMS_SENDUSAGETEST_H_
 
 #include <cxxtest/TestSuite.h>
-
+#include "MantidKernel/ConfigService.h"
 #include "MantidWorkflowAlgorithms/SendUsage.h"
 
 using Mantid::WorkflowAlgorithms::SendUsage;
@@ -22,35 +22,24 @@ public:
   }
 
   void test_exec() {
-    // Name of the output workspace.
-    std::string outWSName("SendUsageTest_OutputWS");
+    // turn of actually sending
+    const std::string SEND_USAGE_CONFIG_KEY("usagereports.enabled");
+    Mantid::Kernel::ConfigService::Instance().setString(SEND_USAGE_CONFIG_KEY,
+                                                        "0");
 
+    // run the algorithm
     SendUsage alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    // Retrieve the workspace from data service. TODO: Change to your desired
-    // type
-    Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName));
-    TS_ASSERT(ws);
-    if (!ws)
-      return;
-
-    // TODO: Check the results
-
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
+    // check the results
+    const std::string json = alg.getPropertyValue("Json");
+    TS_ASSERT(!json.empty());
+    const std::string status = alg.getPropertyValue("HtmlCode");
+    TS_ASSERT_EQUALS(status, "-1"); // not actually run
   }
-
-  void test_Something() { TSM_ASSERT("You forgot to write a test!", 0); }
 };
 
 #endif /* MANTID_WORKFLOWALGORITHMS_SENDUSAGETEST_H_ */
