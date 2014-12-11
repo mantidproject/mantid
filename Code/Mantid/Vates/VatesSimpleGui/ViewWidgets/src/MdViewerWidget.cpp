@@ -2,6 +2,7 @@
 
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h"
+#include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h"
@@ -39,6 +40,7 @@
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxyManager.h>
 #include <vtkSMProxy.h>
+#include <vtkSMViewProxy.h>
 #include <vtkSMSourceProxy.h>
 #include <vtkSMReaderFactory.h>
 #include <vtksys/SystemTools.hxx>
@@ -164,6 +166,7 @@ void MdViewerWidget::internalSetup(bool pMode)
   this->rotPointDialog = NULL;
   this->lodThreshold = 5.0;
   this->viewSwitched = false;
+  this->startingUp = true;
 }
 
 /**
@@ -712,10 +715,34 @@ void MdViewerWidget::setupPluginMode()
  */
 void MdViewerWidget::renderAndFinalSetup()
 {
+  this->setDefaultColorForBackground();
   this->currentView->render();
   this->currentView->setColorsForView();
   this->currentView->checkView(this->initialView);
   this->currentView->updateAnimationControls();
+  
+  // Only load the default color map for the first time
+  // that a representation is created.
+  if (this->startingUp)
+  {
+     this->ui.colorSelectionWidget->loadDefaultColorMap();
+     this->startingUp = false;
+  }
+}
+
+/**
+ * Set the background color for this view. 
+ */
+void MdViewerWidget::setDefaultColorForBackground()
+{
+  // Get background setting
+  BackgroundRgbProvider backgroundRgbProvider;
+  std::vector<double> backgroundRgb = backgroundRgbProvider.getRgb();
+
+  vtkSMDoubleVectorProperty* background = vtkSMDoubleVectorProperty::SafeDownCast(this->currentView->getView()->getViewProxy()->GetProperty("Background"));
+  background->SetElements3(backgroundRgb[0],backgroundRgb[1],backgroundRgb[2]);
+  
+  this->currentView->getView()->resetCamera();
 }
 
 /**
@@ -779,8 +806,10 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->hiddenView->close();
   this->hiddenView->destroyView();
   delete this->hiddenView;
+  this->setDefaultColorForBackground(); // Keeps background color to default value
   this->currentView->render();
   this->currentView->setColorsForView();
+  this->ui.colorSelectionWidget->loadDefaultColorMap(); // Load the default color map
   this->currentView->checkViewOnSwitch();
   this->updateAppState();
   this->initialView = v; 

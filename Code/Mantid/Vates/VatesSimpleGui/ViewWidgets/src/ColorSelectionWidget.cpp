@@ -1,12 +1,14 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorMapManager.h"
 
 #include <pqBuiltinColorMaps.h>
 #include <pqChartValue.h>
 #include <pqColorMapModel.h>
 #include <pqColorPresetManager.h>
 #include <pqColorPresetModel.h>
+
 #include <vtkPVXMLElement.h>
 #include <vtkPVXMLParser.h>
 
@@ -29,7 +31,7 @@ namespace SimpleGui
  * sub-components and connections.
  * @param parent the parent widget of the mode control widget
  */
-ColorSelectionWidget::ColorSelectionWidget(QWidget *parent) : QWidget(parent)
+  ColorSelectionWidget::ColorSelectionWidget(QWidget *parent) : QWidget(parent), colorMapManager(new ColorMapManager())
 {
   this->ui.setupUi(this);
   this->ui.autoColorScaleCheckBox->setChecked(true);
@@ -75,24 +77,50 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
 {
   pqColorPresetModel *presetModel = this->presets->getModel();
 
-  // get builtin color maps xml
-  const char *xml = pqComponentsGetColorMapsXML();
+  // Associate the colormap value with the index a continuous index
 
   // create xml parser
   vtkPVXMLParser *xmlParser = vtkPVXMLParser::New();
+  
+
+  // 1. Get builtinw color maps (Reading fragment requires: InitializeParser, ParseChunk, CleanupParser) 
+  const char *xml = pqComponentsGetColorMapsXML();
   xmlParser->InitializeParser();
   xmlParser->ParseChunk(xml, static_cast<unsigned>(strlen(xml)));
   xmlParser->CleanupParser();
-
   this->addColorMapsFromXML(xmlParser, presetModel);
-
-  // Add color maps from IDL and Matplotlib
+ 
+  // 2. Add color maps from Slice Viewer, IDL and Matplotlib
+  this->addColorMapsFromFile("All_slice_viewer_cmaps_for_vsi.xml", xmlParser, presetModel);
   this->addColorMapsFromFile("All_idl_cmaps.xml", xmlParser, presetModel);
   this->addColorMapsFromFile("All_mpl_cmaps.xml", xmlParser, presetModel);
 
   // cleanup parser
   xmlParser->Delete();
 }
+
+ /**
+  * Load the default color map
+  */
+  void ColorSelectionWidget::loadDefaultColorMap()
+  {
+    // Check in the Mantid.users.properties file if a default color map was specified
+    std::string defaultColorMap = Kernel::ConfigService::Instance().getString("vsi.colormap");
+
+    int defaultColorMapIndex = 0;
+
+    if (!defaultColorMap.empty())
+    {
+      defaultColorMapIndex = this->colorMapManager->getColorMapIndex(defaultColorMap);
+    }
+
+    const pqColorMapModel *colorMap = this->presets->getModel()->getColorMap(defaultColorMapIndex);
+
+    if (colorMap)
+    {
+      emit this->colorMapChanged(colorMap);
+    }
+  }
 
 /**
  * This function takes color maps from a XML file, parses them and loads and
@@ -143,8 +171,15 @@ void ColorSelectionWidget::addColorMapsFromXML(vtkPVXMLParser *parser,
         pqColorPresetManager::createColorMapFromXML(colorMapElement);
     QString name = colorMapElement->GetAttribute("name");
 
-    // add color map to the model
-    model->addBuiltinColorMap(colorMap, name);
+    // Only add the color map if the name does not exist yet
+    if (!this->colorMapManager->isRecordedColorMap(name.toStdString()))
+    {
+      // add color map to the model
+      model->addBuiltinColorMap(colorMap, name);
+
+      // add color map to the color map manager
+      this->colorMapManager->readInColorMap(name.toStdString());
+    }
   }
 }
 

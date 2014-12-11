@@ -2,6 +2,8 @@ project( MantidVatesSimpleGuiViewWidgets )
 
 # These are the C++ files to be compiled.
 set( INCLUDE_FILES
+  inc/MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h
+  inc/MantidVatesSimpleGuiViewWidgets/ColorMapManager.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorUpdater.h
   inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
@@ -17,6 +19,8 @@ set( INCLUDE_FILES
 )
 
 set( SOURCE_FILES
+  src/BackgroundRgbProvider.cpp
+  src/ColorMapManager.cpp
   src/ColorSelectionWidget.cpp
   src/ColorUpdater.cpp
   src/MdViewerWidget.cpp

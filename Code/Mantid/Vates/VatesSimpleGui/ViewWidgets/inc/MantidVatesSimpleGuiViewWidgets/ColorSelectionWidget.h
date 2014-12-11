@@ -3,7 +3,8 @@
 
 #include "ui_ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-
+#include "boost/scoped_ptr.hpp"
+#include "MantidVatesSimpleGuiViewWidgets/ColorMapManager.h"
 #include <QWidget>
 
 class pqColorMapModel;
@@ -62,6 +63,8 @@ public:
   double getMinRange();
   /// Get the maximum color range value
   double getMaxRange();
+  /// Load the default color map
+  void loadDefaultColorMap();
 
 public slots:
   /// Set state for all control widgets.
@@ -117,6 +120,8 @@ private:
 
   pqColorPresetManager *presets; ///< Dialog for choosing color presets
   Ui::ColorSelectionWidgetClass ui; ///< The mode control widget's UI form
+
+  boost::scoped_ptr<ColorMapManager> colorMapManager; ///< Keeps track of the available color maps.
 };
 
 } // SimpleGui
