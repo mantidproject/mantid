@@ -90,20 +90,6 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="mantidlabel">
-          <property name="text">
-           <string>Homepage:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QLabel" name="mantidurl">
-          <property name="text">
-           <string>TextLabel</string>
-          </property>
-         </widget>
-        </item>
         <item row="3" column="0">
          <widget class="QLabel" name="revision_label">
           <property name="text">
@@ -118,8 +104,15 @@
           </property>
          </widget>
         </item>
-        <item row="5" column="1">
-         <widget class="QLabel" name="mantiddoi">
+        <item row="4" column="0">
+         <widget class="QLabel" name="mantidlabel">
+          <property name="text">
+           <string>Homepage:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QLabel" name="mantidurl">
           <property name="text">
            <string>TextLabel</string>
           </property>
@@ -129,6 +122,27 @@
          <widget class="QLabel" name="doi_label">
           <property name="text">
            <string>Citation:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QLabel" name="mantidcitation">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="ReleaseDoi_label">
+          <property name="text">
+           <string>Release doi:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QLabel" name="mantiddoi">
+          <property name="text">
+           <string>TextLabel</string>
           </property>
          </widget>
         </item>
