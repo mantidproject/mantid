@@ -1348,27 +1348,29 @@ def plot(*args, **kwargs):
     Returns :: the list of curves included in the plot
 
     args can take different forms depending on what you plot. You can plot:
-    - a python list or array (x) for example like this:
-      plot(x)
-    - a workspace (ws) for example like this:
-      plot(ws, [100,101])  # this will plot spectra 100 and 101
-    - a list of workspaces (ws, ws2, ws3, etc.) for example like this:
-      plot([ws, ws2, ws3], [100,101])
-    - workspaces identified by their names:
-      plot(['HRP39182', 'MAR11060.nxs'], [100,101])
-    You can also pass matplotlib/pyplot style strings as arguments, for example:
-    - plot(x, '-.')
+
+    * a python list or array (x) for example like this: plot(x)
+
+    * a workspace (ws) for example like this: plot(ws, [100,101])  # this will plot spectra 100 and 101
+
+    * a list of workspaces (ws, ws2, ws3, etc.) for example like this: plot([ws, ws2, ws3], [100,101])
+
+    * workspaces identified by their names: plot(['HRP39182', 'MAR11060.nxs'], [100,101])
+
+    You can also pass matplotlib/pyplot style strings as arguments, for example: plot(x, '-.')
 
     As keyword arguments (kwargs) you can specify multiple
     parameters, for example: linewidth, linestyle, marker, color.
 
     An important keyword argument is tool. At the moment the
     following values are supported:
-    - plot_spectrum  (default for workspaces)
-    - plot_bin
-    - plot_md
+
+    * plot_spectrum  (default for workspaces)
+    * plot_bin
+    * plot_md
 
     Please see the documentation of this module (use help()) for more details.
+
     """
     nargs = len(args)
     if nargs < 1:
