@@ -677,8 +677,6 @@ class DirectEnergyConversion(object):
       prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice');
 
       #Run the conversion first on the sample
-      #result_name = 
-      #deltaE_wkspace_sample = self.convert_to_energy(prop_man.sample_run,prop_man.incident_energy,prop_man.wb_run)
       deltaE_wkspace_sample = self.mono_sample(sample_run,prop_man.incident_energy,prop_man.wb_run,
                                                prop_man.map_file,masking)
 
@@ -935,6 +933,31 @@ class DirectEnergyConversion(object):
            DeleteWorkspace(Workspace=data_ws)
         return (norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
 #-------------------------------------------------------------------------------
+    def set_motors(self,sample_wkspace,motor=None, offset=None):
+        """calculate psi from sample environment motor and offset """
+
+        if self._do_ISIS_normalization:
+            default_offset=float('NaN')
+            if not (motor is None) and sample_wkspace.getRun().hasProperty(motor):
+                 default_offset = 0
+        else:
+            default_offset=0
+        #
+        if (offset is None):
+            motor_offset = default_offset
+        else:
+            motor_offset = float(offset)
+
+        #self.motor=0
+        if not (motor is None):
+        # Check if motor name exists
+            if sample_wkspace.getRun().hasProperty(motor):
+                motor=sample_wkspace.getRun()[motor].value[0]
+                self.log("Motor value is %s" % motor)
+            else:
+                self.log("Could not find such sample environment log. Will use psi=offset")
+        self.prop_man.psi = motor+motor_offset
+
 
 
     def convert_to_energy(self, mono_run, ei, white_run=None, mono_van=None,\
@@ -961,30 +984,6 @@ class DirectEnergyConversion(object):
         #if not norm_factor is None:
         #    sample_wkspace /= norm_factor
         
-        #calculate psi from sample environment motor and offset
-
-        #if prop_man.facility == 'ISIS' :
-        #    default_offset=float('NaN')
-        #    if not (motor is None) and sample_wkspace.getRun().hasProperty(motor):
-        #        default_offset = 0
-        #else:
-        #    default_offset=0
-
-        #if (offset is None):
-        #      self.motor_offset = default_offset
-        #else:
-        #     self.motor_offset = float(offset)
-
-        #self.motor=0
-        #if not (motor is None):
-        ## Check if motor name exists
-        #    if sample_wkspace.getRun().hasProperty(motor):
-        #        self.motor=sample_wkspace.getRun()[motor].value[0]
-        #        self.log("Motor value is %s" % self.motor)
-        #    else:
-        #        self.log("Could not find such sample environment log. Will use psi=offset")
-        #self.psi = self.motor+self.motor_offset
-
         # Save then finish
         self.save_results(sample_wkspace, save_path)
         # Clear loaded raw data to free up memory
@@ -1039,47 +1038,7 @@ class DirectEnergyConversion(object):
         MoveInstrumentComponent(Workspace=resultws_name,ComponentName= src_name, X=mon1_pos.getX(), Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
         return ei, mon1_peak
 
-    @staticmethod
-    def check_monitor_ws(data_ws,monitor_ws,ei_mon_spectra):
-        """ Check if monitors spectra are indeed located in monitor workspace and if not, try to 
-            find them in data workspace
-
-            return tuple of workspaces, with first is data and second -- monitors workspace pointers
-            both can point to the same workspace if monitors and data are located in the same workspace
-
-            Raise if can not found monitors in any workspace 
-        """ 
-
-        if isinstance(monitor_ws,str):
-            monitor_ws = mtd[monitor_ws]
-        if isinstance(data_ws,str): 
-            data_ws = mtd[data_ws]
-        for nspec in ei_mon_spectra:
-            # in case it is list of strings
-            nsp = int(nspec)
-            try:
-                # check if the spectra with correspondent number is present in the workspace
-                nsp = monitor_ws.getIndexFromSpectrumNumber(nspec);
-            except RuntimeError as err:
-                mon_ws = data_ws.getName()+'_monitors'
-                try:
-                    monitor_ws = mtd[mon_ws];
-                except:
-                    monitor_ws=data_ws
-                # no spectra in data workspace
-
-                try:
-                    # check if the spectra with correspondent number is present in the data workspace
-                    nsp = monitor_ws.getIndexFromSpectrumNumber(nspec);
-                except RuntimeError as err:
-                    print "**** ERROR while attempting to get spectra {0} from workspace: {1}, error: {2} ".format(nsp,monitor_ws.getName(), err)
-                    raise
-            #end No spectra in initial monitor ws
-
-
-        return (data_ws,monitor_ws)
-
-
+  
     def remap(self, result_ws, spec_masks, map_file):
         """
         Mask and group detectors based on input parameters
@@ -1283,6 +1242,46 @@ class DirectEnergyConversion(object):
         return (result_ws,monitor_ws)
 
     @staticmethod
+    def check_monitor_ws(data_ws,monitor_ws,ei_mon_spectra):
+        """ Check if monitors spectra are indeed located in monitor workspace and if not, try to 
+            find them in data workspace
+
+            return tuple of workspaces, with first is data and second -- monitors workspace pointers
+            both can point to the same workspace if monitors and data are located in the same workspace
+
+            Raise if can not found monitors in any workspace 
+        """ 
+
+        if isinstance(monitor_ws,str):
+            monitor_ws = mtd[monitor_ws]
+        if isinstance(data_ws,str): 
+            data_ws = mtd[data_ws]
+        for nspec in ei_mon_spectra:
+            # in case it is list of strings
+            nsp = int(nspec)
+            try:
+                # check if the spectra with correspondent number is present in the workspace
+                nsp = monitor_ws.getIndexFromSpectrumNumber(nspec);
+            except RuntimeError as err:
+                mon_ws = data_ws.getName()+'_monitors'
+                try:
+                    monitor_ws = mtd[mon_ws];
+                except:
+                    monitor_ws=data_ws
+                # no spectra in data workspace
+
+                try:
+                    # check if the spectra with correspondent number is present in the data workspace
+                    nsp = monitor_ws.getIndexFromSpectrumNumber(nspec);
+                except RuntimeError as err:
+                    print "**** ERROR while attempting to get spectra {0} from workspace: {1}, error: {2} ".format(nsp,monitor_ws.getName(), err)
+                    raise
+            #end No spectra in initial monitor ws
+
+
+        return (data_ws,monitor_ws)
+
+    @staticmethod
     def copy_spectrum2monitors(wsName,monWSName,spectraID):
        """
         this routine copies a spectrum form workspace to monitor workspace and rebins it according to monitor workspace binning
@@ -1346,15 +1345,15 @@ class DirectEnergyConversion(object):
         """
         Constructor
         """
-        # Internal properties and keys
-        self._keep_wb_workspace = False;
-        self._do_ISIS_normalization = True;
-        self.spectra_masks = None;
-
         if instr_name:
             self.initialise(instr_name,reload_instrument);
         else:
             self._propMan = None;
+            #
+            self._keep_wb_workspace = False;
+            self._do_ISIS_normalization = True;
+            self.spectra_masks = None;
+        #end
 
  
     def initialise(self, instr,reload_instrument=False):
