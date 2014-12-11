@@ -130,7 +130,8 @@ int InternetHelper::sendRequestAndProcess(HTTPClientSession &session,
                 << std::endl;
 
   if (retStatus == HTTPResponse::HTTP_OK ||
-      retStatus == HTTPResponse::HTTP_CREATED) {
+      (retStatus == HTTPResponse::HTTP_CREATED &&
+       m_method == HTTPRequest::HTTP_POST)) {
     Poco::StreamCopier::copyStream(rs, responseStream);
     return retStatus;
   } else if (isRelocated(retStatus)) {
