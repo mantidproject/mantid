@@ -38,6 +38,8 @@ namespace Mantid {
 namespace Kernel {
 
 using namespace Poco::Net;
+using std::map;
+using std::string;
 
 namespace {
 // anonymous namespace for some utility functions
@@ -60,18 +62,40 @@ std::string getMethod(const std::string &method) {
 /** Constructor
 */
 InternetHelper::InternetHelper()
-    : m_proxyInfo(), m_isProxySet(false), m_timeout(30) {}
+    : m_proxyInfo(), m_isProxySet(false), m_timeout(30),
+      m_contentType("application/json"), m_request(NULL) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
 */
 InternetHelper::InternetHelper(const Kernel::ProxyInfo &proxy)
-    : m_proxyInfo(proxy), m_isProxySet(true), m_timeout(30) {}
+    : m_proxyInfo(proxy), m_isProxySet(true), m_timeout(30),
+      m_contentType("application/json"), m_request(NULL) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-InternetHelper::~InternetHelper() {}
+InternetHelper::~InternetHelper() {
+  if (m_request != NULL) {
+    delete m_request;
+  }
+}
+
+void InternetHelper::createRequest(Poco::URI &uri, const std::string method,
+                                   const std::map<string, string> &headers) {
+  string reqMethod = getMethod(method);
+
+  m_request = new HTTPRequest(getMethod(method), uri.getPathAndQuery(),
+                              HTTPMessage::HTTP_1_1);
+  if (reqMethod == HTTPRequest::HTTP_POST) {
+    m_request->setContentType(m_contentType);
+  }
+  m_request->set("User-Agent", "MANTID");
+  for (auto itHeaders = headers.begin(); itHeaders != headers.end();
+       ++itHeaders) {
+    m_request->set(itHeaders->first, itHeaders->second);
+  }
+}
 
 /** Performs a request using http or https depending on the url
 * @param url the address to the network resource
@@ -105,8 +129,7 @@ int InternetHelper::sendHTTPRequest(const std::string &url,
                                     const std::string &method,
                                     const std::string &body) {
   int retStatus = 0;
-  std::string reqMethod = getMethod(method);
-  g_log.debug() << "Sending " << reqMethod << " request : " << url << "\n";
+  g_log.debug() << "Sending request to: " << url << "\n";
 
   Poco::URI uri(url);
   // Configure Poco HTTP Client Session
@@ -120,20 +143,19 @@ int InternetHelper::sendHTTPRequest(const std::string &url,
       session.setProxyPort(static_cast<Poco::UInt16>(getProxy(url).port()));
     }
 
-    Poco::Net::HTTPRequest request(reqMethod, uri.getPathAndQuery(),
-                                   Poco::Net::HTTPMessage::HTTP_1_1);
-
-    session.sendRequest(request) << body;
+    this->createRequest(uri, method, headers);
+    m_request->setContentLength(body.length());
+    session.sendRequest(*m_request) << body;
 
     HTTPResponse res;
     std::istream &rs = session.receiveResponse(res);
     retStatus = res.getStatus();
-    g_log.debug() << "Answer from web: " << res.getStatus() << " "
+    g_log.debug() << "Answer from web: " << retStatus << " "
                   << res.getReason() << std::endl;
 
-    if (res.getStatus() == HTTPResponse::HTTP_OK) {
+    if (retStatus == HTTPResponse::HTTP_OK || retStatus == HTTPResponse::HTTP_CREATED) {
       Poco::StreamCopier::copyStream(rs, responseStream);
-      return res.getStatus();
+      return retStatus;
     } else if ((retStatus == HTTPResponse::HTTP_FOUND) ||
                (retStatus == HTTPResponse::HTTP_MOVED_PERMANENTLY) ||
                (retStatus == HTTPResponse::HTTP_TEMPORARY_REDIRECT) ||
@@ -213,23 +235,19 @@ int InternetHelper::sendHTTPSRequest(const std::string &url,
     }
 
     // create a request
-    HTTPRequest req(reqMethod, uri.getPathAndQuery(), HTTPMessage::HTTP_1_1);
-    req.set("User-Agent", "MANTID");
-    for (auto itHeaders = headers.begin(); itHeaders != headers.end();
-         ++itHeaders) {
-      req.set(itHeaders->first, itHeaders->second);
-    }
-    session.sendRequest(req) << body;
+    this->createRequest(uri, method, headers);
+    m_request->setContentLength(body.length());
+    session.sendRequest(*m_request) << body;
 
     HTTPResponse res;
     std::istream &rs = session.receiveResponse(res);
     retStatus = res.getStatus();
-    g_log.debug() << "Answer from web: " << res.getStatus() << " "
+    g_log.debug() << "Answer from web: " << retStatus << " "
                   << res.getReason() << std::endl;
 
-    if (res.getStatus() == HTTPResponse::HTTP_OK) {
+    if (retStatus == HTTPResponse::HTTP_OK || retStatus == HTTPResponse::HTTP_CREATED) {
       Poco::StreamCopier::copyStream(rs, responseStream);
-      return res.getStatus();
+      return retStatus;
     } else if ((retStatus == HTTPResponse::HTTP_FOUND) ||
                (retStatus == HTTPResponse::HTTP_MOVED_PERMANENTLY) ||
                (retStatus == HTTPResponse::HTTP_TEMPORARY_REDIRECT) ||

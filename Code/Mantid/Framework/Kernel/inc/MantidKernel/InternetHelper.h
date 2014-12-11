@@ -8,9 +8,13 @@
 #include <map>
 
 namespace Poco {
+// forward declaration
+class URI;
 namespace Net {
 // forward declaration
 class HTTPResponse;
+// forward declaration
+class HTTPRequest;
 }
 }
 
@@ -83,9 +87,13 @@ protected:
                                  std::istream &rs, const std::string &url);
 
 private:
+  void createRequest(Poco::URI &uri, const std::string method,
+                     const StringToStringMap &headers);
   Kernel::ProxyInfo m_proxyInfo;
   bool m_isProxySet;
   int m_timeout;
+  std::string m_contentType;
+  Poco::Net::HTTPRequest *m_request;
 };
 
 } // namespace Kernel
