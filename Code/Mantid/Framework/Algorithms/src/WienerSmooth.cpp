@@ -54,7 +54,7 @@ namespace Algorithms
   const std::string WienerSmooth::category() const { return "Arithmetic\\FFT;Transforms\\Smoothing";}
 
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-  const std::string WienerSmooth::summary() const { return "Smooth spectrum using Wiener filter.";};
+  const std::string WienerSmooth::summary() const { return "Smooth spectra using Wiener filter.";};
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
