@@ -38,7 +38,7 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QDialog#FirstTimeSetup{background-image: url(:/First_use_Background.png);}
-color: rgb(255, 255, 255);</string>
+</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -208,7 +208,7 @@ color: rgb(0, 0, 0);</string>
         <enum>Qt::LeftToRight</enum>
        </property>
        <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 0);</string>
+        <string notr="true"/>
        </property>
        <property name="text">
         <string>Sample Datasets</string>
