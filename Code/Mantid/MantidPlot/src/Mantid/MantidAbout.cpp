@@ -55,5 +55,11 @@ MantidAbout::MantidAbout(QWidget *parent) : MantidQt::API::MantidDialog(parent)
                       Mantid::Kernel::MantidVersion::doi() + "</a></p>");
   m_uiForm.mantiddoi->setText(mantidDOI);
   m_uiForm.mantiddoi->setOpenExternalLinks(true);
+
+  QString mantidCitation = QString::fromStdString("<p><a href = " +\
+                    Mantid::Kernel::MantidVersion::paperCitation() + ">" +\
+                    Mantid::Kernel::MantidVersion::paperCitation() + "</a></p>");
+  m_uiForm.mantidcitation->setText(mantidCitation);
+  m_uiForm.mantidcitation->setOpenExternalLinks(true);
 }
 
