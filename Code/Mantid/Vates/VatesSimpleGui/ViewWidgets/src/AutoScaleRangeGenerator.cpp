@@ -122,6 +122,16 @@ namespace SimpleGui
     // Set the color scale output
     VsiColorScale vsiColorScale;
 
+    // Account for possible negative data. If min value is negative and max value is larger than 100, then set to default
+    // else set to three orders of magnitude smaller than the max value
+    if (minValue < 0 && maxValue > 100)
+    {
+      minValue = this->defaultValue;
+    } else if (minValue < 0 && maxValue < 100)
+    {
+      minValue = maxValue*0.001;
+    } 
+
     vsiColorScale.minValue = minValue;
     vsiColorScale.maxValue = minValue + 0.1*(maxValue - minValue);
     vsiColorScale.useLogScale = TRUE;
