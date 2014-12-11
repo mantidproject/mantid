@@ -15,6 +15,8 @@ Mantid as a 'future' import. Feedback is very much welcome!
 
 To use this new functionality you first need to import the new pyplot module:
 
+.. code-block:: python
+
     from pymantidplot.future.pyplot import *
 
 Please do not forget this step, otherwise you may get arcane error
@@ -25,6 +27,8 @@ commands. See the following examples.
 
 Plot an array (python list)
 ---------------------------
+
+.. code-block:: python
 
     # plot array
     plot([0.1, 0.3, 0.2, 4])
@@ -41,6 +45,8 @@ etc. The following example illustrates the use of a few options. You
 can refer to the list of options provided further down in this
 document. In principle, any combination of options is supported, as
 long as it makes sense!
+
+.. code-block:: python
 
     a = [0.1, 0.3, 0.2, 4]
     plot(a)
@@ -62,6 +68,8 @@ indices specified in the second argument. This behavior is similar to
 he plotSpectrum function of the traditional mantidplot module. This is
 a simple example that produces plots of spectra:
 
+.. code-block:: python
+
     # first, load a workspace. You can do this with a Load command or just from the GUI menus
     ws = Load("/path/to/MAR11060.raw", OutputWorkspace="foo")
     # 1 spectrum plot
@@ -75,6 +83,8 @@ Plot spectra using workspace objects and workspace names
 It is also possible to pass workspace names to plot, as in the
 following example:
 
+.. code-block:: python
+
     # please make sure that you use the right path and file name
     mar = Load('/path/to/MAR11060.raw', OutputWorkspace="MAR11060")
     plot('MAR11060', [10,100,500])
@@ -83,10 +93,14 @@ following example:
 Let's load one more workspace so we can see some examples with list of
 workspaces
 
+.. code-block:: python
+
     loq=Load('/path/to/LOQ48097.raw', OutputWorkspace="LOQ48097")
 
 The next lines are all equivalent, you can use workspace objects or
 names in the list passed to plot:
+
+.. code-block:: python
 
     plot([mar, 'LOQ48097'], [800, 900])
     plot([mar, loq], [800, 900])
@@ -96,11 +110,15 @@ Here, the plot function is making a guess and plotting the spectra of
 these workspaces (instead of the bins or anything else). You can make
 that choice more explicit by specifying the 'tool' argument:
 
+.. code-block:: python
+
     plot(['MAR11060', loq], [800, 900], tool='plot_spectrum')
 
 Alternatively, you can use the plot_spectrum command, which is
 equivalent to the plot command with the keyword argument
 tool='plot_spectrum':
+
+.. code-block:: python
 
     plot_spectrum(['MAR11060', loq], [800, 900])
 
@@ -110,10 +128,14 @@ Plotting bins
 To plot workspace bins you can use the keyword 'tool' with the value
 'plot_bin', like this:
 
+.. code-block:: python
+
     ws = Load('/path/to/HRP39182.RAW', OutputWorkspace="HRP39182")
     plot(ws, [1, 5, 7, 100], tool='plot_bin')
 
 or, alternatively, you can use the plot_bin command:
+
+.. code-block:: python
 
     plot_bin(ws, [1, 5, 7, 100], linewidth=4, linestyle=':')
 
@@ -123,10 +145,14 @@ Plotting MD workspaces
 Similarly, to plot MD workspaces you can use the keyword 'tool' with
 the value 'plot_md', like this:
 
+.. code-block:: python
+
     simple_md_ws = CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace=MDWWorkspaceName)
     plot(simple_md_ws, tool='plot_md')
 
 or a specific plot_md command:
+
+.. code-block:: python
 
     plot_md(simple_md_wsws)
 
@@ -141,12 +167,16 @@ Changing style properties
 You can modify the style of your plots. For example like this (for a
 full list of options currently supported, see below).
 
+.. code-block:: python
+
     lines = plot(loq, [100, 104], tool='plot_spectrum', linestyle='-.', marker='*', color='red')
 
 Notice that the plot function returns a list of lines, which
 correspond to the spectra lines. At present the lines have limited
 functionality. Essentially, the data underlying these lines can be
 retrieved as follows:
+
+.. code-block:: python
 
     lines[0].get_xdata()
     lines[0].get_ydata()
@@ -157,15 +187,19 @@ workspace. Conversely, if you use plot_bin, the number of elements in
 the output lines should be equal to the number of spectra in the
 workspace.
 
-   To modify the figure, you first need to obtain the figure object
+To modify the figure, you first need to obtain the figure object
 that represents the figure where the lines are displayed. Once you do
 so you can for example set the title of the figure like this:
+
+.. code-block:: python
 
     fig = lines[0].figure()
     fig.suptitle('Example figure title')
 
 Other properties can be modified using different functions, as in
 matplotlib's pyplot. For example:
+
+.. code-block:: python
 
     title('Test plot of LOQ')
     xlabel('ToF')
@@ -178,6 +212,8 @@ matplotlib's pyplot. For example:
 By default, these functions manipulate the current figure (the last or
 most recently shown figure). You can also save the current figure into
 a file like this:
+
+.. code-block:: python
 
     savefig('example_saved_figure.png')
 
@@ -195,11 +231,14 @@ Additional options supported as keyword arguments (kwargs):
 There is a couple of important plot options that are set as keyword
 arguments:
 
-============  ================
-Option name   Values supported
-------------  ----------------
-error_bars    True, False (default)
-hold          on, off
+
++------------+------------------------+
+|Option name | Values supported       |
++============+========================+
+|error_bars  | True, False (default)  |
++------------+------------------------+
+|hold        | on, off                |
++------------+------------------------+
 
 error_bars has the same meaning as in the traditional mantidplot plot
 functions: it defines whether error bars should be added to the
@@ -211,11 +250,15 @@ possible to make plots incrementally.
 For example, one can add two spectra from a workspace using the
 following command:
 
+.. code-block:: python
+
     lines = plot(loq, [100, 102], linestyle='-.', color='red')
 
 But similar results can be obtained by plotting one of the spectra by
 a first command, and then plotting the second spectra in a subsequent
 command with the hold parameter enabled:
+
+.. code-block:: python
 
     lines = plot(loq, 100, linestyle='-.', color='red')
     lines = plot(loq, 102, linestyle='-.', color='blue', hold='on')
@@ -234,13 +277,17 @@ In this version of future.pyplot there is limited support for
 multi-plot commands (as in pyplot and matlab). For example, you can
 type commands like the following:
 
-plot(ws, [100, 101], 'r', ws, [200, 201], 'b', tool='plot_spectrum')
+.. code-block:: python
+
+    plot(ws, [100, 101], 'r', ws, [200, 201], 'b', tool='plot_spectrum')
 
 This command will plot spectra 100 and 101 in red and spectra 200 and
 201 in blue on the same figure. You can also combine different
 workspaces, for example:
 
-plot(ws, [100, 101], 'r', mar, [50, 41], 'b', tool='plot_spectrum')
+.. code-block:: python
+
+    plot(ws, [100, 101], 'r', mar, [50, 41], 'b', tool='plot_spectrum')
 
 
 Style options supported as keyword arguments
@@ -250,14 +297,20 @@ Unless otherwise stated, these options are in principle supported in
 all the plot variants. These options have the same (or as closed as
 possible) meaning as in matplotlib.
 
-============  ================
-Option name   Values supported
-------------  ----------------
-linewidth     real values
-linestyle     '-', '--', '-.' '.'
-marker        'o', 'v', '^', '<', '>', 's', '*', 'h', '|', '_'
-color         color character or string ('b', 'blue', 'g', 'green', 'k', 'black', 'y', 'yellow', 'c', 'cyan', 'r', 'red'. 'm', 'magenta', etc.). RGB colors are not supported at the moment.
-============  ================
++------------+---------------------------------------------------------+
+|Option name | Values supported                                        |
++============+=========================================================+
+|linewidth   | real values                                             |
++------------+---------------------------------------------------------+
+|linestyle   | '-', '--', '-.' '.'                                     |
++------------+---------------------------------------------------------+
+|marker      |  'o', 'v', '^', '<', '>', 's', '*', 'h', '|', '_'       |
++------------+---------------------------------------------------------+
+|color       |  color character or string ('b', 'blue', 'g', 'green',  |
+|            |  'k', 'black', 'y', 'yellow', 'c', 'cyan', 'r', 'red'.  |
+|            |  'm', 'magenta', etc.). RGB colors are not supported at |
+|            |  the moment.                                            |
++------------+---------------------------------------------------------+
 
 Modifying the plot axes
 -----------------------
@@ -265,6 +318,8 @@ Modifying the plot axes
 You can modify different properties of the plot axes via functions, as
 seen before. This includes the x and y axis titles, limits and scale
 (linear or logarithmic). For example:
+
+.. code-block:: python
 
     ylabel('Counts')
     ylim(0, 8)
@@ -274,11 +329,12 @@ An alternative is to use equivalent methods provided by the Figure and
 Axes objects. For this you first need to retrieve the figure and axes
 where a plot (or line) has been shown.
 
+.. code-block:: python
+
     lines = plot(mar,[3, 500, 800])
     fig = lines[0].figure()
     all_ax = fig.axes()    # fig.axes() returns in principle a list
     ax = all_ax[0]         #  but we only use one axes
-
     ax.set_ylabel('Counts')
     ax.set_xlabel('ToF')
     ax.set_ylim(0, 8)
@@ -305,12 +361,16 @@ pyplot.
 
 This is a limited list of functions that should be sufficient for
 basic plots. These functions are presently provided as an example of
-this type of interface, and some of them provide functionality
-similar or equivalent to several of the keyword arguments for plot
-commands detailed in this documentation. Some others produce results
-equivalent to the more object oriented methods described above. For
-example, the function xlabel is equivalent to the method set_xlabel
-applied on the Axes object for the current figure.
+this type of interface, and some of them provide functionality similar
+or equivalent to several of the keyword arguments for plot commands
+detailed in this documentation. Some others produce results equivalent
+to the more object oriented methods described above. For example, the
+function xlabel is equivalent to the method set_xlabel applied on the
+Axes object for the current figure.
+
+Below is the reference documentation of the classes and functions
+included in this module.
+
 """
 # Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 #
