@@ -62,7 +62,7 @@ std::string welcomeMessage()
 {
     return "Welcome to Mantid " + std::string(Mantid::Kernel::MantidVersion::version()) +
            "\nPlease cite: " +  Mantid::Kernel::MantidVersion::paperCitation() +
-           " or this release: " + Mantid::Kernel::MantidVersion::doi();
+           " and this release: " + Mantid::Kernel::MantidVersion::doi();
 }
 
 namespace Kernel
