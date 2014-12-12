@@ -1,37 +1,3 @@
-""" Class defines the interface for Direct inelastic reduction with properties 
-    present in Instrument_Properties.xml file
-
-    The class is written to provide the following functionality. 
-
-    1) Properties are initiated from Instrument_Properties.xml file as defaults. 
-    2) Attempt to access property, not present in this file throws. 
-    3) Attempt to create property not present in this file throws. 
-    4) A standard behavior is defined for the most of the properties (get/set appropriate value) when there is number of 
-       overloaded properties, which support more complex behavior using specially written attribute-classes. 
-    5) Changes to the properties are recorded and list of changed properties is available on request
-
-
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-"""
-
 from mantid.simpleapi import *
 from mantid import api
 from mantid import geometry
@@ -205,8 +171,6 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
                 raise KeyError("monovan_integr_range has to be list of two values, "\
                     "defining min/max values of integration range or None to use relative to incident energy limits")
             prop_helpers.ComplexProperty.__set__(self,tDict,value)
-
- 
 #end MonovanIntegrationRange
 
 
@@ -375,20 +339,53 @@ class BackbgroundTestRange(object):
 #-----------------------------------------------------------------------------------------
 
 class DirectPropertyManager(DirectReductionProperties):
-    """Class provides interface to all reduction properties, present in IDF
+    """ Class defines the interface for Direct inelastic reduction with properties 
+        present in Instrument_Properties.xml file
 
-       These properties are responsible for fine turning up of the reduction
+        These properties are responsible for fine turning up of the reduction
 
-       Supported properties in IDF can be simple (prop[name]=value e.g. 
-       prop['vanadium_mass']=30.5 
+        Supported properties in IDF can be simple (prop[name]=value e.g. 
+        prop['vanadium_mass']=30.5 
        
-       or complex 
-       where prop[name_complex_prop] value is equal [prop[name_1],prop[name_2]]
-       e.g. time interval used in normalization on monitor 1:
-       prop[norm_mon_integration_range] = [prop['norm-mon1-min'],prop['norm-mon1-max']]
-       prop['norm-mon1-min']=1000,prop['norm-mon1-max']=2000
+        or complex 
+        where prop[name_complex_prop] value is equal [prop[name_1],prop[name_2]]
+        e.g. time interval used in normalization on monitor 1:
+        prop[norm_mon_integration_range] = [prop['norm-mon1-min'],prop['norm-mon1-max']]
+        prop['norm-mon1-min']=1000,prop['norm-mon1-max']=2000
 
-       properties which values described by more complex function have to have Descriptors. 
+        There are properties which provide even more complex functionality. These properties have their own Descriptors. 
+
+    
+        The class is written to provide the following functionality. 
+
+        1) Properties are initiated from Instrument_Properties.xml file as defaults. 
+        2) Attempt to access property, not present in this file throws. 
+        3) Attempt to create property not present in this file throws. 
+        4) A standard behavior is defined for the most of the properties (get/set appropriate value) when there is number of 
+           overloaded properties, which support more complex behavior using specially written attribute-classes. 
+        5) Changes to the properties are recorded and list of changed properties is available on request
+
+
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://github.com/mantidproject/mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+
     """
 
     _class_wrapper ='_DirectPropertyManager__';

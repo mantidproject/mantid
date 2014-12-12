@@ -101,9 +101,12 @@ class SaveFileName(object):
                 sr = instance.sample_run
             except:
                 sr = 0
-            name +='{0:0<5}Ei{1:<4.2f}meV'.format(sr,instance.incident_energy)
-            if instance.monovan_run:
-                name +='_Abs'
+            try:
+                name +='{0:0<5}Ei{1:<4.2f}meV'.format(sr,instance.incident_energy)
+                if instance.monovan_run:
+                    name +='_Abs'
+            except:
+                name = None
         return name
 
     def __set__(self,instance,value):
