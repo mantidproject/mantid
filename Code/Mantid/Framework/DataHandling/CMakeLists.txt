@@ -140,6 +140,7 @@ set ( SRC_FILES
 	src/SaveReflThreeColumnAscii.cpp
 	src/SaveSPE.cpp
 	src/SaveToSNSHistogramNexus.cpp
+      src/SaveTomoConfig.cpp
 	src/SaveVTK.cpp
 	src/SetSampleMaterial.cpp
 	src/SetScalingPSD.cpp
@@ -284,6 +285,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
+      inc/MantidDataHandling/SaveTomoConfig.h
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetSampleMaterial.h
 	inc/MantidDataHandling/SetScalingPSD.h
