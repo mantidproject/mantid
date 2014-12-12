@@ -648,7 +648,8 @@ class DirectEnergyConversion(object):
 
             else: # if Reducer.mono_correction_factor != None :
                 pass
-        # Very important statement propagating masks for further usage in convert_to_energy
+        # Very important statement propagating masks for further usage in convert_to_energy. 
+        # This property is also directly accessible from GUI.
         self.spectra_masks=masking
          # save mask if it does not exist and has been already loaded
          #if Reducer.save_and_reuse_masks and not masks_done:
@@ -942,14 +943,14 @@ class DirectEnergyConversion(object):
         else:
             motor_offset = float(offset)
 
-        #self.motor=0
-        if not (motor is None):
+        if motor:
         # Check if motor name exists
             if sample_wkspace.getRun().hasProperty(motor):
                 motor_rotation=sample_wkspace.getRun()[motor].value[0]
                 self.prop_man.log("Motor {0} rotation is {1}".format(motor,motor_rotation))
             else:
                 self.prop_man.log("Could not find such sample environment log. Will use psi=motor_offset")
+                motor_rotation=0
         else:
            motor_rotation = float('nan')
         self.prop_man.psi = motor_rotation+motor_offset

@@ -23,7 +23,7 @@ const QString deltaECalc::tempWS = "mono_sample_temporyWS";
 */
 deltaECalc::deltaECalc(QWidget * const interface, const Ui::DirectConvertToEnergy &userSettings, 
                        const bool removalBg, const double TOFWinSt, const double TOFWinEnd) :
-  pythonCalc(interface), m_sets(userSettings), m_bgRemove(removalBg), m_TOFWinSt(TOFWinSt), m_TOFWinEnd(TOFWinEnd), m_diagnosedWS("")
+pythonCalc(interface), m_sets(userSettings), m_bgRemove(removalBg), m_TOFWinSt(TOFWinSt), m_TOFWinEnd(TOFWinEnd), m_diagnosedWS("")
 {
 }
 
@@ -35,8 +35,8 @@ deltaECalc::deltaECalc(QWidget * const interface, const Ui::DirectConvertToEnerg
 * @param saveName :: filename for output saving
 */
 void deltaECalc::createProcessingScript(const QStringList &runFiles, const QString &whiteBeam,
-          const QStringList &absRunFiles, const QString &absWhiteBeam,
-          const QString & saveName)
+                                        const QStringList &absRunFiles, const QString &absWhiteBeam,
+                                        const QString & saveName)
 { 
   QString pyCode = "import DirectEnergyConversion as direct\n";
   pyCode += QString("mono_sample = direct.DirectEnergyConversion('%1')\n").arg(m_sets.cbInst->currentText());
@@ -61,9 +61,9 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
   }
 
   if (fileExts.size()==0)
-     pyCode += "mono_sample.prop_man.save_format = None\n";
+    pyCode += "mono_sample.prop_man.save_format = None\n";
   else
-     pyCode += "mono_sample.prop_man.save_format = " + fileExts.join(",") + "\n\n";
+    pyCode += "mono_sample.prop_man.save_format = " + fileExts.join(",") + "\n\n";
 
   // Create the python variables. The strings are wrapped with r'' for slash safety
   QString pyRunFiles = createPyListAsString(runFiles);
@@ -85,21 +85,22 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
   auto map_file = None;
   pyCode += "mono_sample.prop_man.motor_name = " + pyMotorName + "\n";
   pyCode += "mono_sample.prop_man.motor_offset = " + pySeOffset + "\n";
-  
+
 
   if( m_sets.ckSumSpecs->isChecked() || runFiles.size() == 1)
   {
-    pyCode += "mono_sample.prop_man.sum_runs = True\n";
+    if  (m_sets.ckSumSpecs->isChecked() )
+      pyCode += "mono_sample.prop_man.sum_runs = True\n";
 
     QString pySaveName;
     if( saveName.isEmpty() )
     {
-       pyCode += "mono_sample.prop_man.save_file_name = None\n";
+      pyCode += "mono_sample.prop_man.save_file_name = None\n";
 
     }
     else
     {
-       pyCode += "mono_sample.prop_man.save_file_name = r'"+saveName + "'\n";
+      pyCode += "mono_sample.prop_man.save_file_name = r'"+saveName + "'\n";
     }
     pyCode += QString("mono_sample.convert_to_energy(%1, %2, %3, %4, %5, %6, %7)");
     pyCode = pyCode.arg(pyWhiteBeam,pyRunFiles, eiGuess,rebin,map_file,pyAbsRunFiles, pyAbsWhiteBeam);
@@ -127,19 +128,19 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
         "for run, abs in zip(rfiles, abs_rfiles):\n"
         "  mono_sample.convert_to_energy(%1, run, %2, %3,abs, %6)\n";
       pyCode = pyCode.arg(pyWhiteBeam,eiGuess,rebin,map_file,pyAbsRunFiles, pyAbsWhiteBeam);
-//                         pyWhiteBeam,pyRunFiles, eiGuess,rebin,map_file,pyAbsRunFiles, pyAbsWhiteBeam
+      //                         pyWhiteBeam,pyRunFiles, eiGuess,rebin,map_file,pyAbsRunFiles, pyAbsWhiteBeam
     }
   }
   m_pyScript = pyCode;
 }
 
 /**
- * Add the analysis options from the form to the script
- * @param pyCode :: The string containing the script to update
- */
-  void deltaECalc::addAnalysisOptions(QString & pyCode)
+* Add the analysis options from the form to the script
+* @param pyCode :: The string containing the script to update
+*/
+void deltaECalc::addAnalysisOptions(QString & pyCode)
 {
-    //Analysis options
+  //Analysis options
   QString inputValue = m_sets.cbNormal->currentText();  ;
   pyCode += QString("mono_sample.prop_man.normalise_method = '%1'\n").arg(inputValue);
 
@@ -175,7 +176,7 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
     QString absMapFile = m_sets.absMapFile->getFirstFilename();
     if ( !absMapFile.isEmpty() )
     {
-        pyCode += QString("mono_sample.prop_man.monovan_mapfile = r'%1'\n").arg(absMapFile);
+      pyCode += QString("mono_sample.prop_man.monovan_mapfile = r'%1'\n").arg(absMapFile);
     }
     // Set the mono vanadium integration range
     pyCode += QString("mono_sample.prop_man.monovan_integr_range=[float(%1),float(%2)]\n");
@@ -191,20 +192,27 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
 
 void deltaECalc::addMaskingCommands(QString & analysisScript)
 {
+  if (!m_sets.ckRunAbsol->isChecked())
+  {
+    analysisScript += "mono_sample.prop_man.run_diagnostics = False\n";
+  }
+
   if( m_diagnosedWS.isEmpty() )
   {
     return;
   }
-  
+  // provide pre-calculated masks
   analysisScript += "mono_sample.spectra_masks = '" + m_diagnosedWS + "'\n";
+  // disable internal convert_to_energy diagnostics. We already have diagnostics workspace
+  analysisScript += "mono_sample.prop_man.run_diagnostics = False\n";
 
-//   QString tmpWS = QString("tmp_") + m_diagnosedWS;
+  //   QString tmpWS = QString("tmp_") + m_diagnosedWS;
 
-//   analysisScript += "fdol_alg = FindDetectorsOutsideLimits(InputWorkspace='%1',OutputWorkspace='%2',HighThreshold=10,LowThreshold=-1,OutputFile='')\n";
-//   analysisScript += "mono_sample.spectra_masks = fdol_alg.getPropertyValue('BadSpectraNums')\n";
-//   analysisScript += "mtd.deleteWorkspace('%2')\n";
+  //   analysisScript += "fdol_alg = FindDetectorsOutsideLimits(InputWorkspace='%1',OutputWorkspace='%2',HighThreshold=10,LowThreshold=-1,OutputFile='')\n";
+  //   analysisScript += "mono_sample.spectra_masks = fdol_alg.getPropertyValue('BadSpectraNums')\n";
+  //   analysisScript += "mtd.deleteWorkspace('%2')\n";
 
-//   analysisScript = analysisScript.arg(m_diagnosedWS).arg(tmpWS);
+  //   analysisScript = analysisScript.arg(m_diagnosedWS).arg(tmpWS);
 }
 
 QString deltaECalc::createPyListAsString(const QStringList & names) const
@@ -240,7 +248,7 @@ std::string deltaECalc::insertNumber(const std::string &filename, const int numb
   if ( f.depth() > 0 )
   {// get the directory name, the full path of the file minus its name and add it back to the result so that we don't lose the path
     return f.directory(f.depth()-1)+"/"+f.getBaseName()+"_"+
-    boost::lexical_cast<std::string>(number)+"."+f.getExtension();
+      boost::lexical_cast<std::string>(number)+"."+f.getExtension();
   }
   return f.getBaseName()+"_"+boost::lexical_cast<std::string>(number)+
     "."+f.getExtension();
