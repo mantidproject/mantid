@@ -346,7 +346,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman = self.prop_man
 
         params = propman.get_diagnostics_parameters();
-        self.assertEqual(len(params),19);
+        self.assertEqual(len(params),20);
         
         bkg_test_range0 = propman.background_test_range;
         bkg_test_range  = params['background_test_range'];
