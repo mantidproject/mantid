@@ -10,6 +10,11 @@
 <parameter name="det_cal_file" type="string">
    <value val="det_LET_cycle12-3.dat"/>
 </parameter>
+<!-- Specify that the detector positions should be taken from the data file (Not used TODO!) -->
+<parameter name="det-pos-source" type="string">
+  <value val="datafile"/>
+</parameter>
+
 <!-- The file which defines detectors to spectra mapping; File extension has to be specified here but filepath not
      if None - one2one map is used  -->
 <parameter name="map_file" type="string">
@@ -92,7 +97,7 @@
  
 <!--if you use some detectors as monitors and work in event mode, one needs to specify the comma separated list of these detectors here 
     to copy detectors spectra to monitors spectra collected in histogram mode. If no such monitors are used "None" 
-    (with brackets) has to be specified as the value
+    (with quotes) has to be specified as the value
 -->
 <parameter name="spectra_to_monitors_list"  type="string">
   <value val="5506"/>

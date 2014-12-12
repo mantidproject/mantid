@@ -195,12 +195,7 @@ class DirectReductionProperties(object):
         """ Second white beam currently unused in the  workflow """
         pass
         #return self._second_white;
-    #TODO:
-    #-----------------------------------------------------------------------------------
-    @property 
-    def apply_detector_eff(self):
-        return True;
-    #-----------------------------------------------------------------------------------
+     #-----------------------------------------------------------------------------------
     @property 
     def psi(self):
         """ rotation angle (not available from IDF)"""
@@ -297,24 +292,8 @@ class DirectReductionProperties(object):
     @mask_run.setter
     def mask_run(self,value):
        object.__setattr__(self,'_mask_run',value)
-    #-----------------------------------------------------------------------------------
-    @property 
-    def apply_kikf_correction(self):
-        """ Parameter specifies if ki/kf correction should be applied to the reduction result"""
-        if not hasattr(self,'_apply_kikf_correction'):
-            return True;
-        else:
-            return self._apply_kikf_correction;
 
-    @apply_kikf_correction.setter 
-    def apply_kikf_correction(self,value):
-        """ Set up option if ki/kf correction should be applied to the reduction result (default -- true) """
-        if isinstance(value,str):
-            val = value.lower() in ['true','t','yes','y','1']
-        else:
-            val = bool(value)
-        object.__setattr__(self,'_apply_kikf_correction',val);
-
+ 
     # -----------------------------------------------------------------------------
     # Service properties (used by class itself)
     #
@@ -331,7 +310,15 @@ class DirectReductionProperties(object):
             if isinstance(Instrument,geometry._geometry.Instrument):
                 instrument = Instrument;
                 instr_name = instrument.getFullName()
-                new_name,full_name,facility_ = prop_helpers.check_instrument_name(None,instr_name);
+                try: 
+                    new_name,full_name,facility_ = prop_helpers.check_instrument_name(None,instr_name);
+                except KeyError: # the instrument pointer is not found in any facility but we have it after all
+                    new_name=instr_name
+                    full_name=instr_name
+                    facility_= 'TEST'
+                #end
+
+
             elif isinstance(Instrument,str): # instrument name defined
                 new_name,full_name,facility_ = prop_helpers.check_instrument_name(None,Instrument);
                 idf_dir = config.getString('instrumentDefinition.directory')

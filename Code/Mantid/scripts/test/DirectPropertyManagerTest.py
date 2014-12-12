@@ -409,6 +409,191 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         #TODO: this one is not completed
 
+    def test_set_defailts_from_instrument(self) :
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=100)
+
+        SetInstrumentParameter(ws,ParameterName="TestParam1",Value="3.5",ParameterType="Number")
+        SetInstrumentParameter(ws,ParameterName="TestParam2",Value="initial1",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="TestParam3",Value="initial2",ParameterType="String")
+
+        instr = ws.getInstrument()
+        propman = DirectPropertyManager(instr);
+
+        self.assertAlmostEqual(propman.TestParam1,3.5);
+        self.assertEquals(propman.TestParam2,"initial1");
+        self.assertEquals(propman.TestParam3,"initial2");
+        
+        propman.TestParam2="gui_changed1"
+        self.assertEquals(propman.TestParam2,"gui_changed1");
+
+        SetInstrumentParameter(ws,ParameterName="TestParam2",Value="instr_changed1",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="TestParam3",Value="instr_changed2",ParameterType="String")
+
+        self.assertAlmostEqual(propman.TestParam1,3.5);
+        self.assertEquals(propman.TestParam2,"gui_changed1");
+        self.assertEquals(propman.TestParam3,"initial2");
+        changes = propman.getChangedProperties();
+        self.assertTrue('TestParam2' in changes);
+        self.assertTrue(not('TestParam3' in changes));
+
+  
+
+        changes = propman.update_defaults_from_instrument(ws.getInstrument());
+
+        self.assertAlmostEqual(propman.TestParam1,3.5);
+        self.assertEquals(propman.TestParam2,"gui_changed1");
+        self.assertEquals(propman.TestParam3,"instr_changed2");
+
+        self.assertTrue('TestParam2' in changes);
+        self.assertTrue('TestParam3' in changes);
+
+    def test_set_complex_defailts_from_instrument(self) :
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
+
+        SetInstrumentParameter(ws,ParameterName="Param1",Value="BaseParam1:BaseParam2",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="BaseParam1",Value="Val1",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="BaseParam2",Value="Val2",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="synonims",Value="ParaPara=BaseParam2",ParameterType="String")
+
+        instr = ws.getInstrument()
+        propman = DirectPropertyManager(instr);
+
+        SampleResult = ['Val1','Val2']
+        cVal = propman.Param1;
+        for test,sample in zip(cVal,SampleResult):
+            self.assertEqual(test,sample)
+
+        self.assertEqual(propman.ParaPara,'Val2')
+        self.assertEqual(propman.BaseParam2,'Val2')
+
+        SetInstrumentParameter(ws,ParameterName="Param1",Value="addParam1:addParam2",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="BaseParam1",Value="OtherVal1",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="BaseParam2",Value="OtherVal2",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="addParam1",Value="Ignore1",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="addParam2",Value="Ignore2",ParameterType="String")
+
+
+        changed_prop = propman.update_defaults_from_instrument(ws.getInstrument());
+
+        #property have been changed from GUI and changes from instrument are ignored
+        SampleResult = ['OtherVal1','OtherVal2']
+        cVal = propman.Param1;
+        for test,sample in zip(cVal,SampleResult):
+            self.assertEqual(test,sample)
+
+        self.assertEqual(propman.ParaPara,'OtherVal2')
+        self.assertEqual(propman.BaseParam2,'OtherVal2')
+        
+        self.assertEquals(propman.BaseParam1,"OtherVal1")
+       
+
+    def test_set_all_defaults_from_instrument(self) :
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
+        #idf_dir = config.getString('instrumentDefinition.directory')
+        idf_file=api.ExperimentInfo.getInstrumentFilename('LET','2014-05-03 23:59:59')
+        ws = LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=ws)
+
+        # Propman was defined for MARI but reduction parameters are all the same, so testing on LET
+        propman = self.prop_man
+        self.assertEqual(propman.ei_mon1_spec,2)
+
+        ws = mtd['ws'];
+        changed_prop=propman.update_defaults_from_instrument( ws.getInstrument(),False)
+        self.assertFalse('ei-mon1-spec' in changed_prop)
+        self.assertEqual(propman.ei_mon1_spec,65542)
+
+        self.assertTrue('ei_mon_spectra' in changed_prop)
+        ei_spec = propman.ei_mon_spectra
+        self.assertEqual(ei_spec[0],65542)
+        self.assertEqual(ei_spec[1],5506)
+
+    def test_ignore_complex_defailts_changes_fom_instrument(self) :
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
+
+        SetInstrumentParameter(ws,ParameterName="bkgd_range",Value="bkgd-range-min:bkgd-range-max",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="bkgd-range-min",Value="100.",ParameterType="Number")
+        SetInstrumentParameter(ws,ParameterName="bkgd-range-max",Value="200.",ParameterType="Number")
+
+        propman = self.prop_man
+
+        propman.background_range=[20,40]
+        bkgd_range = propman.bkgd_range
+        self.assertAlmostEqual(bkgd_range[0],20)
+        self.assertAlmostEqual(bkgd_range[1],40)
+
+        changed_prop=propman.update_defaults_from_instrument( ws.getInstrument())
+
+        self.assertEqual(len(changed_prop),1)
+        bkgd_range = propman.bkgd_range
+        self.assertAlmostEqual(bkgd_range[0],20)
+        self.assertAlmostEqual(bkgd_range[1],40)
+
+    def test_ignore_complex_defailts_single_fom_instrument(self) :
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
+
+        SetInstrumentParameter(ws,ParameterName="bkgd_range",Value="bkgd-range-min:bkgd-range-max",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="bkgd-range-min",Value="100.",ParameterType="Number")
+        SetInstrumentParameter(ws,ParameterName="bkgd-range-max",Value="200.",ParameterType="Number")
+
+        propman = self.prop_man
+        mari_bkgd_range = propman.bkgd_range
+
+        setattr(propman,'bkgd-range-max',40)
+        bkgd_range = propman.bkgd_range
+        self.assertAlmostEqual(bkgd_range[0],mari_bkgd_range[0])
+        self.assertAlmostEqual(bkgd_range[1],40)
+
+        changed_prop=propman.update_defaults_from_instrument( ws.getInstrument())
+
+        self.assertEqual(len(changed_prop),1)
+        bkgd_range = propman.bkgd_range
+        self.assertAlmostEqual(bkgd_range[0],mari_bkgd_range[0])
+        self.assertAlmostEqual(bkgd_range[1],40)
+
+    def test_monovan_integration_range(self):
+       propman = self.prop_man
+
+       propman.incident_energy = 10
+       propman.monovan_lo_frac = -0.6
+       propman.monovan_hi_frac =  0.7
+
+       range = propman.abs_units_van_range
+       self.assertAlmostEqual(range[0],-6.)
+       self.assertAlmostEqual(range[1], 7.)
+
+       range = propman.monovan_integr_range
+       self.assertAlmostEqual(range[0],-6.)
+       self.assertAlmostEqual(range[1], 7.)
+
+       propman.monovan_lo_value = -10;
+       propman.monovan_hi_value = 10;
+
+       range = propman.abs_units_van_range
+       self.assertAlmostEqual(range[0],-6.)
+       self.assertAlmostEqual(range[1], 7.)
+
+       propman.abs_units_van_range=[-40,40]
+       self.assertAlmostEqual(propman.monovan_lo_value,-40)
+       self.assertAlmostEqual(propman.monovan_hi_value,40)
+
+       range = propman.monovan_integr_range
+       self.assertAlmostEqual(range[0],-40)
+       self.assertAlmostEqual(range[1], 40)
+
+       propman.abs_units_van_range=None
+
+       range = propman.monovan_integr_range
+       self.assertAlmostEqual(range[0],-6.)
+       self.assertAlmostEqual(range[1], 7.)
+       #
+       propman.monovan_lo_frac = -0.7
+       range = propman.monovan_integr_range
+       self.assertAlmostEqual(range[0],-7.)
+
+
+
+
+
 
 
  #def test_default_warnings(self):

@@ -79,6 +79,14 @@
   <value val="norm-mon1-min:norm-mon1-max"/>
 </parameter>
 
+<!-- Usually one wants to avoid loading monitors together with data except in special cases. One of this cases is 
+     MARI which monitors numbers are in the beginning of the spectra. If one loads them separately, 
+     spectra numbers change and ISIS hard masks (msk) prepared for workspace with monitors become invalid. 
+     This parameter is actual until Mantid Masking change
+  -->
+<parameter name="load_monitors_with_workspace"  type="bool">
+<value val="False"/>
+</parameter>
 
 <!-- First spectra number (monitor number) to use when measuring incident energy
     Should be spectra with well defined energy peak -->
@@ -96,21 +104,20 @@
   
 <!--if you use some detectors as monitors and work in event mode, one needs to specify the comma separated list of these detectors here 
     to copy detectors spectra to monitors spectra collected in histogram mode. If no such monitors are used "None" 
-    (with brackets) has to be specified as the value
+    (with brackets) has to be specified as the value. This is also necessary in Histogram mode if you want to use detectors as monitors and 
+    load_monitors_with_workspace is set to False (or monitors are measured with different time channels)
 -->
 <parameter name="spectra_to_monitors_list"  type="string">
     <value val="None"/>
-</parameter>
+  </parameter>
 
-<!-- Usually one wants to avoid loading monitors together with data except in special cases. One of this cases is 
-     MARI which monitors numbers are in the beginning of the spectra. If one loads them separately, 
-     spectra numbers change and ISIS hard masks (msk) prepared for workspace with monitors become invalid. 
-     This parameter is actual until Mantid Masking change     
-  -->
-<parameter name="load_monitors_with_workspace"  type="bool">
-<value val="False"/>
+<!-- by default getEi looks for peaks within (1+-0.1)*TOF_GUES range where TOF_GUES is evaluated on the basis of ei guess.
+    If the peaks are very narrow, or there are a lot of them very close to each other, 
+    this value can be reduced. For example, such situation happens on MARI for very high incident energies Ei=1800.
+ -->
+<parameter name="ei_mon_peak_search_range">
+   <value val="0.1"/>
 </parameter>
-
 
 
 <parameter name="scale-factor">
@@ -324,6 +331,7 @@
 <!--  ****************************************  Workflow control **************************** -->
 
 <!-- This parameter controls the format of output data written by reducer. 
+    Three values are currently supported, namely .spe, .nxspe, and nexus (mantid workspace) (.nxs)
      Three possible values for this are defined inin DirectEnergyConversion init routine as recognized by save method 
      If None is there, no internal script saving occurs and one needs to use external save operations -->  
 <parameter name="save_format" type="string">
@@ -375,7 +383,7 @@
        sum_runs=sum;
        wb_integr_range=detector_van_range;
        van_mass=vanadium-mass;
-       check_background = background;       
+       check_background = background;
        mon1_norm_spec=norm-mon1-spec;
        mon2_norm_spec=norm-mon2-spec;       
        scale_factor=scale-factor;
@@ -402,7 +410,9 @@
        bleed_test = bleed = diag_bleed_test;
        bleed_maxrate = diag_bleed_maxrate;
        bleed_pixels  = diag_bleed_pixels;
-       ei-mon2-spec = test_ei2_mon_spectra;
+       deltaE_mode =  deltaE-mode;
+       ei-mon1-spec=ei_mon1_spec;       
+       ei-mon2-spec = test_ei2_mon_spectra=ei_mon2_spec;
        ei_mon_spectra=test_mon_spectra_composite"
     />
 </parameter>

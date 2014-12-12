@@ -5,6 +5,11 @@
 
 <!-- files properties : -->
 
+<!-- Specify that the detector positions should be taken from the data file (Not used TODO!) -->
+<parameter name="det-pos-source" type="string">
+  <value val="datafile"/>
+</parameter>
+
 <!-- The file which defines proper (calibrated) detector positions 
      if None - it is undefined -->
 <parameter name="det_cal_file" type="string">

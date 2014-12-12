@@ -10,6 +10,11 @@
 <parameter name="det_cal_file" type="string">
    <value val="det_LET_cycle12-3.dat"/>
 </parameter>
+<!-- Specify that the detector positions should be taken from the data file (Not used TODO!) -->
+<parameter name="det-pos-source" type="string">
+  <value val="datafile"/>
+</parameter>
+
 <!-- The file which defines detectors to spectra mapping; File extension has to be specified here but filepath not
      if None - one2one map is used  -->
 <parameter name="map_file" type="string">
