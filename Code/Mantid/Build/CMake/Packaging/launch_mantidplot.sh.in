@@ -9,7 +9,10 @@ SCRIPTFILE=$(readlink -f "$0")
 INSTALLDIR=$(echo $SCRIPTFILE | sed -r -e 's|^(.*)/(.*)$|\1|g') #.* is greedy and eats up until the final slash
 
 # Define extra libraries and load paths
-LOCAL_PRELOAD=@EXTRA_LDPRELOAD_LIBS@:${LD_PRELOAD}
+LOCAL_PRELOAD=$(readlink -f @EXTRA_LDPRELOAD_LIBS@)
+if [ -n "${LD_PRELOAD}" ]; then
+    LOCAL_PRELOAD=${LOCAL_PRELOAD}:${LD_PRELOAD}
+fi
 LOCAL_LDPATH=@EXTRA_LDPATH@:${LD_LIBRARY_PATH}
 if [ -z "${TCMALLOC_RELEASE_RATE}" ]; then
     TCM_RELEASE=10000
