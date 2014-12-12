@@ -258,13 +258,16 @@ class SaveFormat(object):
                 if not(value  in SaveFormat.save_formats):
                     instance.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur for this format")
                     return
-        elif isinstance(value,list) or isinstance(value,set):
-            # set single default save format recursively
-             for val in value:
+        else: 
+            try:
+                 # set single default save format recursively
+                 for val in value:
                     self.__set__(instance,val);
-             return;
-        else:
-            raise KeyError(' Attempting to set unknown saving format type. Allowed values can be spe, nxspe or nxs');
+                 return;
+            except:    
+               raise KeyError(' Attempting to set unknown saving format {0} of type {1}. Allowed values can be spe, nxspe or nxs'\
+                   .format(value,type(value)));
+        #end if different types
         if instance.__dict__['save_format'] is None:
             ts = set();
             ts.add(value)

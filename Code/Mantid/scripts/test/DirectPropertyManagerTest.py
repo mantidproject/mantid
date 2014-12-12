@@ -271,12 +271,21 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue(len(propman.save_format)==0)
         propman.save_format = 'spe,.nxs'
         formats = propman.save_format;
-        self.assertTrue(len(formats)==2)
+        self.assertEqual(len(propman.save_format),2)
         self.assertTrue('nxs' in formats)
         self.assertTrue('spe' in formats)
 
 
-        propman.save_format = '(.spe,nxspe)'
+        propman.save_format = '(spe,nxspe)'
+        self.assertEqual(len(propman.save_format),3)
+
+        propman.save_format = 'None'
+        self.assertTrue(len(propman.save_format)==0)
+
+        propman.save_format = ('spe','nxspe')
+        self.assertEqual(len(propman.save_format),2)
+        self.assertTrue('nxspe' in formats)
+        self.assertTrue('spe' in formats)
 
 
 
@@ -316,6 +325,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         propman.psi = 10
         self.assertEqual(propman.psi,10)
+
     def test_diag_spectra(self):
         propman = self.prop_man
 
