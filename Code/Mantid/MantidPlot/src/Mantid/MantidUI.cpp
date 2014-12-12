@@ -1072,7 +1072,8 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
   {
     indices[i] = m->workspaceIndex(i);
   }
-  return createDetectorTable(m->workspaceName(), indices);
+  Table* t = createDetectorTable(m->workspaceName(), indices);
+  return t;
 }
 
 /**
@@ -1277,6 +1278,9 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
       }
     }
   }
+
+  // want all the detector tables as read-only
+  t->setReadOnlyAllColumns(true);
   t->showNormal();
 
   return t;
@@ -1297,7 +1301,10 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
   bool transpose = false;
   QString tableName = wsName + "-Detectors";
   Table* t = new MantidTable(appWindow()->scriptingEnv(), idtable, tableName, appWindow(), transpose);
-  if(!t) return NULL;
+  if(!t)
+    return NULL;
+  // want all the detector tables as read-only
+  t->setReadOnlyAllColumns(true);
   t->showNormal();
   return t;
 }

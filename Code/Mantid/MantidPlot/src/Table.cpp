@@ -3058,6 +3058,14 @@ void Table::setReadOnlyColumn(int col, bool on)
   d_table->setColumnReadOnly(col, on);
 }
 
+void Table::setReadOnlyAllColumns(bool on)
+{
+  for (int i = 0; i< this->numCols(); ++i)
+  {
+    d_table->setColumnReadOnly(i, on);
+  }
+}
+
 void Table::moveColumn(int, int fromIndex, int toIndex)
 {
   int to = toIndex;
@@ -3389,4 +3397,3 @@ void MyTable::resizeData(int n)
     Q3Table::resizeData(n);
   }
 }
-
