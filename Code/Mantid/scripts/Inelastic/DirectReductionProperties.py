@@ -235,11 +235,11 @@ class DirectReductionProperties(object):
     #-----------------------------------------------------------------------------------
     #TODO: do something about it
     @property
-    def print_results(self):
+    def print_diag_results(self):
         """ property-sink used in diagnostics """
         return True;
-    @print_results.setter
-    def print_results(self,value):
+    @print_diag_results.setter
+    def print_diag_results(self,value):
         pass
     #-----------------------------------------------------------------------------------
     @property

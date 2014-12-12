@@ -73,7 +73,7 @@ Whitebeam run number or file name or workspace
       bleed_maxrate   - If the bleed test is on then this is the maximum framerate allowed in a tube
       bleed_pixels    - If the bleed test is on then this is the number of pixels ignored within the
                        bleed test diagnostic
-      print_results - If True then the results are printed to the screen
+      print_diag_results - If True then the results are printed to the screen
 
       diag_remove_ero =True, False (default):Diag zero counts in background range
       bleed=True , turn bleed correction on and off on by default for Merlin and LET
@@ -166,7 +166,6 @@ class DirectEnergyConversion(object):
               bleed_maxrate - If the bleed test is on then this is the maximum framerate allowed in a tube
               bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
                              bleed test diagnostic
-              print_results - If True then the results are printed to the screen
         """
         lhs_names = funcreturns.lhs_info('names')
         if len(lhs_names) > 0:
@@ -625,9 +624,9 @@ class DirectEnergyConversion(object):
 # --------------------------------------------------------------------------------------------------------
      # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
       if not masks_done:
-        prop_man.log("######## Run diagnose for sample run ###########################",'notice');
+        prop_man.log("======== Run diagnose for sample run ===========================",'notice');
         masking = self.diagnose(prop_man.wb_run,prop_man.mask_run,
-                                second_white=None,print_results=True)
+                                second_white=None,print_diag_results=True)
         header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
 
 
@@ -638,10 +637,10 @@ class DirectEnergyConversion(object):
                     prop_man.log('  Applying sample run mask to mono van')
                 else:
                     if not prop_man.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better solution for that.
-                        prop_man.log("######## Run diagnose for monochromatic vanadium run ###########",'notice');
+                        prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice');
 
                         masking2 = self.diagnose(prop_man.wb_for_monovan_run,prop_man.monovan_run,
-                                         second_white = None,print_results=True)
+                                         second_white = None,print_diag_results=True)
                         masking +=  masking2
                         DeleteWorkspace(masking2)
 

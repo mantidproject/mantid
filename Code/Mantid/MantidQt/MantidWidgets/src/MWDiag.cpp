@@ -445,7 +445,7 @@ QString MWDiag::createDiagnosticScript() const
   }
 
   // Print results argument and Closing  argument bracket
-  diagCall += ", print_results=True)\n";
+  diagCall += ", print_diag_results=True)\n";
 
   return diagCall;
 }
