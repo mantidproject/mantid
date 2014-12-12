@@ -148,15 +148,14 @@ DECLARE_ALGORITHM(ProcessBackground)
                         new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
     // Optional output workspace
-    declareProperty(new WorkspaceProperty<Workspace2D>("UserBackgroundWorkspace", "", Direction::Output,
-                                                       PropertyMode::Optional),
+    declareProperty(new WorkspaceProperty<Workspace2D>("UserBackgroundWorkspace", "_dummy01", Direction::Output),
                     "Output workspace containing fitted background from points specified by users.");
     setPropertySettings("UserBackgroundWorkspace",
                         new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
     // Optional output workspace
-    declareProperty(new WorkspaceProperty<TableWorkspace>("OutputBackgroundParameterWorkspace", "", Direction::Output,
-                                                          PropertyMode::Optional),
+    declareProperty(new WorkspaceProperty<TableWorkspace>("OutputBackgroundParameterWorkspace", "_dummy02",
+                                                          Direction::Output),
                     "Output parameter table workspace containing the background fitting result. ");
     setPropertySettings("OutputBackgroundParameterWorkspace",
                         new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
@@ -454,13 +453,17 @@ DECLARE_ALGORITHM(ProcessBackground)
       throw runtime_error("N/A is not supported.");
     }
 
-    // Fit the background points
+    // Fit the background points if output backgrond parameter workspace is given explicitly
     string outbkgdparwsname = getPropertyValue("OutputBackgroundParameterWorkspace");
-    if (outbkgdparwsname.size() > 0)
+    if (outbkgdparwsname.size() > 0 && outbkgdparwsname.compare("_dummy02") != 0)
     {
       // Will fit the selected background
       string bkgdfunctype = getPropertyValue("OutputBackgroundType");
       fitBackgroundFunction(bkgdfunctype);
+    }
+    else
+    {
+      setupDummyOutputWSes();
     }
 
     m_outputWS->getAxis(0)->setUnit(m_dataWS->getAxis(0)->unit()->unitID());
