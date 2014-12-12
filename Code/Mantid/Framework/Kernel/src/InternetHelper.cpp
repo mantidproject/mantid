@@ -156,8 +156,10 @@ int InternetHelper::processRelocation(const HTTPResponse &response,
 /** Performs a request using http or https depending on the url
 * @param url the address to the network resource
 * @param responseStream The stream to fill with the reply on success
-* @param headers [optional] : A key value pair map of any additional headers to
-*include in the request.
+* @param headers A optional key value pair map of any additional headers to
+* include in the request.
+* @param method Generally GET (default) or POST.
+* @param body The request body to send.
 **/
 int InternetHelper::sendRequest(const std::string &url,
                                 std::ostream &responseStream,
@@ -187,8 +189,6 @@ int InternetHelper::sendRequest(const std::string &url,
 /** Performs a request using http
 * @param url the address to the network resource
 * @param responseStream The stream to fill with the reply on success
-* @param headers [optional] : A key value pair map of any additional headers to
-*include in the request.
 **/
 int InternetHelper::sendHTTPRequest(const std::string &url,
                                     std::ostream &responseStream) {
@@ -220,8 +220,6 @@ int InternetHelper::sendHTTPRequest(const std::string &url,
 /** Performs a request using https
 * @param url the address to the network resource
 * @param responseStream The stream to fill with the reply on success
-* @param headers [optional] : A key value pair map of any additional headers to
-*include in the request.
 **/
 int InternetHelper::sendHTTPSRequest(const std::string &url,
                                      std::ostream &responseStream) {
