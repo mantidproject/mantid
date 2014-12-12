@@ -86,7 +86,10 @@ class EnergyBins(object):
        object.__setattr__(instance,'_energy_bins',value);
 #end EnergyBins
 class SaveFileName(object):
-    """ Property defines default file name to save result to"""
+    """ Property defines default file name to save result to
+
+        See similar property get_sample_ws_name TODO: (leave only one)
+    """
     def __init__(self,Name=None):
        self._file_name = Name
     def __get__(self,instance,owner=None):
@@ -103,6 +106,8 @@ class SaveFileName(object):
                 sr = 0
             try:
                 name +='{0:0<5}Ei{1:<4.2f}meV'.format(sr,instance.incident_energy)
+                if instance.sum_runs:
+                    name +='sum'
                 if instance.monovan_run:
                     name +='_Abs'
             except:
@@ -199,6 +204,15 @@ class DirectReductionProperties(object):
         self._set_instrument_and_facility(Instrument,run_workspace)
   
     #end
+    def get_sample_ws_name(self):
+        """ build and return sample workspace name 
+
+            See similar property save_file_name TODO: (leave only one)
+        """ 
+        if not self.sum_runs:
+            return common.create_resultname(self.sample_run,self.instr_name);
+        else:
+            return common.create_resultname(self.sample_run,self.instr_name,'-sum');
 
     def getDefaultParameterValue(self,par_name):
         """ method to get default parameter value, specified in IDF """

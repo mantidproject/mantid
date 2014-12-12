@@ -88,10 +88,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.map_file = 'a_map_file'
         self.assertEqual(propman.map_file,'a_map_file.map');
 
-        self.assertTrue(propman.hard_mask_file is None);
-        propman.hard_mask_file = 'a_mask_file'
-        self.assertEqual(propman.hard_mask_file,'a_mask_file.msk');
-
         self.assertFalse(propman.monovan_mapfile is None," Monovan map file by default is defined");
         propman.monovan_mapfile = 'a_monovan_map_file'
         self.assertEqual(propman.monovan_mapfile,'a_monovan_map_file.map');
@@ -100,11 +96,20 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
 
         prop_changed =propman.getChangedProperties()
-        self.assertEqual(len(prop_changed),4)
+        self.assertEqual(len(prop_changed),3)
         self.assertTrue('det_cal_file' in prop_changed)
-        self.assertTrue('hard_mask_file' in prop_changed)
         self.assertTrue('map_file' in prop_changed)
         self.assertTrue('monovan_mapfile' in prop_changed)
+
+    def test_hartmask_plus_or_only(self):
+        propman = self.prop_man
+
+        self.assertTrue(propman.hard_mask_file is None);
+        propman.hard_mask_file = 'a_mask_file'
+        self.assertEqual(propman.hard_mask_file,'a_mask_file.msk');
+
+        prop_changed =propman.getChangedProperties()
+        self.assertTrue('hard_mask_file' in prop_changed)
 
 
     def test_set_spectra_to_mon(self):

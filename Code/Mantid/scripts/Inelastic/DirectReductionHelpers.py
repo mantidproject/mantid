@@ -199,8 +199,6 @@ def gen_getter(keyval_dict,key):
         return a_val.__get__(keyval_dict);
     else:
         return a_val
-
-
     #end
 #end
 
@@ -279,20 +277,4 @@ def check_instrument_name(old_name,new_name):
 
     config['default.instrument'] = full_name
     return (new_name,full_name,facility);
-
-
-
-       #if not hasattr(self,'instrument') or self.instrument.getName() != instr_name :
-       #     # Load an empty instrument if one isn't already there
-       #     idf_dir = config.getString('instrumentDefinition.directory')
-       #     try:
-       #         idf_file=api.ExperimentInfo.getInstrumentFilename(new_name)
-       #         tmp_ws_name = '__empty_' + new_name
-       #         if not mtd.doesExist(tmp_ws_name):
-       #             LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
-       #         self.instrument = mtd[tmp_ws_name].getInstrument()
-       #     except:
-       #         self.instrument = None
-       #         self._instr_name = None
-       #         raise RuntimeError('Cannot load instrument for prefix "%s"' % new_name)
 

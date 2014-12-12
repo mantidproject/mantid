@@ -73,13 +73,22 @@ class MapMaskFile(object):
            fileName, fileExtension = os.path.splitext(value)
            if (not fileExtension):
                value=value+self._file_ext;
-        else:
-            if self._field_name=='hard_mask_file':
-                if instance.use_hard_mask_only:
-                    instance.run_diagnostics = False;
-            
+           
         prop_helpers.gen_setter(instance.__dict__,self._field_name,value);
 #end MapMaskFile
+
+class HardMaskPlus(object):
+    """ Legacy HardMaskPlus class which sets up hard_mask_file to file and use_hard_mask_only to True""" 
+    def __get__(self,instance,type=None):
+        is_masked = prop_helpers.gen_getter(instance.__dict__,'hard_mask_only');
+        return prop_helpers.gen_getter(instance.__dict__,'hard_mask_file');
+
+    def __set__(self,instance,value):
+        if value != None:
+           fileName, fileExtension = os.path.splitext(value)
+           if (not fileExtension):
+               value=value+self._file_ext;
+
 
 class HardMaskOnly(object):
     """ Sets diagnostics algorithm to use hard mask file provided and to disable all other diagnostics routines
@@ -573,27 +582,28 @@ class DirectPropertyManager(DirectReductionProperties):
 #              Overloaded setters/getters
 #----------------------------------------------------------------------------------
     #
-    van_rmm = VanadiumRMM();
+    van_rmm = VanadiumRMM()
     #
-    det_cal_file    = DetCalFile();
+    det_cal_file    = DetCalFile()
     #
-    map_file        = MapMaskFile('map_file','.map',"Spectra to detector mapping file for the sample run");
+    map_file        = MapMaskFile('map_file','.map',"Spectra to detector mapping file for the sample run")
     #
-    monovan_mapfile = MapMaskFile('monovan_mapfile','.map',"Spectra to detector mapping file for the monovanadium integrals calculation");
+    monovan_mapfile = MapMaskFile('monovan_mapfile','.map',"Spectra to detector mapping file for the monovanadium integrals calculation")
     #
-    hard_mask_file  = MapMaskFile('hard_mask_file','.msk',"Hard mask file");
+    hard_mask_file  = MapMaskFile('hard_mask_file','.msk',"Hard mask file")
     #
-    monovan_integr_range     = MonovanIntegrationRange();
+    monovan_integr_range     = MonovanIntegrationRange()
     #
-    spectra_to_monitors_list = SpectraToMonitorsList();
+    spectra_to_monitors_list = SpectraToMonitorsList()
     # 
-    save_format = SaveFormat();
+    save_format = SaveFormat()
     #
-    use_hard_mask_only = HardMaskOnly();
+    use_hard_mask_only = HardMaskOnly()
+    hardmaskPlus       = HardMaskPlus()
     #
-    diag_spectra = DiagSpectra();
+    diag_spectra = DiagSpectra()
     #
-    background_test_range = BackbgroundTestRange();
+    background_test_range = BackbgroundTestRange()
 
 #----------------------------------------------------------------------------------------------------------------
     def getChangedProperties(self):
@@ -612,14 +622,7 @@ class DirectPropertyManager(DirectReductionProperties):
             return True
         else:
             return False
-
-    def get_sample_ws_name(self):
-        """ build and return sample workspace name """ 
-        if not self.sum_runs:
-            return common.create_resultname(self.sample_run,self.instr_name);
-        else:
-            return common.create_resultname(self.sample_run,self.instr_name,'-sum');
-   
+  
     def set_input_parameters_ignore_nan(self,**kwargs):
         """ Like similar method set_input_parameters this one is used to 
             set changed parameters from dictionary of parameters. 
