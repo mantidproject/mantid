@@ -53,7 +53,7 @@ namespace Mantid
     /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
     const std::string MDNormDirectSC::summary() const
     { 
-      return "Calculate normalization for an MDEvent workspace for single crystal diffraction.";
+      return "Calculate normalization for an MDEvent workspace for single crystal direct geometry inelastic measurement.";
     }
     
     /// Algorithm's name for use in the GUI and help. @see Algorithm::name
