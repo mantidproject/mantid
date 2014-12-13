@@ -343,7 +343,7 @@
   <customwidget>
    <class>pqProxiesWidget</class>
    <extends>QWidget</extends>
-   <header>pqproxieswidget.h</header>
+   <header>pqProxiesWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources>
