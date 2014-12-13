@@ -141,6 +141,8 @@ public:
     SymmetryOperation operator *(const SymmetryOperation &operand) const;
     SymmetryOperation inverse() const;
 
+    SymmetryOperation operator ^(size_t exponent) const;
+
     bool operator !=(const SymmetryOperation &other) const;
     bool operator ==(const SymmetryOperation &other) const;
     bool operator <(const SymmetryOperation &other) const;
