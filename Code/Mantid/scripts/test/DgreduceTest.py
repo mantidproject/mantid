@@ -2,7 +2,7 @@ from mantid.simpleapi import *
 from mantid import api
 import unittest
 import os, sys
-from dgreduce import *
+from Direct.dgreduce import *
 
 
 

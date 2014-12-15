@@ -3,7 +3,7 @@ from mantid import api
 import unittest
 import inspect
 import os, sys
-from DirectEnergyConversion import DirectEnergyConversion
+from Direct.DirectEnergyConversion import DirectEnergyConversion
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
