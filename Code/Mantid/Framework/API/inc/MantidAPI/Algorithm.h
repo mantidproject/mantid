@@ -65,7 +65,7 @@ class AlgorithmHistory;
  @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
  @date 12/09/2007
 
- Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -239,6 +239,10 @@ public:
   void setLoggingOffset(const int value) { g_log.setLevelOffset(value); }
   ///returns the logging priority offset
   int getLoggingOffset() const { return g_log.getLevelOffset(); }
+  /// disable Logging of start and end messages
+  void setAlgStartupLogging(const bool enabled);  
+  /// get the state of Logging of start and end messages
+  bool getAlgStartupLogging() const;
 
   ///setting the child start progress
   void setChildStartProgress(const double startProgress)const{m_startChildProgress=startProgress;}
@@ -380,6 +384,7 @@ private:
   bool m_runningAsync; ///< Algorithm is running asynchronously
   bool m_running; ///< Algorithm is running
   bool m_rethrow; ///< Algorithm should rethrow exceptions while executing
+  bool m_isAlgStartupLoggingEnabled; /// Whether to log alg startup and closedown messages from the base class (default = true)
   mutable double m_startChildProgress; ///< Keeps value for algorithm's progress at start of an Child Algorithm
   mutable double m_endChildProgress; ///< Keeps value for algorithm's progress at Child Algorithm's finish
   AlgorithmID m_algorithmID; ///< Algorithm ID for managed algorithms

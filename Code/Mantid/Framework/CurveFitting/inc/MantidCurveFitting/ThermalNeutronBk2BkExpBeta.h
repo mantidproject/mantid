@@ -13,7 +13,7 @@ namespace CurveFitting
   /** ThermalNeutronBk2BkExpBETA : Function to calculate Beta of Bk2Bk Exponential function from
     Thermal Neutron Function's beta0, Alph1, Alph0t, Alph1t, Dtt1, and etc.
     
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

@@ -33,7 +33,7 @@ using namespace API;
 /// Constructor
 LoadRawBin0::LoadRawBin0() :
    m_filename(), m_numberOfSpectra(0),
-   m_specTimeRegimes(), m_prog(0.0), m_bmspeclist(false)
+   m_specTimeRegimes(), m_prog(0.0)
 {
 }
 
@@ -65,31 +65,31 @@ void LoadRawBin0::init()
  */
 void LoadRawBin0::exec()
 {
-	// Retrieve the filename from the properties
-	m_filename = getPropertyValue("Filename");
+  // Retrieve the filename from the properties
+  m_filename = getPropertyValue("Filename");
 
-	bool bLoadlogFiles = getProperty("LoadLogFiles");
+  bool bLoadlogFiles = getProperty("LoadLogFiles");
 
-	//open the raw file
-	FILE* file=openRawFile(m_filename);
+  //open the raw file
+  FILE* file=openRawFile(m_filename);
 
-	// Need to check that the file is not a text file as the ISISRAW routines don't deal with these very well, i.e 
-	// reading continues until a bad_alloc is encountered.
-	if( isAscii(file) )
-	{
-		g_log.error() << "File \"" << m_filename << "\" is not a valid RAW file.\n";
-		throw std::invalid_argument("Incorrect file type encountered.");
-	}
-	std::string title;
-	readTitle(file,title);
+  // Need to check that the file is not a text file as the ISISRAW routines don't deal with these very well, i.e 
+  // reading continues until a bad_alloc is encountered.
+  if( isAscii(file) )
+  {
+    g_log.error() << "File \"" << m_filename << "\" is not a valid RAW file.\n";
+    throw std::invalid_argument("Incorrect file type encountered.");
+  }
+  std::string title;
+  readTitle(file,title);
 
-	readworkspaceParameters(m_numberOfSpectra,m_numberOfPeriods,m_lengthIn,m_noTimeRegimes);
+  readworkspaceParameters(m_numberOfSpectra,m_numberOfPeriods,m_lengthIn,m_noTimeRegimes);
 
-	///
-	setOptionalProperties();
+  ///
+  setOptionalProperties();
 
-	// to validate the optional parameters, if set
-	checkOptionalProperties();
+  // to validate the optional parameters, if set
+  checkOptionalProperties();
 
     // Calculate the size of a workspace, given its number of periods & spectra to read
      m_total_specs = calculateWorkspaceSize();
@@ -114,7 +114,7 @@ void LoadRawBin0::exec()
   setProtonCharge(run);
 
   WorkspaceGroup_sptr ws_grp = createGroupWorkspace();
-  setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace,m_numberOfPeriods, false);
+  setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace,m_numberOfPeriods, false,this);
     
   // Loop over the number of periods in the raw file, putting each period in a separate workspace
   for (int period = 0; period < m_numberOfPeriods; ++period)
@@ -147,14 +147,14 @@ void LoadRawBin0::exec()
       {
         progress(m_prog, "Reading raw file data...");
         //readData(file, histToRead);
-		  //read spectrum 
-		  if (!readData(file, histToRead))
-		  {
-			  throw std::runtime_error("Error reading raw file");
-		  }
-		  int64_t binStart=0;
-		  setWorkspaceData(localWorkspace, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes,1,binStart);
-		  ++wsIndex;
+      //read spectrum 
+      if (!readData(file, histToRead))
+      {
+        throw std::runtime_error("Error reading raw file");
+      }
+      int64_t binStart=0;
+      setWorkspaceData(localWorkspace, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes,1,binStart);
+      ++wsIndex;
 
       if (m_numberOfPeriods == 1)
       {
@@ -166,19 +166,19 @@ void LoadRawBin0::exec()
       }
 
     }
-	  else
-	  {
-		  skipData(file, histToRead);
-	  }
+    else
+    {
+      skipData(file, histToRead);
+    }
     
     }
-	
-	if(m_numberOfPeriods>1)
-	{
-		setWorkspaceProperty(localWorkspace, ws_grp, period, false);
-		// progress for workspace groups 
-		m_prog = static_cast<double>(period) / static_cast<double>(m_numberOfPeriods - 1);
-	}
+  
+  if(m_numberOfPeriods>1)
+  {
+    setWorkspaceProperty(localWorkspace, ws_grp, period, false,this);
+    // progress for workspace groups 
+    m_prog = static_cast<double>(period) / static_cast<double>(m_numberOfPeriods - 1);
+  }
   
   } // loop over periods
   // Clean up

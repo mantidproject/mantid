@@ -8,12 +8,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/XML/XMLWriter.h>
-
 #include <fstream>
 
 namespace Mantid
@@ -84,22 +78,18 @@ namespace DataHandling
     const Instrument_const_sptr instrument = ws->getInstrument();
     const ParameterMap_sptr params = instrument->getParameterMap();
 
-    //Map of component ids to their respective XML Elements
-    std::map<ComponentID,XML::AutoPtr<XML::Element> > compMap;
+    //maps components to a tuple of parameters' name, type, and value
+    std::map<ComponentID, std::vector<boost::tuple<std::string,std::string,std::string> > > toSave;
 
-    //Set up the XML document
-    XML::AutoPtr<XML::Document> xmlDoc = new XML::Document;
-    XML::AutoPtr<XML::Element> rootElem = xmlDoc->createElement("parameter-file");
-    rootElem->setAttribute("instrument", instrument->getName());
-    rootElem->setAttribute("valid-from", instrument->getValidFromDate().toISO8601String());
-    xmlDoc->appendChild(rootElem);
-
-    //Vector of tuples: (componentid, paramname, paramtype, paramvalue)
-    std::vector<boost::tuple<ComponentID, std::string, std::string, std::string> > toSave;
+    //Set up a progress bar
+    Progress prog(this, 0.0, 0.3, params->size());
 
     //Build a list of parameters to save;
     for(auto paramsIt = params->begin(); paramsIt != params->end(); ++paramsIt)
     {
+      if(prog.hasCancellationBeenRequested())
+        break;
+      prog.report("Generating parameters");
       const ComponentID    cID = (*paramsIt).first;
       const std::string  pName = (*paramsIt).second->name();
       const std::string  pType = (*paramsIt).second->type();
@@ -114,167 +104,101 @@ namespace DataHandling
         continue;
       }
 
+      if(pName == "pos")
+      {
+        if(saveLocationParams)
+        {
+          V3D pos;
+          std::istringstream pValueSS(pValue);
+          pos.readPrinted(pValueSS);
+          toSave[cID].push_back(boost::make_tuple("x", "double", boost::lexical_cast<std::string>(pos.X())));
+          toSave[cID].push_back(boost::make_tuple("y", "double", boost::lexical_cast<std::string>(pos.Y())));
+          toSave[cID].push_back(boost::make_tuple("z", "double", boost::lexical_cast<std::string>(pos.Z())));
+        }
+      }
+      else if(pName == "rot")
+      {
+        if(saveLocationParams)
+        {
+          V3D rot;
+          std::istringstream pValueSS(pValue);
+          rot.readPrinted(pValueSS);
+          toSave[cID].push_back(boost::make_tuple("rotx", "double", boost::lexical_cast<std::string>(rot.X())));
+          toSave[cID].push_back(boost::make_tuple("roty", "double", boost::lexical_cast<std::string>(rot.Y())));
+          toSave[cID].push_back(boost::make_tuple("rotz", "double", boost::lexical_cast<std::string>(rot.Z())));
+        }
+      }
       //If it isn't a position or rotation parameter, we can just add it to the list to save directly and move on.
-      if(pName != "pos" && pName != "rot")
+      else
       {
-        toSave.push_back(boost::make_tuple(cID, pName, pType, pValue));
+        if(pType == "fitting")
+        {
+          //With fitting parameters we do something special (i.e. silly)
+          //We create an entire XML element to be inserted into the output, instead of just giving a single fixed value
+          const FitParameter& fitParam = paramsIt->second->value<FitParameter>();
+          const std::string fpName = fitParam.getFunction() + ":" + fitParam.getName();
+          std::stringstream fpValue;
+          fpValue << "<formula";
+          fpValue <<          " eq=\"" << fitParam.getFormula() << "\"";
+          fpValue <<        " unit=\"" << fitParam.getFormulaUnit() << "\"";
+          fpValue << " result-unit=\"" << fitParam.getResultUnit() << "\"";
+          fpValue << "/>";
+          toSave[cID].push_back(boost::make_tuple(fpName, "fitting", fpValue.str()));
+        }
+        else
+          toSave[cID].push_back(boost::make_tuple(pName, pType, pValue));
       }
     }
 
-    std::vector<IComponent_const_sptr> components;
-    //If we're saving location parameters we'll check every component to see if its location has been changed
-    if(saveLocationParams)
+    //Begin writing the XML manually
+    std::ofstream file(filename.c_str(), std::ofstream::trunc);
+    file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+    file << "<parameter-file instrument=\"" << instrument->getName() << "\"";
+    file << " valid-from=\"" << instrument->getValidFromDate().toISO8601String() << "\">\n";
+
+    prog.resetNumSteps((int64_t)toSave.size(), 0.6, 1.0);
+    //Iterate through all the parameters we want to save and build an XML document out of them.
+    for(auto compIt = toSave.begin(); compIt != toSave.end(); ++compIt)
     {
-      //Get all the components in the instrument
-      instrument->getChildren(components, true);
-
-      auto progressSteps = std::distance(components.begin(), components.end());
-      for(auto cIt = components.begin(); cIt != components.end(); ++cIt)
-      {
-        const IComponent* comp = cIt->get();
-        const IComponent* baseComp = comp->getBaseComponent();
-        const ComponentID cID = const_cast<ComponentID>(comp);
-
-        //Check if the position has been changed by a parameter
-        //If so, check each axis and add the relevant adjustment parameters to the to-save list.
-        const V3D basePos = baseComp->getPos();
-        const V3D  absPos =     comp->getPos();
-        const V3D posDiff = absPos - basePos;
-
-        bool savePos = true;
-
-        const IComponent_const_sptr parent = comp->getParent();
-        if(parent)
-        {
-          const V3D parBasePos = parent->getBaseComponent()->getPos();
-          const V3D  parAbsPos = parent->getPos();
-          const V3D parPosDiff = parAbsPos - parBasePos;
-          const V3D    parDiff = parPosDiff - posDiff;
-
-          //If our parent's position offset is the same as ours (ignoring floating point errors
-          //then we won't bother saving our own position.
-          //if mag(diff) < mag(tolerance):
-          const double tolerance = 0.0001;
-          if(V3D::CompareMagnitude(parDiff, V3D(tolerance, tolerance, tolerance)))
-            savePos = false;
-        }
-
-        if(savePos)
-        {
-          if(posDiff.X() != 0)
-            toSave.push_back(boost::make_tuple(cID, "x", "double", Strings::toString<double>(absPos.X())));
-          if(posDiff.Y() != 0)
-            toSave.push_back(boost::make_tuple(cID, "y", "double", Strings::toString<double>(absPos.Y())));
-          if(posDiff.Z() != 0)
-            toSave.push_back(boost::make_tuple(cID, "z", "double", Strings::toString<double>(absPos.Z())));
-        }
-
-        //Check if the rotation has been changed by a parameter
-        //If so, convert to Euler (XYZ order) and output each component that differs
-        const Quat baseRot = baseComp->getRotation();
-        const Quat absRot = comp->getRotation();
-
-        if(baseRot != absRot)
-        {
-          //Euler rotation components are not independent so write them all out to be safe.
-          std::vector<double> absEuler = absRot.getEulerAngles("XYZ");
-          toSave.push_back(boost::make_tuple(cID, "rotx", "double", Strings::toString<double>(absEuler[0])));
-          toSave.push_back(boost::make_tuple(cID, "roty", "double", Strings::toString<double>(absEuler[1])));
-          toSave.push_back(boost::make_tuple(cID, "rotz", "double", Strings::toString<double>(absEuler[2])));
-        }
-
-        progress((double)std::distance(components.begin(), cIt) / (double)progressSteps * 0.3, "Identifying location parameters");
-      }
-    }
-
-    auto progressSteps = std::distance(toSave.begin(), toSave.end());
-    //Iterate through all the parameters we want to save and build an XML
-    //document out of them.
-    for(auto paramsIt = toSave.begin(); paramsIt != toSave.end(); ++paramsIt)
-    {
+      if(prog.hasCancellationBeenRequested())
+        break;
+      prog.report("Saving parameters");
       //Component data
-      const ComponentID cID = boost::get<0>(*paramsIt);
+      const ComponentID cID = compIt->first;
       const std::string cFullName = cID->getFullName();
       const IDetector* cDet = dynamic_cast<IDetector*>(cID);
       const detid_t cDetID = (cDet) ? cDet->getID() : 0;
-      const std::string cDetIDStr = boost::lexical_cast<std::string>(cDetID);
 
-      //Parameter data
-      const std::string pName = boost::get<1>(*paramsIt);
-      const std::string pType = boost::get<2>(*paramsIt);
-      const std::string pValue = boost::get<3>(*paramsIt);
-
-      //A component-link element
-      XML::AutoPtr<XML::Element> compElem = 0;
-
-      /* If an element already exists for a component with this name, re-use it.
-       *
-       * Why are we using an std::map and not simply traversing the DOM? Because
-       * the interface for doing that is painful and horrible to use, and this is
-       * probably faster (but negligably so in this case).
-       *
-       * And lastly, because Poco::XML::NodeList::length() segfaults.
-       */
-      auto compIt = compMap.find(cID);
-      if(compIt != compMap.end())
+      file << "	<component-link";
+      if(cDetID != 0)
+        file << " id=\"" << cDetID << "\"";
+      file << " name=\"" << cFullName << "\">\n";
+      for(auto paramIt = compIt->second.begin(); paramIt != compIt->second.end(); ++paramIt)
       {
-        compElem = (*compIt).second;
+        const std::string pName = paramIt->get<0>();
+        const std::string pType = paramIt->get<1>();
+        const std::string pValue = paramIt->get<2>();
+
+        //With fitting parameters, we're actually inserting an entire element, as constructed above
+        if(pType == "fitting")
+        {
+          file << "		<parameter name=\"" << pName << "\" type=\"fitting\" >\n";
+          file << "   " << pValue << "\n";
+          file << "		</parameter>\n";
+        }
+        else
+        {
+          file << "		<parameter name=\"" << pName << "\"" << (pType == "string" ? " type=\"string\"" : "") << ">\n";
+          file << "			<value val=\"" << pValue << "\"/>\n";
+          file << "		</parameter>\n";
+        }
       }
-
-      //One doesn't already exist? Make a new one.
-      if(!compElem)
-      {
-        compElem = xmlDoc->createElement("component-link");
-        rootElem->appendChild(compElem);
-        compMap[cID] = compElem;
-      }
-
-      //Create the parameter and value elements
-      XML::AutoPtr<XML::Element> paramElem = xmlDoc->createElement("parameter");
-      XML::AutoPtr<XML::Element> valueElem = xmlDoc->createElement("value");
-
-      //Set the attributes
-      compElem->setAttribute("name", cFullName);
-
-      //If there is a valid detector id, include it
-      if(cDetID > 0)
-      {
-        compElem->setAttribute("id", cDetIDStr);
-      }
-
-      paramElem->setAttribute("name", pName);
-
-      //For strings, we specify their type.
-      if(pType == "string")
-      {
-        paramElem->setAttribute("type", "string");
-      }
-
-      valueElem->setAttribute("val", pValue);
-
-      //Insert the elements into the document
-      compElem->appendChild(paramElem);
-      paramElem->appendChild(valueElem);
-
-      progress((double)std::distance(toSave.begin(), paramsIt) / (double)progressSteps * 0.6 + 0.3, "Building XML graph");
+      file << "	</component-link>\n";
     }
-    progress(0.95, "Writing XML to file");
+    file << "</parameter-file>\n";
 
-    //Output the XMl document to the given file.
-    XML::DOMWriter writer;
-    writer.setOptions(XML::XMLWriter::PRETTY_PRINT | XML::XMLWriter::WRITE_XML_DECLARATION);
-    std::ofstream file(filename.c_str(), std::ofstream::trunc);
-    try
-    {
-      writer.writeNode(file, xmlDoc);
-    }
-    catch(Poco::Exception &e)
-    {
-      g_log.error() << "Error serializing XML for SaveParameterFile: " << e.displayText() << std::endl;
-    }
     file.flush();
     file.close();
-    progress(1.0, "Done");
   }
 
 } // namespace Algorithms

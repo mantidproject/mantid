@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/Tolerance.h"
 #include <list>
 
@@ -29,7 +30,7 @@ namespace Mantid
     \author M. Gigg, Tessella plc
     \brief For a leg of a track
 
-    Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -52,22 +53,17 @@ namespace Mantid
     struct MANTID_GEOMETRY_DLL Link
     {
       /**
-       * Default constructor
-       */
-      inline Link() : entryPoint(),exitPoint(),distFromStart(), 
-        distInsideObject(), componentID(NULL)
-      {}
-
-      /**
       * Constuctor
       * @param entry :: Kernel::V3D point to start
       * @param exit :: Kernel::V3D point to end track
       * @param totalDistance :: Total distance from start of track
+      * @param obj :: A reference to the object that was intersected
       * @param compID :: An optional component identifier for the physical object hit. (Default=NULL)
       */
-      inline Link(const Kernel::V3D& entry,const Kernel::V3D& exit, const double totalDistance, const ComponentID compID = NULL) :
-        entryPoint(entry),exitPoint(exit),distFromStart(totalDistance), distInsideObject(entryPoint.distance(exitPoint)), 
-        componentID(compID)
+      inline Link(const Kernel::V3D& entry,const Kernel::V3D& exit, const double totalDistance,
+                  const Object & obj, const ComponentID compID = NULL) :
+        entryPoint(entry),exitPoint(exit),distFromStart(totalDistance), distInsideObject(entryPoint.distance(exitPoint)),
+        object(&obj), componentID(compID)
       {}
       /// Less than operator
       inline bool operator<(const Link& other) const { return distFromStart < other.distFromStart; }
@@ -76,20 +72,21 @@ namespace Mantid
 
       /** @name Attributes. */
       //@{
-      Kernel::V3D entryPoint;             ///< Entry point
-      Kernel::V3D exitPoint;              ///< Exit point
+      Kernel::V3D entryPoint;     ///< Entry point
+      Kernel::V3D exitPoint;      ///< Exit point
       double distFromStart;       ///< Total distance from track beginning
       double distInsideObject;    ///< Total distance covered inside object
+      const Object * object;      ///< The object that was intersected
       ComponentID componentID;    ///< ComponentID of the intersected component
       //@}
-    
+
     };
 
     /**
     * Stores a point of intersection along a track. The component intersected
     * is linked using its ComponentID.
     *
-    * Ordering for IntersectionPoint is special since we need that when dist is close 
+    * Ordering for IntersectionPoint is special since we need that when dist is close
     * that the +/- flag is taken into
     * account.
     */
@@ -97,22 +94,25 @@ namespace Mantid
     {
       /**
       * Constuctor
-      * @param flag :: Indicates the direction of travel of the track with respect 
+      * @param flag :: Indicates the direction of travel of the track with respect
       * to the object: +1 is entering, -1 is leaving.
       * @param end :: The end point for this partial segment
       * @param distFromStartOfTrack :: Total distance from start of track
       * @param compID :: An optional unique ID marking the component intersected. (Default=NULL)
+      * @param obj :: A reference to the object that was intersected
       */
       inline IntersectionPoint(const int flag, const Kernel::V3D& end,
-                               const double distFromStartOfTrack, const ComponentID compID = NULL) :
-        directionFlag(flag),endPoint(end),distFromStart(distFromStartOfTrack), componentID(compID)
+                               const double distFromStartOfTrack, const Object & obj,
+                               const ComponentID compID = NULL) :
+        directionFlag(flag),endPoint(end),distFromStart(distFromStartOfTrack),
+        object(&obj), componentID(compID)
       {}
 
       /**
       * A IntersectionPoint is less-than another if either
       * (a) the difference in distances is greater than the tolerance and this distance is less than the other or
       * (b) the distance is less than the other and this point is defined as an exit point
-      * 
+      *
       * @param other :: IntersectionPoint object to compare
       * @return True if the object is considered less than, otherwise false.
       */
@@ -127,6 +127,7 @@ namespace Mantid
       int directionFlag;         ///< Directional flag
       Kernel::V3D endPoint;              ///< Point
       double distFromStart;      ///< Total distance from track begin
+      const Object * object;      ///< The object that was intersected
       ComponentID componentID;   ///< Unique component ID
       //@}
     };
@@ -155,10 +156,12 @@ namespace Mantid
       /// Destructor
       ~Track();
       /// Adds a point of intersection to the track
-      void addPoint(const int directionFlag, const Kernel::V3D& endPoint, const ComponentID compID = NULL);
+      void addPoint(const int directionFlag, const Kernel::V3D& endPoint,
+                    const Object & obj, const ComponentID compID = NULL);
       /// Adds a link to the track
-      int addLink(const Kernel::V3D& firstPoint,const Kernel::V3D& secondPoint, 
-                  const double distanceAlongTrack, const ComponentID compID = NULL);
+      int addLink(const Kernel::V3D& firstPoint,const Kernel::V3D& secondPoint,
+                  const double distanceAlongTrack, const Object & obj,
+                  const ComponentID compID = NULL);
       /// Remove touching Links that have identical components
       void removeCojoins();
       /// Construct links between added points
@@ -175,10 +178,10 @@ namespace Mantid
       /// Returns an interator to the start of the set of links
       LType::const_iterator begin() const { return m_links.begin(); }
       /// Returns an interator to one-past-the-end of the set of links
-      LType::const_iterator end() const { return m_links.end(); }       
+      LType::const_iterator end() const { return m_links.end(); }
       /// Returns the number of links
-      int count() const { return static_cast<int>(m_links.size()); }     
-      /// Is the link complete? 
+      int count() const { return static_cast<int>(m_links.size()); }
+      /// Is the link complete?
       int nonComplete() const;
 
     private:

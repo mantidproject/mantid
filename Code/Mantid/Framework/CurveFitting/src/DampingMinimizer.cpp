@@ -29,9 +29,8 @@ DECLARE_FUNCMINIMIZER(DampingMinimizer,Damping)
 
 
 /// Constructor
-DampingMinimizer::DampingMinimizer():
-IFuncMinimizer(),
-m_relTol(1e-6)
+DampingMinimizer::DampingMinimizer(double relTol):
+IFuncMinimizer(), m_relTol(relTol)
 {
   declareProperty("Damping",0.0,"The damping parameter.");
 }
@@ -114,8 +113,7 @@ bool DampingMinimizer::iterate(size_t)
   GSLVector p(n);
   m_leastSquares->getParameters(p);
   double dx_norm = gsl_blas_dnrm2(dx.gsl());
-  //double p_norm = gsl_blas_dnrm2(p.gsl());
-  if (dx_norm < 0.0001)
+  if (dx_norm < m_relTol)
   {
     return false;
   }

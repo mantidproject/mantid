@@ -244,8 +244,10 @@ namespace Mantid
         mat.reset(new Material(chemicalSymbol, neutron, rho));
       }
 
-      // set the material on workspace
-      expInfo->mutableSample().setMaterial(*mat);
+      // set the material but leave the geometry unchanged
+      auto shapeObject = expInfo->sample().getShape(); //copy 
+      shapeObject.setMaterial(*mat);
+      expInfo->mutableSample().setShape(shapeObject);
       g_log.notice() << "Sample number density ";
       if (isEmpty(mat->numberDensity()))
       {

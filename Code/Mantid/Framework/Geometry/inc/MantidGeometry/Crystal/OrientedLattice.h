@@ -14,7 +14,7 @@ namespace Geometry
   
     @author Andrei Savici, SNS, ORNL
     @date 2011-04-15    
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

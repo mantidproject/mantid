@@ -8,7 +8,6 @@
 #include <MantidAPI/FileProperty.h>
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "Poco/DirectoryIterator.h"
-#include "Poco/RegularExpression.h"
 #include "Poco/NumberParser.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/String.h"
@@ -17,6 +16,7 @@
 #include <istream>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/regex.hpp>
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperty.h"
@@ -94,26 +94,23 @@ std::string EQSANSLoad::findConfigFile(const int& run)
 
   int max_run_number = 0;
   std::string config_file = "";
-  Poco::RegularExpression re1("eqsans_configuration.[0-9]+");
-  Poco::RegularExpression re2("[0-9]+");
+  static boost::regex re1("eqsans_configuration\\.([0-9]+)");
+  boost::smatch matches;
   for (; it != searchPaths.end(); ++it)
   {
     Poco::DirectoryIterator file_it(*it);
     Poco::DirectoryIterator end;
     for (; file_it != end; ++file_it)
     {
-      if (re1.match(file_it.name()))
+      if (boost::regex_search(file_it.name(), matches, re1))
       {
-        std::string s;
-        if (re2.extract(file_it.name(), s)==1)
+        std::string s = matches[1];
+	int run_number = 0;
+	Poco::NumberParser::tryParse(s, run_number);
+	if (run_number > max_run_number && run_number <= run)
         {
-          int run_number = 0;
-          Poco::NumberParser::tryParse(s, run_number);
-          if (run_number > max_run_number && run_number <= run)
-          {
-            max_run_number = run_number;
-            config_file = file_it.path().toString();
-          }
+          max_run_number = run_number;
+          config_file = file_it.path().toString();
         }
       }
     }
@@ -127,21 +124,19 @@ void EQSANSLoad::readRectangularMasks(const std::string& line)
 {
   // Looking for rectangular mask
   // Rectangular mask         = 7, 0; 7, 255
-  Poco::RegularExpression re_key("rectangular mask", Poco::RegularExpression::RE_CASELESS);
-  Poco::RegularExpression re_key_alt("elliptical mask", Poco::RegularExpression::RE_CASELESS);
-  Poco::RegularExpression::Match match;
-  if (re_key.match(line, 0, match) || re_key_alt.match(line, 0, match))
+  boost::regex re_key("rectangular mask", boost::regex::icase);
+  boost::regex re_key_alt("elliptical mask", boost::regex::icase);
+  if (boost::regex_search(line, re_key) || boost::regex_search(line, re_key_alt))
   {
-    Poco::RegularExpression re_sig("=[ ]*([0-9]+)[ ]*[ ,][ ]*([0-9]+)[ ]*[ ;,][ ]*([0-9]+)[ ]*[ ,][ ]*([0-9]+)");
-    if (re_sig.match(line, 0, match))
+    boost::regex re_sig("=[ ]*([0-9]+)[ ]*[ ,][ ]*([0-9]+)[ ]*[ ;,][ ]*([0-9]+)[ ]*[ ,][ ]*([0-9]+)");
+    boost::smatch posVec;
+    if (boost::regex_search(line, posVec, re_sig))
     {
-      Poco::RegularExpression::MatchVec posVec;
-      re_sig.match(line, 0, posVec);
       if (posVec.size()==5)
       {
         for (int i=0; i<4; i++)
         {
-          std::string num_str = line.substr(posVec[i+1].offset, posVec[i+1].length);
+          std::string num_str = posVec[i+1];
           m_mask_as_string = m_mask_as_string + " " + num_str;
         }
         m_mask_as_string += ",";
@@ -155,20 +150,18 @@ void EQSANSLoad::readRectangularMasks(const std::string& line)
 /// @param line :: line (string) from the config file
 void EQSANSLoad::readTOFcuts(const std::string& line)
 {
-  Poco::RegularExpression re_key("tof edge discard", Poco::RegularExpression::RE_CASELESS);
-  Poco::RegularExpression::Match match;
-  if (re_key.match(line, 0, match))
+  boost::regex re_key("tof edge discard", boost::regex::icase);
+  if (boost::regex_search(line, re_key))
   {
-    Poco::RegularExpression re_sig("=[ ]*([0-9]+)[ ]*[ ,][ ]*([0-9]+)");
-    if (re_sig.match(line, 0, match))
+    boost::regex re_sig("=[ ]*([0-9]+)[ ]*[ ,][ ]*([0-9]+)");
+    boost::smatch posVec;
+    if (boost::regex_search(line, posVec, re_sig))
     {
-      Poco::RegularExpression::MatchVec posVec;
-      re_sig.match(line, 0, posVec);
       if (posVec.size()==3)
       {
-        std::string num_str = line.substr(posVec[1].offset, posVec[1].length);
+        std::string num_str = posVec[1];
         Poco::NumberParser::tryParseFloat(num_str, m_low_TOF_cut);
-        num_str = line.substr(posVec[2].offset, posVec[2].length);
+        num_str = posVec[2];
         Poco::NumberParser::tryParseFloat(num_str, m_high_TOF_cut);
       }
     }
@@ -179,20 +172,18 @@ void EQSANSLoad::readTOFcuts(const std::string& line)
 /// @param line :: line (string) from the config file
 void EQSANSLoad::readBeamCenter(const std::string& line)
 {
-  Poco::RegularExpression re_key("spectrum center", Poco::RegularExpression::RE_CASELESS);
-  Poco::RegularExpression::Match match;
-  if (re_key.match(line, 0, match))
+  boost::regex re_key("spectrum center", boost::regex::icase);
+  if (boost::regex_search(line, re_key))
   {
-    Poco::RegularExpression re_sig("=[ ]*([0-9]+.[0-9]*)[ ]*[ ,][ ]*([0-9]+.[0-9]+)");
-    if (re_sig.match(line, 0, match))
+    boost::regex re_sig("=[ ]*([0-9]+.[0-9]*)[ ]*[ ,][ ]*([0-9]+.[0-9]+)");
+    boost::smatch posVec;
+    if (boost::regex_search(line, posVec, re_sig))
     {
-      Poco::RegularExpression::MatchVec posVec;
-      re_sig.match(line, 0, posVec);
       if (posVec.size()==3)
       {
-        std::string num_str = line.substr(posVec[1].offset, posVec[1].length);
+        std::string num_str = posVec[1];
         Poco::NumberParser::tryParseFloat(num_str, m_center_x);
-        num_str = line.substr(posVec[2].offset, posVec[2].length);
+        num_str = posVec[2];
         Poco::NumberParser::tryParseFloat(num_str, m_center_y);
       }
     }
@@ -203,18 +194,16 @@ void EQSANSLoad::readBeamCenter(const std::string& line)
 /// @param line :: line (string) from the config file
 void EQSANSLoad::readModeratorPosition(const std::string& line)
 {
-  Poco::RegularExpression re_key("sample location", Poco::RegularExpression::RE_CASELESS);
-  Poco::RegularExpression::Match match;
-  if (re_key.match(line, 0, match))
+  boost::regex re_key("sample location", boost::regex::icase);
+  if (boost::regex_search(line, re_key))
   {
-    Poco::RegularExpression re_sig("=[ ]*([0-9]+)");
-    if (re_sig.match(line, 0, match))
+    boost::regex re_sig("=[ ]*([0-9]+)");
+    boost::smatch posVec;
+    if (boost::regex_search(line, posVec, re_sig))
     {
-      Poco::RegularExpression::MatchVec posVec;
-      re_sig.match(line, 0, posVec);
       if (posVec.size()==2)
       {
-        std::string num_str = line.substr(posVec[1].offset, posVec[1].length);
+        std::string num_str = posVec[1];
         Poco::NumberParser::tryParseFloat(num_str, m_moderator_position);
         m_moderator_position = -m_moderator_position/1000.0;
       }
@@ -226,34 +215,32 @@ void EQSANSLoad::readModeratorPosition(const std::string& line)
 /// @param line :: line (string) from the config file
 void EQSANSLoad::readSourceSlitSize(const std::string& line)
 {
-  Poco::RegularExpression re_key("wheel", Poco::RegularExpression::RE_CASELESS);
-  Poco::RegularExpression::Match match;
-  if (re_key.match(line, 0, match))
+  boost::regex re_key("wheel", boost::regex::icase);
+  if (boost::regex_search(line, re_key))
   {
-    Poco::RegularExpression re_sig("([1-8]) wheel[ ]*([1-3])[ \\t]*=[ \\t]*(\\w+)");
-    if (re_sig.match(line, 0, match))
+    boost::regex re_sig("([1-8]) wheel[ ]*([1-3])[ \\t]*=[ \\t]*(\\w+)");
+    boost::smatch posVec;
+    if (boost::regex_search(line, posVec, re_sig))
     {
-      Poco::RegularExpression::MatchVec posVec;
-      re_sig.match(line, 0, posVec);
-      if (posVec.size()==2)
+      if (posVec.size()==4)
       {
-        std::string num_str = line.substr(posVec[1].offset, posVec[1].length);
+        std::string num_str = posVec[1];
         int slit_number = 0;
         Poco::NumberParser::tryParse(num_str, slit_number);
         slit_number--;
 
-        num_str = line.substr(posVec[2].offset, posVec[2].length);
+        num_str = posVec[2];
         int wheel_number = 0;
         Poco::NumberParser::tryParse(num_str, wheel_number);
         wheel_number--;
 
-        num_str = line.substr(posVec[3].offset, posVec[3].length);
-        Poco::RegularExpression re_size("\\w*?([0-9]+)mm");
+        num_str = posVec[3];
+	boost::regex re_size("\\w*?([0-9]+)mm");
         int slit_size = 0;
-        re_size.match(num_str, 0, posVec);
+	boost::regex_search(num_str, posVec, re_size);
         if (posVec.size()==2)
         {
-          num_str = line.substr(posVec[1].offset, posVec[1].length);
+          num_str = posVec[1];
           Poco::NumberParser::tryParse(num_str, slit_size);
         }
         m_slit_positions[wheel_number][slit_number] = slit_size;

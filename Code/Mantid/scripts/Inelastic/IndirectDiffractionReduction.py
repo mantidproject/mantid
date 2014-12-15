@@ -2,12 +2,14 @@ import mantid
 from msg_reducer import MSGReducer
 import inelastic_indirect_reduction_steps as steps
 
+
 class MSGDiffractionReducer(MSGReducer):
     """Reducer for Diffraction on IRIS and TOSCA.
     """
 
     def __init__(self):
         super(MSGDiffractionReducer, self).__init__()
+        self._grouping_policy = 'All'
 
     def _setup_steps(self):
         self.append_step(steps.IdentifyBadDetectors(
@@ -36,17 +38,28 @@ class MSGDiffractionReducer(MSGReducer):
             self.append_step(steps.RebinToFirstSpectrum())
 
         step = steps.Grouping()
-        step.set_grouping_policy("All")
+        step.set_grouping_policy(self._grouping_policy)
         self.append_step(step)
 
         # The "SaveItem" step saves the files in the requested formats.
-        if (len(self._save_formats) > 0):
+        if len(self._save_formats) > 0:
             step = steps.SaveItem()
             step.set_formats(self._save_formats)
             self.append_step(step)
 
         step = steps.Naming()
         self.append_step(step)
+
+    def set_grouping_policy(self, policy):
+        """
+        Sets the grouping policy for the result data.
+
+        @parm policy New grouping policy
+        """
+        if not isinstance(policy, str):
+            raise ValueError('Grouping policy must be a string')
+
+        self._grouping_policy = policy
 
 
 def getStringProperty(workspace, property):

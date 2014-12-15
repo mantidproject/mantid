@@ -14,7 +14,7 @@ namespace CurveFitting
 
     It is the number 3 neutron TOF function of GSAS and number 9 peak profile of FullProf.
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

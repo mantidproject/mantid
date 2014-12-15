@@ -292,7 +292,7 @@
      if None, range is calculated from monovan_hi_frac/monovan_lo_frac 
      - providing the fractions of the incident energy      
      if one wants to specify the energy values here it has to be defined in the form:
-    <value val="monovan_lo_value,monovan_hi_value"/>      -->    
+    <value val="monovan_lo_value:monovan_hi_value"/>      -->    
 <parameter name="abs_units_van_range"  type="string">
   <value val="None"/>
 </parameter>
@@ -409,9 +409,11 @@
        samp_sig   = diag_samp_median_sigma=diag_samp_sig;
        variation  = diag_variation;
        bleed_test = bleed = diag_bleed_test;
-       bleed_maxrate = diag_bleed_maxrate;
+       bleed_maxrate= diag_bleed_maxrate;
        bleed_pixels  = diag_bleed_pixels;
-       ei-mon2-spec = test_ei2_mon_spectra;
+       deltaE_mode =  deltaE-mode;
+       ei-mon1-spec=ei_mon1_spec;       
+       ei-mon2-spec = test_ei2_mon_spectra=ei_mon2_spec;
        ei_mon_spectra=test_mon_spectra_composite"
     />
 </parameter>

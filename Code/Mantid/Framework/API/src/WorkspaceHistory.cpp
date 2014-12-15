@@ -276,11 +276,11 @@ void WorkspaceHistory::loadNexus(::NeXus::File * file)
 }
 
 /** Load every algorithm history object at this point in the hierarchy.
- * This method will recurse over every algorithm entry in the nexus file and 
+ * This method will recurse over every algorithm entry in the nexus file and
  * load both the record and its children.
- * 
+ *
  * @param file :: The handle to the nexus file
- * @param parent :: Pointer to the parent AlgorithmHistory object. If null then loaded histories are added to 
+ * @param parent :: Pointer to the parent AlgorithmHistory object. If null then loaded histories are added to
  * the workspace history.
  */
 void WorkspaceHistory::loadNestedHistory(::NeXus::File * file, AlgorithmHistory_sptr parent)
@@ -293,9 +293,9 @@ void WorkspaceHistory::loadNestedHistory(::NeXus::File * file, AlgorithmHistory_
     std::string rawData;
     file->openGroup(entryName, "NXnote");
     file->readData("data", rawData);
-    
+
     try
-    {      
+    {
       AlgorithmHistory_sptr history = parseAlgorithmHistory(rawData);
       loadNestedHistory(file, history);
       if(parent)
@@ -305,7 +305,7 @@ void WorkspaceHistory::loadNestedHistory(::NeXus::File * file, AlgorithmHistory_
       else
       {
         //if not parent point is supplied, assume we're at the top
-        //and attach the history to the workspace 
+        //and attach the history to the workspace
         this->addHistory(history);
       }
     }
@@ -320,7 +320,7 @@ void WorkspaceHistory::loadNestedHistory(::NeXus::File * file, AlgorithmHistory_
 
 }
 
-/** Find all the algorithm entries at a particular point the the nexus file 
+/** Find all the algorithm entries at a particular point the the nexus file
  * @param file :: The handle to the nexus file
  * @returns set of integers. One for each algorithm at the level in the file.
  */
@@ -431,7 +431,7 @@ AlgorithmHistory_sptr WorkspaceHistory::parseAlgorithmHistory(const std::string&
     unsigned int direc(Mantid::Kernel::Direction::asEnum(direction));
     alg_hist.addProperty(prop_name, prop_value, (is_def[0] == 'Y'), direc);
   }
-  
+
   AlgorithmHistory_sptr history = boost::make_shared<AlgorithmHistory>(alg_hist);
   return history;
 }
@@ -441,7 +441,7 @@ AlgorithmHistory_sptr WorkspaceHistory::parseAlgorithmHistory(const std::string&
  */
 boost::shared_ptr<HistoryView> WorkspaceHistory::createView() const
 {
-  return boost::make_shared<HistoryView>(*this); 
+  return boost::make_shared<HistoryView>(*this);
 }
 
 

@@ -615,6 +615,29 @@ namespace Mantid
       }
     }
 
+	 /** Expands the workspace to a number of spectra corresponding to the number of
+     *  pixels/detectors contained in specList.
+     *  All events lists will be empty after calling this method.
+     */
+		void EventWorkspace::padSpectra(const std::vector<int32_t> & specList)
+		{
+			if (specList.empty())
+			{
+				padSpectra();
+			}
+			else
+			{
+				resizeTo(specList.size());
+				for (size_t i = 0; i < specList.size(); ++i)
+				{
+					// specList ranges from 1, ..., N
+					// detector ranges from 0, ..., N-1
+					getSpectrum(i)->setDetectorID(specList[i]-1);
+					getSpectrum(i)->setSpectrumNo(specList[i]);
+				}
+			}
+		}
+
     void EventWorkspace::deleteEmptyLists()
     {
       // figure out how much data to copy
@@ -926,6 +949,7 @@ namespace Mantid
       size_t howManyCores = 1;
       // And auto-detect how many threads
       size_t howManyThreads = 0;
+#ifdef _OPENMP
       if (m_noVectors < num_threads * 10)
       {
         // If you have few vectors, sort with 2 cores.
@@ -940,6 +964,7 @@ namespace Mantid
         howManyCores = 4;
         howManyThreads = num_threads / 4 + 1;
       }
+#endif
       g_log.debug() << "Performing sort with " << howManyCores << " cores per EventList, in "
           << howManyThreads << " threads, using a chunk size of " << chunk_size << ".\n";
 

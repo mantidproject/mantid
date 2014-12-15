@@ -14,7 +14,7 @@ namespace Crystal
       Note that it is possible for multiple peaks in the rhs to be matched to a given lhs peak if
       the tolerance is too large/the peaks are close together.
 
-      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 

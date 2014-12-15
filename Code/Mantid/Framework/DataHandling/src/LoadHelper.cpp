@@ -84,7 +84,7 @@ namespace Mantid
     }
     /**
      * Calculate Neutron Energy from wavelength: \f$ E = h^2 / 2m\lambda ^2 \f$
-     *  @param wavelength :: wavelength in \f$ \AA \f$
+     *  @param wavelength :: wavelength in \f$ \mbox{\AA} \f$
      *  @return tof in seconds
      */
     double LoadHelper::calculateEnergy(double wavelength)

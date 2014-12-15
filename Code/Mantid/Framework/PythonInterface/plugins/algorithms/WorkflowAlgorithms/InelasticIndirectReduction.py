@@ -2,6 +2,7 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
+
 class InelasticIndirectReduction(DataProcessorAlgorithm):
 
     def category(self):
@@ -16,15 +17,15 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceGroup', '',
-                             direction=Direction.Output, optional=PropertyMode.Optional),
-                             doc='Optionally group the resulting workspaces')
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
+                             direction=Direction.Output),
+                             doc='Workspace group for the resulting workspaces')
 
         self.declareProperty(name='SumFiles', defaultValue=False, doc='Toggle input file summing or sequential processing')
         self.declareProperty(name='LoadLogs', defaultValue=False, doc='Load sample logs from input files')
 
         self.declareProperty(name='Instrument', defaultValue='', doc='Instrument used during run',
-                             validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'BASIS', 'VISION']))
+                             validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'TFXA', 'BASIS', 'VISION']))
         self.declareProperty(name='Analyser', defaultValue='', doc='Analyser used during run',
                              validator=StringListValidator(['graphite', 'mica', 'fmica', 'silicon']))
         self.declareProperty(name='Reflection', defaultValue='', doc='Reflection used during run',
@@ -43,7 +44,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         self.declareProperty(name='DetailedBalance', defaultValue=-1.0, doc='')
         self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='')
         self.declareProperty(name='Grouping', defaultValue='',
-                             doc='Method used to group spectra, can be either: Individual, All, a .map fielname or a group workspace name')
+                             doc='Method used to group spectra, can be either: Individual, All, a .map filename or a group workspace name')
         self.declareProperty(name='Fold', defaultValue=False, doc='')
         self.declareProperty(name='SaveCM1', defaultValue=False, doc='')
         self.declareProperty(StringArrayProperty(name='SaveFormats'), doc='Comma separated list of save formats')
@@ -76,10 +77,10 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
         reducer.set_detector_range(int(self._detector_range[0]) - 1, int(self._detector_range[1]) - 1)
 
-        self._use_calib_ws = self._calib_ws.value is not None
+        self._use_calib_ws = self._calib_ws_name != ''
         if self._use_calib_ws:
-            logger.debug('Using calibration workspace')
-            reducer.set_calibration_workspace(self._calib_ws.valueAsStr)
+            logger.information('Using calibration workspace: %s' % self._calib_ws_name)
+            reducer.set_calibration_workspace(self._calib_ws_name)
 
         if len(self._background_range) == 2:
             logger.debug('Using background range: ' + str(self._background_range))
@@ -123,15 +124,15 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
             self._add_ws_logs(workspace)
 
         # Group output workspaces
-        if self._out_ws_group != '':
-            GroupWorkspaces(InputWorkspaces=ws_list, OutputWorkspace=self._out_ws_group)
-            self.setProperty('OutputWorkspaceGroup', self._out_ws_group)
+        GroupWorkspaces(InputWorkspaces=ws_list, OutputWorkspace=self._out_ws_group)
+        self.setProperty('OutputWorkspace', self._out_ws_group)
 
         # Do plotting
         if self._plot_type != 'none':
             self._plot()
 
         EndTime('InelasticIndirectReduction')
+
 
     def validateInputs(self):
         """
@@ -147,9 +148,10 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
             if save_format not in valid_formats:
                 invalid_formats.append(save_format)
         if len(invalid_formats) > 0:
-            issues['SaveFormats'] = 'The following save formats are not valid' + ','.join(invalid_formats)
+            issues['SaveFormats'] = 'The following save formats are not valid: ' + ','.join(invalid_formats)
 
         return issues
+
 
     def _setup(self):
         """
@@ -157,7 +159,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         """
 
         # Get parameter values
-        self._out_ws_group = self.getPropertyValue('OutputWorkspaceGroup')
+        self._out_ws_group = self.getPropertyValue('OutputWorkspace')
         self._data_files = self.getProperty('InputFiles').value
 
         self._instrument = self.getPropertyValue('Instrument')
@@ -169,7 +171,6 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         self._detector_range = self.getProperty('DetectorRange').value
         self._background_range = self.getProperty('BackgroundRange').value
 
-        self._calib_ws = self.getProperty('CalibrationWorkspace')
         self._calib_ws_name = self.getPropertyValue('CalibrationWorkspace')
 
         self._detailed_balance = self.getProperty('DetailedBalance').value
@@ -181,6 +182,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
         self._save_formats = self.getProperty('SaveFormats').value
         self._plot_type = self.getPropertyValue('Plot')
+
 
     def _add_ws_logs(self, workspace_name):
         """

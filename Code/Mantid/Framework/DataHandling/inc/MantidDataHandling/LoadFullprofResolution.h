@@ -17,7 +17,7 @@ namespace Mantid
 
     /** LoadFullprofResolution : Load Fullprof resolution (.irf) file to TableWorkspace(s)
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -54,6 +54,39 @@ namespace Mantid
       ///Summary of algorithms purpose
       virtual const std::string summary() const {return "Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) and/or where this is supported."
         " See description section, translate fullprof resolution fitting parameter into Mantid equivalent fitting parameters.";}
+
+      /// Get row numbers of the parameters in the table workspace
+      static void getTableRowNumbers(const API::ITableWorkspace_sptr & tablews, std::map<std::string, size_t>& parammap);
+
+      /// Put parameters into a matrix workspace
+      static void putParametersIntoWorkspace( const API::Column_const_sptr, API::MatrixWorkspace_sptr ws, int profNumber, std::string & parameterXMLString);
+
+      /// Add an Ikeda-Carpenter PV ALFBE parameter 
+      static void addALFBEParameter(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent, const std::string& paramName);
+
+      /// Add set of Ikeda-Carpenter PV Sigma parameters 
+      static void addSigmaParameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+      /// Add set of Ikeda-Carpenter PV Gamma parameters 
+      static void addGammaParameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+      /// Add set of BackToBackExponential S parameters 
+      static void addBBX_S_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+      /// Add set of BackToBackExponential A parameters 
+      static void addBBX_A_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+      /// Add set of BackToBackExponential B parameters 
+      static void addBBX_B_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+      /// Get value for XML eq attribute for parameter
+      static std::string getXMLEqValue( const API::Column_const_sptr, const std::string& name );
+
+      /// Get value for XML eq attribute for squared parameter
+      static std::string getXMLSquaredEqValue( const API::Column_const_sptr column, const std::string& name );
+
+      // Translate a parameter name from as it appears in the table workspace to its name in the XML file
+      static std::string getXMLParameterName( const std::string& name );
 
     private:
       /// Implement abstract Algorithm methods
@@ -94,41 +127,8 @@ namespace Mantid
       /// Create Bank to Workspace Correspondence
       void createBankToWorkspaceMap ( const std::vector<int>& banks, const std::vector<int>& workspaces, std::map< int, size_t>& WorkpsaceOfBank );
 
-      /// Put parameters into a matrix workspace
-      void putParametersIntoWorkspace( const API::Column_const_sptr, API::MatrixWorkspace_sptr ws, int profNumber);
-
-      /// Add an Ikeda-Carpenter PV ALFBE parameter 
-      void addALFBEParameter(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent, const std::string& paramName);
-
-      /// Add set of Ikeda-Carpenter PV Sigma parameters 
-      void addSigmaParameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
-
-      /// Add set of Ikeda-Carpenter PV Gamma parameters 
-      void addGammaParameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
-
-      /// Add set of BackToBackExponential S parameters 
-      void addBBX_S_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
-
-      /// Add set of BackToBackExponential A parameters 
-      void addBBX_A_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
-
-      /// Add set of BackToBackExponential B parameters 
-      void addBBX_B_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
-
-      /// Get value for XML eq attribute for parameter
-      std::string getXMLEqValue( const API::Column_const_sptr, const std::string& name );
-
-      /// Get value for XML eq attribute for squared parameter
-      std::string getXMLSquaredEqValue( const API::Column_const_sptr column, const std::string& name );
-
-      // Translate a parameter name from as it appears in the table workspace to its name in the XML file
-      std::string getXMLParameterName( const std::string& name );
-
-      /// Get row numbers of the parameters in the table workspace
-      void getTableRowNumbers(const API::ITableWorkspace_sptr & tablews, std::map<std::string, size_t>& parammap);
-
       /// Place to store the row numbers
-      std::map<std::string, size_t> m_rowNumbers;
+      static std::map<std::string, size_t> m_rowNumbers;
 
     };
 

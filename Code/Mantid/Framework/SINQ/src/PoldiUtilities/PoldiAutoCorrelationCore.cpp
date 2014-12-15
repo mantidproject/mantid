@@ -11,6 +11,8 @@
 #include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 
+#include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
+
 namespace Mantid
 {
 namespace Poldi
@@ -29,7 +31,7 @@ PoldiAutoCorrelationCore::PoldiAutoCorrelationCore(Kernel::Logger &g_log) :
     m_weightsForD(),
     m_tofsFor1Angstrom(),
     m_countData(),
-    m_elementsMaxIndex(0),
+    m_normCountData(),
     m_sumOfWeights(0.0),
     m_correlationBackground(0.0),
     m_damp(0.0),
@@ -42,7 +44,7 @@ PoldiAutoCorrelationCore::PoldiAutoCorrelationCore(Kernel::Logger &g_log) :
   * @param detector :: Instance of PoldiAbstractDetector.
   * @param chopper :: Instance of PoldiAbstractChopper.
   */
-void PoldiAutoCorrelationCore::setInstrument(boost::shared_ptr<PoldiAbstractDetector> detector, boost::shared_ptr<PoldiAbstractChopper> chopper)
+void PoldiAutoCorrelationCore::setInstrument(const PoldiAbstractDetector_sptr &detector, const PoldiAbstractChopper_sptr &chopper)
 {
     m_detector = detector;
     m_chopper = chopper;
@@ -60,18 +62,57 @@ void PoldiAutoCorrelationCore::setWavelengthRange(double lambdaMin, double lambd
     m_wavelengthRange = std::make_pair(lambdaMin, lambdaMax);
 }
 
+/** Finalizes the calculation of the correlation spectrum
+  *
+  * This method offers a variable way of using the correlation spectrum calculated previously.
+  * The base version converts to Q and creates an appropriate output workspace.
+  *
+  * @param correctedCorrelatedIntensities :: Intensities of correlation spectrum.
+  * @param dValues :: d-spacings at which the spectrum was calculated.
+  * @return A workspace containing the correlation spectrum.
+  */
+DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::finalizeCalculation(const std::vector<double> &correctedCorrelatedIntensities, const std::vector<double> &dValues) const
+{
+    /* Finally, the d-Values are converted to q-Values for plotting etc. and inserted into the output workspace. */
+    size_t dCount = dValues.size();
+    std::vector<double> qValues(dCount);
+
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for(int i = 0; i < static_cast<int>(dCount); ++i) {
+        qValues[dCount - i - 1] = Conversions::dToQ(dValues[i]);
+    }
+
+    m_logger.information() << "  Setting result..." << std::endl;
+    DataObjects::Workspace2D_sptr outputWorkspace = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
+            (WorkspaceFactory::Instance().create("Workspace2D", 1, dValues.size(), dValues.size()));
+
+    outputWorkspace->getAxis(0)->setUnit("MomentumTransfer");
+
+    outputWorkspace->dataY(0) = correctedCorrelatedIntensities;
+
+    outputWorkspace->setX(0, qValues);
+
+    return outputWorkspace;
+}
+
 /** Performs auto-correlation algorithm on the POLDI data in the supplied workspace.
   *
   * @param countData :: Instance of Workspace2D with POLDI data.
   * @return A workspace containing the correlation spectrum.
   */
-DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::Workspace2D_sptr countData)
+DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::Workspace2D_sptr &countData, const DataObjects::Workspace2D_sptr &normCountData)
 {
     m_logger.information() << "Starting Autocorrelation method..." << std::endl;
 
     if(m_detector && m_chopper) {
         m_logger.information() << "  Assigning count data..." << std::endl;
         setCountData(countData);
+
+        if(normCountData) {
+            setNormCountData(normCountData);
+        } else {
+            setNormCountData(countData);
+        }
 
         /* Calculations related to experiment timings
          *  - width of time bins (deltaT)
@@ -142,7 +183,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
         double sumOfCounts = getSumOfCounts(m_timeBinCount, m_detectorElements);
         m_logger.information() << "  Summing intensities (" << sumOfCounts << ")..." << std::endl;
 
-        m_correlationBackground = sumOfCorrelatedIntensities - sumOfCounts;
+        m_correlationBackground = calculateCorrelationBackground(sumOfCorrelatedIntensities, sumOfCounts);
 
         m_logger.information() << "  Correcting intensities..." << std::endl;
         std::vector<double> correctedCorrelatedIntensities(dValues.size());
@@ -151,28 +192,11 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
                        correctedCorrelatedIntensities.rbegin(),
                        boost::bind<double>(&PoldiAutoCorrelationCore::correctedIntensity, this, _1, _2));
 
-        /* Finally, the d-Values are converted to q-Values for plotting etc. and inserted into the output workspace. */
-        size_t dCount = dValues.size();
-        std::vector<double> qValues(dCount);
-
-        PARALLEL_FOR_NO_WSP_CHECK()
-        for(int i = 0; i < static_cast<int>(dCount); ++i) {
-            qValues[dCount - i - 1] = Conversions::dToQ(dValues[i]);
-        }
-
-        m_logger.information() << "  Setting result..." << std::endl;
-        DataObjects::Workspace2D_sptr outputWorkspace = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
-                (WorkspaceFactory::Instance().create("Workspace2D", 3, dValues.size(), dValues.size()));
-
-        outputWorkspace->getAxis(0)->setUnit("MomentumTransfer");
-
-        outputWorkspace->dataY(0) = correctedCorrelatedIntensities;
-
-        outputWorkspace->setX(0, qValues);
-        outputWorkspace->setX(1, qValues);
-        outputWorkspace->setX(2, qValues);
-
-        return outputWorkspace;
+        /* The algorithm performs some finalization. In the default case the spectrum is
+         * simply converted to Q and stored in a workspace. The reason to make this step variable
+         * is that for calculation of residuals, everything is the same except this next step.
+         */
+        return finalizeCalculation(correctedCorrelatedIntensities, dValues);
     } else {
         throw std::runtime_error("PoldiAutoCorrelationCore was run without specifying detector and chopper.");
     }
@@ -245,10 +269,10 @@ double PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue, double
             slitOffset != m_chopper->slitTimes().end();
             ++slitOffset) {
             /* For each offset, the sum of correlation intensity and error (for each detector element)
-            * is computed from the counts in the space/time location possible for this d-value (by getCMessAndCSigma).
-            * These pairs are put into a vector for later analysis. The size of this vector
-            * is equal to the number of chopper slits.
-            */
+             * is computed from the counts in the space/time location possible for this d-value (by getCMessAndCSigma).
+             * These pairs are put into a vector for later analysis. The size of this vector
+             * is equal to the number of chopper slits.
+             */
             std::vector<UncertainValue> cmess(m_detector->elementCount());
             std::transform(m_indices.begin(), m_indices.end(),
                            cmess.begin(),
@@ -260,8 +284,8 @@ double PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue, double
         }
 
         /* Finally, the list of I/sigma values is reduced to I.
-        * The algorithm used for this depends on the intended use.
-        */
+         * The algorithm used for this depends on the intended use.
+         */
         return reduceChopperSlitList(current, weight);
     } catch (std::domain_error) {
         /* Trying to construct an UncertainValue with negative error will throw, so to preserve
@@ -280,32 +304,10 @@ double PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue, double
   */
 UncertainValue PoldiAutoCorrelationCore::getCMessAndCSigma(double dValue, double slitTimeOffset, int index) const
 {
-    /* Element index and TOF for 1 Angstrom from current setup. */
-    int element = getElementFromIndex(index);
-    double tofFor1Angstrom = getTofFromIndex(index);
-
-    /* Central time bin for given d-value in this wire, taking into account the offset resulting from chopper slit. */
-    double rawCenter = (m_chopper->zeroOffset() + tofFor1Angstrom * dValue) / m_deltaT;
-    double center = rawCenter - floor(rawCenter / static_cast<double>(m_timeBinCount)) * static_cast<double>(m_timeBinCount) + slitTimeOffset / m_deltaT;
-
-    /* Since resolution in terms of d is limited, dValue is actually dValue +/- deltaD, so the arrival window
-     * may be of different width.
+    /* The "count locator" describes where the counts for a given combination of d, time offset and 2-theta value
+     * (corresponding to dValue, slitTimeOffset and index) can be found on the detector.
      */
-    double width = tofFor1Angstrom * m_deltaD / m_deltaT;
-
-    /* From center and width, the indices of time bins that may be involved are derived.
-     * Since the spectrum is periodic, the index wraps around. For accessing the count
-     * data, integer indices are calculated and wrapped. For calculating the correlation terms,
-     * floating point numbers are required.
-     */
-    double cmin = center - width / 2.0;
-    double cmax = center + width / 2.0;
-
-    int icmin = static_cast<int>(floor(cmin));
-    int icmax = static_cast<int>(floor(cmax));
-
-    int iicmin = cleanIndex(icmin, m_timeBinCount);
-    int iicmax = cleanIndex(icmax, m_timeBinCount);
+    CountLocator locator = getCountLocator(dValue, slitTimeOffset, index);
 
     /* In the original fortran program, three cases are considered for the width
      * of the arrival window: 1, 2 and 3 time bins (which corresponds to index differences of
@@ -316,38 +318,38 @@ UncertainValue PoldiAutoCorrelationCore::getCMessAndCSigma(double dValue, double
      * able to use different sources for different implementations, getCounts() and getNormCounts() are
      * provided.
      */
-    int indexDifference = icmax - icmin;
+    int indexDifference = locator.icmax - locator.icmin;
 
     double value = 0.0;
     double error = 0.0;
 
-    double minCounts = getCounts(element, iicmin);
-    double normMinCounts = getNormCounts(element, iicmin);
+    double minCounts = getCounts(locator.detectorElement, locator.iicmin);
+    double normMinCounts = getNormCounts(locator.detectorElement, locator.iicmin);
 
     switch(indexDifference) {
     case 0: {
-            value = minCounts * width / normMinCounts;
-            error = width / normMinCounts;
+            value = minCounts * locator.arrivalWindowWidth / normMinCounts;
+            error = locator.arrivalWindowWidth / normMinCounts;
             break;
         }
     case 2: {
-            int middleIndex = cleanIndex((icmin + 1), m_timeBinCount);
+            int middleIndex = cleanIndex((locator.icmin + 1), m_timeBinCount);
 
-            double counts = getCounts(element, middleIndex);
-            double normCounts = getNormCounts(element, middleIndex);
+            double counts = getCounts(locator.detectorElement, middleIndex);
+            double normCounts = getNormCounts(locator.detectorElement, middleIndex);
 
             value = counts * 1.0 / normCounts;
             error = 1.0 / normCounts;
         }
     case 1: {
-            value += minCounts * (static_cast<double>(icmin) - cmin + 1.0) / normMinCounts;
-            error += (static_cast<double>(icmin) - cmin + 1.0) / normMinCounts;
+            value += minCounts * (static_cast<double>(locator.icmin) - locator.cmin + 1.0) / normMinCounts;
+            error += (static_cast<double>(locator.icmin) - locator.cmin + 1.0) / normMinCounts;
 
-            double maxCounts = getCounts(element, iicmax);
-            double normMaxCounts = getNormCounts(element, iicmax);
+            double maxCounts = getCounts(locator.detectorElement, locator.iicmax);
+            double normMaxCounts = getNormCounts(locator.detectorElement, locator.iicmax);
 
-            value += maxCounts * (cmax - static_cast<double>(icmax)) / normMaxCounts;
-            error += (cmax - static_cast<double>(icmax)) / normMaxCounts;
+            value += maxCounts * (locator.cmax - static_cast<double>(locator.icmax)) / normMaxCounts;
+            error += (locator.cmax - static_cast<double>(locator.icmax)) / normMaxCounts;
             break;
         }
     default:
@@ -355,6 +357,50 @@ UncertainValue PoldiAutoCorrelationCore::getCMessAndCSigma(double dValue, double
     }
 
     return UncertainValue(value, error);
+}
+
+/** Return parameters for locating counts in the data
+  *
+  * This method forms the heart of PoldiAutoCorrelationCore::getCMessAndCSigma, by returning
+  * an object that contains the necessary information to locate counts in the stored data
+  * that belong to a given combination of d, TOF-offset and detector element.
+  *
+  * @param dValue :: d-spacing that should be located.
+  * @param slitTimeOffset :: TOF offset given by chopper slit.
+  * @param index :: Index of detector element.
+  * @return CountLocator object which contains information about the location of counts.
+  */
+CountLocator PoldiAutoCorrelationCore::getCountLocator(double dValue, double slitTimeOffset, int index) const
+{
+    CountLocator locator;
+    /* Element index and TOF for 1 Angstrom from current setup. */
+    locator.detectorElement = getElementFromIndex(index);
+    double tofFor1Angstrom = getTofFromIndex(index);
+
+    /* Central time bin for given d-value in this wire, taking into account the offset resulting from chopper slit. */
+    double rawCenter = (m_chopper->zeroOffset() + tofFor1Angstrom * dValue) / m_deltaT;
+    locator.arrivalWindowCenter = rawCenter - floor(rawCenter / static_cast<double>(m_timeBinCount)) * static_cast<double>(m_timeBinCount) + slitTimeOffset / m_deltaT;
+
+    /* Since resolution in terms of d is limited, dValue is actually dValue +/- deltaD, so the arrival window
+     * may be of different width.
+     */
+    locator.arrivalWindowWidth = tofFor1Angstrom * m_deltaD / m_deltaT;
+
+    /* From center and width, the indices of time bins that may be involved are derived.
+     * Since the spectrum is periodic, the index wraps around. For accessing the count
+     * data, integer indices are calculated and wrapped. For calculating the correlation terms,
+     * floating point numbers are required.
+     */
+    locator.cmin = locator.arrivalWindowCenter - locator.arrivalWindowWidth / 2.0;
+    locator.cmax = locator.arrivalWindowCenter + locator.arrivalWindowWidth / 2.0;
+
+    locator.icmin = static_cast<int>(floor(locator.cmin));
+    locator.icmax = static_cast<int>(floor(locator.cmax));
+
+    locator.iicmin = cleanIndex(locator.icmin, m_timeBinCount);
+    locator.iicmax = cleanIndex(locator.icmax, m_timeBinCount);
+
+    return locator;
 }
 
 
@@ -374,19 +420,43 @@ int PoldiAutoCorrelationCore::cleanIndex(int index, int maximum) const
     return cleanIndex;
 }
 
-/** Assigns workspace pointer containing count data to class member, stores maximum histogram index
+/** Assigns workspace pointer containing count data to class member
   *
   * @param countData :: Workspace containing count data
   */
-void PoldiAutoCorrelationCore::setCountData(DataObjects::Workspace2D_sptr countData)
+void PoldiAutoCorrelationCore::setCountData(const DataObjects::Workspace2D_sptr &countData)
 {
     m_countData = countData;
-    m_elementsMaxIndex = static_cast<int>(countData->getNumberHistograms()) - 1;
 }
 
+
+/** Assigns workspace pointer containing norm count data to class member
+  *
+  * @param countData :: Workspace containing norm count data
+  */
+void PoldiAutoCorrelationCore::setNormCountData(const DataObjects::Workspace2D_sptr &normCountData)
+{
+    m_normCountData = normCountData;
+}
+
+/** Returns the corrected intensity.
+  *
+  * This method returns the corrected intensity calculated from the supplied intensity value
+  * and weight. It also uses the internally stored values for the correlation background
+  * and the sum of weights for all d values.
+  *
+  * @param intensity :: Raw correlation intensity.
+  * @param weight :: Weight as determined in calculateDWeights.
+  * @return Corrected correlation intensity.
+ */
 double PoldiAutoCorrelationCore::correctedIntensity(double intensity, double weight) const
 {
     return intensity - m_correlationBackground * weight / m_sumOfWeights;
+}
+
+double PoldiAutoCorrelationCore::calculateCorrelationBackground(double sumOfCorrelationCounts, double sumOfCounts) const
+{
+    return sumOfCorrelationCounts - sumOfCounts;
 }
 
 /** Reduces list of I/sigma-pairs for N chopper slits to correlation intensity by checking for negative I/sigma-ratios and summing their inverse values.
@@ -476,7 +546,7 @@ double PoldiAutoCorrelationCore::getCounts(int x, int y) const
   */
 double PoldiAutoCorrelationCore::getNormCounts(int x, int y) const
 {
-    return std::max(1.0, m_countData->readY(x)[y]);
+    return std::max(1.0, m_normCountData->readY(x)[y]);
 }
 
 /** Returns detector element index for given index

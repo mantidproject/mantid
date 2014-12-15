@@ -12786,7 +12786,7 @@ static const char * managefolders_xpm[] = {
 
 
 /* TiledWindow icon */
-static char * tiledwindow_xpm[] = {
+static const char * tiledwindow_xpm[] = {
 "15 16 5 1",
 " 	c None",
 ".	c #000000",

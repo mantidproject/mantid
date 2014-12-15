@@ -5,6 +5,8 @@
 // Includes
 //----------------------
 #include "ui_IndirectDiffractionReduction.h"
+
+#include "MantidQtAPI/BatchAlgorithmRunner.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
 namespace MantidQt
@@ -27,28 +29,40 @@ public:
   ~IndirectDiffractionReduction();
 
 public slots:
-  void demonRun();  
+  void demonRun();
   void instrumentSelected(int);
   void reflectionSelected(int);
   void openDirectoryDialog();
   void help();
+  void plotResults(bool error);
+  void runFilesChanged();
+  void runFilesFinding();
+  void runFilesFound();
+  void individualGroupingToggled(int state);
 
 private:
-  /// Initialize the layout
   virtual void initLayout();
   void initLocalPython();
+
   void loadSettings();
   void saveSettings();
 
-  bool validateDemon();
+  bool validateRebin();
+  bool validateVanCal();
+
+  Mantid::API::MatrixWorkspace_sptr loadInstrument(std::string instrumentName,
+      std::string reflection = "");
+
+  void runGenericReduction(QString instName, QString mode);
+  void runOSIRISdiffonlyReduction();
 
 private:
-  /// The form generated using Qt Designer
-  Ui::IndirectDiffractionReduction m_uiForm;
+  Ui::IndirectDiffractionReduction m_uiForm;  /// The form generated using Qt Designer
   QIntValidator * m_valInt;
   QDoubleValidator * m_valDbl;
-  /// The settings group
-  QString m_settingsGroup;
+  QString m_settingsGroup;                    /// The settings group
+  MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
+  std::vector<std::string> m_plotWorkspaces;
 
 };
 

@@ -17,7 +17,7 @@ namespace Algorithms
     @author Steve Williams ISIS Rutherford Appleton Laboratory 
     @date 10/12/2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -47,7 +47,7 @@ public:
   /// Algorithm's name
   virtual const std::string name() const { return "Q1D"; }
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Converts a workspace of counts in wavelength bins into a workspace of counts verses momentum transfer, Q, assuming completely elastic scattering";}
+    virtual const std::string summary() const {return "SANS 1D reduction. Converts a workspace in wavelength into a workspace of momentum transfer, assuming elastic scattering";}
 
   /// Algorithm's version
   virtual int version() const { return (2); }

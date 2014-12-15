@@ -38,15 +38,6 @@ cost function as
 
 , which p is the index of a peak whose position is within MinD and MaxD.
 
-Spectra to mask
-###############
-
--  Empty spectrum marked as "empty det"
-
--  Spectrum with counts less than :math:`10^{-3}` in defined d-range as "dead
-   det"
-
--  Calculated offset exceeds the user-defined maximum offset.
 
 Criteria on peaks
 #################
@@ -61,18 +52,28 @@ A peak will not be used if
 -  its :math:`\chi^2` of peak fitting is larger than pre-defined maximum
    value;
 -  its height is lower than pre-defined lowest peak height;
+-  its observed maximum value corrected by background is smaller than user specified value; 
 -  its signal/noise ratio is less than 5
    :math:`H\cdot FWHM\_To\_SIGMA/width < 5`;
 -  its height is not outside of error bars of background
    :math:`H < \sqrt{H + B}/2`;
--  its z-value on :math:`\frac{\delta d}{d}` is larger than 2.0.
+-  its z-value on :math:`\frac{\delta d}{d}` is larger than 2.0;
+-  its offset from theoretical position exceeds the limitation specified by user; 
+-  its resolution (:math:`\Delta(d)/d`) is out of user-specified range. 
 
 Generate fit window
 ###################
 
--  Required parameter: maxWidth. If it is not given, i.e., less or equal
-   to zero, then there won't be any window defined;
--  Definition of fit window for peaks indexed from 0 to N-1
+There are two approach to generate fit window.  One is via property 'FitWindowMaxWidth';
+and the other is 'FitwindowTableWorkspace'.
+
+If neither of these 2 properties are correctly specified, then then there won't be any window defined.
+
+Uniform fit window
+==================
+
+By specifying a postive float, maxWidth, for 'FitWindowMaxWidth',
+it is the definition of fit window for peaks indexed from 0 to N-1:
 
    -  Peak 0: window = :math:`\min((X0_0-dmin), maxWidth)`, :math:`\min((X0_1-X0_0)/2,maxWidth)`
    -  Peak :math:`i (0 < i < N-1)`: window = :math:`\min((X0_i-X0_{i-1})/2, maxWidth)`, :math:`\min((X0_1-X0_0)/2, maxWidth)`
@@ -80,8 +81,28 @@ Generate fit window
 
 where :math:`X0_i` is the centre of i-th peak.
 
-Fitting Quality
----------------
+Fit window for individual peak
+==============================
+
+FitwindowTableWorkspace contains the fit window for each individual peak in the workspace
+to find.
+It contains :math:`1+2\times N` columns, where N is the number of peaks positions specified in 'DReference'.
+
+- Column 0: spectrum number (workspace index) :math:`iws`.  If :math:`iws < 0`, then it is a 'universal' spectrum;
+- Column :math:`2i+1`: left boundary of peak :math:`i` defined in 'DReference' of spectrum :math:`iws`;
+- Column :math:`2i+2`: right boundary of peak :math:`i` defined in 'DReference' of spectrum :math:`iws`;
+
+Default fit windows
++++++++++++++++++++
+
+In the fit window table workspace, if there is a row, whose 'spectrum number' is a negative number,
+then the fit windows defined in this row is treated as the default fit windows.
+It means that for any spectrum that has no fit windows defined in the tableworkspace,
+the default fit windows will be applied to it.
+
+
+Quality of Fitting
+------------------
 
 GetDetOffsetsMultiPeaks have 2 levels of fitting. First it will call
 FindPeaks to fit Bragg peaks within d-range. Then it will fit offsets
@@ -173,6 +194,27 @@ And it is unitless.
 
 By this mean, the error of all peaks should be close if they are fitted
 correctly.
+
+
+Spectra to be masked
+--------------------
+
+A MaskWorskpace is output from the algorithm.  Along with it, a TableWorkspace is output
+to describe the status of offset calculation. 
+
+Here are the cases that a spectra (i.e., a detector) will be masked in the output MaskWorkspace. 
+
+-  An empty spectrum (i.e., the corresponding EventList is empty).  It is noted as "empty det";
+
+-  A dead detector, i.e., the corresponding spectrum has counts less than :math:`10^{-3}` in defined d-range.  It isnoted as "dead det";
+
+-  A spectrum that does not have peak within specified d-range.  It is noted as "no peaks". Here is the criteria for this case.
+
+ - Algorithm FindPeaks fails to find any peak;
+ - No peak found has height larger than specified 'MinimumPeakHeight';
+ - No peak found has observed height larger than specified 'MinimumPeakHeightObs';
+ - No peak found has resolution within specified range;
+ - No peak found whose calculated offset is smaller than the user-defined maximum offset.
 
 Usage
 -----

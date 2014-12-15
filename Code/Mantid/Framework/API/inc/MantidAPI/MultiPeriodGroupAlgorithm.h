@@ -15,7 +15,7 @@ namespace API
   /** MutliPeriodGroupAlgorithm : Abstract algorithm. Algorithms that need special processing for Mutli-Period group workspaces should inherit from this 
   algorithm rather than from Algorithm directly. This algorithm processes workspaces in each group input in a pair-wise fashion to give a group workspace output.
     
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

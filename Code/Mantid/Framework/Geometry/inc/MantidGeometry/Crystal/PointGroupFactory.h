@@ -6,6 +6,8 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
 
+#include <boost/regex.hpp>
+
 namespace Mantid
 {
 namespace Geometry
@@ -47,6 +49,7 @@ namespace Geometry
   {
   public:
       PointGroup_sptr createPointGroup(const std::string &hmSymbol) const;
+      PointGroup_sptr createPointGroupFromSpaceGroupSymbol(const std::string &spaceGroupSymbol) const;
 
       std::vector<std::string> getAllPointGroupSymbols() const;
       std::vector<std::string> getPointGroupSymbols(const PointGroup::CrystalSystem &crystalSystem) const;
@@ -78,7 +81,14 @@ namespace Geometry
       void addToCrystalSystemMap(const PointGroup::CrystalSystem &crystalSystem, const std::string &hmSymbol);
       void removeFromCrystalSystemMap(const std::string &hmSymbol);
 
+      std::string pointGroupSymbolFromSpaceGroupSymbol(const std::string &spaceGroupSymbol) const;
+
       std::map<std::string, PointGroup::CrystalSystem> m_crystalSystemMap;
+
+      boost::regex m_screwAxisRegex;
+      boost::regex m_glidePlaneRegex;
+      boost::regex m_centeringRegex;
+      boost::regex m_originChoiceRegex;
   };
 
 // This is taken from FuncMinimizerFactory

@@ -26,7 +26,7 @@ namespace LiveData
     The algorithm silently defines three additional spectra with numbers NSpectra+1, NSpectra+2 and NSpectra+3 in a
     different time regime (they have different binning to the rest of the spectra).
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

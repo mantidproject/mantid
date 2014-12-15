@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>reflOptionsDialog</class>
+ <widget class="QDialog" name="reflOptionsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>372</width>
+    <height>222</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Reflectometry UI Options</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tabWarnings">
+      <attribute name="title">
+       <string>Warnings</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayout">
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="checkWarnProcessAll">
+         <property name="text">
+          <string>Warn when processing all rows</string>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>WarnProcessAll</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QCheckBox" name="checkWarnDiscardChanges">
+         <property name="text">
+          <string>Warn when discarding unsaved changes</string>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>WarnDiscardChanges</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="checkWarnProcessPartialGroup">
+         <property name="text">
+          <string>Warn when processing only part of a group</string>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>WarnProcessPartialGroup</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabRounding">
+      <attribute name="title">
+       <string>Rounding</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="2" column="0">
+        <widget class="QCheckBox" name="checkRoundQMax">
+         <property name="text">
+          <string>Round q_max column to</string>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>RoundQMax</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QSpinBox" name="spinQMinPrecision">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>RoundQMinPrecision</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QSpinBox" name="spinQMaxPrecision">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>RoundQMaxPrecision</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QSpinBox" name="spinDQQPrecision">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>RoundDQQPrecision</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="checkRoundQMin">
+         <property name="text">
+          <string>Round q_min column to</string>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>RoundQMin</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QCheckBox" name="checkRoundDQQ">
+         <property name="text">
+          <string>Round dq/q column to</string>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>RoundDQQ</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="checkRoundAngle">
+         <property name="text">
+          <string>Round Angle column to</string>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>RoundAngle</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QSpinBox" name="spinAnglePrecision">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="reflOptionName" stdset="0">
+          <string>RoundAnglePrecision</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="labelAnglePlaces">
+         <property name="text">
+          <string>decimal places</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="labelQMinPlaces">
+         <property name="text">
+          <string>decimal places</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLabel" name="labelQMaxPlaces">
+         <property name="text">
+          <string>decimal places</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QLabel" name="labelDQQPlaces">
+         <property name="text">
+          <string>decimal places</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>reflOptionsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>reflOptionsDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkRoundAngle</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spinAnglePrecision</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>106</x>
+     <y>53</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>226</x>
+     <y>53</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkRoundQMin</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spinQMinPrecision</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>106</x>
+     <y>84</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>226</x>
+     <y>84</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkRoundQMax</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spinQMaxPrecision</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>106</x>
+     <y>115</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>226</x>
+     <y>115</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkRoundDQQ</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spinDQQPrecision</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>106</x>
+     <y>146</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>226</x>
+     <y>146</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

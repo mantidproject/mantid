@@ -63,7 +63,7 @@ namespace Mantid
     @authors Janik Zikovsky, Vickie Lynch, SNS
     @date Oct 2010
 
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -128,12 +128,6 @@ private:
   static const std::string RECTANGULAR_GROUP;
   /// Input workspace name
   static const std::string INPUT_WORKSPACE;
-
-  /// Pixels in the detector
-  int XPixels;
-  /// Pixels in the detector
-  int YPixels;
-
   /// Number to sum
   int AdjX;
   /// Number to sum

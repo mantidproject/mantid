@@ -16,14 +16,14 @@
 
 /// Parallel region start macro. Different to generic one as that is specific to algorithms
 /// Assumes boolean exceptionThrow has been declared
-#define OMP_START_INTERRUPT \
+#define BEGIN_PARALLEL_REGION \
     if (!exceptionThrown && !this->cancellationRequestReceived()) \
     { \
       try \
       {
 
 /// Parallel region end macro. Different to generic one as that is specific to algorithms
-#define OMP_END_INTERRUPT \
+#define END_PARALLEL_REGION \
       } \
       catch(std::exception &ex) \
       { \
@@ -40,7 +40,7 @@
     }
 
 /// Check for exceptions in parallel region
-#define OMP_INTERRUPT_CHECK \
+#define CHECK_PARALLEL_EXCEPTIONS \
   if (exceptionThrown) \
   { \
     g_log.debug("Exception thrown in parallel region"); \
@@ -130,7 +130,7 @@ namespace Mantid
         }
       }
 
-      bool exceptionThrown = false;
+      bool exceptionThrown = false; // required for *_PARALLEL_* macros
       PARALLEL_FOR_NO_WSP_CHECK()
       for(int i = 0; i < nthreads; ++i)
       {
@@ -140,21 +140,18 @@ namespace Mantid
         size_t boxIndex(0);
         do
         {
-          OMP_START_INTERRUPT
+          BEGIN_PARALLEL_REGION // Not standard macros. See top of file for reason
 
-          const double avgSignal = functionMD(*boxIterator);
-          const size_t resultIndex = resultsOffset + boxIndex;
-          PARALLEL_CRITICAL(ResolutionConvolvedCrossSection_function)
-          {
-            values.setCalculated(resultIndex, avgSignal);
-          }
+          storeCalculatedWithMutex(resultsOffset + boxIndex,
+                                   functionMD(*boxIterator),
+                                   values);
           ++boxIndex;
 
-          OMP_END_INTERRUPT
+          END_PARALLEL_REGION  // Not standard macros. See top of file for reason
         }
         while(boxIterator->next());
       }
-      OMP_INTERRUPT_CHECK
+      CHECK_PARALLEL_EXCEPTIONS  // Not standard macros. See top of file for reason
 
       for(auto it = iterators.begin(); it != iterators.end(); ++it)
       {
@@ -335,6 +332,19 @@ namespace Mantid
       {
         this->declareAttribute(*iter, fgModel.getAttribute(*iter));
       }
+    }
+
+    /**
+     * @param index Index value into functionValues array
+     * @param signal Calculated signal value
+     * @param functionValues [InOut] Final calculated values
+     */
+    void
+    ResolutionConvolvedCrossSection::storeCalculatedWithMutex(const size_t index, const double signal,
+                                                              API::FunctionValues& functionValues) const
+    {
+      Poco::FastMutex::ScopedLock lock(m_valuesMutex);
+      functionValues.setCalculated(index, signal);
     }
 
   }

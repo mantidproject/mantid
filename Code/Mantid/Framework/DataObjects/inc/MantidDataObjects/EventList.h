@@ -45,7 +45,7 @@ enum EventSortType {UNSORTED, TOF_SORT, PULSETIME_SORT, PULSETIMETOF_SORT, TIMEA
     @author Janik Zikovsky, SNS ORNL
     @date 4/02/2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

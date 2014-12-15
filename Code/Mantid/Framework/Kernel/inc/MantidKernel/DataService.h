@@ -27,7 +27,7 @@ namespace Kernel
     This is the primary data service that  the users will interact with either through writing scripts or directly
     through the API. It is implemented as a singleton class.
 
-    Copyright &copy; 2008-2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

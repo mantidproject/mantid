@@ -13,6 +13,9 @@
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/MultiThreaded.h"
+
+#include <Poco/ActiveResult.h>
+
 #include <cstdarg>
 
 #ifdef _WIN32
@@ -80,12 +83,39 @@ FrameworkManagerImpl::FrameworkManagerImpl()
 #endif
 
   g_log.debug() << "FrameworkManager created." << std::endl;
+
+  int updateInstrumentDefinitions = 0;
+  int reVal = Kernel::ConfigService::Instance().getValue("UpdateInstrumentDefinitions.OnStartup",updateInstrumentDefinitions);
+  if ((reVal == 1) &&  (updateInstrumentDefinitions == 1))
+  {
+    UpdateInstrumentDefinitions();
+  }
+  else
+  {
+    g_log.information() << "Instrument updates disabled - cannot update instrument definitions." << std::endl;
+  }
 }
 
 /// Destructor
 FrameworkManagerImpl::~FrameworkManagerImpl()
 {
 }
+
+/// Update instrument definitions from github
+void FrameworkManagerImpl::UpdateInstrumentDefinitions()
+{
+  try
+  {
+    IAlgorithm* algDownloadInstrument = this->createAlgorithm("DownloadInstrument");
+    algDownloadInstrument->setAlgStartupLogging(false);
+    Poco::ActiveResult<bool> result = algDownloadInstrument->executeAsync();
+  }
+  catch (Kernel::Exception::NotFoundError &)
+  {
+      g_log.debug() << "DowndloadInstrument algorithm is not available - cannot update instrument definitions." << std::endl;
+  }
+}
+
 
 /**
  * Load a set of plugins from the path pointed to by the given config key

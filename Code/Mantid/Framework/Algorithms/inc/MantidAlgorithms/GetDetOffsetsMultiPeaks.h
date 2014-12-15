@@ -48,7 +48,7 @@ struct FitPeakOffsetResult
  @author Vickie Lynch, SNS
  @date 12/12/2011
 
- Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 

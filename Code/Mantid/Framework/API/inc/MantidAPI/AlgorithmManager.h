@@ -35,7 +35,7 @@ namespace API
 /** The AlgorithmManagerImpl class is responsible for controlling algorithm 
     instances. It incorporates the algorithm factory and initializes algorithms.
 
-    Copyright &copy; 2007-2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid. 
 

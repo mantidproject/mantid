@@ -9,6 +9,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidMDEvents/UserFunctionMD.h"
 
 #include <sstream>
@@ -212,8 +213,72 @@ public:
     TS_ASSERT_EQUALS(params->Double(2,2), 0.0);
 
     API::AnalysisDataService::Instance().clear();
-    //--------------------------------------------------//
 
+  }
+
+  void test_output_histo_workspace()
+  {
+    auto inputWS = createHistoWorkspace(3,4, "name=UserFunctionMD,Formula=10 + y + (2 + 0.1*y) * x");
+
+    auto fit = API::AlgorithmManager::Instance().create("Fit");
+    fit->initialize();
+
+    fit->setProperty("Function","name=UserFunctionMD,Formula=h + y + (s + 0.1*y) * x, h = 0, s = 0");
+    fit->setProperty("InputWorkspace",inputWS);
+    fit->setPropertyValue("Output","out");
+    fit->execute();
+
+    IMDHistoWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>( "out_Workspace" );
+    TS_ASSERT( outputWS );
+    if ( !outputWS ) return;
+
+    TS_ASSERT_EQUALS( inputWS->getNPoints(), outputWS->getNPoints() );
+
+    uint64_t n = outputWS->getNPoints();
+    coord_t invVolume = inputWS->getInverseVolume();
+    for( uint64_t i = 0; i < n; ++i )
+    {
+      TS_ASSERT_DELTA( outputWS->signalAt(i) / inputWS->signalAt(i) / invVolume, 1.0, 0.1 );
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  // ---------------------------------------------------------- //
+  IMDHistoWorkspace_sptr createHistoWorkspace(size_t nx, size_t ny, const std::string& function)
+  {
+
+    std::vector<double> values( nx * ny, 1.0 );
+    std::vector<int> dims(2);
+    dims[0] = static_cast<int>(nx);
+    dims[1] = static_cast<int>(ny);
+
+    auto alg = AlgorithmManager::Instance().create("CreateMDHistoWorkspace");
+    alg->initialize();
+    alg->setProperty("SignalInput", values);
+    alg->setProperty("ErrorInput", values);
+    alg->setProperty("Dimensionality", 2);
+    alg->setProperty("NumberOfBins", dims);
+    alg->setPropertyValue("Extents", "-1,1,-1,1");
+    alg->setPropertyValue("Names", "A,B");
+    alg->setPropertyValue("Units", "U,U");
+    alg->setPropertyValue("OutputWorkspace", "out");
+    alg->execute();
+    TS_ASSERT( alg->isExecuted() );
+
+    IMDHistoWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>("out");
+
+    alg = AlgorithmManager::Instance().create("EvaluateMDFunction");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("Function",function);
+    alg->setPropertyValue("OutputWorkspace", "out");
+    alg->execute();
+
+    ws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>("out");
+
+    AnalysisDataService::Instance().remove("out");
+    return ws;
   }
 
 

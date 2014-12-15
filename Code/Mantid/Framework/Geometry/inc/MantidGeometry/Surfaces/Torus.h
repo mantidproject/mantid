@@ -23,7 +23,7 @@ namespace Geometry
   - Displacement :: elipse displacment from the centre.
   These are c,b,a in that order.
 
-  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
         

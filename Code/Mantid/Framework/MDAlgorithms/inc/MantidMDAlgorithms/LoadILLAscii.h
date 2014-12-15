@@ -17,7 +17,7 @@ namespace MDAlgorithms {
  For more details on data format, please see:
  <http://www.ill.eu/instruments-support/computing-for-science/data-analysis/raw-data/>
 
- Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 

@@ -14,7 +14,7 @@ namespace Mantid
     This class is responsible for the implementation of ICat4 version based information catalogs
     @author Jay Rainey, ISIS Rutherford Appleton Laboratory 
     @date 12/08/2013
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

@@ -12,7 +12,7 @@ namespace Algorithms
     @author Roman Tolchenov, ISIS, RAL
     @date 02/05/2008
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

@@ -7,6 +7,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Mantid::Kernel::DateAndTime;
 
 
 class HistoryViewTest : public CxxTest::TestSuite
@@ -25,45 +26,44 @@ class HistoryViewTest : public CxxTest::TestSuite
 
     void init()
     {
-      declareProperty("name","",Direction::Input);
+      declareProperty("name", "", Direction::Input);
     }
+
     void exec() {}
   };
 
 private:
-  AlgorithmHistory_sptr createFromTestAlg(const std::string& name )
-  {    
+  AlgorithmHistory_sptr createFromTestAlg(const std::string& name, DateAndTime execTime = DateAndTime::defaultTime())
+  {
     testalg alg;
     alg.initialize();
     alg.setPropertyValue("name", name);
     alg.execute();
 
-    Mantid::Kernel::DateAndTime execTime = Mantid::Kernel::DateAndTime::defaultTime();
-
     AlgorithmHistory history(&alg, execTime, 14.0,  m_execCount++);
     return boost::make_shared<AlgorithmHistory>(history);
   }
-  
+
 public:
   HistoryViewTest() : m_wsHist(), m_execCount(0)
   {
     //create dummy history structure
-    auto alg1 = createFromTestAlg("alg1");
-    auto child1 = createFromTestAlg("child1");
+    auto alg1 = createFromTestAlg("alg1", DateAndTime(100, 0));
+    auto child1 = createFromTestAlg("child1", DateAndTime(110, 0));
     alg1->addChildHistory(child1);
-    
-    auto alg2 = createFromTestAlg("alg2");
-    auto child2 = createFromTestAlg("child2");
-    
-    auto subChild21 = createFromTestAlg("subChild21");
-    auto subChild22 = createFromTestAlg("subChild22");
-    
+
+    auto alg2 = createFromTestAlg("alg2", DateAndTime(200, 0));
+    auto child2 = createFromTestAlg("child2", DateAndTime(210, 0));
+
+    auto subChild21 = createFromTestAlg("subChild21", DateAndTime(211, 0));
+    auto subChild22 = createFromTestAlg("subChild22", DateAndTime(212, 0));
+
     child2->addChildHistory(subChild21);
     child2->addChildHistory(subChild22);
 
     alg2->addChildHistory(child2);
-    
-    auto alg3 = createFromTestAlg("alg3");
+
+    auto alg3 = createFromTestAlg("alg3", DateAndTime(300, 0));
 
     m_wsHist.addHistory(alg1);
     m_wsHist.addHistory(alg2);
@@ -92,7 +92,6 @@ public:
       auto props = history->getProperties();
       TS_ASSERT_EQUALS(props[0]->value(), "alg" + boost::lexical_cast<std::string>(i+1) );
     }
-
   }
 
   void test_Unroll_History()
@@ -100,7 +99,7 @@ public:
     HistoryView view(m_wsHist);
     //unroll alg 2
     TS_ASSERT_THROWS_NOTHING( view.unroll(0) );
-    TS_ASSERT_EQUALS(view.size(), 4); 
+    TS_ASSERT_EQUALS(view.size(), 4);
 
     auto items = view.getAlgorithmsList();
     TS_ASSERT_EQUALS(items.size(), 4);
@@ -110,7 +109,7 @@ public:
     {
       propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
-    
+
     TS_ASSERT_EQUALS(propNames[0], "alg1")
     TS_ASSERT_EQUALS(propNames[1], "child1")
     TS_ASSERT_EQUALS(propNames[2], "alg2")
@@ -124,7 +123,7 @@ public:
 
     //unroll alg 2
     TS_ASSERT_THROWS_NOTHING( view.unroll(0) );
-    
+
     TS_ASSERT_EQUALS(view.size(), 4);
     auto items = view.getAlgorithmsList();
     TS_ASSERT_EQUALS(items.size(), 4);
@@ -134,7 +133,7 @@ public:
     {
       propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
-    
+
     //check it unrolled properly
     TS_ASSERT_EQUALS(propNames[0], "alg1")
     TS_ASSERT_EQUALS(propNames[1], "child1")
@@ -165,7 +164,7 @@ public:
   {
     //tests the case where we have multiple layers of history unrolled
     HistoryView view(m_wsHist);
-    
+
     //unroll alg2
     TS_ASSERT_THROWS_NOTHING( view.unroll(1) );
 
@@ -207,7 +206,7 @@ public:
 
     //now roll everything back up to the top level
     TS_ASSERT_THROWS_NOTHING( view.roll(1) )
-    
+
     TS_ASSERT_EQUALS(view.size(), 3);
     items = view.getAlgorithmsList();
     TS_ASSERT_EQUALS(items.size(), 3);
@@ -227,7 +226,7 @@ public:
   void test_Unroll_All()
   {
     HistoryView view(m_wsHist);
-    
+
     TS_ASSERT_THROWS_NOTHING( view.unrollAll() );
 
     TS_ASSERT_EQUALS(view.size(), 7);
@@ -252,13 +251,13 @@ public:
   void test_Roll_All()
   {
     HistoryView view(m_wsHist);
-    
+
     TS_ASSERT_THROWS_NOTHING( view.unrollAll() );
 
     TS_ASSERT_EQUALS(view.size(), 7);
     auto items = view.getAlgorithmsList();
     TS_ASSERT_EQUALS(items.size(), 7);
-    
+
     std::vector<std::string> propNames(items.size());
     for (size_t i=0;i<items.size();++i)
     {
@@ -290,6 +289,62 @@ public:
     HistoryView view(m_wsHist);
     TS_ASSERT_THROWS_ANYTHING ( view.unroll(3) );
     TS_ASSERT_THROWS_ANYTHING ( view.roll(3) );
+  }
+
+  void test_Filter_By_Exec_Time_Full_Range()
+  {
+    HistoryView view(m_wsHist);
+
+    // Unroll to get all algorithms
+    TS_ASSERT_THROWS_NOTHING( view.unrollAll() );
+    TS_ASSERT_EQUALS(view.size(), 7);
+
+    // Filter by time with a start and end time
+    TS_ASSERT_THROWS_NOTHING( view.filterBetweenExecDate(DateAndTime(200, 0), DateAndTime(211, 0)) );
+    TS_ASSERT_EQUALS(view.size(), 3);
+
+    // Get algorithm list and compare results
+    auto items = view.getAlgorithmsList();
+    TS_ASSERT_EQUALS(items.size(), 3);
+
+    std::vector<std::string> propNames(items.size());
+    for (size_t i=0;i<items.size();++i)
+    {
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
+    }
+
+    TS_ASSERT_EQUALS(propNames[0], "alg2")
+    TS_ASSERT_EQUALS(propNames[1], "child2")
+    TS_ASSERT_EQUALS(propNames[2], "subChild21")
+  }
+
+  void test_Filter_By_Exec_Time_Start_Only()
+  {
+    HistoryView view(m_wsHist);
+
+    // Unroll to get all algorithms
+    TS_ASSERT_THROWS_NOTHING( view.unrollAll() );
+    TS_ASSERT_EQUALS(view.size(), 7);
+
+    // Filter by time with a start time only
+    TS_ASSERT_THROWS_NOTHING( view.filterBetweenExecDate(DateAndTime(200, 0)) );
+    TS_ASSERT_EQUALS(view.size(), 5);
+
+    // Get algorithm list and compare results
+    auto items = view.getAlgorithmsList();
+    TS_ASSERT_EQUALS(items.size(), 5);
+
+    std::vector<std::string> propNames(items.size());
+    for (size_t i=0;i<items.size();++i)
+    {
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
+    }
+
+    TS_ASSERT_EQUALS(propNames[0], "alg2")
+    TS_ASSERT_EQUALS(propNames[1], "child2")
+    TS_ASSERT_EQUALS(propNames[2], "subChild21")
+    TS_ASSERT_EQUALS(propNames[3], "subChild22")
+    TS_ASSERT_EQUALS(propNames[4], "alg3")
   }
 
   WorkspaceHistory m_wsHist;

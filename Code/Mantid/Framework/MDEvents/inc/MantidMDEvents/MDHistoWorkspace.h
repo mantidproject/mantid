@@ -443,8 +443,6 @@ namespace MDEvents
     coord_t * m_origin;
     /// the number of events, contributed into the workspace;
     mutable uint64_t m_nEventsContributed;
-    /// The special coordinate system of the workspace.
-    Mantid::API::SpecialCoordinateSystem m_coordinateSystem;
   protected:
   
     /// Linear array of masks for each bin

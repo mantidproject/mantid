@@ -1,6 +1,7 @@
 #include "MantidCurveFitting/CalculateGammaBackground.h"
 #include "MantidCurveFitting/ComptonProfile.h"
 #include "MantidCurveFitting/ConvertToYSpace.h"
+#include "MantidCurveFitting/VesuvioResolution.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionProperty.h"
@@ -231,24 +232,9 @@ namespace Mantid
     */
     void CalculateGammaBackground::calculateSpectrumFromDetector(const size_t inputIndex, const size_t outputIndex)
     {
-      auto det = m_inputWS->getDetector(inputIndex);
-      const auto & pmap = m_inputWS->constInstrumentParameters();
-      auto detPos = det->getPos();
-
       // -- Setup detector & resolution parameters --
-      DetectorParams detPar;
-      detPar.l1 = m_l1;
-      detPar.l2 = m_samplePos.distance(detPos);
-      detPar.theta = m_inputWS->detectorTwoTheta(det); //radians
-      detPar.t0 = ConvertToYSpace::getComponentParameter(det, pmap, "t0")*1e-6; // seconds
-      detPar.efixed = ConvertToYSpace::getComponentParameter(det, pmap,"efixed");
-
-      ResolutionParams detRes;
-      detRes.dl1 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l1"); // DL0
-      detRes.dl2 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l2"); // DL1
-      detRes.dthe = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_theta"); //DTH in radians
-      detRes.dEnGauss = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_gauss");
-      detRes.dEnLorentz = ConvertToYSpace::getComponentParameter(det, pmap, "hwhm_lorentz");
+      DetectorParams detPar = ConvertToYSpace::getDetectorParameters(m_inputWS, inputIndex);
+      ResolutionParams detRes = VesuvioResolution::getResolutionParameters(m_inputWS, inputIndex);
 
       // Compute a time of flight spectrum convolved with a Voigt resolution function for each mass
       // at the detector point & sum to a single spectrum
@@ -269,24 +255,9 @@ namespace Mantid
     */
     void CalculateGammaBackground::calculateBackgroundFromFoils(const size_t inputIndex, const size_t outputIndex)
     {
-      auto det = m_inputWS->getDetector(inputIndex);
-      const auto & pmap = m_inputWS->constInstrumentParameters();
-      auto detPos = det->getPos();
-
       // -- Setup detector & resolution parameters --
-      DetectorParams detPar;
-      detPar.l1 = m_l1;
-      detPar.l2 = m_samplePos.distance(detPos);
-      detPar.theta = m_inputWS->detectorTwoTheta(det); //radians
-      detPar.t0 = ConvertToYSpace::getComponentParameter(det, pmap, "t0")*1e-6; // seconds
-      detPar.efixed = ConvertToYSpace::getComponentParameter(det, pmap,"efixed");
-
-      ResolutionParams detRes;
-      detRes.dl1 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l1"); // DL0
-      detRes.dl2 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l2"); // DL1
-      detRes.dthe = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_theta"); //DTH in radians
-      detRes.dEnGauss = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_gauss");
-      detRes.dEnLorentz = ConvertToYSpace::getComponentParameter(det, pmap, "hwhm_lorentz");
+      DetectorParams detPar = ConvertToYSpace::getDetectorParameters(m_inputWS, inputIndex);
+      ResolutionParams detRes = VesuvioResolution::getResolutionParameters(m_inputWS, inputIndex);
 
       const size_t nxvalues = m_backgroundWS->blocksize();
       std::vector<double> foilSpectrum(nxvalues);
@@ -297,13 +268,13 @@ namespace Mantid
       for(size_t i = 0; i < m_foils0.size(); ++i)
       {
         foilSpectrum.assign(nxvalues,0.0);
-        calculateBackgroundSingleFoil(foilSpectrum, outputIndex,m_foils1[i], detPos, detPar, detRes);
+        calculateBackgroundSingleFoil(foilSpectrum, outputIndex,m_foils1[i], detPar.pos, detPar, detRes);
         // sum spectrum values from first position
         std::transform(ctfoil.begin(), ctfoil.end(), foilSpectrum.begin(), ctfoil.begin(),
           std::plus<double>());
 
         foilSpectrum.assign(nxvalues,0.0);
-        calculateBackgroundSingleFoil(foilSpectrum, outputIndex,m_foils0[i], detPos, detPar, detRes);
+        calculateBackgroundSingleFoil(foilSpectrum, outputIndex,m_foils0[i], detPar.pos, detPar, detRes);
         // subtract spectrum values from zeroth position
         std::transform(ctfoil.begin(), ctfoil.end(), foilSpectrum.begin(), ctfoil.begin(),
           std::minus<double>());
@@ -472,14 +443,14 @@ namespace Mantid
       {
         for(size_t i = 0; i < m_inputWS->getNumberHistograms(); ++i)
         {
-          m_indices[i] = i; // 1-to-1
+          m_indices.insert(std::make_pair(i,i)); // 1-to-1
         }
       }
       else
       {
         for(size_t i = 0; i < requestedIndices.size(); ++i)
         {
-          m_indices[i] = static_cast<size_t>(requestedIndices[i]); //user-requested->increasing on output
+          m_indices.insert(std::make_pair(i, static_cast<size_t>(requestedIndices[i]))); //user-requested->increasing on output
         }
       }
 

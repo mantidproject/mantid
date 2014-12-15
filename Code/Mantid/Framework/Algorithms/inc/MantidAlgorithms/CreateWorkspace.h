@@ -22,7 +22,7 @@ namespace Algorithms
 *  @date 20/10/2010
 *  @author Michael Whitty
 *
-*  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+*  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 *   
 *  This file is part of Mantid.
 *
@@ -56,6 +56,8 @@ public:
 
   virtual const std::string category() const { return "Utility\\Workspaces"; } ///< @return the algorithms category
   virtual int version() const { return (1); } ///< @return version number of algorithm
+
+  virtual std::map<std::string, std::string> validateInputs();
 
 private:
   

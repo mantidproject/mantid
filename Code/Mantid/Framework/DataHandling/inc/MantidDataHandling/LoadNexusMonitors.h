@@ -25,7 +25,7 @@ namespace Mantid
   @author Michael Reuter, SNS
   @date October 25, 2010
 
-  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -69,11 +69,16 @@ namespace Mantid
     void exec();
 
     // Fix the detector numbers if the defaults are not correct
-    void fixUDets(boost::scoped_array<detid_t> &det_ids, ::NeXus::File & file, 
-                  const boost::scoped_array<specid_t> &spec_ids, const size_t nmonitors) const; 
+    void fixUDets(boost::scoped_array<detid_t> &det_ids, ::NeXus::File & file,
+                  const boost::scoped_array<specid_t> &spec_ids, const size_t nmonitors) const;
     /// Load the logs
     void runLoadLogs(const std::string filename,
         API::MatrixWorkspace_sptr localWorkspace);
+    bool allMonitorsHaveHistoData(::NeXus::File& file,
+                                  const std::vector<std::string>& monitorNames);
+    /// is it possible to open the file?
+    bool canOpenAsNeXus(const std::string& fname);
+
     /// The name and path of the input file
     std::string filename;
     /// The workspace being filled out

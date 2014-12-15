@@ -232,44 +232,46 @@ public:
     if (Poco::File(filepath).exists()) Poco::File(filepath).remove();
 	}
 
-	void xtestDownloaddataFile1()
-	{	
-		std::string filepath=Kernel::ConfigService::Instance().getString("defaultsave.directory");
-		filepath += "download_time.txt";
-		std::ofstream ofs(filepath.c_str(), std::ios_base::out | std::ios_base::app);
-		if ( ofs.rdstate() & std::ios::failbit )
-		{
-			throw Mantid::Kernel::Exception::FileError("Error on creating File","download_time.txt");
-		}
+   void xtestDownloaddataFile1()
+   {
+     std::string filepath=Kernel::ConfigService::Instance().getString("defaultsave.directory");
+     filepath += "download_time.txt";
+     std::ofstream ofs(filepath.c_str(), std::ios_base::out | std::ios_base::app);
+     if ( ofs.rdstate() & std::ios::failbit )
+     {
+       throw Mantid::Kernel::Exception::FileError("Error on creating File","download_time.txt");
+     }
 
-		CatalogDownloadDataFiles downloadobj1;
+     CatalogDownloadDataFiles downloadobj1;
 
-		// As the algorithm now uses setProperty to allow us to save it to a directory we must pass in the default for testing.
-		std::string fName = Kernel::ConfigService::Instance().getString("defaultsave.directory");
-		// Need to initialize the algorithm in order to set the "downloadPath" property.
-		if ( !downloadobj1.isInitialized() ) downloadobj1.initialize();
-		downloadobj1.setPropertyValue("DownloadPath",fName);
+     // As the algorithm now uses setProperty to allow us to save it to a directory we must pass in the default for testing.
+     std::string fName = Kernel::ConfigService::Instance().getString("defaultsave.directory");
+     // Need to initialize the algorithm in order to set the "downloadPath" property.
+     if ( !downloadobj1.isInitialized() ) downloadobj1.initialize();
+     downloadobj1.setPropertyValue("DownloadPath",fName);
 
-		clock_t start=clock();
-		std::string fullPathDownloadedFile = downloadobj1.testDownload("http://download.mantidproject.org/videos/Installation.htm","test.htm");
-		clock_t end=clock();
-		float diff = float(end -start)/CLOCKS_PER_SEC;
+     clock_t start=clock();
+     // this gets the main doc page, which should always be there
+     // it's a wiki page so it can be relatively slow
+     std::string fullPathDownloadedFile = downloadobj1.testDownload("http://www.mantidproject.org/Documentation","test.htm");
+     clock_t end=clock();
+     float diff = float(end -start)/CLOCKS_PER_SEC;
 
-		ofs<<"Time taken for http download from mantidwebserver over internet for a small file of size 1KB is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
+     ofs<<"Time taken for http download from mantidwebserver over internet for a small file of size 1KB is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
 
-    //delete the file after execution
-		remove("test.htm");
+     //delete the file after execution
+     remove("test.htm");
 
-    // test if fullPathDownloadedFile ok
-    Poco::Path defaultSaveDir(Kernel::ConfigService::Instance().getString("defaultsave.directory"));
-    Poco::Path path(defaultSaveDir, "test.htm");
-    TS_ASSERT( fullPathDownloadedFile == path.toString() );
-	}
+     // test if fullPathDownloadedFile ok
+     Poco::Path defaultSaveDir(Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+     Poco::Path path(defaultSaveDir, "test.htm");
+     TS_ASSERT( fullPathDownloadedFile == path.toString() );
+   }
 
 private:
-	    CatalogSearch searchobj;
-	    CatalogGetDataFiles invstObj;
-		CatalogDownloadDataFiles downloadobj;
-		CatalogLogin loginobj;
+   CatalogSearch searchobj;
+   CatalogGetDataFiles invstObj;
+   CatalogDownloadDataFiles downloadobj;
+   CatalogLogin loginobj;
 };
 #endif

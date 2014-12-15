@@ -95,6 +95,32 @@ public:
     TS_ASSERT( ld.isExecuted() );
   }
 
+  void testBrokenISISFile()
+  {
+    // Just need to make sure it runs.
+    Mantid::API::FrameworkManager::Instance();
+    LoadNexusMonitors ld;
+    std::string outws_name = "LOQ_49886_monitors";
+    ld.initialize();
+    ld.setPropertyValue("Filename", "LOQ49886.nxs");
+    ld.setPropertyValue("OutputWorkspace", outws_name);
+    TS_ASSERT_THROWS_NOTHING( ld.execute() );
+    TS_ASSERT( ld.isExecuted() );
+
+    MatrixWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
+    //Valid WS and it is an MatrixWorkspace
+    TS_ASSERT( WS );
+    //Correct number of monitors found
+    TS_ASSERT_EQUALS( WS->getNumberHistograms(), 2 );
+    //Monitors data is correct
+    TS_ASSERT_EQUALS( WS->readY(0)[0], 0 );
+    TS_ASSERT_EQUALS( WS->readY(1)[0], 0 );
+
+    TS_ASSERT_EQUALS( WS->readX(0)[0], 5.0 );
+    TS_ASSERT_EQUALS( WS->readX(1)[5],19995.0 );
+
+  }
+
   void test_10_monitors()
   {
     Poco::Path path(ConfigService::Instance().getTempDir().c_str());

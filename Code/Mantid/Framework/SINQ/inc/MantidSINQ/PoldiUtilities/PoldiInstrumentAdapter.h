@@ -42,16 +42,11 @@ namespace Poldi
 class AbstractDoubleValueExtractor
 {
 public:
-    AbstractDoubleValueExtractor(std::string doubleValueKey) :
-        m_doubleValueKey(doubleValueKey)
-    { }
+    AbstractDoubleValueExtractor() { }
 
     virtual ~AbstractDoubleValueExtractor() { }
 
-    virtual double operator()(const API::Run &runInformation) const = 0;
-
-protected:
-    std::string m_doubleValueKey;
+    virtual double operator()(const API::Run &runInformation, const std::string &propertyName) const = 0;
 };
 
 typedef boost::shared_ptr<AbstractDoubleValueExtractor> AbstractDoubleValueExtractor_sptr;
@@ -59,26 +54,39 @@ typedef boost::shared_ptr<AbstractDoubleValueExtractor> AbstractDoubleValueExtra
 class NumberDoubleValueExtractor : public AbstractDoubleValueExtractor
 {
 public:
-    NumberDoubleValueExtractor(std::string doubleValueKey) :
-        AbstractDoubleValueExtractor(doubleValueKey)
+    NumberDoubleValueExtractor() :
+        AbstractDoubleValueExtractor()
     { }
     virtual ~NumberDoubleValueExtractor() { }
 
-    virtual double operator()(const API::Run &runInformation) const {
-        return runInformation.getPropertyValueAsType<double>(m_doubleValueKey);
+    virtual double operator()(const API::Run &runInformation, const std::string &propertyName) const {
+        return runInformation.getPropertyValueAsType<double>(propertyName);
     }
 };
 
 class VectorDoubleValueExtractor : public AbstractDoubleValueExtractor
 {
 public:
-    VectorDoubleValueExtractor(std::string doubleValueKey) :
-        AbstractDoubleValueExtractor(doubleValueKey)
+    VectorDoubleValueExtractor() :
+        AbstractDoubleValueExtractor()
     { }
     virtual ~VectorDoubleValueExtractor() { }
 
-    virtual double operator()(const API::Run &runInformation) const {
-        return runInformation.getPropertyValueAsType<std::vector<double> >(m_doubleValueKey).front();
+    virtual double operator()(const API::Run &runInformation, const std::string &propertyName) const {
+        return runInformation.getPropertyValueAsType<std::vector<double> >(propertyName).front();
+    }
+};
+
+class VectorIntValueExtractor : public AbstractDoubleValueExtractor
+{
+public:
+    VectorIntValueExtractor() :
+        AbstractDoubleValueExtractor()
+    { }
+    virtual ~VectorIntValueExtractor() { }
+
+    virtual double operator()(const API::Run &runInformation, const std::string &propertyName) const {
+        return static_cast<double>(runInformation.getPropertyValueAsType<std::vector<int> >(propertyName).front());
     }
 };
 
@@ -92,26 +100,33 @@ public:
     PoldiAbstractChopper_sptr chopper() const;
     PoldiAbstractDetector_sptr detector() const;
     PoldiSourceSpectrum_sptr spectrum() const;
-    
-    static const std::string getChopperSpeedPropertyName();
-    
+
 protected:
     PoldiInstrumentAdapter() { }
 
     void initializeFromInstrumentAndRun(const Geometry::Instrument_const_sptr &mantidInstrument, const API::Run &runInformation);
 
     void setDetector(const Geometry::Instrument_const_sptr &mantidInstrument);
+
     void setChopper(const Geometry::Instrument_const_sptr &mantidInstrument, const API::Run &runInformation);
+    double getCleanChopperSpeed(double rawChopperSpeed) const;
+    double getChopperSpeedFromRun(const API::Run &runInformation) const;
+    double getChopperSpeedTargetFromRun(const API::Run &runInformation) const;
+    bool chopperSpeedMatchesTarget(const API::Run &runInformation, double chopperSpeed) const;
+
+    double extractPropertyFromRun(const API::Run &runInformation, const std::string &propertyName) const;
+    AbstractDoubleValueExtractor_sptr getExtractorForProperty(Kernel::Property *chopperSpeedProperty) const;
+
     void setSpectrum(const Geometry::Instrument_const_sptr &mantidInstrument);
 
-    double getChopperSpeedFromRun(const API::Run &runInformation);
-    AbstractDoubleValueExtractor_sptr getExtractorForProperty(Kernel::Property *chopperSpeedProperty);
 
     PoldiAbstractChopper_sptr m_chopper;
     PoldiAbstractDetector_sptr m_detector;
     PoldiSourceSpectrum_sptr m_spectrum;
     
     static const std::string m_chopperSpeedPropertyName;
+    static const std::string m_chopperSpeedTargetPropertyName;
+
     static std::map<std::string, AbstractDoubleValueExtractor_sptr> m_extractors;
 };
 

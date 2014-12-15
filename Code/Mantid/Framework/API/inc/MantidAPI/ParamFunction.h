@@ -10,12 +10,6 @@
 #include <string>
 #include <vector>
 
-#ifndef HAS_UNORDERED_MAP_H
-#include <map>
-#else
-#include <tr1/unordered_map>
-#endif
-
 namespace Mantid
 {
 namespace API
@@ -32,7 +26,7 @@ class IConstraint;
     @author Roman Tolchenov, Tessella Support Services plc
     @date 13/01/2011
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

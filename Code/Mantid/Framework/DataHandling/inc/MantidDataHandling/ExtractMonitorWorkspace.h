@@ -13,7 +13,7 @@ namespace DataHandling
       hold a reference to the monitor workspace after running this algorithm.
       If no monitor workspace is present the algorithm will fail.
     
-      Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 

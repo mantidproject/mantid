@@ -84,8 +84,8 @@ class TimeSlice(PythonAlgorithm):
         self.declareProperty(name='OutputNameSuffix', defaultValue='_slice',
                              doc='Suffix to append to raw file name for name of output workspace')
 
-        self.declareProperty(WorkspaceGroupProperty(name='OutputWorkspaceGroup', defaultValue='',
-                             optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty(name='OutputWorkspace', defaultValue='',
+                             direction=Direction.Output),
                              doc='Name of workspace group to group result workspaces into')
 
 
@@ -150,9 +150,9 @@ class TimeSlice(PythonAlgorithm):
                 if self._verbose:
                     logger.notice('Output file :' + save_path)
 
-        if self._out_ws_group is not None:
-            all_workspaces = ','.join(out_ws_list)
-            GroupWorkspaces(InputWorkspaces=all_workspaces, OutputWorkspace=self._out_ws_group)
+        all_workspaces = ','.join(out_ws_list)
+        GroupWorkspaces(InputWorkspaces=all_workspaces, OutputWorkspace=self._out_ws_group)
+        self.setProperty('OutputWorkspace', self._out_ws_group)
 
         if self._plot:
             try:
@@ -182,9 +182,7 @@ class TimeSlice(PythonAlgorithm):
         if self._calib_ws == '':
             self._calib_ws = None
 
-        self._out_ws_group = self.getPropertyValue('OutputWorkspaceGroup')
-        if self._out_ws_group == '':
-            self._out_ws_group = None
+        self._out_ws_group = self.getPropertyValue('OutputWorkspace')
 
         self._verbose = self.getProperty('Verbose').value
         self._plot = self.getProperty('Plot').value

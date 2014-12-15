@@ -5,7 +5,7 @@
 
 <!-- files properties : -->
 
-<!-- Specify that the detector positions should be taken from the data file -->
+<!-- Specify that the detector positions should be taken from the data file (Not used ) -->
 <parameter name="det-pos-source" type="string">
   <value val="datafile"/>
 </parameter>
@@ -63,7 +63,7 @@
 </parameter>
   
 <!-- Monitor after chopper used to estimate total current on the sample, if normalization is done on monitor 2  -->
-<parameter name="norm-mon2-spec">
+<parameter name="norm-mon2-spec"  type="int">
     <value val="69634"/>
 </parameter>
 
@@ -105,9 +105,10 @@
   
 <!--if you use some detectors as monitors and work in event mode, one needs to specify the comma separated list of these detectors here 
     to copy detectors spectra to monitors spectra collected in histogram mode. If no such monitors are used "None" 
-    (with brackets) has to be specified as the value
+    (with brackets) has to be specified as the value. This is also necessary in Histogram mode if you want to use detectors as monitors and 
+    load_monitors_with_workspace is set to False (or monitors are measured with different time channels)
 -->
-  <parameter name="spectra_to_monitors_list"  type="string">
+<parameter name="spectra_to_monitors_list"  type="string">
     <value val="None"/>
   </parameter>
 
@@ -331,7 +332,7 @@
 <!--  ****************************************  Workflow control **************************** -->
 
 <!-- This parameter controls the format of output data written by reducer. 
-     Three values are currently supported, namely spe, nxspe, and nexus (mantid workspace) (.nxs)
+    Three values are currently supported, namely .spe, .nxspe, and nexus (mantid workspace) (.nxs)
      Three possible values for this are defined inin DirectEnergyConversion init routine as recognized by save method 
      If None is there, no internal script saving occurs and one needs to use external save operations -->  
 <parameter name="save_format" type="string">
@@ -363,8 +364,7 @@
     <value val="True"/>
 </parameter>
 
-
-  <!-- If this parameter is set to true, dgreduce will try to load mask from the mask file
+<!-- If this parameter is set to true, dgreduce will try to load mask from the mask file
      correspondent to the run if finds it and uses this mask as hard mask only (does not run diagnostics). 
      If such file has not been found, it will run diagnostics and save the masks into mask file for reuse 
      Hard Mask file, provided separately or as additional hard mask file is ignored in this case -->
@@ -410,8 +410,10 @@
        variation  = diag_variation;
        bleed_test = bleed = diag_bleed_test;
        bleed_maxrate = diag_bleed_maxrate;
-       bleed_pixels  = diag_bleed_pixels;
-       ei-mon2-spec = test_ei2_mon_spectra;
+       bleed_pixels = diag_bleed_pixels;
+       deltaE_mode =  deltaE-mode;
+       ei-mon1-spec=ei_mon1_spec;       
+       ei-mon2-spec = test_ei2_mon_spectra=ei_mon2_spec;
        ei_mon_spectra=test_mon_spectra_composite"
     />
 </parameter>

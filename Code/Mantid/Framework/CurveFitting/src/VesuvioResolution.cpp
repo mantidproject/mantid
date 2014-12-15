@@ -22,8 +22,44 @@ namespace CurveFitting
   // Register into factory
   DECLARE_FUNCTION(VesuvioResolution);
 
+  //---------------------------------------------------------------------------
+  // Static functions
+  //---------------------------------------------------------------------------
+
   /**
-   */
+  * @param ws The workspace with attached instrument
+  * @param index Index of the spectrum
+  * @return DetectorParams structure containing the relevant parameters
+  */
+  ResolutionParams VesuvioResolution::getResolutionParameters(const API::MatrixWorkspace_const_sptr & ws,
+                                                              const size_t index)
+  {
+    Geometry::IDetector_const_sptr detector;
+    try
+    {
+      detector = ws->getDetector(index);
+    }
+    catch (Kernel::Exception::NotFoundError &)
+    {
+      throw std::invalid_argument("VesuvioResolution - Workspace has no detector attached to histogram at index " + \
+        boost::lexical_cast<std::string>(index));
+    }
+
+    ResolutionParams respar;
+    const auto & pmap = ws->constInstrumentParameters();
+    respar.dl1 = ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_l1");
+    respar.dl2 = ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_l2");
+    respar.dtof = ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_tof");
+    respar.dthe = ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_theta"); //radians
+    respar.dEnLorentz = ConvertToYSpace::getComponentParameter(detector, pmap, "hwhm_lorentz");
+    respar.dEnGauss = ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_gauss");
+    return respar;
+  }
+  
+  //---------------------------------------------------------------------------
+  // Member functions
+  //---------------------------------------------------------------------------
+  
   VesuvioResolution::VesuvioResolution() : API::ParamFunction(), API::IFunction1D(),
       m_log("VesuvioResolution"),
       m_wsIndex(0), m_mass(0.0), m_voigt(),
@@ -63,34 +99,9 @@ namespace CurveFitting
     UNUSED_ARG(startX);
     UNUSED_ARG(endX);
 
-    auto inst = workspace->getInstrument();
-    auto sample = inst->getSample();
-    auto source = inst->getSource();
-    if(!sample || !source)
-    {
-      throw std::invalid_argument("VesuvioResolution - Workspace has no source/sample.");
-    }
     m_wsIndex = wsIndex;
-    Geometry::IDetector_const_sptr det;
-    try
-    {
-     det = workspace->getDetector(m_wsIndex);
-    }
-    catch (Kernel::Exception::NotFoundError &)
-    {
-      throw std::invalid_argument("VesuvioResolution - Workspace has no detector attached to histogram at index " + boost::lexical_cast<std::string>(m_wsIndex));
-    }
-
     DetectorParams detpar = ConvertToYSpace::getDetectorParameters(workspace, m_wsIndex);
-    const auto & pmap = workspace->constInstrumentParameters();
-
-    ResolutionParams respar;
-    respar.dl1 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l1");
-    respar.dl2 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l2");
-    respar.dthe = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_theta"); //radians
-    respar.dEnLorentz = ConvertToYSpace::getComponentParameter(det, pmap, "hwhm_lorentz");
-    respar.dEnGauss = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_gauss");
-
+    ResolutionParams respar = getResolutionParameters(workspace, m_wsIndex);
     this->cacheResolutionComponents(detpar, respar);
   }
 
@@ -156,7 +167,7 @@ namespace CurveFitting
     double wl2 = 2.0*STDDEV_TO_HWHM*std::abs((std::pow(k0y0,3)/(k1*qy0*detpar.l1))*common)*respar.dl2;
 
     m_resolutionSigma = std::sqrt(std::pow(wgauss,2) + std::pow(wtheta,2) + std::pow(wl1,2) + std::pow(wl2,2));
-    
+
     m_log.notice() << "--------------------- Mass=" << m_mass << " -----------------------" << std::endl;
     m_log.notice() << "w_l1 (FWHM)=" << wl2 << std::endl;
     m_log.notice() << "w_l0 (FWHM)=" << wl1 << std::endl;
@@ -203,7 +214,7 @@ namespace CurveFitting
   {
     voigtApprox(voigt, xValues, lorentzPos, lorentzAmp, m_lorentzFWHM, m_resolutionSigma);
   }
-  
+
   /**
    * Transforms the input y coordinates using the Voigt function approximation. The area is normalized to lorentzAmp
    * @param voigt [Out] Output values (vector is expected to be of the correct size

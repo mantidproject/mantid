@@ -169,7 +169,7 @@ void NXClass::readAllInfo()
 {
     clear();
     NXClassInfo info;
-    while(info = getNextEntry())
+    while((info = getNextEntry()))
     {
         if (info.nxclass == "SDS")
         {

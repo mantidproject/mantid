@@ -104,7 +104,7 @@ ILiveListener::RunStatus SINQHMListener::runStatus()
 
 boost::shared_ptr<Workspace> SINQHMListener::extractData()
 {
-	static char *dimNames[] = {"x","y","z","t"};
+	static const char *dimNames[] = {"x","y","z","t"};
 
 	if(dimDirty){
 		runStatus(); //make sure that hmhost is initialized

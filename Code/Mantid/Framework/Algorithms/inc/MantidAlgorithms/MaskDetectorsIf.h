@@ -9,11 +9,9 @@
 #include <boost/function.hpp>
 
 // To be compatible with VSC Express edition that does not have tr1
-#ifndef HAS_UNORDERED_MAP_H
-#include <map>
-#else
-#include <tr1/unordered_map>
-#endif
+
+#include <boost/unordered_map.hpp>
+
 
 namespace Mantid
 {
@@ -27,7 +25,7 @@ This algorithm is used to select/deselect detectors in a *.cal file.
  @author Laurent Chapon, Pascal Manuel ISIS Facility, Rutherford Appleton Laboratory
  @date 06/07/2009
 
- Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -56,8 +54,8 @@ public:
   virtual ~MaskDetectorsIf();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "MaskDetectorsIf"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Adjusts the selected field for a CalFile depending on the values in the input workspace.";}
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Adjusts the selected field for a CalFile depending on the values in the input workspace.";}
 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
@@ -68,32 +66,26 @@ private:
   
   /// Returns an allowed values statement to insert into decumentation
   std::string allowedValuesStatement( std::vector<std::string> vals);
-#ifndef HAS_UNORDERED_MAP_H
-  /// Typedef for detector to value map
-	typedef std::map<detid_t,bool> udet2valuem;
-#else
   // Typedef for det to value map
-	typedef std::tr1::unordered_map<detid_t,bool> udet2valuem;
-#endif
-	/// A map of detector numbers to mask boolean
-	udet2valuem umap;
-	/// Get the properties
-	void retrieveProperties();
-	/// Create a new cal file
-	void createNewCalFile(const std::string& oldfile,const std::string& newfile);
-	/// The input workspace
-	API::MatrixWorkspace_const_sptr inputW;
-	/// The Value parameter
-	double value;
-	/// A comparator function
-	boost::function<bool (double,double)> compar_f;
-	/// Whether select is on or off
-	bool select_on;
-	/// Overidden init
-	void init();
-	/// Overidden exec
-	void exec();
-
+  typedef boost::unordered_map<detid_t,bool> udet2valuem;
+  /// A map of detector numbers to mask boolean
+  udet2valuem umap;
+  /// Get the properties
+  void retrieveProperties();
+  /// Create a new cal file
+  void createNewCalFile(const std::string& oldfile,const std::string& newfile);
+  /// The input workspace
+  API::MatrixWorkspace_const_sptr inputW;
+  /// The Value parameter
+  double value;
+  /// A comparator function
+  boost::function<bool (double,double)> compar_f;
+  /// Whether select is on or off
+  bool select_on;
+  /// Overidden init
+  void init();
+  /// Overidden exec
+  void exec();
 };
 
 } // namespace Algorithm

@@ -82,7 +82,7 @@ set ( PYTHONW_EXECUTABLE "${CMAKE_LIBRARY_PATH}/Python27/pythonw.exe" CACHE FILE
 ###########################################################################
 add_definitions ( -DWIN32 -D_WINDOWS -DMS_VISUAL_STUDIO )
 add_definitions ( -D_USE_MATH_DEFINES -DNOMINMAX )
-add_definitions ( -DGSL_DLL )
+add_definitions ( -DGSL_DLL -DJSON_DLL )
 add_definitions ( -DPOCO_NO_UNWINDOWS )
 add_definitions ( -D_SCL_SECURE_NO_WARNINGS )
 add_definitions ( -D_CRT_SECURE_NO_WARNINGS )

@@ -188,11 +188,16 @@ void WorkspaceSelector::handleRemEvent(Mantid::API::WorkspacePostDeleteNotificat
   {
     removeItem(index);
   }
+  if ( currentIndex() == -1 )
+  {
+    emit emptied();
+  }
 }
 
 void WorkspaceSelector::handleClearEvent(Mantid::API::ClearADSNotification_ptr)
 {
   this->clear();
+  emit emptied();
 }
 
 void WorkspaceSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf)

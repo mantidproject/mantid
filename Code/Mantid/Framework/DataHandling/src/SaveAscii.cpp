@@ -122,13 +122,13 @@ namespace Mantid
         bool ice = getProperty("ICEFormat");
         if (ice)
         {
-        	// overwrite properties so file can be read by ICE
-        	errstr = "Y";
-        	errstr2 = "_error";
-        	comstr = ", ";
-        	writeHeader = true;
-        	write_dx = false;
-        	comment = "#features:";
+          // overwrite properties so file can be read by ICE
+          errstr = "Y";
+          errstr2 = "_error";
+          comstr = ", ";
+          writeHeader = true;
+          write_dx = false;
+          comment = "#features:";
         }
 
         // Create an spectra index list for output
@@ -137,19 +137,23 @@ namespace Mantid
         // Add spectra interval into the index list
         if (spec_max != EMPTY_INT() && spec_min != EMPTY_INT())
         {
-            if (spec_min >= nSpectra || spec_max >= nSpectra || spec_min > spec_max)
-                throw std::invalid_argument("Inconsistent spectra interval");
-            for(int spec=spec_min;spec<=spec_max;spec++)
-                    idx.insert(spec);
+          if (spec_min >= nSpectra || spec_max >= nSpectra || spec_min > spec_max)
+            throw std::invalid_argument("Inconsistent spectra interval");
+          for(int spec=spec_min;spec<=spec_max;spec++)
+            idx.insert(spec);
         }
 
         // Add spectra list into the index list
         if (!spec_list.empty())
-            for(size_t i=0;i<spec_list.size();i++)
-                if (spec_list[i] >= nSpectra) throw std::invalid_argument("Inconsistent spectra list");
-                else
-                    idx.insert(spec_list[i]);
-
+        {
+          for(size_t i=0;i<spec_list.size();i++)
+          {
+            if (spec_list[i] >= nSpectra)
+              throw std::invalid_argument("Inconsistent spectra list");
+            else
+              idx.insert(spec_list[i]);
+          }
+        }
         if (!idx.empty()) nSpectra = static_cast<int>(idx.size());
 
         if (nBins == 0 || nSpectra == 0) throw std::runtime_error("Trying to save an empty workspace");

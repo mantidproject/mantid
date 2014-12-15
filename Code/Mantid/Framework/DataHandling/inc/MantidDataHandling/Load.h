@@ -16,7 +16,7 @@ namespace Mantid
     Loads a workspace from a data file. The algorithm tries to determine the actual type
     of the file (raw, nxs, ...) and use the specialized loading algorithm to load it.
 
-    Copyright &copy; 2007-2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

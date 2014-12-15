@@ -25,7 +25,7 @@ namespace Mantid
        It uses OpenCascade to generate a mesh defining the surface of an Object (shape).
        This shape is saved along with the instrument definition as a .vtp file (for speed-ups).
 
-       Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+       Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
        This file is part of Mantid.
 

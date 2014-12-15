@@ -6,36 +6,18 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>875</width>
-    <height>425</height>
+    <width>959</width>
+    <height>346</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>ISIS Reflectometry</string>
+   <string>ISIS Reflectometry (Polref)</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="layoutMain">
     <property name="margin">
      <number>1</number>
     </property>
-    <item>
-     <widget class="QLabel" name="labelPrototype">
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-        <underline>false</underline>
-       </font>
-      </property>
-      <property name="text">
-       <string>PROTOTYPE</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
     <item>
      <widget class="QSplitter" name="splitterTables">
       <property name="sizePolicy">
@@ -48,7 +30,7 @@
        <enum>Qt::Horizontal</enum>
       </property>
       <property name="childrenCollapsible">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <widget class="QGroupBox" name="groupSearchPane">
        <property name="title">
@@ -90,10 +72,13 @@
             <property name="toolTip">
              <string>Select the instrument to search with</string>
             </property>
+            <property name="whatsThis">
+             <string>Specifies which instrument you're searching for data from.</string>
+            </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="labelRB">
+           <widget class="QLabel" name="labelInvestigationId">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -101,15 +86,15 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>RB Search:</string>
+             <string>Investigation Id:</string>
             </property>
             <property name="buddy">
-             <cstring>textRB</cstring>
+             <cstring>textSearch</cstring>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="textRB">
+           <widget class="QLineEdit" name="textSearch">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -124,6 +109,9 @@
             </property>
             <property name="toolTip">
              <string>Investigation to search for</string>
+            </property>
+            <property name="whatsThis">
+             <string>Specifies the investigation id that you are searching for runs from.</string>
             </property>
             <property name="inputMethodHints">
              <set>Qt::ImhDigitsOnly</set>
@@ -144,6 +132,9 @@
             <property name="toolTip">
              <string>Search</string>
             </property>
+            <property name="whatsThis">
+             <string>Searches ICAT for runs from the given instrument with the given investigation id.</string>
+            </property>
             <property name="text">
              <string>Search</string>
             </property>
@@ -152,12 +143,21 @@
          </layout>
         </item>
         <item>
-         <widget class="QTableWidget" name="tableRuns">
-          <property name="toolTip">
-           <string>Search results</string>
+         <widget class="QTableView" name="tableSearchResults">
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
           </property>
-          <attribute name="horizontalHeaderHighlightSections">
-           <bool>false</bool>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::ExtendedSelection</enum>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <attribute name="horizontalHeaderDefaultSectionSize">
+           <number>60</number>
+          </attribute>
+          <attribute name="horizontalHeaderMinimumSectionSize">
+           <number>20</number>
           </attribute>
           <attribute name="horizontalHeaderStretchLastSection">
            <bool>true</bool>
@@ -165,19 +165,9 @@
           <attribute name="verticalHeaderVisible">
            <bool>false</bool>
           </attribute>
-          <attribute name="verticalHeaderHighlightSections">
-           <bool>false</bool>
+          <attribute name="verticalHeaderDefaultSectionSize">
+           <number>20</number>
           </attribute>
-          <column>
-           <property name="text">
-            <string>Run #</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Title</string>
-           </property>
-          </column>
          </widget>
         </item>
         <item>
@@ -196,18 +186,12 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="buttonTransfer">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="toolTip">
-             <string>Add the selected run to the table</string>
-            </property>
+           <widget class="QToolButton" name="buttonTransfer">
             <property name="text">
-             <string>Add Run</string>
+             <string>Transfer</string>
+            </property>
+            <property name="toolButtonStyle">
+             <enum>Qt::ToolButtonTextBesideIcon</enum>
             </property>
            </widget>
           </item>
@@ -232,82 +216,26 @@
            <number>1</number>
           </property>
           <item>
-           <layout class="QHBoxLayout" name="layoutTableButtons">
-            <item>
-             <widget class="QPushButton" name="buttonNew">
-              <property name="toolTip">
-               <string>Start a new table</string>
-              </property>
-              <property name="text">
-               <string>New Table</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="buttonSave">
-              <property name="toolTip">
-               <string>Save the current table as a Table Workspace</string>
-              </property>
-              <property name="text">
-               <string>Save Table</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="buttonSaveAs">
-              <property name="toolTip">
-               <string>Save the current table as a Table Workspace</string>
-              </property>
-              <property name="text">
-               <string>Save Table As</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="spacerTableButtons">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QLabel" name="labelWorkspaceSelector">
-              <property name="text">
-               <string>Table:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="workspaceSelector">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>150</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>Select the Table Workspace to display</string>
-              </property>
-              <property name="WorkspaceTypes" stdset="0">
-               <stringlist>
-                <string>TableWorkspace</string>
-               </stringlist>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <widget class="QToolBar" name="rowToolBar">
+            <property name="styleSheet">
+             <string>QToolBar{border: none;}</string>
+            </property>
+            <addaction name="actionProcess"/>
+            <addaction name="actionExpandSelection"/>
+            <addaction name="separator"/>
+            <addaction name="actionPlotRow"/>
+            <addaction name="actionPlotGroup"/>
+            <addaction name="separator"/>
+            <addaction name="actionAppendRow"/>
+            <addaction name="actionDeleteRow"/>
+            <addaction name="separator"/>
+            <addaction name="actionGroupRows"/>
+            <addaction name="actionCopySelected"/>
+            <addaction name="actionCutSelected"/>
+            <addaction name="actionPasteSelected"/>
+            <addaction name="actionClearSelected"/>
+            <addaction name="actionHelp"/>
+           </widget>
           </item>
           <item>
            <widget class="QTableView" name="viewTable">
@@ -317,8 +245,8 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="toolTip">
-             <string>Runs to process</string>
+            <property name="contextMenuPolicy">
+             <enum>Qt::CustomContextMenu</enum>
             </property>
             <property name="editTriggers">
              <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
@@ -327,13 +255,19 @@
              <bool>true</bool>
             </property>
             <property name="selectionMode">
-             <enum>QAbstractItemView::ContiguousSelection</enum>
+             <enum>QAbstractItemView::ExtendedSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
             </property>
             <attribute name="horizontalHeaderDefaultSectionSize">
              <number>60</number>
             </attribute>
             <attribute name="horizontalHeaderMinimumSectionSize">
              <number>20</number>
+            </attribute>
+            <attribute name="horizontalHeaderStretchLastSection">
+             <bool>true</bool>
             </attribute>
             <attribute name="verticalHeaderDefaultSectionSize">
              <number>20</number>
@@ -346,34 +280,14 @@
              <number>1</number>
             </property>
             <item>
-             <widget class="QPushButton" name="buttonAddRow">
-              <property name="toolTip">
-               <string>Add a row beneath the selected row(s)</string>
+             <widget class="QProgressBar" name="progressBar">
+              <property name="whatsThis">
+               <string>Shows the current progress when processing.</string>
               </property>
-              <property name="text">
-               <string>Add Row</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="buttonDeleteRow">
-              <property name="toolTip">
-               <string>Delete selected row(s) from the table</string>
-              </property>
-              <property name="text">
-               <string>Delete Row</string>
+              <property name="value">
+               <number>0</number>
               </property>
              </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="buttonGroupRows">
-              <property name="text">
-               <string>Group Rows</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QProgressBar" name="progressBar"/>
             </item>
             <item>
              <widget class="QLabel" name="labelProcessInstrument">
@@ -384,30 +298,30 @@
             </item>
             <item>
              <widget class="QComboBox" name="comboProcessInstrument">
-              <property name="toolTip">
-               <string>Select the instrument to assume for fetching runs</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="buttonProcess">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
               <property name="toolTip">
-               <string>Process the selected rows</string>
+               <string>Select the instrument to assume for fetching runs</string>
               </property>
+              <property name="whatsThis">
+               <string>Specifies the instrument that data being processed was generated by. This is used to help identify the correct data to load when given sample run numbers to process.</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="buttonProcess">
               <property name="text">
                <string>Process</string>
+              </property>
+              <property name="toolButtonStyle">
+               <enum>Qt::ToolButtonTextBesideIcon</enum>
+              </property>
+              <property name="arrowType">
+               <enum>Qt::NoArrow</enum>
               </property>
              </widget>
             </item>
@@ -421,98 +335,397 @@
     </item>
    </layout>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>959</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="nativeMenuBar">
+    <bool>false</bool>
+   </property>
+   <widget class="QMenu" name="menuTable">
+    <property name="title">
+     <string>&amp;Reflectometry</string>
+    </property>
+    <widget class="QMenu" name="menuOpenTable">
+     <property name="title">
+      <string>Open Table</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+       <normaloff>:/multiload.png</normaloff>:/multiload.png</iconset>
+     </property>
+    </widget>
+    <addaction name="menuOpenTable"/>
+    <addaction name="actionNewTable"/>
+    <addaction name="actionSaveTable"/>
+    <addaction name="actionSaveTableAs"/>
+    <addaction name="separator"/>
+    <addaction name="actionImportTable"/>
+    <addaction name="actionExportTable"/>
+    <addaction name="separator"/>
+    <addaction name="actionOptionsDialog"/>
+   </widget>
+   <widget class="QMenu" name="menuRows">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="actionProcess"/>
+    <addaction name="actionExpandSelection"/>
+    <addaction name="separator"/>
+    <addaction name="actionPlotRow"/>
+    <addaction name="actionPlotGroup"/>
+    <addaction name="separator"/>
+    <addaction name="actionPrependRow"/>
+    <addaction name="actionAppendRow"/>
+    <addaction name="separator"/>
+    <addaction name="actionGroupRows"/>
+    <addaction name="actionCopySelected"/>
+    <addaction name="actionCutSelected"/>
+    <addaction name="actionPasteSelected"/>
+    <addaction name="actionClearSelected"/>
+    <addaction name="separator"/>
+    <addaction name="actionDeleteRow"/>
+   </widget>
+   <addaction name="menuTable"/>
+   <addaction name="menuRows"/>
+  </widget>
   <action name="actionNewTable">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/new.png</normaloff>:/new.png</iconset>
+   </property>
    <property name="text">
     <string>New Table</string>
    </property>
+   <property name="whatsThis">
+    <string>Discards the current contents of the processing table and starts afresh.</string>
+   </property>
   </action>
   <action name="actionSaveTable">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/filesave.png</normaloff>:/filesave.png</iconset>
+   </property>
    <property name="text">
     <string>Save Table</string>
    </property>
+   <property name="whatsThis">
+    <string>Saves the current contents of the table to the table workspace that was last saved to or opened. If none exist, it prompts for a workspace name to save as.</string>
+   </property>
   </action>
   <action name="actionSaveTableAs">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/filesaveas.png</normaloff>:/filesaveas.png</iconset>
+   </property>
    <property name="text">
     <string>Save Table As</string>
    </property>
+   <property name="whatsThis">
+    <string>Prompts for a workspace name to save the current contents of the table to.</string>
+   </property>
   </action>
-  <action name="actionAddRow">
+  <action name="actionAppendRow">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/insert_row.png</normaloff>:/insert_row.png</iconset>
+   </property>
    <property name="text">
-    <string>Add Row</string>
+    <string>Insert Row After</string>
+   </property>
+   <property name="toolTip">
+    <string>Insert Row After</string>
+   </property>
+   <property name="whatsThis">
+    <string>Inserts a new row after the first selected row. If no rows are selected then a new row is added at the end of the table.</string>
+   </property>
+  </action>
+  <action name="actionPrependRow">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/insert_row.png</normaloff>:/insert_row.png</iconset>
+   </property>
+   <property name="text">
+    <string>Insert Row Before</string>
+   </property>
+   <property name="toolTip">
+    <string>Insert Row Before</string>
+   </property>
+   <property name="whatsThis">
+    <string>Inserts a new row before the first selected row. If no rows are selected then a new row is inserted at the start of the table.</string>
    </property>
   </action>
   <action name="actionDeleteRow">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/delete_row.png</normaloff>:/delete_row.png</iconset>
+   </property>
    <property name="text">
     <string>Delete Row</string>
    </property>
+   <property name="whatsThis">
+    <string>Deletes the selected rows.</string>
+   </property>
   </action>
   <action name="actionGroupRows">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/drag_curves.png</normaloff>:/drag_curves.png</iconset>
+   </property>
    <property name="text">
-    <string>Group Rows</string>
+    <string>Group Selected</string>
+   </property>
+   <property name="whatsThis">
+    <string>Places all of the selected rows into the same group.</string>
    </property>
   </action>
   <action name="actionProcess">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/stat_rows.png</normaloff>:/stat_rows.png</iconset>
+   </property>
    <property name="text">
     <string>Process</string>
    </property>
+   <property name="whatsThis">
+    <string>Processes the selected rows. If no rows are selected then all rows are processed.</string>
+   </property>
+  </action>
+  <action name="actionExpandSelection">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/fit_frame.png</normaloff>:/fit_frame.png</iconset>
+   </property>
+   <property name="text">
+    <string>Expand Selection</string>
+   </property>
+   <property name="toolTip">
+    <string>Select an entire group</string>
+   </property>
+   <property name="whatsThis">
+    <string>Expands the current selection to include any rows that are in the same group as any selected row.</string>
+   </property>
+  </action>
+  <action name="actionOptionsDialog">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/configure.png</normaloff>:/configure.png</iconset>
+   </property>
+   <property name="text">
+    <string>Options...</string>
+   </property>
+   <property name="toolTip">
+    <string>Set options for the Reflectometry UI</string>
+   </property>
+   <property name="whatsThis">
+    <string>Opens a dialog that allows the behaviour of the Reflectometry UI to be customised.</string>
+   </property>
+  </action>
+  <action name="actionClearSelected">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/erase.png</normaloff>:/erase.png</iconset>
+   </property>
+   <property name="text">
+    <string>Clear Selected</string>
+   </property>
+   <property name="whatsThis">
+    <string>Clears the contents of the selected rows and ungroups them, placing each row into a unique group.</string>
+   </property>
+  </action>
+  <action name="actionCopySelected">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/copy.png</normaloff>:/copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy Selected</string>
+   </property>
+   <property name="whatsThis">
+    <string>Copies the selected rows to the clipboard. Each row is placed on a new line, and each cell is separated by a tab.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionPasteSelected">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/paste.png</normaloff>:/paste.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste Selected</string>
+   </property>
+   <property name="whatsThis">
+    <string>Pastes the contents of the clipboard into the selected rows. If no rows are selected, new ones are added at the end of the table.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionCutSelected">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/cut.png</normaloff>:/cut.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cut Selected</string>
+   </property>
+   <property name="whatsThis">
+    <string>Copies the selected rows to the clipboard, and then deletes them. Each row is placed on a new line, and each cell is separated by a tab.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="actionSearch">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/folder.png</normaloff>:/folder.png</iconset>
+   </property>
+   <property name="text">
+    <string>Search</string>
+   </property>
+  </action>
+  <action name="actionTransfer">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/append_drag_curves.png</normaloff>:/append_drag_curves.png</iconset>
+   </property>
+   <property name="text">
+    <string>Transfer</string>
+   </property>
+   <property name="toolTip">
+    <string>Transfer the selected run(s) to the processing table.</string>
+   </property>
+   <property name="whatsThis">
+    <string>Transfers the selected runs into the processing table.</string>
+   </property>
+  </action>
+  <action name="actionImportTable">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/open_template.png</normaloff>:/open_template.png</iconset>
+   </property>
+   <property name="text">
+    <string>Import .TBL</string>
+   </property>
+   <property name="toolTip">
+    <string>Import a .TBL file</string>
+   </property>
+   <property name="whatsThis">
+    <string>Imports a .TBL file to a workspace using the LoadReflTBL algorithm. The resulting workspace can then be loaded as a table as normal.</string>
+   </property>
+  </action>
+  <action name="actionExportTable">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/save_template.png</normaloff>:/save_template.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export .TBL</string>
+   </property>
+   <property name="toolTip">
+    <string>Export a .TBL file</string>
+   </property>
+   <property name="whatsThis">
+    <string>Exports a table workspace to a .TBL file that can be used by the ISIS Reflectometry UI in older versions of Mantid.</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/help.png</normaloff>:/help.png</iconset>
+   </property>
+   <property name="text">
+    <string>Help</string>
+   </property>
+   <property name="toolTip">
+    <string>Opens the documentation.</string>
+   </property>
+   <property name="whatsThis">
+    <string>Opens the interface's documentation in the Qt Help Browser.</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+  </action>
+  <action name="actionPlotRow">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/graph.png</normaloff>:/graph.png</iconset>
+   </property>
+   <property name="text">
+    <string>Plot Selected Rows</string>
+   </property>
+   <property name="toolTip">
+    <string>Plot the selected rows</string>
+   </property>
+   <property name="whatsThis">
+    <string>Creates a plot of the IvsQ workspaces produced by the selected rows.</string>
+   </property>
+  </action>
+  <action name="actionPlotGroup">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/trajectory.png</normaloff>:/trajectory.png</iconset>
+   </property>
+   <property name="text">
+    <string>Plot Selected Groups</string>
+   </property>
+   <property name="toolTip">
+    <string>Plot the selected groups</string>
+   </property>
+   <property name="whatsThis">
+    <string>Creates a plot of the stitched IvsQ workspaces produced by any groups any selected rows are in.</string>
+   </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::WorkspaceSelector</class>
-   <extends>QComboBox</extends>
-   <header>MantidQtMantidWidgets/WorkspaceSelector.h</header>
-  </customwidget>
- </customwidgets>
  <tabstops>
   <tabstop>comboSearchInstrument</tabstop>
-  <tabstop>tableRuns</tabstop>
+  <tabstop>tableSearchResults</tabstop>
   <tabstop>viewTable</tabstop>
-  <tabstop>buttonProcess</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../../../../MantidPlot/icons/icons.qrc"/>
+ </resources>
  <connections>
   <connection>
-   <sender>buttonNew</sender>
+   <sender>buttonSearch</sender>
    <signal>clicked()</signal>
-   <receiver>actionNewTable</receiver>
+   <receiver>actionSearch</receiver>
    <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>217</x>
+     <y>143</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
   </connection>
   <connection>
-   <sender>buttonAddRow</sender>
-   <signal>clicked()</signal>
-   <receiver>actionAddRow</receiver>
+   <sender>textSearch</sender>
+   <signal>returnPressed()</signal>
+   <receiver>actionSearch</receiver>
    <slot>trigger()</slot>
-  </connection>
-  <connection>
-   <sender>buttonDeleteRow</sender>
-   <signal>clicked()</signal>
-   <receiver>actionDeleteRow</receiver>
-   <slot>trigger()</slot>
-  </connection>
-  <connection>
-   <sender>buttonGroupRows</sender>
-   <signal>clicked()</signal>
-   <receiver>actionGroupRows</receiver>
-   <slot>trigger()</slot>
-  </connection>
-  <connection>
-   <sender>buttonProcess</sender>
-   <signal>clicked()</signal>
-   <receiver>actionProcess</receiver>
-   <slot>trigger()</slot>
-  </connection>
-  <connection>
-   <sender>buttonSave</sender>
-   <signal>clicked()</signal>
-   <receiver>actionSaveTable</receiver>
-   <slot>trigger()</slot>
-  </connection>
-  <connection>
-   <sender>buttonSaveAs</sender>
-   <signal>clicked()</signal>
-   <receiver>actionSaveTableAs</receiver>
-   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>228</x>
+     <y>112</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
   </connection>
  </connections>
 </ui>

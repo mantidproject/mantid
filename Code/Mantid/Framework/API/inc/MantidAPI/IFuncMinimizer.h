@@ -20,7 +20,7 @@ class IFitFunction;
     @author Anders Markvardsen, ISIS, RAL
     @date 11/12/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

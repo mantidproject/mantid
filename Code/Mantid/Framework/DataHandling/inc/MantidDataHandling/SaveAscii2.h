@@ -28,7 +28,7 @@ namespace Mantid
     @author Keith Brown, ISIS, Placement student from the University of Derby
     @date 10/10/13
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -57,9 +57,8 @@ namespace Mantid
       ~SaveAscii2() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "SaveAscii"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Saves a 2D workspace to a ascii file.";}
-
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Saves a 2D workspace to a ascii file.";}
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 2; }
       /// Algorithm's category for identification overriding a virtual method
@@ -90,6 +89,7 @@ namespace Mantid
       bool m_writeDX;
       bool m_writeID;
       bool m_isHistogram;
+      bool m_isCommonBins;
       API::MatrixWorkspace_const_sptr m_ws;
     };
   } // namespace DataHandling

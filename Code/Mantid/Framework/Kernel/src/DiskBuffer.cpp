@@ -415,6 +415,28 @@ namespace Kernel
     }
   }
 
+  /** Sets the free space map. Should only be used when loading a file.
+   * @param[in] free :: vector containing free space index to set */
+  void DiskBuffer::setFreeSpaceVector(std::vector<uint64_t> & free)
+  {
+    m_free.clear();
+
+    if (free.size() % 2 != 0)
+        throw std::length_error("Free vector size is not a factor of 2.");
+
+    for (std::vector<uint64_t>::iterator it = free.begin(); it != free.end(); it += 2)
+    {
+        std::vector<uint64_t>::iterator it_next = boost::next(it);
+
+        if (*it == 0 && *it_next == 0) {
+            continue; // Not really a free space block!
+        }
+
+        FreeBlock newBlock(*it, *it_next);
+        m_free.insert(newBlock);
+    }
+  }
+
   /// @return a string describing the memory buffers, for debugging.
   std::string DiskBuffer::getMemoryStr() const
   {

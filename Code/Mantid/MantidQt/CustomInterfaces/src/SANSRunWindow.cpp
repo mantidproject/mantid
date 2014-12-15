@@ -156,11 +156,13 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
   UserSubWindow(parent), m_addFilesTab(NULL), m_displayTab(NULL), m_diagnosticsTab(NULL),
   m_saveWorkspaces(NULL), m_ins_defdir(""), m_last_dir(""),
   m_cfg_loaded(true), m_userFname(false), m_sample_file(),
+  m_reducemapper(NULL),
   m_warnings_issued(false), m_force_reload(false),
   m_newInDir(*this, &SANSRunWindow::handleInputDirChange),
   m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
   m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(),
   m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile(""),
+  m_batch_paste(NULL), m_batch_clear(NULL),
   slicingWindow(NULL)
 {
   ConfigService::Instance().addObserver(m_newInDir);

@@ -105,6 +105,7 @@ set ( SRC_FILES
 	src/Run.cpp
 	src/Sample.cpp
 	src/SampleEnvironment.cpp
+	src/SampleShapeValidator.cpp
 	src/ScopedWorkspace.cpp
 	src/ScriptBuilder.cpp
 	src/ScriptRepository.cpp
@@ -264,6 +265,7 @@ set ( INC_FILES
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
 	inc/MantidAPI/SampleEnvironment.h
+	inc/MantidAPI/SampleShapeValidator.h
 	inc/MantidAPI/ScopedWorkspace.h
 	inc/MantidAPI/ScriptBuilder.h
 	inc/MantidAPI/ScriptRepository.h
@@ -355,6 +357,7 @@ set ( TEST_FILES
 	PropertyNexusTest.h
 	RunTest.h
 	SampleEnvironmentTest.h
+	SampleShapeValidatorTest.h
 	SampleTest.h
 	ScopedWorkspaceTest.h
 	ScriptBuilderTest.h

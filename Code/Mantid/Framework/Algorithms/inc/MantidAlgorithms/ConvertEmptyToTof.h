@@ -16,7 +16,7 @@ namespace Algorithms {
  At the ILL the data is loaded in raw format : no units used. The X-axis represent the time channel number.
  This algorithm converts the channel number to time of flight
 
- Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 

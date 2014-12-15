@@ -5,6 +5,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <map>
 #include <sstream>
 #include <string>
@@ -17,13 +18,18 @@ struct FITSInfo {
   map<string, string> headerKeys;
   int bitsPerPixel;
   int numberOfAxis;
-  vector<int> axisPixelLengths;
+  int offset;  
+  int headerSizeMultiplier;
+  vector<size_t> axisPixelLengths;
   double tof;
   double timeBin;
+  double scale;
+  int imageKey;
   long int countsInImage;
   long int numberOfTriggers;
   string extension;
   string filePath;
+  bool isFloat;
 }; 
 
 namespace Mantid
@@ -46,7 +52,7 @@ namespace DataHandling
     @author John R Hill, RAL 
     @date 29/08/2014
     
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -98,14 +104,41 @@ namespace DataHandling
     void exec();    
     /// Parses the header values for the FITS file
     bool parseHeader(FITSInfo &headerInfo);
-    /// Load data from a number of files into the workspace
-    void loadChunkOfBinsFromFile(Mantid::API::MatrixWorkspace_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, size_t spetraCount, int bitsPerPixel, size_t binChunkStartIndex);
-    /// Initialises a workspace with IDF and fills it with data
-    API::MatrixWorkspace_sptr initAndPopulateHistogramWorkspace();
 
-    vector<FITSInfo> m_allHeaderInfo;
-    size_t m_binChunkSize;
-    static const int FIXED_HEADER_SIZE = 2880;    
+    /// Creates a vector of all rotations from a file
+    std::vector<double> readRotations(std::string rotFilePath, size_t fileCount);
+
+    /// Initialises a workspace with IDF and fills it with data
+    DataObjects::Workspace2D_sptr addWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber, void *&bufferAny, API::MantidImage &imageY, API::MantidImage &imageE, double rotation,const DataObjects::Workspace2D_sptr parent); 
+
+    /// Returns the trailing number from a string minus leading 0's (so 25 from workspace_00025)
+    size_t fetchNumber(std::string name);
+    
+    // Adds a number of leading 0's to another number up to the totalDigitCount.
+    std::string padZeros(size_t number, size_t totalDigitCount);
+
+    // Reads the data from a single FITS file into a workspace
+    void readFileToWorkspace(DataObjects::Workspace2D_sptr ws, const FITSInfo& fileInfo, API::MantidImage &imageY, API::MantidImage &imageE, void *&bufferAny);
+    
+    // Maps the header keys to specified values
+    void mapHeaderKeys();
+
+    // Strings used to map header keys
+    string m_headerScaleKey;
+    string m_headerOffsetKey;
+    string m_headerBitDepthKey;
+    string m_headerRotationKey;
+    string m_headerImageKeyKey;
+    string m_mapFile;
+    std::vector<std::string> m_headerAxisNameKeys;
+
+    string m_baseName; 
+    size_t m_spectraCount;
+    API::Progress *m_progress;
+    
+    // Number of digits which will be appended to a workspace name, i.e. 4 = workspace_0001
+    static const size_t DIGIT_SIZE_APPEND = 4;
+    static const int BASE_HEADER_SIZE = 2880;    
   };
   
 

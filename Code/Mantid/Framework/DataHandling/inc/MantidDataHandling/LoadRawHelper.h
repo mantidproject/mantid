@@ -27,32 +27,32 @@ namespace Mantid
   {
     /** @class LoadRawHelper DataHandling/LoadRawHelper.h
 
-	Helper class for LoadRaw algorithms.
+    Helper class for LoadRaw algorithms.
 
 
-	@author Sofia Antony, ISIS,RAL
-	@date 14/04/2010
+    @author Sofia Antony, ISIS,RAL
+    @date 14/04/2010
 
-	Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
-	This file is part of Mantid.
+    This file is part of Mantid.
 
-	Mantid is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; either version 3 of the License, or
-	(at your option) any later version.
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
 
-	Mantid is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-	File change history is stored at: <https://github.com/mantidproject/mantid>.
-	Code Documentation is available at: <http://doxygen.mantidproject.org>
-     */
+    File change history is stored at: <https://github.com/mantidproject/mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+    */
     class DLLExport LoadRawHelper: public API::IFileLoader<Kernel::FileDescriptor>
     {
     public:
@@ -73,6 +73,37 @@ namespace Mantid
 
       /// Returns a confidence value that this algorithm can load a file
       virtual int confidence(Kernel::FileDescriptor & descriptor) const;
+
+      /// returns true if the Exclude Monitor option(property) selected
+      static bool isExcludeMonitors(const std::string &monitorOption);
+      ///  returns true if the Separate Monitor Option  selected
+      static bool isSeparateMonitors(const std::string &monitorOption);
+      ///  returns true if the Include Monitor Option  selected
+      static bool isIncludeMonitors(const std::string &monitorOption);
+
+
+      static void ProcessLoadMonitorOptions(bool &bincludeMonitors,bool &bseparateMonitors,bool &bexcludeMonitors,API::Algorithm *const pAlgo);
+      ///creates monitor workspace
+      static void createMonitorWorkspace(DataObjects::Workspace2D_sptr& monws_sptr,
+        DataObjects::Workspace2D_sptr& ws_sptr,API::WorkspaceGroup_sptr& mongrp_sptr,
+        const int64_t mwsSpecs,const int64_t nwsSpecs,const int64_t numberOfPeriods,const int64_t lenthIn,std::string title,API::Algorithm *const pAlg);
+      /// creates  shared pointer to group workspace 
+      static API::WorkspaceGroup_sptr createGroupWorkspace();
+
+      ///creates shared pointer to workspace from parent workspace
+      static DataObjects::Workspace2D_sptr createWorkspace(DataObjects::Workspace2D_sptr ws_sptr,
+        int64_t nVectors=-1,int64_t xLengthIn=-1,int64_t yLengthIn=-1);
+
+      /// overloaded method to create shared pointer to workspace
+      static  DataObjects::Workspace2D_sptr createWorkspace(int64_t nVectors,int64_t xlengthIn,int64_t ylengthIn,const std::string& title);
+
+      /// sets the workspace property 
+      static void setWorkspaceProperty(const std::string & propertyName,const std::string& title,
+        API::WorkspaceGroup_sptr grpws_sptr,DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods,bool bMonitor,API::Algorithm * const pAlg);
+
+      /// overloaded method to set the workspace property 
+      static void setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr,API::WorkspaceGroup_sptr grpws_sptr,const int64_t period,bool bmonitors,API::Algorithm *const pAlg);
+
 
     protected:
       /// Overwrites Algorithm method.
@@ -95,19 +126,6 @@ namespace Mantid
       bool readData(FILE* file,int histToRead);
       bool readData(FILE* file,int64_t histToRead);
 
-      ///creates shared pointer to workspace from parent workspace
-      DataObjects::Workspace2D_sptr createWorkspace(DataObjects::Workspace2D_sptr ws_sptr,
-          int64_t nVectors=-1,int64_t xLengthIn=-1,int64_t yLengthIn=-1);
-
-      /// overloaded method to create shared pointer to workspace
-      DataObjects::Workspace2D_sptr createWorkspace(int64_t nVectors,int64_t xlengthIn,int64_t ylengthIn,const std::string& title);
-      ///creates monitor workspace
-      void createMonitorWorkspace(DataObjects::Workspace2D_sptr& monws_sptr,
-          DataObjects::Workspace2D_sptr& ws_sptr,API::WorkspaceGroup_sptr& mongrp_sptr,
-          const int64_t mwsSpecs,const int64_t nwsSpecs,const int64_t numberOfPeriods,const int64_t lenthIn,std::string title);
-
-      /// creates  shared pointer to group workspace 
-      API::WorkspaceGroup_sptr createGroupWorkspace();
 
       //Constructs the time channel (X) vector(s)     
       std::vector<boost::shared_ptr<MantidVec> > getTimeChannels(const int64_t& regimes, const int64_t& lengthIn);
@@ -126,16 +144,10 @@ namespace Mantid
       ///gets the monitor spectrum list from the workspace
       std::vector<specid_t> getmonitorSpectrumList(const API::SpectrumDetectorMapping& mapping);
 
-      /// sets the workspace property 
-      void setWorkspaceProperty(const std::string & propertyName,const std::string& title,
-          API::WorkspaceGroup_sptr grpws_sptr,DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods,bool bMonitor);
-
-      /// overloaded method to set the workspace property 
-      void setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr,API::WorkspaceGroup_sptr grpws_sptr,const int64_t period,bool bmonitors);
 
       /// This method sets the raw file data to workspace vectors
       void setWorkspaceData(DataObjects::Workspace2D_sptr newWorkspace,const std::vector<boost::shared_ptr<MantidVec> >& 
-          timeChannelsVec,int64_t wsIndex,specid_t nspecNum,int64_t noTimeRegimes,int64_t lengthIn,int64_t binStart);
+        timeChannelsVec,int64_t wsIndex,specid_t nspecNum,int64_t noTimeRegimes,int64_t lengthIn,int64_t binStart);
 
 
       /// ISISRAW class instance which does raw file reading. Shared pointer to prevent memory leak when an exception is thrown.
@@ -161,10 +173,10 @@ namespace Mantid
       specid_t  calculateWorkspaceSize();
       /// calculate workspace sizes if separate or exclude monitors are selected
       void calculateWorkspacesizes(const std::vector<specid_t>& monitorSpecList,
-          specid_t& normalwsSpecs, specid_t& monitorwsSpecs);
-      /// load the specra
+        specid_t& normalwsSpecs, specid_t& monitorwsSpecs);
+      /// load the spectra
       void loadSpectra(FILE* file,const int& period, const int& m_total_specs,
-          DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> >);
+        DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> >);
 
       /// Has the spectrum_list property been set?
       bool m_list;

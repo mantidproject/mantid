@@ -26,7 +26,7 @@ namespace Mantid
     PropertyManagerOwner(), m_executeAsync(new Poco::ActiveMethod<bool, Poco::Void, AlgorithmProxy>(this,&AlgorithmProxy::executeAsyncImpl)),
       m_name(alg->name()),m_category(alg->category()), m_categorySeparator(alg->categorySeparator()),
       m_alias(alg->alias()),m_summary(alg->summary()), m_version(alg->version()), m_alg(alg),
-      m_isExecuted(),m_isLoggingEnabled(true), m_loggingOffset(0), m_rethrow(false),
+      m_isExecuted(),m_isLoggingEnabled(true), m_loggingOffset(0), m_isAlgStartupLoggingEnabled(true), m_rethrow(false),
       m_isChild(false)
     {
       if (!alg)
@@ -334,6 +334,20 @@ namespace Mantid
       return res;
     }
 
+    /** Enable or disable Logging of start and end messages
+    @param enabled : true to enable logging, false to disable
+    */ 
+    void AlgorithmProxy::setAlgStartupLogging(const bool enabled) 
+    {
+      m_isAlgStartupLoggingEnabled = enabled;
+    }
 
+    /** return the state of logging of start and end messages
+    @returns : true to logging is enabled
+    */ 
+    bool AlgorithmProxy::getAlgStartupLogging() const
+    {
+      return m_isAlgStartupLoggingEnabled;
+    }
   } // namespace API
 } // namespace Mantid

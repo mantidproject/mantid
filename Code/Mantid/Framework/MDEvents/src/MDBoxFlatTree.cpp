@@ -70,7 +70,7 @@ namespace Mantid
       // currently ID is the number of the box, but it may change in a future. TODO: uint64_t
       size_t id = Box->getID();
       size_t numChildren = Box->getNumChildren();
-      if (numChildren > 0) // MDGridBox have childred
+      if (numChildren > 0) // MDGridBox have children
       {
         // DEBUG:
         //// Make sure that all children are ordered. TODO: This might not be needed if the IDs are rigorously done
@@ -124,7 +124,7 @@ namespace Mantid
       }
       ic++;
     }
-    // file postion have to be calculated afresh
+    // file position have to be calculated afresh
     if(!filePositionDefined)
     {
         uint64_t boxPosition(0);
@@ -140,13 +140,13 @@ namespace Mantid
 
   }
   /*** this function tries to set file positions of the boxes to 
-       make data physiclly located close to each otger to be as close as possible on the HDD 
+       make data physically located close to each other to be as close as possible on the HDD 
        @param setFileBacked  -- initiate the boxes to be fileBacked. The boxes assumed not to be saved before.
   */
   void MDBoxFlatTree::setBoxesFilePositions(bool setFileBacked)
   {
     // this will preserve file-backed workspace and information in it as we are not loading old box data and not?
-    // this would be right for binary axcess but questionable for Nexus --TODO: needs testing
+    // this would be right for binary access but questionable for Nexus --TODO: needs testing
     // Done in INIT--> need check if ID and index in the tree are always the same.
     //Kernel::ISaveable::sortObjByFilePos(m_Boxes);
     // calculate the box positions in the resulting file and save it on place
@@ -172,8 +172,8 @@ namespace Mantid
   void MDBoxFlatTree::saveBoxStructure(const std::string &fileName)
   {
     m_FileName = fileName;
-
-    auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName,m_nDim,m_Boxes[0]->getEventType(),false));
+    bool old_group;
+    auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName,m_nDim,m_Boxes[0]->getEventType(),false,old_group));
 
     //Save box structure;
     this->saveBoxStructure(hFile.get());
@@ -194,7 +194,7 @@ namespace Mantid
  
 
     bool create(false);
-    if(groupEntries.find("box_structure")==groupEntries.end()) //dimesnions dataset exist
+    if(groupEntries.find("box_structure")==groupEntries.end()) //dimensions dataset exist
           create = true;
 
     // Start the box data group
@@ -241,7 +241,7 @@ namespace Mantid
     }
     else
     {
-    // Update the extendible data sets
+    // Update the expendable data sets
       hFile->writeUpdatedData("box_type", m_BoxType);
       hFile->writeUpdatedData("depth", m_Depth);
       hFile->writeUpdatedData("inverse_volume", m_InverseVolume);
@@ -261,8 +261,8 @@ namespace Mantid
    @param fileName       :: The name of the file with the box information
    @param nDim           :: number of dimensions the boxes  have.
                             If this number is <=0 on input, method loads existing number of box dimensions from the file, if it is a number, method verifies if 
-                            if the number of dimensions provided equal to this number in  the file. (leftower from the time when it was templated method) 
-   @param EventType      :: "MDEvent" or "MDLeanEvent"  -- describe the type of events the workspace contans, similarly to nDim, used to check the data integrity
+                            if the number of dimensions provided equal to this number in  the file. (leftover from the time when it was templated method) 
+   @param EventType      :: "MDEvent" or "MDLeanEvent"  -- describe the type of events the workspace contains, similarly to nDim, used to check the data integrity
    @param onlyEventInfo  :: load only box controller information and the events locations -- do not restore boxes themselves 
    @param restoreExperimentInfo :: load also experiment information 
    */
@@ -272,9 +272,13 @@ namespace Mantid
     m_FileName = fileName;
     m_nDim = nDim;
     m_eventType = EventType;
- 
+
+    bool old_group;
     // open the file and the MD workspace group.
-    auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName,nDim,m_eventType,true));
+    auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName,nDim,m_eventType,true,old_group));
+    if(!old_group)
+      throw Kernel::Exception::FileError("MD workspace box structure data are not present in the file",fileName);
+
     m_nDim = nDim;
 
 
@@ -473,10 +477,10 @@ namespace Mantid
   }
 
   /** Method recovers the interconnected box structure from the plain tree into box tree, recovering both boxes and their connectivity
-    * does the opposite to the initFlatStructure operation (the class contants remains unchanged)
+    * does the opposite to the initFlatStructure operation (the class contents remains unchanged)
    @param  Boxes       :: the return vector of pointers to interconnected boxes. All previous pointers found in the vector will be overwritten (beware of memory loss)
    @param  bc          :: shard pointer to the box controller, which each box uses
-   @param  FileBackEnd :: if one should make the data file backed, namely restore/calculate the data, nesessary to obtain events file positions
+   @param  FileBackEnd :: if one should make the data file backed, namely restore/calculate the data, necessary to obtain events file positions
    @param BoxStructureOnly :: restore box tree only ignoring information about the box events
 
 
@@ -589,14 +593,16 @@ namespace Mantid
    *@param nDims     -- number of workspace dimensions;
    *@param WSEventType -- the string describing event type
    *@param readOnly    -- true if the file is opened for read-only access
+   *@param alreadyExists -- return true, if opened existing group or false if new group has been created.
 
    *@return   NeXus pointer to properly opened NeXus data file and group.
    *
    *@throws if group or its component do not exist and the file is opened read-only or if the existing file parameters are not equal to the 
               input parameters.
   */
-  ::NeXus::File * MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName,int &nDims, const std::string &WSEventType, bool readOnly)
+  ::NeXus::File * MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName,int &nDims, const std::string &WSEventType, bool readOnly,bool &alreadyExists)
   {
+        alreadyExists = false;
         Poco::File oldFile(fileName);
         bool fileExists = oldFile.exists();
         if (!fileExists && readOnly)
@@ -626,6 +632,7 @@ namespace Mantid
         {
         // Open and check ws group -------------------------------------------------------------------------------->>>
             hFile->openGroup("MDEventWorkspace", "NXentry");
+            alreadyExists = true;
 
             std::string eventType;
             if(hFile->hasAttr("event_type"))
@@ -683,6 +690,7 @@ namespace Mantid
 
            try
            {
+                alreadyExists = false;
                 hFile->makeGroup("MDEventWorkspace", "NXentry", true);
                 hFile->putAttr("event_type",WSEventType);
 
@@ -698,7 +706,7 @@ namespace Mantid
   }
 
 
-   /**Save workpace generig info like dimension structure, history, titile dimensions etc.*/
+   /**Save workspace generic info like dimension structure, history, title dimensions etc.*/
    void MDBoxFlatTree::saveWSGenericInfo(::NeXus::File *const file,API::IMDWorkspace_const_sptr ws)
    {
 
@@ -723,7 +731,7 @@ namespace Mantid
    }
 
   /**
-   * Save the affine matricies to both directional conversions to the
+   * Save the affine matrices to both directional conversions to the
    * data.
    * @param file : pointer to the NeXus file
    * @param ws : workspace to get matrix from

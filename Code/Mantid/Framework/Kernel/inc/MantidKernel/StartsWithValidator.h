@@ -18,7 +18,7 @@ namespace Kernel
 /** StartsWithValidator is a validator that requires the value of a property to start with one 
     of the strings in a defined list of possibilities.
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

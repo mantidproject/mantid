@@ -7,6 +7,7 @@ import sys
 
 h = 6.626e-34 #m^2 kg s^-1
 m = 1.675e-27 #kg
+ref_date = '2014-10-01' #when the detector has been rotated
 
 def getSequenceRuns(run_numbers):
     """
@@ -1003,7 +1004,8 @@ def normalizeNeXus(inputWorkspace, type):
 
 def integrateOverLowResRange(mt1,
                             dataLowResRange,
-                            type):
+                            type,
+                            is_nexus_detector_rotated_flag):
     """
         This creates the integrated workspace over the low resolution range leaving
         us with a [256,nbr TOF] workspace
@@ -1021,19 +1023,25 @@ def integrateOverLowResRange(mt1,
     fromXpixel = min(dataLowResRange) - 1
     toXpixel = max(dataLowResRange) - 1
 
-    _y_axis = zeros((256, len(_tof_axis) - 1))
-    _y_error_axis = zeros((256, len(_tof_axis) - 1))
+    if is_nexus_detector_rotated_flag:
+        sz_y_axis = 304
+        sz_x_axis = 256
+    else:
+        sz_y_axis = 256
+        sz_x_axis = 304
+
+    _y_axis = zeros((sz_y_axis, len(_tof_axis) - 1))
+    _y_error_axis = zeros((sz_y_axis, len(_tof_axis) - 1))
 
     x_size = toXpixel - fromXpixel + 1
     x_range = arange(x_size) + fromXpixel
 
-    y_range = range(256)
+    y_range = range(sz_y_axis)
 
     for x in x_range:
         for y in y_range:
-            _index = int((256) * x + y)
+            _index = int((sz_y_axis) * x + y)
             _y_axis[y, :] += mt1.readY(_index)[:].copy()
-
             _tmp_error_axis = mt1.readE(_index)[:].copy()
             # 0 -> 1
 #             index_where_0 = where(_tmp_error_axis == 0)
@@ -1050,7 +1058,7 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
                         peakRange, backFlag, backRange,
                         error_0, type):
     """
-    shape of y_axis : [256, nbr_tof]
+    shape of y_axis : [sz_y_axis, nbr_tof]
     This routine will calculate the background, remove it from the peak
     and will return only the range of peak  -> [peak_size, nbr_tof]
 
@@ -1561,12 +1569,19 @@ def divideArrays(num_array, num_error_array, den_array, den_error_array):
 
     return [ratio_array, ratio_error_array]
 
-def getCentralPixel(ws_event_data, dataPeakRange):
+def getCentralPixel(ws_event_data, dataPeakRange, is_new_geometry):
     """
     This function will calculate the central pixel position
     """
 
-    pixelXtof_data = getPixelXTOF(ws_event_data, maxX=304, maxY=256)
+    if is_new_geometry:
+        _maxX = 256
+        _maxY = 304
+    else:
+        _maxX = 304
+        _maxY = 256
+
+    pixelXtof_data = getPixelXTOF(ws_event_data, maxX=_maxX, maxY=_maxY)
     pixelXtof_1d = pixelXtof_data.sum(axis=1)
     # Keep only range of pixels
     pixelXtof_roi = pixelXtof_1d[dataPeakRange[0]:dataPeakRange[1]]
@@ -1744,7 +1759,6 @@ def convertToQWithoutCorrection(tof_axis,
                y_axis,
                y_error_axis,
                peak_range = None,
-               central_pixel = None,
                source_to_detector_distance = None,
                sample_to_detector_distance = None,
                theta = None,
@@ -2029,7 +2043,16 @@ def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
 
     return [final_data_y_axis, final_data_y_error_axis]
 
-
+def isNexusTakeAfterRefDate(nexus_date):
+   '''
+   This function parses the output.date and returns true if this date is after the ref date
+   '''
+   nexus_date_acquistion = nexus_date.split('T')[0]
+   
+   if nexus_date_acquistion > ref_date:
+     return True
+   else:
+     return False
 
 
 

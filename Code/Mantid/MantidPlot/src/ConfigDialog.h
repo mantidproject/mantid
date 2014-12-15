@@ -119,7 +119,6 @@ public:
     void addPythonScriptsDirs();
     void addPythonPluginDirs();
     void addInstrumentDir();
-    void addParameterDir();
     void enableButtons();
     void itemCheckedChanged(QTreeWidgetItem* item);
     void updateChildren(std::map<std::string, std::string> &programKeysAndDetails, QTreeWidgetItem* program);
@@ -187,7 +186,6 @@ private:
   QLineEdit* lePythonScriptsDirs;///< pythonscripts.directories
   QLineEdit* lePythonPluginsDirs;///< python plugins directories
   QLineEdit* leInstrumentDir;///< instrumentDefinition.directory
-  QLineEdit* leParameterDir;///< parameterDefinition.directory
   // Mantid curve fitting page
   QWidget *curveFittingPage;
   QComboBox *backgroundFunctions;
@@ -200,6 +198,7 @@ private:
   QWidget*  mantidOptionsPage;
   QWidget*  mantidSendToPage;
   QCheckBox *m_invisibleWorkspaces;
+  QCheckBox *m_reusePlotInstances;
   QCheckBox *m_useOpenGL;
   QCheckBox *m_sendToPrograms;
   QTreeWidget *treeCategories;
@@ -208,7 +207,7 @@ private:
 
   QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
   QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;
-  QCheckBox *boxTitle, *boxFrame, *boxPlots3D, *boxPlots2D, *boxTables, *boxNotes, *boxFolders,*boxInstrWindow;
+  QCheckBox *boxTitle, *boxFrame, *boxDistribution, *boxPlots3D, *boxPlots2D, *boxTables, *boxNotes, *boxFolders,*boxInstrWindow;
   QCheckBox *boxSave, *boxBackbones, *boxShowLegend, *boxSmoothMesh;
   QCheckBox *boxAutoscaling, *boxShowProjection, *boxMatrices, *boxScaleFonts, *boxResize, *boxAspectRatio;
   QComboBox *boxMajTicks, *boxMinTicks, *boxStyle, *boxCurveStyle, *boxSeparator, *boxLanguage, *boxDecimalSeparator;
@@ -234,7 +233,7 @@ private:
   QLabel *lblScriptingLanguage, *lblInitWindow;
   QComboBox *boxScriptingLanguage, *boxInitWindow;
   QCheckBox *boxAntialiasing, *boxAutoscale3DPlots, *boxTableComments, *boxThousandsSeparator;
-  QCheckBox *boxPromptRenameTables, *boxBackupProject, *boxLabelsEditing;
+  QCheckBox *boxPromptRenameTables, *boxBackupProject, *boxLabelsEditing, *boxPromptDeleteWorkspace;
   QWidget *fileLocationsPage;
   QLabel *lblTranslationsPath, *lblHelpPath, *lblUndoStackSize, *lblEndOfLine;
   QLineEdit *translationsPathLine, *helpPathLine;

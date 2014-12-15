@@ -67,7 +67,7 @@ namespace %s
 
   /** %s : TODO: DESCRIPTION
 
-    Copyright &copy; %s ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; %s ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -129,6 +129,8 @@ def write_source(subproject, classname, filename, args):
     algorithm_source = """
   //----------------------------------------------------------------------------------------------
 
+  /// Algorithms name for identification. @see Algorithm::name
+  const std::string %s::name() const { return "%s"; }
 
   /// Algorithm's version for identification. @see Algorithm::version
   int %s::version() const { return 1;};
@@ -156,7 +158,7 @@ def write_source(subproject, classname, filename, args):
     // TODO Auto-generated execute stub
   }
 
-""" % (classname, classname, classname, classname, classname)
+""" % (classname, classname, classname, classname, classname, classname, classname)
 
     if not args.alg:
         algorithm_top = ""

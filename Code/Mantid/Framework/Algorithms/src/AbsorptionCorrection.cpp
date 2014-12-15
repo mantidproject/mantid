@@ -225,7 +225,7 @@ void AbsorptionCorrection::retrieveBaseProperties()
   double sigma_atten = getProperty("AttenuationXSection"); // in barns
   double sigma_s = getProperty("ScatteringXSection"); // in barns
   double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
-  const Material& sampleMaterial = m_inputWS->sample().getMaterial();
+  const Material& sampleMaterial = m_inputWS->sample().getShape().material();
   if( sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) != 0.0)
   {
     if (rho == EMPTY_DBL()) rho =  sampleMaterial.numberDensity();
@@ -236,8 +236,10 @@ void AbsorptionCorrection::retrieveBaseProperties()
   {
     NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
                          0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
-    Material mat("SetInAbsorptionCorrection", neutron, rho);
-    m_inputWS->mutableSample().setMaterial(mat);
+    
+    Object shape = m_inputWS->sample().getShape(); // copy
+    shape.setMaterial(Material("SetInAbsorptionCorrection", neutron, rho));
+    m_inputWS->mutableSample().setShape(shape);
   }
   rho *= 100;  // Needed to get the units right
   m_refAtten = -sigma_atten * rho / 1.798;

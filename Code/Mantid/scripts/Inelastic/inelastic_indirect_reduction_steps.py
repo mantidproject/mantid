@@ -164,7 +164,6 @@ class LoadData(ReductionStep):
     def _load_data(self, filename, output_ws):
         if self._parameter_file is not None and "VESUVIO" in self._parameter_file:
             loaded_ws = LoadVesuvio(Filename=filename, OutputWorkspace=output_ws, SpectrumList="1-198", **self._extra_load_opts)
-            loader_name = "LoadVesuvio"
         else:
             # loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
             if self._load_logs == True:
@@ -324,146 +323,6 @@ class BackgroundOperations(ReductionStep):
     def set_range(self, start, end):
         self._background_start = start
         self._background_end = end
-
-class CreateCalibrationWorkspace(ReductionStep):
-    """Creates a calibration workspace from a White-Beam Vanadium run.
-    """
-
-    _back_min = None
-    _back_max = None
-    _peak_min = None
-    _peak_max = None
-    _detector_range_start = None
-    _detector_range_end = None
-    _calib_raw_files = []
-    _calib_workspace = None
-    _analyser = None
-    _reflection = None
-
-    def __init__(self):
-        super(CreateCalibrationWorkspace, self).__init__()
-        self._back_min = None
-        self._back_max = None
-        self._peak_min = None
-        self._peak_max = None
-        self._detector_range_start = None
-        self._detector_range_end = None
-        self._calib_raw_files = []
-        self._calib_workspace = None
-        self._analyser = None
-        self._reflection = None
-        self._intensity_scale = None
-
-    def execute(self, reducer, file_ws):
-        """The information we use here is not from the main reducer object
-        (ie, we are not looking at one of the data files.)
-
-        The ApplyCalibration step is related to this.
-        """
-        rawfiles = self._calib_raw_files
-        if ( len(rawfiles) == 0 ):
-            print "Indirect: No calibration run specified."
-            return
-
-        backMin, backMax, peakMin, peakMax = self._get_calib_details()
-        specMin = self._detector_range_start + 1
-        specMax = self._detector_range_end + 1
-
-        runs = []
-        for file in rawfiles:
-            (direct, filename) = os.path.split(file)
-            (root, ext) = os.path.splitext(filename)
-            try:
-                Load(Filename=file,OutputWorkspace= root, SpectrumMin=specMin, SpectrumMax=specMax,
-                    LoadLogFiles=False)
-                runs.append(root)
-            except:
-                sys.exit('Indirect: Could not load raw file: ' + file)
-        cwsn = 'calibration'
-        if ( len(runs) > 1 ):
-            MergeRuns(InputWorkspaces=",".join(runs),OutputWorkspace= cwsn)
-            factor = 1.0 / len(runs)
-            Scale(InputWorkspace=cwsn,OutputWorkspace= cwsn,Factor= factor)
-        else:
-            cwsn = runs[0]
-        CalculateFlatBackground(InputWorkspace=cwsn,OutputWorkspace= cwsn,StartX= backMin,EndX= backMax, Mode='Mean')
-
-        cal_ws = mtd[cwsn]
-        runNo = cal_ws.getRun().getLogData("run_number").value
-        outWS_n = runs[0][:3] + runNo + '_' + self._analyser + self._reflection + '_calib'
-
-        ntu = NormaliseToUnityStep()
-        ntu.set_factor(self._intensity_scale)
-        ntu.set_peak_range(peakMin, peakMax)
-        ntu.execute(reducer, cwsn)
-
-        RenameWorkspace(InputWorkspace=cwsn,OutputWorkspace= outWS_n)
-
-        # Add data about the files creation to the logs
-        if self._intensity_scale:
-            AddSampleLog(Workspace=outWS_n, LogName='Scale Factor', LogType='Number', LogText=str(self._intensity_scale))
-
-        AddSampleLog(Workspace=outWS_n, LogName='Peak Min', LogType='Number', LogText=str(peakMin))
-        AddSampleLog(Workspace=outWS_n, LogName='Peak Max', LogType='Number', LogText=str(peakMax))
-        AddSampleLog(Workspace=outWS_n, LogName='Back Min', LogType='Number', LogText=str(backMin))
-        AddSampleLog(Workspace=outWS_n, LogName='Back Max', LogType='Number', LogText=str(backMax))
-
-        self._calib_workspace = outWS_n # Set result workspace value
-        if ( len(runs) > 1 ):
-            for run in runs:
-                DeleteWorkspace(Workspace=run)
-
-    def set_parameters(self, back_min, back_max, peak_min, peak_max):
-        self._back_min = back_min
-        self._back_max = back_max
-        self._peak_min = peak_min
-        self._peak_max = peak_max
-
-    def set_intensity_scale(self, factor):
-        self._intensity_scale = float(factor)
-
-    def set_detector_range(self, start, end):
-        self._detector_range_start = start
-        self._detector_range_end = end
-
-    def set_instrument_workspace(self, workspace):
-        self._instrument_workspace = workspace
-
-    def set_files(self, files):
-        if len(files) > 0:
-            self._calib_raw_files = files
-        else:
-            raise ValueError("Indirect: Can't set calib files if you don't "
-                "specify a calib file.")
-
-    def set_analyser(self, analyser):
-        self._analyser = str(analyser)
-
-    def set_reflection(self, reflection):
-        self._reflection = str(reflection)
-
-    def result_workspace(self):
-        return self._calib_workspace
-
-    def _get_calib_details(self):
-        if ( self._back_min is None and
-                self._back_max is None and
-                self._peak_min is None and
-                self._peak_max is None ):
-            instrument = mtd[self._instrument_workspace].getInstrument()
-            try:
-                backMin = instrument.getNumberParameter('back-start')[0]
-                backMax = instrument.getNumberParameter('back-end')[0]
-                peakMin = instrument.getNumberParameter('peak-start')[0]
-                peakMax = instrument.getNumberParameter('peak-end')[0]
-            except IndexError:
-                sys.exit("Indirect: Unable to retrieve calibration details "
-                    "from instrument of workspace.")
-            else:
-                return backMin, backMax, peakMin, peakMax
-        else:
-            return ( self._back_min, self._back_max, self._peak_min,
-                self._peak_max )
 
 class ApplyCalibration(ReductionStep):
     """Applies a calibration workspace to the data.
@@ -922,7 +781,7 @@ class Grouping(ReductionStep):
 
     def execute(self, reducer, file_ws):
 
-        if ( self._multiple_frames ):
+        if self._multiple_frames:
             try:
                 workspaces = mtd[file_ws].getNames()
             except AttributeError:
@@ -930,25 +789,24 @@ class Grouping(ReductionStep):
         else:
             workspaces = [file_ws]
 
-        # set the detector mask for this workspace
+        # Set the detector mask for this workspace
         if file_ws in reducer._masking_detectors:
             self._masking_detectors = reducer._masking_detectors[file_ws]
 
         for ws in workspaces:
-            if self._grouping_policy is not None:
-                self._result_workspaces.append(self._group_data(ws))
-            else:
+            # If a grouping policy has not been set then try to get one from the IPF
+            if self._grouping_policy is None:
                 try:
-                    group = mtd[ws].getInstrument().getStringParameter(
-                        'Workflow.GroupingMethod')[0]
+                    group = mtd[ws].getInstrument().getStringParameter('Workflow.GroupingMethod')[0]
                 except IndexError:
                     group = 'User'
-                if (group == 'File' ):
-                    self._grouping_policy =  mtd[ws].getInstrument().getStringParameter(
-                        'Workflow.GroupingFile')[0]
-                    self._result_workspaces.append(self._group_data(ws))
+
+                if group == 'File':
+                    self._grouping_policy = mtd[ws].getInstrument().getStringParameter('Workflow.GroupingFile')[0]
                 else:
-                    self._result_workspaces.append(self._group_data(ws))
+                    self._grouping_policy = group
+
+            self._result_workspaces.append(self._group_data(ws))
 
     def set_grouping_policy(self, value):
         self._grouping_policy = value
@@ -958,9 +816,9 @@ class Grouping(ReductionStep):
 
     def _group_data(self, workspace):
         grouping = self._grouping_policy
-        if ( grouping == 'Individual' ) or ( grouping is None ):
+        if grouping == 'Individual' or grouping is None:
             return workspace
-        elif ( grouping == 'All' ):
+        elif grouping == 'All':
             nhist = mtd[workspace].getNumberHistograms()
             wslist = []
             for i in range(0, nhist):
@@ -982,7 +840,7 @@ class Grouping(ReductionStep):
 
                 # See if it is an absolute path
                 # Otherwise check in the default group files directory
-                if (os.path.isfile(grouping)):
+                if os.path.isfile(grouping):
                     grouping_filename = grouping
                 else:
                     grouping_filename = os.path.join(config.getString('groupingFiles.directory'), grouping)
@@ -1031,8 +889,15 @@ class SaveItem(ReductionStep):
             elif format == 'nxspe':
                 SaveNXSPE(InputWorkspace=file_ws, Filename=filename + '.nxspe')
             elif format == 'ascii':
-                #version 1 of SaveASCII produces output that works better with excel/origin
-                SaveAscii(InputWorkspace=file_ws, Filename=filename + '.dat', Version=1)
+                # Version 1 of SaveASCII produces output that works better with excel/origin
+                # For some reason this has to be done with an algorithm object, using the function
+                # wrapper with Version did not change the version that was run
+                saveAsciiAlg = mantid.api.AlgorithmManager.createUnmanaged('SaveAscii', 1)
+                saveAsciiAlg.initialize()
+                saveAsciiAlg.setProperty('InputWorkspace', file_ws)
+                saveAsciiAlg.setProperty('Filename', filename + '.dat')
+                saveAsciiAlg.execute()
+
             elif format == 'gss':
                 ConvertUnits(InputWorkspace=file_ws, OutputWorkspace="__save_item_temp", Target="TOF")
                 SaveGSS(InputWorkspace="__save_item_temp", Filename=filename + ".gss")

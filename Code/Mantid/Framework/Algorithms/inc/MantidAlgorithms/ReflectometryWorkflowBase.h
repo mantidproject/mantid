@@ -16,7 +16,7 @@ namespace Mantid
     /** ReflectometryWorkflowBase : Abstract workflow algortithm base class containing common implementation functionality usable
      *  by concrete reflectometry workflow algorithms.
 
-     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
      This file is part of Mantid.
 

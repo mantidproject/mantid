@@ -12,6 +12,7 @@ void export_PointGroupFactory()
     class_<PointGroupFactoryImpl,boost::noncopyable>("PointGroupFactoryImpl", no_init)
             .def("exists", &PointGroupFactoryImpl::exists)
             .def("createPointGroup", &PointGroupFactoryImpl::createPointGroup)
+            .def("createPointGroupFromSpaceGroupSymbol", &PointGroupFactoryImpl::createPointGroupFromSpaceGroupSymbol)
             .def("getAllPointGroupSymbols", &PointGroupFactoryImpl::getAllPointGroupSymbols)
             .def("getPointGroupSymbols", &PointGroupFactoryImpl::getPointGroupSymbols)
             .def("Instance", &PointGroupFactory::Instance, return_value_policy<reference_existing_object>(),

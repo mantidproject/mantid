@@ -29,7 +29,7 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 25/08/2008
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -71,9 +71,6 @@ private:
   void exec();
   // Extract the charge value from the logs.
   double extractCharge(boost::shared_ptr<Mantid::API::MatrixWorkspace> inputWs) const;
-  /// Progress reporting
-  API::Progress* m_progress;
-  
 };
 
 } // namespace Algorithm

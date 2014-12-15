@@ -99,7 +99,7 @@ bool SimplexMinimizer::iterate(size_t)
     return false;
   }
   double size = gsl_multimin_fminimizer_size(m_gslSolver);
-  status = gsl_multimin_test_size(size, 1e-6);
+  status = gsl_multimin_test_size(size,m_epsabs);
   if (status != GSL_CONTINUE)
   {
     m_errorString = gsl_strerror(status);

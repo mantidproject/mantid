@@ -1,13 +1,13 @@
 # Algorithm to start Bayes programs
 from mantid.simpleapi import *
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty
+from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty
 from mantid.kernel import Direction
 from mantid import logger
 
 import os.path
 import numpy as np
 
-class SofQWMoments(PythonAlgorithm):
+class SofQWMoments(DataProcessorAlgorithm):
 
     def category(self):
     	return "Workflow\\MIDAS;PythonAlgorithms"
@@ -104,9 +104,9 @@ class SofQWMoments(PythonAlgorithm):
     		AddSampleLog(Workspace=ws_name, LogName="energy_max", LogType="Number", LogText=str(emax))
     		AddSampleLog(Workspace=ws_name, LogName="scale_factor", LogType="Number", LogText=str(factor))
 
-    	#group ouput workspace
+    	# Group output workspace
     	group_workspaces = ','.join([output_workspace+ext for ext in extensions])
-    	GroupWorkspaces(InputWorkspaces=group_workspaces,OutputWorkspace=output_workspace)
+    	GroupWorkspaces(InputWorkspaces=group_workspaces, OutputWorkspace=output_workspace)
 
     	if Save:
     		workdir = getDefaultWorkingDirectory()
@@ -126,8 +126,8 @@ class SofQWMoments(PythonAlgorithm):
     	from IndirectImport import import_mantidplot
     	mp = import_mantidplot()
 
-    	mp.plotSpectrum(inputWS+'_M0',0)
-    	mp.plotSpectrum([inputWS+'_M2',inputWS+'_M4'],0)
+    	mp.plotSpectrum(inputWS+'_M0', 0)
+    	mp.plotSpectrum([inputWS+'_M2', inputWS+'_M4'], 0)
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SofQWMoments)

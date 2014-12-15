@@ -9,7 +9,7 @@ This dynamic factory implementation generates concrete instances of ImplicitFunc
     @author Owen Arnold, Tessella Support Services plc
     @date 27/10/2010
 
-Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 

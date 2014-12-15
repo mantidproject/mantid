@@ -115,7 +115,7 @@ class MantidUI;
 class ScriptingWindow;
 
 /**
-* \brief QtiPlot's main window.
+* \brief MantidPlot's main window.
 *
 * This class contains the main part of the user interface as well as the central project management facilities.
 *
@@ -123,24 +123,6 @@ class ScriptingWindow;
 * and contains the parts of the project explorer not implemented in Folder, FolderListItem or FolderListView.
 *
 * Furthermore, it is responsible for displaying most MDI Windows' context menus and opening all sorts of dialogs.
-*
-* \section future Future Plans
-* Split out the project management part into a new Project class.
-* If MdiSubWindow maintains a reference to its parent Project, it should be possible to have its subclasses
-* display their own context menus and dialogs.
-* This is necessary for implementing new plot types or even completely new MdiSubWindow subclasses in plug-ins.
-* It will also make ApplicationWindow more manageable by removing those parts not directly related to the main window.
-*
-* Project would also take care of basic project file reading/writing (using Qt's XML framework), but delegate most of
-* the work to MdiSubWindow and its subclasses. This is necessary for providing save/restore of classes implemented in
-* plug-ins. Support for foreign formats on the other hand could go into import/export classes (which could also be
-* implemented in plug-ins). Those would interface directly with Project and the MyWidgets it manages. Thus, in addition
-* to supporting QtXML-based save/restore, Project, MdiSubWindow and subclasses will also have to provide generalized
-* save/restore methods/constructors.
-*
-* Maybe split out the project explorer into a new ProjectExplorer class, depending on how much code is left
-* in ApplicationWindow after the above reorganizations. Think about whether a Model/View approach can be
-* used for Project/ProjectExplorer.
 */
 class ApplicationWindow: public QMainWindow, public Scripted
 {
@@ -199,11 +181,17 @@ public:
 
   int matrixUndoStackSize(){return d_matrix_undo_stack_size;};
   void setMatrixUndoStackSize(int size);
+    
+  // Check if delete workspace prompt is enabled
+  bool isDeleteWorkspacePromptEnabled();
 
   QString endOfLine();
   bool autoUpdateTableValues(){return d_auto_update_table_values;};
   void setAutoUpdateTableValues(bool on = true);
-  void enablesaveNexus(const QString& wsName);
+  // enables File->Save->Nexus action in the main menu and sets the parameter wsName as input workspace for save alg.
+  void enableSaveNexus(const QString& wsName);
+  // disables File->Save-Nexus action in the main menu. Useful when de-selecting workspaces
+  void disableSaveNexus();
 
 public slots:
   //! \name Projects and Project Files
@@ -211,10 +199,16 @@ public slots:
   void exitWithPresetCode();
   void open();
   ApplicationWindow* open(const QString& fn, bool factorySettings = false, bool newProject = true);
-  ApplicationWindow* openProject(const QString& fn, bool factorySettings = false, bool newProject = true);
+  ApplicationWindow* openProject(const QString& fn, const int fileVersion);
+  void openProjectFolder(std::string lines, const int fileVersion, bool isTopLevel = false);
   ApplicationWindow* importOPJ(const QString& fn, bool factorySettings = false, bool newProject = true);
-  /// Load mantid data files using generic load algorithm
+  /// Load mantid data files using generic load algorithm, opening user dialog
   void loadDataFile();
+  /// Load mantid data files (generic load algorithm)
+  void loadDataFileByName(QString fn);
+  /// Open from the list of recent files
+  void openRecentFile(int index);
+
   /**
   * \brief Create a new project from a data file.
   *
@@ -224,12 +218,6 @@ public slots:
   */
   ApplicationWindow * plotFile(const QString& fn);
 
-  /**
-  * \brief Create a new project from a script file.
-  *
-  * @param fn :: is read as a Python script file and loaded in the script window.
-  */
-  ApplicationWindow * loadScript(const QString& fn);
   /// Runs a script from a file. Mainly useful for automatically running scripts
   void executeScriptFile(const QString & filename, const Script::ExecutionMode execMode);
   /// Slot to connect the script execution success
@@ -249,6 +237,9 @@ public slots:
 
   void saveProjectAs(const QString& fileName = QString(), bool compress = false);
   bool saveProject(bool compress = false);
+
+  /// Serialises a project folder into its string project file representation
+  QString saveProjectFolder(Folder* folder, int &windowCount, bool isTopLevel = false);
 
   //! Set the project status to modifed
   void modifiedProject();
@@ -408,6 +399,7 @@ public slots:
   //@{
   //! Creates an empty table
   Table* newTable();
+
   //! Used when loading a table from a project file
   Table* newTable(const QString& caption,int r, int c);
   Table* newTable(int r, int c, const QString& name = QString(),const QString& legend = QString());
@@ -566,11 +558,7 @@ public slots:
   QStringList depending3DPlots(Matrix *m);
   QStringList multilayerDependencies(QWidget *w);
 
-  void saveAsTemplate(MdiSubWindow* w = 0, const QString& = QString());
-  void openTemplate();
-  MdiSubWindow* openTemplate(const QString& fn);
-
-  QString windowGeometryInfo(MdiSubWindow *w);
+  std::string windowGeometryInfo(MdiSubWindow *w);
   void restoreWindowGeometry(ApplicationWindow *app, MdiSubWindow *w, const QString& s);
   void restoreApplicationGeometry();
   void resizeActiveWindow();
@@ -611,14 +599,8 @@ public slots:
   MultiLayer* prepareMultiLayer(bool& isNew, MultiLayer* window, const QString& newWindowName = "Graph", 
     bool clearWindow = false);
 
-  //! \name Reading from a Project File
-  //@{
-
-  Table* openTable(ApplicationWindow* app, const QStringList &flist);
-  TableStatistics* openTableStatistics(const QStringList &flist);
-  Graph3D* openSurfacePlot(ApplicationWindow* app, const QStringList &lst);
-  Graph* openGraph(ApplicationWindow* app, MultiLayer *plot, const QStringList &list);
   void openRecentProject(int index);
+
   //@}
 
   //! \name Table Tools
@@ -852,7 +834,11 @@ public slots:
   void custom3DGrids(int grids);
   //@}
 
+  //! Updates the recent projects list and menu (but doesn't insert anything)
   void updateRecentProjectsList();
+
+  //! Inserts file name in the list of recent files (if fname not empty) and updates the "recent files" menu
+  void updateRecentFilesList(QString fname="");
 
   //!  connected to the done(bool) signal of the http object
   //void receivedVersionFile(bool error);
@@ -896,14 +882,13 @@ public slots:
   //@{
   //! Creates a new empty note window
   Note* newNote(const QString& caption = QString());
-  Note* openNote(ApplicationWindow* app, const QStringList &flist);
   void saveNoteAs();
   //@}
 
   //! \name Folders
   //@{
   //! Returns a pointer to the current folder in the project
-  Folder* currentFolder(){return current_folder;}
+  Folder* currentFolder() const {return d_current_folder;}
   //! Adds a new folder to the project
   void addFolder();
   Folder* addFolder(QString name, Folder* parent = NULL);
@@ -976,7 +961,7 @@ public slots:
   Folder* appendProject(const QString& file_name, Folder* parentFolder = 0);
   void saveAsProject();
   void saveFolderAsProject(Folder *f);
-  void saveFolder(Folder *folder, const QString& fn, bool compress = false);
+  void saveProjectFile(Folder *folder, const QString& fn, bool compress = false);
 
   //!  adds a folder list item to the list view "lv"
   void addFolderListViewItem(Folder *f);
@@ -1084,28 +1069,36 @@ protected:
 
 private:
   virtual QMenu * createPopupMenu(){return NULL;}
-  ///void open spectrogram plot from project
-  Spectrogram*  openSpectrogram(Graph*ag,const std::string &wsName,const QStringList &lst);
-  Matrix* openMatrix(ApplicationWindow* app, const QStringList &flist);
-  void openMantidMatrix(const QStringList &lst);
-  MantidMatrix* newMantidMatrix(const QString& wsName,int lower,int upper);
-  void openScriptWindow(const QStringList &list);
-  void populateMantidTreeWdiget(const QString &s);
+
+  void populateMantidTreeWidget(const QString &s);
   void loadWsToMantidTree(const std::string& wsName);
-  void openInstrumentWindow(const QStringList &list);
   /// this method saves the data on project save
   void savedatainNexusFormat(const std::string& wsName,const std::string & fileName);
   QPoint positionNewFloatingWindow(QSize sz) const;
   QPoint mdiAreaTopLeft() const;
   bool hasParaviewPath() const;
   bool shouldExecuteAndQuit(const QString& arg);
+  bool isSilentStartup(const QString& arg);
   void trySetParaviewPath(const QStringList& commandArguments, bool noDialog=false);
   void handleConfigDir();
 
-  private slots:
+  //! \name Project File Loading
+  //@{
+  void openMantidMatrix     (const std::string& lines);
+
+  void openMatrix           (const std::string& lines, const int fileVersion);
+  void openMultiLayer       (const std::string& lines, const int fileVersion);
+  void openSurfacePlot      (const std::string& lines, const int fileVersion);
+  void openTable            (const std::string& lines, const int fileVersion);
+  void openTableStatistics  (const std::string& lines, const int fileVersion);
+  void openScriptWindow     (const QStringList& lines);
+  //@}
+
+  ApplicationWindow* loadScript(const QString& fn, bool existingProject = false);
+
+private slots:
   //! \name Initialization
   //@{
-  
   void setToolbars();
   void displayToolbars();
   void insertTranslatedStrings();
@@ -1191,14 +1184,16 @@ private:
   ///
   void showalgorithmDescriptions();
 
+  /// Contains the rules of when to show the FirstTimeSetup UI.
+  bool shouldWeShowFirstTimeSetup(const QStringList& commandArguments);
   /// Open up the FirstRunSetup dialog
   void showFirstTimeSetup();
 
   /// Open up the SetupParaview dialog
   void showSetupParaview();
 
-  // TODO: a lot of this stuff should be private
 public:
+  // TODO: a lot of this stuff should be private
   //! End of line convention used for copy/paste operations and when exporting tables/matrices to ASCII files.
   EndLineChar d_eol;
   //! Flag telling if the in-place editing of 2D plot labels is enabled
@@ -1216,7 +1211,7 @@ public:
   QPoint d_script_win_pos;
   QSize d_script_win_size;
   bool d_script_win_arrow;
-  bool d_inform_rename_table;
+  bool d_inform_rename_table, d_inform_delete_workspace;
   QString d_export_col_separator;
   bool d_export_col_names, d_export_table_selection, d_export_col_comment;
 
@@ -1275,12 +1270,14 @@ public:
   int d_graphing_digits;
 
   //! pointer to the current folder in the project
-  Folder *current_folder;
+  Folder *d_current_folder;
+  //! pointer to the folder marked current in the last loaded project
+  Folder *d_loaded_current;
+
   //! Describes which windows are shown when the folder becomes the current folder
   ShowWindowsPolicy show_windows_policy;
   enum {MaxRecentProjects = 10};
-  //! File version code used when opening project files (= maj * 100 + min * 10 + patch)
-  int d_file_version;
+  enum {MaxRecentFiles = MaxRecentProjects};
 
   QColor workspaceColor, panelsColor, panelsTextColor;
   QString appStyle, workingDir;
@@ -1311,6 +1308,7 @@ public:
   bool d_synchronize_graph_scales;
 
   int majTicksStyle, minTicksStyle, legendFrameStyle, autoSaveTime, canvasFrameWidth;
+  bool autoDistribution1D;
   QColor legendBackground, legendTextColor, defaultArrowColor;
   int defaultArrowHeadLength, defaultArrowHeadAngle;
   double defaultArrowLineWidth, defaultCurveLineWidth;
@@ -1327,9 +1325,9 @@ public:
   QColor tableBkgdColor, tableTextColor, tableHeaderColor;
   QString projectname, columnSeparator, helpFilePath, appLanguage;
   QString configFilePath, fitPluginsPath, fitModelsPath, asciiDirPath, imagesDirPath, scriptsDirPath;
-  int ignoredLines, savingTimerId, plot3DResolution, recentMenuID;
+  int ignoredLines, savingTimerId, plot3DResolution, recentMenuID, recentFilesMenuID;
   bool renameColumns, strip_spaces, simplify_spaces;
-  QStringList recentProjects;
+  QStringList recentProjects, recentFiles;
   bool saved, showPlot3DProjection, showPlot3DLegend, orthogonal3DPlots, autoscale3DPlots;
   QStringList plot3DColors, locales;
   QStringList functions; //user-defined functions;
@@ -1377,25 +1375,11 @@ private:
   bool d_auto_update_table_values;
   int d_matrix_undo_stack_size;
 
-  /// A method to populate the CurveLayout struct on loading a project
-  CurveLayout fillCurveSettings(const QStringList & curve, unsigned int offset = 0);
-
-  //! Workaround for the new colors introduced in rev 447
-  int convertOldToNewColorIndex(int cindex);
-
   //! Stores the pointers to the dragged items from the FolderListViews objects
   QList<Q3ListViewItem *> draggedItems;
 
   Graph *lastCopiedLayer;
   QSplitter *explorerSplitter;
-
-    /**
-  *  Load a script file into a new or existing project
-  *
-  * @param fn :: is read as a Python script file and loaded in the command script window.
-  * @param exisatingProject :: True if loading into an already existing project
-  */
-  ApplicationWindow * loadScript(const QString& fn, bool existingProject );
 
   //	QAssistantClient *assistant;
   ScriptingWindow *scriptingWindow; //Mantid
@@ -1413,7 +1397,8 @@ private:
 
   QWidget* catalogSearch;
 
-  QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent, *interfaceMenu;
+  QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit;
+  QMenu *recentProjectsMenu, *recentFilesMenu, *interfaceMenu;
   
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
@@ -1470,7 +1455,7 @@ private:
   QAction *actionBoxPlot, *actionMultiPeakGauss, *actionMultiPeakLorentz, *actionCheckUpdates;
   QAction *actionDonate, *actionHomePage, *actionDownloadManual, *actionTechnicalSupport, *actionTranslations;
   QAction *actionHelpForums, *actionHelpBugReports, *actionAskHelp;
-  QAction *actionShowPlotDialog, *actionShowScaleDialog, *actionOpenTemplate, *actionSaveTemplate;
+  QAction *actionShowPlotDialog, *actionShowScaleDialog;
   QAction *actionNextWindow, *actionPrevWindow;
   QAction *actionScriptingLang,*actionClearTable, *actionGoToRow, *actionGoToColumn;
   QAction *actionSaveNote;

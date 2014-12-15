@@ -4,6 +4,7 @@
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidMDEvents/MDGridBox.h"
+#include <boost/math/special_functions/round.hpp>
 #include <cmath>
 
 using namespace Mantid::API;
@@ -437,30 +438,30 @@ namespace MDEvents
   TMDE(
   void MDBox)::calculateCentroid(coord_t * centroid) const
   {
-	for (size_t d=0; d<nd; d++)
-	  centroid[d] = 0;
+  for (size_t d=0; d<nd; d++)
+    centroid[d] = 0;
 
-	// Signal was calculated before (when adding)
-	// Keep 0.0 if the signal is null. This avoids dividing by 0.0
-	if (this->m_signal == 0) return;
+  // Signal was calculated before (when adding)
+  // Keep 0.0 if the signal is null. This avoids dividing by 0.0
+  if (this->m_signal == 0) return;
 
-	typename std::vector<MDE>::const_iterator it_end = data.end();
-	for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; ++it)
-	{
-	  const MDE & Evnt = *it;
-	  double signal = Evnt.getSignal();
-	  for (size_t d=0; d<nd; d++)
-	  {
-		// Total up the coordinate weighted by the signal.
-		centroid[d] += Evnt.getCenter(d) * static_cast<coord_t>(signal);
-	  }
-	}
+  typename std::vector<MDE>::const_iterator it_end = data.end();
+  for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; ++it)
+  {
+    const MDE & Evnt = *it;
+    double signal = Evnt.getSignal();
+    for (size_t d=0; d<nd; d++)
+    {
+    // Total up the coordinate weighted by the signal.
+    centroid[d] += Evnt.getCenter(d) * static_cast<coord_t>(signal);
+    }
+  }
 
-	// Normalize by the total signal
-	for (size_t d=0; d<nd; d++)
-	{
-		centroid[d] /= coord_t(this->m_signal);
-	}
+  // Normalize by the total signal
+  for (size_t d=0; d<nd; d++)
+  {
+    centroid[d] /= coord_t(this->m_signal);
+  }
 
   }
 
@@ -644,9 +645,7 @@ namespace MDEvents
       if (out[0] < radius && std::fabs(out[1]) < 0.5*length)
       {
         // add event to appropriate y channel
-		size_t xchannel;
-		if (out[1] < 0) xchannel = static_cast<int>(out[1] / deltaQ - 0.5) + static_cast<int>(numSteps / 2)-1;
-		else xchannel = static_cast<int>(out[1] / deltaQ + 0.5) + static_cast<int>(numSteps / 2)-1;
+        size_t xchannel = static_cast<size_t>(std::floor(out[1] / deltaQ)) + numSteps / 2;
         if (xchannel < numSteps ) signal_fit[xchannel] += static_cast<signal_t>(it->getSignal());
 
         signal += static_cast<signal_t>(it->getSignal());
@@ -850,8 +849,8 @@ namespace MDEvents
 
     /**Make this box file-backed 
     * @param fileLocation -- the starting position of this box data are/should be located in the direct access file
-    * @param fileSize     -- the size this box data occupy in the file (in the units of the numbner of eventss)
-    * @param markSaved    -- set to true if the data indeed are physically there and one can indedd read then from there
+    * @param fileSize     -- the size this box data occupy in the file (in the units of the number of events)
+    * @param markSaved    -- set to true if the data indeed are physically there and one can indeed read then from there
     */
     TMDE(
     void MDBox)::setFileBacked(const uint64_t fileLocation,const size_t fileSize, const bool markSaved)
@@ -869,7 +868,7 @@ namespace MDEvents
             this->setFileBacked(UNDEF_UINT64,this->getDataInMemorySize(),false);
     }
 
-    /**Save the box dataat specific disk position using the class, responsible for the file IO. 
+    /**Save the box data to specific disk position using the class, responsible for the file IO. 
       * 
       *@param FileSaver -- the pointer to the class, responsible for File IO operations
       *@param position  -- the position of the data within the class.
@@ -900,9 +899,20 @@ namespace MDEvents
        FileSaver->saveBlock(TabledData,position);
 
    }
+
+   /**
+    * Reserve all the memory required for loading in one step.
+    *
+    * @param size -- number of events to reserve for
+    */
+   TMDE(
+   void MDBox)::reserveMemoryForLoad(uint64_t size)
+   {
+      this->data.reserve(size);
+   }
+
    /**Load the box data of specified size from the disk location provided using the class, respoinsible for the file IO and append them to exisiting events
-    * Clear events vector first if overwriting the exisitng events is necessary. The efficiency would be higher if jentle cleaning occurs (the size of event data vector 
-      is nullified but memory still allocated)
+    * Clear events vector first if overwriting the exisitng events is necessary.
     * 
    * @param FileSaver    -- the pointer to the class, responsible for file IO
    * @param filePosition -- the place in the direct access file, where necessary data are located
@@ -923,9 +933,6 @@ namespace MDEvents
        std::vector<coord_t> TableData;
        FileSaver->loadBlock(TableData,filePosition,nEvents);
 
-       // convert loaded events to data;
-       size_t nCurrentEvents = data.size();
-       this->data.reserve(nCurrentEvents+nEvents);
        // convert data to events appending new events to existing
        MDE::dataToEvents(TableData,data,false);
    

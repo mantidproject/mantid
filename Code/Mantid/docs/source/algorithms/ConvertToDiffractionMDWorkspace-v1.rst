@@ -11,7 +11,7 @@ Description
 
 This algorithm converts from a `MatrixWorkspace <http://mantidproject.org/MatrixWorkspace>`__ (in
 detector/time-of-flight space) to a
-`MDEventWorkspace <http://mantidproject.org/MDEventWorkspace>`__ containing events in reciprocal
+`MDEventWorkspace <http://mantidproject.org/MDWorkspace>`__ containing events in reciprocal
 space.
 
 The calculations apply only to elastic diffraction experiments. The
@@ -20,7 +20,7 @@ to HKL of the crystal.
 
 If the OutputWorkspace does NOT already exist, a default one is created.
 In order to define more precisely the parameters of the
-`MDEventWorkspace <http://mantidproject.org/MDEventWorkspace>`__, use the
+`MDEventWorkspace <http://mantidproject.org/MDWorkspace>`__, use the
 :ref:`algm-CreateMDWorkspace` algorithm first.
 
 Types of Conversion
@@ -100,11 +100,14 @@ Usage
 
    # A way to look at these results as a text:
    print "Resulting MD workspace has {0} events and {1} dimensions".format(md.getNEvents(),md.getNumDims())
+   print "Workspace Type is: ",md.id()
+
 
 **Output:**
 
 .. testoutput:: ExConvertToDiffractionMDWorkspace
 
    Resulting MD workspace has 520128 events and 3 dimensions
-
+   Workspace Type is:  MDEventWorkspace<MDLeanEvent,3>
+   
 .. categories::

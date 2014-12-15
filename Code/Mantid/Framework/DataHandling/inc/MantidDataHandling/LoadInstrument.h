@@ -57,7 +57,7 @@ namespace Mantid
     @author Anders Markvardsen, ISIS, RAL
     @date 7/3/2008
 
-    Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -87,7 +87,7 @@ namespace Mantid
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadInstrument";};
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Loads an Instrument Definition File (IDF) into a workspace. After the IDF has been read this algorithm will attempt to run the Child Algorithm LoadParameterFile; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded (in the directory specified by the parameterDefinition.directory Mantid property).";}
+    virtual const std::string summary() const {return "Loads an Instrument Definition File (IDF) into a workspace. After the IDF has been read this algorithm will attempt to run the Child Algorithm LoadParameterFile; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded.";}
 
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;};

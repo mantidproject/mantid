@@ -23,7 +23,7 @@ namespace Mantid
     /** ILiveListener is the interface implemented by classes which connect directly to
         instrument data acquisition systems (DAS) for retrieval of 'live' data into Mantid.
 
-        Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+        Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
         This file is part of Mantid.
 

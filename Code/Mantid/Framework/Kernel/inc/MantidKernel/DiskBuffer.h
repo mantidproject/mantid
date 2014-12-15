@@ -35,7 +35,7 @@ namespace Kernel
 
     @date 2011-12-30
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -94,6 +94,7 @@ namespace Kernel
 
     // For reporting and saving
     void getFreeSpaceVector(std::vector<uint64_t> & free) const;
+    void setFreeSpaceVector(std::vector<uint64_t> & free);
     std::string getMemoryStr() const;
 
 

@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# RPM post-uninstall script
+# If the installation directory is empty then it is removed
+#
+
+# If the install prefix contains mantid then prune empty directories.
+# Begin extra cautious here just in case some has set the something like Prefix=/usr
+if echo \"$RPM_INSTALL_PREFIX0\" | grep -qi mantid; then
+  find $RPM_INSTALL_PREFIX0 -mindepth 1 -type d -empty -delete
+  rmdir --ignore-fail-on-non-empty -p $RPM_INSTALL_PREFIX0
+else
+  echo Install prefix does not contain the word mantid. Empty directories NOT removed.
+fi

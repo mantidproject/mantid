@@ -14,7 +14,7 @@ namespace Mantid
       Implements an analytical approximation to the Voigt function.
       See http://www.citeulike.org/user/dbomse/article/9553243 for approximation used
 
-      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 

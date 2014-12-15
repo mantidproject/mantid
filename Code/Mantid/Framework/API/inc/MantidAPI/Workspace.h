@@ -32,7 +32,7 @@ class AnalysisDataServiceImpl;
     @author Laurent C Chapon, ISIS, RAL
     @date 26/09/2007
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

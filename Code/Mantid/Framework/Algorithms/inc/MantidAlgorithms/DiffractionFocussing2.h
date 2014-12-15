@@ -9,13 +9,6 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/System.h"
 
-// To be compatible with VSC Express edition that does not have tr1
-#ifndef HAS_UNORDERED_MAP_H
-#include <map>
-#else
-#include <tr1/unordered_map>
-#endif
-
 namespace Mantid
 {
 namespace Algorithms
@@ -58,7 +51,7 @@ namespace Algorithms
  @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
  @date 08/03/2009
 
- Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 

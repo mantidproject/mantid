@@ -14,7 +14,7 @@ namespace WorkflowAlgorithms
 
     Workflow algorithm for reflectometry to sum up a region of interest on a 2D detector.
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

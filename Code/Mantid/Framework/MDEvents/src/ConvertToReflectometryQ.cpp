@@ -162,7 +162,7 @@ namespace MDEvents
   int ConvertToReflectometryQ::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string ConvertToReflectometryQ::category() const { return "Reflectometry\\ISIS";}
+  const std::string ConvertToReflectometryQ::category() const { return "Reflectometry";}
 
   //----------------------------------------------------------------------------------------------
 

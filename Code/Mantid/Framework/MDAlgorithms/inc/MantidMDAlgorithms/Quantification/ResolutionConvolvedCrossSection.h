@@ -1,7 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_RESOLUTIONCONVOLVEDCROSSSECTION_H_
 #define MANTID_MDALGORITHMS_RESOLUTIONCONVOLVEDCROSSSECTION_H_
 /**
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -82,7 +82,12 @@ namespace Mantid
       void setAttribute(const std::string& name, const API::IFunction::Attribute & value);
       /// Set a pointer to the concrete convolution object
       void setupResolutionFunction(const std::string & name, const std::string & fgModelName);
+      /// Mutex-locked version to store the function value
+      void storeCalculatedWithMutex(const size_t index, const double signal,
+                                    API::FunctionValues& functionValues) const;
 
+      /// Mutex to protect storing the function values
+      mutable Poco::FastMutex m_valuesMutex;
       /// Flag that marks if this is a simulation store each event
       bool m_simulation;
       /// The meat of the calculation for each MD point

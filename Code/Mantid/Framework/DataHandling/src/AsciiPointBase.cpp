@@ -75,21 +75,37 @@ namespace Mantid
     /** virtual method to add information to the file before the data
      *  @param file :: pointer to output file stream
      *  @param XData :: pointer to a std::vector<double> containing the point data to be printed
+     *  @param exportDeltaQ :: bool on whether deltaQ column to be printed
      */
-    void AsciiPointBase::data(std::ofstream & file, const std::vector<double> & XData)
+    void AsciiPointBase::data(std::ofstream & file, const std::vector<double> & XData, bool exportDeltaQ)
     {
+
       const std::vector<double> & yData = m_ws->readY(0);
       const std::vector<double> & eData = m_ws->readE(0);
-      for (size_t i = 0; i < m_xlength; ++i)
+      if (exportDeltaQ)
       {
-        double dq = XData[i]*m_qres;
-        outputval(XData[i], file, leadingSep());
-        outputval(yData[i], file);
-        outputval(eData[i], file);
-        outputval(dq, file);
-        file << std::endl;
+        for (size_t i = 0; i < m_xlength; ++i)
+        {
+          double dq = XData[i]*m_qres;
+          outputval(XData[i], file, leadingSep());
+          outputval(yData[i], file);
+          outputval(eData[i], file);
+          outputval(dq, file);
+          file << std::endl;
+        }
+      }
+      else 
+      {
+        for (size_t i = 0; i < m_xlength; ++i)
+        {
+          outputval(XData[i], file, leadingSep());
+          outputval(yData[i], file);
+          outputval(eData[i], file);
+          file << std::endl;
+        }
       }
     }
+
 
     /** writes a properly formatted line of data
      *  @param val :: the double value to be written

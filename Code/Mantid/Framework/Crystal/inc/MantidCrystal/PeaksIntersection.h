@@ -16,7 +16,7 @@ namespace Crystal
   /** PeaksIntersection : Abstract base algorithm class for algorithms that identify peaks interacting with one or more surfaces
     i.e. a flat surface or a box made out of flat surfaces.
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

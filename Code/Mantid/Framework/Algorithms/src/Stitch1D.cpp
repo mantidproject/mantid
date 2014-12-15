@@ -300,6 +300,9 @@ namespace Mantid
       auto rebin = this->createChildAlgorithm("Rebin");
       rebin->setProperty("InputWorkspace", input);
       rebin->setProperty("Params", params);
+      std::stringstream ssParams;
+      ssParams << params[0] << "," << params[1] << "," << params[2];
+      g_log.information("Rebinning Params: " + ssParams.str());
       rebin->execute();
       MatrixWorkspace_sptr outWS = rebin->getProperty("OutputWorkspace");
 
@@ -366,6 +369,8 @@ namespace Mantid
       integration->setProperty("InputWorkspace", input);
       integration->setProperty("RangeLower", start);
       integration->setProperty("RangeUpper", stop);
+      g_log.information("Integration RangeLower: " + boost::lexical_cast<std::string>(start));
+      g_log.information("Integration RangeUpper: " + boost::lexical_cast<std::string>(stop));
       integration->execute();
       MatrixWorkspace_sptr outWS = integration->getProperty("OutputWorkspace");
       return outWS;
@@ -386,6 +391,9 @@ namespace Mantid
       multiplyRange->setProperty("StartBin", startBin);
       multiplyRange->setProperty("EndBin", endBin);
       multiplyRange->setProperty("Factor", factor);
+      g_log.information("MultiplyRange StartBin: " + boost::lexical_cast<std::string>(startBin));
+      g_log.information("MultiplyRange EndBin: " + boost::lexical_cast<std::string>(endBin));
+      g_log.information("MultiplyRange Factor: " + boost::lexical_cast<std::string>(factor));
       multiplyRange->execute();
       MatrixWorkspace_sptr outWS = multiplyRange->getProperty("OutputWorkspace");
       return outWS;
@@ -404,6 +412,8 @@ namespace Mantid
       multiplyRange->setProperty("InputWorkspace", input);
       multiplyRange->setProperty("StartBin", startBin);
       multiplyRange->setProperty("Factor", factor);
+      g_log.information("MultiplyRange StartBin: " + boost::lexical_cast<std::string>(startBin));
+      g_log.information("MultiplyRange Factor: " + boost::lexical_cast<std::string>(factor));
       multiplyRange->execute();
       MatrixWorkspace_sptr outWS = multiplyRange->getProperty("OutputWorkspace");
       return outWS;

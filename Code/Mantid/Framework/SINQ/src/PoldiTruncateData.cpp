@@ -1,5 +1,5 @@
 #include "MantidSINQ/PoldiTruncateData.h"
-#include "MantidSINQ/PoldiUtilities/PoldiChopperFactory.h"
+#include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 
 namespace Mantid
 {
@@ -41,25 +41,8 @@ const std::string PoldiTruncateData::summary() const { return "Truncate POLDI ti
  */
 void PoldiTruncateData::setChopperFromWorkspace(MatrixWorkspace_const_sptr workspace)
 {
-    /* This stuff will be gone once the changes from ticket #9445 have been integrated (PoldiInstrumentAdapter). */
-    double chopperSpeed = 0.0;
-
-    try {
-        chopperSpeed = workspace->run().getPropertyValueAsType<std::vector<double> >("chopperspeed").front();
-    } catch(std::invalid_argument&) {
-        throw(std::runtime_error("Chopper speed could not be extracted from Workspace '" + workspace->name() + "'. Aborting."));
-    }
-
-    // Instrument definition
-    Instrument_const_sptr poldiInstrument = workspace->getInstrument();
-
-    // Chopper configuration
-    PoldiChopperFactory chopperFactory;
-    PoldiAbstractChopper_sptr chopper(chopperFactory.createChopper(std::string("default-chopper")));
-    chopper->loadConfiguration(poldiInstrument);
-    chopper->setRotationSpeed(chopperSpeed);
-
-    setChopper(chopper);
+    PoldiInstrumentAdapter poldiInstrument(workspace);
+    setChopper(poldiInstrument.chopper());
 }
 
 /** Sets the chopper used for the calculations.

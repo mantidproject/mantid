@@ -434,13 +434,22 @@ using namespace Kernel;
         if (prop)
         {
           if (m_manager.existsProperty(prop->name() ))
+          {
             m_manager.removeProperty(prop->name() );
+          }
           m_manager.declareProperty(prop);
         }
       }
     }
     if (!(group.empty()||keepOpen))file->closeGroup();
-   
+  }
+
+  /**
+   * Clear the logs.
+   */
+  void LogManager::clearLogs()
+  {
+    m_manager.clear();
   }
 
   //-----------------------------------------------------------------------------------------------------------------------

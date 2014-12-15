@@ -12,7 +12,7 @@ namespace Crystal
       the given tolerance in all components of Q. Note that a peak in the RHSWorkspace will
       only be matched to the first in the LHSWorkspace that is within tolerance.
 
-      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 

@@ -31,7 +31,7 @@ namespace MPIAlgorithms
     <LI> OutputWorkspace - The name of the output workspace. Will only be created by the root process.</LI>
     </UL>
 
-    Copyright &copy; 2011-2 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011-2 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

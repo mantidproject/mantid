@@ -10,7 +10,7 @@ namespace Crystal
 
   /** DisjointElement : Cluster item used in a disjoint-set data structure.
     
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

@@ -13,7 +13,7 @@ namespace Mantid
 
     /** ReflectometryReductionOneAuto : TODO: DESCRIPTION
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -44,6 +44,10 @@ namespace Mantid
       virtual const std::string category() const;
       virtual const std::string summary() const;
 
+      //For (multiperiod) workspace groups
+      virtual bool checkGroups();
+      virtual bool processGroups();
+
     private:
       void init();
       void exec();
@@ -52,6 +56,14 @@ namespace Mantid
         boost::optional<T> isSet(std::string propName) const;
 
       double checkForDefault(std::string propName, Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name="") const;
+
+      std::string pNRLabel() const { return "PNR"; }
+      std::string pALabel() const { return "PA"; }
+      std::string crhoLabel() const { return "CRho"; }
+      std::string cppLabel() const { return "CPp"; }
+      std::string cAlphaLabel() const { return "CAlpha"; }
+      std::string cApLabel() const { return "CAp"; }
+      std::string noPolarizationCorrectionMode() const { return "None"; }
     };
 
 

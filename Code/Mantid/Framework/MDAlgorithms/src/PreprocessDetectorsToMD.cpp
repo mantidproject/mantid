@@ -109,7 +109,7 @@ namespace Mantid
       if(!targWS->addColumn("double","TwoTheta"))throw(std::runtime_error("Can not add column TwoTheta"));
       if(!targWS->addColumn("double","Azimuthal"))throw(std::runtime_error("Can not add column Azimuthal"));
       // the detector ID;
-      if(!targWS->addColumn("int32_t","DetectorID"))throw(std::runtime_error("Can not add column DetectorID"));
+      if(!targWS->addColumn("int","DetectorID"))throw(std::runtime_error("Can not add column DetectorID"));
       // stores spectra index which corresponds to a valid detector index;
       if(!targWS->addColumn("size_t","detIDMap"))throw(std::runtime_error("Can not add column detIDMap"));
       // stores detector index which corresponds to the workspace index;
@@ -200,9 +200,9 @@ namespace Mantid
       uint32_t liveDetectorsCount(0);
       for (size_t i = 0; i < nHist; i++)
       {
-        sp2detMap[i]=std::numeric_limits<size_t>::quiet_NaN();
+        sp2detMap[i]=std::numeric_limits<uint64_t>::quiet_NaN();
         detId[i]    =std::numeric_limits<int32_t>::quiet_NaN();
-        detIDMap[i] =std::numeric_limits<size_t>::quiet_NaN();
+        detIDMap[i] =std::numeric_limits<uint64_t>::quiet_NaN();
         L2[i]       =std::numeric_limits<double>::quiet_NaN(); 
         TwoTheta[i] =std::numeric_limits<double>::quiet_NaN(); 
         Azimuthal[i]=std::numeric_limits<double>::quiet_NaN(); 

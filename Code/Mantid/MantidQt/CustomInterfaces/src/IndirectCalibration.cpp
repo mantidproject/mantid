@@ -4,10 +4,15 @@
 
 #include <QFileInfo>
 
+using namespace Mantid::API;
+
 namespace
 {
   Mantid::Kernel::Logger g_log("IndirectCalibration");
 }
+
+using namespace Mantid::API;
+using MantidQt::API::BatchAlgorithmRunner;
 
 namespace MantidQt
 {
@@ -17,7 +22,7 @@ namespace CustomInterfaces
   /** Constructor
    */
   IndirectCalibration::IndirectCalibration(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
-      IndirectDataReductionTab(uiForm, parent)
+      IndirectDataReductionTab(uiForm, parent), m_lastCalPlotFilename("")
   {
     DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
 
@@ -108,13 +113,16 @@ namespace CustomInterfaces
     m_rangeSelectors["ResBackground"]->setColour(Qt::darkGreen);
     m_rangeSelectors["ResPeak"] = new MantidWidgets::RangeSelector(m_plots["ResPlot"],
         MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, true);
-    
+
     // MISC UI
     m_uiForm.cal_leIntensityScaleMultiplier->setValidator(m_valDbl);
     m_uiForm.cal_leResScale->setValidator(m_valDbl);
     m_uiForm.cal_valIntensityScaleMultiplier->setText(" ");
 
     // SIGNAL/SLOT CONNECTIONS
+    // Update instrument information when a new instrument config is selected
+    connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setDefaultInstDetails()));
+
     connect(m_rangeSelectors["ResPeak"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["ResBackground"], SLOT(setRange(double, double)));
 
     // Update property map when a range seclector is moved
@@ -134,8 +142,6 @@ namespace CustomInterfaces
     connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calPlotRaw()));
     // Toggle RES file options when user toggles Create RES File checkbox
     connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
-    // Toggle RES range selector when user toggles Create RES File checkbox
-    connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), m_uiForm.cal_ckResScale, SLOT(setEnabled(bool)));
     // Enable/disable RES scaling option when user toggles Scale RES checkbox
     connect(m_uiForm.cal_ckResScale, SIGNAL(toggled(bool)), m_uiForm.cal_leResScale, SLOT(setEnabled(bool)));
     // Enable/dosable scale factor option when user toggles Intensity Scale Factor checkbox
@@ -143,80 +149,144 @@ namespace CustomInterfaces
     // Validate the value entered in scale factor option whenever it changes
     connect(m_uiForm.cal_leIntensityScaleMultiplier, SIGNAL(textChanged(const QString &)), this, SLOT(calibValidateIntensity(const QString &)));
 
+    // Shows message on run buton when user is inputting a run number
+    connect(m_uiForm.cal_leRunNo, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
+    // Shows message on run button when Mantid is finding the file for a given run number
+    connect(m_uiForm.cal_leRunNo, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
+    // Reverts run button back to normal when file finding has finished
+    connect(m_uiForm.cal_leRunNo, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
+
     // Nudge resCheck to ensure res range selectors are only shown when Create RES file is checked
     resCheck(m_uiForm.cal_ckRES->isChecked());
   }
-    
+
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   IndirectCalibration::~IndirectCalibration()
   {
   }
-  
+
   void IndirectCalibration::setup()
   {
   }
 
   void IndirectCalibration::run()
   {
-    QString file = m_uiForm.cal_leRunNo->getFirstFilename();
-    QString filenames = "[r'"+m_uiForm.cal_leRunNo->getFilenames().join("', r'")+"']";
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmsComplete(bool)));
 
-    QString reducer = "from mantid.simpleapi import SaveNexus\n"
-      "from inelastic_indirect_reduction_steps import CreateCalibrationWorkspace\n"
-      "calib = CreateCalibrationWorkspace()\n"
-      "calib.set_files(" + filenames + ")\n"
-      "calib.set_detector_range(" + m_uiForm.leSpectraMin->text() + "-1, " + m_uiForm.leSpectraMax->text() + "-1)\n"
-      "calib.set_parameters(" + m_properties["CalBackMin"]->valueText() + "," 
-      + m_properties["CalBackMax"]->valueText() + ","
-      + m_properties["CalPeakMin"]->valueText() + ","
-      + m_properties["CalPeakMax"]->valueText() + ")\n"
-      "calib.set_analyser('" + m_uiForm.cbAnalyser->currentText() + "')\n"
-      "calib.set_reflection('" + m_uiForm.cbReflection->currentText() + "')\n";
+    // Get properties
+    QString firstFile = m_uiForm.cal_leRunNo->getFirstFilename();
+    QString filenames = m_uiForm.cal_leRunNo->getFilenames().join(",");
 
-    //Scale values by arbitrary scalar if requested
+    auto instDetails = getInstrumentDetails();
+    QString instDetectorRange = instDetails["spectra-min"] + "," + instDetails["spectra-max"];
+
+    QString peakRange = m_properties["CalPeakMin"]->valueText() + "," + m_properties["CalPeakMax"]->valueText();
+    QString backgroundRange = m_properties["CalBackMin"]->valueText() + "," + m_properties["CalBackMax"]->valueText();
+
+    QFileInfo firstFileInfo(firstFile);
+    QString outputWorkspaceNameStem = firstFileInfo.baseName() + "_" + m_uiForm.cbAnalyser->currentText()
+      + m_uiForm.cbReflection->currentText();
+
+    QString calibrationWsName = outputWorkspaceNameStem + "_calib";
+
+    // Configure the calibration algorithm
+    IAlgorithm_sptr calibrationAlg = AlgorithmManager::Instance().create("CreateCalibrationWorkspace", -1);
+    calibrationAlg->initialize();
+
+    calibrationAlg->setProperty("InputFiles", filenames.toStdString());
+    calibrationAlg->setProperty("OutputWorkspace", calibrationWsName.toStdString());
+    calibrationAlg->setProperty("DetectorRange", instDetectorRange.toStdString());
+    calibrationAlg->setProperty("PeakRange", peakRange.toStdString());
+    calibrationAlg->setProperty("BackgroundRange", backgroundRange.toStdString());
+    calibrationAlg->setProperty("Plot", m_uiForm.cal_ckPlotResult->isChecked());
+
     if(m_uiForm.cal_ckIntensityScaleMultiplier->isChecked())
     {
-      QString scale = m_uiForm.cal_leIntensityScaleMultiplier->text(); 
+      QString scale = m_uiForm.cal_leIntensityScaleMultiplier->text();
       if(scale.isEmpty())
-      {
-          scale = "1.0";
-        }
-        reducer += "calib.set_intensity_scale("+scale+")\n";
-      }
+        scale = "1.0";
+      calibrationAlg->setProperty("ScaleFactor", scale.toStdString());
+    }
 
-      reducer += "calib.execute(None, None)\n"
-        "result = calib.result_workspace()\n"
-        "print result\n";
+    m_batchAlgoRunner->addAlgorithm(calibrationAlg);
 
-      if( m_uiForm.cal_ckSave->isChecked() )
-      {
-        reducer +=
-          "SaveNexus(InputWorkspace=result, Filename=result+'.nxs')\n";
-      }
+    // Initially take the calibration workspace as the result
+    m_pythonExportWsName = calibrationWsName.toStdString();
 
-      if ( m_uiForm.cal_ckPlotResult->isChecked() )
-      {
-        reducer += "from mantidplot import plotTimeBin\n"
-          "plotTimeBin(result, 0)\n";
-      }
+    // Properties for algorithms that use data from calibration as an input
+    BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromCalProps;
+    inputFromCalProps["InputWorkspace"] = calibrationWsName.toStdString();
 
-      QString pyOutput = m_pythonRunner.runPythonCode(reducer).trimmed();
+    // Add save algorithm to queue if ticked
+    if( m_uiForm.cal_ckSave->isChecked() )
+    {
+      IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus", -1);
+      saveAlg->initialize();
+      saveAlg->setProperty("Filename", calibrationWsName.toStdString() + ".nxs");
 
-      if ( pyOutput == "" )
-      {
-        emit showMessageBox("An error occurred creating the calib file.\n");
-      }
-      else
-      {
-        if ( m_uiForm.cal_ckRES->isChecked() )
-        {
-          createRESfile(filenames);
-        }
-        m_uiForm.ind_calibFile->setFileTextWithSearch(pyOutput + ".nxs");
-        m_uiForm.ckUseCalib->setChecked(true);
-      }
+      m_batchAlgoRunner->addAlgorithm(saveAlg, inputFromCalProps);
+    }
+
+    // Configure the resolution algorithm
+    if(m_uiForm.cal_ckRES->isChecked())
+    {
+      QString resolutionWsName = outputWorkspaceNameStem + "_res";
+
+      QString scaleFactor("1.0");
+      if(m_uiForm.cal_ckResScale->isChecked() && !m_uiForm.cal_leResScale->text().isEmpty())
+        scaleFactor = m_uiForm.cal_leResScale->text();
+
+      QString resDetectorRange = QString::number(m_dblManager->value(m_properties["ResSpecMin"])) + ","
+          + QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
+
+      QString rebinString = QString::number(m_dblManager->value(m_properties["ResELow"])) + "," +
+        QString::number(m_dblManager->value(m_properties["ResEWidth"])) + "," +
+        QString::number(m_dblManager->value(m_properties["ResEHigh"]));
+
+      QString background = QString::number(m_dblManager->value(m_properties["ResStart"])) + ","
+          + QString::number(m_dblManager->value(m_properties["ResEnd"]));
+
+      Mantid::API::IAlgorithm_sptr resAlg = Mantid::API::AlgorithmManager::Instance().create("IndirectResolution", -1);
+      resAlg->initialize();
+
+      resAlg->setProperty("InputFiles", filenames.toStdString());
+      resAlg->setProperty("OutputWorkspace", resolutionWsName.toStdString());
+      resAlg->setProperty("Instrument", m_uiForm.cbInst->currentText().toStdString());
+      resAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
+      resAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
+      resAlg->setProperty("RebinParam", rebinString.toStdString());
+      resAlg->setProperty("DetectorRange", resDetectorRange.toStdString());
+      resAlg->setProperty("BackgroundRange", background.toStdString());
+      resAlg->setProperty("ScaleFactor", m_uiForm.cal_leIntensityScaleMultiplier->text().toDouble());
+      resAlg->setProperty("Smooth", m_uiForm.cal_ckSmooth->isChecked());
+      resAlg->setProperty("Verbose", m_uiForm.cal_ckVerbose->isChecked());
+      resAlg->setProperty("Plot", m_uiForm.cal_ckPlotResult->isChecked());
+      resAlg->setProperty("Save", m_uiForm.cal_ckSave->isChecked());
+
+      m_batchAlgoRunner->addAlgorithm(resAlg);
+
+      // When creating resolution file take the resolution workspace as the result
+      m_pythonExportWsName = resolutionWsName.toStdString();
+    }
+
+    m_batchAlgoRunner->executeBatchAsync();
+  }
+
+  void IndirectCalibration::algorithmsComplete(bool error)
+  {
+    if(error)
+      return;
+
+    QString firstFile = m_uiForm.cal_leRunNo->getFirstFilename();
+    QFileInfo firstFileInfo(firstFile);
+    QString calFileName = firstFileInfo.baseName() + "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_calib.nxs";
+
+    m_uiForm.ind_calibFile->setFileTextWithSearch(calFileName);
+    m_uiForm.ckUseCalib->setChecked(true);
+
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmsComplete(bool)));
   }
 
   bool IndirectCalibration::validate()
@@ -264,25 +334,25 @@ namespace CustomInterfaces
   }
 
   /**
-   * Sets default spectra, peak and background ranges
+   * Sets default spectra, peak and background ranges.
    */
   void IndirectCalibration::setDefaultInstDetails()
   {
-    //Get spectra, peak and background details
+    // Get spectra, peak and background details
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
-    //Set spectra range
+    // Set spectra range
     m_dblManager->setValue(m_properties["ResSpecMin"], instDetails["spectra-min"].toDouble());
     m_dblManager->setValue(m_properties["ResSpecMax"], instDetails["spectra-max"].toDouble());
 
-    //Set pean and background ranges
-    if(instDetails.size() >= 8)
-    {
-      setMiniPlotGuides("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"],
-          std::pair<double, double>(instDetails["peak-start"].toDouble(), instDetails["peak-end"].toDouble()));
-      setMiniPlotGuides("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"],
-          std::pair<double, double>(instDetails["back-start"].toDouble(), instDetails["back-end"].toDouble()));
-    }
+    // Set peak and background ranges
+    std::map<std::string, double> ranges = getRangesFromInstrument();
+
+    std::pair<double, double> peakRange(ranges["peak-start-tof"], ranges["peak-end-tof"]);
+    std::pair<double, double> backgroundRange(ranges["back-start-tof"], ranges["back-end-tof"]);
+
+    setMiniPlotGuides("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"], peakRange);
+    setMiniPlotGuides("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"], backgroundRange);
   }
 
   /**
@@ -294,6 +364,12 @@ namespace CustomInterfaces
 
     QString filename = m_uiForm.cal_leRunNo->getFirstFilename();
 
+    // Don't do anything if the file we would plot has not changed
+    if(filename == m_lastCalPlotFilename)
+      return;
+
+    m_lastCalPlotFilename = filename;
+
     if ( filename.isEmpty() )
     {
       emit showMessageBox("Cannot plot raw data without filename");
@@ -303,7 +379,11 @@ namespace CustomInterfaces
     QFileInfo fi(filename);
     QString wsname = fi.baseName();
 
-    if(!loadFile(filename, wsname, m_uiForm.leSpectraMin->text().toInt(), m_uiForm.leSpectraMax->text().toInt()))
+    auto instDetails = getInstrumentDetails();
+    int specMin = instDetails["spectra-min"].toInt();
+    int specMax = instDetails["spectra-max"].toInt();
+
+    if(!loadFile(filename, wsname, specMin, specMax))
     {
       emit showMessageBox("Unable to load file.\nCheck whether your file exists and matches the selected instrument in the Energy Transfer tab.");
       return;
@@ -338,38 +418,52 @@ namespace CustomInterfaces
       return;
     }
 
-    QString files = "[r'" + m_uiForm.cal_leRunNo->getFilenames().join("', r'") + "']";
-    QString pyInput =
-      "from IndirectEnergyConversion import resolution\n"
-      "iconOpt = { 'first': " +QString::number(m_dblManager->value(m_properties["ResSpecMin"]))+
-      ", 'last': " +QString::number(m_dblManager->value(m_properties["ResSpecMax"]))+ "}\n"
-      "instrument = '" + m_uiForm.cbInst->currentText() + "'\n"
-      "analyser = '" + m_uiForm.cbAnalyser->currentText() + "'\n"
-      "reflection = '" + m_uiForm.cbReflection->currentText() + "'\n"
-      "files = " + files + "\n"
-      "outWS = resolution(files, iconOpt, '', '', instrument, analyser, reflection, Res=False)\n"
-      "print outWS\n";
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
+    QString files = m_uiForm.cal_leRunNo->getFilenames().join(",");
 
-    //Something went wrong in the Python
-    if(pyOutput == "None")
+    QFileInfo fi(m_uiForm.cal_leRunNo->getFirstFilename());
+
+    QString detRange = QString::number(m_dblManager->value(m_properties["ResSpecMin"])) + ","
+        + QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
+
+    IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("InelasticIndirectReduction");
+    reductionAlg->initialize();
+    reductionAlg->setProperty("Instrument", m_uiForm.cbInst->currentText().toStdString());
+    reductionAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
+    reductionAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
+    reductionAlg->setProperty("InputFiles", files.toStdString());
+    reductionAlg->setProperty("OutputWorkspace", "__IndirectCalibration_reduction");
+    reductionAlg->setProperty("DetectorRange", detRange.toStdString());
+    reductionAlg->execute();
+
+    if(!reductionAlg->isExecuted())
     {
-      emit showMessageBox("Failed to convert to energy. See log for details.");
+      g_log.warning("Could not generate energy preview plot.");
       return;
     }
 
-    Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(pyOutput.toStdString()));
+    WorkspaceGroup_sptr reductionOutputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("__IndirectCalibration_reduction");
+    if(reductionOutputGroup->size() == 0)
+    {
+      g_log.warning("No result workspaces, cannot plot energy preview.");
+      return;
+    }
 
-    const Mantid::MantidVec & dataX = input->readX(0);
+    MatrixWorkspace_sptr energyWs = boost::dynamic_pointer_cast<MatrixWorkspace>(reductionOutputGroup->getItem(0));
+    if(!energyWs)
+    {
+      g_log.warning("No result workspaces, cannot plot energy preview.");
+      return;
+    }
+
+    const Mantid::MantidVec & dataX = energyWs->readX(0);
     std::pair<double, double> range(dataX.front(), dataX.back());
 
     setPlotRange("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], range);
 
-    plotMiniPlot(input, 0, "ResPlot", "ResCurve");
+    plotMiniPlot(energyWs, 0, "ResPlot", "ResCurve");
     setXAxisToCurve("ResPlot", "ResCurve");
 
-    calSetDefaultResolution(input);
+    calSetDefaultResolution(energyWs);
 
     replot("ResPlot");
   }
@@ -491,76 +585,11 @@ namespace CustomInterfaces
   {
     m_rangeSelectors["ResPeak"]->setVisible(state);
     m_rangeSelectors["ResBackground"]->setVisible(state);
-  }
 
-  /**
-   * This function is called after calib has run and creates a RES file for use in later analysis (Fury,etc)
-   * 
-   * @param file :: the input file (WBV run.raw)
-   */
-  void IndirectCalibration::createRESfile(const QString& file)
-  {
-    QString scaleFactor("1.0");
-    if(m_uiForm.cal_ckResScale->isChecked())
-    {
-      if(!m_uiForm.cal_leResScale->text().isEmpty())
-      {
-        scaleFactor = m_uiForm.cal_leResScale->text();
-      }
-    }
-
-    QString pyInput =
-      "from IndirectEnergyConversion import resolution\n"
-      "iconOpt = { 'first': " +QString::number(m_dblManager->value(m_properties["ResSpecMin"]))+
-      ", 'last': " +QString::number(m_dblManager->value(m_properties["ResSpecMax"]))+"}\n"
-
-      "instrument = '" + m_uiForm.cbInst->currentText() + "'\n"
-      "analyser = '" + m_uiForm.cbAnalyser->currentText() + "'\n"
-      "reflection = '" + m_uiForm.cbReflection->currentText() + "'\n";
-
-    if ( m_uiForm.cal_ckPlotResult->isChecked() ) { pyInput +=	"plot = True\n"; }
-    else { pyInput += "plot = False\n"; }
-
-    if ( m_uiForm.cal_ckVerbose->isChecked() ) { pyInput +=  "verbose = True\n"; }
-    else { pyInput += "verbose = False\n"; }
-
-    if ( m_uiForm.cal_ckSave->isChecked() ) { pyInput +=  "save = True\n"; }
-    else { pyInput += "save = False\n"; }
-
-    QString rebinParam = QString::number(m_dblManager->value(m_properties["ResELow"])) + "," +
-      QString::number(m_dblManager->value(m_properties["ResEWidth"])) + "," +
-      QString::number(m_dblManager->value(m_properties["ResEHigh"]));
-
-    QString background = "[ " +QString::number(m_dblManager->value(m_properties["ResStart"]))+ ", " +QString::number(m_dblManager->value(m_properties["ResEnd"]))+"]";
-
-    QString scaled = m_uiForm.cal_ckIntensityScaleMultiplier->isChecked() ? "True" : "False";
-    pyInput +=
-      "background = " + background + "\n"
-      "rebinParam = '" + rebinParam + "'\n"
-      "file = " + file + "\n"
-      "ws = resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, Verbose=verbose, Plot=plot, Save=save, factor="+scaleFactor+")\n"
-      "scaled = "+ scaled +"\n"
-      "scaleFactor = "+m_uiForm.cal_leIntensityScaleMultiplier->text()+"\n"
-      "backStart = "+QString::number(m_dblManager->value(m_properties["CalBackMin"]))+"\n"
-      "backEnd = "+QString::number(m_dblManager->value(m_properties["CalBackMax"]))+"\n"
-      "rebinLow = "+QString::number(m_dblManager->value(m_properties["ResELow"]))+"\n"
-      "rebinWidth = "+QString::number(m_dblManager->value(m_properties["ResEWidth"]))+"\n"
-      "rebinHigh = "+QString::number(m_dblManager->value(m_properties["ResEHigh"]))+"\n"
-      "AddSampleLog(Workspace=ws, LogName='scale', LogType='String', LogText=str(scaled))\n"
-      "if scaled:"
-      "  AddSampleLog(Workspace=ws, LogName='scale_factor', LogType='Number', LogText=str(scaleFactor))\n"
-      "AddSampleLog(Workspace=ws, LogName='back_start', LogType='Number', LogText=str(backStart))\n"
-      "AddSampleLog(Workspace=ws, LogName='back_end', LogType='Number', LogText=str(backEnd))\n"
-      "AddSampleLog(Workspace=ws, LogName='rebin_low', LogType='Number', LogText=str(rebinLow))\n"
-      "AddSampleLog(Workspace=ws, LogName='rebin_width', LogType='Number', LogText=str(rebinWidth))\n"
-      "AddSampleLog(Workspace=ws, LogName='rebin_high', LogType='Number', LogText=str(rebinHigh))\n";
-
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
-
-    if ( pyOutput != "" )
-    {
-      emit showMessageBox("Unable to create RES file: \n" + pyOutput);
-    }
+    // Toggle scale and smooth options
+    m_uiForm.cal_ckResScale->setEnabled(state);
+    m_uiForm.cal_ckResScale->setChecked(false);
+    m_uiForm.cal_ckSmooth->setEnabled(state);
   }
 
   /**
@@ -590,6 +619,40 @@ namespace CustomInterfaces
     {
       m_uiForm.cal_valIntensityScaleMultiplier->setText("*");
     }
+  }
+
+  /**
+   * Called when a user starts to type / edit the runs to load.
+   */
+  void IndirectCalibration::pbRunEditing()
+  {
+    emit updateRunButton(false, "Editing...", "Run numbers are curently being edited.");
+  }
+
+  /**
+   * Called when the FileFinder starts finding the files.
+   */
+  void IndirectCalibration::pbRunFinding()
+  {
+    emit updateRunButton(false, "Finding files...", "Searchig for data files for the run numbers entered...");
+    m_uiForm.cal_leRunNo->setEnabled(false);
+  }
+
+  /**
+   * Called when the FileFinder has finished finding the files.
+   */
+  void IndirectCalibration::pbRunFinished()
+  {
+    if(!m_uiForm.cal_leRunNo->isValid())
+    {
+      emit updateRunButton(false, "Invalid Run(s)", "Cannot find data files for some of the run numbers enetered.");
+    }
+    else
+    {
+      emit updateRunButton();
+    }
+
+    m_uiForm.cal_leRunNo->setEnabled(true);
   }
 
 } // namespace CustomInterfaces

@@ -405,7 +405,8 @@ void V3D::getSpherical(double& R, double& theta, double& phi) const
   const double rad2deg = 180.0/M_PI;
   R = norm();
   theta = 0.0;
-  if ( R ) theta = acos(z/R) * rad2deg;
+  if (R != 0.0)
+    theta = acos(z / R) * rad2deg;
   phi = atan2(y,x) * rad2deg;
   return;
 }
@@ -482,9 +483,8 @@ V3D::cross_prod(const V3D& v) const
 double
 V3D::distance(const V3D& v) const
 {
-  V3D dif(*this);
-  dif-=v;
-  return dif.norm();
+  const double dx(x-v.x), dy(y-v.y), dz(z-v.z);
+  return sqrt(dx*dx +dy*dy + dz*dz);
 }
 
 /** Calculates the zenith angle (theta) of this vector with respect to another
@@ -495,8 +495,7 @@ double V3D::zenith(const V3D& v) const
 {
   double R = distance(v);
   double zOffset = z - v.z;
-  if ( R )
-  {
+  if (R != 0.0) {
     return acos( zOffset / R );
   }
   else
@@ -556,15 +555,10 @@ V3D::rotate(const Kernel::Matrix<double>& A)
     @param A :: Rotation matrix (needs to be >3x3)
   */
 {
-  Matrix<double> Pv(3,1);
-  Pv[0][0]=x;
-  Pv[1][0]=y;
-  Pv[2][0]=z;
-  Matrix<double> Po=A*Pv;
-  x=Po[0][0];
-  y=Po[1][0];
-  z=Po[2][0];
-  return;
+  double xold(x), yold(y), zold(z);
+  x = A[0][0]*xold + A[0][1]*yold + A[0][2]*zold;
+  y = A[1][0]*xold + A[1][1]*yold + A[1][2]*zold;
+  z = A[2][0]*xold + A[2][1]*yold + A[2][2]*zold;
 }
 
 /**

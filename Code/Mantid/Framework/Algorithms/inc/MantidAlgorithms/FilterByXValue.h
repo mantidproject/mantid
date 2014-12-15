@@ -13,7 +13,7 @@ namespace Algorithms
       value of X. The filter limits should be given in whatever the units of the input
       workspace are (e.g. TOF).
 
-      Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 

@@ -20,7 +20,7 @@ namespace Algorithms
     @author Janik Zikovsky, SNS
     @date Oct 2010
 
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -62,12 +62,6 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-
-  /// Pixels in the detector
-  int XPixels;
-  /// Pixels in the detector
-  int YPixels;
-
   /// Number to sum
   int SumX;
   /// Number to sum

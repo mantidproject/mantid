@@ -52,7 +52,7 @@ class TableVector;
     \author Roman Tolchenov
     \date 31/10/2008
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -177,6 +177,8 @@ public:
 
     /// Reference to the data.
     std::vector<Type>& data(){return m_data;}
+    /// Const reference to the data.
+    const std::vector<Type>& data() const {return m_data;}
     /// Pointer to the data array
     Type *dataArray(){return &m_data[0];}
 
@@ -190,6 +192,13 @@ public:
         }
  
     }
+
+    /// Sort a vector of indices according to values in corresponding cells of this column.
+    virtual void sortIndex( bool ascending, size_t start, size_t end, std::vector<size_t>& indexVec, std::vector<std::pair<size_t,size_t>>& equalRanges ) const;
+
+    /// Re-arrange values in this column according to indices in indexVec
+    virtual void sortValues( const std::vector<size_t>& indexVec );
+
 
 protected:
     /// Resize.
@@ -220,6 +229,87 @@ void TableColumn<Type>::read(size_t index, const std::string & text)
 {
   std::istringstream istr(text);
   istr >> m_data[index];
+}
+
+namespace{
+  /// Comparison object to compare column values given their indices.
+  template<typename Type>
+  class CompareValues
+  {
+    const std::vector<Type> &m_data;
+    const bool m_ascending;
+  public:
+    CompareValues(const TableColumn<Type> &column, bool ascending):m_data(column.data()),m_ascending(ascending){}
+    bool operator()(size_t i, size_t j)
+    {
+      return m_ascending? m_data[i] < m_data[j] : !(m_data[i] < m_data[j] || m_data[i] == m_data[j]);
+    }
+  };
+}
+
+/// Sort a vector of indices according to values in corresponding cells of this column. @see Column::sortIndex
+template<typename Type>
+void TableColumn<Type>::sortIndex( bool ascending, size_t start, size_t end, std::vector<size_t>& indexVec, std::vector<std::pair<size_t,size_t>>& equalRanges ) const
+{
+  equalRanges.clear();
+
+  const size_t n = m_data.size();
+  if ( n == 0 )
+  {
+    return;
+  }
+
+  auto iBegin = indexVec.begin() + start;
+  auto iEnd   = indexVec.begin() + end;
+
+  std::stable_sort( iBegin, iEnd, CompareValues<Type>(*this,ascending) );
+
+  bool same = false;
+  size_t eqStart = 0;
+  for(auto i = iBegin + 1; i != iEnd; ++i)
+  {
+    if ( !same )
+    {
+      if ( m_data[*i] == m_data[*(i-1)] )
+      {
+        eqStart = static_cast<size_t>( std::distance(indexVec.begin(),i-1) );
+        same = true;
+      }
+    }
+    else
+    {
+      if ( m_data[*i] != m_data[*(i-1)] )
+      {
+        auto p = std::make_pair(eqStart, static_cast<size_t>( std::distance(indexVec.begin(),i) ) );
+        equalRanges.push_back( p );
+        same = false;
+      }
+    }
+  }
+
+  // last elements are equal
+  if ( same ) 
+  {
+    auto p = std::make_pair(eqStart, static_cast<size_t>( std::distance(indexVec.begin(),iEnd) ) );
+    equalRanges.push_back( p );
+  }
+
+}
+
+/// Re-arrange values in this column in order of indices in indexVec
+template<typename Type>
+void TableColumn<Type>::sortValues( const std::vector<size_t>& indexVec )
+{
+  assert( m_data.size() == indexVec.size() );
+  std::vector<Type> sortedData( m_data.size() );
+
+  auto sortedIt = sortedData.begin();
+  for(auto idx = indexVec.begin(); idx != indexVec.end(); ++idx, ++sortedIt)
+  {
+    *sortedIt = m_data[*idx];
+  }
+
+  std::swap( m_data, sortedData );
 }
 
 template<>

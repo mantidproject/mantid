@@ -42,7 +42,7 @@ namespace Algorithms
     <LI> IncludePartialBins  - Scales counts in end bins if min/max not on bin boundary. </LI>
     </UL>
 
-    Copyright &copy; 2008-2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

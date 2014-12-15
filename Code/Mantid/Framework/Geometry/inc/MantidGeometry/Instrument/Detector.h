@@ -23,7 +23,7 @@ namespace Geometry
   @author Laurent C Chapon, ISIS RAL
   @date 01/11/2007
 
-  Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 

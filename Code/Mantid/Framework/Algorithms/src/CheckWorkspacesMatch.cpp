@@ -390,11 +390,9 @@ bool CheckWorkspacesMatch::compareEventWorkspaces(DataObjects::EventWorkspace_co
   size_t numUnequalBothEvents = 0;
 
   std::vector<int> vec_mismatchedwsindex;
-  bool condition = m_ParallelComparison && ews1->threadSafe()  &&  ews2->threadSafe() ;
-  PARALLEL_FOR_IF(condition)
+  PARALLEL_FOR_IF(m_ParallelComparison && ews1->threadSafe()  &&  ews2->threadSafe())
   for (int i=0; i<static_cast<int>(ews1->getNumberHistograms()); ++i)
-  for (int i=0; i<static_cast<int>(ews1->getNumberHistograms()); i++)
-  {   
+  {
     PARALLEL_START_INTERUPT_REGION
     prog->report("EventLists");
     if (!mismatchedEvent || checkallspectra) // This guard will avoid checking unnecessarily
@@ -527,8 +525,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   bool resultBool = true;
 
   // Now check the data itself
-  bool condition = m_ParallelComparison && ws1->threadSafe()  &&  ws2->threadSafe() ;
-  PARALLEL_FOR_IF(condition)
+  PARALLEL_FOR_IF(m_ParallelComparison && ws1->threadSafe()  &&  ws2->threadSafe())
   for ( long i = 0; i < static_cast<long>(numHists); ++i )
   {
     PARALLEL_START_INTERUPT_REGION

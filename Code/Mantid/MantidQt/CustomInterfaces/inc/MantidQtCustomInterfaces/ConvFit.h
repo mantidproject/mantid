@@ -13,7 +13,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class ConvFit : public IDATab
+  class DLLExport ConvFit : public IDATab
   {
     Q_OBJECT
 
@@ -23,16 +23,19 @@ namespace IDA
   private:
     virtual void setup();
     virtual void run();
-    virtual QString validate();
+    virtual bool validate();
     virtual void loadSettings(const QSettings & settings);
     virtual QString helpURL() {return "ConvFit";}
 
   private slots:
     void typeSelection(int index);
     void bgTypeSelection(int index);
+    void newDataLoaded(const QString wsName);
     void plotInput();
     void plotGuess(QtProperty*);
     void singleFit();
+    void specMinChanged(int value);
+    void specMaxChanged(int value);
     void minChanged(double);
     void maxChanged(double);
     void backgLevel(double);
@@ -54,20 +57,9 @@ namespace IDA
     QString fitTypeString() const;
     QString backgroundString() const;
 
-    QIntValidator * m_intVal;
     QtStringPropertyManager* m_stringManager;
     QtTreePropertyBrowser* m_cfTree;
-    QwtPlot* m_cfPlot;
-    QMap<QString, QtProperty*> m_cfProp;
     QMap<QtProperty*, QtProperty*> m_fixedProps;
-    MantidWidgets::RangeSelector* m_cfRangeS;
-    MantidWidgets::RangeSelector* m_cfBackgS;
-    MantidWidgets::RangeSelector* m_cfHwhmRange;
-    QtGroupPropertyManager* m_cfGrpMng;
-    QtDoublePropertyManager* m_cfDblMng;
-    QtBoolPropertyManager* m_cfBlnMng;
-    QwtPlotCurve* m_cfDataCurve;
-    QwtPlotCurve* m_cfCalcCurve;
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_cfInputWS;
     QString m_cfInputWSName;
     bool m_confitResFileType;

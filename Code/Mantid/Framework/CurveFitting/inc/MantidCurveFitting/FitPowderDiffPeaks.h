@@ -33,7 +33,7 @@ namespace CurveFitting
     Its application is to serve as the first step for refining powder diffractomer instrument
     parameters. Its output will be used by RefinePowderInstrumentParameters().
     
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

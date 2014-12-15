@@ -10,6 +10,9 @@
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Algorithm.h"
+
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidMDEvents/MDEventFactory.h"
 
@@ -121,9 +124,13 @@ namespace Mantid
       while(iter)
       {
         values->setFitData(i,iter->getNormalizedSignal());
-        double err = iter->getNormalizedError();
-        if (err <= 0.0) err = 1.0;
-        values->setFitWeight(i,1/err);
+        // there is a problem with errors in md workspaces. Until it is solved
+        // set all weights to 1.0
+        // code commented out after the next line is the normal way of setting weights
+        values->setFitWeight(i,1.0);
+        //double err = iter->getNormalizedError();
+        //if (err <= 0.0) err = 1.0;
+        //values->setFitWeight(i,1/err);
         iter = dmd->getNextIterator();
         ++i;
       };
@@ -139,7 +146,7 @@ namespace Mantid
      * @param outputWorkspacePropertyName :: The property name
      */
     boost::shared_ptr<API::Workspace> FitMD::createOutputWorkspace(const std::string& baseName,
-      API::IFunction_sptr,
+      API::IFunction_sptr function,
       boost::shared_ptr<API::FunctionDomain> domain,
       boost::shared_ptr<API::FunctionValues> values,
       const std::string& outputWorkspacePropertyName)
@@ -154,12 +161,35 @@ namespace Mantid
         return boost::shared_ptr<API::Workspace>();
       }
       API::IMDWorkspace_const_sptr domainWS = functionMD->getWorkspace();
-      auto inputWS = boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(domainWS);
-      if(!inputWS)
+
+      auto inputEventWS = boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(domainWS);
+      if( inputEventWS )
       {
-        return boost::shared_ptr<API::Workspace>();
+        return createEventOutputWorkspace( baseName, *inputEventWS, *values, outputWorkspacePropertyName );
       }
-      auto outputWS = MDEventFactory::CreateMDWorkspace(inputWS->getNumDims(), "MDEvent");
+
+      auto inputHistoWS = boost::dynamic_pointer_cast<const API::IMDHistoWorkspace>(domainWS);
+      if( inputHistoWS )
+      {
+        return createHistoOutputWorkspace( baseName, function, inputHistoWS, outputWorkspacePropertyName );
+      }
+
+      return boost::shared_ptr<API::Workspace>();
+    }
+
+    /**
+     * Create an output event workspace filled with data simulated with the fitting function.
+     * @param baseName :: The base name for the workspace
+     * @param inputWorkspace :: The input workspace.
+     * @param values :: The calculated values
+     * @param outputWorkspacePropertyName :: The property name
+     */
+    boost::shared_ptr<API::Workspace> FitMD::createEventOutputWorkspace(const std::string& baseName,
+        const API::IMDEventWorkspace &inputWorkspace,
+        const API::FunctionValues &values,
+        const std::string& outputWorkspacePropertyName)
+    {
+      auto outputWS = MDEventFactory::CreateMDWorkspace(inputWorkspace.getNumDims(), "MDEvent");
       // Add events
       // TODO: Generalize to ND (the current framework is a bit limiting)
       auto mdWS = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>,4> >(outputWS);
@@ -171,7 +201,7 @@ namespace Mantid
       // Bins extents and meta data
       for(size_t i = 0;i < 4; ++i)
       {
-        boost::shared_ptr<const Geometry::IMDDimension> inputDim = inputWS->getDimension(i);
+        boost::shared_ptr<const Geometry::IMDDimension> inputDim = inputWorkspace.getDimension(i);
         Geometry::MDHistoDimensionBuilder builder;
         builder.setName(inputDim->getName());
         builder.setId(inputDim->getDimensionId());
@@ -184,7 +214,7 @@ namespace Mantid
       }
 
       // Run information
-      outputWS->copyExperimentInfos(*inputWS);
+      outputWS->copyExperimentInfos(inputWorkspace);
       // Set sensible defaults for splitting behaviour
       BoxController_sptr bc = outputWS->getBoxController();
       bc->setSplitInto(3);
@@ -192,13 +222,13 @@ namespace Mantid
       outputWS->initialize();
       outputWS->splitBox();
 
-      auto inputIter = inputWS->createIterator();
+      auto inputIter = inputWorkspace.createIterator();
       size_t resultValueIndex(0);
       const float errorSq = 0.0;
       do
       {
         const size_t numEvents = inputIter->getNumEvents();
-        const float signal = static_cast<float>(values->getCalculated(resultValueIndex));
+        const float signal = static_cast<float>(values.getCalculated(resultValueIndex));
         for(size_t i = 0; i < numEvents; ++i)
         {
           coord_t centers[4] = { inputIter->getInnerPosition(i,0), inputIter->getInnerPosition(i,1),
@@ -233,6 +263,44 @@ namespace Mantid
       }
 
       return outputWS;
+    }
+
+    /**
+     * Create an output histo workspace filled with data simulated with the fitting function.
+     * @param baseName :: The base name for the workspace
+     * @param function :: The function used for the calculation
+     * @param inputWorkspace :: The input workspace
+     * @param outputWorkspacePropertyName :: The property name
+     */
+    boost::shared_ptr<API::Workspace> FitMD::createHistoOutputWorkspace(const std::string& baseName,
+        API::IFunction_sptr function,
+        API::IMDHistoWorkspace_const_sptr inputWorkspace,
+        const std::string& outputWorkspacePropertyName)
+    {
+      // have to cast const away to be able to pass the workspace to the algorithm
+      API::IMDHistoWorkspace_sptr nonConstInputWS = boost::const_pointer_cast<API::IMDHistoWorkspace,const API::IMDHistoWorkspace>( inputWorkspace );
+      // evaluate the function on the input workspace
+      auto alg = API::AlgorithmFactory::Instance().create("EvaluateMDFunction",-1);
+      alg->setChild( true );
+      alg->setRethrows( true );
+      alg->initialize();
+      alg->setProperty( "Function", function );
+      alg->setProperty( "InputWorkspace", nonConstInputWS );
+      alg->setProperty( "OutputWorkspace", "__FitMD_createHistoOutputWorkspace_outputWorkspace" );
+      alg->execute();
+
+      // get the result
+      API::IMDHistoWorkspace_sptr outputWorkspace = alg->getProperty( "OutputWorkspace" );
+      // Store it
+      if ( !outputWorkspacePropertyName.empty() )
+      {
+        declareProperty(new API::WorkspaceProperty<API::IMDHistoWorkspace>(outputWorkspacePropertyName,"",Direction::Output),
+          "Name of the output Workspace holding resulting simulated spectrum");
+        m_manager->setPropertyValue(outputWorkspacePropertyName,baseName+"Workspace");
+        m_manager->setProperty(outputWorkspacePropertyName,outputWorkspace);
+      }
+
+      return outputWorkspace;
     }
 
     /**

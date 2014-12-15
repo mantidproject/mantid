@@ -4,7 +4,7 @@
 // Similar to console channel for logging. The output is on std::cout instead of std::clog (which is the same as std::cerr)
 // Usage: use in it Mantid.properties or mantid.user.properties instead of ConsoleChannel class
 //
-// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 //
 // This file is part of Mantid.
 //

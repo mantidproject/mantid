@@ -36,7 +36,7 @@ namespace Mantid
     <LI> RangeUpper - Stop the integration at the bin before the one that contains this x value (default: the end of each spectrum)</LI>
     </UL>
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

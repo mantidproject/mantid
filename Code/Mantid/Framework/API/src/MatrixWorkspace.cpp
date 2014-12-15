@@ -84,6 +84,10 @@ namespace Mantid
       os << "\n"
         << "Y axis: " << YUnitLabel() << "\n";
 
+      os << "Distribution: "
+        << (isDistribution()? "True" : "False")
+        << "\n";
+
       os << ExperimentInfo::toString();
       return os.str();
     }
@@ -1516,13 +1520,15 @@ namespace Mantid
       double yBinSize(1.0); // only applies for volume normalization & numeric axis
       if (normalization == VolumeNormalization && ax1->isNumeric())
       {
-        if (wi + 1 == nhist && nhist > 1)
+        size_t uVI; // unused vertical index.
+        double currentVertical = ax1->operator ()(wi, uVI);
+        if (wi + 1 == nhist && nhist > 1) // On the boundary, look back to get diff
         {
-          yBinSize =  yVals[wi] - yVals[wi-1];
+          yBinSize =  currentVertical - ax1->operator ()(wi - 1, uVI);
         }
         else
         {
-          yBinSize = yVals[wi+1] - yVals[wi];
+          yBinSize = ax1->operator ()(wi + 1, uVI) - currentVertical;
         }
       }
 
@@ -1712,6 +1718,291 @@ namespace Mantid
     {
       return Mantid::API::None;
     }
+
+    /**
+     * Creates a 2D image.
+     * @param read :: Pointer to a method returning a MantidVec to provide data for the image.
+     * @param start :: First workspace index for the image.
+     * @param stop :: Last workspace index for the image.
+     * @param width :: Image width. Must divide (stop - start + 1) exactly.
+     * @param indexStart :: First index of the x integration range.
+     * @param indexEnd :: Last index of the x integration range.
+     */
+    MantidImage_sptr MatrixWorkspace::getImage(const MantidVec& (MatrixWorkspace::*read)(std::size_t const) const, size_t start, size_t stop, size_t width, size_t indexStart, size_t indexEnd) const
+    {
+      // width must be provided (for now)
+      if ( width == 0 )
+      {
+        throw std::runtime_error("Cannot create image with width 0");
+      }
+
+      size_t nHist = getNumberHistograms();
+      // use all spectra by default
+      if ( stop == 0 )
+      {
+        stop = nHist;
+      }
+
+      // check start and stop
+      if ( stop < start )
+      {
+        throw std::runtime_error("Cannot create image for an empty data set.");
+      }
+
+      if ( start >= nHist )
+      {
+        throw std::runtime_error("Cannot create image: start index is out of range");
+      }
+
+      if ( stop >= nHist )
+      {
+        throw std::runtime_error("Cannot create image: stop index is out of range");
+      }
+
+      // calculate image geometry
+      size_t dataSize = stop - start + 1;
+      size_t height = dataSize / width;
+
+      // and check that the data fits exactly into this geometry
+      if ( height * width != dataSize )
+      {
+        throw std::runtime_error("Cannot create image: the data set cannot form a rectangle.");
+      }
+
+      size_t nBins = blocksize();
+      bool isHisto = isHistogramData();
+
+      // default indexEnd is the last index of the X vector
+      if ( indexEnd == 0 )
+      {
+        indexEnd = nBins;
+        if ( !isHisto && indexEnd > 0 ) --indexEnd;
+      }
+
+      // check the x-range indices
+      if ( indexEnd < indexStart )
+      {
+        throw std::runtime_error("Cannot create image for an empty data set.");
+      }
+
+      if ( indexStart >= nBins || indexEnd > nBins || (!isHisto && indexEnd == nBins) )
+      {
+        throw std::runtime_error("Cannot create image: integration interval is out of range.");
+      }
+
+      // initialize the image
+      auto image = boost::make_shared<MantidImage>( height );
+      if ( !isHisto ) ++indexEnd;
+
+      // deal separately with single-binned workspaces: no integration is required
+      if ( isHisto && indexEnd == indexStart + 1 )
+      {
+        PARALLEL_FOR_NO_WSP_CHECK()
+        for(int i = 0; i < static_cast<int>(height); ++i)
+        {
+          auto &row = (*image)[i];
+          row.resize( width );
+          size_t spec = start + static_cast<size_t>(i) * width;
+          for(size_t j = 0; j< width; ++j, ++spec)
+          {
+            row[j] = (this->*read)(spec)[indexStart];
+          }
+        }
+      }
+      else
+      {
+        // each image pixel is integrated over the x-range [indexStart,indexEnd)
+        PARALLEL_FOR_NO_WSP_CHECK()
+        for(int i = 0; i < static_cast<int>(height); ++i)
+        {
+          auto &row = (*image)[i];
+          row.resize( width );
+          size_t spec = start + static_cast<size_t>(i) * width;
+          for(size_t j = 0; j < width; ++j, ++spec)
+          {
+            auto &V = (this->*read)(spec);
+            row[j] = std::accumulate( V.begin() + indexStart, V.begin() + indexEnd, 0.0 );
+          }
+        }
+      }
+
+      return image;
+    }
+
+    /**
+     * Get start and end x indices for images
+     * @param i :: Histogram index.
+     * @param startX :: Lower bound of the x integration range.
+     * @param endX :: Upper bound of the x integration range.
+     */
+    std::pair<size_t,size_t> MatrixWorkspace::getImageStartEndXIndices( size_t i, double startX, double endX ) const
+    {
+      if ( startX == EMPTY_DBL() ) startX = readX(i).front();
+      auto pStart = getXIndex( i, startX, true );
+      if ( pStart.second != 0.0 )
+      {
+        throw std::runtime_error("Start X value is required to be on bin boundary.");
+      }
+      if ( endX == EMPTY_DBL() ) endX = readX(i).back();
+      auto pEnd = getXIndex( i, endX, false, pStart.first );
+      if ( pEnd.second != 0.0 )
+      {
+        throw std::runtime_error("End X value is required to be on bin boundary.");
+      }
+      return std::make_pair( pStart.first, pEnd.first );
+    }
+
+    /**
+     * Creates a 2D image of the y values in this workspace.
+     * @param start :: First workspace index for the image.
+     * @param stop :: Last workspace index for the image.
+     * @param width :: Image width. Must divide (stop - start + 1) exactly.
+     * @param startX :: Lower bound of the x integration range.
+     * @param endX :: Upper bound of the x integration range.
+     */
+    MantidImage_sptr MatrixWorkspace::getImageY(size_t start, size_t stop, size_t width, double startX, double endX ) const
+    {
+      auto p = getImageStartEndXIndices( 0, startX, endX );
+      return getImage(&MatrixWorkspace::readY,start,stop,width,p.first,p.second);
+    }
+
+    /**
+     * Creates a 2D image of the error values in this workspace.
+     * @param start :: First workspace index for the image.
+     * @param stop :: Last workspace index for the image.
+     * @param width :: Image width. Must divide (stop - start + 1) exactly.
+     * @param startX :: Lower bound of the x integration range.
+     * @param endX :: Upper bound of the x integration range.
+     */
+    MantidImage_sptr MatrixWorkspace::getImageE(size_t start, size_t stop, size_t width, double startX, double endX ) const
+    {
+      auto p = getImageStartEndXIndices( 0, startX, endX );
+      return getImage(&MatrixWorkspace::readE,start,stop,width,p.first,p.second);
+    }
+
+    /**
+     * Find an index in the X vector for an x-value close to a given value. It is returned as the first
+     * member of the pair. The second member is the fraction [0,1] of bin width cut off by the search value.
+     * If the first member == size of X vector then search failed.
+     * @param i :: Histogram index.
+     * @param x :: The value to find the index for.
+     * @param isLeft :: If true the left bin boundary is returned, if false - the right one.
+     * @param start :: Index to start the search from.
+     */
+    std::pair<size_t,double> MatrixWorkspace::getXIndex(size_t i, double x, bool isLeft, size_t start) const
+    {
+      auto &X = readX(i);
+      auto nx = X.size();
+
+      // if start out of range - search failed
+      if ( start >= nx ) return std::make_pair( nx, 0.0 );
+      if ( start > 0 && start == nx - 1 )
+      {
+        // starting with the last index is allowed for right boundary search
+        if ( !isLeft ) return std::make_pair( start, 0.0 );
+        return std::make_pair( nx, 0.0 );
+      }
+
+      // consider point data with single value
+      if ( nx == 1 ) 
+      {
+        assert( start == 0 );
+        if ( isLeft ) return x <= X[start] ? std::make_pair( start, 0.0 ) : std::make_pair( nx, 0.0 );
+        return x >= X[start] ? std::make_pair( start, 0.0 ) : std::make_pair( nx, 0.0 );
+      }
+
+      // left boundaries below start value map to the start value
+      if ( x <= X[start] )
+      {
+        return isLeft ? std::make_pair( start, 0.0 ) : std::make_pair( nx, 0.0 );
+      }
+      // right boundary search returns last x value for all values above it
+      if ( x >= X.back() )
+      {
+        return !isLeft ? std::make_pair( nx - 1, 0.0 ) : std::make_pair( nx, 0.0 );
+      }
+
+      // general case: find the boundary index and bin fraction
+      auto end = X.end();
+      for(auto ix = X.begin() + start + 1; ix != end; ++ix)
+      {
+        if ( *ix >= x )
+        {
+          auto index = static_cast<size_t>( std::distance(X.begin(),ix) );
+          if ( isLeft ) --index;
+          return std::make_pair( index, fabs( (X[index] - x) / (*ix - *(ix - 1)) ) );
+        }
+      }
+      // I don't think we can ever get here
+      return std::make_pair( nx, 0.0 );
+    }
+
+      /**
+       * Copy data from an image.
+       * @param dataVec :: A method returning non-const references to data vectors to copy the image to.
+       * @param image :: An image to copy the data from.
+       * @param start :: Startinf workspace indx to copy data to.
+       * @param parallelExecution :: Should inner loop run as parallel operation
+       */
+      void MatrixWorkspace::setImage( MantidVec& (MatrixWorkspace::*dataVec)(const std::size_t), const MantidImage &image, size_t start, bool parallelExecution )
+      {
+
+        if ( image.empty() ) return;
+        if ( image[0].empty() ) return;
+
+        if ( blocksize() != 1 )
+        {
+          throw std::runtime_error("Cannot set image: a single bin workspace is expected.");
+        }
+
+        size_t height = image.size();
+        size_t width  = image.front().size();
+        size_t dataSize = width * height;
+
+        if ( start + dataSize > getNumberHistograms() )
+        {
+          throw std::runtime_error("Cannot set image: image is bigger than workspace.");
+        }
+
+        PARALLEL_FOR_IF(parallelExecution)
+        for(int i = 0; i < static_cast<int>(height); ++i)
+        {
+          auto &row = image[i];
+          if ( row.size() != width )
+          {
+            throw std::runtime_error("Canot set image: image is corrupted.");
+          }
+          size_t spec = start + static_cast<size_t>(i) * width;
+          auto rowEnd = row.end();
+          for(auto pixel = row.begin(); pixel != rowEnd; ++pixel,++spec)
+          {
+            (this->*dataVec)(spec)[0] = *pixel;
+          }
+        }
+      }
+
+      /**
+       * Copy the data (Y's) from an image to this workspace.
+       * @param image :: An image to copy the data from.
+       * @param start :: Startinf workspace indx to copy data to.       
+       * @param parallelExecution :: Should inner loop run as parallel operation
+       */
+      void MatrixWorkspace::setImageY( const MantidImage &image, size_t start, bool parallelExecution )
+      {
+        setImage( &MatrixWorkspace::dataY, image, start, parallelExecution );
+      }
+
+      /**
+       * Copy the data from an image to this workspace's errors.
+       * @param image :: An image to copy the data from.
+       * @param start :: Startinf workspace indx to copy data to.
+       * @param parallelExecution :: Should inner loop run as parallel operation
+       */
+      void MatrixWorkspace::setImageE( const MantidImage &image, size_t start, bool parallelExecution )
+      {
+        setImage( &MatrixWorkspace::dataE, image, start, parallelExecution );
+      }
+
 
   } // namespace API
 } // Namespace Mantid

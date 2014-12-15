@@ -48,7 +48,7 @@ namespace Mantid
 
     @author Roman Tolchenov, Tessella plc
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -91,42 +91,70 @@ namespace Mantid
       struct SpectraBlock
       {
         /// Constructor - initialize the block
-        SpectraBlock(int64_t f,int64_t l,bool m):first(f),last(l),isMonitor(m){}
+        SpectraBlock(int64_t f,int64_t l,bool is_mon,const std::string &monname):
+          first(f),last(l),isMonitor(is_mon),monName(monname){}
+
         int64_t first; ///< first spectrum number of the block
         int64_t last; ///< last spectrum number of the block
         bool isMonitor; ///< is the data in a monitor group
+        std::string monName;
       };
+
+      /// The structure describes parameters of a single time-block written in the nexus file
+      struct DataBlock
+      {
+        // The number of data periods
+        int numberOfPeriods;
+        // The number of time channels per spectrum (N histogram bins -1)
+        std::size_t numberOfChannels;   
+        // The number of spectra
+        size_t numberOfSpectra;
+        // minimal spectra Id (by default 1, undefined -- max_value)
+        int64_t spectraID_min;
+        // maximal spectra Id (by default 1, undefined  -- 0)
+        int64_t spectraID_max;
+
+        DataBlock():numberOfPeriods(0),numberOfChannels(0),numberOfSpectra(0),spectraID_min(std::numeric_limits<int64_t>::max()),spectraID_max(0){}
+
+        DataBlock(const NeXus::NXInt &data):
+          numberOfPeriods(data.dim0()),
+          numberOfChannels(data.dim2()),
+          numberOfSpectra (data.dim1()),
+          spectraID_min(std::numeric_limits<int64_t>::max()),
+          spectraID_max(0)
+        {};
+     };
     private:
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method
       void exec();
       // Validate the optional input properties
-      void checkOptionalProperties();
+      void checkOptionalProperties(const std::map<int64_t,std::string> &ExcludedMonitors);
       /// Prepare a vector of SpectraBlock structures to simplify loading
-      size_t prepareSpectraBlocks();
+      size_t prepareSpectraBlocks(std::map<int64_t,std::string > &monitors, const std::map<int64_t,specid_t> &specInd2specNum_map,const DataBlock &LoadBlock);
       /// Run LoadInstrument as a ChildAlgorithm
-      void runLoadInstrument(DataObjects::Workspace2D_sptr);
+      void runLoadInstrument(DataObjects::Workspace2D_sptr &);
       /// Load in details about the run
-      void loadRunDetails(DataObjects::Workspace2D_sptr local_workspace, Mantid::NeXus::NXEntry & entry);
+      void loadRunDetails(DataObjects::Workspace2D_sptr &local_workspace, Mantid::NeXus::NXEntry & entry);
       /// Parse an ISO formatted date-time string into separate date and time strings
       void parseISODateTime(const std::string & datetime_iso, std::string & date, std::string & time) const;
       /// Load in details about the sample
-      void loadSampleData(DataObjects::Workspace2D_sptr, Mantid::NeXus::NXEntry & entry);
+      void loadSampleData(DataObjects::Workspace2D_sptr &, Mantid::NeXus::NXEntry & entry);
       /// Load log data from the nexus file
-      void loadLogs(DataObjects::Workspace2D_sptr ws, Mantid::NeXus::NXEntry & entry);
+      void loadLogs(DataObjects::Workspace2D_sptr &ws, Mantid::NeXus::NXEntry & entry);
       // Load a given period into the workspace
-      void loadPeriodData(int64_t period, Mantid::NeXus::NXEntry & entry, DataObjects::Workspace2D_sptr local_workspace);
+      void loadPeriodData(int64_t period, Mantid::NeXus::NXEntry & entry, DataObjects::Workspace2D_sptr &local_workspace);
       // Load a data block
       void loadBlock(Mantid::NeXus::NXDataSetTyped<int> & data, int64_t blocksize, int64_t period, int64_t start,
-          int64_t &hist, int64_t& spec_num, DataObjects::Workspace2D_sptr localWorkspace);
+          int64_t &hist, int64_t& spec_num, DataObjects::Workspace2D_sptr &localWorkspace);
 
       // Create period logs
-      void createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr local_workspace);
+      void createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr &local_workspace);
       // Validate multi-period logs
-      void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr);
+      void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr );
       // build the list of spectra numbers to load and include in the spectra list
-      void buildSpectraInd2SpectraNumMap(const std::vector<int64_t>  &spec_list);
+      void buildSpectraInd2SpectraNumMap(bool range_supplied,int64_t range_min,int64_t range_max,const std::vector<int64_t>  &spec_list,const std::map<int64_t,std::string> &ExcludedMonitors);
 
 
       /// The name and path of the input file
@@ -136,28 +164,19 @@ namespace Mantid
       /// The sample name read from Nexus
       std::string m_samplename;
 
-      /// The number of spectra
-      std::size_t m_numberOfSpectra;
-      /// The number of spectra in the raw file
-      std::size_t m_numberOfSpectraInFile;
-      /// The number of periods
-      int m_numberOfPeriods;
-      /// The number of periods in the raw file
-      int m_numberOfPeriodsInFile;
-      /// The number of time channels per spectrum
-      std::size_t m_numberOfChannels;
-      /// The number of time channels per spectrum in the raw file
-      std::size_t m_numberOfChannelsInFile;
+      // the description of the data block in the file to load.
+       // the description of single time-range data block, obtained from detectors
+      DataBlock m_detBlockInfo;
+      // the description of single time-range data block, obtained from monitors
+      DataBlock m_monBlockInfo;
+      // description of the block to be loaded may include monitors and detectors with the same time binning if the detectors and monitors are loaded together
+      // in single workspace or equal to the detectorBlock if monitors are excluded
+      // or monBlockInfo if only monitors are loaded.
+      DataBlock m_loadBlockInfo;
+
       /// Is there a detector block
       bool m_have_detector;
 
-
-      /// Have the spectrum_min/max properties been set?
-      bool m_range_supplied;
-       /// The value of the SpectrumMin property
-      int64_t m_spec_min;
-      /// The value of the SpectrumMax property
-      int64_t m_spec_max;
       /// if true, a spectra list or range of spectra is supplied
       bool m_load_selected_spectra;
       /// map of spectra Index to spectra Number (spectraID)
@@ -192,8 +211,10 @@ namespace Mantid
       static double dblSqrt(double in);
 
       // C++ interface to the NXS file
-      ::NeXus::File * m_cppFile;
+      boost::scoped_ptr< ::NeXus::File> m_cppFile;
 
+      bool findSpectraDetRangeInFile(NeXus::NXEntry &entry,boost::shared_array<int>  &spectrum_index,int64_t ndets,int64_t n_vms_compat_spectra,
+                                  std::map<int64_t,std::string> &monitors,bool excludeMonitors,bool separateMonitors,std::map<int64_t,std::string> &ExcludedMonitors);
     };
 
   } // namespace DataHandling

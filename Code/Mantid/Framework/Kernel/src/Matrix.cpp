@@ -1347,7 +1347,7 @@ Matrix<T>::lubksb(const int* rowperm,double* b)
       if (ii != -1) 
         for (int j=ii;j<i;j++) 
           sum -= V[i][j] * b[j];
-      else if (sum) 
+      else if (sum != 0.)
         ii=i;
       b[i]=sum;
     }

@@ -42,7 +42,7 @@ The function has two parameters - a scaling factor "Scaling" and a shift factor 
 @author Roman Tolchenov, Tessella plc
 @date 4/09/2012
 
-Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 

@@ -1,7 +1,7 @@
 #ifndef MANTID_CURVEFITTING_AUGMENTEDLAGRANGIANOPTIMIZER_H_
 #define MANTID_CURVEFITTING_AUGMENTEDLAGRANGIANOPTIMIZER_H_
 /**
-  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -73,7 +73,7 @@ namespace Mantid
     \f]
 
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

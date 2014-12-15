@@ -61,7 +61,7 @@ see <http://www.mantidproject.org/MuonAnalysis>.
 
 @author Anders Markvardsen, ISIS, RAL
 
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 

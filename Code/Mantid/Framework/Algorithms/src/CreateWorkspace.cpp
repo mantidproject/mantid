@@ -67,6 +67,20 @@ void CreateWorkspace::init()
     "Name of a parent workspace.");
 }
 
+/// Input validation
+std::map<std::string, std::string> CreateWorkspace::validateInputs()
+{
+  std::map<std::string, std::string> issues;
+
+  const std::string vUnit = getProperty("VerticalAxisUnit");
+  const std::vector<std::string> vAxis = getProperty("VerticalAxisValues");
+
+  if ( vUnit == "SpectraNumber" && vAxis.size() > 0 )
+    issues["VerticalAxisValues"] = "Axis values cannot be provided when using a spectra axis";
+
+  return issues;
+}
+
 /// Exec function
 void CreateWorkspace::exec()
 {

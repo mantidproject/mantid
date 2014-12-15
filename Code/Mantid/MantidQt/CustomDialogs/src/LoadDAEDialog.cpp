@@ -20,13 +20,19 @@ class NoDeleting
 {
 public:
   /// Does nothing
-    void operator()(void*){}
-      /// Does nothing
-        void operator()(const void*){}
-        };
+  void operator()(void*){}
+  /// Does nothing
+  void operator()(const void*){}
+};
         
-        LoadDAEDialog::LoadDAEDialog(QWidget *parent) 
-: MantidQt::API::AlgorithmDialog(parent)
+LoadDAEDialog::LoadDAEDialog(QWidget *parent) 
+  : MantidQt::API::AlgorithmDialog(parent),
+  lineHost(NULL),
+  lineName(NULL),
+  minSpLineEdit(NULL),
+  maxSpLineEdit(NULL),
+  listSpLineEdit(NULL),
+  updateLineEdit(NULL)
 {
 }
 

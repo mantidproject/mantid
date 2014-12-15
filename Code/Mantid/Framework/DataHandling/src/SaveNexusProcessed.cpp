@@ -278,13 +278,9 @@ namespace Mantid
           nexusFile->writeNexusProcessedData2D(matrixWorkspace, uniformSpectra, spec, "workspace", true);
         }
 
-        // MW 27/10/10 - don't try and save the spectra-detector map if there isn't one
-        if (matrixWorkspace->getAxis(1)->isSpectra())
-        {
-          cppFile->openGroup("instrument", "NXinstrument");
-          matrixWorkspace->saveSpectraMapNexus(cppFile, spec, ::NeXus::LZW);
-          cppFile->closeGroup();
-        }
+        cppFile->openGroup("instrument", "NXinstrument");
+        matrixWorkspace->saveSpectraMapNexus(cppFile, spec, ::NeXus::LZW);
+        cppFile->closeGroup();
 
       }  // finish matrix workspace specifics
 

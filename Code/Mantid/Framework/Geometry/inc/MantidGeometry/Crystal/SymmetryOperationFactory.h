@@ -57,6 +57,8 @@ namespace Geometry
   {
   public:
       SymmetryOperation createSymOp(const std::string &identifier);
+      std::vector<SymmetryOperation> createSymOps(const std::string &identifiers);
+      std::vector<SymmetryOperation> createSymOps(const std::vector<std::string> &identifiers);
 
       void subscribeSymOp(const std::string &identifier);
       void unsubscribeSymOp(const std::string &identifier);

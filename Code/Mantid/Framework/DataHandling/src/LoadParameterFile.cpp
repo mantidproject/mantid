@@ -141,6 +141,10 @@ void LoadParameterFile::exec()
 
   // populate parameter map of workspace 
   localWorkspace->populateInstrumentParameters();
+  if (!filename.empty())
+  {
+    localWorkspace->instrumentParameters().addParameterFilename(filename);
+  }
 
   prog.resetNumSteps(1, 0.0, 1.0);
   prog.report("Done");
