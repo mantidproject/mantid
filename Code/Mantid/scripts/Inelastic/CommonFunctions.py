@@ -97,7 +97,7 @@ def load_runs(inst_name, runs, sum=True, calibration=None,load_with_workspace=Fa
         else:
             loaded = []
             for r in runs:
-                loaded.append(load_run(inst_name,r,calibration))
+                loaded.append(load_run(inst_name,r,calibration,False,load_with_workspace))
             if len(loaded) == 1:
                 return loaded[0]
             else:

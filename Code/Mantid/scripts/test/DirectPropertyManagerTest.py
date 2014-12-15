@@ -267,6 +267,28 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue('nxs' in formats)
         self.assertTrue('nxspe' in formats)
 
+        propman.save_format = None
+        self.assertTrue(len(propman.save_format)==0)
+        propman.save_format = 'spe,.nxs'
+        formats = propman.save_format;
+        self.assertEqual(len(propman.save_format),2)
+        self.assertTrue('nxs' in formats)
+        self.assertTrue('spe' in formats)
+
+
+        propman.save_format = '(spe,nxspe)'
+        self.assertEqual(len(propman.save_format),3)
+
+        propman.save_format = 'None'
+        self.assertTrue(len(propman.save_format)==0)
+
+        propman.save_format = ('spe','nxspe')
+        self.assertEqual(len(propman.save_format),2)
+        self.assertTrue('nxspe' in formats)
+        self.assertTrue('spe' in formats)
+
+
+
     def test_allowed_values(self):
 
         propman = self.prop_man
@@ -303,6 +325,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         propman.psi = 10
         self.assertEqual(propman.psi,10)
+
     def test_diag_spectra(self):
         propman = self.prop_man
 
@@ -323,7 +346,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman = self.prop_man
 
         params = propman.get_diagnostics_parameters();
-        self.assertEqual(len(params),19);
+        self.assertEqual(len(params),20);
         
         bkg_test_range0 = propman.background_test_range;
         bkg_test_range  = params['background_test_range'];
@@ -590,6 +613,23 @@ class DirectPropertyManagerTest(unittest.TestCase):
        range = propman.monovan_integr_range
        self.assertAlmostEqual(range[0],-7.)
 
+    def test_save_filename(self):
+       propman = self.prop_man
+
+       propman.incident_energy = 10
+
+       name = propman.save_file_name
+       self.assertEqual(name,'MAR00000Ei10.00meV')
+
+    def test_log_to_Mantid(self):
+        propman = self.prop_man
+        self.assertFalse(propman.log_to_mantid)
+
+        propman.log_to_mantid = True
+        self.assertTrue(propman.log_to_mantid)
+
+        propman.log_to_mantid = 0
+        self.assertFalse(propman.log_to_mantid)
 
 
 
