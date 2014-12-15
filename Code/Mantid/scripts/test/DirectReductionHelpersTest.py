@@ -1,7 +1,7 @@
 from mantid.simpleapi import *
 from mantid import api
 import unittest
-import Direct.DirectReductionHelpers as helpers
+import Direct.ReductionHelpers as helpers
 
 
 class DirectReductionHelpersTest(unittest.TestCase):

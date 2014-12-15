@@ -8,7 +8,7 @@ from mantid.simpleapi import *
 from mantid import api
 from mantid import geometry
 from mantid import config
-import DirectReductionHelpers as prop_helpers
+import ReductionHelpers as prop_helpers
 import CommonFunctions as common
 import os
 

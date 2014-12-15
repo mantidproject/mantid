@@ -3,8 +3,10 @@ from mantid import api
 from mantid import geometry
 from mantid import config
 from mantid.kernel import funcreturns
-import DirectReductionHelpers as prop_helpers
-from DirectReductionProperties import DirectReductionProperties
+
+import ReductionHelpers as prop_helpers
+from Direct.DirectReductionProperties import DirectReductionProperties
+
 from collections import OrderedDict
 import CommonFunctions as common
 import os
