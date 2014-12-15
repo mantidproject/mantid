@@ -636,6 +636,41 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.log_to_mantid = 0
         self.assertFalse(propman.log_to_mantid)
 
+    def test_hadmask_options(self):
+        propman = self.prop_man
+        propman.hard_mask_file = 'some_hard_mask_file'
+        self.assertEqual(propman.hard_mask_file,'some_hard_mask_file.msk')
+
+        propman.use_hard_mask_only = False
+        self.assertFalse(propman.use_hard_mask_only)
+        propman.use_hard_mask_only = True
+        self.assertTrue(propman.use_hard_mask_only)
+
+        propman.hardmaskPlus = 'other_hard_mask_file.msk'
+
+        self.assertFalse(propman.use_hard_mask_only)
+        self.assertEqual(propman.hard_mask_file,'other_hard_mask_file.msk')
+        self.assertTrue(propman.run_diagnostics)
+
+        propman.hardmaskOnly = 'more_hard_mask_file'
+        self.assertTrue(propman.use_hard_mask_only)
+        self.assertEqual(propman.hard_mask_file,'more_hard_mask_file.msk')
+        self.assertTrue(propman.run_diagnostics)
+
+        propman.hardmaskOnly = 'None'
+        self.assertFalse(propman.use_hard_mask_only)
+        self.assertTrue(propman.run_diagnostics)
+        self.assertTrue(propman.hard_mask_file is None)
+
+
+        propman.hardmaskPlus = 'a_hard_mask_file'
+        self.assertFalse(propman.use_hard_mask_only)
+        self.assertEqual(propman.hard_mask_file,'a_hard_mask_file.msk')
+        self.assertTrue(propman.run_diagnostics)
+
+
+
+
 
 
 

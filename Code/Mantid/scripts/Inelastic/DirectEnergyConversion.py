@@ -627,7 +627,10 @@ class DirectEnergyConversion(object):
         prop_man.log("======== Run diagnose for sample run ===========================",'notice');
         masking = self.diagnose(prop_man.wb_run,prop_man.mask_run,
                                 second_white=None,print_diag_results=True)
-        header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
+        if prop_man.use_hard_mask_only:
+            header = "*** Hard mask file applied to workspace with {0:d} spectra masked {1:d} spectra"
+        else:
+            header = "*** Diagnostics processed workspace with {0:d} spectra and masked {1:d} bad spectra"
 
 
         # diagnose absolute units:

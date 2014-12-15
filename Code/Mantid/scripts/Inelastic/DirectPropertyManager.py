@@ -80,14 +80,18 @@ class MapMaskFile(object):
 class HardMaskPlus(object):
     """ Legacy HardMaskPlus class which sets up hard_mask_file to file and use_hard_mask_only to True""" 
     def __get__(self,instance,type=None):
-        is_masked = prop_helpers.gen_getter(instance.__dict__,'hard_mask_only');
-        return prop_helpers.gen_getter(instance.__dict__,'hard_mask_file');
+         return prop_helpers.gen_getter(instance.__dict__,'hard_mask_file');
 
     def __set__(self,instance,value):
         if value != None:
            fileName, fileExtension = os.path.splitext(value)
            if (not fileExtension):
-               value=value+self._file_ext;
+               value=value+'.msk';
+        prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',False);
+        prop_helpers.gen_setter(instance.__dict__,'hard_mask_file',value);
+        # This property enables diagnostics 
+        instance.run_diagnostics = True;
+
 
 
 class HardMaskOnly(object):
@@ -101,6 +105,7 @@ class HardMaskOnly(object):
     def __set__(self,instance,value):
         if value is None:
             prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',False);
+            instance.hard_mask_file = None;            
         elif isinstance(value,bool):
             prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',value);
         elif isinstance(value,str):
@@ -114,8 +119,9 @@ class HardMaskOnly(object):
             #end
         #end
 
-        if not(value) and instance.hard_mask_file is None:
-            instance.run_diagnostics = False;
+        # if no hard mask file is there and use_hard_mask_only is True, diagnostics should not run
+        if instance.use_hard_mask_only and instance.hard_mask_file is None:
+           instance.run_diagnostics = False;
 #end HardMaskOnly
 
 class MonovanIntegrationRange(prop_helpers.ComplexProperty):
@@ -598,8 +604,8 @@ class DirectPropertyManager(DirectReductionProperties):
     # 
     save_format = SaveFormat()
     #
-    use_hard_mask_only = HardMaskOnly()
-    hardmaskPlus       = HardMaskPlus()
+    hardmaskOnly = HardMaskOnly()
+    hardmaskPlus = HardMaskPlus()
     #
     diag_spectra = DiagSpectra()
     #
