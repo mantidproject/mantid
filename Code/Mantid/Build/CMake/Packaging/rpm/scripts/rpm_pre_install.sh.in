@@ -14,7 +14,7 @@ if [  -h $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot ]; then
     rm $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot
 fi
 # Stale _exe
-if [  -f @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot_exe ]; then
+if [  -e @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot_exe ]; then
     rm $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot_exe
 fi
 
