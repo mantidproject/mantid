@@ -723,6 +723,7 @@ void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments, 
       {
         //Launch the dialog to set the PV path.
         SetUpParaview pv(SetUpParaview::FirstLaunch);
+        pv.setWindowFlags(Qt::WindowStaysOnTopHint);
         pv.exec();
       }
     }
