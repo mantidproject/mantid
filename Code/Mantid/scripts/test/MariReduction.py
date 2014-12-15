@@ -1,6 +1,6 @@
 """ Sample MARI reduction scrip used in testing ReductionWrapper """ 
 
-from ReductionWrapper import *
+from Direct.ReductionWrapper import *
 try:
     import reduce_vars as rv
 except:

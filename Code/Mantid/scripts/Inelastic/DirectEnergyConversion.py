@@ -104,7 +104,7 @@ import numpy as np
 
 import CommonFunctions as common
 import diagnostics
-from Direct.DirectPropertyManager import DirectPropertyManager;
+from  DirectPropertyManager import DirectPropertyManager;
 
 def setup_reducer(inst_name,reload_instrument=False):
     """

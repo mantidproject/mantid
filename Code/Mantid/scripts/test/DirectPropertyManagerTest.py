@@ -5,7 +5,7 @@ import inspect
 import numpy as np
 import os
 import sys
-from DirectPropertyManager import DirectPropertyManager
+from Direct.DirectPropertyManager import DirectPropertyManager
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
