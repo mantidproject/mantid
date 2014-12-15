@@ -1135,7 +1135,6 @@ class DirectEnergyConversion(object):
             pass
 
         prop_man =self.prop_man 
-        formats = prop_man.save_format
          
         save_file,ext = os.path.splitext(save_file)
         if len(ext)>1:
