@@ -120,6 +120,9 @@ namespace Algorithms
     auto inTextAxis = dynamic_cast<API::TextAxis*>(inAxis);
     auto outTextAxis = dynamic_cast<API::TextAxis*>(outAxis);
 
+    // Initialise the progress reporting object
+    API::Progress progress(this,0.0,1.0,nOutputSpectra);
+
     // smooth the rest of the input
     for(size_t outIndex = 0; outIndex < nOutputSpectra; ++outIndex)
     {
@@ -147,6 +150,7 @@ namespace Algorithms
       {
         outTextAxis->setLabel( outIndex, inTextAxis->label(inIndex) );
       }
+      progress.report();
     }
 
     // set the output
