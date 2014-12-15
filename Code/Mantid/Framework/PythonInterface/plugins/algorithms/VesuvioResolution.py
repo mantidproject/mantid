@@ -4,7 +4,7 @@ from mantid.kernel import *
 import mantid
 
 
-class VesuvioResolution(PythonAlgorithm):
+class VesuvioResolution(DataProcessorAlgorithm):
 
     def category(self):
         return 'Inelastic'
@@ -59,21 +59,44 @@ class VesuvioResolution(PythonAlgorithm):
 
 
     def PyExec(self):
-        sample_ws = self.getPropertyValue('Sample')
+        sample_ws = self.getProperty('Sample').value
         out_ws_tof = self.getPropertyValue('OutputWorkspaceTOF')
         out_ws_ysp = self.getPropertyValue('OutputWorkspaceYSpace')
-        spectrum_index = self.getProperty('SpectraIndex').value
-        mass = self.getProperty('Mass').value
+        self._spectrum_index = self.getProperty('SpectraIndex').value
+        self._mass = self.getProperty('Mass').value
 
         output_tof = (out_ws_tof != '')
         output_ysp = (out_ws_ysp != '')
 
-        # Give a dummy name here since we will need resolution in time of flight
-        # in order to convert to ySpace
-        if not output_tof:
-            out_ws_tof = '__res_tof'
+        if output_tof:
+            res_tof = self._calculate_resolution(sample_ws, out_ws_tof)
+            self.setProperty('OutputWorkspaceTOF', res_tof)
 
-        function = 'name=VesuvioResolution, Mass=%f' % mass
+        if output_ysp:
+            y_space_conv = mantid.api.AlgorithmManager.createUnmanaged('ConvertToYSpace')
+            y_space_conv.initialize()
+            y_space_conv.setChild(True)
+            y_space_conv.setAlwaysStoreInADS(True)
+            y_space_conv.setProperty('InputWorkspace', sample_ws)
+            y_space_conv.setProperty('OutputWorkspace', '__yspace_sample')
+            y_space_conv.setProperty('Mass', self._mass)
+            y_space_conv.execute()
+
+            # TODO: Should not need this to be in ADS
+            res_ysp = self._calculate_resolution(mtd['__yspace_sample'], out_ws_ysp)
+            self.setProperty('OutputWorkspaceYSpace', res_ysp)
+            DeleteWorkspace('__yspace_sample')
+
+
+    def _calculate_resolution(self, workspace, output_ws_name):
+        """
+        Calculates the resolution function using the VesuvioResolution fit function.
+
+        @param workspace The sample workspace
+        @param output_ws_name Name of the output workspace
+        """
+
+        function = 'name=VesuvioResolution, Mass=%f' % self._mass
         fit_naming_stem = '__vesuvio_res_fit'
 
         # Execute the resolution function using fit.
@@ -82,64 +105,23 @@ class VesuvioResolution(PythonAlgorithm):
         fit = mantid.api.AlgorithmManager.createUnmanaged('Fit')
         fit.initialize()
         fit.setChild(True)
-        fit.setLogging(False)
-        mantid.simpleapi._set_properties(fit, function, sample_ws, MaxIterations=0,
-                CreateOutput=True, Output=fit_naming_stem, WorkspaceIndex=spectrum_index,
+        mantid.simpleapi._set_properties(fit, function, InputWorkspace=workspace, MaxIterations=0,
+                CreateOutput=True, Output=fit_naming_stem, WorkspaceIndex=self._spectrum_index,
                 OutputCompositeMembers=True)
         fit.execute()
-        fit_ws = fit.getProperty("OutputWorkspace").value
+        fit_ws = fit.getProperty('OutputWorkspace').value
 
         # Extract just the function values from the fit spectrum
         extract = mantid.api.AlgorithmManager.createUnmanaged('ExtractSingleSpectrum')
         extract.initialize()
         extract.setChild(True)
-        extract.setLogging(False)
-        extract.setProperty("InputWorkspace", fit_ws)
-        extract.setProperty("OutputWorkspace", out_ws_tof)
-        extract.setProperty("WorkspaceIndex", 1)
+        extract.setProperty('InputWorkspace', fit_ws)
+        extract.setProperty('OutputWorkspace', output_ws_name)
+        extract.setProperty('WorkspaceIndex', 1)
         extract.execute()
-        res_tof = extract.getProperty('OutputWorkspace').value
 
-        if output_tof:
-            self.setProperty('OutputWorkspaceTOF', res_tof)
-
-        # Convert to y-Space if needed
-        if output_ysp:
-
-            # Clone the raw workspace to use the instrument parameters for ySpace conversion
-            # taking only the spectra that was used for the time of flight resolution
-            extract2 = mantid.api.AlgorithmManager.createUnmanaged('ExtractSingleSpectrum')
-            extract2.initialize()
-            extract2.setChild(True)
-            extract2.setLogging(False)
-            extract2.setProperty("InputWorkspace", sample_ws)
-            extract2.setProperty("OutputWorkspace", '__raw_clone')
-            extract2.setProperty("WorkspaceIndex", spectrum_index)
-            extract2.execute()
-            raw_clone = extract2.getProperty('OutputWorkspace').value
-
-            # Get the resolution data in time of flight from the fit workspace
-            res_data_x = res_tof.dataX(0)
-            res_data_y = res_tof.dataY(0)
-            res_data_e = res_tof.dataE(0)
-
-            # Copy it to the cloned raw workspace spectrum
-            raw_clone.setX(0, res_data_x)
-            raw_clone.setY(0, res_data_y)
-            raw_clone.setE(0, res_data_e)
-
-            # Convert the cloned workspace to ySpace
-            extract2 = mantid.api.AlgorithmManager.createUnmanaged('ConvertToYSpace')
-            extract2.initialize()
-            extract2.setChild(True)
-            extract2.setLogging(False)
-            extract2.setProperty("InputWorkspace", raw_clone)
-            extract2.setProperty("OutputWorkspace", out_ws_ysp)
-            extract2.setProperty("Mass", mass)
-            extract2.execute()
-            out_ws_ysp = extract2.getProperty('OutputWorkspace').value
-
-            self.setProperty('OutputWorkspaceYSpace', out_ws_ysp)
+        res_ws = extract.getProperty('OutputWorkspace').value
+        return res_ws
 
 
 AlgorithmFactory.subscribe(VesuvioResolution)
