@@ -6,17 +6,20 @@
 #
 ENVVARS_ON_INSTALL=@ENVVARS_ON_INSTALL_INT@
 
-if [ ! -e $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot ]; then
-  ln -s $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot
-fi
-
+# Create symbolic links
 if [ -f $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot ]; then
-  mv $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot_exe
-  ln -s $RPM_INSTALL_PREFIX0/@BIN_DIR@/launch_mantidplot.sh $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot
+    mv $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot_exe
+    if [ ! -s $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot ]; then
+        ln -s $RPM_INSTALL_PREFIX0/@BIN_DIR@/launch_mantidplot.sh $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot
+    fi
+    if [ ! -s $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot ]; then
+        ln -s $RPM_INSTALL_PREFIX0/@BIN_DIR@/launch_mantidplot.sh $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot
+    fi
 fi
 
+# Environment updates if required
 if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
-  # Link profiles to /etc/profile.d
-  ln -s $RPM_INSTALL_PREFIX0/@ETC_DIR@/mantid.sh /etc/profile.d/mantid.sh
-  ln -s $RPM_INSTALL_PREFIX0/@ETC_DIR@/mantid.csh /etc/profile.d/mantid.csh
+    # Link profiles to /etc/profile.d
+    ln -s $RPM_INSTALL_PREFIX0/@ETC_DIR@/mantid.sh /etc/profile.d/mantid.sh
+    ln -s $RPM_INSTALL_PREFIX0/@ETC_DIR@/mantid.csh /etc/profile.d/mantid.csh
 fi
