@@ -1,7 +1,7 @@
 from mantid.simpleapi import *
 from mantid import api
 
-from ReductionWrapper import *
+from Direct.ReductionWrapper import *
 from MariReduction import ReduceMARI
 import os,sys
 
