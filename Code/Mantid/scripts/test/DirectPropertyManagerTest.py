@@ -5,7 +5,7 @@ import inspect
 import numpy as np
 import os
 import sys
-from Direct.DirectPropertyManager import DirectPropertyManager
+from Direct.PropertyManager import PropertyManager
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
@@ -15,12 +15,12 @@ from Direct.DirectPropertyManager import DirectPropertyManager
 class DirectPropertyManagerTest(unittest.TestCase):
 
     def __init__(self, methodName):
-        self.prop_man = DirectPropertyManager("MAR");
+        self.prop_man = PropertyManager("MAR");
         return super(DirectPropertyManagerTest, self).__init__(methodName)
 
     def setUp(self):
-        if self.prop_man == None or type(self.prop_man) != type(DirectPropertyManager):
-            self.prop_man  = DirectPropertyManager("MAR");
+        if self.prop_man == None or type(self.prop_man) != type(PropertyManager):
+            self.prop_man  = PropertyManager("MAR");
     def tearDown(self):
         pass
 
@@ -175,7 +175,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue("ei-mon1-spec" in prop_changed,"changing ei_mon_spectra should change ei-mon1-spec")
 
     def test_set_non_default_complex_value_synonims(self):
-        propman = DirectPropertyManager("MAP");
+        propman = PropertyManager("MAP");
         propman.test_ei2_mon_spectra = 10000;
         self.assertEqual(propman.ei_mon_spectra,[41474,10000])
 
@@ -341,7 +341,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(spectra[0],(19,299));
         self.assertEqual(spectra[1],(399,500));
 
-        propman  = DirectPropertyManager("MAP");
+        propman  = PropertyManager("MAP");
         spectra = propman.diag_spectra
         # (1,17280);(17281,18432);(18433,32256);(32257,41472)
         self.assertEqual(len(spectra),4)
@@ -445,7 +445,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         SetInstrumentParameter(ws,ParameterName="TestParam3",Value="initial2",ParameterType="String")
 
         instr = ws.getInstrument()
-        propman = DirectPropertyManager(instr);
+        propman = PropertyManager(instr);
 
         self.assertAlmostEqual(propman.TestParam1,3.5);
         self.assertEquals(propman.TestParam2,"initial1");
@@ -484,7 +484,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         SetInstrumentParameter(ws,ParameterName="synonims",Value="ParaPara=BaseParam2",ParameterType="String")
 
         instr = ws.getInstrument()
-        propman = DirectPropertyManager(instr);
+        propman = PropertyManager(instr);
 
         SampleResult = ['Val1','Val2']
         cVal = propman.Param1;

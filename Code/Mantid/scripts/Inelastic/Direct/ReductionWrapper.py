@@ -1,7 +1,7 @@
 from mantid.simpleapi import *
 from mantid import config
-from DirectEnergyConversion import  DirectEnergyConversion
-from DirectPropertyManager import DirectPropertyManager;
+from Direct.DirectEnergyConversion import  DirectEnergyConversion
+from Direct.PropertyManager import PropertyManager;
 #import inspect
 import os
 from abc import abstractmethod
@@ -15,7 +15,7 @@ class ReductionWrapper(object):
     """ 
     def __init__(self,instrumentName,web_var=None):
       """ sets properties defaults for the instrument with Name"""
-      self.iliad_prop = DirectPropertyManager(instrumentName)
+      self.iliad_prop = PropertyManager(instrumentName)
       # the variables which are set up from the main properties
       self._main_properties=[];
       # the variables which are set up from the advanced properties.
