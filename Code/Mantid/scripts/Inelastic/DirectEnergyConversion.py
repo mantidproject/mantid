@@ -918,10 +918,10 @@ class DirectEnergyConversion(object):
                "--------> Monovan Integration range : min={1}, max={2} (meV)\n"\
                "--------> Summed:  {3} spectra with total signal: {4} and error: {5}\n"\
                "--------> Dropped: {6} zero spectra\n"\
-               "--------> Using  mBarn/sR*fu normalization factor = {7} resulting in:"\
+               "--------> Using  mBarn/sR*fu normalization factor = {7} resulting in:\n"\
                "--------> Abs norm factors: LibISIS: {8}\n"\
                "--------> Abs norm factors: Sigma^2: {9}\n"\
-               "--------> Abs norm factors: Poisson: {10}"\
+               "--------> Abs norm factors: Poisson: {10}\n"\
                "--------> Abs norm factors: TGP    : {11}\n"\
                .format(deltaE_wkspaceName,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,
                           norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
