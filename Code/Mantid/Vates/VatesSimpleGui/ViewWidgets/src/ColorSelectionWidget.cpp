@@ -1,5 +1,4 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
-
 #include "MantidKernel/ConfigService.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorMapManager.h"
 
@@ -104,15 +103,7 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
   */
   void ColorSelectionWidget::loadDefaultColorMap()
   {
-    // Check in the Mantid.users.properties file if a default color map was specified
-    std::string defaultColorMap = Kernel::ConfigService::Instance().getString("vsi.colormap");
-
-    int defaultColorMapIndex = 0;
-
-    if (!defaultColorMap.empty())
-    {
-      defaultColorMapIndex = this->colorMapManager->getColorMapIndex(defaultColorMap);
-    }
+    int defaultColorMapIndex = this->colorMapManager->getDefaultColorMapIndex();
 
     const pqColorMapModel *colorMap = this->presets->getModel()->getColorMap(defaultColorMapIndex);
 
@@ -215,8 +206,11 @@ void ColorSelectionWidget::loadPreset()
     QItemSelectionModel *selection = this->presets->getSelectionModel();
     QModelIndex index = selection->currentIndex();
     const pqColorMapModel *colorMap = this->presets->getModel()->getColorMap(index.row());
+
     if (colorMap)
     {
+      // Persist the color map change
+      this->colorMapManager->setNewActiveColorMap(index.row());
       emit this->colorMapChanged(colorMap);
     }
   }

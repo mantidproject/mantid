@@ -59,8 +59,6 @@ namespace Mantid
           */
           std::vector<double> getRbgFromPropertiesFile();
 
-
-
           /**
            * Extract the rgb vector from the numeric user setting
            * @param background A vector with three color settings

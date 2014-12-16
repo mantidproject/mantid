@@ -166,7 +166,6 @@ void MdViewerWidget::internalSetup(bool pMode)
   this->rotPointDialog = NULL;
   this->lodThreshold = 5.0;
   this->viewSwitched = false;
-  this->startingUp = true;
 }
 
 /**
@@ -717,17 +716,10 @@ void MdViewerWidget::renderAndFinalSetup()
 {
   this->setDefaultColorForBackground();
   this->currentView->render();
+  this->ui.colorSelectionWidget->loadDefaultColorMap();
   this->currentView->setColorsForView();
   this->currentView->checkView(this->initialView);
   this->currentView->updateAnimationControls();
-  
-  // Only load the default color map for the first time
-  // that a representation is created.
-  if (this->startingUp)
-  {
-     this->ui.colorSelectionWidget->loadDefaultColorMap();
-     this->startingUp = false;
-  }
 }
 
 /**
@@ -741,7 +733,7 @@ void MdViewerWidget::setDefaultColorForBackground()
 
   vtkSMDoubleVectorProperty* background = vtkSMDoubleVectorProperty::SafeDownCast(this->currentView->getView()->getViewProxy()->GetProperty("Background"));
   background->SetElements3(backgroundRgb[0],backgroundRgb[1],backgroundRgb[2]);
-  
+
   this->currentView->getView()->resetCamera();
 }
 

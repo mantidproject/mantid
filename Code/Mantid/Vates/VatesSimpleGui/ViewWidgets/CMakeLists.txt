@@ -33,6 +33,11 @@ set( SOURCE_FILES
   src/ViewBase.cpp
 )
 
+set( TEST_FILES
+  test/unitTests/BackgroundRgbProviderTest.h
+  test/unitTests/ColorMapManagerTest.h
+)
+
 # These are the headers to be preprocessed using
 # Qt's moc preprocessor.
 qt4_wrap_cpp( MOC_SOURCES
@@ -108,6 +113,22 @@ ${MANTID_SUBPROJECT_LIBS}
 MantidQtSliceViewer
 MantidQtFactory
 )
+
+# Create test file projects
+if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
+  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+
+  include_directories( inc ../../../Framework/TestHelpers/inc ../../../Framework/DataHandling/inc ../../../Framework/DataObjects/inc)
+  set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
+                        ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+                        ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
+                        ../../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
+  cxxtest_add_test( VatesSimpleGuiViewWidgetsTest ${TEST_FILES} )
+  target_link_libraries( VatesSimpleGuiViewWidgetsTest VatesSimpleGuiViewWidgets DataHandling Kernel DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+  add_dependencies( AllTests VatesSimpleGuiViewWidgetsTest )
+  # Add to the 'UnitTests' group in VS
+  set_property ( TARGET VatesSimpleGuiViewWidgetsTest PROPERTY FOLDER "UnitTests" )
+endif()
 
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h.in
                  ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h )

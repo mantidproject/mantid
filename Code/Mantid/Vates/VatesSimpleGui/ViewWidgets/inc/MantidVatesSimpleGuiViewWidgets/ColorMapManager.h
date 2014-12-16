@@ -46,6 +46,12 @@ namespace Mantid
           virtual ~ColorMapManager();
           
           /**
+           * Get default color map
+           * @returns index The index of the default color map in the list of color maps.
+           */
+          int getDefaultColorMapIndex();
+
+          /**
            * Read in and store the available color maps
            * @param xml The path to the colormap.
            */
@@ -65,9 +71,16 @@ namespace Mantid
            */
           bool isRecordedColorMap(std::string colorMap);
 
+          /**
+           * Record the new active color map when the user selected a new one.
+           * @param index The index of the color map in the color map list.
+           */
+          void setNewActiveColorMap(int index);
+
         private:
           int indexCounter;
-          std::map<std::string, int> colorMapInfo;
+          std::map<std::string, int> nameToIndex;
+          std::map<int, std::string> indexToName;
       };
     }
   }
