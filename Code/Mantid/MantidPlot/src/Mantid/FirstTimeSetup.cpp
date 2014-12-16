@@ -60,6 +60,22 @@ void FirstTimeSetup::initLayout()
   m_uiForm.cbInstrument->setCurrentIndex(m_uiForm.cbInstrument->findText(
     QString::fromStdString(instrument)));
   connect(m_uiForm.cbFacility, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(facilitySelected(const QString &)));
+
+  QString stlyeName = QApplication::style()->metaObject()->className();
+  if(stlyeName!="QWindowsVistaStyle")
+  {
+    //add stylesheet formatting for other environemnts
+    QString ss =  this->styleSheet();
+    ss += "\n"
+          "QDialog#FirstTimeSetup QCommandLinkButton {"
+          " background-color: rgba(255, 255, 255, 0);"
+          "}"
+          "\n"
+          "QDialog#FirstTimeSetup QCommandLinkButton:hover {"
+	        "  background-color: rgba(255, 255, 255, 128);"
+          "}";
+    this->setStyleSheet(ss);
+  }
 }
 
 void FirstTimeSetup::confirm()
