@@ -2039,9 +2039,18 @@ Later steps in the process (saving, renaming) will not be done.</string>
             <item>
              <layout class="QGridLayout" name="gridLayout_9" columnstretch="0,10,0,0,10,0" columnminimumwidth="0,0,0,0,0,0">
               <item row="1" column="4">
-               <widget class="QLineEdit" name="sqw_leELow">
+               <widget class="QDoubleSpinBox" name="sqw_spELow">
                 <property name="enabled">
                  <bool>false</bool>
+                </property>
+                <property name="singleStep">
+                 <double>0.1</double>
+                </property>
+                <property name="minimum">
+                 <number>-1000.0</number>
+                </property>
+                <property name="maximum">
+                 <number>1000.0</number>
                 </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -2093,9 +2102,18 @@ Later steps in the process (saving, renaming) will not be done.</string>
                </widget>
               </item>
               <item row="3" column="4">
-               <widget class="QLineEdit" name="sqw_leEHigh">
+               <widget class="QDoubleSpinBox" name="sqw_spEHigh">
                 <property name="enabled">
                  <bool>false</bool>
+                </property>
+                <property name="singleStep">
+                 <double>0.1</double>
+                </property>
+                <property name="minimum">
+                 <number>-1000.0</number>
+                </property>
+                <property name="maximum">
+                 <number>1000.0</number>
                 </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -2236,9 +2254,18 @@ Later steps in the process (saving, renaming) will not be done.</string>
                </widget>
               </item>
               <item row="2" column="4">
-               <widget class="QLineEdit" name="sqw_leEWidth">
+               <widget class="QDoubleSpinBox" name="sqw_spEWidth">
                 <property name="enabled">
                  <bool>false</bool>
+                </property>
+                <property name="singleStep">
+                 <double>0.1</double>
+                </property>
+                <property name="minimum">
+                 <number>-1000.0</number>
+                </property>
+                <property name="maximum">
+                 <number>1000.0</number>
                 </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -2278,7 +2305,16 @@ Later steps in the process (saving, renaming) will not be done.</string>
                </widget>
               </item>
               <item row="1" column="1">
-               <widget class="QLineEdit" name="sqw_leQLow">
+               <widget class="QDoubleSpinBox" name="sqw_spQLow">
+                <property name="singleStep">
+                 <double>0.1</double>
+                </property>
+                <property name="minimum">
+                 <number>-1000.0</number>
+                </property>
+                <property name="maximum">
+                 <number>1000.0</number>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -2288,7 +2324,16 @@ Later steps in the process (saving, renaming) will not be done.</string>
                </widget>
               </item>
               <item row="2" column="1">
-               <widget class="QLineEdit" name="sqw_leQWidth">
+               <widget class="QDoubleSpinBox" name="sqw_spQWidth">
+                <property name="singleStep">
+                 <double>0.1</double>
+                </property>
+                <property name="minimum">
+                 <number>-1000.0</number>
+                </property>
+                <property name="maximum">
+                 <number>1000.0</number>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -2298,7 +2343,16 @@ Later steps in the process (saving, renaming) will not be done.</string>
                </widget>
               </item>
               <item row="3" column="1">
-               <widget class="QLineEdit" name="sqw_leQHigh">
+               <widget class="QDoubleSpinBox" name="sqw_spQHigh">
+                <property name="singleStep">
+                 <double>0.1</double>
+                </property>
+                <property name="minimum">
+                 <number>-1000.0</number>
+                </property>
+                <property name="maximum">
+                 <number>1000.0</number>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -2867,13 +2921,13 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>trans_ckPlot</tabstop>
   <tabstop>trans_ckSave</tabstop>
   <tabstop>sqw_cbRebinType</tabstop>
-  <tabstop>sqw_leQLow</tabstop>
-  <tabstop>sqw_leQWidth</tabstop>
-  <tabstop>sqw_leQHigh</tabstop>
+  <tabstop>sqw_spQLow</tabstop>
+  <tabstop>sqw_spQWidth</tabstop>
+  <tabstop>sqw_spQHigh</tabstop>
   <tabstop>sqw_ckRebinE</tabstop>
-  <tabstop>sqw_leELow</tabstop>
-  <tabstop>sqw_leEWidth</tabstop>
-  <tabstop>sqw_leEHigh</tabstop>
+  <tabstop>sqw_spELow</tabstop>
+  <tabstop>sqw_spEWidth</tabstop>
+  <tabstop>sqw_spEHigh</tabstop>
   <tabstop>sqw_ckVerbose</tabstop>
   <tabstop>sqw_cbPlotType</tabstop>
   <tabstop>sqw_ckSave</tabstop>
