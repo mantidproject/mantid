@@ -46,6 +46,65 @@ public:
   }
 
   /*Demonstrative tests*/
+  void test_3DHistoWorkspace()
+  {
+    FakeProgressAction progressUpdate;
+
+    // Create workspace with 5x5x5 binning 
+    size_t binning = 5;
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, binning);
+    vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    factory.initialize(ws);
+    vtkDataSet* product = NULL;
+
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
+
+    // Expecting 5x5x5 points; Signal equal for each box => 1/(10^3/5^3)
+    const size_t expected_n_points = binning*binning*binning;
+    const size_t expected_n_cells = binning*binning*binning;
+    const size_t expected_n_signals = expected_n_cells;
+    const double expected_signal_value = 1.0/((10.0*10.0*10.0)/(5.0*5.0*5.0));
+
+    double* range = product->GetScalarRange();
+
+    TSM_ASSERT_EQUALS("Should have one point per bin.", expected_n_points, product->GetNumberOfPoints());
+    TSM_ASSERT_EQUALS("Should have one cells per bin", expected_n_cells, product->GetNumberOfCells());
+    TSM_ASSERT_EQUALS("Should have signal flag", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
+    TSM_ASSERT_EQUALS("Should have one signal per bin", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
+    TSM_ASSERT_EQUALS("Should have a signal which is normalized to the 3D volume", expected_signal_value, range[0]);
+
+    product->Delete();
+  }
+
+  void test_4DHistoWorkspace()
+  {
+    FakeProgressAction progressUpdate;
+
+    // Create workspace with  5x5x5x5 binning, signal is 1 and extent for each dimension is 10
+    size_t binning = 5;
+    IMDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4, binning);
+    vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    factory.initialize(ws);
+    vtkDataSet* product = NULL;
+
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
+
+    // Expecting 5x5x5 points; Signal equal for each box => 1/(10^4/5^4)
+    const size_t expected_n_points = binning*binning*binning;
+    const size_t expected_n_cells = binning*binning*binning;
+    const size_t expected_n_signals = expected_n_cells;
+    const double expected_signal_value = 1.0/((10.0*10.0*10.0*10.0)/(5.0*5.0*5.0*5.0));
+
+    double* range = product->GetScalarRange();
+
+    TSM_ASSERT_EQUALS("Should have one point per bin.", expected_n_points, product->GetNumberOfPoints());
+    TSM_ASSERT_EQUALS("Should have one cells per bin", expected_n_cells, product->GetNumberOfCells());
+    TSM_ASSERT_EQUALS("Should have signal flag", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
+    TSM_ASSERT_EQUALS("Should have one signal per bin", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
+    TSM_ASSERT_EQUALS("Should have a signal which is normalized to the 4D volume", expected_signal_value, range[0]);
+
+    product->Delete();
+  }
 
   void test_3DWorkspace()
   {

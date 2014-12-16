@@ -318,7 +318,6 @@ namespace VATES
    */
   void vtkSplatterPlotFactory::doCreateMDHisto(IMDHistoWorkspace_sptr workspace) const
   {
-    CPUTimer tim;
     // Acquire a scoped read-only lock to the workspace (prevent segfault
     // from algos modifying wworkspace)
     ReadLock lock(*workspace);
@@ -420,8 +419,6 @@ namespace VATES
 
     visualDataSet->SetPoints(points);
     visualDataSet->GetCellData()->SetScalars(signal);
-
-    std::cout << tim << " to create the visual data set." << std::endl;
 
     points->Delete();
     signal->Delete();
