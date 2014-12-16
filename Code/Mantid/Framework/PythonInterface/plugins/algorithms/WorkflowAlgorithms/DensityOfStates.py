@@ -67,12 +67,17 @@ class DensityOfStates(DataProcessorAlgorithm):
         """
         issues = dict()
 
+        file_name = self.getPropertyValue('File')
+        file_type = file_name[file_name.rfind('.') + 1:]
         spec_type = self.getPropertyValue('SpectrumType')
         sum_contributions = self.getProperty('SumContributions').value
         scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection') != 'None'
 
         ions = self.getProperty('Ions').value
         calc_partial = len(ions) > 0
+
+        if spec_type == 'IonTable' and file_type != 'phonon':
+            issues['SpectrumType'] = 'Cannot output an ion table from a %s file' % file_type
 
         if spec_type != 'DOS' and calc_partial:
             issues['Ions'] = 'Cannot calculate partial density of states when using %s' % spec_type
@@ -101,9 +106,10 @@ class DensityOfStates(DataProcessorAlgorithm):
         if self._spec_type == 'IonTable':
             ion_table = CreateEmptyTableWorkspace(OutputWorkspace=self._ws_name)
             ion_table.addColumn('str', 'Ion')
+            ion_table.addColumn('int', 'Count')
 
-            for ion in self._ion_dict.keys():
-                ion_table.addRow([ion])
+            for ion, data in self._ion_dict.items():
+                ion_table.addRow([ion, len(data)])
 
         # We want to calculate a partial DoS
         elif self._calc_partial and self._spec_type == 'DOS':
