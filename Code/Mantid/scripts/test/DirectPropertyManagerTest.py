@@ -88,10 +88,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.map_file = 'a_map_file'
         self.assertEqual(propman.map_file,'a_map_file.map');
 
-        self.assertTrue(propman.hard_mask_file is None);
-        propman.hard_mask_file = 'a_mask_file'
-        self.assertEqual(propman.hard_mask_file,'a_mask_file.msk');
-
         self.assertFalse(propman.monovan_mapfile is None," Monovan map file by default is defined");
         propman.monovan_mapfile = 'a_monovan_map_file'
         self.assertEqual(propman.monovan_mapfile,'a_monovan_map_file.map');
@@ -100,11 +96,20 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
 
         prop_changed =propman.getChangedProperties()
-        self.assertEqual(len(prop_changed),4)
+        self.assertEqual(len(prop_changed),3)
         self.assertTrue('det_cal_file' in prop_changed)
-        self.assertTrue('hard_mask_file' in prop_changed)
         self.assertTrue('map_file' in prop_changed)
         self.assertTrue('monovan_mapfile' in prop_changed)
+
+    def test_hartmask_plus_or_only(self):
+        propman = self.prop_man
+
+        self.assertTrue(propman.hard_mask_file is None);
+        propman.hard_mask_file = 'a_mask_file'
+        self.assertEqual(propman.hard_mask_file,'a_mask_file.msk');
+
+        prop_changed =propman.getChangedProperties()
+        self.assertTrue('hard_mask_file' in prop_changed)
 
 
     def test_set_spectra_to_mon(self):
@@ -267,6 +272,28 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue('nxs' in formats)
         self.assertTrue('nxspe' in formats)
 
+        propman.save_format = None
+        self.assertTrue(len(propman.save_format)==0)
+        propman.save_format = 'spe,.nxs'
+        formats = propman.save_format;
+        self.assertEqual(len(propman.save_format),2)
+        self.assertTrue('nxs' in formats)
+        self.assertTrue('spe' in formats)
+
+
+        propman.save_format = '(spe,nxspe)'
+        self.assertEqual(len(propman.save_format),3)
+
+        propman.save_format = 'None'
+        self.assertTrue(len(propman.save_format)==0)
+
+        propman.save_format = ('spe','nxspe')
+        self.assertEqual(len(propman.save_format),2)
+        self.assertTrue('nxspe' in formats)
+        self.assertTrue('spe' in formats)
+
+
+
     def test_allowed_values(self):
 
         propman = self.prop_man
@@ -303,6 +330,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         propman.psi = 10
         self.assertEqual(propman.psi,10)
+
     def test_diag_spectra(self):
         propman = self.prop_man
 
@@ -323,7 +351,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman = self.prop_man
 
         params = propman.get_diagnostics_parameters();
-        self.assertEqual(len(params),19);
+        self.assertEqual(len(params),20);
         
         bkg_test_range0 = propman.background_test_range;
         bkg_test_range  = params['background_test_range'];
@@ -408,6 +436,243 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
 
         #TODO: this one is not completed
+
+    def test_set_defailts_from_instrument(self) :
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=100)
+
+        SetInstrumentParameter(ws,ParameterName="TestParam1",Value="3.5",ParameterType="Number")
+        SetInstrumentParameter(ws,ParameterName="TestParam2",Value="initial1",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="TestParam3",Value="initial2",ParameterType="String")
+
+        instr = ws.getInstrument()
+        propman = DirectPropertyManager(instr);
+
+        self.assertAlmostEqual(propman.TestParam1,3.5);
+        self.assertEquals(propman.TestParam2,"initial1");
+        self.assertEquals(propman.TestParam3,"initial2");
+        
+        propman.TestParam2="gui_changed1"
+        self.assertEquals(propman.TestParam2,"gui_changed1");
+
+        SetInstrumentParameter(ws,ParameterName="TestParam2",Value="instr_changed1",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="TestParam3",Value="instr_changed2",ParameterType="String")
+
+        self.assertAlmostEqual(propman.TestParam1,3.5);
+        self.assertEquals(propman.TestParam2,"gui_changed1");
+        self.assertEquals(propman.TestParam3,"initial2");
+        changes = propman.getChangedProperties();
+        self.assertTrue('TestParam2' in changes);
+        self.assertTrue(not('TestParam3' in changes));
+
+  
+
+        changes = propman.update_defaults_from_instrument(ws.getInstrument());
+
+        self.assertAlmostEqual(propman.TestParam1,3.5);
+        self.assertEquals(propman.TestParam2,"gui_changed1");
+        self.assertEquals(propman.TestParam3,"instr_changed2");
+
+        self.assertTrue('TestParam2' in changes);
+        self.assertTrue('TestParam3' in changes);
+
+    def test_set_complex_defailts_from_instrument(self) :
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
+
+        SetInstrumentParameter(ws,ParameterName="Param1",Value="BaseParam1:BaseParam2",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="BaseParam1",Value="Val1",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="BaseParam2",Value="Val2",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="synonims",Value="ParaPara=BaseParam2",ParameterType="String")
+
+        instr = ws.getInstrument()
+        propman = DirectPropertyManager(instr);
+
+        SampleResult = ['Val1','Val2']
+        cVal = propman.Param1;
+        for test,sample in zip(cVal,SampleResult):
+            self.assertEqual(test,sample)
+
+        self.assertEqual(propman.ParaPara,'Val2')
+        self.assertEqual(propman.BaseParam2,'Val2')
+
+        SetInstrumentParameter(ws,ParameterName="Param1",Value="addParam1:addParam2",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="BaseParam1",Value="OtherVal1",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="BaseParam2",Value="OtherVal2",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="addParam1",Value="Ignore1",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="addParam2",Value="Ignore2",ParameterType="String")
+
+
+        changed_prop = propman.update_defaults_from_instrument(ws.getInstrument());
+
+        #property have been changed from GUI and changes from instrument are ignored
+        SampleResult = ['OtherVal1','OtherVal2']
+        cVal = propman.Param1;
+        for test,sample in zip(cVal,SampleResult):
+            self.assertEqual(test,sample)
+
+        self.assertEqual(propman.ParaPara,'OtherVal2')
+        self.assertEqual(propman.BaseParam2,'OtherVal2')
+        
+        self.assertEquals(propman.BaseParam1,"OtherVal1")
+       
+
+    def test_set_all_defaults_from_instrument(self) :
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
+        #idf_dir = config.getString('instrumentDefinition.directory')
+        idf_file=api.ExperimentInfo.getInstrumentFilename('LET','2014-05-03 23:59:59')
+        ws = LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=ws)
+
+        # Propman was defined for MARI but reduction parameters are all the same, so testing on LET
+        propman = self.prop_man
+        self.assertEqual(propman.ei_mon1_spec,2)
+
+        ws = mtd['ws'];
+        changed_prop=propman.update_defaults_from_instrument( ws.getInstrument(),False)
+        self.assertFalse('ei-mon1-spec' in changed_prop)
+        self.assertEqual(propman.ei_mon1_spec,65542)
+
+        self.assertTrue('ei_mon_spectra' in changed_prop)
+        ei_spec = propman.ei_mon_spectra
+        self.assertEqual(ei_spec[0],65542)
+        self.assertEqual(ei_spec[1],5506)
+
+    def test_ignore_complex_defailts_changes_fom_instrument(self) :
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
+
+        SetInstrumentParameter(ws,ParameterName="bkgd_range",Value="bkgd-range-min:bkgd-range-max",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="bkgd-range-min",Value="100.",ParameterType="Number")
+        SetInstrumentParameter(ws,ParameterName="bkgd-range-max",Value="200.",ParameterType="Number")
+
+        propman = self.prop_man
+
+        propman.background_range=[20,40]
+        bkgd_range = propman.bkgd_range
+        self.assertAlmostEqual(bkgd_range[0],20)
+        self.assertAlmostEqual(bkgd_range[1],40)
+
+        changed_prop=propman.update_defaults_from_instrument( ws.getInstrument())
+
+        self.assertEqual(len(changed_prop),1)
+        bkgd_range = propman.bkgd_range
+        self.assertAlmostEqual(bkgd_range[0],20)
+        self.assertAlmostEqual(bkgd_range[1],40)
+
+    def test_ignore_complex_defailts_single_fom_instrument(self) :
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
+
+        SetInstrumentParameter(ws,ParameterName="bkgd_range",Value="bkgd-range-min:bkgd-range-max",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="bkgd-range-min",Value="100.",ParameterType="Number")
+        SetInstrumentParameter(ws,ParameterName="bkgd-range-max",Value="200.",ParameterType="Number")
+
+        propman = self.prop_man
+        mari_bkgd_range = propman.bkgd_range
+
+        setattr(propman,'bkgd-range-max',40)
+        bkgd_range = propman.bkgd_range
+        self.assertAlmostEqual(bkgd_range[0],mari_bkgd_range[0])
+        self.assertAlmostEqual(bkgd_range[1],40)
+
+        changed_prop=propman.update_defaults_from_instrument( ws.getInstrument())
+
+        self.assertEqual(len(changed_prop),1)
+        bkgd_range = propman.bkgd_range
+        self.assertAlmostEqual(bkgd_range[0],mari_bkgd_range[0])
+        self.assertAlmostEqual(bkgd_range[1],40)
+
+    def test_monovan_integration_range(self):
+       propman = self.prop_man
+
+       propman.incident_energy = 10
+       propman.monovan_lo_frac = -0.6
+       propman.monovan_hi_frac =  0.7
+
+       range = propman.abs_units_van_range
+       self.assertAlmostEqual(range[0],-6.)
+       self.assertAlmostEqual(range[1], 7.)
+
+       range = propman.monovan_integr_range
+       self.assertAlmostEqual(range[0],-6.)
+       self.assertAlmostEqual(range[1], 7.)
+
+       propman.monovan_lo_value = -10;
+       propman.monovan_hi_value = 10;
+
+       range = propman.abs_units_van_range
+       self.assertAlmostEqual(range[0],-6.)
+       self.assertAlmostEqual(range[1], 7.)
+
+       propman.abs_units_van_range=[-40,40]
+       self.assertAlmostEqual(propman.monovan_lo_value,-40)
+       self.assertAlmostEqual(propman.monovan_hi_value,40)
+
+       range = propman.monovan_integr_range
+       self.assertAlmostEqual(range[0],-40)
+       self.assertAlmostEqual(range[1], 40)
+
+       propman.abs_units_van_range=None
+
+       range = propman.monovan_integr_range
+       self.assertAlmostEqual(range[0],-6.)
+       self.assertAlmostEqual(range[1], 7.)
+       #
+       propman.monovan_lo_frac = -0.7
+       range = propman.monovan_integr_range
+       self.assertAlmostEqual(range[0],-7.)
+
+    def test_save_filename(self):
+       propman = self.prop_man
+
+       propman.incident_energy = 10
+
+       name = propman.save_file_name
+       self.assertEqual(name,'MAR00000Ei10.00meV')
+
+    def test_log_to_Mantid(self):
+        propman = self.prop_man
+        self.assertFalse(propman.log_to_mantid)
+
+        propman.log_to_mantid = True
+        self.assertTrue(propman.log_to_mantid)
+
+        propman.log_to_mantid = 0
+        self.assertFalse(propman.log_to_mantid)
+
+    def test_hadmask_options(self):
+        propman = self.prop_man
+        propman.hard_mask_file = 'some_hard_mask_file'
+        self.assertEqual(propman.hard_mask_file,'some_hard_mask_file.msk')
+
+        propman.use_hard_mask_only = False
+        self.assertFalse(propman.use_hard_mask_only)
+        propman.use_hard_mask_only = True
+        self.assertTrue(propman.use_hard_mask_only)
+
+        propman.hardmaskPlus = 'other_hard_mask_file.msk'
+
+        self.assertFalse(propman.use_hard_mask_only)
+        self.assertEqual(propman.hard_mask_file,'other_hard_mask_file.msk')
+        self.assertTrue(propman.run_diagnostics)
+
+        propman.hardmaskOnly = 'more_hard_mask_file'
+        self.assertTrue(propman.use_hard_mask_only)
+        self.assertEqual(propman.hard_mask_file,'more_hard_mask_file.msk')
+        self.assertTrue(propman.run_diagnostics)
+
+        propman.hardmaskOnly = 'None'
+        self.assertFalse(propman.use_hard_mask_only)
+        self.assertTrue(propman.run_diagnostics)
+        self.assertTrue(propman.hard_mask_file is None)
+
+
+        propman.hardmaskPlus = 'a_hard_mask_file'
+        self.assertFalse(propman.use_hard_mask_only)
+        self.assertEqual(propman.hard_mask_file,'a_hard_mask_file.msk')
+        self.assertTrue(propman.run_diagnostics)
+
+
+
+
+
+
 
 
 

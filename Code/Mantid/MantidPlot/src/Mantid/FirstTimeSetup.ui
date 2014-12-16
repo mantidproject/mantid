@@ -242,7 +242,7 @@ font-size: 28px
         <enum>Qt::LeftToRight</enum>
        </property>
        <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 0);</string>
+        <string notr="true"/>
        </property>
        <property name="text">
         <string>Sample Datasets</string>
@@ -534,7 +534,7 @@ font-size: 28px
         <string>Do not show again until next release</string>
        </property>
        <property name="checked">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
       </widget>
      </item>

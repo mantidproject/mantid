@@ -196,20 +196,23 @@ class SaveVulcanGSS(PythonAlgorithm):
             if line.startswith("BANK"):
                 # Indicate a new bank
                 if len(banklines) == 0:
+                    # bank line for first bank
                     inbank = True
                     banklines.append(line.strip("\n"))
                 else:
-                    tmpbuffer = self._rewriteBankInfoLine(banklines)
+                    # bank line for non-first bank. 
+                    tmpbuffer = self._rewriteOneBankData(banklines)
                     filebuffer += tmpbuffer
                     banklines = [line]
                 # ENDIFELSE
             elif (inbank is True and cline.startswith("#") is False):
+                # Write data line
                 banklines.append(line.strip("\n"))
     
         # ENDFOR
     
         if len(banklines) > 0: 
-            tmpbuffer = self._rewriteBankInfoLine(banklines) 
+            tmpbuffer = self._rewriteOneBankData(banklines) 
             filebuffer += tmpbuffer
         else:
             raise NotImplementedError("Impossible to have this")
@@ -288,7 +291,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         return newheader
 
 
-    def _rewriteBankInfoLine(self, banklines):
+    def _rewriteOneBankData(self, banklines):
         """ first line is for bank information
         """
         wbuf = ""
@@ -303,12 +306,33 @@ class SaveVulcanGSS(PythonAlgorithm):
         terms[6] = "%.1f" % (tofmax)
     
         newbankline = ""
+        
+        # title
         for t in terms:
             newbankline += "%s " % (t)
         wbuf = "%-80s\n" % (newbankline)
-    
+   
+        # data
         for i in xrange(1, len(banklines)):
-            wbuf += "%-80s\n" % (banklines[i])
+            cline = banklines[i] 
+            
+            terms = cline.split()
+            try:
+                tof = float(terms[0])
+                y = float(terms[1])
+                e = float(terms[2])
+                
+                x_s = "%.1f" % (tof)
+                y_s = "%.1f" % (y)
+                e_s = "%.2f" % (e)
+
+                temp = "%12s%12s%12s" % (x_s, y_s, e_s)
+
+            except:
+                temp = "%-80s\n" % (cline.rstrip())
+
+            wbuf += "%-80s\n" % (temp)
+        # ENDFOR
     
         return wbuf
 

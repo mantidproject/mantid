@@ -27,9 +27,8 @@ void FirstTimeSetup::initLayout()
 
   connect(m_uiForm.pbConfirm, SIGNAL(clicked()), this, SLOT(confirm()));
   connect(m_uiForm.pbCancel, SIGNAL(clicked()), this, SLOT(cancel()));
-  connect(m_uiForm.cbFacility, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(facilitySelected(const QString &)));
-  connect(m_uiForm.pbMUD, SIGNAL(clicked()), this, SLOT(openManageUserDirectories()));
 
+  connect(m_uiForm.pbMUD, SIGNAL(clicked()), this, SLOT(openManageUserDirectories()));
   connect(m_uiForm.clbReleaseNotes, SIGNAL(clicked()), this, SLOT(openReleaseNotes()));
   connect(m_uiForm.clbSampleDatasets, SIGNAL(clicked()), this, SLOT(openSampleDatasets()));
   connect(m_uiForm.clbMantidIntroduction, SIGNAL(clicked()), this, SLOT(openMantidIntroduction()));
@@ -49,6 +48,33 @@ void FirstTimeSetup::initLayout()
   for ( auto it = faclist.begin(); it != faclist.end(); ++it )
   {
     m_uiForm.cbFacility->addItem(QString::fromStdString(*it));
+  }
+
+  Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
+  std::string facility = config.getString("default.facility", true);
+  m_uiForm.cbFacility->setCurrentIndex(m_uiForm.cbFacility->findText(
+    QString::fromStdString(facility)));
+
+  std::string instrument = config.getString("default.instrument", true);
+  m_uiForm.cbInstrument->updateInstrumentOnSelection(false);
+  m_uiForm.cbInstrument->setCurrentIndex(m_uiForm.cbInstrument->findText(
+    QString::fromStdString(instrument)));
+  connect(m_uiForm.cbFacility, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(facilitySelected(const QString &)));
+
+  QString stlyeName = QApplication::style()->metaObject()->className();
+  if(stlyeName!="QWindowsVistaStyle")
+  {
+    //add stylesheet formatting for other environemnts
+    QString ss =  this->styleSheet();
+    ss += "\n"
+          "QDialog#FirstTimeSetup QCommandLinkButton {"
+          " background-color: rgba(255, 255, 255, 0);"
+          "}"
+          "\n"
+          "QDialog#FirstTimeSetup QCommandLinkButton:hover {"
+	        "  background-color: rgba(255, 255, 255, 128);"
+          "}";
+    this->setStyleSheet(ss);
   }
 }
 
@@ -78,7 +104,7 @@ void FirstTimeSetup::cancel()
 
 void FirstTimeSetup::facilitySelected(const QString & facility)
 {
-  Mantid::Kernel::ConfigService::Instance().setString("default.facility", facility.toStdString());
+  m_uiForm.cbInstrument->fillWithInstrumentsFromFacility(facility);
 }
 
 void FirstTimeSetup::openManageUserDirectories()

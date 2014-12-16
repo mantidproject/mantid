@@ -305,6 +305,7 @@ namespace CurveFitting
 
     // 2. Fit function
     // FIXME powerfit should be a user option before freezing this algorithm
+    // FIXME powdefit = True introduce segmentation fault
     bool powerfit = false;
     double chi2 = fitFunction(m_positionFunc, m_dataWS, m_wsIndex, powerfit);
 
