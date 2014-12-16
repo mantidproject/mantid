@@ -185,21 +185,9 @@ namespace CustomInterfaces
    */
   void IndirectSqw::energyRebinToggle(bool state)
   {
-    QString val;
-    if(state)
-      val = "*";
-    else
-      val = " ";
-
     m_uiForm.sqw_spELow->setEnabled(state);
     m_uiForm.sqw_spEWidth->setEnabled(state);
     m_uiForm.sqw_spEHigh->setEnabled(state);
-    m_uiForm.sqw_valELow->setEnabled(state);
-    m_uiForm.sqw_valELow->setText(val);
-    m_uiForm.sqw_valEWidth->setEnabled(state);
-    m_uiForm.sqw_valEWidth->setText(val);
-    m_uiForm.sqw_valEHigh->setEnabled(state);
-    m_uiForm.sqw_valEHigh->setText(val);
     m_uiForm.sqw_lbELow->setEnabled(state);
     m_uiForm.sqw_lbEWidth->setEnabled(state);
     m_uiForm.sqw_lbEHigh->setEnabled(state);
