@@ -320,6 +320,7 @@ public slots:
 
 	void restore(QString& spec);
 
+        //! This changes the general background color (color of the table widget, not the cells)
 	void setBackgroundColor(const QColor& col);
 	void setTextColor(const QColor& col);
 	void setHeaderColor(const QColor& col);
