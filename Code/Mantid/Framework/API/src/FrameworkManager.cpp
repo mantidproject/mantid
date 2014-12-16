@@ -85,8 +85,8 @@ FrameworkManagerImpl::FrameworkManagerImpl()
   g_log.debug() << "FrameworkManager created." << std::endl;
 
   int updateInstrumentDefinitions = 0;
-  int reVal = Kernel::ConfigService::Instance().getValue("UpdateInstrumentDefinitions.OnStartup",updateInstrumentDefinitions);
-  if ((reVal == 1) &&  (updateInstrumentDefinitions == 1))
+  int retVal = Kernel::ConfigService::Instance().getValue("UpdateInstrumentDefinitions.OnStartup",updateInstrumentDefinitions);
+  if ((retVal == 1) &&  (updateInstrumentDefinitions == 1))
   {
     UpdateInstrumentDefinitions();
   }
@@ -94,6 +94,14 @@ FrameworkManagerImpl::FrameworkManagerImpl()
   {
     g_log.information() << "Instrument updates disabled - cannot update instrument definitions." << std::endl;
   }
+
+  int sendStartupUsageInfo = 0;
+  retVal = Kernel::ConfigService::Instance().getValue("usagereports.enabled",sendStartupUsageInfo);
+  if ((retVal == 1) &&  (sendStartupUsageInfo == 1))
+  {
+    SendStartupUsageInfo();
+  }
+
 }
 
 /// Destructor
@@ -116,6 +124,20 @@ void FrameworkManagerImpl::UpdateInstrumentDefinitions()
   }
 }
 
+/// Sends startup information about OS and Mantid version
+void FrameworkManagerImpl::SendStartupUsageInfo()
+{
+  try
+  {
+    IAlgorithm* algSendStartupUsage = this->createAlgorithm("SendUsage");
+    algSendStartupUsage->setAlgStartupLogging(false);
+    Poco::ActiveResult<bool> result = algSendStartupUsage->executeAsync();
+  }
+  catch (Kernel::Exception::NotFoundError &)
+  {
+      g_log.debug() << "SendUsage algorithm is not available - cannot update send usage information." << std::endl;
+  }
+}
 
 /**
  * Load a set of plugins from the path pointed to by the given config key
