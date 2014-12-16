@@ -216,8 +216,8 @@ ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep,
     return;
   }
 
-  // this is necessary because in windows, the absolute path is given with \
-  // slash.
+  // this is necessary because in windows, the absolute path is given
+  // with \ slash.
   boost::replace_all(local_repository, "\\", "/");
   if (local_repository[local_repository.size() - 1] != '/')
     local_repository.append("/");
@@ -311,8 +311,8 @@ void ScriptRepositoryImpl::install(const std::string &path) {
   }
 
   local_repository = path;
-  // this is necessary because in windows, the absolute path is given with \
-  // slash.
+  // this is necessary because in windows, the absolute path is given
+  // with \ slash.
   boost::replace_all(local_repository, "\\", "/");
   if (local_repository[local_repository.size() - 1] != '/')
     local_repository.append("/");
@@ -1744,10 +1744,10 @@ std::string ScriptRepositoryImpl::convertPath(const std::string &path) {
     absolute_path = pathFound.absolute().toString();
   else
     absolute_path = path;
-  // g_log.debug() << "ConvertPath: Entered: " << path  << " and
-  // local_repository: " << local_repository << std::endl;
-  // this is necessary because in windows, the absolute path is given with \
-  // slash.
+  // g_log.debug() << "ConvertPath: Entered: " << path << " and
+  // local_repository: " << local_repository << std::endl; this is
+  // necessary because in windows, the absolute path is given
+  // with \ slash.
   boost::replace_all(absolute_path, "\\", "/");
 
   // check it the path is inside the repository:

@@ -1,9 +1,9 @@
 #if GCC_VERSION >= 40800 // 4.8.0
-GCC_DIAG_OFF(literal - suffix)
+GCC_DIAG_OFF(literal-suffix)
 #endif
 #include "MantidICat/CatalogSearch.h"
 #if GCC_VERSION >= 40800 // 4.8.0
-GCC_DIAG_ON(literal - suffix)
+GCC_DIAG_ON(literal-suffix)
 #endif
 
 #include "MantidAPI/CatalogManager.h"

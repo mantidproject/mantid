@@ -21,7 +21,7 @@
 #endif
 
 GCC_DIAG_OFF(conversion)
-GCC_DIAG_OFF(cast - qual)
+GCC_DIAG_OFF(cast-qual)
 #include <gp_Pnt.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
@@ -32,7 +32,7 @@ GCC_DIAG_OFF(cast - qual)
 #include <TColgp_Array1OfPnt.hxx>
 #include <Poly_Triangulation.hxx>
 GCC_DIAG_ON(conversion)
-GCC_DIAG_ON(cast - qual)
+GCC_DIAG_ON(cast-qual)
 
 #ifdef __INTEL_COMPILER
 #pragma warning enable 191

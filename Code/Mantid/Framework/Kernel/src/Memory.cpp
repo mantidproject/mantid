@@ -186,21 +186,18 @@ void MemoryStats::process_mem_system(size_t &sys_avail, size_t &sys_total) {
   /*
    * Taken from API/MemoryManager.cpp_LINUX
    *
-   * As usual things are more complex on Linux. I think we need to take into
-   *account
-   * the value of Cached as well since, especially if the system has been
-   *running for a long time,
-   * MemFree will seem a lot smaller than it should be. To be completely correct
-   *we also need to
-   * add the value of the "Buffers" as well.
+   * As usual things are more complex on Linux. I think we need to
+   * take into account the value of Cached as well since, especially
+   * if the system has been running for a long time, MemFree will seem
+   * a lot smaller than it should be. To be completely correct we also
+   * need to add the value of the "Buffers" as well.
    *
-   * The only way I can see as to get acces to the Cached value is from the
-   */ proc / meminfo file *so if this is not successful
-                I'll fall back to using the sysconf method and *
-      forget the cache *
-      *RJT(18 / 2 / 10)
-      : Should we be using sysinfo() here
-      ? * / if (!read_mem_info(sys_avail, sys_total)) {
+   * The only way I can see as to get acces to the Cached value is
+   * from the /proc/meminfo file so if this is not successful I'll
+   * fall back to using the sysconf method and forget the cache
+   * RJT(18/2/10) : Should we be using sysinfo() here?
+   */
+  if (!read_mem_info(sys_avail, sys_total)) {
     long int totPages = sysconf(_SC_PHYS_PAGES);
     long int avPages = sysconf(_SC_AVPHYS_PAGES);
     long int pageSize = sysconf(_SC_PAGESIZE);

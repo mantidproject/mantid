@@ -22,7 +22,7 @@ namespace {
 Kernel::Logger g_log("LevenbergMarquardMD");
 }
 
-DECLARE_FUNCMINIMIZER(LevenbergMarquardtMDMinimizer, Levenberg - MarquardtMD)
+DECLARE_FUNCMINIMIZER(LevenbergMarquardtMDMinimizer, Levenberg-MarquardtMD)
 
 /// Constructor
 LevenbergMarquardtMDMinimizer::LevenbergMarquardtMDMinimizer()

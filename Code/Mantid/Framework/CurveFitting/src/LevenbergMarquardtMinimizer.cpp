@@ -22,7 +22,7 @@ namespace {
 Kernel::Logger g_log("LevenbergMarquardtMinimizer");
 }
 
-DECLARE_FUNCMINIMIZER(LevenbergMarquardtMinimizer, Levenberg - Marquardt)
+DECLARE_FUNCMINIMIZER(LevenbergMarquardtMinimizer, Levenberg-Marquardt)
 
 LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer()
     : m_data(NULL), gslContainer(), m_gslSolver(NULL), m_function(),
