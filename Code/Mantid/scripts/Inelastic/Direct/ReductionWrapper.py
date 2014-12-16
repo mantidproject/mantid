@@ -2,6 +2,8 @@ from mantid.simpleapi import *
 from mantid import config
 
 from PropertyManager import PropertyManager;
+# this import is used by children
+from Direct.DirectEnergyConversion import DirectEnergyConversion
 #import inspect
 import os
 from abc import abstractmethod
@@ -81,10 +83,10 @@ class ReductionWrapper(object):
         raise NotImplementedError('main routine has to be implemented')
 
 
-def MainProperties(F):
+def MainProperties(main_prop_definition):
     """ Decorator stores properties dedicated as main and sets these properties as input to reduction parameters.""" 
     def main_prop_wrapper(*args):
-        properties = F(*args)
+        properties = main_prop_definition(*args)
         #print "in decorator: ",properties
         host = args[0];
         host._main_properties=properties;
@@ -93,10 +95,10 @@ def MainProperties(F):
 
     return main_prop_wrapper
 #
-def AdvancedProperties(F):
+def AdvancedProperties(adv_prop_definition):
     """ Decorator stores properties decided to be advanced and sets these properties as input for reduction parameters """ 
     def advanced_prop_wrapper(*args):
-        properties = F(*args)
+        properties = adv_prop_definition(*args)
         #print "in decorator: ",properties
         host = args[0];
         host._advanced_properties=properties;
@@ -113,7 +115,7 @@ def using_web_data(self):
 
 
 
-def iliad(F):
+def iliad(main):
     """ This decorator wraps around main procedure, tries to identify if the procedure is run from web services or 
         from Mantid directly and sets up web-modified variables as input for reduction if it runs from web services. 
 
@@ -145,7 +147,7 @@ def iliad(F):
             host.iliad_prop.set_input_parameters(**web_vars);
             host.iliad_prop.sample_run = input_file;
 
-        rez = F(*args)
+        rez = main(*args)
         # prohibit returning workspace to web services. 
         if use_web_variables and not isinstance(rez,str):
             rez="";

@@ -234,7 +234,7 @@ class DirectEnergyConversion(object):
                                          RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1],
                                          IncludePartialBins=True)
             total_counts = Integration(result_ws, IncludePartialBins=True)
-            background_int = ConvertUnits(background_int, "Energy", AlignBins=0)
+            background_int = ConvertUnits(background_int, Target="Energy",EMode='Elastic', AlignBins=0)
             prop_man.log("Diagnose: finished convertUnits ",'information')
 
             background_int *= prop_man.scale_factor;
