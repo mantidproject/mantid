@@ -70,8 +70,8 @@ private slots:
   void storeCurve();
   void removeCurve(const QString &);
   void savePlotToWorkspace();
-  void singleDetectorTouched(int detid);
-  void singleDetectorPicked(int detid);
+  void singleComponentTouched(size_t pickID);
+  void singleComponentPicked(size_t pickID);
   void updateSelectionInfoDisplay();
   void shapeCreated();
   void updatePlotMultipleDetectors();

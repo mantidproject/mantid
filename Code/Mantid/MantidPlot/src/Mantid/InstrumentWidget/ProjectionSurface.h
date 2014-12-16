@@ -191,8 +191,8 @@ public:
 signals:
 
   // detector selection
-  void singleDetectorTouched(int);
-  void singleDetectorPicked(int);
+  void singleComponentTouched(size_t);
+  void singleComponentPicked(size_t);
 
   // shape manipulation
   void signalToStartCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor);
@@ -218,8 +218,8 @@ protected slots:
   void setSelectionRect(const QRect& rect);
   void emptySelectionRect();
   void selectMultipleMasks(const QRect& rect);
-  void pickDetectorAt(int x,int y);
-  void touchDetectorAt(int x,int y);
+  void pickComponentAt(int x,int y);
+  void touchComponentAt(int x,int y);
   void erasePeaks(const QRect& rect);
 
   void colorMapChanged();
@@ -244,8 +244,7 @@ protected:
   void clear();
   QRect selectionRect()const;
   RectF selectionRectUV()const;
-  int getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const;
-  int getDetectorID(unsigned char r,unsigned char g,unsigned char b)const;
+  size_t getPickID(int x, int y)const;
   void setInputController(int mode, InputController* controller);
   void setPeakVisibility() const;
 

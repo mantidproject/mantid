@@ -1351,8 +1351,8 @@ void InstrumentWindowPickTab::mouseLeftInstrmentDisplay()
 void InstrumentWindowPickTab::initSurface()
 {
     ProjectionSurface *surface = getSurface().get();
-    connect(surface,SIGNAL(singleDetectorTouched(int)),this,SLOT(singleDetectorTouched(int)));
-    connect(surface,SIGNAL(singleDetectorPicked(int)),this,SLOT(singleDetectorPicked(int)));
+    connect(surface,SIGNAL(singleComponentTouched(size_t)),this,SLOT(singleComponentTouched(size_t)));
+    connect(surface,SIGNAL(singleComponentPicked(size_t)),this,SLOT(singleComponentPicked(size_t)));
     connect(surface,SIGNAL(peaksWorkspaceAdded()),this,SLOT(updateSelectionInfoDisplay()));
     connect(surface,SIGNAL(peaksWorkspaceDeleted()),this,SLOT(updateSelectionInfoDisplay()));
     connect(surface,SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
@@ -1437,16 +1437,20 @@ void InstrumentWindowPickTab::selectTool(const ToolType tool)
 }
 
 
-void InstrumentWindowPickTab::singleDetectorTouched(int detid)
+void InstrumentWindowPickTab::singleComponentTouched(size_t pickID)
 {
   if (canUpdateTouchedDetector())
   {
+    InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+    int detid = instrActor->getDetID( pickID );
     updatePick(detid);
   }
 }
 
-void InstrumentWindowPickTab::singleDetectorPicked(int detid)
+void InstrumentWindowPickTab::singleComponentPicked(size_t pickID)
 {
+    InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+    int detid = instrActor->getDetID( pickID );
     updatePick(detid);
 }
 

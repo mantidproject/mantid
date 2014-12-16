@@ -59,6 +59,7 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling, double
 m_workspace(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString())),
 m_ragged(true),
 m_autoscaling(autoscaling),
+m_defaultPos(),
 m_maskedColor(100,100,100),
 m_failedColor(200,200,200)
 {
@@ -93,6 +94,7 @@ m_failedColor(200,200,200)
 
   // this adds actors for all instrument components to the scene and fills in m_detIDs
   m_scene.addActor(new CompAssemblyActor(*this,instrument->getComponentID()));
+  setupPickColors();
 
   if ( !m_showGuides )
   {
@@ -344,6 +346,15 @@ IDetector_const_sptr InstrumentActor::getDetector(size_t i) const
   }
   // Add line that can never be reached to quiet compiler complaints
   return IDetector_const_sptr();
+}
+
+Mantid::detid_t InstrumentActor::getDetID(size_t pickID)const
+{
+  if ( pickID < m_detIDs.size() )
+  {
+    return m_detIDs[pickID];
+  }
+  return -1;
 }
 
 /** Retrieve the workspace index corresponding to a particular detector
@@ -691,12 +702,38 @@ void InstrumentActor::loadColorMap(const QString& fname,bool reset_colors)
  * @param id :: detector ID to add.
  * @return pick ID of the added detector
  */
-size_t InstrumentActor::push_back_detid(Mantid::detid_t id)const
+size_t InstrumentActor::pushBackDetid(Mantid::detid_t id)const
 {
   m_detIDs.push_back(id);
   return m_detIDs.size() - 1;
 }
 
+//------------------------------------------------------------------------------
+/** Add a non-detector component ID to the pick list (m_nonDetIDs)
+ *
+ * @param actor :: ObjComponentActor for the component added.
+ * @param id :: component ID to add.
+ */
+void InstrumentActor::pushBackNonDetid(ObjComponentActor* actor, Mantid::Geometry::ComponentID compID)const
+{
+  m_nonDetActorsTemp.push_back(actor);
+  m_nonDetIDs.push_back(compID);
+}
+
+//------------------------------------------------------------------------------
+/**
+ * Set pick colors to non-detectors strored by calls to pushBackNonDetid().
+ */
+void InstrumentActor::setupPickColors()
+{
+  assert( m_nonDetActorsTemp.size() == m_nonDetIDs.size() );
+  auto nDets = m_detIDs.size();
+  for(size_t i = 0; i < m_nonDetActorsTemp.size(); ++i)
+  {
+    m_nonDetActorsTemp[i]->setPickColor( makePickColor(nDets + i) );
+  }
+  m_nonDetActorsTemp.clear();
+}
 
 //------------------------------------------------------------------------------
 /** If needed, cache the detector positions for all detectors.
@@ -725,7 +762,11 @@ void InstrumentActor::cacheDetPos() const
  */
 const Mantid::Kernel::V3D & InstrumentActor::getDetPos(size_t pickID)const
 {
-  return m_detPos.at(pickID);
+  if ( pickID < m_detPos.size() )
+  {
+    return m_detPos.at(pickID);
+  }
+  return m_defaultPos;
 }
 
 /**
