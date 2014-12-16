@@ -486,8 +486,8 @@ void FitPropertyBrowser::updateSetupMenus()
   QSignalMapper* mapperLoad = new QSignalMapper(this);
   QSignalMapper* mapperRemove = new QSignalMapper(this);
   // enable actions that open the menus only if there will be >=1 entries in there
-  m_setupActionCustomSetup->setEnabled(names.length() >= 1);
-  m_setupActionRemove->setEnabled(names.length() >= 1);
+  m_setupActionCustomSetup->setEnabled(names.size() >= 1);
+  m_setupActionRemove->setEnabled(names.size() >= 1);
   for (int i = 0; i < names.size(); i++)
   {
     QAction* itemLoad = new QAction(names.at(i), this);
