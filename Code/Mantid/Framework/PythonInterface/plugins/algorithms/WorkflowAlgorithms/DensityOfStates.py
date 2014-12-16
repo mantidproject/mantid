@@ -26,7 +26,7 @@ class DensityOfStates(DataProcessorAlgorithm):
             doc='Set Gaussian/Lorentzian FWHM for broadening. Default is 10')
 
         self.declareProperty(name='SpectrumType',defaultValue='DOS',
-            validator=StringListValidator(['DOS', 'IR_Active', 'Raman_Active']),
+            validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active']),
             doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
 
         self.declareProperty(name='Scale', defaultValue=1.0,
@@ -70,8 +70,9 @@ class DensityOfStates(DataProcessorAlgorithm):
         spec_type = self.getPropertyValue('SpectrumType')
         sum_contributions = self.getProperty('SumContributions').value
         scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection') != 'None'
+
         ions = self.getProperty('Ions').value
-        calc_partial = (len(ions) > 0)
+        calc_partial = len(ions) > 0
 
         if spec_type != 'DOS' and calc_partial:
             issues['Ions'] = 'Cannot calculate partial density of states when using %s' % spec_type
@@ -96,8 +97,16 @@ class DensityOfStates(DataProcessorAlgorithm):
 
         prog_reporter = Progress(self, 0.0, 1.0, 1)
 
+        # We want to output a table workspace with ion information
+        if self._spec_type == 'IonTable':
+            ion_table = CreateEmptyTableWorkspace(OutputWorkspace=self._ws_name)
+            ion_table.addColumn('str', 'Ion')
+
+            for ion in self._ion_dict.keys():
+                ion_table.addRow([ion])
+
         # We want to calculate a partial DoS
-        if self._calc_partial and self._spec_type == 'DOS':
+        elif self._calc_partial and self._spec_type == 'DOS':
             logger.notice('Calculating partial density of states')
             prog_reporter.report('Calculating partial density of states')
 
@@ -153,7 +162,7 @@ class DensityOfStates(DataProcessorAlgorithm):
         # We want to calculate a DoS with IR active
         elif self._spec_type == 'IR_Active':
             if ir_intensities.size == 0:
-                raise ValueError("Could not load any IR intensities from file.")
+                raise ValueError('Could not load any IR intensities from file.')
 
             logger.notice('Calculating IR intensities')
             prog_reporter.report('Calculating IR intensities')
@@ -165,7 +174,7 @@ class DensityOfStates(DataProcessorAlgorithm):
         # We want to create a DoS with Raman active
         elif self._spec_type == 'Raman_Active':
             if raman_intensities.size == 0:
-                raise ValueError("Could not load any Raman intensities from file.")
+                raise ValueError('Could not load any Raman intensities from file.')
 
             logger.notice('Calculating Raman intensities')
             prog_reporter.report('Calculating Raman intensities')
@@ -174,7 +183,7 @@ class DensityOfStates(DataProcessorAlgorithm):
             mtd[self._ws_name].setYUnit('A^4')
             mtd[self._ws_name].setYUnitLabel('Intensity')
 
-        self.setProperty("OutputWorkspace", self._ws_name)
+        self.setProperty('OutputWorkspace', self._ws_name)
 
 #----------------------------------------------------------------------------------------
 
