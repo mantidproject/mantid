@@ -146,13 +146,15 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 # --------------------------------------------------------------------------------------------------------
 #    Deal with mandatory parameters for this and may be some top level procedures
 # --------------------------------------------------------------------------------------------------------
+    if sample_run:
+        Reducer.prop_man.sample_run = sample_run
     try:
          n,r=funcreturns.lhs_info('both')
          wksp_out=r[0]
     except:
          wksp_out = Reducer.prop_man.get_sample_ws_name();
     #
-    res = Reducer.convert_to_energy_transfer(wb_run,sample_run,ei_guess,rebin,map_file,monovan_run,second_wb,**kwargs)
+    res = Reducer.convert_to_energy(wb_run,sample_run,ei_guess,rebin,map_file,monovan_run,second_wb,**kwargs)
     #
     results_name = res.name();
     if results_name != wksp_out:
@@ -250,22 +252,15 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
     kwargs['sample_mass']        = samp_mass
     kwargs['sample_rmm']         = samp_rmm
 
-    # service property, which tells arb_units that here defaults have changed and no need to check they are changed
-    kwargs['_defaults_have_changed']  = True
+    if sample_run:
+        Reducer.prop_man.sample_run = sample_run
     try:
         n,r=funcreturns.lhs_info('both')
-        wksp_out=r[0]
+        results_name=r[0]
 
     except:
-        if sample_run == 0:
-            #deal with the current run being parsed as 0 rather than 00000
-            sample_run='00000'
-        wksp_out=Reducer.instr_name+str(sample_run)+'.spe'
-        if kwargs.has_key('sum') and kwargs.get('sum')==True:
-            wksp_out=inst_name+str(sample_run[0])+'sum'+'.spe'
+        results_name = Reducer.prop_man.get_sample_ws_name();
 
-
-    results_name = wksp_out
     wksp_out = arb_units(wb_for_run,sample_run,ei_guess,rebin,map_file,monovan_run,wb_for_monovanadium,**kwargs)
 
 

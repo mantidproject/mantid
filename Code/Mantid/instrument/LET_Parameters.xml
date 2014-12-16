@@ -387,10 +387,9 @@
        monovan_integr_range=abs_units_van_range;
        monovan_lo_value = monovan-integr-min;
        monovan_hi_value = monovan-integr-max;       
-       use_hard_mask_only=hardmaskOnly;
        bkgd_range = background_range;
        background_test_range = diag_background_test_range;
-       hard_mask_file=hard_mask  =hardmaskPlus;       
+       hard_mask_file=hard_mask;
        van_out_lo = diag_van_median_rate_limit_lo=diag_van_out_lo;
        van_out_hi = diag_van_median_rate_limit_hi=diag_van_out_hi;
        van_lo     = diag_van_median_sigma_lo=diag_van_lo;
