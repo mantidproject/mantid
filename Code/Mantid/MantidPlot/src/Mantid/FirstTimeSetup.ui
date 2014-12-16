@@ -45,7 +45,7 @@ QDialog#FirstTimeSetup QLabel{
     font-weight: bold;
 }
 QDialog#FirstTimeSetup QCheckbox{
-	font: 12px&quot;Segoe UI&quot;;
+	font: 12px &quot;Segoe UI&quot;;
     font-weight: bold;
 }
 QDialog#FirstTimeSetup QGroupBox{
@@ -53,7 +53,7 @@ QDialog#FirstTimeSetup QGroupBox{
     font-weight: bold;
 }
 QDialog#FirstTimeSetup QPushButton{
-	font: 12px&quot;Segoe UI&quot;;
+	font: 12px &quot;Segoe UI&quot;;
 }
 QDialog#FirstTimeSetup QComboBox{
 	font: 12px &quot;Segoe UI&quot;;
@@ -61,7 +61,8 @@ QDialog#FirstTimeSetup QComboBox{
 QDialog#FirstTimeSetup QCommandLinkButton{
 	font: 28px &quot;Segoe UI&quot;;
     font-weight: bold;
-}</string>
+}
+</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <property name="leftMargin">
@@ -237,8 +238,7 @@ QDialog#FirstTimeSetup QCommandLinkButton{
        </property>
        <property name="styleSheet">
         <string notr="true">color: rgb(0, 105, 0);
-font: 28px &quot;Segoe UI&quot;;
-font-weight: bold;</string>
+font-size: 28px</string>
        </property>
        <property name="text">
         <string>Tutorials</string>
@@ -258,8 +258,7 @@ font-weight: bold;</string>
        </property>
        <property name="styleSheet">
         <string notr="true">color: rgb(0, 105, 0);
-font: 28px &quot;Segoe UI&quot;;
-font-weight: bold;</string>
+font-size: 28px</string>
        </property>
        <property name="text">
         <string>Version </string>
