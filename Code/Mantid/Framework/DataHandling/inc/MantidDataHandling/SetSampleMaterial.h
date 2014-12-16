@@ -7,19 +7,19 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/NeutronAtom.h"
 
-namespace Mantid
-{
-namespace DataHandling
-{
+namespace Mantid {
+namespace DataHandling {
 
-/** 
-    This class allows the shape of the sample to be defined by using the allowed XML
+/**
+    This class allows the shape of the sample to be defined by using the allowed
+   XML
     expressions
 
     @author Vickie Lynch, SNS
     @date 2/7/2013
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -37,10 +37,9 @@ namespace DataHandling
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SetSampleMaterial : public Mantid::API::Algorithm
-{
+class DLLExport SetSampleMaterial : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   SetSampleMaterial();
@@ -48,8 +47,10 @@ public:
   virtual ~SetSampleMaterial();
   /// Algorithm's name
   virtual const std::string name() const;
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Sets the neutrons information in the sample.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Sets the neutrons information in the sample.";
+  }
 
   /// Algorithm's version
   virtual int version() const;
@@ -58,17 +59,14 @@ public:
   virtual std::map<std::string, std::string> validateInputs();
 
 private:
-  
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
   /// Print out the list of information for the material
-  void fixNeutron(PhysicalConstants::NeutronAtom &neutron,
-                  double coh_xs, double inc_xs,
-                  double abs_xs, double tot_xs);
+  void fixNeutron(PhysicalConstants::NeutronAtom &neutron, double coh_xs,
+                  double inc_xs, double abs_xs, double tot_xs);
 };
-
 }
 }
 

@@ -8,16 +8,15 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAlgorithms/FFT.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** Performs a Fast Fourier Transform of real data
 
     @author Roman Tolchenov
     @date 01/10/2009
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -37,31 +36,30 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport RealFFT : public API::Algorithm
-{
+class DLLExport RealFFT : public API::Algorithm {
 public:
   /// Default constructor
-  RealFFT() : API::Algorithm() {};
+  RealFFT() : API::Algorithm(){};
   /// Destructor
-  virtual ~RealFFT() {};
+  virtual ~RealFFT(){};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "RealFFT";}
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Performs real Fast Fourier Transform";}
+  virtual const std::string name() const { return "RealFFT"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Performs real Fast Fourier Transform";
+  }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1;}
+  virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Arithmetic\\FFT";}
+  virtual const std::string category() const { return "Arithmetic\\FFT"; }
 
 private:
-  
   // Overridden Algorithm methods
   void init();
   void exec();
 
   bool IgnoreXBins;
-
 };
 
 } // namespace Algorithm

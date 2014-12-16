@@ -14,10 +14,8 @@
 #include "MantidKernel/PropertyManager.h"
 #include "Poco/NumberFormatter.h"
 
-namespace Mantid
-{
-namespace WorkflowAlgorithms
-{
+namespace Mantid {
+namespace WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetupILLD33Reduction)
@@ -26,13 +24,16 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
-void SetupILLD33Reduction::init()
-{
+void SetupILLD33Reduction::init() {
   // Load options
   std::string load_grp = "Load Options";
 
-  declareProperty("SolidAngleCorrection", true, "If true, the solide angle correction will be applied to the data");
-  declareProperty("DetectorTubes", false, "If true, the solid angle correction for tube detectors will be applied");
+  declareProperty(
+      "SolidAngleCorrection", true,
+      "If true, the solide angle correction will be applied to the data");
+  declareProperty(
+      "DetectorTubes", false,
+      "If true, the solid angle correction for tube detectors will be applied");
 
   // -- Define group --
   setPropertyGroup("SolidAngleCorrection", load_grp);
@@ -47,30 +48,39 @@ void SetupILLD33Reduction::init()
   centerOptions.push_back("Scattering");
 
   declareProperty("BeamCenterMethod", "None",
-      boost::make_shared<StringListValidator>(centerOptions),
-      "Method for determining the data beam center");
+                  boost::make_shared<StringListValidator>(centerOptions),
+                  "Method for determining the data beam center");
 
   //    Option 1: Set beam center by hand
-  declareProperty("BeamCenterX", EMPTY_DBL(), "Position of the beam center, in pixel");
-  declareProperty("BeamCenterY", EMPTY_DBL(), "Position of the beam center, in pixel");
-  setPropertySettings("BeamCenterX",
-            new VisibleWhenProperty("BeamCenterMethod", IS_EQUAL_TO, "Value"));
-  setPropertySettings("BeamCenterY",
-            new VisibleWhenProperty("BeamCenterMethod", IS_EQUAL_TO, "Value"));
+  declareProperty("BeamCenterX", EMPTY_DBL(),
+                  "Position of the beam center, in pixel");
+  declareProperty("BeamCenterY", EMPTY_DBL(),
+                  "Position of the beam center, in pixel");
+  setPropertySettings(
+      "BeamCenterX",
+      new VisibleWhenProperty("BeamCenterMethod", IS_EQUAL_TO, "Value"));
+  setPropertySettings(
+      "BeamCenterY",
+      new VisibleWhenProperty("BeamCenterMethod", IS_EQUAL_TO, "Value"));
 
   //    Option 2: Find it (expose properties from FindCenterOfMass)
-  declareProperty(new API::FileProperty("BeamCenterFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
-      "The name of the input event Nexus file to load");
-  setPropertySettings("BeamCenterFile",
-            new VisibleWhenProperty("BeamCenterMethod", IS_NOT_EQUAL_TO, "None"));
+  declareProperty(new API::FileProperty("BeamCenterFile", "",
+                                        API::FileProperty::OptionalLoad,
+                                        "_event.nxs"),
+                  "The name of the input event Nexus file to load");
+  setPropertySettings(
+      "BeamCenterFile",
+      new VisibleWhenProperty("BeamCenterMethod", IS_NOT_EQUAL_TO, "None"));
 
-  auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
+  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
-  declareProperty("BeamRadius", EMPTY_DBL(),
+  declareProperty(
+      "BeamRadius", EMPTY_DBL(),
       "Radius of the beam area used the exclude the beam when calculating "
       "the center of mass of the scattering pattern [pixels]. Default=3.0");
-  setPropertySettings("BeamRadius",
-            new VisibleWhenProperty("BeamCenterMethod", IS_EQUAL_TO, "Scattering"));
+  setPropertySettings(
+      "BeamRadius",
+      new VisibleWhenProperty("BeamCenterMethod", IS_EQUAL_TO, "Scattering"));
 
   // -- Define group --
   setPropertyGroup("BeamCenterMethod", center_grp);
@@ -78,7 +88,6 @@ void SetupILLD33Reduction::init()
   setPropertyGroup("BeamCenterY", center_grp);
   setPropertyGroup("BeamCenterFile", center_grp);
   setPropertyGroup("BeamRadius", center_grp);
-
 
   // Normalisation
   std::string norm_grp = "Normalisation";
@@ -88,58 +97,75 @@ void SetupILLD33Reduction::init()
   incidentBeamNormOptions.push_back("Monitor");
   // The data will be normalised to the total charge only (no beam profile)
   incidentBeamNormOptions.push_back("Timer");
-  this->declareProperty("Normalisation", "None",
+  this->declareProperty(
+      "Normalisation", "None",
       boost::make_shared<StringListValidator>(incidentBeamNormOptions),
       "Options for data normalisation");
 
   setPropertyGroup("Normalisation", norm_grp);
 
   // Dark current
-  declareProperty(new API::FileProperty("DarkCurrentFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
+  declareProperty(
+      new API::FileProperty("DarkCurrentFile", "",
+                            API::FileProperty::OptionalLoad, "_event.nxs"),
       "The name of the input event Nexus file to load as dark current.");
 
   // Sensitivity
   std::string eff_grp = "Sensitivity";
-  declareProperty(new API::FileProperty("SensitivityFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
-      "Flood field or sensitivity file.");
-  declareProperty("MinEfficiency", EMPTY_DBL(), positiveDouble,
+  declareProperty(new API::FileProperty("SensitivityFile", "",
+                                        API::FileProperty::OptionalLoad,
+                                        "_event.nxs"),
+                  "Flood field or sensitivity file.");
+  declareProperty(
+      "MinEfficiency", EMPTY_DBL(), positiveDouble,
       "Minimum efficiency for a pixel to be considered (default: no minimum).");
-  declareProperty("MaxEfficiency", EMPTY_DBL(), positiveDouble,
+  declareProperty(
+      "MaxEfficiency", EMPTY_DBL(), positiveDouble,
       "Maximum efficiency for a pixel to be considered (default: no maximum).");
-  declareProperty("UseDefaultDC", true, "If true, the dark current subtracted from the sample data will also be subtracted from the flood field.");
-  declareProperty(new API::FileProperty("SensitivityDarkCurrentFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
-      "The name of the input file to load as dark current.");
+  declareProperty("UseDefaultDC", true, "If true, the dark current subtracted "
+                                        "from the sample data will also be "
+                                        "subtracted from the flood field.");
+  declareProperty(new API::FileProperty("SensitivityDarkCurrentFile", "",
+                                        API::FileProperty::OptionalLoad,
+                                        "_event.nxs"),
+                  "The name of the input file to load as dark current.");
   // - sensitivity beam center
   declareProperty("SensitivityBeamCenterMethod", "None",
-      boost::make_shared<StringListValidator>(centerOptions),
-      "Method for determining the sensitivity data beam center");
+                  boost::make_shared<StringListValidator>(centerOptions),
+                  "Method for determining the sensitivity data beam center");
 
   //    Option 1: Set beam center by hand
   declareProperty("SensitivityBeamCenterX", EMPTY_DBL(),
-      "Sensitivity beam center location in X [pixels]");
+                  "Sensitivity beam center location in X [pixels]");
   setPropertySettings("SensitivityBeamCenterX",
-            new VisibleWhenProperty("SensitivityBeamCenterMethod", IS_EQUAL_TO, "Value"));
+                      new VisibleWhenProperty("SensitivityBeamCenterMethod",
+                                              IS_EQUAL_TO, "Value"));
 
   declareProperty("SensitivityBeamCenterY", EMPTY_DBL(),
-      "Sensitivity beam center location in Y [pixels]");
+                  "Sensitivity beam center location in Y [pixels]");
   setPropertySettings("SensitivityBeamCenterY",
-            new VisibleWhenProperty("SensitivityBeamCenterMethod", IS_EQUAL_TO, "Value"));
+                      new VisibleWhenProperty("SensitivityBeamCenterMethod",
+                                              IS_EQUAL_TO, "Value"));
 
   //    Option 2: Find it (expose properties from FindCenterOfMass)
   declareProperty(new API::FileProperty("SensitivityBeamCenterFile", "",
-      API::FileProperty::OptionalLoad, ".xml"),
-      "The name of the input data file to load");
+                                        API::FileProperty::OptionalLoad,
+                                        ".xml"),
+                  "The name of the input data file to load");
   setPropertySettings("SensitivityBeamCenterFile",
-            new VisibleWhenProperty("SensitivityBeamCenterMethod", IS_NOT_EQUAL_TO, "None"));
+                      new VisibleWhenProperty("SensitivityBeamCenterMethod",
+                                              IS_NOT_EQUAL_TO, "None"));
 
-  declareProperty("SensitivityBeamCenterRadius", EMPTY_DBL(),
+  declareProperty(
+      "SensitivityBeamCenterRadius", EMPTY_DBL(),
       "Radius of the beam area used the exclude the beam when calculating "
       "the center of mass of the scattering pattern [pixels]. Default=3.0");
-  setPropertySettings("SensitivityBeamCenterRadius",
-            new VisibleWhenProperty("BeamCenterMethod", IS_EQUAL_TO, "Scattering"));
+  setPropertySettings(
+      "SensitivityBeamCenterRadius",
+      new VisibleWhenProperty("BeamCenterMethod", IS_EQUAL_TO, "Scattering"));
 
   declareProperty("OutputSensitivityWorkspace", "",
-      "Name to give the sensitivity workspace");
+                  "Name to give the sensitivity workspace");
 
   // -- Define group --
   setPropertyGroup("SensitivityFile", eff_grp);
@@ -160,71 +186,90 @@ void SetupILLD33Reduction::init()
   transOptions.push_back("Value");
   transOptions.push_back("DirectBeam");
   declareProperty("TransmissionMethod", "Value",
-      boost::make_shared<StringListValidator>(transOptions),
-      "Transmission determination method");
+                  boost::make_shared<StringListValidator>(transOptions),
+                  "Transmission determination method");
 
   // - Transmission value entered by hand
   declareProperty("TransmissionValue", EMPTY_DBL(), positiveDouble,
-      "Transmission value.");
-  setPropertySettings("TransmissionValue",
-            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "Value"));
+                  "Transmission value.");
+  setPropertySettings(
+      "TransmissionValue",
+      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "Value"));
   declareProperty("TransmissionError", EMPTY_DBL(), positiveDouble,
-      "Transmission error.");
-  setPropertySettings("TransmissionError",
-            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "Value"));
+                  "Transmission error.");
+  setPropertySettings(
+      "TransmissionError",
+      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "Value"));
 
   // - Direct beam method transmission calculation
-  declareProperty("TransmissionBeamRadius", 3.0,
+  declareProperty(
+      "TransmissionBeamRadius", 3.0,
       "Radius of the beam area used to compute the transmission [pixels]");
-  setPropertySettings("TransmissionBeamRadius",
-            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  setPropertySettings(
+      "TransmissionBeamRadius",
+      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
   declareProperty(new API::FileProperty("TransmissionSampleDataFile", "",
-      API::FileProperty::OptionalLoad, ".xml"),
-      "Sample data file for transmission calculation");
-  setPropertySettings("TransmissionSampleDataFile",
-            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                                        API::FileProperty::OptionalLoad,
+                                        ".xml"),
+                  "Sample data file for transmission calculation");
+  setPropertySettings(
+      "TransmissionSampleDataFile",
+      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
   declareProperty(new API::FileProperty("TransmissionEmptyDataFile", "",
-      API::FileProperty::OptionalLoad, ".xml"),
-      "Empty data file for transmission calculation");
-  setPropertySettings("TransmissionEmptyDataFile",
-            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                                        API::FileProperty::OptionalLoad,
+                                        ".xml"),
+                  "Empty data file for transmission calculation");
+  setPropertySettings(
+      "TransmissionEmptyDataFile",
+      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   // - transmission beam center
   declareProperty("TransmissionBeamCenterMethod", "None",
-      boost::make_shared<StringListValidator>(centerOptions),
-      "Method for determining the transmission data beam center");
-  setPropertySettings("TransmissionBeamCenterMethod",
-            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                  boost::make_shared<StringListValidator>(centerOptions),
+                  "Method for determining the transmission data beam center");
+  setPropertySettings(
+      "TransmissionBeamCenterMethod",
+      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   //    Option 1: Set beam center by hand
   declareProperty("TransmissionBeamCenterX", EMPTY_DBL(),
-      "Transmission beam center location in X [pixels]");
-  setPropertySettings("TransmissionBeamCenterX",
-            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                  "Transmission beam center location in X [pixels]");
+  setPropertySettings(
+      "TransmissionBeamCenterX",
+      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
   declareProperty("TransmissionBeamCenterY", EMPTY_DBL(),
-      "Transmission beam center location in Y [pixels]");
-  setPropertySettings("TransmissionBeamCenterY",
-            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                  "Transmission beam center location in Y [pixels]");
+  setPropertySettings(
+      "TransmissionBeamCenterY",
+      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   //    Option 2: Find it (expose properties from FindCenterOfMass)
   declareProperty(new API::FileProperty("TransmissionBeamCenterFile", "",
-      API::FileProperty::OptionalLoad, ".xml"),
-      "The name of the input data file to load");
-  setPropertySettings("TransmissionBeamCenterFile",
-            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                                        API::FileProperty::OptionalLoad,
+                                        ".xml"),
+                  "The name of the input data file to load");
+  setPropertySettings(
+      "TransmissionBeamCenterFile",
+      new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
-  declareProperty(new API::FileProperty("TransmissionDarkCurrentFile", "", API::FileProperty::OptionalLoad, ".xml"),
+  declareProperty(
+      new API::FileProperty("TransmissionDarkCurrentFile", "",
+                            API::FileProperty::OptionalLoad, ".xml"),
       "The name of the input data file to load as transmission dark current.");
-  setPropertySettings("TransmissionDarkCurrentFile",
-            new VisibleWhenProperty("TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
+  setPropertySettings(
+      "TransmissionDarkCurrentFile",
+      new VisibleWhenProperty("TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
 
-  declareProperty("TransmissionUseSampleDC", true,
+  declareProperty(
+      "TransmissionUseSampleDC", true,
       "If true, the sample dark current will be used IF a dark current file is"
       "not set.");
-  setPropertySettings("TransmissionUseSampleDC",
-            new VisibleWhenProperty("TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
+  setPropertySettings(
+      "TransmissionUseSampleDC",
+      new VisibleWhenProperty("TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
 
-  declareProperty("ThetaDependentTransmission", true,
+  declareProperty(
+      "ThetaDependentTransmission", true,
       "If true, a theta-dependent transmission correction will be applied.");
 
   // -- Define group --
@@ -247,64 +292,82 @@ void SetupILLD33Reduction::init()
   std::string bck_grp = "Background";
   declareProperty("BackgroundFiles", "", "Background data files");
   declareProperty("BckTransmissionMethod", "Value",
-      boost::make_shared<StringListValidator>(transOptions),
-      "Transmission determination method");
+                  boost::make_shared<StringListValidator>(transOptions),
+                  "Transmission determination method");
 
   // - Transmission value entered by hand
   declareProperty("BckTransmissionValue", EMPTY_DBL(), positiveDouble,
-      "Transmission value.");
-  setPropertySettings("BckTransmissionValue",
-            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "Value"));
+                  "Transmission value.");
+  setPropertySettings(
+      "BckTransmissionValue",
+      new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "Value"));
 
   declareProperty("BckTransmissionError", EMPTY_DBL(), positiveDouble,
-      "Transmission error.");
-  setPropertySettings("BckTransmissionError",
-            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "Value"));
+                  "Transmission error.");
+  setPropertySettings(
+      "BckTransmissionError",
+      new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "Value"));
 
   // - Direct beam method transmission calculation
-  declareProperty("BckTransmissionBeamRadius", 3.0,
+  declareProperty(
+      "BckTransmissionBeamRadius", 3.0,
       "Radius of the beam area used to compute the transmission [pixels]");
   setPropertySettings("BckTransmissionBeamRadius",
-            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                      new VisibleWhenProperty("BckTransmissionMethod",
+                                              IS_EQUAL_TO, "DirectBeam"));
   declareProperty(new API::FileProperty("BckTransmissionSampleDataFile", "",
-      API::FileProperty::OptionalLoad, ".xml"),
-      "Sample data file for transmission calculation");
+                                        API::FileProperty::OptionalLoad,
+                                        ".xml"),
+                  "Sample data file for transmission calculation");
   setPropertySettings("BckTransmissionSampleDataFile",
-            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                      new VisibleWhenProperty("BckTransmissionMethod",
+                                              IS_EQUAL_TO, "DirectBeam"));
   declareProperty(new API::FileProperty("BckTransmissionEmptyDataFile", "",
-      API::FileProperty::OptionalLoad, ".xml"),
-      "Empty data file for transmission calculation");
+                                        API::FileProperty::OptionalLoad,
+                                        ".xml"),
+                  "Empty data file for transmission calculation");
   setPropertySettings("BckTransmissionEmptyDataFile",
-            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                      new VisibleWhenProperty("BckTransmissionMethod",
+                                              IS_EQUAL_TO, "DirectBeam"));
 
   // - transmission beam center
   declareProperty("BckTransmissionBeamCenterMethod", "None",
-      boost::make_shared<StringListValidator>(centerOptions),
-      "Method for determining the transmission data beam center");
+                  boost::make_shared<StringListValidator>(centerOptions),
+                  "Method for determining the transmission data beam center");
   setPropertySettings("BckTransmissionBeamCenterMethod",
-            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                      new VisibleWhenProperty("BckTransmissionMethod",
+                                              IS_EQUAL_TO, "DirectBeam"));
   //    Option 1: Set beam center by hand
   declareProperty("BckTransmissionBeamCenterX", EMPTY_DBL(),
-      "Transmission beam center location in X [pixels]");
+                  "Transmission beam center location in X [pixels]");
   setPropertySettings("BckTransmissionBeamCenterX",
-            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                      new VisibleWhenProperty("BckTransmissionMethod",
+                                              IS_EQUAL_TO, "DirectBeam"));
   declareProperty("BckTransmissionBeamCenterY", EMPTY_DBL(),
-      "Transmission beam center location in Y [pixels]");
+                  "Transmission beam center location in Y [pixels]");
   //    Option 2: Find it (expose properties from FindCenterOfMass)
   setPropertySettings("BckTransmissionBeamCenterY",
-            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                      new VisibleWhenProperty("BckTransmissionMethod",
+                                              IS_EQUAL_TO, "DirectBeam"));
   declareProperty(new API::FileProperty("BckTransmissionBeamCenterFile", "",
-      API::FileProperty::OptionalLoad, ".xml"),
-      "The name of the input data file to load");
+                                        API::FileProperty::OptionalLoad,
+                                        ".xml"),
+                  "The name of the input data file to load");
   setPropertySettings("BckTransmissionBeamCenterFile",
-            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+                      new VisibleWhenProperty("BckTransmissionMethod",
+                                              IS_EQUAL_TO, "DirectBeam"));
 
-  declareProperty(new API::FileProperty("BckTransmissionDarkCurrentFile", "", API::FileProperty::OptionalLoad, ".xml"),
-      "The name of the input data file to load as background transmission dark current.");
+  declareProperty(new API::FileProperty("BckTransmissionDarkCurrentFile", "",
+                                        API::FileProperty::OptionalLoad,
+                                        ".xml"),
+                  "The name of the input data file to load as background "
+                  "transmission dark current.");
   setPropertySettings("BckTransmissionDarkCurrentFile",
-            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "BeamSpreader"));
+                      new VisibleWhenProperty("BckTransmissionMethod",
+                                              IS_EQUAL_TO, "BeamSpreader"));
 
-  declareProperty("BckThetaDependentTransmission", true,
+  declareProperty(
+      "BckThetaDependentTransmission", true,
       "If true, a theta-dependent transmission correction will be applied.");
 
   setPropertyGroup("BackgroundFiles", bck_grp);
@@ -327,16 +390,17 @@ void SetupILLD33Reduction::init()
   // Masking
   std::string mask_grp = "Mask";
   declareProperty(new ArrayProperty<int>("MaskedDetectorList"),
-      "List of detector IDs to be masked");
-  declareProperty(new ArrayProperty<int>("MaskedEdges"),
+                  "List of detector IDs to be masked");
+  declareProperty(
+      new ArrayProperty<int>("MaskedEdges"),
       "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
   std::vector<std::string> maskOptions;
   maskOptions.push_back("None");
   maskOptions.push_back("Front");
   maskOptions.push_back("Back");
   declareProperty("MaskedSide", "None",
-      boost::make_shared<StringListValidator>(maskOptions),
-      "Mask one side of the detector");
+                  boost::make_shared<StringListValidator>(maskOptions),
+                  "Mask one side of the detector");
 
   setPropertyGroup("MaskedDetectorList", mask_grp);
   setPropertyGroup("MaskedEdges", mask_grp);
@@ -349,30 +413,38 @@ void SetupILLD33Reduction::init()
   scaleOptions.push_back("Value");
   scaleOptions.push_back("ReferenceData");
   declareProperty("AbsoluteScaleMethod", "None",
-      boost::make_shared<StringListValidator>(scaleOptions),
-      "Absolute scale correction method");
+                  boost::make_shared<StringListValidator>(scaleOptions),
+                  "Absolute scale correction method");
   declareProperty("AbsoluteScalingFactor", 1.0, "Absolute scaling factor");
-  setPropertySettings("AbsoluteScalingFactor",
+  setPropertySettings(
+      "AbsoluteScalingFactor",
       new VisibleWhenProperty("AbsoluteScaleMethod", IS_EQUAL_TO, "Value"));
 
   declareProperty(new API::FileProperty("AbsoluteScalingReferenceFilename", "",
-      API::FileProperty::OptionalLoad, ".xml"));
+                                        API::FileProperty::OptionalLoad,
+                                        ".xml"));
   setPropertySettings("AbsoluteScalingReferenceFilename",
-            new VisibleWhenProperty("AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
-  declareProperty("AbsoluteScalingBeamDiameter", 0.0,
+                      new VisibleWhenProperty("AbsoluteScaleMethod",
+                                              IS_EQUAL_TO, "ReferenceData"));
+  declareProperty(
+      "AbsoluteScalingBeamDiameter", 0.0,
       "Beamstop diameter for computing the absolute scale factor [mm]. "
       "Read from file if not supplied.");
   setPropertySettings("AbsoluteScalingBeamDiameter",
-      new VisibleWhenProperty("AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
-  declareProperty("AbsoluteScalingAttenuatorTrans", 1.0,
+                      new VisibleWhenProperty("AbsoluteScaleMethod",
+                                              IS_EQUAL_TO, "ReferenceData"));
+  declareProperty(
+      "AbsoluteScalingAttenuatorTrans", 1.0,
       "Attenuator transmission value for computing the absolute scale factor");
   setPropertySettings("AbsoluteScalingAttenuatorTrans",
-      new VisibleWhenProperty("AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
+                      new VisibleWhenProperty("AbsoluteScaleMethod",
+                                              IS_EQUAL_TO, "ReferenceData"));
   declareProperty("AbsoluteScalingApplySensitivity", false,
-      "Apply sensitivity correction to the reference data "
-      "when computing the absolute scale factor");
+                  "Apply sensitivity correction to the reference data "
+                  "when computing the absolute scale factor");
   setPropertySettings("AbsoluteScalingApplySensitivity",
-      new VisibleWhenProperty("AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
+                      new VisibleWhenProperty("AbsoluteScaleMethod",
+                                              IS_EQUAL_TO, "ReferenceData"));
 
   setPropertyGroup("AbsoluteScaleMethod", abs_scale_grp);
   setPropertyGroup("AbsoluteScalingFactor", abs_scale_grp);
@@ -384,7 +456,7 @@ void SetupILLD33Reduction::init()
   // I(Q) calculation
   std::string iq1d_grp = "I(q) Calculation";
   declareProperty("DoAzimuthalAverage", true);
-  auto positiveInt = boost::make_shared<BoundedValidator<int> >();
+  auto positiveInt = boost::make_shared<BoundedValidator<int>>();
   positiveInt->setLower(0);
   declareProperty("IQNumberOfBins", 100, positiveInt,
                   "Number of I(q) bins when binning is not specified");
@@ -406,50 +478,56 @@ void SetupILLD33Reduction::init()
   setPropertyGroup("IQ2DNumberOfBins", iq1d_grp);
 
   // Outputs
-  declareProperty("ProcessInfo","", "Additional process information");
-  declareProperty("OutputDirectory", "", "Directory to put the output files in");
-  declareProperty("OutputMessage","",Direction::Output);
-  declareProperty("ReductionProperties","__sans_reduction_properties", Direction::Input);
+  declareProperty("ProcessInfo", "", "Additional process information");
+  declareProperty("OutputDirectory", "",
+                  "Directory to put the output files in");
+  declareProperty("OutputMessage", "", Direction::Output);
+  declareProperty("ReductionProperties", "__sans_reduction_properties",
+                  Direction::Input);
 }
 
-void SetupILLD33Reduction::exec()
-{
+void SetupILLD33Reduction::exec() {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
-  if (reductionManagerName.size()==0)
-  {
-    g_log.error() << "ERROR: Reduction Property Manager name is empty" << std::endl;
+  if (reductionManagerName.size() == 0) {
+    g_log.error() << "ERROR: Reduction Property Manager name is empty"
+                  << std::endl;
     return;
   }
-  boost::shared_ptr<PropertyManager> reductionManager = boost::make_shared<PropertyManager>();
-  PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
+  boost::shared_ptr<PropertyManager> reductionManager =
+      boost::make_shared<PropertyManager>();
+  PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
+                                                      reductionManager);
 
   // Store name of the instrument
-  reductionManager->declareProperty(new PropertyWithValue<std::string>("InstrumentName", "D33") );
+  reductionManager->declareProperty(
+      new PropertyWithValue<std::string>("InstrumentName", "D33"));
 
   // Store additional (and optional) process information
   const std::string processInfo = getProperty("ProcessInfo");
-  reductionManager->declareProperty(new PropertyWithValue<std::string>("ProcessInfo", processInfo));
+  reductionManager->declareProperty(
+      new PropertyWithValue<std::string>("ProcessInfo", processInfo));
 
   // Store the output directory
   const std::string outputDirectory = getProperty("OutputDirectory");
-  reductionManager->declareProperty(new PropertyWithValue<std::string>("OutputDirectory", outputDirectory));
+  reductionManager->declareProperty(
+      new PropertyWithValue<std::string>("OutputDirectory", outputDirectory));
 
   // Store normalization algorithm
   const std::string normalization = getProperty("Normalisation");
 
   if (!boost::contains(normalization, "None")) {
-	  // If we normalize to monitor, force the loading of monitor data
-	  IAlgorithm_sptr normAlg = createChildAlgorithm("HFIRSANSNormalise");
-	  normAlg->setProperty("NormalisationType", normalization);
-	  //normAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-	  AlgorithmProperty *algProp = new AlgorithmProperty("NormaliseAlgorithm");
-	  algProp->setValue(normAlg->toString());
-	  reductionManager->declareProperty(algProp);
+    // If we normalize to monitor, force the loading of monitor data
+    IAlgorithm_sptr normAlg = createChildAlgorithm("HFIRSANSNormalise");
+    normAlg->setProperty("NormalisationType", normalization);
+    // normAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+    AlgorithmProperty *algProp = new AlgorithmProperty("NormaliseAlgorithm");
+    algProp->setValue(normAlg->toString());
+    reductionManager->declareProperty(algProp);
   }
 
   // Load algorithm
-  //IAlgorithm_sptr loadAlg = createChildAlgorithm("EQSANSLoad");
+  // IAlgorithm_sptr loadAlg = createChildAlgorithm("EQSANSLoad");
   // TODO : It looks like properties need cleanup
   IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadILLSANS");
 
@@ -459,9 +537,9 @@ void SetupILLD33Reduction::exec()
 
   // Store dark current algorithm
   const std::string darkCurrentFile = getPropertyValue("DarkCurrentFile");
-  if (darkCurrentFile.size() > 0)
-  {
-    IAlgorithm_sptr darkAlg = createChildAlgorithm("EQSANSDarkCurrentSubtraction");
+  if (darkCurrentFile.size() > 0) {
+    IAlgorithm_sptr darkAlg =
+        createChildAlgorithm("EQSANSDarkCurrentSubtraction");
     darkAlg->setProperty("Filename", darkCurrentFile);
     darkAlg->setProperty("OutputDarkCurrentWorkspace", "");
     darkAlg->setPropertyValue("ReductionProperties", reductionManagerName);
@@ -471,7 +549,8 @@ void SetupILLD33Reduction::exec()
   }
 
   // Store default dark current algorithm
-  IAlgorithm_sptr darkDefaultAlg = createChildAlgorithm("EQSANSDarkCurrentSubtraction");
+  IAlgorithm_sptr darkDefaultAlg =
+      createChildAlgorithm("EQSANSDarkCurrentSubtraction");
   darkDefaultAlg->setProperty("OutputDarkCurrentWorkspace", "");
   darkDefaultAlg->setPropertyValue("ReductionProperties", reductionManagerName);
   algProp = new AlgorithmProperty("DefaultDarkCurrentAlgorithm");
@@ -480,8 +559,7 @@ void SetupILLD33Reduction::exec()
 
   // Solid angle correction
   const bool solidAngleCorrection = getProperty("SolidAngleCorrection");
-  if (solidAngleCorrection)
-  {
+  if (solidAngleCorrection) {
     const bool detectorTubes = getProperty("DetectorTubes");
     IAlgorithm_sptr solidAlg = createChildAlgorithm("SANSSolidAngleCorrection");
     solidAlg->setProperty("DetectorTubes", detectorTubes);
@@ -496,35 +574,35 @@ void SetupILLD33Reduction::exec()
   const std::string centerMethod = getPropertyValue("BeamCenterMethod");
 
   // Beam center option for transmission data
-  if (boost::iequals(centerMethod, "Value"))
-  {
-    if(!isEmpty(beamCenterX) && !isEmpty(beamCenterY))
-    {
-      reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterX", beamCenterX) );
-      reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterY", beamCenterY) );
+  if (boost::iequals(centerMethod, "Value")) {
+    if (!isEmpty(beamCenterX) && !isEmpty(beamCenterY)) {
+      reductionManager->declareProperty(
+          new PropertyWithValue<double>("LatestBeamCenterX", beamCenterX));
+      reductionManager->declareProperty(
+          new PropertyWithValue<double>("LatestBeamCenterY", beamCenterY));
     }
-  }
-  else if (!boost::iequals(centerMethod, "None"))
-  {
+  } else if (!boost::iequals(centerMethod, "None")) {
     bool useDirectBeamMethod = true;
-    if (!boost::iequals(centerMethod, "DirectBeam")) useDirectBeamMethod = false;
+    if (!boost::iequals(centerMethod, "DirectBeam"))
+      useDirectBeamMethod = false;
     const std::string beamCenterFile = getProperty("BeamCenterFile");
-    if (beamCenterFile.size()>0)
-    {
+    if (beamCenterFile.size() > 0) {
       const double beamRadius = getProperty("BeamRadius");
 
       IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
       ctrAlg->setProperty("Filename", beamCenterFile);
       ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeamMethod);
-      if (!isEmpty(beamRadius)) ctrAlg->setProperty("BeamRadius", beamRadius);
+      if (!isEmpty(beamRadius))
+        ctrAlg->setProperty("BeamRadius", beamRadius);
       ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
-      AlgorithmProperty *algProp = new AlgorithmProperty("SANSBeamFinderAlgorithm");
+      AlgorithmProperty *algProp =
+          new AlgorithmProperty("SANSBeamFinderAlgorithm");
       algProp->setValue(ctrAlg->toString());
       reductionManager->declareProperty(algProp);
     } else {
       g_log.error() << "ERROR: Beam center determination was required"
-          " but no file was provided" << std::endl;
+                       " but no file was provided" << std::endl;
     }
   }
 
@@ -535,8 +613,7 @@ void SetupILLD33Reduction::exec()
 
   // Geometry correction
   const double thickness = getProperty("SampleThickness");
-  if (!isEmpty(thickness))
-  {
+  if (!isEmpty(thickness)) {
     IAlgorithm_sptr thickAlg = createChildAlgorithm("NormaliseByThickness");
     thickAlg->setProperty("SampleThickness", thickness);
 
@@ -562,8 +639,7 @@ void SetupILLD33Reduction::exec()
 
   // Absolute scaling
   const std::string absScaleMethod = getProperty("AbsoluteScaleMethod");
-  if (boost::iequals(absScaleMethod, "Value"))
-  {
+  if (boost::iequals(absScaleMethod, "Value")) {
     const double absScaleFactor = getProperty("AbsoluteScalingFactor");
 
     IAlgorithm_sptr absAlg = createChildAlgorithm("SANSAbsoluteScale");
@@ -573,13 +649,13 @@ void SetupILLD33Reduction::exec()
     algProp = new AlgorithmProperty("AbsoluteScaleAlgorithm");
     algProp->setValue(absAlg->toString());
     reductionManager->declareProperty(algProp);
-  }
-  else if (boost::iequals(absScaleMethod, "ReferenceData"))
-  {
-    const std::string absRefFile = getPropertyValue("AbsoluteScalingReferenceFilename");
+  } else if (boost::iequals(absScaleMethod, "ReferenceData")) {
+    const std::string absRefFile =
+        getPropertyValue("AbsoluteScalingReferenceFilename");
     const double beamDiam = getProperty("AbsoluteScalingBeamDiameter");
     const double attTrans = getProperty("AbsoluteScalingAttenuatorTrans");
-    const bool applySensitivity = getProperty("AbsoluteScalingApplySensitivity");
+    const bool applySensitivity =
+        getProperty("AbsoluteScalingApplySensitivity");
 
     IAlgorithm_sptr absAlg = createChildAlgorithm("SANSAbsoluteScale");
     absAlg->setProperty("Method", absScaleMethod);
@@ -595,8 +671,7 @@ void SetupILLD33Reduction::exec()
 
   // Azimuthal averaging
   const bool doAveraging = getProperty("DoAzimuthalAverage");
-  if (doAveraging)
-  {
+  if (doAveraging) {
     const std::string nBins = getPropertyValue("IQNumberOfBins");
     const bool logBinning = getProperty("IQLogBinning");
     const bool computeResolution = getProperty("ComputeResolution");
@@ -614,8 +689,7 @@ void SetupILLD33Reduction::exec()
 
   // 2D reduction
   const bool do2DReduction = getProperty("Do2DReduction");
-  if (do2DReduction)
-  {
+  if (do2DReduction) {
     const std::string n_bins = getPropertyValue("IQ2DNumberOfBins");
     IAlgorithm_sptr iqAlg = createChildAlgorithm("EQSANSQ2D");
     iqAlg->setPropertyValue("NumberOfBins", n_bins);
@@ -626,16 +700,17 @@ void SetupILLD33Reduction::exec()
   setPropertyValue("OutputMessage", "EQSANS reduction options set");
 }
 
-void SetupILLD33Reduction::setupSensitivity(boost::shared_ptr<PropertyManager> reductionManager)
-{
+void SetupILLD33Reduction::setupSensitivity(
+    boost::shared_ptr<PropertyManager> reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
 
   const std::string sensitivityFile = getPropertyValue("SensitivityFile");
-  if (sensitivityFile.size() > 0)
-  {
+  if (sensitivityFile.size() > 0) {
     const bool useSampleDC = getProperty("UseDefaultDC");
-    const std::string sensitivityDarkCurrentFile = getPropertyValue("SensitivityDarkCurrentFile");
-    const std::string outputSensitivityWS = getPropertyValue("OutputSensitivityWorkspace");
+    const std::string sensitivityDarkCurrentFile =
+        getPropertyValue("SensitivityDarkCurrentFile");
+    const std::string outputSensitivityWS =
+        getPropertyValue("OutputSensitivityWorkspace");
     const double minEff = getProperty("MinEfficiency");
     const double maxEff = getProperty("MaxEfficiency");
     const double sensitivityBeamCenterX = getProperty("SensitivityBeamCenterX");
@@ -649,39 +724,39 @@ void SetupILLD33Reduction::setupSensitivity(boost::shared_ptr<PropertyManager> r
     effAlg->setProperty("MaxEfficiency", maxEff);
 
     // Beam center option for sensitivity data
-    const std::string centerMethod = getPropertyValue("SensitivityBeamCenterMethod");
-    if (boost::iequals(centerMethod, "Value"))
-    {
+    const std::string centerMethod =
+        getPropertyValue("SensitivityBeamCenterMethod");
+    if (boost::iequals(centerMethod, "Value")) {
       if (!isEmpty(sensitivityBeamCenterX) &&
-          !isEmpty(sensitivityBeamCenterY))
-      {
+          !isEmpty(sensitivityBeamCenterY)) {
         effAlg->setProperty("BeamCenterX", sensitivityBeamCenterX);
         effAlg->setProperty("BeamCenterY", sensitivityBeamCenterY);
       }
-    }
-    else if (boost::iequals(centerMethod, "DirectBeam") ||
-        boost::iequals(centerMethod, "Scattering"))
-    {
-      const std::string beamCenterFile = getProperty("SensitivityBeamCenterFile");
-      const double sensitivityBeamRadius = getProperty("SensitivityBeamCenterRadius");
+    } else if (boost::iequals(centerMethod, "DirectBeam") ||
+               boost::iequals(centerMethod, "Scattering")) {
+      const std::string beamCenterFile =
+          getProperty("SensitivityBeamCenterFile");
+      const double sensitivityBeamRadius =
+          getProperty("SensitivityBeamCenterRadius");
       bool useDirectBeam = boost::iequals(centerMethod, "DirectBeam");
-      if (beamCenterFile.size()>0)
-       {
-         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
-         ctrAlg->setProperty("Filename", beamCenterFile);
-         ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeam);
-         ctrAlg->setProperty("PersistentCorrection", false);
-         if (useDirectBeam && !isEmpty(sensitivityBeamRadius))
-           ctrAlg->setProperty("BeamRadius", sensitivityBeamRadius);
-         ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+      if (beamCenterFile.size() > 0) {
+        IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
+        ctrAlg->setProperty("Filename", beamCenterFile);
+        ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeam);
+        ctrAlg->setProperty("PersistentCorrection", false);
+        if (useDirectBeam && !isEmpty(sensitivityBeamRadius))
+          ctrAlg->setProperty("BeamRadius", sensitivityBeamRadius);
+        ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
-         AlgorithmProperty *algProp = new AlgorithmProperty("SensitivityBeamCenterAlgorithm");
-         algProp->setValue(ctrAlg->toString());
-         reductionManager->declareProperty(algProp);
-       } else {
-         g_log.error() << "ERROR: Sensitivity beam center determination was required"
-             " but no file was provided" << std::endl;
-       }
+        AlgorithmProperty *algProp =
+            new AlgorithmProperty("SensitivityBeamCenterAlgorithm");
+        algProp->setValue(ctrAlg->toString());
+        reductionManager->declareProperty(algProp);
+      } else {
+        g_log.error()
+            << "ERROR: Sensitivity beam center determination was required"
+               " but no file was provided" << std::endl;
+      }
     }
 
     effAlg->setPropertyValue("OutputSensitivityWorkspace", outputSensitivityWS);
@@ -692,76 +767,81 @@ void SetupILLD33Reduction::setupSensitivity(boost::shared_ptr<PropertyManager> r
     reductionManager->declareProperty(algProp);
   }
 }
-void SetupILLD33Reduction::setupTransmission(boost::shared_ptr<PropertyManager> reductionManager)
-{
+void SetupILLD33Reduction::setupTransmission(
+    boost::shared_ptr<PropertyManager> reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Transmission options
   const bool thetaDependentTrans = getProperty("ThetaDependentTransmission");
   const std::string transMethod = getProperty("TransmissionMethod");
-  const std::string darkCurrent = getPropertyValue("TransmissionDarkCurrentFile");
+  const std::string darkCurrent =
+      getPropertyValue("TransmissionDarkCurrentFile");
   const bool useSampleDC = getProperty("TransmissionUseSampleDC");
 
   // Transmission is entered by hand
-  if (boost::iequals(transMethod, "Value"))
-  {
+  if (boost::iequals(transMethod, "Value")) {
     const double transValue = getProperty("TransmissionValue");
     const double transError = getProperty("TransmissionError");
-    if (!isEmpty(transValue) && !isEmpty(transError))
-    {
-      IAlgorithm_sptr transAlg = createChildAlgorithm("ApplyTransmissionCorrection");
+    if (!isEmpty(transValue) && !isEmpty(transError)) {
+      IAlgorithm_sptr transAlg =
+          createChildAlgorithm("ApplyTransmissionCorrection");
       transAlg->setProperty("TransmissionValue", transValue);
       transAlg->setProperty("TransmissionError", transError);
       transAlg->setProperty("ThetaDependent", thetaDependentTrans);
 
-      AlgorithmProperty *algProp = new AlgorithmProperty("TransmissionAlgorithm");
+      AlgorithmProperty *algProp =
+          new AlgorithmProperty("TransmissionAlgorithm");
       algProp->setValue(transAlg->toString());
       reductionManager->declareProperty(algProp);
     } else {
-      g_log.information("SetupILLD33Reduction [TransmissionAlgorithm]:"
+      g_log.information(
+          "SetupILLD33Reduction [TransmissionAlgorithm]:"
           "expected transmission/error values and got empty values");
     }
   }
   // Direct beam method for transmission determination
-  else if (boost::iequals(transMethod, "DirectBeam"))
-  {
-    const std::string sampleFilename = getPropertyValue("TransmissionSampleDataFile");
-    const std::string emptyFilename = getPropertyValue("TransmissionEmptyDataFile");
+  else if (boost::iequals(transMethod, "DirectBeam")) {
+    const std::string sampleFilename =
+        getPropertyValue("TransmissionSampleDataFile");
+    const std::string emptyFilename =
+        getPropertyValue("TransmissionEmptyDataFile");
     const double beamRadius = getProperty("TransmissionBeamRadius");
     const double beamX = getProperty("TransmissionBeamCenterX");
     const double beamY = getProperty("TransmissionBeamCenterY");
-    const std::string centerMethod = getPropertyValue("TransmissionBeamCenterMethod");
+    const std::string centerMethod =
+        getPropertyValue("TransmissionBeamCenterMethod");
 
-    IAlgorithm_sptr transAlg = createChildAlgorithm("SANSDirectBeamTransmission");
-     transAlg->setProperty("SampleDataFilename", sampleFilename);
+    IAlgorithm_sptr transAlg =
+        createChildAlgorithm("SANSDirectBeamTransmission");
+    transAlg->setProperty("SampleDataFilename", sampleFilename);
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
     transAlg->setProperty("BeamRadius", beamRadius);
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);
     transAlg->setProperty("UseSampleDarkCurrent", useSampleDC);
 
     // Beam center option for transmission data
-    if (boost::iequals(centerMethod, "Value") && !isEmpty(beamX) && !isEmpty(beamY))
-    {
+    if (boost::iequals(centerMethod, "Value") && !isEmpty(beamX) &&
+        !isEmpty(beamY)) {
       transAlg->setProperty("BeamCenterX", beamX);
       transAlg->setProperty("BeamCenterY", beamY);
-    }
-    else if (boost::iequals(centerMethod, "DirectBeam"))
-    {
-      const std::string beamCenterFile = getProperty("TransmissionBeamCenterFile");
-      if (beamCenterFile.size()>0)
-       {
-         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
-         ctrAlg->setProperty("Filename", beamCenterFile);
-         ctrAlg->setProperty("UseDirectBeamMethod", true);
-         ctrAlg->setProperty("PersistentCorrection", false);
-         ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+    } else if (boost::iequals(centerMethod, "DirectBeam")) {
+      const std::string beamCenterFile =
+          getProperty("TransmissionBeamCenterFile");
+      if (beamCenterFile.size() > 0) {
+        IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
+        ctrAlg->setProperty("Filename", beamCenterFile);
+        ctrAlg->setProperty("UseDirectBeamMethod", true);
+        ctrAlg->setProperty("PersistentCorrection", false);
+        ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
-         AlgorithmProperty *algProp = new AlgorithmProperty("TransmissionBeamCenterAlgorithm");
-         algProp->setValue(ctrAlg->toString());
-         reductionManager->declareProperty(algProp);
-       } else {
-         g_log.error() << "ERROR: Transmission beam center determination was required"
-             " but no file was provided" << std::endl;
-       }
+        AlgorithmProperty *algProp =
+            new AlgorithmProperty("TransmissionBeamCenterAlgorithm");
+        algProp->setValue(ctrAlg->toString());
+        reductionManager->declareProperty(algProp);
+      } else {
+        g_log.error()
+            << "ERROR: Transmission beam center determination was required"
+               " but no file was provided" << std::endl;
+      }
     }
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
     AlgorithmProperty *algProp = new AlgorithmProperty("TransmissionAlgorithm");
@@ -770,49 +850,55 @@ void SetupILLD33Reduction::setupTransmission(boost::shared_ptr<PropertyManager> 
   }
 }
 
-void SetupILLD33Reduction::setupBackground(boost::shared_ptr<PropertyManager> reductionManager)
-{
+void SetupILLD33Reduction::setupBackground(
+    boost::shared_ptr<PropertyManager> reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Background
   const std::string backgroundFile = getPropertyValue("BackgroundFiles");
   if (backgroundFile.size() > 0)
-    reductionManager->declareProperty(new PropertyWithValue<std::string>("BackgroundFiles", backgroundFile) );
+    reductionManager->declareProperty(
+        new PropertyWithValue<std::string>("BackgroundFiles", backgroundFile));
   else
     return;
 
-  const std::string darkCurrent = getPropertyValue("BckTransmissionDarkCurrentFile");
-  const bool bckThetaDependentTrans = getProperty("BckThetaDependentTransmission");
+  const std::string darkCurrent =
+      getPropertyValue("BckTransmissionDarkCurrentFile");
+  const bool bckThetaDependentTrans =
+      getProperty("BckThetaDependentTransmission");
   const std::string bckTransMethod = getProperty("BckTransmissionMethod");
-  if (boost::iequals(bckTransMethod, "Value"))
-  {
+  if (boost::iequals(bckTransMethod, "Value")) {
     const double transValue = getProperty("BckTransmissionValue");
     const double transError = getProperty("BckTransmissionError");
-    if (!isEmpty(transValue) && !isEmpty(transError))
-    {
-      IAlgorithm_sptr transAlg = createChildAlgorithm("ApplyTransmissionCorrection");
+    if (!isEmpty(transValue) && !isEmpty(transError)) {
+      IAlgorithm_sptr transAlg =
+          createChildAlgorithm("ApplyTransmissionCorrection");
       transAlg->setProperty("TransmissionValue", transValue);
       transAlg->setProperty("TransmissionError", transError);
       transAlg->setProperty("ThetaDependent", bckThetaDependentTrans);
 
-      AlgorithmProperty *algProp = new AlgorithmProperty("BckTransmissionAlgorithm");
+      AlgorithmProperty *algProp =
+          new AlgorithmProperty("BckTransmissionAlgorithm");
       algProp->setValue(transAlg->toString());
       reductionManager->declareProperty(algProp);
     } else {
-      g_log.information("SetupILLD33Reduction [BckTransmissionAlgorithm]: "
+      g_log.information(
+          "SetupILLD33Reduction [BckTransmissionAlgorithm]: "
           "expected transmission/error values and got empty values");
     }
-  }
-  else if (boost::iequals(bckTransMethod, "DirectBeam"))
-  {
-    const std::string sampleFilename = getPropertyValue("BckTransmissionSampleDataFile");
-    const std::string emptyFilename = getPropertyValue("BckTransmissionEmptyDataFile");
+  } else if (boost::iequals(bckTransMethod, "DirectBeam")) {
+    const std::string sampleFilename =
+        getPropertyValue("BckTransmissionSampleDataFile");
+    const std::string emptyFilename =
+        getPropertyValue("BckTransmissionEmptyDataFile");
     const double beamRadius = getProperty("BckTransmissionBeamRadius");
     const double beamX = getProperty("BckTransmissionBeamCenterX");
     const double beamY = getProperty("BckTransmissionBeamCenterY");
-    const bool thetaDependentTrans = getProperty("BckThetaDependentTransmission");
+    const bool thetaDependentTrans =
+        getProperty("BckThetaDependentTransmission");
     const bool useSampleDC = getProperty("TransmissionUseSampleDC");
 
-    IAlgorithm_sptr transAlg = createChildAlgorithm("SANSDirectBeamTransmission");
+    IAlgorithm_sptr transAlg =
+        createChildAlgorithm("SANSDirectBeamTransmission");
     transAlg->setProperty("SampleDataFilename", sampleFilename);
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
     transAlg->setProperty("BeamRadius", beamRadius);
@@ -820,38 +906,38 @@ void SetupILLD33Reduction::setupBackground(boost::shared_ptr<PropertyManager> re
     transAlg->setProperty("UseSampleDarkCurrent", useSampleDC);
 
     // Beam center option for transmission data
-    const std::string centerMethod = getPropertyValue("BckTransmissionBeamCenterMethod");
-    if (boost::iequals(centerMethod, "Value") && !isEmpty(beamX) && !isEmpty(beamY))
-    {
+    const std::string centerMethod =
+        getPropertyValue("BckTransmissionBeamCenterMethod");
+    if (boost::iequals(centerMethod, "Value") && !isEmpty(beamX) &&
+        !isEmpty(beamY)) {
       transAlg->setProperty("BeamCenterX", beamX);
       transAlg->setProperty("BeamCenterY", beamY);
-    }
-    else if (boost::iequals(centerMethod, "DirectBeam"))
-    {
-      const std::string beamCenterFile = getProperty("BckTransmissionBeamCenterFile");
-      if (beamCenterFile.size()>0)
-       {
-         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
-         ctrAlg->setProperty("Filename", beamCenterFile);
-         ctrAlg->setProperty("UseDirectBeamMethod", true);
-         ctrAlg->setProperty("PersistentCorrection", false);
-         ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+    } else if (boost::iequals(centerMethod, "DirectBeam")) {
+      const std::string beamCenterFile =
+          getProperty("BckTransmissionBeamCenterFile");
+      if (beamCenterFile.size() > 0) {
+        IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
+        ctrAlg->setProperty("Filename", beamCenterFile);
+        ctrAlg->setProperty("UseDirectBeamMethod", true);
+        ctrAlg->setProperty("PersistentCorrection", false);
+        ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
-         AlgorithmProperty *algProp = new AlgorithmProperty("BckTransmissionBeamCenterAlgorithm");
-         algProp->setValue(ctrAlg->toString());
-         reductionManager->declareProperty(algProp);
-       } else {
-         g_log.error() << "ERROR: Beam center determination was required"
-             " but no file was provided" << std::endl;
-       }
+        AlgorithmProperty *algProp =
+            new AlgorithmProperty("BckTransmissionBeamCenterAlgorithm");
+        algProp->setValue(ctrAlg->toString());
+        reductionManager->declareProperty(algProp);
+      } else {
+        g_log.error() << "ERROR: Beam center determination was required"
+                         " but no file was provided" << std::endl;
+      }
     }
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
-    AlgorithmProperty *algProp = new AlgorithmProperty("BckTransmissionAlgorithm");
+    AlgorithmProperty *algProp =
+        new AlgorithmProperty("BckTransmissionAlgorithm");
     algProp->setValue(transAlg->toString());
     reductionManager->declareProperty(algProp);
   }
-
 }
 } // namespace WorkflowAlgorithms
 } // namespace Mantid

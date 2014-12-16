@@ -3,16 +3,15 @@
 
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** An example algorithm showing the use of properties.
 
     @author Roman Tolchenov, ISIS, RAL
     @date 01/05/2008
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -27,31 +26,30 @@ namespace Algorithms
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
- 	  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+          along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class PropertyAlgorithm : public API::Algorithm
-{
+class PropertyAlgorithm : public API::Algorithm {
 public:
-  ///no arg constructor
+  /// no arg constructor
   PropertyAlgorithm() : API::Algorithm() {}
-  ///virtual destructor
+  /// virtual destructor
   virtual ~PropertyAlgorithm() {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "PropertyAlgorithm";}
+  virtual const std::string name() const { return "PropertyAlgorithm"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return (1);}
+  virtual int version() const { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Examples";}
+  virtual const std::string category() const { return "Examples"; }
   // Algorithm's summary. Overriding a virtual method.
   virtual const std::string summary() const { return "Example summary text."; }
 
 private:
-  ///Initialisation code
+  /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 };
 
@@ -59,4 +57,3 @@ private:
 } // namespace Mantid
 
 #endif /*USER_ALGORITHMS_PROPERTYALGORITHM_H_*/
-

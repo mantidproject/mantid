@@ -6,23 +6,21 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Poco
-{
-  namespace Net
-  {
-    class TCPServer;
-  }
+namespace Poco {
+namespace Net {
+class TCPServer;
+}
 }
 
-namespace Mantid
-{
-namespace ISISLiveData
-{
+namespace Mantid {
+namespace ISISLiveData {
 /**
-    Simulates ISIS histogram DAE. It runs continuously until canceled and listens to port 6789 for
+    Simulates ISIS histogram DAE. It runs continuously until canceled and
+   listens to port 6789 for
     ISIS DAE commands.
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -42,28 +40,30 @@ namespace ISISLiveData
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class FakeISISEventDAE : public API::Algorithm
-{
+class FakeISISEventDAE : public API::Algorithm {
 public:
   FakeISISEventDAE();
   virtual ~FakeISISEventDAE();
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FakeISISEventDAE";}
+  virtual const std::string name() const { return "FakeISISEventDAE"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1;}
+  virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\DataAcquisition";}
-  
+  virtual const std::string category() const {
+    return "DataHandling\\DataAcquisition";
+  }
+
   /// Algorithm's summary
-  virtual const std::string summary() const { return "Simulates ISIS event DAE."; }
-  
+  virtual const std::string summary() const {
+    return "Simulates ISIS event DAE.";
+  }
 
 private:
   void init();
   void exec();
   /// Poco TCP server
-  Poco::Net::TCPServer* m_server;
+  Poco::Net::TCPServer *m_server;
   /// Mutex
   Kernel::Mutex m_mutex;
 };

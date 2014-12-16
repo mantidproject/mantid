@@ -7,11 +7,8 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidKernel/Logger.h"
 
-
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 
 /** IFunction1DSpectrum :
 
@@ -41,27 +38,29 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport IFunction1DSpectrum : public virtual IFunction
-{
+class DLLExport IFunction1DSpectrum : public virtual IFunction {
 public:
-    virtual ~IFunction1DSpectrum() { }
+  virtual ~IFunction1DSpectrum() {}
 
-    virtual void function(const FunctionDomain &domain, FunctionValues &values) const;
-    virtual void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian);
+  virtual void function(const FunctionDomain &domain,
+                        FunctionValues &values) const;
+  virtual void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian);
 
-    /// Provide a concrete function in an implementation that operates on a FunctionDomain1DSpectrum.
-    virtual void function1DSpectrum(const FunctionDomain1DSpectrum &domain, FunctionValues &values) const = 0;
+  /// Provide a concrete function in an implementation that operates on a
+  /// FunctionDomain1DSpectrum.
+  virtual void function1DSpectrum(const FunctionDomain1DSpectrum &domain,
+                                  FunctionValues &values) const = 0;
 
-    /// Derivatives of the function. The base implementation calculates numerical derivatives.
-    virtual void functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain, Jacobian &jacobian);
+  /// Derivatives of the function. The base implementation calculates numerical
+  /// derivatives.
+  virtual void functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain,
+                                       Jacobian &jacobian);
 
 protected:
-    static Kernel::Logger g_log;
-
+  static Kernel::Logger g_log;
 };
-
 
 } // namespace API
 } // namespace Mantid
 
-#endif  /* MANTID_API_IFUNCTION1DSPECTRUM_H_ */
+#endif /* MANTID_API_IFUNCTION1DSPECTRUM_H_ */

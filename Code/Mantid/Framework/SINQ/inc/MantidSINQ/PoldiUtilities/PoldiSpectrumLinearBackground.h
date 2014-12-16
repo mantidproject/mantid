@@ -5,11 +5,8 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
 
-
-namespace Mantid
-{
-namespace Poldi
-{
+namespace Mantid {
+namespace Poldi {
 
 /** PoldiSpectrumLinearBackground :
 
@@ -44,23 +41,26 @@ namespace Poldi
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_SINQ_DLL PoldiSpectrumLinearBackground : virtual public API::ParamFunction, virtual public API::IFunction1DSpectrum
-{
+class MANTID_SINQ_DLL PoldiSpectrumLinearBackground
+    : virtual public API::ParamFunction,
+      virtual public API::IFunction1DSpectrum {
 public:
-    PoldiSpectrumLinearBackground();
-    virtual ~PoldiSpectrumLinearBackground() {}
+  PoldiSpectrumLinearBackground();
+  virtual ~PoldiSpectrumLinearBackground() {}
 
-    virtual std::string name() const { return "PoldiSpectrumLinearBackground"; }
+  virtual std::string name() const { return "PoldiSpectrumLinearBackground"; }
 
-    virtual void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::FunctionValues &values) const;
-    virtual void functionDeriv1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::Jacobian &jacobian);
-    
+  virtual void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
+                                  API::FunctionValues &values) const;
+  virtual void
+  functionDeriv1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
+                          API::Jacobian &jacobian);
+
 protected:
-    void init();
+  void init();
 };
-
 
 } // namespace Poldi
 } // namespace Mantid
 
-#endif  /* MANTID_SINQ_POLDISPECTRUMLINEARBACKGROUND_H_ */
+#endif /* MANTID_SINQ_POLDISPECTRUMLINEARBACKGROUND_H_ */

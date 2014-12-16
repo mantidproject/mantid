@@ -1,20 +1,19 @@
 #ifndef MANTID_CRYSTAL_PREDICTFRACTIONALPEAKS_H_
 #define MANTID_CRYSTAL_PREDICTFRACTIONALPEAKS_H_
-    
-#include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h" 
 
-namespace Mantid
-{
-namespace Crystal
-{
-/** CreatFractionalPeaks : Algorithm to create a PeaksWorkspace with peaks corresponding
+#include "MantidKernel/System.h"
+#include "MantidAPI/Algorithm.h"
+
+namespace Mantid {
+namespace Crystal {
+/** CreatFractionalPeaks : Algorithm to create a PeaksWorkspace with peaks
+   corresponding
     to fractional h,k,and l values.
-    
+
     @author Ruth Mikkelson
     @date   2012-12-05
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & 
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory &
                      NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -32,42 +31,38 @@ namespace Crystal
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: 
+    File change history is stored at:
     <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport PredictFractionalPeaks : public API::Algorithm
-  {
-  public:
-    PredictFractionalPeaks();
-    virtual ~PredictFractionalPeaks();
-    
-    /// Algorithm's name for identification 
-    virtual const std::string name() const { return "PredictFractionalPeaks";};
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "The offsets can be from hkl values in a range of hkl values or from peaks in the input PeaksWorkspace";}
+class DLLExport PredictFractionalPeaks : public API::Algorithm {
+public:
+  PredictFractionalPeaks();
+  virtual ~PredictFractionalPeaks();
 
-    /// Algorithm's version for identification 
-    virtual int version() const 
-            { return 1;};
+  /// Algorithm's name for identification
+  virtual const std::string name() const { return "PredictFractionalPeaks"; };
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "The offsets can be from hkl values in a range of hkl values or "
+           "from peaks in the input PeaksWorkspace";
+  }
 
-    /// Algorithm's category for identification
-    virtual const std::string category() const 
-            { return "Crystal";}
-    
-  private:
+  /// Algorithm's version for identification
+  virtual int version() const { return 1; };
 
-    
+  /// Algorithm's category for identification
+  virtual const std::string category() const { return "Crystal"; }
 
-    /// Initialise the properties
-    void init();
+private:
+  /// Initialise the properties
+  void init();
 
-    /// Run the algorithm
-    void exec();
-  };
-
+  /// Run the algorithm
+  void exec();
+};
 
 } // namespace Crystal
 } // namespace Mantid
 
-#endif  /* MANTID_CRYSTAL_PREDICTFRACTIONALPEAKS */
+#endif /* MANTID_CRYSTAL_PREDICTFRACTIONALPEAKS */

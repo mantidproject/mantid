@@ -7,10 +7,8 @@
 #include "MantidKernel/PropertyManager.h"
 #include "Poco/Path.h"
 
-namespace Mantid
-{
-namespace WorkflowAlgorithms
-{
+namespace Mantid {
+namespace WorkflowAlgorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -19,41 +17,45 @@ using namespace Geometry;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSBeamFluxCorrection)
 
-void SANSBeamFluxCorrection::init()
-{
-	  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
-			  "Workspace to be corrected");
-	  declareProperty(new WorkspaceProperty<>("InputMonitorWorkspace","",Direction::Input),
-			  "Workspace containing the monitor counts for the sample data");
+void SANSBeamFluxCorrection::init() {
+  declareProperty(
+      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      "Workspace to be corrected");
+  declareProperty(
+      new WorkspaceProperty<>("InputMonitorWorkspace", "", Direction::Input),
+      "Workspace containing the monitor counts for the sample data");
 
-	  std::vector<std::string> exts;
-	  exts.push_back("_event.nxs");
-	  exts.push_back(".nxs");
-	  exts.push_back(".nxs.h5");
-	  declareProperty(new API::FileProperty("ReferenceFluxFilename", "", API::FileProperty::Load, exts),
-	      "File containing the reference flux spectrum.");
+  std::vector<std::string> exts;
+  exts.push_back("_event.nxs");
+  exts.push_back(".nxs");
+  exts.push_back(".nxs.h5");
+  declareProperty(new API::FileProperty("ReferenceFluxFilename", "",
+                                        API::FileProperty::Load, exts),
+                  "File containing the reference flux spectrum.");
 
-	  declareProperty("ReductionProperties","__sans_reduction_properties", Direction::Input);
-	  declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output), "Corrected workspace.");
-	  declareProperty("OutputMessage", "", Direction::Output);
+  declareProperty("ReductionProperties", "__sans_reduction_properties",
+                  Direction::Input);
+  declareProperty(
+      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      "Corrected workspace.");
+  declareProperty("OutputMessage", "", Direction::Output);
 }
 
-void SANSBeamFluxCorrection::exec()
-{
-	Progress progress(this,0.0,1.0,10);
-	progress.report("Setting up beam flux correction");
+void SANSBeamFluxCorrection::exec() {
+  Progress progress(this, 0.0, 1.0, 10);
+  progress.report("Setting up beam flux correction");
 
-	// Reduction property manager
-	const std::string reductionManagerName = getProperty("ReductionProperties");
-	m_reductionManager = getProcessProperties(reductionManagerName);
+  // Reduction property manager
+  const std::string reductionManagerName = getProperty("ReductionProperties");
+  m_reductionManager = getProcessProperties(reductionManagerName);
 
-   // If the beam flux correction algorithm isn't in the reduction properties, add it
-   if (!m_reductionManager->existsProperty("BeamFluxAlgorithm"))
-   {
-     AlgorithmProperty *algProp = new AlgorithmProperty("BeamFluxAlgorithm");
-     algProp->setValue(toString());
-     m_reductionManager->declareProperty(algProp);
-   }
+  // If the beam flux correction algorithm isn't in the reduction properties,
+  // add it
+  if (!m_reductionManager->existsProperty("BeamFluxAlgorithm")) {
+    AlgorithmProperty *algProp = new AlgorithmProperty("BeamFluxAlgorithm");
+    algProp->setValue(toString());
+    m_reductionManager->declareProperty(algProp);
+  }
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr monitorWS = getProperty("InputMonitorWorkspace");
@@ -73,7 +75,8 @@ void SANSBeamFluxCorrection::exec()
   rebinAlg->setProperty("WorkspaceToRebin", fluxRefWS);
   rebinAlg->setProperty("WorkspaceToMatch", inputWS);
   rebinAlg->executeAsChildAlg();
-  MatrixWorkspace_sptr scaledfluxRefWS = rebinAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr scaledfluxRefWS =
+      rebinAlg->getProperty("OutputWorkspace");
 
   progress.report("Rebinning monitor data");
   rebinAlg = createChildAlgorithm("RebinToWorkspace");
@@ -98,7 +101,7 @@ void SANSBeamFluxCorrection::exec()
   divideAlg->executeAsChildAlg();
   outputWS = divideAlg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outputWS);
-  setProperty("OutputMessage", "Flux correction applied\n"+m_output_message);
+  setProperty("OutputMessage", "Flux correction applied\n" + m_output_message);
 }
 
 /**
@@ -106,17 +109,16 @@ void SANSBeamFluxCorrection::exec()
  * files since they have to produced by hand by the instrument
  * scientists. A simple Load algorithm should suffice.
  */
-MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference()
-{
-  const std::string referenceFluxFile = getPropertyValue("ReferenceFluxFilename");
+MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference() {
+  const std::string referenceFluxFile =
+      getPropertyValue("ReferenceFluxFilename");
   Poco::Path path(referenceFluxFile);
-  const std::string entryName = "SANSBeamFluxCorrection_"+path.getBaseName();
-  std::string fluxRefWSName = "__beam_flux_reference_"+path.getBaseName();
+  const std::string entryName = "SANSBeamFluxCorrection_" + path.getBaseName();
+  std::string fluxRefWSName = "__beam_flux_reference_" + path.getBaseName();
 
   // Load reference flux as needed
   MatrixWorkspace_sptr fluxRefWS;
-  if (m_reductionManager->existsProperty(entryName))
-  {
+  if (m_reductionManager->existsProperty(entryName)) {
     fluxRefWS = m_reductionManager->getProperty(entryName);
     fluxRefWSName = m_reductionManager->getPropertyValue(entryName);
     m_output_message += "   | Using flux reference " + referenceFluxFile + "\n";
@@ -126,11 +128,13 @@ MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference()
     loadAlg->executeAsChildAlg();
     Workspace_sptr tmpWS = loadAlg->getProperty("OutputWorkspace");
     fluxRefWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tmpWS);
-    m_output_message += "   | Loaded flux reference " + referenceFluxFile + "\n";
+    m_output_message +=
+        "   | Loaded flux reference " + referenceFluxFile + "\n";
 
     // Keep the reference data for later use
     AnalysisDataService::Instance().addOrReplace(fluxRefWSName, fluxRefWS);
-    m_reductionManager->declareProperty(new WorkspaceProperty<>(entryName, fluxRefWSName, Direction::InOut));
+    m_reductionManager->declareProperty(
+        new WorkspaceProperty<>(entryName, fluxRefWSName, Direction::InOut));
     m_reductionManager->setPropertyValue(entryName, fluxRefWSName);
     m_reductionManager->setProperty(entryName, fluxRefWS);
   }

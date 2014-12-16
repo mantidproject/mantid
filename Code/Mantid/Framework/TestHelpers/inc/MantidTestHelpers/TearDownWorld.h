@@ -1,7 +1,8 @@
 #ifndef TEARDOWNWORLD_H_
 #define TEARDOWNWORLD_H_
 /**
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -23,7 +24,7 @@
 */
 #include <cxxtest/GlobalFixture.h>
 
-// This file defines a set of CxxTest::GlobalFixture classes that 
+// This file defines a set of CxxTest::GlobalFixture classes that
 // are used to control various aspects of the global test setUp and tearDown
 // process
 
@@ -31,8 +32,7 @@
  * Defines a CxxTest::GlobalFixture that clears the AlgorithmManager
  * when its tearDownWorld() method is called.
  */
-class ClearAlgorithmManager : public CxxTest::GlobalFixture
-{
+class ClearAlgorithmManager : public CxxTest::GlobalFixture {
   bool tearDownWorld();
 };
 
@@ -42,8 +42,7 @@ class ClearAlgorithmManager : public CxxTest::GlobalFixture
  * Defines a CxxTest::GlobalFixture that clears the AnalysisDataService
  * when its tearDownWorld() method is called.
  */
-class ClearADS : public CxxTest::GlobalFixture
-{
+class ClearADS : public CxxTest::GlobalFixture {
   bool tearDownWorld();
 };
 
@@ -53,10 +52,8 @@ class ClearADS : public CxxTest::GlobalFixture
  * Defines a CxxTest::GlobalFixture that clears the PropertyManagerDataService
  * when its tearDownWorld() method is called.
  */
-class ClearPropertyManagerDataService : public CxxTest::GlobalFixture
-{
+class ClearPropertyManagerDataService : public CxxTest::GlobalFixture {
   bool tearDownWorld();
 };
-
 
 #endif // TEARDOWNWORLD_H_

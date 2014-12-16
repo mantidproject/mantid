@@ -1,7 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_RESOLUTIONCOEFFICIENTS_H_
 #define MANTID_MDALGORITHMS_RESOLUTIONCOEFFICIENTS_H_
 /**
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -23,36 +24,31 @@
 */
 #include "MantidKernel/Matrix.h"
 
-namespace Mantid
-{
-  namespace MDAlgorithms
-  {
-    //-------------------------------------------------------------------------
-    // Forward declarations
-    //-------------------------------------------------------------------------
-    class CachedExperimentInfo;
-    struct QOmegaPoint;
+namespace Mantid {
+namespace MDAlgorithms {
+//-------------------------------------------------------------------------
+// Forward declarations
+//-------------------------------------------------------------------------
+class CachedExperimentInfo;
+struct QOmegaPoint;
 
-    /**
-     * Defines the linear transformation from vector of
-     * independent integration functions to random
-     * integration variables. Defined in Toby G Perring's thesis
-     * pg 112, equation A.48. It is intimately linked to the
-     * TobyFitYVector as their values need to be in sync
-     */
-    class DLLExport TobyFitBMatrix : public Kernel::DblMatrix
-    {
-    public:
-      /// Default constructor sets the size of the matrix
-      TobyFitBMatrix();
+/**
+ * Defines the linear transformation from vector of
+ * independent integration functions to random
+ * integration variables. Defined in Toby G Perring's thesis
+ * pg 112, equation A.48. It is intimately linked to the
+ * TobyFitYVector as their values need to be in sync
+ */
+class DLLExport TobyFitBMatrix : public Kernel::DblMatrix {
+public:
+  /// Default constructor sets the size of the matrix
+  TobyFitBMatrix();
 
-      /// Calculate the values for this observation & QDeltaE point
-      void recalculate(const CachedExperimentInfo & observation,
-                       const QOmegaPoint & qOmega);
-
-    };
-
-  }
+  /// Calculate the values for this observation & QDeltaE point
+  void recalculate(const CachedExperimentInfo &observation,
+                   const QOmegaPoint &qOmega);
+};
+}
 }
 
 #endif /* MANTID_MDALGORITHMS_RESOLUTIONCOEFFICIENTS_H_ */

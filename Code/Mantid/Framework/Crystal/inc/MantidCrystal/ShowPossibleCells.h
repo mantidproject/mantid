@@ -1,22 +1,20 @@
 #ifndef MANTID_CRYSTAL_SHOW_POSSIBLE_CELLS_H_
 #define MANTID_CRYSTAL_SHOW_POSSIBLE_CELLS_H_
-    
-#include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h" 
 
-namespace Mantid
-{
-namespace Crystal
-{
+#include "MantidKernel/System.h"
+#include "MantidAPI/Algorithm.h"
+
+namespace Mantid {
+namespace Crystal {
 /** ShowPossibleCells : Algorithm to display a list of possible conventional
     cells corresponding to the UB saved in the sample associated
     with the specified PeaksWorkspace, provided the saved UB is for a Niggli
     reduced cell.
-    
+
     @author Dennis Mikkelson
     @date   2012-02-08
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & 
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory &
                      NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -34,42 +32,39 @@ namespace Crystal
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: 
+    File change history is stored at:
     <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ShowPossibleCells : public API::Algorithm
-  {
-  public:
-    ShowPossibleCells();
-    ~ShowPossibleCells();
-    
-    /// Algorithm's name for identification 
-    virtual const std::string name() const 
-            { return "ShowPossibleCells";};
+class DLLExport ShowPossibleCells : public API::Algorithm {
+public:
+  ShowPossibleCells();
+  ~ShowPossibleCells();
 
-    /// Algorithm's version for identification 
-    virtual int version() const 
-            { return 1;};
+  /// Algorithm's name for identification
+  virtual const std::string name() const { return "ShowPossibleCells"; };
 
-    /// Algorithm's category for identification
-    virtual const std::string category() const 
-            { return "Crystal";}
-    
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Show conventional cells corresponding to the UB stored with the sample for this peaks works space.";}
-   
-  private:
+  /// Algorithm's version for identification
+  virtual int version() const { return 1; };
 
-    /// Initialise the properties
-    void init();
+  /// Algorithm's category for identification
+  virtual const std::string category() const { return "Crystal"; }
 
-    /// Run the algorithm
-    void exec();
-  };
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Show conventional cells corresponding to the UB stored with the "
+           "sample for this peaks works space.";
+  }
 
+private:
+  /// Initialise the properties
+  void init();
+
+  /// Run the algorithm
+  void exec();
+};
 
 } // namespace Crystal
 } // namespace Mantid
 
-#endif  /* MANTID_CRYSTAL_SHOW_POSSIBLE_CELLS */
+#endif /* MANTID_CRYSTAL_SHOW_POSSIBLE_CELLS */

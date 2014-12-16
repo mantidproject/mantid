@@ -6,18 +6,17 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 
 /** SeqDomainSpectrumCreator :
 
     SeqDomainSpectrumCreator creates a special type of SeqDomain, which contains
     one FunctionDomain1DSpectrum for each histogram of the Workspace2D this
-    domain refers to. It can be used for functions that involve several histograms
+    domain refers to. It can be used for functions that involve several
+   histograms
     at once.
-    
+
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 28/05/2014
 
@@ -42,37 +41,35 @@ namespace CurveFitting
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-class DLLExport SeqDomainSpectrumCreator : public API::IDomainCreator
-{
+class DLLExport SeqDomainSpectrumCreator : public API::IDomainCreator {
 public:
-    SeqDomainSpectrumCreator(Kernel::IPropertyManager* manager,
-                             const std::string& workspacePropertyName);
+  SeqDomainSpectrumCreator(Kernel::IPropertyManager *manager,
+                           const std::string &workspacePropertyName);
 
-    virtual ~SeqDomainSpectrumCreator() { }
+  virtual ~SeqDomainSpectrumCreator() {}
 
-    virtual void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                              boost::shared_ptr<API::FunctionValues> &values,
-                              size_t i0 = 0);
+  virtual void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
+                            boost::shared_ptr<API::FunctionValues> &values,
+                            size_t i0 = 0);
 
-    virtual API::Workspace_sptr createOutputWorkspace(const std::string &baseName,
-                                       API::IFunction_sptr function,
-                                       boost::shared_ptr<API::FunctionDomain> domain,
-                                       boost::shared_ptr<API::FunctionValues> values,
-                                       const std::string &outputWorkspacePropertyName = "OutputWorkspace");
-    virtual size_t getDomainSize() const;
+  virtual API::Workspace_sptr createOutputWorkspace(
+      const std::string &baseName, API::IFunction_sptr function,
+      boost::shared_ptr<API::FunctionDomain> domain,
+      boost::shared_ptr<API::FunctionValues> values,
+      const std::string &outputWorkspacePropertyName = "OutputWorkspace");
+  virtual size_t getDomainSize() const;
 
 protected:
-    void setParametersFromPropertyManager();
-    void setMatrixWorkspace(API::MatrixWorkspace_sptr matrixWorkspace);
+  void setParametersFromPropertyManager();
+  void setMatrixWorkspace(API::MatrixWorkspace_sptr matrixWorkspace);
 
-    bool histogramIsUsable(size_t i) const;
+  bool histogramIsUsable(size_t i) const;
 
-    std::string m_workspacePropertyName;
-    API::MatrixWorkspace_sptr m_matrixWorkspace;
+  std::string m_workspacePropertyName;
+  API::MatrixWorkspace_sptr m_matrixWorkspace;
 };
-
 
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif  /* MANTID_CURVEFITTING_SEQDOMAINSPECTRUMCREATOR_H_ */
+#endif /* MANTID_CURVEFITTING_SEQDOMAINSPECTRUMCREATOR_H_ */

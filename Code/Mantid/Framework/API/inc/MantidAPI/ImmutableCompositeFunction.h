@@ -8,16 +8,18 @@
 
 #include <map>
 
-namespace Mantid
-{
-namespace API
-{
-/** 
-    Immutable composite function is a composite function which members cannot be added or removed
-    after creation. Only a derived class can add functions in its contructor (or methods). 
-    The function factory treat an ImmutableCompositeFunction as a simple function.
+namespace Mantid {
+namespace API {
+/**
+    Immutable composite function is a composite function which members cannot be
+   added or removed
+    after creation. Only a derived class can add functions in its contructor (or
+   methods).
+    The function factory treat an ImmutableCompositeFunction as a simple
+   function.
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -37,59 +39,60 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL ImmutableCompositeFunction : public CompositeFunction
-{
+class MANTID_API_DLL ImmutableCompositeFunction : public CompositeFunction {
 public:
   /// Default constructor
-  ImmutableCompositeFunction(): CompositeFunction(){}
+  ImmutableCompositeFunction() : CompositeFunction() {}
   // Destructor
-  ~ImmutableCompositeFunction(){}
+  ~ImmutableCompositeFunction() {}
 
-              /* Overriden methods */
+  /* Overriden methods */
 
   /// Returns the function's name
-  virtual std::string name()const {return "ImmutableCompositeFunction";}
+  virtual std::string name() const { return "ImmutableCompositeFunction"; }
   /// Writes itself into a string
-  std::string asString()const;
+  std::string asString() const;
   /// Set i-th parameter
-  void setParameter(size_t i, const double& value, bool explicitlySet = true)
-  {CompositeFunction::setParameter(i, value, explicitlySet);}
+  void setParameter(size_t i, const double &value, bool explicitlySet = true) {
+    CompositeFunction::setParameter(i, value, explicitlySet);
+  }
   /// Set i-th parameter description
-  void setParameterDescription(size_t i, const std::string& description)
-  {CompositeFunction::setParameterDescription(i, description);}
+  void setParameterDescription(size_t i, const std::string &description) {
+    CompositeFunction::setParameterDescription(i, description);
+  }
   /// Set parameter by name.
-  void setParameter(const std::string& name, const double& value, bool explicitlySet = true);
+  void setParameter(const std::string &name, const double &value,
+                    bool explicitlySet = true);
   /// Set description of parameter by name.
-  void setParameterDescription(const std::string& name, const std::string& description);
+  void setParameterDescription(const std::string &name,
+                               const std::string &description);
   /// Get i-th parameter
-  double getParameter(size_t i)const { return CompositeFunction::getParameter( i ); }
+  double getParameter(size_t i) const {
+    return CompositeFunction::getParameter(i);
+  }
   /// Get parameter by name.
-  double getParameter(const std::string& name)const;
+  double getParameter(const std::string &name) const;
   /// Returns the index of parameter name
-  size_t parameterIndex(const std::string& name)const;
+  size_t parameterIndex(const std::string &name) const;
   /// Returns the name of parameter i
-  std::string parameterName(size_t i)const;
+  std::string parameterName(size_t i) const;
 
 protected:
-
   /// Make it protected
   using CompositeFunction::addFunction;
   /// Overload addFunction to take a bare pointer
-  void addFunction(IFunction* fun);
+  void addFunction(IFunction *fun);
   /// Define an alias for a parameter
-  void setAlias(const std::string& parName, const std::string& alias);
+  void setAlias(const std::string &parName, const std::string &alias);
   /// Add default ties
-  void addDefaultTies(const std::string& ties);
+  void addDefaultTies(const std::string &ties);
   /// Add default constraints
-  void addDefaultConstraints(const std::string& constraints);
+  void addDefaultConstraints(const std::string &constraints);
 
 private:
-
   /// Keep paramater aliases
-  std::map< std::string, size_t > m_alias;
-
+  std::map<std::string, size_t> m_alias;
 };
-
 
 } // namespace API
 } // namespace Mantid

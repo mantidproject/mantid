@@ -7,95 +7,95 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include <boost/scoped_ptr.hpp>
 
-namespace Mantid
-{
-namespace MDAlgorithms
-{
+namespace Mantid {
+namespace MDAlgorithms {
 
-  /** Load a .nxs file into a MDEventWorkspace.
-    
-    @author Janik Zikovsky
-    @date 2011-07-12
+/** Load a .nxs file into a MDEventWorkspace.
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  @author Janik Zikovsky
+  @date 2011-07-12
 
-    This file is part of Mantid.
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport LoadMD : public API::IFileLoader<Kernel::NexusDescriptor>
-  {
-  public:
-    LoadMD();
-    ~LoadMD();
-    
-    /// Algorithm's name for identification 
-    virtual const std::string name() const { return "LoadMD";};
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Load a MDEventWorkspace in .nxs format.";}
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    /// Algorithm's version for identification 
-    virtual int version() const { return 1;};
-    /// Algorithm's category for identification
-    virtual const std::string category() const { return "MDAlgorithms";}
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport LoadMD : public API::IFileLoader<Kernel::NexusDescriptor> {
+public:
+  LoadMD();
+  ~LoadMD();
 
-    /// Returns a confidence value that this algorithm can load a file
-    int confidence(Kernel::NexusDescriptor & descriptor) const;
+  /// Algorithm's name for identification
+  virtual const std::string name() const { return "LoadMD"; };
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Load a MDEventWorkspace in .nxs format.";
+  }
 
-  private:
-    /// Initialise the properties
-    void init();
-    /// Run the algorithm
-    void exec();
+  /// Algorithm's version for identification
+  virtual int version() const { return 1; };
+  /// Algorithm's category for identification
+  virtual const std::string category() const { return "MDAlgorithms"; }
 
-    /// Helper method
-    template<typename MDE, size_t nd>
-    void doLoad(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  /// Returns a confidence value that this algorithm can load a file
+  int confidence(Kernel::NexusDescriptor &descriptor) const;
 
-    void loadExperimentInfos(boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
+private:
+  /// Initialise the properties
+  void init();
+  /// Run the algorithm
+  void exec();
 
-    void loadSlab(std::string name, void * data, MDEvents::MDHistoWorkspace_sptr ws, NeXus::NXnumtype dataType);
-    void loadHisto();
+  /// Helper method
+  template <typename MDE, size_t nd>
+  void doLoad(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
-    void loadDimensions();
+  void loadExperimentInfos(
+      boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
 
-    /// Load all the affine matricies
-    void loadAffineMatricies(API::IMDWorkspace_sptr ws);
-    /// Load a given affine matrix
-    API::CoordTransform *loadAffineMatrix(std::string entry_name);
+  void loadSlab(std::string name, void *data,
+                MDEvents::MDHistoWorkspace_sptr ws, NeXus::NXnumtype dataType);
+  void loadHisto();
 
-    /// Open file handle
-    boost::scoped_ptr< ::NeXus::File> m_file;
+  void loadDimensions();
 
-    /// Name of that file
-    std::string m_filename;
+  /// Load all the affine matricies
+  void loadAffineMatricies(API::IMDWorkspace_sptr ws);
+  /// Load a given affine matrix
+  API::CoordTransform *loadAffineMatrix(std::string entry_name);
 
-    /// Number of dimensions in loaded file
-    size_t m_numDims;
+  /// Open file handle
+  boost::scoped_ptr<::NeXus::File> m_file;
 
-    /// Each dimension object loaded.
-    std::vector<Mantid::Geometry::IMDDimension_sptr> m_dims;
-    ///load only the box structure with empty boxes but do not tload boxes events
-    bool m_BoxStructureAndMethadata;
+  /// Name of that file
+  std::string m_filename;
 
-  };
+  /// Number of dimensions in loaded file
+  size_t m_numDims;
 
+  /// Each dimension object loaded.
+  std::vector<Mantid::Geometry::IMDDimension_sptr> m_dims;
+  /// load only the box structure with empty boxes but do not tload boxes events
+  bool m_BoxStructureAndMethadata;
+};
 
 } // namespace MDEvents
 } // namespace Mantid
 
-#endif  /* MANTID_MDEVENTS_LOADMD_H_ */
+#endif /* MANTID_MDEVENTS_LOADMD_H_ */

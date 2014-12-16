@@ -5,10 +5,8 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/NeutronAtom.h"
 
-namespace Mantid
-{
-namespace Geometry
-{
+namespace Mantid {
+namespace Geometry {
 
 /** IsotropicAtomBraggScatterer
 
@@ -16,7 +14,8 @@ namespace Geometry
     a given HKL using the following equation, which gives the
     structure factor for the j-th atom in the unit cell:
 
-        F(hkl)_j = b_j * o_j * DWF_j(hkl) * exp[i * 2pi * (h*x_j + k*y_j + l*z_j)]
+        F(hkl)_j = b_j * o_j * DWF_j(hkl) * exp[i * 2pi * (h*x_j + k*y_j +
+   l*z_j)]
 
     Since there are many terms in that equation, further explanation
     is required. The j-th atom in a unit cell occupies a certain position,
@@ -49,7 +48,8 @@ namespace Geometry
     depending on the crystal structure, but as a first approximation it is
     often enough.
 
-    This class is designed to handle atoms in a unit cell. When a position is set,
+    This class is designed to handle atoms in a unit cell. When a position is
+   set,
     the internally stored space group is used to generate all positions that are
     symmetrically equivalent. In the structure factor calculation method
     all contributions are summed.
@@ -58,14 +58,17 @@ namespace Geometry
     Fm-3m, Cu atoms occupy the position (0,0,0) and, because of the F-centering,
     also 3 additional positions.
 
-        BraggScatterer_sptr cu = BraggScattererFactory::Instance().createScatterer(
+        BraggScatterer_sptr cu =
+   BraggScattererFactory::Instance().createScatterer(
                                                             "IsotropicAtomBraggScatterer",
-                                                            "Element=Cu; SpaceGroup=F m -3 m")
+                                                            "Element=Cu;
+   SpaceGroup=F m -3 m")
         cu->setProperty("UnitCell", unitCellToStr(cellCu));
 
         StructureFactor F = cu->calculateStructureFactor(V3D(1, 1, 1));
 
-    The structure factor F contains contributions from all 4 copper atoms in the cell.
+    The structure factor F contains contributions from all 4 copper atoms in the
+   cell.
     This is convenient especially for general positions. The general position
     of Fm-3m for example has 192 equivalents.
 
@@ -96,42 +99,43 @@ namespace Geometry
   */
 class IsotropicAtomBraggScatterer;
 
-typedef boost::shared_ptr<IsotropicAtomBraggScatterer> IsotropicAtomBraggScatterer_sptr;
+typedef boost::shared_ptr<IsotropicAtomBraggScatterer>
+    IsotropicAtomBraggScatterer_sptr;
 
-class MANTID_GEOMETRY_DLL IsotropicAtomBraggScatterer : public BraggScattererInCrystalStructure
-{
+class MANTID_GEOMETRY_DLL IsotropicAtomBraggScatterer
+    : public BraggScattererInCrystalStructure {
 public:
-    IsotropicAtomBraggScatterer();
-    virtual ~IsotropicAtomBraggScatterer() { }
+  IsotropicAtomBraggScatterer();
+  virtual ~IsotropicAtomBraggScatterer() {}
 
-    std::string name() const { return "IsotropicAtomBraggScatterer"; }
-    BraggScatterer_sptr clone() const;
+  std::string name() const { return "IsotropicAtomBraggScatterer"; }
+  BraggScatterer_sptr clone() const;
 
-    std::string getElement() const;
-    PhysicalConstants::NeutronAtom getNeutronAtom() const;
+  std::string getElement() const;
+  PhysicalConstants::NeutronAtom getNeutronAtom() const;
 
-    double getOccupancy() const;
-    double getU() const;
+  double getOccupancy() const;
+  double getU() const;
 
-    StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const;
+  StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const;
 
 protected:
-    void setElement(const std::string &element);
+  void setElement(const std::string &element);
 
-    void declareScattererProperties();
-    void afterScattererPropertySet(const std::string &propertyName);
+  void declareScattererProperties();
+  void afterScattererPropertySet(const std::string &propertyName);
 
-    double getDebyeWallerFactor(const Kernel::V3D &hkl) const;
-    double getScatteringLength() const;
+  double getDebyeWallerFactor(const Kernel::V3D &hkl) const;
+  double getScatteringLength() const;
 
-    PhysicalConstants::NeutronAtom m_atom;
-    std::string m_label;
+  PhysicalConstants::NeutronAtom m_atom;
+  std::string m_label;
 };
 
-typedef boost::shared_ptr<IsotropicAtomBraggScatterer> IsotropicAtomBraggScatterer_sptr;
-
+typedef boost::shared_ptr<IsotropicAtomBraggScatterer>
+    IsotropicAtomBraggScatterer_sptr;
 
 } // namespace Geometry
 } // namespace Mantid
 
-#endif  /* MANTID_GEOMETRY_ISOTROPICATOMBRAGGSCATTERER_H_ */
+#endif /* MANTID_GEOMETRY_ISOTROPICATOMBRAGGSCATTERER_H_ */

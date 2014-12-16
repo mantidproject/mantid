@@ -7,81 +7,81 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 
-namespace Mantid
-{
-namespace MDAlgorithms
-{
+namespace Mantid {
+namespace MDAlgorithms {
 
-  /** Compare two MDWorkspaces for equality.
-    
-    @date 2012-01-19
+/** Compare two MDWorkspaces for equality.
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  @date 2012-01-19
 
-    This file is part of Mantid.
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport CompareMDWorkspaces  : public API::Algorithm
-  {
-  public:
-    CompareMDWorkspaces();
-    virtual ~CompareMDWorkspaces();
-    
-    virtual const std::string name() const;
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Compare two MDWorkspaces for equality.";}
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    virtual int version() const;
-    virtual const std::string category() const;
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport CompareMDWorkspaces : public API::Algorithm {
+public:
+  CompareMDWorkspaces();
+  virtual ~CompareMDWorkspaces();
 
-  private:
-    void init();
-    void exec();
-    void doComparison();
-    void compareMDGeometry(Mantid::API::IMDWorkspace_sptr ws1, Mantid::API::IMDWorkspace_sptr ws2);
-    void compareMDHistoWorkspaces(Mantid::MDEvents::MDHistoWorkspace_sptr ws1, Mantid::MDEvents::MDHistoWorkspace_sptr ws2);
+  virtual const std::string name() const;
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Compare two MDWorkspaces for equality.";
+  }
 
-    template<typename MDE, size_t nd>
-    void compareMDWorkspaces(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  virtual int version() const;
+  virtual const std::string category() const;
 
-    template<typename T>
-    void compare(T a, T b, const std::string & message);
+private:
+  void init();
+  void exec();
+  void doComparison();
+  void compareMDGeometry(Mantid::API::IMDWorkspace_sptr ws1,
+                         Mantid::API::IMDWorkspace_sptr ws2);
+  void compareMDHistoWorkspaces(Mantid::MDEvents::MDHistoWorkspace_sptr ws1,
+                                Mantid::MDEvents::MDHistoWorkspace_sptr ws2);
 
-    template<typename T>
-    inline void compareTol(T a, T b, const std::string & message);
+  template <typename MDE, size_t nd>
+  void compareMDWorkspaces(
+      typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
-    Mantid::API::IMDWorkspace_sptr inWS2;
+  template <typename T> void compare(T a, T b, const std::string &message);
 
-    /// Result string
-    std::string m_result;
+  template <typename T>
+  inline void compareTol(T a, T b, const std::string &message);
 
-    /// Tolerance
-    double m_tolerance;
+  Mantid::API::IMDWorkspace_sptr inWS2;
 
-    /// Is CheckEvents true
-    bool m_CheckEvents;
+  /// Result string
+  std::string m_result;
 
-    bool m_CompareBoxID;
+  /// Tolerance
+  double m_tolerance;
 
-  };
+  /// Is CheckEvents true
+  bool m_CheckEvents;
 
+  bool m_CompareBoxID;
+};
 
 } // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_MDALGORITHMS_COMPAREMDWORKSPACES_H_ */
+#endif /* MANTID_MDALGORITHMS_COMPAREMDWORKSPACES_H_ */

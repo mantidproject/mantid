@@ -10,93 +10,90 @@
 using namespace Mantid::API;
 using namespace std;
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 
-  //----------------------------------------------------------------------------------------------
-  DECLARE_FUNCTION(ThermalNeutronDtoTOFFunction)
+//----------------------------------------------------------------------------------------------
+DECLARE_FUNCTION(ThermalNeutronDtoTOFFunction)
 
-  //----------------------------------------------------------------------------------------------
-  /** Constructor
-   */
-  ThermalNeutronDtoTOFFunction::ThermalNeutronDtoTOFFunction()
-  {
-  }
+//----------------------------------------------------------------------------------------------
+/** Constructor
+ */
+ThermalNeutronDtoTOFFunction::ThermalNeutronDtoTOFFunction() {}
 
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-  */
-  ThermalNeutronDtoTOFFunction::~ThermalNeutronDtoTOFFunction()
-  {
-  }
+//----------------------------------------------------------------------------------------------
+/** Destructor
+*/
+ThermalNeutronDtoTOFFunction::~ThermalNeutronDtoTOFFunction() {}
 
-  /**
-  * Define the fittable parameters
-  */
-  void ThermalNeutronDtoTOFFunction::init()
-  {
+/**
+* Define the fittable parameters
+*/
+void ThermalNeutronDtoTOFFunction::init() {
 
-    /// Instrument geometry related
-    declareParameter("Dtt1", 1.0);   // 0
-    declareParameter("Dtt1t", 1.0);  // 1
-    declareParameter("Dtt2t", 1.0);  // 2
-    declareParameter("Zero", 0.0);   // 3
-    declareParameter("Zerot", 0.0);  // 4
+  /// Instrument geometry related
+  declareParameter("Dtt1", 1.0);  // 0
+  declareParameter("Dtt1t", 1.0); // 1
+  declareParameter("Dtt2t", 1.0); // 2
+  declareParameter("Zero", 0.0);  // 3
+  declareParameter("Zerot", 0.0); // 4
 
-    declareParameter("Width", 1.0);  // 5
-    declareParameter("Tcross", 1.0); // 6
-  }
+  declareParameter("Width", 1.0);  // 5
+  declareParameter("Tcross", 1.0); // 6
+}
 
 /** Main function
   * xValues containing the d-space value of peaks centres
   */
-void ThermalNeutronDtoTOFFunction::function1D(double* out, const double* xValues, const size_t nData) const
-{
-    double dtt1 = getParameter("Dtt1");
-    double dtt1t = getParameter("Dtt1t");
-    double dtt2t = getParameter("Dtt2t");
-    double zero = getParameter("Zero");
-    double zerot = getParameter("Zerot");
-    double width = getParameter("Width");
-    double tcross = getParameter("Tcross");
+void ThermalNeutronDtoTOFFunction::function1D(double *out,
+                                              const double *xValues,
+                                              const size_t nData) const {
+  double dtt1 = getParameter("Dtt1");
+  double dtt1t = getParameter("Dtt1t");
+  double dtt2t = getParameter("Dtt2t");
+  double zero = getParameter("Zero");
+  double zerot = getParameter("Zerot");
+  double width = getParameter("Width");
+  double tcross = getParameter("Tcross");
 
-    for (size_t i = 0; i < nData; ++i)
-    {
-      // out[i] = corefunction(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot, width, tcross);
-      out[i] = calThermalNeutronTOF(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot, width, tcross);
-    }
+  for (size_t i = 0; i < nData; ++i) {
+    // out[i] = corefunction(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot, width,
+    // tcross);
+    out[i] = calThermalNeutronTOF(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot,
+                                  width, tcross);
+  }
 
-    return;
+  return;
 }
 
 //------------------------------------------------------------------------------------------------
 /** Main function
   * xValues containing the d-space value of peaks centres
   */
-void ThermalNeutronDtoTOFFunction::function1D(vector<double>& out, const vector<double> xValues) const
-{
-    double dtt1 = getParameter(0);
-    double dtt1t = getParameter(1);
-    double dtt2t = getParameter(2);
-    double zero = getParameter(3);
-    double zerot = getParameter(4);
-    double width = getParameter(5);
-    double tcross = getParameter(6);
+void
+ThermalNeutronDtoTOFFunction::function1D(vector<double> &out,
+                                         const vector<double> xValues) const {
+  double dtt1 = getParameter(0);
+  double dtt1t = getParameter(1);
+  double dtt2t = getParameter(2);
+  double zero = getParameter(3);
+  double zerot = getParameter(4);
+  double width = getParameter(5);
+  double tcross = getParameter(6);
 
-    size_t nData = out.size();
+  size_t nData = out.size();
 
-    for (size_t i = 0; i < nData; ++i)
-    {
-      out[i] = calThermalNeutronTOF(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot, width, tcross);
-    }
+  for (size_t i = 0; i < nData; ++i) {
+    out[i] = calThermalNeutronTOF(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot,
+                                  width, tcross);
+  }
 
-    return;
+  return;
 }
 
-void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
-{
+void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out,
+                                                   const double *xValues,
+                                                   const size_t nData) {
   // 1. Get hold all parameters
   const double dtt1 = getParameter("Dtt1");
   const double dtt1t = getParameter("Dtt1t");
@@ -107,20 +104,21 @@ void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out, const double *
   const double tcross = getParameter("Tcross");
 
   // 2. Calcualtion
-  for (size_t i = 0; i < nData; ++i)
-  {
+  for (size_t i = 0; i < nData; ++i) {
     // a) Some calcualtion
     double x = xValues[i];
-    double n = 0.5*gsl_sf_erfc(width*(tcross-1/x));
-    double u = width*(tcross-1/x);
+    double n = 0.5 * gsl_sf_erfc(width * (tcross - 1 / x));
+    double u = width * (tcross - 1 / x);
 
-    double deriv_dtt1 = n*x;
-    double deriv_dtt1t = (1-n)*x;
-    double deriv_dtt2t = (n-1)/x;
+    double deriv_dtt1 = n * x;
+    double deriv_dtt1t = (1 - n) * x;
+    double deriv_dtt2t = (n - 1) / x;
     double deriv_zero = n;
-    double deriv_zerot = (1-n);
-    double deriv_width = -(zero+dtt1*x-zerot-dtt1t*x+dtt2t/x)*exp(-u*u)/sqrt(PI)*(tcross-1/x);
-    double deriv_tcross = -(zero+dtt1*x-zerot-dtt1t*x+dtt2t/x)*exp(-u*u)/sqrt(PI)*width;
+    double deriv_zerot = (1 - n);
+    double deriv_width = -(zero + dtt1 * x - zerot - dtt1t * x + dtt2t / x) *
+                         exp(-u * u) / sqrt(PI) * (tcross - 1 / x);
+    double deriv_tcross = -(zero + dtt1 * x - zerot - dtt1t * x + dtt2t / x) *
+                          exp(-u * u) / sqrt(PI) * width;
 
     // b) Set
     out->set(i, 0, deriv_dtt1);
@@ -135,14 +133,15 @@ void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out, const double *
   return;
 }
 
-
 /** Some forbidden function
   */
-void ThermalNeutronDtoTOFFunction::functionDerivLocal(API::Jacobian* , const double* , const size_t )
-{
-  throw Mantid::Kernel::Exception::NotImplementedError("functionDerivLocal is not implemented for ThermalNeutronDtoTOFFunction.");
+void ThermalNeutronDtoTOFFunction::functionDerivLocal(API::Jacobian *,
+                                                      const double *,
+                                                      const size_t) {
+  throw Mantid::Kernel::Exception::NotImplementedError(
+      "functionDerivLocal is not implemented for "
+      "ThermalNeutronDtoTOFFunction.");
 }
-
 
 } // namespace CurveFitting
 } // namespace Mantid

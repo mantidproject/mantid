@@ -9,10 +9,8 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSResolution)
@@ -20,8 +18,7 @@ DECLARE_ALGORITHM(EQSANSResolution)
 /*
  * Double Boltzmann fit to the TOF resolution as a function of wavelength
  */
-double EQSANSResolution::getTOFResolution(double wl)
-{
+double EQSANSResolution::getTOFResolution(double wl) {
   double y0 = -388;
   double A = 3838;
   double frac = 0.04398;
@@ -30,7 +27,9 @@ double EQSANSResolution::getTOFResolution(double wl)
   double k1 = -0.5587;
   double k2 = -65.46;
 
-  return y0 + A * ( frac/(1+std::exp((wl-x01)/k1)) + (1-frac)/(1+std::exp((wl-x02)/k2)) );
+  return y0 +
+         A * (frac / (1 + std::exp((wl - x01) / k1)) +
+              (1 - frac) / (1 + std::exp((wl - x02) / k2)));
 }
 
 } // namespace Algorithms
