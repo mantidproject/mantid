@@ -592,10 +592,9 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   }
 
   // Need to show first time setup dialog?
-  if (shouldWeShowFirstTimeSetup(args))
-  {
-    showFirstTimeSetup();
-  }
+  // It is raised in the about2start method as on OS X if the event loop is not running then raise()
+  // does not push the dialog to the top of the stack
+  d_showFirstTimeSetup = shouldWeShowFirstTimeSetup(args);
  
   using namespace Mantid::API;
   // Do this as late as possible to avoid unnecessary updates
@@ -616,16 +615,16 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
 */
 bool ApplicationWindow::shouldWeShowFirstTimeSetup(const QStringList& commandArguments)
 {
-	//Early check of execute and quit command arguments used by system tests.
-	QString str;
-	foreach(str, commandArguments)
-	{
-		if((this->shouldExecuteAndQuit(str)) || 
-      (this->isSilentStartup(str)))
-		{
-		return false;
-		}
-	}
+  //Early check of execute and quit command arguments used by system tests.
+  QString str;
+  foreach(str, commandArguments)
+  {
+    if((this->shouldExecuteAndQuit(str)) ||
+       (this->isSilentStartup(str)))
+    {
+      return false;
+    }
+  }
 
   //first check the facility and instrument
   using Mantid::Kernel::ConfigService;
@@ -16934,6 +16933,9 @@ void ApplicationWindow::validateWindowPos(MdiSubWindow* w, int& x, int& y)
  *  - Update of Script Repository
  */
 void ApplicationWindow::about2Start(){
+  // Show first time set up
+  if(d_showFirstTimeSetup) showFirstTimeSetup();
+
   // triggers the execution of UpdateScriptRepository Algorithm in a separated thread.
   // this was necessary because in order to log while in a separate thread, it is necessary to have
   // the postEvents available, so, we need to execute it here at about2Start.
