@@ -11,6 +11,8 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 
@@ -61,7 +63,8 @@ namespace Crystal
 
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output),"Output PeaksWorkspace");
     declareProperty("OutputChi2",0.0,"Chi-square is available as output", Direction::Output);
-
+    declareProperty(new WorkspaceProperty<ITableWorkspace>("StatisticsTable","StaticticsTable",Direction::Output),
+        "An output table workspace for the statistics of the peaks.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -76,6 +79,22 @@ namespace Crystal
     if (peaksW != InPeaksW)
       peaksW = InPeaksW->clone();
     
+    // Init a table workspace
+    DataObjects::TableWorkspace_sptr tablews =
+        boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace());
+    tablews->addColumn("str", "Resolution Shell");
+    tablews->addColumn("int", "No. of Unique Reflections");
+    tablews->addColumn("double", "Resolution Min");
+    tablews->addColumn("double", "Resolution Max");
+    tablews->addColumn("double", "Multiplicity");
+    tablews->addColumn("double", "Mean ((I)/sd(I))");
+    tablews->addColumn("double", "Rmerge");
+    tablews->addColumn("double", "Rpim");
+    tablews->addColumn("double", "Data Completeness");
+    // append to the table workspace
+    API::TableRow newrow = tablews->appendRow();
+    newrow << "Overall";
+
     int NumberPeaks = peaksW->getNumberPeaks();
     for (int i = 0; i < NumberPeaks; i++)
     {
@@ -119,8 +138,8 @@ namespace Crystal
     criteria.push_back( std::pair<std::string, bool>("Wavelength", true) );
     peaksW->sort(criteria);
     int unique = NumberPeaks - equivalent;
-    std::cout << "No of Unique Reflections " << unique << "\n";
-    std::cout << "Resolution range (Angstroms) " << peaks[0].getWavelength() << "  " << peaks[NumberPeaks-1].getWavelength() << "\n";
+    // table workspace output
+    newrow << unique << peaks[0].getWavelength()  << peaks[NumberPeaks-1].getWavelength();
 
     criteria.clear();
     // Sort by bank and then HKL
@@ -220,10 +239,8 @@ namespace Crystal
     multiplicity.push_back(data.size());
     Statistics statsMult = getStatistics(multiplicity);
     multiplicity.clear();
-    std::cout << "Multiplicity " << statsMult.mean << "\n";
-    std::cout << "Mean((I)/sd(I)) " << statsIsigI.mean << "\n";
-    std::cout << "Rmerge (%) " << 100.0 * rSum / f2Sum <<"\n";
-    std::cout << "Rpim (%) " << 100.0 * rpSum / f2Sum <<"\n";
+    // statistics to output table workspace
+    newrow  << statsMult.mean << statsIsigI.mean << 100.0 * rSum / f2Sum << 100.0 * rpSum / f2Sum << 0.0;
     data.clear();
     sig2.clear();
     //Reset hkl of equivalent peaks to original value
@@ -233,6 +250,7 @@ namespace Crystal
     }
     setProperty("OutputWorkspace", peaksW);
     setProperty("OutputChi2", Chisq);
+    setProperty("StatisticsTable", tablews);
 
   }
   void SortHKL::Outliers(std::vector<double>& data, std::vector<double>& sig2)
