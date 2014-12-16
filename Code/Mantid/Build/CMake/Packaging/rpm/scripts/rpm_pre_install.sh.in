@@ -6,16 +6,12 @@
 #
 ENVVARS_ON_INSTALL=@ENVVARS_ON_INSTALL_INT@
 
-# Remove stale links if left around
-if [  -h $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot ]; then
-  rm $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot
+# Remove links
+if [ -h $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot ]; then
+    rm $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot
 fi
-if [  -h $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot ]; then
-    rm $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot
-fi
-# Stale _exe
-if [  -e $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot_exe ]; then
-    rm $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot_exe
+if [ -h $RPM_INSTALL_PREFIX0/@BIN_DIR@/Mantidplot ]; then
+    rm $RPM_INSTALL_PREFIX0/@BIN_DIR@/Mantidplot
 fi
 
 if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
