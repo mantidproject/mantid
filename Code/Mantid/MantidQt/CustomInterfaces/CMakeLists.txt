@@ -2,6 +2,7 @@ set ( SRC_FILES
 	src/ApplyCorr.cpp
 	src/CalcCorr.cpp
 	src/ConvFit.cpp
+  src/DataComparison.cpp
 	src/DirectConvertToEnergy.cpp
 	src/Elwin.cpp
 	src/Fury.cpp
@@ -78,6 +79,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Background.h
 	inc/MantidQtCustomInterfaces/CalcCorr.h
 	inc/MantidQtCustomInterfaces/ConvFit.h
+  inc/MantidQtCustomInterfaces/DataComparison.h
 	inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/DllConfig.h
 	inc/MantidQtCustomInterfaces/Elwin.h
@@ -164,6 +166,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ApplyCorr.h
                 inc/MantidQtCustomInterfaces/CalcCorr.h
                 inc/MantidQtCustomInterfaces/ConvFit.h
+                inc/MantidQtCustomInterfaces/DataComparison.h
                 inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/Elwin.h
                 inc/MantidQtCustomInterfaces/Fury.h
@@ -227,6 +230,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
+               inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/IndirectBayes.ui
                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.ui
