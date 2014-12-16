@@ -23,6 +23,7 @@ private:
 private slots:
   void confirm();
   void cancel();
+  void allowUsageDataStateChanged(int);
 
   void openReleaseNotes();
   void openSampleDatasets();
