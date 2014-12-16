@@ -37,8 +37,31 @@
    <string>Welcome to Mantid</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QDialog#FirstTimeSetup{background-image: url(:/First_use_Background.png);}
-</string>
+   <string notr="true">QDialog#FirstTimeSetup{
+	background-image: url(:/First_use_Background.png);
+}
+QDialog#FirstTimeSetup QLabel{
+	font: 12px &quot;Segoe UI&quot;;
+    font-weight: bold;
+}
+QDialog#FirstTimeSetup QCheckbox{
+	font: 12px&quot;Segoe UI&quot;;
+    font-weight: bold;
+}
+QDialog#FirstTimeSetup QGroupBox{
+	font: 12px &quot;Segoe UI&quot;;
+    font-weight: bold;
+}
+QDialog#FirstTimeSetup QPushButton{
+	font: 12px&quot;Segoe UI&quot;;
+}
+QDialog#FirstTimeSetup QComboBox{
+	font: 12px &quot;Segoe UI&quot;;
+}
+QDialog#FirstTimeSetup QCommandLinkButton{
+	font: 28px &quot;Segoe UI&quot;;
+    font-weight: bold;
+}</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <property name="leftMargin">
@@ -66,8 +89,9 @@
        <property name="font">
         <font>
          <family>Segoe UI</family>
-         <pointsize>18</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
@@ -100,8 +124,9 @@
        <property name="font">
         <font>
          <family>Segoe UI</family>
-         <pointsize>18</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
@@ -134,8 +159,9 @@
        <property name="font">
         <font>
          <family>Segoe UI</family>
-         <pointsize>18</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
@@ -168,8 +194,9 @@
        <property name="font">
         <font>
          <family>Segoe UI</family>
-         <pointsize>18</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
@@ -202,13 +229,16 @@
        <property name="font">
         <font>
          <family>Segoe UI</family>
-         <pointsize>24</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">color: rgb(0, 105, 0);</string>
+        <string notr="true">color: rgb(0, 105, 0);
+font: 28px &quot;Segoe UI&quot;;
+font-weight: bold;</string>
        </property>
        <property name="text">
         <string>Tutorials</string>
@@ -220,13 +250,16 @@
        <property name="font">
         <font>
          <family>Segoe UI</family>
-         <pointsize>24</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">color: rgb(0, 105, 0);</string>
+        <string notr="true">color: rgb(0, 105, 0);
+font: 28px &quot;Segoe UI&quot;;
+font-weight: bold;</string>
        </property>
        <property name="text">
         <string>Version </string>
@@ -238,8 +271,9 @@
        <property name="font">
         <font>
          <family>Segoe UI</family>
-         <pointsize>18</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
@@ -273,8 +307,9 @@ color: rgb(0, 0, 0);</string>
        <property name="font">
         <font>
          <family>Segoe UI</family>
-         <pointsize>18</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
@@ -321,6 +356,9 @@ color: rgb(0, 0, 0);</string>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="spacing">
+        <number>2</number>
+       </property>
        <item>
         <widget class="QLabel" name="lbUpdate">
          <property name="minimumSize">
@@ -332,7 +370,9 @@ color: rgb(0, 0, 0);</string>
          <property name="font">
           <font>
            <family>Segoe UI</family>
+           <pointsize>-1</pointsize>
            <weight>75</weight>
+           <italic>false</italic>
            <bold>true</bold>
           </font>
          </property>
@@ -387,12 +427,17 @@ color: rgb(0, 0, 0);</string>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="spacing">
+        <number>3</number>
+       </property>
        <item>
         <widget class="QGroupBox" name="grpPersonalSetup">
          <property name="font">
           <font>
            <family>Segoe UI</family>
+           <pointsize>-1</pointsize>
            <weight>75</weight>
+           <italic>false</italic>
            <bold>true</bold>
           </font>
          </property>
@@ -413,6 +458,9 @@ color: rgb(0, 0, 0);</string>
           <property name="fieldGrowthPolicy">
            <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
           </property>
+          <property name="verticalSpacing">
+           <number>4</number>
+          </property>
           <property name="topMargin">
            <number>18</number>
           </property>
@@ -424,7 +472,9 @@ color: rgb(0, 0, 0);</string>
             <property name="font">
              <font>
               <family>Segoe UI</family>
+              <pointsize>-1</pointsize>
               <weight>75</weight>
+              <italic>false</italic>
               <bold>true</bold>
              </font>
             </property>
@@ -451,7 +501,9 @@ color: rgb(0, 0, 0);</string>
             <property name="font">
              <font>
               <family>Segoe UI</family>
+              <pointsize>-1</pointsize>
               <weight>75</weight>
+              <italic>false</italic>
               <bold>true</bold>
              </font>
             </property>
@@ -475,7 +527,9 @@ color: rgb(0, 0, 0);</string>
             <property name="font">
              <font>
               <family>Segoe UI</family>
+              <pointsize>-1</pointsize>
               <weight>75</weight>
+              <italic>false</italic>
               <bold>true</bold>
              </font>
             </property>
@@ -512,7 +566,9 @@ color: rgb(0, 0, 0);</string>
             <property name="font">
              <font>
               <family>Segoe UI</family>
+              <pointsize>-1</pointsize>
               <weight>75</weight>
+              <italic>false</italic>
               <bold>true</bold>
              </font>
             </property>
