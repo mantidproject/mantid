@@ -175,8 +175,6 @@ class CutMD(DataProcessorAlgorithm):
     
     def __verify_input_workspace(self, to_cut):
         coord_system = to_cut.getSpecialCoordinateSystem()
-        if not coord_system == SpecialCoordinateSystem.HKL:
-            raise ValueError("Input Workspace must be in reciprocal lattice dimensions (HKL)")
         
         ndims = to_cut.getNumDims()
         if ndims < 3 or ndims > 4:
@@ -185,6 +183,10 @@ class CutMD(DataProcessorAlgorithm):
         # Try to sanity check the order of the dimensions. This is important.
         axes_check = self.getProperty("CheckAxes").value
         if axes_check:
+            
+            if not coord_system == SpecialCoordinateSystem.HKL:
+                raise ValueError("Input Workspace must be in reciprocal lattice dimensions (HKL)")
+            
             predicates = ["^(H.*)|(\\[H,0,0\\].*)$","^(K.*)|(\\[0,K,0\\].*)$","^(L.*)|(\\[0,0,L\\].*)$"]  
             n_crystallographic_dims = __builtin__.min(3, ndims)
             for i in range(n_crystallographic_dims):

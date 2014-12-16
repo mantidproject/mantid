@@ -26,7 +26,7 @@ class CutMDTest(unittest.TestCase):
         test_md = CreateMDWorkspace(Dimensions=3, Extents=[-10,10,-10,10,-10,10], Names="A,B,C", Units="U,U,U")
         # Explicitly set the coordinate system to lab Q.
         SetSpecialCoordinates(InputWorkspace=test_md, SpecialCoordinates='Q (lab frame)')
-        self.assertRaises(RuntimeError, CutMD, InputWorkspace=test_md, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=False)
+        self.assertRaises(RuntimeError, CutMD, InputWorkspace=test_md, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=True)
         
     def test_exec_throws_if_set_to_be_a_hkl_workspace_but_with_missaligned_dimension_names(self):
         test_md = CreateMDWorkspace(Dimensions=3, Extents=[-10,10,-10,10,-10,10], Names="K,H,L", Units="U,U,U") # K,H,L are the dimension names
