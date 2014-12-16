@@ -88,10 +88,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.map_file = 'a_map_file'
         self.assertEqual(propman.map_file,'a_map_file.map');
 
-        self.assertTrue(propman.hard_mask_file is None);
-        propman.hard_mask_file = 'a_mask_file'
-        self.assertEqual(propman.hard_mask_file,'a_mask_file.msk');
-
         self.assertFalse(propman.monovan_mapfile is None," Monovan map file by default is defined");
         propman.monovan_mapfile = 'a_monovan_map_file'
         self.assertEqual(propman.monovan_mapfile,'a_monovan_map_file.map');
@@ -100,11 +96,20 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
 
         prop_changed =propman.getChangedProperties()
-        self.assertEqual(len(prop_changed),4)
+        self.assertEqual(len(prop_changed),3)
         self.assertTrue('det_cal_file' in prop_changed)
-        self.assertTrue('hard_mask_file' in prop_changed)
         self.assertTrue('map_file' in prop_changed)
         self.assertTrue('monovan_mapfile' in prop_changed)
+
+    def test_hartmask_plus_or_only(self):
+        propman = self.prop_man
+
+        self.assertTrue(propman.hard_mask_file is None);
+        propman.hard_mask_file = 'a_mask_file'
+        self.assertEqual(propman.hard_mask_file,'a_mask_file.msk');
+
+        prop_changed =propman.getChangedProperties()
+        self.assertTrue('hard_mask_file' in prop_changed)
 
 
     def test_set_spectra_to_mon(self):
@@ -630,6 +635,41 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         propman.log_to_mantid = 0
         self.assertFalse(propman.log_to_mantid)
+
+    def test_hadmask_options(self):
+        propman = self.prop_man
+        propman.hard_mask_file = 'some_hard_mask_file'
+        self.assertEqual(propman.hard_mask_file,'some_hard_mask_file.msk')
+
+        propman.use_hard_mask_only = False
+        self.assertFalse(propman.use_hard_mask_only)
+        propman.use_hard_mask_only = True
+        self.assertTrue(propman.use_hard_mask_only)
+
+        propman.hardmaskPlus = 'other_hard_mask_file.msk'
+
+        self.assertFalse(propman.use_hard_mask_only)
+        self.assertEqual(propman.hard_mask_file,'other_hard_mask_file.msk')
+        self.assertTrue(propman.run_diagnostics)
+
+        propman.hardmaskOnly = 'more_hard_mask_file'
+        self.assertTrue(propman.use_hard_mask_only)
+        self.assertEqual(propman.hard_mask_file,'more_hard_mask_file.msk')
+        self.assertTrue(propman.run_diagnostics)
+
+        propman.hardmaskOnly = 'None'
+        self.assertFalse(propman.use_hard_mask_only)
+        self.assertTrue(propman.run_diagnostics)
+        self.assertTrue(propman.hard_mask_file is None)
+
+
+        propman.hardmaskPlus = 'a_hard_mask_file'
+        self.assertFalse(propman.use_hard_mask_only)
+        self.assertEqual(propman.hard_mask_file,'a_hard_mask_file.msk')
+        self.assertTrue(propman.run_diagnostics)
+
+
+
 
 
 

@@ -27,20 +27,16 @@ namespace
   {
   protected:
     virtual int sendHTTPSRequest(const std::string& url, 
-                          std::ostream& responseStream,
-                          const StringToStringMap& headers = StringToStringMap())
+                          std::ostream& responseStream)
     {
       UNUSED_ARG(url);
-      UNUSED_ARG(headers);
       responseStream << "HTTPS request succeeded";
       return 200;
     }
     virtual int sendHTTPRequest(const std::string& url, 
-                              std::ostream& responseStream,
-                              const StringToStringMap& headers = StringToStringMap())
+                              std::ostream& responseStream)
     {
       UNUSED_ARG(url);
-      UNUSED_ARG(headers);
       responseStream << "HTTP request succeeded";
       return 200;
     }
