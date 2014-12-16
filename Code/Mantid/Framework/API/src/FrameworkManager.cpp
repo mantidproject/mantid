@@ -95,12 +95,8 @@ FrameworkManagerImpl::FrameworkManagerImpl()
     g_log.information() << "Instrument updates disabled - cannot update instrument definitions." << std::endl;
   }
 
-  int sendStartupUsageInfo = 0;
-  retVal = Kernel::ConfigService::Instance().getValue("usagereports.enabled",sendStartupUsageInfo);
-  if ((retVal == 1) &&  (sendStartupUsageInfo == 1))
-  {
-    SendStartupUsageInfo();
-  }
+  // the algorithm will see if it should run
+  SendStartupUsageInfo();
 
 }
 
