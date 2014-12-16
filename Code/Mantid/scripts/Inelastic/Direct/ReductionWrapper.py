@@ -1,7 +1,7 @@
 from mantid.simpleapi import *
 from mantid import config
-from Direct.DirectEnergyConversion import  DirectEnergyConversion
-from Direct.PropertyManager import PropertyManager;
+
+from PropertyManager import PropertyManager;
 #import inspect
 import os
 from abc import abstractmethod
@@ -11,7 +11,7 @@ class ReductionWrapper(object):
     """ Abstract class provides interface to direct inelastic reduction 
         allowing it to be run  from Mantid, web services, or system tests 
         using the same interface and the same run file placed in different 
-        locations
+        locations.
     """ 
     def __init__(self,instrumentName,web_var=None):
       """ sets properties defaults for the instrument with Name"""
@@ -117,6 +117,10 @@ def iliad(F):
     """ This decorator wraps around main procedure, tries to identify if the procedure is run from web services or 
         from Mantid directly and sets up web-modified variables as input for reduction if it runs from web services. 
 
+        The procedure to identify web services presence is simplified and contains two checks: 
+        1) file reduce_vars.py is present and has been imported by reduction script as web_vars 
+        2) the method, this decorators frames, is called with arguments, where second argument defines output directory for reduction data
+           (this variable is present and not empty)
 
     """
     def iliad_wrapper(*args):

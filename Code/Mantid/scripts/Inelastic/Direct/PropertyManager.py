@@ -110,7 +110,7 @@ class PropertyManager(NonIDF_Properties):
         param_list =  prop_helpers.build_properties_dict(param_list,self.__subst_dict)
 
         #--------------------------------------------------------------------------------------
-        # modify some IDF properties, which need overloaded getter (and this getter is provided somewhere in this class)
+        # modify some IDF properties, which need overloaded getter (and this getter is provided somewhere among PropertiesDescriptors)
         if 'background_test_range' in param_list:
             val = param_list['background_test_range']
             param_list['_background_test_range'] = val;
@@ -125,7 +125,7 @@ class PropertyManager(NonIDF_Properties):
         #end
         #
         if 'monovan_integr_range' in param_list:
-            # get reference to class method
+            # get reference to the existing class method
             param_list['_monovan_integr_range']=self.__class__.__dict__['monovan_integr_range']
             #
             val = param_list['monovan_integr_range']

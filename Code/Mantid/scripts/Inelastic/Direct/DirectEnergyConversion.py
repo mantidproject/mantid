@@ -11,6 +11,7 @@ import CommonFunctions as common
 import diagnostics
 from PropertyManager import PropertyManager;
 
+
 def setup_reducer(inst_name,reload_instrument=False):
     """
     Given an instrument name or prefix this sets up a converter
@@ -1145,7 +1146,7 @@ class DirectEnergyConversion(object):
 
 
         for file_format  in formats:
-            for case in switch(file_format):
+            for case in common.switch(file_format):
                 if case('nxspe'):
                    filename = save_file +'.nxspe';
                    SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=prop_man.apply_kikf_correction,psi=prop_man.psi)
@@ -1381,28 +1382,8 @@ class DirectEnergyConversion(object):
 
 
  
-  
 
-class switch(object):
-    """ Helper class providing nice switch statement""" 
-    def __init__(self, value):
-        self.value = value
-        self.fall = False
 
-    def __iter__(self):
-        """Return the match method once, then stop"""
-        yield self.match
-        raise StopIteration
-    
-    def match(self, *args):
-        """Indicate whether or not to enter a case suite"""
-        if self.fall or not args:
-            return True
-        elif self.value in args: # changed for v1.5, see below
-            self.fall = True
-            return True
-        else:
-            return False
 
 def get_failed_spectra_list_from_masks(masking_wksp):
     """Compile a list of spectra numbers that are marked as

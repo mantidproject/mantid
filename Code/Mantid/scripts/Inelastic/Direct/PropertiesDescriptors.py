@@ -1,4 +1,4 @@
-""" File contains collection of Descriptors used to define complex reduction properties """ 
+""" File contains collection of Descriptors used to define complex properties in NonIDF_Properties and PropertyManager classes """ 
 
 from mantid.simpleapi import *
 from mantid import api
@@ -117,9 +117,11 @@ class SaveFileName(object):
         self._file_name = value
 #end SaveFileName
 
-
 #
 class InstrumentDependentProp(object):
+    """ Generic property describing some aspects of instrument (e.g. name, short name etc), 
+        which are undefined if no instrument is defined
+    """
     def __init__(self,prop_name):
         self._prop_name = prop_name;
     def __get__(self,instance,owner=None):
@@ -190,8 +192,8 @@ class DetCalFile(object):
     #       Reducer.log('Setting detector calibration to {0}, which is probably a workspace '.format(str(Reducer.det_cal_file)))
     #else:
     #    Reducer.log('Setting detector calibration to detector block info from '+str(sample_run))
-
 #end DetCalFile
+
 #
 class MapMaskFile(object):
     """ common method to wrap around an auxiliary file name """
@@ -227,7 +229,7 @@ class HardMaskPlus(object):
         prop_helpers.gen_setter(instance.__dict__,'hard_mask_file',value);
         # This property enables diagnostics 
         instance.run_diagnostics = True;
-
+#end HardMaskPlus
 
 
 class HardMaskOnly(object):
@@ -372,12 +374,10 @@ class SpectraToMonitorsList(object):
             else:
                 result =[int(spectra_list)];
        return result
-
 #end SpectraToMonitorsList
 
-# format(s) to save data
 class SaveFormat(object):
-   # formats available for saving
+   # formats available for saving the data
    save_formats = ['spe','nxspe','nxs'];
 
    def __get__(self,instance,type=None):
