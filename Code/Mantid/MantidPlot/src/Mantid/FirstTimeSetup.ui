@@ -37,7 +37,31 @@
    <string>Welcome to Mantid</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QDialog#FirstTimeSetup{background-image: url(:/First_use_Background.png);}
+   <string notr="true">QDialog#FirstTimeSetup{
+	background-image: url(:/First_use_Background.png);
+}
+QDialog#FirstTimeSetup QLabel{
+	font: 12px &quot;Segoe UI&quot;;
+    font-weight: bold;
+}
+QDialog#FirstTimeSetup QCheckbox{
+	font: 12px &quot;Segoe UI&quot;;
+    font-weight: bold;
+}
+QDialog#FirstTimeSetup QGroupBox{
+	font: 12px &quot;Segoe UI&quot;;
+    font-weight: bold;
+}
+QDialog#FirstTimeSetup QPushButton{
+	font: 12px &quot;Segoe UI&quot;;
+}
+QDialog#FirstTimeSetup QComboBox{
+	font: 12px &quot;Segoe UI&quot;;
+}
+QDialog#FirstTimeSetup QCommandLinkButton{
+	font: 28px &quot;Segoe UI&quot;;
+    font-weight: bold;
+}
 </string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -60,8 +84,9 @@
        <property name="font">
         <font>
          <family>Segoe UI</family>
-         <pointsize>18</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
@@ -95,13 +120,16 @@ color: rgb(0, 0, 0);</string>
        <property name="font">
         <font>
          <family>Segoe UI</family>
-         <pointsize>24</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">color: rgb(0, 105, 0);</string>
+        <string notr="true">color: rgb(0, 105, 0);
+font-size: 28px
+</string>
        </property>
        <property name="text">
         <string>Version </string>
@@ -113,8 +141,9 @@ color: rgb(0, 0, 0);</string>
        <property name="font">
         <font>
          <family>Segoe UI</family>
-         <pointsize>18</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
@@ -147,8 +176,9 @@ color: rgb(0, 0, 0);</string>
        <property name="font">
         <font>
          <family>Segoe UI</family>
-         <pointsize>18</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
@@ -181,13 +211,16 @@ color: rgb(0, 0, 0);</string>
        <property name="font">
         <font>
          <family>Segoe UI</family>
-         <pointsize>24</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">color: rgb(0, 105, 0);</string>
+        <string notr="true">color: rgb(0, 105, 0);
+font-size: 28px
+</string>
        </property>
        <property name="text">
         <string>Tutorials</string>
@@ -199,8 +232,9 @@ color: rgb(0, 0, 0);</string>
        <property name="font">
         <font>
          <family>Segoe UI</family>
-         <pointsize>18</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
@@ -233,8 +267,9 @@ color: rgb(0, 0, 0);</string>
        <property name="font">
         <font>
          <family>Segoe UI</family>
-         <pointsize>18</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
@@ -267,8 +302,9 @@ color: rgb(0, 0, 0);</string>
        <property name="font">
         <font>
          <family>Segoe UI</family>
-         <pointsize>18</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
@@ -324,7 +360,9 @@ color: rgb(0, 0, 0);</string>
        <property name="font">
         <font>
          <family>Segoe UI</family>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
@@ -360,7 +398,9 @@ color: rgb(0, 0, 0);</string>
        <property name="font">
         <font>
          <family>Segoe UI</family>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
@@ -392,7 +432,9 @@ color: rgb(0, 0, 0);</string>
           <property name="font">
            <font>
             <family>Segoe UI</family>
+            <pointsize>-1</pointsize>
             <weight>75</weight>
+            <italic>false</italic>
             <bold>true</bold>
            </font>
           </property>
@@ -419,7 +461,9 @@ color: rgb(0, 0, 0);</string>
           <property name="font">
            <font>
             <family>Segoe UI</family>
+            <pointsize>-1</pointsize>
             <weight>75</weight>
+            <italic>false</italic>
             <bold>true</bold>
            </font>
           </property>
@@ -443,7 +487,9 @@ color: rgb(0, 0, 0);</string>
           <property name="font">
            <font>
             <family>Segoe UI</family>
+            <pointsize>-1</pointsize>
             <weight>75</weight>
+            <italic>false</italic>
             <bold>true</bold>
            </font>
           </property>
