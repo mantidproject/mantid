@@ -4,7 +4,7 @@ from mantid.kernel import *
 import mantid
 
 
-class VesuvioResolution(DataProcessorAlgorithm):
+class VesuvioResolution(PythonAlgorithm):
 
     def category(self):
         return 'Inelastic'
