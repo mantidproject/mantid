@@ -360,6 +360,10 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   // Set the Paraview path BEFORE libaries are loaded. Doing it here prevents
   // the logs being poluted with library loading errors.
   trySetParaviewPath(args);
+  // Process all pending events before loading Mantid
+  // Helps particularly on Windows with cleaning up the
+  // splash screen after the 3D visualization dialog has closed
+  qApp->processEvents();
 
   using Mantid::Kernel::ConfigService;
   auto & config = ConfigService::Instance(); // Starts logging
