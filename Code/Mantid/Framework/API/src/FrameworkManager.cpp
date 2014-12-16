@@ -114,9 +114,20 @@ void FrameworkManagerImpl::UpdateInstrumentDefinitions() {
 }
 
 /// Sends startup information about OS and Mantid version
-void FrameworkManagerImpl::SendStartupUsageInfo() {
-  try {
-    IAlgorithm *algSendStartupUsage = this->createAlgorithm("SendUsage");
+void FrameworkManagerImpl::SendStartupUsageInfo()
+{
+  // see whether or not to send
+  int sendStartupUsageInfo = 0;
+  int retVal = Kernel::ConfigService::Instance().getValue(
+      "usagereports.enabled", sendStartupUsageInfo);
+  if ((retVal == 0) || (sendStartupUsageInfo == 0)) {
+    return; // exit early
+  }
+
+  // do it
+  try
+  {
+    IAlgorithm* algSendStartupUsage = this->createAlgorithm("SendUsage");
     algSendStartupUsage->setAlgStartupLogging(false);
     Poco::ActiveResult<bool> result = algSendStartupUsage->executeAsync();
   } catch (Kernel::Exception::NotFoundError &) {
