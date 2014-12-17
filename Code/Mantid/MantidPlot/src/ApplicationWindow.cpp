@@ -360,6 +360,10 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   // Set the Paraview path BEFORE libaries are loaded. Doing it here prevents
   // the logs being poluted with library loading errors.
   trySetParaviewPath(args);
+  // Process all pending events before loading Mantid
+  // Helps particularly on Windows with cleaning up the
+  // splash screen after the 3D visualization dialog has closed
+  qApp->processEvents();
 
   using Mantid::Kernel::ConfigService;
   auto & config = ConfigService::Instance(); // Starts logging
@@ -588,11 +592,48 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   }
 
   // Need to show first time setup dialog?
+  // It is raised in the about2start method as on OS X if the event loop is not running then raise()
+  // does not push the dialog to the top of the stack
+  d_showFirstTimeSetup = shouldWeShowFirstTimeSetup(args);
+ 
+  using namespace Mantid::API;
+  // Do this as late as possible to avoid unnecessary updates
+  AlgorithmFactory::Instance().enableNotifications();
+  AlgorithmFactory::Instance().notificationCenter.postNotification(new AlgorithmFactoryUpdateNotification);
+
+  /*
+  The scripting enironment call setScriptingLanguage is trampling over the PATH, so we have to set it again.
+  Here we do not off the setup dialog.
+  */
+  const bool skipDialog = true;
+  trySetParaviewPath(args, skipDialog);
+}
+
+/** Determines if the first time dialog should be shown
+* @param commandArguments : all command line arguments.
+* @returns true if the dialog should be shown
+*/
+bool ApplicationWindow::shouldWeShowFirstTimeSetup(const QStringList& commandArguments)
+{
+  //Early check of execute and quit command arguments used by system tests.
+  QString str;
+  foreach(str, commandArguments)
+  {
+    if((this->shouldExecuteAndQuit(str)) ||
+       (this->isSilentStartup(str)))
+    {
+      return false;
+    }
+  }
+
+  //first check the facility and instrument
+  using Mantid::Kernel::ConfigService;
+  auto & config = ConfigService::Instance(); 
   std::string facility = config.getString("default.facility");
   std::string instrument = config.getString("default.instrument");
   if ( facility.empty() || instrument.empty() )
   {
-    showFirstTimeSetup();
+    return true;
   }
   else
   {
@@ -609,20 +650,29 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
       //failed to find the facility or instrument
       g_log.error()<<"Could not find your default facility '" << facility 
         <<"' or instrument '" << instrument << "' in facilities.xml, showing please select again." << std::endl;
-      showFirstTimeSetup();
+      return true;
     }
   }
-  using namespace Mantid::API;
-  // Do this as late as possible to avoid unnecessary updates
-  AlgorithmFactory::Instance().enableNotifications();
-  AlgorithmFactory::Instance().notificationCenter.postNotification(new AlgorithmFactoryUpdateNotification);
 
-  /*
-  The scripting enironment call setScriptingLanguage is trampling over the PATH, so we have to set it again.
-  Here we do not off the setup dialog.
-  */
-  const bool skipDialog = true;
-  trySetParaviewPath(args, skipDialog);
+  QSettings settings;
+  settings.beginGroup("Mantid/FirstUse");
+  const bool doNotShowUntilNextRelease = settings.value("DoNotShowUntilNextRelease", 0).toInt();
+  const QString lastVersion = settings.value("LastVersion", "").toString();
+  settings.endGroup();
+
+  if (!doNotShowUntilNextRelease)
+  {
+    return true;
+  }
+
+  //Now check if the version has changed since last time
+  const QString version = QString::fromStdString(Mantid::Kernel::MantidVersion::releaseNotes());
+  if (version != lastVersion)
+  {
+    return true;
+  }
+
+  return false;
 }
 
 /*
@@ -647,7 +697,8 @@ void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments, 
     bool b_skipDialog = noDialog;
     foreach(str, commandArguments)
     {
-      if(this->shouldExecuteAndQuit(str))
+      if ((this->shouldExecuteAndQuit(str)) ||
+        (this->isSilentStartup(str)))
       {
         b_skipDialog = true;
         break;
@@ -675,6 +726,7 @@ void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments, 
       {
         //Launch the dialog to set the PV path.
         SetUpParaview pv(SetUpParaview::FirstLaunch);
+        pv.setWindowFlags(Qt::WindowStaysOnTopHint);
         pv.exec();
       }
     }
@@ -1402,6 +1454,7 @@ void ApplicationWindow::tableMenuAboutToShow()
     tableMenu->addAction(actionConvertTableToWorkspace);
   }
   tableMenu->addAction(actionConvertTableToMatrixWorkspace);
+  tableMenu->addAction(actionSortTable);
 
   tableMenu->insertSeparator();
   tableMenu->addAction(actionShowPlotWizard);
@@ -4671,33 +4724,6 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     }
   }
 
-  if(tsv.hasSection("multiLayer"))
-  {
-    std::vector<std::string> multiLayer = tsv.sections("multiLayer");
-    for(auto it = multiLayer.begin(); it != multiLayer.end(); ++it)
-    {
-      openMultiLayer(*it, fileVersion);
-    }
-  }
-
-  if(tsv.hasSection("SurfacePlot"))
-  {
-    std::vector<std::string> plotSections = tsv.sections("SurfacePlot");
-    for(auto it = plotSections.begin(); it != plotSections.end(); ++it)
-    {
-      openSurfacePlot(*it, fileVersion);
-    }
-  }
-
-  if(tsv.hasSection("log"))
-  {
-    std::vector<std::string> logSections = tsv.sections("log");
-    for(auto it = logSections.begin(); it != logSections.end(); ++it)
-    {
-      currentFolder()->appendLogInfo(QString::fromStdString(*it));
-    }
-  }
-
   if(tsv.hasSection("table"))
   {
     std::vector<std::string> tableSections = tsv.sections("table");
@@ -4725,6 +4751,33 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     }
   }
 
+  if(tsv.hasSection("multiLayer"))
+  {
+    std::vector<std::string> multiLayer = tsv.sections("multiLayer");
+    for(auto it = multiLayer.begin(); it != multiLayer.end(); ++it)
+    {
+      openMultiLayer(*it, fileVersion);
+    }
+  }
+
+  if(tsv.hasSection("SurfacePlot"))
+  {
+    std::vector<std::string> plotSections = tsv.sections("SurfacePlot");
+    for(auto it = plotSections.begin(); it != plotSections.end(); ++it)
+    {
+      openSurfacePlot(*it, fileVersion);
+    }
+  }
+
+  if(tsv.hasSection("log"))
+  {
+    std::vector<std::string> logSections = tsv.sections("log");
+    for(auto it = logSections.begin(); it != logSections.end(); ++it)
+    {
+      currentFolder()->appendLogInfo(QString::fromStdString(*it));
+    }
+  }
+
   if(tsv.hasSection("note"))
   {
     std::vector<std::string> noteSections = tsv.sections("note");
@@ -4740,9 +4793,14 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     std::vector<std::string> scriptSections = tsv.sections("scriptwindow");
     for(auto it = scriptSections.begin(); it != scriptSections.end(); ++it)
     {
-      std::string scriptLines = *it;
-      QStringList sl = QString::fromStdString(scriptLines).split("\n");
-      openScriptWindow(sl);
+      TSVSerialiser sTSV(*it);
+      QStringList files;
+
+      auto scriptNames = sTSV.values("ScriptNames");
+      //Iterate, ignoring scriptNames[0] which is just "ScriptNames"
+      for(size_t i = 1; i < scriptNames.size(); ++i)
+        files.append(QString::fromStdString(scriptNames[i]));
+      openScriptWindow(files);
     }
   }
 
@@ -6557,10 +6615,7 @@ void ApplicationWindow::sortActiveTable()
   if (!t)
     return;
 
-  if ((int)t->selectedColumns().count()>0)
-    t->sortTableDialog();
-  else
-    QMessageBox::warning(this, "MantidPlot - Column selection error","Please select a column first!");//Mantid
+  t->sortTableDialog();
 }
 
 void ApplicationWindow::sortSelection()
@@ -8975,7 +9030,10 @@ void ApplicationWindow::analysisMenuAboutToShow()
     analysisMenu->addAction(actionShowColStatistics);
     analysisMenu->addAction(actionShowRowStatistics);
     analysisMenu->insertSeparator();
-    analysisMenu->addAction(actionSortSelection);
+    if (w->isA("Table"))
+    {
+      analysisMenu->addAction(actionSortSelection);
+    }
     analysisMenu->addAction(actionSortTable);
 
     normMenu->clear();
@@ -11076,25 +11134,23 @@ void ApplicationWindow::openMultiLayer(const std::string& lines, const int fileV
 
 /** This method opens script window with a list of scripts loaded
  */
-void ApplicationWindow::openScriptWindow(const QStringList &list)
+void ApplicationWindow::openScriptWindow(const QStringList& files)
 {
   showScriptWindow();
   if(!scriptingWindow)
     return;
 
   scriptingWindow->setWindowTitle("MantidPlot: " + scriptingEnv()->languageName() + " Window");
-  QStringList scriptnames;
 
-  foreach (QString fileNameEntry, list)
-  {
-    scriptnames.append(fileNameEntry.split("\t"));
-  }
-
+  //The first time we don't use a new tab, to re-use the blank script tab
+  //on further iterations we open a new tab
   bool newTab = false;
-  foreach (QString scriptname, scriptnames)
+  for(auto file = files.begin(); file != files.end(); ++file)
   {
-    scriptingWindow->open(scriptname,newTab);
-    newTab=false;
+    if(file->isEmpty())
+      continue;
+    scriptingWindow->open(*file, newTab);
+    newTab = true;
   }
 }
 
@@ -11339,7 +11395,7 @@ void ApplicationWindow::openSurfacePlot(const std::string& lines, const int file
         }
       } //select line "title"
 
-      int style;
+      int style = Qwt3D::WIREFRAME;
       if(tsv.selectLine("Style"))
         tsv >> style;
 
@@ -13699,6 +13755,15 @@ bool ApplicationWindow::shouldExecuteAndQuit(const QString& arg)
   return arg.endsWith("--execandquit") || arg.endsWith("-xq");
 }
 
+/*
+@param arg: command argument
+@return TRUE if argument suggests a silent startup
+*/
+bool ApplicationWindow::isSilentStartup(const QString& arg)
+{
+  return arg.endsWith("--silent") || arg.endsWith("-s");
+}
+
 void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
 {
   int num_args = args.count();
@@ -13736,6 +13801,10 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
       exec = true;
       quit = true;
     }
+    else if (isSilentStartup(str))
+    {
+      g_log.debug("Starting in Silent mode");
+    }\
     // if filename not found yet then these are all program arguments so we should
     // know what they all are
     else if (file_name.isEmpty() && (str.startsWith("-") || str.startsWith("--")))
@@ -16864,6 +16933,9 @@ void ApplicationWindow::validateWindowPos(MdiSubWindow* w, int& x, int& y)
  *  - Update of Script Repository
  */
 void ApplicationWindow::about2Start(){
+  // Show first time set up
+  if(d_showFirstTimeSetup) showFirstTimeSetup();
+
   // triggers the execution of UpdateScriptRepository Algorithm in a separated thread.
   // this was necessary because in order to log while in a separate thread, it is necessary to have
   // the postEvents available, so, we need to execute it here at about2Start.

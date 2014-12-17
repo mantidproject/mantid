@@ -52,11 +52,13 @@ void SeqDomainSpectrumCreator::createDomain(boost::shared_ptr<FunctionDomain> &d
 
     size_t numberOfHistograms = m_matrixWorkspace->getNumberHistograms();
     for(size_t i = 0; i < numberOfHistograms; ++i) {
-        FunctionDomain1DSpectrumCreator *spectrumDomain = new FunctionDomain1DSpectrumCreator;
-        spectrumDomain->setMatrixWorkspace(m_matrixWorkspace);
-        spectrumDomain->setWorkspaceIndex(i);
+        if(histogramIsUsable(i)) {
+            FunctionDomain1DSpectrumCreator *spectrumDomain = new FunctionDomain1DSpectrumCreator;
+            spectrumDomain->setMatrixWorkspace(m_matrixWorkspace);
+            spectrumDomain->setWorkspaceIndex(i);
 
-        seqDomain->addCreator(IDomainCreator_sptr(spectrumDomain));
+            seqDomain->addCreator(IDomainCreator_sptr(spectrumDomain));
+        }
     }
 
     domain.reset(seqDomain);
@@ -102,6 +104,7 @@ Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(const std::string
 
     MatrixWorkspace_sptr outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create(m_matrixWorkspace));
 
+    // Assign y-values, taking into account masked detectors
     for(size_t i = 0; i < seqDomain->getNDomains(); ++i) {
         FunctionDomain_sptr localDomain;
         FunctionValues_sptr localValues;
@@ -109,15 +112,24 @@ Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(const std::string
         seqDomain->getDomainAndValues(i, localDomain, localValues);
         function->function(*localDomain, *localValues);
 
+        boost::shared_ptr<FunctionDomain1DSpectrum> spectrumDomain = boost::dynamic_pointer_cast<FunctionDomain1DSpectrum>(localDomain);
+
+        if(spectrumDomain) {
+            size_t wsIndex = spectrumDomain->getWorkspaceIndex();
+
+            MantidVec& yValues = outputWs->dataY(wsIndex);
+            for(size_t j = 0; j < yValues.size(); ++j) {
+                yValues[j] = localValues->getCalculated(j);
+            }
+        }
+    }
+
+    // Assign x-values on all histograms
+    for(size_t i = 0; i < m_matrixWorkspace->getNumberHistograms(); ++i) {
         const MantidVec& originalXValue = m_matrixWorkspace->readX(i);
         MantidVec& xValues = outputWs->dataX(i);
         assert(xValues.size() == originalXValue.size());
-        MantidVec& yValues = outputWs->dataY(i);
-
         xValues.assign( originalXValue.begin(), originalXValue.end() );
-        for(size_t j = 0; j < yValues.size(); ++j) {
-            yValues[j] = localValues->getCalculated(j);
-        }
     }
 
     if(m_manager && !outputWorkspacePropertyName.empty()) {
@@ -170,6 +182,26 @@ void SeqDomainSpectrumCreator::setMatrixWorkspace(MatrixWorkspace_sptr matrixWor
     }
 
     m_matrixWorkspace = matrixWorkspace;
+}
+
+/// Determines whether a spectrum is masked, in case there is no instrument this always returns true.
+bool SeqDomainSpectrumCreator::histogramIsUsable(size_t i) const
+{
+    if(!m_matrixWorkspace) {
+        throw std::invalid_argument("No matrix workspace assigned.");
+    }
+
+    try {
+        Geometry::IDetector_const_sptr detector = m_matrixWorkspace->getDetector(i);
+
+        if(!detector) {
+            return true;
+        }
+
+        return !detector->isMasked();
+    } catch(Kernel::Exception::NotFoundError) {
+        return true;
+    }
 }
 
 

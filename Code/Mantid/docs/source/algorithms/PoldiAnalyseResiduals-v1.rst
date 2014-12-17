@@ -14,5 +14,47 @@ After fitting a model to POLDI 2D-data the residuals have to be analysed in orde
 
 The algorithm iteratively calculates the correlation spectrum of the residual data, distributes the correlation counts over the 2D residual data and normalizes the residuals so that their sum is equal to zero. The correlation spectra of all steps are accumulated and returned as output. In the spectrum it's for example possible to spot additional peaks, which may have been hidden in by larger peaks in a first data analysis.
 
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+The following example shows how to calculate the residuals following a fit performed with :ref:`algm-PoldiFitPeaks2D` on Silicon data that had been collected for a calibration measurement.
+
+.. testcode:: ExSiliconMerged
+
+    # Load data from file, load instrument and truncate data to correct size
+    data_Si_raw = Load("Poldi2013Silicon.nxs")
+    LoadInstrument(data_Si_raw, InstrumentName="POLDI")
+    data_Si = PoldiTruncateData(data_Si_raw)
+
+    # Perform correlation method, find and refine peaks in correlation spectrum
+    correlation_Si = PoldiAutoCorrelation(data_Si)
+    peaks_Si_raw = PoldiPeakSearch(correlation_Si)
+
+    # Only use the 11 strongest peaks
+    DeleteTableRows(TableWorkspace=peaks_Si_raw, Rows="12-20")
+
+    peaks_Si_1D = PoldiFitPeaks1D(correlation_Si, FwhmMultiples=4, PoldiPeakTable="peaks_Si_raw",
+                                    ResultTableWorkspace = "result_table_Si",
+                                    FitCharacteristicsWorkspace = "raw_fit_results_Si",
+                                    FitPlotsWorkspace = "fit_plots_Si")
+
+    # Fit peaks to original 2D data
+    fit_result_Si_2D = PoldiFitPeaks2D(data_Si, PoldiPeakWorkspace="peaks_Si_1D", MaximumIterations=100, RefinedPoldiPeakWorkspace="peaks_Si_2D")
+
+    # Calculate residuals
+    residuals_Si = PoldiAnalyseResiduals(MeasuredCountData=data_Si, FittedCountData="fit_result_Si_2D", MaxIterations=5)
+
+    residual_data = residuals_Si.readY(0)
+
+    print "Residuals are in the range: [", round(min(residual_data), 2), ", ", round(max(residual_data), 2), "]"
+
+The output contains the range in which residuals are found:
+    
+.. testoutput:: ExSiliconMerged
+
+    Residuals are in the range: [ -2237.82 ,  2647.45 ]
+
 .. categories::
 

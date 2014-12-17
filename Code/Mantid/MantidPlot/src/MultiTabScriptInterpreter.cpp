@@ -19,6 +19,9 @@
 #include <QTabBar>
 #include <QFileInfo>
 #include <QFileDialog>
+#include <QListWidget>
+#include <QSpinBox>
+#include <QFontDatabase>
 
 // std
 #include <stdexcept>
@@ -88,6 +91,11 @@ void MultiTabScriptInterpreter::newTab(int index, const QString & filename)
   ScriptFileInterpreter *scriptRunner = new ScriptFileInterpreter(this,"ScriptWindow");
   scriptRunner->setup(*scriptingEnv(), filename);
   scriptRunner->toggleProgressReporting(m_reportProgress);
+  scriptRunner->toggleCodeFolding(m_codeFolding);
+  scriptRunner->toggleWhitespace(m_showWhitespace);
+  scriptRunner->setTabWhitespaceCount(m_tabWhitespaceCount);
+  scriptRunner->toggleReplaceTabs(m_replaceTabs);
+  scriptRunner->setFont(m_fontFamily);
   connect(scriptRunner, SIGNAL(editorModificationChanged(bool)),
           this, SLOT(currentEditorModified(bool)));
   index = insertTab(index, scriptRunner, "");
@@ -265,6 +273,18 @@ void MultiTabScriptInterpreter::paste()
   m_current->paste();
 }
 
+///comment method
+void MultiTabScriptInterpreter::comment()
+{
+  m_current->comment();
+}
+
+///uncomment method
+void MultiTabScriptInterpreter::uncomment()
+{
+  m_current->uncomment();
+}
+
 /**
  * Execute the highlighted code from the current tab
  * *@param mode :: The mode used to execute
@@ -386,10 +406,147 @@ void MultiTabScriptInterpreter::toggleProgressReporting(bool state)
  */
 void MultiTabScriptInterpreter::toggleCodeFolding(bool state)
 {
+  m_codeFolding = state;
   int index_end = count() - 1;
   for( int index = index_end; index >= 0; --index )
   {
     interpreterAt(index)->toggleCodeFolding(state);
+  }
+}
+/**
+ * Toggle the whitespace arrow on/off
+ * @param state :: The state of the option
+ */
+void MultiTabScriptInterpreter::toggleWhitespace(bool state)
+{
+  m_showWhitespace = state;
+  int index_end = count() - 1;
+  for( int index = index_end; index >= 0; --index )
+  {
+    interpreterAt(index)->toggleWhitespace(state);
+  }
+}
+
+/**
+ * Show configuration dialogue for tab whitespace
+ */
+void MultiTabScriptInterpreter::openConfigTabs()
+{
+  // Create dialogue
+  QDialog configTabs(this,"Configure Tab Whitespace",false,Qt::Dialog);
+  QBoxLayout *layoutTabDialogue = new QBoxLayout(QBoxLayout::Direction::TopToBottom);
+  configTabs.setLayout(layoutTabDialogue);
+
+  // Toggle replace tab with spaces
+  QCheckBox *chkbxReplaceTabs = new QCheckBox("Replace tabs with spaces?");
+  chkbxReplaceTabs->setChecked(m_replaceTabs);
+  connect(chkbxReplaceTabs, SIGNAL(toggled(bool)), this, SLOT(toggleReplaceTabs(bool)));
+  layoutTabDialogue->addWidget(chkbxReplaceTabs);
+
+  // Count spaces per tab
+  QFrame *frameSpacesPerTab = new QFrame();
+  QBoxLayout *layoutSpacesPerTab = new QBoxLayout(QBoxLayout::Direction::LeftToRight);
+  frameSpacesPerTab->setLayout(layoutSpacesPerTab);
+  layoutTabDialogue->addWidget(frameSpacesPerTab);
+
+  QLabel *labelSpaceCount = new QLabel("Number of spaces per tab"); 
+  layoutSpacesPerTab->addWidget(labelSpaceCount);
+
+  QSpinBox *spinnerSpaceCount = new QSpinBox(); 
+  spinnerSpaceCount->setRange(0,20);
+  spinnerSpaceCount->setValue(m_tabWhitespaceCount);
+  connect (spinnerSpaceCount,SIGNAL(valueChanged(int)),this,SLOT(changeWhitespaceCount(int)));
+  layoutSpacesPerTab->addWidget(spinnerSpaceCount);
+
+  configTabs.exec(); 
+}
+
+/**
+ * Toggle tabs being replaced with whitespace
+ * @param state :: The state of the option
+ */
+void MultiTabScriptInterpreter::toggleReplaceTabs(bool state)
+{
+  m_replaceTabs = state;
+  
+  int index_end = count() - 1;
+  for( int index = index_end; index >= 0; --index )
+  {
+    interpreterAt(index)->toggleReplaceTabs(state);
+  }
+}
+
+/// Change number of characters used for a tab
+void MultiTabScriptInterpreter::changeWhitespaceCount(int value)
+{
+  m_tabWhitespaceCount = value;
+
+  int index_end = count() - 1;
+  for( int index = index_end; index >= 0; --index )
+  {
+    interpreterAt(index)->setTabWhitespaceCount(value);
+  }
+}
+
+/// Convert tabs in selection to spaces
+void MultiTabScriptInterpreter::tabsToSpaces()
+{
+  m_current->tabsToSpaces();
+}
+
+/// Convert spaces in selection to tabs
+void MultiTabScriptInterpreter::spacesToTabs()
+{
+  m_current->spacesToTabs();
+}
+
+/// Show select font dialog
+void MultiTabScriptInterpreter::showSelectFont()
+{
+  // Would prefer to use QFontDialog but only interested in font family
+  
+  QDialog *selectFont = new QDialog(this,"Configure Tab Whitespace",false,Qt::Dialog);
+  QBoxLayout *layoutFontDialogue = new QBoxLayout(QBoxLayout::Direction::TopToBottom);
+  selectFont->setLayout(layoutFontDialogue);
+
+  // Get available fonts
+  QListWidget *fontList = new QListWidget();
+  QFontDatabase database;
+  fontList->addItems(database.families());
+  layoutFontDialogue->addWidget(fontList);
+  
+  // Select saved choice. If not available, use current font
+  QString fontToUse = m_current->font().family(); // Not actually the font used by default by the lexer
+  
+  if(database.families().contains(m_fontFamily))
+    fontToUse = m_fontFamily;
+
+  QListWidgetItem *item = fontList->findItems(fontToUse,Qt::MatchExactly)[0];
+  fontList->setItemSelected(item, true);  
+  fontList->scrollToItem(item, QAbstractItemView::PositionAtTop);
+
+  QFrame *frameButtons = new QFrame();
+  QBoxLayout *layoutButtons = new QBoxLayout(QBoxLayout::Direction::LeftToRight);
+  frameButtons->setLayout(layoutButtons);
+  layoutFontDialogue->addWidget(frameButtons);
+  
+  QPushButton *cancelButton = new QPushButton("Cancel");
+  layoutButtons->addWidget(cancelButton);
+  connect (cancelButton,SIGNAL(clicked()), selectFont, SLOT(reject()));
+
+  QPushButton *acceptButton = new QPushButton("Set Font");
+  layoutButtons->addWidget(acceptButton);
+  connect (acceptButton,SIGNAL(clicked()), selectFont, SLOT(accept()));
+
+  if(selectFont->exec() == QDialog::Accepted)
+  {
+    m_fontFamily = fontList->selectedItems()[0]->text();
+
+    int index_end = count() - 1;
+    for( int index = index_end; index >= 0; --index )
+    {
+      interpreterAt(index)->setFont(m_fontFamily);
+    }
   }
 }
 

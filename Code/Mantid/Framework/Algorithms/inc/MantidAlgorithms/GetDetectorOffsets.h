@@ -59,7 +59,7 @@ private:
   void init();
   void exec();
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
-  double fitSpectra(const int64_t s);
+  double fitSpectra(const int64_t s, bool isAbsolbute);
   /// Create a function string from the given parameters and the algorithm inputs
   API::IFunction_sptr createFunction(const double peakHeight, const double peakLoc);
   /// Read in all the input parameters
@@ -72,8 +72,9 @@ private:
   double Xmax;        ///< The end of the X range for fitting
   double maxOffset;   ///< The maximum absolute value of offsets
   double dreference;  ///< The expected peak position in d-spacing (?)
+  double dideal;      ///< The known peak centre value from the NIST standard information
   double step;        ///< The step size
-  int64_t nspec;          ///< The number of spectra in the input workspace
+  int64_t nspec;      ///< The number of spectra in the input workspace
 };
 
 } // namespace Algorithm

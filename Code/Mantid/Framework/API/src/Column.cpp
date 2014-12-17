@@ -2,6 +2,7 @@
 #include "MantidKernel/Logger.h"
 #include <algorithm>
 #include <iostream>
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -37,6 +38,21 @@ void Column::setPlotType(int t)
   }
 }
 
+/**
+ * No implementation by default.
+ */
+void Column::sortIndex( bool, size_t, size_t, std::vector<size_t>&, std::vector<std::pair<size_t,size_t>>& ) const
+{
+  throw std::runtime_error("Cannot sort column of type " + m_type);
+}
+
+/**
+ * No implementation by default.
+ */
+void Column::sortValues( const std::vector<size_t>& )
+{
+  throw std::runtime_error("Cannot sort column of type " + m_type);
+}
 
 std::ostream& operator<<(std::ostream& s,const API::Boolean& b)
 {

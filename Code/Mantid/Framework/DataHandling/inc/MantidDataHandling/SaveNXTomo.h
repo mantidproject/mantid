@@ -5,9 +5,9 @@
 // Includes
 //---------------------------------------------------
 #include <vector>
+#include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-
 
 namespace Mantid
 {
@@ -76,20 +76,19 @@ namespace Mantid
       void exec();
 
       /// Creates the format for the output file if it doesn't exist
-      ::NeXus::File setupFile(bool resizeData = false);
+      ::NeXus::File setupFile();
 
       /// Writes a single workspace into the file
-      void writeSingle(const DataObjects::Workspace2D_sptr workspace, ::NeXus::File &nxFile);
+      void writeSingleWorkspace(const DataObjects::Workspace2D_sptr workspace, ::NeXus::File &nxFile);
+
+      /// Write various pieces of data from the workspace log with checks on the structure of the nexus file
+      void writeLogValues(const DataObjects::Workspace2D_sptr workspace, ::NeXus::File &nxFile, int thisFileInd);
+      void writeIntensityValue(const DataObjects::Workspace2D_sptr workspace, ::NeXus::File &nxFile, int thisFileInd);
+      void writeImageKeyValue(const DataObjects::Workspace2D_sptr workspace, ::NeXus::File &nxFile, int thisFileInd);    
 
       /// Main exec routine, called for group or individual workspace processing.
       void processAll();
 
-      /// Fetch all rectangular Detector objects defined for an instrument
-      std::vector<boost::shared_ptr<const Mantid::Geometry::RectangularDetector>> getRectangularDetectors(const Geometry::Instrument_const_sptr &instrument);
-
-      /// Populate dims_array with the dimensions defined in the rectangular detector in the instrument
-      std::vector<int64_t> getDimensionsFromDetector(const std::vector<boost::shared_ptr<const Mantid::Geometry::RectangularDetector>> &rectDetectors, size_t useDetectorIndex = 0);
-           
       // Include error data in the written file
       bool m_includeError;
       bool m_overwriteFile;
@@ -100,6 +99,8 @@ namespace Mantid
       std::string m_filename;                     
       // Dimensions for axis in nxTomo file.
       std::vector<int64_t> m_dimensions;
+      // Infinite file range dimensions / for use with makeData data and error
+      std::vector<int64_t> m_infDimensions;
 
       /// file format version
       static const std::string NXTOMO_VER;

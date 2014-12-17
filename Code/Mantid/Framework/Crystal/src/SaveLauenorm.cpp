@@ -59,7 +59,7 @@ namespace Crystal
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::Input),
         "An input PeaksWorkspace.");
     declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save),
-        "The filename to use for the saved data");
+        "Select the directory and base name for the output files.");
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
     declareProperty("ScalePeaks", 1.0, mustBePositive,

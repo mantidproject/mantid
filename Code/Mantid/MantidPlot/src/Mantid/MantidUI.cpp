@@ -1478,11 +1478,12 @@ void MantidUI::showAlgorithmDialog(const QString & algName, int version)
 * @param algName :: The algorithm name
 * @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
 * @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
+* @param version :: version number, -1 for latest
 */
-void MantidUI::showAlgorithmDialog(QString algName, QHash<QString,QString> paramList, Mantid::API::AlgorithmObserver *obs)
+void MantidUI::showAlgorithmDialog(QString algName, QHash<QString,QString> paramList, Mantid::API::AlgorithmObserver *obs, int version)
 {
   //Get latest version of the algorithm
-  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
+  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
   if( !alg ) return;
 
   for(QHash<QString,QString>::Iterator it = paramList.begin(); it != paramList.end(); ++it)

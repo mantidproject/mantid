@@ -157,83 +157,6 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
     EndTime('ConvFit')
 
 ##############################################################################
-# Fury
-##############################################################################
-
-def furyPlot(inWS, spec):
-    graph = mp.plotSpectrum(inWS, spec)
-    layer = graph.activeLayer()
-    layer.setScale(mp.Layer.Left, 0, 1.0)
-
-def fury(samWorkspaces, res_workspace, rebinParam, RES=True, Save=False, Verbose=False,
-        Plot=False):
-
-    StartTime('Fury')
-    workdir = config['defaultsave.directory']
-    samTemp = samWorkspaces[0]
-    nsam,npt = CheckHistZero(samTemp)
-    Xin = mtd[samTemp].readX(0)
-    d1 = Xin[1]-Xin[0]
-    if d1 < 1e-8:
-        raise RuntimeError('Data energy bin is zero')
-
-    d2 = Xin[npt-1]-Xin[npt-2]
-    dmin = min(d1,d2)
-    pars = rebinParam.split(',')
-    if float(pars[1]) <= dmin:
-        raise RuntimeError('EWidth = ' + pars[1] + ' < smallest Eincr = ' + str(dmin))
-
-    outWSlist = []
-    # Process RES Data Only Once
-    CheckAnalysers(samTemp, res_workspace, Verbose)
-    nres,nptr = CheckHistZero(res_workspace)
-    if nres > 1:
-        CheckHistSame(samTemp,'Sample', res_workspace, 'Resolution')
-
-    tmp_res_workspace = '__tmp_' + res_workspace
-    Rebin(InputWorkspace=res_workspace, OutputWorkspace=tmp_res_workspace, Params=rebinParam)
-    Integration(InputWorkspace=tmp_res_workspace, OutputWorkspace='res_int')
-    ConvertToPointData(InputWorkspace=tmp_res_workspace, OutputWorkspace=tmp_res_workspace)
-    ExtractFFTSpectrum(InputWorkspace=tmp_res_workspace, OutputWorkspace='res_fft', FFTPart=2)
-    Divide(LHSWorkspace='res_fft', RHSWorkspace='res_int', OutputWorkspace='res')
-    for samWs in samWorkspaces:
-        (direct, filename) = os.path.split(samWs)
-        (root, ext) = os.path.splitext(filename)
-        Rebin(InputWorkspace=samWs, OutputWorkspace='sam_data', Params=rebinParam)
-        Integration(InputWorkspace='sam_data', OutputWorkspace='sam_int')
-        ConvertToPointData(InputWorkspace='sam_data', OutputWorkspace='sam_data')
-        ExtractFFTSpectrum(InputWorkspace='sam_data', OutputWorkspace='sam_fft', FFTPart=2)
-        Divide(LHSWorkspace='sam_fft', RHSWorkspace='sam_int', OutputWorkspace='sam')
-        # Create save file name
-        savefile = getWSprefix(samWs) + 'iqt'
-        outWSlist.append(savefile)
-        Divide(LHSWorkspace='sam', RHSWorkspace='res', OutputWorkspace=savefile)
-        #Cleanup Sample Files
-        DeleteWorkspace('sam_data')
-        DeleteWorkspace('sam_int')
-        DeleteWorkspace('sam_fft')
-        DeleteWorkspace('sam')
-        # Crop nonsense values off workspace
-        bin = int(math.ceil(mtd[savefile].blocksize()/2.0))
-        binV = mtd[savefile].dataX(0)[bin]
-        CropWorkspace(InputWorkspace=savefile, OutputWorkspace=savefile, XMax=binV)
-        if Save:
-            opath = os.path.join(workdir, savefile+'.nxs')    				# path name for nxs file
-            SaveNexusProcessed(InputWorkspace=savefile, Filename=opath)
-            if Verbose:
-                logger.notice('Output file : '+opath)
-    # Clean Up RES files
-    DeleteWorkspace(tmp_res_workspace)
-    DeleteWorkspace('res_int')
-    DeleteWorkspace('res_fft')
-    DeleteWorkspace('res')
-    if Plot:
-        specrange = range(0,mtd[outWSlist[0]].getNumberHistograms())
-        furyPlot(outWSlist, specrange)
-    EndTime('Fury')
-    return outWSlist
-
-##############################################################################
 # FuryFit
 ##############################################################################
 
@@ -658,8 +581,14 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
                      EMode='Indirect', EFixed=efixed)
         ConvertUnits(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS, Target='DeltaE',
                      EMode='Indirect', EFixed=efixed)
-        ConvertSpectrumAxis(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw',
-                            Target='ElasticQ', EMode='Indirect', EFixed=efixed)
+        # Convert the spectrum axis to Q if not already in it
+        sample_v_unit = mtd[CorrectedWS].getAxis(1).getUnit().unitID()
+        logger.debug('COrrected workspace vertical axis is in %s' % sample_v_unit)
+        if sample_v_unit != 'MomentumTransfer':
+            ConvertSpectrumAxis(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw',
+                                Target='ElasticQ', EMode='Indirect', EFixed=efixed)
+        else:
+            CloneWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS + '_rqw')
 
     RenameWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_red')
 
@@ -742,7 +671,12 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
             if Verbose:
                 logger.notice('Output file created : '+cred_path)
         calc_plot = [cor_result + ext, sample]
-        res_plot = cor_result+'_rqw'
+
+        if not diffraction_run:
+            res_plot = cor_result + '_rqw'
+        else:
+            res_plot = cor_result + '_red'
+
     else:
         if scaled_container == '':
             raise RuntimeError('Invalid options - nothing to do!')

@@ -21,6 +21,7 @@ namespace
     static const std::string BIT_DEPTH_NAME = "BitDepthName";
     static const std::string ROTATION_NAME = "RotationName";
     static const std::string AXIS_NAMES_NAME = "AxisNames";
+    static const std::string IMAGE_KEY_NAME = "ImageKeyName";
     static const std::string HEADER_MAP_NAME = "HeaderMapFile";
 
   /**
@@ -74,12 +75,18 @@ namespace DataHandling
    
     declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace", "", Kernel::Direction::Output));    
   
+    declareProperty(new PropertyWithValue<int>("ImageKey", -1, Kernel::Direction::Input),
+      "Image type to set these files as. 0=data image, 1=flat field, 2=open field, -1=use the value from FITS header.");
+
     declareProperty(new PropertyWithValue<string>(BIT_DEPTH_NAME, "BITPIX", Kernel::Direction::Input),
       "Name for the pixel bit depth header key.");
     declareProperty(new PropertyWithValue<string>(ROTATION_NAME, "ROTATION", Kernel::Direction::Input),
       "Name for the rotation header key.");
     declareProperty(new PropertyWithValue<string>(AXIS_NAMES_NAME, "NAXIS1,NAXIS2", Kernel::Direction::Input),
       "Names for the axis header keys, comma separated string of all axis.");
+    declareProperty(new PropertyWithValue<string>(IMAGE_KEY_NAME, "IMAGEKEY", Kernel::Direction::Input),
+      "Names for the image type, key.");
+    
     
     declareProperty(new FileProperty(HEADER_MAP_NAME, "", FileProperty::OptionalDirectory, "", Kernel::Direction::Input), 
       "A file mapping header keys to the ones used by ISIS [line separated values in the format KEY=VALUE, e.g. BitDepthName=BITPIX ");
@@ -95,6 +102,7 @@ namespace DataHandling
     m_headerScaleKey = "BSCALE";
     m_headerOffsetKey = "BZERO";
     m_headerBitDepthKey = "BITPIX";
+    m_headerImageKeyKey = "IMAGEKEY";
     m_headerRotationKey = "ROTATION";
     m_mapFile = "";
     m_headerAxisNameKeys.push_back("NAXIS1");
@@ -145,6 +153,13 @@ namespace DataHandling
             allHeaderInfo[i].isFloat = false;
           }
 
+          // Add the image key, use the property if it's not -1, otherwise use the header value
+          allHeaderInfo[i].imageKey = boost::lexical_cast<int>(getPropertyValue("ImageKey"));
+          if(allHeaderInfo[i].imageKey == -1)
+          {
+            allHeaderInfo[i].imageKey = boost::lexical_cast<int>(allHeaderInfo[i].headerKeys[m_headerImageKeyKey]);
+          }
+
           allHeaderInfo[i].bitsPerPixel = lexical_cast<int>(tmpBitPix);
           allHeaderInfo[i].numberOfAxis = static_cast<int>(m_headerAxisNameKeys.size());
       
@@ -163,7 +178,7 @@ namespace DataHandling
         catch(std::exception &)
         {
           //todo write error and fail this load with invalid data in file.
-          throw std::runtime_error("Unable to locate one or more valid BITPIX, NAXIS, TOF, TIMEBIN, N_COUNTS or N_TRIGS values in the FITS file header.");
+          throw std::runtime_error("Unable to locate one or more valid BITPIX, NAXIS or IMAGEKEY values in the FITS file header.");
         }
 
         allHeaderInfo[i].scale = (allHeaderInfo[i].headerKeys[m_headerScaleKey] == "") ? 1 : lexical_cast<double>(allHeaderInfo[i].headerKeys[m_headerScaleKey]);
@@ -286,7 +301,7 @@ namespace DataHandling
     else
     {
       // Invalid files, record error
-       throw std::runtime_error("Loader currently doesn't support FITS files with non-standard extensions, greater than two axis of data, or has detected that all the files are not similar.");
+      throw std::runtime_error("Loader currently doesn't support FITS files with non-standard extensions, greater than two axis of data, or has detected that all the files are not similar.");
     }    
   }
 
@@ -332,7 +347,15 @@ namespace DataHandling
     if(rotation != -1)
       ws->mutableRun().addLogData(new PropertyWithValue<double>("Rotation", rotation));  
 
-
+    // Add axis information to log. Clear first from copied WS
+    ws->mutableRun().removeLogData("Axis1",true);
+    ws->mutableRun().addLogData(new PropertyWithValue<int>("Axis1", static_cast<int>(fileInfo.axisPixelLengths[0])));  
+    ws->mutableRun().removeLogData("Axis2",true);
+    ws->mutableRun().addLogData(new PropertyWithValue<int>("Axis2", static_cast<int>(fileInfo.axisPixelLengths[1])));  
+    
+    // Add image key data to log. Clear first from copied WS
+    ws->mutableRun().removeLogData("ImageKey",true);
+    ws->mutableRun().addLogData(new PropertyWithValue<int>("ImageKey", static_cast<int>(fileInfo.imageKey)));
 
     m_progress->report();
 
@@ -589,6 +612,11 @@ namespace DataHandling
               std::string propVal = getProperty(AXIS_NAMES_NAME);
               boost::split(m_headerAxisNameKeys, propVal, boost::is_any_of(","));
             }
+                        
+            if(lineSplit[0] == IMAGE_KEY_NAME && lineSplit[1] != "")
+            {              
+              m_headerImageKeyKey = lineSplit[1];
+            }
           }
 
           fStream.close(); 
@@ -619,6 +647,8 @@ namespace DataHandling
         std::string propVal = getProperty(AXIS_NAMES_NAME);
         boost::split(m_headerAxisNameKeys, propVal, boost::is_any_of(","));
       }
+      if(getPropertyValue(IMAGE_KEY_NAME) != "")
+        m_headerImageKeyKey = getPropertyValue(IMAGE_KEY_NAME);
     }
 
     

@@ -62,7 +62,7 @@ private:
   QDoubleValidator * m_valDbl;
   QString m_settingsGroup;                    /// The settings group
   MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
-  QStringList m_plotWorkspaces;
+  std::vector<std::string> m_plotWorkspaces;
 
 };
 

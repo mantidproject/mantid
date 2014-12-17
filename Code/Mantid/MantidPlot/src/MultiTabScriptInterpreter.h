@@ -124,7 +124,14 @@ public slots:
   void closeAllTabs();
   /// Show the find dialog
   void showFindReplaceDialog();
-
+  /// Comment a block of code
+  void comment();
+  /// Uncomment a block of code
+  void uncomment();
+  /// Convert tabs in selection to spaces
+  void tabsToSpaces();
+  /// Convert spaces in selection to tabs
+  void spacesToTabs();
   /// undo
   void undo();
   /// redo
@@ -167,6 +174,16 @@ public slots:
   void toggleProgressReporting(bool on);
   /// Toggle code folding
   void toggleCodeFolding(bool on);
+  /// Toggle the whitespace reporting arrow
+  void toggleWhitespace(bool state);
+  /// Show configuration dialogue for tab whitespace
+  void openConfigTabs();
+  /// Toggle replacing tabs with whitespace
+  void toggleReplaceTabs(bool state);
+  /// Change whitespace count
+  void changeWhitespaceCount(int value);
+  /// Show select font dialog
+  void showSelectFont();
 
 private slots:
   /// Close clicked tab
@@ -219,6 +236,16 @@ private:
   ScriptFileInterpreter *m_current;
   /// Store the current global zoom level
   int m_globalZoomLevel;
+  // Current whitespace visibility state
+  bool m_showWhitespace;
+  // Are tabs being inserted as whitespace
+  bool m_replaceTabs;
+  // Number of spaces to use for a tab
+  int m_tabWhitespaceCount;
+  // Font to use for script window
+  QString m_fontFamily;
+  // Save the code folding preference
+  bool m_codeFolding;
 };
 
 #endif

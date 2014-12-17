@@ -76,6 +76,8 @@ namespace Geometry
       virtual ~Goniometer();
       // Return rotation matrix
       const Kernel::DblMatrix& getR() const;
+      // Set the rotation matrix
+      void setR(Kernel::DblMatrix rot);
       // Return information about axes  
       std::string axesInfo();
       // Add axis to goniometer

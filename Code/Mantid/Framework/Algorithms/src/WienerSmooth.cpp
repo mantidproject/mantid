@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/WienerSmooth.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidKernel/ArrayProperty.h"
 
 #include <numeric>
 
@@ -52,7 +54,7 @@ namespace Algorithms
   const std::string WienerSmooth::category() const { return "Arithmetic\\FFT;Transforms\\Smoothing";}
 
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-  const std::string WienerSmooth::summary() const { return "Smooth spectrum using Wiener filter.";};
+  const std::string WienerSmooth::summary() const { return "Smooth spectra using Wiener filter.";};
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -60,7 +62,8 @@ namespace Algorithms
   void WienerSmooth::init()
   {
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
-    declareProperty("WorkspaceIndex",0,"A workspace index for the histogram to smooth.");
+    declareProperty(new Kernel::ArrayProperty<int>("WorkspaceIndexList"), "Workspace indices for spectra to process. "
+      "If empty smooth all spectra.");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
   }
 
@@ -71,16 +74,106 @@ namespace Algorithms
   {
     // Get the data to smooth
     API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-    size_t wsIndex = static_cast<int>( getProperty("WorkspaceIndex") );
+    std::vector<int> wsIndexList = getProperty("WorkspaceIndexList");
 
+    // number of spectra in the input workspace
+    const size_t nInputSpectra = inputWS->getNumberHistograms();
+
+    // Validate the input
+    if ( wsIndexList.size() > nInputSpectra )
+    {
+      throw std::invalid_argument("Workspace index list has more indices than there are spectra in the input workspace.");
+    }
+
+    // if empty do whole workspace
+    if ( wsIndexList.empty() )
+    {
+      // fill wsIndexList with consecutive integers from 0 to nSpectra - 1
+      wsIndexList.resize( nInputSpectra );
+      wsIndexList.front() = 0;
+      for(auto index = wsIndexList.begin() + 1; index != wsIndexList.end(); ++index)
+      {
+        *index = *(index-1) + 1;
+      }
+    }
+
+    // number of spectra in the output workspace
+    const size_t nOutputSpectra = wsIndexList.size();
+
+    // smooth the first spectrum to find out the output blocksize
+    size_t wsIndex = static_cast<size_t>( wsIndexList.front() );
+    auto first = smoothSingleSpectrum( inputWS, wsIndex );
+
+
+    // create full output workspace by copying all settings from tinputWS
+    // blocksize is taken form first
+    API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create( inputWS, nOutputSpectra, first->readX(0).size(), first->readY(0).size() );
+
+    // TODO: ideally axis cloning should be done via API::Axis interface but it's not possible
+    // at he moment and as it turned out not straight-forward to implement
+    auto inAxis = inputWS->getAxis(1);
+    auto outAxis = inAxis->clone( nOutputSpectra, outputWS.get() );
+    outputWS->replaceAxis( 1, outAxis );
+
+    bool isSpectra = outAxis->isSpectra();
+    bool isNumeric = outAxis->isNumeric();
+    auto inTextAxis = dynamic_cast<API::TextAxis*>(inAxis);
+    auto outTextAxis = dynamic_cast<API::TextAxis*>(outAxis);
+
+    // Initialise the progress reporting object
+    API::Progress progress(this,0.0,1.0,nOutputSpectra);
+
+    // smooth the rest of the input
+    for(size_t outIndex = 0; outIndex < nOutputSpectra; ++outIndex)
+    {
+      auto inIndex = wsIndexList[outIndex];
+      auto next = outIndex == 0 ? first : smoothSingleSpectrum( inputWS, inIndex );
+
+      // copy the values
+      outputWS->dataX(outIndex) = next->readX(0);
+      outputWS->dataY(outIndex) = next->readY(0);
+      outputWS->dataE(outIndex) = next->readE(0);
+
+      // set the axis value
+      if ( isSpectra )
+      {
+        auto inSpectrum = inputWS->getSpectrum(inIndex);
+        auto outSpectrum = outputWS->getSpectrum(outIndex);
+        outSpectrum->setSpectrumNo( inSpectrum->getSpectrumNo() );
+        outSpectrum->setDetectorIDs( inSpectrum->getDetectorIDs() );
+      }
+      else if ( isNumeric )
+      {
+        outAxis->setValue(outIndex, inAxis->getValue(inIndex) );
+      }
+      else if ( inTextAxis && outTextAxis )
+      {
+        outTextAxis->setLabel( outIndex, inTextAxis->label(inIndex) );
+      }
+      progress.report();
+    }
+
+    // set the output
+    setProperty( "OutputWorkspace", outputWS );
+
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+   * Execute smoothing of a single spectrum.
+   * @param inputWS :: A workspace to pick a spectrum from.
+   * @param wsIndex :: An index of a spectrum to smooth.
+   * @return :: A single-spectrum workspace with the smoothed data.
+   */
+  API::MatrixWorkspace_sptr WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS, size_t wsIndex)
+  {
     size_t dataSize = inputWS->blocksize();
 
     // it won't work for very small workspaces
     if ( dataSize < 4 )
     {
       g_log.debug() << "No smoothing, spectrum copied." << std::endl;
-      setProperty( "OutputWorkspace", copyInput(inputWS,wsIndex) );
-      return;
+      return copyInput(inputWS,wsIndex);
     }
 
     // Due to the way RealFFT works the input should be even-sized
@@ -248,11 +341,13 @@ namespace Algorithms
     else
     {
       g_log.warning() << "Power spectrum has an unexpected shape: no smoothing" << std::endl;
+      return copyInput( inputWS, wsIndex );
     }
 
     // multiply the fourier transform by the filter
     auto &re = fourierOut->dataY(0);
     auto &im = fourierOut->dataY(1);
+
     std::transform( re.begin(), re.end(), wf.begin(), re.begin(), std::multiplies<double>() );
     std::transform( im.begin(), im.end(), wf.begin(), im.begin(), std::multiplies<double>() );
 
@@ -267,6 +362,11 @@ namespace Algorithms
     API::MatrixWorkspace_sptr out = fourier->getProperty("OutputWorkspace");
     auto &background = fitOut->readY(1);
     auto &y = out->dataY(0);
+
+    if ( y.size() != background.size() )
+    {
+      throw std::logic_error("Logic error: inconsistent arrays");
+    }
 
     // add the spline "background" to the smoothed data
     std::transform( y.begin(), y.end(), background.begin(), y.begin(), std::plus<double>() );
@@ -285,8 +385,7 @@ namespace Algorithms
       out->dataE(0).assign(E.begin(),E.end());
     }
 
-    // set the output
-    setProperty( "OutputWorkspace", out );
+    return out;
   }
 
   /**

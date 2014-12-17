@@ -447,6 +447,177 @@ public:
     TS_ASSERT_EQUALS("TableWorkspace", Mantid::Kernel::getUnmangledTypeName(*property.type_info()));
   }
 
+  void test_sort()
+  {
+    const size_t n = 10;
+    TableWorkspace ws(n);
+    ws.addColumn("int","col1");
+    ws.addColumn("str","col2");
+    ws.addColumn("double","col3");
+    auto &data1 = static_cast<TableColumn<int>&>(*ws.getColumn("col1")).data();
+    auto &data2 = static_cast<TableColumn<std::string>&>(*ws.getColumn("col2")).data();
+    auto &data3 = static_cast<TableColumn<double>&>(*ws.getColumn("col3")).data();
+
+    data1[0] = 3;  data2[0] = "three (3)";  data3[0] = 0.0;
+    data1[1] = 1;  data2[1] = "one (3)";  data3[1] = 1.0;
+    data1[2] = 1;  data2[2] = "one (2)";  data3[2] = 2.0;
+    data1[3] = 2;  data2[3] = "two (1)";  data3[3] = 3.0;
+    data1[4] = 3;  data2[4] = "three (2)";  data3[4] = 4.0;
+    data1[5] = 3;  data2[5] = "three (2)";  data3[5] = 5.0;
+    data1[6] = 2;  data2[6] = "two (2)";  data3[6] = 6.0;
+    data1[7] = 1;  data2[7] = "one (1)";  data3[7] = 7.0;
+    data1[8] = 2;  data2[8] = "two (1)";  data3[8] = 8.0;
+    data1[9] = 2;  data2[9] = "two (2)";  data3[9] = 9.0;
+
+    std::vector<std::pair<std::string, bool>> criteria(3);
+    criteria[0] = std::make_pair("col1",true);
+    criteria[1] = std::make_pair("col2",true);
+    criteria[2] = std::make_pair("col3",false);
+
+    ws.sort( criteria );
+
+    TS_ASSERT_EQUALS( data1[0], 1 );
+    TS_ASSERT_EQUALS( data1[1], 1 );
+    TS_ASSERT_EQUALS( data1[2], 1 );
+    TS_ASSERT_EQUALS( data1[3], 2 );
+    TS_ASSERT_EQUALS( data1[4], 2 );
+    TS_ASSERT_EQUALS( data1[5], 2 );
+    TS_ASSERT_EQUALS( data1[6], 2 );
+    TS_ASSERT_EQUALS( data1[7], 3 );
+    TS_ASSERT_EQUALS( data1[8], 3 );
+    TS_ASSERT_EQUALS( data1[9], 3 );
+
+    TS_ASSERT_EQUALS( data2[0], "one (1)" );
+    TS_ASSERT_EQUALS( data2[1], "one (2)" );
+    TS_ASSERT_EQUALS( data2[2], "one (3)" );
+    TS_ASSERT_EQUALS( data2[3], "two (1)" );
+    TS_ASSERT_EQUALS( data2[4], "two (1)" );
+    TS_ASSERT_EQUALS( data2[5], "two (2)" );
+    TS_ASSERT_EQUALS( data2[6], "two (2)" );
+    TS_ASSERT_EQUALS( data2[7], "three (2)" );
+    TS_ASSERT_EQUALS( data2[8], "three (2)" );
+    TS_ASSERT_EQUALS( data2[9], "three (3)" );
+
+    TS_ASSERT_EQUALS( data3[0], 7);
+    TS_ASSERT_EQUALS( data3[1], 2);
+    TS_ASSERT_EQUALS( data3[2], 1);
+    TS_ASSERT_EQUALS( data3[3], 8);
+    TS_ASSERT_EQUALS( data3[4], 3);
+    TS_ASSERT_EQUALS( data3[5], 9);
+    TS_ASSERT_EQUALS( data3[6], 6);
+    TS_ASSERT_EQUALS( data3[7], 5);
+    TS_ASSERT_EQUALS( data3[8], 4);
+    TS_ASSERT_EQUALS( data3[9], 0);
+
+
+  }
+
+  void test_sort_1()
+  {
+    const size_t n = 10;
+    TableWorkspace ws(n);
+    ws.addColumn("int","col1");
+    ws.addColumn("str","col2");
+    ws.addColumn("double","col3");
+    auto &data1 = static_cast<TableColumn<int>&>(*ws.getColumn("col1")).data();
+    auto &data2 = static_cast<TableColumn<std::string>&>(*ws.getColumn("col2")).data();
+    auto &data3 = static_cast<TableColumn<double>&>(*ws.getColumn("col3")).data();
+
+    data1[0] = 3;  data2[0] = "three (3)";  data3[0] = 0.0;
+    data1[1] = 1;  data2[1] = "one (3)";  data3[1] = 1.0;
+    data1[2] = 1;  data2[2] = "one (2)";  data3[2] = 2.0;
+    data1[3] = 2;  data2[3] = "two (1)";  data3[3] = 3.0;
+    data1[4] = 3;  data2[4] = "three (2)";  data3[4] = 4.0;
+    data1[5] = 3;  data2[5] = "three (2)";  data3[5] = 5.0;
+    data1[6] = 2;  data2[6] = "two (2)";  data3[6] = 6.0;
+    data1[7] = 1;  data2[7] = "one (1)";  data3[7] = 7.0;
+    data1[8] = 2;  data2[8] = "two (1)";  data3[8] = 8.0;
+    data1[9] = 2;  data2[9] = "two (2)";  data3[9] = 9.0;
+
+    std::vector<std::pair<std::string, bool>> criteria(3);
+    criteria[0] = std::make_pair("col1",true);
+    criteria[1] = std::make_pair("col2",false);
+    criteria[2] = std::make_pair("col3",true);
+
+    ws.sort( criteria );
+
+    TS_ASSERT_EQUALS( data1[0], 1 );
+    TS_ASSERT_EQUALS( data1[1], 1 );
+    TS_ASSERT_EQUALS( data1[2], 1 );
+    TS_ASSERT_EQUALS( data1[3], 2 );
+    TS_ASSERT_EQUALS( data1[4], 2 );
+    TS_ASSERT_EQUALS( data1[5], 2 );
+    TS_ASSERT_EQUALS( data1[6], 2 );
+    TS_ASSERT_EQUALS( data1[7], 3 );
+    TS_ASSERT_EQUALS( data1[8], 3 );
+    TS_ASSERT_EQUALS( data1[9], 3 );
+
+    TS_ASSERT_EQUALS( data2[0], "one (3)" );
+    TS_ASSERT_EQUALS( data2[1], "one (2)" );
+    TS_ASSERT_EQUALS( data2[2], "one (1)" );
+    TS_ASSERT_EQUALS( data2[3], "two (2)" );
+    TS_ASSERT_EQUALS( data2[4], "two (2)" );
+    TS_ASSERT_EQUALS( data2[5], "two (1)" );
+    TS_ASSERT_EQUALS( data2[6], "two (1)" );
+    TS_ASSERT_EQUALS( data2[7], "three (3)" );
+    TS_ASSERT_EQUALS( data2[8], "three (2)" );
+    TS_ASSERT_EQUALS( data2[9], "three (2)" );
+
+    TS_ASSERT_EQUALS( data3[0], 1);
+    TS_ASSERT_EQUALS( data3[1], 2);
+    TS_ASSERT_EQUALS( data3[2], 7);
+    TS_ASSERT_EQUALS( data3[3], 6);
+    TS_ASSERT_EQUALS( data3[4], 9);
+    TS_ASSERT_EQUALS( data3[5], 3);
+    TS_ASSERT_EQUALS( data3[6], 8);
+    TS_ASSERT_EQUALS( data3[7], 0);
+    TS_ASSERT_EQUALS( data3[8], 4);
+    TS_ASSERT_EQUALS( data3[9], 5);
+
+  }
+
+  void test_sort_empty()
+  {
+    TableWorkspace ws;
+    ws.addColumn("int","col1");
+    ws.addColumn("str","col2");
+    ws.addColumn("double","col3");
+
+    TS_ASSERT_EQUALS( ws.rowCount(), 0 );
+
+    std::vector<std::pair<std::string, bool>> criteria(3);
+    criteria[0] = std::make_pair("col1",true);
+    criteria[1] = std::make_pair("col2",false);
+    criteria[2] = std::make_pair("col3",true);
+
+    TS_ASSERT_THROWS_NOTHING( ws.sort(criteria) );
+
+  }
+
+  void test_sort_almost_empty()
+  {
+    TableWorkspace ws(1);
+    ws.addColumn("int","col1");
+    ws.addColumn("str","col2");
+    ws.addColumn("double","col3");
+    auto &data1 = static_cast<TableColumn<int>&>(*ws.getColumn("col1")).data();
+    auto &data2 = static_cast<TableColumn<std::string>&>(*ws.getColumn("col2")).data();
+    auto &data3 = static_cast<TableColumn<double>&>(*ws.getColumn("col3")).data();
+    data1[0] = 3;  data2[0] = "hello";  data3[0] = 5.0;
+
+    std::vector<std::pair<std::string, bool>> criteria(3);
+    criteria[0] = std::make_pair("col1",true);
+    criteria[1] = std::make_pair("col2",false);
+    criteria[2] = std::make_pair("col3",true);
+
+    TS_ASSERT_THROWS_NOTHING( ws.sort(criteria) );
+
+    TS_ASSERT_EQUALS( data1[0], 3 );
+    TS_ASSERT_EQUALS( data2[0], "hello" );
+    TS_ASSERT_EQUALS( data3[0], 5 );
+
+  }
+
 };
 
 

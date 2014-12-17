@@ -52,8 +52,7 @@ int SplittingInterval::index() const
 }
 
 /// Return true if the b SplittingInterval overlaps with this one.
-double SplittingInterval::overlaps(const SplittingInterval& b) const
-{
+bool SplittingInterval::overlaps(const SplittingInterval &b) const {
   return ((b.m_start < this->m_stop) && (b.m_start >= this->m_start))
       || ((b.m_stop < this->m_stop) && (b.m_stop >= this->m_start))
       || ((this->m_start < b.m_stop) && (this->m_start >= b.m_start))
@@ -183,8 +182,7 @@ TimeSplitterType operator &(const TimeSplitterType& a, const TimeSplitterType& b
   {
     for (bit=b.begin(); bit != b.end(); ++bit)
     {
-      if (ait->overlaps(*bit))
-      {
+      if (ait->overlaps(*bit)) {
         // The & operator for SplittingInterval keeps the index of the left-hand-side (ait in this case)
         //  meaning that a has to be the splitter because the b index is ignored.
         out.push_back( *ait & *bit );

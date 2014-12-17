@@ -405,6 +405,18 @@ namespace CustomInterfaces
       m_uiForm.entryRebinHigh->setText("");
       m_uiForm.entryRebinString->setText("");
     }
+
+    if(!instDetails["cm-1-convert-choice"].isEmpty())
+    {
+      bool defaultOptions = instDetails["cm-1-convert-choice"] == "true";
+      m_uiForm.ckCm1Units->setChecked(defaultOptions);
+    }
+
+    if(!instDetails["save-ascii-choice"].isEmpty())
+    {
+      bool defaultOptions = instDetails["save-ascii-choice"] == "true";
+      m_uiForm.save_ckAscii->setChecked(defaultOptions);
+    }
   }
 
   /**

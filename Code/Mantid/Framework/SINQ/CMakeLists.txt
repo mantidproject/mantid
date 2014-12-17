@@ -4,8 +4,10 @@ set ( SRC_FILES
 	src/MDHistoToWorkspace2D.cpp
 	src/PoldiAnalyseResiduals.cpp
 	src/PoldiAutoCorrelation5.cpp
-        src/PoldiCalculateSpectrum2D.cpp
+	src/PoldiCreatePeaksFromCell.cpp
 	src/PoldiFitPeaks1D.cpp
+        src/PoldiFitPeaks2D.cpp
+	src/PoldiIndexKnownCompounds.cpp
 	src/PoldiLoadChopperSlits.cpp
 	src/PoldiLoadIPP.cpp
 	src/PoldiLoadLog.cpp
@@ -48,8 +50,10 @@ set ( INC_FILES
 	inc/MantidSINQ/MDHistoToWorkspace2D.h
 	inc/MantidSINQ/PoldiAnalyseResiduals.h
 	inc/MantidSINQ/PoldiAutoCorrelation5.h
-        inc/MantidSINQ/PoldiCalculateSpectrum2D.h
+	inc/MantidSINQ/PoldiCreatePeaksFromCell.h
 	inc/MantidSINQ/PoldiFitPeaks1D.h
+        inc/MantidSINQ/PoldiFitPeaks2D.h
+	inc/MantidSINQ/PoldiIndexKnownCompounds.h
 	inc/MantidSINQ/PoldiLoadChopperSlits.h
 	inc/MantidSINQ/PoldiLoadIPP.h
 	inc/MantidSINQ/PoldiLoadLog.h
@@ -100,15 +104,17 @@ set ( TEST_FILES
 	PoldiAnalyseResidualsTest.h
 	PoldiAutoCorrelationCoreTest.h
 	PoldiBasicChopperTest.h
-        PoldiCalculateSpectrum2DTest.h
 	PoldiChopperFactoryTest.h
         PoldiConversionsTest.h
+	PoldiCreatePeaksFromCellTest.h
 	PoldiDeadWireDecoratorTest.h
 	PoldiDetectorDecoratorTest.h
         PoldiDGridTest.h
 	PoldiDetectorFactoryTest.h
 	PoldiDetectorTest.h
 	PoldiFitPeaks1DTest.h
+        PoldiFitPeaks2DTest.h
+	PoldiIndexKnownCompoundsTest.h
         PoldiInstrumentAdapterTest.h
         PoldiPeakCollectionTest.h
 	PoldiPeakSearchTest.h

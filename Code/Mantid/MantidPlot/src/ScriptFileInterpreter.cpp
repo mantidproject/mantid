@@ -2,15 +2,18 @@
 #include "ScriptOutputDisplay.h"
 #include "ScriptingEnv.h"
 #include "MantidQtMantidWidgets/ScriptEditor.h"
-
+#include <iostream>
 #include <QAction>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QMenu>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <q3cstring.h>
+#include <qscilexer.h>
 
 #include <stdexcept>
+
 
 /**
  * Construct a widget
@@ -72,6 +75,186 @@ void ScriptFileInterpreter::prepareToClose()
     UNUSED_ARG(sce);
     m_editor->setModified(false);
   }
+}
+
+/// Convert tabs in selection to spaces
+void ScriptFileInterpreter::tabsToSpaces()
+{
+  int selFromLine, selFromInd, selToLine, selToInd;
+
+  m_editor->getSelection(&selFromLine, &selFromInd, &selToLine, &selToInd);    
+  if(selFromLine == -1)
+    m_editor->selectAll();
+  
+  QString text = m_editor->selectedText();
+
+  // Use the tab space count for each converted character
+  QString spaces = "";
+
+  for(int i=0;i<m_editor->tabWidth();++i)
+    spaces = spaces + " ";
+
+  text = text.replace("\t", spaces, Qt::CaseInsensitive);
+  replaceSelectedText(m_editor, text);
+}
+
+/// Convert spaces in selection to tabs
+void ScriptFileInterpreter::spacesToTabs()
+{
+  int selFromLine, selFromInd, selToLine, selToInd;
+
+  m_editor->getSelection(&selFromLine, &selFromInd, &selToLine, &selToInd);    
+  if(selFromLine == -1)
+    m_editor->selectAll();
+  
+  QString text = m_editor->selectedText();
+
+  // Use the tab space count for each converted characters
+  QString spaces = "";
+
+  for(int i=0;i<m_editor->tabWidth();++i)
+    spaces = spaces + " ";
+
+  text = text.replace(spaces, "\t", Qt::CaseInsensitive);
+  replaceSelectedText(m_editor, text);
+}
+
+/// Set a font
+void ScriptFileInterpreter::setFont(const QString &fontFamily)
+{
+  // This needs to check if the font exists and use default if not
+  QFontDatabase database;
+  
+  // Select saved choice. If not available, use current font
+  QString fontToUse = m_editor->lexer()->defaultFont().family();
+  
+  if(database.families().contains(fontFamily))
+    fontToUse = fontFamily;
+
+  QFont defaultFont = m_editor->lexer()->defaultFont();
+  defaultFont.setFamily(fontToUse);
+  m_editor->lexer()->setDefaultFont(defaultFont);
+
+  // Check through all styles until it starts creating new ones (they match the default style)
+  // On each, copy the font and change only the family
+  int count = 0;
+  while(m_editor->lexer()->font(count) != m_editor->lexer()->defaultFont())
+  {
+    QFont font = m_editor->lexer()->font(count);
+    font.setFamily(fontToUse);
+    m_editor->lexer()->setFont(font,count);
+      
+    count++;
+  }    
+}
+
+/// Toggle replacing tabs with whitespace
+void ScriptFileInterpreter::toggleReplaceTabs(bool state)
+{
+  m_editor->setIndentationsUseTabs(!state);
+}
+
+/// Number of spaces to insert for a tab
+void ScriptFileInterpreter::setTabWhitespaceCount(int count)
+{
+  m_editor->setTabWidth(count);
+}
+
+/// Toggles the whitespace on/off
+void ScriptFileInterpreter::toggleWhitespace(bool state)
+{
+  m_editor->setEolVisibility(state);
+  
+  if(state) 
+      m_editor->setWhitespaceVisibility(QsciScintilla::WhitespaceVisibility::WsVisible);
+  else
+    m_editor->setWhitespaceVisibility(QsciScintilla::WhitespaceVisibility::WsInvisible);  
+}
+
+/// Comment a block of code
+void ScriptFileInterpreter::comment()
+{
+  toggleComment(true);
+}
+
+/// Uncomment a block of code
+void ScriptFileInterpreter::uncomment()
+{
+  toggleComment(false);
+}
+
+void ScriptFileInterpreter::toggleComment(bool addComment)
+{
+  // Get selected text  
+  std::string whitespaces (" \t\f\r");
+  int selFromLine, selFromInd, selToLine, selToInd;
+  
+  m_editor->getSelection(&selFromLine, &selFromInd, &selToLine, &selToInd);    
+
+  // Expand selection to first character on start line to the end char on second line.
+  if(selFromLine == -1)
+  {
+    m_editor->getCursorPosition(&selFromLine, &selFromInd);
+    selToLine = selFromLine;
+  }
+    
+  // For each line, select it, copy the line into a new string minus the comment
+  QString replacementText = "";
+
+  // If it's adding comment, check all lines to find the lowest index for a non space character
+  int minInd = -1;
+  if(addComment)
+  { 
+    for(int i=selFromLine;i<=selToLine;++i)
+    {
+      std::string thisLine = m_editor->text(i).toUtf8().constData();   
+      int lineFirstChar = static_cast<int>(thisLine.find_first_not_of(whitespaces + "\n"));
+     
+  	  if(minInd == -1 || (lineFirstChar != -1 && lineFirstChar < minInd))
+      {
+          minInd = lineFirstChar;
+      }
+    }
+  }
+
+  for(int i=selFromLine;i<=selToLine;++i)
+  {
+    std::string thisLine = m_editor->text(i).toUtf8().constData();
+   
+    int lineFirstChar = static_cast<int>(thisLine.find_first_not_of(whitespaces + "\n"));
+     
+    if(lineFirstChar != -1)
+    {     
+      if(addComment) 
+      { 
+        thisLine.insert(minInd,"#");
+      }
+      else
+      { 
+        // Check that the first character is a #
+        if(thisLine[lineFirstChar] == '#') // Remove the comment, or ignore to add as is
+        {
+          thisLine = thisLine.erase(lineFirstChar,1);    
+        }
+      }
+    }
+
+    replacementText = replacementText + QString::fromStdString(thisLine);
+  }
+
+  m_editor->setSelection(selFromLine,0,selToLine, m_editor->lineLength(selToLine));  
+  replaceSelectedText(m_editor, replacementText);
+  m_editor->setCursorPosition(selFromLine,selFromInd);
+}
+
+// Replaces the currently selected text in the editor
+// Reimplementation of .replaceSelectedText from QScintilla. Added as osx + rhel builds are
+// using an older version(2.4.6) of the library missing the method, and too close to code freeze to update.
+inline void ScriptFileInterpreter::replaceSelectedText(const ScriptEditor *editor, const QString &text)
+{
+  int UTF8_CodePage = 65001; 
+  const char *b = (( editor->SCI_GETCODEPAGE == UTF8_CodePage) ? text.utf8().constData() : text.latin1());    
+  editor->SendScintilla( editor->SCI_REPLACESEL, b );
 }
 
 /**

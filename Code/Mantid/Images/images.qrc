@@ -3,6 +3,7 @@
         <file>pvIcon.png</file>
         <file>MantidSplashScreen.png</file>
         <file>MantidPlot_Icon_32offset.png</file>
+        <file>First_use_Background.png</file>
         <file>SNS_logo_trans_back.gif</file>
         <file>Tessella_Logo_Transparent.gif</file>
         <file>Mantid_Logo_Transparent_Cropped.png</file>
@@ -10,6 +11,7 @@
         <file>ISIS_Logo_Transparent.gif</file>
         <file>ess_logo_transparent_small.png</file>
         <file>Mantid_Logo_Transparent.png</file>
+        <file>Ornl_hfir_sns_logo_small.png</file>
         <file>data_replace.png</file>
         <file>panning.png</file>
         <file>history.png</file>
@@ -36,6 +38,18 @@
     </qresource>
     <qresource prefix="/Icons">
         <file>LoadFile.png</file>
+        <file>Notepad-Bloc-notes-icon-48x48.png</file>
+        <file>Notepad-Bloc-notes-icon-32x32.png</file>
+        <file>download-icon-48x48.png</file>
+        <file>download-icon-32x32.png</file>
+        <file>Python-icon-48x48.png</file>
+        <file>Python-icon-32x32.png</file>
+        <file>Python-icon-16x16.png</file>
+        <file>Plugin-icon-32x32.png</file>
+        <file>Plugin-Python-icon-32x32.png</file>
+        <file>Misc-Tutorial-icon-48x48.png</file>
+        <file>Misc-Tutorial-icon-32x32.png</file>
+        <file>MantidPlot_Python_Icon_32x32.png</file>
     </qresource>
     <qresource prefix="/PickTools">
         <file>zoom.png</file>

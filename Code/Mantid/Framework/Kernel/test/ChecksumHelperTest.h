@@ -19,6 +19,12 @@ public:
   static ChecksumHelperTest *createSuite() { return new ChecksumHelperTest(); }
   static void destroySuite( ChecksumHelperTest *suite ) { delete suite; }
 
+  void testMd5FromString() {
+    std::string response =
+        ChecksumHelper::md5FromString("Test this string out for size");
+    TSM_ASSERT_EQUALS("The calculated MD5 hash is not as expected",
+                      "8061266bbcc3f758359d3ecee24904e6", response);
+  }
 
   void testSha1FromString()
   {
@@ -78,6 +84,5 @@ public:
     file.close();
   }
 };
-
 
 #endif /* MANTID_KERNEL_CHECKSUMHELPERTEST_H_ */

@@ -845,20 +845,29 @@ copy_files_to_dir ( "${CONFIG_RESET_SCRIPT}"
 ###########################################################################
 
 # Top-level python scripts
-set( PY_FILES mantidplotrc.py mantidplot.py mantid_qt_settings_editor.py )
+set( PY_FILES mantidplot.py mantidplotrc.py mantid_qt_settings_editor.py)
 copy_files_to_dir ( "${PY_FILES}"
-                     ${CMAKE_CURRENT_SOURCE_DIR}
-                     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
-                     PYTHON_INSTALL_FILES )
-# mantidplot.py package
+                            ${CMAKE_CURRENT_SOURCE_DIR}
+                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+                            PYTHON_INSTALL_FILES )
+# mantidplot package
 set( MTDPLOTPY_FILES
   __init__.py
   proxies.py
 )
 copy_files_to_dir ( "${MTDPLOTPY_FILES}"
-                     ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotpy
-                     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplotpy
-                     MTDPLOT_INSTALL_FILES )
+                            ${CMAKE_CURRENT_SOURCE_DIR}/pymantidplot
+                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/pymantidplot
+                            MTDPLOT_INSTALL_FILES )
+                            
+set( FUTURE_FILES
+  __init__.py
+  pyplot.py
+)
+copy_files_to_dir ( "${FUTURE_FILES}"
+                            ${CMAKE_CURRENT_SOURCE_DIR}/pymantidplot/future
+                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/pymantidplot/future
+                            MTDPLOT_FUTURE_INSTALL_FILES )
 
 # IPython scripts
 set( IPY_FILES
@@ -877,7 +886,7 @@ copy_files_to_dir ( "${IPY_FILES}"
 add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS}
 							${RES_FILES} ${MANTID_RC_FILE}
-              ${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${IPYTHON_INSTALL_FILES} ${CONFIG_RESET_SCRIPT_FILE}
+							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${CONFIG_RESET_SCRIPT_FILE} ${MTDPLOT_FUTURE_INSTALL_FILES} ${IPYTHON_INSTALL_FILES}
 )
 
 # Library dependencies
@@ -939,17 +948,18 @@ endif( WIN32 )
 
 # List of .py files than must be run WITHIN MantidPlot.
 set ( MANTIDPLOT_TEST_PY_FILES
-        MantidPlotAlgorithmDialogTest.py
-        MantidPlotInstrumentViewTest.py
-	MantidPlotSliceViewerTest.py
-	MantidPlot1DPlotTest.py
-        MantidPlot2DPlotTest.py
-        MantidPlotProxiesTest.py
-	MantidPlotPythonImportTest.py
-	MantidPlotFoldersTest.py 
-	MantidPlotMdiSubWindowTest.py 
-	MantidPlotTiledWindowTest.py 
-        MantidPlotInputArgsCheck.py
+    MantidPlotAlgorithmDialogTest.py
+    MantidPlotInstrumentViewTest.py
+    MantidPlotSliceViewerTest.py
+    MantidPlot1DPlotTest.py
+    MantidPlot2DPlotTest.py
+    MantidPlotProxiesTest.py
+    MantidPlotPythonImportTest.py
+    MantidPlotFoldersTest.py
+    MantidPlotMdiSubWindowTest.py
+    MantidPlotTiledWindowTest.py
+    MantidPlotInputArgsCheck.py
+    MantidPlotFuturePyplotGeneralTest.py
 )
 
 if ( 0 )
@@ -991,9 +1001,12 @@ else ()
 	# Make a ctest target for each file
 	foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
 	 	# Add the test. Name of test = name of the file
-		ADD_TEST( ${PYFILE} ${MANTIDPLOT_PATH} -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
+		add_test ( ${PYFILE} ${MANTIDPLOT_PATH} -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
 		# Set the previously-built environment
-		set_tests_properties( ${PYFILE} PROPERTIES ENVIRONMENT "${TEST_ENVIRONMENT}")
+		set_tests_properties ( ${PYFILE} PROPERTIES
+                           RUN_SERIAL 1
+                           ENVIRONMENT "${TEST_ENVIRONMENT}"
+                           TIMEOUT ${TESTING_TIMEOUT} )
 	endforeach ()
 
     add_dependencies( GUITests MantidPlot )
@@ -1010,7 +1023,10 @@ install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR}
 # Ship required files. Explicit so some can be disabled easily if necessary
 install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )
 foreach(PY_FILE ${MTDPLOTPY_FILES} )
-  install ( FILES mantidplotpy/${PY_FILE} DESTINATION ${BIN_DIR}/mantidplotpy )
+  install ( FILES pymantidplot/${PY_FILE} DESTINATION ${BIN_DIR}/pymantidplot )
+endforeach()
+foreach(FUT_PY_FILE ${FUTURE_FILES} )
+  install ( FILES pymantidplot/future/${FUT_PY_FILE} DESTINATION ${BIN_DIR}/pymantidplot/future )
 endforeach()
 foreach(PY_FILE ${IPY_FILES} )
   install ( FILES ipython_widget/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_widget )

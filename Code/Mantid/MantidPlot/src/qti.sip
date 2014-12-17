@@ -380,6 +380,32 @@ private:
   Matrix(const Matrix&);
 };
 
+class QwtData /PyName = CurveData/
+{
+%TypeHeaderCode
+#include <qwt_data.h>
+%End
+
+public:
+   // Note that the 'unsigned int' in this class should be size_t. But if you typedef size_t you'll get a crash
+   //  at least on linux/gcc (and you'll still get warnings)
+
+   virtual unsigned int size() const = 0;
+   // this MethodCode is only needed for windoze, but apparently it's not possible to nest it inside an %If
+   // Beware: the treatment of typedefs in sip changes with versions, so errors/warnings can vanish/show up anytime
+   // in the future
+%MethodCode
+   size_t v = sipCpp->size();
+   // sipRes will be declared as unsigned int (uint)
+   sipRes = static_cast<unsigned int>(v);
+%End
+   virtual double x(unsigned int i) const = 0;
+   virtual double y(unsigned int i) const = 0;
+
+private:
+   QwtData(const QwtData&);
+};
+
 class QwtSymbol /PyName = PlotSymbol/
 {
 %TypeHeaderCode
@@ -593,6 +619,23 @@ private:
   Spectrogram(const Spectrogram&);
 };
 
+class QwtPlotCurve  // /PyName = PlotCurve/
+{
+%TypeHeaderCode
+#include <qwt_plot_curve.h>
+%End
+public:
+   QwtPlotCurve();
+
+   double minXValue() const;
+   double maxXValue() const;
+   double minYValue() const;
+   double maxYValue() const;
+   const QwtData &data() const;
+
+private:
+   QwtPlotCurve(const QwtPlotCurve&);
+};
 
 class Grid : QObject // : QwtPlotGrid
 {
@@ -692,6 +735,7 @@ public:
   void removeCurve(int);
   void removeCurve(const QString&);
   int curves() /PyName=numCurves/;
+  QwtPlotCurve* curve(int index);
   QString curveTitle(int);
 
   void setCurveLineColor(int, int);

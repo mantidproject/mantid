@@ -74,7 +74,6 @@ public:
 
 protected slots:
   void closeWindow();
-  void updateWorkspace();
 
 protected:
   virtual void resizeEvent(QResizeEvent * event);

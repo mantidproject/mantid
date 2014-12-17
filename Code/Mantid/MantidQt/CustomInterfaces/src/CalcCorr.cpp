@@ -84,6 +84,11 @@ private:
   QDoubleValidator * m_slaveVal;
 };
 
+namespace
+{
+  Mantid::Kernel::Logger g_log("CalcCorr");
+}
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -297,6 +302,19 @@ namespace IDA
     if (useCan)
     {
       uiv.checkDataSelectorIsValid("Can", uiForm().absp_dsCanInput);
+
+      QString sample = uiForm().absp_dsSampleInput->getCurrentDataName();
+      QString sampleType = sample.right(sample.length() - sample.lastIndexOf("_"));
+      QString container = uiForm().absp_dsCanInput->getCurrentDataName();
+      QString containerType = container.right(container.length() - container.lastIndexOf("_"));
+
+      g_log.debug() << "Sample type is: " << sampleType.toStdString() << std::endl;
+      g_log.debug() << "Can type is: " << containerType.toStdString() << std::endl;
+
+      if(containerType != sampleType)
+      {
+        uiv.addErrorMessage("Sample and can workspaces must contain the same type of data.");
+      }
     }
 
     uiv.checkFieldIsValid("Beam Width", uiForm().absp_lewidth, uiForm().absp_valWidth);
