@@ -136,7 +136,6 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
                run_diagnostics = True
             prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[hard_mask_file,use_hard_mask_only,run_diagnostics])
         #end
-
 #end HardMaskOnly
 
 class MonovanIntegrationRange(prop_helpers.ComplexProperty):
