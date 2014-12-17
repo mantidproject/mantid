@@ -3,14 +3,6 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid
-{
-namespace Kernel
-{
-
-
-
-
-} // namespace Mantid
+namespace Mantid {
+namespace Kernel {} // namespace Mantid
 } // namespace Kernel
-

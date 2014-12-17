@@ -1,10 +1,12 @@
 /**
- * This algorithm flattens a MDHistoWorkspace to a Workspace2D. Mantid has far more tools
+ * This algorithm flattens a MDHistoWorkspace to a Workspace2D. Mantid has far
+ more tools
  * to deal with W2D then for MD ones.
  *
  * Original contributor: Mark Koennecke: mark.koennecke@psi.ch
- * 
- * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ *
+ * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  * This file is part of Mantid.
 
@@ -33,8 +35,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-class MANTID_SINQ_DLL MDHistoToWorkspace2D : public Mantid::API::Algorithm
-{
+class MANTID_SINQ_DLL MDHistoToWorkspace2D : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   MDHistoToWorkspace2D() : Mantid::API::Algorithm() {}
@@ -42,8 +43,11 @@ public:
   virtual ~MDHistoToWorkspace2D() {}
   /// Algorithm's name
   virtual const std::string name() const { return "MDHistoToWorkspace2D"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Flattens a n dimensional MDHistoWorkspace into a Workspace2D with many spectra";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Flattens a n dimensional MDHistoWorkspace into a Workspace2D with "
+           "many spectra";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -53,17 +57,20 @@ public:
 private:
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 
   size_t rank;
   size_t currentSpectra;
-  size_t calculateNSpectra( Mantid::API::IMDHistoWorkspace_sptr inws);
-  void recurseData(Mantid::API::IMDHistoWorkspace_sptr inWS, Mantid::DataObjects::Workspace2D_sptr outWS, size_t currentDim, Mantid::coord_t *pos);
+  size_t calculateNSpectra(Mantid::API::IMDHistoWorkspace_sptr inws);
+  void recurseData(Mantid::API::IMDHistoWorkspace_sptr inWS,
+                   Mantid::DataObjects::Workspace2D_sptr outWS,
+                   size_t currentDim, Mantid::coord_t *pos);
 
   void checkW2D(Mantid::DataObjects::Workspace2D_sptr outWS);
 
-  void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inWS, Mantid::DataObjects::Workspace2D_sptr outWS);
+  void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inWS,
+                    Mantid::DataObjects::Workspace2D_sptr outWS);
 };
 
 #endif /*MDHISTOTOWORKSPACE2D_H_*/

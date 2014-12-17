@@ -6,20 +6,22 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FlatPlateAbsorption.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Calculates attenuation due to absorption and scattering in a generic sample, considering only the
+namespace Mantid {
+namespace Algorithms {
+/** Calculates attenuation due to absorption and scattering in a generic sample,
+   considering only the
     scattering within a cuboid shaped 'gauge volume'.
 
-    This gauge volume will be an axis-aligned cuboid with its centre at the samplePos point. The
-    sample object must have been previously defined and must fully enclose the gauge volume.
+    This gauge volume will be an axis-aligned cuboid with its centre at the
+   samplePos point. The
+    sample object must have been previously defined and must fully enclose the
+   gauge volume.
 
     @author Russell Taylor, Tessella
     @date 1/11/2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -39,23 +41,28 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CuboidGaugeVolumeAbsorption : public FlatPlateAbsorption
-{
+class DLLExport CuboidGaugeVolumeAbsorption : public FlatPlateAbsorption {
 public:
   /// (Empty) Constructor
   CuboidGaugeVolumeAbsorption();
   /// Virtual destructor
   virtual ~CuboidGaugeVolumeAbsorption() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "CuboidGaugeVolumeAbsorption"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Calculates bin-by-bin correction factors for attenuation due to absorption and (single) scattering within a cuboid shaped 'gauge volume' of a generic sample. The sample shape can be defined by, e.g., the CreateSampleShape algorithm.";}
+  virtual const std::string name() const {
+    return "CuboidGaugeVolumeAbsorption";
+  }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Calculates bin-by-bin correction factors for attenuation due to "
+           "absorption and (single) scattering within a cuboid shaped 'gauge "
+           "volume' of a generic sample. The sample shape can be defined by, "
+           "e.g., the CreateSampleShape algorithm.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
 
 private:
-  
   std::string sampleXML();
   void initialiseCachedDistances();
 };

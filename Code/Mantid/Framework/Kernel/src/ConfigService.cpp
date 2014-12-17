@@ -1326,8 +1326,7 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
         messageStream << "command \"" << cmd << "\" failed with code: " << rc;
         g_log.debug(messageStream.str());
       }
-    }
-    catch (Poco::SystemException &e) {
+    } catch (Poco::SystemException &e) {
       g_log.debug("command \"" + cmd + "\" failed");
       g_log.debug(e.what());
     }
@@ -1346,8 +1345,7 @@ std::string ConfigServiceImpl::getUsername() {
     if (!username.empty()) {
       return username;
     }
-  }
-  catch (Poco::NotFoundException &e) {
+  } catch (Poco::NotFoundException &e) {
     UNUSED_ARG(e); // let it drop on the floor
   }
 
@@ -1357,8 +1355,7 @@ std::string ConfigServiceImpl::getUsername() {
     if (!username.empty()) {
       return username;
     }
-  }
-  catch (Poco::NotFoundException &e) {
+  } catch (Poco::NotFoundException &e) {
     UNUSED_ARG(e); // let it drop on the floor
   }
 
@@ -1755,8 +1752,7 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
   try {
     try {
       pDoc = pParser.parse(fileName);
-    }
-    catch (...) {
+    } catch (...) {
       throw Kernel::Exception::FileError("Unable to parse file:", fileName);
     }
     // Get pointer to root element
@@ -1781,8 +1777,8 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
       throw std::runtime_error("The facility definition file " + fileName +
                                " defines no facilities");
     }
-  }
-  catch (std::exception &e) {
+
+  } catch (std::exception &e) {
     g_log.error(e.what());
   }
 }

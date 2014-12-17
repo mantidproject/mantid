@@ -1,14 +1,17 @@
 #ifndef IMPLICIT_FUNCTION_FACTORY
 #define IMPLICIT_FUNCTION_FACTORY
 
-/** @class ImplicitFunctionFactory ImplicitFunctionFactory.h Kernel/ImplicitFunctionFactory.h
+/** @class ImplicitFunctionFactory ImplicitFunctionFactory.h
+Kernel/ImplicitFunctionFactory.h
 
-This dynamic factory implementation generates concrete instances of ImplicitFunctions.
+This dynamic factory implementation generates concrete instances of
+ImplicitFunctions.
 
     @author Owen Arnold, Tessella Support Services plc
     @date 27/10/2010
 
-Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -35,42 +38,44 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "ImplicitFunctionParserFactory.h"
 
+namespace Mantid {
+namespace API {
+class MANTID_API_DLL ImplicitFunctionFactoryImpl
+    : public Kernel::DynamicFactory<Mantid::Geometry::MDImplicitFunction> {
+public:
+  virtual Mantid::Geometry::MDImplicitFunction_sptr
+  create(const std::string &className) const;
 
-namespace Mantid
-{
-  namespace API
-  {
-    class MANTID_API_DLL ImplicitFunctionFactoryImpl : public Kernel::DynamicFactory<Mantid::Geometry::MDImplicitFunction>
-    {
-    public:
+  virtual Mantid::Geometry::MDImplicitFunction *
+  createUnwrapped(Poco::XML::Element *processXML) const;
 
-      virtual Mantid::Geometry::MDImplicitFunction_sptr create(const std::string& className) const;
+  virtual Mantid::Geometry::MDImplicitFunction *
+  createUnwrapped(const std::string &processXML) const;
 
-      virtual Mantid::Geometry::MDImplicitFunction* createUnwrapped(Poco::XML::Element* processXML) const;
+  friend struct Mantid::Kernel::CreateUsingNew<ImplicitFunctionFactoryImpl>;
 
-      virtual Mantid::Geometry::MDImplicitFunction* createUnwrapped(const std::string& processXML) const;
+  /// Private Constructor for singleton class
+  ImplicitFunctionFactoryImpl();
+  /// Private copy constructor - NO COPY ALLOWED
+  ImplicitFunctionFactoryImpl(const ImplicitFunctionFactoryImpl &);
+  /// Private assignment operator - NO ASSIGNMENT ALLOWED
+  ImplicitFunctionFactoryImpl &operator=(const ImplicitFunctionFactoryImpl &);
+  /// Private Destructor
+  virtual ~ImplicitFunctionFactoryImpl();
+};
 
-      friend struct Mantid::Kernel::CreateUsingNew<ImplicitFunctionFactoryImpl>;
+/// Forward declaration of a specialisation of SingletonHolder for
+/// ImplicitFunctionFactoryImpl (needed for dllexport/dllimport) and a typedef
+/// for it.
+#ifdef _WIN32
+// this breaks new namespace declaraion rules; need to find a better fix
+template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<ImplicitFunctionFactoryImpl>;
+#endif /* _WIN32 */
 
-      /// Private Constructor for singleton class
-      ImplicitFunctionFactoryImpl();    
-      /// Private copy constructor - NO COPY ALLOWED
-      ImplicitFunctionFactoryImpl(const ImplicitFunctionFactoryImpl&);
-      /// Private assignment operator - NO ASSIGNMENT ALLOWED
-      ImplicitFunctionFactoryImpl& operator = (const ImplicitFunctionFactoryImpl&);
-      ///Private Destructor
-      virtual ~ImplicitFunctionFactoryImpl();
-    };
-
-    ///Forward declaration of a specialisation of SingletonHolder for ImplicitFunctionFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
-    #ifdef _WIN32
-      // this breaks new namespace declaraion rules; need to find a better fix
-      template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<ImplicitFunctionFactoryImpl>;
-    #endif /* _WIN32 */
-
-    typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<ImplicitFunctionFactoryImpl> ImplicitFunctionFactory;
-
-  }
+typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<
+    ImplicitFunctionFactoryImpl> ImplicitFunctionFactory;
+}
 }
 
 #endif

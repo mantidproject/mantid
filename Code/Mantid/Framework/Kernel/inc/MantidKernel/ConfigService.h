@@ -220,8 +220,8 @@ public:
   void setFacility(const std::string &facilityName);
 
   /// Look for an instrument
-  const InstrumentInfo &getInstrument(const std::string &instrumentName =
-                                          "") const;
+  const InstrumentInfo &
+  getInstrument(const std::string &instrumentName = "") const;
 
   /// Add an observer for a notification
   void addObserver(const Poco::AbstractObserver &observer) const;

@@ -8,27 +8,30 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Masks bins in a workspace. Bins falling within the range given (even partially) are
-    masked, i.e. their data and error values are set to zero and the bin is added to the
-    list of masked bins. This range is masked for all spectra in the workspace (though the
+namespace Mantid {
+namespace Algorithms {
+/** Masks bins in a workspace. Bins falling within the range given (even
+   partially) are
+    masked, i.e. their data and error values are set to zero and the bin is
+   added to the
+    list of masked bins. This range is masked for all spectra in the workspace
+   (though the
     workspace does not have to have common X values in all spectra).
 
     Required Properties:
     <UL>
     <LI> InputWorkspace - The name of the Workspace to take as input. </LI>
-    <LI> OutputWorkspace - The name of the Workspace containing the masked bins. </LI>
+    <LI> OutputWorkspace - The name of the Workspace containing the masked bins.
+   </LI>
     <LI> XMin - The value to start masking from.</LI>
     <LI> XMax - The value to end masking at.</LI>
     </UL>
-      
+
     @author Russell Taylor, Tessella plc
     @date 29/04/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -45,11 +48,10 @@ namespace Algorithms
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>    
+    File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport MaskBins : public API::Algorithm
-{
+class DLLExport MaskBins : public API::Algorithm {
 public:
   /// Constructor
   MaskBins();
@@ -57,8 +59,10 @@ public:
   virtual ~MaskBins() {}
   /// Algorithm's name
   virtual const std::string name() const { return "MaskBins"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Marks bins in a workspace as being masked.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Marks bins in a workspace as being masked.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -66,19 +70,19 @@ public:
   virtual const std::string category() const { return "Transforms\\Masking"; }
 
 private:
-  
   /// Initialisation code
   void init();
   /// Execution code
   void exec();
   void execEvent();
-  
-  void findIndices(const MantidVec& X, MantidVec::difference_type& startBin, MantidVec::difference_type& endBin);
 
-  double m_startX;                                   ///< The range start point
-  double m_endX;                                     ///< The range end point
-  std::vector<int> spectra_list; ///<the list of Spectra (workspace index) to load
+  void findIndices(const MantidVec &X, MantidVec::difference_type &startBin,
+                   MantidVec::difference_type &endBin);
 
+  double m_startX; ///< The range start point
+  double m_endX;   ///< The range end point
+  std::vector<int>
+      spectra_list; ///<the list of Spectra (workspace index) to load
 };
 
 } // namespace Algorithms

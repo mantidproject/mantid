@@ -6,28 +6,34 @@
 namespace Mantid {
 namespace RemoteAlgorithms {
 /*** Submit a job to be executed on the remote compute resource.
-    
+
     Input Properties:
     <UL>
-    <LI> ComputeResource  - The name of the compute resource that will execute the job </LI>
+    <LI> ComputeResource  - The name of the compute resource that will execute
+   the job </LI>
     <LI> NumNodes         - The number of nodes to reserve for this job </LI>
-    <LI> CoresPerNode     - The number of cores this job will use on each node </LI>
-    <LI> TaskName         - A short, human readable identifier for the job (Optional) </LI>
-    <LI> TransactionID    - ID of the transaction this job belongs to.  See StartRemoteTransaction </LI>  
+    <LI> CoresPerNode     - The number of cores this job will use on each node
+   </LI>
+    <LI> TaskName         - A short, human readable identifier for the job
+   (Optional) </LI>
+    <LI> TransactionID    - ID of the transaction this job belongs to.  See
+   StartRemoteTransaction </LI>
     <LI> PythonScript     - The actual python code that will be executed </LI>
     <LI> ScriptName       - A name for the python script </LI>
     </UL>
 
     Output Properties:
     <UL>
-    <LI> JobID            - An ID for tracking the status of the submitted job (Queued, Running,
+    <LI> JobID            - An ID for tracking the status of the submitted job
+   (Queued, Running,
       Completed, Error, etc..) </LI>
     <\UL>
-    
+
     @author Ross Miller, ORNL
     @date 04/30/2013
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -48,8 +54,7 @@ namespace RemoteAlgorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-class SubmitRemoteJob : public Mantid::API::Algorithm
-{
+class SubmitRemoteJob : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   SubmitRemoteJob() : Mantid::API::Algorithm() {}
@@ -57,8 +62,11 @@ public:
   virtual ~SubmitRemoteJob() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SubmitRemoteJob"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Submit a job to be executed on the specified remote compute resource.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Submit a job to be executed on the specified remote compute "
+           "resource.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -67,9 +75,8 @@ public:
 
 private:
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
-
 };
 
 } // end namespace RemoteAlgorithms

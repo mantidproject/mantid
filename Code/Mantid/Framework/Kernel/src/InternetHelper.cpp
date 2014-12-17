@@ -206,11 +206,9 @@ int InternetHelper::sendHTTPRequest(const std::string &url,
 
     // low level sending the request
     retStatus = this->sendRequestAndProcess(session, uri, responseStream);
-  }
-  catch (HostNotFoundException &ex) {
+  } catch (HostNotFoundException &ex) {
     throwNotConnected(url, ex);
-  }
-  catch (Poco::Exception &ex) {
+  } catch (Poco::Exception &ex) {
     throw Exception::InternetError("Connection and request failed " +
                                    ex.displayText());
   }
@@ -257,11 +255,9 @@ int InternetHelper::sendHTTPSRequest(const std::string &url,
 
     // low level sending the request
     retStatus = this->sendRequestAndProcess(session, uri, responseStream);
-  }
-  catch (HostNotFoundException &ex) {
+  } catch (HostNotFoundException &ex) {
     throwNotConnected(url, ex);
-  }
-  catch (Poco::Exception &ex) {
+  } catch (Poco::Exception &ex) {
     throw Exception::InternetError("Connection and request failed " +
                                    ex.displayText());
   }
@@ -315,8 +311,7 @@ int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res,
         boost::lexical_cast<int>(res.get("X-RateLimit-Remaining", "-1"));
     rateLimitReset.set_from_time_t(
         boost::lexical_cast<int>(res.get("X-RateLimit-Reset", "0")));
-  }
-  catch (boost::bad_lexical_cast const &) {
+  } catch (boost::bad_lexical_cast const &) {
     rateLimitRemaining = -1;
   }
 

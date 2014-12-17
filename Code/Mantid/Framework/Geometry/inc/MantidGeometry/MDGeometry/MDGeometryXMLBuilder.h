@@ -7,10 +7,8 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
-namespace Mantid
-{
-namespace Geometry
-{
+namespace Mantid {
+namespace Geometry {
 
 /**
  @class  MDGeometryBuliderXML
@@ -19,10 +17,12 @@ namespace Geometry
  @date May 2011
  @version 1.0
 
- Handles the generation of well formed description of a geometry based on input IMDDimensions.
+ Handles the generation of well formed description of a geometry based on input
+ IMDDimensions.
  Outputs xml.
 
- Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -43,11 +43,9 @@ namespace Geometry
 
  */
 template <typename CheckDimensionPolicy>
-class MANTID_GEOMETRY_DLL MDGeometryBuilderXML
-{
+class MANTID_GEOMETRY_DLL MDGeometryBuilderXML {
 
 public:
-
   /// Constructor
   MDGeometryBuilderXML();
 
@@ -57,7 +55,7 @@ public:
   /// Add a dimension that is neither considered x, y, z or t.
   bool addOrdinaryDimension(IMDDimension_const_sptr dimension) const;
 
-  /// Add many ordinary dimensions. 
+  /// Add many ordinary dimensions.
   void addManyOrdinaryDimensions(VecIMDDimension_sptr manyDims) const;
 
   /// Add x dimension.
@@ -73,13 +71,13 @@ public:
   bool addTDimension(IMDDimension_const_sptr dimension) const;
 
   /// Copy constructor
-  MDGeometryBuilderXML(const MDGeometryBuilderXML&);
+  MDGeometryBuilderXML(const MDGeometryBuilderXML &);
 
   /// Assignment Operator
-  MDGeometryBuilderXML& operator=(const MDGeometryBuilderXML&);
+  MDGeometryBuilderXML &operator=(const MDGeometryBuilderXML &);
 
   /// Create the xml.
-  const std::string& create() const;
+  const std::string &create() const;
 
   /// Determine if a valid x dimension has been provided.
   bool hasXDimension() const;
@@ -97,7 +95,6 @@ public:
   bool hasIntegratedTDimension() const;
 
 private:
-
   typedef std::vector<IMDDimension_const_sptr> DimensionContainerType;
 
   mutable DimensionContainerType m_vecDimensions;
@@ -113,12 +110,12 @@ private:
   /// Instantiate and apply the checking policy.
   void applyPolicyChecking(IMDDimension_const_sptr dimensionToAdd) const;
 
-  /// Flag indicating that some change in the inputs has occured. Triggers full recreation.
+  /// Flag indicating that some change in the inputs has occured. Triggers full
+  /// recreation.
   mutable bool m_changed;
 
   /// Variable suports lazy calculation.
   mutable std::string m_lastResult;
-
 };
 
 /*
@@ -128,16 +125,17 @@ private:
  @date May 2011
  @version 1.0
 */
-struct StrictDimensionPolicy: public std::unary_function<IMDDimension_const_sptr, void>
-{
+struct StrictDimensionPolicy
+    : public std::unary_function<IMDDimension_const_sptr, void> {
 public:
   StrictDimensionPolicy() {}
-  void operator()(IMDDimension_const_sptr item)
-  {
-    if(true == item->getIsIntegrated())
-    {
-      std::string message = "StrictDimensionPolicy bans the use of integrated IMDDimensions mapped to x, y, z or t in a IMDWorkspace.";
-      message += "Attempted to do so with IMDDimension: " + item->getDimensionId();
+  void operator()(IMDDimension_const_sptr item) {
+    if (true == item->getIsIntegrated()) {
+      std::string message = "StrictDimensionPolicy bans the use of integrated "
+                            "IMDDimensions mapped to x, y, z or t in a "
+                            "IMDWorkspace.";
+      message +=
+          "Attempted to do so with IMDDimension: " + item->getDimensionId();
       throw std::invalid_argument(message);
     }
   }
@@ -149,14 +147,12 @@ public:
  @author Owen Arnold
  @date May 2011
 */
-struct NoDimensionPolicy: public std::unary_function<IMDDimension_const_sptr, void>
-{
-  void operator()(IMDDimension_const_sptr)
-  {
-    //Do nothing.
+struct NoDimensionPolicy
+    : public std::unary_function<IMDDimension_const_sptr, void> {
+  void operator()(IMDDimension_const_sptr) {
+    // Do nothing.
   }
 };
-
 }
 }
 

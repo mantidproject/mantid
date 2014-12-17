@@ -1,7 +1,8 @@
 #ifndef MANTID_PYTHONINTERFACE_CONVERTERS_PYARRAYTYPE_H_
 #define MANTID_PYTHONINTERFACE_CONVERTERS_PYARRAYTYPE_H_
 /**
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -24,24 +25,19 @@
 #include "MantidKernel/System.h"
 #include <boost/python/detail/prefix.hpp>
 
-namespace Mantid
-{
-  namespace PythonInterface
-  {
-    namespace Converters
-    {
-      //
-      // It is important that the numpy/arrayobject header
-      // does not appear in any of our headers as it
-      // contains some static definitions that cannot be
-      // allowed to be defined in other translation units
+namespace Mantid {
+namespace PythonInterface {
+namespace Converters {
+//
+// It is important that the numpy/arrayobject header
+// does not appear in any of our headers as it
+// contains some static definitions that cannot be
+// allowed to be defined in other translation units
 
-      // Numpy array type
-      DLLExport PyTypeObject * getNDArrayType();
-    }
-  }
+// Numpy array type
+DLLExport PyTypeObject *getNDArrayType();
 }
-
-
+}
+}
 
 #endif /* PYARRAYTYPE_H_ */

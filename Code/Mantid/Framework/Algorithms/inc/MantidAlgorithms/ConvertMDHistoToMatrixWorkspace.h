@@ -6,29 +6,29 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
+namespace Mantid {
 
-namespace API
-{
-  class IMDHistoWorkspace;
+namespace API {
+class IMDHistoWorkspace;
 }
 
-namespace Algorithms
-{
-/** Creates a single spectrum Workspace2D with X,Y, and E copied from an first non-integrated dimension of a IMDHistoWorkspace.
+namespace Algorithms {
+/** Creates a single spectrum Workspace2D with X,Y, and E copied from an first
+ non-integrated dimension of a IMDHistoWorkspace.
 
  Required Properties:
  <UL>
  <LI> InputWorkspace  - The name of the input IMDHistoWorkspace.. </LI>
  <LI> OutputWorkspace - The name of the output matrix workspace. </LI>
- <LI> Normalization -   Signal normalization method: NoNormalization, VolumeNormalization, or NumEventsNormalization</LI>
+ <LI> Normalization -   Signal normalization method: NoNormalization,
+ VolumeNormalization, or NumEventsNormalization</LI>
  </UL>
 
  @author Roman Tolchenov, Tessella plc
  @date 17/04/2012
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -48,30 +48,28 @@ namespace Algorithms
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport ConvertMDHistoToMatrixWorkspace : public API::Algorithm
-{
+class DLLExport ConvertMDHistoToMatrixWorkspace : public API::Algorithm {
 public:
   /// (Empty) Constructor
-  ConvertMDHistoToMatrixWorkspace() : API::Algorithm()
-  {}
+  ConvertMDHistoToMatrixWorkspace() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~ConvertMDHistoToMatrixWorkspace()
-  {}
+  virtual ~ConvertMDHistoToMatrixWorkspace() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "ConvertMDHistoToMatrixWorkspace";};
+  virtual const std::string name() const {
+    return "ConvertMDHistoToMatrixWorkspace";
+  };
 
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Converts if it can a IMDHistoWorkspace to a Workspace2D.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Converts if it can a IMDHistoWorkspace to a Workspace2D.";
+  }
 
   /// Algorithm's version
-  virtual int version() const
-  { return (1);}
+  virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const
-  { return "Utility\\Workspaces";}
+  virtual const std::string category() const { return "Utility\\Workspaces"; }
 
 private:
-  
   /// Initialisation code
   void init();
   /// Execution code
@@ -82,7 +80,7 @@ private:
   /// Make 2D MatrixWorkspace
   void make2DWorkspace();
   /// Calculate the stride for a dimension
-  size_t calcStride(const API::IMDHistoWorkspace& workspace, size_t dim) const;
+  size_t calcStride(const API::IMDHistoWorkspace &workspace, size_t dim) const;
 };
 
 } // namespace Algorithms
