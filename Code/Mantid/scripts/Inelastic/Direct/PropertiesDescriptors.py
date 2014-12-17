@@ -214,9 +214,31 @@ class MapMaskFile(object):
            
         prop_helpers.gen_setter(instance.__dict__,self._field_name,value);
 #end MapMaskFile
+#
+class MapMaskFile(object):
+    """ common method to wrap around an auxiliary file name """
+    def __init__(self,field_name,file_ext,doc_string=None):
+        self._field_name=field_name;
+        self._file_ext  =file_ext;
+        if not(doc_string is None):
+            self.__doc__ = doc_string;
 
-class HardMaskPlus(object):
+    def __get__(self,instance,type=None):
+          return prop_helpers.gen_getter(instance.__dict__,self._field_name);
+
+    def __set__(self,instance,value):
+        if value != None:
+           fileName, fileExtension = os.path.splitext(value)
+           if (not fileExtension):
+               value=value+self._file_ext;
+           
+        prop_helpers.gen_setter(instance.__dict__,self._field_name,value);
+#end MapMaskFile
+
+class HardMaskPlus(prop_helpers.ComplexProperty):
     """ Legacy HardMaskPlus class which sets up hard_mask_file to file and use_hard_mask_only to True""" 
+    def __init__(self):
+        prop_helpers.ComplexProperty.__init__(self,['hard_mask_file','use_hard_mask_only','run_diagnostics'])
     def __get__(self,instance,type=None):
          return prop_helpers.gen_getter(instance.__dict__,'hard_mask_file');
 
@@ -225,41 +247,53 @@ class HardMaskPlus(object):
            fileName, fileExtension = os.path.splitext(value)
            if (not fileExtension):
                value=value+'.msk';
-        prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',False);
-        prop_helpers.gen_setter(instance.__dict__,'hard_mask_file',value);
-        # This property enables diagnostics 
-        instance.run_diagnostics = True;
-#end HardMaskPlus
+           prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[value,False,True])
+        else:
+           prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[None,True,False])
 
 
-class HardMaskOnly(object):
+
+class HardMaskOnly(prop_helpers.ComplexProperty):
     """ Sets diagnostics algorithm to use hard mask file provided and to disable all other diagnostics routines
 
         It controls two options, where the first one is use_hard_mask_only=True/False, controls diagnostics algorithm
         and another one: hard_mask_file provides file for masking.         
     """
+    def __init__(self):
+        prop_helpers.ComplexProperty.__init__(self,['hard_mask_file','use_hard_mask_only','run_diagnostics'])
+
     def __get__(self,instance,type=None):
           return prop_helpers.gen_getter(instance.__dict__,'use_hard_mask_only');
     def __set__(self,instance,value):
         if value is None:
-            prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',False);
-            instance.hard_mask_file = None;            
+            use_hard_mask_only = False
+            hard_mask_file     = None
+            run_diagnostics    = True
+            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[hard_mask_file,use_hard_mask_only,run_diagnostics])
         elif isinstance(value,bool):
-            prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',value);
+            use_hard_mask_only = False
+            hard_mask_file     = instance.hard_mask_file
+            run_diagnostics    = instance.run_diagnostics
+            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[hard_mask_file,use_hard_mask_only,run_diagnostics])
         elif isinstance(value,str):
             if value.lower() in ['true','yes']:
-                prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',True);
+                use_hard_mask_only = True
+                hard_mask_file     = instance.hard_mask_file
             elif value.lower() in ['false','no']:
-                prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',False);
+                use_hard_mask_only = False
+                hard_mask_file     = instance.hard_mask_file
             else: # it is probably a hard mask file provided:
-                prop_helpers.gen_setter(instance.__dict__,'use_hard_mask_only',True);
                 instance.hard_mask_file = value;
-            #end
-        #end
+                use_hard_mask_only = True
+                hard_mask_file     = instance.hard_mask_file
 
-        # if no hard mask file is there and use_hard_mask_only is True, diagnostics should not run
-        if instance.use_hard_mask_only and instance.hard_mask_file is None:
-           instance.run_diagnostics = False;
+            # if no hard mask file is there and use_hard_mask_only is True, diagnostics should not run
+            if instance.use_hard_mask_only and hard_mask_file is None:
+               run_diagnostics = False
+            else:
+               run_diagnostics = True
+            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[hard_mask_file,use_hard_mask_only,run_diagnostics])
+        #end
 #end HardMaskOnly
 
 class MonovanIntegrationRange(prop_helpers.ComplexProperty):
