@@ -139,15 +139,17 @@ void SANSSolidAngleCorrection::exec()
 
     // Compute solid angle correction factor
     const bool is_tube = getProperty("DetectorTubes");
-    double tanTheta;
+    const double tanTheta = tan( inputWS->detectorTwoTheta(det) );
+    const double theta_term = sqrt(tanTheta*tanTheta + 1.0);
+    double corr;
     if (is_tube)
     {
-    	tanTheta = tan( getYTubeAngle(det, inputWS) );
+        const double tanAlpha = tan( getYTubeAngle(det, inputWS) );
+        const double alpha_term = sqrt(tanAlpha*tanAlpha + 1.0);
+        corr = alpha_term*theta_term*theta_term;
     } else {
-        tanTheta = tan( inputWS->detectorTwoTheta(det) );
+        corr = theta_term*theta_term*theta_term;
     }
-    const double term = sqrt(tanTheta*tanTheta + 1.0);
-    const double corr = term*term*term;
 
     // Correct data for all X bins
     for (int j = 0; j < xLength; j++)
@@ -211,9 +213,18 @@ void SANSSolidAngleCorrection::execEvent()
     if ( det->isMonitor() || det->isMasked() ) continue;
 
     // Compute solid angle correction factor
+    const bool is_tube = getProperty("DetectorTubes");
     const double tanTheta = tan( inputEventWS->detectorTwoTheta(det) );
-    const double term = sqrt(tanTheta*tanTheta + 1.0);
-    const double corr = term*term*term;
+    const double theta_term = sqrt(tanTheta*tanTheta + 1.0);
+    double corr;
+    if (is_tube)
+    {
+        const double tanAlpha = tan( getYTubeAngle(det, inputWS) );
+        const double alpha_term = sqrt(tanAlpha*tanAlpha + 1.0);
+        corr = alpha_term*theta_term*theta_term;
+    } else {
+        corr = theta_term*theta_term*theta_term;
+    }
     EventList& el = outputEventWS->getEventList(i);
     el*=corr;
     progress.report("Solid Angle Correction");
