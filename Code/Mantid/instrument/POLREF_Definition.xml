@@ -144,7 +144,7 @@
     We may actually want to draw in the table for clarity.
     -->
     <parameter name="z">
-      <logfile id="theta" eq="2.6*sin(value*0.0174533)" />
+      <logfile id="stheta" eq="2.6*sin(value*0.0174533)" extract-single-value-as="last_value" />
     </parameter>
     
   </component>   

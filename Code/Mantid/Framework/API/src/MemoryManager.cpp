@@ -6,10 +6,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Memory.h"
 
-#ifdef USE_TCMALLOC
-#include "gperftools/malloc_extension.h"
-#endif
-
 #include <ostream> //for endl
 
 using std::size_t;
@@ -32,7 +28,7 @@ MemoryManagerImpl::MemoryManagerImpl() :
 }
 
 /** Private destructor
- *  Prevents client from calling 'delete' on the pointer handed 
+ *  Prevents client from calling 'delete' on the pointer handed
  *  out by Instance
  */
 MemoryManagerImpl::~MemoryManagerImpl()
@@ -55,11 +51,6 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
  */
 void MemoryManagerImpl::releaseFreeMemory()
 {
-
-#ifdef USE_TCMALLOC
-    // Make TCMALLOC release memory to the system
-    MallocExtension::instance()->ReleaseFreeMemory();
-#endif
 }
 
 /** Release any free memory back to the system,
@@ -77,18 +68,7 @@ void MemoryManagerImpl::releaseFreeMemory()
  */
 void MemoryManagerImpl::releaseFreeMemoryIfAbove(double threshold)
 {
-    UNUSED_ARG(threshold);
-#ifdef USE_TCMALLOC
-    Kernel::MemoryStats mem;
-    mem.update();
-    double fraction_available = static_cast<double>(mem.availMem())
-                                / static_cast<double>(mem.totalMem());
-    if (fraction_available < (1.0 - threshold))
-    {
-      // Make TCMALLOC release memory to the system
-      MallocExtension::instance()->ReleaseFreeMemory();
-    }
-#endif
+  UNUSED_ARG(threshold);
 }
 
 
@@ -104,18 +84,6 @@ void MemoryManagerImpl::releaseFreeMemoryIfAccumulated(size_t adding, size_t thr
 {
   UNUSED_ARG(adding);
   UNUSED_ARG(threshold);
-#ifdef USE_TCMALLOC
-  accumulatorMutex.lock();
-
-  memoryCleared += adding;
-  if (memoryCleared > threshold)
-  {
-    releaseFreeMemory();
-    memoryCleared = 0;
-  }
-
-  accumulatorMutex.unlock();
-#endif
 }
 
 

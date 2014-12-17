@@ -59,7 +59,6 @@ namespace CurveFitting
 
   private:
     
-
     /// Implement abstract Algorithm methods
     void init();
 
