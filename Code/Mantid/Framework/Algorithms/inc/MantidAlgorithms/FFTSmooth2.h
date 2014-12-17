@@ -7,16 +7,15 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** Data smoothing using the FFT algorithm and various filters.
 
     @author Roman Tolchenov
     @date 07/07/2009
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -36,25 +35,27 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport FFTSmooth2 : public API::Algorithm
-{
+class DLLExport FFTSmooth2 : public API::Algorithm {
 public:
   /// Default constructor
-  FFTSmooth2() : API::Algorithm() {};
+  FFTSmooth2() : API::Algorithm(){};
   /// Destructor
-  virtual ~FFTSmooth2() {};
+  virtual ~FFTSmooth2(){};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FFTSmooth";}
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Performs smoothing of a spectrum using various filters.";}
+  virtual const std::string name() const { return "FFTSmooth"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Performs smoothing of a spectrum using various filters.";
+  }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 2;}
+  virtual int version() const { return 2; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Arithmetic\\FFT;Transforms\\Smoothing";}
+  virtual const std::string category() const {
+    return "Arithmetic\\FFT;Transforms\\Smoothing";
+  }
 
 private:
-  
   // Overridden Algorithm methods
   void init();
   void exec();
@@ -68,7 +69,8 @@ private:
 
   /// The input workspace
   API::MatrixWorkspace_sptr m_inWS;
-  /// Temporary workspace for keeping the unfiltered Fourier transform of the imput spectrum
+  /// Temporary workspace for keeping the unfiltered Fourier transform of the
+  /// imput spectrum
   API::MatrixWorkspace_sptr m_unfilteredWS;
   /// Temporary workspace for keeping the filtered spectrum
   API::MatrixWorkspace_sptr m_filteredWS;
@@ -77,7 +79,6 @@ private:
 
   /// Will we Allow Any X Bins?
   bool IgnoreXBins;
-
 };
 
 } // namespace Algorithm

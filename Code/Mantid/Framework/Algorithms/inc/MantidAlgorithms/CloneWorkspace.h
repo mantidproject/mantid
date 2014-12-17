@@ -6,12 +6,12 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Creates a copy of the input workspace. At the moment, this is only available for MatrixWorkspaces, though
-    it should be perfectly possible to extend this to include TableWorkspaces if that is ever required.
+namespace Mantid {
+namespace Algorithms {
+/** Creates a copy of the input workspace. At the moment, this is only available
+   for MatrixWorkspaces, though
+    it should be perfectly possible to extend this to include TableWorkspaces if
+   that is ever required.
 
     Required Properties:
     <UL>
@@ -22,7 +22,8 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 09/12/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -42,8 +43,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CloneWorkspace : public API::Algorithm
-{
+class DLLExport CloneWorkspace : public API::Algorithm {
 public:
   /// (Empty) Constructor
   CloneWorkspace() : API::Algorithm() {}
@@ -51,8 +51,10 @@ public:
   virtual ~CloneWorkspace() {}
   /// Algorithm's name
   virtual const std::string name() const { return "CloneWorkspace"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Copies an existing workspace into a new one.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Copies an existing workspace into a new one.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -61,9 +63,10 @@ public:
 
 private:
   const std::string workspaceMethodName() const { return "clone"; }
-  const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
+  const std::string workspaceMethodInputProperty() const {
+    return "InputWorkspace";
+  }
 
-  
   /// Initialisation code
   void init();
   /// Execution code

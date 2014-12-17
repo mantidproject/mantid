@@ -1,6 +1,6 @@
 #ifndef RECTANGULAR_DETECTOR_H
 #define RECTANGULAR_DETECTOR_H
-#include <string> 
+#include <string>
 #include <vector>
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -9,10 +9,8 @@
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/IObjComponent.h"
 
-namespace Mantid
-{
-namespace Geometry
-{
+namespace Mantid {
+namespace Geometry {
 /**
  *  RectangularDetector is a type of CompAssembly, an assembly of components.
  *  It is designed to be an easy way to specify a rectangular (XY) array of
@@ -23,7 +21,8 @@ namespace Geometry
  * @author Janik Zikovsky, SNS
  * @date 2010-Oct-06
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -44,35 +43,33 @@ namespace Geometry
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MANTID_GEOMETRY_DLL RectangularDetector : public CompAssembly, public IObjComponent
-{
+class MANTID_GEOMETRY_DLL RectangularDetector : public CompAssembly,
+                                                public IObjComponent {
   friend class RectangularDetectorPixel;
 
 public:
-  ///String description of the type of component
-  virtual std::string type() const { return "RectangularDetector";}
+  /// String description of the type of component
+  virtual std::string type() const { return "RectangularDetector"; }
   //! Empty constructor
   RectangularDetector();
 
   //! Constructor with a name and parent reference
-  RectangularDetector(const std::string&, IComponent* reference=0);
+  RectangularDetector(const std::string &, IComponent *reference = 0);
 
   //! Parametrized constructor
-  RectangularDetector(const RectangularDetector* base, const ParameterMap * map);
+  RectangularDetector(const RectangularDetector *base, const ParameterMap *map);
 
   /// Create all the detector pixels of this rectangular detector.
-  void initialize(boost::shared_ptr<Object> shape,
-      int xpixels, double xstart, double xstep,
-      int ypixels, double ystart, double ystep,
-      int idstart, bool idfillbyfirst_y, int idstepbyrow,
-      int idstep=1
-      );
+  void initialize(boost::shared_ptr<Object> shape, int xpixels, double xstart,
+                  double xstep, int ypixels, double ystart, double ystep,
+                  int idstart, bool idfillbyfirst_y, int idstepbyrow,
+                  int idstep = 1);
 
-//  //! Copy constructor
-//  RectangularDetector(const RectangularDetector&);
+  //  //! Copy constructor
+  //  RectangularDetector(const RectangularDetector&);
   virtual ~RectangularDetector();
   //! Make a clone of the present component
-  virtual IComponent* clone() const;
+  virtual IComponent *clone() const;
 
   boost::shared_ptr<Detector> getAtXY(const int X, const int Y) const;
 
@@ -81,85 +78,89 @@ public:
 
   int xpixels() const;
   int ypixels() const;
-  
+
   double xstep() const;
   double ystep() const;
 
   double xstart() const;
   double ystart() const;
 
-  ///Size in X of the detector
+  /// Size in X of the detector
   double xsize() const;
-  ///Size in Y of the detector
+  /// Size in Y of the detector
   double ysize() const;
- 
+
   int idstart() const;
   bool idfillbyfirst_y() const;
   int idstepbyrow() const;
   int idstep() const;
 
   Kernel::V3D getRelativePosAtXY(int x, int y) const;
-  void getTextureSize(int & xsize, int & ysize) const;
+  void getTextureSize(int &xsize, int &ysize) const;
 
   unsigned int getTextureID() const;
   void setTextureID(unsigned int textureID);
-  ///minimum detector id
+  /// minimum detector id
   int minDetectorID();
   /// maximum detector id
   int maxDetectorID();
-  virtual boost::shared_ptr<const IComponent> getComponentByName(const std::string & cname, int nlevels = 0) const;
+  virtual boost::shared_ptr<const IComponent>
+  getComponentByName(const std::string &cname, int nlevels = 0) const;
 
-  // This should inherit the getBoundingBox implementation from  CompAssembly but
-  // the multiple inheritance seems to confuse it so we'll explicityly tell it that here
+  // This should inherit the getBoundingBox implementation from  CompAssembly
+  // but
+  // the multiple inheritance seems to confuse it so we'll explicityly tell it
+  // that here
   using CompAssembly::getBoundingBox;
 
-  virtual void testIntersectionWithChildren(Track & testRay, std::deque<IComponent_const_sptr> & searchQueue) const;
+  virtual void testIntersectionWithChildren(
+      Track &testRay, std::deque<IComponent_const_sptr> &searchQueue) const;
 
   // ------------ IObjComponent methods ----------------
 
   /// Does the point given lie within this object component?
-  bool isValid(const Kernel::V3D& point) const ;
+  bool isValid(const Kernel::V3D &point) const;
 
   /// Does the point given lie on the surface of this object component?
-  bool isOnSide(const Kernel::V3D& point) const ;
+  bool isOnSide(const Kernel::V3D &point) const;
 
-  ///Checks whether the track given will pass through this Component.
-  int interceptSurface(Track& track) const ;
+  /// Checks whether the track given will pass through this Component.
+  int interceptSurface(Track &track) const;
 
-  /// Finds the approximate solid angle covered by the component when viewed from the point given
-  double solidAngle(const Kernel::V3D& observer) const;
+  /// Finds the approximate solid angle covered by the component when viewed
+  /// from the point given
+  double solidAngle(const Kernel::V3D &observer) const;
   /// Retrieve the cached bounding box
-  void getBoundingBox(BoundingBox & assemblyBox) const;
+  void getBoundingBox(BoundingBox &assemblyBox) const;
 
-  ///Try to find a point that lies within (or on) the object
-  int getPointInObject(Kernel::V3D& point) const;
+  /// Try to find a point that lies within (or on) the object
+  int getPointInObject(Kernel::V3D &point) const;
 
-  //Rendering member functions
-  ///Draws the objcomponent.
+  // Rendering member functions
+  /// Draws the objcomponent.
   void draw() const;
 
   /// Draws the Object.
   void drawObject() const;
 
-  /// Initializes the ObjComponent for rendering, this function should be called before rendering.
+  /// Initializes the ObjComponent for rendering, this function should be called
+  /// before rendering.
   void initDraw() const;
 
   /// Returns the shape of the Object
   const boost::shared_ptr<const Object> shape() const;
   /// Returns the material of the detector
-  const boost::shared_ptr<const Kernel::Material> material() const
-  {
+  const boost::shared_ptr<const Kernel::Material> material() const {
     return boost::shared_ptr<const Kernel::Material>();
   }
 
   // ------------ End of IObjComponent methods ----------------
 
-
 private:
   /// Pointer to the base RectangularDetector, for parametrized instruments
-  const RectangularDetector * m_rectBase;
+  const RectangularDetector *m_rectBase;
   /// Private copy assignment operator
-  RectangularDetector& operator=(const ICompAssembly&);
+  RectangularDetector &operator=(const ICompAssembly &);
 
   /// The number of pixels in the X (horizontal) direction;
   int m_xpixels;
@@ -199,15 +200,16 @@ private:
   int m_idstepbyrow;
   /// Step size in ID in each col
   int m_idstep;
-
 };
 
-MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const RectangularDetector&);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
+                                             const RectangularDetector &);
 
 typedef boost::shared_ptr<RectangularDetector> RectangularDetector_sptr;
-typedef boost::shared_ptr<const RectangularDetector> RectangularDetector_const_sptr;
+typedef boost::shared_ptr<const RectangularDetector>
+    RectangularDetector_const_sptr;
 
-} //Namespace Geometry
-} //Namespace Mantid
+} // Namespace Geometry
+} // Namespace Mantid
 
 #endif

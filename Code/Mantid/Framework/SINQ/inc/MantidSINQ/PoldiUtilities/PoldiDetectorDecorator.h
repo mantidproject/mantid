@@ -6,14 +6,13 @@
 
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 
-namespace Mantid
-{
-namespace Poldi
-{
+namespace Mantid {
+namespace Poldi {
 
 /** PoldiDetectorDecorator :
 
-    Decorator interface for POLDI detectors. The base implementation just forwards all calls
+    Decorator interface for POLDI detectors. The base implementation just
+   forwards all calls
     to the decorated detector object.
 
         @author Michael Wedel, Paul Scherrer Institut - SINQ
@@ -39,38 +38,39 @@ namespace Poldi
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_SINQ_DLL PoldiDetectorDecorator : public PoldiAbstractDetector
-{
+class MANTID_SINQ_DLL PoldiDetectorDecorator : public PoldiAbstractDetector {
 public:
-    PoldiDetectorDecorator(boost::shared_ptr<PoldiAbstractDetector> decoratedDetector = boost::shared_ptr<PoldiAbstractDetector>());
+  PoldiDetectorDecorator(
+      boost::shared_ptr<PoldiAbstractDetector> decoratedDetector =
+          boost::shared_ptr<PoldiAbstractDetector>());
 
-    virtual ~PoldiDetectorDecorator() { }
+  virtual ~PoldiDetectorDecorator() {}
 
-    void setDecoratedDetector(boost::shared_ptr<PoldiAbstractDetector> detector);
-    boost::shared_ptr<PoldiAbstractDetector> decoratedDetector();
+  void setDecoratedDetector(boost::shared_ptr<PoldiAbstractDetector> detector);
+  boost::shared_ptr<PoldiAbstractDetector> decoratedDetector();
 
-    virtual void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument);
+  virtual void
+  loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument);
 
-    virtual double efficiency();
+  virtual double efficiency();
 
-    virtual double twoTheta(int elementIndex);
-    virtual double distanceFromSample(int elementIndex);
+  virtual double twoTheta(int elementIndex);
+  virtual double distanceFromSample(int elementIndex);
 
-    virtual size_t elementCount();
-    virtual size_t centralElement();
+  virtual size_t elementCount();
+  virtual size_t centralElement();
 
-    virtual const std::vector<int>& availableElements();
+  virtual const std::vector<int> &availableElements();
 
-    virtual std::pair<double, double> qLimits(double lambdaMin, double lambdaMax);
+  virtual std::pair<double, double> qLimits(double lambdaMin, double lambdaMax);
 
 protected:
-    virtual void detectorSetHook();
+  virtual void detectorSetHook();
 
-    boost::shared_ptr<PoldiAbstractDetector> m_decoratedDetector;
+  boost::shared_ptr<PoldiAbstractDetector> m_decoratedDetector;
 };
-
 
 } // namespace Poldi
 } // namespace Mantid
 
-#endif  /* MANTID_SINQ_POLDIDETECTORDECORATOR_H_ */
+#endif /* MANTID_SINQ_POLDIDETECTORDECORATOR_H_ */

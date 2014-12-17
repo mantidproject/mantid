@@ -2,62 +2,57 @@
 #define Triple_h
 #include "MantidGeometry/DllConfig.h"
 
-namespace Mantid
-{
+namespace Mantid {
 /**
   \class Triple
   \brief Triple of three identical types
   \author S. Ansell
   \date April 2005
   \version 1.0
-  
+
   Class maintians a type first/second/third triple
   similar to std::pair except all are identical
 
-  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
-        
+
   Mantid is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
-  
+
   Mantid is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
+
   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
-template<typename T>
-class MANTID_GEOMETRY_DLL Triple
-{
-  public:
-  
-  T first;       ///< First item
-  T second;      ///< Second item
-  T third;       ///< Third item
+template <typename T> class MANTID_GEOMETRY_DLL Triple {
+public:
+  T first;  ///< First item
+  T second; ///< Second item
+  T third;  ///< Third item
 
   Triple();
-  Triple(const Triple<T>&);
-  Triple(const T&,const T&,const T&);
-  Triple<T>& operator=(const Triple<T>&);
+  Triple(const Triple<T> &);
+  Triple(const T &, const T &, const T &);
+  Triple<T> &operator=(const Triple<T> &);
   ~Triple();
 
   T operator[](const int A) const;
-  T& operator[](const int A);
-  int operator<(const Triple<T>&) const;
-  int operator>(const Triple<T>&) const;
-  int operator==(const Triple<T>&) const;
-  int operator!=(const Triple<T>&) const;
-
+  T &operator[](const int A);
+  int operator<(const Triple<T> &) const;
+  int operator>(const Triple<T> &) const;
+  int operator==(const Triple<T> &) const;
+  int operator!=(const Triple<T> &) const;
 };
-
 
 /**
   \class DTriple
@@ -65,31 +60,28 @@ class MANTID_GEOMETRY_DLL Triple
   \author S. Ansell
   \date April 2005
   \version 1.0
-  
+
   Class maintians a different type first/second/third triple
   All are of a different type
 */
 
-template<typename F,typename S,typename T>
-class MANTID_GEOMETRY_DLL DTriple 
-{
-  public:
-  
-  F first;         ///< First item
-  S second;        ///< Second item
-  T third;         ///< Third item
+template <typename F, typename S, typename T>
+class MANTID_GEOMETRY_DLL DTriple {
+public:
+  F first;  ///< First item
+  S second; ///< Second item
+  T third;  ///< Third item
 
   DTriple();
-  DTriple(const DTriple<F,S,T>&);
-  DTriple(const F&,const S&,const T&);
-  DTriple<F,S,T>& operator=(const DTriple<F,S,T>&);
+  DTriple(const DTriple<F, S, T> &);
+  DTriple(const F &, const S &, const T &);
+  DTriple<F, S, T> &operator=(const DTriple<F, S, T> &);
   ~DTriple();
 
-  int operator<(const DTriple<F,S,T>&) const;
-  int operator>(const DTriple<F,S,T>&) const;
-  int operator==(const DTriple<F,S,T>&) const;
-  int operator!=(const DTriple<F,S,T>&) const;
-
+  int operator<(const DTriple<F, S, T> &) const;
+  int operator>(const DTriple<F, S, T> &) const;
+  int operator==(const DTriple<F, S, T> &) const;
+  int operator!=(const DTriple<F, S, T> &) const;
 };
-}  // NAMESPACE Mantid
+} // NAMESPACE Mantid
 #endif

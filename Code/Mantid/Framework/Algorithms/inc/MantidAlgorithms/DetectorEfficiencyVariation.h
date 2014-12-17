@@ -6,85 +6,96 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/DetectorDiagnostic.h"
 
-namespace Mantid
-{
-  namespace Algorithms
-  {
-    /**
-       Required Properties:
-       <UL>
-       <LI> WhiteBeamBase - Name of a white beam vanadium workspace </LI>
-       <LI> WhiteBeamCompare - Name of a matching second white beam vanadium run from the same instrument </LI>
-       <LI> OutputWorkspace - A MaskWorkpace where each spectra that failed the test is masked </LI>
-       <LI> Variation - Identify spectra whose total number of counts has changed by more than this factor of the median change between the two input workspaces </LI>
-       </UL>
+namespace Mantid {
+namespace Algorithms {
+/**
+   Required Properties:
+   <UL>
+   <LI> WhiteBeamBase - Name of a white beam vanadium workspace </LI>
+   <LI> WhiteBeamCompare - Name of a matching second white beam vanadium run
+   from the same instrument </LI>
+   <LI> OutputWorkspace - A MaskWorkpace where each spectra that failed the test
+   is masked </LI>
+   <LI> Variation - Identify spectra whose total number of counts has changed by
+   more than this factor of the median change between the two input workspaces
+   </LI>
+   </UL>
 
-       Optional Properties:
-       <UL>
-       <LI> StartWorkspaceIndex - The index number of the first entry in the Workspace to include in the calculation </LI>
-       <LI> EndWorkspaceIndex - The index number of the last entry in the Workspace to include in the calculation </LI>
-       <LI> RangeLower - No bin with a boundary at an x value less than this will be included in the summation used to decide if a detector is 'bad' </LI>
-       <LI> RangeUpper - No bin with a boundary at an x value higher than this value will be included in the summation used to decide if a detector is 'bad' </LI>
-       </UL>
-    
-       @author Steve D Williams, ISIS Facility Rutherford Appleton Laboratory
-       @date 15/06/2009
+   Optional Properties:
+   <UL>
+   <LI> StartWorkspaceIndex - The index number of the first entry in the
+   Workspace to include in the calculation </LI>
+   <LI> EndWorkspaceIndex - The index number of the last entry in the Workspace
+   to include in the calculation </LI>
+   <LI> RangeLower - No bin with a boundary at an x value less than this will be
+   included in the summation used to decide if a detector is 'bad' </LI>
+   <LI> RangeUpper - No bin with a boundary at an x value higher than this value
+   will be included in the summation used to decide if a detector is 'bad' </LI>
+   </UL>
 
-       Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+   @author Steve D Williams, ISIS Facility Rutherford Appleton Laboratory
+   @date 15/06/2009
 
-       This file is part of Mantid.
+   Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
-       Mantid is free software; you can redistribute it and/or modify
-       it under the terms of the GNU General Public License as published by
-       the Free Software Foundation; either version 3 of the License, or
-       (at your option) any later version.
+   This file is part of Mantid.
 
-       Mantid is distributed in the hope that it will be useful,
-       but WITHOUT ANY WARRANTY; without even the implied warranty of
-       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-       GNU General Public License for more details.
+   Mantid is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
 
-       You should have received a copy of the GNU General Public License
-       along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   Mantid is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-       File change history is stored at: <https://github.com/mantidproject/mantid>
-       Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */
-    class DLLExport DetectorEfficiencyVariation : public DetectorDiagnostic
-    {
-    public:
-      /// Default constructor
-      DetectorEfficiencyVariation();
-      /// Destructor
-      virtual ~DetectorEfficiencyVariation() {};
-      /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "DetectorEfficiencyVariation";}
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Compares two white beam vanadium workspaces from the same instrument to find detectors whose efficiencies have changed beyond a threshold.";}
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-      virtual const std::string category() const;
-      /// Algorithm's version for identification overriding a virtual method
-      virtual int version() const { return (1);}
+   File change history is stored at: <https://github.com/mantidproject/mantid>
+   Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport DetectorEfficiencyVariation : public DetectorDiagnostic {
+public:
+  /// Default constructor
+  DetectorEfficiencyVariation();
+  /// Destructor
+  virtual ~DetectorEfficiencyVariation(){};
+  /// Algorithm's name for identification overriding a virtual method
+  virtual const std::string name() const {
+    return "DetectorEfficiencyVariation";
+  }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Compares two white beam vanadium workspaces from the same "
+           "instrument to find detectors whose efficiencies have changed "
+           "beyond a threshold.";
+  }
 
-    protected:
-      // Overridden Algorithm methods
-      void init();
-      void exec();
+  virtual const std::string category() const;
+  /// Algorithm's version for identification overriding a virtual method
+  virtual int version() const { return (1); }
 
-      /// Loads and checks the values passed to the algorithm
-      void retrieveProperties( API::MatrixWorkspace_sptr &whiteBeam1,
-          API::MatrixWorkspace_sptr &whiteBeam2, double &vari,
-          int &minSpec, int &maxSpec );
-      /// Apply the detector test criterion
-      int doDetectorTests(API::MatrixWorkspace_const_sptr counts1,
-          API::MatrixWorkspace_const_sptr counts2,
-          const double average, double variation);
+protected:
+  // Overridden Algorithm methods
+  void init();
+  void exec();
 
-    private:
-      
-    };
+  /// Loads and checks the values passed to the algorithm
+  void retrieveProperties(API::MatrixWorkspace_sptr &whiteBeam1,
+                          API::MatrixWorkspace_sptr &whiteBeam2, double &vari,
+                          int &minSpec, int &maxSpec);
+  /// Apply the detector test criterion
+  int doDetectorTests(API::MatrixWorkspace_const_sptr counts1,
+                      API::MatrixWorkspace_const_sptr counts2,
+                      const double average, double variation);
 
-  } // namespace Algorithm
+private:
+};
+
+} // namespace Algorithm
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_DETECTOREFFICIENCYVARIATION_H_*/

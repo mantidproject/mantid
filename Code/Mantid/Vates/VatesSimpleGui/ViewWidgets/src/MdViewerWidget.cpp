@@ -252,16 +252,18 @@ void MdViewerWidget::createAppCoreForPlugin()
   if (!pqApplicationCore::instance())
   {
     // Provide ParaView's application core with a path to ParaView
-    int argc = 1;
-
     std::string paraviewPath = Mantid::Kernel::ConfigService::Instance().getParaViewPath();
+    if(paraviewPath.empty())
+    {
+      // ParaView crashes with an empty string but on Linux/OSX we dont set this property
+      paraviewPath = "/tmp/MantidPlot";
+    }
     std::vector<char> argvConversion(paraviewPath.begin(), paraviewPath.end());
     argvConversion.push_back('\0');
 
+    int argc = 1;
     char *argv[] = {&argvConversion[0]};
-
     g_log.debug() << "Intialize pqApplicationCore with " << argv << "\n";
-
     new pqPVApplicationCore(argc, argv);
   }
   else

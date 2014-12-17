@@ -9,10 +9,8 @@
 #include "LoadRaw/isisraw2.h"
 #include <cstdio> //MG: Required for gcc 4.4
 
-namespace Mantid
-{
-namespace DataHandling
-{
+namespace Mantid {
+namespace DataHandling {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -24,29 +22,27 @@ DECLARE_ALGORITHM(LoadSampleDetailsFromRaw)
 /**
  * Initialize the algorithm
  */
-void LoadSampleDetailsFromRaw::init()
-{
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
-		  "The sample details are attached to this workspace.");
-  
+void LoadSampleDetailsFromRaw::init() {
+  declareProperty(
+      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      "The sample details are attached to this workspace.");
+
   std::vector<std::string> exts;
   exts.push_back("raw");
   exts.push_back(".s*");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts), 
-		  "The raw file containing the sample geometry information.");
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+                  "The raw file containing the sample geometry information.");
 }
 
 /**
  * Execute the algorithm
  */
-void LoadSampleDetailsFromRaw::exec()
-{
+void LoadSampleDetailsFromRaw::exec() {
   MatrixWorkspace_sptr data_ws = getProperty("InputWorkspace");
-  
+
   std::string filename = getPropertyValue("Filename");
-  FILE* file = fopen(filename.c_str(), "rb");
-  if (file == NULL)
-  {
+  FILE *file = fopen(filename.c_str(), "rb");
+  if (file == NULL) {
     g_log.error("Unable to open file " + filename);
     throw Exception::FileError("Unable to open File:", filename);
   }
@@ -57,14 +53,20 @@ void LoadSampleDetailsFromRaw::exec()
 
   // Pick out the geometry information
   data_ws->mutableSample().setGeometryFlag(isis_raw->spb.e_geom);
-  data_ws->mutableSample().setThickness(static_cast<double> (isis_raw->spb.e_thick));
-  data_ws->mutableSample().setHeight(static_cast<double> (isis_raw->spb.e_height));
-  data_ws->mutableSample().setWidth(static_cast<double> (isis_raw->spb.e_width));
+  data_ws->mutableSample().setThickness(
+      static_cast<double>(isis_raw->spb.e_thick));
+  data_ws->mutableSample().setHeight(
+      static_cast<double>(isis_raw->spb.e_height));
+  data_ws->mutableSample().setWidth(static_cast<double>(isis_raw->spb.e_width));
 
-  g_log.debug() << "Raw file sample details:\n" << "\tsample geometry flag: " << isis_raw->spb.e_geom
-      << "\n" << "\tsample thickness: " << data_ws->mutableSample().getThickness() << "\n"
-      << "\tsample height: " << data_ws->mutableSample().getHeight() << "\n" << "\tsample width: "
-      << data_ws->mutableSample().getWidth() << std::endl;
+  g_log.debug() << "Raw file sample details:\n"
+                << "\tsample geometry flag: " << isis_raw->spb.e_geom << "\n"
+                << "\tsample thickness: "
+                << data_ws->mutableSample().getThickness() << "\n"
+                << "\tsample height: " << data_ws->mutableSample().getHeight()
+                << "\n"
+                << "\tsample width: " << data_ws->mutableSample().getWidth()
+                << std::endl;
 
   // Free the used memory
   delete isis_raw;

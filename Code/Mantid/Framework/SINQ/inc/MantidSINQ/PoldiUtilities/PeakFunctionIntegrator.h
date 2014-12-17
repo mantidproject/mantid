@@ -38,39 +38,44 @@ namespace Poldi {
 */
 
 struct MANTID_SINQ_DLL IntegrationResult {
-    double result;
-    double error;
-    size_t intervals;
+  double result;
+  double error;
+  size_t intervals;
 
-    int errorCode;
-    bool success;
+  int errorCode;
+  bool success;
 };
 
 class MANTID_SINQ_DLL PeakFunctionIntegrator {
 public:
-    PeakFunctionIntegrator(double requiredRelativePrecision = 1e-8);
-    virtual ~PeakFunctionIntegrator();
+  PeakFunctionIntegrator(double requiredRelativePrecision = 1e-8);
+  virtual ~PeakFunctionIntegrator();
 
-    void setRequiredRelativePrecision(double newPrecision);
-    double requiredRelativePrecision() const;
+  void setRequiredRelativePrecision(double newPrecision);
+  double requiredRelativePrecision() const;
 
-    IntegrationResult integrateInfinity(API::IPeakFunction_const_sptr peakFunction) const;
-    IntegrationResult integratePositiveInfinity(API::IPeakFunction_const_sptr peakFunction, double lowerLimit) const;
-    IntegrationResult integrateNegativeInfinity(API::IPeakFunction_const_sptr peakFunction, double upperLimit) const;
+  IntegrationResult
+  integrateInfinity(API::IPeakFunction_const_sptr peakFunction) const;
+  IntegrationResult
+  integratePositiveInfinity(API::IPeakFunction_const_sptr peakFunction,
+                            double lowerLimit) const;
+  IntegrationResult
+  integrateNegativeInfinity(API::IPeakFunction_const_sptr peakFunction,
+                            double upperLimit) const;
 
-    IntegrationResult integrate(API::IPeakFunction_const_sptr peakFunction, double lowerLimit, double upperLimit) const;
+  IntegrationResult integrate(API::IPeakFunction_const_sptr peakFunction,
+                              double lowerLimit, double upperLimit) const;
 
 protected:
-    gsl_function getGSLFunction(API::IPeakFunction_const_sptr peakFunction) const;
-    void throwIfInvalid(API::IPeakFunction_const_sptr peakFunction) const;
+  gsl_function getGSLFunction(API::IPeakFunction_const_sptr peakFunction) const;
+  void throwIfInvalid(API::IPeakFunction_const_sptr peakFunction) const;
 
-    gsl_integration_workspace *m_integrationWorkspace;
+  gsl_integration_workspace *m_integrationWorkspace;
 
-    double m_relativePrecision;
+  double m_relativePrecision;
 };
 
 double MANTID_SINQ_DLL gsl_peak_wrapper(double x, void *parameters);
-
 }
 }
 

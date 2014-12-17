@@ -7,12 +7,13 @@
  * subscribe method.
  */
 //#define Parser Parser
-#define DECLARE_IMPLICIT_FUNCTION_PARSER(classname) \
-    namespace { \
-    Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-    ((Mantid::API::ImplicitFunctionParserFactory::Instance().subscribe<classname>(#classname)) \
-    , 0)); \
-    }
+#define DECLARE_IMPLICIT_FUNCTION_PARSER(classname)                            \
+  namespace {                                                                  \
+  Mantid::Kernel::RegistrationHelper register_alg_##classname(                 \
+      ((Mantid::API::ImplicitFunctionParserFactory::Instance()                 \
+            .subscribe<classname>(#classname)),                                \
+       0));                                                                    \
+  }
 
 //----------------------------------------------------------------------
 // Includes
@@ -34,17 +35,16 @@
 #include "ImplicitFunctionBuilder.h"
 #include "ImplicitFunctionParameterParser.h"
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 /**
  XML Parser for function types. See chain of reponsibility pattern.
 
  @author Owen Arnold, Tessella plc
  @date 01/10/2010
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -65,49 +65,41 @@ namespace API
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class MANTID_API_DLL ImplicitFunctionParser
-{
+class MANTID_API_DLL ImplicitFunctionParser {
 public:
-
   /// Successor type. Unique pointer with stack scoped deletion semantics.
-  typedef boost::interprocess::unique_ptr<ImplicitFunctionParser, DeleterPolicy<ImplicitFunctionParser> > SuccessorType;
+  typedef boost::interprocess::unique_ptr<ImplicitFunctionParser,
+                                          DeleterPolicy<ImplicitFunctionParser>>
+      SuccessorType;
 
 protected:
-
-  ImplicitFunctionParameterParser::SuccessorType m_paramParserRoot; //Chain of responsibility
+  ImplicitFunctionParameterParser::SuccessorType
+      m_paramParserRoot; // Chain of responsibility
 
   SuccessorType m_successor;
 
-  ImplicitFunctionParameter* parseParameter(Poco::XML::Element* pRoot)
-  {
+  ImplicitFunctionParameter *parseParameter(Poco::XML::Element *pRoot) {
     return m_paramParserRoot->createParameter(pRoot);
   }
 
-  void checkSuccessorExists()
-  {
-    if (0 == m_successor.get())
-    {
-      std::string message =
-          "There is no successor function parser. Is this an empty composite function?";
+  void checkSuccessorExists() {
+    if (0 == m_successor.get()) {
+      std::string message = "There is no successor function parser. Is this an "
+                            "empty composite function?";
       throw std::runtime_error(message);
     }
   }
 
 public:
-  ImplicitFunctionParser(ImplicitFunctionParameterParser* parameterParser) :
-    m_paramParserRoot(parameterParser)
-  {
-  }
+  ImplicitFunctionParser(ImplicitFunctionParameterParser *parameterParser)
+      : m_paramParserRoot(parameterParser) {}
 
-  virtual ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement) = 0;
-  virtual void setSuccessorParser(ImplicitFunctionParser* parser) = 0;
-  virtual void setParameterParser(ImplicitFunctionParameterParser* parser) = 0;
-  virtual ~ImplicitFunctionParser()
-  {
-  }
-
+  virtual ImplicitFunctionBuilder *
+  createFunctionBuilder(Poco::XML::Element *functionElement) = 0;
+  virtual void setSuccessorParser(ImplicitFunctionParser *parser) = 0;
+  virtual void setParameterParser(ImplicitFunctionParameterParser *parser) = 0;
+  virtual ~ImplicitFunctionParser() {}
 };
-
 }
 }
 

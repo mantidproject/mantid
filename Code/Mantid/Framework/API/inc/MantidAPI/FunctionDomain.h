@@ -7,23 +7,23 @@
 #include "MantidAPI/DllConfig.h"
 //#include "MantidKernel/PropertyManager.h"
 #ifndef Q_MOC_RUN
-# include <boost/shared_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #endif
 #include <stdexcept>
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 /** Base class that represents the domain of a function.
-    It is a generalisation of function arguments. 
-    A domain consists at least of a list of function arguments for which a function (IFunction) should 
-    be evaluated. 
+    It is a generalisation of function arguments.
+    A domain consists at least of a list of function arguments for which a
+   function (IFunction) should
+    be evaluated.
 
     @author Roman Tolchenov, Tessella plc
     @date 15/11/2011
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -43,14 +43,15 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL FunctionDomain//: public Kernel::PropertyManager
-{
+class MANTID_API_DLL FunctionDomain //: public Kernel::PropertyManager
+    {
 public:
   /// Virtual destructor
-  virtual ~FunctionDomain(){}
+  virtual ~FunctionDomain() {}
   /// Return the number of points in the domain
-  virtual size_t size() const  = 0;
-  /// Reset the the domain so it can be reused. Implement this method for domains with a state.
+  virtual size_t size() const = 0;
+  /// Reset the the domain so it can be reused. Implement this method for
+  /// domains with a state.
   virtual void reset() const {}
 };
 

@@ -1,7 +1,8 @@
 #ifndef MANTID_PYTHONINTERFACE_CLONEMATRIXWORKSPACE_H_
 #define MANTID_PYTHONINTERFACE_CLONEMATRIXWORKSPACE_H_
 /*
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -24,29 +25,24 @@
 #include <boost/python/object.hpp> //Safer way to include Python.h
 #include <vector>
 
-namespace Mantid
-{
-  namespace API
-  {
-    class MatrixWorkspace;
-  }
-
-  namespace PythonInterface
-  {
-      //** @name Numpy clones of data*/
-      ///{
-      /// Create a numpy array from the X values of the given workspace reference
-      PyObject *cloneX(API::MatrixWorkspace &self);
-      /// Create a numpy array from the Y values of the given workspace reference
-      PyObject *cloneY(API::MatrixWorkspace &self);
-      /// Create a numpy array from the E values of the given workspace reference
-      PyObject *cloneE(API::MatrixWorkspace &self);
-      /// Create a numpy array from the E values of the given workspace reference
-      PyObject *cloneDx(API::MatrixWorkspace &self);
-      ///@}
-
-  }
+namespace Mantid {
+namespace API {
+class MatrixWorkspace;
 }
 
+namespace PythonInterface {
+//** @name Numpy clones of data*/
+///{
+/// Create a numpy array from the X values of the given workspace reference
+PyObject *cloneX(API::MatrixWorkspace &self);
+/// Create a numpy array from the Y values of the given workspace reference
+PyObject *cloneY(API::MatrixWorkspace &self);
+/// Create a numpy array from the E values of the given workspace reference
+PyObject *cloneE(API::MatrixWorkspace &self);
+/// Create a numpy array from the E values of the given workspace reference
+PyObject *cloneDx(API::MatrixWorkspace &self);
+///@}
+}
+}
 
 #endif /* MANTID_PYTHONINTERFACE_CLONEMATRIXWORKSPACE_H_ */
