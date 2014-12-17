@@ -1,12 +1,13 @@
 #ifndef MANTID_KERNEL_EMPTYVALUES_H_
 #define MANTID_KERNEL_EMPTYVALUES_H_
 
-/** 
+/**
     This file contains functions to define empty values, i.e EMPTY_INT();
-    
+
     @author Martyn Gigg, Tessella plc
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -28,18 +29,16 @@
 */
 #include "MantidKernel/DllConfig.h"
 
-namespace Mantid
-{
-  
-  /// Returns what we consider an "empty" integer
-  DLLExport int EMPTY_INT();
+namespace Mantid {
 
-  /// Returns what we consider an "empty" long
-  DLLExport long EMPTY_LONG();
+/// Returns what we consider an "empty" integer
+DLLExport int EMPTY_INT();
 
-  /// Return what we consider to be an empty double
-  DLLExport double EMPTY_DBL();
+/// Returns what we consider an "empty" long
+DLLExport long EMPTY_LONG();
 
+/// Return what we consider to be an empty double
+DLLExport double EMPTY_DBL();
 }
 
-#endif //MANTID_KERNEL_EMPTYVALUES_H_
+#endif // MANTID_KERNEL_EMPTYVALUES_H_

@@ -1,7 +1,8 @@
 #ifndef MANTID_KERNEL_FILTEREDTIMESERIESPROPERTY_H_
 #define MANTID_KERNEL_FILTEREDTIMESERIESPROPERTY_H_
 /**
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -25,39 +26,36 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-namespace Mantid
-{
-  namespace Kernel
-  {
+namespace Mantid {
+namespace Kernel {
 
-    /**
-     * Templated class that defines a filtered time series but
-     * still gives access to the original data.
-     */
-    template<typename HeldType>
-    class DLLExport FilteredTimeSeriesProperty : public TimeSeriesProperty<HeldType>
-    {
+/**
+ * Templated class that defines a filtered time series but
+ * still gives access to the original data.
+ */
+template <typename HeldType>
+class DLLExport FilteredTimeSeriesProperty
+    : public TimeSeriesProperty<HeldType> {
 
-    public:
-      /// Construct with a source time series & a filter property
-      FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType>* seriesProp,
-                                 const TimeSeriesProperty<bool> & filterProp,
-                                 const bool transferOwnserhip = false);
-      /// Destructor
-      ~FilteredTimeSeriesProperty();
+public:
+  /// Construct with a source time series & a filter property
+  FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> *seriesProp,
+                             const TimeSeriesProperty<bool> &filterProp,
+                             const bool transferOwnserhip = false);
+  /// Destructor
+  ~FilteredTimeSeriesProperty();
 
-      /// Access the unfiltered log
-      const TimeSeriesProperty<HeldType>* unfiltered() const;
+  /// Access the unfiltered log
+  const TimeSeriesProperty<HeldType> *unfiltered() const;
 
-    private:
-      DISABLE_DEFAULT_CONSTRUCT(FilteredTimeSeriesProperty);
+private:
+  DISABLE_DEFAULT_CONSTRUCT(FilteredTimeSeriesProperty);
 
-      /// The original unfiltered property as an owned pointer
-      const TimeSeriesProperty<HeldType>* m_unfiltered;
-    };
+  /// The original unfiltered property as an owned pointer
+  const TimeSeriesProperty<HeldType> *m_unfiltered;
+};
 
-
-  } // namespace Kernel
+} // namespace Kernel
 } // namespace Mantid
 
-#endif  /* MANTID_KERNEL_FILTEREDTIMESERIESPROPERTY_H_ */
+#endif /* MANTID_KERNEL_FILTEREDTIMESERIESPROPERTY_H_ */

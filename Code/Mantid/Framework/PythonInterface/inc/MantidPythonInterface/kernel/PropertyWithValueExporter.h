@@ -2,7 +2,8 @@
 #define MANTID_PYTHONINTERFACE_PROPERTYWITHVALUEEXPORTER_H_
 
 /*
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -27,35 +28,31 @@
 #include "MantidPythonInterface/kernel/Policies/DowncastingPolicies.h"
 
 #ifndef Q_MOC_RUN
-# include <boost/python/class.hpp>
-# include <boost/python/bases.hpp>
-# include <boost/python/return_value_policy.hpp>
+#include <boost/python/class.hpp>
+#include <boost/python/bases.hpp>
+#include <boost/python/return_value_policy.hpp>
 #endif
 
-namespace Mantid
-{
-  namespace PythonInterface
-  {
-    /**
-     * A helper struct to export PropertyWithValue<> types to Python.
-     */
-    template<typename HeldType>
-    struct PropertyWithValueExporter
-    {
-      static void define(const char * pythonClassName)
-      {
-        using namespace boost::python;
-        using namespace Mantid::Kernel;
+namespace Mantid {
+namespace PythonInterface {
+/**
+ * A helper struct to export PropertyWithValue<> types to Python.
+ */
+template <typename HeldType> struct PropertyWithValueExporter {
+  static void define(const char *pythonClassName) {
+    using namespace boost::python;
+    using namespace Mantid::Kernel;
 
-        class_<PropertyWithValue<HeldType>, bases<Property>, boost::noncopyable>(pythonClassName, no_init)
-          .add_property("value",
-                        make_function(&PropertyWithValue<HeldType>::operator(),
-                                       return_value_policy<Policies::ToSharedPtrWithDowncast>()))
-         ;
-      }
-
-    };
+    class_<PropertyWithValue<HeldType>, bases<Property>, boost::noncopyable>(
+        pythonClassName, no_init)
+        .add_property(
+            "value",
+            make_function(
+                &PropertyWithValue<HeldType>::operator(),
+                return_value_policy<Policies::ToSharedPtrWithDowncast>()));
   }
+};
+}
 }
 
 #endif /* MANTID_PYTHONINTERFACE_PROPERTYWITHVALUEEXPORTER_H_ */

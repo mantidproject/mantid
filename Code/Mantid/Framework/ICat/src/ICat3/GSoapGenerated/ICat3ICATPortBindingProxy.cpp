@@ -12,109 +12,109 @@ compiling, linking, and/or using OpenSSL is allowed.
 
 namespace ICat3 {
 
-ICATPortBindingProxy::ICATPortBindingProxy()
-{ ICATPortBindingProxy_init(SOAP_IO_DEFAULT, SOAP_IO_DEFAULT);
+ICATPortBindingProxy::ICATPortBindingProxy() {
+  ICATPortBindingProxy_init(SOAP_IO_DEFAULT, SOAP_IO_DEFAULT);
 }
 
-ICATPortBindingProxy::ICATPortBindingProxy(const struct soap &_soap) : soap(_soap)
-{ }
+ICATPortBindingProxy::ICATPortBindingProxy(const struct soap &_soap)
+    : soap(_soap) {}
 
-ICATPortBindingProxy::ICATPortBindingProxy(const char *url)
-{ ICATPortBindingProxy_init(SOAP_IO_DEFAULT, SOAP_IO_DEFAULT);
+ICATPortBindingProxy::ICATPortBindingProxy(const char *url) {
+  ICATPortBindingProxy_init(SOAP_IO_DEFAULT, SOAP_IO_DEFAULT);
   soap_endpoint = url;
 }
 
-ICATPortBindingProxy::ICATPortBindingProxy(soap_mode iomode)
-{ ICATPortBindingProxy_init(iomode, iomode);
+ICATPortBindingProxy::ICATPortBindingProxy(soap_mode iomode) {
+  ICATPortBindingProxy_init(iomode, iomode);
 }
 
-ICATPortBindingProxy::ICATPortBindingProxy(const char *url, soap_mode iomode)
-{ ICATPortBindingProxy_init(iomode, iomode);
+ICATPortBindingProxy::ICATPortBindingProxy(const char *url, soap_mode iomode) {
+  ICATPortBindingProxy_init(iomode, iomode);
   soap_endpoint = url;
 }
 
-ICATPortBindingProxy::ICATPortBindingProxy(soap_mode imode, soap_mode omode)
-{ ICATPortBindingProxy_init(imode, omode);
+ICATPortBindingProxy::ICATPortBindingProxy(soap_mode imode, soap_mode omode) {
+  ICATPortBindingProxy_init(imode, omode);
 }
 
-ICATPortBindingProxy::~ICATPortBindingProxy()
-{ }
+ICATPortBindingProxy::~ICATPortBindingProxy() {}
 
-void ICATPortBindingProxy::ICATPortBindingProxy_init(soap_mode imode, soap_mode omode)
-{ soap_imode(this, imode);
+void ICATPortBindingProxy::ICATPortBindingProxy_init(soap_mode imode,
+                                                     soap_mode omode) {
+  soap_imode(this, imode);
   soap_omode(this, omode);
   soap_endpoint = NULL;
-  static const struct Namespace namespaces[] =
-{
-  {"SOAP-ENV", "http://schemas.xmlsoap.org/soap/envelope/", "http://www.w3.org/*/soap-envelope", NULL},
-  {"SOAP-ENC", "http://schemas.xmlsoap.org/soap/encoding/", "http://www.w3.org/*/soap-encoding", NULL},
-  {"xsi", "http://www.w3.org/2001/XMLSchema-instance", "http://www.w3.org/*/XMLSchema-instance", NULL},
-  {"xsd", "http://www.w3.org/2001/XMLSchema", "http://www.w3.org/*/XMLSchema", NULL},
-  {"ns3", "admin.client.icat3.uk", NULL, NULL},
-  {"ns1", "client.icat3.uk", NULL, NULL},
-  {NULL, NULL, NULL, NULL}
-};
+  static const struct Namespace namespaces[] = {
+      {"SOAP-ENV", "http://schemas.xmlsoap.org/soap/envelope/",
+       "http://www.w3.org/*/soap-envelope", NULL},
+      {"SOAP-ENC", "http://schemas.xmlsoap.org/soap/encoding/",
+       "http://www.w3.org/*/soap-encoding", NULL},
+      {"xsi", "http://www.w3.org/2001/XMLSchema-instance",
+       "http://www.w3.org/*/XMLSchema-instance", NULL},
+      {"xsd", "http://www.w3.org/2001/XMLSchema",
+       "http://www.w3.org/*/XMLSchema", NULL},
+      {"ns3", "admin.client.icat3.uk", NULL, NULL},
+      {"ns1", "client.icat3.uk", NULL, NULL},
+      {NULL, NULL, NULL, NULL}};
   soap_set_namespaces(this, namespaces);
 }
 
-void ICATPortBindingProxy::destroy()
-{ soap_destroy(this);
+void ICATPortBindingProxy::destroy() {
+  soap_destroy(this);
   soap_end(this);
 }
 
-void ICATPortBindingProxy::reset()
-{ destroy();
+void ICATPortBindingProxy::reset() {
+  destroy();
   soap_done(this);
   soap_init(this);
   ICATPortBindingProxy_init(SOAP_IO_DEFAULT, SOAP_IO_DEFAULT);
 }
 
-void ICATPortBindingProxy::soap_noheader()
-{ this->header = NULL;
+void ICATPortBindingProxy::soap_noheader() { this->header = NULL; }
+
+const SOAP_ENV__Header *ICATPortBindingProxy::soap_header() {
+  return this->header;
 }
 
-const SOAP_ENV__Header *ICATPortBindingProxy::soap_header()
-{ return this->header;
+const SOAP_ENV__Fault *ICATPortBindingProxy::soap_fault() {
+  return this->fault;
 }
 
-const SOAP_ENV__Fault *ICATPortBindingProxy::soap_fault()
-{ return this->fault;
+const char *ICATPortBindingProxy::soap_fault_string() {
+  return *soap_faultstring(this);
 }
 
-const char *ICATPortBindingProxy::soap_fault_string()
-{ return *soap_faultstring(this);
+const char *ICATPortBindingProxy::soap_fault_detail() {
+  return *soap_faultdetail(this);
 }
 
-const char *ICATPortBindingProxy::soap_fault_detail()
-{ return *soap_faultdetail(this);
+int ICATPortBindingProxy::soap_close_socket() { return soap_closesock(this); }
+
+int ICATPortBindingProxy::soap_force_close_socket() {
+  return soap_force_closesock(this);
 }
 
-int ICATPortBindingProxy::soap_close_socket()
-{ return soap_closesock(this);
-}
-
-int ICATPortBindingProxy::soap_force_close_socket()
-{ return soap_force_closesock(this);
-}
-
-void ICATPortBindingProxy::soap_print_fault(FILE *fd)
-{ ::soap_print_fault(this, fd);
+void ICATPortBindingProxy::soap_print_fault(FILE *fd) {
+  ::soap_print_fault(this, fd);
 }
 
 #ifndef WITH_LEAN
 #ifndef WITH_COMPAT
-void ICATPortBindingProxy::soap_stream_fault(std::ostream& os)
-{ ::soap_stream_fault(this, os);
+void ICATPortBindingProxy::soap_stream_fault(std::ostream &os) {
+  ::soap_stream_fault(this, os);
 }
 #endif
 
-char *ICATPortBindingProxy::soap_sprint_fault(char *buf, size_t len)
-{ return ::soap_sprint_fault(this, buf, len);
+char *ICATPortBindingProxy::soap_sprint_fault(char *buf, size_t len) {
+  return ::soap_sprint_fault(this, buf, len);
 }
 #endif
 
-int ICATPortBindingProxy::login(const char *endpoint, const char *soap_action, ns1__login *ns1__login_, ns1__loginResponse *ns1__loginResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::login(const char *endpoint, const char *soap_action,
+                                ns1__login *ns1__login_,
+                                ns1__loginResponse *ns1__loginResponse_) {
+  struct soap *soap = this;
   struct __ns1__login soap_tmp___ns1__login;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -129,46 +129,43 @@ int ICATPortBindingProxy::login(const char *endpoint, const char *soap_action, n
   soap_serialize___ns1__login(soap, &soap_tmp___ns1__login);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__login(soap, &soap_tmp___ns1__login, "-ns1:login", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__login(soap, &soap_tmp___ns1__login, "-ns1:login",
+                              NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__login(soap, &soap_tmp___ns1__login, "-ns1:login", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__login(soap, &soap_tmp___ns1__login, "-ns1:login", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__loginResponse_)
     return soap_closesock(soap);
   ns1__loginResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
   ns1__loginResponse_->soap_get(soap, "ns1:loginResponse", "ns1:loginResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::loginLifetime(const char *endpoint, const char *soap_action, ns1__loginLifetime *ns1__loginLifetime_, ns1__loginLifetimeResponse *ns1__loginLifetimeResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::loginLifetime(
+    const char *endpoint, const char *soap_action,
+    ns1__loginLifetime *ns1__loginLifetime_,
+    ns1__loginLifetimeResponse *ns1__loginLifetimeResponse_) {
+  struct soap *soap = this;
   struct __ns1__loginLifetime soap_tmp___ns1__loginLifetime;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -183,46 +180,44 @@ int ICATPortBindingProxy::loginLifetime(const char *endpoint, const char *soap_a
   soap_serialize___ns1__loginLifetime(soap, &soap_tmp___ns1__loginLifetime);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__loginLifetime(soap, &soap_tmp___ns1__loginLifetime, "-ns1:loginLifetime", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__loginLifetime(soap, &soap_tmp___ns1__loginLifetime,
+                                      "-ns1:loginLifetime", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__loginLifetime(soap, &soap_tmp___ns1__loginLifetime, "-ns1:loginLifetime", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__loginLifetime(soap, &soap_tmp___ns1__loginLifetime,
+                                    "-ns1:loginLifetime", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__loginLifetimeResponse_)
     return soap_closesock(soap);
   ns1__loginLifetimeResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__loginLifetimeResponse_->soap_get(soap, "ns1:loginLifetimeResponse", "ns1:loginLifetimeResponse");
+  ns1__loginLifetimeResponse_->soap_get(soap, "ns1:loginLifetimeResponse",
+                                        "ns1:loginLifetimeResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::logout(const char *endpoint, const char *soap_action, ns1__logout *ns1__logout_, ns1__logoutResponse *ns1__logoutResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::logout(const char *endpoint, const char *soap_action,
+                                 ns1__logout *ns1__logout_,
+                                 ns1__logoutResponse *ns1__logoutResponse_) {
+  struct soap *soap = this;
   struct __ns1__logout soap_tmp___ns1__logout;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -237,46 +232,45 @@ int ICATPortBindingProxy::logout(const char *endpoint, const char *soap_action, 
   soap_serialize___ns1__logout(soap, &soap_tmp___ns1__logout);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__logout(soap, &soap_tmp___ns1__logout, "-ns1:logout", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__logout(soap, &soap_tmp___ns1__logout, "-ns1:logout",
+                               NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__logout(soap, &soap_tmp___ns1__logout, "-ns1:logout", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__logout(soap, &soap_tmp___ns1__logout, "-ns1:logout",
+                             NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__logoutResponse_)
     return soap_closesock(soap);
   ns1__logoutResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__logoutResponse_->soap_get(soap, "ns1:logoutResponse", "ns1:logoutResponse");
+  ns1__logoutResponse_->soap_get(soap, "ns1:logoutResponse",
+                                 "ns1:logoutResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getUserDetails(const char *endpoint, const char *soap_action, ns3__getUserDetails *ns1__getUserDetails, ns3__getUserDetailsResponse *ns1__getUserDetailsResponse)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getUserDetails(
+    const char *endpoint, const char *soap_action,
+    ns3__getUserDetails *ns1__getUserDetails,
+    ns3__getUserDetailsResponse *ns1__getUserDetailsResponse) {
+  struct soap *soap = this;
   struct __ns1__getUserDetails soap_tmp___ns1__getUserDetails;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -291,46 +285,45 @@ int ICATPortBindingProxy::getUserDetails(const char *endpoint, const char *soap_
   soap_serialize___ns1__getUserDetails(soap, &soap_tmp___ns1__getUserDetails);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getUserDetails(soap, &soap_tmp___ns1__getUserDetails, "-ns1:getUserDetails", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getUserDetails(soap, &soap_tmp___ns1__getUserDetails,
+                                       "-ns1:getUserDetails", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getUserDetails(soap, &soap_tmp___ns1__getUserDetails, "-ns1:getUserDetails", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getUserDetails(soap, &soap_tmp___ns1__getUserDetails,
+                                     "-ns1:getUserDetails", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getUserDetailsResponse)
     return soap_closesock(soap);
   ns1__getUserDetailsResponse->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getUserDetailsResponse->soap_get(soap, "ns1:getUserDetailsResponse", "ns3:getUserDetailsResponse");
+  ns1__getUserDetailsResponse->soap_get(soap, "ns1:getUserDetailsResponse",
+                                        "ns3:getUserDetailsResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::isSessionValid(const char *endpoint, const char *soap_action, ns1__isSessionValid *ns1__isSessionValid_, ns1__isSessionValidResponse *ns1__isSessionValidResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::isSessionValid(
+    const char *endpoint, const char *soap_action,
+    ns1__isSessionValid *ns1__isSessionValid_,
+    ns1__isSessionValidResponse *ns1__isSessionValidResponse_) {
+  struct soap *soap = this;
   struct __ns1__isSessionValid soap_tmp___ns1__isSessionValid;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -345,46 +338,45 @@ int ICATPortBindingProxy::isSessionValid(const char *endpoint, const char *soap_
   soap_serialize___ns1__isSessionValid(soap, &soap_tmp___ns1__isSessionValid);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__isSessionValid(soap, &soap_tmp___ns1__isSessionValid, "-ns1:isSessionValid", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__isSessionValid(soap, &soap_tmp___ns1__isSessionValid,
+                                       "-ns1:isSessionValid", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__isSessionValid(soap, &soap_tmp___ns1__isSessionValid, "-ns1:isSessionValid", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__isSessionValid(soap, &soap_tmp___ns1__isSessionValid,
+                                     "-ns1:isSessionValid", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__isSessionValidResponse_)
     return soap_closesock(soap);
   ns1__isSessionValidResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__isSessionValidResponse_->soap_get(soap, "ns1:isSessionValidResponse", "ns1:isSessionValidResponse");
+  ns1__isSessionValidResponse_->soap_get(soap, "ns1:isSessionValidResponse",
+                                         "ns1:isSessionValidResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getKeywordsForUser(const char *endpoint, const char *soap_action, ns1__getKeywordsForUser *ns1__getKeywordsForUser_, ns1__getKeywordsForUserResponse *ns1__getKeywordsForUserResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getKeywordsForUser(
+    const char *endpoint, const char *soap_action,
+    ns1__getKeywordsForUser *ns1__getKeywordsForUser_,
+    ns1__getKeywordsForUserResponse *ns1__getKeywordsForUserResponse_) {
+  struct soap *soap = this;
   struct __ns1__getKeywordsForUser soap_tmp___ns1__getKeywordsForUser;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -393,53 +385,58 @@ int ICATPortBindingProxy::getKeywordsForUser(const char *endpoint, const char *s
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getKeywordsForUserRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getKeywordsForUser.ns1__getKeywordsForUser_ = ns1__getKeywordsForUser_;
+  soap_tmp___ns1__getKeywordsForUser.ns1__getKeywordsForUser_ =
+      ns1__getKeywordsForUser_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getKeywordsForUser(soap, &soap_tmp___ns1__getKeywordsForUser);
+  soap_serialize___ns1__getKeywordsForUser(soap,
+                                           &soap_tmp___ns1__getKeywordsForUser);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getKeywordsForUser(soap, &soap_tmp___ns1__getKeywordsForUser, "-ns1:getKeywordsForUser", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getKeywordsForUser(soap,
+                                           &soap_tmp___ns1__getKeywordsForUser,
+                                           "-ns1:getKeywordsForUser", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getKeywordsForUser(soap, &soap_tmp___ns1__getKeywordsForUser, "-ns1:getKeywordsForUser", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getKeywordsForUser(soap,
+                                         &soap_tmp___ns1__getKeywordsForUser,
+                                         "-ns1:getKeywordsForUser", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getKeywordsForUserResponse_)
     return soap_closesock(soap);
   ns1__getKeywordsForUserResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getKeywordsForUserResponse_->soap_get(soap, "ns1:getKeywordsForUserResponse", "ns1:getKeywordsForUserResponse");
+  ns1__getKeywordsForUserResponse_->soap_get(
+      soap, "ns1:getKeywordsForUserResponse", "ns1:getKeywordsForUserResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getKeywordsForUserStartWithMax(const char *endpoint, const char *soap_action, ns1__getKeywordsForUserStartWithMax *ns1__getKeywordsForUserStartWithMax_, ns1__getKeywordsForUserStartWithMaxResponse *ns1__getKeywordsForUserStartWithMaxResponse_)
-{ struct soap *soap = this;
-  struct __ns1__getKeywordsForUserStartWithMax soap_tmp___ns1__getKeywordsForUserStartWithMax;
+int ICATPortBindingProxy::getKeywordsForUserStartWithMax(
+    const char *endpoint, const char *soap_action,
+    ns1__getKeywordsForUserStartWithMax *ns1__getKeywordsForUserStartWithMax_,
+    ns1__getKeywordsForUserStartWithMaxResponse *
+        ns1__getKeywordsForUserStartWithMaxResponse_) {
+  struct soap *soap = this;
+  struct __ns1__getKeywordsForUserStartWithMax
+      soap_tmp___ns1__getKeywordsForUserStartWithMax;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -447,52 +444,57 @@ int ICATPortBindingProxy::getKeywordsForUserStartWithMax(const char *endpoint, c
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getKeywordsForUserStartWithMaxRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getKeywordsForUserStartWithMax.ns1__getKeywordsForUserStartWithMax_ = ns1__getKeywordsForUserStartWithMax_;
+  soap_tmp___ns1__getKeywordsForUserStartWithMax
+      .ns1__getKeywordsForUserStartWithMax_ =
+      ns1__getKeywordsForUserStartWithMax_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getKeywordsForUserStartWithMax(soap, &soap_tmp___ns1__getKeywordsForUserStartWithMax);
+  soap_serialize___ns1__getKeywordsForUserStartWithMax(
+      soap, &soap_tmp___ns1__getKeywordsForUserStartWithMax);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getKeywordsForUserStartWithMax(soap, &soap_tmp___ns1__getKeywordsForUserStartWithMax, "-ns1:getKeywordsForUserStartWithMax", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getKeywordsForUserStartWithMax(
+            soap, &soap_tmp___ns1__getKeywordsForUserStartWithMax,
+            "-ns1:getKeywordsForUserStartWithMax", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getKeywordsForUserStartWithMax(soap, &soap_tmp___ns1__getKeywordsForUserStartWithMax, "-ns1:getKeywordsForUserStartWithMax", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getKeywordsForUserStartWithMax(
+          soap, &soap_tmp___ns1__getKeywordsForUserStartWithMax,
+          "-ns1:getKeywordsForUserStartWithMax", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getKeywordsForUserStartWithMaxResponse_)
     return soap_closesock(soap);
   ns1__getKeywordsForUserStartWithMaxResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getKeywordsForUserStartWithMaxResponse_->soap_get(soap, "ns1:getKeywordsForUserStartWithMaxResponse", "ns1:getKeywordsForUserStartWithMaxResponse");
+  ns1__getKeywordsForUserStartWithMaxResponse_->soap_get(
+      soap, "ns1:getKeywordsForUserStartWithMaxResponse",
+      "ns1:getKeywordsForUserStartWithMaxResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getKeywordsForUserMax(const char *endpoint, const char *soap_action, ns1__getKeywordsForUserMax *ns1__getKeywordsForUserMax_, ns1__getKeywordsForUserMaxResponse *ns1__getKeywordsForUserMaxResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getKeywordsForUserMax(
+    const char *endpoint, const char *soap_action,
+    ns1__getKeywordsForUserMax *ns1__getKeywordsForUserMax_,
+    ns1__getKeywordsForUserMaxResponse *ns1__getKeywordsForUserMaxResponse_) {
+  struct soap *soap = this;
   struct __ns1__getKeywordsForUserMax soap_tmp___ns1__getKeywordsForUserMax;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -501,52 +503,56 @@ int ICATPortBindingProxy::getKeywordsForUserMax(const char *endpoint, const char
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getKeywordsForUserMaxRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getKeywordsForUserMax.ns1__getKeywordsForUserMax_ = ns1__getKeywordsForUserMax_;
+  soap_tmp___ns1__getKeywordsForUserMax.ns1__getKeywordsForUserMax_ =
+      ns1__getKeywordsForUserMax_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getKeywordsForUserMax(soap, &soap_tmp___ns1__getKeywordsForUserMax);
+  soap_serialize___ns1__getKeywordsForUserMax(
+      soap, &soap_tmp___ns1__getKeywordsForUserMax);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getKeywordsForUserMax(soap, &soap_tmp___ns1__getKeywordsForUserMax, "-ns1:getKeywordsForUserMax", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getKeywordsForUserMax(
+            soap, &soap_tmp___ns1__getKeywordsForUserMax,
+            "-ns1:getKeywordsForUserMax", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getKeywordsForUserMax(soap, &soap_tmp___ns1__getKeywordsForUserMax, "-ns1:getKeywordsForUserMax", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getKeywordsForUserMax(
+          soap, &soap_tmp___ns1__getKeywordsForUserMax,
+          "-ns1:getKeywordsForUserMax", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getKeywordsForUserMaxResponse_)
     return soap_closesock(soap);
   ns1__getKeywordsForUserMaxResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getKeywordsForUserMaxResponse_->soap_get(soap, "ns1:getKeywordsForUserMaxResponse", "ns1:getKeywordsForUserMaxResponse");
+  ns1__getKeywordsForUserMaxResponse_->soap_get(
+      soap, "ns1:getKeywordsForUserMaxResponse",
+      "ns1:getKeywordsForUserMaxResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getKeywordsForUserType(const char *endpoint, const char *soap_action, ns1__getKeywordsForUserType *ns1__getKeywordsForUserType_, ns1__getKeywordsForUserTypeResponse *ns1__getKeywordsForUserTypeResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getKeywordsForUserType(
+    const char *endpoint, const char *soap_action,
+    ns1__getKeywordsForUserType *ns1__getKeywordsForUserType_,
+    ns1__getKeywordsForUserTypeResponse *ns1__getKeywordsForUserTypeResponse_) {
+  struct soap *soap = this;
   struct __ns1__getKeywordsForUserType soap_tmp___ns1__getKeywordsForUserType;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -555,52 +561,56 @@ int ICATPortBindingProxy::getKeywordsForUserType(const char *endpoint, const cha
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getKeywordsForUserTypeRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getKeywordsForUserType.ns1__getKeywordsForUserType_ = ns1__getKeywordsForUserType_;
+  soap_tmp___ns1__getKeywordsForUserType.ns1__getKeywordsForUserType_ =
+      ns1__getKeywordsForUserType_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getKeywordsForUserType(soap, &soap_tmp___ns1__getKeywordsForUserType);
+  soap_serialize___ns1__getKeywordsForUserType(
+      soap, &soap_tmp___ns1__getKeywordsForUserType);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getKeywordsForUserType(soap, &soap_tmp___ns1__getKeywordsForUserType, "-ns1:getKeywordsForUserType", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getKeywordsForUserType(
+            soap, &soap_tmp___ns1__getKeywordsForUserType,
+            "-ns1:getKeywordsForUserType", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getKeywordsForUserType(soap, &soap_tmp___ns1__getKeywordsForUserType, "-ns1:getKeywordsForUserType", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getKeywordsForUserType(
+          soap, &soap_tmp___ns1__getKeywordsForUserType,
+          "-ns1:getKeywordsForUserType", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getKeywordsForUserTypeResponse_)
     return soap_closesock(soap);
   ns1__getKeywordsForUserTypeResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getKeywordsForUserTypeResponse_->soap_get(soap, "ns1:getKeywordsForUserTypeResponse", "ns1:getKeywordsForUserTypeResponse");
+  ns1__getKeywordsForUserTypeResponse_->soap_get(
+      soap, "ns1:getKeywordsForUserTypeResponse",
+      "ns1:getKeywordsForUserTypeResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getAllKeywords(const char *endpoint, const char *soap_action, ns1__getAllKeywords *ns1__getAllKeywords_, ns1__getAllKeywordsResponse *ns1__getAllKeywordsResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getAllKeywords(
+    const char *endpoint, const char *soap_action,
+    ns1__getAllKeywords *ns1__getAllKeywords_,
+    ns1__getAllKeywordsResponse *ns1__getAllKeywordsResponse_) {
+  struct soap *soap = this;
   struct __ns1__getAllKeywords soap_tmp___ns1__getAllKeywords;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -615,46 +625,45 @@ int ICATPortBindingProxy::getAllKeywords(const char *endpoint, const char *soap_
   soap_serialize___ns1__getAllKeywords(soap, &soap_tmp___ns1__getAllKeywords);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getAllKeywords(soap, &soap_tmp___ns1__getAllKeywords, "-ns1:getAllKeywords", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getAllKeywords(soap, &soap_tmp___ns1__getAllKeywords,
+                                       "-ns1:getAllKeywords", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getAllKeywords(soap, &soap_tmp___ns1__getAllKeywords, "-ns1:getAllKeywords", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getAllKeywords(soap, &soap_tmp___ns1__getAllKeywords,
+                                     "-ns1:getAllKeywords", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getAllKeywordsResponse_)
     return soap_closesock(soap);
   ns1__getAllKeywordsResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getAllKeywordsResponse_->soap_get(soap, "ns1:getAllKeywordsResponse", "ns1:getAllKeywordsResponse");
+  ns1__getAllKeywordsResponse_->soap_get(soap, "ns1:getAllKeywordsResponse",
+                                         "ns1:getAllKeywordsResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchByAdvanced(const char *endpoint, const char *soap_action, ns1__searchByAdvanced *ns1__searchByAdvanced_, ns1__searchByAdvancedResponse *ns1__searchByAdvancedResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::searchByAdvanced(
+    const char *endpoint, const char *soap_action,
+    ns1__searchByAdvanced *ns1__searchByAdvanced_,
+    ns1__searchByAdvancedResponse *ns1__searchByAdvancedResponse_) {
+  struct soap *soap = this;
   struct __ns1__searchByAdvanced soap_tmp___ns1__searchByAdvanced;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -663,53 +672,57 @@ int ICATPortBindingProxy::searchByAdvanced(const char *endpoint, const char *soa
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchByAdvancedRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchByAdvanced.ns1__searchByAdvanced_ = ns1__searchByAdvanced_;
+  soap_tmp___ns1__searchByAdvanced.ns1__searchByAdvanced_ =
+      ns1__searchByAdvanced_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchByAdvanced(soap, &soap_tmp___ns1__searchByAdvanced);
+  soap_serialize___ns1__searchByAdvanced(soap,
+                                         &soap_tmp___ns1__searchByAdvanced);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchByAdvanced(soap, &soap_tmp___ns1__searchByAdvanced, "-ns1:searchByAdvanced", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchByAdvanced(soap,
+                                         &soap_tmp___ns1__searchByAdvanced,
+                                         "-ns1:searchByAdvanced", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchByAdvanced(soap, &soap_tmp___ns1__searchByAdvanced, "-ns1:searchByAdvanced", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchByAdvanced(soap, &soap_tmp___ns1__searchByAdvanced,
+                                       "-ns1:searchByAdvanced", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchByAdvancedResponse_)
     return soap_closesock(soap);
   ns1__searchByAdvancedResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchByAdvancedResponse_->soap_get(soap, "ns1:searchByAdvancedResponse", "ns1:searchByAdvancedResponse");
+  ns1__searchByAdvancedResponse_->soap_get(soap, "ns1:searchByAdvancedResponse",
+                                           "ns1:searchByAdvancedResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchByAdvancedPagination(const char *endpoint, const char *soap_action, ns1__searchByAdvancedPagination *ns1__searchByAdvancedPagination_, ns1__searchByAdvancedPaginationResponse *ns1__searchByAdvancedPaginationResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchByAdvancedPagination soap_tmp___ns1__searchByAdvancedPagination;
+int ICATPortBindingProxy::searchByAdvancedPagination(
+    const char *endpoint, const char *soap_action,
+    ns1__searchByAdvancedPagination *ns1__searchByAdvancedPagination_,
+    ns1__searchByAdvancedPaginationResponse *
+        ns1__searchByAdvancedPaginationResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchByAdvancedPagination
+      soap_tmp___ns1__searchByAdvancedPagination;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -717,52 +730,56 @@ int ICATPortBindingProxy::searchByAdvancedPagination(const char *endpoint, const
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchByAdvancedPaginationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchByAdvancedPagination.ns1__searchByAdvancedPagination_ = ns1__searchByAdvancedPagination_;
+  soap_tmp___ns1__searchByAdvancedPagination.ns1__searchByAdvancedPagination_ =
+      ns1__searchByAdvancedPagination_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchByAdvancedPagination(soap, &soap_tmp___ns1__searchByAdvancedPagination);
+  soap_serialize___ns1__searchByAdvancedPagination(
+      soap, &soap_tmp___ns1__searchByAdvancedPagination);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchByAdvancedPagination(soap, &soap_tmp___ns1__searchByAdvancedPagination, "-ns1:searchByAdvancedPagination", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchByAdvancedPagination(
+            soap, &soap_tmp___ns1__searchByAdvancedPagination,
+            "-ns1:searchByAdvancedPagination", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchByAdvancedPagination(soap, &soap_tmp___ns1__searchByAdvancedPagination, "-ns1:searchByAdvancedPagination", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchByAdvancedPagination(
+          soap, &soap_tmp___ns1__searchByAdvancedPagination,
+          "-ns1:searchByAdvancedPagination", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchByAdvancedPaginationResponse_)
     return soap_closesock(soap);
   ns1__searchByAdvancedPaginationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchByAdvancedPaginationResponse_->soap_get(soap, "ns1:searchByAdvancedPaginationResponse", "ns1:searchByAdvancedPaginationResponse");
+  ns1__searchByAdvancedPaginationResponse_->soap_get(
+      soap, "ns1:searchByAdvancedPaginationResponse",
+      "ns1:searchByAdvancedPaginationResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchByKeywords(const char *endpoint, const char *soap_action, ns1__searchByKeywords *ns1__searchByKeywords_, ns1__searchByKeywordsResponse *ns1__searchByKeywordsResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::searchByKeywords(
+    const char *endpoint, const char *soap_action,
+    ns1__searchByKeywords *ns1__searchByKeywords_,
+    ns1__searchByKeywordsResponse *ns1__searchByKeywordsResponse_) {
+  struct soap *soap = this;
   struct __ns1__searchByKeywords soap_tmp___ns1__searchByKeywords;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -771,52 +788,54 @@ int ICATPortBindingProxy::searchByKeywords(const char *endpoint, const char *soa
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchByKeywordsRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchByKeywords.ns1__searchByKeywords_ = ns1__searchByKeywords_;
+  soap_tmp___ns1__searchByKeywords.ns1__searchByKeywords_ =
+      ns1__searchByKeywords_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchByKeywords(soap, &soap_tmp___ns1__searchByKeywords);
+  soap_serialize___ns1__searchByKeywords(soap,
+                                         &soap_tmp___ns1__searchByKeywords);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchByKeywords(soap, &soap_tmp___ns1__searchByKeywords, "-ns1:searchByKeywords", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchByKeywords(soap,
+                                         &soap_tmp___ns1__searchByKeywords,
+                                         "-ns1:searchByKeywords", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchByKeywords(soap, &soap_tmp___ns1__searchByKeywords, "-ns1:searchByKeywords", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchByKeywords(soap, &soap_tmp___ns1__searchByKeywords,
+                                       "-ns1:searchByKeywords", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchByKeywordsResponse_)
     return soap_closesock(soap);
   ns1__searchByKeywordsResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchByKeywordsResponse_->soap_get(soap, "ns1:searchByKeywordsResponse", "ns1:searchByKeywordsResponse");
+  ns1__searchByKeywordsResponse_->soap_get(soap, "ns1:searchByKeywordsResponse",
+                                           "ns1:searchByKeywordsResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchByKeywordsAll(const char *endpoint, const char *soap_action, ns1__searchByKeywordsAll *ns1__searchByKeywordsAll_, ns1__searchByKeywordsAllResponse *ns1__searchByKeywordsAllResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::searchByKeywordsAll(
+    const char *endpoint, const char *soap_action,
+    ns1__searchByKeywordsAll *ns1__searchByKeywordsAll_,
+    ns1__searchByKeywordsAllResponse *ns1__searchByKeywordsAllResponse_) {
+  struct soap *soap = this;
   struct __ns1__searchByKeywordsAll soap_tmp___ns1__searchByKeywordsAll;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -825,52 +844,56 @@ int ICATPortBindingProxy::searchByKeywordsAll(const char *endpoint, const char *
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchByKeywordsAllRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchByKeywordsAll.ns1__searchByKeywordsAll_ = ns1__searchByKeywordsAll_;
+  soap_tmp___ns1__searchByKeywordsAll.ns1__searchByKeywordsAll_ =
+      ns1__searchByKeywordsAll_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchByKeywordsAll(soap, &soap_tmp___ns1__searchByKeywordsAll);
+  soap_serialize___ns1__searchByKeywordsAll(
+      soap, &soap_tmp___ns1__searchByKeywordsAll);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchByKeywordsAll(soap, &soap_tmp___ns1__searchByKeywordsAll, "-ns1:searchByKeywordsAll", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchByKeywordsAll(
+            soap, &soap_tmp___ns1__searchByKeywordsAll,
+            "-ns1:searchByKeywordsAll", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchByKeywordsAll(soap, &soap_tmp___ns1__searchByKeywordsAll, "-ns1:searchByKeywordsAll", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchByKeywordsAll(soap,
+                                          &soap_tmp___ns1__searchByKeywordsAll,
+                                          "-ns1:searchByKeywordsAll", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchByKeywordsAllResponse_)
     return soap_closesock(soap);
   ns1__searchByKeywordsAllResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchByKeywordsAllResponse_->soap_get(soap, "ns1:searchByKeywordsAllResponse", "ns1:searchByKeywordsAllResponse");
+  ns1__searchByKeywordsAllResponse_->soap_get(
+      soap, "ns1:searchByKeywordsAllResponse",
+      "ns1:searchByKeywordsAllResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getMyInvestigations(const char *endpoint, const char *soap_action, ns1__getMyInvestigations *ns1__getMyInvestigations_, ns1__getMyInvestigationsResponse *ns1__getMyInvestigationsResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getMyInvestigations(
+    const char *endpoint, const char *soap_action,
+    ns1__getMyInvestigations *ns1__getMyInvestigations_,
+    ns1__getMyInvestigationsResponse *ns1__getMyInvestigationsResponse_) {
+  struct soap *soap = this;
   struct __ns1__getMyInvestigations soap_tmp___ns1__getMyInvestigations;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -879,53 +902,59 @@ int ICATPortBindingProxy::getMyInvestigations(const char *endpoint, const char *
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getMyInvestigationsRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getMyInvestigations.ns1__getMyInvestigations_ = ns1__getMyInvestigations_;
+  soap_tmp___ns1__getMyInvestigations.ns1__getMyInvestigations_ =
+      ns1__getMyInvestigations_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getMyInvestigations(soap, &soap_tmp___ns1__getMyInvestigations);
+  soap_serialize___ns1__getMyInvestigations(
+      soap, &soap_tmp___ns1__getMyInvestigations);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getMyInvestigations(soap, &soap_tmp___ns1__getMyInvestigations, "-ns1:getMyInvestigations", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getMyInvestigations(
+            soap, &soap_tmp___ns1__getMyInvestigations,
+            "-ns1:getMyInvestigations", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getMyInvestigations(soap, &soap_tmp___ns1__getMyInvestigations, "-ns1:getMyInvestigations", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getMyInvestigations(soap,
+                                          &soap_tmp___ns1__getMyInvestigations,
+                                          "-ns1:getMyInvestigations", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getMyInvestigationsResponse_)
     return soap_closesock(soap);
   ns1__getMyInvestigationsResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getMyInvestigationsResponse_->soap_get(soap, "ns1:getMyInvestigationsResponse", "ns1:getMyInvestigationsResponse");
+  ns1__getMyInvestigationsResponse_->soap_get(
+      soap, "ns1:getMyInvestigationsResponse",
+      "ns1:getMyInvestigationsResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getMyInvestigationsIncludes(const char *endpoint, const char *soap_action, ns1__getMyInvestigationsIncludes *ns1__getMyInvestigationsIncludes_, ns1__getMyInvestigationsIncludesResponse *ns1__getMyInvestigationsIncludesResponse_)
-{ struct soap *soap = this;
-  struct __ns1__getMyInvestigationsIncludes soap_tmp___ns1__getMyInvestigationsIncludes;
+int ICATPortBindingProxy::getMyInvestigationsIncludes(
+    const char *endpoint, const char *soap_action,
+    ns1__getMyInvestigationsIncludes *ns1__getMyInvestigationsIncludes_,
+    ns1__getMyInvestigationsIncludesResponse *
+        ns1__getMyInvestigationsIncludesResponse_) {
+  struct soap *soap = this;
+  struct __ns1__getMyInvestigationsIncludes
+      soap_tmp___ns1__getMyInvestigationsIncludes;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -933,106 +962,119 @@ int ICATPortBindingProxy::getMyInvestigationsIncludes(const char *endpoint, cons
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getMyInvestigationsIncludesRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getMyInvestigationsIncludes.ns1__getMyInvestigationsIncludes_ = ns1__getMyInvestigationsIncludes_;
+  soap_tmp___ns1__getMyInvestigationsIncludes
+      .ns1__getMyInvestigationsIncludes_ = ns1__getMyInvestigationsIncludes_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getMyInvestigationsIncludes(soap, &soap_tmp___ns1__getMyInvestigationsIncludes);
+  soap_serialize___ns1__getMyInvestigationsIncludes(
+      soap, &soap_tmp___ns1__getMyInvestigationsIncludes);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getMyInvestigationsIncludes(soap, &soap_tmp___ns1__getMyInvestigationsIncludes, "-ns1:getMyInvestigationsIncludes", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getMyInvestigationsIncludes(
+            soap, &soap_tmp___ns1__getMyInvestigationsIncludes,
+            "-ns1:getMyInvestigationsIncludes", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getMyInvestigationsIncludes(soap, &soap_tmp___ns1__getMyInvestigationsIncludes, "-ns1:getMyInvestigationsIncludes", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getMyInvestigationsIncludes(
+          soap, &soap_tmp___ns1__getMyInvestigationsIncludes,
+          "-ns1:getMyInvestigationsIncludes", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getMyInvestigationsIncludesResponse_)
     return soap_closesock(soap);
   ns1__getMyInvestigationsIncludesResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getMyInvestigationsIncludesResponse_->soap_get(soap, "ns1:getMyInvestigationsIncludesResponse", "ns1:getMyInvestigationsIncludesResponse");
+  ns1__getMyInvestigationsIncludesResponse_->soap_get(
+      soap, "ns1:getMyInvestigationsIncludesResponse",
+      "ns1:getMyInvestigationsIncludesResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getMyInvestigationsIncludesPagination(const char *endpoint, const char *soap_action, ns1__getMyInvestigationsIncludesPagination *ns1__getMyInvestigationsIncludesPagination_, ns1__getMyInvestigationsIncludesPaginationResponse *ns1__getMyInvestigationsIncludesPaginationResponse_)
-{ struct soap *soap = this;
-  struct __ns1__getMyInvestigationsIncludesPagination soap_tmp___ns1__getMyInvestigationsIncludesPagination;
+int ICATPortBindingProxy::getMyInvestigationsIncludesPagination(
+    const char *endpoint, const char *soap_action,
+    ns1__getMyInvestigationsIncludesPagination *
+        ns1__getMyInvestigationsIncludesPagination_,
+    ns1__getMyInvestigationsIncludesPaginationResponse *
+        ns1__getMyInvestigationsIncludesPaginationResponse_) {
+  struct soap *soap = this;
+  struct __ns1__getMyInvestigationsIncludesPagination
+      soap_tmp___ns1__getMyInvestigationsIncludesPagination;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/getMyInvestigationsIncludesPaginationRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/getMyInvestigationsIncludesPaginationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getMyInvestigationsIncludesPagination.ns1__getMyInvestigationsIncludesPagination_ = ns1__getMyInvestigationsIncludesPagination_;
+  soap_tmp___ns1__getMyInvestigationsIncludesPagination
+      .ns1__getMyInvestigationsIncludesPagination_ =
+      ns1__getMyInvestigationsIncludesPagination_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getMyInvestigationsIncludesPagination(soap, &soap_tmp___ns1__getMyInvestigationsIncludesPagination);
+  soap_serialize___ns1__getMyInvestigationsIncludesPagination(
+      soap, &soap_tmp___ns1__getMyInvestigationsIncludesPagination);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getMyInvestigationsIncludesPagination(soap, &soap_tmp___ns1__getMyInvestigationsIncludesPagination, "-ns1:getMyInvestigationsIncludesPagination", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getMyInvestigationsIncludesPagination(
+            soap, &soap_tmp___ns1__getMyInvestigationsIncludesPagination,
+            "-ns1:getMyInvestigationsIncludesPagination", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getMyInvestigationsIncludesPagination(soap, &soap_tmp___ns1__getMyInvestigationsIncludesPagination, "-ns1:getMyInvestigationsIncludesPagination", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getMyInvestigationsIncludesPagination(
+          soap, &soap_tmp___ns1__getMyInvestigationsIncludesPagination,
+          "-ns1:getMyInvestigationsIncludesPagination", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getMyInvestigationsIncludesPaginationResponse_)
     return soap_closesock(soap);
   ns1__getMyInvestigationsIncludesPaginationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getMyInvestigationsIncludesPaginationResponse_->soap_get(soap, "ns1:getMyInvestigationsIncludesPaginationResponse", "ns1:getMyInvestigationsIncludesPaginationResponse");
+  ns1__getMyInvestigationsIncludesPaginationResponse_->soap_get(
+      soap, "ns1:getMyInvestigationsIncludesPaginationResponse",
+      "ns1:getMyInvestigationsIncludesPaginationResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchByUserID(const char *endpoint, const char *soap_action, ns1__searchByUserID *ns1__searchByUserID_, ns1__searchByUserIDResponse *ns1__searchByUserIDResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::searchByUserID(
+    const char *endpoint, const char *soap_action,
+    ns1__searchByUserID *ns1__searchByUserID_,
+    ns1__searchByUserIDResponse *ns1__searchByUserIDResponse_) {
+  struct soap *soap = this;
   struct __ns1__searchByUserID soap_tmp___ns1__searchByUserID;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -1047,47 +1089,48 @@ int ICATPortBindingProxy::searchByUserID(const char *endpoint, const char *soap_
   soap_serialize___ns1__searchByUserID(soap, &soap_tmp___ns1__searchByUserID);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchByUserID(soap, &soap_tmp___ns1__searchByUserID, "-ns1:searchByUserID", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchByUserID(soap, &soap_tmp___ns1__searchByUserID,
+                                       "-ns1:searchByUserID", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchByUserID(soap, &soap_tmp___ns1__searchByUserID, "-ns1:searchByUserID", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchByUserID(soap, &soap_tmp___ns1__searchByUserID,
+                                     "-ns1:searchByUserID", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchByUserIDResponse_)
     return soap_closesock(soap);
   ns1__searchByUserIDResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchByUserIDResponse_->soap_get(soap, "ns1:searchByUserIDResponse", "ns1:searchByUserIDResponse");
+  ns1__searchByUserIDResponse_->soap_get(soap, "ns1:searchByUserIDResponse",
+                                         "ns1:searchByUserIDResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchByUserIDPagination(const char *endpoint, const char *soap_action, ns1__searchByUserIDPagination *ns1__searchByUserIDPagination_, ns1__searchByUserIDPaginationResponse *ns1__searchByUserIDPaginationResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchByUserIDPagination soap_tmp___ns1__searchByUserIDPagination;
+int ICATPortBindingProxy::searchByUserIDPagination(
+    const char *endpoint, const char *soap_action,
+    ns1__searchByUserIDPagination *ns1__searchByUserIDPagination_,
+    ns1__searchByUserIDPaginationResponse *
+        ns1__searchByUserIDPaginationResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchByUserIDPagination
+      soap_tmp___ns1__searchByUserIDPagination;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -1095,52 +1138,56 @@ int ICATPortBindingProxy::searchByUserIDPagination(const char *endpoint, const c
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchByUserIDPaginationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchByUserIDPagination.ns1__searchByUserIDPagination_ = ns1__searchByUserIDPagination_;
+  soap_tmp___ns1__searchByUserIDPagination.ns1__searchByUserIDPagination_ =
+      ns1__searchByUserIDPagination_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchByUserIDPagination(soap, &soap_tmp___ns1__searchByUserIDPagination);
+  soap_serialize___ns1__searchByUserIDPagination(
+      soap, &soap_tmp___ns1__searchByUserIDPagination);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchByUserIDPagination(soap, &soap_tmp___ns1__searchByUserIDPagination, "-ns1:searchByUserIDPagination", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchByUserIDPagination(
+            soap, &soap_tmp___ns1__searchByUserIDPagination,
+            "-ns1:searchByUserIDPagination", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchByUserIDPagination(soap, &soap_tmp___ns1__searchByUserIDPagination, "-ns1:searchByUserIDPagination", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchByUserIDPagination(
+          soap, &soap_tmp___ns1__searchByUserIDPagination,
+          "-ns1:searchByUserIDPagination", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchByUserIDPaginationResponse_)
     return soap_closesock(soap);
   ns1__searchByUserIDPaginationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchByUserIDPaginationResponse_->soap_get(soap, "ns1:searchByUserIDPaginationResponse", "ns1:searchByUserIDPaginationResponse");
+  ns1__searchByUserIDPaginationResponse_->soap_get(
+      soap, "ns1:searchByUserIDPaginationResponse",
+      "ns1:searchByUserIDPaginationResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchByUserSurname(const char *endpoint, const char *soap_action, ns1__searchByUserSurname *ns1__searchByUserSurname_, ns1__searchByUserSurnameResponse *ns1__searchByUserSurnameResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::searchByUserSurname(
+    const char *endpoint, const char *soap_action,
+    ns1__searchByUserSurname *ns1__searchByUserSurname_,
+    ns1__searchByUserSurnameResponse *ns1__searchByUserSurnameResponse_) {
+  struct soap *soap = this;
   struct __ns1__searchByUserSurname soap_tmp___ns1__searchByUserSurname;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -1149,53 +1196,59 @@ int ICATPortBindingProxy::searchByUserSurname(const char *endpoint, const char *
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchByUserSurnameRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchByUserSurname.ns1__searchByUserSurname_ = ns1__searchByUserSurname_;
+  soap_tmp___ns1__searchByUserSurname.ns1__searchByUserSurname_ =
+      ns1__searchByUserSurname_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchByUserSurname(soap, &soap_tmp___ns1__searchByUserSurname);
+  soap_serialize___ns1__searchByUserSurname(
+      soap, &soap_tmp___ns1__searchByUserSurname);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchByUserSurname(soap, &soap_tmp___ns1__searchByUserSurname, "-ns1:searchByUserSurname", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchByUserSurname(
+            soap, &soap_tmp___ns1__searchByUserSurname,
+            "-ns1:searchByUserSurname", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchByUserSurname(soap, &soap_tmp___ns1__searchByUserSurname, "-ns1:searchByUserSurname", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchByUserSurname(soap,
+                                          &soap_tmp___ns1__searchByUserSurname,
+                                          "-ns1:searchByUserSurname", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchByUserSurnameResponse_)
     return soap_closesock(soap);
   ns1__searchByUserSurnameResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchByUserSurnameResponse_->soap_get(soap, "ns1:searchByUserSurnameResponse", "ns1:searchByUserSurnameResponse");
+  ns1__searchByUserSurnameResponse_->soap_get(
+      soap, "ns1:searchByUserSurnameResponse",
+      "ns1:searchByUserSurnameResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchByUserSurnamePagination(const char *endpoint, const char *soap_action, ns1__searchByUserSurnamePagination *ns1__searchByUserSurnamePagination_, ns1__searchByUserSurnamePaginationResponse *ns1__searchByUserSurnamePaginationResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchByUserSurnamePagination soap_tmp___ns1__searchByUserSurnamePagination;
+int ICATPortBindingProxy::searchByUserSurnamePagination(
+    const char *endpoint, const char *soap_action,
+    ns1__searchByUserSurnamePagination *ns1__searchByUserSurnamePagination_,
+    ns1__searchByUserSurnamePaginationResponse *
+        ns1__searchByUserSurnamePaginationResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchByUserSurnamePagination
+      soap_tmp___ns1__searchByUserSurnamePagination;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -1203,52 +1256,57 @@ int ICATPortBindingProxy::searchByUserSurnamePagination(const char *endpoint, co
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchByUserSurnamePaginationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchByUserSurnamePagination.ns1__searchByUserSurnamePagination_ = ns1__searchByUserSurnamePagination_;
+  soap_tmp___ns1__searchByUserSurnamePagination
+      .ns1__searchByUserSurnamePagination_ =
+      ns1__searchByUserSurnamePagination_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchByUserSurnamePagination(soap, &soap_tmp___ns1__searchByUserSurnamePagination);
+  soap_serialize___ns1__searchByUserSurnamePagination(
+      soap, &soap_tmp___ns1__searchByUserSurnamePagination);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchByUserSurnamePagination(soap, &soap_tmp___ns1__searchByUserSurnamePagination, "-ns1:searchByUserSurnamePagination", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchByUserSurnamePagination(
+            soap, &soap_tmp___ns1__searchByUserSurnamePagination,
+            "-ns1:searchByUserSurnamePagination", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchByUserSurnamePagination(soap, &soap_tmp___ns1__searchByUserSurnamePagination, "-ns1:searchByUserSurnamePagination", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchByUserSurnamePagination(
+          soap, &soap_tmp___ns1__searchByUserSurnamePagination,
+          "-ns1:searchByUserSurnamePagination", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchByUserSurnamePaginationResponse_)
     return soap_closesock(soap);
   ns1__searchByUserSurnamePaginationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchByUserSurnamePaginationResponse_->soap_get(soap, "ns1:searchByUserSurnamePaginationResponse", "ns1:searchByUserSurnamePaginationResponse");
+  ns1__searchByUserSurnamePaginationResponse_->soap_get(
+      soap, "ns1:searchByUserSurnamePaginationResponse",
+      "ns1:searchByUserSurnamePaginationResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::listInstruments(const char *endpoint, const char *soap_action, ns1__listInstruments *ns1__listInstruments_, ns1__listInstrumentsResponse *ns1__listInstrumentsResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::listInstruments(
+    const char *endpoint, const char *soap_action,
+    ns1__listInstruments *ns1__listInstruments_,
+    ns1__listInstrumentsResponse *ns1__listInstrumentsResponse_) {
+  struct soap *soap = this;
   struct __ns1__listInstruments soap_tmp___ns1__listInstruments;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -1263,46 +1321,45 @@ int ICATPortBindingProxy::listInstruments(const char *endpoint, const char *soap
   soap_serialize___ns1__listInstruments(soap, &soap_tmp___ns1__listInstruments);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__listInstruments(soap, &soap_tmp___ns1__listInstruments, "-ns1:listInstruments", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__listInstruments(soap, &soap_tmp___ns1__listInstruments,
+                                        "-ns1:listInstruments", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__listInstruments(soap, &soap_tmp___ns1__listInstruments, "-ns1:listInstruments", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__listInstruments(soap, &soap_tmp___ns1__listInstruments,
+                                      "-ns1:listInstruments", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__listInstrumentsResponse_)
     return soap_closesock(soap);
   ns1__listInstrumentsResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__listInstrumentsResponse_->soap_get(soap, "ns1:listInstrumentsResponse", "ns1:listInstrumentsResponse");
+  ns1__listInstrumentsResponse_->soap_get(soap, "ns1:listInstrumentsResponse",
+                                          "ns1:listInstrumentsResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getAllInstruments(const char *endpoint, const char *soap_action, ns1__getAllInstruments *ns1__getAllInstruments_, ns1__getAllInstrumentsResponse *ns1__getAllInstrumentsResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getAllInstruments(
+    const char *endpoint, const char *soap_action,
+    ns1__getAllInstruments *ns1__getAllInstruments_,
+    ns1__getAllInstrumentsResponse *ns1__getAllInstrumentsResponse_) {
+  struct soap *soap = this;
   struct __ns1__getAllInstruments soap_tmp___ns1__getAllInstruments;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -1311,52 +1368,54 @@ int ICATPortBindingProxy::getAllInstruments(const char *endpoint, const char *so
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getAllInstrumentsRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getAllInstruments.ns1__getAllInstruments_ = ns1__getAllInstruments_;
+  soap_tmp___ns1__getAllInstruments.ns1__getAllInstruments_ =
+      ns1__getAllInstruments_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getAllInstruments(soap, &soap_tmp___ns1__getAllInstruments);
+  soap_serialize___ns1__getAllInstruments(soap,
+                                          &soap_tmp___ns1__getAllInstruments);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getAllInstruments(soap, &soap_tmp___ns1__getAllInstruments, "-ns1:getAllInstruments", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getAllInstruments(soap,
+                                          &soap_tmp___ns1__getAllInstruments,
+                                          "-ns1:getAllInstruments", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getAllInstruments(soap, &soap_tmp___ns1__getAllInstruments, "-ns1:getAllInstruments", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) || soap_put___ns1__getAllInstruments(
+                                       soap, &soap_tmp___ns1__getAllInstruments,
+                                       "-ns1:getAllInstruments", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getAllInstrumentsResponse_)
     return soap_closesock(soap);
   ns1__getAllInstrumentsResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getAllInstrumentsResponse_->soap_get(soap, "ns1:getAllInstrumentsResponse", "ns1:getAllInstrumentsResponse");
+  ns1__getAllInstrumentsResponse_->soap_get(
+      soap, "ns1:getAllInstrumentsResponse", "ns1:getAllInstrumentsResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::listRoles(const char *endpoint, const char *soap_action, ns1__listRoles *ns1__listRoles_, ns1__listRolesResponse *ns1__listRolesResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::listRoles(
+    const char *endpoint, const char *soap_action,
+    ns1__listRoles *ns1__listRoles_,
+    ns1__listRolesResponse *ns1__listRolesResponse_) {
+  struct soap *soap = this;
   struct __ns1__listRoles soap_tmp___ns1__listRoles;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -1371,46 +1430,45 @@ int ICATPortBindingProxy::listRoles(const char *endpoint, const char *soap_actio
   soap_serialize___ns1__listRoles(soap, &soap_tmp___ns1__listRoles);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__listRoles(soap, &soap_tmp___ns1__listRoles, "-ns1:listRoles", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__listRoles(soap, &soap_tmp___ns1__listRoles,
+                                  "-ns1:listRoles", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__listRoles(soap, &soap_tmp___ns1__listRoles, "-ns1:listRoles", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__listRoles(soap, &soap_tmp___ns1__listRoles,
+                                "-ns1:listRoles", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__listRolesResponse_)
     return soap_closesock(soap);
   ns1__listRolesResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__listRolesResponse_->soap_get(soap, "ns1:listRolesResponse", "ns1:listRolesResponse");
+  ns1__listRolesResponse_->soap_get(soap, "ns1:listRolesResponse",
+                                    "ns1:listRolesResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::listParameters(const char *endpoint, const char *soap_action, ns1__listParameters *ns1__listParameters_, ns1__listParametersResponse *ns1__listParametersResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::listParameters(
+    const char *endpoint, const char *soap_action,
+    ns1__listParameters *ns1__listParameters_,
+    ns1__listParametersResponse *ns1__listParametersResponse_) {
+  struct soap *soap = this;
   struct __ns1__listParameters soap_tmp___ns1__listParameters;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -1425,46 +1483,45 @@ int ICATPortBindingProxy::listParameters(const char *endpoint, const char *soap_
   soap_serialize___ns1__listParameters(soap, &soap_tmp___ns1__listParameters);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__listParameters(soap, &soap_tmp___ns1__listParameters, "-ns1:listParameters", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__listParameters(soap, &soap_tmp___ns1__listParameters,
+                                       "-ns1:listParameters", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__listParameters(soap, &soap_tmp___ns1__listParameters, "-ns1:listParameters", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__listParameters(soap, &soap_tmp___ns1__listParameters,
+                                     "-ns1:listParameters", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__listParametersResponse_)
     return soap_closesock(soap);
   ns1__listParametersResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__listParametersResponse_->soap_get(soap, "ns1:listParametersResponse", "ns1:listParametersResponse");
+  ns1__listParametersResponse_->soap_get(soap, "ns1:listParametersResponse",
+                                         "ns1:listParametersResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::listFacilityCycles(const char *endpoint, const char *soap_action, ns1__listFacilityCycles *ns1__listFacilityCycles_, ns1__listFacilityCyclesResponse *ns1__listFacilityCyclesResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::listFacilityCycles(
+    const char *endpoint, const char *soap_action,
+    ns1__listFacilityCycles *ns1__listFacilityCycles_,
+    ns1__listFacilityCyclesResponse *ns1__listFacilityCyclesResponse_) {
+  struct soap *soap = this;
   struct __ns1__listFacilityCycles soap_tmp___ns1__listFacilityCycles;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -1473,106 +1530,118 @@ int ICATPortBindingProxy::listFacilityCycles(const char *endpoint, const char *s
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/listFacilityCyclesRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__listFacilityCycles.ns1__listFacilityCycles_ = ns1__listFacilityCycles_;
+  soap_tmp___ns1__listFacilityCycles.ns1__listFacilityCycles_ =
+      ns1__listFacilityCycles_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__listFacilityCycles(soap, &soap_tmp___ns1__listFacilityCycles);
+  soap_serialize___ns1__listFacilityCycles(soap,
+                                           &soap_tmp___ns1__listFacilityCycles);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__listFacilityCycles(soap, &soap_tmp___ns1__listFacilityCycles, "-ns1:listFacilityCycles", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__listFacilityCycles(soap,
+                                           &soap_tmp___ns1__listFacilityCycles,
+                                           "-ns1:listFacilityCycles", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__listFacilityCycles(soap, &soap_tmp___ns1__listFacilityCycles, "-ns1:listFacilityCycles", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__listFacilityCycles(soap,
+                                         &soap_tmp___ns1__listFacilityCycles,
+                                         "-ns1:listFacilityCycles", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__listFacilityCyclesResponse_)
     return soap_closesock(soap);
   ns1__listFacilityCyclesResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__listFacilityCyclesResponse_->soap_get(soap, "ns1:listFacilityCyclesResponse", "ns1:listFacilityCyclesResponse");
+  ns1__listFacilityCyclesResponse_->soap_get(
+      soap, "ns1:listFacilityCyclesResponse", "ns1:listFacilityCyclesResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getFacilityCyclesWithDataForInstrument(const char *endpoint, const char *soap_action, ns1__getFacilityCyclesWithDataForInstrument *ns1__getFacilityCyclesWithDataForInstrument_, ns1__getFacilityCyclesWithDataForInstrumentResponse *ns1__getFacilityCyclesWithDataForInstrumentResponse_)
-{ struct soap *soap = this;
-  struct __ns1__getFacilityCyclesWithDataForInstrument soap_tmp___ns1__getFacilityCyclesWithDataForInstrument;
+int ICATPortBindingProxy::getFacilityCyclesWithDataForInstrument(
+    const char *endpoint, const char *soap_action,
+    ns1__getFacilityCyclesWithDataForInstrument *
+        ns1__getFacilityCyclesWithDataForInstrument_,
+    ns1__getFacilityCyclesWithDataForInstrumentResponse *
+        ns1__getFacilityCyclesWithDataForInstrumentResponse_) {
+  struct soap *soap = this;
+  struct __ns1__getFacilityCyclesWithDataForInstrument
+      soap_tmp___ns1__getFacilityCyclesWithDataForInstrument;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/getFacilityCyclesWithDataForInstrumentRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/getFacilityCyclesWithDataForInstrumentRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getFacilityCyclesWithDataForInstrument.ns1__getFacilityCyclesWithDataForInstrument_ = ns1__getFacilityCyclesWithDataForInstrument_;
+  soap_tmp___ns1__getFacilityCyclesWithDataForInstrument
+      .ns1__getFacilityCyclesWithDataForInstrument_ =
+      ns1__getFacilityCyclesWithDataForInstrument_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getFacilityCyclesWithDataForInstrument(soap, &soap_tmp___ns1__getFacilityCyclesWithDataForInstrument);
+  soap_serialize___ns1__getFacilityCyclesWithDataForInstrument(
+      soap, &soap_tmp___ns1__getFacilityCyclesWithDataForInstrument);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getFacilityCyclesWithDataForInstrument(soap, &soap_tmp___ns1__getFacilityCyclesWithDataForInstrument, "-ns1:getFacilityCyclesWithDataForInstrument", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getFacilityCyclesWithDataForInstrument(
+            soap, &soap_tmp___ns1__getFacilityCyclesWithDataForInstrument,
+            "-ns1:getFacilityCyclesWithDataForInstrument", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getFacilityCyclesWithDataForInstrument(soap, &soap_tmp___ns1__getFacilityCyclesWithDataForInstrument, "-ns1:getFacilityCyclesWithDataForInstrument", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getFacilityCyclesWithDataForInstrument(
+          soap, &soap_tmp___ns1__getFacilityCyclesWithDataForInstrument,
+          "-ns1:getFacilityCyclesWithDataForInstrument", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getFacilityCyclesWithDataForInstrumentResponse_)
     return soap_closesock(soap);
   ns1__getFacilityCyclesWithDataForInstrumentResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getFacilityCyclesWithDataForInstrumentResponse_->soap_get(soap, "ns1:getFacilityCyclesWithDataForInstrumentResponse", "ns1:getFacilityCyclesWithDataForInstrumentResponse");
+  ns1__getFacilityCyclesWithDataForInstrumentResponse_->soap_get(
+      soap, "ns1:getFacilityCyclesWithDataForInstrumentResponse",
+      "ns1:getFacilityCyclesWithDataForInstrumentResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getInstrumentsWithData(const char *endpoint, const char *soap_action, ns1__getInstrumentsWithData *ns1__getInstrumentsWithData_, ns1__getInstrumentsWithDataResponse *ns1__getInstrumentsWithDataResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getInstrumentsWithData(
+    const char *endpoint, const char *soap_action,
+    ns1__getInstrumentsWithData *ns1__getInstrumentsWithData_,
+    ns1__getInstrumentsWithDataResponse *ns1__getInstrumentsWithDataResponse_) {
+  struct soap *soap = this;
   struct __ns1__getInstrumentsWithData soap_tmp___ns1__getInstrumentsWithData;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -1581,52 +1650,56 @@ int ICATPortBindingProxy::getInstrumentsWithData(const char *endpoint, const cha
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getInstrumentsWithDataRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getInstrumentsWithData.ns1__getInstrumentsWithData_ = ns1__getInstrumentsWithData_;
+  soap_tmp___ns1__getInstrumentsWithData.ns1__getInstrumentsWithData_ =
+      ns1__getInstrumentsWithData_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getInstrumentsWithData(soap, &soap_tmp___ns1__getInstrumentsWithData);
+  soap_serialize___ns1__getInstrumentsWithData(
+      soap, &soap_tmp___ns1__getInstrumentsWithData);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getInstrumentsWithData(soap, &soap_tmp___ns1__getInstrumentsWithData, "-ns1:getInstrumentsWithData", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getInstrumentsWithData(
+            soap, &soap_tmp___ns1__getInstrumentsWithData,
+            "-ns1:getInstrumentsWithData", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getInstrumentsWithData(soap, &soap_tmp___ns1__getInstrumentsWithData, "-ns1:getInstrumentsWithData", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getInstrumentsWithData(
+          soap, &soap_tmp___ns1__getInstrumentsWithData,
+          "-ns1:getInstrumentsWithData", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getInstrumentsWithDataResponse_)
     return soap_closesock(soap);
   ns1__getInstrumentsWithDataResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getInstrumentsWithDataResponse_->soap_get(soap, "ns1:getInstrumentsWithDataResponse", "ns1:getInstrumentsWithDataResponse");
+  ns1__getInstrumentsWithDataResponse_->soap_get(
+      soap, "ns1:getInstrumentsWithDataResponse",
+      "ns1:getInstrumentsWithDataResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::listInvestigationTypes(const char *endpoint, const char *soap_action, ns1__listInvestigationTypes *ns1__listInvestigationTypes_, ns1__listInvestigationTypesResponse *ns1__listInvestigationTypesResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::listInvestigationTypes(
+    const char *endpoint, const char *soap_action,
+    ns1__listInvestigationTypes *ns1__listInvestigationTypes_,
+    ns1__listInvestigationTypesResponse *ns1__listInvestigationTypesResponse_) {
+  struct soap *soap = this;
   struct __ns1__listInvestigationTypes soap_tmp___ns1__listInvestigationTypes;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -1635,53 +1708,59 @@ int ICATPortBindingProxy::listInvestigationTypes(const char *endpoint, const cha
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/listInvestigationTypesRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__listInvestigationTypes.ns1__listInvestigationTypes_ = ns1__listInvestigationTypes_;
+  soap_tmp___ns1__listInvestigationTypes.ns1__listInvestigationTypes_ =
+      ns1__listInvestigationTypes_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__listInvestigationTypes(soap, &soap_tmp___ns1__listInvestigationTypes);
+  soap_serialize___ns1__listInvestigationTypes(
+      soap, &soap_tmp___ns1__listInvestigationTypes);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__listInvestigationTypes(soap, &soap_tmp___ns1__listInvestigationTypes, "-ns1:listInvestigationTypes", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__listInvestigationTypes(
+            soap, &soap_tmp___ns1__listInvestigationTypes,
+            "-ns1:listInvestigationTypes", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__listInvestigationTypes(soap, &soap_tmp___ns1__listInvestigationTypes, "-ns1:listInvestigationTypes", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__listInvestigationTypes(
+          soap, &soap_tmp___ns1__listInvestigationTypes,
+          "-ns1:listInvestigationTypes", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__listInvestigationTypesResponse_)
     return soap_closesock(soap);
   ns1__listInvestigationTypesResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__listInvestigationTypesResponse_->soap_get(soap, "ns1:listInvestigationTypesResponse", "ns1:listInvestigationTypesResponse");
+  ns1__listInvestigationTypesResponse_->soap_get(
+      soap, "ns1:listInvestigationTypesResponse",
+      "ns1:listInvestigationTypesResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchSamplesBySampleName(const char *endpoint, const char *soap_action, ns1__searchSamplesBySampleName *ns1__searchSamplesBySampleName_, ns1__searchSamplesBySampleNameResponse *ns1__searchSamplesBySampleNameResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchSamplesBySampleName soap_tmp___ns1__searchSamplesBySampleName;
+int ICATPortBindingProxy::searchSamplesBySampleName(
+    const char *endpoint, const char *soap_action,
+    ns1__searchSamplesBySampleName *ns1__searchSamplesBySampleName_,
+    ns1__searchSamplesBySampleNameResponse *
+        ns1__searchSamplesBySampleNameResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchSamplesBySampleName
+      soap_tmp___ns1__searchSamplesBySampleName;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -1689,52 +1768,56 @@ int ICATPortBindingProxy::searchSamplesBySampleName(const char *endpoint, const 
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchSamplesBySampleNameRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchSamplesBySampleName.ns1__searchSamplesBySampleName_ = ns1__searchSamplesBySampleName_;
+  soap_tmp___ns1__searchSamplesBySampleName.ns1__searchSamplesBySampleName_ =
+      ns1__searchSamplesBySampleName_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchSamplesBySampleName(soap, &soap_tmp___ns1__searchSamplesBySampleName);
+  soap_serialize___ns1__searchSamplesBySampleName(
+      soap, &soap_tmp___ns1__searchSamplesBySampleName);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchSamplesBySampleName(soap, &soap_tmp___ns1__searchSamplesBySampleName, "-ns1:searchSamplesBySampleName", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchSamplesBySampleName(
+            soap, &soap_tmp___ns1__searchSamplesBySampleName,
+            "-ns1:searchSamplesBySampleName", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchSamplesBySampleName(soap, &soap_tmp___ns1__searchSamplesBySampleName, "-ns1:searchSamplesBySampleName", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchSamplesBySampleName(
+          soap, &soap_tmp___ns1__searchSamplesBySampleName,
+          "-ns1:searchSamplesBySampleName", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchSamplesBySampleNameResponse_)
     return soap_closesock(soap);
   ns1__searchSamplesBySampleNameResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchSamplesBySampleNameResponse_->soap_get(soap, "ns1:searchSamplesBySampleNameResponse", "ns1:searchSamplesBySampleNameResponse");
+  ns1__searchSamplesBySampleNameResponse_->soap_get(
+      soap, "ns1:searchSamplesBySampleNameResponse",
+      "ns1:searchSamplesBySampleNameResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatasetsBySample(const char *endpoint, const char *soap_action, ns1__searchDatasetsBySample *ns1__searchDatasetsBySample_, ns1__searchDatasetsBySampleResponse *ns1__searchDatasetsBySampleResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::searchDatasetsBySample(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatasetsBySample *ns1__searchDatasetsBySample_,
+    ns1__searchDatasetsBySampleResponse *ns1__searchDatasetsBySampleResponse_) {
+  struct soap *soap = this;
   struct __ns1__searchDatasetsBySample soap_tmp___ns1__searchDatasetsBySample;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -1743,52 +1826,56 @@ int ICATPortBindingProxy::searchDatasetsBySample(const char *endpoint, const cha
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchDatasetsBySampleRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatasetsBySample.ns1__searchDatasetsBySample_ = ns1__searchDatasetsBySample_;
+  soap_tmp___ns1__searchDatasetsBySample.ns1__searchDatasetsBySample_ =
+      ns1__searchDatasetsBySample_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatasetsBySample(soap, &soap_tmp___ns1__searchDatasetsBySample);
+  soap_serialize___ns1__searchDatasetsBySample(
+      soap, &soap_tmp___ns1__searchDatasetsBySample);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatasetsBySample(soap, &soap_tmp___ns1__searchDatasetsBySample, "-ns1:searchDatasetsBySample", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatasetsBySample(
+            soap, &soap_tmp___ns1__searchDatasetsBySample,
+            "-ns1:searchDatasetsBySample", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatasetsBySample(soap, &soap_tmp___ns1__searchDatasetsBySample, "-ns1:searchDatasetsBySample", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatasetsBySample(
+          soap, &soap_tmp___ns1__searchDatasetsBySample,
+          "-ns1:searchDatasetsBySample", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatasetsBySampleResponse_)
     return soap_closesock(soap);
   ns1__searchDatasetsBySampleResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatasetsBySampleResponse_->soap_get(soap, "ns1:searchDatasetsBySampleResponse", "ns1:searchDatasetsBySampleResponse");
+  ns1__searchDatasetsBySampleResponse_->soap_get(
+      soap, "ns1:searchDatasetsBySampleResponse",
+      "ns1:searchDatasetsBySampleResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::listDatasetTypes(const char *endpoint, const char *soap_action, ns1__listDatasetTypes *ns1__listDatasetTypes_, ns1__listDatasetTypesResponse *ns1__listDatasetTypesResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::listDatasetTypes(
+    const char *endpoint, const char *soap_action,
+    ns1__listDatasetTypes *ns1__listDatasetTypes_,
+    ns1__listDatasetTypesResponse *ns1__listDatasetTypesResponse_) {
+  struct soap *soap = this;
   struct __ns1__listDatasetTypes soap_tmp___ns1__listDatasetTypes;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -1797,52 +1884,54 @@ int ICATPortBindingProxy::listDatasetTypes(const char *endpoint, const char *soa
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/listDatasetTypesRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__listDatasetTypes.ns1__listDatasetTypes_ = ns1__listDatasetTypes_;
+  soap_tmp___ns1__listDatasetTypes.ns1__listDatasetTypes_ =
+      ns1__listDatasetTypes_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__listDatasetTypes(soap, &soap_tmp___ns1__listDatasetTypes);
+  soap_serialize___ns1__listDatasetTypes(soap,
+                                         &soap_tmp___ns1__listDatasetTypes);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__listDatasetTypes(soap, &soap_tmp___ns1__listDatasetTypes, "-ns1:listDatasetTypes", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__listDatasetTypes(soap,
+                                         &soap_tmp___ns1__listDatasetTypes,
+                                         "-ns1:listDatasetTypes", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__listDatasetTypes(soap, &soap_tmp___ns1__listDatasetTypes, "-ns1:listDatasetTypes", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__listDatasetTypes(soap, &soap_tmp___ns1__listDatasetTypes,
+                                       "-ns1:listDatasetTypes", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__listDatasetTypesResponse_)
     return soap_closesock(soap);
   ns1__listDatasetTypesResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__listDatasetTypesResponse_->soap_get(soap, "ns1:listDatasetTypesResponse", "ns1:listDatasetTypesResponse");
+  ns1__listDatasetTypesResponse_->soap_get(soap, "ns1:listDatasetTypesResponse",
+                                           "ns1:listDatasetTypesResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::listDatasetStatus(const char *endpoint, const char *soap_action, ns1__listDatasetStatus *ns1__listDatasetStatus_, ns1__listDatasetStatusResponse *ns1__listDatasetStatusResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::listDatasetStatus(
+    const char *endpoint, const char *soap_action,
+    ns1__listDatasetStatus *ns1__listDatasetStatus_,
+    ns1__listDatasetStatusResponse *ns1__listDatasetStatusResponse_) {
+  struct soap *soap = this;
   struct __ns1__listDatasetStatus soap_tmp___ns1__listDatasetStatus;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -1851,52 +1940,54 @@ int ICATPortBindingProxy::listDatasetStatus(const char *endpoint, const char *so
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/listDatasetStatusRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__listDatasetStatus.ns1__listDatasetStatus_ = ns1__listDatasetStatus_;
+  soap_tmp___ns1__listDatasetStatus.ns1__listDatasetStatus_ =
+      ns1__listDatasetStatus_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__listDatasetStatus(soap, &soap_tmp___ns1__listDatasetStatus);
+  soap_serialize___ns1__listDatasetStatus(soap,
+                                          &soap_tmp___ns1__listDatasetStatus);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__listDatasetStatus(soap, &soap_tmp___ns1__listDatasetStatus, "-ns1:listDatasetStatus", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__listDatasetStatus(soap,
+                                          &soap_tmp___ns1__listDatasetStatus,
+                                          "-ns1:listDatasetStatus", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__listDatasetStatus(soap, &soap_tmp___ns1__listDatasetStatus, "-ns1:listDatasetStatus", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) || soap_put___ns1__listDatasetStatus(
+                                       soap, &soap_tmp___ns1__listDatasetStatus,
+                                       "-ns1:listDatasetStatus", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__listDatasetStatusResponse_)
     return soap_closesock(soap);
   ns1__listDatasetStatusResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__listDatasetStatusResponse_->soap_get(soap, "ns1:listDatasetStatusResponse", "ns1:listDatasetStatusResponse");
+  ns1__listDatasetStatusResponse_->soap_get(
+      soap, "ns1:listDatasetStatusResponse", "ns1:listDatasetStatusResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchByRunNumber(const char *endpoint, const char *soap_action, ns1__searchByRunNumber *ns1__searchByRunNumber_, ns1__searchByRunNumberResponse *ns1__searchByRunNumberResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::searchByRunNumber(
+    const char *endpoint, const char *soap_action,
+    ns1__searchByRunNumber *ns1__searchByRunNumber_,
+    ns1__searchByRunNumberResponse *ns1__searchByRunNumberResponse_) {
+  struct soap *soap = this;
   struct __ns1__searchByRunNumber soap_tmp___ns1__searchByRunNumber;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -1905,53 +1996,57 @@ int ICATPortBindingProxy::searchByRunNumber(const char *endpoint, const char *so
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchByRunNumberRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchByRunNumber.ns1__searchByRunNumber_ = ns1__searchByRunNumber_;
+  soap_tmp___ns1__searchByRunNumber.ns1__searchByRunNumber_ =
+      ns1__searchByRunNumber_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchByRunNumber(soap, &soap_tmp___ns1__searchByRunNumber);
+  soap_serialize___ns1__searchByRunNumber(soap,
+                                          &soap_tmp___ns1__searchByRunNumber);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchByRunNumber(soap, &soap_tmp___ns1__searchByRunNumber, "-ns1:searchByRunNumber", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchByRunNumber(soap,
+                                          &soap_tmp___ns1__searchByRunNumber,
+                                          "-ns1:searchByRunNumber", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchByRunNumber(soap, &soap_tmp___ns1__searchByRunNumber, "-ns1:searchByRunNumber", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) || soap_put___ns1__searchByRunNumber(
+                                       soap, &soap_tmp___ns1__searchByRunNumber,
+                                       "-ns1:searchByRunNumber", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchByRunNumberResponse_)
     return soap_closesock(soap);
   ns1__searchByRunNumberResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchByRunNumberResponse_->soap_get(soap, "ns1:searchByRunNumberResponse", "ns1:searchByRunNumberResponse");
+  ns1__searchByRunNumberResponse_->soap_get(
+      soap, "ns1:searchByRunNumberResponse", "ns1:searchByRunNumberResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchByRunNumberPagination(const char *endpoint, const char *soap_action, ns1__searchByRunNumberPagination *ns1__searchByRunNumberPagination_, ns1__searchByRunNumberPaginationResponse *ns1__searchByRunNumberPaginationResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchByRunNumberPagination soap_tmp___ns1__searchByRunNumberPagination;
+int ICATPortBindingProxy::searchByRunNumberPagination(
+    const char *endpoint, const char *soap_action,
+    ns1__searchByRunNumberPagination *ns1__searchByRunNumberPagination_,
+    ns1__searchByRunNumberPaginationResponse *
+        ns1__searchByRunNumberPaginationResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchByRunNumberPagination
+      soap_tmp___ns1__searchByRunNumberPagination;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -1959,52 +2054,56 @@ int ICATPortBindingProxy::searchByRunNumberPagination(const char *endpoint, cons
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchByRunNumberPaginationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchByRunNumberPagination.ns1__searchByRunNumberPagination_ = ns1__searchByRunNumberPagination_;
+  soap_tmp___ns1__searchByRunNumberPagination
+      .ns1__searchByRunNumberPagination_ = ns1__searchByRunNumberPagination_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchByRunNumberPagination(soap, &soap_tmp___ns1__searchByRunNumberPagination);
+  soap_serialize___ns1__searchByRunNumberPagination(
+      soap, &soap_tmp___ns1__searchByRunNumberPagination);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchByRunNumberPagination(soap, &soap_tmp___ns1__searchByRunNumberPagination, "-ns1:searchByRunNumberPagination", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchByRunNumberPagination(
+            soap, &soap_tmp___ns1__searchByRunNumberPagination,
+            "-ns1:searchByRunNumberPagination", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchByRunNumberPagination(soap, &soap_tmp___ns1__searchByRunNumberPagination, "-ns1:searchByRunNumberPagination", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchByRunNumberPagination(
+          soap, &soap_tmp___ns1__searchByRunNumberPagination,
+          "-ns1:searchByRunNumberPagination", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchByRunNumberPaginationResponse_)
     return soap_closesock(soap);
   ns1__searchByRunNumberPaginationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchByRunNumberPaginationResponse_->soap_get(soap, "ns1:searchByRunNumberPaginationResponse", "ns1:searchByRunNumberPaginationResponse");
+  ns1__searchByRunNumberPaginationResponse_->soap_get(
+      soap, "ns1:searchByRunNumberPaginationResponse",
+      "ns1:searchByRunNumberPaginationResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::listDatafileFormats(const char *endpoint, const char *soap_action, ns1__listDatafileFormats *ns1__listDatafileFormats_, ns1__listDatafileFormatsResponse *ns1__listDatafileFormatsResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::listDatafileFormats(
+    const char *endpoint, const char *soap_action,
+    ns1__listDatafileFormats *ns1__listDatafileFormats_,
+    ns1__listDatafileFormatsResponse *ns1__listDatafileFormatsResponse_) {
+  struct soap *soap = this;
   struct __ns1__listDatafileFormats soap_tmp___ns1__listDatafileFormats;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -2013,52 +2112,56 @@ int ICATPortBindingProxy::listDatafileFormats(const char *endpoint, const char *
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/listDatafileFormatsRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__listDatafileFormats.ns1__listDatafileFormats_ = ns1__listDatafileFormats_;
+  soap_tmp___ns1__listDatafileFormats.ns1__listDatafileFormats_ =
+      ns1__listDatafileFormats_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__listDatafileFormats(soap, &soap_tmp___ns1__listDatafileFormats);
+  soap_serialize___ns1__listDatafileFormats(
+      soap, &soap_tmp___ns1__listDatafileFormats);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__listDatafileFormats(soap, &soap_tmp___ns1__listDatafileFormats, "-ns1:listDatafileFormats", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__listDatafileFormats(
+            soap, &soap_tmp___ns1__listDatafileFormats,
+            "-ns1:listDatafileFormats", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__listDatafileFormats(soap, &soap_tmp___ns1__listDatafileFormats, "-ns1:listDatafileFormats", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__listDatafileFormats(soap,
+                                          &soap_tmp___ns1__listDatafileFormats,
+                                          "-ns1:listDatafileFormats", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__listDatafileFormatsResponse_)
     return soap_closesock(soap);
   ns1__listDatafileFormatsResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__listDatafileFormatsResponse_->soap_get(soap, "ns1:listDatafileFormatsResponse", "ns1:listDatafileFormatsResponse");
+  ns1__listDatafileFormatsResponse_->soap_get(
+      soap, "ns1:listDatafileFormatsResponse",
+      "ns1:listDatafileFormatsResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getInvestigation(const char *endpoint, const char *soap_action, ns1__getInvestigation *ns1__getInvestigation_, ns1__getInvestigationResponse *ns1__getInvestigationResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getInvestigation(
+    const char *endpoint, const char *soap_action,
+    ns1__getInvestigation *ns1__getInvestigation_,
+    ns1__getInvestigationResponse *ns1__getInvestigationResponse_) {
+  struct soap *soap = this;
   struct __ns1__getInvestigation soap_tmp___ns1__getInvestigation;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -2067,53 +2170,57 @@ int ICATPortBindingProxy::getInvestigation(const char *endpoint, const char *soa
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getInvestigationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getInvestigation.ns1__getInvestigation_ = ns1__getInvestigation_;
+  soap_tmp___ns1__getInvestigation.ns1__getInvestigation_ =
+      ns1__getInvestigation_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getInvestigation(soap, &soap_tmp___ns1__getInvestigation);
+  soap_serialize___ns1__getInvestigation(soap,
+                                         &soap_tmp___ns1__getInvestigation);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getInvestigation(soap, &soap_tmp___ns1__getInvestigation, "-ns1:getInvestigation", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getInvestigation(soap,
+                                         &soap_tmp___ns1__getInvestigation,
+                                         "-ns1:getInvestigation", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getInvestigation(soap, &soap_tmp___ns1__getInvestigation, "-ns1:getInvestigation", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getInvestigation(soap, &soap_tmp___ns1__getInvestigation,
+                                       "-ns1:getInvestigation", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getInvestigationResponse_)
     return soap_closesock(soap);
   ns1__getInvestigationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getInvestigationResponse_->soap_get(soap, "ns1:getInvestigationResponse", "ns1:getInvestigationResponse");
+  ns1__getInvestigationResponse_->soap_get(soap, "ns1:getInvestigationResponse",
+                                           "ns1:getInvestigationResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getInvestigationIncludes(const char *endpoint, const char *soap_action, ns1__getInvestigationIncludes *ns1__getInvestigationIncludes_, ns1__getInvestigationIncludesResponse *ns1__getInvestigationIncludesResponse_)
-{ struct soap *soap = this;
-  struct __ns1__getInvestigationIncludes soap_tmp___ns1__getInvestigationIncludes;
+int ICATPortBindingProxy::getInvestigationIncludes(
+    const char *endpoint, const char *soap_action,
+    ns1__getInvestigationIncludes *ns1__getInvestigationIncludes_,
+    ns1__getInvestigationIncludesResponse *
+        ns1__getInvestigationIncludesResponse_) {
+  struct soap *soap = this;
+  struct __ns1__getInvestigationIncludes
+      soap_tmp___ns1__getInvestigationIncludes;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -2121,52 +2228,56 @@ int ICATPortBindingProxy::getInvestigationIncludes(const char *endpoint, const c
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getInvestigationIncludesRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getInvestigationIncludes.ns1__getInvestigationIncludes_ = ns1__getInvestigationIncludes_;
+  soap_tmp___ns1__getInvestigationIncludes.ns1__getInvestigationIncludes_ =
+      ns1__getInvestigationIncludes_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getInvestigationIncludes(soap, &soap_tmp___ns1__getInvestigationIncludes);
+  soap_serialize___ns1__getInvestigationIncludes(
+      soap, &soap_tmp___ns1__getInvestigationIncludes);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getInvestigationIncludes(soap, &soap_tmp___ns1__getInvestigationIncludes, "-ns1:getInvestigationIncludes", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getInvestigationIncludes(
+            soap, &soap_tmp___ns1__getInvestigationIncludes,
+            "-ns1:getInvestigationIncludes", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getInvestigationIncludes(soap, &soap_tmp___ns1__getInvestigationIncludes, "-ns1:getInvestigationIncludes", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getInvestigationIncludes(
+          soap, &soap_tmp___ns1__getInvestigationIncludes,
+          "-ns1:getInvestigationIncludes", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getInvestigationIncludesResponse_)
     return soap_closesock(soap);
   ns1__getInvestigationIncludesResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getInvestigationIncludesResponse_->soap_get(soap, "ns1:getInvestigationIncludesResponse", "ns1:getInvestigationIncludesResponse");
+  ns1__getInvestigationIncludesResponse_->soap_get(
+      soap, "ns1:getInvestigationIncludesResponse",
+      "ns1:getInvestigationIncludesResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getInvestigations(const char *endpoint, const char *soap_action, ns1__getInvestigations *ns1__getInvestigations_, ns1__getInvestigationsResponse *ns1__getInvestigationsResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getInvestigations(
+    const char *endpoint, const char *soap_action,
+    ns1__getInvestigations *ns1__getInvestigations_,
+    ns1__getInvestigationsResponse *ns1__getInvestigationsResponse_) {
+  struct soap *soap = this;
   struct __ns1__getInvestigations soap_tmp___ns1__getInvestigations;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -2175,53 +2286,57 @@ int ICATPortBindingProxy::getInvestigations(const char *endpoint, const char *so
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getInvestigationsRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getInvestigations.ns1__getInvestigations_ = ns1__getInvestigations_;
+  soap_tmp___ns1__getInvestigations.ns1__getInvestigations_ =
+      ns1__getInvestigations_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getInvestigations(soap, &soap_tmp___ns1__getInvestigations);
+  soap_serialize___ns1__getInvestigations(soap,
+                                          &soap_tmp___ns1__getInvestigations);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getInvestigations(soap, &soap_tmp___ns1__getInvestigations, "-ns1:getInvestigations", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getInvestigations(soap,
+                                          &soap_tmp___ns1__getInvestigations,
+                                          "-ns1:getInvestigations", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getInvestigations(soap, &soap_tmp___ns1__getInvestigations, "-ns1:getInvestigations", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) || soap_put___ns1__getInvestigations(
+                                       soap, &soap_tmp___ns1__getInvestigations,
+                                       "-ns1:getInvestigations", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getInvestigationsResponse_)
     return soap_closesock(soap);
   ns1__getInvestigationsResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getInvestigationsResponse_->soap_get(soap, "ns1:getInvestigationsResponse", "ns1:getInvestigationsResponse");
+  ns1__getInvestigationsResponse_->soap_get(
+      soap, "ns1:getInvestigationsResponse", "ns1:getInvestigationsResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getInvestigationsIncludes(const char *endpoint, const char *soap_action, ns1__getInvestigationsIncludes *ns1__getInvestigationsIncludes_, ns1__getInvestigationsIncludesResponse *ns1__getInvestigationsIncludesResponse_)
-{ struct soap *soap = this;
-  struct __ns1__getInvestigationsIncludes soap_tmp___ns1__getInvestigationsIncludes;
+int ICATPortBindingProxy::getInvestigationsIncludes(
+    const char *endpoint, const char *soap_action,
+    ns1__getInvestigationsIncludes *ns1__getInvestigationsIncludes_,
+    ns1__getInvestigationsIncludesResponse *
+        ns1__getInvestigationsIncludesResponse_) {
+  struct soap *soap = this;
+  struct __ns1__getInvestigationsIncludes
+      soap_tmp___ns1__getInvestigationsIncludes;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -2229,52 +2344,56 @@ int ICATPortBindingProxy::getInvestigationsIncludes(const char *endpoint, const 
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getInvestigationsIncludesRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getInvestigationsIncludes.ns1__getInvestigationsIncludes_ = ns1__getInvestigationsIncludes_;
+  soap_tmp___ns1__getInvestigationsIncludes.ns1__getInvestigationsIncludes_ =
+      ns1__getInvestigationsIncludes_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getInvestigationsIncludes(soap, &soap_tmp___ns1__getInvestigationsIncludes);
+  soap_serialize___ns1__getInvestigationsIncludes(
+      soap, &soap_tmp___ns1__getInvestigationsIncludes);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getInvestigationsIncludes(soap, &soap_tmp___ns1__getInvestigationsIncludes, "-ns1:getInvestigationsIncludes", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getInvestigationsIncludes(
+            soap, &soap_tmp___ns1__getInvestigationsIncludes,
+            "-ns1:getInvestigationsIncludes", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getInvestigationsIncludes(soap, &soap_tmp___ns1__getInvestigationsIncludes, "-ns1:getInvestigationsIncludes", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getInvestigationsIncludes(
+          soap, &soap_tmp___ns1__getInvestigationsIncludes,
+          "-ns1:getInvestigationsIncludes", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getInvestigationsIncludesResponse_)
     return soap_closesock(soap);
   ns1__getInvestigationsIncludesResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getInvestigationsIncludesResponse_->soap_get(soap, "ns1:getInvestigationsIncludesResponse", "ns1:getInvestigationsIncludesResponse");
+  ns1__getInvestigationsIncludesResponse_->soap_get(
+      soap, "ns1:getInvestigationsIncludesResponse",
+      "ns1:getInvestigationsIncludesResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::createInvestigation(const char *endpoint, const char *soap_action, ns1__createInvestigation *ns1__createInvestigation_, ns1__createInvestigationResponse *ns1__createInvestigationResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::createInvestigation(
+    const char *endpoint, const char *soap_action,
+    ns1__createInvestigation *ns1__createInvestigation_,
+    ns1__createInvestigationResponse *ns1__createInvestigationResponse_) {
+  struct soap *soap = this;
   struct __ns1__createInvestigation soap_tmp___ns1__createInvestigation;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -2283,54 +2402,59 @@ int ICATPortBindingProxy::createInvestigation(const char *endpoint, const char *
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/createInvestigationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__createInvestigation.ns1__createInvestigation_ = ns1__createInvestigation_;
+  soap_tmp___ns1__createInvestigation.ns1__createInvestigation_ =
+      ns1__createInvestigation_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__createInvestigation(soap, &soap_tmp___ns1__createInvestigation);
+  soap_serialize___ns1__createInvestigation(
+      soap, &soap_tmp___ns1__createInvestigation);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__createInvestigation(soap, &soap_tmp___ns1__createInvestigation, "-ns1:createInvestigation", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__createInvestigation(
+            soap, &soap_tmp___ns1__createInvestigation,
+            "-ns1:createInvestigation", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__createInvestigation(soap, &soap_tmp___ns1__createInvestigation, "-ns1:createInvestigation", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__createInvestigation(soap,
+                                          &soap_tmp___ns1__createInvestigation,
+                                          "-ns1:createInvestigation", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__createInvestigationResponse_)
     return soap_closesock(soap);
   ns1__createInvestigationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__createInvestigationResponse_->soap_get(soap, "ns1:createInvestigationResponse", "ns1:createInvestigationResponse");
+  ns1__createInvestigationResponse_->soap_get(
+      soap, "ns1:createInvestigationResponse",
+      "ns1:createInvestigationResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::deleteInvestigation(const char *endpoint, const char *soap_action, ns1__deleteInvestigation *ns1__deleteInvestigation_, ns1__deleteInvestigationResponse *ns1__deleteInvestigationResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::deleteInvestigation(
+    const char *endpoint, const char *soap_action,
+    ns1__deleteInvestigation *ns1__deleteInvestigation_,
+    ns1__deleteInvestigationResponse *ns1__deleteInvestigationResponse_) {
+  struct soap *soap = this;
   struct __ns1__deleteInvestigation soap_tmp___ns1__deleteInvestigation;
-  struct __ns1__deleteInvestigationResponse *soap_tmp___ns1__deleteInvestigationResponse;
+  struct __ns1__deleteInvestigationResponse *
+      soap_tmp___ns1__deleteInvestigationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -2338,56 +2462,66 @@ int ICATPortBindingProxy::deleteInvestigation(const char *endpoint, const char *
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/deleteInvestigationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__deleteInvestigation.ns1__deleteInvestigation_ = ns1__deleteInvestigation_;
+  soap_tmp___ns1__deleteInvestigation.ns1__deleteInvestigation_ =
+      ns1__deleteInvestigation_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__deleteInvestigation(soap, &soap_tmp___ns1__deleteInvestigation);
+  soap_serialize___ns1__deleteInvestigation(
+      soap, &soap_tmp___ns1__deleteInvestigation);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__deleteInvestigation(soap, &soap_tmp___ns1__deleteInvestigation, "-ns1:deleteInvestigation", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__deleteInvestigation(
+            soap, &soap_tmp___ns1__deleteInvestigation,
+            "-ns1:deleteInvestigation", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__deleteInvestigation(soap, &soap_tmp___ns1__deleteInvestigation, "-ns1:deleteInvestigation", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__deleteInvestigation(soap,
+                                          &soap_tmp___ns1__deleteInvestigation,
+                                          "-ns1:deleteInvestigation", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__deleteInvestigationResponse_)
     return soap_closesock(soap);
   ns1__deleteInvestigationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__deleteInvestigationResponse = soap_get___ns1__deleteInvestigationResponse(soap, NULL, "-ns1:deleteInvestigationResponse", "ns1:deleteInvestigationResponse");
+  soap_tmp___ns1__deleteInvestigationResponse =
+      soap_get___ns1__deleteInvestigationResponse(
+          soap, NULL, "-ns1:deleteInvestigationResponse",
+          "ns1:deleteInvestigationResponse");
   if (!soap_tmp___ns1__deleteInvestigationResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__deleteInvestigationResponse_ && soap_tmp___ns1__deleteInvestigationResponse->ns1__deleteInvestigationResponse_)
-    *ns1__deleteInvestigationResponse_ = *soap_tmp___ns1__deleteInvestigationResponse->ns1__deleteInvestigationResponse_;
+  if (ns1__deleteInvestigationResponse_ &&
+      soap_tmp___ns1__deleteInvestigationResponse
+          ->ns1__deleteInvestigationResponse_)
+    *ns1__deleteInvestigationResponse_ =
+        *soap_tmp___ns1__deleteInvestigationResponse
+             ->ns1__deleteInvestigationResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::removeInvestigation(const char *endpoint, const char *soap_action, ns1__removeInvestigation *ns1__removeInvestigation_, ns1__removeInvestigationResponse *ns1__removeInvestigationResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::removeInvestigation(
+    const char *endpoint, const char *soap_action,
+    ns1__removeInvestigation *ns1__removeInvestigation_,
+    ns1__removeInvestigationResponse *ns1__removeInvestigationResponse_) {
+  struct soap *soap = this;
   struct __ns1__removeInvestigation soap_tmp___ns1__removeInvestigation;
-  struct __ns1__removeInvestigationResponse *soap_tmp___ns1__removeInvestigationResponse;
+  struct __ns1__removeInvestigationResponse *
+      soap_tmp___ns1__removeInvestigationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -2395,54 +2529,63 @@ int ICATPortBindingProxy::removeInvestigation(const char *endpoint, const char *
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/removeInvestigationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__removeInvestigation.ns1__removeInvestigation_ = ns1__removeInvestigation_;
+  soap_tmp___ns1__removeInvestigation.ns1__removeInvestigation_ =
+      ns1__removeInvestigation_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__removeInvestigation(soap, &soap_tmp___ns1__removeInvestigation);
+  soap_serialize___ns1__removeInvestigation(
+      soap, &soap_tmp___ns1__removeInvestigation);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__removeInvestigation(soap, &soap_tmp___ns1__removeInvestigation, "-ns1:removeInvestigation", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__removeInvestigation(
+            soap, &soap_tmp___ns1__removeInvestigation,
+            "-ns1:removeInvestigation", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__removeInvestigation(soap, &soap_tmp___ns1__removeInvestigation, "-ns1:removeInvestigation", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__removeInvestigation(soap,
+                                          &soap_tmp___ns1__removeInvestigation,
+                                          "-ns1:removeInvestigation", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__removeInvestigationResponse_)
     return soap_closesock(soap);
   ns1__removeInvestigationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__removeInvestigationResponse = soap_get___ns1__removeInvestigationResponse(soap, NULL, "-ns1:removeInvestigationResponse", "ns1:removeInvestigationResponse");
+  soap_tmp___ns1__removeInvestigationResponse =
+      soap_get___ns1__removeInvestigationResponse(
+          soap, NULL, "-ns1:removeInvestigationResponse",
+          "ns1:removeInvestigationResponse");
   if (!soap_tmp___ns1__removeInvestigationResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__removeInvestigationResponse_ && soap_tmp___ns1__removeInvestigationResponse->ns1__removeInvestigationResponse_)
-    *ns1__removeInvestigationResponse_ = *soap_tmp___ns1__removeInvestigationResponse->ns1__removeInvestigationResponse_;
+  if (ns1__removeInvestigationResponse_ &&
+      soap_tmp___ns1__removeInvestigationResponse
+          ->ns1__removeInvestigationResponse_)
+    *ns1__removeInvestigationResponse_ =
+        *soap_tmp___ns1__removeInvestigationResponse
+             ->ns1__removeInvestigationResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::addKeyword(const char *endpoint, const char *soap_action, ns1__addKeyword *ns1__addKeyword_, ns1__addKeywordResponse *ns1__addKeywordResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::addKeyword(
+    const char *endpoint, const char *soap_action,
+    ns1__addKeyword *ns1__addKeyword_,
+    ns1__addKeywordResponse *ns1__addKeywordResponse_) {
+  struct soap *soap = this;
   struct __ns1__addKeyword soap_tmp___ns1__addKeyword;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -2457,46 +2600,45 @@ int ICATPortBindingProxy::addKeyword(const char *endpoint, const char *soap_acti
   soap_serialize___ns1__addKeyword(soap, &soap_tmp___ns1__addKeyword);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__addKeyword(soap, &soap_tmp___ns1__addKeyword, "-ns1:addKeyword", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__addKeyword(soap, &soap_tmp___ns1__addKeyword,
+                                   "-ns1:addKeyword", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__addKeyword(soap, &soap_tmp___ns1__addKeyword, "-ns1:addKeyword", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__addKeyword(soap, &soap_tmp___ns1__addKeyword,
+                                 "-ns1:addKeyword", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__addKeywordResponse_)
     return soap_closesock(soap);
   ns1__addKeywordResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__addKeywordResponse_->soap_get(soap, "ns1:addKeywordResponse", "ns1:addKeywordResponse");
+  ns1__addKeywordResponse_->soap_get(soap, "ns1:addKeywordResponse",
+                                     "ns1:addKeywordResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::addInvestigator(const char *endpoint, const char *soap_action, ns1__addInvestigator *ns1__addInvestigator_, ns1__addInvestigatorResponse *ns1__addInvestigatorResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::addInvestigator(
+    const char *endpoint, const char *soap_action,
+    ns1__addInvestigator *ns1__addInvestigator_,
+    ns1__addInvestigatorResponse *ns1__addInvestigatorResponse_) {
+  struct soap *soap = this;
   struct __ns1__addInvestigator soap_tmp___ns1__addInvestigator;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -2511,46 +2653,45 @@ int ICATPortBindingProxy::addInvestigator(const char *endpoint, const char *soap
   soap_serialize___ns1__addInvestigator(soap, &soap_tmp___ns1__addInvestigator);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__addInvestigator(soap, &soap_tmp___ns1__addInvestigator, "-ns1:addInvestigator", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__addInvestigator(soap, &soap_tmp___ns1__addInvestigator,
+                                        "-ns1:addInvestigator", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__addInvestigator(soap, &soap_tmp___ns1__addInvestigator, "-ns1:addInvestigator", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__addInvestigator(soap, &soap_tmp___ns1__addInvestigator,
+                                      "-ns1:addInvestigator", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__addInvestigatorResponse_)
     return soap_closesock(soap);
   ns1__addInvestigatorResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__addInvestigatorResponse_->soap_get(soap, "ns1:addInvestigatorResponse", "ns1:addInvestigatorResponse");
+  ns1__addInvestigatorResponse_->soap_get(soap, "ns1:addInvestigatorResponse",
+                                          "ns1:addInvestigatorResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::addSample(const char *endpoint, const char *soap_action, ns1__addSample *ns1__addSample_, ns1__addSampleResponse *ns1__addSampleResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::addSample(
+    const char *endpoint, const char *soap_action,
+    ns1__addSample *ns1__addSample_,
+    ns1__addSampleResponse *ns1__addSampleResponse_) {
+  struct soap *soap = this;
   struct __ns1__addSample soap_tmp___ns1__addSample;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -2565,46 +2706,45 @@ int ICATPortBindingProxy::addSample(const char *endpoint, const char *soap_actio
   soap_serialize___ns1__addSample(soap, &soap_tmp___ns1__addSample);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__addSample(soap, &soap_tmp___ns1__addSample, "-ns1:addSample", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__addSample(soap, &soap_tmp___ns1__addSample,
+                                  "-ns1:addSample", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__addSample(soap, &soap_tmp___ns1__addSample, "-ns1:addSample", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__addSample(soap, &soap_tmp___ns1__addSample,
+                                "-ns1:addSample", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__addSampleResponse_)
     return soap_closesock(soap);
   ns1__addSampleResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__addSampleResponse_->soap_get(soap, "ns1:addSampleResponse", "ns1:addSampleResponse");
+  ns1__addSampleResponse_->soap_get(soap, "ns1:addSampleResponse",
+                                    "ns1:addSampleResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::addPublication(const char *endpoint, const char *soap_action, ns1__addPublication *ns1__addPublication_, ns1__addPublicationResponse *ns1__addPublicationResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::addPublication(
+    const char *endpoint, const char *soap_action,
+    ns1__addPublication *ns1__addPublication_,
+    ns1__addPublicationResponse *ns1__addPublicationResponse_) {
+  struct soap *soap = this;
   struct __ns1__addPublication soap_tmp___ns1__addPublication;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -2619,46 +2759,45 @@ int ICATPortBindingProxy::addPublication(const char *endpoint, const char *soap_
   soap_serialize___ns1__addPublication(soap, &soap_tmp___ns1__addPublication);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__addPublication(soap, &soap_tmp___ns1__addPublication, "-ns1:addPublication", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__addPublication(soap, &soap_tmp___ns1__addPublication,
+                                       "-ns1:addPublication", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__addPublication(soap, &soap_tmp___ns1__addPublication, "-ns1:addPublication", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__addPublication(soap, &soap_tmp___ns1__addPublication,
+                                     "-ns1:addPublication", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__addPublicationResponse_)
     return soap_closesock(soap);
   ns1__addPublicationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__addPublicationResponse_->soap_get(soap, "ns1:addPublicationResponse", "ns1:addPublicationResponse");
+  ns1__addPublicationResponse_->soap_get(soap, "ns1:addPublicationResponse",
+                                         "ns1:addPublicationResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::addSampleParameter(const char *endpoint, const char *soap_action, ns1__addSampleParameter *ns1__addSampleParameter_, ns1__addSampleParameterResponse *ns1__addSampleParameterResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::addSampleParameter(
+    const char *endpoint, const char *soap_action,
+    ns1__addSampleParameter *ns1__addSampleParameter_,
+    ns1__addSampleParameterResponse *ns1__addSampleParameterResponse_) {
+  struct soap *soap = this;
   struct __ns1__addSampleParameter soap_tmp___ns1__addSampleParameter;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -2667,54 +2806,58 @@ int ICATPortBindingProxy::addSampleParameter(const char *endpoint, const char *s
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/addSampleParameterRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__addSampleParameter.ns1__addSampleParameter_ = ns1__addSampleParameter_;
+  soap_tmp___ns1__addSampleParameter.ns1__addSampleParameter_ =
+      ns1__addSampleParameter_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__addSampleParameter(soap, &soap_tmp___ns1__addSampleParameter);
+  soap_serialize___ns1__addSampleParameter(soap,
+                                           &soap_tmp___ns1__addSampleParameter);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__addSampleParameter(soap, &soap_tmp___ns1__addSampleParameter, "-ns1:addSampleParameter", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__addSampleParameter(soap,
+                                           &soap_tmp___ns1__addSampleParameter,
+                                           "-ns1:addSampleParameter", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__addSampleParameter(soap, &soap_tmp___ns1__addSampleParameter, "-ns1:addSampleParameter", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__addSampleParameter(soap,
+                                         &soap_tmp___ns1__addSampleParameter,
+                                         "-ns1:addSampleParameter", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__addSampleParameterResponse_)
     return soap_closesock(soap);
   ns1__addSampleParameterResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__addSampleParameterResponse_->soap_get(soap, "ns1:addSampleParameterResponse", "ns1:addSampleParameterResponse");
+  ns1__addSampleParameterResponse_->soap_get(
+      soap, "ns1:addSampleParameterResponse", "ns1:addSampleParameterResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::deleteInvestigator(const char *endpoint, const char *soap_action, ns1__deleteInvestigator *ns1__deleteInvestigator_, ns1__deleteInvestigatorResponse *ns1__deleteInvestigatorResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::deleteInvestigator(
+    const char *endpoint, const char *soap_action,
+    ns1__deleteInvestigator *ns1__deleteInvestigator_,
+    ns1__deleteInvestigatorResponse *ns1__deleteInvestigatorResponse_) {
+  struct soap *soap = this;
   struct __ns1__deleteInvestigator soap_tmp___ns1__deleteInvestigator;
-  struct __ns1__deleteInvestigatorResponse *soap_tmp___ns1__deleteInvestigatorResponse;
+  struct __ns1__deleteInvestigatorResponse *
+      soap_tmp___ns1__deleteInvestigatorResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -2722,54 +2865,63 @@ int ICATPortBindingProxy::deleteInvestigator(const char *endpoint, const char *s
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/deleteInvestigatorRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__deleteInvestigator.ns1__deleteInvestigator_ = ns1__deleteInvestigator_;
+  soap_tmp___ns1__deleteInvestigator.ns1__deleteInvestigator_ =
+      ns1__deleteInvestigator_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__deleteInvestigator(soap, &soap_tmp___ns1__deleteInvestigator);
+  soap_serialize___ns1__deleteInvestigator(soap,
+                                           &soap_tmp___ns1__deleteInvestigator);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__deleteInvestigator(soap, &soap_tmp___ns1__deleteInvestigator, "-ns1:deleteInvestigator", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__deleteInvestigator(soap,
+                                           &soap_tmp___ns1__deleteInvestigator,
+                                           "-ns1:deleteInvestigator", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__deleteInvestigator(soap, &soap_tmp___ns1__deleteInvestigator, "-ns1:deleteInvestigator", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__deleteInvestigator(soap,
+                                         &soap_tmp___ns1__deleteInvestigator,
+                                         "-ns1:deleteInvestigator", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__deleteInvestigatorResponse_)
     return soap_closesock(soap);
   ns1__deleteInvestigatorResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__deleteInvestigatorResponse = soap_get___ns1__deleteInvestigatorResponse(soap, NULL, "-ns1:deleteInvestigatorResponse", "ns1:deleteInvestigatorResponse");
+  soap_tmp___ns1__deleteInvestigatorResponse =
+      soap_get___ns1__deleteInvestigatorResponse(
+          soap, NULL, "-ns1:deleteInvestigatorResponse",
+          "ns1:deleteInvestigatorResponse");
   if (!soap_tmp___ns1__deleteInvestigatorResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__deleteInvestigatorResponse_ && soap_tmp___ns1__deleteInvestigatorResponse->ns1__deleteInvestigatorResponse_)
-    *ns1__deleteInvestigatorResponse_ = *soap_tmp___ns1__deleteInvestigatorResponse->ns1__deleteInvestigatorResponse_;
+  if (ns1__deleteInvestigatorResponse_ &&
+      soap_tmp___ns1__deleteInvestigatorResponse
+          ->ns1__deleteInvestigatorResponse_)
+    *ns1__deleteInvestigatorResponse_ =
+        *soap_tmp___ns1__deleteInvestigatorResponse
+             ->ns1__deleteInvestigatorResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::deleteKeyword(const char *endpoint, const char *soap_action, ns1__deleteKeyword *ns1__deleteKeyword_, ns1__deleteKeywordResponse *ns1__deleteKeywordResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::deleteKeyword(
+    const char *endpoint, const char *soap_action,
+    ns1__deleteKeyword *ns1__deleteKeyword_,
+    ns1__deleteKeywordResponse *ns1__deleteKeywordResponse_) {
+  struct soap *soap = this;
   struct __ns1__deleteKeyword soap_tmp___ns1__deleteKeyword;
   struct __ns1__deleteKeywordResponse *soap_tmp___ns1__deleteKeywordResponse;
   if (endpoint)
@@ -2785,50 +2937,52 @@ int ICATPortBindingProxy::deleteKeyword(const char *endpoint, const char *soap_a
   soap_serialize___ns1__deleteKeyword(soap, &soap_tmp___ns1__deleteKeyword);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__deleteKeyword(soap, &soap_tmp___ns1__deleteKeyword, "-ns1:deleteKeyword", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__deleteKeyword(soap, &soap_tmp___ns1__deleteKeyword,
+                                      "-ns1:deleteKeyword", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__deleteKeyword(soap, &soap_tmp___ns1__deleteKeyword, "-ns1:deleteKeyword", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__deleteKeyword(soap, &soap_tmp___ns1__deleteKeyword,
+                                    "-ns1:deleteKeyword", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__deleteKeywordResponse_)
     return soap_closesock(soap);
   ns1__deleteKeywordResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__deleteKeywordResponse = soap_get___ns1__deleteKeywordResponse(soap, NULL, "-ns1:deleteKeywordResponse", "ns1:deleteKeywordResponse");
+  soap_tmp___ns1__deleteKeywordResponse = soap_get___ns1__deleteKeywordResponse(
+      soap, NULL, "-ns1:deleteKeywordResponse", "ns1:deleteKeywordResponse");
   if (!soap_tmp___ns1__deleteKeywordResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__deleteKeywordResponse_ && soap_tmp___ns1__deleteKeywordResponse->ns1__deleteKeywordResponse_)
-    *ns1__deleteKeywordResponse_ = *soap_tmp___ns1__deleteKeywordResponse->ns1__deleteKeywordResponse_;
+  if (ns1__deleteKeywordResponse_ &&
+      soap_tmp___ns1__deleteKeywordResponse->ns1__deleteKeywordResponse_)
+    *ns1__deleteKeywordResponse_ =
+        *soap_tmp___ns1__deleteKeywordResponse->ns1__deleteKeywordResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::deletePublication(const char *endpoint, const char *soap_action, ns1__deletePublication *ns1__deletePublication_, ns1__deletePublicationResponse *ns1__deletePublicationResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::deletePublication(
+    const char *endpoint, const char *soap_action,
+    ns1__deletePublication *ns1__deletePublication_,
+    ns1__deletePublicationResponse *ns1__deletePublicationResponse_) {
+  struct soap *soap = this;
   struct __ns1__deletePublication soap_tmp___ns1__deletePublication;
-  struct __ns1__deletePublicationResponse *soap_tmp___ns1__deletePublicationResponse;
+  struct __ns1__deletePublicationResponse *
+      soap_tmp___ns1__deletePublicationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -2836,54 +2990,62 @@ int ICATPortBindingProxy::deletePublication(const char *endpoint, const char *so
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/deletePublicationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__deletePublication.ns1__deletePublication_ = ns1__deletePublication_;
+  soap_tmp___ns1__deletePublication.ns1__deletePublication_ =
+      ns1__deletePublication_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__deletePublication(soap, &soap_tmp___ns1__deletePublication);
+  soap_serialize___ns1__deletePublication(soap,
+                                          &soap_tmp___ns1__deletePublication);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__deletePublication(soap, &soap_tmp___ns1__deletePublication, "-ns1:deletePublication", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__deletePublication(soap,
+                                          &soap_tmp___ns1__deletePublication,
+                                          "-ns1:deletePublication", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__deletePublication(soap, &soap_tmp___ns1__deletePublication, "-ns1:deletePublication", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) || soap_put___ns1__deletePublication(
+                                       soap, &soap_tmp___ns1__deletePublication,
+                                       "-ns1:deletePublication", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__deletePublicationResponse_)
     return soap_closesock(soap);
   ns1__deletePublicationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__deletePublicationResponse = soap_get___ns1__deletePublicationResponse(soap, NULL, "-ns1:deletePublicationResponse", "ns1:deletePublicationResponse");
+  soap_tmp___ns1__deletePublicationResponse =
+      soap_get___ns1__deletePublicationResponse(
+          soap, NULL, "-ns1:deletePublicationResponse",
+          "ns1:deletePublicationResponse");
   if (!soap_tmp___ns1__deletePublicationResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__deletePublicationResponse_ && soap_tmp___ns1__deletePublicationResponse->ns1__deletePublicationResponse_)
-    *ns1__deletePublicationResponse_ = *soap_tmp___ns1__deletePublicationResponse->ns1__deletePublicationResponse_;
+  if (ns1__deletePublicationResponse_ &&
+      soap_tmp___ns1__deletePublicationResponse
+          ->ns1__deletePublicationResponse_)
+    *ns1__deletePublicationResponse_ =
+        *soap_tmp___ns1__deletePublicationResponse
+             ->ns1__deletePublicationResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::deleteSample(const char *endpoint, const char *soap_action, ns1__deleteSample *ns1__deleteSample_, ns1__deleteSampleResponse *ns1__deleteSampleResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::deleteSample(
+    const char *endpoint, const char *soap_action,
+    ns1__deleteSample *ns1__deleteSample_,
+    ns1__deleteSampleResponse *ns1__deleteSampleResponse_) {
+  struct soap *soap = this;
   struct __ns1__deleteSample soap_tmp___ns1__deleteSample;
   struct __ns1__deleteSampleResponse *soap_tmp___ns1__deleteSampleResponse;
   if (endpoint)
@@ -2899,50 +3061,52 @@ int ICATPortBindingProxy::deleteSample(const char *endpoint, const char *soap_ac
   soap_serialize___ns1__deleteSample(soap, &soap_tmp___ns1__deleteSample);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__deleteSample(soap, &soap_tmp___ns1__deleteSample, "-ns1:deleteSample", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__deleteSample(soap, &soap_tmp___ns1__deleteSample,
+                                     "-ns1:deleteSample", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__deleteSample(soap, &soap_tmp___ns1__deleteSample, "-ns1:deleteSample", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__deleteSample(soap, &soap_tmp___ns1__deleteSample,
+                                   "-ns1:deleteSample", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__deleteSampleResponse_)
     return soap_closesock(soap);
   ns1__deleteSampleResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__deleteSampleResponse = soap_get___ns1__deleteSampleResponse(soap, NULL, "-ns1:deleteSampleResponse", "ns1:deleteSampleResponse");
+  soap_tmp___ns1__deleteSampleResponse = soap_get___ns1__deleteSampleResponse(
+      soap, NULL, "-ns1:deleteSampleResponse", "ns1:deleteSampleResponse");
   if (!soap_tmp___ns1__deleteSampleResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__deleteSampleResponse_ && soap_tmp___ns1__deleteSampleResponse->ns1__deleteSampleResponse_)
-    *ns1__deleteSampleResponse_ = *soap_tmp___ns1__deleteSampleResponse->ns1__deleteSampleResponse_;
+  if (ns1__deleteSampleResponse_ &&
+      soap_tmp___ns1__deleteSampleResponse->ns1__deleteSampleResponse_)
+    *ns1__deleteSampleResponse_ =
+        *soap_tmp___ns1__deleteSampleResponse->ns1__deleteSampleResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::deleteSampleParameter(const char *endpoint, const char *soap_action, ns1__deleteSampleParameter *ns1__deleteSampleParameter_, ns1__deleteSampleParameterResponse *ns1__deleteSampleParameterResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::deleteSampleParameter(
+    const char *endpoint, const char *soap_action,
+    ns1__deleteSampleParameter *ns1__deleteSampleParameter_,
+    ns1__deleteSampleParameterResponse *ns1__deleteSampleParameterResponse_) {
+  struct soap *soap = this;
   struct __ns1__deleteSampleParameter soap_tmp___ns1__deleteSampleParameter;
-  struct __ns1__deleteSampleParameterResponse *soap_tmp___ns1__deleteSampleParameterResponse;
+  struct __ns1__deleteSampleParameterResponse *
+      soap_tmp___ns1__deleteSampleParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -2950,56 +3114,66 @@ int ICATPortBindingProxy::deleteSampleParameter(const char *endpoint, const char
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/deleteSampleParameterRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__deleteSampleParameter.ns1__deleteSampleParameter_ = ns1__deleteSampleParameter_;
+  soap_tmp___ns1__deleteSampleParameter.ns1__deleteSampleParameter_ =
+      ns1__deleteSampleParameter_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__deleteSampleParameter(soap, &soap_tmp___ns1__deleteSampleParameter);
+  soap_serialize___ns1__deleteSampleParameter(
+      soap, &soap_tmp___ns1__deleteSampleParameter);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__deleteSampleParameter(soap, &soap_tmp___ns1__deleteSampleParameter, "-ns1:deleteSampleParameter", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__deleteSampleParameter(
+            soap, &soap_tmp___ns1__deleteSampleParameter,
+            "-ns1:deleteSampleParameter", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__deleteSampleParameter(soap, &soap_tmp___ns1__deleteSampleParameter, "-ns1:deleteSampleParameter", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__deleteSampleParameter(
+          soap, &soap_tmp___ns1__deleteSampleParameter,
+          "-ns1:deleteSampleParameter", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__deleteSampleParameterResponse_)
     return soap_closesock(soap);
   ns1__deleteSampleParameterResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__deleteSampleParameterResponse = soap_get___ns1__deleteSampleParameterResponse(soap, NULL, "-ns1:deleteSampleParameterResponse", "ns1:deleteSampleParameterResponse");
+  soap_tmp___ns1__deleteSampleParameterResponse =
+      soap_get___ns1__deleteSampleParameterResponse(
+          soap, NULL, "-ns1:deleteSampleParameterResponse",
+          "ns1:deleteSampleParameterResponse");
   if (!soap_tmp___ns1__deleteSampleParameterResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__deleteSampleParameterResponse_ && soap_tmp___ns1__deleteSampleParameterResponse->ns1__deleteSampleParameterResponse_)
-    *ns1__deleteSampleParameterResponse_ = *soap_tmp___ns1__deleteSampleParameterResponse->ns1__deleteSampleParameterResponse_;
+  if (ns1__deleteSampleParameterResponse_ &&
+      soap_tmp___ns1__deleteSampleParameterResponse
+          ->ns1__deleteSampleParameterResponse_)
+    *ns1__deleteSampleParameterResponse_ =
+        *soap_tmp___ns1__deleteSampleParameterResponse
+             ->ns1__deleteSampleParameterResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::modifyInvestigation(const char *endpoint, const char *soap_action, ns1__modifyInvestigation *ns1__modifyInvestigation_, ns1__modifyInvestigationResponse *ns1__modifyInvestigationResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::modifyInvestigation(
+    const char *endpoint, const char *soap_action,
+    ns1__modifyInvestigation *ns1__modifyInvestigation_,
+    ns1__modifyInvestigationResponse *ns1__modifyInvestigationResponse_) {
+  struct soap *soap = this;
   struct __ns1__modifyInvestigation soap_tmp___ns1__modifyInvestigation;
-  struct __ns1__modifyInvestigationResponse *soap_tmp___ns1__modifyInvestigationResponse;
+  struct __ns1__modifyInvestigationResponse *
+      soap_tmp___ns1__modifyInvestigationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -3007,56 +3181,66 @@ int ICATPortBindingProxy::modifyInvestigation(const char *endpoint, const char *
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/modifyInvestigationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__modifyInvestigation.ns1__modifyInvestigation_ = ns1__modifyInvestigation_;
+  soap_tmp___ns1__modifyInvestigation.ns1__modifyInvestigation_ =
+      ns1__modifyInvestigation_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__modifyInvestigation(soap, &soap_tmp___ns1__modifyInvestigation);
+  soap_serialize___ns1__modifyInvestigation(
+      soap, &soap_tmp___ns1__modifyInvestigation);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__modifyInvestigation(soap, &soap_tmp___ns1__modifyInvestigation, "-ns1:modifyInvestigation", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__modifyInvestigation(
+            soap, &soap_tmp___ns1__modifyInvestigation,
+            "-ns1:modifyInvestigation", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__modifyInvestigation(soap, &soap_tmp___ns1__modifyInvestigation, "-ns1:modifyInvestigation", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__modifyInvestigation(soap,
+                                          &soap_tmp___ns1__modifyInvestigation,
+                                          "-ns1:modifyInvestigation", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__modifyInvestigationResponse_)
     return soap_closesock(soap);
   ns1__modifyInvestigationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__modifyInvestigationResponse = soap_get___ns1__modifyInvestigationResponse(soap, NULL, "-ns1:modifyInvestigationResponse", "ns1:modifyInvestigationResponse");
+  soap_tmp___ns1__modifyInvestigationResponse =
+      soap_get___ns1__modifyInvestigationResponse(
+          soap, NULL, "-ns1:modifyInvestigationResponse",
+          "ns1:modifyInvestigationResponse");
   if (!soap_tmp___ns1__modifyInvestigationResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__modifyInvestigationResponse_ && soap_tmp___ns1__modifyInvestigationResponse->ns1__modifyInvestigationResponse_)
-    *ns1__modifyInvestigationResponse_ = *soap_tmp___ns1__modifyInvestigationResponse->ns1__modifyInvestigationResponse_;
+  if (ns1__modifyInvestigationResponse_ &&
+      soap_tmp___ns1__modifyInvestigationResponse
+          ->ns1__modifyInvestigationResponse_)
+    *ns1__modifyInvestigationResponse_ =
+        *soap_tmp___ns1__modifyInvestigationResponse
+             ->ns1__modifyInvestigationResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::modifyInvestigator(const char *endpoint, const char *soap_action, ns1__modifyInvestigator *ns1__modifyInvestigator_, ns1__modifyInvestigatorResponse *ns1__modifyInvestigatorResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::modifyInvestigator(
+    const char *endpoint, const char *soap_action,
+    ns1__modifyInvestigator *ns1__modifyInvestigator_,
+    ns1__modifyInvestigatorResponse *ns1__modifyInvestigatorResponse_) {
+  struct soap *soap = this;
   struct __ns1__modifyInvestigator soap_tmp___ns1__modifyInvestigator;
-  struct __ns1__modifyInvestigatorResponse *soap_tmp___ns1__modifyInvestigatorResponse;
+  struct __ns1__modifyInvestigatorResponse *
+      soap_tmp___ns1__modifyInvestigatorResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -3064,54 +3248,63 @@ int ICATPortBindingProxy::modifyInvestigator(const char *endpoint, const char *s
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/modifyInvestigatorRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__modifyInvestigator.ns1__modifyInvestigator_ = ns1__modifyInvestigator_;
+  soap_tmp___ns1__modifyInvestigator.ns1__modifyInvestigator_ =
+      ns1__modifyInvestigator_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__modifyInvestigator(soap, &soap_tmp___ns1__modifyInvestigator);
+  soap_serialize___ns1__modifyInvestigator(soap,
+                                           &soap_tmp___ns1__modifyInvestigator);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__modifyInvestigator(soap, &soap_tmp___ns1__modifyInvestigator, "-ns1:modifyInvestigator", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__modifyInvestigator(soap,
+                                           &soap_tmp___ns1__modifyInvestigator,
+                                           "-ns1:modifyInvestigator", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__modifyInvestigator(soap, &soap_tmp___ns1__modifyInvestigator, "-ns1:modifyInvestigator", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__modifyInvestigator(soap,
+                                         &soap_tmp___ns1__modifyInvestigator,
+                                         "-ns1:modifyInvestigator", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__modifyInvestigatorResponse_)
     return soap_closesock(soap);
   ns1__modifyInvestigatorResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__modifyInvestigatorResponse = soap_get___ns1__modifyInvestigatorResponse(soap, NULL, "-ns1:modifyInvestigatorResponse", "ns1:modifyInvestigatorResponse");
+  soap_tmp___ns1__modifyInvestigatorResponse =
+      soap_get___ns1__modifyInvestigatorResponse(
+          soap, NULL, "-ns1:modifyInvestigatorResponse",
+          "ns1:modifyInvestigatorResponse");
   if (!soap_tmp___ns1__modifyInvestigatorResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__modifyInvestigatorResponse_ && soap_tmp___ns1__modifyInvestigatorResponse->ns1__modifyInvestigatorResponse_)
-    *ns1__modifyInvestigatorResponse_ = *soap_tmp___ns1__modifyInvestigatorResponse->ns1__modifyInvestigatorResponse_;
+  if (ns1__modifyInvestigatorResponse_ &&
+      soap_tmp___ns1__modifyInvestigatorResponse
+          ->ns1__modifyInvestigatorResponse_)
+    *ns1__modifyInvestigatorResponse_ =
+        *soap_tmp___ns1__modifyInvestigatorResponse
+             ->ns1__modifyInvestigatorResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::modifySample(const char *endpoint, const char *soap_action, ns1__modifySample *ns1__modifySample_, ns1__modifySampleResponse *ns1__modifySampleResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::modifySample(
+    const char *endpoint, const char *soap_action,
+    ns1__modifySample *ns1__modifySample_,
+    ns1__modifySampleResponse *ns1__modifySampleResponse_) {
+  struct soap *soap = this;
   struct __ns1__modifySample soap_tmp___ns1__modifySample;
   struct __ns1__modifySampleResponse *soap_tmp___ns1__modifySampleResponse;
   if (endpoint)
@@ -3127,50 +3320,52 @@ int ICATPortBindingProxy::modifySample(const char *endpoint, const char *soap_ac
   soap_serialize___ns1__modifySample(soap, &soap_tmp___ns1__modifySample);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__modifySample(soap, &soap_tmp___ns1__modifySample, "-ns1:modifySample", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__modifySample(soap, &soap_tmp___ns1__modifySample,
+                                     "-ns1:modifySample", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__modifySample(soap, &soap_tmp___ns1__modifySample, "-ns1:modifySample", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__modifySample(soap, &soap_tmp___ns1__modifySample,
+                                   "-ns1:modifySample", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__modifySampleResponse_)
     return soap_closesock(soap);
   ns1__modifySampleResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__modifySampleResponse = soap_get___ns1__modifySampleResponse(soap, NULL, "-ns1:modifySampleResponse", "ns1:modifySampleResponse");
+  soap_tmp___ns1__modifySampleResponse = soap_get___ns1__modifySampleResponse(
+      soap, NULL, "-ns1:modifySampleResponse", "ns1:modifySampleResponse");
   if (!soap_tmp___ns1__modifySampleResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__modifySampleResponse_ && soap_tmp___ns1__modifySampleResponse->ns1__modifySampleResponse_)
-    *ns1__modifySampleResponse_ = *soap_tmp___ns1__modifySampleResponse->ns1__modifySampleResponse_;
+  if (ns1__modifySampleResponse_ &&
+      soap_tmp___ns1__modifySampleResponse->ns1__modifySampleResponse_)
+    *ns1__modifySampleResponse_ =
+        *soap_tmp___ns1__modifySampleResponse->ns1__modifySampleResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::modifyPublication(const char *endpoint, const char *soap_action, ns1__modifyPublication *ns1__modifyPublication_, ns1__modifyPublicationResponse *ns1__modifyPublicationResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::modifyPublication(
+    const char *endpoint, const char *soap_action,
+    ns1__modifyPublication *ns1__modifyPublication_,
+    ns1__modifyPublicationResponse *ns1__modifyPublicationResponse_) {
+  struct soap *soap = this;
   struct __ns1__modifyPublication soap_tmp___ns1__modifyPublication;
-  struct __ns1__modifyPublicationResponse *soap_tmp___ns1__modifyPublicationResponse;
+  struct __ns1__modifyPublicationResponse *
+      soap_tmp___ns1__modifyPublicationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -3178,56 +3373,65 @@ int ICATPortBindingProxy::modifyPublication(const char *endpoint, const char *so
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/modifyPublicationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__modifyPublication.ns1__modifyPublication_ = ns1__modifyPublication_;
+  soap_tmp___ns1__modifyPublication.ns1__modifyPublication_ =
+      ns1__modifyPublication_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__modifyPublication(soap, &soap_tmp___ns1__modifyPublication);
+  soap_serialize___ns1__modifyPublication(soap,
+                                          &soap_tmp___ns1__modifyPublication);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__modifyPublication(soap, &soap_tmp___ns1__modifyPublication, "-ns1:modifyPublication", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__modifyPublication(soap,
+                                          &soap_tmp___ns1__modifyPublication,
+                                          "-ns1:modifyPublication", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__modifyPublication(soap, &soap_tmp___ns1__modifyPublication, "-ns1:modifyPublication", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) || soap_put___ns1__modifyPublication(
+                                       soap, &soap_tmp___ns1__modifyPublication,
+                                       "-ns1:modifyPublication", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__modifyPublicationResponse_)
     return soap_closesock(soap);
   ns1__modifyPublicationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__modifyPublicationResponse = soap_get___ns1__modifyPublicationResponse(soap, NULL, "-ns1:modifyPublicationResponse", "ns1:modifyPublicationResponse");
+  soap_tmp___ns1__modifyPublicationResponse =
+      soap_get___ns1__modifyPublicationResponse(
+          soap, NULL, "-ns1:modifyPublicationResponse",
+          "ns1:modifyPublicationResponse");
   if (!soap_tmp___ns1__modifyPublicationResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__modifyPublicationResponse_ && soap_tmp___ns1__modifyPublicationResponse->ns1__modifyPublicationResponse_)
-    *ns1__modifyPublicationResponse_ = *soap_tmp___ns1__modifyPublicationResponse->ns1__modifyPublicationResponse_;
+  if (ns1__modifyPublicationResponse_ &&
+      soap_tmp___ns1__modifyPublicationResponse
+          ->ns1__modifyPublicationResponse_)
+    *ns1__modifyPublicationResponse_ =
+        *soap_tmp___ns1__modifyPublicationResponse
+             ->ns1__modifyPublicationResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::modifySampleParameter(const char *endpoint, const char *soap_action, ns1__modifySampleParameter *ns1__modifySampleParameter_, ns1__modifySampleParameterResponse *ns1__modifySampleParameterResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::modifySampleParameter(
+    const char *endpoint, const char *soap_action,
+    ns1__modifySampleParameter *ns1__modifySampleParameter_,
+    ns1__modifySampleParameterResponse *ns1__modifySampleParameterResponse_) {
+  struct soap *soap = this;
   struct __ns1__modifySampleParameter soap_tmp___ns1__modifySampleParameter;
-  struct __ns1__modifySampleParameterResponse *soap_tmp___ns1__modifySampleParameterResponse;
+  struct __ns1__modifySampleParameterResponse *
+      soap_tmp___ns1__modifySampleParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -3235,54 +3439,63 @@ int ICATPortBindingProxy::modifySampleParameter(const char *endpoint, const char
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/modifySampleParameterRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__modifySampleParameter.ns1__modifySampleParameter_ = ns1__modifySampleParameter_;
+  soap_tmp___ns1__modifySampleParameter.ns1__modifySampleParameter_ =
+      ns1__modifySampleParameter_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__modifySampleParameter(soap, &soap_tmp___ns1__modifySampleParameter);
+  soap_serialize___ns1__modifySampleParameter(
+      soap, &soap_tmp___ns1__modifySampleParameter);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__modifySampleParameter(soap, &soap_tmp___ns1__modifySampleParameter, "-ns1:modifySampleParameter", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__modifySampleParameter(
+            soap, &soap_tmp___ns1__modifySampleParameter,
+            "-ns1:modifySampleParameter", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__modifySampleParameter(soap, &soap_tmp___ns1__modifySampleParameter, "-ns1:modifySampleParameter", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__modifySampleParameter(
+          soap, &soap_tmp___ns1__modifySampleParameter,
+          "-ns1:modifySampleParameter", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__modifySampleParameterResponse_)
     return soap_closesock(soap);
   ns1__modifySampleParameterResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__modifySampleParameterResponse = soap_get___ns1__modifySampleParameterResponse(soap, NULL, "-ns1:modifySampleParameterResponse", "ns1:modifySampleParameterResponse");
+  soap_tmp___ns1__modifySampleParameterResponse =
+      soap_get___ns1__modifySampleParameterResponse(
+          soap, NULL, "-ns1:modifySampleParameterResponse",
+          "ns1:modifySampleParameterResponse");
   if (!soap_tmp___ns1__modifySampleParameterResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__modifySampleParameterResponse_ && soap_tmp___ns1__modifySampleParameterResponse->ns1__modifySampleParameterResponse_)
-    *ns1__modifySampleParameterResponse_ = *soap_tmp___ns1__modifySampleParameterResponse->ns1__modifySampleParameterResponse_;
+  if (ns1__modifySampleParameterResponse_ &&
+      soap_tmp___ns1__modifySampleParameterResponse
+          ->ns1__modifySampleParameterResponse_)
+    *ns1__modifySampleParameterResponse_ =
+        *soap_tmp___ns1__modifySampleParameterResponse
+             ->ns1__modifySampleParameterResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::removeKeyword(const char *endpoint, const char *soap_action, ns1__removeKeyword *ns1__removeKeyword_, ns1__removeKeywordResponse *ns1__removeKeywordResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::removeKeyword(
+    const char *endpoint, const char *soap_action,
+    ns1__removeKeyword *ns1__removeKeyword_,
+    ns1__removeKeywordResponse *ns1__removeKeywordResponse_) {
+  struct soap *soap = this;
   struct __ns1__removeKeyword soap_tmp___ns1__removeKeyword;
   struct __ns1__removeKeywordResponse *soap_tmp___ns1__removeKeywordResponse;
   if (endpoint)
@@ -3298,50 +3511,52 @@ int ICATPortBindingProxy::removeKeyword(const char *endpoint, const char *soap_a
   soap_serialize___ns1__removeKeyword(soap, &soap_tmp___ns1__removeKeyword);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__removeKeyword(soap, &soap_tmp___ns1__removeKeyword, "-ns1:removeKeyword", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__removeKeyword(soap, &soap_tmp___ns1__removeKeyword,
+                                      "-ns1:removeKeyword", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__removeKeyword(soap, &soap_tmp___ns1__removeKeyword, "-ns1:removeKeyword", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__removeKeyword(soap, &soap_tmp___ns1__removeKeyword,
+                                    "-ns1:removeKeyword", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__removeKeywordResponse_)
     return soap_closesock(soap);
   ns1__removeKeywordResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__removeKeywordResponse = soap_get___ns1__removeKeywordResponse(soap, NULL, "-ns1:removeKeywordResponse", "ns1:removeKeywordResponse");
+  soap_tmp___ns1__removeKeywordResponse = soap_get___ns1__removeKeywordResponse(
+      soap, NULL, "-ns1:removeKeywordResponse", "ns1:removeKeywordResponse");
   if (!soap_tmp___ns1__removeKeywordResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__removeKeywordResponse_ && soap_tmp___ns1__removeKeywordResponse->ns1__removeKeywordResponse_)
-    *ns1__removeKeywordResponse_ = *soap_tmp___ns1__removeKeywordResponse->ns1__removeKeywordResponse_;
+  if (ns1__removeKeywordResponse_ &&
+      soap_tmp___ns1__removeKeywordResponse->ns1__removeKeywordResponse_)
+    *ns1__removeKeywordResponse_ =
+        *soap_tmp___ns1__removeKeywordResponse->ns1__removeKeywordResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::removeInvestigator(const char *endpoint, const char *soap_action, ns1__removeInvestigator *ns1__removeInvestigator_, ns1__removeInvestigatorResponse *ns1__removeInvestigatorResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::removeInvestigator(
+    const char *endpoint, const char *soap_action,
+    ns1__removeInvestigator *ns1__removeInvestigator_,
+    ns1__removeInvestigatorResponse *ns1__removeInvestigatorResponse_) {
+  struct soap *soap = this;
   struct __ns1__removeInvestigator soap_tmp___ns1__removeInvestigator;
-  struct __ns1__removeInvestigatorResponse *soap_tmp___ns1__removeInvestigatorResponse;
+  struct __ns1__removeInvestigatorResponse *
+      soap_tmp___ns1__removeInvestigatorResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -3349,56 +3564,66 @@ int ICATPortBindingProxy::removeInvestigator(const char *endpoint, const char *s
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/removeInvestigatorRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__removeInvestigator.ns1__removeInvestigator_ = ns1__removeInvestigator_;
+  soap_tmp___ns1__removeInvestigator.ns1__removeInvestigator_ =
+      ns1__removeInvestigator_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__removeInvestigator(soap, &soap_tmp___ns1__removeInvestigator);
+  soap_serialize___ns1__removeInvestigator(soap,
+                                           &soap_tmp___ns1__removeInvestigator);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__removeInvestigator(soap, &soap_tmp___ns1__removeInvestigator, "-ns1:removeInvestigator", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__removeInvestigator(soap,
+                                           &soap_tmp___ns1__removeInvestigator,
+                                           "-ns1:removeInvestigator", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__removeInvestigator(soap, &soap_tmp___ns1__removeInvestigator, "-ns1:removeInvestigator", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__removeInvestigator(soap,
+                                         &soap_tmp___ns1__removeInvestigator,
+                                         "-ns1:removeInvestigator", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__removeInvestigatorResponse_)
     return soap_closesock(soap);
   ns1__removeInvestigatorResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__removeInvestigatorResponse = soap_get___ns1__removeInvestigatorResponse(soap, NULL, "-ns1:removeInvestigatorResponse", "ns1:removeInvestigatorResponse");
+  soap_tmp___ns1__removeInvestigatorResponse =
+      soap_get___ns1__removeInvestigatorResponse(
+          soap, NULL, "-ns1:removeInvestigatorResponse",
+          "ns1:removeInvestigatorResponse");
   if (!soap_tmp___ns1__removeInvestigatorResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__removeInvestigatorResponse_ && soap_tmp___ns1__removeInvestigatorResponse->ns1__removeInvestigatorResponse_)
-    *ns1__removeInvestigatorResponse_ = *soap_tmp___ns1__removeInvestigatorResponse->ns1__removeInvestigatorResponse_;
+  if (ns1__removeInvestigatorResponse_ &&
+      soap_tmp___ns1__removeInvestigatorResponse
+          ->ns1__removeInvestigatorResponse_)
+    *ns1__removeInvestigatorResponse_ =
+        *soap_tmp___ns1__removeInvestigatorResponse
+             ->ns1__removeInvestigatorResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::removePublication(const char *endpoint, const char *soap_action, ns1__removePublication *ns1__removePublication_, ns1__removePublicationResponse *ns1__removePublicationResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::removePublication(
+    const char *endpoint, const char *soap_action,
+    ns1__removePublication *ns1__removePublication_,
+    ns1__removePublicationResponse *ns1__removePublicationResponse_) {
+  struct soap *soap = this;
   struct __ns1__removePublication soap_tmp___ns1__removePublication;
-  struct __ns1__removePublicationResponse *soap_tmp___ns1__removePublicationResponse;
+  struct __ns1__removePublicationResponse *
+      soap_tmp___ns1__removePublicationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -3406,54 +3631,62 @@ int ICATPortBindingProxy::removePublication(const char *endpoint, const char *so
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/removePublicationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__removePublication.ns1__removePublication_ = ns1__removePublication_;
+  soap_tmp___ns1__removePublication.ns1__removePublication_ =
+      ns1__removePublication_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__removePublication(soap, &soap_tmp___ns1__removePublication);
+  soap_serialize___ns1__removePublication(soap,
+                                          &soap_tmp___ns1__removePublication);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__removePublication(soap, &soap_tmp___ns1__removePublication, "-ns1:removePublication", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__removePublication(soap,
+                                          &soap_tmp___ns1__removePublication,
+                                          "-ns1:removePublication", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__removePublication(soap, &soap_tmp___ns1__removePublication, "-ns1:removePublication", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) || soap_put___ns1__removePublication(
+                                       soap, &soap_tmp___ns1__removePublication,
+                                       "-ns1:removePublication", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__removePublicationResponse_)
     return soap_closesock(soap);
   ns1__removePublicationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__removePublicationResponse = soap_get___ns1__removePublicationResponse(soap, NULL, "-ns1:removePublicationResponse", "ns1:removePublicationResponse");
+  soap_tmp___ns1__removePublicationResponse =
+      soap_get___ns1__removePublicationResponse(
+          soap, NULL, "-ns1:removePublicationResponse",
+          "ns1:removePublicationResponse");
   if (!soap_tmp___ns1__removePublicationResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__removePublicationResponse_ && soap_tmp___ns1__removePublicationResponse->ns1__removePublicationResponse_)
-    *ns1__removePublicationResponse_ = *soap_tmp___ns1__removePublicationResponse->ns1__removePublicationResponse_;
+  if (ns1__removePublicationResponse_ &&
+      soap_tmp___ns1__removePublicationResponse
+          ->ns1__removePublicationResponse_)
+    *ns1__removePublicationResponse_ =
+        *soap_tmp___ns1__removePublicationResponse
+             ->ns1__removePublicationResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::removeSample(const char *endpoint, const char *soap_action, ns1__removeSample *ns1__removeSample_, ns1__removeSampleResponse *ns1__removeSampleResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::removeSample(
+    const char *endpoint, const char *soap_action,
+    ns1__removeSample *ns1__removeSample_,
+    ns1__removeSampleResponse *ns1__removeSampleResponse_) {
+  struct soap *soap = this;
   struct __ns1__removeSample soap_tmp___ns1__removeSample;
   struct __ns1__removeSampleResponse *soap_tmp___ns1__removeSampleResponse;
   if (endpoint)
@@ -3469,50 +3702,52 @@ int ICATPortBindingProxy::removeSample(const char *endpoint, const char *soap_ac
   soap_serialize___ns1__removeSample(soap, &soap_tmp___ns1__removeSample);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__removeSample(soap, &soap_tmp___ns1__removeSample, "-ns1:removeSample", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__removeSample(soap, &soap_tmp___ns1__removeSample,
+                                     "-ns1:removeSample", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__removeSample(soap, &soap_tmp___ns1__removeSample, "-ns1:removeSample", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__removeSample(soap, &soap_tmp___ns1__removeSample,
+                                   "-ns1:removeSample", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__removeSampleResponse_)
     return soap_closesock(soap);
   ns1__removeSampleResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__removeSampleResponse = soap_get___ns1__removeSampleResponse(soap, NULL, "-ns1:removeSampleResponse", "ns1:removeSampleResponse");
+  soap_tmp___ns1__removeSampleResponse = soap_get___ns1__removeSampleResponse(
+      soap, NULL, "-ns1:removeSampleResponse", "ns1:removeSampleResponse");
   if (!soap_tmp___ns1__removeSampleResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__removeSampleResponse_ && soap_tmp___ns1__removeSampleResponse->ns1__removeSampleResponse_)
-    *ns1__removeSampleResponse_ = *soap_tmp___ns1__removeSampleResponse->ns1__removeSampleResponse_;
+  if (ns1__removeSampleResponse_ &&
+      soap_tmp___ns1__removeSampleResponse->ns1__removeSampleResponse_)
+    *ns1__removeSampleResponse_ =
+        *soap_tmp___ns1__removeSampleResponse->ns1__removeSampleResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::removeSampleParameter(const char *endpoint, const char *soap_action, ns1__removeSampleParameter *ns1__removeSampleParameter_, ns1__removeSampleParameterResponse *ns1__removeSampleParameterResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::removeSampleParameter(
+    const char *endpoint, const char *soap_action,
+    ns1__removeSampleParameter *ns1__removeSampleParameter_,
+    ns1__removeSampleParameterResponse *ns1__removeSampleParameterResponse_) {
+  struct soap *soap = this;
   struct __ns1__removeSampleParameter soap_tmp___ns1__removeSampleParameter;
-  struct __ns1__removeSampleParameterResponse *soap_tmp___ns1__removeSampleParameterResponse;
+  struct __ns1__removeSampleParameterResponse *
+      soap_tmp___ns1__removeSampleParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -3520,54 +3755,63 @@ int ICATPortBindingProxy::removeSampleParameter(const char *endpoint, const char
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/removeSampleParameterRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__removeSampleParameter.ns1__removeSampleParameter_ = ns1__removeSampleParameter_;
+  soap_tmp___ns1__removeSampleParameter.ns1__removeSampleParameter_ =
+      ns1__removeSampleParameter_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__removeSampleParameter(soap, &soap_tmp___ns1__removeSampleParameter);
+  soap_serialize___ns1__removeSampleParameter(
+      soap, &soap_tmp___ns1__removeSampleParameter);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__removeSampleParameter(soap, &soap_tmp___ns1__removeSampleParameter, "-ns1:removeSampleParameter", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__removeSampleParameter(
+            soap, &soap_tmp___ns1__removeSampleParameter,
+            "-ns1:removeSampleParameter", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__removeSampleParameter(soap, &soap_tmp___ns1__removeSampleParameter, "-ns1:removeSampleParameter", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__removeSampleParameter(
+          soap, &soap_tmp___ns1__removeSampleParameter,
+          "-ns1:removeSampleParameter", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__removeSampleParameterResponse_)
     return soap_closesock(soap);
   ns1__removeSampleParameterResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__removeSampleParameterResponse = soap_get___ns1__removeSampleParameterResponse(soap, NULL, "-ns1:removeSampleParameterResponse", "ns1:removeSampleParameterResponse");
+  soap_tmp___ns1__removeSampleParameterResponse =
+      soap_get___ns1__removeSampleParameterResponse(
+          soap, NULL, "-ns1:removeSampleParameterResponse",
+          "ns1:removeSampleParameterResponse");
   if (!soap_tmp___ns1__removeSampleParameterResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__removeSampleParameterResponse_ && soap_tmp___ns1__removeSampleParameterResponse->ns1__removeSampleParameterResponse_)
-    *ns1__removeSampleParameterResponse_ = *soap_tmp___ns1__removeSampleParameterResponse->ns1__removeSampleParameterResponse_;
+  if (ns1__removeSampleParameterResponse_ &&
+      soap_tmp___ns1__removeSampleParameterResponse
+          ->ns1__removeSampleParameterResponse_)
+    *ns1__removeSampleParameterResponse_ =
+        *soap_tmp___ns1__removeSampleParameterResponse
+             ->ns1__removeSampleParameterResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getDataset(const char *endpoint, const char *soap_action, ns1__getDataset *ns1__getDataset_, ns1__getDatasetResponse *ns1__getDatasetResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getDataset(
+    const char *endpoint, const char *soap_action,
+    ns1__getDataset *ns1__getDataset_,
+    ns1__getDatasetResponse *ns1__getDatasetResponse_) {
+  struct soap *soap = this;
   struct __ns1__getDataset soap_tmp___ns1__getDataset;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -3582,46 +3826,45 @@ int ICATPortBindingProxy::getDataset(const char *endpoint, const char *soap_acti
   soap_serialize___ns1__getDataset(soap, &soap_tmp___ns1__getDataset);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getDataset(soap, &soap_tmp___ns1__getDataset, "-ns1:getDataset", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getDataset(soap, &soap_tmp___ns1__getDataset,
+                                   "-ns1:getDataset", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getDataset(soap, &soap_tmp___ns1__getDataset, "-ns1:getDataset", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getDataset(soap, &soap_tmp___ns1__getDataset,
+                                 "-ns1:getDataset", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getDatasetResponse_)
     return soap_closesock(soap);
   ns1__getDatasetResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getDatasetResponse_->soap_get(soap, "ns1:getDatasetResponse", "ns1:getDatasetResponse");
+  ns1__getDatasetResponse_->soap_get(soap, "ns1:getDatasetResponse",
+                                     "ns1:getDatasetResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getDatasetIncludes(const char *endpoint, const char *soap_action, ns1__getDatasetIncludes *ns1__getDatasetIncludes_, ns1__getDatasetIncludesResponse *ns1__getDatasetIncludesResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getDatasetIncludes(
+    const char *endpoint, const char *soap_action,
+    ns1__getDatasetIncludes *ns1__getDatasetIncludes_,
+    ns1__getDatasetIncludesResponse *ns1__getDatasetIncludesResponse_) {
+  struct soap *soap = this;
   struct __ns1__getDatasetIncludes soap_tmp___ns1__getDatasetIncludes;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -3630,52 +3873,55 @@ int ICATPortBindingProxy::getDatasetIncludes(const char *endpoint, const char *s
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getDatasetIncludesRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getDatasetIncludes.ns1__getDatasetIncludes_ = ns1__getDatasetIncludes_;
+  soap_tmp___ns1__getDatasetIncludes.ns1__getDatasetIncludes_ =
+      ns1__getDatasetIncludes_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getDatasetIncludes(soap, &soap_tmp___ns1__getDatasetIncludes);
+  soap_serialize___ns1__getDatasetIncludes(soap,
+                                           &soap_tmp___ns1__getDatasetIncludes);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getDatasetIncludes(soap, &soap_tmp___ns1__getDatasetIncludes, "-ns1:getDatasetIncludes", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getDatasetIncludes(soap,
+                                           &soap_tmp___ns1__getDatasetIncludes,
+                                           "-ns1:getDatasetIncludes", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getDatasetIncludes(soap, &soap_tmp___ns1__getDatasetIncludes, "-ns1:getDatasetIncludes", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getDatasetIncludes(soap,
+                                         &soap_tmp___ns1__getDatasetIncludes,
+                                         "-ns1:getDatasetIncludes", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getDatasetIncludesResponse_)
     return soap_closesock(soap);
   ns1__getDatasetIncludesResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getDatasetIncludesResponse_->soap_get(soap, "ns1:getDatasetIncludesResponse", "ns1:getDatasetIncludesResponse");
+  ns1__getDatasetIncludesResponse_->soap_get(
+      soap, "ns1:getDatasetIncludesResponse", "ns1:getDatasetIncludesResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getDatasets(const char *endpoint, const char *soap_action, ns1__getDatasets *ns1__getDatasets_, ns1__getDatasetsResponse *ns1__getDatasetsResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getDatasets(
+    const char *endpoint, const char *soap_action,
+    ns1__getDatasets *ns1__getDatasets_,
+    ns1__getDatasetsResponse *ns1__getDatasetsResponse_) {
+  struct soap *soap = this;
   struct __ns1__getDatasets soap_tmp___ns1__getDatasets;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -3690,46 +3936,45 @@ int ICATPortBindingProxy::getDatasets(const char *endpoint, const char *soap_act
   soap_serialize___ns1__getDatasets(soap, &soap_tmp___ns1__getDatasets);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getDatasets(soap, &soap_tmp___ns1__getDatasets, "-ns1:getDatasets", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getDatasets(soap, &soap_tmp___ns1__getDatasets,
+                                    "-ns1:getDatasets", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getDatasets(soap, &soap_tmp___ns1__getDatasets, "-ns1:getDatasets", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getDatasets(soap, &soap_tmp___ns1__getDatasets,
+                                  "-ns1:getDatasets", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getDatasetsResponse_)
     return soap_closesock(soap);
   ns1__getDatasetsResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getDatasetsResponse_->soap_get(soap, "ns1:getDatasetsResponse", "ns1:getDatasetsResponse");
+  ns1__getDatasetsResponse_->soap_get(soap, "ns1:getDatasetsResponse",
+                                      "ns1:getDatasetsResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::createDataSet(const char *endpoint, const char *soap_action, ns1__createDataSet *ns1__createDataSet_, ns1__createDataSetResponse *ns1__createDataSetResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::createDataSet(
+    const char *endpoint, const char *soap_action,
+    ns1__createDataSet *ns1__createDataSet_,
+    ns1__createDataSetResponse *ns1__createDataSetResponse_) {
+  struct soap *soap = this;
   struct __ns1__createDataSet soap_tmp___ns1__createDataSet;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -3744,46 +3989,45 @@ int ICATPortBindingProxy::createDataSet(const char *endpoint, const char *soap_a
   soap_serialize___ns1__createDataSet(soap, &soap_tmp___ns1__createDataSet);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__createDataSet(soap, &soap_tmp___ns1__createDataSet, "-ns1:createDataSet", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__createDataSet(soap, &soap_tmp___ns1__createDataSet,
+                                      "-ns1:createDataSet", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__createDataSet(soap, &soap_tmp___ns1__createDataSet, "-ns1:createDataSet", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__createDataSet(soap, &soap_tmp___ns1__createDataSet,
+                                    "-ns1:createDataSet", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__createDataSetResponse_)
     return soap_closesock(soap);
   ns1__createDataSetResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__createDataSetResponse_->soap_get(soap, "ns1:createDataSetResponse", "ns1:createDataSetResponse");
+  ns1__createDataSetResponse_->soap_get(soap, "ns1:createDataSetResponse",
+                                        "ns1:createDataSetResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::createDataSets(const char *endpoint, const char *soap_action, ns1__createDataSets *ns1__createDataSets_, ns1__createDataSetsResponse *ns1__createDataSetsResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::createDataSets(
+    const char *endpoint, const char *soap_action,
+    ns1__createDataSets *ns1__createDataSets_,
+    ns1__createDataSetsResponse *ns1__createDataSetsResponse_) {
+  struct soap *soap = this;
   struct __ns1__createDataSets soap_tmp___ns1__createDataSets;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -3798,46 +4042,45 @@ int ICATPortBindingProxy::createDataSets(const char *endpoint, const char *soap_
   soap_serialize___ns1__createDataSets(soap, &soap_tmp___ns1__createDataSets);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__createDataSets(soap, &soap_tmp___ns1__createDataSets, "-ns1:createDataSets", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__createDataSets(soap, &soap_tmp___ns1__createDataSets,
+                                       "-ns1:createDataSets", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__createDataSets(soap, &soap_tmp___ns1__createDataSets, "-ns1:createDataSets", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__createDataSets(soap, &soap_tmp___ns1__createDataSets,
+                                     "-ns1:createDataSets", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__createDataSetsResponse_)
     return soap_closesock(soap);
   ns1__createDataSetsResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__createDataSetsResponse_->soap_get(soap, "ns1:createDataSetsResponse", "ns1:createDataSetsResponse");
+  ns1__createDataSetsResponse_->soap_get(soap, "ns1:createDataSetsResponse",
+                                         "ns1:createDataSetsResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::deleteDataSet(const char *endpoint, const char *soap_action, ns1__deleteDataSet *ns1__deleteDataSet_, ns1__deleteDataSetResponse *ns1__deleteDataSetResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::deleteDataSet(
+    const char *endpoint, const char *soap_action,
+    ns1__deleteDataSet *ns1__deleteDataSet_,
+    ns1__deleteDataSetResponse *ns1__deleteDataSetResponse_) {
+  struct soap *soap = this;
   struct __ns1__deleteDataSet soap_tmp___ns1__deleteDataSet;
   struct __ns1__deleteDataSetResponse *soap_tmp___ns1__deleteDataSetResponse;
   if (endpoint)
@@ -3853,50 +4096,52 @@ int ICATPortBindingProxy::deleteDataSet(const char *endpoint, const char *soap_a
   soap_serialize___ns1__deleteDataSet(soap, &soap_tmp___ns1__deleteDataSet);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__deleteDataSet(soap, &soap_tmp___ns1__deleteDataSet, "-ns1:deleteDataSet", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__deleteDataSet(soap, &soap_tmp___ns1__deleteDataSet,
+                                      "-ns1:deleteDataSet", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__deleteDataSet(soap, &soap_tmp___ns1__deleteDataSet, "-ns1:deleteDataSet", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__deleteDataSet(soap, &soap_tmp___ns1__deleteDataSet,
+                                    "-ns1:deleteDataSet", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__deleteDataSetResponse_)
     return soap_closesock(soap);
   ns1__deleteDataSetResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__deleteDataSetResponse = soap_get___ns1__deleteDataSetResponse(soap, NULL, "-ns1:deleteDataSetResponse", "ns1:deleteDataSetResponse");
+  soap_tmp___ns1__deleteDataSetResponse = soap_get___ns1__deleteDataSetResponse(
+      soap, NULL, "-ns1:deleteDataSetResponse", "ns1:deleteDataSetResponse");
   if (!soap_tmp___ns1__deleteDataSetResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__deleteDataSetResponse_ && soap_tmp___ns1__deleteDataSetResponse->ns1__deleteDataSetResponse_)
-    *ns1__deleteDataSetResponse_ = *soap_tmp___ns1__deleteDataSetResponse->ns1__deleteDataSetResponse_;
+  if (ns1__deleteDataSetResponse_ &&
+      soap_tmp___ns1__deleteDataSetResponse->ns1__deleteDataSetResponse_)
+    *ns1__deleteDataSetResponse_ =
+        *soap_tmp___ns1__deleteDataSetResponse->ns1__deleteDataSetResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::deleteDataSetParameter(const char *endpoint, const char *soap_action, ns1__deleteDataSetParameter *ns1__deleteDataSetParameter_, ns1__deleteDataSetParameterResponse *ns1__deleteDataSetParameterResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::deleteDataSetParameter(
+    const char *endpoint, const char *soap_action,
+    ns1__deleteDataSetParameter *ns1__deleteDataSetParameter_,
+    ns1__deleteDataSetParameterResponse *ns1__deleteDataSetParameterResponse_) {
+  struct soap *soap = this;
   struct __ns1__deleteDataSetParameter soap_tmp___ns1__deleteDataSetParameter;
-  struct __ns1__deleteDataSetParameterResponse *soap_tmp___ns1__deleteDataSetParameterResponse;
+  struct __ns1__deleteDataSetParameterResponse *
+      soap_tmp___ns1__deleteDataSetParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -3904,54 +4149,63 @@ int ICATPortBindingProxy::deleteDataSetParameter(const char *endpoint, const cha
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/deleteDataSetParameterRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__deleteDataSetParameter.ns1__deleteDataSetParameter_ = ns1__deleteDataSetParameter_;
+  soap_tmp___ns1__deleteDataSetParameter.ns1__deleteDataSetParameter_ =
+      ns1__deleteDataSetParameter_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__deleteDataSetParameter(soap, &soap_tmp___ns1__deleteDataSetParameter);
+  soap_serialize___ns1__deleteDataSetParameter(
+      soap, &soap_tmp___ns1__deleteDataSetParameter);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__deleteDataSetParameter(soap, &soap_tmp___ns1__deleteDataSetParameter, "-ns1:deleteDataSetParameter", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__deleteDataSetParameter(
+            soap, &soap_tmp___ns1__deleteDataSetParameter,
+            "-ns1:deleteDataSetParameter", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__deleteDataSetParameter(soap, &soap_tmp___ns1__deleteDataSetParameter, "-ns1:deleteDataSetParameter", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__deleteDataSetParameter(
+          soap, &soap_tmp___ns1__deleteDataSetParameter,
+          "-ns1:deleteDataSetParameter", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__deleteDataSetParameterResponse_)
     return soap_closesock(soap);
   ns1__deleteDataSetParameterResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__deleteDataSetParameterResponse = soap_get___ns1__deleteDataSetParameterResponse(soap, NULL, "-ns1:deleteDataSetParameterResponse", "ns1:deleteDataSetParameterResponse");
+  soap_tmp___ns1__deleteDataSetParameterResponse =
+      soap_get___ns1__deleteDataSetParameterResponse(
+          soap, NULL, "-ns1:deleteDataSetParameterResponse",
+          "ns1:deleteDataSetParameterResponse");
   if (!soap_tmp___ns1__deleteDataSetParameterResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__deleteDataSetParameterResponse_ && soap_tmp___ns1__deleteDataSetParameterResponse->ns1__deleteDataSetParameterResponse_)
-    *ns1__deleteDataSetParameterResponse_ = *soap_tmp___ns1__deleteDataSetParameterResponse->ns1__deleteDataSetParameterResponse_;
+  if (ns1__deleteDataSetParameterResponse_ &&
+      soap_tmp___ns1__deleteDataSetParameterResponse
+          ->ns1__deleteDataSetParameterResponse_)
+    *ns1__deleteDataSetParameterResponse_ =
+        *soap_tmp___ns1__deleteDataSetParameterResponse
+             ->ns1__deleteDataSetParameterResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::modifyDataSet(const char *endpoint, const char *soap_action, ns1__modifyDataSet *ns1__modifyDataSet_, ns1__modifyDataSetResponse *ns1__modifyDataSetResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::modifyDataSet(
+    const char *endpoint, const char *soap_action,
+    ns1__modifyDataSet *ns1__modifyDataSet_,
+    ns1__modifyDataSetResponse *ns1__modifyDataSetResponse_) {
+  struct soap *soap = this;
   struct __ns1__modifyDataSet soap_tmp___ns1__modifyDataSet;
   struct __ns1__modifyDataSetResponse *soap_tmp___ns1__modifyDataSetResponse;
   if (endpoint)
@@ -3967,50 +4221,52 @@ int ICATPortBindingProxy::modifyDataSet(const char *endpoint, const char *soap_a
   soap_serialize___ns1__modifyDataSet(soap, &soap_tmp___ns1__modifyDataSet);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__modifyDataSet(soap, &soap_tmp___ns1__modifyDataSet, "-ns1:modifyDataSet", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__modifyDataSet(soap, &soap_tmp___ns1__modifyDataSet,
+                                      "-ns1:modifyDataSet", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__modifyDataSet(soap, &soap_tmp___ns1__modifyDataSet, "-ns1:modifyDataSet", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__modifyDataSet(soap, &soap_tmp___ns1__modifyDataSet,
+                                    "-ns1:modifyDataSet", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__modifyDataSetResponse_)
     return soap_closesock(soap);
   ns1__modifyDataSetResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__modifyDataSetResponse = soap_get___ns1__modifyDataSetResponse(soap, NULL, "-ns1:modifyDataSetResponse", "ns1:modifyDataSetResponse");
+  soap_tmp___ns1__modifyDataSetResponse = soap_get___ns1__modifyDataSetResponse(
+      soap, NULL, "-ns1:modifyDataSetResponse", "ns1:modifyDataSetResponse");
   if (!soap_tmp___ns1__modifyDataSetResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__modifyDataSetResponse_ && soap_tmp___ns1__modifyDataSetResponse->ns1__modifyDataSetResponse_)
-    *ns1__modifyDataSetResponse_ = *soap_tmp___ns1__modifyDataSetResponse->ns1__modifyDataSetResponse_;
+  if (ns1__modifyDataSetResponse_ &&
+      soap_tmp___ns1__modifyDataSetResponse->ns1__modifyDataSetResponse_)
+    *ns1__modifyDataSetResponse_ =
+        *soap_tmp___ns1__modifyDataSetResponse->ns1__modifyDataSetResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::modifyDataSetParameter(const char *endpoint, const char *soap_action, ns1__modifyDataSetParameter *ns1__modifyDataSetParameter_, ns1__modifyDataSetParameterResponse *ns1__modifyDataSetParameterResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::modifyDataSetParameter(
+    const char *endpoint, const char *soap_action,
+    ns1__modifyDataSetParameter *ns1__modifyDataSetParameter_,
+    ns1__modifyDataSetParameterResponse *ns1__modifyDataSetParameterResponse_) {
+  struct soap *soap = this;
   struct __ns1__modifyDataSetParameter soap_tmp___ns1__modifyDataSetParameter;
-  struct __ns1__modifyDataSetParameterResponse *soap_tmp___ns1__modifyDataSetParameterResponse;
+  struct __ns1__modifyDataSetParameterResponse *
+      soap_tmp___ns1__modifyDataSetParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -4018,56 +4274,66 @@ int ICATPortBindingProxy::modifyDataSetParameter(const char *endpoint, const cha
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/modifyDataSetParameterRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__modifyDataSetParameter.ns1__modifyDataSetParameter_ = ns1__modifyDataSetParameter_;
+  soap_tmp___ns1__modifyDataSetParameter.ns1__modifyDataSetParameter_ =
+      ns1__modifyDataSetParameter_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__modifyDataSetParameter(soap, &soap_tmp___ns1__modifyDataSetParameter);
+  soap_serialize___ns1__modifyDataSetParameter(
+      soap, &soap_tmp___ns1__modifyDataSetParameter);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__modifyDataSetParameter(soap, &soap_tmp___ns1__modifyDataSetParameter, "-ns1:modifyDataSetParameter", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__modifyDataSetParameter(
+            soap, &soap_tmp___ns1__modifyDataSetParameter,
+            "-ns1:modifyDataSetParameter", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__modifyDataSetParameter(soap, &soap_tmp___ns1__modifyDataSetParameter, "-ns1:modifyDataSetParameter", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__modifyDataSetParameter(
+          soap, &soap_tmp___ns1__modifyDataSetParameter,
+          "-ns1:modifyDataSetParameter", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__modifyDataSetParameterResponse_)
     return soap_closesock(soap);
   ns1__modifyDataSetParameterResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__modifyDataSetParameterResponse = soap_get___ns1__modifyDataSetParameterResponse(soap, NULL, "-ns1:modifyDataSetParameterResponse", "ns1:modifyDataSetParameterResponse");
+  soap_tmp___ns1__modifyDataSetParameterResponse =
+      soap_get___ns1__modifyDataSetParameterResponse(
+          soap, NULL, "-ns1:modifyDataSetParameterResponse",
+          "ns1:modifyDataSetParameterResponse");
   if (!soap_tmp___ns1__modifyDataSetParameterResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__modifyDataSetParameterResponse_ && soap_tmp___ns1__modifyDataSetParameterResponse->ns1__modifyDataSetParameterResponse_)
-    *ns1__modifyDataSetParameterResponse_ = *soap_tmp___ns1__modifyDataSetParameterResponse->ns1__modifyDataSetParameterResponse_;
+  if (ns1__modifyDataSetParameterResponse_ &&
+      soap_tmp___ns1__modifyDataSetParameterResponse
+          ->ns1__modifyDataSetParameterResponse_)
+    *ns1__modifyDataSetParameterResponse_ =
+        *soap_tmp___ns1__modifyDataSetParameterResponse
+             ->ns1__modifyDataSetParameterResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::setDataSetSample(const char *endpoint, const char *soap_action, ns1__setDataSetSample *ns1__setDataSetSample_, ns1__setDataSetSampleResponse *ns1__setDataSetSampleResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::setDataSetSample(
+    const char *endpoint, const char *soap_action,
+    ns1__setDataSetSample *ns1__setDataSetSample_,
+    ns1__setDataSetSampleResponse *ns1__setDataSetSampleResponse_) {
+  struct soap *soap = this;
   struct __ns1__setDataSetSample soap_tmp___ns1__setDataSetSample;
-  struct __ns1__setDataSetSampleResponse *soap_tmp___ns1__setDataSetSampleResponse;
+  struct __ns1__setDataSetSampleResponse *
+      soap_tmp___ns1__setDataSetSampleResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -4075,54 +4341,60 @@ int ICATPortBindingProxy::setDataSetSample(const char *endpoint, const char *soa
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/setDataSetSampleRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__setDataSetSample.ns1__setDataSetSample_ = ns1__setDataSetSample_;
+  soap_tmp___ns1__setDataSetSample.ns1__setDataSetSample_ =
+      ns1__setDataSetSample_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__setDataSetSample(soap, &soap_tmp___ns1__setDataSetSample);
+  soap_serialize___ns1__setDataSetSample(soap,
+                                         &soap_tmp___ns1__setDataSetSample);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__setDataSetSample(soap, &soap_tmp___ns1__setDataSetSample, "-ns1:setDataSetSample", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__setDataSetSample(soap,
+                                         &soap_tmp___ns1__setDataSetSample,
+                                         "-ns1:setDataSetSample", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__setDataSetSample(soap, &soap_tmp___ns1__setDataSetSample, "-ns1:setDataSetSample", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__setDataSetSample(soap, &soap_tmp___ns1__setDataSetSample,
+                                       "-ns1:setDataSetSample", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__setDataSetSampleResponse_)
     return soap_closesock(soap);
   ns1__setDataSetSampleResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__setDataSetSampleResponse = soap_get___ns1__setDataSetSampleResponse(soap, NULL, "-ns1:setDataSetSampleResponse", "ns1:setDataSetSampleResponse");
+  soap_tmp___ns1__setDataSetSampleResponse =
+      soap_get___ns1__setDataSetSampleResponse(soap, NULL,
+                                               "-ns1:setDataSetSampleResponse",
+                                               "ns1:setDataSetSampleResponse");
   if (!soap_tmp___ns1__setDataSetSampleResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__setDataSetSampleResponse_ && soap_tmp___ns1__setDataSetSampleResponse->ns1__setDataSetSampleResponse_)
-    *ns1__setDataSetSampleResponse_ = *soap_tmp___ns1__setDataSetSampleResponse->ns1__setDataSetSampleResponse_;
+  if (ns1__setDataSetSampleResponse_ &&
+      soap_tmp___ns1__setDataSetSampleResponse->ns1__setDataSetSampleResponse_)
+    *ns1__setDataSetSampleResponse_ = *soap_tmp___ns1__setDataSetSampleResponse
+                                           ->ns1__setDataSetSampleResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::addDataSetParameter(const char *endpoint, const char *soap_action, ns1__addDataSetParameter *ns1__addDataSetParameter_, ns1__addDataSetParameterResponse *ns1__addDataSetParameterResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::addDataSetParameter(
+    const char *endpoint, const char *soap_action,
+    ns1__addDataSetParameter *ns1__addDataSetParameter_,
+    ns1__addDataSetParameterResponse *ns1__addDataSetParameterResponse_) {
+  struct soap *soap = this;
   struct __ns1__addDataSetParameter soap_tmp___ns1__addDataSetParameter;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -4131,52 +4403,56 @@ int ICATPortBindingProxy::addDataSetParameter(const char *endpoint, const char *
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/addDataSetParameterRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__addDataSetParameter.ns1__addDataSetParameter_ = ns1__addDataSetParameter_;
+  soap_tmp___ns1__addDataSetParameter.ns1__addDataSetParameter_ =
+      ns1__addDataSetParameter_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__addDataSetParameter(soap, &soap_tmp___ns1__addDataSetParameter);
+  soap_serialize___ns1__addDataSetParameter(
+      soap, &soap_tmp___ns1__addDataSetParameter);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__addDataSetParameter(soap, &soap_tmp___ns1__addDataSetParameter, "-ns1:addDataSetParameter", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__addDataSetParameter(
+            soap, &soap_tmp___ns1__addDataSetParameter,
+            "-ns1:addDataSetParameter", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__addDataSetParameter(soap, &soap_tmp___ns1__addDataSetParameter, "-ns1:addDataSetParameter", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__addDataSetParameter(soap,
+                                          &soap_tmp___ns1__addDataSetParameter,
+                                          "-ns1:addDataSetParameter", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__addDataSetParameterResponse_)
     return soap_closesock(soap);
   ns1__addDataSetParameterResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__addDataSetParameterResponse_->soap_get(soap, "ns1:addDataSetParameterResponse", "ns1:addDataSetParameterResponse");
+  ns1__addDataSetParameterResponse_->soap_get(
+      soap, "ns1:addDataSetParameterResponse",
+      "ns1:addDataSetParameterResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::addDataSetParameters(const char *endpoint, const char *soap_action, ns1__addDataSetParameters *ns1__addDataSetParameters_, ns1__addDataSetParametersResponse *ns1__addDataSetParametersResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::addDataSetParameters(
+    const char *endpoint, const char *soap_action,
+    ns1__addDataSetParameters *ns1__addDataSetParameters_,
+    ns1__addDataSetParametersResponse *ns1__addDataSetParametersResponse_) {
+  struct soap *soap = this;
   struct __ns1__addDataSetParameters soap_tmp___ns1__addDataSetParameters;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -4185,52 +4461,56 @@ int ICATPortBindingProxy::addDataSetParameters(const char *endpoint, const char 
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/addDataSetParametersRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__addDataSetParameters.ns1__addDataSetParameters_ = ns1__addDataSetParameters_;
+  soap_tmp___ns1__addDataSetParameters.ns1__addDataSetParameters_ =
+      ns1__addDataSetParameters_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__addDataSetParameters(soap, &soap_tmp___ns1__addDataSetParameters);
+  soap_serialize___ns1__addDataSetParameters(
+      soap, &soap_tmp___ns1__addDataSetParameters);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__addDataSetParameters(soap, &soap_tmp___ns1__addDataSetParameters, "-ns1:addDataSetParameters", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__addDataSetParameters(
+            soap, &soap_tmp___ns1__addDataSetParameters,
+            "-ns1:addDataSetParameters", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__addDataSetParameters(soap, &soap_tmp___ns1__addDataSetParameters, "-ns1:addDataSetParameters", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__addDataSetParameters(
+          soap, &soap_tmp___ns1__addDataSetParameters,
+          "-ns1:addDataSetParameters", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__addDataSetParametersResponse_)
     return soap_closesock(soap);
   ns1__addDataSetParametersResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__addDataSetParametersResponse_->soap_get(soap, "ns1:addDataSetParametersResponse", "ns1:addDataSetParametersResponse");
+  ns1__addDataSetParametersResponse_->soap_get(
+      soap, "ns1:addDataSetParametersResponse",
+      "ns1:addDataSetParametersResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::removeDataSet(const char *endpoint, const char *soap_action, ns1__removeDataSet *ns1__removeDataSet_, ns1__removeDataSetResponse *ns1__removeDataSetResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::removeDataSet(
+    const char *endpoint, const char *soap_action,
+    ns1__removeDataSet *ns1__removeDataSet_,
+    ns1__removeDataSetResponse *ns1__removeDataSetResponse_) {
+  struct soap *soap = this;
   struct __ns1__removeDataSet soap_tmp___ns1__removeDataSet;
   struct __ns1__removeDataSetResponse *soap_tmp___ns1__removeDataSetResponse;
   if (endpoint)
@@ -4246,50 +4526,52 @@ int ICATPortBindingProxy::removeDataSet(const char *endpoint, const char *soap_a
   soap_serialize___ns1__removeDataSet(soap, &soap_tmp___ns1__removeDataSet);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__removeDataSet(soap, &soap_tmp___ns1__removeDataSet, "-ns1:removeDataSet", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__removeDataSet(soap, &soap_tmp___ns1__removeDataSet,
+                                      "-ns1:removeDataSet", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__removeDataSet(soap, &soap_tmp___ns1__removeDataSet, "-ns1:removeDataSet", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__removeDataSet(soap, &soap_tmp___ns1__removeDataSet,
+                                    "-ns1:removeDataSet", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__removeDataSetResponse_)
     return soap_closesock(soap);
   ns1__removeDataSetResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__removeDataSetResponse = soap_get___ns1__removeDataSetResponse(soap, NULL, "-ns1:removeDataSetResponse", "ns1:removeDataSetResponse");
+  soap_tmp___ns1__removeDataSetResponse = soap_get___ns1__removeDataSetResponse(
+      soap, NULL, "-ns1:removeDataSetResponse", "ns1:removeDataSetResponse");
   if (!soap_tmp___ns1__removeDataSetResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__removeDataSetResponse_ && soap_tmp___ns1__removeDataSetResponse->ns1__removeDataSetResponse_)
-    *ns1__removeDataSetResponse_ = *soap_tmp___ns1__removeDataSetResponse->ns1__removeDataSetResponse_;
+  if (ns1__removeDataSetResponse_ &&
+      soap_tmp___ns1__removeDataSetResponse->ns1__removeDataSetResponse_)
+    *ns1__removeDataSetResponse_ =
+        *soap_tmp___ns1__removeDataSetResponse->ns1__removeDataSetResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::removeDataSetParameter(const char *endpoint, const char *soap_action, ns1__removeDataSetParameter *ns1__removeDataSetParameter_, ns1__removeDataSetParameterResponse *ns1__removeDataSetParameterResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::removeDataSetParameter(
+    const char *endpoint, const char *soap_action,
+    ns1__removeDataSetParameter *ns1__removeDataSetParameter_,
+    ns1__removeDataSetParameterResponse *ns1__removeDataSetParameterResponse_) {
+  struct soap *soap = this;
   struct __ns1__removeDataSetParameter soap_tmp___ns1__removeDataSetParameter;
-  struct __ns1__removeDataSetParameterResponse *soap_tmp___ns1__removeDataSetParameterResponse;
+  struct __ns1__removeDataSetParameterResponse *
+      soap_tmp___ns1__removeDataSetParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -4297,54 +4579,63 @@ int ICATPortBindingProxy::removeDataSetParameter(const char *endpoint, const cha
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/removeDataSetParameterRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__removeDataSetParameter.ns1__removeDataSetParameter_ = ns1__removeDataSetParameter_;
+  soap_tmp___ns1__removeDataSetParameter.ns1__removeDataSetParameter_ =
+      ns1__removeDataSetParameter_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__removeDataSetParameter(soap, &soap_tmp___ns1__removeDataSetParameter);
+  soap_serialize___ns1__removeDataSetParameter(
+      soap, &soap_tmp___ns1__removeDataSetParameter);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__removeDataSetParameter(soap, &soap_tmp___ns1__removeDataSetParameter, "-ns1:removeDataSetParameter", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__removeDataSetParameter(
+            soap, &soap_tmp___ns1__removeDataSetParameter,
+            "-ns1:removeDataSetParameter", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__removeDataSetParameter(soap, &soap_tmp___ns1__removeDataSetParameter, "-ns1:removeDataSetParameter", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__removeDataSetParameter(
+          soap, &soap_tmp___ns1__removeDataSetParameter,
+          "-ns1:removeDataSetParameter", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__removeDataSetParameterResponse_)
     return soap_closesock(soap);
   ns1__removeDataSetParameterResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__removeDataSetParameterResponse = soap_get___ns1__removeDataSetParameterResponse(soap, NULL, "-ns1:removeDataSetParameterResponse", "ns1:removeDataSetParameterResponse");
+  soap_tmp___ns1__removeDataSetParameterResponse =
+      soap_get___ns1__removeDataSetParameterResponse(
+          soap, NULL, "-ns1:removeDataSetParameterResponse",
+          "ns1:removeDataSetParameterResponse");
   if (!soap_tmp___ns1__removeDataSetParameterResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__removeDataSetParameterResponse_ && soap_tmp___ns1__removeDataSetParameterResponse->ns1__removeDataSetParameterResponse_)
-    *ns1__removeDataSetParameterResponse_ = *soap_tmp___ns1__removeDataSetParameterResponse->ns1__removeDataSetParameterResponse_;
+  if (ns1__removeDataSetParameterResponse_ &&
+      soap_tmp___ns1__removeDataSetParameterResponse
+          ->ns1__removeDataSetParameterResponse_)
+    *ns1__removeDataSetParameterResponse_ =
+        *soap_tmp___ns1__removeDataSetParameterResponse
+             ->ns1__removeDataSetParameterResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getDatafile(const char *endpoint, const char *soap_action, ns1__getDatafile *ns1__getDatafile_, ns1__getDatafileResponse *ns1__getDatafileResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getDatafile(
+    const char *endpoint, const char *soap_action,
+    ns1__getDatafile *ns1__getDatafile_,
+    ns1__getDatafileResponse *ns1__getDatafileResponse_) {
+  struct soap *soap = this;
   struct __ns1__getDatafile soap_tmp___ns1__getDatafile;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -4359,46 +4650,45 @@ int ICATPortBindingProxy::getDatafile(const char *endpoint, const char *soap_act
   soap_serialize___ns1__getDatafile(soap, &soap_tmp___ns1__getDatafile);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getDatafile(soap, &soap_tmp___ns1__getDatafile, "-ns1:getDatafile", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getDatafile(soap, &soap_tmp___ns1__getDatafile,
+                                    "-ns1:getDatafile", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getDatafile(soap, &soap_tmp___ns1__getDatafile, "-ns1:getDatafile", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getDatafile(soap, &soap_tmp___ns1__getDatafile,
+                                  "-ns1:getDatafile", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getDatafileResponse_)
     return soap_closesock(soap);
   ns1__getDatafileResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getDatafileResponse_->soap_get(soap, "ns1:getDatafileResponse", "ns1:getDatafileResponse");
+  ns1__getDatafileResponse_->soap_get(soap, "ns1:getDatafileResponse",
+                                      "ns1:getDatafileResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getDatafiles(const char *endpoint, const char *soap_action, ns1__getDatafiles *ns1__getDatafiles_, ns1__getDatafilesResponse *ns1__getDatafilesResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getDatafiles(
+    const char *endpoint, const char *soap_action,
+    ns1__getDatafiles *ns1__getDatafiles_,
+    ns1__getDatafilesResponse *ns1__getDatafilesResponse_) {
+  struct soap *soap = this;
   struct __ns1__getDatafiles soap_tmp___ns1__getDatafiles;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -4413,46 +4703,45 @@ int ICATPortBindingProxy::getDatafiles(const char *endpoint, const char *soap_ac
   soap_serialize___ns1__getDatafiles(soap, &soap_tmp___ns1__getDatafiles);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getDatafiles(soap, &soap_tmp___ns1__getDatafiles, "-ns1:getDatafiles", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getDatafiles(soap, &soap_tmp___ns1__getDatafiles,
+                                     "-ns1:getDatafiles", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getDatafiles(soap, &soap_tmp___ns1__getDatafiles, "-ns1:getDatafiles", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getDatafiles(soap, &soap_tmp___ns1__getDatafiles,
+                                   "-ns1:getDatafiles", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getDatafilesResponse_)
     return soap_closesock(soap);
   ns1__getDatafilesResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getDatafilesResponse_->soap_get(soap, "ns1:getDatafilesResponse", "ns1:getDatafilesResponse");
+  ns1__getDatafilesResponse_->soap_get(soap, "ns1:getDatafilesResponse",
+                                       "ns1:getDatafilesResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::createDataFile(const char *endpoint, const char *soap_action, ns1__createDataFile *ns1__createDataFile_, ns1__createDataFileResponse *ns1__createDataFileResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::createDataFile(
+    const char *endpoint, const char *soap_action,
+    ns1__createDataFile *ns1__createDataFile_,
+    ns1__createDataFileResponse *ns1__createDataFileResponse_) {
+  struct soap *soap = this;
   struct __ns1__createDataFile soap_tmp___ns1__createDataFile;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -4467,46 +4756,45 @@ int ICATPortBindingProxy::createDataFile(const char *endpoint, const char *soap_
   soap_serialize___ns1__createDataFile(soap, &soap_tmp___ns1__createDataFile);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__createDataFile(soap, &soap_tmp___ns1__createDataFile, "-ns1:createDataFile", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__createDataFile(soap, &soap_tmp___ns1__createDataFile,
+                                       "-ns1:createDataFile", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__createDataFile(soap, &soap_tmp___ns1__createDataFile, "-ns1:createDataFile", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__createDataFile(soap, &soap_tmp___ns1__createDataFile,
+                                     "-ns1:createDataFile", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__createDataFileResponse_)
     return soap_closesock(soap);
   ns1__createDataFileResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__createDataFileResponse_->soap_get(soap, "ns1:createDataFileResponse", "ns1:createDataFileResponse");
+  ns1__createDataFileResponse_->soap_get(soap, "ns1:createDataFileResponse",
+                                         "ns1:createDataFileResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::createDataFiles(const char *endpoint, const char *soap_action, ns1__createDataFiles *ns1__createDataFiles_, ns1__createDataFilesResponse *ns1__createDataFilesResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::createDataFiles(
+    const char *endpoint, const char *soap_action,
+    ns1__createDataFiles *ns1__createDataFiles_,
+    ns1__createDataFilesResponse *ns1__createDataFilesResponse_) {
+  struct soap *soap = this;
   struct __ns1__createDataFiles soap_tmp___ns1__createDataFiles;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -4521,46 +4809,45 @@ int ICATPortBindingProxy::createDataFiles(const char *endpoint, const char *soap
   soap_serialize___ns1__createDataFiles(soap, &soap_tmp___ns1__createDataFiles);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__createDataFiles(soap, &soap_tmp___ns1__createDataFiles, "-ns1:createDataFiles", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__createDataFiles(soap, &soap_tmp___ns1__createDataFiles,
+                                        "-ns1:createDataFiles", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__createDataFiles(soap, &soap_tmp___ns1__createDataFiles, "-ns1:createDataFiles", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__createDataFiles(soap, &soap_tmp___ns1__createDataFiles,
+                                      "-ns1:createDataFiles", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__createDataFilesResponse_)
     return soap_closesock(soap);
   ns1__createDataFilesResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__createDataFilesResponse_->soap_get(soap, "ns1:createDataFilesResponse", "ns1:createDataFilesResponse");
+  ns1__createDataFilesResponse_->soap_get(soap, "ns1:createDataFilesResponse",
+                                          "ns1:createDataFilesResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::deleteDataFile(const char *endpoint, const char *soap_action, ns1__deleteDataFile *ns1__deleteDataFile_, ns1__deleteDataFileResponse *ns1__deleteDataFileResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::deleteDataFile(
+    const char *endpoint, const char *soap_action,
+    ns1__deleteDataFile *ns1__deleteDataFile_,
+    ns1__deleteDataFileResponse *ns1__deleteDataFileResponse_) {
+  struct soap *soap = this;
   struct __ns1__deleteDataFile soap_tmp___ns1__deleteDataFile;
   struct __ns1__deleteDataFileResponse *soap_tmp___ns1__deleteDataFileResponse;
   if (endpoint)
@@ -4576,48 +4863,51 @@ int ICATPortBindingProxy::deleteDataFile(const char *endpoint, const char *soap_
   soap_serialize___ns1__deleteDataFile(soap, &soap_tmp___ns1__deleteDataFile);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__deleteDataFile(soap, &soap_tmp___ns1__deleteDataFile, "-ns1:deleteDataFile", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__deleteDataFile(soap, &soap_tmp___ns1__deleteDataFile,
+                                       "-ns1:deleteDataFile", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__deleteDataFile(soap, &soap_tmp___ns1__deleteDataFile, "-ns1:deleteDataFile", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__deleteDataFile(soap, &soap_tmp___ns1__deleteDataFile,
+                                     "-ns1:deleteDataFile", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__deleteDataFileResponse_)
     return soap_closesock(soap);
   ns1__deleteDataFileResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__deleteDataFileResponse = soap_get___ns1__deleteDataFileResponse(soap, NULL, "-ns1:deleteDataFileResponse", "ns1:deleteDataFileResponse");
+  soap_tmp___ns1__deleteDataFileResponse =
+      soap_get___ns1__deleteDataFileResponse(soap, NULL,
+                                             "-ns1:deleteDataFileResponse",
+                                             "ns1:deleteDataFileResponse");
   if (!soap_tmp___ns1__deleteDataFileResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__deleteDataFileResponse_ && soap_tmp___ns1__deleteDataFileResponse->ns1__deleteDataFileResponse_)
-    *ns1__deleteDataFileResponse_ = *soap_tmp___ns1__deleteDataFileResponse->ns1__deleteDataFileResponse_;
+  if (ns1__deleteDataFileResponse_ &&
+      soap_tmp___ns1__deleteDataFileResponse->ns1__deleteDataFileResponse_)
+    *ns1__deleteDataFileResponse_ =
+        *soap_tmp___ns1__deleteDataFileResponse->ns1__deleteDataFileResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::modifyDataFile(const char *endpoint, const char *soap_action, ns1__modifyDataFile *ns1__modifyDataFile_, ns1__modifyDataFileResponse *ns1__modifyDataFileResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::modifyDataFile(
+    const char *endpoint, const char *soap_action,
+    ns1__modifyDataFile *ns1__modifyDataFile_,
+    ns1__modifyDataFileResponse *ns1__modifyDataFileResponse_) {
+  struct soap *soap = this;
   struct __ns1__modifyDataFile soap_tmp___ns1__modifyDataFile;
   struct __ns1__modifyDataFileResponse *soap_tmp___ns1__modifyDataFileResponse;
   if (endpoint)
@@ -4633,48 +4923,51 @@ int ICATPortBindingProxy::modifyDataFile(const char *endpoint, const char *soap_
   soap_serialize___ns1__modifyDataFile(soap, &soap_tmp___ns1__modifyDataFile);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__modifyDataFile(soap, &soap_tmp___ns1__modifyDataFile, "-ns1:modifyDataFile", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__modifyDataFile(soap, &soap_tmp___ns1__modifyDataFile,
+                                       "-ns1:modifyDataFile", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__modifyDataFile(soap, &soap_tmp___ns1__modifyDataFile, "-ns1:modifyDataFile", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__modifyDataFile(soap, &soap_tmp___ns1__modifyDataFile,
+                                     "-ns1:modifyDataFile", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__modifyDataFileResponse_)
     return soap_closesock(soap);
   ns1__modifyDataFileResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__modifyDataFileResponse = soap_get___ns1__modifyDataFileResponse(soap, NULL, "-ns1:modifyDataFileResponse", "ns1:modifyDataFileResponse");
+  soap_tmp___ns1__modifyDataFileResponse =
+      soap_get___ns1__modifyDataFileResponse(soap, NULL,
+                                             "-ns1:modifyDataFileResponse",
+                                             "ns1:modifyDataFileResponse");
   if (!soap_tmp___ns1__modifyDataFileResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__modifyDataFileResponse_ && soap_tmp___ns1__modifyDataFileResponse->ns1__modifyDataFileResponse_)
-    *ns1__modifyDataFileResponse_ = *soap_tmp___ns1__modifyDataFileResponse->ns1__modifyDataFileResponse_;
+  if (ns1__modifyDataFileResponse_ &&
+      soap_tmp___ns1__modifyDataFileResponse->ns1__modifyDataFileResponse_)
+    *ns1__modifyDataFileResponse_ =
+        *soap_tmp___ns1__modifyDataFileResponse->ns1__modifyDataFileResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::addDataFileParameter(const char *endpoint, const char *soap_action, ns1__addDataFileParameter *ns1__addDataFileParameter_, ns1__addDataFileParameterResponse *ns1__addDataFileParameterResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::addDataFileParameter(
+    const char *endpoint, const char *soap_action,
+    ns1__addDataFileParameter *ns1__addDataFileParameter_,
+    ns1__addDataFileParameterResponse *ns1__addDataFileParameterResponse_) {
+  struct soap *soap = this;
   struct __ns1__addDataFileParameter soap_tmp___ns1__addDataFileParameter;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -4683,52 +4976,56 @@ int ICATPortBindingProxy::addDataFileParameter(const char *endpoint, const char 
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/addDataFileParameterRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__addDataFileParameter.ns1__addDataFileParameter_ = ns1__addDataFileParameter_;
+  soap_tmp___ns1__addDataFileParameter.ns1__addDataFileParameter_ =
+      ns1__addDataFileParameter_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__addDataFileParameter(soap, &soap_tmp___ns1__addDataFileParameter);
+  soap_serialize___ns1__addDataFileParameter(
+      soap, &soap_tmp___ns1__addDataFileParameter);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__addDataFileParameter(soap, &soap_tmp___ns1__addDataFileParameter, "-ns1:addDataFileParameter", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__addDataFileParameter(
+            soap, &soap_tmp___ns1__addDataFileParameter,
+            "-ns1:addDataFileParameter", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__addDataFileParameter(soap, &soap_tmp___ns1__addDataFileParameter, "-ns1:addDataFileParameter", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__addDataFileParameter(
+          soap, &soap_tmp___ns1__addDataFileParameter,
+          "-ns1:addDataFileParameter", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__addDataFileParameterResponse_)
     return soap_closesock(soap);
   ns1__addDataFileParameterResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__addDataFileParameterResponse_->soap_get(soap, "ns1:addDataFileParameterResponse", "ns1:addDataFileParameterResponse");
+  ns1__addDataFileParameterResponse_->soap_get(
+      soap, "ns1:addDataFileParameterResponse",
+      "ns1:addDataFileParameterResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::addDataFileParameters(const char *endpoint, const char *soap_action, ns1__addDataFileParameters *ns1__addDataFileParameters_, ns1__addDataFileParametersResponse *ns1__addDataFileParametersResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::addDataFileParameters(
+    const char *endpoint, const char *soap_action,
+    ns1__addDataFileParameters *ns1__addDataFileParameters_,
+    ns1__addDataFileParametersResponse *ns1__addDataFileParametersResponse_) {
+  struct soap *soap = this;
   struct __ns1__addDataFileParameters soap_tmp___ns1__addDataFileParameters;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -4737,54 +5034,60 @@ int ICATPortBindingProxy::addDataFileParameters(const char *endpoint, const char
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/addDataFileParametersRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__addDataFileParameters.ns1__addDataFileParameters_ = ns1__addDataFileParameters_;
+  soap_tmp___ns1__addDataFileParameters.ns1__addDataFileParameters_ =
+      ns1__addDataFileParameters_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__addDataFileParameters(soap, &soap_tmp___ns1__addDataFileParameters);
+  soap_serialize___ns1__addDataFileParameters(
+      soap, &soap_tmp___ns1__addDataFileParameters);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__addDataFileParameters(soap, &soap_tmp___ns1__addDataFileParameters, "-ns1:addDataFileParameters", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__addDataFileParameters(
+            soap, &soap_tmp___ns1__addDataFileParameters,
+            "-ns1:addDataFileParameters", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__addDataFileParameters(soap, &soap_tmp___ns1__addDataFileParameters, "-ns1:addDataFileParameters", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__addDataFileParameters(
+          soap, &soap_tmp___ns1__addDataFileParameters,
+          "-ns1:addDataFileParameters", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__addDataFileParametersResponse_)
     return soap_closesock(soap);
   ns1__addDataFileParametersResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__addDataFileParametersResponse_->soap_get(soap, "ns1:addDataFileParametersResponse", "ns1:addDataFileParametersResponse");
+  ns1__addDataFileParametersResponse_->soap_get(
+      soap, "ns1:addDataFileParametersResponse",
+      "ns1:addDataFileParametersResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::modifyDataFileParameter(const char *endpoint, const char *soap_action, ns1__modifyDataFileParameter *ns1__modifyDataFileParameter_, ns1__modifyDataFileParameterResponse *ns1__modifyDataFileParameterResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::modifyDataFileParameter(
+    const char *endpoint, const char *soap_action,
+    ns1__modifyDataFileParameter *ns1__modifyDataFileParameter_,
+    ns1__modifyDataFileParameterResponse *
+        ns1__modifyDataFileParameterResponse_) {
+  struct soap *soap = this;
   struct __ns1__modifyDataFileParameter soap_tmp___ns1__modifyDataFileParameter;
-  struct __ns1__modifyDataFileParameterResponse *soap_tmp___ns1__modifyDataFileParameterResponse;
+  struct __ns1__modifyDataFileParameterResponse *
+      soap_tmp___ns1__modifyDataFileParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -4792,56 +5095,67 @@ int ICATPortBindingProxy::modifyDataFileParameter(const char *endpoint, const ch
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/modifyDataFileParameterRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__modifyDataFileParameter.ns1__modifyDataFileParameter_ = ns1__modifyDataFileParameter_;
+  soap_tmp___ns1__modifyDataFileParameter.ns1__modifyDataFileParameter_ =
+      ns1__modifyDataFileParameter_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__modifyDataFileParameter(soap, &soap_tmp___ns1__modifyDataFileParameter);
+  soap_serialize___ns1__modifyDataFileParameter(
+      soap, &soap_tmp___ns1__modifyDataFileParameter);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__modifyDataFileParameter(soap, &soap_tmp___ns1__modifyDataFileParameter, "-ns1:modifyDataFileParameter", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__modifyDataFileParameter(
+            soap, &soap_tmp___ns1__modifyDataFileParameter,
+            "-ns1:modifyDataFileParameter", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__modifyDataFileParameter(soap, &soap_tmp___ns1__modifyDataFileParameter, "-ns1:modifyDataFileParameter", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__modifyDataFileParameter(
+          soap, &soap_tmp___ns1__modifyDataFileParameter,
+          "-ns1:modifyDataFileParameter", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__modifyDataFileParameterResponse_)
     return soap_closesock(soap);
   ns1__modifyDataFileParameterResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__modifyDataFileParameterResponse = soap_get___ns1__modifyDataFileParameterResponse(soap, NULL, "-ns1:modifyDataFileParameterResponse", "ns1:modifyDataFileParameterResponse");
+  soap_tmp___ns1__modifyDataFileParameterResponse =
+      soap_get___ns1__modifyDataFileParameterResponse(
+          soap, NULL, "-ns1:modifyDataFileParameterResponse",
+          "ns1:modifyDataFileParameterResponse");
   if (!soap_tmp___ns1__modifyDataFileParameterResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__modifyDataFileParameterResponse_ && soap_tmp___ns1__modifyDataFileParameterResponse->ns1__modifyDataFileParameterResponse_)
-    *ns1__modifyDataFileParameterResponse_ = *soap_tmp___ns1__modifyDataFileParameterResponse->ns1__modifyDataFileParameterResponse_;
+  if (ns1__modifyDataFileParameterResponse_ &&
+      soap_tmp___ns1__modifyDataFileParameterResponse
+          ->ns1__modifyDataFileParameterResponse_)
+    *ns1__modifyDataFileParameterResponse_ =
+        *soap_tmp___ns1__modifyDataFileParameterResponse
+             ->ns1__modifyDataFileParameterResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::deleteDataFileParameter(const char *endpoint, const char *soap_action, ns1__deleteDataFileParameter *ns1__deleteDataFileParameter_, ns1__deleteDataFileParameterResponse *ns1__deleteDataFileParameterResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::deleteDataFileParameter(
+    const char *endpoint, const char *soap_action,
+    ns1__deleteDataFileParameter *ns1__deleteDataFileParameter_,
+    ns1__deleteDataFileParameterResponse *
+        ns1__deleteDataFileParameterResponse_) {
+  struct soap *soap = this;
   struct __ns1__deleteDataFileParameter soap_tmp___ns1__deleteDataFileParameter;
-  struct __ns1__deleteDataFileParameterResponse *soap_tmp___ns1__deleteDataFileParameterResponse;
+  struct __ns1__deleteDataFileParameterResponse *
+      soap_tmp___ns1__deleteDataFileParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -4849,54 +5163,63 @@ int ICATPortBindingProxy::deleteDataFileParameter(const char *endpoint, const ch
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/deleteDataFileParameterRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__deleteDataFileParameter.ns1__deleteDataFileParameter_ = ns1__deleteDataFileParameter_;
+  soap_tmp___ns1__deleteDataFileParameter.ns1__deleteDataFileParameter_ =
+      ns1__deleteDataFileParameter_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__deleteDataFileParameter(soap, &soap_tmp___ns1__deleteDataFileParameter);
+  soap_serialize___ns1__deleteDataFileParameter(
+      soap, &soap_tmp___ns1__deleteDataFileParameter);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__deleteDataFileParameter(soap, &soap_tmp___ns1__deleteDataFileParameter, "-ns1:deleteDataFileParameter", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__deleteDataFileParameter(
+            soap, &soap_tmp___ns1__deleteDataFileParameter,
+            "-ns1:deleteDataFileParameter", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__deleteDataFileParameter(soap, &soap_tmp___ns1__deleteDataFileParameter, "-ns1:deleteDataFileParameter", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__deleteDataFileParameter(
+          soap, &soap_tmp___ns1__deleteDataFileParameter,
+          "-ns1:deleteDataFileParameter", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__deleteDataFileParameterResponse_)
     return soap_closesock(soap);
   ns1__deleteDataFileParameterResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__deleteDataFileParameterResponse = soap_get___ns1__deleteDataFileParameterResponse(soap, NULL, "-ns1:deleteDataFileParameterResponse", "ns1:deleteDataFileParameterResponse");
+  soap_tmp___ns1__deleteDataFileParameterResponse =
+      soap_get___ns1__deleteDataFileParameterResponse(
+          soap, NULL, "-ns1:deleteDataFileParameterResponse",
+          "ns1:deleteDataFileParameterResponse");
   if (!soap_tmp___ns1__deleteDataFileParameterResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__deleteDataFileParameterResponse_ && soap_tmp___ns1__deleteDataFileParameterResponse->ns1__deleteDataFileParameterResponse_)
-    *ns1__deleteDataFileParameterResponse_ = *soap_tmp___ns1__deleteDataFileParameterResponse->ns1__deleteDataFileParameterResponse_;
+  if (ns1__deleteDataFileParameterResponse_ &&
+      soap_tmp___ns1__deleteDataFileParameterResponse
+          ->ns1__deleteDataFileParameterResponse_)
+    *ns1__deleteDataFileParameterResponse_ =
+        *soap_tmp___ns1__deleteDataFileParameterResponse
+             ->ns1__deleteDataFileParameterResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::removeDataFile(const char *endpoint, const char *soap_action, ns1__removeDataFile *ns1__removeDataFile_, ns1__removeDataFileResponse *ns1__removeDataFileResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::removeDataFile(
+    const char *endpoint, const char *soap_action,
+    ns1__removeDataFile *ns1__removeDataFile_,
+    ns1__removeDataFileResponse *ns1__removeDataFileResponse_) {
+  struct soap *soap = this;
   struct __ns1__removeDataFile soap_tmp___ns1__removeDataFile;
   struct __ns1__removeDataFileResponse *soap_tmp___ns1__removeDataFileResponse;
   if (endpoint)
@@ -4912,50 +5235,55 @@ int ICATPortBindingProxy::removeDataFile(const char *endpoint, const char *soap_
   soap_serialize___ns1__removeDataFile(soap, &soap_tmp___ns1__removeDataFile);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__removeDataFile(soap, &soap_tmp___ns1__removeDataFile, "-ns1:removeDataFile", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__removeDataFile(soap, &soap_tmp___ns1__removeDataFile,
+                                       "-ns1:removeDataFile", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__removeDataFile(soap, &soap_tmp___ns1__removeDataFile, "-ns1:removeDataFile", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__removeDataFile(soap, &soap_tmp___ns1__removeDataFile,
+                                     "-ns1:removeDataFile", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__removeDataFileResponse_)
     return soap_closesock(soap);
   ns1__removeDataFileResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__removeDataFileResponse = soap_get___ns1__removeDataFileResponse(soap, NULL, "-ns1:removeDataFileResponse", "ns1:removeDataFileResponse");
+  soap_tmp___ns1__removeDataFileResponse =
+      soap_get___ns1__removeDataFileResponse(soap, NULL,
+                                             "-ns1:removeDataFileResponse",
+                                             "ns1:removeDataFileResponse");
   if (!soap_tmp___ns1__removeDataFileResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__removeDataFileResponse_ && soap_tmp___ns1__removeDataFileResponse->ns1__removeDataFileResponse_)
-    *ns1__removeDataFileResponse_ = *soap_tmp___ns1__removeDataFileResponse->ns1__removeDataFileResponse_;
+  if (ns1__removeDataFileResponse_ &&
+      soap_tmp___ns1__removeDataFileResponse->ns1__removeDataFileResponse_)
+    *ns1__removeDataFileResponse_ =
+        *soap_tmp___ns1__removeDataFileResponse->ns1__removeDataFileResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::removeDataFileParameter(const char *endpoint, const char *soap_action, ns1__removeDataFileParameter *ns1__removeDataFileParameter_, ns1__removeDataFileParameterResponse *ns1__removeDataFileParameterResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::removeDataFileParameter(
+    const char *endpoint, const char *soap_action,
+    ns1__removeDataFileParameter *ns1__removeDataFileParameter_,
+    ns1__removeDataFileParameterResponse *
+        ns1__removeDataFileParameterResponse_) {
+  struct soap *soap = this;
   struct __ns1__removeDataFileParameter soap_tmp___ns1__removeDataFileParameter;
-  struct __ns1__removeDataFileParameterResponse *soap_tmp___ns1__removeDataFileParameterResponse;
+  struct __ns1__removeDataFileParameterResponse *
+      soap_tmp___ns1__removeDataFileParameterResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -4963,54 +5291,63 @@ int ICATPortBindingProxy::removeDataFileParameter(const char *endpoint, const ch
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/removeDataFileParameterRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__removeDataFileParameter.ns1__removeDataFileParameter_ = ns1__removeDataFileParameter_;
+  soap_tmp___ns1__removeDataFileParameter.ns1__removeDataFileParameter_ =
+      ns1__removeDataFileParameter_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__removeDataFileParameter(soap, &soap_tmp___ns1__removeDataFileParameter);
+  soap_serialize___ns1__removeDataFileParameter(
+      soap, &soap_tmp___ns1__removeDataFileParameter);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__removeDataFileParameter(soap, &soap_tmp___ns1__removeDataFileParameter, "-ns1:removeDataFileParameter", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__removeDataFileParameter(
+            soap, &soap_tmp___ns1__removeDataFileParameter,
+            "-ns1:removeDataFileParameter", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__removeDataFileParameter(soap, &soap_tmp___ns1__removeDataFileParameter, "-ns1:removeDataFileParameter", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__removeDataFileParameter(
+          soap, &soap_tmp___ns1__removeDataFileParameter,
+          "-ns1:removeDataFileParameter", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__removeDataFileParameterResponse_)
     return soap_closesock(soap);
   ns1__removeDataFileParameterResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__removeDataFileParameterResponse = soap_get___ns1__removeDataFileParameterResponse(soap, NULL, "-ns1:removeDataFileParameterResponse", "ns1:removeDataFileParameterResponse");
+  soap_tmp___ns1__removeDataFileParameterResponse =
+      soap_get___ns1__removeDataFileParameterResponse(
+          soap, NULL, "-ns1:removeDataFileParameterResponse",
+          "ns1:removeDataFileParameterResponse");
   if (!soap_tmp___ns1__removeDataFileParameterResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__removeDataFileParameterResponse_ && soap_tmp___ns1__removeDataFileParameterResponse->ns1__removeDataFileParameterResponse_)
-    *ns1__removeDataFileParameterResponse_ = *soap_tmp___ns1__removeDataFileParameterResponse->ns1__removeDataFileParameterResponse_;
+  if (ns1__removeDataFileParameterResponse_ &&
+      soap_tmp___ns1__removeDataFileParameterResponse
+          ->ns1__removeDataFileParameterResponse_)
+    *ns1__removeDataFileParameterResponse_ =
+        *soap_tmp___ns1__removeDataFileParameterResponse
+             ->ns1__removeDataFileParameterResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getAuthorisations(const char *endpoint, const char *soap_action, ns1__getAuthorisations *ns1__getAuthorisations_, ns1__getAuthorisationsResponse *ns1__getAuthorisationsResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getAuthorisations(
+    const char *endpoint, const char *soap_action,
+    ns1__getAuthorisations *ns1__getAuthorisations_,
+    ns1__getAuthorisationsResponse *ns1__getAuthorisationsResponse_) {
+  struct soap *soap = this;
   struct __ns1__getAuthorisations soap_tmp___ns1__getAuthorisations;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -5019,52 +5356,54 @@ int ICATPortBindingProxy::getAuthorisations(const char *endpoint, const char *so
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getAuthorisationsRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getAuthorisations.ns1__getAuthorisations_ = ns1__getAuthorisations_;
+  soap_tmp___ns1__getAuthorisations.ns1__getAuthorisations_ =
+      ns1__getAuthorisations_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getAuthorisations(soap, &soap_tmp___ns1__getAuthorisations);
+  soap_serialize___ns1__getAuthorisations(soap,
+                                          &soap_tmp___ns1__getAuthorisations);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getAuthorisations(soap, &soap_tmp___ns1__getAuthorisations, "-ns1:getAuthorisations", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getAuthorisations(soap,
+                                          &soap_tmp___ns1__getAuthorisations,
+                                          "-ns1:getAuthorisations", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getAuthorisations(soap, &soap_tmp___ns1__getAuthorisations, "-ns1:getAuthorisations", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) || soap_put___ns1__getAuthorisations(
+                                       soap, &soap_tmp___ns1__getAuthorisations,
+                                       "-ns1:getAuthorisations", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getAuthorisationsResponse_)
     return soap_closesock(soap);
   ns1__getAuthorisationsResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getAuthorisationsResponse_->soap_get(soap, "ns1:getAuthorisationsResponse", "ns1:getAuthorisationsResponse");
+  ns1__getAuthorisationsResponse_->soap_get(
+      soap, "ns1:getAuthorisationsResponse", "ns1:getAuthorisationsResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::addAuthorisation(const char *endpoint, const char *soap_action, ns1__addAuthorisation *ns1__addAuthorisation_, ns1__addAuthorisationResponse *ns1__addAuthorisationResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::addAuthorisation(
+    const char *endpoint, const char *soap_action,
+    ns1__addAuthorisation *ns1__addAuthorisation_,
+    ns1__addAuthorisationResponse *ns1__addAuthorisationResponse_) {
+  struct soap *soap = this;
   struct __ns1__addAuthorisation soap_tmp___ns1__addAuthorisation;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -5073,54 +5412,57 @@ int ICATPortBindingProxy::addAuthorisation(const char *endpoint, const char *soa
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/addAuthorisationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__addAuthorisation.ns1__addAuthorisation_ = ns1__addAuthorisation_;
+  soap_tmp___ns1__addAuthorisation.ns1__addAuthorisation_ =
+      ns1__addAuthorisation_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__addAuthorisation(soap, &soap_tmp___ns1__addAuthorisation);
+  soap_serialize___ns1__addAuthorisation(soap,
+                                         &soap_tmp___ns1__addAuthorisation);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__addAuthorisation(soap, &soap_tmp___ns1__addAuthorisation, "-ns1:addAuthorisation", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__addAuthorisation(soap,
+                                         &soap_tmp___ns1__addAuthorisation,
+                                         "-ns1:addAuthorisation", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__addAuthorisation(soap, &soap_tmp___ns1__addAuthorisation, "-ns1:addAuthorisation", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__addAuthorisation(soap, &soap_tmp___ns1__addAuthorisation,
+                                       "-ns1:addAuthorisation", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__addAuthorisationResponse_)
     return soap_closesock(soap);
   ns1__addAuthorisationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__addAuthorisationResponse_->soap_get(soap, "ns1:addAuthorisationResponse", "ns1:addAuthorisationResponse");
+  ns1__addAuthorisationResponse_->soap_get(soap, "ns1:addAuthorisationResponse",
+                                           "ns1:addAuthorisationResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::deleteAuthorisation(const char *endpoint, const char *soap_action, ns1__deleteAuthorisation *ns1__deleteAuthorisation_, ns1__deleteAuthorisationResponse *ns1__deleteAuthorisationResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::deleteAuthorisation(
+    const char *endpoint, const char *soap_action,
+    ns1__deleteAuthorisation *ns1__deleteAuthorisation_,
+    ns1__deleteAuthorisationResponse *ns1__deleteAuthorisationResponse_) {
+  struct soap *soap = this;
   struct __ns1__deleteAuthorisation soap_tmp___ns1__deleteAuthorisation;
-  struct __ns1__deleteAuthorisationResponse *soap_tmp___ns1__deleteAuthorisationResponse;
+  struct __ns1__deleteAuthorisationResponse *
+      soap_tmp___ns1__deleteAuthorisationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -5128,56 +5470,66 @@ int ICATPortBindingProxy::deleteAuthorisation(const char *endpoint, const char *
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/deleteAuthorisationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__deleteAuthorisation.ns1__deleteAuthorisation_ = ns1__deleteAuthorisation_;
+  soap_tmp___ns1__deleteAuthorisation.ns1__deleteAuthorisation_ =
+      ns1__deleteAuthorisation_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__deleteAuthorisation(soap, &soap_tmp___ns1__deleteAuthorisation);
+  soap_serialize___ns1__deleteAuthorisation(
+      soap, &soap_tmp___ns1__deleteAuthorisation);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__deleteAuthorisation(soap, &soap_tmp___ns1__deleteAuthorisation, "-ns1:deleteAuthorisation", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__deleteAuthorisation(
+            soap, &soap_tmp___ns1__deleteAuthorisation,
+            "-ns1:deleteAuthorisation", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__deleteAuthorisation(soap, &soap_tmp___ns1__deleteAuthorisation, "-ns1:deleteAuthorisation", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__deleteAuthorisation(soap,
+                                          &soap_tmp___ns1__deleteAuthorisation,
+                                          "-ns1:deleteAuthorisation", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__deleteAuthorisationResponse_)
     return soap_closesock(soap);
   ns1__deleteAuthorisationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__deleteAuthorisationResponse = soap_get___ns1__deleteAuthorisationResponse(soap, NULL, "-ns1:deleteAuthorisationResponse", "ns1:deleteAuthorisationResponse");
+  soap_tmp___ns1__deleteAuthorisationResponse =
+      soap_get___ns1__deleteAuthorisationResponse(
+          soap, NULL, "-ns1:deleteAuthorisationResponse",
+          "ns1:deleteAuthorisationResponse");
   if (!soap_tmp___ns1__deleteAuthorisationResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__deleteAuthorisationResponse_ && soap_tmp___ns1__deleteAuthorisationResponse->ns1__deleteAuthorisationResponse_)
-    *ns1__deleteAuthorisationResponse_ = *soap_tmp___ns1__deleteAuthorisationResponse->ns1__deleteAuthorisationResponse_;
+  if (ns1__deleteAuthorisationResponse_ &&
+      soap_tmp___ns1__deleteAuthorisationResponse
+          ->ns1__deleteAuthorisationResponse_)
+    *ns1__deleteAuthorisationResponse_ =
+        *soap_tmp___ns1__deleteAuthorisationResponse
+             ->ns1__deleteAuthorisationResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::removeAuthorisation(const char *endpoint, const char *soap_action, ns1__removeAuthorisation *ns1__removeAuthorisation_, ns1__removeAuthorisationResponse *ns1__removeAuthorisationResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::removeAuthorisation(
+    const char *endpoint, const char *soap_action,
+    ns1__removeAuthorisation *ns1__removeAuthorisation_,
+    ns1__removeAuthorisationResponse *ns1__removeAuthorisationResponse_) {
+  struct soap *soap = this;
   struct __ns1__removeAuthorisation soap_tmp___ns1__removeAuthorisation;
-  struct __ns1__removeAuthorisationResponse *soap_tmp___ns1__removeAuthorisationResponse;
+  struct __ns1__removeAuthorisationResponse *
+      soap_tmp___ns1__removeAuthorisationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -5185,56 +5537,66 @@ int ICATPortBindingProxy::removeAuthorisation(const char *endpoint, const char *
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/removeAuthorisationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__removeAuthorisation.ns1__removeAuthorisation_ = ns1__removeAuthorisation_;
+  soap_tmp___ns1__removeAuthorisation.ns1__removeAuthorisation_ =
+      ns1__removeAuthorisation_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__removeAuthorisation(soap, &soap_tmp___ns1__removeAuthorisation);
+  soap_serialize___ns1__removeAuthorisation(
+      soap, &soap_tmp___ns1__removeAuthorisation);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__removeAuthorisation(soap, &soap_tmp___ns1__removeAuthorisation, "-ns1:removeAuthorisation", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__removeAuthorisation(
+            soap, &soap_tmp___ns1__removeAuthorisation,
+            "-ns1:removeAuthorisation", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__removeAuthorisation(soap, &soap_tmp___ns1__removeAuthorisation, "-ns1:removeAuthorisation", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__removeAuthorisation(soap,
+                                          &soap_tmp___ns1__removeAuthorisation,
+                                          "-ns1:removeAuthorisation", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__removeAuthorisationResponse_)
     return soap_closesock(soap);
   ns1__removeAuthorisationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__removeAuthorisationResponse = soap_get___ns1__removeAuthorisationResponse(soap, NULL, "-ns1:removeAuthorisationResponse", "ns1:removeAuthorisationResponse");
+  soap_tmp___ns1__removeAuthorisationResponse =
+      soap_get___ns1__removeAuthorisationResponse(
+          soap, NULL, "-ns1:removeAuthorisationResponse",
+          "ns1:removeAuthorisationResponse");
   if (!soap_tmp___ns1__removeAuthorisationResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__removeAuthorisationResponse_ && soap_tmp___ns1__removeAuthorisationResponse->ns1__removeAuthorisationResponse_)
-    *ns1__removeAuthorisationResponse_ = *soap_tmp___ns1__removeAuthorisationResponse->ns1__removeAuthorisationResponse_;
+  if (ns1__removeAuthorisationResponse_ &&
+      soap_tmp___ns1__removeAuthorisationResponse
+          ->ns1__removeAuthorisationResponse_)
+    *ns1__removeAuthorisationResponse_ =
+        *soap_tmp___ns1__removeAuthorisationResponse
+             ->ns1__removeAuthorisationResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::updateAuthorisation(const char *endpoint, const char *soap_action, ns1__updateAuthorisation *ns1__updateAuthorisation_, ns1__updateAuthorisationResponse *ns1__updateAuthorisationResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::updateAuthorisation(
+    const char *endpoint, const char *soap_action,
+    ns1__updateAuthorisation *ns1__updateAuthorisation_,
+    ns1__updateAuthorisationResponse *ns1__updateAuthorisationResponse_) {
+  struct soap *soap = this;
   struct __ns1__updateAuthorisation soap_tmp___ns1__updateAuthorisation;
-  struct __ns1__updateAuthorisationResponse *soap_tmp___ns1__updateAuthorisationResponse;
+  struct __ns1__updateAuthorisationResponse *
+      soap_tmp___ns1__updateAuthorisationResponse;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -5242,54 +5604,63 @@ int ICATPortBindingProxy::updateAuthorisation(const char *endpoint, const char *
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/updateAuthorisationRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__updateAuthorisation.ns1__updateAuthorisation_ = ns1__updateAuthorisation_;
+  soap_tmp___ns1__updateAuthorisation.ns1__updateAuthorisation_ =
+      ns1__updateAuthorisation_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__updateAuthorisation(soap, &soap_tmp___ns1__updateAuthorisation);
+  soap_serialize___ns1__updateAuthorisation(
+      soap, &soap_tmp___ns1__updateAuthorisation);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__updateAuthorisation(soap, &soap_tmp___ns1__updateAuthorisation, "-ns1:updateAuthorisation", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__updateAuthorisation(
+            soap, &soap_tmp___ns1__updateAuthorisation,
+            "-ns1:updateAuthorisation", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__updateAuthorisation(soap, &soap_tmp___ns1__updateAuthorisation, "-ns1:updateAuthorisation", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__updateAuthorisation(soap,
+                                          &soap_tmp___ns1__updateAuthorisation,
+                                          "-ns1:updateAuthorisation", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__updateAuthorisationResponse_)
     return soap_closesock(soap);
   ns1__updateAuthorisationResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  soap_tmp___ns1__updateAuthorisationResponse = soap_get___ns1__updateAuthorisationResponse(soap, NULL, "-ns1:updateAuthorisationResponse", "ns1:updateAuthorisationResponse");
+  soap_tmp___ns1__updateAuthorisationResponse =
+      soap_get___ns1__updateAuthorisationResponse(
+          soap, NULL, "-ns1:updateAuthorisationResponse",
+          "ns1:updateAuthorisationResponse");
   if (!soap_tmp___ns1__updateAuthorisationResponse || soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
-  if (ns1__updateAuthorisationResponse_ && soap_tmp___ns1__updateAuthorisationResponse->ns1__updateAuthorisationResponse_)
-    *ns1__updateAuthorisationResponse_ = *soap_tmp___ns1__updateAuthorisationResponse->ns1__updateAuthorisationResponse_;
+  if (ns1__updateAuthorisationResponse_ &&
+      soap_tmp___ns1__updateAuthorisationResponse
+          ->ns1__updateAuthorisationResponse_)
+    *ns1__updateAuthorisationResponse_ =
+        *soap_tmp___ns1__updateAuthorisationResponse
+             ->ns1__updateAuthorisationResponse_;
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::ingestMetadata(const char *endpoint, const char *soap_action, ns1__ingestMetadata *ns1__ingestMetadata_, ns1__ingestMetadataResponse *ns1__ingestMetadataResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::ingestMetadata(
+    const char *endpoint, const char *soap_action,
+    ns1__ingestMetadata *ns1__ingestMetadata_,
+    ns1__ingestMetadataResponse *ns1__ingestMetadataResponse_) {
+  struct soap *soap = this;
   struct __ns1__ingestMetadata soap_tmp___ns1__ingestMetadata;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -5304,46 +5675,45 @@ int ICATPortBindingProxy::ingestMetadata(const char *endpoint, const char *soap_
   soap_serialize___ns1__ingestMetadata(soap, &soap_tmp___ns1__ingestMetadata);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__ingestMetadata(soap, &soap_tmp___ns1__ingestMetadata, "-ns1:ingestMetadata", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__ingestMetadata(soap, &soap_tmp___ns1__ingestMetadata,
+                                       "-ns1:ingestMetadata", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__ingestMetadata(soap, &soap_tmp___ns1__ingestMetadata, "-ns1:ingestMetadata", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__ingestMetadata(soap, &soap_tmp___ns1__ingestMetadata,
+                                     "-ns1:ingestMetadata", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__ingestMetadataResponse_)
     return soap_closesock(soap);
   ns1__ingestMetadataResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__ingestMetadataResponse_->soap_get(soap, "ns1:ingestMetadataResponse", "ns1:ingestMetadataResponse");
+  ns1__ingestMetadataResponse_->soap_get(soap, "ns1:ingestMetadataResponse",
+                                         "ns1:ingestMetadataResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::downloadDatafile(const char *endpoint, const char *soap_action, ns1__downloadDatafile *ns1__downloadDatafile_, ns1__downloadDatafileResponse *ns1__downloadDatafileResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::downloadDatafile(
+    const char *endpoint, const char *soap_action,
+    ns1__downloadDatafile *ns1__downloadDatafile_,
+    ns1__downloadDatafileResponse *ns1__downloadDatafileResponse_) {
+  struct soap *soap = this;
   struct __ns1__downloadDatafile soap_tmp___ns1__downloadDatafile;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -5352,52 +5722,54 @@ int ICATPortBindingProxy::downloadDatafile(const char *endpoint, const char *soa
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/downloadDatafileRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__downloadDatafile.ns1__downloadDatafile_ = ns1__downloadDatafile_;
+  soap_tmp___ns1__downloadDatafile.ns1__downloadDatafile_ =
+      ns1__downloadDatafile_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__downloadDatafile(soap, &soap_tmp___ns1__downloadDatafile);
+  soap_serialize___ns1__downloadDatafile(soap,
+                                         &soap_tmp___ns1__downloadDatafile);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__downloadDatafile(soap, &soap_tmp___ns1__downloadDatafile, "-ns1:downloadDatafile", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__downloadDatafile(soap,
+                                         &soap_tmp___ns1__downloadDatafile,
+                                         "-ns1:downloadDatafile", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__downloadDatafile(soap, &soap_tmp___ns1__downloadDatafile, "-ns1:downloadDatafile", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__downloadDatafile(soap, &soap_tmp___ns1__downloadDatafile,
+                                       "-ns1:downloadDatafile", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__downloadDatafileResponse_)
     return soap_closesock(soap);
   ns1__downloadDatafileResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__downloadDatafileResponse_->soap_get(soap, "ns1:downloadDatafileResponse", "ns1:downloadDatafileResponse");
+  ns1__downloadDatafileResponse_->soap_get(soap, "ns1:downloadDatafileResponse",
+                                           "ns1:downloadDatafileResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::downloadDataset(const char *endpoint, const char *soap_action, ns1__downloadDataset *ns1__downloadDataset_, ns1__downloadDatasetResponse *ns1__downloadDatasetResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::downloadDataset(
+    const char *endpoint, const char *soap_action,
+    ns1__downloadDataset *ns1__downloadDataset_,
+    ns1__downloadDatasetResponse *ns1__downloadDatasetResponse_) {
+  struct soap *soap = this;
   struct __ns1__downloadDataset soap_tmp___ns1__downloadDataset;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -5412,46 +5784,45 @@ int ICATPortBindingProxy::downloadDataset(const char *endpoint, const char *soap
   soap_serialize___ns1__downloadDataset(soap, &soap_tmp___ns1__downloadDataset);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__downloadDataset(soap, &soap_tmp___ns1__downloadDataset, "-ns1:downloadDataset", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__downloadDataset(soap, &soap_tmp___ns1__downloadDataset,
+                                        "-ns1:downloadDataset", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__downloadDataset(soap, &soap_tmp___ns1__downloadDataset, "-ns1:downloadDataset", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__downloadDataset(soap, &soap_tmp___ns1__downloadDataset,
+                                      "-ns1:downloadDataset", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__downloadDatasetResponse_)
     return soap_closesock(soap);
   ns1__downloadDatasetResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__downloadDatasetResponse_->soap_get(soap, "ns1:downloadDatasetResponse", "ns1:downloadDatasetResponse");
+  ns1__downloadDatasetResponse_->soap_get(soap, "ns1:downloadDatasetResponse",
+                                          "ns1:downloadDatasetResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::downloadDatafiles(const char *endpoint, const char *soap_action, ns1__downloadDatafiles *ns1__downloadDatafiles_, ns1__downloadDatafilesResponse *ns1__downloadDatafilesResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::downloadDatafiles(
+    const char *endpoint, const char *soap_action,
+    ns1__downloadDatafiles *ns1__downloadDatafiles_,
+    ns1__downloadDatafilesResponse *ns1__downloadDatafilesResponse_) {
+  struct soap *soap = this;
   struct __ns1__downloadDatafiles soap_tmp___ns1__downloadDatafiles;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -5460,53 +5831,57 @@ int ICATPortBindingProxy::downloadDatafiles(const char *endpoint, const char *so
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/downloadDatafilesRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__downloadDatafiles.ns1__downloadDatafiles_ = ns1__downloadDatafiles_;
+  soap_tmp___ns1__downloadDatafiles.ns1__downloadDatafiles_ =
+      ns1__downloadDatafiles_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__downloadDatafiles(soap, &soap_tmp___ns1__downloadDatafiles);
+  soap_serialize___ns1__downloadDatafiles(soap,
+                                          &soap_tmp___ns1__downloadDatafiles);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__downloadDatafiles(soap, &soap_tmp___ns1__downloadDatafiles, "-ns1:downloadDatafiles", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__downloadDatafiles(soap,
+                                          &soap_tmp___ns1__downloadDatafiles,
+                                          "-ns1:downloadDatafiles", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__downloadDatafiles(soap, &soap_tmp___ns1__downloadDatafiles, "-ns1:downloadDatafiles", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) || soap_put___ns1__downloadDatafiles(
+                                       soap, &soap_tmp___ns1__downloadDatafiles,
+                                       "-ns1:downloadDatafiles", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__downloadDatafilesResponse_)
     return soap_closesock(soap);
   ns1__downloadDatafilesResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__downloadDatafilesResponse_->soap_get(soap, "ns1:downloadDatafilesResponse", "ns1:downloadDatafilesResponse");
+  ns1__downloadDatafilesResponse_->soap_get(
+      soap, "ns1:downloadDatafilesResponse", "ns1:downloadDatafilesResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::checkDatafileDownloadAccess(const char *endpoint, const char *soap_action, ns1__checkDatafileDownloadAccess *ns1__checkDatafileDownloadAccess_, ns1__checkDatafileDownloadAccessResponse *ns1__checkDatafileDownloadAccessResponse_)
-{ struct soap *soap = this;
-  struct __ns1__checkDatafileDownloadAccess soap_tmp___ns1__checkDatafileDownloadAccess;
+int ICATPortBindingProxy::checkDatafileDownloadAccess(
+    const char *endpoint, const char *soap_action,
+    ns1__checkDatafileDownloadAccess *ns1__checkDatafileDownloadAccess_,
+    ns1__checkDatafileDownloadAccessResponse *
+        ns1__checkDatafileDownloadAccessResponse_) {
+  struct soap *soap = this;
+  struct __ns1__checkDatafileDownloadAccess
+      soap_tmp___ns1__checkDatafileDownloadAccess;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -5514,53 +5889,59 @@ int ICATPortBindingProxy::checkDatafileDownloadAccess(const char *endpoint, cons
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/checkDatafileDownloadAccessRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__checkDatafileDownloadAccess.ns1__checkDatafileDownloadAccess_ = ns1__checkDatafileDownloadAccess_;
+  soap_tmp___ns1__checkDatafileDownloadAccess
+      .ns1__checkDatafileDownloadAccess_ = ns1__checkDatafileDownloadAccess_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__checkDatafileDownloadAccess(soap, &soap_tmp___ns1__checkDatafileDownloadAccess);
+  soap_serialize___ns1__checkDatafileDownloadAccess(
+      soap, &soap_tmp___ns1__checkDatafileDownloadAccess);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__checkDatafileDownloadAccess(soap, &soap_tmp___ns1__checkDatafileDownloadAccess, "-ns1:checkDatafileDownloadAccess", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__checkDatafileDownloadAccess(
+            soap, &soap_tmp___ns1__checkDatafileDownloadAccess,
+            "-ns1:checkDatafileDownloadAccess", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__checkDatafileDownloadAccess(soap, &soap_tmp___ns1__checkDatafileDownloadAccess, "-ns1:checkDatafileDownloadAccess", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__checkDatafileDownloadAccess(
+          soap, &soap_tmp___ns1__checkDatafileDownloadAccess,
+          "-ns1:checkDatafileDownloadAccess", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__checkDatafileDownloadAccessResponse_)
     return soap_closesock(soap);
   ns1__checkDatafileDownloadAccessResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__checkDatafileDownloadAccessResponse_->soap_get(soap, "ns1:checkDatafileDownloadAccessResponse", "ns1:checkDatafileDownloadAccessResponse");
+  ns1__checkDatafileDownloadAccessResponse_->soap_get(
+      soap, "ns1:checkDatafileDownloadAccessResponse",
+      "ns1:checkDatafileDownloadAccessResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::checkDatasetDownloadAccess(const char *endpoint, const char *soap_action, ns1__checkDatasetDownloadAccess *ns1__checkDatasetDownloadAccess_, ns1__checkDatasetDownloadAccessResponse *ns1__checkDatasetDownloadAccessResponse_)
-{ struct soap *soap = this;
-  struct __ns1__checkDatasetDownloadAccess soap_tmp___ns1__checkDatasetDownloadAccess;
+int ICATPortBindingProxy::checkDatasetDownloadAccess(
+    const char *endpoint, const char *soap_action,
+    ns1__checkDatasetDownloadAccess *ns1__checkDatasetDownloadAccess_,
+    ns1__checkDatasetDownloadAccessResponse *
+        ns1__checkDatasetDownloadAccessResponse_) {
+  struct soap *soap = this;
+  struct __ns1__checkDatasetDownloadAccess
+      soap_tmp___ns1__checkDatasetDownloadAccess;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -5568,52 +5949,56 @@ int ICATPortBindingProxy::checkDatasetDownloadAccess(const char *endpoint, const
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/checkDatasetDownloadAccessRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__checkDatasetDownloadAccess.ns1__checkDatasetDownloadAccess_ = ns1__checkDatasetDownloadAccess_;
+  soap_tmp___ns1__checkDatasetDownloadAccess.ns1__checkDatasetDownloadAccess_ =
+      ns1__checkDatasetDownloadAccess_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__checkDatasetDownloadAccess(soap, &soap_tmp___ns1__checkDatasetDownloadAccess);
+  soap_serialize___ns1__checkDatasetDownloadAccess(
+      soap, &soap_tmp___ns1__checkDatasetDownloadAccess);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__checkDatasetDownloadAccess(soap, &soap_tmp___ns1__checkDatasetDownloadAccess, "-ns1:checkDatasetDownloadAccess", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__checkDatasetDownloadAccess(
+            soap, &soap_tmp___ns1__checkDatasetDownloadAccess,
+            "-ns1:checkDatasetDownloadAccess", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__checkDatasetDownloadAccess(soap, &soap_tmp___ns1__checkDatasetDownloadAccess, "-ns1:checkDatasetDownloadAccess", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__checkDatasetDownloadAccess(
+          soap, &soap_tmp___ns1__checkDatasetDownloadAccess,
+          "-ns1:checkDatasetDownloadAccess", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__checkDatasetDownloadAccessResponse_)
     return soap_closesock(soap);
   ns1__checkDatasetDownloadAccessResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__checkDatasetDownloadAccessResponse_->soap_get(soap, "ns1:checkDatasetDownloadAccessResponse", "ns1:checkDatasetDownloadAccessResponse");
+  ns1__checkDatasetDownloadAccessResponse_->soap_get(
+      soap, "ns1:checkDatasetDownloadAccessResponse",
+      "ns1:checkDatasetDownloadAccessResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getICATAPIVersion(const char *endpoint, const char *soap_action, ns1__getICATAPIVersion *ns1__getICATAPIVersion_, ns1__getICATAPIVersionResponse *ns1__getICATAPIVersionResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getICATAPIVersion(
+    const char *endpoint, const char *soap_action,
+    ns1__getICATAPIVersion *ns1__getICATAPIVersion_,
+    ns1__getICATAPIVersionResponse *ns1__getICATAPIVersionResponse_) {
+  struct soap *soap = this;
   struct __ns1__getICATAPIVersion soap_tmp___ns1__getICATAPIVersion;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -5622,53 +6007,57 @@ int ICATPortBindingProxy::getICATAPIVersion(const char *endpoint, const char *so
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getICATAPIVersionRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getICATAPIVersion.ns1__getICATAPIVersion_ = ns1__getICATAPIVersion_;
+  soap_tmp___ns1__getICATAPIVersion.ns1__getICATAPIVersion_ =
+      ns1__getICATAPIVersion_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getICATAPIVersion(soap, &soap_tmp___ns1__getICATAPIVersion);
+  soap_serialize___ns1__getICATAPIVersion(soap,
+                                          &soap_tmp___ns1__getICATAPIVersion);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getICATAPIVersion(soap, &soap_tmp___ns1__getICATAPIVersion, "-ns1:getICATAPIVersion", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getICATAPIVersion(soap,
+                                          &soap_tmp___ns1__getICATAPIVersion,
+                                          "-ns1:getICATAPIVersion", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getICATAPIVersion(soap, &soap_tmp___ns1__getICATAPIVersion, "-ns1:getICATAPIVersion", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) || soap_put___ns1__getICATAPIVersion(
+                                       soap, &soap_tmp___ns1__getICATAPIVersion,
+                                       "-ns1:getICATAPIVersion", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getICATAPIVersionResponse_)
     return soap_closesock(soap);
   ns1__getICATAPIVersionResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getICATAPIVersionResponse_->soap_get(soap, "ns1:getICATAPIVersionResponse", "ns1:getICATAPIVersionResponse");
+  ns1__getICATAPIVersionResponse_->soap_get(
+      soap, "ns1:getICATAPIVersionResponse", "ns1:getICATAPIVersionResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getFacilityUserByFacilityUserId(const char *endpoint, const char *soap_action, ns1__getFacilityUserByFacilityUserId *ns1__getFacilityUserByFacilityUserId_, ns1__getFacilityUserByFacilityUserIdResponse *ns1__getFacilityUserByFacilityUserIdResponse_)
-{ struct soap *soap = this;
-  struct __ns1__getFacilityUserByFacilityUserId soap_tmp___ns1__getFacilityUserByFacilityUserId;
+int ICATPortBindingProxy::getFacilityUserByFacilityUserId(
+    const char *endpoint, const char *soap_action,
+    ns1__getFacilityUserByFacilityUserId *ns1__getFacilityUserByFacilityUserId_,
+    ns1__getFacilityUserByFacilityUserIdResponse *
+        ns1__getFacilityUserByFacilityUserIdResponse_) {
+  struct soap *soap = this;
+  struct __ns1__getFacilityUserByFacilityUserId
+      soap_tmp___ns1__getFacilityUserByFacilityUserId;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -5676,53 +6065,60 @@ int ICATPortBindingProxy::getFacilityUserByFacilityUserId(const char *endpoint, 
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getFacilityUserByFacilityUserIdRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getFacilityUserByFacilityUserId.ns1__getFacilityUserByFacilityUserId_ = ns1__getFacilityUserByFacilityUserId_;
+  soap_tmp___ns1__getFacilityUserByFacilityUserId
+      .ns1__getFacilityUserByFacilityUserId_ =
+      ns1__getFacilityUserByFacilityUserId_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getFacilityUserByFacilityUserId(soap, &soap_tmp___ns1__getFacilityUserByFacilityUserId);
+  soap_serialize___ns1__getFacilityUserByFacilityUserId(
+      soap, &soap_tmp___ns1__getFacilityUserByFacilityUserId);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getFacilityUserByFacilityUserId(soap, &soap_tmp___ns1__getFacilityUserByFacilityUserId, "-ns1:getFacilityUserByFacilityUserId", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getFacilityUserByFacilityUserId(
+            soap, &soap_tmp___ns1__getFacilityUserByFacilityUserId,
+            "-ns1:getFacilityUserByFacilityUserId", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getFacilityUserByFacilityUserId(soap, &soap_tmp___ns1__getFacilityUserByFacilityUserId, "-ns1:getFacilityUserByFacilityUserId", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getFacilityUserByFacilityUserId(
+          soap, &soap_tmp___ns1__getFacilityUserByFacilityUserId,
+          "-ns1:getFacilityUserByFacilityUserId", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getFacilityUserByFacilityUserIdResponse_)
     return soap_closesock(soap);
   ns1__getFacilityUserByFacilityUserIdResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getFacilityUserByFacilityUserIdResponse_->soap_get(soap, "ns1:getFacilityUserByFacilityUserIdResponse", "ns1:getFacilityUserByFacilityUserIdResponse");
+  ns1__getFacilityUserByFacilityUserIdResponse_->soap_get(
+      soap, "ns1:getFacilityUserByFacilityUserIdResponse",
+      "ns1:getFacilityUserByFacilityUserIdResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getFacilityUserByFederalId(const char *endpoint, const char *soap_action, ns1__getFacilityUserByFederalId *ns1__getFacilityUserByFederalId_, ns1__getFacilityUserByFederalIdResponse *ns1__getFacilityUserByFederalIdResponse_)
-{ struct soap *soap = this;
-  struct __ns1__getFacilityUserByFederalId soap_tmp___ns1__getFacilityUserByFederalId;
+int ICATPortBindingProxy::getFacilityUserByFederalId(
+    const char *endpoint, const char *soap_action,
+    ns1__getFacilityUserByFederalId *ns1__getFacilityUserByFederalId_,
+    ns1__getFacilityUserByFederalIdResponse *
+        ns1__getFacilityUserByFederalIdResponse_) {
+  struct soap *soap = this;
+  struct __ns1__getFacilityUserByFederalId
+      soap_tmp___ns1__getFacilityUserByFederalId;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -5730,485 +6126,563 @@ int ICATPortBindingProxy::getFacilityUserByFederalId(const char *endpoint, const
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getFacilityUserByFederalIdRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getFacilityUserByFederalId.ns1__getFacilityUserByFederalId_ = ns1__getFacilityUserByFederalId_;
+  soap_tmp___ns1__getFacilityUserByFederalId.ns1__getFacilityUserByFederalId_ =
+      ns1__getFacilityUserByFederalId_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getFacilityUserByFederalId(soap, &soap_tmp___ns1__getFacilityUserByFederalId);
+  soap_serialize___ns1__getFacilityUserByFederalId(
+      soap, &soap_tmp___ns1__getFacilityUserByFederalId);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getFacilityUserByFederalId(soap, &soap_tmp___ns1__getFacilityUserByFederalId, "-ns1:getFacilityUserByFederalId", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getFacilityUserByFederalId(
+            soap, &soap_tmp___ns1__getFacilityUserByFederalId,
+            "-ns1:getFacilityUserByFederalId", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getFacilityUserByFederalId(soap, &soap_tmp___ns1__getFacilityUserByFederalId, "-ns1:getFacilityUserByFederalId", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getFacilityUserByFederalId(
+          soap, &soap_tmp___ns1__getFacilityUserByFederalId,
+          "-ns1:getFacilityUserByFederalId", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getFacilityUserByFederalIdResponse_)
     return soap_closesock(soap);
   ns1__getFacilityUserByFederalIdResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getFacilityUserByFederalIdResponse_->soap_get(soap, "ns1:getFacilityUserByFederalIdResponse", "ns1:getFacilityUserByFederalIdResponse");
+  ns1__getFacilityUserByFederalIdResponse_->soap_get(
+      soap, "ns1:getFacilityUserByFederalIdResponse",
+      "ns1:getFacilityUserByFederalIdResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchInvestigationByParameterCondition(const char *endpoint, const char *soap_action, ns1__searchInvestigationByParameterCondition *ns1__searchInvestigationByParameterCondition_, ns1__searchInvestigationByParameterConditionResponse *ns1__searchInvestigationByParameterConditionResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchInvestigationByParameterCondition soap_tmp___ns1__searchInvestigationByParameterCondition;
+int ICATPortBindingProxy::searchInvestigationByParameterCondition(
+    const char *endpoint, const char *soap_action,
+    ns1__searchInvestigationByParameterCondition *
+        ns1__searchInvestigationByParameterCondition_,
+    ns1__searchInvestigationByParameterConditionResponse *
+        ns1__searchInvestigationByParameterConditionResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchInvestigationByParameterCondition
+      soap_tmp___ns1__searchInvestigationByParameterCondition;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchInvestigationByParameterConditionRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchInvestigationByParameterConditionRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchInvestigationByParameterCondition.ns1__searchInvestigationByParameterCondition_ = ns1__searchInvestigationByParameterCondition_;
+  soap_tmp___ns1__searchInvestigationByParameterCondition
+      .ns1__searchInvestigationByParameterCondition_ =
+      ns1__searchInvestigationByParameterCondition_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchInvestigationByParameterCondition(soap, &soap_tmp___ns1__searchInvestigationByParameterCondition);
+  soap_serialize___ns1__searchInvestigationByParameterCondition(
+      soap, &soap_tmp___ns1__searchInvestigationByParameterCondition);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchInvestigationByParameterCondition(soap, &soap_tmp___ns1__searchInvestigationByParameterCondition, "-ns1:searchInvestigationByParameterCondition", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchInvestigationByParameterCondition(
+            soap, &soap_tmp___ns1__searchInvestigationByParameterCondition,
+            "-ns1:searchInvestigationByParameterCondition", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchInvestigationByParameterCondition(soap, &soap_tmp___ns1__searchInvestigationByParameterCondition, "-ns1:searchInvestigationByParameterCondition", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchInvestigationByParameterCondition(
+          soap, &soap_tmp___ns1__searchInvestigationByParameterCondition,
+          "-ns1:searchInvestigationByParameterCondition", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchInvestigationByParameterConditionResponse_)
     return soap_closesock(soap);
   ns1__searchInvestigationByParameterConditionResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchInvestigationByParameterConditionResponse_->soap_get(soap, "ns1:searchInvestigationByParameterConditionResponse", "ns1:searchInvestigationByParameterConditionResponse");
+  ns1__searchInvestigationByParameterConditionResponse_->soap_get(
+      soap, "ns1:searchInvestigationByParameterConditionResponse",
+      "ns1:searchInvestigationByParameterConditionResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatafileByParameterCondition(const char *endpoint, const char *soap_action, ns1__searchDatafileByParameterCondition *ns1__searchDatafileByParameterCondition_, ns1__searchDatafileByParameterConditionResponse *ns1__searchDatafileByParameterConditionResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchDatafileByParameterCondition soap_tmp___ns1__searchDatafileByParameterCondition;
+int ICATPortBindingProxy::searchDatafileByParameterCondition(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatafileByParameterCondition *
+        ns1__searchDatafileByParameterCondition_,
+    ns1__searchDatafileByParameterConditionResponse *
+        ns1__searchDatafileByParameterConditionResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchDatafileByParameterCondition
+      soap_tmp___ns1__searchDatafileByParameterCondition;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchDatafileByParameterConditionRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchDatafileByParameterConditionRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatafileByParameterCondition.ns1__searchDatafileByParameterCondition_ = ns1__searchDatafileByParameterCondition_;
+  soap_tmp___ns1__searchDatafileByParameterCondition
+      .ns1__searchDatafileByParameterCondition_ =
+      ns1__searchDatafileByParameterCondition_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatafileByParameterCondition(soap, &soap_tmp___ns1__searchDatafileByParameterCondition);
+  soap_serialize___ns1__searchDatafileByParameterCondition(
+      soap, &soap_tmp___ns1__searchDatafileByParameterCondition);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatafileByParameterCondition(soap, &soap_tmp___ns1__searchDatafileByParameterCondition, "-ns1:searchDatafileByParameterCondition", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatafileByParameterCondition(
+            soap, &soap_tmp___ns1__searchDatafileByParameterCondition,
+            "-ns1:searchDatafileByParameterCondition", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatafileByParameterCondition(soap, &soap_tmp___ns1__searchDatafileByParameterCondition, "-ns1:searchDatafileByParameterCondition", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatafileByParameterCondition(
+          soap, &soap_tmp___ns1__searchDatafileByParameterCondition,
+          "-ns1:searchDatafileByParameterCondition", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatafileByParameterConditionResponse_)
     return soap_closesock(soap);
   ns1__searchDatafileByParameterConditionResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatafileByParameterConditionResponse_->soap_get(soap, "ns1:searchDatafileByParameterConditionResponse", "ns1:searchDatafileByParameterConditionResponse");
+  ns1__searchDatafileByParameterConditionResponse_->soap_get(
+      soap, "ns1:searchDatafileByParameterConditionResponse",
+      "ns1:searchDatafileByParameterConditionResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatasetByParameterCondition(const char *endpoint, const char *soap_action, ns1__searchDatasetByParameterCondition *ns1__searchDatasetByParameterCondition_, ns1__searchDatasetByParameterConditionResponse *ns1__searchDatasetByParameterConditionResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchDatasetByParameterCondition soap_tmp___ns1__searchDatasetByParameterCondition;
+int ICATPortBindingProxy::searchDatasetByParameterCondition(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatasetByParameterCondition *
+        ns1__searchDatasetByParameterCondition_,
+    ns1__searchDatasetByParameterConditionResponse *
+        ns1__searchDatasetByParameterConditionResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchDatasetByParameterCondition
+      soap_tmp___ns1__searchDatasetByParameterCondition;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchDatasetByParameterConditionRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchDatasetByParameterConditionRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatasetByParameterCondition.ns1__searchDatasetByParameterCondition_ = ns1__searchDatasetByParameterCondition_;
+  soap_tmp___ns1__searchDatasetByParameterCondition
+      .ns1__searchDatasetByParameterCondition_ =
+      ns1__searchDatasetByParameterCondition_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatasetByParameterCondition(soap, &soap_tmp___ns1__searchDatasetByParameterCondition);
+  soap_serialize___ns1__searchDatasetByParameterCondition(
+      soap, &soap_tmp___ns1__searchDatasetByParameterCondition);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatasetByParameterCondition(soap, &soap_tmp___ns1__searchDatasetByParameterCondition, "-ns1:searchDatasetByParameterCondition", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatasetByParameterCondition(
+            soap, &soap_tmp___ns1__searchDatasetByParameterCondition,
+            "-ns1:searchDatasetByParameterCondition", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatasetByParameterCondition(soap, &soap_tmp___ns1__searchDatasetByParameterCondition, "-ns1:searchDatasetByParameterCondition", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatasetByParameterCondition(
+          soap, &soap_tmp___ns1__searchDatasetByParameterCondition,
+          "-ns1:searchDatasetByParameterCondition", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatasetByParameterConditionResponse_)
     return soap_closesock(soap);
   ns1__searchDatasetByParameterConditionResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatasetByParameterConditionResponse_->soap_get(soap, "ns1:searchDatasetByParameterConditionResponse", "ns1:searchDatasetByParameterConditionResponse");
+  ns1__searchDatasetByParameterConditionResponse_->soap_get(
+      soap, "ns1:searchDatasetByParameterConditionResponse",
+      "ns1:searchDatasetByParameterConditionResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchSampleByParameterCondition(const char *endpoint, const char *soap_action, ns1__searchSampleByParameterCondition *ns1__searchSampleByParameterCondition_, ns1__searchSampleByParameterConditionResponse *ns1__searchSampleByParameterConditionResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchSampleByParameterCondition soap_tmp___ns1__searchSampleByParameterCondition;
+int ICATPortBindingProxy::searchSampleByParameterCondition(
+    const char *endpoint, const char *soap_action,
+    ns1__searchSampleByParameterCondition *
+        ns1__searchSampleByParameterCondition_,
+    ns1__searchSampleByParameterConditionResponse *
+        ns1__searchSampleByParameterConditionResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchSampleByParameterCondition
+      soap_tmp___ns1__searchSampleByParameterCondition;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchSampleByParameterConditionRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchSampleByParameterConditionRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchSampleByParameterCondition.ns1__searchSampleByParameterCondition_ = ns1__searchSampleByParameterCondition_;
+  soap_tmp___ns1__searchSampleByParameterCondition
+      .ns1__searchSampleByParameterCondition_ =
+      ns1__searchSampleByParameterCondition_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchSampleByParameterCondition(soap, &soap_tmp___ns1__searchSampleByParameterCondition);
+  soap_serialize___ns1__searchSampleByParameterCondition(
+      soap, &soap_tmp___ns1__searchSampleByParameterCondition);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchSampleByParameterCondition(soap, &soap_tmp___ns1__searchSampleByParameterCondition, "-ns1:searchSampleByParameterCondition", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchSampleByParameterCondition(
+            soap, &soap_tmp___ns1__searchSampleByParameterCondition,
+            "-ns1:searchSampleByParameterCondition", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchSampleByParameterCondition(soap, &soap_tmp___ns1__searchSampleByParameterCondition, "-ns1:searchSampleByParameterCondition", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchSampleByParameterCondition(
+          soap, &soap_tmp___ns1__searchSampleByParameterCondition,
+          "-ns1:searchSampleByParameterCondition", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchSampleByParameterConditionResponse_)
     return soap_closesock(soap);
   ns1__searchSampleByParameterConditionResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchSampleByParameterConditionResponse_->soap_get(soap, "ns1:searchSampleByParameterConditionResponse", "ns1:searchSampleByParameterConditionResponse");
+  ns1__searchSampleByParameterConditionResponse_->soap_get(
+      soap, "ns1:searchSampleByParameterConditionResponse",
+      "ns1:searchSampleByParameterConditionResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchInvestigationByParameterComparison(const char *endpoint, const char *soap_action, ns1__searchInvestigationByParameterComparison *ns1__searchInvestigationByParameterComparison_, ns1__searchInvestigationByParameterComparisonResponse *ns1__searchInvestigationByParameterComparisonResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchInvestigationByParameterComparison soap_tmp___ns1__searchInvestigationByParameterComparison;
+int ICATPortBindingProxy::searchInvestigationByParameterComparison(
+    const char *endpoint, const char *soap_action,
+    ns1__searchInvestigationByParameterComparison *
+        ns1__searchInvestigationByParameterComparison_,
+    ns1__searchInvestigationByParameterComparisonResponse *
+        ns1__searchInvestigationByParameterComparisonResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchInvestigationByParameterComparison
+      soap_tmp___ns1__searchInvestigationByParameterComparison;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchInvestigationByParameterComparisonRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchInvestigationByParameterComparisonRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchInvestigationByParameterComparison.ns1__searchInvestigationByParameterComparison_ = ns1__searchInvestigationByParameterComparison_;
+  soap_tmp___ns1__searchInvestigationByParameterComparison
+      .ns1__searchInvestigationByParameterComparison_ =
+      ns1__searchInvestigationByParameterComparison_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchInvestigationByParameterComparison(soap, &soap_tmp___ns1__searchInvestigationByParameterComparison);
+  soap_serialize___ns1__searchInvestigationByParameterComparison(
+      soap, &soap_tmp___ns1__searchInvestigationByParameterComparison);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchInvestigationByParameterComparison(soap, &soap_tmp___ns1__searchInvestigationByParameterComparison, "-ns1:searchInvestigationByParameterComparison", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchInvestigationByParameterComparison(
+            soap, &soap_tmp___ns1__searchInvestigationByParameterComparison,
+            "-ns1:searchInvestigationByParameterComparison", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchInvestigationByParameterComparison(soap, &soap_tmp___ns1__searchInvestigationByParameterComparison, "-ns1:searchInvestigationByParameterComparison", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchInvestigationByParameterComparison(
+          soap, &soap_tmp___ns1__searchInvestigationByParameterComparison,
+          "-ns1:searchInvestigationByParameterComparison", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchInvestigationByParameterComparisonResponse_)
     return soap_closesock(soap);
   ns1__searchInvestigationByParameterComparisonResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchInvestigationByParameterComparisonResponse_->soap_get(soap, "ns1:searchInvestigationByParameterComparisonResponse", "ns1:searchInvestigationByParameterComparisonResponse");
+  ns1__searchInvestigationByParameterComparisonResponse_->soap_get(
+      soap, "ns1:searchInvestigationByParameterComparisonResponse",
+      "ns1:searchInvestigationByParameterComparisonResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatafileByParameterComparison(const char *endpoint, const char *soap_action, ns1__searchDatafileByParameterComparison *ns1__searchDatafileByParameterComparison_, ns1__searchDatafileByParameterComparisonResponse *ns1__searchDatafileByParameterComparisonResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchDatafileByParameterComparison soap_tmp___ns1__searchDatafileByParameterComparison;
+int ICATPortBindingProxy::searchDatafileByParameterComparison(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatafileByParameterComparison *
+        ns1__searchDatafileByParameterComparison_,
+    ns1__searchDatafileByParameterComparisonResponse *
+        ns1__searchDatafileByParameterComparisonResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchDatafileByParameterComparison
+      soap_tmp___ns1__searchDatafileByParameterComparison;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchDatafileByParameterComparisonRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchDatafileByParameterComparisonRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatafileByParameterComparison.ns1__searchDatafileByParameterComparison_ = ns1__searchDatafileByParameterComparison_;
+  soap_tmp___ns1__searchDatafileByParameterComparison
+      .ns1__searchDatafileByParameterComparison_ =
+      ns1__searchDatafileByParameterComparison_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatafileByParameterComparison(soap, &soap_tmp___ns1__searchDatafileByParameterComparison);
+  soap_serialize___ns1__searchDatafileByParameterComparison(
+      soap, &soap_tmp___ns1__searchDatafileByParameterComparison);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatafileByParameterComparison(soap, &soap_tmp___ns1__searchDatafileByParameterComparison, "-ns1:searchDatafileByParameterComparison", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatafileByParameterComparison(
+            soap, &soap_tmp___ns1__searchDatafileByParameterComparison,
+            "-ns1:searchDatafileByParameterComparison", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatafileByParameterComparison(soap, &soap_tmp___ns1__searchDatafileByParameterComparison, "-ns1:searchDatafileByParameterComparison", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatafileByParameterComparison(
+          soap, &soap_tmp___ns1__searchDatafileByParameterComparison,
+          "-ns1:searchDatafileByParameterComparison", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatafileByParameterComparisonResponse_)
     return soap_closesock(soap);
   ns1__searchDatafileByParameterComparisonResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatafileByParameterComparisonResponse_->soap_get(soap, "ns1:searchDatafileByParameterComparisonResponse", "ns1:searchDatafileByParameterComparisonResponse");
+  ns1__searchDatafileByParameterComparisonResponse_->soap_get(
+      soap, "ns1:searchDatafileByParameterComparisonResponse",
+      "ns1:searchDatafileByParameterComparisonResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatasetByParameterComparison(const char *endpoint, const char *soap_action, ns1__searchDatasetByParameterComparison *ns1__searchDatasetByParameterComparison_, ns1__searchDatasetByParameterComparisonResponse *ns1__searchDatasetByParameterComparisonResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchDatasetByParameterComparison soap_tmp___ns1__searchDatasetByParameterComparison;
+int ICATPortBindingProxy::searchDatasetByParameterComparison(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatasetByParameterComparison *
+        ns1__searchDatasetByParameterComparison_,
+    ns1__searchDatasetByParameterComparisonResponse *
+        ns1__searchDatasetByParameterComparisonResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchDatasetByParameterComparison
+      soap_tmp___ns1__searchDatasetByParameterComparison;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchDatasetByParameterComparisonRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchDatasetByParameterComparisonRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatasetByParameterComparison.ns1__searchDatasetByParameterComparison_ = ns1__searchDatasetByParameterComparison_;
+  soap_tmp___ns1__searchDatasetByParameterComparison
+      .ns1__searchDatasetByParameterComparison_ =
+      ns1__searchDatasetByParameterComparison_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatasetByParameterComparison(soap, &soap_tmp___ns1__searchDatasetByParameterComparison);
+  soap_serialize___ns1__searchDatasetByParameterComparison(
+      soap, &soap_tmp___ns1__searchDatasetByParameterComparison);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatasetByParameterComparison(soap, &soap_tmp___ns1__searchDatasetByParameterComparison, "-ns1:searchDatasetByParameterComparison", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatasetByParameterComparison(
+            soap, &soap_tmp___ns1__searchDatasetByParameterComparison,
+            "-ns1:searchDatasetByParameterComparison", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatasetByParameterComparison(soap, &soap_tmp___ns1__searchDatasetByParameterComparison, "-ns1:searchDatasetByParameterComparison", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatasetByParameterComparison(
+          soap, &soap_tmp___ns1__searchDatasetByParameterComparison,
+          "-ns1:searchDatasetByParameterComparison", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatasetByParameterComparisonResponse_)
     return soap_closesock(soap);
   ns1__searchDatasetByParameterComparisonResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatasetByParameterComparisonResponse_->soap_get(soap, "ns1:searchDatasetByParameterComparisonResponse", "ns1:searchDatasetByParameterComparisonResponse");
+  ns1__searchDatasetByParameterComparisonResponse_->soap_get(
+      soap, "ns1:searchDatasetByParameterComparisonResponse",
+      "ns1:searchDatasetByParameterComparisonResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchSampleByParameterComparison(const char *endpoint, const char *soap_action, ns1__searchSampleByParameterComparison *ns1__searchSampleByParameterComparison_, ns1__searchSampleByParameterComparisonResponse *ns1__searchSampleByParameterComparisonResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchSampleByParameterComparison soap_tmp___ns1__searchSampleByParameterComparison;
+int ICATPortBindingProxy::searchSampleByParameterComparison(
+    const char *endpoint, const char *soap_action,
+    ns1__searchSampleByParameterComparison *
+        ns1__searchSampleByParameterComparison_,
+    ns1__searchSampleByParameterComparisonResponse *
+        ns1__searchSampleByParameterComparisonResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchSampleByParameterComparison
+      soap_tmp___ns1__searchSampleByParameterComparison;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchSampleByParameterComparisonRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchSampleByParameterComparisonRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchSampleByParameterComparison.ns1__searchSampleByParameterComparison_ = ns1__searchSampleByParameterComparison_;
+  soap_tmp___ns1__searchSampleByParameterComparison
+      .ns1__searchSampleByParameterComparison_ =
+      ns1__searchSampleByParameterComparison_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchSampleByParameterComparison(soap, &soap_tmp___ns1__searchSampleByParameterComparison);
+  soap_serialize___ns1__searchSampleByParameterComparison(
+      soap, &soap_tmp___ns1__searchSampleByParameterComparison);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchSampleByParameterComparison(soap, &soap_tmp___ns1__searchSampleByParameterComparison, "-ns1:searchSampleByParameterComparison", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchSampleByParameterComparison(
+            soap, &soap_tmp___ns1__searchSampleByParameterComparison,
+            "-ns1:searchSampleByParameterComparison", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchSampleByParameterComparison(soap, &soap_tmp___ns1__searchSampleByParameterComparison, "-ns1:searchSampleByParameterComparison", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchSampleByParameterComparison(
+          soap, &soap_tmp___ns1__searchSampleByParameterComparison,
+          "-ns1:searchSampleByParameterComparison", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchSampleByParameterComparisonResponse_)
     return soap_closesock(soap);
   ns1__searchSampleByParameterComparisonResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchSampleByParameterComparisonResponse_->soap_get(soap, "ns1:searchSampleByParameterComparisonResponse", "ns1:searchSampleByParameterComparisonResponse");
+  ns1__searchSampleByParameterComparisonResponse_->soap_get(
+      soap, "ns1:searchSampleByParameterComparisonResponse",
+      "ns1:searchSampleByParameterComparisonResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchInvestigationByParameter(const char *endpoint, const char *soap_action, ns1__searchInvestigationByParameter *ns1__searchInvestigationByParameter_, ns1__searchInvestigationByParameterResponse *ns1__searchInvestigationByParameterResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchInvestigationByParameter soap_tmp___ns1__searchInvestigationByParameter;
+int ICATPortBindingProxy::searchInvestigationByParameter(
+    const char *endpoint, const char *soap_action,
+    ns1__searchInvestigationByParameter *ns1__searchInvestigationByParameter_,
+    ns1__searchInvestigationByParameterResponse *
+        ns1__searchInvestigationByParameterResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchInvestigationByParameter
+      soap_tmp___ns1__searchInvestigationByParameter;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -6216,53 +6690,60 @@ int ICATPortBindingProxy::searchInvestigationByParameter(const char *endpoint, c
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchInvestigationByParameterRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchInvestigationByParameter.ns1__searchInvestigationByParameter_ = ns1__searchInvestigationByParameter_;
+  soap_tmp___ns1__searchInvestigationByParameter
+      .ns1__searchInvestigationByParameter_ =
+      ns1__searchInvestigationByParameter_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchInvestigationByParameter(soap, &soap_tmp___ns1__searchInvestigationByParameter);
+  soap_serialize___ns1__searchInvestigationByParameter(
+      soap, &soap_tmp___ns1__searchInvestigationByParameter);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchInvestigationByParameter(soap, &soap_tmp___ns1__searchInvestigationByParameter, "-ns1:searchInvestigationByParameter", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchInvestigationByParameter(
+            soap, &soap_tmp___ns1__searchInvestigationByParameter,
+            "-ns1:searchInvestigationByParameter", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchInvestigationByParameter(soap, &soap_tmp___ns1__searchInvestigationByParameter, "-ns1:searchInvestigationByParameter", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchInvestigationByParameter(
+          soap, &soap_tmp___ns1__searchInvestigationByParameter,
+          "-ns1:searchInvestigationByParameter", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchInvestigationByParameterResponse_)
     return soap_closesock(soap);
   ns1__searchInvestigationByParameterResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchInvestigationByParameterResponse_->soap_get(soap, "ns1:searchInvestigationByParameterResponse", "ns1:searchInvestigationByParameterResponse");
+  ns1__searchInvestigationByParameterResponse_->soap_get(
+      soap, "ns1:searchInvestigationByParameterResponse",
+      "ns1:searchInvestigationByParameterResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatafileByParameter(const char *endpoint, const char *soap_action, ns1__searchDatafileByParameter *ns1__searchDatafileByParameter_, ns1__searchDatafileByParameterResponse *ns1__searchDatafileByParameterResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchDatafileByParameter soap_tmp___ns1__searchDatafileByParameter;
+int ICATPortBindingProxy::searchDatafileByParameter(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatafileByParameter *ns1__searchDatafileByParameter_,
+    ns1__searchDatafileByParameterResponse *
+        ns1__searchDatafileByParameterResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchDatafileByParameter
+      soap_tmp___ns1__searchDatafileByParameter;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -6270,53 +6751,59 @@ int ICATPortBindingProxy::searchDatafileByParameter(const char *endpoint, const 
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchDatafileByParameterRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatafileByParameter.ns1__searchDatafileByParameter_ = ns1__searchDatafileByParameter_;
+  soap_tmp___ns1__searchDatafileByParameter.ns1__searchDatafileByParameter_ =
+      ns1__searchDatafileByParameter_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatafileByParameter(soap, &soap_tmp___ns1__searchDatafileByParameter);
+  soap_serialize___ns1__searchDatafileByParameter(
+      soap, &soap_tmp___ns1__searchDatafileByParameter);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatafileByParameter(soap, &soap_tmp___ns1__searchDatafileByParameter, "-ns1:searchDatafileByParameter", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatafileByParameter(
+            soap, &soap_tmp___ns1__searchDatafileByParameter,
+            "-ns1:searchDatafileByParameter", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatafileByParameter(soap, &soap_tmp___ns1__searchDatafileByParameter, "-ns1:searchDatafileByParameter", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatafileByParameter(
+          soap, &soap_tmp___ns1__searchDatafileByParameter,
+          "-ns1:searchDatafileByParameter", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatafileByParameterResponse_)
     return soap_closesock(soap);
   ns1__searchDatafileByParameterResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatafileByParameterResponse_->soap_get(soap, "ns1:searchDatafileByParameterResponse", "ns1:searchDatafileByParameterResponse");
+  ns1__searchDatafileByParameterResponse_->soap_get(
+      soap, "ns1:searchDatafileByParameterResponse",
+      "ns1:searchDatafileByParameterResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatasetByParameter(const char *endpoint, const char *soap_action, ns1__searchDatasetByParameter *ns1__searchDatasetByParameter_, ns1__searchDatasetByParameterResponse *ns1__searchDatasetByParameterResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchDatasetByParameter soap_tmp___ns1__searchDatasetByParameter;
+int ICATPortBindingProxy::searchDatasetByParameter(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatasetByParameter *ns1__searchDatasetByParameter_,
+    ns1__searchDatasetByParameterResponse *
+        ns1__searchDatasetByParameterResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchDatasetByParameter
+      soap_tmp___ns1__searchDatasetByParameter;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -6324,52 +6811,57 @@ int ICATPortBindingProxy::searchDatasetByParameter(const char *endpoint, const c
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchDatasetByParameterRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatasetByParameter.ns1__searchDatasetByParameter_ = ns1__searchDatasetByParameter_;
+  soap_tmp___ns1__searchDatasetByParameter.ns1__searchDatasetByParameter_ =
+      ns1__searchDatasetByParameter_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatasetByParameter(soap, &soap_tmp___ns1__searchDatasetByParameter);
+  soap_serialize___ns1__searchDatasetByParameter(
+      soap, &soap_tmp___ns1__searchDatasetByParameter);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatasetByParameter(soap, &soap_tmp___ns1__searchDatasetByParameter, "-ns1:searchDatasetByParameter", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatasetByParameter(
+            soap, &soap_tmp___ns1__searchDatasetByParameter,
+            "-ns1:searchDatasetByParameter", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatasetByParameter(soap, &soap_tmp___ns1__searchDatasetByParameter, "-ns1:searchDatasetByParameter", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatasetByParameter(
+          soap, &soap_tmp___ns1__searchDatasetByParameter,
+          "-ns1:searchDatasetByParameter", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatasetByParameterResponse_)
     return soap_closesock(soap);
   ns1__searchDatasetByParameterResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatasetByParameterResponse_->soap_get(soap, "ns1:searchDatasetByParameterResponse", "ns1:searchDatasetByParameterResponse");
+  ns1__searchDatasetByParameterResponse_->soap_get(
+      soap, "ns1:searchDatasetByParameterResponse",
+      "ns1:searchDatasetByParameterResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchSampleByParameter(const char *endpoint, const char *soap_action, ns1__searchSampleByParameter *ns1__searchSampleByParameter_, ns1__searchSampleByParameterResponse *ns1__searchSampleByParameterResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::searchSampleByParameter(
+    const char *endpoint, const char *soap_action,
+    ns1__searchSampleByParameter *ns1__searchSampleByParameter_,
+    ns1__searchSampleByParameterResponse *
+        ns1__searchSampleByParameterResponse_) {
+  struct soap *soap = this;
   struct __ns1__searchSampleByParameter soap_tmp___ns1__searchSampleByParameter;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -6378,52 +6870,57 @@ int ICATPortBindingProxy::searchSampleByParameter(const char *endpoint, const ch
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchSampleByParameterRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchSampleByParameter.ns1__searchSampleByParameter_ = ns1__searchSampleByParameter_;
+  soap_tmp___ns1__searchSampleByParameter.ns1__searchSampleByParameter_ =
+      ns1__searchSampleByParameter_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchSampleByParameter(soap, &soap_tmp___ns1__searchSampleByParameter);
+  soap_serialize___ns1__searchSampleByParameter(
+      soap, &soap_tmp___ns1__searchSampleByParameter);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchSampleByParameter(soap, &soap_tmp___ns1__searchSampleByParameter, "-ns1:searchSampleByParameter", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchSampleByParameter(
+            soap, &soap_tmp___ns1__searchSampleByParameter,
+            "-ns1:searchSampleByParameter", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchSampleByParameter(soap, &soap_tmp___ns1__searchSampleByParameter, "-ns1:searchSampleByParameter", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchSampleByParameter(
+          soap, &soap_tmp___ns1__searchSampleByParameter,
+          "-ns1:searchSampleByParameter", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchSampleByParameterResponse_)
     return soap_closesock(soap);
   ns1__searchSampleByParameterResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchSampleByParameterResponse_->soap_get(soap, "ns1:searchSampleByParameterResponse", "ns1:searchSampleByParameterResponse");
+  ns1__searchSampleByParameterResponse_->soap_get(
+      soap, "ns1:searchSampleByParameterResponse",
+      "ns1:searchSampleByParameterResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getParameterByNameUnits(const char *endpoint, const char *soap_action, ns1__getParameterByNameUnits *ns1__getParameterByNameUnits_, ns1__getParameterByNameUnitsResponse *ns1__getParameterByNameUnitsResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getParameterByNameUnits(
+    const char *endpoint, const char *soap_action,
+    ns1__getParameterByNameUnits *ns1__getParameterByNameUnits_,
+    ns1__getParameterByNameUnitsResponse *
+        ns1__getParameterByNameUnitsResponse_) {
+  struct soap *soap = this;
   struct __ns1__getParameterByNameUnits soap_tmp___ns1__getParameterByNameUnits;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -6432,52 +6929,56 @@ int ICATPortBindingProxy::getParameterByNameUnits(const char *endpoint, const ch
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getParameterByNameUnitsRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getParameterByNameUnits.ns1__getParameterByNameUnits_ = ns1__getParameterByNameUnits_;
+  soap_tmp___ns1__getParameterByNameUnits.ns1__getParameterByNameUnits_ =
+      ns1__getParameterByNameUnits_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getParameterByNameUnits(soap, &soap_tmp___ns1__getParameterByNameUnits);
+  soap_serialize___ns1__getParameterByNameUnits(
+      soap, &soap_tmp___ns1__getParameterByNameUnits);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getParameterByNameUnits(soap, &soap_tmp___ns1__getParameterByNameUnits, "-ns1:getParameterByNameUnits", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getParameterByNameUnits(
+            soap, &soap_tmp___ns1__getParameterByNameUnits,
+            "-ns1:getParameterByNameUnits", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getParameterByNameUnits(soap, &soap_tmp___ns1__getParameterByNameUnits, "-ns1:getParameterByNameUnits", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getParameterByNameUnits(
+          soap, &soap_tmp___ns1__getParameterByNameUnits,
+          "-ns1:getParameterByNameUnits", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getParameterByNameUnitsResponse_)
     return soap_closesock(soap);
   ns1__getParameterByNameUnitsResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getParameterByNameUnitsResponse_->soap_get(soap, "ns1:getParameterByNameUnitsResponse", "ns1:getParameterByNameUnitsResponse");
+  ns1__getParameterByNameUnitsResponse_->soap_get(
+      soap, "ns1:getParameterByNameUnitsResponse",
+      "ns1:getParameterByNameUnitsResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getParameterByName(const char *endpoint, const char *soap_action, ns1__getParameterByName *ns1__getParameterByName_, ns1__getParameterByNameResponse *ns1__getParameterByNameResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getParameterByName(
+    const char *endpoint, const char *soap_action,
+    ns1__getParameterByName *ns1__getParameterByName_,
+    ns1__getParameterByNameResponse *ns1__getParameterByNameResponse_) {
+  struct soap *soap = this;
   struct __ns1__getParameterByName soap_tmp___ns1__getParameterByName;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -6486,53 +6987,58 @@ int ICATPortBindingProxy::getParameterByName(const char *endpoint, const char *s
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getParameterByNameRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getParameterByName.ns1__getParameterByName_ = ns1__getParameterByName_;
+  soap_tmp___ns1__getParameterByName.ns1__getParameterByName_ =
+      ns1__getParameterByName_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getParameterByName(soap, &soap_tmp___ns1__getParameterByName);
+  soap_serialize___ns1__getParameterByName(soap,
+                                           &soap_tmp___ns1__getParameterByName);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getParameterByName(soap, &soap_tmp___ns1__getParameterByName, "-ns1:getParameterByName", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getParameterByName(soap,
+                                           &soap_tmp___ns1__getParameterByName,
+                                           "-ns1:getParameterByName", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getParameterByName(soap, &soap_tmp___ns1__getParameterByName, "-ns1:getParameterByName", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getParameterByName(soap,
+                                         &soap_tmp___ns1__getParameterByName,
+                                         "-ns1:getParameterByName", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getParameterByNameResponse_)
     return soap_closesock(soap);
   ns1__getParameterByNameResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getParameterByNameResponse_->soap_get(soap, "ns1:getParameterByNameResponse", "ns1:getParameterByNameResponse");
+  ns1__getParameterByNameResponse_->soap_get(
+      soap, "ns1:getParameterByNameResponse", "ns1:getParameterByNameResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getParameterByRestriction(const char *endpoint, const char *soap_action, ns1__getParameterByRestriction *ns1__getParameterByRestriction_, ns1__getParameterByRestrictionResponse *ns1__getParameterByRestrictionResponse_)
-{ struct soap *soap = this;
-  struct __ns1__getParameterByRestriction soap_tmp___ns1__getParameterByRestriction;
+int ICATPortBindingProxy::getParameterByRestriction(
+    const char *endpoint, const char *soap_action,
+    ns1__getParameterByRestriction *ns1__getParameterByRestriction_,
+    ns1__getParameterByRestrictionResponse *
+        ns1__getParameterByRestrictionResponse_) {
+  struct soap *soap = this;
+  struct __ns1__getParameterByRestriction
+      soap_tmp___ns1__getParameterByRestriction;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -6540,52 +7046,56 @@ int ICATPortBindingProxy::getParameterByRestriction(const char *endpoint, const 
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getParameterByRestrictionRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getParameterByRestriction.ns1__getParameterByRestriction_ = ns1__getParameterByRestriction_;
+  soap_tmp___ns1__getParameterByRestriction.ns1__getParameterByRestriction_ =
+      ns1__getParameterByRestriction_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getParameterByRestriction(soap, &soap_tmp___ns1__getParameterByRestriction);
+  soap_serialize___ns1__getParameterByRestriction(
+      soap, &soap_tmp___ns1__getParameterByRestriction);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getParameterByRestriction(soap, &soap_tmp___ns1__getParameterByRestriction, "-ns1:getParameterByRestriction", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getParameterByRestriction(
+            soap, &soap_tmp___ns1__getParameterByRestriction,
+            "-ns1:getParameterByRestriction", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getParameterByRestriction(soap, &soap_tmp___ns1__getParameterByRestriction, "-ns1:getParameterByRestriction", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getParameterByRestriction(
+          soap, &soap_tmp___ns1__getParameterByRestriction,
+          "-ns1:getParameterByRestriction", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getParameterByRestrictionResponse_)
     return soap_closesock(soap);
   ns1__getParameterByRestrictionResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getParameterByRestrictionResponse_->soap_get(soap, "ns1:getParameterByRestrictionResponse", "ns1:getParameterByRestrictionResponse");
+  ns1__getParameterByRestrictionResponse_->soap_get(
+      soap, "ns1:getParameterByRestrictionResponse",
+      "ns1:getParameterByRestrictionResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::getParameterByUnits(const char *endpoint, const char *soap_action, ns1__getParameterByUnits *ns1__getParameterByUnits_, ns1__getParameterByUnitsResponse *ns1__getParameterByUnitsResponse_)
-{ struct soap *soap = this;
+int ICATPortBindingProxy::getParameterByUnits(
+    const char *endpoint, const char *soap_action,
+    ns1__getParameterByUnits *ns1__getParameterByUnits_,
+    ns1__getParameterByUnitsResponse *ns1__getParameterByUnitsResponse_) {
+  struct soap *soap = this;
   struct __ns1__getParameterByUnits soap_tmp___ns1__getParameterByUnits;
   if (endpoint)
     soap_endpoint = endpoint;
@@ -6594,323 +7104,374 @@ int ICATPortBindingProxy::getParameterByUnits(const char *endpoint, const char *
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/getParameterByUnitsRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__getParameterByUnits.ns1__getParameterByUnits_ = ns1__getParameterByUnits_;
+  soap_tmp___ns1__getParameterByUnits.ns1__getParameterByUnits_ =
+      ns1__getParameterByUnits_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__getParameterByUnits(soap, &soap_tmp___ns1__getParameterByUnits);
+  soap_serialize___ns1__getParameterByUnits(
+      soap, &soap_tmp___ns1__getParameterByUnits);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__getParameterByUnits(soap, &soap_tmp___ns1__getParameterByUnits, "-ns1:getParameterByUnits", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__getParameterByUnits(
+            soap, &soap_tmp___ns1__getParameterByUnits,
+            "-ns1:getParameterByUnits", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__getParameterByUnits(soap, &soap_tmp___ns1__getParameterByUnits, "-ns1:getParameterByUnits", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__getParameterByUnits(soap,
+                                          &soap_tmp___ns1__getParameterByUnits,
+                                          "-ns1:getParameterByUnits", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__getParameterByUnitsResponse_)
     return soap_closesock(soap);
   ns1__getParameterByUnitsResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__getParameterByUnitsResponse_->soap_get(soap, "ns1:getParameterByUnitsResponse", "ns1:getParameterByUnitsResponse");
+  ns1__getParameterByUnitsResponse_->soap_get(
+      soap, "ns1:getParameterByUnitsResponse",
+      "ns1:getParameterByUnitsResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatasetByParameterRestriction(const char *endpoint, const char *soap_action, ns1__searchDatasetByParameterRestriction *ns1__searchDatasetByParameterRestriction_, ns1__searchDatasetByParameterRestrictionResponse *ns1__searchDatasetByParameterRestrictionResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchDatasetByParameterRestriction soap_tmp___ns1__searchDatasetByParameterRestriction;
+int ICATPortBindingProxy::searchDatasetByParameterRestriction(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatasetByParameterRestriction *
+        ns1__searchDatasetByParameterRestriction_,
+    ns1__searchDatasetByParameterRestrictionResponse *
+        ns1__searchDatasetByParameterRestrictionResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchDatasetByParameterRestriction
+      soap_tmp___ns1__searchDatasetByParameterRestriction;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchDatasetByParameterRestrictionRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchDatasetByParameterRestrictionRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatasetByParameterRestriction.ns1__searchDatasetByParameterRestriction_ = ns1__searchDatasetByParameterRestriction_;
+  soap_tmp___ns1__searchDatasetByParameterRestriction
+      .ns1__searchDatasetByParameterRestriction_ =
+      ns1__searchDatasetByParameterRestriction_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatasetByParameterRestriction(soap, &soap_tmp___ns1__searchDatasetByParameterRestriction);
+  soap_serialize___ns1__searchDatasetByParameterRestriction(
+      soap, &soap_tmp___ns1__searchDatasetByParameterRestriction);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatasetByParameterRestriction(soap, &soap_tmp___ns1__searchDatasetByParameterRestriction, "-ns1:searchDatasetByParameterRestriction", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatasetByParameterRestriction(
+            soap, &soap_tmp___ns1__searchDatasetByParameterRestriction,
+            "-ns1:searchDatasetByParameterRestriction", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatasetByParameterRestriction(soap, &soap_tmp___ns1__searchDatasetByParameterRestriction, "-ns1:searchDatasetByParameterRestriction", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatasetByParameterRestriction(
+          soap, &soap_tmp___ns1__searchDatasetByParameterRestriction,
+          "-ns1:searchDatasetByParameterRestriction", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatasetByParameterRestrictionResponse_)
     return soap_closesock(soap);
   ns1__searchDatasetByParameterRestrictionResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatasetByParameterRestrictionResponse_->soap_get(soap, "ns1:searchDatasetByParameterRestrictionResponse", "ns1:searchDatasetByParameterRestrictionResponse");
+  ns1__searchDatasetByParameterRestrictionResponse_->soap_get(
+      soap, "ns1:searchDatasetByParameterRestrictionResponse",
+      "ns1:searchDatasetByParameterRestrictionResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchSampleByParameterRestriction(const char *endpoint, const char *soap_action, ns1__searchSampleByParameterRestriction *ns1__searchSampleByParameterRestriction_, ns1__searchSampleByParameterRestrictionResponse *ns1__searchSampleByParameterRestrictionResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchSampleByParameterRestriction soap_tmp___ns1__searchSampleByParameterRestriction;
+int ICATPortBindingProxy::searchSampleByParameterRestriction(
+    const char *endpoint, const char *soap_action,
+    ns1__searchSampleByParameterRestriction *
+        ns1__searchSampleByParameterRestriction_,
+    ns1__searchSampleByParameterRestrictionResponse *
+        ns1__searchSampleByParameterRestrictionResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchSampleByParameterRestriction
+      soap_tmp___ns1__searchSampleByParameterRestriction;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchSampleByParameterRestrictionRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchSampleByParameterRestrictionRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchSampleByParameterRestriction.ns1__searchSampleByParameterRestriction_ = ns1__searchSampleByParameterRestriction_;
+  soap_tmp___ns1__searchSampleByParameterRestriction
+      .ns1__searchSampleByParameterRestriction_ =
+      ns1__searchSampleByParameterRestriction_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchSampleByParameterRestriction(soap, &soap_tmp___ns1__searchSampleByParameterRestriction);
+  soap_serialize___ns1__searchSampleByParameterRestriction(
+      soap, &soap_tmp___ns1__searchSampleByParameterRestriction);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchSampleByParameterRestriction(soap, &soap_tmp___ns1__searchSampleByParameterRestriction, "-ns1:searchSampleByParameterRestriction", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchSampleByParameterRestriction(
+            soap, &soap_tmp___ns1__searchSampleByParameterRestriction,
+            "-ns1:searchSampleByParameterRestriction", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchSampleByParameterRestriction(soap, &soap_tmp___ns1__searchSampleByParameterRestriction, "-ns1:searchSampleByParameterRestriction", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchSampleByParameterRestriction(
+          soap, &soap_tmp___ns1__searchSampleByParameterRestriction,
+          "-ns1:searchSampleByParameterRestriction", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchSampleByParameterRestrictionResponse_)
     return soap_closesock(soap);
   ns1__searchSampleByParameterRestrictionResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchSampleByParameterRestrictionResponse_->soap_get(soap, "ns1:searchSampleByParameterRestrictionResponse", "ns1:searchSampleByParameterRestrictionResponse");
+  ns1__searchSampleByParameterRestrictionResponse_->soap_get(
+      soap, "ns1:searchSampleByParameterRestrictionResponse",
+      "ns1:searchSampleByParameterRestrictionResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatafileByParameterRestriction(const char *endpoint, const char *soap_action, ns1__searchDatafileByParameterRestriction *ns1__searchDatafileByParameterRestriction_, ns1__searchDatafileByParameterRestrictionResponse *ns1__searchDatafileByParameterRestrictionResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchDatafileByParameterRestriction soap_tmp___ns1__searchDatafileByParameterRestriction;
+int ICATPortBindingProxy::searchDatafileByParameterRestriction(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatafileByParameterRestriction *
+        ns1__searchDatafileByParameterRestriction_,
+    ns1__searchDatafileByParameterRestrictionResponse *
+        ns1__searchDatafileByParameterRestrictionResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchDatafileByParameterRestriction
+      soap_tmp___ns1__searchDatafileByParameterRestriction;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchDatafileByParameterRestrictionRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchDatafileByParameterRestrictionRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatafileByParameterRestriction.ns1__searchDatafileByParameterRestriction_ = ns1__searchDatafileByParameterRestriction_;
+  soap_tmp___ns1__searchDatafileByParameterRestriction
+      .ns1__searchDatafileByParameterRestriction_ =
+      ns1__searchDatafileByParameterRestriction_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatafileByParameterRestriction(soap, &soap_tmp___ns1__searchDatafileByParameterRestriction);
+  soap_serialize___ns1__searchDatafileByParameterRestriction(
+      soap, &soap_tmp___ns1__searchDatafileByParameterRestriction);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatafileByParameterRestriction(soap, &soap_tmp___ns1__searchDatafileByParameterRestriction, "-ns1:searchDatafileByParameterRestriction", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatafileByParameterRestriction(
+            soap, &soap_tmp___ns1__searchDatafileByParameterRestriction,
+            "-ns1:searchDatafileByParameterRestriction", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatafileByParameterRestriction(soap, &soap_tmp___ns1__searchDatafileByParameterRestriction, "-ns1:searchDatafileByParameterRestriction", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatafileByParameterRestriction(
+          soap, &soap_tmp___ns1__searchDatafileByParameterRestriction,
+          "-ns1:searchDatafileByParameterRestriction", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatafileByParameterRestrictionResponse_)
     return soap_closesock(soap);
   ns1__searchDatafileByParameterRestrictionResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatafileByParameterRestrictionResponse_->soap_get(soap, "ns1:searchDatafileByParameterRestrictionResponse", "ns1:searchDatafileByParameterRestrictionResponse");
+  ns1__searchDatafileByParameterRestrictionResponse_->soap_get(
+      soap, "ns1:searchDatafileByParameterRestrictionResponse",
+      "ns1:searchDatafileByParameterRestrictionResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchInvestigationByParameterRestriction(const char *endpoint, const char *soap_action, ns1__searchInvestigationByParameterRestriction *ns1__searchInvestigationByParameterRestriction_, ns1__searchInvestigationByParameterRestrictionResponse *ns1__searchInvestigationByParameterRestrictionResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchInvestigationByParameterRestriction soap_tmp___ns1__searchInvestigationByParameterRestriction;
+int ICATPortBindingProxy::searchInvestigationByParameterRestriction(
+    const char *endpoint, const char *soap_action,
+    ns1__searchInvestigationByParameterRestriction *
+        ns1__searchInvestigationByParameterRestriction_,
+    ns1__searchInvestigationByParameterRestrictionResponse *
+        ns1__searchInvestigationByParameterRestrictionResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchInvestigationByParameterRestriction
+      soap_tmp___ns1__searchInvestigationByParameterRestriction;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchInvestigationByParameterRestrictionRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchInvestigationByParameterRestrictionRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchInvestigationByParameterRestriction.ns1__searchInvestigationByParameterRestriction_ = ns1__searchInvestigationByParameterRestriction_;
+  soap_tmp___ns1__searchInvestigationByParameterRestriction
+      .ns1__searchInvestigationByParameterRestriction_ =
+      ns1__searchInvestigationByParameterRestriction_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchInvestigationByParameterRestriction(soap, &soap_tmp___ns1__searchInvestigationByParameterRestriction);
+  soap_serialize___ns1__searchInvestigationByParameterRestriction(
+      soap, &soap_tmp___ns1__searchInvestigationByParameterRestriction);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchInvestigationByParameterRestriction(soap, &soap_tmp___ns1__searchInvestigationByParameterRestriction, "-ns1:searchInvestigationByParameterRestriction", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchInvestigationByParameterRestriction(
+            soap, &soap_tmp___ns1__searchInvestigationByParameterRestriction,
+            "-ns1:searchInvestigationByParameterRestriction", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchInvestigationByParameterRestriction(soap, &soap_tmp___ns1__searchInvestigationByParameterRestriction, "-ns1:searchInvestigationByParameterRestriction", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchInvestigationByParameterRestriction(
+          soap, &soap_tmp___ns1__searchInvestigationByParameterRestriction,
+          "-ns1:searchInvestigationByParameterRestriction", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchInvestigationByParameterRestrictionResponse_)
     return soap_closesock(soap);
   ns1__searchInvestigationByParameterRestrictionResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchInvestigationByParameterRestrictionResponse_->soap_get(soap, "ns1:searchInvestigationByParameterRestrictionResponse", "ns1:searchInvestigationByParameterRestrictionResponse");
+  ns1__searchInvestigationByParameterRestrictionResponse_->soap_get(
+      soap, "ns1:searchInvestigationByParameterRestrictionResponse",
+      "ns1:searchInvestigationByParameterRestrictionResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchInvestigationByRestriction(const char *endpoint, const char *soap_action, ns1__searchInvestigationByRestriction *ns1__searchInvestigationByRestriction_, ns1__searchInvestigationByRestrictionResponse *ns1__searchInvestigationByRestrictionResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchInvestigationByRestriction soap_tmp___ns1__searchInvestigationByRestriction;
+int ICATPortBindingProxy::searchInvestigationByRestriction(
+    const char *endpoint, const char *soap_action,
+    ns1__searchInvestigationByRestriction *
+        ns1__searchInvestigationByRestriction_,
+    ns1__searchInvestigationByRestrictionResponse *
+        ns1__searchInvestigationByRestrictionResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchInvestigationByRestriction
+      soap_tmp___ns1__searchInvestigationByRestriction;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchInvestigationByRestrictionRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchInvestigationByRestrictionRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchInvestigationByRestriction.ns1__searchInvestigationByRestriction_ = ns1__searchInvestigationByRestriction_;
+  soap_tmp___ns1__searchInvestigationByRestriction
+      .ns1__searchInvestigationByRestriction_ =
+      ns1__searchInvestigationByRestriction_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchInvestigationByRestriction(soap, &soap_tmp___ns1__searchInvestigationByRestriction);
+  soap_serialize___ns1__searchInvestigationByRestriction(
+      soap, &soap_tmp___ns1__searchInvestigationByRestriction);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchInvestigationByRestriction(soap, &soap_tmp___ns1__searchInvestigationByRestriction, "-ns1:searchInvestigationByRestriction", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchInvestigationByRestriction(
+            soap, &soap_tmp___ns1__searchInvestigationByRestriction,
+            "-ns1:searchInvestigationByRestriction", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchInvestigationByRestriction(soap, &soap_tmp___ns1__searchInvestigationByRestriction, "-ns1:searchInvestigationByRestriction", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchInvestigationByRestriction(
+          soap, &soap_tmp___ns1__searchInvestigationByRestriction,
+          "-ns1:searchInvestigationByRestriction", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchInvestigationByRestrictionResponse_)
     return soap_closesock(soap);
   ns1__searchInvestigationByRestrictionResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchInvestigationByRestrictionResponse_->soap_get(soap, "ns1:searchInvestigationByRestrictionResponse", "ns1:searchInvestigationByRestrictionResponse");
+  ns1__searchInvestigationByRestrictionResponse_->soap_get(
+      soap, "ns1:searchInvestigationByRestrictionResponse",
+      "ns1:searchInvestigationByRestrictionResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatasetByRestriction(const char *endpoint, const char *soap_action, ns1__searchDatasetByRestriction *ns1__searchDatasetByRestriction_, ns1__searchDatasetByRestrictionResponse *ns1__searchDatasetByRestrictionResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchDatasetByRestriction soap_tmp___ns1__searchDatasetByRestriction;
+int ICATPortBindingProxy::searchDatasetByRestriction(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatasetByRestriction *ns1__searchDatasetByRestriction_,
+    ns1__searchDatasetByRestrictionResponse *
+        ns1__searchDatasetByRestrictionResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchDatasetByRestriction
+      soap_tmp___ns1__searchDatasetByRestriction;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -6918,53 +7479,59 @@ int ICATPortBindingProxy::searchDatasetByRestriction(const char *endpoint, const
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchDatasetByRestrictionRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatasetByRestriction.ns1__searchDatasetByRestriction_ = ns1__searchDatasetByRestriction_;
+  soap_tmp___ns1__searchDatasetByRestriction.ns1__searchDatasetByRestriction_ =
+      ns1__searchDatasetByRestriction_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatasetByRestriction(soap, &soap_tmp___ns1__searchDatasetByRestriction);
+  soap_serialize___ns1__searchDatasetByRestriction(
+      soap, &soap_tmp___ns1__searchDatasetByRestriction);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatasetByRestriction(soap, &soap_tmp___ns1__searchDatasetByRestriction, "-ns1:searchDatasetByRestriction", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatasetByRestriction(
+            soap, &soap_tmp___ns1__searchDatasetByRestriction,
+            "-ns1:searchDatasetByRestriction", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatasetByRestriction(soap, &soap_tmp___ns1__searchDatasetByRestriction, "-ns1:searchDatasetByRestriction", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatasetByRestriction(
+          soap, &soap_tmp___ns1__searchDatasetByRestriction,
+          "-ns1:searchDatasetByRestriction", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatasetByRestrictionResponse_)
     return soap_closesock(soap);
   ns1__searchDatasetByRestrictionResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatasetByRestrictionResponse_->soap_get(soap, "ns1:searchDatasetByRestrictionResponse", "ns1:searchDatasetByRestrictionResponse");
+  ns1__searchDatasetByRestrictionResponse_->soap_get(
+      soap, "ns1:searchDatasetByRestrictionResponse",
+      "ns1:searchDatasetByRestrictionResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatafileByRestriction(const char *endpoint, const char *soap_action, ns1__searchDatafileByRestriction *ns1__searchDatafileByRestriction_, ns1__searchDatafileByRestrictionResponse *ns1__searchDatafileByRestrictionResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchDatafileByRestriction soap_tmp___ns1__searchDatafileByRestriction;
+int ICATPortBindingProxy::searchDatafileByRestriction(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatafileByRestriction *ns1__searchDatafileByRestriction_,
+    ns1__searchDatafileByRestrictionResponse *
+        ns1__searchDatafileByRestrictionResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchDatafileByRestriction
+      soap_tmp___ns1__searchDatafileByRestriction;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -6972,53 +7539,59 @@ int ICATPortBindingProxy::searchDatafileByRestriction(const char *endpoint, cons
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchDatafileByRestrictionRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatafileByRestriction.ns1__searchDatafileByRestriction_ = ns1__searchDatafileByRestriction_;
+  soap_tmp___ns1__searchDatafileByRestriction
+      .ns1__searchDatafileByRestriction_ = ns1__searchDatafileByRestriction_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatafileByRestriction(soap, &soap_tmp___ns1__searchDatafileByRestriction);
+  soap_serialize___ns1__searchDatafileByRestriction(
+      soap, &soap_tmp___ns1__searchDatafileByRestriction);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatafileByRestriction(soap, &soap_tmp___ns1__searchDatafileByRestriction, "-ns1:searchDatafileByRestriction", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatafileByRestriction(
+            soap, &soap_tmp___ns1__searchDatafileByRestriction,
+            "-ns1:searchDatafileByRestriction", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatafileByRestriction(soap, &soap_tmp___ns1__searchDatafileByRestriction, "-ns1:searchDatafileByRestriction", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatafileByRestriction(
+          soap, &soap_tmp___ns1__searchDatafileByRestriction,
+          "-ns1:searchDatafileByRestriction", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatafileByRestrictionResponse_)
     return soap_closesock(soap);
   ns1__searchDatafileByRestrictionResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatafileByRestrictionResponse_->soap_get(soap, "ns1:searchDatafileByRestrictionResponse", "ns1:searchDatafileByRestrictionResponse");
+  ns1__searchDatafileByRestrictionResponse_->soap_get(
+      soap, "ns1:searchDatafileByRestrictionResponse",
+      "ns1:searchDatafileByRestrictionResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchSampleByRestriction(const char *endpoint, const char *soap_action, ns1__searchSampleByRestriction *ns1__searchSampleByRestriction_, ns1__searchSampleByRestrictionResponse *ns1__searchSampleByRestrictionResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchSampleByRestriction soap_tmp___ns1__searchSampleByRestriction;
+int ICATPortBindingProxy::searchSampleByRestriction(
+    const char *endpoint, const char *soap_action,
+    ns1__searchSampleByRestriction *ns1__searchSampleByRestriction_,
+    ns1__searchSampleByRestrictionResponse *
+        ns1__searchSampleByRestrictionResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchSampleByRestriction
+      soap_tmp___ns1__searchSampleByRestriction;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -7026,593 +7599,689 @@ int ICATPortBindingProxy::searchSampleByRestriction(const char *endpoint, const 
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchSampleByRestrictionRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchSampleByRestriction.ns1__searchSampleByRestriction_ = ns1__searchSampleByRestriction_;
+  soap_tmp___ns1__searchSampleByRestriction.ns1__searchSampleByRestriction_ =
+      ns1__searchSampleByRestriction_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchSampleByRestriction(soap, &soap_tmp___ns1__searchSampleByRestriction);
+  soap_serialize___ns1__searchSampleByRestriction(
+      soap, &soap_tmp___ns1__searchSampleByRestriction);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchSampleByRestriction(soap, &soap_tmp___ns1__searchSampleByRestriction, "-ns1:searchSampleByRestriction", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchSampleByRestriction(
+            soap, &soap_tmp___ns1__searchSampleByRestriction,
+            "-ns1:searchSampleByRestriction", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchSampleByRestriction(soap, &soap_tmp___ns1__searchSampleByRestriction, "-ns1:searchSampleByRestriction", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchSampleByRestriction(
+          soap, &soap_tmp___ns1__searchSampleByRestriction,
+          "-ns1:searchSampleByRestriction", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchSampleByRestrictionResponse_)
     return soap_closesock(soap);
   ns1__searchSampleByRestrictionResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchSampleByRestrictionResponse_->soap_get(soap, "ns1:searchSampleByRestrictionResponse", "ns1:searchSampleByRestrictionResponse");
+  ns1__searchSampleByRestrictionResponse_->soap_get(
+      soap, "ns1:searchSampleByRestrictionResponse",
+      "ns1:searchSampleByRestrictionResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchInvestigationByRestrictionComparasion(const char *endpoint, const char *soap_action, ns1__searchInvestigationByRestrictionComparasion *ns1__searchInvestigationByRestrictionComparasion_, ns1__searchInvestigationByRestrictionComparasionResponse *ns1__searchInvestigationByRestrictionComparasionResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchInvestigationByRestrictionComparasion soap_tmp___ns1__searchInvestigationByRestrictionComparasion;
+int ICATPortBindingProxy::searchInvestigationByRestrictionComparasion(
+    const char *endpoint, const char *soap_action,
+    ns1__searchInvestigationByRestrictionComparasion *
+        ns1__searchInvestigationByRestrictionComparasion_,
+    ns1__searchInvestigationByRestrictionComparasionResponse *
+        ns1__searchInvestigationByRestrictionComparasionResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchInvestigationByRestrictionComparasion
+      soap_tmp___ns1__searchInvestigationByRestrictionComparasion;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchInvestigationByRestrictionComparasionRequest";
+    soap_action = "client.icat3.uk/ICAT/"
+                  "searchInvestigationByRestrictionComparasionRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchInvestigationByRestrictionComparasion.ns1__searchInvestigationByRestrictionComparasion_ = ns1__searchInvestigationByRestrictionComparasion_;
+  soap_tmp___ns1__searchInvestigationByRestrictionComparasion
+      .ns1__searchInvestigationByRestrictionComparasion_ =
+      ns1__searchInvestigationByRestrictionComparasion_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchInvestigationByRestrictionComparasion(soap, &soap_tmp___ns1__searchInvestigationByRestrictionComparasion);
+  soap_serialize___ns1__searchInvestigationByRestrictionComparasion(
+      soap, &soap_tmp___ns1__searchInvestigationByRestrictionComparasion);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchInvestigationByRestrictionComparasion(soap, &soap_tmp___ns1__searchInvestigationByRestrictionComparasion, "-ns1:searchInvestigationByRestrictionComparasion", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchInvestigationByRestrictionComparasion(
+            soap, &soap_tmp___ns1__searchInvestigationByRestrictionComparasion,
+            "-ns1:searchInvestigationByRestrictionComparasion", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchInvestigationByRestrictionComparasion(soap, &soap_tmp___ns1__searchInvestigationByRestrictionComparasion, "-ns1:searchInvestigationByRestrictionComparasion", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchInvestigationByRestrictionComparasion(
+          soap, &soap_tmp___ns1__searchInvestigationByRestrictionComparasion,
+          "-ns1:searchInvestigationByRestrictionComparasion", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchInvestigationByRestrictionComparasionResponse_)
     return soap_closesock(soap);
   ns1__searchInvestigationByRestrictionComparasionResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchInvestigationByRestrictionComparasionResponse_->soap_get(soap, "ns1:searchInvestigationByRestrictionComparasionResponse", "ns1:searchInvestigationByRestrictionComparasionResponse");
+  ns1__searchInvestigationByRestrictionComparasionResponse_->soap_get(
+      soap, "ns1:searchInvestigationByRestrictionComparasionResponse",
+      "ns1:searchInvestigationByRestrictionComparasionResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatasetByRestrictionComparison(const char *endpoint, const char *soap_action, ns1__searchDatasetByRestrictionComparison *ns1__searchDatasetByRestrictionComparison_, ns1__searchDatasetByRestrictionComparisonResponse *ns1__searchDatasetByRestrictionComparisonResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchDatasetByRestrictionComparison soap_tmp___ns1__searchDatasetByRestrictionComparison;
+int ICATPortBindingProxy::searchDatasetByRestrictionComparison(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatasetByRestrictionComparison *
+        ns1__searchDatasetByRestrictionComparison_,
+    ns1__searchDatasetByRestrictionComparisonResponse *
+        ns1__searchDatasetByRestrictionComparisonResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchDatasetByRestrictionComparison
+      soap_tmp___ns1__searchDatasetByRestrictionComparison;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchDatasetByRestrictionComparisonRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchDatasetByRestrictionComparisonRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatasetByRestrictionComparison.ns1__searchDatasetByRestrictionComparison_ = ns1__searchDatasetByRestrictionComparison_;
+  soap_tmp___ns1__searchDatasetByRestrictionComparison
+      .ns1__searchDatasetByRestrictionComparison_ =
+      ns1__searchDatasetByRestrictionComparison_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatasetByRestrictionComparison(soap, &soap_tmp___ns1__searchDatasetByRestrictionComparison);
+  soap_serialize___ns1__searchDatasetByRestrictionComparison(
+      soap, &soap_tmp___ns1__searchDatasetByRestrictionComparison);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatasetByRestrictionComparison(soap, &soap_tmp___ns1__searchDatasetByRestrictionComparison, "-ns1:searchDatasetByRestrictionComparison", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatasetByRestrictionComparison(
+            soap, &soap_tmp___ns1__searchDatasetByRestrictionComparison,
+            "-ns1:searchDatasetByRestrictionComparison", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatasetByRestrictionComparison(soap, &soap_tmp___ns1__searchDatasetByRestrictionComparison, "-ns1:searchDatasetByRestrictionComparison", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatasetByRestrictionComparison(
+          soap, &soap_tmp___ns1__searchDatasetByRestrictionComparison,
+          "-ns1:searchDatasetByRestrictionComparison", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatasetByRestrictionComparisonResponse_)
     return soap_closesock(soap);
   ns1__searchDatasetByRestrictionComparisonResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatasetByRestrictionComparisonResponse_->soap_get(soap, "ns1:searchDatasetByRestrictionComparisonResponse", "ns1:searchDatasetByRestrictionComparisonResponse");
+  ns1__searchDatasetByRestrictionComparisonResponse_->soap_get(
+      soap, "ns1:searchDatasetByRestrictionComparisonResponse",
+      "ns1:searchDatasetByRestrictionComparisonResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatafileByRestrictionComparison(const char *endpoint, const char *soap_action, ns1__searchDatafileByRestrictionComparison *ns1__searchDatafileByRestrictionComparison_, ns1__searchDatafileByRestrictionComparisonResponse *ns1__searchDatafileByRestrictionComparisonResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchDatafileByRestrictionComparison soap_tmp___ns1__searchDatafileByRestrictionComparison;
+int ICATPortBindingProxy::searchDatafileByRestrictionComparison(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatafileByRestrictionComparison *
+        ns1__searchDatafileByRestrictionComparison_,
+    ns1__searchDatafileByRestrictionComparisonResponse *
+        ns1__searchDatafileByRestrictionComparisonResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchDatafileByRestrictionComparison
+      soap_tmp___ns1__searchDatafileByRestrictionComparison;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchDatafileByRestrictionComparisonRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchDatafileByRestrictionComparisonRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatafileByRestrictionComparison.ns1__searchDatafileByRestrictionComparison_ = ns1__searchDatafileByRestrictionComparison_;
+  soap_tmp___ns1__searchDatafileByRestrictionComparison
+      .ns1__searchDatafileByRestrictionComparison_ =
+      ns1__searchDatafileByRestrictionComparison_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatafileByRestrictionComparison(soap, &soap_tmp___ns1__searchDatafileByRestrictionComparison);
+  soap_serialize___ns1__searchDatafileByRestrictionComparison(
+      soap, &soap_tmp___ns1__searchDatafileByRestrictionComparison);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatafileByRestrictionComparison(soap, &soap_tmp___ns1__searchDatafileByRestrictionComparison, "-ns1:searchDatafileByRestrictionComparison", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatafileByRestrictionComparison(
+            soap, &soap_tmp___ns1__searchDatafileByRestrictionComparison,
+            "-ns1:searchDatafileByRestrictionComparison", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatafileByRestrictionComparison(soap, &soap_tmp___ns1__searchDatafileByRestrictionComparison, "-ns1:searchDatafileByRestrictionComparison", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatafileByRestrictionComparison(
+          soap, &soap_tmp___ns1__searchDatafileByRestrictionComparison,
+          "-ns1:searchDatafileByRestrictionComparison", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatafileByRestrictionComparisonResponse_)
     return soap_closesock(soap);
   ns1__searchDatafileByRestrictionComparisonResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatafileByRestrictionComparisonResponse_->soap_get(soap, "ns1:searchDatafileByRestrictionComparisonResponse", "ns1:searchDatafileByRestrictionComparisonResponse");
+  ns1__searchDatafileByRestrictionComparisonResponse_->soap_get(
+      soap, "ns1:searchDatafileByRestrictionComparisonResponse",
+      "ns1:searchDatafileByRestrictionComparisonResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchSampleByRestrictionComparison(const char *endpoint, const char *soap_action, ns1__searchSampleByRestrictionComparison *ns1__searchSampleByRestrictionComparison_, ns1__searchSampleByRestrictionComparisonResponse *ns1__searchSampleByRestrictionComparisonResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchSampleByRestrictionComparison soap_tmp___ns1__searchSampleByRestrictionComparison;
+int ICATPortBindingProxy::searchSampleByRestrictionComparison(
+    const char *endpoint, const char *soap_action,
+    ns1__searchSampleByRestrictionComparison *
+        ns1__searchSampleByRestrictionComparison_,
+    ns1__searchSampleByRestrictionComparisonResponse *
+        ns1__searchSampleByRestrictionComparisonResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchSampleByRestrictionComparison
+      soap_tmp___ns1__searchSampleByRestrictionComparison;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchSampleByRestrictionComparisonRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchSampleByRestrictionComparisonRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchSampleByRestrictionComparison.ns1__searchSampleByRestrictionComparison_ = ns1__searchSampleByRestrictionComparison_;
+  soap_tmp___ns1__searchSampleByRestrictionComparison
+      .ns1__searchSampleByRestrictionComparison_ =
+      ns1__searchSampleByRestrictionComparison_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchSampleByRestrictionComparison(soap, &soap_tmp___ns1__searchSampleByRestrictionComparison);
+  soap_serialize___ns1__searchSampleByRestrictionComparison(
+      soap, &soap_tmp___ns1__searchSampleByRestrictionComparison);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchSampleByRestrictionComparison(soap, &soap_tmp___ns1__searchSampleByRestrictionComparison, "-ns1:searchSampleByRestrictionComparison", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchSampleByRestrictionComparison(
+            soap, &soap_tmp___ns1__searchSampleByRestrictionComparison,
+            "-ns1:searchSampleByRestrictionComparison", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchSampleByRestrictionComparison(soap, &soap_tmp___ns1__searchSampleByRestrictionComparison, "-ns1:searchSampleByRestrictionComparison", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchSampleByRestrictionComparison(
+          soap, &soap_tmp___ns1__searchSampleByRestrictionComparison,
+          "-ns1:searchSampleByRestrictionComparison", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchSampleByRestrictionComparisonResponse_)
     return soap_closesock(soap);
   ns1__searchSampleByRestrictionComparisonResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchSampleByRestrictionComparisonResponse_->soap_get(soap, "ns1:searchSampleByRestrictionComparisonResponse", "ns1:searchSampleByRestrictionComparisonResponse");
+  ns1__searchSampleByRestrictionComparisonResponse_->soap_get(
+      soap, "ns1:searchSampleByRestrictionComparisonResponse",
+      "ns1:searchSampleByRestrictionComparisonResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchSampleByRestrictionLogical(const char *endpoint, const char *soap_action, ns1__searchSampleByRestrictionLogical *ns1__searchSampleByRestrictionLogical_, ns1__searchSampleByRestrictionLogicalResponse *ns1__searchSampleByRestrictionLogicalResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchSampleByRestrictionLogical soap_tmp___ns1__searchSampleByRestrictionLogical;
+int ICATPortBindingProxy::searchSampleByRestrictionLogical(
+    const char *endpoint, const char *soap_action,
+    ns1__searchSampleByRestrictionLogical *
+        ns1__searchSampleByRestrictionLogical_,
+    ns1__searchSampleByRestrictionLogicalResponse *
+        ns1__searchSampleByRestrictionLogicalResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchSampleByRestrictionLogical
+      soap_tmp___ns1__searchSampleByRestrictionLogical;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchSampleByRestrictionLogicalRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchSampleByRestrictionLogicalRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchSampleByRestrictionLogical.ns1__searchSampleByRestrictionLogical_ = ns1__searchSampleByRestrictionLogical_;
+  soap_tmp___ns1__searchSampleByRestrictionLogical
+      .ns1__searchSampleByRestrictionLogical_ =
+      ns1__searchSampleByRestrictionLogical_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchSampleByRestrictionLogical(soap, &soap_tmp___ns1__searchSampleByRestrictionLogical);
+  soap_serialize___ns1__searchSampleByRestrictionLogical(
+      soap, &soap_tmp___ns1__searchSampleByRestrictionLogical);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchSampleByRestrictionLogical(soap, &soap_tmp___ns1__searchSampleByRestrictionLogical, "-ns1:searchSampleByRestrictionLogical", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchSampleByRestrictionLogical(
+            soap, &soap_tmp___ns1__searchSampleByRestrictionLogical,
+            "-ns1:searchSampleByRestrictionLogical", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchSampleByRestrictionLogical(soap, &soap_tmp___ns1__searchSampleByRestrictionLogical, "-ns1:searchSampleByRestrictionLogical", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchSampleByRestrictionLogical(
+          soap, &soap_tmp___ns1__searchSampleByRestrictionLogical,
+          "-ns1:searchSampleByRestrictionLogical", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchSampleByRestrictionLogicalResponse_)
     return soap_closesock(soap);
   ns1__searchSampleByRestrictionLogicalResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchSampleByRestrictionLogicalResponse_->soap_get(soap, "ns1:searchSampleByRestrictionLogicalResponse", "ns1:searchSampleByRestrictionLogicalResponse");
+  ns1__searchSampleByRestrictionLogicalResponse_->soap_get(
+      soap, "ns1:searchSampleByRestrictionLogicalResponse",
+      "ns1:searchSampleByRestrictionLogicalResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatasetByRestrictionLogical(const char *endpoint, const char *soap_action, ns1__searchDatasetByRestrictionLogical *ns1__searchDatasetByRestrictionLogical_, ns1__searchDatasetByRestrictionLogicalResponse *ns1__searchDatasetByRestrictionLogicalResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchDatasetByRestrictionLogical soap_tmp___ns1__searchDatasetByRestrictionLogical;
+int ICATPortBindingProxy::searchDatasetByRestrictionLogical(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatasetByRestrictionLogical *
+        ns1__searchDatasetByRestrictionLogical_,
+    ns1__searchDatasetByRestrictionLogicalResponse *
+        ns1__searchDatasetByRestrictionLogicalResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchDatasetByRestrictionLogical
+      soap_tmp___ns1__searchDatasetByRestrictionLogical;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchDatasetByRestrictionLogicalRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchDatasetByRestrictionLogicalRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatasetByRestrictionLogical.ns1__searchDatasetByRestrictionLogical_ = ns1__searchDatasetByRestrictionLogical_;
+  soap_tmp___ns1__searchDatasetByRestrictionLogical
+      .ns1__searchDatasetByRestrictionLogical_ =
+      ns1__searchDatasetByRestrictionLogical_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatasetByRestrictionLogical(soap, &soap_tmp___ns1__searchDatasetByRestrictionLogical);
+  soap_serialize___ns1__searchDatasetByRestrictionLogical(
+      soap, &soap_tmp___ns1__searchDatasetByRestrictionLogical);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatasetByRestrictionLogical(soap, &soap_tmp___ns1__searchDatasetByRestrictionLogical, "-ns1:searchDatasetByRestrictionLogical", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatasetByRestrictionLogical(
+            soap, &soap_tmp___ns1__searchDatasetByRestrictionLogical,
+            "-ns1:searchDatasetByRestrictionLogical", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatasetByRestrictionLogical(soap, &soap_tmp___ns1__searchDatasetByRestrictionLogical, "-ns1:searchDatasetByRestrictionLogical", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatasetByRestrictionLogical(
+          soap, &soap_tmp___ns1__searchDatasetByRestrictionLogical,
+          "-ns1:searchDatasetByRestrictionLogical", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatasetByRestrictionLogicalResponse_)
     return soap_closesock(soap);
   ns1__searchDatasetByRestrictionLogicalResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatasetByRestrictionLogicalResponse_->soap_get(soap, "ns1:searchDatasetByRestrictionLogicalResponse", "ns1:searchDatasetByRestrictionLogicalResponse");
+  ns1__searchDatasetByRestrictionLogicalResponse_->soap_get(
+      soap, "ns1:searchDatasetByRestrictionLogicalResponse",
+      "ns1:searchDatasetByRestrictionLogicalResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchInvestigationByRestrictionLogical(const char *endpoint, const char *soap_action, ns1__searchInvestigationByRestrictionLogical *ns1__searchInvestigationByRestrictionLogical_, ns1__searchInvestigationByRestrictionLogicalResponse *ns1__searchInvestigationByRestrictionLogicalResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchInvestigationByRestrictionLogical soap_tmp___ns1__searchInvestigationByRestrictionLogical;
+int ICATPortBindingProxy::searchInvestigationByRestrictionLogical(
+    const char *endpoint, const char *soap_action,
+    ns1__searchInvestigationByRestrictionLogical *
+        ns1__searchInvestigationByRestrictionLogical_,
+    ns1__searchInvestigationByRestrictionLogicalResponse *
+        ns1__searchInvestigationByRestrictionLogicalResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchInvestigationByRestrictionLogical
+      soap_tmp___ns1__searchInvestigationByRestrictionLogical;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchInvestigationByRestrictionLogicalRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchInvestigationByRestrictionLogicalRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchInvestigationByRestrictionLogical.ns1__searchInvestigationByRestrictionLogical_ = ns1__searchInvestigationByRestrictionLogical_;
+  soap_tmp___ns1__searchInvestigationByRestrictionLogical
+      .ns1__searchInvestigationByRestrictionLogical_ =
+      ns1__searchInvestigationByRestrictionLogical_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchInvestigationByRestrictionLogical(soap, &soap_tmp___ns1__searchInvestigationByRestrictionLogical);
+  soap_serialize___ns1__searchInvestigationByRestrictionLogical(
+      soap, &soap_tmp___ns1__searchInvestigationByRestrictionLogical);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchInvestigationByRestrictionLogical(soap, &soap_tmp___ns1__searchInvestigationByRestrictionLogical, "-ns1:searchInvestigationByRestrictionLogical", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchInvestigationByRestrictionLogical(
+            soap, &soap_tmp___ns1__searchInvestigationByRestrictionLogical,
+            "-ns1:searchInvestigationByRestrictionLogical", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchInvestigationByRestrictionLogical(soap, &soap_tmp___ns1__searchInvestigationByRestrictionLogical, "-ns1:searchInvestigationByRestrictionLogical", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchInvestigationByRestrictionLogical(
+          soap, &soap_tmp___ns1__searchInvestigationByRestrictionLogical,
+          "-ns1:searchInvestigationByRestrictionLogical", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchInvestigationByRestrictionLogicalResponse_)
     return soap_closesock(soap);
   ns1__searchInvestigationByRestrictionLogicalResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchInvestigationByRestrictionLogicalResponse_->soap_get(soap, "ns1:searchInvestigationByRestrictionLogicalResponse", "ns1:searchInvestigationByRestrictionLogicalResponse");
+  ns1__searchInvestigationByRestrictionLogicalResponse_->soap_get(
+      soap, "ns1:searchInvestigationByRestrictionLogicalResponse",
+      "ns1:searchInvestigationByRestrictionLogicalResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatafileByRestrictionLogical(const char *endpoint, const char *soap_action, ns1__searchDatafileByRestrictionLogical *ns1__searchDatafileByRestrictionLogical_, ns1__searchDatafileByRestrictionLogicalResponse *ns1__searchDatafileByRestrictionLogicalResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchDatafileByRestrictionLogical soap_tmp___ns1__searchDatafileByRestrictionLogical;
+int ICATPortBindingProxy::searchDatafileByRestrictionLogical(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatafileByRestrictionLogical *
+        ns1__searchDatafileByRestrictionLogical_,
+    ns1__searchDatafileByRestrictionLogicalResponse *
+        ns1__searchDatafileByRestrictionLogicalResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchDatafileByRestrictionLogical
+      soap_tmp___ns1__searchDatafileByRestrictionLogical;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchDatafileByRestrictionLogicalRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchDatafileByRestrictionLogicalRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatafileByRestrictionLogical.ns1__searchDatafileByRestrictionLogical_ = ns1__searchDatafileByRestrictionLogical_;
+  soap_tmp___ns1__searchDatafileByRestrictionLogical
+      .ns1__searchDatafileByRestrictionLogical_ =
+      ns1__searchDatafileByRestrictionLogical_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatafileByRestrictionLogical(soap, &soap_tmp___ns1__searchDatafileByRestrictionLogical);
+  soap_serialize___ns1__searchDatafileByRestrictionLogical(
+      soap, &soap_tmp___ns1__searchDatafileByRestrictionLogical);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatafileByRestrictionLogical(soap, &soap_tmp___ns1__searchDatafileByRestrictionLogical, "-ns1:searchDatafileByRestrictionLogical", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatafileByRestrictionLogical(
+            soap, &soap_tmp___ns1__searchDatafileByRestrictionLogical,
+            "-ns1:searchDatafileByRestrictionLogical", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatafileByRestrictionLogical(soap, &soap_tmp___ns1__searchDatafileByRestrictionLogical, "-ns1:searchDatafileByRestrictionLogical", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatafileByRestrictionLogical(
+          soap, &soap_tmp___ns1__searchDatafileByRestrictionLogical,
+          "-ns1:searchDatafileByRestrictionLogical", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatafileByRestrictionLogicalResponse_)
     return soap_closesock(soap);
   ns1__searchDatafileByRestrictionLogicalResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatafileByRestrictionLogicalResponse_->soap_get(soap, "ns1:searchDatafileByRestrictionLogicalResponse", "ns1:searchDatafileByRestrictionLogicalResponse");
+  ns1__searchDatafileByRestrictionLogicalResponse_->soap_get(
+      soap, "ns1:searchDatafileByRestrictionLogicalResponse",
+      "ns1:searchDatafileByRestrictionLogicalResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchInvestigationByParameterLogical(const char *endpoint, const char *soap_action, ns1__searchInvestigationByParameterLogical *ns1__searchInvestigationByParameterLogical_, ns1__searchInvestigationByParameterLogicalResponse *ns1__searchInvestigationByParameterLogicalResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchInvestigationByParameterLogical soap_tmp___ns1__searchInvestigationByParameterLogical;
+int ICATPortBindingProxy::searchInvestigationByParameterLogical(
+    const char *endpoint, const char *soap_action,
+    ns1__searchInvestigationByParameterLogical *
+        ns1__searchInvestigationByParameterLogical_,
+    ns1__searchInvestigationByParameterLogicalResponse *
+        ns1__searchInvestigationByParameterLogicalResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchInvestigationByParameterLogical
+      soap_tmp___ns1__searchInvestigationByParameterLogical;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchInvestigationByParameterLogicalRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchInvestigationByParameterLogicalRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchInvestigationByParameterLogical.ns1__searchInvestigationByParameterLogical_ = ns1__searchInvestigationByParameterLogical_;
+  soap_tmp___ns1__searchInvestigationByParameterLogical
+      .ns1__searchInvestigationByParameterLogical_ =
+      ns1__searchInvestigationByParameterLogical_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchInvestigationByParameterLogical(soap, &soap_tmp___ns1__searchInvestigationByParameterLogical);
+  soap_serialize___ns1__searchInvestigationByParameterLogical(
+      soap, &soap_tmp___ns1__searchInvestigationByParameterLogical);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchInvestigationByParameterLogical(soap, &soap_tmp___ns1__searchInvestigationByParameterLogical, "-ns1:searchInvestigationByParameterLogical", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchInvestigationByParameterLogical(
+            soap, &soap_tmp___ns1__searchInvestigationByParameterLogical,
+            "-ns1:searchInvestigationByParameterLogical", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchInvestigationByParameterLogical(soap, &soap_tmp___ns1__searchInvestigationByParameterLogical, "-ns1:searchInvestigationByParameterLogical", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchInvestigationByParameterLogical(
+          soap, &soap_tmp___ns1__searchInvestigationByParameterLogical,
+          "-ns1:searchInvestigationByParameterLogical", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchInvestigationByParameterLogicalResponse_)
     return soap_closesock(soap);
   ns1__searchInvestigationByParameterLogicalResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchInvestigationByParameterLogicalResponse_->soap_get(soap, "ns1:searchInvestigationByParameterLogicalResponse", "ns1:searchInvestigationByParameterLogicalResponse");
+  ns1__searchInvestigationByParameterLogicalResponse_->soap_get(
+      soap, "ns1:searchInvestigationByParameterLogicalResponse",
+      "ns1:searchInvestigationByParameterLogicalResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatafileByParameterLogical(const char *endpoint, const char *soap_action, ns1__searchDatafileByParameterLogical *ns1__searchDatafileByParameterLogical_, ns1__searchDatafileByParameterLogicalResponse *ns1__searchDatafileByParameterLogicalResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchDatafileByParameterLogical soap_tmp___ns1__searchDatafileByParameterLogical;
+int ICATPortBindingProxy::searchDatafileByParameterLogical(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatafileByParameterLogical *
+        ns1__searchDatafileByParameterLogical_,
+    ns1__searchDatafileByParameterLogicalResponse *
+        ns1__searchDatafileByParameterLogicalResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchDatafileByParameterLogical
+      soap_tmp___ns1__searchDatafileByParameterLogical;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
     soap_endpoint = "https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT";
   if (soap_action == NULL)
-    soap_action = "client.icat3.uk/ICAT/searchDatafileByParameterLogicalRequest";
+    soap_action =
+        "client.icat3.uk/ICAT/searchDatafileByParameterLogicalRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatafileByParameterLogical.ns1__searchDatafileByParameterLogical_ = ns1__searchDatafileByParameterLogical_;
+  soap_tmp___ns1__searchDatafileByParameterLogical
+      .ns1__searchDatafileByParameterLogical_ =
+      ns1__searchDatafileByParameterLogical_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatafileByParameterLogical(soap, &soap_tmp___ns1__searchDatafileByParameterLogical);
+  soap_serialize___ns1__searchDatafileByParameterLogical(
+      soap, &soap_tmp___ns1__searchDatafileByParameterLogical);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatafileByParameterLogical(soap, &soap_tmp___ns1__searchDatafileByParameterLogical, "-ns1:searchDatafileByParameterLogical", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatafileByParameterLogical(
+            soap, &soap_tmp___ns1__searchDatafileByParameterLogical,
+            "-ns1:searchDatafileByParameterLogical", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatafileByParameterLogical(soap, &soap_tmp___ns1__searchDatafileByParameterLogical, "-ns1:searchDatafileByParameterLogical", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatafileByParameterLogical(
+          soap, &soap_tmp___ns1__searchDatafileByParameterLogical,
+          "-ns1:searchDatafileByParameterLogical", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatafileByParameterLogicalResponse_)
     return soap_closesock(soap);
   ns1__searchDatafileByParameterLogicalResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatafileByParameterLogicalResponse_->soap_get(soap, "ns1:searchDatafileByParameterLogicalResponse", "ns1:searchDatafileByParameterLogicalResponse");
+  ns1__searchDatafileByParameterLogicalResponse_->soap_get(
+      soap, "ns1:searchDatafileByParameterLogicalResponse",
+      "ns1:searchDatafileByParameterLogicalResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchDatasetByParameterLogical(const char *endpoint, const char *soap_action, ns1__searchDatasetByParameterLogical *ns1__searchDatasetByParameterLogical_, ns1__searchDatasetByParameterLogicalResponse *ns1__searchDatasetByParameterLogicalResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchDatasetByParameterLogical soap_tmp___ns1__searchDatasetByParameterLogical;
+int ICATPortBindingProxy::searchDatasetByParameterLogical(
+    const char *endpoint, const char *soap_action,
+    ns1__searchDatasetByParameterLogical *ns1__searchDatasetByParameterLogical_,
+    ns1__searchDatasetByParameterLogicalResponse *
+        ns1__searchDatasetByParameterLogicalResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchDatasetByParameterLogical
+      soap_tmp___ns1__searchDatasetByParameterLogical;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -7620,53 +8289,60 @@ int ICATPortBindingProxy::searchDatasetByParameterLogical(const char *endpoint, 
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchDatasetByParameterLogicalRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchDatasetByParameterLogical.ns1__searchDatasetByParameterLogical_ = ns1__searchDatasetByParameterLogical_;
+  soap_tmp___ns1__searchDatasetByParameterLogical
+      .ns1__searchDatasetByParameterLogical_ =
+      ns1__searchDatasetByParameterLogical_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchDatasetByParameterLogical(soap, &soap_tmp___ns1__searchDatasetByParameterLogical);
+  soap_serialize___ns1__searchDatasetByParameterLogical(
+      soap, &soap_tmp___ns1__searchDatasetByParameterLogical);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchDatasetByParameterLogical(soap, &soap_tmp___ns1__searchDatasetByParameterLogical, "-ns1:searchDatasetByParameterLogical", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchDatasetByParameterLogical(
+            soap, &soap_tmp___ns1__searchDatasetByParameterLogical,
+            "-ns1:searchDatasetByParameterLogical", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchDatasetByParameterLogical(soap, &soap_tmp___ns1__searchDatasetByParameterLogical, "-ns1:searchDatasetByParameterLogical", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchDatasetByParameterLogical(
+          soap, &soap_tmp___ns1__searchDatasetByParameterLogical,
+          "-ns1:searchDatasetByParameterLogical", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchDatasetByParameterLogicalResponse_)
     return soap_closesock(soap);
   ns1__searchDatasetByParameterLogicalResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchDatasetByParameterLogicalResponse_->soap_get(soap, "ns1:searchDatasetByParameterLogicalResponse", "ns1:searchDatasetByParameterLogicalResponse");
+  ns1__searchDatasetByParameterLogicalResponse_->soap_get(
+      soap, "ns1:searchDatasetByParameterLogicalResponse",
+      "ns1:searchDatasetByParameterLogicalResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchSampleByParameterLogical(const char *endpoint, const char *soap_action, ns1__searchSampleByParameterLogical *ns1__searchSampleByParameterLogical_, ns1__searchSampleByParameterLogicalResponse *ns1__searchSampleByParameterLogicalResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchSampleByParameterLogical soap_tmp___ns1__searchSampleByParameterLogical;
+int ICATPortBindingProxy::searchSampleByParameterLogical(
+    const char *endpoint, const char *soap_action,
+    ns1__searchSampleByParameterLogical *ns1__searchSampleByParameterLogical_,
+    ns1__searchSampleByParameterLogicalResponse *
+        ns1__searchSampleByParameterLogicalResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchSampleByParameterLogical
+      soap_tmp___ns1__searchSampleByParameterLogical;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -7674,53 +8350,60 @@ int ICATPortBindingProxy::searchSampleByParameterLogical(const char *endpoint, c
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchSampleByParameterLogicalRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchSampleByParameterLogical.ns1__searchSampleByParameterLogical_ = ns1__searchSampleByParameterLogical_;
+  soap_tmp___ns1__searchSampleByParameterLogical
+      .ns1__searchSampleByParameterLogical_ =
+      ns1__searchSampleByParameterLogical_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchSampleByParameterLogical(soap, &soap_tmp___ns1__searchSampleByParameterLogical);
+  soap_serialize___ns1__searchSampleByParameterLogical(
+      soap, &soap_tmp___ns1__searchSampleByParameterLogical);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchSampleByParameterLogical(soap, &soap_tmp___ns1__searchSampleByParameterLogical, "-ns1:searchSampleByParameterLogical", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchSampleByParameterLogical(
+            soap, &soap_tmp___ns1__searchSampleByParameterLogical,
+            "-ns1:searchSampleByParameterLogical", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchSampleByParameterLogical(soap, &soap_tmp___ns1__searchSampleByParameterLogical, "-ns1:searchSampleByParameterLogical", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchSampleByParameterLogical(
+          soap, &soap_tmp___ns1__searchSampleByParameterLogical,
+          "-ns1:searchSampleByParameterLogical", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchSampleByParameterLogicalResponse_)
     return soap_closesock(soap);
   ns1__searchSampleByParameterLogicalResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchSampleByParameterLogicalResponse_->soap_get(soap, "ns1:searchSampleByParameterLogicalResponse", "ns1:searchSampleByParameterLogicalResponse");
+  ns1__searchSampleByParameterLogicalResponse_->soap_get(
+      soap, "ns1:searchSampleByParameterLogicalResponse",
+      "ns1:searchSampleByParameterLogicalResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }
 
-int ICATPortBindingProxy::searchFacilityUserByRestriction(const char *endpoint, const char *soap_action, ns1__searchFacilityUserByRestriction *ns1__searchFacilityUserByRestriction_, ns1__searchFacilityUserByRestrictionResponse *ns1__searchFacilityUserByRestrictionResponse_)
-{ struct soap *soap = this;
-  struct __ns1__searchFacilityUserByRestriction soap_tmp___ns1__searchFacilityUserByRestriction;
+int ICATPortBindingProxy::searchFacilityUserByRestriction(
+    const char *endpoint, const char *soap_action,
+    ns1__searchFacilityUserByRestriction *ns1__searchFacilityUserByRestriction_,
+    ns1__searchFacilityUserByRestrictionResponse *
+        ns1__searchFacilityUserByRestrictionResponse_) {
+  struct soap *soap = this;
+  struct __ns1__searchFacilityUserByRestriction
+      soap_tmp___ns1__searchFacilityUserByRestriction;
   if (endpoint)
     soap_endpoint = endpoint;
   if (soap_endpoint == NULL)
@@ -7728,46 +8411,48 @@ int ICATPortBindingProxy::searchFacilityUserByRestriction(const char *endpoint, 
   if (soap_action == NULL)
     soap_action = "client.icat3.uk/ICAT/searchFacilityUserByRestrictionRequest";
   soap->encodingStyle = NULL;
-  soap_tmp___ns1__searchFacilityUserByRestriction.ns1__searchFacilityUserByRestriction_ = ns1__searchFacilityUserByRestriction_;
+  soap_tmp___ns1__searchFacilityUserByRestriction
+      .ns1__searchFacilityUserByRestriction_ =
+      ns1__searchFacilityUserByRestriction_;
   soap_begin(soap);
   soap_serializeheader(soap);
-  soap_serialize___ns1__searchFacilityUserByRestriction(soap, &soap_tmp___ns1__searchFacilityUserByRestriction);
+  soap_serialize___ns1__searchFacilityUserByRestriction(
+      soap, &soap_tmp___ns1__searchFacilityUserByRestriction);
   if (soap_begin_count(soap))
     return soap->error;
-  if (soap->mode & SOAP_IO_LENGTH)
-  { if (soap_envelope_begin_out(soap)
-     || soap_putheader(soap)
-     || soap_body_begin_out(soap)
-     || soap_put___ns1__searchFacilityUserByRestriction(soap, &soap_tmp___ns1__searchFacilityUserByRestriction, "-ns1:searchFacilityUserByRestriction", NULL)
-     || soap_body_end_out(soap)
-     || soap_envelope_end_out(soap))
-       return soap->error;
+  if (soap->mode & SOAP_IO_LENGTH) {
+    if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+        soap_body_begin_out(soap) ||
+        soap_put___ns1__searchFacilityUserByRestriction(
+            soap, &soap_tmp___ns1__searchFacilityUserByRestriction,
+            "-ns1:searchFacilityUserByRestriction", NULL) ||
+        soap_body_end_out(soap) || soap_envelope_end_out(soap))
+      return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action)
-   || soap_envelope_begin_out(soap)
-   || soap_putheader(soap)
-   || soap_body_begin_out(soap)
-   || soap_put___ns1__searchFacilityUserByRestriction(soap, &soap_tmp___ns1__searchFacilityUserByRestriction, "-ns1:searchFacilityUserByRestriction", NULL)
-   || soap_body_end_out(soap)
-   || soap_envelope_end_out(soap)
-   || soap_end_send(soap))
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+      soap_envelope_begin_out(soap) || soap_putheader(soap) ||
+      soap_body_begin_out(soap) ||
+      soap_put___ns1__searchFacilityUserByRestriction(
+          soap, &soap_tmp___ns1__searchFacilityUserByRestriction,
+          "-ns1:searchFacilityUserByRestriction", NULL) ||
+      soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
+      soap_end_send(soap))
     return soap_closesock(soap);
   if (!ns1__searchFacilityUserByRestrictionResponse_)
     return soap_closesock(soap);
   ns1__searchFacilityUserByRestrictionResponse_->soap_default(soap);
-  if (soap_begin_recv(soap)
-   || soap_envelope_begin_in(soap)
-   || soap_recv_header(soap)
-   || soap_body_begin_in(soap))
+  if (soap_begin_recv(soap) || soap_envelope_begin_in(soap) ||
+      soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
-  ns1__searchFacilityUserByRestrictionResponse_->soap_get(soap, "ns1:searchFacilityUserByRestrictionResponse", "ns1:searchFacilityUserByRestrictionResponse");
+  ns1__searchFacilityUserByRestrictionResponse_->soap_get(
+      soap, "ns1:searchFacilityUserByRestrictionResponse",
+      "ns1:searchFacilityUserByRestrictionResponse");
   if (soap->error)
     return soap_recv_fault(soap, 0);
-  if (soap_body_end_in(soap)
-   || soap_envelope_end_in(soap)
-   || soap_end_recv(soap))
+  if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
+      soap_end_recv(soap))
     return soap_closesock(soap);
   return soap_closesock(soap);
 }

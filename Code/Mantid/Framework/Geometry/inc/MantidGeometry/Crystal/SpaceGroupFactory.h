@@ -8,12 +8,11 @@
 
 #include <map>
 
-namespace Mantid
-{
-namespace Geometry
-{
+namespace Mantid {
+namespace Geometry {
 
-bool MANTID_GEOMETRY_DLL isValidGeneratorString(const std::string &generatorString);
+bool MANTID_GEOMETRY_DLL
+    isValidGeneratorString(const std::string &generatorString);
 
 /** AbstractSpaceGroupGenerator
  *
@@ -29,56 +28,62 @@ bool MANTID_GEOMETRY_DLL isValidGeneratorString(const std::string &generatorStri
  * leaves the door open for new algorithms that may be more efficient or have
  * other favorable properties.
  */
-class MANTID_GEOMETRY_DLL AbstractSpaceGroupGenerator
-{
+class MANTID_GEOMETRY_DLL AbstractSpaceGroupGenerator {
 public:
-    AbstractSpaceGroupGenerator(size_t number, const std::string &hmSymbol, const std::string &generatorInformation);
-    virtual ~AbstractSpaceGroupGenerator() { }
+  AbstractSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
+                              const std::string &generatorInformation);
+  virtual ~AbstractSpaceGroupGenerator() {}
 
-    inline size_t getNumber() const { return m_number; }
-    inline std::string getHMSymbol() const { return m_hmSymbol; }
-    inline std::string getGeneratorString() const { return m_generatorString; }
+  inline size_t getNumber() const { return m_number; }
+  inline std::string getHMSymbol() const { return m_hmSymbol; }
+  inline std::string getGeneratorString() const { return m_generatorString; }
 
-    SpaceGroup_const_sptr getPrototype();
+  SpaceGroup_const_sptr getPrototype();
 
 protected:
-    virtual Group_const_sptr generateGroup() const = 0;
+  virtual Group_const_sptr generateGroup() const = 0;
 
 private:
-    inline bool hasValidPrototype() const { return static_cast<bool>(m_prototype); }
-    SpaceGroup_const_sptr generatePrototype();
+  inline bool hasValidPrototype() const {
+    return static_cast<bool>(m_prototype);
+  }
+  SpaceGroup_const_sptr generatePrototype();
 
-    size_t m_number;
-    std::string m_hmSymbol;
-    std::string m_generatorString;
+  size_t m_number;
+  std::string m_hmSymbol;
+  std::string m_generatorString;
 
-    SpaceGroup_const_sptr m_prototype;
+  SpaceGroup_const_sptr m_prototype;
 };
 
-typedef boost::shared_ptr<AbstractSpaceGroupGenerator> AbstractSpaceGroupGenerator_sptr;
+typedef boost::shared_ptr<AbstractSpaceGroupGenerator>
+    AbstractSpaceGroupGenerator_sptr;
 
-/// Concrete space group generator that uses space group generators as given in ITA.
-class MANTID_GEOMETRY_DLL AlgorithmicSpaceGroupGenerator : public AbstractSpaceGroupGenerator
-{
+/// Concrete space group generator that uses space group generators as given in
+/// ITA.
+class MANTID_GEOMETRY_DLL AlgorithmicSpaceGroupGenerator
+    : public AbstractSpaceGroupGenerator {
 public:
-    AlgorithmicSpaceGroupGenerator(size_t number, const std::string &hmSymbol, const std::string &generatorInformation);
-    virtual ~AlgorithmicSpaceGroupGenerator() { }
+  AlgorithmicSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
+                                 const std::string &generatorInformation);
+  virtual ~AlgorithmicSpaceGroupGenerator() {}
 
 protected:
-    Group_const_sptr generateGroup() const;
-    std::string getCenteringSymbol() const;
-
+  Group_const_sptr generateGroup() const;
+  std::string getCenteringSymbol() const;
 };
 
-/// Concrete space group generator that constructs space groups from a list of symmetry operations with no further computations.
-class MANTID_GEOMETRY_DLL TabulatedSpaceGroupGenerator : public AbstractSpaceGroupGenerator
-{
+/// Concrete space group generator that constructs space groups from a list of
+/// symmetry operations with no further computations.
+class MANTID_GEOMETRY_DLL TabulatedSpaceGroupGenerator
+    : public AbstractSpaceGroupGenerator {
 public:
-    TabulatedSpaceGroupGenerator(size_t number, const std::string &hmSymbol, const std::string &generatorInformation);
-    virtual ~TabulatedSpaceGroupGenerator() { }
+  TabulatedSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
+                               const std::string &generatorInformation);
+  virtual ~TabulatedSpaceGroupGenerator() {}
 
 protected:
-    Group_const_sptr generateGroup() const;
+  Group_const_sptr generateGroup() const;
 };
 
 /** SpaceGroupFactory
@@ -122,59 +127,65 @@ protected:
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_GEOMETRY_DLL SpaceGroupFactoryImpl
-{
+class MANTID_GEOMETRY_DLL SpaceGroupFactoryImpl {
 public:
-    virtual ~SpaceGroupFactoryImpl() { }
+  virtual ~SpaceGroupFactoryImpl() {}
 
-    SpaceGroup_const_sptr createSpaceGroup(const std::string &hmSymbol);
+  SpaceGroup_const_sptr createSpaceGroup(const std::string &hmSymbol);
 
-    bool isSubscribed(const std::string &hmSymbol) const;
-    bool isSubscribed(size_t number) const;
+  bool isSubscribed(const std::string &hmSymbol) const;
+  bool isSubscribed(size_t number) const;
 
-    std::vector<std::string> subscribedSpaceGroupSymbols() const;
-    std::vector<std::string> subscribedSpaceGroupSymbols(size_t number) const;
-    std::vector<size_t> subscribedSpaceGroupNumbers() const;
+  std::vector<std::string> subscribedSpaceGroupSymbols() const;
+  std::vector<std::string> subscribedSpaceGroupSymbols(size_t number) const;
+  std::vector<size_t> subscribedSpaceGroupNumbers() const;
 
-    void unsubscribeSpaceGroup(const std::string &hmSymbol);
+  void unsubscribeSpaceGroup(const std::string &hmSymbol);
 
-    void subscribeGeneratedSpaceGroup(size_t number, const std::string &hmSymbol, const std::string &generators);
-    void subscribeTabulatedSpaceGroup(size_t number, const std::string &hmSymbol, const std::string &symmetryOperations);
+  void subscribeGeneratedSpaceGroup(size_t number, const std::string &hmSymbol,
+                                    const std::string &generators);
+  void subscribeTabulatedSpaceGroup(size_t number, const std::string &hmSymbol,
+                                    const std::string &symmetryOperations);
 
-    /// Templated method to subscribe other generators than the ones provided here.
-    template<typename T>
-    void subscribeUsingGenerator(size_t number, const std::string &hmSymbol, const std::string &generatorString)
-    {
-        if(isSubscribed(hmSymbol)) {
-            throw std::invalid_argument("Space group with this symbol is already registered.");
-        }
-
-        AbstractSpaceGroupGenerator_sptr generator = boost::make_shared<T>(number, hmSymbol, generatorString);
-
-        subscribe(generator);
+  /// Templated method to subscribe other generators than the ones provided
+  /// here.
+  template <typename T>
+  void subscribeUsingGenerator(size_t number, const std::string &hmSymbol,
+                               const std::string &generatorString) {
+    if (isSubscribed(hmSymbol)) {
+      throw std::invalid_argument(
+          "Space group with this symbol is already registered.");
     }
 
+    AbstractSpaceGroupGenerator_sptr generator =
+        boost::make_shared<T>(number, hmSymbol, generatorString);
+
+    subscribe(generator);
+  }
+
 protected:
-    SpaceGroup_const_sptr getPrototype(const std::string &hmSymbol);
-    void subscribe(const AbstractSpaceGroupGenerator_sptr &generator);
-    SpaceGroup_const_sptr constructFromPrototype(const SpaceGroup_const_sptr prototype) const;
+  SpaceGroup_const_sptr getPrototype(const std::string &hmSymbol);
+  void subscribe(const AbstractSpaceGroupGenerator_sptr &generator);
+  SpaceGroup_const_sptr
+  constructFromPrototype(const SpaceGroup_const_sptr prototype) const;
 
-    std::multimap<size_t, std::string> m_numberMap;
-    std::map<std::string, AbstractSpaceGroupGenerator_sptr> m_generatorMap;
+  std::multimap<size_t, std::string> m_numberMap;
+  std::map<std::string, AbstractSpaceGroupGenerator_sptr> m_generatorMap;
 
-    SpaceGroupFactoryImpl();
+  SpaceGroupFactoryImpl();
 
 private:
-    friend struct Mantid::Kernel::CreateUsingNew<SpaceGroupFactoryImpl>;
+  friend struct Mantid::Kernel::CreateUsingNew<SpaceGroupFactoryImpl>;
 };
 
 // This is taken from FuncMinimizerFactory
 #ifdef _WIN32
-  template class MANTID_GEOMETRY_DLL Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>;
+template class MANTID_GEOMETRY_DLL
+    Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>;
 #endif
 
-typedef Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl> SpaceGroupFactory;
-
+typedef Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>
+    SpaceGroupFactory;
 
 } // namespace Geometry
 } // namespace Mantid
@@ -193,18 +204,23 @@ typedef Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl> SpaceGroupFactory
 #define SPGF_CONCAT_IMPL(x, y) x##y
 #define SPGF_CONCAT(x, y) SPGF_CONCAT_IMPL(x, y)
 
-#define DECLARE_GENERATED_SPACE_GROUP(number,hmSymbol,generators) \
-      namespace { \
-  Mantid::Kernel::RegistrationHelper SPGF_CONCAT(register_spacegroup_, __COUNTER__)( \
-((Mantid::Geometry::SpaceGroupFactory::Instance().subscribeGeneratedSpaceGroup(number, hmSymbol, generators)) \
-  , 0)); \
+#define DECLARE_GENERATED_SPACE_GROUP(number, hmSymbol, generators)            \
+  namespace {                                                                  \
+  Mantid::Kernel::RegistrationHelper SPGF_CONCAT(register_spacegroup_,         \
+                                                 __COUNTER__)(                 \
+      ((Mantid::Geometry::SpaceGroupFactory::Instance()                        \
+            .subscribeGeneratedSpaceGroup(number, hmSymbol, generators)),      \
+       0));                                                                    \
   }
 
-#define DECLARE_TABULATED_SPACE_GROUP(number,hmSymbol,symmetryOperations) \
-    namespace { \
-Mantid::Kernel::RegistrationHelper SPGF_CONCAT(register_spacegroup_, __COUNTER__)( \
-((Mantid::Geometry::SpaceGroupFactory::Instance().subscribeTabulatedSpaceGroup(number, hmSymbol, symmetryOperations)) \
-, 0)); \
-}
+#define DECLARE_TABULATED_SPACE_GROUP(number, hmSymbol, symmetryOperations)    \
+  namespace {                                                                  \
+  Mantid::Kernel::RegistrationHelper SPGF_CONCAT(register_spacegroup_,         \
+                                                 __COUNTER__)(                 \
+      ((Mantid::Geometry::SpaceGroupFactory::Instance()                        \
+            .subscribeTabulatedSpaceGroup(number, hmSymbol,                    \
+                                          symmetryOperations)),                \
+       0));                                                                    \
+  }
 
-#endif  /* MANTID_GEOMETRY_SPACEGROUPFACTORY_H_ */
+#endif /* MANTID_GEOMETRY_SPACEGROUPFACTORY_H_ */

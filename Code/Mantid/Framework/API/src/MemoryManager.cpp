@@ -10,20 +10,15 @@
 
 using std::size_t;
 
-namespace Mantid
-{
-namespace API
-{
-  namespace
-  {
-    /// static logger
-    Kernel::Logger g_log("MemoryManager");
-  }
+namespace Mantid {
+namespace API {
+namespace {
+/// static logger
+Kernel::Logger g_log("MemoryManager");
+}
 
 /// Private Constructor for singleton class
-MemoryManagerImpl::MemoryManagerImpl() :
-  memoryCleared(0)
-{
+MemoryManagerImpl::MemoryManagerImpl() : memoryCleared(0) {
   g_log.debug() << "Memory Manager created." << std::endl;
 }
 
@@ -31,12 +26,9 @@ MemoryManagerImpl::MemoryManagerImpl() :
  *  Prevents client from calling 'delete' on the pointer handed
  *  out by Instance
  */
-MemoryManagerImpl::~MemoryManagerImpl()
-{
-}
+MemoryManagerImpl::~MemoryManagerImpl() {}
 
-MemoryInfo MemoryManagerImpl::getMemoryInfo()
-{
+MemoryInfo MemoryManagerImpl::getMemoryInfo() {
   Kernel::MemoryStats mem_stats;
   MemoryInfo info;
   info.totalMemory = mem_stats.totalMem();
@@ -49,9 +41,7 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
  * Calling this could help the system avoid going into swap.
  * NOTE: This only works if you linked against tcmalloc.
  */
-void MemoryManagerImpl::releaseFreeMemory()
-{
-}
+void MemoryManagerImpl::releaseFreeMemory() {}
 
 /** Release any free memory back to the system,
  * but only if you are above a certain fraction of use of the
@@ -66,11 +56,9 @@ void MemoryManagerImpl::releaseFreeMemory()
  *        memory used that has to be in use before the call to
  *        release memory is actually called.
  */
-void MemoryManagerImpl::releaseFreeMemoryIfAbove(double threshold)
-{
+void MemoryManagerImpl::releaseFreeMemoryIfAbove(double threshold) {
   UNUSED_ARG(threshold);
 }
-
 
 /** Release memory back to the system if you accumulated enough.
  * Each call adds to the amount cleared, but it is only
@@ -78,14 +66,14 @@ void MemoryManagerImpl::releaseFreeMemoryIfAbove(double threshold)
  * NOTE: This only works if you linked against tcmalloc.
  *
  * @param adding :: how many bytes where just cleared
- * @param threshold :: threshold number of bytes accumulated before clearing memory.
+ * @param threshold :: threshold number of bytes accumulated before clearing
+ *memory.
  */
-void MemoryManagerImpl::releaseFreeMemoryIfAccumulated(size_t adding, size_t threshold)
-{
+void MemoryManagerImpl::releaseFreeMemoryIfAccumulated(size_t adding,
+                                                       size_t threshold) {
   UNUSED_ARG(adding);
   UNUSED_ARG(threshold);
 }
-
 
 } // namespace API
 } // namespace Mantid

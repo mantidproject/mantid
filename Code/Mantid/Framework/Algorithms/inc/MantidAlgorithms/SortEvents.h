@@ -1,27 +1,28 @@
 #ifndef MANTID_ALGORITHMS_SORTEVENTS_H_
 #define MANTID_ALGORITHMS_SORTEVENTS_H_
-    
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** Takes an EventWorkspace and sorts by TOF or frame_index.
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace  - The name of the workspace to take as input. Must contain event data. </LI>
-    <LI> SortByTof - check to sort by Time of Flight; uncheck to sort by frame index.</LI>
+    <LI> InputWorkspace  - The name of the workspace to take as input. Must
+   contain event data. </LI>
+    <LI> SortByTof - check to sort by Time of Flight; uncheck to sort by frame
+   index.</LI>
     </UL>
 
     @author Janik Zikovsky, SNS
     @date Friday, August 13, 2010.
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -41,33 +42,31 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport SortEvents : public API::Algorithm
-{
+class DLLExport SortEvents : public API::Algorithm {
 public:
   /// Default constructor
-  SortEvents() : API::Algorithm() {};
+  SortEvents() : API::Algorithm(){};
   /// Destructor
-  virtual ~SortEvents() {};
+  virtual ~SortEvents(){};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SortEvents";}
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Sort the events in an EventWorkspace, for faster rebinning.";}
+  virtual const std::string name() const { return "SortEvents"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Sort the events in an EventWorkspace, for faster rebinning.";
+  }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1;}
+  virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Events";}
+  virtual const std::string category() const { return "Events"; }
 
 protected:
-  
   // Overridden Algorithm methods
   void init();
   virtual void exec();
-
 };
 
 } // namespace Algorithms
 } // namespace Mantid
 
-
-#endif  /* MANTID_ALGORITHMS_SORTEVENTS_H_ */
+#endif /* MANTID_ALGORITHMS_SORTEVENTS_H_ */
