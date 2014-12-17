@@ -160,7 +160,9 @@ void SendUsage::generateHeader() {
          << "\"osArch\":\"" << ConfigService::Instance().getOSArchitecture()
          << "\","
          << "\"osVersion\":\"" << ConfigService::Instance().getOSVersion()
-         << "\",";
+         << "\","
+         << "\"osReadable\":\""
+         << ConfigService::Instance().getOSVersionReadable() << "\",";
 
   // paraview version or zero
   buffer << "\"ParaView\":\"";
