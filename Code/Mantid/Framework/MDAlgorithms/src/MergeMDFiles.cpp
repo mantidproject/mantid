@@ -314,7 +314,7 @@ void MergeMDFiles::finalizeOutput(const std::string &outputFile) {
     // create or open WS group and put there additional information about WS and
     // its dimensions
     bool old_data_there;
-    boost::scoped_ptr<::NeXus::File> file(MDBoxFlatTree::createOrOpenMDWSgroup(
+    boost::scoped_ptr< ::NeXus::File> file(MDBoxFlatTree::createOrOpenMDWSgroup(
         outputFile, m_nDims, m_MDEventType, false, old_data_there));
     this->progress(0.94, "Saving ws history and dimensions");
     MDBoxFlatTree::saveWSGenericInfo(file.get(), m_OutIWS);

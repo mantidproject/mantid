@@ -128,7 +128,7 @@ public:
 
 private:
   /// C++ API file handle
-  boost::shared_ptr<::NeXus::File> m_filehandle;
+  boost::shared_ptr< ::NeXus::File> m_filehandle;
   /// Nexus compression method
   int m_nexuscompression;
   /// Allow an externally supplied progress object to be used
