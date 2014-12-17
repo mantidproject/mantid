@@ -7133,7 +7133,7 @@ void ApplicationWindow::showAxisDialog()
       g_log.error() << "Failed to open axis dialog for multi layer plot";
       return;
     }
-    if (ml->layers())
+    if (ml && ml->layers())
       dynamic_cast<AxesDialog*>(gd)->showAxesPage();
   }
   else if (gd && plot->isA("Graph3D"))
