@@ -116,7 +116,8 @@ void SANSSolidAngleCorrection::exec() {
     IDetector_const_sptr det;
     try {
       det = inputWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
+    }
+    catch (Exception::NotFoundError &) {
       g_log.warning() << "Spectrum index " << i
                       << " has no detector assigned to it - discarding"
                       << std::endl;
@@ -142,16 +143,15 @@ void SANSSolidAngleCorrection::exec() {
 
     // Compute solid angle correction factor
     const bool is_tube = getProperty("DetectorTubes");
-    const double tanTheta = tan( inputWS->detectorTwoTheta(det) );
-    const double theta_term = sqrt(tanTheta*tanTheta + 1.0);
+    const double tanTheta = tan(inputWS->detectorTwoTheta(det));
+    const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
     double corr;
-    if (is_tube)
-    {
-        const double tanAlpha = tan( getYTubeAngle(det, inputWS) );
-        const double alpha_term = sqrt(tanAlpha*tanAlpha + 1.0);
-        corr = alpha_term*theta_term*theta_term;
+    if (is_tube) {
+      const double tanAlpha = tan(getYTubeAngle(det, inputWS));
+      const double alpha_term = sqrt(tanAlpha * tanAlpha + 1.0);
+      corr = alpha_term * theta_term * theta_term;
     } else {
-        corr = theta_term*theta_term*theta_term;
+      corr = theta_term * theta_term * theta_term;
     }
 
     // Correct data for all X bins
@@ -204,7 +204,8 @@ void SANSSolidAngleCorrection::execEvent() {
     IDetector_const_sptr det;
     try {
       det = inputEventWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
+    }
+    catch (Exception::NotFoundError &) {
       g_log.warning() << "Spectrum index " << i
                       << " has no detector assigned to it - discarding"
                       << std::endl;
@@ -223,19 +224,18 @@ void SANSSolidAngleCorrection::execEvent() {
 
     // Compute solid angle correction factor
     const bool is_tube = getProperty("DetectorTubes");
-    const double tanTheta = tan( inputEventWS->detectorTwoTheta(det) );
-    const double theta_term = sqrt(tanTheta*tanTheta + 1.0);
+    const double tanTheta = tan(inputEventWS->detectorTwoTheta(det));
+    const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
     double corr;
-    if (is_tube)
-    {
-        const double tanAlpha = tan( getYTubeAngle(det, inputWS) );
-        const double alpha_term = sqrt(tanAlpha*tanAlpha + 1.0);
-        corr = alpha_term*theta_term*theta_term;
+    if (is_tube) {
+      const double tanAlpha = tan(getYTubeAngle(det, inputWS));
+      const double alpha_term = sqrt(tanAlpha * tanAlpha + 1.0);
+      corr = alpha_term * theta_term * theta_term;
     } else {
-        corr = theta_term*theta_term*theta_term;
+      corr = theta_term * theta_term * theta_term;
     }
-    EventList& el = outputEventWS->getEventList(i);
-    el*=corr;
+    EventList &el = outputEventWS->getEventList(i);
+    el *= corr;
     progress.report("Solid Angle Correction");
     PARALLEL_END_INTERUPT_REGION
   }
