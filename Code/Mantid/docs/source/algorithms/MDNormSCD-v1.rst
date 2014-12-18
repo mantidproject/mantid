@@ -81,7 +81,7 @@ Usage
   except:
     pass
    
-.. testoutput:: SCDMDNormExample 
+.. testoutput:: MDNormSCDExample 
 
     
     

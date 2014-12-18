@@ -48,7 +48,7 @@ private:
 
   /// limits for h,k,l,dE dimensions
   coord_t m_hmin, m_hmax, m_kmin, m_kmax, m_lmin, m_lmax, m_dEmin, m_dEmax;
-  /// cached values for incident energy and momentum
+  /// cached values for incident energy and momentum, final momentum min/max
   double m_Ei, m_ki, m_kfmin, m_kfmax;
   /// flag for integrated h,k,l,dE dimensions
   bool m_hIntegrated, m_kIntegrated, m_lIntegrated, m_dEIntegrated;
