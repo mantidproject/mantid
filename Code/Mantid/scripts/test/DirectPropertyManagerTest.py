@@ -1,5 +1,5 @@
 import os
-os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release"
+#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -143,8 +143,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         prop_changed = propman.getChangedProperties();
         self.assertEqual(len(prop_changed),1)
         self.assertTrue('spectra_to_monitors_list' in prop_changed)
-
-
 
 
     def test_set_non_default_complex_value(self):
@@ -404,42 +402,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
          propman.log_changed_values()
 
 
-    def test_set_energy_bins_and_ei(self):
-        #TODO  modify and verify the energy bins for range of energies
-        propman = self.prop_man
-
-        propman.energy_bins='-30,3,10'
-        bins = propman.energy_bins
-        self.assertAlmostEqual(bins[0],-30)
-        self.assertAlmostEqual(bins[1],3)
-        self.assertAlmostEqual(bins[2],10)
-
-
-        propman.energy_bins=[-20,4,100]
-        bins = propman.energy_bins
-        self.assertAlmostEqual(bins[0],-20)
-        self.assertAlmostEqual(bins[1],4)
-        self.assertAlmostEqual(bins[2],100)
-
-
-        propman.incident_energy=10
-        self.assertAlmostEqual(propman.incident_energy,10)
-        ei = [20,30]
-        propman.incident_energy=ei
-        got_ei = propman.incident_energy
-        for ind,en in enumerate(got_ei):
-            self.assertAlmostEqual(en,ei[ind])
-
-        propman.incident_energy='20,30'
-        got_ei = propman.incident_energy
-        for ind,en in enumerate(got_ei):
-            self.assertAlmostEqual(en,ei[ind])
-
-
-        prop_man.energy_bins = None
-
-        #TODO: this one is not completed
-
     def test_set_defailts_from_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=100)
 
@@ -689,15 +651,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertFalse(propman1.use_hard_mask_only)
         self.assertEqual(propman1.hard_mask_file,'a_hard_mask_file.msk')
         self.assertTrue(propman1.run_diagnostics)
-   
-
-
-
-
-
-
-
- #def test_default_warnings(self):
+#def test_default_warnings(self):
     #    tReducer = self.reducer
 
     #    keys_changed=['somethins_else1','sample_mass','sample_rmm','somethins_else2']
@@ -716,11 +670,50 @@ class DirectPropertyManagerTest(unittest.TestCase):
     #    name = tReducer.make_ckpt_name('do_white',monovan,data,'t1')
     #    self.assertEqual('do_white1000t1',name)
 
+   
+   
+    def test_set_energy_bins_and_ei(self):
+        #TODO  modify and verify the energy bins for range of energies
+        propman = self.prop_man
 
+        propman.energy_bins='-30,3,10'
+        bins = propman.energy_bins
+        self.assertAlmostEqual(bins[0],-30)
+        self.assertAlmostEqual(bins[1],3)
+        self.assertAlmostEqual(bins[2],10)
+
+
+        propman.energy_bins=[-20,4,100]
+        bins = propman.energy_bins
+        self.assertAlmostEqual(bins[0],-20)
+        self.assertAlmostEqual(bins[1],4)
+        self.assertAlmostEqual(bins[2],100)
+
+
+        propman.incident_energy=10
+        self.assertAlmostEqual(propman.incident_energy,10)
+        ei = [20,30]
+        propman.incident_energy=ei
+        got_ei = propman.incident_energy
+        for ind,en in enumerate(got_ei):
+            self.assertAlmostEqual(en,ei[ind])
+
+        propman.incident_energy='20,30'
+        got_ei = propman.incident_energy
+        for ind,en in enumerate(got_ei):
+            self.assertAlmostEqual(en,ei[ind])
+
+
+        propman.energy_bins = None
+        self.assertFalse(propman.energy_bins)
+       
+        #TODO: this one is not completed
 
 
     
 
 if __name__=="__main__":
-        unittest.main()
+    unittest.main()
+    #tester = DirectPropertyManagerTest('test_set_energy_bins_and_ei')
+    #tester.run()
 
