@@ -3,17 +3,13 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeak.h"
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 
 using namespace Kernel;
 
 IPeak::~IPeak() {}
 
+} // API namespace
 
-} //API namespace
-
-} //Mantid namespace
-
+} // Mantid namespace

@@ -57,6 +57,7 @@ public:
 
 public slots:
   void clickedWorkspace(QTreeWidgetItem*, int);
+  void saveWorkspaceGroup();
   void deleteWorkspaces();
   void renameWorkspace();
   void populateChildData(QTreeWidgetItem* item);
@@ -65,17 +66,18 @@ public slots:
   void sortDescending();
   void chooseByName();
   void chooseByLastModified();
+  void saveWorkspacesToFolder(const QString &folder);
+
 protected slots:
   void popupMenu(const QPoint & pos);
   void workspaceSelected();
 
 private slots:
+  void handleShowSaveAlgorithm();
   void treeSelectionChanged();
   void groupingButtonClick();
   void plotSpectra();
-  void plotSpectraDistribution();
   void plotSpectraErr();
-  void plotSpectraDistributionErr();
   void drawColorFillPlot();
   void showDetectorTable();
   void convertToMatrixWorkspace();
@@ -84,8 +86,10 @@ private slots:
   void incrementUpdateCount();
   void recordWorkspaceRename(QString,QString);
   void clearUB();
+  void filterWorkspaceTree(const QString &text);
 
 private:
+  void addSaveMenuOption(QString algorithmString, QString menuEntryName = "");
   void setTreeUpdating(const bool state);
   inline bool isTreeUpdating() const { return m_treeUpdating; }
   void populateTopLevel(const std::map<std::string,Mantid::API::Workspace_sptr> & topLevelItems, const QStringList & expanded);
@@ -115,25 +119,30 @@ private:
   MantidUI * const m_mantidUI;
 
   QPushButton *m_loadButton;
-  QMenu *m_loadMenu, *m_saveToProgram, *m_sortMenu;
+  QPushButton *m_saveButton;
+  QMenu *m_loadMenu, *m_saveToProgram, *m_sortMenu, *m_saveMenu;
   QPushButton *m_deleteButton;
   QPushButton *m_groupButton;
   QPushButton *m_sortButton;
+  QLineEdit *m_workspaceFilter;
   QSignalMapper *m_loadMapper, *m_programMapper;
   QActionGroup *m_sortChoiceGroup;
+  QFileDialog *m_saveFolderDialog;
 
   //Context-menu actions
-  QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr, *m_plotSpecDistr,
+  QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr,
   *m_showDetectors, *m_showBoxData, *m_showVatesGui,
   *m_showSpectrumViewer,
   *m_showSliceViewer,
-  *m_colorFill, *m_showLogs, *m_showHist, *m_showMDPlot, *m_showListData,
+  *m_colorFill, *m_showLogs, *m_showSampleMaterial,  *m_showHist, *m_showMDPlot, *m_showListData,
   *m_saveNexus, *m_rename, *m_delete,
   *m_program, * m_ascendingSortAction,
   *m_descendingSortAction, *m_byNameChoice, *m_byLastModifiedChoice, *m_showTransposed,
   *m_convertToMatrixWorkspace,
   *m_convertMDHistoToMatrixWorkspace,
   *m_clearUB;
+  
+  ApplicationWindow *m_appParent;
 
   QAtomicInt m_updateCount;
   bool m_treeUpdating;

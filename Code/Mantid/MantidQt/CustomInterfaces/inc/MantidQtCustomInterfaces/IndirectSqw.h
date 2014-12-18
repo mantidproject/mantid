@@ -14,7 +14,7 @@ namespace CustomInterfaces
     @author Dan Nixon
     @date 23/07/2014
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -47,8 +47,13 @@ namespace CustomInterfaces
     virtual bool validate();
 
   private slots:
-    void sOfQwRebinE(bool state);
-    void sOfQwPlotInput();
+    void energyRebinToggle(bool state);
+    void plotContour();
+    void sqwAlgDone(bool error);
+
+  private:
+    bool validateQRebin();
+    bool validateEnergyRebin();
 
   };
 } // namespace CustomInterfaces

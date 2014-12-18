@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MantidEV</class>
- <widget class="QWidget" name="MantidEV">
+ <widget class="QMainWindow" name="MantidEV">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -19,6 +19,7 @@
   <property name="windowTitle">
    <string>SCD Event Data Reduction</string>
   </property>
+  <widget class="QWidget" name="centralwidget">
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QMenuBar" name="menubar">
@@ -3444,6 +3445,7 @@
     </widget>
    </item>
   </layout>
+  </widget>
   <widget class="QStatusBar" name="statusbar">
    <property name="geometry">
     <rect>

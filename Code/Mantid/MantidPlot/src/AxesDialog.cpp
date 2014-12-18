@@ -42,6 +42,8 @@ Description          : General plot options dialog
 #include "ScaleDraw.h"
 #include <float.h>
 
+#include "MantidKernel/Logger.h"
+
 #include <QCheckBox>
 #include <QComboBox>
 #include <QLabel>
@@ -622,7 +624,11 @@ static const char* image7_data[] = { "32 32 4 1", "# c #000000", "b c #bfbfbf",
 #ifndef M_PI
 #define M_PI	3.141592653589793238462643
 #endif
-//Mantid::Kernel::Logger & AxesDialog::g_log=Mantid::Kernel::Logger::get("AxesDialog");
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("AxisDialog");
+}
 
 ///////////////////
 // Public Functions
@@ -649,6 +655,17 @@ AxesDialog::AxesDialog(ApplicationWindow* app, Graph* g, Qt::WFlags fl) :
   initAxesPage();
   initGridPage();
   initGeneralPage();
+
+  //Connect scale details to axis details in order to diable scale options when an axis is not shown
+  auto scaleIter = m_Scale_list.begin();
+  auto axisIter = m_Axis_list.begin();
+  while((scaleIter != m_Scale_list.end()) && (axisIter != m_Axis_list.end()))
+  {
+    connect(*axisIter, SIGNAL(axisShowChanged(bool)), *scaleIter, SLOT(axisEnabled(bool)));
+
+    ++scaleIter;
+    ++axisIter;
+  }
 
   QHBoxLayout * bottomButtons = new QHBoxLayout();
   bottomButtons->addStretch();
@@ -679,7 +696,6 @@ AxesDialog::AxesDialog(ApplicationWindow* app, Graph* g, Qt::WFlags fl) :
 
 AxesDialog::~AxesDialog()
 {
-
 }
 
 /**Applies changes then closes the dialog
@@ -986,6 +1002,7 @@ void AxesDialog::initGridPage()
   m_chkAntialiseGrid = new QCheckBox(tr("An&tialised"));
   bottombox->addWidget(m_chkAntialiseGrid, 0, 2, Qt::AlignLeft);
   m_chkAntialiseGrid->setChecked(grd->testRenderHint(QwtPlotItem::RenderAntialiased));
+  m_chkAntialiseGrid->setToolTip("Attempts to remove visual artifacts caused by plot resolution giving a smoother plot");
 
   gridPageLayout->addLayout(topBox);
   gridPageLayout->addLayout(bottombox);
@@ -1008,20 +1025,6 @@ void AxesDialog::initGeneralPage()
   m_generalPage = new QWidget();
 
   Plot *p = m_graph->plotWidget();
-
-  m_grpFramed = new QGroupBox(tr("Canvas frame"));
-  m_grpFramed->setCheckable(true);
-
-  QGridLayout * grpFramedLayout = new QGridLayout(m_grpFramed);
-  grpFramedLayout->addWidget(new QLabel(tr("Color")), 0, 0);
-  m_cbtnFrameColor = new ColorButton(m_grpFramed);
-  grpFramedLayout->addWidget(m_cbtnFrameColor, 0, 1);
-  grpFramedLayout->addWidget(new QLabel(tr("Width")), 1, 0);
-  m_spnFrameWidth = new QSpinBox();
-  m_spnFrameWidth->setMinimum(1);
-  grpFramedLayout->addWidget(m_spnFrameWidth, 1, 1);
-
-  grpFramedLayout->setRowStretch(2, 1);
 
   QGroupBox * boxAxes = new QGroupBox(tr("Axes"));
   QGridLayout * boxAxesLayout = new QGridLayout(boxAxes);
@@ -1047,14 +1050,9 @@ void AxesDialog::initGeneralPage()
   boxAxesLayout->setRowStretch(4, 1);
 
   QHBoxLayout * mainLayout = new QHBoxLayout(m_generalPage);
-  mainLayout->addWidget(m_grpFramed);
   mainLayout->addWidget(boxAxes);
 
   m_generalDialog->addTab(m_generalPage, tr("General"));
-
-  m_grpFramed->setChecked(m_graph->canvasFrameWidth() > 0);
-  m_cbtnFrameColor->setColor(m_graph->canvasFrameColor());
-  m_spnFrameWidth->setValue(m_graph->canvasFrameWidth());
 
   m_chkBackbones->setChecked(m_graph->axesBackbones());
   m_spnAxesLinewidth->setValue(p->axesLinewidth());
@@ -1064,15 +1062,12 @@ void AxesDialog::initGeneralPage()
   connect(m_spnMajorTicksLength, SIGNAL(valueChanged (int)), this, SLOT(changeMajorTicksLength(int)));
   connect(m_spnMinorTicksLength, SIGNAL(valueChanged (int)), this, SLOT(changeMinorTicksLength(int)));
 
-  connect(m_cbtnFrameColor,SIGNAL(colorChanged()),this, SLOT(setModified()));
-  connect(m_spnFrameWidth,SIGNAL(valueChanged(int)),this, SLOT(setModified()));
   connect(m_spnAxesLinewidth,SIGNAL(valueChanged(int)),this, SLOT(setModified()));
   connect(m_spnMajorTicksLength,SIGNAL(valueChanged(int)),this, SLOT(setModified()));
   connect(m_spnMinorTicksLength,SIGNAL(valueChanged(int)),this, SLOT(setModified()));
   connect(m_chkBackbones,SIGNAL(clicked()),this, SLOT(setModified()));
   connect(m_chkAntialiseGrid,SIGNAL(clicked()),this, SLOT(setModified()));
   connect(m_cmbApplyGridFormat,SIGNAL(currentIndexChanged(int)),this, SLOT(setModified()));
-  connect(m_grpFramed,SIGNAL(clicked()),this, SLOT(setModified()));
 }
 
 /**sets the flag that shows the general tab has been modified
@@ -1205,6 +1200,7 @@ bool AxesDialog::pressToGraph()
   {
     if(!((*axisItr)->valid()))
     {
+      g_log.warning("Axis options are invalid!");
       return false;
     }
   }
@@ -1213,6 +1209,7 @@ bool AxesDialog::pressToGraph()
   {
     if(!((*scaleItr)->valid()))
     {
+      g_log.warning("Scale options are invalid!");
       return false;
     }
   }
@@ -1234,14 +1231,6 @@ bool AxesDialog::pressToGraph()
     m_graph->changeTicksLength(m_spnMinorTicksLength->value(), m_spnMajorTicksLength->value());
     m_graph->drawAxesBackbones(m_chkBackbones->isChecked());
     m_graph->setAxesLinewidth(m_spnAxesLinewidth->value());
-    if (m_grpFramed->isChecked())
-    {
-      m_graph->setCanvasFrame(m_spnFrameWidth->value(), m_cbtnFrameColor->color());
-    }
-    else
-    {
-      m_graph->setCanvasFrame(0);
-    }
     m_generalModified = false;
   }
   m_graph->replot();

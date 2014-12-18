@@ -2,6 +2,7 @@ import unittest
 from mantid import logger
 from mantid.simpleapi import DensityOfStates, CheckWorkspacesMatch, Scale
 
+
 def scipy_not_available():
     ''' Check whether scipy is available on this platform'''
     try:
@@ -10,6 +11,7 @@ def scipy_not_available():
     except:
         logger.warning("Skipping DensityOfStatesTest because scipy is unavailable.")
         return True
+
 
 def skip_if(skipping_criteria):
     '''
@@ -24,25 +26,26 @@ def skip_if(skipping_criteria):
         return cls
     return decorate
 
+
 @skip_if(scipy_not_available)
 class DensityOfStatesTest(unittest.TestCase):
 
     def setUp(self):
         self._file_name = 'squaricn.phonon'
-    
+
     def test_phonon_load(self):
         ws = DensityOfStates(File=self._file_name)
         self.assertEquals(ws.getNumberHistograms(), 1)
-    
+
     def test_castep_load(self):
         ws = DensityOfStates(File='squaricn.castep')
         self.assertEquals(ws.getNumberHistograms(), 1)
-    
+
     def test_raman_active(self):
         spec_type = 'Raman_Active'
         ws = DensityOfStates(File=self._file_name, SpectrumType=spec_type)
         self.assertEquals(ws.getNumberHistograms(), 1)
-        
+
     def test_ir_active(self):
         spec_type = 'IR_Active'
         ws = DensityOfStates(File=self._file_name, SpectrumType=spec_type)
@@ -65,17 +68,17 @@ class DensityOfStatesTest(unittest.TestCase):
         ref = DensityOfStates(File=self._file_name)
         ref = Scale(ref, Factor=10)
 
-        CheckWorkspacesMatch(ws, ref)
+        self.assertEqual(CheckWorkspacesMatch(ws, ref), 'Success!')
 
     def test_bin_width(self):
         import math
 
         ref = DensityOfStates(File=self._file_name)
         ws = DensityOfStates(File=self._file_name, BinWidth=2)
-        
+
         size = ws.blocksize()
         ref_size = ref.blocksize()
-        
+
         self.assertEquals(size, math.ceil(ref_size/2.0))
 
     def test_zero_threshold(self):
@@ -91,7 +94,8 @@ class DensityOfStatesTest(unittest.TestCase):
 
     def test_partial(self):
         spec_type = 'DOS'
-        ws = DensityOfStates(File=self._file_name, SpectrumType=spec_type, Ions="H,C,O")
+
+        ws = DensityOfStates(File=self._file_name, SpectrumType=spec_type, Ions='H,C,O')
 
         workspaces = ws.getNames()
         self.assertEquals(len(workspaces), 3)
@@ -100,10 +104,28 @@ class DensityOfStatesTest(unittest.TestCase):
         spec_type = 'DOS'
         tolerance = 1e-10
 
-        summed = DensityOfStates(File=self._file_name, SpectrumType=spec_type, Ions="H,C,O", SumContributions=True)
+        summed = DensityOfStates(File=self._file_name, SpectrumType=spec_type, Ions='H,C,O', SumContributions=True)
         total = DensityOfStates(File=self._file_name,  SpectrumType=spec_type)
 
-        CheckWorkspacesMatch(summed, total, tolerance)
+        self.assertEquals(CheckWorkspacesMatch(summed, total, tolerance), 'Success!')
+
+    def test_partial_cross_section_scale(self):
+        spec_type = 'DOS'
+
+        ws = DensityOfStates(File=self._file_name, SpectrumType=spec_type, Ions='H,C,O', ScaleByCrossSection='Incoherent')
+
+        workspaces = ws.getNames()
+        self.assertEquals(len(workspaces), 3)
+
+    def test_sum_partial_contributions_cross_section_scale(self):
+        spec_type = 'DOS'
+        tolerance = 1e-10
+
+        summed = DensityOfStates(File=self._file_name, SpectrumType=spec_type, Ions='H,C,O', SumContributions=True, ScaleByCrossSection='Incoherent')
+        total = DensityOfStates(File=self._file_name,  SpectrumType=spec_type, ScaleByCrossSection='Incoherent')
+
+        self.assertEquals(CheckWorkspacesMatch(summed, total, tolerance), 'Success!')
+
 
 if __name__=="__main__":
     unittest.main()

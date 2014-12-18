@@ -6,14 +6,6 @@
 
 #include <vector>
 
-#ifndef HAS_UNORDERED_MAP_H
-#include <map>
-#else
-#include <tr1/unordered_map>
-#endif
-
-
-
 /**
   \class  GLActorCollection
   \brief  An actor class collection
@@ -24,7 +16,7 @@
 
   GLActorCollection has the list of GLActor.
 
-  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 

@@ -24,10 +24,15 @@ If the GroupNames parameter is given, the names of banks matching the
 comma-separated strings in the parameter will be used to sequentially
 number the groups in the output.
 
+If both the FixedGroupCount and ComponentName parameter are given then
+the detectors for the given component will be grouped into the number
+of groups specified, detectors will be left ungrouped in the event that
+the number of detectors does not divide equally into the number of groups.
+
 Usage
 -----
 
-**Example - CreateGoupingWorkspace for MUSR Instrument**
+**Example - CreateGroupingWorkspace for MUSR Instrument**
 
 .. include:: ../usagedata-note.txt 
 
@@ -48,7 +53,7 @@ Output:
 
    Instrument name = MUSR
 
-**Example - CreateGoupingWorkspace from MUSR workspace**
+**Example - CreateGroupingWorkspace from MUSR workspace**
 
 .. testcode:: ExCreateGroupingWorkspaceFromWorkspace
 
@@ -72,7 +77,7 @@ Output:
 
    Instrument name = MUSR
 
-**Example - CreateGoupingWorkspace from GEM Instrument Definition**
+**Example - CreateGroupingWorkspace from GEM Instrument Definition**
 
 .. testcode:: ExCreateGroupingWorkspaceFromIDF
 
@@ -91,4 +96,20 @@ Output:
 
    Instrument name = GEM
    
+**Example - CreateGroupingWorkspace for IRIS graphite component**
+
+.. testcode:: ExCreateGroupingWorkspaceFromComponent
+
+   grouping_ws, spectra_count, group_count = CreateGroupingWorkspace(InstrumentName='IRIS', ComponentName='graphite', FixedGroupCount=5)
+  
+   print "Number of grouped spectra:",spectra_count
+   print "Number of groups:",group_count
+
+Output:
+
+.. testoutput:: ExCreateGroupingWorkspaceFromComponent
+
+   Number of grouped spectra: 50
+   Number of groups: 5
+
 .. categories::

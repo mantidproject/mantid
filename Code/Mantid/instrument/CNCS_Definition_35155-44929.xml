@@ -1,5 +1,7 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  valid-to="2012-02-15 10:44:59" name="CNCS" valid-from="2011-08-17 17:17:00">
   <!--for runs 35155 to 44930 -->
   <defaults>

@@ -2,7 +2,10 @@
 
 #include "MantidQtCustomInterfaces/Background.h"
 
+#include <QFileInfo>
 #include <QInputDialog>
+
+using namespace Mantid::API;
 
 namespace MantidQt
 {
@@ -25,12 +28,10 @@ namespace CustomInterfaces
     m_uiForm.entryRebinLow->setValidator(m_valDbl);
     m_uiForm.entryRebinWidth->setValidator(m_valDbl);
     m_uiForm.entryRebinHigh->setValidator(m_valDbl);
-    
+
     // SIGNAL/SLOT CONNECTIONS
-    // Updates current analyser when analyser is selected from drop down
-    connect(m_uiForm.cbAnalyser, SIGNAL(activated(int)), this, SLOT(analyserSelected(int)));
-    // Updates current reflection when reflection is selected from drop down
-    connect(m_uiForm.cbReflection, SIGNAL(activated(int)), this, SLOT(reflectionSelected(int)));
+    // Update instrument information when a new instrument config is selected
+    connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrumentDefault()));
     // Shows required mapping option UI widgets when a new mapping option is selected from drop down
     connect(m_uiForm.cbMappingOptions, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(mappingOptionSelected(const QString&)));
     // Shows background removal dialog when user clicks Background Removal
@@ -63,6 +64,8 @@ namespace CustomInterfaces
     connect(m_uiForm.entryRebinWidth, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
     connect(m_uiForm.entryRebinHigh, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
 
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+
     // Update UI widgets to show default values
     mappingOptionSelected(m_uiForm.cbMappingOptions->currentText());
     rebinEntryToggle(m_uiForm.rebin_ckDNR->isChecked());
@@ -78,144 +81,136 @@ namespace CustomInterfaces
   IndirectConvertToEnergy::~IndirectConvertToEnergy()
   {
   }
-  
+
   void IndirectConvertToEnergy::setup()
   {
+    detailedBalanceCheck(m_uiForm.ckDetailedBalance->isChecked());
+    scaleMultiplierCheck(m_uiForm.ckScaleMultiplier->isChecked());
+
+    // Load the default instrument parameters
+    setInstrumentDefault();
   }
 
   void IndirectConvertToEnergy::run()
   {
-    QString pyInput =
-      "import inelastic_indirect_reducer as iir\n"
-      "reducer = iir.IndirectReducer()\n"
-      "reducer.set_instrument_name('" + m_uiForm.cbInst->currentText() + "')\n"
-      "reducer.set_detector_range(" +m_uiForm.leSpectraMin->text()+ "-1, " +m_uiForm.leSpectraMax->text()+ "-1)\n"
-      "reducer.set_parameter_file('" + QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory")) + m_uiForm.cbInst->currentText() + "_" + m_uiForm.cbAnalyser->currentText() + "_" + m_uiForm.cbReflection->currentText() + "_Parameters.xml')\n";
+    using MantidQt::API::BatchAlgorithmRunner;
 
-    QStringList files = m_uiForm.ind_runFiles->getFilenames();
-    for ( QStringList::iterator it = files.begin(); it != files.end(); ++it )
+    IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("InelasticIndirectReduction", -1);
+    reductionAlg->initialize();
+    BatchAlgorithmRunner::AlgorithmRuntimeProps reductionRuntimeProps;
+
+    reductionAlg->setProperty("Instrument", m_uiForm.cbInst->currentText().toStdString());
+    reductionAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
+    reductionAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
+
+    QString files = m_uiForm.ind_runFiles->getFilenames().join(",");
+    reductionAlg->setProperty("InputFiles", files.toStdString());
+
+    reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
+    reductionAlg->setProperty("LoadLogs", m_uiForm.ckLoadLogs->isChecked());
+
+    // If using a calibration file, load it
+    if(m_uiForm.ckUseCalib->isChecked())
     {
-      pyInput += "reducer.append_data_file(r'" + *it + "')\n";
+      QString calibFilename = m_uiForm.ind_calibFile->getFirstFilename();
+
+      QFileInfo fi(calibFilename);
+      std::string calibWorkspaceName = fi.baseName().toStdString();
+
+      IAlgorithm_sptr calibLoadAlg = AlgorithmManager::Instance().create("LoadNexus", -1);
+      calibLoadAlg->initialize();
+      calibLoadAlg->setProperty("Filename", calibFilename.toStdString());
+      calibLoadAlg->setProperty("OutputWorkspace", calibWorkspaceName);
+      m_batchAlgoRunner->addAlgorithm(calibLoadAlg);
+
+      reductionRuntimeProps["CalibrationWorkspace"] = calibWorkspaceName;
     }
 
-    if ( m_uiForm.ckSumFiles->isChecked() )
-    {
-      pyInput += "reducer.set_sum_files(True)\n";
-    }
+    std::vector<long> detectorRange;
+    detectorRange.push_back(m_uiForm.leSpectraMin->text().toInt());
+    detectorRange.push_back(m_uiForm.leSpectraMax->text().toInt());
+    reductionAlg->setProperty("DetectorRange", detectorRange);
 
-    if ( m_bgRemoval )
+    if(m_bgRemoval)
     {
       QPair<double,double> background = m_backgroundDialog->getRange();
-      pyInput += "reducer.set_background("+QString::number(background.first)+", "+QString::number(background.second)+")\n";
+      std::vector<double> backgroundRange;
+      backgroundRange.push_back(background.first);
+      backgroundRange.push_back(background.second);
+      reductionAlg->setProperty("BackgroundRange", backgroundRange);
     }
 
-    if ( m_uiForm.ckUseCalib->isChecked() )
-    {
-      pyInput +=
-        "from IndirectCommon import loadNexus\n"
-        "reducer.set_calibration_workspace(loadNexus(r'"+m_uiForm.ind_calibFile->getFirstFilename()+"'))\n";
-    }
-
-    if ( m_uiForm.ckLoadLogs->isChecked() )
-    {
-      pyInput += "reducer.set_load_logs(True)\n";
-    }
-
-    if ( ! m_uiForm.rebin_ckDNR->isChecked() )
+    if(!m_uiForm.rebin_ckDNR->isChecked())
     {
       QString rebin;
-      if ( m_uiForm.comboRebinType->currentIndex() == 0 )
-      {
+      if(m_uiForm.comboRebinType->currentIndex() == 0)
         rebin = m_uiForm.entryRebinLow->text() + "," + m_uiForm.entryRebinWidth->text() + "," + m_uiForm.entryRebinHigh->text();
-      }
       else
-      {
         rebin = m_uiForm.entryRebinString->text();
-      }
-      pyInput += "reducer.set_rebin_string('"+rebin+"')\n";
+
+      reductionAlg->setProperty("RebinString", rebin.toStdString());
     }
 
-    if ( m_uiForm.ckDetailedBalance->isChecked() )
-    {
-      pyInput += "reducer.set_detailed_balance(" + m_uiForm.leDetailedBalance->text() + ")\n";
-    }
+    if(m_uiForm.ckDetailedBalance->isChecked())
+      reductionAlg->setProperty("DetailedBalance", m_uiForm.leDetailedBalance->text().toDouble());
 
-    if ( m_uiForm.ckScaleMultiplier->isChecked() )
-    {
-      pyInput += "reducer.set_scale_factor(" + m_uiForm.leScaleMultiplier->text() + ")\n";
-    }
+    if(m_uiForm.ckScaleMultiplier->isChecked())
+      reductionAlg->setProperty("ScaleFactor", m_uiForm.leScaleMultiplier->text().toDouble());
 
-    if ( m_uiForm.cbMappingOptions->currentText() != "Default" )
+    if(m_uiForm.cbMappingOptions->currentText() != "Default")
     {
       QString grouping = createMapFile(m_uiForm.cbMappingOptions->currentText());
-      pyInput += "reducer.set_grouping_policy('" + grouping + "')\n";
+      reductionAlg->setProperty("Grouping", grouping.toStdString());
     }
 
-    if ( ! m_uiForm.ckRenameWorkspace->isChecked() )
-    {
-      pyInput += "reducer.set_rename(False)\n";
-    }
+    reductionAlg->setProperty("Fold", m_uiForm.ckFold->isChecked());
+    reductionAlg->setProperty("SaveCM1", m_uiForm.ckCm1Units->isChecked());
+    reductionAlg->setProperty("SaveFormats", getSaveFormats());
 
-    if ( ! m_uiForm.ckFold->isChecked() )
-    {
-      pyInput += "reducer.set_fold_multiple_frames(False)\n";
-    }
-
-    if( m_uiForm.ckCm1Units->isChecked() )
-    {
-      pyInput += "reducer.set_save_to_cm_1(True)\n";
-    }
-
-    pyInput += "reducer.set_save_formats([" + savePyCode() + "])\n";
-
-    pyInput +=
-      "reducer.reduce()\n"
-      "ws_list = reducer.get_result_workspaces()\n";
+    reductionAlg->setProperty("OutputWorkspace", "IndirectEnergyTransfer_Workspaces");
 
     // Plot Output options
-    switch ( m_uiForm.ind_cbPlotOutput->currentIndex() )
+    switch(m_uiForm.ind_cbPlotOutput->currentIndex())
     {
       case 0: // "None"
         break;
       case 1: // "Spectra"
-        {
-          // Plot a spectra of the first result workspace
-          pyInput += 
-            "if ( len(ws_list) > 0 ):\n"
-            "  nSpec = mtd[ws_list[0]].getNumberHistograms()\n"
-            "  plotSpectrum(ws_list[0], range(0, nSpec))\n";
-        }
+        reductionAlg->setProperty("Plot", "spectra");
         break;
       case 2: // "Contour"
-        {
-          // Plot a 2D Contour Lines of the first result workspace
-          pyInput += 
-            "if ( len(ws_list) > 0 ):\n"
-            "  ws = importMatrixWorkspace(ws_list[0])\n"
-            "  ws.plotGraph2D()\n";
-        }
+        reductionAlg->setProperty("Plot", "contour");
         break;
     }
 
-    // add sample logs to each of the workspaces
-    QString calibChecked = m_uiForm.ckUseCalib->isChecked() ? "True" : "False";
-    QString detailedBalance = m_uiForm.ckDetailedBalance->isChecked() ? "True" : "False";
-    QString scaled = m_uiForm.ckScaleMultiplier->isChecked() ? "True" : "False";
-    pyInput += "calibCheck = "+calibChecked+"\n"
-      "detailedBalance = "+detailedBalance+"\n"
-      "scaled = "+scaled+"\n"
-      "for ws in ws_list:\n"
-      "  AddSampleLog(Workspace=ws, LogName='calib_file', LogType='String', LogText=str(calibCheck))\n"
-      "  if calibCheck:\n"
-      "    AddSampleLog(Workspace=ws, LogName='calib_file_name', LogType='String', LogText='"+m_uiForm.ind_calibFile->getFirstFilename()+"')\n"
-      "  AddSampleLog(Workspace=ws, LogName='detailed_balance', LogType='String', LogText=str(detailedBalance))\n"
-      "  if detailedBalance:\n"
-      "    AddSampleLog(Workspace=ws, LogName='detailed_balance_temp', LogType='Number', LogText='"+m_uiForm.leDetailedBalance->text()+"')\n"
-      "  AddSampleLog(Workspace=ws, LogName='scale', LogType='String', LogText=str(scaled))\n"
-      "  if scaled:\n"
-      "    AddSampleLog(Workspace=ws, LogName='scale_factor', LogType='Number', LogText='"+m_uiForm.leScaleMultiplier->text()+"')\n";
+    m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
+    m_batchAlgoRunner->executeBatchAsync();
 
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
+    // Set output workspace name for Python export
+    m_pythonExportWsName = "IndirectInergyTransfer_Workspaces";
+  }
+
+  /**
+   * Handles completion of the algorithm.
+   *
+   * Sets result workspace for Python export and ungroups result WorkspaceGroup.
+   *
+   * @param error True if the algorithm was stopped due to error, false otherwise
+   */
+  void IndirectConvertToEnergy::algorithmComplete(bool error)
+  {
+    if(error)
+      return;
+
+    WorkspaceGroup_sptr energyTransferOutputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IndirectEnergyTransfer_Workspaces");
+    if(energyTransferOutputGroup->size() == 0)
+      return;
+
+    // Set workspace for Python export as the first result workspace
+    m_pythonExportWsName = energyTransferOutputGroup->getNames()[0];
+
+    // Ungroup the output workspace
+    energyTransferOutputGroup->removeAll();
+    AnalysisDataService::Instance().remove("IndirectEnergyTransfer_Workspaces");
   }
 
   bool IndirectConvertToEnergy::validate()
@@ -236,7 +231,7 @@ namespace CustomInterfaces
 
     // mapping selection
     if (
-        ( m_uiForm.cbMappingOptions->currentText() == "Groups" && m_uiForm.leNoGroups->text() == "" ) 
+        ( m_uiForm.cbMappingOptions->currentText() == "Groups" && m_uiForm.leNoGroups->text() == "" )
         ||
         ( m_uiForm.cbMappingOptions->currentText() == "File" && ! m_uiForm.ind_mapFile->isValid() )
        )
@@ -286,7 +281,7 @@ namespace CustomInterfaces
     const QString specMax = m_uiForm.leSpectraMax->text();
 
     if (specMin.isEmpty() || specMax.isEmpty() ||
-        (specMin.toDouble() < 1 || specMax.toDouble() < 1) ||  
+        (specMin.toDouble() < 1 || specMax.toDouble() < 1) ||
         (specMin.toDouble() > specMax.toDouble()))
     {
       valid = false;
@@ -358,96 +353,69 @@ namespace CustomInterfaces
     return valid;
   }
 
-  /**
-   * This function is called when the user selects an analyser from the cbAnalyser QComboBox
-   * object. It's main purpose is to initialise the values for the Reflection ComboBox.
-   * @param index :: Index of the value selected in the combo box.
-   */
-  void IndirectConvertToEnergy::analyserSelected(int index)
-  {
-    // populate Reflection combobox with correct values for Analyser selected.
-    m_uiForm.cbReflection->clear();
-    clearReflectionInfo();
-
-    QVariant currentData = m_uiForm.cbAnalyser->itemData(index);
-    if ( currentData == QVariant::Invalid )
-    {
-      m_uiForm.lbReflection->setEnabled(false);
-      m_uiForm.cbReflection->setEnabled(false);
-      return;
-    }
-    else
-    {
-      m_uiForm.lbReflection->setEnabled(true);
-      m_uiForm.cbReflection->setEnabled(true);
-      QStringList reflections = currentData.toStringList();
-      for ( int i = 0; i < reflections.count(); i++ )
-      {
-        m_uiForm.cbReflection->addItem(reflections[i]);
-      }
-    }
-
-    reflectionSelected(m_uiForm.cbReflection->currentIndex());
-  }
 
   /**
-   * This function is called when the user selects a reflection from the cbReflection QComboBox
-   * object.
-   * @param index :: Index of the value selected in the combo box.
+   * Called when the instrument has changed, used to update default values.
    */
-  void IndirectConvertToEnergy::reflectionSelected(int index)
+  void IndirectConvertToEnergy::setInstrumentDefault()
   {
-    UNUSED_ARG(index);
-    // first, clear values in assosciated boxes:
-    clearReflectionInfo();
+    m_uiForm.leSpectraMin->clear();
+    m_uiForm.leSpectraMax->clear();
+    m_uiForm.leEfixed->clear();
 
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
-    if ( instDetails.size() < 3 )
+    if(instDetails["spectra-min"].isEmpty() || instDetails["spectra-max"].isEmpty())
     {
       emit showMessageBox("Could not gather necessary data from parameter file.");
       return;
     }
+
+    m_uiForm.leSpectraMin->setText(instDetails["spectra-min"]);
+    m_uiForm.leSpectraMax->setText(instDetails["spectra-max"]);
+
+    if(!instDetails["efixed-val"].isEmpty())
+      m_uiForm.leEfixed->setText(instDetails["efixed-val"]);
+    else
+      m_uiForm.leEfixed->clear();
+
+    // Default rebinning parameters can be set in instrument parameter file
+    if(!instDetails["rebin-default"].isEmpty())
+    {
+      m_uiForm.entryRebinString->setText(instDetails["rebin-default"]);
+      m_uiForm.rebin_ckDNR->setChecked(false);
+      QStringList rbp = instDetails["rebin-default"].split(",", QString::SkipEmptyParts);
+      if ( rbp.size() == 3 )
+      {
+        m_uiForm.entryRebinLow->setText(rbp[0]);
+        m_uiForm.entryRebinWidth->setText(rbp[1]);
+        m_uiForm.entryRebinHigh->setText(rbp[2]);
+        m_uiForm.comboRebinType->setCurrentIndex(0);
+      }
+      else
+      {
+        m_uiForm.comboRebinType->setCurrentIndex(1);
+      }
+    }
     else
     {
-      m_uiForm.leSpectraMin->setText(instDetails["SpectraMin"]);
-      m_uiForm.leSpectraMax->setText(instDetails["SpectraMax"]);
+      m_uiForm.rebin_ckDNR->setChecked(true);
+      m_uiForm.entryRebinLow->setText("");
+      m_uiForm.entryRebinWidth->setText("");
+      m_uiForm.entryRebinHigh->setText("");
+      m_uiForm.entryRebinString->setText("");
+    }
 
-      if ( instDetails.size() >= 8 )
-      {
-        m_uiForm.leEfixed->setText(instDetails["EFixed"]);
-      }
-      else
-      {
-        m_uiForm.leEfixed->clear();
-      }
+    if(!instDetails["cm-1-convert-choice"].isEmpty())
+    {
+      bool defaultOptions = instDetails["cm-1-convert-choice"] == "true";
+      m_uiForm.ckCm1Units->setChecked(defaultOptions);
+    }
 
-      // Default rebinning parameters can be set in instrument parameter file
-      if ( instDetails.size() == 9 )
-      {
-        m_uiForm.entryRebinString->setText(instDetails["RebinString"]);
-        m_uiForm.rebin_ckDNR->setChecked(false);
-        QStringList rbp = instDetails["RebinString"].split(",", QString::SkipEmptyParts);
-        if ( rbp.size() == 3 )
-        {
-          m_uiForm.entryRebinLow->setText(rbp[0]);
-          m_uiForm.entryRebinWidth->setText(rbp[1]);
-          m_uiForm.entryRebinHigh->setText(rbp[2]);
-          m_uiForm.comboRebinType->setCurrentIndex(0);
-        }
-        else
-        {
-          m_uiForm.comboRebinType->setCurrentIndex(1);
-        }
-      }
-      else
-      {
-        m_uiForm.rebin_ckDNR->setChecked(true);
-        m_uiForm.entryRebinLow->setText("");
-        m_uiForm.entryRebinWidth->setText("");
-        m_uiForm.entryRebinHigh->setText("");
-        m_uiForm.entryRebinString->setText("");
-      }
+    if(!instDetails["save-ascii-choice"].isEmpty())
+    {
+      bool defaultOptions = instDetails["save-ascii-choice"] == "true";
+      m_uiForm.save_ckAscii->setChecked(defaultOptions);
     }
   }
 
@@ -503,84 +471,12 @@ namespace CustomInterfaces
   }
 
   /**
-   * This function holds any steps that must be performed on the selection of an instrument,
-   * for example loading values from the Instrument Definition File (IDF).
-   * @param prefix :: The selected instruments prefix in Mantid.
-   */
-  void IndirectConvertToEnergy::setIDFValues(const QString & prefix)
-  {
-    UNUSED_ARG(prefix);
-    // empty ComboBoxes, LineEdits,etc of previous values
-    m_uiForm.cbAnalyser->clear();
-    m_uiForm.cbReflection->clear();
-    clearReflectionInfo();
-
-    rebinEntryToggle(m_uiForm.rebin_ckDNR->isChecked());
-    detailedBalanceCheck(m_uiForm.ckDetailedBalance->isChecked());
-    /* resCheck(m_uiForm.cal_ckRES->isChecked()); */
-
-    scaleMultiplierCheck(m_uiForm.ckScaleMultiplier->isChecked());
-
-    // Get list of analysers and populate cbAnalyser
-    QString pyInput = 
-      "from IndirectEnergyConversion import getInstrumentDetails\n"
-      "result = getInstrumentDetails('" + m_uiForm.cbInst->currentText() + "')\n"
-      "print result\n";
-
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput, false).trimmed();
-
-    if ( pyOutput == "" )
-    {
-      emit showMessageBox("Could not get list of analysers from Instrument Parameter file.");
-    }
-    else
-    {
-      QStringList analysers = pyOutput.split("\n", QString::SkipEmptyParts);
-
-      for (int i = 0; i< analysers.count(); i++ )
-      {
-        QStringList analyser = analysers[i].split("-", QString::SkipEmptyParts);
-        QString text = analyser[0];
-
-        if ( text != "diffraction" ) // do not put diffraction into the analyser list
-        {
-          QVariant data; // holds Data field of combo box (list of reflections)
-
-          if ( analyser.count() > 1 )
-          {
-            QStringList reflections = analyser[1].split(",", QString::SkipEmptyParts);
-            data = QVariant(reflections);
-            m_uiForm.cbAnalyser->addItem(text, data);
-          }
-          else
-          {
-            m_uiForm.cbAnalyser->addItem(text);
-          }
-        }
-      }
-
-      analyserSelected(m_uiForm.cbAnalyser->currentIndex());
-    }
-  }
-
-  /**
-   * This function clears the values of the QLineEdit objec  ts used to hold Reflection-specific
-   * information.
-   */
-  void IndirectConvertToEnergy::clearReflectionInfo()
-  {
-    m_uiForm.leSpectraMin->clear();
-    m_uiForm.leSpectraMax->clear();
-    m_uiForm.leEfixed->clear();
-  }
-
-  /**
    * This function will disable the necessary elements of the interface when the user selects "Do Not Rebin"
    * and enable them again when this is de-selected.
    *
    * @param state :: whether the "Do Not Rebin" checkbox is checked
    */
-  void IndirectConvertToEnergy::rebinEntryToggle(bool state) 
+  void IndirectConvertToEnergy::rebinEntryToggle(bool state)
   {
     //Determine value for single rebin field
     QString val;
@@ -642,76 +538,64 @@ namespace CustomInterfaces
    */
   QString IndirectConvertToEnergy::createMapFile(const QString& groupType)
   {
-    QString groupFile, ngroup, nspec;
-    QString ndet = "( "+m_uiForm.leSpectraMax->text()+" - "+m_uiForm.leSpectraMin->text()+") + 1";
+    QString specRange = m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text();
 
-    if ( groupType == "File" )
+    if(groupType == "File")
     {
-      groupFile = m_uiForm.ind_mapFile->getFirstFilename();
-      if ( groupFile == "" )
+      QString groupFile = m_uiForm.ind_mapFile->getFirstFilename();
+      if(groupFile == "")
       {
         emit showMessageBox("You must enter a path to the .map file.");
       }
       return groupFile;
     }
-    else if ( groupType == "Groups" )
+    else if(groupType == "Groups")
     {
-      ngroup = m_uiForm.leNoGroups->text();
-      nspec = "( " +ndet+ " ) / " +ngroup;
+      QString groupWS = "__Grouping";
+
+      IAlgorithm_sptr groupingAlg = AlgorithmManager::Instance().create("CreateGroupingWorkspace");
+      groupingAlg->initialize();
+
+      groupingAlg->setProperty("FixedGroupCount", m_uiForm.leNoGroups->text().toInt());
+      groupingAlg->setProperty("InstrumentName", m_uiForm.cbInst->currentText().toStdString());
+      groupingAlg->setProperty("ComponentName", m_uiForm.cbAnalyser->currentText().toStdString());
+      groupingAlg->setProperty("OutputWorkspace", groupWS.toStdString());
+
+      m_batchAlgoRunner->addAlgorithm(groupingAlg);
+
+      return groupWS;
     }
-    else if ( groupType == "All" )
+    else
     {
-      return "All";
+      // Catch All and Individual
+      return groupType;
     }
-    else if ( groupType == "Individual" )
-    {
-      return "Individual";
-    }
-
-    groupFile = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
-    groupFile += "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText();
-    groupFile += "_" + groupType + ".map";	
-
-    QString pyInput =
-      "import IndirectEnergyConversion as ind\n"
-      "mapfile = ind.createMappingFile('"+groupFile+"', %1, %2, %3)\n"
-      "print mapfile\n";
-    pyInput = pyInput.arg(ngroup);
-    pyInput = pyInput.arg(nspec);
-    pyInput = pyInput.arg(m_uiForm.leSpectraMin->text());
-
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
-
-    return pyOutput;
   }
 
   /**
-   * This function creates the Python script necessary to set the variables used for saving data
-   * in the main convert_to_energy script.
-   * @return python code as a string
+   * Converts the checkbox selection to a comma delimited list of save formats for the
+   * InelasticIndirectReduction algorithm.
+   *
+   * @return A vector of save formats
    */
-  QString IndirectConvertToEnergy::savePyCode()
+  std::vector<std::string> IndirectConvertToEnergy::getSaveFormats()
   {
-    QStringList fileFormats;
-    QString fileFormatList;
+    std::vector<std::string> fileFormats;
 
     if ( m_uiForm.save_ckNexus->isChecked() )
-      fileFormats << "nxs";
+      fileFormats.push_back("nxs");
     if ( m_uiForm.save_ckSPE->isChecked() )
-      fileFormats << "spe";
+      fileFormats.push_back("spe");
     if ( m_uiForm.save_ckNxSPE->isChecked() )
-      fileFormats << "nxspe";
+      fileFormats.push_back("nxspe");
     if ( m_uiForm.save_ckAscii->isChecked() )
-      fileFormats << "ascii";
+      fileFormats.push_back("ascii");
     if ( m_uiForm.save_ckAclimax->isChecked() )
-      fileFormats << "aclimax";
+      fileFormats.push_back("aclimax");
+    if ( m_uiForm.save_ckDaveGrp->isChecked() )
+      fileFormats.push_back("davegrp");
 
-    if ( fileFormats.size() != 0 )
-      fileFormatList = "'" + fileFormats.join("', '") + "'";
-    else
-      fileFormatList = "";
-
-    return fileFormatList;
+    return fileFormats;
   }
 
   /**
@@ -719,68 +603,108 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::plotRaw()
   {
-    if ( m_uiForm.ind_runFiles->isValid() )
+    using MantidQt::API::BatchAlgorithmRunner;
+
+    if(!m_uiForm.ind_runFiles->isValid())
     {
-      bool ok;
-      QString spectraRange = QInputDialog::getText(0, "Insert Spectra Ranges", "Range: ", QLineEdit::Normal, m_uiForm.leSpectraMin->text() +"-"+ m_uiForm.leSpectraMax->text(), &ok);
+      emit showMessageBox("You must select a run file.");
+      return;
+    }
 
-      if ( !ok || spectraRange.isEmpty() )
-      {
-        return;
-      }
-      QStringList specList = spectraRange.split("-");
+    bool ok;
+    QString spectraRange = QInputDialog::getText(0, "Insert Spectra Ranges", "Range: ", QLineEdit::Normal, m_uiForm.leSpectraMin->text() +"-"+ m_uiForm.leSpectraMax->text(), &ok);
 
-      QString rawFile = m_uiForm.ind_runFiles->getFirstFilename();
-      if ( (specList.size() > 2) || ( specList.size() < 1) )
-      {
-        emit showMessageBox("Invalid input. Must be of form <SpecMin>-<SpecMax>");
-        return;
-      }
-      if ( specList.size() == 1 )
-      {
-        specList.append(specList[0]);
-      }
+    if(!ok || spectraRange.isEmpty())
+      return;
 
-      QString bgrange;
+    QStringList specList = spectraRange.split("-");
+    if(specList.size() != 2)
+    {
+      emit showMessageBox("Invalid input. Must be of form <SpecMin>-<SpecMax>");
+      return;
+    }
 
-      if ( m_bgRemoval )
-      {
-        QPair<double, double> range = m_backgroundDialog->getRange();
-        bgrange = "[ " + QString::number(range.first) + "," + QString::number(range.second) + " ]";
-      }
-      else
-      {
-        bgrange = "[-1, -1]";
-      }
+    std::vector<int> detectorRange;
+    detectorRange.push_back(specList[0].toInt());
 
-      QString pyInput =
-        "from mantid.simpleapi import CalculateFlatBackground,GroupDetectors,Load\n"
-        "from mantidplot import plotSpectrum\n"
-        "import os.path as op\n"
-        "file = r'" + rawFile + "'\n"
-        "name = op.splitext( op.split(file)[1] )[0]\n"
-        "bgrange = " + bgrange + "\n"
-        "Load(Filename=file, OutputWorkspace=name, SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
-        "if ( bgrange != [-1, -1] ):\n"
-        "    #Remove background\n"
-        "    CalculateFlatBackground(InputWorkspace=name, OutputWorkspace=name+'_bg', StartX=bgrange[0], EndX=bgrange[1], Mode='Mean')\n"
-        "    GroupDetectors(InputWorkspace=name+'_bg', OutputWorkspace=name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
-        "    GroupDetectors(InputWorkspace=name, OutputWorkspace=name+'_grp_raw', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
-        "else: # Just group detectors as they are\n"
-        "    GroupDetectors(InputWorkspace=name, OutputWorkspace=name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
-        "graph = plotSpectrum(name+'_grp', 0)\n";
+    if(specList.size() == 1)
+      detectorRange.push_back(specList[0].toInt() + 1);
+    else
+      detectorRange.push_back(specList[1].toInt() + 1);
 
-      QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
+    QString rawFile = m_uiForm.ind_runFiles->getFirstFilename();
+    QFileInfo rawFileInfo(rawFile);
+    std::string name = rawFileInfo.baseName().toStdString();
 
-      if ( pyOutput != "" )
-      {
-        emit showMessageBox(pyOutput);
-      }
+    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
+    loadAlg->initialize();
+    loadAlg->setProperty("Filename", rawFile.toStdString());
+    loadAlg->setProperty("OutputWorkspace", name);
+    loadAlg->setProperty("SpectrumMin", specList[0].toStdString());
+    loadAlg->setProperty("SpectrumMax", specList[1].toStdString());
+    m_batchAlgoRunner->addAlgorithm(loadAlg);
+
+    BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromLoad;
+    inputFromLoad["InputWorkspace"] = name;
+
+    if(m_bgRemoval)
+    {
+      QPair<double, double> range = m_backgroundDialog->getRange();
+
+      IAlgorithm_sptr calcBackAlg = AlgorithmManager::Instance().create("CalculateFlatBackground");
+      calcBackAlg->initialize();
+      calcBackAlg->setProperty("OutputWorkspace", name + "_bg");
+      calcBackAlg->setProperty("Mode", "Mean");
+      calcBackAlg->setProperty("StartX", range.first);
+      calcBackAlg->setProperty("EndX", range.second);
+      m_batchAlgoRunner->addAlgorithm(calcBackAlg, inputFromLoad);
+
+      BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromCalcBG;
+      inputFromCalcBG["InputWorkspace"] = name + "_bg";
+
+      IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().create("GroupDetectors");
+      groupAlg->initialize();
+      groupAlg->setProperty("OutputWorkspace", name + "_grp");
+      groupAlg->setProperty("DetectorList", detectorRange);
+      m_batchAlgoRunner->addAlgorithm(groupAlg, inputFromCalcBG);
+
+      IAlgorithm_sptr rawGroupAlg = AlgorithmManager::Instance().create("GroupDetectors");
+      rawGroupAlg->initialize();
+      rawGroupAlg->setProperty("OutputWorkspace", name + "_grp_raw");
+      rawGroupAlg->setProperty("DetectorList", detectorRange);
+      m_batchAlgoRunner->addAlgorithm(rawGroupAlg, inputFromLoad);
     }
     else
     {
-      emit showMessageBox("You must select a run file.");
+      IAlgorithm_sptr rawGroupAlg = AlgorithmManager::Instance().create("GroupDetectors");
+      rawGroupAlg->initialize();
+      rawGroupAlg->setProperty("OutputWorkspace", name + "_grp");
+      rawGroupAlg->setProperty("DetectorList", detectorRange);
+      m_batchAlgoRunner->addAlgorithm(rawGroupAlg, inputFromLoad);
     }
+
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
+  }
+
+  /**
+   * Handles plotting the result of Plot Raw
+   *
+   * @param error Indicates if the algorithm chain failed
+   */
+  void IndirectConvertToEnergy::plotRawComplete(bool error)
+  {
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
+
+    if(error)
+      return;
+
+    QString rawFile = m_uiForm.ind_runFiles->getFirstFilename();
+    QFileInfo rawFileInfo(rawFile);
+    std::string name = rawFileInfo.baseName().toStdString();
+
+    std::string pyInput = "from mantidplot import plotSpectrum\nplotSpectrum('" + name + "_grp', 0)\n";
+    m_pythonRunner.runPythonCode(QString::fromStdString(pyInput));
   }
 
   void IndirectConvertToEnergy::useCalib(bool state)
@@ -795,14 +719,10 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::calibFileChanged(const QString & calib)
   {
-    if ( calib.isEmpty() )
-    {
+    if(calib.isEmpty())
       m_uiForm.ckUseCalib->setChecked(false);
-    }
     else
-    {
       m_uiForm.ckUseCalib->setChecked(true);
-    }
   }
 
   /**
@@ -810,8 +730,7 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::pbRunEditing()
   {
-    m_uiForm.pbRun->setEnabled(false);
-    m_uiForm.pbRun->setText("Editing...");
+    emit updateRunButton(false, "Editing...", "Run numbers are curently being edited.");
   }
 
   /**
@@ -819,7 +738,7 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::pbRunFinding()
   {
-    m_uiForm.pbRun->setText("Finding files...");
+    emit updateRunButton(false, "Finding files...", "Searchig for data files for the run numbers entered...");
     m_uiForm.ind_runFiles->setEnabled(false);
   }
 
@@ -830,13 +749,13 @@ namespace CustomInterfaces
   {
     if(!m_uiForm.ind_runFiles->isValid())
     {
-      m_uiForm.pbRun->setText("Invalid Run");
+      emit updateRunButton(false, "Invalid Run(s)", "Cannot find data files for some of the run numbers enetered.");
     }
     else
     {
-      m_uiForm.pbRun->setText("Run");
-      m_uiForm.pbRun->setEnabled(true);
+      emit updateRunButton();
     }
+
     m_uiForm.ind_runFiles->setEnabled(true);
   }
 

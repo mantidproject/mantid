@@ -1,7 +1,8 @@
 #ifndef MANTID_PYTHONINTERFACE_NDARRAYTOVECTORCONVERTER_H_
 #define MANTID_PYTHONINTERFACE_NDARRAYTOVECTORCONVERTER_H_
 /*
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -25,32 +26,28 @@
 #include <boost/python/object.hpp>
 #include <vector>
 
-namespace Mantid
-{
-  namespace PythonInterface
-  {
-    namespace Converters
-    {
-      /**
-       * Converts a Python sequence type to a C++ std::vector, where the vector element
-       * type is defined by the template type
-       */
-      template <typename DestElementType>
-      struct DLLExport NDArrayToVector
-      {
-        /// Constructor
-        NDArrayToVector(const boost::python::object & value);
-        /// Do the conversion
-        const std::vector<DestElementType> operator()();
-      private:
-        /// Check the array is of the correct type and coerce it if not
-        void typeCheck();
-        /// Pointer to ndarray object
-        boost::python::object m_arr;
-      };
+namespace Mantid {
+namespace PythonInterface {
+namespace Converters {
+/**
+ * Converts a Python sequence type to a C++ std::vector, where the vector
+ * element
+ * type is defined by the template type
+ */
+template <typename DestElementType> struct DLLExport NDArrayToVector {
+  /// Constructor
+  NDArrayToVector(const boost::python::object &value);
+  /// Do the conversion
+  const std::vector<DestElementType> operator()();
 
-    }
-  }
+private:
+  /// Check the array is of the correct type and coerce it if not
+  void typeCheck();
+  /// Pointer to ndarray object
+  boost::python::object m_arr;
+};
+}
+}
 }
 
 #endif /* MANTID_PYTHONINTERFACE_NDARRAYTOVECTORCONVERTER_H_ */

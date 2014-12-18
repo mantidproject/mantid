@@ -9,19 +9,11 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/System.h"
 
-// To be compatible with VSC Express edition that does not have tr1
-#ifndef HAS_UNORDERED_MAP_H
-#include <map>
-#else
-#include <tr1/unordered_map>
-#endif
-
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /**
- Algorithm to focus powder diffraction data into a number of histograms according to a
+ Algorithm to focus powder diffraction data into a number of histograms
+ according to a
  grouping scheme defined in a file.
  The structure of the grouping file is as follows:
  # Format: number  UDET offset  select  group
@@ -30,35 +22,45 @@ namespace Algorithms
  2        601  0.0000000  0    0
  3        602  0.0000000  0    0
  4        621  0.0000000  1    0
- The first column is simply an index, the second is a UDET identifier for the detector,
- the third column corresponds to an offset in Deltad/d (not applied, usually applied using
- the AlignDetectors algorithm). The forth column is a flag to indicate whether the detector
- is selected. The fifth column indicates the group this detector belongs to (number >=1),
+ The first column is simply an index, the second is a UDET identifier for the
+ detector,
+ the third column corresponds to an offset in Deltad/d (not applied, usually
+ applied using
+ the AlignDetectors algorithm). The forth column is a flag to indicate whether
+ the detector
+ is selected. The fifth column indicates the group this detector belongs to
+ (number >=1),
  zero is not considered as a group.
 
  Given an InputWorkspace and a Grouping filename, the algorithm follows:
- 1) The calibration file is read and a map of corresponding udet-group is created.
- 2) The algorithm determine the X boundaries for each group as the upper and lower limits
- of all contributing detectors to this group and determine a logarithmic step that will ensure
+ 1) The calibration file is read and a map of corresponding udet-group is
+ created.
+ 2) The algorithm determine the X boundaries for each group as the upper and
+ lower limits
+ of all contributing detectors to this group and determine a logarithmic step
+ that will ensure
  preserving the number of bins in the initial workspace.
  3) All histograms are read and rebinned to the new grid for their group.
  4) A new workspace with N histograms is created.
 
  Since the new X boundaries depend on the group and not the entire workspace,
- this focusing algorithm does not create overestimated Xranges for multi-group intruments.
+ this focusing algorithm does not create overestimated Xranges for multi-group
+ intruments.
 
  Required Properties:
  <UL>
  <LI> InputWorkspace - The name of the 2D Workspace to take as input.
  It should be an histogram and the X-unit should be d-spacing. </LI>
  <LI> GroupingFileName - The path to a grouping file</LI>
- <LI> OutputWorkspace - The name of the 2D workspace in which to store the result </LI>
+ <LI> OutputWorkspace - The name of the 2D workspace in which to store the
+ result </LI>
  </UL>
 
  @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
  @date 08/03/2009
 
- Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -78,8 +80,7 @@ namespace Algorithms
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport DiffractionFocussing2: public API::Algorithm
-{
+class DLLExport DiffractionFocussing2 : public API::Algorithm {
 public:
   /// Default constructor
   DiffractionFocussing2();
@@ -87,16 +88,18 @@ public:
   virtual ~DiffractionFocussing2();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "DiffractionFocussing"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Algorithm to focus powder diffraction data into a number of histograms according to a grouping scheme defined in a CalFile.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Algorithm to focus powder diffraction data into a number of "
+           "histograms according to a grouping scheme defined in a CalFile.";
+  }
 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 2; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Diffraction"; }
-  
+
 private:
-  
   // Overridden Algorithm methods
   void init();
   void exec();
@@ -107,11 +110,12 @@ private:
   // For events
   void execEvent();
 
-  /// Loop over the workspace and determine the rebin parameters (Xmin,Xmax,step) for each group.
+  /// Loop over the workspace and determine the rebin parameters
+  /// (Xmin,Xmax,step) for each group.
   /// The result is stored in group2params
   void determineRebinParameters();
   int validateSpectrumInGroup(size_t wi);
-  
+
   /// Shared pointer to the input workspace
   API::MatrixWorkspace_const_sptr m_matrixInputW;
 
@@ -127,7 +131,7 @@ private:
 
   // This map needs to be ordered to process the groups in order.
   /// typedef for the storage of each group's X vector
-  typedef std::map<int, boost::shared_ptr<MantidVec> > group2vectormap;
+  typedef std::map<int, boost::shared_ptr<MantidVec>> group2vectormap;
   /// Map from udet to group
   std::vector<int> udet2group;
   /// The list of group numbers
@@ -143,10 +147,9 @@ private:
   /// Number of points in the 2D workspace
   int nPoints;
   /// Mapping of group number to vector of inputworkspace indices.
-  std::vector< std::vector<std::size_t> > m_wsIndices;
+  std::vector<std::vector<std::size_t>> m_wsIndices;
   /// List of valid group numbers
   std::vector<int> m_validGroups;
-
 };
 
 } // namespace Algorithm

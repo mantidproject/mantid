@@ -44,7 +44,7 @@ class EQSANSInterface(InstrumentInterface):
         self.attach(SANSInstrumentWidget(settings = self._settings, data_proxy=DataProxy, data_type = self.data_type))
 
         # Detector
-        self.attach(DetectorWidget(settings = self._settings, data_proxy=None,
+        self.attach(DetectorWidget(settings = self._settings, data_proxy=DataProxy,
                                    data_type = self.data_type, use_sample_dc=True,
                                    options_callback = self.scripter.set_options))
 

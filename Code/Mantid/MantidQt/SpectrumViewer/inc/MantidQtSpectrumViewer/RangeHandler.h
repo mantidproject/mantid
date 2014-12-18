@@ -7,16 +7,16 @@
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
-    @class RangeHandler 
-  
-      This manages the min, max and step range controls for the SpectrumView 
-    data viewer. 
- 
-    @author Dennis Mikkelson 
-    @date   2012-04-25 
-     
+    @class RangeHandler
+
+    This manages the min, max and step range controls for the SpectrumView
+    data viewer.
+
+    @author Dennis Mikkelson
+    @date   2012-04-25
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -31,8 +31,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
@@ -41,31 +41,30 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-
 class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER RangeHandler : public IRangeHandler
 {
   public:
-
     /// Construct object to manage min, max and step controls in the UI
-    RangeHandler( Ui_SpectrumViewer* sv_ui );
+    RangeHandler( Ui_SpectrumViewer* svUI );
 
     /// Configure min, max and step controls for the specified data source
-    void ConfigureRangeControls( SpectrumDataSource* data_source );
+    void configureRangeControls( SpectrumDataSource_sptr dataSource );
 
     /// Get the range of data to display in the image, from GUI controls
-    void GetRange( double &min, double &max, double &step );
+    void getRange( double &min, double &max, double &step );
 
     /// Set the values displayed in the GUI controls
-    void SetRange( double min, double max, double step );
+    void setRange( double min, double max, double step );
 
   private:
-    Ui_SpectrumViewer* sv_ui;
-    double         total_min_x;
-    double         total_max_x;
-    size_t         total_n_steps;
+    Ui_SpectrumViewer* m_svUI;
+    double             m_totalMinX;
+    double             m_totalMaxX;
+    size_t             m_totalNSteps;
+
 };
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif // RANGE_HANDLER_H

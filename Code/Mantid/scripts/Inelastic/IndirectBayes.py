@@ -185,10 +185,9 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
     	logger.notice('Sample is ' + samWS)
     	logger.notice('Resolution is ' + resWS)
 
-    if facility == 'ISIS':
-    	CheckAnalysers(samWS,resWS,Verbose)
-    	efix = getEfixed(samWS)
-    	theta,Q = GetThetaQ(samWS)
+    CheckAnalysers(samWS,resWS,Verbose)
+    efix = getEfixed(samWS)
+    theta, Q = GetThetaQ(samWS)
 
     nsam,ntc = CheckHistZero(samWS)
 

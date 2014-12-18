@@ -1,24 +1,24 @@
 #ifndef MANTID_MDEVENTS_WS_SELECTOR_H
 #define MANTID_MDEVENTS_WS_SELECTOR_H
 
-
 #include "MantidMDEvents/ConvToMDEventsWS.h"
 #include "MantidMDEvents/ConvToMDHistoWS.h"
 
-namespace Mantid
-{
-namespace MDEvents
-{
-/** small class to select proper solver as function of the workspace kind and (possibly, in a future) other workspace parameters. 
-  * may be replaced by usual mantid factory in a future; 
+namespace Mantid {
+namespace MDEvents {
+/** small class to select proper solver as function of the workspace kind and
+  (possibly, in a future) other workspace parameters.
+  * may be replaced by usual mantid factory in a future;
   *
   *
-  * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation for detailed description of this
-  * class place in the algorithms hierarchy. 
+  * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation
+  for detailed description of this
+  * class place in the algorithms hierarchy.
   *
   * @date 25-05-2012
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
         This file is part of Mantid.
 
@@ -35,19 +35,20 @@ namespace MDEvents
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-        File/ change history is stored at: <https://github.com/mantidproject/mantid>
+        File/ change history is stored at:
+  <https://github.com/mantidproject/mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport ConvToMDSelector
-{
+class DLLExport ConvToMDSelector {
 public:
- /// function which selects the convertor depending on workspace type and (possibly, in a future) some workspace properties
-   boost::shared_ptr<ConvToMDBase> convSelector(API::MatrixWorkspace_sptr inputWS,
-                     boost::shared_ptr<ConvToMDBase> &currentSptr)const;
+  /// function which selects the convertor depending on workspace type and
+  /// (possibly, in a future) some workspace properties
+  boost::shared_ptr<ConvToMDBase>
+  convSelector(API::MatrixWorkspace_sptr inputWS,
+               boost::shared_ptr<ConvToMDBase> &currentSptr) const;
 };
 } // end MDAlgorithms Namespace
 } // end Mantid Namespace
-
 
 #endif

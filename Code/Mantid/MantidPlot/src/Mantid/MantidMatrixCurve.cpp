@@ -359,3 +359,21 @@ bool MantidMatrixCurve::isDistribution() const
   }
   else return false;
 }
+
+bool MantidMatrixCurve::isHistogramData() const
+{
+  if( auto *d = dynamic_cast<const QwtWorkspaceSpectrumData*>(&data()))
+  {
+    return d->isHistogram();
+  }
+  else return false;
+}
+
+bool MantidMatrixCurve::isNormalizable() const
+{
+  if( auto *d = dynamic_cast<const QwtWorkspaceSpectrumData*>(&data()))
+  {
+    return d->isHistogram() && !d->dataIsNormalized();
+  }
+  else return false;
+}

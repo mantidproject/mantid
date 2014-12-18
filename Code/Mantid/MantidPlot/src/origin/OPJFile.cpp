@@ -76,8 +76,8 @@ int strcmp_i(const char *s1, const char *s2) { //compare two strings ignoring ca
 }
 
 void OPJFile::ByteSwap(unsigned char * b, int n) {
-  register int i = 0;
-  register int j = n-1;
+  int i = 0;
+  int j = n-1;
   while (i<j) {
     std::swap(b[i], b[j]);
     i++, j--;
@@ -2346,7 +2346,7 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 
           fseek(f,LAYER+0x19,SEEK_SET);
           fread(&h,1,1,f);
-          if(h >= 0x64 && h < 0x1F4)
+          if(h >= 0x64)
           {
             col=findDataByIndex(nColY - 1 + h - 0x64);
             if(col.size()>0)

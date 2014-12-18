@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/AddTimeSeriesLog.cpp
 	src/AlignDetectors.cpp
 	src/AlphaCalc.cpp
+	src/AnnularRingAbsorption.cpp
 	src/AnyShapeAbsorption.cpp
 	src/AppendSpectra.cpp
 	src/ApplyCalibration.cpp
@@ -53,6 +54,7 @@ set ( SRC_FILES
 	src/CopyInstrumentParameters.cpp
 	src/CopyLogs.cpp
 	src/CopySample.cpp
+	src/CorelliCrossCorrelate.cpp
 	src/CorrectFlightPaths.cpp
 	src/CorrectKiKf.cpp
 	src/CorrectToFile.cpp
@@ -134,6 +136,7 @@ set ( SRC_FILES
 	src/InterpolatingRebin.cpp
 	src/InvertMask.cpp
 	src/Logarithm.cpp
+	src/LorentzCorrection.cpp
 	src/MaskBins.cpp
 	src/MaskBinsFromTable.cpp
 	src/MaskDetectorsIf.cpp
@@ -158,6 +161,7 @@ set ( SRC_FILES
 	src/PDFFourierTransform.cpp
 	src/Pause.cpp
 	src/PerformIndexOperations.cpp
+	src/PhaseQuadMuon.cpp
 	src/PlotAsymmetryByLogValue.cpp
 	src/Plus.cpp
 	src/PointByPointVCorrection.cpp
@@ -186,6 +190,7 @@ set ( SRC_FILES
 	src/ReflectometryReductionOneAuto.cpp
 	src/ReflectometryWorkflowBase.cpp
 	src/Regroup.cpp
+	src/RemoveBackground.cpp    
 	src/RemoveBins.cpp
 	src/RemoveExpDecay.cpp
 	src/RemoveLowResTOF.cpp
@@ -221,6 +226,7 @@ set ( SRC_FILES
 	src/SpecularReflectionPositionCorrect.cpp
 	src/SphericalAbsorption.cpp
 	src/Stitch1D.cpp
+	src/Stitch1DMany.cpp
 	src/StripPeaks.cpp
 	src/StripVanadiumPeaks.cpp
 	src/StripVanadiumPeaks2.cpp
@@ -229,6 +235,7 @@ set ( SRC_FILES
 	src/SumRowColumn.cpp
 	src/SumSpectra.cpp
 	src/TOFSANSResolution.cpp
+  src/TOFSANSResolutionByPixel.cpp
 	src/Transpose.cpp
 	src/UnGroupWorkspace.cpp
 	src/UnaryOperation.cpp
@@ -238,6 +245,7 @@ set ( SRC_FILES
 	src/WeightedMean.cpp
 	src/WeightedMeanOfWorkspace.cpp
 	src/WeightingStrategy.cpp
+	src/WienerSmooth.cpp
 	src/WorkspaceJoiners.cpp
 	src/XDataConverter.cpp
 )
@@ -253,6 +261,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AddTimeSeriesLog.h
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AlphaCalc.h
+	inc/MantidAlgorithms/AnnularRingAbsorption.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
 	inc/MantidAlgorithms/AppendSpectra.h
 	inc/MantidAlgorithms/ApplyCalibration.h
@@ -297,6 +306,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CopyInstrumentParameters.h
 	inc/MantidAlgorithms/CopyLogs.h
 	inc/MantidAlgorithms/CopySample.h
+	inc/MantidAlgorithms/CorelliCrossCorrelate.h
 	inc/MantidAlgorithms/CorrectFlightPaths.h
 	inc/MantidAlgorithms/CorrectKiKf.h
 	inc/MantidAlgorithms/CorrectToFile.h
@@ -379,6 +389,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/InterpolatingRebin.h
 	inc/MantidAlgorithms/InvertMask.h
 	inc/MantidAlgorithms/Logarithm.h
+	inc/MantidAlgorithms/LorentzCorrection.h
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskBinsFromTable.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
@@ -403,6 +414,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PDFFourierTransform.h
 	inc/MantidAlgorithms/Pause.h
 	inc/MantidAlgorithms/PerformIndexOperations.h
+	inc/MantidAlgorithms/PhaseQuadMuon.h
 	inc/MantidAlgorithms/PlotAsymmetryByLogValue.h
 	inc/MantidAlgorithms/Plus.h
 	inc/MantidAlgorithms/PointByPointVCorrection.h
@@ -431,6 +443,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ReflectometryReductionOneAuto.h
 	inc/MantidAlgorithms/ReflectometryWorkflowBase.h
 	inc/MantidAlgorithms/Regroup.h
+	inc/MantidAlgorithms/RemoveBackground.h        
 	inc/MantidAlgorithms/RemoveBins.h
 	inc/MantidAlgorithms/RemoveExpDecay.h
 	inc/MantidAlgorithms/RemoveLowResTOF.h
@@ -466,6 +479,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SpecularReflectionPositionCorrect.h
 	inc/MantidAlgorithms/SphericalAbsorption.h
 	inc/MantidAlgorithms/Stitch1D.h
+	inc/MantidAlgorithms/Stitch1DMany.h
 	inc/MantidAlgorithms/StripPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks2.h
@@ -474,6 +488,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SumRowColumn.h
 	inc/MantidAlgorithms/SumSpectra.h
 	inc/MantidAlgorithms/TOFSANSResolution.h
+  inc/MantidAlgorithms/TOFSANSResolutionByPixel.h
 	inc/MantidAlgorithms/Transpose.h
 	inc/MantidAlgorithms/UnGroupWorkspace.h
 	inc/MantidAlgorithms/UnaryOperation.h
@@ -483,6 +498,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/WeightedMean.h
 	inc/MantidAlgorithms/WeightedMeanOfWorkspace.h
 	inc/MantidAlgorithms/WeightingStrategy.h
+	inc/MantidAlgorithms/WienerSmooth.h
 	inc/MantidAlgorithms/WorkspaceJoiners.h
 	inc/MantidAlgorithms/XDataConverter.h
 )
@@ -509,6 +525,7 @@ set ( TEST_FILES
 	AddTimeSeriesLogTest.h
 	AlignDetectorsTest.h
 	AlphaCalcTest.h
+	AnnularRingAbsorptionTest.h
 	AnyShapeAbsorptionTest.h
 	AppendSpectraTest.h
 	ApplyCalibrationTest.h
@@ -553,6 +570,7 @@ set ( TEST_FILES
 	CopyInstrumentParametersTest.h
 	CopyLogsTest.h
 	CopySampleTest.h
+	CorelliCrossCorrelateTest.h
 	CorrectFlightPathsTest.h
 	CorrectKiKfTest.h
 	CorrectToFileTest.h
@@ -582,6 +600,7 @@ set ( TEST_FILES
 	DiffractionFocussingTest.h
 	DivideTest.h
 	EditInstrumentGeometryTest.h
+  ElasticWindowTest.h
 	EstimatePDDetectorResolutionTest.h
 	ExponentialCorrectionTest.h
 	ExponentialTest.h
@@ -625,6 +644,7 @@ set ( TEST_FILES
 	InterpolatingRebinTest.h
 	InvertMaskTest.h
 	LogarithmTest.h
+	LorentzCorrectionTest.h
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
 	MaxMinTest.h
@@ -645,6 +665,7 @@ set ( TEST_FILES
 	PDFFourierTransformTest.h
 	PauseTest.h
 	PerformIndexOperationsTest.h
+  PhaseQuadMuonTest.h
 	PlotAsymmetryByLogValueTest.h
 	PlusTest.h
 	PointByPointVCorrectionTest.h
@@ -669,6 +690,7 @@ set ( TEST_FILES
 	ReflectometryReductionOneAutoTest.h
 	ReflectometryReductionOneTest.h
 	RegroupTest.h
+	RemoveBackgroundTest.h    
 	RemoveBinsTest.h
 	RemoveExpDecayTest.h
 	RemoveLowResTOFTest.h
@@ -707,6 +729,7 @@ set ( TEST_FILES
 	SumNeighboursTest.h
 	SumRowColumnTest.h
 	SumSpectraTest.h
+  TOFSANSResolutionByPixelTest.h
 	TransposeTest.h
 	UnGroupWorkspaceTest.h
 	UnaryOperationTest.h
@@ -714,6 +737,7 @@ set ( TEST_FILES
 	WeightedMeanOfWorkspaceTest.h
 	WeightedMeanTest.h
 	WeightingStrategyTest.h
+	WienerSmoothTest.h
 	WorkspaceCreationHelperTest.h
 	WorkspaceGroupTest.h
 )

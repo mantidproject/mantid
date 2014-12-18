@@ -6,24 +6,27 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
-/** Scales an input workspace by the given factor, which can be either multiplicative or additive.
+namespace Mantid {
+namespace Algorithms {
+/** Scales an input workspace by the given factor, which can be either
+   multiplicative or additive.
 
     Properties:
     <UL>
     <LI> InputWorkspace  - The name of the input workspace. </LI>
-    <LI> OutputWorkspace - The name of the output workspace. Can be the same as the input one. </LI>
-    <LI> Factor          - The value by which to scale the input workspace. </LI>
-    <LI> Operation       - Whether to multiply (the default) or add by Factor. </LI>
+    <LI> OutputWorkspace - The name of the output workspace. Can be the same as
+   the input one. </LI>
+    <LI> Factor          - The value by which to scale the input workspace.
+   </LI>
+    <LI> Operation       - Whether to multiply (the default) or add by Factor.
+   </LI>
     </UL>
 
     @author Russell Taylor, Tessella plc
     @date 19/03/2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -43,8 +46,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Scale : public API::Algorithm
-{
+class DLLExport Scale : public API::Algorithm {
 public:
   /// (Empty) Constructor
   Scale() : API::Algorithm() {}
@@ -52,16 +54,20 @@ public:
   virtual ~Scale() {}
   /// Algorithm's name
   virtual const std::string name() const { return "Scale"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Scales an input workspace by the given factor, which can be either multiplicative or additive.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Scales an input workspace by the given factor, which can be either "
+           "multiplicative or additive.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Arithmetic;CorrectionFunctions"; }
+  virtual const std::string category() const {
+    return "Arithmetic;CorrectionFunctions";
+  }
 
 private:
-  
   /// Initialisation code
   void init();
   /// Execution code

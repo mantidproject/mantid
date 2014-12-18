@@ -8,24 +8,24 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ParameterReference.h"
 
-namespace mu
-{
-  class Parser;
+namespace mu {
+class Parser;
 }
 
-namespace Mantid
-{
-namespace API
-{
-/** Ties fitting parameters. A tie is a formula that is used to 
-    calculate the value of a function parameter based on the values of other parameters.
-    A tied parameter is not considered independent and doesn't take part in fitting.
+namespace Mantid {
+namespace API {
+/** Ties fitting parameters. A tie is a formula that is used to
+    calculate the value of a function parameter based on the values of other
+   parameters.
+    A tied parameter is not considered independent and doesn't take part in
+   fitting.
     Its value is always calculated with its tie's formula.
 
     @author Roman Tolchenov, Tessella Support Services plc
     @date 28/10/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -45,38 +45,39 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class MANTID_API_DLL ParameterTie: public ParameterReference
-{
+class MANTID_API_DLL ParameterTie : public ParameterReference {
 public:
   /// Constructor
-  ParameterTie(IFunction* funct,const std::string& parName,const std::string& expr = "", bool isDefault = false);
+  ParameterTie(IFunction *funct, const std::string &parName,
+               const std::string &expr = "", bool isDefault = false);
   /// Destructor
   virtual ~ParameterTie();
   /// Set the tie expression
-  virtual void set(const std::string& expr);
+  virtual void set(const std::string &expr);
   /// Evaluate the expression
   virtual double eval();
   /// Return the string that can be used to recreate this tie
-  virtual std::string asString(const IFunction* fun = NULL)const;
+  virtual std::string asString(const IFunction *fun = NULL) const;
 
   /// Check if the tie has any references to certain parameters
-  bool findParametersOf(const IFunction* fun)const;
+  bool findParametersOf(const IFunction *fun) const;
   /// Check if the tie is a constant
   bool isConstant() const;
 
 protected:
-  mu::Parser* m_parser;         ///< math parser
-  /// Store for parameters used in the tie. The map's key is address used by the mu::Parser
-  std::map<double*,ParameterReference> m_varMap;
+  mu::Parser *m_parser; ///< math parser
+  /// Store for parameters used in the tie. The map's key is address used by the
+  /// mu::Parser
+  std::map<double *, ParameterReference> m_varMap;
   /// Keep the function that was passed to the constructor
-  IFunction* m_function1;
+  IFunction *m_function1;
   /// Keep the template for the input string passed to this->set(...)
   /// In the template CompositeFunction prefixes are replaced with placeholders
   std::string m_expression;
 
 private:
   /// MuParser callback function
-  static double* AddVariable(const char *varName, void *palg);
+  static double *AddVariable(const char *varName, void *palg);
 };
 
 } // namespace API

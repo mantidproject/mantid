@@ -199,8 +199,7 @@ github_compare_url() {
     if [ ! $# -eq 1 ]; then
         echo "github_compare_address requires a single argument giving the branch name"
     fi
-    # Any forward slashes must be replaced with semicolons
-    changes_branch_gh=$(echo $1 | sed -e "s@/@;@g")
+    changes_branch_gh=$1
     # Find which repository we are in
     repo_stem=$(git config --get remote.origin.url | sed -e 's@.*github.com[:,/]@@' | sed -e 's@\.git$@@')
     changes_address="https://github.com/${repo_stem}/compare/${changes_branch_gh}"

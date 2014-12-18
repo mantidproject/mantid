@@ -13,6 +13,7 @@
 # Print out the versions of things we are using
 ###############################################################################
 cmake --version
+echo "SHA1=${sha1}"
 
 ###############################################################################
 # OS X setup steps
@@ -95,19 +96,35 @@ fi
 $SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DDOCS_HTML=ON ${PACKAGINGVARS} ../Code/Mantid"
 
 ###############################################################################
+# Coverity build should exit early
+###############################################################################
+if [[ ${JOB_NAME} == *coverity_build_and_submit* ]]; then
+  ${COVERITY_DIR}/cov-build --dir cov-int scl enable mantidlibs "make -j${BUILD_THREADS}"
+  tar czvf mantid.tgz cov-int
+  status=$(curl --form token=$COVERITY_TOKEN --form email=mantidproject@gmail.com \
+       --form file=@mantid.tgz --form version=$GIT_COMMIT \
+       https://scan.coverity.com/builds?project=mantidproject%2Fmantid)
+  status=$(echo ${status} | sed -e 's/^ *//' -e 's/ *$//')
+  if [[ -z $status ]]; then
+    exit 0
+  else
+    echo "$status"
+    exit 1
+  fi
+fi
+
+###############################################################################
 # Build step
 ###############################################################################
-$SCL_ON_RHEL6 "make -j$BUILD_THREADS"
-$SCL_ON_RHEL6 "make -j$BUILD_THREADS AllTests"
+$SCL_ON_RHEL6 "cmake --build . -- -j$BUILD_THREADS"
+$SCL_ON_RHEL6 "cmake --build . --target AllTests -- -j$BUILD_THREADS"
 
 ###############################################################################
 # Run the tests
 ###############################################################################
 # Remove any Mantid.user.properties file
 rm -f ~/.mantid/Mantid.user.properties
-$SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure -E MantidPlot"
-# Run GUI tests serially
-$SCL_ON_RHEL6 "ctest --output-on-failure -R MantidPlot"
+$SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure"
 
 ###############################################################################
 # Documentation
@@ -119,7 +136,7 @@ if [[ "$CLEANBUILD" == true ]]; then
   if [[ $(uname) == 'Darwin' ]]; then
     export MANTIDPATH=$PWD/bin
   fi
-  $SCL_ON_RHEL6 "make docs-qthelp"
+  $SCL_ON_RHEL6 "cmake --build . --target docs-qthelp"
 fi
 
 ###############################################################################
@@ -142,7 +159,7 @@ if [[ "$CLEANBUILD" == true ]]; then
   # and labelled by the commit id it was built with. This assumes the Jenkins git plugin
   # has set the GIT_COMMIT environment variable
   if [[ "$ON_RHEL6" == true ]]; then
-    $SCL_ON_RHEL6 "make docs-html"
+    $SCL_ON_RHEL6 "cmake --build . --target docs-html"
     tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' --exclude="MantidProject.q*" docs/html
     # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
     $SCL_ON_RHEL6 "cpack --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX="

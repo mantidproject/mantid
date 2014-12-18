@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>SANSEventSlicing</class>
- <widget class="QWidget" name="SANSEventSlicing">
+ <widget class="QMainWindow" name="SANSEventSlicing">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,6 +13,7 @@
   <property name="windowTitle">
    <string>SANS Time Slicing</string>
   </property>
+  <widget class="QWidget" name="centralwidget">
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -214,6 +215,7 @@
     </layout>
    </item>
   </layout>
+  </widget>
  </widget>
  <customwidgets>
   <customwidget>

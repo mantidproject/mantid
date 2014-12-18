@@ -15,7 +15,7 @@ namespace CustomInterfaces
     @author Dan Nixon
     @date 23/07/2014
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -47,12 +47,9 @@ namespace CustomInterfaces
     virtual void run();
     virtual bool validate();
 
-    void setIDFValues(const QString & prefix);
-
   private slots:
-    void clearReflectionInfo(); ///< clear various line edit boxes
-    void analyserSelected(int index); ///< set up cbReflection based on Analyser selection
-    void reflectionSelected(int index); ///< set up parameter file values based on reflection
+    void algorithmComplete(bool error);
+    void setInstrumentDefault(); ///< Sets default parameters for current instrument
     void mappingOptionSelected(const QString& groupType); ///< change ui to display appropriate options
     void backgroundClicked(); ///< handles showing and hiding m_backgroundDialog
     void backgroundRemoval(); ///< handles data from BG
@@ -65,13 +62,14 @@ namespace CustomInterfaces
     void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
     void pbRunFinding();  //< Called when the FileFinder starts finding the files.
     void pbRunFinished(); //< Called when the FileFinder has finished finding the files.
+    void plotRawComplete(bool error); //< Called when the Plot Raw algorithmm chain completes
 
   private:
     Background *m_backgroundDialog; ///< background removal dialog
     bool m_bgRemoval; ///< whether user has set values for BG removal
 
     QString createMapFile(const QString& groupType); ///< create the mapping file with which to group results
-    QString savePyCode(); ///< create python code as string to save files
+    std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
 
   };
 } // namespace CustomInterfaces

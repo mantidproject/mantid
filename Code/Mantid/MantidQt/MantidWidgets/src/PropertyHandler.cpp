@@ -42,6 +42,8 @@ PropertyHandler::PropertyHandler(Mantid::API::IFunction_sptr fun,
                 m_type(NULL),
                 m_item(item),
                 m_isMultispectral(false),
+                m_workspace(NULL),
+                m_workspaceIndex(NULL),
                 m_base(0),
                 m_ci(0),
                 m_hasPlot(false)

@@ -4,8 +4,9 @@
  * dimensions inverted because they were delivered in C storage order.
  *
  * Original contributor: Mark Koennecke: mark.koennecke@psi.ch
- * 
- * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ *
+ * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  * This file is part of Mantid.
 
@@ -32,8 +33,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 
-class MANTID_SINQ_DLL InvertMDDim : public Mantid::API::Algorithm
-{
+class MANTID_SINQ_DLL InvertMDDim : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   InvertMDDim() : Mantid::API::Algorithm() {}
@@ -41,8 +41,10 @@ public:
   virtual ~InvertMDDim() {}
   /// Algorithm's name
   virtual const std::string name() const { return "InvertMDDim"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Inverts dimensions of a MDHistoWorkspace";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Inverts dimensions of a MDHistoWorkspace";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -52,16 +54,18 @@ public:
 private:
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 
-  void copyMetaData( Mantid::API::IMDHistoWorkspace_sptr inws,  Mantid::API::IMDHistoWorkspace_sptr outws);
-  void recurseDim(Mantid::API::IMDHistoWorkspace_sptr inWS, Mantid::API::IMDHistoWorkspace_sptr outWS,
-  		  int currentDim, int *idx, int rank);
+  void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
+                    Mantid::API::IMDHistoWorkspace_sptr outws);
+  void recurseDim(Mantid::API::IMDHistoWorkspace_sptr inWS,
+                  Mantid::API::IMDHistoWorkspace_sptr outWS, int currentDim,
+                  int *idx, int rank);
 
   unsigned int calcIndex(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim);
-  unsigned int calcInvertedIndex(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim);
-
+  unsigned int calcInvertedIndex(Mantid::API::IMDHistoWorkspace_sptr ws,
+                                 int *dim);
 };
 
 #endif /*INVERTMDDIM_H_*/

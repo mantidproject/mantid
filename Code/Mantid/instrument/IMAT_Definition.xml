@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File
+see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
+name="IMAT" valid-from ="1900-01-31 23:59:59"
+valid-to ="2014-08-12 23:59:59"
+last-modified="2014-08-12 00:00:00">
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the
+y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <default-view axis-view="z"/>
+  </defaults>
+  <!-- BRIEF DESCRIPTION OF IMAT INSTRUMENT:
+
+  -->
+  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+  <!-- source and sample-position components -->
+  <component type="source">
+    <location />
+  </component>
+  <type name="source" is="Source" />
+  <component type="some-sample-holder">
+    <location z="19.281"/>
+  </component>
+  <type name="some-sample-holder" is="SamplePos" />
+  <!-- detector components (including monitors) -->
+  <component type="monitors" idlist="monitors">
+    <location />
+  </component>
+  <type name="monitors">
+    <component type="monitor-tbd">
+      <location z="7.217" name="monitor1"/>
+      <location z="17.937" name="monitor2"/>
+    </component>   
+  </type>
+  <type name="monitor-tbd" is="monitor">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" />
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder>
+  </type>
+  <component type="detector-bank" idstart="0" idfillbyfirst="y" idstep="1000" idstepbyrow="1">
+    <location z="23.281" x="-0.7" name="detector"/>
+  </component>
+  <type name="detector-bank" is="rectangular_detector" type="pixel"
+  xpixels="512" xstart="-0.48705" xstep="+0.0051"
+  ypixels="512" ystart="-0.48705" ystep="+0.0051" >
+  </type>
+  <type name="pixel" is="detector">
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.005104167" y="-0.005104167" z="0.0" />
+      <left-front-top-point x="0.005104167" y="-0.005104167" z="0.000005" />
+      <left-back-bottom-point x="-0.005104167" y="-0.005104167" z="0.0" />
+      <right-front-bottom-point x="0.005104167" y="0.005104167" z="0.0" />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+  <!-- DETECTOR and MONITOR ID LISTS -->
+  <idlist idname="monitors">
+    <id start="1" end="2" />
+  </idlist>
+</instrument>

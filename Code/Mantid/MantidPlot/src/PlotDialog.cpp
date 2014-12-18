@@ -536,10 +536,17 @@ void PlotDialog::initLayerPage()
   boxBkgLayout->addWidget(new QLabel(tr("Border Color")), 2, 0);
   boxBorderColor = new ColorButton();
   boxBkgLayout->addWidget(boxBorderColor, 2, 1);
-
   boxBkgLayout->addWidget(new QLabel(tr("Width")), 2, 2);
   boxBorderWidth = new QSpinBox();
   boxBkgLayout->addWidget(boxBorderWidth, 2, 3);
+  boxBkgLayout->setRowStretch(4, 1);
+
+  boxBkgLayout->addWidget(new QLabel(tr("Canvas Frame Color")), 3, 0);
+  boxCanvasFrameColor = new ColorButton();
+  boxBkgLayout->addWidget(boxCanvasFrameColor, 3, 1);
+  boxBkgLayout->addWidget(new QLabel(tr("Width")), 3, 2);
+  boxCanvasFrameWidth = new QSpinBox();
+  boxBkgLayout->addWidget(boxCanvasFrameWidth, 3, 3);
   boxBkgLayout->setRowStretch(4, 1);
 
   QGroupBox * box4 = new QGroupBox(QString());
@@ -1371,6 +1378,7 @@ void PlotDialog::setMultiLayer(MultiLayer *ml)
   boxScaleLayers->setChecked(d_ml->scaleLayersOnPrint());
   boxPrintCrops->setChecked(d_ml->printCropmarksEnabled());
 
+  // the plot (dataset) name will be displayed in the tree entry (leftmost/topmost tree level)
   QTreeWidgetItem *item = new QTreeWidgetItem(listBox, QStringList(ml->name()));
   item->setIcon(0, QIcon(getQPixmap("folder_open")));
   listBox->addTopLevelItem(item);
@@ -1378,21 +1386,23 @@ void PlotDialog::setMultiLayer(MultiLayer *ml)
 
   QList<Graph *> layers = ml->layersList();
   int i = 0;
-  foreach(Graph *g, layers){
-  LayerItem *layer = new LayerItem(g, item, tr("Layer") + QString::number(++i));
-  item->addChild(layer);
-
-  if (g == ml->activeGraph())
+  foreach(Graph *g, layers)
   {
-    layer->setExpanded(true);
-    layer->setActive(true);
-    listBox->setCurrentItem(layer);
+    // builds the names/labels of layers (Layer1, Layer2, etc.) visible in the tree
+    LayerItem *layer = new LayerItem(g, item, tr("Layer ") + QString::number(++i));
+    item->addChild(layer);
 
-    keepRatioOnResizeBox->setChecked(g->isFixedAspectRatioEnabled());
-    if (g->isSpectrogram()) keepRatioOnResizeBox->show();
-    else keepRatioOnResizeBox->hide();
+    if (g == ml->activeGraph())
+    {
+      layer->setExpanded(true);
+      layer->setActive(true);
+      listBox->setCurrentItem(layer);
+
+      keepRatioOnResizeBox->setChecked(g->isFixedAspectRatioEnabled());
+      if (g->isSpectrogram()) keepRatioOnResizeBox->show();
+      else keepRatioOnResizeBox->hide();
+    }
   }
-}
 }
 
 void PlotDialog::selectCurve(int index)
@@ -1462,7 +1472,7 @@ void PlotDialog::showStatistics()
   info += "-------------------------------------------------------------\n";
   if (!info.isEmpty())
   {
-    d_app->current_folder->appendLogInfo(info);
+    d_app->currentFolder()->appendLogInfo(info);
     d_app->showResults(true);
   }
 
@@ -1827,6 +1837,9 @@ void PlotDialog::setActiveLayer(LayerItem *item)
   boxBackgroundTransparency->blockSignals(false);
   boxCanvasTransparency->blockSignals(false);
   boxBorderWidth->blockSignals(false);
+
+  boxCanvasFrameColor->setColor(g->canvasFrameColor());
+  boxCanvasFrameWidth->setValue(g->canvasFrameWidth());
 
   boxX->setValue(g->pos().x());
   boxY->setValue(g->pos().y());
@@ -2221,6 +2234,9 @@ bool PlotDialog::acceptParams()
         g->setCanvasBackground(c);
 
         g->setAntialiasing(boxAntialiasing->isChecked());
+
+        //Canvas frame
+        g->setCanvasFrame(boxCanvasFrameWidth->value(), boxCanvasFrameColor->color());
       }
     }
     else
@@ -2248,6 +2264,8 @@ bool PlotDialog::acceptParams()
         g->setAntialiasing(boxAntialiasing->isChecked());
         //Margin
         g->setMargin(boxMargin->value());
+        //Canvas frame
+        g->setCanvasFrame(boxCanvasFrameWidth->value(), boxCanvasFrameColor->color());
       }
     }
     return true;
@@ -3064,10 +3082,17 @@ void LayerItem::insertCurvesList()
         plotAssociation = table + ": " + s.remove(table + "_");
       }
       else
+      {
+        plotAssociation = it->title().text();
+      }
+    }
+    else  // builds the names/labels of special (non-) curves within layers displayed in tree entries
+    {
+      if (d_graph->isSpectrogram() || it->title().isEmpty())
+        plotAssociation = it->title().text() + " Layer details (editable)";
+      else
         plotAssociation = it->title().text();
     }
-    else
-      plotAssociation = it->title().text();
 
     addChild(new CurveTreeItem(it, this, plotAssociation));
   }

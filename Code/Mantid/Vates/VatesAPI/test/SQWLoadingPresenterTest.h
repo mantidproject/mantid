@@ -192,7 +192,7 @@ void testTimeLabel()
   presenter.executeLoadMetadata();
   vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
   TSM_ASSERT_EQUALS("Time label should be exact.",
-                    presenter.getTimeStepLabel(), "en (mEv)");
+                    presenter.getTimeStepLabel(), "en (meV)");
 
   TS_ASSERT(Mock::VerifyAndClearExpectations(view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));

@@ -17,7 +17,7 @@ namespace CustomInterfaces
     @author Samuel Jackson
     @date 13/08/2013
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -52,12 +52,14 @@ namespace CustomInterfaces
   protected slots:
     // Handle when a file/workspace is ready for plotting
     void handleSampleInputReady(const QString&);
-    /// Slot for when the min range on the range selector changes
-    void minValueChanged(double min);
-    /// Slot for when the min range on the range selector changes
-    void maxValueChanged(double max);
+    /// Slot for when the range selector changes
+    void rangeChanged(double min, double max);
     /// Slot to update the guides when the range properties change
     void updateProperties(QtProperty* prop, double val);
+    /// Triggers an update of the preview plot
+    void updatePreviewPlot(QString workspaceName = "");
+    /// Called when the algorithm completes to update preview plot
+    void momentsAlgComplete(bool error);
 
   };
 } // namespace CustomInterfaces

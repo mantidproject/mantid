@@ -7,16 +7,16 @@
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
-    @class QtUtils 
-  
+    @class QtUtils
+
     This class has some static methods to simplify interaction with
     Qt and Qwt for the SpectrumView data viewer.
- 
-    @author Dennis Mikkelson 
-    @date   2012-04-03 
-     
+
+    @author Dennis Mikkelson
+    @date   2012-04-03
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -31,8 +31,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
@@ -46,14 +46,14 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER QtUtils
 {
   public:
   /// enter the specified string in the table
-  static void SetTableEntry(       int           row, 
-                                   int           col, 
+  static void SetTableEntry(       int           row,
+                                   int           col,
                              const std::string & string,
                                    QTableWidget* table );
 
   /// enter the specified double, formatted, in the table
-  static void SetTableEntry( int           row, 
-                             int           col, 
+  static void SetTableEntry( int           row,
+                             int           col,
                              int           width,
                              int           precision,
                              double        value,
@@ -61,16 +61,16 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER QtUtils
 
   /// Set the specified string into the specified QLineEdit widget.
   static void SetText( const std::string & string,
-                             QLineEdit*    q_line_edit );
+                             QLineEdit*    lineEdit );
 
   /// enter the specified double, formatted, in the QLineEdit control
   static void SetText( int        width,
                        int        precision,
                        double     value,
-                       QLineEdit* q_line_edit );
+                       QLineEdit* lineEdit );
 };
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif   // QT_UTILS_H

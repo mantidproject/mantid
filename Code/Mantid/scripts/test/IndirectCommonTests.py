@@ -97,27 +97,27 @@ class IndirectCommonTests(unittest.TestCase):
         ws = self.make_dummy_QENS_workspace()
         expected_result = [0.48372274526965614, 0.5253047207470043, 0.5667692111215948, 0.6079351677527526, 0.6487809073399486]
         actual_result = indirect_common.createQaxis(ws)
-        self.assert_lists_match(expected_result, actual_result)
+        self.assert_lists_almost_match(expected_result, actual_result)
 
     def test_GetWSangles(self):
         ws = self.make_dummy_QENS_workspace()
         expected_result = [29.700000000000006, 32.32, 34.949999999999996, 37.58, 40.209999999999994]
         actual_result = indirect_common.GetWSangles(ws)
-        self.assert_lists_match(expected_result, actual_result)
+        self.assert_lists_almost_match(expected_result, actual_result)
 
     def test_GetThetaQ(self):
         ws = self.make_dummy_QENS_workspace()
         expected_theta_result = [29.700000000000006, 32.32, 34.949999999999996, 37.58, 40.209999999999994]
         expected_Q_result = [0.48372274526965625, 0.5253047207470042, 0.5667692111215948, 0.6079351677527525, 0.6487809073399485]
         actual_theta_result, actual_Q_result =  indirect_common.GetThetaQ(ws)
-        self.assert_lists_match(expected_theta_result, actual_theta_result)
-        self.assert_lists_match(expected_Q_result, actual_Q_result)
+        self.assert_lists_almost_match(expected_theta_result, actual_theta_result)
+        self.assert_lists_almost_match(expected_Q_result, actual_Q_result)
 
     def test_ExtractFloat(self):
         data = "0.0 1 .2 3e-3 4.3 -5.5 6.0"
         expected_result = [0, 1, 0.2, 3e-3, 4.3, -5.5, 6.0]
         actual_result = indirect_common.ExtractFloat(data)
-        self.assert_lists_match(expected_result, actual_result)
+        self.assert_lists_almost_match(expected_result, actual_result)
 
     def test_ExtractInt(self):
         data = "-2 -1 0 1 2 3 4 5"
@@ -317,6 +317,10 @@ class IndirectCommonTests(unittest.TestCase):
     #-----------------------------------------------------------
     # Custom assertion functions
     #-----------------------------------------------------------
+
+    def assert_lists_almost_match(self, expected, actual,decimal=6):
+        self.assertTrue(isinstance(expected, list))
+        np.testing.assert_array_almost_equal(expected, actual, decimal, "The results do not match")
 
     def assert_lists_match(self, expected, actual):
         self.assertTrue(isinstance(expected, list))

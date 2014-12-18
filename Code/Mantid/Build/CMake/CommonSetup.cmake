@@ -36,6 +36,10 @@ if ( stdint )
   add_definitions ( -DHAVE_STDINT_H )
 endif ( stdint )
 
+# Configure a variable to hold the required test timeout value for all tests
+set ( TESTING_TIMEOUT 300 CACHE INTEGER
+      "Timeout in seconds for each test (default 300=5minutes)")
+
 ###########################################################################
 # Look for dependencies - bail out if any not found
 ###########################################################################
@@ -47,13 +51,15 @@ add_definitions ( -DBOOST_ALL_DYN_LINK )
 # Need this defined globally for our log time values
 add_definitions ( -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG )
 
-find_package ( Poco REQUIRED )
+find_package ( Poco 1.4.2 REQUIRED )
 include_directories( SYSTEM ${POCO_INCLUDE_DIRS} )
 
 find_package ( Nexus 4.3.0 REQUIRED )
 include_directories ( SYSTEM ${NEXUS_INCLUDE_DIR} )
 
 find_package ( MuParser REQUIRED )
+
+find_package ( JsonCPP REQUIRED )
 
 find_package ( Doxygen ) # optional
 
@@ -234,6 +240,8 @@ endif ()
 # Add compiler options if using gcc
 ###########################################################################
 if ( CMAKE_COMPILER_IS_GNUCXX )
+  include ( GNUSetup )
+elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
   include ( GNUSetup )
 endif ()
 

@@ -108,7 +108,7 @@ public:
      * Changing compiler on OS X has yet again caused this (and only this) test to fail.
      * Switch it off until it is clear why the other Fit tests are okay on OS X using Intel
      */
-#if !(defined __APPLE__ && defined __INTEL_COMPILER)
+#if !(defined __APPLE__)
 
     // create mock data to test against
     std::string wsName = "IkedaCarpenterPV1D_GaussMockData";
@@ -174,7 +174,7 @@ public:
     using namespace Mantid::CurveFitting;
 
 
-#if !(defined __APPLE__ && defined __INTEL_COMPILER)
+#if !(defined __APPLE__)
 
     // create mock data to test against
     std::string wsName = "IkedaCarpenterPV1D_GaussMockData_DeltaE";

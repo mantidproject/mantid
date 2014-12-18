@@ -15,7 +15,7 @@ namespace CustomInterfaces
     @author Dan Nixon
     @date 23/07/2014
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -48,6 +48,7 @@ namespace CustomInterfaces
     virtual bool validate();
 
   private slots:
+    void algorithmsComplete(bool error);
     void calPlotRaw();
     void calPlotEnergy();
     void calMinChanged(double);
@@ -58,9 +59,14 @@ namespace CustomInterfaces
     void intensityScaleMultiplierCheck(bool state); /// Toggle the intensity scale multiplier box
     void calibValidateIntensity(const QString & text); /// Check that the scale multiplier is valid
     void setDefaultInstDetails();
+    void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
+    void pbRunFinding();  //< Called when the FileFinder starts finding the files.
+    void pbRunFinished(); //< Called when the FileFinder has finished finding the files.
 
   private:
     void createRESfile(const QString& file);
+
+    QString m_lastCalPlotFilename;
 
   };
 } // namespace CustomInterfaces

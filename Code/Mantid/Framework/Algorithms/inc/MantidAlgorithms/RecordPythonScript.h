@@ -5,14 +5,13 @@
 #include "MantidAlgorithms/GeneratePythonScript.h"
 #include "MantidAPI/AlgorithmObserver.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 
 /** RecordPythonScript : TODO: DESCRIPTION
 
-  An Algorithm to generate a Python script file to reproduce the history of a workspace.
+  An Algorithm to generate a Python script file to reproduce the history of a
+  workspace.
 
   Properties:
   <ul>
@@ -20,7 +19,8 @@ namespace Algorithms
   <li>InputWorkspace - the workspace name who's history is to be saved.</li>
   </ul>
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -40,36 +40,40 @@ namespace Algorithms
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport RecordPythonScript : public Algorithms::GeneratePythonScript, public API::AlgorithmObserver
-{
+class DLLExport RecordPythonScript : public Algorithms::GeneratePythonScript,
+                                     public API::AlgorithmObserver {
 public:
   RecordPythonScript();
   virtual ~RecordPythonScript() {}
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "RecordPythonScript";};
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "An Algorithm to generate a Python script file to reproduce the history of a workspace.";}
+  virtual const std::string name() const { return "RecordPythonScript"; };
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "An Algorithm to generate a Python script file to reproduce the "
+           "history of a workspace.";
+  }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1;};
+  virtual int version() const { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Utility;PythonAlgorithms";}
+  virtual const std::string category() const {
+    return "Utility;PythonAlgorithms";
+  }
 
 private:
-  
   /// Initialise the properties
   void init();
   /// Run the algorithm
   void exec();
-  /** Handler of the start notifications. Must be overriden in inherited classes.
-  @param alg :: Shared Pointer to the algorithm sending the notification. 
+  /** Handler of the start notifications. Must be overriden in inherited
+  classes.
+  @param alg :: Shared Pointer to the algorithm sending the notification.
   */
   void startingHandle(API::IAlgorithm_sptr alg);
   /// buffer for the script
   std::string m_generatedScript;
 };
-
 
 } // namespace Algorithms
 } // namespace Mantid

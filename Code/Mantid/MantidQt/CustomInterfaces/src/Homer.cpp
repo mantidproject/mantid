@@ -38,7 +38,9 @@ using namespace MantidQt::CustomInterfaces;
 Homer::Homer(QWidget *parent, Ui::DirectConvertToEnergy & uiForm) : 
   UserSubWindow(parent), m_uiForm(uiForm),
   m_backgroundDialog(NULL), m_diagPage(NULL),m_saveChanged(false),
-  m_backgroundWasVisible(false), m_absEiDirty(false), m_topSettingsGroup("CustomInterfaces/Homer")
+  m_backgroundWasVisible(false), m_absEiDirty(false),
+  m_saveChecksGroup(NULL),
+  m_topSettingsGroup("CustomInterfaces/Homer")
 {}
 
 /// Set up the dialog layout
@@ -165,7 +167,7 @@ void Homer::page1Validators()
 /// Adds the diag custom widgets and a check box to allow users to enable or disable the widget
 void Homer::setUpPage2()
 {
-  /* The diag -detector diagnositics part of the form is a separate widget, all the work is 
+  /* The diag -detector diagnostics part of the form is a separate widget, all the work is 
      coded in over there
      this second page is largely filled with the diag widget, previous settings, 
      second argument, depends on the instrument and the detector diagnostic settings are 
@@ -393,7 +395,7 @@ QString Homer::openFileDia(const bool save, const QStringList &exts)
     {
       filter.append("*." + exts[i] + " ");
     }
-    filter.trimmed();
+    filter = filter.trimmed();
   }
   filter.append(";;All Files (*.*)");
 
@@ -581,7 +583,7 @@ bool Homer::runScripts()
       m_backgroundDialog->getRange().first, m_backgroundDialog->getRange().second);
   connect(&unitsConv, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   
-  // The diag -detector diagnositics part of the form is a separate widget, all the work is coded in over there
+  // The diag -detector diagnostics part of the form is a separate widget, all the work is coded in over there
   if (m_uiForm.ckRunDiag->isChecked())
   {
     // mostly important to stop the run button being clicked twice, prevents any change to the form until the run has completed
@@ -654,7 +656,7 @@ void Homer::helpClicked()
   QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Homer"));
 }
 
-/** This slot updates the MWDiag and SPE filename suggestor with the
+/** This slot updates the MWDiag and SPE filename suggester with the
 * names of the files the user has just chosen
 */
 void Homer::runFilesChanged()
@@ -712,7 +714,7 @@ void Homer::updateWBV()
 QString Homer::defaultName()
 {
   try
-  {//this will trhow if there is an invalid filename
+  {//this will throw if there is an invalid filename
     QStringList fileList = m_uiForm.runFiles->getFilenames();
     if ( fileList.size() == 0 )
     {
@@ -769,18 +771,18 @@ void Homer::setIDFValues(const QString &)
 
   // Fill in default values for tab
   QString param_defs = 
-    "import DirectEnergyConversion as direct\n"
-    "mono = direct.DirectEnergyConversion('%1')\n";
+    "from DirectPropertyManager import DirectPropertyManager\n"
+    "prop_man = DirectPropertyManager('%1')\n"
+    "prop_man.incident_energy = 1\n"
+    "int_range = prop_man.monovan_integr_range\n"
+    "bkg_rane = prop_man.bkgd_range\n";
   param_defs = param_defs.arg(prefix);
 
   param_defs += 
-    "print mono.monovan_integr_range[0]\n"
-    "print mono.monovan_integr_range[1]\n"
-    "print mono.van_mass\n"
-    "print mono.bkgd_range[0]\n"
-    "print mono.bkgd_range[1]\n"
-    "print str(mono.check_background)\n";
-  
+    "print '{0}\\n{1}\\n{2}\\n{3}\\n{4}\\n{5}\\n'"
+    ".format(int_range[0],int_range[1],prop_man.van_mass,"
+    "bkg_rane[0],bkg_rane[1],str(prop_man.check_background))\n";
+ 
   QString pyOutput = runPythonCode(param_defs).trimmed();
   QStringList values = pyOutput.split("\n", QString::SkipEmptyParts);
   if( values.count() != 6 )

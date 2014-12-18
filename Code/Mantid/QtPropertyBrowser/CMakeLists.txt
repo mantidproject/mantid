@@ -40,7 +40,7 @@ qt4_generate_moc (
   ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp
 )
 qt4_generate_moc (
-  src/qteditorfactory.h
+  src/qteditorfactory.h 
   ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
 )
 qt4_generate_moc (
@@ -103,6 +103,7 @@ set (
 )
 
 qt4_wrap_cpp ( EXTRA_MOCS src/DoubleEditorFactory.h 
+                          src/ButtonEditorFactory.h
                           src/ParameterPropertyManager.h
 )
 

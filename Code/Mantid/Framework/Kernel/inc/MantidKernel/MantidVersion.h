@@ -8,13 +8,13 @@
 
 #include <string>
 
-namespace Mantid
-{
-namespace Kernel
-{
-/** Class containing static methods to return the Mantid version number and date.
+namespace Mantid {
+namespace Kernel {
+/** Class containing static methods to return the Mantid version number and
+   date.
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -34,17 +34,20 @@ namespace Kernel
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_KERNEL_DLL MantidVersion
-{
+class MANTID_KERNEL_DLL MantidVersion {
 public:
-  static const char* version();     ///< The full version number
-  static const char* revision();    ///< The abbreviated SHA-1 of the last commit
-  static const char* revisionFull();    ///< The full SHA-1 of the last commit
-  static const char* releaseDate(); ///< The date of the last commit
-  static std::string doi();         ///< The DOI for this release of Mantid.
+  static const char *version(); ///< The full version number
+  static std::string
+  releaseNotes(); ///< The url to the most applicable release notes
+  static const char *revision(); ///< The abbreviated SHA-1 of the last commit
+  static const char *revisionFull();  ///< The full SHA-1 of the last commit
+  static const char *releaseDate();   ///< The date of the last commit
+  static std::string doi();           ///< The DOI for this release of Mantid.
+  static std::string paperCitation(); ///< The citation for the Mantid paper
 
 private:
-  MantidVersion(); ///< Private, unimplemented constructor. Not a class that can be instantiated.
+  MantidVersion(); ///< Private, unimplemented constructor. Not a class that can
+  /// be instantiated.
 };
 
 } // namespace Kernel

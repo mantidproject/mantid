@@ -6,15 +6,14 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace WorkflowAlgorithms
-{
+namespace Mantid {
+namespace WorkflowAlgorithms {
 /**
 
     Sensitivity correction for SANS
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -34,23 +33,24 @@ namespace WorkflowAlgorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SANSSensitivityCorrection : public API::Algorithm
-{
+class DLLExport SANSSensitivityCorrection : public API::Algorithm {
 public:
   /// (Empty) Constructor
-  SANSSensitivityCorrection() : API::Algorithm() {
-    m_output_message = "";
-  }
+  SANSSensitivityCorrection() : API::Algorithm() { m_output_message = ""; }
   /// Virtual destructor
   virtual ~SANSSensitivityCorrection() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SANSSensitivityCorrection"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Perform SANS sensitivity correction.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Perform SANS sensitivity correction.";
+  }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Workflow\\SANS\\UsesPropertyManager"; }
+  virtual const std::string category() const {
+    return "Workflow\\SANS\\UsesPropertyManager";
+  }
 
 private:
   /// Initialisation code
@@ -58,10 +58,9 @@ private:
   /// Execution code
   void exec();
   /// Check whether we have a processed file of not
-  bool fileCheck(const std::string& filePath);
+  bool fileCheck(const std::string &filePath);
 
   std::string m_output_message;
-
 };
 
 } // namespace Algorithms

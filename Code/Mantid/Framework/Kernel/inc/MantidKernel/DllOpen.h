@@ -5,19 +5,19 @@
 
 #include "MantidKernel/DllConfig.h"
 
-namespace Mantid
-{
-namespace Kernel
-{
+namespace Mantid {
+namespace Kernel {
 
-/** @class DllOpen DllOpen.h 
+/** @class DllOpen DllOpen.h
 
- Simple class for opening shared libraries at run-time. Works for Windows and Linux.
+ Simple class for opening shared libraries at run-time. Works for Windows and
+ Linux.
 
  @author ISIS, STFC
  @date 25/10/2007
- 
- Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+ Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -33,61 +33,59 @@ namespace Kernel
 
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
  File change history is stored at: <https://github.com/mantidproject/mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_KERNEL_DLL DllOpen
-{
+class MANTID_KERNEL_DLL DllOpen {
 public:
-	/// Static method for opening the shared library
-	static void* OpenDll(const std::string&);
+  /// Static method for opening the shared library
+  static void *OpenDll(const std::string &);
 
-	/// Static method for opening the shared library
-	static void* OpenDll(const std::string&, const std::string&);
+  /// Static method for opening the shared library
+  static void *OpenDll(const std::string &, const std::string &);
 
-	/// Static method for retrieving a function pointer
-	static void* GetFunction(void*, const std::string&);
+  /// Static method for retrieving a function pointer
+  static void *GetFunction(void *, const std::string &);
 
-	/// Static method for closing the shared library
-	static void CloseDll(void*);
+  /// Static method for closing the shared library
+  static void CloseDll(void *);
 
-	/// Static method for converting a filename to a libName (without lib___.so or ___.dll)
-	static const std::string ConvertToLibName(const std::string&);
+  /// Static method for converting a filename to a libName (without lib___.so or
+  /// ___.dll)
+  static const std::string ConvertToLibName(const std::string &);
 
-    /// Adds a directiry to the dll search path.
-    static void addSearchDirectory(const std::string&);
+  /// Adds a directiry to the dll search path.
+  static void addSearchDirectory(const std::string &);
 
 private:
-	/// Constructor private as not needed
-	DllOpen()
-	{};
-	/// Copy operator private as not needed
-	DllOpen(const DllOpen &)
-	{};
-	///Destructor private as not needed	
-	~DllOpen()
-	{};
+  /// Constructor private as not needed
+  DllOpen(){};
+  /// Copy operator private as not needed
+  DllOpen(const DllOpen &){};
+  /// Destructor private as not needed
+  ~DllOpen(){};
 
-	//private functions specific to implementation
-	/// Implementation specifc static method for opening a shared library
-	static void* OpenDllImpl(const std::string&);
+  // private functions specific to implementation
+  /// Implementation specifc static method for opening a shared library
+  static void *OpenDllImpl(const std::string &);
 
-	/// Implementation specifc static method for retrieving a function pointer
-	static void* GetFunctionImpl(void*, const std::string&);
+  /// Implementation specifc static method for retrieving a function pointer
+  static void *GetFunctionImpl(void *, const std::string &);
 
-	/// Implementation specifc static method for closing a shared library
-	static void CloseDllImpl(void*);
+  /// Implementation specifc static method for closing a shared library
+  static void CloseDllImpl(void *);
 
-    /// Implementation specifc static method for adding a directiry to the dll search path.
-    static void addSearchDirectoryImpl(const std::string&);
+  /// Implementation specifc static method for adding a directiry to the dll
+  /// search path.
+  static void addSearchDirectoryImpl(const std::string &);
 
-	///lib prefix
-	static const std::string LIB_PREFIX;
-	///lib postfix
-	static const std::string LIB_POSTFIX;
-	///path seperator 
-	static const std::string PATH_SEPERATOR;
+  /// lib prefix
+  static const std::string LIB_PREFIX;
+  /// lib postfix
+  static const std::string LIB_POSTFIX;
+  /// path seperator
+  static const std::string PATH_SEPERATOR;
 };
 
 } // namespace Kernel

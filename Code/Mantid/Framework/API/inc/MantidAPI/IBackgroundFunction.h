@@ -6,17 +6,16 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionWithLocation.h"
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 /** An interface to a background function. This interface is just
     a copy of the IFunctionWithLocation interface for now.
 
     @author Anders Markvardsen, ISIS, RAL
     @date 2/11/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -36,13 +35,13 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IBackgroundFunction : public IFunctionWithLocation
-{
+class DLLExport IBackgroundFunction : public IFunctionWithLocation {
 public:
-  ///Fits the function
+  /// Fits the function
   /// @param X :: a vector of x values
   /// @param Y :: a matching vector of Y values
-  virtual void fit(const std::vector<double>& X,const std::vector<double>& Y) = 0;
+  virtual void fit(const std::vector<double> &X,
+                   const std::vector<double> &Y) = 0;
 };
 
 typedef boost::shared_ptr<IBackgroundFunction> IBackgroundFunction_sptr;

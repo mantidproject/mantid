@@ -255,6 +255,8 @@ class HFIRSANSReduction(PythonAlgorithm):
             alg.setProperty("InputWorkspace", output_ws)
             alg.setProperty("OutputWorkspace", iq_output)
             alg.setProperty("ReductionProperties", property_manager_name)
+            if alg.existsProperty("WedgeWorkspace"):
+                alg.setProperty("WedgeWorkspace", iq_output+'_wedges')
             alg.execute()
             if alg.existsProperty("OutputMessage"):
                 output_msg += alg.getProperty("OutputMessage").value+'\n'
@@ -393,9 +395,9 @@ class HFIRSANSReduction(PythonAlgorithm):
             @param property_manager: property manager object
         """
         output_msg = ""
-        # Save I(Q)
-        if iq_output is not None:
-            if AnalysisDataService.doesExist(iq_output):
+                
+        def _save_ws(iq_ws):
+            if AnalysisDataService.doesExist(iq_ws):
                 proc_xml = ""
                 if property_manager.existsProperty("ProcessInfo"):
                     process_file = property_manager.getProperty("ProcessInfo").value
@@ -414,32 +416,39 @@ class HFIRSANSReduction(PythonAlgorithm):
                         proc_xml += "  <Filename>%s</Filename>\n" % filename
                         proc_xml += "</Reduction>\n"
 
-                filename = os.path.join(output_dir, iq_output+'.txt')
+                filename = os.path.join(output_dir, iq_ws+'.txt')
 
                 alg = AlgorithmManager.create("SaveAscii")
                 alg.initialize()
                 alg.setChild(True)
                 alg.setProperty("Filename", filename)
-                alg.setProperty("InputWorkspace", iq_output)
+                alg.setProperty("InputWorkspace", iq_ws)
                 alg.setProperty("Separator", "Tab")
                 alg.setProperty("CommentIndicator", "# ")
                 alg.setProperty("WriteXError", True)
                 alg.setProperty("WriteSpectrumID", False)
                 alg.execute()
 
-                filename = os.path.join(output_dir, iq_output+'.xml')
+                filename = os.path.join(output_dir, iq_ws+'.xml')
                 alg = AlgorithmManager.create("SaveCanSAS1D")
                 alg.initialize()
                 alg.setChild(True)
                 alg.setProperty("Filename", filename)
-                alg.setProperty("InputWorkspace", iq_output)
+                alg.setProperty("InputWorkspace", iq_ws)
                 alg.setProperty("Process", proc_xml)
                 alg.execute()
-
-                output_msg += "I(Q) saved in %s\n" % (filename)
+                return filename
             else:
-                Logger("HFIRSANSReduction").error("No I(Q) output found")
+                Logger("HFIRSANSReduction").error("No I(Q) output found for %s" % iq_ws)
 
+        # Save I(Q), including all wedges
+        ws_list = AnalysisDataService.getObjectNames()
+        for item in ws_list:
+            if iq_output is not None and item.startswith(iq_output) and not item.startswith(iqxy_output):
+                filename = _save_ws(item)
+                if filename is not None:
+                    output_msg += "I(Q) saved in %s\n" % (filename)
+                    
         # Save I(Qx,Qy)
         if iqxy_output is not None:
             if AnalysisDataService.doesExist(iqxy_output):

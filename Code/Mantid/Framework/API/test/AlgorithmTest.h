@@ -223,6 +223,15 @@ public:
     TS_ASSERT_EQUALS(false, alg.isChild());
   }
 
+  void testAlgStartupLogging()
+  {
+    TSM_ASSERT_EQUALS("Default logging should be true", true, alg.getAlgStartupLogging());
+    alg.setAlgStartupLogging(false);
+    TSM_ASSERT_EQUALS("After setting logging should be false", false, alg.getAlgStartupLogging());
+    alg.setAlgStartupLogging(true);
+    TSM_ASSERT_EQUALS("After setting logging it back it should be true", true, alg.getAlgStartupLogging());
+  }
+
   void testInitialize()
   {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());

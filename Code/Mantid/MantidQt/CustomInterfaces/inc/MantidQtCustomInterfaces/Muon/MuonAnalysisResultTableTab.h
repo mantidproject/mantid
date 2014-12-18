@@ -1,4 +1,4 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_MUONANALYSITREESULTTABLETAB_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_MUONANALYSISRESULTTABLETAB_H_
 #define MANTIDQTCUSTOMINTERFACES_MUONANALYSISRESULTTABLETAB_H_
 
 //----------------------
@@ -26,7 +26,7 @@ callbacks from the Plot Options tab.
 
 @author Robert Whitley, ISIS, RAL
 
-Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -151,4 +151,4 @@ private:
 }
 }
 
-#endif //MANTIDQTCUSTOMINTERFACES_MUONANALYSISTESULTTABLETAB_H_
+#endif //MANTIDQTCUSTOMINTERFACES_MUONANALYSISRESULTTABLETAB_H_

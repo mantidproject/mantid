@@ -25,6 +25,8 @@ class PoldiMergeTest(unittest.TestCase):
         self.badTimingOffset = CreateWorkspace(rightDataBadOffset, ydata, OutputWorkspace="BadTimingOffset")
         self.badTimingDelta = CreateWorkspace(rightDataBadDelta, ydata, OutputWorkspace="BadTimingDelta")
 
+        self.groupGood = GroupWorkspaces(["Base", "GoodTiming"], OutputWorkspace="GoodGroup")
+
         goodProperty = 10.0
         badProperty = 20.0
 
@@ -37,10 +39,27 @@ class PoldiMergeTest(unittest.TestCase):
             self.goodTimingBadProperties.getRun().addProperty(p, badProperty, True)
 
     def __runMerge__(self, workspaceNames):
-        return PoldiMerge(WorkspaceNames=workspaceNames, OutputWorkspace="PoldiMergeOutput")
+        return PoldiMerge(WorkspaceNames=workspaceNames, OutputWorkspace="PoldiMergeOutput", CheckInstruments=False)
 
     def test_happyCase(self):
         output = self.__runMerge__("Base,GoodTiming")
+
+        self.assertTrue(isinstance(output, MatrixWorkspace))
+
+        dataX = output.dataX(0)
+        self.assertEqual(dataX[0], 0.0)
+        self.assertEqual(dataX[-1], 3.0)
+        self.assertEqual(len(dataX), 4)
+
+        dataY = output.dataY(0)
+        self.assertEqual(dataY[0], 2.0)
+        self.assertEqual(dataY[1], 2.0)
+        self.assertEqual(len(dataY), 4)
+
+        DeleteWorkspace("PoldiMergeOutput")
+
+    def test_workspaceGroup(self):
+        output = self.__runMerge__("GoodGroup")
 
         self.assertTrue(isinstance(output, MatrixWorkspace))
 

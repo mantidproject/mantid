@@ -19,7 +19,7 @@ class ITableWorkspaceTest(unittest.TestCase):
 
         column_names = self._test_ws.getColumnNames()
         self.assertEquals(len(column_names), 19)
-        self.assertEquals(type(column_names), std_vector_str)
+        self.assertEquals(type(column_names), list)
 
     def test_cell_access_returns_variables_as_native_python_types(self):
         self.assertAlmostEquals(self._test_ws.cell('r_gd_prtn_chrg',0), 10.040912628173828, 15)

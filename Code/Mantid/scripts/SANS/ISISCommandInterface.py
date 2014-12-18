@@ -560,56 +560,56 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
         Fit rear data to FRONTnew(Q) = ( FRONT(Q) + SHIFT )xRESCALE,
         FRONT(Q) is the frontData argument. Returns scale and shift
 
+        Note SHIFT is shift of a constant back, not the Shift parameter in
+        TabulatedFunction.
+
         @param rAnds: A DetectorBank -> _RescaleAndShift structure
         @param frontData: Reduced front data
         @param rearData: Reduced rear data
     """
     if rAnds.fitScale==False and rAnds.fitShift==False:
         return rAnds.scale, rAnds.shift
-    #TODO: we should allow the user to add constraints?
+
     if rAnds.fitScale==False:
         if rAnds.qRangeUserSelected:
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", Ties='f0.Scaling='+str(rAnds.scale),
+                +";name=FlatBackground", 
+                Ties='f0.Scaling='+str(rAnds.scale)+',f0.Shift=0.0',
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
         else:
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", Ties='f0.Scaling='+str(rAnds.scale),
+                +";name=FlatBackground", 
+                Ties='f0.Scaling='+str(rAnds.scale)+',f0.Shift=0.0',
                 Output="__fitRescaleAndShift")
     elif rAnds.fitShift==False:
         if rAnds.qRangeUserSelected:
-            function_input = 'name=TabulatedFunction, Workspace="'+str(frontData)+'"' +";name=FlatBackground"
-            ties = 'f1.A0='+str(rAnds.shift*rAnds.scale)
-            logger.warning('function input ' + str(function_input))
-
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", Ties='f1.A0='+str(rAnds.shift*rAnds.scale),
+                +";name=FlatBackground", 
+                Ties='f1.A0='+str(rAnds.shift*rAnds.scale)+',f0.Shift=0.0',
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
         else:
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", Ties='f1.A0='+str(rAnds.shift*rAnds.scale),
+                +";name=FlatBackground", 
+                Ties='f1.A0='+str(rAnds.shift*rAnds.scale)+',f0.Shift=0.0',
                 Output="__fitRescaleAndShift")
     else:
         if rAnds.qRangeUserSelected:
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground",
+                +";name=FlatBackground", Ties=',f0.Shift=0.0',
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
         else:
             Fit(InputWorkspace=rearData, Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground",Output="__fitRescaleAndShift")
+                +";name=FlatBackground", Ties=',f0.Shift=0.0', Output="__fitRescaleAndShift")
 
     param = mtd['__fitRescaleAndShift_Parameters']
 
-    row1 = param.row(0).items()
-    row2 = param.row(1).items()
-    row3 = param.row(2).items()
-    scale = row1[1][1]
-    chiSquared = row3[1][1]
+    scale = param.row(0).items()[1][1]
+    chiSquared = param.row(3).items()[1][1]
 
     fitSuccess = True
     if not chiSquared > 0:
@@ -622,7 +622,7 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     if fitSuccess == False:
         return rAnds.scale, rAnds.shift
 
-    shift = row2[1][1] / scale
+    shift =  param.row(2).items()[1][1] / scale
 
     delete_workspaces('__fitRescaleAndShift_Parameters')
     delete_workspaces('__fitRescaleAndShift_NormalisedCovarianceMatrix')

@@ -1,65 +1,65 @@
 #ifndef MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_
 #define MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_
-    
-#include "MantidAPI/Algorithm.h" 
+
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidAPI/CompositeFunction.h"
 
-namespace Mantid
-{
-namespace MDAlgorithms
-{
+namespace Mantid {
+namespace MDAlgorithms {
 
-  /** Integrate single-crystal peaks in reciprocal-space.
-   * 
-   * @author Janik Zikovsky
-   * @date 2011-04-13 18:11:53.496539
-   */
-  class DLLExport IntegratePeaksMD2  : public API::Algorithm
-  {
-  public:
-    IntegratePeaksMD2();
-    ~IntegratePeaksMD2();
-    
-    /// Algorithm's name for identification 
-    virtual const std::string name() const { return "IntegratePeaksMD";};
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Integrate single-crystal peaks in reciprocal space, for MDEventWorkspaces.";}
+/** Integrate single-crystal peaks in reciprocal-space.
+ *
+ * @author Janik Zikovsky
+ * @date 2011-04-13 18:11:53.496539
+ */
+class DLLExport IntegratePeaksMD2 : public API::Algorithm {
+public:
+  IntegratePeaksMD2();
+  ~IntegratePeaksMD2();
 
-    /// Algorithm's version for identification 
-    virtual int version() const { return 2;};
-    /// Algorithm's category for identification
-    virtual const std::string category() const { return "MDAlgorithms";}
-    
-  private:
-    /// Initialise the properties
-    void init();
-    /// Run the algorithm
-    void exec();
+  /// Algorithm's name for identification
+  virtual const std::string name() const { return "IntegratePeaksMD"; };
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Integrate single-crystal peaks in reciprocal space, for "
+           "MDEventWorkspaces.";
+  }
 
-    template<typename MDE, size_t nd>
-    void integrate(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  /// Algorithm's version for identification
+  virtual int version() const { return 2; };
+  /// Algorithm's category for identification
+  virtual const std::string category() const { return "MDAlgorithms"; }
 
-    /// Input MDEventWorkspace
-    Mantid::API::IMDEventWorkspace_sptr inWS;
+private:
+  /// Initialise the properties
+  void init();
+  /// Run the algorithm
+  void exec();
 
-    /// Calculate if this Q is on a detector
-    bool detectorQ(Mantid::Kernel::V3D QLabFrame, double PeakRadius);
+  template <typename MDE, size_t nd>
+  void integrate(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
-    /// Instrument reference
-    Geometry::Instrument_const_sptr inst;
+  /// Input MDEventWorkspace
+  Mantid::API::IMDEventWorkspace_sptr inWS;
 
-    /// Check if peaks overlap
-    void checkOverlap(int i,
-    		Mantid::DataObjects::PeaksWorkspace_sptr peakWS, int CoordinatesToUse, double radius);
+  /// Calculate if this Q is on a detector
+  bool detectorQ(Mantid::Kernel::V3D QLabFrame, double PeakRadius);
+  void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
+                        std::string property, std::string values);
 
-  };
+  /// Instrument reference
+  Geometry::Instrument_const_sptr inst;
 
+  /// Check if peaks overlap
+  void checkOverlap(int i, Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
+                    int CoordinatesToUse, double radius);
+};
 
 } // namespace Mantid
 } // namespace MDEvents
 
-#endif  /* MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_ */
+#endif /* MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_ */

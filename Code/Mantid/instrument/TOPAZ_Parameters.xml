@@ -2,12 +2,10 @@
 <parameter-file instrument = "TOPAZ" valid-from = "2012-08-23T00:00:01">
 
 <component-link name = "TOPAZ">
-
 <!-- Specify that any banks not in NeXus file are to be removed -->
 <parameter name="remove-unused-banks">
-  <value val="1"/>
+ <value val="0"/>
 </parameter>
-
 </component-link>
 
 </parameter-file>

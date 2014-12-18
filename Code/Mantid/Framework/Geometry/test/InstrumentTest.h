@@ -45,7 +45,7 @@ public:
     instrument.markAsMonitor(det3);
 
     //instrument.setDefaultViewAxis("X-");
-    instrument.getLogfileCache().insert(std::make_pair(std::make_pair("apple",det3),boost::shared_ptr<XMLlogfile>()));
+    instrument.getLogfileCache().insert(std::make_pair(std::make_pair("apple",det3),boost::shared_ptr<XMLInstrumentParameter>()));
     instrument.getLogfileUnit()["banana"] = "yellow";
   }
 

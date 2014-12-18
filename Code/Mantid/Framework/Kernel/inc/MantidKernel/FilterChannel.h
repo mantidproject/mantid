@@ -9,7 +9,8 @@
 //
 // Definition of the FilterChannel class. A small extension to the POCO logging.
 //
-// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+// National Laboratory & European Spallation Source
 //
 // This file is part of Mantid.
 //
@@ -26,9 +27,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-//File change history is stored at: <https://github.com/mantidproject/mantid>
+// File change history is stored at: <https://github.com/mantidproject/mantid>
 //
-
 
 #ifndef Foundation_FilterChannel_INCLUDED
 #define Foundation_FilterChannel_INCLUDED
@@ -40,55 +40,51 @@
 #include <Poco/Mutex.h>
 #include <vector>
 
-
 namespace Poco {
 
 /// This channel sends a message to multiple
 /// channels simultaneously.
-class MANTID_KERNEL_DLL FilterChannel: public Channel
+class MANTID_KERNEL_DLL FilterChannel : public Channel
 
-{
+                                        {
 public:
-	/// Creates the SplitterChannel.
-	FilterChannel();
+  /// Creates the SplitterChannel.
+  FilterChannel();
 
-  ///destructor
-	~FilterChannel();
+  /// destructor
+  ~FilterChannel();
 
-	/// Attaches a channel, which may not be null.
-	void addChannel(Channel* pChannel);
+  /// Attaches a channel, which may not be null.
+  void addChannel(Channel *pChannel);
 
-	/// Returns the channel pointer.
-  Channel* getChannel() {return _channel;}
+  /// Returns the channel pointer.
+  Channel *getChannel() { return _channel; }
 
-	/// Attaches a channel, which may not be null.
-  const FilterChannel& setPriority(const std::string& priority);
+  /// Attaches a channel, which may not be null.
+  const FilterChannel &setPriority(const std::string &priority);
 
   /// Returns the integer representation of the priority
   unsigned int getPriority() const { return _priority; }
-		
-	/// Sends the given Message to the attached channel. 
-	void log(const Message& msg);
+
+  /// Sends the given Message to the attached channel.
+  void log(const Message &msg);
 
   /// Sets or changes a configuration property.
-	void setProperty(const std::string& name, const std::string& value);
+  void setProperty(const std::string &name, const std::string &value);
 
   /// Removes all channels.
-	void close();
-		
-protected:
+  void close();
 
+protected:
 private:
-  ///private pointer to the channel to pass messages onto
-	Channel*        _channel;
-  ///The priority used to filter messages
+  /// private pointer to the channel to pass messages onto
+  Channel *_channel;
+  /// The priority used to filter messages
   int _priority;
-  ///A mutex lock to prevent race conditions
-	mutable FastMutex _mutex;
+  /// A mutex lock to prevent race conditions
+  mutable FastMutex _mutex;
 };
 
-
 } // namespace Poco
-
 
 #endif // Foundation_FilterChannel_INCLUDED

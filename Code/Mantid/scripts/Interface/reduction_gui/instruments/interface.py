@@ -88,7 +88,7 @@ class InstrumentInterface(object):
             populate the UI with them
             @param file_name: XML file to be loaded
         """
-        if self.scripter.check_xml_compatibility(file_name, 'Instrument'):
+        if self.scripter.check_xml_compatibility(file_name, 'mantid_version'):
             self.scripter.from_xml(file_name)
             self.scripter.push_state()
         elif self.scripter.check_xml_compatibility(file_name, 'SetupInfo'):

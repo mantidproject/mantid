@@ -6,16 +6,16 @@
 # project settings should be included in the relevant CMakeLists.txt file
 # for that project.
 
-# Get the GCC version
-EXEC_PROGRAM(${CMAKE_CXX_COMPILER} ARGS --version | cut -d \" \" -f 3 OUTPUT_VARIABLE _compiler_output)
-STRING(REGEX REPLACE ".*([0-9]\\.[0-9]\\.[0-9]).*" "\\1" GCC_COMPILER_VERSION ${_compiler_output})
-MESSAGE(STATUS "gcc version: ${GCC_COMPILER_VERSION}")
-
-# Export the GCC compiler version globally
-set(GCC_COMPILER_VERSION ${GCC_COMPILER_VERSION} CACHE INTERNAL "")
+# Set our own compiler version flag from the cmake one and export it globally
+if ( CMAKE_COMPILER_IS_GNUCXX )
+  set( GCC_COMPILER_VERSION ${CMAKE_CXX_COMPILER_VERSION} CACHE INTERNAL "")
+  message( STATUS "gcc version: ${GCC_COMPILER_VERSION}" )
+elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
+  message( STATUS "clang version ${CMAKE_CXX_COMPILER_VERSION}" )
+endif()
 
 # Global warning flags.
-set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qual -Wcast-align -fno-common" ) 
+set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qual -Wcast-align -fno-common" )
 # Disable some warnings about deprecated headers and type conversions that
 # we can't do anything about
 # -Wno-deprecated: Do not warn about use of deprecated headers.
@@ -24,9 +24,13 @@ set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qua
 set( GNUFLAGS "${GNUFLAGS} -Wno-deprecated -Wno-write-strings")
 
 # Check if we have a new enough version for this flag
-IF (GCC_COMPILER_VERSION VERSION_GREATER "4.3")
-	set(GNUFLAGS "${GNUFLAGS} -Wno-unused-result")
-ENDIF (GCC_COMPILER_VERSION VERSION_GREATER "4.3")
+if ( CMAKE_COMPILER_IS_GNUCXX )
+  if (GCC_COMPILER_VERSION VERSION_GREATER "4.3")
+    set(GNUFLAGS "${GNUFLAGS} -Wno-unused-result")
+  endif ()
+elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
+    set(GNUFLAGS "${GNUFLAGS} -Wno-sign-conversion")
+endif()
 
 # Add some options for debug build to help the Zoom profiler
 set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer" )
@@ -38,4 +42,3 @@ set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GNUFLAGS}" )
 set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GNUFLAGS} -Woverloaded-virtual -fno-operator-names -std=c++0x" )
 # Cleanup
 set ( GNUFLAGS )
-

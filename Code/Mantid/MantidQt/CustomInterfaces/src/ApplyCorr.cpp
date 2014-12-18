@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/ApplyCorr.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/TextAxis.h"
 
 #include <QStringList>
 
@@ -29,16 +30,25 @@ namespace IDA
     connect(uiForm().abscor_ckUseCorrections, SIGNAL(toggled(bool)), uiForm().abscor_dsCorrections, SLOT(setEnabled(bool)));
     connect(uiForm().abscor_ckScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(scaleMultiplierCheck(bool)));
     connect(uiForm().abscor_cbGeometry, SIGNAL(currentIndexChanged(int)), this, SLOT(handleGeometryChange(int)));
-    connect(uiForm().abscor_ckUseCan, SIGNAL(toggled(bool)), uiForm().abscor_ckPlotContrib, SLOT(setEnabled(bool)));
     connect(uiForm().abscor_dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(newData(const QString&)));
+    connect(uiForm().abscor_spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(plotPreview(int)));
 
     // Create a validator for input box of the Scale option.
-    m_valPosDbl = new QDoubleValidator(this);
     const double tolerance = 0.00001; // Tolerance chosen arbitrarily.
     m_valPosDbl->setBottom(tolerance);
 
     // Apply the validator to the input box for the Scale option.
     uiForm().abscor_leScaleMultiplier->setValidator(m_valPosDbl);
+
+    // Create the plot
+    m_plots["ApplyCorrPlot"] = new QwtPlot(m_parentWidget);
+    m_plots["ApplyCorrPlot"]->setCanvasBackground(Qt::white);
+    m_plots["ApplyCorrPlot"]->setAxisFont(QwtPlot::xBottom, m_parentWidget->font());
+    m_plots["ApplyCorrPlot"]->setAxisFont(QwtPlot::yLeft, m_parentWidget->font());
+	  uiForm().abscor_plotPreview->addWidget(m_plots["ApplyCorrPlot"]);
+
+    uiForm().abscor_spPreviewSpec->setMinimum(0);
+    uiForm().abscor_spPreviewSpec->setMaximum(0);
   }
 
   /**
@@ -68,15 +78,14 @@ namespace IDA
    */
   void ApplyCorr::newData(const QString &dataName)
   {
-    bool isSqw = dataName.endsWith("_sqw", Qt::CaseInsensitive);
+    removeCurve("CalcCurve");
+    removeCurve("CanCurve");
+    // removeCurve would usually need a replot() but this is done in plotMiniPlot()
 
-    if(isSqw)
-    {
-      g_log.information("Input data is in S(Q, w), correction file cannot be used");
-      uiForm().abscor_ckUseCorrections->setCheckState(Qt::Unchecked);
-    }
+    plotMiniPlot(dataName, 0, "ApplyCorrPlot", "ApplyCorrSampleCurve");
 
-    uiForm().abscor_ckUseCorrections->setEnabled(!isSqw);
+    MatrixWorkspace_const_sptr sampleWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(dataName.toStdString());
+    uiForm().abscor_spPreviewSpec->setMaximum(static_cast<int>(sampleWs->getNumberHistograms()) - 1);
   }
 
   bool ApplyCorr::validateScaleInput()
@@ -116,31 +125,17 @@ namespace IDA
     QString pyInput = "from IndirectDataAnalysis import abscorFeeder, loadNexus\n";
 
     QString sample = uiForm().abscor_dsSample->getCurrentDataName();
-    MatrixWorkspace_const_sptr sampleWs;
-    if (!Mantid::API::AnalysisDataService::Instance().doesExist(sample.toStdString()) )
-    {
-      sampleWs = runLoadNexus(uiForm().abscor_dsSample->getFullFilePath(), sample);
-    }
-    else
-    {
-      sampleWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(sample.toStdString());
-    }
+    MatrixWorkspace_const_sptr sampleWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(sample.toStdString());
 
     pyInput += "sample = '"+sample+"'\n";
-
+    pyInput += "rebin_can = False\n";
     bool noContainer = false;
-    if ( uiForm().abscor_ckUseCan->isChecked() )
+
+    bool useCan = uiForm().abscor_ckUseCan->isChecked();
+    if(useCan)
     {
       QString container = uiForm().abscor_dsContainer->getCurrentDataName();
-      MatrixWorkspace_const_sptr canWs;
-      if ( !Mantid::API::AnalysisDataService::Instance().doesExist(container.toStdString()) )
-      {
-        canWs = runLoadNexus(uiForm().abscor_dsContainer->getFullFilePath(), container);
-      }
-      else
-      {
-        canWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(container.toStdString());
-      }
+      MatrixWorkspace_const_sptr canWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(container.toStdString());
 
       if (!checkWorkspaceBinningMatches(sampleWs, canWs))
       {
@@ -153,10 +148,6 @@ namespace IDA
           //user clicked cancel and didn't want to rebin, so just do nothing.
           return;
         }
-      }
-      else
-      {
-        pyInput += "rebin_can = False\n";
       }
 
       pyInput += "container = '" + container + "'\n";
@@ -192,7 +183,7 @@ namespace IDA
       // if we have no container and no corrections then abort
       if(noContainer)
       {
-        showInformationBox("Apply Corrections requires either a can file or a corrections file.");
+        showMessageBox("Apply Corrections requires either a can file or a corrections file.");
         return;
       }
     }
@@ -233,31 +224,52 @@ namespace IDA
     }
     
     pyInput += "plotResult = '" + plotResult + "'\n";
-        
-    if ( uiForm().abscor_ckPlotContrib->isChecked() ) pyInput += "plotContrib = True\n";
-    else pyInput += "plotContrib = False\n";
-
-    pyInput += "abscorFeeder(sample, container, geom, useCor, corrections, Verbose=verbose, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult, PlotContrib=plotContrib)\n";
+    pyInput += "print abscorFeeder(sample, container, geom, useCor, corrections, Verbose=verbose, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
+
+    outputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(pyOutput.toStdString());
+    plotPreview(uiForm().abscor_spPreviewSpec->value());
+
+    // Set the result workspace for Python script export
+    m_pythonExportWsName = pyOutput.toStdString();
   }
 
   /**
-  * Ask the user is they wish to rebin the can to the sample.
-  * @return whether a rebin of the can workspace is required.
-  */
+   * Ask the user is they wish to rebin the can to the sample.
+   * @return whether a rebin of the can workspace is required.
+   */
   bool ApplyCorr::requireCanRebin()
   {
     QString message = "The sample and can energy ranges do not match, this is not recommended."
         "\n\n Click OK to rebin the can to match the sample and continue or Cancel to abort applying corrections.";
-    QMessageBox::StandardButton reply = QMessageBox::warning(this, "Energy Ranges Do Not Match", 
+    QMessageBox::StandardButton reply = QMessageBox::warning(m_parentWidget, "Energy Ranges Do Not Match", 
                                                              message, QMessageBox::Ok|QMessageBox::Cancel);
     return (reply == QMessageBox::Ok);
   }
 
-  QString ApplyCorr::validate()
+  bool ApplyCorr::validate()
   {
-    return "";
+    bool useCan = uiForm().abscor_ckUseCan->isChecked();
+
+    if(useCan)
+    {
+      QString sample = uiForm().abscor_dsSample->getCurrentDataName();
+      QString sampleType = sample.right(sample.length() - sample.lastIndexOf("_"));
+      QString container = uiForm().abscor_dsContainer->getCurrentDataName();
+      QString containerType = container.right(container.length() - container.lastIndexOf("_"));
+
+      g_log.debug() << "Sample type is: " << sampleType.toStdString() << std::endl;
+      g_log.debug() << "Container type is: " << containerType.toStdString() << std::endl;
+
+      if(containerType != sampleType)
+      {
+        g_log.error("Must use the same type of files for sample and container inputs.");
+        return false;
+      }
+    }
+
+    return true;
   }
 
   void ApplyCorr::loadSettings(const QSettings & settings)
@@ -279,18 +291,57 @@ namespace IDA
     {
       case 0:
         // Geomtry is flat
-        ext = "_flt_Abs";
+        ext = "_flt_abs";
         uiForm().abscor_dsCorrections->setWSSuffixes(QStringList(ext));
         uiForm().abscor_dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));
         break;
       case 1:
         // Geomtry is cylinder
-        ext = "_cyl_Abs";
+        ext = "_cyl_abs";
         uiForm().abscor_dsCorrections->setWSSuffixes(QStringList(ext));
         uiForm().abscor_dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));
         break;
     }
   }
+  
+  /**
+   * Replots the preview plot.
+   *
+   * @param specIndex Spectrum index to plot
+   */
+  void ApplyCorr::plotPreview(int specIndex)
+  {
+    bool useCan = uiForm().abscor_ckUseCan->isChecked();
+
+    // Plot sample
+    QString sample = uiForm().abscor_dsSample->getCurrentDataName();
+    if(AnalysisDataService::Instance().doesExist(sample.toStdString()))
+    {
+      MatrixWorkspace_const_sptr sampleWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(sample.toStdString());
+      plotMiniPlot(sampleWs, specIndex, "ApplyCorrPlot", "ApplyCorrSampleCurve");
+    }
+
+    // Plot result
+    if(outputWs)
+    {
+      plotMiniPlot(outputWs, specIndex, "ApplyCorrPlot", "CalcCurve");
+      m_curves["CalcCurve"]->setPen(QColor(Qt::green));
+    }
+
+    // Plot can
+    if(useCan)
+    {
+      QString container = uiForm().abscor_dsContainer->getCurrentDataName();
+      MatrixWorkspace_const_sptr canWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(container.toStdString());
+      plotMiniPlot(canWs, specIndex, "ApplyCorrPlot", "CanCurve");
+      m_curves["CanCurve"]->setPen(QColor(Qt::red));
+    }
+    else
+      removeCurve("CanCurve");
+
+    replot("ApplyCorrPlot");
+  }
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -162,4 +162,8 @@ Desktop.ini
 # Mac OS X Finder
 .DS_Store
 
+# Ctags index files
+.tags
+.tags_sorted_by_file
+
 Code/Mantid/Vates/VatesSimpleGui/ViewWidgets/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h

@@ -64,7 +64,7 @@ const QString DELETABLEENTRY = "deletable";
      This class should be constructed just once, and as so, the copy constructor and the assignment 
      will be make private to ensure this. 
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

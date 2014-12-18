@@ -62,4 +62,35 @@ spectrum.
 In both cases, the :ref:`algm-Divide` algorithm is used to perform the
 normalisation.
 
+Usage
+-----
+.. include:: ../usagedata-note.txt
+
+**Example - Normalise to Monitor ID=1**
+
+.. testcode:: exNormaliseToMonitorSimple
+
+   ws =Load('IRS26173.raw')
+
+   wsN = NormaliseToMonitor( ws, MonitorID=1 )
+
+   print "Without normalisation"
+   print "Monitor ID=1 %.3f, %.3f" % ( ws.readY(0)[0], ws.readY(0)[1] )
+   print "Selected data %.6f, %.6f" % ( ws.readY(6)[0], ws.readY(3)[1] )
+
+   print "With Normalisation"
+   print "Monitor ID=1 %.3f, %.3f" % ( wsN.readY(0)[0], wsN.readY(0)[1] )
+   print "Selected data %.6f, %.6f" % ( wsN.readY(6)[0], wsN.readY(3)[1] )
+
+Output:
+
+.. testoutput:: exNormaliseToMonitorSimple
+
+   Without normalisation
+   Monitor ID=1 626034.000, 626681.000 
+   Selected data 2.000000, 1.000000
+   With Normalisation
+   Monitor ID=1 464872.441, 464872.441 
+   Selected data 1.485135, 0.741801
+
 .. categories::

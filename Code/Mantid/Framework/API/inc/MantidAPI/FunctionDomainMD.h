@@ -7,16 +7,15 @@
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/IMDWorkspace.h"
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 /** Implements a domain for MD functions (IFunctionMD).
 
     @author Roman Tolchenov, Tessella plc
     @date 15/11/2011
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -36,29 +35,29 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL FunctionDomainMD: public FunctionDomain
-{
+class MANTID_API_DLL FunctionDomainMD : public FunctionDomain {
 public:
   /// Constructor.
-  FunctionDomainMD(IMDWorkspace_const_sptr ws, size_t start = 0, size_t length = 0);
+  FunctionDomainMD(IMDWorkspace_const_sptr ws, size_t start = 0,
+                   size_t length = 0);
   /// Destructor.
   ~FunctionDomainMD();
   /// Return the number of arguments in the domain
-  virtual size_t size() const  {return m_size;}
+  virtual size_t size() const { return m_size; }
   /// Reset the iterator to point to the start of the domain.
   virtual void reset() const;
   /// Next iterator.
-  const IMDIterator* getNextIterator() const;
+  const IMDIterator *getNextIterator() const;
   /// Returns the pointer to the original workspace
   IMDWorkspace_const_sptr getWorkspace() const;
 
 protected:
   /// IMDIterator
-  mutable IMDIterator* m_iterator;
+  mutable IMDIterator *m_iterator;
   /// start of the domain, 0 <= m_startIndex < m_iterator->getDataSize()
   const size_t m_startIndex;
   /// track the iterator's index, 0 <= m_currentIndex < m_size.
-  mutable size_t m_currentIndex; 
+  mutable size_t m_currentIndex;
   /// The size of the domain
   size_t m_size;
   /// Just reset flag

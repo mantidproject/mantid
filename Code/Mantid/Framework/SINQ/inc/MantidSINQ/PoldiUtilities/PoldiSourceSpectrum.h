@@ -42,29 +42,30 @@ namespace Poldi {
 
 class MANTID_SINQ_DLL PoldiSourceSpectrum {
 public:
-    PoldiSourceSpectrum(Kernel::Interpolation spectrum);
-    PoldiSourceSpectrum(Geometry::Instrument_const_sptr poldiInstrument);
+  PoldiSourceSpectrum(Kernel::Interpolation spectrum);
+  PoldiSourceSpectrum(Geometry::Instrument_const_sptr poldiInstrument);
 
-    ~PoldiSourceSpectrum() { }
+  ~PoldiSourceSpectrum() {}
 
-    double intensity(double wavelength) const;
+  double intensity(double wavelength) const;
 
 protected:
-    void setSpectrumFromInstrument(Geometry::Instrument_const_sptr poldiInstrument);
-    Geometry::IComponent_const_sptr getSourceComponent(Geometry::Instrument_const_sptr poldiInstrument);
-    Geometry::Parameter_sptr getSpectrumParameter(Geometry::IComponent_const_sptr source,
-                                                  Geometry::ParameterMap_sptr instrumentParameterMap);
-    void setSpectrum(Geometry::Parameter_sptr spectrumParameter);
+  void
+  setSpectrumFromInstrument(Geometry::Instrument_const_sptr poldiInstrument);
+  Geometry::IComponent_const_sptr
+  getSourceComponent(Geometry::Instrument_const_sptr poldiInstrument);
+  Geometry::Parameter_sptr
+  getSpectrumParameter(Geometry::IComponent_const_sptr source,
+                       Geometry::ParameterMap_sptr instrumentParameterMap);
+  void setSpectrum(Geometry::Parameter_sptr spectrumParameter);
 
-    Kernel::Interpolation m_spectrum;
+  Kernel::Interpolation m_spectrum;
 };
 
 typedef boost::shared_ptr<PoldiSourceSpectrum> PoldiSourceSpectrum_sptr;
-typedef boost::shared_ptr<const PoldiSourceSpectrum> PoldiSourceSpectrum_const_sptr;
-
-
+typedef boost::shared_ptr<const PoldiSourceSpectrum>
+    PoldiSourceSpectrum_const_sptr;
 }
 }
-
 
 #endif // MANTID_SINQ_POLDISOURCESPECTRUM_H

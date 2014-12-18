@@ -1,4 +1,4 @@
-#ifndef @MULTIPLYDIVIDETEST_CLASS@_H
+#ifndef @MULTIPLYDIVIDETEST_CLASS@_H_
 #define @MULTIPLYDIVIDETEST_CLASS@_H_
 
 #include <cxxtest/TestSuite.h>
@@ -980,4 +980,4 @@ public:
 };
 
 
-#endif /*MULTIPLYTEST_H_ or DIVIDETEST_H*/
+#endif /*MULTIPLYTEST_H_ or DIVIDETEST_H_*/

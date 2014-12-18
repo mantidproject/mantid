@@ -95,7 +95,14 @@ class V3DTest(unittest.TestCase):
         self.assertAlmostEquals(math.acos(1.0/math.sqrt(3.0)) * 180 / math.pi, angles.Y())
         self.assertAlmostEquals(math.acos(1.0/math.sqrt(3.0)) * 180 / math.pi, angles.Z())
 
+    def test_hash(self):
+        v1 = V3D(1, 1, 1)
+        v2 = V3D(1, 1, 1)
+        v3 = V3D(1, 0, 0)
 
+        a = set([v1, v2, v3])
+
+        self.assertEquals(len(a), 2)
 
 
 if __name__ == '__main__':

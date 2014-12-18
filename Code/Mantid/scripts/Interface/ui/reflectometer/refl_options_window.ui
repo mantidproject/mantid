@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>330</width>
-    <height>179</height>
+    <height>194</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,21 +47,28 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="0" colspan="2">
+   <item row="2" column="0" colspan="2">
     <widget class="QCheckBox" name="checkAlg">
      <property name="text">
       <string>Use ReflectometryReductionOneAuto Algorithm</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="0" colspan="2">
+   <item row="3" column="0" colspan="2">
     <widget class="QCheckBox" name="checkICATDownload">
      <property name="text">
       <string>Download Files Using ICAT</string>
      </property>
     </widget>
    </item>
-   <item row="6" column="0" colspan="2">
+   <item row="4" column="0" colspan="2">
+    <widget class="QCheckBox" name="checkGroupTOFWorkspaces">
+     <property name="text">
+      <string>Group TOF Workspaces</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0" colspan="2">
     <widget class="QDialogButtonBox" name="buttonsLive">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>

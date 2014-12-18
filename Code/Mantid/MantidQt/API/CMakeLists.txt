@@ -3,6 +3,7 @@ set ( SRC_FILES
   src/AlgorithmInputHistory.cpp
   src/AlgorithmPropertiesWidget.cpp
   src/AlgorithmRunner.cpp
+  src/BatchAlgorithmRunner.cpp
   src/BoolPropertyWidget.cpp
   src/FilePropertyWidget.cpp
   src/GenericDialog.cpp
@@ -40,6 +41,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/AlgorithmDialog.h 
   inc/MantidQtAPI/AlgorithmRunner.h 
   inc/MantidQtAPI/AlgorithmPropertiesWidget.h
+  inc/MantidQtAPI/BatchAlgorithmRunner.h 
   inc/MantidQtAPI/BoolPropertyWidget.h
   inc/MantidQtAPI/FilePropertyWidget.h
   inc/MantidQtAPI/GenericDialog.h
@@ -67,6 +69,7 @@ set ( INC_FILES
   ${MOC_FILES}
   inc/MantidQtAPI/AlgorithmInputHistory.h
   inc/MantidQtAPI/AlgorithmRunner.h
+  inc/MantidQtAPI/BatchAlgorithmRunner.h
   inc/MantidQtAPI/DllOption.h
   inc/MantidQtAPI/FileDialogHandler.h
   inc/MantidQtAPI/GraphOptions.h
@@ -92,6 +95,7 @@ set ( UI_FILES
 )
 
 set( TEST_FILES
+   BatchAlgorithmRunnerTest.h
    InterfaceManagerTest.h
    MantidColorMapTest.h
    PlotAxisTest.h

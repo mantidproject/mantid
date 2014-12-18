@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
             name="POLDI"
             valid-from="2013-01-01 00:00:00"
             last-modified="2013-01-01 00:00:00">

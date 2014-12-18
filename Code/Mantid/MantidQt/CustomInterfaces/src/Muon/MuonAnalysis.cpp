@@ -12,7 +12,6 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Exception.h"

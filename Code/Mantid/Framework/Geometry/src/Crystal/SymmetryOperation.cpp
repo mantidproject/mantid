@@ -1,219 +1,233 @@
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
+#include "MantidGeometry/Crystal/SymmetryOperationSymbolParser.h"
+#include <boost/make_shared.hpp>
 
-namespace Mantid
-{
-namespace Geometry
-{
+#include <boost/algorithm/string.hpp>
+
+namespace Mantid {
+namespace Geometry {
+
+/// Default constructor, results in identity.
+SymmetryOperation::SymmetryOperation()
+    : m_order(1), m_matrix(Kernel::IntMatrix(3, 3, true)), m_vector(),
+      m_identifier() {
+  m_identifier = SymmetryOperationSymbolParser::getNormalizedIdentifier(
+      m_matrix, m_vector);
+}
 
 /**
- * The constructor of SymmetryOperation
+ * Construct a symmetry operation from a Jones faithful representation
  *
- * Since the SymmetryOperation base-class is not intended to be used directly, the
- * only constructor is protected. This way, it can be called by the inheriting classes
- * with the correct parameters, but no "anonymous" symmetry operation is possible.
+ * This method invokes SymmetryOperationSymbolParser and tries to parse the
+ *supplied string.
+ * Please not that parsing this string is not very efficient. If you have to
+ *create the same
+ * operations very often, use SymmetryOperationFactory, which works with the
+ *copy constructor
+ * - it's orders of magnitude faster.
  *
- * Three parameters are required. The "order", as described in the header file specifies
- * how often the operation has to be applied to an object in sequence until it is
- * identical with itself. The matrix-parameter is the transformation matrix that
- * represents the operation and identifier is a string that follows a certain convention,
- * also described in the header file. It must match the following regular expression:
- *
- *      ^-?((1)|((2|3|4|6|m) \\[(-?\\d{1}){3}\\]h?))$
- *
- * @param order :: Order of the symmetry operation.
- * @param matrix :: Integer matrix with dimensions 3x3, defines symmetry operation.
- * @param identifier :: Identifier string for symmetry operation.
+ * @param identifier :: Jones faithful representation of a symmetry operation
  */
-SymmetryOperation::SymmetryOperation(size_t order, Kernel::IntMatrix matrix, std::string identifier) :
-    m_order(order),
-    m_matrix(matrix),
-    m_identifier(identifier)
-{
+SymmetryOperation::SymmetryOperation(const std::string &identifier) {
+  const std::pair<Kernel::IntMatrix, V3R> parsedSymbol =
+      SymmetryOperationSymbolParser::parseIdentifier(identifier);
+  init(parsedSymbol.first, parsedSymbol.second);
 }
+
+/// Constructs a symmetry operation from a matrix component and a vector,
+/// derives order and identifier from matrix and vector.
+SymmetryOperation::SymmetryOperation(const Kernel::IntMatrix &matrix,
+                                     const V3R &vector) {
+  init(matrix, vector);
+}
+
+/// Copy-constructor
+SymmetryOperation::SymmetryOperation(const SymmetryOperation &other)
+    : m_order(other.m_order), m_matrix(other.m_matrix),
+      m_vector(other.m_vector), m_identifier(other.m_identifier) {}
+
+/// Assignment operator
+SymmetryOperation &SymmetryOperation::
+operator=(const SymmetryOperation &other) {
+  m_order = other.m_order;
+  m_matrix = other.m_matrix;
+  m_vector = other.m_vector;
+  m_identifier = other.m_identifier;
+
+  return *this;
+}
+
+/// Initialize from matrix and vector.
+void SymmetryOperation::init(const Kernel::IntMatrix &matrix,
+                             const V3R &vector) {
+  m_matrix = matrix;
+  m_vector = getWrappedVector(vector);
+
+  m_order = getOrderFromMatrix(m_matrix);
+  m_identifier = SymmetryOperationSymbolParser::getNormalizedIdentifier(
+      m_matrix, m_vector);
+}
+
+/// Returns a const reference to the internally stored matrix
+const Kernel::IntMatrix &SymmetryOperation::matrix() const { return m_matrix; }
+
+/// Returns a const reference to the internall stored vector
+const V3R &SymmetryOperation::vector() const { return m_vector; }
 
 /**
  * Returns the order of the symmetry operation
  *
  * @return Order of the symmetry operation
  */
-size_t SymmetryOperation::order() const
-{
-    return m_order;
-}
+size_t SymmetryOperation::order() const { return m_order; }
 
 /**
  * Returns the string-identifier for this symmetry operation
  *
  * @return Identifier of the symmetry operation
  */
-std::string SymmetryOperation::identifier() const
-{
-    return m_identifier;
+std::string SymmetryOperation::identifier() const { return m_identifier; }
+
+/// Returns true if this is the identity operation.
+bool SymmetryOperation::isIdentity() const {
+  return !hasTranslation() && m_matrix == Kernel::IntMatrix(3, 3, true);
+}
+
+/// Returns true if the operation has a translational component.
+bool SymmetryOperation::hasTranslation() const { return m_vector != 0; }
+
+/**
+ * Multiplication operator for combining symmetry operations
+ *
+ * This operator constructs from S1 (this) and S2 (other) a new symmetry
+ *operation SymOp' with
+ *
+ *      SymOp'(M', v')
+ *
+ * where
+ *      M' = M1 * M2
+ *
+ * and
+ *      v' = (M1 * v2) + v1
+ *
+ * and the components of v' are on the interval (0, 1].
+ *
+ * @param operand
+ * @return
+ */
+SymmetryOperation SymmetryOperation::
+operator*(const SymmetryOperation &operand) const {
+  return SymmetryOperation(
+      m_matrix * operand.m_matrix,
+      getWrappedVector((m_matrix * operand.m_vector) + m_vector));
+}
+
+/// Returns the inverse of the symmetry operation.
+SymmetryOperation SymmetryOperation::inverse() const {
+  Kernel::IntMatrix matrix(m_matrix);
+  matrix.Invert();
+
+  return SymmetryOperation(matrix, -(matrix * m_vector));
+}
+
+/// Returns true if matrix and vector are equal
+bool SymmetryOperation::operator==(const SymmetryOperation &other) const {
+  return m_matrix == other.m_matrix && m_vector == other.m_vector;
+}
+
+/// Returns true if SymmetryOperation is "smaller" than other, determined by
+/// using the identifier strings.
+bool SymmetryOperation::operator<(const SymmetryOperation &other) const {
+  return m_identifier < other.m_identifier;
+}
+
+/// Returns true if operatios are not equal
+bool SymmetryOperation::operator!=(const SymmetryOperation &other) const {
+  return !(this->operator==(other));
+}
+
+/// Returns the order of the symmetry operation based on the matrix. From
+/// "Introduction to Crystal Growth and Characterization, Benz and Neumann,
+/// Wiley, 2014, p. 51."
+size_t
+SymmetryOperation::getOrderFromMatrix(const Kernel::IntMatrix &matrix) const {
+  int trace = matrix.Trace();
+  int determinant = matrix.determinant();
+
+  if (determinant == 1) {
+    switch (trace) {
+    case 3:
+      return 1;
+    case 2:
+      return 6;
+    case 1:
+      return 4;
+    case 0:
+      return 3;
+    case -1:
+      return 2;
+    default:
+      break;
+    }
+  } else if (determinant == -1) {
+    switch (trace) {
+    case -3:
+      return 2;
+    case -2:
+      return 6;
+    case -1:
+      return 4;
+    case 0:
+      return 6;
+    case 1:
+      return 2;
+    default:
+      break;
+    }
+  }
+
+  throw std::runtime_error("There is something wrong with supplied matrix.");
 }
 
 /**
- * Takes a flat int-array and assigns its 9 elements to the internal matrix.
+ * Wraps a V3R to the interval (0, 1]
  *
- * @param array :: int-array containing the transformation matrix.
+ * For certain crystallographic calculations it is necessary to constrain
+ *fractional
+ * coordinates to the unit cell, for example to generate all atomic positions
+ * in the cell. In this context, the fractional coordinate -0.45 is equal to
+ * "0.55 of the next cell", so it's transformed to 0.55.
+ *
+ * @param vector :: Input vector with arbitrary numbers.
+ * @return Vector with components on the interval (0, 1]
  */
-void SymmetryOperation::setMatrixFromArray(int array[])
-{
-    for(size_t row = 0; row < 3; ++row) {
-        for(size_t col = 0; col < 3; ++col) {
-            m_matrix[row][col] = array[row * 3 + col];
-        }
+V3R getWrappedVector(const V3R &vector) {
+  V3R wrappedVector(vector);
+  for (size_t i = 0; i < 3; ++i) {
+    if (wrappedVector[i] < 0) {
+      wrappedVector[i] +=
+          (abs(vector[i].numerator() / vector[i].denominator()) + 1);
+    } else if (wrappedVector[i] >= 1) {
+      wrappedVector[i] -= (vector[i].numerator() / vector[i].denominator());
     }
+  }
+
+  return wrappedVector;
 }
 
-/// Identity
-SymOpIdentity::SymOpIdentity() :
-    SymmetryOperation(1, Kernel::IntMatrix(3, 3, true), "1")
-{
+/// Returns a V3D with components on the interval (0, 1], as the version for
+/// V3R.
+Kernel::V3D getWrappedVector(const Kernel::V3D &vector) {
+  Kernel::V3D wrappedVector(vector);
+  for (size_t i = 0; i < 3; ++i) {
+    if (wrappedVector[i] < 0) {
+      wrappedVector[i] = fmod(vector[i], 1.0) + 1.0;
+    } else if (wrappedVector[i] >= 1) {
+      wrappedVector[i] = fmod(vector[i], 1.0);
+    }
+  }
 
-}
-
-/// Inversion
-SymOpInversion::SymOpInversion() :
-    SymmetryOperation(2, Kernel::IntMatrix(3, 3, true), "-1")
-{
-    m_matrix *= -1;
-}
-
-/* 2-fold rotation axes */
-/// 2-fold rotation around x-axis
-SymOpRotationTwoFoldX::SymOpRotationTwoFoldX() :
-    SymmetryOperation(2, Kernel::IntMatrix(3, 3), "2 [100]")
-{
-    int rotTwoFoldX[] = {1,  0,  0,
-                         0, -1,  0,
-                         0,  0, -1};
-
-    setMatrixFromArray(rotTwoFoldX);
-}
-
-/// 2-fold rotation around y-axis
-SymOpRotationTwoFoldY::SymOpRotationTwoFoldY() :
-    SymmetryOperation(2, Kernel::IntMatrix(3, 3), "2 [010]")
-{
-    int rotTwoFoldY[] = {-1,  0,  0,
-                          0,  1,  0,
-                          0,  0, -1};
-
-    setMatrixFromArray(rotTwoFoldY);
-}
-
-/// 2-fold rotation around z-axis
-SymOpRotationTwoFoldZ::SymOpRotationTwoFoldZ() :
-    SymmetryOperation(2, Kernel::IntMatrix(3, 3), "2 [001]")
-{
-    int rotTwoFoldZ[] = {-1,  0,  0,
-                          0, -1,  0,
-                          0,  0,  1};
-
-    setMatrixFromArray(rotTwoFoldZ);
-}
-
-/// 2-fold rotation around x-axis, hexagonal coordinate system
-SymOpRotationTwoFoldXHexagonal::SymOpRotationTwoFoldXHexagonal() :
-    SymmetryOperation(2, Kernel::IntMatrix(3, 3), "2 [100]h")
-{
-    int rotTwoFoldXHexagonal[] = {1, -1,  0,
-                                  0, -1,  0,
-                                  0,  0, -1};
-
-    setMatrixFromArray(rotTwoFoldXHexagonal);
-}
-
-/// 2-fold rotation around [210]-axis, hexagonal coordinate system
-SymOpRotationTwoFold210Hexagonal::SymOpRotationTwoFold210Hexagonal() :
-    SymmetryOperation(2, Kernel::IntMatrix(3, 3), "2 [210]h")
-{
-    int rotTwoFold210Hexagonal[] = { 1,  0,  0,
-                                     1, -1,  0,
-                                     0,  0, -1};
-
-    setMatrixFromArray(rotTwoFold210Hexagonal);
-}
-
-/* 4-fold rotation axes */
-/// 4-fold rotation around z-axis
-SymOpRotationFourFoldZ::SymOpRotationFourFoldZ() :
-    SymmetryOperation(4, Kernel::IntMatrix(3, 3), "4 [001]")
-{
-    int rotFourFoldZ[] = { 0, -1,  0,
-                           1,  0,  0,
-                           0,  0,  1};
-
-    setMatrixFromArray(rotFourFoldZ);
-}
-
-/* 3-fold rotation axes */
-/// 3-fold rotation around z-axis, hexagonal coordinate system
-SymOpRotationThreeFoldZHexagonal::SymOpRotationThreeFoldZHexagonal() :
-    SymmetryOperation(3, Kernel::IntMatrix(3, 3), "3 [001]h")
-{
-    int rotThreeFoldZHexagonal[] = { 0, -1,  0,
-                                     1, -1,  0,
-                                     0,  0,  1};
-
-    setMatrixFromArray(rotThreeFoldZHexagonal);
-}
-
-/// 3-fold rotation around [111]-axis
-SymOpRotationThreeFold111::SymOpRotationThreeFold111() :
-    SymmetryOperation(3, Kernel::IntMatrix(3, 3), "3 [111]")
-{
-    int rotThreeFold111[] = { 0,  0,  1,
-                              1,  0,  0,
-                              0,  1,  0};
-
-    setMatrixFromArray(rotThreeFold111);
-}
-
-/* 6-fold rotation axes */
-/// 6-fold rotation around z-axis, hexagonal coordinate system
-SymOpRotationSixFoldZHexagonal::SymOpRotationSixFoldZHexagonal() :
-    SymmetryOperation(6, Kernel::IntMatrix(3, 3), "6 [001]h")
-{
-    int rotSixFoldZHexagonal[] = { 1, -1,  0,
-                                   1,  0,  0,
-                                   0,  0,  1};
-
-    setMatrixFromArray(rotSixFoldZHexagonal);
-}
-
-/* Mirror planes */
-/// Mirror plane perpendicular to y-axis
-SymOpMirrorPlaneY::SymOpMirrorPlaneY() :
-    SymmetryOperation(2, Kernel::IntMatrix(3, 3), "m [010]")
-{
-    int mirrorPlaneY[] = {1,  0,  0,
-                          0, -1,  0,
-                          0,  0,  1};
-
-    setMatrixFromArray(mirrorPlaneY);
-}
-
-/// Mirror plane perpendicular to z-axis
-SymOpMirrorPlaneZ::SymOpMirrorPlaneZ() :
-    SymmetryOperation(2, Kernel::IntMatrix(3, 3), "m [001]")
-{
-    int mirrorPlaneZ[] = {1,  0,  0,
-                          0,  1,  0,
-                          0,  0, -1};
-
-    setMatrixFromArray(mirrorPlaneZ);
-}
-
-/// Mirror plane perpendicular to [210]-axis
-SymOpMirrorPlane210Hexagonal::SymOpMirrorPlane210Hexagonal() :
-    SymmetryOperation(2, Kernel::IntMatrix(3, 3), "m [210]h")
-{
-    int mirrorPlane210Hexagonal[] = {-1,  0,  0,
-                                     -1,  1,  0,
-                                      0,  0,  1};
-
-    setMatrixFromArray(mirrorPlane210Hexagonal);
+  return wrappedVector;
 }
 
 } // namespace Geometry

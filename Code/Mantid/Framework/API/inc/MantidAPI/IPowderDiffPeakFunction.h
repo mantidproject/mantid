@@ -8,17 +8,16 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 
-namespace Mantid
-{
-namespace API
-{
-/** An interface to a peak function, which extend the interface of 
+namespace Mantid {
+namespace API {
+/** An interface to a peak function, which extend the interface of
     IFunctionWithLocation by adding methods to set and get peak width.
 
     @author Roman Tolchenov, Tessella Support Services plc
     @date 16/10/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -38,10 +37,10 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL IPowderDiffPeakFunction : public virtual API::ParamFunction,public virtual API::IFunction1D
-{
+class MANTID_API_DLL IPowderDiffPeakFunction
+    : public virtual API::ParamFunction,
+      public virtual API::IFunction1D {
 public:
-
   /// Constructor and Destructor
   IPowderDiffPeakFunction();
 
@@ -57,18 +56,19 @@ public:
   /// Get peak's intensity
   virtual double height() const;
   /// Get peakl's FWHM
-  virtual double fwhm()const;
+  virtual double fwhm() const;
   /// Set peak's height
   virtual void setHeight(const double h);
   /// Set peak's radius
-  virtual void setPeakRadius(const int& r);
+  virtual void setPeakRadius(const int &r);
 
-  //--------------- ThermalNeutron peak function special ---------------------------------------
+  //--------------- ThermalNeutron peak function special
+  //---------------------------------------
   /// Set Miller Indicies
   virtual void setMillerIndex(int h, int k, int l);
 
   /// Get Miller Index from this peak
-  virtual void getMillerIndex(int& h, int &k, int &l);
+  virtual void getMillerIndex(int &h, int &k, int &l);
 
   /// Get peak parameters
   virtual double getPeakParameter(std::string) = 0;
@@ -77,46 +77,56 @@ public:
   virtual void calculateParameters(bool explicitoutput) const = 0;
 
   /// Set up the flag to show whether (from client) cell parameter value changed
-  virtual void setUnitCellParameterValueChangeFlag(bool changed)
-  {
+  virtual void setUnitCellParameterValueChangeFlag(bool changed) {
     m_cellParamValueChanged = changed;
   }
 
-  /// The flag to show whether the parameters set to peak function making an valid peak
+  /// The flag to show whether the parameters set to peak function making an
+  /// valid peak
   virtual bool isPhysical() { return m_parameterValid; }
 
   /// Override setting a new value to the i-th parameter
-  virtual void setParameter(size_t i, const double& value, bool explicitlySet=true);
+  virtual void setParameter(size_t i, const double &value,
+                            bool explicitlySet = true);
 
   /// Override setting a new value to a parameter by name
-  virtual void setParameter(const std::string& name, const double& value, bool explicitlySe=true);
+  virtual void setParameter(const std::string &name, const double &value,
+                            bool explicitlySe = true);
 
   /// Check whether a parameter is a profile parameter
   virtual bool hasProfileParameter(std::string paramname);
 
-  // void functionLocal(double* out, const double* xValues, const size_t nData)const;
+  // void functionLocal(double* out, const double* xValues, const size_t
+  // nData)const;
 
   /// Calculate function in a range
   using IFunction1D::function;
-  virtual void function(std::vector<double>& out, const std::vector<double>& xValues) const = 0;
+  virtual void function(std::vector<double> &out,
+                        const std::vector<double> &xValues) const = 0;
 
   /// Get maximum value on a given set of data points
-  virtual double getMaximumValue(const std::vector<double> &xValues, size_t& indexmax) const;
+  virtual double getMaximumValue(const std::vector<double> &xValues,
+                                 size_t &indexmax) const;
 
 protected:
   /// Local function for GSL minimizer
   // virtual void functionLocal(double*, const double*, int&) const = 0;
 
   /// Local function for calculation in Mantid
-  // virtual void functionLocal(vector<double> &out, const vector<double> &xValues) const = 0;
+  // virtual void functionLocal(vector<double> &out, const vector<double>
+  // &xValues) const = 0;
 
-  /// General implementation of the method for all peaks. Calculates derivatives only
-  /// void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData) const;
+  /// General implementation of the method for all peaks. Calculates derivatives
+  /// only
+  /// void functionDeriv1D(Jacobian* out, const double* xValues, const size_t
+  /// nData) const;
 
   /// General implemenation of derivative
-  // void functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData) const;
+  // void functionDerivLocal(Jacobian* out, const double* xValues, const size_t
+  // nData) const;
 
-  /// Defines the area around the centre where the peak values are to be calculated (in FWHM).
+  /// Defines the area around the centre where the peak values are to be
+  /// calculated (in FWHM).
   static int s_peakRadius;
 
   /// Centre of the peak
@@ -151,11 +161,6 @@ protected:
 
   size_t LATTICEINDEX;
   size_t HEIGHTINDEX;
-
-private:
-  /// Peak intensity
-  double m_intensity;
-
 };
 
 typedef boost::shared_ptr<IPowderDiffPeakFunction> IPowderDiffPeakFunction_sptr;

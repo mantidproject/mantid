@@ -22,6 +22,7 @@
 #include "PythonRunner.h"
 
 #include <QWidget>
+#include <QMainWindow>
 #include <QStringList>
 #include <QLabel>
 #include <set>
@@ -59,7 +60,7 @@ class InterfaceManager;
     @author Martyn Gigg, Tessella Support Services plc
     @date 18/03/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -79,7 +80,7 @@ class InterfaceManager;
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class EXPORT_OPT_MANTIDQT_API UserSubWindow : public QWidget
+class EXPORT_OPT_MANTIDQT_API UserSubWindow : public QMainWindow
 {
   Q_OBJECT
 

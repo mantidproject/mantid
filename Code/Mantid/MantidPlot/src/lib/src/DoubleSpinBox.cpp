@@ -27,6 +27,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "DoubleSpinBox.h"
+
 #include <MyParser.h>
 #include <QLineEdit>
 #include <QHBoxLayout>
@@ -61,12 +62,22 @@ void DoubleSpinBox::setMaximum(double max)
   d_max_val = max;
 }
 
+double DoubleSpinBox::getMaximum()
+{
+  return d_max_val;
+}
+
 void DoubleSpinBox::setMinimum(double min)
 {
   if (min == d_min_val || min < -DBL_MAX)
     return;
 
   d_min_val = min;
+}
+
+double DoubleSpinBox::getMinimum()
+{
+  return d_min_val;
 }
 
 void DoubleSpinBox::setRange(double min, double max)
@@ -102,6 +113,21 @@ void DoubleSpinBox::interpretText(bool notify)
     }
     else
     {
+      //Check for any registered test strings that map to a given value
+      for(auto it = m_specialTextMappings.begin(); it != m_specialTextMappings.end(); ++it)
+      {
+        if(it->first == text())
+        {
+          //Found a matching string, try to set the value
+          if(setValue(it->second))
+          {
+            lineEdit()->setText(text());
+            if(notify)
+              emit valueChanged(d_value);
+          }
+        }
+      }
+
       lineEdit()->setText(textFromValue(d_value));
     }
   }
@@ -132,6 +158,18 @@ void DoubleSpinBox::interpretText(bool notify)
 //    emit valueChanged( d_value);
 //  else
 //    lineEdit()->setText(textFromValue(d_value));
+}
+
+/**
+ * Adds a mapping from string whihc may be entered into the edit box and a double value.
+ * The mapping is case sensitive
+ *
+ * @param text QString with text to map
+ * @param value Value to map it to
+ */
+void DoubleSpinBox::addSpecialTextMapping(QString text, double value)
+{
+  m_specialTextMappings[text] = value;
 }
 
 void DoubleSpinBox::stepBy(int steps)

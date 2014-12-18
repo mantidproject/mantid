@@ -17,7 +17,7 @@ namespace MantidWidgets
 
   /** PeakPicker : A simplified version of PeakPickerTool, available for use on general QwtPlots.
     
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

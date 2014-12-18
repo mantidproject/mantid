@@ -143,6 +143,8 @@ public:
   std::string costFunction()const;
   /// Get the "ConvolveMembers" option
   bool convolveMembers()const;
+  /// Set if the data must be normalised before fitting
+  void normaliseData(bool on) {m_shouldBeNormalised = on;}
 
   /// Get the start X
   double startX()const;
@@ -545,6 +547,9 @@ private:
 
   /// store current workspace name
   std::string m_storedWorkspaceName;
+
+  /// Should the data be normalised before fitting?
+  bool m_shouldBeNormalised;
 
   friend class PropertyHandler;
   friend class CreateAttributeProperty;

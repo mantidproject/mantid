@@ -8,10 +8,8 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidAPI/ICostFunction.h"
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 // Forward declaration
 class IFitFunction;
 
@@ -20,7 +18,8 @@ class IFitFunction;
     @author Anders Markvardsen, ISIS, RAL
     @date 11/12/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -40,8 +39,7 @@ class IFitFunction;
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL IFuncMinimizer: public Kernel::PropertyManager
-{
+class MANTID_API_DLL IFuncMinimizer : public Kernel::PropertyManager {
 public:
   /// Virtual destructor
   virtual ~IFuncMinimizer() {}
@@ -49,13 +47,15 @@ public:
   /// Initialize minimizer.
   /// @param function :: Function to minimize
   /// @param maxIterations :: Maximum number of iterations.
-  virtual void initialize(API::ICostFunction_sptr function, size_t maxIterations = 1000) = 0;
+  virtual void initialize(API::ICostFunction_sptr function,
+                          size_t maxIterations = 1000) = 0;
 
   /// Get name of minimizer
   virtual std::string name() const = 0;
 
   /// Do one iteration
-  /// @param iteration :: Current iteration number. 0 <= iteration < maxIterations
+  /// @param iteration :: Current iteration number. 0 <= iteration <
+  /// maxIterations
   /// @return :: true if iterations should be continued or false to stop
   virtual bool iterate(size_t iteration) = 0;
 
@@ -64,9 +64,9 @@ public:
   virtual bool minimize(size_t maxIterations = 1000);
 
   /// Get the error string
-  virtual std::string getError() const {return m_errorString;}
+  virtual std::string getError() const { return m_errorString; }
 
-  /// Get value of cost function 
+  /// Get value of cost function
   virtual double costFunctionVal() = 0;
 
 protected:

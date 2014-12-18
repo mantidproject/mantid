@@ -9,7 +9,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class Fury : public IDATab
+  class DLLExport Fury : public IDATab
   {
     Q_OBJECT
 
@@ -19,24 +19,21 @@ namespace IDA
   private:
     virtual void setup();
     virtual void run();
-    virtual QString validate();
+    virtual bool validate();
     virtual void loadSettings(const QSettings & settings);
     virtual QString helpURL() {return "Fury";}
 
   private slots:
     void plotInput(const QString& wsname);
-    void minChanged(double val);
-    void maxChanged(double val);
+    void rsRangeChangedLazy(double min, double max);
     void updateRS(QtProperty* prop, double val);
+    void updatePropertyValues(QtProperty* prop, double val);
+    void calculateBinning();
       
   private:
-    QwtPlot* m_furPlot;
-    MantidWidgets::RangeSelector* m_furRange;
-    QwtPlotCurve* m_furCurve;
     QtTreePropertyBrowser* m_furTree;
-    QMap<QString, QtProperty*> m_furProp;
-    QtDoublePropertyManager* m_furDblMng;
     bool m_furyResFileType;
+
   };
 } // namespace IDA
 } // namespace CustomInterfaces

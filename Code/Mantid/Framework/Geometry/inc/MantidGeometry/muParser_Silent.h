@@ -1,9 +1,11 @@
-/** 
-  
-  This file includes the muParser.h header file and avoids a conflict with the DLLExport macro
+/**
+
+  This file includes the muParser.h header file and avoids a conflict with the
+  DLLExport macro
   that we both have defined.
-  
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -24,12 +26,12 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifdef _WIN32
-  #ifdef DLLExport
-    #undef DLLExport //Avoid warning about redefinition
-  #endif
-  #include <muParser.h>
-  #undef DLLExport
-  #define DLLExport __declspec( dllexport ) // Our version.
+#ifdef DLLExport
+#undef DLLExport // Avoid warning about redefinition
+#endif
+#include <muParser.h>
+#undef DLLExport
+#define DLLExport __declspec(dllexport) // Our version.
 #else
-  #include <muParser.h>
+#include <muParser.h>
 #endif

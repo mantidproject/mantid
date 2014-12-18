@@ -6,32 +6,36 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace DataHandling
-{
-/** An algorithm for finding masking detectors that are contained within a user defined shape within the instrument.
+namespace Mantid {
+namespace DataHandling {
+/** An algorithm for finding masking detectors that are contained within a user
+   defined shape within the instrument.
 
     Required Properties:
     <UL>
-    <LI> Workspace - The name of the input Workspace2D on which to perform the algorithm </LI>
-		<LI> ShapeXML - An XML definition of the shape to be projected within the instruemnt of the workspace </LI>
+    <LI> Workspace - The name of the input Workspace2D on which to perform the
+   algorithm </LI>
+                <LI> ShapeXML - An XML definition of the shape to be projected
+   within the instruemnt of the workspace </LI>
     </UL>
 
     Optional Properties:
     <UL>
-    <LI> IncludeMonitors - True/False whether to include monitors in the results</LI>
-		</UL>
+    <LI> IncludeMonitors - True/False whether to include monitors in the
+   results</LI>
+                </UL>
 
-		Output Properties:
+                Output Properties:
     <UL>
-    <LI> DetectorList - An array property containing the detectors ids masked in the shape </LI>
+    <LI> DetectorList - An array property containing the detectors ids masked in
+   the shape </LI>
     </UL>
 
     @author Nick Draper, Tessella plc
     @date 16/02/2009
 
-    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -51,30 +55,34 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MaskDetectorsInShape : public API::Algorithm
-{
+class DLLExport MaskDetectorsInShape : public API::Algorithm {
 public:
   MaskDetectorsInShape();
   virtual ~MaskDetectorsInShape();
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "MaskDetectorsInShape";};
+  virtual const std::string name() const { return "MaskDetectorsInShape"; };
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1;};
+  virtual int version() const { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Masking";}
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Masks detectors whose centres fall within the given 3D shape.";}
+  virtual const std::string category() const { return "Transforms\\Masking"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Masks detectors whose centres fall within the given 3D shape.";
+  }
+
 private:
   // Implement abstract Algorithm methods
   void init();
   void exec();
 
-	//internal functions
-	std::vector<int> runFindDetectorsInShape(API::MatrixWorkspace_sptr workspace,
-		const std::string shapeXML, const bool includeMonitors);
-	/// Calls MaskDetectors as a Child Algorithm
-	void runMaskDetectors(API::MatrixWorkspace_sptr workspace, const std::vector<int> detectorIds);
+  // internal functions
+  std::vector<int> runFindDetectorsInShape(API::MatrixWorkspace_sptr workspace,
+                                           const std::string shapeXML,
+                                           const bool includeMonitors);
+  /// Calls MaskDetectors as a Child Algorithm
+  void runMaskDetectors(API::MatrixWorkspace_sptr workspace,
+                        const std::vector<int> detectorIds);
 };
 
 } // namespace DataHandling

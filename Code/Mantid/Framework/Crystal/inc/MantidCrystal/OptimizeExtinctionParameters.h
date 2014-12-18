@@ -10,17 +10,16 @@
 #include <gsl/gsl_multimin.h>
 #include <gsl/gsl_statistics.h>
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /**
  Find the offsets for each detector
 
  @author Vickie Lynch, SNS
  @date 02/06/2012
 
- Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -40,31 +39,36 @@ namespace Algorithms
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport OptimizeExtinctionParameters: public API::Algorithm
-{
+class DLLExport OptimizeExtinctionParameters : public API::Algorithm {
 public:
   /// Default constructorMatrix
   OptimizeExtinctionParameters();
   /// Destructor
   virtual ~OptimizeExtinctionParameters();
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "OptimizeExtinctionParameters"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const { return "Finds optimal mosaic and r_crystallite parameters for extinction correction."; }
+  virtual const std::string name() const {
+    return "OptimizeExtinctionParameters";
+  }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Finds optimal mosaic and r_crystallite parameters for extinction "
+           "correction.";
+  }
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Crystal"; }
   /// Call TOFExtinction as a Child Algorithm to get statistics of the peaks
-  double fitMosaic(double mosaic, double rcrystallite, std::string inname, std::string corrOption, std::string pointOption, std::string tofParams);
+  double fitMosaic(double mosaic, double rcrystallite, std::string inname,
+                   std::string corrOption, std::string pointOption,
+                   std::string tofParams);
 
 private:
-   /// Point Groups possible
+  /// Point Groups possible
   std::vector<Mantid::Geometry::PointGroup_sptr> m_pointGroups;
   // Overridden Algorithm methods
   void init();
   void exec();
-  
 };
 
 } // namespace Algorithm

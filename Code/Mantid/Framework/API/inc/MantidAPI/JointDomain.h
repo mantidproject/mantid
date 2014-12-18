@@ -11,16 +11,15 @@
 #include <vector>
 #include <algorithm>
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 /** An implementation of CompositeDomain.
 
     @author Roman Tolchenov, Tessella plc
     @date 15/11/2011
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -40,19 +39,19 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL JointDomain: public CompositeDomain
-{
+class MANTID_API_DLL JointDomain : public CompositeDomain {
 public:
   /// Return the number of points in the domain
   virtual size_t size() const;
   /// Return the number of parts in the domain
   virtual size_t getNParts() const;
   /// Return i-th domain
-  virtual const FunctionDomain& getDomain(size_t i) const;
+  virtual const FunctionDomain &getDomain(size_t i) const;
   void addDomain(FunctionDomain_sptr domain);
+
 protected:
   /// Vector with member domains.
-  std::vector< FunctionDomain_sptr > m_domains;
+  std::vector<FunctionDomain_sptr> m_domains;
 };
 
 } // namespace API

@@ -5,7 +5,6 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-
 #include "boost/shared_ptr.hpp"
 
 namespace Mantid
@@ -23,7 +22,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class FuryFit : public IDATab
+  class DLLExport FuryFit : public IDATab
   {
     Q_OBJECT
 
@@ -33,13 +32,16 @@ namespace IDA
   private:
     virtual void setup();
     virtual void run();
-    virtual QString validate();
+    virtual bool validate();
     virtual void loadSettings(const QSettings & settings);
     virtual QString helpURL() {return "FuryFit";}
 
   private slots:
     void typeSelection(int index);
+    void newDataLoaded(const QString wsName);
     void plotInput();
+    void specMinChanged(int value);
+    void specMaxChanged(int value);
     void xMinSelected(double val);
     void xMaxSelected(double val);
     void backgroundSelected(double val);
@@ -59,24 +61,15 @@ namespace IDA
     QString fitTypeString() const;
     void constrainIntensities(Mantid::API::CompositeFunction_sptr func);
 
-    
-    QIntValidator * m_intVal;
     QtStringPropertyManager* m_stringManager;
     QtTreePropertyBrowser* m_ffTree; ///< FuryFit Property Browser
-    QtGroupPropertyManager* m_groupManager;
-    QtDoublePropertyManager* m_ffDblMng;
     QtDoublePropertyManager* m_ffRangeManager; ///< StartX and EndX for FuryFit
-    QMap<QString, QtProperty*> m_ffProp;
     QMap<QtProperty*, QtProperty*> m_fixedProps;
-    QwtPlot* m_ffPlot;
-    QwtPlotCurve* m_ffDataCurve;
-    QwtPlotCurve* m_ffFitCurve;
-    MantidQt::MantidWidgets::RangeSelector* m_ffRangeS;
-    MantidQt::MantidWidgets::RangeSelector* m_ffBackRangeS;
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ffInputWS;
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ffOutputWS;
     QString m_ffInputWSName;
     QString m_ties;
+
   };
 } // namespace IDA
 } // namespace CustomInterfaces

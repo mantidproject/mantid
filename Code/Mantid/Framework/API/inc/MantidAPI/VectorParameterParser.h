@@ -17,20 +17,19 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #ifndef Q_MOC_RUN
-# include <boost/lexical_cast.hpp>
-#endif 
+#include <boost/lexical_cast.hpp>
+#endif
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 /**
 
  XML parser for vector value (n elements) parameter types.
 
  @author Owen Arnold, Tessella plc
  @date 21/07/2011
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -50,19 +49,22 @@ namespace API
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-template<class VectorValueParameterType>
-class DLLExport VectorParameterParser: public Mantid::API::ImplicitFunctionParameterParser
-{
+template <class VectorValueParameterType>
+class DLLExport VectorParameterParser
+    : public Mantid::API::ImplicitFunctionParameterParser {
 public:
   VectorParameterParser();
 
-  VectorValueParameterType* parseVectorParameter(std::string value);
+  VectorValueParameterType *parseVectorParameter(std::string value);
 
-  Mantid::API::ImplicitFunctionParameter* createParameter(Poco::XML::Element* parameterElement);
+  Mantid::API::ImplicitFunctionParameter *
+  createParameter(Poco::XML::Element *parameterElement);
 
-  VectorValueParameterType* createWithoutDelegation(Poco::XML::Element* parameterElement);
+  VectorValueParameterType *
+  createWithoutDelegation(Poco::XML::Element *parameterElement);
 
-  void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser* paramParser);
+  void
+  setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser *paramParser);
 
   ~VectorParameterParser();
 };
@@ -70,29 +72,26 @@ public:
 ////////////////////////////////////////////////////////////////////
 
 /// Default constructor
-template<typename VectorValueParameterType>
-VectorParameterParser<VectorValueParameterType>::VectorParameterParser()
-{
-}
+template <typename VectorValueParameterType>
+VectorParameterParser<VectorValueParameterType>::VectorParameterParser() {}
 
 //----------------------------------------------------------------------
 /* Parse the value aspect of the parameter only.
 @param sValue : parameter value in string form.
 @return new parameter object.
 */
-template<typename VectorValueParameterType>
-VectorValueParameterType* VectorParameterParser<VectorValueParameterType>::parseVectorParameter(
-    std::string sValue)
-{
+template <typename VectorValueParameterType>
+VectorValueParameterType *
+VectorParameterParser<VectorValueParameterType>::parseVectorParameter(
+    std::string sValue) {
   std::vector<std::string> strs;
   boost::split(strs, sValue, boost::is_any_of(","));
 
-  VectorValueParameterType* product = new VectorValueParameterType(strs.size());
+  VectorValueParameterType *product = new VectorValueParameterType(strs.size());
   typedef typename VectorValueParameterType::ValueType ValType;
   ValType value = 0;
 
-  for(size_t i = 0; i < strs.size(); i++)
-  {
+  for (size_t i = 0; i < strs.size(); i++) {
     boost::erase_all(strs[i], " ");
     value = boost::lexical_cast<ValType>(strs[i]);
     product->addValue(i, value);
@@ -105,43 +104,40 @@ VectorValueParameterType* VectorParameterParser<VectorValueParameterType>::parse
 @param parameterElement : XML element containing the parameter info.
 @return new parameter object.
 */
-template<typename VectorValueParameterType>
-Mantid::API::ImplicitFunctionParameter* VectorParameterParser<VectorValueParameterType>::createParameter(
-    Poco::XML::Element* parameterElement)
-{
+template <typename VectorValueParameterType>
+Mantid::API::ImplicitFunctionParameter *
+VectorParameterParser<VectorValueParameterType>::createParameter(
+    Poco::XML::Element *parameterElement) {
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
-  if (VectorValueParameterType::parameterName() != typeName)
-  {
-    if(!m_successor)
-    {
+  if (VectorValueParameterType::parameterName() != typeName) {
+    if (!m_successor) {
       throw std::runtime_error("No successor ParameterParser!");
     }
     return m_successor->createParameter(parameterElement);
-  }
-  else
-  {
-    std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
+  } else {
+    std::string sParameterValue =
+        parameterElement->getChildElement("Value")->innerText();
     return parseVectorParameter(sParameterValue);
   }
 }
 
 //------------------------------------------------------------------------------
-/* Creates a parameter from an xml element. This is single-shot. Does not defer to successor if it fails!.
+/* Creates a parameter from an xml element. This is single-shot. Does not defer
+to successor if it fails!.
 @param parameterElement : xml Element
 @return A fully constructed VectorValueParameterType.
 */
-template<class VectorValueParameterType>
-VectorValueParameterType* VectorParameterParser<VectorValueParameterType>::createWithoutDelegation(
-    Poco::XML::Element* parameterElement)
-{
+template <class VectorValueParameterType>
+VectorValueParameterType *
+VectorParameterParser<VectorValueParameterType>::createWithoutDelegation(
+    Poco::XML::Element *parameterElement) {
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
-  if (VectorValueParameterType::parameterName() != typeName)
-  {
-    throw std::runtime_error("The attempted ::createWithoutDelegation failed. The type provided does not match this parser.");
-  }
-  else
-  {
-    std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
+  if (VectorValueParameterType::parameterName() != typeName) {
+    throw std::runtime_error("The attempted ::createWithoutDelegation failed. "
+                             "The type provided does not match this parser.");
+  } else {
+    std::string sParameterValue =
+        parameterElement->getChildElement("Value")->innerText();
     return parseVectorParameter(sParameterValue);
   }
 }
@@ -150,20 +146,16 @@ VectorValueParameterType* VectorParameterParser<VectorValueParameterType>::creat
 /* Setter for a successor parser.
 @param paramParser : successor
 */
-template<typename VectorValueParameterType>
+template <typename VectorValueParameterType>
 void VectorParameterParser<VectorValueParameterType>::setSuccessorParser(
-    Mantid::API::ImplicitFunctionParameterParser* paramParser)
-{
+    Mantid::API::ImplicitFunctionParameterParser *paramParser) {
   Mantid::API::ImplicitFunctionParameterParser::SuccessorType temp(paramParser);
   m_successor.swap(temp);
 }
 
 /// Destructor
-template<typename VectorValueParameterType>
-VectorParameterParser<VectorValueParameterType>::~VectorParameterParser()
-{
-}
-
+template <typename VectorValueParameterType>
+VectorParameterParser<VectorValueParameterType>::~VectorParameterParser() {}
 }
 }
 

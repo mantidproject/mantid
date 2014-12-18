@@ -6,10 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /** Makes a histogram workspace a distribution. i.e. divides by the bin width
 
     Required Properties:
@@ -20,7 +18,8 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 17/11/2008
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -40,8 +39,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConvertToDistribution : public API::Algorithm
-{
+class DLLExport ConvertToDistribution : public API::Algorithm {
 public:
   /// (Empty) Constructor
   ConvertToDistribution() : API::Algorithm() {}
@@ -50,16 +48,21 @@ public:
   /// Algorithm's name
   virtual const std::string name() const { return "ConvertToDistribution"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {return "Makes a histogram workspace a distribution i.e. divides by the bin width.";}
+  virtual const std::string summary() const {
+    return "Makes a histogram workspace a distribution i.e. divides by the bin "
+           "width.";
+  }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Transforms\\Distribution"; }
+  virtual const std::string category() const {
+    return "Transforms\\Distribution";
+  }
 
 private:
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 };
 

@@ -1,7 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="VULCAN" valid-from   ="1900-01-31 23:59:59"
                           valid-to     ="2100-01-31 23:59:59"
 		          last-modified="2011-09-16 10:30:00">
@@ -45,10 +47,10 @@
   </component>
 
   <type name="Group1">
-  <component type="flip-panel" idstart="28750" idfillbyfirst="y" idstepbyrow="8">
-    <location y="-0.4021558" x="-1.9591505" z="0.0" name="bank21" rot="0.0" axis-x="0" axis-y="1" axis-z="0">
+  <component type="flip-panel" idstart="26250" idfillbyfirst="y" idstepbyrow="8">
+    <location y="0.4021558" x="-1.9591505" z="0.0" name="bank21" rot="-180.0" axis-x="0" axis-y="1" axis-z="0">
       <rot val="11.6000073013">
-        <rot val="-90.0" axis-x="0" axis-y="1" axis-z="0" />
+        <rot val="90.0" axis-x="0" axis-y="1" axis-z="0" />
       </rot>
     </location>
   </component>
@@ -59,10 +61,10 @@
       </rot>
     </location>
   </component>
-  <component type="flip-panel" idstart="26250" idfillbyfirst="y" idstepbyrow="8">
-    <location y="0.4021558" x="-1.9591505" z="0.0" name="bank23" rot="-180.0" axis-x="0" axis-y="1" axis-z="0">
+  <component type="flip-panel" idstart="28750" idfillbyfirst="y" idstepbyrow="8">
+    <location y="-0.4021558" x="-1.9591505" z="0.0" name="bank23" rot="0.0" axis-x="0" axis-y="1" axis-z="0">
       <rot val="11.6000073013">
-        <rot val="90.0" axis-x="0" axis-y="1" axis-z="0" />
+        <rot val="-90.0" axis-x="0" axis-y="1" axis-z="0" />
       </rot>
     </location>
   </component>

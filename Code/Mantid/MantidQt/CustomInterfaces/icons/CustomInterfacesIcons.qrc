@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/MultiDatasetFit/icons">
+        <file>zoom.png</file>
+        <file>panning.png</file>
+    </qresource>
+</RCC>

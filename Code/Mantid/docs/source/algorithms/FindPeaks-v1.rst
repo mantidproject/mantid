@@ -86,4 +86,29 @@ References
 
 #. M.A.Mariscotti, *A method for automatic identification of peaks in the presence of background and its application to spectrum analysis , NIM 50 (1967) 309.*
 
+Usage
+-----
+
+**Example - Find a single peak:**
+
+.. testcode:: ExFindPeakSingle
+
+   ws = CreateSampleWorkspace(Function="User Defined", UserDefinedFunction="name=LinearBackground, \
+      A0=0.3;name=Gaussian, PeakCentre=5, Height=10, Sigma=0.7", NumBanks=1, BankPixelWidth=1, XMin=0, XMax=10, BinWidth=0.1)
+
+   table = FindPeaks(InputWorkspace='ws', FWHM='20')
+
+   row = table.row(0)
+
+   #print row
+   print "Peak 1 {Centre: %.3f, width: %.3f, height: %.3f }" % ( row["centre"],  row["width"], row["height"])
+
+
+Output:
+
+.. testoutput:: ExFindPeakSingle
+
+   Peak 1 {Centre: 5.050, width: 1.648, height: 10.000 }
+
+
 .. categories::

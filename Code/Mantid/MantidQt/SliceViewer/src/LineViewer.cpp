@@ -301,7 +301,8 @@ IAlgorithm_sptr LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sp
     if (getPlanarWidth() <= 0)
       throw std::runtime_error("Planar Width must be > 0");
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Rebin2D");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("Rebin2D");
+    alg->initialize();
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", m_integratedWSName);
     if(ws->id() == "RebinnedOutput")
@@ -1083,7 +1084,8 @@ void LineViewer::showFull()
   MatrixWorkspace_sptr sliceMatrix = boost::dynamic_pointer_cast<MatrixWorkspace>(m_sliceWS);
   if (sliceMatrix)
   {
-    QwtWorkspaceSpectrumData curveData(*sliceMatrix, 0, isLogScaledY());
+    const bool distribution(false);
+    QwtWorkspaceSpectrumData curveData(*sliceMatrix, 0, isLogScaledY(), distribution);
     m_fullCurve->setData(curveData);
     setupScaleEngine(curveData);
     m_plot->setAxisTitle( QwtPlot::xBottom, curveData.getXAxisLabel() );
