@@ -505,12 +505,14 @@ void LoadFITS::readFileToWorkspace(Workspace2D_sptr ws,
         val = static_cast<double>(*reinterpret_cast<uint64_t *>(tmp));
 
       // cppcheck doesn't realise that these are safe casts
-      // cppcheck-suppress invalidPointerCast
-      if (fileInfo.bitsPerPixel == 32 && fileInfo.isFloat)
+      if (fileInfo.bitsPerPixel == 32 && fileInfo.isFloat) {
+        // cppcheck-suppress invalidPointerCast
         val = static_cast<double>(*reinterpret_cast<float *>(tmp));
-      // cppcheck-suppress invalidPointerCast
-      if (fileInfo.bitsPerPixel == 64 && fileInfo.isFloat)
+      }
+      if (fileInfo.bitsPerPixel == 64 && fileInfo.isFloat) {
+        // cppcheck-suppress invalidPointerCast
         val = *reinterpret_cast<double *>(tmp);
+      }
 
       val = fileInfo.scale * val - fileInfo.offset;
 
