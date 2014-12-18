@@ -6,7 +6,6 @@ from mantid.simpleapi import *
 from mantid import api
 from mantid.kernel import funcreturns
 
-import unittest
 
 # the class which is responsible for data reduction
 global Reducer
