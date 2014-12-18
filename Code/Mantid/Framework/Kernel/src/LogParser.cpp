@@ -294,12 +294,11 @@ struct hasNewStyleCommands {
 }
 
 /**
-  * Check if the icp log commands are in the new style. The new style is the one
- * that
-  * uses START_COLLECTION and STOP_COLLECTION commands for changing periods and
- * running status.
-  * @param logm :: A log map created from a icp-event log.
-  */
+ * Check if the icp log commands are in the new style. The new style is the one
+ * that uses START_COLLECTION and STOP_COLLECTION commands for changing periods
+ * and running status.
+ * @param logm :: A log map created from a icp-event log.
+ */
 bool LogParser::isICPEventLogNewStyle(
     const std::multimap<Kernel::DateAndTime, std::string> &logm) {
   hasNewStyleCommands checker;
@@ -309,12 +308,12 @@ bool LogParser::isICPEventLogNewStyle(
 
 /**
  * Returns the time-weighted mean value if the property is
- *TimeSeriesProperty<double>.
+ * TimeSeriesProperty<double>.
  *
  * TODO: Make this more efficient.
  *
  * @param p :: Property with the data. Will throw if not
- *TimeSeriesProperty<double>.
+ *             TimeSeriesProperty<double>.
  * @return The mean value over time.
  * @throw runtime_error if the property is not TimeSeriesProperty<double>
 */
