@@ -91,6 +91,7 @@ namespace Crystal
     tablews->addColumn("double", "Rmerge");
     tablews->addColumn("double", "Rpim");
     tablews->addColumn("double", "Data Completeness");
+
     // append to the table workspace
     API::TableRow newrow = tablews->appendRow();
     newrow << "Overall";
@@ -134,12 +135,25 @@ namespace Crystal
       }
     }
     std::vector< std::pair<std::string, bool> > criteria;
-    // Sort by bank and then HKL
-    criteria.push_back( std::pair<std::string, bool>("Wavelength", true) );
+    // Sort by wavelength
+    criteria.push_back( std::pair<std::string, bool>("wavelength", true) );
     peaksW->sort(criteria);
     int unique = NumberPeaks - equivalent;
     // table workspace output
     newrow << unique << peaks[0].getWavelength()  << peaks[NumberPeaks-1].getWavelength();
+
+    API::IAlgorithm_sptr predictAlg = createChildAlgorithm("PredictPeaks");
+    predictAlg->setProperty("InputWorkspace", InPeaksW);
+    predictAlg->setPropertyValue("OutputWorkspace", "predictedPeaks");
+    predictAlg->setProperty("WavelengthMin",peaks[0].getWavelength());
+    predictAlg->setProperty("WavelengthMax",peaks[NumberPeaks-1].getWavelength());
+    // Sort by dspacing
+    criteria.push_back( std::pair<std::string, bool>("dspacing", true) );
+    peaksW->sort(criteria);
+    predictAlg->setProperty("MinDSpacing",peaks[0].getDSpacing());
+    predictAlg->executeAsChildAlg();
+    PeaksWorkspace_sptr predictedWksp = predictAlg->getProperty("OutputWorkspace");
+    int predictedPeaks = predictedWksp->getNumberPeaks();
 
     criteria.clear();
     // Sort by bank and then HKL
@@ -240,7 +254,8 @@ namespace Crystal
     Statistics statsMult = getStatistics(multiplicity);
     multiplicity.clear();
     // statistics to output table workspace
-    newrow  << statsMult.mean << statsIsigI.mean << 100.0 * rSum / f2Sum << 100.0 * rpSum / f2Sum << 0.0;
+    newrow  << statsMult.mean << statsIsigI.mean << 100.0 * rSum / f2Sum << 100.0 * rpSum / f2Sum
+        << double(NumberPeaks)/double(predictedPeaks);
     data.clear();
     sig2.clear();
     //Reset hkl of equivalent peaks to original value

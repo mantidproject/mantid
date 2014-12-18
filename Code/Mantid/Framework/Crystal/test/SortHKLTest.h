@@ -8,6 +8,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -38,7 +39,13 @@ public:
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(4, 10, 1.0);
     PeaksWorkspace_sptr ws(new PeaksWorkspace());
     ws->setInstrument(inst);
-    //ws->setName("TOPAZ_peaks");
+
+    auto lattice = new Mantid::Geometry::OrientedLattice;
+    Mantid::Kernel::DblMatrix UB(3, 3, true);
+    UB.identityMatrix();
+    lattice->setUB(UB);
+    ws->mutableSample().setOrientedLattice(lattice);
+
     double smu = 0.357;
     double amu = 0.011;
     NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
