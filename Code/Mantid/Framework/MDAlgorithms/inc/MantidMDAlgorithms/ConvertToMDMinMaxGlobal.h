@@ -12,7 +12,7 @@ namespace MDAlgorithms
   /** ConvertToMDMinMaxGlobal : Algorithm to calculate limits for ConvertToMD transformation which can be observed using an instrument which covers whole MD-space 
       The current version knows 
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

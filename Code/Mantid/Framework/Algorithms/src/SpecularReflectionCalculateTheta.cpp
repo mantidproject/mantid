@@ -56,7 +56,7 @@ namespace Mantid
     /// Algorithm's category for identification. @see Algorithm::category
     const std::string SpecularReflectionCalculateTheta::category() const
     {
-      return "Reflectometry\\ISIS";
+      return "Reflectometry";
     }
 
     //----------------------------------------------------------------------------------------------

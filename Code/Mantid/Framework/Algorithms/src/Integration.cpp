@@ -9,6 +9,7 @@
 #include "MantidAPI/Progress.h"
 #include <cmath>
 
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/BoundedValidator.h"
 
@@ -45,6 +46,20 @@ void Integration::init()
   declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,"Index of the last spectrum to integrate.");
   declareProperty("IncludePartialBins", false, "If true then partial bins from the beginning and end of the input range are also included in the integration.");
 }
+
+/**
+ * Std-style comparision function object (satisfies the requirements of Compare)
+ * @return true if first argument < second argument (with some tolerance/epsilon)
+ */
+struct tolerant_less: public std::binary_function<double,double,bool>
+{
+public:
+  bool operator()(const double &left, const double &right) const
+  {
+    // soft equal, if the diff left-right is below a numerical error (uncertainty) threshold, we cannot say
+    return (left < right) && (std::abs(left - right) > 1*std::numeric_limits<double>::epsilon());
+  }
+};
 
 /** Executes the algorithm
  *
@@ -89,6 +104,7 @@ void Integration::exec()
   Progress progress(this, 0, 1, m_MaxSpec-m_MinSpec+1);
 
   const bool axisIsText = localworkspace->getAxis(1)->isText();
+  const bool axisIsNumeric = localworkspace->getAxis(1)->isNumeric();
 
   // Loop over spectra
   PARALLEL_FOR2(localworkspace,outputWorkspace)
@@ -103,6 +119,11 @@ void Integration::exec()
     {
       Mantid::API::TextAxis* newAxis = dynamic_cast<Mantid::API::TextAxis*>(outputWorkspace->getAxis(1));
       newAxis->setLabel(outWI, localworkspace->getAxis(1)->label(i));
+    }
+    else if ( axisIsNumeric )
+    {
+      Mantid::API::NumericAxis* newAxis = dynamic_cast<Mantid::API::NumericAxis*>(outputWorkspace->getAxis(1));
+      newAxis->setValue(outWI, (*(localworkspace->getAxis(1)))(i));
     }
 
     // This is the output
@@ -129,17 +150,29 @@ void Integration::exec()
 
     // Find the range [min,max]
     MantidVec::const_iterator lowit, highit;
-    if (m_MinRange == EMPTY_DBL()) lowit=X.begin();
-    else lowit=std::lower_bound(X.begin(),X.end(),m_MinRange);
+    if (m_MinRange == EMPTY_DBL())
+    {
+      lowit=X.begin();
+    }
+    else
+    {
+      lowit = std::lower_bound(X.begin(), X.end(), m_MinRange, tolerant_less());
+    }
 
-    if (m_MaxRange == EMPTY_DBL()) highit=X.end();
-    else highit=std::find_if(lowit,X.end(),std::bind2nd(std::greater<double>(),m_MaxRange));
+    if (m_MaxRange == EMPTY_DBL())
+    {
+      highit=X.end();
+    }
+    else
+    {
+      highit = std::upper_bound(lowit, X.end(), m_MaxRange, tolerant_less());
+    }
 
     // If range specified doesn't overlap with this spectrum then bail out
     if ( lowit == X.end() || highit == X.begin() ) continue;
 
     // Upper limit is the bin before, i.e. the last value smaller than MaxRange
-    --highit;
+    --highit; // (note: decrementing 'end()' is safe for vectors, at least according to the C++ standard)
 
     MantidVec::difference_type distmin = std::distance(X.begin(),lowit);
     MantidVec::difference_type distmax = std::distance(X.begin(),highit);

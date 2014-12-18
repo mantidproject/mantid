@@ -16,7 +16,7 @@ namespace Mantid
     Saves a table workspace to a reflectometry tbl format ascii file.
     Rows are 17 cells long and this save algorithm will throw if the workspace has stitch groups of longer than 3 runs.
 
-    Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

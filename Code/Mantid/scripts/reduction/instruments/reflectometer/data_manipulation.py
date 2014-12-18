@@ -95,14 +95,24 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
 
             instr_dir = config.getInstrumentDirectory()
 
+            # check date of input file
+            date = mtd['ws'].getRun().getProperty('run_start').value
+            nexus_acquisition = date.split('T')[0]
+            if nexus_acquisition > '2014-10-01':
+                geo_base_file_x = "REFL_Detector_Grouping_Sum_X_rot.xml"
+                geo_base_file_y = "REFL_Detector_Grouping_Sum_Y_rot.xml"
+            else:
+                geo_base_file_x = "REFL_Detector_Grouping_Sum_X.xml"
+                geo_base_file_y = "REFL_Detector_Grouping_Sum_Y.xml"
+                
             if is_pixel_y:
                 grouping_file = os.path.join(instr_dir, "Grouping",
-                                             "REFL_Detector_Grouping_Sum_X.xml")
+                                             geo_base_file_x)
                 GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws_output,
                                MapFile=grouping_file)
             else:
                 grouping_file = os.path.join(instr_dir, "Grouping",
-                                             "REFL_Detector_Grouping_Sum_Y.xml")
+                                             geo_base_file_y)
                 GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws_output,
                                MapFile=grouping_file)
 

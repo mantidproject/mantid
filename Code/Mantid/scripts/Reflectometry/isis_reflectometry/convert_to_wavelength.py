@@ -35,7 +35,7 @@ class ConvertToWavelength(object):
         return output
 
     @classmethod
-    def to_workspace(cls, candidate):
+    def to_workspace(cls, candidate, ws_prefix="_"):
         _workspace = None
         if isinstance(candidate, str):
             candidate = ConvertToWavelength.get_first_of_coadd_ws(candidate)
@@ -44,10 +44,10 @@ class ConvertToWavelength(object):
         elif isinstance(candidate, str):
             if  mantid.api.AnalysisDataService.doesExist(candidate.strip()):
                 _workspace = mantid.api.AnalysisDataService.retrieve(candidate.strip())
-            elif  mantid.api.AnalysisDataService.doesExist("_" + str(candidate.strip())):
-                _workspace = mantid.api.AnalysisDataService.retrieve("_" + str(candidate.strip()))
+            elif  mantid.api.AnalysisDataService.doesExist(ws_prefix + str(candidate.strip())):
+                _workspace = mantid.api.AnalysisDataService.retrieve(ws_prefix + str(candidate.strip()))
             else:
-                ws_name = "_" + str(candidate.strip())
+                ws_name = ws_prefix + str(candidate.strip())
                 msi.Load(Filename=candidate, OutputWorkspace=ws_name)
                 _workspace = mantid.api.AnalysisDataService.retrieve(ws_name)
         else:

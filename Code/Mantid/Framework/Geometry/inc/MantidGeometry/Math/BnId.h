@@ -28,7 +28,7 @@ namespace Geometry
   \todo Could be improved by using a set of 
   unsigned integers. 
 
-  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
         

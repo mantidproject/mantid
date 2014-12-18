@@ -11,7 +11,7 @@ namespace Algorithms
 
   /** IntegrateByComponent : The algorithm integrates up the instrument hierarchy, and each pixel will contain the average value for the component
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

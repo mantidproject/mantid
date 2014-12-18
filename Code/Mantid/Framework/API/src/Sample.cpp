@@ -2,14 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Sample.h"
-#include "MantidKernel/Strings.h"
 #include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/Strings.h"
 
 #include <nexus/NeXusException.hpp>
-
 
 namespace Mantid
 {
@@ -17,28 +16,26 @@ namespace Mantid
   namespace API
   {
     using namespace Mantid::Kernel;
-    using Geometry::ShapeFactory;
     using Geometry::Object;
-    using Kernel::Material;
     using Geometry::OrientedLattice;
-    using Kernel::V3D;
-    
+    using Geometry::ShapeFactory;
+
     /**
      * Default constructor. Required for cow_ptr.
      */
-    Sample::Sample() : 
-      m_name(), m_shape(), m_material(), m_environment(),
+    Sample::Sample() :
+      m_name(), m_shape(), m_environment(),
       m_lattice(NULL),m_samples(),
       m_geom_id(0), m_thick(0.0), m_height(0.0), m_width(0.0)
     {
     }
 
-    /** 
-     * Copy constructor 
+    /**
+     * Copy constructor
      *  @param copy :: const reference to the sample object
      */
     Sample::Sample(const Sample& copy) :
-      m_name(copy.m_name), m_shape(copy.m_shape), m_material(copy.m_material), 
+      m_name(copy.m_name), m_shape(copy.m_shape),
       m_environment(copy.m_environment),
       m_lattice(NULL),m_samples(copy.m_samples),
       m_geom_id(copy.m_geom_id), m_thick(copy.m_thick),
@@ -54,9 +51,9 @@ namespace Mantid
       delete m_lattice;
     }
 
-    /** Assignment operator 
+    /** Assignment operator
      * @param rhs :: const reference to the sample object
-     * @return A reference to this object, which will have the same 
+     * @return A reference to this object, which will have the same
      * state as the argument
      */
     Sample& Sample::operator=(const Sample& rhs)
@@ -64,7 +61,6 @@ namespace Mantid
       if (this == &rhs) return *this;
       m_name = rhs.m_name;
       m_shape = rhs.m_shape;
-      m_material = rhs.m_material;
       m_environment = rhs.m_environment;
       m_geom_id = rhs.m_geom_id;
       m_samples = std::vector<boost::shared_ptr<Sample> >(rhs.m_samples);
@@ -72,15 +68,15 @@ namespace Mantid
       m_height = rhs.m_height;
       m_width = rhs.m_width;
       if (m_lattice!=NULL) delete m_lattice;
-      if (rhs.m_lattice)       
+      if (rhs.m_lattice)
         m_lattice = new OrientedLattice(rhs.getOrientedLattice());
       else
         m_lattice = NULL;
 
       return *this;
     }
-  
-    /** 
+
+    /**
      * Returns the name of the sample
      * @returns The name of this  sample
      */
@@ -89,7 +85,7 @@ namespace Mantid
       return m_name;
     }
 
-    /** 
+    /**
      * Update the name of the sample
      * @param name :: The name of the sample
      */
@@ -108,22 +104,13 @@ namespace Mantid
       return m_shape;
     }
 
-    /** Set the object that describes the sample shape. It is assumed that this is defined such
-     * that its centre is at [0,0,0]
+    /** Set the object that describes the sample shape. The object is defined within
+     * its own coordinate system
      * @param shape :: The object describing the shape
-     * @throw An std::invalid_argument error if the object does 
-     * not have a valid shape
      */
     void Sample::setShape(const Object & shape)
     {
-      if( shape.hasValidShape() )
-      {
-        m_shape = shape;
-      }
-      else
-      {
-        throw std::invalid_argument("Sample::setShape - Object has an invalid shape.");
-      }
+      m_shape = shape;
     }
 
     /** Return the material.
@@ -131,16 +118,7 @@ namespace Mantid
      */
     const Material & Sample::getMaterial() const
     {
-      return m_material;
-    }
-    
-    /**
-     * Set the type of material that this sample is composed from
-     * @param material :: A reference to the material object. It is copied into the sample.
-     */
-    void Sample::setMaterial(const Kernel::Material& material)
-    {
-      m_material = material;
+      return m_shape.material();
     }
 
     /**
@@ -159,7 +137,7 @@ namespace Mantid
 
     /**
      * Attach an environment onto this sample
-     * @param env :: A pointer to a created sample environment. This takes 
+     * @param env :: A pointer to a created sample environment. This takes
      * ownership of the object.
      */
     void Sample::setEnvironment(SampleEnvironment * env)
@@ -316,7 +294,7 @@ namespace Mantid
     {
       return m_samples.size()+1;
     }
-    
+
 
     /**
      * Adds a sample to the sample collection
@@ -340,7 +318,7 @@ namespace Mantid
       file->putAttr("version", 1);
       file->putAttr("shape_xml", m_shape.getShapeXML());
 
-      m_material.saveNexus(file, "material");
+      m_shape.material().saveNexus(file, "material");
       // Write out the other (indexes 1+) samples
       file->writeData("num_other_samples", int(m_samples.size()) );
       for (size_t i=0; i<m_samples.size(); i++)
@@ -400,8 +378,10 @@ namespace Mantid
           ShapeFactory shapeMaker;
           m_shape = *shapeMaker.createShape(shape_xml, false /*Don't wrap with <type> tag*/);
         }
+        Kernel::Material material;
+        material.loadNexus(file, "material");
+        m_shape.setMaterial(material);
 
-        m_material.loadNexus(file, "material");
         // Load other samples
         int num_other_samples;
         file->readData("num_other_samples", num_other_samples);

@@ -285,8 +285,27 @@ namespace DataHandling
     declareProperty(new WorkspaceProperty<IEventWorkspace>(OUT_PARAM,"",Direction::Output),
         "The name of the workspace that will be created, filled with the read-in data and stored in the [[Analysis Data Service]].");
 
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("EventNumberWorkspace", "", Direction::Output, PropertyMode::Optional),
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("EventNumberWorkspace", "", Direction::Output,
+                                                           PropertyMode::Optional),
                     "Workspace with number of events per pulse");
+
+    // Some debugging options
+    auto mustBeNonNegative = boost::make_shared<BoundedValidator<int> >();
+    mustBeNonNegative->setLower(0);
+    declareProperty("DBOutputBlockNumber", EMPTY_INT(), mustBeNonNegative,
+                    "Index of the loading block for debugging output. ");
+
+    declareProperty("DBNumberOutputEvents", 40, mustBePositive,
+                    "Number of output events for debugging purpose.  Must be defined with DBOutputBlockNumber.");
+
+    declareProperty("DBNumberOutputPulses", EMPTY_INT(), mustBePositive,
+                    "Number of output pulses for debugging purpose. ");
+
+    std::string dbgrp = "Investigation Use";
+    setPropertyGroup("EventNumberWorkspace", dbgrp);
+    setPropertyGroup("DBOutputBlockNumber", dbgrp);
+    setPropertyGroup("DBNumberOutputEvents", dbgrp);
+    setPropertyGroup("DBNumberOutputPulses", dbgrp);
 
     return;
   }
@@ -301,7 +320,7 @@ namespace DataHandling
     */
   void LoadEventPreNexus2::exec()
   {
-    g_log.information() << "Executing LoadEventPreNexus Ver 2.0" << std::endl;
+    g_log.information("Executing LoadEventPreNexus Ver 2.0");
 
     // Process input properties
     // a. Check 'chunk' properties are valid, if set
@@ -337,6 +356,8 @@ namespace DataHandling
 
       }
     }
+
+    processInvestigationInputs();
 
     // Read input files
     prog->report("Loading Pulse ID file");
@@ -534,7 +555,7 @@ namespace DataHandling
       // d. Add this to log
       this->addToWorkspaceLog(logname, mindex);
 
-      g_log.notice() << "End of Processing Log " << logname << std::endl << std::endl;
+      g_log.notice() << "Processed imbedded log " << logname << "\n";
 
     } //ENDFOR pit
 
@@ -810,7 +831,8 @@ namespace DataHandling
       }
 
       // This processes the events. Can be done in parallel!
-      procEventsLinear(ws, theseEventVectors, event_buffer, current_event_buffer_size, fileOffset);
+      bool dbprint = m_dbOutput && (blockNum == m_dbOpBlockNumber);
+      procEventsLinear(ws, theseEventVectors, event_buffer, current_event_buffer_size, fileOffset, dbprint);
 
       // Report progress
       prog->report("Load Event PreNeXus");
@@ -957,10 +979,12 @@ namespace DataHandling
     * @param event_buffer :: The buffer containing the DAS events
     * @param current_event_buffer_size :: The length of the given DAS buffer
     * @param fileOffset :: Value for an offset into the binary file
+    * @param dbprint :: flag to print out events information
     */
   void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*workspace*/,
                                             std::vector<TofEvent> ** arrayOfVectors, DasEvent * event_buffer,
-                                            size_t current_event_buffer_size, size_t fileOffset)
+                                            size_t current_event_buffer_size, size_t fileOffset,
+                                            bool dbprint)
   {
     // Starting pulse time
     DateAndTime pulsetime;
@@ -988,12 +1012,16 @@ namespace DataHandling
     std::set<PixelType> local_wrongdetids;
 
     // process the individual events
-    size_t numwrongpid = 0;
+    std::stringstream dbss;
+    // size_t numwrongpid = 0;
     for (size_t i = 0; i < current_event_buffer_size; i++)
     {
       DasEvent & temp = *(event_buffer + i);
       PixelType pid = temp.pid;
       bool iswrongdetid = false;
+
+      if (dbprint && i < m_dbOpNumEvents)
+        dbss << i << " \t" << temp.tof << " \t" << temp.pid << "\n";
 
       // Filter out bad event
       if ((pid & ERROR_PID) == ERROR_PID)
@@ -1098,7 +1126,7 @@ namespace DataHandling
 
           theindex = newindex;
 
-          ++ numwrongpid;
+          // ++ numwrongpid;
 
           g_log.debug() << "Find New Wrong Pixel ID = " << pid << "\n";
         }
@@ -1116,6 +1144,9 @@ namespace DataHandling
       } // END-IF-ELSE: On Event's Pixel's Nature
 
     } // ENDFOR each event
+
+    if (dbprint)
+      g_log.information(dbss.str());
 
     // Update local statistics to their global counterparts
     PARALLEL_CRITICAL( LoadEventPreNexus2_global_statistics )
@@ -1361,10 +1392,48 @@ namespace DataHandling
 
     this->proton_charge_tot = this->proton_charge_tot * CURRENT_CONVERSION;
 
+    if (m_dbOpNumPulses > 0)
+    {
+      std::stringstream dbss;
+      for (size_t i = 0; i < m_dbOpNumPulses; ++i)
+        dbss << "[Pulse] " << i << "\t " << event_indices[i] << "\t " << pulsetimes[i].totalNanoseconds() << "\n";
+      g_log.information(dbss.str());
+    }
+
     //Clear the vector
     delete pulses;
 
   }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Process input properties for purpose of investigation
+    */
+  void LoadEventPreNexus2::processInvestigationInputs()
+  {
+    m_dbOpBlockNumber = getProperty("DBOutputBlockNumber");
+    if (isEmpty(m_dbOpBlockNumber))
+    {
+      m_dbOutput = false;
+      m_dbOpBlockNumber = 0;
+    }
+    else
+    {
+      m_dbOutput = true;
+
+      int numdbevents = getProperty("DBNumberOutputEvents");
+      m_dbOpNumEvents = static_cast<size_t>(numdbevents);
+    }
+
+    int dbnumpulses = getProperty("DBNumberOutputPulses");
+    if (!isEmpty(dbnumpulses))
+      m_dbOpNumPulses = static_cast<size_t>(dbnumpulses);
+    else
+      m_dbOpNumPulses = 0;
+
+    return;
+  }
+
 
 } // namespace DataHandling
 } // namespace Mantid

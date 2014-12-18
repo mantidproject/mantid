@@ -8,10 +8,11 @@ namespace MantidQt
 {
 namespace SpectrumView
 {
+
 /** An interface to the RangeHandler class, which manages the min, max and step
     range controls for the SpectrumView data viewer.
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -30,20 +31,24 @@ namespace SpectrumView
 
     Code Documentation is available at <http://doxygen.mantidproject.org>
  */
+
 class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER IRangeHandler
 {
+
 public:
   /// Construct object to manage min, max and step controls in the UI
   IRangeHandler() {}
   virtual ~IRangeHandler() {}
 
   /// Configure min, max and step controls for the specified data source
-  virtual void ConfigureRangeControls( SpectrumDataSource* data_source ) = 0;
+  virtual void configureRangeControls( SpectrumDataSource_sptr dataSource ) = 0;
+
   /// Get the range of data to display in the image, from GUI controls
-  virtual void GetRange( double &min, double &max, double &step ) = 0;
+  virtual void getRange( double &min, double &max, double &step ) = 0;
+
 };
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif // IRANGE_HANDLER_H

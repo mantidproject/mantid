@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# RPM post-uninstall script
+# If the installation directory is empty then it is removed
+#
+
+# Configured by CMake
+ENVVARS_ON_INSTALL=@ENVVARS_ON_INSTALL_INT@
+
+# Remove exe and links only if it looks like we were removed
+# and not upgraded. If launch_mantidplot.sh exists then package
+# has been upgraded and MantidPlot_exe replaced so don't touch anything
+if [ ! -e $RPM_INSTALL_PREFIX0/@BIN_DIR@/launch_mantidplot.sh  ]; then
+    rm $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot_exe
+
+    if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
+	if [ -h /etc/profile.d/mantid.sh ]; then
+	    rm /etc/profile.d/mantid.sh
+	fi
+	if [ -h /etc/profile.d/mantid.csh ]; then
+	    rm /etc/profile.d/mantid.csh
+	fi
+    fi
+fi
+
+# If the install prefix contains mantid then prune empty directories.
+# Begin extra cautious here just in case some has set the something like Prefix=/usr
+if echo \"$RPM_INSTALL_PREFIX0\" | grep -qi mantid; then
+  find $RPM_INSTALL_PREFIX0 -mindepth 1 -type d -empty -delete
+  rmdir --ignore-fail-on-non-empty -p $RPM_INSTALL_PREFIX0
+else
+  echo Install prefix does not contain the word mantid. Empty directories NOT removed.
+fi

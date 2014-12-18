@@ -14,7 +14,7 @@ namespace Mantid
     Defines an interface to an algorithm that loads a file so that it can take part in
     the automatic selection procedure provided by the FileLoaderRegistry.
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -42,6 +42,8 @@ namespace Mantid
       virtual ~IFileLoader() {}
       /// Returns a confidence value that this algorithm can load a file
       virtual int confidence(DescriptorType & descriptor) const = 0;
+      /// Returns a value indicating whether or not loader wants to load multiple files into a single workspace
+      virtual bool loadMutipleAsOne() { return false; }
     };
 
   } // namespace API

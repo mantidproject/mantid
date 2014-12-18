@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/ReflectometryReductionOneAuto.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/assign/list_of.hpp>
 
 using Mantid::Algorithms::ReflectometryReductionOneAuto;
@@ -370,7 +371,28 @@ public:
 
   }
 
+  void test_missing_instrument_parameters_throws()
+  {
+    auto tinyWS = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+    auto inst = tinyWS->getInstrument();
 
+    inst->getParameterMap()->addDouble(inst.get(), "I0MonitorIndex", 1.0);
+
+    tinyWS->mutableRun().addLogData(new PropertyWithValue<double>("Theta", 0.12345));
+    tinyWS->mutableRun().addLogData(new PropertyWithValue<std::string>("run_number", "12345"));
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+    alg->setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg->initialize());
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", tinyWS));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", outWSQName));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
+    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSQName);
+    AnalysisDataService::Instance().remove(outWSLamName);
+  }
 
 };
 

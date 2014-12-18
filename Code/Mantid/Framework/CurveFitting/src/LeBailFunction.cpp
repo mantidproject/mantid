@@ -22,7 +22,6 @@ namespace CurveFitting
 {
   namespace
   {
-    const int PEAKRADIUS = 8;
     const double PEAKRANGECONSTANT = 5.0;
 
     const string CHEBYSHEV_BACKGROUND("Chebyshev");

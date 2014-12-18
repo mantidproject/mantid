@@ -16,4 +16,9 @@ algorithm.
 **NOTE:** In the current implementation, the rendering of the NXSPE
 instrument is VERY memory intensive.
 
+Usage
+-----
+
+See :ref:`algm-SaveNXSPE` usage examples where Save and Load NXSPE operations are tested together.
+
 .. categories::

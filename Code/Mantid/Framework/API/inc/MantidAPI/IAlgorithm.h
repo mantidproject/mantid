@@ -32,7 +32,7 @@ typedef void* AlgorithmID;
  @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
  @date 11/09/2007
  
- Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -156,6 +156,10 @@ public:
   virtual void setLoggingOffset(const int value) = 0;
   ///returns the logging priority offset
   virtual int getLoggingOffset() const = 0;
+  /// disable Logging of start and end messages
+  virtual void setAlgStartupLogging(const bool enabled) = 0;
+  /// get the state of Logging of start and end messages
+  virtual bool getAlgStartupLogging() const = 0;
   ///setting the child start progress
   virtual void setChildStartProgress(const double startProgress)const = 0;
   /// setting the child end progress

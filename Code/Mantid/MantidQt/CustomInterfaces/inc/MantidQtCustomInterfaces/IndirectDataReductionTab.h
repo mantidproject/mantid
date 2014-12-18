@@ -5,9 +5,11 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtAPI/BatchAlgorithmRunner.h"
 #include "MantidQtAPI/PythonRunner.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "MantidQtCustomInterfaces/IndirectDataReduction.h"
+#include "MantidQtCustomInterfaces/IndirectTab.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include <QDoubleValidator>
@@ -40,12 +42,14 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  /** IndirectDataReductionTab : TODO: DESCRIPTION
-    
+  /** IndirectDataReductionTab
+
+    This class defines common functionality of tabs used in the Indirect Data Reduction interface.
+
     @author Samuel Jackson
     @date 13/08/2013
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -65,7 +69,7 @@ namespace CustomInterfaces
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport IndirectDataReductionTab : public QObject
+  class DLLExport IndirectDataReductionTab : public IndirectTab
   {
     Q_OBJECT
 
@@ -75,95 +79,29 @@ namespace CustomInterfaces
 
   public slots:
     void runTab();
-    void setupTab();
-    void validateTab();
-
-  protected slots:
-    /// Slot to handle when an algorithm finishes running
-    virtual void algorithmFinished(bool error);
 
   protected:
-    /// Run the load algorithm with the given file name, output name and spectrum range
-    bool loadFile(const QString& filename, const QString& outputName, const int specMin = -1, const int specMax = -1);
-
+    Mantid::API::MatrixWorkspace_sptr loadInstrumentIfNotExist(std::string instrumentName, std::string analyser="", std::string reflection="");
     /// Function to get details about the instrument configuration defined on C2E tab
     std::map<QString, QString> getInstrumentDetails();
 
-    /// Function to plot a workspace to the miniplot using a workspace name
-    void plotMiniPlot(const QString& workspace, size_t index, const QString& plotID, const QString& curveID = "");
-    /// Function to plot a workspace to the miniplot using a workspace pointer
-    void plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex, const QString& plotID, const QString& curveID = "");
-    /// Function to replot a miniplot
-    void replot(const QString& plotID);
+    std::map<std::string, double> getRangesFromInstrument(QString instName = "", QString analyser = "", QString reflection = "");
 
-    /// Function to get the range of the curve displayed on the mini plot
-    std::pair<double, double> getCurveRange(const QString& plotID);
-    /// Function to set the range of an axis on a plot
-    void setAxisRange(const QString& plotID, QwtPlot::Axis axis, std::pair<double, double> range);
-    /// Function to autoscale a given axis based on the data in a curve
-    void setXAxisToCurve(const QString& plotID, const QString& curveID);
-
-    /// Function to set the range limits of the plot
-    void setPlotRange(const QString& rsID, QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds);
-    /// Function to set the range selector on the mini plot
-    void setMiniPlotGuides(const QString& rsID, QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds);
-
-    /// Function to run an algorithm on a seperate thread
-    void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
-
-    /// Parent QWidget (if applicable)
-    QWidget *m_parentWidget;
-
-    /// Plot of the input
-    std::map<QString, QwtPlot *> m_plots;
-    /// Curve on the plot
-    std::map<QString, QwtPlotCurve *> m_curves;
-    /// Range selector widget for mini plot
-    std::map<QString, MantidQt::MantidWidgets::RangeSelector *> m_rangeSelectors;
-    /// Tree of the properties
-    std::map<QString, QtTreePropertyBrowser *> m_propTrees;
-
-    /// Internal list of the properties
-    QMap<QString, QtProperty*> m_properties;
-
-    /// Double manager to create properties
-    QtDoublePropertyManager* m_dblManager;
-    /// Boolean manager to create properties
-    QtBoolPropertyManager* m_blnManager;
-    /// Group manager to create properties
-    QtGroupPropertyManager* m_grpManager;
-
-    /// Double editor facotry for the properties browser
-    DoubleEditorFactory* m_dblEdFac;
-    /// Algorithm runner object to execute algorithms on a seperate thread from the gui
-    MantidQt::API::AlgorithmRunner* m_algRunner;
-
-    /// Use a Python runner for when we need the output of a script
-    MantidQt::API::PythonRunner m_pythonRunner;
-
-    /// Validator for int inputs
-    QIntValidator *m_valInt;
-    /// Validator for double inputs
-    QDoubleValidator *m_valDbl;
-    /// Validator for positive double inputs
-    QDoubleValidator *m_valPosDbl;
+    Ui::IndirectDataReduction m_uiForm;
 
   signals:
-    /// Send signal to parent window to show a message box to user
-    void showMessageBox(const QString& message);
-    /// Run a python script
-    void runAsPythonScript(const QString & code, bool no_output);
+    /// Update the Run button on the IDR main window
+    void updateRunButton(bool enabled = true, QString message = "Run", QString tooltip = "");
+    /// Emitted when the instrument setup is changed
+    void newInstrumentConfiguration();
 
   private:
-    /// Overidden by child class.
-    virtual void setup() = 0;
-    /// Overidden by child class.
-    virtual void run() = 0;
-    /// Overidden by child class.
-    virtual bool validate() = 0;
+    bool m_tabRunning;
 
-  protected:
-    Ui::IndirectDataReduction m_uiForm;
+    QString getInstrumentParameterFrom(Mantid::Geometry::IComponent_const_sptr comp, std::string param);
+
+  private slots:
+    void tabExecutionComplete(bool error);
 
   };
 } // namespace CustomInterfaces

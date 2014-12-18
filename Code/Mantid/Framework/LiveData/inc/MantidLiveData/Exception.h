@@ -19,7 +19,7 @@ namespace Exception
     is not in a run. LoadLiveData will ask for data again after a short delay.
     Other exceptions thrown by the listener will have the effect of stopping the algorithm.
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

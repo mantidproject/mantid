@@ -125,7 +125,6 @@ namespace Mantid
       loadDataIntoTheWorkSpace(dataFirstEntry, monitors, calculatedDetectorElasticPeakPosition);
 
       addEnergyToRun();
-      loadExperimentDetails(dataFirstEntry);
 
       // load the instrument from the IDF if it exists
       runLoadInstrument();
@@ -243,8 +242,19 @@ namespace Mantid
       m_numberOfChannels = static_cast<size_t>(data.dim2());
       size_t numberOfMonitors = monitors.size();
 
+      /**
+       * IN4 : Rosace detector is now in a different field!
+       */
+      size_t numberOfTubesInRosace = 0;
+      if (m_instrumentName == "IN4")
+      {
+        NXData dataGroup = entry.openNXData("instrument/Detector_Rosace/data");
+        NXInt data = dataGroup.openIntData();
+        numberOfTubesInRosace += static_cast<size_t>(data.dim0());
+      }
+
       // dim0 * m_numberOfPixelsPerTube is the total number of detectors
-      m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
+      m_numberOfHistograms = (m_numberOfTubes + numberOfTubesInRosace) * m_numberOfPixelsPerTube;
 
       g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << std::endl;
       g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube << std::endl;
@@ -360,18 +370,6 @@ namespace Mantid
 
     }
 
-    /*
-     * Load data about the Experiment.
-     * TODO: Scientists must provide information to complete the code below
-     *
-     * @param entry :: The Nexus entry
-     */
-    void LoadILL::loadExperimentDetails(NXEntry & entry)
-    {
-      std::string description = boost::lexical_cast<std::string>(entry.getFloat("sample/description"));
-      m_localWorkspace->mutableSample().setName(description);
-    }
-
     /**
      * Gets the experimental Elastic Peak Position in the dectector
      * as the value parsed from the nexus file might be wrong.
@@ -482,6 +480,7 @@ namespace Mantid
         const std::vector<std::vector<int> >&monitors, int vanaCalculatedDetectorElasticPeakPosition)
     {
 
+      g_log.debug() << "Loading data into the workspace..." << std::endl;
       // read in the data
       NXData dataGroup = entry.openNXData("data");
       NXInt data = dataGroup.openIntData();
@@ -561,6 +560,45 @@ namespace Mantid
           progress.report();
         }
       }
+
+      g_log.debug() << "Loading data into the workspace: DONE!" << std::endl;
+
+      /**
+       * IN4 Low angle and high angle have been split!
+       */
+      if (m_instrumentName == "IN4")
+      {
+        g_log.debug() << "Loading data into the workspace: IN4 Rosace!" << std::endl;
+        // read in the data
+        NXData dataGroup = entry.openNXData("instrument/Detector_Rosace/data");
+        NXInt data = dataGroup.openIntData();
+        auto numberOfTubes = static_cast<size_t>(data.dim0());
+        // load the counts from the file into memory
+        data.load();
+
+        Progress progress(this, 0, 1, numberOfTubes * m_numberOfPixelsPerTube);
+        for (size_t i = 0; i < numberOfTubes; ++i)
+        {
+          for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j)
+          {
+            // just copy the time binning axis to every spectra
+            m_localWorkspace->dataX(spec) = m_localWorkspace->readX(firstSpec);
+
+            // Assign Y
+            int* data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+            m_localWorkspace->dataY(spec).assign(data_p, data_p + m_numberOfChannels);
+
+            // Assign Error
+            MantidVec& E = m_localWorkspace->dataE(spec);
+            std::transform(data_p, data_p + m_numberOfChannels, E.begin(), LoadILL::calculateError);
+
+            ++spec;
+            progress.report();
+          }
+        }
+
+      }
+
     }
 
     /**

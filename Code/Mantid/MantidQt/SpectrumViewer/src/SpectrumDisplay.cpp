@@ -14,6 +14,7 @@
 #include "MantidQtSpectrumViewer/ColorMaps.h"
 #include "MantidQtSpectrumViewer/QtUtils.h"
 #include "MantidQtSpectrumViewer/SVUtils.h"
+#include "MantidQtSpectrumViewer/SliderHandler.h"
 
 namespace MantidQt
 {
@@ -23,108 +24,117 @@ namespace SpectrumView
 /**
  * Make an SpectrumDisplay to display with the given widgets and controls.
  *
- * @param spectrum_plot   The QwtPlot that will hold the image
- * @param slider_handler  The object that manages interaction with the
- *                        horizontal and vertical scroll bars
- * @param range_handler   The object that manages interaction with the range.
- * @param h_graph         The GraphDisplay for the graph showing horizontal
- *                        cuts through the image at the bottom of the image.
- * @param v_graph         The GraphDisplay for the graph showing vertical 
- *                        cuts through the image at the left side of the image.
- * @param table_widget    The widget where the information about a pointed
- *                        at location will be displayed.
+ * @param spectrumPlot   The QwtPlot that will hold the image
+ * @param sliderHandler  The object that manages interaction with the
+ *                       horizontal and vertical scroll bars
+ * @param rangeHander  The object that manages interaction with the range.
+ * @param hGraph        The GraphDisplay for the graph showing horizontal
+ *                       cuts through the image at the bottom of the image.
+ * @param vGraph        The GraphDisplay for the graph showing vertical
+ *                       cuts through the image at the left side of the image.
+ * @param tableWidget   The widget where the information about a pointed
+ *                       at location will be displayed.
  */
-SpectrumDisplay::SpectrumDisplay(  QwtPlot*       spectrum_plot,
-                             ISliderHandler* slider_handler,
-                             IRangeHandler*  range_handler,
-                             GraphDisplay*  h_graph,
-                             GraphDisplay*  v_graph,
-                             QTableWidget*  table_widget )
-  : data_source(0), spectrum_plot(spectrum_plot), slider_handler(slider_handler),
-    range_handler(range_handler), h_graph_display(h_graph), v_graph_display(v_graph),
-    image_table(table_widget)
+SpectrumDisplay::SpectrumDisplay(  QwtPlot*         spectrumPlot,
+                                   ISliderHandler*  sliderHandler,
+                                   IRangeHandler*   rangeHander,
+                                   GraphDisplay*    hGraph,
+                                   GraphDisplay*    vGraph,
+                                   QTableWidget*    tableWidget ) :
+  m_spectrumPlot(spectrumPlot),
+  m_sliderHandler(sliderHandler),
+  m_rangeHandler(rangeHander),
+  m_hGraphDisplay(hGraph),
+  m_vGraphDisplay(vGraph),
+  m_pointedAtX(0.0), m_pointedAtY(0.0),
+  m_imageTable(tableWidget),
+  m_totalXMin(0.0), m_totalXMax(0.0),
+  m_totalYMin(0.0), m_totalYMax(0.0)
 {
   ColorMaps::GetColorMap( ColorMaps::HEAT,
                           256,
-                          positive_color_table );
+                          m_positiveColorTable );
   ColorMaps::GetColorMap( ColorMaps::GRAY,
                           256,
-                          negative_color_table );
+                          m_negativeColorTable );
 
-  spectrum_plot_item = new SpectrumPlotItem;
+  m_spectrumPlotItem = new SpectrumPlotItem;
   setupSpectrumPlotItem();
 }
 
 
 SpectrumDisplay::~SpectrumDisplay()
 {
-  // std::cout << "SpectrumDisplay destructor called" << std::endl;
-  delete spectrum_plot_item;
+  delete m_spectrumPlotItem;
 }
+
 
 bool SpectrumDisplay::hasData(const std::string& wsName,
                               const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
-  return this->data_source->hasData(wsName, ws);
+  return m_dataSource->hasData(wsName, ws);
 }
+
 
 /// Set some properties of the SpectrumPlotItem object
 void SpectrumDisplay::setupSpectrumPlotItem()
 {
-  spectrum_plot_item->setXAxis( QwtPlot::xBottom );
-  spectrum_plot_item->setYAxis( QwtPlot::yLeft );
+  m_spectrumPlotItem->setXAxis( QwtPlot::xBottom );
+  m_spectrumPlotItem->setYAxis( QwtPlot::yLeft );
 
-  spectrum_plot_item->attach( spectrum_plot );
+  m_spectrumPlotItem->attach( m_spectrumPlot );
 
   double DEFAULT_INTENSITY = 30;
-  SetIntensity( DEFAULT_INTENSITY );
+  setIntensity( DEFAULT_INTENSITY );
 }
+
 
 /**
  * Set the data source from which the image and data table information will
  * be obtained.
  *
- * @param data_source The SpectrumDataSource that provides the array of values
+ * @param dataSource The SpectrumDataSource that provides the array of values
  *                    and information for the table.
  */
-void SpectrumDisplay::SetDataSource( SpectrumDataSource* data_source )
+void SpectrumDisplay::setDataSource( SpectrumDataSource_sptr dataSource )
 {
-  this->data_source = data_source;
-  h_graph_display->SetDataSource( data_source );
-  v_graph_display->SetDataSource( data_source );
+  m_dataSource = dataSource;
 
-  total_y_min = data_source->GetYMin();
-  total_y_max = data_source->GetYMax();
+  m_hGraphDisplay->setDataSource( m_dataSource );
+  m_vGraphDisplay->setDataSource( m_dataSource );
 
-  total_x_min = data_source->GetXMin();
-  total_x_max = data_source->GetXMax();
-  
-  pointed_at_x = DBL_MAX;
-  pointed_at_y = DBL_MAX;
+  m_totalYMin = m_dataSource->getYMin();
+  m_totalYMax = m_dataSource->getYMax();
 
-  int    n_rows = 500;         // get reasonable size initial image data
-  int    n_cols = 500;     
-                               // data_array is deleted in the SpectrumPlotItem
-  data_array = data_source->GetDataArray( total_x_min, total_x_max,
-                                          total_y_min, total_y_max,
-                                          n_rows, n_cols,
-                                          false );
+  m_totalXMin = m_dataSource->getXMin();
+  m_totalXMax = m_dataSource->getXMax();
 
-  spectrum_plot->setAxisScale( QwtPlot::xBottom, data_array->GetXMin(),
-                                              data_array->GetXMax() );
-  spectrum_plot->setAxisScale( QwtPlot::yLeft, data_array->GetYMin(),
-                                            data_array->GetYMax() );
+  m_pointedAtX = DBL_MAX;
+  m_pointedAtY = DBL_MAX;
 
-  spectrum_plot_item->SetData(  data_array,
-                            &positive_color_table, 
-                            &negative_color_table );
+  int n_rows = static_cast<int>(m_totalYMax - m_totalYMin); // get reasonable size initial image data
+  int n_cols = 500;
 
-  range_handler->ConfigureRangeControls( data_source );
+  // m_dataArray is deleted in the SpectrumPlotItem
+  m_dataArray = m_dataSource->getDataArray( m_totalXMin, m_totalXMax,
+                                            m_totalYMin, m_totalYMax,
+                                            n_rows, n_cols,
+                                            false );
 
-  QRect draw_area;
-  GetDisplayRectangle( draw_area );
-  slider_handler->ConfigureSliders( draw_area, data_source );
+  m_spectrumPlot->setAxisScale( QwtPlot::xBottom, m_dataArray->getXMin(), m_dataArray->getXMax() );
+  m_spectrumPlot->setAxisScale( QwtPlot::yLeft,   m_dataArray->getYMin(), m_dataArray->getYMax() );
+
+  m_spectrumPlotItem->setData( m_dataArray,
+                               &m_positiveColorTable,
+                               &m_negativeColorTable );
+
+  m_rangeHandler->configureRangeControls( m_dataSource );
+
+  QRect drawArea;
+  getDisplayRectangle( drawArea );
+  m_sliderHandler->configureSliders( drawArea, m_dataSource );
 }
+
 
 /**
  *  Rebuild the scrollbars and image due to a change in the range xmin, xmax
@@ -132,37 +142,47 @@ void SpectrumDisplay::SetDataSource( SpectrumDataSource* data_source )
  *  the xmin, xmax or step controls.  It should not be called directly from
  *  other threads.
  */
-void SpectrumDisplay::UpdateRange()
+void SpectrumDisplay::updateRange()
 {
-  if ( data_source == 0 )
-  {
-    return;   // no image data to update
-  }
+  if ( m_dataSource == 0 )
+    return;   // No image data to update
 
-  if ( DataSourceRangeChanged() )
-  {
-    SetDataSource( data_source );   // re-initialize with the altered source
-  }
+  if ( dataSourceRangeChanged() )
+    setDataSource( m_dataSource );   // Re-initialize with the altered source
 
-  QRect display_rect;
-  GetDisplayRectangle( display_rect );
-                                           // range controls now determine
-                                            // the number of bins
-  double min  = total_x_min;
-  double max  = total_x_max;
-  double step = (total_x_max - total_x_min)/2000;
-  range_handler->GetRange( min, max, step );
-    
-  int n_bins = SVUtils::NumSteps( min, max, step );
-  if ( n_bins == 0 )
-  {
+  QRect displayRect;
+  getDisplayRectangle( displayRect );
+  // Range controls now determine the number of bins
+
+  double min  = m_totalXMin;
+  double max  = m_totalXMax;
+  double step = (m_totalXMax - m_totalXMin) / 2000;
+  m_rangeHandler->getRange( min, max, step );
+
+  int numBins = SVUtils::NumSteps( min, max, step );
+  if ( numBins == 0 )
     return;
-  }
 
-  slider_handler->ConfigureHSlider( n_bins, display_rect.width() );
+  m_sliderHandler->configureHSlider( numBins, displayRect.width() );
 
-  UpdateImage();
+  updateImage();
 }
+
+
+/**
+ * Updates the rnages of the scroll bars when the window is resized.
+ */
+void SpectrumDisplay::handleResize()
+{
+  QRect draw_area;
+  getDisplayRectangle( draw_area );
+
+  // Notify the sliders of the resize
+  SliderHandler * sliderHandler = dynamic_cast<SliderHandler*>(m_sliderHandler);
+  if(sliderHandler)
+    sliderHandler->reConfigureSliders(draw_area, m_dataSource);
+}
+
 
 /**
  *  This will rebuild the image from the data source.  It should be invoked
@@ -170,31 +190,31 @@ void SpectrumDisplay::UpdateRange()
  *  intensity tables are changed.  It should not be called directly from
  *  other threads.
  */
-void SpectrumDisplay::UpdateImage()
+void SpectrumDisplay::updateImage()
 {
-  if ( data_source == 0 )
+  if ( m_dataSource == 0 )
   {
     return;   // no image data to update
   }
 
-  if ( DataSourceRangeChanged() )
+  if ( dataSourceRangeChanged() )
   {
-    SetDataSource( data_source );   // re-initialize with the altered source
+    setDataSource( m_dataSource );   // re-initialize with the altered source
   }
 
   QRect display_rect;
-  GetDisplayRectangle( display_rect );
+  getDisplayRectangle( display_rect );
 
-  double scale_y_min = data_source->GetYMin();
-  double scale_y_max = data_source->GetYMax();
+  double scale_y_min = m_dataSource->getYMin();
+  double scale_y_max = m_dataSource->getYMax();
 
-  double scale_x_min  = total_x_min;
-  double scale_x_max  = total_x_max;
-  double x_step = (total_x_max - total_x_min)/2000;
+  double scale_x_min  = m_totalXMin;
+  double scale_x_max  = m_totalXMax;
+  double x_step = (m_totalXMax - m_totalXMin)/2000;
 
-  range_handler->GetRange( scale_x_min, scale_x_max, x_step );
+  m_rangeHandler->getRange( scale_x_min, scale_x_max, x_step );
 
-  int n_rows = (int)data_source->GetNRows();
+  int n_rows = (int)m_dataSource->getNRows();
   int n_cols = SVUtils::NumSteps( scale_x_min, scale_x_max, x_step );
 
                                      // This works for linear or log scales
@@ -203,32 +223,32 @@ void SpectrumDisplay::UpdateImage()
     return;                          // can't draw empty image
   }
 
-  if ( slider_handler->VSliderOn() )
+  if ( m_sliderHandler->vSliderOn() )
   {
     int y_min;
     int y_max;
-    slider_handler->GetVSliderInterval( y_min, y_max );
+    m_sliderHandler->getVSliderInterval( y_min, y_max );
 
     double new_y_min = 0;
     double new_y_max = 0;
 
-    SVUtils::Interpolate( 0, n_rows, y_min, 
+    SVUtils::Interpolate( 0, n_rows, y_min,
                           scale_y_min, scale_y_max, new_y_min );
-    SVUtils::Interpolate( 0, n_rows, y_max, 
+    SVUtils::Interpolate( 0, n_rows, y_max,
                           scale_y_min, scale_y_max, new_y_max );
 
     scale_y_min = new_y_min;
     scale_y_max = new_y_max;
   }
 
-  if ( slider_handler->HSliderOn() )
+  if ( m_sliderHandler->hSliderOn() )
   {
     int x_min;
     int x_max;
-    slider_handler->GetHSliderInterval( x_min, x_max );  
+    m_sliderHandler->getHSliderInterval( x_min, x_max );
                             // NOTE: The interval [xmin,xmax] is always
                             // found linearly.  For log_x, we need to adjust it
-      
+
     double new_x_min = 0;
     double new_x_max = 0;
 
@@ -263,38 +283,39 @@ void SpectrumDisplay::UpdateImage()
 
   bool is_log_x = ( x_step < 0 );
                                          // NOTE: The DataArray is deleted
-  data_array = data_source->GetDataArray( scale_x_min, scale_x_max, 
-                                          scale_y_min, scale_y_max, 
-                                          n_rows, n_cols,
-                                          is_log_x );
+  m_dataArray = m_dataSource->getDataArray( scale_x_min, scale_x_max,
+                                            scale_y_min, scale_y_max,
+                                            n_rows, n_cols,
+                                            is_log_x );
 
-  is_log_x = data_array->IsLogX();       // Data source might not be able to
+  is_log_x = m_dataArray->isLogX();       // Data source might not be able to
                                          // provide log binned data, so check
                                          // if log binned data was returned.
 
-  spectrum_plot->setAxisScale( QwtPlot::xBottom, data_array->GetXMin(),
-                                              data_array->GetXMax() );
+  m_spectrumPlot->setAxisScale( QwtPlot::xBottom, m_dataArray->getXMin(),
+                                                  m_dataArray->getXMax() );
+
   if ( is_log_x )
   {
     QwtLog10ScaleEngine* log_engine = new QwtLog10ScaleEngine();
-    spectrum_plot->setAxisScaleEngine( QwtPlot::xBottom, log_engine );
+    m_spectrumPlot->setAxisScaleEngine( QwtPlot::xBottom, log_engine );
   }
   else
   {
     QwtLinearScaleEngine* linear_engine = new QwtLinearScaleEngine();
-    spectrum_plot->setAxisScaleEngine( QwtPlot::xBottom, linear_engine );
+    m_spectrumPlot->setAxisScaleEngine( QwtPlot::xBottom, linear_engine );
   }
 
-  spectrum_plot->setAxisScale( QwtPlot::yLeft, data_array->GetYMin(),
-                                            data_array->GetYMax() );
+  m_spectrumPlot->setAxisScale( QwtPlot::yLeft, m_dataArray->getYMin(),
+                                                m_dataArray->getYMax() );
 
-  spectrum_plot_item->SetData( data_array,
-                           &positive_color_table,
-                           &negative_color_table );
-  spectrum_plot->replot();
+  m_spectrumPlotItem->setData( m_dataArray,
+                               &m_positiveColorTable,
+                               &m_negativeColorTable );
+  m_spectrumPlot->replot();
 
-  SetVGraph( pointed_at_x );
-  SetHGraph( pointed_at_y );
+  setVGraph( m_pointedAtX );
+  setHGraph( m_pointedAtY );
 }
 
 
@@ -305,50 +326,64 @@ void SpectrumDisplay::UpdateImage()
  *  scale, the negative color table should be a gray scale to easily
  *  distinguish between positive and negative values.
  *
- *  @param positive_color_table  The new color table used to map positive data 
- *                               values to an RGB color.  This can have any
- *                               positive number of values, but will typically
- *                               have 256 entries.
- *  @param negative_color_table  The new color table used to map negative data 
- *                               values to an RGB color.  This must have the
- *                               same number of entries as the positive
- *                               color table.
+ *  @param positiveColorTable  The new color table used to map positive data
+ *                             values to an RGB color.  This can have any
+ *                             positive number of values, but will typically
+ *                             have 256 entries.
+ *  @param negativeColorTable  The new color table used to map negative data
+ *                             values to an RGB color.  This must have the
+ *                             same number of entries as the positive
+ *                             color table.
  */
-void SpectrumDisplay::SetColorScales( std::vector<QRgb> & positive_color_table,
-                                   std::vector<QRgb> & negative_color_table )
+void SpectrumDisplay::setColorScales( std::vector<QRgb> & positiveColorTable,
+                                      std::vector<QRgb> & negativeColorTable )
 {
-  this->positive_color_table.resize( positive_color_table.size() );
-  for ( size_t i = 0; i < positive_color_table.size(); i++ )
-  {
-    this->positive_color_table[i] = positive_color_table[i];
-  }
+  m_positiveColorTable.resize( positiveColorTable.size() );
+  for ( size_t i = 0; i < positiveColorTable.size(); i++ )
+    m_positiveColorTable[i] = positiveColorTable[i];
 
-  this->negative_color_table.resize( negative_color_table.size() );
-  for ( size_t i = 0; i < negative_color_table.size(); i++ )
-  {
-    this->negative_color_table[i] = negative_color_table[i];
-  }
- 
-  UpdateImage();
+  this->m_negativeColorTable.resize( negativeColorTable.size() );
+  for ( size_t i = 0; i < negativeColorTable.size(); i++ )
+    m_negativeColorTable[i] = negativeColorTable[i];
+
+  updateImage();
 }
 
 
 /**
  *  Change the control parameter (0...100) used to brighten the image.
  *  If the control parameter is 0, the mapping from data values to color
- *  table index will be linear.  As the control parameter is increased 
+ *  table index will be linear.  As the control parameter is increased
  *  the mapping becomes more and more non-linear in a way that emphasizes
  *  the lower level values.  This is similar to a log intensity scale.
- *  
- *  @param control_parameter  This is clamped between 0 (linear) and
- *                            100 (most emphasis on low intensity values)
+ *
+ *  @param controlParameter  This is clamped between 0 (linear) and
+ *                           100 (most emphasis on low intensity values)
  */
-void SpectrumDisplay::SetIntensity( double control_parameter )
+void SpectrumDisplay::setIntensity( double controlParameter )
 {
   size_t DEFAULT_SIZE = 100000;
-  ColorMaps::GetIntensityMap( control_parameter, DEFAULT_SIZE, intensity_table);
-  spectrum_plot_item->SetIntensityTable( &intensity_table );
-  UpdateImage();
+  ColorMaps::GetIntensityMap( controlParameter, DEFAULT_SIZE, m_intensityTable);
+  m_spectrumPlotItem->setIntensityTable( &m_intensityTable );
+  updateImage();
+}
+
+
+QPoint SpectrumDisplay::getPlotTransform( QPair<double, double> values )
+{
+  double x = m_spectrumPlot->transform( QwtPlot::xBottom, values.first );
+  double y = m_spectrumPlot->transform( QwtPlot::yLeft,   values.second );
+
+  return QPoint((int)x, (int)y);
+}
+
+
+QPair<double, double> SpectrumDisplay::getPlotInvTransform( QPoint point )
+{
+  double x = m_spectrumPlot->invTransform( QwtPlot::xBottom, point.x() );
+  double y = m_spectrumPlot->invTransform( QwtPlot::yLeft,   point.y() );
+
+  return qMakePair(x,y);
 }
 
 
@@ -357,28 +392,26 @@ void SpectrumDisplay::SetIntensity( double control_parameter )
  * show those as graphs in the horizontal and vertical graphs and show
  * information about the specified point.
  *
- * @param point  The point that the user is currently pointing at with 
+ * @param point  The point that the user is currently pointing at with
  *               the mouse.
  * @param mouseClick Which mouse button was clicked (used by derived class)
  * @return A pair containing the (x,y) values in the graph of the point
  */
-QPair<double,double> SpectrumDisplay::SetPointedAtPoint( QPoint point, int /*mouseClick*/ )
+QPair<double,double> SpectrumDisplay::setPointedAtPoint( QPoint point, int /*mouseClick*/ )
 {
-  if ( data_source == 0 || data_array == 0 )
-  { 
-    return qMakePair(0.0,0.0);
-  }
+  if ( m_dataSource == 0 || m_dataArray == 0 )
+    return qMakePair(0.0, 0.0);
 
-  double x = spectrum_plot->invTransform( QwtPlot::xBottom, point.x() );
-  double y = spectrum_plot->invTransform( QwtPlot::yLeft, point.y() );
+  QPair<double, double> transPoints = getPlotInvTransform(point);
 
-  SetHGraph( y );
-  SetVGraph( x );
+  setHGraph( transPoints.second );
+  setVGraph( transPoints.first );
 
-  ShowInfoList( x, y );
+  showInfoList( transPoints.first, transPoints.second );
 
-  return qMakePair(x,y);
+  return transPoints;
 }
+
 
 /*
  *  Extract data for Horizontal graph from the image at the specified y value.
@@ -387,24 +420,24 @@ QPair<double,double> SpectrumDisplay::SetPointedAtPoint( QPoint point, int /*mou
  *
  *  @param y   The y-value of the horizontal cut through the image.
  */
-void SpectrumDisplay::SetHGraph( double y )
+void SpectrumDisplay::setHGraph( double y )
 {
-  if ( y < data_array->GetYMin() || y > data_array->GetYMax()  )
+  if ( y < m_dataArray->getYMin() || y > m_dataArray->getYMax() )
   {
-    h_graph_display->Clear();
+    m_hGraphDisplay->clear();
     return;
   }
 
-  pointed_at_y = y;
+  m_pointedAtY = y;
 
-  float *data   = data_array->GetData();
+  std::vector<float>data   = m_dataArray->getData();
 
-  size_t n_cols = data_array->GetNCols();
+  size_t n_cols = m_dataArray->getNCols();
 
-  double x_min = data_array->GetXMin();
-  double x_max = data_array->GetXMax();
+  double x_min = m_dataArray->getXMin();
+  double x_max = m_dataArray->getXMax();
 
-  size_t row = data_array->RowOfY( y );
+  size_t row = m_dataArray->rowOfY( y );
 
   QVector<double> xData;
   QVector<double> yData;
@@ -413,15 +446,15 @@ void SpectrumDisplay::SetHGraph( double y )
   yData.push_back( data[ row * n_cols ] );
   for ( size_t col = 0; col < n_cols; col++ )
   {
-    double x_val = data_array->XOfColumn( col );
+    double x_val = m_dataArray->xOfColumn( col );
     xData.push_back( x_val );                           // mark data at col
     yData.push_back( data[ row * n_cols + col ] );      // centers
   }
   xData.push_back( x_max );                             // end at x_max
   yData.push_back( data[ row * n_cols + n_cols-1 ] );
 
-  h_graph_display->SetLogX( data_array->IsLogX() );
-  h_graph_display->SetData( xData, yData, y );
+  m_hGraphDisplay->setLogX( m_dataArray->isLogX() );
+  m_hGraphDisplay->setData( xData, yData, y );
 }
 
 
@@ -432,25 +465,25 @@ void SpectrumDisplay::SetHGraph( double y )
  *
  *  @param x   The x-value of the vertical cut through the image.
  */
-void SpectrumDisplay::SetVGraph( double x )
+void SpectrumDisplay::setVGraph( double x )
 {
-  if ( x < data_array->GetXMin() || x > data_array->GetXMax()  )
+  if ( x < m_dataArray->getXMin() || x > m_dataArray->getXMax() )
   {
-    v_graph_display->Clear();
+    m_vGraphDisplay->clear();
     return;
   }
 
-  pointed_at_x = x;
+  m_pointedAtX = x;
 
-  float *data   = data_array->GetData();
+  std::vector<float> data   = m_dataArray->getData();
 
-  size_t n_rows = data_array->GetNRows();
-  size_t n_cols = data_array->GetNCols();
+  size_t n_rows = m_dataArray->getNRows();
+  size_t n_cols = m_dataArray->getNCols();
 
-  double y_min = data_array->GetYMin();
-  double y_max = data_array->GetYMax();
+  double y_min = m_dataArray->getYMin();
+  double y_max = m_dataArray->getYMax();
 
-  size_t col = data_array->ColumnOfX( x );
+  size_t col = m_dataArray->columnOfX( x );
 
   QVector<double> v_xData;
   QVector<double> v_yData;
@@ -460,49 +493,73 @@ void SpectrumDisplay::SetVGraph( double x )
   v_xData.push_back( data[col] );
   for ( size_t row = 0; row < n_rows; row++ )     // mark data at row centres
   {
-    double y_val = data_array->YOfRow( row );
+    double y_val = m_dataArray->yOfRow( row );
     v_yData.push_back( y_val );
     v_xData.push_back( data[ row * n_cols + col ] );
   }
   v_yData.push_back( y_max );                     // end at y_max
   v_xData.push_back( data[ (n_rows-1) * n_cols + col] );
 
-  v_graph_display->SetData( v_xData, v_yData, x );
+  m_vGraphDisplay->setData( v_xData, v_yData, x );
 }
 
 
 /**
  *  Get the information about a pointed at location and show it in the
- *  table. 
+ *  table.
  *
  *  @param x  The x coordinate of the pointed at location on the image.
  *  @param y  The y coordinate of the pointed at location on the image.
  */
-void SpectrumDisplay::ShowInfoList( double x, double y )
+std::vector<std::string> SpectrumDisplay::showInfoList( double x, double y )
 {
   std::vector<std::string> info_list;
-  data_source->GetInfoList( x, y, info_list );
+  m_dataSource->getInfoList( x, y, info_list );
   int n_infos = (int)info_list.size() / 2;
 
-  image_table->setRowCount(n_infos + 1);
-  image_table->setColumnCount(2);
-  image_table->verticalHeader()->hide();
-  image_table->horizontalHeader()->hide();
+  m_imageTable->setRowCount(n_infos + 1);
+  m_imageTable->setColumnCount(2);
+  m_imageTable->verticalHeader()->hide();
+  m_imageTable->horizontalHeader()->hide();
 
   int width = 9;
   int prec  = 3;
 
-  double value = data_array->GetValue( x, y );
-  QtUtils::SetTableEntry( 0, 0, "Value", image_table );
-  QtUtils::SetTableEntry( 0, 1, width, prec, value, image_table );
+  double value = m_dataArray->getValue( x, y );
+  QtUtils::SetTableEntry( 0, 0, "Value", m_imageTable );
+  QtUtils::SetTableEntry( 0, 1, width, prec, value, m_imageTable );
 
   for ( int i = 0; i < n_infos; i++ )
   {
-    QtUtils::SetTableEntry( i+1, 0, info_list[2*i], image_table );
-    QtUtils::SetTableEntry( i+1, 1, info_list[2*i+1], image_table );
+    QtUtils::SetTableEntry( i+1, 0, info_list[2*i], m_imageTable );
+    QtUtils::SetTableEntry( i+1, 1, info_list[2*i+1], m_imageTable );
   }
 
-  image_table->resizeColumnsToContents();
+  m_imageTable->resizeColumnsToContents();
+
+  return info_list;
+}
+
+
+/**
+ * Gets the X value being pointed at.
+ *
+ * @returns X value
+ */
+double SpectrumDisplay::getPointedAtX()
+{
+  return m_pointedAtX;
+}
+
+
+/**
+ * Gets the Y value being pointed at.
+ *
+ * @returns Y value
+ */
+double SpectrumDisplay::getPointedAtY()
+{
+  return m_pointedAtY;
 }
 
 
@@ -512,15 +569,15 @@ void SpectrumDisplay::ShowInfoList( double x, double y )
  *  @param rect  A QRect object that will be filled out with position, width
  *               and height of the pixel region covered by the image.
  */
-void SpectrumDisplay::GetDisplayRectangle( QRect &rect )
+void SpectrumDisplay::getDisplayRectangle( QRect &rect )
 {
-  QwtScaleMap xMap = spectrum_plot->canvasMap( QwtPlot::xBottom );
-  QwtScaleMap yMap = spectrum_plot->canvasMap( QwtPlot::yLeft );
+  QwtScaleMap xMap = m_spectrumPlot->canvasMap( QwtPlot::xBottom );
+  QwtScaleMap yMap = m_spectrumPlot->canvasMap( QwtPlot::yLeft );
 
-  double x_min = data_array->GetXMin();
-  double x_max = data_array->GetXMax();
-  double y_min = data_array->GetYMin();
-  double y_max = data_array->GetYMax();
+  double x_min = m_dataArray->getXMin();
+  double x_max = m_dataArray->getXMax();
+  double y_min = m_dataArray->getYMin();
+  double y_max = m_dataArray->getYMax();
 
   int pix_x_min = (int)xMap.transform( x_min );
   int pix_x_max = (int)xMap.transform( x_max );
@@ -543,21 +600,14 @@ void SpectrumDisplay::GetDisplayRectangle( QRect &rect )
 }
 
 
-bool SpectrumDisplay::DataSourceRangeChanged()
+bool SpectrumDisplay::dataSourceRangeChanged()
 {
-  if ( total_y_min != data_source->GetYMin() ||
-       total_y_max != data_source->GetYMax() ||
-       total_x_min != data_source->GetXMin() ||
-       total_x_max != data_source->GetXMax() )
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
+  return ( m_totalYMin != m_dataSource->getYMin() ||
+           m_totalYMax != m_dataSource->getYMax() ||
+           m_totalXMin != m_dataSource->getXMin() ||
+           m_totalXMax != m_dataSource->getXMax() );
 }
 
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt

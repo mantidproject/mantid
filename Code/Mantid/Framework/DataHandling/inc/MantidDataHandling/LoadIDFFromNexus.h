@@ -1,4 +1,4 @@
-#ifndef MANTID_DATAHANDLING_LOADIDFROMNEXUS_H_
+#ifndef MANTID_DATAHANDLING_LOADIDFFROMNEXUS_H_
 #define MANTID_DATAHANDLING_LOADIDFFROMNEXUS_H_
 
 //----------------------------------------------------------------------
@@ -28,7 +28,7 @@ namespace Mantid
     <LI> Workspace - The name of the workspace in which to use as a basis for any data to be added.</LI>
     </UL>
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

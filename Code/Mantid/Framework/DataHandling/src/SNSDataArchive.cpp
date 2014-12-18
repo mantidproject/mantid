@@ -35,6 +35,8 @@ namespace DataHandling
   {
     // Get a reference to the logger
     Kernel::Logger g_log("SNSDataArchive");
+    /// Base url for restful web survice
+    const std::string BASE_URL("http://icat.sns.gov:2080/icat-rest-ws/datafile/filename/");
   }
 
   DECLARE_ARCHIVESEARCH(SNSDataArchive,SNSDataSearch);
@@ -59,9 +61,8 @@ std::string SNSDataArchive::getArchivePath(const std::set<std::string>& filename
   }
   g_log.debug()  << "\n";
 
-  std::string baseURL("http://icat.sns.gov:8080/icat-rest-ws/datafile/filename/");
 
-  std::string URL(baseURL + filename);
+  const std::string URL(BASE_URL + filename);
   g_log.debug() << "URL: " << URL << "\n";
 
   Poco::URI uri(URL);

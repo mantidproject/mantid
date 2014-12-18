@@ -11,16 +11,19 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "MantidKernel/V3D.h" 
-#include "MantidGeometry/Objects/Object.h" 
-#include "MantidGeometry/Surfaces/Cylinder.h" 
-#include "MantidGeometry/Surfaces/Sphere.h" 
-#include "MantidGeometry/Surfaces/Plane.h" 
-#include "MantidGeometry/Math/Algebra.h" 
-#include "MantidGeometry/Surfaces/SurfaceFactory.h" 
-#include "MantidGeometry/Objects/Track.h" 
+#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Math/Algebra.h"
+#include "MantidGeometry/Surfaces/SurfaceFactory.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
+
+#include "MantidKernel/Material.h"
+
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid;
 using namespace Geometry;
@@ -31,6 +34,67 @@ class ObjectTest: public CxxTest::TestSuite
 
 public:
 
+  void testDefaultObjectHasEmptyMaterial()
+  {
+    Object obj;
+
+    TSM_ASSERT_DELTA("Expected a zero number density",0.0, obj.material().numberDensity(), 1e-12);
+  }
+
+  void testObjectSetMaterialReplacesExisting()
+  {
+    using Mantid::Kernel::Material;
+    Object obj;
+
+    TSM_ASSERT_DELTA("Expected a zero number density", 0.0,
+                     obj.material().numberDensity(), 1e-12);
+    obj.setMaterial(Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0));
+    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
+                     obj.material().numberDensity(), 1e-12);
+  }
+
+  void testCopyConstructorGivesObjectWithSameAttributes()
+  {
+    Object_sptr original = ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
+    int objType(-1);
+    double radius(-1.0), height(-1.0);
+    std::vector<V3D> pts;
+    original->GetObjectGeom(objType, pts, radius, height);
+    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(original->getGeometryHandler()));
+
+    Object copy(*original);
+    // The copy should be a primitive object with a GluGeometryHandler
+    objType = -1;
+    copy.GetObjectGeom(objType, pts, radius, height);
+
+    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(copy.getGeometryHandler()));
+    TS_ASSERT_EQUALS(copy.getName(), original->getName());
+    // Check the string representation is the same
+    TS_ASSERT_EQUALS(copy.str(), original->str());
+    TS_ASSERT_EQUALS(copy.getSurfaceIndex(), original->getSurfaceIndex());
+  }
+
+  void testAssignmentOperatorGivesObjectWithSameAttributes()
+  {
+    Object_sptr original = ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
+    int objType(-1);
+    double radius(-1.0), height(-1.0);
+    std::vector<V3D> pts;
+    original->GetObjectGeom(objType, pts, radius, height);
+    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(original->getGeometryHandler()));
+
+    Object lhs; // initialize
+    lhs = *original; // assign
+    // The copy should be a primitive object with a GluGeometryHandler
+    objType = -1;
+    lhs.GetObjectGeom(objType, pts, radius, height);
+
+    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(lhs.getGeometryHandler()));
+  }
 
   void testCreateUnitCube()
   {
@@ -179,7 +243,7 @@ public:
 
   void testGetBoundingBoxForSphere()
   {
-    Object_sptr geom_obj = createSphere();    
+    Object_sptr geom_obj = createSphere();
     const double tolerance(1e-10);
 
     double xmax,ymax,zmax,xmin,ymin,zmin;
@@ -234,10 +298,10 @@ public:
     SphSurMap[41]->setSurface(S41);
     SphSurMap[41]->setName(41);
 
-    // A sphere 
+    // A sphere
     std::string ObjSphere="-41" ;
 
-    Object_sptr geom_obj = Object_sptr(new Object); 
+    Object_sptr geom_obj = Object_sptr(new Object);
     geom_obj->setObject(41,ObjSphere);
     geom_obj->populate(SphSurMap);
 
@@ -247,7 +311,7 @@ public:
     // format = startPoint, endPoint, total distance so far
     // forward only intercepts means that start point should be track origin
     expectedResults.push_back(Link(V3D(-1,1.5,1),
-      V3D(sqrt(16-0.25)+1,1.5,1.0),sqrt(15.75)+2));
+      V3D(sqrt(16-0.25)+1,1.5,1.0),sqrt(15.75)+2,*geom_obj));
 
     checkTrackIntercept(geom_obj,track,expectedResults);
   }
@@ -259,7 +323,7 @@ public:
     Track track(V3D(0,-10,0),V3D(0,1,0));
 
     //format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(Link(V3D(0,-4.1,0),V3D(0,4.1,0),14.1));
+    expectedResults.push_back(Link(V3D(0,-4.1,0),V3D(0,4.1,0),14.1,*geom_obj));
 
     checkTrackIntercept(geom_obj,track,expectedResults);
   }
@@ -271,7 +335,7 @@ public:
     Track track(V3D(-10,0,0),V3D(1,0,0));
 
     //format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(Link(V3D(-4.1,0,0),V3D(4.1,0,0),14.1));
+    expectedResults.push_back(Link(V3D(-4.1,0,0),V3D(4.1,0,0),14.1,*geom_obj));
     checkTrackIntercept(geom_obj,track,expectedResults);
   }
 
@@ -280,7 +344,7 @@ public:
     std::vector<Link> expectedResults;
     Object_sptr geom_obj = createCappedCylinder();
     //format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(Link(V3D(0,-3,0),V3D(0,3,0),13));
+    expectedResults.push_back(Link(V3D(0,-3,0),V3D(0,3,0),13,*geom_obj));
 
     Track track(V3D(0,-10,0),V3D(0,1,0));
     checkTrackIntercept(geom_obj,track,expectedResults);
@@ -293,7 +357,7 @@ public:
     Track track(V3D(-10,0,0),V3D(1,0,0));
 
     //format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(Link(V3D(-3.2,0,0),V3D(1.2,0,0),11.2));
+    expectedResults.push_back(Link(V3D(-3.2,0,0),V3D(1.2,0,0),11.2,*geom_obj));
     checkTrackIntercept(geom_obj,track,expectedResults);
   }
 
@@ -354,8 +418,8 @@ public:
     TS_ASSERT(object2.interceptSurface(TL)!=0);
 
     std::vector<Link> expectedResults;
-    expectedResults.push_back(Link(V3D(-1,0,0),V3D(1,0,0),6));
-    expectedResults.push_back(Link(V3D(4.5,0,0),V3D(6.5,0,0),11.5));
+    expectedResults.push_back(Link(V3D(-1,0,0),V3D(1,0,0),6,object1));
+    expectedResults.push_back(Link(V3D(4.5,0,0),V3D(6.5,0,0),11.5,object2));
     checkTrackIntercept(TL,expectedResults);
 
   }
@@ -385,8 +449,8 @@ public:
     TS_ASSERT(object2.interceptSurface(TL)!=0);
 
     std::vector<Link> expectedResults;
-    expectedResults.push_back(Link(V3D(-1,0,0),V3D(1,0,0),6));
-    expectedResults.push_back(Link(V3D(1,0,0),V3D(6.5,0,0),11.5));
+    expectedResults.push_back(Link(V3D(-1,0,0),V3D(1,0,0),6, object1));
+    expectedResults.push_back(Link(V3D(1,0,0),V3D(6.5,0,0),11.5, object2));
 
     checkTrackIntercept(TL,expectedResults);
 
@@ -418,9 +482,9 @@ public:
     TS_ASSERT(object2.interceptSurface(TL)!=0);
 
     std::vector<Link> expectedResults;
-    expectedResults.push_back(Link(V3D(-1,0,0),V3D(-0.8,0,0),4.2));
-    expectedResults.push_back(Link(V3D(-0.8,0,0),V3D(0.8,0,0),5.8));
-    expectedResults.push_back(Link(V3D(0.8,0,0),V3D(1,0,0),6));
+    expectedResults.push_back(Link(V3D(-1,0,0),V3D(-0.8,0,0),4.2,object1));
+    expectedResults.push_back(Link(V3D(-0.8,0,0),V3D(0.8,0,0),5.8,object1));
+    expectedResults.push_back(Link(V3D(0.8,0,0),V3D(1,0,0),6,object2));
     checkTrackIntercept(TL,expectedResults);
   }
 
@@ -450,9 +514,9 @@ public:
     TS_ASSERT(object2.interceptSurface(TL)!=0);
 
     std::vector<Link> expectedResults;
-    expectedResults.push_back(Link(V3D(-1,0,0),V3D(-0.4,0,0),4.6));
-    expectedResults.push_back(Link(V3D(-0.4,0,0),V3D(0.2,0,0),5.2));
-    expectedResults.push_back(Link(V3D(0.2,0,0),V3D(1,0,0),6));
+    expectedResults.push_back(Link(V3D(-1,0,0),V3D(-0.4,0,0),4.6,object1));
+    expectedResults.push_back(Link(V3D(-0.4,0,0),V3D(0.2,0,0),5.2,object1));
+    expectedResults.push_back(Link(V3D(0.2,0,0),V3D(1,0,0),6,object2));
     checkTrackIntercept(TL,expectedResults);
   }
 
@@ -769,7 +833,7 @@ public:
 private:
 
   /// Surface type
-  typedef std::map<int,Surface*> STYPE ; 
+  typedef std::map<int,Surface*> STYPE ;
 
   /// set timeTest true to get time comparisons of soild angle methods
   const static bool timeTest=false;
@@ -795,11 +859,11 @@ private:
     CylSurMap[32]->setName(32);
     CylSurMap[33]->setName(33);
 
-    // Capped cylinder (id 21) 
+    // Capped cylinder (id 21)
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder="-31 -32 33";
 
-    Object_sptr retVal = Object_sptr(new Object); 
+    Object_sptr retVal = Object_sptr(new Object);
     retVal->setObject(21,ObjCapCylinder);
     retVal->populate(CylSurMap);
 
@@ -829,11 +893,11 @@ private:
     CylSurMap[32]->setName(32);
     CylSurMap[33]->setName(33);
 
-    // Capped cylinder (id 21) 
+    // Capped cylinder (id 21)
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder="-31 -32 33";
 
-    Object_sptr retVal = Object_sptr(new Object); 
+    Object_sptr retVal = Object_sptr(new Object);
     retVal->setObject(21,ObjCapCylinder);
     retVal->populate(CylSurMap);
 
@@ -850,10 +914,10 @@ private:
     SphSurMap[41]->setSurface(S41);
     SphSurMap[41]->setName(41);
 
-    // A sphere 
+    // A sphere
     std::string ObjSphere="-41" ;
 
-    Object_sptr retVal = Object_sptr(new Object); 
+    Object_sptr retVal = Object_sptr(new Object);
     retVal->setObject(41,ObjSphere);
     retVal->populate(SphSurMap);
 
@@ -912,7 +976,7 @@ private:
     // Note that the testObject now manages the "new Plane"
     Geometry::Surface* A;
     for(vc=SurfLine.begin();vc!=SurfLine.end();vc++)
-    {  
+    {
       A=Geometry::SurfaceFactory::Instance()->processLine(vc->second);
       if (!A)
       {
@@ -958,11 +1022,11 @@ private:
     CubeSurMap[5]->setName(5);
     CubeSurMap[6]->setName(6);
 
-    // Cube (id 68) 
+    // Cube (id 68)
     // using surface ids:  1-6
     std::string ObjCube="1 -2 3 -4 5 -6";
 
-    Object_sptr retVal = Object_sptr(new Object); 
+    Object_sptr retVal = Object_sptr(new Object);
     retVal->setObject(68,ObjCube);
     retVal->populate(CubeSurMap);
 
@@ -1001,11 +1065,11 @@ private:
     CubeSurMap[5]->setName(5);
     CubeSurMap[6]->setName(6);
 
-    // Cube (id 68) 
+    // Cube (id 68)
     // using surface ids:  1-6
     std::string ObjCube="1 -2 3 -4 5 -6";
 
-    Object_sptr retVal = Object_sptr(new Object); 
+    Object_sptr retVal = Object_sptr(new Object);
     retVal->setObject(68,ObjCube);
     retVal->populate(CubeSurMap);
 

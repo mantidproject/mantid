@@ -29,17 +29,23 @@ namespace API
    *  @param instrumentName The name of the instrument to 'listen to' (Note that the argument has
    *                        different semantics to the base class create method).
    *  @param connect        Whether to connect the listener to the data stream for the given instrument.
+   *  @param properties     Property manager to copy property values to the listener if it has any.
    *  @returns A shared pointer to the created ILiveListener implementation
    *  @throws Exception::NotFoundError If the requested listener is not registered
    *  @throws std::runtime_error If unable to connect to the listener at the configured address
    */
-  boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(const std::string& instrumentName, bool connect) const
+  boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(const std::string& instrumentName, bool connect, const Kernel::IPropertyManager* properties) const
   {
     ILiveListener_sptr listener;
     // See if we know about the instrument with the given name
     try {
       Kernel::InstrumentInfo inst = Kernel::ConfigService::Instance().getInstrument(instrumentName);
       listener = Kernel::DynamicFactory<ILiveListener>::create(inst.liveListener());
+      // set the properties
+      if ( properties )
+      {
+        listener->updatePropertyValues( *properties );
+      }
       if ( connect && !listener->connect(Poco::Net::SocketAddress(inst.liveDataAddress())) )
       {
         // If we can't connect, log and throw an exception

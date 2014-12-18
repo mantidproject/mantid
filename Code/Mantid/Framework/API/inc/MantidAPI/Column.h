@@ -9,9 +9,10 @@
 #ifndef Q_MOC_RUN
 # include <boost/shared_ptr.hpp>
 #endif
+#include <cstring>
 #include <string>
-#include <typeinfo>
 #include <limits>
+#include <typeinfo>
 #include <vector>
 
 namespace Mantid
@@ -27,7 +28,7 @@ namespace API
     \author Roman Tolchenov
     \date 31/10/2008
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -108,13 +109,29 @@ public:
     /// Assign an element from double if possible
     virtual void fromDouble(size_t index, double value) = 0;
 
+    /// Sort all or part of a vector of indices according to values in corresponding cells of this column.
+    /// Fill in a vector of ranges of equal values. A range is a [begin,end) pair of indices in indexVec.
+    /// @param ascending :: Sort in ascending (true) or descending (false) order.
+    /// @param start :: Starting index in indexVec to be sorted.
+    /// @param end :: Ending index (one past last) in indexVec to be sorted.
+    /// @param indexVec :: A vector of indices. On input it must contain all indices from 0 to this->size()-1. 
+    ///          On output indices between start and end are sorted in ascending order of values in this column.
+    ///          So that: cell(indexVec[i]) <= cell(indexVec[i+1])
+    /// @param equalRanges :: Output only vector. For each pair p in equalRanges 
+    ///          cell(indexVec[p.first]) == cell(indexVec[p.first+1]) == ... == cell(indexVec[p.end-1]).
+    ///          If equalRanges is empty then there are no equal velues in this column.
+    virtual void sortIndex( bool ascending, size_t start, size_t end, std::vector<size_t>& indexVec, std::vector<std::pair<size_t,size_t>>& equalRanges ) const;
+
+    /// Re-arrange values in this column according to indices in indexVec
+    virtual void sortValues( const std::vector<size_t>& indexVec );
+
     /// Templated method for returning a value. No type checks are done.
     template<class T>
     T& cell(size_t index)
     {
         return *static_cast<T*>(void_pointer(index));
     }
- 
+
 
     /// Templated method for returning a value (const version). No type checks are done.
     template<class T>
@@ -127,17 +144,17 @@ public:
     template<class T>
     bool isType()const
     {
-        return get_type_info() == typeid(T);
+      return !std::strcmp(get_type_info().name(), typeid(T).name());
     }
 
-    /// get plot type 
-    /// @return See description of setPlotType() for the interpretation of the returned int   
+    /// get plot type
+    /// @return See description of setPlotType() for the interpretation of the returned int
     int getPlotType() const
     {
        return m_plotType;
     }
 
-    /// Set plot type where 
+    /// Set plot type where
     void setPlotType(int t);
 
     /**
@@ -169,7 +186,7 @@ protected:
     std::string m_name;///< name
     std::string m_type;///< type
 
-    /// plot type where 
+    /// plot type where
     /// None = 0 (means it has specifically been set to 'no plot type')
     /// NotSet = -1000 (this is the default and means plot style has not been set)
     /// X = 1, Y = 2, Z = 3, xErr = 4, yErr = 5, Label = 6
@@ -184,7 +201,7 @@ protected:
 };
 
 /**  @class Boolean
-    As TableColumn stores its data in a std::vector bool type cannot be used 
+    As TableColumn stores its data in a std::vector bool type cannot be used
     in the same way as the other types. Class Boolean is used instead.
 */
 struct MANTID_API_DLL Boolean
@@ -197,7 +214,7 @@ struct MANTID_API_DLL Boolean
     operator bool(){return value;}
     /// equal to operator
     bool operator==(const Boolean& b)const
-    {return(this->value==b.value);		
+    {return(this->value==b.value);
     }
     //
     operator double(void)const{return double(this->value);}

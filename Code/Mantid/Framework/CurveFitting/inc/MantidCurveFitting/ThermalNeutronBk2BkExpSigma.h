@@ -13,7 +13,7 @@ namespace CurveFitting
   /** ThermalNeutronBk2BkExpSIGMA : Function to calculate Sigma of Bk2Bk Exponential function from
     Thermal Neutron Function's Sig0, Sig1, Sig2, Width and etc.
     
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

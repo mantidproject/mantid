@@ -1,10 +1,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadPoolRunnable.h"
 #include "MantidKernel/Task.h"
+#include "MantidKernel/ConfigService.h"
 #include <algorithm>
 #include <sstream>
 #include <cmath>
@@ -12,6 +12,7 @@
 #include <Poco/Mutex.h>
 #include <Poco/Runnable.h>
 #include <Poco/Thread.h>
+#include <Poco/Environment.h>
 
 namespace Mantid
 {
@@ -38,8 +39,8 @@ namespace Kernel
 
     if (numThreads == 0)
     {
-      //Uses OpenMP to find how many cores there are.
-      m_numThreads = PARALLEL_GET_MAX_THREADS;
+      //Uses Poco to find how many cores there are.
+      m_numThreads = getNumPhysicalCores();
     }
     else
       m_numThreads = numThreads;
@@ -60,15 +61,18 @@ namespace Kernel
 
   //--------------------------------------------------------------------------------
   /** Return the number of physical cores available on the system.
-   * NOTE: Uses OpenMP getMaxThreads to find the number.
-   * @return how many cores are present. 1 if no OpenMP is installed.
+   * NOTE: Uses Poco::Environment::processorCount() to find the number.
+   * @return how many cores are present.
    */
   size_t ThreadPool::getNumPhysicalCores()
   {
-    return PARALLEL_GET_MAX_THREADS;
+    int maxCores(0);
+    int retVal = Kernel::ConfigService::Instance().getValue("MultiThreaded.MaxCores", maxCores);
+    if(retVal > 0 && maxCores > 0)
+      return maxCores;
+    else
+      return Poco::Environment::processorCount();
   }
-
-
 
   //--------------------------------------------------------------------------------
   /** Start the threads and begin looking for tasks.

@@ -115,7 +115,7 @@ namespace Mantid
     /**
        A specialised Property class for holding a series of time-value pairs.
 
-       Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+       Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
        This file is part of Mantid.
 
@@ -158,6 +158,10 @@ namespace Mantid
       virtual bool operator==( const TimeSeriesProperty<TYPE> & right ) const;
       ///Deep comparison (not equal).
       virtual bool operator!=(const TimeSeriesProperty<TYPE> & right ) const;
+      /// Deep comparison
+      virtual bool operator==( const Property & right ) const;
+      ///Deep comparison (not equal).
+      virtual bool operator!=(const Property & right ) const;
 
       /// Set name of property
       void setName(const std::string name);

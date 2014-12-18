@@ -13,6 +13,9 @@
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/MultiThreaded.h"
+
+#include <Poco/ActiveResult.h>
+
 #include <cstdarg>
 
 #ifdef _WIN32
@@ -80,11 +83,56 @@ FrameworkManagerImpl::FrameworkManagerImpl()
 #endif
 
   g_log.debug() << "FrameworkManager created." << std::endl;
+
+  int updateInstrumentDefinitions = 0;
+  int retVal = Kernel::ConfigService::Instance().getValue("UpdateInstrumentDefinitions.OnStartup",updateInstrumentDefinitions);
+  if ((retVal == 1) &&  (updateInstrumentDefinitions == 1))
+  {
+    UpdateInstrumentDefinitions();
+  }
+  else
+  {
+    g_log.information() << "Instrument updates disabled - cannot update instrument definitions." << std::endl;
+  }
+
+  // the algorithm will see if it should run
+  SendStartupUsageInfo();
+
 }
 
 /// Destructor
 FrameworkManagerImpl::~FrameworkManagerImpl()
 {
+}
+
+/// Update instrument definitions from github
+void FrameworkManagerImpl::UpdateInstrumentDefinitions()
+{
+  try
+  {
+    IAlgorithm* algDownloadInstrument = this->createAlgorithm("DownloadInstrument");
+    algDownloadInstrument->setAlgStartupLogging(false);
+    Poco::ActiveResult<bool> result = algDownloadInstrument->executeAsync();
+  }
+  catch (Kernel::Exception::NotFoundError &)
+  {
+      g_log.debug() << "DowndloadInstrument algorithm is not available - cannot update instrument definitions." << std::endl;
+  }
+}
+
+/// Sends startup information about OS and Mantid version
+void FrameworkManagerImpl::SendStartupUsageInfo()
+{
+  try
+  {
+    IAlgorithm* algSendStartupUsage = this->createAlgorithm("SendUsage");
+    algSendStartupUsage->setAlgStartupLogging(false);
+    Poco::ActiveResult<bool> result = algSendStartupUsage->executeAsync();
+  }
+  catch (Kernel::Exception::NotFoundError &)
+  {
+      g_log.debug() << "SendUsage algorithm is not available - cannot update send usage information." << std::endl;
+  }
 }
 
 /**

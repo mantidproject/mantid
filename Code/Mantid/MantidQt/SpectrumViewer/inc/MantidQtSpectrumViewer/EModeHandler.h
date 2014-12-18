@@ -6,16 +6,16 @@
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
-    @class EModeHandler 
-  
-      This manages the instrument type combo box (emode) and E Fixed controls 
-    for the SpectrumView data viewer. 
- 
-    @author Dennis Mikkelson 
+    @class EModeHandler
+
+    This manages the instrument type combo box (emode) and E Fixed controls
+    for the SpectrumView data viewer.
+
+    @author Dennis Mikkelson
     @date   2012-10-12
-     
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -30,8 +30,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
@@ -40,30 +40,31 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER EModeHandler 
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER EModeHandler
 {
   public:
 
     /// Construct object to manage E Mode controls in the UI
-    EModeHandler(Ui_SpectrumViewer* sv_ui );
+    EModeHandler( Ui_SpectrumViewer* sv_ui );
 
     /// Get the E Mode to control units calculation, from the combo box
-    int GetEMode();
+    int getEMode();
 
     /// Set the E Mode to control units calculation, in the combo box
-    void SetEMode( const int mode );
+    void setEMode( const int mode );
 
     /// Get the E Fixed value from the GUI
-    double GetEFixed();
+    double getEFixed();
 
     /// Set the E Fixed value in the GUI
-    void SetEFixed( const double efixed );
+    void setEFixed( const double efixed );
 
   private:
-    Ui_SpectrumViewer* sv_ui;
+    Ui_SpectrumViewer* m_svUI;
+
 };
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif // EMODE_HANDLER_H

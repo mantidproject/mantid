@@ -65,6 +65,8 @@ protected:
     void setParametersFromPropertyManager();
     void setMatrixWorkspace(API::MatrixWorkspace_sptr matrixWorkspace);
 
+    bool histogramIsUsable(size_t i) const;
+
     std::string m_workspacePropertyName;
     API::MatrixWorkspace_sptr m_matrixWorkspace;
 };

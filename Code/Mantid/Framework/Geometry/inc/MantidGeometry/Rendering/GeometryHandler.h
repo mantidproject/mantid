@@ -25,7 +25,7 @@ namespace Mantid
 
        This is an abstract class for handling geometry primitives.
 
-       Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+       Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
        This file is part of Mantid.
 
@@ -58,6 +58,7 @@ namespace Mantid
       GeometryHandler(IObjComponent *comp);   ///< Constructor
       GeometryHandler(boost::shared_ptr<Object> obj); ///<Constructor
       GeometryHandler(Object *obj); ///<Constructor
+      virtual boost::shared_ptr<GeometryHandler> clone() const = 0; ///< Virtual copy constructor
       virtual ~GeometryHandler();
       virtual GeometryHandler* createInstance(IObjComponent *)=0; ///< Create an instance of concrete geometry handler for ObjComponent
       virtual GeometryHandler* createInstance(boost::shared_ptr<Object> )=0; ///< Create an instance of concrete geometry handler for Object

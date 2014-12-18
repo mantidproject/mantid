@@ -52,10 +52,6 @@ public:
   CaptionPolicy captionPolicy();
   void setCaptionPolicy(CaptionPolicy);
 
-  virtual SIP_PYOBJECT saveAsTemplate(const QString& );
-%MethodCode
-  sipRes = PyString_FromString(sipCpp->saveAsTemplate(*a0));
-%End
   virtual void restore(const QStringList& );
   //Folder* folder();
   QString name();
@@ -384,6 +380,32 @@ private:
   Matrix(const Matrix&);
 };
 
+class QwtData /PyName = CurveData/
+{
+%TypeHeaderCode
+#include <qwt_data.h>
+%End
+
+public:
+   // Note that the 'unsigned int' in this class should be size_t. But if you typedef size_t you'll get a crash
+   //  at least on linux/gcc (and you'll still get warnings)
+
+   virtual unsigned int size() const = 0;
+   // this MethodCode is only needed for windoze, but apparently it's not possible to nest it inside an %If
+   // Beware: the treatment of typedefs in sip changes with versions, so errors/warnings can vanish/show up anytime
+   // in the future
+%MethodCode
+   size_t v = sipCpp->size();
+   // sipRes will be declared as unsigned int (uint)
+   sipRes = static_cast<unsigned int>(v);
+%End
+   virtual double x(unsigned int i) const = 0;
+   virtual double y(unsigned int i) const = 0;
+
+private:
+   QwtData(const QwtData&);
+};
+
 class QwtSymbol /PyName = PlotSymbol/
 {
 %TypeHeaderCode
@@ -597,6 +619,23 @@ private:
   Spectrogram(const Spectrogram&);
 };
 
+class QwtPlotCurve  // /PyName = PlotCurve/
+{
+%TypeHeaderCode
+#include <qwt_plot_curve.h>
+%End
+public:
+   QwtPlotCurve();
+
+   double minXValue() const;
+   double maxXValue() const;
+   double minYValue() const;
+   double maxYValue() const;
+   const QwtData &data() const;
+
+private:
+   QwtPlotCurve(const QwtPlotCurve&);
+};
 
 class Grid : QObject // : QwtPlotGrid
 {
@@ -696,6 +735,7 @@ public:
   void removeCurve(int);
   void removeCurve(const QString&);
   int curves() /PyName=numCurves/;
+  QwtPlotCurve* curve(int index);
   QString curveTitle(int);
 
   void setCurveLineColor(int, int);
@@ -1066,7 +1106,7 @@ public:
   enum MatrixToTableConversion{Direct, XYZ, YXZ};
   Table* table(const QString&);
 %MethodCode
-  sipRes = sipCpp->current_folder->table(*a0, false);
+  sipRes = sipCpp->currentFolder()->table(*a0, false);
   if(!sipRes)
     sipRes = sipCpp->projectFolder()->table(*a0, true);
 %End
@@ -1077,7 +1117,7 @@ public:
 %End
   Matrix* matrix(const QString&);
 %MethodCode
-  sipRes = sipCpp->current_folder->matrix(*a0, false);
+  sipRes = sipCpp->currentFolder()->matrix(*a0, false);
   if(!sipRes)
     sipRes = sipCpp->projectFolder()->matrix(*a0, true);
 %End
@@ -1088,7 +1128,7 @@ public:
   
   MultiLayer *plot(const QString&) /PyName=graph/;
 %MethodCode
-  sipRes = sipCpp->current_folder->graph(*a0, false);
+  sipRes = sipCpp->currentFolder()->graph(*a0, false);
   if(!sipRes)
     sipRes = sipCpp->projectFolder()->graph(*a0, true);
 %End
@@ -1097,7 +1137,7 @@ public:
 
   Note *note(const QString&);
 %MethodCode
-  sipRes = sipCpp->current_folder->note(*a0, false);
+  sipRes = sipCpp->currentFolder()->note(*a0, false);
   if(!sipRes)
     sipRes = sipCpp->projectFolder()->note(*a0, true);
 %End
@@ -1170,20 +1210,16 @@ public:
   // folders
   Folder *activeFolder();
 %MethodCode
-  sipRes = sipCpp->current_folder;
+  sipRes = sipCpp->currentFolder();
 %End
 
   Folder* appendProject(const QString& file_name, Folder* parentFolder = 0);
-  void saveFolder(Folder *folder, const QString& fn, bool=false);
   Folder* projectFolder() /PyName=rootFolder/;
 
   Folder* addFolder(QString name, Folder* parent = 0);
   bool deleteFolder(Folder *);
   bool changeFolder(Folder *, bool force = false);
   bool copyFolder(Folder *src, Folder *dest);
-
-  MdiSubWindow* openTemplate(const QString&);
-  void saveAsTemplate(MdiSubWindow*, const QString&);
 
   void setWindowName(MdiSubWindow *, const QString &);
   void setPreferences(Graph*);

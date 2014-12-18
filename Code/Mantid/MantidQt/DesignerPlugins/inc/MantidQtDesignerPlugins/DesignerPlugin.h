@@ -9,7 +9,7 @@ The DesignerPlugin creates a Qt designer plugin of the AlgorithmSelectorWidget.
 @author Martyn Gigg, Tessella plc
 @date 03/08/2009
 
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 

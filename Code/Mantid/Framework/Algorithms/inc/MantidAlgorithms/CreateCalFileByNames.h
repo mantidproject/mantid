@@ -33,7 +33,7 @@ namespace Algorithms
     @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
     @date 01/03/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -91,8 +91,6 @@ private:
   std::string groups;
   /// Calibration map used if the *.cal file exist. All entries in the *.cal file are registered with the udet number as the key and the <Number,Offset,Select,Group> as the tuple value.
   instrcalmap instrcalib;
-  /// Number of groups
-  int group_no;
 };
 
 } // namespace Algorithms

@@ -2,7 +2,7 @@
  getWorkspaceNames
 ===================
 
-.. module:`mantidplotpy.proxies`
+.. module:`pymantidplot.proxies`
 
-.. autofunction:: mantidplotpy.proxies.getWorkspaceNames
+.. autofunction:: pymantidplot.proxies.getWorkspaceNames
 

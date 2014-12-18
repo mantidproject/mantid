@@ -20,7 +20,7 @@ namespace Mantid
     Should work for real and complex objects. Carries out eigenvalue
     and inversion if the matrix is square
     
-    Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

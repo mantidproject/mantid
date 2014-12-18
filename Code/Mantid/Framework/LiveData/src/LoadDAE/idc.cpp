@@ -106,6 +106,7 @@ static int getdat(idc_handle_t fh, int ifsn, int nos, int** value, int dims_arra
 	if (do_alloc)
 	{
 		stat = isisds_recv_command_alloc(fh->s, &command, (void**)value, &ret_type, dims_array, ndims);
+    free(command);
 	}
 	else
 	{
@@ -157,6 +158,7 @@ static int IDCgetpar(idc_handle_t fh, const char* name, void** value, ISISDSData
 	if (do_alloc)
 	{
 		stat = isisds_recv_command_alloc(fh->s, &command, value, &ret_type, dims_array, ndims);
+    free(command);
 	}
 	else
 	{

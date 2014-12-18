@@ -15,7 +15,7 @@ namespace Mantid
     It overrides indexOfValue to search using the values as bin edges are than
     centre points
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

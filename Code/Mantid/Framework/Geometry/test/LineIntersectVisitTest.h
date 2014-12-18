@@ -20,8 +20,8 @@ public:
 	void testConstructor(){
 		LineIntersectVisit A(V3D(-1.0,-1.0,-1.0),V3D(1.0,0.0,0.0));
 		TS_ASSERT_EQUALS(A.getNPoints(),0);
-		TS_ASSERT_EQUALS(A.getPoints(),std::vector<Kernel::V3D>());
-		TS_ASSERT_EQUALS(A.getDistance(),std::vector<double>());
+		TS_ASSERT_EQUALS(A.getPoints(),std::list<Kernel::V3D>());
+		TS_ASSERT_EQUALS(A.getDistance(),std::list<double>());
 	}
 
 	void testAcceptPlane(){
@@ -31,10 +31,10 @@ public:
 		TS_ASSERT_EQUALS(extractString(B),"-1 px 0\n");
 		A.Accept(B);
 		TS_ASSERT_EQUALS(A.getNPoints(),1);
-		std::vector<Kernel::V3D> Pnts;
+		std::list<Kernel::V3D> Pnts;
 		Pnts.push_back(V3D(0.0,-1.0,-1.0));
 		TS_ASSERT_EQUALS(A.getPoints(),Pnts);
-		std::vector<double> Dist;
+		std::list<double> Dist;
 		Dist.push_back(1.0);
 		TS_ASSERT_EQUALS(A.getDistance(),Dist);
 	}
@@ -45,14 +45,13 @@ public:
 		Sphere B;
 		B.setSurface("s 0.0 0.0 0.0 2");
 		A.Accept(B);
-		std::vector<V3D> pntOut;
+		std::list<V3D> pntOut;
 		// changed for forward going only intercepts on quadratice surfaces
 		//pntOut.push_back(V3D(-2.0,0.0,0.0));
 		pntOut.push_back(V3D(2.0,0.0,0.0));
 		TS_ASSERT_EQUALS(A.getNPoints(),1);
 		TS_ASSERT_EQUALS(A.getPoints(),pntOut);
-		std::vector<double> Dist;
-		//Dist.push_back(2.0);
+		std::list<double> Dist;
 		Dist.push_back(2.0);
 		TS_ASSERT_EQUALS(A.getDistance(),Dist);		
 	}
@@ -67,19 +66,13 @@ public:
 		A.Accept(B);
 		// change for forward only intercept
 		TS_ASSERT_EQUALS(A.getNPoints(),1);
-		std::vector<V3D> pntOut;
-		pntOut=A.getPoints();
-		//TS_ASSERT_DELTA(pntOut[0].X(),-1,0.0000001);
-		//TS_ASSERT_DELTA(pntOut[0].Y(),0.0,0.0000001);
-		//TS_ASSERT_DELTA(pntOut[0].Z(),0.0,0.0000001);
-		TS_ASSERT_DELTA(pntOut[0].X(),1,0.0000001);
-		TS_ASSERT_DELTA(pntOut[0].Y(),0.0,0.0000001);
-		TS_ASSERT_DELTA(pntOut[0].Z(),0.0,0.0000001);
+		const auto &pntOut = A.getPoints();
+		TS_ASSERT_DELTA(pntOut.front().X(),1,0.0000001);
+		TS_ASSERT_DELTA(pntOut.front().Y(),0.0,0.0000001);
+		TS_ASSERT_DELTA(pntOut.front().Z(),0.0,0.0000001);
 
-		std::vector<double> Dist;
-		Dist=A.getDistance();
-		TS_ASSERT_DELTA(Dist[0],1.0,0.0000001);
-		//TS_ASSERT_DELTA(Dist[1],1.0,0.0000001);		
+		const auto &Dist = A.getDistance();
+		TS_ASSERT_DELTA(Dist.front(),1.0,0.0000001);
 	}
 
 	void testAcceptCylinder(){
@@ -92,13 +85,13 @@ public:
 		TS_ASSERT_EQUALS(B.getNormal(),V3D(0,1,0));
 
 		A.Accept(B);
-		std::vector<V3D> pntOut;
+		std::list<V3D> pntOut;
 		// forward only
 		//pntOut.push_back(V3D(-1.0,0.0,0.0));
 		pntOut.push_back(V3D(1.0,0.0,0.0));
 		TS_ASSERT_EQUALS(A.getNPoints(),1);
 		TS_ASSERT_EQUALS(A.getPoints(),pntOut);
-		std::vector<double> Dist;
+		std::list<double> Dist;
 		//Dist.push_back(1.0);
 		Dist.push_back(1.0);
 		TS_ASSERT_EQUALS(A.getDistance(),Dist);	
@@ -106,14 +99,12 @@ public:
 		LineIntersectVisit C(V3D(1.1,0.0,0.0),V3D(-1.0,0.0,0.0));
 		C.Accept(B);
 		TS_ASSERT_EQUALS(C.getNPoints(),2);
-        std::vector<V3D> pntOut2;
+		std::list<V3D> pntOut2;
 		pntOut2.push_back(V3D(-1.0,0.0,0.0));
 		pntOut2.push_back(V3D(1.0,0.0,0.0));
 		TS_ASSERT_EQUALS(C.getPoints(),pntOut2);
 	}
 
-	void testAcceptGeneral(){
-	}
 private:
 
 std::string extractString(const Surface& pv)

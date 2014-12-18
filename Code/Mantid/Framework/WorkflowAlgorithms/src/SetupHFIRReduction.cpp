@@ -466,12 +466,23 @@ void SetupHFIRReduction::init()
                   "Number of I(q) bins when binning is not specified.");
   declareProperty("IQLogBinning", false,
                   "I(q) log binning when binning is not specified.");
+  declareProperty("IQAlignLogWithDecades", false,
+                  "If true and log binning was selected, the bins will be aligned to log decades "
+                  "and the number of bins will be used as the number of bins per decade.");
 
   declareProperty("NumberOfSubpixels", 1, positiveInt,
                   "Number of sub-pixels used for each detector pixel in each direction."
                   "The total number of sub-pixels will be NPixelDivision*NPixelDivision.");
   declareProperty("ErrorWeighting", false,
                   "Choose whether each pixel contribution will be weighted by 1/error^2.");
+
+  // Wedge options
+  declareProperty("NumberOfWedges", 2, positiveInt,
+                  "Number of wedges to calculate.");
+  declareProperty("WedgeAngle", 30.0,
+                  "Opening angle of each wedge, in degrees.");
+  declareProperty("WedgeOffset", 0.0,
+                  "Angular offset for the wedges, in degrees.");
 
   declareProperty("Do2DReduction", true);
   declareProperty("IQ2DNumberOfBins", 100, positiveInt,
@@ -690,6 +701,11 @@ void SetupHFIRReduction::exec()
     const std::string n_subpix = getPropertyValue("NumberOfSubpixels");
     const bool err_weighting = getProperty("ErrorWeighting");
 
+    const std::string n_wedges = getPropertyValue("NumberOfWedges");
+    const double wedge_angle = getProperty("WedgeAngle");
+    const double wedge_offset = getProperty("WedgeOffset");
+    const bool align = getProperty("IQAlignLogWithDecades");
+
     IAlgorithm_sptr iqAlg = createChildAlgorithm("SANSAzimuthalAverage1D");
     iqAlg->setPropertyValue("Binning", binning);
     iqAlg->setPropertyValue("NumberOfBins", n_bins);
@@ -697,6 +713,10 @@ void SetupHFIRReduction::exec()
     iqAlg->setPropertyValue("NumberOfSubpixels", n_subpix);
     iqAlg->setProperty("ErrorWeighting", err_weighting);
     iqAlg->setProperty("ComputeResolution", true);
+    iqAlg->setProperty("NumberOfWedges", n_wedges);
+    iqAlg->setProperty("WedgeAngle", wedge_angle);
+    iqAlg->setProperty("WedgeOffset", wedge_offset);
+    iqAlg->setProperty("AlignWithDecades", align);
     iqAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
     algProp = new AlgorithmProperty("IQAlgorithm");

@@ -40,7 +40,7 @@ namespace Algorithms
     <LI> Result - Contains 'success' if the workspaces match, the reason for the failure otherwise </LI>
     </UL>
 
-    Copyright &copy; 2009-2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009-2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

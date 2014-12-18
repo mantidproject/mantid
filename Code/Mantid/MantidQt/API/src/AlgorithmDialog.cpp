@@ -31,6 +31,7 @@
 #include <QCheckBox>
 #include <QtGui>
 
+#include <Poco/AbstractObserver.h>
 #include <Poco/ActiveResult.h>
 
 using namespace MantidQt::API;
@@ -761,7 +762,12 @@ void AlgorithmDialog::executeAlgorithmAsync()
 {
   try
   {
+    // Add AlgorithmObservers to the algorithm
+    for(auto it = m_observers.begin(); it != m_observers.end(); ++it)
+      (*it)->observeAll(m_algorithm);
+
     m_algorithm->executeAsync();
+    m_observers.clear();
   }
   catch (Poco::NoThreadAvailableException &)
   {
@@ -1041,4 +1047,16 @@ void AlgorithmDialog::setPreviousValue(QWidget* widget, const QString& propName)
   QMessageBox::warning(this, windowTitle(),
                QString("Cannot set value for ") + widget->metaObject()->className() +
                ". Update AlgorithmDialog::setValue() to cope with this widget.");
+}
+
+/**
+ * Observer the execution of the algorithm using an AlgorithmObserver.
+ *
+ * All notifications will be observed.
+ *
+ * @param observer Pointer to the AlgorithmObserver to add.
+ */
+void AlgorithmDialog::addAlgorithmObserver(Mantid::API::AlgorithmObserver *observer)
+{
+  m_observers.push_back(observer);
 }

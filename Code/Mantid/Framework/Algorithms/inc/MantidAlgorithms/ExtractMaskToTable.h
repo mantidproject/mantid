@@ -15,7 +15,7 @@ namespace Algorithms
   /** ExtractMaskToTable : Extract the mask in a workspace to a table workspace.
     The table workspace must be compatible to algorithm MaskBinsFromTable.
     
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -87,13 +87,6 @@ namespace Algorithms
 
     /// Input workspace type
     bool m_inputIsMask;
-
-    /// Minimum X range
-    double m_XMin;
-
-    /// Maximum X range
-    double m_XMax;
-    
   };
 
 

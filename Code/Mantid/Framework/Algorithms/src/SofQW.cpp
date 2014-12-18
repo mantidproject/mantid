@@ -1,9 +1,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <stdexcept>
+
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -77,6 +80,7 @@ void SofQW::exec()
   using namespace Geometry;
 
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+
   // Do the full check for common binning
   if ( ! WorkspaceHelpers::commonBoundaries(inputWorkspace) )
   {
@@ -87,6 +91,10 @@ void SofQW::exec()
   std::vector<double> verticalAxis;
   MatrixWorkspace_sptr outputWorkspace = setUpOutputWorkspace(inputWorkspace, getProperty("QAxisBinning"), verticalAxis);
   setProperty("OutputWorkspace",outputWorkspace);
+
+  // Holds the spectrum-detector mapping
+  std::vector<specid_t> specNumberMapping;
+  std::vector<detid_t> detIDMapping;
 
   m_EmodeProperties.initCachedValues(inputWorkspace,this);
   int emode = m_EmodeProperties.m_emode;
@@ -127,7 +135,7 @@ void SofQW::exec()
       IDetector_const_sptr spectrumDet = inputWorkspace->getDetector(i);
       if( spectrumDet->isMonitor() ) continue;
 
-       const double efixed = m_EmodeProperties.getEFixed(spectrumDet);
+      const double efixed = m_EmodeProperties.getEFixed(spectrumDet);
 
       // For inelastic scattering the simple relationship q=4*pi*sinTheta/lambda does not hold. In order to
       // be completely general we must calculate the momentum transfer by calculating the incident and final
@@ -142,6 +150,7 @@ void SofQW::exec()
       {
         detectors.push_back(spectrumDet);
       }
+
       const size_t numDets = detectors.size();
       const double numDets_d = static_cast<double>(numDets); // cache to reduce number of static casts
       const MantidVec& Y = inputWorkspace->readY(i);
@@ -185,15 +194,23 @@ void SofQW::exec()
             }
 
           }
-          const V3D ki = beamDir*sqrt(energyToK*ei);
-          const V3D kf = scatterDir*(sqrt(energyToK*(ef)));
+
+          if(ei < 0)
+            throw std::runtime_error("Negative incident energy. Check binning.");
+
+          const V3D ki = beamDir * sqrt(energyToK * ei);
+          const V3D kf = scatterDir * (sqrt(energyToK * (ef)));
           const double q = (ki - kf).norm();
 
           // Test whether it's in range of the Q axis
           if ( q < verticalAxis.front() || q > verticalAxis.back() ) continue;
           // Find which q bin this point lies in
           const MantidVec::difference_type qIndex =
-              std::upper_bound(verticalAxis.begin(),verticalAxis.end(),q) - verticalAxis.begin() - 1;
+              std::upper_bound(verticalAxis.begin(), verticalAxis.end(), q) - verticalAxis.begin() - 1;
+
+          // Add this spectra-detector pair to the mapping
+          specNumberMapping.push_back(outputWorkspace->getSpectrum(qIndex)->getSpectrumNo());
+          detIDMapping.push_back(det->getID());
 
           // And add the data and it's error to that bin, taking into account the number of detectors contributing to this bin
           outputWorkspace->dataY(qIndex)[j] += Y[j]/numDets_d;
@@ -212,6 +229,10 @@ void SofQW::exec()
 
   // If the input workspace was a distribution, need to divide by q bin width
   if (inputWorkspace->isDistribution()) this->makeDistribution(outputWorkspace,verticalAxis);
+
+  // Set the output spectrum-detector mapping
+  SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
+  outputWorkspace->updateSpectraUsing(outputDetectorMap);
 }
 
 /** Creates the output workspace, setting the axes according to the input binning parameters

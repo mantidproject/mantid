@@ -5,19 +5,19 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/V3D.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 #include "BoundingBox.h"
 #include <map>
 
 namespace Mantid
 {
-
+  //----------------------------------------------------------------------
+  // Forward declarations
+  //----------------------------------------------------------------------
   namespace Geometry
   {
-    //----------------------------------------------------------------------
-    // Forward declarations
-    //----------------------------------------------------------------------
     class Rule;
     class CompGrp;
     class Surface;
@@ -36,7 +36,7 @@ namespace Mantid
 
     An object is a collection of Rules and surface objects
 
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -75,6 +75,9 @@ namespace Mantid
 
       void setName(const int nx) { ObjName=nx; }           ///< Set Name
       int getName() const  { return ObjName; }             ///< Get Name
+
+      void setMaterial(const Kernel::Material & material);
+      const Kernel::Material & material() const;
 
       /// Return whether this object has a valid shape
       bool hasValidShape() const;
@@ -132,7 +135,7 @@ namespace Mantid
       const BoundingBox & getBoundingBox() const;
       /// Define axis-aligned bounding box
       void defineBoundingBox(const double& xmax,const double& ymax,const double& zmax,const double& xmin,const double& ymin,const double& zmin);
-      /// Set a null bounding box for this object 
+      /// Set a null bounding box for this object
       void setNullBoundingBox();
       // find internal point to object
       int getPointInObject(Kernel::V3D& point) const;
@@ -176,11 +179,11 @@ namespace Mantid
       double getTriangleSolidAngle(const Kernel::V3D& a, const Kernel::V3D& b, const Kernel::V3D& c, const Kernel::V3D& observer) const;
       double CuboidSolidAngle(const Kernel::V3D observer, const std::vector<Kernel::V3D> vectors) const;
       double SphereSolidAngle(const Kernel::V3D observer, const std::vector<Kernel::V3D> vectors, const double radius) const;
-      double CylinderSolidAngle(const Kernel::V3D & observer, const Mantid::Kernel::V3D & centre, 
-        const Mantid::Kernel::V3D & axis, 
+      double CylinderSolidAngle(const Kernel::V3D & observer, const Mantid::Kernel::V3D & centre,
+        const Mantid::Kernel::V3D & axis,
         const double radius, const double height) const;
-      double ConeSolidAngle(const Kernel::V3D & observer, const Mantid::Kernel::V3D & centre, 
-        const Mantid::Kernel::V3D & axis, 
+      double ConeSolidAngle(const Kernel::V3D & observer, const Mantid::Kernel::V3D & centre,
+        const Mantid::Kernel::V3D & axis,
         const double radius, const double height) const;
 
       /// Geometry Handle for rendering
@@ -200,6 +203,8 @@ namespace Mantid
       double* getTriangleVertices() const;
       /// original shape xml used to generate this object.
       std::string m_shapeXML;
+      /// material composition
+      Kernel::Material m_material;
 
     protected:
       std::vector<const Surface*> SurList;  ///< Full surfaces (make a map including complementary object ?)

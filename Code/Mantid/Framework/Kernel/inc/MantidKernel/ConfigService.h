@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/ProxyInfo.h"
 #include <vector>
 #include <map>
 #include <set>
@@ -51,7 +52,7 @@ namespace Mantid
         @author Nicholas Draper, Tessella Support Services plc
         @date 15/10/2007
 
-        Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+        Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
         This file is part of Mantid.
 
@@ -152,12 +153,18 @@ namespace Mantid
       std::string getOSArchitecture();
       /// Returns the OS version
       std::string getOSVersion();
+      /// Returns a human readable version of the OS version
+      std::string getOSVersionReadable();
+      /// Returns the username
+      std::string getUsername();
       /// Returns the current directory
       std::string getCurrentDir();
       /// Returns the current directory
       std::string getCurrentDir() const;
       /// Returns the system's temp directory
       std::string getTempDir();
+      /// Returns the system's appdata directory
+      std::string getAppDataDir();
       //Return the executable path
       std::string getDirectoryOfExecutable() const;
       //Return the full path to the executable
@@ -183,6 +190,8 @@ namespace Mantid
       void appendDataSearchDir(const std::string & path);
       /// Get the list of user search paths
       const std::vector<std::string>& getUserSearchDirs() const;
+      /// Get instrument search directory
+      const std::vector<std::string>& getInstrumentDirectories() const;
       /// Get instrument search directory
       const std::string getInstrumentDirectory() const;
       //@}
@@ -221,6 +230,11 @@ namespace Mantid
       /// Quick check to determine if vates has been installed.
       bool quickVatesCheck() const;
 
+      /// Gets the proxy for the system
+      Kernel::ProxyInfo& getProxy(const std::string& url);
+
+      /// Get the ParaViewPath
+      const std::string getParaViewPath() const;
     private:
       friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
       /// Handles distribution of Poco signals.
@@ -249,13 +263,17 @@ namespace Mantid
       /// Create the storage of the data search directories
       void cacheDataSearchPaths();
       /// Create the storage of the user search directories
-      void cacheUserSearchPaths();
+      void cacheUserSearchPaths();      
+      /// Create the storage of the instrument directories
+      void cacheInstrumentPaths();
       /// Returns true if the path is in the data search list
       bool isInDataSearchList(const std::string & path) const;
       /// Empty the list of facilities, deleting the FacilityInfo objects in the process
       void clearFacilities();
       /// Set the PV_PLUGIN_PATH to point at this version of Mantid.
       void setParaViewPluginPath() const;
+      /// Verifies the directory exists and add it to the back of the directory list if valid
+      bool addDirectoryifExists(const std::string& directoryName, std::vector<std::string>& directoryList);
 
       // Forward declaration of inner class
       template <class T>
@@ -288,6 +306,8 @@ namespace Mantid
       std::vector<std::string> m_DataSearchDirs;
       /// Store a list of user search paths
       std::vector<std::string> m_UserSearchDirs;
+      /// Store a list of instrument directory paths
+      std::vector<std::string> m_InstrumentDirs;
       /// A map of facilities to instruments
       std::map<std::string,std::vector<std::string> > m_instr_prefixes;
 
@@ -295,10 +315,16 @@ namespace Mantid
       std::vector<FacilityInfo*> m_facilities;
       /// Define a flag value for a removed property
       const std::string m_removedFlag;
+
+      ///local cache of proxy details
+      Kernel::ProxyInfo m_proxyInfo;
+      ///wether the proxy has been populated yet
+      bool m_isProxySet;
+
     };
 
     /// Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(__INTEL_COMPILER)
     inline
 #endif
     template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;

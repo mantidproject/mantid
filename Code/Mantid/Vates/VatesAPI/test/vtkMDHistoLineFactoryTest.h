@@ -1,5 +1,5 @@
 #ifndef VTK_MD_HISTO_LINE_FACTORY_TEST_H_
-#define VTK_MD_HISOT_LINE_FACTORY_TEST_H_
+#define VTK_MD_HISTO_LINE_FACTORY_TEST_H_
 
 #include "MantidAPI/IMDIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"

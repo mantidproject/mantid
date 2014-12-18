@@ -28,7 +28,7 @@ namespace Mantid
     <LI> Title - the title to describe the saved processed data
     </UL>
 
-    Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -65,6 +65,11 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Nexus";}
 
+    protected:
+
+    /// Override process groups
+    virtual bool processGroups();
+
     private:
       
       /// Overwrites Algorithm method.
@@ -80,6 +85,9 @@ namespace Mantid
       void execEvent(Mantid::NeXus::NexusFileIO * nexusFile,const bool uniformSpectra,const std::vector<int> spec);
       /// sets non workspace properties for the algorithm
       void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
+      /// execute the algorithm.
+      void doExec(Mantid::API::Workspace_sptr workspace, Mantid::NeXus::NexusFileIO_sptr& nexusFile,
+          const bool keepFile=false, NeXus::NexusFileIO::optional_size_t entryNumber = NeXus::NexusFileIO::optional_size_t());
       
       /// The name and path of the input file
       std::string m_filename;

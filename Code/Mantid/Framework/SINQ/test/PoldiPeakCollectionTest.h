@@ -10,6 +10,10 @@
 #include "MantidAPI/TableRow.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidGeometry/Crystal/BraggScattererFactory.h"
+
 #include <stdexcept>
 
 using namespace Mantid::Poldi;
@@ -179,6 +183,33 @@ public:
         TS_ASSERT_EQUALS(otherCollection.intensityType(), PoldiPeakCollection::Integral);
     }
 
+    void testPointGroup()
+    {
+        PoldiPeakCollection peaks;
+        TS_ASSERT(!peaks.pointGroup());
+
+        PointGroup_sptr m3m = boost::make_shared<PointGroupLaue13>();
+        peaks.setPointGroup(m3m);
+        TS_ASSERT_EQUALS(peaks.pointGroup()->getName(), m3m->getName());
+    }
+
+    void testPointGroupStringConversion()
+    {
+        TestablePoldiPeakCollection peaks;
+        PointGroup_sptr m3m = boost::make_shared<PointGroupLaue13>();
+
+        TS_ASSERT_EQUALS(m3m->getName(), peaks.pointGroupFromString(peaks.pointGroupToString(m3m))->getName());
+    }
+
+    void testGetPointGroupStringFromLog()
+    {
+        TableWorkspace_sptr newDummy(m_dummyData->clone());
+        newDummy->logs()->addProperty<std::string>("PointGroup", "SomeString");
+
+        TestablePoldiPeakCollection peaks;
+        TS_ASSERT_EQUALS(peaks.getPointGroupStringFromLog(newDummy->logs()), "SomeString");
+    }
+
     void testAddPeak()
     {
         PoldiPeakCollection peaks;
@@ -249,10 +280,7 @@ public:
 
     void testStructureConstructor()
     {
-        UnitCell CsCl(4.126, 4.126, 4.126);
-        PointGroup_sptr m3m = boost::make_shared<PointGroupLaue13>();
-
-        CrystalStructure_sptr structure = boost::make_shared<CrystalStructure>(CsCl, m3m);
+        CrystalStructure_sptr structure = getCsClStructure();
 
         double dMin = 0.55;
         double dMax = 5.0;
@@ -285,25 +313,42 @@ public:
 
     void testSetPeaks()
     {
-        UnitCell CsCl(4.126, 4.126, 4.126);
-        PointGroup_sptr m3m = boost::make_shared<PointGroupLaue13>();
-
-        CrystalStructure_sptr structure = boost::make_shared<CrystalStructure>(CsCl, m3m);
+        CrystalStructure_sptr structure = getCsClStructure();
 
         double dMin = 0.55;
         double dMax = 5.0;
 
         std::vector<V3D> hkls = structure->getUniqueHKLs(dMin, dMax);
         std::vector<double> dValues = structure->getDValues(hkls);
+        std::vector<double> fSquared(dValues.size(), 0.0);
 
         TestablePoldiPeakCollection p;
-        TS_ASSERT_THROWS_NOTHING(p.setPeaks(hkls, dValues));
+        // point group has not been set - required for multiplicities
+        TS_ASSERT_THROWS(p.setPeaks(hkls, dValues, fSquared), std::runtime_error);
+
+        p.setPointGroup(structure->pointGroup());
+        TS_ASSERT_THROWS_NOTHING(p.setPeaks(hkls, dValues, fSquared));
 
         dValues.pop_back();
-        TS_ASSERT_THROWS(p.setPeaks(hkls, dValues), std::invalid_argument);
+        TS_ASSERT_THROWS(p.setPeaks(hkls, dValues, fSquared), std::invalid_argument);
     }
 
 private:
+    CrystalStructure_sptr getCsClStructure()
+    {
+        UnitCell CsCl(4.126, 4.126, 4.126);
+        SpaceGroup_const_sptr Pm3m = SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m");
+
+        BraggScatterer_sptr cs = BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Cs;Position=[0.5,0.5,0.5];U=0.005");
+        BraggScatterer_sptr cl = BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Cl;Position=[0,0,0];U=0.005");
+
+        CompositeBraggScatterer_sptr atoms = CompositeBraggScatterer::create();
+        atoms->addScatterer(cs);
+        atoms->addScatterer(cl);
+
+        return boost::make_shared<CrystalStructure>(CsCl, Pm3m, atoms);
+    }
+
     TableWorkspace_sptr m_dummyData;
 };
 

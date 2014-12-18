@@ -4,7 +4,7 @@
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Line.h"
 #include "MantidKernel/V3D.h"
-#include <vector>
+#include <list>
 
 namespace Mantid
 {
@@ -32,7 +32,7 @@ namespace Mantid
 
     Creates interaction with a line
 
-    Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -56,8 +56,8 @@ namespace Mantid
     private:
 
       Line ATrack;                         ///< The line
-      std::vector<Kernel::V3D> PtOut;  ///< The intersection point
-      std::vector<double> DOut;            ///< The distance
+      std::list<Kernel::V3D> PtOut;  ///< The intersection point
+      std::list<double> DOut;            ///< The distance
 
       void procTrack();
 
@@ -66,7 +66,7 @@ namespace Mantid
       LineIntersectVisit(const Kernel::V3D&,
         const Kernel::V3D&);
       /// Destructor
-      virtual ~LineIntersectVisit() {};
+      virtual ~LineIntersectVisit() {}
 
       void Accept(const Surface&);
       void Accept(const Quadratic&);
@@ -78,10 +78,10 @@ namespace Mantid
 
       // Accessor
       /// Get the distance
-      const std::vector<double>& getDistance() const 
+      const std::list<double>& getDistance() const 
       { return DOut; }
       /// Get the intersection points
-      const std::vector<Kernel::V3D>& getPoints() const 
+      const std::list<Kernel::V3D>& getPoints() const 
       { return PtOut; }
       /// Get the number of intersection points
       unsigned long getNPoints() const { return (unsigned long)PtOut.size(); }

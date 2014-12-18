@@ -9,10 +9,8 @@
 #include <climits>
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+
 #include <map>
-#ifdef HAS_UNORDERED_MAP_H
-#include <tr1/unordered_map>
-#endif
 
 #include <Poco/SAX/ContentHandler.h>
 
@@ -81,7 +79,7 @@ namespace DataHandling
     @author Steve Williams and Russell Taylor (Tessella Support Services plc)
     @date 27/07/2009
 
-    Copyright &copy; 2008-11 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-11 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -109,8 +107,8 @@ public:
 
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "GroupDetectors"; };
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Sums spectra bin-by-bin, equivalent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file.";}
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Sums spectra bin-by-bin, equivalent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file.";}
 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 2; };
@@ -133,13 +131,8 @@ private:
     };
   };
 
-
-#ifndef HAS_UNORDERED_MAP_H
-/// used to store the lists of WORKSPACE INDICES that will be grouped, the keys are not used
-typedef std::map<specid_t, std::vector<size_t> > storage_map;
-#else
-typedef std::tr1::unordered_map<specid_t, std::vector<size_t> > storage_map;
-#endif
+  /// used to store the lists of WORKSPACE INDICES that will be grouped, the keys are not used
+  typedef std::map<specid_t, std::vector<size_t> > storage_map;
 
   /// An estimate of the percentage of the algorithm runtimes that has been completed 
   double m_FracCompl;

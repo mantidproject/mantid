@@ -13,7 +13,7 @@ namespace Mantid
     /**
       This class is used in Catalog Search service to set/get all the inputs to search for.
 
-      Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
       This file is part of Mantid.
 

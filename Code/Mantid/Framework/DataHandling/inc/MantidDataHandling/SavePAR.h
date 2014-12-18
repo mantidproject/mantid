@@ -19,7 +19,7 @@ namespace DataHandling
  *     @author Alex Buts; after save PHX Sturat Cambell, ScD, Oak Ridge National Laboratory
  *     @date 15/09/2011
  *
- *     Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ *     Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
  *
  *     This file is part of Mantid.
  *

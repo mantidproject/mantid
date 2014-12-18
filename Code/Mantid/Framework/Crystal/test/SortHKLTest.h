@@ -49,9 +49,11 @@ public:
     double smu = 0.357;
     double amu = 0.011;
     NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
-  			0.0, 0.0, smu, 0.0, smu, amu);
-    Material mat("SetInSaveHKLTest", neutron, 1.0);
-    ws->mutableSample().setMaterial(mat);
+                        0.0, 0.0, smu, 0.0, smu, amu);
+    Object sampleShape;
+    sampleShape.setMaterial(Material("SetInSaveHKLTest", neutron, 1.0));
+    ws->mutableSample().setShape(sampleShape);
+    
     API::Run & mrun = ws->mutableRun();
     mrun.addProperty<double>("Radius", 0.1, true);
 

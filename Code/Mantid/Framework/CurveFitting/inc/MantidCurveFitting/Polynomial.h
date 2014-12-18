@@ -13,7 +13,7 @@ namespace CurveFitting
 
   /** Polynomial : N-th polynomial background function.
     
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -69,12 +69,6 @@ namespace CurveFitting
 
     /// Polynomial order
     int m_n;
-
-    /// Lower x boundary.
-    double m_StartX;
-
-    /// Upper x boundary
-    double m_EndX;
   };
 
   typedef boost::shared_ptr<Polynomial> Polynomial_sptr;

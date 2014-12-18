@@ -43,13 +43,19 @@
 <parameter name="Workflow.MaskFile" type="string">
   <value val="BASIS_Mask.xml" />
 </parameter>
-<parameter name="Workflow.MonitorArea" >
+<parameter name="Workflow.Monitor1-SpectrumNumber" >
+  <value val="0" />
+</parameter>
+<parameter name="Workflow.Monitor1-SpectrumNumber" >
+  <value val="0" />
+</parameter>
+<parameter name="Workflow.Monitor1-Area" >
   <value val="1.276e-3" />
 </parameter>
-<parameter name="Workflow.MonitorThickness" >
+<parameter name="Workflow.Monitor1-Thickness" >
   <value val="0.025" />
 </parameter>
-<parameter name="Workflow.MonitorScalingFactor">
+<parameter name="Workflow.Monitor1-ScalingFactor">
   <value val="1e6" />
 </parameter>
 <parameter name="Workflow.UnwrapMonitor" type="string">
@@ -57,6 +63,9 @@
 </parameter>
 <parameter name="Workflow.NamingConvention" type="string">
     <value val="AnalyserReflection" />
+</parameter>
+<parameter name="Workflow.SE-log" type="string">
+    <value val="SetpointLP1" />
 </parameter>
 
 </component-link>

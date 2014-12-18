@@ -22,7 +22,7 @@ class EnginXFitPeaks(PythonAlgorithm):
     		"Index of the spectra to fit peaks in")
 
     	self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),
-    		"A list of dSpacing values where peaks are expected.")
+    		"A list of dSpacing values to be translated into TOF to find expected peaks.")
 
     	self.declareProperty("Difc", 0.0, direction = Direction.Output,
     		doc = "Fitted Difc value")

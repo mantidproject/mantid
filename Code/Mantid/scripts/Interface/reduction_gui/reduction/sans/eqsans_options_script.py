@@ -31,6 +31,12 @@ class ReductionOptions(BaseOptions):
 
     # Perform EQSANS TOF correction
     perform_TOF_correction = True
+    
+    # Turn off the wedges
+    n_wedges = 0
+    
+    # Turn off log binning alignment with decades
+    align_log_with_decades = False
 
     # Normalize to beam monitor
     use_beam_monitor = False
@@ -61,6 +67,8 @@ class ReductionOptions(BaseOptions):
         self.sample_aperture_diameter = ReductionOptions.sample_aperture_diameter
 
         self.perform_TOF_correction = True
+        self.n_wedges = ReductionOptions.n_wedges
+        self.align_log_with_decades = ReductionOptions.align_log_with_decades
         self.use_beam_monitor = False
         self.beam_monitor_reference = ''
 

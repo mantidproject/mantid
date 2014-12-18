@@ -1,75 +1,80 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "TOSCA" valid-from = "2011-01-19T00:00:00">
+<parameter-file instrument="TOSCA"
+  valid-from="2000-03-31 15:20:00"
+  valid-to="2100-01-31 23:59:59" >
 
-<component-link name = "TOSCA">
+  <component-link name = "TOSCA">
 
-<parameter name="deltaE-mode" type="string">
-    <value val="indirect"/>
-</parameter>
+    <parameter name="deltaE-mode" type="string">
+      <value val="indirect"/>
+    </parameter>
 
-<!-- These properties are neceessary for use in the Indirect CTE interface. -->
-<parameter name="analysers" type="string">
-    <value val="graphite,diffraction" />
-</parameter>
-<parameter name="refl-graphite" type="string">
-    <value val="002" />
-</parameter>
-<parameter name="refl-diffraction" type="string">
-  <value val="diffspec" />
-</parameter>
+    <!-- These properties are neceessary for use in the Indirect CTE interface. -->
+    <parameter name="analysers" type="string">
+      <value val="graphite,diffraction" />
+    </parameter>
+    <parameter name="refl-graphite" type="string">
+      <value val="002" />
+    </parameter>
+    <parameter name="refl-diffraction" type="string">
+      <value val="diffspec" />
+    </parameter>
 
-<!-- Available options are "Show" or "Hide". -->
-<parameter name="cm-1-convert-choice" type="string">
-    <value val="Show" />
-</parameter>
-<parameter name="save-aclimax-choice" type="string">
-    <value val="Show" />
-</parameter>
-  
-<!-- This parameter will be taken as a default value for the rebinning of
-        the data in DeltaE. The existence of the parameter will make rebinning
-        the default, as opposed to not rebinning.
-        This is necessary so that the spectra can be grouped.
--->
-<parameter name="rebin-default" type="string">
-    <value val="-2.5,0.015,3,-0.005,1000" />
-</parameter>
+    <!-- Available options are "true" or "false". -->
+    <parameter name="cm-1-convert-choice" type="string">
+      <value val="true" />
+    </parameter>
+    <parameter name="save-ascii-choice" type="string">
+      <value val="true" />
+    </parameter>
 
-<!-- Reduction workflow parameters under this line -->
-<parameter name="Workflow.InfoTable" type="string">
-    <value val="inst_abrv, run_number, user_name, run_title, hd_dur" />
-</parameter>
-<parameter name="Workflow.Monitor1-ID" >
-  <value val="0" />
-</parameter>
-<parameter name="Workflow.Monitor1-Area" >
-    <value val="5.391011e-5" />
-</parameter>
-<parameter name="Workflow.Monitor1-Thickness" >
-    <value val="0.013" />
-</parameter>
-<parameter name="Workflow.Monitor1-ScalingFactor">
-    <value val="1e9" />
-</parameter>
-<parameter name="Workflow.Monitor1-Attenuation" >
-  <value val="8.3" />
-</parameter>
-<parameter name="Workflow.UnwrapMonitor" type="string">
-    <value val="Never" />
-</parameter>
-<parameter name="Workflow.ChopDataIfGreaterThan">
-    <value val="40000" />
-</parameter>
-<parameter name="Workflow.GroupingMethod" type="string">
-    <value val="File" />
-</parameter>
-<parameter name="Workflow.GroupingFile" type="string">
-  <value val="TOSCA_Grouping.xml" />
-</parameter>
-<parameter name="Workflow.Masking" type="string">
-    <value val="IdentifyNoisyDetectors" />
-</parameter>
-  
-</component-link>
+    <!-- This parameter will be taken as a default value for the rebinning of
+            the data in DeltaE. The existence of the parameter will make rebinning
+            the default, as opposed to not rebinning.
+            This is necessary so that the spectra can be grouped.
+    -->
+    <parameter name="rebin-default" type="string">
+      <value val="-2.5,0.015,3,-0.005,1000" />
+    </parameter>
+
+    <!-- Reduction workflow parameters under this line -->
+    <parameter name="Workflow.InfoTable" type="string">
+      <value val="inst_abrv, run_number, user_name, run_title, hd_dur" />
+    </parameter>
+
+    <!-- This is actually spectrum index, NOT spectrum number -->
+    <parameter name="Workflow.Monitor1-SpectrumNumber" >
+      <value val="140" />
+    </parameter>
+    <parameter name="Workflow.Monitor1-Area" >
+      <value val="5.391011e-5" />
+    </parameter>
+    <parameter name="Workflow.Monitor1-Thickness" >
+      <value val="0.013" />
+    </parameter>
+    <parameter name="Workflow.Monitor1-ScalingFactor">
+      <value val="1e9" />
+    </parameter>
+    <parameter name="Workflow.Monitor1-Attenuation" >
+      <value val="8.3" />
+    </parameter>
+
+    <parameter name="Workflow.UnwrapMonitor" type="string">
+      <value val="Never" />
+    </parameter>
+    <parameter name="Workflow.ChopDataIfGreaterThan">
+      <value val="40000" />
+    </parameter>
+    <parameter name="Workflow.GroupingMethod" type="string">
+      <value val="File" />
+    </parameter>
+    <parameter name="Workflow.GroupingFile" type="string">
+      <value val="TOSCA_Grouping.xml" />
+    </parameter>
+    <parameter name="Workflow.Masking" type="string">
+      <value val="IdentifyNoisyDetectors" />
+    </parameter>
+
+  </component-link>
 
 </parameter-file>

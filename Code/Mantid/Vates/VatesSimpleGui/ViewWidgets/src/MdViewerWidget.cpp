@@ -12,6 +12,8 @@
 
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidKernel/DynamicFactory.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/ConfigService.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
@@ -84,6 +86,8 @@
 #include <QWidget>
 
 #include <iostream>
+#include <vector>
+#include <string>
 
 namespace Mantid
 {
@@ -93,6 +97,12 @@ namespace SimpleGui
 {
 using namespace Mantid::API;
 using namespace MantidQt::API;
+
+namespace
+{
+  /// Static logger
+  Kernel::Logger g_log("MdViewerWidget");
+}
 
 REGISTER_VATESGUI(MdViewerWidget)
 
@@ -241,8 +251,17 @@ void MdViewerWidget::createAppCoreForPlugin()
 {
   if (!pqApplicationCore::instance())
   {
+    // Provide ParaView's application core with a path to ParaView
     int argc = 1;
-    char *argv[] = {"/tmp/MantidPlot"};
+
+    std::string paraviewPath = Mantid::Kernel::ConfigService::Instance().getParaViewPath();
+    std::vector<char> argvConversion(paraviewPath.begin(), paraviewPath.end());
+    argvConversion.push_back('\0');
+
+    char *argv[] = {&argvConversion[0]};
+
+    g_log.debug() << "Intialize pqApplicationCore with " << argv << "\n";
+
     new pqPVApplicationCore(argc, argv);
   }
   else

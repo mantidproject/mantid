@@ -236,10 +236,18 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   setFocusPolicy(Qt::StrongFocus);
   setFocusProxy(m_uiForm.fileEditor);
 
-  // When first used try to starting directory better than the directory MantidPlot
-  // is installed in
-  QStringList datadirs = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories")).split(";", QString::SkipEmptyParts);
-  if ( ! datadirs.isEmpty() ) m_lastDir = datadirs[0];
+  // When first used try to starting directory better than the directory MantidPlot is installed in
+  // First try default save directory
+  m_lastDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+
+  // If that fails pick the first data search directory
+  if(m_lastDir.isEmpty())
+  {
+    QStringList dataDirs = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories")).split(";", QString::SkipEmptyParts);
+
+    if(!dataDirs.isEmpty())
+      m_lastDir = dataDirs[0];
+  }
 
   //this for accepts drops, but the underlying text input does not.
   this->setAcceptDrops(true);

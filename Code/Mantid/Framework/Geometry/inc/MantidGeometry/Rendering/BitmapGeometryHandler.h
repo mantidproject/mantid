@@ -28,7 +28,7 @@ namespace Mantid
                 A texture will have been created by the RectangularDetectorActor (in MantidPlot)
                 and this is what will be mapped.
 
-                Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+                Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
                 This file is part of Mantid.
 
@@ -53,6 +53,8 @@ namespace Mantid
                 {
                 private:
                         static Kernel::Logger& PLog;           ///< The official logger
+
+                        boost::shared_ptr<GeometryHandler> clone() const;
 
                         /// The RectangularDetector object being plotted.
                         RectangularDetector * mRectDet;

@@ -67,6 +67,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self.declareProperty(ITableWorkspaceProperty("FitwindowTableWorkspace", "", Direction.Input, PropertyMode.Optional),
                 "Name of input table workspace containing the fit window information for each spectrum. ")
         self.declareProperty("MinimumPeakHeight", 2., "Minimum value allowed for peak height")
+        self.declareProperty("MinimumPeakHeightObs", 0., 
+            "Minimum value of a peak's maximum observed Y value for this peak to be used to calculate offset.")
 
         self.declareProperty(MatrixWorkspaceProperty("DetectorResolutionWorkspace", "", Direction.Input, PropertyMode.Optional),
                 "Name of optional input matrix workspace for each detector's resolution (D(d)/d).")
@@ -395,6 +397,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                                 DReference=self._peakpos,
                                 FitWindowMaxWidth=self.getProperty("PeakWindowMax").value,
                                 MinimumPeakHeight=self.getProperty("MinimumPeakHeight").value,
+                                MinimumPeakHeightObs=self.getProperty("MinimumPeakHeightObs").value,
                                 BackgroundType=self.getProperty("BackgroundType").value,
                                 MaxOffset=self._maxoffset, NumberPeaksWorkspace=str(wksp)+"peaks",
                                 MaskWorkspace=str(wksp)+"mask",

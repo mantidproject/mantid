@@ -1,6 +1,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/SaveCalFile.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <cmath>
 #include <fstream>
 
@@ -22,7 +23,7 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  SaveCalFile::SaveCalFile()
+  SaveCalFile::SaveCalFile() : m_precision(7)
   {
   }
     
@@ -52,6 +53,12 @@ namespace DataHandling
 
     declareProperty(new FileProperty("Filename", "", FileProperty::Save, ".cal"),
         "Path to the .cal file that will be created.");
+
+    auto offsetprecision = boost::make_shared<BoundedValidator<int> >();
+    offsetprecision->setLower(7);
+    offsetprecision->setUpper(11);
+    declareProperty("OffsetPrecision", 7, offsetprecision,
+                    "Precision of offsets (between 7 and 11 decimal).");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -63,6 +70,7 @@ namespace DataHandling
     OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
     MaskWorkspace_sptr maskWS = getProperty("MaskWorkspace");
     std::string Filename = getPropertyValue("Filename");
+    m_precision = getProperty("OffsetPrecision");
 
     // Do the saving
     SaveCalFile::saveCalFile(Filename, groupWS, offsetsWS, maskWS);
@@ -145,7 +153,7 @@ namespace DataHandling
       //if(group > 0)
       fout << std::fixed << std::setw(9) << number <<
               std::fixed << std::setw(15) << detectorID <<
-              std::fixed << std::setprecision(7) << std::setw(15)<< offset <<
+              std::fixed << std::setprecision(m_precision) << std::setw(15)<< offset <<
               std::fixed << std::setw(8) << selected <<
               std::fixed << std::setw(8) << group  << "\n";
 

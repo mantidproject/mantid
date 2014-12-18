@@ -48,6 +48,7 @@ namespace MDAlgorithms
 
     /// Calculate if this Q is on a detector
     bool detectorQ(Mantid::Kernel::V3D QLabFrame, double PeakRadius);
+    void  runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS, std::string property, std::string values);
 
     /// Instrument reference
     Geometry::Instrument_const_sptr inst;

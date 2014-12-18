@@ -12,8 +12,8 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/UnitFactory.h"
 
-#if (GCC_VERSION >= 40400 && GCC_VERSION < 40500) // 4.4.0 < GCC > 4.5.0
-  // Avoid compiler warnings on gcc 4.4 from unused static constants in isisds_command.h
+#ifdef GCC_VERSION
+  // Avoid compiler warnings on gcc from unused static constants in isisds_command.h
   GCC_DIAG_OFF(unused-variable)
 #endif
 #include "LoadDAE/idc.h"
@@ -39,7 +39,11 @@ DECLARE_LISTENER(ISISLiveEventDataListener)
  */
 ISISLiveEventDataListener::ISISLiveEventDataListener():API::ILiveListener(),
     m_isConnected(false),
-    m_stopThread(false)
+    m_stopThread(false),
+    m_runNumber(0),
+    m_daeHandle(),
+    m_numberOfPeriods(0),
+    m_numberOfSpectra(0)
 {
   m_warnings["period"] = "Period number is outside the range. Changed to 0.";
 }

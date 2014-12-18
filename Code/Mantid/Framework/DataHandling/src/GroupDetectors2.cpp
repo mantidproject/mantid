@@ -127,7 +127,6 @@ void GroupDetectors2::exec()
     unGroupedInds.push_back(i);
   }
 
-  // read in the input parameters to make that map, if KeepUngroupedSpectra was set we'll need a list of the ungrouped spectrra too
   getGroups(inputWS, unGroupedInds);
 
   // converting the list into a set gets rid of repeated values, here the multiple GroupDetectors2::USED become one USED at the start

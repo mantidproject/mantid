@@ -29,6 +29,7 @@
 #ifndef GRAPH3D_H
 #define GRAPH3D_H
 
+#include "Mantid/IProjectSerialisable.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 
 #include <qwt3d_surfaceplot.h>
@@ -58,7 +59,7 @@ class Function2D;//Mantid
  * Big problem here: export to vector formats. Qwt3D's export filters write directly to a file, so they
  * can't be combined with output generated via QPrinter.
  */
-class Graph3D: public MdiSubWindow
+class Graph3D: public MdiSubWindow, public Mantid::IProjectSerialisable
 {
 	Q_OBJECT
 
@@ -245,8 +246,8 @@ public slots:
     void exportVector(const QString& fileName);
     void exportToFile(const QString& fileName);
 
-	QString saveToString(const QString& geometry, bool = false);
-	QString saveAsTemplate(const QString& geometryInfo);
+  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
+  std::string saveToProject(ApplicationWindow* app);
 
 	void zoomChanged(double);
 	void rotationChanged(double, double, double);

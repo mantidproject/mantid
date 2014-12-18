@@ -26,7 +26,7 @@ namespace Mantid
     @author Freddie Akeroyd, STFC ISIS Facility, GB
     @date 24/01/2008
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -88,8 +88,11 @@ namespace Mantid
       /// sets non workspace properties for the algorithm
       void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
 
+    protected:
 
-		
+      /// Override process groups
+      virtual bool processGroups();
+
     };
 
   } // namespace DataHandling

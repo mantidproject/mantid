@@ -22,7 +22,7 @@ namespace Geometry
  Handles the generation of well formed description of a geometry based on input IMDDimensions.
  Outputs xml.
 
- Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 

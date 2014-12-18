@@ -10,71 +10,47 @@ namespace Mantid
 {
   namespace API
   {
-    
-    using Geometry::IComponent;
-    using Geometry::IObjComponent;
-    using Kernel::V3D;
+    using Geometry::BoundingBox;
     using Geometry::Track;
+    using Kernel::Material;
+    using Kernel::V3D;
 
     //------------------------------------------------------------------------------
     // Public methods
     //------------------------------------------------------------------------------
-    
+
     /**
-     * Constructor specifying a name for the environment
+     * Constructor specifying a name for the environment. It is empty by default and
+     * required by various other users of it
      * @param name :: A name for the environment kit
      */
-    SampleEnvironment::SampleEnvironment(const std::string & name) : 
-      CompAssembly(name, NULL)
+    SampleEnvironment::SampleEnvironment(const std::string & name) :
+      m_name(name), m_elements()
     {
     }
 
     /**
-     * Copy constructor
-     * @param original :: The object whose state is to be copied.
+     * @return An axis-aligned BoundingBox object that encompasses the whole kit.
      */
-    SampleEnvironment::SampleEnvironment(const SampleEnvironment & original) : 
-      CompAssembly(original)
+    Geometry::BoundingBox SampleEnvironment::boundingBox() const
     {
+      BoundingBox box;
+      auto itrEnd = m_elements.end();
+      for(auto itr = m_elements.begin(); itr != itrEnd; ++itr)
+      {
+        box.grow(itr->getBoundingBox());
+      }
+      return box;
     }
 
     /**
-     * Clone the environment assembly
-     * @returns A pointer to the clone object
+     * @param element A shape + material object
      */
-    Geometry::IComponent* SampleEnvironment::clone() const
+    void SampleEnvironment::add(const Geometry::Object &element)
     {
-      return new SampleEnvironment(*this);
+      m_elements.push_back(element);
     }
-    
-    /**
-     * Override the add method so that we can only add physical components that
-     * have a defined shape, i.e. an ObjComponent with a valid shape
-     * @param comp :: A pointer to the phyiscal component. This object will take 
-     * ownership of the pointer
-     * @returns The number of items within the assembly, after this component has 
-     * been added
-     */
-    int SampleEnvironment::add(IComponent * comp)
-    {
-      // Check if this is a component with a shape
-      IObjComponent * physicalComp = dynamic_cast<IObjComponent*>(comp);
-      if( !physicalComp )
-      {
-	throw std::invalid_argument("CompAssembly::add - Invalid component, it must implement "
-				    "the IObjComponent interface");
-      }
-      if( physicalComp->shape() && physicalComp->shape()->hasValidShape() )
-      {
-	// Accept this component
-	return CompAssembly::add(comp);
-      }
-      else
-      {
-	throw std::invalid_argument("CompAssembly::add - Component does not have a defined shape.");
-      }
-    }
-    
+
     /**
      * Is the point given a valid point within the environment
      * @param point :: Is the point valid within the environment
@@ -82,36 +58,31 @@ namespace Mantid
      */
     bool SampleEnvironment::isValid(const V3D & point) const
     {
-      const int numElements(nelements());
-      for(int i = 0; i < numElements; ++i )
+      auto itrEnd = m_elements.end();
+      for(auto itr = m_elements.begin(); itr != itrEnd; ++itr)
       {
-	boost::shared_ptr<IObjComponent> part = boost::dynamic_pointer_cast<IObjComponent>(getChild(i));
-	if( part && part->isValid(point) )
-	{
-	  return true;
-	}
+        if( itr->isValid(point) )
+        {
+          return true;
+        }
       }
       return false;
     }
-    
+
     /**
-     * Update the given track with intersections within the environment 
+     * Update the given track with intersections within the environment
      * @param track :: The track is updated with an intersection with the
      *        environment
      */
     void SampleEnvironment::interceptSurfaces(Track & track) const
     {
-      const int numElements(nelements());
-      for(int i = 0; i < numElements; ++i )
+      auto itrEnd = m_elements.end();
+      for(auto itr = m_elements.begin(); itr != itrEnd; ++itr)
       {
-	boost::shared_ptr<IObjComponent> part = boost::dynamic_pointer_cast<IObjComponent>(getChild(i));
-	if( part )
-	{
-	  part->interceptSurface(track);
-	}
-      }      
-    } 
-    
+        itr->interceptSurface(track);
+      }
+    }
+
   }
 
 }

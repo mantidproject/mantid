@@ -629,6 +629,15 @@ static void destroySuite(MDBoxTest * suite) { delete suite; }
     TS_ASSERT_THROWS_NOTHING(box.unmask());
     TSM_ASSERT("Should have been masked.", !box.getIsMasked());
   }
+
+  void test_reserve()
+  {
+    BoxController_sptr sc( new BoxController(2));
+    MDBox<MDLeanEvent<2>,2> b(sc.get());
+
+    b.reserveMemoryForLoad(3);
+    TS_ASSERT_EQUALS( b.getEvents().capacity(), 3);
+  }
 };
 
 

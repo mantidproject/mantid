@@ -76,14 +76,18 @@ public:
     testWS->setYUnitLabel("Counts");
 
     std::string expected = \
-        "WorkspaceTester\n"
-        "Title: A test run\n"
-        "Histograms: 1\n"
-        "Bins: 1\n"
-        "Histogram\n"
-        "X axis: Time-of-flight / microsecond\n"
-        "Y axis: Counts\n"
-        "Instrument:  (1990-Jan-01 to 1990-Jan-01)\n";
+      "WorkspaceTester\n"
+      "Title: A test run\n"
+      "Histograms: 1\n"
+      "Bins: 1\n"
+      "Histogram\n"
+      "X axis: Time-of-flight / microsecond\n"
+      "Y axis: Counts\n"
+      "Distribution: False\n"
+      "Instrument:  (1990-Jan-01 to 1990-Jan-01)\n"
+      "Run start: not available\n"
+      "Run end:  not available\n"
+      ;
 
     TS_ASSERT_EQUALS(expected, testWS->toString());
   }
@@ -700,6 +704,47 @@ public:
     TS_ASSERT_DELTA(ws.getSignalAtCoord(coords, Mantid::API::NoNormalization), 1.0, 1e-5);
   }
 
+  void test_getCoordAtSignal_regression()
+  {
+    /*
+    Having more spectrum numbers (acutally vertical axis increments) than x bins in VolumeNormalisation mode
+    should not cause any issues.
+    */
+    WorkspaceTester ws;
+    const int nVertical = 4;
+
+    const int nBins = 2;
+    const int nYValues = 1;
+    ws.initialize(nVertical, nBins, nYValues);
+    NumericAxis* verticalAxis = new NumericAxis(nVertical);
+    for(int i = 0; i < nVertical; ++i)
+    {
+      for(int j = 0; j < nBins; ++j)
+      {
+        if( j < nYValues )
+        {
+          ws.dataY(i)[j] = 1.0; // All y values are 1.
+          ws.dataE(i)[j] = j;
+        }
+        ws.dataX(i)[j] = j; // x increments by 1
+      }
+      verticalAxis->setValue(i, double(i)); // Vertical axis increments by 1.
+    }
+    ws.replaceAxis(1, verticalAxis);
+    // Signal is always 1 and volume of each box is 1. Therefore normalized signal values by volume should always be 1.
+
+    // Test at the top right.
+    coord_t coord_top_right[2] = {static_cast<float>(ws.readX(0).back()),  float(0)};
+    signal_t value = 0;
+    TS_ASSERT_THROWS_NOTHING(value = ws.getSignalAtCoord(coord_top_right, VolumeNormalization));
+    TS_ASSERT_EQUALS(1.0, value);
+
+    // Test at another location just to be sure.
+    coord_t coord_bottom_left[2] = {static_cast<float>(ws.readX(nVertical-1)[1]),  float(nVertical-1) };
+    TS_ASSERT_THROWS_NOTHING(value = ws.getSignalAtCoord(coord_bottom_left, VolumeNormalization));
+    TS_ASSERT_EQUALS(1.0, value);
+  }
+
   void test_setMDMasking()
   {
     WorkspaceTester ws;
@@ -800,7 +845,478 @@ public:
     TSM_ASSERT( "Monitor workspace not successfully reset", ! ws->monitorWorkspace() )
   }
 
+  void test_getXIndex()
+  {
+    WorkspaceTester ws;
+    ws.init(1,4,3);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
+    X[2] = 3.0;
+    X[3] = 4.0;
+
+    auto ip = ws.getXIndex( 0, 0.0, true );
+    TS_ASSERT_EQUALS( ip.first, 0 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 0.0, false );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 1.0, true );
+    TS_ASSERT_EQUALS( ip.first, 0 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 1.0, false );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 5.0, true );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 5.0, false );
+    TS_ASSERT_EQUALS( ip.first, 3 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, true );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, false );
+    TS_ASSERT_EQUALS( ip.first, 3 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 5.0, true, 5 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 5.0, false, 5 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 3.0, true, 5 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 3.0, false, 5 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, true, 5 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, false, 5 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, true, 4 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, false, 4 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, true, 3 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, false, 3 );
+    TS_ASSERT_EQUALS( ip.first, 3 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, true );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 4.0, false );
+    TS_ASSERT_EQUALS( ip.first, 3 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 2.0, true, 3 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 2.0, false, 3 );
+    TS_ASSERT_EQUALS( ip.first, 3 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 1.0, true, 3 );
+    TS_ASSERT_EQUALS( ip.first, 4 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 1.0, false, 3 );
+    TS_ASSERT_EQUALS( ip.first, 3 );
+    TS_ASSERT_DELTA( ip.second, 0.0, 1e-15 );
+
+    ip = ws.getXIndex( 0, 2.1, true );
+    TS_ASSERT_EQUALS( ip.first, 1 );
+    TS_ASSERT_DELTA( ip.second, 0.1, 1e-15 );
+
+    ip = ws.getXIndex( 0, 2.1, false );
+    TS_ASSERT_EQUALS( ip.first, 2 );
+    TS_ASSERT_DELTA( ip.second, 0.9, 1e-15 );
+  }
+
+  void test_getImage_0_width()
+  {
+    WorkspaceTester ws;
+    ws.init(9,2,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
+    const size_t start = 0;
+    const size_t stop  = 8;
+    size_t width = 0;
+    TS_ASSERT_THROWS( ws.getImageY(start,stop,width), std::runtime_error );
+    width = 3;
+    TS_ASSERT_THROWS_NOTHING( ws.getImageY(start,stop,width) );
+  }
+
+  void test_getImage_wrong_start()
+  {
+    WorkspaceTester ws;
+    ws.init(9,2,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
+    size_t start = 10;
+    size_t stop  = 8;
+    size_t width = 3;
+    TS_ASSERT_THROWS( ws.getImageY(start,stop,width), std::runtime_error );
+    start = 9;
+    TS_ASSERT_THROWS( ws.getImageY(start,stop,width), std::runtime_error );
+    start = 0;
+    TS_ASSERT_THROWS_NOTHING( ws.getImageY(start,stop,width) );
+  }
+
+  void test_getImage_wrong_stop()
+  {
+    WorkspaceTester ws;
+    ws.init(9,2,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
+    size_t start = 0;
+    size_t stop  = 18;
+    size_t width = 3;
+    TS_ASSERT_THROWS( ws.getImageY(start,stop,width), std::runtime_error );
+    stop = 9;
+    TS_ASSERT_THROWS( ws.getImageY(start,stop,width), std::runtime_error );
+    stop = 8;
+    TS_ASSERT_THROWS_NOTHING( ws.getImageY(start,stop,width) );
+  }
+
+  void test_getImage_empty_set()
+  {
+    WorkspaceTester ws;
+    ws.init(9,2,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
+    size_t start = 1;
+    size_t stop  = 0;
+    size_t width = 1;
+    TS_ASSERT_THROWS( ws.getImageY(start,stop,width), std::runtime_error );
+    stop = 1;
+    TS_ASSERT_THROWS_NOTHING( ws.getImageY(start,stop,width) );
+  }
+
+  void test_getImage_non_rectangular()
+  {
+    WorkspaceTester ws;
+    ws.init(9,2,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
+    size_t start = 0;
+    size_t stop  = 7;
+    size_t width = 3;
+    TS_ASSERT_THROWS( ws.getImageY(start,stop,width), std::runtime_error );
+  }
+
+  void test_getImage_wrong_indexStart()
+  {
+    WorkspaceTester ws;
+    ws.init(9,2,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
+    const size_t start = 0;
+    const size_t stop  = 8;
+    const size_t width = 3;
+    double startX = 3;
+    double endX = 4;
+    TS_ASSERT_THROWS( ws.getImageY(start,stop,width,startX,endX), std::runtime_error );
+
+    WorkspaceTester wsh;
+    wsh.init(9,1,1);
+    startX = 2;
+    endX = 2;
+    TS_ASSERT_THROWS( wsh.getImageY(start,stop,width,startX,endX), std::runtime_error );
+  }
+
+  void test_getImage_wrong_indexEnd()
+  {
+    WorkspaceTester ws;
+    ws.init(9,2,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
+    const size_t start = 0;
+    const size_t stop  = 8;
+    const size_t width = 3;
+    double startX = 1.0;
+    double endX = 0.0;
+    TS_ASSERT_THROWS( ws.getImageY(start,stop,width,startX,endX), std::runtime_error );
+
+    WorkspaceTester wsh;
+    wsh.init(9,2,2);
+    auto &X1 = ws.dataX(0);
+    X1[0] = 1.0;
+    X1[1] = 2.0;
+    startX = 1.0;
+    endX = 0.0;
+    TS_ASSERT_THROWS( wsh.getImageY(start,stop,width,startX,endX), std::runtime_error );
+  }
+
+  void test_getImage_single_bin_histo()
+  {
+    WorkspaceTester ws;
+    ws.init(9,2,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
+    for(size_t i = 0; i < ws.getNumberHistograms(); ++i)
+    {
+      ws.dataY(i)[0] = static_cast<double>( i + 1 );
+    }
+    const size_t start = 0;
+    const size_t stop  = 8;
+    const size_t width = 3;
+    double startX = 0;
+    double endX = 3;
+    Mantid::API::MantidImage_sptr image;
+    TS_ASSERT_THROWS_NOTHING( image = ws.getImageY(start,stop,width,startX,endX) );
+    if ( !image ) return;
+    TS_ASSERT_EQUALS( image->size(), 3 );
+    TS_ASSERT_EQUALS( (*image)[0].size(), 3 );
+    TS_ASSERT_EQUALS( (*image)[1].size(), 3 );
+    TS_ASSERT_EQUALS( (*image)[2].size(), 3 );
+
+    TS_ASSERT_EQUALS( (*image)[0][0], 1 );
+    TS_ASSERT_EQUALS( (*image)[0][1], 2 );
+    TS_ASSERT_EQUALS( (*image)[0][2], 3 );
+    TS_ASSERT_EQUALS( (*image)[1][0], 4 );
+    TS_ASSERT_EQUALS( (*image)[1][1], 5 );
+    TS_ASSERT_EQUALS( (*image)[1][2], 6 );
+    TS_ASSERT_EQUALS( (*image)[2][0], 7 );
+    TS_ASSERT_EQUALS( (*image)[2][1], 8 );
+    TS_ASSERT_EQUALS( (*image)[2][2], 9 );
+
+  }
+
+  void test_getImage_single_bin_points()
+  {
+    WorkspaceTester ws;
+    ws.init(9,1,1);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    for(size_t i = 0; i < ws.getNumberHistograms(); ++i)
+    {
+      ws.dataY(i)[0] = static_cast<double>( i + 1 );
+    }
+    const size_t start = 0;
+    const size_t stop  = 8;
+    const size_t width = 3;
+    double startX = 1;
+    double endX = 1;
+    Mantid::API::MantidImage_sptr image;
+    TS_ASSERT_THROWS_NOTHING( image = ws.getImageY(start,stop,width,startX,endX) );
+    if ( !image ) return;
+    TS_ASSERT_EQUALS( image->size(), 3 );
+    TS_ASSERT_EQUALS( (*image)[0].size(), 3 );
+    TS_ASSERT_EQUALS( (*image)[1].size(), 3 );
+    TS_ASSERT_EQUALS( (*image)[2].size(), 3 );
+
+    TS_ASSERT_EQUALS( (*image)[0][0], 1 );
+    TS_ASSERT_EQUALS( (*image)[0][1], 2 );
+    TS_ASSERT_EQUALS( (*image)[0][2], 3 );
+    TS_ASSERT_EQUALS( (*image)[1][0], 4 );
+    TS_ASSERT_EQUALS( (*image)[1][1], 5 );
+    TS_ASSERT_EQUALS( (*image)[1][2], 6 );
+    TS_ASSERT_EQUALS( (*image)[2][0], 7 );
+    TS_ASSERT_EQUALS( (*image)[2][1], 8 );
+    TS_ASSERT_EQUALS( (*image)[2][2], 9 );
+
+  }
+
+  void test_getImage_multi_bin_histo()
+  {
+    WorkspaceTester ws;
+    ws.init(9,4,3);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
+    X[2] = 3.0;
+    X[3] = 4.0;
+    for(size_t i = 0; i < ws.getNumberHistograms(); ++i)
+    {
+      ws.dataY(i)[0] = static_cast<double>( i + 1 );
+      ws.dataY(i)[1] = static_cast<double>( i + 2 );
+      ws.dataY(i)[2] = static_cast<double>( i + 3 );
+    }
+    const size_t start = 0;
+    const size_t stop  = 8;
+    const size_t width = 3;
+    Mantid::API::MantidImage_sptr image;
+    TS_ASSERT_THROWS_NOTHING( image = ws.getImageY(start,stop,width) );
+    if ( !image ) return;
+    TS_ASSERT_EQUALS( image->size(), 3 );
+    TS_ASSERT_EQUALS( (*image)[0].size(), 3 );
+    TS_ASSERT_EQUALS( (*image)[1].size(), 3 );
+    TS_ASSERT_EQUALS( (*image)[2].size(), 3 );
+
+    TS_ASSERT_EQUALS( (*image)[0][0], 6 );
+    TS_ASSERT_EQUALS( (*image)[0][1], 9 );
+    TS_ASSERT_EQUALS( (*image)[0][2], 12 );
+    TS_ASSERT_EQUALS( (*image)[1][0], 15 );
+    TS_ASSERT_EQUALS( (*image)[1][1], 18 );
+    TS_ASSERT_EQUALS( (*image)[1][2], 21 );
+    TS_ASSERT_EQUALS( (*image)[2][0], 24 );
+    TS_ASSERT_EQUALS( (*image)[2][1], 27 );
+    TS_ASSERT_EQUALS( (*image)[2][2], 30 );
+
+  }
+
+  void test_getImage_multi_bin_points()
+  {
+    WorkspaceTester ws;
+    ws.init(9,3,3);
+    auto &X = ws.dataX(0);
+    X[0] = 1.0;
+    X[1] = 2.0;
+    X[2] = 3.0;
+    for(size_t i = 0; i < ws.getNumberHistograms(); ++i)
+    {
+      ws.dataY(i)[0] = static_cast<double>( i + 1 );
+      ws.dataY(i)[1] = static_cast<double>( i + 2 );
+      ws.dataY(i)[2] = static_cast<double>( i + 3 );
+    }
+    const size_t start = 0;
+    const size_t stop  = 8;
+    const size_t width = 3;
+    Mantid::API::MantidImage_sptr image;
+    TS_ASSERT_THROWS_NOTHING( image = ws.getImageY(start,stop,width) );
+    if ( !image ) return;
+    TS_ASSERT_EQUALS( image->size(), 3 );
+    TS_ASSERT_EQUALS( (*image)[0].size(), 3 );
+    TS_ASSERT_EQUALS( (*image)[1].size(), 3 );
+    TS_ASSERT_EQUALS( (*image)[2].size(), 3 );
+
+    TS_ASSERT_EQUALS( (*image)[0][0], 6 );
+    TS_ASSERT_EQUALS( (*image)[0][1], 9 );
+    TS_ASSERT_EQUALS( (*image)[0][2], 12 );
+    TS_ASSERT_EQUALS( (*image)[1][0], 15 );
+    TS_ASSERT_EQUALS( (*image)[1][1], 18 );
+    TS_ASSERT_EQUALS( (*image)[1][2], 21 );
+    TS_ASSERT_EQUALS( (*image)[2][0], 24 );
+    TS_ASSERT_EQUALS( (*image)[2][1], 27 );
+    TS_ASSERT_EQUALS( (*image)[2][2], 30 );
+
+  }
+
+  void test_setImage_too_large()
+  {
+    auto image = createImage(2,3);
+    WorkspaceTester ws;
+    ws.init(2,2,1);
+    TS_ASSERT_THROWS( ws.setImageY( *image ), std::runtime_error );
+  }
+
+  void test_setImage_not_single_bin()
+  {
+    auto image = createImage(2,3);
+    WorkspaceTester ws;
+    ws.init(20,3,2);
+    TS_ASSERT_THROWS( ws.setImageY( *image ), std::runtime_error );
+  }
+
+  void test_setImageY()
+  {
+    auto image = createImage(2,3);
+    WorkspaceTester ws;
+    ws.init(6,2,1);
+    TS_ASSERT_THROWS_NOTHING( ws.setImageY( *image ) );
+    TS_ASSERT_EQUALS( ws.readY(0)[0], 1 );
+    TS_ASSERT_EQUALS( ws.readY(1)[0], 2 );
+    TS_ASSERT_EQUALS( ws.readY(2)[0], 3 );
+    TS_ASSERT_EQUALS( ws.readY(3)[0], 4 );
+    TS_ASSERT_EQUALS( ws.readY(4)[0], 5 );
+    TS_ASSERT_EQUALS( ws.readY(5)[0], 6 );
+  }
+
+  void test_setImageE()
+  {
+    auto image = createImage(2,3);
+    WorkspaceTester ws;
+    ws.init(6,2,1);
+    TS_ASSERT_THROWS_NOTHING( ws.setImageE( *image ) );
+    TS_ASSERT_EQUALS( ws.readE(0)[0], 1 );
+    TS_ASSERT_EQUALS( ws.readE(1)[0], 2 );
+    TS_ASSERT_EQUALS( ws.readE(2)[0], 3 );
+    TS_ASSERT_EQUALS( ws.readE(3)[0], 4 );
+    TS_ASSERT_EQUALS( ws.readE(4)[0], 5 );
+    TS_ASSERT_EQUALS( ws.readE(5)[0], 6 );
+  }
+
+  void test_setImageY_start()
+  {
+    auto image = createImage(2,3);
+    WorkspaceTester ws;
+    ws.init(9,2,1);
+    TS_ASSERT_THROWS_NOTHING( ws.setImageY( *image, 3 ) );
+    TS_ASSERT_EQUALS( ws.readY(3)[0], 1 );
+    TS_ASSERT_EQUALS( ws.readY(4)[0], 2 );
+    TS_ASSERT_EQUALS( ws.readY(5)[0], 3 );
+    TS_ASSERT_EQUALS( ws.readY(6)[0], 4 );
+    TS_ASSERT_EQUALS( ws.readY(7)[0], 5 );
+    TS_ASSERT_EQUALS( ws.readY(8)[0], 6 );
+  }
+
+  void test_setImageE_start()
+  {
+    auto image = createImage(2,3);
+    WorkspaceTester ws;
+    ws.init(9,2,1);
+    TS_ASSERT_THROWS_NOTHING( ws.setImageE( *image, 2 ) );
+    TS_ASSERT_EQUALS( ws.readE(2)[0], 1 );
+    TS_ASSERT_EQUALS( ws.readE(3)[0], 2 );
+    TS_ASSERT_EQUALS( ws.readE(4)[0], 3 );
+    TS_ASSERT_EQUALS( ws.readE(5)[0], 4 );
+    TS_ASSERT_EQUALS( ws.readE(6)[0], 5 );
+    TS_ASSERT_EQUALS( ws.readE(7)[0], 6 );
+  }
+
 private:
+
+  Mantid::API::MantidImage_sptr createImage(size_t width, size_t height)
+  {
+    auto image = new Mantid::API::MantidImage(height);
+    double value = 1.0;
+    for(auto row = image->begin(); row != image->end(); ++row)
+    {
+      row->resize( width );
+      for(auto pixel = row->begin(); pixel != row->end(); ++pixel, value += 1.0)
+      {
+        *pixel = value;
+      }
+    }
+    return Mantid::API::MantidImage_sptr( image );
+  }
+
   boost::shared_ptr<MatrixWorkspace> ws;
 
 };

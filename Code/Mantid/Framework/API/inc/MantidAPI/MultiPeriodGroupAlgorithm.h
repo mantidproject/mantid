@@ -3,6 +3,9 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MultiPeriodGroupWorker.h"
+#include <boost/scoped_ptr.hpp>
+
 
 namespace Mantid
 {
@@ -12,7 +15,7 @@ namespace API
   /** MutliPeriodGroupAlgorithm : Abstract algorithm. Algorithms that need special processing for Mutli-Period group workspaces should inherit from this 
   algorithm rather than from Algorithm directly. This algorithm processes workspaces in each group input in a pair-wise fashion to give a group workspace output.
     
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -45,22 +48,15 @@ namespace API
     virtual bool processGroups();
     /// Method to provide the name for the input workspace property.
     virtual std::string fetchInputPropertyName() const = 0;
-    /// Metod to indicate that a non-standard property is taken as the input, so will be specified via fetchInputPropertyName.
+    /// Method to indicate that a non-standard property is taken as the input, so will be specified via fetchInputPropertyName.
     virtual bool useCustomInputPropertyName() const {return false;}
-    /// Try to add the input workspace to the input group list.
-    void tryAddInputWorkspaceToInputGroups(Workspace_sptr ws);
-    /// Copy input workspace properties to spawned algorithm.
-    void copyInputWorkspaceProperties(IAlgorithm* alg, const int& periodNumber);
 
-    std::string createFormattedInputWorkspaceNames(const size_t& periodIndex) const;
-    void validateMultiPeriodGroupInputs(const size_t& nInputWorkspaces) const;
-
-    /// Flag used to determine whether to use base or local virtual methods.
-    bool m_useDefaultGroupingBehaviour;
     /// Convenience typdef for workspace names.
-    typedef std::vector<boost::shared_ptr<Mantid::API::WorkspaceGroup> > VecWSGroupType;
+    typedef MultiPeriodGroupWorker::VecWSGroupType VecWSGroupType;
     /// multi period group workspaces.
     VecWSGroupType m_multiPeriodGroups;
+    /// Multiperiod group worker.
+    boost::scoped_ptr<MultiPeriodGroupWorker> m_worker;
 
   };
 

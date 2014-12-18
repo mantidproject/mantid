@@ -29,7 +29,7 @@ namespace Mantid
     /** ILiveListener is the interface implemented by classes which connect directly to
         instrument data acquisition systems (DAS) for retrieval of 'live' data into Mantid.
 
-        Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+        Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
         This file is part of Mantid.
 
@@ -64,18 +64,21 @@ namespace Mantid
       ILiveListener::RunStatus runStatus();
       int runNumber() const;
 
-      void setSpectra(const std::vector<specid_t>& specList);
-
     private:
 
+      void setSpectra(const std::vector<specid_t>& specList);
+      void setPeriods(const std::vector<specid_t>& periodList);
       int getInt(const std::string& par) const;
       std::string getString(const std::string& par) const;
       void getFloatArray(const std::string& par, std::vector<float>& arr, const size_t dim);
       void getIntArray(const std::string& par, std::vector<int>& arr, const size_t dim);
       void getData(int period, int index, int count, boost::shared_ptr<API::MatrixWorkspace> workspace, size_t workspaceIndex);
       void calculateIndicesForReading(std::vector<int>& index, std::vector<int>& count);
-      void loadSpectraMap(boost::shared_ptr<API::MatrixWorkspace> localWorkspace);
+      void loadSpectraMap();
       void runLoadInstrument(boost::shared_ptr<API::MatrixWorkspace> localWorkspace, const std::string& iName);
+      void loadTimeRegimes();
+      int getTimeRegimeToLoad() const;
+      bool isPeriodIgnored(int period) const;
       static double dblSqrt(double in);
 
       /// is initialized
@@ -90,17 +93,35 @@ namespace Mantid
       /// number of periods
       int m_numberOfPeriods;
 
-      /// number of spectra
-      int m_numberOfSpectra;
+      /// number of spectra for each time regime
+      std::vector<int> m_numberOfSpectra;
 
-      /// number of bins
-      int m_numberOfBins;
+      /// total number of spectra
+      int m_totalNumberOfSpectra;
+
+      /// number of bins for each time regime
+      std::vector<int> m_numberOfBins;
 
       /// list of spectra to read or empty to read all
       std::vector<specid_t> m_specList;
 
-      /// Store the bin boundaries
-      boost::shared_ptr<MantidVec> m_bins;
+      /// list of periods to read or empty to read all
+      std::vector<specid_t> m_periodList;
+
+      /// Store the bin boundaries for each time regime
+      std::vector<boost::shared_ptr<MantidVec>> m_bins;
+
+      /// Detector IDs
+      std::vector<int> m_detIDs;
+
+      /// Spectra IDs
+      std::vector<int> m_specIDs;
+
+      /// Monitor spectra
+      std::vector<int> m_monitorSpectra;
+
+      /// Time regime to load
+      int m_timeRegime;
 
       /// reporter function called when the IDC reading routines raise an error
       static void IDCReporter(int status, int code, const char* message);

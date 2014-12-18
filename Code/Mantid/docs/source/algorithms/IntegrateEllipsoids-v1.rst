@@ -13,7 +13,7 @@ Overview and similar algorithms
 ###############################
 
 This algorithm will integrate disjoint single crystal Bragg peaks by
-summing the number of raw events in a 3D ellipsoidal peak region in
+summing the number of raw or weighted events in a 3D ellipsoidal peak region in
 reciprocal space and subtracting an estimate of the background obtained
 from an ellipsoidal shell. In some ways it is similar to the
 :ref:`algm-IntegratePeaksMD` algorithm. In particular the size parameters to
@@ -22,7 +22,7 @@ background subtraction is done in the same way for both the intensity
 and the estimated standard deviations. However, this algorithm differs
 from :ref:`algm-IntegratePeaksMD` in several critical ways.
 
--  This algorithm works directly with raw, un-weighted events 
+-  This algorithm works directly with raw or weighted events 
    while :ref:`algm-IntegratePeaksMD` uses **MDEvents** from 
    `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_.
 -  This algorithm uses 3D ellipsoidal regions with aspect ratios that

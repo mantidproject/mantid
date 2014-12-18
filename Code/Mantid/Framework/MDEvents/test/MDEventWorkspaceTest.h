@@ -630,7 +630,7 @@ public:
 
 private:
   MDEventWorkspace3Lean::sptr m_ws;
-  size_t nEvents,nBoxes;
+  size_t nBoxes;
 public: 
     void setUp()
     {

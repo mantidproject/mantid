@@ -19,7 +19,7 @@ namespace Mantid
 
        This is an concrete class for rendering GtsSurface using opengl.
 
-       Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+       Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
        This file is part of Mantid.
 

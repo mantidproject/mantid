@@ -79,8 +79,18 @@ endif ()
 ###########################################################################
 # Force 64-bit compiler as that's all we support
 ###########################################################################
-set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64" )
+
+set ( CLANG_WARNINGS "-Wall -Wno-deprecated-register")
+
+set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64 ${CLANG_WARNINGS}" )
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -std=c++0x" )
+set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x" )
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CLANG_WARNINGS} -stdlib=libc++" )
+  set ( CMAKE_XCODE_ATTRIBUTE_OTHER_CPLUSPLUSFLAGS "${CLANG_WARNINGS}")
+  set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
+endif()
 
 if( ${CMAKE_C_COMPILER} MATCHES "icc.*$" )
   set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -no-intel-extensions" )
@@ -113,8 +123,14 @@ if (OSX_VERSION VERSION_LESS 10.9)
  set ( SITEPACKAGES /Library/Python/${PY_VER}/site-packages )
 else()
  # Assume we are using homebrew for now
+ # set Deployment target to 10.8
+ set ( CMAKE_OSX_SYSROOT /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk )
+ set ( CMAKE_OSX_ARCHITECTURES x86_64 )
+ set ( CMAKE_OSX_DEPLOYMENT_TARGET 10.8 )
  set ( PYQT4_PYTHONPATH /usr/local/lib/python${PY_VER}/site-packages/PyQt4 )
  set ( SITEPACKAGES /usr/local/lib/python${PY_VER}/site-packages )
+ # use homebrew OpenSSL package
+ set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
 endif()
 
 # Python packages
@@ -145,6 +161,8 @@ file ( GLOB THIRDPARTY_PYTHON_PACKAGES ${CMAKE_LIBRARY_PATH}/Python/* )
 foreach ( PYPACKAGE ${THIRDPARTY_PYTHON_PACKAGES} )
   if ( IS_DIRECTORY ${PYPACKAGE} )
     install ( DIRECTORY ${PYPACKAGE} DESTINATION ${BIN_DIR} )
+  else()
+    install ( FILES ${PYPACKAGE} DESTINATION ${BIN_DIR} )
   endif()
   file ( COPY ${PYPACKAGE} DESTINATION ${PROJECT_BINARY_DIR}/bin )
 endforeach( PYPACKAGE )

@@ -83,8 +83,13 @@ std::map<std::string, std::string> FilterByLogValue::validateInputs()
 {
   std::map<std::string, std::string> errors;
 
-  // Check that the log exists for the given input workspace
+  // check for null pointers - this is to protect against workspace groups
   EventWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
+  if (!inputWS) {
+    return errors;
+  }
+
+  // Check that the log exists for the given input workspace
   std::string logname = getPropertyValue("LogName");
   try {
     ITimeSeriesProperty * log = dynamic_cast<ITimeSeriesProperty*>( inputWS->run().getLogData(logname) );

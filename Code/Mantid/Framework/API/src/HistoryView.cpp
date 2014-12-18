@@ -24,7 +24,7 @@ HistoryView::HistoryView(const WorkspaceHistory& wsHist)
 /**
  * Unroll an algorithm history to export its child algorithms.
  *
- * This places each of the child algorithm histories into the 
+ * This places each of the child algorithm histories into the
  * HistoryView object. The parent is retained as a marker so we can
  * "roll" the history back up if we want. This method does nothing if
  * the history object has no children
@@ -43,13 +43,13 @@ void HistoryView::unroll(size_t index)
   auto it = m_historyItems.begin();
   std::advance (it,index);
 
-  unroll(it);  
+  unroll(it);
 }
 
 /**
  * Unroll an algorithm history to export its child algorithms.
  *
- * This places each of the child algorithm histories into the 
+ * This places each of the child algorithm histories into the
  * HistoryView object. The parent is retained as a marker so we can
  * "roll" the history back up if we want. This method does nothing if
  * the history object has no children
@@ -62,15 +62,15 @@ void HistoryView::unroll(std::list<HistoryItem>::iterator it)
   const auto childHistories = history->getChildHistories();
 
   if (!it->isUnrolled() && childHistories.size() > 0)
-  {  
+  {
     //mark this record as being ignored by the script builder
     it->unrolled(true);
-    
+
     ++it; //move iterator forward to insertion position
     //insert each of the records, in order, at this position
     for (auto childIter = childHistories.begin(); childIter != childHistories.end(); ++childIter)
     {
-      HistoryItem item(*childIter);    
+      HistoryItem item(*childIter);
       m_historyItems.insert(it, item);
     }
   }
@@ -125,8 +125,8 @@ void HistoryView::roll(size_t index)
   //advance to the item at the index
   auto it = m_historyItems.begin();
   std::advance (it,index);
- 
-  roll(it); 
+
+  roll(it);
 }
 
 /**
@@ -145,7 +145,7 @@ void HistoryView::roll(std::list<HistoryItem>::iterator it)
   // the number of records after this position
   const size_t numChildren = it->numberOfChildren();
   if (it->isUnrolled() && numChildren > 0)
-  {  
+  {
     //mark this record as not being ignored by the script builder
     it->unrolled(false);
     ++it; //move to first child
@@ -153,7 +153,7 @@ void HistoryView::roll(std::list<HistoryItem>::iterator it)
     //remove each of the children from the list
     for (size_t i = 0; i < numChildren; ++i)
     {
-      //check if our children are unrolled and 
+      //check if our children are unrolled and
       //roll them back up if so.
       if(it->isUnrolled())
       {
@@ -161,6 +161,31 @@ void HistoryView::roll(std::list<HistoryItem>::iterator it)
       }
       //Then just remove the item from the list
       it = m_historyItems.erase(it);
+    }
+  }
+}
+
+/**
+ * Filter the list of history items to remove any anlgorithms whos start
+ * time is outside of the given range.
+ *
+ * @param start Start of time range
+ * @param end End of time range
+ */
+void HistoryView::filterBetweenExecDate(Mantid::Kernel::DateAndTime start, Mantid::Kernel::DateAndTime end)
+{
+  for(auto it = m_historyItems.begin(); it != m_historyItems.end();)
+  {
+    Mantid::Kernel::DateAndTime algExecutionDate = it->getAlgorithmHistory()->executionDate();
+
+    // If the algorithm is outside of the time range, remove it and keep iterating
+    if(algExecutionDate < start || algExecutionDate > end)
+    {
+      it = m_historyItems.erase(it);
+    }
+    else
+    {
+      ++it;
     }
   }
 }

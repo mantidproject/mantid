@@ -17,7 +17,7 @@ namespace Mantid
       Structure to store neutronic scattering information for the various elements.
       This is taken from http://www.ncnr.nist.gov/resources/n-lengths/list.html.
      
-      Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
       
       This file is part of Mantid.
       

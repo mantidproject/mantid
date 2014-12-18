@@ -435,7 +435,7 @@ SOAP_FMAC3 char * SOAP_FMAC4 soap_in_byte(struct soap *soap, const char *tag, ch
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_byte(struct soap *soap, const char *a, const char *tag, const char *type)
 {
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_byte);
+	int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_byte);
 	if (soap_out_byte(soap, tag?tag:"byte", id, a, type))
 		return soap->error;
 	return soap_putindependent(soap);
@@ -472,7 +472,7 @@ SOAP_FMAC3 int * SOAP_FMAC4 soap_in_int(struct soap *soap, const char *tag, int 
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_int(struct soap *soap, const int *a, const char *tag, const char *type)
 {
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_int);
+	int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_int);
 	if (soap_out_int(soap, tag?tag:"int", id, a, type))
 		return soap->error;
 	return soap_putindependent(soap);
@@ -631,7 +631,7 @@ SOAP_FMAC3 struct SOAP_ENV__Fault * SOAP_FMAC4 soap_in_SOAP_ENV__Fault(struct so
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_SOAP_ENV__Fault(struct soap *soap, const struct SOAP_ENV__Fault *a, const char *tag, const char *type)
 {
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_SOAP_ENV__Fault);
+	int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_SOAP_ENV__Fault);
 	if (soap_out_SOAP_ENV__Fault(soap, tag?tag:"SOAP-ENV:Fault", id, a, type))
 		return soap->error;
 	return soap_putindependent(soap);
@@ -743,7 +743,7 @@ SOAP_FMAC3 struct SOAP_ENV__Reason * SOAP_FMAC4 soap_in_SOAP_ENV__Reason(struct 
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_SOAP_ENV__Reason(struct soap *soap, const struct SOAP_ENV__Reason *a, const char *tag, const char *type)
 {
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_SOAP_ENV__Reason);
+	int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_SOAP_ENV__Reason);
 	if (soap_out_SOAP_ENV__Reason(soap, tag?tag:"SOAP-ENV:Reason", id, a, type))
 		return soap->error;
 	return soap_putindependent(soap);
@@ -862,7 +862,7 @@ SOAP_FMAC3 struct SOAP_ENV__Detail * SOAP_FMAC4 soap_in_SOAP_ENV__Detail(struct 
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_SOAP_ENV__Detail(struct soap *soap, const struct SOAP_ENV__Detail *a, const char *tag, const char *type)
 {
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_SOAP_ENV__Detail);
+	int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_SOAP_ENV__Detail);
 	if (soap_out_SOAP_ENV__Detail(soap, tag?tag:"SOAP-ENV:Detail", id, a, type))
 		return soap->error;
 	return soap_putindependent(soap);
@@ -983,7 +983,7 @@ SOAP_FMAC3 struct SOAP_ENV__Code * SOAP_FMAC4 soap_in_SOAP_ENV__Code(struct soap
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_SOAP_ENV__Code(struct soap *soap, const struct SOAP_ENV__Code *a, const char *tag, const char *type)
 {
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_SOAP_ENV__Code);
+	int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_SOAP_ENV__Code);
 	if (soap_out_SOAP_ENV__Code(soap, tag?tag:"SOAP-ENV:Code", id, a, type))
 		return soap->error;
 	return soap_putindependent(soap);
@@ -1083,7 +1083,7 @@ SOAP_FMAC3 struct SOAP_ENV__Header * SOAP_FMAC4 soap_in_SOAP_ENV__Header(struct 
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_SOAP_ENV__Header(struct soap *soap, const struct SOAP_ENV__Header *a, const char *tag, const char *type)
 {
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_SOAP_ENV__Header);
+	int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_SOAP_ENV__Header);
 	if (soap_out_SOAP_ENV__Header(soap, tag?tag:"SOAP-ENV:Header", id, a, type))
 		return soap->error;
 	return soap_putindependent(soap);
@@ -1170,7 +1170,7 @@ SOAP_FMAC3 struct SOAP_ENV__Reason ** SOAP_FMAC4 soap_in_PointerToSOAP_ENV__Reas
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerToSOAP_ENV__Reason(struct soap *soap, struct SOAP_ENV__Reason *const*a, const char *tag, const char *type)
 {
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_PointerToSOAP_ENV__Reason);
+	int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_PointerToSOAP_ENV__Reason);
 	if (soap_out_PointerToSOAP_ENV__Reason(soap, tag?tag:"SOAP-ENV:Reason", id, a, type))
 		return soap->error;
 	return soap_putindependent(soap);
@@ -1227,7 +1227,7 @@ SOAP_FMAC3 struct SOAP_ENV__Detail ** SOAP_FMAC4 soap_in_PointerToSOAP_ENV__Deta
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerToSOAP_ENV__Detail(struct soap *soap, struct SOAP_ENV__Detail *const*a, const char *tag, const char *type)
 {
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_PointerToSOAP_ENV__Detail);
+	int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_PointerToSOAP_ENV__Detail);
 	if (soap_out_PointerToSOAP_ENV__Detail(soap, tag?tag:"SOAP-ENV:Detail", id, a, type))
 		return soap->error;
 	return soap_putindependent(soap);
@@ -1284,7 +1284,7 @@ SOAP_FMAC3 struct SOAP_ENV__Code ** SOAP_FMAC4 soap_in_PointerToSOAP_ENV__Code(s
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerToSOAP_ENV__Code(struct soap *soap, struct SOAP_ENV__Code *const*a, const char *tag, const char *type)
 {
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_PointerToSOAP_ENV__Code);
+	int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_PointerToSOAP_ENV__Code);
 	if (soap_out_PointerToSOAP_ENV__Code(soap, tag?tag:"SOAP-ENV:Code", id, a, type))
 		return soap->error;
 	return soap_putindependent(soap);
@@ -1320,7 +1320,7 @@ SOAP_FMAC3 char * * SOAP_FMAC4 soap_in__QName(struct soap *soap, const char *tag
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put__QName(struct soap *soap, char *const*a, const char *tag, const char *type)
 {
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE__QName);
+	int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE__QName);
 	if (soap_out__QName(soap, tag?tag:"byte", id, a, type))
 		return soap->error;
 	return soap_putindependent(soap);
@@ -1364,7 +1364,7 @@ SOAP_FMAC3 char * * SOAP_FMAC4 soap_in_string(struct soap *soap, const char *tag
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_string(struct soap *soap, char *const*a, const char *tag, const char *type)
 {
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_string);
+	int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_string);
 	if (soap_out_string(soap, tag?tag:"byte", id, a, type))
 		return soap->error;
 	return soap_putindependent(soap);

@@ -49,7 +49,7 @@ namespace Mantid
     @author Gesner Passos, Rutherford Appleton Laboratory
     @date 11/04/2013
 
-    Copyright &copy; 2007-13 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-13 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

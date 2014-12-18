@@ -5,17 +5,17 @@
 #include <qwt_plot_canvas.h>
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
-/** 
-   @class TrackingPicker
+/**
+    @class TrackingPicker
 
-      This class is a QwtPlotPicker that will emit a signal whenever the 
-    mouse is moved.  It was adapted from the SliceViewer's CustomPicker 
-  
-    @author Dennis Mikkelson 
-    @date   2012-04-03 
-     
+    This class is a QwtPlotPicker that will emit a signal whenever the
+    mouse is moved.  It was adapted from the SliceViewer's CustomPicker
+
+    @author Dennis Mikkelson
+    @date   2012-04-03
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -30,8 +30,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
@@ -52,11 +52,11 @@ public:
   /// Disable (or enable) position readout at cursor position, even if
   /// tracking is ON.  Tracking MUST be on for the mouseMoved signal to be
   /// emitted.
-  void HideReadout( bool hide );
+  void hideReadout( bool hide );
 
 signals:
   /// This signal will be emitted for each mouse moved event
-  void mouseMoved() const;
+  void mouseMoved(const QPoint & point) const;
 
 protected:
 
@@ -65,11 +65,11 @@ protected:
   QwtText trackerText( const QwtDoublePoint & pos) const;
 
 private:
-  bool hide_readout;
+  bool m_hideReadout;
 
 };
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif  // TRACKING_PICKER_H

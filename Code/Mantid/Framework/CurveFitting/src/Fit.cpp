@@ -45,12 +45,7 @@ namespace CurveFitting
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(Fit)
 
-    using API::IDomainCreator;
-
-  namespace
-  {
-    bool isStringEmpty(const std::string& str){return str.empty();}
-  }
+  using API::IDomainCreator;
   
   /**
    * Examine "Function" and "InputWorkspace" properties to decide which domain creator to use.
@@ -118,7 +113,7 @@ namespace CurveFitting
       auto &properties = minimizer.getProperties();
       for(auto prop = properties.begin(); prop != properties.end(); ++prop)
       {
-          if ( (**prop).direction() == Kernel::Direction::Output )
+          if ( (**prop).direction() == Kernel::Direction::Output && (**prop).isValid() == "" )
           {
               Kernel::Property* property = (**prop).clone();
               declareProperty( property );
@@ -335,7 +330,7 @@ namespace CurveFitting
 
     declareProperty("Minimizer","Levenberg-Marquardt",
       Kernel::IValidator_sptr(new Kernel::StartsWithValidator(minimizerOptions)),
-      "Minimizer to use for fitting. Minimizers available are \"Levenberg-Marquardt\", \"Simplex\", \"Conjugate gradient (Fletcher-Reeves imp.)\", \"Conjugate gradient (Polak-Ribiere imp.)\", \"BFGS\", and \"Levenberg-MarquardtMD\"");
+      "Minimizer to use for fitting. Minimizers available are \"Levenberg-Marquardt\", \"Simplex\", \"FABADA\", \"Conjugate gradient (Fletcher-Reeves imp.)\", \"Conjugate gradient (Polak-Ribiere imp.)\", \"BFGS\", and \"Levenberg-MarquardtMD\"");
 
     std::vector<std::string> costFuncOptions = API::CostFunctionFactory::Instance().getKeys();
     // select only CostFuncFitting variety

@@ -18,7 +18,7 @@ namespace DataHandling
     @author Andrei Savici, ORNL
     @date 2011-08-14
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -56,6 +56,9 @@ namespace DataHandling
 
     /// Returns a confidence value that this algorithm can load a file
     virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
+
+    /// Confidence in identifier.
+    static int identiferConfidence(const std::string& value);
 
   private:
     

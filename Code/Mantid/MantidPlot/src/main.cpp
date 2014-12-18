@@ -28,6 +28,7 @@
  ***************************************************************************/
 #include <iostream>
 #include <QApplication>
+#include <QBitmap>
 #include <QSplashScreen>
 #include <QMessageBox>
 #include <QDir>
@@ -129,15 +130,6 @@ If you want to contribute code, please read the notes on \ref style "coding styl
   - For indentations, tabs are preferred because they allow everyone to choose the indentation depth for him/herself.
 */
 
-class WaitThread:public QThread
-{
-public:
-    void run()
-    {
-        sleep(1);
-    }
-};
-
 int main( int argc, char ** argv )
 {
   // First, look for command-line arguments that we want to deal with before launching anything
@@ -172,14 +164,12 @@ int main( int argc, char ** argv )
       s += "-h or --help: show command line options\n";
       s += "-v or --version: print MantidPlot version and release date\n";
       s += "-r or --revision: print MantidPlot version and release date\n";
+      s += "-s or --silent: start mantidplot without any setup dialogs\n";
       s += "-x or --execute: execute the script file given as argument\n";
       s += "-xq or --executeandquit: execute the script file given as argument and then exit MantidPlot\n\n";
       s += "'filename' can be any of .qti, qti.gz, .opj, .ogm, .ogw, .ogg, .py or ASCII file\n\n";
-#ifdef Q_OS_WIN
-      QMessageBox::information(NULL, "MantidPlot - Help", s);
-#else
       std::wcout << s.toStdWString();
-#endif
+
       exit(0);
     }
     //else if ( str == "-m" || str == "--manual" ) // Not for the time being at least
@@ -191,27 +181,27 @@ int main( int argc, char ** argv )
   QStringList args = app.arguments();
   args.removeFirst(); // remove application name
 
-  WaitThread t;
   try
   {
-    t.start();
+    // Splash
     QPixmap pixmap;
-    if (!pixmap.load(":/MantidSplashScreen.png")) QMessageBox::warning(0,"","Couldn't load splashscreen");
-    QSplashScreen splash(pixmap);
+    if (!pixmap.load(":/MantidSplashScreen.png")) std::cerr << "Couldn't load splashscreen\n";
+    QSplashScreen splash(pixmap, Qt::WindowStaysOnTopHint);
     const QString releaseDateTime(Mantid::Kernel::MantidVersion::releaseDate());
     const QString versionInfo(Mantid::Kernel::MantidVersion::version());
     splash.showMessage("Release: " + releaseDateTime + " (Version " + versionInfo + ")", Qt::AlignLeft | Qt::AlignBottom);
+    splash.setMask(pixmap.createMaskFromColor(QColor(Qt::transparent)));
     splash.show();
+    // If we take too long to get to the event loop then box starts out gray so ensure
+    // it is painted before doing any heavy lifting like the ApplicationWindow init
+    splash.repaint();
     app.processEvents();
 
-    bool factorySettings = false;
-    if (args.contains("-d") || args.contains("--default-settings"))
-      factorySettings = true;
-
+    const bool factorySettings = (args.contains("-d") || args.contains("--default-settings"));
     ApplicationWindow *mw = new ApplicationWindow(factorySettings, args);
     mw->restoreApplicationGeometry();
     mw->parseCommandLineArguments(args);
-    t.wait();
+    app.processEvents();
     splash.finish(mw);
 
     app.connect( &app, SIGNAL(lastWindowClosed()), mw, SLOT(exitWithPresetCode()) );
@@ -220,15 +210,11 @@ int main( int argc, char ** argv )
   }
   catch(std::exception& e)
   {
-    if (t.isRunning())  t.quit();
-
     QMessageBox::critical(0,"Mantid - Error",
       QString("An unhandled exception has been caught. MantidPlot will have to close. Details:\n\n")+e.what());
   }
   catch(...)
   {
-    if (t.isRunning())  t.quit();
-
     QMessageBox::critical(0,"Mantid - Error",
       "An unhandled exception has been caught. MantidPlot will have to close.");
   }

@@ -5,6 +5,8 @@
 #include "MantidGeometry/Rendering/OCGeometryGenerator.h"
 #include "MantidGeometry/Rendering/OCGeometryRenderer.h"
 
+#include <boost/make_shared.hpp>
+
 namespace Mantid
 {
   namespace Geometry
@@ -25,6 +27,14 @@ namespace Mantid
     {
       Triangulator=new OCGeometryGenerator(obj);
       Renderer    =new OCGeometryRenderer();
+    }
+
+    boost::shared_ptr<GeometryHandler> OCGeometryHandler::clone() const
+    {
+      auto clone = boost::make_shared<OCGeometryHandler>(*this);
+      clone->Renderer = new OCGeometryRenderer(*(this->Renderer));
+      if(this->Triangulator) clone->Triangulator = new OCGeometryGenerator(this->Obj);
+      return clone;
     }
 
     OCGeometryHandler::~OCGeometryHandler()

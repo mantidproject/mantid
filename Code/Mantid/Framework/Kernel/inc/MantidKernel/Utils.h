@@ -50,6 +50,34 @@ namespace Utils
     return (r > 0.0) ? std::floor(r + 0.5) : std::ceil(r - 0.5);
   }
 
+  //------------------------------------------------------------------------------------------------
+  /** Custom rounding method for a double->double because none is
+   * portable in C++ (!)
+   *
+   * @param r :: floating point value to round
+   * @param f :: number of significant figures to preserve
+   * @return r rounded to f significant figures
+   */
+  inline double roundToSF(double r, int f)
+  {
+    double factor = pow(10.0, f - ceil(log10(fabs(r))));
+    return rounddbl(r * factor) / factor;
+  }
+
+  //------------------------------------------------------------------------------------------------
+  /** Custom rounding method for a double->double because none is
+   * portable in C++ (!)
+   *
+   * @param r :: floating point value to round
+   * @param d :: number of digits after decimal point to preserve
+   * @return r rounded to d decimal places
+   */
+  inline double roundToDP(double r, int d)
+  {
+    double m = pow(10.0, d);
+    return (int)r + (1.0/m) * rounddbl((r - (int)r) * m);
+  }
+
 
   namespace NestedForLoop
   {

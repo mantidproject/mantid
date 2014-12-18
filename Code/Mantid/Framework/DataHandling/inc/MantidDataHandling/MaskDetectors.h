@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid
 {
@@ -27,7 +28,7 @@ namespace DataHandling
     <LI> WorkspaceIndexList - An ArrayProperty containing the workspace indices to mask </LI>
     </UL>
 
-    Copyright &copy; 2008-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -70,6 +71,7 @@ private:
   // Implement abstract Algorithm methods
   void init();
   void exec();
+  void execPeaks(DataObjects::PeaksWorkspace_sptr WS);
   void fillIndexListFromSpectra(std::vector<size_t>& indexList, const std::vector<specid_t>& spectraList,
                                 const API::MatrixWorkspace_sptr WS);
   void appendToIndexListFromWS(std::vector<size_t>& indexList, const API::MatrixWorkspace_sptr maskedWorkspace);

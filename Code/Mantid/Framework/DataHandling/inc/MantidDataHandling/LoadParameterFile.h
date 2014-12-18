@@ -50,7 +50,7 @@ namespace Mantid
     @author Anders Markvardsen, ISIS, RAL
     @date 19/4/2010
 
-    Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -86,8 +86,6 @@ namespace Mantid
       virtual int version() const { return 1;};
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Instrument";}
-
-      static void execManually(bool useString, std::string filename, std::string parameterString, Mantid::API::ExperimentInfo_sptr localWorkspace);
 
     private:
       

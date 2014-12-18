@@ -11,7 +11,7 @@ namespace Mantid
 
     /** RebinByTimeAtSample : Rebins an event workspace to a histogram workspace with time at sample along the x-axis.
 
-     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
      This file is part of Mantid.
 

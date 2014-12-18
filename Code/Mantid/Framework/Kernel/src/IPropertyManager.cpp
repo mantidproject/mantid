@@ -29,7 +29,6 @@ namespace Mantid
 {
   namespace Kernel
   {
-
     // This template implementation has been left in because although you can't assign to an existing string
     // via the getProperty() method, you can construct a local variable by saying,
     // e.g.: std::string s = getProperty("myProperty")
@@ -66,6 +65,45 @@ namespace Mantid
           return true;
       }
       return false;
+    }
+
+    /**
+     * Set values of the properties existing in this manager to the values of 
+     * properties with the same name in another manger. 
+     * @param other A property manager to copy property values from.
+     */
+    void IPropertyManager::updatePropertyValues( const IPropertyManager &other )
+    {
+      auto props = this->getProperties();
+      for (auto prop = props.begin(); prop != props.end(); ++prop)
+      {
+        const std::string propName = (**prop).name();
+        if ( other.existsProperty(propName) )
+        {
+          (**prop).setValueFromProperty( *other.getPointerToProperty( propName ) );
+        }
+      }
+    }
+
+    /**
+     * Get all properties in a group.
+     * @param group Name of a group.
+     */
+    std::vector< Property*> IPropertyManager::getPropertiesInGroup(const std::string& group) const
+    {
+      auto props = getProperties();
+      for(auto prop = props.begin(); prop != props.end(); )
+      {
+        if ( (**prop).getGroup() == group )
+        {
+          ++prop;
+        }
+        else
+        {
+          prop = props.erase( prop );
+        }
+      }
+      return props;
     }
 
     // Definitions for TypedValue cast operators

@@ -30,7 +30,7 @@ namespace Mantid
   {
     /** The factory for creating instances of ILiveListener implementations.
 
-        Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+        Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
         This file is part of Mantid.
 
@@ -50,7 +50,7 @@ namespace Mantid
     class MANTID_API_DLL LiveListenerFactoryImpl : public Kernel::DynamicFactory<ILiveListener>
     {
     public:
-      boost::shared_ptr<ILiveListener> create(const std::string& instrumentName, bool connect) const;
+      boost::shared_ptr<ILiveListener> create(const std::string& instrumentName, bool connect, const Kernel::IPropertyManager* props = NULL) const;
       bool checkConnection(const std::string& instrumentName) const;
 
     private:

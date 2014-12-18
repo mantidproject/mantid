@@ -1,3 +1,5 @@
+import mantid
+import mantid.api
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -77,6 +79,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty("VanadiumPeakTol", 0.05,
                              "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
+        self.declareProperty("BackgroundSmoothParams", "", "Default=off, suggested 20,2")
         self.declareProperty("FilterBadPulses", 95.,
                              doc="Filter out events measured while proton charge is more than 5% below average")
         self.declareProperty("ScaleData", defaultValue=1., validator=FloatBoundedValidator(lower=0., exclusive=True),
@@ -96,6 +99,16 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                              "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. Otherwise, ignored.")
 
         self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
+
+        self.declareProperty("CompressTOFTolerance", 0.01, "Tolerance to compress events in TOF.")
+
+        self.declareProperty(StringArrayProperty("FrequencyLogNames", ["SpeedRequest1", "Speed1", "frequency"],
+            direction=Direction.Input),
+            "Possible log names for frequency.")
+
+        self.declareProperty(StringArrayProperty("WaveLengthLogNames", ["LambdaRequest", "lambda"],
+            direction=Direction.Input),
+            "Candidate log names for wave length.")
 
         return
 
@@ -155,6 +168,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._splitinfotablews = self.getProperty("SplitInformationWorkspace").value
 
         self._normalisebycurrent = self.getProperty("NormalizeByCurrent").value
+
+        # Tolerance for compress TOF event
+        COMPRESS_TOL_TOF = float(self.getProperty("CompressTOFTolerance").value)
+        if COMPRESS_TOL_TOF < 0.:
+            COMPRESS_TOL_TOF = 0.01
 
         # Process data
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
@@ -233,7 +251,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 returned = self._focusChunks(samRun, SUFFIX, timeFilterWall, calib, self._splitws,
                         preserveEvents=preserveEvents)
 
-                if returned.__class__.__name__ == "list":
+                if isinstance(returned, list):
                     # Returned with a list of workspaces
                     focusedwksplist = returned
                     irun = 0
@@ -257,9 +275,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         for samRun in samwksplist:
             samRun = mtd[str(samRun)]
             try:
-                self.log().information("[F1136] Sample Run %s:  number of events = %d" % (str(samRun), samRun.getNumberEvents()))
+                self.log().information("Sample Run %s:  starting number of events = %d" % (str(samRun), samRun.getNumberEvents()))
             except Exception as e:
-                self.log().information("[F1136] Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e)))
+                self.log().information("Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e)))
 
             # Get run number
             runnumber = samRun.getRunNumber()
@@ -283,6 +301,12 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     canRun = self._focusChunks(canRun, SUFFIX, canFilterWall, calib,
                                preserveEvents=preserveEvents)
                 canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
+
+                smoothParams = self.getProperty("BackgroundSmoothParams").value
+                if smoothParams != None and len(smoothParams)>0:
+                    canRun = api.FFTSmooth(InputWorkspace=canRun, OutputWorkspace=canRun, Filter="Butterworth",
+                                       Params=smoothParams,IgnoreXBins=True,AllSpectra=True)
+
                 workspacelist.append(str(canRun))
             else:
                 canRun = None
@@ -351,11 +375,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     # strip peaks
                     if self.getProperty("StripVanadiumPeaks").value:
                         vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
-                        # api.CloneWorkspace(InputWorkspace=vanRun, OutputWorkspace=str(vanRun)+"_Raw")
                         vanRun = api.StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, FWHM=self._vanPeakFWHM,
                                            PeakPositionTolerance=self.getProperty("VanadiumPeakTol").value,
                                            BackgroundType="Quadratic", HighBackground=True)
-                        # api.CloneWorkspace(InputWorkspace=vanRun, OutputWorkspace=str(vanRun)+"_PostStrip")
                     else:
                         self.log().information("Not strip vanadium peaks")
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
@@ -373,6 +395,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 return
             # the final bit of math
             if canRun is not None:
+                # must convert the sample to a matrix workspace if the can run isn't one
+                if canRun.id() != EVENT_WORKSPACE_ID and samRun.id() == EVENT_WORKSPACE_ID:
+                    samRun = api.ConvertToMatrixWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun)
                 samRun = api.Minus(LHSWorkspace=samRun, RHSWorkspace=canRun, OutputWorkspace=samRun)
                 if samRun.id() == EVENT_WORKSPACE_ID:
                     samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
@@ -469,12 +494,18 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # filter bad pulses
         if self._filterBadPulses > 0.:
+            isEventWS = isinstance(wksp, mantid.api._api.IEventWorkspace)
+            if isEventWS is True:
+                # Event workspace: record original number of events
+                numeventsbefore =  wksp.getNumberEvents()
+
             wksp = api.FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp,
                                        LowerCutoff=self._filterBadPulses)
-            if str(type(wksp)).count("IEvent") > 0:
+
+            if isEventWS is True:
                 # Event workspace
-                self.log().information("F1141D There are %d events after FilterBadPulses in workspace %s." % (
-                        wksp.getNumberEvents(), str(wksp)))
+                self.log().information("FilterBadPulses reduces number of events from %d to %d (under %s percent) of workspace %s." % (
+                        numeventsbefore, wksp.getNumberEvents(), str(self._filterBadPulses), str(wksp)))
 
         return wksp
 
@@ -560,7 +591,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # Load chunk
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
-            if str(type(temp)).count("IEvent") > 0:
+            if isinstance(temp, mantid.api._api.IEventWorkspace) is True:
                 # Event workspace
                 self.log().debug("F1141C There are %d events after data is loaded in workspace %s." % (
                     temp.getNumberEvents(), str(temp)))
@@ -630,10 +661,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             for itemp in xrange(numwksp):
                 temp = tempwslist[itemp]
                 # Align and focus
-                self.log().information("[F1141] Align and focus workspace %s; Number of events = %d of chunk %d " % (str(temp), temp.getNumberEvents(), ichunk))
-
                 focuspos = self._focusPos
-
                 temp = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, CalFileName=calib,
                     Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
                     DMin=self._info["d_min"], DMax=self._info["d_max"], TMin=self._info["tof_min"], TMax=self._info["tof_max"],
@@ -644,6 +672,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 for iws in xrange(temp.getNumberHistograms()):
                     spec = temp.getSpectrum(iws)
                     self.log().debug("[DBx131] ws %d: spectrum ID = %d. " % (iws, spec.getSpectrumNo()))
+
+                if preserveEvents is True and isinstance(temp, mantid.api._api.IEventWorkspace) is True:
+                    self.log().information("After being aligned and focussed workspace %s; Number of events = %d of chunk %d " % (str(temp),
+                        temp.getNumberEvents(), ichunk))
 
                 # Rename and/or add to workspace of same splitter but different chunk
                 wkspname = wksp
@@ -682,11 +714,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 wksplist[itemp].getRun()['iparm_file'] = self.iparmFile
 
         for itemp in xrange(numwksp):
-            #if wksplist[itemp].__class__.__name__.count("Event") > 0:
-            #    try:
-            #        print "[DB1050-X] Number of events = %d of split-workspace %d" % (wksplist[itemp].getNumberEvents(), itemp)
-            #    except Exception as e:
-            #        print e
             if wksplist[itemp].id() == EVENT_WORKSPACE_ID:
                 wksplist[itemp] = api.CompressEvents(InputWorkspace=wksplist[itemp],
                     OutputWorkspace=wksplist[itemp], Tolerance=COMPRESS_TOL_TOF) # 100ns
@@ -702,12 +729,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self._save(wksplist[itemp], self._info, False, True)
             self.log().information("Done focussing data of %d." % (itemp))
 
-            #if wksplist[itemp].__class__.__name__.count("Event") > 0:
-            #    try:
-            #        print "[DB1050-Z] Number of events = %d of split-workspace %d" % (wksplist[itemp].getNumberEvents(), itemp)
-            #    except Exception as e:
-            #        print e
-
         self.log().information("[E1207] Number of workspace in workspace list after clean = %d. " %(len(wksplist)))
 
         # About return
@@ -721,12 +742,16 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         if mtd.doesExist("characterizations"):
             # get the correct row of the table
+
+
             charac = api.PDDetermineCharacterizations(InputWorkspace=wksp,
                                                       Characterizations="characterizations",
                                                       ReductionProperties="__snspowderreduction",
                                                       BackRun=self.getProperty("BackgroundNumber").value,
                                                       NormRun=self.getProperty("VanadiumNumber").value,
-                                                      NormBackRun=self.getProperty("VanadiumBackgroundNumber").value)
+                                                      NormBackRun=self.getProperty("VanadiumBackgroundNumber").value,
+                                                      FrequencyLogNames = self.getProperty("FrequencyLogNames").value,
+                                                      WaveLengthLogNames = self.getProperty("WaveLengthLogNames").value)
             # convert the result into a dict
             manager = PropertyManagerDataService.retrieve("__snspowderreduction")
             for name in ["frequency", "wavelength", "bank", "vanadium", "container",

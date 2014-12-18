@@ -38,7 +38,7 @@ namespace Algorithms
     
     @date 2012-04-09
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -147,8 +147,11 @@ namespace Algorithms
                           const double &minvalue, const double &maxvalue,
                           const Kernel::DateAndTime &startT, const Kernel::DateAndTime &stopT, const bool &filterIncrease, const bool &filterDecrease);
 
-    /// ??
+    /// Determine the chaning direction of log value
     int determineChangingDirection(int startindex);
+
+    /// Find the end of the run
+    Kernel::DateAndTime findRunEnd();
 
     DataObjects::EventWorkspace_const_sptr m_dataWS;
 
@@ -161,6 +164,9 @@ namespace Algorithms
 
     Kernel::DateAndTime m_startTime;
     Kernel::DateAndTime m_stopTime;
+
+    /// Run end time
+    Kernel::DateAndTime m_runEndTime;
 
     double m_timeUnitConvertFactorToNS;
 

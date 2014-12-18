@@ -139,14 +139,14 @@ namespace DataHandling
 
     // get the input paramters
     string filename = getPropertyValue(PARAM_IN_FILE);
-    MatrixWorkspace_sptr inWS = getProperty(PARAM_IN_WKSP);
+    string inWSname = getPropertyValue(PARAM_IN_WKSP);
     string instName = getPropertyValue(PARAM_INST_NAME);
     string instFilename = getPropertyValue(PARAM_INST_FILE);
 
     // count how many ways the input instrument was specified
     int numInst = 0;
     if (!filename.empty()) numInst++;
-    if (inWS) numInst++;
+    if (!inWSname.empty()) numInst++;
     if (!instName.empty()) numInst++;
     if (!instFilename.empty()) numInst++;
 

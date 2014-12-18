@@ -49,6 +49,7 @@ public:
   void setFileBacked(){};
   void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/)const{/*Not saveable */};
   void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */){};
+  void reserveMemoryForLoad(uint64_t /* Size */){};
   // regardless of what is actually instantiated, base tester would call itself gridbox
   bool isBox()const{return false;}
 

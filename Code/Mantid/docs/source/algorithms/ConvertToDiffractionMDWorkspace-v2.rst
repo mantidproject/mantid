@@ -9,19 +9,30 @@
 Description
 -----------
 
-This algorithm converts from a `MatrixWorkspace <http://mantidproject.org/MatrixWorkspace>`__ (in
-detector/time-of-flight space) to a
-`MDEventWorkspace <http://mantidproject.org/MDEventWorkspace>`__ containing events in reciprocal
-space.
+The algorithm converts from a `MatrixWorkspace <http://mantidproject.org/MatrixWorkspace>`__ (in
+any input units) into `MDWorkspace <http://mantidproject.org/MDWorkspace>`__ containing 
+3D events in reciprocal space.
 
 The calculations apply only to elastic diffraction experiments. The
 conversion can be done either to Q-space in the lab or sample frame, or
 to HKL of the crystal.
 
-If the OutputWorkspace does NOT already exist, a default one is created.
-In order to define more precisely the parameters of the
-`MDEventWorkspace <http://mantidproject.org/MDEventWorkspace>`__, use the
-:ref:`algm-CreateMDWorkspace` algorithm first.
+Version 2 of the algorithm is the wrapper around :ref:`algm-ConvertToMD` algorithm, used for
+diffraction workflow and for supporting the interface of the previous specialized version of this 
+algorithm.  Old specialized version of this algorithm also exists.
+
+See the :ref:`algm-ConvertToDiffractionMDWorkspace-v1` for details of the old and  :ref:`algm-ConvertToMD` for this algorithms implementations. 
+ 
+The main difference between the results produced by the version one and two of this algorithm 
+is the type of the workspace, produced by default. 
+Version one is producing `MDLeanEvent<3> <http://www.mantidproject.org/MDWorkspace#Description%20of%20MDWorkspace>`__-s workspace 
+and this version generates `MDEvent<3> <http://www.mantidproject.org/MDWorkspace#Description%20of%20MDWorkspace>`__-s workspace.
+
+To obtain a workspace containing `MDLeanEvent<3> <http://www.mantidproject.org/MDWorkspace#Description%20of%20MDWorkspace>`__-s, 
+and fine-tune the output workspace properties, 
+one has to create OutputWorkspace using :ref:`algm-CreateMDWorkspace` algorithm first.
+
+ 
 
 Types of Conversion
 ###################
@@ -52,41 +63,6 @@ This correction is also done by the
 :ref:`algm-AnvredCorrection` algorithm, and will be set to
 false if that algorithm has been run on the input workspace.
 
-OneEventPerBin option
-#####################
-
-If you specify *OneEventPerBin*, then the **histogram** representation
-of the input workspace is used, with one MDEvent generated for each bin
-of the workspace, **including zeros**.
-
-This can be useful in cases where the experimental coverage needs to be
-tracked. With one MDEvent for each bin, you can count which regions in
-Q-space have been measured. The `SliceViewer <http://mantidproject.org/SliceViewer>`__ has an
-option to view normalized by number of events. This means that, for
-example, areas with overlap from two runs will appear scaled down.
-
-A significant drawback to this is that the output MDEventWorkspace will
-be *significantly* larger than the events alone would be. It currently
-must be created in physical memory (it cannot yet be cached to disk).
-One way to limit the memory used is to limit the OutputExtents to a
-smaller region and only convert part of the space.
-
-Also, the :ref:`algm-FindPeaksMD` algorithm may not work optimally
-because it depends partly on higher density of events causing more
-finely split boxes.
-
-If your input is a `Workspace2D <http://mantidproject.org/Workspace2D>`__ and you do NOT check
-*OneEventPerBin*, then the workspace is converted to an
-`EventWorkspace <http://mantidproject.org/EventWorkspace>`__ but with no events for empty bins.
-
-Performance Notes
-#################
-
--  8-core Intel Xeon 3.2 GHz computer: measured between 4 and 5.5
-   million events per second (100-200 million event workspace).
--  32-core AMD Opteron 2.7 GHz computer: measured between 8 and 9
-   million events per second (400-1000 million event workspaces).
-
 Usage 
 
 **Example - Convert re-binned MARI 2D workspace to 3D MD workspace for further analysis/merging with data at different temperatures :**
@@ -100,11 +76,14 @@ Usage
 
    # A way to look at these results as a text:
    print "Resulting MD workspace has {0} events and {1} dimensions".format(md.getNEvents(),md.getNumDims())
+   print "Workspace Type is: ",md.id()   
 
 **Output:**
 
 .. testoutput:: ExConvertToDiffractionMDWorkspace
 
    Resulting MD workspace has 520128 events and 3 dimensions
+   Workspace Type is:  MDEventWorkspace<MDEvent,3>
+
 
 .. categories::

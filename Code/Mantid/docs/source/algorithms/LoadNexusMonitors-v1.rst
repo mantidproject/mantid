@@ -10,13 +10,13 @@ Description
 -----------
 
 This algorithm loads all monitors found in a NeXus file into a single
-:ref:`Workspace2D <Workspace2D>`. The algorithm
-assumes that all of the
-monitors are histograms and have the same bin boundaries. **NOTE:** The
-entry is assumed to be in SNS format, so the loader is currently not
-generically applicable. It is also written for single entry files and
-will need tweaking to handle period data where the monitors are
-different.
+:ref:`Workspace2D <Workspace2D>` (if there is no event data) or into
+an :ref:`EventWorkspace <EventWorkspace>` (if event monitor data is
+found).  The algorithm assumes that all of the monitors are histograms
+and have the same bin boundaries. **NOTE:** The entry is assumed to be
+in SNS or ISIS format, so the loader is currently not generically
+applicable. It is also written for single entry files and will need
+tweaking to handle period data where the monitors are different.
 
 Usage
 -----

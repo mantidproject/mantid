@@ -136,9 +136,9 @@ namespace Mantid
     }
 
     int
-      Line::lambdaPair(const int ix,const std::pair<
+      Line::lambdaPair(const int ix, const std::pair<
       std::complex<double>,std::complex<double> >& SQ,
-      std::vector<Kernel::V3D>& PntOut) const
+      std::list<Kernel::V3D> &PntOut) const
       /** 
       Helper function to decide which roots to take.
       The assumption is that lambda has been solved by quadratic
@@ -190,7 +190,7 @@ namespace Mantid
     }
 
     int
-      Line::intersect(std::vector<Kernel::V3D>& VecOut,
+      Line::intersect(std::list<Kernel::V3D> &VecOut,
       const Quadratic& Sur) const
       /**
       For the line that intersects the surfaces 
@@ -220,7 +220,7 @@ namespace Mantid
     }  
 
     int 
-      Line::intersect(std::vector<Kernel::V3D>& PntOut ,const Plane& Pln) const
+      Line::intersect(std::list<Kernel::V3D>& PntOut ,const Plane& Pln) const
       /** 
       For the line that intersects the cylinder generate 
       add the point to the VecOut, return number of points
@@ -244,7 +244,7 @@ namespace Mantid
     }
 
     int 
-      Line::intersect(std::vector<Kernel::V3D>& PntOut ,const Cylinder& Cyl) const
+      Line::intersect(std::list<Kernel::V3D> &PntOut , const Cylinder& Cyl) const
       /** 
       For the line that intersects the cylinder generate 
       add the point to the VecOut, return number of points
@@ -273,7 +273,7 @@ namespace Mantid
     }
 
     int 
-      Line::intersect(std::vector<Kernel::V3D>& PntOut ,const Sphere& Sph) const
+      Line::intersect(std::list<Kernel::V3D> &PntOut , const Sphere& Sph) const
       /** 
       For the line that intersects the cylinder generate 
       add the point to the VecOut, return number of points

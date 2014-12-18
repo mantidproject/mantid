@@ -13,7 +13,7 @@ namespace WorkflowAlgorithms
 /**
     Calculate the detector sensitivity and patch the pixels that are masked in a second workspace.
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

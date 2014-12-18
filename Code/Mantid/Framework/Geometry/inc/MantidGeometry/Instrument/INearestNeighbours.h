@@ -29,7 +29,7 @@ namespace Mantid
      *  Abstract Nearest neighbours class. Implementations of this are used for seaching for the nearest neighbours of a 
      *  detector in the instrument geometry.
      *
-     *  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     *  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
      *
      *  This file is part of Mantid.
      *

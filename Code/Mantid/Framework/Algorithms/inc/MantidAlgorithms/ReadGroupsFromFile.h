@@ -5,12 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 
-// To be compatible with MSVC++ Express Edition that does not have TR1 headers
-#ifndef HAS_UNORDERED_MAP_H
-#include <map>
-#else
-#include <tr1/unordered_map>
-#endif
+#include <boost/unordered_map.hpp>
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -48,7 +43,7 @@ namespace Algorithms
     @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
     @date 09/03/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -77,8 +72,8 @@ public:
   virtual ~ReadGroupsFromFile() {}
   /// Algorithm's name
   virtual const std::string name() const { return "ReadGroupsFromFile"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Read a diffraction calibration file (*.cal) or an XML grouping file (*.xml) and an instrument name, and output a 2D workspace containing on the Y-axis the values of the Group each detector belongs to.  This is used to visualise the grouping scheme for powder diffractometers, where a large number of detectors are grouped together. The output 2D workspace can be visualize using the show instrument method.";}
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Read a diffraction calibration file (*.cal) or an XML grouping file (*.xml) and an instrument name, and output a 2D workspace containing on the Y-axis the values of the Group each detector belongs to.  This is used to visualise the grouping scheme for powder diffractometers, where a large number of detectors are grouped together. The output 2D workspace can be visualize using the show instrument method.";}
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -86,14 +81,9 @@ public:
   virtual const std::string category() const { return "Diffraction"; }
 
 private:
-  
-	/// Map containing the detector entries found in the *.cal file. The key is the udet number, the value of is a pair of <group,selected>.
-	#ifndef HAS_UNORDERED_MAP_H
-	typedef std::map<int,std::pair<int,int> > calmap;
-	#else
-	typedef std::tr1::unordered_map<int,std::pair<int,int> > calmap;
-	#endif
-	/// Initialisation code
+  /// Map containing the detector entries found in the *.cal file. The key is the udet number, the value of is a pair of <group,selected>.
+  typedef boost::unordered_map<int,std::pair<int,int> > calmap;
+  /// Initialisation code
   void init();
   /// Execution code
   void exec();

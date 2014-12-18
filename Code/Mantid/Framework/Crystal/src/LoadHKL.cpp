@@ -161,9 +161,11 @@ namespace Crystal
     API::Run & mrun = ws->mutableRun();
     mrun.addProperty<double>("Radius", radius, true);
     NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
-  			0.0, 0.0, smu, 0.0, smu, amu);
-    Material mat("SetInLoadHKL", neutron, 1.0);
-    ws->mutableSample().setMaterial(mat);
+                        0.0, 0.0, smu, 0.0, smu, amu);
+    Object shape = ws->sample().getShape(); // copy
+    shape.setMaterial(Material("SetInLoadHKL", neutron, 1.0));
+    ws->mutableSample().setShape(shape);
+
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<PeaksWorkspace>(ws));
 
 

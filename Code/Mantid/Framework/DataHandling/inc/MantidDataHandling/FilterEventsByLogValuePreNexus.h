@@ -19,7 +19,7 @@ namespace DataHandling
 
     A data loading and splitting routine for SNS pre-nexus event files
     
-    Copyright &copy; 2010-11 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010-11 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

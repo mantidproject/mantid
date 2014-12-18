@@ -36,7 +36,7 @@ namespace Mantid
     @author Sofia Antony,ISIS,RAL
     @date 12/04/2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

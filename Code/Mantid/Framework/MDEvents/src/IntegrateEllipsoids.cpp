@@ -83,8 +83,7 @@ namespace MDEvents
     auto ws_valid = boost::make_shared<CompositeValidator>();
    
     ws_valid->add<InstrumentValidator>();
-    // the validator which checks if the workspace has axis and time-of-flight units
-    ws_valid->add<WorkspaceUnitValidator>("TOF");
+    // the validator which checks if the workspace has axis
 
     declareProperty(new WorkspaceProperty<EventWorkspace>( "InputWorkspace", "", Direction::Input,ws_valid),
                     "An input EventWorkspace with time-of-flight units along X-axis and defined instrument with defined sample");
@@ -122,11 +121,6 @@ namespace MDEvents
     // get the input workspace
     EventWorkspace_sptr wksp = getProperty("InputWorkspace");
 
-    // this only works for unweighted events
-    if (wksp->getEventType() != API::TOF)
-    {
-      throw std::runtime_error("IntegrateEllipsoids only works for raw events");
-    }
     // error out if there are not events
     if (wksp->getNumberEvents() <= 0)
     {
@@ -226,7 +220,9 @@ namespace MDEvents
     for (std::size_t i = 0; i < numSpectra; ++i)
     {
       // get a reference to the event list
-      const EventList& events = wksp->getEventList(i);
+      EventList& events = wksp->getEventList(i);
+
+      events.switchTo(WEIGHTED_NOTIME);
 
       // check to see if the event list is empty
       if (events.empty())
@@ -243,7 +239,7 @@ namespace MDEvents
       // loop over the events
       double signal(1.);  // ignorable garbage
       double errorSq(1.); // ignorable garbage
-      const std::vector<TofEvent>& raw_events = events.getEvents();
+      const std::vector<WeightedEventNoTime>& raw_events = events.getWeightedEventsNoTime();
       event_qs.clear();
       for (auto event = raw_events.begin(); event != raw_events.end(); ++event)
       {

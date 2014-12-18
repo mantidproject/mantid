@@ -4,7 +4,6 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/LineIntersectVisit.h"
@@ -34,9 +33,10 @@ namespace Mantid
     */
     Object::Object() :
     ObjName(0), TopRule(0), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
-      AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), bGeometryCaching(false),
-      vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()), vtkCacheWriter(boost::shared_ptr<
-      vtkGeometryCacheWriter>())
+      AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), handle(), bGeometryCaching(false),
+      vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
+      vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
+      m_material() // empty by default
     {
       handle = boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
     }
@@ -47,9 +47,9 @@ namespace Mantid
     */
     Object::Object(const std::string& shapeXML) :
     ObjName(0), TopRule(0), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
-      AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), bGeometryCaching(false),
+      AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), handle(), bGeometryCaching(false),
       vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()), vtkCacheWriter(boost::shared_ptr<
-      vtkGeometryCacheWriter>()), m_shapeXML(shapeXML)
+      vtkGeometryCacheWriter>()), m_shapeXML(shapeXML), m_material() // empty by default
     {
       handle = boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
     }
@@ -60,14 +60,12 @@ namespace Mantid
     */
     Object::Object(const Object& A) :
     ObjName(A.ObjName), TopRule((A.TopRule) ? A.TopRule->clone() : NULL), m_boundingBox(A.m_boundingBox),
-      AABBxMax(A.AABBxMax), AABByMax(A.AABByMax), AABBzMax(A.AABBzMax), AABBxMin(A.AABBxMin), 
-      AABByMin(A.AABByMin), AABBzMin(A.AABBzMin), boolBounded(A.boolBounded), 
+      AABBxMax(A.AABBxMax), AABByMax(A.AABByMax), AABBzMax(A.AABBzMax), AABBxMin(A.AABBxMin),
+      AABByMin(A.AABByMin), AABBzMin(A.AABBzMin), boolBounded(A.boolBounded), handle(A.handle->clone()),
       bGeometryCaching(A.bGeometryCaching), vtkCacheReader(A.vtkCacheReader),
       vtkCacheWriter(A.vtkCacheWriter),
-      m_shapeXML(A.m_shapeXML)
+      m_shapeXML(A.m_shapeXML), m_material(A.m_material)
     {
-      handle = boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
-
       if (TopRule) createSurfaceList();
     }
 
@@ -90,11 +88,12 @@ namespace Mantid
         AABByMin = A.AABByMin;
         AABBzMin = A.AABBzMin;
         boolBounded = A.boolBounded;
-        handle.reset(A.handle->createInstance(this));
+        handle = A.handle->clone();
         bGeometryCaching = A.bGeometryCaching;
         vtkCacheReader = A.vtkCacheReader;
         vtkCacheWriter = A.vtkCacheWriter;
         m_shapeXML = A.m_shapeXML;
+        m_material = A.m_material;
 
         if (TopRule) createSurfaceList();
       }
@@ -111,8 +110,24 @@ namespace Mantid
     }
 
     /**
+     * @param material The new Material that the object is composed from
+     */
+    void Object::setMaterial(const Kernel::Material &material)
+    {
+      m_material = material;
+    }
+
+    /**
+     * @return The Material that the object is composed from
+     */
+    const Kernel::Material &Object::material() const
+    {
+      return m_material;
+    }
+
+    /**
     * Returns whether this object has a valid shape
-    * @returns True if the surface list is populated and there is a 
+    * @returns True if the surface list is populated and there is a
     * defined TopRule, false otherwise.
     */
     bool Object::hasValidShape() const
@@ -264,7 +279,7 @@ namespace Mantid
     * @retval 1000+ keyNumber :: Error with keyNumber
     * @retval 0 :: successfully populated all the whole Object.
     */
-    int Object::populate(const std::map<int, Surface*>& Smap)     
+    int Object::populate(const std::map<int, Surface*>& Smap)
     {
       std::deque<Rule*> Rst;
       Rst.push_back(TopRule);
@@ -626,7 +641,7 @@ namespace Mantid
     /**
     * Takes the complement of a group
     */
-    void Object::makeComplement() 
+    void Object::makeComplement()
     {
       Rule* NCG = procComp(TopRule);
       TopRule = NCG;
@@ -795,16 +810,18 @@ namespace Mantid
       {
         (*vc)->acceptVisitor(LI);
       }
-      const std::vector<Kernel::V3D>& IPts(LI.getPoints());
-      const std::vector<double>& dPts(LI.getDistance());
+      const auto& IPts(LI.getPoints());
+      const auto& dPts(LI.getDistance());
 
-      for (unsigned int i = 0; i < IPts.size(); i++)
+      auto ditr = dPts.begin();
+      auto itrEnd = IPts.end();
+      for (auto iitr = IPts.begin(); iitr != itrEnd; ++iitr, ++ditr)
       {
-        if (dPts[i] > 0.0) // only interested in forward going points
+        if (*ditr > 0.0) // only interested in forward going points
         {
           // Is the point and enterance/exit Point
-          const int flag = calcValidType(IPts[i], UT.direction());
-          UT.addPoint(flag, IPts[i]);
+          const int flag = calcValidType(*iitr, UT.direction());
+          UT.addPoint(flag, *iitr, *this);
         }
       }
       UT.buildLink();
@@ -1267,12 +1284,12 @@ namespace Mantid
     double Object::CylinderSolidAngle(const V3D & observer, const Mantid::Kernel::V3D & centre,
       const Mantid::Kernel::V3D & axis, const double radius, const double height) const
     {
-      // The cylinder is triangulated along its axis EXCLUDING the end caps so that stacked cylinders 
-      // give the correct value of solid angle (i.e shadowing is losely taken into account by this 
+      // The cylinder is triangulated along its axis EXCLUDING the end caps so that stacked cylinders
+      // give the correct value of solid angle (i.e shadowing is losely taken into account by this
       //method)
-      // Any triangle that has a normal facing away from the observer gives a negative solid 
+      // Any triangle that has a normal facing away from the observer gives a negative solid
       //angle and is excluded
-      // For simplicity the triangulation points are constructed such that the cone axis 
+      // For simplicity the triangulation points are constructed such that the cone axis
       // points up the +Z axis and then rotated into their final position
       Kernel::V3D axis_direction = axis;
       axis_direction.normalize();
@@ -1497,7 +1514,7 @@ namespace Mantid
     */
     const BoundingBox & Object::getBoundingBox() const
     {
-      // This member function is const given that from a user's perspective it is perfecly reasonable 
+      // This member function is const given that from a user's perspective it is perfecly reasonable
       // to call it on a const object. We need to call a non-const function in places to update the cache,
       // which is where the const_cast comes in to play.
 
@@ -1509,10 +1526,10 @@ namespace Mantid
       else if( m_boundingBox.isNull() )
       {
         // First up, construct the trial set of elements from the object's bounding box
-        const double big(1e10); 
+        const double big(1e10);
         double minX(-big), maxX(big), minY(-big), maxY(big), minZ(-big), maxZ(big);
         TopRule->getBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
-        //If the object is not axis aligned then the bounding box will be poor, in particular the minima are left at the trial start so return 
+        //If the object is not axis aligned then the bounding box will be poor, in particular the minima are left at the trial start so return
         // a null object here
         if (minX < -100 || maxX > 100 || minY < -100 || maxY > 100 || minZ < -100 || maxZ > 100)
         {

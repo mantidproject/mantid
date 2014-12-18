@@ -23,7 +23,7 @@ namespace CurveFitting
     The workflow and architecture of this algorithm is different from LeBailFit,
     though they hold the same interface to users.
     
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

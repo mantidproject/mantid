@@ -17,7 +17,7 @@ CATEGORIES_DIR = "categories"
 # List of category names that are considered the index for everything in that type
 # When this category is encountered an additional index.html is written to both the
 # directory of the document and the category directory
-INDEX_CATEGORIES = ["Algorithms", "FitFunctions","Concepts"]
+INDEX_CATEGORIES = ["Algorithms", "FitFunctions", "Concepts", "Interfaces"]
 
 class LinkItem(object):
     """

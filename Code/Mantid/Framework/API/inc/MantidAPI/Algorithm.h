@@ -65,7 +65,7 @@ class AlgorithmHistory;
  @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
  @date 12/09/2007
 
- Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -239,6 +239,10 @@ public:
   void setLoggingOffset(const int value) { g_log.setLevelOffset(value); }
   ///returns the logging priority offset
   int getLoggingOffset() const { return g_log.getLevelOffset(); }
+  /// disable Logging of start and end messages
+  void setAlgStartupLogging(const bool enabled);  
+  /// get the state of Logging of start and end messages
+  bool getAlgStartupLogging() const;
 
   ///setting the child start progress
   void setChildStartProgress(const double startProgress)const{m_startChildProgress=startProgress;}
@@ -260,6 +264,18 @@ public:
 
   /// set whether we wish to track the child algorithm's history and pass it the parent object to fill.
   void trackAlgorithmHistory(boost::shared_ptr<AlgorithmHistory> parentHist);
+
+  typedef std::vector<boost::shared_ptr<Workspace> > WorkspaceVector;
+
+  void findWorkspaceProperties(WorkspaceVector& inputWorkspaces,
+      WorkspaceVector& outputWorkspaces) const;
+
+  // ------------------ For WorkspaceGroups ------------------------------------
+  virtual bool checkGroups();
+
+  virtual bool processGroups();
+
+  void copyNonWorkspaceProperties(IAlgorithm * alg, int periodNum);
 
 protected:
 
@@ -312,17 +328,7 @@ protected:
   friend class WorkspaceHistory; // Allow workspace history loading to adjust g_execCount 
   static size_t g_execCount; ///< Counter to keep track of algorithm execution order
 
-  // ------------------ For WorkspaceGroups ------------------------------------
-  virtual bool checkGroups();
-
-  virtual bool processGroups();
   virtual void setOtherProperties(IAlgorithm * alg, const std::string & propertyName, const std::string & propertyValue, int periodNum);
-  typedef std::vector<boost::shared_ptr<Workspace> > WorkspaceVector;
-
-  void findWorkspaceProperties(WorkspaceVector& inputWorkspaces,
-      WorkspaceVector& outputWorkspaces) const;
-
-  void copyNonWorkspaceProperties(IAlgorithm * alg, int periodNum);
 
   /// All the WorkspaceProperties that are Input or InOut. Set in execute()
   std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;
@@ -335,6 +341,11 @@ protected:
 
   /// Pointer to the parent history object (if set)
   boost::shared_ptr<AlgorithmHistory> m_parentHistory;
+
+  /// One vector of workspaces for each input workspace property
+  std::vector<WorkspaceVector> m_groups;
+  /// Size of the group(s) being processed
+  size_t m_groupSize;
 
 private:
   /// Private Copy constructor: NO COPY ALLOWED
@@ -351,6 +362,9 @@ private:
   void logAlgorithmInfo() const;
 
   bool executeAsyncImpl(const Poco::Void & i);
+
+  // Report that the algorithm has completed.
+  void reportCompleted(const double& duration, const bool groupProcessing = false);
 
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.
@@ -370,6 +384,7 @@ private:
   bool m_runningAsync; ///< Algorithm is running asynchronously
   bool m_running; ///< Algorithm is running
   bool m_rethrow; ///< Algorithm should rethrow exceptions while executing
+  bool m_isAlgStartupLoggingEnabled; /// Whether to log alg startup and closedown messages from the base class (default = true)
   mutable double m_startChildProgress; ///< Keeps value for algorithm's progress at start of an Child Algorithm
   mutable double m_endChildProgress; ///< Keeps value for algorithm's progress at Child Algorithm's finish
   AlgorithmID m_algorithmID; ///< Algorithm ID for managed algorithms
@@ -385,14 +400,10 @@ private:
   /// All the WorkspaceProperties that are Output (not inOut). Set in execute()
   std::vector<IWorkspaceProperty *> m_pureOutputWorkspaceProps;
 
-  /// One vector of workspaces for each input workspace property
-  std::vector<WorkspaceVector> m_groups;
   /// Pointer to the WorkspaceGroup (if any) for each input workspace property
   std::vector<boost::shared_ptr<WorkspaceGroup> > m_groupWorkspaces;
   /// If only one input is a group, this is its index. -1 if they are all groups
   int m_singleGroup;
-  /// Size of the group(s) being processed
-  size_t m_groupSize;
   /// All the groups have similar names (group_1, group_2 etc.)
   bool m_groupsHaveSimilarNames;
   /// A non-recursive mutex for thread-safety

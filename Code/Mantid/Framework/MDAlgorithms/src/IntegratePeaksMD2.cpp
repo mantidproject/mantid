@@ -136,7 +136,19 @@ namespace MDAlgorithms
     Mantid::DataObjects::PeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
     if (peakWS != inPeakWS)
       peakWS = inPeakWS->clone();
+    // This only fails in the unit tests which say that MaskBTP is not registered
+    try
+    {
+		runMaskDetectors(peakWS,"Tube","edges");
+		runMaskDetectors(peakWS,"Pixel","edges");
+    } catch (...)
+    {
+		g_log.error("Can't execute MaskBTP algorithm for this instrument to set edge for IntegrateIfOnEdge option");
+    }
 
+
+    // Get the instrument and its detectors
+    inst = peakWS->getInstrument();
     int CoordinatesToUse =  ws->getSpecialCoordinateSystem();
 
     /// Radius to use around peaks
@@ -145,6 +157,8 @@ namespace MDAlgorithms
     double BackgroundOuterRadius = getProperty("BackgroundOuterRadius");
     /// Start radius of the background
     double BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
+    if (BackgroundInnerRadius < PeakRadius)
+      BackgroundInnerRadius = PeakRadius;
     /// Cylinder Length to use around peaks for cylinder
     double cylinderLength = getProperty("CylinderLength");
     Workspace2D_sptr wsProfile2D,wsFit2D,wsDiff2D;
@@ -187,7 +201,6 @@ namespace MDAlgorithms
       newAxis3->setLabel(i, label.str());
         }
     }
-    double backgroundCylinder = cylinderLength;
     double percentBackground = getProperty("PercentBackground");
     size_t peakMin = 0;
     size_t peakMax = numSteps;
@@ -200,12 +213,10 @@ namespace MDAlgorithms
       size_t numBkgCh = numSteps - numPeakCh;  //number of background channels
       ratio = static_cast<double>(numPeakCh)/static_cast<double>(numBkgCh);
     }
-    //cylinderLength *= 1.0 - (percentBackground/100.);
     /// Replace intensity with 0
     bool replaceIntensity = getProperty("ReplaceIntensity");
     bool integrateEdge = getProperty("IntegrateIfOnEdge");
-    if (BackgroundInnerRadius < PeakRadius)
-      BackgroundInnerRadius = PeakRadius;
+
   std::string profileFunction = getProperty("ProfileFunction");
   std::string integrationOption = getProperty("IntegrationOption");
     std::ofstream out;
@@ -242,25 +253,21 @@ namespace MDAlgorithms
       else if (CoordinatesToUse == 3) //"HKL"
         pos = p.getHKL();
 
-      // Get the instrument and its detectors
-      inst = peakWS->getInstrument();
       // Do not integrate if sphere is off edge of detector
-      if (BackgroundOuterRadius > PeakRadius)
-      {
-        if (!detectorQ(p.getQLabFrame(), BackgroundOuterRadius))
-          {
-             g_log.warning() << "Warning: sphere/cylinder for integration is off edge of detector for peak " << i << std::endl;
-             if (!integrateEdge)continue;
-          }
-      }
-      else
-      {
-        if (!detectorQ(p.getQLabFrame(), PeakRadius))
-          {
-             g_log.warning() << "Warning: sphere/cylinder for integration is off edge of detector for peak " << i << std::endl;
-             if (!integrateEdge)continue;
-          }
-      }
+
+      if (!detectorQ(p.getQLabFrame(), std::max(BackgroundOuterRadius, PeakRadius)))
+        {
+           g_log.warning() << "Warning: sphere/cylinder for integration is off edge of detector for peak " << i << std::endl;
+           if (!integrateEdge)
+           {
+             if (replaceIntensity)
+             {
+                p.setIntensity(0.0);
+                p.setSigmaIntensity( 0.0 );
+             }
+             continue;
+           }
+        }
 
       // Build the sphere transformation
       bool dimensionsUsed[nd];
@@ -327,7 +334,7 @@ namespace MDAlgorithms
             double ratio = (PeakRadius / BackgroundOuterRadius);
             double peakVolume = ratio * ratio * ratio;
 
-            // Relative volume of the interior of the shell vs overall backgroundratio * ratio
+            // Relative volume of the interior of the shell vs overall background
             double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
             // Volume of the bg shell, relative to the volume of the BackgroundOuterRadius sphere
             double bgVolume = 1.0 - interiorRatio * interiorRatio * interiorRatio;
@@ -335,11 +342,7 @@ namespace MDAlgorithms
             // Finally, you will multiply the bg intensity by this to get the estimated background under the peak volume
             double scaleFactor = peakVolume / bgVolume;
             bgSignal *= scaleFactor;
-            bgErrorSquared *= scaleFactor;
-            // Adjust the integrated values.
-            signal -= bgSignal;
-            // But we add the errors together
-            errorSquared += bgErrorSquared;
+            bgErrorSquared *= scaleFactor * scaleFactor;
       }
     }
       else
@@ -360,14 +363,13 @@ namespace MDAlgorithms
       }
 
       // Integrate around the background radius
-      if (BackgroundOuterRadius > PeakRadius || percentBackground > 0.0)
+      if (BackgroundOuterRadius > PeakRadius)
       {
         // Get the total signal inside "BackgroundOuterRadius"
 
-        if (BackgroundOuterRadius < PeakRadius ) BackgroundOuterRadius = PeakRadius;
         signal_fit.clear();
         for (size_t j=0; j<numSteps; j++)signal_fit.push_back(0.0);
-        ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundOuterRadius), static_cast<coord_t>(backgroundCylinder), bgSignal, bgErrorSquared, signal_fit);
+        ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundOuterRadius), static_cast<coord_t>(cylinderLength), bgSignal, bgErrorSquared, signal_fit);
         for (size_t j = 0; j < numSteps; j++)
         {
            wsProfile2D->dataX(i)[j] = static_cast<double>(j);
@@ -394,23 +396,19 @@ namespace MDAlgorithms
             bgSignal -= interiorSignal;
             // We can subtract the error (instead of adding) because the two values are 100% dependent; this is the same as integrating a shell.
             bgErrorSquared -= interiorErrorSquared;
-            // Relative volume of peak vs the BackgroundOuterRadius sphere
+            // Relative volume of peak vs the BackgroundOuterRadius cylinder
             double ratio = (PeakRadius / BackgroundOuterRadius);
-            double peakVolume = ratio * ratio * (1-percentBackground/100.);
+            double peakVolume = ratio * ratio * cylinderLength;
 
-            // Relative volume of the interior of the shell vs overall backgroundratio * ratio
+            // Relative volume of the interior of the shell vs overall background
             double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
-            // Volume of the bg shell, relative to the volume of the BackgroundOuterRadius sphere
-            double bgVolume = 1.0 - interiorRatio * interiorRatio * (percentBackground/100.);
+            // Volume of the bg shell, relative to the volume of the BackgroundOuterRadius cylinder
+            double bgVolume = 1.0 - interiorRatio * interiorRatio * cylinderLength;
 
             // Finally, you will multiply the bg intensity by this to get the estimated background under the peak volume
             double scaleFactor = peakVolume / bgVolume;
             bgSignal *= scaleFactor;
-            bgErrorSquared *= scaleFactor;
-            // Adjust the integrated values.
-            signal -= bgSignal;
-            // But we add the errors together
-            errorSquared += bgErrorSquared;
+            bgErrorSquared *= scaleFactor * scaleFactor;
       }
       else
       {
@@ -422,7 +420,19 @@ namespace MDAlgorithms
         }
       }
 
-      if (profileFunction.compare("NoFit") != 0)
+      if (profileFunction.compare("NoFit") == 0)
+      {
+        signal = 0.;
+        for (size_t j = 0; j < numSteps; j++)
+        {
+            if (j < peakMin || j > peakMax)
+              background_total = background_total + wsProfile2D->dataY(i)[j];
+            else
+              signal = signal + wsProfile2D->dataY(i)[j];
+         }
+        errorSquared = std::fabs(signal);
+      }
+      else
       {
           API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
           findpeaks->setProperty("InputWorkspace", wsProfile2D);
@@ -504,7 +514,7 @@ namespace MDAlgorithms
         signal = 0.0;
         if (integrationOption.compare("Sum") == 0)
         {
-          for (size_t j = 0; j < numSteps; j++) if ( !boost::math::isnan(yy[j]) && !boost::math::isinf(yy[j]))signal+= yy[j];
+          for (size_t j = peakMin; j <= peakMax; j++) if ( !boost::math::isnan(yy[j]) && !boost::math::isinf(yy[j]))signal+= yy[j];
         }
         else
         {
@@ -517,7 +527,7 @@ namespace MDAlgorithms
           F.function = &Mantid::MDAlgorithms::f_eval2;
           F.params = &fun;
 
-          gsl_integration_qags (&F, x[0], x[numSteps-1], 0, 1e-7, 1000,
+          gsl_integration_qags (&F, x[peakMin], x[peakMax], 0, 1e-7, 1000,
                      w, &signal, &error);
 
           gsl_integration_workspace_free (w);
@@ -538,13 +548,14 @@ namespace MDAlgorithms
       // Save it back in the peak object.
       if (signal != 0. || replaceIntensity)
       {
-      p.setIntensity(signal - ratio * background_total);
-      p.setSigmaIntensity( sqrt(errorSquared + ratio * ratio * std::fabs(background_total)) );
+        p.setIntensity(signal - ratio * background_total - bgSignal);
+        p.setSigmaIntensity( sqrt(errorSquared + ratio * ratio * std::fabs(background_total) + bgErrorSquared) );
       }
 
       g_log.information() << "Peak " << i << " at " << pos << ": signal "
         << signal << " (sig^2 " << errorSquared << "), with background "
-        << bgSignal << " (sig^2 " << bgErrorSquared << ") subtracted."
+        << bgSignal + ratio * background_total << " (sig^2 "
+        << bgErrorSquared+ ratio * ratio * std::fabs(background_total) << ") subtracted."
         << std::endl;
 
     }
@@ -579,45 +590,49 @@ namespace MDAlgorithms
   }
 
   /** Calculate if this Q is on a detector
+   * Define edges for each instrument by masking. For CORELLI, tubes 1 and 16, and pixels 0 and 255.
+   * Get Q in the lab frame for every peak, call it C
+   * For every point on the edge, the trajectory in reciprocal space is a straight line, going through O=V3D(0,0,0).
+   * Calculate a point at a fixed momentum, say k=1. Q in the lab frame E=V3D(-k*sin(tt)*cos(ph),-k*sin(tt)*sin(ph),k-k*cos(ph)).
+   * Normalize E to 1: E=E*(1./E.norm())
+   * The distance from C to OE is given by dv=C-E*(C.scalar_prod(E))
+   * If dv.norm<integration_radius, one of the detector trajectories on the edge is too close to the peak
+   * This method is applied to all masked pixels. If there are masked pixels trajectories inside an integration volume, the peak must be rejected.
    *
    * @param QLabFrame: The Peak center.
    * @param r: Peak radius.
    */
   bool IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r)
   {
-    bool in = true;
-    const int nAngles = 8;
-    double dAngles = static_cast<coord_t>(nAngles);
-    // check 64 points in theta and phi at outer radius
-    for (int i = 0; i < nAngles; ++i)
-    {
-      double theta = (2 * M_PI) / dAngles * i;
-      for (int j = 0; j < nAngles; ++j)
-      {
-        double phi = (2 * M_PI) / dAngles * j;
-        // Calculate an edge position at this point on the sphere surface. Spherical coordinates to cartesian.
-        V3D edge = V3D(
-            QLabFrame.X() + r * std::cos(theta) * std::sin(phi),
-            QLabFrame.Y() + r * std::sin(theta) * std::sin(phi),
-            QLabFrame.Z() + r * std::cos(phi));
-        // Create the peak using the Q in the lab frame with all its info:
-        try
-        {
-          Peak p(inst, edge);
-          in = (in && p.findDetector());
-          if (!in)
-          {
-            return in;
-          }
-        }
-        catch (...)
-        {
-          return false;
-        }
-      }
-    }
-    return in;
+		std::vector<detid_t> detectorIDs = inst->getDetectorIDs();
+
+		for (auto detID = detectorIDs.begin(); detID != detectorIDs.end(); ++detID)
+		{
+				Mantid::Geometry::IDetector_const_sptr det = inst->getDetector(*detID);
+				if( det->isMonitor() ) continue; //skip monitor
+				if( !det->isMasked() ) continue;// edge is masked so don't check if not masked
+				double tt1=det->getTwoTheta(V3D(0,0,0),V3D(0,0,1)); //two theta
+				double ph1=det->getPhi(); //phi
+				V3D E1=V3D(-std::sin(tt1)*std::cos(ph1),-std::sin(tt1)*std::sin(ph1),1.-std::cos(tt1)); //end of trajectory
+				E1=E1*(1./E1.norm()); //normalize
+				V3D distv=QLabFrame-E1*(QLabFrame.scalar_prod(E1)); //distance to the trajectory as a vector
+				if(distv.norm()<r)
+				{
+					return false;
+				}
+		}
+
+		return true;
   }
+  void  IntegratePeaksMD2::runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,std::string property, std::string values)
+  {
+    IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
+    alg->setProperty<Workspace_sptr>("Workspace", peakWS);
+    alg->setProperty(property,values);
+    if (!alg->execute())
+      throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
+  }
+
   void IntegratePeaksMD2::checkOverlap(int i,
       Mantid::DataObjects::PeaksWorkspace_sptr peakWS, int CoordinatesToUse, double radius)
   {

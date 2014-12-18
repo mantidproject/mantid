@@ -1,5 +1,5 @@
 #ifndef MANTID_API_PLOTAXISLABELTEST_H_
-#define MANTID_API_AXISLABELTEST_H_
+#define MANTID_API_PLOTAXISLABELTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -114,23 +114,23 @@ public:
     TS_ASSERT_EQUALS("Spectrum", PlotAxis(*ws, 1).title());
   }
 
-  void test_Passing_Just_NonDistribution_Workspace_Creates_UnitLess_Title_For_Y_Data()
+  void test_Passing_Workspace_Not_Plotting_As_Distribution_Creates_UnitLess_Title_For_Y_Data()
   {
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(1,1);
     ws->setYUnit("Counts");
 
-    TS_ASSERT_EQUALS("Counts", PlotAxis(*ws).title());
+    TS_ASSERT_EQUALS("Counts", PlotAxis(false, *ws).title());
   }
 
-  void test_Passing_Just_Distribution_Workspace_Creates_Title_For_Y_Data_With_Unit()
+  void test_Passing_Workspace_And_Plotting_As_Distribution_Creates_UnitLess_Title_For_Y_Data()
   {
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(1,1);
     ws->setYUnit("Counts");
 
     QString expected = QString::fromWCharArray(L"Counts (\u03bcs\u207b\u00b9)");
-    TS_ASSERT_EQUALS("Counts", PlotAxis(*ws).title());
+    TS_ASSERT_EQUALS("Counts", PlotAxis(true, *ws).title());
   }
 
   void test_title_from_just_dimension()
@@ -157,4 +157,4 @@ public:
 };
 
 
-#endif /* MANTID_API_AXISLABELTEST_H_ */
+#endif /* MANTID_API_PLOTAXISLABELTEST_H_ */

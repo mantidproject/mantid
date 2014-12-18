@@ -129,8 +129,13 @@ namespace API
     /// Populate the parameter map given a string
     void readParameterMap(const std::string & parameterStr);
 
-    /// Returns the start date for this experiment
-    std::string getWorkspaceStartDate();
+    /// Returns the start date for this experiment (or current time if no info available)
+    std::string getWorkspaceStartDate() const;
+
+    // run/experiment stat time if available, empty otherwise
+    std::string getAvailableWorkspaceStartDate() const;
+    // run end time if available, empty otherwise
+    std::string getAvailableWorkspaceEndDate() const;
 
     /// Utility to retrieve the validity dates for the given IDF
     static void getValidFromTo(const std::string& IDFfilename, std::string& outValidFrom, std::string& outValidTo);
@@ -155,7 +160,7 @@ namespace API
   private:
     /// Fill with given instrument parameter
     void populateWithParameter(Geometry::ParameterMap & paramMap,
-                               const std::string & name, const Geometry::XMLlogfile & paramInfo,
+                               const std::string & name, const Geometry::XMLInstrumentParameter & paramInfo,
                                const Run & runData);
 
     /// Detector grouping information

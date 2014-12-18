@@ -117,8 +117,13 @@ class SANSInstrumentWidget(BaseWidget):
         # Q range
         self._summary.n_q_bins_edit.setText("100")
         self._summary.n_sub_pix_edit.setText("1")
+        self.connect(self._summary.log_binning_radio, QtCore.SIGNAL("clicked(bool)"), self._summary.align_check.setEnabled)
 
         self._summary.scale_edit.setText("1")
+        
+        self._summary.n_wedges_edit.setText("2")
+        self._summary.wedge_angle_edit.setText("30")
+        self._summary.wedge_offset_edit.setText("0")
 
         self._summary.instr_name_label.hide()
         self._dark_clicked(self._summary.dark_current_check.isChecked())
@@ -138,6 +143,14 @@ class SANSInstrumentWidget(BaseWidget):
         self.connect(self._summary.scale_chk, QtCore.SIGNAL("clicked(bool)"), self._scale_clicked)
         self._scale_clicked(self._summary.scale_chk.isChecked())
 
+        # If we are not in debug/expert mode, hide some advanced options
+        if not self._settings.debug:
+            self._summary.mask_side_layout.deleteLater()
+            self._summary.mask_side_label.hide()
+            self._summary.mask_side_none_radio.hide()
+            self._summary.mask_side_front_radio.hide()
+            self._summary.mask_side_back_radio.hide()
+            
         if not self._in_mantidplot:
             self._summary.dark_plot_button.hide()
             self._summary.scale_data_plot_button.hide()
@@ -333,13 +346,26 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.n_q_bins_edit.setText(str(state.n_q_bins))
         self._summary.n_sub_pix_edit.setText(str(state.n_sub_pix))
         self._summary.log_binning_radio.setChecked(state.log_binning)
-
+        self._summary.align_check.setEnabled(state.log_binning)
+        self._summary.align_check.setChecked(state.align_log_with_decades)
+        
+        self._summary.n_wedges_edit.setText(str(state.n_wedges))
+        self._summary.wedge_angle_edit.setText(str(state.wedge_angle))
+        self._summary.wedge_offset_edit.setText(str(state.wedge_offset))
+        
         # Mask
         self._summary.mask_edit.setText(str(state.mask_file))
         self._summary.mask_check.setChecked(state.use_mask_file)
         self._mask_checked(state.use_mask_file)
         self._masked_detectors = state.detector_ids
         self.mask_reload = True
+        
+        if state.masked_side == 'Front':
+            self._summary.mask_side_front_radio.setChecked(True)
+        elif state.masked_side == 'Back':
+            self._summary.mask_side_back_radio.setChecked(True)
+        else:
+            self._summary.mask_side_none_radio.setChecked(True)
 
     def _prepare_field(self, is_enabled, stored_value, chk_widget, edit_widget, suppl_value=None, suppl_edit=None):
         #to_display = str(stored_value) if is_enabled else ''
@@ -399,7 +425,20 @@ class SANSInstrumentWidget(BaseWidget):
         m.n_q_bins = util._check_and_get_int_line_edit(self._summary.n_q_bins_edit)
         m.n_sub_pix = util._check_and_get_int_line_edit(self._summary.n_sub_pix_edit)
         m.log_binning = self._summary.log_binning_radio.isChecked()
+        m.align_log_with_decades = self._summary.align_check.isChecked()
 
+        m.n_wedges = util._check_and_get_int_line_edit(self._summary.n_wedges_edit)
+        m.wedge_angle = util._check_and_get_float_line_edit(self._summary.wedge_angle_edit)
+        m.wedge_offset = util._check_and_get_float_line_edit(self._summary.wedge_offset_edit)
+
+        # Detector side masking
+        if self._summary.mask_side_front_radio.isChecked():
+            m.masked_side = 'Front'
+        elif self._summary.mask_side_back_radio.isChecked():
+            m.masked_side = 'Back'
+        else:
+            m.masked_side = None
+            
         # Mask detector IDs
         m.use_mask_file = self._summary.mask_check.isChecked()
         m.mask_file = unicode(self._summary.mask_edit.text())

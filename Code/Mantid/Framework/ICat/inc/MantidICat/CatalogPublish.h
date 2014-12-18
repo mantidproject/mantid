@@ -1,5 +1,5 @@
 #ifndef MANTID_ICAT_CATALOGPUBLISH_H
-#define MATIND_ICAT_CATALOGPUBLISH_H
+#define MANTID_ICAT_CATALOGPUBLISH_H
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ICatalogInfoService.h"
@@ -23,7 +23,7 @@ namespace Mantid
 
      @author Jay Rainey, ISIS Rutherford Appleton Laboratory
      @date 06/12/2013
-     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
      This file is part of Mantid.
 

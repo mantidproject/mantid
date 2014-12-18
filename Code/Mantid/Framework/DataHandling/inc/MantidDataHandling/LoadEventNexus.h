@@ -62,7 +62,7 @@ namespace DataHandling
 
     @date Sep 27, 2010
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -129,6 +129,9 @@ namespace DataHandling
 
     static void loadSampleDataISIScompatibility(::NeXus::File& file, Mantid::API::MatrixWorkspace_sptr WS);
 
+    /// method used to return instrument name for some old ISIS files where it is not written properly within the instrument
+    static std::string readInstrumentFromISIS_VMSCompat(::NeXus::File &hFile);
+
   public:
 
     /// The name and path of the input file
@@ -141,6 +144,13 @@ namespace DataHandling
     double filter_tof_min;
     /// Filter by a maximum time-of-flight
     double filter_tof_max;
+
+		/// Spectra list to load
+		std::vector<int32_t> m_specList;
+		/// Minimum spectrum to load
+		int32_t m_specMin;
+		/// Maximum spectrum to load
+		int32_t m_specMax;
 
     /// Filter by start time
     Kernel::DateAndTime filter_time_start;
@@ -158,6 +168,9 @@ namespace DataHandling
     /// Was the instrument loaded?
     bool instrument_loaded_correctly;
 
+    /// Mutex protecting tof limits
+    Poco::FastMutex m_tofMutex;
+      
     /// Limits found to tof
     double longest_tof;
     /// Limits found to tof
@@ -224,6 +237,7 @@ namespace DataHandling
                               const std::vector<std::string> & bankNames = std::vector<std::string>());
     void deleteBanks(API::MatrixWorkspace_sptr workspace, std::vector<std::string> bankNames);
     bool hasEventMonitors();
+    void runLoadMonitorsAsEvents(API::Progress * const prog);
     void runLoadMonitors();
     /// Set the filters on TOF.
     void setTimeFilters(const bool monitors);
@@ -244,6 +258,9 @@ namespace DataHandling
                                      const std::string& binsName,size_t start_wi = 0, size_t end_wi = 0);
 
     void filterDuringPause(API::MatrixWorkspace_sptr workspace);
+
+		// Validate the optional spectra input properties and initialize m_specList
+		void createSpectraList(int32_t min, int32_t max);
 
   public:
     /// name of top level NXentry to use

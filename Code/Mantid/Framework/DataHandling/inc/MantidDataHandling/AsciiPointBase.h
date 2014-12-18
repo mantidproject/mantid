@@ -17,7 +17,7 @@ namespace Mantid
     implementation for any subclasses and as such any subclasses should only provide implementations
     for the additional abstract and virtual methods provided by this class.
 
-    Copyright &copy; 2007-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -60,8 +60,7 @@ namespace Mantid
       virtual void extraProps() = 0;
       /// write any extra information required
       virtual void extraHeaders(std::ofstream & file) = 0;
-      /// write the main content of the data
-      virtual void data(std::ofstream & file, const std::vector<double> & XData);
+      
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method
@@ -77,8 +76,11 @@ namespace Mantid
     protected:
       /// Return the separator character
       virtual char sep() {return '\t';}
+      /// write the main content of the data
+      virtual void data(std::ofstream & file, const std::vector<double> & XData, bool exportDeltaQ = true);
       double m_qres;
       size_t m_xlength;
+
       API::MatrixWorkspace_const_sptr m_ws;
     };
 

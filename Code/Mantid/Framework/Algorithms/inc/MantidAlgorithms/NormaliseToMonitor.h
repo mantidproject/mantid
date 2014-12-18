@@ -11,14 +11,14 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** Normalises a 2D workspace by a specified monitor spectrum. By default ,the
-    normalisation is done bin-by-bin following this formula:
+/** Normalizes a 2D workspace by a specified monitor spectrum. By default ,the
+    normalization is done bin-by-bin following this formula:
     Norm(s_i)=(s_i/m_i)*Dlam_i*Sum(m_i)/Sum(Dlam_i)
     where s_i is the signal in bin i, m_i the count in the corresponding monitor bin,
     Dlam_i the width of the bin, Sum(m_i) is the integrated monitor count and
     Sum(Dlam_i) the sum of all bin widths (the full range).
 
-    Optionally, can instead normalise by the integrated monitor count over a specified
+    Optionally, can instead normalize by the integrated monitor count over a specified
     range in X. In this case all bins in all spectra will simply be divided by this
     integrated count. No bin width correction takes place in this case.
 
@@ -30,19 +30,19 @@ namespace Algorithms
     <LI> InputWorkspace   - The name of the input workspace. Must be a histogram
                             and not a distribution.</LI>
     <LI> OutputWorkspace  - The name of the output workspace. </LI>
-    <LI> MonitorSpectrum  - The spectrum number for the monitor to normalise with. </LI>
+    <LI> MonitorSpectrum  - The spectrum number for the monitor to normalize with. </LI>
     <LI> MonitorWorkspace - A workspace containing the monitor spectrum. </LI>
     </UL>
 
     Optional Properties:
-    These should be set to normalise by an integrated monitor count over the range given
+    These should be set to normalize by an integrated monitor count over the range given
     <UL>
     <LI> IntegrationRangeMin - The lower bound of the range to use. </LI>
     <LI> IntegrationRangeMax - The upper bound of the range to use. </LI>
     <LI> IncludePartialBins  - Scales counts in end bins if min/max not on bin boundary. </LI>
     </UL>
 
-    Copyright &copy; 2008-2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -70,7 +70,7 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "NormaliseToMonitor"; }
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Normalises a 2D workspace by a specified spectrum, spectrum, described by a monitor ID or spectrun provided in a separate worskspace. ";}
+    virtual const std::string summary() const {return "Normalizes a 2D workspace by a specified spectrum, spectrum, described by a monitor ID or spectrun provided in a separate worskspace. ";}
 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }

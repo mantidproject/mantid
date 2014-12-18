@@ -17,7 +17,7 @@ namespace Mantid
     AsciiPointBase class which provides the main implementation for the init() & exec() methods.
     Output is tab delimited Ascii point data with dq/q.
 
-    Copyright &copy; 2007-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

@@ -1678,8 +1678,7 @@ namespace Mantid
            workspaceIndex= wi_to_detid_map.find(DetID)->second;
         else
         {
-         g_log.error("No workspaceIndex for detID="+DetID);
-         throw  std::runtime_error("No workspaceIndex for detID="+DetID);
+          throw std::runtime_error("No workspaceIndex for detID="+boost::lexical_cast<std::string>(DetID));
         }
 
 

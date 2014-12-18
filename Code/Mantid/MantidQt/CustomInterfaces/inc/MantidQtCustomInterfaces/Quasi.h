@@ -17,6 +17,7 @@ namespace MantidQt
 
 			// Inherited methods from IndirectBayesTab
 			QString help() { return "Quasi"; };
+      void setup();
 			bool validate();
 			void run();
 			/// Load default settings into the interface
@@ -24,9 +25,9 @@ namespace MantidQt
 
 		private slots:
 			/// Slot for when the min range on the range selector changes
-			virtual void minValueChanged(double min);
+			void minValueChanged(double min);
 			/// Slot for when the min range on the range selector changes
-			virtual void maxValueChanged(double max);
+			void maxValueChanged(double max);
 			/// Slot to update the guides when the range properties change
 			void updateProperties(QtProperty* prop, double val);
 			/// Slot to handle when a new sample file is available

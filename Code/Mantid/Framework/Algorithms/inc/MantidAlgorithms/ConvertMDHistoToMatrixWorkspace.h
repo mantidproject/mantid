@@ -8,6 +8,12 @@
 
 namespace Mantid
 {
+
+namespace API
+{
+  class IMDHistoWorkspace;
+}
+
 namespace Algorithms
 {
 /** Creates a single spectrum Workspace2D with X,Y, and E copied from an first non-integrated dimension of a IMDHistoWorkspace.
@@ -22,7 +28,7 @@ namespace Algorithms
  @author Roman Tolchenov, Tessella plc
  @date 17/04/2012
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -55,7 +61,7 @@ public:
   virtual const std::string name() const { return "ConvertMDHistoToMatrixWorkspace";};
 
   ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Creates a single spectrum Workspace2D with X,Y, and E copied from an first non-integrated dimension of a IMDHistoWorkspace.";}
+  virtual const std::string summary() const {return "Converts if it can a IMDHistoWorkspace to a Workspace2D.";}
 
   /// Algorithm's version
   virtual int version() const
@@ -70,6 +76,13 @@ private:
   void init();
   /// Execution code
   void exec();
+
+  /// Make MatrixWorkspace with 1 spectrum
+  void make1DWorkspace();
+  /// Make 2D MatrixWorkspace
+  void make2DWorkspace();
+  /// Calculate the stride for a dimension
+  size_t calcStride(const API::IMDHistoWorkspace& workspace, size_t dim) const;
 };
 
 } // namespace Algorithms

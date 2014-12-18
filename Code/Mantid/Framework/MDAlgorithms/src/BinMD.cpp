@@ -270,7 +270,7 @@ namespace MDAlgorithms
 
     // How many bins (in that dimension) per chunk.
     // Try to split it so each core will get 2 tasks:
-    int chunkNumBins =  int(m_binDimensions[chunkDimension]->getNBins() / (Mantid::Kernel::ThreadPool::getNumPhysicalCores() * 2));
+    int chunkNumBins =  int(m_binDimensions[chunkDimension]->getNBins() / (PARALLEL_GET_MAX_THREADS*2));
     if (chunkNumBins < 1) chunkNumBins = 1;
 
     // Do we actually do it in parallel?

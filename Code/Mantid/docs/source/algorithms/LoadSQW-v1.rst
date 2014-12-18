@@ -159,8 +159,35 @@ functionality at a later stage. However, we can now assume that:
 - requires that all sqw files that are to be combined have
   #.   each been created from only one spe file
   #.   the same lattice parameters and pixel projection axes as held in the header block
-  #.  the same projection axes and offsets, as held in the data block
+  #.   the same projection axes and offsets, as held in the data block
   #.   the same plot and integration axes, with same bins and integration ranges
 - the display axes will be taken from the first sqw object in the list to be combined
+
+Usage
+-----
+.. include:: ../usagedata-note.txt
+
+**Example - Load 4D workspace form sample SQW file.**
+
+.. testcode:: ExLoadSQW
+
+   # Delete existing workspace if it is already in Mantid as LoadSQW does not support overwriting
+   # existig workspaces by desighn
+   if 'mdws' in mtd:
+       DeleteWorkspace('mdws')
+   #
+   # Load sample sqw file, present in Mantid unit tests as MD workspace
+   mdws = LoadSQW('test_horace_reader.sqw');
+   
+   # Check results
+   print "Workspace type is: ",type(mdws)
+   print "Workspace has:{0:2} dimensions and contains: {1:4} MD events".format(mdws.getNumDims(),mdws.getNEvents())
+   
+Output:
+
+.. testoutput:: ExLoadSQW
+
+   Workspace type is:  <class 'mantid.api._api.IMDEventWorkspace'>
+   Workspace has: 4 dimensions and contains:  580 MD events
 
 .. categories::

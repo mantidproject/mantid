@@ -113,14 +113,28 @@ namespace Algorithms
 
     // everything depends on being parallel to the workspace # histo
     size_t numHist(0);
+    bool hasWorkspacePtr(false);
     {
       MatrixWorkspace_const_sptr workspace = getProperty("Workspace");
-      numHist = workspace->getNumberHistograms();
+      // this is to guard against WorkspaceGroups
+      // fallthrough is to skip workspace check and make sure
+      if (bool(workspace)) {
+        hasWorkspacePtr = true;
+        numHist = workspace->getNumberHistograms();
+      }
     }
 
     std::string error;
 
     const std::vector<int32_t> specids = this->getProperty("SpectrumIDs");
+    if (!hasWorkspacePtr) {
+      // use the number of spectra for the number of histograms
+      numHist = specids.size();
+      // give up if it is empty
+      if (numHist == 0) {
+        return result;
+      }
+    }
     error = checkValues(specids, numHist);
     if (!error.empty())
       result["SpectrumIDs"] = error;

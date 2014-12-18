@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="VESUVIO" valid-from   ="2006-08-11 00:00:00"
                            valid-to     ="2100-01-31 23:59:59"
 		           last-modified="2011-07-20 00:00:21"
@@ -320,22 +322,22 @@
   
   <type name="pixel forward" is="detector">
     <cuboid id="shape">
-      <left-front-bottom-point x="0.0125" y="-0.04" z="0.0"  />
-      <left-front-top-point  x="0.0125" y="-0.04" z="0.003"  />
-      <left-back-bottom-point  x="-0.0125" y="-0.04" z="0.0"  />
-      <right-front-bottom-point  x="0.0125" y="0.04" z="0.0"  />
+      <left-front-bottom-point x="0.0125" y="-0.0395" z= "0.0045" />
+      <left-front-top-point x="0.0125" y="0.0395" z= "0.0045" />
+      <left-back-bottom-point x="0.0125" y="-0.0395" z= "-0.0045" />
+      <right-front-bottom-point x="-0.0125" y="-0.0395" z= "0.0045" />
     </cuboid>
     <algebra val="shape" />
   </type>  
 
   <type name="pixel back" is="detector">
-    <cuboid id="shape">
-      <left-front-bottom-point x="0.01" y="-0.02" z="0.0"  />
-      <left-front-top-point  x="0.01" y="-0.02" z="0.003"  />
-      <left-back-bottom-point  x="-0.01" y="-0.02" z="0.0"  />
-      <right-front-bottom-point  x="0.01" y="0.02" z="0.0"  />
+    <cuboid id="shape" >
+      <left-front-bottom-point x="0.0125" y="-0.04" z= "0.0045" />
+      <left-front-top-point x="0.0125" y="0.04" z= "0.0045" />
+      <left-back-bottom-point x="0.0125" y="-0.04" z= "-0.0045" />
+      <right-front-bottom-point x="-0.0125" y="-0.04" z= "0.0045" />
     </cuboid>
-    <algebra val="shape" />
+  <algebra val="shape" />
   </type>  
   
   <!-- DETECTOR ID LISTS -->

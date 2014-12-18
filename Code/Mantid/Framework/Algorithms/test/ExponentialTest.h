@@ -1,4 +1,4 @@
-#ifndef EXPONENTAILTEST_H_
+#ifndef EXPONENTIALTEST_H_
 #define EXPONENTIALTEST_H_
 
 #include <cxxtest/TestSuite.h>

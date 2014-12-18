@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>DirectConvertToEnergy</class>
- <widget class="QWidget" name="DirectConvertToEnergy">
+ <widget class="QMainWindow" name="DirectConvertToEnergy">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,6 +13,7 @@
   <property name="windowTitle">
    <string>Convert To Energy Transfer (Direct)</string>
   </property>
+  <widget class="QWidget" name="centralwidget">
   <layout class="QVBoxLayout" name="verticalLayout_20">
    <property name="topMargin">
     <number>9</number>
@@ -1304,6 +1305,7 @@
     </layout>
    </item>
   </layout>
+  </widget>
  </widget>
  <customwidgets>
   <customwidget>

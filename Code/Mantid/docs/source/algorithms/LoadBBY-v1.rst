@@ -22,7 +22,7 @@ Usage
 
 .. testcode:: ExSimple
 
-   ws = LoadBBY('Bilby_EOS.bin');
+   ws = LoadBBY('BBY0000014.tar');
 
    print "Number of spectra:", ws.getNumberHistograms()
 

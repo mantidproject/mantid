@@ -42,6 +42,13 @@ class ExportExperimentLog(PythonAlgorithm):
                 "With this option, the posfix of the output file is .csv automatically. "
         self.declareProperty("FileFormat", "tab", mantid.kernel.StringListValidator(fileformates), des)
 
+        self.declareProperty("OrderByTitle", "", "Log file will be ordered by the value of this title from low to high.") 
+        self.declareProperty("RemoveDuplicateRecord", False, "Coupled with OrderByTitle, duplicated record will be removed.")
+
+        overrideprop = StringArrayProperty("OverrideLogValue", values=[], direction=Direction.Input)
+        self.declareProperty(overrideprop, "List of paired strings as log title and value to override values from workspace.")
+
+
         # Time zone
         timezones = ["UTC", "America/New_York"]
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))
@@ -81,6 +88,10 @@ class ExportExperimentLog(PythonAlgorithm):
         # Append the new experiment log
         self._appendExpLog(valuedict)
 
+        # Order the record file
+        if self._orderRecord is True:
+            self._orderRecordFile()
+
         return
 
     def _processInputs(self):
@@ -100,33 +111,14 @@ class ExportExperimentLog(PythonAlgorithm):
 
         if len(self._sampleLogNames) != len(ops):
             raise NotImplementedError("Size of sample log names and sample operations are unequal!")
-        self._sampleLogOperations = {}
+        self._sampleLogOperations = []
         for i in xrange(len(self._sampleLogNames)):
-            key = self._sampleLogNames[i]
             value = ops[i]
-            self._sampleLogOperations[key] = value
+            self._sampleLogOperations.append(value)
         # ENDFOR
 
         if len(self._headerTitles) > 0 and len(self._headerTitles) != len(self._sampleLogNames):
             raise NotImplementedError("Input header titles have a different length to sample log names")
-
-        # Determine file mode
-        if os.path.exists(self._logfilename) is False:
-            self._filemode = "new"
-            if len(self._headerTitles) == 0:
-                raise NotImplementedError("Without specifying header title, unable to new a file.")
-        else:
-            self._filemode = self.getProperty("FileMode").value
-
-        # Examine the file mode
-        if self._filemode == "new" or self._filemode == "append":
-            if len(self._headerTitles) != len(self._sampleLogNames):
-                raise NotImplementedError("In mode new or append, there must be same number of sample titles and names")
-
-        self.log().notice("File mode is %s. " % (self._filemode))
-
-        # This is left for a feature that might be needed in future.
-        self._reorderOld = False
 
         # Output file format
         self._fileformat = self.getProperty("FileFormat").value
@@ -142,7 +134,55 @@ class ExportExperimentLog(PythonAlgorithm):
                 # Force the extension of the output file to be .csv
                 self._logfilename = "%s.csv" % (fileName)
 
+        # Determine file mode
+        if os.path.exists(self._logfilename) is False:
+            self._filemode = "new"
+            if len(self._headerTitles) == 0:
+                raise NotImplementedError("Without specifying header title, unable to new a file.")
+            self.log().debug("Log file %s does not exist. So file mode is NEW." % (self._logfilename))
+        else:
+            self._filemode = self.getProperty("FileMode").value
+            self.log().debug("FileMode is from user specified value.")
+
+        # Examine the file mode
+        if self._filemode == "new" or self._filemode == "append":
+            if len(self._headerTitles) != len(self._sampleLogNames):
+                raise NotImplementedError("In mode new or append, there must be same number of sample titles and names")
+
+        self.log().information("File mode is %s. " % (self._filemode))
+
+        # This is left for a feature that might be needed in future.
+        self._reorderOld = False
+
         self._timezone = self.getProperty("TimeZone").value
+
+        # Determine whether output log-record file should be ordered by value of some log
+        self._orderRecord = False
+        self._titleToOrder = None
+        if self._filemode != "new":
+            ordertitle = self.getProperty("OrderByTitle").value 
+            if ordertitle in self._headerTitles:
+                self._orderRecord = True
+                self._removeDupRecord = self.getProperty("RemoveDuplicateRecord").value
+                self.titleToOrder = ordertitle
+            else:
+                self.log().warning("Specified title to order by (%s) is not in given log titles." % (ordertitle))
+
+        if self._orderRecord is False:
+            self._removeDupRecord = False
+
+        # Override log values: it will not work in fastappend mode to override
+        overridelist = self.getProperty("OverrideLogValue").value
+        if len(self._headerTitles) > 0:
+            if len(overridelist) % 2 != 0:
+                raise NotImplementedError("Number of items in OverrideLogValue must be even.")
+            self._ovrdTitleValueDict = {}
+            for i in xrange(len(overridelist)/2):
+                title = overridelist[2*i]
+                if title in self._headerTitles:
+                    self._ovrdTitleValueDict[title] = overridelist[2*i+1]
+                else:
+                    self.log().warning("Override title %s is not recognized. " % (title))
 
         return
 
@@ -191,10 +231,14 @@ class ExportExperimentLog(PythonAlgorithm):
 
         # Examine
         titles = titleline.split()
+        self.log().debug("Examine finds titles: %s" % (titles))
 
         same = True
         if len(titles) != len(self._headerTitles):
-            same = False
+            if len(self._headerTitles) == 0:
+                self._headerTitles = titles[:]
+            else: 
+                same = False
         for ititle in xrange(len(titles)):
             title1 = titles[ititle]
             title2 = self._headerTitles[ititle]
@@ -239,8 +283,33 @@ class ExportExperimentLog(PythonAlgorithm):
         # Write to a buffer
         wbuf = ""
 
-        for logname in self._sampleLogNames:
-            value = logvaluedict[logname]
+        self.log().debug("Samlpe Log Names: %s" % (self._sampleLogNames))
+        self.log().debug("Title      Names: %s" % (self._headerTitles))
+
+        if len(self._headerTitles) == 0:
+            skip = True
+        else:
+            skip = False
+        
+        headertitle = None
+        for il in xrange(len(self._sampleLogNames)):
+            if skip is False: 
+                headertitle = self._headerTitles[il]
+            if headertitle is not None and headertitle in self._ovrdTitleValueDict.keys():
+                # overriden
+                value = self._ovrdTitleValueDict[headertitle]
+
+            else:
+                # from input workspace
+                logname = self._sampleLogNames[il]
+                optype = self._sampleLogOperations[il]
+                key = logname + "-" + optype
+                if key in logvaluedict.keys():
+                    value = logvaluedict[key]
+                elif logname in logvaluedict.keys():
+                    value = logvaluedict[logname]
+            # ENDIFELSE
+
             wbuf += "%s%s" % (str(value), self._valuesep)
         wbuf = wbuf[0:-1]
 
@@ -251,12 +320,106 @@ class ExportExperimentLog(PythonAlgorithm):
 
         return
 
+    def _orderRecordFile(self):
+        """ Check and order (if necessary) record file 
+        by value of specified log by title
+        """
+        self.log().debug("Order Record File!")
+
+        # Read line
+        lfile = open(self._logfilename, "r")
+        lines = lfile.readlines()
+        lfile.close()
+
+        # Create dictionary for the log value
+        titlelines = []
+        linedict = {}
+        ilog = self._headerTitles.index(self.titleToOrder)
+
+        totnumlines = 0
+        for line in lines:
+            cline = line.strip()
+            if len(cline) == 0:
+                continue
+
+            if cline.startswith(self._headerTitles[0]) is True or cline.startswith('#'):
+                # title line or comment line
+                titlelines.append(line)
+            else:
+                # value line
+                try: 
+                    keyvalue = line.split(self._valuesep)[ilog].strip()
+                except IndexError:
+                    self.log().error("Order record failed.")
+                    return
+                if linedict.has_key(keyvalue) is False: 
+                    linedict[keyvalue] = []
+                linedict[keyvalue].append(line)
+                totnumlines += 1
+            # ENDIFELSE
+        # ENDFOR
+
+        # Check needs to re-order
+        if linedict.keys() != sorted(linedict.keys()):
+            # Re-write file
+            wbuf = ""
+            
+            # title line
+            for line in titlelines:
+                wbuf += line
+
+            # log entry line
+            numlines = 0
+
+            # consider the mode to remove duplicate
+            if self._removeDupRecord is True:
+                totnumlines = len(linedict.keys())
+
+            for ivalue in sorted(linedict.keys()):
+                if self._removeDupRecord is True:
+                    # If duplicated records is to be removed, only consider the last record
+                    line = linedict[ivalue][-1]
+                    wbuf += line
+                    if numlines != totnumlines-1 and wbuf[-1] != '\n':
+                        wbuf += '\n'
+                    numlines += 1
+
+                else:
+                    # Consider all! 
+                    for line in linedict[ivalue]: 
+                        wbuf += line
+                        # Add extra \n in case reordered
+                        if numlines != totnumlines-1 and wbuf[-1] != '\n':
+                            wbuf += '\n'
+                        numlines += 1
+                    # ENDFOR
+                # ENDFOR
+            # ENDFOR
+
+            # Last line should not ends with \n
+            if wbuf[-1] == '\n':
+                wbuf = wbuf[0:-1]
+
+            # Remove unsupported character which may cause importing error of GNUMERIC
+            wbuf = wbuf.translate(None, chr(0))
+
+            # Re-write file
+            ofile = open(self._logfilename, "w")
+            ofile.write(wbuf)
+            ofile.close()
+
+        # ENDIF
+
+        return
+
+
     def _reorderExistingFile(self):
         """ Re-order the columns of the existing experimental log file
         """
         raise NotImplementedError("Too complicated")
 
         return
+
 
     def _getSampleLogsValue(self):
         """ From the workspace to get the value
@@ -270,9 +433,12 @@ class ExportExperimentLog(PythonAlgorithm):
                 str(self._wksp)))
             return None
 
-        for logname in self._sampleLogNames:
+        #for logname in self._sampleLogNames:
+        for il in xrange(len(self._sampleLogNames)):
+            logname = self._sampleLogNames[il]
             isexist = run.hasProperty(logname)
 
+            operationtype = self._sampleLogOperations[il]
             # check whether this property does exist.
             if isexist is False:
                 # If not exist, use 0.00 as default
@@ -286,17 +452,17 @@ class ExportExperimentLog(PythonAlgorithm):
             # Get log value according to type
             if logclass == "StringPropertyWithValue":
                 propertyvalue = logproperty.value
-                operationtype = self._sampleLogOperations[logname]
+                # operationtype = self._sampleLogOperations[il]
                 if operationtype.lower() == "localtime":
                     propertyvalue = self._convertLocalTimeString(propertyvalue)
             elif logclass == "FloatPropertyWithValue":
                 propertyvalue = logproperty.value
             elif logclass == "FloatTimeSeriesProperty":
-                operationtype = self._sampleLogOperations[logname]
+                # operationtype = self._sampleLogOperations[il]
                 if operationtype.lower() == "min":
                     propertyvalue = min(logproperty.value)
                 elif operationtype.lower() == "max":
-                    propertyvalue = min(logproperty.value)
+                    propertyvalue = max(logproperty.value)
                 elif operationtype.lower() == "average":
                     propertyvalue = np.average(logproperty.value)
                 elif operationtype.lower() == "sum":
@@ -308,7 +474,8 @@ class ExportExperimentLog(PythonAlgorithm):
             else:
                 raise NotImplementedError("Class type %d is not supported." % (logclass))
 
-            valuedict[logname] = propertyvalue
+            key = logname + "-" + operationtype
+            valuedict[key] = propertyvalue
         # ENDFOR
 
         return valuedict

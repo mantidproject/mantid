@@ -68,6 +68,7 @@ namespace MDEvents
     //-----------------------------------------------------------------------------------------------
     virtual void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/)const;
     virtual void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */);
+    virtual void reserveMemoryForLoad(uint64_t /* Size */);
     /**drop events data from memory but keep averages (and file-backed info) */
     void clearDataFromMemory();
     /** */

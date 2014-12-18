@@ -15,7 +15,7 @@ namespace Mantid
     /**
      Loads an ILL nexus file into a Mantid workspace.
 
-     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
      This file is part of Mantid.
 
@@ -82,7 +82,6 @@ namespace Mantid
       void addAllNexusFieldsAsProperties(std::string filename);
       void addEnergyToRun();
 
-      void loadExperimentDetails(NeXus::NXEntry & entry);
       int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
       void loadTimeDetails(NeXus::NXEntry& entry);
       NeXus::NXData loadNexusFileData(NeXus::NXEntry& entry);

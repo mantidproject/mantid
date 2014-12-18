@@ -25,7 +25,7 @@ namespace Mantid
        It uses OpenCascade to generate a mesh defining the surface of an Object (shape).
        This shape is saved along with the instrument definition as a .vtp file (for speed-ups).
 
-       Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+       Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
        This file is part of Mantid.
 
@@ -54,6 +54,7 @@ namespace Mantid
       OCGeometryHandler(IObjComponent* obj); ///< Constructor
       OCGeometryHandler(boost::shared_ptr<Object>       obj); ///< Constructor
       OCGeometryHandler(Object* obj); ///< Constructor
+      boost::shared_ptr<GeometryHandler> clone() const; ///< Virtual copy constructor
       ~OCGeometryHandler(); ///< Destructor
       GeometryHandler* createInstance(IObjComponent *comp);
       GeometryHandler* createInstance(boost::shared_ptr<Object> obj);

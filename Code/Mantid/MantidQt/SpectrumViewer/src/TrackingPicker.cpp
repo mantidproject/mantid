@@ -1,11 +1,9 @@
-
-#include "MantidQtSpectrumViewer/TrackingPicker.h" 
+#include "MantidQtSpectrumViewer/TrackingPicker.h"
 
 namespace MantidQt
 {
 namespace SpectrumView
 {
-
 
 /**
  *  Construct a tracking picker to work with the specified canvas
@@ -13,9 +11,8 @@ namespace SpectrumView
  *  @param canvas  Pointer to the QwtPlotCanvas this picker will work with
  */
 TrackingPicker::TrackingPicker( QwtPlotCanvas* canvas )
-               :QwtPlotPicker( canvas )
+  : QwtPlotPicker( canvas ), m_hideReadout(true)
 {
-  hide_readout = true;
 }
 
 
@@ -26,9 +23,9 @@ TrackingPicker::TrackingPicker( QwtPlotCanvas* canvas )
  * @param hide  If true, the position readout at the mouse position will
  *              be turned off.
  */
-void TrackingPicker::HideReadout( bool hide )
+void TrackingPicker::hideReadout( bool hide )
 {
-  this->hide_readout = hide;
+  m_hideReadout = hide;
 }
 
 
@@ -40,8 +37,8 @@ void TrackingPicker::HideReadout( bool hide )
  */
 QwtText TrackingPicker::trackerText( const QPoint & point ) const
 {
-  emit mouseMoved();
-  if ( hide_readout )
+  emit mouseMoved(point);
+  if ( m_hideReadout )
   {
     return QwtText();
   }
@@ -60,8 +57,8 @@ QwtText TrackingPicker::trackerText( const QPoint & point ) const
  */
 QwtText TrackingPicker::trackerText( const QwtDoublePoint & pos ) const
 {
-  emit mouseMoved();
-  if ( hide_readout )
+  emit mouseMoved(pos.toPoint());
+  if ( m_hideReadout )
   {
     return QwtText();
   }
@@ -72,4 +69,4 @@ QwtText TrackingPicker::trackerText( const QwtDoublePoint & pos ) const
 }
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt

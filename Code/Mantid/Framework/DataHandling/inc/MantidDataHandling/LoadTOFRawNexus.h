@@ -20,7 +20,7 @@ namespace DataHandling
 /**
  Loads a NeXus file that conforms to the TOFRaw instrument definition format and stores it in a 2D workspace.
 
- Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 

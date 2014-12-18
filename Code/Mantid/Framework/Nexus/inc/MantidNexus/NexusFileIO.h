@@ -13,6 +13,8 @@
 
 #include <limits.h>
 #include <nexus/NeXusFile.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
 
 namespace Mantid
 {
@@ -29,7 +31,7 @@ namespace Mantid
     other Nexus formats. It might be replaced in future by methods using
     the new Nexus C++ API.
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -51,7 +53,11 @@ namespace Mantid
     */
     class DLLExport NexusFileIO
     {
+
     public:
+      // Helper typedef
+      typedef boost::optional<size_t> optional_size_t;
+
       /// Default constructor
       NexusFileIO();
 
@@ -59,14 +65,16 @@ namespace Mantid
       NexusFileIO( API::Progress* prog );
 
       /// Destructor
-      ~NexusFileIO() {}
+      ~NexusFileIO();
 
       /// open the nexus file for writing
-      void openNexusWrite(const std::string& fileName);
+      void openNexusWrite(const std::string& fileName, optional_size_t entryNumber = optional_size_t());
       /// write the header ifon for the Mantid workspace format
       int writeNexusProcessedHeader( const std::string& title, const std::string& wsName="") const;
       /// close the nexus file
       void closeNexusFile();
+      /// Close the group.
+      void closeGroup();
       /// Write a lgos section
       int writeNexusSampleLogs( const Mantid::API::Run& runProperties) const;
       /// write the workspace data
@@ -101,12 +109,15 @@ namespace Mantid
       /// write bin masking information
       bool writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws) const;
 
+       /// Reset the pointer to the progress object.
+      void resetProgress(Mantid::API::Progress* prog);
+
       /// Nexus file handle
       NXhandle fileID;
 
     private:
       /// C++ API file handle
-      ::NeXus::File *m_filehandle;
+      boost::shared_ptr< ::NeXus::File> m_filehandle;
       /// Nexus compression method
       int m_nexuscompression;
       /// Allow an externally supplied progress object to be used
@@ -182,10 +193,14 @@ namespace Mantid
       std::string logValueType()const{return "unknown";}
 
       /// Writes given vector column to the currently open Nexus file
-      template<typename Type>
-      void writeNexusVectorColumn(const boost::shared_ptr< const DataObjects::VectorColumn<Type> >& column,
+      template<typename VecType, typename ElemType>
+      void writeNexusVectorColumn(API::Column_const_sptr column,
                                   const std::string& columnName, int nexusType,
-                                  const std::string& typeName) const;
+                                  const std::string& interpret_as) const;
+
+      /// Save a numeric columns of a TableWorkspace to currently open nexus file.
+      template<typename ColumnT, typename NexusT>
+      void writeTableColumn(int type, const std::string& interpret_as, const API::Column& col, const std::string& columnName) const;
     };
     
     /**
@@ -361,76 +376,9 @@ namespace Mantid
       status=NXclosegroup(fileID);
     }
 
-    /**
-     * Writes given vector column to the currently open Nexus file.
-     * @param columnName :: Name of NXdata to write to
-     * @param nexusType  :: Nexus type to use to store data
-     * @param typeName   :: Name of the type to use for "interpret_as" attribute
-     * @param column     :: Column to write
-     */
-    template<typename Type>
-    void NexusFileIO::writeNexusVectorColumn(const boost::shared_ptr<const DataObjects::VectorColumn<Type> >& column,
-                                             const std::string& columnName, int nexusType,
-                                             const std::string& typeName) const
-    {
-      size_t rowCount = column->size();
 
-      // Search for the longest array amongst the cells
-      size_t maxSize(0);
-      for ( size_t i = 0; i < rowCount; ++i )
-      {
-        size_t size = column->template cell< std::vector<Type> >(i).size();
-
-        if ( size > maxSize )
-          maxSize = size;
-      }
-
-      // Set-up dimensions
-      int dims[2];
-      dims[0] = static_cast<int>(rowCount);
-      dims[1] = static_cast<int>(maxSize);
-
-      // Create data array
-      boost::scoped_array<Type> data(new Type[rowCount * maxSize]);
-
-      for ( size_t i = 0; i < rowCount; ++i )
-      {
-        auto values = column->template cell< std::vector<Type> >(i);
-
-        // So that all the arrays are of the size maxSize
-        values.resize(maxSize);
-
-        // Copy values to the data array
-        for ( size_t j = 0; j < maxSize; ++j )
-          data[i*maxSize + j] = values[j];
-      }
-
-      // Write data
-      NXwritedata(columnName.c_str(), nexusType, 2, dims, reinterpret_cast<void*>(data.get()), false);
-
-      NXopendata(fileID, columnName.c_str());
-
-      // Add sizes of rows as attributes. We can't use padding zeroes to determine that because the
-      // vector stored might end with zeroes as well.
-      for ( size_t i = 0; i < rowCount; ++i )
-      {
-        auto size = static_cast<int>( column->template cell< std::vector<Type> >(i).size() );
-
-        std::ostringstream rowSizeAttrName;
-        rowSizeAttrName << "row_size_" << i;
-
-        NXputattr(fileID, rowSizeAttrName.str().c_str(), &size, 1, NX_INT32);
-      }
-
-      std::string units = "Not known";
-      std::string interpret_as = "A vector of " + typeName;
-
-      // Write general attributes
-      NXputattr(fileID, "units",  units.c_str(), static_cast<int>(units.size()), NX_CHAR);
-      NXputattr(fileID, "interpret_as",  interpret_as.c_str(), static_cast<int>(interpret_as.size()), NX_CHAR);
-
-      NXclosedata(fileID);
-    }
+    /// Helper typedef for a shared pointer of a NexusFileIO.
+    typedef boost::shared_ptr<NexusFileIO> NexusFileIO_sptr;
 
   } // namespace NeXus
 } // namespace Mantid

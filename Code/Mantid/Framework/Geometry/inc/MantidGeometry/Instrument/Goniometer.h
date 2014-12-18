@@ -21,7 +21,7 @@ namespace Geometry
   @author Andrei Savici, SNS, ORNL
   @date 04/13/2011
 
-  Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -76,6 +76,8 @@ namespace Geometry
       virtual ~Goniometer();
       // Return rotation matrix
       const Kernel::DblMatrix& getR() const;
+      // Set the rotation matrix
+      void setR(Kernel::DblMatrix rot);
       // Return information about axes  
       std::string axesInfo();
       // Add axis to goniometer

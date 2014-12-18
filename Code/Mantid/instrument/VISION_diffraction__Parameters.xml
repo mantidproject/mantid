@@ -37,10 +37,10 @@
 <!-- These two properties being set to invalid values (-1) will signal to the
     reducer that it is not to correct for monitor efficiency.
     -->
-<parameter name="Workflow.MonitorArea">
+<parameter name="Workflow.Monitor1-Area">
     <value val="-1" />
 </parameter>
-<parameter name="Workflow.MonitorThickness">
+<parameter name="Workflow.Monitor1-Thickness">
     <value val="-1" />
 </parameter>
 

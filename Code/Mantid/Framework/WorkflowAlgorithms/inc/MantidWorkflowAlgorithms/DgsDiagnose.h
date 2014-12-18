@@ -13,7 +13,7 @@ namespace Mantid
      * for performing detector diagnostics and then runs the diagnostic
      * algorithm.
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     @date 2012-02-08
 

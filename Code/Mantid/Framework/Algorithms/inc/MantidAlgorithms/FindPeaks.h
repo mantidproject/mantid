@@ -34,7 +34,7 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 25/11/2008
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -203,6 +203,8 @@ private:
 
   /// Minimum peak height
   double m_minHeight;
+  /// Minimum value of peak's observed maximum Y value
+  double m_leastMaxObsY;
 
   /// Start values
   bool m_useObsCentre;

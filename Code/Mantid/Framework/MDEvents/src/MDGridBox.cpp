@@ -9,6 +9,7 @@
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDGridBox.h"
+#include <boost/math/special_functions/round.hpp>
 #include <ostream>
 #include "MantidKernel/Strings.h"
 
@@ -1436,11 +1437,7 @@ GCC_DIAG_OFF(array-bounds)
             coord_t out[nd];
             radiusTransform.apply(eventCenter, out);
             // add event to appropriate y channel
-            size_t xchannel;
-            if (out[1] < 0)
-              xchannel = static_cast<int>(out[1] / deltaQ - 0.5) + static_cast<int>(numSteps / 2)-1;
-            else
-              xchannel = static_cast<int>(out[1] / deltaQ + 0.5) + static_cast<int>(numSteps / 2)-1;
+            size_t xchannel = static_cast<size_t>(std::floor(out[1] / deltaQ)) + numSteps / 2;
 
             if (xchannel < numSteps )
               signal_fit[xchannel] += coordTable[k*nColumns];
@@ -1715,11 +1712,15 @@ GCC_DIAG_ON(array-bounds)
   {
       throw(Kernel::Exception::NotImplementedError("Recursive file backed is not yet implemented (unclear how to set file location etc)"));
   }
-  /** Make the box file-backed without knowing its position on the HDD. Not implemented for gridboxes*/
+  /** Make the box file-backed without knowing its position on the HDD. Works recursively through all children*/
   TMDE(
   void MDGridBox)::setFileBacked()
   {
-      this->setFileBacked(UNDEF_UINT64,0,false);
+    for(size_t i=0;i<this->numBoxes;i++)
+    {
+      m_Children[i]->setFileBacked();
+    }
+
   }
    /**Recursively clear the file-backed information stored in mdBoxes from the boxes if such information exists 
     *

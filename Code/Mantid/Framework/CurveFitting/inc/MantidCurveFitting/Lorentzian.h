@@ -23,7 +23,7 @@ namespace Mantid
     <LI> FWHM - Full-width half-maximum (default 0.0)</LI>
     </UL>
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

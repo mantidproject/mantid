@@ -5,14 +5,10 @@
 #include <iomanip>
 #include <sstream>
 
-#ifdef USE_TCMALLOC
-#include "google/malloc_extension.h"
-#endif
-
 #ifdef __linux__
   #include <unistd.h>
   #include <fstream>
-  #include<malloc.h>
+  #include <malloc.h>
 #endif
 #ifdef __APPLE__
   #include <malloc/malloc.h>
@@ -217,7 +213,7 @@ void MemoryStats::process_mem_system(size_t & sys_avail, size_t & sys_total)
     if (avPages < 0) totPages = 0;
     if (pageSize < 1) pageSize = 1;
     //Commented out the next line as the value was being written by the one after
-	//sys_avail = avPages / 1024 * pageSize;
+  //sys_avail = avPages / 1024 * pageSize;
     sys_avail = totPages / 1024 * pageSize;
   }
   // Can get the info on the memory that we've already obtained but aren't using right now
@@ -283,7 +279,7 @@ void MemoryOptions::initAllocatorOptions()
   if( initialized ) return;
 #ifdef __linux__
    /* The line below tells malloc to use a different memory allocation system call (mmap) to the 'usual'
-   * one (sbrk) for requests above the threshold of the second argument (in bytes). The effect of this 
+   * one (sbrk) for requests above the threshold of the second argument (in bytes). The effect of this
    * is that, for the current threshold value of 8*4096, storage for workspaces having 4096 or greater
    * bins per spectrum will be allocated using mmap.
    * This should have the effect that memory is returned to the kernel as soon as a workspace is deleted,
@@ -357,7 +353,7 @@ void MemoryStats::update()
  * Set the fields to ignore
  * @param ignore :: An enumeration giving the fields to ignore
  */
-void MemoryStats::ignoreFields(const MemoryStatsIgnore ignore) 
+void MemoryStats::ignoreFields(const MemoryStatsIgnore ignore)
 {
   this->ignore = ignore;
 }
@@ -399,7 +395,7 @@ string MemoryStats::availMemStr() const
 }
 
 /**
- * Returns the total memory of the system 
+ * Returns the total memory of the system
  * @returns An unsigned containing the total amount of memory on the system in kiB
  */
 size_t MemoryStats::totalMem() const

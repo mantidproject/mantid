@@ -34,7 +34,7 @@ template<typename T> class Matrix;
  @author Roman Tolchenov, Tessella plc
  @date 02/03/2009
 
- Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -131,6 +131,9 @@ public:
       return this;
     }
 
+    /// Update values of the existing properties.
+    void updatePropertyValues( const IPropertyManager &other );
+
     /// Return the property manager serialized as a string.
     virtual std::string asString(bool withDefaultValues = false, char separator=',') const = 0;
 
@@ -151,6 +154,9 @@ public:
       Property * prop = getPointerToProperty(name);
       if (prop) prop->setGroup(group);
     }
+
+    /// Get the list of managed properties in a given group.
+    std::vector< Property*> getPropertiesInGroup(const std::string& group) const;
 
     virtual void filterByTime(const DateAndTime &/*start*/, const DateAndTime &/*stop*/) = 0;
     virtual void splitByTime(std::vector<SplittingInterval>& /*splitter*/, std::vector< PropertyManager * >/* outputs*/) const = 0;

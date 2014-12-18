@@ -34,11 +34,11 @@ namespace Mantid
     {
       //------------------------------------------------------------------------------------------------
       /** Helper function allowing to typecast sequence of bytes into proper expected type.
-       * The input buffer is interpreted as the template type
-       *
-       * @param Buf -- the vector of characters, representing data to cast
-       * @param ind -- the starting position of first byte of data within the data buffer
-       * @returns the data type produced by type-casing proper sequence of bytes
+      * The input buffer is interpreted as the template type
+      *
+      * @param Buf -- the vector of characters, representing data to cast
+      * @param ind -- the starting position of first byte of data within the data buffer
+      * @returns the data type produced by type-casing proper sequence of bytes
       */
       template<typename T> T interpretAs(std::vector<char> &Buf, size_t ind=0)
       {
@@ -50,14 +50,14 @@ namespace Mantid
 
     /// Constructor
     LoadSQW::LoadSQW()
-    : m_prog(new Mantid::API::Progress(this, 0.05, 0.95, 100))
+      : m_prog(new Mantid::API::Progress(this, 0.05, 0.95, 100))
     {
     }
     /**
-     * Return the confidence with with this algorithm can load the file
-     * @param descriptor A descriptor for the file
-     * @returns An integer specifying the confidence level. 0 indicates it will not be used
-     */
+    * Return the confidence with this algorithm can load the file
+    * @param descriptor A descriptor for the file
+    * @returns An integer specifying the confidence level. 0 indicates it will not be used
+    */
     int LoadSQW::confidence(Kernel::FileDescriptor & descriptor) const
     {
 
@@ -66,11 +66,11 @@ namespace Mantid
       if(extn.compare(".sqw") != 0) return 0;
 
 
-     if(descriptor.isAscii())
-     {
-         return 10; // Low so that others may try
-     }
-     return 80; // probably it is sqw indeed
+      if(descriptor.isAscii())
+      {
+        return 10; // Low so that others may try
+      }
+      return 80; // probably it is sqw indeed
     }
 
 
@@ -83,7 +83,7 @@ namespace Mantid
 
     /// Provide wiki documentation.
 
-    /// Initalize the algorithm
+    /// Initialize the algorithm
     void LoadSQW::init()
     {
       std::vector<std::string> fileExtensions(1);
@@ -96,8 +96,8 @@ namespace Mantid
       std::vector<std::string> fileExtensions2(1);
       fileExtensions2[0]=".nxs";
       declareProperty(new API::FileProperty("OutputFilename","", API::FileProperty::OptionalSave, fileExtensions2),
-          "If the input SQW file is too large to fit in memory, specify an output NXS file.\n"
-          "The MDEventWorkspace will be create with this file as its back-end.");
+        "If the input SQW file is too large to fit in memory, specify an output NXS file.\n"
+        "The MDEventWorkspace will be create with this file as its back-end.");
     }
 
     /// Execute the algorithm
@@ -114,13 +114,8 @@ namespace Mantid
 
       // Add dimensions onto workspace.
       std::vector<Mantid::Geometry::MDHistoDimensionBuilder> DimVector;
+
       readDNDDimensions(DimVector,false);
-      this->m_nBins.resize(4);
-      for(size_t i=0;i<4;i++)
-      {
-        m_nBins[i] = DimVector[i].getNumBins();
-        if(m_nBins[i]<1)m_nBins[i]=1;
-      }
       readSQWDimensions(DimVector);
       addDimsToWs(pWs,DimVector);     
       // Set some reasonable values for the box controller
@@ -129,31 +124,24 @@ namespace Mantid
       {
         bc->setSplitInto(i,m_nBins[i]);
       }
-      bc->setSplitThreshold(3000);
+      bc->setMaxDepth(1);
 
       // Initialize the workspace.
       pWs->initialize();
 
       // Add oriented lattice.
       addLattice(pWs);
-      // Save the empty WS and turn it into a file-backed MDEventWorkspace (on option)
-      m_outputFile = getPropertyValue("OutputFilename");
 
-      // set file backed;
-      if(!m_outputFile.empty()) 
-      {
-          auto Saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNeXusIO(bc.get()));
-          bc->setFileBacked(Saver,m_outputFile);
-          pWs->getBox()->setFileBacked();
-          bc->getFileIO()->setWriteBufferSize(1000000);
-      }
       // Start with a MDGridBox.
       pWs->splitBox();
-
+      //
       readBoxSizes();
 
+      // Save the empty WS and turn it into a file-backed MDEventWorkspace (on option)
+      m_outputFile = getPropertyValue("OutputFilename");
       if (!m_outputFile.empty())
       {
+        // set file backed;
         MemoryStats stat;
         if ((m_nDataPoints * sizeof(MDEvent<4>) * 2 / 1024) < stat.availMem())
           g_log.notice() << "You have enough memory available to load the " << m_nDataPoints << " points into memory; this would be faster than using a file back-end." << std::endl;
@@ -161,9 +149,18 @@ namespace Mantid
         IAlgorithm_sptr saver = this->createChildAlgorithm("SaveMD" ,0.01, 0.05, true);
         saver->setProperty("InputWorkspace", ws);
         saver->setPropertyValue("Filename", m_outputFile);
-        saver->setProperty("MakeFileBacked", true);
+        // should think about it. 
+        saver->setProperty("UpdateFileBackEnd", false);
+        saver->setProperty("MakeFileBacked", false);        
         saver->executeAsChildAlg();
         m_prog->resetNumSteps(100, 0.05, 0.75);
+
+        // set file backed boxes
+        auto Saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNeXusIO(bc.get()));
+        bc->setFileBacked(Saver,m_outputFile);
+        pWs->getBox()->setFileBacked();
+        bc->getFileIO()->setWriteBufferSize(1000000);
+
       }
       else
       {
@@ -174,12 +171,12 @@ namespace Mantid
 
       if(bc->isFileBacked())
       {
-          std::cout << "File backed? " << bc->isFileBacked() << ". Cache " << bc->getFileIO()->getMemoryStr() << std::endl;
+        std::cout << "File backed? " << bc->isFileBacked() << ". Cache " << bc->getFileIO()->getMemoryStr() << std::endl;
       }
       else
       {
-          bool ff(false);
-          std::cout << "File backed? " << ff << ". Cache  0" <<  std::endl;
+        bool ff(false);
+        std::cout << "File backed? " << ff << ". Cache  0" <<  std::endl;
       }
 
       //Persist the workspace.
@@ -245,7 +242,7 @@ namespace Mantid
       BoxController_sptr bc = ws->getBoxController();
       DiskBuffer * dbuf(NULL);
       if(bc->isFileBacked())
-          dbuf = bc->getFileIO();
+        dbuf = bc->getFileIO();
 
       for (int blockNum=0; blockNum < numBlocks; blockNum++)
       {
@@ -273,25 +270,25 @@ namespace Mantid
           size_t current_pix = size_t(i*pixel_width);
           coord_t centers[4] =
           {
-              interpretAs<float>(Buffer,current_pix),
-              interpretAs<float>(Buffer,current_pix + column_size),
-              interpretAs<float>(Buffer,current_pix + column_size_2),
-              interpretAs<float>(Buffer,current_pix + column_size_3)
+            interpretAs<float>(Buffer,current_pix),
+            interpretAs<float>(Buffer,current_pix + column_size),
+            interpretAs<float>(Buffer,current_pix + column_size_2),
+            interpretAs<float>(Buffer,current_pix + column_size_3)
           };
           float error = interpretAs<float>(Buffer,current_pix + column_size_8);
           ws->addEvent(MDEvent<4>( 
-              interpretAs<float>(Buffer,current_pix + column_size_7),  // Signal
-              error*error,                                               // Error sq
-              static_cast<uint16_t>(interpretAs<float>(Buffer,current_pix + column_size_6)),  // run Index
-              static_cast<int32_t>(interpretAs<float>(Buffer,current_pix + column_size_4)),  // Detector Id
-              centers));
+            interpretAs<float>(Buffer,current_pix + column_size_7),  // Signal
+            error*error,                                               // Error sq
+            static_cast<uint16_t>(interpretAs<float>(Buffer,current_pix + column_size_6)),  // run Index
+            static_cast<int32_t>(interpretAs<float>(Buffer,current_pix + column_size_4)),  // Detector Id
+            centers));
         }
 
 
-//        MemoryStats stat;
-//        size_t bytesAvail = stat.availMem() * 1024;
-//        // Estimate how many extra bytes will (temporarily) be used when splitting events
-//        size_t bytesNeededToSplit = eventsAdded * sizeof(MDEvent<4>) / 2;
+        //        MemoryStats stat;
+        //        size_t bytesAvail = stat.availMem() * 1024;
+        //        // Estimate how many extra bytes will (temporarily) be used when splitting events
+        //        size_t bytesNeededToSplit = eventsAdded * sizeof(MDEvent<4>) / 2;
 
         // Split:
         // 1. When < 1 GB of memory is free
@@ -300,8 +297,8 @@ namespace Mantid
         // 4. At the last block being added
 
 
-//        if ((bytesAvail < 1000000000) || (bytesAvail < bytesNeededToSplit) ||
-//            bc->shouldSplitBoxes(eventsAdded*2, lastNumBoxes) || (blockNum == numBlocks-1) )
+        //        if ((bytesAvail < 1000000000) || (bytesAvail < bytesNeededToSplit) ||
+        //            bc->shouldSplitBoxes(eventsAdded*2, lastNumBoxes) || (blockNum == numBlocks-1) )
 
 
         if (eventsAdded > 19000000 )
@@ -316,45 +313,57 @@ namespace Mantid
           tp.joinAll();
 
           // Flush the cache - this will save things out to disk
-          dbuf->flushCache();
+          if(dbuf)dbuf->flushCache();
           // Flush memory
           Mantid::API::MemoryManager::Instance().releaseFreeMemory();
           eventsAdded = 0;
         }
 
-//
-//        if (false)
-//        {
-//          std::vector<MDBoxBase<MDEvent<4>,4>*> boxes;
-//          ws->getBox()->getBoxes(boxes, 100, true);
-//          size_t modified = 0;
-//          size_t inmem = 0;
-//          size_t ondisk = 0;
-//          size_t events = 0;
-//          for (size_t i=0; i<boxes.size(); i++)
-//          {
-//            MDBox<MDEvent<4>,4>* box = dynamic_cast<MDBox<MDEvent<4>,4>*>(boxes[i]);
-//            if (box)
-//            {
-//              //box->save();
-//              if (box->dataAdded() || box->dataModified())
-//                modified++;
-//              if (box->getInMemory())
-//                inmem++;
-//              if (box->getOnDisk())
-//                ondisk++;
-//              events += box->getEventVectorSize();
-//            }
-//          }
-//          g_log.information() << modified << " of " << boxes.size() << " MDBoxes have data added or modified." << std::endl;
-//          g_log.information() << inmem << " MDBoxes are in memory." << std::endl;
-//          //g_log.information() << ondisk << " MDBoxes are on disk." << std::endl;
-//          g_log.information() << double(events)/1e6 << " million events in memory." << std::endl;
-//        }
+        // This will be correct optimized code after all. 
+        //
+        //        if (false)
+        //        {
+        //          std::vector<MDBoxBase<MDEvent<4>,4>*> boxes;
+        //          ws->getBox()->getBoxes(boxes, 100, true);
+        //          size_t modified = 0;
+        //          size_t inmem = 0;
+        //          size_t ondisk = 0;
+        //          size_t events = 0;
+        //          for (size_t i=0; i<boxes.size(); i++)
+        //          {
+        //            MDBox<MDEvent<4>,4>* box = dynamic_cast<MDBox<MDEvent<4>,4>*>(boxes[i]);
+        //            if (box)
+        //            {
+        //              //box->save();
+        //              if (box->dataAdded() || box->dataModified())
+        //                modified++;
+        //              if (box->getInMemory())
+        //                inmem++;
+        //              if (box->getOnDisk())
+        //                ondisk++;
+        //              events += box->getEventVectorSize();
+        //            }
+        //          }
+        //          g_log.information() << modified << " of " << boxes.size() << " MDBoxes have data added or modified." << std::endl;
+        //          g_log.information() << inmem << " MDBoxes are in memory." << std::endl;
+        //          //g_log.information() << ondisk << " MDBoxes are on disk." << std::endl;
+        //          g_log.information() << double(events)/1e6 << " million events in memory." << std::endl;
+        //        }
 
         // Report progress once per block.
         m_prog->report();
       }
+      Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
+      ThreadPool tp(ts);
+      ws->splitAllIfNeeded(ts);
+      tp.joinAll();
+
+      // Flush the cache - this will save things out to disk
+      if(dbuf)dbuf->flushCache();
+      // Flush memory
+      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+  
+
     }
 
     /**
@@ -373,7 +382,7 @@ namespace Mantid
       double aa = static_cast<double>(interpretAs<float>(buf,12));
       double bb = static_cast<double>(interpretAs<float>(buf,16));
       double cc = static_cast<double>(interpretAs<float>(buf,20));
-      
+
       ExperimentInfo_sptr info(new ExperimentInfo());
       // set up the goniometer. All mdEvents (pixels) in Horace sqw file are in lab frame, 
       // Q units so general goniometer should provide unit rotation matrix
@@ -389,7 +398,7 @@ namespace Mantid
       std::vector<std::string> dimID(4,"qx");
       std::vector<std::string> dimUnit(4,"A^-1");
       dimID[1]="qy";dimID[2]="qz";dimID[3]="en";
-      dimUnit[3]="mEv";
+      dimUnit[3]="meV";
       DimVector.resize(4);
       for(size_t i=0;i<4;i++)
       {
@@ -415,8 +424,8 @@ namespace Mantid
       // interpret shifts
       size_t i0 = 4*(3+3) ; 
       //for(size_t i=0;i<this->m_nDims;i++){
-        //double val = (double)*((float*)(&buf[i0+i*4]));
-        //dscrptn.pDimDescription(i)->data_shift = val;
+      //double val = (double)*((float*)(&buf[i0+i*4]));
+      //dscrptn.pDimDescription(i)->data_shift = val;
       //}
 
       //TODO: how to use it in our framework? -> it is B^-1 matrix possibly re-scaled
@@ -477,17 +486,17 @@ namespace Mantid
       unsigned int npax = interpretAs<uint32_t>(buf);
       unsigned int niax = 4-npax;
 
-    /*
+      /*
       [npax, count, ok, mess] = fread_catch(fid,1,'int32'); if ~all(ok); return; end;
       niax=4-npax;
       if niax~=0
-          [data.iax, count, ok, mess] = fread_catch(fid,[1,niax],'int32'); if ~all(ok); return; end;
-          [data.iint, count, ok, mess] = fread_catch(fid,[2,niax],'float32'); if ~all(ok); return; end;
+      [data.iax, count, ok, mess] = fread_catch(fid,[1,niax],'int32'); if ~all(ok); return; end;
+      [data.iint, count, ok, mess] = fread_catch(fid,[2,niax],'float32'); if ~all(ok); return; end;
       else
-          data.iax=zeros(1,0);    % create empty index of integration array in standard form
+      data.iax=zeros(1,0);    % create empty index of integration array in standard form
       data.iint=zeros(2,0);
-    end
-     */
+      end
+      */
       // axis counter
       ic = 0;;
       std::vector<unsigned int> iax;
@@ -513,22 +522,22 @@ namespace Mantid
 
       /*
       if npax~=0
-          [data.pax, count, ok, mess] = fread_catch(fid,[1,npax],'int32'); if ~all(ok); return; end;
-          psize=zeros(1,npax);    % will contain number of bins along each dimension of plot axes
-          for i=1:npax
-              [np,count,ok,mess] = fread_catch(fid,1,'int32'); if ~all(ok); return; end;
-              [data.p{i},count,ok,mess] = fread_catch(fid,np,'float32'); if ~all(ok); return; end;
-              psize(i)=np-1;
-          end
-          [data.dax, count, ok, mess] = fread_catch(fid,[1,npax],'int32'); if ~all(ok); return; end;
-          if length(psize)==1
-              psize=[psize,1];    % make size of a column vector
-          end
+      [data.pax, count, ok, mess] = fread_catch(fid,[1,npax],'int32'); if ~all(ok); return; end;
+      psize=zeros(1,npax);    % will contain number of bins along each dimension of plot axes
+      for i=1:npax
+      [np,count,ok,mess] = fread_catch(fid,1,'int32'); if ~all(ok); return; end;
+      [data.p{i},count,ok,mess] = fread_catch(fid,np,'float32'); if ~all(ok); return; end;
+      psize(i)=np-1;
+      end
+      [data.dax, count, ok, mess] = fread_catch(fid,[1,npax],'int32'); if ~all(ok); return; end;
+      if length(psize)==1
+      psize=[psize,1];    % make size of a column vector
+      end
       else
-          data.pax=zeros(1,0);    % create empty index of plot axes
-          data.p=cell(1,0);
-          data.dax=zeros(1,0);    % create empty index of plot axes
-            psize=[1,1];    % to hold a scalar
+      data.pax=zeros(1,0);    % create empty index of plot axes
+      data.p=cell(1,0);
+      data.dax=zeros(1,0);    % create empty index of plot axes
+      psize=[1,1];    % to hold a scalar
       end
       */
       std::vector<unsigned int> pax,dax;
@@ -561,13 +570,13 @@ namespace Mantid
         //[data.dax, count, ok, mess] = fread_catch(fid,[1,npax],'int32'); if ~all(ok); return; end;
         this->m_fileStream.read(&buf[0],4*npax);
         for(unsigned int i=0;i<npax;i++)
-            dax[i]=interpretAs<uint32_t>(buf,4*i)-1;
+          dax[i]=interpretAs<uint32_t>(buf,4*i)-1;
 
       }
       if(arrangeByMDImage)
       {
 
-       //Place dimensions to output vector in the correct dimensions order;
+        //Place dimensions to output vector in the correct dimensions order;
         size_t ic=0;
         DimVectorOut.resize(4);
         for(size_t i=0;i<npax;i++)
@@ -578,7 +587,7 @@ namespace Mantid
 
         for(size_t i=0;i<niax;i++)
         {
-           DimVectorOut[ic] = DimVectorIn[iax[i]];
+          DimVectorOut[ic] = DimVectorIn[iax[i]];
           ic++;
         }
       }else // arrange according to sqw
@@ -586,24 +595,27 @@ namespace Mantid
         DimVectorOut.assign(DimVectorIn.begin(),DimVectorIn.end());
       }
 
+      // set up proper dimension bin numbers to use in further calculations
+      this->m_nBins.resize(4);
+      for(size_t i=0;i<4;i++)
+      {
+        m_nBins[i] = DimVectorOut[i].getNumBins();
+        if(m_nBins[i]<1)m_nBins[i]=1;
+      }
+
 
     }
     /// add range of dimensions to the workspace;
     void LoadSQW::addDimsToWs(Mantid::MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>,4>* ws,std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVector)
     {
+      //Add dimensions to the workspace by invoking the dimension builders.
       for(size_t i=0;i<4;i++)
       {
-            ws->addDimension(DimVector[i].create());
+        ws->addDimension(DimVector[i].create());
       }
-      //Add dimensions to the workspace by invoking the dimension builders.
-     // ws->addDimension(qx.create());
-    //  ws->addDimension(qy.create());
-    //  ws->addDimension(qz.create());
-     // ws->addDimension(en.create());
-
     }
 
-    
+
     /// Add a dimension after reading info from file.
     void LoadSQW::readSQWDimensions(std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVectorOut)
     {
@@ -622,16 +634,12 @@ namespace Mantid
       {
         float min =  interpretAs<float>(buf,4*i*2);
         float max =  interpretAs<float>(buf,4*(i*2+1))*(1+FLT_EPSILON);
-        DimVectorOut[i].setNumBins(10);
+        DimVectorOut[i].setNumBins(m_nBins[i]);
         DimVectorOut[i].setMax(max);
         DimVectorOut[i].setMin(min);
 
       }
 
-//      std::cout << qx.create()->getNBins() << " bins in x\n";
-//      std::cout << qy.create()->getNBins() << " bins in y\n";
-//      std::cout << qz.create()->getNBins() << " bins in z\n";
-//      std::cout << en.create()->getNBins() << " bins in en\n";
 
     }
 
@@ -640,8 +648,8 @@ namespace Mantid
     Region: Functions in the following region are candidates for refactoring. Copied from MD_FileHoraceReader
     ==================================================================================*/
 
-    /** Function provides seam on to access auxillary functions ported from MD_FileHoraceReader.
-       
+    /** Function provides seam on to access axillary functions ported from MD_FileHoraceReader.
+
     */
     void LoadSQW::parseMetadata(const std::string &fileName)
     {
@@ -649,7 +657,7 @@ namespace Mantid
       m_fileStream.open(fileName.c_str(), std::ios::binary);
 
       if(!m_fileStream.is_open())
-        throw(Kernel::Exception::FileError("Can not open inout sqw file",fileName));
+        throw(Kernel::Exception::FileError("Can not open input sqw file",fileName));
 
       std::vector<char> data_buffer;
       m_fileStream.seekg(m_dataPositions.if_sqw_start);
@@ -677,273 +685,273 @@ namespace Mantid
 
     void LoadSQW::readBoxSizes()
     {
-      
-       m_boxSizes.resize(m_dataPositions.mdImageSize);
-       m_fileStream.seekg(m_dataPositions.n_cell_pix_start, std::ios::beg);
-       m_fileStream.read((char *)(&m_boxSizes[0]),m_dataPositions.mdImageSize*sizeof(uint64_t));
-       
-    }
 
-namespace LoadSQWHelper
-{
-
-    // auxiliary functions
-   /**Block 1:  Main_header: Parse SQW main data header
-    *@param dataStream -- the open file hanlder responsible for IO operations
-     **/
-   void dataPositions::parse_sqw_main_header(std::ifstream &dataStream)
-    { // we do not need this header  at the moment -> just need to calculated its length;
-
-      std::vector<char> data_buffer(4 * 3);
-      dataStream.read(&data_buffer[0], 4);
-
-      unsigned int file_name_length = *((uint32_t*) (&data_buffer[0]));
-      //skip main header file name
-      dataStream.seekg(file_name_length, std::ios_base::cur);
-
-      dataStream.read(&data_buffer[0], 4);             
-      unsigned int file_path_length = *((uint32_t*) (&data_buffer[0]));
-
-
-      //skip main header file path
-      dataStream.seekg(file_path_length, std::ios_base::cur);    
-
-      dataStream.read(&data_buffer[0], 4);
-      unsigned int file_title = *((uint32_t*) (&data_buffer[0]));     
-
-      //skip ws titile
-      dataStream.seekg(file_title, std::ios_base::cur);          
-
-      // indentify number of file headers, contributed into the dataset
-      dataStream.read(&data_buffer[0], 4);               
-      unsigned int nFiles = *((uint32_t*) (&data_buffer[0]));
-
-
-      /// allocate space for the component headers positions;
-      this->component_headers_starts.assign(nFiles, 0);
-
-      std::streamoff last_location = dataStream.tellg();
-      if(last_location<0)throw("IO error for input  file at start of component headers; Can not seek to last location");
-      if (nFiles > 0)
-      {
-        this->component_headers_starts[0] = last_location;
-      }
-    }
-   /**Block 2: Header: Parse header of single SPE file
-    *@param dataStream -- the open file hanlder responsible for IO operations
-    *@param start_location -- initial file position of the header within the binary file
-    *
-    *@returns: the file location of the first byte behind this header
-   */
-   std::streamoff dataPositions::parse_component_header(std::ifstream &dataStream,std::streamoff start_location)
-   { // we do not need this header  at the moment -> just calculating its length; or may be we do soon?
-      std::vector<char> data_buffer(8);
-
-      std::streamoff shift = start_location-dataStream.tellg();
-      // move to specified location, which should be usually 0;
-      dataStream.seekg(shift,std::ios_base::cur);
-
-
-      dataStream.read(&data_buffer[0],4);
-
-      unsigned int file_name_length= *((uint32_t*)(&data_buffer[0]));
-      //skip component header file name
-      dataStream.seekg(file_name_length,std::ios_base::cur);
-
-
-      dataStream.read(&data_buffer[0],4);
-      unsigned int file_path_length= *((uint32_t*)(&data_buffer[0]));
-
-
-      //skip component header file path
-      dataStream.seekg(file_path_length,std::ios_base::cur);
-
-
-      // move to by specifified nuber of bytes, see Matlab header above;
-      dataStream.seekg(4*(7+3*4),std::ios_base::cur);
-
-
-      // read number of energy bins;
-      dataStream.read(&data_buffer[0],4);
-      unsigned int nEn_bins = *((uint32_t*)(&data_buffer[0]));
-      // skip energy values;
-      dataStream.seekg(4*(nEn_bins),std::ios_base::cur);
-
-      // skip offsets and conversions;
-      dataStream.seekg(4*(4+4*4+4),std::ios_base::cur);
-
-
-      // get labels matix size;
-      dataStream.read(&data_buffer[0],8);
-
-      unsigned int nRows = *((uint32_t*)(&data_buffer[0]));
-      unsigned int nCols = *((uint32_t*)(&data_buffer[4]));
-
-      // skip labels
-      dataStream.seekg(nRows*nCols,std::ios_base::cur);
-
-      std::streamoff end_location = dataStream.tellg();
-      return end_location;
+      m_boxSizes.resize(m_dataPositions.mdImageSize);
+      m_fileStream.seekg(m_dataPositions.n_cell_pix_start, std::ios::beg);
+      m_fileStream.read((char *)(&m_boxSizes[0]),m_dataPositions.mdImageSize*sizeof(uint64_t));
 
     }
-   /**Block 3: Detpar: parse positions of the contributed detectors. These detectors have to be the same for all contributing spe files
-    *@param dataStream -- the open file hanlder responsible for IO operations
-    *@param start_location -- initial file position of the detectors data within the binary file
-    *
-    *@returns: the file location of the first byte behind this header   */
-   std::streamoff dataPositions::parse_sqw_detpar(std::ifstream &dataStream,std::streamoff start_location)
-    { //
-      std::vector<char> data_buffer(8);
 
-      std::streamoff shift = start_location-dataStream.tellg();
-      // move to specified location, which should be usually 0;
-      dataStream.seekg(shift,std::ios_base::cur);              
-
-
-      dataStream.read(&data_buffer[0],4);                 
-      unsigned int file_name_length= *((uint32_t*)(&data_buffer[0]));
-      //skip component header file name
-      dataStream.seekg(file_name_length,std::ios_base::cur);     
-
-      dataStream.read(&data_buffer[0],4);
-      unsigned int file_path_length= *((uint32_t*)(&data_buffer[0]));  
-      //skip component header file path
-      dataStream.seekg(file_path_length,std::ios_base::cur);     
-
-      dataStream.read(&data_buffer[0],4);
-      unsigned int num_detectors = *((uint32_t*)(&data_buffer[0]));
-      //skip detector information
-      dataStream.seekg(num_detectors*6*4,std::ios_base::cur);  
-
-      std::streamoff end_location = dataStream.tellg();
-      return end_location;
-
-    }
-   /**Block 4: Data: parse positions of the data fields 
-    *@param dataStream -- the open file hanlder responsible for IO operations
-    *@param data_start -- Initial position of the data block4 within the data file
-     @param nBins -- the vector of bin sizes for MD image
-     @param nDataPoints -- number of pixels (MD events) contributing to the image
-   */
-    void dataPositions::parse_data_locations(std::ifstream &dataStream,std::streamoff data_start,
-                                                      std::vector<size_t> &nBins,uint64_t &nDataPoints)
+    namespace LoadSQWHelper
     {
-      std::vector<char> data_buffer(12);
 
-      std::streamoff shift = data_start-dataStream.tellg();
-      // move to specified location, which should be usually 0;
-      dataStream.seekg(shift,std::ios_base::cur);
+      // auxiliary functions
+      /**Block 1:  Main_header: Parse SQW main data header
+      *@param dataStream -- the open file handler responsible for IO operations
+      **/
+      void dataPositions::parse_sqw_main_header(std::ifstream &dataStream)
+      { // we do not need this header  at the moment -> just need to calculated its length;
 
-      dataStream.read(&data_buffer[0],4);
+        std::vector<char> data_buffer(4 * 3);
+        dataStream.read(&data_buffer[0], 4);
 
+        unsigned int file_name_length = *((uint32_t*) (&data_buffer[0]));
+        //skip main header file name
+        dataStream.seekg(file_name_length, std::ios_base::cur);
 
-      unsigned int file_name_length= *((uint32_t*)(&data_buffer[0]));
-      //skip dummy file name
-      dataStream.seekg(file_name_length,std::ios_base::cur);
-
-
-      dataStream.read(&data_buffer[0],4);
-      unsigned int file_path_length= *((uint32_t*)(&data_buffer[0]));
-
-      //skip dummy file path
-      dataStream.seekg(file_path_length,std::ios_base::cur);
+        dataStream.read(&data_buffer[0], 4);             
+        unsigned int file_path_length = *((uint32_t*) (&data_buffer[0]));
 
 
-      dataStream.read(&data_buffer[0],4);
-      unsigned int data_title_length = *((uint32_t*)(&data_buffer[0]));
+        //skip main header file path
+        dataStream.seekg(file_path_length, std::ios_base::cur);    
 
-      //skip data title
-      dataStream.seekg(data_title_length,std::ios_base::cur);
+        dataStream.read(&data_buffer[0], 4);
+        unsigned int file_title = *((uint32_t*) (&data_buffer[0]));     
+
+        //skip ws title
+        dataStream.seekg(file_title, std::ios_base::cur);          
+
+        // identify number of file headers, contributed into the dataset
+        dataStream.read(&data_buffer[0], 4);               
+        unsigned int nFiles = *((uint32_t*) (&data_buffer[0]));
 
 
-      this->geom_start = dataStream.tellg();
+        /// allocate space for the component headers positions;
+        this->component_headers_starts.assign(nFiles, 0);
 
-      dataStream.seekg(4*(3+3+4+16+4),std::ios_base::cur);
-
-      // get label information and skip labels;
-      dataStream.read(&data_buffer[0],8);
-
-      unsigned int n_labels      = *((uint32_t*)(&data_buffer[0])); 
-      unsigned int labels_length = *((uint32_t*)(&data_buffer[4])); 
-      dataStream.seekg(n_labels*labels_length,std::ios_base::cur);
-
-      this->npax_start = dataStream.tellg();
-
-      dataStream.read(&data_buffer[0],4);
-
-      unsigned int npax = *((uint32_t*)(&data_buffer[0])); 
-      unsigned int niax = 4-npax;
-      if(niax!=0)
-      {
-        dataStream.seekg(3*niax*4,std::ios_base::cur);
+        std::streamoff last_location = dataStream.tellg();
+        if(last_location<0)throw("IO error for input  file at start of component headers; Can not seek to last location");
+        if (nFiles > 0)
+        {
+          this->component_headers_starts[0] = last_location;
+        }
       }
-      if(npax!=0)
+      /**Block 2: Header: Parse header of single SPE file
+      *@param dataStream -- the open file handler responsible for IO operations
+      *@param start_location -- initial file position of the header within the binary file
+      *
+      *@returns: the file location of the first byte behind this header
+      */
+      std::streamoff dataPositions::parse_component_header(std::ifstream &dataStream,std::streamoff start_location)
+      { // we do not need this header  at the moment -> just calculating its length; or may be we do soon?
+        std::vector<char> data_buffer(8);
+
+        std::streamoff shift = start_location-dataStream.tellg();
+        // move to specified location, which should be usually 0;
+        dataStream.seekg(shift,std::ios_base::cur);
+
+
+        dataStream.read(&data_buffer[0],4);
+
+        unsigned int file_name_length= *((uint32_t*)(&data_buffer[0]));
+        //skip component header file name
+        dataStream.seekg(file_name_length,std::ios_base::cur);
+
+
+        dataStream.read(&data_buffer[0],4);
+        unsigned int file_path_length= *((uint32_t*)(&data_buffer[0]));
+
+
+        //skip component header file path
+        dataStream.seekg(file_path_length,std::ios_base::cur);
+
+
+        // move to by specified number of bytes, see Matlab header above;
+        dataStream.seekg(4*(7+3*4),std::ios_base::cur);
+
+
+        // read number of energy bins;
+        dataStream.read(&data_buffer[0],4);
+        unsigned int nEn_bins = *((uint32_t*)(&data_buffer[0]));
+        // skip energy values;
+        dataStream.seekg(4*(nEn_bins),std::ios_base::cur);
+
+        // skip offsets and conversions;
+        dataStream.seekg(4*(4+4*4+4),std::ios_base::cur);
+
+
+        // get labels matrix size;
+        dataStream.read(&data_buffer[0],8);
+
+        unsigned int nRows = *((uint32_t*)(&data_buffer[0]));
+        unsigned int nCols = *((uint32_t*)(&data_buffer[4]));
+
+        // skip labels
+        dataStream.seekg(nRows*nCols,std::ios_base::cur);
+
+        std::streamoff end_location = dataStream.tellg();
+        return end_location;
+
+      }
+      /**Block 3: Detpar: parse positions of the contributed detectors. These detectors have to be the same for all contributing spe files
+      *@param dataStream -- the open file handler responsible for IO operations
+      *@param start_location -- initial file position of the detectors data within the binary file
+      *
+      *@returns: the file location of the first byte behind this header   */
+      std::streamoff dataPositions::parse_sqw_detpar(std::ifstream &dataStream,std::streamoff start_location)
+      { //
+        std::vector<char> data_buffer(8);
+
+        std::streamoff shift = start_location-dataStream.tellg();
+        // move to specified location, which should be usually 0;
+        dataStream.seekg(shift,std::ios_base::cur);              
+
+
+        dataStream.read(&data_buffer[0],4);                 
+        unsigned int file_name_length= *((uint32_t*)(&data_buffer[0]));
+        //skip component header file name
+        dataStream.seekg(file_name_length,std::ios_base::cur);     
+
+        dataStream.read(&data_buffer[0],4);
+        unsigned int file_path_length= *((uint32_t*)(&data_buffer[0]));  
+        //skip component header file path
+        dataStream.seekg(file_path_length,std::ios_base::cur);     
+
+        dataStream.read(&data_buffer[0],4);
+        unsigned int num_detectors = *((uint32_t*)(&data_buffer[0]));
+        //skip detector information
+        dataStream.seekg(num_detectors*6*4,std::ios_base::cur);  
+
+        std::streamoff end_location = dataStream.tellg();
+        return end_location;
+
+      }
+      /**Block 4: Data: parse positions of the data fields 
+      *@param dataStream -- the open file handler responsible for IO operations
+      *@param data_start -- Initial position of the data block4 within the data file
+      @param nBins -- the vector of bin sizes for MD image
+      @param nDataPoints -- number of pixels (MD events) contributing to the image
+      */
+      void dataPositions::parse_data_locations(std::ifstream &dataStream,std::streamoff data_start,
+        std::vector<size_t> &nBins,uint64_t &nDataPoints)
       {
-        nBins.resize(npax);
+        std::vector<char> data_buffer(12);
 
-        // skip projection axis
-        dataStream.seekg(npax*4,std::ios_base::cur);
+        std::streamoff shift = data_start-dataStream.tellg();
+        // move to specified location, which should be usually 0;
+        dataStream.seekg(shift,std::ios_base::cur);
 
-        mdImageSize = 1;
-        for(unsigned int i=0;i<npax;i++){
-          dataStream.read(&data_buffer[0],4);
+        dataStream.read(&data_buffer[0],4);
 
-          unsigned int  nAxisPoints = *((uint32_t*)(&data_buffer[0])); 
-          nBins[i] = nAxisPoints-1;
-          mdImageSize *= nBins[i] ;
-          dataStream.seekg(nAxisPoints*4,std::ios_base::cur);
+
+        unsigned int file_name_length= *((uint32_t*)(&data_buffer[0]));
+        //skip dummy file name
+        dataStream.seekg(file_name_length,std::ios_base::cur);
+
+
+        dataStream.read(&data_buffer[0],4);
+        unsigned int file_path_length= *((uint32_t*)(&data_buffer[0]));
+
+        //skip dummy file path
+        dataStream.seekg(file_path_length,std::ios_base::cur);
+
+
+        dataStream.read(&data_buffer[0],4);
+        unsigned int data_title_length = *((uint32_t*)(&data_buffer[0]));
+
+        //skip data title
+        dataStream.seekg(data_title_length,std::ios_base::cur);
+
+
+        this->geom_start = dataStream.tellg();
+
+        dataStream.seekg(4*(3+3+4+16+4),std::ios_base::cur);
+
+        // get label information and skip labels;
+        dataStream.read(&data_buffer[0],8);
+
+        unsigned int n_labels      = *((uint32_t*)(&data_buffer[0])); 
+        unsigned int labels_length = *((uint32_t*)(&data_buffer[4])); 
+        dataStream.seekg(n_labels*labels_length,std::ios_base::cur);
+
+        this->npax_start = dataStream.tellg();
+
+        dataStream.read(&data_buffer[0],4);
+
+        unsigned int npax = *((uint32_t*)(&data_buffer[0])); 
+        unsigned int niax = 4-npax;
+        if(niax!=0)
+        {
+          dataStream.seekg(3*niax*4,std::ios_base::cur);
+        }
+        if(npax!=0)
+        {
+          nBins.resize(npax);
+
+          // skip projection axis
+          dataStream.seekg(npax*4,std::ios_base::cur);
+
+          mdImageSize = 1;
+          for(unsigned int i=0;i<npax;i++){
+            dataStream.read(&data_buffer[0],4);
+
+            unsigned int  nAxisPoints = *((uint32_t*)(&data_buffer[0])); 
+            nBins[i] = nAxisPoints-1;
+            mdImageSize *= nBins[i] ;
+            dataStream.seekg(nAxisPoints*4,std::ios_base::cur);
+
+          }
+          // skip display indexes;
+          dataStream.seekg(npax*4,std::ios_base::cur);
 
         }
-        // skip display indexes;
-        dataStream.seekg(npax*4,std::ios_base::cur);
+        // signal start:
+        this->s_start = dataStream.tellg();
+        // and skip to errors
+        dataStream.seekg(mdImageSize*4,std::ios_base::cur);
 
+        // error start:
+        this->err_start= dataStream.tellg();
+        dataStream.seekg(mdImageSize*4,std::ios_base::cur);
+
+        // dnd data file.  we do not support this?
+        if(dataStream.eof())
+        {
+          nDataPoints = 0;
+          return;
+          //throw(std::invalid_argument("DND Horace datasets are not supported by Mantid"));
+        }
+
+        this->n_cell_pix_start=dataStream.tellg();
+        // skip to the end of pixels;
+        dataStream.seekg(mdImageSize*8,std::ios_base::cur);
+
+        if(dataStream.eof()){
+          nDataPoints = 0;
+          return;
+          //throw(std::invalid_argument("DND b+ Horace datasets are not supported by Mantid"));
+        }
+        this->min_max_start = dataStream.tellg();
+        // skip min-max start
+        //[data.urange,count,ok,mess] = fread_catch(fid,[2,4],'float32'); if ~all(ok); return; end;
+        dataStream.seekg(8*4,std::ios_base::cur);
+
+        if(dataStream.eof()){
+          nDataPoints = 0;
+          return;
+          //throw(std::invalid_argument("SQW a- Horace datasets are not supported by Mantid"));
+        }
+        // skip redundant field and read nPix (number of data points)
+        dataStream.read(&data_buffer[0],12);
+
+        nDataPoints =(size_t)( *((uint64_t*)(&data_buffer[4])));
+        this->pix_start = dataStream.tellg();
       }
-      // signal start:
-      this->s_start = dataStream.tellg();
-      // and skip to errors
-      dataStream.seekg(mdImageSize*4,std::ios_base::cur);
 
-      // error start:
-      this->err_start= dataStream.tellg();
-      dataStream.seekg(mdImageSize*4,std::ios_base::cur);
-
-      // dnd data file.  we do not suppor this?
-      if(dataStream.eof())
-      {
-        nDataPoints = 0;
-        return;
-        //throw(std::invalid_argument("DND Horace datasets are not supported by Mantid"));
-      }
-
-      this->n_cell_pix_start=dataStream.tellg();
-      // skip to the end of pixels;
-      dataStream.seekg(mdImageSize*8,std::ios_base::cur);
-
-      if(dataStream.eof()){
-        nDataPoints = 0;
-        return;
-        //throw(std::invalid_argument("DND b+ Horace datasets are not supported by Mantid"));
-      }
-      this->min_max_start = dataStream.tellg();
-      // skip min-max start
-      //[data.urange,count,ok,mess] = fread_catch(fid,[2,4],'float32'); if ~all(ok); return; end;
-      dataStream.seekg(8*4,std::ios_base::cur);
-
-      if(dataStream.eof()){
-         nDataPoints = 0;
-         return;
-        //throw(std::invalid_argument("SQW a- Horace datasets are not supported by Mantid"));
-      }
-      // skip redundant field and read nPix (number of data points)
-      dataStream.read(&data_buffer[0],12);
-
-      nDataPoints =(size_t)( *((uint64_t*)(&data_buffer[4])));
-      this->pix_start = dataStream.tellg();
-    }
-   
-    /*==================================================================================
-    EndRegion:
-    ==================================================================================*/
+      /*==================================================================================
+      EndRegion:
+      ==================================================================================*/
     } // endNamespace LoadSQWHelper
-}
+  }
 }

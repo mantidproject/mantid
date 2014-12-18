@@ -14,6 +14,8 @@ namespace Mantid
     class FunctionDomain;
     class FunctionDomainMD;
     class IMDWorkspace;
+    class IMDEventWorkspace;
+    class IMDHistoWorkspace;
   }
 
   namespace MDEvents
@@ -24,7 +26,7 @@ namespace Mantid
     @author Roman Tolchenov, Tessella plc
     @date 06/12/2011
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -82,6 +84,17 @@ namespace Mantid
     protected:
       /// Set all parameters
       void setParameters()const;
+      /// Create event output workspace
+      boost::shared_ptr<API::Workspace> createEventOutputWorkspace(const std::string& baseName,
+          const API::IMDEventWorkspace &inputWorkspace,
+          const API::FunctionValues &values,
+          const std::string& outputWorkspacePropertyName);
+      /// Create histo output workspace
+      boost::shared_ptr<API::Workspace> createHistoOutputWorkspace(const std::string& baseName,
+          API::IFunction_sptr function,
+          boost::shared_ptr<const API::IMDHistoWorkspace> inputWorkspace,
+          const std::string& outputWorkspacePropertyName);
+
       /// Store workspace property name
       std::string m_workspacePropertyName;
       /// Store maxSize property name

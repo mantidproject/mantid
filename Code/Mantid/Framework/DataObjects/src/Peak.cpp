@@ -528,6 +528,7 @@ namespace DataObjects
    */
   bool Peak::findDetector()
   {
+	bool found = false;
     // Scattered beam direction
     V3D oldDetPos = detPos;
     V3D beam = detPos - samplePos;
@@ -539,13 +540,42 @@ namespace DataObjects
     IDetector_const_sptr det = tracker.getDetectorResult();
     if (det)
     {
-      // Set the detector ID, the row, col, etc.
-      this->setDetectorID(det->getID());
-      // The old detector position is not more precise if it comes from FindPeaksMD
-      detPos = det->getPos();
-      return true;
+        // Set the detector ID, the row, col, etc.
+        this->setDetectorID(det->getID());
+        // The old detector position is not more precise if it comes from FindPeaksMD
+        detPos = det->getPos();
+        found = true;
     }
-    return false;
+    //Use tube-gap parameter in instrument parameter file  to find peaks with center in gaps between tubes
+    else if (m_inst->hasParameter("tube-gap"))
+    {
+        std::vector<double> gaps = m_inst->getNumberParameter("tube-gap", true);
+        if (!gaps.empty())
+        {
+			const double gap = static_cast<double>(gaps.front());
+			// try adding and subtracting tube-gap in 3 q dimensions to see if you can find detectors on each side of tube gap
+			for(int i=0;i<3;i++)
+			{
+				V3D gapDir = V3D(0.,0.,0.);
+				gapDir[i] = gap;
+				V3D beam1 = beam + gapDir;
+				tracker.traceFromSample(beam1);
+				IDetector_const_sptr det1 = tracker.getDetectorResult();
+				V3D beam2 = beam - gapDir;
+				tracker.traceFromSample(beam2);
+				IDetector_const_sptr det2 = tracker.getDetectorResult();
+				if (det1 && det2)
+				{
+					// Set the detector ID to one of the neighboring pixels
+					this->setDetectorID(static_cast<int>(det1->getID()));;
+					detPos = det1->getPos() ;
+					found = true;
+					break;
+				}
+			}
+        }
+    }
+    return found;
   }
 
   //----------------------------------------------------------------------------------------------

@@ -17,7 +17,7 @@ namespace Crystal
 
     Set the special coordinates on an IMDWorspace or peaksworkspace. Also print out any existing special coordinates.
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

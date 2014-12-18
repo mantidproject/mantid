@@ -14,7 +14,7 @@ namespace Mantid
     /**
     Loads a table workspace from an ascii file in reflectometry tbl format. Rows must be no longer than 17 cells.
 
-    Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

@@ -291,8 +291,9 @@ namespace Mantid
       auto colQmin = ws->addColumn("str","Qmin");
       auto colQmax = ws->addColumn("str","Qmax");
       auto colDqq = ws->addColumn("str","dq/q");
-      auto colScale = ws->addColumn("str","Scale");
+      auto colScale = ws->addColumn("double","Scale");
       auto colStitch = ws->addColumn("int","StitchGroup");
+      auto colOptions = ws->addColumn("str","Options");
 
       colRuns->setPlotType(0);
       colTheta->setPlotType(0);
@@ -302,6 +303,7 @@ namespace Mantid
       colDqq->setPlotType(0);
       colScale->setPlotType(0);
       colStitch->setPlotType(0);
+      colOptions->setPlotType(0);
 
       std::vector<std::string> columns;
 
@@ -315,6 +317,11 @@ namespace Mantid
         }
         getCells(line, columns);
 
+        const std::string scaleStr = columns.at(16);
+        double scale = 1.0;
+        if(!scaleStr.empty())
+          Mantid::Kernel::Strings::convert<double>(columns.at(16), scale);
+
         //check if the first run in the row has any data associated with it
         // 0 = runs, 1 = theta, 2 = trans, 3 = qmin, 4 = qmax
         if (columns[0] != "" || columns[1] != "" || columns[2] != "" || columns[3] != "" || columns[4] != "")
@@ -325,7 +332,7 @@ namespace Mantid
             row << columns.at(i);
           }
           row << columns.at(15);
-          row << columns.at(16);
+          row << scale;
           row << stitchID;
         }
 
@@ -339,7 +346,7 @@ namespace Mantid
             row << columns.at(i);
           }
           row << columns.at(15);
-          row << columns.at(16);
+          row << scale;
           row << stitchID;
         }
 
@@ -350,7 +357,10 @@ namespace Mantid
           TableRow row = ws->appendRow();
           for (int i = 10; i < 17; ++i)
           {
-            row << columns.at(i);
+            if(i == 16)
+              row << scale;
+            else
+              row << columns.at(i);
           }
           row << stitchID;
         }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>IndirectBayes</class>
- <widget class="QWidget" name="IndirectBayes">
+ <widget class="QMainWindow" name="IndirectBayes">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,6 +13,7 @@
   <property name="windowTitle">
    <string>Indirect Bayes</string>
   </property>
+  <widget class="QWidget" name="centralwidget">
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTabWidget" name="indirectBayesTabs">
@@ -108,6 +109,7 @@
     </layout>
    </item>
   </layout>
+  </widget>
  </widget>
  <resources/>
  <connections/>

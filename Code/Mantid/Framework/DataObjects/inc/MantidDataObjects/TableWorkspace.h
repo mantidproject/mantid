@@ -47,7 +47,7 @@ namespace DataObjects
     \author Roman Tolchenov
     \date 31/10/2008
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -268,6 +268,9 @@ namespace DataObjects
         API::Column_const_sptr spCol = this->getColumn(col_name);
         return static_cast<U>(spCol->operator[](nRow));
     }
+
+    /// Sort this table. @see ITableWorkspace::sort
+    void sort(std::vector< std::pair<std::string, bool> > & criteria);
 
 private:
     

@@ -29,7 +29,7 @@ namespace Mantid
        @author Martyn Gigg, Tessella plc
        @date 02/10/201
        
-       Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+       Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
        
        This file is part of Mantid.
        
@@ -150,6 +150,8 @@ namespace Mantid
       virtual void saveNexus(::NeXus::File * file, const std::string & group,bool keepOpen=false) const;
       /// Load the run from a NeXus file with a given group name
       virtual void loadNexus(::NeXus::File * file, const std::string & group,bool keepOpen=false);
+      /// Clear the logs
+      void clearLogs();
 
     protected:
       /// A pointer to a property manager

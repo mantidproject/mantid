@@ -25,7 +25,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void xtest_exec()
+  void test_exec()
   {
     // Name of the output workspace.
     std::string outWSName("LoadNXSPETest_OutputWS");
@@ -33,27 +33,29 @@ public:
     LoadNXSPE alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "/home/andrei/Mantid/Test/Data/CNCS_7850.nxspe") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "NXSPEData.nxspe") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
-//    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "/home/andrei/Desktop/cncs.nxspe") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "/home/andrei/Desktop/reduction.py") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
     // Retrieve the workspace from data service.
     Workspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName) );
     TS_ASSERT(ws);
     if (!ws) return;
     
-    // TODO: Check the results
-    
-    // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
 
+  }
+
+  void test_identifier_confidence()
+  {
+    const int high_confidence = LoadNXSPE::identiferConfidence("NXSPE");
+    const int good_confidence = LoadNXSPE::identiferConfidence("NXSP");
+    const int no_confidence = LoadNXSPE::identiferConfidence("NXS");
+
+    TS_ASSERT(high_confidence > good_confidence);
+    TS_ASSERT(good_confidence > no_confidence);
   }
 
 };

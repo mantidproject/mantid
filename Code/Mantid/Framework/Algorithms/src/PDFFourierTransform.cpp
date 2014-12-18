@@ -134,7 +134,12 @@ namespace Mantid
         if (Qmax <= Qmin)
           result["Qmax"] = "Must be greater than Qmin";
 
+      // check for null pointers - this is to protect against workspace groups
       API::MatrixWorkspace_const_sptr inputWS =  getProperty("InputWorkspace");
+      if (!inputWS) {
+        return result;
+      }
+
       if (inputWS->getNumberHistograms() != 1)
       {
         result["InputWorkspace"] = "Input workspace must have only one spectrum";

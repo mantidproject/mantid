@@ -481,7 +481,8 @@ namespace WorkflowAlgorithms
       maskAlg->setProperty("Workspace", m_outputW);
       maskAlg->setProperty("MaskedWorkspace", m_maskWS);
       maskAlg->executeAsChildAlg();
-      m_outputW = maskAlg->getProperty("Workspace");
+      Workspace_sptr tmpW = maskAlg->getProperty("Workspace");
+      m_outputW =boost::dynamic_pointer_cast<MatrixWorkspace>(tmpW);
     }
     m_progress->report();
 

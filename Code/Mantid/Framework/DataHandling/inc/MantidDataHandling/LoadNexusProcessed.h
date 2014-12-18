@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
@@ -15,6 +16,7 @@ namespace Mantid
 
   namespace DataHandling
   {
+
     /**
 
     Loads a workspace from a NeXus Processed entry in a NeXus file.
@@ -28,7 +30,7 @@ namespace Mantid
     <LI> InputWorkspace - The name of the workspace to put the data </LI>
     </UL>
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -95,6 +97,13 @@ namespace Mantid
 
       API::Workspace_sptr loadTableEntry(Mantid::NeXus::NXEntry& entry);
 
+      /// Load a numeric column to the TableWorkspace.
+      template<typename ColumnType, typename NexusType>
+      void loadNumericColumn(const Mantid::NeXus::NXData& tableData,
+                            const std::string& dataSetName,
+                            const API::ITableWorkspace_sptr& tableWs,
+                            const std::string& columnType);
+
       /// Loads a vector column to the TableWorkspace.
       template<typename Type>
       void loadVectorColumn(const Mantid::NeXus::NXData& tableData,
@@ -102,7 +111,10 @@ namespace Mantid
                             const API::ITableWorkspace_sptr& tableWs,
                             const std::string& columnType);
 
-	  API::Workspace_sptr loadPeaksEntry(Mantid::NeXus::NXEntry & entry);
+      /// Loads a V3D column to the TableWorkspace.
+      void loadV3DColumn(Mantid::NeXus::NXDouble& data, const API::ITableWorkspace_sptr& tableWs);
+
+	    API::Workspace_sptr loadPeaksEntry(Mantid::NeXus::NXEntry & entry);
 
       API::MatrixWorkspace_sptr loadEventEntry(Mantid::NeXus::NXData & wksp_cls,Mantid::NeXus::NXDouble & xbins,
           const double& progressStart, const double& progressRange);
@@ -155,6 +167,9 @@ namespace Mantid
 
       /// calculates the workspace size
       std::size_t calculateWorkspacesize(const std::size_t numberofspectra);
+
+      /// Accellerated multiperiod loading
+      Mantid::API::Workspace_sptr doAccelleratedMultiPeriodLoading(Mantid::NeXus::NXRoot & root, const std::string & entryName, Mantid::API::MatrixWorkspace_sptr& tempMatrixWorkspace, const int64_t nWorkspaceEntries, const int64_t i);
      
       /// Does the current workspace have uniform binning
       bool m_shared_bins;

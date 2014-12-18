@@ -3,7 +3,7 @@
   This file includes the muParser.h header file and avoids a conflict with the DLLExport macro
   that we both have defined.
   
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 

@@ -44,4 +44,30 @@ Also Note that for isotopes specified in a molecular expression, the
 isotope must be enclosed by parenthesis, except for two special cases, 
 ``D`` and ``T``, which stand for ``H2`` and ``H3``, respectively.
 
+Cross Section Calculations
+##########################
+
+Each of the cross sections (:math:`\sigma`) are calculated according to
+
+.. math:: \sigma = \frac{1}{N_{atoms}}\sum_{i}\sigma_{i}n_{i}
+
+where :math:`N_{atoms} = \sum_{i}n_{i}`. A concrete example for the total
+cross section of ``D2 O``
+
+.. math:: \sigma = \frac{1}{2+1}\left( 7.64*2 + 4.232*1\right) = 6.504\ barns
+
+Number Density
+##############
+
+The number density is defined as
+
+.. math:: \rho_n = \frac{ZParameter}{UnitCellVolume}
+
+It can can be generated in one of two ways:
+
+1. Specifying it directly with ``SampleNumberDensity``
+2. Specifying the ``ZParameter`` and the ``UnitCellVolume`` (or letting
+   the algorithm calculate it from the OrientedLattice on the 
+   ``InputWorkspace``).
+
 .. categories::

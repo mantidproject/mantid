@@ -19,10 +19,10 @@ namespace Mantid
 
     void EndErfc::init()
     {
-      declareParameter("A", 2000.0); 
-      declareParameter("B", 50.0); 
-      declareParameter("C", 6.0); 
-      declareParameter("D", 0.0); 
+      declareParameter("A", 2000.0,"Half value at minus infinity minus half value at plus infinity"); 
+      declareParameter("B", 50.0,"Mid x value"); 
+      declareParameter("C", 6.0,"Width parameter"); 
+      declareParameter("D", 0.0,"Minimum value - must not be negative");
     }
 
 

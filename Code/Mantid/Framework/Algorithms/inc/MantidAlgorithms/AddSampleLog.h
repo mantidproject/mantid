@@ -25,7 +25,7 @@ namespace Algorithms
     to the sample during the experiment. This algorithm allows one named log
     to be entered.
 
-    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.  
 

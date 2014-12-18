@@ -16,8 +16,6 @@ namespace Geometry
   using Mantid::Kernel::Matrix;
 
   namespace {
-  const double TWO_PI = 2.*M_PI;
-  const double DEG_TO_RAD = M_PI / 180.;
   const double RAD_TO_DEG = 180. / M_PI;
   }
   /**

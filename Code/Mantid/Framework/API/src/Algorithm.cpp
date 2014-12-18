@@ -78,13 +78,14 @@ namespace Mantid
     Algorithm::Algorithm() :
     PropertyManagerOwner(),
       m_cancel(false),m_parallelException(false), m_log("Algorithm"), g_log(m_log),
+      m_groupSize(0),
       m_executeAsync(NULL),
       m_notificationCenter(NULL),
       m_progressObserver(NULL),
       m_isInitialized(false), m_isExecuted(false),m_isChildAlgorithm(false), m_recordHistoryForChild(false),
       m_alwaysStoreInADS(false),m_runningAsync(false),
-      m_running(false),m_rethrow(false),m_algorithmID(this),
-      m_singleGroup(-1), m_groupSize(0), m_groupsHaveSimilarNames(false)
+      m_running(false), m_rethrow(false), m_isAlgStartupLoggingEnabled(true),
+      m_algorithmID(this), m_singleGroup(-1), m_groupsHaveSimilarNames(false)
     {
     }
 
@@ -523,33 +524,6 @@ namespace Mantid
         }
       }
 
-      // ----- Perform validation of the whole set of properties -------------
-      std::map<std::string, std::string> errors = this->validateInputs();
-      if (!errors.empty())
-      {
-        size_t numErrors = errors.size();
-        // Log each issue
-        auto & errorLog = getLogger().error();
-        auto & warnLog = getLogger().warning();
-        for (auto it = errors.begin(); it != errors.end(); it++)
-        {
-          if (this->existsProperty(it->first))
-            errorLog << "Invalid value for " << it->first << ": " << it->second << "\n";
-          else
-          {
-            numErrors -= 1; // don't count it as an error
-            warnLog << "validateInputs() references non-existant property \""
-                    << it->first << "\"\n";
-          }
-        }
-        // Throw because something was invalid
-        if (numErrors > 0)
-        {
-          notificationCenter().postNotification(new ErrorNotification(this,"Some invalid Properties found"));
-          throw std::runtime_error("Some invalid Properties found");
-        }
-      }
-
       // ----- Check for processing groups -------------
       // default true so that it has the right value at the check below the catch block should checkGroups throw
       bool callProcessGroups = true;
@@ -557,16 +531,11 @@ namespace Mantid
       {
         // Checking the input is a group. Throws if the sizes are wrong
         callProcessGroups = this->checkGroups();
-        if (callProcessGroups)
-        {
-          // This calls this->execute() again on each member of the group.
-          return processGroups();
-        }
       }
       catch(std::exception& ex)
       {
-        getLogger().error() << "Error in execution of algorithm "<< this->name() << std::endl
-                      << ex.what()<<std::endl;
+        getLogger().error() << "Error in execution of algorithm "<< this->name() << "\n"
+                            << ex.what() << "\n";
         notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
         m_running = false;
         if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
@@ -574,11 +543,74 @@ namespace Mantid
           m_runningAsync = false;
           throw;
         }
+        return false;
       }
+
+      // ----- Perform validation of the whole set of properties -------------
+      if (!callProcessGroups) // for groups this is called on each workspace separately
+      {
+        std::map<std::string, std::string> errors = this->validateInputs();
+        if (!errors.empty())
+        {
+          size_t numErrors = errors.size();
+          // Log each issue
+          auto & errorLog = getLogger().error();
+          auto & warnLog = getLogger().warning();
+          for (auto it = errors.begin(); it != errors.end(); it++)
+          {
+            if (this->existsProperty(it->first))
+              errorLog << "Invalid value for " << it->first << ": " << it->second << "\n";
+            else
+            {
+              numErrors -= 1; // don't count it as an error
+              warnLog << "validateInputs() references non-existant property \""
+                      << it->first << "\"\n";
+            }
+          }
+          // Throw because something was invalid
+          if (numErrors > 0)
+          {
+            notificationCenter().postNotification(new ErrorNotification(this,"Some invalid Properties found"));
+            throw std::runtime_error("Some invalid Properties found");
+          }
+        }
+      }
+
+      if(trackingHistory())
+      {
+        // count used for defining the algorithm execution order
+        // If history is being recorded we need to count this as a separate algorithm
+        // as the history compares histories by their execution number
+        ++Algorithm::g_execCount;
+            
+        //populate history record before execution so we can record child algorithms in it
+        AlgorithmHistory algHist;
+        m_history = boost::make_shared<AlgorithmHistory>(algHist);
+      }
+
+      // ----- Process groups -------------
       // If checkGroups() threw an exception but there ARE group workspaces
       // (means that the group sizes were incompatible)
       if (callProcessGroups)
-        return false;
+      {
+        // This calls this->execute() again on each member of the group.
+        start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
+        // Start a timer
+        Timer timer;
+        // Call the concrete algorithm's exec method
+        const bool completed = processGroups();
+        // Check for a cancellation request in case the concrete algorithm doesn't
+        interruption_point();
+        // Get how long this algorithm took to run
+        const float duration = timer.elapsed();
+
+        if(completed)
+        {
+          // Log that execution has completed.
+          reportCompleted(duration, true/*indicat that this is for group processing*/);
+        }
+        return completed;
+      }
 
       // Read or write locks every input/output workspace
       this->lockWorkspaces();
@@ -592,19 +624,6 @@ namespace Mantid
           { 
             Poco::FastMutex::ScopedLock _lock(m_mutex);
             m_running = true;
-          }
-          
-          
-          if(trackingHistory())
-          {
-            // count used for defining the algorithm execution order
-            // If history is being recorded we need to count this as a separate algorithm
-            // as the history compares histories by their execution number
-            ++Algorithm::g_execCount;
-            
-            //populate history record before execution so we can record child algorithms in it
-            AlgorithmHistory algHist;
-            m_history = boost::make_shared<AlgorithmHistory>(algHist);
           }
 
           start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
@@ -631,14 +650,9 @@ namespace Mantid
 
           // RJT, 19/3/08: Moved this up from below the catch blocks
           setExecuted(true);
-          if (!m_isChildAlgorithm || m_alwaysStoreInADS)
-          {
-            getLogger().notice() << name() << " successful, Duration "
-              << std::fixed << std::setprecision(2) << duration << " seconds" << std::endl;
-          }
-          else
-            getLogger().debug() << name() << " finished with isChild = " << isChild() << std::endl;
-          m_running = false;
+
+          // Log that execution has completed.
+          reportCompleted(duration);
         }
         catch(std::runtime_error& ex)
         {
@@ -1021,6 +1035,7 @@ namespace Mantid
       m_algorithmID = proxy.getAlgorithmID();
       setLogging(proxy.isLogging());
       setLoggingOffset(proxy.getLoggingOffset());
+      setAlgStartupLogging(proxy.getAlgStartupLogging());
       setChild(proxy.isChild());
     }
 
@@ -1042,15 +1057,35 @@ namespace Mantid
         // Loop over the output workspaces
         for (outWS = outputWorkspaces.begin(); outWS != outputWorkspaces.end(); ++outWS)
         {
+          WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(*outWS);
+
           // Loop over the input workspaces, making the call that copies their history to the output ones
           // (Protection against copy to self is in WorkspaceHistory::copyAlgorithmHistory)
           for (inWS = inputWorkspaces.begin(); inWS != inputWorkspaces.end(); ++inWS)
           {
             (*outWS)->history().addHistory( (*inWS)->getHistory() );
+
+            // Add history to each child of output workspace group
+            if(wsGroup)
+            {
+              for(size_t i = 0; i < wsGroup->size(); i++)
+              {
+                wsGroup->getItem(i)->history().addHistory( (*inWS)->getHistory() );
+              }
+            }
           }
 
           // Add the history for the current algorithm to all the output workspaces
           (*outWS)->history().addHistory(m_history);
+
+          // Add history to each child of output workspace group
+          if(wsGroup)
+          {
+            for(size_t i = 0; i < wsGroup->size(); i++)
+            {
+              wsGroup->getItem(i)->history().addHistory(m_history);
+            }
+          }
         }
       }
       //this is a child algorithm, but we still want to keep the history.
@@ -1176,13 +1211,16 @@ namespace Mantid
     {
       auto & logger = getLogger();
 
-      logger.notice() << name() << " started";
-      if (this->isChild())
-        logger.notice() << " (child)";
-      logger.notice() << std::endl;
-      // Make use of the AlgorithmHistory class, which holds all the info we want here
-      AlgorithmHistory AH(this);
-      logger.information() << AH;
+      if (m_isAlgStartupLoggingEnabled)
+      {
+        logger.notice() << name() << " started";
+        if (this->isChild())
+          logger.notice() << " (child)";
+        logger.notice() << std::endl;
+        // Make use of the AlgorithmHistory class, which holds all the info we want here
+        AlgorithmHistory AH(this);
+        logger.information() << AH;
+      }
     }
 
 
@@ -1614,8 +1652,50 @@ namespace Mantid
         if (m_cancel) throw CancelException();
     }
 
+    /**
+    Report that the algorithm has completed.
+    @param duration : Algorithm duration
+    @param groupProcessing : We have been processing via processGroups if true.
+    */
+    void Algorithm::reportCompleted(const double& duration, const bool groupProcessing)
+    {
+      std::string optionalMessage;
+      if(groupProcessing)
+      {
+        optionalMessage = ". Processed as a workspace group";
+      }
 
+      if (!m_isChildAlgorithm || m_alwaysStoreInADS)
+      {
+        if (m_isAlgStartupLoggingEnabled)
+        {
+          getLogger().notice() << name() << " successful, Duration "
+                << std::fixed << std::setprecision(2) << duration << " seconds" << optionalMessage << std::endl;
+        }
+      }
+      
+      else
+      {
+        getLogger().debug() << name() << " finished with isChild = " << isChild() << std::endl;
+      }
+      m_running = false;
+    }
 
+    /** Enable or disable Logging of start and end messages
+    @param enabled : true to enable logging, false to disable
+    */ 
+    void Algorithm::setAlgStartupLogging(const bool enabled) 
+    {
+      m_isAlgStartupLoggingEnabled = enabled;
+    }
+
+    /** return the state of logging of start and end messages
+    @returns : true to logging is enabled
+    */ 
+    bool Algorithm::getAlgStartupLogging() const
+    {
+      return m_isAlgStartupLoggingEnabled;
+    }
   } // namespace API
 
   //---------------------------------------------------------------------------

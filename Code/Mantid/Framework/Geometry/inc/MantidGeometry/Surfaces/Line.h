@@ -32,7 +32,7 @@ namespace Mantid
     Impliments the line 
     \f[ r=\vec{O} + \lambda \vec{n} \f]
 
-    Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -62,7 +62,7 @@ namespace Mantid
       Kernel::V3D Direct;   ///< Direction of outer surface (Unit Vector) 
 
       int lambdaPair(const int ix,const std::pair<std::complex<double>,
-        std::complex<double> >& SQ,std::vector<Kernel::V3D>& PntOut) const;
+        std::complex<double> >& SQ,std::list<Kernel::V3D>& PntOut) const;
 
     public: 
 
@@ -86,10 +86,10 @@ namespace Mantid
 
       int setLine(const Kernel::V3D&,const Kernel::V3D&);     ///< input Origin + direction
 
-      int intersect(std::vector<Kernel::V3D>&,const Quadratic&) const;
-      int intersect(std::vector<Kernel::V3D>&,const Cylinder&) const;
-      int intersect(std::vector<Kernel::V3D>&,const Plane&) const;
-      int intersect(std::vector<Kernel::V3D>&,const Sphere&) const;
+      int intersect(std::list<Kernel::V3D>&,const Quadratic&) const;
+      int intersect(std::list<Kernel::V3D>&,const Cylinder&) const;
+      int intersect(std::list<Kernel::V3D>&,const Plane&) const;
+      int intersect(std::list<Kernel::V3D>&,const Sphere&) const;
 
     };
 

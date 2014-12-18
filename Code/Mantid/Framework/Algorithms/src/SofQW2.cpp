@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/SofQW2.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Math/LaszloIntersection.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Math/Vertex2D.h"
@@ -68,6 +69,10 @@ namespace Mantid
 
       const size_t nTheta = m_thetaPts.size();
       const MantidVec & X = inputWS->readX(0);
+
+      // Holds the spectrum-detector mapping
+      std::vector<specid_t> specNumberMapping;
+      std::vector<detid_t> detIDMapping;
       
       // Select the calculate Q method based on the mode
       // rather than doing this repeatedly in the loop
@@ -82,20 +87,23 @@ namespace Mantid
         qCalculator = &SofQW2::calculateIndirectQ;
       }
 
-      PARALLEL_FOR2(inputWS, outputWS)
+      /* PARALLEL_FOR2(inputWS, outputWS) */
       for(int64_t i = 0; i < static_cast<int64_t>(nTheta); ++i) // signed for openmp
       {
-        PARALLEL_START_INTERUPT_REGION
+        /* PARALLEL_START_INTERUPT_REGION */
 
         const double theta = m_thetaPts[i];
         if( theta < 0.0 ) // One to skip
         {
           continue;
         }
+
+        IDetector_const_sptr det = inputWS->getDetector(i);
         double halfWidth(0.5*m_thetaWidth);
         const double thetaLower = theta - halfWidth;
         const double thetaUpper = theta + halfWidth;
-        const double efixed = m_EmodeProperties.getEFixed(inputWS->getDetector(i));
+        const double efixed = m_EmodeProperties.getEFixed(det);
+
         for(size_t j = 0; j < nenergyBins; ++j)
         {
           m_progress->report("Computing polygon intersections");
@@ -104,20 +112,35 @@ namespace Mantid
           const double dE_j = X[j];
           const double dE_jp1 = X[j+1];
 
+          const double lrQ = (this->*qCalculator)(efixed, dE_jp1,thetaLower,0.0);
+
           const V2D ll(dE_j, (this->*qCalculator)(efixed, dE_j,thetaLower,0.0));
-          const V2D lr(dE_jp1, (this->*qCalculator)(efixed, dE_jp1,thetaLower,0.0));
+          const V2D lr(dE_jp1, lrQ);
           const V2D ur(dE_jp1, (this->*qCalculator)(efixed, dE_jp1,thetaUpper,0.0));
           const V2D ul(dE_j, (this->*qCalculator)(efixed, dE_j,thetaUpper,0.0));
           Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
 
           rebinToOutput(inputQ, inputWS, i, j, outputWS, m_Qout);
+
+          // Find which q bin this point lies in
+          const MantidVec::difference_type qIndex = std::upper_bound(m_Qout.begin(), m_Qout.end(), lrQ) - m_Qout.begin();
+          if(qIndex != 0 && qIndex < static_cast<int>(m_Qout.size()))
+          {
+            // Add this spectra-detector pair to the mapping
+            specNumberMapping.push_back(outputWS->getSpectrum(qIndex - 1)->getSpectrumNo());
+            detIDMapping.push_back(det->getID());
+          }
         }
 
-        PARALLEL_END_INTERUPT_REGION
+        /* PARALLEL_END_INTERUPT_REGION */
       }
-      PARALLEL_CHECK_INTERUPT_REGION
+      /* PARALLEL_CHECK_INTERUPT_REGION */
 
       normaliseOutput(outputWS, inputWS);
+
+      // Set the output spectrum-detector mapping
+      SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
+      outputWS->updateSpectraUsing(outputDetectorMap);
     }
 
 

@@ -22,6 +22,7 @@ if ( NOT COMMONSETUP_DONE )
   include ( CommonSetup )
 endif ()
 
+option(BUILD_MATLAB_DEPENDENCIES "Build Mantid-Matlab interface in the case of Matlab was found" OFF)
 ###########################################################################
 # Look for dependencies - bail out if any necessary ones not found
 ###########################################################################
@@ -39,6 +40,15 @@ if ( boost_stdint )
 endif ()
 
 ###########################################################################
+# Globally-linked libraries variable
+###########################################################################
+
+# Might just as well link everything to Boost & Poco (found in CommonSetup)
+# Boost_LIBRARIES variable is redefined by MPISetup so capture the value here
+# and just add MPI stuff if required
+set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} )
+
+###########################################################################
 # MPI-enable build setup
 ###########################################################################
 
@@ -46,17 +56,10 @@ endif ()
 if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
   set ( MPI_BUILD OFF CACHE BOOL "Enable MPI options" )
   if ( MPI_BUILD )
-	include ( MPISetup )
+  include ( MPISetup )
+        set ( MANTIDLIBS  ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES} )
   endif ( MPI_BUILD )
 endif ()
-
-###########################################################################
-# Globally-linked libraries variable
-###########################################################################
-
-# Might just as well link everything to Boost & Poco (found in CommonSetup)
-# TCMalloc & MPI_CXX variables will be empty if not using
-set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${TCMALLOC_LIBRARY} ${MPI_CXX_LIBRARIES} )
 
 ###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go
@@ -81,11 +84,13 @@ add_subdirectory (API)
 set ( MANTIDLIBS ${MANTIDLIBS} API )
 
 add_subdirectory (PythonInterface)
-
-find_package ( Matlab )
-if( MATLAB_FOUND )
-  add_subdirectory (MatlabAPI)
-endif ()
+#
+if (BUILD_MATLAB_DEPENDENCIES)
+    find_package ( Matlab )
+    if( MATLAB_FOUND )
+        add_subdirectory (MatlabAPI)
+    endif ()
+endif()
 
 include_directories (DataObjects/inc)
 add_subdirectory (DataObjects)
@@ -100,7 +105,7 @@ add_subdirectory (CurveFitting)
 add_subdirectory (Crystal)
 add_subdirectory (ICat)
 add_subdirectory (LiveData)
-add_subdirectory (SINQ) 
+add_subdirectory (SINQ)
 
 # If an MPI-enabled build, add in the MPI-specific algorithms package
 if ( MPI_BUILD )
@@ -113,7 +118,7 @@ if ( OPENCL_BUILD )
   add_subdirectory ( GPUAlgorithms )
 endif ()
 
-# Unit test helper packages 
+# Unit test helper packages
 if ( CXXTEST_FOUND )
   add_subdirectory ( UserAlgorithms )
   # This needs to be here so that a Framework-only build will work.
@@ -131,14 +136,14 @@ add_subdirectory (ISISLiveData)
 # Add a custom target to build all of the Framework
 ###########################################################################
 
-set ( FRAMEWORK_LIBS Kernel Geometry API PythonKernelModule 
+set ( FRAMEWORK_LIBS Kernel Geometry API PythonKernelModule
                      PythonGeometryModule PythonAPIModule DataObjects
                      DataHandling Nexus Algorithms CurveFitting ICat
                      Crystal MDAlgorithms MDEvents WorkflowAlgorithms
                      LiveData ISISLiveData RemoteAlgorithms SINQ
 )
 
-add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} ) 
+add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} )
 
 ###########################################################################
 # Installation settings
@@ -148,7 +153,7 @@ add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} )
 ###########################################################################
 
 # Create instrument directory and make it writable so vtp files can go there
-install ( DIRECTORY ../instrument/ DESTINATION ${INBUNDLE}instrument 
+install ( DIRECTORY ../instrument/ DESTINATION ${INBUNDLE}instrument
           DIRECTORY_PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
                                 GROUP_READ GROUP_EXECUTE GROUP_WRITE
                                 WORLD_READ WORLD_EXECUTE WORLD_WRITE

@@ -29,7 +29,7 @@ namespace Mantid
        This is an implementation class for handling geometry from cache, if the cache doesn't exist then the 
        triangulation is done using another triangulation handler and store in cache.
 
-       Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+       Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
        This file is part of Mantid.
 
@@ -58,6 +58,7 @@ namespace Mantid
       CacheGeometryHandler(IObjComponent* obj); ///< Constructor
       CacheGeometryHandler(boost::shared_ptr<Object>       obj); ///< Constructor
       CacheGeometryHandler(Object* obj); ///< Constructor
+      boost::shared_ptr<GeometryHandler> clone() const;
       ~CacheGeometryHandler(); ///< Destructor
       GeometryHandler* createInstance(IObjComponent *comp);
       GeometryHandler* createInstance(boost::shared_ptr<Object> obj);

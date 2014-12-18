@@ -35,6 +35,7 @@
 #include <QPainter>
 #include <QPolygon>
 #include <QMessageBox>
+#include <QApplication>
 
 #include <qwt_plot.h>
 #include <qwt_scale_widget.h>
@@ -607,36 +608,61 @@ PlotCurve* LegendWidget::getCurve(const QString& s, int &point)
 	return curve;
 }
 
-void LegendWidget::mousePressEvent (QMouseEvent *)
+void LegendWidget::mousePressEvent (QMouseEvent * /*e*/)
 {
-    if (d_selector){
-        delete d_selector;
-		d_selector = NULL;
-	}
+  if (d_selector)
+  {
+    delete d_selector;
+    d_selector = NULL;
+  }
 
-  (dynamic_cast<Graph *>(d_plot->parent()))->activateGraph();
-  (dynamic_cast<Graph *>(d_plot->parent()))->deselectMarker();
+  Graph *g = (dynamic_cast<Graph*>(d_plot->parent()));
+  if (!g)
+    return;
+  g->activateGraph();
+  g->deselectMarker();
 
-    d_selector = new SelectionMoveResizer(this);
+  // Make sure the target of the new SelectionMoveResizer is the actual object being clicked.
+  // You cannot use 'this', that mixes up the labels and the last legend added (tickets #8891, #8851).
+  // Alternative way of guessing the widget being clicked (we have QMouseEvent* e here): 
+  // qApp->widgetAt(e->globalX(),e->globalY()))
+  LegendWidget *clickedWidget = dynamic_cast<LegendWidget*>(qApp->widgetAt(QCursor::pos()));
+
+  d_selector = new SelectionMoveResizer(clickedWidget);
   connect(d_selector, SIGNAL(targetsChanged()), dynamic_cast<Graph*>(d_plot->parent()), SIGNAL(modifiedGraph()));
-  (dynamic_cast<Graph *>(d_plot->parent()))->setSelectedText(this);
+  (dynamic_cast<Graph *>(d_plot->parent()))->setSelectedText(clickedWidget);
 }
 
 void LegendWidget::setSelected(bool on)
 {
-	if (on){
-		if (d_selector)
-			return;
-		else {
-			d_selector = new SelectionMoveResizer(this);
-      connect(d_selector, SIGNAL(targetsChanged()), dynamic_cast<Graph*>(d_plot->parent()), SIGNAL(modifiedGraph()));
-      (dynamic_cast<Graph *>(d_plot->parent()))->setSelectedText(this);
-		}
-	} else if (d_selector){
-		d_selector->close();
-		d_selector = NULL;
-    (dynamic_cast<Graph *>(d_plot->parent()))->setSelectedText(NULL);
-	}
+  if (on)
+  {
+    if (d_selector)
+    {
+      return;
+    }
+    else
+    {
+      LegendWidget *clickedWidget = dynamic_cast<LegendWidget*>(qApp->widgetAt(QCursor::pos()));
+      if (!clickedWidget)
+	return;
+      d_selector = new SelectionMoveResizer(clickedWidget);
+      Graph *g = (dynamic_cast<Graph*>(d_plot->parent()));
+      if (!g)
+	return;
+      connect(d_selector, SIGNAL(targetsChanged()), g, SIGNAL(modifiedGraph()));
+      g->setSelectedText(this);
+    }
+  }
+  else if (d_selector)
+  {
+    d_selector->close();
+    d_selector = NULL;
+    Graph *g = (dynamic_cast<Graph*>(d_plot->parent()));
+    if (!g)
+      return;
+    g->setSelectedText(NULL);
+  }
 }
 
 void LegendWidget::showTextEditor()

@@ -5,9 +5,8 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Material.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidKernel/V3D.h"
 #include <vector>
 
 
@@ -28,28 +27,28 @@ namespace Mantid
     //------------------------------------------------------------------------------
     class SampleEnvironment;
 
-    /** 
-      This class stores information about the sample used in particular 
+    /**
+      This class stores information about the sample used in particular
       run. It is a type of ObjComponent meaning it has a shape, a position
       and a material.
 
-      Copyright &copy; 2007-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-      
+      Copyright &copy; 2007-2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+
       This file is part of Mantid.
-      
+
       Mantid is free software; you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation; either version 3 of the License, or
       (at your option) any later version.
-      
+
       Mantid is distributed in the hope that it will be useful,
       but WITHOUT ANY WARRANTY; without even the implied warranty of
       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
       GNU General Public License for more details.
-      
+
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
-      
+
       File change history is stored at: <https://github.com/mantidproject/mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
@@ -82,10 +81,8 @@ namespace Mantid
 
       /** @name Material properties.*/
       //@{
-      /// Return the material
+      /// Return the material (convenience method)
       const Kernel::Material & getMaterial() const;
-      /// Set the type of material that this sample is composed from
-      void setMaterial(const Kernel::Material& material);
       //@}
 
       /** @name Access the environment information */
@@ -102,7 +99,7 @@ namespace Mantid
       const Geometry::OrientedLattice & getOrientedLattice() const;
       /// Get a reference to the sample's OrientedLattice
       Geometry::OrientedLattice & getOrientedLattice();
-      /** Set the pointer to OrientedLattice defining the sample's lattice and orientation. 
+      /** Set the pointer to OrientedLattice defining the sample's lattice and orientation.
           No copying is done in the class, but the class deletes pointer on destruction so the application, providing the pointer should not do it*/
       void setOrientedLattice(Geometry::OrientedLattice * latt);
       bool hasOrientedLattice() const;
@@ -129,18 +126,16 @@ namespace Mantid
       /// Sets the width
       void setWidth(double width);
       /// Returns the width
-      double getWidth() const;  
+      double getWidth() const;
       //@}
       /// Delete the oriented lattice
       void clearOrientedLattice();
 
-    private: 
+    private:
       /// The sample name
       std::string m_name;
       /// The sample shape object
       Geometry::Object m_shape;
-      /// The sample composition
-      Kernel::Material m_material;
       /// An owned pointer to the SampleEnvironment object
       boost::shared_ptr<SampleEnvironment> m_environment;
       /// Pointer to the OrientedLattice of the sample, NULL if not set.

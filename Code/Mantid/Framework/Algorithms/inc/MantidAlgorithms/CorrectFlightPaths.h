@@ -21,7 +21,7 @@ namespace Algorithms {
  @author Ricardo Ferraz Leal
  @date 30/01/2013
 
- Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 

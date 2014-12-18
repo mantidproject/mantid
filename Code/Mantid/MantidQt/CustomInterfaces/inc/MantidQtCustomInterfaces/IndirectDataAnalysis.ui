@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>IndirectDataAnalysis</class>
- <widget class="QWidget" name="IndirectDataAnalysis">
+ <widget class="QMainWindow" name="IndirectDataAnalysis">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>801</width>
+    <width>807</width>
     <height>638</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Indirect Data Analysis</string>
   </property>
+  <widget class="QWidget" name="centralwidget">
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTabWidget" name="tabWidget">
@@ -31,40 +32,38 @@
       </attribute>
       <layout class="QVBoxLayout" name="layoutElwin">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_16">
-         <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>41</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="findRunFiles" stdset="0">
-            <bool>false</bool>
-           </property>
-           <property name="label" stdset="0">
-            <string>Input File</string>
-           </property>
-           <property name="multipleFiles" stdset="0">
-            <bool>true</bool>
-           </property>
-           <property name="fileExtensions" stdset="0">
-            <stringlist>
-             <string>_red.nxs</string>
-             <string>_sqw.nxs</string>
-            </stringlist>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="elwin_pbPlotInput">
-           <property name="text">
-            <string>Plot Input</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="elwin_gbInput">
+         <property name="title">
+          <string>Input</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_16">
+          <item>
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>41</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="findRunFiles" stdset="0">
+             <bool>false</bool>
+            </property>
+            <property name="label" stdset="0">
+             <string>Input File</string>
+            </property>
+            <property name="multipleFiles" stdset="0">
+             <bool>true</bool>
+            </property>
+            <property name="fileExtensions" stdset="0">
+             <stringlist>
+              <string>_red.nxs</string>
+              <string>_sqw.nxs</string>
+             </stringlist>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -72,19 +71,51 @@
           <layout class="QVBoxLayout" name="elwin_properties"/>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="elwin_plot"/>
+          <layout class="QVBoxLayout" name="elwin_loPlotAndOptions">
+           <item>
+            <layout class="QHBoxLayout" name="elwin_loPreviewSelection">
+             <item>
+              <widget class="QLabel" name="elwin_lbPreviewFile">
+               <property name="text">
+                <string>Preview file:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="elwin_cbPreviewFile">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="elwin_lbPreviewSpec">
+               <property name="text">
+                <string>Spectrum:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="elwin_spPreviewSpec">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="elwin_plot"/>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>
        <item>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="4">
-          <widget class="QCheckBox" name="elwin_ckNormalise">
-           <property name="text">
-            <string>Normalise to Lowest Temperature</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="3">
           <spacer name="horizontalSpacer_28">
            <property name="orientation">
@@ -128,61 +159,53 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <item>
-          <widget class="QCheckBox" name="elwin_ckVerbose">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Verbose</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_8">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="elwin_ckPlot">
-           <property name="text">
-            <string>Plot Result</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_10">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="elwin_ckSave">
-           <property name="text">
-            <string>Save Result</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="elwin_gbOutput">
+         <property name="title">
+          <string>Output</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <spacer name="horizontalSpacer_8">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="elwin_ckPlot">
+            <property name="text">
+             <string>Plot Result</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_10">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="elwin_ckSave">
+            <property name="text">
+             <string>Save Result</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -192,31 +215,36 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_18">
-         <item>
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="msd_dsSampleInput" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="workspaceSuffixes" stdset="0">
-            <stringlist>
-             <string>_eq2</string>
-            </stringlist>
-           </property>
-           <property name="fileBrowserSuffixes" stdset="0">
-            <stringlist>
-             <string>_eq2.nxs</string>
-            </stringlist>
-           </property>
-           <property name="showLoad" stdset="0">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="msd_gbInput">
+         <property name="title">
+          <string>Input</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_18">
+          <item>
+           <widget class="MantidQt::MantidWidgets::DataSelector" name="msd_dsSampleInput" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="workspaceSuffixes" stdset="0">
+             <stringlist>
+              <string>_eq2</string>
+             </stringlist>
+            </property>
+            <property name="fileBrowserSuffixes" stdset="0">
+             <stringlist>
+              <string>_eq2.nxs</string>
+             </stringlist>
+            </property>
+            <property name="showLoad" stdset="0">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -229,6 +257,47 @@
             <layout class="QVBoxLayout" name="msd_plot"/>
            </item>
            <item>
+            <layout class="QHBoxLayout" name="msd_gpLegend">
+             <item>
+              <widget class="QPushButton" name="msd_pbSingle">
+               <property name="text">
+                <string>Fit Single Spectrum</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="msd_spLegendSpace">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="msd_lbLegendSample">
+               <property name="text">
+                <string>Sample</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="msd_lbLegendFit">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text">
+                <string>Fit</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
               <widget class="QLabel" name="label_51">
@@ -238,12 +307,12 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="msd_lePlotSpectrum">
-               <property name="maximumSize">
-                <size>
-                 <width>50</width>
-                 <height>16777215</height>
-                </size>
+              <widget class="QSpinBox" name="msd_spPlotSpectrum">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
                </property>
               </widget>
              </item>
@@ -277,18 +346,12 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="msd_leSpectraMin">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
+              <widget class="QSpinBox" name="msd_spSpectraMin">
+               <property name="maximum">
+                <number>0</number>
                </property>
-               <property name="maximumSize">
-                <size>
-                 <width>50</width>
-                 <height>16777215</height>
-                </size>
+               <property name="minimum">
+                <number>0</number>
                </property>
               </widget>
              </item>
@@ -306,18 +369,12 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="msd_leSpectraMax">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
+              <widget class="QSpinBox" name="msd_spSpectraMax">
+               <property name="maximum">
+                <number>0</number>
                </property>
-               <property name="maximumSize">
-                <size>
-                 <width>50</width>
-                 <height>16777215</height>
-                </size>
+               <property name="minimum">
+                <number>0</number>
                </property>
               </widget>
              </item>
@@ -328,91 +385,69 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_21">
-         <item>
-          <spacer name="horizontalSpacer_17">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Expanding</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>0</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="msd_pbSingle">
-           <property name="text">
-            <string>Fit Single Spectrum</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_8">
-         <item>
-          <widget class="QCheckBox" name="msd_ckVerbose">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Verbose</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_22">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="msd_ckPlot">
-           <property name="text">
-            <string>Plot Result</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_23">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="msd_ckSave">
-           <property name="text">
-            <string>Save Result</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="msd_gbOutput">
+         <property name="title">
+          <string>Output</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <widget class="QCheckBox" name="msd_ckVerbose">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Verbose</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_22">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="msd_ckPlot">
+            <property name="text">
+             <string>Plot Result</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_23">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="msd_ckSave">
+            <property name="text">
+             <string>Save Result</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -422,90 +457,97 @@
       </attribute>
       <layout class="QVBoxLayout" name="layoutFury">
        <item>
-        <layout class="QGridLayout" name="fury_layoutFiles">
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_6">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Resolution</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_52">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Sample</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1" colspan="2">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsInput" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="loadLabelText" stdset="0">
-            <string>Plot Input</string>
-           </property>
-           <property name="workspaceSuffixes" stdset="0">
-            <stringlist>
-             <string>_red</string>
-             <string>_sqw</string>
-            </stringlist>
-           </property>
-           <property name="fileBrowserSuffixes" stdset="0">
-            <stringlist>
-             <string>_red.nxs</string>
-             <string>_sqw.nxs</string>
-            </stringlist>
-           </property>
-           <property name="showLoad" stdset="0">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1" colspan="2">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsResInput" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="autoLoad" stdset="0">
-            <bool>false</bool>
-           </property>
-           <property name="workspaceSuffixes" stdset="0">
-            <stringlist>
-             <string>_res</string>
-             <string>_red</string>
-            </stringlist>
-           </property>
-           <property name="fileBrowserSuffixes" stdset="0">
-            <stringlist>
-             <string>_res.nxs</string>
-             <string>_red.nxs</string>
-            </stringlist>
-           </property>
-           <property name="showLoad" stdset="0">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="fury_gbInput">
+         <property name="title">
+          <string>Input</string>
+         </property>
+         <layout class="QGridLayout" name="fury_layoutFiles">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Resolution</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_52">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Sample</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="2">
+           <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsInput" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="loadLabelText" stdset="0">
+             <string>Plot Input</string>
+            </property>
+            <property name="workspaceSuffixes" stdset="0">
+             <stringlist>
+              <string>_red</string>
+              <string>_sqw</string>
+             </stringlist>
+            </property>
+            <property name="fileBrowserSuffixes" stdset="0">
+             <stringlist>
+              <string>_red.nxs</string>
+              <string>_sqw.nxs</string>
+             </stringlist>
+            </property>
+            <property name="showLoad" stdset="0">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" colspan="2">
+           <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsResInput" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="autoLoad" stdset="0">
+             <bool>true</bool>
+            </property>
+            <property name="workspaceSuffixes" stdset="0">
+             <stringlist>
+              <string>_res</string>
+              <string>_red</string>
+              <string>_sqw</string>
+             </stringlist>
+            </property>
+            <property name="fileBrowserSuffixes" stdset="0">
+             <stringlist>
+              <string>_res.nxs</string>
+              <string>_red.nxs</string>
+              <string>_sqw.nxs</string>
+             </stringlist>
+            </property>
+            <property name="showLoad" stdset="0">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_22">
@@ -518,61 +560,66 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_9">
-         <item>
-          <widget class="QCheckBox" name="fury_ckVerbose">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Verbose</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_7">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="fury_ckPlot">
-           <property name="text">
-            <string>Plot Result</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_18">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="fury_ckSave">
-           <property name="text">
-            <string>Save Result</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="fury_gbOutput">
+         <property name="title">
+          <string>Output</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <item>
+           <widget class="QCheckBox" name="fury_ckVerbose">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Verbose</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_7">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="fury_ckPlot">
+            <property name="text">
+             <string>Plot Result</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_18">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="fury_ckSave">
+            <property name="text">
+             <string>Save Result</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -582,86 +629,42 @@
       </attribute>
       <layout class="QVBoxLayout" name="layoutFuryFit">
        <item>
-        <layout class="QHBoxLayout" name="furyfit_layoutInput">
-         <item>
-          <widget class="QComboBox" name="furyfit_cbInputType">
-           <item>
-            <property name="text">
-             <string>File</string>
+        <widget class="QGroupBox" name="furyfit_gbInput">
+         <property name="title">
+          <string>Input</string>
+         </property>
+         <layout class="QHBoxLayout" name="furyfit_layoutInput">
+          <item>
+           <widget class="MantidQt::MantidWidgets::DataSelector" name="furyfit_dsSampleInput" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Workspace</string>
+            <property name="autoLoad" stdset="0">
+             <bool>true</bool>
             </property>
-           </item>
-          </widget>
-         </item>
-         <item>
-          <widget class="QStackedWidget" name="furyfit_swInput">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="currentIndex">
-            <number>0</number>
-           </property>
-           <widget class="QWidget" name="furyfit_page_inputFile">
-            <layout class="QHBoxLayout" name="horizontalLayout_19">
-             <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="furyfit_inputFile" native="true">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>41</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="findRunFiles" stdset="0">
-                <bool>false</bool>
-               </property>
-               <property name="label" stdset="0">
-                <string/>
-               </property>
-               <property name="multipleFiles" stdset="0">
-                <bool>false</bool>
-               </property>
-               <property name="fileExtensions" stdset="0">
-                <stringlist>
-                 <string>_iqt.nxs</string>
-                </stringlist>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="furyfit_pbPlotInput">
-               <property name="text">
-                <string>Plot Input</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <property name="workspaceSuffixes" stdset="0">
+             <stringlist>
+              <string>_iqt</string>
+             </stringlist>
+            </property>
+            <property name="fileBrowserSuffixes" stdset="0">
+             <stringlist>
+              <string>_iqt.nxs</string>
+             </stringlist>
+            </property>
+            <property name="showLoad" stdset="0">
+             <bool>false</bool>
+            </property>
+            <property name="autoLoad" stdset="0">
+             <bool>true</bool>
+            </property>
            </widget>
-           <widget class="QWidget" name="furyfit_page_inputWorkspace">
-            <layout class="QHBoxLayout" name="horizontalLayout_12">
-             <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="furyfit_wsIqt">
-               <property name="WorkspaceTypes" stdset="0">
-                <stringlist/>
-               </property>
-               <property name="Suffix" stdset="0">
-                <stringlist>
-                 <string>_iqt</string>
-                </stringlist>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </widget>
-         </item>
-        </layout>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_25">
@@ -753,18 +756,62 @@
             <layout class="QVBoxLayout" name="furyfit_vlPlot"/>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_27">
+            <layout class="QHBoxLayout" name="furyfit_gpLegend">
              <item>
-              <widget class="QLabel" name="furyfit_lbSpectra">
+              <widget class="QPushButton" name="furyfit_pbSingle">
                <property name="text">
-                <string>Spectrum:</string>
+                <string>Fit Single Spectrum</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="furyfit_leSpecNo">
+              <spacer name="furyfit_spLegendSpace">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="furyfit_lbLegendSample">
                <property name="text">
-                <string>0</string>
+                <string>Sample</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="furyfit_lbLegendFit">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text">
+                <string>Fit</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_27">
+             <item>
+              <widget class="QLabel" name="furyfit_lbSpectra">
+               <property name="text">
+                <string>Plot Spectrum:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="furyfit_spPlotSpectrum">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
                </property>
               </widget>
              </item>
@@ -781,82 +828,37 @@
                </property>
               </spacer>
              </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_26">
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_10"/>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_7">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_13">
              <item>
-              <widget class="QLabel" name="furyfit_lbPlotOutputSeq">
+              <widget class="QLabel" name="label_3">
                <property name="text">
-                <string>Plot Output: </string>
+                <string>Spectra Range:</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="furyfit_cbPlotOutput">
-               <item>
-                <property name="text">
-                 <string>None</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Intensity</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Tau</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Beta</string>
-                </property>
-               </item>
+              <widget class="QSpinBox" name="furyfit_spSpectraMin">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
               </widget>
              </item>
              <item>
-              <spacer name="horizontalSpacer_19">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>to</string>
                </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
+              </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="furyfit_pbSingle">
-               <property name="text">
-                <string>Fit Single Spectum</string>
+              <widget class="QSpinBox" name="furyfit_spSpectraMax">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
                </property>
               </widget>
              </item>
@@ -867,58 +869,92 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_14">
-         <item>
-          <widget class="QCheckBox" name="furyfit_ckVerbose">
-           <property name="text">
-            <string>Verbose</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_5">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="furyfit_ckPlotOutput">
-           <property name="text">
-            <string>Plot Output (Single Run)</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_20">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="furyfit_ckSaveSeq">
-           <property name="text">
-            <string>Save Result</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="furyfit_gbOutput">
+         <property name="title">
+          <string>Output</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QCheckBox" name="furyfit_ckVerbose">
+            <property name="text">
+             <string>Verbose</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="furyfit_lbPlotOutputSeq">
+            <property name="text">
+             <string>Plot Output: </string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="furyfit_cbPlotOutput">
+            <item>
+             <property name="text">
+              <string>None</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>All</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Intensity</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Tau</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Beta</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_20">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="furyfit_ckSaveSeq">
+            <property name="text">
+             <string>Save Result</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -928,92 +964,99 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_42">
        <item>
-        <layout class="QGridLayout" name="confit_layoutFiles">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_42">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Sample</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_32">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Resolution</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1" colspan="2">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="confit_dsSampleInput" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="autoLoad" stdset="0">
-            <bool>true</bool>
-           </property>
-           <property name="workspaceSuffixes" stdset="0">
-            <stringlist>
-             <string>_red</string>
-             <string>_sqw</string>
-            </stringlist>
-           </property>
-           <property name="fileBrowserSuffixes" stdset="0">
-            <stringlist>
-             <string>_red.nxs</string>
-             <string>_sqw.nxs</string>
-             <string>.sqw</string>
-             <string>.red</string>
-            </stringlist>
-           </property>
-           <property name="showLoad" stdset="0">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1" colspan="2">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="confit_dsResInput" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="autoLoad" stdset="0">
-            <bool>false</bool>
-           </property>
-           <property name="workspaceSuffixes" stdset="0">
-            <stringlist>
-             <string>_res</string>
-             <string>_red</string>
-            </stringlist>
-           </property>
-           <property name="fileBrowserSuffixes" stdset="0">
-            <stringlist>
-             <string>_res.nxs</string>
-             <string>_red.nxs</string>
-            </stringlist>
-           </property>
-           <property name="showLoad" stdset="0">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="confit_gbInput">
+         <property name="title">
+          <string>Input</string>
+         </property>
+         <layout class="QGridLayout" name="confit_layoutFiles">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_42">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Sample</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_32">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Resolution</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" colspan="2">
+           <widget class="MantidQt::MantidWidgets::DataSelector" name="confit_dsSampleInput" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="autoLoad" stdset="0">
+             <bool>true</bool>
+            </property>
+            <property name="workspaceSuffixes" stdset="0">
+             <stringlist>
+              <string>_red</string>
+              <string>_sqw</string>
+             </stringlist>
+            </property>
+            <property name="fileBrowserSuffixes" stdset="0">
+             <stringlist>
+              <string>_red.nxs</string>
+              <string>_sqw.nxs</string>
+              <string>.sqw</string>
+              <string>.red</string>
+             </stringlist>
+            </property>
+            <property name="showLoad" stdset="0">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="2">
+           <widget class="MantidQt::MantidWidgets::DataSelector" name="confit_dsResInput" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="autoLoad" stdset="0">
+             <bool>false</bool>
+            </property>
+            <property name="workspaceSuffixes" stdset="0">
+             <stringlist>
+              <string>_res</string>
+              <string>_red</string>
+              <string>_sqw</string>
+             </stringlist>
+            </property>
+            <property name="fileBrowserSuffixes" stdset="0">
+             <stringlist>
+              <string>_res.nxs</string>
+              <string>_red.nxs</string>
+              <string>_sqw.nxs</string>
+             </stringlist>
+            </property>
+            <property name="showLoad" stdset="0">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="confit_layoutPlotArea">
@@ -1139,120 +1182,16 @@
             <layout class="QHBoxLayout" name="confit_plot"/>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="confit_layoutSpectra">
+            <layout class="QHBoxLayout" name="confit_gpLegend">
              <item>
-              <widget class="QLabel" name="confit_lbSpecNo">
+              <widget class="QPushButton" name="confit_pbSingle">
                <property name="text">
-                <string>Spectra Range</string>
+                <string>Fit Single Spectrum</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="confit_leSpecNo">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>65</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>0</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="confit_lbTo">
-               <property name="text">
-                <string>to</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="confit_leSpecMax">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>65</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>-1</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="confit_layoutOuputOptions">
-         <item>
-          <layout class="QVBoxLayout" name="confit_layoutSeq_2"/>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="confit_layoutSeq">
-           <item>
-            <layout class="QHBoxLayout" name="confit_layoutSeqPlot">
-             <item>
-              <widget class="QLabel" name="confit_lbPlotSeq">
-               <property name="text">
-                <string>Plot Output:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="confit_cbPlotOutput">
-               <item>
-                <property name="text">
-                 <string>None</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>All</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Amplitude</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>FWHM</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_3">
+              <spacer name="confit_spLegendSpace">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
@@ -1265,9 +1204,87 @@
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="confit_pbSingle">
+              <widget class="QLabel" name="confit_lbLegendSample">
                <property name="text">
-                <string>Fit Single Spectrum</string>
+                <string>Sample</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="confit_lbLegendFit">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text">
+                <string>Fit</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="confit_layoutSpectra">
+             <item>
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Plot Spectrum:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="confit_spPlotSpectrum">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_15">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="confit_lbSpecNo">
+               <property name="text">
+                <string>Spectra Range:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="confit_spSpectraMin">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="confit_lbTo">
+               <property name="text">
+                <string>to</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="confit_spSpectraMax">
+               <property name="maximum">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <number>0</number>
                </property>
               </widget>
              </item>
@@ -1278,58 +1295,87 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_20">
-         <item>
-          <widget class="QCheckBox" name="confit_ckVerbose">
-           <property name="text">
-            <string>Verbose</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_21">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="confit_ckPlotOutput">
-           <property name="text">
-            <string>Plot Output (Single Run)</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_4">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="confit_ckSaveSeq">
-           <property name="text">
-            <string>Save Result</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="confit_gbOutput">
+         <property name="title">
+          <string>Output</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <item>
+           <widget class="QCheckBox" name="confit_ckVerbose">
+            <property name="text">
+             <string>Verbose</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_21">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="confit_lbPlotSeq">
+            <property name="text">
+             <string>Plot Output:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="confit_cbPlotOutput">
+            <item>
+             <property name="text">
+              <string>None</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>All</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Amplitude</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FWHM</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="confit_ckSaveSeq">
+            <property name="text">
+             <string>Save Result</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -1339,81 +1385,86 @@
       </attribute>
       <layout class="QVBoxLayout" name="layoutAbsF2P">
        <item>
-        <layout class="QGridLayout" name="gridLayout_11">
-         <item row="1" column="1">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="absp_dsCanInput" native="true">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="autoLoad" stdset="0">
-            <bool>true</bool>
-           </property>
-           <property name="workspaceSuffixes" stdset="0">
-            <stringlist>
-             <string>_red</string>
-             <string>_sqw</string>
-            </stringlist>
-           </property>
-           <property name="fileBrowserSuffixes" stdset="0">
-            <stringlist>
-             <string>_red.nxs</string>
-             <string>_sqw.nxs</string>
-            </stringlist>
-           </property>
-           <property name="showLoad" stdset="0">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="absp_ckUseCan">
-           <property name="text">
-            <string>Use Can:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="absp_dsSampleInput" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="autoLoad" stdset="0">
-            <bool>true</bool>
-           </property>
-           <property name="workspaceSuffixes" stdset="0">
-            <stringlist>
-             <string>_red</string>
-             <string>_sqw</string>
-            </stringlist>
-           </property>
-           <property name="fileBrowserSuffixes" stdset="0">
-            <stringlist>
-             <string>_red.nxs</string>
-             <string>_sqw.nxs</string>
-            </stringlist>
-           </property>
-           <property name="showLoad" stdset="0">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Input type:</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="absp_gbInput">
+         <property name="title">
+          <string>Input</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_11">
+          <item row="1" column="1">
+           <widget class="MantidQt::MantidWidgets::DataSelector" name="absp_dsCanInput" native="true">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="autoLoad" stdset="0">
+             <bool>true</bool>
+            </property>
+            <property name="workspaceSuffixes" stdset="0">
+             <stringlist>
+              <string>_red</string>
+              <string>_sqw</string>
+             </stringlist>
+            </property>
+            <property name="fileBrowserSuffixes" stdset="0">
+             <stringlist>
+              <string>_red.nxs</string>
+              <string>_sqw.nxs</string>
+             </stringlist>
+            </property>
+            <property name="showLoad" stdset="0">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="absp_ckUseCan">
+            <property name="text">
+             <string>Use Can:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="MantidQt::MantidWidgets::DataSelector" name="absp_dsSampleInput" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="autoLoad" stdset="0">
+             <bool>true</bool>
+            </property>
+            <property name="workspaceSuffixes" stdset="0">
+             <stringlist>
+              <string>_red</string>
+              <string>_sqw</string>
+             </stringlist>
+            </property>
+            <property name="fileBrowserSuffixes" stdset="0">
+             <stringlist>
+              <string>_red.nxs</string>
+              <string>_sqw.nxs</string>
+             </stringlist>
+            </property>
+            <property name="showLoad" stdset="0">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Input type:</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <widget class="QGroupBox" name="absp_gbShape">
@@ -2371,6 +2422,13 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
+        <widget class="QGroupBox" name="abscor_gbInput">
+         <property name="title">
+          <string>Input</string>
+         </property>
+         <layout class="QVBoxLayout" name="abscor_loInput">
+
+       <item>
         <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsSample" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -2398,6 +2456,17 @@
          </property>
         </widget>
        </item>
+
+     </layout>
+    </widget>
+   </item>
+
+       <item>
+        <widget class="QGroupBox" name="abscor_gbOptions">
+         <property name="title">
+          <string>Options</string>
+         </property>
+         <layout class="QHBoxLayout" name="abscor_loOptions">
        <item>
         <layout class="QGridLayout" name="gridLayout_4">
          <item row="0" column="0">
@@ -2440,16 +2509,18 @@
             </sizepolicy>
            </property>
            <property name="autoLoad" stdset="0">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
             <stringlist>
              <string>_red</string>
+             <string>_sqw</string>
             </stringlist>
            </property>
            <property name="fileBrowserSuffixes" stdset="0">
             <stringlist>
              <string>_red.nxs</string>
+             <string>_sqw.nxs</string>
             </stringlist>
            </property>
            <property name="showLoad" stdset="0">
@@ -2507,12 +2578,12 @@
            </property>
            <property name="workspaceSuffixes" stdset="0">
             <stringlist>
-             <string>_flt_Abs</string>
+             <string>_flt_abs</string>
             </stringlist>
            </property>
            <property name="fileBrowserSuffixes" stdset="0">
             <stringlist>
-             <string>_flt_Abs.nxs</string>
+             <string>_flt_abs.nxs</string>
             </stringlist>
            </property>
            <property name="showLoad" stdset="0">
@@ -2522,65 +2593,83 @@
          </item>
         </layout>
        </item>
-       <item>
-        <spacer name="abscor_verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
+        </layout>
+        </widget>
        </item>
+
+
+        <item>
+         <widget class="QGroupBox" name="abscor_gbPreview">
+          <property name="title">
+           <string>Preview</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_11">
+           <item>
+            <layout class="QVBoxLayout" name="abscor_plotPreview"/>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="abscor_plotLegend">
+             <item>
+              <widget class="QLabel" name="abscor_plotLSample">
+               <property name="text">
+                <string>Sample</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="abscor_plotLCan">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 0, 0);</string>
+               </property>
+               <property name="text">
+                <string>Can</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="abscor_plotLCorr">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(0, 255, 0);</string>
+               </property>
+               <property name="text">
+                <string>Corrected</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="abscor_lbPreviewSPec">
+               <property name="text">
+                <string>Spectrum:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="abscor_spPreviewSpec"/>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
        <item>
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
           <string>Output Options</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_33">
-            <item>
-             <spacer name="horizontalSpacer_9">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="abscor_ckPlotContrib">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>Plot Contributions</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_25">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </item>
           <item>
            <layout class="QHBoxLayout" name="abscor_layoutPlotOutput">
             <item>
@@ -2691,14 +2780,42 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Open interface help page in your web browser.</string>
+       </property>
        <property name="maximumSize">
         <size>
-         <width>20</width>
-         <height>20</height>
+         <width>25</width>
+         <height>25</height>
         </size>
        </property>
        <property name="text">
         <string>?</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pbPythonExport">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Export a Python script for the algorithms run on this tab.</string>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>30</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Py</string>
        </property>
       </widget>
      </item>
@@ -2745,6 +2862,7 @@
     </layout>
    </item>
   </layout>
+  </widget>
  </widget>
  <customwidgets>
   <customwidget>
@@ -2765,57 +2883,58 @@
  </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
-  <tabstop>elwin_pbPlotInput</tabstop>
-  <tabstop>elwin_ckVerbose</tabstop>
+  <tabstop>elwin_inputFile</tabstop>
+  <tabstop>leLogName</tabstop>
+  <tabstop>elwin_cbPreviewFile</tabstop>
+  <tabstop>elwin_spPreviewSpec</tabstop>
   <tabstop>elwin_ckPlot</tabstop>
   <tabstop>elwin_ckSave</tabstop>
+  <tabstop>msd_spPlotSpectrum</tabstop>
+  <tabstop>msd_spSpectraMin</tabstop>
+  <tabstop>msd_spSpectraMax</tabstop>
   <tabstop>msd_ckVerbose</tabstop>
   <tabstop>msd_ckPlot</tabstop>
   <tabstop>msd_ckSave</tabstop>
   <tabstop>fury_ckVerbose</tabstop>
   <tabstop>fury_ckPlot</tabstop>
   <tabstop>fury_ckSave</tabstop>
-  <tabstop>furyfit_cbInputType</tabstop>
+  <tabstop>furyfit_dsSampleInput</tabstop>
   <tabstop>furyfit_cbFitType</tabstop>
   <tabstop>furyfit_ckConstrainIntensities</tabstop>
   <tabstop>furyfit_ckPlotGuess</tabstop>
-  <tabstop>furyfit_leSpecNo</tabstop>
+  <tabstop>furyfit_ckConstrainBeta</tabstop>
+  <tabstop>furyfit_spPlotSpectrum</tabstop>
+  <tabstop>furyfit_spSpectraMin</tabstop>
+  <tabstop>furyfit_spSpectraMax</tabstop>
+  <tabstop>furyfit_pbSingle</tabstop>
+  <tabstop>furyfit_ckVerbose</tabstop>
+  <tabstop>furyfit_cbPlotOutput</tabstop>
+  <tabstop>furyfit_ckSaveSeq</tabstop>
+  <tabstop>confit_dsSampleInput</tabstop>
+  <tabstop>confit_dsResInput</tabstop>
   <tabstop>confit_cbFitType</tabstop>
   <tabstop>confit_cbBackground</tabstop>
+  <tabstop>confit_ckTempCorrection</tabstop>
+  <tabstop>confit_leTempCorrection</tabstop>
   <tabstop>confit_ckPlotGuess</tabstop>
-  <tabstop>confit_leSpecNo</tabstop>
-  <tabstop>confit_leSpecMax</tabstop>
-  <tabstop>confit_cbPlotOutput</tabstop>
-  <tabstop>abscor_cbPlotOutput</tabstop>
-  <tabstop>pbHelp</tabstop>
-  <tabstop>pbRun</tabstop>
-  <tabstop>pbManageDirs</tabstop>
-  <tabstop>elwin_inputFile</tabstop>
-  <tabstop>elwin_ckNormalise</tabstop>
-  <tabstop>leLogName</tabstop>
-  <tabstop>furyfit_inputFile</tabstop>
-  <tabstop>furyfit_pbPlotInput</tabstop>
-  <tabstop>furyfit_wsIqt</tabstop>
-  <tabstop>furyfit_ckConstrainBeta</tabstop>
-  <tabstop>furyfit_cbPlotOutput</tabstop>
-  <tabstop>furyfit_ckVerbose</tabstop>
-  <tabstop>furyfit_ckPlotOutput</tabstop>
-  <tabstop>furyfit_ckSaveSeq</tabstop>
   <tabstop>confit_ckTieCentres</tabstop>
+  <tabstop>confit_spPlotSpectrum</tabstop>
+  <tabstop>confit_spSpectraMin</tabstop>
+  <tabstop>confit_spSpectraMax</tabstop>
   <tabstop>confit_pbSingle</tabstop>
   <tabstop>confit_ckVerbose</tabstop>
-  <tabstop>confit_ckPlotOutput</tabstop>
+  <tabstop>confit_cbPlotOutput</tabstop>
   <tabstop>confit_ckSaveSeq</tabstop>
   <tabstop>absp_ckUseCan</tabstop>
   <tabstop>absp_cbShape</tabstop>
-  <tabstop>absp_leavar</tabstop>
-  <tabstop>absp_lewidth</tabstop>
   <tabstop>absp_lets</tabstop>
   <tabstop>absp_letc1</tabstop>
   <tabstop>absp_letc2</tabstop>
   <tabstop>absp_ler1</tabstop>
   <tabstop>absp_ler2</tabstop>
   <tabstop>absp_ler3</tabstop>
+  <tabstop>absp_leavar</tabstop>
+  <tabstop>absp_lewidth</tabstop>
   <tabstop>absp_lesamden</tabstop>
   <tabstop>absp_cbSampleInputType</tabstop>
   <tabstop>absp_lesamsigs</tabstop>
@@ -2834,9 +2953,12 @@
   <tabstop>abscor_ckScaleMultiplier</tabstop>
   <tabstop>abscor_leScaleMultiplier</tabstop>
   <tabstop>abscor_ckUseCorrections</tabstop>
-  <tabstop>abscor_ckPlotContrib</tabstop>
   <tabstop>abscor_ckVerbose</tabstop>
+  <tabstop>abscor_cbPlotOutput</tabstop>
   <tabstop>abscor_ckSave</tabstop>
+  <tabstop>pbHelp</tabstop>
+  <tabstop>pbRun</tabstop>
+  <tabstop>pbManageDirs</tabstop>
  </tabstops>
  <resources/>
  <connections/>

@@ -167,6 +167,7 @@ SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type, uint16_t
 	op.ver_major = ISISDS_MAJOR_VER;
 	op.ver_minor = ISISDS_MINOR_VER;
 	op.pid = 0;
+	op.pad[0] = 0;
 	op.access_type = access_type;
 	strncpy(op.user, "faa", sizeof(op.user));
 	strncpy(op.host, "localhost", sizeof(op.host));
@@ -176,9 +177,11 @@ SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type, uint16_t
 		closesocket(s);
 		return INVALID_SOCKET;
 	}
+  comm = NULL;
 	if (isisds_recv_command_alloc(s, &comm, (void**)&comm_data, &data_type, dims_array, &ndims) <= 0)
 	{
 		closesocket(s);
+    free(comm);
 		return INVALID_SOCKET;
 	}
 	if (comm_data != NULL)
@@ -255,7 +258,9 @@ int isisds_send_command(SOCKET s, const char* command, const void* data, ISISDSD
 	}
 	comm.len = sizeof(comm) + len_data;
 	comm.type = type;
-	strncpy(comm.command, command, sizeof(comm.command));
+  // fixing coverity warning: comm.command is filled with 0's by memset(&comm, 0, sizeof(comm)); above
+  // if strncpy reaches the limit the last character in comm.command is still '\0'
+	strncpy(comm.command, command, sizeof(comm.command)-1);
 	clear_replies(s);
 	n = send(s, (char*)&comm, sizeof(comm), 0);
 	if ( (n == sizeof(comm)) && (data != NULL) && (len_data > 0) )

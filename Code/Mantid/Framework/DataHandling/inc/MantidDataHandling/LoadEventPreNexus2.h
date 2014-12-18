@@ -18,7 +18,7 @@ namespace Mantid
 
     A data loading routine for SNS pre-nexus event files
     
-    Copyright &copy; 2010-11 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010-11 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -190,6 +190,12 @@ private:
   std::vector<std::vector<int64_t> > mSEpulseids;
   std::vector<std::vector<double> > mSEtofs;
 
+  /// Investigation properties
+  bool m_dbOutput;
+  int m_dbOpBlockNumber;
+  size_t m_dbOpNumEvents;
+  size_t m_dbOpNumPulses;
+
   void loadPixelMap(const std::string &filename);
 
   void openEventFile(const std::string &filename);
@@ -202,7 +208,8 @@ private:
 
   void procEvents(DataObjects::EventWorkspace_sptr & workspace);
 
-  void procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, std::vector<DataObjects::TofEvent> ** arrayOfVectors, DasEvent * event_buffer, size_t current_event_buffer_size, size_t fileOffset);
+  void procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, std::vector<DataObjects::TofEvent> ** arrayOfVectors, DasEvent * event_buffer,
+                        size_t current_event_buffer_size, size_t fileOffset, bool dbprint);
 
   void setProtonCharge(DataObjects::EventWorkspace_sptr & workspace);
 
@@ -217,6 +224,9 @@ private:
   API::MatrixWorkspace_sptr generateEventDistribtionWorkspace();
 
   void createOutputWorkspace(const std::string event_filename);
+
+  /// Processing the input properties for purpose of investigation
+  void processInvestigationInputs();
 
 };
 

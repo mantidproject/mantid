@@ -39,10 +39,18 @@ void Q1DWeighted::init()
 
   auto positiveInt = boost::make_shared<BoundedValidator<int> >();
   positiveInt->setLower(0);
-  declareProperty("NPixelDivision", 1, positiveInt,"Number of sub-pixels used for each detector pixel in each direction.The total number of sub-pixelswill be NPixelDivision*NPixelDivision.");
-
   auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
   positiveDouble->setLower(0);
+
+  declareProperty("NPixelDivision", 1, positiveInt,"Number of sub-pixels used for each detector pixel in each direction.The total number of sub-pixels will be NPixelDivision*NPixelDivision.");
+
+  // Wedge properties
+  declareProperty("NumberOfWedges", 2, positiveInt, "Number of wedges to calculate.");
+  declareProperty("WedgeAngle", 30.0, positiveDouble, "Opening angle of the wedge, in degrees.");
+  declareProperty("WedgeOffset", 0.0, positiveDouble, "Wedge offset relative to the horizontal axis, in degrees.");
+  declareProperty(new WorkspaceProperty<WorkspaceGroup>("WedgeWorkspace", "", Direction::Output, PropertyMode::Optional),
+      "Name for the WorkspaceGroup containing the wedge I(q) distributions.");
+
   declareProperty("PixelSizeX", 5.15, positiveDouble,
       "Pixel size in the X direction (mm).");
   declareProperty("PixelSizeY", 5.15, positiveDouble,
@@ -102,6 +110,32 @@ void Q1DWeighted::exec()
   // Beam line axis, to compute scattering angle
   V3D beamLine = samplePos - sourcePos;
 
+  // Get wedge properties
+  const int nWedges = getProperty("NumberOfWedges");
+  const double wedgeOffset = getProperty("WedgeOffset");
+  const double wedgeAngle = getProperty("WedgeAngle");
+
+  // Create wedge workspaces
+  bool isCone = false;
+  std::vector<MatrixWorkspace_sptr> wedgeWorkspaces;
+  for ( int iWedge = 0; iWedge < nWedges; iWedge++ )
+  {
+    double center_angle = 180.0/nWedges*iWedge;
+    if ( isCone ) center_angle *= 2.0;
+    center_angle += wedgeOffset;
+
+    MatrixWorkspace_sptr wedge_ws = WorkspaceFactory::Instance().create(inputWS,1,sizeOut,sizeOut-1);
+    wedge_ws->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
+    wedge_ws->setYUnitLabel("1/cm");
+    wedge_ws->isDistribution(true);
+    wedge_ws->setX(0,XOut);
+    wedge_ws->mutableRun().addProperty("wedge_angle", center_angle, "degrees", true);
+    wedgeWorkspaces.push_back(wedge_ws);
+  }
+
+  // Count histogram for wedge normalization
+  std::vector<std::vector<double>> wedge_XNormLambda(nWedges, std::vector<double>(sizeOut-1, 0.0));
+
   PARALLEL_FOR2(inputWS,outputWS)
   // Loop over all xLength-1 detector channels
   // Note: xLength -1, because X is a histogram and has a number of boundaries
@@ -113,6 +147,11 @@ void Q1DWeighted::exec()
     std::vector<double> lambda_iq(sizeOut-1, 0.0);
     std::vector<double> lambda_iq_err(sizeOut-1, 0.0);
     std::vector<double> XNorm(sizeOut-1, 0.0);
+
+    // Wedges
+    std::vector<std::vector<double>> wedge_lambda_iq(nWedges, std::vector<double>(sizeOut-1, 0.0));
+    std::vector<std::vector<double>> wedge_lambda_iq_err(nWedges, std::vector<double>(sizeOut-1, 0.0));
+    std::vector<std::vector<double>> wedge_XNorm(nWedges, std::vector<double>(sizeOut-1, 0.0));
 
     for (int i = 0; i < numSpec; i++)
     {
@@ -151,11 +190,24 @@ void Q1DWeighted::exec()
         int iq = 0;
 
         // Bin assignment depends on whether we have log or linear bins
-        if(binParams[1]>0.0)
+        if (binParams.size()==3)
         {
-          iq = (int)floor( (q-binParams[0])/ binParams[1] );
+          if(binParams[1]>0.0)
+          {
+            iq = (int)floor( (q-binParams[0])/ binParams[1] );
+          } else {
+            iq = (int)floor(log(q/binParams[0])/log(1.0-binParams[1]));
+          }
+        // If we got a more complicated binning, find the q bin the slow way
         } else {
-          iq = (int)floor(log(q/binParams[0])/log(1.0-binParams[1]));
+          for ( int i_qbin=0; i_qbin<(int)XOut.access().size()-1; i_qbin++)
+          {
+            if (q >= XOut.access()[i_qbin] && q < XOut.access()[(i_qbin+1)])
+            {
+              iq = i_qbin;
+              break;
+            }
+          }
         }
 
         if (iq>=0 && iq < sizeOut-1)
@@ -180,6 +232,23 @@ void Q1DWeighted::exec()
             lambda_iq[iq] += YIn[j]*w;
             lambda_iq_err[iq] += w*w*EIn[j]*EIn[j];
             XNorm[iq] += w;
+
+            // Fill in the wedge data
+            for ( int iWedge = 0; iWedge < nWedges; iWedge++ )
+            {
+              double center_angle = M_PI/nWedges*iWedge;
+              // For future option: if we set isCone to true, we can average only over a forward-going cone
+              if ( isCone ) center_angle *= 2.0;
+              center_angle += wedgeOffset;
+              V3D sub_pix = V3D(pos.X(), pos.Y(), 0.0);
+              double angle = fabs(sub_pix.angle( V3D(cos(center_angle), sin(center_angle), 0.0) ));
+              if ( angle < M_PI/180.0*wedgeAngle/2.0 || (!isCone && fabs(M_PI-angle) < M_PI/180.0*wedgeAngle/2.0) )
+              {
+                wedge_lambda_iq[iWedge][iq] += YIn[j]*w;
+                wedge_lambda_iq_err[iWedge][iq] += w*w*EIn[j]*EIn[j];
+                wedge_XNorm[iWedge][iq] += w;
+              }
+            }
           }
         }
       }
@@ -196,6 +265,19 @@ void Q1DWeighted::exec()
           EOut[k] += lambda_iq_err[k]/XNorm[k]/XNorm[k];
           XNormLambda[k] += 1.0;
         }
+
+        // Normalize wedges
+        for ( int iWedge = 0; iWedge < nWedges; iWedge++ )
+        {
+          if (wedge_XNorm[iWedge][k]>0)
+          {
+            MantidVec& wedgeYOut = wedgeWorkspaces[iWedge]->dataY(0);
+            MantidVec& wedgeEOut = wedgeWorkspaces[iWedge]->dataE(0);
+            wedgeYOut[k] += wedge_lambda_iq[iWedge][k] / wedge_XNorm[iWedge][k];
+            wedgeEOut[k] += wedge_lambda_iq_err[iWedge][k] / wedge_XNorm[iWedge][k] / wedge_XNorm[iWedge][k];
+            wedge_XNormLambda[iWedge][k] += 1.0;
+          }
+        }
       }
     }
     PARALLEL_END_INTERUPT_REGION
@@ -208,6 +290,32 @@ void Q1DWeighted::exec()
     YOut[i] /= XNormLambda[i];
     EOut[i] = sqrt(EOut[i])/XNormLambda[i];
   }
+  for ( int iWedge = 0; iWedge < nWedges; iWedge++ )
+  {
+    for ( int i = 0; i<sizeOut-1; i++ )
+    {
+      MantidVec& wedgeYOut = wedgeWorkspaces[iWedge]->dataY(0);
+      MantidVec& wedgeEOut = wedgeWorkspaces[iWedge]->dataE(0);
+      wedgeYOut[i] /= wedge_XNormLambda[iWedge][i];
+      wedgeEOut[i] = sqrt(wedgeEOut[i]) / wedge_XNormLambda[iWedge][i];
+    }
+  }
+
+  // Create workspace group that holds output workspaces
+  WorkspaceGroup_sptr wsgroup = WorkspaceGroup_sptr(new WorkspaceGroup());
+
+  for ( auto it = wedgeWorkspaces.begin(); it != wedgeWorkspaces.end(); ++it )
+  {
+    wsgroup->addWorkspace(*it);
+  }
+  // set the output property
+  std::string outputWSGroupName = getPropertyValue("WedgeWorkspace");
+  if (outputWSGroupName.size()==0) {
+    std::string outputWSName = getPropertyValue("OutputWorkspace");
+    outputWSGroupName = outputWSName + "_wedges";
+    setPropertyValue("WedgeWorkspace", outputWSGroupName);
+  }
+  setProperty("WedgeWorkspace", wsgroup);
 
 }
 

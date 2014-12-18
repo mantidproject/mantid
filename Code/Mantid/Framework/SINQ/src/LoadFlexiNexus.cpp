@@ -264,7 +264,7 @@ double LoadFlexiNexus::dblSqrt(double in)
 
 MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index, int length)
 {
-  static char *axisNames[] = {"x","y","z"};
+  static const char *axisNames[] = {"x","y","z"};
   std::map<std::string,std::string>::const_iterator it;
 
   // get a name

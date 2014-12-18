@@ -10,12 +10,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Cache.h"
 
-#ifndef HAS_UNORDERED_MAP_H
 #include <map>
-#else
-#include <tr1/unordered_map>
-#endif
-
 #include <vector>
 #include <typeinfo>
 
@@ -39,7 +34,7 @@ namespace Geometry
     @author Roman Tolchenov, Tessella Support Services plc
     @date 2/12/2008
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
     
     This file is part of Mantid.
     
@@ -59,34 +54,19 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-#ifndef HAS_UNORDERED_MAP_H
-    /// Parameter map iterator typedef
+  /// Parameter map iterator typedef
   typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator component_map_it;
   typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator component_map_cit;
-#else
-   /// Parameter map iterator typedef
-   typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator component_map_it;
-   typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator component_map_cit;
-#endif
 
   class MANTID_GEOMETRY_DLL ParameterMap
   {
   public:
-#ifndef HAS_UNORDERED_MAP_H
     /// Parameter map typedef
     typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
     /// Parameter map iterator typedef
     typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator pmap_it;
     /// Parameter map iterator typedef
     typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_cit;
-#else
-    /// Parameter map typedef
-    typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
-    /// Parameter map iterator typedef
-    typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator pmap_it;
-    /// Parameter map iterator typedef
-    typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_cit;
-#endif
     /// Default constructor
     ParameterMap();
     /// Returns true if the map is empty, false otherwise
@@ -285,6 +265,12 @@ namespace Geometry
     void saveNexus(::NeXus::File * file, const std::string & group) const;
     /// Copy pairs (oldComp->id,Parameter) to the m_map assigning the new newComp->id
     void copyFromParameterMap(const IComponent* oldComp,const IComponent* newComp, const ParameterMap *oldPMap);
+
+    /// Returns a list of all the parameter files loaded
+    const std::vector<std::string>& getParameterFilenames() const;
+    /// adds a parameter filename that has been loaded
+    void addParameterFilename(const std::string& filename);
+
     /// access iterators. begin;
     pmap_it begin(){return m_map.begin();}
     pmap_cit begin()const{return m_map.begin();}
@@ -300,6 +286,8 @@ namespace Geometry
     ///const version of the internal function to get position of the parameter in the parameter map
     component_map_cit positionOf(const IComponent* comp,const char *name, const char * type) const;
 
+    /// internal list of parameter files loaded
+    std::vector<std::string> m_parameterFileNames;
 
     /// internal parameter map instance
     pmap m_map;

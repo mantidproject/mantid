@@ -30,10 +30,10 @@ namespace Mantid
 namespace ComponentCreationHelper
 {
 
-  /** 
+  /**
   A set of helper functions for creating various component structures for the unit tests.
 
-  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -59,8 +59,8 @@ namespace ComponentCreationHelper
   /**
    * Create a capped cylinder object
    */
-  Mantid::Geometry::Object_sptr 
-  createCappedCylinder(double radius, double height, const Mantid::Kernel::V3D & baseCentre, 
+  Mantid::Geometry::Object_sptr
+  createCappedCylinder(double radius, double height, const Mantid::Kernel::V3D & baseCentre,
                const Mantid::Kernel::V3D & axis, const std::string & id);
   /**
    * Return the XML for a sphere.
@@ -69,9 +69,11 @@ namespace ComponentCreationHelper
   /**
    * Create a sphere object
    */
-  Mantid::Geometry::Object_sptr createSphere(double radius, const Mantid::Kernel::V3D & centre, const std::string & id);
+  Mantid::Geometry::Object_sptr createSphere(double radius,
+                                             const Mantid::Kernel::V3D & centre = Mantid::Kernel::V3D(),
+                                             const std::string & id = "sp-1");
   /** Create a cuboid shape for your pixels */
-  Mantid::Geometry::Object_sptr createCuboid(double x_side_length, double y_side_length = -1.0, 
+  Mantid::Geometry::Object_sptr createCuboid(double x_side_length, double y_side_length = -1.0,
                                  double z_side_length = -1.0);
   /**
   * Create a component assembly at the origin made up of 4 cylindrical detectors
@@ -84,7 +86,7 @@ namespace ComponentCreationHelper
   /**
    * Create a hollow shell, i.e. the intersection of two spheres or radius r1 and r2
    */
-  Mantid::Geometry::Object_sptr createHollowShell(double innerRadius, double outerRadius, 
+  Mantid::Geometry::Object_sptr createHollowShell(double innerRadius, double outerRadius,
                         const Mantid::Kernel::V3D & centre = Mantid::Kernel::V3D());
   /**
    * Create a detector group containing 5 detectors
@@ -98,7 +100,7 @@ namespace ComponentCreationHelper
    * Create a detector group containing detectors ring
    * R_min -- min radius of the ring
    * R_max -- max radius of the ring, center has to be in 0 position,
-   * z     -- axial z-coordinate of the detectors position; 
+   * z     -- axial z-coordinate of the detectors position;
     The detectors are the cylinders with 1.5cm height and 0.5 cm radius
    */
   boost::shared_ptr<Mantid::Geometry::DetectorGroup> createRingOfCylindricalDetectors(const double R_min=4.5, const double R_max=5, const double z=4);
@@ -107,7 +109,7 @@ namespace ComponentCreationHelper
    */
   boost::shared_ptr<Mantid::Geometry::DetectorGroup> createGroupOfTwoMonitors();
   /** create instrument with cylindrical detectors located in specific angular positions */
-  Mantid::Geometry::Instrument_sptr 
+  Mantid::Geometry::Instrument_sptr
   createCylInstrumentWithDetInGivenPosisions(const std::vector<double>& L2, const std::vector<double>& polar, const std::vector<double>& azim);
   /**
    * Create an test instrument with n panels of 9 cylindrical detectors, a source and spherical sample shape.

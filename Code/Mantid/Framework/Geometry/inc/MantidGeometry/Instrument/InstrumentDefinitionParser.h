@@ -40,7 +40,7 @@ namespace Geometry
     @author Anders Markvardsen, ISIS, RAL
     @date 7/3/2008
 
-    Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -78,7 +78,7 @@ namespace Geometry
     boost::shared_ptr<Instrument> parseXML(Kernel::ProgressBase * prog);
 
     /// Add/overwrite any parameters specified in instrument with param values specified in <component-link> XML elements
-    void setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pElem);
+    void setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pElem, Kernel::ProgressBase* progress = NULL);
 
     std::string getMangledName();
 

@@ -22,7 +22,11 @@ namespace LiveData
     Simulates ISIS histogram DAE. It runs continuously until canceled and listens to port 6789 for
     ISIS DAE commands.
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Data is generated starting at 10000 microseconds Time of flight, and each bin requested covers 100 microseconds.
+    The algorithm silently defines three additional spectra with numbers NSpectra+1, NSpectra+2 and NSpectra+3 in a
+    different time regime (they have different binning to the rest of the spectra).
+
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

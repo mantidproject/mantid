@@ -8,6 +8,7 @@
 #include "Poco/File.h"
 #include <cstdio>
 #include <cmath>
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <stdexcept>
 
 namespace Mantid
@@ -23,7 +24,7 @@ namespace Mantid
     *  @param stream :: the file object to write to
     *  @param format :: C string that contains the text to be written to the stream.
     *  @param ... :: Additional arguments to fill format specifiers
-    *  @throws std::runtime_error :: throws when there is a problem writing to disk, ususally disk space or permissions based
+    *  @throws std::runtime_error :: throws when there is a problem writing to disk, usually disk space or permissions based
     */
     #define FPRINTF_WITH_EXCEPTION(stream, format, ... ) if (fprintf(stream, format, ##__VA_ARGS__) <= 0)\
     {\
@@ -35,8 +36,8 @@ namespace Mantid
     using namespace API;
 
     ///@cond
-    const char NUM_FORM[] = "%10.3E";
-    const char NUMS_FORM[] = "%10.3E%10.3E%10.3E%10.3E%10.3E%10.3E%10.3E%10.3E\n";
+    const char NUM_FORM[] = "%-10.4G";
+    const char NUMS_FORM[] = "%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G\n";
     static const char Y_HEADER[] = "### S(Phi,w)\n";
     static const char E_HEADER[] = "### Errors\n";
     ///@endcond
@@ -53,7 +54,7 @@ namespace Mantid
     // Private member functions
     //---------------------------------------------------
     /**
-    * Initialise the algorithm
+    * Initialize the algorithm
     */
     void SaveSPE::init()
     {
@@ -219,7 +220,7 @@ namespace Mantid
           spuriousSpectra.push_back(i);
           writeMaskFlags(outFile);
         }
-        // make regular progress reports and check for cancelling the algorithm
+        // make regular progress reports and check for canceling the algorithm
         if ( i % progStep == 0 )
         {
           progress.report();
@@ -227,18 +228,49 @@ namespace Mantid
       }
       logMissingMasked(spuriousSpectra, nHist-nMasked, nMasked);
     }
+    /**  method verifies if a spectra contains any NaN or Inf values and replaces these values with SPE-specified constants
+      @param  inSignal :: the vector of the spectra signals 
+      @param  inErr  :: the vector of the spectra errors
+
+      @param  Signal   :: the vector of the verified spectra signals, containing masked values in place of NaN-s and Inf-S
+      @param  Error  :: the vector of the verified spectra errors, containing masked values in place of NaN-s and Inf-S of the correspondent signal
+
+    */
+    void SaveSPE::check_and_copy_spectra(const MantidVec &inSignal,const MantidVec &inErr,MantidVec &Signal,MantidVec &Error)const
+    {
+      if(Signal.size() != inSignal.size())
+      {
+        Signal.resize(inSignal.size());
+        Error.resize(inSignal.size());
+      }
+      for(size_t i=0;i<inSignal.size();i++)
+      {
+        if (boost::math::isnan(inSignal[i]) || boost::math::isinf(inSignal[i]))
+        {
+          Signal[i]=SaveSPE::MASK_FLAG;
+          Error[i] =SaveSPE::MASK_ERROR;
+        }
+        else
+        {
+          Signal[i]=inSignal[i];
+          Error[i] = inErr[i];
+        }
+
+      }
+    }
     /** Write the bin values and errors in a single histogram spectra to the file
     *  @param WS :: the workspace to being saved
     *  @param outFile :: the file object to write to
-    *  @param specIn :: the index number of the histgram to write
+    *  @param specIn :: the index number of the histogram to write
     */
     void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr WS, FILE * const outFile, const int specIn) const
     {
+      check_and_copy_spectra(WS->readY(specIn),WS->readE(specIn),m_tSignal,m_tError);
       FPRINTF_WITH_EXCEPTION(outFile,"%s", Y_HEADER);
-      writeBins(WS->readY(specIn), outFile);
+      writeBins(m_tSignal, outFile);
 
       FPRINTF_WITH_EXCEPTION(outFile,"%s", E_HEADER);
-      writeBins(WS->readE(specIn), outFile);
+      writeBins(m_tError, outFile);
     }
     /** Write the mask flags for in a histogram entry
     *  @param outFile :: the file object to write to
@@ -251,12 +283,13 @@ namespace Mantid
       FPRINTF_WITH_EXCEPTION(outFile,"%s", E_HEADER);
       writeValue(MASK_ERROR, outFile);
     }
-    /** Write the the values in the array to the file in the correct format
+    /** Write the values in the array to the file in the correct format
     *  @param Vs :: the array of values to write (must have length given by m_nbins)
     *  @param outFile :: the file object to write to
     */
     void SaveSPE::writeBins(const MantidVec &Vs, FILE * const outFile) const
     {
+
       for(size_t j = NUM_PER_LINE-1; j < m_nBins; j+=NUM_PER_LINE)
       {// output a whole line of numbers at once
         FPRINTF_WITH_EXCEPTION(outFile,NUMS_FORM,
@@ -271,8 +304,8 @@ namespace Mantid
         FPRINTF_WITH_EXCEPTION(outFile,"\n");
       }
     }
-    /** Write the the value the file a number of times given by m_nbins
-    *  @param value :: the value that will be writen continuely
+    /** Write the  value the file a number of times given by m_nbins
+    *  @param value :: the value that will be written continually
     *  @param outFile :: the file object to write to
     */
     void SaveSPE::writeValue(const double value, FILE * const outFile) const
@@ -295,7 +328,7 @@ namespace Mantid
     *  file
     *  @param inds :: the indices of histograms whose detectors couldn't be found
     *  @param nonMasked :: the number of histograms saved successfully
-    *  @param masked :: the number of histograms for which mask values were writen
+    *  @param masked :: the number of histograms for which mask values were written
     */
     void SaveSPE::logMissingMasked(const std::vector<int> &inds, const size_t nonMasked, const int masked) const
     {

@@ -8,7 +8,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/Instrument/XMLlogfile.h"
+#include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -114,6 +114,30 @@ namespace API
         << inst->getValidFromDate().toFormattedString("%Y-%b-%d")
         << " to " << inst->getValidToDate().toFormattedString("%Y-%b-%d") << ")";
     out << "\n";
+    if (!inst->getFilename().empty())
+    {
+      out << "Instrument from: " << inst->getFilename();
+      out << "\n";
+    }
+
+    //parameter files loaded
+    auto paramFileVector = this->instrumentParameters().getParameterFilenames();
+    for (auto itFilename = paramFileVector.begin(); itFilename != paramFileVector.end(); ++itFilename)
+    {
+      out << "Parameters from: " << *itFilename;
+      out << "\n";
+    }
+
+    std::string runStart = getAvailableWorkspaceStartDate();
+    std::string runEnd = getAvailableWorkspaceEndDate();
+    std::string msgNA = "not available";
+    if (runStart.empty())
+      runStart = msgNA;
+    if (runEnd.empty())
+      runEnd = msgNA;
+    out << "Run start: " << runStart << "\n";
+    out << "Run end:  " << runEnd << "\n";   // note extra space for pseudo/approx-alignment
+
     if (this->sample().hasOrientedLattice())
     {
       const Geometry::OrientedLattice & latt = this->sample().getOrientedLattice();
@@ -213,7 +237,7 @@ namespace API
    
     struct ParameterValue
     {
-      ParameterValue(const Geometry::XMLlogfile & paramInfo, 
+      ParameterValue(const Geometry::XMLInstrumentParameter & paramInfo, 
                      const API::Run & run) 
         : info(paramInfo), runData(run) {}
       
@@ -234,7 +258,7 @@ namespace API
         else if(boost::iequals(info.m_value, "yes")) return true;
         else return false;
       }
-      const Geometry::XMLlogfile & info;
+      const Geometry::XMLInstrumentParameter & info;
       const Run & runData;
     };
     ///@endcond
@@ -365,7 +389,6 @@ namespace API
   {
     if(m_detgroups.empty())
     {
-      g_log.debug("No detector mapping cached, getting detector from instrument");
       return getInstrument()->getDetector(detID);
     }
     else
@@ -766,11 +789,11 @@ namespace API
 
   //---------------------------------------------------------------------------------------
   /** Return workspace start date as an ISO 8601 string. If this info not stored in workspace the
-  *   method returns current date.
+  *   method returns current date. This date is used for example to retrieve the instrument file.
   *
-  *  @return workspace start date as a string
+  *  @return workspace start date as a string (current time if start date not available)
   */
-  std::string ExperimentInfo::getWorkspaceStartDate()
+  std::string ExperimentInfo::getWorkspaceStartDate() const
   {
     std::string date;
     try
@@ -781,6 +804,48 @@ namespace API
     {
       g_log.information("run_start/start_time not stored in workspace. Default to current date.");
       date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
+    }
+    return date;
+  }
+
+  //---------------------------------------------------------------------------------------
+  /** Return workspace start date as a formatted string (strftime, as
+   *  returned by Kernel::DateAndTime) string, if available. If
+   *  unavailable, an empty string is returned
+   *
+   *  @return workspace start date as a string (empty if no date available)
+   */
+  std::string ExperimentInfo::getAvailableWorkspaceStartDate() const
+  {
+    std::string date;
+    try
+    {
+      date = run().startTime().toFormattedString();
+    }
+    catch (std::runtime_error &)
+    {
+      g_log.information("Note: run_start/start_time not stored in workspace.");
+    }
+    return date;
+  }
+
+  //---------------------------------------------------------------------------------------
+  /** Return workspace end date as a formatted string (strftime style,
+   *  as returned by Kernel::DateAdnTime) string, if available. If
+   *  unavailable, an empty string is returned
+   *
+   *  @return workspace end date as a string (empty if no date available)
+   */
+  std::string ExperimentInfo::getAvailableWorkspaceEndDate() const
+  {
+    std::string date;
+    try
+    {
+      date = run().endTime().toFormattedString();
+    }
+    catch (std::runtime_error &)
+    {
+      g_log.information("Note: run_start/start_time not stored in workspace.");
     }
     return date;
   }
@@ -817,7 +882,7 @@ namespace API
     std::string instrument(Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
 
     // Get the search directory for XML instrument definition files (IDFs)
-    std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
+    const std::vector<std::string>& directoryNames = Kernel::ConfigService::Instance().getInstrumentDirectories();
 
     boost::regex regex(instrument+"_Definition.*\\.xml", boost::regex_constants::icase);
     Poco::DirectoryIterator end_iter;
@@ -826,38 +891,43 @@ namespace API
     std::string mostRecentIDF; // store most recently starting matching IDF if found, else most recently starting IDF.
     DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most recently starting IDF, if none match 
     DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine the most recently starting matching IDF 
-    for ( Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter; ++dir_itr )
+    for ( auto instDirs_itr = directoryNames.begin(); instDirs_itr != directoryNames.end(); ++instDirs_itr)
     {
-      if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
-
-      std::string l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
-      if ( regex_match(l_filenamePart, regex) )
+      //This will iterate around the directories from user ->etc ->install, and find the first beat file
+      std::string directoryName = *instDirs_itr;
+      for ( Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter; ++dir_itr )
       {
-        g_log.debug() << "Found file: '" << dir_itr->path() << "'\n";
-        std::string validFrom, validTo;
-        getValidFromTo(dir_itr->path(), validFrom, validTo);
-        g_log.debug() << "File '" << dir_itr->path() << " valid dates: from '" << validFrom << "' to '" << validTo << "'\n";
-        DateAndTime from(validFrom);
-        // Use a default valid-to date if none was found.
-        DateAndTime to;
-        if (validTo.length() > 0)
-          to.setFromISO8601(validTo);
-        else
-          to.setFromISO8601("2100-01-01T00:00:00");
+        if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
 
-        if ( from <= d && d <= to )
+        std::string l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
+        if ( regex_match(l_filenamePart, regex) )
         {
-          if( from > refDateGoodFile ) 
-          { // We'd found a matching file more recently starting than any other matching file found
-            foundGoodFile = true;
-            refDateGoodFile = from;
+          g_log.debug() << "Found file: '" << dir_itr->path() << "'\n";
+          std::string validFrom, validTo;
+          getValidFromTo(dir_itr->path(), validFrom, validTo);
+          g_log.debug() << "File '" << dir_itr->path() << " valid dates: from '" << validFrom << "' to '" << validTo << "'\n";
+          DateAndTime from(validFrom);
+          // Use a default valid-to date if none was found.
+          DateAndTime to;
+          if (validTo.length() > 0)
+            to.setFromISO8601(validTo);
+          else
+            to.setFromISO8601("2100-01-01T00:00:00");
+
+          if ( from <= d && d <= to )
+          {
+            if( from > refDateGoodFile ) 
+            { // We'd found a matching file more recently starting than any other matching file found
+              foundGoodFile = true;
+              refDateGoodFile = from;
+              mostRecentIDF = dir_itr->path();
+            }
+          }
+          if ( !foundGoodFile && ( from > refDate ) )
+          {  // Use most recently starting file, in case we don't find a matching file.
+            refDate = from;
             mostRecentIDF = dir_itr->path();
           }
-        }
-        if ( !foundGoodFile && ( from > refDate ) )
-        {  // Use most recently starting file, in case we don't find a matching file.
-          refDate = from;
-          mostRecentIDF = dir_itr->path();
         }
       }
     }
@@ -1099,7 +1169,7 @@ namespace API
    * @param runData A reference to the run object, which stores log value entries
    */
   void ExperimentInfo::populateWithParameter(Geometry::ParameterMap & paramMap,
-                                             const std::string & name, const Geometry::XMLlogfile & paramInfo,
+                                             const std::string & name, const Geometry::XMLInstrumentParameter & paramInfo,
                                              const Run & runData)
   {
     const std::string & category = paramInfo.m_type;

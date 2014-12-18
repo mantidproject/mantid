@@ -3,7 +3,7 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/XMLlogfile.h"
+#include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
@@ -1909,7 +1909,7 @@ namespace Geometry
         }
         
         auto cacheKey = std::make_pair(paramName, comp);
-        auto cacheValue = boost::shared_ptr<XMLlogfile>(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, resultUnit,
+        auto cacheValue = boost::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(logfileID, value, interpolation, formula, formulaUnit, resultUnit,
                                                                        paramName, type, tie, constraint, penaltyFactor, fittingFunction, 
                                                                        extractSingleValueAs, eq, comp, m_angleConvertConst));
         auto inserted = logfileCache.insert(std::make_pair(cacheKey,cacheValue));
@@ -1929,13 +1929,10 @@ namespace Geometry
   *
   *  @param instrument :: Instrument
   *  @param pRootElem ::  Associated Poco::XML element that may contain \<component-link\> elements
+  *  @param progress :: Optional progress object for reporting progress to an algorithm
   */
-  void InstrumentDefinitionParser::setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pRootElem)
+  void InstrumentDefinitionParser::setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pRootElem, Kernel::ProgressBase* progress)
   {
-    Poco::AutoPtr<NodeList> pNL_link = pRootElem->getElementsByTagName("component-link");
-    unsigned long numberLinks = pNL_link->length();
-
-
     // check if any logfile cache units set. As of this writing the only unit to check is if "angle=radian"
     std::map<std::string, std::string>& units = instrument->getLogfileUnit();
     std::map<std::string, std::string>::iterator unit_it;
@@ -1944,81 +1941,98 @@ namespace Geometry
       if ( unit_it->second == "radian" )
         m_angleConvertConst = 180.0/M_PI;
 
+    const std::string elemName = "component-link";
+    Poco::AutoPtr<NodeList> pNL_link = pRootElem->getElementsByTagName(elemName);
+    unsigned long numberLinks = pNL_link->length();
 
-    // Loop over all component-link elements of pRootElem
-    for (unsigned long iLink = 0; iLink < numberLinks; iLink++)
+    if(progress)
+      progress->resetNumSteps((int64_t)numberLinks, 0.0, 0.95);
+
+    Node* curNode = pRootElem->firstChild();
+    while(curNode)
     {
-      Element* pLinkElem = static_cast<Element*>(pNL_link->item(iLink));
-      std::string id = pLinkElem->getAttribute("id");
-      std::string name = pLinkElem->getAttribute("name");
-      std::vector<boost::shared_ptr<const Geometry::IComponent> > sharedIComp;
-
-      //If available, use the detector id as it's the most specific.
-      if(id.length() > 0)
+      if(curNode->nodeType() == Node::ELEMENT_NODE && curNode->nodeName() == elemName)
       {
-        int detid;
-        std::stringstream(id) >> detid;
-        boost::shared_ptr<const Geometry::IComponent> detector = instrument->getDetector((detid_t) detid);
+        Element* curElem = static_cast<Element*>(curNode);
 
-        //If we didn't find anything with the detector id, explain why to the user, and throw an exception.
-        if(!detector)
+        if(progress)
         {
-          g_log.error() << "Error whilst loading parameters. No detector found with id '" << detid << "'" << std::endl;
-          g_log.error() << "Please check that your detectors' ids are correct." << std::endl;
-          throw Kernel::Exception::InstrumentDefinitionError("Invalid detector id in component-link tag.");
+          if(progress->hasCancellationBeenRequested())
+            return;
+          progress->report("Loading parameters");
         }
 
-        sharedIComp.push_back(detector);
+        std::string id = curElem->getAttribute("id");
+        std::string name = curElem->getAttribute("name");
+        std::vector<boost::shared_ptr<const Geometry::IComponent> > sharedIComp;
 
-        //If the user also supplied a name, make sure it's consistent with the detector id.
-        if(name.length() > 0)
+        //If available, use the detector id as it's the most specific.
+        if(id.length() > 0)
         {
-          auto comp = boost::dynamic_pointer_cast<const IComponent>(detector);
-          if(comp)
+          int detid;
+          std::stringstream(id) >> detid;
+          boost::shared_ptr<const Geometry::IComponent> detector = instrument->getDetector((detid_t) detid);
+
+          //If we didn't find anything with the detector id, explain why to the user, and throw an exception.
+          if(!detector)
           {
-            bool consistent = (comp->getFullName() == name || comp->getName() == name);
-            if(!consistent)
+            g_log.error() << "Error whilst loading parameters. No detector found with id '" << detid << "'" << std::endl;
+            g_log.error() << "Please check that your detectors' ids are correct." << std::endl;
+            throw Kernel::Exception::InstrumentDefinitionError("Invalid detector id in component-link tag.");
+          }
+
+          sharedIComp.push_back(detector);
+
+          //If the user also supplied a name, make sure it's consistent with the detector id.
+          if(name.length() > 0)
+          {
+            auto comp = boost::dynamic_pointer_cast<const IComponent>(detector);
+            if(comp)
             {
-              g_log.warning() << "Error whilst loading parameters. Name '" << name << "' does not match id '" << detid << "'." << std::endl;
-              g_log.warning() << "Parameters have been applied to detector with id '" << detid << "'. Please check the name is correct." << std::endl;
+              bool consistent = (comp->getFullName() == name || comp->getName() == name);
+              if(!consistent)
+              {
+                g_log.warning() << "Error whilst loading parameters. Name '" << name << "' does not match id '" << detid << "'." << std::endl;
+                g_log.warning() << "Parameters have been applied to detector with id '" << detid << "'. Please check the name is correct." << std::endl;
+              }
+            }
+          }
+        }
+        else
+        {
+          //No detector id given, fall back to using the name
+
+          if( name.find('/',0) == std::string::npos )
+          { // Simple name, look for all components of that name.
+              sharedIComp = instrument->getAllComponentsWithName(name);
+          }
+          else
+          { // Pathname given. Assume it is unique.
+            boost::shared_ptr<const Geometry::IComponent> shared = instrument->getComponentByName(name);
+            sharedIComp.push_back( shared );
+          }
+        }
+
+        for (size_t i = 0; i < sharedIComp.size(); i++)
+        {
+          boost::shared_ptr<const Geometry::Component> sharedComp = boost::dynamic_pointer_cast<const Geometry::Component>(sharedIComp[i]);
+          if ( sharedComp )
+          {
+            //Not empty Component
+            if (sharedComp->isParametrized())
+            {
+              setLogfile(sharedComp->base(), curElem, instrument->getLogfileCache());
+            }
+            else
+            {
+              setLogfile(sharedIComp[i].get(), curElem, instrument->getLogfileCache());
             }
           }
         }
       }
-      else
-      {
-        //No detector id given, fall back to using the name
-
-        if( name.find('/',0) == std::string::npos )
-        { // Simple name, look for all components of that name.
-            sharedIComp = instrument->getAllComponentsWithName(name);
-        }
-        else
-        { // Pathname given. Assume it is unique.
-          boost::shared_ptr<const Geometry::IComponent> shared = instrument->getComponentByName(name);
-          sharedIComp.push_back( shared );
-        }
-      }
-
-      for (size_t i = 0; i < sharedIComp.size(); i++)
-      {
-        boost::shared_ptr<const Geometry::Component> sharedComp = boost::dynamic_pointer_cast<const Geometry::Component>(sharedIComp[i]);
-        if ( sharedComp )
-        {
-          //Not empty Component
-          if (sharedComp->isParametrized())
-          {
-            setLogfile(sharedComp->base(), pLinkElem, instrument->getLogfileCache());
-          }
-          else
-          {
-            setLogfile(sharedIComp[i].get(), pLinkElem, instrument->getLogfileCache());
-          }
-        }
-      }
+      curNode = curNode->nextSibling();
     }
   }
-
 
   /**
   Check that the cache file does actually exist and that it was modified last after the last modification to the xml def file. i.e. the vtp file contains the

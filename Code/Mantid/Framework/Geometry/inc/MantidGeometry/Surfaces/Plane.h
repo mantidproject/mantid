@@ -30,7 +30,7 @@ namespace Mantid
     Defines a plane and a normal and a distance from
     the origin
 
-    Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -82,7 +82,7 @@ namespace Mantid
       double distance(const Kernel::V3D&) const;      ///< distance from a point
 
       double getDistance() const { return Dist; }  ///< Distance from origin
-      Kernel::V3D getNormal() const { return NormV; }    ///< Normal to plane (+ve surface)
+      const Kernel::V3D & getNormal() const { return NormV; }    ///< Normal to plane (+ve surface)
 
       void rotate(const Kernel::Matrix<double>&);
       void displace(const Kernel::V3D&);

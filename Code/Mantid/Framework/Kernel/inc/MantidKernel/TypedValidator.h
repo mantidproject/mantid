@@ -20,7 +20,7 @@ namespace Mantid
 
     A specialised type exists for boost::shared_ptr types
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -113,7 +113,13 @@ namespace Mantid
        */
       ElementType_sptr extractValue(const boost::any & value) const
       {
+// Despite the name and hash code being identical, operator== is returning false in Release mode
+// with clang and libc++. The simplest workaround is to compare hash codes.
+#ifdef __clang__
+        if( value.type().hash_code() == m_dataitemTypeID.hash_code() )
+#else
         if( value.type() == m_dataitemTypeID )
+#endif
         {
           return extractFromDataItem(value);
         }

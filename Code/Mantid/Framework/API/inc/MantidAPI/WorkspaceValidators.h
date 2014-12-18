@@ -22,7 +22,7 @@ namespace API
     @author Russell Taylor, Tessella Support Services plc
     @date 16/09/2008
 
-    Copyright &copy; 2008-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -222,20 +222,8 @@ private:
   std::string checkValidity( const MatrixWorkspace_sptr& value ) const
   {
     if ( !value ) return "Enter an existing workspace"; 
-    //there being only one or zero histograms is accepted as not being an error
-    if ( !value->blocksize() || value->getNumberHistograms() < 2) return "";
-    //otherwise will compare some of the data, to save time just check two the first and the last
-    const size_t lastSpec = value->getNumberHistograms() - 1;
-    // Quickest check is to see if they are actually the same vector
-    if ( &(value->readX(0)[0]) == &(value->readX(lastSpec)[0]) ) return "";
-    // Now check numerically
-    const double first = std::accumulate(value->readX(0).begin(),value->readX(0).end(),0.);
-    const double last = std::accumulate(value->readX(lastSpec).begin(),value->readX(lastSpec).end(),0.);
-    if ( std::abs(first-last)/std::abs(first+last) > 1.0E-9 )
-    {
-      return "The workspace must have common bin boundaries for all histograms";
-    }
-    return "";
+    if ( value->isCommonBins() ) return "";
+    else return "The workspace must have common bin boundaries for all histograms";
   }
 
 };

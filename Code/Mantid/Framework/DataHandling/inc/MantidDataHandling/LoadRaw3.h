@@ -21,10 +21,10 @@ namespace Mantid
 
     Loads an file in ISIS RAW format and stores it in a 2D workspace
     (Workspace2D class). LoadRaw is an algorithm and LoadRawHelper class and
-	overrides the init() & exec() methods.
+  overrides the init() & exec() methods.
     LoadRaw3 uses less memory by only loading up the datablocks as required.
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -71,12 +71,6 @@ namespace Mantid
 
       /// returns true if the given spectrum is a monitor
       bool isMonitor(const std::vector<specid_t>& monitorIndexes,specid_t spectrumNum);
-      /// returns true if the Exclude Monitor option(property) selected
-      bool isExcludeMonitors(const std::string &monitorOption);
-      ///  returns true if the Separate Monitor Option  selected
-      bool isSeparateMonitors(const std::string &monitorOption);
-      ///  returns true if the Include Monitor Option  selected
-      bool isIncludeMonitors(const std::string &monitorOption);
 
       /// validate workspace sizes
       void validateWorkspaceSizes( bool bexcludeMonitors ,bool bseparateMonitors,
@@ -127,8 +121,6 @@ namespace Mantid
 
       /// Read in the time bin boundaries
       int64_t m_lengthIn;
-      /// boolean for list spectra options
-      bool m_bmspeclist;
       /// time channels vector
       std::vector<boost::shared_ptr<MantidVec> > m_timeChannelsVec;
       /// total number of specs

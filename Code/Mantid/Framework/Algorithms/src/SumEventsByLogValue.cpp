@@ -48,7 +48,11 @@ namespace Algorithms
   {
     std::map<std::string, std::string> errors;
 
+    // check for null pointers - this is to protect against workspace groups
     m_inputWorkspace = getProperty("InputWorkspace");
+    if (!m_inputWorkspace) {
+      return errors;
+    }
 
     // This only works for unweighted events
     // TODO: Either turn this check into a proper validator or amend the algorithm to work for weighted events

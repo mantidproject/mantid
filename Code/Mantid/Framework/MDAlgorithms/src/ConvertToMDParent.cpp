@@ -188,6 +188,30 @@ namespace Mantid
 
           if(oldInstrName==currentWSInstrumentName)
           { 
+            // a direct mode instrument can be unchanged but incident energy can be different.
+            // It is cheap operation so we should always replace incident energy on the target workspace
+            bool hasEi= InWS2D->run().hasProperty("Ei");
+            bool hasEfix= InWS2D->run().hasProperty("eFixed");
+            if (hasEi||hasEfix)
+            {
+
+              double Ei;
+              if (hasEi) Ei=InWS2D->run().getPropertyValueAsType<double>("Ei");
+              if (hasEfix) Ei=InWS2D->run().getPropertyValueAsType<double>("eFixed");
+
+              TargTableWS->logs()->addProperty<double>("Ei",Ei,true);           
+            }
+            else
+            {
+              Emode = Kernel::DeltaEMode().fromString(dEModeRequested);
+              if(Emode==Kernel::DeltaEMode::Direct)
+                  throw(std::invalid_argument("Input neutron's energy has to be present at the workspace as Ei or eFixed number log in Direct inelastic mode"));
+              //if(Emode==Kernel::DeltaEMode::Indirect && !hasEfix)
+              //    throw(std::invalid_argument("Input neutron's energy has to be present at the workspace as eFixed number log in Indirect inelastic mode"));
+
+            }
+ 
+
             if(!updateMasks) return TargTableWS;
             //Target workspace with preprocessed detectors exists and seems is correct one. 
             // We still need to update masked detectors information

@@ -21,6 +21,7 @@ DECLARE_ALGORITHM(MaskDetectors)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 using Geometry::Instrument_const_sptr;
 using Geometry::IDetector_const_sptr;
 using namespace DataObjects;
@@ -37,7 +38,7 @@ MaskDetectors::~MaskDetectors() {}
 void MaskDetectors::init()
 {
   declareProperty(
-    new WorkspaceProperty<>("Workspace","", Direction::InOut),
+    new WorkspaceProperty<Workspace>("Workspace","", Direction::InOut),
     "The name of the input and output workspace on which to perform the algorithm." );
   declareProperty(new ArrayProperty<specid_t>("SpectraList"),
     "An ArrayProperty containing a list of spectra to mask" );
@@ -63,7 +64,14 @@ void MaskDetectors::init()
 void MaskDetectors::exec()
 {
   // Get the input workspace
-  const MatrixWorkspace_sptr WS = getProperty("Workspace");
+  Workspace_sptr propWS = getProperty("Workspace");
+  MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(propWS);
+  PeaksWorkspace_sptr peaksWS = boost::dynamic_pointer_cast<PeaksWorkspace>(propWS);
+  if (peaksWS)
+  {
+	  execPeaks(peaksWS);
+	  return;
+  }
 
   // Is it an event workspace?
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
@@ -189,7 +197,88 @@ void MaskDetectors::exec()
   */
   WS->rebuildNearestNeighbours();
 }
+/*
+ * Peaks exec body
+ * @param WS :: The input peaks workspace to be masked
+ */
+void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS)
+{
+  std::vector<detid_t> detectorList = getProperty("DetectorList");
+  const MatrixWorkspace_sptr prevMasking = getProperty("MaskedWorkspace");
 
+  // each one of these values is optional but the user can't leave all four blank
+  if ( detectorList.empty() && !prevMasking )
+  {
+    g_log.information(name() + ": There is nothing to mask, "
+		      "detector lists and masked workspace properties are all empty");
+    return;
+  }
+
+  // Need to get hold of the parameter map and instrument
+  Geometry::ParameterMap& pmap = WS->instrumentParameters();
+  Instrument_const_sptr instrument = WS->getInstrument();
+
+  // If we have a workspace that could contain masking,copy that in too
+
+  if( prevMasking )
+  {
+    DataObjects::MaskWorkspace_sptr maskWS = boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
+    if (maskWS)
+    {
+    	Geometry::ParameterMap& maskPmap = maskWS->instrumentParameters();
+    	Instrument_const_sptr maskInstrument = maskWS->getInstrument();
+      if (maskInstrument->getDetectorIDs().size() != WS->getInstrument()->getDetectorIDs().size())
+      {
+        throw std::runtime_error("Size mismatch between input Workspace and MaskWorkspace");
+      }
+
+      g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name() << ")" << std::endl;
+      std::vector<detid_t> detectorIDs = maskInstrument->getDetectorIDs();
+      std::vector<detid_t>::const_iterator it;
+      for (it = detectorIDs.begin(); it != detectorIDs.end(); ++it)
+      {
+        try
+        {
+          if ( const Geometry::ComponentID det = maskInstrument->getDetector(*it)->getComponentID() )
+          {
+        	Geometry::Parameter_sptr maskedParam = maskPmap.get(det, "masked");
+        	int detID =static_cast<int>( maskInstrument->getDetector(*it)->getID());
+            if (maskedParam) detectorList.push_back(detID);
+          }
+        }
+        catch(Kernel::Exception::NotFoundError &e)
+        {
+          g_log.warning() << e.what() << " Found while running MaskDetectors" << std::endl;
+        }
+      }
+    }
+  }
+
+
+
+  // If explicitly given a list of detectors to mask, just mark those.
+  // Otherwise, mask all detectors pointing to the requested spectra in indexlist loop below
+  std::vector<detid_t>::const_iterator it;
+  if ( !detectorList.empty() )
+  {
+    for (it = detectorList.begin(); it != detectorList.end(); ++it)
+    {
+      try
+      {
+        if ( const Geometry::ComponentID det = instrument->getDetector(*it)->getComponentID() )
+        {
+          pmap.addBool(det,"masked",true);
+        }
+      }
+      catch(Kernel::Exception::NotFoundError &e)
+      {
+        g_log.warning() << e.what() << " Found while running MaskDetectors" << std::endl;
+      }
+    }
+  }
+
+
+}
 /**
  * Convert a list of spectra numbers into the corresponding workspace indices
  * @param indexList :: An output index list from the given spectra list

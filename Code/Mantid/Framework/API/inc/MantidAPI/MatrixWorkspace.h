@@ -16,6 +16,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidKernel/EmptyValues.h"
 
 
 namespace Mantid
@@ -33,13 +34,20 @@ namespace Mantid
   {
     class SpectrumDetectorMapping;
 
+    /// typedef for the image type
+    typedef std::vector<std::vector<double>> MantidImage;
+    /// shared pointer to MantidImage
+    typedef boost::shared_ptr<MantidImage> MantidImage_sptr;
+    /// shared pointer to const MantidImage
+    typedef boost::shared_ptr<const MantidImage> MantidImage_const_sptr;
+
     //----------------------------------------------------------------------
     /** Base MatrixWorkspace Abstract Class.
 
     @author Laurent C Chapon, ISIS, RAL
     @date 26/09/2007
 
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -167,7 +175,7 @@ namespace Mantid
       const MantidVec& readDx(size_t const index) const { return getSpectrum(index)->dataDx(); }
 
       /// Returns the x data
-      virtual MantidVec& dataX(const std::size_t index) { return getSpectrum(index)->dataX(); }
+      virtual MantidVec& dataX(const std::size_t index) { invalidateCommonBinsFlag(); return getSpectrum(index)->dataX(); }
       /// Returns the y data
       virtual MantidVec& dataY(const std::size_t index) { return getSpectrum(index)->dataY(); }
       /// Returns the error data
@@ -192,13 +200,13 @@ namespace Mantid
       virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const { return getSpectrum(index)->ptrX(); }
 
       /// Set the specified X array to point to the given existing array
-      virtual void setX(const std::size_t index, const MantidVec& X) { getSpectrum(index)->setX(X); }
+      virtual void setX(const std::size_t index, const MantidVec& X) { getSpectrum(index)->setX(X); invalidateCommonBinsFlag(); }
 
       /// Set the specified X array to point to the given existing array
-      virtual void setX(const std::size_t index, const MantidVecPtr& X) { getSpectrum(index)->setX(X); }
+      virtual void setX(const std::size_t index, const MantidVecPtr& X) { getSpectrum(index)->setX(X); invalidateCommonBinsFlag(); }
 
       /// Set the specified X array to point to the given existing array
-      virtual void setX(const std::size_t index, const MantidVecPtr::ptr_type& X)  { getSpectrum(index)->setX(X); }
+      virtual void setX(const std::size_t index, const MantidVecPtr::ptr_type& X)  { getSpectrum(index)->setX(X); invalidateCommonBinsFlag(); }
 
       /** Sets the data in the workspace
       @param index :: the workspace index to set.
@@ -227,14 +235,20 @@ namespace Mantid
       /// Return a vector with the integrated counts for all spectra withing the given range
       virtual void getIntegratedSpectra(std::vector<double> & out, const double minX, const double maxX, const bool entireRange) const;
 
+      /// Return an index in the X vector for an x-value close to a given value
+      std::pair<size_t,double> getXIndex(size_t i, double x, bool isLeft = true, size_t start = 0) const;
+
       //----------------------------------------------------------------------
 
       int axes() const;
       Axis* getAxis(const std::size_t& axisIndex) const;
       void replaceAxis(const std::size_t& axisIndex, Axis* const newAxis);
-
+      
       /// Returns true if the workspace contains data in histogram form (as opposed to point-like)
       virtual bool isHistogramData() const;
+
+      /// Returns true if the workspace contains has common X bins
+      virtual bool isCommonBins() const;
 
       std::string YUnit() const;
       void setYUnit(const std::string& newUnit);
@@ -308,11 +322,33 @@ namespace Mantid
       // End IMDWorkspace methods
       //=====================================================================================
 
+      //=====================================================================================
+      // Image methods
+      //=====================================================================================
+
+      /// Get start and end x indices for images
+      std::pair<size_t,size_t> getImageStartEndXIndices( size_t i, double startX, double endX ) const;
+      /// Create an image of Ys.
+      MantidImage_sptr getImageY (size_t start = 0, size_t stop = 0, size_t width = 0, double startX = EMPTY_DBL(), double endX = EMPTY_DBL() ) const;
+      /// Create an image of Es.
+      MantidImage_sptr getImageE (size_t start = 0, size_t stop = 0, size_t width = 0, double startX = EMPTY_DBL(), double endX = EMPTY_DBL() ) const;
+      /// Copy the data (Y's) from an image to this workspace.
+      virtual void setImageY( const MantidImage &image, size_t start = 0, bool parallelExecution=true);
+      /// Copy the data from an image to this workspace's errors.
+      virtual void setImageE( const MantidImage &image, size_t start = 0, bool parallelExecution=true );
+
+      //=====================================================================================
+      // End image methods
+      //=====================================================================================
+
     protected:
       MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory* factory = NULL);
 
       /// Initialises the workspace. Sets the size and lengths of the arrays. Must be overloaded.
       virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength) = 0;
+
+      /// Invalidates the commons bins flag.  This is generally called when a method could allow the X values to be changed.
+      void invalidateCommonBinsFlag() { m_isCommonBinsFlagSet = false; }
 
       /// A vector of pointers to the axes for this workspace
       std::vector<Axis*> m_axes;
@@ -322,6 +358,10 @@ namespace Mantid
       MatrixWorkspace(const MatrixWorkspace&);
       /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
       MatrixWorkspace& operator=(const MatrixWorkspace&);
+      /// Create an MantidImage instance.
+      MantidImage_sptr getImage(const MantidVec& (MatrixWorkspace::*read)(std::size_t const) const, size_t start, size_t stop, size_t width, size_t indexStart, size_t indexEnd) const;
+      /// Copy data from an image.
+      void setImage( MantidVec& (MatrixWorkspace::*dataVec)(const std::size_t), const MantidImage &image, size_t start, bool parallelExecution );
 
       /// Has this workspace been initialised?
       bool m_isInitialized;
@@ -332,6 +372,12 @@ namespace Mantid
       std::string m_YUnitLabel;
       /// Flag indicating whether the Y-values are dimensioned. False by default
       bool m_isDistribution;
+
+      /// Flag indicating whether the m_isCommonBinsFlag has been set. False by default
+      mutable bool m_isCommonBinsFlagSet;
+      /// Flag indicating whether the data has common bins. False by default
+      mutable bool m_isCommonBinsFlag;
+
       /// The set of masked bins in a map keyed on spectrum index
       std::map< int64_t, MaskList > m_masks;
 

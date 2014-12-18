@@ -8,7 +8,7 @@
 #include "MantidKernel/Exception.h"
 #include <algorithm>
 #include <ostream>
-#include <stdexcept> 
+#include <stdexcept>
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 namespace Mantid
@@ -44,7 +44,7 @@ RectangularDetector::RectangularDetector(const RectangularDetector* base, const 
 /** Valued constructor
  *  @param n :: name of the assembly
  *  @param reference :: the parent Component
- * 
+ *
  * 	If the reference is an object of class Component,
  *  normal parenting apply. If the reference object is
  *  an assembly itself, then in addition to parenting
@@ -63,7 +63,7 @@ RectangularDetector::RectangularDetector(const std::string& n, IComponent* refer
  */
 RectangularDetector::~RectangularDetector()
 {
-  
+
 }
 
 /** Clone method
@@ -406,7 +406,7 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
       //Calculate its id and set it.
       int id;
       id = this->getDetectorIDAtXY(ix, iy);
-     
+
       //minimum rectangular detector id
       if(id<minDetId)
       {
@@ -437,7 +437,7 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
   m_minDetId=minDetId;
   m_maxDetId=maxDetId;
 
-   
+
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -544,8 +544,8 @@ void RectangularDetector::testIntersectionWithChildren(Track & testRay, std::deq
   if (yIndex >= ypixels()) return;
 
   // TODO: Do I need to put something smart here for the first 3 parameters?
-  testRay.addLink(intersec, intersec, 0.0,
-      getAtXY(xIndex, yIndex)->getComponentID());
+  auto comp = getAtXY(xIndex, yIndex);
+  testRay.addLink(intersec, intersec, 0.0, *(comp->shape()), comp->getComponentID());
 }
 
 

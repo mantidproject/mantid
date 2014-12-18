@@ -14,6 +14,7 @@ namespace CurveFitting
   {
     double l1; ///< source-sample distance in metres
     double l2; ///< sample-detector distance in metres
+    Kernel::V3D pos; ///< Full 3D position
     double theta; ///< scattering angle in radians
     double t0; ///< time delay in seconds
     double efixed; ///< final energy
@@ -23,7 +24,7 @@ namespace CurveFitting
     Takes a workspace with X axis in TOF and converts it to Y-space where the transformation is defined
     by equation (7) in http://link.aip.org/link/doi/10.1063/1.3561493?ver=pdfcov
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 
 #include <boost/algorithm/string.hpp>
+#include <algorithm>
 
 #include <nexus/napi.h>
 #include <iostream>
@@ -24,9 +25,6 @@ namespace Mantid
 
 // Register the algorithm into the AlgorithmFactory
     DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry);
-
-// PI again !
-    const double PI = 3.14159265358979323846264338327950288419716939937510582;
 
 //----------------------------------------------------------------------------------------------
     /** Constructor
@@ -107,6 +105,30 @@ namespace Mantid
     }
 
 //----------------------------------------------------------------------------------------------
+  /**
+     * Run the Child Algorithm LoadInstrument.
+     */
+    void LoadILLReflectometry::runLoadInstrument()
+    {
+
+      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+      try
+      {
+
+        loadInst->setPropertyValue("InstrumentName", m_instrumentName);
+        loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+        loadInst->execute();
+
+      } catch (std::runtime_error& e)
+      {
+        g_log.information() << "Unable to successfully run LoadInstrument Child Algorithm : "
+                            << e.what() << std::endl;
+      }
+    }
+
+//----------------------------------------------------------------------------------------------
     /** Execute the algorithm.
      */
     void LoadILLReflectometry::exec()
@@ -132,7 +154,7 @@ namespace Mantid
       g_log.debug("Building properties...");
       loadNexusEntriesIntoProperties(filenameData);
 
-//	g_log.debug("Loading data...");
+      g_log.debug("Loading data...");
       loadDataIntoTheWorkSpace(firstEntry, monitorsData);
 
       // load the instrument from the IDF if it exists
@@ -143,18 +165,14 @@ namespace Mantid
 
       // Get distance and tilt angle stored in nexus file
       // Mantid way
-      //	auto angleProp = dynamic_cast<PropertyWithValue<double>*>(m_localWorkspace->run().getProperty("dan.value"));
+      ////	auto angleProp = dynamic_cast<PropertyWithValue<double>*>(m_localWorkspace->run().getProperty("dan.value"));
       // Nexus way
       double angle = firstEntry.getFloat("instrument/dan/value");	// detector angle in degrees
       double distance = firstEntry.getFloat("instrument/det/value");	// detector distance in millimeter
-      distance /= 1000;	// convert to meter
-      placeDetector(distance, angle);
 
-      // 2) Center, (must be done after move)
-      int par1_101 = firstEntry.getInt("instrument/PSD/ny");
-      g_log.debug("Note: using PSD/ny instead of PSD/nx. Should be corrected in next D17 nexus file.");
-      double xCenter = 0.1325 / par1_101;	// As in lamp, but in meter
-      centerDetector(xCenter);
+      distance /= 1000.0;	// convert to meter
+      g_log.debug() << "Moving detector at angle " << angle << " and distance " << distance << std::endl;
+      placeDetector(distance, angle);
 
       // Set the channel width property
       auto channel_width = dynamic_cast<PropertyWithValue<double>*>(m_localWorkspace->run().getProperty(
@@ -306,15 +324,28 @@ namespace Mantid
           "monitor1.time_of_flight_2"));
       double tof_delay = *tof_delay_prop; /* PAR1[96] */
 
+
       double POFF = entry.getFloat("instrument/VirtualChopper/poff"); /* par1[54] */
-      double mean_chop_2_phase = entry.getFloat("instrument/VirtualChopper/chopper2_phase_average"); /* PAR2[114] */
-
-      //double mean_chop_1_phase = entry.getFloat("instrument/VirtualChopper/chopper1_phase_average"); /* PAR2[110] */
-      // this entry seems to be wrong for now, we use the old one instead [YR 5/06/2014]
-      double mean_chop_1_phase = entry.getFloat("instrument/Chopper1/phase");
-
-      double open_offset = entry.getFloat("instrument/VirtualChopper/open_offset"); /* par1[56] */
+      double open_offset=entry.getFloat("instrument/VirtualChopper/open_offset"); /* par1[56] */
+      double mean_chop_1_phase=0.0;
+      double mean_chop_2_phase=0.0;
+      // [30/09/14] Test on availability of VirtualChopper data
       double chop1_speed = entry.getFloat("instrument/VirtualChopper/chopper1_speed_average"); /* PAR2[109] */
+      if (chop1_speed != 0.0) {
+        // Virtual Chopper entries are valid
+
+        //double mean_chop_1_phase = entry.getFloat("instrument/VirtualChopper/chopper1_phase_average"); /* PAR2[110] */
+        // this entry seems to be wrong for now, we use the old one instead [YR 5/06/2014]
+        mean_chop_1_phase = entry.getFloat("instrument/Chopper1/phase");
+        mean_chop_2_phase = entry.getFloat("instrument/VirtualChopper/chopper2_phase_average"); /* PAR2[114] */
+
+      } else {
+        // Use Chopper values instead
+        chop1_speed = entry.getFloat("instrument/Chopper1/rotation_speed"); /* PAR2[109] */
+
+        mean_chop_1_phase = entry.getFloat("instrument/Chopper1/phase");
+        mean_chop_2_phase = entry.getFloat("instrument/Chopper2/phase");
+      }
 
       g_log.debug() << "m_numberOfChannels: " << m_numberOfChannels << std::endl;
       g_log.debug() << "m_channelWidth: " << m_channelWidth << std::endl;
@@ -325,28 +356,31 @@ namespace Mantid
       g_log.debug() << "mean_chop_1_phase: " << mean_chop_1_phase << std::endl;
       g_log.debug() << "chop1_speed: " << chop1_speed << std::endl;
 
+      double t_TOF2 = 0.0;
+      if (chop1_speed == 0.0)
+      {
+        g_log.debug() << "Warning: chop1_speed is null." << std::endl;
+        // stay with t_TOF2 to O.0
+      }
+      else
+      {
       // Thanks to Miguel Gonzales/ILL for this TOF formula
-      double t_TOF2 = -1.e6 * 60.0 * (POFF - 45.0 + mean_chop_2_phase - mean_chop_1_phase + open_offset)
+        t_TOF2 = -1.e6 * 60.0 * (POFF - 45.0 + mean_chop_2_phase - mean_chop_1_phase + open_offset)
           / (2.0 * 360 * chop1_speed);
 
+      }
       g_log.debug() << "t_TOF2: " << t_TOF2 << std::endl;
 
       // 2) Compute tof values
       for (size_t timechannelnumber = 0; timechannelnumber <= m_numberOfChannels; ++timechannelnumber)
       {
-
         double t_TOF1 = (static_cast<int>(timechannelnumber) + 0.5) * m_channelWidth + tof_delay;
-
-        //g_log.debug() << "t_TOF1: " << t_TOF1 << std::endl;
-
         m_localWorkspace->dataX(0)[timechannelnumber] = t_TOF1 + t_TOF2;
-
       }
 
       // Load monitors
       for (size_t im = 0; im < nb_monitors; im++)
       {
-
         if (im > 0)
         {
           m_localWorkspace->dataX(im) = m_localWorkspace->readX(0);
@@ -359,8 +393,6 @@ namespace Mantid
         progress.report();
       }
 
-      // TODO
-      // copy data if m_numberOfTubes = 1 or m_numberOfPixelsPerTube = 1
 
       // Then Tubes
       for (size_t i = 0; i < m_numberOfTubes; ++i)
@@ -371,7 +403,7 @@ namespace Mantid
           // just copy the time binning axis to every spectra
           m_localWorkspace->dataX(spec + nb_monitors) = m_localWorkspace->readX(0);
 
-          // Assign Y
+          //// Assign Y
           int* data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
           m_localWorkspace->dataY(spec + nb_monitors).assign(data_p, data_p + m_numberOfChannels);
 
@@ -387,6 +419,10 @@ namespace Mantid
 
     }  // LoadILLIndirect::loadDataIntoTheWorkSpace
 
+
+    /**
+     * Use the LoadHelper utility to load most of the nexus entries into workspace log properties
+     */
     void LoadILLReflectometry::loadNexusEntriesIntoProperties(std::string nexusfilename)
     {
 
@@ -408,28 +444,10 @@ namespace Mantid
       stat = NXclose(&nxfileID);
     }
 
+  
     /**
-     * Run the Child Algorithm LoadInstrument.
+     * Utility to center detector.
      */
-    void LoadILLReflectometry::runLoadInstrument()
-    {
-
-      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
-
-      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-      try
-      {
-
-        loadInst->setPropertyValue("InstrumentName", m_instrumentName);
-        loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-        loadInst->execute();
-
-      } catch (...)
-      {
-        g_log.information("Cannot load the instrument definition.");
-      }
-    }
-
     void LoadILLReflectometry::centerDetector(double xCenter)
     {
 
@@ -441,18 +459,19 @@ namespace Mantid
 
     }
 
+    /**
+     * Utility to place detector in space, according to data file
+     */
     void LoadILLReflectometry::placeDetector(double distance /* meter */, double angle /* degree */)
     {
-
+      const double deg2rad = M_PI/180.0;
       std::string componentName("uniq_detector");
       V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
+//      double r, theta, phi;
+//      pos.getSpherical(r, theta, phi);
 
-      double r, theta, phi;
-      pos.getSpherical(r, theta, phi);
-
-      V3D newpos;
-      newpos.spherical(distance, angle, phi);
-
+      double angle_rad = angle*deg2rad;
+      V3D newpos(distance*sin(angle_rad), pos.Y(), distance*cos(angle_rad));
       m_loader.moveComponent(m_localWorkspace, componentName, newpos);
 
       // Apply a local rotation to stay perpendicular to the beam

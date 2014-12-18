@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-
+#include "MantidGeometry/Instrument/FitParameter.h"
 namespace Mantid
 {
 
@@ -15,7 +15,7 @@ namespace DataHandling
     @author Harry Jeffery, ISIS, RAL
     @date 17/7/2014
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

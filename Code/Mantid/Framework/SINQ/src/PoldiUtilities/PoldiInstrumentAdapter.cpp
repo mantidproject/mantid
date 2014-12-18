@@ -16,11 +16,13 @@ using namespace Mantid::API;
 
 // Initializing static variables for DoubleValueExtractors
 const std::string PoldiInstrumentAdapter::m_chopperSpeedPropertyName = "chopperspeed";
+const std::string PoldiInstrumentAdapter::m_chopperSpeedTargetPropertyName = "ChopperSpeedTarget";
 
 std::map<std::string, AbstractDoubleValueExtractor_sptr> PoldiInstrumentAdapter::m_extractors =
         boost::assign::map_list_of
-        ("dbl list", boost::static_pointer_cast<AbstractDoubleValueExtractor>(boost::make_shared<VectorDoubleValueExtractor>(PoldiInstrumentAdapter::m_chopperSpeedPropertyName)))
-        ("number", boost::static_pointer_cast<AbstractDoubleValueExtractor>(boost::make_shared<NumberDoubleValueExtractor>(PoldiInstrumentAdapter::m_chopperSpeedPropertyName)));
+        ("dbl list", boost::static_pointer_cast<AbstractDoubleValueExtractor>(boost::make_shared<VectorDoubleValueExtractor>()))
+        ("int list", boost::static_pointer_cast<AbstractDoubleValueExtractor>(boost::make_shared<VectorIntValueExtractor>()))
+        ("number", boost::static_pointer_cast<AbstractDoubleValueExtractor>(boost::make_shared<NumberDoubleValueExtractor>()));
 
 /** Constructor with workspace argument
   *
@@ -48,11 +50,6 @@ PoldiInstrumentAdapter::PoldiInstrumentAdapter(const Instrument_const_sptr &mant
 PoldiInstrumentAdapter::~PoldiInstrumentAdapter()
 {
 }
-
-    const std::string PoldiInstrumentAdapter::getChopperSpeedPropertyName()
-    {
-        return PoldiInstrumentAdapter::m_chopperSpeedPropertyName;
-    }
     
 /** Returns the chopper stored in the adapter
   *
@@ -127,7 +124,12 @@ void PoldiInstrumentAdapter::setDetector(const Instrument_const_sptr &mantidInst
   */
 void PoldiInstrumentAdapter::setChopper(const Instrument_const_sptr &mantidInstrument, const Run &runInformation)
 {
-    double chopperSpeed = getChopperSpeedFromRun(runInformation);
+    double rawChopperSpeed = getChopperSpeedFromRun(runInformation);
+    double chopperSpeed = getCleanChopperSpeed(rawChopperSpeed);
+
+    if(!chopperSpeedMatchesTarget(runInformation, chopperSpeed)) {
+        throw std::invalid_argument("Chopper speed deviates from target speed.");
+    }
 
     PoldiChopperFactory chopperFactory;
     m_chopper = PoldiAbstractChopper_sptr(chopperFactory.createChopper(std::string("default-chopper")));
@@ -136,29 +138,104 @@ void PoldiInstrumentAdapter::setChopper(const Instrument_const_sptr &mantidInstr
 }
 
 /**
+ * Returns a plausible chopper speed
+ *
+ * Sometimes the measured chopper speed is off by a few ms, which is a result of
+ * the measuring method. Since only multiples of 500 are allowed, the speed is
+ * rounded to the next multiple of 500.
+ *
+ * @param rawChopperSpeed :: Raw chopper rotation speed as found in the HDF-file
+ * @return Next multiple of 500.
+ */
+double PoldiInstrumentAdapter::getCleanChopperSpeed(double rawChopperSpeed) const
+{
+    return floor((rawChopperSpeed + 250.0) / 500.0) * 500.0;
+}
+
+/**
  * Extracts the chopper speed from run information
  *
- * This method tries to extract the chopper rotation speed from the run information, using
- * an appropriate functor of type AbstractDoubleValueExtractor.
+ * This method tries to extract the chopper rotation speed from the run information,
+ * using extractPropertyFromRun with the correct property name.
  *
- * @param runInformation :: Run information that contains a "chopperspeed" property
+ * @param runInformation :: Run information that contains a property with the chopper speed.
  * @return Chopper speed as stored in run information
  */
-double PoldiInstrumentAdapter::getChopperSpeedFromRun(const Run &runInformation)
+double PoldiInstrumentAdapter::getChopperSpeedFromRun(const Run &runInformation) const
 {
-    if(!runInformation.hasProperty(m_chopperSpeedPropertyName)) {
-        throw std::runtime_error("Cannot construct instrument without " + m_chopperSpeedPropertyName + "property in log. Aborting.");
+    return extractPropertyFromRun(runInformation, m_chopperSpeedPropertyName);
+}
+
+/**
+ * Extracts the target chopper speed from run information
+ *
+ * Tries to extract the target chopper speed from run information.
+ *
+ * @param runInformation :: Run information that contains a property with the target chopper speed.
+ * @return Target chopper speed as stored in run information
+ */
+double PoldiInstrumentAdapter::getChopperSpeedTargetFromRun(const Run &runInformation) const
+{
+    return extractPropertyFromRun(runInformation, m_chopperSpeedTargetPropertyName);
+}
+
+/**
+ * Checks if the chopper speed matches the target value
+ *
+ * If runInformation contains the chopper target speed, this method checks whether the actural speed
+ * agrees with the target.
+ *
+ * If the information is not present, it's most likely an older data file, where this information
+ * is not available. In this case it is not possible to compare anything, so the function returns
+ * true for any value of chopperSpeed.
+ *
+ * @param runInformation :: Run information that may or may not contain information about chopper target speed.
+ * @param chopperSpeed :: Chopper speed, "cleaned" by PoldiInstrumentAdapter::getCleanChopperSpeed.
+ * @return True if speed matches target or information is absent, false otherwise.
+ */
+bool PoldiInstrumentAdapter::chopperSpeedMatchesTarget(const Run &runInformation, double chopperSpeed) const
+{
+    try {
+        double targetChopperSpeed = getChopperSpeedTargetFromRun(runInformation);
+
+        if(fabs(targetChopperSpeed - chopperSpeed) > 1e-4) {
+            return false;
+        }
+
+        return true;
+    } catch(std::runtime_error) {
+        // Old data files don't have information on target chopper speed. Do nothing.
+        return true;
+    }
+}
+
+/**
+ * Extracts a property from run information
+ *
+ * This method extracts the property with the supplied name from the run information,
+ * using the appropriate AbstractDoubleValueExtractor. If the property is not found,
+ * an std::runtime_error exception is thrown. If there is no extractor for the requested
+ * data type, an std::invalid_argument exception is thrown.
+ *
+ * @param runInformation :: Run information that cotains the property with propertyName
+ * @param propertyName :: Property name that should be extracted
+ * @return Value of property as double
+ */
+double PoldiInstrumentAdapter::extractPropertyFromRun(const Run &runInformation, const std::string &propertyName) const
+{
+    if(!runInformation.hasProperty(propertyName)) {
+        throw std::runtime_error("Cannot construct instrument without " + propertyName + "-property in log. Aborting.");
     }
 
-    Kernel::Property *chopperSpeedProperty = runInformation.getProperty(m_chopperSpeedPropertyName);
+    Kernel::Property *property = runInformation.getProperty(propertyName);
 
-    AbstractDoubleValueExtractor_sptr extractor = getExtractorForProperty(chopperSpeedProperty);
+    AbstractDoubleValueExtractor_sptr extractor = getExtractorForProperty(property);
 
     if(!extractor) {
         throw std::invalid_argument("Cannot extract chopper speed from run information.");
     }
 
-    return (*extractor)(runInformation);
+    return (*extractor)(runInformation, propertyName);
 }
 
 /**
@@ -170,7 +247,7 @@ double PoldiInstrumentAdapter::getChopperSpeedFromRun(const Run &runInformation)
  * @param chopperSpeedProperty :: Property containing the chopper speed
  * @return Functor of type AbstractDoubleValueExtractor
  */
-AbstractDoubleValueExtractor_sptr PoldiInstrumentAdapter::getExtractorForProperty(Kernel::Property *chopperSpeedProperty)
+AbstractDoubleValueExtractor_sptr PoldiInstrumentAdapter::getExtractorForProperty(Kernel::Property *chopperSpeedProperty) const
 {
     if(!chopperSpeedProperty) {
         throw std::invalid_argument("Cannot process null-Property.");

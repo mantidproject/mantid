@@ -1,7 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_TOBYFITRESOLUTIONMODEL_H_
 #define MANTID_MDALGORITHMS_TOBYFITRESOLUTIONMODEL_H_
 /**
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -134,8 +134,6 @@ namespace Mantid
 
       /// Storage for currently in use random number generators
       mutable std::vector<Kernel::NDRandomNumberGenerator*> m_randomNumbers;
-      /// The value to mark an attribute as active
-      int m_activeAttrValue;
       /// Check for convergence after loop min number of steps
       int m_mcLoopMin;
       /// Maximum number of Monte Carlo evaluations

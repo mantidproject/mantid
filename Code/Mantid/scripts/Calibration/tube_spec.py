@@ -40,7 +40,7 @@ class TubeSpec:
         The constructor creates empty tube specification for specified instrument.
         :param ws: workspace containing the specified instrument with one pixel detector per spectrum.
         """
-    self.ws = ws
+        self.ws = ws
         self.inst = ws.getInstrument()
         self.numTubes = 0
         self.componentNameArray = []
@@ -154,7 +154,7 @@ class TubeSpec:
         """
         Returns instrument component corresponding to specification
 
-    :rtype: instrument component
+        :rtype: instrument component
         """
         if( self.componentArray != []):
             return self.componentArray[0]
@@ -164,17 +164,17 @@ class TubeSpec:
 
         comp = self.inst.getComponentByName(self.componentNameArray[0])
 
-    if( comp ):
-         self.componentArray.append(comp)
+        if( comp ):
+           self.componentArray.append(comp)
 
-    return self.componentArray[0]
+        return self.componentArray[0]
 
 
     def getComponents ( self ):
         """
         Returns instrument components corresponding to specification
 
-    :rtype: array of instrument components
+        :rtype: array of instrument components
         """
         if( self.componentArray != []):
             return self.componentArray
@@ -185,15 +185,15 @@ class TubeSpec:
 
            comp = self.inst.getComponentByName(self.componentNameArray[i])
 
-       if( comp ):
+        if( comp ):
             self.componentArray.append(comp)
-       else:
+        else:
             print "Did not find", self.componentNameArray[i]
             print "Tube specification not valid"
             self.componentArray = []
             return []
 
-    return self.componentArray
+        return self.componentArray
 
     def getDetectorInfoFromTube( self, tubeIx ):
         """
@@ -210,33 +210,33 @@ class TubeSpec:
 
         :param tubeIx:  index of Tube in specified set
 
-    :rtype: ID of first detector, number of detectors and step between detectors +1 or -1
+        :rtype: ID of first detector, number of detectors and step between detectors +1 or -1
         """
-    nTubes = self.getNumTubes()
-    if(nTubes < 0):
-    	print "Error in listing tubes"
-    	return 0, 0, 1
-    if(tubeIx < 0 or tubeIx >= nTubes):
-    	print "Tube index",tubeIx,"out of range 0 to",nTubes
-    	return 0, 0, 1
+        nTubes = self.getNumTubes()
+        if(nTubes < 0):
+           print "Error in listing tubes"
+           return 0, 0, 1
+        if(tubeIx < 0 or tubeIx >= nTubes):
+           print "Tube index",tubeIx,"out of range 0 to",nTubes
+           return 0, 0, 1
 
-    comp = self.tubes[tubeIx]
+        comp = self.tubes[tubeIx]
 
-    if(comp != 0):
+        if(comp != 0):
             firstDet = comp[0].getID()
-        numDet = comp.nelements()
-        # Allow for reverse numbering of Detectors
-        lastDet = comp[numDet-1].getID()
-        if (lastDet < firstDet):
-           step = -1
-           if( firstDet - lastDet + 1 != numDet):
-           	  print "Detector number range",firstDet-lastDet+1," not equal to number of detectors",numDet
-              print "Detectors not numbered continuously in this tube. Calibration will fail for this tube."
-        else:
-           step = 1
-           if( lastDet - firstDet + 1 != numDet):
-           	  print "Detector number range",lastDet-firstDet+1," not equal to number of detectors",numDet
-              print "Detectors not numbered continuously in this tube. Calibration will fail for this tube."
+            numDet = comp.nelements()
+            # Allow for reverse numbering of Detectors
+            lastDet = comp[numDet-1].getID()
+            if (lastDet < firstDet):
+               step = -1
+               if( firstDet - lastDet + 1 != numDet):
+                  print "Detector number range",firstDet-lastDet+1," not equal to number of detectors",numDet
+                  print "Detectors not numbered continuously in this tube. Calibration will fail for this tube."
+            else:
+               step = 1
+               if( lastDet - firstDet + 1 != numDet):
+                  print "Detector number range",lastDet-firstDet+1," not equal to number of detectors",numDet
+                  print "Detectors not numbered continuously in this tube. Calibration will fail for this tube."
 
             #print "First dectector ", firstDet," Last detector ", firstDet+numDet-1, "Number of detectors ", numDet
             #print "First dectector ", firstDet," Last detector ", comp[numDet-1].getID()
@@ -252,22 +252,22 @@ class TubeSpec:
 
         :param tubeIx:  index of Tube in specified set
 
-    :rtype: Length of tube (first pixel to last pixel) in metres. 0.0 if tube not found.
+        :rtype: Length of tube (first pixel to last pixel) in metres. 0.0 if tube not found.
 
         """
-    nTubes = self.getNumTubes()
-    if(nTubes < 0):
-    	print "Error in listing tubes"
-    	return 0.0
-    if(tubeIx < 0 or tubeIx >= nTubes):
-    	print "Tube index",tubeIx,"out of range 0 to",nTubes
-    	return 0.0
+        nTubes = self.getNumTubes()
+        if(nTubes < 0):
+            print "Error in listing tubes"
+            return 0.0
+        if(tubeIx < 0 or tubeIx >= nTubes):
+            print "Tube index",tubeIx,"out of range 0 to",nTubes
+            return 0.0
 
-    comp = self.tubes[tubeIx]
+        comp = self.tubes[tubeIx]
 
-    if(comp != 0):
+        if(comp != 0):
             firstDet = comp[0].getID()
-        numDet = comp.nelements()
+            numDet = comp.nelements()
             return comp[0].getDistance( comp[numDet-1] )
         else:
             print self.componentNameArray[0], tubeIx, "not found"
@@ -282,20 +282,20 @@ class TubeSpec:
 
         :param tubeIx:  index of Tube in specified set
 
-    :rtype: Name of tube as in IDF or 'unknown' if not found.
+        :rtype: Name of tube as in IDF or 'unknown' if not found.
         """
-    nTubes = self.getNumTubes()
-    if(nTubes < 0):
-    	print "Error in listing tubes"
-    	return 'Unknown'
-    if(tubeIx < 0 or tubeIx >= nTubes):
-    	print "Tube index",tubeIx,"out of range 0 to",nTubes
-    	return 'Unknown'
+        nTubes = self.getNumTubes()
+        if(nTubes < 0):
+           print "Error in listing tubes"
+           return 'Unknown'
+        if(tubeIx < 0 or tubeIx >= nTubes):
+           print "Tube index",tubeIx,"out of range 0 to",nTubes
+           return 'Unknown'
 
-    comp = self.tubes[tubeIx]
+        comp = self.tubes[tubeIx]
 
-    if(comp != 0):
-        return comp.getFullName()
+        if(comp != 0):
+            return comp.getFullName()
         else:
             print self.componentNameArray[0], tubeIx, "not found"
             return "Unknown"
@@ -303,14 +303,14 @@ class TubeSpec:
 
 
     def getTubeByString(self, tubeIx):
-         """
+        """
         Returns list of workspace indices of a tube set that has been specified by string
         It assumes that all the pixels along the tube have consecutive detector IDs
 
         :param tubeIx:  index of Tube in specified set
 
         :rtype: list of indices
-            """
+        """
         firstDet, numDet, step = self.getDetectorInfoFromTube( tubeIx )
         wkIds = []
         skipped = []
@@ -355,18 +355,18 @@ class TubeSpec:
 
 
     def getTube(self, tubeIx):
-    """
+        """
         Returns list of workspace indices of a tube
 
         :param tubeIx:  index of Tube in specified set
 
-    :rtype: list of indices
+        :rtype: list of indices
         """
         nTubes = self.getNumTubes()
         if( (0 <= tubeIx) & (tubeIx < nTubes) ):
-        return self.getTubeByString(tubeIx)
-    else:
-        print "Tube", tubeIx, "out of range 0 to",self.numTubes,"."
+            return self.getTubeByString(tubeIx)
+        else:
+            print "Tube", tubeIx, "out of range 0 to",self.numTubes,"."
 
 
 

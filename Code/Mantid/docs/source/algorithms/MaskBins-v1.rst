@@ -23,6 +23,33 @@ downstream algorithms. Only
 algorithms (e.g. :ref:`algm-Rebin`, :ref:`algm-CropWorkspace`)
 have been modified to properly propagate the masking.
 
+
+Usage
+-----
+
+**Masking of a small workspace**
+
+.. testcode:: exMaskBinsSimple
+
+   # Create workspace with 10 bins of width 10
+   ws = CreateSampleWorkspace(BankPixelWidth=1, Xmax=100, BinWidth=10)
+
+   # Mask a range of X-values
+   wsMasked = MaskBins(ws,XMin=16,XMax=32)
+
+   # Show Y values in workspaces
+   print "Before masking:", ws.readY(0)
+   print "After masking:",wsMasked.readY(0)
+
+
+Output:
+
+.. testoutput:: exMaskBinsSimple
+
+   Before masking: [  0.3   0.3   0.3   0.3   0.3  10.3   0.3   0.3   0.3   0.3]
+   After masking: [  0.3   0.    0.    0.    0.3  10.3   0.3   0.3   0.3   0.3]
+
+
 Related Algorithms
 ------------------
 

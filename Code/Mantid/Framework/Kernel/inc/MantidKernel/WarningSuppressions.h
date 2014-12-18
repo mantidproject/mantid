@@ -4,7 +4,7 @@
 /*  A system-wide file to contain, e.g., useful system-dependent macros
     for suppressing compiler warnings.
 
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
