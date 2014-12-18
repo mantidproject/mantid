@@ -1,7 +1,7 @@
 ###############################################################################
 # Sphinx documentation
 ###############################################################################
-find_package ( Sphinx )
+find_package ( Sphinx 1.2 )
 
 if ( SPHINX_FOUND )
   # run python to see if the theme is installed
@@ -19,7 +19,8 @@ if ( SPHINX_FOUND )
     message (FATAL_ERROR " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/")
   endif (SPHINX_BOOTSTRAP_THEME_ERR)
 
-  # We generate a target per build type, i.e docs-html, docs-test
+  # We generate a target per build type, i.e docs-html
+  set ( SPHINX_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source )
   set ( SPHINX_BUILD_DIR ${DOCS_BUILDDIR} )
   set ( SCREENSHOTS_DIR ${SPHINX_BUILD_DIR}/screenshots )
 
@@ -80,20 +81,29 @@ if ( SPHINX_FOUND )
                            EXCLUDE_FROM_ALL 1)
   endif (DOCS_HTML)
 
-  # doctest target
+  ###############################################################################
+  # Tests ( It would be nice to have this is a test sub directory but the
+  #        configure of the runsphinx file doesn't like being in two directories.
+  #        Ninja complains about multiple targets creating runsphinx.py.in)
+  ###############################################################################
+
+  ###############################################################################
+  # Overall doctest target that executes in MantidPlot
+  ###############################################################################
   set ( BUILDER doctest )
   set ( SPHINX_CONF_DIR ${SPHINX_BUILD_DIR}/conf/${BUILDER} )
   configure_file ( conf.py.in ${SPHINX_CONF_DIR}/conf.py @ONLY )
   configure_file ( runsphinx.py.in runsphinx_doctest.py @ONLY )
   add_custom_target ( ${TARGET_PREFIX}-test
     COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_doctest.py
-    DEPENDS Framework MantidPlot ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_doctest.py ${SPHINX_CONF_DIR}/conf.py
+    DEPENDS Framework MantidPlot ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_doctest.py
+            ${SPHINX_CONF_DIR}/conf.py
     COMMENT "Running documentation tests"
   )
   # Group within VS and exclude from whole build
   set_target_properties ( ${TARGET_PREFIX}-test PROPERTIES FOLDER "Documentation"
-                                                EXCLUDE_FROM_DEFAULT_BUILD 1
-                                                EXCLUDE_FROM_ALL 1)
+                                              EXCLUDE_FROM_DEFAULT_BUILD 1
+                                              EXCLUDE_FROM_ALL 1)
 
   ###############################################################################
   # Installation settings
@@ -121,5 +131,5 @@ if ( SPHINX_FOUND )
     endif ( QT_QCOLLECTIONGENERATOR_EXECUTABLE )
   endif ( PACKAGE_DOCS )
 else ( SPHINX_FOUND )
-  message ( WARNING "Sphinx package not found, unable to build documentation." )
+  message ( WARNING "Sphinx package (version >= 1.2) not found, unable to build documentation." )
 endif ( SPHINX_FOUND )

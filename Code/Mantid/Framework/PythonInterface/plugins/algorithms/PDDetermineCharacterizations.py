@@ -37,7 +37,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
 
     def summary(self):
         return "Determines the characterizations of a workspace."
-    
+
     def PyInit(self):
         # input parameters
         self.declareProperty(WorkspaceProperty("InputWorkspace", "",
@@ -49,16 +49,16 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                              "Table of characterization information")
 
         self.declareProperty("ReductionProperties",
-                             "__pd_reduction_properties", 
+                             "__pd_reduction_properties",
                              validator=StringMandatoryValidator(),
                              doc="Property manager name for the reduction")
 
         defaultMsg = " run to use. 0 to use value in table, -1 to not use."
-        self.declareProperty("BackRun", 0, 
+        self.declareProperty("BackRun", 0,
                              doc="The background" + defaultMsg)
-        self.declareProperty("NormRun", 0, 
+        self.declareProperty("NormRun", 0,
                              doc="The background" + defaultMsg)
-        self.declareProperty("NormBackRun", 0, 
+        self.declareProperty("NormBackRun", 0,
                              doc="The background" + defaultMsg)
 
     def validateInputs(self):
@@ -109,7 +109,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
         self.log().information("Determined frequency: " + str(frequency) \
                                    + " Hz, center wavelength:" \
                                    + str(wavelength) + " Angstrom")
-        
+
         # get a row of the table
         info = self.getLine(char, frequency, wavelength)
 
@@ -130,7 +130,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
     def processInformation(self, prop_man, info_dict):
         for key in COL_NAMES:
             val = info_dict[key]
-            # Convert comma-delimited list to array, else return the original 
+            # Convert comma-delimited list to array, else return the original
             # value.
             if type("") == type(val):
                 val = [float(x) for x in val.split(',')]
@@ -179,7 +179,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                     self.log().information(msg)
                 else:
                     frequency = frequency.getStatistics().mean
-                    if frequency == 0.: 
+                    if frequency == 0.:
                         self.log().information("'%s' mean value is zero" % name)
                     else:
                         self.log().information("Found frequency in %s log" \

@@ -60,7 +60,7 @@ public:
 
     OrientedLattice o_lattice;
     o_lattice.setUB( UB );
-    ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
+    ws->mutableSample().setOrientedLattice( &o_lattice );
 
     Matrix<double> UB_inverse(UB);
     UB_inverse.Invert();

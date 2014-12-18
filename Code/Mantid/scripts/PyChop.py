@@ -6,12 +6,12 @@ import sys
 
 
 def qapp():
-	if QtGui.QApplication.instance():
-		app = QtGui.QApplication.instance()
-	else:
-		app = QtGui.QApplication(sys.argv)
-	return app
- 
+    if QtGui.QApplication.instance():
+    	app = QtGui.QApplication.instance()
+    else:
+    	app = QtGui.QApplication(sys.argv)
+    return app
+
 app = qapp()
 instr_name = config['default.instrument']
 if instr_name[0:3] == 'LET':

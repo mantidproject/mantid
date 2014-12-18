@@ -14,7 +14,6 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
 
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
@@ -40,7 +39,7 @@ namespace Mantid
   namespace DataHandling
   {
     DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2);
-    
+
     using namespace Kernel;
     using namespace API;
     using namespace NeXus;
@@ -48,25 +47,26 @@ namespace Mantid
 
     /// Empty default constructor
     LoadISISNexus2::LoadISISNexus2() : 
-    m_filename(), m_instrument_name(), m_samplename(), m_numberOfSpectra(0), m_numberOfSpectraInFile(0), 
-    m_numberOfPeriods(0), m_numberOfPeriodsInFile(0), m_numberOfChannels(0), m_numberOfChannelsInFile(0),
-    m_have_detector(false), m_spec_min(0), m_spec_max(EMPTY_INT()), m_spec_list(), 
-    m_entrynumber(0), m_range_supplied(true), m_tof_data(), m_proton_charge(0.),
-    m_spec(), m_monitors(), m_logCreator(), m_progress()
+      m_filename(), m_instrument_name(), m_samplename(), m_numberOfSpectra(0), m_numberOfSpectraInFile(0), 
+      m_numberOfPeriods(0), m_numberOfPeriodsInFile(0), m_numberOfChannels(0), m_numberOfChannelsInFile(0),
+      m_have_detector(false),m_range_supplied(true), m_spec_min(0), m_spec_max(EMPTY_INT()),
+      m_load_selected_spectra(false),m_specInd2specNum_map(),m_spec2det_map(),
+      m_entrynumber(0), m_tof_data(), m_proton_charge(0.),
+      m_spec(), m_monitors(), m_logCreator(), m_progress()
     {}
 
     /**
-     * Return the confidence with with this algorithm can load the file
-     * @param descriptor A descriptor for the file
-     * @returns An integer specifying the confidence level. 0 indicates it will not be used
-     */
+    * Return the confidence criteria for this algorithm can load the file
+    * @param descriptor A descriptor for the file
+    * @returns An integer specifying the confidence level. 0 indicates it will not be used
+    */
     int LoadISISNexus2::confidence(Kernel::NexusDescriptor & descriptor) const
     {
       if(descriptor.pathOfTypeExists("/raw_data_1","NXentry")) return 80;
       return 0;
     }
 
-    /// Initialisation method.
+    /// Initialization method.
     void LoadISISNexus2::init()
     {
       std::vector<std::string> exts;
@@ -198,17 +198,23 @@ namespace Mantid
 
       // Test if IDF exists in Nexus otherwise load default instrument
       bool foundInstrument = LoadEventNexus::runLoadIDFFromNexus(m_filename, local_workspace, "raw_data_1", this);
-      local_workspace->updateSpectraUsing(SpectrumDetectorMapping(spec(),udet(),udet.dim0()));
+      if(m_load_selected_spectra)
+        m_spec2det_map = SpectrumDetectorMapping(spec(),udet(),udet.dim0());
+      else
+        local_workspace->updateSpectraUsing(SpectrumDetectorMapping(spec(),udet(),udet.dim0()));
+
+
+
       if (!foundInstrument) 
       {
         runLoadInstrument(local_workspace);
       }
-      
+
       // Load logs and sample information
       m_cppFile->openPath(entry.path());      
       local_workspace->loadSampleAndLogInfoNexus(m_cppFile);
 
-      // Load logs and sample information further information... See mainteance ticket #8697 
+      // Load logs and sample information further information... See maintenance ticket #8697 
       loadSampleData(local_workspace, entry);
       m_progress->report("Loading logs");
       loadLogs(local_workspace, entry);
@@ -224,23 +230,23 @@ namespace Mantid
       }
       int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
       loadPeriodData(firstentry, entry, local_workspace);
-      
+
       // Clone the workspace at this point to provide a base object for future workspace generation.
       DataObjects::Workspace2D_sptr period_free_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-              (WorkspaceFactory::Instance().create(local_workspace));
+        (WorkspaceFactory::Instance().create(local_workspace));
 
       createPeriodLogs(firstentry, local_workspace);
 
       if( m_numberOfPeriods > 1 && m_entrynumber == 0 )
       {
-        
+
         WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
         wksp_group->setTitle(local_workspace->getTitle());
 
         //This forms the name of the group
         const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
         const std::string prop_name = "OutputWorkspace_";
-        
+
         for( int p = 1; p <= m_numberOfPeriods; ++p )
         {
           std::ostringstream os;
@@ -252,7 +258,7 @@ namespace Mantid
               (WorkspaceFactory::Instance().create(period_free_workspace));
             loadPeriodData(p, entry, local_workspace);
             createPeriodLogs(p, local_workspace);
-            // Check consistency of logs data for multiperiod workspaces and raise warnings where necessary.
+            // Check consistency of logs data for multi-period workspaces and raise warnings where necessary.
             validateMultiPeriodLogs(local_workspace);
           }
           declareProperty(new WorkspaceProperty<Workspace>(prop_name + os.str(), base_name + os.str(), Direction::Output));
@@ -268,7 +274,6 @@ namespace Mantid
       }
 
       // Clear off the member variable containers
-      m_spec_list.clear();
       m_tof_data.reset();
       m_spec.reset();
       m_monitors.clear();
@@ -293,6 +298,36 @@ namespace Mantid
       };
 
     }
+    /**
+    build the list of spectra to load and include into spectra-detectors map
+    @param spec_list -- list of spectra to load 
+    **/
+    void  LoadISISNexus2::buildSpectraInd2SpectraNumMap(const std::vector<int64_t>  &spec_list)
+    {
+
+      int64_t ic(0);
+
+      if(spec_list.size()>0)
+      {
+        auto start_point = spec_list.begin();
+        for(auto it =start_point  ;it!=spec_list.end();it++)
+        {
+          ic = it-start_point;
+          m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(ic,static_cast<specid_t>(*it)));
+        }
+      }
+      else
+      {
+        if(m_range_supplied)
+        {
+          ic = m_specInd2specNum_map.size();
+          for(int64_t i=m_spec_min;i<m_spec_max+1;i++)
+            m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(i-m_spec_min+ic,static_cast<specid_t>(i)));
+
+        }
+      }
+    }
+
 
     /**
     Check for a set of synthetic logs associated with multi-period log data. Raise warnings where necessary.
@@ -315,10 +350,12 @@ namespace Mantid
     }
 
     /**
-    * Check the validity of the optional properties of the algorithm
+    * Check the validity of the optional properties of the algorithm and identify if partial data should be loaded.
     */
     void LoadISISNexus2::checkOptionalProperties()
     {
+      // optional properties specify that only some spectra have to be loaded
+      m_load_selected_spectra = false;
       m_spec_min = getProperty("SpectrumMin");
       m_spec_max = getProperty("SpectrumMax");
 
@@ -328,36 +365,34 @@ namespace Mantid
       }
 
       if( m_spec_min == 0 )
-      {
         m_spec_min = 1;
-      }
+      else
+        m_load_selected_spectra = true;
+
 
       if( m_spec_max == EMPTY_INT() )
-      {
         m_spec_max = m_numberOfSpectra;
-      }
+      else
+        m_load_selected_spectra = true;
 
       // Sanity check for min/max
       if( m_spec_min > m_spec_max )
       {
-        g_log.error() << "Inconsistent range properties. SpectrumMin is larger than SpectrumMax." << std::endl;
-        throw std::invalid_argument("Inconsistent range properties defined.");
+        throw std::invalid_argument("Inconsistent range properties. SpectrumMin is larger than SpectrumMax.");
       }
 
       if( static_cast<size_t>(m_spec_max) > m_numberOfSpectra )
       {
-        g_log.error() << "Inconsistent range property. SpectrumMax is larger than number of spectra: " 
-          << m_numberOfSpectra << std::endl;
-        throw std::invalid_argument("Inconsistent range properties defined.");
+        std::string err="Inconsistent range property. SpectrumMax is larger than number of spectra: "+boost::lexical_cast<std::string>(m_numberOfSpectra ); 
+        throw std::invalid_argument(err);
       }
 
       // Check the entry number
       m_entrynumber = getProperty("EntryNumber");
       if( static_cast<int>(m_entrynumber) > m_numberOfPeriods || m_entrynumber < 0 )
       {
-        g_log.error() << "Invalid entry number entered. File contains " << m_numberOfPeriods << " period. " 
-          << std::endl;
-        throw std::invalid_argument("Invalid entry number.");
+        std::string err="Invalid entry number entered. File contains "+boost::lexical_cast<std::string>(m_numberOfPeriods )+ " period. ";
+        throw std::invalid_argument(err);
       }
       if( m_numberOfPeriods == 1 )
       {
@@ -365,37 +400,49 @@ namespace Mantid
       }
 
       //Check the list property
-      m_spec_list = getProperty("SpectrumList");
-      if( ! m_spec_list.empty() ) 
+      std::vector<int64_t> spec_list = getProperty("SpectrumList");
+      if( ! spec_list.empty() ) 
       {
-        // Sort the list so that we can check it's range
-        std::sort(m_spec_list.begin(), m_spec_list.end());
+        m_load_selected_spectra = true;
 
-        if( m_spec_list.back() > static_cast<int64_t>(m_numberOfSpectra) )
+        // Sort the list so that we can check it's range
+        std::sort(spec_list.begin(), spec_list.end());
+
+        if( spec_list.back() > static_cast<int64_t>(m_numberOfSpectra) )
         {
-          g_log.error() << "Inconsistent SpectraList property defined for a total of " << m_numberOfSpectra 
-            << " spectra." << std::endl;
-          throw std::invalid_argument("Inconsistent property defined");
+          std::string err="A spectra number in the spectra list exceeds total number of "+boost::lexical_cast<std::string>(m_numberOfSpectra )+ " spectra ";
+          throw std::invalid_argument(err);
         }
 
         //Check no negative numbers have been passed
         std::vector<int64_t>::iterator itr =
-          std::find_if(m_spec_list.begin(), m_spec_list.end(), std::bind2nd(std::less<int>(), 0));
-        if( itr != m_spec_list.end() )
+          std::find_if(spec_list.begin(), spec_list.end(), std::bind2nd(std::less<int>(), 0));
+        if( itr != spec_list.end() )
         {
-          g_log.error() << "Negative SpectraList property encountered." << std::endl;
-          throw std::invalid_argument("Inconsistent property defined.");
+          throw std::invalid_argument("Negative SpectraList property encountered.");
         }
-
         range_check in_range(m_spec_min, m_spec_max);
         if( m_range_supplied )
         {
-          m_spec_list.erase(remove_if(m_spec_list.begin(), m_spec_list.end(), in_range), m_spec_list.end());
+          spec_list.erase(remove_if(spec_list.begin(), spec_list.end(), in_range), spec_list.end());
+          // combine spectra numbers from ranges and the list
+          if (spec_list.size()>0)
+          {
+            for(int64_t i=m_spec_min;i<m_spec_max+1;i++)
+              spec_list.push_back(static_cast<specid_t>(i));
+            // Sort the list so that lower spectra indexes correspond to smaller spectra ID-s
+            std::sort(spec_list.begin(), spec_list.end());
+
+          }
         }
       }
       else
       {
         m_range_supplied = true;
+      }
+      if (m_load_selected_spectra)
+      {
+        buildSpectraInd2SpectraNumMap(spec_list);
       }
 
     }
@@ -415,34 +462,36 @@ namespace Mantid
     }
 
     /**
-     * Analyze the spectra ranges and prepare a list contiguous blocks. Each monitor must be
-     * in a separate block.
-     * @return :: Number of spectra to load.
-     */
+    * Analyze the spectra ranges and prepare a list contiguous blocks. Each monitor must be
+    * in a separate block.
+    * @return :: Number of spectra to load.
+    */
     size_t LoadISISNexus2::prepareSpectraBlocks()
     {
       std::vector<int64_t> includedMonitors;
       // fill in the data block descriptor vector
-      if ( ! m_spec_list.empty() )
+      if ( ! m_specInd2specNum_map.empty() )
       {
-        int64_t hist = m_spec_list[0];
+        auto itSpec= m_specInd2specNum_map.begin();
+        int64_t hist = itSpec->second;
         SpectraBlock block(hist,hist,false);
-        for(auto spec = m_spec_list.begin() + 1; spec != m_spec_list.end(); ++spec)
+        itSpec++;
+        for(; itSpec != m_specInd2specNum_map.end(); ++itSpec)
         {
-          // try to put all consequtive numbers in same block
+          // try to put all consecutive numbers in same block
           bool isMonitor = m_monitors.find( hist ) != m_monitors.end();
-          if ( isMonitor || *spec != hist + 1 )
+          if ( isMonitor || itSpec->second!= hist + 1 )
           {
             block.last = hist;
             block.isMonitor =  isMonitor;
             m_spectraBlocks.push_back( block );
             if ( isMonitor ) includedMonitors.push_back( hist );
-            block = SpectraBlock(*spec,*spec,false);
+            block = SpectraBlock(itSpec ->second,itSpec ->second,false);
           }
-          hist = *spec;
+          hist = itSpec ->second;
         }
         // push the last block
-        hist = m_spec_list.back();
+        hist = m_specInd2specNum_map.rbegin()->second;
         block.last = hist;
         if ( m_monitors.find( hist ) != m_monitors.end() )
         {
@@ -450,22 +499,24 @@ namespace Mantid
           block.isMonitor =  true;
         }
         m_spectraBlocks.push_back( block );
+
+        return m_specInd2specNum_map.size();
       }
 
       // put in the spectra range, possibly breaking it into parts by monitors
       int64_t first = m_spec_min;
       for(int64_t hist = first; hist < m_spec_max; ++hist)
       {
-          if ( m_monitors.find( hist ) != m_monitors.end() )
+        if ( m_monitors.find( hist ) != m_monitors.end() )
+        {
+          if ( hist != first )
           {
-            if ( hist != first )
-            {
-              m_spectraBlocks.push_back( SpectraBlock( first, hist - 1, false ) );
-            }
-            m_spectraBlocks.push_back( SpectraBlock( hist, hist, true) );
-            includedMonitors.push_back( hist );
-            first = hist + 1;
+            m_spectraBlocks.push_back( SpectraBlock( first, hist - 1, false ) );
           }
+          m_spectraBlocks.push_back( SpectraBlock( hist, hist, true) );
+          includedMonitors.push_back( hist );
+          first = hist + 1;
+        }
       }
       if ( first == m_spec_max && m_monitors.find( first ) != m_monitors.end() )
       {
@@ -542,7 +593,15 @@ namespace Mantid
           Y.assign(mondata(),mondata() + m_numberOfChannels);
           MantidVec& E = local_workspace->dataE(hist_index);
           std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
-          //local_workspace->getAxis(1)->setValue(hist_index, static_cast<specid_t>(it->first));
+
+          if (m_load_selected_spectra)
+          {
+            //local_workspace->getAxis(1)->setValue(hist_index, static_cast<specid_t>(it->first));
+            auto spec = local_workspace->getSpectrum(hist_index);
+            specid_t specID = m_specInd2specNum_map.at(hist_index);
+            spec->setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specID));
+            spec->setSpectrumNo(specID);
+          }
 
           NXFloat timeBins = monitor.openNXFloat("time_of_flight");
           timeBins.load();
@@ -554,9 +613,9 @@ namespace Mantid
           NXData nxdata = entry.openNXData("detector_1");
           NXDataSetTyped<int> data = nxdata.openIntData();
           data.open();
-          //Start with thelist members that are lower than the required spectrum
+          //Start with the list members that are lower than the required spectrum
           const int * const spec_begin = m_spec.get();
-          // When reading in blocks we need to be careful that the range is exactly divisible by the blocksize
+          // When reading in blocks we need to be careful that the range is exactly divisible by the block-size
           // and if not have an extra read of the left overs
           const int64_t blocksize = 8;
           const int64_t rangesize = block->last - block->first + 1;
@@ -596,9 +655,9 @@ namespace Mantid
 
 
     /**
-     * Creates period log data in the workspace
-     * @param period :: period number
-     * @param local_workspace :: workspace to add period log data to.
+    * Creates period log data in the workspace
+    * @param period :: period number
+    * @param local_workspace :: workspace to add period log data to.
     */
     void LoadISISNexus2::createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr local_workspace)
     {
@@ -607,9 +666,9 @@ namespace Mantid
 
 
     /**
-    * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given blocksize
+    * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given block-size
     * @param data :: The NXDataSet object
-    * @param blocksize :: The blocksize to use
+    * @param blocksize :: The block-size to use
     * @param period :: The period number
     * @param start :: The index within the file to start reading from (zero based)
     * @param hist :: The workspace index to start reading into
@@ -617,7 +676,7 @@ namespace Mantid
     * @param local_workspace :: The workspace to fill the data with
     */
     void LoadISISNexus2::loadBlock(NXDataSetTyped<int> & data, int64_t blocksize, int64_t period, int64_t start,
-        int64_t &hist, int64_t& spec_num,
+      int64_t &hist, int64_t& spec_num,
       DataObjects::Workspace2D_sptr local_workspace)
     {
       data.load(static_cast<int>(blocksize), static_cast<int>(period), static_cast<int>(start)); // TODO this is just wrong
@@ -634,7 +693,17 @@ namespace Mantid
         std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
         // Populate the workspace. Loop starts from 1, hence i-1
         local_workspace->setX(hist, m_tof_data);
-        //local_workspace->getAxis(1)->setValue(hist, static_cast<specid_t>(spec_num));
+        if (m_load_selected_spectra)
+        {
+          //local_workspace->getAxis(1)->setValue(hist, static_cast<specid_t>(spec_num));
+          auto spec = local_workspace->getSpectrum(hist);
+          specid_t specID = m_specInd2specNum_map.at(hist);
+          // set detectors corresponding to spectra Number
+          spec->setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specID));
+          // set correct spectra Number          
+          spec->setSpectrumNo(specID);
+        }
+
         ++hist;
         ++spec_num;
       }
@@ -694,7 +763,7 @@ namespace Mantid
       }
 
     }
-    
+
     /**
     * Load data about the run
     *   @param local_workspace :: The workspace to load the run information in to
@@ -709,17 +778,39 @@ namespace Mantid
 
       std::string run_num = boost::lexical_cast<std::string>(entry.getInt("run_number"));
       runDetails.addProperty("run_number", run_num);
-      
+
       //
-      // Some details are only stored in the VMS compatability block so we'll pull everything from there
+      // Some details are only stored in the VMS comparability block so we'll pull everything from there
       // for consistency
 
       NXClass vms_compat = entry.openNXGroup("isis_vms_compat");
       // Run header
       NXChar char_data = vms_compat.openNXChar("HDR");
       char_data.load();
-      runDetails.addProperty("run_header", std::string(char_data(),80));
-      
+
+      // Space-separate the fields
+      char * nxsHdr = char_data();
+      char header[86] = {};
+      const size_t byte = sizeof(char);
+      const char fieldSep(' ');
+      size_t fieldWidths[7] = {3, 5, 20, 24, 12, 8, 8};
+
+      char * srcStart = nxsHdr;
+      char * destStart = header;
+      for(size_t i = 0; i < 7; ++i)
+      {
+        size_t width = fieldWidths[i];
+        memcpy(destStart, srcStart, width*byte);
+        if( i < 6 ) // no space after last field
+        {
+          srcStart += width;
+          destStart += width;
+          memset(destStart, fieldSep, byte); // insert separator
+          destStart += 1;
+        }
+      }
+      runDetails.addProperty("run_header", std::string(header, header + 86));
+
       // Data details on run not the workspace
       runDetails.addProperty("nspectra", static_cast<int>(m_numberOfSpectraInFile));
       runDetails.addProperty("nchannels", static_cast<int>(m_numberOfChannelsInFile));
@@ -735,7 +826,7 @@ namespace Mantid
       runDetails.addProperty("dmp_units", rpb_int[4]);  // scaler for above
       runDetails.addProperty("dmp_freq", rpb_int[5]);   // interval for above
       runDetails.addProperty("freq", rpb_int[6]);       // 2**k where source frequency = 50 / 2**k
-      
+
       // Now double data
       NXFloat rpb_dbl = vms_compat.openNXFloat("RRPB");
       rpb_dbl.load();
@@ -760,17 +851,17 @@ namespace Mantid
       std::string start_time_iso = std::string(char_data(), 19);
       runDetails.addProperty("run_start", start_time_iso);
 
-      
+
       runDetails.addProperty("rb_proposal",rpb_int[21]); // RB (proposal) number
       vms_compat.close();
     }
 
     /**
-     * Parse an ISO formatted date-time string into separate date and time strings
-     * @param datetime_iso :: The string containing the ISO formatted date-time
-     * @param date :: An output parameter containing the date from the original string or ??-??-???? if the format is unknown
-     * @param time :: An output parameter containing the time from the original string or ??-??-?? if the format is unknown
-     */
+    * Parse an ISO formatted date-time string into separate date and time strings
+    * @param datetime_iso :: The string containing the ISO formatted date-time
+    * @param date :: An output parameter containing the date from the original string or ??-??-???? if the format is unknown
+    * @param time :: An output parameter containing the time from the original string or ??-??-?? if the format is unknown
+    */
     void LoadISISNexus2::parseISODateTime(const std::string & datetime_iso, std::string & date, std::string & time) const
     {
       try
@@ -835,7 +926,7 @@ namespace Mantid
           << "data associated with this workspace\n";
         return;
       }
-      // For ISIS Nexus only, fabricate an addtional log containing an array of proton charge information from the periods group.
+      // For ISIS Nexus only, fabricate an additional log containing an array of proton charge information from the periods group.
       try
       {
         NXClass protonChargeClass = entry.openNXGroup("periods");

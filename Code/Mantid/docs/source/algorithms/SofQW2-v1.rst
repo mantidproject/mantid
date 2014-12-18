@@ -9,7 +9,7 @@
 Description
 -----------
 
-Converts a 2D workspace in `units <http://www.mantidproject.org/Unit_Factory>`_ 
+Converts a 2D workspace in :ref:`units <Unit Factory>` 
 of spectrum number/**energy transfer** to 
 the intensity as a function of momentum transfer 
 :math:`Q` and energy transfer :math:`\Delta E`. 

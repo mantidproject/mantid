@@ -9,7 +9,7 @@ class SANSMask(PythonAlgorithm):
     """
         Normalise detector counts by the sample thickness
     """
-    
+
     def category(self):
         return "Workflow\\SANS"
 
@@ -25,24 +25,24 @@ class SANSMask(PythonAlgorithm):
                              StringListValidator(facilities),
                              "Facility to which the SANS instrument belongs")
 
-        self.declareProperty(MatrixWorkspaceProperty("Workspace", "", 
+        self.declareProperty(MatrixWorkspaceProperty("Workspace", "",
                                                      direction=Direction.InOut),
                              "Workspace to apply the mask to")
 
         self.declareProperty(IntArrayProperty("MaskedDetectorList", values=[],
                                               direction=Direction.Input),
                              "List of detector IDs to be masked")
-        
+
         self.declareProperty(IntArrayProperty("MaskedEdges", values=[0,0,0,0],
                                               direction=Direction.Input),
                              "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high")
-        
+
         sides = [ "None", "Front", "Back"]
         self.declareProperty("MaskedSide", "None",
                              StringListValidator(sides),
                              "Side of the detector to which to apply the mask")
-    
-        self.declareProperty("OutputMessage", "", 
+
+        self.declareProperty("OutputMessage", "",
                              direction=Direction.Output, doc = "Output message")
 
     def PyExec(self):
@@ -57,7 +57,7 @@ class SANSMask(PythonAlgorithm):
 
         # Mask edges
         edge_str = self.getPropertyValue("MaskedEdges")
-        
+
         edges = self.getProperty("MaskedEdges").value
         if len(edges)==4:
             if facility.upper() == "HFIR":
@@ -74,7 +74,7 @@ class SANSMask(PythonAlgorithm):
         masked_dets = self.getProperty("MaskedDetectorList").value
         if len(masked_dets)>0:
             api.MaskDetectors(Workspace=workspace, DetectorList=masked_dets)
-        
+
         self.setProperty("OutputMessage", "Mask applied")
 
     def _mask_pixels(self, pixel_list, workspace, facility):
@@ -86,7 +86,7 @@ class SANSMask(PythonAlgorithm):
                 masked_detectors = sns_instrument.get_detector_from_pixel(pixel_list, workspace)
             # Mask the pixels by passing the list of IDs
             api.MaskDetectors(Workspace=workspace, DetectorList = masked_detectors)
-                
+
     def _apply_saved_mask(self, workspace, facility):
         # Check whether the workspace has mask information
         if workspace.getRun().hasProperty("rectangular_masks"):
@@ -111,7 +111,7 @@ class SANSMask(PythonAlgorithm):
                     Logger("SANSMask").error("Badly defined mask from configuration file: %s" % str(rec))
                     Logger("SANSMask").error(str(sys.exc_value))
             self._mask_pixels(masked_pixels, workspace, facility)
-                
+
     def _mask_detector_side(self, workspace, facility):
         """
             Mask the back side or front side as needed
@@ -123,16 +123,16 @@ class SANSMask(PythonAlgorithm):
             side_to_mask = 1
         else:
             return
-        
+
         if not workspace.getInstrument().hasParameter("number-of-x-pixels") \
             and not workspace.getInstrument().hasParameter("number-of-y-pixels"):
             Logger("SANSMask").error("Could not find number of pixels: skipping side masking")
             return
-            
+
         nx = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
         ny = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
         id_side = []
-        
+
         for iy in range(ny):
             for ix in range(side_to_mask, nx+side_to_mask, 2):
                 # For some odd reason the HFIR format has the x,y coordinates inverted
@@ -142,5 +142,5 @@ class SANSMask(PythonAlgorithm):
                     id_side.append([ix,iy])
 
         self._mask_pixels(id_side, workspace, facility)
-       
+
 AlgorithmFactory.subscribe(SANSMask())

@@ -32,7 +32,7 @@ class VMDTest(unittest.TestCase):
     def test_norm(self):
         p = VMD(1.0,-5.0,8.0);
         self.assertAlmostEquals(p.norm(), math.sqrt(90.0),places=6)
-        
+
     def test_norm2(self):
         p = VMD(1.0,-5.0,8.0);
         self.assertAlmostEquals(p.norm2(), 90.0, places=6)
@@ -67,7 +67,7 @@ class VMDTest(unittest.TestCase):
     def test_standard_mathematical_operators(self):
         v1 = VMD(1.0,2.0)
         v2 = VMD(5.0,-1.0)
-        
+
         v3 = v1 + v2
         self.assertAlmostEqual(6.0, v3[0])
         self.assertAlmostEqual(1.0, v3[1])
@@ -80,11 +80,11 @@ class VMDTest(unittest.TestCase):
         v3 = v1 / v2
         self.assertAlmostEqual(1.0/5.0, v3[0])
         self.assertAlmostEqual(-2.0, v3[1])
-        
+
     def test_inplace_mathematical_operators(self):
         v1 = VMD(1.0,2.0)
         v2 = VMD(5.0,-1.0)
-        
+
         v1 += v2
         self.assertAlmostEqual(6.0, v1[0])
         self.assertAlmostEqual(1.0, v1[1])
@@ -100,7 +100,7 @@ class VMDTest(unittest.TestCase):
         v1 /= v2
         self.assertAlmostEqual(1.0/5.0, v1[0])
         self.assertAlmostEqual(-2.0, v1[1])
-    
+
     def test_equality_operators(self):
         v1 = VMD(1.0,2.0)
         self.assertTrue(v1 == v1)
@@ -119,7 +119,7 @@ class VMDTest(unittest.TestCase):
     def test_value_write_access_raises_error_for_invalid_indices(self):
         vector = VMD(1.0,2.0)
         self.assertRaises(IndexError, vector.__setitem__, 2, 5.0)
-    
+
     def test_scalar_prod_raises_error_with_dimension_mismatch(self):
         v1 = VMD(1,2,3)
         v2 = VMD(1,2,3,4)

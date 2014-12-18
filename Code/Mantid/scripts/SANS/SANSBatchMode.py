@@ -65,9 +65,9 @@ IN_FORMAT['can_direct_beam'] = ''
 IN_FORMAT['output_as'] = ''
 #maps the run types above to the Python interface command to use to load it
 COMMAND = {}
-COMMAND['sample_sans'] = 'AssignSample(' 
+COMMAND['sample_sans'] = 'AssignSample('
 COMMAND['can_sans'] = 'AssignCan('
-COMMAND['sample_trans'] = 'TransmissionSample(' 
+COMMAND['sample_trans'] = 'TransmissionSample('
 COMMAND['can_trans'] = 'TransmissionCan('
 
 class SkipEntry(RuntimeError):
@@ -79,10 +79,10 @@ class SkipReduction(RuntimeError):
 def addRunToStore(parts, run_store):
     """ Add a CSV line to the input data store (run_store)
         @param parts: the parts of a CSV line
-        @param run_store: Append info about CSV line 
-    """     
+        @param run_store: Append info about CSV line
+    """
     # Check logical structure of line
-    nparts = len(parts) 
+    nparts = len(parts)
     if nparts not in ALLOWED_NUM_ENTRIES:
         return 1
 
@@ -95,7 +95,7 @@ def addRunToStore(parts, run_store):
             inputdata[parts[i]] = parts[i+1]
         if 'background' in role:
             issueWarning('Background runs are not yet implemented in Mantid! Will process Sample & Can only')
-        
+
     run_store.append(inputdata)
     return 0
 
@@ -110,10 +110,10 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         @param reducer: if to use the command line (default) or GUI reducer object
         @param combineDet: that will be forward to WavRangeReduction (rear, front, both, merged, None)
         @return final_setings: A dictionary with some values of the Reduction - Right Now:(scale, shift)
-    """     
+    """
     if not format.startswith('.'):
         format = '.' + format
-        
+
     # Read CSV file and store information in runinfo using format IN_FORMAT
     file_handle = open(filename, 'r')
     runinfo = []
@@ -131,7 +131,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     detnames = ', '.join(ReductionSingleton().instrument.listDetectors())
 
     # LARMOR has just one detector, but, it defines two because ISISInstrument is defined as two banks! #8395
-    if ins_name == 'LARMOR': 
+    if ins_name == 'LARMOR':
         detnames = ReductionSingleton().instrument.cur_detector().name()
 
     scale_shift = {'scale':1.0000, 'shift':0.0000}
@@ -145,21 +145,21 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         try:
             # Load in the sample runs specified in the csv file
             raw_workspaces.append(read_run(run, 'sample_sans', format))
-            
+
             #Transmission runs to be applied to the sample
             raw_workspaces += read_trans_runs(run, 'sample', format)
-            
-            # Can run 
+
+            # Can run
             raw_workspaces.append(read_run(run, 'can_sans', format))
-    
+
             #Transmission runs for the can
             raw_workspaces += read_trans_runs(run, 'can', format)
-    
+
             if centreit == 1:
                 if verbose == 1:
                     FindBeamCentre(50.,170.,12)
-                    
-            
+
+
             # WavRangeReduction runs the reduction for the specified wavelength range where the final argument can either be DefaultTrans or CalcTrans:
             reduced = WavRangeReduction(combineDet=combineDet, out_fit_settings=scale_shift)
 
@@ -176,9 +176,9 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
             #when we are all up to Python 2.5 replace the duplicated code below with one finally:
             delete_workspaces(raw_workspaces)
             raise
-        
+
         delete_workspaces(raw_workspaces)
-            
+
 
         if verbose:
             sanslog.notice(createColetteScript(run, format, reduced, centreit, plotresults, filename))
@@ -186,7 +186,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         final_name = run['output_as']
         if final_name == '':
             final_name = reduced
-        
+
         #convert the names from the default one, to the agreement
         names = [final_name]
         if combineDet == 'rear':
@@ -203,7 +203,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                 rear_reduced = reduced.replace('HAB','main')
             RenameWorkspace(InputWorkspace=reduced,OutputWorkspace=final_name+'_front')
             RenameWorkspace(InputWorkspace=rear_reduced,OutputWorkspace=final_name+'_rear')
-        elif combineDet == 'merged':            
+        elif combineDet == 'merged':
             names = [final_name + '_merged', final_name + '_rear',  final_name+'_front']
             if ins_name == 'SANS2D':
                 rear_reduced = reduced.replace('merged','rear')
@@ -213,8 +213,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                 front_reduced = rear_reduced.replace('main','HAB')
             RenameWorkspace(InputWorkspace=reduced,OutputWorkspace= final_name + '_merged')
             RenameWorkspace(InputWorkspace=rear_reduced,OutputWorkspace= final_name + '_rear')
-            RenameWorkspace(InputWorkspace=front_reduced,OutputWorkspace= final_name+'_front')            
-        else:            
+            RenameWorkspace(InputWorkspace=front_reduced,OutputWorkspace= final_name+'_front')
+        else:
             RenameWorkspace(InputWorkspace=reduced,OutputWorkspace=final_name)
 
         file = run['output_as']
@@ -235,7 +235,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                         ext = '.' + ext
                     if algor == "SaveCanSAS1D":
                         # From v2, SaveCanSAS1D is able to save the Transmission workspaces related to the
-                        # reduced data. The name of workspaces of the Transmission are available at the 
+                        # reduced data. The name of workspaces of the Transmission are available at the
                         # sample logs.
                         extra_param = dict()
                         _ws = mtd[workspace_name]
@@ -285,7 +285,7 @@ def parse_run(run_num, ext):
     else:
         period = -1
 
-    return run_spec, period 
+    return run_spec, period
 
 def read_run(runs, run_role, format):
     """
@@ -306,11 +306,11 @@ def read_run(runs, run_role, format):
             return
 
     run_file, period = parse_run(run_file, format)
-    run_ws = eval(COMMAND[run_role] + 'run_file, period=period)')    
+    run_ws = eval(COMMAND[run_role] + 'run_file, period=period)')
     if not run_ws:
         raise SkipReduction('Cannot load ' + run_role + ' run "' + run_file + '"')
 
-    #AssignCan and AssignSample will change signature for: ws_name = AssignCan 
+    #AssignCan and AssignSample will change signature for: ws_name = AssignCan
     if isinstance(run_ws, tuple):
         return run_ws[0]
     return run_ws
@@ -320,7 +320,7 @@ def read_trans_runs(runs, sample_or_can, format):
         Loads the transmission runs to either be applied to the sample or the can.
         There must be two runs
         @param runs: a line from a CSV file
-        @param sample_or_can: a string with the name of the set of transmission runs to use, e.g. can 
+        @param sample_or_can: a string with the name of the set of transmission runs to use, e.g. can
         @param format: extension to add to the end of the run number specifications
         @return: names of the two workspaces that were loaded
         @throw SkipReduction: if there is a problem with the line that means a reduction is impossible
@@ -337,7 +337,7 @@ def read_trans_runs(runs, sample_or_can, format):
     ws1, ws2 = eval(COMMAND[role1] + 'run_file1, run_file2, period_t=p1, period_d=p2)')
     if len(run_file1) > 0 and len(ws1) == 0:
         raise SkipReduction('Cannot load ' + role1 + ' run "' + run_file1 + '"')
-    if len(run_file2) > 0 and len(ws2) == 0: 
+    if len(run_file2) > 0 and len(ws2) == 0:
         raise SkipReduction('Cannot load ' + role2 + ' run "' + run_file2 + '"')
     return [ws1, ws2]
 

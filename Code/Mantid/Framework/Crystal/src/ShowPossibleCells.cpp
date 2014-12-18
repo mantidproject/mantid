@@ -40,7 +40,7 @@ namespace Crystal
   void ShowPossibleCells::init()
   {
     this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
-          "PeaksWorkspace","",Direction::Input), "Input Peaks Workspace");
+          "PeaksWorkspace","",Direction::InOut), "Input Peaks Workspace");
 
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);

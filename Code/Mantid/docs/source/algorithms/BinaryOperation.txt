@@ -10,6 +10,8 @@ Workspaces are compatible if:
 * the units of the axes match
 * the distribution status/counts units match
 
+For information about how errors are handled and propagated see :ref:`Error Propagation`.
+
 Compatible Sizes
 ################
 

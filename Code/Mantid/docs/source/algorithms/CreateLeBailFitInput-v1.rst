@@ -67,7 +67,6 @@ Usage
 
   DeleteWorkspace(partablews)
   DeleteWorkspace(braggtablews)
-  DeleteWorkspace("TempXXX")
 
 
 Output:
@@ -75,7 +74,6 @@ Output:
 .. testoutput:: ExCreateLBInputs
 
   GeneraateHKL? =  False
-  LaB6_HKL_Table
   Number Bragg peaks from .hkl file is 76.  Number of peak profile parameters is 30.
 
 

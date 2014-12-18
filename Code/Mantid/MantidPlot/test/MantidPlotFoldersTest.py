@@ -1,5 +1,5 @@
-""" 
-Test creating, switching and deleting 
+"""
+Test creating, switching and deleting
 folders.
 """
 import mantidplottests
@@ -7,15 +7,15 @@ from mantidplottests import *
 from PyQt4 import QtCore
 
 class MantidPlotFoldersTest(unittest.TestCase):
-    
+
     def setUp(self):
         # Make sure NOT to ask to close a folder. This hangs up tests
         import _qti
         _qti.app.setConfirmFolderClose(False)
-    
+
     def tearDown(self):
         pass
-    
+
     # FIXME: Avoid folder deletion confirmation dialog
     def setup_folder(self, name):
         """ Create a folder with some windows in it """
@@ -32,13 +32,13 @@ class MantidPlotFoldersTest(unittest.TestCase):
         for w in windows:
             w.confirmClose(False)
         return (f, windows)
-      
+
     def test_Folder_deletion(self):
         """ Create a folder then delete it """
         f = addFolder("test_folder")
         deleteFolder(f)
         self.assertTrue(f._getHeldObject() is None, "Folder was deleted")
-        
+
     def test_Folder_accessing_windows(self):
         """ Access windows through a folder """
         f, old_windows = self.setup_folder("fld")
@@ -50,17 +50,17 @@ class MantidPlotFoldersTest(unittest.TestCase):
         self.assertTrue( f.graph("graph-fld") is not None)
         for w in windows: w.close()
         deleteFolder(f)
-        
+
     def test_Folder_deletinging_windows(self):
         """ Access windows through a folder """
         f, windows = self.setup_folder("fld")
         n = 4
-        for w in windows: 
+        for w in windows:
             w.close()
             n -= 1
             self.assertEqual(len(f.windows()), n)
         deleteFolder(f)
-        
+
     def test_switchFolder_windows(self):
         """ Access windows through a folder """
         f1, windows1 = self.setup_folder("folder1")
@@ -75,7 +75,7 @@ class MantidPlotFoldersTest(unittest.TestCase):
             self.assertFalse( w.isVisible(), "Window in closed folder is hidden." )
         for w in windows1:
             self.assertTrue( w.isVisible(), "Window in active folder is visible." )
-            
-            
+
+
 # Run the unit tests
 mantidplottests.runTests(MantidPlotFoldersTest)

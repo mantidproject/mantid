@@ -68,6 +68,7 @@ public:
     sample.setEnvironment(kit);
     OrientedLattice *latt = new OrientedLattice(1.0,2.0,3.0, 90, 90, 90);
     sample.setOrientedLattice(latt);
+    delete latt;
     Material vanBlock("vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
     sample.setMaterial(vanBlock);
     Object_sptr shape_sptr =
@@ -241,7 +242,9 @@ public:
     ExperimentInfo_sptr ei1(new ExperimentInfo);
     Sample s=createsample();
     Sample s1;
-    s1.setOrientedLattice(new OrientedLattice(6.0,7.0,8.0, 90, 90, 90));
+    OrientedLattice *latt=new OrientedLattice(6.0,7.0,8.0, 90, 90, 90);
+    s1.setOrientedLattice(latt);
+    delete latt;
     s1.setName("newsample");
     ei->mutableSample()=s;
     TS_ASSERT_EQUALS( ew->addExperimentInfo(ei), 0);

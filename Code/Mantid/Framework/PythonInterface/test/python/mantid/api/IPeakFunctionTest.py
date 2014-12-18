@@ -4,7 +4,7 @@ from mantid.api import *
 import numpy as np
 
 class MyPeak(IPeakFunction):
-    
+
     def init(self):
         self.declareAttribute("Centre", 1)
         self.declareAttribute("Height", 3.4)
@@ -27,7 +27,7 @@ class IPeakFunctionTest(unittest.TestCase):
         self.assertTrue(isinstance(func, IPeakFunction))
         self.assertTrue(isinstance(func, IFunction1D))
         FunctionFactory.unsubscribe(func_name)
-        
+
     def test_functionLocal_can_be_called_directly(self):
         func = MyPeak()
         func.initialize()

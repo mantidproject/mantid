@@ -117,7 +117,7 @@ private:
     // OrientedLattice
     OrientedLattice * latticeRotation = new OrientedLattice;
     expt->mutableSample().setOrientedLattice(latticeRotation);
-
+    delete latticeRotation;
     return expt;
   }
 

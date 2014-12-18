@@ -9,7 +9,7 @@
 Description
 -----------
 
-Stitches single histogram `Matrix Workspaces <http://www.mantidproject.org/MatrixWorkspace>`_
+Stitches single histogram :ref:`Matrix Workspaces <MatrixWorkspace>`
 together outputting a stitched Matrix Workspace. Either the
 right-hand-side or left-hand-side workspace can be chosen to be scaled.
 Users must provide a Param step (single value), but the binning start
@@ -21,6 +21,16 @@ x-axis intersection.
 The workspaces must be histogrammed. Use
 :ref:`algm-ConvertToHistogram` on workspaces prior to
 passing them to this algorithm.
+
+**Special Value Processing**
+
+Special values, meaning infinite and NaN double precision values, are treated in a different way by the algorithm. The processing is as follows:
+
+#. The workspaces are initially rebinned, as prescribed by the rebin Params (determined automatically if not provided)
+#. Each spectra is searched for signal values and error values that are special values. Positions and type of special value are recorded
+#. Special values found in the previous step are set to zero
+#. Stitching proceeds, integration will not be performed considering any special values
+#. Post processing the indexes of the special values are used to put the special values back where they came from
 
 Usage
 -----

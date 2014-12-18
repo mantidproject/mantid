@@ -1,6 +1,6 @@
 """
-    Classes for each reduction step. Those are kept separately 
-    from the the interface class so that the DgsReduction class could 
+    Classes for each reduction step. Those are kept separately
+    from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
 import os
@@ -28,13 +28,13 @@ class DataCorrectionsScript(BaseScriptElement):
     detvan_int_range_units = 'Energy'
     save_proc_detvan = False
     save_proc_detvan_file = ''
-    use_proc_detvan = False    
-    
+    use_proc_detvan = False
+
     def __init__(self, inst_name):
         super(DataCorrectionsScript, self).__init__()
         self.set_default_pars(inst_name)
         self.reset()
-        
+
     def set_default_pars(self, inst_name):
         import dgs_utils
         ip = dgs_utils.InstrumentParameters(inst_name)
@@ -44,7 +44,7 @@ class DataCorrectionsScript(BaseScriptElement):
         DataCorrectionsScript.tib_tof_end = int(ip.get_parameter("bkgd-range-max"))
         DataCorrectionsScript.detvan_int_range_low = ip.get_parameter("wb-integr-min")
         DataCorrectionsScript.detvan_int_range_high = ip.get_parameter("wb-integr-max")
-        
+
     def to_script(self):
         script = ""
         if self.filter_bad_pulses:
@@ -81,7 +81,7 @@ class DataCorrectionsScript(BaseScriptElement):
                 script += "UseProcessedDetVan=%s,\n" % self.use_proc_detvan
 
         return script
-    
+
     def to_xml(self):
         """
             Create XML from the current data.
@@ -105,20 +105,20 @@ class DataCorrectionsScript(BaseScriptElement):
         xml += "  <use_proc_detvan>%s</use_proc_detvan>\n" % str(self.use_proc_detvan)
         xml += "</DataCorrections>\n"
         return xml
-    
+
     def from_xml(self, xml_str):
         """
             Read in data from XML
             @param xml_str: text to read the data from
-        """       
+        """
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("DataCorrections")
         if len(element_list)>0:
             instrument_dom = element_list[0]
-            self.filter_bad_pulses = BaseScriptElement.getBoolElement(instrument_dom, 
+            self.filter_bad_pulses = BaseScriptElement.getBoolElement(instrument_dom,
                                                                       "filter_bad_pulses",
                                                                       default=DataCorrectionsScript.filter_bad_pulses)
-            self.incident_beam_norm = BaseScriptElement.getStringElement(instrument_dom, 
+            self.incident_beam_norm = BaseScriptElement.getStringElement(instrument_dom,
                                                                          "incident_beam_norm",
                                                                          default=DataCorrectionsScript.incident_beam_norm)
             self.monitor_int_low = BaseScriptElement.getIntElement(instrument_dom,
@@ -184,4 +184,3 @@ class DataCorrectionsScript(BaseScriptElement):
         self.save_proc_detvan = DataCorrectionsScript.save_proc_detvan
         self.save_proc_detvan_file = DataCorrectionsScript.save_proc_detvan_file
         self.use_proc_detvan = DataCorrectionsScript.use_proc_detvan
-        

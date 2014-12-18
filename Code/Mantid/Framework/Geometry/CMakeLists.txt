@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/ComponentParser.cpp
 	src/Crystal/ConventionalCell.cpp
+	src/Crystal/CrystalStructure.cpp
 	src/Crystal/IndexingUtils.cpp
 	src/Crystal/NiggliCell.cpp
 	src/Crystal/OrientedLattice.cpp
@@ -8,6 +9,7 @@ set ( SRC_FILES
 	src/Crystal/ReducedCell.cpp
 	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/ScalarUtils.cpp
+	src/Crystal/SymmetryOperation.cpp
 	src/Crystal/UnitCell.cpp
 	src/IObjComponent.cpp
 	src/Instrument.cpp
@@ -100,6 +102,7 @@ set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
 set ( INC_FILES
 	inc/MantidGeometry/ComponentParser.h
 	inc/MantidGeometry/Crystal/ConventionalCell.h
+	inc/MantidGeometry/Crystal/CrystalStructure.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
 	inc/MantidGeometry/Crystal/NiggliCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
@@ -107,6 +110,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
 	inc/MantidGeometry/Crystal/ScalarUtils.h
+	inc/MantidGeometry/Crystal/SymmetryOperation.h
 	inc/MantidGeometry/Crystal/UnitCell.h
 	inc/MantidGeometry/DllConfig.h
 	inc/MantidGeometry/ICompAssembly.h
@@ -202,6 +206,7 @@ set ( TEST_FILES
 	ConeTest.h
 	ConventionalCellTest.h
 	ConvexPolygonTest.h
+	CrystalStructureTest.h
 	CylinderTest.h
 	DetectorGroupTest.h
 	DetectorTest.h
@@ -265,6 +270,7 @@ set ( TEST_FILES
 	SphereTest.h
 	SurfaceFactoryTest.h
 	SurfaceTest.h
+	SymmetryOperationTest.h
 	TorusTest.h
 	TrackTest.h
 	TripleTest.h

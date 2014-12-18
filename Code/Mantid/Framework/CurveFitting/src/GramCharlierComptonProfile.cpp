@@ -352,12 +352,11 @@ namespace Mantid
      * @param tseconds A vector containing the time-of-flight values in seconds
      * @param isHistogram True if histogram tof values have been passed in
      * @param detpar Structure containing detector parameters
-     * @param respar Structure containing resolution parameters
      */
     void GramCharlierComptonProfile::cacheYSpaceValues(const std::vector<double> & tseconds, const bool isHistogram,
-                                                       const DetectorParams & detpar, const ResolutionParams & respar)
+                                                       const DetectorParams & detpar)
     {
-      ComptonProfile::cacheYSpaceValues(tseconds,isHistogram,detpar, respar); // base-class calculations
+      ComptonProfile::cacheYSpaceValues(tseconds,isHistogram,detpar); // base-class calculations
 
       // Is FSE fixed at the moment?
       // The ComptonScatteringCountRate fixes it but we still need to know if the user wanted it fixed
@@ -419,7 +418,7 @@ namespace Mantid
 
         const double yi = yspace[i];
         std::transform(minusYFine.begin(), minusYFine.end(), ym.begin(), std::bind2nd(std::plus<double>(), yi)); //yfine is actually -yfine
-        voigtApprox(voigt,ym,0,1.0,lorentzFWHM(),resolutionFWHM());
+        m_resolutionFunction->voigtApprox(voigt,ym,0,1.0);
       }
 
       m_voigtProfile.resize(NFINE_Y); // Value holder for later to avoid repeated memory allocations when creating a new vector

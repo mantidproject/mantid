@@ -24,8 +24,8 @@ The default analysis mode is *PointDetectorAnalysis*. Only this mode
 supports Transmission corrections (see below). For PointAnalysisMode the
 analysis can be roughly reduced to IvsLam = DetectorWS / sum(I0) /
 TransmissionWS / sum(I0). The normalization by tranmission run(s) is
-optional. Input workspaces are converted to *Wavelength* first via
-:ref:`algm-ConvertUnits`.
+optional. If necessary, input workspaces are converted to *Wavelength*
+first via :ref:`algm-ConvertUnits`.
 
 IvsQ is calculated via :ref:`algm-ConvertUnits` into units of
 *MomentumTransfer*. Corrections may be applied prior to the

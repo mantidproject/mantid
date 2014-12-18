@@ -1,15 +1,15 @@
 def reportUnitCell(peaks_ws):
-	latt = peaks_ws.sample().getOrientedLattice()
-	print "-- Unit Cell --"
-	print latt.a()
-	print latt.b()
-	print latt.c()
-	print latt.alpha()
-	print latt.beta()
-	print latt.gamma()
+    latt = peaks_ws.sample().getOrientedLattice()
+    print "-- Unit Cell --"
+    print latt.a()
+    print latt.b()
+    print latt.c()
+    print latt.alpha()
+    print latt.beta()
+    print latt.gamma()
 
 #
-# Exclude the monitors when loading the raw SXD file.  This avoids 
+# Exclude the monitors when loading the raw SXD file.  This avoids
 #
 Load(Filename='SXD23767.raw',OutputWorkspace='SXD23767',LoadMonitors='Exclude')
 
@@ -48,16 +48,16 @@ if use_cubic_lat_par:
 
 if use_Niggli_lat_par:
    FindUBUsingLatticeParameters(PeaksWorkspace=peaks_qLab, a=3.9882,b=3.9882,c=3.9882,alpha=60,beta=60,gamma=60,NumInitial=25,Tolerance=0.12)
-   print '\nNiggli cell found from FindUBUsingLatticeParameters:' 
-   
-reportUnitCell(peaks_qLab)  
+   print '\nNiggli cell found from FindUBUsingLatticeParameters:'
+
+reportUnitCell(peaks_qLab)
 
 IndexPeaks(PeaksWorkspace=peaks_qLab,Tolerance=0.12,RoundHKLs=1)
 
 if use_fft or use_Niggli_lat_par:
    ShowPossibleCells(PeaksWorkspace=peaks_qLab,MaxScalarError='0.5')
    SelectCellOfType(PeaksWorkspace=peaks_qLab, CellType='Cubic', Centering='F', Apply=True)
-   
+
 peaks_qLab_Integrated = IntegratePeaksMD(InputWorkspace=QLab, PeaksWorkspace=peaks_qLab, PeakRadius=0.2, BackgroundInnerRadius=0.3, BackgroundOuterRadius=0.4)
 
 binned=BinMD(InputWorkspace=QLab,AlignedDim0='Q_lab_x,-15,15,200',AlignedDim1='Q_lab_y,-15,15,200',AlignedDim2='Q_lab_z,-15,15,200')

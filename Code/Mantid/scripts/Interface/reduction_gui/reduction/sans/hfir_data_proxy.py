@@ -6,8 +6,8 @@ try:
     import mantid.simpleapi as api
     HAS_MANTID = True
 except:
-    HAS_MANTID = False 
-    
+    HAS_MANTID = False
+
 class DataProxy(object):
     """
         Class used to load a data file temporarily to extract header information
@@ -19,10 +19,10 @@ class DataProxy(object):
     data_ws = ''
     sample_thickness = None
     beam_diameter = None
-    
+
     ## Error log
     errors = []
-    
+
     def __init__(self, data_file, workspace_name=None):
         self.errors = []
         if HAS_MANTID:
@@ -39,9 +39,8 @@ class DataProxy(object):
                 self.sample_detector_distance = ws.getRun().getProperty("sample_detector_distance").value
                 self.sample_thickness = ws.getRun().getProperty("sample-thickness").value
                 self.beam_diameter = ws.getRun().getProperty("beam-diameter").value
-                
+
                 Logger("hfir_data_proxy").information("Loaded data file: %s" % data_file)
             except:
                 Logger("hfir_data_proxy").error("Error loading data file:\n%s" % sys.exc_value)
                 self.errors.append("Error loading data file:\n%s" % sys.exc_value)
-            

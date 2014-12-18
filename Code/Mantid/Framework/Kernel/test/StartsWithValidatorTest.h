@@ -49,12 +49,12 @@ public:
     StartsWithValidator v;
     v.addAllowedValue("one");
     v.addAllowedValue("two");
-    std::set<std::string> s;
+    std::vector<std::string> s;
     TS_ASSERT_THROWS_NOTHING( s = v.allowedValues() )
     TS_ASSERT_EQUALS( s.size(), 2 )
-    TS_ASSERT( s.count("one") )
-    TS_ASSERT( s.count("two") )
-    TS_ASSERT( ! s.count("three") )
+    TS_ASSERT( std::find( s.begin(), s.end(), "one")  != s.end() )
+    TS_ASSERT( std::find( s.begin(), s.end(), "two")  != s.end() )
+    TS_ASSERT( std::find( s.begin(), s.end(), "three")  == s.end() )
   }
 
   void testLongValues()

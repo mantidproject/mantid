@@ -23,6 +23,7 @@ PoldiAutoCorrelationCore::PoldiAutoCorrelationCore(Kernel::Logger &g_log) :
     m_chopper(),
     m_wavelengthRange(),
     m_deltaT(),
+    m_deltaD(),
     m_timeBinCount(),
     m_detectorElements(),
     m_weightsForD(),

@@ -8,23 +8,23 @@ import ui.inelastic.ui_dgs_absolute_units
 class AbsoluteUnitsWidget(BaseWidget):
     """
         Widget that presents absolute units normalisation options to the user.
-    """ 
+    """
     ## Widget name
     name = "Absolute Units"
-    
+
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
         super(AbsoluteUnitsWidget, self).__init__(parent, state, settings, data_type=data_type)
 
-        class AbsUnitsFrame(QtGui.QFrame, ui.inelastic.ui_dgs_absolute_units.Ui_AbsUnitsFrame): 
+        class AbsUnitsFrame(QtGui.QFrame, ui.inelastic.ui_dgs_absolute_units.Ui_AbsUnitsFrame):
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
-                
+
         self._content = AbsUnitsFrame(self)
         self._layout.addWidget(self._content)
         self.initialize_content()
         self._instrument_name = settings.instrument_name
-        
+
         if state is not None:
             self.set_state(state)
         else:
@@ -43,34 +43,34 @@ class AbsoluteUnitsWidget(BaseWidget):
                        self._content.median_test_out_low_edit,
                        self._content.errorbar_crit_edit,
                        ]:
-            
+
             dvp = QtGui.QDoubleValidator(widget)
             dvp.setBottom(0.0)
             widget.setValidator(dvp)
-        
+
         # Connections
-        self.connect(self._content.absunits_van_browse, QtCore.SIGNAL("clicked()"), 
+        self.connect(self._content.absunits_van_browse, QtCore.SIGNAL("clicked()"),
                      self._absunits_van_browse)
-        self.connect(self._content.absunits_detvan_browse, QtCore.SIGNAL("clicked()"), 
+        self.connect(self._content.absunits_detvan_browse, QtCore.SIGNAL("clicked()"),
                      self._absunits_detvan_browse)
-        self.connect(self._content.grouping_file_browse, QtCore.SIGNAL("clicked()"), 
+        self.connect(self._content.grouping_file_browse, QtCore.SIGNAL("clicked()"),
                      self._grouping_file_browse)
 
     def _absunits_van_browse(self):
         fname = self.data_browse_dialog()
         if fname:
-            self._content.absunits_van_edit.setText(fname)   
+            self._content.absunits_van_edit.setText(fname)
 
     def _absunits_detvan_browse(self):
         fname = self.data_browse_dialog()
         if fname:
-            self._content.absunits_detvan_edit.setText(fname)   
+            self._content.absunits_detvan_edit.setText(fname)
 
     def _grouping_file_browse(self):
         fname = self.data_browse_dialog()
         if fname:
-            self._content.grouping_file_edit.setText(fname)   
-    
+            self._content.grouping_file_edit.setText(fname)
+
     def set_state(self, state):
         """
             Populate the UI elements with the data from the given state.
@@ -113,7 +113,7 @@ class AbsoluteUnitsWidget(BaseWidget):
         a.absunits_median_test_out_low = util._check_and_get_float_line_edit(self._content.median_test_out_low_edit)
         a.absunits_errorbar_criterion = util._check_and_get_float_line_edit(self._content.errorbar_crit_edit)
         return a
-        
+
     def live_button_toggled_actions(self,checked):
         if checked:
             self._old_absunits = self._content.absunits_gb.isChecked()

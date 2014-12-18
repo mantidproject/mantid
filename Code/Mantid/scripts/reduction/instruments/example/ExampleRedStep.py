@@ -3,7 +3,7 @@ from mantid.api import *
 from mantid.simpleapi import *
 
 class ExampleRedStep(PythonAlgorithm):
-    
+
     def name(self):
         return "ExampleRedStep"
 
@@ -15,7 +15,7 @@ class ExampleRedStep(PythonAlgorithm):
     def PyExec(self):
         input_ws = self.getProperty("InputWorkspace").value
         output_ws = self.getProperty("OutputWorkspace").value
-        
+
         alg = self.getProperty("Algorithm").value
         alg.setPropertyValue("InputWorkspace", str(input_ws))
         alg.setPropertyValue("OutputWorkspace", output_ws)
@@ -24,7 +24,7 @@ class ExampleRedStep(PythonAlgorithm):
 #AlgorithmFactory.subscribe(ExampleRedStep)
 
 class ExampleLoader(PythonAlgorithm):
-    
+
     def name(self):
         return "ExampleLoader"
 
@@ -36,6 +36,6 @@ class ExampleLoader(PythonAlgorithm):
         filename = self.getProperty("Filename").value
         output_ws = self.getProperty("OutputWorkspace").value
         LoadAscii(filename, output_ws)
-        
+
         print filename, output_ws
 

@@ -7,7 +7,7 @@ import sys
 class ResultReporter(object):
     '''
     A base class for results reporting. In order to get the results in an
-    appropriate form, subclass this class and implement the dispatchResults 
+    appropriate form, subclass this class and implement the dispatchResults
     method.
     '''
 
@@ -16,7 +16,7 @@ class ResultReporter(object):
         pass
 
     def dispatchResults(self, result):
-        """ 
+        """
         Parameters
             result: a TestResult object """
         raise NotImplementedError('"dispatchResults(self, result)" should be overridden in a derived class')
@@ -29,7 +29,7 @@ class TextResultReporter(ResultReporter):
     '''
     Report the results of a test using standard out
     '''
-    
+
     def dispatchResults(self, result):
         '''
         Print the results to standard out
@@ -57,7 +57,7 @@ class LogArchivingReporter(ResultReporter):
         self.logarchive = os.path.abspath(logarchive)
         if not os.path.exists(self.logarchive):
             os.mkdir(self.logarchive)
-    
+
     def dispatchResults(self, result):
         '''
         Print the results to standard out
@@ -75,29 +75,29 @@ class JUnitXMLReporter(ResultReporter):
     Report the results of a test to a JUnit style XML format
     that can be read by Hudson/Jenkins
     '''
-    
+
     def __init__(self, path):
         # Path to .xml files
         self._path = path
-    
+
     def dispatchResults(self, result):
         '''
         Make a junit .xml file
         '''
         fullpath = os.path.join(self._path, "%s.xml" % result["name"])
         f = open(fullpath, 'w')
-        
+
         names  = result["name"].split(".")
-        suitename = names[0]  
+        suitename = names[0]
         testname = ".".join(names[1:])
-        
+
         failure = ""
         num_failures = 0
         if not result["success"]:
             failure = """\n        <failure type="failedAssert">%s</failure>
             <system-out ><![CDATA[%s]]></system-out>""" % (result["status"], result["log_contents"])
             num_failures = 1
-          
+
         f.write("""<?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="%s" tests="1" failures="%d" disabled="0" errors="0" time="0.0">
     <testcase name="%s" time="%f" classname="%s">%s
@@ -110,14 +110,14 @@ class JUnitXMLReporter(ResultReporter):
 if __name__=="__main__":
     import testresult
     rep = JUnitXMLReporter(".")
-    
+
     res = testresult.TestResult()
     res["name"] = "MyTestTest.Test"
     res["status"] = "success maybe?"
     res["success"] = True
     res["runtime"] = 1.234
     rep.dispatchResults(res)
-    
+
     res = testresult.TestResult()
     res["name"] = "MyTestTest.OtherTest"
     res["status"] = "failure"

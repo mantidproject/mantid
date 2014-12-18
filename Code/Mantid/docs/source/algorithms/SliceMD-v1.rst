@@ -48,7 +48,7 @@ in every other dimension - that way, boxes will only be split along the
 Slicing a MDHistoWorkspace
 ##########################
 
-It is possible to slice a `MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`_. Each
+It is possible to slice a :ref:`MDHistoWorkspace <MDHistoWorkspace>`. Each
 MDHistoWorkspace holds a reference to the
 `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ that created it, as well as the
 coordinate transformation that was used.

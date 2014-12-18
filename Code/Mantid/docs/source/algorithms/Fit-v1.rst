@@ -13,7 +13,7 @@ Additional properties for a 1D function and a MatrixWorkspace
 #############################################################
 
 If Function defines a one-dimensional function and InputWorkspace is a
-`MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`_ the algorithm will have these
+:ref:`MatrixWorkspace <MatrixWorkspace>` the algorithm will have these
 additional properties:
 
 +------------------+-------------+-----------+-------------------------+---------------------------------------------------------------------+
@@ -31,7 +31,7 @@ Overview
 
 This is a generic algorithm for fitting data in a Workspace with a
 function. The workspace must have the type supported by the algorithm.
-Currently supported types are: `MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`_ for
+Currently supported types are: :ref:`MatrixWorkspace <MatrixWorkspace>` for
 fitting with a `IFunction1D <http://www.mantidproject.org/IFunction1D>`_ and
 `IMDWorkspace <http://www.mantidproject.org/IMDWorkspace>`_ for fitting with
 `IFunctionMD <http://www.mantidproject.org/IFunctionMD>`_. After Function and InputWorkspace
@@ -151,7 +151,7 @@ Parameters can be constrained to be above a lower boundary and/or below
 an upper boundary. If a constraint is violated a penalty to the fit is
 applied which should result the parameters satisfying the constraint.
 The penalty applied is described in more detail
-`here <http://www.mantidproject.org/FitConstraint>`_. Use Constraints property to set any
+:ref:`here <FitConstraint>`. Use Constraints property to set any
 constraints. In case of a simple function the parameter names are used
 as variables in the constraint expressions. For example
 
@@ -186,7 +186,7 @@ Output
 Setting the Output property defines the names of the two output
 workspaces. One of them is a `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with
 the fitted parameter values. The other is a
-`Workspace2D <http://www.mantidproject.org/Workspace2D>`_ which compares the fit with the original
+:ref:`Workspace2D <Workspace2D>` which compares the fit with the original
 data. It has three spectra. The first (index 0) contains the original
 data, the second one the data simulated with the fitting function and
 the third spectrum is the difference between the first two. For example,

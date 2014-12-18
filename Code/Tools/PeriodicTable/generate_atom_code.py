@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
     # read in an existing file
     (code_before, code_after) = readExisting(filename)
-    
+
     # setup the file for the elements and isotopes
     print "writing information to %s" % filename
     handle = open(filename, 'w')

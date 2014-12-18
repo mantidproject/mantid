@@ -1,6 +1,6 @@
 """
-    Classes for each reduction step. Those are kept separately 
-    from the the interface class so that the HFIRReduction class could 
+    Classes for each reduction step. Those are kept separately
+    from the the interface class so that the HFIRReduction class could
     be used independently of the interface implementation
 """
 import xml.dom.minidom
@@ -38,7 +38,7 @@ class DataSets(BaseScriptElement):
 
 #        _u_list = self.incident_medium_list
 #        _list = str(_u_list[0]).split(',')
-        
+
         script += 'Incident medium: %s \n' % str(self.incident_medium_list)
 #        script += 'Incident medium: %s \n' % str(self.incident_medium_list[self.incident_medium_index_selected])
 #        script += 'Incident medium: %s \n' % str(_list[self.incident_medium_index_selected])
@@ -83,11 +83,11 @@ class DataSets(BaseScriptElement):
         xml += "<s2w>%s</s2w>\n" % str(self.s2w)
         xml += "<scaling_factor_file>%s</scaling_factor_file>\n" % str(self.scaling_factor_file)
         xml += "</RefLSFCalculator>\n"
-        
+
         return xml
 
     def from_xml(self, xml_str):
-        self.reset()    
+        self.reset()
         dom = xml.dom.minidom.parseString(xml_str)
         self.from_xml_element(dom)
         element_list = dom.getElementsByTagName("RefLSFCalculator")
@@ -98,40 +98,40 @@ class DataSets(BaseScriptElement):
         """
             Read in data from XML
             @param xml_str: text to read the data from
-        """   
+        """
         #incident medium
-        self.incident_medium_list = BaseScriptElement.getStringList(instrument_dom, "incident_medium_list")        
+        self.incident_medium_list = BaseScriptElement.getStringList(instrument_dom, "incident_medium_list")
         self.incident_medium_index_selected = BaseScriptElement.getIntElement(instrument_dom, "incident_medium_index_selected")
-        
+
         self.tof_min = BaseScriptElement.getFloatElement(instrument_dom, "tof_min")
         self.tof_max = BaseScriptElement.getFloatElement(instrument_dom, "tof_max")
-                
+
         #run number
         self.data_file = BaseScriptElement.getIntElement(instrument_dom, "data_file")
-        
+
         #number of attenuator
         self.number_attenuator = BaseScriptElement.getIntElement(instrument_dom, "number_attenuator")
-        
+
         #peak selection from and to
         self.peak_selection = [BaseScriptElement.getIntElement(instrument_dom, "peak_selection_from_pixel"),
                                BaseScriptElement.getIntElement(instrument_dom, "peak_selection_to_pixel")]
-        
+
         #background flag and selection from and to
         self.back_selection = [BaseScriptElement.getIntElement(instrument_dom, "back_selection_from_pixel"),
                                BaseScriptElement.getIntElement(instrument_dom, "back_selection_to_pixel")]
-        
+
         #lambda requested
         self.lambda_requested = BaseScriptElement.getStringElement(instrument_dom, "lambda_requested")
-        
+
         #s1h, s2h, s1w, s2w
         self.s1h = BaseScriptElement.getStringElement(instrument_dom, "s1h")
         self.s2h = BaseScriptElement.getStringElement(instrument_dom, "s2h")
         self.s1w = BaseScriptElement.getStringElement(instrument_dom, "s1w")
         self.s2w = BaseScriptElement.getStringElement(instrument_dom, "s2w")
-        
+
         #scaling factor file
         self.scaling_factor_file = BaseScriptElement.getStringElement(instrument_dom, "scaling_factor_file")
-                
+
     def reset(self):
         """
             Reset state
@@ -146,8 +146,7 @@ class DataSets(BaseScriptElement):
         self.s1h = DataSets.s1h
         self.s2h = DataSets.s2h
         self.s1w = DataSets.s1w
-        self.s2w = DataSets.s2w 
+        self.s2w = DataSets.s2w
         self.tof_min = DataSets.tof_min
-        self.tof_max = DataSets.tof_max   
-        self.scaling_factor_file = DataSets.scaling_factor_file 
-        
+        self.tof_max = DataSets.tof_max
+        self.scaling_factor_file = DataSets.scaling_factor_file

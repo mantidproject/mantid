@@ -8,7 +8,7 @@ import sys
 
 def get_exportfile(headerfile):
     """
-    For the given header path create a path to the corresponding 
+    For the given header path create a path to the corresponding
     export file in the PythonInterface
     """
     # We need to find the submodule from the Mantid package
@@ -20,12 +20,12 @@ def get_exportfile(headerfile):
 
 def get_unittest_file(headerfile):
     """
-    For the given header path create a path to the corresponding 
+    For the given header path create a path to the corresponding
     Python unit test file
     """
     frameworkdir = get_frameworkdir(headerfile)
     submodule = get_submodule(headerfile)
-    testpath = os.path.join(frameworkdir, 'PythonInterface', 'test', 
+    testpath = os.path.join(frameworkdir, 'PythonInterface', 'test',
                             'python','mantid',submodule)
     return os.path.join(testpath, os.path.basename(headerfile).replace('.h','Test.py'))
 
@@ -59,7 +59,7 @@ def get_frameworkdir(headerfile):
     else:
         raise RuntimeError("Script must be run from outside the Framework directory")
     return frameworkdir
-    
+
 def get_classname(headerfile):
     """
     Returns the classname from a given file. At the moment it just uses the file name
@@ -92,7 +92,7 @@ def write_export_file(headerfile, overwrite):
     print 'Writing export file \"%s\" '% os.path.basename(exportfile)
     if os.path.exists(exportfile) and not overwrite:
         raise RuntimeError("Export file '%s' already exists, use the --overwrite option to overwrite the file." % exportfile)
-    
+
     namespace = get_namespace(headerfile)
     classname = get_classname(headerfile)
     include = get_include(headerfile)
@@ -117,7 +117,7 @@ void export_%(class)s()
     print 'Generated export file "%s"' % os.path.basename(exportfile)
     print
     print "  ** Add this to the EXPORT_FILES variable in '%s'" % \
-       os.path.join(get_modulepath(get_frameworkdir(headerfile), get_submodule(headerfile)), 'CMakeLists.txt')        
+       os.path.join(get_modulepath(get_frameworkdir(headerfile), get_submodule(headerfile)), 'CMakeLists.txt')
 
     return exportfile
 
@@ -129,7 +129,7 @@ def write_unittest(headerfile, overwrite):
     print 'Writing unit test \"%s\" '% os.path.basename(filename)
     if os.path.exists(filename) and not overwrite:
         raise RuntimeError("A unit test file '%s' already exists, use the --overwrite-test option to overwrite the file." % filename)
-    
+
     classname = get_classname(headerfile)
     pytest = \
 """import unittest
@@ -150,7 +150,7 @@ if __name__ == '__main__':
     print 'Generated unit test file "%s"' % os.path.basename(filename)
     print
     print "  ** Add this to the TEST_PY_FILES variable in '%s'" % \
-        os.path.join('PythonInterface', 'CMakeLists.txt')        
+        os.path.join('PythonInterface', 'CMakeLists.txt')
 
 def main():
     """Main function
@@ -164,7 +164,7 @@ def main():
     (options, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("Incorrect number of arguments")
-    
+
     headerfile = args[0]
     if not os.path.exists(headerfile):
         parser.error("Invalid header path")
@@ -183,4 +183,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
+

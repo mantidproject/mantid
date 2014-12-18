@@ -68,7 +68,7 @@ namespace DataHandling
     declareProperty(new API::FileProperty("Filename","", API::FileProperty::Save, exts),
     "The name of the file into which the instrument parameters will be saved.");
 
-    declareProperty("SaveLocationParameters", false, "Save the location parameters used to calibrate the instrument.", Direction::Input);
+    declareProperty("LocationParameters", false, "Save the location parameters used to calibrate the instrument.", Direction::Input);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ namespace DataHandling
   void SaveParameterFile::exec()
   {
     const MatrixWorkspace_const_sptr ws = getProperty("Workspace");
-    const bool saveLocationParams = getProperty("SaveLocationParameters");
+    const bool saveLocationParams = getProperty("LocationParameters");
     const std::string filename = getProperty("Filename");
 
     const Instrument_const_sptr instrument = ws->getInstrument();

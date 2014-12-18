@@ -120,12 +120,8 @@ namespace Mantid
      */
     void ReflectometryReductionOne::init()
     {
-      boost::shared_ptr<CompositeValidator> inputValidator = boost::make_shared<CompositeValidator>();
-      inputValidator->add(boost::make_shared<WorkspaceUnitValidator>(tofUnitId));
 
-      declareProperty(
-          new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, inputValidator),
-          "Run to reduce.");
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input), "Run to reduce.");
 
       std::vector<std::string> propOptions;
       propOptions.push_back(pointDetectorAnalysis);
@@ -169,9 +165,11 @@ namespace Mantid
           new WorkspaceProperty<MatrixWorkspace>("FirstTransmissionRun", "", Direction::Input,
               PropertyMode::Optional),
           "First transmission run, or the low wavelength transmission run if SecondTransmissionRun is also provided.");
+
+      auto inputValidator = boost::make_shared<WorkspaceUnitValidator>(tofUnitId);
       declareProperty(
           new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun", "", Direction::Input,
-              PropertyMode::Optional, inputValidator->clone()),
+              PropertyMode::Optional, inputValidator),
           "Second, high wavelength transmission run. Optional. Causes the FirstTransmissionRun to be treated as the low wavelength transmission run.");
 
       this->initStitchingInputs();
@@ -416,51 +414,68 @@ namespace Mantid
 
       const int i0MonitorIndex = getProperty("I0MonitorIndex");
 
-      const bool correctDetctorPositions = getProperty("CorrectDetectorPositions");
-
-      DetectorMonitorWorkspacePair inLam = toLam(runWS, processingCommands, i0MonitorIndex,
-          wavelengthInterval, monitorBackgroundWavelengthInterval, wavelengthStep);
-      auto detectorWS = inLam.get<0>();
-      auto monitorWS = inLam.get<1>();
+      const bool correctDetectorPositions = getProperty("CorrectDetectorPositions");
 
       MatrixWorkspace_sptr IvsLam; // Output workspace
       MatrixWorkspace_sptr IvsQ; // Output workspace
-      if (isMultiDetector)
+
+      auto xUnitID = runWS->getAxis(0)->unit()->unitID();
+
+      if(xUnitID == "Wavelength")
       {
-        if (directBeam.is_initialized())
-        {
-          // Sum over the direct beam.
-          WorkspaceIndexList db = directBeam.get();
-          std::stringstream buffer;
-          buffer << db.front() << "-" << db.back();
-          MatrixWorkspace_sptr regionOfDirectBeamWS = this->toLamDetector(buffer.str(), runWS,
-              wavelengthInterval, wavelengthStep);
-
-          // Rebin to the detector workspace
-          auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
-          rebinToWorkspaceAlg->initialize();
-          rebinToWorkspaceAlg->setProperty("WorkspaceToRebin", regionOfDirectBeamWS);
-          rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", detectorWS);
-          rebinToWorkspaceAlg->execute();
-          regionOfDirectBeamWS = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
-
-          // Normalize by the direct beam.
-          detectorWS = divide(detectorWS, regionOfDirectBeamWS);
-        }
+        //If the input workspace is in lambda, we don't need to do any corrections, just use it as is.
+        g_log.information("Input workspace already in unit 'Wavelength'. Skipping lambda conversions.");
+        IvsLam = runWS;
       }
-      auto integrationAlg = this->createChildAlgorithm("Integration");
-      integrationAlg->initialize();
-      integrationAlg->setProperty("InputWorkspace", monitorWS);
-      integrationAlg->setProperty("RangeLower", monitorIntegrationWavelengthInterval.get<0>());
-      integrationAlg->setProperty("RangeUpper", monitorIntegrationWavelengthInterval.get<1>());
-      integrationAlg->execute();
-      MatrixWorkspace_sptr integratedMonitor = integrationAlg->getProperty("OutputWorkspace");
+      else if(xUnitID == "TOF")
+      {
+        //If the input workspace is in TOF, do some corrections and generate IvsLam from it.
+        DetectorMonitorWorkspacePair inLam = toLam(runWS, processingCommands, i0MonitorIndex,
+            wavelengthInterval, monitorBackgroundWavelengthInterval, wavelengthStep);
+        auto detectorWS = inLam.get<0>();
+        auto monitorWS = inLam.get<1>();
 
-      IvsLam = divide(detectorWS, integratedMonitor); // Normalize by the integrated monitor counts.
+        if (isMultiDetector)
+        {
+          if (directBeam.is_initialized())
+          {
+            // Sum over the direct beam.
+            WorkspaceIndexList db = directBeam.get();
+            std::stringstream buffer;
+            buffer << db.front() << "-" << db.back();
+            MatrixWorkspace_sptr regionOfDirectBeamWS = this->toLamDetector(buffer.str(), runWS,
+                wavelengthInterval, wavelengthStep);
+
+            // Rebin to the detector workspace
+            auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
+            rebinToWorkspaceAlg->initialize();
+            rebinToWorkspaceAlg->setProperty("WorkspaceToRebin", regionOfDirectBeamWS);
+            rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", detectorWS);
+            rebinToWorkspaceAlg->execute();
+            regionOfDirectBeamWS = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
+
+            // Normalize by the direct beam.
+            detectorWS = divide(detectorWS, regionOfDirectBeamWS);
+          }
+        }
+        auto integrationAlg = this->createChildAlgorithm("Integration");
+        integrationAlg->initialize();
+        integrationAlg->setProperty("InputWorkspace", monitorWS);
+        integrationAlg->setProperty("RangeLower", monitorIntegrationWavelengthInterval.get<0>());
+        integrationAlg->setProperty("RangeUpper", monitorIntegrationWavelengthInterval.get<1>());
+        integrationAlg->execute();
+        MatrixWorkspace_sptr integratedMonitor = integrationAlg->getProperty("OutputWorkspace");
+
+        IvsLam = divide(detectorWS, integratedMonitor); // Normalize by the integrated monitor counts.
+      }
+      else
+      {
+        //Neither TOF or Lambda? Abort.
+        throw std::invalid_argument("InputWorkspace must have units of TOF or Wavelength");
+      }
 
       if (firstTransmissionRun.is_initialized())
       {
-
         // Perform transmission correction.
         IvsLam = this->transmissonCorrection(IvsLam, wavelengthInterval,
             monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval, i0MonitorIndex,
@@ -473,7 +488,7 @@ namespace Mantid
         g_log.warning("No transmission correction will be applied.");
       }
 
-      IvsQ = this->toIvsQ(IvsLam, correctDetctorPositions, theta, isPointDetector);
+      IvsQ = this->toIvsQ(IvsLam, correctDetectorPositions, theta, isPointDetector);
 
       setProperty("ThetaOut", theta.get());
       setProperty("OutputWorkspaceWavelength", IvsLam);

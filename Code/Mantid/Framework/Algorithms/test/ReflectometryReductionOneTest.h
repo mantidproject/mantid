@@ -1,5 +1,5 @@
-#ifndef REFLECTOMETRYREDUCTIONONETEST_H_
-#define REFLECTOMETRYREDUCTIONONETEST_H_
+#ifndef ALGORITHMS_TEST_REFLECTOMETRYREDUCTIONONETEST_H_
+#define ALGORITHMS_TEST_REFLECTOMETRYREDUCTIONONETEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <algorithm>
@@ -22,6 +22,17 @@ private:
   MatrixWorkspace_sptr m_tinyReflWS;
 
 public:
+
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ReflectometryReductionOneTest *createSuite()
+  {
+    return new ReflectometryReductionOneTest();
+  }
+  static void destroySuite(ReflectometryReductionOneTest *suite)
+  {
+    delete suite;
+  }
 
   ReflectometryReductionOneTest()
   {
@@ -141,4 +152,4 @@ public:
 
 };
 
-#endif /* REFLECTOMETRYREDUCTIONONETEST_H_ */
+#endif /* ALGORITHMS_TEST_REFLECTOMETRYREDUCTIONONETEST_H_ */

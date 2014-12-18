@@ -8,7 +8,7 @@ class InstrumentInfoTest(object):
 
     def test_instrument_name(self):
         pass
-    
+
     def test_instrument_shortName(self):
         pass
 

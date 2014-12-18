@@ -94,12 +94,16 @@ set ( SRC_FILES
 	src/ThermalNeutronDtoTOFFunction.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
+  src/VesuvioResolution.cpp
 	src/Voigt.cpp
+  src/FakeMinimizer.cpp
+
 )
                 
 set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES
+  inc/MantidCurveFitting/FakeMinimizer.h
 	#	inc/MantidCurveFitting/CostFuncIgnorePosPeaks.h
 	#	inc/MantidCurveFitting/SCDPanelErrors.h
 	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
@@ -199,6 +203,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ThermalNeutronDtoTOFFunction.h
 	inc/MantidCurveFitting/UserFunction.h
 	inc/MantidCurveFitting/UserFunction1D.h
+  inc/MantidCurveFitting/VesuvioResolution.h
 	inc/MantidCurveFitting/Voigt.h
 )
               
@@ -233,8 +238,9 @@ set ( TEST_FILES
 	ExpDecayOscTest.h
 	ExpDecayTest.h
 	FRConjugateGradientTest.h
-	FitMWTest.h
-	FitPowderDiffPeaksTest.h
+  FitMWTest.h
+  FitTest.h
+  FitPowderDiffPeaksTest.h
 	FlatBackgroundTest.h
 	FullprofPolynomialTest.h
 	FunctionDomain1DSpectrumCreatorTest.h
@@ -290,6 +296,7 @@ set ( TEST_FILES
 	ThermalNeutronDtoTOFFunctionTest.h
 	UserFunction1DTest.h
 	UserFunctionTest.h
+  VesuvioResolutionTest.h
 	VoigtTest.h
 )
 

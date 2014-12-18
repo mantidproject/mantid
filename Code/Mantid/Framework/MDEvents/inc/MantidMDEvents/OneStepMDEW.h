@@ -2,19 +2,19 @@
 #define MANTID_MDEVENTS_ONESTEPMDEW_H_
     
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h" 
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
 {
 namespace MDEvents
 {
 
-  /** OneStepMDEW : TODO: DESCRIPTION
+  /** OneStepMDEW : Assumes elastic diffration. Load Event data and immediately converts to MDEvent with Lorentz correction applied.
    * 
    * @author
    * @date 2011-04-06 10:19:10.284945
    */
-  class DLLExport OneStepMDEW  : public API::Algorithm
+  class DLLExport OneStepMDEW  : public API::Algorithm, API::DeprecatedAlgorithm
   {
   public:
     OneStepMDEW();

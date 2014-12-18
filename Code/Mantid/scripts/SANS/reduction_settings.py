@@ -58,7 +58,7 @@ between reduction steps.  The benefits to this new method are as follows:
    of the ReductionStep in the PropertyManager.
 
 4) It gets us slightly nearer to the "modern" way of way of reducing data
-   in Mantid, namely "workflow" algorithms which call child algorithms, 
+   in Mantid, namely "workflow" algorithms which call child algorithms,
    passing settings to each other via PropertyManager objects.
 """
 

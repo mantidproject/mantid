@@ -100,6 +100,7 @@ private:
     std::vector<double>* err = NULL);
     QString getTubeXUnitsName(TubeXUnits unit) const;
   QString getNonDetectorInfo();
+  QString getParameterInfo(Mantid::Geometry::IComponent_const_sptr comp);
   QColor getShapeBorderColor() const;
   static double getOutOfPlaneAngle(const Mantid::Kernel::V3D& pos, const Mantid::Kernel::V3D& origin, const Mantid::Kernel::V3D& normal);
 

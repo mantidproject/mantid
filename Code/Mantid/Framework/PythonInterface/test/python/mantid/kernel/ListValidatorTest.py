@@ -13,14 +13,14 @@ class ListValidatorTest(unittest.TestCase):
         """
 
         class EmptyListValidator(PythonAlgorithm):
-            
+
             def PyInit(self):
                 validator = StringListValidator()
                 self.declareProperty("Input", "", validator)
 
             def PyExec(self):
                 pass
-        
+
         alg = EmptyListValidator()
         alg.initialize()
         self.assertRaises(ValueError, alg.setProperty, "Input", "AnyOldString")
@@ -32,7 +32,7 @@ class ListValidatorTest(unittest.TestCase):
         """
 
         class SingleItemListValidator(PythonAlgorithm):
-            
+
             _allowed = "OnlyThis"
 
             def PyInit(self):
@@ -42,7 +42,7 @@ class ListValidatorTest(unittest.TestCase):
 
             def PyExec(self):
                 pass
-        
+
         alg = SingleItemListValidator()
         alg.initialize()
         self.assertRaises(ValueError, alg.setProperty, "Input", "NotValid")
@@ -55,7 +55,7 @@ class ListValidatorTest(unittest.TestCase):
         """
 
         class MultiValueValidator(PythonAlgorithm):
-            
+
             _allowed_vals = ["Val1", "Val2","Val3"]
 
             def PyInit(self):
@@ -64,7 +64,7 @@ class ListValidatorTest(unittest.TestCase):
 
             def PyExec(self):
                 pass
-        
+
         alg = MultiValueValidator()
         alg.initialize()
         self.assertRaises(ValueError, alg.setProperty, "Input", "NotValid")

@@ -8,6 +8,8 @@
 #include <cstdlib>
 #include <float.h>
 
+#include <boost/algorithm/string.hpp>
+
 
 namespace Mantid
 {
@@ -775,6 +777,85 @@ void Quat::rotateBB(double& xmin, double& ymin, double& zmin, double& xmax, doub
 	xmax=maxV[0]; ymax=maxV[1]; zmax=maxV[2];
 	return;
 }
+
+/** Calculate the Euler angles that are equivalent to this Quaternion.
+ *
+ * Euler angles are calculated intrinsically, i.e. the first rotation modifies the axis used for
+ * the second rotation, and the second rotation modifies the axis used for the third rotation.
+ *
+ * You can specify which axis the rotations should be applied around and the order in which they
+ * are to be applied with the convention parameter. For instance, for a rotation of Y and then
+ * the new Z axis, and then the new Y axis: pass "YZY" as the convention. Or for a rotation
+ * such as X, and then the new Y axis, and then the new Z axis: pass "XYZ" as the convention.
+ *
+ * @param convention :: The axes to apply the rotations to and the order in which to do so. Defaults to "XYZ".
+ * @returns A vector of the Euler angles in degrees. The order of the angles is the same as in the convention parameter.
+ */
+std::vector<double> Quat::getEulerAngles(const std::string& convention = "XYZ") const
+{
+  std::string conv(convention);
+
+  if(conv.length() != 3)
+    throw std::invalid_argument("Wrong convention name (string length not 3)");
+
+  boost::to_upper(conv);
+
+  //Check it's only XYZ in the string
+  if(conv.find_first_not_of("XYZ") != std::string::npos)
+    throw std::invalid_argument("Wrong convention name (characters other than XYZ)");
+
+  //Cannot be XXY, XYY, or similar. Only first and last may be the same: YXY
+  if((conv[0]==conv[1]) || (conv[2]==conv[1]))
+    throw std::invalid_argument("Wrong convention name (repeated indices)");
+
+  boost::replace_all(conv,"X","0");
+  boost::replace_all(conv,"Y","1");
+  boost::replace_all(conv,"Z","2");
+
+  std::stringstream s;
+  s << conv[0] << " " << conv[1] << " " << conv[2];
+
+  int first, second, last;
+  s >> first >> second >> last;
+
+  // Do we want Tait-Bryan angles, as opposed to 'classic' Euler angles?
+  const int TB = (first * second * last == 0 && first + second + last == 3) ? 1 : 0;
+
+  const int par01 = ( (second - first + 9) % 3 == 1) ? 1 : -1;
+  const int par12 = ( (last - second + 9)  % 3 == 1) ? 1 : -1;
+
+  std::vector<double> angles(3);
+
+  const DblMatrix R = DblMatrix(this->getRotation());
+
+  const int i = (last + TB * par12 + 9) % 3;
+  const int j1 = (last - par12 + 9) % 3;
+  const int j2 = (last + par12 + 9) % 3;
+
+  const double s3 = (1.0 -  TB - TB  * par12) * R[i][j1];
+  const double c3 = (TB - (1.0 - TB) * par12) * R[i][j2];
+
+  V3D axis3(0,0,0);
+  axis3[last] = 1.0;
+
+  const double rad2deg = 180.0 / M_PI;
+
+  angles[2] = atan2(s3,c3) * rad2deg;
+
+  DblMatrix Rm3(Quat(-angles[2], axis3).getRotation());
+  DblMatrix Rp = R * Rm3;
+
+  const double s1 = par01 * Rp[(first - par01 + 9) % 3][(first + par01 + 9) % 3];
+  const double c1 = Rp[second][second];
+  const double s2 = par01*Rp[first][3-first-second];
+  const double c2 = Rp[first][first];
+
+  angles[0] = atan2(s1,c1) * rad2deg;
+  angles[1] = atan2(s2,c2) * rad2deg;
+
+  return angles;
+}
+
 
 } // Namespace Kernel
 

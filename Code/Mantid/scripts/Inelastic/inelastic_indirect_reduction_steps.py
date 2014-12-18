@@ -9,10 +9,10 @@ class LoadData(ReductionStep):
     """Handles the loading of the data for Indirect instruments. The summing
     of input workspaces is handled in this routine, as well as the identifying
     of detectors that require masking.
-    
+
     This step will use the following parameters from the Instrument's parameter
     file:
-    
+
     * Workflow.ChopDataIfGreaterThan - if this parameter is specified on the
         instrument, then the raw data will be split into multiple frames if
         the largest TOF (X) value in the workspace is greater than the provided
@@ -110,7 +110,7 @@ class LoadData(ReductionStep):
             basis_mask_filename = os.path.join(config.getString('maskFiles.directory')
                     , basis_mask)
             if os.path.isfile(basis_mask_filename):
-                    LoadMask(Instrument="BASIS", OutputWorkspace="__basis_mask", 
+                    LoadMask(Instrument="BASIS", OutputWorkspace="__basis_mask",
                              InputFile=basis_mask_filename)
                     MaskDetectors(Workspace=output_ws, MaskedWorkspace="__basis_mask")
             else:
@@ -122,7 +122,7 @@ class LoadData(ReductionStep):
 
         if self._require_chop_data(output_ws):
             ChopData(InputWorkspace=output_ws,OutputWorkspace= output_ws,Step= 20000.0,NChops= 5, IntegrationRangeLower=5000.0,
-                IntegrationRangeUpper=10000.0, 
+                IntegrationRangeUpper=10000.0,
                 MonitorWorkspaceIndex=self._monitor_index)
             self._multiple_frames = True
         else:
@@ -218,7 +218,7 @@ class LoadData(ReductionStep):
 #--------------------------------------------------------------------------------------------------
 
 class IdentifyBadDetectors(ReductionStep):
-    """ Identifies bad detectors in a workspace and creates a list of 
+    """ Identifies bad detectors in a workspace and creates a list of
     detectors to mask. This step will set the masking detectors property on
     the reducer object passed to execute. This uses the IdentifyNoisyDetectors algorithm.
 
@@ -338,7 +338,7 @@ class CreateCalibrationWorkspace(ReductionStep):
     def execute(self, reducer, file_ws):
         """The information we use here is not from the main reducer object
         (ie, we are not looking at one of the data files.)
-        
+
         The ApplyCalibration step is related to this.
         """
         rawfiles = self._calib_raw_files
@@ -356,7 +356,7 @@ class CreateCalibrationWorkspace(ReductionStep):
             (root, ext) = os.path.splitext(filename)
             try:
                 Load(Filename=file,OutputWorkspace= root, SpectrumMin=specMin, SpectrumMax=specMax,
-                    LoadLogFiles=False)                
+                    LoadLogFiles=False)
                 runs.append(root)
             except:
                 sys.exit('Indirect: Could not load raw file: ' + file)
@@ -368,16 +368,16 @@ class CreateCalibrationWorkspace(ReductionStep):
         else:
             cwsn = runs[0]
         CalculateFlatBackground(InputWorkspace=cwsn,OutputWorkspace= cwsn,StartX= backMin,EndX= backMax, Mode='Mean')
-        
+
         cal_ws = mtd[cwsn]
         runNo = cal_ws.getRun().getLogData("run_number").value
         outWS_n = runs[0][:3] + runNo + '_' + self._analyser + self._reflection + '_calib'
-        
+
         ntu = NormaliseToUnityStep()
         ntu.set_factor(self._intensity_scale)
         ntu.set_peak_range(peakMin, peakMax)
         ntu.execute(reducer, cwsn)
-        
+
         RenameWorkspace(InputWorkspace=cwsn,OutputWorkspace= outWS_n)
 
         # Add data about the files creation to the logs
@@ -399,34 +399,34 @@ class CreateCalibrationWorkspace(ReductionStep):
         self._back_max = back_max
         self._peak_min = peak_min
         self._peak_max = peak_max
-    
+
     def set_intensity_scale(self, factor):
         self._intensity_scale = float(factor)
-    
+
     def set_detector_range(self, start, end):
         self._detector_range_start = start
         self._detector_range_end = end
-        
+
     def set_instrument_workspace(self, workspace):
         self._instrument_workspace = workspace
-        
+
     def set_files(self, files):
         if len(files) > 0:
             self._calib_raw_files = files
         else:
             raise ValueError("Indirect: Can't set calib files if you don't "
                 "specify a calib file.")
-    
+
     def set_analyser(self, analyser):
         self._analyser = str(analyser)
-    
+
     def set_reflection(self, reflection):
         self._reflection = str(reflection)
-                
+
     def result_workspace(self):
         return self._calib_workspace
-        
-    def _get_calib_details(self):    
+
+    def _get_calib_details(self):
         if ( self._back_min is None and
                 self._back_max is None and
                 self._peak_min is None and
@@ -480,7 +480,7 @@ class ApplyCalibration(ReductionStep):
 
 class HandleMonitor(ReductionStep):
     """Handles the montior for the reduction of inelastic indirect data.
-    
+
     This uses the following parameters from the instrument:
     * Workflow.MonitorArea
     * Workflow.MonitorThickness
@@ -518,8 +518,8 @@ class HandleMonitor(ReductionStep):
 
     def _rebin_monitor(self, ws):
         """For some instruments (e.g. BASIS) the monitor binning is too
-	fine and needs to be rebinned. This is controlled
-        by the 'Workflow.Monitor.RebinStep' parameter set on the 
+    fine and needs to be rebinned. This is controlled
+        by the 'Workflow.Monitor.RebinStep' parameter set on the
         instrument.  If no parameter is present, no rebinning will occur.
         """
         try:
@@ -553,7 +553,7 @@ class HandleMonitor(ReductionStep):
         l_ref = self._get_reference_length(ws, 0)
         monitor = ws+'_mon'
         unwrapped_ws, join = UnwrapMonitor(InputWorkspace=monitor, OutputWorkspace=monitor, LRef=l_ref)
-        RemoveBins(InputWorkspace=monitor,OutputWorkspace= monitor,XMin= join-0.001,XMax= join+0.001, 
+        RemoveBins(InputWorkspace=monitor,OutputWorkspace= monitor,XMin= join-0.001,XMax= join+0.001,
             Interpolation='Linear')
         try:
             FFTSmooth(InputWorkspace=monitor,OutputWorkspace=monitor,WorkspaceIndex=0)
@@ -590,7 +590,7 @@ class HandleMonitor(ReductionStep):
     def _scale_monitor(self, monitor):
         """Some instruments wish to scale their data. Doing this at the
         monitor is the most efficient way to do this. This is controlled
-        by the 'Workflow.MonitorScalingFactor' parameter set on the 
+        by the 'Workflow.MonitorScalingFactor' parameter set on the
         instrument.
         """
         try:
@@ -636,11 +636,11 @@ class CorrectByMonitor(ReductionStep):
 
 class FoldData(ReductionStep):
     _result_workspaces = []
-    
+
     def __init__(self):
         super(FoldData, self).__init__()
         self._result_workspaces = []
-        
+
     def execute(self, reducer, file_ws):
         try:
             wsgroup = mtd[file_ws].getNames()
@@ -655,10 +655,10 @@ class FoldData(ReductionStep):
         DeleteWorkspace(Workspace=scaling)
         RenameWorkspace(InputWorkspace=ws,OutputWorkspace= file_ws)
         self._result_workspaces.append(file_ws)
-        
+
     def get_result_workspaces(self):
         return self._result_workspaces
-        
+
     def _create_scaling_workspace(self, wsgroup, merged):
         wsname = '__scaling'
         unit = ''
@@ -692,19 +692,19 @@ class ConvertToCm1(ReductionStep):
     """
     Converts the workspaces to cm-1.
     """
-    
+
     _multiple_frames = False
     _save_to_cm_1 = False
-    
+
     def __init__(self, MultipleFrames=False):
         super(ConvertToCm1, self).__init__()
         self._multiple_frames = MultipleFrames
-    
+
     def execute(self, reducer, file_ws):
-        
+
         if self._save_to_cm_1 == False:
             return
-        
+
         if ( self._multiple_frames ):
             try:
                 workspaceNames = mtd[file_ws].getNames()
@@ -712,7 +712,7 @@ class ConvertToCm1(ReductionStep):
                 workspaceNames = [file_ws]
         else:
             workspaceNames = [file_ws]
-        
+
         for wsName in workspaceNames:
             try:
                 ws = mtd[wsName]
@@ -722,18 +722,18 @@ class ConvertToCm1(ReductionStep):
 
     def set_save_to_cm_1(self, save_to_cm_1):
         self._save_to_cm_1 = save_to_cm_1
-            
+
 class ConvertToEnergy(ReductionStep):
     """
-    """    
+    """
     _rebin_string = None
     _multiple_frames = False
-    
+
     def __init__(self, MultipleFrames=False):
         super(ConvertToEnergy, self).__init__()
         self._rebin_string = None
         self._multiple_frames = MultipleFrames
-        
+
     def execute(self, reducer, file_ws):
         if ( self._multiple_frames ):
             try:
@@ -742,7 +742,7 @@ class ConvertToEnergy(ReductionStep):
                 workspaces = [file_ws]
         else:
             workspaces = [file_ws]
-            
+
         for ws in workspaces:
             ConvertUnits(InputWorkspace=ws,OutputWorkspace= ws,Target= 'DeltaE',EMode= 'Indirect')
             CorrectKiKf(InputWorkspace=ws,OutputWorkspace= ws,EMode= 'Indirect')
@@ -756,7 +756,7 @@ class ConvertToEnergy(ReductionStep):
                                      OutputWorkspace=ws)
                 except Exception:
                     logger.information("RebinToWorkspace failed. Attempting to continue without it.")
-                    
+
         if self._multiple_frames and self._rebin_string is not None:
             self._rebin_mf(workspaces)
 
@@ -789,7 +789,7 @@ class RebinToFirstSpectrum(ReductionStep):
     def execute(self, reducer, inputworkspace):
         RebinToWorkspace(WorkspaceToRebin=inputworkspace,WorkspaceToMatch=inputworkspace,
                          OutputWorkspace=inputworkspace)
-    
+
 class NormaliseToUnityStep(ReductionStep):
     """
         A simple step to normalise a workspace to a given factor
@@ -797,8 +797,8 @@ class NormaliseToUnityStep(ReductionStep):
     _factor = None
     _peak_min = None
     _peak_max = None
-    
-    def execute(self, reducer, ws):   
+
+    def execute(self, reducer, ws):
         number_historgrams = mtd[ws].getNumberHistograms()
         Integration(InputWorkspace=ws, OutputWorkspace=ws, RangeLower=self._peak_min, RangeUpper= self._peak_max)
         ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=ws, OutputWorkspace='__temp_ws_mask')
@@ -807,15 +807,15 @@ class NormaliseToUnityStep(ReductionStep):
         tempSum = SumSpectra(InputWorkspace=ws, OutputWorkspace='__temp_sum')
         total = tempSum.readY(0)[0]
         DeleteWorkspace(tempSum)
-        
+
         if self._factor is None:
             self._factor = 1 / ( total / (number_historgrams - num_zero_spectra) )
 
-        Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=self._factor, Operation='Multiply') 
-        
+        Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=self._factor, Operation='Multiply')
+
     def set_factor(self, factor):
         self._factor = factor
-        
+
     def set_peak_range(self, pmin, pmax):
         self._peak_min = pmin
         self._peak_max = pmax
@@ -825,12 +825,12 @@ class DetailedBalance(ReductionStep):
     """
     _temp = None
     _multiple_frames = False
-    
+
     def __init__(self, MultipleFrames=False):
         super(DetailedBalance, self).__init__()
         self._temp = None
         self._multiple_frames = MultipleFrames
-        
+
     def execute(self, reducer, file_ws):
         if self._temp is None:
             return
@@ -844,21 +844,21 @@ class DetailedBalance(ReductionStep):
 
         for ws in workspaces:
             ExponentialCorrection(InputWorkspace=ws,OutputWorkspace= ws,C0= 1.0,C1= correction, Operation="Multiply")
-        
+
     def set_temperature(self, temp):
         self._temp = temp
-            
+
 class Scaling(ReductionStep):
     """
     """
     _scale_factor = None
     _multiple_frames = False
-    
+
     def __init__(self, MultipleFrames=False):
         super(Scaling, self).__init__()
         self._scale_factor = None
         self._multiple_frames = MultipleFrames
-        
+
     def execute(self, reducer, file_ws):
         if self._scale_factor is None: # Scale factor is the default value, 1.0
             return
@@ -870,19 +870,19 @@ class Scaling(ReductionStep):
 
         for ws in workspaces:
             Scale(InputWorkspace=ws,OutputWorkspace= ws,Factor= self._scale_factor, Operation="Multiply")
-        
+
     def set_scale_factor(self, scaleFactor):
         self._scale_factor = scaleFactor
-            
+
 class Grouping(ReductionStep):
     """This ReductionStep handles the grouping and renaming of the final
     workspace. In most cases, this will require a Rebin on the data. The option
     to do this is given in the ConvertToEnergy step.
-    
+
     The step will use the following parameters on the workspace:
     * 'Workflow.GroupingMethod' - if this is equal to 'File' then we look for a
         parameter called:
-    * 'Workflow.GroupingFile' - the name of a file which contains the grouping of 
+    * 'Workflow.GroupingFile' - the name of a file which contains the grouping of
         detectors for the instrument.
 
     If a masking list has been set using set_mask_list(), then the workspace
@@ -893,14 +893,14 @@ class Grouping(ReductionStep):
     _masking_detectors = []
     _result_workspaces = []
     _multiple_frames = False
-    
+
     def __init__(self, MultipleFrames=False):
         super(Grouping, self).__init__()
         self._grouping_policy = None
         self._masking_detectors = []
         self._result_workspaces = []
         self._multiple_frames = MultipleFrames
-        
+
     def execute(self, reducer, file_ws):
 
         if ( self._multiple_frames ):
@@ -914,7 +914,7 @@ class Grouping(ReductionStep):
         # set the detector mask for this workspace
         if file_ws in reducer._masking_detectors:
             self._masking_detectors = reducer._masking_detectors[file_ws]
-            
+
         for ws in workspaces:
             if self._grouping_policy is not None:
                 self._result_workspaces.append(self._group_data(ws))
@@ -926,14 +926,14 @@ class Grouping(ReductionStep):
                     group = 'User'
                 if (group == 'File' ):
                     self._grouping_policy =  mtd[ws].getInstrument().getStringParameter(
-                        'Workflow.GroupingFile')[0]  
+                        'Workflow.GroupingFile')[0]
                     self._result_workspaces.append(self._group_data(ws))
                 else:
                     self._result_workspaces.append(self._group_data(ws))
-            
+
     def set_grouping_policy(self, value):
         self._grouping_policy = value
-        
+
     def get_result_workspaces(self):
         return self._result_workspaces
 
@@ -947,7 +947,7 @@ class Grouping(ReductionStep):
             for i in range(0, nhist):
                 if i not in self._masking_detectors:
                     wslist.append(i)
-            GroupDetectors(InputWorkspace=workspace,OutputWorkspace= workspace, 
+            GroupDetectors(InputWorkspace=workspace,OutputWorkspace= workspace,
                 WorkspaceIndexList=wslist, Behaviour='Average')
         else:
             # Assume we have a grouping file.
@@ -964,7 +964,7 @@ class Grouping(ReductionStep):
 
             # Final check that the Mapfile exists, if not don't run the alg.
             if os.path.isfile(grouping_filename):
-                GroupDetectors(InputWorkspace=workspace,OutputWorkspace=workspace, MapFile=grouping_filename, 
+                GroupDetectors(InputWorkspace=workspace,OutputWorkspace=workspace, MapFile=grouping_filename,
                         Behaviour='Average')
         return workspace
 
@@ -980,11 +980,11 @@ class SaveItem(ReductionStep):
     """
     _formats = []
     _save_to_cm_1 = False
-    
+
     def __init__(self):
         super(SaveItem, self).__init__()
         self._formats = []
-        
+
     def execute(self, reducer, file_ws):
         naming = Naming()
         filename = naming._get_ws_name(file_ws)
@@ -996,7 +996,8 @@ class SaveItem(ReductionStep):
             elif format == 'nxspe':
                 SaveNXSPE(InputWorkspace=file_ws,Filename= filename+'.nxspe')
             elif format == 'ascii':
-                SaveAscii(InputWorkspace=file_ws,Filename= filename+'.dat')
+                #version 1 of SaveASCII produces output that works better with excel/origin
+                SaveAscii(InputWorkspace=file_ws,Filename= filename+'.dat', Version=1)
             elif format == 'gss':
                 ConvertUnits(InputWorkspace=file_ws,OutputWorkspace= "__save_item_temp",Target= "TOF")
                 SaveGSS(InputWorkspace="__save_item_temp",Filename= filename+".gss")
@@ -1009,7 +1010,7 @@ class SaveItem(ReductionStep):
                 Rebin(InputWorkspace=file_ws,OutputWorkspace= file_ws + '_aclimax_save_temp',Params= bins)
                 SaveAscii(InputWorkspace=file_ws + '_aclimax_save_temp',Filename= filename+ '_aclimax.dat', Separator='Tab')
                 DeleteWorkspace(Workspace=file_ws + '_aclimax_save_temp')
-                
+
     def set_formats(self, formats):
         self._formats = formats
     def set_save_to_cm_1(self, save_to_cm_1):
@@ -1023,11 +1024,11 @@ class Naming(ReductionStep):
         The default (when nothing is selected) is to use the run title.
     """
     _result_workspaces = []
-    
+
     def __init__(self):
         super(Naming, self).__init__()
         self._result_workspaces = []
-        
+
     def execute(self, reducer, file_ws):
         wsname = self._get_ws_name(file_ws)
         RenameWorkspace(InputWorkspace=file_ws,OutputWorkspace= wsname)
@@ -1042,7 +1043,7 @@ class Naming(ReductionStep):
                 'Workflow.NamingConvention')[0]
         except IndexError:
             type = 'RunTitle'
-            
+
         if ( type == 'AnalyserReflection' ):
             return self._analyser_reflection(workspace)
         elif ( type == 'RunTitle' ):
@@ -1050,7 +1051,7 @@ class Naming(ReductionStep):
         else:
             raise NotImplementedError('Unknown \'Workflow.NamingConvention\''
                 ' parameter encountered on workspace: ' + workspace)
-        
+
     def _run_title(self, workspace):
         ws = mtd[workspace]
         title = ws.getRun()['run_title'].value.strip()
@@ -1061,7 +1062,7 @@ class Naming(ReductionStep):
         title = ''.join(ch for ch in title if ch in valid)
         title = isn + runNo + '-' + title
         return title
-        
+
     def _analyser_reflection(self, workspace):
         if workspace == '':
             return ''

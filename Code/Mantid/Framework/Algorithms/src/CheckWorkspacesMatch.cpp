@@ -729,9 +729,8 @@ bool CheckWorkspacesMatch::checkInstrument(API::MatrixWorkspace_const_sptr ws1, 
 
   if ( ws1_parmap != ws2_parmap )
   {
-    g_log.debug() << "Parameter maps...\n";
-    g_log.debug() << "WS1: " << ws1_parmap.asString() << "\n";
-    g_log.debug() << "WS2: " << ws2_parmap.asString() << "\n";
+    g_log.debug() << "Here information to help understand parameter map differences:\n";
+    g_log.debug() << ws1_parmap.diff(ws2_parmap);
     result = "Instrument ParameterMap mismatch (differences in ordering ignored)";
     return false;
   }

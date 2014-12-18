@@ -19,4 +19,15 @@ In addition, this only works for instruments that use
 example); in addition, the name in the instrument definition file must
 match the name in the NXS file.
 
+Usage
+-----
+
+.. code-block:: python
+
+    # Needs an SNS nexus file with rectangular detectors available from system tests
+    ws = Load(Filename='/home/vel/workspace/TOPAZ_3132_event.nxs',  LoaderName='LoadEventNexus', LoaderVersion=1)
+    SaveToSNSHistogramNexus(InputFilename="TOPAZ_3132_event.nxs",InputWorkspace=ws,OutputFilename=TOPAZ_3132_copy.nxs")
+
+
+
 .. categories::

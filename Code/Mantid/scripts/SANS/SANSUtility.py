@@ -1,5 +1,5 @@
 #########################################################
-# This module contains utility functions common to the 
+# This module contains utility functions common to the
 # SANS data reduction scripts
 ########################################################
 from mantid.simpleapi import *
@@ -47,7 +47,7 @@ def GetInstrumentDetails(instrum):
     """
         Return the details specific to the instrument's current detector bank
         @return number of pixels ac, first spectrum in the current detector, its last spectrum
-	"""
+    """
     det = instrum.cur_detector()
     #LOQ HAB is not a square detector and so has no width
     #for backwards compatibility we have to return a width
@@ -64,17 +64,17 @@ def GetInstrumentDetails(instrum):
     return det.n_columns, first_spectrum, last_spectrum
 
 def InfinitePlaneXML(id, plane_pt, normal_pt):
-	return '<infinite-plane id="' + str(id) + '">' + \
-	    '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
-	    '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
-	    '</infinite-plane>'
+    return '<infinite-plane id="' + str(id) + '">' + \
+        '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
+        '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
+        '</infinite-plane>'
 
 def InfiniteCylinderXML(id, centre, radius, axis):
-	return  '<infinite-cylinder id="' + str(id) + '">' + \
-	'<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
-	'<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
-	'<radius val="' + str(radius) + '" />' + \
-	'</infinite-cylinder>\n'
+    return  '<infinite-cylinder id="' + str(id) + '">' + \
+    '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
+    '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
+    '<radius val="' + str(radius) + '" />' + \
+    '</infinite-cylinder>\n'
 
 # Mask a cylinder, specifying the algebra to use
 def MaskWithCylinder(workspace, radius, xcentre, ycentre, algebra):
@@ -100,19 +100,19 @@ def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
     InfinitePlaneXML('pla2',centre, [-math.cos(-phimax + math.pi/2.0),-math.sin(-phimax + math.pi/2.0),0]) + \
     InfinitePlaneXML('pla3',centre, [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0]) + \
     InfinitePlaneXML('pla4',centre, [-math.cos(-phimin + math.pi/2.0),-math.sin(-phimin + math.pi/2.0),0])
-    
-    if use_mirror : 
+
+    if use_mirror :
         xmldef += '<algebra val="#((pla pla2):(pla3 pla4))" />'
     else:
         #the formula is different for acute verses obstruse angles
-	if phimax-phimin > math.pi :
-	      # to get an obtruse angle, a wedge that's more than half the area, we need to add the semi-inifinite volumes
+        if phimax-phimin > math.pi :
+            # to get an obtruse angle, a wedge that's more than half the area, we need to add the semi-inifinite volumes
             xmldef += '<algebra val="#(pla:pla2)" />'
         else :
-	      # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
+            # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
             xmldef += '<algebra val="#(pla pla2)" />'
-    
-    MaskDetectorsInShape(Workspace=workspace,ShapeXML= xmldef)	
+
+    MaskDetectorsInShape(Workspace=workspace,ShapeXML= xmldef)
 
 # Work out the spectra IDs for block of detectors
 def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
@@ -127,8 +127,8 @@ def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
         start_spec = base + xlow*det_dimension + ylow
         for x in range(det_dimension - 1, det_dimension - xdim-1,-1):
             for y in range(0, ydim):
-    	        std_i = start_spec + y + ((det_dimension-x-1)*det_dimension)
-		output += str(std_i ) + ','
+                std_i = start_spec + y + ((det_dimension-x-1)*det_dimension)
+                output += str(std_i ) + ','
     elif orientation == Orientation.Rotated:
         # This is the horizontal one rotated so need to map the xlow and vlow to their rotated versions
         start_spec = base + ylow*det_dimension + xlow
@@ -138,53 +138,53 @@ def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
                 std_i = start_spec + x + (y*det_dimension)
                 output += str(max_spec - (std_i - base)) + ','
     elif orientation == Orientation.HorizontalFlipped:
-         start_spec = base + ylow*det_dimension + xlow
-	 for y in range(0,ydim):
-             max_row = base + (y+1)*det_dimension - 1
-	     min_row = base + (y)*det_dimension
-	     for x in range(0,xdim):
+        start_spec = base + ylow*det_dimension + xlow
+        for y in range(0,ydim):
+            max_row = base + (y+1)*det_dimension - 1
+            min_row = base + (y)*det_dimension
+            for x in range(0,xdim):
                  std_i = start_spec + x + (y*det_dimension)
-		 diff_s = std_i - min_row
-		 output += str(max_row - diff_s) + ','
+                 diff_s = std_i - min_row
+                 output += str(max_row - diff_s) + ','
 
     return output.rstrip(",")
- 
+
 # Mask by bin range
 def MaskByBinRange(workspace, timemask):
-	# timemask should be a ';' separated list of start/end values
-	ranges = timemask.split(';')
-	for r in ranges:
-		limits = r.split()
-		if len(limits) == 2:
-			MaskBins(InputWorkspace=workspace,OutputWorkspace= workspace, XMin= limits[0] ,XMax=limits[1])
-								     
+    # timemask should be a ';' separated list of start/end values
+    ranges = timemask.split(';')
+    for r in ranges:
+        limits = r.split()
+        if len(limits) == 2:
+            MaskBins(InputWorkspace=workspace,OutputWorkspace= workspace, XMin= limits[0] ,XMax=limits[1])
+
 def QuadrantXML(centre,rmin,rmax,quadrant):
-	cin_id = 'cyl-in'
-	xmlstring = InfiniteCylinderXML(cin_id, centre, rmin, [0,0,1])
-	cout_id = 'cyl-out'
-	xmlstring+= InfiniteCylinderXML(cout_id, centre, rmax, [0,0,1])
-	plane1Axis=None
-	plane2Axis=None
-	if quadrant == 'Left':
-		plane1Axis = [-1,1,0]
-		plane2Axis = [-1,-1,0]
-	elif quadrant == 'Right':
-		plane1Axis = [1,-1,0]
-		plane2Axis = [1,1,0]
-	elif quadrant == 'Up':
-		plane1Axis = [1,1,0]
-		plane2Axis = [-1,1,0]
-	elif quadrant == 'Down':
-		plane1Axis = [-1,-1,0]
-		plane2Axis = [1,-1,0]
-	else:
-		return ''
-	p1id = 'pl-a'
-	xmlstring += InfinitePlaneXML(p1id, centre, plane1Axis)
-	p2id = 'pl-b'
-	xmlstring += InfinitePlaneXML(p2id, centre, plane2Axis)
-	xmlstring += '<algebra val="(#((#(' + cout_id + ':(#' + cin_id  + '))) ' + p1id + ' ' + p2id + '))"/>\n' 
-	return xmlstring
+    cin_id = 'cyl-in'
+    xmlstring = InfiniteCylinderXML(cin_id, centre, rmin, [0,0,1])
+    cout_id = 'cyl-out'
+    xmlstring+= InfiniteCylinderXML(cout_id, centre, rmax, [0,0,1])
+    plane1Axis=None
+    plane2Axis=None
+    if quadrant == 'Left':
+        plane1Axis = [-1,1,0]
+        plane2Axis = [-1,-1,0]
+    elif quadrant == 'Right':
+        plane1Axis = [1,-1,0]
+        plane2Axis = [1,1,0]
+    elif quadrant == 'Up':
+        plane1Axis = [1,1,0]
+        plane2Axis = [-1,1,0]
+    elif quadrant == 'Down':
+        plane1Axis = [-1,-1,0]
+        plane2Axis = [1,-1,0]
+    else:
+        return ''
+    p1id = 'pl-a'
+    xmlstring += InfinitePlaneXML(p1id, centre, plane1Axis)
+    p2id = 'pl-b'
+    xmlstring += InfinitePlaneXML(p2id, centre, plane2Axis)
+    xmlstring += '<algebra val="(#((#(' + cout_id + ':(#' + cin_id  + '))) ' + p1id + ' ' + p2id + '))"/>\n'
+    return xmlstring
 
 def getWorkspaceReference(ws_pointer):
     if isinstance(ws_pointer, str):
@@ -192,7 +192,7 @@ def getWorkspaceReference(ws_pointer):
     if str(ws_pointer) not in mtd:
         raise RuntimeError("Invalid workspace name input: " + str(ws_pointer))
     return ws_pointer
-    
+
 def isEventWorkspace(ws_reference):
     return isinstance(getWorkspaceReference(ws_reference),IEventWorkspace)
 
@@ -233,20 +233,20 @@ def getFilePathFromWorkspace(ws):
     return file_path
 
 def fromEvent2Histogram(ws_event, ws_monitor, binning = ""):
-    """Transform an event mode workspace into a histogram workspace. 
-    It does conjoin the monitor and the workspace as it is expected from the current 
+    """Transform an event mode workspace into a histogram workspace.
+    It does conjoin the monitor and the workspace as it is expected from the current
     SANS data inside ISIS.
 
     A non-empty binning string will specify a rebin param list to use instead of using
     the binning of the monitor ws.
 
     Finally, it copies the parameter map from the workspace to the resulting histogram
-    in order to preserve the positions of the detectors components inside the workspace. 
-    
+    in order to preserve the positions of the detectors components inside the workspace.
+
     It will finally, replace the input workspace with the histogram equivalent workspace.
     """
     assert ws_monitor != None
-    
+
     name = '__monitor_tmp'
 
     if binning != "":
@@ -256,9 +256,9 @@ def fromEvent2Histogram(ws_event, ws_monitor, binning = ""):
         aux_hist = RebinToWorkspace(ws_event, ws_monitor, False)
         ws_monitor.clone(OutputWorkspace=name)
 
-    ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True)    
+    ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True)
     CopyInstrumentParameters(ws_event, OutputWorkspace=name)
-    
+
     ws_hist = RenameWorkspace(name, OutputWorkspace=str(ws_event))
 
     return ws_hist
@@ -268,7 +268,7 @@ def getChargeAndTime(ws_event):
     charges = r.getLogData('proton_charge')
     total_charge = sum(charges.value)
     time_passed = (charges.times[-1] - charges.times[0]).total_microseconds()
-    time_passed /= 1e6    
+    time_passed /= 1e6
     return total_charge, time_passed
 
 def sliceByTimeWs(ws_event, time_start=None, time_stop=None):
@@ -307,8 +307,8 @@ def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
     if (time_start == -1) and (time_stop == -1):
         hist = fromEvent2Histogram(ws_event, monitor, binning)
         return hist, (tot_t, tot_c, tot_t, tot_c)
-    
-    if time_start == -1: 
+
+    if time_start == -1:
         time_start = 0.0
     if time_stop == -1:
         time_stop = tot_t+0.001
@@ -326,23 +326,23 @@ def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
 
 def sliceParser(str_to_parser):
     """
-    Create a list of boundaries from a string defing the slices. 
+    Create a list of boundaries from a string defing the slices.
     Valid syntax is:
       * From 8 to 9 > '8-9' --> return [[8,9]]
       * From 8 to 9 and from 10 to 12 > '8-9, 10-12' --> return [[8,9],[10,12]]
       * From 5 to 10 in steps of 1 > '5:1:10' --> return [[5,6],[6,7],[7,8],[8,9],[9,10]]
       * From 5 > '>5' --> return [[5,-1]]
       * Till 5 > '<5' --> return [[-1,5]]
-      
+
     Any combination of these syntax separated by comma is valid.
-    A special mark is used to signalize no limit: -1, 
+    A special mark is used to signalize no limit: -1,
     As, so, for an empty string, it will return: [[-1, -1]].
 
     It does not accept negative values.
-    
+
     """
     num_pat = r'(\d+(?:\.\d+)?(?:[eE][+-]\d+)?)' # float without sign
-    slice_pat = num_pat + r'-' + num_pat 
+    slice_pat = num_pat + r'-' + num_pat
     lowbound = '>'+num_pat
     upbound = '<'+num_pat
     sss_pat = num_pat+r':'+num_pat+r':'+num_pat
@@ -371,7 +371,7 @@ def sliceParser(str_to_parser):
         val = _check_match(inpstr, upbound, 1)
         if not val: return val
         return [MARK, val[0]]
-        
+
     def _parse_start_step_stop(inpstr):
         val = _check_match(inpstr, sss_pat, 3)
         if not val: return val
@@ -379,28 +379,28 @@ def sliceParser(str_to_parser):
         step = val[1]
         stop = val[2]
         curr_value = start
-        
+
         vallist = []
         while True:
-            
-            next_value = curr_value + step 
-            
+
+            next_value = curr_value + step
+
             if next_value >= stop:
                 vallist.append([curr_value, stop])
                 return vallist
             else:
                 vallist.append([curr_value, next_value])
-                
+
             curr_value = next_value
-            
-            
-        
+
+
+
     def _extract_simple_input(inpstr):
         for fun in _parse_slice, _parse_lower, _parse_upper:
             val = fun(inpstr)
             if val:
                 return val
-            
+
         return False
 
     def _extract_composed_input(inpstr):
@@ -433,7 +433,7 @@ def getFileAndName(incomplete_path):
         # if list, get first value
         if hasattr(this_path, '__iter__'):
             this_path = this_path[0]
-    
+
     # this_path contains the full_path
     basename = os.path.basename(this_path)
     # remove extension
@@ -469,7 +469,7 @@ def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
             masked_det_ids.append(masking_ws.getDetector(ws_index).getID())
 
     MaskDetectors(Workspace=ws, DetectorList=masked_det_ids)
-                
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################
@@ -486,7 +486,7 @@ def parseLogFile(logfile):
         entry = line.split()[1]
         if entry in logkeywords.keys():
             logkeywords[entry] = float(line.split()[2])
-    
+
     return tuple(logkeywords.values())
 
 @deprecated
@@ -537,7 +537,7 @@ def ConvertToSpecList(maskstring, firstspec, dimension, orientation):
                 upp2 = int(pieces[1].lstrip('hv'))
             else:
                 low2 = int(bigPieces[1].lstrip('hv'))
-                upp2 = low2            
+                upp2 = low2
             if 'h' in bigPieces[0] and 'v' in bigPieces[1]:
                 ydim=abs(upp-low)+1
                 xdim=abs(upp2-low2)+1
@@ -567,7 +567,7 @@ def ConvertToSpecList(maskstring, firstspec, dimension, orientation):
             speclist += spectrumBlock(firstspec,0,int(x.lstrip('v')), dimension, 1, dimension,orientation) + ','
         else:
             speclist += x.lstrip('s') + ','
-    
+
     return speclist
 
 # Mask by detector number
@@ -590,7 +590,7 @@ def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, w
 
     # Convert and rebin
     ConvertUnits(InputWorkspace=tmpWS,OutputWorkspace=tmpWS,Target="Wavelength")
-    
+
     if interpolate :
         InterpolatingRebin(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Params= wavbining)
     else :
@@ -658,10 +658,10 @@ class WorkspaceDetails(object):
         self._name = name
         run_number = str(run_number).split('-add')[0]
         self._run_number = int(run_number)
-        
+
     def getName(self):
         return self._name
-        
+
     def getRunNumber(self):
         return self._run_number
 
@@ -702,7 +702,7 @@ class RunDetails(object):
 
     def setMaskPtMin(self, rmin):
         self._maskrmin = rmin
-        
+
     def getMaskPtMax(self):
         return self._maskrmax
 

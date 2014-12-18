@@ -5,7 +5,7 @@ from mantid.simpleapi import *
 import os.path
 
 class FuryFitMultiple(PythonAlgorithm):
- 
+
     def category(self):
         return "Workflow\\MIDAS;PythonAlgorithms"
 
@@ -21,11 +21,11 @@ class FuryFitMultiple(PythonAlgorithm):
                              doc='Analyser & reflection')
         self.declareProperty(name="RunNumber",defaultValue=-1, validator=IntBoundedValidator(lower=0),
                              doc="Sample run number")
-        self.declareProperty(name="TimeMax", defaultValue=0.2, validator=FloatMandatoryValidator(), 
+        self.declareProperty(name="TimeMax", defaultValue=0.2, validator=FloatMandatoryValidator(),
                              doc="Multiplicative scale factor")
         self.declareProperty(name='Plot', defaultValue='None', validator=StringListValidator(['None', 'Intensity', 'Tau', 'Beta', 'All']),
                              doc='Switch Plot Off/On')
- 
+
     def PyExec(self):
         from IndirectDataAnalysis import furyfitMult
 

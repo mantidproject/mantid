@@ -30,13 +30,52 @@ The format must be:
    identical for each spectra
 
 The following is an example valid file of 4 spectra of 2 bins each with
-no X error
+no X error::
 
-#. X , Y , E
+    #. X , Y , E
 
-1 2.00000000,2.00000000,1.00000000 4.00000000,1.00000000,1.00000000 2
-2.00000000,5.00000000,2.00000000 4.00000000,4.00000000,2.00000000 3
-2.00000000,3.00000000,1.00000000 4.00000000,0.00000000,0.00000000 4
-2.00000000,0.00000000,0.00000000 4.00000000,0.00000000,0.00000000
+    1 2.00000000,2.00000000,1.00000000 4.00000000,1.00000000,1.00000000 2
+    2.00000000,5.00000000,2.00000000 4.00000000,4.00000000,2.00000000 3
+    2.00000000,3.00000000,1.00000000 4.00000000,0.00000000,0.00000000 4
+    2.00000000,0.00000000,0.00000000 4.00000000,0.00000000,0.00000000
+
+
+Usage
+-----
+
+**Example**
+
+.. testcode:: LoadASCII
+
+    #import the os path libraries for directory functions
+    import os
+
+    # create histogram workspace
+    dataX1 = [0,1,2,3,4,5,6,7,8] # or use dataX1=range(0,10)
+    dataY1 = [0,1,2,3,4,5,6,7,8] # or use dataY1=range(0,9)
+    dataE1 = [1,1,1,1,1,1,1,1,1] # or use dataE1=[1]*9
+
+    ws1 = CreateWorkspace(dataX1, dataY1, dataE1)
+
+    #Create an absolute path by joining the proposed filename to a directory
+    #os.path.expanduser("~") used in this case returns the home directory of the current user
+    savefile = os.path.join(os.path.expanduser("~"), "AsciiFile.txt")
+
+    # perform the algorithm
+    SaveAscii(InputWorkspace=ws1,Filename=savefile)
+
+    #Load it again - Load would work just as well as LoadAscii
+    wsOutput = LoadAscii(savefile,Unit="Label")
+
+    print CheckWorkspacesMatch(ws1,wsOutput)
+
+    #clean up the file I saved
+    os.remove(savefile)
+
+Output:
+
+.. testoutput:: LoadASCII
+
+   Success!
 
 .. categories::

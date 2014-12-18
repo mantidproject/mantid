@@ -17,7 +17,7 @@ instrument and masks any detector detectors that in contained within it.
 A detector is considered to be contained it its central location point
 is contained within the shape.
 
-`This page <http://www.mantidproject.org/HowToDefineGeometricShape>`_
+:ref:`This page <HowToDefineGeometricShape>`
 provides a description of the syntax of ShapeXML string.
 
 ChildAlgorithms used

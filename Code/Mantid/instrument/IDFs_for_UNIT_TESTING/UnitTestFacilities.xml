@@ -14,7 +14,7 @@
     <zeropadding size="8"/>
     <zeropadding size="11" startRunNumber="300" prefix="TST"/>
     <technique>Test ISISHistoDataListener</technique>
-    <livedata listener="ISISHistoDataListener" address="127.0.0.1:6789" />
+    <livedata listener="ISISHistoDataListener" address="127.0.0.1:56789" />
   </instrument>
 
   <instrument name="TestDataListener">

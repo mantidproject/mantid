@@ -13,6 +13,7 @@
 #include <QTreeWidget>
 #include <QStandardItemModel>
 #include <QAbstractListModel>
+#include <QComboBox>
 #include <QGroupBox>
 #include <QPushButton>
 
@@ -153,8 +154,12 @@ private:
   void updateExecSummaryGrpBox(Mantid::API::AlgorithmHistory_const_sptr algHistory);
   void updateAlgHistoryProperties(Mantid::API::AlgorithmHistory_const_sptr algHistory);
 
+  std::string getScriptVersionMode();
+
 private:
   const Mantid::API::WorkspaceHistory & m_algHist;
+  QLabel *m_scriptVersionLabel;
+  QComboBox *m_scriptComboMode;
   QPushButton *m_scriptButtonFile;
   QPushButton *m_scriptButtonClipboard;
   AlgHistoryTreeWidget *m_Historytree;

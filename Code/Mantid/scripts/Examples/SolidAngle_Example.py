@@ -1,6 +1,6 @@
 ##-------------------------------------------------------------------------
 ##
-## Example: Calculating the solid angle for a spectrum with respect to the 
+## Example: Calculating the solid angle for a spectrum with respect to the
 ##          sample position
 ##
 ##-------------------------------------------------------------------------
@@ -15,7 +15,7 @@ sample = rawData.getInstrument().getSample()
 samplePos = sample.getPos()
 beamPos = samplePos - rawData.getInstrument().getSource().getPos()
 
-# Pick a workspace index 
+# Pick a workspace index
 wsIndex = 0
 # Find the detector associated with the spectrum location at position wsIndex
 detector = rawData.getDetector(0)

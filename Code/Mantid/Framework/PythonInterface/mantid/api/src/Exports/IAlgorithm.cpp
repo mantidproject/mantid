@@ -167,7 +167,7 @@ namespace
       if (!prop->isValid().empty())
         buffer << ":req";
       buffer << ") *" << prop->type() << "* ";
-      std::set<std::string> allowed = prop->allowedValues();
+      std::vector<std::string> allowed = prop->allowedValues();
       if (!prop->documentation().empty() || !allowed.empty())
       {
         buffer << "      " << prop->documentation();

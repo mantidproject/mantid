@@ -933,7 +933,7 @@ QStringList MWRunFiles::getFileExtensionsFromAlgorithm(const QString & algName, 
   FileProperty *fileProp = dynamic_cast<FileProperty*>(prop);
   MultipleFileProperty *multiFileProp = dynamic_cast<MultipleFileProperty*>(prop);
 
-  std::set<std::string> allowed;
+  std::vector<std::string> allowed;
   QString preferredExt;
 
   if( fileProp )
@@ -951,9 +951,9 @@ QStringList MWRunFiles::getFileExtensionsFromAlgorithm(const QString & algName, 
     return fileExts;
   }
 
-  std::set<std::string>::const_iterator iend = allowed.end();
+  std::vector<std::string>::const_iterator iend = allowed.end();
   int index(0);
-  for(std::set<std::string>::const_iterator it = allowed.begin(); it != iend; ++it)
+  for(std::vector<std::string>::const_iterator it = allowed.begin(); it != iend; ++it)
   {
     if ( ! it->empty() )
     {

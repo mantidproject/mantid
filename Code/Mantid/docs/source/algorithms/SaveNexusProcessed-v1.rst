@@ -36,7 +36,7 @@ loaded at present.
 EventWorkspaces
 ###############
 
-This algorithm will save `EventWorkspaces <http://www.mantidproject.org/EventWorkspace>`_ with full
+This algorithm will save :ref:`EventWorkspaces <EventWorkspace>` with full
 event data, unless you uncheck *PreserveEvents*, in which case the
 histogram version of the workspace is saved.
 

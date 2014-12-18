@@ -19,11 +19,11 @@ class EQSANSReductionScripter(BaseReductionScripter):
         create a reduction script. Parameters are organized by groups that
         will each have their own UI representation.
     """
-    
+
     def __init__(self, name="EQSANS", settings=None):
         super(EQSANSReductionScripter, self).__init__(name=name)
-        self._settings = settings        
-    
+        self._settings = settings
+
     def to_script(self, file_name=None):
         """
             Spits out the text of a reduction script with the current state.
@@ -31,25 +31,25 @@ class EQSANSReductionScripter(BaseReductionScripter):
         """
         script = "# EQSANS reduction script\n"
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
-        
+
         script += "import mantid\n"
         script += "from mantid.simpleapi import *\n"
         script += "from reduction_workflow.instruments.sans.sns_command_interface import *\n"
         script += "config = ConfigService.Instance()\n"
         script += "config['instrumentName']='EQSANS'\n"
-        
+
         script += "\n"
-        
+
         for item in self._observers:
             if item.state() is not None:
                 script += str(item.state())
-        
+
         xml_process = "None"
         if file_name is None:
             xml_process = os.path.join(self._output_directory, "EQSANS_process.xml")
             xml_process = os.path.normpath(xml_process)
             self.to_xml(xml_process)
-            
+
         script += "SaveIq(process=%r)\n" % xml_process
 
         script += "Reduce()\n"
@@ -58,9 +58,9 @@ class EQSANSReductionScripter(BaseReductionScripter):
             f = open(file_name, 'w')
             f.write(script)
             f.close()
-        
+
         return script
-    
+
     def to_batch(self):
         """
         """
@@ -70,46 +70,46 @@ class EQSANSReductionScripter(BaseReductionScripter):
             state = item.state()
             if state is not None and state.__class__.__name__=="DataSets":
                 data_options = state
-        
+
         if data_options is None or data_options.separate_jobs is False:
             return [self.to_script()]
-        
+
         data_files = data_options.get_data_file_list()
-                    
+
         scripts = []
         for data_file in data_files:
             script = "# EQSANS reduction script\n"
             script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
-            
+
             script += "import mantid\n"
             script += "from mantid.simpleapi import *\n"
             script += "from reduction_workflow.instruments.sans.sns_command_interface import *\n"
             script += "config = ConfigService.Instance()\n"
             script += "config['instrumentName']='EQSANS'\n"
-            
+
             script += "\n"
-            
+
             for item in self._observers:
                 if item.state() is not None:
                     if item.state().__class__.__name__=="DataSets":
                         script += item.state().to_script(data_file=data_file)
                     else:
                         script += str(item.state())
-            
+
             # Save the process description
             base_name = os.path.basename(data_file)
             name, ext = os.path.splitext(base_name)
             xml_process = os.path.join(self._output_directory, "%s_process.xml" % name)
             xml_process = os.path.normpath(xml_process)
             self.to_xml(xml_process)
-            
+
             script += "SaveIq(process=%r)\n" % xml_process
-    
-            script += "Reduce()\n"         
+
+            script += "Reduce()\n"
             scripts.append(script)
-            
+
         return scripts
-        
+
     def set_options(self):
         """
             Set up the reduction options, without executing
@@ -123,12 +123,11 @@ class EQSANSReductionScripter(BaseReductionScripter):
                     if hasattr(item.state(), "options"):
                         script += item.state().options()
 
-            script += "ReductionProperties='%s')" % table_ws            
+            script += "ReductionProperties='%s')" % table_ws
             mantidplot.runPythonScript(script, True)
             return table_ws
         else:
             raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
 
-        
 
-    
+

@@ -13,31 +13,31 @@ class DgsInterface(InstrumentInterface):
     # Allowed extensions for loading data files
     data_type = "Data files *.* (*.*)"
 
-    
+
     def __init__(self, name, settings):
         super(DgsInterface, self).__init__(name, settings)
-        
+
         self.ERROR_REPORT_NAME = "dgs_error_report.xml"
-        
-        # Scripter object to interface with Mantid 
-        self.scripter = DgsReductionScripter(name=name, facility=settings.facility_name)        
+
+        # Scripter object to interface with Mantid
+        self.scripter = DgsReductionScripter(name=name, facility=settings.facility_name)
 
         # Sample run setup
-        self.attach(SampleSetupWidget(settings = self._settings, 
+        self.attach(SampleSetupWidget(settings = self._settings,
                                       data_type = self.data_type))
-        
+
         # Data corrections
         self.attach(DataCorrectionsWidget(settings = self._settings,
                                           data_type = self.data_type))
-        
+
         # Diagnose detectors
-        self.attach(DiagnoseDetectorsWidget(settings = self._settings, 
+        self.attach(DiagnoseDetectorsWidget(settings = self._settings,
                                             data_type = self.data_type))
-        
+
         # Absolute units normalisation
         self.attach(AbsoluteUnitsWidget(settings = self._settings,
                                         data_type = self.data_type))
-        
+
         # Powder and Single Crystal conversion
         #self.attach(PdAndScConversionWidget(settings = self._settings,
         #                                    data_type = self.data_type))

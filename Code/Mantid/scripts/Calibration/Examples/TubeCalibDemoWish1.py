@@ -10,11 +10,11 @@ from tube_spec import TubeSpec
 import tube_calib #from tube_calib import constructIdealTubeFromRealTube
 from tube_calib_fit_params import TubeCalibFitParams
 
-filename = 'WISH00017701.raw' # Calibration run ( found in \\isis\inst$\NDXWISH\Instrument\data\cycle_11_1 ) 
+filename = 'WISH00017701.raw' # Calibration run ( found in \\isis\inst$\NDXWISH\Instrument\data\cycle_11_1 )
 rawCalibInstWS = Load(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
 CalibInstWS = Integration( rawCalibInstWS, RangeLower=1, RangeUpper=20000 )
 DeleteWorkspace(rawCalibInstWS)
-print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate" 
+print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate"
 
 CalibratedComponent = 'WISH/panel03/tube038'
 
@@ -38,7 +38,7 @@ print known_pos
 # Get the calibration and put it into the calibration table
 calibrationTable = tube.calibrate( CalibInstWS, 'WISH/panel03', known_pos, func_form, fitPar=fitPar)
 print "Got calibration (new positions of detectors)"
-    
+
 #Apply the calibration
 ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
 print "Applied calibration"

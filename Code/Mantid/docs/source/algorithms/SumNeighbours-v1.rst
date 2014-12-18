@@ -9,7 +9,7 @@
 Description
 -----------
 
-The algorithm looks through the `Instrument <http://www.mantidproject.org/Instrument>`__ to find all
+The algorithm looks through the :ref:`Instrument <Instrument>` to find all
 the `RectangularDetectors <http://www.mantidproject.org/RectangularDetector>`__ defined. For each
 detector, the SumX\*SumY neighboring event lists are summed together and
 saved in the output workspace as a single spectrum. Therefore, the

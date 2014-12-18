@@ -1,9 +1,9 @@
 import unittest
 import numpy
-from mantid.kernel import * 
+from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import (CreateWorkspace, LoadInstrument, 
-                              MoveInstrumentComponent, CropWorkspace,                            
+from mantid.simpleapi import (CreateWorkspace, LoadInstrument,
+                              MoveInstrumentComponent, CropWorkspace,
                               SANSWideAngleCorrection, Min, Max, Transpose,
                               Multiply)
 class SANSWideAngleCorrectionTest(unittest.TestCase):
@@ -16,12 +16,12 @@ class SANSWideAngleCorrectionTest(unittest.TestCase):
         yd = 10
         data = numpy.random.normal(size=xd*yd*nb)/2.0 + 5.0
         xvalues = numpy.linspace(3500,43500,nb+1)
-        tv = numpy.linspace(7e-2,6e-2,nb)        
-        Sample = CreateWorkspace(xvalues,data,NSpec=xd*yd)        
+        tv = numpy.linspace(7e-2,6e-2,nb)
+        Sample = CreateWorkspace(xvalues,data,NSpec=xd*yd)
         LoadInstrument(Sample, InstrumentName='SANS2D')
         Sample = CropWorkspace(Sample,StartWorkspaceIndex=8)#remove the monitors
         # create a transmission workspace
-        Trans = CropWorkspace(Sample,StartWorkspaceIndex=10,EndWorkspaceIndex=10)        
+        Trans = CropWorkspace(Sample,StartWorkspaceIndex=10,EndWorkspaceIndex=10)
         x_v = Trans.dataX(0)[:-1]
         y_v = numpy.linspace(0.743139, 0.6,nb)
         e_v = y_v/58.0
@@ -41,7 +41,7 @@ class SANSWideAngleCorrectionTest(unittest.TestCase):
         lRange = Transpose(lRange)
         hRange = Transpose(hRange)
         self.assertTrue(97 > hRange.dataY(0).all())
-        self.assertTrue(1 >= hRange.dataY(0).all())        
+        self.assertTrue(1 >= hRange.dataY(0).all())
 
 
     def test_negative_trans_data(self):
@@ -58,4 +58,4 @@ class SANSWideAngleCorrectionTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-        
+

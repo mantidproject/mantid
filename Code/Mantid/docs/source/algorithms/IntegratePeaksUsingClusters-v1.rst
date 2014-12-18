@@ -10,7 +10,7 @@ Description
 -----------
 
 Integrates arbitary shaped single crystal peaks defined on an
-`MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`_ using connected component
+:ref:`MDHistoWorkspace <MDHistoWorkspace>` using connected component
 analysis to determine regions of interest around each peak of the
 `PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_. The output is an integrated
 `PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_ as well as an image containing the
@@ -72,7 +72,7 @@ No Cluster Corresponding to Peak
 This is because the input `PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_ has peaks
 that do not align with peaks in the image. The error could either be on
 the side of the input PeaksWorkspace (spurious peaks), or of the
-`MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`_ generated as part of processing.
+:ref:`MDHistoWorkspace <MDHistoWorkspace>` generated as part of processing.
 One thing to verify is that the combination of Threshold and
 Normalization input parameters are not so low that they are treating
 genuine peaks in the image as background.

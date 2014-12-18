@@ -457,6 +457,55 @@ public:
     TS_ASSERT_DELTA(final.Z(), 1.0, 1e-5);
   }
 
+  void testGetEulerAngles1()
+  {
+    Quat X(120.0, V3D(1,0,0));
+    Quat Y(-60.0, V3D(0,1,0));
+    Quat Z(90.0, V3D(0,0,1));
+    Quat rot = X * Y * Z;
+
+    std::vector<double> angles = rot.getEulerAngles("XYZ");
+    TS_ASSERT_DELTA(angles[0], 120.0, 1e-5);
+    TS_ASSERT_DELTA(angles[1], -60.0, 1e-5);
+    TS_ASSERT_DELTA(angles[2], 90.0, 1e-5);
+  }
+
+  void testGetEulerAngles2()
+  {
+    //Test using a different convention
+    Quat X(0.0, V3D(1,0,0));
+    Quat Y(15.0, V3D(0,1,0));
+    Quat Z(75.0, V3D(0,0,1));
+    Quat rot = Z * X * Y;
+
+    std::vector<double> angles = rot.getEulerAngles("ZXY");
+    TS_ASSERT_DELTA(angles[0], 75.0, 1e-5);
+    TS_ASSERT_DELTA(angles[1], 0.0, 1e-5);
+    TS_ASSERT_DELTA(angles[2], 15.0, 1e-5);
+  }
+
+  void testGetEulerAngles3()
+  {
+    //In some cases we don't get the same angles out as we put in.
+    //That's okay though, so long as they represent the same rotation.
+    Quat X(68.0, V3D(1,0,0));
+    Quat Y(175.0, V3D(0,1,0));
+    Quat Z(20.0, V3D(0,0,1));
+    Quat rot = X * Y * Z;
+
+    Quat X2(-112.0, V3D(1,0,0));
+    Quat Y2(5.0, V3D(0,1,0));
+    Quat Z2(-160.0, V3D(0,0,1));
+    Quat rot2 = X * Y * Z;
+
+    TS_ASSERT(rot == rot2);
+
+    std::vector<double> angles = rot.getEulerAngles("XYZ");
+    TS_ASSERT_DELTA(angles[0], -112.0, 1e-5);
+    TS_ASSERT_DELTA(angles[1], 5.0, 1e-5);
+    TS_ASSERT_DELTA(angles[2], -160.0, 1e-5);
+  }
+
   void compareArbitrary(const Quat& rotQ)
   {
     V3D oX(1,0,0);

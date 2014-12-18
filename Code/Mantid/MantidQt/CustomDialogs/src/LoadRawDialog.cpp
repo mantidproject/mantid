@@ -128,9 +128,9 @@ void LoadRawDialog::initLayout()
   if(cacheProp)
   {
     QComboBox *cacheBox = new QComboBox;
-    std::set<std::string> items =cacheProp->allowedValues();
-    std::set<std::string>::const_iterator vend = items.end();
-    for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
+    std::vector<std::string> items =cacheProp->allowedValues();
+    std::vector<std::string>::const_iterator vend = items.end();
+    for(std::vector<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
         ++vitr)
     {
       cacheBox->addItem(QString::fromStdString(*vitr));
@@ -154,22 +154,14 @@ void LoadRawDialog::initLayout()
   //------------- If the algorithm version supports the LoadMonitors property add a check box for it ----
   Mantid::Kernel::Property* loadMonitors=getAlgorithmProperty("LoadMonitors");
   if(loadMonitors)
-  {  	  
-    // define property values which should not be shown
-    const char *excl[]={"0","1"};
-    std::vector<std::string> excluded_values(excl,excl+2);
-
-
+  {
     QComboBox *monitorsBox =new QComboBox;
-    std::set<std::string> monitoritems =loadMonitors->allowedValues();
-    std::set<std::string>::const_iterator mend = monitoritems.end();
-    for(std::set<std::string>::const_iterator mitr = monitoritems.begin(); mitr != mend; 
+    std::vector<std::string> monitoritems =loadMonitors->allowedValues();
+    std::vector<std::string>::const_iterator mend = monitoritems.end();
+    for(std::vector<std::string>::const_iterator mitr = monitoritems.begin(); mitr != mend; 
         ++mitr)
     {
-      if (std::find(excluded_values.begin(), excluded_values.end(), *mitr)==excluded_values.end())
-      {
-          monitorsBox->addItem(QString::fromStdString(*mitr));
-      }
+        monitorsBox->addItem(QString::fromStdString(*mitr));
     }
     prop_line->addWidget(new QLabel("LoadMonitors:"), 0, Qt::AlignRight);
     prop_line->addWidget(monitorsBox);

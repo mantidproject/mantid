@@ -6,7 +6,7 @@ from numpy import *
 from string import *
 
 class GetEiT0atSNSTest(unittest.TestCase):
-            
+
     def testGETS(self):
         w=Load('ADARAMonitors.nxs')
         LoadInstrument(Workspace=w,InstrumentName='SEQUOIA',RewriteSpectraMap='0')
@@ -20,7 +20,7 @@ class GetEiT0atSNSTest(unittest.TestCase):
         except Exception as e:
             s="Could not get Ei, and this is not a white beam run\nNo peak found for the monitor with spectra num: 2"
             self.assertEquals(find(e.message,s),0)
-        DeleteWorkspace(w)           
-   
+        DeleteWorkspace(w)
+
 if __name__ == '__main__':
     unittest.main()

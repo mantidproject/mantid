@@ -17,4 +17,22 @@ NOTE: The instrument used is determined by reading the 'Instrument:' and
 latest `Instrument Definition File <Instrument Definition File>`__ is
 used.
 
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+**Example**
+
+.. testcode:: LoadIsawPeaksEx
+
+    peaks = LoadIsawPeaks('TOPAZ_1204.peaks')
+    print "Number of peaks entries", peaks.getNumberPeaks()
+
+Output:
+
+.. testoutput:: LoadIsawPeaksEx
+
+    Number of peaks entries 36
+
 .. categories::

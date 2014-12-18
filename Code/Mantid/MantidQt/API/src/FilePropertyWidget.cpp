@@ -98,7 +98,7 @@ namespace API
    * @param defaultExt :: default extension to use
    * @return a string that filters files by extenstions
    */
-  QString getFileDialogFilter(const std::set<std::string>& exts, const std::string& defaultExt)
+  QString getFileDialogFilter(const std::vector<std::string>& exts, const std::string& defaultExt)
   {
     QString filter("");
 
@@ -110,9 +110,9 @@ namespace API
     if( !exts.empty() )
     {
       // --------- Load a File -------------
-      std::set<std::string>::const_iterator iend = exts.end();
+      auto iend = exts.end();
       // Push a wild-card onto the front of each file suffix
-      for( std::set<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
+      for( auto itr = exts.begin(); itr != iend; ++itr)
       {
         if( (*itr) != defaultExt )
         {
@@ -138,7 +138,7 @@ namespace API
     if( !prop ) return "";
 
     //The allowed values in this context are file extensions
-    std::set<std::string> exts = prop->allowedValues();
+    std::vector<std::string> exts = prop->allowedValues();
     std::string defaultExt = prop->getDefaultExt();
 
     /* MG 20/07/09: Static functions such as these that use native Windows and MAC dialogs
@@ -160,8 +160,8 @@ namespace API
       {
         filter = "*" + QString::fromStdString(defaultExt) + ";;";
       }
-      std::set<std::string>::const_iterator iend = exts.end();
-      for( std::set<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
+      auto iend = exts.end();
+      for( auto itr = exts.begin(); itr != iend; ++itr)
       {
         if( (*itr) != defaultExt )
         {

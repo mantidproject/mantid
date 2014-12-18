@@ -755,6 +755,9 @@ namespace MantidQt
       resultsTable->setColumnHidden(headerIndexByName(resultsTable, "DatabaseID"),true);
       resultsTable->setColumnHidden(headerIndexByName(resultsTable, "SessionID"), true);
 
+      //Resize InvestigationID column to fit contents
+      resultsTable->resizeColumnToContents(headerIndexByName(resultsTable, "InvestigationID"));
+
       // Sort by endDate with the most recent being first.
       resultsTable->setSortingEnabled(true);
       resultsTable->sortByColumn(headerIndexByName(resultsTable, "Start date"),Qt::DescendingOrder);

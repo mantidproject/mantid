@@ -16,6 +16,6 @@ class DeprecatedAlgorithmCheckerTest(unittest.TestCase):
         msg = deprecation_check.isDeprecated()
         self.assertTrue(len(msg) > 0)
 
-        
+
 if __name__ == '__main__':
     unittest.main()

@@ -58,10 +58,10 @@ class MantidIPythonWidget(RichIPythonWidget):
         f = shell.run_code
         shell.run_code = types.MethodType(our_run_code, shell)
         shell.ipython_run_code = f
-    
+
         kernel_client = kernel_manager.client()
         kernel_client.start_channels()
-    
+
         self.kernel_manager = kernel_manager
         self.kernel_client = kernel_client
 

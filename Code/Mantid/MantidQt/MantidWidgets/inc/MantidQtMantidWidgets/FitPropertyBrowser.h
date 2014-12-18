@@ -224,7 +224,7 @@ public:
 
 
 public slots:
-  virtual void fit(){ doFit(500); }
+  virtual void fit();
   virtual void sequentialFit();
   void undoFit();
   void clear();
@@ -379,6 +379,7 @@ protected:
   QtProperty *m_minimizer;
   QtProperty *m_ignoreInvalidData;
   QtProperty *m_costFunction;
+  QtProperty *m_maxIterations;
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;
   QtProperty *m_plotCompositeMembers;

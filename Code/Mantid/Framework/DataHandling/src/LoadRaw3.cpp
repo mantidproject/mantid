@@ -67,16 +67,18 @@ namespace Mantid
       monitorOptions.push_back("Include");
       monitorOptions.push_back("Exclude");
       monitorOptions.push_back("Separate");
-      monitorOptions.push_back("1");
-      monitorOptions.push_back("0");
-      declareProperty("LoadMonitors","Include", boost::make_shared<StringListValidator>(monitorOptions),
+      std::map<std::string,std::string> monitorOptionsAliases;
+      monitorOptionsAliases["1"] = "Separate";
+      monitorOptionsAliases["0"] = "Exclude";
+      declareProperty("LoadMonitors","Include", boost::make_shared<StringListValidator>(monitorOptions,monitorOptionsAliases),
           "Option to control the loading of monitors.\n"
-      "Allowed options are Include,Exclude, Separate, 1, and 0.\n"
+      "Allowed options are Include,Exclude, Separate.\n"
       "Include:The default is Include option which loads the monitors into the output workspace.\n"
       "Exclude:The Exclude option excludes monitors from the output workspace.\n"
       "Separate:The Separate option loads monitors into a separate workspace called OutputWorkspace_Monitor.\n"
-      "1:  The option introduced to allow compatibility with LoadEventNexus in scripts. Equivalent to Separate.\n"
-      "0:  The option introduced to allow compatibility with LoadEventNexus in scripts. Equivalent to Exclude.\n");
+      "Defined aliases:\n"
+      "1:  Equivalent to Separate.\n"
+      "0:  Equivalent to Exclude.\n");
     }
 
 

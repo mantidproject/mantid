@@ -21,8 +21,6 @@ namespace DataHandling
 {
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(LoadCalFile)
-  
-
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -37,9 +35,6 @@ namespace DataHandling
   LoadCalFile::~LoadCalFile()
   {
   }
-  
-
-  //----------------------------------------------------------------------------------------------
 
 
   //----------------------------------------------------------------------------------------------
@@ -258,7 +253,9 @@ namespace DataHandling
         }
         catch (std::invalid_argument &)
         {
-          numErrors++;
+          // Ignore the error if the IS is actually for a monitor
+          if(!idIsMonitor(offsetsWS->getInstrument(), udet))
+            numErrors++;
         }
       }
 
@@ -272,7 +269,9 @@ namespace DataHandling
         }
         catch (std::invalid_argument &)
         {
-          numErrors++;
+          // Ignore the error if the IS is actually for a monitor
+          if(!idIsMonitor(groupWS->getInstrument(), udet))
+            numErrors++;
         }
       }
 
@@ -296,12 +295,12 @@ namespace DataHandling
             if (!hasUnmasked)
               hasUnmasked = true;
           }
-
         }
         else
         {
-          // Could not find the UDET.
-          numErrors++;
+          // Ignore the error if the IS is actually for a monitor
+          if(!idIsMonitor(maskWS->getInstrument(), udet))
+            numErrors++;
         }
       }
     }
@@ -314,6 +313,20 @@ namespace DataHandling
       Logger("LoadCalFile").warning() << "'" << calFileName << "' has no spectra grouped\n";
     if (doMask && (!hasUnmasked))
       Logger("LoadCalFile").warning() << "'" << calFileName << "' masks all spectra\n";
+  }
+
+  /**
+   * Used to determine if a given detector ID is for a monitor.
+   *
+   * @param inst Pointer to the instrument
+   * @param detID Detector ID to check
+   * @return True if a monitor, false otherwise
+   */
+  bool LoadCalFile::idIsMonitor(Instrument_const_sptr inst, int detID)
+  {
+    auto monitorList = inst->getMonitors();
+    auto it = std::find(monitorList.begin(), monitorList.end(), detID);
+    return (it != monitorList.end());
   }
 
 

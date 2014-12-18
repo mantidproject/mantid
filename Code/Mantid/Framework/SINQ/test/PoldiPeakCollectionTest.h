@@ -15,6 +15,8 @@
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 
 class PoldiPeakCollectionTest;
 
@@ -198,6 +200,17 @@ public:
         TS_ASSERT_THROWS(peaks.peak(-2), std::range_error);
     }
 
+    void testPeaksVector()
+    {
+        PoldiPeakCollection fromTable(m_dummyData);
+        std::vector<PoldiPeak_sptr> peaks = fromTable.peaks();
+
+        // make sure that a copy of the vector is created
+        peaks.clear();
+        TS_ASSERT_EQUALS(fromTable.peakCount(), 2);
+
+    }
+
     void testColumnCheckConsistency()
     {
         TestablePoldiPeakCollection peaks;
@@ -234,6 +247,61 @@ public:
         }
     }
 
+    void testStructureConstructor()
+    {
+        UnitCell CsCl(4.126, 4.126, 4.126);
+        PointGroup_sptr m3m = boost::make_shared<PointGroupLaue13>();
+
+        CrystalStructure_sptr structure = boost::make_shared<CrystalStructure>(CsCl, m3m);
+
+        double dMin = 0.55;
+        double dMax = 5.0;
+
+        /* The peak collection should contain all allowed symmetry independent HKLs
+         * between 0.55 and 5.0 Angstrom, for the unit cell of CsCl
+         * (Primitive cubic cell with a = 4.126 Angstrom, Pointgroup m-3m).
+         */
+        PoldiPeakCollection p(structure, dMin, dMax);
+
+        TS_ASSERT_EQUALS(p.peakCount(), 69);
+
+        PoldiPeak_sptr peak1 = p.peak(0);
+        TS_ASSERT_EQUALS(peak1->hkl(), MillerIndices(1, 0, 0));
+        TS_ASSERT_EQUALS(peak1->d(), 4.126);
+
+        PoldiPeak_sptr peak68 = p.peak(68);
+        TS_ASSERT_EQUALS(peak68->hkl(), MillerIndices(7, 2, 1));
+        TS_ASSERT_DELTA(peak68->d(), 0.5615, 1e-4);
+
+        std::vector<PoldiPeak_sptr> poldiPeaks = p.peaks();
+
+        // sort peak list and check that all peaks are within the limits
+        std::sort(poldiPeaks.begin(), poldiPeaks.end(), boost::bind<bool>(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::d));
+
+        TS_ASSERT_LESS_THAN_EQUALS(poldiPeaks[0]->d(), 5.0);
+        TS_ASSERT_LESS_THAN_EQUALS(0.55, poldiPeaks[68]->d());
+        TS_ASSERT_LESS_THAN(poldiPeaks[68]->d(), poldiPeaks[0]->d());
+    }
+
+    void testSetPeaks()
+    {
+        UnitCell CsCl(4.126, 4.126, 4.126);
+        PointGroup_sptr m3m = boost::make_shared<PointGroupLaue13>();
+
+        CrystalStructure_sptr structure = boost::make_shared<CrystalStructure>(CsCl, m3m);
+
+        double dMin = 0.55;
+        double dMax = 5.0;
+
+        std::vector<V3D> hkls = structure->getUniqueHKLs(dMin, dMax);
+        std::vector<double> dValues = structure->getDValues(hkls);
+
+        TestablePoldiPeakCollection p;
+        TS_ASSERT_THROWS_NOTHING(p.setPeaks(hkls, dValues));
+
+        dValues.pop_back();
+        TS_ASSERT_THROWS(p.setPeaks(hkls, dValues), std::invalid_argument);
+    }
 
 private:
     TableWorkspace_sptr m_dummyData;

@@ -12,17 +12,17 @@ class Mean(PythonAlgorithm):
 
     def summary(self):
         return "Calculates the arithemetic mean of the workspaces provided."
-        
+
     def PyInit(self):
         mustHaveWorkspaceNames = StringMandatoryValidator()
         self.declareProperty("Workspaces", "", validator=mustHaveWorkspaceNames, direction=Direction.Input, doc="Input workspaces. Comma separated workspace names")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output mean workspace")
-    
+
     def areWorkspacesCompatible(self, a, b):
-        sizeA = a.blocksize() * a.getNumberHistograms() 
+        sizeA = a.blocksize() * a.getNumberHistograms()
         sizeB = b.blocksize() * b.getNumberHistograms()
         return sizeA == sizeB
-        
+
     def PyExec(self):
         workspaces = self.getProperty("Workspaces").value.split(',')
         out_ws = CloneWorkspace(InputWorkspace=mtd[workspaces[0]], OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
@@ -34,7 +34,7 @@ class Mean(PythonAlgorithm):
             out_ws += ws
         out_ws /= len(workspaces)
         self.setProperty("OutputWorkspace", out_ws)
-        
+
 
 
 #############################################################################################

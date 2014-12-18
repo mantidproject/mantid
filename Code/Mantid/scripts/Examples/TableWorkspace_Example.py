@@ -12,9 +12,9 @@ print "Number of Columns: " + str(peaks.columnCount()) + " , Number of rows: "+ 
 
 colNames = peaks.getColumnNames()
 for i in colNames:
-	print i
+    print i
 
 for i in range(peaks.rowCount()):
-	row = peaks.row(i)
-	print "Spectrum %d has peak at pos %f" % (row['spectrum'], row['centre'])
+    row = peaks.row(i)
+    print "Spectrum %d has peak at pos %f" % (row['spectrum'], row['centre'])
 

@@ -502,11 +502,11 @@ public:
     TS_ASSERT_EQUALS( p.setValue("three"), "The value \"three\" is not in the list of allowed values" );
     TS_ASSERT_EQUALS( p.value(), "two" );
     TS_ASSERT_EQUALS( p.isValid(), "" );
-    std::set<std::string> vals;
-    TS_ASSERT_THROWS_NOTHING( vals = p.allowedValues() );
-    TS_ASSERT_EQUALS( vals.size(), 2 );
-    TS_ASSERT( vals.count("one") );
-    TS_ASSERT( vals.count("two") );
+    std::vector<std::string> s;
+    TS_ASSERT_THROWS_NOTHING( s = p.allowedValues() );
+    TS_ASSERT_EQUALS( s.size(), 2 );
+    TS_ASSERT( std::find( s.begin(), s.end(), "one")  != s.end() )
+    TS_ASSERT( std::find( s.begin(), s.end(), "two")  != s.end() )
   }
   
   void testIsDefault()
@@ -602,6 +602,32 @@ public:
     TS_ASSERT_EQUALS( v3.size(), 6 );
     delete p1;
     delete p2;
+  }
+
+  void test_string_property_alias()
+  {
+    // system("pause");
+    std::vector<std::string> allowedValues;
+    allowedValues.push_back( "Hello");
+    allowedValues.push_back( "World");
+    std::map<std::string,std::string> alias;
+    alias["1"] = "Hello";
+    alias["0"] = "World";
+    auto validator = boost::make_shared<ListValidator<std::string>>(allowedValues,alias);
+    PropertyWithValue<std::string> prop("String","",validator);
+    TS_ASSERT_THROWS_NOTHING( prop = "Hello" );
+    std::string value = prop;
+    TS_ASSERT_EQUALS( value, "Hello" );
+    
+    TS_ASSERT_THROWS( prop = "Mantid", std::invalid_argument );
+    
+    TS_ASSERT_THROWS_NOTHING( prop = "1" );
+    value = prop;
+    TS_ASSERT_EQUALS( value, "Hello" );
+    
+    TS_ASSERT_THROWS_NOTHING( prop = "0" );
+    value = prop;
+    TS_ASSERT_EQUALS( value, "World" );
   }
   
 private:

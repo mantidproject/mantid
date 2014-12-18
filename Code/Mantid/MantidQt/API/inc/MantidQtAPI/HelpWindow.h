@@ -43,6 +43,8 @@ public:
   static void showPage(QWidget *parent, const QUrl & url);
   static void showAlgorithm(QWidget *parent, const std::string &name=std::string(), const int version=-1);
   static void showAlgorithm(QWidget *parent, const QString &name, const int version=-1);
+  static void showConcept(QWidget *parent, const std::string &name=std::string());
+  static void showConcept(QWidget *parent, const QString &name);
   static void showFitFunction(QWidget *parent, const std::string &name=std::string());
 };
 } // namespace API

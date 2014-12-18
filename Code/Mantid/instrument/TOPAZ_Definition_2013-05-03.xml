@@ -1,0 +1,181 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+ name="TOPAZ" valid-from   ="2013-05-02 00:00:01"
+              valid-to     ="2013-12-31 23:59:59"
+		      last-modified="2014-08-20 10:04:33">
+  <!--Created by Vickie Lynch-->
+  <!--Modified by Vickie Lynch using the TOPAZ.py script from the Translation Service calibration/geometry/ code. -->
+  <!--Modified valid-to by A.Savici-->
+  <!--DEFAULTS-->
+  <defaults>
+    <length unit="metre"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <default-view view="spherical_y"/>
+  </defaults>
+
+  <!--SOURCE-->
+  <component type="moderator">
+    <location z="-18.0"/>
+  </component>
+  <type name="moderator" is="Source"/>
+
+  <!--SAMPLE-->
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0"/>
+  </component>
+  <type name="sample-position" is="SamplePos"/>
+
+  <!--MONITORS-->
+  <component type="monitors" idlist="monitors">
+    <location/>
+  </component>
+  <type name="monitors">
+    <component type="monitor">
+      <location z="-2.488" name="monitor1"/>
+    </component>
+    <component type="monitor">
+      <location z="1.049" name="monitor2"/>
+    </component>
+  </type>
+
+<!-- XML Code automatically generated on 2012-10-09 15:04:33.238638 for the Mantid instrument definition file -->
+
+<component type="panel" idstart="1114112" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.455000" t="105.192621" p="-146.694008" name="bank17" rot="44.079783" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="53.154399">
+    <rot val="41.466968" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="1179648" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.455000" t="74.807731" p="-146.694071" name="bank18" rot="80.079867" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="53.154399">
+    <rot val="41.466968" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="1441792" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.425000" t="90.000202" p="-16.000018" name="bank22" rot="-105.410002" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="47.178655">
+    <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="1703936" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.425000" t="124.403098" p="-160.483843" name="bank26" rot="38.590066" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="47.178655">
+    <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="1769472" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.425000" t="90.000202" p="-163.999982" name="bank27" rot="74.589577" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="47.178655">
+    <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="1835008" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.425000" t="55.596651" p="-160.483782" name="bank28" rot="110.589776" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="47.178655">
+    <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="2359296" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.395000" t="143.999764" p="180.000000" name="bank36" rot="36.000236" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="45.000000">
+    <rot val="0.000000" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="2424832" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.395000" t="108.000253" p="180.000000" name="bank37" rot="71.999747" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="45.000000">
+    <rot val="0.000000" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="2490368" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.395000" t="72.000168" p="180.000000" name="bank38" rot="107.999832" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="45.000000">
+    <rot val="0.000000" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="2555904" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.395000" t="36.000027" p="180.000000" name="bank39" rot="143.999973" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="45.000000">
+    <rot val="0.000000" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="3080192" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.425000" t="90.000202" p="163.999982" name="bank47" rot="105.410002" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="47.178655">
+    <rot val="-22.073524" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="3145728" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.425000" t="55.596651" p="160.483782" name="bank48" rot="141.410201" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="47.178655">
+    <rot val="-22.073524" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="3801088" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.455000" t="74.807731" p="146.694071" name="bank58" rot="135.919796" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="53.154399">
+    <rot val="-41.466968" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<!-- List of all the bank names:
+bank10,bank11,bank12,bank13,bank14,bank15,bank16,bank17,bank18,bank19,bank20,bank21,bank22,bank23,bank24,bank25,bank26,bank27,bank28,bank29,bank31,bank32,bank33,bank34,bank36,bank37,bank38,bank39,bank40,bank41,bank42,bank43,bank44,bank45,bank46,bank47,bank48,bank49,bank50,bank51,bank52,bank53,bank54,bank55,bank56,bank57,bank58,bank59
+-->
+
+<!-- NOTE: This detector is the same as the SNAP detector -->
+<!-- Rectangular Detector Panel -->
+<type name="panel" is="rectangular_detector" type="pixel"
+    xpixels="256" xstart="-0.078795" xstep="+0.000618"
+    ypixels="256" ystart="-0.078795" ystep="+0.000618" >
+  <properties/>
+</type>
+
+  <!-- Pixel for Detectors-->
+  <type is="detector" name="pixel">
+    <cuboid id="pixel-shape">
+      <left-front-bottom-point y="-0.000309" x="-0.000309" z="0.0"/>
+      <left-front-top-point y="0.000309" x="-0.000309" z="0.0"/>
+      <left-back-bottom-point y="-0.000309" x="-0.000309" z="-0.0001"/>
+      <right-front-bottom-point y="-0.000309" x="0.000309" z="0.0"/>
+    </cuboid>
+    <algebra val="pixel-shape"/>
+  </type>
+
+  <!-- Shape for Monitors-->
+  <!-- TODO: Update to real shape -->
+  <type is="monitor" name="monitor">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis y="0.0" x="0.0" z="1.0"/>
+      <radius val="0.01"/>
+      <height val="0.03"/>
+    </cylinder>
+    <algebra val="some-shape"/>
+  </type>
+
+  <!--MONITOR IDs-->
+  <idlist idname="monitors">
+    <id val="-1"/>
+    <id val="-2"/>
+  </idlist>
+</instrument>

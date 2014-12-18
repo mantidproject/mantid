@@ -120,7 +120,7 @@ namespace Mantid
       std::string outputWorkspaceName = this->getPropertyValue("OutputWorkspace");
       std::string analysis_mode = this->getPropertyValue("AnalysisMode");
 
-      auto second_ws_property = this->getPointerToProperty("SecondTransmissionRun");
+      MatrixWorkspace_sptr secondWS = this->getProperty("SecondTransmissionRun");
 
       auto start_overlap = isSet<double>("StartOverlap");
       auto end_overlap = isSet<double>("EndOverlap");
@@ -173,6 +173,7 @@ namespace Mantid
       //construct the algorithm
 
       IAlgorithm_sptr algCreateTransWS = createChildAlgorithm("CreateTransmissionWorkspace");
+      algCreateTransWS->setRethrows(true);
       algCreateTransWS->initialize();
 
       if (algCreateTransWS->isInitialized())
@@ -180,9 +181,9 @@ namespace Mantid
 
         algCreateTransWS->setProperty("FirstTransmissionRun", firstWS);
 
-        if (!second_ws_property->isDefault())
+        if (secondWS)
         {
-          algCreateTransWS->setProperty("SecondTransmissionRun", second_ws_property->value());
+          algCreateTransWS->setProperty("SecondTransmissionRun", secondWS);
         }
 
         algCreateTransWS->setProperty("OutputWorkspace", outputWorkspaceName);

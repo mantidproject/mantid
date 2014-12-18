@@ -41,8 +41,8 @@ namespace API
     m_combo->setToolTip(m_doc);
     m_widgets.push_back(m_combo);
 
-    std::set<std::string> items = prop->allowedValues();
-    for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != items.end(); ++vitr)
+    std::vector<std::string> items = prop->allowedValues();
+    for(auto vitr = items.begin(); vitr != items.end(); ++vitr)
     {
       m_combo->addItem(QString::fromStdString(*vitr));
     }

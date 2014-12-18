@@ -132,6 +132,8 @@ namespace Mantid
       //@{
       /// Return the names of the parameters for this component
       virtual std::set<std::string> getParameterNames(bool recursive = true) const = 0;
+      ///return the parameter names and the component they are from
+      virtual std::map<std::string,ComponentID > getParameterNamesByComponent() const = 0;
       /// Returns a boolean indicating if the component has the named parameter
       virtual bool hasParameter(const std::string & name, bool recursive = true) const = 0;
       //Hack until proper python export functions are defined
@@ -150,7 +152,8 @@ namespace Mantid
       virtual std::vector<int> getIntParameter(const std::string& pname, bool recursive = true) const = 0;
       /// Get a parameter defined as a boolean
       virtual std::vector<bool> getBoolParameter(const std::string& pname, bool recursive = true) const = 0;
-
+      ///get a string representation of a parameter
+      virtual std::string getParameterAsString(const std::string& pname, bool recursive = true) const =0;
       //@}
       /** Prints a text representation of itself
       */

@@ -163,18 +163,22 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
 void ConjoinWorkspaces::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2,
                                            API::MatrixWorkspace_sptr output)
 {
-  // If check throws then we need to fix the output
   bool needsFix(false);
-  try
+
+  if (this->getProperty("CheckOverlapping"))
   {
-    if( !m_overlapChecked && this->getProperty("CheckOverlapping")) checkForOverlap(ws1, ws2, true);
+    // If CheckOverlapping is required, then either skip fixing spectrum number or get stopped by an exception
+    if (!m_overlapChecked)
+      checkForOverlap(ws1, ws2, true);
+    needsFix = false;
   }
-  catch(std::invalid_argument&)
+  else
   {
+    // It will be determined later whether spectrum number needs to be fixed.
     needsFix = true;
   }
-
   if( !needsFix ) return;
+
   // is everything possibly ok?
   specid_t min;
   specid_t max;

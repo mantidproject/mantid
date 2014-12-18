@@ -6,7 +6,7 @@ import os
 from MigrationTest import MigrationTest
 
 class PythonAlgorithmlReplaceMigrationTest(MigrationTest):
-    
+
     def tearDown(self):
         """Clean up after a test"""
         self.remove_test_files()
@@ -16,15 +16,15 @@ class PythonAlgorithmlReplaceMigrationTest(MigrationTest):
         """
         from MantidFramework import *
         mtd.initialize()
-        
+
         class MyAlgorithm(PythonAlgorithm):
-            
+
             def PyInit(self):
                 pass
-                
+
             def PyExec(self):
                 pass
-                
+
         mtd.registerPyAlgorithm(MyAlgorithm())
         """
         expected = \
@@ -32,15 +32,15 @@ class PythonAlgorithmlReplaceMigrationTest(MigrationTest):
         from mantid import *
         from mantid.kernel import *
         from mantid.api import *
-        
+
         class MyAlgorithm(PythonAlgorithm):
-            
+
             def PyInit(self):
                 pass
-                
+
             def PyExec(self):
                 pass
-                
+
         registerAlgorithm(MyAlgorithm)
         """
         self.do_migration(inputstring)
@@ -53,7 +53,7 @@ class PythonAlgorithmlReplaceMigrationTest(MigrationTest):
         mtd.initialize()
         Name, DefaultValue, Validator = None, Description = '', Direction = Direction.Input):
         class MyAlgorithm(PythonAlgorithm):
-            
+
             def PyInit(self):
                 self.declareProperty(Name="StringKeywords",DefaultValue="", Validator=MandatoryValidator(),Description="description",Direction=Direction.Input)
                 self.declareProperty("StringNonKeywords","", MandatoryValidator(),"description",Direction.Input)
@@ -65,10 +65,10 @@ class PythonAlgorithmlReplaceMigrationTest(MigrationTest):
                 self.declareProperty("NonStringNotAllArgs",1)
                 self.declareProperty("NonStringMixKeywordsAndPos",1,Description="desc")
 
-                
+
             def PyExec(self):
                 pass
-                
+
         mtd.registerPyAlgorithm(MyAlgorithm())
         """
         expected = \
@@ -76,9 +76,9 @@ class PythonAlgorithmlReplaceMigrationTest(MigrationTest):
         from mantid import *
         from mantid.kernel import *
         from mantid.api import *
-        
+
         class MyAlgorithm(PythonAlgorithm):
-            
+
             def PyInit(self):
                 self.declareProperty(name="StringKeywords",defaultValue="", validator=MandatoryValidator(),doc="description",direction=Direction.Input)
                 self.declareProperty("StringNonKeywords","", MandatoryValidator(),"description",Direction.Input)
@@ -89,10 +89,10 @@ class PythonAlgorithmlReplaceMigrationTest(MigrationTest):
                 self.declareProperty("NonStringNonKeywords", 1, IntMandatoryValidator(),"description",Direction.Input)
                 self.declareProperty("NonStringNotAllArgs",1)
                 self.declareProperty("NonStringMixKeywordsAndPos",1,doc="desc")
-                
+
             def PyExec(self):
                 pass
-                
+
         registerAlgorithm(MyAlgorithm)
         """
         self.do_migration(inputstring)

@@ -1,6 +1,6 @@
 """
-    Classes for each reduction step. Those are kept separately 
-    from the the interface class so that the DgsReduction class could 
+    Classes for each reduction step. Those are kept separately
+    from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
 import xml.dom.minidom
@@ -18,18 +18,18 @@ class DgsReductionScripter(BaseReductionScripter):
     TOPLEVEL_WORKFLOWALG = "DgsReduction"
     WIDTH_END = "".join([" " for i in range(len(TOPLEVEL_WORKFLOWALG))])
     WIDTH = WIDTH_END + " "
-    
+
     def __init__(self, name="SEQ", facility="SNS"):
         super(DgsReductionScripter, self).__init__(name=name, facility=facility)
-        
+
     def to_script(self, file_name=None):
         """
             Generate reduction script
             @param file_name: name of the file to write the script to
-        """     
-        
-        
-        
+        """
+
+
+
         for item in self._observers:
             state = item.state()
             if state is not None:
@@ -37,15 +37,15 @@ class DgsReductionScripter(BaseReductionScripter):
                     data_list = state.sample_file
                 except:
                     pass
-                    
-                    
+
+
         out_dir_line=""
         script = "# DGS reduction script\n"
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
-            
+
         script += "import mantid\n"
         script += "import os\n"
-        script += "from mantid.simpleapi import *\n"        
+        script += "from mantid.simpleapi import *\n"
         script += "config['default.facility']=\"%s\"\n" % self.facility_name
         script += "\n"
         script += 'DGS_input_data=Load("'+data_list+'")\n'
@@ -60,11 +60,11 @@ class DgsReductionScripter(BaseReductionScripter):
                         out_dir_line=subitem.strip(',')+"\n"
         script += DgsReductionScripter.WIDTH_END + ")\n"
         script += "\n"
-        
+
         if len(out_dir_line)==0:
             output_dir=mantid.config['defaultsave.directory']
             out_dir_line='OutputDirectory="%s"\n'%output_dir
-        
+
         script += out_dir_line
 
         filenames=self.filenameParser(data_list)
@@ -81,9 +81,9 @@ class DgsReductionScripter(BaseReductionScripter):
             f = open(file_name, 'w')
             f.write(script)
             f.close()
-        
+
         return script
-        
+
     def to_live_script(self):
         """
             Generate the script for live data reduction
@@ -99,7 +99,7 @@ class DgsReductionScripter(BaseReductionScripter):
                             options += "OutputWorkspace=output,"
                         else:
                             options += subitem
-                            
+
         if '_spe' in output_workspace:
             output_workspace_name = 'live_spe'
             output_workspace = 'OutputWorkspace="live_spe"'
@@ -108,15 +108,15 @@ class DgsReductionScripter(BaseReductionScripter):
 
         script = """StartLiveData(UpdateEvery='10',Instrument='"""
         script += self.instrument_name
-        script += """',ProcessingScript='"""        
+        script += """',ProcessingScript='"""
         script +=  DgsReductionScripter.TOPLEVEL_WORKFLOWALG + '('
         script += options
         script += ")"
-        
+
         script += """',PreserveEvents=True,RunTransitionBehavior='Stop',"""
         script += output_workspace
-        script += ")\n" 
-        
+        script += ")\n"
+
         return script
 
     def to_batch(self):
@@ -131,21 +131,21 @@ class DgsReductionScripter(BaseReductionScripter):
                     data_list = state.sample_file
                 except:
                     pass
-        
-        data_files = self.filenameParser(data_list)                    
+
+        data_files = self.filenameParser(data_list)
         scripts = []
 
         out_dir_line=""
         for data_file in data_files:
             script = "# DGS reduction script\n"
             script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
-            
+
             script += "import mantid\n"
             script += "import os\n"
-            script += "from mantid.simpleapi import *\n"        
+            script += "from mantid.simpleapi import *\n"
             script += "config['default.facility']=\"%s\"\n" % self.facility_name
 
-            
+
             script += "\n"
 
             if isinstance(data_file,list):
@@ -161,23 +161,23 @@ class DgsReductionScripter(BaseReductionScripter):
                         elif len(subitem) and subitem.find("OutputDirectory")!=-1:
                             out_dir_line=subitem.strip(',')+"\n"
             script += DgsReductionScripter.WIDTH_END + ")\n"
-             
-            script +="\n"        
+
+            script +="\n"
             if len(out_dir_line)==0:
                 output_dir=mantid.config['defaultsave.directory']
-                out_dir_line='OutputDirectory="%s"\n'%output_dir        
+                out_dir_line='OutputDirectory="%s"\n'%output_dir
             script += out_dir_line
 
             script +="OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0].getInstrument().getName()+str(DGS_output_data[0].getRunNumber())+'.nxs')\n"
             script +="SaveNexus(DGS_output_data[0],OutputFilename)\n"
-   
+
             scripts.append(script)
-            
+
         return scripts
 
     def filenameParser(self, filename):
         alg = mantid.api.AlgorithmManager.createUnmanaged("Load")
-        alg.initialize()        
+        alg.initialize()
         alg.setPropertyValue('Filename',str(filename))
         fnames=alg.getProperty('Filename').value
         if not isinstance(fnames,list):

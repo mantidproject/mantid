@@ -1,10 +1,10 @@
 """
     Defines a set of aliases to make accessing certain objects easier
 """
-from _api import (FrameworkManagerImpl, AnalysisDataServiceImpl, 
+from _api import (FrameworkManagerImpl, AnalysisDataServiceImpl,
                   AlgorithmFactoryImpl, AlgorithmManagerImpl,
                   FileFinderImpl, FunctionFactoryImpl,
-                  WorkspaceFactoryImpl, 
+                  WorkspaceFactoryImpl,
                   PropertyManagerDataServiceImpl, CatalogManagerImpl)
 
 ###############################################################################

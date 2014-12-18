@@ -1,4 +1,4 @@
-''' 
+'''
 @author Jose Borreguero, NScD
 @date October 06, 2013
 
@@ -31,7 +31,7 @@ import copy
 from pdb import set_trace as tr
 
 class StretchedExpFT(IFunction1D):
-    
+
     def __init__(self):
         '''declare some constants'''
         super(StretchedExpFT, self).__init__()
@@ -63,17 +63,17 @@ class StretchedExpFT(IFunction1D):
                 #raise ValueError(message)
                 return None
         return {'height':height, 'tau':tau, 'beta':beta}
-       
+
     def function1D(self, xvals, **optparms):
         '''
         Computes the Fourier transform of the Symmetrized Stretched Exponential
-        
+
         The Symmetrized Stretched Exponential:
                 Fourier{ height * exp( - |t/tau|**beta ) }
-        
+
         Given a time step dt and M=2*N+1 time points (N negative, one at zero, N positive),
         then fft will sample frequencies [0, 1/(M*dt), N/(M*dt), -N/(M*dt), (-N+1)/(M*dt),..,1/(M*dt)].
-        
+
         Given xvals, let:
             1/(M*dt) = xvals[1]-xvals[0]
             N/(M*dt) = max(abs(xvals))
@@ -84,7 +84,7 @@ class StretchedExpFT(IFunction1D):
         Its Fourier transform is real by definition, thus we return the real part
         of the Fast Fourier Transform (FFT). The FFT step is meant to produce
         some residual imaginary part due to numerical inaccuracies which we ignore.
-        
+
         We take the absolute value of the real part. The Fourier transform introduces
         an extra factor exp(i*pi*E/de) which amounts to alternating sign every
         time E increases by de, the energy bin width
@@ -115,7 +115,7 @@ class StretchedExpFT(IFunction1D):
         interpolator = scipy.interpolate.interp1d(freqs, fourier)
         fourier = interpolator(xvals)
         return fourier
-    
+
     def functionDeriv1D(self, xvals, jacobian):
         '''Numerical derivative'''
         p = self.validateParams()
@@ -128,7 +128,7 @@ class StretchedExpFT(IFunction1D):
             df = (self.function1D(xvals, **pp) - f0) / dp[name]
             ip = self._parm2index[name]
             for ix in range(len(xvals)):
-                jacobian.set(ix, ip, df[ix])  
+                jacobian.set(ix, ip, df[ix])
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(StretchedExpFT)

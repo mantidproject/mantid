@@ -9,6 +9,7 @@
 #include "PeakMarker2D.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DynamicFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -366,6 +367,8 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
       xUnits = QString::fromStdString(instrActor->getWorkspace()->getAxis(0)->unit()->caption());
     }
     text += "X units: " + xUnits + '\n';
+    // display info about peak overlays
+    text += getParameterInfo(det);
   }
   else
   {
@@ -376,6 +379,8 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
   // display info about peak overlays
   text += getNonDetectorInfo();
 
+
+
   if ( !text.isEmpty() )
   {
       m_selectionInfoDisplay->setText(text);
@@ -384,6 +389,55 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
   {
       m_selectionInfoDisplay->clear();
   }
+}
+
+/**
+ * Form a string for output from the components instrument parameters
+ */
+QString InstrumentWindowPickTab::getParameterInfo(Mantid::Geometry::IComponent_const_sptr comp)
+{  
+  QString text = "";
+  std::map<Mantid::Geometry::ComponentID, std::vector<std::string> > mapCmptToNameVector;
+
+  auto paramNames = comp->getParameterNamesByComponent();
+  for (auto itParamName = paramNames.begin(); itParamName != paramNames.end(); ++itParamName)
+  {
+    //build the data structure I need Map comp id -> vector of names
+    std::string paramName = itParamName->first;
+    Mantid::Geometry::ComponentID paramCompId = itParamName->second;
+    //attempt to insert this will fail silently if the key already exists
+    if ( mapCmptToNameVector.find(paramCompId) == mapCmptToNameVector.end() )
+    {
+      mapCmptToNameVector.insert(std::pair<Mantid::Geometry::ComponentID, std::vector<std::string> >(paramCompId,std::vector<std::string>()));
+    }
+    //get the vector out and add the name
+    mapCmptToNameVector[paramCompId].push_back(paramName);
+  }
+
+  //walk out from the selected component
+  Mantid::Geometry::IComponent_const_sptr paramComp = comp;
+  while (paramComp)
+  {
+    auto& compParamNames = mapCmptToNameVector[paramComp->getComponentID()];
+    if (compParamNames.size() > 0)
+    {
+      text += QString::fromStdString("\nParameters from: " + paramComp->getName() + "\n");
+      std::sort(compParamNames.begin(), compParamNames.end(),Mantid::Kernel::CaseInsensitiveStringComparator());
+      for (auto itParamName = compParamNames.begin(); itParamName != compParamNames.end(); ++itParamName)
+      {
+        std::string paramName = *itParamName;
+        //no need to search recursively as we are asking from the matching component
+        std::string paramValue = paramComp->getParameterAsString(paramName,false);
+        if (paramValue != "")
+        {
+          text += QString::fromStdString(paramName + ": " + paramValue + "\n");
+        }
+      }
+    }
+    paramComp = paramComp->getParent();
+  }
+
+  return text;
 }
 
 /**

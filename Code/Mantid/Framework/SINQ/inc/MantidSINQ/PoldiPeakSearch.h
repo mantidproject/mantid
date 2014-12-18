@@ -100,6 +100,7 @@ namespace Poldi
 
     MantidVec::const_iterator m_recursionAbsoluteBegin;
     MantidVec::const_iterator m_recursionAbsoluteEnd;
+    bool m_recursionBordersInitialized;
 
     PoldiPeakCollection_sptr m_peaks;
 

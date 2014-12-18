@@ -29,9 +29,9 @@ private:
   //set to true when execution of the python scripts starts and false on completion
   bool m_pythonRunning;
   //this is set to the extensions supported by the Load algorithm
-  std::set<std::string> m_exts;
+  std::vector<std::string> m_exts;
   //this is set to the extensions supported by LoadRaw
-  std::set<std::string> m_rawExts;
+  std::vector<std::string> m_rawExts;
   ///the directory to which files will be saved
   QString m_outDir;
   ///The text that goes into the beginning of the output directory message

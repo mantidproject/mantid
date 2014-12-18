@@ -1786,7 +1786,7 @@ namespace Mantid
         ++ vit;
       }
 
-      // 2.5 Re-count values
+      // update m_size
       countSize();
 
       // 3. Finish

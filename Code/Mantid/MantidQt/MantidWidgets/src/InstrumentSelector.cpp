@@ -116,13 +116,22 @@ namespace MantidWidgets
     clear();
     blockSignals(false);
 
-    if( name.isEmpty() )
+    try
     {
-      m_currentFacility = &(mantidSettings.getFacility());
+      if( name.isEmpty() )
+      {
+        m_currentFacility = &(mantidSettings.getFacility());
+      }
+      else
+      {
+        m_currentFacility = &(mantidSettings.getFacility(name.toStdString()));
+      }
     }
-    else
+    catch (Mantid::Kernel::Exception::NotFoundError&)
     {
-      m_currentFacility = &(mantidSettings.getFacility(name.toStdString()));
+      //could not find the facility
+      //pick the first facility from the valid list
+      m_currentFacility = &(mantidSettings.getFacility(mantidSettings.getFacilityNames()[0]));
     }
 
     const std::vector<InstrumentInfo> & instruments = m_currentFacility->instruments();

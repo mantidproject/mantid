@@ -13,8 +13,8 @@ try:
     import mantid.simpleapi as api
     HAS_MANTID = True
 except:
-    HAS_MANTID = False    
-    
+    HAS_MANTID = False
+
 try:
     import mantidplot
     IN_MANTIDPLOT = True
@@ -23,13 +23,13 @@ except:
 
 class HFIRDataType(DataType):
     TABLE_NAME="hfir_datatype"
-    
+
 class HFIRDataSet(DataSet):
     TABLE_NAME="hfir_dataset"
     data_type_cls = HFIRDataType
-    
+
     def __init__(self, run_number, title, run_start, duration, sdd):
-        super(HFIRDataSet, self).__init__(run_number, title, run_start, 
+        super(HFIRDataSet, self).__init__(run_number, title, run_start,
                                           duration, sdd)
 
     @classmethod
@@ -55,22 +55,22 @@ class HFIRDataSet(DataSet):
         if handle=="":
             return None
         return handle
-    
+
     @classmethod
     def read_properties(cls, ws, run, cursor):
         def read_prop(prop):
             try:
-                ws_object = AnalysisDataService.retrieve(ws) 
+                ws_object = AnalysisDataService.retrieve(ws)
                 return str(ws_object.getRun().getProperty(prop).value)
             except:
                 return ""
         def read_series(prop):
             try:
-                ws_object = AnalysisDataService.retrieve(ws) 
+                ws_object = AnalysisDataService.retrieve(ws)
                 return str(ws_object.getRun().getProperty(prop).getStatistics().mean)
             except:
                 return -1
-        
+
         title = read_prop("run_title")
         t_str = read_prop("start_time")
         t = time.strptime(t_str, '%Y-%m-%d %H:%M:%S')
@@ -81,13 +81,13 @@ class HFIRDataSet(DataSet):
             duration = float(duration)
         except:
             duration = 0
-        
+
         sdd = float(read_prop("sample-detector-distance"))
 
         d = HFIRDataSet(run, title, run_start, duration, sdd)
         d.insert_in_db(cursor)
         return d
-    
+
 
 class DataCatalog(BaseCatalog):
     extension = "xml"

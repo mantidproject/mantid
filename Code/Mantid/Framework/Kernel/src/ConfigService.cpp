@@ -647,28 +647,80 @@ void ConfigServiceImpl::createUserPropertiesFile() const
         std::fstream::out);
 
     filestr << "# This file can be used to override any properties for this installation." << std::endl;
-    filestr
-        << "# Any properties found in this file will override any that are found in the Mantid.Properties file"
-        << std::endl;
-    filestr
-        << "# As this file will not be replaced with futher installations of Mantid it is a safe place to put "
-        << std::endl;
+    filestr << "# Any properties found in this file will override any that are found in the Mantid.Properties file" << std::endl;
+    filestr << "# As this file will not be replaced with futher installations of Mantid it is a safe place to put " << std::endl;
     filestr << "# properties that suit your particular installation." << std::endl;
-    filestr << "" << std::endl;
-    filestr << "#for example" << std::endl;
-    filestr
-        << "#uncommenting the line below will set the number of algorithms to retain interim results for to be 90"
-        << std::endl;
-    filestr << "#overriding any value set in the Mantid.properties file" << std::endl;
-    filestr << "#algorithms.retained = 90" << std::endl;
-
+    filestr << "#" << std::endl;
+    filestr << "# See here for a list of possible options:" << std::endl;
+    filestr << "# http://www.mantidproject.org/Properties_File#Mantid.User.Properties" << std::endl;
     filestr << std::endl;
-    filestr << "#uncomment to enable archive search - ICat and Orbiter" << std::endl;
-    filestr << "#datasearch.searcharchive = On" << std::endl;
-
+    filestr << "##" << std::endl;
+    filestr << "## GENERAL" << std::endl;
+    filestr << "##" << std::endl;
     filestr << std::endl;
-    filestr << "#uncomment to change logging level. Valid values are: error, warning, notice, information, debug" << std::endl;
-    filestr << "#logging.loggers.root.level = information" << std::endl;
+    filestr << "## Set the number of algorithm properties to retain" << std::endl;
+    filestr << "#algorithms.retained=90" << std::endl;
+    filestr << std::endl;
+    filestr << "## Hides catagories from the algorithm list in MantidPlot" << std::endl;
+    filestr << "#algorithms.catagories.hidden=Muons,Inelastic" << std::endl;
+    filestr << std::endl;
+    filestr << "## Set the maximum number of coures used to run algorithms over" << std::endl;
+    filestr << "#MultiThreaded.MaxCores=4" << std::endl;
+    filestr << std::endl;
+    filestr << "##" << std::endl;
+    filestr << "## FACILITY AND INSTRUMENT" << std::endl;
+    filestr << "##" << std::endl;
+    filestr << std::endl;
+    filestr << "## Sets the default facility" << std::endl;
+    filestr << "## e.g.: ISIS, SNS, ILL" << std::endl;
+    filestr << "default.facility=" << std::endl;
+    filestr << std::endl;
+    filestr << "## Stes the default instrument" << std::endl;
+    filestr << "## e.g. IRIS, HET, NIMROD" << std::endl;
+    filestr << "default.instrument=" << std::endl;
+    filestr << std::endl;
+    filestr << "##" << std::endl;
+    filestr << "## DIRECTORIES" << std::endl;
+    filestr << "##" << std::endl;
+    filestr << std::endl;
+    filestr << "## Sets a list of directories (separated by semi colons) to search for data" << std::endl;
+    filestr << "#datasearch.directories=../data;../isis/data" << std::endl;
+    filestr << std::endl;
+    filestr << "## Set a list (separated by semi colons) of directories to look for additional Python scripts" << std::endl;
+    filestr << "#pythonscripts.directories=../scripts;../docs/MyScripts" << std::endl;
+    filestr << std::endl;
+    filestr << "## Uncomment to enable archive search - ICat and Orbiter" << std::endl;
+    filestr << "#datasearch.searcharchive=On" << std::endl;
+    filestr << std::endl;
+    filestr << "## Sets default save directory" << std::endl;
+    filestr << "#defaultsave.directory=../data" << std::endl;
+    filestr << std::endl;
+    filestr << "##" << std::endl;
+    filestr << "## LOGGING" << std::endl;
+    filestr << "##" << std::endl;
+    filestr << std::endl;
+    filestr << "## Uncomment to change logging level" << std::endl;
+    filestr << "## Default is information" << std::endl;
+    filestr << "## Valid values are: error, warning, notice, information, debug" << std::endl;
+    filestr << "#logging.loggers.root.level=information" << std::endl;
+    filestr << std::endl;
+    filestr << "## Sets the lowest level messages to be logged to file" << std::endl;
+    filestr << "## Default is warning" << std::endl;
+    filestr << "## Valid values are: error, warning, notice, information, debug" << std::endl;
+    filestr << "#logging.channels.fileFilterChannel.level=debug" << std::endl;
+    filestr << std::endl;
+    filestr << "## Sets the file to write logs to" << std::endl;
+    filestr << "#logging.channels.fileChannel.path=../mantid.log" << std::endl;
+    filestr << std::endl;
+    filestr << "##" << std::endl;
+    filestr << "## MantidPlot" << std::endl;
+    filestr << "##" << std::endl;
+    filestr << std::endl;
+    filestr << "## Show invisible workspaces" << std::endl;
+    filestr << "#MantidOptions.InvisibleWorkspaces=0" << std::endl;
+    filestr << std::endl;
+    filestr << "## Uncomment to disable use of OpenGL to render unwrapped instrument views" << std::endl;
+    filestr << "#MantidOptions.InstrumentView.UseOpenGL=Off" << std::endl;
 
     filestr.close();
   } catch (std::runtime_error& ex)
@@ -1637,7 +1689,7 @@ const FacilityInfo& ConfigServiceImpl::getFacility(const std::string& facilityNa
       return **it;
     }
   }
-  g_log.error("Facility " + facilityName + " not found");
+
   throw Exception::NotFoundError("Facilities", facilityName);
 }
 

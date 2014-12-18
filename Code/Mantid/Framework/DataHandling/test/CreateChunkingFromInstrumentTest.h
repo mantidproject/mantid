@@ -25,37 +25,6 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void test_snap()
-  {
-    // Name of the output workspace.
-    std::string outWSName("CreateChunkingFromInstrumentTest_OutputSNAP");
-  
-    CreateChunkingFromInstrument alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InstrumentName", "snap") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ChunkNames", "East,West"); );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MaxBankNumber", 20) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
-    
-    // Retrieve the workspace from data service. TODO: Change to your desired type
-    Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName) );
-    TS_ASSERT(ws);
-    if (!ws) return;
-
-    // Check the results
-    ITableWorkspace_sptr tws = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
-    TS_ASSERT_EQUALS(tws->columnCount(), 1);
-    TS_ASSERT_EQUALS(tws->getColumnNames()[0], "BankName");
-    TS_ASSERT_EQUALS(tws->rowCount(), 2);
-    
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
-  }
-  
   void test_pg3()
   {
     // Name of the output workspace.
@@ -97,6 +66,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InstrumentName", "seq") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ChunkBy", "All"); );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MaxRecursionDepth",2); );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
@@ -129,6 +99,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InstrumentName", "seq") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ChunkNames", "B row,C row,D row"); );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MaxRecursionDepth",2); );
     TS_ASSERT_THROWS_NOTHING( alg.execute() );//, std::runtime_error );
     TS_ASSERT( !alg.isExecuted() );
   }

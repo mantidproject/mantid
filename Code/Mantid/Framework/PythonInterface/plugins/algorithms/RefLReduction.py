@@ -19,13 +19,13 @@ class RefLReduction(PythonAlgorithm):
 
     def name(self):
         return "RefLReduction"
-    
+
     def version(self):
         return 1
 
     def summary(self):
         return "Liquids Reflectometer (REFL) reduction"
-    
+
     def PyInit(self):
         self.declareProperty(IntArrayProperty("RunNumbers"), "List of run numbers to process")
         self.declareProperty("NormalizationRunNumber", 0, "Run number of the normalization run to use")
@@ -39,16 +39,16 @@ class RefLReduction(PythonAlgorithm):
         self.declareProperty(IntArrayProperty("NormPeakPixelRange", [127,133],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range defining the normalization peak")
-        self.declareProperty("SubtractNormBackground", True, 
+        self.declareProperty("SubtractNormBackground", True,
                              doc="If true, the background will be subtracted from the normalization peak")
         self.declareProperty(IntArrayProperty("NormBackgroundPixelRange", [127,137],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
-                             "Pixel range defining the background for the normalization")            
+                             "Pixel range defining the background for the normalization")
         self.declareProperty("LowResDataAxisPixelRangeFlag", True,
                              doc="If true, the low resolution direction of the data will be cropped according to the lowResDataAxisPixelRange property")
         self.declareProperty(IntArrayProperty("LowResDataAxisPixelRange", [115,210],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
-                             "Pixel range to use in the low resolution direction of the data")        
+                             "Pixel range to use in the low resolution direction of the data")
         self.declareProperty("LowResNormAxisPixelRangeFlag", True,
                              doc="If true, the low resolution direction of the normalization run will be cropped according to the LowResNormAxisPixelRange property")
         self.declareProperty(IntArrayProperty("LowResNormAxisPixelRange", [115,210],
@@ -58,7 +58,7 @@ class RefLReduction(PythonAlgorithm):
                                                 FloatArrayLengthValidator(2), direction=Direction.Input),
                              "TOF range to use")
         self.declareProperty("TofRangeFlag", True,
-                             doc="If true, the TOF will be cropped according to the TOF range property")        
+                             doc="If true, the TOF will be cropped according to the TOF range property")
         self.declareProperty("QMin", 0.05, doc="Mnimum Q-value")
         self.declareProperty("QStep", 0.02, doc="Step size in Q. Enter a negative value to get a log scale")
         self.declareProperty("AngleOffset", 0.0, doc="angle offset (degrees)")
@@ -67,20 +67,20 @@ class RefLReduction(PythonAlgorithm):
 #         self.declareProperty("", True,
 #                              doc="Use Scaling Factor configuration file")
         self.declareProperty("ScalingFactorFile", "", doc="Scaling factor configuration file")
-        self.declareProperty("SlitsWidthFlag", True, 
+        self.declareProperty("SlitsWidthFlag", True,
                              doc="Looking for perfect match of slits width when using Scaling Factor file")
         self.declareProperty("IncidentMediumSelected", "", doc="Incident medium used for those runs")
         self.declareProperty("GeometryCorrectionFlag", False, doc="Use or not the geometry correction")
 
-    def PyExec(self):   
-        
+    def PyExec(self):
+
         print '-- > starting new Reflectometer Reduction ...'
-        
+
         import os
         import numpy
         import math
         from reduction.instruments.reflectometer import wks_utility
-        
+
         from mantid import mtd
         #remove all previous workspaces
         list_mt = mtd.getObjectNames()
@@ -93,7 +93,7 @@ class RefLReduction(PythonAlgorithm):
 
         # retrieve settings from GUI
         print '-> Retrieving settings from GUI'
-        
+
         # DATA
         dataRunNumbers = self.getProperty("RunNumbers").value
         dataPeakRange = self.getProperty("SignalPeakPixelRange").value
@@ -107,8 +107,8 @@ class RefLReduction(PythonAlgorithm):
             dataLowResRange = self.getProperty("LowResDataAxisPixelRange").value
         else:
             dataLowResRange = [0,maxX-1]
-        
-        # NORM    
+
+        # NORM
         normalizationRunNumber = self.getProperty("NormalizationRunNumber").value
         normFlag = self.getProperty("NormFlag")
         normBackRange = self.getProperty("NormBackgroundPixelRange").value
@@ -122,7 +122,7 @@ class RefLReduction(PythonAlgorithm):
             normLowResRange = self.getProperty("LowResNormAxisPixelRange").value
         else:
             normLowResRange = [0,maxX-1]
-       
+
         #GENERAL
         TOFrangeFlag = self.getProperty("TofRangeFlag")
         if (TOFrangeFlag):
@@ -147,29 +147,29 @@ class RefLReduction(PythonAlgorithm):
         #dimension of the detector (256 by 304 pixels)
         maxX = 304
         maxY = 256
-                
+
         h = 6.626e-34  #m^2 kg s^-1
         m = 1.675e-27     #kg
 
         # sfCalculator settings
         slitsValuePrecision = sfCalculator.PRECISION
         sfFile = self.getProperty("ScalingFactorFile").value
-        
+
         incidentMedium = self.getProperty("IncidentMediumSelected").value
         slitsWidthFlag = self.getProperty("SlitsWidthFlag").value
-        # ==== done retrievin the settings =====        
+        # ==== done retrievin the settings =====
 
         # ==== start reduction ====
 
-        # work with data        
+        # work with data
         # load data
-        ws_event_data = wks_utility.loadNeXus(dataRunNumbers, 'data')        
-        
+        ws_event_data = wks_utility.loadNeXus(dataRunNumbers, 'data')
+
         ## retrieve general informations
         # calculate the central pixel (using weighted average)
         print '-> retrieving general informations'
-        data_central_pixel = wks_utility.getCentralPixel(ws_event_data, 
-                                                         dataPeakRange) 
+        data_central_pixel = wks_utility.getCentralPixel(ws_event_data,
+                                                         dataPeakRange)
         # get the distance moderator-detector and sample-detector
         [dMD, dSD] = wks_utility.getDistances(ws_event_data)
         # get theta
@@ -182,7 +182,7 @@ class RefLReduction(PythonAlgorithm):
         ws_histo_data = wks_utility.rebinNeXus(ws_event_data,
                               [binTOFrange[0], binTOFsteps, binTOFrange[1]],
                               'data')
-        
+
         # get q range
         q_range = wks_utility.getQrange(ws_histo_data, theta, dMD, qMin, qStep)
 
@@ -190,14 +190,14 @@ class RefLReduction(PythonAlgorithm):
         [first_slit_size, last_slit_size] = wks_utility.getSlitsSize(ws_histo_data)
 
         # keep only TOF range
-        ws_histo_data = wks_utility.cropTOF(ws_histo_data, 
+        ws_histo_data = wks_utility.cropTOF(ws_histo_data,
                                       TOFrange[0],
                                       TOFrange[1],
                                       'data')
-        
+
         # normalize by current proton charge
         ws_histo_data = wks_utility.normalizeNeXus(ws_histo_data, 'data')
-        
+
         # integrate over low resolution range
         [data_tof_axis, data_y_axis, data_y_error_axis] = wks_utility.integrateOverLowResRange(ws_histo_data,
                                                             dataLowResRange,
@@ -208,7 +208,7 @@ class RefLReduction(PythonAlgorithm):
 #                                         data_tof_axis,
 #                                         data_y_axis,
 #                                         data_y_error_axis)
-        
+
         tof_axis = data_tof_axis[0:-1].copy()
         tof_axis_full = data_tof_axis.copy()
 
@@ -216,13 +216,13 @@ class RefLReduction(PythonAlgorithm):
         # data_y_axis.shape -> (256,61)
 
         #substract background
-        [data_y_axis, data_y_error_axis] = wks_utility.substractBackground(tof_axis , 
-                                                                           data_y_axis, 
+        [data_y_axis, data_y_error_axis] = wks_utility.substractBackground(tof_axis ,
+                                                                           data_y_axis,
                                                                            data_y_error_axis,
                                                                            dataPeakRange,
                                                                            dataBackFlag,
                                                                            dataBackRange,
-                                                                           error_0, 
+                                                                           error_0,
                                                                            'data')
 #        #DEBUG ONLY
 #        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/data_file_back_sub_not_integrated.txt',
@@ -230,11 +230,11 @@ class RefLReduction(PythonAlgorithm):
 #                                         data_y_axis,
 #                                         data_y_error_axis)
 
-        # work with normalization        
-        
+        # work with normalization
+
         # load normalization
-        ws_event_norm = wks_utility.loadNeXus(int(normalizationRunNumber), 'normalization')        
-        
+        ws_event_norm = wks_utility.loadNeXus(int(normalizationRunNumber), 'normalization')
+
         # get proton charge
         pc = wks_utility.getProtonCharge(ws_event_norm)
         error_0 = 1. / pc
@@ -243,84 +243,84 @@ class RefLReduction(PythonAlgorithm):
         ws_histo_norm = wks_utility.rebinNeXus(ws_event_norm,
                               [binTOFrange[0], binTOFsteps, binTOFrange[1]],
                               'normalization')
-        
+
         # keep only TOF range
-        ws_histo_norm = wks_utility.cropTOF(ws_histo_norm, 
+        ws_histo_norm = wks_utility.cropTOF(ws_histo_norm,
                                       TOFrange[0],
                                       TOFrange[1],
                                       'normalization')
-        
+
         # normalize by current proton charge
         ws_histo_norm = wks_utility.normalizeNeXus(ws_histo_norm, 'normalization')
-        
+
         # integrate over low resolution range
         [norm_tof_axis, norm_y_axis, norm_y_error_axis] = wks_utility.integrateOverLowResRange(ws_histo_norm,
                                                             normLowResRange,
                                                             'normalization')
 
         # substract background
-        [norm_y_axis, norm_y_error_axis] = wks_utility.substractBackground(norm_tof_axis[0:-1], 
-                                                        norm_y_axis, 
+        [norm_y_axis, norm_y_error_axis] = wks_utility.substractBackground(norm_tof_axis[0:-1],
+                                                        norm_y_axis,
                                                         norm_y_error_axis,
                                                         normPeakRange,
                                                         normBackFlag,
                                                         normBackRange,
-                                                        error_0, 
-                                                        'normalization') 
+                                                        error_0,
+                                                        'normalization')
 
-        [av_norm, av_norm_error] = wks_utility.fullSumWithError(norm_y_axis, 
+        [av_norm, av_norm_error] = wks_utility.fullSumWithError(norm_y_axis,
                                                            norm_y_error_axis)
 
 #        ## DEBUGGING ONLY
 #        wks_utility.ouput_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/norm_file_back_sub_not_integrated.txt',
-#                                     norm_tof_axis, 
-#                                     av_norm, 
-#                                     av_norm_error)        
+#                                     norm_tof_axis,
+#                                     av_norm,
+#                                     av_norm_error)
 
         [final_data_y_axis, final_data_y_error_axis] = wks_utility.divideDataByNormalization(data_y_axis,
                                                                                              data_y_error_axis,
                                                                                              av_norm,
-                                                                                             av_norm_error)        
-        
+                                                                                             av_norm_error)
+
 #        #DEBUG ONLY
 #        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/data_divided_by_norm_not_integrated.txt',
 #                                         data_tof_axis,
 #                                         final_data_y_axis,
 #                                         final_data_y_error_axis)
-        
-        # apply Scaling factor    
-        [tof_axis_full, y_axis, y_error_axis] = wks_utility.applyScalingFactor(tof_axis_full, 
-                                                                               final_data_y_axis, 
-                                                                               final_data_y_error_axis, 
+
+        # apply Scaling factor
+        [tof_axis_full, y_axis, y_error_axis] = wks_utility.applyScalingFactor(tof_axis_full,
+                                                                               final_data_y_axis,
+                                                                               final_data_y_error_axis,
                                                                                incidentMedium,
                                                                                sfFile,
                                                                                slitsValuePrecision,
                                                                                slitsWidthFlag)
-        
+
 #        #DEBUG ONLY
 #        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/after_applying_scaling_factor.txt',
 #                                         data_tof_axis,
 #                                         y_axis,
 #                                         y_error_axis)
-        
+
         if geometryCorrectionFlag: # convert To Q with correction
             [q_axis, y_axis, y_error_axis] = wks_utility.convertToQ(tof_axis_full,
-                                                                    y_axis, 
+                                                                    y_axis,
                                                                     y_error_axis,
-                                                                    peak_range = dataPeakRange,  
+                                                                    peak_range = dataPeakRange,
                                                                     central_pixel = data_central_pixel,
                                                                     source_to_detector_distance = dMD,
                                                                     sample_to_detector_distance = dSD,
                                                                     theta = theta,
                                                                     first_slit_size = first_slit_size,
                                                                     last_slit_size = last_slit_size)
-        
+
         else: # convert to Q without correction
-        
+
             [q_axis, y_axis, y_error_axis] = wks_utility.convertToQWithoutCorrection(tof_axis_full,
-                                                                                     y_axis, 
+                                                                                     y_axis,
                                                                                      y_error_axis,
-                                                                                     peak_range = dataPeakRange,  
+                                                                                     peak_range = dataPeakRange,
                                                                                      central_pixel = data_central_pixel,
                                                                                      source_to_detector_distance = dMD,
                                                                                      sample_to_detector_distance = dSD,
@@ -328,31 +328,31 @@ class RefLReduction(PythonAlgorithm):
                                                                                      first_slit_size = first_slit_size,
                                                                                      last_slit_size = last_slit_size)
 
-            
+
 #            wks_utility.ouput_big_Q_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/after_conversion_to_q.txt',
 #                                         q_axis,
 #                                         y_axis,
 #                                         y_error_axis)
-         
+
         sz = q_axis.shape
         nbr_pixel = sz[0]
-        
+
         # create workspace
         q_workspace = wks_utility.createQworkspace(q_axis, y_axis, y_error_axis)
 
         q_rebin = Rebin(InputWorkspace=q_workspace,
-                        Params=q_range,         
+                        Params=q_range,
                         PreserveEvents=True)
-        
+
         # keep only the q values that have non zero counts
-        nonzero_q_rebin_wks = wks_utility.cropAxisToOnlyNonzeroElements(q_rebin, 
+        nonzero_q_rebin_wks = wks_utility.cropAxisToOnlyNonzeroElements(q_rebin,
                                                                         dataPeakRange)
         new_q_axis = nonzero_q_rebin_wks.readX(0)[:]
-                  
+
         # integrate spectra (normal mean) and remove first and last Q value
         [final_x_axis, final_y_axis, final_error_axis] = wks_utility.integrateOverPeakRange(nonzero_q_rebin_wks, dataPeakRange)
-         
-                  
+
+
         # cleanup data
         [final_y_axis, final_y_error_axis] = wks_utility.cleanupData1D(final_y_axis,
                                                                         final_error_axis)
@@ -363,12 +363,12 @@ class RefLReduction(PythonAlgorithm):
         _time = int(time.time())
         name_output_ws = self.getPropertyValue("OutputWorkspace")
         name_output_ws = name_output_ws + '_#' + str(_time) + 'ts'
-        final_workspace = wks_utility.createFinalWorkspace(final_x_axis, 
-                                                           final_y_axis, 
+        final_workspace = wks_utility.createFinalWorkspace(final_x_axis,
+                                                           final_y_axis,
                                                            final_y_error_axis,
                                                            name_output_ws)
-                                
+
         self.setProperty('OutputWorkspace', mtd[name_output_ws])
-           
-        
+
+
 AlgorithmFactory.subscribe(RefLReduction)

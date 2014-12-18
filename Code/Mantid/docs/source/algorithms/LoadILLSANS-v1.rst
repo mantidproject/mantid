@@ -9,7 +9,7 @@
 Description
 -----------
 
-Loads an ILL D33 NeXus file into a `Workspace2D <http://www.mantidproject.org/Workspace2D>`_ with
+Loads an ILL D33 nexus file into a :ref:`Workspace2D <Workspace2D>` with
 the given name.
 
 This loader reads the detector positions from the NeXus file and places all the five detectors (front and back) at the right positions.

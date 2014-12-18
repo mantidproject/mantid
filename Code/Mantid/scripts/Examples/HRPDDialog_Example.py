@@ -1,8 +1,8 @@
 # First a function definition for the Loading algorithms which loads the data and immediately aligns the detectors
 def LoadAndAlign(type, outputArea):
-	LoadRawDialog(OutputWorkspace=outputArea, Message = "Enter path to the file containing the " + type)
-	AlignDetectorsDialog(InputWorkspace=outputArea, OutputWorkspace=outputArea,Message="Enter path to calibration file")
-		
+    LoadRawDialog(OutputWorkspace=outputArea, Message = "Enter path to the file containing the " + type)
+    AlignDetectorsDialog(InputWorkspace=outputArea, OutputWorkspace=outputArea,Message="Enter path to calibration file")
+
 # ========== The script starts here ============
 dataWorkspace = "Vanadium"
 LoadAndAlign("data", dataWorkspace)

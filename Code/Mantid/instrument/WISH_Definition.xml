@@ -3,7 +3,7 @@
      see http://www.mantidproject.org/IDF -->
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
  name="WISH" valid-from   ="1900-01-31 23:59:59"
-                        valid-to     ="2012-09-26 17:24:36"
+                        valid-to     ="2012-10-21 17:24:36"
 		        last-modified="2012-11-13 12:00:00">
  
    <defaults>

@@ -11,7 +11,7 @@ Description
 
 This algorithm will clones an existing
 `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ or
-`MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`_ into a new one.
+:ref:`MDHistoWorkspace <MDHistoWorkspace>` into a new one.
 
 If the InputWorkspace is a file-backed MDEventWorkspace, then the
 algorithm will copy the original file into a new one with the suffix

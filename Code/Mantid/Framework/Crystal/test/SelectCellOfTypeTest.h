@@ -60,7 +60,7 @@ public:
 
     OrientedLattice o_lattice;
     o_lattice.setUB( UB );
-    ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
+    ws->mutableSample().setOrientedLattice( &o_lattice );
 
                                            // now get the UB back from the WS
     UB = o_lattice.getUB();

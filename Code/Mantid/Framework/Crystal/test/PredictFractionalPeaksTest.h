@@ -85,7 +85,7 @@ public:
     TS_ASSERT( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
     alg.setPropertyValue("FracPeaks","FracPeaks");
-    PeaksWorkspace_sptr FracPeaks= alg.getProperty("FracPeaks");
+    IPeaksWorkspace_sptr FracPeaks = alg.getProperty("FracPeaks");
 
     TS_ASSERT_EQUALS(FracPeaks->getNumberPeaks(),117);
 

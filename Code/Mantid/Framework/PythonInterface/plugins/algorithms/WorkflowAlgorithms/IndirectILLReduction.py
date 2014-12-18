@@ -1,7 +1,3 @@
-"""*WIKI* 
-A workflow algorithm to perform a data reduction for Indirect ILL instruments. Note that currently only IN16B is supported. 
-*WIKI*"""
-
 from mantid.simpleapi import *
 from mantid.kernel import StringListValidator, Direction
 from mantid.api import DataProcessorAlgorithm, PropertyMode, AlgorithmFactory, FileProperty, FileAction, MatrixWorkspaceProperty
@@ -14,7 +10,7 @@ import os.path
 class IndirectILLReduction(DataProcessorAlgorithm):
 
     def category(self):
-        return "Workflow\\MIDAS;Inelastic;PythonAlgorithms" 
+        return "Workflow\\MIDAS;Inelastic;PythonAlgorithms"
 
     def PyInit(self):
         #input options
@@ -102,7 +98,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             from IndirectImport import import_mantidplot
             mp = import_mantidplot()
             graph = mp.newGraph()
-            
+
             for ws in output_workspaces:
                 mp.plotSpectrum(ws, 0, window=graph)
 
@@ -197,7 +193,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         right_mon_ws = right_ws + '_mon'
         CropWorkspace(InputWorkspace=grouped_ws, OutputWorkspace=right_ws, Xmin=x[mid_point])
         CropWorkspace(InputWorkspace=monitor_ws, OutputWorkspace=right_mon_ws, Xmin=x[mid_point])
-        x = mtd[right_ws].readX(0)
 
         self._calculate_energy(right_mon_ws, right_ws, self._red_right_workspace)
         xr = mtd[self._red_right_workspace].readX(0)

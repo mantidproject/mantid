@@ -186,7 +186,7 @@ namespace MantidQt
       */
       void _preDeleteHandle(Mantid::API::WorkspacePreDeleteNotification_ptr pNf)
       {
-        m_proxy->preDeleteRequested(pNf->object_name(), pNf->object());
+        m_proxy->preDeleteRequested(pNf->objectName(), pNf->object());
       }
       /// Poco::NObserver for DataServise::DeleteNotification.
       Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspacePreDeleteNotification> m_preDeleteObserver;
@@ -196,7 +196,7 @@ namespace MantidQt
       */
       void _postDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr pNf)
       {
-        m_proxy->postDeleteRequested(pNf->object_name());
+        m_proxy->postDeleteRequested(pNf->objectName());
       }
       /// Poco::NObserver for DataServise::DeleteNotification.
       Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspacePostDeleteNotification> m_postDeleteObserver;
@@ -206,7 +206,7 @@ namespace MantidQt
       */
       void _addHandle(Mantid::API::WorkspaceAddNotification_ptr pNf)
       {
-        m_proxy->addRequested(pNf->object_name(), pNf->object());
+        m_proxy->addRequested(pNf->objectName(), pNf->object());
       }
       /// Poco::NObserver for DataServise::AddNotification.
       Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceAddNotification> m_addObserver;
@@ -216,7 +216,7 @@ namespace MantidQt
       */
       void _afterReplaceHandle(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
       {
-        m_proxy->afterReplaced(pNf->object_name(), pNf->object());
+        m_proxy->afterReplaced(pNf->objectName(), pNf->object());
       }
       /// Poco::NObserver for DataServise::AfterReplaceNotification.
       Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceAfterReplaceNotification> m_afterReplaceObserver;
@@ -226,7 +226,7 @@ namespace MantidQt
       */
       void _renameHandle(Mantid::API::WorkspaceRenameNotification_ptr pNf)
       {
-        m_proxy->renamed(pNf->object_name(), pNf->new_objectname());
+        m_proxy->renamed(pNf->objectName(), pNf->newObjectName());
       }
       /// Poco::NObserver for DataServise::RenameNotification.
       Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceRenameNotification> m_renameObserver;

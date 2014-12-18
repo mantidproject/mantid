@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm sums two `MDHistoWorkspaces <http://www.mantidproject.org/MDHistoWorkspace>`_ or
+This algorithm sums two :ref:`MDHistoWorkspaces <MDHistoWorkspace>` or
 merges two `MDEventWorkspaces <http://www.mantidproject.org/MDEventWorkspace>`_ together.
 
 MDHistoWorkspaces
@@ -28,7 +28,7 @@ MDEventWorkspaces
 #################
 
 This algorithm operates similary to calling Plus on two
-`EventWorkspaces <http://www.mantidproject.org/EventWorkspace>`_: it combines the events from the
+:ref:`EventWorkspaces <EventWorkspace>`: it combines the events from the
 two workspaces together to form one large workspace.
 
 Note for file-backed workspaces

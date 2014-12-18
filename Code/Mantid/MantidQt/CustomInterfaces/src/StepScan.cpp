@@ -642,14 +642,14 @@ void StepScan::plotCurve()
 
 void StepScan::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf)
 {
-  checkForMaskWorkspace(pNf->object_name());
+  checkForMaskWorkspace(pNf->objectName());
 }
 
 void StepScan::handleReplEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
 {
-  checkForMaskWorkspace(pNf->object_name());
-  checkForResultTableUpdate(pNf->object_name());
-  checkForVaryingLogs(pNf->object_name());
+  checkForMaskWorkspace(pNf->objectName());
+  checkForResultTableUpdate(pNf->objectName());
+  checkForVaryingLogs(pNf->objectName());
 }
 
 void StepScan::addReplaceObserverOnce()

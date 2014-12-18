@@ -49,6 +49,11 @@ PoldiInstrumentAdapter::~PoldiInstrumentAdapter()
 {
 }
 
+    const std::string PoldiInstrumentAdapter::getChopperSpeedPropertyName()
+    {
+        return PoldiInstrumentAdapter::m_chopperSpeedPropertyName;
+    }
+    
 /** Returns the chopper stored in the adapter
   *
   * @return Abstract chopper, configured according to instrument and run (chopperspeed).

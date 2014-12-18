@@ -20,7 +20,7 @@ class CompositeValidatorTest(unittest.TestCase):
         """
         validation = CompositeValidator([FloatBoundedValidator(lower=5), FloatBoundedValidator(upper=10)])
         self._do_validation_test(validation)
-    
+
     def _do_validation_test(self, validation):
         """Run the validator tests"""
         test_alg = self._create_test_algorithm(validation)
@@ -29,17 +29,17 @@ class CompositeValidatorTest(unittest.TestCase):
         test_alg.setProperty("Input", 6.8)
         self.assertEquals(prop.isValid, "")
         self.assertRaises(ValueError, test_alg.setProperty, "Input", 15)
-    
+
     def _create_test_algorithm(self, validator):
         """Create a test algorithm"""
         class TestAlgorithm(PythonAlgorithm):
-            
+
             def PyInit(self):
                 self.declareProperty("Input", -1.0, validator)
 
             def PyExec(self):
                 pass
-            
+
         alg = TestAlgorithm()
         alg.initialize()
         return alg

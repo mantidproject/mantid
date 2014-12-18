@@ -8,11 +8,11 @@ try:
     from mantid.api import AnalysisDataService
 except:
     pass
- 
+
 class Output(BaseScriptElement):
     log_text = ''
     data = None
-    
+
     def update(self):
         """
             Update data members according to reduction results

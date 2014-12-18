@@ -37,7 +37,7 @@ m_relTol(1e-6)
 }
 
 /// Initialize minimizer, i.e. pass a function to minimize.
-void DampingMinimizer::initialize(API::ICostFunction_sptr function)
+void DampingMinimizer::initialize(API::ICostFunction_sptr function,size_t)
 {
   m_leastSquares = boost::dynamic_pointer_cast<CostFuncLeastSquares>(function);
   if ( !m_leastSquares )
@@ -47,7 +47,7 @@ void DampingMinimizer::initialize(API::ICostFunction_sptr function)
 }
 
 /// Do one iteration.
-bool DampingMinimizer::iterate()
+bool DampingMinimizer::iterate(size_t)
 {
   const bool debug = false;
 

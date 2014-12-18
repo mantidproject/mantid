@@ -4,7 +4,7 @@ try:
 except ImportError:
     has_sql = False
     print "Error importing sqlite3. SQL will not work"
-    
+
 import reporters
 import datetime
 import testresult
@@ -27,13 +27,13 @@ def getSourceDir():
 #=====================================================================
 # These are the table fields, in order
 TABLE_FIELDS = ['date', 'name', 'type', 'host', 'environment', 'runner',
-                 'revision', 'commitid', 'runtime', 'cpu_fraction', 
+                 'revision', 'commitid', 'runtime', 'cpu_fraction',
                  'success',
                  'status', 'logarchive', 'variables']
 
 #=====================================================================
 # The default path to the database file
-database_file = os.path.join(getSourceDir(), "MantidSystemTests.db")     
+database_file = os.path.join(getSourceDir(), "MantidSystemTests.db")
 
 #=====================================================================
 def get_database_filename():
@@ -54,26 +54,26 @@ def SQLgetConnection():
 
 
 #=====================================================================
-def get_TestResult_from_row(row):     
+def get_TestResult_from_row(row):
     """Return a filled TestResult object from a "row"
     obtained by selecting * from the TestRuns table
     Returns
     -------
         result :: TestResult object, with an extra
-            .testID member containing the ID into the table (testID field) 
+            .testID member containing the ID into the table (testID field)
     """
     res = testresult.TestResult()
     res.testID = row[0]
     # ------ Get each entry in the table ---------
     for i in xrange(len(TABLE_FIELDS)):
         res[TABLE_FIELDS[i]] = row[i+1]
-        
+
     return (res)
 
-    
+
 #=====================================================================
 def get_latest_result(name=''):
-    """Returns a TestResult object corresponding to the 
+    """Returns a TestResult object corresponding to the
     last result in the table
     Parameters
     ----------
@@ -87,7 +87,7 @@ def get_latest_result(name=''):
     # Get all rows - there should be only one
     rows = c.fetchall()
     c.close()
-    
+
     if len(rows) > 0:
         res = get_TestResult_from_row(rows[0])
         return res
@@ -97,24 +97,24 @@ def get_latest_result(name=''):
 #=====================================================================
 def get_results(name, type="", where_clause='', orderby_clause=''):
     """Return a list of testresult.TestResult objects
-    generated from looking up in the table 
+    generated from looking up in the table
     Parameters:
         name: test name to search for. Empty string = don't limit by name
         type: limit by type; default empty string means = don't limit by type.
         get_log : set to True to retrieve the log_contents too.
         where_clause : an additional SQL "where" clause to further limit the search.
             Do not include the WHERE keyword!
-            e.g "date > 2010 AND environment='mac'". 
+            e.g "date > 2010 AND environment='mac'".
         orderby_clause : a clause to order and/or limit the results.
-            e.g. "ORDER BY revision DESC limit 100" to get only the latest 100 revisions.            
+            e.g. "ORDER BY revision DESC limit 100" to get only the latest 100 revisions.
         """
     out = []
-    
+
     db = SQLgetConnection()
     c = db.cursor()
-    
+
     query = "SELECT * FROM TestRuns "
-    
+
     # Build up the where clause
     where_clauses = []
     if name != "":
@@ -128,65 +128,65 @@ def get_results(name, type="", where_clause='', orderby_clause=''):
         query += "WHERE " + " AND ".join(where_clauses)
     # Now the ordering clause
     query += " " + orderby_clause
-    
+
     c.execute(query)
-    
+
     # Get all rows
     rows = c.fetchall()
-    
+
     for row in rows:
         # Turn the row into TestResult
         res = get_TestResult_from_row(row)
-        
+
         out.append(res)
     c.close()
     return out
-      
-      
+
+
 #=====================================================================
 def get_all_field_values(field_name, where_clause=""):
     """Return a list of every entry of the given
-    field (e.g. 'name' or 'environment').  
+    field (e.g. 'name' or 'environment').
     Parameters:
         field_name: field/column name to search for.
         where_clause : an additional SQL "where" clause to further limit the search.
             Do not include the WHERE keyword!
-            e.g "date > 2010 AND environment='mac'". 
-            
+            e.g "date > 2010 AND environment='mac'".
+
         """
     db = SQLgetConnection()
     c = db.cursor()
-    
+
     query = "SELECT (%s) FROM TestRuns " % field_name
     if (where_clause != ""):
         query += "WHERE " + where_clause
-        
+
     c.execute(query)
-    
+
     # Get all rows
     rows = c.fetchall()
-    
-    out = [x for (x,) in rows] 
-        
+
+    out = [x for (x,) in rows]
+
     return out
-      
+
 #=====================================================================
 def get_latest_revison():
     """ Return the latest revision number """
     # Now get the latest revision
     db = SQLgetConnection()
     c = db.cursor()
-    query = "SELECT (revision) FROM Revisions ORDER BY revision DESC LIMIT 1;"  
+    query = "SELECT (revision) FROM Revisions ORDER BY revision DESC LIMIT 1;"
     c.execute(query)
     rows = c.fetchall()
     if (len(rows)>0):
         return int(rows[0][0])
     else:
         return 0
-    
+
 #=====================================================================
 def add_revision():
-    """ Adds an entry with the current date/time to the table. 
+    """ Adds an entry with the current date/time to the table.
     Retrieve the index of that entry = the "revision".
     Returns the current revision"""
     db = SQLgetConnection()
@@ -196,7 +196,7 @@ def add_revision():
     db.commit()
     return get_latest_revison()
 
-            
+
 #=====================================================================
 def get_all_test_names(where_clause=""):
     """Returns a set containing all the UNIQUE test names in the database.
@@ -208,13 +208,13 @@ def get_all_test_names(where_clause=""):
 #=====================================================================
 def setup_database():
     """ Routine to set up the mysql database the first time.
-    WARNING: THIS DELETES ANY TABLES ALREADY THERE 
+    WARNING: THIS DELETES ANY TABLES ALREADY THERE
     """
     print "Setting up SQL database at",get_database_filename()
     if os.path.exists(get_database_filename()):
         print "Creating a backup at", get_database_filename()+".bak"
         shutil.copyfile(get_database_filename(), get_database_filename()+".bak")
-        
+
     db = SQLgetConnection()
 
     c = db.cursor()
@@ -223,26 +223,26 @@ def setup_database():
         c.execute("DROP TABLE Revisions;")
     except:
         print "Error dropping tables. Perhaps one does not exist (this is normal on first run)."
-        
+
     c.execute("""CREATE TABLE TestRuns (
     testID INTEGER PRIMARY KEY,
-    date DATETIME, name VARCHAR(60), type VARCHAR(20), 
-    host VARCHAR(30), environment VARCHAR(50), runner VARCHAR(20), 
-    revision INT, commitid VARCHAR(45), 
-    runtime DOUBLE, cpu_fraction DOUBLE, 
+    date DATETIME, name VARCHAR(60), type VARCHAR(20),
+    host VARCHAR(30), environment VARCHAR(50), runner VARCHAR(20),
+    revision INT, commitid VARCHAR(45),
+    runtime DOUBLE, cpu_fraction DOUBLE,
     success BOOL,
     status VARCHAR(50), logarchive VARCHAR(80),
     variables VARCHAR(200)
     ); """)
-    
+
     # Now a table that is just one entry per run (a fake "revision")
-            
+
     c.execute("""CREATE TABLE Revisions (
     revision INTEGER PRIMARY KEY,
     date DATETIME
     ); """)
 
-        
+
 ###########################################################################
 # A class to report the results of stress tests to the Mantid Test database
 # (requires sqlite3 module)
@@ -254,7 +254,7 @@ class SQLResultReporter(reporters.ResultReporter):
 
     def __init__(self):
         pass
-       
+
 
     def dispatchResults(self, result):
         '''
@@ -263,10 +263,10 @@ class SQLResultReporter(reporters.ResultReporter):
         dbcxn = SQLgetConnection()
         cur = dbcxn.cursor()
         #last_id = dbcxn.insert_id()
-        
+
         # Create the field for the log archive name
         result["logarchive"] = result.get_logarchive_filename()
-               
+
         valuessql = "INSERT INTO TestRuns VALUES(NULL, "
 
         # Insert the test results in the order of the table
@@ -274,19 +274,19 @@ class SQLResultReporter(reporters.ResultReporter):
             val = result[field]
             # Make into a string
             val_str = str(val)
-            
+
             # Booleans must be 0 or 1
             if type(val).__name__ == "bool":
-                val_str = ["0", "1"][val] 
-                
+                val_str = ["0", "1"][val]
+
             valuessql += "'" + val_str + "',"
-            
+
         valuessql = valuessql.rstrip(',')
         valuessql += ');'
         cur.execute(valuessql)
         # Save test id for iteration table
         test_id = cur.lastrowid
-        
+
         # Commit and close the connection
         dbcxn.commit()
         cur.close()
@@ -320,8 +320,7 @@ def generate_fake_data(num_extra = 0):
 if __name__ == "__main__":
     set_database_filename("SqlResults.test.db")
     generate_fake_data()
-    
+
     res = get_latest_result()
     print res
-    
-    
+

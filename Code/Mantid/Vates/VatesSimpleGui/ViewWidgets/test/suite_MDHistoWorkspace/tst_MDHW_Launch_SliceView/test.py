@@ -3,7 +3,7 @@ def main():
     source(findFile("scripts", "common_checks.py"))
     startApplication("MantidPlot")
     run_script("viewable_mdhistos.py")
-    
+
     workspace_name = "SEQ_4D_rebin"
     get_workspace(workspace_name)
     activate_vsi()

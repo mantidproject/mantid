@@ -40,7 +40,7 @@ which is a `CalFile <http://www.mantidproject.org/CalFile>`_.
 For EventWorkspaces
 ###################
 
-The algorithm can be used with an `EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_
+The algorithm can be used with an :ref:`EventWorkspace <EventWorkspace>`
 input, and will create an EventWorkspace output if a different workspace
 is specified.
 

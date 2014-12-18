@@ -11,10 +11,10 @@ app = QtGui.QApplication(sys.argv)
 class MWRunFilesTest(unittest.TestCase):
     """Test for accessing SliceViewer widgets from MantidPlot
     python interpreter"""
-    
+
     def setUp(self):
         self.mwrunfiles = mantidqtpython.MantidQt.MantidWidgets.MWRunFiles()
-    
+
     def tearDown(self):
         """ Close the created widget """
         # This is crucial! Forces the object to be deleted NOW, not when python exits
@@ -33,7 +33,7 @@ class MWRunFilesTest(unittest.TestCase):
         self.assertTrue(self.mwrunfiles.text().isEmpty())
         self.mwrunfiles.setText("a/file")
         self.assertEquals(self.mwrunfiles.text(), "a/file")
-        
+
     def test_setUserInput(self):
         self.assertFalse(self.mwrunfiles.isValid())
         self.mwrunfiles.setUserInput("CNCS7860")

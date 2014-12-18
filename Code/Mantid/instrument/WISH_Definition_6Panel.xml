@@ -2,7 +2,7 @@
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
- name="WISH" valid-from   ="2012-09-26 17:24:36"
+ name="WISH" valid-from   ="2012-10-21 17:24:36"
                         valid-to     ="2013-07-01 17:24:36"
 		        last-modified="2013-10-10 09:00:00">
  

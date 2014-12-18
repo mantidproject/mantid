@@ -91,6 +91,20 @@ PythonScripting::~PythonScripting()
 }
 
 /**
+ * @param args A list of strings that denoting command line arguments
+ */
+void PythonScripting::setSysArgs(const QStringList &args)
+{
+  GlobalInterpreterLock gil;
+
+  PyObject *argv = toPyList(args);
+  if(argv && m_sys)
+  {
+    PyDict_SetItemString(m_sys, "argv", argv);
+  }
+}
+
+/**
  * Create a new script object that can execute code within this environment
  *
  * @param name :: A identifier of the script, mainly used in error messages
@@ -271,11 +285,29 @@ QStringList PythonScripting::toStringList(PyObject *py_seq)
       PyObject *item = PyList_GetItem(py_seq, i);
       if( PyString_Check(item) )
       {
-  elements << PyString_AsString(item);
+        elements << PyString_AsString(item);
       }
     }
   }
   return elements;
+}
+
+/**
+ * Returns a new Python list from the given Qt QStringList
+ * @param items A reference to a QStringList object
+ * @return A new reference to a Python list. Caller is responsible for calling Py_DECREF
+ */
+PyObject *PythonScripting::toPyList(const QStringList &items)
+{
+  Py_ssize_t length = static_cast<Py_ssize_t>(items.length());
+  PyObject * pylist = PyList_New((length));
+  for(Py_ssize_t i = 0; i < length; ++i)
+  {
+    QString item = items.at(static_cast<int>(i));
+    PyList_SetItem(pylist, i,
+                   PyString_FromString(item.ascii()));
+  }
+  return pylist;
 }
 
 /**

@@ -12,8 +12,8 @@ Description
 The `Sassena <http://sassena.org>`__  application generates
 intermediate scattering factors from molecular dynamics trajectories.
 This algorithm reads Sassena output and stores all data in workspaces of
-type `Workspace2D <http://www.mantidproject.org/Workspace2D>`_, grouped under a single
-`WorkspaceGroup <http://www.mantidproject.org/WorkspaceGroup>`_. It is implied that the time unit is
+type :ref:`Workspace2D <Workspace2D>`, grouped under a single
+:ref:`WorkspaceGroup <WorkspaceGroup>`. It is implied that the time unit is
 one **picosecond**.
 
 Sassena ouput files are in `HDF5 <http://www.hdfgroup.org/HDF5>`__ format, and can be made up of the
@@ -58,5 +58,49 @@ is transformed, the result is another Gaussian:
    :alt: SassenaFFTexample.jpg
 
    SassenaFFTexample.jpg
+
+Usage
+-----
+
+**Example - Load a Sassena file, Fourier transform it, and do a fit of S(Q,E):**
+
+.. testcode:: Ex
+
+    ws = LoadSassena("loadSassenaExample.h5", TimeUnit=1.0)
+    SassenaFFT(ws, FFTonlyRealPart=1, Temp=1000, DetailedBalance=1)
+
+    print 'workspaces instantiated: ', ', '.join(ws.getNames())
+
+    sqt = ws[3] # S(Q,E)
+    # I(Q,t) is a Gaussian, thus S(Q,E) is a Gaussian too (at high temperatures)
+    # Let's fit it to a Gaussian. We start with an initial guess
+    intensity = 100.0
+    center = 0.0
+    sigma = 0.01    #in meV
+    startX = -0.1   #in meV
+    endX = 0.1 
+    myFunc = 'name=Gaussian,Height={0},PeakCentre={1},Sigma={2}'.format(intensity,center,sigma)
+
+    # Call the Fit algorithm and perform the fit
+    fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace =\
+    Fit(Function=myFunc, InputWorkspace=sqt, WorkspaceIndex=0, StartX = startX, EndX=endX, Output='fit')
+
+    print "The fit was: " + fitStatus
+    print("Fitted Height value is: %.1f" % paramTable.column(1)[0])
+    print("Fitted centre value is: %.1f" % abs(paramTable.column(1)[1]))
+    print("Fitted sigma value is: %.4f" % paramTable.column(1)[2])
+    # fitWorkspace contains the data, the calculated and the difference patterns
+    print "Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms())
+
+Output:
+
+.. testoutput:: Ex
+
+    workspaces instantiated:  ws_qvectors, ws_fqt.Re, ws_fqt.Im, ws_sqw
+    The fit was: success
+    Fitted Height value is: 250.7
+    Fitted centre value is: 0.0
+    Fitted sigma value is: 0.0066
+    Number of spectra in fitWorkspace is: 3
 
 .. categories::

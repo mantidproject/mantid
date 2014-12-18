@@ -22,7 +22,7 @@ using namespace Mantid::Kernel;
 
 class PoldiFitPeaks1D;
 
-class TestablePoldiFitPeaks1D : public PoldiFitPeaks1D
+class TestablePoldiFitPeaks1D : public Mantid::Poldi::PoldiFitPeaks1D
 {
     friend class PoldiFitPeaks1DTest;
 public:
@@ -97,7 +97,7 @@ public:
 
     void testProperties()
     {
-        PoldiFitPeaks1D fitPeaks1D;
+        Mantid::Poldi::PoldiFitPeaks1D fitPeaks1D;
         fitPeaks1D.initialize();
 
         TS_ASSERT_EQUALS(fitPeaks1D.propertyCount(), 8);

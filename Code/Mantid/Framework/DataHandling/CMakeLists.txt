@@ -386,6 +386,7 @@ set ( TEST_FILES
 	SaveDspacemapTest.h
 	SaveFocussedXYETest.h
 	SaveFullprofResolutionTest.h
+	SaveGSSTest.h
 	SaveILLCosmosAsciiTest.h
 	SaveIsawDetCalTest.h
 	SaveMaskTest.h

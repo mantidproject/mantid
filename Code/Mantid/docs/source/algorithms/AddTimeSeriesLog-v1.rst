@@ -19,4 +19,46 @@ series is either created or expected. However, if the "Type" is set to
 "int" then the value is interpreted as an integer and an integer is
 either created or expected.
 
+Usage
+-----
+
+**Example**
+
+.. testcode:: AddTimeSeriesLogEx
+
+    ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
+
+    AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:00:00", Value=100) 
+    AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:30:00", Value=15)
+    AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:50:00", Value=100.2)
+
+    log = ws.getRun().getLogData("my_log")
+    print "my_log has %i entries" % log.size()
+    for i in range(log.size()):
+      print "\t%s\t%f" % (log.times[i], log.value[i])
+
+    AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:00:00", Value=12, Type="int", DeleteExisting=True)
+    AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:50:00", Value=34, Type="int")
+
+    log = ws.getRun().getLogData("my_log")
+    print "my_log now has %i entries" % log.size()
+    for i in range(log.size()):
+      print "\t%s\t%i" % (log.times[i], log.value[i])
+
+Output:
+
+.. testoutput:: AddTimeSeriesLogEx
+    :options: +NORMALIZE_WHITESPACE
+
+    my_log has 3 entries
+            2010-01-01T00:00:00     100.000000
+            2010-01-01T00:30:00     15.000000
+            2010-01-01T00:50:00     100.200000
+    my_log now has 2 entries
+            2010-01-01T00:00:00     12
+            2010-01-01T00:50:00     34
+
 .. categories::
+
+  
+

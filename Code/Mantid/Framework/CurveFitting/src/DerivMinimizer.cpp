@@ -119,9 +119,11 @@ DerivMinimizer::~DerivMinimizer()
 /**
  * Initialize the minimizer.
  * @param function :: A cost function to minimize.
+ * @param maxIterations :: Maximum number of iterations.
  */
-void DerivMinimizer::initialize(API::ICostFunction_sptr function) 
+void DerivMinimizer::initialize(API::ICostFunction_sptr function, size_t maxIterations)
 {
+  UNUSED_ARG(maxIterations);
   m_costFunction = function;
   m_gslMultiminContainer.n = m_costFunction->nParams();
   m_gslMultiminContainer.f = &fun;
@@ -147,7 +149,7 @@ void DerivMinimizer::initialize(API::ICostFunction_sptr function)
  * Perform one iteration.
  * @return :: true to continue, false to stop.
  */
-bool DerivMinimizer::iterate() 
+bool DerivMinimizer::iterate(size_t)
 {
   if (m_gslSolver == NULL)
   {

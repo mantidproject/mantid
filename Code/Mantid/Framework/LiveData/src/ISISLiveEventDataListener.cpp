@@ -7,10 +7,15 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/UnitFactory.h"
 
+#if (GCC_VERSION >= 40400 && GCC_VERSION < 40500) // 4.4.0 < GCC > 4.5.0
+  // Avoid compiler warnings on gcc 4.4 from unused static constants in isisds_command.h
+  GCC_DIAG_OFF(unused-variable)
+#endif
 #include "LoadDAE/idc.h"
 
 const char* PROTON_CHARGE_PROPERTY = "proton_charge";
@@ -111,7 +116,18 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     // set IDC reporter function for errors
     IDCsetreportfunc(&ISISLiveEventDataListener::IDCReporter);
 
-    if (IDCopen(daeName.c_str(), 0, 0, &m_daeHandle) != 0)
+    int retVal = 0;
+    if (address.port() > 10000)
+    {
+      //we are using a custom port, set the DAE port as one higher
+      retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle, static_cast<uint16_t>(address.port()+1));
+    }
+    else
+    {
+      //we are using the default port, take the default DAE port
+      retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle);
+    }
+    if (retVal != 0)
     {
       m_daeHandle = NULL;
       return false;
@@ -263,7 +279,7 @@ void ISISLiveEventDataListener::run()
                 }
                 else
                 {
-                    Poco::Thread::sleep(100);
+                    Poco::Thread::sleep(RECV_WAIT);
                 }
             }
             if (!events.isValid())

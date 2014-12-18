@@ -1,12 +1,11 @@
 """
-    Classes for each reduction step. Those are kept separately 
-    from the the interface class so that the HFIRReduction class could 
+    Classes for each reduction step. Those are kept separately
+    from the the interface class so that the HFIRReduction class could
     be used independently of the interface implementation
 """
 import xml.dom.minidom
-import copy
 import os
-from reduction_gui.reduction.scripter import BaseScriptElement 
+from reduction_gui.reduction.scripter import BaseScriptElement
 
 # Check whether we are running in MantidPlot
 IS_IN_MANTIDPLOT = False
@@ -23,7 +22,7 @@ class SampleData(BaseScriptElement):
         direct_beam = ''
         # Beam radius in pixels
         beam_radius = 3.0
-        
+
         def to_script(self):
             """
                 Generate reduction script
@@ -35,7 +34,7 @@ class SampleData(BaseScriptElement):
 
             return "DirectBeamTransmission(\"%s\", \"%s\", beam_radius=%g)\n" % \
             (self.sample_file, self.direct_beam, self.beam_radius)
-            
+
         def to_xml(self):
             """
                 Create XML from the current data.
@@ -46,11 +45,11 @@ class SampleData(BaseScriptElement):
             xml += "  <beam_radius>%g</beam_radius>\n" % self.beam_radius
             xml += "</DirectBeam>\n"
             return xml
-        
+
         def find(self, dom):
             element_list = dom.getElementsByTagName("DirectBeam")
             return len(element_list)>0
-        
+
         def from_xml(self, dom):
             """
                 Read in data from XML
@@ -58,20 +57,39 @@ class SampleData(BaseScriptElement):
             """
             element_list = dom.getElementsByTagName("DirectBeam")
             if len(element_list)>0:
-                instrument_dom = element_list[0]       
+                instrument_dom = element_list[0]
                 self.sample_file = BaseScriptElement.getStringElement(instrument_dom, "sample_file")
                 self.direct_beam = BaseScriptElement.getStringElement(instrument_dom, "direct_beam")
                 self.beam_radius = BaseScriptElement.getFloatElement(instrument_dom, "beam_radius",
-                                                                     default=SampleData.DirectBeam.beam_radius)           
-        
+                                                                     default=SampleData.DirectBeam.beam_radius)
+
+        def from_setup_info(self, xml_str):
+            """
+                Read in data from XML using the string representation of the setup algorithm used
+                to prepare the reduction properties.
+                @param xml_str: text to read the data from
+            """
+            self.reset()
+            from mantid.api import Algorithm
+            dom = xml.dom.minidom.parseString(xml_str)
+
+            process_dom = dom.getElementsByTagName("SASProcess")[0]
+            setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
+            alg=Algorithm.fromString(str(setup_alg_str))
+
+            self.sample_file = BaseScriptElement.getPropertyValue(alg, "TransmissionSampleDataFile", default='')
+            self.direct_beam = BaseScriptElement.getPropertyValue(alg, "TransmissionEmptyDataFile", default='')
+            self.beam_radius = BaseScriptElement.getPropertyValue(alg, "TransmissionBeamRadius",
+                                                                  default=SampleData.DirectBeam.beam_radius)
+
         def reset(self):
             """
                 Reset state
             """
             self.sample_file = ''
             self.direct_beam = ''
-            self.beam_radius = SampleData.DirectBeam.beam_radius   
-            
+            self.beam_radius = SampleData.DirectBeam.beam_radius
+
     class BeamSpreader(BaseScriptElement):
         sample_scatt = ''
         sample_spreader = ''
@@ -79,7 +97,7 @@ class SampleData(BaseScriptElement):
         direct_spreader = ''
         spreader_trans = 1.0
         spreader_trans_spread = 0.0
-        
+
         def to_script(self):
             """
                 Generate reduction script
@@ -90,12 +108,12 @@ class SampleData(BaseScriptElement):
                 or len(str(self.direct_scatt).strip())==0 \
                 or len(str(self.direct_spreader).strip())==0:
                 raise RuntimeError, "Transmission with beam spreader was selected but data files were not entered."
-                        
+
             return "BeamSpreaderTransmission(\"%s\",\n \"%s\",\n \"%s\",\n \"%s\", %g, %g)\n" % \
-            (self.sample_spreader, self.direct_spreader, 
-             self.sample_scatt, self.direct_scatt, 
-             self.spreader_trans, self.spreader_trans_spread) 
-            
+            (self.sample_spreader, self.direct_spreader,
+             self.sample_scatt, self.direct_scatt,
+             self.spreader_trans, self.spreader_trans_spread)
+
         def to_xml(self):
             """
                 Create XML from the current data.
@@ -110,27 +128,50 @@ class SampleData(BaseScriptElement):
             xml += "  <spreader_trans_spread>%g</spreader_trans_spread>\n" % self.spreader_trans_spread
             xml += "</BeamSpreader>\n"
             return xml
-            
+
         def find(self, dom):
             element_list = dom.getElementsByTagName("BeamSpreader")
             return len(element_list)>0
-        
+
         def from_xml(self, dom):
             """
                 Read in data from XML
                 @param dom: text to read the data from
-            """       
+            """
             element_list = dom.getElementsByTagName("BeamSpreader")
             if len(element_list)>0:
-                instrument_dom = element_list[0]      
+                instrument_dom = element_list[0]
                 self.sample_scatt = BaseScriptElement.getStringElement(instrument_dom, "sample_scatt")
                 self.sample_spreader = BaseScriptElement.getStringElement(instrument_dom, "sample_spreader")
                 self.direct_scatt = BaseScriptElement.getStringElement(instrument_dom, "direct_scatt")
                 self.direct_spreader = BaseScriptElement.getStringElement(instrument_dom, "direct_spreader")
                 self.spreader_trans = BaseScriptElement.getFloatElement(instrument_dom, "spreader_trans",
-                                                                     default=SampleData.BeamSpreader.spreader_trans)           
+                                                                     default=SampleData.BeamSpreader.spreader_trans)
                 self.spreader_trans_spread = BaseScriptElement.getFloatElement(instrument_dom, "spreader_trans_spread",
-                                                                     default=SampleData.BeamSpreader.spreader_trans_spread)           
+                                                                     default=SampleData.BeamSpreader.spreader_trans_spread)
+
+        def from_setup_info(self, xml_str):
+            """
+                Read in data from XML using the string representation of the setup algorithm used
+                to prepare the reduction properties.
+                @param xml_str: text to read the data from
+            """
+            self.reset()
+            from mantid.api import Algorithm
+            dom = xml.dom.minidom.parseString(xml_str)
+
+            process_dom = dom.getElementsByTagName("SASProcess")[0]
+            setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
+            alg=Algorithm.fromString(str(setup_alg_str))
+
+            self.sample_scatt = BaseScriptElement.getPropertyValue(alg, "TransSampleScatteringFilename", default='')
+            self.sample_spreader = BaseScriptElement.getPropertyValue(alg, "TransSampleSpreaderFilename", default='')
+            self.direct_scatt = BaseScriptElement.getPropertyValue(alg, "TransDirectScatteringFilename", default='')
+            self.direct_spreader = BaseScriptElement.getPropertyValue(alg, "TransDirectSpreaderFilename", default='')
+            self.spreader_trans = BaseScriptElement.getPropertyValue(alg, "SpreaderTransmissionValue",
+                                                                     default=SampleData.BeamSpreader.spreader_trans)
+            self.spreader_trans_spread = BaseScriptElement.getPropertyValue(alg, "SpreaderTransmissionError",
+                                                                            default=SampleData.BeamSpreader.spreader_trans_spread)
 
         def reset(self):
             """
@@ -140,8 +181,8 @@ class SampleData(BaseScriptElement):
             self.sample_spreader = ''
             self.direct_scatt = ''
             self.direct_spreader = ''
-            self.spreader_trans = SampleData.BeamSpreader.spreader_trans           
-            self.spreader_trans_spread = SampleData.BeamSpreader.spreader_trans_spread     
+            self.spreader_trans = SampleData.BeamSpreader.spreader_trans
+            self.spreader_trans_spread = SampleData.BeamSpreader.spreader_trans_spread
 
     transmission = 1.0
     transmission_spread = 0.0
@@ -150,18 +191,18 @@ class SampleData(BaseScriptElement):
     theta_dependent = True
     dark_current = ''
     sample_thickness = 1.0
-    
+
     # Data file
     data_files = []
     separate_jobs = False
 
-     # Option list
+    # Option list
     option_list = [DirectBeam, BeamSpreader]
-    
+
     def get_data_file_list(self):
         """
             Get the list of data files.
-            Includes expanding run ranges. 
+            Includes expanding run ranges.
         """
         data_list = []
         for f in self.data_files:
@@ -178,16 +219,16 @@ class SampleData(BaseScriptElement):
         # Sample thickness
         if not self.sample_thickness == 1.0:
             script += "DivideByThickness(%g)\n" % self.sample_thickness
-        
+
         if not self.calculate_transmission:
             script += "SetTransmission(%g, %g)\n" % (self.transmission, self.transmission_spread)
         else:
             script += str(self.calculation_method)
-            
+
         script += "ThetaDependentTransmission(%s)\n" % str(self.theta_dependent)
         if self.dark_current is not None and len(str(self.dark_current))>0:
             script += "TransmissionDarkCurrent(\"%s\")\n" % str(self.dark_current)
-        
+
         # Data files
         if len(self.data_files)==0:
             raise RuntimeError, "Trying to generate reduction script without a data file."
@@ -245,7 +286,7 @@ class SampleData(BaseScriptElement):
         xml += "  <separate_jobs>%s</separate_jobs>\n" % str(self.separate_jobs)
         xml += "  <sample_thickness>%g</sample_thickness>\n" % self.sample_thickness
         for item in self.data_files:
-            xml += "  <data_file>%s</data_file>\n" % item.strip()        
+            xml += "  <data_file>%s</data_file>\n" % item.strip()
         xml += "</SampleData>\n"
 
         return xml
@@ -254,50 +295,82 @@ class SampleData(BaseScriptElement):
         """
             Read in data from XML
             @param xml_str: text to read the data from
-        """   
-        self.reset()    
+        """
+        self.reset()
         dom = xml.dom.minidom.parseString(xml_str)
-        
-        # Get Mantid version
-        mtd_version = BaseScriptElement.getMantidBuildVersion(dom)
 
         element_list = dom.getElementsByTagName("Transmission")
         if len(element_list)>0:
-            instrument_dom = element_list[0]      
+            instrument_dom = element_list[0]
             self.transmission = BaseScriptElement.getFloatElement(instrument_dom, "trans",
-                                                                  default=SampleData.transmission)      
+                                                                  default=SampleData.transmission)
             self.transmission_spread = BaseScriptElement.getFloatElement(instrument_dom, "trans_spread",
-                                                                  default=SampleData.transmission_spread)  
+                                                                  default=SampleData.transmission_spread)
             self.calculate_transmission = BaseScriptElement.getBoolElement(instrument_dom, "calculate_trans",
                                                                            default = SampleData.calculate_transmission)
             self.theta_dependent = BaseScriptElement.getBoolElement(instrument_dom, "theta_dependent",
                                                                            default = SampleData.theta_dependent)
             self.dark_current = BaseScriptElement.getStringElement(instrument_dom, "dark_current")
-            
+
             for m in self.option_list:
                 method = m()
                 if method.find(instrument_dom):
                     method.from_xml(instrument_dom)
                     self.calculation_method = method
                     break
-                    
+
         # Data file section
         element_list = dom.getElementsByTagName("SampleData")
         if len(element_list)>0:
-            sample_data_dom = element_list[0]      
+            sample_data_dom = element_list[0]
             self.data_files = BaseScriptElement.getStringList(sample_data_dom, "data_file")
             self.sample_thickness = BaseScriptElement.getFloatElement(sample_data_dom, "sample_thickness",
-                                                                      default=SampleData.sample_thickness)      
+                                                                      default=SampleData.sample_thickness)
             self.separate_jobs = BaseScriptElement.getBoolElement(sample_data_dom, "separate_jobs",
-                                                                  default = SampleData.separate_jobs) 
+                                                                  default = SampleData.separate_jobs)
 
-    
+    def from_setup_info(self, xml_str):
+        """
+            Read in data from XML using the string representation of the setup algorithm used
+            to prepare the reduction properties.
+            @param xml_str: text to read the data from
+        """
+        self.reset()
+        from mantid.api import Algorithm
+        dom = xml.dom.minidom.parseString(xml_str)
+
+        process_dom = dom.getElementsByTagName("SASProcess")[0]
+        setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
+        alg=Algorithm.fromString(str(setup_alg_str))
+
+        # Transmission
+        self.transmission = BaseScriptElement.getPropertyValue(alg, "TransmissionValue", default=SampleData.transmission)
+        self.transmission_spread = BaseScriptElement.getPropertyValue(alg, "TransmissionError", default=SampleData.transmission_spread)
+        self.dark_current = BaseScriptElement.getPropertyValue(alg, "TransmissionDarkCurrentFile", default='')
+        self.theta_dependent = BaseScriptElement.getPropertyValue(alg, "ThetaDependentTransmission",
+                                                                  default = SampleData.theta_dependent)
+        self.sample_thickness = BaseScriptElement.getPropertyValue(alg, "SampleThickness",
+                                                                   default = SampleData.sample_thickness)
+
+        trans_method = BaseScriptElement.getPropertyValue(alg, "TransmissionMethod", default='Value')
+
+        self.calculate_transmission = trans_method in ['DirectBeam', 'BeamSpreader']
+        if trans_method=='DirectBeam':
+            self.calculation_method = SampleData.DirectBeam()
+            self.calculation_method.from_setup_info(xml_str)
+        elif trans_method=='BeamSpreader':
+            self.calculation_method = SampleData.BeamSpreader()
+            self.calculation_method.from_setup_info(xml_str)
+
+        # Data file section
+        self.data_files = [BaseScriptElement.getStringElement(process_dom, 'Filename', '')]
+
     def reset(self):
         """
             Reset state
         """
-        self.transmission = SampleData.transmission      
-        self.transmission_spread = SampleData.transmission_spread  
+        self.transmission = SampleData.transmission
+        self.transmission_spread = SampleData.transmission_spread
         self.calculate_transmission = SampleData.calculate_transmission
         self.calculation_method = SampleData.calculation_method
         self.theta_dependent = SampleData.theta_dependent
@@ -305,6 +378,5 @@ class SampleData(BaseScriptElement):
         self.sample_thickness = SampleData.sample_thickness
         self.data_files = []
         self.separate_jobs = SampleData.separate_jobs
-    
 
-    
+

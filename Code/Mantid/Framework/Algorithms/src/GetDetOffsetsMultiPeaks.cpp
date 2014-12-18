@@ -495,7 +495,7 @@ namespace Algorithms
     fr.chi2 = -1;
 
     fr.fitSum = 0.0;
-    // fr.chisqSum = 0.0;
+    fr.chisqSum = 0.0;
 
     fr.peakPosFittedSize = 0.0;
 

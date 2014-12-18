@@ -289,7 +289,8 @@ public:
     ExperimentInfo ws;
     ws.mutableRun().setProtonCharge(1.234);
     ws.mutableSample().setName("test");
-    ws.mutableSample().setOrientedLattice( new OrientedLattice(1,2,3,90,90,90) );
+    OrientedLattice latt(1,2,3,90,90,90);
+    ws.mutableSample().setOrientedLattice( &latt  );
     boost::shared_ptr<Instrument> inst1(new Instrument());
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
@@ -306,7 +307,8 @@ public:
     ExperimentInfo ws;
     ws.mutableRun().setProtonCharge(1.234);
     ws.mutableSample().setName("test");
-    ws.mutableSample().setOrientedLattice( new OrientedLattice(1,2,3,90,90,90) );
+    OrientedLattice latt(1,2,3,90,90,90);
+    ws.mutableSample().setOrientedLattice( &latt  );
     boost::shared_ptr<Instrument> inst1(new Instrument());
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
@@ -323,7 +325,8 @@ public:
     ExperimentInfo ws;
     ws.mutableRun().setProtonCharge(1.234);
     ws.mutableSample().setName("test");
-    ws.mutableSample().setOrientedLattice( new OrientedLattice(1,2,3,90,90,90) );
+    OrientedLattice latt(1,2,3,90,90,90);
+    ws.mutableSample().setOrientedLattice( &latt  );
     boost::shared_ptr<Instrument> inst1(new Instrument());
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);

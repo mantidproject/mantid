@@ -1,6 +1,6 @@
 """
-    Classes for each reduction step. Those are kept separately 
-    from the the interface class so that the DgsReduction class could 
+    Classes for each reduction step. Those are kept separately
+    from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
 import os
@@ -35,7 +35,7 @@ class FilterSetupScript(BaseScriptElement):
     logvaluetolerance = ""
     logvaluetimesections = 1
     titleofsplitters = ""
-    
+
     def __init__(self, inst_name):
         """ Initialization
         """
@@ -71,13 +71,13 @@ class FilterSetupScript(BaseScriptElement):
         self.parnamelist.append("LogValueTimeSections")
 
         return
-        
+
     def set_default_pars(self, inst_name):
         """ Default parameters
         """
 
         return
-        
+
 
     def buildParameterDict(self):
         """ Create a dictionary for parameter and parameter values for SNSPowderReductionPlus()
@@ -101,7 +101,7 @@ class FilterSetupScript(BaseScriptElement):
         pardict["LogValueTolerance"] = self.logvaluetolerance
         pardict["LogValueTimeSections"] = self.logvaluetimesections
         pardict["TitleOfSplitters"] = self.titleofsplitters
-        
+
         # 2. Sort out some issue
         filtertype = "NoFilter"
         if self.filterbytime is True and self.filterbylogvalue is True:
@@ -113,7 +113,7 @@ class FilterSetupScript(BaseScriptElement):
         pardict["FilterType"] = filtertype
 
         return pardict
-        
+
     def to_script(self):
         """ 'Public'  method  to save the current GUI to string via str() and general class ReductionScript
         """
@@ -150,7 +150,7 @@ class FilterSetupScript(BaseScriptElement):
     def from_xml(self, xml_str):
         """ 'Public' method to read in data from XML
             @param xml_str: text to read the data from
-        """       
+        """
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("FilterSetup")
         if len(element_list)>0:
@@ -162,7 +162,7 @@ class FilterSetupScript(BaseScriptElement):
             self.stoptime = self.getFloatElement(instrument_dom, "filterbytimemax", FilterSetupScript.stoptime)
 
             filtertype = self.getStringElement(instrument_dom, "filtertype", FilterSetupScript.filtertype)
-            
+
             self.numbertimeinterval = self.getIntegerElement(instrument_dom, "numberoftimeinterval", FilterSetupScript.numbertimeinterval)
             self.lengthtimeinterval = self.getFloatElement(instrument_dom, "lengthoftimeinterval", FilterSetupScript.lengthtimeinterval)
             self.unitoftime = self.getStringElement(instrument_dom, "unitoftime", FilterSetupScript.unitoftime)
@@ -172,15 +172,15 @@ class FilterSetupScript(BaseScriptElement):
             self.minimumlogvalue = self.getFloatElement(instrument_dom, "minimumlogvalue", FilterSetupScript.minimumlogvalue)
             self.maximumlogvalue = self.getFloatElement(instrument_dom, "maximumlogvalue", FilterSetupScript.maximumlogvalue)
             self.logvalueinterval = self.getFloatElement(instrument_dom, "logvalueinterval", FilterSetupScript.logvalueinterval)
-            self.filterlogvaluebychangingdirection = self.getStringElement(instrument_dom, "filterlogvaluebychangingdirection", 
+            self.filterlogvaluebychangingdirection = self.getStringElement(instrument_dom, "filterlogvaluebychangingdirection",
                     FilterSetupScript.filterlogvaluebychangingdirection)
             self.timetolerance = self.getFloatElement(instrument_dom, "timetolerance", FilterSetupScript.timetolerance)
             self.logboundary = self.getStringElement(instrument_dom, "logboundary", FilterSetupScript.logboundary)
 
             self.logvaluetimesections = 1
 
-            if filtertype == "ByTime": 
-                self.filterbytime = True 
+            if filtertype == "ByTime":
+                self.filterbytime = True
                 self.filterbylogvalue = False
             elif filtertype == "ByLogValue":
                 self.filterbytime = False
@@ -194,33 +194,33 @@ class FilterSetupScript(BaseScriptElement):
     def reset(self):
         """ 'Public' method to reset state
         """
-        self.starttime           = FilterSetupScript.starttime           
-        self.stoptime            = FilterSetupScript.stoptime            
-        self.filterbytime        = FilterSetupScript.filterbytime        
-        self.filterbylogvalue    = FilterSetupScript.filterbylogvalue    
-        self.numbertimeinterval  = FilterSetupScript.numbertimeinterval  
-        self.lengthtimeinterval  = FilterSetupScript.lengthtimeinterval  
-        self.unitoftime          = FilterSetupScript.unitoftime          
-        self.logname             = FilterSetupScript.logname             
-        self.minimumlogvalue     = FilterSetupScript.minimumlogvalue     
-        self.maximumlogvalue     = FilterSetupScript.maximumlogvalue     
-        self.logvalueinterval    = FilterSetupScript.logvalueinterval    
-        self.timetolerance       = FilterSetupScript.timetolerance       
-        self.logboundary         = FilterSetupScript.logboundary         
-        self.logvaluetolerance   = FilterSetupScript.logvaluetolerance   
-        self.titleofsplitters    = FilterSetupScript.titleofsplitters    
-        self.logvaluetimesections     = FilterSetupScript.logvaluetimesections 
-        self.filterlogvaluebychangingdirection = FilterSetupScript.filterlogvaluebychangingdirection 
+        self.starttime           = FilterSetupScript.starttime
+        self.stoptime            = FilterSetupScript.stoptime
+        self.filterbytime        = FilterSetupScript.filterbytime
+        self.filterbylogvalue    = FilterSetupScript.filterbylogvalue
+        self.numbertimeinterval  = FilterSetupScript.numbertimeinterval
+        self.lengthtimeinterval  = FilterSetupScript.lengthtimeinterval
+        self.unitoftime          = FilterSetupScript.unitoftime
+        self.logname             = FilterSetupScript.logname
+        self.minimumlogvalue     = FilterSetupScript.minimumlogvalue
+        self.maximumlogvalue     = FilterSetupScript.maximumlogvalue
+        self.logvalueinterval    = FilterSetupScript.logvalueinterval
+        self.timetolerance       = FilterSetupScript.timetolerance
+        self.logboundary         = FilterSetupScript.logboundary
+        self.logvaluetolerance   = FilterSetupScript.logvaluetolerance
+        self.titleofsplitters    = FilterSetupScript.titleofsplitters
+        self.logvaluetimesections     = FilterSetupScript.logvaluetimesections
+        self.filterlogvaluebychangingdirection = FilterSetupScript.filterlogvaluebychangingdirection
 
         return
-        
+
     def getFloatElement(self, instrument_dom, xmlname, default):
         """ Get a float value from xml
         """
         floatstr = BaseScriptElement.getStringElement(instrument_dom, xmlname, default)
-        
+
         if floatstr != "" and floatstr is not None and floatstr != "None":
-            try: 
+            try:
                 value = float(floatstr)
             except ValueError:
                 print "Warning! XML field %s value %s cannot be converted to float" % (xmlname, floatstr)
@@ -229,13 +229,13 @@ class FilterSetupScript(BaseScriptElement):
             value = None
 
         return value
-    
+
     def getIntegerElement(self, instrument_dom, xmlname, default):
         """ Get a float value from xml
         """
         integerstr = BaseScriptElement.getStringElement(instrument_dom, xmlname, default)
         if integerstr != "" and integerstr is not None and integerstr != "None":
-            try: 
+            try:
                 value = int(integerstr)
             except ValueError:
                 print "Warning! XML field %s value %s cannot be converted to integer" % (xmlname, integerstr)
@@ -251,4 +251,4 @@ class FilterSetupScript(BaseScriptElement):
         value = BaseScriptElement.getStringElement(instrument_dom, xmlname, default)
 
         return value
-    
+

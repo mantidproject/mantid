@@ -1,7 +1,8 @@
 import unittest
-from mantid.simpleapi import Load, CreateTransmissionWorkspaceAuto, CreateWorkspace, _set_properties
-from mantid.api import *
-from mantid.kernel import *
+from mantid.simpleapi import CreateWorkspace, _set_properties
+from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, AlgorithmManager,
+                        DataProcessorAlgorithm, PythonAlgorithm)
+from mantid.kernel import Direction
 
 
 class ChildAlg(PythonAlgorithm):
@@ -16,13 +17,16 @@ AlgorithmFactory.subscribe(ChildAlg)
 
 
 class ParentAlg(DataProcessorAlgorithm):
+    """Dummy workflow algorithm for testing purposes.
+    This just creates an output workspace and runs a child algorithm.
+    """
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
-                             doc="Name to give the output workspace.")
+        self.declareProperty(MatrixWorkspaceProperty('Workspace', '', Direction.InOut),
+                             doc="Name to give the input workspace.")
 
     def PyExec(self):
-        ws_name = self.getProperty("OutputWorkspace").value
+
         alg = self.createChildAlgorithm('ChildAlg')
         alg.initialize()
         args = {}
@@ -30,55 +34,61 @@ class ParentAlg(DataProcessorAlgorithm):
         _set_properties(alg, *args, **kwargs)
         alg.execute()
 
-        ws = CreateWorkspace([0, 1, 2], [0, 1, 2], OutputWorkspace=ws_name)
-        self.setProperty('OutputWorkspace', ws)
-
 AlgorithmFactory.subscribe(ParentAlg)
 
 
 class AlgorithmHistoryTest(unittest.TestCase):
 
     def test_nested_history(self):
-        trans1 = Load('INTER00013463.nxs', OutputWorkspace="trans1")
-        #run an algorithm which has multiple layers of history
-        out_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, AnalysisMode="PointDetectorAnalysis")
+        ws_name = '__tmp_test_algorithm_history'
+        ws = CreateWorkspace([0, 1, 2], [0, 1, 2], OutputWorkspace=ws_name)
+        alg = self._run_algorithm("ParentAlg", Workspace=ws_name)
 
-        history = out_ws.getHistory()
-
+        history = ws.getHistory()
         alg_hists = history.getAlgorithmHistories()
+
         self.assertEquals(history.size(), 2)
         self.assertEquals(len(alg_hists), 2)
 
         parent_alg = history.getAlgorithmHistory(1)
-        self.assertEquals(parent_alg.name(), "CreateTransmissionWorkspaceAuto")
+
+        self.assertEquals(parent_alg.name(), "ParentAlg")
         self.assertEquals(parent_alg.version(), 1)
-
-        alg = parent_alg.getChildAlgorithm(0)
-        self.assertEquals(alg.name(), "CreateTransmissionWorkspace")
-
         self.assertEquals(parent_alg.childHistorySize(), 1)
 
-        nested_alg = parent_alg.getChildAlgorithmHistory(0)
-        self.assertEquals(nested_alg.name(), "CreateTransmissionWorkspace")
-        self.assertEquals(nested_alg.version(), 1)
+        child_alg = parent_alg.getChildAlgorithmHistory(0)
 
-        basic_child_algs = nested_alg.getChildHistories()
-        self.assertTrue(len(basic_child_algs) > 0)
+        self.assertEquals(child_alg.name(), "ChildAlg")
+        self.assertEquals(child_alg.version(), 1)
+        self.assertEquals(child_alg.childHistorySize(), 0)
 
     def test_disable_history(self):
         ws_name = '__tmp_test_algorithm_history'
+        ws = CreateWorkspace([0, 1, 2], [0, 1, 2], OutputWorkspace=ws_name)
+        alg = self._run_algorithm('ParentAlg', child_algorithm=True, record_history=False, Workspace=ws_name)
 
-        alg = AlgorithmManager.createUnmanaged('ParentAlg')
-        alg.initialize()
-        alg.setChild(True)
-        alg.enableHistoryRecordingForChild(False)
-        alg.setProperty("OutputWorkspace", ws_name)
-        alg.execute()
-        history = alg.getProperty("OutputWorkspace").value.getHistory()
-
+        history = ws.getHistory()
         alg_hists = history.getAlgorithmHistories()
-        self.assertEquals(history.size(), 0)
-        self.assertEquals(len(alg_hists), 0)
+
+        self.assertEquals(history.size(), 1)
+        self.assertEquals(len(alg_hists), 1)
+
+    #-------------------------------------------------------------------------
+    # Test Helper Functions
+    #-------------------------------------------------------------------------
+
+    def _run_algorithm(self, algorithm_name, child_algorithm=False, record_history=True, **kwargs):
+        """ Create and run an algorithm not in the simpleapi"""
+        alg = AlgorithmManager.create(algorithm_name)
+        alg.initialize()
+        alg.setChild(child_algorithm)
+        alg.enableHistoryRecordingForChild(record_history)
+        for key, value in kwargs.iteritems():
+            alg.setProperty(key, value)
+        alg.execute()
+        return alg
+
+
 
 if __name__ == '__main__':
     unittest.main()

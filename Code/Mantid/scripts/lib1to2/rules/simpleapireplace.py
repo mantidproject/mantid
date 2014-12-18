@@ -15,7 +15,7 @@ __FUNCTION_CALL_REGEXSTR = r"""(|\w*\s*) # Any variable on the lhs of the functi
                      (|=\s*) # The equals sign including any whitespace on the right
                      (\w*) # The function name
                      \((.*?)\) # The function call arguments (without the parentheses)
-                     (\.workspace\(\)|) # An optional trailing .workspace() call""" 
+                     (\.workspace\(\)|) # An optional trailing .workspace() call"""
 
 __FUNCTION_CALL_REGEX__ = re.compile(__FUNCTION_CALL_REGEXSTR, re.VERBOSE)
 
@@ -25,18 +25,18 @@ __MANTID_ALGS__ = mantid.api.AlgorithmFactory.getRegisteredAlgorithms(True)
 
 def _is_mantid_algorithm(name):
     """Returns true if the given name is a mantid algorithm"""
-    if type(name) is not str: 
+    if type(name) is not str:
         raise ValueError("Expected string name found: %s" % str(name))
     return name in __MANTID_ALGS__
 
 class SimpleAPIFunctionCallReplace(rules.Rules):
-    
+
     func_regex = __FUNCTION_CALL_REGEX__
     current_line = None
-     
+
     def __init__(self):
         rules.Rules.__init__(self)
-        
+
     def apply(self, text):
         """
         """
@@ -45,8 +45,8 @@ class SimpleAPIFunctionCallReplace(rules.Rules):
 
     def apply_to_ast(self, tree):
         """
-        Returns a replacement ast tree for the input tree where the simple 
-        API function calls are replaced by improved ones for the new API. 
+        Returns a replacement ast tree for the input tree where the simple
+        API function calls are replaced by improved ones for the new API.
             @param tree An AST tree from lib2to3
             @returns A string containing the replacement of the original text
                      if no replacement was needed
@@ -78,7 +78,7 @@ class SimpleAPIFunctionCallReplace(rules.Rules):
         elif nchildren == 3:
             self.errors.append("Unable to handle assignment for '%s' algorithm call" % (name))
             return
-        
+
         # Get the argument list node: child 1 = arglist parent node then child 1 = arg list
         arglist_node = fn_call_node.children[1].children[1]
 
@@ -118,7 +118,7 @@ class SimpleAPIFunctionCallReplace(rules.Rules):
                 nargs += 1
             else:
                 args[index].append(node)
-        
+
         # Ordered props
         prop_index = 0 # List has commas so standard enumerate won't do the trick
         arg_nodes = [] # Holds the final node list
@@ -127,7 +127,7 @@ class SimpleAPIFunctionCallReplace(rules.Rules):
                 arg_nodes.append(arg_list)
             else:
                 first = arg_list[0]
-                if not (isinstance(first, Node) and first.type == syms.argument): 
+                if not (isinstance(first, Node) and first.type == syms.argument):
                     prop_name = ordered_props[prop_index]
                     children=[Leaf(token.NAME,prop_name),Leaf(token.EQUAL,"=")]
                     children.extend(arg_list)

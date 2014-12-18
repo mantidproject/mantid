@@ -54,7 +54,7 @@ public:
     CompositeValidator comp;
     comp.add(IValidator_sptr(val1));
 
-    std::set<std::string> allowed=comp.allowedValues();
+    std::vector<std::string> allowed=comp.allowedValues();
     TS_ASSERT_EQUALS(allowed_val1.size(),allowed.size());
 
     std::vector<std::string> allowed_val2(3);
@@ -63,7 +63,7 @@ public:
     StringListValidator * val2 = new StringListValidator(allowed_val2);
     comp.add(IValidator_sptr(val2));
 
-    std::set<std::string> allowed2=comp.allowedValues();
+    std::vector<std::string> allowed2=comp.allowedValues();
     TS_ASSERT_EQUALS(1,allowed2.size());
     TS_ASSERT_EQUALS("b2",*(allowed2.begin()));
 

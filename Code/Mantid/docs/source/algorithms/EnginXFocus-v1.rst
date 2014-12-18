@@ -17,6 +17,11 @@ Description
 Performs a TOF to dSpacing conversion using calibrated pixel positions, focuses the values in dSpacing
 and then converts them back to TOF.
 
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
 **Example - Simple focussing of and EnginX data file:**
 
 .. testcode:: ExSimple

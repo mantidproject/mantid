@@ -7,7 +7,7 @@ import testhelpers
 import types
 
 from mantid.kernel import Direction
-from mantid.api import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm, 
+from mantid.api import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm,
                         AlgorithmManager, AlgorithmFactory)
 
 ########################### Test classes #####################################
@@ -15,60 +15,60 @@ from mantid.api import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm,
 class TestPyAlgDefaultAttrs(PythonAlgorithm):
     def PyInit(self):
         pass
-    
+
     def PyExec(self):
         pass
 
 class TestPyAlgOverriddenAttrs(PythonAlgorithm):
-    
+
     def version(self):
         return 2
-    
+
     def category(self):
         return "BestAlgorithms"
-    
+
     def isRunning(self):
         return True
-    
+
     def PyInit(self):
         pass
-    
+
     def PyExec(self):
         pass
-    
+
 class TestPyAlgIsRunningReturnsNonBool(PythonAlgorithm):
 
     def isRunning(self):
         return 1
-    
+
     def PyInit(self):
         pass
-    
+
     def PyExec(self):
         pass
 
 class CancellableAlg(PythonAlgorithm):
-    
+
     is_running = True
-    
+
     def PyInit(self):
         pass
-    
+
     def PyExec(self):
         pass
-    
+
     def isRunning(self):
         return self.is_running
-    
+
     def cancel(self):
         self.is_running = False
 
 ###############################################################################
 
 class PythonAlgorithmTest(unittest.TestCase):
-        
+
     _registered = None
-    
+
     def setUp(self):
         if self.__class__._registered is None:
             self.__class__._registered = True
@@ -76,7 +76,7 @@ class PythonAlgorithmTest(unittest.TestCase):
             AlgorithmFactory.subscribe(TestPyAlgOverriddenAttrs)
             AlgorithmFactory.subscribe(TestPyAlgIsRunningReturnsNonBool)
             AlgorithmFactory.subscribe(CancellableAlg)
-            
+
     def test_managed_alg_is_descendent_of_AlgorithmProxy(self):
         alg = AlgorithmManager.create("TestPyAlgDefaultAttrs")
         self.assertTrue(isinstance(alg, AlgorithmProxy))
@@ -87,12 +87,12 @@ class PythonAlgorithmTest(unittest.TestCase):
         self.assertTrue(isinstance(alg, PythonAlgorithm))
         self.assertTrue(isinstance(alg, Algorithm))
         self.assertTrue(isinstance(alg, IAlgorithm))
-        
+
     def test_alg_with_default_attrs(self):
         testhelpers.assertRaisesNothing(self,AlgorithmManager.createUnmanaged, "TestPyAlgDefaultAttrs")
         alg = AlgorithmManager.createUnmanaged("TestPyAlgDefaultAttrs")
         testhelpers.assertRaisesNothing(self,alg.initialize)
-       
+
         self.assertEquals(alg.name(), "TestPyAlgDefaultAttrs")
         self.assertEquals(alg.version(), 1)
         self.assertEquals(alg.category(), "PythonAlgorithms")
@@ -111,11 +111,16 @@ class PythonAlgorithmTest(unittest.TestCase):
         self.assertTrue(alg.isRunning())
         alg.cancel()
         self.assertTrue(not alg.isRunning())
-        
+
     # --------------------------- Failure cases --------------------------------------------
     def test_isRunning_returning_non_bool_raises_error(self):
         alg = AlgorithmManager.createUnmanaged("TestPyAlgIsRunningReturnsNonBool")
-        self.assertRaises(RuntimeError, alg.isRunning)
+        # boost.python automatically downcasts to the most available type
+        # meaning that type(alg)=TestPyAlgIsRunningReturnsNonBool and not the interface
+        # so that any method lookup doesn't go through the base class automatically.
+        # Here we simulate how it would be called on C++ framework side
+        base_running_attr = getattr(IAlgorithm, "isRunning")
+        self.assertRaises(RuntimeError, base_running_attr, alg)
 
 if __name__ == '__main__':
     unittest.main()

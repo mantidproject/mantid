@@ -14,6 +14,11 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
+namespace
+{
+  Mantid::Kernel::Logger g_log("ConvFit");
+}
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -118,7 +123,7 @@ namespace IDA
     
     connect(uiForm().confit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
     connect(uiForm().confit_cbBackground, SIGNAL(currentIndexChanged(int)), this, SLOT(bgTypeSelection(int)));
-    connect(uiForm().confit_pbSequential, SIGNAL(clicked()), this, SLOT(sequential()));
+    connect(uiForm().confit_pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
 
     uiForm().confit_leSpecNo->setValidator(m_intVal);
     uiForm().confit_leSpecMax->setValidator(m_intVal);
@@ -134,143 +139,68 @@ namespace IDA
 
   void ConvFit::run()
   {
-    plotInput();
-
-    if ( m_cfDataCurve == NULL )
+    const QString error = validate();
+    if( ! error.isEmpty() )
     {
-      showInformationBox("There was an error reading the data file.");
+      showInformationBox(error);
       return;
     }
 
-    uiForm().confit_ckPlotGuess->setChecked(false);
+    if ( m_cfInputWS == NULL )
+    {
+      return;
+    }
 
-    Mantid::API::CompositeFunction_sptr function = createFunction(uiForm().confit_ckTieCentres->isChecked());
-
-    // get output name
     QString ftype = fitTypeString();
     QString bg = backgroundString();
 
-    QString outputNm = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + m_cfInputWSName + QString("')\n")).trimmed();
-    outputNm += QString("conv_") + ftype + bg + uiForm().confit_leSpecNo->text();  
-    std::string output = outputNm.toStdString();
-
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
-    alg->initialize();
-    alg->setPropertyValue("Function", function->asString());
-    alg->setPropertyValue("InputWorkspace", m_cfInputWSName.toStdString());
-    alg->setProperty<int>("WorkspaceIndex", uiForm().confit_leSpecNo->text().toInt());
-    alg->setProperty<double>("StartX", m_cfDblMng->value(m_cfProp["StartX"]));
-    alg->setProperty<double>("EndX", m_cfDblMng->value(m_cfProp["EndX"]));
-    alg->setPropertyValue("Output", output);
-    alg->execute();
-   
-    if ( ! alg->isExecuted() )
+    if(ftype == "")
     {
-      showInformationBox("Fit algorithm failed.");
-      return;
+      g_log.error("No fit type defined");
     }
 
-    // Plot the line on the mini plot
-    m_cfCalcCurve = plotMiniplot(m_cfPlot, m_cfCalcCurve, outputNm+"_Workspace", 1);
-    QPen fitPen(Qt::red, Qt::SolidLine);
-    m_cfCalcCurve->setPen(fitPen);
-    m_cfPlot->replot();
+    bool useTies = uiForm().confit_ckTieCentres->isChecked();
+    QString ties = (useTies ? "True" : "False");
 
-    Mantid::API::IFunction_sptr outputFunc = alg->getProperty("Function");
+    Mantid::API::CompositeFunction_sptr func = createFunction(useTies);
+    std::string function = std::string(func->asString());
+    QString stX = m_cfProp["StartX"]->valueText();
+    QString enX = m_cfProp["EndX"]->valueText();
 
-    // Get params.
-    QMap<QString,double> parameters;
-    std::vector<std::string> parNames = outputFunc->getParameterNames();
-    std::vector<double> parVals;
+    QString pyInput =
+      "from IndirectDataAnalysis import confitSeq\n"
+      "input = '" + m_cfInputWSName + "'\n"
+      "func = r'" + QString::fromStdString(function) + "'\n"
+      "startx = " + stX + "\n"
+      "endx = " + enX + "\n"
+      "specMin = " + uiForm().confit_leSpecNo->text() + "\n"
+      "specMax = " + uiForm().confit_leSpecMax->text() + "\n"
+      "plot = '" + uiForm().confit_cbPlotOutput->currentText() + "'\n"
+      "ties = " + ties + "\n"
+      "save = ";
+  
+    pyInput += uiForm().confit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
 
-    for( size_t i = 0; i < parNames.size(); ++i )
-      parVals.push_back(outputFunc->getParameter(parNames[i]));
+    if ( uiForm().confit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+    else pyInput += "verbose = False\n";
 
-    for ( size_t i = 0; i < parNames.size(); ++i )
-      parameters[QString(parNames[i].c_str())] = parVals[i];
-
-    // Populate Tree widget with values
-    // Background should always be f0
-    m_cfDblMng->setValue(m_cfProp["BGA0"], parameters["f0.A0"]);
-    m_cfDblMng->setValue(m_cfProp["BGA1"], parameters["f0.A1"]);
-
-    int noLorentz = uiForm().confit_cbFitType->currentIndex();
-
-    int funcIndex = 0;
-		int subIndex = 0;
-
-		//check if we're using a temperature correction
-		if (uiForm().confit_ckTempCorrection->isChecked() && 
-				!uiForm().confit_leTempCorrection->text().isEmpty())
-		{
-				subIndex++;
-		}
-
-		bool usingDeltaFunc = m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]);
-		bool usingCompositeFunc = ((usingDeltaFunc && noLorentz > 0) || noLorentz > 1);
-    QString prefBase = "f1.f1.";
-
-		if ( usingDeltaFunc )
+    QString temperature = uiForm().confit_leTempCorrection->text();
+    bool useTempCorrection = (!temperature.isEmpty() && uiForm().confit_ckTempCorrection->isChecked());
+    if ( useTempCorrection ) 
     {
-      QString key = prefBase;
-			if (usingCompositeFunc)
-			{
-				key += "f0.";
-			}
-			
-			key += "Height";
-
-      m_cfDblMng->setValue(m_cfProp["DeltaHeight"], parameters[key]);
-      funcIndex++;
+      pyInput += "temp=" + temperature + "\n";
     }
-
-    if ( noLorentz > 0 )
+    else
     {
-      // One Lorentz
-			QString pref = prefBase;
-
-			if ( usingCompositeFunc )
-			{
-				pref += "f" + QString::number(funcIndex) + ".f" + QString::number(subIndex) + ".";
-			}
-			else
-			{
-				pref += "f" + QString::number(subIndex) + ".";
-			}
-
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.Amplitude"], parameters[pref+"Amplitude"]);
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.PeakCentre"], parameters[pref+"PeakCentre"]);
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], parameters[pref+"FWHM"]);
-      funcIndex++;
+      pyInput += "temp=None\n";
     }
+  
+    pyInput +=    
+      "bg = '" + bg + "'\n"
+      "ftype = '" + ftype + "'\n"
+      "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, Verbose=verbose, Plot=plot, Save=save)\n";
 
-    if ( noLorentz > 1 )
-    {
-      // Two Lorentz
-			QString pref = prefBase;
-
-			if ( usingCompositeFunc )
-			{
-				pref += "f" + QString::number(funcIndex) + ".f" + QString::number(subIndex) + ".";
-			}
-			else
-			{
-				pref += "f" + QString::number(subIndex) + ".";
-			}
-
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 2.Amplitude"], parameters[pref+"Amplitude"]);
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 2.PeakCentre"], parameters[pref+"PeakCentre"]);
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 2.FWHM"], parameters[pref+"FWHM"]);
-    }
-
-    // Plot Output
-    if ( uiForm().confit_ckPlotOutput->isChecked() )
-    {
-      QString pyInput =
-        "plotSpectrum('" + QString::fromStdString(output) + "_Workspace', [0,1,2])\n";
-      QString pyOutput = runPythonCode(pyInput);
-    }
-
+    QString pyOutput = runPythonCode(pyInput);
   }
 
   /**
@@ -603,14 +533,7 @@ namespace IDA
       fitType += "1L"; break;
     case 2:
       fitType += "2L"; break;
-    default:
-      assert( false ); // Should never happen.
     }
-
-    // We should never get to a stage where the user is allowed to
-    // continue having not selected at least one fit - be it 
-    // Lorentzian, delta, or both.
-    assert( ! fitType.isEmpty() );
 
     return fitType;
   }
@@ -635,7 +558,6 @@ namespace IDA
     case 2:
       return "FitL_s";
     default: 
-      assert( false ); // Should never happen.
       return "";
     }
   }
@@ -724,7 +646,6 @@ namespace IDA
 
   void ConvFit::plotGuess(QtProperty*)
   {
-
     if ( ! uiForm().confit_ckPlotGuess->isChecked() || m_cfDataCurve == NULL )
     {
       return;
@@ -785,7 +706,7 @@ namespace IDA
     m_cfPlot->replot();
   }
 
-  void ConvFit::sequential()
+  void ConvFit::singleFit()
   {
     const QString error = validate();
     if( ! error.isEmpty() )
@@ -794,55 +715,147 @@ namespace IDA
       return;
     }
 
-    if ( m_cfInputWS == NULL )
+    plotInput();
+
+    if ( m_cfDataCurve == NULL )
     {
+      showInformationBox("There was an error reading the data file.");
       return;
     }
 
+    uiForm().confit_ckPlotGuess->setChecked(false);
+
+    Mantid::API::CompositeFunction_sptr function = createFunction(uiForm().confit_ckTieCentres->isChecked());
+
+    // get output name
     QString ftype = fitTypeString();
     QString bg = backgroundString();
-    bool useTies = uiForm().confit_ckTieCentres->isChecked();
-    QString ties = (useTies ? "True" : "False");
 
-    Mantid::API::CompositeFunction_sptr func = createFunction(useTies);
-    std::string function = std::string(func->asString());
-    QString stX = m_cfProp["StartX"]->valueText();
-    QString enX = m_cfProp["EndX"]->valueText();
-
-    QString pyInput =
-      "from IndirectDataAnalysis import confitSeq\n"
-      "input = '" + m_cfInputWSName + "'\n"
-      "func = r'" + QString::fromStdString(function) + "'\n"
-      "startx = " + stX + "\n"
-      "endx = " + enX + "\n"
-      "specMin = " + uiForm().confit_leSpecNo->text() + "\n"
-      "specMax = " + uiForm().confit_leSpecMax->text() + "\n"
-      "plot = '" + uiForm().confit_cbPlotOutput->currentText() + "'\n"
-      "ties = " + ties + "\n"
-      "save = ";
-  
-    pyInput += uiForm().confit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
-
-    if ( uiForm().confit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
-
-    QString temperature = uiForm().confit_leTempCorrection->text();
-    bool useTempCorrection = (!temperature.isEmpty() && uiForm().confit_ckTempCorrection->isChecked());
-    if ( useTempCorrection ) 
+    if(ftype == "")
     {
-      pyInput += "temp=" + temperature + "\n";
+      g_log.error("No fit type defined!");
     }
-    else
-    {
-      pyInput += "temp=None\n";
-    }
-  
-    pyInput +=    
-      "bg = '" + bg + "'\n"
-      "ftype = '" + ftype + "'\n"
-      "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, Verbose=verbose, Plot=plot, Save=save)\n";
 
-    QString pyOutput = runPythonCode(pyInput);
+    QString outputNm = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + m_cfInputWSName + QString("')\n")).trimmed();
+    outputNm += QString("conv_") + ftype + bg + uiForm().confit_leSpecNo->text();  
+    std::string output = outputNm.toStdString();
+
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    alg->initialize();
+    alg->setPropertyValue("Function", function->asString());
+    alg->setPropertyValue("InputWorkspace", m_cfInputWSName.toStdString());
+    alg->setProperty<int>("WorkspaceIndex", uiForm().confit_leSpecNo->text().toInt());
+    alg->setProperty<double>("StartX", m_cfDblMng->value(m_cfProp["StartX"]));
+    alg->setProperty<double>("EndX", m_cfDblMng->value(m_cfProp["EndX"]));
+    alg->setPropertyValue("Output", output);
+    alg->execute();
+   
+    if ( ! alg->isExecuted() )
+    {
+      showInformationBox("Fit algorithm failed.");
+      return;
+    }
+
+    // Plot the line on the mini plot
+    m_cfCalcCurve = plotMiniplot(m_cfPlot, m_cfCalcCurve, outputNm+"_Workspace", 1);
+    QPen fitPen(Qt::red, Qt::SolidLine);
+    m_cfCalcCurve->setPen(fitPen);
+    m_cfPlot->replot();
+
+    Mantid::API::IFunction_sptr outputFunc = alg->getProperty("Function");
+
+    // Get params.
+    QMap<QString,double> parameters;
+    std::vector<std::string> parNames = outputFunc->getParameterNames();
+    std::vector<double> parVals;
+
+    for( size_t i = 0; i < parNames.size(); ++i )
+      parVals.push_back(outputFunc->getParameter(parNames[i]));
+
+    for ( size_t i = 0; i < parNames.size(); ++i )
+      parameters[QString(parNames[i].c_str())] = parVals[i];
+
+    // Populate Tree widget with values
+    // Background should always be f0
+    m_cfDblMng->setValue(m_cfProp["BGA0"], parameters["f0.A0"]);
+    m_cfDblMng->setValue(m_cfProp["BGA1"], parameters["f0.A1"]);
+
+    int noLorentz = uiForm().confit_cbFitType->currentIndex();
+
+    int funcIndex = 0;
+		int subIndex = 0;
+
+		//check if we're using a temperature correction
+		if (uiForm().confit_ckTempCorrection->isChecked() && 
+				!uiForm().confit_leTempCorrection->text().isEmpty())
+		{
+				subIndex++;
+		}
+
+		bool usingDeltaFunc = m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]);
+		bool usingCompositeFunc = ((usingDeltaFunc && noLorentz > 0) || noLorentz > 1);
+    QString prefBase = "f1.f1.";
+
+		if ( usingDeltaFunc )
+    {
+      QString key = prefBase;
+			if (usingCompositeFunc)
+			{
+				key += "f0.";
+			}
+			
+			key += "Height";
+
+      m_cfDblMng->setValue(m_cfProp["DeltaHeight"], parameters[key]);
+      funcIndex++;
+    }
+
+    if ( noLorentz > 0 )
+    {
+      // One Lorentz
+			QString pref = prefBase;
+
+			if ( usingCompositeFunc )
+			{
+				pref += "f" + QString::number(funcIndex) + ".f" + QString::number(subIndex) + ".";
+			}
+			else
+			{
+				pref += "f" + QString::number(subIndex) + ".";
+			}
+
+      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.Amplitude"], parameters[pref+"Amplitude"]);
+      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.PeakCentre"], parameters[pref+"PeakCentre"]);
+      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], parameters[pref+"FWHM"]);
+      funcIndex++;
+    }
+
+    if ( noLorentz > 1 )
+    {
+      // Two Lorentz
+			QString pref = prefBase;
+
+			if ( usingCompositeFunc )
+			{
+				pref += "f" + QString::number(funcIndex) + ".f" + QString::number(subIndex) + ".";
+			}
+			else
+			{
+				pref += "f" + QString::number(subIndex) + ".";
+			}
+
+      m_cfDblMng->setValue(m_cfProp["Lorentzian 2.Amplitude"], parameters[pref+"Amplitude"]);
+      m_cfDblMng->setValue(m_cfProp["Lorentzian 2.PeakCentre"], parameters[pref+"PeakCentre"]);
+      m_cfDblMng->setValue(m_cfProp["Lorentzian 2.FWHM"], parameters[pref+"FWHM"]);
+    }
+
+    // Plot Output
+    if ( uiForm().confit_ckPlotOutput->isChecked() )
+    {
+      QString pyInput =
+        "plotSpectrum('" + QString::fromStdString(output) + "_Workspace', [0,1,2])\n";
+      QString pyOutput = runPythonCode(pyInput);
+    }
   }
 
   void ConvFit::minChanged(double val)

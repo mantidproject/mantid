@@ -7,7 +7,7 @@ class RunTest(unittest.TestCase):
 
     _expt_ws = None
     _nspec=1
-  
+
     def setUp(self):
         if self.__class__._expt_ws is None:
             alg = run_algorithm('CreateWorkspace', DataX=[1,2,3,4,5], DataY=[1,2,3,4,5],NSpec=self._nspec, child=True)
@@ -27,7 +27,7 @@ class RunTest(unittest.TestCase):
         charge = run.getProtonCharge()
         self.assertEquals(type(charge), float)
         self.assertAlmostEquals(charge, 10.05, 2)
-        
+
     def test_run_hasProperty(self):
         self.assertTrue(self._expt_ws.run().hasProperty('start_time'))
         self.assertTrue('start_time' in self._expt_ws.run())
@@ -37,7 +37,7 @@ class RunTest(unittest.TestCase):
         run_start = self._expt_ws.run().getProperty('start_time')
         self.assertEquals(type(run_start.value), str)
         self.assertEquals(run_start.value, "2008-12-18T17:58:38")
-        
+
         def do_spectra_check(nspectra):
             self.assertEquals(type(nspectra.value), int)
             self.assertEquals(nspectra.value, self._nspec)
@@ -50,7 +50,7 @@ class RunTest(unittest.TestCase):
         # get returns the default if key does not exist, or None if no default
         self.assertEquals(self._expt_ws.run().get('not_a_log'), None)
         self.assertEquals(self._expt_ws.run().get('not_a_log', 5.), 5.)
-       
+
     def test_add_property_with_known_type_succeeds(self):
         run = self._expt_ws.run()
         nprops = len(run.getProperties())
@@ -73,12 +73,12 @@ class RunTest(unittest.TestCase):
     def test_add_property_with_unknown_type_raises_error(self):
         run = self._expt_ws.run()
         self.assertRaises(ValueError, run.addProperty, 'dict_t', {}, False)
-        
+
     def test_keys_returns_a_list_of_the_property_names(self):
         run = self._expt_ws.run()
         names = run.keys()
         self.assertEqual(type(names), list)
-        
+
         # Test a few
         self.assertTrue('nspectra' in names)
         self.assertTrue('start_time' in names)

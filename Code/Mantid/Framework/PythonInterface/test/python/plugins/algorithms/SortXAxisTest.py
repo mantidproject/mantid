@@ -2,7 +2,7 @@ import unittest
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
-    
+
 class SortXAxisTest(unittest.TestCase):
 
     def test_x_ascending(self):
@@ -41,7 +41,7 @@ class SortXAxisTest(unittest.TestCase):
         self.assertEqual(dataE, sortedE.tolist())
         DeleteWorkspace(unsortedws)
         DeleteWorkspace(sortedws)
-        
+
     def test_on_multiple_spectrum(self):
         dataX = [3, 2, 1, 3, 2, 1] # In descending order, so y and e will need to be reversed.
         dataY = [1, 2, 3, 1, 2, 3]
@@ -50,7 +50,7 @@ class SortXAxisTest(unittest.TestCase):
         dataY.reverse()
         dataE.reverse()
         # Run the algorithm
-        sortedws = SortXAxis(InputWorkspace=unsortedws) 
+        sortedws = SortXAxis(InputWorkspace=unsortedws)
         # Check the resulting data values for 1st spectrum.
         sortedX = sortedws.readX(0)
         sortedY = sortedws.readY(0)
@@ -67,10 +67,10 @@ class SortXAxisTest(unittest.TestCase):
         self.assertEqual(dataE[3:], sortedE.tolist())
         DeleteWorkspace(unsortedws)
         DeleteWorkspace(sortedws)
-        
-        
+
+
     def test_sorts_x_histogram_ascending(self):
-        dataX = [1, 2, 3, 4] 
+        dataX = [1, 2, 3, 4]
         dataY = [1, 2, 3]
         dataE = [1, 2, 3]
         unsortedws = CreateWorkspace(DataX=dataX,DataY=dataY,DataE=dataE,UnitX='TOF',Distribution=False)
@@ -83,12 +83,12 @@ class SortXAxisTest(unittest.TestCase):
         self.assertEqual(dataX, sortedX.tolist())
         self.assertEqual(dataY, sortedY.tolist())
         self.assertEqual(dataE, sortedE.tolist())
-        
+
         DeleteWorkspace(unsortedws)
         DeleteWorkspace(sortedws)
-        
+
     def test_sorts_x_histogram_descending(self):
-        dataX = [4, 3, 2, 1] 
+        dataX = [4, 3, 2, 1]
         dataY = [1, 2, 3]
         dataE = [1, 2, 3]
         unsortedws = CreateWorkspace(DataX=dataX,DataY=dataY,DataE=dataE,UnitX='TOF',Distribution=False)
@@ -103,11 +103,11 @@ class SortXAxisTest(unittest.TestCase):
         dataE.reverse()
         self.assertEqual(dataY, sortedY.tolist())
         self.assertEqual(dataE, sortedE.tolist())
-        
+
         DeleteWorkspace(unsortedws)
         DeleteWorkspace(sortedws)
-        
-        
-        
+
+
+
 if __name__ == '__main__':
     unittest.main()

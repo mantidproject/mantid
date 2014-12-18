@@ -1,6 +1,6 @@
 """
-    Classes for each reduction step. Those are kept separately 
-    from the the interface class so that the HFIRReduction class could 
+    Classes for each reduction step. Those are kept separately
+    from the the interface class so that the HFIRReduction class could
     be used independently of the interface implementation
 """
 import xml.dom.minidom
@@ -17,13 +17,13 @@ class DataSets(BaseScriptElement):
     DataBackgroundRoi = [115, 137,123, 137]
     DataTofRange = [9600., 21600.]
     TofRangeFlag = True
-    
+
     data_x_range_flag = True
     data_x_range = [115,210]
 
     tthd_value = 'N/A'
     ths_value = 'N/A'
-    
+
     norm_x_range_flag = True
     norm_x_range = [115,210]
 
@@ -37,12 +37,12 @@ class DataSets(BaseScriptElement):
     #norm_file = 66196
     data_files = [0]
     norm_file = 0
-    
+
     # Q range
     q_min = 0.001
     q_step = 0.001
     auto_q_binning = False
-    
+
     # Angle offset
     angle_offset = 0.0
     angle_offset_error = 0.0
@@ -96,10 +96,10 @@ class DataSets(BaseScriptElement):
         script += "              LowResNormAxisPixelRangeFlag=%s,\n" % str(self.norm_x_range_flag)
         script += "              LowResNormAxisPixelRange=%s,\n" % str(self.norm_x_range)
         script += "              TOFRange=%s,\n" % str(self.DataTofRange)
-        
+
         _incident_medium_str = str(self.incident_medium_list[0])
         _list = _incident_medium_str.split(',')
-                
+
         script += "              IncidentMediumSelected='%s',\n" % str(_list[self.incident_medium_index_selected])
         script += "              GeometryCorrectionFlag=%s,\n" % str(self.geometry_correction_switch)
         script += "              QMin=%s,\n" % str(self.q_min)
@@ -109,16 +109,16 @@ class DataSets(BaseScriptElement):
         if self.angle_offset != 0.0:
             script += "              AngleOffset=%s,\n" % str(self.angle_offset)
             script += "              AngleOffsetError=%s,\n" % str(self.angle_offset_error)
-           
+
         # sf configuration file
 #        if self.scaling_factor_file != '':
         if (self.scaling_factor_file_flag):
             script += "ScalingFactorFile='%s',\n" % str(self.scaling_factor_file)
         else:
             script += "ScalingFactorFile='',\n"
-               
+
         script += "SlitsWidthFlag=%s,\n" % str(self.slits_width_flag)
-            
+
         # The output should be slightly different if we are generating
         # a script for the automated reduction
         if for_automated_reduction:
@@ -164,33 +164,33 @@ class DataSets(BaseScriptElement):
         xml += "<norm_x_range_flag>%s</norm_x_range_flag>\n" % str(self.norm_x_range_flag)
         xml += "<norm_x_max>%s</norm_x_max>\n" % str(self.norm_x_range[1])
         xml += "<norm_x_min>%s</norm_x_min>\n" % str(self.norm_x_range[0])
-        
+
         xml += "<norm_from_peak_pixels>%s</norm_from_peak_pixels>\n" % str(self.NormPeakPixels[0])
         xml += "<norm_to_peak_pixels>%s</norm_to_peak_pixels>\n" % str(self.NormPeakPixels[1])
         xml += "<norm_background_flag>%s</norm_background_flag>\n" % str(self.NormBackgroundFlag)
         xml += "<norm_from_back_pixels>%s</norm_from_back_pixels>\n" % str(self.NormBackgroundRoi[0])
         xml += "<norm_to_back_pixels>%s</norm_to_back_pixels>\n" % str(self.NormBackgroundRoi[1])
         xml += "<norm_dataset>%s</norm_dataset>\n" % str(self.norm_file)
-        
+
         # Q cut
         xml += "<q_min>%s</q_min>\n" % str(self.q_min)
         xml += "<q_step>%s</q_step>\n" % str(self.q_step)
         xml += "<auto_q_binning>%s</auto_q_binning>\n" % str(self.auto_q_binning)
         xml += "<overlap_lowest_error>%s</overlap_lowest_error>\n" % str(self.overlap_lowest_error)
         xml += "<overlap_mean_value>%s</overlap_mean_value>\n" % str(self.overlap_mean_value)
-        
+
         # Angle offset
         xml += "<angle_offset>%s</angle_offset>\n" % str(self.angle_offset)
         xml += "<angle_offset_error>%s</angle_offset_error>\n" % str(self.angle_offset_error)
-        
+
         # scaling factor file name
         xml += "<scaling_factor_flag>%s</scaling_factor_flag>\n" % str(self.scaling_factor_file_flag)
         xml += "<scaling_factor_file>%s</scaling_factor_file>\n" % str(self.scaling_factor_file)
         xml += "<slits_width_flag>%s</slits_width_flag>\n" % str(self.slits_width_flag)
-        
+
         # geometry correction
         xml += "<geometry_correction_switch>%s</geometry_correction_switch>\n" % str(self.geometry_correction_switch)
-        
+
         #incident medium
         xml += "<incident_medium_list>%s</incident_medium_list>\n" % str(self.incident_medium_list[0])
         xml += "<incident_medium_index_selected>%s</incident_medium_index_selected>\n" % str(self.incident_medium_index_selected)
@@ -205,7 +205,7 @@ class DataSets(BaseScriptElement):
         return xml
 
     def from_xml(self, xml_str):
-        self.reset()    
+        self.reset()
         dom = xml.dom.minidom.parseString(xml_str)
         self.from_xml_element(dom)
         element_list = dom.getElementsByTagName("RefLData")
@@ -216,42 +216,42 @@ class DataSets(BaseScriptElement):
         """
             Read in data from XML
             @param xml_str: text to read the data from
-        """   
+        """
         #Peak selection
         self.DataPeakSelectionType = BaseScriptElement.getStringElement(instrument_dom, "peak_selection_type")
-        
+
         #Peak from/to pixels
         self.DataPeakPixels = [BaseScriptElement.getIntElement(instrument_dom, "from_peak_pixels"),
                                BaseScriptElement.getIntElement(instrument_dom, "to_peak_pixels")]
-        
-        
+
+
         #data metadata
         _tthd_value = BaseScriptElement.getStringElement(instrument_dom, "tthd_value")
         if (_tthd_value == ''):
             _tthd_value = 'N/A'
         self.tthd_value = _tthd_value
-        
+
         _ths_value = BaseScriptElement.getStringElement(instrument_dom, "ths_value")
         if (_ths_value == ''):
             _ths_value = 'N/A'
         self.ths_value = _ths_value
-        
+
         #low resolution range
         self.data_x_range_flag = BaseScriptElement.getBoolElement(instrument_dom, "x_range_flag",
                                                                   default=DataSets.data_x_range_flag)
-        
+
         self.data_x_range = [BaseScriptElement.getIntElement(instrument_dom, "x_min_pixel"),
                              BaseScriptElement.getIntElement(instrument_dom, "x_max_pixel")]
-        
+
         self.norm_x_range_flag = BaseScriptElement.getBoolElement(instrument_dom, "norm_x_range_flag",
                                                                   default=DataSets.norm_x_range_flag)
 
         self.norm_x_range = [BaseScriptElement.getIntElement(instrument_dom, "norm_x_min"),
                              BaseScriptElement.getIntElement(instrument_dom, "norm_x_max")]
-        
+
         #discrete selection string
         self.DataPeakDiscreteSelection = BaseScriptElement.getStringElement(instrument_dom, "peak_discrete_selection")
-        
+
         #background flag
         self.DataBackgroundFlag = BaseScriptElement.getBoolElement(instrument_dom,
                                                                    "background_flag",
@@ -264,55 +264,55 @@ class DataSets(BaseScriptElement):
                                   BaseScriptElement.getIntElement(instrument_dom, "back_roi2_to")]
 
         #from TOF and to TOF
-        self.TofRangeFlag = BaseScriptElement.getBoolElement(instrument_dom, "tof_range_flag", 
+        self.TofRangeFlag = BaseScriptElement.getBoolElement(instrument_dom, "tof_range_flag",
                                                              default=DataSets.TofRangeFlag)
         self.DataTofRange = [BaseScriptElement.getFloatElement(instrument_dom, "from_tof_range"),
                              BaseScriptElement.getFloatElement(instrument_dom, "to_tof_range")]
 
         self.data_files = BaseScriptElement.getIntList(instrument_dom, "data_sets")
-            
-        #with or without norm 
+
+        #with or without norm
         self.NormFlag = BaseScriptElement.getBoolElement(instrument_dom, "norm_flag",
                                                          default=DataSets.NormFlag)
-        
+
         #Peak from/to pixels
         self.NormPeakPixels = [BaseScriptElement.getIntElement(instrument_dom, "norm_from_peak_pixels"),
                                BaseScriptElement.getIntElement(instrument_dom, "norm_to_peak_pixels")]
 
         #background flag
-        self.NormBackgroundFlag = BaseScriptElement.getBoolElement(instrument_dom, 
-                                                                   "norm_background_flag", 
+        self.NormBackgroundFlag = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                   "norm_background_flag",
                                                                    default=DataSets.NormBackgroundFlag)
-        
+
         #background from/to pixels
         self.NormBackgroundRoi = [BaseScriptElement.getIntElement(instrument_dom, "norm_from_back_pixels"),
                                   BaseScriptElement.getIntElement(instrument_dom, "norm_to_back_pixels")]
-        
+
         self.norm_file = BaseScriptElement.getIntElement(instrument_dom, "norm_dataset")
-    
+
         # Q cut
-        self.q_min = BaseScriptElement.getFloatElement(instrument_dom, "q_min", default=DataSets.q_min)    
+        self.q_min = BaseScriptElement.getFloatElement(instrument_dom, "q_min", default=DataSets.q_min)
         self.q_step = BaseScriptElement.getFloatElement(instrument_dom, "q_step", default=DataSets.q_step)
         self.auto_q_binning = BaseScriptElement.getBoolElement(instrument_dom, "auto_q_binning", default=False)
-        
+
         # overlap_lowest_error
         self.overlap_lowest_error = BaseScriptElement.getBoolElement(instrument_dom, "overlap_lowest_error", default=True)
         self.overlap_mean_value = BaseScriptElement.getBoolElement(instrument_dom, "overlap_mean_value", default=False)
-    
+
         # Angle offset
         self.angle_offset = BaseScriptElement.getFloatElement(instrument_dom, "angle_offset", default=DataSets.angle_offset)
-        self.angle_offset_error = BaseScriptElement.getFloatElement(instrument_dom, "angle_offset_error", default=DataSets.angle_offset_error)        
-        
+        self.angle_offset_error = BaseScriptElement.getFloatElement(instrument_dom, "angle_offset_error", default=DataSets.angle_offset_error)
+
         #scaling factor file and options
         self.scaling_factor_file = BaseScriptElement.getStringElement(instrument_dom, "scaling_factor_file")
         self.slits_width_flag = BaseScriptElement.getBoolElement(instrument_dom, "slits_width_flag")
         self.scaling_factor_file_flag = BaseScriptElement.getBoolElement(instrument_dom, "scaling_factor_flag")
-        
+
         # geometry correction switch
         self.geometry_correction_switch = BaseScriptElement.getBoolElement(instrument_dom, "geometry_correction_switch")
-        
+
         #incident medium selected
-        if BaseScriptElement.getStringList(instrument_dom, "incident_medium_list") != []:        
+        if BaseScriptElement.getStringList(instrument_dom, "incident_medium_list") != []:
             self.incident_medium_list = BaseScriptElement.getStringList(instrument_dom, "incident_medium_list")
             self.incident_medium_index_selected = BaseScriptElement.getIntElement(instrument_dom, "incident_medium_index_selected")
         else:
@@ -336,10 +336,10 @@ class DataSets(BaseScriptElement):
         self.DataTofRange = DataSets.DataTofRange
         self.TofRangeFlag = DataSets.TofRangeFlag
         self.data_files = DataSets.data_files
-        
+
         self.tthd_value = DataSets.tthd_value
         self.ths_value = DataSets.ths_value
-        
+
         self.NormFlag = DataSets.NormFlag
         self.NormBackgroundFlag = DataSets.NormBackgroundFlag
         self.NormBackgroundRoi = DataSets.NormBackgroundRoi
@@ -349,28 +349,28 @@ class DataSets(BaseScriptElement):
         self.data_x_range = DataSets.data_x_range
         self.norm_x_range_flag = DataSets.norm_x_range_flag
         self.norm_x_range = DataSets.norm_x_range
-        
+
         # Q range
         self.q_min = DataSets.q_min
         self.q_step = DataSets.q_step
         self.auto_q_binning = DataSets.auto_q_binning
-        
+
         # overlap_lowest_error
         self.overlap_lowest_error = DataSets.overlap_lowest_error
         self.overlap_mean_value = DataSets.overlap_mean_value
-        
+
         # Angle offset
         self.angle_offset = DataSets.angle_offset
         self.angle_offset_error = DataSets.angle_offset_error
-        
+
         #scaling factor file and options
         self.scaling_factor_file = DataSets.scaling_factor_file
         self.slits_width_flag = DataSets.slits_width_flag
         self.scaling_factor_file_flag = DataSets.scaling_factor_file_flag
-        
+
         #geometry correction
         self.geometry_correction_switch = DataSets.geometry_correction_switch
-        
+
         #incident medium selected
         self.incident_medium_list = DataSets.incident_medium_list
         self.incident_medium_index_selected = DataSets.incident_medium_index_selected
@@ -379,4 +379,3 @@ class DataSets(BaseScriptElement):
         self.fourth_column_flag = DataSets.fourth_column_flag
         self.fourth_column_dq0 = DataSets.fourth_column_dq0
         self.fourth_column_dq_over_q = DataSets.fourth_column_dq_over_q
-        

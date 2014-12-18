@@ -1,6 +1,6 @@
 """
-    Classes for each reduction step. Those are kept separately 
-    from the the interface class so that the DgsReduction class could 
+    Classes for each reduction step. Those are kept separately
+    from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
 import os
@@ -10,8 +10,8 @@ import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 
 def getBooleanElement(instrument_dom, keyname, default):
-    """ Get a boolean value from an element. 
-    Boolean can be recorded as 
+    """ Get a boolean value from an element.
+    Boolean can be recorded as
     (1) True/False
     (2) 1/0
     """
@@ -19,8 +19,8 @@ def getBooleanElement(instrument_dom, keyname, default):
             keyname, default=default)
 
     if tempbool == "True":
-        tempbool = 1 
-    elif tempbool == "False": 
+        tempbool = 1
+    elif tempbool == "False":
         tempbool = 0
 
     return bool(int(tempbool))
@@ -88,13 +88,13 @@ class AdvancedSetupScript(BaseScriptElement):
         self.parnamelist.append("ScaleData")
 
         return
-        
+
     def set_default_pars(self, inst_name):
         """ Set default values
         """
 
         return
-        
+
     def to_script(self):
         """ 'Public'  method  to save the current GUI to string via str() and general class ReductionScript
         """
@@ -118,7 +118,7 @@ class AdvancedSetupScript(BaseScriptElement):
         """ Create a dictionary for parameter and parameter values for SNSPowderReductionPlus()
         """
         pardict = {}
-       
+
         pardict["UnwrapRef"] = self.unwrapref
         pardict["LowResRef"] = self.lowresref
         pardict["CropWavelengthMin"] = self.cropwavelengthmin
@@ -136,7 +136,7 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["ScaleData"] = self.scaledata
 
         return pardict
-        
+
     def to_xml(self):
         """ 'Public' method to create XML from the current data.
         """
@@ -155,11 +155,11 @@ class AdvancedSetupScript(BaseScriptElement):
         xml += "</AdvancedSetup>\n"
 
         return xml
-    
+
     def from_xml(self, xml_str):
         """ 'Public' method to read in data from XML
             @param xml_str: text to read the data from
-        """       
+        """
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("AdvancedSetup")
         if len(element_list)>0:
@@ -190,7 +190,7 @@ class AdvancedSetupScript(BaseScriptElement):
             self.pushdatapositive = BaseScriptElement.getStringElement(instrument_dom,
                     "pushdatapositive", default=AdvancedSetupScript.pushdatapositive)
 
-            self.stripvanadiumpeaks = getBooleanElement(instrument_dom, 
+            self.stripvanadiumpeaks = getBooleanElement(instrument_dom,
                     "stripvanadiumpeaks", AdvancedSetupScript.stripvanadiumpeaks)
 
             self.vanadiumfwhm = getFloatElement(instrument_dom, "vanadiumfwhm",
@@ -202,7 +202,7 @@ class AdvancedSetupScript(BaseScriptElement):
             self.vanadiumsmoothparams = BaseScriptElement.getStringElement(instrument_dom,
                 "vanadiumsmoothparams", default=AdvancedSetupScript.vanadiumsmoothparams)
 
-            self.extension = BaseScriptElement.getStringElement(instrument_dom, 
+            self.extension = BaseScriptElement.getStringElement(instrument_dom,
                     "extension", default=AdvancedSetupScript.extension)
 
             self.preserveevents = getBooleanElement(instrument_dom, "preserveevents",

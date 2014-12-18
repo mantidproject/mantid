@@ -55,12 +55,10 @@ namespace MDEventsTestHelper
    *
    * @return EventWorkspace_sptr
    */
-  EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents)
+  EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents,int numPixels,int numBins)
   {
     FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
 
-    int numPixels = 10000;
-    int numBins = 1600;
     double binDelta = 10.0;
 
     EventWorkspace_sptr retVal(new EventWorkspace);

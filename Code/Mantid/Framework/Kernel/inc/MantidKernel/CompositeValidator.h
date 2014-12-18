@@ -49,7 +49,7 @@ namespace Kernel
     ///Gets the type of the validator
     std::string getType() const { return "composite"; }
     /// Return the instersection of allowed values from children
-    std::set<std::string> allowedValues() const;
+    std::vector<std::string> allowedValues() const;
     /// Clones this and the children into a new Validator
     IValidator_sptr clone() const;
     /// Adds a validator to the group of validators to check

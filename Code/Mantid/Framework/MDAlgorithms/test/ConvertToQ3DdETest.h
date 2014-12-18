@@ -284,6 +284,7 @@ void xtestTransfMat1()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,2,3, 90., 90., 90.);
      ws2D->mutableSample().setOrientedLattice(latt);
+     delete latt;
      MDWSDescription TWS(4);
 
 
@@ -298,7 +299,7 @@ void xtestTransfMat2()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,2,3, 75., 45., 35.);
      ws2D->mutableSample().setOrientedLattice(latt);
-
+     delete latt;
       std::vector<double> rot;
     //std::vector<double> rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,0,0),Kernel::V3D(0,1,0));
      Kernel::Matrix<double> unit = Kernel::Matrix<double>(3,3, true);
@@ -310,7 +311,7 @@ void xtestTransfMat3()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,2,3, 75., 45., 35.);
      ws2D->mutableSample().setOrientedLattice(latt);
-
+     delete latt;
       std::vector<double> rot;
      //std::vector<double> rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,0,0),Kernel::V3D(0,-1,0));
      Kernel::Matrix<double> unit = Kernel::Matrix<double>(3,3, true);
@@ -324,6 +325,7 @@ void xtestTransfMat4()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,1,3, 90., 90., 90.);
      ws2D->mutableSample().setOrientedLattice(latt);
+     delete latt;
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,0);
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(1,0);
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(2,0);
@@ -344,6 +346,7 @@ void xtestTransfMat5()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,2,3, 75., 45., 90.);
      ws2D->mutableSample().setOrientedLattice(latt);
+     delete latt;
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,0);
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(1,0);
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(2,0);
@@ -365,6 +368,7 @@ void xtestTransf_PSI_DPSI()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);
      ws2D->mutableSample().setOrientedLattice(latt);
+     delete latt;
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,0);
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(1,-20); // Psi, dPsi
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(2,0);
@@ -385,6 +389,7 @@ void xtestTransf_GL()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);
      ws2D->mutableSample().setOrientedLattice(latt);
+     delete latt;
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,20);  //gl
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(1,0);
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(2,0);

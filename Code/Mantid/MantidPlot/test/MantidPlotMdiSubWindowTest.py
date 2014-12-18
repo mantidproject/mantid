@@ -1,4 +1,4 @@
-""" 
+"""
 Test of basic 1D plotting methods in MantidPlot
 """
 import mantidplottests
@@ -7,13 +7,13 @@ from mantidplot import *
 from PyQt4 import QtGui, QtCore
 
 class MantidPlotMdiSubWindowTest(unittest.TestCase):
-    
+
     def test_table(self):
-        
+
         self.doTest( newTable() )
 
     def test_graph(self):
-        
+
         self.doTest( newGraph() )
 
     def doTest(self, w):
@@ -31,7 +31,7 @@ class MantidPlotMdiSubWindowTest(unittest.TestCase):
         # TODO: sizes are not equal. Should we fix it?
         # self.assertEqual( size, w.size() )
         w.close()
-            
+
 
 # Run the unit tests
 mantidplottests.runTests(MantidPlotMdiSubWindowTest)

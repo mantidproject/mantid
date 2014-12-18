@@ -9,35 +9,48 @@
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 #include "MantidDataObjects/Events.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 
 namespace Mantid
 {
 
-  namespace DataHandling
+namespace DataHandling
+{
+
+  /** This class defines the pulse times for a specific bank.
+   * Since some instruments (ARCS, VULCAN) have multiple preprocessors,
+   * this means that some banks have different lists of pulse times.
+   */
+  class BankPulseTimes
   {
+  public:
 
-    /** This class defines the pulse times for a specific bank.
-     * Since some instruments (ARCS, VULCAN) have multiple preprocessors,
-     * this means that some banks have different lists of pulse times.
-     */
-    class BankPulseTimes
-    {
-    public:
-      BankPulseTimes(::NeXus::File & file);
-      BankPulseTimes(std::vector<Kernel::DateAndTime> & times);
-      ~BankPulseTimes();
-      bool equals(size_t otherNumPulse, std::string otherStartTime);
+    /// Constructor with NeXus::File
+    BankPulseTimes(::NeXus::File &file);
 
-      /// String describing the start time
-      std::string startTime;
-      /// Size of the array of pulse times
-      size_t numPulses;
-      /// Array of the pulse times
-      Kernel::DateAndTime * pulseTimes;
-    };
+    /// Constructor with vector of DateAndTime
+    BankPulseTimes(const std::vector<Kernel::DateAndTime> & times);
 
-    /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
+    /// Destructor
+    ~BankPulseTimes();
+
+    /// Equals
+    bool equals(size_t otherNumPulse, std::string otherStartTime);
+
+    /// String describing the start time
+    std::string startTime;
+
+    /// Size of the array of pulse times
+    size_t numPulses;
+
+    /// Array of the pulse times
+    Kernel::DateAndTime * pulseTimes;
+
+  };
+
+
+  /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
     Load Event Nexus files.
 
@@ -68,173 +81,180 @@ namespace Mantid
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
     */
-    class DLLExport LoadEventNexus : public API::IFileLoader<Kernel::NexusDescriptor>
-    {
-    public:
-      
-      LoadEventNexus();
-      virtual ~LoadEventNexus();
+  class DLLExport LoadEventNexus : public API::IFileLoader<Kernel::NexusDescriptor>
+  {
 
-      virtual const std::string name() const { return "LoadEventNexus";};
-    ///Summary of algorithms purpose
+  public:
+
+    LoadEventNexus();
+    virtual ~LoadEventNexus();
+
+    virtual const std::string name() const { return "LoadEventNexus";};
+
+    /// Summary of algorithms purpose
     virtual const std::string summary() const {return "Loads Event NeXus files (produced by the SNS) and stores it in an EventWorkspace. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval.";}
 
-      virtual int version() const { return 1;};
-      virtual const std::string category() const { return "DataHandling\\Nexus";}
+    /// Version
+    virtual int version() const { return 1;};
 
-      /// Returns a confidence value that this algorithm can load a file
-      int confidence(Kernel::NexusDescriptor & descriptor) const;
+    /// Category
+    virtual const std::string category() const { return "DataHandling\\Nexus";}
 
-      /** Sets whether the pixel counts will be pre-counted.
-       * @param value :: true if you want to precount. */
-      void setPrecount(bool value)
-      {
-        precount = value;
-      }
+    /// Returns a confidence value that this algorithm can load a file
+    int confidence(Kernel::NexusDescriptor & descriptor) const;
 
-    public:
-      void init();
-      void exec();
+    /** Sets whether the pixel counts will be pre-counted.
+     * @param value :: true if you want to precount. */
+    void setPrecount(bool value)
+    {
+      precount = value;
+    }
 
-      /// The name and path of the input file
-      std::string m_filename;
+    static boost::shared_ptr<BankPulseTimes> runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+                                                              Algorithm &alg, bool returnpulsetimes);
 
-      /// The workspace being filled out
-      DataObjects::EventWorkspace_sptr WS;
+    static void loadEntryMetadata(const std::string &nexusfilename, Mantid::API::MatrixWorkspace_sptr WS,
+                                  const std::string &entry_name);
+    /// Load instrument from Nexus file if possible, else from IDF spacified by Nexus file
+    static bool loadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+                               const std::string & top_entry_name, Algorithm * alg);
 
-      /// Filter by a minimum time-of-flight
-      double filter_tof_min;
-      /// Filter by a maximum time-of-flight
-      double filter_tof_max;
+    /// Load instrument for Nexus file
+    static bool runLoadIDFFromNexus(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+                                    const std::string & top_entry_name, Algorithm * alg);
 
-      /// Filter by start time
-      Kernel::DateAndTime filter_time_start;
-      /// Filter by stop time
-      Kernel::DateAndTime filter_time_stop;
-      /// chunk number
-      int chunk;
-      /// number of chunks
-      int totalChunks;
-      /// for multiple chunks per bank
-      int firstChunkForBank;
-      /// number of chunks per bank
-      size_t eventsPerChunk;
+    /// Load instrument from IDF file specified by Nexus file
+    static bool runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+                                  const std::string & top_entry_name, Algorithm * alg);
 
-      /// Was the instrument loaded?
-      bool instrument_loaded_correctly;
+    static void loadSampleDataISIScompatibility(::NeXus::File& file, Mantid::API::MatrixWorkspace_sptr WS);
 
-      /// Limits found to tof
-      double longest_tof;
-      /// Limits found to tof
-      double shortest_tof;
-      /// Count of all the "bad" tofs found. These are events with TOF > 2e8 microsec
-      size_t bad_tofs;
-      /// A count of events discarded because they came from a pixel that's not in the IDF
-      size_t discarded_events;
+  public:
 
-      /// Do we pre-count the # of events in each pixel ID?
-      bool precount;
+    /// The name and path of the input file
+    std::string m_filename;
 
-      /// Tolerance for CompressEvents; use -1 to mean don't compress.
-      double compressTolerance;
+    /// The workspace being filled out
+    DataObjects::EventWorkspace_sptr WS;
 
-      /// Do we load the sample logs?
-      bool loadlogs;
-      
-      /// Pointer to the vector of events
-      typedef std::vector<Mantid::DataObjects::TofEvent> * EventVector_pt;
+    /// Filter by a minimum time-of-flight
+    double filter_tof_min;
+    /// Filter by a maximum time-of-flight
+    double filter_tof_max;
 
-      /// Vector where index = event_id; value = ptr to std::vector<TofEvent> in the event list.
-      std::vector<EventVector_pt> eventVectors;
+    /// Filter by start time
+    Kernel::DateAndTime filter_time_start;
+    /// Filter by stop time
+    Kernel::DateAndTime filter_time_stop;
+    /// chunk number
+    int chunk;
+    /// number of chunks
+    int totalChunks;
+    /// for multiple chunks per bank
+    int firstChunkForBank;
+    /// number of chunks per bank
+    size_t eventsPerChunk;
 
-      /// Mutex to protect eventVectors from each task
-      Poco::Mutex m_eventVectorMutex;
+    /// Was the instrument loaded?
+    bool instrument_loaded_correctly;
 
-      /// Maximum (inclusive) event ID possible for this instrument
-      int32_t eventid_max;
+    /// Limits found to tof
+    double longest_tof;
+    /// Limits found to tof
+    double shortest_tof;
+    /// Count of all the "bad" tofs found. These are events with TOF > 2e8 microsec
+    size_t bad_tofs;
+    /// A count of events discarded because they came from a pixel that's not in the IDF
+    size_t discarded_events;
 
-      /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace index)
-      std::vector<size_t> pixelID_to_wi_vector;
+    /// Do we pre-count the # of events in each pixel ID?
+    bool precount;
 
-      /// Offset in the pixelID_to_wi_vector to use.
-      detid_t pixelID_to_wi_offset;
+    /// Tolerance for CompressEvents; use -1 to mean don't compress.
+    double compressTolerance;
 
-      /// True if the event_id is spectrum no not pixel ID
-      bool event_id_is_spec;
+    /// Do we load the sample logs?
+    bool loadlogs;
 
-      /// One entry of pulse times for each preprocessor
-      std::vector<BankPulseTimes*> m_bankPulseTimes;
+    /// Pointer to the vector of events
+    typedef std::vector<Mantid::DataObjects::TofEvent> * EventVector_pt;
 
-      /// Pulse times for ALL banks, taken from proton_charge log.
-      BankPulseTimes* m_allBanksPulseTimes;
+    /// Vector where index = event_id; value = ptr to std::vector<TofEvent> in the event list.
+    std::vector<EventVector_pt> eventVectors;
 
-      /// Flag for dealing with a simulated file
-      bool m_haveWeights;
+    /// Mutex to protect eventVectors from each task
+    Poco::Mutex m_eventVectorMutex;
 
-      /// Pointer to the vector of weighted events
-      typedef std::vector<Mantid::DataObjects::WeightedEvent> * WeightedEventVector_pt;
+    /// Maximum (inclusive) event ID possible for this instrument
+    int32_t eventid_max;
 
-      /// Vector where index = event_id; value = ptr to std::vector<WeightedEvent> in the event list.
-      std::vector<WeightedEventVector_pt> weightedEventVectors;
+    /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace index)
+    std::vector<size_t> pixelID_to_wi_vector;
 
-      DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
+    /// Offset in the pixelID_to_wi_vector to use.
+    detid_t pixelID_to_wi_offset;
 
-      /// Map detector IDs to event lists.
-      template <class T>
-      void makeMapToEventLists(std::vector<T> & vectors);
+    /// True if the event_id is spectrum no not pixel ID
+    bool event_id_is_spec;
 
-      void loadEvents(API::Progress * const prog, const bool monitors);
-      void createSpectraMapping(const std::string &nxsfile,
-                                const bool monitorsOnly,
-                                const std::vector<std::string> & bankNames = std::vector<std::string>());
-      void deleteBanks(API::MatrixWorkspace_sptr workspace, std::vector<std::string> bankNames);
-      bool hasEventMonitors();
-      void runLoadMonitors();
-      /// Set the filters on TOF.
-      void setTimeFilters(const bool monitors);
+    /// One entry of pulse times for each preprocessor
+    std::vector<boost::shared_ptr<BankPulseTimes> > m_bankPulseTimes;
 
-      static void loadEntryMetadata(const std::string &nexusfilename, Mantid::API::MatrixWorkspace_sptr WS,
-          const std::string &entry_name);
-      /// Load instrument from Nexus file if possible, else from IDF spacified by Nexus file 
-      static bool loadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
-          const std::string & top_entry_name, Algorithm * alg);
+    /// Pulse times for ALL banks, taken from proton_charge log.
+    boost::shared_ptr<BankPulseTimes> m_allBanksPulseTimes;
 
-      /// Load instrument for Nexus file
-      static bool runLoadIDFFromNexus(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
-                                      const std::string & top_entry_name, Algorithm * alg);
+    /// Flag for dealing with a simulated file
+    bool m_haveWeights;
 
-      /// Load instrument from IDF file specified by Nexus file
-      static bool runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
-          const std::string & top_entry_name, Algorithm * alg);
+    /// Pointer to the vector of weighted events
+    typedef std::vector<Mantid::DataObjects::WeightedEvent> * WeightedEventVector_pt;
 
-      static BankPulseTimes * runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
-          Algorithm * alg);
+    /// Vector where index = event_id; value = ptr to std::vector<WeightedEvent> in the event list.
+    std::vector<WeightedEventVector_pt> weightedEventVectors;
 
-      /// Load a spectra mapping from the given file
-      bool loadSpectraMapping(const std::string& filename, const bool monitorsOnly, const std::string& entry_name);
+    DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
 
-      static void loadSampleDataISIScompatibility(::NeXus::File& file, Mantid::API::MatrixWorkspace_sptr WS);
-    private:
+    /// Map detector IDs to event lists.
+    template <class T>
+    void makeMapToEventLists(std::vector<T> & vectors);
 
-      // ISIS specific methods for dealing with wide events
-      static void loadTimeOfFlight(const std::string &nexusfilename, DataObjects::EventWorkspace_sptr WS,
-          const std::string &entry_name, const std::string &classType);
+    void loadEvents(API::Progress * const prog, const bool monitors);
+    void createSpectraMapping(const std::string &nxsfile,
+                              const bool monitorsOnly,
+                              const std::vector<std::string> & bankNames = std::vector<std::string>());
+    void deleteBanks(API::MatrixWorkspace_sptr workspace, std::vector<std::string> bankNames);
+    bool hasEventMonitors();
+    void runLoadMonitors();
+    /// Set the filters on TOF.
+    void setTimeFilters(const bool monitors);
 
-      static void loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS, 
-        const std::string& binsName,size_t start_wi = 0, size_t end_wi = 0);
+    /// Load a spectra mapping from the given file
+    bool loadSpectraMapping(const std::string& filename, const bool monitorsOnly, const std::string& entry_name);
 
-      void filterDuringPause(API::MatrixWorkspace_sptr workspace);
+  private:
 
-    public:
-      /// name of top level NXentry to use
-      std::string m_top_entry_name;
-      /// Set the top entry field name
-      void setTopEntryName();
-      /// whether or not to launch multiple ProcessBankData jobs per bank
-      bool splitProcessing;
-    };
+    void init();
+    void exec();
 
-  } // namespace DataHandling
+    /// ISIS specific methods for dealing with wide events
+    static void loadTimeOfFlight(const std::string &nexusfilename, DataObjects::EventWorkspace_sptr WS,
+                                 const std::string &entry_name, const std::string &classType);
+
+    static void loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS,
+                                     const std::string& binsName,size_t start_wi = 0, size_t end_wi = 0);
+
+    void filterDuringPause(API::MatrixWorkspace_sptr workspace);
+
+  public:
+    /// name of top level NXentry to use
+    std::string m_top_entry_name;
+    /// Set the top entry field name
+    void setTopEntryName();
+    /// whether or not to launch multiple ProcessBankData jobs per bank
+    bool splitProcessing;
+  };
+
+} // namespace DataHandling
 } // namespace Mantid
 
 #endif /*MANTID_DATAHANDLING_LOADEVENTNEXUS_H_*/

@@ -1,5 +1,5 @@
 """
-    List of user commands. 
+    List of user commands.
 """
 
 from reducer import Reducer
@@ -19,14 +19,14 @@ class ReductionSingleton:
 
         # Store instance reference as the only member in the handle
         self.__dict__['_ReductionSingleton__instance'] = ReductionSingleton.__instance
-        
+
     @classmethod
     def clean(cls, reducer_cls=None):
         if reducer_cls==None:
             ReductionSingleton.__instance = Reducer()
         else:
             ReductionSingleton.__instance = reducer_cls()
-        
+
     @classmethod
     def replace(cls, red):
         """
@@ -39,7 +39,7 @@ class ReductionSingleton:
         else:
             raise RuntimeError, 'The object passed to ReductionSingleton.replace() must be of type Reducer'
 
-        
+
     @classmethod
     def run(cls):
         """
@@ -52,7 +52,7 @@ class ReductionSingleton:
                 return ReductionSingleton.__instance._reduce()
         finally:
             ReductionSingleton.clean(ReductionSingleton.__instance.__class__)
-        
+
     def __getattr__(self, attr):
         """ Delegate access to implementation """
         return getattr(self.__instance, attr)
@@ -70,16 +70,16 @@ def Clear(reducer_cls=None):
 
 def DataPath(path):
     ReductionSingleton().set_data_path(path)
-    
+
 def OutputPath(path):
     ReductionSingleton().set_output_path(path)
 
 def Reduce1D():
     return ReductionSingleton().reduce()
-        
+
 def Reduce():
     return ReductionSingleton().reduce()
-        
+
 def AppendDataFile(datafile, workspace=None):
     """
         Append a data file in the list of files to be processed.
@@ -88,11 +88,10 @@ def AppendDataFile(datafile, workspace=None):
             [Default will be the name of the file]
     """
     ReductionSingleton().append_data_file(datafile, workspace)
-    
+
 def ClearDataFiles():
     """
         Empty the list of data files to be processed while keeping
         all other reduction options.
     """
     ReductionSingleton().clear_data_files()
-    

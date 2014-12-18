@@ -99,7 +99,9 @@ REGISTER_VATESGUI(MdViewerWidget)
 /**
  * This constructor is used in the plugin mode operation of the VSI.
  */
-MdViewerWidget::MdViewerWidget() : VatesViewerInterface()
+MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
+  dataLoader(NULL), hiddenView(NULL), lodAction(NULL), screenShot(NULL), viewLayout(NULL),
+  viewSettings(NULL)
 {
   // Calling workspace observer functions.
   observeAfterReplace();

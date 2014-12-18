@@ -29,7 +29,7 @@ public:
   static void destroySuite( PlotAsymmetryByLogValueTest *suite ) { delete suite; }
 
   PlotAsymmetryByLogValueTest()
-    :firstRun("MUSR00015189.nxs"),lastRun("MUSR00015193.nxs")
+    :firstRun("MUSR00015189.nxs"),lastRun("MUSR00015190.nxs")
   {
   }
 
@@ -52,14 +52,11 @@ public:
       );
 
     TS_ASSERT(outWS);
-    TS_ASSERT_EQUALS(outWS->blocksize(),5);
+    TS_ASSERT_EQUALS(outWS->blocksize(),2);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(),4);
     const Mantid::MantidVec& Y = outWS->readY(0);
     TS_ASSERT_DELTA(Y[0],0.0128845,0.001);
     TS_ASSERT_DELTA(Y[1],0.0224898,0.00001);
-    TS_ASSERT_DELTA(Y[2],0.0387179,0.00001);
-    TS_ASSERT_DELTA(Y[3],0.0545464,0.00001);
-    TS_ASSERT_DELTA(Y[4],0.0906989,0.00001);
 
     const TextAxis* axis = dynamic_cast<const TextAxis*>(outWS->getAxis(1));
     TS_ASSERT(axis);
@@ -94,14 +91,11 @@ public:
       );
 
     TS_ASSERT(outWS);
-    TS_ASSERT_EQUALS(outWS->blocksize(),5);
+    TS_ASSERT_EQUALS(outWS->blocksize(),2);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(),4);
     const Mantid::MantidVec& Y = outWS->readY(0);
     TS_ASSERT_DELTA(Y[0],-0.01236,0.001);
     TS_ASSERT_DELTA(Y[1],0.019186,0.00001);
-    TS_ASSERT_DELTA(Y[2],0.020093,0.00001);
-    TS_ASSERT_DELTA(Y[3],0.037658,0.00001);
-    TS_ASSERT_DELTA(Y[4],0.085060,0.00001);
 
     AnalysisDataService::Instance().clear();
   }
@@ -213,16 +207,13 @@ public:
       AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWs);
-    TS_ASSERT_EQUALS(outWs->blocksize(), 5);
+    TS_ASSERT_EQUALS(outWs->blocksize(), 2);
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(),1);
 
     const Mantid::MantidVec& Y = outWs->readY(0);
 
     TS_ASSERT_DELTA(Y[0], 0.15108, 0.00001);
     TS_ASSERT_DELTA(Y[1], 0.14389, 0.00001);
-    TS_ASSERT_DELTA(Y[2], 0.12929, 0.00001);
-    TS_ASSERT_DELTA(Y[3], 0.10982, 0.00001);
-    TS_ASSERT_DELTA(Y[4], 0.07581, 0.00001);
 
     AnalysisDataService::Instance().remove(ws);
     AnalysisDataService::Instance().remove(deadTimeWs);
@@ -252,16 +243,13 @@ public:
       AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWs);
-    TS_ASSERT_EQUALS(outWs->blocksize(), 5);
+    TS_ASSERT_EQUALS(outWs->blocksize(), 2);
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(),1);
 
     const Mantid::MantidVec& Y = outWs->readY(0);
 
     TS_ASSERT_DELTA(Y[0], 0.150616, 0.00001);
     TS_ASSERT_DELTA(Y[1], 0.143444, 0.00001);
-    TS_ASSERT_DELTA(Y[2], 0.128855, 0.00001);
-    TS_ASSERT_DELTA(Y[3], 0.109394, 0.00001);
-    TS_ASSERT_DELTA(Y[4], 0.075398, 0.00001);
 
     AnalysisDataService::Instance().remove(ws);
   }

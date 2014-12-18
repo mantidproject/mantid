@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm takes a `Workspace2D <http://www.mantidproject.org/Workspace2D>`__ 
+This algorithm takes a :ref:`Workspace2D <Workspace2D>` 
 with any binning or units as its input. An event is created for each 
 bin of each histogram, except if the bin count is 0.0 (unless 
 ``GenerateZeros`` is true). Infinity and NAN (not-a-number) values 

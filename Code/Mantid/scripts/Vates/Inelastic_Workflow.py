@@ -1,6 +1,6 @@
 #Common names
 filename = 'fe_demo_30.sqw'
-ws_in ='fe_demo_30' 
+ws_in ='fe_demo_30'
 
 #Load an SQW file and internally convert to a Multidimensional event workspace (MDEW)
 if not mtd.doesExist(ws_in):

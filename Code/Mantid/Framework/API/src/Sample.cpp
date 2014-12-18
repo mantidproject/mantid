@@ -71,7 +71,8 @@ namespace Mantid
       m_thick = rhs.m_thick;
       m_height = rhs.m_height;
       m_width = rhs.m_width;
-      if (rhs.m_lattice)
+      if (m_lattice!=NULL) delete m_lattice;
+      if (rhs.m_lattice)       
         m_lattice = new OrientedLattice(rhs.getOrientedLattice());
       else
         m_lattice = NULL;
@@ -198,7 +199,14 @@ namespace Mantid
      */
     void Sample::setOrientedLattice(OrientedLattice * latt)
     {
-      m_lattice = latt;
+      if (m_lattice!=NULL)
+      {
+          delete m_lattice;
+      }
+      if (latt!=NULL)
+        m_lattice = new OrientedLattice(*latt);
+      else
+        m_lattice=NULL;
     }
 
     /** @return true if the sample has an OrientedLattice  */

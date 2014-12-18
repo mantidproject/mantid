@@ -1,6 +1,6 @@
 """
-    Classes for each reduction step. Those are kept separately 
-    from the the interface class so that the DgsReduction class could 
+    Classes for each reduction step. Those are kept separately
+    from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
 import os
@@ -35,7 +35,7 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         super(DiagnoseDetectorsScript, self).__init__()
         self.set_default_pars(inst_name)
         self.reset()
-        
+
     def set_default_pars(self, inst_name):
         import dgs_utils
         ip = dgs_utils.InstrumentParameters(inst_name)
@@ -57,7 +57,7 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         DiagnoseDetectorsScript.psd_bleed = ip.get_bool_param("diag_bleed_test")
         DiagnoseDetectorsScript.max_framerate = ip.get_parameter("diag_bleed_maxrate")
         DiagnoseDetectorsScript.ignored_pixels = ip.get_parameter("diag_bleed_pixels")
-        
+
     def to_script(self):
         script = ""
         if self.high_counts != DiagnoseDetectorsScript.high_counts:
@@ -97,9 +97,9 @@ class DiagnoseDetectorsScript(BaseScriptElement):
             if self.max_framerate != DiagnoseDetectorsScript.max_framerate:
                 script += "MaxFramerate=%s,\n" % str(self.max_framerate)
             if self.ignored_pixels != DiagnoseDetectorsScript.ignored_pixels:
-                script += "IgnoredPixels=%s,\n" % str(self.ignored_pixels) 
+                script += "IgnoredPixels=%s,\n" % str(self.ignored_pixels)
         return script
-    
+
     def to_xml(self):
         """
             Create XML from the current data.
@@ -126,12 +126,12 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         xml += "  <ignored_pixels>%s</ignored_pixels>\n" % self.ignored_pixels
         xml += "</DiagnoseDetectors>\n"
         return xml
-    
+
     def from_xml(self, xml_str):
         """
             Read in data from XML
             @param xml_str: text to read the data from
-        """       
+        """
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("DiagnoseDetectors")
         if len(element_list)>0:
@@ -156,7 +156,7 @@ class DiagnoseDetectorsScript(BaseScriptElement):
                                                                       default=DiagnoseDetectorsScript.median_test_high)
             self.errorbar_criterion = BaseScriptElement.getFloatElement(instrument_dom,
                                                                         "errorbar_criterion",
-                                                                        default=DiagnoseDetectorsScript.errorbar_criterion)    
+                                                                        default=DiagnoseDetectorsScript.errorbar_criterion)
             self.det_van2 = BaseScriptElement.getStringElement(instrument_dom,
                                                                "det_van2",
                                                                default=DiagnoseDetectorsScript.det_van2)
@@ -174,7 +174,7 @@ class DiagnoseDetectorsScript(BaseScriptElement):
                                                                              default=DiagnoseDetectorsScript.sambkg_median_test_high)
             self.sambkg_errorbar_criterion = BaseScriptElement.getFloatElement(instrument_dom,
                                                                                "sambkg_errorbar_criterion",
-                                                                               default=DiagnoseDetectorsScript.sambkg_errorbar_criterion)        
+                                                                               default=DiagnoseDetectorsScript.sambkg_errorbar_criterion)
             self.tof_start = BaseScriptElement.getIntElement(instrument_dom,
                                                               "background_tof_start",
                                                               default=DiagnoseDetectorsScript.tof_start)
@@ -217,4 +217,3 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         self.psd_bleed = DiagnoseDetectorsScript.psd_bleed
         self.max_framerate = DiagnoseDetectorsScript.max_framerate
         self.ignored_pixels = DiagnoseDetectorsScript.ignored_pixels
-        

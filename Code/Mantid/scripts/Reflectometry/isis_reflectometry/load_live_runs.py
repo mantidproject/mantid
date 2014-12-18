@@ -8,4 +8,3 @@ def is_live_run(run):
         return (int(run) is 0)
     except:
         return False
-    

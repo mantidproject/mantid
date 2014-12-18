@@ -41,6 +41,7 @@ PoldiPeakSearch::PoldiPeakSearch() :
     m_maximumPeakNumber(0),
     m_recursionAbsoluteBegin(),
     m_recursionAbsoluteEnd(),
+    m_recursionBordersInitialized(false),
     m_peaks(new PoldiPeakCollection())
 {
 }
@@ -171,7 +172,7 @@ MantidVec::const_iterator PoldiPeakSearch::getLeftRangeBegin(MantidVec::const_it
      *
      * Exactly the same considerations are valid for the rightmost sublist.
      */
-    if(begin != m_recursionAbsoluteBegin) {
+    if(!m_recursionBordersInitialized || begin != m_recursionAbsoluteBegin) {
         return begin + m_minimumDistance;
     }
 
@@ -188,7 +189,7 @@ MantidVec::const_iterator PoldiPeakSearch::getLeftRangeBegin(MantidVec::const_it
   */
 MantidVec::const_iterator PoldiPeakSearch::getRightRangeEnd(MantidVec::const_iterator end) const
 {
-    if(end != m_recursionAbsoluteEnd) {
+    if(!m_recursionBordersInitialized || end != m_recursionAbsoluteEnd) {
         return end - m_minimumDistance;
     }
 
@@ -477,6 +478,8 @@ void PoldiPeakSearch::setRecursionAbsoluteBorders(MantidVec::const_iterator begi
 {
     m_recursionAbsoluteBegin = begin;
     m_recursionAbsoluteEnd = end;
+
+    m_recursionBordersInitialized = true;
 }
 
 bool PoldiPeakSearch::vectorElementGreaterThan(MantidVec::const_iterator first, MantidVec::const_iterator second)

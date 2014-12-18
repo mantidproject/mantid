@@ -3,7 +3,7 @@ def main():
     source(findFile("scripts", "common_checks.py"))
     startApplication("MantidPlot")
     run_script("mdew_4D.py")
-    
+
     workspace_name = "SEQ"
     get_workspace(workspace_name)
     activate_vsi()

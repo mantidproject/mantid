@@ -37,9 +37,9 @@ typedef struct
 }  isisds_open_t;
 
 /** used for sends and replies once a connection open
- * try to align to 64 bits (8 bytes) boundaries 
+ * try to align to 64 bits (8 bytes) boundaries
  */
-typedef struct 
+typedef struct
 {
 	int len;  /* of this structure plus any additional data (in bytes) */
  	int type; /* ISISDSDataType */
@@ -212,13 +212,13 @@ public:
       catch(...)
       {
         break;
-      } 
+      }
       if ( comm.type == ISISDSChar )
       {
         std::string command(buffer, n);
         if ( command == "NAME" )
         {
-          sendString("TESTHISTOLISTENER");
+          sendString("MUSR");
         }
         else if ( command == "NPER" )
         {
@@ -239,8 +239,8 @@ public:
         else if ( command == "RTCB1" )
         {
           std::vector<float> bins( m_nBins + 1 );
-          const float dx = 0.1f;
-          float x = 0;
+          const float dx = 100.0f;
+          float x = 10000.0f;
           for(auto b = bins.begin(); b != bins.end(); ++b, x += dx)
           {
             *b = x;
@@ -276,7 +276,7 @@ public:
           sendOK();
         }
       }
-      else 
+      else
       {
         std::string command(comm.command);
         if ( command == "GETDAT" )
@@ -310,8 +310,8 @@ public:
    * @param nspec :: Number of spectra in the simulated dataset.
    * @param nbins :: Number of bins in the simulated dataset.
    */
-  TestServerConnectionFactory(int nper = 1, int nspec = 100, int nbins = 30): 
-  Poco::Net::TCPServerConnectionFactory(), 
+  TestServerConnectionFactory(int nper = 1, int nspec = 100, int nbins = 30):
+  Poco::Net::TCPServerConnectionFactory(),
   m_nPeriods(nper),
   m_nSpectra(nspec),
   m_nBins(nbins)
@@ -330,12 +330,12 @@ using namespace Kernel;
 using namespace API;
 
 /// (Empty) Constructor
-FakeISISHistoDAE::FakeISISHistoDAE():m_server(NULL) 
+FakeISISHistoDAE::FakeISISHistoDAE():m_server(NULL)
 {
 }
 
 /// Destructor
-FakeISISHistoDAE::~FakeISISHistoDAE() 
+FakeISISHistoDAE::~FakeISISHistoDAE()
 {
   if ( m_server )
   {
@@ -352,6 +352,7 @@ void FakeISISHistoDAE::init()
   declareProperty(new PropertyWithValue<int>("NPeriods", 1, Direction::Input),"Number of periods.");
   declareProperty(new PropertyWithValue<int>("NSpectra", 100, Direction::Input),"Number of spectra.");
   declareProperty(new PropertyWithValue<int>("NBins", 30, Direction::Input),"Number of bins.");
+  declareProperty(new PropertyWithValue<int>("Port", 56789, Direction::Input),"The port to broadcast on (default 56789, ISISDAE 6789).");
 }
 
 /**
@@ -359,12 +360,15 @@ void FakeISISHistoDAE::init()
  */
 void FakeISISHistoDAE::exec()
 {
-  Mutex::ScopedLock lock(m_mutex);
-  Poco::Net::ServerSocket socket(6789);
-  socket.listen();
   int nper = getProperty("NPeriods");
   int nspec = getProperty("NSpectra");
   int nbins = getProperty("NBins");
+  int port = getProperty("Port");
+
+  Mutex::ScopedLock lock(m_mutex);
+  Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));
+  socket.listen();
+
   m_server = new Poco::Net::TCPServer(TestServerConnectionFactory::Ptr( new TestServerConnectionFactory(nper,nspec,nbins) ), socket );
   m_server->start();
   // Keep going until you get cancelled

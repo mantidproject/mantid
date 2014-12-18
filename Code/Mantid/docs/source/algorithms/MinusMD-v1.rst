@@ -9,7 +9,7 @@
 Description
 -----------
 
-Subtract two `MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`_'s or a
+Subtract two :ref:`MDHistoWorkspace <MDHistoWorkspace>`'s or a
 MDHistoWorkspace and a scalar.
 
 -  **MDHistoWorkspace - MDHistoWorkspace**

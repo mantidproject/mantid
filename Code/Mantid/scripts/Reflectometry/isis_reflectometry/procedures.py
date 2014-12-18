@@ -68,13 +68,13 @@ def addRuns(runlist,wname):
 
 '''
 parse a text string of the format "1-6:2+8+9,10+11+12+13-19:3,20-24"
-to return a structure containing the separated lists [1, 3, 5, 8, 9], 
+to return a structure containing the separated lists [1, 3, 5, 8, 9],
 [10, 11, 12, 13, 16, 19] and [20, 21, 22, 23, 24]
 as integer lists that addRuns can handle.
 '''
 def parseRunList(istring):
     rlist=[]
-    if len(istring) >0: 
+    if len(istring) >0:
         s1=istring.split(',')
         rlist1=[]
         for i in range(len(s1)):
@@ -125,7 +125,7 @@ def parseNameList(istring):
     namelist=[]
     for i in range(len(s1)):
         tstr=s1[i].strip()
-        namelist.append(tstr)   
+        namelist.append(tstr)
     return namelist
 
 def floodnorm(wkspName,floodfile):
@@ -188,7 +188,7 @@ def plot2D(wkspNames,limits,logScales):
                 l.setAxisScale(mantidplot.Layer.Right,float(limits[4]),float(limits[5]))
             elif logScales[2]=="2":
                 l.setAxisScale(mantidplot.Layer.Right,float(limits[4]),float(limits[5]),1)
-        
+
     mtd.sendLogMessage("plot2D finished")
 #
 # Plot a bunch of workspaces as 2D maps
@@ -206,23 +206,23 @@ def XYPlot(wkspNames,spectra,limits,logScales,errors,singleFigure):
         xLog=1
     if logScales[1] == "2":
         yLog=1
-        
+
     if singleFigure == "2":
         p1=plotSpectrum(wNames,spec,ploterr)
         l=p1.activeLayer()
         l.setAxisScale(mantidplot.Layer.Bottom,float(limits[0]),float(limits[1]),xLog)
         l.setAxisScale(mantidplot.Layer.Left,float(limits[2]),float(limits[3]),yLog)
-    else:   
+    else:
         for i in range(len(wNames)):
             p1=plotSpectrum(wNames[i],spec,ploterr)
             l=p1.activeLayer()
             l.setAxisScale(mantidplot.Layer.Bottom,float(limits[0]),float(limits[1]),xLog)
             l.setAxisScale(mantidplot.Layer.Left,float(limits[2]),float(limits[3]),yLog)
-        
+
     mtd.sendLogMessage("XYPlot finished")
 
 def nrtestfn(runlist,wnames):
-    
+
     rlist=parseRunList(runlist)
     mtd.sendLogMessage("This is the runlist:"+str(rlist))
     namelist=parseNameList(wnames)
@@ -251,7 +251,7 @@ def nrtestfn(runlist,wnames):
         gr2d=workspace_mtx[nplot].plotGraph2D()
         nplot=nplot+1
         l=gr2d.activeLayer()
-    
+
     mtd.sendLogMessage("quickPlot Finished")
 '''
 def removeoutlayer(wksp):
@@ -289,7 +289,7 @@ def nrSESANSFn(runList,nameList,P0runList,P0nameList,minSpec,maxSpec,upPeriod,do
     reb=gparams[0]+","+gparams[1]+","+gparams[2]
     if len(gparams) == 5:
         mapfile=gparams[4]
-    
+
     for i in nlist:
         a1=mtd[i+"_1"]
         nspec=a1.getNumberHistograms()
@@ -334,7 +334,7 @@ def nrSESANSFn(runList,nameList,P0runList,P0nameList,minSpec,maxSpec,upPeriod,do
         #DeleteWorkspace(i+"norm_1")
         DeleteWorkspace("num")
         DeleteWorkspace("den")
-        
+
     if existingP0 != "2":
         for i in P0nlist:
             ConvertUnits(i,i,"Wavelength",AlignBins=1)
@@ -358,7 +358,7 @@ def nrSESANSFn(runList,nameList,P0runList,P0nameList,minSpec,maxSpec,upPeriod,do
             DeleteWorkspace(i+"norm_1")
             DeleteWorkspace("num")
             DeleteWorkspace("den")
-        
+
     for i in range(len(nlist)):
         if existingP0 != "2":
             Divide(nlist[i]+"pol",P0nlist[i]+"pol",nlist[i]+"SESANS")
@@ -369,7 +369,7 @@ def nrSESANSFn(runList,nameList,P0runList,P0nameList,minSpec,maxSpec,upPeriod,do
             if nspec > 4 and minSp != 3:
                 Divide(nlist[i]+"2dpol",P0nlist[i],nlist[i]+"2dSESANS")
         ReplaceSpecialValues(nlist[i]+"SESANS",nlist[i]+"SESANS",0.0,0.0,0.0,0.0)
-    
+
     SEConstList=parseNameList(SEConstants)
     k=0
     for i in nlist:
@@ -395,7 +395,7 @@ def nrSESANSFn(runList,nameList,P0runList,P0nameList,minSpec,maxSpec,upPeriod,do
                 #print str(lam)+" "+str(1.0e-2*float(SEConstList[k])*lam*lam)
         k=k+1
 
-    
+
     if nspec > 4 and minSp != 3:
         k=0
         for i in nlist:
@@ -430,7 +430,7 @@ def nrCalcSEConst(RFFrequency,poleShoeAngle):
         B=34.288
     else:
         B=2.0*34.288
-    
+
     h=6.62607e-34
     m=1.67493e-27
     L=1.0
@@ -511,7 +511,7 @@ def nrSERGISFn(runList,nameList,P0runList,P0nameList,incidentAngles,SEConstants,
     minSp=int(minSpec)-1
     maxSp=int(maxSpec)-1
     reb=gparams[0]+","+gparams[1]+","+gparams[2]
-    
+
     k=0
     for i in nlist:
         for j in range(2):
@@ -542,7 +542,7 @@ def nrSERGISFn(runList,nameList,P0runList,P0nameList,incidentAngles,SEConstants,
             DeleteWorkspace(wksp+"mon")
             DeleteWorkspace(wksp+"det")
             DeleteWorkspace(wksp)
-            
+
         Minus(i+"_"+upPeriod+"norm",i+"_"+downPeriod+"norm","num")
         Plus(i+"_1norm",i+"_2norm","den")
         Divide("num","den",i+"pol")
@@ -561,7 +561,7 @@ def nrSERGISFn(runList,nameList,P0runList,P0nameList,incidentAngles,SEConstants,
             DeleteWorkspace(i+"_2detnorm")
             DeleteWorkspace("num")
             DeleteWorkspace("den")
-        
+
     if existingP0 != "2":
         for i in P0nlist:
             ConvertUnits(i,i,"Wavelength",AlignBins=1)
@@ -583,14 +583,14 @@ def nrSERGISFn(runList,nameList,P0runList,P0nameList,incidentAngles,SEConstants,
             DeleteWorkspace(i+"norm_1")
             DeleteWorkspace("num")
             DeleteWorkspace("den")
-        
+
     for i in range(len(nlist)):
         if existingP0 != "2":
             Divide(nlist[i]+"pol",P0nlist[i]+"pol",nlist[i]+"SESANS")
         else:
             Divide(nlist[i]+"pol",P0nlist[i]+"pol",nlist[i]+"SESANS")
         ReplaceSpecialValues(nlist[i]+"SESANS",nlist[i]+"SESANS",0.0,0.0,0.0,0.0)
-    
+
     SEConstList=parseNameList(SEConstants)
     k=0
     for i in nlist:
@@ -618,10 +618,10 @@ def nrNRFn(runList,nameList,incidentAngles,DBList,specChan,minSpec,maxSpec,gpara
 
     for i in range(len(rlist)):
         addRuns(rlist[i],nlist[i])
-    
+
     mon_spec=int(gparams[3])-1
     reb=gparams[0]+","+gparams[1]+","+gparams[2]
-    
+
     k=0
     for i in nlist:
         if(mtd[i].isGroup()):
@@ -661,7 +661,7 @@ def nrNRFn(runList,nameList,incidentAngles,DBList,specChan,minSpec,maxSpec,gpara
             a1=2.0*float(incAngles[k])+atan((float(minSpec)-float(specChan))*1.2e-3/3.53)*180.0/pi
             #print str(2.0*float(incAngles[k]))+" "+str(atan((float(minSpec)-float(specChan))*1.2e-3/3.63)*180.0/pi)+" "+str(a1)
             RotateInstrumentComponent(i+"det","DetectorBench",X="-1.0",Angle=str(a1))
-            # Experimental convert to Q before summing 
+            # Experimental convert to Q before summing
             #CropWorkspace(InputWorkspace=i+"det",OutputWorkspace=i+"detQ",StartWorkspaceIndex=int(minSpec)-5,EndWorkspaceIndex=int(maxSpec)-5+1)
             #ConvertUnits(InputWorkspace=i+"detQ",OutputWorkspace=i+"detQ",Target="MomentumTransfer",AlignBins="1")
             #GroupDetectors(i+"detQ",i+"sum",WorkspaceIndexList=range(0,int(maxSpec)-int(minSpec)),KeepUngroupedSpectra="0")
@@ -697,7 +697,7 @@ def nrNRFn(runList,nameList,incidentAngles,DBList,specChan,minSpec,maxSpec,gpara
             ConvertUnits(i+"norm",i+"RvQ",Target="MomentumTransfer")
             #floodnorm(i+"detnorm",floodfile)
             DeleteWorkspace(i+"sum")
-            
+
         k=k+1
         DeleteWorkspace(i)
         if(diagnostics==0):
@@ -724,12 +724,12 @@ def nrDBFn(runListShort,nameListShort,runListLong,nameListLong,nameListComb,minS
         addRuns(rlistS[i],nlistS[i])
     for i in range(len(rlistL)):
         addRuns(rlistL[i],nlistL[i])
-    
+
     mon_spec=int(gparams[3])-1
     minSp=int(minSpec)-1
     maxSp=int(maxSpec)-1
     reb=gparams[0]+","+gparams[1]+","+gparams[2]
-    
+
     for i in nlistS:
         ConvertUnits(InputWorkspace=i,OutputWorkspace=i,Target="Wavelength",AlignBins="1")
         Rebin(InputWorkspace=i,OutputWorkspace=i,Params=reb)
@@ -739,9 +739,9 @@ def nrDBFn(runListShort,nameListShort,runListLong,nameListLong,nameListComb,minS
             a1=mtd[snames[0]]
         else:
             a1=mtd[i]
-        
+
         nspec=a1.getNumberHistograms()
-        
+
         if nspec == 4:
             CropWorkspace(InputWorkspace=i,OutputWorkspace=i+"det",StartWorkspaceIndex=3,EndWorkspaceIndex=3)
             Divide(i+"det",i+"mon",i+"norm")
@@ -752,7 +752,7 @@ def nrDBFn(runListShort,nameListShort,runListLong,nameListLong,nameListComb,minS
             GroupDetectors(i+"det",i+"sum",WorkspaceIndexList=range(int(minSpec)-5,int(maxSpec)-5+1),KeepUngroupedSpectra="0")
             Divide(i+"sum",i+"mon",i+"norm")
             ReplaceSpecialValues(i+"norm",i+"norm","0.0","0.0","0.0","0.0")
-            
+
     for i in nlistL:
         ConvertUnits(InputWorkspace=i,OutputWorkspace=i,Target="Wavelength",AlignBins="1")
         Rebin(InputWorkspace=i,OutputWorkspace=i,Params=reb)
@@ -775,7 +775,7 @@ def nrDBFn(runListShort,nameListShort,runListLong,nameListLong,nameListComb,minS
             GroupDetectors(i+"det",i+"sum",WorkspaceIndexList=range(int(minSpec)-5,int(maxSpec)-5+1),KeepUngroupedSpectra="0")
             Divide(i+"sum",i+"mon",i+"norm")
             ReplaceSpecialValues(i+"norm",i+"norm","0.0","0.0","0.0","0.0")
-        
+
     for i in range(len(nlistS)):
         if(mtd[nlistS[i]+"norm"].isGroup()):
             snames=mtd[nlistS[i]+"norm"].getNames()
@@ -884,7 +884,7 @@ def NRCombineDatafn(RunsNameList,CombNameList,applySFs,SFList,SFError,scaleOptio
             sferrs.append(str(a1.readE(0)[0]))
         mtd.deleteWorkspace("i"+str(i)+"1temp")
         mtd.deleteWorkspace("i"+str(i)+"2temp")
-    # if applying pre-defined scale factors substitute the given values now 
+    # if applying pre-defined scale factors substitute the given values now
     # Note the errors are now set to 0
     if applySFs == "2":
         for i in range(len(rlist)-1):
@@ -905,7 +905,7 @@ def NRCombineDatafn(RunsNameList,CombNameList,applySFs,SFList,SFError,scaleOptio
     if len(rlist) > 2:
         for i in range(2,len(rlist)):
             WeightedMean("currentSum",rlist[i]+"reb","currentSum")
-    
+
     # if applying a global scale factor do it here
     if applyGlobalSF == "2":
         scaledData=mtd['currentSum']/float(globalSF)
@@ -918,7 +918,7 @@ def NRCombineDatafn(RunsNameList,CombNameList,applySFs,SFList,SFError,scaleOptio
     if (diagnostics==0):
         for i in range(len(rlist)):
             mtd.deleteWorkspace(rlist[i]+"reb")
-    return [arr2list(sfs),arr2list(sferrs)] 
+    return [arr2list(sfs),arr2list(sferrs)]
 
 def nrWriteXYE(wksp,fname):
     a1=mtd[wksp]
@@ -933,7 +933,7 @@ def nrWriteXYE(wksp,fname):
         s=""
         s+="%f," % X1[i]
         s+="%f," % y1[i]
-        s+="%f\n" % e1[i]  
+        s+="%f\n" % e1[i]
         f.write(s)
     f.close()
 
@@ -942,7 +942,7 @@ def nrPNRCorrection(UpWksp,DownWksp):
 #   calpha=[0.945088,0.0242861,-0.00213624,0.0]
 #   cAp=[1.00079,-0.0186778,0.00131546,0.0]
 #   cPp=[1.01649,-0.0228172,0.00214626,0.0]
-    # Constants Based on Runs 18350+18355 and 18351+18356 analyser theta at -0.1deg 
+    # Constants Based on Runs 18350+18355 and 18351+18356 analyser theta at -0.1deg
     # 2 RF Flippers as the polarising system
     crho=[1.006831,-0.011467,0.002244,-0.000095]
     calpha=[1.017526,-0.017183,0.003136,-0.000140]
@@ -998,7 +998,7 @@ def nrPACorrection(UpUpWksp,UpDownWksp,DownUpWksp,DownDownWksp):
 #   calpha=[0.945088,0.0242861,-0.00213624,0.0]
 #   cAp=[1.00079,-0.0186778,0.00131546,0.0]
 #   cPp=[1.01649,-0.0228172,0.00214626,0.0]
-    # Constants Based on Runs 18350+18355 and 18351+18356 analyser theta at -0.1deg 
+    # Constants Based on Runs 18350+18355 and 18351+18356 analyser theta at -0.1deg
     # 2 RF Flippers as the polarising system
     crho=[1.006831,-0.011467,0.002244,-0.000095]
     calpha=[1.017526,-0.017183,0.003136,-0.000140]
@@ -1034,7 +1034,7 @@ def nrPACorrection(UpUpWksp,UpDownWksp,DownUpWksp,DownDownWksp):
     PolynomialCorrection(InputWorkspace="PCrho",OutputWorkspace="PCrho",Coefficients=crho,Operation="Multiply")
     PolynomialCorrection(InputWorkspace="PCAp",OutputWorkspace="PCAp",Coefficients=cAp,Operation="Multiply")
     PolynomialCorrection(InputWorkspace="PCPp",OutputWorkspace="PCPp",Coefficients=cPp,Operation="Multiply")
-    
+
     A0 = (Iaa * Pp * Ap) + (Ap * Ipa * rho * Pp) + (Ap * Iap * Pp * alpha) + (Ipp * Ap * alpha * rho * Pp)
     A1 = Pp * Iaa
     A2 = Pp * Iap
@@ -1044,7 +1044,7 @@ def nrPACorrection(UpUpWksp,UpDownWksp,DownUpWksp,DownDownWksp):
     A6 = Ap * alpha * Iap
     A7 = Pp * rho  * Ipp
     A8 = Pp * rho  * Ipa
-    D = Pp * Ap *( 1.0 + rho + alpha + (rho * alpha) )  
+    D = Pp * Ap *( 1.0 + rho + alpha + (rho * alpha) )
     nIpp = (A0 - A1 + A2 - A3 + A4 + A5 - A6 + A7 - A8 + Ipp + Iaa - Ipa - Iap) / D
     nIaa = (A0 + A1 - A2 + A3 - A4 - A5 + A6 - A7 + A8 + Ipp + Iaa - Ipa - Iap) / D
     nIpa = (A0 - A1 + A2 + A3 - A4 - A5 + A6 + A7 - A8 - Ipp - Iaa + Ipa + Iap) / D
@@ -1088,28 +1088,28 @@ def nrPNRFn(runList,nameList,incidentAngles,DBList,specChan,minSpec,maxSpec,gpar
     mtd.sendLogMessage("This is the Direct Beam nameslist:"+str(dlist))
     incAngles=parseNameList(incidentAngles)
     mtd.sendLogMessage("This incident Angles are:"+str(incAngles))
-    
+
     if PNRwithPA == "2":
         nper=4
         mtd.sendLogMessage("PNRwithPA="+str(PNRwithPA))
         mtd.sendLogMessage(str(pnums))
     else:
         nper=2
-    
+
     for i in range(len(rlist)):
         addRuns(rlist[i],nlist[i])
-    
+
     mon_spec=int(gparams[3])-1
     minSp=int(minSpec)
     maxSp=int(maxSpec)
     reb=gparams[0]+","+gparams[1]+","+gparams[2]
-    
+
     k=0
     for i in nlist:
         a1=mtd[i+"_1"]
         nspec=a1.getNumberHistograms()
         if (subbgd==1 and nspec!=4):
-            # If a background subtraction is required sum the bgd outside the 
+            # If a background subtraction is required sum the bgd outside the
             # area of the detector that is visible through the analyser over all periods and average
             CloneWorkspace(i,"bgdtemp")
             ConvertUnits(InputWorkspace="bgdtemp",OutputWorkspace="bgdtemp",Target="Wavelength",AlignBins="1")
@@ -1128,7 +1128,7 @@ def nrPNRFn(runList,nameList,incidentAngles,DBList,specChan,minSpec,maxSpec,gpar
             mtd.deleteWorkspace("bgd1")
             mtd.deleteWorkspace("bgd2")
             mtd.deleteWorkspace("bgd")
-            
+
         wksp=i
         ConvertUnits(InputWorkspace=wksp,OutputWorkspace=wksp,Target="Wavelength",AlignBins="1")
         Rebin(InputWorkspace=wksp,OutputWorkspace=wksp,Params=reb)
@@ -1168,7 +1168,7 @@ def nrPNRFn(runList,nameList,incidentAngles,DBList,specChan,minSpec,maxSpec,gpar
                 ReplaceSpecialValues(wksp+"detnorm",wksp+"detnorm","0.0","0.0","0.0","0.0")
             ConvertUnits(wksp+"norm",wksp+"RvQ",Target="MomentumTransfer")
             DeleteWorkspace(wksp+"sum")
-    
+
             DeleteWorkspace(wksp+"mon")
             DeleteWorkspace(wksp+"det")
         if doCorrs != "0":
@@ -1268,7 +1268,7 @@ def writeXYE_tab(dat,fname):
     f=open(fname,'w')
     x=a1[0]
     y=a1[1]
-    e=a1[2]     
+    e=a1[2]
     s=""
     s+="x\ty\te\n"
     f.write(s)
@@ -1276,7 +1276,7 @@ def writeXYE_tab(dat,fname):
         s=""
         s+="%f\t" % x[i]
         s+="%f\t" % y[i]
-        s+="%f\n" % e[i]  
+        s+="%f\n" % e[i]
         f.write(s)
     f.close()
 
@@ -1289,7 +1289,7 @@ def quickPlot(runlist,dataDir,lmin,reb,lmax,spmin,spmax,output,plotper,polper,zm
     addruns(runlist,output)
     nper=nperFromList(output)
     rebpars=str(lmin)+","+str(reb)+","+str(lmax)
-        
+
     if nper == 1:
         ConvertUnits(InputWorkspace=output,OutputWorkspace=output,Target="Wavelength",AlignBins="1")
         Rebin(InputWorkspace=output,OutputWorkspace=output,Params=rebpars)
@@ -1320,7 +1320,7 @@ def quickPlot(runlist,dataDir,lmin,reb,lmax,spmin,spmax,output,plotper,polper,zm
                 l.setAxisScale(1,zmin,zmax,0)
             else:
                 l.setAxisScale(1,zmin,zmax,1)
-        
+
         up=mtd[output+"_2d"]
         down=mtd[output+"_1d"]
         asym=(up-down)/(down+up)

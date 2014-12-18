@@ -512,7 +512,7 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
           </property>
           <property name="infoString" stdset="0">
            <string>Select either Algorithm or Python Script under &quot;Processing&quot; to perform processing on each chunk of live data.
-In the python script 'input' is the input workspace and 'output' is the output workspace.</string>
+In the python script 'input' is a reference to the input workspace and 'output' is a string of the name of the output workspace.</string>
           </property>
          </widget>
         </item>
@@ -527,7 +527,8 @@ In the python script 'input' is the input workspace and 'output' is the output w
          <widget class="MantidQt::MantidWidgets::ProcessingAlgoWidget" name="postAlgo">
           <property name="infoString" stdset="0">
            <string>Select either Algorithm or Python Script under &quot;Post Processing&quot; to perform processing on the accumulated data, after each chunk is added.
-In the python script 'input' is the input workspace and 'output' is the output workspace.</string>
+In the python script 'input' is a reference to the input workspace and 'output' is a string of the name of the output workspace.
+           </string>
           </property>
           <property name="editorVisible" stdset="0">
            <bool>false</bool>

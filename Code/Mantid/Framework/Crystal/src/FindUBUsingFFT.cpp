@@ -130,7 +130,7 @@ namespace Crystal
       g_log.notice() << o_lattice << "\n";
 
 
-      ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
+      ws->mutableSample().setOrientedLattice( &o_lattice );
     }
   }
 

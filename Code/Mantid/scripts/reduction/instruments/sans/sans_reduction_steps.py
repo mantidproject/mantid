@@ -14,12 +14,12 @@ import warnings
 import mantid
 from mantid.simpleapi import *
 
-# Define a SANS specific logger 
+# Define a SANS specific logger
 from mantid.kernel import Logger
 import mantid.simpleapi as api
 from mantid.api import AnalysisDataService
 sanslog = Logger("SANS")
-        
+
 class BaseBeamFinder(ReductionStep):
     """
         Base beam finder. Holds the position of the beam center
@@ -38,34 +38,34 @@ class BaseBeamFinder(ReductionStep):
         self._beam_radius = None
         self._datafile = None
         self._persistent = True
-        
+
     def set_persistent(self, persistent):
         self._persistent = persistent
         return self
-        
+
     def get_beam_center(self):
         """
             Returns the beam center
         """
         return [self._beam_center_x, self._beam_center_y]
-    
+
     def execute(self, reducer, workspace=None):
         return "Beam Center set at: %s %s" % (str(self._beam_center_x), str(self._beam_center_y))
-        
+
     def _find_beam(self, direct_beam, reducer, workspace=None):
         if self._beam_center_x is not None and self._beam_center_y is not None:
             return "Using Beam Center at: %g %g" % (self._beam_center_x, self._beam_center_y)
-        
+
         beam_x,beam_y,msg = SANSBeamFinder(Filename=self._datafile,
                                          UseDirectBeamMethod=direct_beam,
                                          BeamRadius=self._beam_radius,
                                          PersistentCorrection=self._persistent,
                                          ReductionProperties=reducer.get_reduction_table_name())
-        
+
         self._beam_center_x = beam_x
         self._beam_center_y = beam_y
         return msg
-        
+
 
 class BaseTransmission(ReductionStep):
     """
@@ -81,7 +81,7 @@ class BaseTransmission(ReductionStep):
         self._dark_current_data = None
         self._dark_current_subtracter = None
         self._beam_finder = None
-        
+
     def set_theta_dependence(self, theta_dependence=True):
         """
             Set the flag for whether or not we want the full theta-dependence
@@ -90,62 +90,62 @@ class BaseTransmission(ReductionStep):
             @param theta_dependence: theta-dependence included if True
         """
         self._theta_dependent = theta_dependence
-        
+
     def set_dark_current(self, dark_current=None):
         """
             Set the dark current data file to be subtracted from each tranmission data file
             @param dark_current: path to dark current data file
         """
         self._dark_current_data = dark_current
-                
+
     @validate_step
     def set_dark_current_subtracter(self, subtracter):
         self._dark_current_subtracter = subtracter
-                        
+
     def get_transmission(self):
         return [self._trans, self._error]
-    
+
     @validate_step
     def set_beam_finder(self, beam_finder):
         self._beam_finder = beam_finder
-        
+
     def execute(self, reducer, workspace):
         if self._theta_dependent:
-            ApplyTransmissionCorrection(InputWorkspace=workspace, 
+            ApplyTransmissionCorrection(InputWorkspace=workspace,
                                         TransmissionValue=self._trans,
-                                        TransmissionError=self._error, 
-                                        OutputWorkspace=workspace) 
+                                        TransmissionError=self._error,
+                                        OutputWorkspace=workspace)
         else:
             CreateSingleValuedWorkspace(OutputWorkspace="transmission", DataValue=self._trans, ErrorValue=self._error)
             Divide(LHSWorkspace=workspace, RHSWorkspace="transmission", OutputWorkspace=workspace)
-        
+
         return "Transmission correction applied for T = %g +- %g" % (self._trans, self._error)
-  
-  
+
+
 class Normalize(ReductionStep):
     """
-        Normalize the data to timer or a spectrum, typically a monitor, 
-        with in the workspace. By default the normalization is done with 
+        Normalize the data to timer or a spectrum, typically a monitor,
+        with in the workspace. By default the normalization is done with
         respect to the Instrument's incident monitor
     """
     def __init__(self, normalization_spectrum=None):
         super(Normalize, self).__init__()
         self._normalization_spectrum = normalization_spectrum
-        
+
     def get_normalization_spectrum(self):
         return self._normalization_spectrum
-        
+
     def execute(self, reducer, workspace):
         if self._normalization_spectrum is None:
             self._normalization_spectrum = reducer.instrument.get_incident_mon()
-        
+
         # Get counting time or monitor
         if self._normalization_spectrum == reducer.instrument.NORMALIZATION_MONITOR:
             norm_count = mtd[workspace].getRun().getProperty("monitor").value
             # HFIR-specific: If we count for monitor we need to multiply by 1e8
-            Scale(InputWorkspace=workspace, OutputWorkspace=workspace, 
+            Scale(InputWorkspace=workspace, OutputWorkspace=workspace,
                   Factor=1.0e8/norm_count, Operation='Multiply')
-            return "Normalization by monitor: %6.2g counts" % norm_count 
+            return "Normalization by monitor: %6.2g counts" % norm_count
         elif self._normalization_spectrum == reducer.instrument.NORMALIZATION_TIME:
             norm_count = mtd[workspace].getRun().getProperty("timer").value
             Scale(InputWorkspace=workspace, OutputWorkspace=workspace,
@@ -157,49 +157,49 @@ class Normalize(ReductionStep):
 
     def clean(self):
         DeleteWorkspace(Workspace=norm_ws)
-                    
+
 class Mask(ReductionStep):
     """
         Marks some spectra so that they are not included in the analysis
-        
+
         ORNL & ISIS
-        
+
     """
     def __init__(self):
         """
-            Initalize masking 
+            Initalize masking
         """
         super(Mask, self).__init__()
         self._nx_low = 0
         self._nx_high = 0
         self._ny_low = 0
         self._ny_high = 0
-        
+
         self._xml = []
 
         #these spectra will be masked by the algorithm MaskDetectors
         self.detect_list = []
-        
+
         # List of pixels to mask
         self.masked_pixels = []
-        
+
         # Only apply mask defined in the class and ignore additional
         # information from the run properties
         self._ignore_run_properties = False
-        
+
     def mask_edges(self, nx_low=0, nx_high=0, ny_low=0, ny_high=0):
         """
             Define a "picture frame" outside of which the spectra from all detectors are to be masked.
             @param nx_low: number of pixels to mask on the lower-x side of the detector
             @param nx_high: number of pixels to mask on the higher-x side of the detector
             @param ny_low: number of pixels to mask on the lower-y side of the detector
-            @param ny_high: number of pixels to mask on the higher-y side of the detector        
+            @param ny_high: number of pixels to mask on the higher-y side of the detector
         """
         self._nx_low = nx_low
         self._nx_high = nx_high
         self._ny_low = ny_low
-        self._ny_high = ny_high        
-        
+        self._ny_high = ny_high
+
     def add_xml_shape(self, complete_xml_element):
         """
             Add an arbitrary shape to region to be masked
@@ -246,7 +246,7 @@ class Mask(ReductionStep):
             Generates xml code for an infintely long cylinder
             @param centre: a tupple for a point on the axis
             @param radius: cylinder radius
-            @param height: cylinder height            
+            @param height: cylinder height
             @param axis: cylinder orientation
             @param id: a string to refer to the shape by
             @return the xml string
@@ -260,7 +260,7 @@ class Mask(ReductionStep):
         '''Mask the inside of an infinite cylinder on the input workspace.'''
         self.add_xml_shape(
             self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0,0,1], id=ID)+'<algebra val="' + str(ID) + '"/>')
-            
+
 
     def add_outside_cylinder(self, radius, xcentre = 0.0, ycentre = 0.0, ID='shape'):
         '''Mask out the outside of a cylinder or specified radius'''
@@ -284,18 +284,18 @@ class Mask(ReductionStep):
             Mask the given detectors
             @param det_list: list of detector IDs
         """
-        self.detect_list.extend(det_list) 
+        self.detect_list.extend(det_list)
 
     def ignore_run_properties(self, ignore=True):
         """
-            Only use the mask information set in the current object 
+            Only use the mask information set in the current object
             and ignore additional information that may have been
             stored in the workspace properties.
         """
         self._ignore_run_properties = ignore
-        
+
     def execute(self, reducer, workspace):
-        
+
         # Check whether the workspace has mask information
         run = mtd[workspace].run()
         if not self._ignore_run_properties and run.hasProperty("rectangular_masks"):
@@ -315,13 +315,13 @@ class Mask(ReductionStep):
                     self.add_pixel_rectangle(rec[0], rec[1], rec[2], rec[3])
                 except:
                     mantid.logger.notice("Badly defined mask from configuration file: %s" % str(rec))
-        
+
         for shape in self._xml:
             api.MaskDetectorsInShape(Workspace=workspace, ShapeXML=shape)
-        
+
         instrument = reducer.instrument
         # Get a list of detector pixels to mask
-        if self._nx_low != 0 or self._nx_high != 0 or self._ny_low != 0 or self._ny_high != 0:            
+        if self._nx_low != 0 or self._nx_high != 0 or self._ny_low != 0 or self._ny_high != 0:
             self.masked_pixels.extend(instrument.get_masked_pixels(self._nx_low,
                                                                    self._nx_high,
                                                                    self._ny_low,
@@ -330,25 +330,25 @@ class Mask(ReductionStep):
 
         if len(self.detect_list)>0:
             MaskDetectors(Workspace=workspace, DetectorList = self.detect_list)
-            
+
         # Mask out internal list of pixels
         if len(self.masked_pixels)>0:
             # Transform the list of pixels into a list of Mantid detector IDs
             masked_detectors = instrument.get_detector_from_pixel(self.masked_pixels, workspace)
             # Mask the pixels by passing the list of IDs
             MaskDetectors(Workspace=workspace, DetectorList = masked_detectors)
-            
+
         output_ws, detector_list = ExtractMask(InputWorkspace=workspace, OutputWorkspace="__mask")
         mantid.logger.notice("Mask check %s: %g masked pixels" % (workspace, len(detector_list)))
-        
+
         return "Mask applied %s: %g masked pixels" % (workspace, len(detector_list))
 
 class CorrectToFileStep(ReductionStep):
     """
         Runs the algorithm CorrectToFile()
-        
+
         ISIS only
-        
+
     """
     def __init__(self, file='', corr_type='', operation=''):
         """
@@ -380,15 +380,15 @@ class CalculateNorm(object):
         of other, sometimes optional, reduction_steps or specified workspaces.
         Workspaces for wavelength adjustment must have their
         distribution/non-distribution flag set correctly as they maybe converted
-        
+
         ISIS only
         ORNL doesnt't use that approach
-        
+
     """
     TMP_WORKSPACE_NAME = '__CalculateNorm_loaded_temp'
     WAVE_CORR_NAME = '__Q_WAVE_conversion_temp'
     PIXEL_CORR_NAME = '__Q_pixel_conversion_temp'
-    
+
     def  __init__(self, wavelength_deps=[]):
         super(CalculateNorm, self).__init__()
         self._wave_steps = wavelength_deps
@@ -413,7 +413,7 @@ class CalculateNorm(object):
             @return the file that has been set to load as the pixelAdj workspace or '' if none has been set
         """
         return self._pixel_file
-    
+
     def _is_point_data(self, wksp):
         """
             Tests if the workspace whose name is passed contains point or histogram data
@@ -425,7 +425,7 @@ class CalculateNorm(object):
         if len(handle.readX(0)) == len(handle.readY(0)):
             return True
         else:
-            return False 
+            return False
 
     def calculate(self, reducer, wave_wksps=[]):
         """
@@ -433,7 +433,7 @@ class CalculateNorm(object):
             dependent scalings into another workspace that can be used by ConvertToQ. It is important
             that the wavelength correction workspaces have a know distribution/non-distribution state
             @param reducer: settings used for this reduction
-            @param wave_wksps: additional wavelength dependent correction workspaces to include   
+            @param wave_wksps: additional wavelength dependent correction workspaces to include
         """
         for step in self._wave_steps:
             if step.output_wksp:
@@ -441,7 +441,7 @@ class CalculateNorm(object):
 
         wave_adj = None
         for wksp in wave_wksps:
-            #before the workspaces can be combined they all need to match 
+            #before the workspaces can be combined they all need to match
             api.RebinToWorkspace(WorkspaceToRebin=wksp, WorkspaceToMatch=reducer.output_wksp, OutputWorkspace=self.TMP_WORKSPACE_NAME)
 
             if not wave_adj:
@@ -453,8 +453,8 @@ class CalculateNorm(object):
 
         # read pixel correction file
         # note the python code below is an attempt to emulate function overloading
-        # If a derived class overwrite self._load and self._load_params then 
-        # a custom specific loading can be achieved 
+        # If a derived class overwrite self._load and self._load_params then
+        # a custom specific loading can be achieved
         pixel_adj = ''
         if self._pixel_file:
             pixel_adj = self.PIXEL_CORR_NAME
@@ -463,36 +463,36 @@ class CalculateNorm(object):
                 load_com  += ','+self._load_params
             load_com += ')'
             eval(load_com)
-        
+
         if AnalysisDataService.doesExist(self.TMP_WORKSPACE_NAME):
             AnalysisDataService.remove(self.TMP_WORKSPACE_NAME)
-        
+
         return wave_adj, pixel_adj
 
 class ConvertToQ(ReductionStep):
     """
         Runs the Q1D or Qxy algorithms to convert wavelength data into momentum transfer, Q
-        
-        ISIS only 
+
+        ISIS only
         ORNL uses WeightedAzimuthalAverage
-        
+
     """
     # the list of possible Q conversion algorithms to use
     _OUTPUT_TYPES = {'1D' : 'Q1D',
                      '2D' : 'Qxy'}
     # defines if Q1D should correct for gravity by default
-    _DEFAULT_GRAV = False    
+    _DEFAULT_GRAV = False
     def __init__(self, normalizations):
         """
             @param normalizations: CalculateNormISIS object contains the workspace, ReductionSteps or files require for the optional normalization arguments
         """
         super(ConvertToQ, self).__init__()
-        
+
         if not issubclass(normalizations.__class__, CalculateNorm):
             raise RuntimeError('Error initializing ConvertToQ, invalid normalization object')
-        #contains the normalization optional workspaces to pass to the Q algorithm 
+        #contains the normalization optional workspaces to pass to the Q algorithm
         self._norms = normalizations
-        
+
         #this should be set to 1D or 2D
         self._output_type = '1D'
         #the algorithm that corresponds to the above choice
@@ -511,7 +511,7 @@ class ConvertToQ(ReductionStep):
         self.w_cut = 0.0
         # Whether to output parts when running either Q1D2 or Qxy
         self.outputParts = False
-    
+
     def set_output_type(self, descript):
         """
             Requests the given output from the Q conversion, either 1D or 2D. For
@@ -521,7 +521,7 @@ class ConvertToQ(ReductionStep):
         """
         self._Q_alg = self._OUTPUT_TYPES[descript]
         self._output_type = descript
-                    
+
     def get_output_type(self):
         return self._output_type
 
@@ -542,7 +542,7 @@ class ConvertToQ(ReductionStep):
         if (not self._grav_set) or override:
                 self._use_gravity = bool(flag)
         else:
-            msg = "User file can't override previous gravity setting, do gravity correction remains " + str(self._use_gravity) 
+            msg = "User file can't override previous gravity setting, do gravity correction remains " + str(self._use_gravity)
             print msg
             sanslog.warning(msg)
 
@@ -570,14 +570,14 @@ class ConvertToQ(ReductionStep):
         try:
             if self._Q_alg == 'Q1D':
                 Q1D(DetBankWorkspace=workspace, OutputWorkspace=workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
-    
+
             elif self._Q_alg == 'Qxy':
                 Qxy(InputWorkspace=workspace, OutputWorkspace=workspace, MaxQxy=reducer.QXY2, DeltaQ=reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
                 ReplaceSpecialValues(InputWorkspace=workspace, OutputWorkspace=workspace, NaNValue="0", InfinityValue="0")
             else:
                 raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')
         except:
-            #when we are all up to Python 2.5 replace the duplicated code below with one finally:        
+            #when we are all up to Python 2.5 replace the duplicated code below with one finally:
             self._deleteWorkspaces([wave_adj, pixel_adj])
             raise
 
@@ -603,17 +603,17 @@ class GetSampleGeom(ReductionStep):
         On initialisation this class will return default geometry values (compatible with the Colette software)
         There are functions to override these settings
         On execute if there is geometry information in the workspace this will override any unset attributes
-        
+
         ISIS only
         ORNL only divides by thickness, in the absolute scaling step
-        
+
     """
     # IDs for each shape as used by the Colette software
     _shape_ids = {1 : 'cylinder-axis-up',
                   2 : 'cuboid',
                   3 : 'cylinder-axis-along'}
     _default_shape = 'cylinder-axis-along'
-    
+
     def __init__(self):
         super(GetSampleGeom, self).__init__()
 
@@ -623,7 +623,7 @@ class GetSampleGeom(ReductionStep):
         self._width = None
         self._thickness = None
         self._height = None
-        
+
         self._use_wksp_shape = True
         self._use_wksp_width = True
         self._use_wksp_thickness = True
@@ -659,13 +659,13 @@ class GetSampleGeom(ReductionStep):
             self.width = self._width
         if self._thickness:
             self.thickness = self._thickness
-    
+
     def get_shape(self):
         if self._shape is None:
             return self._get_default('shape')
         else:
             return self._shape
-        
+
     def set_width(self, width):
         self._width = float(width)
         self._use_wksp_width = False
@@ -679,11 +679,11 @@ class GetSampleGeom(ReductionStep):
             return self._get_default('width')
         else:
             return self._width
-            
+
     def set_height(self, height):
         self._height = float(height)
         self._use_wksp_height = False
-        
+
         # For a cylinder and sphere the height=width=radius
         if (not self._shape is None) and (self._shape.startswith('cylinder')):
             self._width = self._height
@@ -721,7 +721,7 @@ class GetSampleGeom(ReductionStep):
             Reads the geometry information stored in the workspace
             but doesn't replace values that have been previously set
         """
-        wksp = mtd[workspace] 
+        wksp = mtd[workspace]
         if isinstance(wksp, mantid.api.WorkspaceGroup):
             wksp = wksp[0]
         sample_details = wksp.sample()
@@ -745,7 +745,7 @@ class GetSampleGeom(ReductionStep):
 class SampleGeomCor(ReductionStep):
     """
         Correct the neutron count rates for the size of the sample
-        
+
         ISIS only
         ORNL only divides by thickness, in the absolute scaling step
 
@@ -775,8 +775,8 @@ class SampleGeomCor(ReductionStep):
             else:
                 raise NotImplemented('Shape "'+geo.shape+'" is not in the list of supported shapes')
         except TypeError:
-            raise TypeError('Error calculating sample volume with width='+str(geo.width) + ' height='+str(geo.height) + 'and thickness='+str(geo.thickness)) 
-                
+            raise TypeError('Error calculating sample volume with width='+str(geo.width) + ' height='+str(geo.height) + 'and thickness='+str(geo.thickness))
+
         return volume
 
     def execute(self, reducer, workspace):
@@ -786,7 +786,7 @@ class SampleGeomCor(ReductionStep):
         if not reducer.is_can():
             # it calculates the volume for the sample and may or not apply to the can as well.
             self.volume = self.calculate_volume(reducer)
-            
+
         ws = mtd[str(workspace)]
         ws /= self.volume
 
@@ -795,7 +795,7 @@ class StripEndZeros(ReductionStep):
     def __init__(self, flag_value = 0.0):
         super(StripEndZeros, self).__init__()
         self._flag_value = flag_value
-        
+
     def execute(self, reducer, workspace):
         result_ws = mtd[workspace]
         if result_ws.getNumberHistograms() != 1:
@@ -828,7 +828,7 @@ class StripEndNans(ReductionStep):
     # ISIS only
     def __init__(self):
         super(StripEndNans, self).__init__()
-        
+
     def _isNan(self, val):
         """
             Can replaced by isNaN in Python 2.6
@@ -838,7 +838,7 @@ class StripEndNans(ReductionStep):
             return True
         else:
             return False
-        
+
     def execute(self, reducer, workspace):
         """
             Trips leading and trailing Nan values from workspace

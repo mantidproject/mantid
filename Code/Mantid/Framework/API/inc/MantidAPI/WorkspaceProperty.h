@@ -309,7 +309,7 @@ namespace Mantid
        *  For output workspaces, an empty set is returned
        *  @return set of objects in AnalysisDataService
        */
-      virtual std::set<std::string> allowedValues() const
+      virtual std::vector<std::string> allowedValues() const
       {
         if ( this->direction() == Kernel::Direction::Input || this->direction() == Kernel::Direction::InOut )
         {
@@ -331,12 +331,12 @@ namespace Mantid
             }
             else ++it;
           }
-          return vals;
+          return std::vector<std::string>(vals.begin(), vals.end());
         }
         else
         {
           // For output workspaces, just return an empty set
-          return std::set<std::string>();
+          return std::vector<std::string>();
         }
       }
 

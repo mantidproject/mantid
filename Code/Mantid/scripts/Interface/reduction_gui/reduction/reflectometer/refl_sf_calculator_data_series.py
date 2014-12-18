@@ -1,6 +1,6 @@
 """
-    Classes for each reduction step. Those are kept separately 
-    from the the interface class so that the HFIRReduction class could 
+    Classes for each reduction step. Those are kept separately
+    from the the interface class so that the HFIRReduction class could
     be used independently of the interface implementation
 """
 import xml.dom.minidom
@@ -13,7 +13,7 @@ from refm_data_script import DataSets as REFMDataSets
 class DataSeries(BaseScriptElement):
 
     data_sets = []
-    
+
     def __init__(self, data_class=REFLDataSets):
         super(DataSeries, self).__init__()
         self._data_class = data_class
@@ -46,29 +46,29 @@ class DataSeries(BaseScriptElement):
         for item in self.data_sets:
             xml += item.to_xml()
         xml += "</DataSeries>\n"
-        
+
         return xml
 
     def from_xml(self, xml_str):
         """
             Read in data from XML
             @param xml_str: text to read the data from
-        """   
+        """
         self.reset()
         self.data_sets = []
         dom = xml.dom.minidom.parseString(xml_str)
-        
+
 #        # Get Mantid version
 #        mtd_version = BaseScriptElement.getMantidBuildVersion(dom)
-        
+
         self._data_class = REFLDataSets
         element_list = dom.getElementsByTagName("Data")
         if len(element_list)==0:
             element_list = dom.getElementsByTagName("RefLSFCalculator")
-            
+
         if len(element_list)>0:
             for item in element_list:
-                if item is not None:             
+                if item is not None:
                     data_set = self._data_class()
                     data_set.from_xml_element(item)
                     self.data_sets.append(data_set)

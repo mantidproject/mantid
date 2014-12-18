@@ -42,15 +42,17 @@ energy :math:`E_2` selected by the analyzers is known.
 - :math:`t_2 = L_2/v_2` with :math:`L_2` the distance from sample to
   detector, and :math:`v_2` is the final fixed velocity (:math:`E_2=1/2*m*v_2^2`)
 
-.. note:: We obtain :math:`TOF^*` as an iterative process,
-  taking into account the fact that the correction :math:`t_0` is much
-  smaller than :math:`t_i+t_f`. Thus
-  :math:`TOF-t_0^{(n)} = L_1/v_1^{(n)} + L_2/v_2` , :math:`n=0, 1, 2,..`
-  Set :math:`t_0^{(0)}=0` and obtain :math:`v_1^{(0)}` from the previous
-  formula. From :math:`v_1^{(0)}` we obtain :math:`E_1^{(0)}`
-  Set :math:`t_0^{(1)}=func( E_1^{(0)} )` and repeat the steps until
-  :math:`|t_0^{(n+1)} - t_0^{(n+1)}| < tolTOF`. With
-  :math:`tolTOF=0.1 microsecond`, only one iteration is needed for convergence.
+.. note::
+
+   We obtain :math:`TOF^*` as an iterative process,
+   taking into account the fact that the correction :math:`t_0` is much
+   smaller than :math:`t_i+t_f`. Thus
+   :math:`TOF-t_0^{(n)} = L_1/v_1^{(n)} + L_2/v_2` , :math:`n=0, 1, 2,..`
+   Set :math:`t_0^{(0)}=0` and obtain :math:`v_1^{(0)}` from the previous
+   formula. From :math:`v_1^{(0)}` we obtain :math:`E_1^{(0)}`
+   Set :math:`t_0^{(1)}=func( E_1^{(0)} )` and repeat the steps until
+   :math:`|t_0^{(n+1)} - t_0^{(n+1)}| < tolTOF`. With
+   :math:`tolTOF=0.1 microsecond`, only one iteration is needed for convergence.
 
 Here's the result of applying ModeratorTzero to both the event list and
 the histogrammed data of a run in the VISION beamline. The

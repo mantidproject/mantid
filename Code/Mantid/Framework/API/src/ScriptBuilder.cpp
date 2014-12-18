@@ -1,6 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/HistoryItem.h"
 #include "MantidAPI/ScriptBuilder.h"
 
@@ -14,8 +15,8 @@ namespace API
 using Mantid::Kernel::PropertyHistory_sptr;
 using Mantid::Kernel::PropertyHistory_const_sptr;
 
-ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view)
-  : m_historyItems(view->getAlgorithmsList()), m_output()
+ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view, std::string versionSpecificity)
+  : m_historyItems(view->getAlgorithmsList()), m_output(), m_versionSpecificity(versionSpecificity)
 {
 }
 
@@ -115,6 +116,35 @@ const std::string ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_spt
       properties << prop << ", ";
     }
   }
+
+  //Three cases, we can either specify the version of every algorithm...
+  if(m_versionSpecificity == "all")
+  {
+    properties << "Version=" << algHistory->version() << ", ";
+  }
+  else if(m_versionSpecificity == "old")
+  {
+    //...or only specify algorithm versions when they're not the newest version
+    bool oldVersion = false;
+
+    std::vector<Algorithm_descriptor> descriptors = AlgorithmFactory::Instance().getDescriptors();
+    for(auto dit = descriptors.begin(); dit != descriptors.end(); ++dit)
+    {
+      //If a newer version of this algorithm exists, then this must be an old version.
+      if((*dit).name == algHistory->name() && (*dit).version > algHistory->version())
+      {
+        oldVersion = true;
+        break;
+      }
+    }
+
+    if(oldVersion)
+    {
+      properties << "Version=" << algHistory->version() << ", ";
+    }
+  }
+  //Third case is we never specify the version, so do nothing.
+
 
   std::string propStr = properties.str();
   if (propStr.length() > 0)

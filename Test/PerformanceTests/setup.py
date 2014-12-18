@@ -2,7 +2,7 @@
 of system tests.
 THIS WILL DELETE YOUR DATABASE!
 
-This is not strictly necessary because it will be created automatically 
+This is not strictly necessary because it will be created automatically
 when running the scripts.
 """
 import sys

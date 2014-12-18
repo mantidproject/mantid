@@ -109,7 +109,7 @@ class AlgorithmBaseDirective(BaseDirective):
         The main entry point that docutils calls.
         It calls self.execute to do the main work. If an
         algorithm doesn't exist then the directive is
-        skipped and a warning is emitted.
+        skipped a debug message is emitted
 
         Derived classes should override execute() and insert
         whatever rst they require with self.add_rst()
@@ -153,7 +153,7 @@ class AlgorithmBaseDirective(BaseDirective):
         # warn the user
         if len(msg) > 0:
             env = self.state.document.settings.env
-            env.warn(env.docname, msg)
+            env.app.verbose(env.docname, msg)
         return msg
 
     def algorithm_name(self):

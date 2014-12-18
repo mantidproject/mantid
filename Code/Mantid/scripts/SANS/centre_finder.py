@@ -8,8 +8,8 @@ class CentreFinder(object):
     """
         Aids estimating the effective centre of the particle beam by calculating Q in four
         quadrants and using the asymmetry to calculate the direction to the beam centre. A
-        better estimate for the beam centre position can hence be calculated iteratively 
-    """  
+        better estimate for the beam centre position can hence be calculated iteratively
+    """
     QUADS = ['Left', 'Right', 'Up', 'Down']
     def __init__(self, guess_centre):
         """
@@ -27,53 +27,53 @@ class CentreFinder(object):
             to it
             @param setup: the reduction chain object that contains information about the reduction
             @param trial: the coordinates of the location to test as a list in the form [x, y]
-            @return: the asymmetry in the calculated Q in the x and y directions  
+            @return: the asymmetry in the calculated Q in the x and y directions
         """
-        
+
         self.detector = setup.instrument.cur_detector().name()
-    
+
         self.move(setup, trial[0]-self._last_pos[0], trial[1]-self._last_pos[1])
-    
-        #phi masking will remove areas of the detector that we need 
+
+        #phi masking will remove areas of the detector that we need
         setup.mask.mask_phi = False
-        
+
         setup.pre_process()
         setup.output_wksp = 'centre'
         steps = setup._conv_Q
         steps = steps[0:len(steps)-1]
         setup._reduce(init=False, post=False, steps=steps)
-    
+
         self._group_into_quadrants(setup, 'centre', trial[0], trial[1], suffix='_tmp')
-    
+
         if setup.get_can():
             #reduce the can here
             setup.reduce_can('centre_can', run_Q=False)
-            
+
             self._group_into_quadrants(setup, 'centre_can', trial[0], trial[1], suffix='_can')
             Minus(LHSWorkspace='Left_tmp',RHSWorkspace= 'Left_can',OutputWorkspace= 'Left_tmp')
             Minus(LHSWorkspace='Right_tmp',RHSWorkspace= 'Right_can',OutputWorkspace= 'Right_tmp')
             Minus(LHSWorkspace='Up_tmp',RHSWorkspace= 'Up_can',OutputWorkspace= 'Up_tmp')
-            Minus(LHSWorkspace='Down_tmp',RHSWorkspace= 'Down_can',OutputWorkspace= 'Down_tmp')    
+            Minus(LHSWorkspace='Down_tmp',RHSWorkspace= 'Down_can',OutputWorkspace= 'Down_tmp')
             DeleteWorkspace(Workspace='Left_can')
             DeleteWorkspace(Workspace='Right_can')
             DeleteWorkspace(Workspace='Up_can')
             DeleteWorkspace(Workspace='Down_can')
             DeleteWorkspace(Workspace='centre_can')
-        
+
         DeleteWorkspace(Workspace='centre')
         self._last_pos = trial
-        
+
         #prepare the workspaces for "publication", after they have their standard names calculations will be done on them and they will be plotted
         for out_wksp in self.QUADS:
-            in_wksp = out_wksp+'_tmp' 
+            in_wksp = out_wksp+'_tmp'
             ReplaceSpecialValues(InputWorkspace=in_wksp,OutputWorkspace=in_wksp,NaNValue=0,InfinityValue=0)
             rem_nans = StripEndNans()
             rem_nans.execute(setup, in_wksp)
-    
+
             RenameWorkspace(InputWorkspace=in_wksp,OutputWorkspace= out_wksp)
-    
-        return self._calculate_residue()                        
-    
+
+        return self._calculate_residue()
+
     def status_str(self, iter, x_res, y_res):
         """
             Creates a human readble string from the numbers passed to it
@@ -81,13 +81,13 @@ class CentreFinder(object):
             @param x_res: asymmetry in the x direction
             @param y_res: asymmetry in y
             @return: a human readable string
-        """ 
+        """
         x_str = str(self._last_pos[0]*1000.).ljust(10)[0:9]
         y_str = str(self._last_pos[1]*1000.).ljust(10)[0:9]
         x_res = '    SX='+str(x_res).ljust(7)[0:6]
         y_res = '    SY='+str(y_res).ljust(7)[0:6]
         return 'Itr '+str(iter)+':  ('+x_str+',  '+y_str+')'+x_res+y_res
-    
+
     def move(self, setup, x, y):
         """
             Move the selected detector in both the can and sample workspaces, remembering the
@@ -104,7 +104,7 @@ class CentreFinder(object):
             MoveInstrumentComponent(Workspace=setup.get_can().wksp_name,
                 ComponentName=self.detector, X=x, Y=y, RelativePosition=True)
 
-    # Create a workspace with a quadrant value in it 
+    # Create a workspace with a quadrant value in it
     def _create_quadrant(self, setup, reduced_ws, quadrant, xcentre, ycentre, r_min, r_max, suffix):
         out_ws = quadrant+suffix
         # Need to create a copy because we're going to mask 3/4 out and that's a one-way trip
@@ -112,23 +112,23 @@ class CentreFinder(object):
         objxml = SANSUtility.QuadrantXML([0, 0, 0.0], r_min, r_max, quadrant)
         # Mask out everything outside the quadrant of interest
         MaskDetectorsInShape(Workspace=out_ws,ShapeXML= objxml)
-    
+
         setup.to_Q.execute(setup, out_ws)
         #Q1D(output,rawcount_ws,output,q_bins,AccountForGravity=GRAVITY)
-    
+
     # Create 4 quadrants for the centre finding algorithm and return their names
     def _group_into_quadrants(self, setup, input, xcentre, ycentre, suffix=''):
         r_min = setup.CENT_FIND_RMIN
         r_max = setup.CENT_FIND_RMAX
-    
+
         for q in self.QUADS:
             self._create_quadrant(setup, input, q, xcentre, ycentre, r_min, r_max, suffix)
-    
+
     def _calculate_residue(self):
         """
             Calculate the sum squared difference between pairs of workspaces named Left, Right, Up
             and Down. This assumes that a workspace with one spectrum for each of the quadrants
-            @return: difference left to right, difference up down 
+            @return: difference left to right, difference up down
         """
         yvalsA = mtd['Left'].readY(0)
         yvalsB = mtd['Right'].readY(0)
@@ -150,7 +150,7 @@ class CentreFinder(object):
                 break
             residueX += pow(yvalsA[indexA] - yvalsB[indexB], 2)
             indexB += 1
-    
+
         yvalsA = mtd['Up'].readY(0)
         yvalsB = mtd['Down'].readY(0)
         qvalsA = mtd['Up'].readX(0)
@@ -171,5 +171,5 @@ class CentreFinder(object):
                 break
             residueY += pow(yvalsA[indexA] - yvalsB[indexB], 2)
             indexB += 1
-      
+
         return residueX, residueY

@@ -1811,7 +1811,7 @@ void MantidUI::handleClearADS(Mantid::API::ClearADSNotification_ptr)
 
 void MantidUI::handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr msg)
 {
-  emit workspace_renamed(QString::fromStdString(msg->object_name()),QString::fromStdString(msg->new_objectname()));
+  emit workspace_renamed(QString::fromStdString(msg->objectName()),QString::fromStdString(msg->newObjectName()));
   emit ADS_updated();
 }
 void MantidUI::handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_ptr)

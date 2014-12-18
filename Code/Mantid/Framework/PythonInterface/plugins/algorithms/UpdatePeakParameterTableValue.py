@@ -1,9 +1,9 @@
 import mantid
 import mantid.api
 import mantid.kernel
-import mantid.simpleapi  
+import mantid.simpleapi
 from numpy import arange
- 
+
 class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
     """ Class to generate grouping file
     """
@@ -20,7 +20,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
 
     def summary(self):
         return "Update cell value(s) in a TableWorkspace containing instrument peak profile parameters."
-        
+
     def PyInit(self):
         """ Property definition
         """
@@ -59,7 +59,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
             rownumberlist.extend(rows)
         # ENDFOR
 
-        if len(rownumberlist) > 1: 
+        if len(rownumberlist) > 1:
             rownumberlist = sorted(rownumberlist)
         elif len(rownumberlist) == 0:
             # if no input row number/parameter name, set the value to all rows
@@ -71,10 +71,10 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
 
         # 3. Process column (to change) information
         colname = self.getProperty("Column").value
-        if colnamedict.has_key(colname): 
+        if colnamedict.has_key(colname):
             icolumn = colnamedict[colname]
         else:
-            raise NotImplementedError("Column name %s does not exist in TableWorkspace %s" 
+            raise NotImplementedError("Column name %s does not exist in TableWorkspace %s"
                     % (colname, tablews.name()))
 
         # 3. Set value
@@ -86,17 +86,17 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
             value = self.getProperty("NewFloatValue").value
 
         # print "Input Value = %s.  Type = %s" % (str(value), type(value))
-        
+
         for irow in rownumberlist:
             irow = int(irow)
-            if irow >= 0: 
+            if irow >= 0:
                 tableWS.setCell(irow, icolumn, value)
 
-        # 4. 
+        # 4.
         self.setProperty("InputWorkspace", tableWS)
 
         return
-        
+
     def convertParameterNameToTableRows(self, parametername, paramnamedict):
         """ Convert parameter name (incomplete might be) to row number(s)
         An algorithm to recognize parameter with blurred definition will be use such as
@@ -110,7 +110,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
          - parametername:  parameter name to change value
          - paramnamedict:  dictionary key = parameter name, value = row number in table workspace
 
-        Return: List of row numbers (integer), a negative value might exit to represent a non-existing parameter name 
+        Return: List of row numbers (integer), a negative value might exit to represent a non-existing parameter name
         """
         rownumbers= []
 
@@ -155,7 +155,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
             if ismatch is True:
                 rownumber = paramnamedict[parname]
                 rownumbers.append(rownumber)
-        # ENDFOR: 
+        # ENDFOR:
 
         # 2. Take in the case that there is no match
         if len(rownumbers) == 0:
@@ -163,7 +163,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
             print "Warning! There is no match for parameter %s" % (parnametofit)
             rownumbers.append(-1000)
         # ENDIFELSE
-        
+
         return rownumbers
 
     def parseTableWorkspace(self, tablews):
@@ -185,7 +185,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
             raise NotImplementedError("Input table workspace is not supported due to column size.")
         if colnames[0] != "Name" or colnames[1] != "Value":
             raise NotImplementedError("Input table workspace is not supported due to column name.")
-       
+
         # 3. Parse!
         parametersdict = {}
         parnamedict = {}
@@ -198,7 +198,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
             parnamedict[parname] = irow
             self.parameternames.append(parname)
 
-            # NEW! Collect each variable in 
+            # NEW! Collect each variable in
             valuelist = []
             for icol in xrange(len(colnames)):
                 value = tablews.cell(irow, icol)
@@ -207,7 +207,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
             # ENDFOR
 
         # ENDFOR
-        
+
         return (parnamedict, colnamedict, parameterdict)
 
 

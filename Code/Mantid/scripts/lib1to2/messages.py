@@ -8,7 +8,7 @@ def quiet():
     """
     """
     return __QUIET__
-    
+
 def notify(msg):
     """
     Prints a message to the console

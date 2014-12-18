@@ -38,7 +38,7 @@ class QLabel;
 //! Export ASCII dialog
 class ExportDialog : public QDialog
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
 	//! Constructor
@@ -47,21 +47,21 @@ public:
 	 * @param parent :: parent widget
 	 * @param fl :: window flags
 	 */
-    ExportDialog(const QString& tableName, QWidget* parent = 0, Qt::WFlags fl = 0 );
+  ExportDialog(const QString& tableName, QWidget* parent = 0, Qt::WFlags fl = 0 );
 
 private:
-	void closeEvent(QCloseEvent*);
+  void closeEvent(QCloseEvent*);
 
-    QPushButton* buttonOk;
-	QPushButton* buttonCancel;
-	QPushButton* buttonHelp;
-    QCheckBox* boxNames;
-    QCheckBox* boxComments;
-    QCheckBox* boxSelection;
-	QCheckBox* boxAllTables;
-    QComboBox* boxSeparator;
-	QComboBox* boxTable;
-	QLabel *sepText;
+  QPushButton* buttonOk;
+  QPushButton* buttonCancel;
+  QPushButton* buttonHelp;
+  QCheckBox* boxNames;
+  QCheckBox* boxComments;
+  QCheckBox* boxSelection;
+  QCheckBox* boxAllTables;
+  QComboBox* boxSeparator;
+  QComboBox* boxTable;
+  QLabel *sepText;
 
 public slots:
 	//! Set the column delimiter

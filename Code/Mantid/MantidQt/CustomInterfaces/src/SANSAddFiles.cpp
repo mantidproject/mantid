@@ -276,8 +276,8 @@ void SANSAddFiles::runPythonAddFiles()
   code_torun += ext+"'";
   
   code_torun += ", rawTypes=(";
-  std::set<std::string>::const_iterator end = m_rawExts.end();
-  for(std::set<std::string>::const_iterator j=m_rawExts.begin(); j != end; ++j)
+  std::vector<std::string>::const_iterator end = m_rawExts.end();
+  for(std::vector<std::string>::const_iterator j=m_rawExts.begin(); j != end; ++j)
   {
     code_torun += "'"+QString::fromStdString(*j)+"',";
   }
@@ -339,8 +339,8 @@ void SANSAddFiles::new2AddBrowse()
   
 	QString fileFilter = "Files (";
 
-  std::set<std::string>::const_iterator end = m_exts.end();
-  for(std::set<std::string>::const_iterator i = m_exts.begin(); i != end; ++i)
+  std::vector<std::string>::const_iterator end = m_exts.end();
+  for(std::vector<std::string>::const_iterator i = m_exts.begin(); i != end; ++i)
   {
     fileFilter += " *"+QString::fromStdString(*i);
   }

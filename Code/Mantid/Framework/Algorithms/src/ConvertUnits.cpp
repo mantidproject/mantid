@@ -370,7 +370,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
   IComponent_const_sptr sample = instrument->getSample();
   if ( source == NULL || sample == NULL )
   {
-    throw Exception::InstrumentDefinitionError("Instrubment not sufficiently defined: failed to get source and/or sample");
+    throw Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
   }
   double l1;
   try

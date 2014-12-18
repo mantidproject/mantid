@@ -321,7 +321,7 @@ public:
         TS_ASSERT_THROWS_NOTHING(pSett= monSpec->getSettings());
         TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(&norm6, monSpec));
         // it should return the list of allowed monitor ID-s
-        std::set<std::string> monitors = monSpec->allowedValues();
+        std::vector<std::string> monitors = monSpec->allowedValues();
         TS_ASSERT_EQUALS(1,monitors.size());
         TS_ASSERT_EQUALS("0",*(monitors.begin()));
 

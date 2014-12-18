@@ -5,6 +5,11 @@
 
 using namespace Mantid::API;
 
+namespace
+{
+  Mantid::Kernel::Logger g_log("ApplyCorr");
+}
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -14,7 +19,6 @@ namespace IDA
   ApplyCorr::ApplyCorr(QWidget * parent) : 
     IDATab(parent)
   {
-
   }
 
   void ApplyCorr::setup()
@@ -26,6 +30,7 @@ namespace IDA
     connect(uiForm().abscor_ckScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(scaleMultiplierCheck(bool)));
     connect(uiForm().abscor_cbGeometry, SIGNAL(currentIndexChanged(int)), this, SLOT(handleGeometryChange(int)));
     connect(uiForm().abscor_ckUseCan, SIGNAL(toggled(bool)), uiForm().abscor_ckPlotContrib, SLOT(setEnabled(bool)));
+    connect(uiForm().abscor_dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(newData(const QString&)));
 
     // Create a validator for input box of the Scale option.
     m_valPosDbl = new QDoubleValidator(this);
@@ -43,19 +48,36 @@ namespace IDA
   */
   void ApplyCorr::scaleMultiplierCheck(bool state)
   {
-    //scale input should be disabled if we're not using a can
+    // Scale input should be disabled if we're not using a can
     if(!uiForm().abscor_ckUseCan->isChecked())
     {
       uiForm().abscor_leScaleMultiplier->setEnabled(false);
     }
     else
     {
-      //else it should be whatever the scale checkbox is
+      // Else it should be whatever the scale checkbox is
       state = uiForm().abscor_ckScaleMultiplier->isChecked();
       uiForm().abscor_leScaleMultiplier->setEnabled(state);
     }
   }
 
+  /**
+   * Disables corrections when using S(Q, w) as input data.
+   *
+   * @param dataName Name of new data source
+   */
+  void ApplyCorr::newData(const QString &dataName)
+  {
+    bool isSqw = dataName.endsWith("_sqw", Qt::CaseInsensitive);
+
+    if(isSqw)
+    {
+      g_log.information("Input data is in S(Q, w), correction file cannot be used");
+      uiForm().abscor_ckUseCorrections->setCheckState(Qt::Unchecked);
+    }
+
+    uiForm().abscor_ckUseCorrections->setEnabled(!isSqw);
+  }
 
   bool ApplyCorr::validateScaleInput()
   {

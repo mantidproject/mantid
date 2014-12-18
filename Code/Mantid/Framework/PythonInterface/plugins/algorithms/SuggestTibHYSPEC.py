@@ -1,5 +1,5 @@
 from mantid.api import PythonAlgorithm, AlgorithmFactory
-import mantid.simpleapi 
+import mantid.simpleapi
 from mantid.kernel import FloatBoundedValidator,Direction,logger
 from numpy import sqrt,divide
 
@@ -11,7 +11,7 @@ class SuggestTibHYSPEC(PythonAlgorithm):
         """ Return category
         """
         return "PythonAlgorithms;Utility;Inelastic"
-    
+
     def name(self):
         """ Return name
         """
@@ -21,17 +21,17 @@ class SuggestTibHYSPEC(PythonAlgorithm):
         """ Return summary
         """
         return "Suggest possible time independent background range for HYSPEC"
-            
+
     def PyInit(self):
         """ Declare properties
         """
         val=mantid.kernel.FloatBoundedValidator()
         val.setBounds(3,100) #reasonable incident nergy range for HYSPEC
         self.declareProperty("IncidentEnergy",0.,val,"Incident energy (3 to 100 meV)")
-        self.declareProperty("TibMin",0.,Direction.Output)        
-        self.declareProperty("TibMax",0.,Direction.Output)  
+        self.declareProperty("TibMin",0.,Direction.Output)
+        self.declareProperty("TibMax",0.,Direction.Output)
         return
-    
+
     def e2v(self,energy):
         return sqrt(energy/5.227e-6)
 
@@ -40,7 +40,7 @@ class SuggestTibHYSPEC(PythonAlgorithm):
         """
         #get parameter
         energy = self.getProperty("IncidentEnergy").value
-       
+
         msd=1800.0
         tail_length_us = 3000.0
         dist_mm = 39000.0 + msd + 4500.0
@@ -118,7 +118,7 @@ class SuggestTibHYSPEC(PythonAlgorithm):
         #return the result
         self.setProperty("TibMin",TIB_low_us)
         self.setProperty("TibMax",TIB_high_us)
-        return 
-    
-    
+        return
+
+
 AlgorithmFactory.subscribe(SuggestTibHYSPEC)

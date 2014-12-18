@@ -55,6 +55,7 @@ protected:
   void init();
 
 private:
+  static size_t numberOfPatterns();
   static const Qt::BrushStyle patterns[];
 };
 

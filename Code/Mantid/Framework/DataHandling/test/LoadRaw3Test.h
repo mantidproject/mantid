@@ -424,6 +424,12 @@ public:
   }
   void testSeparateMonitors()
   {
+    doTestSeparateMonitors("Separate");
+    doTestSeparateMonitors("1");
+  }
+
+  void doTestSeparateMonitors(const std::string& option)
+  {
     LoadRaw3 loader6;
     if ( !loader6.isInitialized() ) loader6.initialize();
 
@@ -432,7 +438,7 @@ public:
 
     // Now set it...
     loader6.setPropertyValue("Filename", inputFile);
-    loader6.setPropertyValue("LoadMonitors", "Separate");
+    loader6.setPropertyValue("LoadMonitors", option);
 
     outputSpace = "outer1";
     loader6.setPropertyValue("OutputWorkspace", outputSpace);
@@ -835,15 +841,21 @@ public:
     AnalysisDataService::Instance().remove("outWS_monitors");
     AnalysisDataService::Instance().remove("outWS");
   }
-  //no monitors in the selected range
   void testExcludeMonitors()
+  {
+    doTestExcludeMonitors("Exclude");
+    doTestExcludeMonitors("0");
+  }
+
+  //no monitors in the selected range
+  void doTestExcludeMonitors(const std::string& option)
   {
     LoadRaw3 loader11;
     if ( !loader11.isInitialized() ) loader11.initialize();
 
     loader11.setPropertyValue("Filename", inputFile);
     loader11.setPropertyValue("OutputWorkspace", "outWS");
-    loader11.setPropertyValue("LoadMonitors", "Exclude");
+    loader11.setPropertyValue("LoadMonitors", option);
 
     TS_ASSERT_THROWS_NOTHING(loader11.execute());
     TS_ASSERT( loader11.isExecuted() );

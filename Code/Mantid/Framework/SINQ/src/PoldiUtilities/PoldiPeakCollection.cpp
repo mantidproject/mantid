@@ -13,6 +13,8 @@ namespace Poldi {
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 PoldiPeakCollection::PoldiPeakCollection(IntensityType intensityType) :
     m_peaks(),
@@ -22,12 +24,24 @@ PoldiPeakCollection::PoldiPeakCollection(IntensityType intensityType) :
 }
 
 PoldiPeakCollection::PoldiPeakCollection(const TableWorkspace_sptr &workspace) :
-    m_peaks()
+    m_peaks(),
+    m_intensityType(Maximum),
+    m_profileFunctionName()
 {
     if(workspace) {
         constructFromTableWorkspace(workspace);
     }
 }
+
+PoldiPeakCollection::PoldiPeakCollection(const Geometry::CrystalStructure_sptr &crystalStructure, double dMin, double dMax) :
+    m_peaks()
+{
+    std::vector<V3D> uniqueHKL = crystalStructure->getUniqueHKLs(dMin, dMax);
+    std::vector<double> dValues = crystalStructure->getDValues(uniqueHKL);
+
+    setPeaks(uniqueHKL, dValues);
+}
+
 
 PoldiPeakCollection_sptr PoldiPeakCollection::clone()
 {
@@ -59,6 +73,12 @@ PoldiPeak_sptr PoldiPeakCollection::peak(size_t index) const
 
     return m_peaks[index];
 }
+
+const std::vector<PoldiPeak_sptr> &PoldiPeakCollection::peaks() const
+{
+    return m_peaks;
+}
+
 
 PoldiPeakCollection::IntensityType PoldiPeakCollection::intensityType() const
 {
@@ -159,6 +179,19 @@ bool PoldiPeakCollection::checkColumns(const TableWorkspace_sptr &tableWorkspace
     return columnNames == shouldNames;
 }
 
+void PoldiPeakCollection::setPeaks(const std::vector<V3D> &hkls, const std::vector<double> &dValues)
+{
+    if(hkls.size() != dValues.size()) {
+        throw std::invalid_argument("hkl-vector and d-vector do not have the same length.");
+    }
+
+    m_peaks.clear();
+
+    for(size_t i = 0; i < hkls.size(); ++i) {
+        addPeak(PoldiPeak::create(MillerIndices(hkls[i]), dValues[i]));
+    }
+}
+
 void PoldiPeakCollection::recoverDataFromLog(const TableWorkspace_sptr &tableWorkspace)
 {
     LogManager_sptr tableLog = tableWorkspace->logs();
@@ -171,6 +204,7 @@ std::string PoldiPeakCollection::getIntensityTypeFromLog(const LogManager_sptr &
 {
     return getStringValueFromLog(tableLog, "IntensityType");
 }
+
 
 std::string PoldiPeakCollection::getProfileFunctionNameFromLog(const LogManager_sptr &tableLog)
 {

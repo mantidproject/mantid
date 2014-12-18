@@ -66,6 +66,8 @@ private:
 
         void function1DSpectrum(const FunctionDomain1DSpectrum &domain, FunctionValues &values) const
         {
+            values.zeroCalculated();
+
             for(size_t i = 0; i < domain.size(); ++i) {
                 values.addToCalculated(i, 1.0);
             }

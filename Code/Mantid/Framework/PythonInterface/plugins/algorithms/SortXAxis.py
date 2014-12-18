@@ -15,11 +15,11 @@ class SortXAxis(PythonAlgorithm):
 
     def summary(self):
         return "Clones the input MatrixWorkspace(s) and orders the x-axis in an ascending fashion."
-        
+
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", defaultValue="",  direction=Direction.Input), doc="Input workspace")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output), doc="Sorted Output Workspace")
-        
+
     def PyExec(self):
         inputws = self.getProperty("InputWorkspace").value
         specs = inputws.getNumberHistograms()
@@ -35,7 +35,7 @@ class SortXAxis(PythonAlgorithm):
                indexes = np.delete(indexes, max_index)
             yordered = y[indexes]
             eordered = e[indexes]
-            
+
             outws.setX(i, xordered)
             outws.setY(i, yordered)
             outws.setE(i, eordered)

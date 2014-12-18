@@ -50,8 +50,8 @@ Assumptions
 This algorithm assumes that the (parallel) beam illuminates the entire
 sample **unless** a 'gauge volume' has been defined using the
 :ref:`algm-DefineGaugeVolume` algorithm (or by otherwise
-adding a valid XML string `defining a
-shape <http://www.mantidproject.org/HowToDefineGeometricShape>`_ to a `Run <http://www.mantidproject.org/Run>`_ property called
+adding a valid XML string :ref:`defining a
+shape <HowToDefineGeometricShape>` to a :ref:`Run <Run>` property called
 "GaugeVolume"). In this latter case only scattering within this volume
 (and the sample) is integrated, because this is all the detector can
 'see'. The full sample is still used for the neutron paths. (**N.B.** If
@@ -64,7 +64,7 @@ Restrictions on the input workspace
 ###################################
 
 The input workspace must have units of wavelength. The
-`instrument <http://www.mantidproject.org/instrument>`_ associated with the workspace must be fully
+:ref:`instrument <instrument>` associated with the workspace must be fully
 defined because detector, source & sample position are needed.
 
 .. |AbsorptionFlow.png| image:: /images/AbsorptionFlow.png

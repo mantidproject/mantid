@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidCurveFitting/CubicSpline.h"
+#include "MantidCurveFitting/BSpline.h"
 
 namespace Mantid
 {
@@ -54,25 +54,28 @@ namespace CurveFitting
     /// number of smoothing points to start with
     const int M_START_SMOOTH_POINTS;
 
-    /// CubicSpline member used to perform smoothing
-    boost::shared_ptr<CubicSpline> m_cspline;
 
     //Overriden methods
     void init();
     void exec();
+    
+    /// smooth a single spectrum of the workspace
+    void smoothSpectrum(int index);
+  
+    /// calculate derivatives for a single spectrum
+    void calculateSpectrumDerivatives(int index, int order);
 
     /// setup an output workspace using meta data from inws and taking a number of spectra
-    API::MatrixWorkspace_sptr setupOutputWorkspace(API::MatrixWorkspace_sptr inws, int size) const;
+    API::MatrixWorkspace_sptr setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws, int size) const;
 
     /// convert a binned workspace to point data. Uses mean of the bins as point
-    API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace) const;
+    API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace);
 
     /// set the points used in the spline for smoothing
     void setSmoothingPoint(const int index, const double xpoint, const double ypoint) const;
 
     /// choose points to define a spline and smooth the data
-    void selectSmoothingPoints(std::set<int>& xPoints,
-        API::MatrixWorkspace_const_sptr inputWorkspace, size_t row) const;
+    void selectSmoothingPoints(API::MatrixWorkspace_const_sptr inputWorkspace, size_t row);
 
     /// calculate the spline based on the smoothing points chosen
     void calculateSmoothing(API::MatrixWorkspace_const_sptr inputWorkspace,
@@ -91,7 +94,19 @@ namespace CurveFitting
         const double* ys, const double* ysmooth) const;
 
     /// Use an existing fit function to tidy smoothing
-    void performAdditionalFitting(const API::MatrixWorkspace_sptr& ws, const int row);
+    void performAdditionalFitting(API::MatrixWorkspace_sptr ws, const int row);
+
+    /// CubicSpline member used to perform smoothing
+    boost::shared_ptr<BSpline> m_cspline;
+    /// pointer to the input workspace
+    API::MatrixWorkspace_sptr m_inputWorkspace;
+    /// pointer to the input workspace converted to point data
+    API::MatrixWorkspace_sptr m_inputWorkspacePointData;
+    /// pointer to the output workspace group of derivatives
+    API::WorkspaceGroup_sptr m_derivativeWorkspaceGroup;
+    /// pointer to the smoothed output workspace
+    API::MatrixWorkspace_sptr m_outputWorkspace;
+
   };
 
 

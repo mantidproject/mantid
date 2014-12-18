@@ -35,10 +35,9 @@ Usage
     ws = CreateSampleWorkspace("Histogram","Multiple Peaks", 
         BankPixelWidth=1, NumBanks=10, Random=True,
         XMax=30, BinWidth=0.3)
-    (wsOut,wsOutDeriv) = SplineSmoothing(ws,Error=1)
+    wsOut = SplineSmoothing(ws,Error=1)
 
     print "This has created a spline for each spectra in the %s workspace" % wsOut
-    print "The derivatives are stored in a Group Workspace %s with one workspace per spectra" % wsOutDeriv
 
     try:
         plotSpectrum([ws,wsOut],0)
@@ -52,7 +51,5 @@ Output:
 .. testoutput:: SmoothNoisy
 
     This has created a spline for each spectra in the wsOut workspace
-    The derivatives are stored in a Group Workspace wsOutDeriv with one workspace per spectra
-
 
 .. categories::

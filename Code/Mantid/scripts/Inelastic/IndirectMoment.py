@@ -10,23 +10,23 @@ mp = import_mantidplot()
 def CheckElimits(erange,Xin):
     nx = len(Xin)-1
     if math.fabs(erange[0]) < 1e-5:
-        error = 'Elimits - input emin ( '+str(erange[0])+' ) is Zero'			
+        error = 'Elimits - input emin ( '+str(erange[0])+' ) is Zero'
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
     if erange[0] < Xin[0]:
-        error = 'Elimits - input emin ( '+str(erange[0])+' ) < data emin ( '+str(Xin[0])+' )'		
+        error = 'Elimits - input emin ( '+str(erange[0])+' ) < data emin ( '+str(Xin[0])+' )'
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
     if math.fabs(erange[1]) < 1e-5:
-        error = 'Elimits - input emax ( '+str(erange[1])+' ) is Zero'			
+        error = 'Elimits - input emax ( '+str(erange[1])+' ) is Zero'
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
     if erange[1] > Xin[nx]:
-        error = 'Elimits - input emax ( '+str(erange[1])+' ) > data emax ( '+str(Xin[nx])+' )'			
+        error = 'Elimits - input emax ( '+str(erange[1])+' ) > data emax ( '+str(Xin[nx])+' )'
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
     if erange[1] < erange[0]:
-        error = 'Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+erange[0]+' )'			
+        error = 'Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+erange[0]+' )'
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
 
@@ -90,11 +90,11 @@ def MomentRun(samWS,erange,factor,Verbose,Plot,Save):
         opath = os.path.join(workdir,fname+'.nxs')
         SaveNexusProcessed(InputWorkspace=fname, Filename=opath)
         if Verbose:
-			logger.notice('Output file : ' + opath)
+    		logger.notice('Output file : ' + opath)
     if (Plot != 'None'):
         MomentPlot(fname,Plot)
-    EndTime('Moments')	
-	
+    EndTime('Moments')
+
 def MomentPlot(inputWS,Plot):
     m0_plot=mp.plotSpectrum(inputWS+'_M0',0)
     m2_plot=mp.plotSpectrum([inputWS+'_M2',inputWS+'_M4'],0)
@@ -102,7 +102,7 @@ def MomentPlot(inputWS,Plot):
 def MomentStart(inType,sname,erange,factor,Verbose,Plot,Save):
     workdir = config['defaultsave.directory']
     if inType == 'File':
-        spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
+        spath = os.path.join(workdir, sname+'.nxs')    	# path name for sample nxs file
         logger.notice('Input from File : '+spath)
         LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
     else:

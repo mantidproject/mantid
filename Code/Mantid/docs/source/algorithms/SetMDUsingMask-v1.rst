@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm is used to replace values in a
-`MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`_ but only at particular points.
+:ref:`MDHistoWorkspace <MDHistoWorkspace>` but only at particular points.
 
 A mask MDHistoWorkspace is provided, where non-zero values indicate
 'true'. At these points, the corresponding value in the ValueWorkspace

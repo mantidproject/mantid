@@ -32,9 +32,8 @@ namespace DataObjects
      * Constructor - Default.
      * @return MaskWorkspace
      */
-    MaskWorkspace::MaskWorkspace()  : m_hasInstrument(false)
+    MaskWorkspace::MaskWorkspace()
     {
-      m_hasInstrument = hasInstrument();
     }
 
     /**
@@ -42,11 +41,10 @@ namespace DataObjects
      * @param[in] numvectors Number of vectors/histograms for this workspace.
      * @return MaskWorkspace
      */
-    MaskWorkspace::MaskWorkspace(std::size_t numvectors) : m_hasInstrument(false)
+    MaskWorkspace::MaskWorkspace(std::size_t numvectors)
     {
       this->init(numvectors, 1, 1);
       this->clearMask();
-      m_hasInstrument = hasInstrument();
     }
 
     /**
@@ -56,10 +54,9 @@ namespace DataObjects
      * @return MaskWorkspace
      */
     MaskWorkspace::MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument, const bool includeMonitors)
-      : SpecialWorkspace2D(instrument, includeMonitors), m_hasInstrument(true)
+      : SpecialWorkspace2D(instrument, includeMonitors)
     {
       this->clearMask();
-      m_hasInstrument = hasInstrument();
     }
 
     /**
@@ -68,10 +65,9 @@ namespace DataObjects
      * @return MaskWorkspace
      */
     MaskWorkspace::MaskWorkspace(const API::MatrixWorkspace_const_sptr parent)
-        : SpecialWorkspace2D(parent), m_hasInstrument(true)
+        : SpecialWorkspace2D(parent)
     {
       this->clearMask();
-      m_hasInstrument = hasInstrument();
     }
 
     //--------------------------------------------------------------------------
@@ -107,14 +103,6 @@ namespace DataObjects
     {
       // Determine whether has instrument or not
       Geometry::Instrument_const_sptr inst = getInstrument();
-      if (inst)
-      {
-        if (inst->getNumberDetectors() > 0)
-          m_hasInstrument = true;
-        else
-          m_hasInstrument = false;
-      }
-      else m_hasInstrument = false;
 
       size_t numMasked(0);
       const size_t numWksp(this->getNumberHistograms());
@@ -124,7 +112,7 @@ namespace DataObjects
         {
           numMasked++;
         }
-        else if (m_hasInstrument)
+        else if (this->hasInstrument())
         {
           const set<detid_t> ids = this->getDetectorIDs(i);
           if (this->isMasked(ids)) // slow and correct check with the real method
@@ -149,9 +137,13 @@ namespace DataObjects
       set<detid_t> detIDs;
 
       Geometry::Instrument_const_sptr inst = this->getInstrument();
-      if (inst) m_hasInstrument = true;
 
-      if (m_hasInstrument)
+      /*
+       * Note
+       * This test originally just checked if there was an instument and ignored
+       * the number of detectors
+       */
+      if (this->hasInstrument())
       {
         size_t numHist(this->getNumberHistograms());
         for (size_t i = 0; i < numHist; i++)
@@ -194,7 +186,7 @@ namespace DataObjects
      */
     bool MaskWorkspace::isMasked(const detid_t detectorID) const
     {
-      if (!m_hasInstrument)
+      if (!this->hasInstrument())
       {
         std::stringstream msg;
         if (!this->getInstrument())
@@ -296,8 +288,6 @@ namespace DataObjects
     void MaskWorkspace::copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews)
     {
       SpecialWorkspace2D::copyFrom(sourcews);
-
-      m_hasInstrument = hasInstrument();
     }
 
     /**
@@ -316,7 +306,7 @@ namespace DataObjects
       * (1) There is an instrument associated with
       * (2) Number of detectors is larger than 0
       */
-    bool MaskWorkspace::hasInstrument()
+    bool MaskWorkspace::hasInstrument() const
     {
       bool hasinst;
       Geometry::Instrument_const_sptr inst = this->getInstrument();

@@ -28,7 +28,7 @@ from mantid import logger
 import math, numpy as np
 
 class HallRoss(IFunction1D):
-    
+
     def category(self):
         return "QuasiElastic"
 
@@ -36,7 +36,7 @@ class HallRoss(IFunction1D):
         # Active fitting parameters
         self.declareParameter("Tau", 1.0, 'Residence time')
         self.declareParameter("L", 0.2, 'Jump length')
-       
+
     def function1D(self, xvals):
         tau = self.getParameterValue("Tau")
         l = self.getParameterValue("L")
@@ -46,7 +46,7 @@ class HallRoss(IFunction1D):
         hwhm = (1.0 - np.exp( -l * xvals * xvals )) / tau
 
         return hwhm
-    
+
     def functionDeriv1D(self, xvals, jacobian):
         tau = self.getParameterValue("Tau")
         l = self.getParameterValue("L")

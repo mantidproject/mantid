@@ -24,7 +24,7 @@ bool isIntermediateValueHelper(qint64 num, qint64 min, qint64 max, qint64 *match
   qint64 tmp = num;
 
   int numDigits = 0;
-  int digits[10];
+  int digits[] = {0,0,0,0,0,0,0,0,0,0};
   if (tmp == 0) {
     numDigits = 1;
     digits[0] = 0;

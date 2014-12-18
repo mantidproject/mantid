@@ -439,6 +439,11 @@ public:
     {
       return m_value;
     }
+    else if ( problem == "_alias" )
+    {
+      m_value = getValueForAlias( value );
+      return m_value;
+    }
     else
     {
       m_value = oldValue;
@@ -486,7 +491,7 @@ public:
    *  If not, it returns an empty vector.
    *  @return Returns the set of valid values for this property, or it returns an empty vector.
    */
-  virtual std::set<std::string> allowedValues() const
+  virtual std::vector<std::string> allowedValues() const
   {
     return m_validator->allowedValues();
   }
@@ -564,6 +569,19 @@ private:
       UNUSED_ARG(value);
       return "Attempt to assign object of type DataItem to property (" + name() + ") of incorrect type";
     }
+
+  /** Return value for a given alias.
+   * @param alias :: An alias for a value. If a value cannot be found throw an invalid_argument exception.
+   * @return :: A value.
+   */
+  const TYPE getValueForAlias(const TYPE& alias) const
+  {
+    std::string strAlias = toString( alias );
+    std::string strValue = m_validator->getValueForAlias( strAlias );
+    TYPE value;
+    toValue( strValue, value );
+    return value;
+  }
 
   /// Visitor validator class
   IValidator_sptr m_validator;

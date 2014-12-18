@@ -81,14 +81,14 @@ public:
 
   void handlePreDeleteNotification(const Poco::AutoPtr<FakeDataService::PreDeleteNotification>& notification)
   {
-    TS_ASSERT_EQUALS( notification->object_name(), "one" );
+    TS_ASSERT_EQUALS( notification->objectName(), "one" );
     TS_ASSERT_EQUALS( *notification->object(), 1 );
     ++notificationFlag;
   }
 
   void handlePostDeleteNotification(const Poco::AutoPtr<FakeDataService::PostDeleteNotification>& notification)
   {
-    TS_ASSERT_EQUALS( notification->object_name(), "one" );
+    TS_ASSERT_EQUALS( notification->objectName(), "one" );
     ++notificationFlag;
   }
 

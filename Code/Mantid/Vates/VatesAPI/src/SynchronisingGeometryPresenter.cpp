@@ -192,7 +192,10 @@ namespace Mantid
         std::replace_if(m_dimensions.begin(), m_dimensions.end(), FindModelId(pDimensionPresenter->getAppliedModel()->getDimensionId()), pDimensionPresenter->getAppliedModel());
         //Insert an axis-mapping for this expanded dimension.
         VecDimPresenter_sptr::iterator location = std::find_if(m_dimPresenters.begin(), m_dimPresenters.end(), FindId(pDimensionPresenter->getAppliedModel()->getDimensionId()));
-        insertMappedPresenter((*location));
+        if (location != m_dimPresenters.end())
+        {
+          insertMappedPresenter((*location));
+        }
         shuffleMappedPresenters();
       
     }

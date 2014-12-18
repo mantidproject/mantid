@@ -26,7 +26,7 @@ CreateMDWorkspaceAlgDialog::CreateMDWorkspaceAlgDialog()
   auto QModes = convertToMD->getPointerToProperty("QDimensions")->allowedValues();
   if ( QModes.empty() ) // avoid weird situations with factory not initiated
   {
-    QModes.insert("No Q modes available; error Initiating Q-conversion factory");
+    QModes.push_back("No Q modes available; error Initiating Q-conversion factory");
   }
   for ( auto it = QModes.begin(); it != QModes.end(); ++it )
   {

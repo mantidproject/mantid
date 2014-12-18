@@ -16,10 +16,10 @@ larger sample in the :ref:`algm-AbsorptionCorrection`
 algorithm. The sample shape will also need to be defined using, e.g.,
 the :ref:`algm-CreateSampleShape` algorithm. Shapes are
 defined using XML descriptions that can be found
-`here <http://www.mantidproject.org/HowToDefineGeometricShape>`__.
+:ref:`here <HowToDefineGeometricShape>`.
 
 Internally, this works by attaching the XML string (after validating it)
-to a property called "GaugeVolume" on the workspace's `Run <http://www.mantidproject.org/Run>`__
+to a property called "GaugeVolume" on the workspace's :ref:`Run <Run>`
 object.
 
 

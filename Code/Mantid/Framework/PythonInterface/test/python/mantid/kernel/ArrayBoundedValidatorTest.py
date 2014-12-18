@@ -40,8 +40,8 @@ class ArrayBoundedValidatorTest(unittest.TestCase):
         validator.clearUpper()
         self.assertFalse(validator.hasLower())
         self.assertFalse(validator.hasUpper())
-        
-        
+
+
     def test_values_within_array_bounds_are_accepted_by_validator(self):
        alg = self._create_alg_with_ArrayBoundedValidator(5.1, 10.4)
        input_vals = [5.1, 5.6, 10.4, 9.2]
@@ -51,25 +51,25 @@ class ArrayBoundedValidatorTest(unittest.TestCase):
        alg = self._create_alg_with_ArrayBoundedValidator(5.1, 10.4)
        input_vals = [5.4, 6.2, 1.3]
        self.assertRaises(ValueError, alg.setProperty, "Input", input_vals)
-       
+
     def test_values_greater_than_array_bounds_are_not_accepted_by_validator(self):
        alg = self._create_alg_with_ArrayBoundedValidator(5.1, 10.4)
        input_vals = [5.4, 20.1, 8.3, ]
        self.assertRaises(ValueError, alg.setProperty, "Input", input_vals)
-       
+
     def _create_alg_with_ArrayBoundedValidator(self, lower, upper):
         """
             Creates a test algorithm with a bounded validator
         """
         class TestAlgorithm(PythonAlgorithm):
-            
+
             def PyInit(self):
                 validator = FloatArrayBoundedValidator(lower, upper)
                 self.declareProperty(FloatArrayProperty("Input", validator))
 
             def PyExec(self):
                 pass
-            
+
         alg = TestAlgorithm()
         alg.initialize()
         return alg

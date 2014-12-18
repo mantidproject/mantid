@@ -53,6 +53,9 @@ namespace DataHandling
     void init();
     /// Run the algorithm
     void exec();
+
+    /// Checks if a detector ID is for a monitor on a given instrument
+    static bool idIsMonitor(Mantid::Geometry::Instrument_const_sptr inst, int detID);
   };
 
 

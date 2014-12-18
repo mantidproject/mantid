@@ -6,7 +6,7 @@ import VTKConvert
 if( len(sys.argv) == 1 ):
     print "Usage: processISISData file-name1 file-name2 ...\n       processISISDATA dir-name"
     exit(1)
-    
+
 names=[]
 is_dir = os.path.isdir(sys.argv[1])
 if( is_dir ):

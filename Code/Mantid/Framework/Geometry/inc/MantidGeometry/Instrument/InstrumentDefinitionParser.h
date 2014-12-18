@@ -228,9 +228,9 @@ private:
      *  of quickly accessing if a component have a parameter/logfile associated with it or not
      *  - instead of using the comparatively slow poco call getElementsByTagName() (or getChildElement)
      */
-    std::vector<Poco::XML::Element*> hasParameterElement;
-    /// has hasParameterElement been set - used when public method setComponentLinks is used
-    bool hasParameterElement_beenSet;
+    std::vector<Poco::XML::Element*> m_hasParameterElement;
+    /// has m_hasParameterElement been set - used when public method setComponentLinks is used
+    bool m_hasParameterElement_beenSet;
     /** map which holds names of types and whether or not they are categorized as being
      *  assemblies, which means whether the type element contains component elements
      */

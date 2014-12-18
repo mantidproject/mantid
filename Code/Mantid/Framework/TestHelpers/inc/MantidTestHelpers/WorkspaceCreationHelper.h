@@ -254,6 +254,9 @@ namespace WorkspaceCreationHelper
 
   /// Create a 2D workspace with one detector and one monitor based around a virtual reflectometry instrument.
   Mantid::API::MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(double startX=0);
+
+  void createInstrumentForWorkspaceWithDistances(Mantid::API::MatrixWorkspace_sptr workspace,
+      const Mantid::Kernel::V3D& samplePosition, const Mantid::Kernel::V3D& sourcePosition, const std::vector<Mantid::Kernel::V3D>& detectorPositions);
 }
 
 #endif /*WORKSPACECREATIONHELPER_H_*/

@@ -150,7 +150,7 @@ void SymbolBox::init(bool showNoSymbol)
 void SymbolBox::setStyle(const QwtSymbol::Style& style)
 {
   // Avoid compiler warnings relating to symbols + sizeof(symbols) being out of range
-  size_t n = sizeof(symbols);
+  size_t n = numberOfSymbols();
   for(size_t i = 0; i < n; ++i)
   {
     if (symbols[i] == style)
@@ -179,7 +179,7 @@ QwtSymbol::Style SymbolBox::selectedSymbol() const
 int SymbolBox::symbolIndex(const QwtSymbol::Style& style)
 {
   // Avoid compiler warnings relating to symbols + sizeof(symbols) being out of range
-  size_t n = sizeof(symbols);
+  size_t n = numberOfSymbols();
   for(size_t i = 0; i < n; ++i)
   {
     if (symbols[i] == style)
@@ -197,7 +197,7 @@ int SymbolBox::symbolIndex(const QwtSymbol::Style& style)
 
 QwtSymbol::Style SymbolBox::style(int index)
 {
-  if (index >= 0 && index < (int)sizeof(symbols))
+  if (index >= 0 && index < (int)numberOfSymbols())
     return symbols[index];
 
   return QwtSymbol::NoSymbol;
@@ -216,4 +216,9 @@ void SymbolBox::focusInEvent(QFocusEvent * e)
 {
   emit activated(this);
   return QComboBox::focusInEvent(e);
+}
+
+size_t SymbolBox::numberOfSymbols()
+{
+  return sizeof(symbols) / sizeof(QwtSymbol::Style);
 }

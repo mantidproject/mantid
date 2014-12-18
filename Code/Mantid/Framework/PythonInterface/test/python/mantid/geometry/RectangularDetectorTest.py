@@ -3,16 +3,16 @@ from mantid.geometry import *
 from testhelpers import can_be_instantiated, WorkspaceCreationHelper
 
 class RectangularDetectorTest(unittest.TestCase):
-    
+
     def test_RectangularDetector_cannot_be_instantiated(self):
         self.assertFalse(can_be_instantiated(RectangularDetector))
-        
+
     def test_RectangularDetector_has_expected_attributes(self):
         attrs = dir(RectangularDetector)
         expected_attrs = ['idfillbyfirst_y','idstart', 'idstep','idstepbyrow',  'maxDetectorID', 'minDetectorID', 'xpixels', 'xsize', 'xstart', 'xstep', 'ypixels', 'ysize', 'ystart', 'ystep','type','nelements']
         for att in expected_attrs:
             self.assertTrue(att in attrs)
-    
+
     def test_RectangularDetector_getattributes(self):
         testws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(3,5,5)
         i = testws.getInstrument()
@@ -28,6 +28,6 @@ class RectangularDetectorTest(unittest.TestCase):
         self.assertEquals(i[1].idstepbyrow(),5)
         self.assertEquals(i[1].maxDetectorID(),74)
         self.assertEquals(i[1].minDetectorID(),50)
-        
+
 if __name__ == '__main__':
     unittest.main()

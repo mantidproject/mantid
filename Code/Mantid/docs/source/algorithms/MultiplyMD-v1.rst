@@ -9,7 +9,7 @@
 Description
 -----------
 
-Multiply two `MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`_'s or a
+Multiply two :ref:`MDHistoWorkspace <MDHistoWorkspace>`'s or a
 MDHistoWorkspace and a scalar.
 
 The error of :math:`f = a * b` is propagated with

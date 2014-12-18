@@ -13,7 +13,7 @@ class CreateLeBailFitInputTest(unittest.TestCase):
         """ Test to load a .hkl file
         """
         # Set up
-        alg_test = run_algorithm("CreateLeBailFitInput", 
+        alg_test = run_algorithm("CreateLeBailFitInput",
                 ReflectionsFile         = "LB4853b2.hkl",
                 FullprofParameterFile   = "2011B_HR60b2.irf",
                 Bank                    = 2,
@@ -30,7 +30,7 @@ class CreateLeBailFitInputTest(unittest.TestCase):
         paramws = AnalysisDataService.retrieve("PG3_Bank2_Foo")
 
         paramname0 = paramws.cell(0, 0)
-        
+
         if paramname0.lower() == "bank":
             numrowgood = 29
         else:
@@ -60,7 +60,7 @@ class CreateLeBailFitInputTest(unittest.TestCase):
         """ Test to load a .hkl file
         """
         # Set up
-        alg_test = run_algorithm("CreateLeBailFitInput", 
+        alg_test = run_algorithm("CreateLeBailFitInput",
                 ReflectionsFile         = "",
                 MaxHKL                  = "12,12,12",
                 FullprofParameterFile   = "2011B_HR60b2.irf",
@@ -79,7 +79,7 @@ class CreateLeBailFitInputTest(unittest.TestCase):
         paramws = AnalysisDataService.retrieve("PG3_Bank2_Foo2")
 
         paramname0 = paramws.cell(0, 0)
-        
+
         if paramname0.lower() == "bank":
             numrowgood = 28
         else:

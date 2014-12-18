@@ -5,6 +5,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -28,26 +29,19 @@ private:
   /// Test helper method. Creates an empty 2D MDEventWorkspace, with the specified event type.
   IMDEventWorkspace_sptr createInputWorkspace(const std::string& eventType)
   {
-    const std::string outWSName = "inputWS";
-
-    AnalysisDataServiceImpl& ADS = AnalysisDataService::Instance();
-
-    if(ADS.doesExist(outWSName))
-    {
-      ADS.remove(outWSName);
-    }
-    
-    IAlgorithm* createAlg = FrameworkManager::Instance().createAlgorithm("CreateMDWorkspace");
+    IAlgorithm_sptr createAlg = AlgorithmManager::Instance().createUnmanaged("CreateMDWorkspace");
     createAlg->initialize();
+    createAlg->setChild(true);
     createAlg->setProperty("Dimensions", 2);
     createAlg->setPropertyValue("Extents", "-10,10,-10,10");
     createAlg->setPropertyValue("Names", "A, B");
     createAlg->setPropertyValue("Units", "m, m");
     createAlg->setPropertyValue("EventType", eventType);
-    createAlg->setPropertyValue("OutputWorkspace", outWSName);
+    createAlg->setPropertyValue("OutputWorkspace", "out_ws");
     createAlg->execute();
-
-    return ADS.retrieveWS<IMDEventWorkspace>(outWSName);
+    Workspace_sptr temp = createAlg->getProperty("OutputWorkspace");
+    IMDEventWorkspace_sptr outWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(temp);
+    return outWS;
   }
 
 public:
@@ -55,6 +49,11 @@ public:
   // This means the constructor isn't called when running other tests
   static MDEventInserterTest *createSuite() { return new MDEventInserterTest(); }
   static void destroySuite( MDEventInserterTest *suite ) { delete suite; }
+
+  MDEventInserterTest()
+  {
+    FrameworkManager::Instance();
+  }
 
 
   void test_add_md_lean_events()

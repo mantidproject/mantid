@@ -15,9 +15,9 @@ def make_slice(axisScaleName, coordinate):
         ext = "_2"
     if axisScaleName[0] == "z":
         ext = "_3"
-        
+
     scaleWidget = waitForObject(":splitter_2_QwtScaleWidget%s" % ext)
-        
+
     sp = axisScale.scalePosition
     min = axisScale.getMinimum
     max = axisScale.getMaximum
@@ -32,12 +32,12 @@ def make_slice(axisScaleName, coordinate):
         height = axisScale.width
 
     scaleFactor = height / delta
-    
+
     if sp in (0, 2):
         x = 1
     else:
         x = width - 1
-    
+
     if sp in (0, 1):
         scaleFactor *= -1.0
         y = scaleFactor * (coordinate - min) + height
@@ -45,7 +45,7 @@ def make_slice(axisScaleName, coordinate):
     else:
         y = scaleFactor * (coordinate - min)
         mouseClick(scaleWidget, y, x, 0, Qt.LeftButton)
-# Get the pipeline filter at a specific index position in the pqPipelineBrowserWidget. Do not 
+# Get the pipeline filter at a specific index position in the pqPipelineBrowserWidget. Do not
 # include the server line in the index position.
 def get_pipeline_filter_at_position(index):
     pipeline_model = waitForObject(":_pqPipelineModel")

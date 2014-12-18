@@ -1,9 +1,9 @@
 #! /usr/bin/python
 #----------------------------------------------------------------
-# Creates a new sub-class to be used as 
+# Creates a new sub-class to be used as
 # a custom interface
 # Usage: python CreateInterfaceTemplate algorithm-name [yes|no]
-# 
+#
 # yes - Create the class so that it can be used with Qt designer
 # no  - Create the class so that the layout is created by hand
 #
@@ -49,7 +49,7 @@ headerfile.write("#include \"MantidQtAPI/UserSubWindow.h\"\n\n"
                  "  Q_OBJECT\n\n"
                  "public:\n"
                  "  /// The name of the interface as registered into the factory\n"
-                 "  static std::string name() { return \"" + ifacename + "\"; }\n\n" 
+                 "  static std::string name() { return \"" + ifacename + "\"; }\n\n"
                  "public:\n"
                  "  /// Default Constructor\n"
                  + "  " + ifacename + "(QWidget *parent = 0);\n\n"

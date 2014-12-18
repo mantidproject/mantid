@@ -28,7 +28,7 @@ class _InternalMakeSEFTData( PythonAlgorithm ):
     nhalfbins = self.getProperty( 'nhalfbins' ).value
     de = self.getProperty( 'de' ).value #bin width, in meV or ueV
     nbins = 2 * nhalfbins
-    xvals = de * np.arange( -nhalfbins, nhalfbins + 1) + de/2  # 
+    xvals = de * np.arange( -nhalfbins, nhalfbins + 1) + de/2  #
 
     #Find the time domain
     M = 2 * nhalfbins + 1
@@ -91,7 +91,7 @@ class StretchedExpFTTest( unittest.TestCase ):
       return
 
     from random import random
-    variation = lambda x: x * ( 1 + ( random() - 0.5 ) / 5. )  # range [x*0.9, x*1.1] should be bigger but not until parameter constraints have been exposed to python 
+    variation = lambda x: x * ( 1 + ( random() - 0.5 ) / 5. )  # range [x*0.9, x*1.1] should be bigger but not until parameter constraints have been exposed to python
     #Generate a data workspace using random parameters around {'height':0.1,'tau':100,'beta':1}
     parms={ 'height' : variation( 0.1 ),  'tau' : variation( 100 ),  'beta' : variation( 1 ) }
 
@@ -114,7 +114,7 @@ class StretchedExpFTTest( unittest.TestCase ):
         value = row[ 'Value' ]
       elif name in parms.keys():
         fitted += '{0}={1}, '.format( name, row[ 'Value' ] )
-    target = ', '.join( '{0}={1}'.format( key, val ) for key, val in parms.items() )       
+    target = ', '.join( '{0}={1}'.format( key, val ) for key, val in parms.items() )
     msg = 'Cost function {0} too high\nTargets were {1},\nbut obtained {2}'.format( value, target, fitted )
     self.assertTrue( value < 5.0, msg )
     msg='Cost function {0}\nStarted with height=0.1, tau=100, beta=1\nTargets were {1},\nobtained {2}'.format( value, target, fitted )

@@ -6,7 +6,7 @@ import string
 
 def find_file(run_number):
     """Use Mantid to search for the given run.
-    """    
+    """
     file_hint = str(run_number)
     try:
         return FileFinder.findRuns(file_hint)[0]
@@ -16,8 +16,8 @@ def find_file(run_number):
         raise ValueError( message % (file_hint, config['default.instrument']))
 
 def create_resultname(run_number, prefix='', suffix=''):
-    """Create a string based on the run number and optional prefix and 
-    suffix.    
+    """Create a string based on the run number and optional prefix and
+    suffix.
     """
     if type(run_number) is api._api.MatrixWorkspace:
         run_number = run_number.getRunNumber();
@@ -40,7 +40,7 @@ def create_resultname(run_number, prefix='', suffix=''):
             name = os.path.splitext(name)[0] + '.spe' + suffix
 
     return name
-    
+
 def create_dataname(input):
     """This assumes some kind of filename input and creates a workspace
     from the basename of the full file path
@@ -58,7 +58,7 @@ def clear_loaded_data():
     for data_ws in _loaded_data:
         DeleteWorkspace(data_ws)
     _loaded_data = []
-   
+
 def is_loaded(filename):
     """Returns True if the file is already loaded, false otherwise
     """
@@ -68,7 +68,7 @@ def is_loaded(filename):
         return True
     else:
         return False
-    
+
 def mark_as_loaded(filename):
     """Mark a file as loaded.
     """
@@ -80,7 +80,7 @@ def mark_as_loaded(filename):
 
 def load_runs(inst_name, runs, sum=True, calibration=None,load_with_workspace=False):
     """
-    Loads a list of files, summing if the required.    
+    Loads a list of files, summing if the required.
     """
     if type(runs) == list:
         if len(runs) == 1:
@@ -107,7 +107,7 @@ def load_runs(inst_name, runs, sum=True, calibration=None,load_with_workspace=Fa
         return load_run(inst_name, runs, calibration,False,load_with_workspace)
 
 def load_run(inst_name, run_number, calibration=None, force=False, load_with_workspace=False):
-    """Loads run into the given workspace. 
+    """Loads run into the given workspace.
 
     If force is true then the file is loaded regardless of whether
     its workspace exists already.
@@ -121,18 +121,18 @@ def load_run(inst_name, run_number, calibration=None, force=False, load_with_wor
             loaded_ws = run_number
     else:
         # If it doesn't exists as a workspace assume we have to try and load a file
-        if type(run_number) == int: 
+        if type(run_number) == int:
             filename = find_file(run_number)
         elif type(run_number) == list:
             raise TypeError('load_run() cannot handle run lists')
         else:
-            # Check if it exists, else tell Mantid to try and 
+            # Check if it exists, else tell Mantid to try and
             # find it
             if os.path.exists(run_number):
                 filename = run_number
             else:
                 filename = find_file(run_number)
-        # The output name 
+        # The output name
         output_name = create_dataname(filename)
         if (not force) and (output_name in mtd):
             logger.notice("%s already loaded" % filename)
@@ -149,12 +149,12 @@ def load_run(inst_name, run_number, calibration=None, force=False, load_with_wor
 
         elif ext.endswith('nxs'):
             args['LoadMonitors'] = '1'
-    
+
         loaded_ws = Load(Filename=filename, OutputWorkspace=output_name,**args)
         if isinstance(loaded_ws,tuple) and len(loaded_ws)>1:
             mon_ws = loaded_ws[1];
             loaded_ws=loaded_ws[0];
-        
+
         logger.notice("Loaded %s" % filename)
 
     ######## Now we have the workspace

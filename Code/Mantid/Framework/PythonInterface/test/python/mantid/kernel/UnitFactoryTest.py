@@ -11,12 +11,12 @@ class UnitFactoryTest(unittest.TestCase):
         self.assertTrue(isinstance(energy, Unit))
 
     def test_unknown_unit_raises_error(self):
-        self.assertRaises(RuntimeError, UnitFactory.create, 
+        self.assertRaises(RuntimeError, UnitFactory.create,
                           "NotAUnit")
-        
+
     def test_keys_returns_a_non_empty_python_list_of_unit_keys(self):
         known_units = UnitFactory.getKeys()
-        
+
         self.assertEquals(type(known_units), list)
         # Check length is at least the known core units
         # but allow for others to be added

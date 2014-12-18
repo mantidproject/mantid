@@ -219,7 +219,8 @@ namespace Mantid
         throw std::invalid_argument("FirstTransmissionRun must be either in TOF or Wavelength");
       }
 
-      const bool bInWavelength = (!wavelengthValidator.isValid(firstTransmissionRun).empty());
+      const auto message = wavelengthValidator.isValid(firstTransmissionRun);
+      const bool bInWavelength = message.empty();
       return bInWavelength;
     }
 

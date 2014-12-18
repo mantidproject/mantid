@@ -110,10 +110,6 @@ const MantidVec LoadSassena::loadQvectors(const hid_t& h5file, API::WorkspaceGro
   double* buf = new double[nq*3];
   this->dataSetDouble(h5file,"qvectors",buf);
 
-  DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::WorkspaceFactory::Instance().create("Workspace2D", nq, 3, 3));
-  std::string wsName = gwsName + std::string("_") + setName;
-  ws->setTitle(wsName);
-
   MantidVec qvmod; //store the modulus of the vector
   double* curr = buf;
   for(int iq=0; iq<nq; iq++){
@@ -132,18 +128,20 @@ const MantidVec LoadSassena::loadQvectors(const hid_t& h5file, API::WorkspaceGro
   else
     for(int iq=0; iq<nq; iq++) sorting_indexes.push_back(iq);
 
-  curr = buf;
+  DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::WorkspaceFactory::Instance().create("Workspace2D", nq, 3, 3));
+  std::string wsName = gwsName + std::string("_") + setName;
+  ws->setTitle(wsName);
+
   for(int iq=0; iq<nq; iq++)
   {
+    MantidVec& Y = ws->dataY(iq);
     const int index=sorting_indexes[iq];
-    MantidVec& Y = ws->dataY(index);
-    Y.assign(curr,curr+3);
-    curr += 3;
+    curr = buf + 3*index;
+    Y.assign(curr, curr+3);
   }
   delete[] buf;
 
-  // Set the Units
-  ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("MomentumTransfer");
+  ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("MomentumTransfer"); // Set the Units
 
   this->registerWorkspace(gws,wsName,ws, "X-axis: origin of Q-vectors; Y-axis: tip of Q-vectors");
   return qvmod;
@@ -174,12 +172,13 @@ void LoadSassena::loadFQ(const hid_t& h5file, API::WorkspaceGroup_sptr gws, cons
   ws->dataX(0) = qvmod;  //X-axis values are the modulus of the q vector
   MantidVec& im = ws->dataY(1); // store the imaginary part
   ws->dataX(1) = qvmod;
-  double *curr = buf;
+
+  double *curr;
   for(int iq=0; iq<nq; iq++){
     const int index=sorting_indexes[iq];
-    re[index]=curr[0];
-    im[index]=curr[1];
-    curr+=2;
+    curr = buf + 2*index;
+    re[iq]=curr[0];
+    im[iq]=curr[1];
   }
   delete[] buf;
 
@@ -224,27 +223,26 @@ void LoadSassena::loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, con
   const std::string wsImName = gwsName + std::string("_") + setName + std::string(".Im");
   wsIm->setTitle(wsImName);
 
-  double* curr = buf;
   for(int iq=0; iq<nq; iq++)
   {
+    MantidVec& reX = wsRe->dataX(iq);
+    MantidVec& imX = wsIm->dataX(iq);
+    MantidVec& reY = wsRe->dataY(iq);
+    MantidVec& imY = wsIm->dataY(iq);
     const int index=sorting_indexes[iq];
-    MantidVec& reX = wsRe->dataX(index);
-    MantidVec& imX = wsIm->dataX(index);
-    MantidVec& reY = wsRe->dataY(index);
-    MantidVec& imY = wsIm->dataY(index);
+    double* curr = buf + index*nnt*2;
     for(int it=0; it<nnt; it++)
     {
       reX[origin+it] = it*dt;  // time point for the real part
       reY[origin+it] = *curr;  // real part of the intermediate structure factor
       reX[origin-it] = -it*dt; // symmetric negative time
       reY[origin-it] = *curr;  // symmetric value for the negative time
-      curr ++;
-      // For it=0, it is expected that *curr==0.0 (no imaginary part for for it=0)
+      curr++;
       imX[origin+it] = it*dt;
       imY[origin+it] = *curr;
       imX[origin-it] = -it*dt;
       imY[origin-it] = -(*curr); // antisymmetric value for negative times
-      curr ++;
+      curr++;
     }
   }
   delete[] buf;

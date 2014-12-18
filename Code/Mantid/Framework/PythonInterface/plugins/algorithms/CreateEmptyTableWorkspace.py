@@ -10,11 +10,11 @@ class CreateEmptyTableWorkspace(PythonAlgorithm):
     def PyInit(self):
         # Declare properties
         self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output), "The name of the table workspace that will be created.")
- 
+
     def PyExec(self):
         tableWS = WorkspaceFactory.createTable()
 
         self.setProperty("OutputWorkspace", tableWS)
- 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CreateEmptyTableWorkspace)

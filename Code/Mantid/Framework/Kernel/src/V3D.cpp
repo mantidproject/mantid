@@ -877,6 +877,23 @@ bool V3D::CompareMagnitude( const V3D & v1, const V3D & v2 )
   return (mag_sq_1 < mag_sq_2);
 }
 
+/**
+ * Get direction angles from direction cosines.
+ * @param inDegrees : optional argument for specifying in radians (false). Defaults to true.
+ * @return V3D containing anlges.
+ */
+V3D V3D::directionAngles(bool inDegrees) const
+{
+  double conversionFactor = 1.0;
+  if(inDegrees)
+  {
+    conversionFactor = 180.0/M_PI;
+  }
+  const double divisor = this->norm();
+  return V3D(conversionFactor*acos(x/divisor), conversionFactor*acos(y/divisor), conversionFactor*acos(z/divisor));
+
+}
+
 
 } // Namespace Kernel
 } // Namespace Mantid

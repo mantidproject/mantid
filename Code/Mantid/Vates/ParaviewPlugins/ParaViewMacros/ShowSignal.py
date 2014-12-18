@@ -2,7 +2,7 @@
 ## Author: Owen Arnold @ ISIS/Tessella
 ## Date: 24/03/2011
 ## Purpose: Show signal cell data as surface plot. Sets color range between 0 and 3 for signal value.
-##          
+##
 ##-------------------------------------------------------------------------
 
 try: paraview.simple

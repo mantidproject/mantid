@@ -6,10 +6,10 @@ class BoundedValidatorTest(unittest.TestCase):
 
     def test_construction_does_not_raise_error_when_both_are_floats(self):
         testhelpers.assertRaisesNothing(self, FloatBoundedValidator, 1.0, 2.0)
-        
+
     def test_construction_with_Exclusive_bounds_with_floats(self):
         testhelpers.assertRaisesNothing(self, FloatBoundedValidator, 1.0, 2.0, True)
-        
+
     def test_constructor_sets_both_boundary_values_correctly(self):
         validator = FloatBoundedValidator(1.3, 2.6)
         self.assertTrue(validator.hasLower())
@@ -18,7 +18,7 @@ class BoundedValidatorTest(unittest.TestCase):
         self.assertEquals(validator.upper(), 2.6)
         self.assertFalse(validator.isLowerExclusive())
         self.assertFalse(validator.isUpperExclusive())
-        
+
     def test_constructor_sets_both_Exclusive_boundary_values_correctly(self):
         validator = FloatBoundedValidator(1.3, 2.6, True)
         self.assertTrue(validator.hasLower())
@@ -30,7 +30,7 @@ class BoundedValidatorTest(unittest.TestCase):
 
     def test_construction_does_not_raise_error_when_both_are_ints(self):
         testhelpers.assertRaisesNothing(self, IntBoundedValidator, 1, 20)
-        
+
     def test_construction_with_Exclusive_bounds_with_ints(self):
         testhelpers.assertRaisesNothing(self, IntBoundedValidator, 1, 20, True)
 

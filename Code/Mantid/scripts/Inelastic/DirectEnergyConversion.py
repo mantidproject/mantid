@@ -1,14 +1,14 @@
 """
 Conversion class defined for conversion to deltaE for
 'direct' inelastic geometry instruments
-   
-The class defines various methods to allow users to convert their 
+
+The class defines various methods to allow users to convert their
 files to DeltaE.
 
 Example:
 
-Assuming we have the following data files for MARI. 
-NOTE: This assumes that the data path for these runs is in the 
+Assuming we have the following data files for MARI.
+NOTE: This assumes that the data path for these runs is in the
 Mantid preferences.
 
 mono-sample: 11015
@@ -23,7 +23,7 @@ reducer.normalise_method = 'monitor-2'
 reducer.background = False
 reducer.fix_ei = True
 reducer.save_format = ['.spe']
-# 
+#
 Set parameters for these runs
 reducer.map_file = 'mari_res.map'
 reducer.energy_bins = '-10,0.1,80'
@@ -50,7 +50,7 @@ def setup_reducer(inst_name):
         return DirectEnergyConversion(inst_name)
     except RuntimeError, exc:
         raise RuntimeError('Unknown instrument "%s" or wrong IDF file for this instrument, cannot continue' % inst_name)
-    
+
 
 class DirectEnergyConversion(object):
     """
@@ -60,19 +60,19 @@ class DirectEnergyConversion(object):
     def diagnose(self, white, **kwargs):
         """
             Run diagnostics on the provided workspaces.
-            
+
             This method does some additional processing before moving on to the diagnostics:
               1) Computes the white beam integrals, converting to energy
               2) Computes the background integral using the instrument defined range
               3) Computes a total count from the sample
-              
+
             These inputs are passed to the diagnostics functions
-    
+
             Required inputs:
-            
+
               white  - A workspace, run number or filepath of a white beam run. A workspace is assumed to
                        have simple been loaded and nothing else.
-            
+
             Optional inputs:
               sample - A workspace, run number or filepath of a sample run. A workspace is assumed to
                        have simple been loaded and nothing else. (default = None)
@@ -127,15 +127,15 @@ class DirectEnergyConversion(object):
         if kwargs['use_hard_mask_only'] :
             if mtd.doesExist('hard_mask_ws'):
                 diag_mask = mtd['hard_mask_ws']
-            else: # build hard mask 
-                # in this peculiar way we can obtain working mask which accounts for initial data grouping in the data file. 
+            else: # build hard mask
+                # in this peculiar way we can obtain working mask which accounts for initial data grouping in the data file.
                 # SNS or 1 to 1 maps may probably avoid this stuff and can load masks directly
                 whitews_name = common.create_resultname(white, suffix='-white')
                 if whitews_name in mtd:
                     DeleteWorkspace(Workspace=whitews_name)
                 # Load
                 white_data = self.load_data(white,whitews_name,self._keep_wb_workspace)
-                        
+
                 diag_mask= LoadMask(Instrument=self.instr_name,InputFile=kwargs['hard_mask_file'],
                                OutputWorkspace='hard_mask_ws')
                 MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
@@ -143,7 +143,7 @@ class DirectEnergyConversion(object):
                 DeleteWorkspace(Workspace=whitews_name)
 
             return diag_mask
-  
+
         # Get the white beam vanadium integrals
         whiteintegrals = self.do_white(white, None, None,None) # No grouping yet
         if 'second_white' in kwargs:
@@ -162,7 +162,7 @@ class DirectEnergyConversion(object):
             # If the bleed test is requested then we need to pass in the sample_run as well
             if kwargs.get('bleed_test', False):
                 kwargs['sample_run'] = sample
-            
+
             # Set up the background integrals
             result_ws = self.load_data(sample)
             result_ws = self.normalise(result_ws, result_ws.name(), self.normalise_method)
@@ -181,7 +181,7 @@ class DirectEnergyConversion(object):
             diagnostics.normalise_background(background_int, whiteintegrals, kwargs.get('second_white',None))
             kwargs['background_int'] = background_int
             kwargs['sample_counts'] = total_counts
-        
+
         # Check how we should run diag
         if self.diag_spectra is None:
             # Do the whole lot at once
@@ -191,17 +191,17 @@ class DirectEnergyConversion(object):
             bank_spectra = []
             for b in banks:
                 token = b.split(",")  # b = "(,)"
-                if len(token) != 2: 
+                if len(token) != 2:
                     raise ValueError("Invalid bank spectra specification in diag %s" % self.diag_spectra)
                 start = int(token[0].lstrip('('))
                 end = int(token[1].rstrip(')'))
                 bank_spectra.append((start,end))
-            
+
             for index, bank in enumerate(bank_spectra):
                 kwargs['start_index'] = bank[0] - 1
                 kwargs['end_index'] = bank[1] - 1
                 diagnostics.diagnose(whiteintegrals, **kwargs)
-                
+
         if 'sample_counts' in kwargs:
             DeleteWorkspace(Workspace='background_int')
             DeleteWorkspace(Workspace='total_counts')
@@ -213,24 +213,24 @@ class DirectEnergyConversion(object):
         DeleteWorkspace(Workspace=whiteintegrals)
         self.spectra_masks = diag_mask
         return diag_mask
-    
 
-    def do_white(self, white_run, spectra_masks, map_file,mon_number=None): 
+
+    def do_white(self, white_run, spectra_masks, map_file,mon_number=None):
         """
         Create the workspace, which each spectra containing the correspondent white beam integral (single value)
 
-        These integrals are used as estimate for detector efficiency in wide range of energies 
-        (rather the detector electronic's efficiency as the geuger counters are very different in efficiency) 
+        These integrals are used as estimate for detector efficiency in wide range of energies
+        (rather the detector electronic's efficiency as the geuger counters are very different in efficiency)
         and is used to remove the influence of this efficiency to the different detectors.
         """
-          
+
 
         whitews_name = common.create_resultname(white_run, suffix='-white')
         if whitews_name in mtd:
             DeleteWorkspace(Workspace=whitews_name)
         # Load
         white_data = self.load_data(white_run,whitews_name,self._keep_wb_workspace)
-        
+
         # Normalise
         self.__in_white_normalization = True;
         white_ws = self.normalise(white_data, whitews_name, self.normalise_method,0.0,mon_number)
@@ -253,13 +253,13 @@ class DirectEnergyConversion(object):
         white_ws = self.remap(white_ws, spectra_masks, map_file)
 
         # White beam scale factor
-        white_ws *= self.wb_scale_factor            
+        white_ws *= self.wb_scale_factor
         return white_ws
 
     def mono_van(self, mono_van, ei_guess, white_run=None, map_file=None,
                  spectra_masks=None, result_name=None, Tzero=None):
         """Convert a mono vanadium run to DeltaE.
-        If multiple run files are passed to this function, they are summed into a run and then processed         
+        If multiple run files are passed to this function, they are summed into a run and then processed
         """
         # Load data
         sample_data = self.load_data(mono_van)
@@ -267,7 +267,7 @@ class DirectEnergyConversion(object):
         if result_name is None:
             result_name = common.create_resultname(mono_van)
 
-        monovan = self._do_mono(sample_data, sample_data, result_name, ei_guess, 
+        monovan = self._do_mono(sample_data, sample_data, result_name, ei_guess,
                                 white_run, map_file, spectra_masks, Tzero)
         # Normalize by vanadium sample weight
         monovan /= float(self.van_mass)/float(self.van_rmm)
@@ -284,19 +284,19 @@ class DirectEnergyConversion(object):
         if result_name is None:
             result_name = common.create_resultname(mono_run, prefix=self.instr_name)
 
-        mono_s=self._do_mono(sample_data, sample_data, result_name, ei_guess, 
+        mono_s=self._do_mono(sample_data, sample_data, result_name, ei_guess,
                                   white_run, map_file, spectra_masks, Tzero)
         return mono_s
 
 
 # -------------------------------------------------------------------------------------------
 #         This actually does the conversion for the mono-sample and mono-vanadium runs
-#  
+#
 # -------------------------------------------------------------------------------------------
-    def _do_mono_SNS(self, data_ws, monitor_ws, result_name, ei_guess, 
+    def _do_mono_SNS(self, data_ws, monitor_ws, result_name, ei_guess,
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
 
-        # Special load monitor stuff.    
+        # Special load monitor stuff.
         if (self.instr_name == "CNCS" or self.instr_name == "HYSPEC"):
             self.fix_ei = True
             ei_value = ei_guess
@@ -313,15 +313,15 @@ class DirectEnergyConversion(object):
         elif (self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
             if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename'].value
             else: raise RuntimeError('Cannot load monitors for event reduction. Unable to determine Filename from mono workspace, it should have been added as a run log.')
-                 
+
             self.log("mono_run = %s (%s)" % (mono_run,type(mono_run)),'debug')
-          
+
             if mono_run.endswith("_event.nxs"):
                 monitor_ws=LoadNexusMonitors(Filename=mono_run)
             elif mono_run.endswith("_event.dat"):
                 InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
                 monitor_ws=LoadPreNexusMonitors(RunInfoFilename=InfoFilename)
-            
+
             argi = {};
             argi['Monitor1Spec']=int(self.ei_mon_spectra[0]);
             argi['Monitor2Spec']=int(self.ei_mon_spectra[1]);
@@ -340,13 +340,13 @@ class DirectEnergyConversion(object):
                 AddSampleLog(Workspace=monitor_ws,LogName= 'Ei',LogText= ei_value,LogType= "Number")
                 ei_calc = None
                 TzeroCalculated = Tzero
-                
+
             # Set the tzero to be the calculated value
             if (TzeroCalculated is None):
                 tzero = 0.0
-            else:    
+            else:
                 tzero = TzeroCalculated
-            
+
             # If we are fixing, then use the guess if given
             if (self.fix_ei):
                 ei_value = ei_guess
@@ -358,7 +358,7 @@ class DirectEnergyConversion(object):
                     ei_value = ei_calc
                 else:
                     ei_value = ei_guess
-            
+
             mon1_peak = 0.0
             # apply T0 shift
             ScaleX(InputWorkspace=data_ws,OutputWorkspace= result_name,Operation="Add",Factor=-tzero)
@@ -371,7 +371,7 @@ class DirectEnergyConversion(object):
 
         # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in CalculateFlatBackground and normalisation
         bin_offset = -mon1_peak
-        
+
         # For event mode, we are going to histogram in energy first, then go back to TOF
         if self.check_background== True:
            # Extract the time range for the background determination before we throw it away
@@ -389,7 +389,7 @@ class DirectEnergyConversion(object):
 
         if self.check_background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
-            ConvertToDistribution(Workspace=result_name)    
+            ConvertToDistribution(Workspace=result_name)
 
             CalculateFlatBackground(InputWorkspace="background_origin_ws",OutputWorkspace= "background_ws",
                                StartX= self.bkgd_range[0] + bin_offset,EndX= self.bkgd_range[1] + bin_offset,
@@ -397,31 +397,31 @@ class DirectEnergyConversion(object):
             # Delete the raw data background region workspace
             DeleteWorkspace("background_origin_ws")
             # Convert to distribution to make it compatible with the data workspace (result_name).
-            ConvertToDistribution(Workspace="background_ws") 
+            ConvertToDistribution(Workspace="background_ws")
             # Subtract the background
             Minus(LHSWorkspace=result_name,RHSWorkspace= "background_ws",OutputWorkspace=result_name)
-             # Delete the determined background 
+             # Delete the determined background
             DeleteWorkspace("background_ws")
 
-            ConvertFromDistribution(Workspace=result_name)  
+            ConvertFromDistribution(Workspace=result_name)
 
         # Normalize using the chosen method
         # This should be done as soon as possible after loading and usually happens at diag. Here just in case if diag was bypassed
         self.normalise(mtd[result_name], result_name, self.normalise_method, range_offset=bin_offset)
 
-       
+
 
         # This next line will fail the SystemTests
         #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
         # But this one passes...
         ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
         self.log("_do_mono: finished ConvertUnits for : "+result_name)
-      
 
-                
+
+
         if not self.energy_bins is None:
             Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= self.energy_bins,PreserveEvents=False)
-        
+
         if self.apply_detector_eff:
            # Need to be in lambda for detector efficiency correction
             ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="Wavelength", EMode="Direct", EFixed=ei_value)
@@ -430,7 +430,7 @@ class DirectEnergyConversion(object):
         ############
         return
 
-    def _do_mono_ISIS(self, data_ws, monitor_ws, result_name, ei_guess, 
+    def _do_mono_ISIS(self, data_ws, monitor_ws, result_name, ei_guess,
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
 
         # Do ISIS stuff for Ei
@@ -440,7 +440,7 @@ class DirectEnergyConversion(object):
 
         # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in CalculateFlatBackground and normalization
         bin_offset = -mon1_peak
-        
+
         if self.check_background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
             CalculateFlatBackground(InputWorkspace=result_name,OutputWorkspace=result_name,
@@ -452,29 +452,29 @@ class DirectEnergyConversion(object):
         # : This really should be done as soon as possible after loading
         self.normalise(mtd[result_name], result_name, self.normalise_method, range_offset=bin_offset)
 
-       
+
 
         # This next line will fail the SystemTests
         #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
         # But this one passes...
         ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
         self.log("_do_mono: finished ConvertUnits for : "+result_name)
-      
 
-                
+
+
         if not self.energy_bins is None:
             Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= self.energy_bins,PreserveEvents=False)
-        
+
         if self.apply_detector_eff:
            DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
            self.log("_do_mono: finished DetectorEfficiencyCor for : "+result_name)
         #############
         return
 
-    def _do_mono(self, data_ws, monitor_ws, result_name, ei_guess, 
+    def _do_mono(self, data_ws, monitor_ws, result_name, ei_guess,
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
         """
-        Convert units of a given workspace to deltaE, including possible 
+        Convert units of a given workspace to deltaE, including possible
         normalization to a white-beam vanadium run.
         """
         if (self.__facility == "SNS"):
@@ -487,14 +487,14 @@ class DirectEnergyConversion(object):
         #######################
         # Ki/Kf Scaling...
         if self.apply_kikf_correction:
-            self.log('Start Applying ki/kf corrections to the workspace : '+result_name)                                
+            self.log('Start Applying ki/kf corrections to the workspace : '+result_name)
             CorrectKiKf(InputWorkspace=result_name,OutputWorkspace= result_name, EMode='Direct')
-            self.log('finished applying ki/kf corrections for : '+result_name)                                            
+            self.log('finished applying ki/kf corrections for : '+result_name)
 
         # Make sure that our binning is consistent
         if not self.energy_bins is None:
             Rebin(InputWorkspace=result_name,OutputWorkspace= result_name,Params= self.energy_bins)
-        
+
         # Masking and grouping
         result_ws = mtd[result_name]
         result_ws = self.remap(result_ws, spectra_masks, map_file)
@@ -525,9 +525,9 @@ class DirectEnergyConversion(object):
             if abs_ei is None:
                 abs_ei = ei
             mapping_file = self.abs_map_file
-            spectrum_masks = self.spectra_masks 
+            spectrum_masks = self.spectra_masks
             monovan_wkspace = self.mono_van(mono_van, abs_ei, abs_white_run, mapping_file, spectrum_masks)
-            
+
             # TODO: Need a better check than this...
             if (abs_white_run is None):
                 self.log("Performing Normalisation to Mono Vanadium.")
@@ -540,19 +540,19 @@ class DirectEnergyConversion(object):
         else:
             norm_factor = None
 
-        # Figure out what to call the workspace 
+        # Figure out what to call the workspace
         result_name = mono_run
         if not result_name is None:
             result_name = common.create_resultname(mono_run)
-        
+
         # Main run file conversion
         sample_wkspace = self.mono_sample(mono_run, ei, white_run, self.map_file,
                                           self.spectra_masks, result_name, Tzero)
         if not norm_factor is None:
             sample_wkspace /= norm_factor
-        
-        #calculate psi from sample environment motor and offset 
-        
+
+        #calculate psi from sample environment motor and offset
+
         if self.__facility == 'ISIS' :
             default_offset=float('NaN')
             if not (motor is None) and sample_wkspace.getRun().hasProperty(motor):
@@ -563,10 +563,10 @@ class DirectEnergyConversion(object):
               self.motor_offset = default_offset
         else:
              self.motor_offset = float(offset)
-        
+
         self.motor=0
         if not (motor is None):
-        # Check if motor name exists    
+        # Check if motor name exists
             if sample_wkspace.getRun().hasProperty(motor):
                 self.motor=sample_wkspace.getRun()[motor].value[0]
                 self.log("Motor value is %s" % self.motor)
@@ -578,16 +578,16 @@ class DirectEnergyConversion(object):
         self.save_results(sample_wkspace, save_path)
         # Clear loaded raw data to free up memory
         common.clear_loaded_data()
-        
+
         return sample_wkspace
 
 #----------------------------------------------------------------------------------
 #                        Reduction steps
 #----------------------------------------------------------------------------------
-     
+
     def get_ei(self, input_ws, resultws_name, ei_guess):
         """
-        Calculate incident energy of neutrons and the time of the of the 
+        Calculate incident energy of neutrons and the time of the of the
         peak in the monitor spectrum
         The X data is corrected to set the first monitor peak at t=0 by subtracting
             t_mon + t_det_delay
@@ -612,7 +612,7 @@ class DirectEnergyConversion(object):
         monitors_from_separate_ws=False;
         if type(monitor_ws) is str:
             monitor_ws = mtd[monitor_ws]
-        try: 
+        try:
             # check if the spectra with correspondent number is present in the workspace
             nsp = monitor_ws.getIndexFromSpectrumNumber(int(self.ei_mon_spectra[0]));
         except RuntimeError as err:
@@ -624,10 +624,10 @@ class DirectEnergyConversion(object):
                 print "**** ERROR while attempting to get spectra {0} from workspace: {1}, error: {2} ".format(self.ei_mon_spectra[0],monitor_ws.getName(), err)
                 raise
         #------------------------------------------------
-            
+
         # Calculate the incident energy
         ei,mon1_peak,mon1_index,tzero = \
-            GetEi(InputWorkspace=monitor_ws, Monitor1Spec=int(self.ei_mon_spectra[0]), Monitor2Spec=int(self.ei_mon_spectra[1]), 
+            GetEi(InputWorkspace=monitor_ws, Monitor1Spec=int(self.ei_mon_spectra[0]), Monitor2Spec=int(self.ei_mon_spectra[1]),
                   EnergyEstimate=ei_guess,FixEi=self.fix_ei)
 
         self.incident_energy = ei
@@ -639,8 +639,8 @@ class DirectEnergyConversion(object):
             ScaleX(InputWorkspace=mon_ws,OutputWorkspace=result_mon_name,Operation="Add",Factor=-mon1_peak,
                    InstrumentParameter="DelayTime",Combine=True)
 
-            
-        # Adjust the TOF such that the first monitor peak is at t=0  
+
+        # Adjust the TOF such that the first monitor peak is at t=0
         ScaleX(InputWorkspace=input_ws,OutputWorkspace=resultws_name,Operation="Add",Factor=-mon1_peak,
                InstrumentParameter="DelayTime",Combine=True)
 
@@ -655,7 +655,7 @@ class DirectEnergyConversion(object):
         Mask and group detectors based on input parameters
         """
         if not spec_masks is None:
-            MaskDetectors(Workspace=result_ws, MaskedWorkspace=spec_masks)       
+            MaskDetectors(Workspace=result_ws, MaskedWorkspace=spec_masks)
         if not map_file is None:
             result_ws = GroupDetectors(InputWorkspace=result_ws,OutputWorkspace=result_ws,
                                        MapFile= map_file, KeepUngroupedSpectra=0, Behaviour='Average')
@@ -663,10 +663,10 @@ class DirectEnergyConversion(object):
         return result_ws
 
     def getMonitorWS(self,data_ws,method,mon_number=None):
-        """get pointer to monitor workspace. 
+        """get pointer to monitor workspace.
 
-           Explores different ways of finding monitor workspace in Mantid and returns the python pointer to the 
-           workspace which contains monitors. 
+           Explores different ways of finding monitor workspace in Mantid and returns the python pointer to the
+           workspace which contains monitors.
 
 
         """
@@ -684,7 +684,7 @@ class DirectEnergyConversion(object):
         else:
             # get pointer to the workspace
             mon_ws=data_ws;
- 
+
             # get the index of the monitor spectra
             ws_index= mon_ws.getIndexFromSpectrumNumber(mon_spectr_num);
             # create monitor workspace consisting of single index
@@ -692,7 +692,7 @@ class DirectEnergyConversion(object):
 
         mon_index = mon_ws.getIndexFromSpectrumNumber(mon_spectr_num);
         return (mon_ws,mon_index);
-        
+
 
 
     def normalise(self, data_ws, result_name, method, range_offset=0.0,mon_number=None):
@@ -701,7 +701,7 @@ class DirectEnergyConversion(object):
         """
         if method is None :
             method = "undefined"
-        if not method in self.__normalization_methods:           
+        if not method in self.__normalization_methods:
             raise KeyError("Normalization method: "+method+" is not among known normalization methods")
 
         # Make sure we don't call this twice
@@ -756,24 +756,24 @@ class DirectEnergyConversion(object):
         # Add a log to the workspace to say that the normalization has been done
         AddSampleLog(Workspace=output, LogName=done_log,LogText=method)
         return output
-            
+
     def calc_average(self, data_ws,energy_incident):
         """
         Compute the average Y value of a workspace.
-        
+
         The average is computed by collapsing the workspace to a single bin per spectra then masking
         masking out detectors given by the FindDetectorsOutsideLimits and MedianDetectorTest algorithms.
         The average is then the computed as the using the remainder and factoring in their errors as weights, i.e.
-        
+
             average = sum(Yvalue[i]*weight[i]) / sum(weights)
-            
+
         where only those detectors that are unmasked are used and the weight[i] = 1/errorValue[i].
         """
 
         if self.monovan_integr_range is None :
             self.monovan_integr_range = [self.monovan_lo_frac*energy_incident,self.monovan_hi_frac*energy_incident];
 
-            
+
         e_low = self.monovan_integr_range[0]
         e_upp = self.monovan_integr_range[1]
         if e_low > e_upp:
@@ -833,9 +833,9 @@ class DirectEnergyConversion(object):
         except KeyError:
             raise RuntimeError('The given workspace "%s" does not contain an Ei value. Run GetEi first.' % str(ei_workspace))
 
-        ei_value = ei_prop.value        
+        ei_value = ei_prop.value
         absnorm_factor = self.calc_average(ei_workspace,ei_value)
-        
+
 
         if ei_value >= 200.0:
             xsection = 421.0
@@ -846,7 +846,7 @@ class DirectEnergyConversion(object):
 
     def save_results(self, workspace, save_file=None, formats = None):
         """
-        Save the result workspace to the specfied filename using the list of formats specified in 
+        Save the result workspace to the specfied filename using the list of formats specified in
         formats. If formats is None then the default list is used
         """
         if save_file is None:
@@ -859,7 +859,7 @@ class DirectEnergyConversion(object):
             pass
 
         if formats is None:
-            formats = self.save_format 
+            formats = self.save_format
         if type(formats) == str:
             formats = [formats]
 
@@ -871,14 +871,14 @@ class DirectEnergyConversion(object):
 
         save_file = os.path.splitext(save_file)[0]
         # this is mainly for debugging purposes as real save do not return anything
- 
+
         for ext in formats:
             if ext in self.__save_formats :
                 filename = save_file + ext
-                self.__save_formats[ext](workspace,filename)            
+                self.__save_formats[ext](workspace,filename)
             else:
                 self.log("Unknown file format {0} requested while saving results.".format(ext))
-   
+
     #-------------------------------------------------------------------------------
     def load_data(self, runs,new_ws_name=None,keep_previous_ws=False):
         """
@@ -897,7 +897,7 @@ class DirectEnergyConversion(object):
         else:
             monitor_ws = None;
 
-       
+
         if new_ws_name != None :
             mon_WsName = new_ws_name+'_monitors'
             if keep_previous_ws:
@@ -920,10 +920,10 @@ class DirectEnergyConversion(object):
     def copy_spectrum2monitors(wsName,monWSName,spectraID):
        """
         this routine copies a spectrum form workspace to monitor workspace and rebins it according to monitor workspace binning
-    
+
         @param wsName    -- the name of event workspace which detector is considered as monitor or Mantid pointer to this workspace
         @param monWSName -- the name of histogram workspace with monitors where one needs to place the detector's spectra or Mantid pointer to this workspace
-        @param spectraID -- the ID of the spectra to copy. 
+        @param spectraID -- the ID of the spectra to copy.
 
          TODO: As extract sinele spectrum works only with WorkspaceIndex, we have to assume that WorkspaceIndex=spectraID-1;
          this does not always correct, so it is better to change ExtractSingleSpectrum to accept workspaceID
@@ -995,7 +995,7 @@ class DirectEnergyConversion(object):
 
         setattr(self,'_load_monitors_with_workspace',do_load);
 
-    @property 
+    @property
     def ei_mon_spectra(self):
 
         if hasattr(self,'_ei_mon1_spectra'):
@@ -1030,7 +1030,7 @@ class DirectEnergyConversion(object):
             return self._det_cal_file
         return None;
 
-    @det_cal_file.setter    
+    @det_cal_file.setter
     def det_cal_file(self,val):
 
        if val is None:
@@ -1062,13 +1062,13 @@ class DirectEnergyConversion(object):
           self._det_cal_file = common.find_file(val);
           return;
 
-      
+
        raise NameError('Detector calibration file name can be a workspace name present in Mantid or string describing file name');
 
     @property
     def spectra_to_monitors_list(self):
         if not hasattr(self,'_spectra_to_monitors_list'):
-           return None;            
+           return None;
         return self._spectra_to_monitors_list;
     @spectra_to_monitors_list.setter
     def spectra_to_monitors_list(self,spectra_list):
@@ -1145,7 +1145,7 @@ class DirectEnergyConversion(object):
 
 
 
-       if not hasattr(self,'instument') or self.instrument.getName() != instr_name : 
+       if not hasattr(self,'instument') or self.instrument.getName() != instr_name :
             # Load an empty instrument if one isn't already there
             idf_dir = config.getString('instrumentDefinition.directory')
             try:
@@ -1158,16 +1158,16 @@ class DirectEnergyConversion(object):
                 self.instrument = None
                 self._instr_name = None
                 raise RuntimeError('Cannot load instrument for prefix "%s"' % new_name)
-      
+
 
        # Initialise other IDF parameters
        self.init_idf_params(True)
- 
+
 
 
 
     # Vanadium rmm
-    @property 
+    @property
     def van_rmm(self):
       """The rmm of Vanadium is a constant, should not be instrument parameter. Atom not exposed to python :( """
       return 50.9415
@@ -1194,7 +1194,7 @@ class DirectEnergyConversion(object):
 
 
     # format to save data
-    @property 
+    @property
     def save_format(self):
         return self._save_format
     @save_format.setter
@@ -1209,7 +1209,7 @@ class DirectEnergyConversion(object):
     # check string, if it is empty, clear save format, if not -- continue
         if isinstance(value,str):
             if value not in self.__save_formats :
-                self.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur for this format")    
+                self.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur for this format")
                 if len(value) == 0: # user wants to clear internal save formats
                    self._save_format = None
                 return
@@ -1220,7 +1220,7 @@ class DirectEnergyConversion(object):
                     self.save_format = val
                 return;
       # clear all previous formats by providing empty list
-            else: 
+            else:
                 self._save_format = None;
                 return
 
@@ -1231,18 +1231,18 @@ class DirectEnergyConversion(object):
         self._save_format.append(value);
 
     # bin ranges
-    @property 
+    @property
     def energy_bins(self):
         return self._energy_bins;
     @energy_bins.setter
     def energy_bins(self,value):
-       if value != None:          
+       if value != None:
           if isinstance(value,str):
              list = str.split(value,',');
              nBlocks = len(list);
              for i in xrange(0,nBlocks,3):
                 value = [float(list[i]),float(list[i+1]),float(list[i+2])]
-          else: 
+          else:
               nBlocks = len(value);
           if nBlocks%3 != 0:
                raise KeyError("Energy_bin value has to be either list of n-blocks of 3 number each or string representation of this list with numbers separated by commas")
@@ -1250,7 +1250,7 @@ class DirectEnergyConversion(object):
        self._energy_bins= value
 
     # map file name
-    @property 
+    @property
     def map_file(self):
         return self._map_file;
     @map_file.setter
@@ -1258,12 +1258,12 @@ class DirectEnergyConversion(object):
         if value != None:
            fileName, fileExtension = os.path.splitext(value)
            if (not fileExtension):
-               value=value+'.map'    
+               value=value+'.map'
 
         self._map_file = value
 
     # monovanadium map file name
-    @property 
+    @property
     def monovan_mapfile(self):
         return self._monovan_mapfile;
     @monovan_mapfile.setter
@@ -1271,7 +1271,7 @@ class DirectEnergyConversion(object):
         if value != None:
            fileName, fileExtension = os.path.splitext(value)
            if (not fileExtension):
-               value=value+'.map'    
+               value=value+'.map'
 
         self._monovan_mapfile = value
     @property
@@ -1295,10 +1295,10 @@ class DirectEnergyConversion(object):
         if value in self.__normalization_methods:
             self._normalise_method = value
         else:
-            self.log('Attempt to set up unknown normalization method {0}'.format(value),'error') 
+            self.log('Attempt to set up unknown normalization method {0}'.format(value),'error')
             raise KeyError('Attempt to set up unknown normalization method {0}'.format(value))
 
-    @property 
+    @property
     def background_test_range(self):
         if not hasattr(self,'_background_test_range') or self._background_test_range is None:
             return self.bkgd_range;
@@ -1329,7 +1329,7 @@ class DirectEnergyConversion(object):
         self.__save_formats['.nxspe'] = lambda workspace,filename : SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=self.apply_kikf_correction,Psi=self.psi)
         self.__save_formats['.nxs']   = lambda workspace,filename : SaveNexus(InputWorkspace=workspace,Filename= filename)
         ## Detector diagnosis
-        # Diag parameters -- keys used by diag method to pick from default parameters. Diag cuts these keys removing diag_ word 
+        # Diag parameters -- keys used by diag method to pick from default parameters. Diag cuts these keys removing diag_ word
         # and tries to get rest from the correspondent Direct Energy conversion attributes.
         self.__diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
                               'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation',\
@@ -1341,7 +1341,7 @@ class DirectEnergyConversion(object):
 
         self.__normalization_methods=['none','monitor-1','monitor-2','current'] # 'uamph', peak -- disabled/unknown at the moment
 
-        # list of the parameters which should usually be changed by user and if not, user should be warn about it. 
+        # list of the parameters which should usually be changed by user and if not, user should be warn about it.
         self.__abs_units_par_to_change=['sample_mass','sample_rmm']
         # list of the parameters which should always be taken from IDF unless explicitly set from elsewhere. These parameters MUST have setters and getters
         self.__instr_par_located =['ei_mon_spectra']
@@ -1354,7 +1354,7 @@ class DirectEnergyConversion(object):
             # TODO: Check it!
             self.instrument = workspace.getInstrument()
             self.instr_name = self.instrument.getName()
- 
+
 
     def init_idf_params(self, reinitialize_parameters=False):
         """
@@ -1362,9 +1362,9 @@ class DirectEnergyConversion(object):
         """
         if self._idf_values_read == True and reinitialize_parameters == False:
             return
-           
+
         """
-        Attach analysis arguments that are particular to the ElasticConversion 
+        Attach analysis arguments that are particular to the ElasticConversion
 
         specify some parameters which may be not in IDF Parameters file
         """
@@ -1376,18 +1376,18 @@ class DirectEnergyConversion(object):
           # should come from Mantid
         # Motor names-- SNS stuff -- psi used by nxspe file
         # These should be reconsidered on moving into _Parameters.xml
-        self.monitor_workspace = None  # looks like unused parameter                  
+        self.monitor_workspace = None  # looks like unused parameter
         self.motor = None
         self.motor_offset = None
         self.psi = float('NaN')
-                
+
         if self.__facility == 'SNS':
-            self.normalise_method  = 'current'        
+            self.normalise_method  = 'current'
 
-      
 
-        # special property -- synonims -- how to treat external parameters. 
-        try:           
+
+        # special property -- synonims -- how to treat external parameters.
+        try:
             self.__synonims = self.get_default_parameter("synonims")
         except Exception:
             self.__synonims=dict();
@@ -1402,7 +1402,7 @@ class DirectEnergyConversion(object):
         # build the dictionary which allows to process coupled property, namely the property, expressed through other properties values
         self.build_coupled_keys_dict(par_names)
 
-        # Add IDF parameters as properties to the reducer 
+        # Add IDF parameters as properties to the reducer
         self.build_idf_parameters(par_names)
 
         if reinitialize_parameters:
@@ -1427,7 +1427,7 @@ class DirectEnergyConversion(object):
                 n_warnings += 1
                 self.log(message,'warning')
 
-        
+
         return n_warnings
 
     def get_default_parameter(self, name):
@@ -1442,8 +1442,8 @@ class DirectEnergyConversion(object):
             val = instr.getBoolParameter(name)
         elif type_name == "string":
             val = instr.getStringParameter(name)
-            if val[0] == "None" : 
-                return None        
+            if val[0] == "None" :
+                return None
         elif type_name == "int" :
               val = instr.getIntParameter(name)
         else :
@@ -1453,19 +1453,19 @@ class DirectEnergyConversion(object):
 
     @staticmethod
     def build_subst_dictionary(synonims_list=None) :
-        """Method to process the field "synonims_list" in the parameters string 
+        """Method to process the field "synonims_list" in the parameters string
 
-           it takes string of synonyms in the form key1=subs1=subst2=subts3;key2=subst4 and returns the dictionary 
+           it takes string of synonyms in the form key1=subs1=subst2=subts3;key2=subst4 and returns the dictionary
            in the form dict[subs1]=key1 ; dict[subst2] = key1 ... dict[subst4]=key2
 
-           e.g. if one wants to use the IDF key word my_detector instead of e.g. norm-mon1-spec, he has to type 
-           norm-mon1-spec=my_detector in the synonims field of the IDF parameters file. 
+           e.g. if one wants to use the IDF key word my_detector instead of e.g. norm-mon1-spec, he has to type
+           norm-mon1-spec=my_detector in the synonims field of the IDF parameters file.
         """
-        if not synonims_list :  # nothing to do            
+        if not synonims_list :  # nothing to do
             return dict();
         if type(synonims_list) == dict : # all done
             return synonims_list
-        if type(synonims_list) != str : 
+        if type(synonims_list) != str :
             raise AttributeError("The synonims field of Reducer object has to be special format string or the dictionary")
         # we are in the right place and going to transform string into dictionary
 
@@ -1487,10 +1487,10 @@ class DirectEnergyConversion(object):
         return rez;
 
     def set_input_parameters(self,**kwargs):
-        """ Method analyzes input parameters list, substitutes the synonims in this list with predefined synonims 
+        """ Method analyzes input parameters list, substitutes the synonims in this list with predefined synonims
             and sets the existing class parameters with its non-default values taken from input
 
-            returns the list of changed properties. 
+            returns the list of changed properties.
         """
 
         properties_changed=[];
@@ -1544,7 +1544,7 @@ class DirectEnergyConversion(object):
 
     def build_coupled_keys_dict(self,par_names) :
         """Method to build the dictionary of the keys which are expressed through other keys values
-           
+
           e.g. to substitute key1 = key2,key3  with key = [value[key1],value[key2]]
         """
         instr = self.instrument;
@@ -1570,7 +1570,7 @@ class DirectEnergyConversion(object):
                        key = keys[i];
                        if key in self.__synonims:
                            key = self.__synonims[key];
-                       
+
                        final_name = name
                        if final_name in self.__synonims:
                            final_name = self.__synonims[name];
@@ -1582,12 +1582,12 @@ class DirectEnergyConversion(object):
         self.composite_keys_set   = composite_keys_set
 
     def build_idf_parameters(self,list_param_names) :
-        """Method to process idf parameters, substitute duplicate values and 
+        """Method to process idf parameters, substitute duplicate values and
            add the attributes with the names, defined in IDF to the object
 
-           also sets composite names through component values, e.g creating 
-           self.key1 = [value[key1],value[key2]] where key1 was defined as key1 = key2,key3 
-           
+           also sets composite names through component values, e.g creating
+           self.key1 = [value[key1],value[key2]] where key1 was defined as key1 = key2,key3
+
            @param Reducer object with defined coposite_keys dictionary and synonimus dictionary
            @param list of parameter names to transform
         """
@@ -1596,10 +1596,10 @@ class DirectEnergyConversion(object):
             raise ValueError("Cannot init default parameter, instrument has not been loaded.")
 
         new_comp_name_set = set();
-        # process all default parameters and create property names from them 
+        # process all default parameters and create property names from them
         for name in list_param_names :
 
-            key_name = name;           
+            key_name = name;
             if key_name == 'synonims' : # this is special key we have already dealt with
                 continue
 
@@ -1615,26 +1615,26 @@ class DirectEnergyConversion(object):
                 continue # komposite names are created through their values
 
              # create or fill in additional values to the composite key
-            if key_name in self.composite_keys_subst : 
+            if key_name in self.composite_keys_subst :
                 composite_prop_name,index,nc = self.composite_keys_subst[key_name]
                 if composite_prop_name in self.__instr_par_located:
                     continue;
 
                 if not hasattr(self,composite_prop_name): # create new attribute value
-                    val = [float('nan')]*nc;  
+                    val = [float('nan')]*nc;
                 else:              # key is already created, get its value
                     val = getattr(self,composite_prop_name)
-                    if val is None: # some composie property names were set to none. leave them this way. 
+                    if val is None: # some composie property names were set to none. leave them this way.
                         continue
 
                 val[index] = self.get_default_parameter(name)
                 setattr(self,composite_prop_name, val);
             else :
                 # just new ordinary key, assighn the value to it
-            #if hasattr(self,key_name): 
+            #if hasattr(self,key_name):
             #    raise KeyError(" Dublicate key "+key_name+" found in IDF property file")
             #else:
-    
+
                 setattr(self,key_name, self.get_default_parameter(name));
 
         # reset the list of composite names defined using synonims
@@ -1645,7 +1645,7 @@ class DirectEnergyConversion(object):
         """ Make the name of the checkpoint from the function arguments
         """
         return ''.join(str(arg) for arg in argi if arg is not None)
-  
+
     def check_necessary_files(self,monovan_run):
         """ Method verifies if all files necessary for a run are availible.
 
@@ -1658,7 +1658,7 @@ class DirectEnergyConversion(object):
                 file = getattr(self,prop)
                 if not (file is None) and isinstance(file,str):
                     file_path = FileFinder.getFullPath(file)
-                    if len(file_path) == 0: 
+                    if len(file_path) == 0:
                         # it still can be run number
                         try:
                             file_path = common.find_file(file)
@@ -1670,7 +1670,7 @@ class DirectEnergyConversion(object):
                             file_missing=True
 
             return file_missing
-        
+
         base_file_missing = check_files_list(self.__file_properties)
         abs_file_missing=False
         if not (monovan_run is None):
@@ -1686,8 +1686,8 @@ class DirectEnergyConversion(object):
         """Send a log message to the location defined
         """
         log_options = \
-        {"notice" :      lambda (msg):   logger.notice(msg),    
-         "warning" :     lambda (msg):   logger.warning(msg),    
+        {"notice" :      lambda (msg):   logger.notice(msg),
+         "warning" :     lambda (msg):   logger.warning(msg),
          "error" :       lambda (msg):   logger.error(msg),
          "information" : lambda (msg):   logger.information(msg),
          "debug" :       lambda (msg):   logger.debug(msg)}
@@ -1698,8 +1698,8 @@ class DirectEnergyConversion(object):
 
 
     def help(self,keyword=None) :
-        """function returns help on reduction parameters. 
-        
+        """function returns help on reduction parameters.
+
            if provided without arguments it returns the list of the parameters availible
         """
         if self.instrument is None:
@@ -1718,12 +1718,12 @@ class DirectEnergyConversion(object):
                 #print par_names[i],
                 #print  type(self.instrument.getParameterType(par_names[i])),
                 #print  self.instrument.getParameterType(par_names[i])
-            print "****:" 
+            print "****:"
             print "****: type help(parameter_name) to get help on a parameter with the name requested"
             print "****: ***************************************************************************** ";
         else:
             if self.instrument.hasParameter(keyword) :
-                print "****: ***************************************************************************** ";        
+                print "****: ***************************************************************************** ";
                 print "****: IDF value for keyword: ",keyword," is: ",self.get_default_parameter(keyword)
                 if keyword in self.__synonims :
                     fieldName = self.__synonims[keyword]
@@ -1740,6 +1740,6 @@ class DirectEnergyConversion(object):
 
 
 #-----------------------------------------------------------------
-if __name__=="__main__":  
+if __name__=="__main__":
     pass
     #unittest.main()

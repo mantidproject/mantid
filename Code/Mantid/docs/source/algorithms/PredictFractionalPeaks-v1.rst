@@ -27,17 +27,15 @@ Usage
 
 **Example:**
 
-.. This test is not run at the moment as it creates an exception in python.  Ticket 9642 is in place to fix this and reinstate the test
+.. testcode:: TopazExample
 
-.. code-block:: python
+   peaks = LoadIsawPeaks("TOPAZ_3007.peaks")
+   LoadIsawUB(peaks,"TOPAZ_3007.mat")
+   IndexPeaks(peaks)
 
-    ws=LoadIsawPeaks("TOPAZ_3007.peaks")
-    LoadIsawUB(ws,"ls5637.mat")
-    IndexPeaks(ws)
+   fractional_peaks = PredictFractionalPeaks(peaks, HOffset=[-0.5,0,0.5],KOffset=0,LOffset=0.2)
+   print "Number of fractional peaks:",fractional_peaks.getNumberPeaks()
 
-    PredictFractionalPeaks(ws,FracPeaks='wsPeaksOut',HOffset=[-0.5,0,0.5],KOffset=0,LOffset=0.2)
+.. testoutput:: TopazExample
 
-
-
-    
-
+   Number of fractional peaks: 117

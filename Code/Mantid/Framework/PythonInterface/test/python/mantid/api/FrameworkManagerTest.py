@@ -11,6 +11,6 @@ class FrameworkManagerTest(unittest.TestCase):
         testhelpers.assertRaisesNothing(self, FrameworkManager.clearAlgorithms)
         testhelpers.assertRaisesNothing(self, FrameworkManager.clearInstruments)
         testhelpers.assertRaisesNothing(self, FrameworkManager.clearPropertyManagers)
-        
+
 if __name__ == '__main__':
     unittest.main()

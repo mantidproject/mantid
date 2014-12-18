@@ -57,7 +57,7 @@ m_gslSolver(NULL)
 {
 }
 
-void SimplexMinimizer::initialize(API::ICostFunction_sptr function) 
+void SimplexMinimizer::initialize(API::ICostFunction_sptr function, size_t)
 {
   m_costFunction = function;
 
@@ -90,7 +90,7 @@ void SimplexMinimizer::initialize(API::ICostFunction_sptr function)
  * Do one iteration.
  * @return :: true if iterations to be continued, false if they can stop
  */
-bool SimplexMinimizer::iterate() 
+bool SimplexMinimizer::iterate(size_t)
 {
   int status = gsl_multimin_fminimizer_iterate(m_gslSolver);
   if (status)

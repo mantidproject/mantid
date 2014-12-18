@@ -39,7 +39,7 @@ public:
   {
 
     int numEventsPer = 100;
-    EventWorkspace_sptr inputW = Mantid::MDEvents::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer);
+    EventWorkspace_sptr inputW = Mantid::MDEvents::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer,10000,1600);
     AnalysisDataService::Instance().addOrReplace("testInEW", inputW);
     if (type == WEIGHTED)
       inputW *= 2.0;
@@ -99,7 +99,7 @@ public:
   {
 
     int numEventsPer = 100;
-    EventWorkspace_sptr inputW = Mantid::MDEvents::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer);
+    EventWorkspace_sptr inputW = Mantid::MDEvents::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer,10000,1600);
     AnalysisDataService::Instance().addOrReplace("testInEW", inputW);
     if (type == WEIGHTED)
     {

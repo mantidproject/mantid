@@ -26,10 +26,10 @@ public:
 
   /// Overloading base class methods
   std::string name()const {return "Boevs";}
-  bool iterate() {return true;}
+  bool iterate(size_t) {return true;}
   int hasConverged() {return 101;}
   double costFunctionVal() {return 5.0;}
-  void initialize(API::ICostFunction_sptr)
+  void initialize(API::ICostFunction_sptr,size_t)
   {
   }
 };

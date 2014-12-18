@@ -9,6 +9,6 @@ class ReferenceFrameTest(object):
         expected_attrs = ["pointingAlongBeam", "pointingUp", "vecPointingAlongBeam", "vecPointingUp", "pointingUpAxis", "pointingAlongBeamAxis", "pointingHorizontalAxis"]
         for att in expected_attrs:
             self.assertTrue(att in attrs)
-            
+
 if __name__ == '__main__':
     unittest.main()

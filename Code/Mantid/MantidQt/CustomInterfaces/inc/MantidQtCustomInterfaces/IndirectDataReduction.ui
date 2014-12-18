@@ -43,85 +43,83 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_27">
-         <property name="topMargin">
-          <number>0</number>
+        <widget class="QGroupBox" name="gbC2EInstrument">
+         <property name="title">
+          <string>Instrument</string>
          </property>
-         <item>
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>Instrument</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInst">
-           <property name="techniques" stdset="0">
-            <stringlist>
-             <string>TOF Indirect Geometry Spectroscopy</string>
-            </stringlist>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QLabel" name="lbAnalyser">
-           <property name="text">
-            <string>Analyser</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="cbAnalyser">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Select Analyser bank to use.</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="lbReflection">
-           <property name="text">
-            <string>Reflection</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="cbReflection">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Select Reflection used for experiment(s).</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+         <layout class="QHBoxLayout" name="horizontalLayout_27">
+          <property name="topMargin">
+           <number>1</number>
+          </property>
+          <item>
+           <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInst">
+            <property name="techniques" stdset="0">
+             <stringlist>
+              <string>TOF Indirect Geometry Spectroscopy</string>
+             </stringlist>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="lbAnalyser">
+            <property name="text">
+             <string>Analyser</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="cbAnalyser">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Select Analyser bank to use.</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lbReflection">
+            <property name="text">
+             <string>Reflection</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="cbReflection">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Select Reflection used for experiment(s).</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="gbExperiment">
+        <widget class="QGroupBox" name="gbConvertToEnergyInput">
          <property name="title">
-          <string>Input Files</string>
+          <string>Input</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout">
           <property name="spacing">
@@ -416,7 +414,7 @@
        <item>
         <widget class="QGroupBox" name="gbAnalysis">
          <property name="title">
-          <string>Analysis Options</string>
+          <string>Analysis</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
           <property name="sizeConstraint">
@@ -682,14 +680,14 @@ p, li { white-space: pre-wrap; }
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_29">
                 <item>
-                 <widget class="QLabel" name="label_7">
+                 <widget class="QLabel" name="labelRebinSteps">
                   <property name="text">
                    <string>Rebin Steps:</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QComboBox" name="cbIndRebType">
+                 <widget class="QComboBox" name="comboRebinType">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -730,17 +728,17 @@ p, li { white-space: pre-wrap; }
                        <number>6</number>
                       </property>
                       <item>
-                       <widget class="QLabel" name="rebin_lbLow">
+                       <widget class="QLabel" name="labelRebinLow">
                         <property name="text">
                          <string>Low</string>
                         </property>
                         <property name="buddy">
-                         <cstring>rebin_leELow</cstring>
+                         <cstring>entryRebinLow</cstring>
                         </property>
                        </widget>
                       </item>
                       <item>
-                       <widget class="QLineEdit" name="rebin_leELow">
+                       <widget class="QLineEdit" name="entryRebinLow">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                           <horstretch>0</horstretch>
@@ -780,17 +778,17 @@ p, li { white-space: pre-wrap; }
                        </spacer>
                       </item>
                       <item>
-                       <widget class="QLabel" name="rebin_lbWidth">
+                       <widget class="QLabel" name="labelRebinWidth">
                         <property name="text">
                          <string>Width</string>
                         </property>
                         <property name="buddy">
-                         <cstring>rebin_leEWidth</cstring>
+                         <cstring>entryRebinWidth</cstring>
                         </property>
                        </widget>
                       </item>
                       <item>
-                       <widget class="QLineEdit" name="rebin_leEWidth">
+                       <widget class="QLineEdit" name="entryRebinWidth">
                         <property name="toolTip">
                          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -824,17 +822,17 @@ p, li { white-space: pre-wrap; }
                        </spacer>
                       </item>
                       <item>
-                       <widget class="QLabel" name="rebin_lbHigh">
+                       <widget class="QLabel" name="labelRebinHigh">
                         <property name="text">
                          <string>High</string>
                         </property>
                         <property name="buddy">
-                         <cstring>rebin_leEHigh</cstring>
+                         <cstring>entryRebinHigh</cstring>
                         </property>
                        </widget>
                       </item>
                       <item>
-                       <widget class="QLineEdit" name="rebin_leEHigh">
+                       <widget class="QLineEdit" name="entryRebinHigh">
                         <property name="toolTip">
                          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -867,14 +865,14 @@ p, li { white-space: pre-wrap; }
                      <number>0</number>
                     </property>
                     <item>
-                     <widget class="QLabel" name="lbRebinString">
+                     <widget class="QLabel" name="labelRebinString">
                       <property name="text">
                        <string>Rebin String</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLineEdit" name="leRebinString"/>
+                     <widget class="QLineEdit" name="entryRebinString"/>
                     </item>
                    </layout>
                   </widget>
@@ -925,7 +923,7 @@ p, li { white-space: pre-wrap; }
        <item>
         <widget class="QGroupBox" name="gbSave">
          <property name="title">
-          <string>Output Options</string>
+          <string>Output</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_8">
           <property name="topMargin">
@@ -1110,218 +1108,237 @@ Later steps in the process (saving, renaming) will not be done.</string>
          <item>
           <layout class="QGridLayout" name="gridLayout">
            <item row="0" column="0">
-            <layout class="QHBoxLayout" name="horizontalLayout_33">
-             <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="cal_leRunNo" native="true">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>41</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="label" stdset="0">
-                <string>Run No</string>
-               </property>
-               <property name="multipleFiles" stdset="0">
-                <bool>true</bool>
-               </property>
-               <property name="algorithmAndProperty" stdset="0">
-                <string/>
-               </property>
-               <property name="fileExtensions" stdset="0">
-                <stringlist>
-                 <string>.raw</string>
-                </stringlist>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="cal_pbPlot">
-               <property name="toolTip">
-                <string>Plot first detector spectra</string>
-               </property>
-               <property name="text">
-                <string>Plot Raw</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="1" column="0">
-            <layout class="QHBoxLayout" name="horizontalLayout_18">
-             <item>
-              <widget class="QCheckBox" name="cal_ckIntensityScaleMultiplier">
-               <property name="text">
-                <string>Intensity Scale Factor</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="cal_leIntensityScaleMultiplier">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>50</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>1.0</string>
-               </property>
-               <property name="placeholderText">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="cal_valIntensityScaleMultiplier">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>10</horstretch>
-                 <verstretch>20</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>10</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="palette">
-                <palette>
-                 <active>
-                  <colorrole role="WindowText">
-                   <brush brushstyle="SolidPattern">
-                    <color alpha="255">
-                     <red>170</red>
-                     <green>0</green>
-                     <blue>0</blue>
-                    </color>
-                   </brush>
-                  </colorrole>
-                 </active>
-                 <inactive>
-                  <colorrole role="WindowText">
-                   <brush brushstyle="SolidPattern">
-                    <color alpha="255">
-                     <red>170</red>
-                     <green>0</green>
-                     <blue>0</blue>
-                    </color>
-                   </brush>
-                  </colorrole>
-                 </inactive>
-                 <disabled>
-                  <colorrole role="WindowText">
-                   <brush brushstyle="SolidPattern">
-                    <color alpha="255">
-                     <red>118</red>
-                     <green>116</green>
-                     <blue>108</blue>
-                    </color>
-                   </brush>
-                  </colorrole>
-                 </disabled>
-                </palette>
-               </property>
-               <property name="text">
-                <string>*</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_23">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Expanding</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
+            <widget class="QGroupBox" name="gbCalibrationInput">
+             <property name="title">
+              <string>Input</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_11">
+              <item>
+               <layout class="QHBoxLayout" name="loCalibInputFile">
+                <item>
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="cal_leRunNo" native="true">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>41</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="label" stdset="0">
+                   <string>Run No</string>
+                  </property>
+                  <property name="multipleFiles" stdset="0">
+                   <bool>true</bool>
+                  </property>
+                  <property name="algorithmAndProperty" stdset="0">
+                   <string/>
+                  </property>
+                  <property name="fileExtensions" stdset="0">
+                   <stringlist>
+                    <string>.raw</string>
+                   </stringlist>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="cal_pbPlot">
+                  <property name="toolTip">
+                   <string>Plot first detector spectra</string>
+                  </property>
+                  <property name="text">
+                   <string>Plot Raw</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="loCalibScaleFactor">
+                <item>
+                 <widget class="QCheckBox" name="cal_ckIntensityScaleMultiplier">
+                  <property name="text">
+                   <string>Intensity Scale Factor</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="cal_leIntensityScaleMultiplier">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>50</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>1.0</string>
+                  </property>
+                  <property name="placeholderText">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="cal_valIntensityScaleMultiplier">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>10</horstretch>
+                    <verstretch>20</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>10</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="palette">
+                   <palette>
+                    <active>
+                     <colorrole role="WindowText">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
+                        <red>170</red>
+                        <green>0</green>
+                        <blue>0</blue>
+                       </color>
+                      </brush>
+                     </colorrole>
+                    </active>
+                    <inactive>
+                     <colorrole role="WindowText">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
+                        <red>170</red>
+                        <green>0</green>
+                        <blue>0</blue>
+                       </color>
+                      </brush>
+                     </colorrole>
+                    </inactive>
+                    <disabled>
+                     <colorrole role="WindowText">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
+                        <red>118</red>
+                        <green>116</green>
+                        <blue>108</blue>
+                       </color>
+                      </brush>
+                     </colorrole>
+                    </disabled>
+                   </palette>
+                  </property>
+                  <property name="text">
+                   <string>*</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_23">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Expanding</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
            </item>
           </layout>
          </item>
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_20">
-         <item>
-          <layout class="QVBoxLayout" name="cal_treeCal"/>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="cal_plotCal"/>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="gbCalibration">
+         <property name="title">
+          <string>Calibration</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_20">
+          <item>
+           <layout class="QVBoxLayout" name="cal_treeCal"/>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="cal_plotCal"/>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="cal_plots">
-         <item>
-          <layout class="QVBoxLayout" name="cal_treeRes">
-           <item>
-            <layout class="QGridLayout" name="gridLayout_5">
-             <item row="1" column="0">
-              <widget class="QCheckBox" name="cal_ckResScale">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Scale RES:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLineEdit" name="cal_leResScale">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>1.0</string>
-               </property>
-               <property name="placeholderText">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0" colspan="2">
-              <widget class="QCheckBox" name="cal_ckRES">
-               <property name="toolTip">
-                <string>Create RES file</string>
-               </property>
-               <property name="text">
-                <string>Create RES File</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="cal_plotRes"/>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="gbResolution">
+         <property name="title">
+          <string>Resolution</string>
+         </property>
+         <layout class="QHBoxLayout" name="cal_plots">
+          <item>
+           <layout class="QVBoxLayout" name="cal_treeRes">
+            <item>
+             <layout class="QGridLayout" name="gridLayout_5">
+              <item row="1" column="0">
+               <widget class="QCheckBox" name="cal_ckResScale">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>Scale RES:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="cal_leResScale">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>1.0</string>
+                </property>
+                <property name="placeholderText">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0" colspan="2">
+               <widget class="QCheckBox" name="cal_ckRES">
+                <property name="toolTip">
+                 <string>Create RES file</string>
+                </property>
+                <property name="text">
+                 <string>Create RES File</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="cal_plotRes"/>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <spacer name="verticalSpacer_4">
@@ -1339,7 +1356,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
        <item>
         <widget class="QGroupBox" name="slice_outputOptions">
          <property name="title">
-          <string>Output Options</string>
+          <string>Output</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
@@ -1407,13 +1424,13 @@ Later steps in the process (saving, renaming) will not be done.</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_25">
        <item>
-        <widget class="QGroupBox" name="slice_gbTimeSlice">
+        <widget class="QGroupBox" name="gbDiagnosticsInput">
          <property name="title">
-          <string>Time Slice</string>
+          <string>Input</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_26">
+         <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_36">
+           <layout class="QHBoxLayout" name="loDiagnosticsInputFile">
             <item>
              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_inputFile" native="true">
               <property name="sizePolicy">
@@ -1448,7 +1465,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_37">
+           <layout class="QHBoxLayout" name="loDiagnosticsCalibrationFile">
             <item>
              <widget class="QCheckBox" name="slice_ckUseCalib">
               <property name="text">
@@ -1488,8 +1505,17 @@ Later steps in the process (saving, renaming) will not be done.</string>
             </item>
            </layout>
           </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="gbTimeSlice">
+         <property name="title">
+          <string>Time Slice</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_26">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_19">
+           <layout class="QHBoxLayout" name="loTimeSlice">
             <item>
              <layout class="QVBoxLayout" name="slice_properties"/>
             </item>
@@ -1515,13 +1541,13 @@ Later steps in the process (saving, renaming) will not be done.</string>
         </spacer>
        </item>
        <item>
-        <widget class="QGroupBox" name="diag_outputOptions">
+        <widget class="QGroupBox" name="gbDiagnosticsOutput">
          <property name="title">
-          <string>Output Options</string>
+          <string>Output</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_30">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_39">
+           <layout class="QHBoxLayout" name="loDiagnosticsOutputOptions">
             <item>
              <widget class="QCheckBox" name="slice_ckVerbose">
               <property name="enabled">
@@ -1585,47 +1611,56 @@ Later steps in the process (saving, renaming) will not be done.</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_17">
        <item>
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="1">
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transInputFile" native="true">
-           <property name="label" stdset="0">
-            <string/>
-           </property>
-           <property name="fileExtensions" stdset="0">
-            <stringlist>
-             <string>.raw</string>
-            </stringlist>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transCanFile" native="true">
-           <property name="label" stdset="0">
-            <string/>
-           </property>
-           <property name="fileExtensions" stdset="0">
-            <stringlist>
-             <string>.raw</string>
-            </stringlist>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Sample File: </string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_8">
-           <property name="text">
-            <string>Can/Background File:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <spacer name="verticalSpacer_3">
+        <widget class="QGroupBox" name="gbTransmissionInput">
+         <property name="title">
+          <string>Input</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="1">
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transInputFile" native="true">
+            <property name="label" stdset="0">
+             <string/>
+            </property>
+            <property name="fileExtensions" stdset="0">
+             <stringlist>
+              <string>.raw</string>
+             </stringlist>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transCanFile" native="true">
+            <property name="label" stdset="0">
+             <string/>
+            </property>
+            <property name="fileExtensions" stdset="0">
+             <stringlist>
+              <string>.raw</string>
+             </stringlist>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Sample File: </string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Can/Background File:</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
@@ -1642,7 +1677,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
        <item>
         <widget class="QGroupBox" name="trans_OutputOptions">
          <property name="title">
-          <string>Output Options</string>
+          <string>Output</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_29">
           <item>
@@ -1744,6 +1779,9 @@ Later steps in the process (saving, renaming) will not be done.</string>
              <stringlist>
               <string>_red.nxs</string>
              </stringlist>
+            </property>
+            <property name="showLoad" stdset="0">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -2092,7 +2130,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
        <item>
         <widget class="QGroupBox" name="sqw_outputOptions">
          <property name="title">
-          <string>Output Options</string>
+          <string>Output</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_27">
           <item>
@@ -2308,7 +2346,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
        <item>
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
-          <string>Output Options</string>
+          <string>Output</string>
          </property>
          <layout class="QVBoxLayout" name="moment_verticalLayout_26">
           <item>
@@ -2473,9 +2511,9 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>leSpectraMin</tabstop>
   <tabstop>leSpectraMax</tabstop>
   <tabstop>rebin_ckDNR</tabstop>
-  <tabstop>rebin_leELow</tabstop>
-  <tabstop>rebin_leEWidth</tabstop>
-  <tabstop>rebin_leEHigh</tabstop>
+  <tabstop>entryRebinLow</tabstop>
+  <tabstop>entryRebinWidth</tabstop>
+  <tabstop>entryRebinHigh</tabstop>
   <tabstop>pbBack_2</tabstop>
   <tabstop>pbPlotRaw</tabstop>
   <tabstop>ckSumFiles</tabstop>
@@ -2491,8 +2529,8 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>leDetailedBalance</tabstop>
   <tabstop>ckScaleMultiplier</tabstop>
   <tabstop>leScaleMultiplier</tabstop>
-  <tabstop>cbIndRebType</tabstop>
-  <tabstop>leRebinString</tabstop>
+  <tabstop>comboRebinType</tabstop>
+  <tabstop>entryRebinString</tabstop>
   <tabstop>save_ckNxSPE</tabstop>
   <tabstop>save_ckAscii</tabstop>
   <tabstop>save_ckAclimax</tabstop>
@@ -2501,8 +2539,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>ckRenameWorkspace</tabstop>
   <tabstop>ckFold</tabstop>
   <tabstop>ckCm1Units</tabstop>
-  <tabstop>cal_leRunNo</tabstop>
-  <tabstop>cal_pbPlot</tabstop>
   <tabstop>cal_ckIntensityScaleMultiplier</tabstop>
   <tabstop>cal_leIntensityScaleMultiplier</tabstop>
   <tabstop>cal_ckResScale</tabstop>

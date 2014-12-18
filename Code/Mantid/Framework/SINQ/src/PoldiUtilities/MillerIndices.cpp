@@ -10,7 +10,8 @@ MillerIndices::MillerIndices(int h, int k, int l) :
     m_h(h),
     m_k(k),
     m_l(l),
-    m_asVector(3)
+    m_asVector(3),
+    m_asV3D(static_cast<double>(h), static_cast<double>(k), static_cast<double>(l))
 {
     populateVector();
 }
@@ -25,6 +26,17 @@ MillerIndices::MillerIndices(std::vector<int> hkl)
     m_h = hkl[0];
     m_k = hkl[1];
     m_l = hkl[2];
+    m_asV3D(static_cast<double>(m_h), static_cast<double>(m_k), static_cast<double>(m_l));
+}
+
+MillerIndices::MillerIndices(const Kernel::V3D &hkl) :
+    m_h(static_cast<int>(hkl.X())),
+    m_k(static_cast<int>(hkl.Y())),
+    m_l(static_cast<int>(hkl.Z())),
+    m_asVector(3),
+    m_asV3D(hkl)
+{
+    populateVector();
 }
 
 int MillerIndices::h() const
@@ -51,14 +63,24 @@ int MillerIndices::operator [](int index)
     return m_asVector[index];
 }
 
-bool MillerIndices::operator ==(MillerIndices &other) const
+bool MillerIndices::operator==(const MillerIndices &other) const
 {
     return m_h == other.m_h && m_k == other.m_k && m_l == other.m_l;
+}
+
+bool MillerIndices::operator!=(const MillerIndices &other) const
+{
+    return !operator ==(other);
 }
 
 const std::vector<int> &MillerIndices::asVector() const
 {
     return m_asVector;
+}
+
+const Kernel::V3D &MillerIndices::asV3D() const
+{
+    return m_asV3D;
 }
 
 void MillerIndices::populateVector()

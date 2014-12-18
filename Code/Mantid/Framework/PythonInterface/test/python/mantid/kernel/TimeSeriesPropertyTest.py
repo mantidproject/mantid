@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 
 import mantid
-from mantid.kernel import (DateAndTime, BoolTimeSeriesProperty, FloatTimeSeriesProperty, Int64TimeSeriesProperty, 
+from mantid.kernel import (DateAndTime, BoolTimeSeriesProperty, FloatTimeSeriesProperty, Int64TimeSeriesProperty,
                            StringTimeSeriesProperty)
 from testhelpers import run_algorithm
 
@@ -18,7 +18,7 @@ class TimeSeriesPropertyTest(unittest.TestCase):
         alg = run_algorithm('CreateWorkspace', DataX=[1,2,3,4,5], DataY=[1,2,3,4,5],NSpec=1, child=True)
         ws = alg.getProperty("OutputWorkspace").value
         run = ws.run()
-        
+
         start_time = DateAndTime("2008-12-18T17:58:38")
         nanosec = 1000000000
         # === Float type ===
@@ -52,7 +52,7 @@ class TimeSeriesPropertyTest(unittest.TestCase):
 
         self.__class__._test_ws = ws
 
-            
+
     def test_time_series_double_can_be_extracted(self):
         log_series = self._test_ws.getRun()["TEMP1"]
         self._check_has_time_series_attributes(log_series)
@@ -70,12 +70,12 @@ class TimeSeriesPropertyTest(unittest.TestCase):
         self._check_has_time_series_attributes(log_series, list)
         self.assertEquals(log_series.size(), 4)
         self.assertEquals(log_series.nthValue(0).strip(), 'CHANGE_PERIOD 1')
-        
+
     def test_time_series_bool_can_be_extracted(self):
         log_series = self._test_ws.getRun()["period 1"]
         self._check_has_time_series_attributes(log_series)
         self.assertEquals(log_series.size(), 1)
-    
+
     def _check_has_time_series_attributes(self, log, values_type=np.ndarray):
         self.assertTrue(hasattr(log, "value"))
         self.assertTrue(hasattr(log, "times"))

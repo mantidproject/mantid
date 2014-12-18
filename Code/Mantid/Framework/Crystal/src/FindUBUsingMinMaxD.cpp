@@ -166,7 +166,7 @@ namespace Crystal
                                               <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[4]
                                               <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[5]
                                               <<std::endl;
-        ws->mutableSample().setOrientedLattice(new OrientedLattice(o_lattice));
+        ws->mutableSample().setOrientedLattice(&o_lattice);
       }
   }
 

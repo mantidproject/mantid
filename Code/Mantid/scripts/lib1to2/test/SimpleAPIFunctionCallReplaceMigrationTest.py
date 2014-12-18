@@ -6,7 +6,7 @@ import os
 from MigrationTest import MigrationTest
 
 class SimpleAPIFunctionCallReplaceMigrationTest(MigrationTest):
-    
+
     _test_filename = None
     _test_backupname = None
     _backup_ext = '.mantidbackup'
@@ -50,7 +50,7 @@ class SimpleAPIFunctionCallReplaceMigrationTest(MigrationTest):
         expected = """LoadRaw(Filename="test-file.raw",OutputWorkspace='testWS',SpectrumMax=1)"""
         self.do_migration(inputstring)
         self.check_outcome(inputstring, expected)
-        
+
     def test_function_returning_no_args_is_replaced_correctly(self):
         inputstring = """
 def foo():
@@ -73,6 +73,6 @@ LoadRaw(Filename="test-file.raw",OutputWorkspace='testWS',
         self.create_test_file(inputstring)
         self.do_migration(inputstring)
         self.check_outcome(inputstring, expected)
-            
+
 if __name__ == "__main__":
     unittest.main()

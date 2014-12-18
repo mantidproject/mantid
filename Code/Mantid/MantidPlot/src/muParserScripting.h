@@ -52,10 +52,13 @@ class muParserScripting: public ScriptingEnv
     muParserScripting(ApplicationWindow *parent) : ScriptingEnv(parent, langName) { d_initialized=true; }
     static ScriptingEnv *constructor(ApplicationWindow *parent) { return new muParserScripting(parent); }
 
-  Script *newScript(const QString &name, QObject * context, const Script::InteractionType) const
-  {
-    return new muParserScript(const_cast<muParserScripting*>(this), name, context);
-  }
+    /// Set the system arguments. Throws an exception as it is not supported
+    void setSysArgs(const QStringList & args);
+
+    Script *newScript(const QString &name, QObject * context, const Script::InteractionType) const
+    {
+      return new muParserScript(const_cast<muParserScripting*>(this), name, context);
+    }
     
     virtual bool supportsEvaluation() { return true; }
 

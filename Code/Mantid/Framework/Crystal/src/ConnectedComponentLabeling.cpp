@@ -173,8 +173,9 @@ namespace Mantid
             }
 
             if (nonEmptyNeighbourIndexes.empty())
-            {
-              neighbourElements[currentIndex] = DisjointElement(static_cast<int>(currentLabelCount)); // New leaf
+            {            
+              DisjointElement& element = neighbourElements[currentIndex];
+              element.setId(static_cast<int>(currentLabelCount));
               ++currentLabelCount;
             }
             else if (neighbourIds.size() == 1) // Do we have a single unique id amongst all neighbours.
@@ -184,28 +185,28 @@ namespace Mantid
             else
             {
               // Choose the lowest neighbour index as the parent.
-              size_t parentIndex = nonEmptyNeighbourIndexes[0];
+              size_t candidateSourceParentIndex = nonEmptyNeighbourIndexes[0];
               for (size_t i = 1; i < nonEmptyNeighbourIndexes.size(); ++i)
               {
                 size_t neighIndex = nonEmptyNeighbourIndexes[i];
-                if (neighbourElements[neighIndex].getId() < neighbourElements[parentIndex].getId())
+                if (neighbourElements[neighIndex].getRoot() < neighbourElements[candidateSourceParentIndex].getRoot())
                 {
-                  parentIndex = neighIndex;
+                  candidateSourceParentIndex = neighIndex;
                 }
               }
               // Get the chosen parent
-              DisjointElement& parentElement = neighbourElements[parentIndex];
+              DisjointElement& parentElement = neighbourElements[candidateSourceParentIndex];
               // Union remainder parents with the chosen parent
               for (size_t i = 0; i < nonEmptyNeighbourIndexes.size(); ++i)
               {
                 size_t neighIndex = nonEmptyNeighbourIndexes[i];
-                if (neighIndex != parentIndex)
+                if (neighIndex != candidateSourceParentIndex)
                 {
-                  neighbourElements[neighIndex] = parentElement;
+                  neighbourElements[neighIndex].unionWith(&parentElement);
                 }
               }
 
-              neighbourElements[currentIndex] = parentElement;
+              neighbourElements[currentIndex].unionWith(&parentElement);
             }
           }
         } while (iterator->next());

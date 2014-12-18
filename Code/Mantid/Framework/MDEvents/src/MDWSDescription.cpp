@@ -14,7 +14,7 @@ namespace Mantid
 
     /** set specific (non-default) dimension name 
     * @param nDim   -- number of dimension;
-    * @param Name   -- the name to assighn into diemnsion names vector;
+    * @param Name   -- the name to assign into dimension names vector;
     */
     void MDWSDescription::setDimName(unsigned int nDim,const std::string &Name)
     {
@@ -26,7 +26,7 @@ namespace Mantid
       m_DimNames[nDim] = Name;
     }
     /** this is rather misleading function, as MD workspace does not currently have dimension units. 
-    *It actually sets the units for the dimension names, which will be displayed along axis and have nothinbg in common with units, defined by unit factory */
+    *It actually sets the units for the dimension names, which will be displayed along axis and have nothing in common with units, defined by unit factory */
     void MDWSDescription::setDimUnit(unsigned int nDim,const std::string &Unit)
     {
       if(nDim>=m_NDims)
@@ -38,7 +38,7 @@ namespace Mantid
     }
 
     /** the method builds the MD ws description from existing matrix workspace and the requested transformation parameters. 
-    *@param  pWS    -- input matrix workspace to be converted into MD workpsace
+    *@param  pWS    -- input matrix workspace to be converted into MD workspace
     *@param  QMode  -- momentum conversion mode. Any mode supported by Q conversion factory. Class just carries up the name of Q-mode, 
     *                  to the place where factory call to the solver is made , so no code modification is needed when new modes are added 
     *                  to the factory
@@ -262,6 +262,33 @@ namespace Mantid
       }
 
     }
+   /**function sets number of bins each dimension become split
+    * @param nBins_toSplit vector, containing number of bins each dimension is split into.
+    *                      If the vector contains only one element, each dimension is split according to this element values. 
+    */
+    void MDWSDescription::setNumBins(const std::vector<int> &nBins_toSplit)
+    {
+
+      if (!(nBins_toSplit.size() == 1 || nBins_toSplit.size()== this->m_NDims))
+        throw std::invalid_argument(" Number of dimensions: "+boost::lexical_cast<std::string>(nBins_toSplit.size())+
+                                    " defining number of bins to split into is not equal to total number of dimensions: "+
+                                      boost::lexical_cast<std::string>(this->m_NDims));
+
+      this->m_NBins.resize(this->m_NDims);
+
+      bool propagateOneNum=true;
+      if (nBins_toSplit.size() == this->m_NDims) propagateOneNum=false;
+
+      for(size_t i=0;i<this->m_NDims;i++)
+      {
+        if (propagateOneNum)
+          this->m_NBins[i]=nBins_toSplit[0];      
+        else
+          this->m_NBins[i]=nBins_toSplit[i];      
+
+      }
+    }
+
     /**function sets up min-max values to the dimensions, described by the class
     *@param minVal  -- vector of minimal dimension's values
     *@param maxVal  -- vector of maximal dimension's values

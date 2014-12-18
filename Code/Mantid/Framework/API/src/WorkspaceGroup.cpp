@@ -268,7 +268,7 @@ void WorkspaceGroup::removeItem(const size_t index)
 void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice)
 {
   Poco::Mutex::ScopedLock _lock(m_mutex);
-  const std::string deletedName = notice->object_name();
+  const std::string deletedName = notice->objectName();
   if( !this->contains(deletedName)) return;
 
   if( deletedName != this->getName() )
@@ -292,12 +292,12 @@ void WorkspaceGroup::workspaceReplaceHandle(Mantid::API::WorkspaceBeforeReplaceN
 {
   Poco::Mutex::ScopedLock _lock(m_mutex);
 
-  const std::string replacedName = notice->object_name();
+  const std::string replacedName = notice->objectName();
   for(auto citr=m_workspaces.begin(); citr!=m_workspaces.end(); ++citr)
   {
     if ( (**citr).name() == replacedName )
     {
-      *citr = notice->new_object();
+      *citr = notice->newObject();
       break;
     }
   }

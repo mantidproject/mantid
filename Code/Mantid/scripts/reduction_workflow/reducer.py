@@ -15,7 +15,7 @@ class Reducer(object):
     """
         Base reducer class. Instrument-specific reduction processes should be
         implemented in a child of this class.
-    """   
+    """
     ## Path for data files
     _data_path = '.'
     ## Path for output files
@@ -32,20 +32,20 @@ class Reducer(object):
     instrument_name = ""
     setup_algorithm = None
     reduction_algorithm = None
-        
+
     def __init__(self):
         self.UID = ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
         self.property_manager = "__reduction_parameters_"+self.UID
         self._data_files = {}
         self._reduction_steps = []
         self.reduction_properties = {}
-        
+
     def get_reduction_table_name(self):
         return self.property_manager
-    
+
     def set_reduction_table_name(self, name):
         self.property_manager = str(name)
-    
+
     def set_instrument(self, instrument, setup_algorithm=None,
                        reduction_algorithm=None):
         self.instrument_name = instrument
@@ -54,7 +54,7 @@ class Reducer(object):
 
     def get_instrument(self):
         return self.instrument_name
-        
+
     def set_data_path(self, path):
         """
             Set the path for data files
@@ -66,7 +66,7 @@ class Reducer(object):
             ConfigService.Instance().appendDataSearchDir(path)
         else:
             raise RuntimeError, "Reducer.set_data_path: provided path is not a directory (%s)" % path
-        
+
     def set_output_path(self, path):
         """
             Set the path for output files
@@ -77,20 +77,20 @@ class Reducer(object):
             self._output_path = path
         else:
             raise RuntimeError, "Reducer.set_output_path: provided path is not a directory (%s)" % path
-        
+
     def clear_data_files(self):
         """
             Empty the list of files to reduce while keeping all the
             other options the same.
         """
         self._data_files = {}
-        
+
     def append_data_file(self, data_file, workspace=None):
         """
             Append a file to be processed.
             @param data_file: name of the file to be processed
             @param workspace: optional name of the workspace for this data,
-                default will be the name of the file 
+                default will be the name of the file
             TODO: this needs to be an ordered list
         """
         if data_file is None:
@@ -106,9 +106,9 @@ class Reducer(object):
         else:
             if workspace is None:
                 workspace = extract_workspace_name(data_file)
-                
-        self._data_files[workspace] = data_file 
-    
+
+        self._data_files[workspace] = data_file
+
     def pre_process(self):
         """
             Reduction steps that are meant to be executed only once per set
@@ -130,26 +130,26 @@ class Reducer(object):
                         Logger("Reducer").error(msg)
                 else:
                     Logger("Reducer").warning("Setup algorithm has no %s property" % key)
-            
+
             if "ReductionProperties" in props:
                 alg.setPropertyValue("ReductionProperties",
                                      self.get_reduction_table_name())
             alg.execute()
-    
+
     def post_process(self):
         """
             Reduction steps to be executed after all data files have been
             processed.
-        """ 
+        """
         pass
-        
+
     def reduce(self):
         """
             Go through the list of reduction steps
         """
         t_0 = time.time()
         self.output_workspaces = []
-        
+
         # Log text
         self.log_text = "%s reduction - %s\n" % (self.instrument_name, time.ctime())
         self.log_text += "Mantid Python API v2\n"
@@ -160,7 +160,7 @@ class Reducer(object):
         if self.reduction_algorithm is None:
             Logger("Reducer").error("A reduction algorithm wasn't set: stopping")
             return
-        
+
         _first_ws_name = None
         for ws in self._data_files.keys():
             if _first_ws_name is None:
@@ -168,7 +168,7 @@ class Reducer(object):
             alg = AlgorithmManager.create(self.reduction_algorithm)
             alg.initialize()
             props = [p.name for p in alg.getProperties()]
-            
+
             # Check whether the data is already available or needs to be loaded
             if self._data_files[ws] is not None:
                 datafile = self._data_files[ws]
@@ -185,21 +185,21 @@ class Reducer(object):
                 else:
                     msg = "Can't set the InputWorkspace property on %s" % self.reduction_algorithm
                     Logger("Reducer").error(msg)
-                
+
             if "ReductionProperties" in props:
                 alg.setPropertyValue("ReductionProperties",
                                      self.get_reduction_table_name())
-            
+
             if "OutputWorkspace" in props:
                 alg.setPropertyValue("OutputWorkspace", ws)
-            
-            alg.execute()   
+
+            alg.execute()
             if "OutputMessage" in props:
                 self.log_text += alg.getProperty("OutputMessage").value+'\n'
 
-        #any clean up, possibly removing workspaces 
+        #any clean up, possibly removing workspaces
         self.post_process()
-    
+
         # Determine which directory to use
         output_dir = self._data_path
         if self._output_path is not None:
@@ -214,7 +214,7 @@ class Reducer(object):
         else:
             log_path = os.path.join(output_dir,"%s_reduction.log" % self.instrument_name)
         self.log_text += "Log saved to %s" % log_path
-        
+
         # Write the log to file
         f = open(log_path, 'a')
         f.write("\n-------------------------------------------\n")
@@ -225,22 +225,22 @@ class Reducer(object):
 def extract_workspace_name(filepath, suffix=''):
     """
         Returns a default workspace name for a given data file path.
-        
+
         @param filepath: path of the file to generate a workspace name for
         @param suffix: string to append to name
     """
     filepath_tmp = filepath
     if type(filepath)==list:
         filepath_tmp = filepath[0]
-        
+
     (head, tail) = os.path.split(filepath_tmp)
     basename, extension = os.path.splitext(tail)
 
     if type(filepath)==list:
         basename += "_combined"
-    
+
     #TODO: check whether the workspace name is already in use
-    #      and modify it if it is. 
+    #      and modify it if it is.
 
     return basename+suffix
-    
+

@@ -61,9 +61,9 @@ namespace MDAlgorithms
    protected: 
     void init();
     // 
-    DataObjects::TableWorkspace_const_sptr preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested,bool updateMasks,
+    DataObjects::TableWorkspace_const_sptr preprocessDetectorsPositions(const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,const std::string &dEModeRequested,bool updateMasks,
                                                                          const std::string &preproc_detectorsWSName);
-    DataObjects::TableWorkspace_sptr runPreprocessDetectorsToMDChildUpdatingMasks(Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &OutWSName,
+    DataObjects::TableWorkspace_sptr runPreprocessDetectorsToMDChildUpdatingMasks(const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,const std::string &OutWSName,
                                                                                   const std::string &dEModeRequested,Kernel::DeltaEMode::Type &Emode);
 
   /// logger -> to provide logging, for MD dataset file operations

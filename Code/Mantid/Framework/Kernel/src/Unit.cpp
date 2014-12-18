@@ -59,6 +59,17 @@ namespace Kernel
     return *this;
   }
 
+
+  bool Unit::operator==(const Unit& u) const
+  {
+    return unitID() == u.unitID();
+  }
+
+  bool Unit::operator!=(const Unit& u) const
+  {
+    return !(*this == u);
+  }
+
 /** Is conversion by constant multiplication possible?
  *
  *  Look to see if conversion from the unit upon which this method is called requires

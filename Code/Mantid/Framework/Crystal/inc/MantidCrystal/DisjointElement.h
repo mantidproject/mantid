@@ -41,6 +41,8 @@ namespace Crystal
     virtual ~DisjointElement();
     /// Get Id
     int getId() const;
+    /// Set the id
+    void setId(int id);
     /// Get parent element
     DisjointElement * getParent() const;
     /// Get root id

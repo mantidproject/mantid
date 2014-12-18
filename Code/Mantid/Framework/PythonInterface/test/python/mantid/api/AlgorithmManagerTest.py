@@ -5,7 +5,7 @@ from mantid.api import (AlgorithmManager, IAlgorithm, Algorithm, AlgorithmProxy)
 import sys
 
 class AlgorithmManagerTest(unittest.TestCase):
-    
+
     def test_create_default_version(self):
         alg = testhelpers.assertRaisesNothing(self, AlgorithmManager.create, "ConvertUnits")
         # Tests
@@ -13,14 +13,14 @@ class AlgorithmManagerTest(unittest.TestCase):
         self.assertEquals(alg.name(), "ConvertUnits")
         self.assertEquals(alg.version(), 1)
         self.assertEquals(alg.category(), "Transforms\\Units")
-        
+
     def test_create_unknown_alg_throws(self):
         self.assertRaises(RuntimeError, AlgorithmManager.create,"DoesNotExist")
-        
+
     def test_created_alg_isinstance_of_IAlgorithm(self):
         alg = AlgorithmManager.create("ConvertUnits")
         self.assertTrue(isinstance(alg, IAlgorithm))
-        
+
     def test_managed_cppalg_isinstance_of_AlgorithmProxy(self):
         alg = AlgorithmManager.create("ConvertUnits")
         self.assertTrue(isinstance(alg, AlgorithmProxy))
@@ -40,7 +40,7 @@ class AlgorithmManagerTest(unittest.TestCase):
         id = returned_instance.getAlgorithmID()
         mgr_instance = AlgorithmManager.getAlgorithm(id)
         self.assertEquals(id, mgr_instance.getAlgorithmID())
-        
+
     def test_removeById_removes_correct_instance(self):
         alg = AlgorithmManager.create("ConvertUnits")
         alg2 = AlgorithmManager.create("ConvertUnits")
@@ -52,14 +52,14 @@ class AlgorithmManagerTest(unittest.TestCase):
         alg = AlgorithmManager.create("ConvertUnits")
         alg2 = AlgorithmManager.create("ConvertUnits")
         alg3 = AlgorithmManager.newestInstanceOf("ConvertUnits")
-        
+
         self.assertEquals(alg2.getAlgorithmID(), alg3.getAlgorithmID())
         self.assertNotEqual(alg.getAlgorithmID(), alg3.getAlgorithmID())
-        
+
     def test_runningInstancesOf_returns_python_list(self):
         algs = AlgorithmManager.runningInstancesOf("ConvertUnits")
         self.assertTrue(isinstance(algs, list))
-        
+
         import threading
         class AlgThread(threading.Thread):
             def __init__(self):
@@ -95,4 +95,4 @@ class AlgorithmManagerTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()        
+    unittest.main()

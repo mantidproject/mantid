@@ -1,4 +1,4 @@
-import mantid.simpleapi  
+import mantid.simpleapi
 import mantid.kernel
 import mantid.api
 import numpy
@@ -21,7 +21,7 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         """ Mantid require
         """
         return "Algorithm to mask detectors with scattering angles in a given interval (in degrees)."
-        
+
     def PyInit(self):
         self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.Input,validator=mantid.api.InstrumentValidator()), "Input workspace")
         angleValidator=mantid.kernel.FloatBoundedValidator()

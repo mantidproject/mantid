@@ -10,8 +10,8 @@ Description
 -----------
 
 This algorithm filters events from an
-`EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_ to one or multiple
-`EventWorkspaces <http://www.mantidproject.org/EventWorkspace>`_ according to an input
+:ref:`EventWorkspace <EventWorkspace>` to one or multiple
+:ref:`EventWorkspaces <EventWorkspace>` according to an input
 `SplittersWorkspace <http://www.mantidproject.org/SplittersWorkspace>`_ containing a series of
 splitters (i.e., `SplittingIntervals <http://www.mantidproject.org/SplittingInterval>`_).
 

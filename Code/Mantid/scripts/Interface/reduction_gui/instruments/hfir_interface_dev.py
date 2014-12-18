@@ -29,31 +29,31 @@ class HFIRInterface(InstrumentInterface):
     """
         Defines the widgets for HFIR reduction
     """
-    
+
     def __init__(self, name, settings):
         super(HFIRInterface, self).__init__(name, settings)
-        
-        self.ERROR_REPORT_NAME = "sans_error_report.xml"    
-        self.LAST_REDUCTION_NAME = ".mantid_last_HFIR_reduction.xml"    
-        
-        # Scripter object to interface with Mantid 
-        self.scripter = HFIRReductionScripter(name=name, settings = self._settings)        
+
+        self.ERROR_REPORT_NAME = "sans_error_report.xml"
+        self.LAST_REDUCTION_NAME = ".mantid_last_HFIR_reduction.xml"
+
+        # Scripter object to interface with Mantid
+        self.scripter = HFIRReductionScripter(name=name, settings = self._settings)
 
         # Instrument description
         self.attach(SANSInstrumentWidget(settings = self._settings, name=name, data_proxy=DataProxy))
-        
+
         # Detector
         self.attach(DetectorWidget(settings = self._settings, data_proxy=DataProxy))
 
         # Sample
         self.attach(SampleDataWidget(settings = self._settings, data_proxy=DataProxy))
-        
+
         # Background
         self.attach(BackgroundWidget(settings = self._settings, data_proxy=DataProxy))
-        
+
         # Reduction output
         self.attach(OutputWidget(settings = self._settings))
-        
+
         # Catalog
         self.attach(SANSCatalogWidget(settings = self._settings, catalog_cls=DataCatalog))
 

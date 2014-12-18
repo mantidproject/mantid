@@ -610,9 +610,9 @@ void AlgorithmDialog::fillAndSetComboBox(const QString & propName, QComboBox* op
   Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
   if( !property ) return;
 
-  std::set<std::string> items = property->allowedValues();
-  std::set<std::string>::const_iterator vend = items.end();
-  for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != vend;
+  std::vector<std::string> items = property->allowedValues();
+  std::vector<std::string>::const_iterator vend = items.end();
+  for(std::vector<std::string>::const_iterator vitr = items.begin(); vitr != vend;
       ++vitr)
   {
     optionsBox->addItem(QString::fromStdString(*vitr));
