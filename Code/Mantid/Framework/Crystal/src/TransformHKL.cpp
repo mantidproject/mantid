@@ -45,7 +45,7 @@ void TransformHKL::init() {
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive(
+  boost::shared_ptr<BoundedValidator<double> > mustBePositive(
       new BoundedValidator<double>());
   mustBePositive->setLower(0.0);
 
@@ -58,7 +58,7 @@ void TransformHKL::init() {
   identity_matrix[0] = 1;
   identity_matrix[4] = 1;
   identity_matrix[8] = 1;
-  auto threeBythree = boost::make_shared<ArrayLengthValidator<double>>(9);
+  auto threeBythree = boost::make_shared<ArrayLengthValidator<double> >(9);
   this->declareProperty(
       new ArrayProperty<double>("HKLTransform", identity_matrix, threeBythree),
       "Specify 3x3 HKL transform matrix as a comma separated list of 9 "
