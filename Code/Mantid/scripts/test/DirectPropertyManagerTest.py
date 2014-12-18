@@ -1,9 +1,10 @@
+import os
+os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release"
 from mantid.simpleapi import *
 from mantid import api
 import unittest
 import inspect
 import numpy as np
-import os
 import sys
 from Direct.PropertyManager import PropertyManager
 
@@ -435,6 +436,8 @@ class DirectPropertyManagerTest(unittest.TestCase):
             self.assertAlmostEqual(en,ei[ind])
 
 
+        prop_man.energy_bins = None
+
         #TODO: this one is not completed
 
     def test_set_defailts_from_instrument(self) :
@@ -686,7 +689,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertFalse(propman1.use_hard_mask_only)
         self.assertEqual(propman1.hard_mask_file,'a_hard_mask_file.msk')
         self.assertTrue(propman1.run_diagnostics)
-
+   
 
 
 

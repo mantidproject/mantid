@@ -81,6 +81,8 @@ class EnergyBins(object):
               nBlocks = len(value);
           if nBlocks%3 != 0:
                raise KeyError("Energy_bin value has to be either list of n-blocks of 3 number each or string representation of this list with numbers separated by commas")
+       else:
+          value = None              
        #TODO: implement single value settings according to rebin
        object.__setattr__(instance,'_energy_bins',value);
 #end EnergyBins
