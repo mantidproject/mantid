@@ -12,12 +12,12 @@ DEFAULT_CONFIG_DIR = "/SNS/BSS/IPTS-5908/shared"
 DEFAULT_MASK_FILE = "BASIS_Mask.xml"
 DEFAULT_ENERGY = 7.6368
 
-class BASISReduction_311(PythonAlgorithm):
+class BASISReduction311(PythonAlgorithm):
     def category(self):
         return "Inelastic;PythonAlgorithms"
 
     def name(self):
-        return "BASISReduction_311"
+        return "BASISReduction311"
 
     def summary(self):
         return "This algorithm is meant to temporarily deal with letting BASIS reduce lots of files via Mantid for the 311 reflection."
@@ -251,4 +251,4 @@ class BASISReduction_311(PythonAlgorithm):
                        OutputWorkspace=sam_ws)
     
 # Register algorithm with Mantid.
-AlgorithmFactory.subscribe(BASISReduction_311)
+AlgorithmFactory.subscribe(BASISReduction311)
