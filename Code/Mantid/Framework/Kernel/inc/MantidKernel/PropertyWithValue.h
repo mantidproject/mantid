@@ -219,7 +219,7 @@ void toValue(const std::string& strvalue, std::vector<std::vector<T> >& value, c
   PROPERTYWITHVALUE_TOVALUE(long);
   PROPERTYWITHVALUE_TOVALUE(uint32_t);
   PROPERTYWITHVALUE_TOVALUE(uint64_t);
-  #if defined(__INTEL_COMPILER) || defined(__clang__)
+  #if defined(__APPLE__)
     PROPERTYWITHVALUE_TOVALUE(unsigned long);
   #endif
 

@@ -7,6 +7,7 @@ set ( SRC_FILES
 	src/BinMD.cpp
 	src/BinaryOperationMD.cpp
 	src/BooleanBinaryOperationMD.cpp
+	src/CalculateCoverageDGS.cpp
 	src/CentroidPeaksMD.cpp
 	src/CentroidPeaksMD2.cpp
 	src/CloneMDWorkspace.cpp
@@ -87,6 +88,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/BinMD.h
 	inc/MantidMDAlgorithms/BinaryOperationMD.h
 	inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
+	inc/MantidMDAlgorithms/CalculateCoverageDGS.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD2.h
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
@@ -169,6 +171,7 @@ set ( TEST_FILES
 	AndMDTest.h
 	BooleanBinaryOperationMDTest.h
 	CachedExperimentInfoTest.h
+	CalculateCoverageDGSTest.h
 	CentroidPeaksMD2Test.h
 	CentroidPeaksMDTest.h
 	CloneMDWorkspaceTest.h

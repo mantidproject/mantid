@@ -115,6 +115,8 @@ namespace Mantid
       void disableNexusOutput();
       /// Update instrument definitions from github
       void UpdateInstrumentDefinitions();
+      /// Sends startup usage information
+      void SendStartupUsageInfo();
 
       #ifdef MPI_BUILD
       /** Member variable that initialises the MPI environment on construction (in the

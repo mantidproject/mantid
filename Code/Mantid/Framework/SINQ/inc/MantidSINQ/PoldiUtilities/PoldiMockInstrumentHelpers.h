@@ -21,10 +21,17 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include "MantidGeometry/Crystal/CrystalStructure.h"
+#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidGeometry/Crystal/BraggScattererFactory.h"
+#include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
+
 using ::testing::Return;
 
 namespace Mantid {
 namespace Poldi {
+
+using namespace Geometry;
 
 typedef std::pair<double, double> DoublePair;
 
@@ -44,7 +51,7 @@ public:
 
     ~MockDetector() { }
 
-    void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument)
+    void loadConfiguration(Instrument_const_sptr poldiInstrument)
     {
         UNUSED_ARG(poldiInstrument);
     }
@@ -68,15 +75,15 @@ public:
     ConfiguredHeliumDetector() :
         PoldiHeliumDetector()
     {
-        loadConfiguration(Geometry::Instrument_const_sptr());
+        loadConfiguration(Instrument_const_sptr());
     }
 
-    void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument)
+    void loadConfiguration(Instrument_const_sptr poldiInstrument)
     {
         UNUSED_ARG(poldiInstrument);
 
         initializeFixedParameters(3000.0, static_cast<size_t>(400), 2.5, 0.88);
-        initializeCalibratedParameters(Mantid::Kernel::V2D(-931.47, -860.0), Conversions::degToRad(90.41));
+        initializeCalibratedParameters(Kernel::V2D(-931.47, -860.0), Conversions::degToRad(90.41));
     }
 };
 
@@ -99,7 +106,7 @@ public:
 
     ~MockChopper() { }
 
-    void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument)
+    void loadConfiguration(Instrument_const_sptr poldiInstrument)
     {
         UNUSED_ARG(poldiInstrument)
     }
@@ -119,26 +126,26 @@ public:
     }
 };
 
-class PoldiFakeSourceComponent : public Geometry::ObjComponent
+class PoldiFakeSourceComponent : public ObjComponent
 {
 public:
     PoldiFakeSourceComponent() :
         ObjComponent("FakePoldiSource", 0) {}
 };
 
-class PoldiAbstractFakeInstrument : public Geometry::Instrument
+class PoldiAbstractFakeInstrument : public Instrument
 {
 public:
     PoldiAbstractFakeInstrument() {}
 
-    virtual boost::shared_ptr<const Geometry::IComponent> getComponentByName(const std::string &cname, int nlevels = 0) const {
+    virtual boost::shared_ptr<const IComponent> getComponentByName(const std::string &cname, int nlevels = 0) const {
         UNUSED_ARG(cname);
         UNUSED_ARG(nlevels);
 
         return getComponentByNameFake();
     }
 
-    virtual boost::shared_ptr<const Geometry::IComponent> getComponentByNameFake() const = 0;
+    virtual boost::shared_ptr<const IComponent> getComponentByNameFake() const = 0;
 };
 
 class PoldiValidSourceFakeInstrument : public PoldiAbstractFakeInstrument
@@ -147,9 +154,9 @@ public:
     PoldiValidSourceFakeInstrument() :
         PoldiAbstractFakeInstrument() {}
 
-    boost::shared_ptr<const Geometry::IComponent> getComponentByNameFake() const
+    boost::shared_ptr<const IComponent> getComponentByNameFake() const
     {
-        return boost::shared_ptr<const Geometry::IComponent>(new PoldiFakeSourceComponent);
+        return boost::shared_ptr<const IComponent>(new PoldiFakeSourceComponent);
     }
 };
 
@@ -159,28 +166,28 @@ public:
     PoldiInvalidSourceFakeInstrument() :
         PoldiAbstractFakeInstrument() {}
 
-    boost::shared_ptr<const Geometry::IComponent> getComponentByNameFake() const
+    boost::shared_ptr<const IComponent> getComponentByNameFake() const
     {
-        return boost::shared_ptr<const Geometry::IComponent>();
+        return boost::shared_ptr<const IComponent>();
     }
 };
 
-class PoldiValidFakeParameterMap : public Geometry::ParameterMap
+class PoldiValidFakeParameterMap : public ParameterMap
 {
 public:
-    PoldiValidFakeParameterMap(const Geometry::IComponent *component) :
-        Geometry::ParameterMap()
+    PoldiValidFakeParameterMap(const IComponent *component) :
+        ParameterMap()
     {
-        add("fitting", component, "WavelengthDistribution", Mantid::Geometry::FitParameter());
+        add("fitting", component, "WavelengthDistribution", FitParameter());
     }
 
 };
 
-class PoldiInvalidFakeParameterMap : public Geometry::ParameterMap
+class PoldiInvalidFakeParameterMap : public ParameterMap
 {
 public:
     PoldiInvalidFakeParameterMap() :
-        Geometry::ParameterMap()
+        ParameterMap()
     {
     }
 
@@ -516,6 +523,20 @@ static PoldiPeakCollection_sptr createPoldiPeakCollectionNormalized()
     peaks->setProfileFunctionName("Gaussian");
 
     return peaks;
+}
+
+static PoldiPeakCollection_sptr createTheoreticalPeakCollectionSilicon()
+{
+    BraggScatterer_sptr atomSi = BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Si;Position=[0,0,0];U=0.005");
+    CompositeBraggScatterer_sptr atoms = CompositeBraggScatterer::create();
+    atoms->addScatterer(atomSi);
+
+    CrystalStructure_sptr Si(new CrystalStructure(
+                UnitCell(5.43071, 5.43071, 5.43071),
+                SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m"),
+                atoms));
+
+    return PoldiPeakCollection_sptr(new PoldiPeakCollection(Si, 1.1, 1.95));
 }
 
 };

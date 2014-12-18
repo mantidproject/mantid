@@ -22,7 +22,7 @@ class Fury(PythonAlgorithm):
 
         self.declareProperty(name='EnergyMin', defaultValue=-0.5, doc='Minimum energy for fit. Default=-0.5')
         self.declareProperty(name='EnergyMax', defaultValue=0.5, doc='Maximum energy for fit. Default=0.5')
-        self.declareProperty(name='NumBins', defaultValue=10, doc='Binning value (integer) for sample. Default=1')
+        self.declareProperty(name='NumBins', defaultValue=1, doc='Decrease total number of spectrum points by this ratio through merging of intensities from neighbouring bins. Default=1')
 
         self.declareProperty(MatrixWorkspaceProperty('ParameterWorkspace', '',
                              direction=Direction.Output, optional=PropertyMode.Optional),
@@ -76,7 +76,7 @@ class Fury(PythonAlgorithm):
 
         self._e_min = self.getProperty('EnergyMin').value
         self._e_max = self.getProperty('EnergyMax').value
-        self._num_bins = self.getProperty('NumBins').value
+        self._number_points_per_bin = self.getProperty('NumBins').value
 
         self._parameter_table = self.getPropertyValue('ParameterWorkspace')
         if self._parameter_table == '':
@@ -117,8 +117,8 @@ class Fury(PythonAlgorithm):
         CropWorkspace(InputWorkspace=self._sample, OutputWorkspace='__Fury_sample_cropped', Xmin=self._e_min, Xmax=self._e_max)
         x_data = mtd['__Fury_sample_cropped'].readX(0)
         number_input_points = len(x_data) - 1
-        number_points_per_bin = number_input_points / self._num_bins
-        self._e_width = (abs(self._e_min) + abs(self._e_max)) / number_points_per_bin
+        num_bins = number_input_points / self._number_points_per_bin
+        self._e_width = (abs(self._e_min) + abs(self._e_max)) / num_bins
 
         try:
             instrument = mtd[self._sample].getInstrument()
@@ -158,7 +158,7 @@ class Fury(PythonAlgorithm):
         param_table.addColumn('float', 'Resolution')
         param_table.addColumn('int', 'ResolutionBins')
 
-        param_table.addRow([number_input_points, self._num_bins, number_points_per_bin,
+        param_table.addRow([number_input_points, self._number_points_per_bin, num_bins,
                             self._e_min, self._e_max, self._e_width,
                             resolution, resolution_bins])
 
