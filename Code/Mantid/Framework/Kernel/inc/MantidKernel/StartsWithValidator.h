@@ -7,18 +7,18 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ListValidator.h"
 #ifndef Q_MOC_RUN
-# include <boost/lexical_cast.hpp>
+#include <boost/lexical_cast.hpp>
 #endif
 #include <vector>
 
-namespace Mantid
-{
-namespace Kernel
-{
-/** StartsWithValidator is a validator that requires the value of a property to start with one 
+namespace Mantid {
+namespace Kernel {
+/** StartsWithValidator is a validator that requires the value of a property to
+   start with one
     of the strings in a defined list of possibilities.
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -38,33 +38,37 @@ namespace Kernel
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport StartsWithValidator : public Kernel::StringListValidator
-{
+class DLLExport StartsWithValidator : public Kernel::StringListValidator {
 public:
   /**
    * Default constructor.
-   * 
+   *
    */
-  StartsWithValidator():Kernel::StringListValidator(){}
+  StartsWithValidator() : Kernel::StringListValidator() {}
   /**
    * Constructor.
    * @param values :: A vector with the allowed values.
    */
-  StartsWithValidator(const std::vector<std::string>& values):Kernel::StringListValidator(values){}
+  StartsWithValidator(const std::vector<std::string> &values)
+      : Kernel::StringListValidator(values) {}
   /**
    * Constructor.
    * @param values :: A set with the allowed values.
    */
-  StartsWithValidator(const std::set<std::string>& values):Kernel::StringListValidator(values){}
+  StartsWithValidator(const std::set<std::string> &values)
+      : Kernel::StringListValidator(values) {}
   /// Clone the validator
-  IValidator_sptr clone() const{ return boost::make_shared<StartsWithValidator>(*this); }
+  IValidator_sptr clone() const {
+    return boost::make_shared<StartsWithValidator>(*this);
+  }
+
 protected:
   /** Checks if the string passed starts with one from the list
    *  @param value :: The value to test
-   *  @return "" if the value is on the list, or "The value does not start with any of the allowed values"
+   *  @return "" if the value is on the list, or "The value does not start with
+   * any of the allowed values"
    */
-  std::string checkValidity(const std::string & value) const;
-
+  std::string checkValidity(const std::string &value) const;
 };
 
 } // namespace Kernel

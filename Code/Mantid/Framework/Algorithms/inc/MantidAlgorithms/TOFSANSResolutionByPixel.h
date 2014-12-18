@@ -7,19 +7,17 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 /**
-    Calculates the TOF-SANS Q-resolution for each wavelenght and pixel using formula 
-    by Mildner and Carpenter. 
+    Calculates the TOF-SANS Q-resolution for each wavelenght and pixel using
+   formula
+    by Mildner and Carpenter.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport TOFSANSResolutionByPixel : public API::Algorithm
-{
+class DLLExport TOFSANSResolutionByPixel : public API::Algorithm {
 public:
   /// (Empty) Constructor
   TOFSANSResolutionByPixel() : API::Algorithm() {}
@@ -27,8 +25,10 @@ public:
   virtual ~TOFSANSResolutionByPixel() {}
   /// Algorithm's name
   virtual const std::string name() const { return "TOFSANSResolutionByPixel"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Calculate the Q resolution for TOF SANS data for each pixel.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Calculate the Q resolution for TOF SANS data for each pixel.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -36,7 +36,6 @@ public:
   virtual const std::string category() const { return "SANS"; }
 
 private:
-  
   /// Initialisation code
   void init();
   /// Execution code

@@ -39,36 +39,33 @@ namespace Poldi {
 
 class MANTID_SINQ_DLL MillerIndices {
 public:
-    MillerIndices(int h = 0, int k = 0, int l = 0);
-    MillerIndices(std::vector<int> hkl);
-    MillerIndices(const Kernel::V3D &hkl);
-    ~MillerIndices() {}
+  MillerIndices(int h = 0, int k = 0, int l = 0);
+  MillerIndices(std::vector<int> hkl);
+  MillerIndices(const Kernel::V3D &hkl);
+  ~MillerIndices() {}
 
-    int h() const;
-    int k() const;
-    int l() const;
+  int h() const;
+  int k() const;
+  int l() const;
 
-    int operator[](int index);
-    bool operator==(const MillerIndices &other) const;
-    bool operator!=(const MillerIndices &other) const;
+  int operator[](int index);
+  bool operator==(const MillerIndices &other) const;
+  bool operator!=(const MillerIndices &other) const;
 
-    const std::vector<int>& asVector() const;
-    const Kernel::V3D &asV3D() const;
+  const std::vector<int> &asVector() const;
+  const Kernel::V3D &asV3D() const;
 
 private:
-    void populateVector();
+  void populateVector();
 
-    int m_h;
-    int m_k;
-    int m_l;
+  int m_h;
+  int m_k;
+  int m_l;
 
-    std::vector<int> m_asVector;
-    Kernel::V3D m_asV3D;
+  std::vector<int> m_asVector;
+  Kernel::V3D m_asV3D;
 };
-
-
 }
 }
-
 
 #endif // MANTID_SINQ_MILLERINDICES_H

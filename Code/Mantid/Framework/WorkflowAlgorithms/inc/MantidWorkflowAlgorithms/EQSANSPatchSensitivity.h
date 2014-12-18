@@ -6,14 +6,14 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace WorkflowAlgorithms
-{
+namespace Mantid {
+namespace WorkflowAlgorithms {
 /**
-    Calculate the detector sensitivity and patch the pixels that are masked in a second workspace.
+    Calculate the detector sensitivity and patch the pixels that are masked in a
+   second workspace.
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -33,8 +33,7 @@ namespace WorkflowAlgorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport EQSANSPatchSensitivity : public API::Algorithm
-{
+class DLLExport EQSANSPatchSensitivity : public API::Algorithm {
 public:
   /// (Empty) Constructor
   EQSANSPatchSensitivity() : API::Algorithm() {}
@@ -42,8 +41,10 @@ public:
   virtual ~EQSANSPatchSensitivity() {}
   /// Algorithm's name
   virtual const std::string name() const { return "EQSANSPatchSensitivity"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Patch EQSANS sensitivity correction.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Patch EQSANS sensitivity correction.";
+  }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification

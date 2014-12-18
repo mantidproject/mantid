@@ -349,11 +349,11 @@ Mantid::DataObjects::Peak readPeak(PeaksWorkspace_sptr outWS,
   seqNum = -1;
 
   std::string s = lastStr;
+
   if (s.length() < 1 && in.good()) // blank line
   {
     readToEndOfLine(in, true);
     s = getWord(in, false);
-    ;
   }
 
   if (s.length() < 1)

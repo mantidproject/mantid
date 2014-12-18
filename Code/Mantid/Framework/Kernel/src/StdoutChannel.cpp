@@ -2,11 +2,6 @@
 #include <iostream>
 
 namespace Poco {
-StdoutChannel::StdoutChannel():ConsoleChannel(std::cout)
-{
-}
-StdoutChannel::~StdoutChannel()
-{
-}
-
+StdoutChannel::StdoutChannel() : ConsoleChannel(std::cout) {}
+StdoutChannel::~StdoutChannel() {}
 }

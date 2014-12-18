@@ -6,12 +6,12 @@
 //----------------------------------------------------------------------
 // Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
 // David Mount.  All Rights Reserved.
-// 
+//
 // This software and related documentation is part of the Approximate
 // Nearest Neighbor Library (ANN).  This software is provided under
 // the provisions of the Lesser GNU Public License (LGPL).  See the
 // file ../ReadMe.txt for further information.
-// 
+//
 // The University of Maryland (U.M.) and the authors make no
 // representations about the suitability or fitness of this software for
 // any purpose.  It is provided "as is" without express or implied
@@ -23,17 +23,17 @@
 //	Revision 1.0  04/01/05
 //----------------------------------------------------------------------
 
-#include "kd_tree.h"					// kd-tree definitions
-#include "kd_util.h"					// kd-tree utilities
-#include "kd_split.h"					// splitting functions
+#include "kd_tree.h"  // kd-tree definitions
+#include "kd_util.h"  // kd-tree utilities
+#include "kd_split.h" // splitting functions
 
 //----------------------------------------------------------------------
 //	Constants
 //----------------------------------------------------------------------
 
-const double ERR = 0.001;				// a small value
-const double FS_ASPECT_RATIO = 3.0;		// maximum allowed aspect ratio
-										// in fair split. Must be >= 2.
+const double ERR = 0.001;           // a small value
+const double FS_ASPECT_RATIO = 3.0; // maximum allowed aspect ratio
+                                    // in fair split. Must be >= 2.
 
 //----------------------------------------------------------------------
 //	kd_split - Bentley's standard splitting routine for kd-trees
@@ -41,21 +41,20 @@ const double FS_ASPECT_RATIO = 3.0;		// maximum allowed aspect ratio
 //		just before the median point along this dimension.
 //----------------------------------------------------------------------
 
-void kd_split(
-	ANNpointArray		pa,				// point array (permuted on return)
-	ANNidxArray			pidx,			// point indices
-	const ANNorthRect	&bnds,			// bounding rectangle for cell
-	int					n,				// number of points
-	int					dim,			// dimension of space
-	int					&cut_dim,		// cutting dimension (returned)
-	ANNcoord			&cut_val,		// cutting value (returned)
-	int					&n_lo)			// num of points on low side (returned)
+void kd_split(ANNpointArray pa,        // point array (permuted on return)
+              ANNidxArray pidx,        // point indices
+              const ANNorthRect &bnds, // bounding rectangle for cell
+              int n,                   // number of points
+              int dim,                 // dimension of space
+              int &cut_dim,            // cutting dimension (returned)
+              ANNcoord &cut_val,       // cutting value (returned)
+              int &n_lo)               // num of points on low side (returned)
 {
-										// find dimension of maximum spread
-	cut_dim = annMaxSpread(pa, pidx, n, dim);
-	n_lo = n/2;							// median rank
-										// split about median
-	annMedianSplit(pa, pidx, n, cut_dim, cut_val, n_lo);
+  // find dimension of maximum spread
+  cut_dim = annMaxSpread(pa, pidx, n, dim);
+  n_lo = n / 2; // median rank
+                // split about median
+  annMedianSplit(pa, pidx, n, cut_dim, cut_val, n_lo);
 }
 
 //----------------------------------------------------------------------
@@ -73,53 +72,55 @@ void kd_split(
 //		recommended, instead.
 //----------------------------------------------------------------------
 
-void midpt_split(
-	ANNpointArray		pa,				// point array
-	ANNidxArray			pidx,			// point indices (permuted on return)
-	const ANNorthRect	&bnds,			// bounding rectangle for cell
-	int					n,				// number of points
-	int					dim,			// dimension of space
-	int					&cut_dim,		// cutting dimension (returned)
-	ANNcoord			&cut_val,		// cutting value (returned)
-	int					&n_lo)			// num of points on low side (returned)
+void midpt_split(ANNpointArray pa,        // point array
+                 ANNidxArray pidx,        // point indices (permuted on return)
+                 const ANNorthRect &bnds, // bounding rectangle for cell
+                 int n,                   // number of points
+                 int dim,                 // dimension of space
+                 int &cut_dim,            // cutting dimension (returned)
+                 ANNcoord &cut_val,       // cutting value (returned)
+                 int &n_lo) // num of points on low side (returned)
 {
-	int d;
+  int d;
 
-	ANNcoord max_length = bnds.hi[0] - bnds.lo[0];
-	for (d = 1; d < dim; d++) {			// find length of longest box side
-		ANNcoord length = bnds.hi[d] - bnds.lo[d];
-		if (length > max_length) {
-			max_length = length;
-		}
-	}
-	ANNcoord max_spread = -1;			// find long side with most spread
-	for (d = 0; d < dim; d++) {
-										// is it among longest?
-		if (double(bnds.hi[d] - bnds.lo[d]) >= (1-ERR)*max_length) {
-										// compute its spread
-			ANNcoord spr = annSpread(pa, pidx, n, d);
-			if (spr > max_spread) {		// is it max so far?
-				max_spread = spr;
-				cut_dim = d;
-			}
-		}
-	}
-										// split along cut_dim at midpoint
-	cut_val = (bnds.lo[cut_dim] + bnds.hi[cut_dim]) / 2;
-										// permute points accordingly
-	int br1, br2;
-	annPlaneSplit(pa, pidx, n, cut_dim, cut_val, br1, br2);
-	//------------------------------------------------------------------
-	//	On return:		pa[0..br1-1] < cut_val
-	//					pa[br1..br2-1] == cut_val
-	//					pa[br2..n-1] > cut_val
-	//
-	//	We can set n_lo to any value in the range [br1..br2].
-	//	We choose split so that points are most evenly divided.
-	//------------------------------------------------------------------
-	if (br1 > n/2) n_lo = br1;
-	else if (br2 < n/2) n_lo = br2;
-	else n_lo = n/2;
+  ANNcoord max_length = bnds.hi[0] - bnds.lo[0];
+  for (d = 1; d < dim; d++) { // find length of longest box side
+    ANNcoord length = bnds.hi[d] - bnds.lo[d];
+    if (length > max_length) {
+      max_length = length;
+    }
+  }
+  ANNcoord max_spread = -1; // find long side with most spread
+  for (d = 0; d < dim; d++) {
+    // is it among longest?
+    if (double(bnds.hi[d] - bnds.lo[d]) >= (1 - ERR) * max_length) {
+      // compute its spread
+      ANNcoord spr = annSpread(pa, pidx, n, d);
+      if (spr > max_spread) { // is it max so far?
+        max_spread = spr;
+        cut_dim = d;
+      }
+    }
+  }
+  // split along cut_dim at midpoint
+  cut_val = (bnds.lo[cut_dim] + bnds.hi[cut_dim]) / 2;
+  // permute points accordingly
+  int br1, br2;
+  annPlaneSplit(pa, pidx, n, cut_dim, cut_val, br1, br2);
+  //------------------------------------------------------------------
+  //	On return:		pa[0..br1-1] < cut_val
+  //					pa[br1..br2-1] == cut_val
+  //					pa[br2..n-1] > cut_val
+  //
+  //	We can set n_lo to any value in the range [br1..br2].
+  //	We choose split so that points are most evenly divided.
+  //------------------------------------------------------------------
+  if (br1 > n / 2)
+    n_lo = br1;
+  else if (br2 < n / 2)
+    n_lo = br2;
+  else
+    n_lo = n / 2;
 }
 
 //----------------------------------------------------------------------
@@ -133,7 +134,8 @@ void midpt_split(
 //		on one side of the splitting plane) then we slide the splitting
 //		(maintaining its orientation) until it produces a nontrivial
 //		split. For example, if the splitting plane is along the x-axis,
-//		and all the data points have x-coordinate less than the x-bisector,
+//		and all the data points have x-coordinate less than the
+// x-bisector,
 //		then the split is taken along the maximum x-coordinate of the
 //		data points.
 //
@@ -143,73 +145,79 @@ void midpt_split(
 //
 //----------------------------------------------------------------------
 
-void sl_midpt_split(
-	ANNpointArray		pa,				// point array
-	ANNidxArray			pidx,			// point indices (permuted on return)
-	const ANNorthRect	&bnds,			// bounding rectangle for cell
-	int					n,				// number of points
-	int					dim,			// dimension of space
-	int					&cut_dim,		// cutting dimension (returned)
-	ANNcoord			&cut_val,		// cutting value (returned)
-	int					&n_lo)			// num of points on low side (returned)
+void sl_midpt_split(ANNpointArray pa, // point array
+                    ANNidxArray pidx, // point indices (permuted on return)
+                    const ANNorthRect &bnds, // bounding rectangle for cell
+                    int n,                   // number of points
+                    int dim,                 // dimension of space
+                    int &cut_dim,            // cutting dimension (returned)
+                    ANNcoord &cut_val,       // cutting value (returned)
+                    int &n_lo) // num of points on low side (returned)
 {
-	int d;
+  int d;
 
-	ANNcoord max_length = bnds.hi[0] - bnds.lo[0];
-	for (d = 1; d < dim; d++) {			// find length of longest box side
-		ANNcoord length = bnds.hi[d] - bnds.lo[d];
-		if (length > max_length) {
-			max_length = length;
-		}
-	}
-	ANNcoord max_spread = -1;			// find long side with most spread
-	for (d = 0; d < dim; d++) {
-										// is it among longest?
-		if ((bnds.hi[d] - bnds.lo[d]) >= (1-ERR)*max_length) {
-										// compute its spread
-			ANNcoord spr = annSpread(pa, pidx, n, d);
-			if (spr > max_spread) {		// is it max so far?
-				max_spread = spr;
-				cut_dim = d;
-			}
-		}
-	}
-										// ideal split at midpoint
-	ANNcoord ideal_cut_val = (bnds.lo[cut_dim] + bnds.hi[cut_dim])/2;
+  ANNcoord max_length = bnds.hi[0] - bnds.lo[0];
+  for (d = 1; d < dim; d++) { // find length of longest box side
+    ANNcoord length = bnds.hi[d] - bnds.lo[d];
+    if (length > max_length) {
+      max_length = length;
+    }
+  }
+  ANNcoord max_spread = -1; // find long side with most spread
+  for (d = 0; d < dim; d++) {
+    // is it among longest?
+    if ((bnds.hi[d] - bnds.lo[d]) >= (1 - ERR) * max_length) {
+      // compute its spread
+      ANNcoord spr = annSpread(pa, pidx, n, d);
+      if (spr > max_spread) { // is it max so far?
+        max_spread = spr;
+        cut_dim = d;
+      }
+    }
+  }
+  // ideal split at midpoint
+  ANNcoord ideal_cut_val = (bnds.lo[cut_dim] + bnds.hi[cut_dim]) / 2;
 
-	ANNcoord min, max;
-	annMinMax(pa, pidx, n, cut_dim, min, max);	// find min/max coordinates
+  ANNcoord min, max;
+  annMinMax(pa, pidx, n, cut_dim, min, max); // find min/max coordinates
 
-	if (ideal_cut_val < min)			// slide to min or max as needed
-		cut_val = min;
-	else if (ideal_cut_val > max)
-		cut_val = max;
-	else
-		cut_val = ideal_cut_val;
+  if (ideal_cut_val < min) // slide to min or max as needed
+    cut_val = min;
+  else if (ideal_cut_val > max)
+    cut_val = max;
+  else
+    cut_val = ideal_cut_val;
 
-										// permute points accordingly
-	int br1, br2;
-	annPlaneSplit(pa, pidx, n, cut_dim, cut_val, br1, br2);
-	//------------------------------------------------------------------
-	//	On return:		pa[0..br1-1] < cut_val
-	//					pa[br1..br2-1] == cut_val
-	//					pa[br2..n-1] > cut_val
-	//
-	//	We can set n_lo to any value in the range [br1..br2] to satisfy
-	//	the exit conditions of the procedure.
-	//
-	//	if ideal_cut_val < min (implying br2 >= 1),
-	//			then we select n_lo = 1 (so there is one point on left) and
-	//	if ideal_cut_val > max (implying br1 <= n-1),
-	//			then we select n_lo = n-1 (so there is one point on right).
-	//	Otherwise, we select n_lo as close to n/2 as possible within
-	//			[br1..br2].
-	//------------------------------------------------------------------
-	if (ideal_cut_val < min) n_lo = 1;
-	else if (ideal_cut_val > max) n_lo = n-1;
-	else if (br1 > n/2) n_lo = br1;
-	else if (br2 < n/2) n_lo = br2;
-	else n_lo = n/2;
+  // permute points accordingly
+  int br1, br2;
+  annPlaneSplit(pa, pidx, n, cut_dim, cut_val, br1, br2);
+  //------------------------------------------------------------------
+  //	On return:		pa[0..br1-1] < cut_val
+  //					pa[br1..br2-1] == cut_val
+  //					pa[br2..n-1] > cut_val
+  //
+  //	We can set n_lo to any value in the range [br1..br2] to satisfy
+  //	the exit conditions of the procedure.
+  //
+  //	if ideal_cut_val < min (implying br2 >= 1),
+  //			then we select n_lo = 1 (so there is one point on left)
+  // and
+  //	if ideal_cut_val > max (implying br1 <= n-1),
+  //			then we select n_lo = n-1 (so there is one point on
+  // right).
+  //	Otherwise, we select n_lo as close to n/2 as possible within
+  //			[br1..br2].
+  //------------------------------------------------------------------
+  if (ideal_cut_val < min)
+    n_lo = 1;
+  else if (ideal_cut_val > max)
+    n_lo = n - 1;
+  else if (br1 > n / 2)
+    n_lo = br1;
+  else if (br2 < n / 2)
+    n_lo = br2;
+  else
+    n_lo = n / 2;
 }
 
 //----------------------------------------------------------------------
@@ -233,78 +241,78 @@ void sl_midpt_split(
 //		determine how narrowly we can cut this side, without causing the
 //		aspect ratio bound to be exceeded (small_piece).
 //
-//		This procedure is more robust than either kd_split or midpt_split,
+//		This procedure is more robust than either kd_split or
+// midpt_split,
 //		but is more complicated as well.  When point distribution is
 //		extremely skewed, this degenerates to midpt_split (actually
-//		1/3 point split), and when the points are most evenly distributed,
+//		1/3 point split), and when the points are most evenly
+// distributed,
 //		this degenerates to kd-split.
 //----------------------------------------------------------------------
 
-void fair_split(
-	ANNpointArray		pa,				// point array
-	ANNidxArray			pidx,			// point indices (permuted on return)
-	const ANNorthRect	&bnds,			// bounding rectangle for cell
-	int					n,				// number of points
-	int					dim,			// dimension of space
-	int					&cut_dim,		// cutting dimension (returned)
-	ANNcoord			&cut_val,		// cutting value (returned)
-	int					&n_lo)			// num of points on low side (returned)
+void fair_split(ANNpointArray pa,        // point array
+                ANNidxArray pidx,        // point indices (permuted on return)
+                const ANNorthRect &bnds, // bounding rectangle for cell
+                int n,                   // number of points
+                int dim,                 // dimension of space
+                int &cut_dim,            // cutting dimension (returned)
+                ANNcoord &cut_val,       // cutting value (returned)
+                int &n_lo)               // num of points on low side (returned)
 {
-	int d;
-	ANNcoord max_length = bnds.hi[0] - bnds.lo[0];
-	cut_dim = 0;
-	for (d = 1; d < dim; d++) {			// find length of longest box side
-		ANNcoord length = bnds.hi[d] - bnds.lo[d];
-		if (length > max_length) {
-			max_length = length;
-			cut_dim = d;
-		}
-	}
+  int d;
+  ANNcoord max_length = bnds.hi[0] - bnds.lo[0];
+  cut_dim = 0;
+  for (d = 1; d < dim; d++) { // find length of longest box side
+    ANNcoord length = bnds.hi[d] - bnds.lo[d];
+    if (length > max_length) {
+      max_length = length;
+      cut_dim = d;
+    }
+  }
 
-	ANNcoord max_spread = 0;			// find legal cut with max spread
-	cut_dim = 0;
-	for (d = 0; d < dim; d++) {
-		ANNcoord length = bnds.hi[d] - bnds.lo[d];
-										// is this side midpoint splitable
-										// without violating aspect ratio?
-		if (((double) max_length)*2.0/((double) length) <= FS_ASPECT_RATIO) {
-										// compute spread along this dim
-			ANNcoord spr = annSpread(pa, pidx, n, d);
-			if (spr > max_spread) {		// best spread so far
-				max_spread = spr;
-				cut_dim = d;			// this is dimension to cut
-			}
-		}
-	}
+  ANNcoord max_spread = 0; // find legal cut with max spread
+  cut_dim = 0;
+  for (d = 0; d < dim; d++) {
+    ANNcoord length = bnds.hi[d] - bnds.lo[d];
+    // is this side midpoint splitable
+    // without violating aspect ratio?
+    if (((double)max_length) * 2.0 / ((double)length) <= FS_ASPECT_RATIO) {
+      // compute spread along this dim
+      ANNcoord spr = annSpread(pa, pidx, n, d);
+      if (spr > max_spread) { // best spread so far
+        max_spread = spr;
+        cut_dim = d; // this is dimension to cut
+      }
+    }
+  }
 
-	max_length = 0;						// find longest side other than cut_dim
-	for (d = 0; d < dim; d++) {
-		ANNcoord length = bnds.hi[d] - bnds.lo[d];
-		if (d != cut_dim && length > max_length)
-			max_length = length;
-	}
-										// consider most extreme splits
-	ANNcoord small_piece = max_length / FS_ASPECT_RATIO;
-	ANNcoord lo_cut = bnds.lo[cut_dim] + small_piece;// lowest legal cut
-	ANNcoord hi_cut = bnds.hi[cut_dim] - small_piece;// highest legal cut
+  max_length = 0; // find longest side other than cut_dim
+  for (d = 0; d < dim; d++) {
+    ANNcoord length = bnds.hi[d] - bnds.lo[d];
+    if (d != cut_dim && length > max_length)
+      max_length = length;
+  }
+  // consider most extreme splits
+  ANNcoord small_piece = max_length / FS_ASPECT_RATIO;
+  ANNcoord lo_cut = bnds.lo[cut_dim] + small_piece; // lowest legal cut
+  ANNcoord hi_cut = bnds.hi[cut_dim] - small_piece; // highest legal cut
 
-	int br1, br2;
-										// is median below lo_cut ?
-	if (annSplitBalance(pa, pidx, n, cut_dim, lo_cut) >= 0) {
-		cut_val = lo_cut;				// cut at lo_cut
-		annPlaneSplit(pa, pidx, n, cut_dim, cut_val, br1, br2);
-		n_lo = br1;
-	}
-										// is median above hi_cut?
-	else if (annSplitBalance(pa, pidx, n, cut_dim, hi_cut) <= 0) {
-		cut_val = hi_cut;				// cut at hi_cut
-		annPlaneSplit(pa, pidx, n, cut_dim, cut_val, br1, br2);
-		n_lo = br2;
-	}
-	else {								// median cut preserves asp ratio
-		n_lo = n/2;						// split about median
-		annMedianSplit(pa, pidx, n, cut_dim, cut_val, n_lo);
-	}
+  int br1, br2;
+  // is median below lo_cut ?
+  if (annSplitBalance(pa, pidx, n, cut_dim, lo_cut) >= 0) {
+    cut_val = lo_cut; // cut at lo_cut
+    annPlaneSplit(pa, pidx, n, cut_dim, cut_val, br1, br2);
+    n_lo = br1;
+  }
+  // is median above hi_cut?
+  else if (annSplitBalance(pa, pidx, n, cut_dim, hi_cut) <= 0) {
+    cut_val = hi_cut; // cut at hi_cut
+    annPlaneSplit(pa, pidx, n, cut_dim, cut_val, br1, br2);
+    n_lo = br2;
+  } else {        // median cut preserves asp ratio
+    n_lo = n / 2; // split about median
+    annMedianSplit(pa, pidx, n, cut_dim, cut_val, n_lo);
+  }
 }
 
 //----------------------------------------------------------------------
@@ -332,7 +340,8 @@ void fair_split(
 //		the side with the largest spread (as fair split would).	 It
 //		then considers the most extreme cuts that would be allowed by
 //		the aspect ratio bound.	 This is done by dividing the longest
-//		side of the box by the aspect ratio bound.	If the median cut
+//		side of the box by the aspect ratio bound.	If the median
+// cut
 //		lies between these extreme cuts, then we use the median cut.
 //		If not, then consider the extreme cut that is closer to the
 //		median.	 If all the points lie to one side of this cut, then
@@ -343,86 +352,82 @@ void fair_split(
 //
 //----------------------------------------------------------------------
 
-void sl_fair_split(
-	ANNpointArray		pa,				// point array
-	ANNidxArray			pidx,			// point indices (permuted on return)
-	const ANNorthRect	&bnds,			// bounding rectangle for cell
-	int					n,				// number of points
-	int					dim,			// dimension of space
-	int					&cut_dim,		// cutting dimension (returned)
-	ANNcoord			&cut_val,		// cutting value (returned)
-	int					&n_lo)			// num of points on low side (returned)
+void sl_fair_split(ANNpointArray pa, // point array
+                   ANNidxArray pidx, // point indices (permuted on return)
+                   const ANNorthRect &bnds, // bounding rectangle for cell
+                   int n,                   // number of points
+                   int dim,                 // dimension of space
+                   int &cut_dim,            // cutting dimension (returned)
+                   ANNcoord &cut_val,       // cutting value (returned)
+                   int &n_lo) // num of points on low side (returned)
 {
-	int d;
-	ANNcoord min, max;					// min/max coordinates
-	int br1, br2;						// split break points
+  int d;
+  ANNcoord min, max; // min/max coordinates
+  int br1, br2;      // split break points
 
-	ANNcoord max_length = bnds.hi[0] - bnds.lo[0];
-	cut_dim = 0;
-	for (d = 1; d < dim; d++) {			// find length of longest box side
-		ANNcoord length = bnds.hi[d] - bnds.lo[d];
-		if (length	> max_length) {
-			max_length = length;
-			cut_dim = d;
-		}
-	}
+  ANNcoord max_length = bnds.hi[0] - bnds.lo[0];
+  cut_dim = 0;
+  for (d = 1; d < dim; d++) { // find length of longest box side
+    ANNcoord length = bnds.hi[d] - bnds.lo[d];
+    if (length > max_length) {
+      max_length = length;
+      cut_dim = d;
+    }
+  }
 
-	ANNcoord max_spread = 0;			// find legal cut with max spread
-	cut_dim = 0;
-	for (d = 0; d < dim; d++) {
-		ANNcoord length = bnds.hi[d] - bnds.lo[d];
-										// is this side midpoint splitable
-										// without violating aspect ratio?
-		if (((double) max_length)*2.0/((double) length) <= FS_ASPECT_RATIO) {
-										// compute spread along this dim
-			ANNcoord spr = annSpread(pa, pidx, n, d);
-			if (spr > max_spread) {		// best spread so far
-				max_spread = spr;
-				cut_dim = d;			// this is dimension to cut
-			}
-		}
-	}
+  ANNcoord max_spread = 0; // find legal cut with max spread
+  cut_dim = 0;
+  for (d = 0; d < dim; d++) {
+    ANNcoord length = bnds.hi[d] - bnds.lo[d];
+    // is this side midpoint splitable
+    // without violating aspect ratio?
+    if (((double)max_length) * 2.0 / ((double)length) <= FS_ASPECT_RATIO) {
+      // compute spread along this dim
+      ANNcoord spr = annSpread(pa, pidx, n, d);
+      if (spr > max_spread) { // best spread so far
+        max_spread = spr;
+        cut_dim = d; // this is dimension to cut
+      }
+    }
+  }
 
-	max_length = 0;						// find longest side other than cut_dim
-	for (d = 0; d < dim; d++) {
-		ANNcoord length = bnds.hi[d] - bnds.lo[d];
-		if (d != cut_dim && length > max_length)
-			max_length = length;
-	}
-										// consider most extreme splits
-	ANNcoord small_piece = max_length / FS_ASPECT_RATIO;
-	ANNcoord lo_cut = bnds.lo[cut_dim] + small_piece;// lowest legal cut
-	ANNcoord hi_cut = bnds.hi[cut_dim] - small_piece;// highest legal cut
-										// find min and max along cut_dim
-	annMinMax(pa, pidx, n, cut_dim, min, max);
-										// is median below lo_cut?
-	if (annSplitBalance(pa, pidx, n, cut_dim, lo_cut) >= 0) {
-		if (max > lo_cut) {				// are any points above lo_cut?
-			cut_val = lo_cut;			// cut at lo_cut
-			annPlaneSplit(pa, pidx, n, cut_dim, cut_val, br1, br2);
-			n_lo = br1;					// balance if there are ties
-		}
-		else {							// all points below lo_cut
-			cut_val = max;				// cut at max value
-			annPlaneSplit(pa, pidx, n, cut_dim, cut_val, br1, br2);
-			n_lo = n-1;
-		}
-	}
-										// is median above hi_cut?
-	else if (annSplitBalance(pa, pidx, n, cut_dim, hi_cut) <= 0) {
-		if (min < hi_cut) {				// are any points below hi_cut?
-			cut_val = hi_cut;			// cut at hi_cut
-			annPlaneSplit(pa, pidx, n, cut_dim, cut_val, br1, br2);
-			n_lo = br2;					// balance if there are ties
-		}
-		else {							// all points above hi_cut
-			cut_val = min;				// cut at min value
-			annPlaneSplit(pa, pidx, n, cut_dim, cut_val, br1, br2);
-			n_lo = 1;
-		}
-	}
-	else {								// median cut is good enough
-		n_lo = n/2;						// split about median
-		annMedianSplit(pa, pidx, n, cut_dim, cut_val, n_lo);
-	}
+  max_length = 0; // find longest side other than cut_dim
+  for (d = 0; d < dim; d++) {
+    ANNcoord length = bnds.hi[d] - bnds.lo[d];
+    if (d != cut_dim && length > max_length)
+      max_length = length;
+  }
+  // consider most extreme splits
+  ANNcoord small_piece = max_length / FS_ASPECT_RATIO;
+  ANNcoord lo_cut = bnds.lo[cut_dim] + small_piece; // lowest legal cut
+  ANNcoord hi_cut = bnds.hi[cut_dim] - small_piece; // highest legal cut
+  // find min and max along cut_dim
+  annMinMax(pa, pidx, n, cut_dim, min, max);
+  // is median below lo_cut?
+  if (annSplitBalance(pa, pidx, n, cut_dim, lo_cut) >= 0) {
+    if (max > lo_cut) { // are any points above lo_cut?
+      cut_val = lo_cut; // cut at lo_cut
+      annPlaneSplit(pa, pidx, n, cut_dim, cut_val, br1, br2);
+      n_lo = br1;    // balance if there are ties
+    } else {         // all points below lo_cut
+      cut_val = max; // cut at max value
+      annPlaneSplit(pa, pidx, n, cut_dim, cut_val, br1, br2);
+      n_lo = n - 1;
+    }
+  }
+  // is median above hi_cut?
+  else if (annSplitBalance(pa, pidx, n, cut_dim, hi_cut) <= 0) {
+    if (min < hi_cut) { // are any points below hi_cut?
+      cut_val = hi_cut; // cut at hi_cut
+      annPlaneSplit(pa, pidx, n, cut_dim, cut_val, br1, br2);
+      n_lo = br2;    // balance if there are ties
+    } else {         // all points above hi_cut
+      cut_val = min; // cut at min value
+      annPlaneSplit(pa, pidx, n, cut_dim, cut_val, br1, br2);
+      n_lo = 1;
+    }
+  } else {        // median cut is good enough
+    n_lo = n / 2; // split about median
+    annMedianSplit(pa, pidx, n, cut_dim, cut_val, n_lo);
+  }
 }

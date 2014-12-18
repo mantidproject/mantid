@@ -11,10 +11,8 @@
 #include <string>
 #include <vector>
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
@@ -25,7 +23,8 @@ class MatrixWorkspace;
     @author Roman Tolchenov, Tessella plc
     @date 05/07/2010
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -45,25 +44,27 @@ class MatrixWorkspace;
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL SpectraAxis: public Axis
-{
+class MANTID_API_DLL SpectraAxis : public Axis {
 public:
-  explicit SpectraAxis(const MatrixWorkspace* const parentWorkspace);
-  virtual ~SpectraAxis(){}
-  virtual Axis* clone(const MatrixWorkspace* const parentWorkspace);
-  virtual Axis* clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace);
+  explicit SpectraAxis(const MatrixWorkspace *const parentWorkspace);
+  virtual ~SpectraAxis() {}
+  virtual Axis *clone(const MatrixWorkspace *const parentWorkspace);
+  virtual Axis *clone(const std::size_t length,
+                      const MatrixWorkspace *const parentWorkspace);
   virtual std::size_t length() const;
   /// If this is a spectra Axis - always true for this class
-  virtual bool isSpectra() const{return true;}
-  virtual double operator()(const std::size_t& index, const std::size_t& verticalIndex = 0) const;
-  virtual void setValue(const std::size_t& index, const double& value);
+  virtual bool isSpectra() const { return true; }
+  virtual double operator()(const std::size_t &index,
+                            const std::size_t &verticalIndex = 0) const;
+  virtual void setValue(const std::size_t &index, const double &value);
   size_t indexOfValue(const double value) const;
-  virtual bool operator==(const Axis&) const;
-  std::string label(const std::size_t& index)const;
+  virtual bool operator==(const Axis &) const;
+  std::string label(const std::size_t &index) const;
 
-  specid_t spectraNo(const std::size_t& index) const;
-  // Get a map that contains the spectra index as the key and the index in the array as teh value
-  void getSpectraIndexMap(spec2index_map&) const;
+  specid_t spectraNo(const std::size_t &index) const;
+  // Get a map that contains the spectra index as the key and the index in the
+  // array as teh value
+  void getSpectraIndexMap(spec2index_map &) const;
 
   double getMin() const;
   double getMax() const;
@@ -72,12 +73,13 @@ private:
   /// Default constructor
   SpectraAxis();
   /// Private, undefined copy constructor
-  SpectraAxis(const SpectraAxis&);
+  SpectraAxis(const SpectraAxis &);
   /// Private, undefined copy assignment operator
-  const SpectraAxis& operator=(const SpectraAxis&);
+  const SpectraAxis &operator=(const SpectraAxis &);
   /// A pointer to the workspace holding the axis
-  const MatrixWorkspace* const m_parentWS;
-  /// List of edge values for quick searching of values as if this is binned data
+  const MatrixWorkspace *const m_parentWS;
+  /// List of edge values for quick searching of values as if this is binned
+  /// data
   mutable std::vector<double> m_edges;
 };
 

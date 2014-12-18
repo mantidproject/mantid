@@ -7,12 +7,13 @@
  * subscribe method.
  */
 //#define Parser Parser
-#define DECLARE_IMPLICIT_FUNCTION_PARAMETER_PARSER(classname) \
-    namespace { \
-    Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-    ((Mantid::API::ImplicitFunctionParameterParserFactory::Instance().subscribe<classname>(#classname)) \
-    , 0)); \
-    }
+#define DECLARE_IMPLICIT_FUNCTION_PARAMETER_PARSER(classname)                  \
+  namespace {                                                                  \
+  Mantid::Kernel::RegistrationHelper register_alg_##classname(                 \
+      ((Mantid::API::ImplicitFunctionParameterParserFactory::Instance()        \
+            .subscribe<classname>(#classname)),                                \
+       0));                                                                    \
+  }
 
 //----------------------------------------------------------------------
 // Includes
@@ -20,8 +21,8 @@
 #include <vector>
 
 #ifndef Q_MOC_RUN
-# include <boost/shared_ptr.hpp>
-# include <boost/interprocess/smart_ptr/unique_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
 #endif
 
 #include <Poco/DOM/DOMParser.h>
@@ -42,7 +43,8 @@
  @author Owen Arnold, Tessella plc
  @date 01/10/2010
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -63,43 +65,38 @@
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 
 /*
  * Deletion policy for unique pointers.
  */
-template<typename T>
-class DLLExport DeleterPolicy
-{
+template <typename T> class DLLExport DeleterPolicy {
 public:
-  void operator()(T* pParser)
-  {
-    delete pParser;
-  }
+  void operator()(T *pParser) { delete pParser; }
 };
 
 /*
- * ImplicitFunctionParameterParser definition. Used to parse implicit function xml.
+ * ImplicitFunctionParameterParser definition. Used to parse implicit function
+ * xml.
  */
-class MANTID_API_DLL ImplicitFunctionParameterParser
-{
+class MANTID_API_DLL ImplicitFunctionParameterParser {
 public:
+  /// Successor type. Unique shared pointer with stack scoped deletion
+  /// semantics.
+  typedef boost::interprocess::unique_ptr<
+      ImplicitFunctionParameterParser,
+      DeleterPolicy<ImplicitFunctionParameterParser>> SuccessorType;
 
-  /// Successor type. Unique shared pointer with stack scoped deletion semantics.
-  typedef boost::interprocess::unique_ptr<ImplicitFunctionParameterParser, DeleterPolicy<ImplicitFunctionParameterParser> > SuccessorType;
+  virtual ImplicitFunctionParameter *
+  createParameter(Poco::XML::Element *parameterElement) = 0;
+  virtual void
+  setSuccessorParser(ImplicitFunctionParameterParser *paramParser) = 0;
+  virtual ~ImplicitFunctionParameterParser() {}
 
-  virtual ImplicitFunctionParameter* createParameter(Poco::XML::Element* parameterElement) = 0;
-  virtual void setSuccessorParser(ImplicitFunctionParameterParser* paramParser) = 0;
-  virtual ~ImplicitFunctionParameterParser()
-  {
-  }
 protected:
   SuccessorType m_successor;
 };
-
 }
 }
 

@@ -9,14 +9,13 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PropertyManager.h"
 
-namespace Mantid
-{
-namespace WorkflowAlgorithms
-{
+namespace Mantid {
+namespace WorkflowAlgorithms {
 /**
     Set up the reduction options for EQSANS reduction.
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -37,8 +36,7 @@ namespace WorkflowAlgorithms
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport SetupEQSANSReduction : public API::Algorithm
-{
+class DLLExport SetupEQSANSReduction : public API::Algorithm {
 public:
   /// Constructor
   SetupEQSANSReduction() : API::Algorithm() {}
@@ -46,8 +44,10 @@ public:
   virtual ~SetupEQSANSReduction() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SetupEQSANSReduction"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Set up EQSANS SANS reduction options.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Set up EQSANS SANS reduction options.";
+  }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -59,10 +59,12 @@ private:
   /// Execution code
   void exec();
   std::string _findFile(std::string dataRun);
-  void setupSensitivity(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
-  void setupTransmission(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
-  void setupBackground(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
-
+  void
+  setupSensitivity(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
+  void setupTransmission(
+      boost::shared_ptr<Kernel::PropertyManager> reductionManager);
+  void
+  setupBackground(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
 };
 
 } // namespace Algorithms
