@@ -29,7 +29,7 @@ const std::string SEND_USAGE_CONFIG_KEY("usagereports.enabled");
 
 /// The URL endpoint.
 const std::string URL("http://django-mantid.rhcloud.com/api/usage");
-//const std::string URL("http://127.0.0.1:8000/api/usage"); // dev location
+// const std::string URL("http://127.0.0.1:8000/api/usage"); // dev location
 
 /// The string for post method
 const std::string POST(Poco::Net::HTTPRequest::HTTP_POST);

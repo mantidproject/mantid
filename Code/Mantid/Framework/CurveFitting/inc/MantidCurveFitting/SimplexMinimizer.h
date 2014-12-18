@@ -8,17 +8,16 @@
 
 #include <gsl/gsl_multimin.h>
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 /** Implementing Simplex by wrapping the IFuncMinimizer interface
     around the GSL implementation of this algorithm.
 
     @author Anders Markvardsen, ISIS, RAL
     @date 8/1/2010
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -38,35 +37,33 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SimplexMinimizer : public API::IFuncMinimizer
-{
+class DLLExport SimplexMinimizer : public API::IFuncMinimizer {
 public:
-  /// Constructor setting a value for the relative error acceptance (default=0.01)
+  /// Constructor setting a value for the relative error acceptance
+  /// (default=0.01)
   SimplexMinimizer(const double epsabs = 1e-2);
   /// Destructor
   ~SimplexMinimizer();
 
   /// Overloading base class methods
-  std::string name()const{return "Simplex";}
+  std::string name() const { return "Simplex"; }
   /// Do one iteration
   bool iterate(size_t);
   /// Return current value of the cost function
   double costFunctionVal();
   /// Initialize minimizer, i.e. pass a function to minimize.
-  virtual void initialize(API::ICostFunction_sptr function, size_t maxIterations = 0);
+  virtual void initialize(API::ICostFunction_sptr function,
+                          size_t maxIterations = 0);
 
 protected:
-
-
-  void resetSize(const double& size);
+  void resetSize(const double &size);
 
 private:
-
   /// clear memory
   void clearMemory();
 
   /// Used by the GSL to evaluate the function
-  static double fun(const gsl_vector * x, void *params);
+  static double fun(const gsl_vector *x, void *params);
 
   /// Absolute value of the error that is considered a fit
   double m_epsabs;
@@ -89,7 +86,6 @@ private:
   /// GSL simplex minimizer container
   gsl_multimin_function gslContainer;
 };
-
 
 } // namespace CurveFitting
 } // namespace Mantid

@@ -13,10 +13,8 @@
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
 
-namespace Mantid
-{
-namespace Poldi
-{
+namespace Mantid {
+namespace Poldi {
 
 /** PoldiInstrumentAdapter :
     Adapter for constructing POLDI objects on the basis
@@ -39,95 +37,100 @@ namespace Poldi
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-class AbstractDoubleValueExtractor
-{
+class AbstractDoubleValueExtractor {
 public:
-    AbstractDoubleValueExtractor() { }
+  AbstractDoubleValueExtractor() {}
 
-    virtual ~AbstractDoubleValueExtractor() { }
+  virtual ~AbstractDoubleValueExtractor() {}
 
-    virtual double operator()(const API::Run &runInformation, const std::string &propertyName) const = 0;
+  virtual double operator()(const API::Run &runInformation,
+                            const std::string &propertyName) const = 0;
 };
 
-typedef boost::shared_ptr<AbstractDoubleValueExtractor> AbstractDoubleValueExtractor_sptr;
+typedef boost::shared_ptr<AbstractDoubleValueExtractor>
+    AbstractDoubleValueExtractor_sptr;
 
-class NumberDoubleValueExtractor : public AbstractDoubleValueExtractor
-{
+class NumberDoubleValueExtractor : public AbstractDoubleValueExtractor {
 public:
-    NumberDoubleValueExtractor() :
-        AbstractDoubleValueExtractor()
-    { }
-    virtual ~NumberDoubleValueExtractor() { }
+  NumberDoubleValueExtractor() : AbstractDoubleValueExtractor() {}
+  virtual ~NumberDoubleValueExtractor() {}
 
-    virtual double operator()(const API::Run &runInformation, const std::string &propertyName) const {
-        return runInformation.getPropertyValueAsType<double>(propertyName);
-    }
+  virtual double operator()(const API::Run &runInformation,
+                            const std::string &propertyName) const {
+    return runInformation.getPropertyValueAsType<double>(propertyName);
+  }
 };
 
-class VectorDoubleValueExtractor : public AbstractDoubleValueExtractor
-{
+class VectorDoubleValueExtractor : public AbstractDoubleValueExtractor {
 public:
-    VectorDoubleValueExtractor() :
-        AbstractDoubleValueExtractor()
-    { }
-    virtual ~VectorDoubleValueExtractor() { }
+  VectorDoubleValueExtractor() : AbstractDoubleValueExtractor() {}
+  virtual ~VectorDoubleValueExtractor() {}
 
-    virtual double operator()(const API::Run &runInformation, const std::string &propertyName) const {
-        return runInformation.getPropertyValueAsType<std::vector<double> >(propertyName).front();
-    }
+  virtual double operator()(const API::Run &runInformation,
+                            const std::string &propertyName) const {
+    return runInformation.getPropertyValueAsType<std::vector<double>>(
+                              propertyName).front();
+  }
 };
 
-class VectorIntValueExtractor : public AbstractDoubleValueExtractor
-{
+class VectorIntValueExtractor : public AbstractDoubleValueExtractor {
 public:
-    VectorIntValueExtractor() :
-        AbstractDoubleValueExtractor()
-    { }
-    virtual ~VectorIntValueExtractor() { }
+  VectorIntValueExtractor() : AbstractDoubleValueExtractor() {}
+  virtual ~VectorIntValueExtractor() {}
 
-    virtual double operator()(const API::Run &runInformation, const std::string &propertyName) const {
-        return static_cast<double>(runInformation.getPropertyValueAsType<std::vector<int> >(propertyName).front());
-    }
+  virtual double operator()(const API::Run &runInformation,
+                            const std::string &propertyName) const {
+    return static_cast<double>(
+        runInformation.getPropertyValueAsType<std::vector<int>>(propertyName)
+            .front());
+  }
 };
 
-class MANTID_SINQ_DLL PoldiInstrumentAdapter
-{
+class MANTID_SINQ_DLL PoldiInstrumentAdapter {
 public:
-    PoldiInstrumentAdapter(const API::MatrixWorkspace_const_sptr &matrixWorkspace);
-    PoldiInstrumentAdapter(const Geometry::Instrument_const_sptr &mantidInstrument, const API::Run &runInformation);
-    virtual ~PoldiInstrumentAdapter();
+  PoldiInstrumentAdapter(
+      const API::MatrixWorkspace_const_sptr &matrixWorkspace);
+  PoldiInstrumentAdapter(
+      const Geometry::Instrument_const_sptr &mantidInstrument,
+      const API::Run &runInformation);
+  virtual ~PoldiInstrumentAdapter();
 
-    PoldiAbstractChopper_sptr chopper() const;
-    PoldiAbstractDetector_sptr detector() const;
-    PoldiSourceSpectrum_sptr spectrum() const;
+  PoldiAbstractChopper_sptr chopper() const;
+  PoldiAbstractDetector_sptr detector() const;
+  PoldiSourceSpectrum_sptr spectrum() const;
 
 protected:
-    PoldiInstrumentAdapter() { }
+  PoldiInstrumentAdapter() {}
 
-    void initializeFromInstrumentAndRun(const Geometry::Instrument_const_sptr &mantidInstrument, const API::Run &runInformation);
+  void initializeFromInstrumentAndRun(
+      const Geometry::Instrument_const_sptr &mantidInstrument,
+      const API::Run &runInformation);
 
-    void setDetector(const Geometry::Instrument_const_sptr &mantidInstrument);
+  void setDetector(const Geometry::Instrument_const_sptr &mantidInstrument);
 
-    void setChopper(const Geometry::Instrument_const_sptr &mantidInstrument, const API::Run &runInformation);
-    double getCleanChopperSpeed(double rawChopperSpeed) const;
-    double getChopperSpeedFromRun(const API::Run &runInformation) const;
-    double getChopperSpeedTargetFromRun(const API::Run &runInformation) const;
-    bool chopperSpeedMatchesTarget(const API::Run &runInformation, double chopperSpeed) const;
+  void setChopper(const Geometry::Instrument_const_sptr &mantidInstrument,
+                  const API::Run &runInformation);
+  double getCleanChopperSpeed(double rawChopperSpeed) const;
+  double getChopperSpeedFromRun(const API::Run &runInformation) const;
+  double getChopperSpeedTargetFromRun(const API::Run &runInformation) const;
+  bool chopperSpeedMatchesTarget(const API::Run &runInformation,
+                                 double chopperSpeed) const;
 
-    double extractPropertyFromRun(const API::Run &runInformation, const std::string &propertyName) const;
-    AbstractDoubleValueExtractor_sptr getExtractorForProperty(Kernel::Property *chopperSpeedProperty) const;
+  double extractPropertyFromRun(const API::Run &runInformation,
+                                const std::string &propertyName) const;
+  AbstractDoubleValueExtractor_sptr
+  getExtractorForProperty(Kernel::Property *chopperSpeedProperty) const;
 
-    void setSpectrum(const Geometry::Instrument_const_sptr &mantidInstrument);
+  void setSpectrum(const Geometry::Instrument_const_sptr &mantidInstrument);
 
+  PoldiAbstractChopper_sptr m_chopper;
+  PoldiAbstractDetector_sptr m_detector;
+  PoldiSourceSpectrum_sptr m_spectrum;
 
-    PoldiAbstractChopper_sptr m_chopper;
-    PoldiAbstractDetector_sptr m_detector;
-    PoldiSourceSpectrum_sptr m_spectrum;
-    
-    static const std::string m_chopperSpeedPropertyName;
-    static const std::string m_chopperSpeedTargetPropertyName;
+  static const std::string m_chopperSpeedPropertyName;
+  static const std::string m_chopperSpeedTargetPropertyName;
 
-    static std::map<std::string, AbstractDoubleValueExtractor_sptr> m_extractors;
+  static std::map<std::string, AbstractDoubleValueExtractor_sptr> m_extractors;
 };
 
 typedef boost::shared_ptr<PoldiInstrumentAdapter> PoldiInstrumentAdapter_sptr;
@@ -135,4 +138,4 @@ typedef boost::shared_ptr<PoldiInstrumentAdapter> PoldiInstrumentAdapter_sptr;
 } // namespace Poldi
 } // namespace Mantid
 
-#endif  /* MANTID_SINQ_POLDIINSTRUMENTADAPTER_H_ */
+#endif /* MANTID_SINQ_POLDIINSTRUMENTADAPTER_H_ */

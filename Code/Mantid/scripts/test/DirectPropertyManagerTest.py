@@ -662,12 +662,30 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue(propman.run_diagnostics)
         self.assertTrue(propman.hard_mask_file is None)
 
+    def test_hadmask_options_locked(self):
+        # 
+        propman1 = self.prop_man
+        propman1.setChangedProperties()
+        propman1.hardmaskPlus = 'a_hard_mask_file'
+        self.assertFalse(propman1.use_hard_mask_only)
+        self.assertEqual(propman1.hard_mask_file,'a_hard_mask_file.msk')
+        self.assertTrue(propman1.run_diagnostics)
+        changed_prop=propman1.getChangedProperties()
+        self.assertEqual(len(changed_prop),1)
 
-        propman.hardmaskPlus = 'a_hard_mask_file'
-        self.assertFalse(propman.use_hard_mask_only)
-        self.assertEqual(propman.hard_mask_file,'a_hard_mask_file.msk')
-        self.assertTrue(propman.run_diagnostics)
 
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
+
+        SetInstrumentParameter(ws,ParameterName="hard_mask_file",Value="different",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="run_diagnostics",Value="False",ParameterType="String")
+        SetInstrumentParameter(ws,ParameterName="use_hard_mask_only",Value="True",ParameterType="String")
+
+        # verify if changed properties list does not change anything
+        changed_prop=propman1.update_defaults_from_instrument( ws.getInstrument())
+        self.assertEqual(len(changed_prop),1)
+        self.assertFalse(propman1.use_hard_mask_only)
+        self.assertEqual(propman1.hard_mask_file,'a_hard_mask_file.msk')
+        self.assertTrue(propman1.run_diagnostics)
 
 
 

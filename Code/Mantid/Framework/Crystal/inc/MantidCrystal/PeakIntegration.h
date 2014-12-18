@@ -8,17 +8,16 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
-namespace Mantid
-{
-namespace Crystal
-{
+namespace Mantid {
+namespace Crystal {
 /**
  Find the offsets for each detector
 
  @author Vickie Lynch, SNS, ORNL
  @date 02/08/2011
 
- Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -38,8 +37,7 @@ namespace Crystal
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport PeakIntegration: public API::Algorithm
-{
+class DLLExport PeakIntegration : public API::Algorithm {
 public:
   /// Default constructor
   PeakIntegration();
@@ -50,9 +48,12 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal";}
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Integrate single crystal peaks using IkedaCarpenter fit TOF";}
+  virtual const std::string category() const { return "Crystal"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Integrate single crystal peaks using IkedaCarpenter fit TOF";
+  }
+
 private:
   API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace
   API::MatrixWorkspace_sptr outputW; ///< A pointer to the output workspace
@@ -60,14 +61,14 @@ private:
   void init();
   void exec();
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
-  void fitSpectra(const int s, double TOFPeakd, double& I, double& sigI);
+  void fitSpectra(const int s, double TOFPeakd, double &I, double &sigI);
   /// Read in all the input parameters
   void retrieveProperties();
-  int fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet, double qspan,
-                    DataObjects::PeaksWorkspace_sptr &Peaks, const detid2index_map& pixel_to_wi);
-  
-  bool IC;           ///< Ikeida Carpenter fit of TOF
+  int fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet,
+                    double qspan, DataObjects::PeaksWorkspace_sptr &Peaks,
+                    const detid2index_map &pixel_to_wi);
 
+  bool IC; ///< Ikeida Carpenter fit of TOF
 };
 
 } // namespace Algorithm

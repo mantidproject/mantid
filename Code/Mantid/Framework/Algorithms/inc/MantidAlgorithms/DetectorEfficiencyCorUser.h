@@ -9,13 +9,15 @@ namespace Algorithms {
 
 /** DetectorEfficiencyCorUser :
 
- This algorithm will calculate the detector efficiency according to the ILL INX program for time-of-flight
+ This algorithm will calculate the detector efficiency according to the ILL INX
+ program for time-of-flight
  data reduction.
 
  Formula_eff must be defined in the instrument parameters file.
 
 
- Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -35,40 +37,43 @@ namespace Algorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport DetectorEfficiencyCorUser: public API::Algorithm {
+class DLLExport DetectorEfficiencyCorUser : public API::Algorithm {
 public:
-	DetectorEfficiencyCorUser();
-	virtual ~DetectorEfficiencyCorUser();
+  DetectorEfficiencyCorUser();
+  virtual ~DetectorEfficiencyCorUser();
 
-	virtual const std::string name() const;
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "This algorithm calculates the detector efficiency according the formula set in the instrument definition file/parameters.";}
+  virtual const std::string name() const;
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "This algorithm calculates the detector efficiency according the "
+           "formula set in the instrument definition file/parameters.";
+  }
 
-	virtual int version() const;
-	virtual const std::string category() const;
+  virtual int version() const;
+  virtual const std::string category() const;
 
 private:
-	void init();
-	void exec();
-	void retrieveProperties();
-	double calculateFormulaValue(const std::string&,double);
-	MantidVec calculateEfficiency(double, const std::string&, const MantidVec&);
+  void init();
+  void exec();
+  void retrieveProperties();
+  double calculateFormulaValue(const std::string &, double);
+  MantidVec calculateEfficiency(double, const std::string &, const MantidVec &);
 
-	std::string getValFromInstrumentDef(const std::string&);
+  std::string getValFromInstrumentDef(const std::string &);
 
-	void applyDetEfficiency(const size_t numberOfChannels,
-			const MantidVec& yIn, const MantidVec& eIn, const MantidVec& effVec,
-			MantidVec& yOut, MantidVec& eOut);
+  void applyDetEfficiency(const size_t numberOfChannels, const MantidVec &yIn,
+                          const MantidVec &eIn, const MantidVec &effVec,
+                          MantidVec &yOut, MantidVec &eOut);
 
-	/// The user selected (input) workspace
-	API::MatrixWorkspace_const_sptr m_inputWS;
-	/// The output workspace, maybe the same as the input one
-	API::MatrixWorkspace_sptr m_outputWS;
-	/// stores the user selected value for incidient energy of the neutrons
-	double m_Ei;
+  /// The user selected (input) workspace
+  API::MatrixWorkspace_const_sptr m_inputWS;
+  /// The output workspace, maybe the same as the input one
+  API::MatrixWorkspace_sptr m_outputWS;
+  /// stores the user selected value for incidient energy of the neutrons
+  double m_Ei;
 };
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_DETECTOREFFICIENCYCORUSER_H_ */
+#endif /* MANTID_ALGORITHMS_DETECTOREFFICIENCYCORUSER_H_ */

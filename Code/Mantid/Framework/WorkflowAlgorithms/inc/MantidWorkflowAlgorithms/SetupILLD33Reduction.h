@@ -9,14 +9,13 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PropertyManager.h"
 
-namespace Mantid
-{
-namespace WorkflowAlgorithms
-{
+namespace Mantid {
+namespace WorkflowAlgorithms {
 /**
     Set up the reduction options for ILL D33 reduction.
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -37,17 +36,18 @@ namespace WorkflowAlgorithms
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport SetupILLD33Reduction : public API::Algorithm
-{
+class DLLExport SetupILLD33Reduction : public API::Algorithm {
 public:
   /// Constructor
-	SetupILLD33Reduction() : API::Algorithm() {}
+  SetupILLD33Reduction() : API::Algorithm() {}
   /// Virtual destructor
   virtual ~SetupILLD33Reduction() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SetupILLD33Reduction"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Set up ILL D33 SANS reduction options.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Set up ILL D33 SANS reduction options.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -60,10 +60,12 @@ private:
   /// Execution code
   void exec();
   std::string _findFile(std::string dataRun);
-  void setupSensitivity(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
-  void setupTransmission(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
-  void setupBackground(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
-
+  void
+  setupSensitivity(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
+  void setupTransmission(
+      boost::shared_ptr<Kernel::PropertyManager> reductionManager);
+  void
+  setupBackground(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
 };
 
 } // namespace Algorithms

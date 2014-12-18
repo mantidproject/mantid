@@ -6,8 +6,7 @@
 namespace Mantid {
 namespace RemoteAlgorithms {
 
-class AbortRemoteJob : public Mantid::API::Algorithm
-{
+class AbortRemoteJob : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   AbortRemoteJob() : Mantid::API::Algorithm() {}
@@ -15,8 +14,10 @@ public:
   virtual ~AbortRemoteJob() {}
   /// Algorithm's name
   virtual const std::string name() const { return "AbortRemoteJob"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Abort a previously submitted job.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Abort a previously submitted job.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -25,9 +26,8 @@ public:
 
 private:
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
-
 };
 
 } // end namespace RemoteAlgorithms

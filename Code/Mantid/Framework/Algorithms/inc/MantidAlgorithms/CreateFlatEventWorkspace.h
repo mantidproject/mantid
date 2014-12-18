@@ -4,56 +4,54 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 
-  /** CreateFlatEventWorkspace : Creates a flat event workspace that can be used for background removal.
-    
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+/** CreateFlatEventWorkspace : Creates a flat event workspace that can be used
+  for background removal.
 
-    This file is part of Mantid.
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport CreateFlatEventWorkspace  : public API::Algorithm
-  {
-  public:
-    CreateFlatEventWorkspace();
-    virtual ~CreateFlatEventWorkspace();
-    
-    virtual const std::string name() const;
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Creates a flat event workspace that can be used for background removal.";}
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    virtual int version() const;
-    virtual const std::string category() const;
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport CreateFlatEventWorkspace : public API::Algorithm {
+public:
+  CreateFlatEventWorkspace();
+  virtual ~CreateFlatEventWorkspace();
 
-  private:
+  virtual const std::string name() const;
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Creates a flat event workspace that can be used for background "
+           "removal.";
+  }
 
-    void init();
-    void exec();
+  virtual int version() const;
+  virtual const std::string category() const;
 
-
-  };
-
+private:
+  void init();
+  void exec();
+};
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_CREATEFLATEVENTWORKSPACE_H_ */
+#endif /* MANTID_ALGORITHMS_CREATEFLATEVENTWORKSPACE_H_ */

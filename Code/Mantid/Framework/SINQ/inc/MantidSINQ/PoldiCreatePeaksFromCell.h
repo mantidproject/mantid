@@ -9,10 +9,8 @@
 #include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 
-namespace Mantid
-{
-namespace Poldi
-{
+namespace Mantid {
+namespace Poldi {
 
 /** PoldiCreatePeaksFromCell :
 
@@ -43,40 +41,44 @@ namespace Poldi
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_SINQ_DLL PoldiCreatePeaksFromCell  : public API::Algorithm
-{
+class MANTID_SINQ_DLL PoldiCreatePeaksFromCell : public API::Algorithm {
 public:
-    PoldiCreatePeaksFromCell();
-    virtual ~PoldiCreatePeaksFromCell();
-    
-    virtual const std::string name() const;
-    virtual int version() const;
-    virtual const std::string category() const;
-    virtual const std::string summary() const;
+  PoldiCreatePeaksFromCell();
+  virtual ~PoldiCreatePeaksFromCell();
 
-    virtual std::map<std::string, std::string> validateInputs();
+  virtual const std::string name() const;
+  virtual int version() const;
+  virtual const std::string category() const;
+  virtual const std::string summary() const;
+
+  virtual std::map<std::string, std::string> validateInputs();
 
 protected:
-    Geometry::SpaceGroup_const_sptr getSpaceGroup(const std::string &spaceGroupString) const;
+  Geometry::SpaceGroup_const_sptr
+  getSpaceGroup(const std::string &spaceGroupString) const;
 
-    Geometry::CompositeBraggScatterer_sptr getScatterers(const std::string &scattererString) const;
-    Geometry::BraggScatterer_sptr getScatterer(const std::string &singleScatterer) const;
-    std::vector<std::string> getCleanScattererTokens(const std::vector<std::string> &tokens) const;
+  Geometry::CompositeBraggScatterer_sptr
+  getScatterers(const std::string &scattererString) const;
+  Geometry::BraggScatterer_sptr
+  getScatterer(const std::string &singleScatterer) const;
+  std::vector<std::string>
+  getCleanScattererTokens(const std::vector<std::string> &tokens) const;
 
-    double getDMaxValue(const Geometry::UnitCell &unitCell) const;
+  double getDMaxValue(const Geometry::UnitCell &unitCell) const;
 
-    double getLargestDValue(const Geometry::UnitCell &unitCell) const;
+  double getLargestDValue(const Geometry::UnitCell &unitCell) const;
 
-    Geometry::UnitCell getUnitCellFromProperties() const;
-    Geometry::UnitCell getConstrainedUnitCell(const Geometry::UnitCell &unitCell, const Geometry::PointGroup::CrystalSystem &crystalSystem) const;
+  Geometry::UnitCell getUnitCellFromProperties() const;
+  Geometry::UnitCell getConstrainedUnitCell(
+      const Geometry::UnitCell &unitCell,
+      const Geometry::PointGroup::CrystalSystem &crystalSystem) const;
 
 private:
-    void init();
-    void exec();
+  void init();
+  void exec();
 };
-
 
 } // namespace SINQ
 } // namespace Mantid
 
-#endif  /* MANTID_SINQ_POLDICREATEPEAKSFROMCELL_H_ */
+#endif /* MANTID_SINQ_POLDICREATEPEAKSFROMCELL_H_ */

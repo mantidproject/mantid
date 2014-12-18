@@ -8,69 +8,64 @@
 #include <map>
 #include <vector>
 
-namespace Mantid
-{
-namespace Crystal
-{
-  class ICluster;
-  class ImplClusterRegister;
+namespace Mantid {
+namespace Crystal {
+class ICluster;
+class ImplClusterRegister;
 
-  /** ClusterRegister : A fly-weight ICluster regeister. Handles the logic of merging clusters.
-    
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+/** ClusterRegister : A fly-weight ICluster regeister. Handles the logic of
+  merging clusters.
 
-    This file is part of Mantid.
+  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport ClusterRegister 
-  {
-  public:
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    /// Cluster map
-    typedef std::map<size_t, boost::shared_ptr<ICluster> >  MapCluster;
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport ClusterRegister {
+public:
+  /// Cluster map
+  typedef std::map<size_t, boost::shared_ptr<ICluster>> MapCluster;
 
-    /// Constructor
-    ClusterRegister();
+  /// Constructor
+  ClusterRegister();
 
-    /// Add clusters
-    void add(const size_t& label, const boost::shared_ptr<ICluster>& cluster);
+  /// Add clusters
+  void add(const size_t &label, const boost::shared_ptr<ICluster> &cluster);
 
-    /// Merge clusters on the basis of known pairs of disjoint elements
-    void merge(const DisjointElement& a, const DisjointElement& b) const;
+  /// Merge clusters on the basis of known pairs of disjoint elements
+  void merge(const DisjointElement &a, const DisjointElement &b) const;
 
-    /// Get all combined clusters
-    MapCluster clusters(std::vector<DisjointElement>& elements) const;
+  /// Get all combined clusters
+  MapCluster clusters(std::vector<DisjointElement> &elements) const;
 
-    /// Get all combined clusters
-    MapCluster clusters() const;
+  /// Get all combined clusters
+  MapCluster clusters() const;
 
-    /// Destructor
-    virtual ~ClusterRegister();
-    
-  private:
+  /// Destructor
+  virtual ~ClusterRegister();
 
-    /// Pointer to implementation
-    boost::scoped_ptr<ImplClusterRegister> m_Impl;
-
-  };
-
+private:
+  /// Pointer to implementation
+  boost::scoped_ptr<ImplClusterRegister> m_Impl;
+};
 
 } // namespace Crystal
 } // namespace Mantid
 
-#endif  /* MANTID_CRYSTAL_CLUSTERREGISTER_H_ */
+#endif /* MANTID_CRYSTAL_CLUSTERREGISTER_H_ */

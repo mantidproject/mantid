@@ -8,26 +8,28 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
-namespace Mantid
-{
+namespace Mantid {
 
+namespace Algorithms {
 
-namespace Algorithms
-{
-
-/** Filters out events associated with pulses that happen when proton charge is lower than a given percentage of the average. 
+/** Filters out events associated with pulses that happen when proton charge is
+   lower than a given percentage of the average.
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - The name of the Workspace whose detectors are to be aligned </LI>
-    <LI> OutputWorkspace - The name of the Workspace in which the result of the algorithm will be stored </LI>
-    <LI> LowerCutoff - The percentage of the average to use as the lower bound  </LI>
+    <LI> InputWorkspace - The name of the Workspace whose detectors are to be
+   aligned </LI>
+    <LI> OutputWorkspace - The name of the Workspace in which the result of the
+   algorithm will be stored </LI>
+    <LI> LowerCutoff - The percentage of the average to use as the lower bound
+   </LI>
     </UL>
 
     @author Peter Peterson, ORNL
     @date 21/12/10
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -47,30 +49,27 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FilterBadPulses : public API::Algorithm
-{
+class DLLExport FilterBadPulses : public API::Algorithm {
 public:
   FilterBadPulses();
   virtual ~FilterBadPulses();
 
-
   virtual const std::string name() const;
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Filters out events associated with pulses that happen when proton charge is lower than a given percentage of the average.";}
-
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Filters out events associated with pulses that happen when proton "
+           "charge is lower than a given percentage of the average.";
+  }
 
   virtual int version() const;
 
   virtual const std::string category() const;
 
 private:
-  
   // Implement abstract Algorithm methods
   void init();
   void exec();
 };
-
-
 
 } // namespace Algorithms
 } // namespace Mantid

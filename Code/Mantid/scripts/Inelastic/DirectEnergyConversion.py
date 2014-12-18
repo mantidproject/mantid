@@ -657,7 +657,8 @@ class DirectEnergyConversion(object):
          #if Reducer.save_and_reuse_masks and not masks_done:
          #    SaveMask(InputWorkspace=masking,OutputFile = mask_file_name,GroupedDetectors=True)
       else:
-         masking=self.spectra_masks
+          header = '*** Using stored mask file for workspace with  {0} spectra and {1} masked spectra'
+          masking=self.spectra_masks
  
       # estimate and report the number of failing detectors
       failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)

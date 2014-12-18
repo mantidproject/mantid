@@ -3,15 +3,11 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ArchiveSearchFactory.h"
 
-namespace Mantid
-{
-namespace API
-{
+namespace Mantid {
+namespace API {
 
-  /// Default constructor
-  ArchiveSearchFactoryImpl::ArchiveSearchFactoryImpl()
-  {
-  }
+/// Default constructor
+ArchiveSearchFactoryImpl::ArchiveSearchFactoryImpl() {}
 
 } // namespace API
 } // namespace Mantid

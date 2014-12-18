@@ -6,21 +6,19 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace WorkflowAlgorithms
-{
+namespace Mantid {
+namespace WorkflowAlgorithms {
 /**
 
-    Workflow algorithm to process a reduced EQSANS workspace and produce I(Qx,Qy).
+    Workflow algorithm to process a reduced EQSANS workspace and produce
+   I(Qx,Qy).
     The algorithm deals with the frame skipping option.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport EQSANSQ2D : public API::Algorithm
-{
+class DLLExport EQSANSQ2D : public API::Algorithm {
 public:
   /// (Empty) Constructor
   EQSANSQ2D() : API::Algorithm() {}
@@ -28,8 +26,11 @@ public:
   virtual ~EQSANSQ2D() {}
   /// Algorithm's name
   virtual const std::string name() const { return "EQSANSQ2D"; }
-  ///Summary of algorithms purpose
-  virtual const std::string summary() const {return "Workflow algorithm to process a reduced EQSANS workspace and produce I(Qx,Qy).";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Workflow algorithm to process a reduced EQSANS workspace and "
+           "produce I(Qx,Qy).";
+  }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
