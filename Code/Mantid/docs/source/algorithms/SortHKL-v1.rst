@@ -23,6 +23,7 @@ Usage
 
     #load a peaks workspace from file
     peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
+    LoadIsawUB(peaks,"ls5637.mat")
     peak = peaks.getPeak(0)
     print "HKL of first peak in table %d" % peak.getH(),peak.getK(),peak.getL()
     
