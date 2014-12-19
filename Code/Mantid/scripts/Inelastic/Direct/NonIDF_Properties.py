@@ -33,10 +33,6 @@ class NonIDF_Properties(object):
         object.__setattr__(self,'_wb_for_monovan_run',None)
         object.__setattr__(self,'_mask_run',None)
 
-
-        object.__setattr__(self,'_incident_energy',None)
-        object.__setattr__(self,'_energy_bins',None)
-
         # Helper properties, defining logging options 
         object.__setattr__(self,'_log_level','notice')
         object.__setattr__(self,'_log_to_mantid',False)

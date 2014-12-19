@@ -18,10 +18,11 @@ import os
 class IncidentEnergy(object):
     """ descriptor for incident energy or range of incident energies to be processed """
     def __init__(self): 
+        self._incident_energy = None
         pass
     def __get__(self,instance,owner=None):
         """ return  incident energy or list of incident energies """ 
-        return instance._incident_energy;
+        return self._incident_energy 
     def __set__(self,instance,value):
        """ Set up incident energy or range of energies in various formats """
        if value != None:
@@ -32,9 +33,9 @@ class IncidentEnergy(object):
                 for en_str in en_list:
                     val = float(en_str);
                     rez.append(val)
-                instance._incident_energy=rez;
+                self._incident_energy=rez;
              else:
-               instance._incident_energy=float(value);
+               self._incident_energy =float(value);
           else:
             if isinstance(value,list):
                 rez = [];
@@ -44,15 +45,14 @@ class IncidentEnergy(object):
                         raise KeyError("Incident energy has to be positive, but is: {0} ".format(en_val));
                     else:
                         rez.append(en_val);
-
-                object.__setattr__(instance,'_incident_energy',rez);
+                self._incident_energy = rez
             else:
-               object.__setattr__(instance,'_incident_energy',float(value));
+                self._incident_energy = float(value)
        else:
          raise KeyError("Incident energy have to be positive number of list of positive numbers. Got None")
        
        # 
-       inc_en=instance._incident_energy
+       inc_en= self._incident_energy
        if isinstance(inc_en,list):
            for en in inc_en:
                if en<= 0:
@@ -65,9 +65,11 @@ class IncidentEnergy(object):
 # end IncidentEnergy
 class EnergyBins(object):
     """ Property provides various energy bin possibilities """
+    def __init__(self):
+        self._energy_bins=None
     def __get__(self,instance,owner=None):
         """ binning range for the result of convertToenergy procedure or list of such ranges """
-        return instance._energy_bins
+        return self._energy_bins
 
     def __set__(self,instance,values):
        if values != None:
@@ -84,7 +86,7 @@ class EnergyBins(object):
        else:
           value = None              
        #TODO: implement single value settings according to rebin
-       object.__setattr__(instance,'_energy_bins',value);
+       self._energy_bins = value
 #end EnergyBins
 class SaveFileName(object):
     """ Property defines default file name to save result to
@@ -166,6 +168,9 @@ class VanadiumRMM(object):
 #
 class DetCalFile(object):
     """ property describes various sources for the detector calibration file """
+    def __init__(self):
+        self._det_cal_file = None
+
     def __get__(self,instance,owner):
           return prop_helpers.gen_getter(instance.__dict__,'det_cal_file');
 
@@ -176,15 +181,15 @@ class DetCalFile(object):
        # nothing provided or workspace provided or filename probably provided
           if str(val) in mtd:
                 # workspace name provided
-                val = mtd[str(val)];
-          prop_helpers.gen_setter(instance.__dict__,'det_cal_file',val)
+                val = mtd[str(val)]
+          self._det_cal_file = val
           return
   
 
        if isinstance(val,int):
-          file_name= common.find_file(val);
-          prop_helpers.gen_setter(instance.__dict__,'det_cal_file',file_name);
-          return;
+          file_name= common.find_file(val)
+          self._det_cal_file = file_name
+          return
 
        raise NameError('Detector calibration file name can be a workspace name present in Mantid or string describing an file name');
     #if  Reducer.det_cal_file != None :
@@ -196,62 +201,44 @@ class DetCalFile(object):
     #    Reducer.log('Setting detector calibration to detector block info from '+str(sample_run))
 #end DetCalFile
 
-#
 class MapMaskFile(object):
     """ common method to wrap around an auxiliary file name """
-    def __init__(self,field_name,file_ext,doc_string=None):
-        self._field_name=field_name;
+    def __init__(self,file_ext,doc_string=None):
+        self._file_name=None;
         self._file_ext  =file_ext;
         if not(doc_string is None):
             self.__doc__ = doc_string;
 
     def __get__(self,instance,type=None):
-          return prop_helpers.gen_getter(instance.__dict__,self._field_name);
+          return self._file_name
 
     def __set__(self,instance,value):
         if value != None:
            fileName, fileExtension = os.path.splitext(value)
            if (not fileExtension):
-               value=value+self._file_ext;
-           
-        prop_helpers.gen_setter(instance.__dict__,self._field_name,value);
-#end MapMaskFile
-#
-class MapMaskFile(object):
-    """ common method to wrap around an auxiliary file name """
-    def __init__(self,field_name,file_ext,doc_string=None):
-        self._field_name=field_name;
-        self._file_ext  =file_ext;
-        if not(doc_string is None):
-            self.__doc__ = doc_string;
-
-    def __get__(self,instance,type=None):
-          return prop_helpers.gen_getter(instance.__dict__,self._field_name);
-
-    def __set__(self,instance,value):
-        if value != None:
-           fileName, fileExtension = os.path.splitext(value)
-           if (not fileExtension):
-               value=value+self._file_ext;
-           
-        prop_helpers.gen_setter(instance.__dict__,self._field_name,value);
+               value=value+self._file_ext
+        self._file_name=value;
+  
 #end MapMaskFile
 
 class HardMaskPlus(prop_helpers.ComplexProperty):
     """ Legacy HardMaskPlus class which sets up hard_mask_file to file and use_hard_mask_only to True""" 
     def __init__(self):
-        prop_helpers.ComplexProperty.__init__(self,['hard_mask_file','use_hard_mask_only','run_diagnostics'])
+        prop_helpers.ComplexProperty.__init__(self,['use_hard_mask_only','run_diagnostics'])
     def __get__(self,instance,type=None):
-         return prop_helpers.gen_getter(instance.__dict__,'hard_mask_file');
+         return instance.hard_mask_file
 
     def __set__(self,instance,value):
         if value != None:
            fileName, fileExtension = os.path.splitext(value)
            if (not fileExtension):
-               value=value+'.msk';
-           prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[value,False,True])
+               value=value+'.msk'
+           instance.hard_mask_file = value
+           prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[False,True])
         else:
-           prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[None,True,False])
+           prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[True,False])
+ 
+
 
 
 
@@ -262,40 +249,38 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
         and another one: hard_mask_file provides file for masking.         
     """
     def __init__(self):
-        prop_helpers.ComplexProperty.__init__(self,['hard_mask_file','use_hard_mask_only','run_diagnostics'])
+        prop_helpers.ComplexProperty.__init__(self,['use_hard_mask_only','run_diagnostics'])
 
     def __get__(self,instance,type=None):
           return prop_helpers.gen_getter(instance.__dict__,'use_hard_mask_only');
     def __set__(self,instance,value):
         if value is None:
             use_hard_mask_only = False
-            hard_mask_file     = None
             run_diagnostics    = True
-            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[hard_mask_file,use_hard_mask_only,run_diagnostics])
+            instance.hard_mask_file = None
+            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[use_hard_mask_only,run_diagnostics])
         elif isinstance(value,bool):
             use_hard_mask_only = False
-            hard_mask_file     = instance.hard_mask_file
             run_diagnostics    = instance.run_diagnostics
-            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[hard_mask_file,use_hard_mask_only,run_diagnostics])
+            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[use_hard_mask_only,run_diagnostics])
         elif isinstance(value,str):
             if value.lower() in ['true','yes']:
                 use_hard_mask_only = True
-                hard_mask_file     = instance.hard_mask_file
             elif value.lower() in ['false','no']:
                 use_hard_mask_only = False
-                hard_mask_file     = instance.hard_mask_file
             else: # it is probably a hard mask file provided:
-                instance.hard_mask_file = value;
+                instance.hard_mask_file = value             
                 use_hard_mask_only = True
-                hard_mask_file     = instance.hard_mask_file
+            hard_mask_file = instance.hard_mask_file
 
             # if no hard mask file is there and use_hard_mask_only is True, diagnostics should not run
             if instance.use_hard_mask_only and hard_mask_file is None:
                run_diagnostics = False
             else:
                run_diagnostics = True
-            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[hard_mask_file,use_hard_mask_only,run_diagnostics])
+            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[use_hard_mask_only,run_diagnostics])
         #end
+  
 #end HardMaskOnly
 
 class MonovanIntegrationRange(prop_helpers.ComplexProperty):
@@ -373,19 +358,17 @@ class SpectraToMonitorsList(object):
        Written to work with old IDF too, where this property is absent.
    """ 
    def __init__(self):
-       pass
+       self._spectra_to_monitors_list = None
+
 
    def __get__(self,instance,type=None):
-       try:
-           return  prop_helpers.gen_getter(instance.__dict__,'spectra_to_monitors_list');
-       except KeyError:
-           return None
+       return self.__spectra_to_monitors_list
+
    def __set__(self,instance,spectra_list):
         """ Sets copy spectra to monitors variable as a list of monitors using different forms of input """
-        result = self.convert_to_list(spectra_list);
-        prop_helpers.gen_setter(instance.__dict__,'spectra_to_monitors_list',result);
-        return;
-   def convert_to_list(self,spectra_list):
+        self._spectra_to_monitors_list = self._convert_to_list(spectra_list)
+
+   def _convert_to_list(self,spectra_list):
        """ convert any spectra_list representation into a list """ 
        if spectra_list is None:
             return None
@@ -394,10 +377,10 @@ class SpectraToMonitorsList(object):
             if spectra_list.lower() is 'none':
                 result = None;
             else:
-                spectra = spectra_list.split(',');
+                spectra = spectra_list.split(',')
                 result = [];
                 for spectum in spectra :
-                    result.append(int(spectum));
+                    result.append(int(spectum))
 
        else:
             if isinstance(spectra_list,list):
@@ -406,7 +389,7 @@ class SpectraToMonitorsList(object):
                 else:
                     result=[];
                     for i in range(0,len(spectra_list)):
-                        result.append(int(spectra_list[i]));
+                        result.append(int(spectra_list[i]))
             else:
                 result =[int(spectra_list)];
        return result
@@ -414,14 +397,12 @@ class SpectraToMonitorsList(object):
 
 class SaveFormat(object):
    # formats available for saving the data
-   save_formats = ['spe','nxspe','nxs'];
+   save_formats = ['spe','nxspe','nxs']
+   def __init__(self):
+       self._save_format = set()
 
    def __get__(self,instance,type=None):
-        formats=  prop_helpers.gen_getter(instance.__dict__,'save_format');
-        if formats is None:
-            return set();
-        else:
-            return formats;
+        return self._save_format
 
    def __set__(self,instance,value):
         """ user can clear save formats by setting save_format=None or save_format = [] or save_format=''
@@ -429,7 +410,7 @@ class SaveFormat(object):
 
         # clear format by using None 
         if value is None:
-            prop_helpers.gen_setter(instance.__dict__,'save_format',set());
+            self._save_format = set()
             return
 
         # check string
@@ -449,18 +430,13 @@ class SaveFormat(object):
             try:
                  # set single default save format recursively
                  for val in value:
-                    self.__set__(instance,val);
-                 return;
+                    self.__set__(instance,val)
+                 return
             except:    
                raise KeyError(' Attempting to set unknown saving format {0} of type {1}. Allowed values can be spe, nxspe or nxs'\
-                   .format(value,type(value)));
+                   .format(value,type(value)))
         #end if different types
-        if instance.__dict__['save_format'] is None:
-            ts = set();
-            ts.add(value)
-            instance.__dict__['save_format'] = ts;
-        else:
-            instance.__dict__['save_format'].add(value);
+        self._save_format.add(value)
 #end SaveFormat
 
 class DiagSpectra(object):
@@ -470,33 +446,36 @@ class DiagSpectra(object):
         indicating first-last spectra in the group.
         if None, all spectra are used in diagnostics
 
-        TODO: not fully completed, a setter does not verify string and non-string values
     """
+    def __init__(self):
+        self._diag_spectra = None
+
     def __get__(self,instance,type=None):
-       sp_string = prop_helpers.gen_getter(instance.__dict__,'diag_spectra');
-       if sp_string:
-            return self.__process_spectra_list(sp_string);
-       else:
-            return None
+        return self._diag_spectra
 
     def __set__(self,instance,spectra_list):
-            prop_helpers.gen_setter(instance.__dict__,'diag_spectra',spectra_list);
+        self._diag_spectra = self._process_spectra_list(spectra_list)
 
-    def __process_spectra_list(self,specta_sring):
+    def _process_spectra_list(self,specta_sring):
         """ process IDF description of the spectra string """
-        if specta_sring.lower() in ['none','no']:
+        if specta_sring is None:
             return None
+        if isinstance(specta_sring,str):
+            if specta_sring.lower() in ['none','no']:
+                return None
+            else:
+                banks = specta_sring.split(";")
+                bank_spectra = []
+                for b in banks:
+                    token = b.split(",")  # b = "(,)"
+                    if len(token) != 2:
+                        raise ValueError("Invalid bank spectra specification in diagnostics properties %s" % specta_sring)
+                    start = int(token[0].lstrip('('))
+                    end = int(token[1].rstrip(')'))
+                    bank_spectra.append((start,end))
+            return bank_spectra
         else:
-            banks = specta_sring.split(";")
-            bank_spectra = []
-            for b in banks:
-                token = b.split(",")  # b = "(,)"
-                if len(token) != 2:
-                    raise ValueError("Invalid bank spectra specification in diagnostics properties %s" % specta_sring)
-                start = int(token[0].lstrip('('))
-                end = int(token[1].rstrip(')'))
-                bank_spectra.append((start,end))
-        return bank_spectra;
+            raise ValueError("Spectra For diagnostics can be a string inthe form (num1,num2);(num3,num4) etc. or None")
 #end class DiagSpectra
 
 class BackbgroundTestRange(object):
@@ -505,23 +484,25 @@ class BackbgroundTestRange(object):
         Usually it is the same range as the TOF range used to remove 
         background (usually in powders) though it may be set up separately.        
     """
+    def __init__(self):
+        self._background_test_range = None
+
     def __get__(self,instance,type=None):
-       range = prop_helpers.gen_getter(instance.__dict__,'_background_test_range');
-       if range  :
-            return range 
+       if self._background_test_range:
+            return self._background_test_range  
        else:
             return instance.bkgd_range;
 
     def __set__(self,instance,value):
         if value is None:
-           range = prop_helpers.gen_setter(instance.__dict__,'_background_test_range',None);
+           self._background_test_range  = None
            return
         if isinstance(value,str):
             value = str.split(value,',')
         if len(value) != 2:
             raise ValueError("background test range can be set to a 2 element list of floats")
+        self._background_test_range = [float(value[0]),float(value[1])]
 
-        range = prop_helpers.gen_setter(instance.__dict__,'_background_test_range',[float(value[0]),float(value[1])]);
 #end BackbgroundTestRange
 
 #-----------------------------------------------------------------------------------------

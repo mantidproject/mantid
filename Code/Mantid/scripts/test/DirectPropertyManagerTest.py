@@ -636,7 +636,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(propman1.hard_mask_file,'a_hard_mask_file.msk')
         self.assertTrue(propman1.run_diagnostics)
         changed_prop=propman1.getChangedProperties()
-        self.assertEqual(len(changed_prop),1)
+        self.assertEqual(len(changed_prop),2)
 
 
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)

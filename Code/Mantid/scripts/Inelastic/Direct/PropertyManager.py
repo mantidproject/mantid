@@ -57,23 +57,28 @@ class PropertyManager(NonIDF_Properties):
     def __init__(self,Instrument,instr_run=None):
         #
         NonIDF_Properties.__init__(self,Instrument,instr_run)
+        host_descr_list = NonIDF_Properties.__class__.__dict__.keys()
+        this_descr_list = self.__class__.__dict__.keys()+host_decorators_list 
         #
         # define private properties served the class
-        private_properties = {'descriptors':[],'subst_dict':{},'prop_allowed_values':{},'changed_properties':set(),
+        private_properties = {'subst_dict':{},'prop_allowed_values':{},'changed_properties':set(),
                               'file_properties':[],'abs_norm_file_properties':[]}
         # place these properties to __dict__  with proper decoration
         self._set_private_properties(private_properties)
         # ---------------------------------------------------------------------------------------------
         # overloaded descriptors. These properties have their personal descriptors, different from default
-        all_methods = dir(self);
-        self.__descriptors = prop_helpers.extract_non_system_names(all_methods,PropertyManager._class_wrapper)
+        #all_methods = dir(self);
+        #self.__descriptors = prop_helpers.extract_non_system_names(all_methods,PropertyManager._class_wrapper)
 
         # retrieve the dictionary of property-values described in IDF
         param_list = prop_helpers.get_default_idf_param_list(self.instrument)
 
-        param_list = self._convert_params_to_properties(param_list)
+        param_dict,decor_dict = self._convert_params_to_properties(param_list,this_descr_list)
         #
         self.__dict__.update(param_list)
+
+        for key,val in decor_dict.iteritems():
+            object.__setattr__(self,key,val)
 
 
         # file properties -- the properties described files which should exist for reduction to work.
@@ -90,7 +95,7 @@ class PropertyManager(NonIDF_Properties):
         #self.__special_properties['monovan_integr_range']=(self._get_monovan_integr_range,lambda val : self._set_monovan_integr_range(val));
         # list of the parameters which should always be taken from IDF unless explicitly set from elsewhere. These parameters MUST have setters and getters
   
-    def _convert_params_to_properties(self,param_list,detine_subst_dict=True):
+    def _convert_params_to_properties(self,param_list,detine_subst_dict=True,decor_list=[]):
         """ method processes parameters obtained from IDF and modifies the IDF properties
             to the form allowing them be assigned as python class properties.            
         """ 
@@ -106,34 +111,34 @@ class PropertyManager(NonIDF_Properties):
 
 
         # build and initiate  properties with default descriptors 
-        param_list =  prop_helpers.build_properties_dict(param_list,self.__subst_dict)
+        param_dict,decor_dict =  prop_helpers.build_properties_dict(param_list,self.__subst_dict,decor_list)
 
-        #--------------------------------------------------------------------------------------
-        # modify some IDF properties, which need overloaded getter (and this getter is provided somewhere among PropertiesDescriptors)
-        if 'background_test_range' in param_list:
-            val = param_list['background_test_range']
-            param_list['_background_test_range'] = val;
-            del param_list['background_test_range']
-        else:
-            param_list['_background_test_range'] = None;
-        #end
-        # make spectra_to_monitors_list to be the list indeed. 
-        if 'spectra_to_monitors_list' in param_list:
-            sml = SpectraToMonitorsList();
-            param_list['spectra_to_monitors_list']=sml.convert_to_list(param_list['spectra_to_monitors_list'])
-        #end
-        #
-        if 'monovan_integr_range' in param_list:
-            # get reference to the existing class method
-            param_list['_monovan_integr_range']=self.__class__.__dict__['monovan_integr_range']
-            #
-            val = param_list['monovan_integr_range']
-            if str(val).lower() != 'none':
-                prop= param_list['_monovan_integr_range']
-                prop.__init__('AbsRange')
-            del param_list['monovan_integr_range']
-        #End monovan_integr_range
-        #-
+        ##--------------------------------------------------------------------------------------
+        ## modify some IDF properties, which need overloaded getter (and this getter is provided somewhere among PropertiesDescriptors)
+        #if 'background_test_range' in param_list:
+        #    val = param_list['background_test_range']
+        #    param_list['_background_test_range'] = val;
+        #    del param_list['background_test_range']
+        #else:
+        #    param_list['_background_test_range'] = None;
+        ##end
+        ## make spectra_to_monitors_list to be the list indeed. 
+        #if 'spectra_to_monitors_list' in param_list:
+        #    sml = SpectraToMonitorsList();
+        #    param_list['spectra_to_monitors_list']=sml.convert_to_list(param_list['spectra_to_monitors_list'])
+        ##end
+        ##
+        #if 'monovan_integr_range' in param_list:
+        #    # get reference to the existing class method
+        #    param_list['_monovan_integr_range']=self.__class__.__dict__['monovan_integr_range']
+        #    #
+        #    val = param_list['monovan_integr_range']
+        #    if str(val).lower() != 'none':
+        #        prop= param_list['_monovan_integr_range']
+        #        prop.__init__('AbsRange')
+        #    del param_list['monovan_integr_range']
+        ##End monovan_integr_range
+        ##-
         # End modify. 
         #----------------------------------------------------------------------------------------
         return param_list
@@ -198,13 +203,10 @@ class PropertyManager(NonIDF_Properties):
         #end
 
         # set property value:
-        if name in self.__descriptors:
-            try:
-                super(PropertyManager,self).__setattr__(name,val)
-            except AttributeError:
-                raise AttributeError(" Can not set property {0} to value {1}".format(name,val));
-        else:
-            other_prop=prop_helpers.gen_setter(self.__dict__,name,val);
+        try:
+           super(PropertyManager,self).__setattr__(name,val)
+        except :
+           other_prop=prop_helpers.gen_setter(self.__dict__,name,val);
             #if other_prop:
             #    for prop_name in other_prop:
             #        self.__changed_properties.add(prop_name);
@@ -217,19 +219,15 @@ class PropertyManager(NonIDF_Properties):
        """ Overloaded get method, disallowing non-existing properties being get but allowing 
           a property been called with  different names specified in substitution dictionary. """ 
 
-       tDict = object.__getattribute__(self,'__dict__');
-       if name is '__dict__':
-           return tDict;
-       else:
-           if name in self.__subst_dict:
-                name = self.__subst_dict[name]
-           #end
-           if name in self.__descriptors:
-              ph = tDict['_'+name]           
-              return ph.__get__(self)
-           else:
-              return prop_helpers.gen_getter(tDict,name)
-       pass
+       if name in self.__subst_dict:
+          name = self.__subst_dict[name]
+          try:
+              return object.__getattr__(self,name)
+          except:
+              pass
+       #end
+       return prop_helpers.gen_getter(self.__dict__,name)
+
 #----------------------------------------------------------------------------------
 #              Overloaded setters/getters
 #----------------------------------------------------------------------------------
@@ -238,11 +236,11 @@ class PropertyManager(NonIDF_Properties):
     #
     det_cal_file    = DetCalFile()
     #
-    map_file        = MapMaskFile('map_file','.map',"Spectra to detector mapping file for the sample run")
+    map_file        = MapMaskFile('.map',"Spectra to detector mapping file for the sample run")
     #
-    monovan_mapfile = MapMaskFile('monovan_mapfile','.map',"Spectra to detector mapping file for the monovanadium integrals calculation")
+    monovan_mapfile = MapMaskFile('.map',"Spectra to detector mapping file for the monovanadium integrals calculation")
     #
-    hard_mask_file  = MapMaskFile('hard_mask_file','.msk',"Hard mask file")
+    hard_mask_file  = MapMaskFile('.msk',"Hard mask file")
     #
     monovan_integr_range     = MonovanIntegrationRange()
     #
