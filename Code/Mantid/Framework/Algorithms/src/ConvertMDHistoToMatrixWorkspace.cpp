@@ -8,11 +8,14 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/NullCoordTransform.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/NumericAxis.h"
-
 #include <boost/mpl/if.hpp>
 #include <boost/type_traits.hpp>
 #include <sstream>
+
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 namespace {
 /**
@@ -22,6 +25,42 @@ struct NullDeleter {
   void operator()(void const *) const { // Do nothing
   }
 };
+
+size_t findXAxis(const VMD &start, const VMD &end, CoordTransform const *const transform,
+                 IMDHistoWorkspace const *const inputWorkspace,
+                 Logger &logger, const size_t id) {
+
+  // Find the start and end points in the original workspace
+  VMD originalStart = transform->applyVMD(start);
+  VMD originalEnd = transform->applyVMD(end);
+  VMD diff = originalEnd - originalStart;
+
+  // Now we find the dimension with the biggest change
+  double largest = -1e30;
+
+  size_t dimIndex = id;
+
+  const size_t nOriginalWorkspaces = inputWorkspace->numOriginalWorkspaces();
+  if (nOriginalWorkspaces < 1) {
+    logger.information("No original workspaces. Assume X-axis is Dim0.");
+    return dimIndex;
+  }
+
+  auto originalWS =
+    boost::dynamic_pointer_cast<IMDWorkspace>(inputWorkspace->getOriginalWorkspace(nOriginalWorkspaces - 1));
+
+  for (size_t d = 0; d < diff.getNumDims(); d++) {
+    if (fabs(diff[d]) > largest ||
+        (originalWS->getDimension(dimIndex)->getIsIntegrated())) {
+      // Skip over any integrated dimensions
+      if (originalWS && !originalWS->getDimension(d)->getIsIntegrated()) {
+        largest = fabs(diff[d]);
+        dimIndex = d;
+      }
+    }
+  }
+  return dimIndex;
+}
 }
 
 namespace Mantid {
@@ -29,9 +68,6 @@ namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertMDHistoToMatrixWorkspace)
-
-using namespace Kernel;
-using namespace API;
 
 /// Decalare the properties
 void ConvertMDHistoToMatrixWorkspace::init() {
@@ -82,14 +118,15 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
 
   std::string alongDim = "";
   if (!nonIntegDims.empty())
-    alongDim = nonIntegDims[0]->getName();
+    alongDim = nonIntegDims[0]->getDimensionId();
   else
-    alongDim = inputWorkspace->getDimension(0)->getName();
+    alongDim = inputWorkspace->getDimension(0)->getDimensionId();
 
   size_t nd = inputWorkspace->getNumDims();
   Mantid::Kernel::VMD start = VMD(nd);
   Mantid::Kernel::VMD end = VMD(nd);
-  size_t id = 0;
+
+  size_t id;
   for (size_t d = 0; d < nd; d++) {
     Mantid::Geometry::IMDDimension_const_sptr dim =
         inputWorkspace->getDimension(d);
@@ -97,7 +134,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
       // All the way through in the single dimension
       start[d] = dim->getMinimum();
       end[d] = dim->getMaximum();
-      id = d;
+      id = d; // We take the first non integrated dimension to be the diemnsion of interest.
     } else {
       // Mid point along each dimension
       start[d] = (dim->getMaximum() + dim->getMinimum()) / 2.0f;
@@ -146,6 +183,10 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   }
 
   assert(X.size() == outputWorkspace->dataX(0).size());
+
+  // We look to the original workspace if possbible to find the dimension of interest to plot against.
+  id = findXAxis(start, end, transform.get(), inputWorkspace.get(), g_log, id);
+
   for (size_t i = 0; i < X.size(); ++i) {
     // Coordinates in the workspace being plotted
     VMD wsCoord = start + dir * X[i];
