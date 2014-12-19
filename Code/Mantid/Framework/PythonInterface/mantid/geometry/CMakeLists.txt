@@ -71,7 +71,7 @@ set_python_properties( PythonGeometryModule _geometry )
 set_target_output_directory ( PythonGeometryModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
 target_link_libraries ( PythonGeometryModule PythonKernelModule Geometry )
-
+set_target_properties ( PythonGeometryModule PROPERTIES INSTALL_RPATH "@loader_path/../../;@loader_path/../kernel/")
 ###########################################################################
 # Installation settings
 ###########################################################################

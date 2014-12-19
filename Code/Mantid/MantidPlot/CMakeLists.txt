@@ -903,6 +903,7 @@ target_link_libraries ( MantidPlot
 )
 # Plugin dependencies
 add_dependencies( MantidPlot mantidqtpython )
+set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "@executable_path/")
 
 
 ###########################################################################
