@@ -319,7 +319,7 @@ public:
     convert_alg.execute();
     MatrixWorkspace_sptr out_ws = convert_alg.getProperty("OutputWorkspace");
 
-    //TS_ASSERT_EQUALS("X", out_ws->getAxis(0)->unit()->label());
+    TSM_ASSERT_EQUALS("Wrong dimension auto selected for output x-axis", "X", out_ws->getDimension(0)->getName());
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 1);
     auto first_x_spectra = out_ws->readX(0);
 
@@ -377,12 +377,21 @@ public:
     convert_alg.execute();
     MatrixWorkspace_sptr out_ws = convert_alg.getProperty("OutputWorkspace");
 
-    //TS_ASSERT_EQUALS("X", out_ws->getAxis(0)->unit()->label());
+    TSM_ASSERT_EQUALS("Wrong dimension auto selected for output x-axis", "Y", out_ws->getDimension(0)->getName());
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 1);
     auto first_x_spectra = out_ws->readX(0);
-
     TSM_ASSERT_DELTA("First coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.front(), -8, 1e-3);
-    TSM_ASSERT_DELTA( "Last coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.back(), 8, 1e-3);
+    TSM_ASSERT_DELTA("Last coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.back(), 8, 1e-3);
+
+    // Run it again, this time with FindXAxis set off.
+    convert_alg.setProperty("FindXAxis", false);
+    convert_alg.execute();
+    out_ws = convert_alg.getProperty("OutputWorkspace");
+    TSM_ASSERT_EQUALS("FindXAxis if off", "X", out_ws->getDimension(0)->getName());
+    TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 1);
+    first_x_spectra = out_ws->readX(0);
+    TSM_ASSERT_DELTA("First coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.front(), -5, 1e-3);
+    TSM_ASSERT_DELTA("Last coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.back(), 5, 1e-3);
   }
 
 

@@ -26,9 +26,24 @@ struct NullDeleter {
   }
 };
 
-size_t findXAxis(const VMD &start, const VMD &end, CoordTransform const *const transform,
-                 IMDHistoWorkspace const *const inputWorkspace,
-                 Logger &logger, const size_t id) {
+/**
+Find the dimension to use as the plot axis.
+
+@param start : start point in final frame
+@param end : end point in final frame
+@param transform : transform to original frame
+@param inputWorkspace : inputWorkspace
+@param logger : log object
+@param id : id, or current index for the dimension to use as the x-plot
+dimension
+
+@return id/index of the dimension with the longest span in the original
+coordinate system.
+*/
+size_t findXAxis(const VMD &start, const VMD &end,
+                 CoordTransform const *const transform,
+                 IMDHistoWorkspace const *const inputWorkspace, Logger &logger,
+                 const size_t id) {
 
   // Find the start and end points in the original workspace
   VMD originalStart = transform->applyVMD(start);
@@ -46,8 +61,8 @@ size_t findXAxis(const VMD &start, const VMD &end, CoordTransform const *const t
     return dimIndex;
   }
 
-  auto originalWS =
-    boost::dynamic_pointer_cast<IMDWorkspace>(inputWorkspace->getOriginalWorkspace(nOriginalWorkspaces - 1));
+  auto originalWS = boost::dynamic_pointer_cast<IMDWorkspace>(
+      inputWorkspace->getOriginalWorkspace(nOriginalWorkspaces - 1));
 
   for (size_t d = 0; d < diff.getNumDims(); d++) {
     if (fabs(diff[d]) > largest ||
@@ -87,6 +102,11 @@ void ConvertMDHistoToMatrixWorkspace::init() {
                   Kernel::IValidator_sptr(
                       new Kernel::ListValidator<std::string>(normalizations)),
                   "Signal normalization method");
+
+  declareProperty(
+      new PropertyWithValue<bool>("FindXAxis", true, Direction::Input),
+      "If True, tries to automatically determine the dimension to use as the "
+      "output x-axis. Applies to line cut MD workspaces.");
 }
 
 /// Execute the algorithm
@@ -134,7 +154,8 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
       // All the way through in the single dimension
       start[d] = dim->getMinimum();
       end[d] = dim->getMaximum();
-      id = d; // We take the first non integrated dimension to be the diemnsion of interest.
+      id = d; // We take the first non integrated dimension to be the diemnsion
+              // of interest.
     } else {
       // Mid point along each dimension
       start[d] = (dim->getMaximum() + dim->getMinimum()) / 2.0f;
@@ -184,8 +205,12 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
 
   assert(X.size() == outputWorkspace->dataX(0).size());
 
-  // We look to the original workspace if possbible to find the dimension of interest to plot against.
-  id = findXAxis(start, end, transform.get(), inputWorkspace.get(), g_log, id);
+  const bool autoFind = this->getProperty("FindXAxis");
+  if (autoFind) {
+    // We look to the original workspace if possbible to find the dimension of
+    // interest to plot against.
+    id = findXAxis(start, end, transform.get(), inputWorkspace.get(), g_log, id);
+  }
 
   for (size_t i = 0; i < X.size(); ++i) {
     // Coordinates in the workspace being plotted
@@ -198,7 +223,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   boost::shared_ptr<Kernel::Units::Label> labelX =
       boost::dynamic_pointer_cast<Kernel::Units::Label>(
           Kernel::UnitFactory::Instance().create("Label"));
-  labelX->setLabel(alongDim);
+  labelX->setLabel(inputWorkspace->getDimension(id)->getName());
   outputWorkspace->getAxis(0)->unit() = labelX;
 
   outputWorkspace->setYUnitLabel("Signal");
