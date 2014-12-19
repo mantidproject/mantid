@@ -124,6 +124,11 @@ public:
     TS_ASSERT_EQUALS(9,TableWS6->rowCount());
     TS_ASSERT_EQUALS(4,TableWS5->rowCount());
 
+    // Trow on  running the test again if the workspace does not have energy attached.
+    ws2DNew->mutableRun().removeProperty("Ei");
+    TSM_ASSERT_THROWS("WS has to have input energy for indirect methods despite the table workspace is already calculated",pAlg->preprocessDetectorsPositions(ws2DNew),std::invalid_argument);
+
+
 
   }
   void testUpdateMasksSkipped()

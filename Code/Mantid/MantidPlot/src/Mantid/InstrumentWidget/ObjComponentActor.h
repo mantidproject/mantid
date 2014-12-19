@@ -11,7 +11,7 @@
 
    This class has the implementation for rendering ObjComponents in OpenGL and it inherits from the GLActor
 
-  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 

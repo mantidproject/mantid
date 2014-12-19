@@ -6,19 +6,19 @@
 //--------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace DataHandling
-{
+namespace Mantid {
+namespace DataHandling {
 
-/** 
-    This class allows the shape of the sample to be defined by using the allowed XML
+/**
+    This class allows the shape of the sample to be defined by using the allowed
+   XML
     expressions
 
     @author Martyn Gigg, Tessella Support Services plc
     @date 13/03/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -36,10 +36,9 @@ namespace DataHandling
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CreateSampleShape : public Mantid::API::Algorithm
-{
+class DLLExport CreateSampleShape : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   CreateSampleShape() : Mantid::API::Algorithm() {}
@@ -47,8 +46,10 @@ public:
   virtual ~CreateSampleShape() {}
   /// Algorithm's name
   virtual const std::string name() const { return "CreateSampleShape"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Create a shape object to model the sample.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Create a shape object to model the sample.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -56,13 +57,11 @@ public:
   virtual const std::string category() const { return "Sample;DataHandling"; }
 
 private:
-  
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 };
-
 }
 }
 

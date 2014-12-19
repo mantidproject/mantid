@@ -16,7 +16,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 
-//Add this class to the list of specialised dialogs in this namespace
+//Add this class to the list of specialized dialogs in this namespace
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -36,7 +36,7 @@ using namespace MantidQt::CustomInterfaces;
 //----------------------
 
 /**
- * Default constructor for class. Initialises interface pointers to NULL values.
+ * Default constructor for class. Initializes interface pointers to NULL values.
  * @param parent :: This is a pointer to the "parent" object in Qt, most likely the main MantidPlot window.
  */
 DirectConvertToEnergy::DirectConvertToEnergy(QWidget *parent) :
@@ -69,7 +69,7 @@ void DirectConvertToEnergy::helpClicked()
 }
 
 /**
- * This is the function called when the "Run" button is clicked. It will call the relevent function
+ * This is the function called when the "Run" button is clicked. It will call the relevant function
  * in the subclass.
  */
 void DirectConvertToEnergy::runClicked()
@@ -179,7 +179,7 @@ void DirectConvertToEnergy::instrumentSelectChanged(const QString& name)
   QString defFile = (Mantid::API::ExperimentInfo::getInstrumentFilename(name.toStdString())).c_str();
   if((defFile == "") || !m_uiForm.cbInst->isVisible())
   {
-    g_log.error("Instument loading failed!");
+    g_log.error("Instrument loading failed!");
     m_uiForm.cbInst->setEnabled(true);
     m_uiForm.pbRun->setEnabled(true);
     return;
@@ -200,14 +200,14 @@ void DirectConvertToEnergy::instrumentSelectChanged(const QString& name)
 }
 
 /**
- * Tasks to be carried out after an empty instument has finished loading
+ * Tasks to be carried out after an empty instrument has finished loading
  */
 void DirectConvertToEnergy::instrumentLoadingDone(bool error)
 {
   QString curInstPrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString();
   if((curInstPrefix == "") || error)
   {
-    g_log.error("Instument loading failed! (this can be caused by having both direct and indirect interfaces open)");
+    g_log.error("Instrument loading failed! (this can be caused by having both direct and indirect interfaces open)");
     m_uiForm.cbInst->setEnabled(true);
     m_uiForm.pbRun->setEnabled(true);
     return;

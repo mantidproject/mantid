@@ -12,21 +12,20 @@
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
 #include "DllOption.h"
 
-
 /**
-    @class RefIVConnections 
-  
-       This class provides the connections between the SpectrumView GUI components
+    @class RefIVConnections
+
+    This class provides the connections between the SpectrumView GUI components
     made using QtDesigner and the classes that do the actual work for the
-    SpectrumView.  It basically provides SLOTS that are called by the GUI 
-   components' SIGNALS and in turn call methods on the SpectrumView 
-   implementation objects.
- 
-    @author Dennis Mikkelson 
-    @date   2012-04-03 
-     
+    SpectrumView.  It basically provides SLOTS that are called by the GUI
+    components' SIGNALS and in turn call methods on the SpectrumView
+    implementation objects.
+
+    @author Dennis Mikkelson
+    @date   2012-04-03
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -41,8 +40,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
@@ -51,75 +50,73 @@ namespace MantidQt
 namespace RefDetectorViewer
 {
 
-
 class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefIVConnections: public QWidget
 {
   Q_OBJECT
 
 public:
-
   /// Construct the object that links the GUI components to the other specifed
   /// higher level objects.
-  RefIVConnections( Ui_RefImageViewer* ui, 
-                 RefImageView*     image_view,
-                 RefImageDisplay*  image_display,
-                 SpectrumView::GraphDisplay*  h_graph_display,
-                 SpectrumView::GraphDisplay*  v_graph_display );
+  RefIVConnections( Ui_RefImageViewer*          ui,
+                    RefImageView*               imageView,
+                    RefImageDisplay*            imageDisplay,
+                    SpectrumView::GraphDisplay* hGraphDisplay,
+                    SpectrumView::GraphDisplay* vGraphDisplay );
 
   ~RefIVConnections();
 
   /// Set the pix map that shows the color scale from the specified color maps
-  void ShowColorScale( std::vector<QRgb> & positive_color_table,
-                       std::vector<QRgb> & negative_color_table );
+  void showColorScale( std::vector<QRgb> & positiveColorTable,
+                       std::vector<QRgb> & negativeColorTable );
 
 public slots:
-  void close_viewer();
-  void toggle_Hscroll();
-  void toggle_Vscroll();
-  void image_horizontal_range_changed();
-  void graph_range_changed();
-  void v_scroll_bar_moved();
-  void h_scroll_bar_moved();
-  void imageSplitter_moved();
-  void imagePicker_moved();
-  void imagePicker2_moved();
-  void h_graphPicker_moved();
-  void v_graphPicker_moved();
-  void intensity_slider_moved();
-  void heat_color_scale();
-  void gray_color_scale();
-  void negative_gray_color_scale();
-  void green_yellow_color_scale();
-  void rainbow_color_scale();
-  void optimal_color_scale();
-  void multi_color_scale();
-  void spectrum_color_scale();
-  void edit_manual_input();
-  void peak_back_tof_range_update();
-    
-public:
-    signals:
-    void peak_back_tof_range_update(double, double, double, double, double, double);
+  void closeViewer();
+  void toggleHScroll();
+  void toggleVScroll();
+  void imageHorizontalRangeChanged();
+  void graphRangeChanged();
+  void vScrollBarMoved();
+  void hScrollBarMoved();
+  void imageSplitterMoved();
+  void imagePickerMoved();
+  void imagePicker2Moved();
+  void hGraphPickerMoved();
+  void vGraphPickerMoved();
+  void intensitySliderMoved();
+  void editManualInput();
+  void peakBackTofRangeUpdate();
 
- private:
-    RefIVConnections() {}
-    
+  void heatColorScale();
+  void grayColorScale();
+  void negativeGrayColorScale();
+  void greenYellowColorScale();
+  void rainbowColorScale();
+  void optimalColorScale();
+  void multiColorScale();
+  void spectrumColorScale();
+
+signals:
+  void peakBackTofRangeUpdate(double, double, double, double, double, double);
+
+private:
+  RefIVConnections() {}
+
 private:
 
-  Ui_RefImageViewer*   iv_ui;
-  RefImageView*       iv_main_window;
-  RefImageDisplay*    image_display;
-  SpectrumView::GraphDisplay*    h_graph_display;
-  SpectrumView::GraphDisplay*    v_graph_display;
-  SpectrumView::TrackingPicker*  image_picker;
-  SpectrumView::TrackingPicker*  image_picker2;
-  SpectrumView::TrackingPicker*  h_graph_picker;
-  SpectrumView::TrackingPicker*  v_graph_picker;
-  QActionGroup*    color_group;
+  Ui_RefImageViewer*            m_ivUI;
+  RefImageView*                 m_ivMainWindow;
+  RefImageDisplay*              m_imageDisplay;
+  SpectrumView::GraphDisplay*   m_hGraphDisplay;
+  SpectrumView::GraphDisplay*   m_vGraphDisplay;
+  SpectrumView::TrackingPicker* m_imagePicker;
+  SpectrumView::TrackingPicker* m_imagePicker2;
+  SpectrumView::TrackingPicker* m_hGraphPicker;
+  SpectrumView::TrackingPicker* m_vGraphPicker;
+  QActionGroup*                 m_colorGroup;
 
 };
 
 } // namespace RefDetectorViewer
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif  // REF_IV_CONNECTIONS_H

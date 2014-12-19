@@ -5,8 +5,9 @@
  * histogram memory  servers used at SINQ, PSI and ANSTO
  *
  * Original contributor: Mark Koennecke: mark.koennecke@psi.ch
- * 
- * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ *
+ * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  * This file is part of Mantid.
 
@@ -38,24 +39,24 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPClientSession.h>
 
-class MANTID_SINQ_DLL SINQHMListener : public Mantid::API::ILiveListener
-{
+class MANTID_SINQ_DLL SINQHMListener : public Mantid::API::ILiveListener {
 public:
   SINQHMListener();
   ~SINQHMListener();
 
-  std::string name() const {return "SINQHMListener";}
-  bool supportsHistory() const {return false;}
-  bool buffersEvents() const {return false;}
+  std::string name() const { return "SINQHMListener"; }
+  bool supportsHistory() const { return false; }
+  bool buffersEvents() const { return false; }
 
-  bool connect(const Poco::Net::SocketAddress& address);
-  void start(Mantid::Kernel::DateAndTime startTime = Mantid::Kernel::DateAndTime());
+  bool connect(const Poco::Net::SocketAddress &address);
+  void
+  start(Mantid::Kernel::DateAndTime startTime = Mantid::Kernel::DateAndTime());
   boost::shared_ptr<Mantid::API::Workspace> extractData();
   bool isConnected();
   ILiveListener::RunStatus runStatus();
   int runNumber() const { return 0; }
 
-  void setSpectra(const std::vector<Mantid::specid_t>& specList);
+  void setSpectra(const std::vector<Mantid::specid_t> &specList);
 
 private:
   Poco::Net::HTTPClientSession httpcon;
@@ -66,11 +67,12 @@ private:
   int dim[3]; // @SINQ we only do 3D HM's, change when more dimensions
   std::string hmhost;
 
-  std::istream& httpRequest(std::string path);
+  std::istream &httpRequest(std::string path);
   void loadDimensions();
   void doSpecialDim();
   void readHMData(Mantid::API::IMDHistoWorkspace_sptr ws);
-  void recurseDim(int *data, Mantid::API::IMDHistoWorkspace_sptr ws, int currentDim, Mantid::coord_t *idx);
+  void recurseDim(int *data, Mantid::API::IMDHistoWorkspace_sptr ws,
+                  int currentDim, Mantid::coord_t *idx);
   int calculateCAddress(Mantid::coord_t *pos);
 
   ILiveListener::RunStatus oldStatus;

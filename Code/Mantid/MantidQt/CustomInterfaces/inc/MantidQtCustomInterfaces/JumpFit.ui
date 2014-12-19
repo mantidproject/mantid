@@ -24,7 +24,7 @@
       </widget>
      </item>
      <item row="0" column="1" colspan="3">
-      <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSample">
+      <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSample" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -110,7 +110,55 @@
       <layout class="QVBoxLayout" name="treeSpace"/>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="plotSpace"/>
+      <layout class="QVBoxLayout" name="plotArea">
+       <item>
+        <layout class="QVBoxLayout" name="plotSpace"/>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="plotLegend">
+         <item>
+          <spacer name="legendSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="legendRaw">
+           <property name="text">
+            <string>Data</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="legendFit">
+           <property name="styleSheet">
+            <string notr="true">color: rgb(255, 0, 0);</string>
+           </property>
+           <property name="text">
+            <string>Fit</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="legendDiff">
+           <property name="styleSheet">
+            <string notr="true">color: rgb(0, 255, 0);</string>
+           </property>
+           <property name="text">
+            <string>Diff</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>

@@ -11,8 +11,6 @@ def qapp():
  
 app = qapp()
 
-print "[******************] It is touched."
-
 reducer = eventFilterGUI.MainWindow() #the main ui class in this file is called MainWindow
 reducer.show()
 app.exec_()

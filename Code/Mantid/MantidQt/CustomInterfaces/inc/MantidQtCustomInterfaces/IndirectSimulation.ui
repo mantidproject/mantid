@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>504</width>
-    <height>277</height>
+    <width>445</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,6 +29,11 @@
      <widget class="QWidget" name="molDyn">
       <attribute name="title">
        <string>MolDyn</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="sassena">
+      <attribute name="title">
+       <string>Sassena</string>
       </attribute>
      </widget>
     </widget>

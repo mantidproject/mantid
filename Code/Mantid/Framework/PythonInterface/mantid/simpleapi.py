@@ -19,17 +19,15 @@
     and assign it to the rebinned variable
 
 """
-import api as _api
-import kernel as _kernel
-from kernel import funcreturns as _funcreturns
-from api import AnalysisDataService as _ads
-from api import FrameworkManager as _framework
-from api import _workspaceops
+from __future__ import absolute_import
+
+import mantid.api as _api
+import mantid.kernel as _kernel
 
 # This is a simple API so give access to the aliases by default as well
 from mantid import apiVersion, __gui__
-from kernel._aliases import *
-from api._aliases import *
+from mantid.kernel._aliases import *
+from mantid.api._aliases import *
 
 #------------------------ Specialized function calls --------------------------
 # List of specialized algorithms
@@ -94,7 +92,7 @@ def Load(*args, **kwargs):
         del kwargs['Filename']
     except KeyError:
         pass
-    lhs = _funcreturns.lhs_info()
+    lhs = _kernel.funcreturns.lhs_info()
     # If the output has not been assigned to anything, i.e. lhs[0] = 0 and kwargs does not have OutputWorkspace
     # then raise a more helpful error than what we would get from an algorithm
     if lhs[0] == 0 and 'OutputWorkspace' not in kwargs:
@@ -134,7 +132,7 @@ def LoadDialog(*args, **kwargs):
 
     Additional arguments available here (as keyword only) are:
       - Enable :: A CSV list of properties to keep enabled in the dialog
-      - Disable :: A CSV list of properties to keep enabled in the dialog
+      - Disable :: A CSV list of properties to disable in the dialog
       - Message :: An optional message string
     """
     arguments = {}
@@ -166,7 +164,7 @@ def LoadDialog(*args, **kwargs):
 
 def Fit(*args, **kwargs):
     """
-    Fit defines the interface to the fitting framework within Mantid.
+    Fit defines the interface to the fitting 562 within Mantid.
     It can work with arbitrary data sources and therefore some options
     are only available when the function & workspace type are known.
 
@@ -186,7 +184,7 @@ def Fit(*args, **kwargs):
         del kwargs['InputWorkspace']
 
     # Check for behaviour consistent with old API
-    if type(Function) == str and Function in _ads:
+    if type(Function) == str and Function in _api.AnalysisDataService:
         raise ValueError("Fit API has changed. The function must now come first in the argument list and the workspace second.")
     # Create and execute
     algm = _create_algorithm_object('Fit')
@@ -200,7 +198,7 @@ def Fit(*args, **kwargs):
             algm.setProperty(key, kwargs[key])
             del kwargs[key]
 
-    lhs = _funcreturns.lhs_info()
+    lhs = _kernel.funcreturns.lhs_info()
     # Check for any properties that aren't known and warn they will not be used
     for key in kwargs.keys():
         if key not in algm:
@@ -229,7 +227,7 @@ def FitDialog(*args, **kwargs):
 
     Additional arguments available here (as keyword only) are:
       - Enable :: A CSV list of properties to keep enabled in the dialog
-      - Disable :: A CSV list of properties to keep enabled in the dialog
+      - Disable :: A CSV list of properties to disable in the dialog
       - Message :: An optional message string
     """
     arguments = {}
@@ -454,7 +452,7 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
         if _is_workspace_property(prop):
             value_str = prop.valueAsStr
             try:
-                retvals.append(_ads[value_str])
+                retvals.append(_api.AnalysisDataService[value_str])
             except KeyError:
                 if not prop.isOptional():
                     raise RuntimeError("Internal error. Output workspace property '%s' on algorithm '%s' has not been stored correctly."
@@ -561,7 +559,7 @@ def _create_algorithm_function(algorithm, version, _algm_object):
         except KeyError:
             frame = None
 
-        lhs = _funcreturns.lhs_info(frame=frame)
+        lhs = _kernel.funcreturns.lhs_info(frame=frame)
         lhs_args = _get_args_from_lhs(lhs, algm)
         final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
 
@@ -841,7 +839,7 @@ def _mockup(plugins):
     #-------------------------------------
 
     # Start with the loaded C++ algorithms
-    from api import AlgorithmFactory
+    from mantid.api import AlgorithmFactory
     import os
     cppalgs = AlgorithmFactory.getRegisteredAlgorithms(True)
     create_fake_functions(cppalgs.keys())
@@ -861,7 +859,7 @@ def _translate():
 
         :returns: a list of new function calls
     """
-    from api import AlgorithmFactory, AlgorithmManager
+    from mantid.api import AlgorithmFactory, AlgorithmManager
 
     new_functions = [] # Names of new functions added to the global namespace
     new_methods = {} # Method names mapped to their algorithm names. Used to detect multiple copies of same method name
@@ -917,5 +915,5 @@ def _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object
                            "Algorithm::workspaceMethodInputProperty() has returned a property name that "
                            "does not exist on the algorithm." % algm_object.name())
 
-    _workspaceops.attach_func_as_method(method_name, algorithm_wrapper, input_prop,
-                                        algm_object.workspaceMethodOn())
+    _api._workspaceops.attach_func_as_method(method_name, algorithm_wrapper, input_prop,
+                                                  algm_object.workspaceMethodOn())

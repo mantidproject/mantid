@@ -5,26 +5,21 @@ kernel
 Defines Python objects that wrap the C++ Kernel namespace.
 
 """
+from __future__ import absolute_import
 
 ###############################################################################
-# Loads the C library with the correct flags
+# Load the C++ library
 ###############################################################################
-import dlopen as _pydlopen
-import os as _os
-clib = _os.path.join(_os.path.dirname(__file__), '_kernel.so')
-flags = _pydlopen.setup_dlopen(clib, ['libMantidKernel'])
-from _kernel import *
-_pydlopen.restore_flags(flags)
-###############################################################################
+from ._kernel import *
 
 ###############################################################################
 # Do any site-specific setup for packages
 ###############################################################################
-import packagesetup as _packagesetup
+from . import packagesetup as _packagesetup
 
 ###############################################################################
 # Make modules available in this namespace
 ###############################################################################
-import environment
-import funcreturns
-from _aliases import *
+from . import environment
+from . import funcreturns
+from ._aliases import *

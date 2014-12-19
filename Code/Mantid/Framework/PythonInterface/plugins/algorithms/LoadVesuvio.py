@@ -43,12 +43,9 @@ class LoadVesuvio(PythonAlgorithm):
                                  "14188-14195 - for summed consecutive runs"
                                  "14188,14195 - for summed non-consecutive runs")
 
-        self.declareProperty(WorkspaceProperty(WKSP_PROP, "", Direction.Output),
-                             doc="The name of the output workspace.")
-
-        self.declareProperty(IntArrayProperty(SPECTRA_PROP, IntArrayMandatoryValidator(),
-                                              Direction.Input),
-                             doc="The spectrum numbers to load")
+        self.declareProperty(SPECTRA_PROP, "", StringMandatoryValidator(),
+                             doc="The spectrum numbers to load. "
+                                 "A dash will load a range and a semicolon delimits spectra to sum")
 
         self.declareProperty(MODE_PROP, "DoubleDifference", StringListValidator(MODES),
                              doc="The difference option. Valid values: %s" % str(MODES))
@@ -62,6 +59,10 @@ class LoadVesuvio(PythonAlgorithm):
                              doc="If true then the final output is a single spectrum containing the sum "
                                  "of all of the requested spectra. All detector angles/parameters are "
                                  "averaged over the individual inputs")
+
+        self.declareProperty(WorkspaceProperty(WKSP_PROP, "", Direction.Output),
+                             doc="The name of the output workspace.")
+
 #----------------------------------------------------------------------------------------
     def PyExec(self):
         self._load_inst_parameters()
@@ -79,10 +80,11 @@ class LoadVesuvio(PythonAlgorithm):
            Execution path when a difference mode is selected
         """
         try:
-            self._setup_raw(self._spectra)
+            all_spectra = [item for sublist in self._spectra for item in sublist]
+            self._setup_raw(all_spectra)
             self._create_foil_workspaces()
 
-            for ws_index, spectrum_no in enumerate(self._spectra):
+            for ws_index, spectrum_no in enumerate(all_spectra):
                 self._ws_index, self._spectrum_no = ws_index, spectrum_no
                 self._set_spectra_type(spectrum_no)
                 self.foil_map = SpectraToFoilPeriodMap(self._nperiods)
@@ -123,7 +125,8 @@ class LoadVesuvio(PythonAlgorithm):
         except ValueError:
             run_str = runs[0]
 
-        LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=self._spectra,
+        all_spectra = [item for sublist in self._spectra for item in sublist]
+        LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spectra,
                 EnableLogging=_LOGGING_)
         raw_group = mtd[SUMMED_WS]
         self._nperiods = raw_group.size()
@@ -133,7 +136,7 @@ class LoadVesuvio(PythonAlgorithm):
         self.foil_out = foil_out
 
         foil_map = SpectraToFoilPeriodMap(self._nperiods)
-        for ws_index, spectrum_no in enumerate(self._spectra):
+        for ws_index, spectrum_no in enumerate(all_spectra):
             self._set_spectra_type(spectrum_no)
             foil_out_periods, foil_thin_periods, foil_thick_periods = self._get_foil_periods()
 
@@ -221,9 +224,19 @@ class LoadVesuvio(PythonAlgorithm):
 #----------------------------------------------------------------------------------------
     def _retrieve_input(self):
         self._diff_opt = self.getProperty(MODE_PROP).value
-        self._spectra = self.getProperty(SPECTRA_PROP).value.tolist()
-        if self._mon_spectra in self._spectra:
-            self._spectra.remove(self._spectra)
+
+        # Check for sets of spectra to sum. Semi colon delimits sets
+        # that should be summed
+        spectra_str = self.getPropertyValue(SPECTRA_PROP)
+        summed_blocks = spectra_str.split(";")
+        self._spectra = []
+        for block in summed_blocks:
+            prop = IntArrayProperty("unnamed", block)
+            numbers = prop.value.tolist()
+            if self._mon_spectra in numbers:
+                numbers.remove(self._spectra)
+            self._spectra.append(numbers)
+        #endfor
         self._sumspectra = self.getProperty(SUM_PROP).value
 
 #----------------------------------------------------------------------------------------
@@ -644,17 +657,25 @@ class LoadVesuvio(PythonAlgorithm):
 
     def _sum_all_spectra(self):
         """
-            Runs the SumSpectra algorithm to collapse all of the
-            spectra into 1
+            Sum requested sets of spectra together
         """
-        # More verbose until the child algorithm stuff is sorted
-        sum_spectra = self.createChildAlgorithm("SumSpectra")
-        sum_spectra.setLogging(_LOGGING_)
-        sum_spectra.setProperty("InputWorkspace", self.foil_out)
-        sum_spectra.setProperty("OutputWorkspace", self.foil_out)
-        sum_spectra.execute()
-
-        self.foil_out = sum_spectra.getProperty("OutputWorkspace").value
+        nspectra_out = len(self._spectra)
+        ws_out = WorkspaceFactory.create(self.foil_out, NVectors=nspectra_out)
+        # foil_out has all spectra in order specified by input
+        foil_start = 0
+        for idx_out in range(len(self._spectra)):
+            summed_set = self._spectra[idx_out]
+            nsummed = len(summed_set)
+            y_out, e_out = ws_out.dataY(idx_out), ws_out.dataE(idx_out)
+            for foil_idx in range(foil_start, foil_start+nsummed):
+                y_out += self.foil_out.readY(foil_idx)
+                foil_err = self.foil_out.readE(foil_idx)
+                e_out += foil_err*foil_err # gaussian errors
+            #endfor
+            np.sqrt(e_out, e_out)
+            foil_start += nsummed
+        #endfor
+        self.foil_out = ws_out
 
 #----------------------------------------------------------------------------------------
     def _get_header_format(self, ip_filename):

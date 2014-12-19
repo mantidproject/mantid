@@ -18,7 +18,7 @@ namespace MantidQt
   {
     /** HintingLineEdit : A QLineEdit widget providing autocompletion.
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -57,6 +57,7 @@ namespace MantidQt
       std::map<std::string,std::string> m_matches;
       std::map<std::string,std::string> m_hints;
       bool m_dontComplete;
+      QLabel* m_hintLabel;
     protected slots:
       void updateHints(const QString& text);
     };

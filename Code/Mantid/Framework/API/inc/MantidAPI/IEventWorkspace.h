@@ -4,69 +4,66 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IEventList.h"
 
-namespace Mantid
-{
+namespace Mantid {
 
-namespace API
-{
+namespace API {
 
+/** This class provides an interface to an EventWorkspace.
 
-  /** This class provides an interface to an EventWorkspace.
+  @author Martyn Gigg, Tessella plc
+  @date 13/08/2010
 
-    @author Martyn Gigg, Tessella plc
-    @date 13/08/2010
+  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  This file is part of Mantid.
 
-    This file is part of Mantid.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  File change history is stored at: <https://github.com/mantidproject/mantid>.
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class MANTID_API_DLL IEventWorkspace : public MatrixWorkspace {
+public:
+  /// Return the workspace typeID
+  virtual const std::string id() const { return "IEventWorkspace"; }
+  virtual std::size_t getNumberEvents() const = 0;
+  virtual double getTofMin() const = 0;
+  virtual double getTofMax() const = 0;
+  virtual Mantid::Kernel::DateAndTime getPulseTimeMax() const = 0;
+  virtual Mantid::Kernel::DateAndTime getPulseTimeMin() const = 0;
+  virtual Mantid::Kernel::DateAndTime
+  getTimeAtSampleMax(double tofOffset = 0) const = 0;
+  virtual Mantid::Kernel::DateAndTime
+  getTimeAtSampleMin(double tofOffset = 0) const = 0;
+  virtual EventType getEventType() const = 0;
+  virtual IEventList *getEventListPtr(const std::size_t workspace_index) = 0;
+  virtual void generateHistogram(const std::size_t index, const MantidVec &X,
+                                 MantidVec &Y, MantidVec &E,
+                                 bool skipError = false) const = 0;
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
-  class MANTID_API_DLL IEventWorkspace : public MatrixWorkspace
-  {
-  public:
-    /// Return the workspace typeID
-    virtual const std::string id() const { return "IEventWorkspace"; }
-    virtual std::size_t getNumberEvents() const = 0;
-    virtual double getTofMin() const = 0;
-    virtual double getTofMax() const = 0;
-    virtual Mantid::Kernel::DateAndTime getPulseTimeMax() const = 0;
-    virtual Mantid::Kernel::DateAndTime getPulseTimeMin() const = 0;
-    virtual Mantid::Kernel::DateAndTime getTimeAtSampleMax(double tofOffset = 0) const = 0;
-    virtual Mantid::Kernel::DateAndTime getTimeAtSampleMin(double tofOffset = 0) const = 0;
-    virtual EventType getEventType() const = 0;
-    virtual IEventList * getEventListPtr(const std::size_t workspace_index) = 0;
-    virtual void generateHistogram(const std::size_t index, 
-                                   const MantidVec& X, MantidVec& Y, MantidVec& E, 
-                                   bool skipError = false) const = 0;
+  virtual void clearMRU() const = 0;
 
-    virtual void clearMRU() const = 0;
+protected:
+  virtual const std::string toString() const;
+};
 
-  protected:
-      virtual const std::string toString() const;
-  };
-
-  ///shared pointer to the matrix workspace base class
-  typedef boost::shared_ptr<IEventWorkspace> IEventWorkspace_sptr;
-  ///shared pointer to the matrix workspace base class (const version)
-  typedef boost::shared_ptr<const IEventWorkspace> IEventWorkspace_const_sptr;
-
-
+/// shared pointer to the matrix workspace base class
+typedef boost::shared_ptr<IEventWorkspace> IEventWorkspace_sptr;
+/// shared pointer to the matrix workspace base class (const version)
+typedef boost::shared_ptr<const IEventWorkspace> IEventWorkspace_const_sptr;
 }
 }
 
-#endif //MANTID_API_IEVENTWORKSPACE_H_
+#endif // MANTID_API_IEVENTWORKSPACE_H_

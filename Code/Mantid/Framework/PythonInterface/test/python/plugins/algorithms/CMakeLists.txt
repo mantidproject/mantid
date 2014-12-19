@@ -28,6 +28,7 @@ set ( TEST_PY_FILES
   MaskWorkspaceToCalFileTest.py
   MeanTest.py
   MergeCalFilesTest.py
+  MolDynTest.py
   PDDetermineCharacterizationsTest.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
@@ -40,12 +41,14 @@ set ( TEST_PY_FILES
   Stitch1DManyTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
+  SymmetriseTest.py
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
   TimeSliceTest.py
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
+  LoadSPICEAsciiTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

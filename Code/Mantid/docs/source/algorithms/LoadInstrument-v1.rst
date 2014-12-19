@@ -36,23 +36,23 @@ Usage
    # create sample workspace
    ws=CreateSampleWorkspace();
    inst0=ws.getInstrument();
-   
+
    print "Default workspace has instrument: {0} with {1} parameters".format(inst0.getName(),len(inst0.getParameterNames()));
-   
+
    # load MARI
    det=LoadInstrument(ws,InstrumentName='MARI')
    inst1=ws.getInstrument();
-   
+
    print "Modified workspace has instrument: {0} with {1} parameters".format(inst1.getName(),len(inst1.getParameterNames()));
    print "Instrument {0} has the following detectors: ".format(inst1.getName()),det
-   
+
 
 **Output:**
 
 .. testoutput:: exLoadInstrument
 
    Default workspace has instrument: basic_rect with 0 parameters
-   Modified workspace has instrument: MARI with 69 parameters
+   Modified workspace has instrument: MARI with 70 parameters
    Instrument MARI has the following detectors:  [1 2 3]
 
 

@@ -13,13 +13,15 @@
 </parameter>
 <parameter name="refl-graphite" type="string">
     <value val="002" />
-</parameter>
-<!-- Available options are "Show" or "Hide". -->
+  </parameter>
+
+<!-- Default Indirect Data Reduction > Energy Transfer GUI setup -->
+<!-- Available options are "true" or "false" -->
 <parameter name="cm-1-convert-choice" type="string">
-    <value val="Show" />
+    <value val="false" />
 </parameter>
-<parameter name="save-aclimax-choice" type="string">
-    <value val="Show" />
+<parameter name="save-ascii-choice" type="string">
+    <value val="false" />
 </parameter>
   
 <!-- This parameter will be taken as a default value for the rebinning of

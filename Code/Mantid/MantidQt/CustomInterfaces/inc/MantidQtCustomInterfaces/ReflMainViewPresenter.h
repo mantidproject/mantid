@@ -3,10 +3,12 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/IReflSearcher.h"
+#include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtCustomInterfaces/ReflTransferStrategy.h"
+#include "MantidQtCustomInterfaces/QReflTableModel.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
@@ -19,7 +21,7 @@ namespace MantidQt
 
     ReflMainViewPresenter is a presenter class for teh Reflectometry Interface. It handles any interface functionality and model manipulation.
 
-    Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -42,60 +44,90 @@ namespace MantidQt
     class DLLExport ReflMainViewPresenter: public IReflPresenter
     {
     public:
-      ReflMainViewPresenter(ReflMainView* view);
+      ReflMainViewPresenter(ReflMainView* view, boost::shared_ptr<IReflSearcher> searcher = boost::shared_ptr<IReflSearcher>());
       virtual ~ReflMainViewPresenter();
-      virtual void notify(int flag);
-
+      virtual void notify(IReflPresenter::Flag flag);
+      virtual const std::map<std::string,QVariant>& options() const;
+      virtual void setOptions(const std::map<std::string,QVariant>& options);
       //Public for the purposes of unit testing
       static std::map<std::string,std::string> parseKeyValueString(const std::string& str);
     protected:
-      //the model the table is currently representing
-      Mantid::API::ITableWorkspace_sptr m_model;
+      //the workspace the model is currently representing
+      Mantid::API::ITableWorkspace_sptr m_ws;
+      //the models
+      QReflTableModel_sptr m_model;
+      ReflSearchModel_sptr m_searchModel;
       //the name of the workspace/table/model in the ADS, blank if unsaved
       std::string m_wsName;
       //the view we're managing
       ReflMainView* m_view;
       //stores whether or not the table has changed since it was last saved
       bool m_tableDirty;
+      //stores the user options for the presenter
+      std::map<std::string,QVariant> m_options;
+      //the search implementation
+      boost::shared_ptr<IReflSearcher> m_searcher;
+      boost::shared_ptr<ReflTransferStrategy> m_transferStrategy;
 
       //process selected rows
-      virtual void process();
+      void process();
       //Reduce a row
-      void reduceRow(size_t rowNo);
+      void reduceRow(int rowNo);
+      //prepare a run or list of runs for processing
+      Mantid::API::Workspace_sptr prepareRunWorkspace(const std::string& run);
       //load a run into the ADS, or re-use one in the ADS if possible
       Mantid::API::Workspace_sptr loadRun(const std::string& run, const std::string& instrument);
       //get the run number of a TOF workspace
       std::string getRunNumber(const Mantid::API::Workspace_sptr& ws);
       //get an unused group id
-      int getUnusedGroup(std::set<size_t> ignoredRows = std::set<size_t>()) const;
+      int getUnusedGroup(std::set<int> ignoredRows = std::set<int>()) const;
       //make a transmission workspace
-      Mantid::API::MatrixWorkspace_sptr makeTransWS(const std::string& transString);
+      Mantid::API::Workspace_sptr makeTransWS(const std::string& transString);
       //Validate a row
-      void validateRow(size_t rowNo) const;
+      void validateRow(int rowNo) const;
       //Autofill a row with sensible values
-      void autofillRow(size_t rowNo);
+      void autofillRow(int rowNo);
       //calculates qmin and qmax
-      static std::vector<double> calcQRange(Mantid::API::MatrixWorkspace_sptr ws, double theta);
+      std::vector<double> calcQRange(Mantid::API::Workspace_sptr ws, double theta);
       //get the number of rows in a group
       size_t numRowsInGroup(int groupId) const;
       //Stitch some rows
-      void stitchRows(std::set<size_t> rows);
+      void stitchRows(std::set<int> rows);
       //insert a row in the model before the given index
-      virtual void insertRow(size_t before);
+      void insertRow(int index);
       //add row(s) to the model
-      virtual void appendRow();
-      virtual void prependRow();
+      void appendRow();
+      void prependRow();
       //delete row(s) from the model
-      virtual void deleteRow();
+      void deleteRow();
+      //clear selected row(s) in the model
+      void clearSelected();
+      //copy selected rows to clipboard
+      void copySelected();
+      //copy selected rows to clipboard and then delete them
+      void cutSelected();
+      //paste clipboard into selected rows
+      void pasteSelected();
       //group selected rows together
-      virtual void groupRows();
+      void groupRows();
       //expand selection to group
-      virtual void expandSelection();
+      void expandSelection();
       //table io methods
-      virtual void newTable();
-      virtual void openTable();
-      virtual void saveTable();
-      virtual void saveTableAs();
+      void newTable();
+      void openTable();
+      void saveTable();
+      void saveTableAs();
+      void importTable();
+      void exportTable();
+      //searching
+      void search();
+      void transfer();
+      //plotting
+      void plotRow();
+      void plotGroup();
+      //options
+      void showOptionsDialog();
+      void initOptions();
 
       //List of workspaces the user can open
       std::set<std::string> m_workspaceList;

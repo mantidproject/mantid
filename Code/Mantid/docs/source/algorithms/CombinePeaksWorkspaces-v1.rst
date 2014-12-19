@@ -11,7 +11,7 @@ Description
 
 This algorithm can be used to combine lists of single crystal peaks,
 possibly obtained by different methods, in to a single list (contained
-in a `PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`__). 
+in a :ref:`PeaksWorkspace <PeaksWorkspace>`). 
 With the default options, this will simply append the lists of peaks. 
 If CombineMatchingPeaks is selected then an attempt
 will be made to identify identical peaks by matching them in Q within

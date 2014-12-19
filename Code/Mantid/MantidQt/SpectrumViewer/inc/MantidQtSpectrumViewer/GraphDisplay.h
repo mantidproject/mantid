@@ -9,16 +9,16 @@
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
-    @class GraphDisplay 
-  
+    @class GraphDisplay
+
     This class handles the display of vertical and horizontal cuts
     through the data in an SpectrumView display.
- 
-    @author Dennis Mikkelson 
-    @date   2012-04-03 
-     
+
+    @author Dennis Mikkelson
+    @date   2012-04-03
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -33,8 +33,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
@@ -43,58 +43,59 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER GraphDisplay 
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER GraphDisplay
 {
   public:
 
-   /// Construct a GraphDisplay to display in the specifed plot and table    
-   GraphDisplay( QwtPlot*      graph_plot, 
-                 QTableWidget* graph_table,
-                 bool          is_vertical );
+   /// Construct a GraphDisplay to display in the specifed plot and table
+   GraphDisplay( QwtPlot*      graphPlot,
+                 QTableWidget* graphTable,
+                 bool          isVertical );
 
-  ~GraphDisplay();
+   ~GraphDisplay();
 
-   /// Set the source of information for the table of position information 
-   void SetDataSource( SpectrumDataSource* data_source );
+   /// Set the source of information for the table of position information
+   void setDataSource( SpectrumDataSource_sptr dataSource );
 
    /// Set the actual data that will be displayed on the graph
-   void SetData( const QVector<double> & xData,
+   void setData( const QVector<double> & xData,
                  const QVector<double> & yData,
-                       double            cut_value );
+                       double            cutValue );
 
    /// Clear the graph(s) off the display
-   void Clear();
+   void clear();
 
-   /// Set up axes using the specified scale factor and replot the graph 
-   void SetRangeScale( double range_scale );
+   /// Set up axes using the specified scale factor and replot the graph
+   void setRangeScale( double rangeScale );
 
    /// Set flag indicating whether or not to use a log scale on the x-axis
-   void SetLogX( bool is_log_x );
+   void setLogX( bool isLogX );
 
    /// Record the point that the user is currently pointing at with the mouse
-   void SetPointedAtPoint( QPoint point );
+   void setPointedAtPoint( QPoint point );
 
   private:
    /// Show information about the point (x, y) on the graph, in the info table
-   void ShowInfoList( double x, double y );
+   void showInfoList( double x, double y );
 
-   QwtPlot*          graph_plot;
-   QwtPlotCurve*     curve;
-   QTableWidget*     graph_table;
-   SpectrumDataSource*  data_source;
+   QwtPlot            * m_graphPlot;
+   QwtPlotCurve       * m_curve;
+   QTableWidget       * m_graphTable;
+   SpectrumDataSource_sptr m_dataSource;
 
-   bool    is_vertical;
-   bool    is_log_x;
-   double  image_x;
-   double  image_y;
-   double  range_scale;         // fraction of data range to be graphed  
-   double  min_x,
-           max_x;
-   double  min_y,
-           max_y;
+   bool   m_isVertical;
+   bool   m_isLogX;
+   double m_imageX;
+   double m_imageY;
+   double m_rangeScale;  // Fraction of data range to be graphed
+   double m_minX;
+   double m_maxX;
+   double m_minY;
+   double m_maxY;
+
 };
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif   // GRAPH_DISPLAY_H

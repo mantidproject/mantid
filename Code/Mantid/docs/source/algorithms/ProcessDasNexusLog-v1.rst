@@ -16,4 +16,9 @@ off of a sample environment device. This algorithm will convert sample
 logs of this time such that the new log will have the time stamp as the
 absolute time, i.e., sum of pulse time and time-of-flight.
 
+This type of DAS sample log won't be generated anymore in NeXus file.  
+Hence algorithm ProcessDasNexusLog is deprecated. 
+
+No usage example is needed for a deprecated algorithm. 
+
 .. categories::

@@ -6,23 +6,23 @@
 //-----------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid
-{
-namespace DataHandling
-{
+namespace Mantid {
+namespace DataHandling {
 /**
-   An algorithm to extract the sample details from the SPB structure within a RAW file
-   
+   An algorithm to extract the sample details from the SPB structure within a
+   RAW file
+
    Required properties:
    <UL>
    <LI>InputWorkspace - The workspace to add information to</LI>
    <LI>Filename - The raw file to use to gather the information</LI>
    </UL>
-   
+
    @author Martyn, Tessella plc
    @date 29/07/2009
-   
-   Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+   Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
    This file is part of Mantid.
 
@@ -39,11 +39,10 @@ namespace DataHandling
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-   File change history is stored at: <https://github.com/mantidproject/mantid>. 
+   File change history is stored at: <https://github.com/mantidproject/mantid>.
    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LoadSampleDetailsFromRaw : public Mantid::API::Algorithm
-{
+class DLLExport LoadSampleDetailsFromRaw : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   LoadSampleDetailsFromRaw() : Mantid::API::Algorithm() {}
@@ -51,23 +50,25 @@ public:
   virtual ~LoadSampleDetailsFromRaw() {}
   /// Algorithm's name
   virtual const std::string name() const { return "LoadSampleDetailsFromRaw"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Loads the simple sample geometry that is defined within an ISIS raw file.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Loads the simple sample geometry that is defined within an ISIS "
+           "raw file.";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling\\Raw;Sample"; }
+  virtual const std::string category() const {
+    return "DataHandling\\Raw;Sample";
+  }
 
 private:
-  
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
-
 };
-
 }
 }
 

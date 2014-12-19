@@ -8,17 +8,16 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 
 /** Perform Fourier Transform of the Sassena Intermediate Scattering Function
 
   @author Jose Borreguero
   @date 2012-05-29
 
-  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -36,32 +35,38 @@ namespace Algorithms
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-class DLLExport SassenaFFT : public API::Algorithm
-{
+class DLLExport SassenaFFT : public API::Algorithm {
 public:
   /// Default constructor
-  SassenaFFT() : API::Algorithm(), m_T2ueV(1000.0/Mantid::PhysicalConstants::meVtoKelvin), m_ps2meV(4.136) {}
+  SassenaFFT()
+      : API::Algorithm(),
+        m_T2ueV(1000.0 / Mantid::PhysicalConstants::meVtoKelvin),
+        m_ps2meV(4.136) {}
   /// Destructor
   virtual ~SassenaFFT() {}
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "SassenaFFT"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Performs complex Fast Fourier Transform of intermediate scattering function";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Performs complex Fast Fourier Transform of intermediate scattering "
+           "function";
+  }
 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Arithmetic\\FFT"; }
+
 protected:
   // Overridden Algorithm methods
   bool processGroups();
+
 private:
-  
   // Overridden Algorithm methods
   void init();
   void exec();
   bool checkGroups();
-  const double m_T2ueV; // conversion factor from Kelvin to ueV
+  const double m_T2ueV;  // conversion factor from Kelvin to ueV
   const double m_ps2meV; // conversion factor from picosecond to mili-eV
 
 }; // class SassenaFFT

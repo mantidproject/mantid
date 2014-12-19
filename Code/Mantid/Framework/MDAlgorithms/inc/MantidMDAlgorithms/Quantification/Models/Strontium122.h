@@ -1,7 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_STRONTIUM122_H_
 #define MANTID_MDALGORITHMS_STRONTIUM122_H_
 /**
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -23,39 +24,38 @@
 */
 #include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
 
-namespace Mantid
-{
-  namespace MDAlgorithms
-  {
+namespace Mantid {
+namespace MDAlgorithms {
 
-    /**
-     * Defines the Strontium-122 model of Ewings et al.
-     * This is model 207 in TobyFit.
-     */
-    class DLLExport Strontium122 : public ForegroundModel
-    {
-    private:
-      /// String name of the model
-      std::string name() const { return "Strontium122"; }
+/**
+ * Defines the Strontium-122 model of Ewings et al.
+ * This is model 207 in TobyFit.
+ */
+class DLLExport Strontium122 : public ForegroundModel {
+private:
+  /// String name of the model
+  std::string name() const { return "Strontium122"; }
 
-      /// Setup the model
-      void init();
-      /// Called when an attribute is set
-      void setAttribute(const std::string & name, const API::IFunction::Attribute& attr);
+  /// Setup the model
+  void init();
+  /// Called when an attribute is set
+  void setAttribute(const std::string &name,
+                    const API::IFunction::Attribute &attr);
 
-      /// Returns the type of model
-      ModelType modelType() const { return Broad; }
-      /// Calculates the intensity for the model for the current parameters.
-      double scatteringIntensity(const API::ExperimentInfo & exptDescr, const std::vector<double> & point) const;
+  /// Returns the type of model
+  ModelType modelType() const { return Broad; }
+  /// Calculates the intensity for the model for the current parameters.
+  double scatteringIntensity(const API::ExperimentInfo &exptDescr,
+                             const std::vector<double> &point) const;
 
-      /// Twin type attribute
-      int m_twinType;
-      /// MultEps attribute
-      bool m_multEps;
-    public:
-      Strontium122();
-    };
+  /// Twin type attribute
+  int m_twinType;
+  /// MultEps attribute
+  bool m_multEps;
 
-  }
+public:
+  Strontium122();
+};
+}
 }
 #endif /* MANTID_MDALGORITHMS_STRONTIUM122_H_ */

@@ -13,14 +13,13 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 
-namespace Mantid
-{
-namespace Poldi
-{
+namespace Mantid {
+namespace Poldi {
 
 /** PoldiSpectrumDomainFunction : TODO: DESCRIPTION
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -41,34 +40,37 @@ namespace Poldi
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-class MANTID_SINQ_DLL PoldiSpectrumDomainFunction : virtual public API::ParamFunction, virtual public API::IFunction1DSpectrum
-{
+class MANTID_SINQ_DLL PoldiSpectrumDomainFunction
+    : virtual public API::ParamFunction,
+      virtual public API::IFunction1DSpectrum {
 public:
-    PoldiSpectrumDomainFunction();
-    virtual ~PoldiSpectrumDomainFunction()
-    {}
-    
-    virtual std::string name() const { return "PoldiSpectrumDomainFunction"; }
+  PoldiSpectrumDomainFunction();
+  virtual ~PoldiSpectrumDomainFunction() {}
 
-    virtual void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
-    virtual void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::FunctionValues &values) const;
+  virtual std::string name() const { return "PoldiSpectrumDomainFunction"; }
+
+  virtual void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
+  virtual void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
+                                  API::FunctionValues &values) const;
 
 protected:
-    virtual void init();
-    void initializeParametersFromWorkspace(const DataObjects::Workspace2D_const_sptr &workspace2D);
-    void initializeInstrumentParameters(const PoldiInstrumentAdapter_sptr &poldiInstrument);
-    std::vector<double> getChopperSlitOffsets(const PoldiAbstractChopper_sptr &chopper);
+  virtual void init();
+  void initializeParametersFromWorkspace(
+      const DataObjects::Workspace2D_const_sptr &workspace2D);
+  void initializeInstrumentParameters(
+      const PoldiInstrumentAdapter_sptr &poldiInstrument);
+  std::vector<double>
+  getChopperSlitOffsets(const PoldiAbstractChopper_sptr &chopper);
 
-    double actualFunction(double x, double x0, double sigma, double area) const;
+  double actualFunction(double x, double x0, double sigma, double area) const;
 
-    std::vector<double> m_chopperSlitOffsets;
-    double m_deltaT;
+  std::vector<double> m_chopperSlitOffsets;
+  double m_deltaT;
 
-    PoldiTimeTransformer_sptr m_timeTransformer;
+  PoldiTimeTransformer_sptr m_timeTransformer;
 };
-
 
 } // namespace Poldi
 } // namespace Mantid
 
-#endif  /* MANTID_SINQ_POLDISPECTRUMDOMAINFUNCTION_H_ */
+#endif /* MANTID_SINQ_POLDISPECTRUMDOMAINFUNCTION_H_ */

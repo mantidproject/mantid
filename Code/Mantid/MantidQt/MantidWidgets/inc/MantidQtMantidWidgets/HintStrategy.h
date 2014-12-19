@@ -6,11 +6,11 @@
 
 namespace MantidQt
 {
-  namespace CustomInterfaces
+  namespace MantidWidgets
   {
     /** HintStrategy : Provides an interface for generating hints to be used by a HintingLineEdit.
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 

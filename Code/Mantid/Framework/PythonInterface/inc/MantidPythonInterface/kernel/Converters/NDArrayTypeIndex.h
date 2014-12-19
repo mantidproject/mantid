@@ -1,7 +1,8 @@
 #ifndef MANTID_PYTHONINTERFACE_NDARRAYTYPEINDEX_H_
 #define MANTID_PYTHONINTERFACE_NDARRAYTYPEINDEX_H_
 /**
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -23,31 +24,23 @@
 */
 #include "MantidKernel/System.h"
 
-namespace Mantid
-{
-  namespace PythonInterface
-  {
-    namespace Converters
-    {
+namespace Mantid {
+namespace PythonInterface {
+namespace Converters {
 
-      /**
-       * Defines a mapping between C++ type given by
-       * the template parameter and numpy type enum
-       * NPY_TYPES.
-       *
-       * There is no general definition, only specialized
-       * versions are defined. Each specialization should
-       * contain a static const NPY_TYPES definition giving
-       * the result of the mapping
-       */
-      template<typename T>
-      struct DLLExport NDArrayTypeIndex
-      {
-        static int typenum;
-      };
-
-    }
-  }
+/**
+ * Defines a mapping between C++ type given by
+ * the template parameter and numpy type enum
+ * NPY_TYPES.
+ *
+ * There is no general definition, only specialized
+ * versions are defined. Each specialization should
+ * contain a static const NPY_TYPES definition giving
+ * the result of the mapping
+ */
+template <typename T> struct DLLExport NDArrayTypeIndex { static int typenum; };
+}
+}
 }
 
 #endif /* MANTID_PYTHONINTERFACE_NDARRAYTYPEINDEX_H_*/

@@ -5,6 +5,7 @@
 #include <Poco/File.h>
 #include <fstream>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidDataHandling/SavePDFGui.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 
@@ -56,6 +57,16 @@ public:
     return n;
   }
 
+  bool loadWorkspace(const std::string &filename, const std::string wsName)
+  {
+    LoadNexusProcessed load;
+    load.initialize();
+    load.setProperty("Filename", filename);
+    load.setProperty("OutputWorkspace", wsName);
+    load.execute();
+    return load.isExecuted();
+  }
+
   void test_exec()
   {
     // name of workspace to create and save
@@ -64,11 +75,7 @@ public:
     const std::string outFilename("SavePDFGuiTest_Output.gr");
 
     // Load a file to save out
-    LoadNexusProcessed load;
-    load.initialize();
-    load.setProperty("Filename", "nom_gr.nxs");
-    load.setProperty("OutputWorkspace", wsName);
-    load.execute();
+    TS_ASSERT(loadWorkspace("nom_gr.nxs", wsName));
 
     // save the file
     SavePDFGui alg;
@@ -91,6 +98,33 @@ public:
     outFile.remove(false);
   }
 
+  void test_exec_ws_group()
+  {
+    // Create a group
+    const std::string groupName("SavePDFGUIGroup");
+    TS_ASSERT(loadWorkspace("nom_gr.nxs", groupName+"_1"));
+    TS_ASSERT(loadWorkspace("nom_gr.nxs", groupName+"_2"));
+
+    auto grpAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    grpAlg->initialize();
+    grpAlg->setPropertyValue("InputWorkspaces", groupName+"_1,"+groupName+"_2");
+    grpAlg->setPropertyValue("OutputWorkspace", groupName);
+    grpAlg->execute();
+
+    // name of the output file
+    const std::string outFilename("SavePDFGUIGroup.gr");
+
+    // run the algorithm with a group
+    SavePDFGui alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", groupName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename","SavePDFGUIGroup.gr") );
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    // remove the workspace group
+    AnalysisDataService::Instance().deepRemoveGroup(groupName);
+  }
 };
 
 

@@ -2,6 +2,7 @@
 #define COMPTONPROFILETESTHELPERS_H_
 
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/MersenneTwister.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -14,9 +15,12 @@ namespace ComptonProfileTestHelpers
   static Mantid::API::MatrixWorkspace_sptr createTestWorkspace(const size_t nhist,const double x0, const double x1,
                                                                const double dx, const bool singleMassSpectrum = false,
                                                                const bool addFoilChanger = false);
-  static Mantid::Geometry::Instrument_sptr createTestInstrumentWithFoilChanger(const Mantid::detid_t id,const Mantid::Kernel::V3D &);
+  static Mantid::Geometry::Instrument_sptr createTestInstrumentWithFoilChanger(const Mantid::detid_t id,
+                                                                               const Mantid::Kernel::V3D &,
+                                                                               const std::string &detShapeXML = "");
   static Mantid::Geometry::Instrument_sptr createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
-                                                                                 const Mantid::Kernel::V3D &);
+                                                                                 const Mantid::Kernel::V3D &,
+                                                                                 const std::string & detShape = "");
   static void addResolutionParameters(const Mantid::API::MatrixWorkspace_sptr & ws,
                                       const Mantid::detid_t detID);
   static void addFoilResolution(const Mantid::API::MatrixWorkspace_sptr & ws,
@@ -60,14 +64,14 @@ namespace ComptonProfileTestHelpers
     {
       double r(0.553), theta(66.5993), phi(138.6);
       Mantid::Kernel::V3D detPos;
-      detPos.spherical(r, theta, phi);
+      detPos.spherical_rad(r, theta*M_PI/180.0, phi*M_PI/180.0);
       ws2d->setInstrument(createTestInstrumentWithFoilChanger(id,detPos));
     }
     else
     {
       double r(0.55), theta(66.5993), phi(0.0);
       Mantid::Kernel::V3D detPos;
-      detPos.spherical(r, theta, phi);
+      detPos.spherical_rad(r, theta*M_PI/180.0, phi*M_PI/180.0);
       ws2d->setInstrument(createTestInstrumentWithNoFoilChanger(id,detPos));
     }
 
@@ -90,15 +94,19 @@ namespace ComptonProfileTestHelpers
     return ws2d;
   }
 
-  static Mantid::Geometry::Instrument_sptr createTestInstrumentWithFoilChanger(const Mantid::detid_t id,
-                                                                               const Mantid::Kernel::V3D & detPos)
+  static Mantid::Geometry::Instrument_sptr
+  createTestInstrumentWithFoilChanger(const Mantid::detid_t id,
+                                      const Mantid::Kernel::V3D & detPos,
+                                      const std::string &detShapeXML)
   {
     using Mantid::Kernel::V3D;
     using namespace Mantid::Geometry;
 
-    auto inst = createTestInstrumentWithNoFoilChanger(id, detPos);
+    auto inst = createTestInstrumentWithNoFoilChanger(id, detPos, detShapeXML);
     // add changer
-    auto changerShape = ComponentCreationHelper::createCappedCylinder(0.05,0.4,V3D(0.0,-0.2,0.0),V3D(0.0,1,0.0), "cylinder");
+    auto changerShape = \
+        ComponentCreationHelper::createCappedCylinder(0.05, 0.4, V3D(0.0,-0.2,0.0),
+                                                      V3D(0.0,1,0.0), "cylinder");
     auto *changer = new ObjComponent("foil-changer",changerShape);
     changer->setPos(V3D(0.0,0.0,0.0));
     inst->add(changer);
@@ -120,8 +128,10 @@ namespace ComptonProfileTestHelpers
     return inst;
   }
 
-  static Mantid::Geometry::Instrument_sptr createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
-                                                                                 const Mantid::Kernel::V3D & detPos)
+  static Mantid::Geometry::Instrument_sptr
+  createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
+                                        const Mantid::Kernel::V3D & detPos,
+                                        const std::string &detShapeXML)
   {
     using Mantid::Kernel::V3D;
     using namespace Mantid::Geometry;
@@ -140,7 +150,16 @@ namespace ComptonProfileTestHelpers
     inst->markAsSamplePos(sampleHolder);
 
     //Just give it a single detector
-    auto *det0 = new Detector("det0",id,NULL);
+    Detector *det0(NULL);
+    if(!detShapeXML.empty())
+    {
+      auto shape = ShapeFactory().createShape(detShapeXML);
+      det0 = new Detector("det0", id, shape, NULL);
+    }
+    else
+    {
+      det0 = new Detector("det0", id, NULL);
+    }
     det0->setPos(detPos);
     inst->add(det0);
     inst->markAsDetector(det0);
@@ -163,6 +182,7 @@ namespace ComptonProfileTestHelpers
     pmap.addDouble(compID, "t0", -0.32);
     pmap.addDouble(compID, "hwhm_lorentz", 24);
     pmap.addDouble(compID, "sigma_gauss", 73);
+    pmap.addDouble(compID, "sigma_tof", 0.3);
   }
 
   static void addFoilResolution(const Mantid::API::MatrixWorkspace_sptr & ws,

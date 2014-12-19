@@ -16,7 +16,6 @@ using namespace Mantid::API;
 
 class CostFunctionFactoryTest_A: public ICostFunction
 {
-  int m_attr;
 public:
   CostFunctionFactoryTest_A() {}
 

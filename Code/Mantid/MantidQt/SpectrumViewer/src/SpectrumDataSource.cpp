@@ -9,27 +9,23 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-
 /**
  *  Construct data source with specified total range and data size.
  *
- *  @param total_xmin  The smallest 'x' value covered by the data
- *  @param total_xmax  The largest 'x' value covered by the data
- *  @param total_ymin  The smallest 'y' value covered by the data
- *  @param total_ymax  The largest 'y' value covered by the data
- *  @param total_rows  The total number of rows the data is divided into
- *  @param total_cols  The total number of columns the data is divided into
+ *  @param totalXMin  The smallest 'x' value covered by the data
+ *  @param totalXMax  The largest 'x' value covered by the data
+ *  @param totalYMin  The smallest 'y' value covered by the data
+ *  @param totalYMax  The largest 'y' value covered by the data
+ *  @param totalRows  The total number of rows the data is divided into
+ *  @param totalCols  The total number of columns the data is divided into
  */
-SpectrumDataSource::SpectrumDataSource( double total_xmin, double total_xmax,
-                                  double total_ymin, double total_ymax,
-                                  size_t total_rows, size_t total_cols )
+SpectrumDataSource::SpectrumDataSource( double totalXMin, double totalXMax,
+                                        double totalYMin, double totalYMax,
+                                        size_t totalRows, size_t totalCols ) :
+  m_totalXMin(totalXMin), m_totalXMax(totalXMax),
+  m_totalYMin(totalYMin), m_totalYMax(totalYMax),
+  m_totalRows(totalRows), m_totalCols(totalCols)
 {
-  this->total_xmin = total_xmin;
-  this->total_xmax = total_xmax;
-  this->total_ymin = total_ymin;
-  this->total_ymax = total_ymax;
-  this->total_rows = total_rows;
-  this->total_cols = total_cols;
 }
 
 
@@ -41,90 +37,84 @@ SpectrumDataSource::~SpectrumDataSource()
 /**
  * Get the smallest 'x' value covered by the data.
  */
-double SpectrumDataSource::GetXMin()
+double SpectrumDataSource::getXMin()
 {
-  return total_xmin;
+  return m_totalXMin;
 }
 
 
 /**
  * Get the largest 'x' value covered by the data.
  */
-double SpectrumDataSource::GetXMax()
+double SpectrumDataSource::getXMax()
 {
-  return total_xmax;
+  return m_totalXMax;
 }
 
 
 /**
  * Get the smallest 'y' value covered by the data.
  */
-double SpectrumDataSource::GetYMin()
+double SpectrumDataSource::getYMin()
 {
-  return total_ymin;
+  return m_totalYMin;
 }
 
 
 /**
  * Get the largest 'y' value covered by the data.
  */
-double SpectrumDataSource::GetYMax()
+double SpectrumDataSource::getYMax()
 {
-  return total_ymax;
+  return m_totalYMax;
 }
 
 
 /**
  * Get the total number of rows the data is divided into
  */
-size_t SpectrumDataSource::GetNRows()
+size_t SpectrumDataSource::getNRows()
 {
-  return total_rows;
+  return m_totalRows;
 }
 
 
 /**
  * Get the total number of columns the data is divided into
  */
-size_t SpectrumDataSource::GetNCols()
+size_t SpectrumDataSource::getNCols()
 {
-  return total_cols;
+  return m_totalCols;
 }
 
 
 /**
  * Clamp x to the interval of x-values covered by this DataSource
- * @param x   If x is more than xmax it will be set to xmax. If x is less 
+ * @param x   If x is more than xmax it will be set to xmax. If x is less
  *            than xmin, it will be set to xmin.
  */
-void SpectrumDataSource::RestrictX( double & x )
+void SpectrumDataSource::restrictX( double & x )
 {
-  if ( x > total_xmax )
-  {
-    x = total_xmax;
-  }
-  else if ( x < total_xmin )
-  {
-    x = total_xmin;
-  }
+  if ( x > m_totalXMax )
+    x = m_totalXMax;
+
+  else if ( x < m_totalXMin )
+    x = m_totalXMin;
 }
 
 
 /**
  * Clamp y to the interval of y-values covered by this DataSource.
- * @param y   If y is more than ymax it will be set to ymax. If y is less 
+ * @param y   If y is more than ymax it will be set to ymax. If y is less
  *            than ymin, it will be set to ymin.
  */
-void SpectrumDataSource::RestrictY( double & y )
+void SpectrumDataSource::restrictY( double & y )
 {
-  if ( y > total_ymax )
-  {
-    y = total_ymax;
-  }
-  else if ( y < total_ymin )
-  {
-    y = total_ymin;
-  }
+  if ( y > m_totalYMax )
+    y = m_totalYMax;
+
+  else if ( y < m_totalYMin )
+    y = m_totalYMin;
 }
 
 
@@ -133,16 +123,13 @@ void SpectrumDataSource::RestrictY( double & y )
  * @param row  If row is more than n_rows-1, it is set to n_rows-1.  If
  *             row < 0 it is set to zero.
  */
-void SpectrumDataSource::RestrictRow( int & row )
+void SpectrumDataSource::restrictRow( int & row )
 {
-  if ( row >= (int)total_rows )
-  {
-    row = (int)total_rows - 1;
-  }
+  if ( row >= (int)m_totalRows )
+    row = (int)m_totalRows - 1;
+
   else if ( row < 0 )
-  {
     row = 0;
-  }
 }
 
 
@@ -151,27 +138,24 @@ void SpectrumDataSource::RestrictRow( int & row )
  * @param col  If col is more than n_cols-1, it is set to n_cols-1.  If
  *             col < 0 it is set to zero.
  */
-void SpectrumDataSource::RestrictCol( int & col )
+void SpectrumDataSource::restrictCol( int & col )
 {
-  if ( col >= (int)total_cols )
-  {
-    col = (int)total_cols - 1;
-  }
+  if ( col >= (int)m_totalCols )
+    col = (int)m_totalCols - 1;
+
   else if ( col < 0 )
-  {
     col = 0;
-  }
 }
 
 
 /**
  *  Convenience method to get all the data at the maximum resolution.
  */
-DataArray* SpectrumDataSource::GetDataArray( bool is_log_x )
+DataArray_const_sptr SpectrumDataSource::getDataArray( bool isLogX )
 {
-  return GetDataArray( total_xmin, total_xmax, total_ymin, total_ymax,
-                       total_rows, total_cols, is_log_x );
+  return getDataArray( m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax,
+                       m_totalRows, m_totalCols, isLogX );
 }
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt

@@ -10,6 +10,8 @@ set ( SRC_FILES
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
+	src/DownloadInstrument.cpp
+	src/DownloadFile.cpp
 	src/ExtractMonitorWorkspace.cpp
 	src/FilterEventsByLogValuePreNexus.cpp
 	src/FindDetectorsInShape.cpp
@@ -126,21 +128,22 @@ set ( SRC_FILES
 	src/SaveMask.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
+	src/SaveNXTomo.cpp
 	src/SaveNexus.cpp
 	src/SaveNexusProcessed.cpp
-	src/SaveNXTomo.cpp
-	src/SaveParameterFile.cpp
 	src/SavePAR.cpp
 	src/SavePDFGui.cpp
 	src/SavePHX.cpp
 	src/SaveParameterFile.cpp
 	src/SaveRKH.cpp
 	src/SaveReflTBL.cpp
+	src/SaveReflThreeColumnAscii.cpp
 	src/SaveSPE.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
 	src/SetSampleMaterial.cpp
 	src/SetScalingPSD.cpp
+	src/SortTableWorkspace.cpp
 	src/UpdateInstrumentFromFile.cpp
 )
 
@@ -156,6 +159,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
+	inc/MantidDataHandling/DownloadInstrument.h
+	inc/MantidDataHandling/DownloadFile.h
 	inc/MantidDataHandling/ExtractMonitorWorkspace.h
 	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
@@ -267,21 +272,22 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveMask.h
 	inc/MantidDataHandling/SaveNISTDAT.h
 	inc/MantidDataHandling/SaveNXSPE.h
+	inc/MantidDataHandling/SaveNXTomo.h
 	inc/MantidDataHandling/SaveNexus.h
 	inc/MantidDataHandling/SaveNexusProcessed.h
-	inc/MantidDataHandling/SaveNXTomo.h
-	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SavePAR.h
 	inc/MantidDataHandling/SavePDFGui.h
 	inc/MantidDataHandling/SavePHX.h
 	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SaveRKH.h
 	inc/MantidDataHandling/SaveReflTBL.h
+	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetSampleMaterial.h
 	inc/MantidDataHandling/SetScalingPSD.h
+	inc/MantidDataHandling/SortTableWorkspace.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
 	src/LoadRaw/byte_rel_comp.h
 	src/LoadRaw/isisraw.h
@@ -301,6 +307,8 @@ set ( TEST_FILES
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
+	DownloadInstrumentTest.h
+	DownloadFileTest.h
 	ExtractMonitorWorkspaceTest.h
 	FilterEventsByLogValuePreNexusTest.h
 	FindDetectorsInShapeTest.h
@@ -403,6 +411,7 @@ set ( TEST_FILES
 	SaveMaskTest.h
 	SaveNISTDATTest.h
 	SaveNXSPETest.h
+	SaveNXTomoTest.h
 	SaveNexusProcessedTest.h
 	SaveNexusTest.h
 	SavePARTest.h
@@ -411,10 +420,12 @@ set ( TEST_FILES
 	SaveParameterFileTest.h
 	SaveRKHTest.h
 	SaveReflTBLTest.h
+	SaveReflThreeColumnAsciiTest.h
 	SaveSPETest.h
 	SaveToSNSHistogramNexusTest.h
 	SetSampleMaterialTest.h
 	SetScalingPSDTest.h
+	SortTableWorkspaceTest.h
 	UpdateInstrumentFromFileTest.h
 	XMLInstrumentParameterTest.h
 )

@@ -28,7 +28,7 @@ namespace SimpleGui
  @author Michael Reuter
  @date 10/10/2011
 
- Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -62,7 +62,7 @@ public:
   virtual ~SplatterPlotView();
 
   /// @see ViewBase::checkView
-  void checkView();
+  void checkView(ModeControlWidget::Views initialView);
   /**
    * ViewBase::destroyView
    */

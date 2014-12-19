@@ -27,7 +27,7 @@ namespace MantidQt
      * It has as its state a QStringList, which are the accumulated error messages after multiple
      * calls to its "check[...]" member-functions.
      *
-     * Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     * Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
      *
      * This file is part of Mantid.
      *

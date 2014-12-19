@@ -7,17 +7,17 @@
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/DerivMinimizer.h"
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 /** Implementing Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm
-    by wrapping the IFuncMinimizer interface around the GSL implementation of this algorithm.
+    by wrapping the IFuncMinimizer interface around the GSL implementation of
+   this algorithm.
 
     @author Anders Markvardsen, ISIS, RAL
     @date 13/1/2010
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -37,23 +37,20 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport BFGS_Minimizer : public DerivMinimizer
-{
+class DLLExport BFGS_Minimizer : public DerivMinimizer {
 public:
   /// Constructor.
-  BFGS_Minimizer():DerivMinimizer()  {}
+  BFGS_Minimizer() : DerivMinimizer() {}
   /// Name of the minimizer.
-  std::string name() const {return "BFGS_Minimizer";}
+  std::string name() const { return "BFGS_Minimizer"; }
 
 protected:
-
   /// Return a concrete type to initialize m_gslSolver with
-  virtual const gsl_multimin_fdfminimizer_type* getGSLMinimizerType();
+  virtual const gsl_multimin_fdfminimizer_type *getGSLMinimizerType();
 
   /// Static reference to the logger class
-  static Kernel::Logger& g_log;
+  static Kernel::Logger &g_log;
 };
-
 
 } // namespace CurveFitting
 } // namespace Mantid

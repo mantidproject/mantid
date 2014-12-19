@@ -10,10 +10,8 @@
 #include <cmath>
 #include <complex>
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 /*
     Special functions used as part of peak shape functions that are not
     included in the Gnu Scientific Lib or other C/C++ open source code projects
@@ -21,7 +19,8 @@ namespace CurveFitting
     @author Anders J Markvardsen, Rutherford Appleton Laboratory
     @date 30/09/2009
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -41,10 +40,11 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-namespace SpecialFunctionSupport
-{
-  /// Compute exp(z)*E1(z) where z is complex and E1(z) is the Exponential Integral
-  std::complex<double> DLLExport exponentialIntegral(const std::complex<double>& z);
+namespace SpecialFunctionSupport {
+/// Compute exp(z)*E1(z) where z is complex and E1(z) is the Exponential
+/// Integral
+std::complex<double> DLLExport
+    exponentialIntegral(const std::complex<double> &z);
 
 } // namespace SpecialFunctionSupport
 } // namespace CurveFitting

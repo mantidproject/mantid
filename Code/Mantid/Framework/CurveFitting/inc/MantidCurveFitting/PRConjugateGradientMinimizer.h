@@ -7,17 +7,17 @@
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/DerivMinimizer.h"
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 /** Implementing Polak-Ribiere flavour of the conjugate gradient algorithm
-    by wrapping the IFuncMinimizer interface around the GSL implementation of this algorithm.
+    by wrapping the IFuncMinimizer interface around the GSL implementation of
+   this algorithm.
 
     @author Anders Markvardsen, ISIS, RAL
     @date 13/1/2010
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -37,21 +37,17 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PRConjugateGradientMinimizer : public DerivMinimizer
-{
+class DLLExport PRConjugateGradientMinimizer : public DerivMinimizer {
 public:
-
   /// Constructor.
-  PRConjugateGradientMinimizer():DerivMinimizer()  {}
+  PRConjugateGradientMinimizer() : DerivMinimizer() {}
   /// Name of the minimizer.
-  std::string name() const {return "Conjugate gradient (Polak-Ribiere imp.)";}
+  std::string name() const { return "Conjugate gradient (Polak-Ribiere imp.)"; }
 
 protected:
-
   /// Return a concrete type to initialize m_gslSolver with
-  virtual const gsl_multimin_fdfminimizer_type* getGSLMinimizerType();
+  virtual const gsl_multimin_fdfminimizer_type *getGSLMinimizerType();
 };
-
 
 } // namespace CurveFitting
 } // namespace Mantid

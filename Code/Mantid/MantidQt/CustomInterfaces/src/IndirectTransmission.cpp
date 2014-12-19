@@ -100,6 +100,9 @@ namespace CustomInterfaces
     transAlg->setProperty("Plot", false);
     transAlg->setProperty("Save", false);
 
+    // Set the workspace name for Python script export
+    m_pythonExportWsName = sampleWsName.toStdString() + "_Trans";
+
     runAlgorithm(transAlg);
   }
 

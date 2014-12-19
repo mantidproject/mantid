@@ -9,17 +9,17 @@
 #include "DllOption.h"
 
 /**
-    @class RefImageView 
-  
-      This is the QMainWindow for the SpectrumView data viewer.  Data is
+    @class RefImageView
+
+    This is the QMainWindow for the SpectrumView data viewer.  Data is
     displayed in an SpectrumView, by constructing the SpectrumView object and
     specifying a particular data source.
- 
-    @author Dennis Mikkelson 
-    @date   2012-04-03 
-     
+
+    @author Dennis Mikkelson
+    @date   2012-04-03
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -34,45 +34,52 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
+
+namespace Ui
+{
+class RefImageViewer;
+}
 
 namespace MantidQt
 {
 namespace RefDetectorViewer
 {
+class RefSliderHandler;
+class RefRangeHandler;
+class RefImageDisplay;
+class RefIVConnections;
 
-  class RefIVConnections;
 class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageView : public QMainWindow
 {
   public:
 
-     /// Construct an RefImageView to display data from the specified data source 
-     RefImageView( SpectrumView::SpectrumDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max);
+     /// Construct an RefImageView to display data from the specified data source
+     RefImageView( SpectrumView::SpectrumDataSource_sptr dataSource,
+                   int peakMin, int peakMax,
+                   int backMin, int backMax,
+                   int tofMin,  int tofMax);
 
-    ~RefImageView();    
-    
+    ~RefImageView();
+
     RefIVConnections* getIVConnections();
 
   private:
-    SpectrumView::GraphDisplay*    h_graph;
-    SpectrumView::GraphDisplay*    v_graph;
-                                 
-    // keep void pointers to the following objects, to avoid having to 
-    // include ui_RefImageView.h, which disappears by the time MantidPlot is
-    // being built.  We need the pointers so we can delete them in the 
-    // destructor.  
-    void*            saved_ui;               // Ui_RefImageViewer*
-    void*            saved_slider_handler;   // SliderHandler*
-    void*            saved_range_handler;    // RangeHandler*
-    void*            saved_image_display;    // RefImageDisplay*
-    //    void*            saved_iv_connections;   // IVConnections*
-    RefIVConnections*            saved_iv_connections;   // IVConnections*
+    SpectrumView::GraphDisplay* m_hGraph;
+    SpectrumView::GraphDisplay* m_vGraph;
+
+    Ui::RefImageViewer* m_ui;
+    RefSliderHandler*   m_sliderHandler;
+    RefRangeHandler*    m_rangeHandler;
+    RefImageDisplay*    m_imageDisplay;
+    RefIVConnections*   m_ivConnections;
+
 };
 
 } // namespace RefDetectorViewer
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif   // REF_IMAGE_VIEW_H

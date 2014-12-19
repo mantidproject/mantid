@@ -7,16 +7,15 @@
 #include "MantidKernel/TypedValidator.h"
 #include <vector>
 
-namespace Mantid
-{
-namespace Kernel
-{
+namespace Mantid {
+namespace Kernel {
 /** Validator to check the format of a vector providing the rebin
     parameters to an algorithm.
 
     @author Russell Taylor, Tessella plc
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -36,15 +35,17 @@ namespace Kernel
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL RebinParamsValidator : public TypedValidator<std::vector<double> >
-{
+class MANTID_KERNEL_DLL RebinParamsValidator
+    : public TypedValidator<std::vector<double>> {
 public:
-  RebinParamsValidator(bool allowEmpty=false);
+  RebinParamsValidator(bool allowEmpty = false);
   virtual ~RebinParamsValidator() {}
-  IValidator_sptr clone() const { return boost::make_shared<RebinParamsValidator>(*this); }
+  IValidator_sptr clone() const {
+    return boost::make_shared<RebinParamsValidator>(*this);
+  }
 
 private:
-  std::string checkValidity( const std::vector<double> &value ) const;
+  std::string checkValidity(const std::vector<double> &value) const;
   bool m_allowEmpty;
 };
 

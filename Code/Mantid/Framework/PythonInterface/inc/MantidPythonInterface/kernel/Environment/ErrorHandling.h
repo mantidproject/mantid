@@ -1,7 +1,8 @@
 #ifndef MANTID_PYTHONINTERFACE_ERRORHANDLING_H
 #define MANTID_PYTHONINTERFACE_ERRORHANDLING_H
-/** 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+/**
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -18,7 +19,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>    
+    File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 #include "MantidKernel/System.h"
 
@@ -27,14 +28,13 @@
  * a Python error state to C++ exceptions.
  */
 
-namespace Mantid { namespace PythonInterface {
-  namespace Environment
-  {
-    /// Convert Python error state to C++ exception
-    DLLExport void throwRuntimeError(const bool withTrace = true);
-  }
-}}
-
-
+namespace Mantid {
+namespace PythonInterface {
+namespace Environment {
+/// Convert Python error state to C++ exception
+DLLExport void throwRuntimeError(const bool withTrace = true);
+}
+}
+}
 
 #endif /* MANTID_PYTHONINTERFACE_CALLMETHOD_H_ */

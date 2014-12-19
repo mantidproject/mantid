@@ -1,9 +1,7 @@
-
 #include <iostream>
-#include  "MantidQtSpectrumViewer/SpectrumView.h"
-#include  "MantidQtSpectrumViewer/ColorMaps.h"
+#include "MantidQtSpectrumViewer/SpectrumView.h"
+#include "MantidQtSpectrumViewer/ColorMaps.h"
 
-#include "ui_SpectrumView.h"
 #include "MantidQtSpectrumViewer/SVConnections.h"
 #include "MantidQtSpectrumViewer/SpectrumDisplay.h"
 #include "MantidQtSpectrumViewer/SliderHandler.h"
@@ -15,7 +13,6 @@ namespace MantidQt
 {
 namespace SpectrumView
 {
-
 
 /**
  *  Construct an SpectrumView to display data from the specified data source.
@@ -30,121 +27,157 @@ namespace SpectrumView
 SpectrumView::SpectrumView(QWidget *parent) :
   QMainWindow(parent, 0),
   WorkspaceObserver(),
-  m_ui(new Ui::SpectrumViewer())
+  m_hGraph(NULL), m_vGraph(NULL),
+  m_ui(new Ui::SpectrumViewer()),
+  m_sliderHandler(NULL),
+  m_rangeHandler(NULL),
+  m_spectrumDisplay(NULL),
+  m_svConnections(NULL),
+  m_emodeHandler(NULL)
 {
   m_ui->setupUi(this);
 }
 
+
 SpectrumView::~SpectrumView()
 {
-//  std::cout << "SpectrumView destructor called" << std::endl;
+  delete m_spectrumDisplay;
+  delete m_svConnections;
 
-  delete  h_graph;
-  delete  v_graph;
-
-  delete  m_ui;
-  delete  m_slider_handler;
-  delete  m_range_handler;
-  delete  m_spectrum_display;
-  delete  m_sv_connections;
-  if ( m_emode_handler)
-  {
-    delete m_emode_handler;
-  }
+  if(m_emodeHandler)
+    delete m_emodeHandler;
 }
+
+
+/**
+ * Handles the resize event fo rthe window.
+ *
+ * Used to keep the image splitters in the correct position and
+ * in alighment with each other.
+ *
+ * @param event The resize event
+ */
+void SpectrumView::resizeEvent(QResizeEvent * event)
+{
+  QMainWindow::resizeEvent(event);
+
+  if(m_svConnections)
+    m_svConnections->imageSplitterMoved();
+}
+
+
+/**
+ * Renders a new workspace on the spectrum viewer.
+ *
+ * @param wksp The matrix workspace to render
+ */
 void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
 {
-  MatrixWSDataSource* data_source = new MatrixWSDataSource(wksp);
-  this->updateHandlers(data_source);
+  m_dataSource = MatrixWSDataSource_sptr(new MatrixWSDataSource(wksp));
+
+  updateHandlers(m_dataSource);
 
   // Watch for the deletion of the associated workspace
   observeAfterReplace();
   observePreDelete();
   observeADSClear();
 
-  // connect WorkspaceObserver signals
+  // Connect WorkspaceObserver signals
   connect(this, SIGNAL(needToClose()), this, SLOT(closeWindow()));
   connect(this, SIGNAL(needToUpdate()), this, SLOT(updateWorkspace()));
 
-  // set the window title
-  std::string title = std::string("SpectrumView (") +
-      wksp->getTitle() +
-      std::string(")");
-  this->setWindowTitle(QString::fromStdString(title));
+  // Set the window title
+  std::string windowTitle = "SpectrumView (" + wksp->getTitle() + ")";
+  this->setWindowTitle(QString::fromStdString(windowTitle).simplified());
 
-  h_graph = new GraphDisplay( m_ui->h_graphPlot, m_ui->h_graph_table, false );
-  v_graph = new GraphDisplay( m_ui->v_graphPlot, m_ui->v_graph_table, true );
+  // Remove the old graph plots
+  if(m_hGraph) delete m_hGraph;
+  if(m_vGraph) delete m_vGraph;
+  if(m_spectrumDisplay) delete m_spectrumDisplay;
+  if(m_svConnections) delete m_svConnections;
 
-  m_spectrum_display = new SpectrumDisplay( m_ui->spectrumPlot,
-                 m_slider_handler,
-                 m_range_handler,
-                 h_graph, v_graph,
-                 m_ui->image_table );
+  m_hGraph = new GraphDisplay( m_ui->h_graphPlot, m_ui->h_graph_table, false );
+  m_vGraph = new GraphDisplay( m_ui->v_graphPlot, m_ui->v_graph_table, true );
 
-  m_sv_connections = new SVConnections( m_ui, this, m_spectrum_display,
-                                        h_graph, v_graph );
+  m_spectrumDisplay = new SpectrumDisplay( m_ui->spectrumPlot,
+                                           m_sliderHandler,
+                                           m_rangeHandler,
+                                           m_hGraph, m_vGraph,
+                                           m_ui->image_table);
 
-  m_spectrum_display->SetDataSource( data_source );
+  m_svConnections = new SVConnections( m_ui, this, m_spectrumDisplay,
+                                       m_hGraph, m_vGraph );
+
+  m_spectrumDisplay->setDataSource( m_dataSource );
 }
 
-/// Setup the various handlers (energy-mode, slider, range)
-void SpectrumView::updateHandlers(SpectrumDataSource* data_source)
+
+/**
+ * Setup the various handlers (energy-mode, slider, range) for UI controls.
+ *
+ * @param dataSource The data source for the current workspace
+ */
+void SpectrumView::updateHandlers(SpectrumDataSource_sptr dataSource)
 {
-  // IF we have a MatrixWSDataSource give it the handler for the
+  // If we have a MatrixWSDataSource give it the handler for the
   // EMode, so the user can set EMode and EFixed.  NOTE: we could avoid
   // this type checking if we made the ui in the calling code and passed
   // it in.  We would need a common base class for this class and
   // the ref-viewer UI.
-  MatrixWSDataSource* matrix_ws_data_source =
-                      dynamic_cast<MatrixWSDataSource*>( data_source );
-  if ( matrix_ws_data_source != 0 )
+  MatrixWSDataSource_sptr matrixWsDataSource = boost::dynamic_pointer_cast<MatrixWSDataSource>( dataSource );
+
+  if ( matrixWsDataSource != NULL )
   {
-    m_emode_handler = new EModeHandler( m_ui );
-    matrix_ws_data_source -> SetEModeHandler( m_emode_handler );
+    m_emodeHandler = new EModeHandler( m_ui );
+    matrixWsDataSource -> setEModeHandler( m_emodeHandler );
   }
   else
   {
-    m_emode_handler = 0;
+    m_emodeHandler = NULL;
   }
 
-  m_slider_handler = new SliderHandler( m_ui );
-  m_range_handler = new RangeHandler( m_ui );
-
+  m_sliderHandler = new SliderHandler( m_ui );
+  m_rangeHandler = new RangeHandler( m_ui );
 }
 
-/** Slot to close the window */
+
+/**
+ * Slot to close the window.
+ */
 void SpectrumView::closeWindow()
 {
   close();
 }
 
-/** Slot to replace the workspace being looked at. */
-void SpectrumView::updateWorkspace()
-{
-  close(); // TODO the right thing
-}
 
-/** Signal to close this window if the workspace has just been deleted */
-void SpectrumView::preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+/**
+ * Signal to close this window if the workspace has just been deleted.
+ *
+ * @param wsName Name of workspace
+ * @param ws Pointer to workspace
+ */
+void SpectrumView::preDeleteHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
-  if (m_spectrum_display->hasData(wsName, ws))
+  if (m_spectrumDisplay->hasData(wsName, ws))
   {
     emit needToClose();
   }
 }
 
-/** Signal that the workspace being looked at was just replaced with a different one */
-void SpectrumView::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+
+/**
+ * Signal that the workspace being looked at was just replaced with a different one.
+ *
+ * @param wsName Name of workspace
+ * @param ws Pointer to workspace
+ */
+void SpectrumView::afterReplaceHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
-  std::cout << "afterReplaceHandle" << std::endl;
-  if (m_spectrum_display->hasData(wsName, ws))
+  if (m_spectrumDisplay->hasData(wsName, ws))
   {
-//    MatrixWSDataSource* matrix_ws_data_source = new Matrix
-//                        dynamic_cast<MatrixWSDataSource>( ws );
-//    saved_spectrum_display->SetDataSource(ws); // TODO implement the right thing
-    emit needToUpdate();
+    renderWorkspace(boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws));
   }
 }
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt

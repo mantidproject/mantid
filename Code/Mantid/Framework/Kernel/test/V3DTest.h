@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 
 using Mantid::Kernel::V3D;
@@ -300,6 +301,63 @@ public:
     TS_ASSERT_DELTA( a.angle(d), M_PI, 0.0001);
   }
 
+  void testRotate()
+  {
+    V3D direc(1,1,1);
+    const double theta = 45.0*M_PI/180.0;
+    const double invRt2(1.0/sqrt(2.0));
+
+    // rotate around X
+    Mantid::Kernel::Matrix<double> rx(3,3);
+    rx[0][0] = 1.0;
+    rx[1][1] = cos(theta);
+    rx[1][2] = -sin(theta);
+    rx[2][2] = cos(theta);
+    rx[2][1] = sin(theta);
+    direc.rotate(rx);
+
+    TS_ASSERT_DELTA(direc.X(), 1.0, 1e-08);
+    TS_ASSERT_DELTA(direc.Y(), 0.0, 1e-08);
+    TS_ASSERT_DELTA(direc.Z(), 2.0*invRt2, 1e-08);
+
+    // rotate around Y
+    direc = V3D(1,1,1);
+    Mantid::Kernel::Matrix<double> ry(3,3);
+    ry[0][0] = cos(theta);
+    ry[0][2] = sin(theta);
+    ry[1][1] = 1.0;
+    ry[2][0] = -sin(theta);
+    ry[2][2] = cos(theta);
+    direc.rotate(ry);
+
+    TS_ASSERT_DELTA(direc.X(), 2.0*invRt2, 1e-08);
+    TS_ASSERT_DELTA(direc.Y(), 1.0, 1e-08);
+    TS_ASSERT_DELTA(direc.Z(), 0.0, 1e-08);
+
+    // rotate around Z
+    direc = V3D(1,1,1);
+    Mantid::Kernel::Matrix<double> rz(3,3);
+    rz[0][0] = cos(theta);
+    rz[0][1] = -sin(theta);
+    rz[1][0] = sin(theta);
+    rz[1][1] = cos(theta);
+    rz[2][2] = 1.0;
+    direc.rotate(rz);
+
+    TS_ASSERT_DELTA(direc.X(), 0.0, 1e-08);
+    TS_ASSERT_DELTA(direc.Y(), 2.0*invRt2, 1e-08);
+    TS_ASSERT_DELTA(direc.Z(), 1.0, 1e-08);
+
+    // General rotation
+    Mantid::Kernel::Matrix<double> Rt = rz*ry*rx;
+    direc = V3D(1,1,1);
+    direc.rotate(Rt);
+
+    TS_ASSERT_DELTA(direc.X(), invRt2*(1+invRt2), 1e-08);
+    TS_ASSERT_DELTA(direc.Y(), invRt2*(1+invRt2), 1e-08);
+    TS_ASSERT_DELTA(direc.Z(), 1.0-invRt2, 1e-08);
+  }
+
   void testSpherical()
   {
     double r = 3, theta = 45.0, phi = 45.0;
@@ -537,6 +595,47 @@ public:
     TS_ASSERT_DELTA(acos(4.0 / modv2) * 180 / M_PI, angles[2], 1e-6);
   }
 
+};
+
+//---------------------------------------------------------------------------
+// Performance tests
+//---------------------------------------------------------------------------
+
+class V3DTestPerformance : public CxxTest::TestSuite
+{
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static V3DTestPerformance *createSuite() { return new V3DTestPerformance(); }
+  static void destroySuite( V3DTestPerformance *suite ) { delete suite; }
+
+  V3DTestPerformance()
+  {
+    const double theta = 45.0*M_PI/180.0;
+
+    // rotate around X
+    m_rotx = Mantid::Kernel::Matrix<double>(3,3);
+    m_rotx[0][0] = 1.0;
+    m_rotx[1][1] = cos(theta);
+    m_rotx[1][2] = -sin(theta);
+    m_rotx[2][2] = cos(theta);
+    m_rotx[2][1] = sin(theta);
+  }
+
+  void testRotate()
+  {
+    V3D direction(1.0,1.0,1.0);
+    for(size_t i = 0; i < 100000; ++i)
+    {
+      direction = V3D(1.0,1.0,1.0);
+      direction.rotate(m_rotx);
+    }
+    // Do something so the compiler doesn't optimise the loop away
+    TS_ASSERT_DELTA(direction.Y(), 0.0, 1e-08);
+  }
+
+private:
+  Mantid::Kernel::Matrix<double> m_rotx;
 };
 
 #endif

@@ -14,6 +14,7 @@ set ( SRC_FILES src/CatalogPublishDialog.cpp
                 src/SampleShapeHelpers.cpp
                 src/SlicingAlgorithmDialog.cpp
                 src/SmoothNeighboursDialog.cpp
+                src/SortTableWorkspaceDialog.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
@@ -35,6 +36,7 @@ set ( MOC_FILES inc/MantidQtCustomDialogs/CatalogPublishDialog.h
                 inc/MantidQtCustomDialogs/SampleShapeHelpers.h
                 inc/MantidQtCustomDialogs/SlicingAlgorithmDialog.h
                 inc/MantidQtCustomDialogs/SmoothNeighboursDialog.h
+                inc/MantidQtCustomDialogs/SortTableWorkspaceDialog.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -53,6 +55,7 @@ set ( UI_FILES inc/MantidQtCustomDialogs/CatalogPublishDialog.ui
                inc/MantidQtCustomDialogs/StartLiveDataDialog.ui
                inc/MantidQtCustomDialogs/SlicingAlgorithmDialog.ui
                inc/MantidQtCustomDialogs/FitDialog.ui
+               inc/MantidQtCustomDialogs/SortTableWorkspaceDialog.ui
 )
 
 include_directories ( inc )

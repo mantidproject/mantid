@@ -1,11 +1,14 @@
 #include "MantidTable.h"
 #include "../ApplicationWindow.h"
+#include "../Mantid/MantidUI.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Algorithm.h"
 
 #include <QApplication>
 #include <QMessageBox>
+#include <QHash>
+
 #include <iostream>
 #include <qfontmetrics.h>
 
@@ -410,4 +413,11 @@ void MantidTable::sortColumns(const QStringList&s, int type, int order, const QS
     // Fall-back to the default sorting of the table
     Table::sortColumns(s, type, order, leadCol);
   }
+}
+
+void MantidTable::sortTableDialog()
+{
+  QHash<QString, QString> paramList;
+  paramList["InputWorkspace"] = QString::fromStdString(m_wsName);
+  applicationWindow()->mantidUI->showAlgorithmDialog("SortTableWorkspace",paramList);
 }

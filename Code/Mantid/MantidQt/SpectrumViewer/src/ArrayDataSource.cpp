@@ -16,39 +16,38 @@ namespace SpectrumView
  * when this class is deleted.  The calling code should not change the
  * values in the array or delete it!
  *
- * @param total_xmin   The x-coordinate at the left edge of the first column
- *                     of data. 
- * @param total_xmax   The x-coordinate at the right edge of the last column
- *                     of data. 
- * @param total_ymin   The y-coordinate at the bottom edge of bottom row of
+ * @param m_totalXMin   The x-coordinate at the left edge of the first column
+ *                     of data.
+ * @param m_totalXMax   The x-coordinate at the right edge of the last column
+ *                     of data.
+ * @param m_totalYMin   The y-coordinate at the bottom edge of bottom row of
  *                     the data region.
- * @param total_ymax   The y-coordinate at the top edge of the top row of
+ * @param m_totalYMax   The y-coordinate at the top edge of the top row of
  *                     the data region
- * @param total_rows   The number of rows the data values are divided into.
- * @param total_cols   The number of columns the test values are divided 
+ * @param m_totalRows   The number of rows the data values are divided into.
+ * @param m_totalCols   The number of columns the test values are divided
  *                     into.
  * @param data         The list of floats holding the data to be displayed,
- *                     stored in row major order.                    
+ *                     stored in row major order.
  */
-ArrayDataSource::ArrayDataSource( double total_xmin, double total_xmax,
-                                  double total_ymin, double total_ymax,
-                                  size_t total_rows, size_t total_cols,
-                                  float* data )
-                :SpectrumDataSource( total_xmin, total_xmax,
-				     total_ymin, total_ymax,
-				     total_rows, total_cols )
+ArrayDataSource::ArrayDataSource( double m_totalXMin, double m_totalXMax,
+                                  double m_totalYMin, double m_totalYMax,
+                                  size_t m_totalRows, size_t m_totalCols,
+                                  std::vector<float> data ) :
+  SpectrumDataSource( m_totalXMin, m_totalXMax,
+                      m_totalYMin, m_totalYMax,
+                      m_totalRows, m_totalCols ),
+  m_data(data)
 {
-  this->data       = data;
 }
 
 
 ArrayDataSource::~ArrayDataSource()
 {
-  delete[] data;
 }
 
 bool ArrayDataSource::hasData(const std::string& wsName,
-                     const boost::shared_ptr<Mantid::API::Workspace> ws)
+                              const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
   UNUSED_ARG(wsName);
   UNUSED_ARG(ws);
@@ -57,66 +56,73 @@ bool ArrayDataSource::hasData(const std::string& wsName,
 
 /**
  * Get a data array covering the specified range of data, at the specified
- * resolution.  NOTE: The calling code is responsible for deleting the 
+ * resolution.  NOTE: The calling code is responsible for deleting the
  * DataArray that is returned, when it is no longer needed.
  *
- * @param xmin      Left edge of region to be covered.
- * @param xmax      Right edge of region to be covered.
- * @param ymin      Bottom edge of region to be covered.
- * @param ymax      Top edge of region to be covered.
- * @param n_rows    Number of rows to return. If the number of rows is less
- *                  than the actual number of data rows in [ymin,ymax], the 
- *                  data will be subsampled, and only the specified number 
+ * @param xMin      Left edge of region to be covered.
+ * @param xMax      Right edge of region to be covered.
+ * @param yMin      Bottom edge of region to be covered.
+ * @param yMax      Top edge of region to be covered.
+ * @param nRows    Number of rows to return. If the number of rows is less
+ *                  than the actual number of data rows in [yMin,yMax], the
+ *                  data will be subsampled, and only the specified number
  *                  of rows will be returned.
- * @param n_cols    The event data will be rebinned using the specified
+ * @param nCols    The event data will be rebinned using the specified
  *                  number of colums.
- * @param is_log_x  Flag indicating whether or not the data should be
+ * @param isLogX  Flag indicating whether or not the data should be
  *                  binned logarithmically in the X-direction.  This
  *                  DataSource does not support rebinning to a log axis, so
- *                  the DataArray is always returned with is_log_x = false. 
+ *                  the DataArray is always returned with isLogX = false.
  */
-DataArray * ArrayDataSource::GetDataArray( double xmin,   double  xmax,
-                                           double ymin,   double  ymax,
-                                           size_t n_rows, size_t  n_cols,
-                                           bool   is_log_x )
+DataArray_const_sptr ArrayDataSource::getDataArray( double xMin,   double  xMax,
+                                                    double yMin,   double  yMax,
+                                                    size_t nRows,  size_t  nCols,
+                                                    bool   isLogX )
 {
-  size_t first_col;
-  SVUtils::CalculateInterval( total_xmin, total_xmax, total_cols,
-                              first_col, xmin, xmax, n_cols );
+  size_t firstCol;
+  SVUtils::CalculateInterval( m_totalXMin, m_totalXMax, m_totalCols,
+                              firstCol, xMin, xMax, nCols );
 
-  size_t first_row;
-  SVUtils::CalculateInterval( total_ymin, total_ymax, total_rows,
-                              first_row, ymin, ymax, n_rows );
+  size_t firstRow;
+  SVUtils::CalculateInterval( m_totalYMin, m_totalYMax, m_totalRows,
+                              firstRow, yMin, yMax, nRows );
 
-  float* new_data = new float[n_rows * n_cols];   // This is deleted in the
-                                                  // DataArray destructor
+  std::vector<float> newData(nRows * nCols);
 
-  double x_step = (xmax - xmin) / (double)n_cols;
-  double y_step = (ymax - ymin) / (double)n_rows;
-  double d_x_index,
-         d_y_index;
-  size_t index = 0;                               // get data for middle of
-  for ( size_t row = 0; row < n_rows; row++ )     // each destination position
+  double xStep = (xMax - xMin) / (double)nCols;
+  double yStep = (yMax - yMin) / (double)nRows;
+
+  double xIndex;
+  double yIndex;
+  size_t index = 0;
+
+  /* Get data for middle of */
+  /* each destination position */
+  for ( size_t row = 0; row < nRows; row++ )
   {
-    double mid_y = ymin + ((double)row + 0.5) * y_step;
-    SVUtils::Interpolate( total_ymin, total_ymax, mid_y,
-                                 0.0, (double)total_rows, d_y_index );
-    size_t source_row = (size_t)d_y_index;
-    for ( size_t col = 0; col < n_cols; col++ )
+    double midY = yMin + ((double)row + 0.5) * yStep;
+    SVUtils::Interpolate( m_totalYMin, m_totalYMax,         midY,
+                          0.0,         (double)m_totalRows, yIndex );
+
+    size_t sourceRow = (size_t)yIndex;
+    for ( size_t col = 0; col < nCols; col++ )
     {
-      double mid_x = xmin + ((double)col + 0.5) * x_step;
-      SVUtils::Interpolate( total_xmin, total_xmax, mid_x,
-                                   0.0, (double)total_cols, d_x_index );
-      size_t source_col = (size_t)d_x_index;             
-      new_data[index] = data[source_row * total_cols + source_col];
+      double midX = xMin + ((double)col + 0.5) * xStep;
+      SVUtils::Interpolate( m_totalXMin, m_totalXMax,         midX,
+                            0.0,         (double)m_totalCols, xIndex );
+
+      size_t sourceCol = (size_t)xIndex;
+
+      newData[index] = m_data[sourceRow * m_totalCols + sourceCol];
       index++;
-    } 
+    }
   }
-                                           // The calling code is responsible
-  is_log_x = false;                        // for deleting the DataArray
-  DataArray* new_data_array = new DataArray( xmin, xmax, ymin, ymax, 
-                                           is_log_x, n_rows, n_cols, new_data);
-  return new_data_array;
+
+  // The calling code is responsible for deleting the DataArray
+  isLogX = false;
+  DataArray_const_sptr newDataArray( new DataArray( xMin, xMax, yMin, yMax,
+                                           isLogX, nRows, nCols, newData) );
+  return newDataArray;
 }
 
 
@@ -125,22 +131,22 @@ DataArray * ArrayDataSource::GetDataArray( double xmin,   double  xmax,
  * NOTE: The calling code is responsible for deleting the DataArray that is
  * returned, when it is no longer needed.
  *
- * @param is_log_x  Flag indicating whether or not the data should be
- *                  binned logarithmically.  This DataSource does not 
- *                  support rebinning to a log axis, so the DataArray is 
- *                  always returned with is_log_x = false.
+ * @param isLogX  Flag indicating whether or not the data should be
+ *                binned logarithmically.  This DataSource does not
+ *                support rebinning to a log axis, so the DataArray is
+ *                always returned with isLogX = false.
  */
-DataArray * ArrayDataSource::GetDataArray( bool is_log_x )
+DataArray_const_sptr ArrayDataSource::getDataArray( bool isLogX )
 {
-  is_log_x = false;
-  return GetDataArray( total_xmin, total_xmax, total_ymin, total_ymax,
-                       total_rows, total_cols, is_log_x );
+  isLogX = false;
+  return getDataArray( m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax,
+                       m_totalRows, m_totalCols, isLogX );
 }
 
 
 /**
  * Clear the vector of strings and then add pairs of strings giving information
- * about the specified point, x, y.  The first string in a pair should 
+ * about the specified point, x, y.  The first string in a pair should
  * generally be a string describing the value being presented and the second
  * string should contain the value.
  *
@@ -148,7 +154,7 @@ DataArray * ArrayDataSource::GetDataArray( bool is_log_x )
  * @param y    The y-coordinate of the point of interest in the data.
  * @param list Vector that will be filled out with the information strings.
  */
-void ArrayDataSource::GetInfoList( double x, 
+void ArrayDataSource::getInfoList( double x,
                                    double y,
                                    std::vector<std::string> &list )
 {
@@ -159,4 +165,4 @@ void ArrayDataSource::GetInfoList( double x,
 }
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt

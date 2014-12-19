@@ -77,9 +77,7 @@ namespace Factory
    */
   MantidQt::SliceViewer::SliceViewerWindow* WidgetFactory::getSliceViewerWindow(const QString& wsName,  const QString& label)
   {
-
-    std::vector<QPointer<MantidQt::SliceViewer::SliceViewerWindow> >::iterator it;
-    for (it = m_windows.begin(); it != m_windows.end(); ++it)
+    for (auto it = m_windows.begin(); it != m_windows.end(); ++it)
     {
       QPointer<MantidQt::SliceViewer::SliceViewerWindow> window = *it;
       if (window)
@@ -99,8 +97,7 @@ namespace Factory
    */
   void WidgetFactory::closeAllSliceViewerWindows()
   {
-    std::vector<QPointer<MantidQt::SliceViewer::SliceViewerWindow> >::iterator it;
-    for (it = m_windows.begin(); it != m_windows.end(); ++it)
+    for (auto it = m_windows.begin(); it != m_windows.end(); ++it)
     {
       QPointer<MantidQt::SliceViewer::SliceViewerWindow> window = *it;
       if (window)
@@ -108,6 +105,18 @@ namespace Factory
         window->close(true);
     }
     m_windows.clear();
+  }
+
+  /**
+   * Closes one instance
+   */
+  void WidgetFactory::closeSliceViewerWindow(SliceViewerWindow* w)
+  {
+    if (w)
+    {
+      w->close(true);
+      m_windows.remove(w);
+    }
   }
 
   //----------------------------------------------------------------------------------------------

@@ -16,7 +16,10 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
+
 #include "MantidQtAPI/AlgorithmDialog.h"
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+
 #include <Poco/NObserver.h>
 
 #include <QDockWidget>
@@ -46,8 +49,15 @@ namespace MantidQt
   {
     class FitPropertyBrowser;
   }
+  namespace SliceViewer
+  {
+    class SliceViewerWindow;
+  }
+  namespace SpectrumView
+  {
+    class SpectrumView;
+  }
 }
-
 namespace Ui
 {
   class SequentialFitDialog;
@@ -67,7 +77,7 @@ MantidUI is the extension of QtiPlot's ApplicationWindow which deals with Mantid
 @author Roman Tolchenov, Tessella Support Services plc
 @date 02/07/2008
 
-Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -181,7 +191,9 @@ public:
   MultiLayer* createGraphFromTable(Table* t, int type = 0);
 
   // Shows 1D graphs of the spectra (rows) selected in a MantidMatrix
-  MultiLayer* plotSelectedRows(const MantidMatrix * const m, bool errs = true, bool distr = false);
+  MultiLayer* plotSelectedRows(const MantidMatrix * const m,
+                               MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+                               bool errs = true);
   // Shows 1D graphs of the columns (bins) selected in a MantidMatrix
   MultiLayer* plotSelectedColumns(const MantidMatrix * const m, bool errs = true);
 
@@ -199,22 +211,25 @@ public:
   public slots:
     // Create a 1d graph form specified MatrixWorkspace and index
   MultiLayer* plot1D(const QStringList& wsnames, const QList<int>& indexList, bool spectrumPlot,
-                              bool errs=true, Graph::CurveType style = Graph::Unspecified,
-                              MultiLayer* plotWindow = NULL, bool clearWindow = false);
+                     bool errs=true, Graph::CurveType style = Graph::Unspecified,
+                     MultiLayer* plotWindow = NULL, bool clearWindow = false);
 
   MultiLayer* plot1D(const QString& wsName, const std::set<int>& indexList, bool spectrumPlot,
-                              bool errs=false, bool distr=false,
-                              MultiLayer* plotWindow = NULL, bool clearWindow = false);
+                     MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+                     bool errs=false,
+                     MultiLayer* plotWindow = NULL, bool clearWindow = false);
 
   MultiLayer* plot1D(const QMultiMap<QString,int>& toPlot, bool spectrumPlot,
-                              bool errs=false, bool distr=false,
-                              Graph::CurveType style = Graph::Unspecified,
-                              MultiLayer* plotWindow = NULL, bool clearWindow = false);
+                     MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+                     bool errs=false,
+                     Graph::CurveType style = Graph::Unspecified,
+                     MultiLayer* plotWindow = NULL, bool clearWindow = false);
 
   MultiLayer* plot1D(const QMultiMap<QString,std::set<int> >& toPlot, bool spectrumPlot,
-                              bool errs=false, bool distr=false,
-                              MultiLayer* plotWindow = NULL, bool clearWindow = false);
-
+                     MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+                     bool errs=false,
+                     MultiLayer* plotWindow = NULL, bool clearWindow = false);
+  
     /// Draw a color fill plot for each of the listed workspaces
     void drawColorFillPlots(const QStringList & wsNames, Graph::CurveType curveType = Graph::ColorMap);
     /// Draw a color fill plot for the named workspace
@@ -222,7 +237,9 @@ public:
                                         MultiLayer* window = NULL);
 
     // Create a 1d graph form specified spectra in a MatrixWorkspace
-    MultiLayer* plotSpectraRange(const QString& wsName, int i0, int i1, bool errs=true, bool distr=false);
+    MultiLayer* plotSpectraRange(const QString& wsName, int i0, int i1, 
+                                 MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+                                 bool errs=true);
 
     // Set properties of a 1d graph which plots data from a workspace
     static void setUpBinGraph(MultiLayer* ml, const QString& wsName, Mantid::API::MatrixWorkspace_const_sptr workspace);
@@ -267,7 +284,6 @@ public:
 
   MultiLayer* mergePlots(MultiLayer* g1, MultiLayer* g2);
   MantidMatrix* getMantidMatrix(const QString& wsName);
-  MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
 
   void setIsRunning(bool running);
   bool createScriptInputDialog(const QString & alg_name, const QString & preset_values,
@@ -282,16 +298,13 @@ public:
   */
   void savedatainNexusFormat(const std::string& fileName,const std::string & wsName);
 
-  /** load data from nexus file.This method is useful 
-  when a project is opened  from mantidplot
-  */
-  void loaddataFromNexusFile(const std::string& wsname,const std::string& fileName,bool project=false);
-  void loadadataFromRawFile(const std::string& wsname,const std::string& fileName,bool project=false);
+  void loadWSFromFile(const std::string& wsname,const std::string& fileName);
 
-  MantidMatrix* openMatrixWorkspace(ApplicationWindow* parent,const QString& wsName,int lower,int upper);
+  MantidMatrix* openMatrixWorkspace(const std::string& wsName, int lower, int upper);
 
   void saveProject(bool save);
   void enableSaveNexus(const QString & wsName);
+  void disableSaveNexus();
 
 signals:
   //A signal to indicate that we want a script to produce a dialog
@@ -378,12 +391,12 @@ signals:
 
     // Execute algorithm given name and version
     void showAlgorithmDialog(const QString & algName, int version = -1);
-    //Execute an algorithm with the given parameter list
-    void showAlgorithmDialog(QString algName, QHash<QString, QString> paramList, Mantid::API::AlgorithmObserver* obs = NULL);
+    // Execute an algorithm with the given parameter list
+    void showAlgorithmDialog(QString algName, QHash<QString, QString> paramList, Mantid::API::AlgorithmObserver *obs = NULL, int version = -1);
     // Execute an algorithm
     void executeAlgorithm(Mantid::API::IAlgorithm_sptr alg);
     // Execute a named algorithm using the given parameters
-    void executeAlgorithm(const QString & algName, const QString & paramList,Mantid::API::AlgorithmObserver* obs);
+    void executeAlgorithm(const QString & algName, const QString & paramList, Mantid::API::AlgorithmObserver* obs);
 
     // Find the name of the first input workspace for an algorithm
     QString findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algorithm) const;
@@ -409,6 +422,9 @@ signals:
 
     // Show log files for selected workspace
     void showLogFileWindow();
+
+    // Show sample material window for selected workspace
+    void showSampleMaterialWindow();
 
     void insertMenu();
 
@@ -500,6 +516,10 @@ private:
   ///extracts the files from a mimedata object that have a .py extension
   QStringList extractPyFiles(const QList<QUrl>& urlList) const;
 
+  // Whether new plots shoul re-use the same plot instance (for every different type of plot).
+  // The name comes from: these plots are normally opened from the context menu of the workspaces dock window
+  bool workspacesDockPlot1To1();
+
   // Private variables
 
   ApplicationWindow *m_appWindow;             // QtiPlot main ApplicationWindow
@@ -528,6 +548,14 @@ private:
   QMenu *mantidMenu;
   QMenu *menuMantidMatrix;             //  MantidMatrix specific menu
   AlgorithmMonitor *m_algMonitor;      //  Class for monitoring running algorithms
+
+  // keep track of the last shown, which will be refreshed or killed/rebuilt if showing only one inst. window
+  // QPointer handles when events, etc. destroy these windows
+  QPointer<InstrumentWindow> m_lastShownInstrumentWin;
+  QPointer<MantidQt::SliceViewer::SliceViewerWindow> m_lastShownSliceViewWin;
+  QPointer<MantidQt::SpectrumView::SpectrumView> m_lastShownSpectrumViewerWin;
+  QPointer<MultiLayer> m_lastShownColorFillWin;
+  QPointer<MultiLayer> m_lastShown1DPlotWin;
 
   // Map of <workspace_name,update_interval> pairs. Positive update_intervals mean
   // UpdateDAE must be launched after LoadDAE for this workspace

@@ -30,11 +30,17 @@
  *                                                                         *
  ***************************************************************************/
 #include "Note.h"
+
+#include <boost/algorithm/string.hpp>
+
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QTextStream>
 #include <Qsci/qsciprinter.h>
 #include <QPrintDialog>
+
+#include "ApplicationWindow.h"
+#include "TSVSerialiser.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 
@@ -62,33 +68,6 @@ void Note::setName(const QString& name)
 void Note::modifiedNote()
 {
   emit modifiedWindow(this);
-}
-
-QString Note::saveToString(const QString &info, bool)
-{
-  QString s= "<note>\n";
-  s+= QString(name()) + "\t" + birthDate() + "\n";
-  s+= info;
-  s+= "WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
-  s+= "<content>\n"+te->text().stripWhiteSpace()+"\n</content>";
-  s+="\n</note>\n";
-  return s;
-}
-
-void Note::restore(const QStringList& data)
-{
-  QStringList::ConstIterator line = data.begin();
-  QStringList fields;
-
-  fields = (*line).split("\t");
-  // Needed for backwards compatability
-  if (fields[0] == "AutoExec"){
-    line++;
-  }
-
-  if (*line == "<content>") line++;
-  while (line != data.end() && *line != "</content>")
-    te->append((*line++)+"\n");  //Mantid - changes for QScintilla
 }
 
 void Note::print()
@@ -154,4 +133,59 @@ QString Note::exportASCII(const QString &filename)
     f.close();
   }
   return fn;
+}
+
+void Note::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
+{
+  Q_UNUSED(fileVersion);
+
+  std::vector<std::string> lineVec;
+  boost::split(lineVec, lines, boost::is_any_of("\n"));
+
+  if(lineVec.size() < 1)
+    return;
+
+  std::vector<std::string> firstLineVec;
+  boost::split(firstLineVec, lineVec[0], boost::is_any_of("\t"));
+  if(firstLineVec.size() < 2)
+    return;
+
+  const QString name = QString::fromUtf8(firstLineVec[0].c_str());
+  const QString date = QString::fromUtf8(firstLineVec[1].c_str());
+
+  setName(name);
+  app->setListViewDate(name, date);
+  setBirthDate(date);
+
+  TSVSerialiser tsv(lines);
+
+  if(tsv.hasLine("geometry"))
+  {
+    const QString geometry = QString::fromUtf8(tsv.lineAsString("geometry").c_str());
+    app->restoreWindowGeometry(app, this, geometry);
+  }
+
+  if(tsv.selectLine("WindowLabel"))
+  {
+    setWindowLabel(QString::fromUtf8(tsv.asString(1).c_str()));
+    setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
+  }
+
+  if(tsv.hasSection("content"))
+  {
+    const std::string content = tsv.sections("content").front();
+    te->setText(QString::fromUtf8(content.c_str()));
+  }
+}
+
+std::string Note::saveToProject(ApplicationWindow* app)
+{
+  TSVSerialiser tsv;
+  tsv.writeRaw("<note>");
+  tsv.writeLine(name().toStdString()) << birthDate();
+  tsv.writeRaw(app->windowGeometryInfo(this));
+  tsv.writeLine("WindowLabel") << windowLabel() << captionPolicy();
+  tsv.writeSection("content", te->text().stripWhiteSpace().toUtf8().constData());
+  tsv.writeRaw("</note>");
+  return tsv.outputLines();
 }

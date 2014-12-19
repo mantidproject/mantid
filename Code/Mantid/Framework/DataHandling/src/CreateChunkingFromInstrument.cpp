@@ -9,446 +9,428 @@
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 
-namespace Mantid
-{
-namespace DataHandling
-{
-  using namespace Mantid::API;
-  using namespace Mantid::DataObjects;
-  using namespace Mantid::Geometry;
-  using namespace Mantid::Kernel;
-  using namespace std;
+namespace Mantid {
+namespace DataHandling {
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
+using namespace std;
 
-  typedef boost::tokenizer<boost::char_separator<char> >  tokenizer;
+typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 
-  // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(CreateChunkingFromInstrument)
-  
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(CreateChunkingFromInstrument)
 
-  namespace { // anonymous namespace to hide things
-    /// Input file name
-    const string PARAM_IN_FILE("Filename");
-    /// Input workspace parameter name
-    const string PARAM_IN_WKSP("InputWorkspace");
-    /// Instrument name parameter name
-    const string PARAM_INST_NAME("InstrumentName");
-    /// Instrument file parameter name
-    const string PARAM_INST_FILE("InstrumentFilename");
-    /// Explicitly name instrument components
-    const string PARAM_CHUNK_NAMES("ChunkNames");
-    /// Canned instrument components names
-    const string PARAM_CHUNK_BY("ChunkBy");
-    /// Recursion depth parameter name
-    const string PARAM_MAX_RECURSE("MaxRecursionDepth");
-    /// Output workspace parameter name
-    const string PARAM_OUT_WKSP("OutputWorkspace");
-    /// Maximum number of banks to look for
-    const string PARAM_MAX_BANK_NUM("MaxBankNumber");
+namespace { // anonymous namespace to hide things
+/// Input file name
+const string PARAM_IN_FILE("Filename");
+/// Input workspace parameter name
+const string PARAM_IN_WKSP("InputWorkspace");
+/// Instrument name parameter name
+const string PARAM_INST_NAME("InstrumentName");
+/// Instrument file parameter name
+const string PARAM_INST_FILE("InstrumentFilename");
+/// Explicitly name instrument components
+const string PARAM_CHUNK_NAMES("ChunkNames");
+/// Canned instrument components names
+const string PARAM_CHUNK_BY("ChunkBy");
+/// Recursion depth parameter name
+const string PARAM_MAX_RECURSE("MaxRecursionDepth");
+/// Output workspace parameter name
+const string PARAM_OUT_WKSP("OutputWorkspace");
+/// Maximum number of banks to look for
+const string PARAM_MAX_BANK_NUM("MaxBankNumber");
+}
+
+//----------------------------------------------------------------------------------------------
+/** Constructor
+ */
+CreateChunkingFromInstrument::CreateChunkingFromInstrument() {}
+
+//----------------------------------------------------------------------------------------------
+/** Destructor
+ */
+CreateChunkingFromInstrument::~CreateChunkingFromInstrument() {}
+
+//----------------------------------------------------------------------------------------------
+/// Algorithm's name for identification. @see Algorithm::name
+const string CreateChunkingFromInstrument::name() const {
+  return "CreateChunkingFromInstrument";
+};
+
+/// Algorithm's version for identification. @see Algorithm::version
+int CreateChunkingFromInstrument::version() const { return 1; };
+
+/// Algorithm's category for identification. @see Algorithm::category
+const string CreateChunkingFromInstrument::category() const {
+  return "Workflow\\DataHandling";
+}
+
+/// Algorithm's summary for identification. @see Algorithm::summary
+const string CreateChunkingFromInstrument::summary() const {
+  return "Creates chunking at a level of the instrument or instrument "
+         "components.";
+}
+
+//----------------------------------------------------------------------------------------------
+/** Initialize the algorithm's properties.
+ */
+void CreateChunkingFromInstrument::init() {
+  // instrument selection
+  string grp1Name("Specify the Instrument");
+
+  std::vector<std::string> exts;
+  exts.push_back("_event.nxs");
+  exts.push_back(".nxs.h5");
+  exts.push_back(".nxs");
+  this->declareProperty(
+      new FileProperty(PARAM_IN_FILE, "", FileProperty::OptionalLoad, exts),
+      "The name of the event nexus file to read, including its full or "
+      "relative path.");
+
+  this->declareProperty(
+      new WorkspaceProperty<>(PARAM_IN_WKSP, "", Direction::Input,
+                              PropertyMode::Optional),
+      "Optional: An input workspace with the instrument we want to use.");
+
+  this->declareProperty(
+      new PropertyWithValue<string>(PARAM_INST_NAME, "", Direction::Input),
+      "Optional: Name of the instrument to base the ChunkingWorkpace on which "
+      "to base the GroupingWorkspace.");
+
+  this->declareProperty(
+      new FileProperty(PARAM_INST_FILE, "", FileProperty::OptionalLoad, ".xml"),
+      "Optional: Path to the instrument definition file on which to base the "
+      "ChunkingWorkpace.");
+
+  this->setPropertyGroup(PARAM_IN_FILE, grp1Name);
+  this->setPropertyGroup(PARAM_IN_WKSP, grp1Name);
+  this->setPropertyGroup(PARAM_INST_NAME, grp1Name);
+  this->setPropertyGroup(PARAM_INST_FILE, grp1Name);
+
+  // chunking
+  string grp2Name("Specify Instrument Components");
+
+  declareProperty(PARAM_CHUNK_NAMES, "",
+                  "Optional: A string of the instrument component names to use "
+                  "as separate groups. "
+                  "Use / or , to separate multiple groups. "
+                  "If empty, then an empty GroupingWorkspace will be created.");
+  vector<string> grouping;
+  grouping.push_back("");
+  grouping.push_back("All");
+  grouping.push_back("Group");
+  grouping.push_back("Column");
+  grouping.push_back("bank");
+  declareProperty(
+      PARAM_CHUNK_BY, "", boost::make_shared<StringListValidator>(grouping),
+      "Only used if GroupNames is empty: All detectors as one group, Groups "
+      "(East,West for SNAP), Columns for SNAP, detector banks");
+
+  this->setPropertyGroup(PARAM_CHUNK_NAMES, grp2Name);
+  this->setPropertyGroup(PARAM_CHUNK_BY, grp2Name);
+
+  // everything else
+  declareProperty(PARAM_MAX_RECURSE, 5,
+                  "Number of levels to search into the instrument (default=5)");
+  declareProperty(PARAM_MAX_BANK_NUM, 300,
+                  "Maximum bank number to search for in the instrument");
+
+  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+                      PARAM_OUT_WKSP, "", Direction::Output),
+                  "An output workspace describing the cunking.");
+}
+
+/// @copydoc Mantid::API::Algorithm::validateInputs
+map<string, string> CreateChunkingFromInstrument::validateInputs() {
+  map<string, string> result;
+
+  // get the input paramters
+  string filename = getPropertyValue(PARAM_IN_FILE);
+  string inWSname = getPropertyValue(PARAM_IN_WKSP);
+  string instName = getPropertyValue(PARAM_INST_NAME);
+  string instFilename = getPropertyValue(PARAM_INST_FILE);
+
+  // count how many ways the input instrument was specified
+  int numInst = 0;
+  if (!filename.empty())
+    numInst++;
+  if (!inWSname.empty())
+    numInst++;
+  if (!instName.empty())
+    numInst++;
+  if (!instFilename.empty())
+    numInst++;
+
+  // set the error bits
+  string msg;
+  if (numInst == 0) {
+    msg = "Must specify instrument one way";
+  } else if (numInst > 1) {
+    msg = "Can only specify instrument one way";
+  }
+  if (!msg.empty()) {
+    result[PARAM_IN_FILE] = msg;
+    result[PARAM_IN_WKSP] = msg;
+    result[PARAM_INST_NAME] = msg;
+    result[PARAM_INST_FILE] = msg;
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Constructor
-   */
-  CreateChunkingFromInstrument::CreateChunkingFromInstrument()
-  {
+  // get the chunking technology to use
+  string chunkNames = getPropertyValue(PARAM_CHUNK_NAMES);
+  string chunkGroups = getPropertyValue(PARAM_CHUNK_BY);
+  msg = "";
+  if (chunkNames.empty() && chunkGroups.empty()) {
+    msg = "Must specify either " + PARAM_CHUNK_NAMES + " or " + PARAM_CHUNK_BY;
+  } else if ((!chunkNames.empty()) && (!chunkGroups.empty())) {
+    msg = "Must specify either " + PARAM_CHUNK_NAMES + " or " + PARAM_CHUNK_BY +
+          " not both";
   }
-    
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  CreateChunkingFromInstrument::~CreateChunkingFromInstrument()
-  {
-  }
-  
-
-  //----------------------------------------------------------------------------------------------
-  /// Algorithm's name for identification. @see Algorithm::name
-  const string CreateChunkingFromInstrument::name() const { return "CreateChunkingFromInstrument";};
-  
-  /// Algorithm's version for identification. @see Algorithm::version
-  int CreateChunkingFromInstrument::version() const { return 1;};
-  
-  /// Algorithm's category for identification. @see Algorithm::category
-  const string CreateChunkingFromInstrument::category() const { return "Workflow\\DataHandling";}
-
-  /// Algorithm's summary for identification. @see Algorithm::summary
-  const string CreateChunkingFromInstrument::summary() const { return "Creates chunking at a level of the instrument or instrument components."; }
-
-  //----------------------------------------------------------------------------------------------
-  /** Initialize the algorithm's properties.
-   */
-  void CreateChunkingFromInstrument::init()
-  {
-    // instrument selection
-    string grp1Name("Specify the Instrument");
-
-    std::vector<std::string> exts;
-    exts.push_back("_event.nxs");
-    exts.push_back(".nxs.h5");
-    exts.push_back(".nxs");
-    this->declareProperty(new FileProperty(PARAM_IN_FILE, "", FileProperty::OptionalLoad, exts),
-        "The name of the event nexus file to read, including its full or relative path." );
-
-    this->declareProperty(new WorkspaceProperty<>(PARAM_IN_WKSP,"",Direction::Input, PropertyMode::Optional),
-                          "Optional: An input workspace with the instrument we want to use.");
-
-    this->declareProperty(new PropertyWithValue<string>(PARAM_INST_NAME,"",Direction::Input),
-                          "Optional: Name of the instrument to base the ChunkingWorkpace on which to base the GroupingWorkspace.");
-
-    this->declareProperty(new FileProperty(PARAM_INST_FILE, "", FileProperty::OptionalLoad, ".xml"),
-                          "Optional: Path to the instrument definition file on which to base the ChunkingWorkpace.");
-
-    this->setPropertyGroup(PARAM_IN_FILE, grp1Name);
-    this->setPropertyGroup(PARAM_IN_WKSP, grp1Name);
-    this->setPropertyGroup(PARAM_INST_NAME, grp1Name);
-    this->setPropertyGroup(PARAM_INST_FILE, grp1Name);
-
-    // chunking
-    string grp2Name("Specify Instrument Components");
-
-    declareProperty(PARAM_CHUNK_NAMES,"",
-      "Optional: A string of the instrument component names to use as separate groups. "
-      "Use / or , to separate multiple groups. "
-      "If empty, then an empty GroupingWorkspace will be created.");
-    vector<string> grouping;
-    grouping.push_back("");
-    grouping.push_back("All");
-    grouping.push_back("Group");
-    grouping.push_back("Column");
-    grouping.push_back("bank");
-    declareProperty(PARAM_CHUNK_BY, "", boost::make_shared<StringListValidator>(grouping),
-        "Only used if GroupNames is empty: All detectors as one group, Groups (East,West for SNAP), Columns for SNAP, detector banks");
-
-    this->setPropertyGroup(PARAM_CHUNK_NAMES, grp2Name);
-    this->setPropertyGroup(PARAM_CHUNK_BY, grp2Name);
-
-    // everything else
-    declareProperty(PARAM_MAX_RECURSE, 5,
-                    "Number of levels to search into the instrument (default=5)");
-    declareProperty(PARAM_MAX_BANK_NUM, 300,
-                    "Maximum bank number to search for in the instrument");
-
-    declareProperty(new WorkspaceProperty<API::ITableWorkspace>(PARAM_OUT_WKSP,"",Direction::Output),
-                    "An output workspace describing the cunking.");
+  if (!msg.empty()) {
+    result[PARAM_CHUNK_NAMES] = msg;
+    result[PARAM_CHUNK_BY] = msg;
   }
 
-  /// @copydoc Mantid::API::Algorithm::validateInputs
-  map<string, string> CreateChunkingFromInstrument::validateInputs()
-  {
-    map<string, string> result;
+  return result;
+}
 
-    // get the input paramters
-    string filename = getPropertyValue(PARAM_IN_FILE);
-    MatrixWorkspace_sptr inWS = getProperty(PARAM_IN_WKSP);
-    string instName = getPropertyValue(PARAM_INST_NAME);
-    string instFilename = getPropertyValue(PARAM_INST_FILE);
+/**
+ * Returns true if str starts with prefix.
+ *
+ * @param str The string to check.
+ * @param prefix The prefix to look for.
+ * @return true if str starts with prefix.
+ */
+bool startsWith(const string &str, const string &prefix) {
+  // can't start with if it is shorter than the prefix
+  if (str.length() < prefix.length())
+    return false;
 
-    // count how many ways the input instrument was specified
-    int numInst = 0;
-    if (!filename.empty()) numInst++;
-    if (inWS) numInst++;
-    if (!instName.empty()) numInst++;
-    if (!instFilename.empty()) numInst++;
+  return (str.substr(0, prefix.length()).compare(prefix) == 0);
+}
 
-    // set the error bits
-    string msg;
-    if (numInst == 0)
-    {
-      msg = "Must specify instrument one way";
-    }
-    else if (numInst > 1)
-    {
-      msg = "Can only specify instrument one way";
-    }
-    if (!msg.empty())
-    {
-      result[PARAM_IN_FILE]   = msg;
-      result[PARAM_IN_WKSP]   = msg;
-      result[PARAM_INST_NAME] = msg;
-      result[PARAM_INST_FILE] = msg;
-    }
+/**
+ * Find the name of the parent of the component that starts with the
+ * supplied prefix.
+ *
+ * @param comp The component to find the parent of.
+ * @param prefix Prefix of parent names to look for.
+ * @return The correct parent name. This is an empty string if the name
+ * isn't found.
+ */
+string parentName(IComponent_const_sptr comp, const string &prefix) {
+  // handle the special case of the component has the name
+  if (startsWith(comp->getName(), prefix))
+    return comp->getName();
 
-    // get the chunking technology to use
-    string chunkNames  = getPropertyValue(PARAM_CHUNK_NAMES);
-    string chunkGroups = getPropertyValue(PARAM_CHUNK_BY);
-    msg = "";
-    if (chunkNames.empty() && chunkGroups.empty())
-    {
-      msg = "Must specify either " + PARAM_CHUNK_NAMES + " or "
-                 + PARAM_CHUNK_BY;
-    }
-    else if ((!chunkNames.empty()) && (!chunkGroups.empty()))
-    {
-      msg = "Must specify either " + PARAM_CHUNK_NAMES + " or "
-                 + PARAM_CHUNK_BY + " not both";
-    }
-    if (!msg.empty())
-    {
-      result[PARAM_CHUNK_NAMES] = msg;
-      result[PARAM_CHUNK_BY]    = msg;
-    }
-
-    return result;
-  }
-
-  /**
-   * Returns true if str starts with prefix.
-   *
-   * @param str The string to check.
-   * @param prefix The prefix to look for.
-   * @return true if str starts with prefix.
-   */
-  bool startsWith(const string & str, const string & prefix)
-  {
-    // can't start with if it is shorter than the prefix
-    if (str.length() < prefix.length())
-      return false;
-
-    return (str.substr(0, prefix.length()).compare(prefix) == 0);
-  }
-
-  /**
-   * Find the name of the parent of the component that starts with the
-   * supplied prefix.
-   *
-   * @param comp The component to find the parent of.
-   * @param prefix Prefix of parent names to look for.
-   * @return The correct parent name. This is an empty string if the name
-   * isn't found.
-   */
-  string parentName(IComponent_const_sptr comp, const string & prefix)
-  {
-    // handle the special case of the component has the name
-    if (startsWith(comp->getName(), prefix))
-      return comp->getName();
-
-    // find the parent with the correct name
-    IComponent_const_sptr parent = comp->getParent();
-    if (parent)
-    {
-      if (startsWith(parent->getName(), prefix))
-        return parent->getName();
-      else
-        return parentName(parent, prefix);
-    }
+  // find the parent with the correct name
+  IComponent_const_sptr parent = comp->getParent();
+  if (parent) {
+    if (startsWith(parent->getName(), prefix))
+      return parent->getName();
     else
-    {
-      return "";
-    }
+      return parentName(parent, prefix);
+  } else {
+    return "";
   }
+}
 
-  /**
-   * Find the name of the parent of the component that is in the list of
-   * parents that are being searched for.
-   *
-   * @param comp The component to find the parent of.
-   * @param names List of parent names to look for.
-   * @return The correct parent name. This is an empty string if the name
-   * isn't found.
-   */
-  string parentName(IComponent_const_sptr comp, const vector<string> & names)
-  {
-    // handle the special case of the component has the name
+/**
+ * Find the name of the parent of the component that is in the list of
+ * parents that are being searched for.
+ *
+ * @param comp The component to find the parent of.
+ * @param names List of parent names to look for.
+ * @return The correct parent name. This is an empty string if the name
+ * isn't found.
+ */
+string parentName(IComponent_const_sptr comp, const vector<string> &names) {
+  // handle the special case of the component has the name
+  for (auto name = names.begin(); name != names.end(); ++name)
+    if (name->compare(comp->getName()) == 0)
+      return (*name);
+
+  // find the parent with the correct name
+  IComponent_const_sptr parent = comp->getParent();
+  if (parent) {
+    // see if this is the parent
     for (auto name = names.begin(); name != names.end(); ++name)
-      if (name->compare(comp->getName()) == 0)
+      if (name->compare(parent->getName()) == 0)
         return (*name);
 
-    // find the parent with the correct name
-    IComponent_const_sptr parent = comp->getParent();
-    if (parent)
-    {
-      // see if this is the parent
-      for (auto name = names.begin(); name != names.end(); ++name)
-        if (name->compare(parent->getName()) == 0)
-          return (*name);
-
-      // or recurse
-      return parentName(parent, names);
-    }
-    else
-    {
-      return "";
-    }
+    // or recurse
+    return parentName(parent, names);
+  } else {
+    return "";
   }
+}
 
-  /**
-   * Split a list of instrument components into a vector of strings.
-   *
-   * @param names Comma separated list of instrument components
-   * @return The vector of instrument component names.
-   */
-  vector<string> getGroupNames(const string & names)
-  {
-    vector<string> groups;
+/**
+ * Split a list of instrument components into a vector of strings.
+ *
+ * @param names Comma separated list of instrument components
+ * @return The vector of instrument component names.
+ */
+vector<string> getGroupNames(const string &names) {
+  vector<string> groups;
 
-    // check that there is something
-    if (names.empty())
-      return groups;
-
-    // do the actual splitting
-    const boost::char_separator<char> SEPERATOR(",");
-    tokenizer tokens(names, SEPERATOR);
-    for (auto item = tokens.begin(); item != tokens.end(); ++item)
-    {
-      groups.push_back(*item);
-    }
-
+  // check that there is something
+  if (names.empty())
     return groups;
+
+  // do the actual splitting
+  const boost::char_separator<char> SEPERATOR(",");
+  tokenizer tokens(names, SEPERATOR);
+  for (auto item = tokens.begin(); item != tokens.end(); ++item) {
+    groups.push_back(*item);
   }
 
-  /**
-   * Determine the instrument from the various input parameters.
-   *
-   * @return The correct instrument.
-   */
-  Instrument_const_sptr CreateChunkingFromInstrument::getInstrument()
-  {
-    // try the input workspace
-    MatrixWorkspace_sptr inWS = getProperty(PARAM_IN_WKSP);
-    if (inWS)
-    {
-      return inWS->getInstrument();
+  return groups;
+}
+
+/**
+ * Determine the instrument from the various input parameters.
+ *
+ * @return The correct instrument.
+ */
+Instrument_const_sptr CreateChunkingFromInstrument::getInstrument() {
+  // try the input workspace
+  MatrixWorkspace_sptr inWS = getProperty(PARAM_IN_WKSP);
+  if (inWS) {
+    return inWS->getInstrument();
+  }
+
+  // temporary workspace to hang everything else off of
+  MatrixWorkspace_sptr tempWS(new Workspace2D());
+  // name of the instrument
+  string instName = getPropertyValue(PARAM_INST_NAME);
+
+  // see if there is an input file
+  string filename = getPropertyValue(PARAM_IN_FILE);
+  if (!filename.empty()) {
+    string top_entry_name("entry"); // TODO make more flexible
+
+    // get the instrument name from the filename
+    size_t n = filename.rfind('/');
+    if (n != std::string::npos) {
+      std::string temp = filename.substr(n + 1, filename.size() - n - 1);
+      n = temp.find('_');
+      if (n != std::string::npos && n > 0) {
+        instName = temp.substr(0, n);
+      }
     }
 
-    // temporary workspace to hang everything else off of
-    MatrixWorkspace_sptr tempWS(new Workspace2D());
-    // name of the instrument
-    string instName = getPropertyValue(PARAM_INST_NAME);
+    // read information from the nexus file itself
+    try {
+      NeXus::File nxsfile(filename);
 
-    // see if there is an input file
-    string filename = getPropertyValue(PARAM_IN_FILE);
-    if (!filename.empty())
-    {
-      string top_entry_name("entry"); // TODO make more flexible
+      // get the run start time
+      string start_time;
+      nxsfile.openGroup(top_entry_name, "NXentry");
+      nxsfile.readData("start_time", start_time);
+      tempWS->mutableRun().addProperty(
+          "run_start", DateAndTime(start_time).toISO8601String(), true);
 
-      // get the instrument name from the filename
-      size_t n = filename.rfind('/');
-      if (n != std::string::npos)
-      {
-        std::string temp = filename.substr(n+1, filename.size()-n-1);
-        n = temp.find('_');
-        if (n != std::string::npos && n > 0)
-        {
-          instName = temp.substr(0, n);
-        }
-      }
+      // get the instrument name
+      nxsfile.openGroup("instrument", "NXinstrument");
+      nxsfile.readData("name", instName);
+      nxsfile.closeGroup();
 
-      // read information from the nexus file itself
+      // Test if IDF exists in file, move on quickly if not
+      nxsfile.openPath("instrument/instrument_xml");
+      nxsfile.close();
+      IAlgorithm_sptr loadInst =
+          createChildAlgorithm("LoadIDFFromNexus", 0.0, 0.2);
+      // Now execute the Child Algorithm. Catch and log any error, but don't
+      // stop.
       try {
-        NeXus::File nxsfile(filename);
-
-        // get the run start time
-        string start_time;
-        nxsfile.openGroup(top_entry_name, "NXentry");
-        nxsfile.readData("start_time", start_time);
-        tempWS->mutableRun().addProperty("run_start", DateAndTime(start_time).toISO8601String(), true );
-
-        // get the instrument name
-        nxsfile.openGroup("instrument", "NXinstrument");
-        nxsfile.readData("name", instName);
-        nxsfile.closeGroup();
-
-        // Test if IDF exists in file, move on quickly if not
-        nxsfile.openPath("instrument/instrument_xml");
-        nxsfile.close();
-        IAlgorithm_sptr loadInst= createChildAlgorithm("LoadIDFFromNexus",0.0,0.2);
-        // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-        try
-        {
-          loadInst->setPropertyValue("Filename", filename);
-          loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", tempWS);
-          loadInst->setPropertyValue("InstrumentParentPath",top_entry_name);
-          loadInst->execute();
-        }
-        catch( std::invalid_argument&)
-        {
-          g_log.error("Invalid argument to LoadIDFFromNexus Child Algorithm ");
-        }
-        catch (std::runtime_error&)
-        {
-          g_log.debug("No instrument definition found in "+filename+" at "+top_entry_name+"/instrument");
-        }
-
-        if ( loadInst->isExecuted() )
-          return tempWS->getInstrument();
-        else
-          g_log.information("No IDF loaded from Nexus file.");
-
-      } catch (::NeXus::Exception&) {
-        g_log.information("No instrument definition found in "+filename+" at "+top_entry_name+"/instrument");
+        loadInst->setPropertyValue("Filename", filename);
+        loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
+        loadInst->setPropertyValue("InstrumentParentPath", top_entry_name);
+        loadInst->execute();
+      } catch (std::invalid_argument &) {
+        g_log.error("Invalid argument to LoadIDFFromNexus Child Algorithm ");
+      } catch (std::runtime_error &) {
+        g_log.debug("No instrument definition found in " + filename + " at " +
+                    top_entry_name + "/instrument");
       }
+
+      if (loadInst->isExecuted())
+        return tempWS->getInstrument();
+      else
+        g_log.information("No IDF loaded from Nexus file.");
+
+    } catch (::NeXus::Exception &) {
+      g_log.information("No instrument definition found in " + filename +
+                        " at " + top_entry_name + "/instrument");
     }
-
-    // run LoadInstrument if other methods have not run
-    string instFilename = getPropertyValue(PARAM_INST_FILE);
-
-    Algorithm_sptr childAlg = createChildAlgorithm("LoadInstrument",0.0,0.2);
-    childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
-    childAlg->setPropertyValue("Filename", instFilename);
-    childAlg->setPropertyValue("InstrumentName", instName);
-    childAlg->executeAsChildAlg();
-    return tempWS->getInstrument();
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Execute the algorithm.
-   */
-  void CreateChunkingFromInstrument::exec()
-  {
-    // get the instrument
-    Instrument_const_sptr inst = this->getInstrument();
+  // run LoadInstrument if other methods have not run
+  string instFilename = getPropertyValue(PARAM_INST_FILE);
 
-    // setup the output workspace
-    ITableWorkspace_sptr strategy = WorkspaceFactory::Instance().createTable("TableWorkspace");
-    strategy->addColumn("str", "BankName");
-    this->setProperty("OutputWorkspace", strategy);
+  Algorithm_sptr childAlg = createChildAlgorithm("LoadInstrument", 0.0, 0.2);
+  childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
+  childAlg->setPropertyValue("Filename", instFilename);
+  childAlg->setPropertyValue("InstrumentName", instName);
+  childAlg->executeAsChildAlg();
+  return tempWS->getInstrument();
+}
 
-    // get the correct level of grouping
-    string groupLevel = this->getPropertyValue(PARAM_CHUNK_BY);
-    vector<string> groupNames = getGroupNames(this->getPropertyValue(PARAM_CHUNK_NAMES));
-    if (groupLevel.compare("All") == 0)
-    {
-      return; // nothing to do
-    }
-    else if (inst->getName().compare("SNAP") == 0 && groupLevel.compare("Group") == 0)
-    {
-      groupNames.clear();
-      groupNames.push_back("East");
-      groupNames.push_back("West");
-    }
+//----------------------------------------------------------------------------------------------
+/** Execute the algorithm.
+ */
+void CreateChunkingFromInstrument::exec() {
+  // get the instrument
+  Instrument_const_sptr inst = this->getInstrument();
 
-    // set up a progress bar with the "correct" number of steps
-    int maxBankNum = this->getProperty(PARAM_MAX_BANK_NUM);
-    Progress progress(this, .2, 1., maxBankNum);
+  // setup the output workspace
+  ITableWorkspace_sptr strategy =
+      WorkspaceFactory::Instance().createTable("TableWorkspace");
+  strategy->addColumn("str", "BankName");
+  this->setProperty("OutputWorkspace", strategy);
 
-    // search the instrument for the bank names
-    int maxRecurseDepth = this->getProperty(PARAM_MAX_RECURSE);
-    map<string, vector<string> > grouping;
-    // cppcheck-suppress syntaxError
+  // get the correct level of grouping
+  string groupLevel = this->getPropertyValue(PARAM_CHUNK_BY);
+  vector<string> groupNames =
+      getGroupNames(this->getPropertyValue(PARAM_CHUNK_NAMES));
+  if (groupLevel.compare("All") == 0) {
+    return; // nothing to do
+  } else if (inst->getName().compare("SNAP") == 0 &&
+             groupLevel.compare("Group") == 0) {
+    groupNames.clear();
+    groupNames.push_back("East");
+    groupNames.push_back("West");
+  }
+
+  // set up a progress bar with the "correct" number of steps
+  int maxBankNum = this->getProperty(PARAM_MAX_BANK_NUM);
+  Progress progress(this, .2, 1., maxBankNum);
+
+  // search the instrument for the bank names
+  int maxRecurseDepth = this->getProperty(PARAM_MAX_RECURSE);
+  map<string, vector<string>> grouping;
+  // cppcheck-suppress syntaxError
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-    for (int num = 0; num < maxBankNum; ++num)
-    {
+    for (int num = 0; num < maxBankNum; ++num) {
       PARALLEL_START_INTERUPT_REGION
       ostringstream mess;
-      mess<< "bank"<<num;
-      IComponent_const_sptr comp = inst->getComponentByName(mess.str(), maxRecurseDepth);
+      mess << "bank" << num;
+      IComponent_const_sptr comp =
+          inst->getComponentByName(mess.str(), maxRecurseDepth);
       PARALLEL_CRITICAL(grouping)
-      if(comp)
-      {
+      if (comp) {
         // get the name of the correct parent
         string parent;
-        if (groupNames.empty())
-        {
+        if (groupNames.empty()) {
           parent = parentName(comp, groupLevel);
-        }
-        else
-        {
+        } else {
           parent = parentName(comp, groupNames);
         }
 
         // add it to the correct chunk
-        if (!parent.empty())
-        {
+        if (!parent.empty()) {
           if (grouping.count(parent) == 0)
             grouping[parent] = vector<string>();
 
@@ -462,27 +444,24 @@ namespace DataHandling
 
     // check to see that something happened
     if (grouping.empty())
-        throw std::runtime_error("Failed to find any banks in the instrument");
+      throw std::runtime_error("Failed to find any banks in the instrument");
 
     // fill in the table workspace
-    for (auto group = grouping.begin(); group != grouping.end(); ++group)
-    {
+    for (auto group = grouping.begin(); group != grouping.end(); ++group) {
       stringstream banks;
-      for (auto bank = group->second.begin(); bank != group->second.end(); ++bank)
+      for (auto bank = group->second.begin(); bank != group->second.end();
+           ++bank)
         banks << (*bank) << ",";
 
       // remove the trailing comma
       string banksStr = banks.str();
-      banksStr = banksStr.substr(0, banksStr.size()-1);
+      banksStr = banksStr.substr(0, banksStr.size() - 1);
 
       // add it to the table
       TableRow row = strategy->appendRow();
       row << banksStr;
     }
-
-  }
-
-
+}
 
 } // namespace DataHandling
 } // namespace Mantid

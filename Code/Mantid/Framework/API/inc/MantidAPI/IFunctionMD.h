@@ -12,19 +12,17 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #ifndef Q_MOC_RUN
-# include <boost/shared_ptr.hpp>
-# include <boost/shared_array.hpp>
-# include <boost/variant.hpp>
-# include <boost/scoped_array.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
+#include <boost/variant.hpp>
+#include <boost/scoped_array.hpp>
 #endif
 #include <string>
 #include <vector>
 
-namespace Mantid
-{
+namespace Mantid {
 
-namespace API
-{
+namespace API {
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
@@ -37,14 +35,17 @@ class ParameterReference;
 class FunctionHandler;
 class FunctionDomainMD;
 
-/** This is a specialization of IFunction for functions defined on an IMDWorkspace.
-    It uses FunctionDomainMD as a domain. Implement functionMD(...) method in a concrete
+/** This is a specialization of IFunction for functions defined on an
+   IMDWorkspace.
+    It uses FunctionDomainMD as a domain. Implement functionMD(...) method in a
+   concrete
     function.
 
     @author Roman Tolchenov, Tessella Support Services plc
     @date 12/01/2011
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -64,10 +65,8 @@ class FunctionDomainMD;
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL IFunctionMD: public virtual IFunction
-{
+class MANTID_API_DLL IFunctionMD : public virtual IFunction {
 public:
-
   /* Overidden methods */
 
   /// Virtual copy constructor
@@ -76,28 +75,33 @@ public:
   /// @param ws :: Shared pointer to a workspace
   virtual void setWorkspace(boost::shared_ptr<const Workspace> ws);
 
-  virtual void function(const FunctionDomain& domain,FunctionValues& values)const;
-  virtual void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian){calNumericalDeriv(domain,jacobian);}
+  virtual void function(const FunctionDomain &domain,
+                        FunctionValues &values) const;
+  virtual void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
+    calNumericalDeriv(domain, jacobian);
+  }
 
 protected:
   /// Performs the function evaluations on the MD domain
-  void evaluateFunction(const FunctionDomainMD& domain,FunctionValues& values) const;
+  void evaluateFunction(const FunctionDomainMD &domain,
+                        FunctionValues &values) const;
 
-  virtual void useDimension(const std::string& id);
+  virtual void useDimension(const std::string &id);
   /// Do finction initialization after useAllDimensions() was called
-  virtual void initDimensions(){}
+  virtual void initDimensions() {}
   /// Does the function evaluation. Must be implemented in derived classes.
-  virtual double functionMD(const IMDIterator& r) const = 0;
+  virtual double functionMD(const IMDIterator &r) const = 0;
 
   /// maps dimension id to its index in m_dimensions
-  std::map<std::string,size_t> m_dimensionIndexMap;
+  std::map<std::string, size_t> m_dimensionIndexMap;
   /// dimensions used in this function in the expected order
-  std::vector< boost::shared_ptr<const Mantid::Geometry::IMDDimension> > m_dimensions;
+  std::vector<boost::shared_ptr<const Mantid::Geometry::IMDDimension>>
+      m_dimensions;
 
 private:
   /// Use all the dimensions in the workspace
-  virtual void useAllDimensions(boost::shared_ptr<const IMDWorkspace> workspace);
-
+  virtual void
+  useAllDimensions(boost::shared_ptr<const IMDWorkspace> workspace);
 };
 
 } // namespace API

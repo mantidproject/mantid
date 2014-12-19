@@ -9,16 +9,20 @@
 # Find the installed version of PyQt4. FindPyQt4 should only be called after
 # Python has been found.
 #
-# This file defines the following variables:
+# This file defines the following variables, which can also be overriden by
+# users:
 #
 # PYQT4_VERSION - The version of PyQt4 found expressed as a 6 digit hex number
-#     suitable for comparision as a string
+#     suitable for comparison as a string
 #
 # PYQT4_VERSION_STR - The version of PyQt4 as a human readable string.
 #
-# PYQT4_VERSION_TAG - The PyQt version tag using by PyQt's sip files.
+# PYQT4_VERSION_TAG - The Qt4 version tag used by PyQt's sip files.
 #
-# PYQT4_SIP_DIR - The directory holding the PyQt4 .sip files.
+# PYQT4_SIP_DIR - The directory holding the PyQt4 .sip files. This can be unset
+# if PyQt4 was built using its new build system and pyqtconfig.py is not
+# present on the system, as in this case its value cannot be determined
+# automatically.
 #
 # PYQT4_SIP_FLAGS - The SIP flags used to build PyQt.
 
@@ -30,19 +34,38 @@ ELSE(EXISTS PYQT4_VERSION)
   FIND_FILE(_find_pyqt_py FindPyQt.py PATHS ${CMAKE_MODULE_PATH})
 
   EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} ${_find_pyqt_py} OUTPUT_VARIABLE pyqt_config)
-  IF( NOT ${pyqt_config} MATCHES "Traceback" )
-    STRING(REGEX REPLACE "^pyqt_version:([^\n]+).*$" "\\1" PYQT4_VERSION ${pyqt_config})
-    STRING(REGEX REPLACE ".*\npyqt_version_str:([^\n]+).*$" "\\1" PYQT4_VERSION_STR ${pyqt_config})
-    STRING(REGEX REPLACE ".*\npyqt_version_tag:([^\n]+).*$" "\\1" PYQT4_VERSION_TAG ${pyqt_config})
-    STRING(REGEX REPLACE ".*\npyqt_sip_dir:([^\n]+).*$" "\\1" PYQT4_SIP_DIR ${pyqt_config})
-    STRING(REGEX REPLACE ".*\npyqt_sip_flags:([^\n]+).*$" "\\1" PYQT4_SIP_FLAGS ${pyqt_config})
+  IF(pyqt_config)
+    STRING(REGEX MATCH "^pyqt_version:([^\n]+).*$" _dummy ${pyqt_config})
+    SET(PYQT4_VERSION "${CMAKE_MATCH_1}" CACHE STRING "PyQt4's version as a 6-digit hexadecimal number")
 
-    SET(PYQT4_FOUND TRUE)
-  ENDIF()
+    STRING(REGEX MATCH ".*\npyqt_version_str:([^\n]+).*$" _dummy ${pyqt_config})
+    SET(PYQT4_VERSION_STR "${CMAKE_MATCH_1}" CACHE STRING "PyQt4's version as a human-readable string")
 
-  include ( FindPackageHandleStandardArgs )
-  find_package_handle_standard_args ( PyQt4 DEFAULT_MSG PYQT4_VERSION )
+    STRING(REGEX MATCH ".*\npyqt_version_tag:([^\n]+).*$" _dummy ${pyqt_config})
+    SET(PYQT4_VERSION_TAG "${CMAKE_MATCH_1}" CACHE STRING "The Qt4 version tag used by PyQt4's .sip files")
 
-  mark_as_advanced ( _find_pyqt_py )
+    STRING(REGEX MATCH ".*\npyqt_sip_dir:([^\n]+).*$" _dummy ${pyqt_config})
+    SET(PYQT4_SIP_DIR "${CMAKE_MATCH_1}" CACHE FILEPATH "The base directory where PyQt4's .sip files are installed")
+
+    STRING(REGEX MATCH ".*\npyqt_sip_flags:([^\n]+).*$" _dummy ${pyqt_config})
+    SET(PYQT4_SIP_FLAGS "${CMAKE_MATCH_1}" CACHE STRING "The SIP flags used to build PyQt4")
+
+    IF(NOT IS_DIRECTORY "${PYQT4_SIP_DIR}")
+      MESSAGE(WARNING "The base directory where PyQt4's SIP files are installed could not be determined. This usually means PyQt4 was built with its new build system and pyqtconfig.py is not present.\n"
+                      "Please set the PYQT4_SIP_DIR variable manually.")
+    ELSE(NOT IS_DIRECTORY "${PYQT4_SIP_DIR}")
+      SET(PYQT4_FOUND TRUE)
+    ENDIF(NOT IS_DIRECTORY "${PYQT4_SIP_DIR}")
+  ENDIF(pyqt_config)
+
+  IF(PYQT4_FOUND)
+    IF(NOT PYQT4_FIND_QUIETLY)
+      MESSAGE(STATUS "Found PyQt4 version: ${PYQT4_VERSION_STR}")
+    ENDIF(NOT PYQT4_FIND_QUIETLY)
+  ELSE(PYQT4_FOUND)
+    IF(PYQT4_FIND_REQUIRED)
+      MESSAGE(FATAL_ERROR "Could not find Python")
+    ENDIF(PYQT4_FIND_REQUIRED)
+  ENDIF(PYQT4_FOUND)
 
 ENDIF(EXISTS PYQT4_VERSION)

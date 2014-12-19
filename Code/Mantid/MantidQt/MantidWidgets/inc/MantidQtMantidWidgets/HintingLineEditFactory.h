@@ -17,7 +17,7 @@ namespace MantidQt
   {
     /** HintingLineEditFactory : A QStyledItemDelegate that produces HintingLineEdits using the given hint strategy.
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -41,10 +41,7 @@ namespace MantidQt
     {
     public:
       HintingLineEditFactory(HintStrategy* hintStrategy) : m_strategy(hintStrategy) {};
-      virtual ~HintingLineEditFactory()
-      {
-        delete m_strategy;
-      };
+      virtual ~HintingLineEditFactory() {};
       virtual QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
       {
         Q_UNUSED(option);
@@ -56,7 +53,7 @@ namespace MantidQt
         return editor;
       }
     protected:
-      HintStrategy* m_strategy;
+      boost::scoped_ptr<HintStrategy> m_strategy;
     };
   }
 }

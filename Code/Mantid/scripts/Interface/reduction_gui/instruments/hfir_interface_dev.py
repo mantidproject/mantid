@@ -43,7 +43,8 @@ class HFIRInterface(InstrumentInterface):
         self.attach(SANSInstrumentWidget(settings = self._settings, name=name, data_proxy=DataProxy))
 
         # Detector
-        self.attach(DetectorWidget(settings = self._settings, data_proxy=DataProxy))
+        self.attach(DetectorWidget(settings = self._settings, data_proxy=DataProxy,
+                                   options_callback = self.scripter.set_options))
 
         # Sample
         self.attach(SampleDataWidget(settings = self._settings, data_proxy=DataProxy))

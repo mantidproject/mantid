@@ -36,7 +36,6 @@
 	<value val="138000" />
 </parameter>
 
- 
 <parameter name="analyser" type="string">
   <value val="silicon" />
 </parameter>
@@ -47,31 +46,13 @@
 
 </component-link>
 
-
-  <component-link name="bank1">
-    <parameter name="Efixed">
-      <value val="2.082" />
-    </parameter>
-  </component-link>
-
-  <component-link name="bank2">
-    <parameter name="Efixed">
-      <value val="2.082" />
-    </parameter>
-  </component-link>
-
-  <component-link name="bank3">
-    <parameter name="Efixed">
-      <value val="2.082" />
-    </parameter>
-  </component-link>
-
-  <component-link name="bank4">
-    <parameter name="Efixed">
-      <value val="2.082" />
-    </parameter>
-  </component-link>
-
-
+<component-link name="silicon">
+  <parameter name="Efixed">
+    <value val="2.082" />
+  </parameter>
+  <parameter name="resolution">
+    <value val="0.0035" />
+  </parameter>
+</component-link>
 
 </parameter-file>

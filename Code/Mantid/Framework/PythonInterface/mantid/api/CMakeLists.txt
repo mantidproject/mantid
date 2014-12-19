@@ -6,7 +6,7 @@ set ( MODULE_TEMPLATE src/api.cpp.in )
 
 # Files containing export definitions, these are automatically processed
 # -- Do NOT sort this list. The order defines the order in which the export
-#    definitions occur and some depend on their base classes being exported first -- 
+#    definitions occur and some depend on their base classes being exported first --
 set ( EXPORT_FILES
   src/Exports/IAlgorithm.cpp
   src/Exports/AlgorithmProxy.cpp
@@ -34,9 +34,11 @@ set ( EXPORT_FILES
   src/Exports/ITableWorkspaceProperty.cpp
   src/Exports/MDGeometry.cpp
   src/Exports/IMDWorkspace.cpp
+  src/Exports/IMDWorkspaceProperty.cpp
   src/Exports/IMDHistoWorkspace.cpp
-  src/Exports/IMDHistoWorkspaceProperty.cpp  
+  src/Exports/IMDHistoWorkspaceProperty.cpp
   src/Exports/IMDEventWorkspace.cpp
+  src/Exports/IMDEventWorkspaceProperty.cpp
   src/Exports/MatrixWorkspace.cpp
   src/Exports/MatrixWorkspaceProperty.cpp
   src/Exports/IEventWorkspace.cpp
@@ -66,7 +68,7 @@ set ( EXPORT_FILES
   src/Exports/Progress.cpp
   src/Exports/FunctionProperty.cpp
   src/Exports/AlgorithmProperty.cpp
-)  
+)
 
 # Files containing additional helper code that are not related to exporting class/functions
 set ( SRC_FILES
@@ -91,7 +93,7 @@ set ( INC_FILES
   ${HEADER_DIR}/api/WorkspacePropertyExporter.h
 )
 
-set ( PY_FILES 
+set ( PY_FILES
   __init__.py
   _adsimports.py
   _aliases.py
@@ -101,7 +103,7 @@ set ( PY_FILES
 #############################################################################################
 # Generate a source file from the export definitions
 #############################################################################################
-create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/api.cpp EXPORT_FILES 
+create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/api.cpp EXPORT_FILES
                 SRC_FILES )
 
 #############################################################################################
@@ -115,8 +117,8 @@ if(CMAKE_GENERATOR STREQUAL Xcode)
   set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/api )
 endif()
 
-copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
-                           PYTHON_INSTALL_FILES )
+copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
+                     PYTHON_INSTALL_FILES )
 
 #############################################################################################
 # Create the target for this directory
@@ -127,12 +129,12 @@ set_python_properties( PythonAPIModule _api )
 set_target_output_directory ( PythonAPIModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
-target_link_libraries ( PythonAPIModule PythonGeometryModule PythonKernelModule ${PYTHON_DEPS} )
+target_link_libraries ( PythonAPIModule PythonGeometryModule PythonKernelModule API )
 
 ###########################################################################
 # Installation settings
 ###########################################################################
 install ( TARGETS PythonAPIModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/api )
 
-# Pure Python files 
+# Pure Python files
 install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/api )
