@@ -65,7 +65,7 @@ Usage
             )
     normalized=histoData/histoNorm  
     print "The normalization workspace shape is "+str(histoNorm.getSignalArray().shape)
-    print "Out of those elements, "+str(count_nonzero(histoNorm.getSignalArray()))+" are nonzero"
+    print "Out of those elements, "+str(nonzero(histoNorm.getSignalArray())[0].size)+" are nonzero"
    
 .. testoutput:: MDNormDirectSCExample 
 
