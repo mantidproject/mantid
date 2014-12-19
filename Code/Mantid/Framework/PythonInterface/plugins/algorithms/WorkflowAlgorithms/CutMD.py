@@ -182,10 +182,13 @@ class CutMD(DataProcessorAlgorithm):
         
         # Try to sanity check the order of the dimensions. This is important.
         axes_check = self.getProperty("CheckAxes").value
+        
+        # Coordinate system message
+        restricted_coordinates_message = "Input Workspace should be in reciprocal lattice dimensions (HKL)"
         if axes_check:
             
             if not coord_system == SpecialCoordinateSystem.HKL:
-                raise ValueError("Input Workspace must be in reciprocal lattice dimensions (HKL)")
+                raise ValueError(restricted_coordinates_message)
             
             predicates = ["^(H.*)|(\\[H,0,0\\].*)$","^(K.*)|(\\[0,K,0\\].*)$","^(L.*)|(\\[0,0,L\\].*)$"]  
             n_crystallographic_dims = __builtin__.min(3, ndims)
@@ -194,6 +197,9 @@ class CutMD(DataProcessorAlgorithm):
                 p = re.compile(predicates[i])
                 if not p.match( dimension.getName() ):
                     raise ValueError("Dimensions must be in order H, K, L")
+        else:
+            if not coord_system == SpecialCoordinateSystem.HKL:
+                logger.warning(restricted_coordinates_message)
 
     def __verify_projection_input(self, projection_table):
         if isinstance(projection_table, ITableWorkspace):
