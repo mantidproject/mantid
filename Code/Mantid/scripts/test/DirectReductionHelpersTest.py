@@ -13,6 +13,11 @@ class SomeDescriptor(object):
                 return self._val;
          def __set__(self,instance,value):
                 self._val = value
+         def get_helper(self):
+             return "using helper"
+         def set_helper(self,value):
+             self._val=value
+
 
 
 class DirectReductionHelpersTest(unittest.TestCase):
@@ -327,9 +332,20 @@ class DirectReductionHelpersTest(unittest.TestCase):
                     tDict = object.__getattribute__(self,'__dict__');
                     return helpers.gen_getter(tDict,name)
   
+            def access(self,obj_name):
+               try:
+                  obj = self.__class__.__dict__[obj_name]
+                  return obj
+               except:
+                  priv_name = '_'+obj_name
+                  if priv_name in self.__dict__:
+                     return self.__dict__[priv_name]
+                  else:
+                      raise KeyError("Property {0} is not among class descriptors or complex properties ".format(obj_name))
+               
 
 
-        t1 =test_class();
+        t1 =test_class()
 
         self.assertEqual(t1.B,19);
 
@@ -359,35 +375,14 @@ class DirectReductionHelpersTest(unittest.TestCase):
         t1.some_descriptor = 'blaBla'
         self.assertEqual(t1.some_descriptor ,'blaBla');
 
+        self.assertEqual(t1.access('some_descriptor').get_helper() ,'using helper');
 
-    #def test_class_property_setter3(self):
-    #    class TDescr(object):
-    #        def __init__(self):
-    #            self._tval = 10;
-    #        def __get__(self,instace,cls):
-    #            return self._tval;
-    #        def __set__(self,instace,val):
-    #            self._tval = val
+        t1.access('some_descriptor').set_helper('other')
+        self.assertEqual(t1.some_descriptor ,'other');
 
-
-    #    class test_class(object):
-    #        def __init__(self):
-    #            pass
-
-    #        @property 
-    #        def loc_prop(self):
-    #            return 10;
-    #        B=TDescr();
-
-
-
-    #    t1 =test_class();
-    #    cls_prop = dir(test_class);
-
-    #    descr = helpers.get_class_descriptors(test_class,cls_prop);
-
-    #    self.assertEqual(len(descr),1);
-    #    self.assertEqual(descr[0],'B');
+        dep = t1.access('A').dependencies()
+        self.assertEqual(dep[0],'B')
+        self.assertEqual(dep[1],'C')
 
 
 
