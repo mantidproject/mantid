@@ -56,22 +56,22 @@ class PropertyManager(NonIDF_Properties):
     _class_wrapper ='_PropertyManager__';
     def __init__(self,Instrument,instr_run=None):
         #
-        NonIDF_Properties.__init__(self,Instrument,instr_run);
+        NonIDF_Properties.__init__(self,Instrument,instr_run)
         #
         # define private properties served the class
         private_properties = {'descriptors':[],'subst_dict':{},'prop_allowed_values':{},'changed_properties':set(),
-        'file_properties':[],'abs_norm_file_properties':[]};
+                              'file_properties':[],'abs_norm_file_properties':[]}
         # place these properties to __dict__  with proper decoration
-        self._set_private_properties(private_properties);
+        self._set_private_properties(private_properties)
         # ---------------------------------------------------------------------------------------------
         # overloaded descriptors. These properties have their personal descriptors, different from default
         all_methods = dir(self);
-        self.__descriptors = prop_helpers.extract_non_system_names(all_methods,PropertyManager._class_wrapper);
+        self.__descriptors = prop_helpers.extract_non_system_names(all_methods,PropertyManager._class_wrapper)
 
         # retrieve the dictionary of property-values described in IDF
-        param_list = prop_helpers.get_default_idf_param_list(self.instrument);
+        param_list = prop_helpers.get_default_idf_param_list(self.instrument)
 
-        param_list = self._convert_params_to_properties(param_list);
+        param_list = self._convert_params_to_properties(param_list)
         #
         self.__dict__.update(param_list)
 
@@ -106,7 +106,6 @@ class PropertyManager(NonIDF_Properties):
 
 
         # build and initiate  properties with default descriptors 
-        #(TODO: consider complex automatic descriptors -- almost done differently through complex properties in dictionary)
         param_list =  prop_helpers.build_properties_dict(param_list,self.__subst_dict)
 
         #--------------------------------------------------------------------------------------
@@ -434,31 +433,6 @@ class PropertyManager(NonIDF_Properties):
         else:
             return None;
     #end
-
-    # TODO: finish refactoring this. 
-    def init_idf_params(self, reinitialize_parameters=False):
-        """
-        Initialize some default parameters and add the one from the IDF file
-        """
-        if self._idf_values_read == True and reinitialize_parameters == False:
-            return
-
-        """
-        Attach analysis arguments that are particular to the ElasticConversion
-
-        specify some parameters which may be not in IDF Parameters file
-        """
-
-          # should come from Mantid
-        # Motor names-- SNS stuff -- psi used by nxspe file
-        # These should be reconsidered on moving into _Parameters.xml
-        self.motor = None
-        self.motor_offset = None
-
-        if self.__facility == 'SNS':
-            self.normalise_method  = 'current'
-
-
 
     def _check_file_exist(self,file_name):
         file_path = FileFinder.getFullPath(file);

@@ -1,7 +1,18 @@
+import os
+os.environ["PATH"] = r"c:/Mantid/Code/builds/br_10803/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
 import Direct.ReductionHelpers as helpers
+
+class SomeDescriptor(object):
+         def __init__(self):
+             self._val=None
+
+         def __get__(self,instance,owner=None):
+                return self._val;
+         def __set__(self,instance,value):
+                self._val = value
 
 
 class DirectReductionHelpersTest(unittest.TestCase):
@@ -212,27 +223,48 @@ class DirectReductionHelpersTest(unittest.TestCase):
         self.assertEqual(kkdict['C'],10);
 
     def test_class_property_setter(self):
+ 
+
         class test_class(object):
             def __init__(self):
+                object.__setattr__(self,'A',helpers.ComplexProperty(['B','C']))
+                #kkdict['A']=
                 kkdict = {};
-                kkdict['A']=helpers.ComplexProperty(['B','C']);
                 kkdict['B']=19;
                 kkdict['C']=1000; 
                 self.__dict__.update(kkdict)
 
+            oveloaded_prop = SomeDescriptor()
 
             def __setattr__(self,name,val):
-                helpers.gen_setter(self.__dict__,name,val);
+                if name in self.__class__.__dict__:
+                    fob = self.__class__.__dict__[name]
+                    fob.__set__(self,val)
+                    return
+                if name in self.__dict__:
+                    pw = self.__dict__[name]
+                    if isinstance(pw,helpers.ComplexProperty):
+                        pw.__set__(self,val)
+                    else:
+                        self.__dict__[name] = val
+                        #object.__setattr__(self,name,val)
+                    return
+                raise KeyError("Property {0} is not defined for class {1}".format(name,self.__class__))
+                #helpers.gen_setter(self,name,val);
+                #object.__setattr__(self,name,val)
 
-   
+            
             def __getattribute__(self,name):
-                tDict = object.__getattribute__(self,'__dict__');
-                if name is '__dict__':
-                    # first call with empty dictionary
-                    return tDict;
+                if name[:2] == '__':
+                    attr = object.__getattribute__(self,name);
+                    return attr
                 else:
-                    return helpers.gen_getter(tDict,name)
-                pass
+                    attr_dic = object.__getattribute__(self,'__dict__');
+                    if name is '__dict__':
+                        return attr_dic;
+                    else:
+                        return helpers.gen_getter(attr_dic,name)
+                    pass
 
 
         t1 =test_class();
@@ -260,25 +292,32 @@ class DirectReductionHelpersTest(unittest.TestCase):
         self.assertEqual(t1.A,[1,10]);
 
 
+        t1.oveloaded_prop = 'BlaBla'
+        #And this become too complicated:: to implement access to __class__.__dict__
+        #self.assertEqual(t1.oveloaded_prop ,'BlaBla');
+
     def test_class_property_setter2(self):
         class test_class(object):
             def __init__(self):
                 kkdict = {};
-                kkdict['_A']=helpers.ComplexProperty(['_B','_C']);
-                kkdict['_B']=19;
-                kkdict['_C']=1000; 
+                kkdict['_A']=helpers.ComplexProperty(['B','C']);
+                kkdict['B']=19;
+                kkdict['C']=1000; 
                 class_decor = '_'+type(self).__name__;
 
                 kkdict[class_decor+'__special']='D'; 
                 self.__dict__.update(kkdict)
 
-
+            some_descriptor = SomeDescriptor()
 
             def __setattr__(self,name,val):
                 if name is 'special':
                     return;
+                elif name in self.__class__.__dict__:
+                    fp = self.__class__.__dict__[name]
+                    fp.__set__(self,val)
                 else:
-                    helpers.gen_setter(self.__dict__,'_'+name,val);
+                    helpers.gen_setter(self.__dict__,name,val);
 
    
             def __getattr__(self,name):
@@ -286,7 +325,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
                     return self.__special;
                 else:
                     tDict = object.__getattribute__(self,'__dict__');
-                    return helpers.gen_getter(tDict,'_'+name)
+                    return helpers.gen_getter(tDict,name)
   
 
 
@@ -316,6 +355,10 @@ class DirectReductionHelpersTest(unittest.TestCase):
 
         t1.special = 10;
         self.assertEqual(t1.special,'D');
+
+        t1.some_descriptor = 'blaBla'
+        self.assertEqual(t1.some_descriptor ,'blaBla');
+
 
     #def test_class_property_setter3(self):
     #    class TDescr(object):
