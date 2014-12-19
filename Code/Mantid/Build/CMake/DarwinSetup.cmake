@@ -102,6 +102,10 @@ endif()
 ###########################################################################
 # Mac-specific installation setup
 ###########################################################################
+
+set(CMAKE_MACOSX_RPATH 1)
+
+#set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR};${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR} )
 set ( CMAKE_INSTALL_PREFIX "" )
 set ( CPACK_PACKAGE_EXECUTABLES MantidPlot )
 set ( INBUNDLE MantidPlot.app/ )
@@ -127,8 +131,10 @@ else()
  set ( CMAKE_OSX_SYSROOT /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk )
  set ( CMAKE_OSX_ARCHITECTURES x86_64 )
  set ( CMAKE_OSX_DEPLOYMENT_TARGET 10.8 )
- set ( PYQT4_PYTHONPATH /usr/local/lib/python${PY_VER}/site-packages/PyQt4 )
- set ( SITEPACKAGES /usr/local/lib/python${PY_VER}/site-packages )
+ #set ( PYQT4_PYTHONPATH /usr/local/lib/python${PY_VER}/site-packages/PyQt4 )
+ set  ( PYQT4_PYTHONPATH /usr/local/Cellar/pyqt/4.11.1/lib/python${PY_VER}/site-packages/PyQt4 )
+ #set ( SITEPACKAGES /usr/local/lib/python${PY_VER}/site-packages )
+ set  ( SITEPACKAGES /usr/local/Cellar/sip/4.16.3_1/lib/python${PY_VER}/site-packages )
  # use homebrew OpenSSL package
  set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
 endif()
