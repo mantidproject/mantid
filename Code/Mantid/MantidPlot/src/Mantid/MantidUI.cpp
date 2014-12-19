@@ -685,22 +685,48 @@ void MantidUI::showVatesSimpleInterface()
     {
       return;
     }
-    // Set the type of workspace, the GUI needs it
+
+    // Set the type of workspace, the GUI needs it and
+    // extract the instrument which was used to measure the workspace data
     int wsType = MantidQt::API::VatesViewerInterface::MDEW;
+
+    std::string instrumentName;
+    
+    // check for peak workspace
     if (pws)
     {
       wsType = MantidQt::API::VatesViewerInterface::PEAKS;
+      
+      instrumentName = pws->getInstrument()->getFullName();
     }
+
+  // Check for histo workspace
     if (mdhist)
     {
       wsType = MantidQt::API::VatesViewerInterface::MDHW;
+      
+      // Get the instrument name
+      if  (mdhist->getNumExperimentInfo() > 0 )
+      {
+        instrumentName = mdhist->getExperimentInfo(0)->getInstrument()->getFullName();
+      }
+    }
+
+    // Check for event workspace
+    if (mdews)
+    {
+      // Get the instrument name
+      if  (mdews->getNumExperimentInfo() > 0 )
+      {
+        instrumentName = mdews->getExperimentInfo(0)->getInstrument()->getFullName();
+      }
     }
 
     if (m_vatesSubWindow)
     {
       QWidget *vwidget = m_vatesSubWindow->widget();
       vwidget->show();
-      qobject_cast<MantidQt::API::VatesViewerInterface *>(vwidget)->renderWorkspace(wsName, wsType);
+      qobject_cast<MantidQt::API::VatesViewerInterface *>(vwidget)->renderWorkspace(wsName, wsType, instrumentName);
       return;
     }
     else
@@ -720,11 +746,12 @@ void MantidUI::showVatesSimpleInterface()
         connect(vsui, SIGNAL(requestClose()), m_vatesSubWindow, SLOT(close()));
         vsui->setParent(m_vatesSubWindow);
         m_vatesSubWindow->setWindowTitle("Vates Simple Interface");
+
         vsui->setupPluginMode();
         //m_appWindow->setGeometry(m_vatesSubWindow, vsui);
         m_vatesSubWindow->setWidget(vsui);
         m_vatesSubWindow->widget()->show();
-        vsui->renderWorkspace(wsName, wsType);
+        vsui->renderWorkspace(wsName, wsType, instrumentName);
       }
       else
       {
