@@ -387,58 +387,25 @@ class PropertyManager(NonIDF_Properties):
 
   
         for key,val in param_list.iteritems():
-            # set new values to old values and record this
-            if key[0] == '_':
-               public_name = key[1:]
-            else:
-               public_name = key
 
             # complex properties change through their dependencies so we are not setting them here
             if isinstance(val,prop_helpers.ComplexProperty):
                 continue
-            if 
+            # simple property have been changed by setting it from running script (directly or indirectly through complex property)
+            if key in existing_changes:
+                continue
  
             try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains 
                     # properties, not present in recent IDF.
-                  cur_val = self.__dict__[name]
+                  cur_val = getattr(self,name)
             except:
                   self.log("property {0} or its derivatives have not been found in existing IDF. Ignoring this property"\
                        .format(key),'warning')
                   continue
-
-            # complex properties may be set up through their members so no need to set up one
-            if isinstance(cur_val,prop_helpers.ComplexProperty):
-               # is complex property changed through its dependent properties?
-               dependent_prop = val.dependencies()
-               replace_old_value = True
-               if public_name in existing_changes:
-                   replace_old_value = False
-
-               if replace_old_value: # may be property have changed through its dependencies
-                    for prop_name in dependent_prop:
-                        if  prop_name in existing_changes:
-                            replace_old_value =False
-                            break
-               #
-               if replace_old_value:
-                   old_val = cur_val.__get__(self.__dict__)
-                   new_val = val.__get__(param_list)
-                   if old_val != new_val:
-                      setattr(self,public_name,new_val)
-               # remove dependent values from list of changed properties not to assign them later one-by one
-               for prop_name in dependent_prop:
-                   try:
-                      del sorted_param[prop_name]
-                   except:
-                       pass
-            # simple property
-            else: 
-                if public_name in existing_changes:
-                    continue
-                else: 
-                   old_val = getattr(self,name);
-                   if not(val == old_val or val == cur_val):
-                     setattr(self,name,val)
+            if val != cur_val :
+                setattr(self,key,val)
+                         
+  
         #End_if
 
         # Clear changed properties list (is this wise?, may be we want to know that some defaults changed?)
