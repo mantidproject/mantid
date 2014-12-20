@@ -52,10 +52,41 @@ class PropertyManager(NonIDF_Properties):
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 
     """
+    #-----------------------------------------------------------------------------------
+    @property
+    def mono_correction_factor(self):
+        """ pre-calculated absolute units correction factor"""
+        if self._mono_correction_factor:
+            return self._mono_correction_factor;
+        else:
+            return None;
+    @mono_correction_factor.setter
+    def mono_correction_factor(self,value):
+        object.__setattr__(self,'_mono_correction_factor',value)
+
+    #-----------------------------------------------------------------------------------
+    @property
+    def mask_run(self):
+        """ run used to get masks to remove unreliable spectra
+
+           Usually it is sample run but separate run may be used 
+        """
+        if self._mask_run:
+            return self._mask_run
+        else:
+            return self._sample_run
+    @mask_run.setter
+    def mask_run(self,value):
+       object.__setattr__(self,'_mask_run',value)
+    #-----------------------------------------------------------------------------------
 
     def __init__(self,Instrument,instr_run=None):
         #
         NonIDF_Properties.__init__(self,Instrument,instr_run)
+
+        object.__setattr__(self,'_mask_run',None)
+        object.__setattr__(self,'_mono_correction_factor',None)
+
 
         #
         # define private properties served the class
