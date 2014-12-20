@@ -122,7 +122,7 @@ class PropertyManager(NonIDF_Properties):
 
 
    
-    def _convert_params_to_properties(self,param_list,detine_subst_dict=True,decor_list=[]):
+    def _convert_params_to_properties(self,param_list,detine_subst_dict=True,descr_list=[]):
         """ method processes parameters obtained from IDF and modifies the IDF properties
             to the form allowing them be assigned as python class properties.            
         """ 
@@ -139,7 +139,7 @@ class PropertyManager(NonIDF_Properties):
 
 
         # build properties list and descriptors list with their initial values 
-        param_dict,decor_dict =  prop_helpers.build_properties_dict(param_list,self.__dict__[subst_name],decor_list)
+        param_dict,descr_dict =  prop_helpers.build_properties_dict(param_list,self.__dict__[subst_name],descr_list)
 
         ##--------------------------------------------------------------------------------------
         ## modify some IDF properties, which need overloaded getter (and this getter is provided somewhere among PropertiesDescriptors)
@@ -169,7 +169,7 @@ class PropertyManager(NonIDF_Properties):
         ##-
         # End modify. 
         #----------------------------------------------------------------------------------------
-        return (param_dict,decor_dict)
+        return (param_dict,descr_dict)
 
     def _init_private_properties(self,prop_dict):
 
@@ -251,10 +251,23 @@ class PropertyManager(NonIDF_Properties):
        #end 
 
        if name in self.__descriptors:
-          return object.__getattr__(self,name)
+           descr=self.access_fprop(name)
+           return descr.__get__(self,name)
        else:
-          return prop_helpers.gen_getter(self.__dict__,name)
-       #end
+           return prop_helpers.gen_getter(self.__dict__,name)
+
+       ##end
+    def access_fprop(self,obj_name):
+        """ access pointer to a complex property"""
+        try:
+           obj = self.__class__.__dict__[obj_name]
+           return obj
+        except:
+           priv_name = '_'+obj_name
+           if priv_name in self.__dict__:
+              return self.__dict__[priv_name]
+           else:
+              raise KeyError("Property {0} is not among class descriptors or complex properties ".format(obj_name))
 
 #----------------------------------------------------------------------------------
 #              Overloaded setters/getters
