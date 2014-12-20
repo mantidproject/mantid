@@ -441,7 +441,8 @@ enable_precompiled_headers( inc/MantidDataHandling/PrecompiledHeader.h SRC_FILES
 # Add the target for this directory
 add_library ( DataHandling ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling )
+set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling 
+                                                INSTALL_RPATH "@loader_path/../contents/MacOS/")
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 

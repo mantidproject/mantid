@@ -38,7 +38,8 @@ set( INC_FILES
 add_library ( RemoteAlgorithms ${SRC_FILES} ${INC_FILES})
 
 # Set the name of the generated library
-set_target_properties ( RemoteAlgorithms PROPERTIES OUTPUT_NAME MantidRemoteAlgorithms )
+set_target_properties ( RemoteAlgorithms PROPERTIES OUTPUT_NAME MantidRemoteAlgorithms 
+                                                    INSTALL_RPATH "@loader_path/../contents/MacOS/")
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET RemoteAlgorithms PROPERTY FOLDER "MantidFramework" )
