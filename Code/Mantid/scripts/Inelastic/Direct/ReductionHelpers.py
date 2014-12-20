@@ -96,8 +96,6 @@ def build_properties_dict(param_map,synonims,descr_list=[]) :
        in the form properties_dict[key1]=(True,['key2','key3'])
 
     """ 
-        if name in descr_list:
-
     # dictionary used for substituting composite keys.
     prelim_dict = dict()
 
@@ -117,6 +115,9 @@ def build_properties_dict(param_map,synonims,descr_list=[]) :
             final_name = str(synonims[name])
         else:
             final_name = str(name)
+        is_descriptor = False
+        if final_name in descr_list:
+            is_descriptor = True
 
         if isinstance(val,str):  
                val = val.strip()
@@ -134,11 +135,20 @@ def build_properties_dict(param_map,synonims,descr_list=[]) :
                           result.append(rkey)
                        else:
                           raise KeyError('Substitution key : {0} is not in the list of allowed keys'.format(rkey))
-                   properties_dict['_'+final_name]=ComplexProperty(result)
+                   if is_descriptor:
+                       descr_dict[final_name] = result
+                   else:
+                      properties_dict['_'+final_name]=ComplexProperty(result)
                else:
-                   properties_dict[final_name] =keys_candidates[0];
+                   if is_descriptor:
+                       descr_dict[final_name] = keys_candidates[0]
+                   else:
+                       properties_dict[final_name] =keys_candidates[0]
         else:
-            properties_dict[final_name]=val;
+           if is_descriptor:
+                descr_dict[final_name] = val
+           else:
+                properties_dict[final_name]=val
 
     return (properties_dict,descr_dict)
 

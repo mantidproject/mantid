@@ -87,7 +87,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
         subst['ssss1']='kkk1';
         subst['ssss2']='other';
 
-        subst_dict = helpers.build_properties_dict(kkdict,subst)
+        subst_dict,descr = helpers.build_properties_dict(kkdict,subst)
 
         self.assertEqual(len(subst_dict),6);
 
@@ -112,32 +112,42 @@ class DirectReductionHelpersTest(unittest.TestCase):
 
     def testbuild_properties_dict_pref(self):
         kkdict = {};
-        kkdict['first']='kkk1:kkk2';
-        kkdict['kkk1']=19;
+        kkdict['first']='kkk1:kkk2'
+        kkdict['kkk1']=19
         kkdict['kkk2']=1000;
-        kkdict['other']='unrelated';
-        kkdict['second']='ssss1:ssss2:third';
-        kkdict['third']='Babara';
+        kkdict['other']='unrelated'
+        kkdict['second']='ssss1:ssss2:third'
+        kkdict['third']='Babara'
+        kkdict['descr1']='ddd'
+        kkdict['descr2']='kkk1:kkk2'
+        kkdict['descr3']=10
 
-        subst = {};
-        subst['ssss1']='kkk1';
-        subst['ssss2']='other';
+        subst = {}
+        subst['ssss1']='kkk1'
+        subst['ssss2']='other'
+        subst['descr2']='des222'
 
-        prop_dict = helpers.build_properties_dict(kkdict,subst,'_')
 
-        self.assertEqual(len(prop_dict),6);
+        prop_dict,desct = helpers.build_properties_dict(kkdict,subst,['descr1','des222','descr3'])
+        self.assertEqual(len(desct),3)
+        self.assertEqual(desct['descr3'],10)
+        self.assertEqual(desct['descr1'],'ddd')
+        self.assertTrue('des222' in desct.keys())
 
-        val = prop_dict['__first']
+
+        self.assertEqual(len(prop_dict),6)
+
+        val = prop_dict['_first']
         self.assertTrue(type(val) is helpers.ComplexProperty)
 
         #elf.assertEqual(val[0],'_kkk1');
         #self.assertEqual(val[1],'_kkk2');
 
-        val = prop_dict['_other']
+        val = prop_dict['other']
         self.assertFalse(type(val) is helpers.ComplexProperty)
         self.assertEqual(val,'unrelated');
 
-        val = prop_dict['__second']
+        val = prop_dict['_second']
         self.assertTrue(type(val) is helpers.ComplexProperty)
 
         #self.assertEqual(val[0],'_kkk1')
@@ -145,7 +155,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
         #self.assertEqual(val[2],'_third')
 
 
-        val = prop_dict['_third']
+        val = prop_dict['third']
         self.assertFalse(type(val) is helpers.ComplexProperty)
         self.assertEqual(val,'Babara')
 
@@ -166,7 +176,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
         subst['third']=3;
         subst['second']=2;
 
-        subst_dict = helpers.build_properties_dict(kkdict,subst)
+        subst_dict,descr_dict = helpers.build_properties_dict(kkdict,subst)
 
         self.assertEqual(len(subst_dict),6);
 
@@ -200,7 +210,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
         subst['ssss1']='kkk1';
         subst['ssss2']='other';
 
-        subst_dict = helpers.build_properties_dict(kkdict,subst)
+        subst_dict,descr = helpers.build_properties_dict(kkdict,subst)
         self.assertEqual(helpers.gen_getter(subst_dict,'kkk1'),19);
         self.assertEqual(helpers.gen_getter(subst_dict,'kkk2'),1000);
         self.assertEqual(helpers.gen_getter(subst_dict,'first'),[19,1000]);
