@@ -316,7 +316,9 @@ enable_precompiled_headers( inc/MantidCurveFitting/PrecompiledHeader.h SRC_FILES
 # Add the target for this directory
 add_library ( CurveFitting ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting COMPILE_DEFINITIONS IN_MANTID_CURVEFITTING)
+set_target_properties ( CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting 
+                                     COMPILE_DEFINITIONS IN_MANTID_CURVEFITTING
+                                     INSTALL_RPATH "@loader_path/../contents/MacOS/")
 # Add to the 'Framework' group in VS
 set_property ( TARGET CurveFitting PROPERTY FOLDER "MantidFramework" )
 

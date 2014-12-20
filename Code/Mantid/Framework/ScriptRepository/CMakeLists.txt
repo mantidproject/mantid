@@ -18,7 +18,8 @@ add_library ( ScriptRepository ${SRC_FILES} ${INC_FILES} )
 add_subdirectory ( test )
 # Set the name of the generated library
 set_target_properties ( ScriptRepository PROPERTIES OUTPUT_NAME MantidScriptRepository 
-                        COMPILE_DEFINITIONS IN_MANTID_SCRIPTREPO)
+                        COMPILE_DEFINITIONS IN_MANTID_SCRIPTREPO
+                        INSTALL_RPATH "@loader_path/../contents/MacOS/")
 
 set_property (TARGET ScriptRepository PROPERTY FOLDER "MantidFramework")
 

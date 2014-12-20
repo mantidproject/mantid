@@ -130,7 +130,7 @@ set_target_output_directory ( PythonAPIModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
 target_link_libraries ( PythonAPIModule PythonGeometryModule PythonKernelModule API )
-set_target_properties( PythonAPIModule PROPERTIES INSTALL_RPATH "@loader_path/../../;@loader_path/../kernel/")
+set_target_properties( PythonAPIModule PROPERTIES INSTALL_RPATH "@loader_path/../../;@loader_path/../kernel/;@loader_path/../geometry/")
 ###########################################################################
 # Installation settings
 ###########################################################################
