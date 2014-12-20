@@ -384,7 +384,87 @@ class DirectReductionHelpersTest(unittest.TestCase):
         self.assertEqual(dep[0],'B')
         self.assertEqual(dep[1],'C')
 
+    def test_class_property_setter3(self):
+        class test_class(object):
+            def __init__(self):
+                all_methods = dir(self)
+                existing=[]
+                for meth in all_methods:
+                    if meth[:1] != '_':
+                        existing.append(meth)
+                kkdict = {};
+                kkdict['_A']=helpers.ComplexProperty(['B','C']);
+                kkdict['B']=19;
+                kkdict['C']=1000;
 
+                class_decor = '_'+type(self).__name__;
+                object.__setattr__(self,class_decor+'__exmeth',existing)
+                
+
+                self.__dict__.update(kkdict)
+
+            some_descriptor = SomeDescriptor()
+
+            def __setattr__(self,name,val):
+                if  name in self.__exmeth:
+                    object.__setattr__(self,name,val)
+                else:
+                    helpers.gen_setter(self.__dict__,name,val);
+                    #raise KeyError("Property {0} is not among recognized properties".format(name))
+
+            def __getattr__(self,name):
+                return helpers.gen_getter(self.__dict__,name);
+
+  
+            def access(self,obj_name):
+               try:
+                  obj = self.__class__.__dict__[obj_name]
+                  return obj
+               except:
+                  priv_name = '_'+obj_name
+                  if priv_name in self.__dict__:
+                     return self.__dict__[priv_name]
+                  else:
+                      raise KeyError("Property {0} is not among class descriptors or complex properties ".format(obj_name))
+               
+
+
+        t1 =test_class()
+
+        self.assertEqual(t1.B,19);
+
+        t1.B=0;
+        self.assertEqual(t1.B,0);
+
+        self.assertRaises(KeyError,setattr,t1,'non_existing_property','some value')
+
+
+        t1.A = [1,10];
+        self.assertEqual(t1.A,[1,10]);
+
+        # This does not work as the assignment occurs to temporary vector
+        # lets ban partial assignment
+        #t1.D[0] = 200;
+        #self.assertEqual(t1.B,200);
+        # This kind of assignment requests the whole list to be setup  
+        self.assertRaises(KeyError,setattr,t1,'A',200)
+
+        # Very bad -- fails silently
+        t1.A[0] = 10;
+        self.assertEqual(t1.A,[1,10]);
+
+
+        t1.some_descriptor = 'blaBla'
+        self.assertEqual(t1.some_descriptor ,'blaBla');
+
+        self.assertEqual(t1.access('some_descriptor').get_helper() ,'using helper');
+
+        t1.access('some_descriptor').set_helper('other')
+        self.assertEqual(t1.some_descriptor ,'other');
+
+        dep = t1.access('A').dependencies()
+        self.assertEqual(dep[0],'B')
+        self.assertEqual(dep[1],'C')
 
         
 if __name__=="__main__":

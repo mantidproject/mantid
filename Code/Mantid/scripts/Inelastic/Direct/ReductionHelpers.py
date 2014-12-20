@@ -41,7 +41,7 @@ class ComplexProperty(object):
     def len(self):
         """ returns the number of properties, this property depends on"""
 
-        return len(self._other_prop);
+        return len(self._other_prop)
 #end ComplexProperty
 
 
@@ -80,11 +80,11 @@ def get_default_idf_param_list(pInstrument,synonims_list=None):
         par_list[name] = get_default_parameter(pInstrument,name);
 
 
-    return par_list;
+    return par_list
 
 
 
-def build_properties_dict(param_map,synonims,preffix='') :
+def build_properties_dict(param_map,synonims,descr_list=[]) :
     """ function builds the properties list from the properties strings obtained from Insturment_Parameters.xml file
               
        The properties, which have simple values are added to dictionary in the form:
@@ -96,24 +96,27 @@ def build_properties_dict(param_map,synonims,preffix='') :
        in the form properties_dict[key1]=(True,['key2','key3'])
 
     """ 
+        if name in descr_list:
+
     # dictionary used for substituting composite keys.
-    prelim_dict = dict();
+    prelim_dict = dict()
 
     for name in param_map:
        if name in synonims:
-          final_name = preffix+str(synonims[name]);
+          final_name = str(synonims[name])
        else:
-          final_name = preffix+str(name)
-       prelim_dict[final_name]=None;
+          final_name = str(name)
+       prelim_dict[final_name]=None
 
-    param_keys = prelim_dict.keys();
-    properties_dict = dict();
+    param_keys = prelim_dict.keys()
+    properties_dict = dict()
+    descr_dict = dict()
 
     for name,val in param_map.items() :
         if name in synonims:
-            final_name = preffix+str(synonims[name]);
+            final_name = str(synonims[name])
         else:
-            final_name = preffix+str(name)
+            final_name = str(name)
 
         if isinstance(val,str):  
                val = val.strip()
@@ -121,26 +124,26 @@ def build_properties_dict(param_map,synonims,preffix='') :
                n_keys = len(keys_candidates)
                #
                if n_keys>1 : # this is the property we want to modify
-                   result=list();
+                   result=list()
                    for key in keys_candidates :
                        if key in synonims:
-                           rkey = preffix+str(synonims[key]);
+                           rkey = str(synonims[key])
                        else:
-                           rkey = preffix+str(key);
+                           rkey = str(key)
                        if rkey in param_keys:
-                          result.append(rkey);
+                          result.append(rkey)
                        else:
-                          raise KeyError('Substitution key : {0} is not in the list of allowed keys'.format(rkey));
+                          raise KeyError('Substitution key : {0} is not in the list of allowed keys'.format(rkey))
                    properties_dict['_'+final_name]=ComplexProperty(result)
                else:
                    properties_dict[final_name] =keys_candidates[0];
         else:
             properties_dict[final_name]=val;
 
-    return properties_dict
+    return (properties_dict,descr_dict)
 
 
-def extract_non_system_names(names_list,prefix='__'):
+def extract_non_system_names(names_list,prefix='_'):
     """ The function processes the input list and returns 
         the list with names which do not have the system framing (leading __)                  
     """
@@ -184,7 +187,7 @@ def build_subst_dictionary(synonims_list=None) :
                 kkk = keys[i].strip();
                 rez[kkk]=keys[0].strip()
 
-    return rez;
+    return rez
 
 def gen_getter(keyval_dict,key):
     """ function returns value from dictionary with substitution 
@@ -282,5 +285,5 @@ def check_instrument_name(old_name,new_name):
     facility = str(config.getFacility())
 
     config['default.instrument'] = full_name
-    return (new_name,full_name,facility);
+    return (new_name,full_name,facility)
 
