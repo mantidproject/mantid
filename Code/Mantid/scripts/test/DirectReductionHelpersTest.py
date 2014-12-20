@@ -481,6 +481,9 @@ class DirectReductionHelpersTest(unittest.TestCase):
 
         self.assertEqual(test_class.some_descriptor.get_helper(),'using helper')
 
+        prop = getattr(test_class,'some_descriptor')
+        self.assertEqual(prop.get_helper(),'using helper')
+
 
         
 if __name__=="__main__":
