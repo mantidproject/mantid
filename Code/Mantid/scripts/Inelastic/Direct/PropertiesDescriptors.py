@@ -22,6 +22,9 @@ class IncidentEnergy(object):
         pass
     def __get__(self,instance,owner=None):
         """ return  incident energy or list of incident energies """ 
+        if instance is None:
+           return self
+
         return self._incident_energy 
     def __set__(self,instance,value):
        """ Set up incident energy or range of energies in various formats """
@@ -69,6 +72,8 @@ class EnergyBins(object):
         self._energy_bins=None
     def __get__(self,instance,owner=None):
         """ binning range for the result of convertToenergy procedure or list of such ranges """
+        if instance is None:
+           return self
         return self._energy_bins
 
     def __set__(self,instance,values):
@@ -96,6 +101,9 @@ class SaveFileName(object):
     def __init__(self,Name=None):
        self._file_name = Name
     def __get__(self,instance,owner=None):
+
+        if instance is None:
+           return self
         if self._file_name:
             return self._file_name
         else:
@@ -129,6 +137,10 @@ class InstrumentDependentProp(object):
     def __init__(self,prop_name):
         self._prop_name = prop_name;
     def __get__(self,instance,owner=None):
+
+         if instance is None:
+           return self
+
          if instance._pInstrument is None:
             raise KeyError("Attempt to use uninitialized property manager");
          else:
@@ -161,6 +173,7 @@ class VanadiumRMM(object):
     """ define constant static rmm for vanadium """ 
     def __get__(self,instance,owner=None):
         """ return rmm for vanadium """
+
         return 50.9415;
     def __set__(self,instance,value):
         raise AttributeError("Can not change vanadium rmm");
@@ -172,7 +185,10 @@ class DetCalFile(object):
         self._det_cal_file = None
 
     def __get__(self,instance,owner):
-          return prop_helpers.gen_getter(instance.__dict__,'det_cal_file');
+        if instance is None:
+           return self
+
+        return prop_helpers.gen_getter(instance.__dict__,'det_cal_file');
 
     def __set__(self,instance,val):
        """ set detector calibration file using various formats """ 
@@ -210,7 +226,10 @@ class MapMaskFile(object):
             self.__doc__ = doc_string;
 
     def __get__(self,instance,type=None):
-          return self._file_name
+        if instance is None:
+           return self
+
+        return self._file_name
 
     def __set__(self,instance,value):
         if value != None:
@@ -226,7 +245,10 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
     def __init__(self):
         prop_helpers.ComplexProperty.__init__(self,['use_hard_mask_only','run_diagnostics'])
     def __get__(self,instance,type=None):
-         return instance.hard_mask_file
+        if instance is None:
+           return self
+
+        return instance.hard_mask_file
 
     def __set__(self,instance,value):
         if value != None:
@@ -252,7 +274,10 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
         prop_helpers.ComplexProperty.__init__(self,['use_hard_mask_only','run_diagnostics'])
 
     def __get__(self,instance,type=None):
-          return prop_helpers.gen_getter(instance.__dict__,'use_hard_mask_only');
+        if instance is None:
+           return self
+
+        return prop_helpers.gen_getter(instance.__dict__,'use_hard_mask_only');
     def __set__(self,instance,value):
         if value is None:
             use_hard_mask_only = False
@@ -300,6 +325,10 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
         pass
 
     def __get__(self,instance,type=None):
+
+        if instance is None:
+           return self
+
         if isinstance(instance,dict):
                 ei = 1
                 tDict = instance
@@ -362,6 +391,8 @@ class SpectraToMonitorsList(object):
 
 
    def __get__(self,instance,type=None):
+       if instance is None:
+           return self
        return self._spectra_to_monitors_list
 
    def __set__(self,instance,spectra_list):
@@ -402,6 +433,9 @@ class SaveFormat(object):
        self._save_format = set()
 
    def __get__(self,instance,type=None):
+        if instance is None:
+           return self
+
         return self._save_format
 
    def __set__(self,instance,value):
@@ -451,6 +485,9 @@ class DiagSpectra(object):
         self._diag_spectra = None
 
     def __get__(self,instance,type=None):
+        if instance is None:
+           return self
+
         return self._diag_spectra
 
     def __set__(self,instance,spectra_list):
@@ -488,6 +525,9 @@ class BackbgroundTestRange(object):
         self._background_test_range = None
 
     def __get__(self,instance,type=None):
+       if instance is None:
+           return self
+
        if self._background_test_range:
             return self._background_test_range  
        else:

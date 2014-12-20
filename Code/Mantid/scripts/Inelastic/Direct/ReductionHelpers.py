@@ -10,6 +10,10 @@ class ComplexProperty(object):
  
     def __get__(self,spec_dict,owner=None):
         """ return complex properties list """
+        if spec_dict is None:
+            # access to property methods
+            return self
+
         if not isinstance(spec_dict,dict):
             spec_dict = spec_dict.__dict__
         rez = list()

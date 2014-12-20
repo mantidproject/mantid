@@ -10,7 +10,11 @@ class SomeDescriptor(object):
              self._val=None
 
          def __get__(self,instance,owner=None):
-                return self._val;
+             if instance is None:
+                 return self
+
+             return self._val
+
          def __set__(self,instance,value):
                 self._val = value
          def get_helper(self):
@@ -467,14 +471,16 @@ class DirectReductionHelpersTest(unittest.TestCase):
         t1.some_descriptor = 'blaBla'
         self.assertEqual(t1.some_descriptor ,'blaBla');
 
-        self.assertEqual(t1.access('some_descriptor').get_helper() ,'using helper');
-
+        self.assertEqual(t1.access('some_descriptor').get_helper() ,'using helper')
         t1.access('some_descriptor').set_helper('other')
         self.assertEqual(t1.some_descriptor ,'other');
 
         dep = t1.access('A').dependencies()
         self.assertEqual(dep[0],'B')
         self.assertEqual(dep[1],'C')
+
+        self.assertEqual(test_class.some_descriptor.get_helper(),'using helper')
+
 
         
 if __name__=="__main__":

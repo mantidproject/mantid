@@ -116,8 +116,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_set_spectra_to_mon(self):
         propman = self.prop_man
 
-        ll = propman.spectra_to_monitors_list
-        self.assertTrue(ll is None)
+        self.assertTrue(propman.spectra_to_monitors_list is None)
 
         propman.spectra_to_monitors_list = 35;
         self.assertTrue(isinstance(propman.spectra_to_monitors_list,list));
@@ -539,7 +538,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         changed_prop=propman.update_defaults_from_instrument( ws.getInstrument())
 
-        self.assertEqual(len(changed_prop),1)
+        self.assertEqual(len(changed_prop),2) # TODO -- somt
         bkgd_range = propman.bkgd_range
         self.assertAlmostEqual(bkgd_range[0],mari_bkgd_range[0])
         self.assertAlmostEqual(bkgd_range[1],40)

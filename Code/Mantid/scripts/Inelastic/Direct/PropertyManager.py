@@ -141,34 +141,7 @@ class PropertyManager(NonIDF_Properties):
         # build properties list and descriptors list with their initial values 
         param_dict,descr_dict =  prop_helpers.build_properties_dict(param_list,self.__dict__[subst_name],descr_list)
 
-        ##--------------------------------------------------------------------------------------
-        ## modify some IDF properties, which need overloaded getter (and this getter is provided somewhere among PropertiesDescriptors)
-        #if 'background_test_range' in param_list:
-        #    val = param_list['background_test_range']
-        #    param_list['_background_test_range'] = val;
-        #    del param_list['background_test_range']
-        #else:
-        #    param_list['_background_test_range'] = None;
-        ##end
-        ## make spectra_to_monitors_list to be the list indeed. 
-        #if 'spectra_to_monitors_list' in param_list:
-        #    sml = SpectraToMonitorsList();
-        #    param_list['spectra_to_monitors_list']=sml.convert_to_list(param_list['spectra_to_monitors_list'])
-        ##end
-        ##
-        #if 'monovan_integr_range' in param_list:
-        #    # get reference to the existing class method
-        #    param_list['_monovan_integr_range']=self.__class__.__dict__['monovan_integr_range']
-        #    #
-        #    val = param_list['monovan_integr_range']
-        #    if str(val).lower() != 'none':
-        #        prop= param_list['_monovan_integr_range']
-        #        prop.__init__('AbsRange')
-        #    del param_list['monovan_integr_range']
-        ##End monovan_integr_range
-        ##-
-        # End modify. 
-        #----------------------------------------------------------------------------------------
+   
         return (param_dict,descr_dict)
 
     def _init_private_properties(self,prop_dict):
@@ -257,19 +230,7 @@ class PropertyManager(NonIDF_Properties):
            return prop_helpers.gen_getter(self.__dict__,name)
 
        ##end
-    def access_fprop(self,obj_name):
-        """ access pointer to a complex property"""
-        try:
-           obj = self.__class__.__dict__[obj_name]
-           return obj
-        except:
-           priv_name = '_'+obj_name
-           if priv_name in self.__dict__:
-              return self.__dict__[priv_name]
-           else:
-              raise KeyError("Property {0} is not among class descriptors or complex properties ".format(obj_name))
-
-#----------------------------------------------------------------------------------
+ #----------------------------------------------------------------------------------
 #              Overloaded setters/getters
 #----------------------------------------------------------------------------------
     #
@@ -388,7 +349,7 @@ class PropertyManager(NonIDF_Properties):
         for change in old_changes:
             dependencies = None
             try:
-                prop = self.access_fprop(change)
+                prop = getattr(PropertyManager,'change')
                 dependencies = prop.dependencies()
             except:
                 pass
