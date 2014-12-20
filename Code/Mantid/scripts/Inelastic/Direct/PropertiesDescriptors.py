@@ -362,7 +362,7 @@ class SpectraToMonitorsList(object):
 
 
    def __get__(self,instance,type=None):
-       return self.__spectra_to_monitors_list
+       return self._spectra_to_monitors_list
 
    def __set__(self,instance,spectra_list):
         """ Sets copy spectra to monitors variable as a list of monitors using different forms of input """

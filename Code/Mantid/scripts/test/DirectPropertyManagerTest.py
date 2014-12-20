@@ -116,7 +116,8 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_set_spectra_to_mon(self):
         propman = self.prop_man
 
-        self.assertTrue(propman.spectra_to_monitors_list is None);
+        ll = propman.spectra_to_monitors_list
+        self.assertTrue(ll is None)
 
         propman.spectra_to_monitors_list = 35;
         self.assertTrue(isinstance(propman.spectra_to_monitors_list,list));
@@ -647,7 +648,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         # verify if changed properties list does not change anything
         changed_prop=propman1.update_defaults_from_instrument( ws.getInstrument())
-        self.assertEqual(len(changed_prop),1)
+        self.assertEqual(len(changed_prop),2)
         self.assertFalse(propman1.use_hard_mask_only)
         self.assertEqual(propman1.hard_mask_file,'a_hard_mask_file.msk')
         self.assertTrue(propman1.run_diagnostics)

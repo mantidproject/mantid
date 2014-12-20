@@ -388,7 +388,7 @@ class PropertyManager(NonIDF_Properties):
         for change in old_changes:
             dependencies = None
             try:
-                prop = self.__class__.__dict__[change]
+                prop = self.access_fprop(change)
                 dependencies = prop.dependencies()
             except:
                 pass
@@ -410,7 +410,7 @@ class PropertyManager(NonIDF_Properties):
  
             try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains 
                     # properties, not present in recent IDF.
-                  cur_val = getattr(self,name)
+                  cur_val = getattr(self,key)
             except:
                   self.log("property {0} or its derivatives have not been found in existing IDF. Ignoring this property"\
                        .format(key),'warning')
