@@ -86,7 +86,7 @@ class PropertyManager(NonIDF_Properties):
 
         object.__setattr__(self,'_mask_run',None)
         object.__setattr__(self,'_mono_correction_factor',None)
-
+        class_dec = '_'+type(self).__name__+'__'
 
         #
         # define private properties served the class
@@ -99,13 +99,13 @@ class PropertyManager(NonIDF_Properties):
         # overloaded descriptors. These properties have their personal descriptors, different from default. There will be other 
         # methods but let's ignore this for the time beein
         all_methods = dir(self)
-        object.__setattr__(self,'_'+type(self).__name__+'__descriptors',prop_helpers.extract_non_system_names(all_methods))
+        object.__setattr__(self,class_dec+'descriptors',prop_helpers.extract_non_system_names(all_methods))
 
         # retrieve the dictionary of property-values described in IDF
         param_list = prop_helpers.get_default_idf_param_list(self.instrument)
         param_dict,descr_dict = self._convert_params_to_properties(param_list,True,self.__descriptors)
         #
-        self.__dict__.update(param_list)
+        self.__dict__.update(param_dict)
 
         # use existing descriptors setter to define IDF-defined descriptor's state
         for key,val in descr_dict.iteritems():
@@ -113,8 +113,8 @@ class PropertyManager(NonIDF_Properties):
 
 
         # file properties -- the properties described files which should exist for reduction to work.
-        self.__file_properties = ['det_cal_file','map_file','hard_mask_file']
-        self.__abs_norm_file_properties = ['monovan_mapfile']
+        object.__setattr__(self,class_dec+'file_properties',['det_cal_file','map_file','hard_mask_file'])
+        object.__setattr__(self,class_dec+'abs_norm_file_properties',['monovan_mapfile'])
 
         # properties with allowed values
         self.__prop_allowed_values['normalise_method']=[None,'monitor-1','monitor-2','current']  # 'uamph', peak -- disabled/unknown at the moment
@@ -127,10 +127,11 @@ class PropertyManager(NonIDF_Properties):
             to the form allowing them be assigned as python class properties.            
         """ 
             # build and use substitution dictionary
+        subst_name = '_'+type(self).__name__+'__subst_dict'
         if 'synonims' in param_list :
             synonyms_string  = param_list['synonims'];
             if detine_subst_dict:
-                object.__setattr__(self,'_'+type(self).__name__+'__subst_dict',prop_helpers.build_subst_dictionary(synonyms_string))
+                object.__setattr__(self,subst_name,prop_helpers.build_subst_dictionary(synonyms_string))
             #end
             # this dictionary will not be needed any more
             del param_list['synonims']
@@ -138,7 +139,7 @@ class PropertyManager(NonIDF_Properties):
 
 
         # build properties list and descriptors list with their initial values 
-        param_dict,decor_dict =  prop_helpers.build_properties_dict(param_list,self.__subst_dict,decor_list)
+        param_dict,decor_dict =  prop_helpers.build_properties_dict(param_list,self.__dict__[subst_name],decor_list)
 
         ##--------------------------------------------------------------------------------------
         ## modify some IDF properties, which need overloaded getter (and this getter is provided somewhere among PropertiesDescriptors)
@@ -283,11 +284,13 @@ class PropertyManager(NonIDF_Properties):
 #----------------------------------------------------------------------------------------------------------------
     def getChangedProperties(self):
         """ method returns set of the properties changed from defaults """
-        return self.__dict__[self._class_wrapper+'changed_properties'];
+        decor_prop = '_'+type(self).__name__+'__changed_properties'
+        return self.__dict__[decor_prop]
     def setChangedProperties(self,value=set()):
         """ Method to clear changed properties list""" 
         if isinstance(value,set):
-            self.__dict__[self._class_wrapper+'changed_properties'] =value;
+            decor_prop = '_'+type(self).__name__+'__changed_properties'
+            self.__dict__[decor_prop] =value;
         else:
             raise KeyError("Changed properties can be initialized by appropriate properties set only")
 
@@ -380,24 +383,21 @@ class PropertyManager(NonIDF_Properties):
                  existing_changes.update(dependencies)
 
         param_list = prop_helpers.get_default_idf_param_list(pInstrument)
-        param_list =  self._convert_params_to_properties(param_list,False)
+        param_list,descr_dict =  self._convert_params_to_properties(param_list,False,self.__descriptors)
 
-        #sort parameters to have complex properties (with underscore _) first    
-        sorted_param =  OrderedDict(sorted(param_list.items(),key=lambda x : ord((x[0][0]).lower())))
   
-
-        for key,val in sorted_param.iteritems():
+        for key,val in param_list.iteritems():
             # set new values to old values and record this
             if key[0] == '_':
                public_name = key[1:]
             else:
                public_name = key
-            # complex properties were modified to start with _
-            if not(key in self.__dict__):
-                 name = '_'+key
-            else:
-                 name = key
 
+            # complex properties change through their dependencies so we are not setting them here
+            if isinstance(val,prop_helpers.ComplexProperty):
+                continue
+            if 
+ 
             try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains 
                     # properties, not present in recent IDF.
                   cur_val = self.__dict__[name]
