@@ -83,24 +83,22 @@ class PropertyManager(NonIDF_Properties):
     def __init__(self,Instrument,instr_run=None):
         #
         NonIDF_Properties.__init__(self,Instrument,instr_run)
-
+        # Overloaded parameters, defined through properties rather then descriptors
         object.__setattr__(self,'_mask_run',None)
         object.__setattr__(self,'_mono_correction_factor',None)
-        class_dec = '_'+type(self).__name__+'__'
 
-        #
         # define private properties served the class
         private_properties = {'descriptors':[],'subst_dict':{},'prop_allowed_values':{},'changed_properties':set(),
                               'file_properties':[],'abs_norm_file_properties':[]}
         # place these properties to __dict__  with proper decoration
         self._init_private_properties(private_properties)
-
+        # 
+        class_dec = '_'+type(self).__name__+'__'
         # ---------------------------------------------------------------------------------------------
-        # overloaded descriptors. These properties have their personal descriptors, different from default. There will be other 
-        # methods but let's ignore this for the time beein
+        # overloaded descriptors. These properties have their personal descriptors, different from default. 
         all_methods = dir(self)
         object.__setattr__(self,class_dec+'descriptors',prop_helpers.extract_non_system_names(all_methods))
-
+        # ---------------------------------------------------------------------------------------------
         # retrieve the dictionary of property-values described in IDF
         param_list = prop_helpers.get_default_idf_param_list(self.instrument)
         param_dict,descr_dict = self._convert_params_to_properties(param_list,True,self.__descriptors)
@@ -126,11 +124,11 @@ class PropertyManager(NonIDF_Properties):
         """ method processes parameters obtained from IDF and modifies the IDF properties
             to the form allowing them be assigned as python class properties.            
         """ 
-            # build and use substitution dictionary
-        subst_name = '_'+type(self).__name__+'__subst_dict'
+        # build and use substitution dictionary
         if 'synonims' in param_list :
             synonyms_string  = param_list['synonims'];
             if detine_subst_dict:
+                subst_name = '_'+type(self).__name__+'__subst_dict'
                 object.__setattr__(self,subst_name,prop_helpers.build_subst_dictionary(synonyms_string))
             #end
             # this dictionary will not be needed any more
@@ -139,12 +137,13 @@ class PropertyManager(NonIDF_Properties):
 
 
         # build properties list and descriptors list with their initial values 
-        param_dict,descr_dict =  prop_helpers.build_properties_dict(param_list,self.__dict__[subst_name],descr_list)
-
-   
+        param_dict,descr_dict =  prop_helpers.build_properties_dict(param_list,self.__dict__[subst_name],descr_list) 
         return (param_dict,descr_dict)
 
     def _init_private_properties(self,prop_dict):
+        """ helper method used to define all private dictionaries at once 
+            during __init__ procedure
+        """
 
         class_decor = '_'+type(self).__name__+'__'
 
@@ -153,26 +152,20 @@ class PropertyManager(NonIDF_Properties):
             new_key = class_decor+key
             object.__setattr__(self,new_key,val)
 
-    def _is_private_property(self,prop_name):
-        """ specify if property is private """
-
-        class_decor = '_'+type(self).__name__+'__'
-        if prop_name[:len(class_decor)] == class_decor :
-            return True
-        else:
-            return False
-        #end if
-
-
+ 
     def __setattr__(self,name0,val):
         """ Overloaded generic set method, disallowing non-existing properties being set.
                
-           It also provides common checks for generic properties groups """ 
+           It also provides common checks for generic properties groups 
+           and records all properties changed
+        """ 
 
-        #if self._is_private_property(name0):
-        #    self.__dict__[name0] = val;
-        #    return
-
+        # Let's set private properties directly. Normally, nobody should try 
+        # to set them through PropertyManager interface
+        if name0[:1]=='_':
+            self.__dict__[name0] = val;
+            return
+        #end
         if name0 in self.__subst_dict:
             name = self.__subst_dict[name0]
         else:
@@ -197,7 +190,7 @@ class PropertyManager(NonIDF_Properties):
             val = None;
  
 
-        # Check allowed values property if value allowed
+        # Check allowed values property if value allowed TODO: re-implement through descriptors
         if name in self.__prop_allowed_values:
             allowed_values = self.__prop_allowed_values[name];
             if not(val in allowed_values):
@@ -210,7 +203,7 @@ class PropertyManager(NonIDF_Properties):
         else:
            other_prop=prop_helpers.gen_setter(self.__dict__,name,val);
 
-        # record changes in the property
+        # record the fact that the property have changed
         self.__changed_properties.add(name);
 
    # ----------------------------
@@ -224,13 +217,14 @@ class PropertyManager(NonIDF_Properties):
        #end 
 
        if name in self.__descriptors:
-           descr=self.access_fprop(name)
+           # This can only happen only if descriptor is called through synonims dictionary 
+           # This to work, all descriptors should define getter to return self on Null instance.
+           descr=getattr(PropertyManager,name)
            return descr.__get__(self,name)
        else:
            return prop_helpers.gen_getter(self.__dict__,name)
-
        ##end
- #----------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------
 #              Overloaded setters/getters
 #----------------------------------------------------------------------------------
     #
@@ -341,21 +335,14 @@ class PropertyManager(NonIDF_Properties):
                      "*** This only works if both instruments have the same reduction properties!"\
                       .format(self.instr_name,pInstrument.getName()),'warning')
 
-        old_changes  = self.getChangedProperties()
+        old_changes_list  = self.getChangedProperties()
         self.setChangedProperties(set())
 
         # find all changes, present in the old changes list
-        existing_changes = old_changes.copy()
-        for change in old_changes:
-            dependencies = None
-            try:
-                prop = getattr(PropertyManager,'change')
-                dependencies = prop.dependencies()
-            except:
-                pass
-            if dependencies:
-                 existing_changes.update(dependencies)
-
+        old_changes={}
+        for prop_name in old_changes_list:
+            old_changes[prop_name] = getattr(self,prop_name)
+ 
         param_list = prop_helpers.get_default_idf_param_list(pInstrument)
         param_list,descr_dict =  self._convert_params_to_properties(param_list,False,self.__descriptors)
 
