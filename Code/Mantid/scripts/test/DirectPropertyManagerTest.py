@@ -1,5 +1,5 @@
 import os
-os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -651,6 +651,17 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertFalse(propman1.use_hard_mask_only)
         self.assertEqual(propman1.hard_mask_file,'a_hard_mask_file.msk')
         self.assertTrue(propman1.run_diagnostics)
+
+        propman1.setChangedProperties(set())
+        propman1.hardmaskOnly = 'more_hard_mask_file'
+
+        # verify if changed properties list does not change anything
+        changed_prop=propman1.update_defaults_from_instrument( ws.getInstrument())
+        self.assertTrue(propman1.use_hard_mask_only)
+        self.assertEqual(propman1.hard_mask_file,'more_hard_mask_file.msk')
+        self.assertTrue(propman1.run_diagnostics)
+
+
 #def test_default_warnings(self):
     #    tReducer = self.reducer
 

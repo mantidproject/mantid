@@ -259,6 +259,10 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[False,True])
         else:
            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[True,False])
+        try:
+             del instance.__changed_properties['hardmaskOnly']
+        except:
+           pass
  
 
 
@@ -281,13 +285,11 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
     def __set__(self,instance,value):
         if value is None:
             use_hard_mask_only = False
-            run_diagnostics    = True
             instance.hard_mask_file = None
-            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[use_hard_mask_only,run_diagnostics])
-        elif isinstance(value,bool):
-            use_hard_mask_only = False
-            run_diagnostics    = instance.run_diagnostics
-            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[use_hard_mask_only,run_diagnostics])
+            hard_mask_file = None
+        elif isinstance(value,bool) or isinstance(value,int):
+            use_hard_mask_only = bool(value)
+            hard_mask_file= instance.hard_mask_file
         elif isinstance(value,str):
             if value.lower() in ['true','yes']:
                 use_hard_mask_only = True
@@ -297,14 +299,20 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
                 instance.hard_mask_file = value             
                 use_hard_mask_only = True
             hard_mask_file = instance.hard_mask_file
-
-            # if no hard mask file is there and use_hard_mask_only is True, diagnostics should not run
-            if instance.use_hard_mask_only and hard_mask_file is None:
-               run_diagnostics = False
-            else:
-               run_diagnostics = True
-            prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[use_hard_mask_only,run_diagnostics])
         #end
+
+        # if no hard mask file is there and use_hard_mask_only is True, diagnostics should not run
+        if use_hard_mask_only and hard_mask_file is None:
+            run_diagnostics = False
+        else:
+            run_diagnostics = True
+        prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[use_hard_mask_only,run_diagnostics])
+        try:
+             del instance.__changed_properties['hardmaskPlus']
+        except:
+           pass
+ 
+
   
 #end HardMaskOnly
 

@@ -33,17 +33,18 @@ class PropertyManager(NonIDF_Properties):
         ########
         design remarks:
 
-        1) Simple properties from IDF are stored in class dictionary in the form __dict__[property name]==property value
+        1) Simple properties from IDF are stored in class dictionary in the form __dict__[property name]=property value
 
         2) Complex properties from IDF implemented as instances of ReductionHelpers.ComplexProperty class and are stored
           in class dictionary in the forn __dict__[_property name] = ReductionHelpers.ComplexProperty([dependent properties list])
           __getattr__ and __setattr__ are overloaded to understand such calls
 
-        3) Descriptors with the name present in IDF do not store their values and names in __dict__ but keep their information in the descriptor
+        3) Descriptors with the name present in IDF do not store their values and names in __dict__ 
+          (the name is removed during IDF parsing) but keep their information in the descriptor.
           This is not considered a problem as only one instance of property manager is expected. 
 
-        4) __getattr__ method is overloaded to provide call to descriptor before the search in the system dictionary. This works only
-          if Python does not find a property name in the __dict__ or __class__.__dict__ (and mro()) first 
+        4) __getattr__ (and __setattr__ ) method is overloaded to provide call to descriptor before the search in the system dictionary.
+           This works only if Python does not find a property name in the __dict__ or __class__.__dict__ (and mro()) first 
 
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -241,7 +242,7 @@ class PropertyManager(NonIDF_Properties):
         """ method returns set of the properties changed from defaults """
         decor_prop = '_'+type(self).__name__+'__changed_properties'
         return self.__dict__[decor_prop]
-    def setChangedProperties(self,value=set()):
+    def setChangedProperties(self,value=set([])):
         """ Method to clear changed properties list""" 
         if isinstance(value,set):
             decor_prop = '_'+type(self).__name__+'__changed_properties'
