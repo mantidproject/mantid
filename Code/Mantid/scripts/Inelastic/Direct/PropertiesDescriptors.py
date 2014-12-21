@@ -188,7 +188,7 @@ class DetCalFile(object):
         if instance is None:
            return self
 
-        return prop_helpers.gen_getter(instance.__dict__,'det_cal_file');
+        return self._det_cal_file
 
     def __set__(self,instance,val):
        """ set detector calibration file using various formats """ 

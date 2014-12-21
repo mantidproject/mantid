@@ -538,9 +538,9 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         changed_prop=propman.update_defaults_from_instrument( ws.getInstrument())
 
-        self.assertEqual(len(changed_prop),1) # TODO -- somt
+        self.assertEqual(len(changed_prop),2)
         bkgd_range = propman.bkgd_range
-        self.assertAlmostEqual(bkgd_range[0],mari_bkgd_range[0])
+        self.assertAlmostEqual(bkgd_range[0],100)
         self.assertAlmostEqual(bkgd_range[1],40)
 
     def test_monovan_integration_range(self):
@@ -647,7 +647,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         # verify if changed properties list does not change anything
         changed_prop=propman1.update_defaults_from_instrument( ws.getInstrument())
-        self.assertEqual(len(changed_prop),2)
+        self.assertEqual(len(changed_prop),4)
         self.assertFalse(propman1.use_hard_mask_only)
         self.assertEqual(propman1.hard_mask_file,'a_hard_mask_file.msk')
         self.assertTrue(propman1.run_diagnostics)
