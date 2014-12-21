@@ -538,7 +538,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         changed_prop=propman.update_defaults_from_instrument( ws.getInstrument())
 
-        self.assertEqual(len(changed_prop),2) # TODO -- somt
+        self.assertEqual(len(changed_prop),1) # TODO -- somt
         bkgd_range = propman.bkgd_range
         self.assertAlmostEqual(bkgd_range[0],mari_bkgd_range[0])
         self.assertAlmostEqual(bkgd_range[1],40)

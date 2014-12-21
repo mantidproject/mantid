@@ -124,11 +124,12 @@ class PropertyManager(NonIDF_Properties):
         """ method processes parameters obtained from IDF and modifies the IDF properties
             to the form allowing them be assigned as python class properties.            
         """ 
+        subst_name = '_'+type(self).__name__+'__subst_dict'
+
         # build and use substitution dictionary
         if 'synonims' in param_list :
             synonyms_string  = param_list['synonims'];
             if detine_subst_dict:
-                subst_name = '_'+type(self).__name__+'__subst_dict'
                 object.__setattr__(self,subst_name,prop_helpers.build_subst_dictionary(synonyms_string))
             #end
             # this dictionary will not be needed any more
@@ -162,10 +163,10 @@ class PropertyManager(NonIDF_Properties):
 
         # Let's set private properties directly. Normally, nobody should try 
         # to set them through PropertyManager interface
-        if name0[:1]=='_':
-            self.__dict__[name0] = val;
-            return
-        #end
+        #if name0[:2]=='_P':
+        #    self.__dict__[name0] = val;
+        #    return
+        ##end
         if name0 in self.__subst_dict:
             name = self.__subst_dict[name0]
         else:
@@ -339,9 +340,19 @@ class PropertyManager(NonIDF_Properties):
         self.setChangedProperties(set())
 
         # record all changes, present in the old changes list
-        old_changes={}
+        #old_changes={}
+        all_changes_list = old_changes_list.copy()
         for prop_name in old_changes_list:
-            old_changes[prop_name] = getattr(self,prop_name)
+            #old_changes[prop_name] = getattr(self,prop_name)
+
+            # some properties may have changed through descriptors, which have nothing to do with IDF (e.g. hadmaskPlus)
+            # this is why it is wise to identify all changed properties
+            try:
+                dependencies = getattr(PropertyManager,prop_name).dependencies()
+            except:
+                dependencies = set()
+            for dep in dependencies:
+                all_changes_list.add(dep)
  
         param_list = prop_helpers.get_default_idf_param_list(pInstrument)
         param_list,descr_dict =  self._convert_params_to_properties(param_list,False,self.__descriptors)
@@ -362,20 +373,37 @@ class PropertyManager(NonIDF_Properties):
                        .format(key),'warning')
                    continue
 
-                if prop_new_val !=cur_val:
-                    if not(key in old_changes_list):
-                        setattr(self,key,prop_new_val)
-                # delete dependent properties not to deal with them again
-                dependencies = val.dependencies();
+                changed_through_dependencies=False
+                dependencies = val.dependencies()
                 for dep_name in dependencies:
+                    if dep_name in all_changes_list:
+                        changed_through_dependencies = True
+                   # delete dependent properties not to deal with them again
                     del sorted_param[dep_name]
+
+                
+                if not(prop_new_val ==cur_val or key in all_changes_list or changed_through_dependencies):
+                      setattr(self,key,prop_new_val)
+                del sorted_param[key]
                 continue
             else:
                 break # no complex properties left. finish for the time being
         #end
         # now the same for descriptors. Assignment to descriptors should accept the form, descriptor is written in IDF
         for key,new_val in descr_dict.iteritems():
-            if not(key in old_changes_list):
+            try:
+                dependencies = getattr(PropertyManager,key).dependencies()
+            except:
+                dependencies = []
+
+            changed_through_dependencies=False
+            for dep_name in dependencies:
+                if dep_name in sorted_param:
+                    if dep_name in all_changes_list:
+                        changed_through_dependencies = True
+            #end
+            descr_changed = False
+            if not(key in all_changes_list or changed_through_dependencies):
                 try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains 
                     # properties, not present in recent IDF.
                   cur_val = getattr(self,key)
@@ -384,19 +412,17 @@ class PropertyManager(NonIDF_Properties):
                        .format(key),'warning')
                    continue
                 if new_val != cur_val:
+                    descr_changed = True
                     setattr(self,key,new_val)
-            try:
-                dependencies = getattr(PropertyManager,key).dependencies()
-            except:
-                dependencies = []
-            for dep_name in dependencies:
+            if descr_changed:
+               for dep_name in dependencies:
                 if dep_name in sorted_param:
-                    del sorted_param[dep_name]
-            #end
+                      del sorted_param[dep_name]
+
         #end loop
         # only simple properties left. Deal with them
         for key,new_val in sorted_param.iteritems():
-            if not(key in old_changes_list):
+            if not(key in all_changes_list):
                 try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains 
                     # properties, not present in recent IDF.
                   cur_val = getattr(self,key)
@@ -411,11 +437,11 @@ class PropertyManager(NonIDF_Properties):
      
         # Clear changed properties list (is this wise?, may be we want to know that some defaults changed?)
         if ignore_changes:
-            self.setChangedProperties(old_changes)
+            self.setChangedProperties(old_changes_list)
             all_changes = old_changes
         else:
             new_changes = self.getChangedProperties()
-            all_changes = old_changes.union(new_changes)
+            all_changes = old_changes_list.union(new_changes)
             self.setChangedProperties(all_changes)
 
         n=funcreturns.lhs_info('nreturns')
