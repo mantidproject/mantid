@@ -18,7 +18,7 @@ class PropertyManager(NonIDF_Properties):
         prop[norm_mon_integration_range] = [prop['norm-mon1-min'],prop['norm-mon1-max']]
         prop['norm-mon1-min']=1000,prop['norm-mon1-max']=2000
 
-        There are properties which provide even more complex functionality. These properties have their own Descriptors. 
+        There are properties which provide even more complex functionality. These defined using Descriptors. 
 
     
         The class is written to provide the following functionality. 
@@ -27,42 +27,29 @@ class PropertyManager(NonIDF_Properties):
         2) Attempt to access property, not present in this file throws. 
         3) Attempt to create property not present in this file throws. 
         4) A standard behavior is defined for the most of the properties (get/set appropriate value) when there is number of 
-           overloaded properties, which support more complex behavior using specially written attribute-classes. 
+           overloaded properties, which support more complex behavior using specially written Descriptors 
         5) Changes to the properties are recorded and list of changed properties is available on request
+
+        ########
+        design remarks:
+
+        1) Simple properties from IDF are stored in class dictionary in the form __dict__[property name]==property value
+
+        2) Complex properties from IDF implemented as instances of ReductionHelpers.ComplexProperty class and are stored
+          in class dictionary in the forn __dict__[_property name] = ReductionHelpers.ComplexProperty([dependent properties list])
+          __getattr__ and __setattr__ are overloaded to understand such calls
+
+        3) Descriptors with the name present in IDF do not store their values and names in __dict__ but keep their information in the descriptor
+          This is not considered a problem as only one instance of property manager is expected. 
+
+        4) __getattr__ method is overloaded to provide call to descriptor before the search in the system dictionary. This works only
+          if Python does not find a property name in the __dict__ or __class__.__dict__ (and mro()) first 
 
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-
+    This file is part of Mantid and is distributed under GPL
     """
-    #-----------------------------------------------------------------------------------
-    @property
-    def mono_correction_factor(self):
-        """ pre-calculated absolute units correction factor"""
-        if self._mono_correction_factor:
-            return self._mono_correction_factor;
-        else:
-            return None;
-    @mono_correction_factor.setter
-    def mono_correction_factor(self,value):
-        object.__setattr__(self,'_mono_correction_factor',value)
 
     #-----------------------------------------------------------------------------------
     @property
@@ -85,7 +72,6 @@ class PropertyManager(NonIDF_Properties):
         NonIDF_Properties.__init__(self,Instrument,instr_run)
         # Overloaded parameters, defined through properties rather then descriptors
         object.__setattr__(self,'_mask_run',None)
-        object.__setattr__(self,'_mono_correction_factor',None)
 
         # define private properties served the class
         private_properties = {'descriptors':[],'subst_dict':{},'prop_allowed_values':{},'changed_properties':set(),
