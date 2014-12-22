@@ -448,9 +448,9 @@ void MDNormDirectSC::calculateNormalization(
   }
 
   auto *prog = new API::Progress(this, 0.3, 1.0, ndets);
-  // PARALLEL_FOR_NO_WSP_CHECK()
+  PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < ndets; i++) {
-    // PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERUPT_REGION
 
     const auto detID = detIDs[i];
     double theta(0.0), phi(0.0);
@@ -514,7 +514,7 @@ void MDNormDirectSC::calculateNormalization(
       // *PC
       double signal = solid * delta;
 
-      // PARALLEL_CRITICAL(updateMD)
+      PARALLEL_CRITICAL(updateMD)
       {
         signal += m_normWS->getSignalAt(linIndex);
         m_normWS->setSignalAt(linIndex, signal);
@@ -522,9 +522,9 @@ void MDNormDirectSC::calculateNormalization(
     }
     prog->report();
 
-    // PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERUPT_REGION
   }
-  // PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERUPT_REGION
 
   delete prog;
 }
